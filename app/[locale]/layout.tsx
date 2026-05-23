@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
-import localFont from "next/font/local";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import {
@@ -23,20 +22,8 @@ import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
 import { OpsAnalyticsTracker } from "@/components/tracking/ops-analytics-tracker";
-import { pretendard } from "@/lib/fonts/pretendard";
+import { fontClassNames } from "@/lib/fonts";
 import "../globals.css";
-
-const geistSans = localFont({
-  src: "../fonts/geist-latin.woff2",
-  variable: "--font-geist-sans",
-  display: "swap",
-});
-
-const geistMono = localFont({
-  src: "../fonts/geist-mono-latin.woff2",
-  variable: "--font-geist-mono",
-  display: "swap",
-});
 
 /** ISR: marketing subtree; admin/client opt out via their own layouts. */
 export const revalidate = 3600;
@@ -162,7 +149,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${pretendard.variable} ${geistSans.variable} ${geistMono.variable} flex min-h-full min-h-[100dvh] flex-col antialiased`}
+        className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans antialiased`}
       >
         <JsonLd data={structuredData} />
         <WebVitalsReporter />

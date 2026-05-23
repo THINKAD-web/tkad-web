@@ -72,7 +72,7 @@ export default function AdminInquiryStatusControls({
 
   return (
     <div className="space-y-3">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         [ 관리 정보 ]
       </p>
       <div className="flex flex-wrap gap-2">
@@ -85,7 +85,7 @@ export default function AdminInquiryStatusControls({
               onClick={() => setDraftStatus(option.value)}
               disabled={isPending}
               className={[
-                "inline-flex items-center justify-center border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors disabled:cursor-not-allowed disabled:opacity-70",
+                "inline-flex items-center justify-center border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors disabled:cursor-not-allowed disabled:opacity-70",
                 active
                   ? "border-primary bg-primary text-primary-foreground"
                   : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -98,7 +98,7 @@ export default function AdminInquiryStatusControls({
       </div>
 
       <div className="space-y-1">
-        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <label className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           담당자
         </label>
         <input
@@ -112,7 +112,7 @@ export default function AdminInquiryStatusControls({
       </div>
 
       <div className="space-y-1">
-        <label className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <label className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           관리 메모
         </label>
         <textarea
@@ -130,24 +130,24 @@ export default function AdminInquiryStatusControls({
           type="button"
           onClick={saveMeta}
           disabled={!dirty || isPending}
-          className="inline-flex items-center justify-center border-2 border-border bg-foreground px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
+          className="inline-flex items-center justify-center border-2 border-border bg-foreground px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isPending ? "저장 중..." : "관리 정보 저장"}
         </button>
         {dirty && !isPending ? (
-          <span className="font-mono text-[10px] tracking-tight text-amber-700">
+          <span className="text-[10px] tracking-tight text-amber-700">
             {`// `}변경 사항 있음
           </span>
         ) : null}
       </div>
 
       {error ? (
-        <p className="font-mono text-[10px] tracking-tight text-destructive">
+        <p className="text-[10px] tracking-tight text-destructive">
           {`// `}
           {error}
         </p>
       ) : isPending ? (
-        <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
+        <p className="text-[10px] tracking-tight text-muted-foreground">
           {`// `}저장 중...
         </p>
       ) : null}

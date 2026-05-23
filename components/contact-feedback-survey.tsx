@@ -125,7 +125,7 @@ export function ContactFeedbackSurvey() {
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-violet-500/20 to-cyan-400/20 text-cyan-300">
             <CheckCircle className="h-8 w-8" />
           </div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ THANKS ]
           </p>
           <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -137,11 +137,11 @@ export function ContactFeedbackSurvey() {
         </div>
 
         <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-6">
-          <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             <Gift className="h-4 w-4" />
             [ {t("couponTitle")} ]
           </div>
-          <p className="mt-2 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-2 text-[11px] tracking-tight text-muted-foreground">
             {t("couponHint")}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
@@ -153,7 +153,7 @@ export function ContactFeedbackSurvey() {
               {t("copyCode")}
             </button>
           </div>
-          <p className="mt-4 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+          <p className="mt-4 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
             {`// `}{t("couponTerms")}
           </p>
         </div>
@@ -304,7 +304,7 @@ export function ContactFeedbackSurvey() {
 
       {campaign === "yes" ? (
         <div className="space-y-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ {t("qCampaignResult")} ]
           </p>
           <div className="flex flex-wrap gap-0">

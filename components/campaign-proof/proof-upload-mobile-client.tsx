@@ -111,7 +111,7 @@ export function ProofUploadMobileClient({
 
   return (
     <div className="mx-auto min-h-[100dvh] max-w-lg px-4 py-6 pb-10">
-      <p className="font-mono text-[10px] uppercase tracking-[0.2em] text-violet-300/80">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
         {title ?? (isKo ? "현장 인증" : "Field proof")}
       </p>
       <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">{campaignName || "—"}</h1>

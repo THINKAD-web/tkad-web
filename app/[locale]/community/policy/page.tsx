@@ -52,7 +52,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
       <section className="bg-hero-void py-16 sm:py-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             [ {isKo ? "정책" : "POLICY"} ]
           </p>
           <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-hero-fg sm:text-4xl">
@@ -64,7 +64,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
               ? "THINKAD 커뮤니티는 광고주·매체사·마케터 간의 정보 교류 공간입니다. 건강한 토론을 위해 다음 정책을 따라주세요."
               : "THINKAD Community is a space for advertisers, media operators, and marketers to share information. Please follow these policies for healthy discussion."}
           </p>
-          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/55">
+          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-hero-fg/55">
             {`// `}
             {isKo ? "최종 갱신" : "Last updated"}: 2026.04.28
           </p>
@@ -75,7 +75,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 space-y-12">
           {/* 1. 게시 가이드라인 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 1. {isKo ? "게시 가이드라인" : "POSTING GUIDELINES"} ]
             </p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -108,7 +108,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
           {/* 2. 금지 사항 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 2. {isKo ? "금지 사항" : "PROHIBITED"} ]
             </p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -147,7 +147,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
           {/* 3. 신고 / 모더레이션 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 3. {isKo ? "신고 · 모더레이션" : "REPORTS & MODERATION"} ]
             </p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -184,7 +184,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
           {/* 4. 작성자 정보 처리 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 4. {isKo ? "작성자 정보 처리" : "AUTHOR DATA HANDLING"} ]
             </p>
             <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -241,7 +241,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
           {/* 5. 면책 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 5. {isKo ? "면책 조항" : "DISCLAIMER"} ]
             </p>
             <div className="mt-3 border-2 border-border bg-muted p-5 text-sm leading-relaxed text-foreground">
@@ -260,7 +260,7 @@ export default async function CommunityPolicyPage({ params }: Props) {
 
           {/* 6. 문의 */}
           <section>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 6. {isKo ? "문의" : "CONTACT"} ]
             </p>
             <p className="mt-3 text-base leading-relaxed text-foreground">

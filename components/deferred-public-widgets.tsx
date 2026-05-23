@@ -2,15 +2,11 @@
 
 /**
  * Floating widgets use `ssr: false` so the server HTML omits them; they mount only
- * on the client (localStorage, window, exit intent). That avoids hydration
- * mismatches for markup that depends on browser-only state.
+ * on the client (localStorage, window). That avoids hydration mismatches for
+ * markup that depends on browser-only state.
  */
 import dynamic from "next/dynamic";
 
-const ExitIntentPopup = dynamic(
-  () => import("@/components/exit-intent-popup"),
-  { ssr: false },
-);
 const FloatingSupportDock = dynamic(
   () => import("@/components/floating-support-dock"),
   { ssr: false },
@@ -27,14 +23,6 @@ const PwaPushOptIn = dynamic(
   () => import("@/components/pwa-push-opt-in").then((m) => ({ default: m.PwaPushOptIn })),
   { ssr: false },
 );
-const MobileQuickQuoteFloating = dynamic(
-  () => import("@/components/mobile-quick-quote-floating"),
-  { ssr: false },
-);
-const ExitIntentMobileBanner = dynamic(
-  () => import("@/components/exit-intent-mobile-banner"),
-  { ssr: false },
-);
 const HomeOnboardingTour = dynamic(
   () => import("@/components/home/home-onboarding-tour"),
   { ssr: false },
@@ -46,9 +34,6 @@ export default function DeferredPublicWidgets() {
       <PwaCatalogSync />
       <RecentlyViewedSync />
       <PwaPushOptIn />
-      <ExitIntentPopup />
-      <ExitIntentMobileBanner />
-      <MobileQuickQuoteFloating />
       <HomeOnboardingTour />
       <FloatingSupportDock />
     </>

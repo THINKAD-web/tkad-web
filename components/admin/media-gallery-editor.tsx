@@ -60,7 +60,7 @@ function SortableThumb({
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt="" className="h-24 w-full object-cover" />
       {isPrimary ? (
-        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-cyan-600/90 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase dark:text-white text-gray-900">
+        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-cyan-600/90 px-1.5 py-0.5 font-display text-xs font-medium uppercase dark:text-white text-gray-900">
           <Star className="h-2.5 w-2.5 fill-current" />
           대표
         </span>

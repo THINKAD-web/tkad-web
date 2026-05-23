@@ -73,8 +73,12 @@ export function ActionSheet({
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               exit={{ y: "100%" }}
-              transition={{ type: "spring", damping: 28, stiffness: 320 }}
+              transition={{ type: "spring", damping: 30, stiffness: 340 }}
             >
+              <div
+                className="mx-auto mt-2.5 h-1 w-10 rounded-full bg-gray-300 dark:bg-white/20"
+                aria-hidden
+              />
               {title ? (
                 <p className="border-b border-gray-200 px-4 py-3 text-center text-xs font-semibold text-gray-500 dark:border-white/10 dark:text-white/50">
                   {title}

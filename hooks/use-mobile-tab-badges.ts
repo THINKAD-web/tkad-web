@@ -10,13 +10,12 @@ type TabBadges = {
 
 const DEFAULT_BADGES: TabBadges = { contact: 0, my: 0 };
 
-/** Placeholder fallbacks when logged out or API unavailable. */
-const PLACEHOLDER_BADGES: TabBadges = { contact: 1, my: 3 };
+const BADGE_REFRESH_MS = 60_000;
 
 /**
  * Fetches unread counts for bottom tab badges.
  * - my: `/api/my/notifications` → unreadCount
- * - contact: chat rooms needing advertiser attention (fallback placeholder)
+ * - contact: chat rooms awaiting advertiser reply
  */
 export function useMobileTabBadges(): TabBadges {
   const pathname = usePathname();
@@ -36,20 +35,19 @@ export function useMobileTabBadges(): TabBadges {
         fetch("/api/chat/rooms?side=advertiser", { cache: "no-store" }),
       ]);
 
-      let myCount = PLACEHOLDER_BADGES.my;
-      let contactCount = PLACEHOLDER_BADGES.contact;
+      let myCount = 0;
+      let contactCount = 0;
 
       const notifData = await notifRes.json();
       if (notifData?.ok && typeof notifData.data?.unreadCount === "number") {
-        myCount = notifData.data.unreadCount;
+        myCount = Math.max(0, notifData.data.unreadCount);
       }
 
       const chatData = await chatRes.json();
       if (chatData?.ok && Array.isArray(chatData.data?.items)) {
-        const pending = chatData.data.items.filter(
+        contactCount = chatData.data.items.filter(
           (room: { ownerReplied?: boolean }) => !room.ownerReplied,
         ).length;
-        if (pending > 0) contactCount = pending;
       }
 
       setBadges({ contact: contactCount, my: myCount });
@@ -60,6 +58,15 @@ export function useMobileTabBadges(): TabBadges {
 
   useEffect(() => {
     void refresh();
+    const interval = window.setInterval(() => void refresh(), BADGE_REFRESH_MS);
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") void refresh();
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+    return () => {
+      window.clearInterval(interval);
+      document.removeEventListener("visibilitychange", onVisibility);
+    };
   }, [pathname, refresh]);
 
   return badges;

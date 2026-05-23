@@ -79,7 +79,7 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
                 : "Use the link we sent at signup, or resend from settings."}
           </p>
           {error && (
-            <p className="mt-1 font-mono text-[11px] text-destructive">{error}</p>
+            <p className="mt-1 text-[11px] text-destructive">{error}</p>
           )}
         </div>
         <div className="flex flex-wrap items-center gap-2">

@@ -86,23 +86,23 @@ export default async function ReportDetailPage({ params }: Params) {
             className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.75),rgba(0,0,0,0.95))]"
           />
           <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-20 lg:px-8">
-            <nav className="mb-8 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
+            <nav className="mb-8 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
               <Link href="/report" className="transition-colors hover:dark:text-white text-gray-900">
                 {isKo ? "← 트렌드 리포트 목록" : "← Trend reports"}
               </Link>
             </nav>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 <span className="tkad-home-accent-text">Report</span>
               </span>
               <CategoryHeroBetaBadge />
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 {labelForReportCategory(row.category, isKo)}
               </span>
             </div>
             <time
               dateTime={row.publishedAt?.toISOString()}
-              className="mt-5 block font-mono text-[11px] font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500"
+              className="mt-5 block font-display text-[11px] font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500"
             >
               {formatPublished(row.publishedAt, locale)}
             </time>
@@ -145,7 +145,7 @@ export default async function ReportDetailPage({ params }: Params) {
 
             {related.length > 0 ? (
               <section className="mt-14">
-                <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+                <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   {isKo ? "관련 커뮤니티 글" : "Related community posts"}
                 </h2>
                 <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -157,13 +157,13 @@ export default async function ReportDetailPage({ params }: Params) {
                         href={`/community/post/${post.id}`}
                         className={relatedCard}
                       >
-                        <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
+                        <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
                           {isKo ? labels.shortKo : labels.en}
                         </span>
                         <h3 className="mt-3 line-clamp-2 text-base font-bold leading-snug text-foreground dark:text-white text-gray-900">
                           {post.title}
                         </h3>
-                        <div className="mt-4 flex items-center gap-3 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
+                        <div className="mt-4 flex items-center gap-3 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                           <span className="inline-flex items-center gap-1 text-foreground dark:text-white text-gray-900">
                             <Heart
                               className="h-3.5 w-3.5 text-primary dark:text-cyan-300"

@@ -31,7 +31,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
         return (
           <li key={m.id} className="list-none">
             <MediaCard
-              href={mediaItemDetailPath(m.id)}
+              href={mediaItemDetailPath(m)}
               imageSrc={getPrimaryMediaImageUrl(m)}
               imageAlt={name}
               imagePriority={index < 6}

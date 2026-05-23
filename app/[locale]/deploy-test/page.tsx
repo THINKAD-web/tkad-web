@@ -55,7 +55,7 @@ export default function DeployTestPage() {
   const allOk = checks.every((c) => c.ok);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-16 font-[family-name:var(--font-geist-sans)]">
+    <div className="mx-auto max-w-2xl px-4 py-16 font-sans">
       <h1 className="mb-2 text-3xl font-bold">
         THINKAD Deploy Test
       </h1>
@@ -65,11 +65,7 @@ export default function DeployTestPage() {
       </p>
 
       <div
-        className={`mb-8 rounded-lg border-2 p-4 text-center text-lg font-semibold ${
-          allOk
-            ? "border-green-400 bg-green-50 text-green-800"
-            : "border-yellow-400 bg-yellow-50 text-yellow-800"
-        }`}
+        className={`mb-8 rounded-lg border-2 p-4 text-center text-lg font-semibold ${ allOk ? "border-green-400 bg-green-50 text-green-800" : "border-yellow-400 bg-yellow-50 text-yellow-800" }`}
       >
         {allOk ? "All checks passed" : "Some optional env vars missing"}
       </div>
@@ -86,7 +82,7 @@ export default function DeployTestPage() {
           {checks.map((c) => (
             <tr key={c.label} className="border-b border-gray-100">
               <td className="py-2.5 font-medium">{c.label}</td>
-              <td className="py-2.5 font-mono text-xs text-gray-600">
+              <td className="py-2.5 text-xs text-gray-600">
                 {c.value}
               </td>
               <td className="py-2.5 text-center">

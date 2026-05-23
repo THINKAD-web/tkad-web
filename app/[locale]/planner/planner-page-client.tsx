@@ -743,13 +743,13 @@ export default function PlannerPageClient({
             appearance={landingAppearance}
             className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6"
           >
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-foreground/70">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground/70">
               [ EMPTY CATALOG ]
             </p>
             <p className="mt-3 text-lg font-bold tracking-tight text-foreground">
               {t("preparingMedia")}
             </p>
-            <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
+            <p className="mt-2 text-[12px] tracking-tight text-muted-foreground">
               {t("preparingMediaDesc")}
             </p>
             <div className="mt-8 inline-block">
@@ -1336,7 +1336,7 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
+                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
                       {t("estimatedModelBadge")}
                     </span>
                     <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
@@ -1432,7 +1432,7 @@ export default function PlannerPageClient({
                     {portfolio.map((m) => (
                       <Link
                         key={m.id}
-                        href={mediaItemDetailPath(m.id)}
+                        href={mediaItemDetailPath(m)}
                         className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:dark:bg-white/10 bg-gray-100"
                       >
                         <CompositePreview
@@ -1611,10 +1611,10 @@ export default function PlannerPageClient({
                     ).map(([labelKey, val]) => (
                       <div key={labelKey}>
                         <div className="mb-1 flex justify-between text-sm">
-                          <span className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+                          <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
                             {t(labelKey)}
                           </span>
-                          <span className="font-mono font-bold tabular-nums text-primary">
+                          <span className="font-display font-bold tabular-nums text-primary">
                             {val}
                             {t("roiUnit")}
                           </span>

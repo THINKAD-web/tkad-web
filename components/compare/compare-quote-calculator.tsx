@@ -111,7 +111,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
   );
 
   const inputCls =
-    "h-10 rounded-xl border border-border bg-card px-3 font-mono text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 dark:text-white text-gray-900";
+    "h-10 rounded-xl border border-border bg-card px-3 text-sm text-foreground outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 dark:text-white text-gray-900";
 
   return (
     <section
@@ -123,7 +123,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
     >
       <div className="flex flex-col gap-2 border-b border-border/60 pb-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="inline-flex items-center gap-2 font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-accent">
+          <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             <Calculator className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "인스턴트 견적" : "Instant quote"}
           </p>
@@ -171,7 +171,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                       setDurationValue(p.value);
                     }}
                     className={cn(
-                      "rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide transition-colors",
+                      "rounded-lg border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-wide transition-colors",
                       durationUnit === p.unit && durationValue === p.value
                         ? "border-accent bg-accent/15 text-accent"
                         : "border-border text-muted-foreground hover:border-accent/50",
@@ -183,7 +183,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
               </div>
               <div className="flex flex-wrap items-end gap-3">
                 <div>
-                  <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <label className="mb-1 block font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {isKo ? "기간" : "Duration"}
                   </label>
                   <input
@@ -198,7 +198,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                  <label className="mb-1 block font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
                     {isKo ? "단위" : "Unit"}
                   </label>
                   <select
@@ -218,7 +218,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
           ) : (
             <div className="flex flex-wrap gap-3">
               <div>
-                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <label className="mb-1 block font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {isKo ? "시작일" : "From"}
                 </label>
                 <input
@@ -229,7 +229,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                 />
               </div>
               <div>
-                <label className="mb-1 block font-mono text-[10px] uppercase tracking-wider text-muted-foreground">
+                <label className="mb-1 block font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
                   {isKo ? "종료일" : "To"}
                 </label>
                 <input
@@ -243,7 +243,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
           )}
 
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {isKo ? "포함 매체" : "Media included"}
             </p>
             <ul className="space-y-2">
@@ -259,7 +259,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                     <span className="min-w-0 flex-1 text-sm font-semibold text-foreground">
                       {isKo ? m.name : m.nameEn || m.name}
                     </span>
-                    <span className="shrink-0 font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <span className="shrink-0 text-[11px] tabular-nums text-muted-foreground">
                       {formatCatalogPriceFieldWon(m.price, localeTag)}
                     </span>
                   </label>
@@ -270,7 +270,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
         </div>
 
         <div className="rounded-2xl border-2 border-border bg-muted/30 p-4 dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 sm:p-5">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             {isKo ? "견적 요약" : "Quote summary"}
           </p>
           <p className="mt-1 text-xs text-muted-foreground">
@@ -288,14 +288,14 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
                 <span className="min-w-0 truncate text-foreground/90">
                   {line.name}
                 </span>
-                <span className="shrink-0 font-mono text-[12px] font-bold tabular-nums">
+                <span className="shrink-0 text-[12px] font-bold tabular-nums">
                   {formatWonShort(line.costWon, locale)}
                 </span>
               </li>
             ))}
           </ul>
 
-          <dl className="mt-4 space-y-2 font-mono text-sm">
+          <dl className="mt-4 space-y-2 text-sm">
             <div className="flex justify-between gap-2">
               <dt className="text-muted-foreground">
                 {isKo ? "합계 (VAT 별도)" : "Subtotal (excl. VAT)"}

@@ -32,14 +32,14 @@ export function Timeline({ items, className }: Props) {
             />
             <AnimatedCard delay={i * 90}>
               <div className="border-2 border-border bg-card p-5 sm:p-6">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                   [ STEP {item.label} ]
                 </p>
                 <p className="mt-2 text-base font-bold tracking-tight text-foreground sm:text-lg">
                   {item.title}
                 </p>
                 {item.description ? (
-                  <div className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                  <div className="mt-3 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                     {item.description}
                   </div>
                 ) : null}

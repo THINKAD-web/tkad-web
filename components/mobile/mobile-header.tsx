@@ -8,14 +8,12 @@ import {
   ArrowLeft,
   Bell,
   Filter,
-  MoreVertical,
   Search,
   Share2,
-  Sparkles,
+  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/haptic";
-import { useMobileSessionPoints } from "@/hooks/use-mobile-session-points";
 import { useMobileSearch } from "@/components/mobile/mobile-search-context";
 import { ActionSheet, type ActionSheetItem } from "@/components/mobile/action-sheet";
 
@@ -50,7 +48,6 @@ export function MobileHeader({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { openSearch } = useMobileSearch();
-  const { pointBalance } = useMobileSessionPoints();
   const [sheetOpen, setSheetOpen] = useState(false);
 
   const handleBack = () => {
@@ -92,23 +89,25 @@ export function MobileHeader({
           </span>
           <span className="tkad-home-accent-text text-lg font-black">AD</span>
         </Link>
-        <div className="flex items-center gap-1">
+        <div className="flex items-center gap-0.5">
+          <button
+            type="button"
+            onClick={() => openSearch()}
+            className={iconBtn}
+            aria-label={isKo ? "검색" : "Search"}
+            data-tour="search"
+          >
+            <Search className="h-5 w-5" />
+          </button>
           <Link
             href="/my/notifications"
             className={iconBtn}
-            aria-label="알림"
+            aria-label={isKo ? "알림" : "Notifications"}
           >
             <Bell className="h-5 w-5" />
           </Link>
-          <Link
-            href="/points"
-            className="inline-flex h-9 items-center gap-1 rounded-full bg-violet-500/10 px-2.5 text-xs font-bold text-violet-600 transition-transform duration-150 active:scale-95 dark:text-violet-300"
-            aria-label="포인트"
-          >
-            <Sparkles className="h-3.5 w-3.5 shrink-0" />
-            <span className="tabular-nums">
-              {pointBalance.toLocaleString(isKo ? "ko-KR" : "en-US")}P
-            </span>
+          <Link href="/my" className={iconBtn} aria-label={isKo ? "프로필" : "Profile"}>
+            <User className="h-5 w-5" />
           </Link>
         </div>
       </header>
@@ -143,7 +142,9 @@ export function MobileHeader({
               }}
             >
               <span>{isKo ? "더보기" : "More"}</span>
-              <MoreVertical className="h-5 w-5" aria-hidden />
+              <span className="text-base leading-none" aria-hidden>
+                ⋮
+              </span>
             </button>
           ) : (
             <span className="w-9 shrink-0" aria-hidden />

@@ -24,7 +24,7 @@ export function AiChatbotMediaCards({
   return (
     <div className="mt-3 flex w-full min-w-0 max-w-full flex-col gap-2.5 sm:max-w-[min(100%,22rem)]">
       {items.map((m) => {
-        const href = mediaItemDetailPath(m.id);
+        const href = mediaItemDetailPath(m);
         const label = isKo ? m.name : (m.nameEn || m.name) || m.name;
         const thumb = m.imageUrl?.trim();
         return (

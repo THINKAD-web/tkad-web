@@ -116,7 +116,7 @@ export function AiChatbotMessage({
       {timeStr ? (
         <span
           className={cn(
-            "px-1 font-mono text-[10px] uppercase tracking-[0.18em] tabular-nums text-muted-foreground",
+            "px-1 font-display text-xs font-medium uppercase tracking-[0.18em] tabular-nums text-muted-foreground",
             isUser ? "text-right" : "text-left",
           )}
         >

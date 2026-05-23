@@ -80,7 +80,7 @@ export function AdvertiserCampaignCard({ item, isKo }: Props) {
           />
         ) : null}
         {item.proofCount > 0 ? (
-          <span className="absolute bottom-1.5 right-1.5 rounded-lg bg-foreground/80 px-2 py-0.5 font-mono text-[10px] font-bold text-background">
+          <span className="absolute bottom-1.5 right-1.5 rounded-lg bg-foreground/80 px-2 py-0.5 text-[10px] font-bold text-background">
             {item.proofCount}
           </span>
         ) : null}
@@ -93,14 +93,14 @@ export function AdvertiserCampaignCard({ item, isKo }: Props) {
           <ChevronRight className="mt-1 h-5 w-5 shrink-0 text-muted-foreground" />
         </div>
         <p className="mt-1 truncate text-sm text-muted-foreground">{mediaLabel}</p>
-        <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {period}
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
           <span className="rounded-full border border-primary/35 bg-primary/10 px-3 py-1 text-xs font-bold text-primary">
             {status}
           </span>
-          <span className="font-mono text-xs tabular-nums text-muted-foreground">
+          <span className=" tabular-nums text-muted-foreground">
             {isKo ? "노출 " : "Imp "}
             {item.impressionsTotal.toLocaleString(isKo ? "ko-KR" : "en-US")}
             {isKo ? " (추정)" : " (est.)"}

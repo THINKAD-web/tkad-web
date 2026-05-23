@@ -68,7 +68,7 @@ function VerificationBadge({ score }: { score: number }) {
         : "border-border bg-card text-muted-foreground";
   return (
     <span
-      className={`inline-flex items-center gap-1 border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${variant}`}
+      className={`inline-flex items-center gap-1 border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] ${variant}`}
     >
       <ShieldCheck className="w-3 h-3" />
       {tier}
@@ -91,7 +91,7 @@ function InfoRow({
         <Icon className="w-4 h-4" />
       </span>
       <div className="min-w-0">
-        <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+        <dt className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ {label} ]
         </dt>
         <dd className="mt-1 break-words text-sm font-bold text-foreground">{value}</dd>
@@ -222,7 +222,7 @@ export default function QuotePreviewView({
           action={
             <Link
               href="/media/map"
-              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               매체 탐색하러 가기
             </Link>
@@ -239,7 +239,7 @@ export default function QuotePreviewView({
       <div className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
         <Link
           href="/my"
-          className="group mb-6 inline-flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-accent"
+          className="group mb-6 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-accent"
         >
           <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
           대시보드로
@@ -247,7 +247,7 @@ export default function QuotePreviewView({
 
         <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ QUOTE / #{quote.id.slice(-8).toUpperCase()} ]
             </p>
             <div className="mt-2 flex items-center gap-3">
@@ -256,7 +256,7 @@ export default function QuotePreviewView({
               </h1>
               <QuoteStatusBadge status={quote.status} />
             </div>
-            <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}생성일 {formatDate(quote.createdAt)}
             </p>
           </div>
@@ -265,7 +265,7 @@ export default function QuotePreviewView({
               type="button"
               onClick={() => void onDownload()}
               disabled={downloading}
-              className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border bg-card px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-60"
+              className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border bg-card px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-60"
             >
               {downloading ? (
                 <Loader2 className="w-4 h-4 animate-spin" />
@@ -279,7 +279,7 @@ export default function QuotePreviewView({
                 type="button"
                 onClick={() => void onProceed()}
                 disabled={proceeding}
-                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-accent bg-accent px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-60"
+                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-accent bg-accent px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-60"
               >
                 {proceeding ? (
                   <Loader2 className="w-4 h-4 animate-spin" />
@@ -296,7 +296,7 @@ export default function QuotePreviewView({
 
         <div ref={captureRef} className="space-y-0 bg-card">
           <section className="border-2 border-border bg-card p-5 sm:p-6">
-            <h2 className="mb-5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <h2 className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ 캠페인 정보 ]
             </h2>
             <dl className="grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
@@ -319,10 +319,10 @@ export default function QuotePreviewView({
 
           <section className="-mt-[2px] overflow-hidden border-2 border-border bg-card">
             <header className="flex items-center justify-between border-b-2 border-border px-5 py-4 sm:px-6">
-              <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 [ 선택한 매체 ]
               </h2>
-              <span className="font-mono text-[11px] font-bold tabular-nums text-foreground">
+              <span className="font-display text-[11px] font-bold tabular-nums text-foreground">
                 {quote.medias.length}개
               </span>
             </header>
@@ -330,9 +330,7 @@ export default function QuotePreviewView({
               {quote.medias.map((m, idx) => (
                 <li
                   key={m.id}
-                  className={`group flex gap-3 p-4 transition-colors hover:bg-muted sm:gap-4 sm:p-5 ${
-                    idx > 0 ? "border-t-2 border-border" : ""
-                  }`}
+                  className={`group flex gap-3 p-4 transition-colors hover:bg-muted sm:gap-4 sm:p-5 ${ idx > 0 ? "border-t-2 border-border" : "" }`}
                 >
                   {m.image ? (
                     /* eslint-disable-next-line @next/next/no-img-element */
@@ -354,10 +352,10 @@ export default function QuotePreviewView({
                       </Link>
                       <VerificationBadge score={m.visibilityScore} />
                     </div>
-                    <p className="mb-2 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="mb-2 truncate font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{m.location}
                     </p>
-                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       <span className="border-2 border-border bg-card px-1.5 py-0.5 font-bold">
                         {m.type}
                       </span>
@@ -368,7 +366,7 @@ export default function QuotePreviewView({
                         </span>
                       )}
                     </div>
-                    <div className="font-mono text-sm font-bold tabular-nums text-accent">
+                    <div className="font-display text-sm font-bold tabular-nums text-accent">
                       {formatKRW(m.price)}
                     </div>
                   </div>
@@ -380,16 +378,16 @@ export default function QuotePreviewView({
           <section className="-mt-[2px] border-2 border-accent bg-hero-void p-5 text-hero-fg sm:p-6">
             <div className="flex items-center justify-between">
               <div>
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                   [ 총 견적 ]
                 </p>
-                <div className="mt-2 font-mono text-3xl font-bold tabular-nums text-accent sm:text-4xl">
+                <div className="mt-2 font-display text-3xl font-bold tabular-nums text-accent sm:text-4xl">
                   {formatKRW(quote.totalAmount)}
                 </div>
               </div>
               <Wallet className="w-10 h-10 text-accent/40" />
             </div>
-            <p className="mt-4 font-mono text-[11px] uppercase tracking-[0.18em] text-hero-fg/65">
+            <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg/65">
               {`// `}VAT 별도 · {quote.medias.length}개 매체 합산 · {quote.period}
             </p>
           </section>

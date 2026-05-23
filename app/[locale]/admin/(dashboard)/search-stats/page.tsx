@@ -94,7 +94,7 @@ export default function AdminSearchStatsPage() {
               </div>
             </CardHeader>
             <CardContent>
-              <p className="font-mono text-3xl font-bold tabular-nums">
+              <p className="font-display text-3xl font-bold tabular-nums">
                 {data.totalSearches.toLocaleString("ko-KR")}
               </p>
               <p className="mt-1 text-sm text-muted-foreground">총 검색 수</p>
@@ -116,12 +116,12 @@ export default function AdminSearchStatsPage() {
                       className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border/60 px-3 py-2 text-sm"
                     >
                       <span>
-                        <span className="mr-2 font-mono text-muted-foreground">
+                        <span className="mr-2 text-muted-foreground">
                           {i + 1}.
                         </span>
                         <span className="font-semibold">{row.query}</span>
                       </span>
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {row.count}회 · 최근 결과 {row.lastResultCount}건
                         {row.zeroCount > 0
                           ? ` · 무결과 ${row.zeroCount}회`
@@ -154,7 +154,7 @@ export default function AdminSearchStatsPage() {
                       className="flex justify-between gap-2 rounded-lg border border-amber-500/25 bg-amber-500/5 px-3 py-2 text-sm"
                     >
                       <span className="font-semibold">{row.query}</span>
-                      <span className="font-mono text-xs text-muted-foreground">
+                      <span className="text-xs text-muted-foreground">
                         {row.count}회
                       </span>
                     </li>

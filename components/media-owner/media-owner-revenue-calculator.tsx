@@ -70,7 +70,7 @@ export function MediaOwnerRevenueCalculator({
       <div className={shell}>
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-violet-400">
+            <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-400">
               <Calculator className="h-3.5 w-3.5" />
               {isKo ? "수익 시뮬레이터" : "Revenue simulator"}
             </p>
@@ -136,7 +136,7 @@ export function MediaOwnerRevenueCalculator({
                 <span className="text-xs font-semibold uppercase tracking-wide dark:text-white/60 text-gray-500">
                   {isKo ? "월 희망 단가" : "Target monthly rate"}
                 </span>
-                <span className="font-mono text-sm font-bold tabular-nums dark:text-white text-gray-900">
+                <span className="font-display text-sm font-bold tabular-nums dark:text-white text-gray-900">
                   {monthlyPriceWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                   {isKo ? "원" : " KRW"}
                 </span>
@@ -150,7 +150,7 @@ export function MediaOwnerRevenueCalculator({
                 onChange={(e) => setMonthlyPriceWon(Number(e.target.value))}
                 className="mt-3 w-full accent-violet-500"
               />
-              <div className="mt-1 flex justify-between font-mono text-[10px] dark:text-white/40 text-gray-400">
+              <div className="mt-1 flex justify-between text-[10px] dark:text-white/40 text-gray-400">
                 <span>{isKo ? "50만" : "₩0.5M"}</span>
                 <span>
                   {isKo ? "지역·유형 평균" : "Regional avg"}{" "}

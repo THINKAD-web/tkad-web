@@ -70,7 +70,7 @@ export function PwaHomeWidget() {
         "tkad-glass-surface mx-auto mb-8 max-w-6xl rounded-2xl p-4",
       )}
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-300/90">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-300/90">
         {isKo ? "앱 홈" : "App home"}
       </p>
       <div className="mt-4 grid gap-4 md:grid-cols-3">

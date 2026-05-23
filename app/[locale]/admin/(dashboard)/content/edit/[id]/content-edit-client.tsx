@@ -232,7 +232,7 @@ export default function AdminContentEditClient() {
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/admin/content`}>← 목록</Link>
         </Button>
-        <span className="rounded border px-2 py-1 font-mono text-xs uppercase">
+        <span className="rounded border px-2 py-1 font-display text-xs uppercase">
           {status || "…"}
         </span>
         <div className="ml-auto flex flex-wrap gap-2">
@@ -323,7 +323,7 @@ export default function AdminContentEditClient() {
                   value={contentKo}
                   onChange={(e) => setContentKo(e.target.value)}
                   rows={24}
-                  className="font-mono text-sm"
+                  className="text-sm"
                 />
               </CardContent>
             </Card>

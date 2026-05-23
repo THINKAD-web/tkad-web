@@ -267,13 +267,13 @@ export default function AdminReportNewClient() {
     <div className="space-y-6 p-6 text-foreground">
       <header className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/80">
             [ TREND REPORT ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">
             트렌드 리포트 작성
           </h1>
-          <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+          <p className="mt-1 text-[11px] text-muted-foreground">
             {`// Tavily 뉴스 + Claude 초안 → 검토 후 발행 · 상태: ${status}`}
           </p>
         </div>
@@ -301,7 +301,7 @@ export default function AdminReportNewClient() {
       <section className="rounded-2xl border border-border/60 bg-card/40 p-4 backdrop-blur">
         <div className="flex flex-wrap items-end gap-4">
           <div>
-            <label className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               대상 월
             </label>
             <Input
@@ -344,7 +344,7 @@ export default function AdminReportNewClient() {
 
       {reportId || titleKo ? (
         <section className="space-y-4 rounded-2xl border border-border/60 bg-card/30 p-4">
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          <h2 className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             [ 초안 편집 ]
           </h2>
           <div>
@@ -365,7 +365,7 @@ export default function AdminReportNewClient() {
               value={summaryLines}
               onChange={(e) => setSummaryLines(e.target.value)}
               rows={4}
-              className="mt-1 font-mono text-sm"
+              className="mt-1 text-sm"
             />
           </div>
           <div>
@@ -376,7 +376,7 @@ export default function AdminReportNewClient() {
               value={contentKo}
               onChange={(e) => setContentKo(e.target.value)}
               rows={18}
-              className="mt-1 font-mono text-sm"
+              className="mt-1 text-sm"
             />
           </div>
           <div className="grid gap-4 md:grid-cols-2">
@@ -388,7 +388,7 @@ export default function AdminReportNewClient() {
                 value={marketLines}
                 onChange={(e) => setMarketLines(e.target.value)}
                 rows={6}
-                className="mt-1 font-mono text-sm"
+                className="mt-1 text-sm"
               />
             </div>
             <div>
@@ -399,7 +399,7 @@ export default function AdminReportNewClient() {
                 value={doohLines}
                 onChange={(e) => setDoohLines(e.target.value)}
                 rows={6}
-                className="mt-1 font-mono text-sm"
+                className="mt-1 text-sm"
               />
             </div>
           </div>

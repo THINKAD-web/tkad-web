@@ -30,7 +30,7 @@ export default function RecommendCartBar({
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-border bg-card">
       <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
-        <div className="flex shrink-0 items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+        <div className="flex shrink-0 items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
           <ShoppingCart className="h-4 w-4 text-accent" />
           {t("cartTitle")}{" "}
           <span className="text-muted-foreground">

@@ -141,12 +141,12 @@ export default function AdminMediasBulkImportPage() {
         <div>
           <Link
             href="/admin/medias"
-            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
+            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             매체 목록
           </Link>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA BULK IMPORT ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
@@ -218,7 +218,7 @@ export default function AdminMediasBulkImportPage() {
               setSubmitError(null);
             }}
             placeholder='[ { "media_name": "...", "full_address": "...", ... }, { ... } ]'
-            className="min-h-[420px] font-mono text-sm"
+            className="min-h-[420px] text-sm"
             spellCheck={false}
           />
           {parseState.kind === "syntax" && (
@@ -296,7 +296,7 @@ export default function AdminMediasBulkImportPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3 text-sm">
-            <div className="flex flex-wrap gap-2 text-[11px] font-mono uppercase tracking-[0.16em]">
+            <div className="flex flex-wrap gap-2 text-[11px] font-display uppercase tracking-[0.16em]">
               <span className="border-2 border-emerald-300 bg-emerald-50 px-2 py-1 text-emerald-900">
                 CREATED {response.counts.created}
               </span>
@@ -319,7 +319,7 @@ export default function AdminMediasBulkImportPage() {
                       : "border-l-4 border-emerald-400 bg-emerald-50 px-2 py-1 text-emerald-900"
                   }
                 >
-                  <span className="font-mono uppercase tracking-[0.14em]">
+                  <span className="font-display uppercase tracking-[0.14em]">
                     {o.kind}
                   </span>{" "}
                   · <strong>{o.name}</strong>

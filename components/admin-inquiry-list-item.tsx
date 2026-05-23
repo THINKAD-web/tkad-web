@@ -200,14 +200,14 @@ export default function AdminInquiryListItem({
             <div className="flex flex-wrap items-center gap-2">
               <h2 className="text-sm font-bold">{title}</h2>
               {item.isHighBudget ? (
-                <Badge className="border border-rose-200 bg-rose-50 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-rose-700">
+                <Badge className="border border-rose-200 bg-rose-50 text-[10px] font-display font-bold uppercase tracking-[0.18em] text-rose-700">
                   우선 검토
                 </Badge>
               ) : null}
               {!item.hasCompany ? (
                 <Badge
                   variant="outline"
-                  className="border border-amber-200 bg-amber-50 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-amber-700"
+                  className="border border-amber-200 bg-amber-50 text-[10px] font-display font-bold uppercase tracking-[0.18em] text-amber-700"
                 >
                   회사 미입력
                 </Badge>
@@ -215,19 +215,19 @@ export default function AdminInquiryListItem({
               {adminAssignee ? (
                 <Badge
                   variant="outline"
-                  className="border border-border bg-background text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-foreground"
+                  className="border border-border bg-background text-[10px] font-display font-bold uppercase tracking-[0.18em] text-foreground"
                 >
                   담당 {adminAssignee}
                 </Badge>
               ) : null}
               {item.isTrashed ? (
-                <Badge className="border border-slate-300 bg-slate-100 text-[10px] font-mono font-bold uppercase tracking-[0.18em] text-slate-700">
+                <Badge className="border border-slate-300 bg-slate-100 text-[10px] font-display font-bold uppercase tracking-[0.18em] text-slate-700">
                   휴지통
                 </Badge>
               ) : null}
             </div>
 
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
               {metaLine}
             </p>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
@@ -239,13 +239,13 @@ export default function AdminInquiryListItem({
             <div className="flex flex-wrap justify-end gap-2">
               <Badge
                 variant="outline"
-                className={`border text-[10px] font-mono font-bold uppercase tracking-[0.18em] ${statusBadgeClass(adminStatusCode)}`}
+                className={`border text-[10px] font-display font-bold uppercase tracking-[0.18em] ${statusBadgeClass(adminStatusCode)}`}
               >
                 {STATUS_LABELS[adminStatusCode]}
               </Badge>
               <Badge
                 variant="outline"
-                className={`border text-[10px] font-mono font-bold uppercase tracking-[0.18em] ${typeBadgeClass(item.inquiryTypeCode)}`}
+                className={`border text-[10px] font-display font-bold uppercase tracking-[0.18em] ${typeBadgeClass(item.inquiryTypeCode)}`}
               >
                 {item.inquiryTypeLabel}
               </Badge>
@@ -277,7 +277,7 @@ export default function AdminInquiryListItem({
 
             {item.oohQuoteId ? (
               <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-3">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-emerald-800">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-emerald-800">
                   [ 자동 견적 초안 ]
                 </p>
                 <p className="mt-1 text-xs text-emerald-900">
@@ -341,7 +341,7 @@ export default function AdminInquiryListItem({
             ) : null}
 
             <div className="space-y-1">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 연락 정보 ]
               </p>
               <div className="space-y-1.5 text-sm">
@@ -374,13 +374,13 @@ export default function AdminInquiryListItem({
             </div>
 
             <div className="space-y-1">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 빠른 액션 ]
               </p>
               <div className="flex flex-wrap gap-2">
                 <a
                   href={item.phoneHref}
-                  className="inline-flex items-center gap-1 border-2 border-border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
+                  className="inline-flex items-center gap-1 border-2 border-border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
                 >
                   전화
                   <ArrowUpRight className="h-3.5 w-3.5" />
@@ -388,7 +388,7 @@ export default function AdminInquiryListItem({
                 {item.hasEmail ? (
                   <a
                     href={item.emailHref}
-                    className="inline-flex items-center gap-1 border-2 border-border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
+                    className="inline-flex items-center gap-1 border-2 border-border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
                   >
                     메일 답장
                     <ArrowUpRight className="h-3.5 w-3.5" />
@@ -399,7 +399,7 @@ export default function AdminInquiryListItem({
                     type="button"
                     onClick={handleRestore}
                     disabled={actionBusy}
-                    className="inline-flex items-center gap-1 border-2 border-emerald-200 bg-emerald-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex items-center gap-1 border-2 border-emerald-200 bg-emerald-50 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-emerald-700 transition-colors hover:bg-emerald-100 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     {actionBusy ? "복구 중..." : "복구"}
                   </button>
@@ -408,7 +408,7 @@ export default function AdminInquiryListItem({
                     type="button"
                     onClick={() => setConfirmTrashOpen(true)}
                     disabled={actionBusy}
-                    className="inline-flex items-center gap-1 border-2 border-rose-200 bg-rose-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
+                    className="inline-flex items-center gap-1 border-2 border-rose-200 bg-rose-50 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                     휴지통 이동
@@ -416,7 +416,7 @@ export default function AdminInquiryListItem({
                 )}
               </div>
               {actionError ? (
-                <p className="font-mono text-[10px] tracking-tight text-destructive">
+                <p className="text-[10px] tracking-tight text-destructive">
                   {`// `}
                   {actionError}
                 </p>
@@ -426,7 +426,7 @@ export default function AdminInquiryListItem({
 
           <div className="space-y-3">
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 문의 내용 ]
               </p>
               <div className="border-2 border-border bg-background p-4 text-sm leading-relaxed text-foreground">
@@ -436,7 +436,7 @@ export default function AdminInquiryListItem({
 
             {adminNote ? (
               <div className="space-y-2">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   [ 관리 메모 미리보기 ]
                 </p>
                 <div className="border-2 border-border bg-background p-4 text-sm leading-relaxed text-foreground">
@@ -445,7 +445,7 @@ export default function AdminInquiryListItem({
               </div>
             ) : null}
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-tight text-muted-foreground">
               <span className="inline-flex items-center gap-1">
                 <Clock3 className="h-3.5 w-3.5" />
                 {item.createdAtLabel}
@@ -463,7 +463,7 @@ export default function AdminInquiryListItem({
       {confirmTrashOpen ? (
         <div className="fixed inset-0 z-50 flex items-center justify-center dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-4">
           <div className="w-full max-w-md border-2 border-border bg-card p-5 shadow-2xl">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-rose-700">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-rose-700">
               [ 휴지통 이동 확인 ]
             </p>
             <p className="mt-3 text-sm font-bold text-foreground">
@@ -477,7 +477,7 @@ export default function AdminInquiryListItem({
                 type="button"
                 onClick={() => setConfirmTrashOpen(false)}
                 disabled={actionBusy}
-                className="inline-flex items-center justify-center border-2 border-border px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center justify-center border-2 border-border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 취소
               </button>
@@ -485,7 +485,7 @@ export default function AdminInquiryListItem({
                 type="button"
                 onClick={handleMoveToTrash}
                 disabled={actionBusy}
-                className="inline-flex items-center justify-center border-2 border-rose-200 bg-rose-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
+                className="inline-flex items-center justify-center border-2 border-rose-200 bg-rose-50 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-rose-700 transition-colors hover:bg-rose-100 disabled:cursor-not-allowed disabled:opacity-70"
               >
                 {actionBusy ? "이동 중..." : "휴지통 이동"}
               </button>

@@ -128,7 +128,7 @@ export function JoinTeamClient() {
                 ? `${preview.teamName} 팀에 ${preview.roleLabel.ko}(으)로 초대되었습니다.`
                 : `You are invited to "${preview.teamName}" as ${preview.roleLabel.en}.`}
             </p>
-            <p className="mt-2 font-mono text-xs dark:text-white">{preview.email}</p>
+            <p className="mt-2 text-xs dark:text-white">{preview.email}</p>
             <button
               type="button"
               onClick={() => void accept()}

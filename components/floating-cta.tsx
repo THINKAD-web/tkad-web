@@ -21,9 +21,7 @@ export function FloatingCta() {
 
   return (
     <div
-      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${
-        visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none"
-      }`}
+      className={`fixed bottom-6 right-6 z-50 transition-all duration-300 ${ visible ? "translate-y-0 opacity-100" : "translate-y-4 opacity-0 pointer-events-none" }`}
     >
       <div className="w-[360px] max-w-[calc(100vw-48px)]">
         <div className="tkad-home-floating-cta flex items-center justify-between gap-3 rounded-[22px] dark:bg-white/5 bg-gray-50 px-4 py-3 backdrop-blur tkad-neon-border tkad-neon-glow">
@@ -31,7 +29,7 @@ export function FloatingCta() {
             <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
               {t("floatingTitle")}
             </p>
-            <p className="mt-0.5 hidden truncate font-mono text-[11px] uppercase tracking-[0.2em] dark:text-white text-gray-500 sm:block">
+            <p className="mt-0.5 hidden truncate font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500 sm:block">
               {t("floatingSub")}
             </p>
           </div>

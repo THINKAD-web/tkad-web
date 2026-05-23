@@ -1,14 +1,16 @@
 import type { MediaItem } from "@/lib/media-data";
 import {
-  computeMediaPriceBenchmark,
-  mediaMonthlyPriceWon,
-} from "@/lib/media-price-transparency";
+  calculateDiscountFromCatalog,
+  formatDiscountBadgeEn,
+  formatDiscountBadgeKo,
+} from "@/lib/best-deal";
 
 export type BestDealItem = MediaItem & {
   dealReason: "price" | "availability" | "new";
   dealLabelKo: string;
   dealLabelEn: string;
   savingsPct?: number;
+  avgPriceWon?: number;
 };
 
 export function pickBestDeals(
@@ -19,18 +21,16 @@ export function pickBestDeals(
   const deals: BestDealItem[] = [];
 
   for (const m of active) {
-    const price = mediaMonthlyPriceWon(m);
-    if (price <= 0) continue;
-    const bench = computeMediaPriceBenchmark(m, catalog);
-    if (bench && bench.percentVsAvg <= -20) {
-      deals.push({
-        ...m,
-        dealReason: "price",
-        dealLabelKo: `평균 대비 ${Math.abs(bench.percentVsAvg)}% 저렴`,
-        dealLabelEn: `${Math.abs(bench.percentVsAvg)}% below area avg`,
-        savingsPct: Math.abs(bench.percentVsAvg),
-      });
-    }
+    const discount = calculateDiscountFromCatalog(m, catalog);
+    if (!discount) continue;
+    deals.push({
+      ...m,
+      dealReason: "price",
+      dealLabelKo: formatDiscountBadgeKo(discount),
+      dealLabelEn: formatDiscountBadgeEn(discount),
+      savingsPct: discount.discountPct,
+      avgPriceWon: discount.avgPriceWon,
+    });
   }
 
   deals.sort((a, b) => (b.savingsPct ?? 0) - (a.savingsPct ?? 0));
@@ -43,7 +43,7 @@ export function pickBestDeals(
       (m) =>
         !pickedIds.has(m.id) &&
         m.availability === "available" &&
-        mediaMonthlyPriceWon(m) > 0,
+        m.price > 0,
     )
     .sort((a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0))
     .slice(0, Math.ceil(limit / 3))

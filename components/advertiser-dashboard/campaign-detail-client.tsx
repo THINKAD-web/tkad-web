@@ -61,7 +61,7 @@ export function AdvertiserCampaignDetailClient({
     <div className="mx-auto max-w-3xl px-4 py-5 pb-24 sm:py-8">
       <Link
         href="/dashboard"
-        className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        className="mb-4 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {isKo ? "대시보드" : "Dashboard"}
@@ -70,7 +70,7 @@ export function AdvertiserCampaignDetailClient({
       <h1 className="text-xl font-black tracking-tight sm:text-2xl">
         {initial.name}
       </h1>
-      <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+      <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
         {initial.startDate ?? "—"} ~ {initial.endDate ?? "—"} · {initial.status}
       </p>
 
@@ -85,7 +85,7 @@ export function AdvertiserCampaignDetailClient({
       </div>
 
       <section className="mt-6">
-        <h2 className="mb-3 font-mono text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
           {isKo ? "집행 매체 지도" : "Media map"}
         </h2>
         {initial.mapPins.length > 0 ? (
@@ -108,7 +108,7 @@ export function AdvertiserCampaignDetailClient({
       </section>
 
       <section className="mt-8">
-        <h2 className="mb-3 font-mono text-[11px] font-black uppercase tracking-[0.24em]">
+        <h2 className="mb-3 font-display text-[11px] font-black uppercase tracking-[0.24em]">
           {isKo ? "일별 노출 추이" : "Daily impressions"}
         </h2>
         <AdvertiserImpressionsChart data={initial.dailySeries} isKo={isKo} />

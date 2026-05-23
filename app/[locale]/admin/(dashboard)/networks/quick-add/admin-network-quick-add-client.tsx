@@ -384,7 +384,7 @@ export default function AdminNetworkQuickAddClient() {
           <CardContent className="space-y-3">
             <Textarea
               rows={18}
-              className="font-mono text-xs"
+              className="text-xs"
               value={fullJsonText}
               onChange={(e) => setFullJsonText(e.target.value)}
               placeholder={SAMPLE_FULL_JSON}
@@ -502,7 +502,7 @@ export default function AdminNetworkQuickAddClient() {
             <CardContent className="space-y-2">
               <Textarea
                 rows={8}
-                className="font-mono text-xs"
+                className="text-xs"
                 value={locationsJson}
                 onChange={(e) => {
                   setLocationsJson(e.target.value);

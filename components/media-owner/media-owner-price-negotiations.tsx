@@ -115,7 +115,7 @@ export function MediaOwnerPriceNegotiations() {
               className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-4"
             >
               <p className="font-medium dark:text-white text-gray-900">{row.mediaName}</p>
-              <p className="mt-1 font-mono text-sm text-violet-200">
+              <p className="mt-1 text-sm text-violet-200">
                 {isKo ? "표시가" : "List"} {row.listLabel} →{" "}
                 {isKo ? "제안" : "Offer"} {row.proposedLabel}
               </p>

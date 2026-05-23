@@ -74,12 +74,12 @@ export function CreativesShell({
             {showBackToLibrary ? (
               <Link
                 href="/creatives"
-                className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600 transition-colors hover:dark:text-white text-gray-900"
+                className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600 transition-colors hover:dark:text-white text-gray-900"
               >
                 <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> {isKo ? "라이브러리로" : "Library"}
               </Link>
             ) : null}
-            <p className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.28em] dark:text-white text-gray-600", showBackToLibrary ? "mt-3" : null)}>
+            <p className={cn("font-display text-xs font-medium uppercase tracking-[0.28em] dark:text-white text-gray-600", showBackToLibrary ? "mt-3" : null)}>
               {eyebrow}
             </p>
             <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
@@ -135,7 +135,7 @@ function CreativesSubNav({ className }: { className?: string }) {
             key={item.href}
             href={item.href}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-all",
+              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-all",
               isActive
                 ? "border-white/30 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
                 : "dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:text-white text-gray-900",

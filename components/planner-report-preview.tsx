@@ -138,7 +138,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
               <Wallet className="h-3.5 w-3.5" aria-hidden />
               {t("reportLabelBudget")}
             </dt>
-            <dd className="mt-1 font-mono text-sm font-bold tabular-nums">
+            <dd className="mt-1 font-display text-sm font-bold tabular-nums">
               {formatBudgetManwon(budgetNum, isKo ? "ko" : "en")}
               {isKo ? " (총)" : " total"}
             </dd>
@@ -220,7 +220,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                         decoding="async"
                       />
                     ) : (
-                      <div className="flex h-full w-full items-center justify-center font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+                      <div className="flex h-full w-full items-center justify-center font-display text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
                         {t("reportPreviewNoImage")}
                       </div>
                     )}
@@ -553,7 +553,7 @@ function TrafficBarBlock({
         {labels.map((label, i) => (
           <div
             key={i}
-            className="flex-1 text-center font-mono text-[8px] font-bold leading-tight tracking-[0.18em] text-muted-foreground"
+            className="flex-1 text-center font-display text-[8px] font-bold leading-tight tracking-[0.18em] text-muted-foreground"
           >
             {label}
           </div>

@@ -9,7 +9,7 @@ import {
   isGuestFavorite,
   toggleGuestFavorite,
 } from "@/lib/favorites-client";
-import { hapticLight } from "@/lib/haptic";
+import { hapticMedium } from "@/lib/haptic";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -95,7 +95,7 @@ export function MediaFavoriteButton({
         }
         setFavorited(result.favorited);
         if (result.favorited) {
-          hapticLight();
+          hapticMedium();
           toast.success(t("added", { name: displayName }));
         } else {
           toast.warning(t("removed"));
@@ -118,7 +118,7 @@ export function MediaFavoriteButton({
         const next = data.data.favorited as boolean;
         setFavorited(next);
         if (next) {
-          hapticLight();
+          hapticMedium();
           toast.success(t("added", { name: displayName }));
         } else {
           toast.warning(t("removed"));

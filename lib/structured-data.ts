@@ -4,8 +4,8 @@ import {
   buildMediaSeoJsonDescription,
   collectMediaSeoKeywordStrings,
 } from "@/lib/media-seo";
-import type { MediaItem } from "@/lib/media-data";
-import { getPrimaryMediaImageUrl, typeLabels } from "@/lib/media-data";
+import { mediaItemDetailPath } from "@/lib/media-slug";
+import { getPrimaryMediaImageUrl, typeLabels, type MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
 import { CONTACT_EMAIL } from "@/lib/constants";
@@ -127,7 +127,7 @@ export function buildMediaPlaceJsonLd(
   const name = isKo ? media.name : media.nameEn || media.name;
   const description = buildMediaSeoJsonDescription(media, locale, 1100);
   const image = getPrimaryMediaImageUrl(media);
-  const url = `${siteUrl}/${locale}/media/${media.id}`;
+  const url = `${siteUrl}/${locale}${mediaItemDetailPath(media)}`;
 
   const data: Record<string, unknown> = {
     "@context": "https://schema.org",
@@ -185,7 +185,7 @@ export function buildMediaProductJsonLd(
   const name = isKo ? media.name : media.nameEn || media.name;
   const description = buildMediaSeoJsonDescription(media, locale, 1100);
   const image = getPrimaryMediaImageUrl(media);
-  const url = `${siteUrl}/${locale}/media/${media.id}`;
+  const url = `${siteUrl}/${locale}${mediaItemDetailPath(media)}`;
   const locationLabel = isKo
     ? media.location
     : media.locationEn || media.location;
@@ -294,7 +294,7 @@ export function buildMediaBreadcrumbJsonLd(
         "@type": "ListItem",
         position: 3,
         name,
-        item: `${siteUrl}/${locale}/media/${media.id}`,
+        item: `${siteUrl}/${locale}${mediaItemDetailPath(media)}`,
       },
     ],
   };
@@ -478,7 +478,14 @@ export function buildBreadcrumbJsonLd(
  */
 export function buildMediaCatalogItemListJsonLd(
   locale: string,
-  items: { id: string; name: string; nameEn?: string; location: string; locationEn?: string }[],
+  items: {
+    id: string;
+    slug?: string | null;
+    name: string;
+    nameEn?: string;
+    location: string;
+    locationEn?: string;
+  }[],
   limit = 30,
 ): Record<string, unknown> {
   const origin = siteUrl.replace(/\/$/, "");
@@ -490,7 +497,7 @@ export function buildMediaCatalogItemListJsonLd(
     itemListElement: items.slice(0, limit).map((m, idx) => ({
       "@type": "ListItem",
       position: idx + 1,
-      url: `${origin}/${locale}/media/${m.id}`,
+      url: `${origin}/${locale}${mediaItemDetailPath(m)}`,
       name: isKo ? m.name : (m.nameEn || m.name),
       ...(m.location && {
         item: {

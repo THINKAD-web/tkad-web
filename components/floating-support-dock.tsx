@@ -30,7 +30,10 @@ function KakaoTalkIcon({ className }: { className?: string }) {
   );
 }
 
-const fabClass =
+const mobileFabClass =
+  "flex h-10 w-10 items-center justify-center rounded-full shadow-md transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
+
+const desktopFabClass =
   "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
 
 export default function FloatingSupportDock() {
@@ -56,9 +59,27 @@ export default function FloatingSupportDock() {
     <>
       <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
 
-      {/* 모바일: 하단 탭바(문의)로 대체 — FAB 숨김 */}
+      {/* 모바일: 카카오 1개 (작게) */}
+      <div
+        className={cn(
+          "fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-50 md:hidden",
+          !mounted && "pointer-events-none opacity-0",
+        )}
+        aria-label={isKo ? "카카오 상담" : "Kakao support"}
+      >
+        <a
+          href={KAKAO_CHANNEL_PUBLIC_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          className={cn(mobileFabClass, "bg-[#FEE500] text-[#191600]")}
+          aria-label={tChat("kakaoCta")}
+          title={tChat("kakaoCta")}
+        >
+          <KakaoTalkIcon className="h-5 w-5" />
+        </a>
+      </div>
 
-      {/* PC: AI 채팅 + 카카오 채널 (세로 2개) */}
+      {/* 데스크탑: 채팅 + 카카오 */}
       <div
         className={cn(
           "fixed bottom-6 right-4 z-50 hidden flex-col gap-3 md:flex",
@@ -74,7 +95,7 @@ export default function FloatingSupportDock() {
           type="button"
           onClick={() => setAiOpen(true)}
           className={cn(
-            fabClass,
+            desktopFabClass,
             "bg-gradient-to-br from-violet-500 to-cyan-400 text-white shadow-violet-500/30",
           )}
           aria-label={isKo ? "채팅 상담" : "Chat support"}
@@ -87,7 +108,7 @@ export default function FloatingSupportDock() {
           href={KAKAO_CHANNEL_PUBLIC_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(fabClass, "bg-[#FEE500] text-[#191600]")}
+          className={cn(desktopFabClass, "bg-[#FEE500] text-[#191600]")}
           aria-label={tChat("kakaoCta")}
           title={tChat("kakaoCta")}
         >

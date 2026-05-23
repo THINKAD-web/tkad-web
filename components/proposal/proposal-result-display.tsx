@@ -86,7 +86,7 @@ export function ProposalResultDisplay({
       </div>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-300">
           [ {t("sectionOverview")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -95,7 +95,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-violet-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-300">
           [ {t("sectionStrategy")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -104,7 +104,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-pink-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-pink-300">
           [ {t("sectionMediaMix")} ]
         </h2>
         <ul className="mt-4 space-y-4">
@@ -115,7 +115,7 @@ export function ProposalResultDisplay({
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-bold dark:text-white text-gray-900">{row.mediaName}</p>
-                <span className="font-mono text-xs text-cyan-300">
+                <span className="text-xs text-cyan-300">
                   {row.budgetSharePct}%
                 </span>
               </div>
@@ -134,7 +134,7 @@ export function ProposalResultDisplay({
 
       <section className={cn(glassCard, "grid gap-4 sm:grid-cols-2")}>
         <div>
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
             [ {t("sectionBudget")} ]
           </h2>
           <ul className="mt-3 space-y-2 text-sm dark:text-white text-gray-800">
@@ -150,7 +150,7 @@ export function ProposalResultDisplay({
           </ul>
         </div>
         <div>
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
             [ {t("sectionMetrics")} ]
           </h2>
           <dl className="mt-3 space-y-3 text-sm">
@@ -184,7 +184,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
           [ {t("sectionTimeline")} ]
         </h2>
         <ol className="mt-4 space-y-4">
@@ -207,7 +207,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-emerald-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-emerald-300">
           [ {t("sectionOutcomes")} ]
         </h2>
         <ul className="mt-3 list-disc space-y-2 pl-5 text-sm dark:text-white text-gray-800">

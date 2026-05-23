@@ -7,7 +7,7 @@ export default function AdminLoading() {
     <div className="space-y-6 p-6">
       <div className="tkad-glass-surface relative overflow-hidden rounded-[22px] p-5">
         <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           {`// LOADING…`}
         </p>
         <div className="skeleton-shimmer mt-3 h-7 w-40" />

@@ -218,13 +218,13 @@ export default function AdminAcademyNewClient() {
   return (
     <div className="space-y-6 p-6 text-foreground">
       <header>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/80">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/80">
           [ ACADEMY ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
           아카데미 아티클 작성
         </h1>
-        <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+        <p className="mt-1 text-[11px] text-muted-foreground">
           {`// 카테고리 선택 → Claude 초안 · 상태: ${status}`}
         </p>
         <Button variant="outline" size="sm" className="mt-3" asChild>
@@ -249,7 +249,7 @@ export default function AdminAcademyNewClient() {
       <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
         <div className="grid gap-4 sm:grid-cols-2">
           <div>
-            <label className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               카테고리
             </label>
             <select
@@ -268,7 +268,7 @@ export default function AdminAcademyNewClient() {
             </select>
           </div>
           <div>
-            <label className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               코스 제목
             </label>
             <Input
@@ -279,7 +279,7 @@ export default function AdminAcademyNewClient() {
             />
           </div>
           <div className="sm:col-span-2">
-            <label className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               레슨 주제
             </label>
             <Input
@@ -337,7 +337,7 @@ export default function AdminAcademyNewClient() {
 
       {lessonId || titleKo ? (
         <section className="space-y-4 rounded-2xl border border-border/60 bg-card/30 p-4">
-          <h2 className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+          <h2 className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             [ 초안 편집 ]
           </h2>
           <div>
@@ -369,7 +369,7 @@ export default function AdminAcademyNewClient() {
               value={chaptersJson}
               onChange={(e) => setChaptersJson(e.target.value)}
               rows={14}
-              className="mt-1 font-mono text-xs"
+              className="mt-1 text-xs"
             />
           </div>
           <div className="flex flex-wrap gap-2">

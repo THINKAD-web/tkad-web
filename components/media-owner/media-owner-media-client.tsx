@@ -199,7 +199,7 @@ export function MediaOwnerMediaClient() {
                           {m.region} · {m.type}
                         </p>
                       </div>
-                      <span className={cn("text-xs font-mono", st.cls)}>
+                      <span className={cn("text-xs ", st.cls)}>
                         {isKo ? st.ko : st.en}
                       </span>
                     </div>
@@ -208,7 +208,7 @@ export function MediaOwnerMediaClient() {
                       {isKo ? "찜" : "Fav"} {m.favoriteCount} ·{" "}
                       {isKo ? "문의" : "Inq."} {m.inquiryCount}
                     </p>
-                    <p className="mt-1 font-mono text-sm text-violet-200">
+                    <p className="mt-1 text-sm text-violet-200">
                       ₩{m.price.toLocaleString(isKo ? "ko-KR" : "en-US")}
                       /{isKo ? "월" : "mo"}
                     </p>

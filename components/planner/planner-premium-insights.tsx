@@ -14,7 +14,7 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
   const content = (
     <div className="space-y-8 border-2 border-border bg-card p-5 sm:p-6">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "캠페인 타임라인" : "Campaign timeline"} ]
         </p>
         <div className="relative mt-4 h-12 rounded-2xl bg-muted/40">
@@ -36,7 +36,7 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
       </div>
 
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "예산 배분 추천" : "Budget allocation"} ]
         </p>
         <p className="mt-2 text-sm font-semibold text-foreground">
@@ -81,7 +81,7 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
       </div>
 
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "경쟁사 노출 분석" : "Competitor exposure"} ]
         </p>
         <ul className="mt-3 space-y-2">

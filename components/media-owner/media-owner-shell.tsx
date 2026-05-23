@@ -90,7 +90,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
     <HomeLandingDayNight>
       <div className="mx-auto flex min-h-[80vh] max-w-6xl flex-col gap-6 px-4 py-8 lg:flex-row lg:py-12">
         <aside className="lg:w-56 lg:shrink-0">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-violet-300/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
             {isKo ? "매체사 포털" : "Media owner"}
           </p>
           <h1 className="mt-2 text-lg font-bold dark:text-white text-gray-900">{me.name}</h1>
@@ -153,4 +153,4 @@ export const ownerGlassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 export const ownerInputCls =
-  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";
+  "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3  text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/40";

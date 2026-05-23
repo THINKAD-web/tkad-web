@@ -149,13 +149,13 @@ export default function BlogPage() {
         <div className="ui-container">
           <div className="flex items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 {`// 17 / Blog`}
               </p>
               <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
                 {isKo ? "OOH 블로그 & 인사이트" : "OOH Blog & Insights"}
               </h1>
-              <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+              <p className="mt-5 max-w-2xl text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
                 {isKo
                   ? "OOH 트렌드, 성공사례, 회사소식을 한 곳에서 확인하세요."
                   : "Explore OOH trends, case studies, and company news in one place."}
@@ -164,7 +164,7 @@ export default function BlogPage() {
             <div className="hidden sm:block">
               <Link
                 href="/"
-                className="inline-flex items-center gap-1 border-2 border-hero-fg bg-transparent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
+                className="inline-flex items-center gap-1 border-2 border-hero-fg bg-transparent px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg transition-colors hover:bg-card hover:text-foreground"
               >
                 <ArrowLeft className="h-3.5 w-3.5" />
                 {isKo ? "Home" : "Home"}
@@ -189,12 +189,12 @@ export default function BlogPage() {
                       ? "키워드로 검색 (예: 코엑스, 타임스퀘어)"
                       : "Search by keyword (e.g., COEX, Times Square)"
                   }
-                  className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                  className="h-10 w-full border-2 border-border bg-card pl-9 pr-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 />
               </div>
             </div>
             <div className="flex flex-wrap items-center gap-0">
-              <span className="mr-2 flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+              <span className="mr-2 flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 <Filter className="h-3.5 w-3.5" />
                 {t("common.filter")}
               </span>
@@ -208,7 +208,7 @@ export default function BlogPage() {
                       setSelectedCategory(cat.key as BlogCategoryKey | "all")
                     }
                     className={cn(
-                      "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                      "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                       isActive
                         ? "border-accent bg-accent text-accent-foreground"
                         : "border-border bg-card text-foreground hover:bg-muted",
@@ -222,7 +222,7 @@ export default function BlogPage() {
           </div>
 
           {/* Result count */}
-          <div className="mt-4 flex items-center justify-between font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="mt-4 flex items-center justify-between font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             <div className="flex items-center gap-2">
               <Tag className="h-3.5 w-3.5 text-accent" />
               <span>
@@ -267,12 +267,12 @@ export default function BlogPage() {
                     </div>
                     <div className="absolute left-3 top-3 flex items-center gap-2">
                       {categoryLabel && (
-                        <span className="border-2 border-hero-fg bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
+                        <span className="border-2 border-hero-fg bg-hero-void px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-hero-fg">
                           [ {categoryLabel} ]
                         </span>
                       )}
                     </div>
-                    <div className="absolute bottom-3 left-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+                    <div className="absolute bottom-3 left-3 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg">
                       <Calendar className="h-3.5 w-3.5" />
                       <span>{formattedDate}</span>
                     </div>
@@ -283,10 +283,10 @@ export default function BlogPage() {
                     </h3>
                   </header>
                   <div className="flex flex-1 flex-col p-4">
-                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
+                    <p className="text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
                       {summary}
                     </p>
-                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
+                    <div className="mt-4 flex items-center justify-between font-display text-xs font-medium uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
                       <span>
                         {isKo ? "Read more →" : "Read more →"}
                       </span>
@@ -312,7 +312,7 @@ export default function BlogPage() {
           </div>
 
           {filteredPosts.length === 0 && (
-            <div className="mt-10 border-2 border-border bg-card px-6 py-10 text-center font-mono text-sm text-muted-foreground">
+            <div className="mt-10 border-2 border-border bg-card px-6 py-10 text-center text-sm text-muted-foreground">
               {`// `}{isKo
                 ? "검색 조건에 맞는 인사이트가 없습니다. 다른 키워드나 카테고리로 다시 시도해보세요."
                 : "No insights match your filters. Try a different keyword or category."}

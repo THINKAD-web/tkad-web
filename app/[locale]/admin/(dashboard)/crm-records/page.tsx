@@ -198,7 +198,7 @@ export default function AdminCrmRecordsPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ CRM RECORDS ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">CRM · 고객 히스토리</h2>
@@ -272,11 +272,7 @@ export default function AdminCrmRecordsPage() {
                   key={a.id}
                   type="button"
                   onClick={() => loadOne(a.id)}
-                  className={`w-full rounded-lg border p-3 text-left ${
-                    sel === a.id
-                      ? "border-primary bg-muted bg-muted/60"
-                      : "border-slate-200"
-                  }`}
+                  className={`w-full rounded-lg border p-3 text-left ${ sel === a.id ? "border-primary bg-muted bg-muted/60" : "border-slate-200" }`}
                 >
                   <div className="flex items-center gap-2 font-semibold text-foreground">
                     <UserRound className="h-4 w-4" />

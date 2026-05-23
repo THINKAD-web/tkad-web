@@ -349,7 +349,7 @@ export default function AdminAiContentEditClient() {
         <Button variant="outline" size="sm" asChild>
           <Link href={`/${locale}/admin/ai-content`}>← 목록</Link>
         </Button>
-        <span className="rounded border-2 border-border bg-muted/60 px-2 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.12em] text-foreground">
+        <span className="rounded border-2 border-border bg-muted/60 px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.12em] text-foreground">
           {status || "…"}
         </span>
       </div>
@@ -381,7 +381,7 @@ export default function AdminAiContentEditClient() {
                 <CardTitle className="flex items-center justify-between text-base">
                   <span>
                     자동 검증{" "}
-                    <span className="ml-2 font-mono text-sm">
+                    <span className="ml-2 text-sm">
                       {validation.totalScore}/100 ·{" "}
                       {validation.verdict.toUpperCase()}
                     </span>
@@ -404,25 +404,25 @@ export default function AdminAiContentEditClient() {
                 <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-xs sm:grid-cols-4">
                   <div>
                     팩트{" "}
-                    <span className="font-mono">
+                    <span className="">
                       {validation.scores.factual}/25
                     </span>
                   </div>
                   <div>
                     법적{" "}
-                    <span className="font-mono">
+                    <span className="">
                       {validation.scores.legal}/25
                     </span>
                   </div>
                   <div>
                     톤{" "}
-                    <span className="font-mono">
+                    <span className="">
                       {validation.scores.tone}/25
                     </span>
                   </div>
                   <div>
                     SEO{" "}
-                    <span className="font-mono">
+                    <span className="">
                       {validation.scores.seo}/25
                     </span>
                   </div>
@@ -434,7 +434,7 @@ export default function AdminAiContentEditClient() {
                         key={idx}
                         className="rounded border border-black/10 dark:bg-white/6 bg-gray-500 p-2 text-xs"
                       >
-                        <div className="font-mono text-[10px] uppercase tracking-wide text-muted-foreground">
+                        <div className="font-display text-xs font-medium uppercase tracking-wide text-muted-foreground">
                           {iss.category} · {iss.severity}
                         </div>
                         <div className="mt-1 font-medium">
@@ -588,7 +588,7 @@ export default function AdminAiContentEditClient() {
                       성과 bullet (줄마다 한 줄)
                     </label>
                     <Textarea
-                      className="mt-1 min-h-[100px] font-mono text-sm"
+                      className="mt-1 min-h-[100px] text-sm"
                       value={scResultsLines}
                       onChange={(e) => setScResultsLines(e.target.value)}
                     />
@@ -606,7 +606,7 @@ export default function AdminAiContentEditClient() {
                   <div>
                     <label className="text-xs font-semibold">metrics JSON</label>
                     <Textarea
-                      className="mt-1 min-h-[120px] font-mono text-xs"
+                      className="mt-1 min-h-[120px] text-xs"
                       value={scMetricsJson}
                       onChange={(e) => setScMetricsJson(e.target.value)}
                     />
@@ -624,7 +624,7 @@ export default function AdminAiContentEditClient() {
                       갤러리 URL (줄마다)
                     </label>
                     <Textarea
-                      className="mt-1 min-h-[80px] font-mono text-xs"
+                      className="mt-1 min-h-[80px] text-xs"
                       value={scGalleryLines}
                       onChange={(e) => setScGalleryLines(e.target.value)}
                     />
@@ -677,7 +677,7 @@ export default function AdminAiContentEditClient() {
                       본문 Markdown
                     </label>
                     <Textarea
-                      className="mt-1 min-h-[420px] font-mono text-sm"
+                      className="mt-1 min-h-[420px] text-sm"
                       value={contentKo}
                       onChange={(e) => setContentKo(e.target.value)}
                     />
@@ -721,7 +721,7 @@ export default function AdminAiContentEditClient() {
                       chapters JSON (배열: title, content)
                     </label>
                     <Textarea
-                      className="mt-1 min-h-[360px] font-mono text-xs"
+                      className="mt-1 min-h-[360px] text-xs"
                       value={chaptersJson}
                       onChange={(e) => setChaptersJson(e.target.value)}
                     />

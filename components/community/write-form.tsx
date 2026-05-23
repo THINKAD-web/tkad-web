@@ -121,7 +121,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-[26px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 shadow-[0_28px_100px_rgba(0,0,0,0.55)] backdrop-blur tkad-neon-border">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 작성자 ]
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -130,7 +130,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
           </span>
           <RoleBadge role={memberRole} locale={locale} />
           {currentUser.company ? (
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
               {currentUser.company}
             </span>
           ) : null}
@@ -139,7 +139,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
 
       <div>
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+          <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
             [ 카테고리 ]
           </span>
         </label>
@@ -152,19 +152,13 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
-                  active
-                    ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]"
-                    : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100"
-                }`}
+                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ active ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
               >
                 <span>
                   {labels.emoji} {labels.ko}
                 </span>
                 <span
-                  className={`font-mono text-[9px] tracking-tight ${
-                    active ? "dark:text-white text-gray-600" : "dark:text-white"
-                  }`}
+                  className={`text-[9px] tracking-tight ${ active ? "dark:text-white text-gray-600" : "dark:text-white" }`}
                   style={{ textTransform: "none", letterSpacing: 0 }}
                 >
                   {labels.description.ko}
@@ -271,11 +265,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
                   aria-label={`${n} stars`}
                 >
                   <Star
-                    className={`h-6 w-6 ${
-                      n <= rating
-                        ? "fill-amber-400 text-amber-400"
-                        : "text-gray-300"
-                    }`}
+                    className={`h-6 w-6 ${ n <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300" }`}
                   />
                 </button>
               ))}
@@ -285,7 +275,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       ) : null}
 
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 제목 ]
         </span>
         <input
@@ -300,7 +290,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       </label>
 
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 본문 ]
         </span>
         <textarea
@@ -344,7 +334,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 disabled:opacity-50"
       >
         <Send className="h-3.5 w-3.5" />
         {busy ? "전송 중…" : "글 등록"}

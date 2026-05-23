@@ -101,7 +101,7 @@ export function NotificationsPageClient() {
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell mx-auto max-w-3xl min-h-[calc(100dvh-4rem)] px-4 py-10 sm:px-6 sm:py-14">
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-300/80">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-300/80">
               {isKo ? "// MY · ALERTS" : "// MY · ALERTS"}
             </p>
             <h1 className="mt-2 flex items-center gap-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
@@ -127,7 +127,7 @@ export function NotificationsPageClient() {
               type="button"
               onClick={() => setFilter(key)}
               className={cn(
-                "rounded-full px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
+                "rounded-full px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                 filter === key
                   ? "bg-gradient-to-r from-violet-500 to-cyan-400 dark:text-white text-gray-900"
                   : "border dark:border-white/18 border-gray-300 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:dark:bg-white/10 bg-gray-100",
@@ -187,7 +187,7 @@ export function NotificationsPageClient() {
                         {n.title}
                       </p>
                       <p className="mt-1 text-sm dark:text-white text-gray-600">{n.body}</p>
-                      <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
+                      <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-400">
                         {new Date(n.createdAt).toLocaleString(
                           isKo ? "ko-KR" : "en-US",
                         )}

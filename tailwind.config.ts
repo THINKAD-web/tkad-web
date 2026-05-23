@@ -23,4 +23,18 @@ export default {
   ],
   /** `next-themes` 는 `html.dark` 토글 — v4 기본 `dark:` 는 OS 미디어쿼리라 토글과 불일치 */
   darkMode: "class",
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ["var(--font-pretendard)", "system-ui", "sans-serif"],
+        display: [
+          "var(--font-space-grotesk)",
+          "var(--font-pretendard)",
+          "system-ui",
+          "sans-serif",
+        ],
+        mono: ["var(--font-jetbrains)", "ui-monospace", "monospace"],
+      },
+    },
+  },
 } satisfies Config;

@@ -99,7 +99,7 @@ export default function NewsPage() {
     <>
       <section className="bg-hero-void py-24">
         <div className="ui-container">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             {`// 15 / News`}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
@@ -107,7 +107,7 @@ export default function NewsPage() {
               ? "THINKAD 뉴스·보도자료"
               : "THINKAD News & Press Releases"}
           </h1>
-          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mt-5 max-w-2xl text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "회사 소식, 보도자료, 수상 소식과 이벤트 정보를 한눈에 확인하세요."
               : "Browse press releases, awards and event updates from THINKAD."}
@@ -117,7 +117,7 @@ export default function NewsPage() {
 
       <section className="bg-card py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+          <div className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             <Filter className="h-3.5 w-3.5" />
             [ {isKo ? "CATEGORY" : "CATEGORY"} ]
           </div>
@@ -130,7 +130,7 @@ export default function NewsPage() {
                   type="button"
                   onClick={() => setSelectedCategory(cat.key)}
                   className={cn(
-                    "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     isActive
                       ? "border-accent bg-accent text-accent-foreground"
                       : "border-border bg-card text-foreground hover:bg-muted",
@@ -141,7 +141,7 @@ export default function NewsPage() {
               );
             })}
           </div>
-          <div className="ml-auto font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="ml-auto font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{isKo ? "TOTAL" : "TOTAL"}{" "}
             <span className="font-bold text-accent">{items.length}</span>
           </div>
@@ -172,12 +172,12 @@ export default function NewsPage() {
                 >
                   <header className="border-b-2 border-border bg-hero-void p-4">
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-1.5 font-mono text-[10px] uppercase tracking-[0.18em] text-hero-fg/85">
+                      <div className="flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg/85">
                         <Calendar className="h-3.5 w-3.5 text-accent" />
                         <span>{formatDate(item.date)}</span>
                       </div>
                       {categoryLabel && (
-                        <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+                        <span className="border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
                           [ {categoryLabel} ]
                         </span>
                       )}
@@ -187,10 +187,10 @@ export default function NewsPage() {
                     </h3>
                   </header>
                   <div className="flex flex-1 flex-col justify-between p-4">
-                    <p className="font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
+                    <p className="text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
                       {summary}
                     </p>
-                    <div className="mt-4 flex items-center justify-between font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
+                    <div className="mt-4 flex items-center justify-between font-display text-xs font-medium uppercase tracking-[0.18em] text-accent group-hover:text-foreground">
                       {item.link ? (
                         <a
                           href={item.link}

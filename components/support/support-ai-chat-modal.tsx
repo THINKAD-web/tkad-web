@@ -147,7 +147,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             <Bot className="h-5 w-5" aria-hidden />
           </div>
           <div className="min-w-0 flex-1">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
               {t("aiEyebrow")}
             </p>
             <p className="truncate text-sm font-black">{t("aiTitle")}</p>
@@ -167,7 +167,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           className="relative min-h-0 flex-1 space-y-3 overflow-y-auto px-3 py-3"
         >
           {messages.length === 0 && !loading ? (
-            <p className="px-2 text-center font-mono text-xs dark:text-white text-gray-500">
+            <p className="px-2 text-center text-xs dark:text-white text-gray-500">
               {t("aiEmpty")}
             </p>
           ) : null}
@@ -175,7 +175,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             <Bubble key={`${i}-${msg.role}`} role={msg.role} content={msg.content} />
           ))}
           {loading ? (
-            <p className="font-mono text-[11px] uppercase tracking-[0.16em] dark:text-white text-gray-400">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-400">
               {t("thinking")}
             </p>
           ) : null}
@@ -194,7 +194,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                 type="button"
                 disabled={loading}
                 onClick={() => void send(t(key))}
-                className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 font-mono text-[10px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
+                className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 text-[10px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
               >
                 {t(key)}
               </button>
@@ -235,7 +235,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             <MessageCircle className="h-4 w-4" aria-hidden />
             {t("kakaoHandoff")}
           </a>
-          <p className="mt-2 text-center font-mono text-[9px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
+          <p className="mt-2 text-center font-display text-[9px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
             {t("aiDisclaimer")}
           </p>
         </div>

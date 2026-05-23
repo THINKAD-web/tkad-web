@@ -76,9 +76,7 @@ export function AdminChatMonitor() {
             key={r.id}
             type="button"
             onClick={() => setSelectedId(r.id)}
-            className={`w-full rounded-xl border p-3 text-left text-sm ${
-              selectedId === r.id ? "border-primary bg-primary/5" : "border-border"
-            }`}
+            className={`w-full rounded-xl border p-3 text-left text-sm ${ selectedId === r.id ? "border-primary bg-primary/5" : "border-border" }`}
           >
             <p className="font-bold">{r.mediaName}</p>
             <p className="text-xs text-muted-foreground">
@@ -105,7 +103,7 @@ export function AdminChatMonitor() {
           <div className="space-y-3">
             {detail.map((m) => (
               <div key={m.id} className="rounded-2xl bg-muted/40 p-2 text-sm">
-                <p className="text-[10px] font-mono uppercase text-muted-foreground">
+                <p className="text-[10px] font-display uppercase text-muted-foreground">
                   {m.displayLabel} · {m.senderRole}
                   {m.sender ? ` · ${m.sender.email}` : ""}
                 </p>

@@ -212,7 +212,7 @@ export default function AiChatbot({
             )}
           </button>
           <span
-            className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[14rem] rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 py-2 text-center font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-700 opacity-0 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity group-hover/button:opacity-100 sm:block"
+            className="pointer-events-none absolute bottom-full right-0 mb-2 hidden max-w-[14rem] rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 py-2 text-center font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-700 opacity-0 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-opacity group-hover/button:opacity-100 sm:block"
             role="tooltip"
           >
             {t("tooltip")}
@@ -251,7 +251,7 @@ export default function AiChatbot({
                   <Bot className="h-6 w-6" strokeWidth={2} />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                     [ AI ASSISTANT ]
                   </p>
                   <p className="mt-1 truncate text-base font-black tracking-tight dark:text-white text-gray-900">
@@ -288,7 +288,7 @@ export default function AiChatbot({
                       aria-selected={panelTab === tab.id}
                       onClick={() => setPanelTab(tab.id)}
                       className={cn(
-                        "flex min-w-0 flex-1 items-center justify-center gap-1.5 px-2 py-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] transition-colors",
+                        "flex min-w-0 flex-1 items-center justify-center gap-1.5 px-2 py-2.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                         i > 0 && "border-l dark:border-white/10 border-gray-200",
                         panelTab === tab.id
                           ? "dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900"
@@ -307,7 +307,7 @@ export default function AiChatbot({
               <>
                 {/* Suggestions */}
                 <div className="relative shrink-0 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-3 py-3">
-                  <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+                  <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                     [ {t("suggestionsLabel")} ]
                   </p>
                   <div className="flex flex-wrap gap-0">
@@ -317,7 +317,7 @@ export default function AiChatbot({
                         type="button"
                         disabled={loading}
                         onClick={() => applySuggestion(t(key))}
-                        className="-mt-[2px] -ml-[2px] max-w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2.5 py-1.5 text-left font-mono text-[11px] font-bold tracking-tight dark:text-white text-gray-800 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-35"
+                        className="-mt-[2px] -ml-[2px] max-w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2.5 py-1.5 text-left text-[11px] font-bold tracking-tight dark:text-white text-gray-800 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-35"
                       >
                         <span className="break-words">{t(key)}</span>
                       </button>
@@ -330,7 +330,7 @@ export default function AiChatbot({
                   className="relative flex min-h-0 min-w-0 flex-1 flex-col gap-3 overflow-y-auto overflow-x-hidden dark:bg-black bg-white dark:bg-white/10 bg-gray-100 px-3 py-3"
                 >
                   {messages.length === 0 && !loading ? (
-                    <p className="px-1 text-center font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
+                    <p className="px-1 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
                       {`// `}{t("emptyState")}
                     </p>
                   ) : null}
@@ -345,12 +345,12 @@ export default function AiChatbot({
                     />
                   ))}
                   {loading ? (
-                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
                       {`// `}{t("thinking")}
                     </p>
                   ) : null}
                   {error ? (
-                    <p className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
+                    <p className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">
                       {`// `}{error}
                     </p>
                   ) : null}
@@ -380,7 +380,7 @@ export default function AiChatbot({
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2 font-mono text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15"
+                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15"
                       disabled={loading}
                     />
                     <button
@@ -393,7 +393,7 @@ export default function AiChatbot({
                       <Send className="h-4 w-4" strokeWidth={2.25} />
                     </button>
                   </div>
-                  <p className="mt-2 font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
+                  <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
                     {`// `}{t("disclaimer")}
                   </p>
                 </div>
@@ -402,10 +402,10 @@ export default function AiChatbot({
               <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden dark:bg-black bg-white dark:bg-white/10 bg-gray-100">
                 <div className="flex min-w-0 items-center gap-2 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-4 py-3">
                   <BarChart3 className="h-4 w-4 dark:text-white text-gray-700" />
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+                  <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                     [ {t("tabCompare")} ]
                   </span>
-                  <span className="ml-auto font-mono text-[11px] font-bold tabular-nums dark:text-white text-gray-700">
+                  <span className="ml-auto font-display text-[11px] font-bold tabular-nums dark:text-white text-gray-700">
                     {t("compareCount", {
                       count: compareEntries.length,
                       max: COMPARE_MAX_ITEMS,
@@ -415,7 +415,7 @@ export default function AiChatbot({
                 <div className="min-h-0 min-w-0 flex-1 overflow-y-auto overflow-x-hidden px-3 py-3">
                   {compareEntries.length === 0 ? (
                     <div className="flex flex-col items-center gap-4 py-8 text-center">
-                      <p className="font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
+                      <p className="text-[12px] tracking-tight dark:text-white text-gray-500">
                         {`// `}{t("compareEmpty")}
                       </p>
                       <BtnBlock
@@ -474,7 +474,7 @@ export default function AiChatbot({
                         <button
                           type="button"
                           disabled
-                          className="-ml-2 flex-1 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500 opacity-60"
+                          className="-ml-2 flex-1 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500 opacity-60"
                         >
                           {t("compareNow")}
                         </button>
@@ -485,21 +485,21 @@ export default function AiChatbot({
               </div>
             ) : (
               <div className="flex min-h-0 min-w-0 flex-1 flex-col gap-4 overflow-y-auto overflow-x-hidden dark:bg-black bg-white dark:bg-white/10 bg-gray-100 px-4 py-5">
-                <p className="font-mono text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
+                <p className="text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
                   {`// `}{t("kakaoTabLead")}
                 </p>
                 <a
                   href={KAKAO_CHANNEL_PUBLIC_URL}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex h-12 w-full items-center justify-center rounded-[18px] border dark:border-white/12 border-gray-200 px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] text-[#191919] shadow-[0_18px_60px_rgba(0,0,0,0.45)] transition-all hover:-translate-y-0.5 hover:opacity-95"
+                  className="flex h-12 w-full items-center justify-center rounded-[18px] border dark:border-white/12 border-gray-200 px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-[#191919] shadow-[0_18px_60px_rgba(0,0,0,0.45)] transition-all hover:-translate-y-0.5 hover:opacity-95"
                   style={{ backgroundColor: "#FEE500" }}
                 >
                   {isKo ? "카카오톡채널" : "KakaoTalk Channel"}
                 </a>
                 <a
                   href="tel:02-515-2772"
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 px-5 font-mono text-xs font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 px-5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12"
                 >
                   <Phone className="h-4 w-4" />
                   {isKo ? "전화문의" : "Call"} 02-515-2772

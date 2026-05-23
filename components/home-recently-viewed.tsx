@@ -47,7 +47,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
         <ScrollAnimate>
           <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-500">
                 {isKo ? "// PERSONAL" : "// PERSONAL"}
               </p>
               <h2 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
@@ -91,13 +91,13 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                         className="h-full w-full object-cover transition duration-300 group-hover:scale-[1.03]"
                       />
                     ) : (
-                      <div className="flex h-full items-center justify-center font-mono text-[10px] uppercase tracking-[0.2em] dark:text-white text-gray-400">
+                      <div className="flex h-full items-center justify-center font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
                         {isKo ? "이미지 준비 중" : "No image"}
                       </div>
                     )}
                   </div>
                   <div className="flex flex-1 flex-col gap-1.5 p-3">
-                    <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/90">
+                    <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-cyan-300/90">
                       {typeLabel}
                     </span>
                     <p className="line-clamp-2 text-sm font-bold leading-snug dark:text-white text-gray-900 group-hover:text-cyan-100">

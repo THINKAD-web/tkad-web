@@ -72,7 +72,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ RECENTLY VIEWED ]
           </p>
           <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
@@ -90,7 +90,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
             aria-label={isKo ? "최근 본 매체 초기화" : "Reset recently viewed"}
           >
             <RotateCcw className="h-3.5 w-3.5" aria-hidden />
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em]">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.18em]">
               {isKo ? "초기화" : "Reset"}
             </span>
           </button>
@@ -129,19 +129,19 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                 bottomGradientClassName={null}
                 placeholderSize="xs"
               >
-                <div className="pointer-events-none absolute left-2.5 top-2.5 z-20 rounded-xl border border-border/80 bg-card/80 px-1.5 py-1 font-mono text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground shadow-xs backdrop-blur">
+                <div className="pointer-events-none absolute left-2.5 top-2.5 z-20 rounded-xl border border-border/80 bg-card/80 px-1.5 py-1 font-display text-[9px] font-black uppercase tracking-[0.2em] text-muted-foreground shadow-xs backdrop-blur">
                   <Clock className="mr-1 inline-block h-3 w-3" aria-hidden />
                   {isKo ? "최근" : "Recent"}
                 </div>
               </MediaCatalogThumbnail>
               <div className="flex flex-1 flex-col gap-1.5 p-3">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   [ {typeLabel} ]
                 </span>
                 <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug tracking-tight text-foreground group-hover:text-accent">
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
-                <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
+                <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground">
                   {formatCatalogPriceFieldWon(m.price)}
                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}

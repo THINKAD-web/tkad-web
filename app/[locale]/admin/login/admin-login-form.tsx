@@ -67,13 +67,13 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       className="w-full max-w-sm space-y-4"
     >
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ ADMIN ACCESS ]
         </p>
         <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">
           {t("title")}
         </h1>
-        <p className="mt-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+        <p className="mt-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
           {`// `}{t("subtitle")}
         </p>
       </div>
@@ -81,7 +81,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <div className="space-y-1.5">
         <label
           htmlFor="admin-user"
-          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+          className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground"
         >
           {t("username")}
         </label>
@@ -98,7 +98,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <div className="space-y-1.5">
         <label
           htmlFor="admin-pass"
-          className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground"
+          className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground"
         >
           {t("password")}
         </label>
@@ -115,7 +115,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
 
       {error ? (
         <p
-          className="rounded-[18px] border border-border/70 bg-card/80 px-4 py-3 font-mono text-[11px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur"
+          className="rounded-[18px] border border-border/70 bg-card/80 px-4 py-3 font-display text-[11px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur"
           role="alert"
         >
           {error}
@@ -125,7 +125,7 @@ export function AdminLoginForm({ locale }: { locale: string }) {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded-[18px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-mono text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
+        className="w-full rounded-[18px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] py-3 font-display text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-colors hover:brightness-105 disabled:opacity-60"
       >
         {loading ? t("submitting") : t("submit")}
       </button>

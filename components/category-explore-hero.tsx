@@ -70,7 +70,7 @@ export function CategoryHeroBetaBadge({ className }: { className?: string }) {
 
 function CategoryHeroCodeLine({ code, showBeta }: { code: string; showBeta?: boolean }) {
   return (
-    <p className={cn("ui-section-label flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-0 font-mono")}>
+    <p className={cn("ui-section-label flex flex-wrap items-center justify-center gap-x-2 gap-y-1 mb-0 ")}>
       <span>{code}</span>
       {showBeta ? <CategoryHeroBetaBadge /> : null}
     </p>

@@ -70,7 +70,7 @@ export function PlaylistListClient() {
             href={`/creatives/playlists/${p.id}`}
             className="group block rounded-2xl border-2 border-border bg-card p-4 transition-all hover:-translate-y-0.5 hover:shadow-[0_18px_60px_rgba(15,23,42,0.10)] sm:p-5"
           >
-            <div className="mb-2 inline-flex items-center gap-1 rounded-md border-2 border-accent bg-accent/10 px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-accent">
+            <div className="mb-2 inline-flex items-center gap-1 rounded-md border-2 border-accent bg-accent/10 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
               <ListMusic className="h-3 w-3" /> 플레이리스트
             </div>
             <p className="line-clamp-2 text-base font-bold leading-snug text-foreground">
@@ -81,7 +81,7 @@ export function PlaylistListClient() {
                 {p.description}
               </p>
             ) : null}
-            <div className="mt-3 flex items-center gap-3 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+            <div className="mt-3 flex items-center gap-3 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               <span>{p.itemCount} 개 소재</span>
               <span className="inline-flex items-center gap-0.5">
                 <Clock className="h-3 w-3" /> {Math.max(1, Math.round(p.totalDurationSec / 60))} 분

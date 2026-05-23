@@ -155,7 +155,7 @@ export default async function IndustryLandingPage({ params }: Props) {
               meta={t("mediaGridMeta", { count: mediaItems.length })}
             />
             {mediaItems.length === 0 ? (
-              <p className="mt-8 text-center font-mono text-sm dark:text-white text-gray-500">
+              <p className="mt-8 text-center text-sm dark:text-white text-gray-500">
                 {t("mediaGridEmpty")}
               </p>
             ) : (
@@ -191,7 +191,7 @@ export default async function IndustryLandingPage({ params }: Props) {
               <p className="mt-6 text-center">
                 <Link
                   href="/cases"
-                  className="font-mono text-xs font-bold uppercase tracking-[0.18em] dark:text-white text-gray-600 underline-offset-4 hover:dark:text-white text-gray-900 hover:underline"
+                  className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-600 underline-offset-4 hover:dark:text-white text-gray-900 hover:underline"
                 >
                   {isKo ? "성공 사례 더보기" : "More success stories"}
                 </Link>

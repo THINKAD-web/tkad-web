@@ -139,7 +139,7 @@ export function AdminMediaQualityToolbar({
         </div>
       </div>
       {message ? (
-        <p className="mt-2 font-mono text-[11px] text-muted-foreground">{message}</p>
+        <p className="mt-2 text-[11px] text-muted-foreground">{message}</p>
       ) : null}
     </div>
   );
@@ -154,7 +154,7 @@ export function MediaQualityScoreBadge({ score }: { score: number }) {
         : "bg-red-500/15 text-red-700 dark:text-red-300";
   return (
     <span
-      className={`inline-flex rounded-md px-1.5 py-0.5 font-mono text-[10px] font-bold tabular-nums ${tone}`}
+      className={`inline-flex rounded-md px-1.5 py-0.5 text-[10px] font-bold tabular-nums ${tone}`}
       title="데이터 완성도"
     >
       {score}%

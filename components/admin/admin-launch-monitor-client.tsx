@@ -42,11 +42,11 @@ function StatCard({
         alert && "border-rose-400/60",
       )}
     >
-      <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-muted-foreground">
+      <div className="flex items-center gap-2 text-xs font-display uppercase tracking-wider text-muted-foreground">
         <Icon className="h-3.5 w-3.5" />
         {label}
       </div>
-      <p className="mt-2 font-mono text-2xl font-bold text-foreground">{value}</p>
+      <p className="mt-2 text-2xl font-bold text-foreground">{value}</p>
       {sub ? <p className="mt-1 text-xs text-muted-foreground">{sub}</p> : null}
     </div>
   );
@@ -86,7 +86,7 @@ export function AdminLaunchMonitorClient({ locale }: { locale: string }) {
     <div className="space-y-6 p-4 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="font-mono text-lg font-black uppercase tracking-widest text-foreground">
+          <h1 className="font-display text-lg font-black uppercase tracking-widest text-foreground">
             Launch Monitor
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
@@ -165,7 +165,7 @@ export function AdminLaunchMonitorClient({ locale }: { locale: string }) {
           <div className="rounded-xl border-2 border-border bg-muted/30 p-4 text-sm">
             <p className="font-semibold">백업</p>
             <p className="mt-1 text-muted-foreground">{m.backup.pitrNote}</p>
-            <p className="mt-2 font-mono text-xs">
+            <p className="mt-2 text-xs">
               최근 스냅샷: {m.backup.lastStatus ?? "—"}{" "}
               {m.backup.lastRunAt
                 ? new Date(m.backup.lastRunAt).toLocaleString("ko-KR")
@@ -181,7 +181,7 @@ export function AdminLaunchMonitorClient({ locale }: { locale: string }) {
           {data?.system.recentErrors.length ? (
             <div className="rounded-xl border-2 border-border bg-card p-4">
               <h2 className="text-sm font-bold">최근 에러</h2>
-              <ul className="mt-3 space-y-2 font-mono text-xs">
+              <ul className="mt-3 space-y-2 text-xs">
                 {data.system.recentErrors.map((e) => (
                   <li key={e.id} className="border-b border-border/50 pb-2">
                     <span className="text-rose-500">{e.status}</span>{" "}

@@ -40,7 +40,7 @@ export async function GET(req: Request) {
       const typeLabel = typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
       return {
         id: m.id,
-        href: mediaItemDetailPath(m.id),
+        href: mediaItemDetailPath(m),
         name,
         location,
         type: typeLabel,

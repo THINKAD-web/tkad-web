@@ -44,7 +44,7 @@ export function MediaLandingLinksFooter({
       <div className="ui-container">
         <div className="mb-10 flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.24em] text-muted-foreground">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-muted-foreground">
               {`// ${isKo ? "매체 더 탐색하기" : "Discover more media"}`}
             </p>
             <h2 className="mt-3 text-balance text-2xl font-black tracking-[-0.05em] text-foreground sm:text-3xl">
@@ -75,7 +75,7 @@ export function MediaLandingLinksFooter({
           <div className="tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ {isKo ? "지역별 매체" : "BY REGION"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">
@@ -99,7 +99,7 @@ export function MediaLandingLinksFooter({
           <div className="tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ {isKo ? "유형별 매체" : "BY TYPE"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">
@@ -125,7 +125,7 @@ export function MediaLandingLinksFooter({
           <div className="mt-6 tkad-glass-surface p-6 sm:p-7">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
             <div className="relative">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ {isKo ? "지구·구역" : "BY DISTRICT"} ]
               </p>
               <h3 className="mt-2 text-xl font-black tracking-tight text-foreground">

@@ -10,14 +10,15 @@ import {
   type DaumAddressResult,
 } from "@/components/media-application/daum-address-search";
 import { PhotoSlotUpload } from "@/components/media-application/photo-slot-upload";
+import { TurnstileWidget } from "@/components/turnstile";
 import { MEDIA_APPLICATION_MEDIA_TYPES } from "@/lib/media-application";
 
 const inputCls =
   "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500";
+  "block font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500";
 const sectionTitleCls =
-  "font-mono text-[12px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-800";
+  "font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-800";
 
 export function MediaRegisterForm() {
   const locale = useLocale();
@@ -53,6 +54,7 @@ export function MediaRegisterForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successId, setSuccessId] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const onAddress = (r: DaumAddressResult) => {
     setAddress(r.address);
@@ -96,6 +98,7 @@ export function MediaRegisterForm() {
           notes,
           ...(outreachToken ? { outreachToken } : {}),
           ...(referralRef ? { referralRef } : {}),
+          turnstileToken: captchaToken || undefined,
         }),
       });
       const text = await res.text();
@@ -137,7 +140,7 @@ export function MediaRegisterForm() {
   if (successId) {
     return (
       <div className="mx-auto max-w-xl rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-10 text-center backdrop-blur">
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ {isKo ? "접수 완료" : "Submitted"} ]
         </p>
         <h2 className="mt-4 text-2xl font-black dark:text-white text-gray-900">
@@ -148,10 +151,10 @@ export function MediaRegisterForm() {
             ? "심사 후 담당자 이메일로 결과를 안내드립니다. 영업일 기준 수일이 소요될 수 있습니다."
             : "We will email you after review."}
         </p>
-        <p className="mt-6 font-mono text-[10px] dark:text-white">ID: {successId}</p>
+        <p className="mt-6 text-[10px] dark:text-white">ID: {successId}</p>
         <Link
           href="/"
-          className="tkad-neon-cta-clean mt-8 inline-flex items-center justify-center rounded-2xl px-8 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900"
+          className="tkad-neon-cta-clean mt-8 inline-flex items-center justify-center rounded-2xl px-8 py-3 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900"
         >
           {isKo ? "홈으로" : "Home"}
         </Link>
@@ -301,7 +304,7 @@ export function MediaRegisterForm() {
             />
           </label>
         </div>
-        <label className="flex items-center gap-2 font-mono text-sm dark:text-white text-gray-700">
+        <label className="flex items-center gap-2 text-sm dark:text-white text-gray-700">
           <input
             type="checkbox"
             className="rounded dark:border-white/20 border-gray-300"
@@ -321,7 +324,7 @@ export function MediaRegisterForm() {
             onChange={(e) => setOperatingHours(e.target.value)}
           />
         </label>
-        <label className="flex items-center gap-2 font-mono text-sm dark:text-white text-gray-700">
+        <label className="flex items-center gap-2 text-sm dark:text-white text-gray-700">
           <input
             type="checkbox"
             className="rounded dark:border-white/20 border-gray-300"
@@ -426,6 +429,8 @@ export function MediaRegisterForm() {
         />
       </section>
 
+      <TurnstileWidget onVerify={setCaptchaToken} className="mb-2" />
+
       <button
         type="submit"
         disabled={
@@ -435,7 +440,7 @@ export function MediaRegisterForm() {
           !photoNightUrl ||
           !address
         }
-        className="tkad-neon-cta-clean inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-mono text-[12px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto sm:min-w-[14rem] sm:px-12"
+        className="tkad-neon-cta-clean inline-flex w-full items-center justify-center gap-2 rounded-2xl py-4 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5 disabled:opacity-50 sm:w-auto sm:min-w-[14rem] sm:px-12"
       >
         {submitting ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
         {isKo ? "등록 신청 제출" : "Submit application"}

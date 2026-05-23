@@ -107,7 +107,7 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
 
   return (
     <div className="space-y-2">
-      <span className="block font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500">
+      <span className="block font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
         {isKo ? "주소" : "Address"}
       </span>
       <div className="flex flex-wrap gap-2">
@@ -122,7 +122,7 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
           type="button"
           disabled={disabled || loading}
           onClick={() => void openSearch()}
-          className="tkad-neon-cta-clean shrink-0 rounded-xl px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.14em] dark:text-white text-gray-900 disabled:opacity-50"
+          className="tkad-neon-cta-clean shrink-0 rounded-xl px-4 py-2.5 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-900 disabled:opacity-50"
         >
           {loading
             ? isKo
@@ -140,7 +140,7 @@ export function DaumAddressSearch({ isKo, value, onChange, disabled }: Props) {
         >
           <button
             type="button"
-            className="absolute right-2 top-2 z-10 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-2 py-1 font-mono text-[10px] font-bold dark:text-white text-gray-900"
+            className="absolute right-2 top-2 z-10 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-2 py-1 text-[10px] font-bold dark:text-white text-gray-900"
             onClick={() => setOpen(false)}
           >
             {isKo ? "닫기" : "Close"}

@@ -5,9 +5,13 @@ import { usePathname } from "@/i18n/navigation";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const DISMISS_KEY = "tkad-pwa-install-dismissed";
+const DISMISS_AT_KEY = "tkad-pwa-install-dismissed-at";
 const VIEWS_KEY = "tkad-pwa-page-views";
+const VISITS_KEY = "tkad-pwa-visit-count";
+const SESSION_KEY = "tkad-pwa-session-tracked";
 const MIN_VIEWS = 3;
+const MIN_VISITS = 2;
+const DISMISS_MS = 30 * 24 * 60 * 60 * 1000;
 
 type BeforeInstallPromptEvent = Event & {
   prompt: () => Promise<void>;
@@ -32,6 +36,28 @@ function isAndroid(): boolean {
   return /Android/i.test(navigator.userAgent);
 }
 
+function isDismissedRecently(): boolean {
+  try {
+    const raw = localStorage.getItem(DISMISS_AT_KEY);
+    if (!raw) return false;
+    const at = Number(raw);
+    return Number.isFinite(at) && Date.now() - at < DISMISS_MS;
+  } catch {
+    return false;
+  }
+}
+
+function trackVisitOncePerSession() {
+  try {
+    if (sessionStorage.getItem(SESSION_KEY) === "1") return;
+    sessionStorage.setItem(SESSION_KEY, "1");
+    const visits = Number(localStorage.getItem(VISITS_KEY) ?? "0") + 1;
+    localStorage.setItem(VISITS_KEY, String(visits));
+  } catch {
+    /* ignore */
+  }
+}
+
 export function PwaInstallBanner() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(false);
@@ -41,7 +67,9 @@ export function PwaInstallBanner() {
 
   useEffect(() => {
     if (isStandalone()) return;
-    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    if (isDismissedRecently()) return;
+
+    trackVisitOncePerSession();
 
     const onBip = (e: Event) => {
       e.preventDefault();
@@ -53,7 +81,7 @@ export function PwaInstallBanner() {
 
   useEffect(() => {
     if (isStandalone()) return;
-    if (localStorage.getItem(DISMISS_KEY) === "1") return;
+    if (isDismissedRecently()) return;
     if (!pathname) return;
 
     const path = window.location.pathname;
@@ -66,19 +94,28 @@ export function PwaInstallBanner() {
       return;
     }
 
-    const seen = new Set(
-      JSON.parse(localStorage.getItem(VIEWS_KEY) ?? "[]") as string[],
-    );
-    seen.add(pathname);
-    localStorage.setItem(VIEWS_KEY, JSON.stringify([...seen]));
+    try {
+      const seen = new Set(
+        JSON.parse(localStorage.getItem(VIEWS_KEY) ?? "[]") as string[],
+      );
+      seen.add(pathname);
+      localStorage.setItem(VIEWS_KEY, JSON.stringify([...seen]));
 
-    if (seen.size >= MIN_VIEWS) {
-      setVisible(true);
+      const visits = Number(localStorage.getItem(VISITS_KEY) ?? "0");
+      if (seen.size >= MIN_VIEWS && visits >= MIN_VISITS) {
+        setVisible(true);
+      }
+    } catch {
+      /* ignore */
     }
   }, [pathname]);
 
-  const dismissForever = useCallback(() => {
-    localStorage.setItem(DISMISS_KEY, "1");
+  const dismissFor30Days = useCallback(() => {
+    try {
+      localStorage.setItem(DISMISS_AT_KEY, String(Date.now()));
+    } catch {
+      /* ignore */
+    }
     setVisible(false);
   }, []);
 
@@ -91,8 +128,8 @@ export function PwaInstallBanner() {
     await deferred.prompt();
     await deferred.userChoice;
     setDeferred(null);
-    dismissForever();
-  }, [deferred, dismissForever]);
+    dismissFor30Days();
+  }, [deferred, dismissFor30Days]);
 
   if (!visible || isStandalone()) return null;
 
@@ -149,7 +186,7 @@ export function PwaInstallBanner() {
           )}
           <button
             type="button"
-            onClick={dismissForever}
+            onClick={dismissFor30Days}
             className="inline-flex items-center gap-1 text-xs font-medium text-gray-400 hover:text-gray-600 dark:text-white/50 dark:hover:text-white/70"
           >
             다시 보지 않기

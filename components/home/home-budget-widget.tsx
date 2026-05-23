@@ -64,7 +64,7 @@ export function HomeBudgetWidget() {
       >
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300/90">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300/90">
               [ INSTANT QUOTE ]
             </p>
             <h2 className="mt-2 text-xl font-black tracking-tight dark:text-white text-gray-900 sm:text-2xl">
@@ -72,7 +72,7 @@ export function HomeBudgetWidget() {
             </h2>
             <p className="mt-1 max-w-xl text-sm dark:text-white text-gray-600">{t("subtitle")}</p>
           </div>
-          <p className="font-mono text-2xl font-black tabular-nums text-cyan-300">
+          <p className="font-display text-2xl font-black tabular-nums text-cyan-300">
             {budgetMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
             <span className="ml-1 text-sm font-bold dark:text-white text-gray-500">
               {isKo ? "만원" : "M KRW"}
@@ -82,7 +82,7 @@ export function HomeBudgetWidget() {
 
         <div className="mt-6 space-y-5">
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
               {t("budgetLabel")}
             </span>
             <input
@@ -94,14 +94,14 @@ export function HomeBudgetWidget() {
               onChange={(e) => setBudgetMan(Number(e.target.value))}
               className="mt-2 h-2 w-full cursor-pointer accent-cyan-400"
             />
-            <div className="mt-1 flex justify-between font-mono text-[10px] dark:text-white">
+            <div className="mt-1 flex justify-between text-[10px] dark:text-white">
               <span>100{isKo ? "만" : "M"}</span>
               <span>5,000{isKo ? "만" : "M"}</span>
             </div>
           </label>
 
           <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
               {t("regionLabel")}
             </span>
             <div className="mt-2 flex flex-wrap gap-2">
@@ -124,7 +124,7 @@ export function HomeBudgetWidget() {
           </div>
 
           <div>
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
               {t("industryLabel")}
             </span>
             <div className="mt-2 flex flex-wrap gap-2">

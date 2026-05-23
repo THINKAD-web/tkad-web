@@ -68,7 +68,7 @@ function KpiChip({
       <p className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/40 text-gray-400">
         {label}
       </p>
-      <p className="mt-1 font-mono text-sm font-bold tabular-nums dark:text-white text-gray-900">
+      <p className="mt-1 font-display text-sm font-bold tabular-nums dark:text-white text-gray-900">
         {value}
       </p>
     </div>
@@ -99,22 +99,22 @@ export function MediaDetailHeroSection({
 
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
-      <span className="font-mono text-3xl font-black tabular-nums dark:text-white text-gray-900">
+      <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
         {formatCatalogPriceFieldWon(primaryPriceOption.price)}
       </span>
     ) : (
-      <span className="font-mono text-2xl font-black tabular-nums dark:text-white text-gray-900 sm:text-3xl">
+      <span className="font-display text-2xl font-black tabular-nums dark:text-white text-gray-900 sm:text-3xl">
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}
         <span className="dark:text-white/40 text-gray-400">~</span>{" "}
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
       </span>
     )
   ) : hasPriceOptions && primaryPriceOption ? (
-    <span className="font-mono text-3xl font-black tabular-nums dark:text-white text-gray-900">
+    <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
       {formatCatalogPriceFieldWon(primaryPriceOption.price)}
     </span>
   ) : (
-    <span className="font-mono text-3xl font-black tabular-nums dark:text-white text-gray-900">
+    <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
       {formatCatalogPriceFieldWon(media.price)}
     </span>
   );
@@ -143,7 +143,7 @@ export function MediaDetailHeroSection({
       <div className="mb-5 hidden items-start justify-between gap-3 md:flex">
         <Link
           href="/media"
-          className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/15 border-gray-200 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white/80 text-gray-600 transition hover:dark:bg-white/8 bg-gray-50 hover:dark:text-white text-gray-900"
+          className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/15 border-gray-200 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white/80 text-gray-600 transition hover:dark:bg-white/8 bg-gray-50 hover:dark:text-white text-gray-900"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {labels.back}
@@ -162,7 +162,7 @@ export function MediaDetailHeroSection({
 
         <div className="min-w-0 space-y-5">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-violet-500 dark:text-violet-300/80">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-500 dark:text-violet-300/80">
               {typeLabel}
             </p>
             <h1 className="mt-2 text-balance text-2xl font-black leading-tight tracking-tight dark:text-white text-gray-900 sm:text-3xl">
@@ -212,7 +212,7 @@ export function MediaDetailHeroSection({
               {labels.priceTitle}
             </p>
             <div className="mt-1">{priceBlock}</div>
-            <p className="mt-1 font-mono text-[11px] dark:text-white/50 text-gray-500">
+            <p className="mt-1 text-[11px] dark:text-white/50 text-gray-500">
               {labels.periodLabel}
             </p>
           </div>

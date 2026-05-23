@@ -196,7 +196,7 @@ export function OnboardingWizard({
         <div className="mx-auto w-full max-w-2xl">
           <div className="mb-8 flex items-center justify-between gap-4">
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                 {t("kicker")}
               </p>
               <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
@@ -207,14 +207,14 @@ export function OnboardingWizard({
               type="button"
               onClick={() => void handleSkip()}
               disabled={saving}
-              className="shrink-0 font-mono text-[11px] font-semibold uppercase tracking-wider dark:text-white text-gray-500 underline-offset-2 hover:dark:text-white text-gray-700 hover:underline disabled:opacity-50"
+              className="shrink-0 font-display text-[11px] font-semibold uppercase tracking-wider dark:text-white text-gray-500 underline-offset-2 hover:dark:text-white text-gray-700 hover:underline disabled:opacity-50"
             >
               {t("skip")}
             </button>
           </div>
 
           <div className="mb-8">
-            <div className="mb-2 flex justify-between font-mono text-[10px] font-bold uppercase tracking-wider dark:text-white text-gray-400">
+            <div className="mb-2 flex justify-between font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-400">
               <span>
                 {t("stepLabel", { current: displayStep, total: totalSteps })}
               </span>
@@ -430,7 +430,7 @@ export function OnboardingWizard({
                   <button
                     type="button"
                     onClick={() => setStep(3)}
-                    className="mt-4 w-full text-center font-mono text-[11px] dark:text-white hover:dark:text-white text-gray-600"
+                    className="mt-4 w-full text-center text-[11px] dark:text-white hover:dark:text-white text-gray-600"
                   >
                     {t("back")}
                   </button>
@@ -438,7 +438,7 @@ export function OnboardingWizard({
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="mt-4 w-full text-center font-mono text-[11px] dark:text-white hover:dark:text-white text-gray-600"
+                    className="mt-4 w-full text-center text-[11px] dark:text-white hover:dark:text-white text-gray-600"
                   >
                     {t("back")}
                   </button>

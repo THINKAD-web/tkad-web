@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState, useRef } from "react";
+import { useTranslations, useLocale } from "next-intl";
 import { Sparkles, Plus, Check, RefreshCw, Eye, Users } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -25,6 +25,7 @@ import {
 } from "@/lib/ai-recommend-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
+import { formatMediaCategoryBadges } from "@/lib/media-category-badges";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -54,6 +55,7 @@ export function PlannerRecommendationPanel({
   limit = 5,
 }: Props) {
   const t = useTranslations("planner");
+  const locale = useLocale();
   const goal = usePlannerStore((s) => s.campaignGoal);
   const regions = usePlannerStore((s) => s.regions);
   const categories = usePlannerStore((s) => s.categories);
@@ -66,6 +68,10 @@ export function PlannerRecommendationPanel({
 
   const [loading, setLoading] = useState(true);
   const [refreshTick, setRefreshTick] = useState(0);
+  const [recommendations, setRecommendations] = useState<ScoredMedia[]>([]);
+  const [matchScores, setMatchScores] = useState<Record<string, number>>({});
+  const [oneLines, setOneLines] = useState<Record<string, string>>({});
+  const fetchRef = useRef(0);
 
   const depsKey = useMemo(
     () =>
@@ -83,45 +89,119 @@ export function PlannerRecommendationPanel({
   );
 
   useEffect(() => {
-    const show = requestAnimationFrame(() => {
-      setLoading(true);
-    });
-    const hide = window.setTimeout(() => setLoading(false), 1200);
-    return () => {
-      cancelAnimationFrame(show);
-      window.clearTimeout(hide);
-    };
-  }, [depsKey]);
-
-  const recommendations = useMemo<ScoredMedia[]>(
-    () =>
-      recommendPlannerMedia(
-        catalog,
-        {
-          goal,
-          regions,
-          categories,
-          ageKey,
-          industryKey,
-          budgetMan,
-          months,
-        },
-        limit,
-        refreshTick,
-      ),
-    [
-      catalog,
-      goal,
-      regions,
-      categories,
-      ageKey,
-      industryKey,
-      budgetMan,
-      months,
-      limit,
-      refreshTick,
-    ],
-  );
+    const id = ++fetchRef.current;
+    setLoading(true);
+    const timer = window.setTimeout(() => {
+      void (async () => {
+        try {
+          const res = await fetch("/api/planner/recommend", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              goal,
+              regions,
+              categories,
+              ageKey,
+              industryKey,
+              budgetMan,
+              months,
+              seed: refreshTick,
+              limit,
+              locale,
+            }),
+          });
+          const data = (await res.json()) as {
+            ok?: boolean;
+            items?: Array<{
+              mediaId: string;
+              score: number;
+              oneLine?: string;
+            }>;
+          };
+          if (id !== fetchRef.current) return;
+          if (data.ok && data.items?.length) {
+            const byId = new Map(catalog.map((m) => [m.id, m]));
+            const scores: Record<string, number> = {};
+            const lines: Record<string, string> = {};
+            const recs: ScoredMedia[] = [];
+            for (const item of data.items) {
+              const media = byId.get(item.mediaId);
+              if (!media) continue;
+              scores[media.id] = item.score;
+              if (item.oneLine) lines[media.id] = item.oneLine;
+              recs.push({
+                media,
+                score: item.score / 100,
+                reasons: [
+                  ...(item.score >= 70 ?
+                    [{ key: "goalFit" as RecommendReasonKey, weight: 0.7 }]
+                  : []),
+                ],
+              });
+            }
+            setRecommendations(recs);
+            setMatchScores(scores);
+            setOneLines(lines);
+          } else {
+            const fallback = recommendPlannerMedia(
+              catalog,
+              {
+                goal,
+                regions,
+                categories,
+                ageKey,
+                industryKey,
+                budgetMan,
+                months,
+              },
+              limit,
+              refreshTick,
+            );
+            setRecommendations(fallback);
+            setMatchScores(
+              Object.fromEntries(
+                fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
+              ),
+            );
+            setOneLines({});
+          }
+        } catch {
+          if (id !== fetchRef.current) return;
+          const fallback = recommendPlannerMedia(
+            catalog,
+            {
+              goal,
+              regions,
+              categories,
+              ageKey,
+              industryKey,
+              budgetMan,
+              months,
+            },
+            limit,
+            refreshTick,
+          );
+          setRecommendations(fallback);
+        } finally {
+          if (id === fetchRef.current) setLoading(false);
+        }
+      })();
+    }, 500);
+    return () => window.clearTimeout(timer);
+  }, [
+    depsKey,
+    catalog,
+    goal,
+    regions,
+    categories,
+    ageKey,
+    industryKey,
+    budgetMan,
+    months,
+    limit,
+    refreshTick,
+    locale,
+  ]);
 
   // 분석 애니메이션: depsKey 변경 시 위 effect에서 로딩 재생.
 
@@ -205,6 +285,8 @@ export function PlannerRecommendationPanel({
           <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map(({ media, reasons }) => {
               const selected = isSelected(media.id);
+              const matchScore = matchScores[media.id];
+              const oneLine = oneLines[media.id];
               return (
                 <li
                   key={media.id}
@@ -219,7 +301,19 @@ export function PlannerRecommendationPanel({
                     <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                       {isKo ? media.name : media.nameEn || media.name}
                     </p>
-                    <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    {typeof matchScore === "number" ? (
+                      <p className="mt-1 text-xs font-semibold text-violet-600 dark:text-violet-300">
+                        {isKo ?
+                          `매칭도 ${matchScore}점`
+                        : `Match ${matchScore}/100`}
+                      </p>
+                    ) : null}
+                    {oneLine ? (
+                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                        {oneLine}
+                      </p>
+                    ) : null}
+                    <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{regionLabel(media.region)} ·{" "}
                       {(isKo
                         ? media.location
@@ -254,7 +348,7 @@ export function PlannerRecommendationPanel({
                     }
                     if (items.length === 0) return null;
                     return (
-                      <p className="inline-flex flex-wrap items-center gap-x-3 gap-y-0.5 font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <p className="inline-flex flex-wrap items-center gap-x-3 gap-y-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         <Users className="h-3 w-3 text-primary" aria-hidden />
                         <span>{items[0]}</span>
                         {items[1] ? (
@@ -273,7 +367,7 @@ export function PlannerRecommendationPanel({
                         <span
                           key={r.key}
                           className={cn(
-                            "border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
+                            "border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em]",
                             REASON_COLORS[r.key],
                           )}
                         >
@@ -282,6 +376,22 @@ export function PlannerRecommendationPanel({
                       ))}
                     </div>
                   ) : null}
+                  {(() => {
+                    const badges = formatMediaCategoryBadges(media, locale, 2);
+                    if (badges.length === 0) return null;
+                    return (
+                      <div className="flex flex-wrap gap-1">
+                        {badges.map((b) => (
+                          <span
+                            key={`${media.id}-${b.label}`}
+                            className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-200"
+                          >
+                            {b.icon} {b.label}
+                          </span>
+                        ))}
+                      </div>
+                    );
+                  })()}
                   <button
                     type="button"
                     onClick={() => handleToggle(media.id)}

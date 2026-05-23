@@ -13,13 +13,20 @@ import { listPublishedReports } from "@/lib/report-queries";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
 import { matchesTextQuery, normalizeSearchQuery } from "@/lib/search-text";
 import { typeLabels } from "@/lib/media-data";
+import {
+  flattenMediaCategories,
+  TARGET_CATEGORIES,
+} from "@/lib/media-categories";
 
 export type SearchResultKind =
   | "media"
   | "package"
   | "case"
   | "report"
-  | "academy";
+  | "academy"
+  | "media_category"
+  | "target_category"
+  | "category_page";
 
 export type UnifiedSearchHit = {
   kind: SearchResultKind;
@@ -273,7 +280,7 @@ export async function runUnifiedSearch(
   };
 }
 
-/** 매체명 자동완성 (상위 N개) */
+/** 매체명·카테고리 자동완성 (상위 N개) */
 export async function suggestMediaNames(
   query: string,
   limit = 5,
@@ -283,5 +290,59 @@ export async function suggestMediaNames(
   if (!q) return [];
   const catalog = await fetchPublicMediaCatalog();
   const isKo = locale === "ko" || locale.startsWith("ko");
-  return searchMedia(catalog, q.toLowerCase(), limit, isKo);
+  const lower = q.toLowerCase();
+
+  const mediaHits = searchMedia(
+    catalog,
+    lower,
+    Math.max(2, limit - 2),
+    isKo,
+  );
+
+  const categoryHits: UnifiedSearchHit[] = [];
+  for (const c of flattenMediaCategories()) {
+    const label = isKo ? c.nameKo : c.nameEn;
+    if (
+      matchesTextQuery(label, q) ||
+      c.slug.includes(lower) ||
+      (c.seoKeywordsKo ?? []).some((k) => k.toLowerCase().includes(lower))
+    ) {
+      categoryHits.push({
+        kind: "media_category",
+        id: c.slug,
+        title: `${c.icon ?? "🚇"} ${label}`,
+        subtitle: isKo ? "매체 카테고리" : "Media category",
+        href: `/media/category/${c.slug}`,
+      });
+    }
+  }
+
+  for (const t of TARGET_CATEGORIES) {
+    const label = isKo ? t.nameKo : t.nameEn;
+    if (
+      matchesTextQuery(label, q) ||
+      t.slug.includes(lower) ||
+      (t.seoKeywordsKo ?? []).some((k) => k.toLowerCase().includes(lower))
+    ) {
+      categoryHits.push({
+        kind: "target_category",
+        id: t.slug,
+        title: `${t.icon ?? "📢"} ${label}`,
+        subtitle: isKo ? "캠페인 목적" : "Campaign goal",
+        href: `/target/${t.slug}`,
+      });
+    }
+  }
+
+  if (lower.length >= 2) {
+    categoryHits.push({
+      kind: "category_page",
+      id: `browse-${lower}`,
+      title: isKo ? `${q} 매체 모아보기` : `Browse media: ${q}`,
+      subtitle: isKo ? "카테고리 페이지" : "Category browse",
+      href: `/media?q=${encodeURIComponent(q)}`,
+    });
+  }
+
+  return [...categoryHits.slice(0, 3), ...mediaHits].slice(0, limit);
 }

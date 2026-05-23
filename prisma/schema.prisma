@@ -158,6 +158,8 @@ enum OohContractStatus {
 
 model Media {
   id           String           @id @default(cuid())
+  /// Public URL slug — `/media/[slug]`
+  slug         String?          @unique
   name         String
   nameEn       String?          @map("name_en")
   location     String
@@ -176,6 +178,10 @@ model Media {
 
   description           String?
   subCategory           String?   @map("sub_category")
+  /// 매체 카테고리 slug 배열 (대·소분류, `MediaCategory.slug`)
+  mediaCategory         String[]  @default([]) @map("media_category")
+  /// 적합 캠페인 타겟 slug 배열 (`TargetCategory.slug`)
+  targetCategory        String[]  @default([]) @map("target_category")
   tags                  String[]  @default([])
   district              String?
   city                  String?
@@ -276,6 +282,32 @@ model Media {
   @@index([isActive, popularityScore(sort: Desc)])
   @@index([ownerUserId])
   @@map("media")
+}
+
+model MediaCategory {
+  id          String          @id
+  name        String
+  slug        String          @unique
+  parentId    String?         @map("parent_id")
+  parent      MediaCategory?  @relation("MediaCategoryTree", fields: [parentId], references: [id], onDelete: SetNull)
+  children    MediaCategory[] @relation("MediaCategoryTree")
+  icon        String?
+  description String?
+  order       Int             @default(0)
+
+  @@index([parentId])
+  @@map("media_categories")
+}
+
+model TargetCategory {
+  id          String  @id
+  name        String
+  slug        String  @unique
+  description String?
+  icon        String?
+  order       Int     @default(0)
+
+  @@map("target_categories")
 }
 
 model MediaPriceSnapshot {
@@ -2875,4 +2907,21 @@ model ApiUsageLog {
   @@index([endpoint, createdAt(sort: Desc)])
   @@index([createdAt(sort: Desc)])
   @@map("api_usage_logs")
+}
+
+/// AI·플래너 매체 추천 요청 로그
+model RecommendationLog {
+  id                  String   @id @default(cuid())
+  userId              String?  @map("user_id")
+  sessionId           String?  @map("session_id") @db.VarChar(64)
+  source              String   @db.VarChar(32)
+  input               Json
+  recommendations     Json
+  selectedMediaIds    String[] @default([]) @map("selected_media_ids")
+  convertedToInquiry  Boolean  @default(false) @map("converted_to_inquiry")
+  createdAt           DateTime @default(now()) @map("created_at")
+
+  @@index([createdAt(sort: Desc)])
+  @@index([source, createdAt(sort: Desc)])
+  @@map("recommendation_logs")
 }

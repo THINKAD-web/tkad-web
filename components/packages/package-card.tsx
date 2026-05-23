@@ -57,14 +57,14 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
     >
       {/* 상단 — 지역 + 목적 태그 */}
       <div className="relative flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-cyan-200">
+        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-cyan-200">
           <Tag className="h-3 w-3" aria-hidden />
           {region}
         </span>
         {pkg.purposes.slice(0, 2).map((p) => (
           <span
             key={p}
-            className="inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-violet-700 dark:border-violet-400/40 dark:bg-violet-400/10 dark:text-violet-200"
+            className="inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-violet-700 dark:border-violet-400/40 dark:bg-violet-400/10 dark:text-violet-200"
           >
             {purposeMap[p]}
           </span>
@@ -100,7 +100,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
 
       {/* 추천 이유 */}
       <div className="relative mt-4 rounded-xl border-l-2 border-cyan-400 bg-cyan-50/60 px-3 py-2 dark:border-cyan-300/70 dark:bg-cyan-400/10">
-        <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-200">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-200">
           {`// `}{cardLabels.reason}
         </p>
         <p className="mt-1 text-[13px] leading-relaxed text-foreground/85">
@@ -111,14 +111,14 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
       {/* 타겟 업종 */}
       {pkg.industryBadges.length > 0 ? (
         <div className="relative mt-4">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             {cardLabels.industries}
           </p>
           <div className="mt-1.5 flex flex-wrap gap-1.5">
             {pkg.industryBadges.map((b) => (
               <span
                 key={b}
-                className="inline-flex items-center rounded-full border border-black/10 dark:bg-white/8 bg-gray-100 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] text-foreground/85 dark:border-white/12 border-gray-200 dark:bg-white/[0.06] dark:text-white text-gray-800"
+                className="inline-flex items-center rounded-full border border-black/10 dark:bg-white/8 bg-gray-100 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-foreground/85 dark:border-white/12 border-gray-200 dark:bg-white/[0.06] dark:text-white text-gray-800"
               >
                 {isKo
                   ? PACKAGE_INDUSTRY_LABELS[b].ko
@@ -131,7 +131,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
 
       {pkg.media.length > 0 ? (
         <div className="relative mt-4">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             {isKo ? "구성 매체" : "Included media"}
           </p>
           <ul className="mt-2 flex flex-wrap gap-1.5">
@@ -174,7 +174,7 @@ function Stat({
 }) {
   return (
     <div className="min-w-0">
-      <dt className="flex items-center gap-1 font-mono text-[9px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+      <dt className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
         <span className="text-cyan-500" aria-hidden>
           {icon}
         </span>

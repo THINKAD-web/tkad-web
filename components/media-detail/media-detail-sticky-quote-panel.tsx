@@ -48,7 +48,7 @@ export function MediaDetailStickyQuotePanel({
   );
 
   const inputCls =
-    "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/50 focus:ring-2 focus:ring-violet-400/20";
+    "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/50 focus:ring-2 focus:ring-violet-400/20";
 
   return (
     <aside
@@ -60,10 +60,10 @@ export function MediaDetailStickyQuotePanel({
       <p className="truncate text-base font-bold dark:text-white text-gray-900">
         {displayName}
       </p>
-      <p className="mt-1 font-mono text-2xl font-black tabular-nums dark:text-white text-gray-900">
+      <p className="mt-1 text-2xl font-black tabular-nums dark:text-white text-gray-900">
         {formatCatalogPriceFieldWon(media.price, locale)}
       </p>
-      <p className="font-mono text-[11px] dark:text-white/45 text-gray-500">
+      <p className="text-[11px] dark:text-white/45 text-gray-500">
         {periodLabel}
       </p>
 
@@ -99,14 +99,14 @@ export function MediaDetailStickyQuotePanel({
         <div className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3 text-sm">
           <p className="flex justify-between gap-2 dark:text-white/80 text-gray-700">
             <span>{isKo ? "예상 비용" : "Est. cost"}</span>
-            <span className="font-mono font-bold tabular-nums dark:text-white text-gray-900">
+            <span className="font-bold tabular-nums dark:text-white text-gray-900">
               {formatWonShort(quote.costWon, isKo ? "ko" : "en")}
             </span>
           </p>
           {quote.impressions > 0 ? (
             <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
               <span>{isKo ? "예상 노출" : "Est. impressions"}</span>
-              <span className="font-mono tabular-nums">
+              <span className="tabular-nums">
                 {quote.impressions.toLocaleString(locale)}
                 {isKo ? "회" : ""}
               </span>

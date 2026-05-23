@@ -24,7 +24,7 @@ export type NeonErrorPageProps = {
 };
 
 const actionBtnClass =
-  "inline-flex min-h-12 w-full items-center justify-center gap-2 border-2 px-8 py-4 font-mono text-sm font-bold uppercase tracking-[0.18em] transition-colors duration-150 sm:w-auto";
+  "inline-flex min-h-12 w-full items-center justify-center gap-2 border-2 px-8 py-4 font-display text-sm font-medium uppercase tracking-[0.18em] transition-colors duration-150 sm:w-auto";
 
 function NeonErrorActions({
   standalone,
@@ -158,7 +158,7 @@ function NeonErrorShell({
               />
             </div>
 
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300/90">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300/90">
               {eyebrow}
             </p>
 
@@ -179,7 +179,7 @@ function NeonErrorShell({
             {children}
 
             {footerNote ? (
-              <p className="mt-6 font-mono text-[10px] uppercase tracking-[0.2em] dark:text-white text-gray-400">
+              <p className="mt-6 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
                 {footerNote}
               </p>
             ) : null}

@@ -42,10 +42,10 @@ export function MediaCard({
         <div className="truncate text-sm font-bold tracking-tight text-foreground group-hover:text-accent">
           {item.name}
         </div>
-        <div className="mt-1 truncate font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="mt-1 truncate font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {`// `}{item.region} · {item.type}
         </div>
-        <div className="mt-2 font-mono text-sm font-bold tabular-nums text-accent">
+        <div className="mt-2 font-display text-sm font-bold tabular-nums text-accent">
           {formatKRW(item.price)}
         </div>
       </div>

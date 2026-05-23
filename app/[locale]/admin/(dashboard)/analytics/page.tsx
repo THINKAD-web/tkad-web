@@ -265,11 +265,11 @@ export default function AdminAnalyticsPage() {
     <div className="space-y-6 text-foreground">
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ ANALYTICS ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight">분석 대시보드</h2>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
             {`// `}문의, 견적, 계약 데이터를 한눈에 확인하세요.
             {useDb ? (
               <span className="ml-2 text-primary">· DB 실데이터</span>
@@ -299,9 +299,7 @@ export default function AdminAnalyticsPage() {
               <div className="mt-1 flex items-baseline gap-2">
                 <span className="text-2xl font-bold text-foreground">{kpi.value}</span>
                 <span
-                  className={`inline-flex items-center gap-0.5 text-xs font-semibold ${
-                    kpi.up ? "text-emerald-600" : "text-rose-600"
-                  }`}
+                  className={`inline-flex items-center gap-0.5 text-xs font-semibold ${ kpi.up ? "text-emerald-600" : "text-rose-600" }`}
                 >
                   {kpi.up ? (
                     <ArrowUpRight className="h-3 w-3" />
@@ -489,11 +487,7 @@ export default function AdminAnalyticsPage() {
                   {conversionData.rate}%
                 </span>
                 <span
-                  className={`inline-flex items-center gap-0.5 text-sm font-semibold ${
-                    conversionData.rate >= conversionData.prevRate
-                      ? "text-emerald-600"
-                      : "text-rose-600"
-                  }`}
+                  className={`inline-flex items-center gap-0.5 text-sm font-semibold ${ conversionData.rate >= conversionData.prevRate ? "text-emerald-600" : "text-rose-600" }`}
                 >
                   {conversionData.rate >= conversionData.prevRate ? (
                     <ArrowUpRight className="h-3.5 w-3.5" />

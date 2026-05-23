@@ -146,7 +146,7 @@ export function PointsPageClient() {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon mx-auto max-w-3xl px-4 py-10">
         <div className="tkad-glass-surface tkad-neon-border mb-8 rounded-[28px] border p-6 sm:p-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             {t("eyebrow")}
           </p>
           <p className="mt-3 text-4xl font-black tabular-nums tracking-tight">
@@ -154,19 +154,19 @@ export function PointsPageClient() {
           </p>
           <div className="mt-4 grid grid-cols-3 gap-3 text-center">
             <div className="rounded-2xl bg-muted/30 p-3">
-              <p className="font-mono text-[10px] uppercase text-muted-foreground">{t("monthEarned")}</p>
+              <p className="font-display text-xs font-medium uppercase text-muted-foreground">{t("monthEarned")}</p>
               <p className="mt-1 text-lg font-bold text-emerald-400 tabular-nums">
                 +{(summary?.monthEarned ?? 0).toLocaleString()}
               </p>
             </div>
             <div className="rounded-2xl bg-muted/30 p-3">
-              <p className="font-mono text-[10px] uppercase text-muted-foreground">{t("monthSpent")}</p>
+              <p className="font-display text-xs font-medium uppercase text-muted-foreground">{t("monthSpent")}</p>
               <p className="mt-1 text-lg font-bold text-rose-400 tabular-nums">
                 -{(summary?.monthSpent ?? 0).toLocaleString()}
               </p>
             </div>
             <div className="rounded-2xl bg-muted/30 p-3">
-              <p className="font-mono text-[10px] uppercase text-muted-foreground">{t("expiringSoon")}</p>
+              <p className="font-display text-xs font-medium uppercase text-muted-foreground">{t("expiringSoon")}</p>
               <p className="mt-1 text-lg font-bold text-amber-400 tabular-nums">
                 {(summary?.expiringSoon ?? 0).toLocaleString()}
               </p>
@@ -174,7 +174,7 @@ export function PointsPageClient() {
           </div>
         </div>
 
-        <h2 className="mb-4 flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           <Gift className="h-4 w-4" />
           {t("shopTitle")}
         </h2>
@@ -193,7 +193,7 @@ export function PointsPageClient() {
                     <p className="font-bold">{t(`redeem.${type}`)}</p>
                   </div>
                   {badge ? (
-                    <span className="rounded-full bg-primary/15 px-2 py-0.5 font-mono text-[10px] font-bold text-primary">
+                    <span className="rounded-full bg-primary/15 px-2 py-0.5 text-[10px] font-bold text-primary">
                       {badge}
                     </span>
                   ) : null}
@@ -204,7 +204,7 @@ export function PointsPageClient() {
                   disabled={!canAfford || redeeming === type}
                   onClick={() => void handleRedeem(type)}
                   className={cn(
-                    "mt-4 rounded-2xl px-4 py-3 font-mono text-xs font-bold uppercase tracking-wider transition-all",
+                    "mt-4 rounded-2xl px-4 py-3 font-display text-xs font-medium uppercase tracking-wider transition-all",
                     canAfford
                       ? "bg-primary text-primary-foreground hover:opacity-90"
                       : "cursor-not-allowed bg-muted text-muted-foreground",
@@ -217,7 +217,7 @@ export function PointsPageClient() {
           })}
         </div>
 
-        <h2 className="mb-4 flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="mb-4 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           <Sparkles className="h-4 w-4" />
           {t("earnGuideTitle")}
         </h2>
@@ -236,7 +236,7 @@ export function PointsPageClient() {
           </table>
         </div>
 
-        <h2 className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {t("historyTitle")}
         </h2>
         <div className="tkad-glass-surface tkad-neon-border rounded-[24px] border divide-y divide-border/40">
@@ -247,7 +247,7 @@ export function PointsPageClient() {
               <div key={row.id} className="flex items-center justify-between gap-3 px-4 py-3 text-sm">
                 <div>
                   <p className="font-medium">{row.description}</p>
-                  <p className="font-mono text-[10px] text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground">
                     {new Date(row.createdAt).toLocaleString()}
                   </p>
                 </div>
@@ -262,7 +262,7 @@ export function PointsPageClient() {
                     {row.amount.toLocaleString()}P
                   </p>
                   {row.balanceAfter != null ? (
-                    <p className="font-mono text-[10px] text-muted-foreground tabular-nums">
+                    <p className="text-[10px] text-muted-foreground tabular-nums">
                       {row.balanceAfter.toLocaleString()}P
                     </p>
                   ) : null}

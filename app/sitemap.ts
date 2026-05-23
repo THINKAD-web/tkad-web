@@ -8,6 +8,11 @@ import { listGuideMeta } from "@/lib/guides-data";
 import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
 import { LOCAL_SEO_LANDINGS, localSeoPath } from "@/lib/local-seo-landings";
 import { MARKETING_MEDIA_TYPE_SLUGS } from "@/lib/marketing-media-types";
+import {
+  KNOWN_MEDIA_CATEGORY_SLUGS,
+  KNOWN_TARGET_SLUGS,
+} from "@/lib/media-category-landing";
+import { KNOWN_SPECIAL_SLUGS } from "@/lib/special-media-landings";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
@@ -23,6 +28,8 @@ function sitemapPriority(path: string): number {
   if (path === "/academy" || path.startsWith("/guides")) return 0.6;
   if (path.startsWith("/cases/")) return 0.75;
   if (path.startsWith("/media/")) return 0.72;
+  if (path.startsWith("/target/")) return 0.72;
+  if (path.startsWith("/special/")) return 0.75;
   if (path.startsWith("/report/")) return 0.72;
   if (path.startsWith("/insights/")) return 0.72;
   return 0.8;
@@ -99,7 +106,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
           ? updated
           : new Date(updated)
         : buildTime;
-      return sitemapEntry(`/media/${m.id}`, lastmod);
+      return sitemapEntry(`/media/${m.slug?.trim() || m.id}`, lastmod);
     });
 
     const regionSet = new Set<string>();
@@ -226,6 +233,19 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const marketingTypePart: MetadataRoute.Sitemap =
     MARKETING_MEDIA_TYPE_SLUGS.map((t) => sitemapEntry(`/type/${t}`));
 
+  const mediaCategoryPart: MetadataRoute.Sitemap =
+    KNOWN_MEDIA_CATEGORY_SLUGS.map((slug) =>
+      sitemapEntry(`/media/category/${slug}`),
+    );
+
+  const targetCategoryPart: MetadataRoute.Sitemap = KNOWN_TARGET_SLUGS.map(
+    (slug) => sitemapEntry(`/target/${slug}`),
+  );
+
+  const specialMediaPart: MetadataRoute.Sitemap = KNOWN_SPECIAL_SLUGS.map(
+    (slug) => sitemapEntry(`/special/${slug}`),
+  );
+
   const blogSeoPart: MetadataRoute.Sitemap = BLOG_SEO_POSTS.map((p) =>
     sitemapEntry(
       `/blog/${p.slug}`,
@@ -238,6 +258,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...industryPart,
     ...localSeoPart,
     ...marketingTypePart,
+    ...mediaCategoryPart,
+    ...targetCategoryPart,
+    ...specialMediaPart,
     ...blogSeoPart,
     ...regionLandingPart,
     ...typeLandingPart,

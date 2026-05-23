@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import { sendEmail } from "@/lib/email/client";
 import { getContactConfirmationEmail } from "@/lib/email/contact-confirmation";
 import {
@@ -32,8 +32,6 @@ import { getCurrentUser } from "@/lib/user-session";
 
 export const dynamic = "force-dynamic";
 
-const limiter = rateLimit({ limit: 5, windowMs: 60_000 });
-
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 
@@ -49,11 +47,9 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ??
     "unknown";
 
-  if (!limiter.check(ip)) {
-    return json(
-      { error: "Too many requests. Please try again later." },
-      { status: 429 },
-    );
+  const rl = await enforceRateLimit("contact", ip);
+  if (!rl.ok) {
+    return json({ error: rl.message }, { status: rl.status });
   }
 
   let body: Record<string, unknown>;
@@ -79,9 +75,15 @@ export async function POST(request: NextRequest) {
     host: request.headers.get("host"),
   });
   if (!turnstile.ok) {
+    console.warn("[contact] turnstile_failed", turnstile.reason, { ip });
+    void postInternalAlert({
+      type: "security_turnstile",
+      title: "Contact Turnstile 실패",
+      body: `reason=${turnstile.reason} ip=${ip}`,
+    }).catch(() => {});
     return json(
-      { error: "turnstile_failed", reason: turnstile.reason },
-      { status: 403 },
+      { error: "보안 확인이 필요합니다.", reason: turnstile.reason },
+      { status: 401 },
     );
   }
 

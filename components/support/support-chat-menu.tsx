@@ -33,7 +33,7 @@ export function SupportChatMenu({ open, onClose, hours, onOpenAi }: Props) {
       <div className="relative p-4">
         <div className="mb-3 flex items-start justify-between gap-2">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 dark:text-white/40">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-400 dark:text-white/40">
               {t("brandEyebrow")}
             </p>
             <p className="mt-1 text-base font-semibold tracking-tight text-gray-900 dark:text-white">

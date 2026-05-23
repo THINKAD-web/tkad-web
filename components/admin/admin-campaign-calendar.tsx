@@ -133,7 +133,7 @@ export function AdminCampaignCalendar() {
           ) : (
             byMonth.map(([month, list]) => (
               <section key={month} className="rounded-xl border bg-card p-4">
-                <h2 className="font-mono text-sm font-bold text-muted-foreground">
+                <h2 className="text-sm font-bold text-muted-foreground">
                   {month}
                 </h2>
                 <ul className="mt-3 space-y-2">
@@ -142,9 +142,7 @@ export function AdminCampaignCalendar() {
                       <button
                         type="button"
                         onClick={() => setSelected(e)}
-                        className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition hover:bg-muted ${
-                          selected?.id === e.id ? "border-primary bg-muted" : ""
-                        }`}
+                        className={`w-full rounded-lg border px-3 py-2 text-left text-sm transition hover:bg-muted ${ selected?.id === e.id ? "border-primary bg-muted" : "" }`}
                       >
                         <span className="font-semibold">{e.title}</span>
                         <span className="mt-0.5 block text-xs text-muted-foreground">

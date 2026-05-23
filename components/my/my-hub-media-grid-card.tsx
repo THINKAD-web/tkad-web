@@ -58,10 +58,10 @@ export function MyHubMediaGridCard({
           ) : null}
         </div>
         <p className="truncate text-base font-bold text-foreground">{item.name}</p>
-        <p className="mt-1 truncate font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+        <p className="mt-1 truncate font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
           {item.region} · {item.type}
         </p>
-        <p className="mt-2 font-mono text-sm font-bold tabular-nums text-primary">
+        <p className="mt-2 font-display text-sm font-bold tabular-nums text-primary">
           {formatKRW(item.price, isKo)}
         </p>
       </div>

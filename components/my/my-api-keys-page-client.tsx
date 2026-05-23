@@ -33,7 +33,7 @@ const glassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
 
 const inputCls =
-  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
+  "h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4  text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 outline-none focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/10";
 
 const PLAN_LABEL: Record<string, { ko: string; en: string }> = {
   FREE: { ko: "Free (월 1,000회)", en: "Free (1k/mo)" },
@@ -137,7 +137,7 @@ export function MyApiKeysPageClient() {
       <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
         <Link
           href="/my"
-          className="mb-6 inline-flex items-center gap-2 font-mono text-xs uppercase tracking-widest dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
+          className="mb-6 inline-flex items-center gap-2 font-display text-xs uppercase tracking-widest dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {isKo ? "마이페이지" : "My hub"}
@@ -210,7 +210,7 @@ export function MyApiKeysPageClient() {
             <button
               type="submit"
               disabled={creating || !name.trim()}
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 font-mono text-sm font-bold text-black hover:bg-cyan-400 disabled:opacity-50"
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 text-sm font-bold text-black hover:bg-cyan-400 disabled:opacity-50"
             >
               {creating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -233,7 +233,7 @@ export function MyApiKeysPageClient() {
                 <div className="flex flex-wrap items-start justify-between gap-3">
                   <div>
                     <p className="font-medium dark:text-white text-gray-900">{k.name}</p>
-                    <p className="mt-1 font-mono text-xs dark:text-white text-gray-600">
+                    <p className="mt-1 text-xs dark:text-white text-gray-600">
                       {k.maskedKey}
                     </p>
                     <p className="mt-2 text-xs dark:text-white text-gray-400">

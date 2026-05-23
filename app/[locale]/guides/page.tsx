@@ -238,7 +238,7 @@ export default async function GuidesIndexPage({ params }: Props) {
 
             {otherGuides.length > 0 ? (
               <div className="mt-12">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [ {sectionCopy.moreGuides} ]
                 </p>
                 <ul className="mt-4 grid gap-3 sm:grid-cols-2">

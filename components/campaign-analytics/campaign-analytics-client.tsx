@@ -133,7 +133,7 @@ export function CampaignAnalyticsClient({
       <AnalyticsShell>
         <Link
           href={backHref}
-          className="mb-4 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
+          className="mb-4 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {mode === "admin"
@@ -147,13 +147,13 @@ export function CampaignAnalyticsClient({
 
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
               [ {isKo ? "성과 분석" : "PERFORMANCE ANALYTICS"} ]
             </p>
             <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900 sm:text-3xl">
               {data.name}
             </h1>
-            <p className="mt-2 font-mono text-[11px] tracking-tight dark:text-white text-gray-500">
+            <p className="mt-2 text-[11px] tracking-tight dark:text-white text-gray-500">
               {data.startDate ?? "—"} ~ {data.endDate ?? "—"} · {data.status}
               {data.clientCompany ? ` · ${data.clientCompany}` : ""}
             </p>
@@ -161,7 +161,7 @@ export function CampaignAnalyticsClient({
           <BarChart3 className="hidden h-10 w-10 text-[#a855f7] sm:block" aria-hidden />
         </div>
 
-        <p className="mt-4 font-mono text-[10px] tracking-tight dark:text-white">
+        <p className="mt-4 text-[10px] tracking-tight dark:text-white">
           {`// `}
           {isKo
             ? "집행 기간·매체 DB 기반 추정치입니다. 공식 집행 리포트는 PDF를 참고하세요."
@@ -174,7 +174,7 @@ export function CampaignAnalyticsClient({
               key={card.label}
               className={`rounded-[20px] border dark:border-white/12 border-gray-200 bg-gradient-to-br ${card.accent} dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur`}
             >
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
                 {card.label}
               </p>
               <p className="mt-2 text-2xl font-black tabular-nums tracking-tight dark:text-white text-gray-900">
@@ -185,10 +185,10 @@ export function CampaignAnalyticsClient({
         </section>
 
         <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+          <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "노출 추이" : "Impression trend"}
           </h2>
-          <p className="mt-1 font-mono text-[10px] dark:text-white">
+          <p className="mt-1 text-[10px] dark:text-white">
             {isKo
               ? "평일(시안) · 주말(핑크) 구분"
               : "Weekday (cyan) · weekend (pink)"}
@@ -274,10 +274,10 @@ export function CampaignAnalyticsClient({
 
         <div className="mt-8 grid grid-cols-1 gap-6 lg:grid-cols-2">
           <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-            <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+            <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "매체별 기여도" : "Media contribution"}
             </h2>
-            <p className="mt-1 font-mono text-[10px] dark:text-white">
+            <p className="mt-1 text-[10px] dark:text-white">
               {isKo ? "조각 클릭 시 매체 상세로 이동" : "Click a slice for media detail"}
             </p>
             {pieData.length === 0 ? (
@@ -348,7 +348,7 @@ export function CampaignAnalyticsClient({
                         {m.name}
                       </span>
                     </span>
-                    <span className="shrink-0 font-mono text-[11px] dark:text-white text-gray-500">
+                    <span className="shrink-0 text-[11px] dark:text-white text-gray-500">
                       {m.sharePct}%
                     </span>
                   </Link>
@@ -358,10 +358,10 @@ export function CampaignAnalyticsClient({
           </section>
 
           <section className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-            <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+            <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
               {isKo ? "지역별 커버리지" : "Regional coverage"}
             </h2>
-            <p className="mt-1 font-mono text-[10px] dark:text-white">
+            <p className="mt-1 text-[10px] dark:text-white">
               {isKo ? "집행 지역별 추정 노출 비중" : "Share of est. impressions by region"}
             </p>
             {data.regionShares.length === 0 ? (
@@ -385,7 +385,7 @@ export function CampaignAnalyticsClient({
         </div>
 
         <section className="mt-8 rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4 backdrop-blur sm:p-6">
-          <h2 className="font-mono text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
+          <h2 className="font-display text-[11px] font-black uppercase tracking-[0.24em] dark:text-white text-gray-600">
             {isKo ? "집행 인증 사진" : "Proof photos"}
           </h2>
           {data.proofPhotos.length === 0 ? (
@@ -426,7 +426,7 @@ export function CampaignAnalyticsClient({
         </section>
 
         <section className="mt-10 space-y-3 pb-8">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
             [ {isKo ? "다음 액션" : "NEXT ACTIONS"} ]
           </p>
           <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
@@ -494,9 +494,9 @@ function RegionShareRow({
     <>
       <div className="flex items-center justify-between gap-2">
         <span className="font-semibold dark:text-white text-gray-900">{row.region}</span>
-        <span className="font-mono text-[11px] text-[#22d3ee]">{row.sharePct}%</span>
+        <span className="text-[11px] text-[#22d3ee]">{row.sharePct}%</span>
       </div>
-      <p className="mt-1 font-mono text-[10px] dark:text-white">
+      <p className="mt-1 text-[10px] dark:text-white">
         {isKo ? "추정 노출" : "Est. imp."}{" "}
         {row.impressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
       </p>

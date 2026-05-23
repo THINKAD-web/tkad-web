@@ -102,7 +102,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
           { k: t("heroMapStatResponse"), v: "24h" },
         ].map((s) => (
           <div key={s.k} className="min-w-0 text-center">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {s.k}
             </p>
             <p className="mt-1 truncate text-base font-black tabular-nums tracking-tight text-foreground sm:text-lg">

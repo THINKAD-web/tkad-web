@@ -238,11 +238,11 @@ export default function AdminAiContentPage() {
       <div className="flex flex-wrap items-center gap-3">
         <Sparkles className="h-8 w-8 text-primary" />
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ AI CONTENT ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight">AI 콘텐츠</h1>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
             {`// `}트렌드·아카데미·성공 사례 초안 생성, 검토 및 게시
           </p>
         </div>
@@ -265,7 +265,7 @@ export default function AdminAiContentPage() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
-            <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               대상 월
             </label>
             <Input
@@ -298,7 +298,7 @@ export default function AdminAiContentPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 코스(그룹) 제목
               </label>
               <Input
@@ -308,7 +308,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 강의 초점 / 제목
               </label>
               <Input
@@ -337,7 +337,7 @@ export default function AdminAiContentPage() {
           </CardHeader>
           <CardContent className="space-y-3">
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 광고주 / 클라이언트명
               </label>
               <Input
@@ -348,7 +348,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 업종
               </label>
               <Input
@@ -359,7 +359,7 @@ export default function AdminAiContentPage() {
               />
             </div>
             <div>
-              <label className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <label className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 사용 매체 (쉼표 또는 줄바꿈)
               </label>
               <Input
@@ -399,7 +399,7 @@ export default function AdminAiContentPage() {
           ) : (
             <>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   트렌드
                 </p>
                 <ul className="space-y-2 text-sm">
@@ -430,7 +430,7 @@ export default function AdminAiContentPage() {
                 </ul>
               </div>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   아카데미
                 </p>
                 <ul className="space-y-2 text-sm">
@@ -461,7 +461,7 @@ export default function AdminAiContentPage() {
                 </ul>
               </div>
               <div>
-                <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   성공 사례
                 </p>
                 <ul className="space-y-2 text-sm">
@@ -502,7 +502,7 @@ export default function AdminAiContentPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
               트렌드
             </p>
             <ul className="space-y-2 text-sm">
@@ -528,7 +528,7 @@ export default function AdminAiContentPage() {
             </ul>
           </div>
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
               아카데미
             </p>
             <ul className="space-y-2 text-sm">
@@ -554,7 +554,7 @@ export default function AdminAiContentPage() {
             </ul>
           </div>
           <div>
-            <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
               성공 사례
             </p>
             <ul className="space-y-2 text-sm">

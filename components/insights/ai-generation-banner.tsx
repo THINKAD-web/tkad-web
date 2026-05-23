@@ -20,7 +20,7 @@ export function AiGenerationBanner() {
         <Sparkles className="h-5 w-5" aria-hidden />
       </div>
       <div className="space-y-2">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ AI 분석 리포트 ]
         </p>
         <p className="leading-relaxed text-foreground">
@@ -29,7 +29,7 @@ export function AiGenerationBanner() {
           하단에서 확인하실 수 있습니다. 잘못된 정보를 발견하시면{" "}
           <a
             href={`${CONTACT_MAILTO}?subject=${encodeURIComponent("[인사이트] 오류 신고")}`}
-            className="border-b-2 border-border pb-0.5 font-mono text-[12px] font-bold tracking-tight text-foreground transition-colors hover:border-accent hover:text-accent"
+            className="border-b-2 border-border pb-0.5 text-[12px] font-bold tracking-tight text-foreground transition-colors hover:border-accent hover:text-accent"
           >
             {CONTACT_EMAIL}
           </a>{" "}

@@ -40,12 +40,10 @@ function CardShell({
   const Icon = card.icon;
   return (
     <article
-      className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8 ${
-        card.wide ? "md:col-span-2 lg:col-span-3" : ""
-      }`}
+      className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8 ${ card.wide ? "md:col-span-2 lg:col-span-3" : "" }`}
     >
       <div className="mb-4 flex items-center justify-between">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [{String(index + 1).padStart(2, "0")}]
         </span>
         <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
@@ -78,7 +76,7 @@ function BulletList({ items }: { items: string[] }) {
 
 function SubLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-cyan-300/80">
+    <p className="mt-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-cyan-300/80">
       [ {children} ]
     </p>
   );
@@ -173,7 +171,7 @@ function CpmDetail({ isKo }: { isKo: boolean }) {
     <>
       <BulletList items={isKo ? ["CPM = 광고비 ÷ (예상 노출 ÷ 1,000)"] : ["CPM = spend ÷ (estimated impressions ÷ 1,000)"]} />
       <SubLabel>{example.title}</SubLabel>
-      <div className="mt-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-700">
+      <div className="mt-2 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-4 text-xs leading-relaxed dark:text-white text-gray-700">
         {example.lines.map((line) => (
           <p key={line}>{line}</p>
         ))}

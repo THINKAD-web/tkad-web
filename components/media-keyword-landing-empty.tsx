@@ -17,7 +17,7 @@ export function MediaKeywordLandingEmpty({
     <section className="tkad-media-browse-main border-t border-border/60 bg-card py-12 sm:py-16">
       <div className="ui-container">
         <div className="rounded-[28px] border-2 border-border bg-muted/40 p-10 text-center backdrop-blur-sm sm:p-14">
-          <p className="mx-auto max-w-2xl font-mono text-xs uppercase leading-relaxed tracking-[0.18em] text-muted-foreground sm:text-sm">
+          <p className="mx-auto max-w-2xl font-display text-xs uppercase leading-relaxed tracking-[0.18em] text-muted-foreground sm:text-sm">
             {`// ${message}`}
           </p>
           <Link

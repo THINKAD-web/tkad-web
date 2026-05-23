@@ -71,14 +71,14 @@ export default async function DevelopersPage({ params }: Props) {
         <div className="mt-10 flex flex-wrap gap-4">
           <Link
             href="/my/api-keys"
-            className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 font-mono text-sm font-bold text-black shadow-[0_0_24px_rgba(34,211,238,0.35)] hover:bg-cyan-300"
+            className="inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-6 py-3 text-sm font-bold text-black shadow-[0_0_24px_rgba(34,211,238,0.35)] hover:bg-cyan-300"
           >
             <KeyRound className="h-4 w-4" />
             {isKo ? "API 키 발급" : "Get API key"}
           </Link>
           <a
             href="#endpoints"
-            className="inline-flex items-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 px-6 py-3 font-mono text-sm dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50"
+            className="inline-flex items-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 px-6 py-3 text-sm dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50"
           >
             <Code2 className="h-4 w-4" />
             {isKo ? "엔드포인트" : "Endpoints"}
@@ -122,7 +122,7 @@ export default async function DevelopersPage({ params }: Props) {
       </NeonSection>
 
       <NeonSection className="!bg-[#080812] !py-14" id="auth">
-        <h2 className="font-mono text-xs uppercase tracking-[0.2em] text-cyan-300/80">
+        <h2 className="font-display text-xs uppercase tracking-[0.2em] text-cyan-300/80">
           {isKo ? "인증" : "Authentication"}
         </h2>
         <p className="mt-3 max-w-2xl text-sm dark:text-white text-gray-600">
@@ -181,7 +181,7 @@ export default async function DevelopersPage({ params }: Props) {
 
               {ep.params.length > 0 ? (
                 <div className="mt-4">
-                  <p className="text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
+                  <p className="text-xs font-display uppercase tracking-wider dark:text-white text-gray-400">
                     {isKo ? "쿼리 파라미터" : "Query params"}
                   </p>
                   <ul className="mt-2 space-y-1 text-sm dark:text-white text-gray-600">
@@ -196,14 +196,14 @@ export default async function DevelopersPage({ params }: Props) {
                 </div>
               ) : null}
 
-              <p className="mt-6 text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
+              <p className="mt-6 text-xs font-display uppercase tracking-wider dark:text-white text-gray-400">
                 {isKo ? "응답 예시" : "Response example"}
               </p>
               <pre className="mt-2 overflow-x-auto rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-4 font-mono text-xs leading-relaxed dark:text-white text-gray-800">
                 {ep.exampleResponse}
               </pre>
 
-              <p className="mt-6 text-xs font-mono uppercase tracking-wider dark:text-white text-gray-400">
+              <p className="mt-6 text-xs font-display uppercase tracking-wider dark:text-white text-gray-400">
                 cURL
               </p>
               <pre className="mt-2 overflow-x-auto rounded-xl border border-cyan-500/15 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 p-4 font-mono text-xs text-cyan-100/90">
@@ -224,7 +224,7 @@ export default async function DevelopersPage({ params }: Props) {
           </p>
           <Link
             href="/my/api-keys"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-8 py-3 font-mono text-sm font-bold text-black hover:bg-cyan-300"
+            className="mt-6 inline-flex items-center gap-2 rounded-xl bg-cyan-400 px-8 py-3 text-sm font-bold text-black hover:bg-cyan-300"
           >
             <KeyRound className="h-4 w-4" />
             {isKo ? "API 키 발급" : "Get API key"}

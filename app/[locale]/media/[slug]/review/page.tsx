@@ -5,13 +5,13 @@ import { WriteMediaReviewClient } from "@/components/media-detail/write-media-re
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type Props = {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 };
 
 export default async function WriteMediaReviewPage({ params }: Props) {
-  const { locale, id } = await params;
+  const { locale, slug } = await params;
   setRequestLocale(locale);
-  const media = await resolveMediaForDetail(id);
+  const media = await resolveMediaForDetail(slug);
   if (!media) notFound();
 
   const t = await getTranslations({ locale, namespace: "media.reviews" });

@@ -52,6 +52,11 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { Link } from "@/i18n/navigation";
 import type { AdminMediaDto, MediaAvailability } from "@/lib/admin-media-dto";
+import {
+  AdminMediaCategoryFields,
+  mergeMediaCategoryForm,
+  splitMediaCategoryForm,
+} from "@/components/admin/admin-media-category-fields";
 import type { MediaEngagementMap } from "@/lib/admin-media-engagement";
 import {
   normalizeAdminMediaRow,
@@ -187,6 +192,9 @@ type AdminMediaForm = {
   heightM: string;
   description: string;
   subCategory: string;
+  mediaCategoryParent: string;
+  mediaCategorySubs: string[];
+  targetCategories: string[];
   tags: string;
   priceNote: string;
   priceOptionsJson: string;
@@ -250,6 +258,9 @@ const emptyForm: AdminMediaForm = {
   heightM: "",
   description: "",
   subCategory: "",
+  mediaCategoryParent: "",
+  mediaCategorySubs: [],
+  targetCategories: [],
   tags: "",
   priceNote: "",
   priceOptionsJson: "",
@@ -379,6 +390,7 @@ function validatePriceOptionsJsonField(raw: string): string | null {
 }
 
 function apiToForm(m: AdminMediaDto): AdminMediaForm {
+  const { parentSlug, subSlugs } = splitMediaCategoryForm(m.mediaCategory ?? []);
   return {
     name: m.name,
     nameEn: m.nameEn ?? "",
@@ -408,6 +420,9 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     heightM: m.heightM != null ? String(m.heightM) : "",
     description: m.description ?? "",
     subCategory: m.subCategory ?? "",
+    mediaCategoryParent: parentSlug,
+    mediaCategorySubs: subSlugs,
+    targetCategories: [...(m.targetCategory ?? [])],
     tags: (m.tags ?? []).join(", "),
     priceNote: m.priceNote ?? "",
     priceOptionsJson:
@@ -481,6 +496,11 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     height: form.height.trim() || null,
     description: form.description.trim() || null,
     subCategory: form.subCategory.trim() || null,
+    mediaCategory: mergeMediaCategoryForm(
+      form.mediaCategoryParent,
+      form.mediaCategorySubs,
+    ),
+    targetCategory: [...form.targetCategories],
     tags,
     city: form.city.trim() || null,
     district: form.district.trim() || null,
@@ -1904,7 +1924,7 @@ export default function AdminMediasClient({
             {selectedCount > 0 && (
               <div className="flex flex-col gap-2 border-b border-border bg-muted/40 px-3 py-2.5 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-2">
                 <p className="text-xs font-medium text-foreground">
-                  <span className="font-mono tabular-nums">{selectedCount}</span>
+                  <span className="tabular-nums">{selectedCount}</span>
                   개 선택 · 필터 결과 순서대로 &quot;목록순&quot; 번호가 매겨집니다
                 </p>
                 <div className="flex flex-wrap items-center gap-1.5">
@@ -2068,7 +2088,7 @@ export default function AdminMediasClient({
                                 </span>
                               </p>
                               {regionZoneLabel(media.regionZone, "ko") ? (
-                                <p className="text-[10px] font-mono text-muted-foreground">
+                                <p className="text-[10px] text-muted-foreground">
                                   // {regionZoneLabel(media.regionZone, "ko")}
                                   {media.district ? ` · ${media.district}` : ""}
                                 </p>
@@ -2084,7 +2104,7 @@ export default function AdminMediasClient({
                               <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
                                 <Badge
                                   variant="secondary"
-                                  className="border border-border bg-card text-[10px] font-mono font-bold uppercase tracking-[0.1em] text-foreground"
+                                  className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
                                 >
                                   {typeBadgeLabel(media.type)}
                                 </Badge>
@@ -2375,7 +2395,7 @@ export default function AdminMediasClient({
                         <td className="px-2 py-2.5 align-middle">
                           <Badge
                             variant="secondary"
-                            className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-mono font-bold uppercase tracking-[0.06em] text-foreground"
+                            className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-display font-bold uppercase tracking-[0.06em] text-foreground"
                             title={typeBadgeLabel(media.type)}
                           >
                             {typeBadgeLabel(media.type)}
@@ -2393,7 +2413,7 @@ export default function AdminMediasClient({
                           (key) => (
                             <td
                               key={key}
-                              className="px-1 py-2.5 text-center align-middle font-mono text-xs tabular-nums text-muted-foreground"
+                              className="px-1 py-2.5 text-center align-middle  tabular-nums text-muted-foreground"
                             >
                               {engagement[media.id]?.[key] ?? 0}
                             </td>
@@ -2675,7 +2695,7 @@ export default function AdminMediasClient({
                       >
                         <ChevronLeft className="h-3.5 w-3.5" />
                       </Button>
-                      <span className="flex items-center px-1 font-mono text-[11px] text-muted-foreground">
+                      <span className="flex items-center px-1 text-[11px] text-muted-foreground">
                         {page}/{totalPages}
                       </span>
                       <Button
@@ -2710,7 +2730,7 @@ export default function AdminMediasClient({
                   {editing ? "매체 수정" : "매체 추가"}
                 </CardTitle>
                 {!editing ? (
-                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     {draftSavedAt
                       ? `임시저장 ${new Date(draftSavedAt).toLocaleTimeString("ko-KR")} · 30초마다 자동 저장`
                       : "필수(*) 항목만 채워도 저장 가능 · 주소 입력 시 좌표 자동 변환"}
@@ -2793,7 +2813,7 @@ export default function AdminMediasClient({
                   <p className="mt-1 text-xs text-amber-700">{geoLookupError}</p>
                 )}
                 {form.latitude && form.longitude ? (
-                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     좌표: {form.latitude}, {form.longitude}
                     {form.city ? ` · ${form.city}` : ""}
                     {form.district ? ` ${form.district}` : ""}
@@ -3288,6 +3308,34 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
+              <AdminMediaCategoryFields
+                parentSlug={form.mediaCategoryParent}
+                subSlugs={form.mediaCategorySubs}
+                targetSlugs={form.targetCategories}
+                onParentChange={(slug) =>
+                  setForm((f) => ({
+                    ...f,
+                    mediaCategoryParent: slug,
+                    mediaCategorySubs: [],
+                  }))
+                }
+                onToggleSub={(slug) =>
+                  setForm((f) => ({
+                    ...f,
+                    mediaCategorySubs: f.mediaCategorySubs.includes(slug)
+                      ? f.mediaCategorySubs.filter((s) => s !== slug)
+                      : [...f.mediaCategorySubs, slug],
+                  }))
+                }
+                onToggleTarget={(slug) =>
+                  setForm((f) => ({
+                    ...f,
+                    targetCategories: f.targetCategories.includes(slug)
+                      ? f.targetCategories.filter((s) => s !== slug)
+                      : [...f.targetCategories, slug],
+                  }))
+                }
+              />
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   태그 (쉼표 구분)
@@ -3476,7 +3524,7 @@ export default function AdminMediasClient({
                     }
                     rows={5}
                     spellCheck={false}
-                    className="w-full rounded-md border-2 border-border bg-card px-3 py-2 text-xs font-mono text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                    className="w-full rounded-md border-2 border-border bg-card px-3 py-2 text-xs text-foreground shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     placeholder='[{"label":"20초 기준","price":30000000,"period":"month","description":"피크 15초"}]'
                   />
                 </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import { hapticLight } from "@/lib/haptic";
+import { hapticNotification } from "@/lib/haptic";
 
 /** Listens for SW push messages and triggers haptic when a notification arrives in foreground. */
 export function PushHapticListener() {
@@ -10,7 +10,7 @@ export function PushHapticListener() {
 
     const onMessage = (event: MessageEvent) => {
       const data = event.data as { type?: string } | null;
-      if (data?.type === "PUSH_RECEIVED") hapticLight();
+      if (data?.type === "PUSH_RECEIVED") hapticNotification();
     };
 
     navigator.serviceWorker.addEventListener("message", onMessage);

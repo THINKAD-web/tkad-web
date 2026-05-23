@@ -68,13 +68,13 @@ export default function FaqPage() {
     <>
       <section className="bg-hero-void py-24">
         <div className="mx-auto max-w-7xl px-4 text-center sm:px-6 lg:px-8">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             {`// 11 / FAQ`}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
             {isKo ? "자주 묻는 질문" : "FAQ"}
           </h1>
-          <p className="mx-auto mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mx-auto mt-5 max-w-2xl text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "THINKAD 서비스에 대해 자주 묻는 질문을 모았습니다."
               : "Answers to common questions about THINKAD services."}
@@ -96,7 +96,7 @@ export default function FaqPage() {
               placeholder={
                 isKo ? "질문 또는 답변 검색…" : "Search questions or answers…"
               }
-              className="h-11 w-full border-2 border-border bg-card pl-10 pr-4 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+              className="h-11 w-full border-2 border-border bg-card pl-10 pr-4 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               aria-label={isKo ? "FAQ 검색" : "Search FAQ"}
             />
           </div>
@@ -113,7 +113,7 @@ export default function FaqPage() {
                   type="button"
                   onClick={() => setActiveCategory(cat.value)}
                   className={cn(
-                    "-mt-[2px] -ml-[2px] border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "-mt-[2px] -ml-[2px] border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     activeCategory === cat.value
                       ? "border-accent bg-accent text-accent-foreground"
                       : "border-border bg-card text-foreground hover:bg-muted",
@@ -123,7 +123,7 @@ export default function FaqPage() {
                 </button>
               ))}
             </div>
-            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}
               {isKo
                 ? `${filtered.length}개의 결과`
@@ -133,7 +133,7 @@ export default function FaqPage() {
 
           {filtered.length === 0 ? (
             <div className="border-2 border-border bg-card px-6 py-20 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 [ NO RESULTS ]
               </p>
               <p className="mt-3 text-foreground">
@@ -161,12 +161,12 @@ export default function FaqPage() {
                       {/* Q 마커 */}
                       <span
                         aria-hidden
-                        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border-2 border-accent bg-accent font-mono text-[11px] font-bold tracking-wide text-accent-foreground"
+                        className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border-2 border-accent bg-accent text-[11px] font-bold tracking-wide text-accent-foreground"
                       >
                         Q
                       </span>
                       <span className="min-w-0 flex-1 space-y-2">
-                        <span className={cn("inline-block border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em]", badge.className)}>
+                        <span className={cn("inline-block border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em]", badge.className)}>
                           [ {isKo ? badge.ko : badge.en} ]
                         </span>
                         <span className="block font-bold leading-snug tracking-tight text-foreground">
@@ -192,7 +192,7 @@ export default function FaqPage() {
                           {/* A 마커 */}
                           <span
                             aria-hidden
-                            className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border-2 border-border bg-hero-void font-mono text-[11px] font-bold text-hero-fg"
+                            className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border-2 border-border bg-hero-void text-[11px] font-bold text-hero-fg"
                           >
                             A
                           </span>

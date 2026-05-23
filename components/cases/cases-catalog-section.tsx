@@ -58,7 +58,7 @@ export function CasesCatalogSection({
           {recommended.length > 0 ? (
             <section className="mb-12">
               <div className="mb-5">
-                <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+                <p className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                   <Sparkles className="h-3.5 w-3.5" />
                   [ {t("recommendedTitle")} ]
                 </p>

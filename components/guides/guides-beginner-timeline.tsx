@@ -15,7 +15,7 @@ function RoleList({
   if (items.length === 0) return null;
   return (
     <div className="mt-3">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white">
         {label}
       </p>
       <ul className="mt-1.5 space-y-1">
@@ -46,7 +46,7 @@ export function GuidesBeginnerTimeline({ steps, isKo }: Props) {
                 className="absolute left-[1.125rem] top-10 bottom-0 w-px bg-gradient-to-b from-cyan-400/50 to-transparent"
               />
             ) : null}
-            <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-cyan-500/15 font-mono text-xs font-black text-cyan-200">
+            <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-cyan-500/15 text-xs font-black text-cyan-200">
               {step.step}
             </div>
             <div className="min-w-0 flex-1 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
@@ -54,7 +54,7 @@ export function GuidesBeginnerTimeline({ steps, isKo }: Props) {
                 <h3 className="text-base font-black dark:text-white text-gray-900">
                   {isKo ? step.titleKo : step.titleEn}
                 </h3>
-                <span className="rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                <span className="rounded-lg border dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
                   {isKo ? step.durationKo : step.durationEn}
                 </span>
               </div>

@@ -1,5 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { matchMediaCatalog } from "@/lib/matching-engine";
+import { aiInputToMatching } from "@/lib/recommendation-adapters";
 
 /**
  * AI 매체 추천 (규칙 기반)
@@ -594,19 +596,28 @@ function pickRecommendPool(
   return valid.length > 0 ? [...valid] : [];
 }
 
-/** Fisher–Yates shuffle 후 앞에서 n개 */
-function randomSample<T>(items: readonly T[], n: number): T[] {
+/** Fisher–Yates shuffle 후 앞에서 n개 — 결정론적 (id+seed 해시 순) */
+function deterministicSample<T>(
+  items: readonly T[],
+  n: number,
+  seed: number,
+): T[] {
   if (n <= 0 || items.length === 0) return [];
-  const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    const a = copy[i];
-    const b = copy[j];
-    if (a !== undefined && b !== undefined) {
-      copy[i] = b;
-      copy[j] = a;
-    }
-  }
+  const copy = [...items].sort((a, b) => {
+    const idA =
+      typeof a === "object" && a && "id" in a ?
+        String((a as { id: string }).id)
+      : String(a);
+    const idB =
+      typeof b === "object" && b && "id" in b ?
+        String((b as { id: string }).id)
+      : String(b);
+    let hA = 2166136261 ^ seed;
+    let hB = 2166136261 ^ seed;
+    for (const ch of idA) hA = Math.imul(hA ^ ch.charCodeAt(0), 16777619);
+    for (const ch of idB) hB = Math.imul(hB ^ ch.charCodeAt(0), 16777619);
+    return (hA >>> 0) - (hB >>> 0);
+  });
   return copy.slice(0, Math.min(n, copy.length));
 }
 
@@ -622,7 +633,7 @@ function ensureMinPoolSize(
   const rest = catalog.filter((m) => !seen.has(m.id));
   const need = Math.min(min - pool.length, rest.length);
   if (need <= 0) return pool;
-  return [...pool, ...randomSample(rest, need)];
+  return [...pool, ...deterministicSample(rest, need, pool.length)];
 }
 
 function finalizeScoredList(
@@ -671,12 +682,23 @@ function recommendMediaCore(
   const budgetCap = input.budgetMaxMan > 0 ? input.budgetMaxMan : null;
   let pool = pickRecommendPool(valid, input);
   if (pool.length === 0) {
-    pool = randomSample(
+    pool = deterministicSample(
       sourceForPad,
       Math.min(MIN_RESULTS, sourceForPad.length),
+      0,
     );
   } else {
     pool = ensureMinPoolSize(pool, sourceForPad, MIN_RESULTS);
+  }
+
+  const matchingInput = aiInputToMatching(input, 0);
+  const matched = matchMediaCatalog(pool, matchingInput, MAX_RECOMMEND_RESULTS);
+  if (matched.length >= MIN_RESULTS) {
+    return matched.map((m) => ({
+      item: m.media,
+      score: m.score,
+      reasons: m.reasons,
+    }));
   }
 
   return finalizeScoredList(pool, input, budgetCap);

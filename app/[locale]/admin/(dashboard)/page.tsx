@@ -47,13 +47,13 @@ function FeedList({
   return (
     <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
       <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
-        <h2 className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           <Icon className="h-4 w-4 text-cyan-400/80" aria-hidden />
           [ {title} ]
         </h2>
         <Link
           href={viewAllHref}
-          className="inline-flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground/70 hover:text-foreground"
+          className="inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground/70 hover:text-foreground"
         >
           전체
           <ArrowRight className="h-3 w-3" />
@@ -61,7 +61,7 @@ function FeedList({
       </div>
       <ul className="divide-y divide-border/50">
         {items.length === 0 ? (
-          <li className="px-4 py-10 text-center font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+          <li className="px-4 py-10 text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
             {`// `}
             {empty}
           </li>
@@ -74,17 +74,17 @@ function FeedList({
               >
                 <div className="min-w-0">
                   <p className="truncate text-sm font-bold">{item.title}</p>
-                  <p className="mt-0.5 truncate font-mono text-[11px] text-muted-foreground">
+                  <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                     {item.subtitle}
                   </p>
                 </div>
                 <div className="shrink-0 text-right">
                   {item.badge ? (
-                    <span className="mb-1 inline-flex rounded-md border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-1.5 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] dark:text-white text-gray-600">
+                    <span className="mb-1 inline-flex rounded-md border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-1.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.12em] dark:text-white text-gray-600">
                       {item.badge}
                     </span>
                   ) : null}
-                  <p className="font-mono text-[10px] text-muted-foreground">
+                  <p className="text-[10px] text-muted-foreground">
                     {item.time}
                   </p>
                 </div>
@@ -139,13 +139,13 @@ export default async function AdminOverviewPage({ params }: Props) {
     <div className="space-y-6 text-foreground">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/80">
             [ OPERATIONS HUB ]
           </p>
           <h1 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl">
             운영 대시보드
           </h1>
-          <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
             {`// `}
             {data.configured
               ? "실시간 DB · KPI · 미처리 알림"
@@ -156,7 +156,7 @@ export default async function AdminOverviewPage({ params }: Props) {
 
       {data.alerts.length > 0 ? (
         <section className="rounded-2xl border border-red-500/35 bg-red-500/10 p-4 backdrop-blur">
-          <p className="mb-3 flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-red-200">
+          <p className="mb-3 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-red-200">
             <AlertTriangle className="h-4 w-4" aria-hidden />
             [ 미처리 항목 ]
           </p>
@@ -168,7 +168,7 @@ export default async function AdminOverviewPage({ params }: Props) {
                   className="inline-flex items-center gap-2 rounded-xl border border-red-400/40 bg-red-950/40 px-3 py-2 text-sm font-semibold text-red-50 transition hover:bg-red-950/60"
                 >
                   {a.label}
-                  <span className="inline-flex min-w-[1.25rem] justify-center rounded-full bg-red-500 px-1.5 py-0.5 font-mono text-[10px] font-black dark:text-white text-gray-900">
+                  <span className="inline-flex min-w-[1.25rem] justify-center rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-black dark:text-white text-gray-900">
                     {a.count}
                   </span>
                 </Link>
@@ -191,14 +191,14 @@ export default async function AdminOverviewPage({ params }: Props) {
               {kpi.alert ? (
                 <span className="absolute right-3 top-3 h-2.5 w-2.5 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.9)]" />
               ) : null}
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {kpi.label}
               </p>
               <p className="mt-2 text-2xl font-black tabular-nums">{kpi.value}</p>
               {kpi.delta ? (
                 <p
                   className={[
-                    "mt-1 font-mono text-[11px] font-bold",
+                    "mt-1 text-[11px] font-bold",
                     kpi.deltaUp ? "text-emerald-400" : "text-amber-300",
                   ].join(" ")}
                 >
@@ -211,7 +211,7 @@ export default async function AdminOverviewPage({ params }: Props) {
       </section>
 
       <section>
-        <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           [ 빠른 액션 ]
         </p>
         <div className="grid grid-cols-2 gap-2 lg:grid-cols-4">
@@ -281,7 +281,7 @@ export default async function AdminOverviewPage({ params }: Props) {
           <Link key={href} href={href}>
             <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-3 py-3 transition hover:bg-muted/30">
               <Icon className="h-4 w-4 text-muted-foreground" />
-              <span className="font-mono text-[11px] font-bold uppercase tracking-[0.14em]">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.14em]">
                 {label}
               </span>
               <ArrowRight className="ml-auto h-3.5 w-3.5 text-muted-foreground" />

@@ -218,7 +218,7 @@ export function BrutalNav({
             <Link
               href={cta.href}
               className={cn(
-                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
+                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-display text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
                 sidebarLayout && "lg:hidden",
               )}
             >
@@ -236,7 +236,7 @@ export function BrutalNav({
             {cta ? (
               <Link
                 href={cta.href}
-                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[10px] font-black uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-display text-[10px] font-black uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
               >
                 {cta.label}
               </Link>
@@ -393,7 +393,7 @@ export function BrutalNav({
                 <Link
                   href={cta.href}
                   onClick={() => setMobileOpen(false)}
-                  className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+                  className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
                 >
                   {cta.label}
                 </Link>
@@ -509,7 +509,7 @@ function BrutalNavDropdown({
               </p>
               <p
                 className={cn(
-                  "mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em]",
+                  "mt-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
                   lightPanel ? "text-zinc-500" : "dark:text-white",
                 )}
               >

@@ -336,7 +336,7 @@ export function MediaMapView({
                         <div className="mt-2.5 border-t border-navy/10 pt-2.5">
                           <ShareButtons
                             compact
-                            url={`/${locale}${mediaItemDetailPath(media.id)}`}
+                            url={`/${locale}${mediaItemDetailPath(media)}`}
                             title={isKo ? media.name : (media.nameEn || media.name)}
                             description={`${formatMediaLocationShort(media, isKo)} - ${formatCatalogPriceFieldWon(media.price)} · ${tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}`}
                             locale={locale}
@@ -344,7 +344,7 @@ export function MediaMapView({
                         </div>
                         <div className="mt-3 flex flex-col gap-2">
                           <Link
-                            href={mediaItemDetailPath(media.id)}
+                            href={mediaItemDetailPath(media)}
                             className="flex w-full items-center justify-center gap-1.5 rounded-md border border-navy/15 bg-white px-3 py-2 text-sm font-semibold text-navy transition-colors hover:bg-slate-50"
                           >
                             {t("media.cardDetail")}

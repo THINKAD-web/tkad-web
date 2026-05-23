@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   buildCaseStudyGalleryItems,
-  getAllMediaIds,
   getMediaDetailGalleryUrls,
   getPrimaryMediaImageUrl,
   getSimilarMediaFromCatalog,
@@ -39,7 +38,11 @@ import { mediaDetailPricePeriodTranslationKey } from "@/lib/media-price-format";
 import MediaCaseStudyGallery from "@/components/media-case-study-gallery";
 import { RelatedCases } from "@/components/media-detail/related-cases";
 import { getSuccessCasesForMedia } from "@/lib/public-content-queries";
-import { fetchPublicMediaCatalog, resolveMediaForDetail } from "@/lib/public-media-catalog";
+import {
+  fetchPublicMediaCatalog,
+  getAllMediaSlugsForStaticParams,
+  resolveMediaForDetail,
+} from "@/lib/public-media-catalog";
 import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
 import { attachReviewStatsToMediaItems } from "@/lib/media-reviews";
 import { getCurrentUser } from "@/lib/user-session";
@@ -57,25 +60,27 @@ import { MediaDetailPageView } from "@/components/media-detail/media-detail-page
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
+import {
+  mediaItemDetailPath,
+  shouldRedirectMediaIdToSlug,
+} from "@/lib/media-slug";
 
-type Props = { params: Promise<{ locale: string; id: string }> };
+type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export const revalidate = 3600;
 
-export function generateStaticParams() {
-  const ids = [
-    ...getAllMediaIds(),
-    ...getAllKeywordFilterMediaIds(),
-  ];
-  return ids.map((id) => ({ id: String(id) }));
+export async function generateStaticParams() {
+  const slugs = await getAllMediaSlugsForStaticParams();
+  const keywordIds = getAllKeywordFilterMediaIds().map(String);
+  const merged = [...new Set([...slugs, ...keywordIds])];
+  return merged.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
-  const { id } = await params;
-  const media = await resolveMediaForDetail(id);
+  const { slug } = await params;
+  const media = await resolveMediaForDetail(slug);
   if (!media) return { title: "Media" };
-  const isKo = locale === "ko";
   const title = buildMediaPageTitle(media, locale);
   const description = buildMediaMetaDescription(media, locale);
   const keywords = buildMediaMetaKeywordsList(media, locale, 28);
@@ -85,11 +90,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     ko: imageAlt,
     en: imageAlt,
   });
+  const canonicalPath = mediaItemDetailPath(media);
   return {
     title,
     description,
     keywords,
-    alternates: pageAlternates(locale, `/media/${media.id}`),
+    alternates: pageAlternates(locale, canonicalPath),
     openGraph: {
       title,
       description,
@@ -108,9 +114,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function MediaDetailPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const { id: idStr } = await params;
-  let media = await resolveMediaForDetail(idStr);
+  const { slug: slugParam } = await params;
+  let media = await resolveMediaForDetail(slugParam);
   if (!media) notFound();
+
+  if (shouldRedirectMediaIdToSlug(slugParam, media)) {
+    permanentRedirect(`/${locale}${mediaItemDetailPath(media)}`);
+  }
   [media] = await attachReviewStatsToMediaItems([media]);
   media = await enrichMediaWithTrust(media);
 

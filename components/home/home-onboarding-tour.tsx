@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HOME_TOUR_OPEN_EVENT } from "@/lib/home-tour";
 
 const STORAGE_KEY = "tkad-home-tour-v2";
 
@@ -70,13 +71,9 @@ export default function HomeOnboardingTour() {
   }, [step]);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") return;
-    } catch {
-      return;
-    }
-    const t = window.setTimeout(() => setOpen(true), 2200);
-    return () => window.clearTimeout(t);
+    const onManualOpen = () => setOpen(true);
+    window.addEventListener(HOME_TOUR_OPEN_EVENT, onManualOpen);
+    return () => window.removeEventListener(HOME_TOUR_OPEN_EVENT, onManualOpen);
   }, []);
 
   useEffect(() => {
@@ -174,7 +171,7 @@ export default function HomeOnboardingTour() {
         style={popupStyle}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-primary">
             {isKo ? "안내" : "Guide"} · {step + 1}/{STEPS.length}
           </p>
           <button

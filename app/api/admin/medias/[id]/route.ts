@@ -98,6 +98,24 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     data.tags = body.tags;
   }
+  if (body.mediaCategory !== undefined) {
+    if (
+      !Array.isArray(body.mediaCategory) ||
+      !body.mediaCategory.every((x) => typeof x === "string")
+    ) {
+      return json({ error: "mediaCategory must be string[]" }, 400);
+    }
+    data.mediaCategory = body.mediaCategory;
+  }
+  if (body.targetCategory !== undefined) {
+    if (
+      !Array.isArray(body.targetCategory) ||
+      !body.targetCategory.every((x) => typeof x === "string")
+    ) {
+      return json({ error: "targetCategory must be string[]" }, 400);
+    }
+    data.targetCategory = body.targetCategory;
+  }
   if (body.coverageDistrictCodes !== undefined) {
     const normalized = normalizeCoverageDistrictCodesInput(
       body.coverageDistrictCodes,
@@ -532,7 +550,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       for (const locale of ["ko", "en"] as const) {
         revalidatePath(`/${locale}/compare`);
         revalidatePath(`/${locale}/media`);
-        revalidatePath(`/${locale}/media/${id}`);
+        revalidatePath(`/${locale}/media/${media.slug ?? id}`);
+        if (media.slug && media.slug !== id) {
+          revalidatePath(`/${locale}/media/${id}`);
+        }
         revalidatePath(`/${locale}/planner`);
         revalidatePath(`/${locale}/quote`);
       }

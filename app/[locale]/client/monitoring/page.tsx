@@ -439,7 +439,7 @@ function PinDetailCard({ pin, isKo }: { pin: CampaignMapPin; isKo: boolean }) {
       <CardContent className="space-y-4 text-sm">
         <div className="flex flex-wrap items-center gap-2 text-xs text-navy/70">
           <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-dark" />
-          <span className="font-mono">
+          <span className="">
             {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
           </span>
         </div>

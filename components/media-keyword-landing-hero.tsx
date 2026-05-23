@@ -36,7 +36,7 @@ export function MediaKeywordLandingHero({
       />
 
       <div className="tkad-media-keyword-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
-        <p className="tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-cyan-400/60">
+        <p className="tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/60">
           <span>{eyebrow}</span>
           {showBeta ? <CategoryHeroBetaBadge /> : null}
         </p>

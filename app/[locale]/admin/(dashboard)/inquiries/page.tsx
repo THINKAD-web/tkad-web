@@ -483,11 +483,11 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
   return (
     <div className="space-y-6 text-foreground">
       <header className="space-y-2">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ INQUIRIES ]
         </p>
         <h1 className="text-xl font-bold tracking-tight">문의 관리</h1>
-        <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
+        <p className="text-[11px] tracking-tight text-muted-foreground">
           {`// `}최근 200건 기준으로 빠르게 검색하고, 고예산/오늘 접수 문의를 우선 확인할 수 있습니다.
         </p>
       </header>
@@ -497,7 +497,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
           <CardContent className="py-12 text-center">
             <TriangleAlert className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
             <p className="text-sm font-bold">DB 연결이 필요합니다</p>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
               {`// `}문의 데이터베이스가 설정되면 최근 문의가 이 화면에 표시됩니다.
             </p>
           </CardContent>
@@ -507,7 +507,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
           <CardContent className="py-12 text-center">
             <TriangleAlert className="mx-auto mb-3 h-10 w-10 text-destructive" />
             <p className="text-sm font-bold">문의 목록을 불러오지 못했습니다</p>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
               {`// `}잠시 후 다시 시도하거나 DB 상태를 확인해 주세요.
             </p>
           </CardContent>
@@ -522,7 +522,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               { label: "답변완료", value: `${stats.done}건` },
             ].map((stat) => (
               <div key={stat.label} className="border-2 border-border bg-card p-4">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   [ {stat.label} ]
                 </p>
                 <p className="mt-2 text-2xl font-bold tabular-nums">{stat.value}</p>
@@ -560,21 +560,21 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                 </div>
                 <button
                   type="submit"
-                  className="inline-flex h-11 items-center justify-center border-2 border-border bg-foreground px-4 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
+                  className="inline-flex h-11 items-center justify-center border-2 border-border bg-foreground px-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-background transition-colors hover:bg-primary hover:border-primary hover:text-primary-foreground"
                 >
                   검색 적용
                 </button>
               </form>
               <Link
                 href={buildQuery({ view: selectedView })}
-                className="inline-flex h-11 items-center justify-center border-2 border-border px-4 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
+                className="inline-flex h-11 items-center justify-center border-2 border-border px-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-muted/50"
               >
                 필터 초기화
               </Link>
             </div>
 
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 보기 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -593,7 +593,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                       view: option.value,
                     })}
                     className={[
-                      "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                      "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                       selectedView === option.value
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -607,7 +607,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
             </div>
 
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 문의 유형 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -632,7 +632,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                         view: selectedView,
                       })}
                       className={[
-                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                         active
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -647,7 +647,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
             </div>
 
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 처리 상태 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -672,7 +672,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                         view: selectedView,
                       })}
                       className={[
-                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                         active
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -687,7 +687,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
             </div>
 
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 담당자 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -700,7 +700,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                     view: selectedView,
                   })}
                   className={[
-                    "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     selectedAssignee === ""
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -720,7 +720,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                     view: selectedView,
                   })}
                   className={[
-                    "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     selectedAssignee === UNASSIGNED_FILTER
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -750,7 +750,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                       view: selectedView,
                     })}
                     className={[
-                      "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                      "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                       selectedAssignee === assignee
                         ? "border-primary bg-primary text-primary-foreground"
                         : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -772,7 +772,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
             </div>
 
             <div className="space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                 [ 우선 보기 ]
               </p>
               <div className="flex flex-wrap gap-2">
@@ -791,7 +791,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                         view: selectedView,
                       })}
                       className={[
-                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                        "inline-flex items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                         active
                           ? "border-primary bg-primary text-primary-foreground"
                           : "border-border bg-background text-foreground hover:bg-muted/50",
@@ -804,7 +804,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               </div>
             </div>
 
-            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] tracking-tight text-muted-foreground">
               <span>{`// `}최근 200건 중 {items.length}건 표시</span>
               {hasActiveFilter ? (
                 <span className="text-primary">필터 적용 중</span>
@@ -819,7 +819,7 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               <CardContent className="py-12 text-center">
                 <MessageSquareText className="mx-auto mb-3 h-10 w-10 text-muted-foreground" />
                 <p className="text-sm font-bold">조건에 맞는 문의가 없습니다</p>
-                <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
                   {`// `}검색어 또는 필터를 조정하면 다른 문의를 확인할 수 있습니다.
                 </p>
               </CardContent>
@@ -829,10 +829,10 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               {selectedView === "trash" ? (
                 <section className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       [ 휴지통 ]
                     </h2>
-                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {items.length}건
                     </span>
                   </div>
@@ -843,10 +843,10 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               {selectedView === "active" && newItems.length > 0 ? (
                 <section className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-rose-700">
+                    <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-rose-700">
                       [ 미처리 우선 ]
                     </h2>
-                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {newItems.length}건
                     </span>
                   </div>
@@ -857,10 +857,10 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
               {selectedView === "active" && inProgressItems.length > 0 ? (
                 <section className="space-y-2">
                   <div className="flex items-center justify-between gap-3">
-                    <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-amber-700">
+                    <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-700">
                       [ 진행중 ]
                     </h2>
-                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {inProgressItems.length}건
                     </span>
                   </div>
@@ -877,10 +877,10 @@ export default async function AdminInquiriesPage({ searchParams }: Props) {
                   }
                 >
                   <summary className="flex cursor-pointer list-none items-center justify-between gap-3">
-                    <h2 className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-emerald-700">
+                    <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-emerald-700">
                       [ 답변완료 ]
                     </h2>
-                    <span className="font-mono text-[11px] tabular-nums text-muted-foreground">
+                    <span className="text-[11px] tabular-nums text-muted-foreground">
                       {doneItems.length}건
                     </span>
                   </summary>

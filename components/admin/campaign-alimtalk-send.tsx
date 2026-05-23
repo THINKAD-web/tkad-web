@@ -103,7 +103,7 @@ export function CampaignAlimtalkSend({
           <MessageCircle className="h-4 w-4 text-[#FEE500]" />
           알림톡 발송
         </span>
-        <span className="font-mono text-[10px] text-muted-foreground">
+        <span className="text-[10px] text-muted-foreground">
           {open ? "닫기" : "열기"}
         </span>
       </button>

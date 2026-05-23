@@ -12,7 +12,7 @@ const TrafficChartsInner = dynamic(
     ssr: false,
     loading: () => (
       <div className="flex min-h-[280px] items-center justify-center rounded-2xl border border-border/60 bg-muted/20">
-        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           // loading charts…
         </p>
       </div>

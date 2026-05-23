@@ -62,7 +62,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
   }, [days, displayCost, includeVat, isKo, locale, media, quote.impressions]);
 
   const inputCls =
-    "h-10 rounded-xl border border-border bg-background px-3 font-mono text-sm text-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15";
+    "h-10 rounded-xl border border-border bg-background px-3  text-sm text-foreground outline-none focus:border-primary/40 focus:ring-2 focus:ring-primary/15";
 
   return (
     <section
@@ -72,7 +72,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
       )}
       id="media-quote-calculator"
     >
-      <p className="inline-flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300/90">
+      <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300/90">
         <Calculator className="h-3.5 w-3.5" aria-hidden />
         {isKo ? "간편 견적" : "Quick estimate"}
       </p>
@@ -92,7 +92,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             type="button"
             onClick={() => setDays(d)}
             className={cn(
-              "rounded-lg border px-3 py-1.5 font-mono text-[11px] font-bold transition-colors",
+              "rounded-lg border px-3 py-1.5  text-[11px] font-bold transition-colors",
               days === d
                 ? "border-cyan-600/40 bg-cyan-500/15 text-cyan-900 dark:border-cyan-400/50 dark:text-cyan-200"
                 : "border-border text-muted-foreground hover:border-foreground/25 hover:text-foreground",
@@ -102,7 +102,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             {isKo ? "일" : "d"}
           </button>
         ))}
-        <label className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 font-mono text-[11px] text-muted-foreground">
+        <label className="flex items-center gap-2 rounded-lg border border-border px-3 py-1.5 text-[11px] text-muted-foreground">
           <input
             type="number"
             min={1}
@@ -136,7 +136,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
       </p>
 
       {quote.impressions > 0 && (
-        <p className="mt-2 font-mono text-[12px] text-muted-foreground">
+        <p className="mt-2 text-[12px] text-muted-foreground">
           {isKo ? "예상 노출 " : "Est. reach "}
           {quote.impressions.toLocaleString(localeTag)}
           {isKo ? "회" : ""}

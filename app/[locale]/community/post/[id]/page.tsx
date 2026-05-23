@@ -80,7 +80,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
         <div className="tkad-landing-neon tkad-planner-neon">
           <NeonSection className="pb-20 pt-16 sm:pt-20 lg:pt-24">
             <div className="mx-auto max-w-3xl rounded-[30px] border border-[#fb7185]/25 bg-[rgba(127,29,29,0.28)] p-8 text-center backdrop-blur">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-rose-200">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-rose-200">
                 [ DB 마이그레이션 필요 ]
               </p>
               <p className="mt-3 font-bold dark:text-white text-gray-900">
@@ -88,7 +88,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                   ? "커뮤니티 스키마가 아직 최신 상태가 아닙니다."
                   : "The community schema is not up to date yet."}
               </p>
-              <p className="mt-2 font-mono text-[11px] tracking-tight dark:text-white">
+              <p className="mt-2 text-[11px] tracking-tight dark:text-white">
                 {e instanceof Error ? e.message : String(e)}
               </p>
             </div>
@@ -119,14 +119,14 @@ export default async function CommunityPostDetailPage({ params }: Props) {
         <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href={post.category ? `/community/${post.category}` : "/community"}
-            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
+            className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? labels.ko : labels.en}
           </Link>
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_320px]">
             <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
-              <span className="inline-flex rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900">
+              <span className="inline-flex rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900">
                 {isKo ? labels.shortKo : labels.en}
               </span>
               <NeonSectionHead
@@ -137,7 +137,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                 className="mb-0 mt-5"
               />
 
-              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
+              <div className="mt-6 flex flex-wrap items-center gap-x-4 gap-y-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
                 <span className="inline-flex items-center gap-1.5">
                   <User className="h-3.5 w-3.5 dark:text-white" />
                   {post.author ? (
@@ -176,7 +176,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                   key={item.label}
                   className="rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border"
                 >
-                  <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     {item.label}
                   </p>
                   <p className="mt-2 font-display text-2xl font-black tracking-tight dark:text-white text-gray-900">
@@ -191,7 +191,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
         <NeonSection className="pt-0">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <article className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 {isKo ? "// thread body" : "// thread body"}
               </p>
               <div className="mt-6 whitespace-pre-wrap break-words text-[15px] leading-8 dark:text-white sm:text-base">
@@ -213,7 +213,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
 
             <aside className="grid gap-4 self-start">
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// author" : "// author"}
                 </p>
                 <div className="mt-4 space-y-3">
@@ -224,7 +224,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                     <RoleBadge role={post.author?.role ?? null} locale={locale} />
                   </div>
                   {post.author?.company ? (
-                    <p className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
                       {post.author.company}
                     </p>
                   ) : null}
@@ -237,7 +237,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                   {post.author ? (
                     <Link
                       href={`/community/profile/${post.author.id}`}
-                      className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                      className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
                     >
                       {isKo ? "프로필 보기" : "View profile"}
                     </Link>
@@ -246,7 +246,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
               </div>
 
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// policy note" : "// policy note"}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed dark:text-white">
@@ -256,7 +256,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                 </p>
                 <Link
                   href="/community/policy"
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
                 >
                   {isKo ? "운영 정책 보기" : "Read policy"}
                 </Link>

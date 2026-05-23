@@ -19,7 +19,7 @@ export function SimilarCasesRow({ items, compact }: Props) {
   return (
     <section className="border-t border-gray-200 bg-gray-50 py-16 dark:border-white/10 dark:bg-[#0A0A0A] sm:py-20">
       <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
           [ {t("similarCasesTitle")} ]
         </p>
         <h2 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">

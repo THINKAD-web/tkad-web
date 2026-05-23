@@ -43,7 +43,7 @@ export function CompetitorOohSection({ report, isKo, access }: Props) {
 
   return (
     <section className="mt-10">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         [ {isKo ? "경쟁사 OOH 집행 분석" : "Competitor OOH booking trends"} ]
       </p>
       <h3 className="mt-2 text-lg font-bold">
@@ -84,7 +84,7 @@ export function WeatherEventPanel({
 
   return (
     <section className="mt-10 rounded-xl border border-border bg-card/50 p-5">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {isKo ? "날씨·이벤트" : "Weather & events"} ]
       </p>
       {sensitivity ? (
@@ -129,7 +129,7 @@ export function DataMethodologyPanel({
 
   return (
     <section className="mt-10 border-t border-border pt-8">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         [ {isKo ? "데이터 출처 및 방법론" : "Data sources & methodology"} ]
       </p>
       <ul className="mt-3 list-disc space-y-1 pl-5 text-xs text-muted-foreground">

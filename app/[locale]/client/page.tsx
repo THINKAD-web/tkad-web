@@ -288,7 +288,7 @@ export default function ClientPortalPage() {
                         >
                           <div className="mb-3 flex items-start justify-between gap-2">
                             <div>
-                              <p className="text-xs font-mono text-muted-foreground">
+                              <p className="text-xs text-muted-foreground">
                                 {project.id}
                               </p>
                               <h3 className="mt-1 text-sm font-semibold text-navy">

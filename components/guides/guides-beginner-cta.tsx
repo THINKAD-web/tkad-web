@@ -24,7 +24,7 @@ export function GuidesBeginnerCta({
         className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_0%,rgba(168,85,247,0.2),transparent_55%),radial-gradient(circle_at_50%_100%,rgba(34,211,238,0.16),transparent_55%)]"
       />
       <div className="relative">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-300/90">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-300/90">
           [ {isKo ? "시작하기" : "GET STARTED"} ]
         </p>
         <h2 className="mt-3 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">{title}</h2>

@@ -559,7 +559,7 @@ export default function ContactInquiryForm() {
         "expired-callback": () => setTurnstileToken(""),
         "error-callback": () => setTurnstileToken(""),
       });
-      turnstileWidgetId.current = id;
+      turnstileWidgetId.current = id ?? null;
     };
 
     const w = window as TurnstileWindow;
@@ -776,7 +776,7 @@ export default function ContactInquiryForm() {
         <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-violet-500/20 to-cyan-400/20 text-cyan-300">
           <CheckCircle className="h-8 w-8" aria-hidden />
         </div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
           [ SUCCESS ]
         </p>
         <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -821,7 +821,7 @@ export default function ContactInquiryForm() {
 
       {packageRef ? (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ PACKAGE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
@@ -837,7 +837,7 @@ export default function ContactInquiryForm() {
         </div>
       ) : plannerPlanRef ? (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ PLANNER REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("plannerRefBanner")}</p>
@@ -853,7 +853,7 @@ export default function ContactInquiryForm() {
         </div>
       ) : publishedCaseRef ? (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ CASE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("caseRefBanner")}</p>
@@ -872,7 +872,7 @@ export default function ContactInquiryForm() {
         </div>
       ) : academyTopic ? (
         <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 text-sm dark:text-white text-gray-800 backdrop-blur">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ ACADEMY REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("academyRefBanner")}</p>

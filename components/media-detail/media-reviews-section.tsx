@@ -95,7 +95,7 @@ export function MediaReviewsSection({ mediaId, mediaName }: Props) {
 
   return (
     <section className="mt-12" aria-labelledby="media-reviews-heading">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
         [ REVIEWS ]
       </p>
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">

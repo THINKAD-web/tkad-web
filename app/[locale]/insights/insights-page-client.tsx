@@ -7,11 +7,11 @@ import Modal from "@/components/ui/modal";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 const inputCls =
-  "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+  "h-10 w-full border-2 border-border bg-card px-3  text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const textareaCls =
-  "min-h-[100px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+  "min-h-[100px] w-full border-2 border-border bg-card px-3 py-2  text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary";
+  "block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary";
 import {
   BarChart3,
   BookOpen,
@@ -179,17 +179,17 @@ export default function InsightsPageClient({
           />
 
           <div className="relative mx-auto max-w-7xl px-4 pb-24 pt-24 text-center sm:px-6 sm:pb-32 sm:pt-32 lg:px-8 lg:pb-44 lg:pt-40">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
               {`// 09 / Insights`}
             </p>
             <div className="mt-4 inline-flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 {t("filterMonthly")} · {t("filterQuarterly")}
               </span>
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 <span className="tkad-home-accent-text">OOH</span>
               </span>
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
                 <span className="tkad-home-accent-text">BETA</span>
               </span>
             </div>
@@ -215,7 +215,7 @@ export default function InsightsPageClient({
                 <p className="font-bold tracking-tight text-foreground">
                   {t("valueStripTrends")}
                 </p>
-                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-tight opacity-75">
                   {`// `}
                   {t("valueStripTrendsDesc")}
                 </p>
@@ -232,7 +232,7 @@ export default function InsightsPageClient({
                 <p className="font-bold tracking-tight text-foreground">
                   {t("valueStripPdf")}
                 </p>
-                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-tight opacity-75">
                   {`// `}
                   {t("valueStripPdfDesc")}
                 </p>
@@ -249,7 +249,7 @@ export default function InsightsPageClient({
                 <p className="font-bold tracking-tight text-foreground">
                   {t("valueStripCustom")}
                 </p>
-                <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-tight opacity-75">
                   {`// `}
                   {t("valueStripCustomDesc")}
                 </p>
@@ -261,13 +261,13 @@ export default function InsightsPageClient({
         <section className="bg-muted pb-0 pt-16 text-foreground sm:pt-20">
           <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:px-8">
             <div id="reports" className="scroll-mt-24 space-y-2">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ REPORTS ]
               </p>
               <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {t("reportsSectionTitle")}
               </h2>
-              <p className="max-w-2xl font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+              <p className="max-w-2xl text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                 {`// `}
                 {t("reportsSectionDesc")}
               </p>
@@ -275,13 +275,13 @@ export default function InsightsPageClient({
 
             {!hasLibrary ? (
               <div className="border-2 border-border bg-card py-12 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   [ PREPARING ]
                 </p>
                 <p className="mt-3 text-base font-bold text-foreground">
                   {t("preparingContent")}
                 </p>
-                <p className="mx-auto mt-3 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
+                <p className="mx-auto mt-3 max-w-md text-[12px] tracking-tight text-muted-foreground">
                   {t("preparingContentDesc")}
                 </p>
               </div>
@@ -296,7 +296,7 @@ export default function InsightsPageClient({
                         type="button"
                         onClick={() => setPeriod(tab.value)}
                         className={cn(
-                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                           period === tab.value
                             ? "border-primary bg-primary text-primary-foreground"
                             : "border-border bg-card text-foreground hover:bg-muted",
@@ -318,7 +318,7 @@ export default function InsightsPageClient({
                         type="button"
                         onClick={() => setVertical(tab.value)}
                         className={cn(
-                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                          "-mt-[2px] -ml-[2px] inline-flex items-center gap-1.5 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                           vertical === tab.value
                             ? "border-primary bg-primary text-primary-foreground"
                             : "border-border bg-card text-foreground hover:bg-muted",
@@ -330,7 +330,7 @@ export default function InsightsPageClient({
                   </div>
                 </div>
 
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {`// `}
                   {t("resultsCount", { count: filtered.length })}
                 </p>
@@ -349,7 +349,7 @@ export default function InsightsPageClient({
                 </div>
 
                 {filtered.length === 0 ? (
-                  <p className="py-8 text-center font-mono text-[12px] tracking-tight text-muted-foreground">
+                  <p className="py-8 text-center text-[12px] tracking-tight text-muted-foreground">
                     {`// `}
                     {t("empty")}
                   </p>
@@ -367,13 +367,13 @@ export default function InsightsPageClient({
                     <Send className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                       [ {t("customSectionEyebrow")} ]
                     </p>
                     <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
                       {t("formTitle")}
                     </h3>
-                    <p className="mt-1 font-mono text-[12px] tracking-tight text-muted-foreground">
+                    <p className="mt-1 text-[12px] tracking-tight text-muted-foreground">
                       {`// `}
                       {t("formDesc")}
                     </p>
@@ -492,7 +492,7 @@ export default function InsightsPageClient({
           ariaLabelledBy="insights-viewer-title"
         >
           <div className="border-2 border-border bg-card p-6 pt-12">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
               [ VIEWER ]
             </p>
             <h2
@@ -501,13 +501,13 @@ export default function InsightsPageClient({
             >
               {viewerTitle}
             </h2>
-            <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
               {`// `}
               {t("viewerHint")}
             </p>
             <div className="mt-4 min-h-[60vh] overflow-hidden border-2 border-border bg-muted">
               {viewerLoading ? (
-                <div className="flex min-h-[60vh] items-center justify-center gap-2 font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="flex min-h-[60vh] items-center justify-center gap-2 font-display text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
                   <Loader2 className="h-6 w-6 animate-spin text-primary" />
                   {`// `}
                   {t("viewerLoading")}
@@ -551,16 +551,16 @@ function ReportCard({
     <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
       <header className="border-b-2 border-border p-5">
         <div className="flex flex-wrap items-center gap-1">
-          <span className="border-2 border-border bg-hero-void px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+          <span className="border-2 border-border bg-hero-void px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg">
             [ {periodBadge} ]
           </span>
-          <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+          <span className="border-2 border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
             {isKo ? report.labelKo : report.labelEn}
           </span>
           {tags.map((tag) => (
             <span
               key={tag}
-              className="border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground"
+              className="border-2 border-primary bg-primary px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground"
             >
               {tag === "fashion"
                 ? t("verticalFashion")
@@ -573,7 +573,7 @@ function ReportCard({
         <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
           {isKo ? report.titleKo : report.titleEn}
         </h3>
-        <p className="mt-2 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="mt-2 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           <FileText className="h-3.5 w-3.5" />
           {report.publishedIso}
         </p>
@@ -589,7 +589,7 @@ function ReportCard({
         </ul>
 
         <div className="border-2 border-border bg-muted p-3 text-xs">
-          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          <p className="flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             <MonitorPlay className="h-3.5 w-3.5" />[ {t("previewDooh")} ]
           </p>
           <p className="mt-2 leading-relaxed text-foreground">
@@ -598,7 +598,7 @@ function ReportCard({
         </div>
 
         <div className="border-2 border-border bg-muted p-3 text-xs">
-          <p className="flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+          <p className="flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             <BookOpen className="h-3.5 w-3.5" />[ {t("previewVertical")} ]
           </p>
           <p className="mt-2 font-bold text-foreground">

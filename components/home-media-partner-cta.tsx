@@ -28,7 +28,7 @@ export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
             <Radio className="h-4 w-4" />
           </span>
           <div className="min-w-0">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-[0.28em] dark:text-white text-gray-500 sm:text-[10px]">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] dark:text-white text-gray-500 sm:text-[10px]">
               {`[ ${isKo ? "신규 매체" : "New media"} ]`}
             </p>
             <p className="mt-1 text-balance text-sm font-bold leading-snug dark:text-white text-gray-900 sm:text-base">
@@ -44,7 +44,7 @@ export function HomeMediaPartnerCta({ isKo }: { isKo: boolean }) {
         </div>
         <Link
           href="/register/media"
-          className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 sm:self-auto sm:px-5"
+          className="group inline-flex shrink-0 items-center gap-1.5 self-start rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 sm:self-auto sm:px-5"
         >
           {isKo ? "매체 등록 신청하기" : "Apply to list media"}
           <ArrowRight

@@ -60,7 +60,7 @@ export default async function EducationArticlePage({ params }: Props) {
         </Link>
         <div className="mb-2 flex items-center gap-2 text-primary">
           <GraduationCap className="h-5 w-5" />
-          <span className="font-mono text-xs uppercase tracking-widest">
+          <span className="font-display text-xs uppercase tracking-widest">
             OOH 입문 가이드
           </span>
         </div>

@@ -38,7 +38,7 @@ export function MediaAvailabilityBadge({
   return (
     <span
       className={cn(
-        "inline-flex max-w-full shrink-0 items-center whitespace-nowrap border font-mono font-bold uppercase leading-none tracking-[0.12em] shadow-sm sm:tracking-[0.14em]",
+        "inline-flex max-w-full shrink-0 items-center whitespace-nowrap border font-display font-bold uppercase leading-none tracking-[0.12em] shadow-sm sm:tracking-[0.14em]",
         compact
           ? "px-1.5 py-0.5 text-[8px] sm:text-[9px]"
           : "px-2 py-1 text-[9px] sm:text-[10px]",

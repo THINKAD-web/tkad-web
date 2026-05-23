@@ -61,7 +61,7 @@ export function SitemapModal({
             <section key={section.id} aria-labelledby={`sitemap-${section.id}`}>
               <h2
                 id={`sitemap-${section.id}`}
-                className="font-mono text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+                className="font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
               >
                 {section.title}
               </h2>

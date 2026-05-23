@@ -95,7 +95,7 @@ export function CreativeLibraryPicker({
       </div>
       <Link
         href="/creatives"
-        className="block text-right font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground"
+        className="block text-right font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground"
       >
         라이브러리 전체 보기 →
       </Link>

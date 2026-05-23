@@ -394,7 +394,7 @@ export function MyHubPageClient() {
           />
           <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
             <div className="min-w-0">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/60">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/60">
                 {isKo ? "// 마이 허브" : "// My hub"}
               </p>
               <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
@@ -467,7 +467,7 @@ export function MyHubPageClient() {
                       type="button"
                       onClick={() => setCampaignFilter(key)}
                       className={cn(
-                        "rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors",
+                        "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.14em] transition-colors",
                         myHubFilterPill(campaignFilter === key),
                       )}
                     >
@@ -523,7 +523,7 @@ export function MyHubPageClient() {
           {tab === "favorites" && (
             <section aria-labelledby="my-favorites-heading">
               <div className="tkad-neon-surface relative mb-8 overflow-hidden rounded-[28px] px-6 py-8 sm:px-8 sm:py-10">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/80">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
                   {isKo ? "// 찜한 매체" : "// Saved media"}
                 </p>
                 <h2
@@ -615,7 +615,7 @@ export function MyHubPageClient() {
                 <div className="space-y-8">
                   {proposals.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                         {t("planner.proposalsSection")}
                       </h3>
                       <ul className="space-y-3">
@@ -629,7 +629,7 @@ export function MyHubPageClient() {
                                 <p className="mt-1 text-sm text-muted-foreground">
                                   {p.brandName}
                                 </p>
-                                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                                <p className="mt-1 text-[11px] text-muted-foreground">
                                   {isKo
                                     ? `예산 ${p.budgetManwon.toLocaleString("ko-KR")}만원`
                                     : `Budget ${p.budgetManwon.toLocaleString("en-US")}×10k KRW`}
@@ -657,7 +657,7 @@ export function MyHubPageClient() {
                   ) : null}
                   {plannerPlans.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                         {t("planner.plansSection")}
                       </h3>
                       <ul className="space-y-3">
@@ -668,12 +668,12 @@ export function MyHubPageClient() {
                           <p className="truncate text-base font-bold text-foreground">
                             {plan.title}
                           </p>
-                          <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                          <p className="mt-1 text-[11px] text-muted-foreground">
                             {isKo
                               ? `총 예산 ${plan.budgetManwon.toLocaleString("ko-KR")}만원 · 매체 ${plan.mediaCount}개`
                               : `Budget ${plan.budgetManwon.toLocaleString("en-US")}×10k KRW · ${plan.mediaCount} media`}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80">
+                          <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                             {new Date(plan.createdAt).toLocaleDateString(
                               isKo ? "ko-KR" : "en-US",
                             )}

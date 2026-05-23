@@ -43,7 +43,7 @@ const inputClass =
   "mt-1.5 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30 px-3 py-2.5 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
 
 const labelClass =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500";
+  "block font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500";
 
 function goalToPlanner(goal: ProposalGoal): PlannerCampaignGoal {
   if (goal === "awareness") return "brand";
@@ -269,7 +269,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
           <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.28em] text-cyan-300">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300">
               [ {t("resultEyebrow")} ]
             </p>
             <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">
@@ -529,7 +529,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           </span>
                           <span
                             className={cn(
-                              "shrink-0 font-mono text-[10px]",
+                              "shrink-0  text-[10px]",
                               selected ? "text-cyan-300" : "dark:text-white text-gray-400",
                             )}
                           >
@@ -540,7 +540,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                     );
                   })}
                 </ul>
-                <p className="font-mono text-[10px] dark:text-white">
+                <p className="text-[10px] dark:text-white">
                   {t("selectedCount", { count: mediaIds.length })}
                 </p>
               </div>

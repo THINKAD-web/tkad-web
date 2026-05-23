@@ -39,7 +39,7 @@ export async function IndustryPackageLinks({ slug, locale }: Props) {
         <p className="mt-4">
           <Link
             href="/media/packages"
-            className="font-mono text-xs font-bold uppercase tracking-[0.18em] text-accent underline-offset-4 hover:underline"
+            className="font-display text-xs font-medium uppercase tracking-[0.18em] text-accent underline-offset-4 hover:underline"
           >
             {isKo ? "전체 패키지 보기 →" : "View all packages →"}
           </Link>

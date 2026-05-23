@@ -236,7 +236,7 @@ function PrivacyContent({
                       주소: 서울특별시 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호<br />
                       전화: 02-515-2772<br />
                       이메일:{" "}
-                      <a href={CONTACT_MAILTO} className="border-b-2 border-border pb-0.5 font-mono text-foreground transition-colors hover:border-accent hover:text-accent">{CONTACT_EMAIL}</a>
+                      <a href={CONTACT_MAILTO} className="border-b-2 border-border pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent">{CONTACT_EMAIL}</a>
                     </p>
                   ) : (
                     <p className="text-foreground">
@@ -245,7 +245,7 @@ function PrivacyContent({
                       Address: #1102, Seongsu A-One Knowledge Industry Center, 48 Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul<br />
                       Phone: +82-2-515-2772<br />
                       Email:{" "}
-                      <a href={CONTACT_MAILTO} className="border-b-2 border-border pb-0.5 font-mono text-foreground transition-colors hover:border-accent hover:text-accent">{CONTACT_EMAIL}</a>
+                      <a href={CONTACT_MAILTO} className="border-b-2 border-border pb-0.5 text-foreground transition-colors hover:border-accent hover:text-accent">{CONTACT_EMAIL}</a>
                     </p>
                   )}
                 </div>
@@ -253,7 +253,7 @@ function PrivacyContent({
 
               {/* Last Updated */}
               <div className="mt-16 border-t-2 border-border pt-8">
-                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "최종 업데이트: 2026년 4월" : "Last Updated: April 2026"}
                 </p>
               </div>

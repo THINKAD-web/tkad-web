@@ -117,7 +117,7 @@ export default function ExitIntentPopup() {
       className="max-w-[min(100%,440px)] dark:border-white/14 border-gray-200 sm:max-w-[480px]"
     >
       <div className="relative z-[1] px-6 pb-8 pt-9 sm:px-9 sm:pb-9 sm:pt-10">
-        <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
+        <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-500">
           <Sparkles className="h-3.5 w-3.5 text-cyan-300/90" aria-hidden />
           {isKo ? "잠시만요!" : "Wait!"}
         </div>
@@ -142,7 +142,7 @@ export default function ExitIntentPopup() {
             <Gift className="h-6 w-6 dark:text-white text-gray-900" aria-hidden />
           </div>
           <div className="min-w-0">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
               PDF · 가이드
             </p>
             <p className="mt-1 text-sm font-semibold dark:text-white text-gray-900">
@@ -203,7 +203,7 @@ export default function ExitIntentPopup() {
           </form>
         )}
 
-        <p className="mt-5 font-mono text-[10px] tracking-tight dark:text-white text-gray-400">
+        <p className="mt-5 text-[10px] tracking-tight dark:text-white text-gray-400">
           {`// `}
           {isKo ? "동일 기기·브라우저에서 하루 한 번만 표시됩니다." : "Shown at most once per day on this device."}
         </p>

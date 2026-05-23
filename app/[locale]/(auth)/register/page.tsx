@@ -116,13 +116,13 @@ function RegisterPageInner() {
             />
             <div className="relative">
               <div className="mb-6 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                   [ REGISTER ]
                 </p>
                 <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
                   회원가입
                 </h1>
-                <p className="mt-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
                   {`// `}THINKAD 계정을 만들어보세요
                 </p>
               </div>
@@ -197,10 +197,10 @@ function RegisterPageInner() {
                             : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
                         )}
                       >
-                        <p className="font-mono text-sm font-bold tracking-tight">
+                        <p className="text-sm font-bold tracking-tight">
                           {opt.title}
                         </p>
-                        <p className="mt-1 font-mono text-[11px] dark:text-white text-gray-500">
+                        <p className="mt-1 text-[11px] dark:text-white text-gray-500">
                           {opt.desc}
                         </p>
                       </button>
@@ -209,7 +209,7 @@ function RegisterPageInner() {
                 </Field>
 
                 {error && (
-                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 font-mono text-[12px] tracking-tight dark:text-white text-gray-800">
+                  <div className="rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">
                     {`// `}{error}
                   </div>
                 )}
@@ -228,7 +228,7 @@ function RegisterPageInner() {
             </div>
           </div>
 
-          <p className="mt-6 text-center font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
+          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
             {`// `}이미 계정이 있으신가요?{" "}
             <Link
               href="/login"
@@ -244,7 +244,7 @@ function RegisterPageInner() {
 }
 
 const inputCls =
-  "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/28 px-4 font-mono text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
+  "tkad-auth-input h-11 w-full rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/28 px-4  text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-all focus:dark:border-white/18 border-gray-300 focus:ring-2 focus:ring-white/12";
 
 function Field({
   label,
@@ -261,7 +261,7 @@ function Field({
     <div>
       <label
         htmlFor={htmlFor}
-        className="mb-2 block font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600"
+        className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600"
       >
         [ {label}{hint && <span className="ml-1 dark:text-white">{hint}</span>} ]
       </label>

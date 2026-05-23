@@ -13,7 +13,7 @@ export function SourcesSection({ sources }: { sources: InsightSource[] }) {
       aria-labelledby="insight-sources-heading"
       className="mt-12 border-2 border-border bg-muted p-6"
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
         [ SOURCES / {sources.length} ]
       </p>
       <h2
@@ -37,9 +37,9 @@ export function SourcesSection({ sources }: { sources: InsightSource[] }) {
                   rel="noopener noreferrer"
                   className="line-clamp-2 font-bold tracking-tight text-foreground transition-colors hover:text-accent"
                 >
-                  <span className="font-mono text-accent">[{i + 1}]</span> {s.title || s.domain}
+                  <span className="text-accent">[{i + 1}]</span> {s.title || s.domain}
                 </a>
-                <div className="flex flex-wrap items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <div className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   <span>{s.domain}</span>
                   {s.publishedAt ? <span>· {s.publishedAt}</span> : null}
                   {s.trustGrade ? (
@@ -65,7 +65,7 @@ export function SourcesSection({ sources }: { sources: InsightSource[] }) {
           </li>
         ))}
       </ul>
-      <p className="mt-4 font-mono text-[11px] tracking-tight text-muted-foreground">
+      <p className="mt-4 text-[11px] tracking-tight text-muted-foreground">
         {`// `}외부 링크는 새 창으로 열리며, THINKAD 가 해당 사이트의 정확성·견해를
         보증하지 않습니다.
       </p>

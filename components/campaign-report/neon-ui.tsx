@@ -18,7 +18,7 @@ export function ReportPanel({
   return (
     <div className={cn(reportPanelShell, className)}>
       <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
           [ {title} ]
         </p>
       </div>
@@ -63,10 +63,10 @@ export function CampaignReportHero({
       <div aria-hidden className="absolute inset-0 tkad-neon-depth opacity-50" />
       <div className="relative flex flex-wrap items-start justify-between gap-6">
         <div className="min-w-0 flex-1">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-accent)]">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-accent)]">
             [ THINKAD · 싱커드 ]
           </p>
-          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.18em] text-[color:var(--cr-fg-subtle)]">
+          <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--cr-fg-subtle)]">
             {`// `}OOH 광고 게재 완료 보고서
           </p>
           <h1 className="mt-4 text-balance text-2xl font-[950] leading-tight tracking-[-0.04em] text-[color:var(--cr-fg)] sm:text-3xl">
@@ -75,10 +75,10 @@ export function CampaignReportHero({
           <p className="mt-2 text-sm text-[color:var(--cr-fg-soft)]">{clientLine}</p>
         </div>
         <div className="shrink-0 text-right">
-          <span className="tkad-neon-border inline-block rounded-2xl bg-[var(--cr-surface)] px-3 py-1.5 font-mono text-[10px] font-black uppercase tracking-[0.16em] text-[color:var(--cr-fg)] backdrop-blur">
+          <span className="tkad-neon-border inline-block rounded-2xl bg-[var(--cr-surface)] px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-[color:var(--cr-fg)] backdrop-blur">
             [ {status || "—"} ]
           </span>
-          <p className="mt-2 font-mono text-[10px] tracking-[0.18em] text-[color:var(--cr-fg-muted)]">
+          <p className="mt-2 font-display text-[10px] tracking-[0.18em] text-[color:var(--cr-fg-muted)]">
             {`// `}발행일 {new Date().toLocaleDateString("ko-KR")}
           </p>
         </div>
@@ -103,7 +103,7 @@ export function ReportSection({
 
 export function SectionTitle({ children }: { children: ReactNode }) {
   return (
-    <h2 className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-accent)]">
+    <h2 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-accent)]">
       [ {children} ]
     </h2>
   );
@@ -111,7 +111,7 @@ export function SectionTitle({ children }: { children: ReactNode }) {
 
 export function SectionNote({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-2 font-mono text-[10px] leading-relaxed text-[color:var(--cr-fg-muted)]">
+    <p className="mt-2 text-[10px] leading-relaxed text-[color:var(--cr-fg-muted)]">
       {`// `}
       {children}
     </p>
@@ -159,12 +159,12 @@ export function StatCard({
         : "tkad-glass-surface-soft border-[color:var(--cr-border-soft)] bg-[var(--cr-surface)] text-[color:var(--cr-fg)]";
   return (
     <div className={cn("rounded-[18px] border p-3.5 backdrop-blur-md", shell, className)}>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
         [ {label} ]
       </p>
       <p
         className={cn(
-          "mt-1.5 font-mono text-xl font-extrabold tabular-nums",
+          "mt-1.5 text-xl font-extrabold tabular-nums",
           variant === "accent" ? "text-[color:var(--cr-accent)]" : "text-[color:var(--cr-fg)]",
         )}
       >
@@ -214,7 +214,7 @@ export function ChartGrid({
 
 export function NeonBadge({ children }: { children: ReactNode }) {
   return (
-    <span className="inline-flex rounded-full border border-[color:var(--cr-accent-border)] bg-[var(--cr-accent-surface)] px-2 py-0.5 font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[color:var(--cr-accent)]">
+    <span className="inline-flex rounded-full border border-[color:var(--cr-accent-border)] bg-[var(--cr-accent-surface)] px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--cr-accent)]">
       {children}
     </span>
   );
@@ -252,13 +252,13 @@ export function InfoCell({
 }) {
   return (
     <div className={cn("tkad-glass-surface-soft rounded-[18px] border border-[color:var(--cr-border-soft)] bg-[var(--cr-surface)] p-3.5 backdrop-blur-md", className)}>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
         [ {label} ]
       </p>
       <p
         className={cn(
           "mt-1.5 text-sm font-semibold text-[color:var(--cr-fg)]",
-          variant === "accent" && "font-mono text-base font-extrabold text-[color:var(--cr-accent)]",
+          variant === "accent" && "text-base font-extrabold text-[color:var(--cr-accent)]",
         )}
       >
         {children}
@@ -286,7 +286,7 @@ export function StatCardFootnote({
     <div className={cn("space-y-1", className)}>
       <StatCard label={label} value={value} suffix={suffix} variant={variant} />
       {footnote ? (
-        <p className="px-1 font-mono text-[10px] text-[color:var(--cr-fg-dim)]">{`// `}{footnote}</p>
+        <p className="px-1 font-display text-[10px] text-[color:var(--cr-fg-dim)]">{`// `}{footnote}</p>
       ) : null}
     </div>
   );
@@ -311,7 +311,7 @@ export function ThumbGrid({
             crossOrigin="anonymous"
             className="block h-24 w-full object-cover"
           />
-          <span className="absolute left-0 top-0 rounded-br-[10px] border border-[color:var(--cr-border)] bg-[var(--cr-thumb-badge-bg)] px-2 py-1 font-mono text-[9px] font-bold uppercase tracking-[0.14em] text-[color:var(--cr-accent)] backdrop-blur">
+          <span className="absolute left-0 top-0 rounded-br-[10px] border border-[color:var(--cr-border)] bg-[var(--cr-thumb-badge-bg)] px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--cr-accent)] backdrop-blur">
             [ {x.tag} ]
           </span>
         </div>
@@ -335,7 +335,7 @@ export function NeonTable({
             {headers.map((h) => (
               <th
                 key={h}
-                className="px-3 py-2.5 text-left font-mono text-[9px] font-bold uppercase tracking-[0.12em] text-[color:var(--cr-accent)]"
+                className="px-3 py-2.5 text-left font-display text-xs font-medium uppercase tracking-[0.12em] text-[color:var(--cr-accent)]"
               >
                 [ {h} ]
               </th>
@@ -371,7 +371,7 @@ export function DistBar({
     <div className="rounded-[14px] border border-[color:var(--cr-border-soft)] bg-[var(--cr-surface)] p-3 backdrop-blur-sm">
       <div className="mb-2 flex justify-between gap-2 text-[11px]">
         <span className="font-semibold text-[color:var(--cr-fg)]">{label}</span>
-        <span className="font-mono tabular-nums text-[color:var(--cr-fg-subtle)]">
+        <span className="tabular-nums text-[color:var(--cr-fg-subtle)]">
           {count}개 · {pct}%
         </span>
       </div>
@@ -394,15 +394,15 @@ export function ReportFooter() {
   return (
     <footer className="mt-10 flex flex-wrap items-center justify-between gap-3 border-t border-[color:var(--cr-border-soft)] pt-6">
       <div>
-        <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-soft)]">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-soft)]">
           [ THINKAD · 싱커드 ]
         </p>
-        <p className="mt-1 font-mono text-[10px] text-[color:var(--cr-fg-dim)]">
+        <p className="mt-1 text-[10px] text-[color:var(--cr-fg-dim)]">
           {`// `}
           {CONTACT_EMAIL} · 02-515-2772 · 서울특별시 성동구
         </p>
       </div>
-      <p className="font-mono text-[10px] text-[color:var(--cr-fg-dim)]">{`// `}© 2026 THINKAD</p>
+      <p className="font-display text-[10px] text-[color:var(--cr-fg-dim)]">{`// `}© 2026 THINKAD</p>
     </footer>
   );
 }

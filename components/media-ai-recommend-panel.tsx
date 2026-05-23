@@ -420,7 +420,7 @@ export default function MediaAiRecommendPanel({
                   <span className="truncate">
                     {isKo ? s.item.name : (s.item.nameEn || s.item.name)}
                   </span>
-                  <span className="shrink-0 font-mono text-gold-dark">
+                  <span className="shrink-0 text-gold-dark">
                     {s.score}
                   </span>
                 </li>

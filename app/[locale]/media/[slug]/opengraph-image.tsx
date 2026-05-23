@@ -11,10 +11,10 @@ export const contentType = "image/png";
 export default async function Image({
   params,
 }: {
-  params: Promise<{ locale: string; id: string }>;
+  params: Promise<{ locale: string; slug: string }>;
 }) {
-  const { locale, id } = await params;
-  const media = await resolveMediaForDetail(id);
+  const { locale, slug } = await params;
+  const media = await resolveMediaForDetail(slug);
   const isKo = locale === "ko" || locale.startsWith("ko");
 
   const title = media
