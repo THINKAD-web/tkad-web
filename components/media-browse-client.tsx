@@ -25,7 +25,7 @@ import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summar
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { INDUSTRY_BUDGET_SESSION_KEY } from "@/lib/industry-landing";
 import { BtnBlock } from "@/components/brutalist";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   CategoryExploreHero,
   CategoryHeroCtaRow,
@@ -100,6 +100,8 @@ import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { MobileMediaBrowseBar } from "@/components/mobile/mobile-media-browse-bar";
+import { MobilePullToRefresh } from "@/components/mobile/mobile-pull-to-refresh";
 import { KEYWORD_FILTER_SEARCH_DEBOUNCE_MS } from "@/lib/media-keyword-filter-logic";
 
 function subscribeMediaLg(cb: () => void) {
@@ -128,6 +130,7 @@ export default function MediaBrowseClient({
   const t = useTranslations();
   const tMedia = useTranslations("media");
   const locale = useLocale();
+  const router = useRouter();
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
@@ -181,6 +184,7 @@ export default function MediaBrowseClient({
     | "ratingDesc"
   >("default");
   const [instantOnlyFilter, setInstantOnlyFilter] = useState(false);
+  const [mobileRegionChip, setMobileRegionChip] = useState("");
   const { summary: availabilitySummary } = useMediaAvailabilitySummary();
 
   /**
@@ -393,13 +397,22 @@ export default function MediaBrowseClient({
   }, [filtered, sortBy]);
 
   const catalogListForDisplay = useMemo(() => {
-    if (!instantOnlyFilter || !availabilitySummary?.items) {
-      return sortedFiltered;
+    let base = sortedFiltered;
+    if (instantOnlyFilter && availabilitySummary?.items) {
+      base = sortedFiltered.filter(
+        (m) => availabilitySummary.items[m.id]?.tier === "instant",
+      );
     }
-    return sortedFiltered.filter(
-      (m) => availabilitySummary.items[m.id]?.tier === "instant",
-    );
-  }, [sortedFiltered, instantOnlyFilter, availabilitySummary]);
+    if (mobileRegionChip.trim()) {
+      const chip = mobileRegionChip.toLowerCase();
+      base = base.filter((m) =>
+        [m.region, m.district, m.city, m.name, m.nameEn].some((v) =>
+          v?.toLowerCase().includes(chip),
+        ),
+      );
+    }
+    return base;
+  }, [sortedFiltered, instantOnlyFilter, availabilitySummary, mobileRegionChip]);
 
   /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드·지도 최소 노출 유지 */
   const { gridDisplayList, catalogMinPadActive } = useMemo(() => {
@@ -439,6 +452,7 @@ export default function MediaBrowseClient({
     sortBy,
     filters,
     instantOnlyFilter,
+    mobileRegionChip,
   ]);
 
   const pagedCatalog = useMemo(() => {
@@ -526,9 +540,28 @@ export default function MediaBrowseClient({
     setMapPopupOpen(true);
   }, []);
 
+  const handleMobileRefresh = useCallback(async () => {
+    router.refresh();
+    await new Promise((r) => setTimeout(r, 400));
+  }, [router]);
+
+  const sortOptions = useMemo(
+    () => [
+      { value: "default", label: t("media.sortDefault") },
+      { value: "newest", label: t("media.sortNewest") },
+      { value: "priceAsc", label: t("media.sortPriceAsc") },
+      { value: "priceDesc", label: t("media.sortPriceDesc") },
+      { value: "trafficDesc", label: t("media.sortTrafficDesc") },
+      { value: "ratingDesc", label: t("media.sortRatingDesc") },
+    ],
+    [t],
+  );
+
   return (
+    <MobilePullToRefresh onRefresh={handleMobileRefresh}>
     <>
       {hideHero ? null : (
+        <div className="hidden md:block">
         <CategoryExploreHero
           code="// 01 · MEDIA"
           showBeta
@@ -589,9 +622,22 @@ export default function MediaBrowseClient({
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
+        </div>
       )}
 
-      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-10 sm:py-14">
+      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-6 sm:py-14 md:py-10">
+        <MobileMediaBrowseBar
+          isKo={isKo}
+          activeChip={mobileRegionChip}
+          onChipChange={(chip) => {
+            setMobileRegionChip(chip);
+            setCatalogPage(1);
+          }}
+          sortBy={sortBy}
+          onSortChange={(v) => setSortBy(v as typeof sortBy)}
+          sortOptions={sortOptions}
+          resultCount={gridDisplayList.length}
+        />
         <div className="ui-container">
             <div className="flex flex-col gap-6">
               <MediaScarcitySection
@@ -1033,10 +1079,13 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className="grid grid-cols-2 gap-0 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2 md:gap-0 md:px-0 lg:grid-cols-3">
                     {pagedCatalog.map((media) => (
-                      <MediaCatalogGridCard
+                      <div
                         key={media.id}
+                        className="transition-transform duration-150 active:scale-[0.98] md:active:scale-100"
+                      >
+                      <MediaCatalogGridCard
                         variant="link"
                         media={media}
                         isKo={isKo}
@@ -1072,6 +1121,7 @@ export default function MediaBrowseClient({
                           </label>
                         }
                       />
+                      </div>
                     ))}
                   </div>
                     ) : (
@@ -1170,5 +1220,6 @@ export default function MediaBrowseClient({
         <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
     </>
+    </MobilePullToRefresh>
   );
 }

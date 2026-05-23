@@ -4,7 +4,7 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, BarChart3, Download, MapPin } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
-import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
+import { DarkCampaignMap } from "@/components/public-map/dark-campaign-map";
 import type { CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 import { AdvertiserImpressionsChart } from "@/components/advertiser-dashboard/impressions-chart";
 import {
@@ -90,7 +90,7 @@ export function AdvertiserCampaignDetailClient({
         </h2>
         {initial.mapPins.length > 0 ? (
           <div className="overflow-hidden rounded-[20px] border border-border">
-            <CampaignMonitoringMap
+            <DarkCampaignMap
               pins={initial.mapPins}
               selectedId={initial.mapPins[0]?.id}
               onSelectPin={() => {}}

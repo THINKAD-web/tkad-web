@@ -1006,6 +1006,7 @@ export default function ContactInquiryForm() {
             <input
               id="contact-email"
               type="email"
+              inputMode="email"
               className={cn(inputClass, inputErrorBorder("email"))}
               placeholder={tForm("emailPlaceholder")}
               {...register("email")}

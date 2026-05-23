@@ -3,14 +3,13 @@
 import { useMemo, useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
-import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
 import type { MediaItem } from "@/lib/media-data";
 import { MapPin } from "lucide-react";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { SectionHead } from "@/components/brutalist/section-head";
 
-const KakaoMapView = dynamic(() => import("@/components/media-map/kakao-map-view"), {
+const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
   ssr: false,
 });
 
@@ -67,8 +66,6 @@ export default function MediaDetailExtras({
   const effectiveCoverageGeoJson = coverageCodesKey ? coverageGeoJson : null;
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : (media.nameEn || media.name))},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
-  // map provider: keep for compatibility, but detail uses the same Kakao map UI as `/media/map`.
-  const mapProvider = useMemo(() => getCampaignMonitoringMapProvider(), []);
   const regionDisplay = useMemo(() => {
     switch (media.region) {
       case "seoul":
@@ -144,13 +141,11 @@ export default function MediaDetailExtras({
           </div>
         </div>
         <div className="min-w-0 flex-1 overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-sm backdrop-blur lg:min-w-0 lg:flex-[1.15]">
-          {mapProvider === "kakao" ? (
-            <p className="border-b border-border/70 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
-              [ {labels.kakaoMapEmbedBadge} ]
-            </p>
-          ) : null}
+          <p className="border-b border-border/70 px-4 py-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+            [ {isKo ? "다크 지도" : "Dark map"} ]
+          </p>
           <div className="h-[400px]">
-            <KakaoMapView
+            <DarkMapView
               markers={[
                 {
                   id: media.id,
@@ -163,15 +158,12 @@ export default function MediaDetailExtras({
               ]}
               selectedId={mapSelectedId}
               onSelect={(id) => setMapSelectedId(id)}
-              onBoundsChange={() => {
-                // detail page: bounds not used
-              }}
-              onMarkerDetail={() => window.open(kakaoUrl, "_blank", "noopener,noreferrer")}
+              onBoundsChange={() => {}}
               center={{ lat: media.lat, lng: media.lng }}
               zoom={4}
               coverageGeoJson={effectiveCoverageGeoJson}
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
-              monochromeTiles
+              disableCluster
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { CaseDetailMobileChromeSync } from "@/components/mobile/case-detail-mobile-chrome-sync";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
@@ -90,6 +91,10 @@ export default function CaseDetailClient({
 
   return (
     <HomeLandingDayNight>
+      <CaseDetailMobileChromeSync
+        title={title}
+        shareDescription={isKo ? `${title} — THINKAD 성공 사례` : `${title} — THINKAD case study`}
+      />
       <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-gray-50 dark:bg-[#0A0A0A] dark:text-white text-gray-900">
         <section className="py-20 sm:py-24">
           <CaseDetailContainer>

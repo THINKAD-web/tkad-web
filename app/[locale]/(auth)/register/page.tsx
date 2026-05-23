@@ -145,6 +145,7 @@ function RegisterPageInner() {
                   <input
                     id="email"
                     type="email"
+                    inputMode="email"
                     required
                     autoComplete="email"
                     value={email}

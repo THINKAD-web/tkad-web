@@ -1,0 +1,75 @@
+/** 공개 다크 지도 마커 핀 SVG — `/media/map`·매체 상세 공통 */
+
+import L from "leaflet";
+
+export function pinColorForType(type: string): {
+  fill: string;
+  stroke: string;
+  text: string;
+} {
+  const t = (type || "").toLowerCase();
+  if (t.includes("office") || t.includes("thinkad")) {
+    return { fill: "#a855f7", stroke: "#ead6ff", text: "#0a0a0c" };
+  }
+  if (t.includes("digital")) {
+    return { fill: "#22c55e", stroke: "#a3ffcc", text: "#0a0a0c" };
+  }
+  if (t.includes("static")) {
+    return { fill: "#22d3ee", stroke: "#bff7ff", text: "#0a0a0c" };
+  }
+  if (t.includes("mobile")) {
+    return { fill: "#fb7185", stroke: "#ffd3db", text: "#0a0a0c" };
+  }
+  return { fill: "#a855f7", stroke: "#ead6ff", text: "#0a0a0c" };
+}
+
+export function pinLetterForType(type: string): string {
+  const t = (type || "").toLowerCase();
+  if (t.includes("office") || t.includes("thinkad")) return "T";
+  if (t.includes("digital")) return "D";
+  if (t.includes("static")) return "S";
+  if (t.includes("mobile")) return "M";
+  return "•";
+}
+
+export function pinDataUrl(type: string, selected: boolean): string {
+  const { fill, stroke, text } = pinColorForType(type);
+  const w = selected ? 44 : 40;
+  const h = selected ? 52 : 48;
+  const label = pinLetterForType(type);
+  const ring = selected ? 3 : 2;
+  const font = selected ? 14 : 13;
+  const bodyFill = selected ? fill : "rgba(8,8,12,0.94)";
+  const bodyStroke = selected ? stroke : "rgba(255,255,255,0.14)";
+  const coreFill = selected ? fill : "rgba(12,12,18,0.98)";
+  const labelFill = selected ? text : stroke;
+  const svg = `
+  <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 44 52">
+    <defs>
+      <linearGradient id="ring" x1="8" y1="8" x2="36" y2="36" gradientUnits="userSpaceOnUse">
+        <stop offset="0" stop-color="${stroke}" stop-opacity="1"/>
+        <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.5"/>
+        <stop offset="1" stop-color="${stroke}" stop-opacity="1"/>
+      </linearGradient>
+    </defs>
+    <g>
+      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.5 : 1.75}"/>
+      ${selected ? `<ellipse cx="22" cy="21" rx="17" ry="18" fill="none" stroke="${stroke}" stroke-width="2" opacity="0.85"/>` : ""}
+      <circle cx="22" cy="22" r="11.8" fill="${coreFill}" stroke="url(#ring)" stroke-width="${ring}"/>
+      <text x="22" y="26.8" text-anchor="middle" font-family="ui-monospace, monospace" font-size="${font}" font-weight="800" fill="${labelFill}">${label}</text>
+    </g>
+  </svg>`;
+  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
+}
+
+export function leafletPinIcon(type: string, selected: boolean, hovered: boolean) {
+  const highlighted = selected || hovered;
+  const w = highlighted ? 44 : 40;
+  const h = highlighted ? 52 : 48;
+  return L.icon({
+    iconUrl: pinDataUrl(type, highlighted),
+    iconSize: [w, h],
+    iconAnchor: [w / 2, h],
+    popupAnchor: [0, -h + 8],
+  });
+}

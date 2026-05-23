@@ -3,7 +3,17 @@
 import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { getCampaignMonitoringMapProvider } from "@/components/campaign-monitoring-map";
+import {
+  getAdminKakaoMapAppKey,
+  loadAdminKakaoMapsSdk,
+} from "@/lib/kakao-maps-admin";
+
+function getAdminMapProvider(): "kakao" | "google" | "fallback" {
+  if (getAdminKakaoMapAppKey()) return "kakao";
+  const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+  if (typeof g === "string" && g.trim().length > 0) return "google";
+  return "fallback";
+}
 
 function loadScript(src: string): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -82,7 +92,7 @@ export default function AdminMediaDraggableMap({
   } | null>(null);
 
   const cleanupRef = useRef<(() => void) | null>(null);
-  const provider = getCampaignMonitoringMapProvider();
+  const provider = getAdminMapProvider();
   const coverageKey = useMemo(
     () => [...(coverageDistrictCodes ?? [])].sort().join(","),
     [coverageDistrictCodes],
@@ -103,18 +113,13 @@ export default function AdminMediaDraggableMap({
 
   const mountKakao = useCallback(() => {
     const el = containerRef.current;
-    const appKey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
+    const appKey = getAdminKakaoMapAppKey();
     if (!el || !appKey) return;
 
     let cancelled = false;
     void (async () => {
       try {
-        const w = window as unknown as { kakao?: { maps?: unknown } };
-        if (!w.kakao?.maps) {
-          await loadScript(
-            `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appKey)}&autoload=false`,
-          );
-        }
+        await loadAdminKakaoMapsSdk(appKey);
       } catch {
         return;
       }
@@ -411,7 +416,8 @@ export default function AdminMediaDraggableMap({
         <MapPin className="mb-2 h-8 w-8 text-navy/25" />
         <p>
           지도를 쓰려면{" "}
-          <code className="rounded bg-white px-1">NEXT_PUBLIC_KAKAO_MAP_APP_KEY</code> 또는{" "}
+          <code className="rounded bg-white px-1">NEXT_PUBLIC_KAKAO_MAP_APP_KEY</code>
+          (어드민 매체 등록 전용) 또는{" "}
           <code className="rounded bg-white px-1">NEXT_PUBLIC_GOOGLE_MAPS_API_KEY</code>를
           설정하세요.
         </p>

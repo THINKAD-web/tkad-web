@@ -9,7 +9,7 @@ import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
 import { PublicNavAside } from "@/components/public-chrome/public-nav-aside";
 import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate";
 import { PwaInstallBanner } from "@/components/pwa-install-banner";
-import PageTransition from "@/components/page-transition";
+import { MobileAppChrome } from "@/components/mobile/mobile-app-chrome";
 
 type Props = {
   skipLinkLabel: string;
@@ -35,13 +35,15 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
         <div className="flex min-h-0 min-w-0 flex-1 flex-col">
           <ConditionalPublicChrome>
             <TopLoader />
-            {header}
+            <div className="hidden md:block">{header}</div>
           </ConditionalPublicChrome>
           <main id="main-content" className="tkad-app-ui flex min-h-0 flex-1 flex-col">
-            <PageTransition>{children}</PageTransition>
+            <MobileAppChrome>{children}</MobileAppChrome>
           </main>
           <ConditionalPublicChrome>
-            <FooterBrutal />
+            <div className="hidden md:block">
+              <FooterBrutal />
+            </div>
             <DeferredPublicWidgetsGate />
           </ConditionalPublicChrome>
         </div>

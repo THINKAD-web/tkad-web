@@ -8,7 +8,7 @@ import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import type { MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 
-const KakaoMapView = dynamic(() => import("@/components/media-map/kakao-map-view"), {
+const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
   ssr: false,
 });
 
@@ -46,7 +46,7 @@ export function MediaDetailLocationPanel({
     <div className={cn("space-y-6", className)}>
       <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white shadow-sm">
         <div className="h-80 min-h-[20rem] w-full sm:h-96">
-          <KakaoMapView
+          <DarkMapView
             markers={[
               {
                 id: media.id,
@@ -62,7 +62,7 @@ export function MediaDetailLocationPanel({
             onBoundsChange={() => {}}
             center={{ lat: media.lat, lng: media.lng }}
             zoom={4}
-            monochromeTiles
+            disableCluster
           />
         </div>
       </div>

@@ -8,6 +8,7 @@ import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
+import { MediaDetailMobileChromeSync } from "@/components/mobile/media-detail-mobile-chrome-sync";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import {
@@ -92,6 +93,9 @@ export function MediaDetailHeroSection({
   const displayName = isKo ? media.name : media.nameEn || media.name;
   const cpm = resolveMediaCpmWon(media);
   const impressions = performanceMetrics.monthlyImpressions;
+  const shareDescription = isKo
+    ? `${displayName} — THINKAD 매체 상세`
+    : `${displayName} — THINKAD media detail`;
 
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
@@ -128,8 +132,15 @@ export function MediaDetailHeroSection({
       : null;
 
   return (
-    <section className={cn("mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8", className)}>
-      <div className="mb-5 flex items-start justify-between gap-3">
+    <>
+      <MediaDetailMobileChromeSync
+        mediaId={media.id}
+        title={displayName}
+        shareDescription={shareDescription}
+        imageUrl={heroImage}
+      />
+      <section className={cn("mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:py-8", className)}>
+      <div className="mb-5 hidden items-start justify-between gap-3 md:flex">
         <Link
           href="/media"
           className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/15 border-gray-200 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] dark:text-white/80 text-gray-600 transition hover:dark:bg-white/8 bg-gray-50 hover:dark:text-white text-gray-900"
@@ -256,5 +267,6 @@ export function MediaDetailHeroSection({
         </div>
       </div>
     </section>
+    </>
   );
 }

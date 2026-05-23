@@ -8,7 +8,7 @@ import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-ligh
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { cn } from "@/lib/utils";
 
-const KakaoMapView = dynamic(() => import("@/components/media-map/kakao-map-view"), {
+const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
   ssr: false,
 });
 
@@ -84,14 +84,14 @@ export function MediaDetailHeroGalleryV2({
           </button>
         ) : mapFallback ? (
           <div className="absolute inset-0">
-            <KakaoMapView
+            <DarkMapView
               markers={[mapFallback]}
               selectedId={mapFallback.id}
               onSelect={() => {}}
               onBoundsChange={() => {}}
               center={{ lat: mapFallback.lat, lng: mapFallback.lng }}
               zoom={4}
-              monochromeTiles
+              disableCluster
             />
           </div>
         ) : (

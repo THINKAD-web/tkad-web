@@ -48,6 +48,7 @@ import {
 import { syncRecentlyViewedWithServer } from "@/lib/recently-viewed-sync";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
+import { MobileMyHubView } from "@/components/mobile/mobile-my-hub-view";
 
 type Me = {
   id: string;
@@ -61,6 +62,7 @@ type Me = {
   trialDaysLeft?: number;
   trialProgressPct?: number;
   pointBalance?: number;
+  createdAt?: string | null;
 };
 
 type CampaignItem = {
@@ -163,6 +165,39 @@ export function MyHubPageClient() {
   const [recentItems, setRecentItems] = useState<MyHubMediaItem[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
 
+  const [inquiryCount, setInquiryCount] = useState(0);
+
+  const reloadMe = useCallback(async () => {
+    const res = await fetch("/api/auth/session", { cache: "no-store" });
+    const data = await res.json();
+    if (data.ok && data.data) setMe(data.data);
+  }, []);
+
+  const reloadMobileStats = useCallback(async () => {
+    await reloadMe();
+    try {
+      const [favRes, planRes, bookingRes] = await Promise.all([
+        fetch("/api/my/favorites", { cache: "no-store" }),
+        fetch("/api/my/planner-plans", { cache: "no-store" }),
+        fetch("/api/my/booking-requests", { cache: "no-store" }),
+      ]);
+      const favData = await favRes.json();
+      const planData = await planRes.json();
+      const bookingData = await bookingRes.json();
+      if (favData.ok && Array.isArray(favData.data)) {
+        setFavorites(favData.data);
+      }
+      if (planData.ok && Array.isArray(planData.data)) {
+        setPlannerPlans(planData.data);
+      }
+      if (bookingData.ok && Array.isArray(bookingData.data)) {
+        setInquiryCount(bookingData.data.length);
+      }
+    } catch {
+      /* non-fatal */
+    }
+  }, [reloadMe]);
+
   const tabDefs = useMemo(
     () => [
       { key: "campaigns" as const, label: t("tabs.campaigns"), icon: Megaphone },
@@ -195,6 +230,11 @@ export function MyHubPageClient() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!me) return;
+    void reloadMobileStats();
+  }, [me, reloadMobileStats]);
 
   useEffect(() => {
     if (!me) return;
@@ -330,8 +370,21 @@ export function MyHubPageClient() {
   );
 
   return (
-    <HomeLandingDayNight portal>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
+    <>
+      <MobileMyHubView
+        me={me}
+        stats={{
+          favorites: favorites.length,
+          inquiries: inquiryCount,
+          plans: plannerPlans.length,
+        }}
+        isKo={isKo}
+        onRefresh={reloadMobileStats}
+        onLogout={logout}
+      />
+
+      <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell hidden min-h-[calc(100dvh-4rem)] md:block">
         <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 py-14 text-gray-900 dark:bg-[#05050a] dark:text-white sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
@@ -699,5 +752,6 @@ export function MyHubPageClient() {
         </section>
       </div>
     </HomeLandingDayNight>
+    </>
   );
 }

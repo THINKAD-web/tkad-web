@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { ClipboardCheck, Crosshair, LayoutList } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { cn } from "@/lib/utils";
-import type { MapBounds, MapMarker } from "./kakao-map-view";
+import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
@@ -52,7 +52,7 @@ function NeonLoadingCard({ label }: { label: string }) {
   );
 }
 
-const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
+const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
@@ -493,7 +493,7 @@ export default function MediaMapPageClient() {
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">
-            <KakaoMapView
+            <DarkMapView
               markers={markers}
               selectedId={selectedId}
               hoveredId={hoveredId}

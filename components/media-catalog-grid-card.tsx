@@ -248,10 +248,29 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         <div
           className={cn(
             mediaCatalogGridCardShellClass,
+            denseMobile &&
+              "overflow-hidden rounded-2xl border border-gray-200 shadow-md -mt-0 -ml-0 transition-transform duration-150 active:scale-[0.98] dark:border-white/10 md:rounded-none md:border-2 md:border-border md:shadow-none",
             (props.quickInquiryOverlay ?? false) && "overflow-hidden",
           )}
         >
           {body}
+          {denseMobile && props.variant === "link" ? (
+            <div
+              className="absolute right-2 top-2 z-20 md:hidden"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <MediaFavoriteButton
+                mediaId={media.id}
+                mediaName={media.name}
+                mediaNameEn={media.nameEn}
+                compact
+                className="h-9 w-9 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm"
+              />
+            </div>
+          ) : null}
           {props.quickInquiryOverlay ? (
             <div
               className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border dark:bg-black bg-white/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"

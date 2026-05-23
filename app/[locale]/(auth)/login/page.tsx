@@ -103,6 +103,7 @@ function LoginForm() {
                   <input
                     id="email"
                     type="email"
+                    inputMode="email"
                     required
                     autoComplete="email"
                     value={email}

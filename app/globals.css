@@ -3356,4 +3356,20 @@ img {
   textarea {
     font-size: 16px !important;
   }
+
+  /* Native-app touch feedback */
+  .tkad-app-ui button,
+  .tkad-app-ui a[href],
+  .tkad-app-ui [role="button"] {
+    transition: transform 150ms ease;
+  }
+  .tkad-app-ui button:active,
+  .tkad-app-ui a[href]:active,
+  .tkad-app-ui [role="button"]:active {
+    transform: scale(0.97);
+  }
+  .tkad-app-ui .tkad-mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+  }
 }

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @deprecated 공개 페이지는 `components/public-map/dark-map-view.tsx` 를 사용하세요.
+ * Kakao Maps SDK — 레거시 참조용. 신규 코드에서 import 하지 마세요.
+ */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 

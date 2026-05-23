@@ -17,7 +17,16 @@ self.addEventListener("push", (event) => {
     tag: data.tag || "tkad-push",
     data: { url: data.url || "/ko" },
   };
-  event.waitUntil(self.registration.showNotification(data.title, options));
+  event.waitUntil(
+    Promise.all([
+      self.registration.showNotification(data.title, options),
+      self.clients.matchAll({ type: "window", includeUncontrolled: true }).then((clients) => {
+        for (const client of clients) {
+          client.postMessage({ type: "PUSH_RECEIVED" });
+        }
+      }),
+    ]),
+  );
 });
 
 self.addEventListener("notificationclick", (event) => {
