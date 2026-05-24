@@ -8,7 +8,7 @@
     "dev:webpack": "next dev --webpack",
     "dev:clean": "node scripts/dev-reset.mjs && next dev",
     "build": "prisma generate && next build --webpack",
-    "vercel-build": "prisma generate && next build --webpack",
+    "vercel-build": "prisma generate && next build",
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
@@ -21,7 +21,8 @@
     "postinstall": "prisma generate && node scripts/ensure-noto-kr-font.mjs",
     "generate:pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "cursor:prompt": "tsx scripts/cursor-agent.mts",
-    "cursor:agent": "CURSOR_AGENT_MODE=agent tsx scripts/cursor-agent.mts"
+    "cursor:agent": "CURSOR_AGENT_MODE=agent tsx scripts/cursor-agent.mts",
+    "screenshots:hub": "node scripts/capture-hub-screenshots.mjs"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

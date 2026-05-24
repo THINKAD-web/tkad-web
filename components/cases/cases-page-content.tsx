@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
@@ -93,13 +94,15 @@ export async function CasesPageContent({ locale, cases }: Props) {
               <p className="mb-4 text-center text-[12px] tracking-tight dark:text-white text-gray-500 sm:text-sm">
                 {`// `}{t("cases.listIntro")}
               </p>
-              <CasesCatalogSection locale={locale} initialCases={cases}>
-                <CasesCatalogGrids
-                  locale={locale}
-                  recommended={recommended}
-                  gridCases={gridCases}
-                />
-              </CasesCatalogSection>
+              <Suspense fallback={null}>
+                <CasesCatalogSection locale={locale} initialCases={cases}>
+                  <CasesCatalogGrids
+                    locale={locale}
+                    recommended={recommended}
+                    gridCases={gridCases}
+                  />
+                </CasesCatalogSection>
+              </Suspense>
 
               <div className="mt-16 rounded-[24px] border border-[#22d3ee]/25 bg-gradient-to-br from-[#a855f7]/15 via-transparent to-[#22d3ee]/10 px-6 py-10 text-center">
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">

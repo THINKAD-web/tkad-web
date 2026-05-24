@@ -154,6 +154,7 @@ export default function MediaBrowseClient({
   const catFromUrl = searchParams.get("cat") ?? "";
   const targetFromUrl = searchParams.get("target") ?? "";
   const chipFromUrl = (searchParams.get("chip") ?? "all") as BrowseCategoryChip;
+  const instantFromUrl = searchParams.get("instant") === "1";
 
   const [categoryChip, setCategoryChip] = useState<BrowseCategoryChip>("all");
   const [selectedMediaSlugs, setSelectedMediaSlugs] = useState<string[]>([]);
@@ -288,7 +289,10 @@ export default function MediaBrowseClient({
         targetFromUrl.split(",").map((s) => s.trim()).filter(Boolean),
       );
     }
-  }, [catFromUrl, targetFromUrl, chipFromUrl]);
+    if (instantFromUrl) {
+      setInstantOnlyFilter(true);
+    }
+  }, [catFromUrl, targetFromUrl, chipFromUrl, instantFromUrl]);
 
   const filterState = useMemo(
     () => ({

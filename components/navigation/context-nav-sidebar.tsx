@@ -10,6 +10,7 @@ import {
   resolveContextSidebar,
   type ContextSidebarItem,
 } from "@/lib/navigation/context-sidebar-config";
+import { QuickActionBarDesktop } from "@/components/navigation/quick-action-bar";
 import {
   readSidebarCollapsed,
   writeSidebarCollapsed,
@@ -187,6 +188,8 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
       aria-label={isKo ? "컨텍스트 메뉴" : "Context menu"}
     >
       <ContextNavSidebar collapsed={collapsed} hoverExpanded={hoverExpanded} />
+
+      <QuickActionBarDesktop />
 
       <div className="mt-auto shrink-0 border-t border-gray-200 p-2 dark:border-white/10">
         <button

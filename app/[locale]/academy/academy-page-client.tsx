@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
@@ -38,6 +39,14 @@ const inputCls =
 const labelCls =
   "block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary";
 
+const ACADEMY_CAT_PATTERNS: Record<string, RegExp> = {
+  "ooh-basics": /ooh|101|기초|입문/i,
+  measurement: /측정|cpm|ots|데이터|검증/i,
+  creative: /크리에이티브|소재|제작/i,
+  planning: /전략|플래|믹스|캠페인/i,
+  programmatic: /팬덤|프로그래매틱|dooh/i,
+};
+
 export default function AcademyPageClient({
   dbLessons,
   downloadPdfUrls = {},
@@ -48,6 +57,9 @@ export default function AcademyPageClient({
   const t = useTranslations("academy");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const activeCat = searchParams.get("cat");
+  const basicsRef = useRef<HTMLElement | null>(null);
   const { toast } = useToast();
   const registerRef = useRef<HTMLElement | null>(null);
 
@@ -73,6 +85,21 @@ export default function AcademyPageClient({
   };
 
   const closeVideo = useCallback(() => setVideoOpen(false), []);
+
+  const filteredLessons = useMemo(() => {
+    if (!activeCat) return dbLessons;
+    const pattern = ACADEMY_CAT_PATTERNS[activeCat];
+    if (!pattern) return dbLessons;
+    return dbLessons.filter((lesson) => {
+      const hay = `${lesson.titleKo} ${lesson.titleEn} ${lesson.descKo} ${lesson.descEn}`;
+      return pattern.test(hay);
+    });
+  }, [activeCat, dbLessons]);
+
+  useEffect(() => {
+    if (!activeCat) return;
+    basicsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeCat]);
 
   const handleOutline = async (lesson: AcademyLesson) => {
     setDownloading(`outline-${lesson.id}`);
@@ -291,7 +318,7 @@ export default function AcademyPageClient({
         </section>
 
         <div className="mx-auto max-w-7xl space-y-16 bg-muted px-4 pb-16 pt-14 text-foreground sm:px-6 sm:pb-20 lg:px-8">
-          <section id="academy-basics" className="scroll-mt-24">
+          <section id="academy-basics" ref={basicsRef} className="scroll-mt-24">
             <div className="mb-8 text-center">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ BASICS ]
@@ -304,7 +331,7 @@ export default function AcademyPageClient({
                 {t("sectionBasicsDesc")}
               </p>
             </div>
-            {dbLessons.length === 0 ? (
+            {filteredLessons.length === 0 ? (
               <div className="border-2 border-border bg-card py-12 text-center">
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   [ PREPARING ]
@@ -321,7 +348,7 @@ export default function AcademyPageClient({
               </div>
             ) : (
               <div className="grid gap-0 lg:grid-cols-3">
-                {dbLessons.map((lesson) => (
+                {filteredLessons.map((lesson) => (
                   <article
                     key={lesson.id}
                     className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card"

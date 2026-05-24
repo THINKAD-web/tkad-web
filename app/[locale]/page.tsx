@@ -17,6 +17,7 @@ import {
   HomePopularMediaList,
   HomeTrustStrip,
 } from "@/components/home/home-simple-sections";
+import { HomeHubNavigationSection } from "@/components/home/home-hub-navigation";
 
 /** 홈 — ISR 60초 */
 export const revalidate = 60;
@@ -80,6 +81,9 @@ export default async function HomePage({ params }: Props) {
 
       {/* 섹션 2 — 카테고리 아이콘 그리드 */}
       <HomeCategorySection locale={locale} />
+
+      {/* 섹션 2b — 전체 페이지 허브 버튼 */}
+      <HomeHubNavigationSection locale={locale} />
 
       {/* 섹션 3 — 이번 주 인기 매체 (리스트형) */}
       {popularItems.length > 0 ? (

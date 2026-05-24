@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode } from "react";
+import { Suspense, type ReactNode } from "react";
 import { BottomTabBar } from "@/components/mobile/bottom-tab-bar";
 import { MobileAutoHeader } from "@/components/mobile/mobile-auto-header";
 import { MobileSearchModal } from "@/components/mobile/mobile-search-modal";
@@ -9,6 +9,8 @@ import { MobileDetailChromeProvider } from "@/components/mobile/mobile-detail-ch
 import { PwaSplashScreen } from "@/components/mobile/pwa-splash-screen";
 import { MobileKeyboardProvider } from "@/components/mobile/mobile-keyboard-provider";
 import { PushHapticListener } from "@/components/mobile/push-haptic-listener";
+import { SubpageRelatedChips } from "@/components/navigation/subpage-related-chips";
+import { QuickActionBarMobile } from "@/components/navigation/quick-action-bar";
 
 type Props = {
   children: ReactNode;
@@ -27,7 +29,13 @@ export function MobileAppChrome({ children }: Props) {
         <PwaSplashScreen />
         <div className="flex min-h-0 flex-1 flex-col md:contents">
           <MobileAutoHeader />
-          <div className="flex min-h-0 flex-1 flex-col pb-16 md:pb-0 tkad-mobile-scroll">{children}</div>
+          <Suspense fallback={null}>
+            <SubpageRelatedChips />
+          </Suspense>
+          <div className="flex min-h-0 flex-1 flex-col pb-28 md:pb-0 tkad-mobile-scroll">
+            {children}
+          </div>
+          <QuickActionBarMobile />
           <BottomTabBar />
           <MobileSearchModal />
         </div>
