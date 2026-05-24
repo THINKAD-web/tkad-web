@@ -10,11 +10,13 @@ import {
   useMap,
 } from "react-leaflet";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
+import {
+  PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
+  PUBLIC_DARK_MAP_TILE_URL,
+} from "@/lib/public-dark-map-config";
 import { useTranslations } from "next-intl";
 
 const ACCENT = "#22d3ee";
-const TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
 
 function MapInvalidateSize() {
   const map = useMap();
@@ -68,7 +70,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
           zoomControl={false}
           attributionControl={false}
         >
-          <TileLayer url={TILE_URL} subdomains="abcd" maxZoom={20} />
+          <TileLayer url={PUBLIC_DARK_MAP_TILE_URL} subdomains={PUBLIC_DARK_MAP_TILE_SUBDOMAINS} maxZoom={20} />
           <MapInvalidateSize />
           {validPins.map((p) => (
             <CircleMarker
@@ -100,7 +102,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
           { k: t("heroMapStatResponse"), v: "24h" },
         ].map((s) => (
           <div key={s.k} className="min-w-0 text-center">
-            <p className="font-mono text-[9px] font-bold uppercase tracking-wider text-muted-foreground">
+            <p className="font-display text-xs font-medium uppercase tracking-wider text-muted-foreground">
               {s.k}
             </p>
             <p className="mt-1 truncate text-base font-black tabular-nums tracking-tight text-foreground sm:text-lg">

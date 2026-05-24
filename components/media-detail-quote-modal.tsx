@@ -46,7 +46,7 @@ function MediaDetailQuoteModalBody({
   }, [media.id, hasOpts, safeIdx]);
 
   const btnBlockBase =
-    "inline-flex w-full items-center justify-center gap-2 border-2 font-mono font-bold uppercase tracking-[0.18em] transition-colors duration-150";
+    "inline-flex w-full items-center justify-center gap-2 border-2 font-display font-bold uppercase tracking-[0.18em] transition-colors duration-150";
   const primaryLinkClass = cn(
     btnBlockBase,
     "px-6 py-3 text-xs",
@@ -75,7 +75,7 @@ function MediaDetailQuoteModalBody({
         <div className="min-w-0">
           <h2
             id="media-quote-modal-title"
-            className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-600"
+            className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-600"
           >
             [ {t("quoteModalTitle")} ]
           </h2>
@@ -94,7 +94,7 @@ function MediaDetailQuoteModalBody({
           role="radiogroup"
           aria-label={t("quoteModalPriceOptionLabel")}
         >
-          <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-500">
+          <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
             [ {t("quoteModalPriceOptionLabel")} ]
           </p>
           <div className="flex max-h-[min(52vh,22rem)] flex-col gap-2 overflow-y-auto pr-0.5">
@@ -132,7 +132,7 @@ function MediaDetailQuoteModalBody({
                   <span className="mt-1.5 block text-lg font-black tabular-nums tracking-tight dark:text-white text-gray-900 sm:text-xl">
                     {formatCatalogPriceKrwLong(o.price, locale)}
                   </span>
-                  <span className="mt-1.5 font-mono text-[9px] font-bold uppercase tracking-wider dark:text-white text-gray-500">
+                  <span className="mt-1.5 font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
                     {t(
                       mediaDetailPricePeriodTranslationKey(
                         o.period ?? media.pricePeriod,
@@ -150,7 +150,7 @@ function MediaDetailQuoteModalBody({
           </div>
           {selected ? (
             <p className="mt-3 border-t dark:border-white/10 border-gray-200 pt-3 text-sm dark:text-white text-gray-700">
-              <span className="font-mono text-[9px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
                 {t("quoteModalSelectedPriceLine")}{" "}
               </span>
               <span className="font-black dark:text-white text-gray-900">
@@ -166,13 +166,13 @@ function MediaDetailQuoteModalBody({
         </p>
       ) : (
         <div className="mb-5 rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 px-3 py-3 dark:text-white text-gray-900 backdrop-blur">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-wider dark:text-white text-gray-500">
+          <p className="font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
             {isKo ? "기준 요금" : "Base rate"}
           </p>
           <p className="mt-1.5 text-lg font-black tabular-nums dark:text-white text-gray-900">
             {formatCatalogPriceKrwLong(media.price, locale)}
           </p>
-          <p className="mt-0.5 font-mono text-[9px] dark:text-white text-gray-500">
+          <p className="mt-0.5 text-[9px] dark:text-white text-gray-500">
             {t(
               mediaDetailPricePeriodTranslationKey(media.pricePeriod),
             )}

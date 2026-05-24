@@ -53,7 +53,7 @@ export function SectionHead({
           align === "center" ? "justify-center" : "justify-start",
         )}
       >
-        <span className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card/70 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground shadow-[0_14px_44px_rgba(0,0,0,0.08)] backdrop-blur dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
+        <span className="inline-flex items-center gap-2 rounded-2xl border border-border/60 bg-card/70 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground shadow-[0_14px_44px_rgba(0,0,0,0.08)] backdrop-blur dark:shadow-[0_18px_60px_rgba(0,0,0,0.45)]">
           <span className="text-accent">[{number}]</span>
           {category ? <span className="text-muted-foreground">/ {category}</span> : null}
         </span>
@@ -63,7 +63,7 @@ export function SectionHead({
         {title}
       </h2>
       {meta ? (
-        <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           <span aria-hidden className="mr-1.5">
             /
           </span>

@@ -46,6 +46,8 @@ export type KeywordFilterDetailMeta = {
 
 export interface MediaItem {
   id: string;
+  /** Canonical public URL segment (DB `slug`) */
+  slug?: string;
   name: string;
   nameEn: string;
   location: string;
@@ -61,6 +63,10 @@ export interface MediaItem {
   availability?: "available" | "reserved" | "maintenance";
   /** 세부 카테고리 (DB `sub_category`) */
   subCategory?: string;
+  /** 매체 카테고리 slug 배열 (DB `media_category`) */
+  mediaCategory?: string[];
+  /** 적합 캠페인 타겟 slug 배열 (DB `target_category`) */
+  targetCategory?: string[];
   /** 검색·표시용 태그 */
   tags?: string[];
   city?: string;
@@ -157,6 +163,8 @@ export interface MediaItem {
   executionCount?: number;
   /** 최근 집행으로부터 경과 개월 수 */
   lastExecutionMonthsAgo?: number | null;
+  /** 성과 데이터 보증 배지 충족 */
+  performanceGuaranteed?: boolean;
   /** 이동형(`mobile`) 서비스 구역 — 전국 시·군·구 행정코드(5자리). 공개 지도 폴리곤에 사용 */
   coverageDistrictCodes?: string[];
 }

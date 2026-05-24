@@ -2027,6 +2027,7 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "refund": "Refund Policy",
+    "guarantee": "Performance Guarantee",
     "industryGuide": "Industry guides",
     "sitemap": "Sitemap",
     "sitemapClose": "Close sitemap",
@@ -2196,6 +2197,7 @@
     "mediaOwnerOps": "Media owner ops",
     "mediaReviews": "Media reviews",
     "searchStats": "Search stats",
+    "recommendations": "AI recommendations",
     "abTest": "A/B test",
     "apiUsage": "API usage"
   },

@@ -1,5 +1,10 @@
 "use client";
 
+/**
+ * @deprecated 공개 페이지는 `components/public-map/dark-map-view.tsx` 를 사용하세요.
+ * Kakao Maps SDK — 레거시 참조용. 신규 코드에서 import 하지 마세요.
+ */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 
@@ -1011,7 +1016,7 @@ export default function KakaoMapView({
             className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
           />
           <div className="relative">
-            <div className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+            <div className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
               MAP SDK ERROR
             </div>
             <div className="mt-2 leading-relaxed dark:text-white text-gray-800">{sdkError}</div>
@@ -1038,7 +1043,7 @@ export default function KakaoMapView({
               className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
             />
             <div className="relative flex flex-col items-center gap-4">
-              <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
+              <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
                 LOADING
               </div>
               <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>

@@ -705,13 +705,13 @@ export default function AdminCampaignsPage() {
   return (
     <div className="space-y-6">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ CAMPAIGNS ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight text-foreground">
           캠페인 관리
         </h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
           제안 → 협의 → 계약 → 제작 → 송출 → 완료 파이프라인, 송출 일정, 견적·계약·청구,
           송출 증빙 사진을 한 곳에서 관리합니다.
         </p>
@@ -845,9 +845,7 @@ export default function AdminCampaignsPage() {
                         loadDetail(c.id);
                       }
                     }}
-                    className={`w-full rounded-lg border p-2 text-left transition hover:bg-slate-50 ${
-                      selectedId === c.id ? "border-primary bg-muted" : "border-slate-200"
-                    }`}
+                    className={`w-full rounded-lg border p-2 text-left transition hover:bg-slate-50 ${ selectedId === c.id ? "border-primary bg-muted" : "border-slate-200" }`}
                   >
                     <div className="flex flex-wrap items-center justify-between gap-2">
                       <span className="line-clamp-1 font-semibold text-foreground">{c.name}</span>
@@ -910,21 +908,21 @@ export default function AdminCampaignsPage() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="tkad-glass-surface-soft space-y-3 rounded-[18px] border border-border/70 p-4">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                 [ REPORT ACTIONS ]
               </p>
               <div className="flex flex-wrap gap-2">
                 <button
                   type="button"
                   onClick={() => setShowReportPreview((v) => !v)}
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))]"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))]"
                 >
                   <Eye className="h-3.5 w-3.5" />
                   {showReportPreview ? "미리보기 닫기" : "보고서 미리보기"}
                 </button>
                 <button
                   type="button"
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))] disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground backdrop-blur transition-all hover:border-[#22d3ee]/40 hover:bg-[linear-gradient(135deg,rgba(34,211,238,0.12),rgba(168,85,247,0.08))] disabled:cursor-not-allowed disabled:opacity-40"
                   disabled={
                     !selectedId ||
                     !showReportPreview ||
@@ -961,7 +959,7 @@ export default function AdminCampaignsPage() {
                       ? `/api/admin/campaigns/${selectedId}/completion-report`
                       : "#"
                   }
-                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#22d3ee]/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.16))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(34,211,238,0.15)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
+                  className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#22d3ee]/40 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.16))] px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(34,211,238,0.15)] transition-all hover:brightness-110 disabled:cursor-not-allowed disabled:opacity-40"
                   target="_blank"
                   rel="noreferrer"
                   aria-disabled={!selectedId}
@@ -975,14 +973,14 @@ export default function AdminCampaignsPage() {
                 {selectedId ? (
                   <Link
                     href={`/admin/campaigns/${selectedId}/analytics`}
-                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#a855f7]/40 bg-[linear-gradient(135deg,rgba(168,85,247,0.22),rgba(34,211,238,0.12))] px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(168,85,247,0.12)] transition-all hover:brightness-110"
+                    className="inline-flex items-center justify-center gap-1.5 rounded-full border border-[#a855f7]/40 bg-[linear-gradient(135deg,rgba(168,85,247,0.22),rgba(34,211,238,0.12))] px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(168,85,247,0.12)] transition-all hover:brightness-110"
                   >
                     <BarChart3 className="h-3.5 w-3.5" />
                     성과 분석
                   </Link>
                 ) : null}
               </div>
-              <p className="font-mono text-[10px] tracking-tight text-muted-foreground">
+              <p className="text-[10px] tracking-tight text-muted-foreground">
                 {`// `}서버 PDF(완료 보고서)는 KPI·패턴·매체·일정·문서를 반영합니다. 이미지 저장은 화면 캡처용입니다.
               </p>
             </div>

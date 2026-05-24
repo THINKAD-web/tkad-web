@@ -41,7 +41,7 @@ export function QuoteStatusBadge({ status }: Props) {
   };
   return (
     <span
-      className={`inline-flex items-center border-2 px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] ${m.className}`}
+      className={`inline-flex items-center border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] ${m.className}`}
     >
       [ {m.label} ]
     </span>

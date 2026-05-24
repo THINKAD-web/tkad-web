@@ -238,7 +238,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
   return (
     <div className="space-y-8">
-      <ol className="flex gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground">
+      <ol className="flex gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
         {[1, 2, 3].map((n) => (
           <li
             key={n}
@@ -255,7 +255,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
       {step === 1 ? (
         <section className="space-y-4">
-          <h2 className="font-mono text-sm font-black uppercase tracking-[0.2em]">
+          <h2 className="font-display text-sm font-black uppercase tracking-[0.2em]">
             {t("datesTitle")}
           </h2>
           <p className="text-sm text-muted-foreground">{t("datesDesc")}</p>
@@ -279,7 +279,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                 >
                   <ChevronLeft className="h-4 w-4" />
                 </button>
-                <span className="font-mono text-sm font-bold">
+                <span className="text-sm font-bold">
                   {viewMonth.getFullYear()}.
                   {String(viewMonth.getMonth() + 1).padStart(2, "0")}
                 </span>
@@ -296,7 +296,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                   <ChevronRight className="h-4 w-4" />
                 </button>
               </div>
-              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-mono uppercase text-muted-foreground">
+              <div className="grid grid-cols-7 gap-1 text-center text-[10px] font-display uppercase text-muted-foreground">
                 {["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"].map((d) => (
                   <span key={d}>{d}</span>
                 ))}
@@ -319,13 +319,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                       type="button"
                       disabled={blockedDay}
                       onClick={() => onDayClick(cell.date)}
-                      className={`min-h-9 rounded-lg text-sm font-medium ${
-                        blockedDay
-                          ? "cursor-not-allowed bg-muted/40 text-muted-foreground line-through"
-                          : selected
-                            ? "bg-primary text-primary-foreground"
-                            : "hover:bg-muted"
-                      }`}
+                      className={`min-h-9 rounded-lg text-sm font-medium ${ blockedDay ? "cursor-not-allowed bg-muted/40 text-muted-foreground line-through" : selected ? "bg-primary text-primary-foreground" : "hover:bg-muted" }`}
                     >
                       {cell.day}
                     </button>
@@ -335,7 +329,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
             </div>
           )}
           {rangeStart && rangeEnd ? (
-            <p className="font-mono text-sm">
+            <p className="text-sm">
               {rangeStart} → {rangeEnd} ·{" "}
               <strong>{amountPreview.toLocaleString(isKo ? "ko-KR" : "en-US")}원</strong>
             </p>
@@ -355,7 +349,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
       {step === 2 ? (
         <section className="space-y-4">
-          <h2 className="font-mono text-sm font-black uppercase tracking-[0.2em]">
+          <h2 className="font-display text-sm font-black uppercase tracking-[0.2em]">
             {t("creativeTitle")}
           </h2>
           <ul className="list-inside list-disc text-sm text-muted-foreground">
@@ -369,22 +363,14 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
             <button
               type="button"
               onClick={() => setCreativeSource("library")}
-              className={`rounded-full px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
-                creativeSource === "library"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`rounded-full px-4 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${ creativeSource === "library" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
             >
               {isKo ? "내 라이브러리" : "My Library"}
             </button>
             <button
               type="button"
               onClick={() => setCreativeSource("upload")}
-              className={`rounded-full px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
-                creativeSource === "upload"
-                  ? "bg-primary text-primary-foreground"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
+              className={`rounded-full px-4 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${ creativeSource === "upload" ? "bg-primary text-primary-foreground" : "text-muted-foreground hover:text-foreground" }`}
             >
               {isKo ? "새로 업로드" : "Upload New"}
             </button>
@@ -396,7 +382,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
                 selectedId={creativeId}
                 onSelect={handlePickFromLibrary}
               />
-              <p className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 {isKo ? "처음이신가요?" : "First time?"}{" "}
                 <Link
                   href="/creatives/upload"
@@ -430,7 +416,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
           {creativeUrl ? (
             <div className="rounded-2xl border-2 border-border bg-card p-3">
-              <p className="mb-2 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-accent">
+              <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
                 {isKo
                   ? creativeId
                     ? "[ 선택된 소재 — 라이브러리 ]"
@@ -473,7 +459,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
 
       {step === 3 ? (
         <section className="space-y-4">
-          <h2 className="font-mono text-sm font-black uppercase tracking-[0.2em]">
+          <h2 className="font-display text-sm font-black uppercase tracking-[0.2em]">
             {t("contactTitle")}
           </h2>
           <div className="grid gap-3 sm:grid-cols-2">
@@ -510,7 +496,7 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
             <p>
               {rangeStart} ~ {rangeEnd}
             </p>
-            <p className="mt-2 font-mono text-lg font-black">
+            <p className="mt-2 text-lg font-black">
               {amountPreview.toLocaleString(isKo ? "ko-KR" : "en-US")}원
             </p>
           </div>

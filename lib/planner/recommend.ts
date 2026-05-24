@@ -6,6 +6,8 @@ import type {
   PlannerCategory,
   PlannerIndustryKey,
 } from "@/lib/planner/types";
+import { matchMediaCatalog } from "@/lib/matching-engine";
+import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 import { haversineKm } from "@/lib/media-data";
 
@@ -644,84 +646,35 @@ export function recommendPlannerMedia(
   limit = 5,
   seed = 0,
 ): ScoredMedia[] {
-  const effFn = efficiencyScoreFactory(catalog);
   const filteredByCategory = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
     return (ctx.categories as readonly PlannerCategory[]).some((c) =>
       matchesPlannerCategory(m, c),
     );
   });
-  // Region is a primary intent signal for planner. Prefer strict matching when provided,
-  // but keep a safe fallback to avoid empty recommendations.
-  const filtered =
-    ctx.regions.length > 0
-      ? (() => {
-          const strict = filteredByCategory.filter(
-            (m) => regionScore(m, ctx.regions) > 0,
-          );
-          return strict.length > 0 ? strict : filteredByCategory;
-        })()
-      : filteredByCategory;
 
-  const seededTiebreak = (id: string) => {
-    // deterministic per refresh; avoids “등록 순” when scores tie.
-    let h = 2166136261 ^ seed;
-    for (let i = 0; i < id.length; i++) {
-      h ^= id.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return h >>> 0;
-  };
-  const seeded01 = (id: string) => {
-    // 0..1 deterministic pseudo-rand per seed + id
-    const x = seededTiebreak(id);
-    // mulberry32-ish mix
-    let t = x + 0x6d2b79f5;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-  const emptyReasonLast = (a: ScoredMedia, b: ScoredMedia) => {
-    const ae = a.reasons.length === 0 ? 1 : 0;
-    const be = b.reasons.length === 0 ? 1 : 0;
-    if (ae !== be) return ae - be;
-    return 0;
-  };
-  const scored = filtered
-    .map((m) => {
-      const sm = scoreMedia(m, ctx, effFn);
-      const mult = budgetAffordabilityMultiplier(m, ctx.budgetMan, ctx.months);
-      const ageT = ageTargetTilt(ctx.ageKey, m.targetAge);
-      return { ...sm, score: sm.score * mult * ageT };
-    })
-    .sort((a, b) => {
-      // Refresh: 점수 근접 구간에서 순서가 바뀌도록 지터 확대
-      const aj = a.score * (0.94 + 0.12 * seeded01(a.media.id));
-      const bj = b.score * (0.94 + 0.12 * seeded01(b.media.id));
-      const d = bj - aj;
-      if (Math.abs(d) > 1e-6) return d;
-      const e = emptyReasonLast(a, b);
-      if (e !== 0) return e;
-      const ft = (b.media.dailyFootTraffic ?? 0) - (a.media.dailyFootTraffic ?? 0);
-      if (ft !== 0) return ft;
-      return seededTiebreak(a.media.id) - seededTiebreak(b.media.id);
-    });
+  const matchingInput = plannerContextToMatching(ctx, seed);
+  const matched = matchMediaCatalog(filteredByCategory, matchingInput, limit);
 
-  const n = scored.length;
-  if (n === 0) return [];
-
-  const maxWindowShift =
-    n <= limit ? 0 : Math.min(22, Math.max(0, n - limit - 1));
-  const windowOffset =
-    seed === 0
-      ? 0
-      : ((seed * 2654435761 + n * 17) >>> 0) % (maxWindowShift + 1);
-  const windowSize = Math.min(48, Math.max(limit + 10, n));
-  const pool = scored.slice(
-    windowOffset,
-    Math.min(n, windowOffset + windowSize),
-  );
-  if (pool.length === 0) return [];
-
-  return pickDiverseTop(pool, limit, seed);
+  return matched.map((m) => ({
+    media: m.media,
+    score: m.score / 100,
+    reasons: [
+      ...(m.breakdown.budget >= 20
+        ? [{ key: 'budgetEfficient' as RecommendReasonKey, weight: m.breakdown.budget / 100 }]
+        : []),
+      ...(m.breakdown.region >= 15
+        ? [{ key: 'matchRegion' as RecommendReasonKey, weight: m.breakdown.region / 100 }]
+        : []),
+      ...(m.breakdown.industry >= 10
+        ? [{ key: 'goalFit' as RecommendReasonKey, weight: m.breakdown.industry / 100 }]
+        : []),
+      ...(m.breakdown.target >= 12
+        ? [{ key: 'ageMatch' as RecommendReasonKey, weight: m.breakdown.target / 100 }]
+        : []),
+      ...(m.breakdown.popularity >= 5
+        ? [{ key: 'highVisibility' as RecommendReasonKey, weight: m.breakdown.popularity / 100 }]
+        : []),
+    ],
+  }));
 }

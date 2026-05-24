@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { HOME_TOUR_OPEN_EVENT } from "@/lib/home-tour";
 
 const STORAGE_KEY = "tkad-home-tour-v2";
 
@@ -70,13 +71,9 @@ export default function HomeOnboardingTour() {
   }, [step]);
 
   useEffect(() => {
-    try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") return;
-    } catch {
-      return;
-    }
-    const t = window.setTimeout(() => setOpen(true), 2200);
-    return () => window.clearTimeout(t);
+    const onManualOpen = () => setOpen(true);
+    window.addEventListener(HOME_TOUR_OPEN_EVENT, onManualOpen);
+    return () => window.removeEventListener(HOME_TOUR_OPEN_EVENT, onManualOpen);
   }, []);
 
   useEffect(() => {
@@ -118,11 +115,14 @@ export default function HomeOnboardingTour() {
   const popupStyle: React.CSSProperties = isMobile
     ? {
         position: "fixed",
-        left: "50%",
-        bottom: "5.5rem",
-        transform: "translateX(-50%)",
-        width: "min(calc(100vw - 2rem), 22rem)",
-        zIndex: 50,
+        left: "1rem",
+        right: "1rem",
+        bottom: "6rem",
+        width: "auto",
+        maxWidth: "24rem",
+        marginLeft: "auto",
+        marginRight: "auto",
+        zIndex: 60,
       }
     : targetRect
       ? {
@@ -132,21 +132,22 @@ export default function HomeOnboardingTour() {
             Math.max(16, targetRect.left),
             window.innerWidth - Math.min(320, window.innerWidth - 32) - 16,
           ),
-          width: "min(20rem, calc(100vw - 2rem))",
-          zIndex: 50,
+          width: "min(24rem, calc(100vw - 2rem))",
+          zIndex: 60,
         }
       : {
           position: "fixed",
-          right: 16,
-          bottom: 16,
-          width: "min(20rem, calc(100vw - 2rem))",
-          zIndex: 50,
+          right: "1rem",
+          bottom: "6rem",
+          width: "min(24rem, calc(100vw - 2rem))",
+          maxWidth: "24rem",
+          zIndex: 60,
         };
 
   return (
     <>
       <div
-        className="fixed inset-0 z-[44] bg-black/45 backdrop-blur-[1px]"
+        className="fixed inset-0 z-40 bg-black/45 backdrop-blur-[1px]"
         aria-hidden
         onClick={dismissSession}
       />
@@ -170,7 +171,7 @@ export default function HomeOnboardingTour() {
         style={popupStyle}
       >
         <div className="flex items-start justify-between gap-2">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-primary">
             {isKo ? "안내" : "Guide"} · {step + 1}/{STEPS.length}
           </p>
           <button

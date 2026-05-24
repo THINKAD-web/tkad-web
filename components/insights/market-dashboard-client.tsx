@@ -130,7 +130,7 @@ export function MarketDashboardClient({ isKo, access }: Props) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ PRO · MARKET INSIGHTS ]
         </p>
         <h1 className="text-3xl font-black tracking-tight">

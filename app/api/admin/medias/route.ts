@@ -16,6 +16,7 @@ import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverag
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
+import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
 
 export const dynamic = "force-dynamic";
 
@@ -157,6 +158,10 @@ export async function POST(request: NextRequest) {
   if (sc !== undefined) data.subCategory = sc;
   const tags = optStrArr(body.tags);
   if (tags !== undefined) data.tags = tags;
+  const mediaCategory = optStrArr(body.mediaCategory);
+  if (mediaCategory !== undefined) data.mediaCategory = mediaCategory;
+  const targetCategory = optStrArr(body.targetCategory);
+  if (targetCategory !== undefined) data.targetCategory = targetCategory;
   const dist = optStr(body.district);
   if (dist !== undefined) data.district = dist;
   const city = optStr(body.city);
@@ -281,6 +286,9 @@ export async function POST(request: NextRequest) {
     if (locNorm.district) data.district = locNorm.district;
 
     const db = getPrisma();
+    if (!data.slug) {
+      data.slug = await assignUniqueMediaSlug(db, name, data.nameEn);
+    }
     const media = await db.$transaction(async (tx) => {
       const m = await tx.media.create({ data });
       await persistMediaCoverageDistrictCodes(
@@ -310,7 +318,7 @@ export async function POST(request: NextRequest) {
       for (const locale of ["ko", "en"] as const) {
         revalidatePath(`/${locale}/compare`);
         revalidatePath(`/${locale}/media`);
-        revalidatePath(`/${locale}/media/${media.id}`);
+        revalidatePath(`/${locale}/media/${media.slug ?? media.id}`);
         revalidatePath(`/${locale}/planner`);
         revalidatePath(`/${locale}/quote`);
       }

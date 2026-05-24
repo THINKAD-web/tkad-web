@@ -98,7 +98,7 @@ export default function AdminManualClient() {
   return (
     <div className="mx-auto max-w-3xl space-y-8">
       <header>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ OPS / MANUAL ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">

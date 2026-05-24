@@ -39,7 +39,7 @@ export function InsightMarkdownBody({ markdown }: { markdown: string }) {
             </ul>
           ),
           ol: ({ children }) => (
-            <ol className="my-3 list-decimal space-y-2 pl-6 leading-[1.8] text-foreground marker:font-mono marker:text-accent">
+            <ol className="my-3 list-decimal space-y-2 pl-6 leading-[1.8] text-foreground marker: marker:text-accent">
               {children}
             </ol>
           ),
@@ -75,7 +75,7 @@ export function InsightMarkdownBody({ markdown }: { markdown: string }) {
             </div>
           ),
           th: ({ children }) => (
-            <th className="border-b-2 border-border bg-hero-void px-3 py-2 text-left font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
+            <th className="border-b-2 border-border bg-hero-void px-3 py-2 text-left font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
               {children}
             </th>
           ),

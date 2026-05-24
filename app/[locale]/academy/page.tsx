@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { listAcademyDownloadAssetUrls } from "@/lib/academy-download-assets";
 import { getPublishedAcademyLessonsForUi } from "@/lib/public-content-queries";
 import AcademyPageClient from "./academy-page-client";
@@ -10,9 +11,11 @@ export default async function AcademyPage() {
     listAcademyDownloadAssetUrls(),
   ]);
   return (
-    <AcademyPageClient
-      dbLessons={dbLessons}
-      downloadPdfUrls={downloadPdfUrls}
-    />
+    <Suspense fallback={null}>
+      <AcademyPageClient
+        dbLessons={dbLessons}
+        downloadPdfUrls={downloadPdfUrls}
+      />
+    </Suspense>
   );
 }

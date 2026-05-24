@@ -1,10 +1,12 @@
 import type { MediaItem } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
+import { isPerformanceGuaranteed } from "@/lib/performance-guarantee";
 
 export type MediaTrustBadgeId =
   | "popular"
   | "instant_booking"
   | "verified_execution"
+  | "performance_guaranteed"
   | "new"
   | "hot_week";
 
@@ -44,6 +46,11 @@ const BADGE_DEFS: Record<
     emoji: "✅",
     labelKo: "집행 검증",
     labelEn: "Verified flights",
+  },
+  performance_guaranteed: {
+    emoji: "📊",
+    labelKo: "성과 데이터 보증",
+    labelEn: "Performance data guaranteed",
   },
   new: {
     emoji: "🆕",
@@ -95,12 +102,23 @@ export function computeTrustBadges(
   media: MediaItem,
   ctx: MediaTrustBadgeContext,
   execution: MediaExecutionStats,
+  certifiedPhotoCount = 0,
 ): MediaTrustBadge[] {
   const badges: MediaTrustBadge[] = [];
 
   if (ctx.topInquiryIds.has(media.id)) badges.push(badge("popular"));
   if (isInstantBookingEligible(media).eligible) {
     badges.push(badge("instant_booking"));
+  }
+  if (
+    isPerformanceGuaranteed({
+      executionCount: execution.totalCount,
+      reviewCount: media.reviewCount ?? 0,
+      averageRating: media.averageRating,
+      certifiedPhotoCount,
+    })
+  ) {
+    badges.push(badge("performance_guaranteed"));
   }
   if (execution.totalCount > 0) badges.push(badge("verified_execution"));
   if (isMediaNewListing(media.createdAt)) badges.push(badge("new"));
@@ -170,6 +188,7 @@ export function pickTrustBadgesForThumbnail(
 ): MediaTrustBadge[] {
   if (!badges?.length) return [];
   const order: MediaTrustBadgeId[] = [
+    "performance_guaranteed",
     "instant_booking",
     "popular",
     "hot_week",

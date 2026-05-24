@@ -17,7 +17,7 @@ export function CommunityRoleBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em]",
+        "inline-flex items-center rounded-full border px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.18em]",
         label.surfaceClassName,
         className,
       )}

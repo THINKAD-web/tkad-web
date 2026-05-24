@@ -1,5 +1,3 @@
-/* Display / mono — 필요 웨이트만 (next/font Pretendard는 layout에서 로드) */
-@import url("https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap");
 @import "tailwindcss";
 @import "./ui-system.css";
 /* v4: JS 설정(darkMode: class 등)을 쓰려면 명시 필요 — 없으면 `dark:` 가 OS 미디어쿼리만 따름(일몰 후 자동 다크) */
@@ -100,16 +98,10 @@
   --color-bx-gray-dim: var(--bx-gray-dim);
   --color-bx-accent: var(--bx-accent);
 
-  /* Font (2026/2027) — Body: Inter, Display: General Sans
-   * 한글은 Pretendard/Wanted Sans로 자연스럽게 폴백. */
-  --font-display: var(--font-pretendard), "Space Grotesk", var(--font-geist-sans),
-    -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard,
-    "Malgun Gothic", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-sans: var(--font-pretendard), var(--font-geist-sans), -apple-system,
-    BlinkMacSystemFont, "Apple SD Gothic Neo", Pretendard, "Malgun Gothic",
-    Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: "JetBrains Mono", var(--font-geist-mono), ui-monospace,
-    SFMono-Regular, Menlo, monospace;
+  /* Typography — Pretendard (sans) · Space Grotesk (display) · JetBrains Mono (mono) */
+  --font-sans: var(--font-pretendard), system-ui, sans-serif;
+  --font-display: var(--font-space-grotesk), var(--font-pretendard), system-ui, sans-serif;
+  --font-mono: var(--font-jetbrains), ui-monospace, monospace;
 
   /* App UI — 표준 radius (카드 2xl · 버튼 xl · 칩 full) */
   --radius-sm: 0.25rem;
@@ -533,10 +525,14 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --color-navy-900: #050a14;
 }
 
+html[lang="ko"] {
+  word-break: keep-all;
+  word-wrap: break-word;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
-  /* 2026: Inter 기반 본문. (한글: Pretendard/Wanted Sans 폴백) */
   font-family: var(--font-sans);
   font-feature-settings: "ss06", "tnum", "cv11";
   letter-spacing: -0.012em;
@@ -2268,10 +2264,10 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-display);
-    font-weight: 900;
-    letter-spacing: -0.04em;
-    line-height: 1.15;
+    font-family: var(--font-sans);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
   }
 }
 
@@ -2918,6 +2914,11 @@ html {
 
 .admin-dashboard-root {
   position: relative;
+  font-family: var(--font-sans);
+}
+
+.admin-dashboard-root table {
+  font-variant-numeric: tabular-nums;
 }
 
 .admin-dashboard-root::before {
@@ -3355,5 +3356,21 @@ img {
   select,
   textarea {
     font-size: 16px !important;
+  }
+
+  /* Native-app touch feedback */
+  .tkad-app-ui button,
+  .tkad-app-ui a[href],
+  .tkad-app-ui [role="button"] {
+    transition: transform 150ms ease;
+  }
+  .tkad-app-ui button:active,
+  .tkad-app-ui a[href]:active,
+  .tkad-app-ui [role="button"]:active {
+    transform: scale(0.97);
+  }
+  .tkad-app-ui .tkad-mobile-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
   }
 }

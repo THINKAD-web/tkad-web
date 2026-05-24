@@ -28,7 +28,7 @@ export default async function BookingPayPage({ params }: Props) {
         </p>
         <Link
           href={`/bookings/${id}`}
-          className="mt-4 inline-block font-mono text-sm underline"
+          className="mt-4 inline-block text-sm underline"
         >
           {(await getTranslations("instantBooking"))("viewBooking")}
         </Link>
@@ -45,7 +45,7 @@ export default async function BookingPayPage({ params }: Props) {
     <main className="mx-auto max-w-lg px-4 py-10 sm:px-6">
       <Link
         href={`/media/${booking.mediaId}/book`}
-        className="mb-6 inline-flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
+        className="mb-6 inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="h-4 w-4" />
         {t("back")}
@@ -56,7 +56,7 @@ export default async function BookingPayPage({ params }: Props) {
         <p>
           {start} ~ {end}
         </p>
-        <p className="font-mono text-xl font-black">
+        <p className="text-xl font-black">
           {booking.amount.toLocaleString(locale === "ko" ? "ko-KR" : "en-US")}원
         </p>
         <p className="text-xs text-muted-foreground">

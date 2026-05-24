@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
@@ -34,9 +35,17 @@ import { cn } from "@/lib/utils";
 import { ContentNotifySignup } from "@/components/content-notify-signup";
 
 const inputCls =
-  "h-10 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
+  "h-10 w-full border-2 border-border bg-card px-3  text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none";
 const labelCls =
-  "block font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary";
+  "block font-display text-xs font-medium uppercase tracking-[0.22em] text-primary";
+
+const ACADEMY_CAT_PATTERNS: Record<string, RegExp> = {
+  "ooh-basics": /ooh|101|기초|입문/i,
+  measurement: /측정|cpm|ots|데이터|검증/i,
+  creative: /크리에이티브|소재|제작/i,
+  planning: /전략|플래|믹스|캠페인/i,
+  programmatic: /팬덤|프로그래매틱|dooh/i,
+};
 
 export default function AcademyPageClient({
   dbLessons,
@@ -48,6 +57,9 @@ export default function AcademyPageClient({
   const t = useTranslations("academy");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const searchParams = useSearchParams();
+  const activeCat = searchParams.get("cat");
+  const basicsRef = useRef<HTMLElement | null>(null);
   const { toast } = useToast();
   const registerRef = useRef<HTMLElement | null>(null);
 
@@ -73,6 +85,21 @@ export default function AcademyPageClient({
   };
 
   const closeVideo = useCallback(() => setVideoOpen(false), []);
+
+  const filteredLessons = useMemo(() => {
+    if (!activeCat) return dbLessons;
+    const pattern = ACADEMY_CAT_PATTERNS[activeCat];
+    if (!pattern) return dbLessons;
+    return dbLessons.filter((lesson) => {
+      const hay = `${lesson.titleKo} ${lesson.titleEn} ${lesson.descKo} ${lesson.descEn}`;
+      return pattern.test(hay);
+    });
+  }, [activeCat, dbLessons]);
+
+  useEffect(() => {
+    if (!activeCat) return;
+    basicsRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [activeCat]);
 
   const handleOutline = async (lesson: AcademyLesson) => {
     setDownloading(`outline-${lesson.id}`);
@@ -280,7 +307,7 @@ export default function AcademyPageClient({
                   <p className="text-sm font-bold tracking-tight text-foreground">
                     {t(titleKey as "valueStripBasics")}
                   </p>
-                  <p className="mt-1 font-mono text-[11px] tracking-tight opacity-75">
+                  <p className="mt-1 text-[11px] tracking-tight opacity-75">
                     {`// `}
                     {t(descKey as "valueStripBasicsDesc")}
                   </p>
@@ -291,28 +318,28 @@ export default function AcademyPageClient({
         </section>
 
         <div className="mx-auto max-w-7xl space-y-16 bg-muted px-4 pb-16 pt-14 text-foreground sm:px-6 sm:pb-20 lg:px-8">
-          <section id="academy-basics" className="scroll-mt-24">
+          <section id="academy-basics" ref={basicsRef} className="scroll-mt-24">
             <div className="mb-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ BASICS ]
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {t("sectionBasics")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
                 {`// `}
                 {t("sectionBasicsDesc")}
               </p>
             </div>
-            {dbLessons.length === 0 ? (
+            {filteredLessons.length === 0 ? (
               <div className="border-2 border-border bg-card py-12 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   [ PREPARING ]
                 </p>
                 <p className="mt-3 text-base font-bold text-foreground">
                   {t("preparingLessons")}
                 </p>
-                <p className="mx-auto mt-2 max-w-md font-mono text-[12px] tracking-tight text-muted-foreground">
+                <p className="mx-auto mt-2 max-w-md text-[12px] tracking-tight text-muted-foreground">
                   {t("preparingLessonsDesc")}
                 </p>
                 <div className="mx-auto mt-8 max-w-lg text-left">
@@ -321,19 +348,19 @@ export default function AcademyPageClient({
               </div>
             ) : (
               <div className="grid gap-0 lg:grid-cols-3">
-                {dbLessons.map((lesson) => (
+                {filteredLessons.map((lesson) => (
                   <article
                     key={lesson.id}
                     className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card"
                   >
                     <header className="border-b-2 border-border p-5">
-                      <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
+                      <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground">
                         [ {t("minutes", { n: lesson.durationMin })} ]
                       </span>
                       <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
                         {isKo ? lesson.titleKo : lesson.titleEn}
                       </h3>
-                      <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                      <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}
                         {isKo ? lesson.descKo : lesson.descEn}
                       </p>
@@ -371,13 +398,13 @@ export default function AcademyPageClient({
 
           <section id="academy-webinars" className="scroll-mt-24">
             <div className="mb-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ WEBINARS ]
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {t("sectionWebinars")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
                 {`// `}
                 {t("sectionWebinarsDesc")}
               </p>
@@ -389,19 +416,19 @@ export default function AcademyPageClient({
                   className="-mt-[2px] -ml-[2px] border-2 border-border bg-card"
                 >
                   <header className="border-b-2 border-border p-5">
-                    <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary-foreground">
+                    <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground">
                       [ {t("badgeLive")} ]
                     </span>
                     <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
                       {isKo ? w.titleKo : w.titleEn}
                     </h3>
-                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {`// `}
                       {isKo ? w.descKo : w.descEn}
                     </p>
                   </header>
                   <div className="space-y-3 p-5 text-sm">
-                    <div className="flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <div className="flex flex-wrap gap-x-4 gap-y-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       <span className="inline-flex items-center gap-1.5">
                         <Calendar className="h-4 w-4 text-primary" />
                         <span className="font-bold text-foreground">
@@ -439,13 +466,13 @@ export default function AcademyPageClient({
 
           <section id="academy-downloads" className="scroll-mt-24">
             <div className="mb-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ DOWNLOADS ]
               </p>
               <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
                 {t("sectionDownloads")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl font-mono text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
                 {`// `}
                 {t("sectionDownloadsDesc")}
               </p>
@@ -458,13 +485,13 @@ export default function AcademyPageClient({
                 >
                   <div className="flex flex-1 flex-col p-5">
                     <FileSpreadsheet className="h-8 w-8 text-primary" />
-                    <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                    <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                       [ ASSET / PDF ]
                     </p>
                     <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                       {isKo ? asset.titleKo : asset.titleEn}
                     </h3>
-                    <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                       {`// `}
                       {isKo ? asset.descKo : asset.descEn}
                     </p>
@@ -488,13 +515,13 @@ export default function AcademyPageClient({
               <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
                 <div className="flex flex-1 flex-col p-5">
                   <Presentation className="h-8 w-8 text-primary" />
-                  <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ PPT ]
                   </p>
                   <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                     {t("pptTitle")}
                   </h3>
-                  <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                     {`// `}
                     {t("pptDesc")}
                   </p>
@@ -512,13 +539,13 @@ export default function AcademyPageClient({
               <article className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card">
                 <div className="flex flex-1 flex-col p-5">
                   <MonitorPlay className="h-8 w-8 text-primary" />
-                  <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                  <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ VIDEO ]
                   </p>
                   <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
                     {t("videoAssetTitle")}
                   </h3>
-                  <p className="mt-2 flex-1 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                     {`// `}
                     {t("videoAssetDesc")}
                   </p>
@@ -547,13 +574,13 @@ export default function AcademyPageClient({
           >
             <div className="border-2 border-border bg-card">
               <header className="border-b-2 border-border p-5">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   [ REGISTER ]
                 </p>
                 <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
                   {t("sectionRegister")}
                 </h3>
-                <p className="mt-2 font-mono text-[12px] tracking-tight text-muted-foreground">
+                <p className="mt-2 text-[12px] tracking-tight text-muted-foreground">
                   {`// `}
                   {t("sectionRegisterDesc")}
                 </p>
@@ -640,13 +667,13 @@ export default function AcademyPageClient({
             id="academy-consult"
             className="scroll-mt-24 border-2 border-primary bg-hero-void px-6 pb-12 pt-12 text-center sm:pb-16"
           >
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
               [ {t("consultSectionTitle")} ]
             </p>
             <h2 className="mt-3 text-xl font-bold tracking-tight text-hero-fg sm:text-2xl">
               {t("ctaTitle")}
             </h2>
-            <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight text-hero-fg/75">
+            <p className="mx-auto mt-3 max-w-xl text-[12px] tracking-tight text-hero-fg/75">
               {`// `}
               {t("consultSectionDesc")}
             </p>
@@ -673,13 +700,13 @@ export default function AcademyPageClient({
               className="border-2 border-border bg-card p-5 pt-12"
               onSubmit={submitPdfDownload}
             >
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ PDF ]
               </p>
               <h3 className="mt-2 text-lg font-bold text-foreground">
                 {isKo ? pdfModalAsset.titleKo : pdfModalAsset.titleEn}
               </h3>
-              <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+              <p className="mt-2 text-[11px] text-muted-foreground">
                 {isKo
                   ? "이메일을 입력하면 PDF 링크를 보내드립니다."
                   : "Enter your email to receive the PDF link."}
@@ -721,7 +748,7 @@ export default function AcademyPageClient({
           ariaLabel={t("videoModalTitle")}
         >
           <div className="border-2 border-border bg-card p-4 pt-12 sm:p-6">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
               [ VIDEO ]
             </p>
             <h3 className="mt-2 pr-10 text-lg font-bold tracking-tight text-foreground">

@@ -73,7 +73,7 @@ export function CompareRadarChart({ items, isKo, className }: Props) {
       )}
     >
       <div className="mb-4">
-        <p className="font-mono text-[9px] font-bold uppercase tracking-[0.22em] text-accent">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           {`[ ${isKo ? "레이더" : "RADAR"} ]`}
         </p>
         <h2 className="mt-1 text-base font-bold tracking-tight text-foreground sm:text-lg">

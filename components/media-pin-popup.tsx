@@ -81,7 +81,7 @@ export function MediaPinPopup({
                     : "+ Add to compare"}
               </Button>
             )}
-            <Link href={mediaItemDetailPath(media.id)}>
+            <Link href={mediaItemDetailPath(media)}>
               <Button
                 size="sm"
                 variant="outline"

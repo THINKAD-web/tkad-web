@@ -20,6 +20,10 @@ async function main() {
 
   console.log("Seeding database...\n");
 
+  const { seedMediaCategories } = await import("@/lib/seed-media-categories");
+  await seedMediaCategories(prisma);
+  console.log("MediaCategory + TargetCategory seeded");
+
   // --- Admin ---
   const admin = await prisma.adminUser.upsert({
     where: { email: "admin@tkad.co.kr" },

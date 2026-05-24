@@ -179,7 +179,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
     <div className="mx-auto max-w-6xl space-y-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA JSON EDIT ]
           </p>
           <h1 className="mt-2 text-xl font-bold tracking-tight text-foreground">

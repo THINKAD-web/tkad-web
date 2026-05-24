@@ -45,7 +45,7 @@ export function PublicNavAside({ className }: Props) {
       <div className="shrink-0 border-t border-border/60 p-4 dark:border-white/10 border-gray-200">
         <Link
           href="/contact"
-          className="tkad-neon-cta-clean inline-flex h-11 w-full items-center justify-center rounded-xl px-4 font-mono text-[11px] font-black uppercase tracking-[0.2em] dark:text-white text-gray-900 transition-colors"
+          className="tkad-neon-cta-clean inline-flex h-11 w-full items-center justify-center rounded-xl px-4 font-display text-[11px] font-black uppercase tracking-[0.2em] dark:text-white text-gray-900 transition-colors"
         >
           {t("nav.contact")}
         </Link>

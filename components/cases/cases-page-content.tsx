@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
@@ -72,10 +73,10 @@ export async function CasesPageContent({ locale, cases }: Props) {
                     key={card.titleKey}
                     className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur"
                   >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                       [ {t(card.titleKey)} ]
                     </p>
-                    <p className="mt-3 font-mono text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
+                    <p className="mt-3 text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
                       {t(card.descKey)}
                     </p>
                   </div>
@@ -90,25 +91,27 @@ export async function CasesPageContent({ locale, cases }: Props) {
             </div>
           ) : (
             <>
-              <p className="mb-4 text-center font-mono text-[12px] tracking-tight dark:text-white text-gray-500 sm:text-sm">
+              <p className="mb-4 text-center text-[12px] tracking-tight dark:text-white text-gray-500 sm:text-sm">
                 {`// `}{t("cases.listIntro")}
               </p>
-              <CasesCatalogSection locale={locale} initialCases={cases}>
-                <CasesCatalogGrids
-                  locale={locale}
-                  recommended={recommended}
-                  gridCases={gridCases}
-                />
-              </CasesCatalogSection>
+              <Suspense fallback={null}>
+                <CasesCatalogSection locale={locale} initialCases={cases}>
+                  <CasesCatalogGrids
+                    locale={locale}
+                    recommended={recommended}
+                    gridCases={gridCases}
+                  />
+                </CasesCatalogSection>
+              </Suspense>
 
               <div className="mt-16 rounded-[24px] border border-[#22d3ee]/25 bg-gradient-to-br from-[#a855f7]/15 via-transparent to-[#22d3ee]/10 px-6 py-10 text-center">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                   [ NEXT STEP ]
                 </p>
                 <h2 className="mt-3 text-xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-2xl">
                   {t("cases.sectionCtaTitle")}
                 </h2>
-                <p className="mx-auto mt-3 max-w-xl font-mono text-[12px] tracking-tight dark:text-white text-gray-500">
+                <p className="mx-auto mt-3 max-w-xl text-[12px] tracking-tight dark:text-white text-gray-500">
                   {`// `}{t("cases.sectionCtaDesc")}
                 </p>
                 <div className="mt-6 inline-flex">

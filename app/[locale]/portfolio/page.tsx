@@ -115,7 +115,7 @@ export default function PortfolioPage() {
     <>
       <section className="bg-hero-void py-24">
         <div className="ui-container">
-          <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             {`// 13 / Portfolio`}
           </p>
           <h1 className="mt-3 text-3xl font-bold tracking-tight text-hero-fg sm:text-5xl lg:text-6xl">
@@ -123,7 +123,7 @@ export default function PortfolioPage() {
               ? "THINKAD가 집행한 OOH 캠페인"
               : "OOH campaigns delivered by THINKAD"}
           </h1>
-          <p className="mt-5 max-w-2xl font-mono text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
+          <p className="mt-5 max-w-2xl text-[12px] tracking-tight text-hero-fg/75 sm:text-sm">
             {isKo
               ? "전광판, 버스, 지하철, 빌딩 래핑까지 다양한 옥외 매체로 진행한 실제 캠페인 사례를 한눈에 확인해 보세요."
               : "Explore real-world OOH campaigns across billboards, buses, subways and building wraps."}
@@ -133,7 +133,7 @@ export default function PortfolioPage() {
 
       <section className="bg-card py-4">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-2 px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+          <div className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             <Filter className="h-3.5 w-3.5" />
             [ {isKo ? "CATEGORY" : "CATEGORY"} ]
           </div>
@@ -146,7 +146,7 @@ export default function PortfolioPage() {
                   type="button"
                   onClick={() => setSelectedCategory(cat.key)}
                   className={cn(
-                    "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "-mt-[2px] -ml-[2px] border-2 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     isActive
                       ? "border-accent bg-accent text-accent-foreground"
                       : "border-border bg-card text-foreground hover:bg-muted",
@@ -162,7 +162,7 @@ export default function PortfolioPage() {
 
       <section className="bg-muted py-10">
         <div className="ui-container">
-          <div className="mb-4 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <div className="mb-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{isKo ? "Total campaigns" : "Total campaigns"}:{" "}
             <span className="font-bold text-accent">
               {filteredItems.length}
@@ -179,30 +179,30 @@ export default function PortfolioPage() {
               >
                 <article className="flex h-full flex-col border-2 border-border bg-card">
                   <div className="relative h-40 overflow-hidden border-b-2 border-border bg-hero-void">
-                    <div className="absolute inset-0 flex items-center justify-center font-mono text-xs font-bold uppercase tracking-[0.22em] text-accent/70">
+                    <div className="absolute inset-0 flex items-center justify-center font-display text-xs font-medium uppercase tracking-[0.22em] text-accent/70">
                       OOH CAMPAIGN
                     </div>
                     <div className="absolute inset-x-3 bottom-3 flex flex-wrap items-center justify-between gap-2">
-                      <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+                      <span className="border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
                         [ {CATEGORY_LABELS[item.category]} ]
                       </span>
-                      <span className="border-2 border-hero-fg bg-transparent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hero-fg">
+                      <span className="border-2 border-hero-fg bg-transparent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-hero-fg">
                         {item.year} · {item.location}
                       </span>
                     </div>
-                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 border-2 border-hero-fg bg-hero-void/80 px-2 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-hero-fg">
+                    <div className="absolute right-3 top-3 inline-flex items-center gap-1 border-2 border-hero-fg bg-hero-void/80 px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg">
                       <Maximize2 className="h-3 w-3" />
                       {isKo ? "VIEW" : "VIEW"}
                     </div>
                   </div>
                   <div className="flex flex-1 flex-col gap-2 p-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                       [ {item.client} ]
                     </p>
                     <h2 className="text-sm font-bold tracking-tight text-foreground sm:text-base">
                       {item.title}
                     </h2>
-                    <p className="line-clamp-3 font-mono text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="line-clamp-3 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
                       {item.description}
                     </p>
                   </div>
@@ -237,17 +237,17 @@ export default function PortfolioPage() {
               <div className="relative h-56 border-b-2 border-border bg-hero-void sm:h-full sm:col-span-3 sm:border-b-0 sm:border-r-2">
                 <div className="flex h-full flex-col justify-between p-5">
                   <div>
-                    <span className="border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+                    <span className="border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
                       [ {CATEGORY_LABELS[activeItem.category]} ]
                     </span>
                     <h2 className="mt-4 text-lg font-bold leading-snug tracking-tight text-hero-fg">
                       {activeItem.title}
                     </h2>
-                    <p className="mt-2 font-mono text-[11px] uppercase tracking-[0.18em] text-accent">
+                    <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
                       {activeItem.client} · {activeItem.year}
                     </p>
                   </div>
-                  <p className="mt-3 font-mono text-[11px] leading-relaxed tracking-tight text-hero-fg/75">
+                  <p className="mt-3 text-[11px] leading-relaxed tracking-tight text-hero-fg/75">
                     {`// `}{activeItem.location}
                   </p>
                 </div>
@@ -255,7 +255,7 @@ export default function PortfolioPage() {
 
               <div className="flex flex-col justify-between bg-card p-5 text-sm text-foreground sm:col-span-2">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                     [ {isKo ? "캠페인 개요" : "Campaign Overview"} ]
                   </p>
                   <p className="mt-2 text-sm leading-relaxed text-foreground">
@@ -265,26 +265,26 @@ export default function PortfolioPage() {
                 <div className="mt-4 border-2 border-accent bg-muted px-3 py-3 text-[11px] text-foreground">
                   {isKo ? (
                     <>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                         [ INTERESTED? ]
                       </p>
                       <p className="mt-2 font-bold">
                         비슷한 캠페인을 진행하고 싶으신가요?
                       </p>
-                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-muted-foreground">
+                      <p className="mt-1 leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}견적 문의나 자세한 성과 데이터가 필요하시면 상단
                         &quot;문의&quot; 또는 &quot;견적&quot; 메뉴를 통해 연락 주세요.
                       </p>
                     </>
                   ) : (
                     <>
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                         [ INTERESTED? ]
                       </p>
                       <p className="mt-2 font-bold">
                         Interested in a similar campaign?
                       </p>
-                      <p className="mt-1 font-mono leading-relaxed tracking-tight text-muted-foreground">
+                      <p className="mt-1 leading-relaxed tracking-tight text-muted-foreground">
                         {`// `}Contact us via the Inquiry or Quote menu for detailed
                         performance data and pricing.
                       </p>

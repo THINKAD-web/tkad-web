@@ -132,24 +132,24 @@
     "beta": "BETA",
     "groups": {
       "discovery": {
-        "label": "발견하기",
-        "labelEn": "Discovery"
+        "label": "매체",
+        "labelEn": "Media"
       },
       "planning": {
-        "label": "기획하기",
-        "labelEn": "Planning"
+        "label": "플래너",
+        "labelEn": "Planner"
       },
       "creative": {
-        "label": "크리에이티브",
-        "labelEn": "Creative"
+        "label": "스튜디오",
+        "labelEn": "Studio"
       },
       "insights": {
-        "label": "인사이트",
-        "labelEn": "Insights"
+        "label": "콘텐츠",
+        "labelEn": "Content"
       },
       "academy": {
-        "label": "아카데미",
-        "labelEn": "Academy"
+        "label": "가이드",
+        "labelEn": "Guide"
       }
     },
     "items": {
@@ -2027,6 +2027,7 @@
     "privacy": "개인정보처리방침",
     "terms": "이용약관",
     "refund": "환불 정책",
+    "guarantee": "성과 보증 정책",
     "industryGuide": "업종별 가이드",
     "sitemap": "사이트맵",
     "sitemapClose": "사이트맵 닫기",
@@ -2196,6 +2197,7 @@
     "mediaOwnerOps": "매체사 운영",
     "mediaReviews": "매체 리뷰",
     "searchStats": "검색 통계",
+    "recommendations": "AI 추천",
     "abTest": "A/B 테스트",
     "apiUsage": "API 사용량"
   },

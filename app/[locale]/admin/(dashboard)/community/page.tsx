@@ -220,13 +220,13 @@ export default function AdminCommunityPage() {
     <div className="space-y-6 text-foreground">
       <Card className="py-4">
         <CardHeader className="gap-2 pb-2">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             [ ADMIN · COMMUNITY MODERATION ]
           </p>
           <CardTitle className="text-2xl font-bold tracking-tight">
             커뮤니티 모더레이션
           </CardTitle>
-          <CardDescription className="font-mono text-xs">
+          <CardDescription className="text-xs">
             신고된 글 / 댓글 검토 · 복구 · 영구 삭제 / 신고 사유 확인
           </CardDescription>
           <div className="pt-1">
@@ -290,11 +290,7 @@ export default function AdminCommunityPage() {
                   key={s}
                   type="button"
                   onClick={() => setStatusFilter(s)}
-                  className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                    statusFilter === s
-                      ? "bg-muted text-foreground shadow-sm"
-                      : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                  }`}
+                  className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${ statusFilter === s ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground" }`}
                 >
                   {STATUS_LABELS[s]}
                 </button>
@@ -311,11 +307,7 @@ export default function AdminCommunityPage() {
                     key={c}
                     type="button"
                     onClick={() => setCategoryFilter(c as CommunityCategory | "all")}
-                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${
-                      categoryFilter === c
-                        ? "bg-muted text-foreground shadow-sm"
-                        : "text-muted-foreground hover:bg-muted/50 hover:text-foreground"
-                    }`}
+                    className={`rounded-md px-2.5 py-1.5 text-xs font-medium transition-colors ${ categoryFilter === c ? "bg-muted text-foreground shadow-sm" : "text-muted-foreground hover:bg-muted/50 hover:text-foreground" }`}
                   >
                     {c === "all" ? "전체" : COMMUNITY_CATEGORY_LABELS[c].ko}
                   </button>
@@ -587,9 +579,7 @@ function PostsTable({
                 </td>
                 <td className="px-4 py-3 pr-3 align-top text-center">
                   <span
-                    className={`text-sm font-semibold tabular-nums ${
-                      r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
-                    }`}
+                    className={`text-sm font-semibold tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
                   >
                     {r.reportCount}
                   </span>
@@ -695,9 +685,7 @@ function CommentsTable({
                 </td>
                 <td className="px-4 py-3 pr-3 align-top text-center">
                   <span
-                    className={`text-sm font-semibold tabular-nums ${
-                      r.reportCount > 0 ? "text-primary" : "text-muted-foreground"
-                    }`}
+                    className={`text-sm font-semibold tabular-nums ${ r.reportCount > 0 ? "text-primary" : "text-muted-foreground" }`}
                   >
                     {r.reportCount}
                   </span>

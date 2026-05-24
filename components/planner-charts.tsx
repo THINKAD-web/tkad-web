@@ -248,7 +248,7 @@ export function PlannerRoiLineChart({
           </text>
         ))}
       </svg>
-      <div className="flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
+      <div className="flex flex-wrap gap-x-4 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground sm:text-[11px]">
         <span className="inline-flex items-center gap-1.5">
           <span className="h-[2px] w-4 border-t-2 border-dashed border-muted-foreground" />
           {legendConservative}
@@ -414,15 +414,15 @@ export function PlannerReachDonutChart({
         </g>
       </svg>
       <div className="space-y-2 text-sm">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ {title} ]
         </p>
-        <div className="flex items-center gap-2 font-mono text-xs">
+        <div className="flex items-center gap-2 text-xs">
           <span className="h-3 w-3 shrink-0 bg-foreground" />
           <span className="text-muted-foreground">{coreLabel}</span>
           <span className="font-bold tabular-nums text-foreground">{corePct}%</span>
         </div>
-        <div className="flex items-center gap-2 font-mono text-xs">
+        <div className="flex items-center gap-2 text-xs">
           <span className="h-3 w-3 shrink-0 bg-[#8B5CF6]" />
           <span className="text-muted-foreground">{extendedLabel}</span>
           <span className="font-bold tabular-nums text-foreground">{extendedPct}%</span>
@@ -472,7 +472,7 @@ export function PlannerBudgetPieChart({
 
   return (
     <div className="w-full space-y-3">
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         [ {title} ]
       </p>
       <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start sm:gap-8">
@@ -492,7 +492,7 @@ export function PlannerBudgetPieChart({
             />
           ))}
         </svg>
-        <ul className="min-w-0 flex-1 space-y-2 font-mono text-xs">
+        <ul className="min-w-0 flex-1 space-y-2 text-xs">
           {slices.map((s) => (
             <li key={s.key} className="flex items-center gap-2">
               <span

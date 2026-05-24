@@ -62,11 +62,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
               key={ind}
               type="button"
               onClick={() => setIndustry(ind)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${
-                industry === ind
-                  ? "border-violet-500 bg-violet-500/15 text-violet-700 dark:text-violet-200"
-                  : "border-border bg-card hover:border-violet-400/40"
-              }`}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${ industry === ind ? "border-violet-500 bg-violet-500/15 text-violet-700 dark:text-violet-200" : "border-border bg-card hover:border-violet-400/40" }`}
             >
               {industryLabel(ind, isKo)}
             </button>
@@ -176,7 +172,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
   return (
     <div className="space-y-6">
       <header className="space-y-2">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ PRO · COMPETITIVE INTEL ]
         </p>
         <h1 className="text-3xl font-black tracking-tight">

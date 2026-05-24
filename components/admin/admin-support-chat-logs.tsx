@@ -59,7 +59,7 @@ export function AdminSupportChatLogs() {
           새로고침
         </button>
       </div>
-      <ul className="mt-4 max-h-[420px] space-y-2 overflow-y-auto font-mono text-xs">
+      <ul className="mt-4 max-h-[420px] space-y-2 overflow-y-auto text-xs">
         {logs.map((l) => (
           <li
             key={l.id}

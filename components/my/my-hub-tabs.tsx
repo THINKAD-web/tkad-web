@@ -35,7 +35,7 @@ export function MyHubTabs({ tabs, active, onChange, counts }: Props) {
             aria-selected={isActive}
             onClick={() => onChange(key)}
             className={cn(
-              "inline-flex shrink-0 items-center gap-2 rounded-[18px] px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.14em] transition-all sm:px-5 sm:text-xs",
+              "inline-flex shrink-0 items-center gap-2 rounded-[18px] px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.14em] transition-all sm:px-5 sm:text-xs",
               isActive
                 ? "bg-primary/20 text-primary shadow-[0_0_0_1px_rgba(34,211,238,0.35),0_8px_32px_rgba(34,211,238,0.12)]"
                 : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",

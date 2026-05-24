@@ -54,7 +54,7 @@ export function HomeMediaHorizontalScroll({
         )}
       >
         <MediaCard
-          href={mediaItemDetailPath(m.id)}
+          href={mediaItemDetailPath(m)}
           imageSrc={getPrimaryMediaImageUrl(m)}
           imagePriority={index < 4}
           imageAlt={name}
@@ -79,7 +79,7 @@ export function HomeMediaHorizontalScroll({
                 />
               ) : null}
               {m.recommendReason ? (
-                <p className="mt-1 line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
+                <p className="mt-1 line-clamp-1 text-[10px] font-semibold tracking-wide text-muted-foreground">
                   {m.recommendReason}
                 </p>
               ) : null}
@@ -87,7 +87,7 @@ export function HomeMediaHorizontalScroll({
           }
           topLeft={
             pickTrustBadgesForThumbnail(m.trustBadges, 1)[0] ? (
-              <span className="font-mono text-[10px] font-bold uppercase tracking-wide">
+              <span className="font-display text-xs font-medium uppercase tracking-wide">
                 {trustBadgeLabel(
                   pickTrustBadgesForThumbnail(m.trustBadges, 1)[0]!,
                   isKo,

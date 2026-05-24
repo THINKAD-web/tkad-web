@@ -85,11 +85,11 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" && media.isVerified ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
           Verified
         </div>
       ) : media.catalogSource === "network" ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-hero-fg">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hero-void px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-hero-fg">
           {tMedia("networkSitesBadge", {
             count: media.networkTotalLocations ?? 0,
           })}
@@ -98,7 +98,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
       {pickTrustBadgesForThumbnail(media.trustBadges).map((b, i) => (
         <div
           key={b.id}
-          className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 font-mono text-[10px] font-bold tracking-wide backdrop-blur-sm"
+          className="absolute left-0 z-10 max-w-[calc(100%-0.5rem)] border-b-2 border-r-2 border-border bg-card/95 px-2 py-1 text-[10px] font-bold tracking-wide backdrop-blur-sm"
           style={{ top: `${i * 1.75}rem` }}
         >
           {b.emoji} {isKo ? b.labelKo : b.labelEn}
@@ -128,7 +128,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         </div>
       ) : null}
       {popularIds?.has(media.id) ? (
-        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-accent-foreground">
+        <div className="absolute bottom-0 right-0 z-10 flex items-center gap-1 border-l-2 border-t-2 border-border bg-accent px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-accent-foreground">
           <Flame className="h-3 w-3" />
           {isKo ? "인기" : "Hot"}
         </div>
@@ -235,7 +235,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   if (props.variant === "link") {
     return (
       <Link
-        href={mediaItemDetailPath(media.id)}
+        href={mediaItemDetailPath(media)}
         aria-label={isKo ? media.name : (media.nameEn || media.name)}
         className={wrapClass}
         onClick={() =>
@@ -248,10 +248,29 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
         <div
           className={cn(
             mediaCatalogGridCardShellClass,
+            denseMobile &&
+              "overflow-hidden rounded-2xl border border-gray-200 shadow-md -mt-0 -ml-0 transition-transform duration-150 active:scale-[0.98] dark:border-white/10 md:rounded-none md:border-2 md:border-border md:shadow-none",
             (props.quickInquiryOverlay ?? false) && "overflow-hidden",
           )}
         >
           {body}
+          {denseMobile && props.variant === "link" ? (
+            <div
+              className="absolute right-2 top-2 z-20 md:hidden"
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+              }}
+            >
+              <MediaFavoriteButton
+                mediaId={media.id}
+                mediaName={media.name}
+                mediaNameEn={media.nameEn}
+                compact
+                className="h-9 w-9 rounded-full border border-white/20 bg-black/40 backdrop-blur-sm"
+              />
+            </div>
+          ) : null}
           {props.quickInquiryOverlay ? (
             <div
               className="absolute inset-x-0 bottom-0 z-30 flex gap-2 border-t-2 border-border dark:bg-black bg-white/75 p-2.5 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100 max-md:hidden"

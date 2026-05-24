@@ -44,7 +44,7 @@ export function MediaScarcitySection({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <p className="inline-flex items-center gap-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-rose-400">
+          <p className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-rose-400">
             <AlertTriangle className="h-3.5 w-3.5" aria-hidden />
             {t("scarcityEyebrow")}
           </p>

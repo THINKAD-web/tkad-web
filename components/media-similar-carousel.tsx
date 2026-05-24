@@ -93,7 +93,7 @@ export default function MediaSimilarCarousel({
     >
       <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[8px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             [ SIMILAR MEDIA ]
           </p>
           <h2
@@ -124,7 +124,7 @@ export default function MediaSimilarCarousel({
                   aria-pressed={sortBy === key}
                   onClick={() => setSortBy(key)}
                   className={cn(
-                    "rounded-[14px] px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors",
+                    "rounded-[14px] px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
                     sortBy === key
                       ? "bg-primary text-primary-foreground shadow-sm"
                       : "text-foreground hover:bg-background/70",
@@ -198,28 +198,28 @@ export default function MediaSimilarCarousel({
               />
               <div className="flex flex-1 flex-col gap-1.5 p-3">
                 {typeLabel ? (
-                  <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                     [ {typeLabel} ]
                   </span>
                 ) : null}
                 <p className="line-clamp-2 min-h-[2.35rem] text-sm font-bold leading-snug tracking-tight text-foreground group-hover:text-accent">
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
-                <p className="mt-1 font-mono text-sm font-bold tabular-nums text-foreground">
+                <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground">
                   {formatCatalogPriceFieldWon(m.price)}
                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
                 {distanceKm != null && Number.isFinite(distanceKm) ? (
-                  <p className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                     {t("similarDistance", {
                       km: distanceKm < 1 ? distanceKm.toFixed(2) : distanceKm.toFixed(1),
                     })}
                   </p>
                 ) : null}
                 {m.recommendReason ? (
-                  <p className="line-clamp-1 font-mono text-[10px] font-semibold tracking-wide text-muted-foreground">
+                  <p className="line-clamp-1 text-[10px] font-semibold tracking-wide text-muted-foreground">
                     {m.recommendReason}
                   </p>
                 ) : null}

@@ -36,7 +36,7 @@ export function NeonFullPageSpinner({
             className="h-12 w-12 animate-spin rounded-full border-[3px] dark:border-white/15 border-gray-200 border-t-[#22d3ee] sm:h-14 sm:w-14"
             aria-hidden
           />
-          <p className="font-mono text-sm font-bold uppercase tracking-[0.2em] text-foreground sm:text-base">
+          <p className="font-display text-sm font-medium uppercase tracking-[0.2em] text-foreground sm:text-base">
             {label}
           </p>
           <p className="max-w-xs text-xs text-muted-foreground sm:text-sm">

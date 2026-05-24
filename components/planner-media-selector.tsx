@@ -96,11 +96,11 @@ function DraggableCatalogRow({
           <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mt-1 line-clamp-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{regionLabel(m.region)} ·{" "}
             {(isKo ? m.location : (m.locationEn || m.location) || m.location).slice(0, 48)}
           </p>
-          <p className="mt-1 font-mono text-xs font-bold tabular-nums text-foreground">
+          <p className="mt-1 font-display text-xs font-bold tabular-nums text-foreground">
             {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
             <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
               /{isKo ? "월" : "mo"}
@@ -169,7 +169,7 @@ function SortableBasketRow({
           <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
             {isKo ? m.name : (m.nameEn || m.name) || m.name}
           </p>
-          <p className="mt-1 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {`// `}{regionLabel(m.region)}
           </p>
         </div>
@@ -435,7 +435,7 @@ export default function PlannerMediaSelector({
                 </SortableContext>
               )}
             </div>
-            <p className="mt-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{t("campaignReorderHint")}
             </p>
           </div>

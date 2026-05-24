@@ -126,7 +126,7 @@ export function HomeMediaCarousel({
     const compact = density === "compact";
     return (
       <Link
-        href={mediaItemDetailPath(media.id)}
+        href={mediaItemDetailPath(media)}
         className={cn(
           "group relative flex h-full min-w-0 flex-col overflow-hidden transition-transform duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/25 focus-visible:ring-offset-2 focus-visible:ring-offset-black hover:-translate-y-1",
           "tkad-glass-surface",
@@ -149,7 +149,7 @@ export function HomeMediaCarousel({
               decoding="async"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+            <div className="flex h-full w-full items-center justify-center font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
               [ no image ]
             </div>
           )}
@@ -157,7 +157,7 @@ export function HomeMediaCarousel({
           {topRight ? (
             <div
               className={cn(
-                "absolute right-3 top-3 rounded-2xl border px-2.5 py-1 font-mono text-[10px] font-black uppercase tracking-[0.2em] dark:text-white text-gray-900 backdrop-blur",
+                "absolute right-3 top-3 rounded-2xl border px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.2em] dark:text-white text-gray-900 backdrop-blur",
                 topRightClassName,
               )}
             >
@@ -166,7 +166,7 @@ export function HomeMediaCarousel({
           ) : null}
 
           {index !== undefined ? (
-            <div className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 font-mono text-[12px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
+            <div className="absolute left-3 top-3 inline-flex h-9 w-9 items-center justify-center rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 text-[12px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
               {index}
             </div>
           ) : null}
@@ -184,7 +184,7 @@ export function HomeMediaCarousel({
                 >
                   <p
                     className={cn(
-                      "font-mono font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600",
+                      "font-display font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600",
                       compact ? "text-[9px]" : "text-[10px]",
                     )}
                   >
@@ -202,7 +202,7 @@ export function HomeMediaCarousel({
                 >
                   <p
                     className={cn(
-                      "font-mono font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600",
+                      "font-display font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600",
                       compact ? "text-[9px]" : "text-[10px]",
                     )}
                   >
@@ -226,7 +226,7 @@ export function HomeMediaCarousel({
                     >
                       <span
                         className={cn(
-                          "font-mono font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
+                          "font-display font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
                           compact ? "text-[9px]" : "text-[10px]",
                         )}
                       >
@@ -244,7 +244,7 @@ export function HomeMediaCarousel({
                     >
                       <span
                         className={cn(
-                          "font-mono font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
+                          "font-display font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
                           compact ? "text-[9px]" : "text-[10px]",
                         )}
                       >
@@ -261,7 +261,7 @@ export function HomeMediaCarousel({
                   >
                     <span
                       className={cn(
-                        "font-mono font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
+                        "font-display font-black uppercase tracking-[0.16em] dark:text-white text-gray-500",
                         compact ? "text-[9px]" : "text-[10px]",
                       )}
                     >
@@ -273,7 +273,7 @@ export function HomeMediaCarousel({
                 <div className={cn("col-span-2 pt-1", compact ? "pt-1" : "pt-1.5")}>
                   <div
                     className={cn(
-                      "tkad-neon-cta inline-flex w-full items-center justify-center gap-2 text-center font-mono font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5",
+                      "tkad-neon-cta inline-flex w-full items-center justify-center gap-2 text-center font-display font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-transform hover:-translate-y-0.5",
                       compact ? "rounded-lg px-3 py-2 text-[10px]" : "rounded-xl px-3 py-3 text-[11px]",
                     )}
                   >
@@ -290,7 +290,7 @@ export function HomeMediaCarousel({
         </div>
 
         <div className={cn("relative flex min-w-0 flex-1 flex-col gap-2", compact ? "p-5" : "p-6")}>
-          <div className="flex items-center justify-between font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-foreground/75 dark:text-white text-gray-600">
+          <div className="flex items-center justify-between font-display text-xs font-medium uppercase tracking-[0.2em] text-foreground/75 dark:text-white text-gray-600">
             <span className="text-foreground/90 dark:text-white text-gray-800">{typeLabel}</span>
             {location ? (
               <span className="truncate text-muted-foreground dark:text-white">{location}</span>
@@ -301,7 +301,7 @@ export function HomeMediaCarousel({
           <h3 className={cn("font-black leading-tight tracking-tight dark:text-white text-gray-900", compact ? "text-base sm:text-lg" : "text-lg sm:text-xl")}>
             {name}
           </h3>
-          <p className={cn("mt-1 font-mono font-black tabular-nums dark:text-white text-gray-900", compact ? "text-[22px]" : "text-[28px]")}>
+          <p className={cn("mt-1 font-display font-black tabular-nums dark:text-white text-gray-900", compact ? "text-[22px]" : "text-[28px]")}>
             {priceText}
           </p>
           <p className="mt-auto text-xs font-semibold dark:text-white text-gray-500">{th("carouselFooter")}</p>

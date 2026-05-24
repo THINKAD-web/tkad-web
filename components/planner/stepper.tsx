@@ -29,7 +29,7 @@ export function PlannerStepper({
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {stepOfLabel} ]
       </p>
       <ol className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
@@ -47,7 +47,7 @@ export function PlannerStepper({
                   aria-label={label ? `${s}. ${label}` : `Step ${s}`}
                   onClick={() => onStepClick?.(s)}
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                    "flex h-10 w-10 items-center justify-center border-2  text-sm font-bold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
                     isCurrent
                       ? "border-primary bg-primary text-primary-foreground cursor-default"
                       : "border-border bg-card text-foreground hover:bg-foreground hover:text-background cursor-pointer",
@@ -60,7 +60,7 @@ export function PlannerStepper({
                   aria-current={isCurrent ? "step" : undefined}
                   aria-label={label ? `${s}. ${label}` : `Step ${s}`}
                   className={cn(
-                    "flex h-10 w-10 items-center justify-center border-2 font-mono text-sm font-bold",
+                    "flex h-10 w-10 items-center justify-center border-2  text-sm font-bold",
                     isCurrent
                       ? "border-primary bg-primary text-primary-foreground"
                       : isComplete

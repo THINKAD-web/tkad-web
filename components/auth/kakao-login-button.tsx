@@ -32,7 +32,7 @@ export function KakaoLoginButton({ className }: Props) {
       disabled={loading}
       className={
         className ??
-        "flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-[#FEE500]/40 bg-[#FEE500] px-4 font-mono text-sm font-bold text-[#191600] shadow-[0_12px_40px_rgba(254,229,0,0.22)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-70"
+        "flex h-12 w-full items-center justify-center gap-2 rounded-[18px] border border-[#FEE500]/40 bg-[#FEE500] px-4 text-sm font-bold text-[#191600] shadow-[0_12px_40px_rgba(254,229,0,0.22)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-70"
       }
     >
       <span

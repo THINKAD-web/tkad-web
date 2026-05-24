@@ -41,7 +41,7 @@ export function AdminFunnelDashboard({
           >
             <p className="text-xs font-medium text-muted-foreground">{s.label}</p>
             <p className="mt-1 text-2xl font-bold tabular-nums">{s.count.toLocaleString("ko-KR")}</p>
-            <p className="mt-0.5 font-mono text-xs text-muted-foreground">{s.rate}</p>
+            <p className="mt-0.5 text-xs text-muted-foreground">{s.rate}</p>
           </div>
         ))}
       </div>
@@ -58,7 +58,7 @@ export function AdminFunnelDashboard({
                   key={row.source}
                   className="flex justify-between text-sm"
                 >
-                  <span className="font-mono">{row.source}</span>
+                  <span>{row.source}</span>
                   <span className="tabular-nums font-semibold">{row.count}</span>
                 </li>
               ))
@@ -71,7 +71,7 @@ export function AdminFunnelDashboard({
           <ul className="mt-3 max-h-64 space-y-2 overflow-y-auto">
             {stats.stepCounts.map((row) => (
               <li key={row.step} className="flex justify-between text-sm">
-                <span className="font-mono text-xs">{row.step}</span>
+                <span className="text-xs">{row.step}</span>
                 <span className="tabular-nums font-semibold">{row.count}</span>
               </li>
             ))}
@@ -94,7 +94,7 @@ export function AdminFunnelDashboard({
               <tbody>
                 {stats.daily.map((d) => (
                   <tr key={d.date} className="border-b border-border/50">
-                    <td className="py-2 font-mono text-xs">{d.date}</td>
+                    <td className="py-2 text-xs">{d.date}</td>
                     <td className="py-2 tabular-nums">{d.journeys}</td>
                     <td className="py-2 tabular-nums">{d.quotes}</td>
                   </tr>

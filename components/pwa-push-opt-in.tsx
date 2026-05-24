@@ -22,8 +22,8 @@ export function PwaPushOptIn() {
   if (!visible) return null;
 
   return (
-    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-[60] mx-auto max-w-md md:left-auto md:right-4">
-      <div className="rounded-2xl border border-violet-400/35 dark:bg-black bg-white dark:bg-white/8 bg-gray-1005 p-4 shadow-xl backdrop-blur">
+    <div className="fixed bottom-[calc(5.5rem+env(safe-area-inset-bottom))] left-3 right-3 z-[55] mx-auto max-w-md md:bottom-24 md:left-auto md:right-4">
+      <div className="rounded-2xl border border-violet-400/35 bg-white p-4 shadow-xl backdrop-blur dark:border-white/12 dark:bg-gray-900">
         <div className="flex gap-3">
           <Bell className="h-5 w-5 shrink-0 text-violet-300" />
           <div className="min-w-0 flex-1">

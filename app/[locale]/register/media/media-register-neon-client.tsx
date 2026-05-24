@@ -59,7 +59,7 @@ export function MediaRegisterNeonClient() {
         {steps.map((label, i) => (
           <span
             key={label}
-            className="rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.14em] dark:text-white text-gray-600"
+            className="rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-600"
           >
             {String(i + 1).padStart(2, "0")} {label}
           </span>
@@ -67,7 +67,7 @@ export function MediaRegisterNeonClient() {
       </div>
 
       <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 shadow-[0_24px_80px_rgba(0,0,0,0.45)] backdrop-blur sm:p-8">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ {isKo ? "SELF REGISTRATION" : "SELF REGISTRATION"} ]
         </p>
         <p className="mt-2 text-sm leading-relaxed dark:text-white text-gray-700">

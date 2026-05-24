@@ -2,6 +2,7 @@ import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   dedupeImageUrls,
+  getAllMediaIds,
   getMediaById,
   mediaData,
   type MediaItem,
@@ -151,6 +152,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
 
   return {
     id: m.id,
+    slug: m.slug?.trim() || undefined,
     name: m.name,
     nameEn: resolveNameEn(m.name, m.nameEn),
     location: m.location,
@@ -164,6 +166,8 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       | "maintenance"
       | undefined,
     subCategory: m.subCategory?.trim() || undefined,
+    mediaCategory: m.mediaCategory?.length ? [...m.mediaCategory] : undefined,
+    targetCategory: m.targetCategory?.length ? [...m.targetCategory] : undefined,
     tags: m.tags?.length ? [...m.tags] : undefined,
     city: m.city?.trim() || undefined,
     district: m.district?.trim() || undefined,
@@ -607,24 +611,27 @@ export async function fetchPlannerMediaCatalog(): Promise<{
   }
 }
 
-/** Detail: static catalog first, keyword-filter JSON, then DB by cuid (active only). */
+/** Detail: static catalog, keyword-filter JSON, then DB by slug or cuid. */
 export async function resolveMediaForDetail(
-  id: string,
+  slugOrId: string,
 ): Promise<MediaItem | null> {
-  const fromStatic = getMediaById(id);
+  const fromStatic = getMediaById(slugOrId);
   if (fromStatic) {
     return {
       ...fromStatic,
       pricePeriod: normalizePricePeriod(fromStatic.pricePeriod),
     };
   }
-  const fromKeywordFilter = keywordFilterItemToMediaItem(id);
+  const fromKeywordFilter = keywordFilterItemToMediaItem(slugOrId);
   if (fromKeywordFilter) return fromKeywordFilter;
   if (!isDatabaseConfigured()) return null;
   try {
     const db = getPrisma();
     const row = await db.media.findFirst({
-      where: { id, isActive: true },
+      where: {
+        isActive: true,
+        OR: [{ id: slugOrId }, { slug: slugOrId }],
+      },
       include: {
         advertiserExecutions: {
           select: { advertiserName: true },
@@ -637,5 +644,65 @@ export async function resolveMediaForDetail(
     return prismaMediaToMediaItem(rowWithCoverage);
   } catch {
     return null;
+  }
+}
+
+/** All active media slugs for static generation (falls back to id). */
+export async function getAllMediaSlugsForStaticParams(): Promise<string[]> {
+  if (!isDatabaseConfigured()) {
+    return getAllMediaIds().map(String);
+  }
+  try {
+    const db = getPrisma();
+    const rows = await db.media.findMany({
+      where: { isActive: true },
+      select: { id: true, slug: true },
+    });
+    return rows.map((r) => r.slug?.trim() || r.id);
+  } catch {
+    return getAllMediaIds().map(String);
+  }
+}
+
+/**
+ * Slugs to pre-render at build time. On Vercel, cap count to avoid build timeout;
+ * remaining pages render on first request (ISR via revalidate).
+ */
+export async function getMediaSlugsForStaticBuild(
+  limit?: number,
+): Promise<string[]> {
+  if (!isDatabaseConfigured()) {
+    const ids = getAllMediaIds().map(String);
+    return limit ? ids.slice(0, limit) : ids;
+  }
+  try {
+    const db = getPrisma();
+    const take = limit && limit > 0 ? limit : undefined;
+    const popular = await db.media.findMany({
+      where: { isActive: true, isPopular: true },
+      select: { id: true, slug: true },
+      orderBy: { updatedAt: "desc" },
+      ...(take ? { take } : {}),
+    });
+    const popularSlugs = popular.map((r) => r.slug?.trim() || r.id);
+    if (!take || popularSlugs.length >= take) {
+      return take ? popularSlugs.slice(0, take) : popularSlugs;
+    }
+    const rest = await db.media.findMany({
+      where: {
+        isActive: true,
+        id: { notIn: popular.map((r) => r.id) },
+      },
+      select: { id: true, slug: true },
+      orderBy: { updatedAt: "desc" },
+      take: take - popularSlugs.length,
+    });
+    return [
+      ...popularSlugs,
+      ...rest.map((r) => r.slug?.trim() || r.id),
+    ];
+  } catch {
+    const all = getAllMediaIds().map(String);
+    return limit ? all.slice(0, limit) : all;
   }
 }

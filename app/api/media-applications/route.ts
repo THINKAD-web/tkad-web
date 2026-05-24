@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import { rateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
+import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
+import { postInternalAlert } from "@/lib/internal-webhook";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 import {
   getMediaApplicationAdminEmail,
@@ -13,8 +15,6 @@ import { notifySlackMediaApplication } from "@/lib/media-application-slack";
 import { recordOutreachRegistration } from "@/lib/media-owner-outreach-register";
 
 export const dynamic = "force-dynamic";
-
-const limiter = rateLimit({ limit: 5, windowMs: 60_000 });
 
 function json(body: unknown, init?: ResponseInit) {
   return NextResponse.json(body, {
@@ -29,8 +29,9 @@ export async function POST(request: NextRequest) {
     request.headers.get("x-real-ip") ??
     "unknown";
 
-  if (!limiter.check(ip)) {
-    return json({ error: "Too many requests" }, { status: 429 });
+  const rl = await enforceRateLimit("mediaRegister", ip);
+  if (!rl.ok) {
+    return json({ error: rl.message }, { status: rl.status });
   }
 
   if (!isDatabaseConfigured()) {
@@ -51,6 +52,27 @@ export async function POST(request: NextRequest) {
     (raw as { website?: string }).website
   ) {
     return json({ success: true, id: "ok" }, { status: 201 });
+  }
+
+  const turnstileToken =
+    typeof raw === "object" && raw && !Array.isArray(raw)
+      ? ((raw as Record<string, unknown>).turnstileToken as string | undefined) ??
+        ((raw as Record<string, unknown>).captchaToken as string | undefined)
+      : undefined;
+
+  const turnstile = await verifyTurnstileForRequest({
+    token: turnstileToken,
+    remoteip: ip,
+    host: request.headers.get("host"),
+  });
+  if (!turnstile.ok) {
+    console.warn("[media-applications] turnstile_failed", turnstile.reason, { ip });
+    void postInternalAlert({
+      type: "security_turnstile",
+      title: "Media register Turnstile 실패",
+      body: `reason=${turnstile.reason} ip=${ip}`,
+    }).catch(() => {});
+    return json({ error: "보안 확인이 필요합니다." }, { status: 401 });
   }
 
   const parsed = parseMediaApplicationSubmit(raw);

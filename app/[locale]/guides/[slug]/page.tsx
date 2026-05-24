@@ -141,12 +141,12 @@ export default async function GuideDetailPage({ params }: Props) {
         {/* Hero */}
         <header className="border-b-2 border-border bg-hero-void py-16 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               <BookText className="mr-2 inline h-3.5 w-3.5" aria-hidden />
               [ {isKo ? "가이드" : "GUIDE"} ]
             </p>
             {guide.draft ? (
-              <p className="mt-4 inline-flex items-center border-2 border-accent bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+              <p className="mt-4 inline-flex items-center border-2 border-accent bg-accent px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
                 {`// `}
                 {isKo
                   ? "초안 — 편집자 검수 진행 중"
@@ -159,7 +159,7 @@ export default async function GuideDetailPage({ params }: Props) {
             <p className="mt-6 max-w-3xl text-base leading-relaxed text-hero-fg/80 sm:text-lg">
               {isKo ? guide.descriptionKo : guide.descriptionEn}
             </p>
-            <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/55">
+            <p className="mt-6 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-hero-fg/55">
               <Calendar className="h-3 w-3" aria-hidden />
               {`// `}
               {new Date(guide.publishedAt).toLocaleDateString(
@@ -204,7 +204,7 @@ export default async function GuideDetailPage({ params }: Props) {
           {/* FAQ */}
           {guide.faqs && guide.faqs.length > 0 ? (
             <section className="mt-16 border-t-2 border-border pt-10">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 [ FAQ ]
               </p>
               <h2 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
@@ -230,7 +230,7 @@ export default async function GuideDetailPage({ params }: Props) {
 
           {/* 관련 키워드 랜딩으로 내부 링크 */}
           <section className="mt-16 border-t-2 border-border pt-10">
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ {isKo ? "관련 매체 둘러보기" : "BROWSE RELATED MEDIA"} ]
             </p>
             <ul className="mt-4 flex flex-wrap gap-2">
@@ -238,7 +238,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li>
                   <Link
                     href={`/media/region/${guide.relatedRegion}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {regionLabel(guide.relatedRegion, locale)}
                     <ArrowRight className="h-3 w-3" />
@@ -249,7 +249,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li key={t}>
                   <Link
                     href={`/media/type/${t}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {typeLabel(t, locale)}
                     <ArrowRight className="h-3 w-3" />
@@ -260,7 +260,7 @@ export default async function GuideDetailPage({ params }: Props) {
                 <li key={a}>
                   <Link
                     href={`/media/area/${encodeURIComponent(a)}`}
-                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-mono text-[11px] font-bold tracking-[0.04em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+                    className="inline-flex items-center gap-1.5 border-2 border-border bg-card px-4 py-2 font-display text-[11px] font-bold tracking-[0.04em] text-foreground transition-colors hover:bg-foreground hover:text-background"
                   >
                     {a}
                     <ArrowRight className="h-3 w-3" />

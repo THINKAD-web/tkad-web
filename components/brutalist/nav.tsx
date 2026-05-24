@@ -108,6 +108,15 @@ export function BrutalNav({
     : null;
   const navEntries: BrutalNavEntry[] = navGroups ? [] : (links as BrutalNavEntry[]);
 
+  useEffect(() => {
+    if (!mobileOpen) return;
+    const prev = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prev;
+    };
+  }, [mobileOpen]);
+
   const Logo = (
     <Link
       href="/"
@@ -209,7 +218,7 @@ export function BrutalNav({
             <Link
               href={cta.href}
               className={cn(
-                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
+                "tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-display text-[11px] font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 lg:px-4 lg:text-[12px] lg:tracking-[0.2em]",
                 sidebarLayout && "lg:hidden",
               )}
             >
@@ -227,7 +236,7 @@ export function BrutalNav({
             {cta ? (
               <Link
                 href={cta.href}
-                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-mono text-[10px] font-black uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
+                className="tkad-neon-cta-clean inline-flex h-10 shrink-0 items-center justify-center rounded-xl px-3 font-display text-[10px] font-black uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 sm:px-3.5 sm:text-[11px] sm:tracking-[0.18em]"
               >
                 {cta.label}
               </Link>
@@ -296,93 +305,108 @@ export function BrutalNav({
         </div>
       </div>
 
-      {/* 모바일 패널 — 라이트에선 솔리드 배경(네온 레이어는 다크만). 그렇지 않으면 검정 글자가 어두운 그라데이션에 묻힘 */}
-      {mobileOpen && (
-        <div className="relative overflow-hidden border-t border-zinc-200/90 bg-zinc-50 text-zinc-950 md:hidden dark:border-white/10 border-gray-200 dark:bg-[#05050a] dark:text-white text-gray-900">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 tkad-neon-depth hidden dark:block"
+      {/* 모바일 사이드 패널 — 오버레이 z-40 · 패널 z-50 */}
+      {mobileOpen ? (
+        <>
+          <button
+            type="button"
+            className="fixed inset-0 z-40 bg-black/50 md:hidden"
+            aria-label="Close menu"
+            onClick={() => {
+              setMobileOpen(false);
+              setMobileExpandedGroupId(null);
+            }}
           />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-15 tkad-neon-grid hidden dark:block"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay hidden dark:block"
-          />
-          {navGroups ? (
-            <PublicNavSidebar
-              groups={navGroups}
-              initialOpenId={mobileExpandedGroupId}
-              onNavigate={() => {
-                setMobileOpen(false);
-                setMobileExpandedGroupId(null);
-              }}
-              className="relative max-h-[min(70dvh,520px)] overflow-y-auto"
-            />
-          ) : (
-            <ul className="relative divide-y divide-zinc-200 dark:divide-white/10">
-              {navEntries.map((entry, i) =>
-                isGroup(entry) ? (
-                  <li key={`mg-${i}`}>
-                    <p className="bg-zinc-200/90 px-5 py-3 text-xs font-semibold uppercase tracking-[0.18em] text-zinc-600 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600">
-                      {entry.label}
-                    </p>
-                    <ul className="divide-y divide-zinc-200 dark:divide-white/10">
-                      {entry.items.map((leaf) => (
-                        <li key={navLeafKey(leaf)}>
-                          <Link
-                            href={leaf.href}
-                            onClick={() => setMobileOpen(false)}
-                            className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6"
-                          >
-                            {leaf.label}
-                            {leaf.badge ? <NavBetaBadge /> : null}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </li>
-                ) : (
-                  <li key={navLeafKey(entry)}>
-                    <Link
-                      href={entry.href}
-                      onClick={() => setMobileOpen(false)}
-                      className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-semibold tracking-tight text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6"
-                    >
-                      {entry.label}
-                    </Link>
-                  </li>
-                ),
-              )}
-            </ul>
-          )}
-          {mobileMenuExtras ? (
-            <div className="relative border-t border-zinc-200 dark:border-white/10 border-gray-200">
-              {typeof mobileMenuExtras === "function"
-                ? mobileMenuExtras(() => setMobileOpen(false))
-                : mobileMenuExtras}
-            </div>
-          ) : null}
-          {cta ? (
-            <div className="relative border-t border-zinc-200 dark:border-white/10 border-gray-200 p-4">
-              <Link
-                href={cta.href}
-                onClick={() => setMobileOpen(false)}
-                className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-mono text-[11px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors"
+          <div className="fixed inset-y-0 right-0 z-50 flex w-[min(100vw-2.5rem,20rem)] max-w-full flex-col overflow-hidden border-l border-gray-200 bg-white shadow-2xl md:hidden dark:border-white/10 dark:bg-gray-950">
+            <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-4 py-3 dark:border-white/10">
+              {Logo}
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileOpen(false);
+                  setMobileExpandedGroupId(null);
+                }}
+                className="inline-flex h-10 w-10 items-center justify-center rounded-xl border border-gray-200 bg-gray-50 text-gray-900 dark:border-white/12 dark:bg-white/5 dark:text-white"
+                aria-label="Close menu"
               >
-                {cta.label}
-              </Link>
+                <X className="h-4 w-4" />
+              </button>
             </div>
-          ) : null}
-          {mobileMenuFooter ? (
-            <div className="relative flex items-center justify-center gap-2 border-t border-zinc-200 p-4 dark:border-white/10 border-gray-200">
-              {mobileMenuFooter}
+            <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
+              {navGroups ? (
+                <PublicNavSidebar
+                  groups={navGroups}
+                  initialOpenId={mobileExpandedGroupId}
+                  onNavigate={() => {
+                    setMobileOpen(false);
+                    setMobileExpandedGroupId(null);
+                  }}
+                  className="py-1"
+                />
+              ) : (
+                <ul className="divide-y divide-gray-200 dark:divide-white/10">
+                  {navEntries.map((entry, i) =>
+                    isGroup(entry) ? (
+                      <li key={`mg-${i}`}>
+                        <p className="bg-gray-100 px-5 py-3 text-[10px] font-semibold uppercase tracking-wider text-gray-400 dark:bg-white/5 dark:text-white/30">
+                          {entry.label}
+                        </p>
+                        <ul className="divide-y divide-gray-200 dark:divide-white/10">
+                          {entry.items.map((leaf) => (
+                            <li key={navLeafKey(leaf)}>
+                              <Link
+                                href={leaf.href}
+                                onClick={() => setMobileOpen(false)}
+                                className="flex min-h-[3.25rem] items-center gap-2 px-5 py-3 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 hover:text-gray-900 dark:text-white/60 dark:hover:bg-white/6 dark:hover:text-white"
+                              >
+                                {leaf.label}
+                                {leaf.badge ? <NavBetaBadge /> : null}
+                              </Link>
+                            </li>
+                          ))}
+                        </ul>
+                      </li>
+                    ) : (
+                      <li key={navLeafKey(entry)}>
+                        <Link
+                          href={entry.href}
+                          onClick={() => setMobileOpen(false)}
+                          className="flex min-h-[3.25rem] items-center px-5 py-3 text-sm font-medium text-gray-900 transition-colors hover:bg-gray-50 dark:text-white dark:hover:bg-white/6"
+                        >
+                          {entry.label}
+                        </Link>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              )}
+              {mobileMenuExtras ? (
+                <div className="border-t border-gray-200 dark:border-white/10">
+                  {typeof mobileMenuExtras === "function"
+                    ? mobileMenuExtras(() => setMobileOpen(false))
+                    : mobileMenuExtras}
+                </div>
+              ) : null}
             </div>
-          ) : null}
-        </div>
-      )}
+            {cta ? (
+              <div className="shrink-0 border-t border-gray-200 p-4 dark:border-white/10">
+                <Link
+                  href={cta.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="tkad-neon-cta-clean inline-flex h-12 w-full items-center justify-center rounded-2xl px-6 font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+                >
+                  {cta.label}
+                </Link>
+              </div>
+            ) : null}
+            {mobileMenuFooter ? (
+              <div className="flex shrink-0 items-center justify-center gap-2 border-t border-gray-200 p-4 dark:border-white/10">
+                {mobileMenuFooter}
+              </div>
+            ) : null}
+          </div>
+        </>
+      ) : null}
     </nav>
   );
 }
@@ -485,7 +509,7 @@ function BrutalNavDropdown({
               </p>
               <p
                 className={cn(
-                  "mt-0.5 font-mono text-[10px] font-semibold uppercase tracking-[0.16em]",
+                  "mt-0.5 font-display text-[10px] font-semibold uppercase tracking-[0.16em]",
                   lightPanel ? "text-zinc-500" : "dark:text-white",
                 )}
               >

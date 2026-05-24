@@ -63,7 +63,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_55%)]"
         />
         <div className="relative flex flex-col gap-4">
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
             {isKo ? "// 멤버 커뮤니티" : "// members community"}
           </p>
           <p className="text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
@@ -74,7 +74,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           <ul className="space-y-2 text-sm dark:text-white">
             {bullets.map((item) => (
               <li key={item} className="flex gap-2">
-                <span className="tkad-home-accent-text font-mono font-bold" aria-hidden>
+                <span className="tkad-home-accent-text font-bold" aria-hidden>
                   →
                 </span>
                 <span>{item}</span>
@@ -83,7 +83,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           </ul>
           <Link
             href="/register"
-            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5"
+            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
@@ -131,12 +131,12 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                 <article className="relative flex h-full flex-col gap-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <span
-                      className="inline-flex max-w-full items-center rounded-full border dark:border-white/18 border-gray-300 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.9))] px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+                      className="inline-flex max-w-full items-center rounded-full border dark:border-white/18 border-gray-300 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.9))] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
                       style={{ wordBreak: "break-word" }}
                     >
                       {isKo ? labels.shortKo : labels.en}
                     </span>
-                    <span className="shrink-0 font-mono text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500">
+                    <span className="shrink-0 font-display text-[10px] font-semibold uppercase tracking-[0.16em] dark:text-white text-gray-500">
                       {fmtRelative(post.createdAt, locale)}
                     </span>
                   </div>
@@ -145,14 +145,14 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                     {post.title}
                   </h3>
 
-                  <div className="mt-auto flex flex-wrap items-center gap-2 border-t dark:border-white/10 border-gray-200 pt-3 font-mono text-[11px] uppercase tracking-[0.14em] dark:text-white text-gray-500">
+                  <div className="mt-auto flex flex-wrap items-center gap-2 border-t dark:border-white/10 border-gray-200 pt-3 font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white text-gray-500">
                     <span className="font-bold dark:text-white text-gray-800">{post.authorName}</span>
                     {!post.isAnonymous && post.author ? (
                       <RoleBadge role={post.author.role} locale={locale} />
                     ) : null}
                   </div>
 
-                  <div className="flex flex-wrap items-center justify-between gap-2 font-mono text-[11px] font-semibold uppercase tracking-[0.14em] dark:text-white text-gray-500">
+                  <div className="flex flex-wrap items-center justify-between gap-2 font-display text-[11px] font-semibold uppercase tracking-[0.14em] dark:text-white text-gray-500">
                     <span className="inline-flex items-center gap-3">
                       <span className="inline-flex items-center gap-1 dark:text-white text-gray-700">
                         <Heart
@@ -179,7 +179,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
       <div className="mt-8 flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-8 sm:mt-10 sm:flex-row sm:flex-wrap sm:items-center sm:justify-between sm:gap-4">
         <Link
           href="/community"
-          className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-white/40 hover:dark:text-white text-gray-900"
+          className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-white/40 hover:dark:text-white text-gray-900"
         >
           {t("communityViewAll")}
           <span aria-hidden className="transition-transform group-hover:translate-x-1">
@@ -189,7 +189,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
         {posts.length > 0 ? (
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-[#a855f7]/70 hover:dark:text-white text-gray-900"
+            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-[#a855f7]/70 hover:dark:text-white text-gray-900"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-1">

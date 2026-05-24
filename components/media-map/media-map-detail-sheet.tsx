@@ -63,7 +63,7 @@ function SpecBlock({
     >
       <dt
         className={cn(
-          "font-mono text-[9px] font-bold uppercase tracking-[0.12em]",
+          "font-display text-xs font-medium uppercase tracking-[0.12em]",
           dark ? "dark:text-white" : "text-muted-foreground",
         )}
       >
@@ -203,7 +203,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
   if (variant === "dock") {
     return (
       <div className="px-3 py-3 sm:px-4">
-        <p className="mb-2 font-mono text-[9px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
+        <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-400/70">
           {isKo ? "선택한 매체" : "Selected"}
         </p>
         <div className="flex gap-3">
@@ -220,7 +220,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-violet-300/90">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-violet-300/90">
                   {item.type}
                 </p>
                 <h2 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug dark:text-white text-gray-900 sm:text-base">
@@ -267,7 +267,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
   if (variant === "inline") {
     return (
       <div className="px-3 py-4 sm:px-4">
-        <p className="mb-2.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="mb-2.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {isKo ? "선택한 매체" : "Selected"}
         </p>
         <div className="flex gap-3">
@@ -284,7 +284,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-mono text-[9px] font-bold uppercase tracking-[0.16em] text-primary">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-primary">
                   {item.type}
                 </p>
                 <h2 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-foreground">
@@ -355,7 +355,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
       </div>
       <div className="flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 px-4 py-3">
         <div className="min-w-0">
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-cyan-400/70">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-400/70">
             {item.type}
             {item.subCategory ? ` · ${item.subCategory}` : ""}
           </p>
@@ -395,7 +395,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
         </dl>
 
         <div className="mt-4 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-3">
-          <p className="font-mono text-[9px] font-bold uppercase tracking-[0.14em] dark:text-white">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white">
             {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
           </p>
           <p className="mt-1.5 text-sm dark:text-white text-gray-700">{availability.label}</p>

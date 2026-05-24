@@ -48,6 +48,7 @@ import {
 import { syncRecentlyViewedWithServer } from "@/lib/recently-viewed-sync";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
+import { MobileMyHubView } from "@/components/mobile/mobile-my-hub-view";
 
 type Me = {
   id: string;
@@ -61,6 +62,7 @@ type Me = {
   trialDaysLeft?: number;
   trialProgressPct?: number;
   pointBalance?: number;
+  createdAt?: string | null;
 };
 
 type CampaignItem = {
@@ -163,6 +165,39 @@ export function MyHubPageClient() {
   const [recentItems, setRecentItems] = useState<MyHubMediaItem[]>([]);
   const [recentLoading, setRecentLoading] = useState(true);
 
+  const [inquiryCount, setInquiryCount] = useState(0);
+
+  const reloadMe = useCallback(async () => {
+    const res = await fetch("/api/auth/session", { cache: "no-store" });
+    const data = await res.json();
+    if (data.ok && data.data) setMe(data.data);
+  }, []);
+
+  const reloadMobileStats = useCallback(async () => {
+    await reloadMe();
+    try {
+      const [favRes, planRes, bookingRes] = await Promise.all([
+        fetch("/api/my/favorites", { cache: "no-store" }),
+        fetch("/api/my/planner-plans", { cache: "no-store" }),
+        fetch("/api/my/booking-requests", { cache: "no-store" }),
+      ]);
+      const favData = await favRes.json();
+      const planData = await planRes.json();
+      const bookingData = await bookingRes.json();
+      if (favData.ok && Array.isArray(favData.data)) {
+        setFavorites(favData.data);
+      }
+      if (planData.ok && Array.isArray(planData.data)) {
+        setPlannerPlans(planData.data);
+      }
+      if (bookingData.ok && Array.isArray(bookingData.data)) {
+        setInquiryCount(bookingData.data.length);
+      }
+    } catch {
+      /* non-fatal */
+    }
+  }, [reloadMe]);
+
   const tabDefs = useMemo(
     () => [
       { key: "campaigns" as const, label: t("tabs.campaigns"), icon: Megaphone },
@@ -195,6 +230,11 @@ export function MyHubPageClient() {
       cancelled = true;
     };
   }, [router]);
+
+  useEffect(() => {
+    if (!me) return;
+    void reloadMobileStats();
+  }, [me, reloadMobileStats]);
 
   useEffect(() => {
     if (!me) return;
@@ -330,8 +370,21 @@ export function MyHubPageClient() {
   );
 
   return (
-    <HomeLandingDayNight portal>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
+    <>
+      <MobileMyHubView
+        me={me}
+        stats={{
+          favorites: favorites.length,
+          inquiries: inquiryCount,
+          plans: plannerPlans.length,
+        }}
+        isKo={isKo}
+        onRefresh={reloadMobileStats}
+        onLogout={logout}
+      />
+
+      <HomeLandingDayNight portal>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell hidden min-h-[calc(100dvh-4rem)] md:block">
         <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 py-14 text-gray-900 dark:bg-[#05050a] dark:text-white sm:py-20 lg:py-24">
           <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
@@ -341,7 +394,7 @@ export function MyHubPageClient() {
           />
           <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
             <div className="min-w-0">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/60">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/60">
                 {isKo ? "// 마이 허브" : "// My hub"}
               </p>
               <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
@@ -414,7 +467,7 @@ export function MyHubPageClient() {
                       type="button"
                       onClick={() => setCampaignFilter(key)}
                       className={cn(
-                        "rounded-full border px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.14em] transition-colors",
+                        "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.14em] transition-colors",
                         myHubFilterPill(campaignFilter === key),
                       )}
                     >
@@ -470,7 +523,7 @@ export function MyHubPageClient() {
           {tab === "favorites" && (
             <section aria-labelledby="my-favorites-heading">
               <div className="tkad-neon-surface relative mb-8 overflow-hidden rounded-[28px] px-6 py-8 sm:px-8 sm:py-10">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] text-cyan-400/80">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
                   {isKo ? "// 찜한 매체" : "// Saved media"}
                 </p>
                 <h2
@@ -562,7 +615,7 @@ export function MyHubPageClient() {
                 <div className="space-y-8">
                   {proposals.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                         {t("planner.proposalsSection")}
                       </h3>
                       <ul className="space-y-3">
@@ -576,7 +629,7 @@ export function MyHubPageClient() {
                                 <p className="mt-1 text-sm text-muted-foreground">
                                   {p.brandName}
                                 </p>
-                                <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                                <p className="mt-1 text-[11px] text-muted-foreground">
                                   {isKo
                                     ? `예산 ${p.budgetManwon.toLocaleString("ko-KR")}만원`
                                     : `Budget ${p.budgetManwon.toLocaleString("en-US")}×10k KRW`}
@@ -604,7 +657,7 @@ export function MyHubPageClient() {
                   ) : null}
                   {plannerPlans.length > 0 ? (
                     <div>
-                      <h3 className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+                      <h3 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                         {t("planner.plansSection")}
                       </h3>
                       <ul className="space-y-3">
@@ -615,12 +668,12 @@ export function MyHubPageClient() {
                           <p className="truncate text-base font-bold text-foreground">
                             {plan.title}
                           </p>
-                          <p className="mt-1 font-mono text-[11px] text-muted-foreground">
+                          <p className="mt-1 text-[11px] text-muted-foreground">
                             {isKo
                               ? `총 예산 ${plan.budgetManwon.toLocaleString("ko-KR")}만원 · 매체 ${plan.mediaCount}개`
                               : `Budget ${plan.budgetManwon.toLocaleString("en-US")}×10k KRW · ${plan.mediaCount} media`}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground/80">
+                          <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground/80">
                             {new Date(plan.createdAt).toLocaleDateString(
                               isKo ? "ko-KR" : "en-US",
                             )}
@@ -699,5 +752,6 @@ export function MyHubPageClient() {
         </section>
       </div>
     </HomeLandingDayNight>
+    </>
   );
 }

@@ -187,7 +187,7 @@ export function TeamManagementSection() {
       <div className={myHubGlassCard}>
         <div className="mb-4 flex items-center gap-2">
           <Users className="h-5 w-5 text-primary" />
-          <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             {isKo ? "팀 설정" : "Team settings"}
           </p>
         </div>
@@ -216,7 +216,7 @@ export function TeamManagementSection() {
 
       {perms?.canInvite ? (
         <form onSubmit={sendInvite} className={myHubGlassCard}>
-          <p className="mb-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+          <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             {isKo ? "팀원 초대" : "Invite member"}
           </p>
           <div className="flex flex-col gap-3 sm:flex-row">
@@ -248,26 +248,26 @@ export function TeamManagementSection() {
       ) : null}
 
       <div className={cn(myHubGlassPanel, "p-5 sm:p-6 lg:p-8")}>
-        <p className="mb-5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           {isKo ? `팀원 (${members.length})` : `Members (${members.length})`}
         </p>
         <div className="overflow-x-auto rounded-[20px] border border-border/60 dark:border-white/10 border-gray-200">
           <table className="w-full min-w-[640px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-border/60 bg-muted/40 dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50">
-                <th className="px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "이름" : "Name"}
                 </th>
-                <th className="px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "이메일" : "Email"}
                 </th>
-                <th className="px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "가입일" : "Joined"}
                 </th>
-                <th className="px-4 py-3.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "역할" : "Role"}
                 </th>
-                <th className="px-4 py-3.5 text-right font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                <th className="px-4 py-3.5 text-right font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   {isKo ? "관리" : "Actions"}
                 </th>
               </tr>
@@ -280,7 +280,7 @@ export function TeamManagementSection() {
                 >
                   <td className="px-4 py-4 font-semibold text-foreground">{m.name}</td>
                   <td className="px-4 py-4 text-muted-foreground">{m.email}</td>
-                  <td className="px-4 py-4 font-mono text-xs tabular-nums text-muted-foreground">
+                  <td className="px-4 py-4  tabular-nums text-muted-foreground">
                     {new Date(m.joinedAt).toLocaleDateString(isKo ? "ko-KR" : "en-US")}
                   </td>
                   <td className="px-4 py-4">

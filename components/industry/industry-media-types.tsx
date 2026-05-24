@@ -54,7 +54,7 @@ export async function IndustryMediaTypes({ slug }: Props) {
               className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8"
             >
               <div className="mb-4 flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [{String(i + 1).padStart(2, "0")}]
                 </span>
                 <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />

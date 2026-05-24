@@ -39,7 +39,7 @@ export function DbGuideArticlePage({
       <article className="bg-card">
         <header className="border-b-2 border-border bg-hero-void py-16 sm:py-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-            <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               <BookText className="mr-2 inline h-3.5 w-3.5" aria-hidden />
               [ {isKo ? "OOH 가이드" : "OOH GUIDE"} ]
             </p>
@@ -50,7 +50,7 @@ export function DbGuideArticlePage({
               {article.excerptKo}
             </p>
             {article.publishedAt ? (
-              <p className="mt-6 flex items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-hero-fg/55">
+              <p className="mt-6 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-hero-fg/55">
                 <Calendar className="h-3 w-3" aria-hidden />
                 {article.publishedAt.toLocaleDateString(isKo ? "ko-KR" : "en-US")}
               </p>
@@ -62,7 +62,7 @@ export function DbGuideArticlePage({
           <section className="mt-16 border-t-2 border-border pt-10">
             <Link
               href="/planner"
-              className="inline-flex border-2 border-border bg-foreground px-4 py-2 font-mono text-xs font-bold uppercase tracking-widest text-background"
+              className="inline-flex border-2 border-border bg-foreground px-4 py-2 font-display text-xs font-medium uppercase tracking-widest text-background"
             >
               AI 플래너로 매체 추천받기
             </Link>

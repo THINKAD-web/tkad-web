@@ -121,7 +121,7 @@ export function MediaOwnerCampaignsClient() {
                   <p className="mt-1 text-xs text-violet-200/90">
                     {isKo ? "업종" : "Industry"}: {r.industryLabel}
                   </p>
-                  <p className="mt-2 font-mono text-xs dark:text-white text-gray-400">
+                  <p className="mt-2 text-xs dark:text-white text-gray-400">
                     {r.startsAt.slice(0, 10)} ~ {r.endsAt.slice(0, 10)}
                   </p>
                   <p className="mt-1 text-sm tabular-nums dark:text-white text-gray-700">

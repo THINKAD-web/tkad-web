@@ -61,7 +61,7 @@ export default function AdminInstantBookingsPage() {
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <header>
-        <p className="font-mono text-[11px] uppercase tracking-[0.28em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-muted-foreground">
           Operations
         </p>
         <h1 className="text-2xl font-black tracking-tight">즉시 예약 (소액 DOOH)</h1>
@@ -80,7 +80,7 @@ export default function AdminInstantBookingsPage() {
       ) : (
         <div className="overflow-x-auto rounded-[16px] border border-border">
           <table className="w-full min-w-[900px] text-left text-sm">
-            <thead className="border-b border-border bg-muted/40 font-mono text-[10px] uppercase tracking-[0.18em]">
+            <thead className="border-b border-border bg-muted/40 font-display text-xs font-medium uppercase tracking-[0.18em]">
               <tr>
                 <th className="px-3 py-2">매체</th>
                 <th className="px-3 py-2">기간</th>
@@ -95,9 +95,7 @@ export default function AdminInstantBookingsPage() {
               {items.map((row) => (
                 <tr
                   key={row.id}
-                  className={`border-b border-border/60 ${
-                    highlightId === row.id ? "bg-primary/10" : ""
-                  }`}
+                  className={`border-b border-border/60 ${ highlightId === row.id ? "bg-primary/10" : "" }`}
                 >
                   <td className="px-3 py-3">
                     <p className="font-semibold">{row.mediaName}</p>
@@ -108,7 +106,7 @@ export default function AdminInstantBookingsPage() {
                   <td className="px-3 py-3 whitespace-nowrap">
                     {row.startDate} ~ {row.endDate}
                   </td>
-                  <td className="px-3 py-3 font-mono">
+                  <td className="px-3 py-3">
                     {row.amount.toLocaleString("ko-KR")}원
                   </td>
                   <td className="px-3 py-3">

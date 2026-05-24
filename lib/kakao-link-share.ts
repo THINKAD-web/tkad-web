@@ -15,11 +15,7 @@ declare global {
 let sdkPromise: Promise<void> | null = null;
 
 function getJsKey(): string | null {
-  return (
-    process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim() ||
-    process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim() ||
-    null
-  );
+  return process.env.NEXT_PUBLIC_KAKAO_JS_KEY?.trim() || null;
 }
 
 export function isKakaoShareAvailable(): boolean {

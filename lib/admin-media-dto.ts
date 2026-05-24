@@ -17,6 +17,8 @@ export type AdminMediaDto = {
   height: string | null;
   description: string | null;
   subCategory: string | null;
+  mediaCategory: string[];
+  targetCategory: string[];
   tags: string[];
   district: string | null;
   city: string | null;
@@ -188,6 +190,8 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     height: pickStr(r, "height", "height"),
     description: pickStr(r, "description", "description"),
     subCategory: pickStr(r, "subCategory", "sub_category"),
+    mediaCategory: pickStrArr(r, "mediaCategory", "media_category"),
+    targetCategory: pickStrArr(r, "targetCategory", "target_category"),
     tags: pickStrArr(r, "tags", "tags"),
     district: pickStr(r, "district", "district"),
     city: pickStr(r, "city", "city"),
@@ -279,6 +283,8 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     height: m.height,
     description: m.description,
     subCategory: m.subCategory,
+    mediaCategory: m.mediaCategory ?? [],
+    targetCategory: m.targetCategory ?? [],
     tags: m.tags ?? [],
     district: m.district,
     city: m.city,

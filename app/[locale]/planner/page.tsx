@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import PlannerPageClient from "./planner-page-client";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
+import { getPlatformPredictionAccuracy } from "@/lib/prediction-accuracy-server";
 
 export const revalidate = 3600;
 
@@ -12,10 +13,17 @@ export const revalidate = 3600;
  * (PR-D `?addMedia=` 쿼리 핸들러) 대응.
  */
 export default async function PlannerPage() {
-  const { catalog, databaseEmpty } = await fetchPlannerMediaCatalog();
+  const [{ catalog, databaseEmpty }, predictionAccuracy] = await Promise.all([
+    fetchPlannerMediaCatalog(),
+    getPlatformPredictionAccuracy(),
+  ]);
   return (
     <Suspense fallback={null}>
-      <PlannerPageClient catalog={catalog} databaseEmpty={databaseEmpty} />
+      <PlannerPageClient
+        catalog={catalog}
+        databaseEmpty={databaseEmpty}
+        predictionAccuracy={predictionAccuracy}
+      />
     </Suspense>
   );
 }

@@ -68,16 +68,16 @@ export function CommunityPostCard({
         <div className="flex flex-wrap items-start justify-between gap-3">
           <span
             className={cn(
-              "inline-flex items-center border-2 border-accent bg-accent px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground",
+              "inline-flex items-center border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground",
               isNeon &&
                 "rounded-full dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 dark:text-white text-gray-900",
             )}
           >
-            {isKo ? labels.shortKo : labels.en}
+            {labels.emoji} {isKo ? labels.shortKo : labels.en}
           </span>
           <span
             className={cn(
-              "font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground",
+              "font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
               isNeon && "dark:text-white text-gray-500",
             )}
           >
@@ -111,7 +111,7 @@ export function CommunityPostCard({
           <div className="flex flex-wrap items-center gap-2">
             <span
               className={cn(
-                "font-mono text-[11px] uppercase tracking-[0.18em] text-foreground",
+                "font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground",
                 isNeon && "dark:text-white text-gray-800",
               )}
             >
@@ -127,7 +127,7 @@ export function CommunityPostCard({
             {!post.isAnonymous && post.author?.company ? (
               <span
                 className={cn(
-                  "font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground",
+                  "font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
                   isNeon && "dark:text-white text-gray-500",
                 )}
               >
@@ -138,7 +138,7 @@ export function CommunityPostCard({
 
           <div
             className={cn(
-              "flex flex-wrap items-center gap-3 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground",
+              "flex flex-wrap items-center gap-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground",
               isNeon && "dark:text-white text-gray-500",
               variant === "community" && "justify-between gap-y-2",
             )}

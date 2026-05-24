@@ -12,6 +12,7 @@ import {
   fallbackCommunityRoleFromAppRole,
   normalizeCommunityCategory,
   normalizeCommunityMemberRole,
+  resolveCommunityCategoryWhere,
   type CommunityAuthorSummary,
   type CommunityCategory,
   type CommunityCommentItem,
@@ -49,9 +50,7 @@ function excerpt(body: string): string {
 
 function resolveCategoryWhere(category?: CommunityCategory | null) {
   if (!category) return undefined;
-  if (category === "qna") return { in: ["qna", "qa"] };
-  if (category === "networking") return { in: ["networking", "recommend"] };
-  return category;
+  return resolveCommunityCategoryWhere(category);
 }
 
 function toAuthorSummary(user: CommunityUserRow | null): CommunityAuthorSummary | null {
@@ -75,6 +74,7 @@ function toPostListItem(row: {
   body: string;
   authorName: string;
   isAnonymous: boolean;
+  isPinned?: boolean;
   status: string;
   reportCount: number;
   likeCount: number;
@@ -87,7 +87,7 @@ function toPostListItem(row: {
   const author = row.isAnonymous ? null : toAuthorSummary(row.authorUser);
   return {
     id: row.id,
-    category: normalizeCommunityCategory(row.category) ?? "qna",
+    category: normalizeCommunityCategory(row.category) ?? "free",
     title: row.title,
     bodyExcerpt: excerpt(row.body),
     authorName: row.isAnonymous ? "익명" : author?.name ?? row.authorName,
@@ -98,6 +98,7 @@ function toPostListItem(row: {
     likeCount: row.likeCount,
     viewCount: row.viewCount,
     commentCount: row._count.comments,
+    isPinned: row.isPinned ?? false,
     createdAt: row.createdAt.toISOString(),
     updatedAt: row.updatedAt.toISOString(),
   };
@@ -201,7 +202,28 @@ export async function listCommunityPosts(
   };
 
   const db = getPrisma();
-  const total = await db.communityPost.count({ where });
+  let total = await db.communityPost.count({ where });
+
+  if (total === 0 && !category) {
+    try {
+      const { seedCommunityPosts } = await import("@/lib/community/seed-posts");
+      const seeded = await seedCommunityPosts();
+      if (!seeded.skipped && seeded.created > 0) {
+        total = await db.communityPost.count({ where });
+      }
+    } catch {
+      /* ignore seed errors */
+    }
+  }
+
+  const pinFirst = (items: CommunityPostListItem[]) => {
+    if (category && category !== "notice") return items;
+    return [...items].sort((a, b) => {
+      const pinDiff = Number(b.isPinned) - Number(a.isPinned);
+      if (pinDiff !== 0) return pinDiff;
+      return 0;
+    });
+  };
 
   if (sort === "mixed") {
     const candidateTake = Math.min(160, Math.max(page * pageSize * 4, 80));
@@ -214,25 +236,30 @@ export async function listCommunityPosts(
         authorUser: { select: COMMUNITY_USER_SELECT },
       },
     });
-    const items = rows
-      .sort((a, b) => {
-        const scoreDiff = calcMixedScore(b) - calcMixedScore(a);
-        if (scoreDiff !== 0) return scoreDiff;
-        return b.createdAt.getTime() - a.createdAt.getTime();
-      })
-      .slice((page - 1) * pageSize, page * pageSize)
-      .map(toPostListItem);
+    const items = pinFirst(
+      rows
+        .sort((a, b) => {
+          const scoreDiff = calcMixedScore(b) - calcMixedScore(a);
+          if (scoreDiff !== 0) return scoreDiff;
+          const pinDiff = Number(b.isPinned) - Number(a.isPinned);
+          if (pinDiff !== 0) return pinDiff;
+          return b.createdAt.getTime() - a.createdAt.getTime();
+        })
+        .slice((page - 1) * pageSize, page * pageSize)
+        .map(toPostListItem),
+    );
     return { items, total, page, pageSize };
   }
 
   const orderBy =
     sort === "popular"
       ? [
+          { isPinned: "desc" as const },
           { likeCount: "desc" as const },
           { viewCount: "desc" as const },
           { createdAt: "desc" as const },
         ]
-      : [{ createdAt: "desc" as const }];
+      : [{ isPinned: "desc" as const }, { createdAt: "desc" as const }];
 
   const rows = await db.communityPost.findMany({
     where,
@@ -403,6 +430,8 @@ export type CreatePostParams = {
   authorEmail: string | null;
   authorUserId: string;
   authorIp: string | null;
+  metadata?: Record<string, unknown> | null;
+  isPinned?: boolean;
 };
 
 export async function createCommunityPost(p: CreatePostParams) {
@@ -417,8 +446,29 @@ export async function createCommunityPost(p: CreatePostParams) {
       authorUserId: p.authorUserId,
       isAnonymous: false,
       authorIp: p.authorIp,
+      metadata: (p.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
+      isPinned: p.isPinned ?? false,
     },
     select: { id: true },
+  });
+}
+
+export async function createSystemCommunityComment(p: {
+  postId: string;
+  authorName: string;
+  body: string;
+}) {
+  const db = getPrisma();
+  return db.communityComment.create({
+    data: {
+      postId: p.postId,
+      body: p.body,
+      authorName: p.authorName,
+      authorUserId: null,
+      authorEmail: null,
+      isAnonymous: false,
+      authorIp: null,
+    },
   });
 }
 

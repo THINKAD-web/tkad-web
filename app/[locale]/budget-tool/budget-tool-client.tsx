@@ -45,7 +45,7 @@ export function BudgetToolClient({
             <p className="mt-1 text-sm text-muted-foreground">
               {isKo ? c.tier.descKo : c.tier.descEn}
             </p>
-            <p className="mt-3 font-mono text-sm font-bold text-accent">
+            <p className="mt-3 text-sm font-bold text-accent">
               {isKo ? "합계 약 " : "Total ~ "}
               {c.totalPriceMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
               {isKo ? "만원/월" : "M KRW/mo"}
@@ -71,7 +71,7 @@ export function BudgetToolClient({
                   return (
                     <li key={m.id} className="list-none">
                       <MediaCard
-                        href={mediaItemDetailPath(m.id)}
+                        href={mediaItemDetailPath(m)}
                         imageSrc={getPrimaryMediaImageUrl(m)}
                         imageAlt={name}
                         type={typeLabel}

@@ -95,7 +95,7 @@ export function CampaignProofSection({
 
   return (
     <section ref={sectionRef} id="proof" className="mt-8 scroll-mt-24">
-      <h2 className="mb-3 flex items-center gap-2 font-mono text-[11px] font-black uppercase tracking-[0.24em]">
+      <h2 className="mb-3 flex items-center gap-2 font-display text-[11px] font-black uppercase tracking-[0.24em]">
         {isKo ? "인증 사진" : "Proof photos"}
         {unseen ? (
           <span

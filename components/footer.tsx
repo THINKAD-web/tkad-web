@@ -41,6 +41,7 @@ export default function Footer() {
     { href: "/privacy", label: t("footer.privacy") },
     { href: "/terms", label: t("footer.terms") },
     { href: "/refund", label: t("footer.refund") },
+    { href: "/guarantee", label: t("footer.guarantee") },
   ];
 
   const serviceItems = [

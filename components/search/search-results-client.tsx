@@ -155,7 +155,7 @@ function SearchResultsInner() {
               name="q"
               defaultValue={q}
               placeholder={t("modalPlaceholder")}
-              className="h-11 min-w-0 flex-1 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4 font-mono text-sm dark:text-white text-gray-900 outline-none focus:border-white/25"
+              className="h-11 min-w-0 flex-1 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-4 text-sm dark:text-white text-gray-900 outline-none focus:border-white/25"
             />
             <button
               type="submit"
@@ -177,7 +177,7 @@ function SearchResultsInner() {
                     type="button"
                     onClick={() => setTab(item.key)}
                     className={cn(
-                      "rounded-full border px-4 py-1.5 font-mono text-[11px] font-bold uppercase tracking-wide transition-colors",
+                      "rounded-full border px-4 py-1.5 font-display text-xs font-medium uppercase tracking-wide transition-colors",
                       tab === item.key
                         ? "border-accent bg-accent/15 text-accent"
                         : "border-border text-muted-foreground hover:border-accent/40",
@@ -208,7 +208,7 @@ function SearchResultsInner() {
                 </p>
                 {similar.length > 0 ? (
                   <div className="mt-6">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       {t("similarQueries")}
                     </p>
                     <div className="mt-3 flex flex-wrap justify-center gap-2">
@@ -243,7 +243,7 @@ function SearchResultsInner() {
               <div className="space-y-10">
                 {showMedia.length > 0 && mediaItems.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       🏢 {t("sectionMedia")}
                     </h2>
                     <div className={MEDIA_CATALOG_GRID_CLASS}>
@@ -262,7 +262,7 @@ function SearchResultsInner() {
 
                 {showPackages.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       📦 {t("sectionPackages")}
                     </h2>
                     <ul className="space-y-2">
@@ -283,7 +283,7 @@ function SearchResultsInner() {
 
                 {showContent.length > 0 ? (
                   <section>
-                    <h2 className="mb-4 font-mono text-xs font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                    <h2 className="mb-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                       {t("tabContent")}
                     </h2>
                     <ul className="divide-y divide-border rounded-2xl border border-border bg-card">
@@ -299,7 +299,7 @@ function SearchResultsInner() {
                                 {h.subtitle}
                               </p>
                             </div>
-                            <span className="shrink-0 font-mono text-[10px] uppercase tracking-wider text-accent">
+                            <span className="shrink-0 font-display text-xs font-medium uppercase tracking-wider text-accent">
                               {h.kind}
                             </span>
                           </Link>

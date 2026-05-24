@@ -41,7 +41,7 @@ export function MediaInquiryDialog({
         type="button"
         onClick={() => setOpen(true)}
         className={cn(
-          "tkad-media-detail-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-6 font-mono text-xs font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
+          "tkad-media-detail-cta-secondary inline-flex h-12 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-6 font-display text-xs font-black uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
           className,
         )}
       >
@@ -70,13 +70,13 @@ export function MediaInquiryDialog({
             />
             <div className="relative flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-4">
               <div className="min-w-0 dark:text-white text-gray-900">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-600">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
                   [ INQUIRY · QUOTE ]
                 </p>
                 <h2 className="mt-1 truncate text-lg font-black tracking-tight dark:text-white text-gray-900">
                   {triggerLabel}
                 </h2>
-                <p className="mt-1 truncate font-mono text-[11px] tracking-tight dark:text-white text-gray-500">
+                <p className="mt-1 truncate text-[11px] tracking-tight dark:text-white text-gray-500">
                   {`// `}{mediaName}
                 </p>
               </div>
@@ -98,14 +98,14 @@ export function MediaInquiryDialog({
               >
                 <FileText className="h-5 w-5 shrink-0" strokeWidth={2} />
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
                     [ FORM ]
                   </p>
                   <p className="text-sm font-black tracking-tight">
                     상세 문의 양식 작성
                   </p>
                 </div>
-                <span className="font-mono text-base font-bold">→</span>
+                <span className="text-base font-bold">→</span>
               </Link>
 
               <a
@@ -122,14 +122,14 @@ export function MediaInquiryDialog({
                   <MessageCircle className="h-4 w-4" strokeWidth={2.25} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     [ KAKAOTALK ]
                   </p>
                   <p className="text-sm font-black tracking-tight">
                     카카오톡 채널 상담
                   </p>
                 </div>
-                <span className="font-mono text-base font-bold">→</span>
+                <span className="text-base font-bold">→</span>
               </a>
 
               <a
@@ -140,18 +140,18 @@ export function MediaInquiryDialog({
                   <Phone className="h-4 w-4" strokeWidth={2} />
                 </span>
                 <div className="min-w-0 flex-1">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     [ PHONE ]
                   </p>
                   <p className="text-sm font-black tabular-nums tracking-tight">
                     02-515-2772
                   </p>
                 </div>
-                <span className="font-mono text-base font-bold">→</span>
+                <span className="text-base font-bold">→</span>
               </a>
             </div>
 
-            <p className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-mono text-[10px] uppercase tracking-[0.18em] dark:text-white">
+            <p className="relative border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
               {`// `}평일 9:30 – 18:30 / 주말·공휴일 휴무
             </p>
           </div>

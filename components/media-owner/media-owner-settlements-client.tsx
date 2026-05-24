@@ -90,7 +90,7 @@ export function MediaOwnerSettlementsClient() {
           <ul className="space-y-3">
             {scheduled.map((r) => (
               <li key={r.id} className={ownerGlassCard}>
-                <p className="font-mono text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
+                <p className="text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
                 <p className="mt-2 text-2xl font-bold tabular-nums dark:text-white text-gray-900">
                   ₩{r.netWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                 </p>
@@ -135,7 +135,7 @@ export function MediaOwnerSettlementsClient() {
           <ul className="space-y-3">
             {completed.map((r) => (
               <li key={r.id} className={ownerGlassCard}>
-                <p className="font-mono text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
+                <p className="text-sm dark:text-white text-gray-900">{r.periodMonth}</p>
                 <p className="mt-2 text-xl font-bold tabular-nums text-emerald-200">
                   ₩{r.netWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
                 </p>

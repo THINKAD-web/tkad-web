@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import { CaseDetailMobileChromeSync } from "@/components/mobile/case-detail-mobile-chrome-sync";
 import { useLocale, useTranslations } from "next-intl";
 import { useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
@@ -90,33 +91,37 @@ export default function CaseDetailClient({
 
   return (
     <HomeLandingDayNight>
+      <CaseDetailMobileChromeSync
+        title={title}
+        shareDescription={isKo ? `${title} — THINKAD 성공 사례` : `${title} — THINKAD case study`}
+      />
       <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-gray-50 dark:bg-[#0A0A0A] dark:text-white text-gray-900">
         <section className="py-20 sm:py-24">
           <CaseDetailContainer>
             <Link
               href="/cases"
-              className="group mb-6 inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-500 transition-colors hover:text-[#22d3ee]"
+              className="group mb-6 inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500 transition-colors hover:text-[#22d3ee]"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               {t("detailBack")}
             </Link>
 
-            <p className="flex flex-wrap items-center gap-2 font-mono text-[11px] uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
               <span>{`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}</span>
               <CategoryHeroBetaBadge />
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#e9d5ff]">
+              <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#e9d5ff]">
                 {row.industry}
               </span>
-              <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
+              <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
                 <BadgeCheck className="h-3 w-3 text-[#22d3ee]" />
                 {t("detailVerified")}
               </span>
             </div>
 
-            <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-400">
+            <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-400">
               {row.clientName}
             </p>
 
@@ -124,13 +129,13 @@ export default function CaseDetailClient({
               {title}
             </h1>
             {headline ? (
-              <p className="mt-3 font-mono text-sm font-semibold text-[#22d3ee]">
+              <p className="mt-3 text-sm font-semibold text-[#22d3ee]">
                 {headline}
               </p>
             ) : null}
 
             <div className="mt-6 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                 [ {t("backgroundLabel")} ]
               </p>
               <p className="mt-2 max-w-3xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
@@ -138,7 +143,7 @@ export default function CaseDetailClient({
               </p>
             </div>
 
-            <CaseDetailContainer className="mt-6 flex flex-wrap gap-4 font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white text-gray-500">
+            <CaseDetailContainer className="mt-6 flex flex-wrap gap-4 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
               {period ? (
                 <span className="inline-flex items-center gap-1.5">
                   <Calendar className="h-4 w-4 text-[#22d3ee]" aria-hidden />
@@ -158,7 +163,7 @@ export default function CaseDetailClient({
         {metrics.length > 0 ? (
           <section className="border-y dark:border-white/10 border-gray-200 py-12 sm:py-16">
             <CaseDetailContainer>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                 [ {t("metricsSectionTitle")} ]
               </p>
               <CaseMetricsCharts metrics={metrics} />
@@ -168,10 +173,10 @@ export default function CaseDetailClient({
                     key={m.key}
                     className="rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-4"
                   >
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       {isKo ? m.labelKo : m.labelEn}
                     </p>
-                    <p className="mt-2 font-mono text-2xl font-black tabular-nums dark:text-white text-gray-900">
+                    <p className="mt-2 font-display text-2xl font-black tabular-nums dark:text-white text-gray-900">
                       {formatCaseStudyMetricValue(m, locale)}
                     </p>
                   </div>
@@ -183,12 +188,12 @@ export default function CaseDetailClient({
 
         <section className="py-16 sm:py-20">
           <CaseDetailContainer>
-            <p className="mb-6 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+            <p className="mb-6 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
               [ {t("strategySectionTitle")} ]
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                   <Target className="h-4 w-4" aria-hidden />
                   {t("challengeLabel")}
                 </div>
@@ -197,7 +202,7 @@ export default function CaseDetailClient({
                 </p>
               </div>
               <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
-                <div className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                   <Eye className="h-4 w-4" aria-hidden />
                   {t("solutionLabel")}
                 </div>
@@ -211,7 +216,7 @@ export default function CaseDetailClient({
 
         <section className="border-t dark:border-white/10 border-gray-200 py-16 sm:py-20">
           <CaseDetailContainer>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
               [ {t("mediaLabel")} ]
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -223,14 +228,14 @@ export default function CaseDetailClient({
                   <Link
                     key={String(link.id)}
                     href={`/media/${link.id}`}
-                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors hover:border-[#22d3ee]/40 hover:bg-[#22d3ee]/15"
+                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors hover:border-[#22d3ee]/40 hover:bg-[#22d3ee]/15"
                   >
                     {link.label}
                   </Link>
                 ) : (
                   <span
                     key={link.label}
-                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] dark:text-white text-gray-600"
+                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-600"
                   >
                     {link.label}
                   </span>
@@ -240,7 +245,7 @@ export default function CaseDetailClient({
 
             {row.resultsKo.length > 0 ? (
               <div className="mt-10 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-5 sm:p-6">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("resultsLabel")} ]
                 </p>
                 <ul className="mt-4 space-y-3">
@@ -259,7 +264,7 @@ export default function CaseDetailClient({
         {galleryUrls.length > 0 ? (
           <section className="py-16">
             <CaseDetailContainer>
-              <p className="mb-5 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+              <p className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                 [ {t("galleryLabel")} ]
               </p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -294,7 +299,7 @@ export default function CaseDetailClient({
           <section className="border-t dark:border-white/10 border-gray-200 py-16">
             <CaseDetailContainer className="mx-auto max-w-3xl">
               <div className="rounded-[24px] border border-[#a855f7]/30 bg-gradient-to-br from-[#a855f7]/15 to-transparent p-8">
-                <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("managerCommentTitle")} ]
                 </p>
                 <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
@@ -340,7 +345,7 @@ export default function CaseDetailClient({
                     href={`/cases/${prev.id}`}
                     className="group flex flex-1 flex-col rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 transition-colors hover:border-[#22d3ee]/30"
                   >
-                    <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                       <ArrowLeft className="h-3 w-3" />
                       {t("detailPrev")}
                     </span>
@@ -356,7 +361,7 @@ export default function CaseDetailClient({
                     href={`/cases/${next.id}`}
                     className="group flex flex-1 flex-col items-end rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 text-right transition-colors hover:border-[#22d3ee]/30"
                   >
-                    <span className="flex items-center gap-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                       {t("detailNext")}
                       <ArrowRight className="h-3 w-3" />
                     </span>

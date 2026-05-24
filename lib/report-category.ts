@@ -32,11 +32,11 @@ export function communityCategoryForReport(
 ): CommunityCategory {
   switch (category) {
     case "GUIDE":
-      return "review";
+      return "execution_review";
     case "TREND":
     case "REGION":
     case "CAMPAIGN":
     default:
-      return "insight";
+      return "free";
   }
 }

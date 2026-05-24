@@ -9,6 +9,11 @@ import {
   computeCampaignTotalAmount,
   type CampaignKpiBooking,
 } from "@/lib/campaign-kpis";
+import {
+  computeCampaignPredictionVariance,
+  formatImpressionsCompact,
+  formatVariancePct,
+} from "@/lib/prediction-accuracy";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
 import {
   formatCampaignStatusKo,
@@ -375,6 +380,11 @@ function drawExecutiveSummary(
   const stats = computeCampaignBaseStats(kpiBookings);
   const totalAmount = computeCampaignTotalAmount(p.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount);
+  const proofCount = p.proofPhotos?.length ?? 0;
+  const predictionVariance = computeCampaignPredictionVariance(
+    kpiBookings,
+    proofCount,
+  );
 
   // 한 줄 요약 (템플릿 — AI X)
   let y = 38;
@@ -547,6 +557,31 @@ function drawExecutiveSummary(
   );
 
   y = budgetY + kpiCardH + 16;
+
+  if (predictionVariance) {
+    ensureExecPage(36);
+    monoLabel(doc, fam, "예측 vs 실측", MARGIN_X, y, 8, C_ACCENT);
+    y += 6;
+    doc.setFont(fam, "normal");
+    doc.setFontSize(9);
+    setColor(doc, "text", C_BLACK);
+    const predLine = `예측 노출: ${formatImpressionsCompact(predictionVariance.predictedImpressions)}회`;
+    const actLine = `실측 노출: ${formatImpressionsCompact(predictionVariance.actualImpressions)}회 (${formatVariancePct(predictionVariance.variancePct, "ko")})`;
+    doc.text(predLine, MARGIN_X, y);
+    y += 5;
+    doc.text(actLine, MARGIN_X, y);
+    y += 4;
+    doc.setFontSize(7);
+    setColor(doc, "text", C_GRAY);
+    const note = predictionVariance.hasProofData
+      ? "현장 인증 사진·매체 실측 데이터 반영. 예측 모델 대비 오차를 플랫폼 정확도에 누적합니다."
+      : "인증 사진 업로드 시 실측 노출이 확정됩니다.";
+    for (const line of doc.splitTextToSize(note, CONTENT_W)) {
+      y += 4;
+      doc.text(line, MARGIN_X, y);
+    }
+    y += 10;
+  }
 
   // 매체 유형 분포 (미니) — 집행 매체 기준 카운트
   ensureExecPage(70);

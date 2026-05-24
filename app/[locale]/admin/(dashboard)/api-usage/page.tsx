@@ -141,7 +141,7 @@ export default function AdminApiUsagePage() {
                       key={row.endpoint}
                       className="flex flex-wrap justify-between gap-2 border-b border-border/60 py-2 last:border-0"
                     >
-                      <span className="font-mono text-xs">{row.endpoint}</span>
+                      <span className="text-xs">{row.endpoint}</span>
                       <span className="tabular-nums text-muted-foreground">
                         {row.count.toLocaleString()}회
                         {row.errors > 0 ? ` · 오류 ${row.errors}` : ""}
@@ -170,7 +170,7 @@ export default function AdminApiUsagePage() {
                         {a.keyName} · {a.maskedKey}
                       </p>
                       <p className="text-muted-foreground">{a.userEmail}</p>
-                      <p className="mt-1 font-mono text-xs">
+                      <p className="mt-1 text-xs">
                         {a.minute} — {a.requestsPerMinute} req/min (한도{" "}
                         {a.threshold})
                       </p>
@@ -201,7 +201,7 @@ export default function AdminApiUsagePage() {
                   {data.keys.map((k) => (
                     <tr key={k.id} className="border-b border-border/50">
                       <td className="py-2 pr-4 font-medium">{k.name}</td>
-                      <td className="py-2 pr-4 font-mono text-xs">
+                      <td className="py-2 pr-4 text-xs">
                         {k.maskedKey}
                       </td>
                       <td className="py-2 pr-4 text-xs">

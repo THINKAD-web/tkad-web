@@ -816,22 +816,14 @@ export default function AdminQuoteNewClient() {
                 <button
                   type="button"
                   onClick={() => setVatIncluded(false)}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
-                    !vatIncluded
-                      ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
-                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10"
-                  }`}
+                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${ !vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
                 >
                   {t("vatExtra")}
                 </button>
                 <button
                   type="button"
                   onClick={() => setVatIncluded(true)}
-                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${
-                    vatIncluded
-                      ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground"
-                      : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10"
-                  }`}
+                  className={`flex-1 rounded-md py-2 text-xs font-semibold transition-colors ${ vatIncluded ? "bg-hero-void text-hero-fg dark:bg-card dark:text-foreground" : "text-muted-foreground hover:bg-slate-50 dark:hover:bg-card/10" }`}
                 >
                   {t("vatIncluded")}
                 </button>
@@ -1012,7 +1004,7 @@ export default function AdminQuoteNewClient() {
               <Input
                 value={displayQuoteNumber}
                 readOnly
-                className="bg-slate-50 font-mono text-xs"
+                className="bg-slate-50 text-xs"
               />
             </div>
             <div>

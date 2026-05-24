@@ -34,7 +34,7 @@ export function MediaDetailMobileBar({
     >
       <div className="mx-auto flex max-w-lg items-center gap-3">
         <div className="min-w-0 flex-1">
-          <p className="truncate font-mono text-sm font-bold tabular-nums dark:text-white text-gray-900">
+          <p className="truncate font-display text-sm font-bold tabular-nums dark:text-white text-gray-900">
             {formatCatalogPriceFieldWon(media.price, locale)}
           </p>
           <p className="truncate text-[10px] dark:text-white/45 text-gray-500">

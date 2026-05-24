@@ -73,7 +73,7 @@ export function OnboardingProgressBar() {
               style={{ width: `${Math.max(pct, 8)}%` }}
             />
           </div>
-          <span className="shrink-0 font-mono text-xs font-bold text-[#ff6b2c]">
+          <span className="shrink-0 text-xs font-bold text-[#ff6b2c]">
             {pct}%
           </span>
         </div>

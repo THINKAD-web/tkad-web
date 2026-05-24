@@ -71,7 +71,7 @@ function PipelineCardView({
         {card.contactName}
         {card.sourceType ? ` · ${card.sourceType}` : ""}
       </p>
-      <p className="mt-2 font-mono text-xs">
+      <p className="mt-2 text-xs">
         예상 {formatKrw(card.expectedAmountWon)}원
       </p>
       <div className="mt-2 flex flex-wrap items-center gap-1 text-xs text-muted-foreground">

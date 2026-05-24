@@ -26,7 +26,7 @@ export function IntegratedPlannerStepper({
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-primary">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {stepOfLabel} ]
       </p>
       <ol className="flex flex-wrap items-center justify-center gap-1 sm:gap-2">
@@ -42,7 +42,7 @@ export function IntegratedPlannerStepper({
                   aria-current={isCurrent ? "step" : undefined}
                   onClick={() => onStepClick?.(s)}
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center border-2 font-mono text-xs font-bold transition-colors sm:h-10 sm:w-10 sm:text-sm",
+                    "flex h-9 w-9 items-center justify-center border-2  text-xs font-bold transition-colors sm:h-10 sm:w-10 sm:text-sm",
                     isCurrent
                       ? "border-primary bg-primary text-primary-foreground"
                       : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
@@ -54,7 +54,7 @@ export function IntegratedPlannerStepper({
                 <div
                   aria-current={isCurrent ? "step" : undefined}
                   className={cn(
-                    "flex h-9 w-9 items-center justify-center border-2 font-mono text-xs font-bold sm:h-10 sm:w-10 sm:text-sm",
+                    "flex h-9 w-9 items-center justify-center border-2  text-xs font-bold sm:h-10 sm:w-10 sm:text-sm",
                     isCurrent
                       ? "border-primary bg-primary text-primary-foreground"
                       : isComplete

@@ -30,7 +30,7 @@ export function RecentlyViewedSection() {
     <section className="mb-8">
       <div className="mb-4 flex items-center gap-2">
         <Clock className="h-4 w-4 text-accent" />
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ RECENTLY VIEWED / {items.length} ]
         </p>
       </div>
@@ -54,10 +54,10 @@ export function RecentlyViewedSection() {
             <div className="truncate text-xs font-bold tracking-tight text-foreground group-hover:text-accent">
               {m.name}
             </div>
-            <p className="mt-0.5 truncate font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mt-0.5 truncate font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{m.region} · {m.type}
             </p>
-            <p className="mt-1 font-mono text-[10px] tabular-nums text-foreground">
+            <p className="mt-1 text-[10px] tabular-nums text-foreground">
               {formatCatalogPriceFieldWon(m.price)}
             </p>
           </Link>

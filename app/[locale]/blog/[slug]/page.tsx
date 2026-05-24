@@ -154,14 +154,14 @@ export default async function BlogSeoPostPage({ params }: Props) {
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent"
+              className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "블로그 목록" : "Back to blog"}
             </Link>
 
             <header className="mt-6 border-2 border-border bg-card p-6 sm:p-8">
-              <p className="font-mono text-[11px] uppercase tracking-[0.22em] text-accent">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 {`// ${post.publishedAt}`}
               </p>
               <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">

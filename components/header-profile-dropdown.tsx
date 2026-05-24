@@ -71,7 +71,7 @@ export function HeaderProfileDropdown({
           role="menu"
           className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] min-w-[11.5rem] overflow-hidden rounded-xl border border-border/60 bg-background py-1 shadow-lg dark:border-white/12 border-gray-200 dark:bg-[#0a0a12]"
         >
-          <p className="truncate px-3 py-2 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground dark:text-white">
+          <p className="truncate px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground dark:text-white">
             {session.name}
           </p>
           {typeof session.pointBalance === "number" ? (

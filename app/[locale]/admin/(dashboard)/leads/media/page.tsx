@@ -169,7 +169,7 @@ export default function AdminPotentialMediaLeadsPage() {
                     <td className="max-w-[200px] truncate px-3 py-3 text-muted-foreground">
                       {r.address}
                     </td>
-                    <td className="px-3 py-3 font-mono text-xs">
+                    <td className="px-3 py-3 text-xs">
                       {r.foundFrom}
                     </td>
                     <td className="px-3 py-3">

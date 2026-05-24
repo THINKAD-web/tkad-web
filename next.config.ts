@@ -101,7 +101,17 @@ const nextConfig: NextConfig = {
   },
 };
 
-/** next-pwa webpack hooks break PostCSS/Tailwind in `next dev` — apply only for production builds */
+/**
+ * next-pwa webpack hooks break PostCSS/Tailwind in `next dev` — apply only for production builds.
+ * On Vercel, skip PWA: webpack + Workbox on 2-core builders routinely hits the 45m build limit.
+ */
+const usePwa =
+  process.env.NODE_ENV === "production" &&
+  process.env.VERCEL !== "1" &&
+  process.env.ENABLE_PWA !== "0";
+
+const productionConfig = usePwa ? withPWA(nextConfig) : nextConfig;
+
 export default process.env.NODE_ENV === "production"
-  ? withNextIntl(withPWA(nextConfig))
+  ? withNextIntl(productionConfig)
   : withNextIntl(nextConfig);

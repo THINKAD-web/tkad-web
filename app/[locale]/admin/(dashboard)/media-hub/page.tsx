@@ -445,7 +445,7 @@ export default function AdminMediaHubPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ MEDIA HUB ]
         </p>
         <h2 className="mt-2 text-lg font-bold tracking-tight">매체 허브 (DB)</h2>
@@ -455,7 +455,7 @@ export default function AdminMediaHubPage() {
         </p>
         <Link
           href="/admin/medias/quick-add"
-          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
+          className="mt-2 inline-flex items-center gap-1.5 border-b-2 border-border pb-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
         >
           <Code2 className="h-4 w-4" />
           JSON 간편 등록 (DB)
@@ -558,11 +558,7 @@ export default function AdminMediaHubPage() {
                   key={m.id}
                   type="button"
                   onClick={() => loadDetail(m)}
-                  className={`w-full rounded-lg border p-3 text-left ${
-                    sel?.id === m.id
-                      ? "border-primary bg-muted bg-muted/60"
-                      : "border-slate-200"
-                  }`}
+                  className={`w-full rounded-lg border p-3 text-left ${ sel?.id === m.id ? "border-primary bg-muted bg-muted/60" : "border-slate-200" }`}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-foreground">{m.name}</p>
@@ -926,9 +922,7 @@ export default function AdminMediaHubPage() {
                                 {b.startsAt.replace("T", " ")} ~ {b.endsAt.replace("T", " ")}
                               </span>
                               <span
-                                className={`rounded px-1.5 py-0.5 font-mono text-[10px] font-semibold ${
-                                  statusColor[b.status] ?? "bg-slate-100"
-                                }`}
+                                className={`rounded px-1.5 py-0.5 text-[10px] font-semibold ${ statusColor[b.status] ?? "bg-slate-100" }`}
                               >
                                 {statusLabel[b.status] ?? b.status}
                               </span>

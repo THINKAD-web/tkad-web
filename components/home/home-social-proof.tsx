@@ -58,7 +58,7 @@ export function HomeSocialProof() {
               "hover:border-cyan-400/40 hover:bg-white/[0.08] hover:-translate-y-0.5",
             )}
           >
-            <p className="font-mono text-2xl font-black tabular-nums tracking-tight dark:text-white text-gray-900 sm:text-3xl">
+            <p className="font-display text-2xl font-black tabular-nums tracking-tight dark:text-white text-gray-900 sm:text-3xl">
               {s.value}
             </p>
             <p className="mt-1 text-xs font-semibold dark:text-white text-gray-600 sm:text-sm">

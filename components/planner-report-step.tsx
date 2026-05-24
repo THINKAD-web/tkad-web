@@ -829,10 +829,10 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             {props.metrics ? (
               <div className="border-2 border-bx-black bg-bx-white">
                 <div className="border-b-2 border-bx-black p-5">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                     [ EFFECT DASHBOARD SNAPSHOT ]
                   </p>
-                  <p className="mt-2 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                  <p className="mt-2 text-[11px] tracking-tight text-bx-gray-dim">
                     {`// `}
                     {props.isKo
                       ? "보고서(플랜) + 효과측정(시뮬레이션) 내용을 한 번에 출력합니다."
@@ -857,47 +857,47 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                     return (
                       <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
                         <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
                             [ {t("kpiImpressions")} ]
                           </p>
-                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-accent">
                             {props.metrics!.estimatedTotalImpressions.toLocaleString()}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
                             {t("kpiImpressionsHint")}
                           </p>
                         </div>
                         <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
                             [ {t("kpiReach")} ]
                           </p>
-                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-black">
                             {estReach.toLocaleString()}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
                             {t("kpiReachHint")}
                           </p>
                         </div>
                         <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-gray-dim">
+                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
                             [ {t("kpiCpm")} ]
                           </p>
-                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-black">
+                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-black">
                             {formatCpmKrw(estCpm, props.isKo ? "ko" : "en")}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-gray-dim">
+                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
                             {t("kpiCpmHint")}
                           </p>
                         </div>
                         <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-black p-4 text-bx-white">
-                          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                             [ {t("kpiRoi")} ]
                           </p>
-                          <p className="mt-2 font-mono text-2xl font-bold tabular-nums text-bx-accent">
+                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-accent">
                             {props.metrics!.roiExpected}
                             {t("roiUnit")}
                           </p>
-                          <p className="mt-1 font-mono text-[10px] tracking-tight text-bx-white/65">
+                          <p className="mt-1 text-[10px] tracking-tight text-bx-white/65">
                             {t("kpiRoiHint")}
                           </p>
                         </div>
@@ -907,7 +907,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
 
                   <div className="border-2 border-bx-black bg-bx-white">
                     <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                         [ {t("chartDailyBarTitle")} ]
                       </p>
                     </div>
@@ -923,7 +923,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                   <div className="grid gap-0 lg:grid-cols-2">
                     <div className="border-2 border-bx-black bg-bx-white">
                       <div className="border-b-2 border-bx-black p-5">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                           [ {t("chartCpmTitle")} ]
                         </p>
                       </div>
@@ -937,7 +937,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                     </div>
                     <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
                       <div className="border-b-2 border-bx-black p-5">
-                        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                           [ {t("chartMonthCompareTitle")} ]
                         </p>
                       </div>
@@ -960,7 +960,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
 
                   <div className="border-2 border-bx-black bg-bx-white">
                     <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                         [ {t("chartImpLineTitle")} ]
                       </p>
                     </div>
@@ -975,10 +975,10 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
 
                   <div className="border-2 border-bx-black bg-bx-white">
                     <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-bx-accent">
+                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
                         [ {t("chartRoiLineTitle")} ]
                       </p>
-                      <p className="mt-1 font-mono text-[11px] tracking-tight text-bx-gray-dim">
+                      <p className="mt-1 text-[11px] tracking-tight text-bx-gray-dim">
                         {t("chartRoiLineHint")}
                       </p>
                     </div>

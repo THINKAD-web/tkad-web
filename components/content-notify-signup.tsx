@@ -66,7 +66,7 @@ export function ContentNotifySignup({
         }}
         placeholder={t("emailPlaceholder")}
         disabled={status === "loading" || status === "done"}
-        className="h-11 min-w-0 flex-1 border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:min-w-[240px]"
+        className="h-11 min-w-0 flex-1 border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:min-w-[240px]"
       />
       <BtnBlock
         type="submit"
@@ -89,12 +89,12 @@ export function ContentNotifySignup({
       <div className={className}>
         {form}
         {status === "error" ? (
-          <p className="mt-2 text-center font-mono text-[11px] text-destructive">
+          <p className="mt-2 text-center text-[11px] text-destructive">
             {t("error")}
           </p>
         ) : null}
         {status === "done" ? (
-          <p className="mt-2 text-center font-mono text-[11px] text-muted-foreground">
+          <p className="mt-2 text-center text-[11px] text-muted-foreground">
             {t("successHint")}
           </p>
         ) : null}
@@ -109,19 +109,19 @@ export function ContentNotifySignup({
         className,
       )}
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-primary">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {t("badge")} ]
       </p>
       <p className="mt-2 text-base font-bold text-foreground">{t("title")}</p>
-      <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+      <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
         {source === "report" ? t("descReport") : t("descAcademy")}
       </p>
       <div className="mt-5">{form}</div>
       {status === "error" ? (
-        <p className="mt-2 font-mono text-[11px] text-destructive">{t("error")}</p>
+        <p className="mt-2 text-[11px] text-destructive">{t("error")}</p>
       ) : null}
       {status === "done" ? (
-        <p className="mt-2 font-mono text-[11px] text-muted-foreground">
+        <p className="mt-2 text-[11px] text-muted-foreground">
           {t("successHint")}
         </p>
       ) : null}

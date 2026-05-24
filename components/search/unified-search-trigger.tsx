@@ -50,13 +50,13 @@ export function UnifiedSearchTrigger({ className, compact }: Props) {
           />
           <span
             className={cn(
-              "truncate font-mono text-[13px] text-muted-foreground dark:text-white",
+              "truncate  text-[13px] text-muted-foreground dark:text-white",
             )}
           >
             {t("searchPlaceholderUnified")}
           </span>
         </span>
-        <kbd className="hidden shrink-0 items-center gap-0.5 self-center border-l border-border/40 px-2.5 font-mono text-[10px] font-bold uppercase tracking-wider text-muted-foreground dark:border-white/12 border-gray-200 dark:text-white text-gray-400 sm:inline-flex">
+        <kbd className="hidden shrink-0 items-center gap-0.5 self-center border-l border-border/40 px-2.5 font-display text-xs font-medium uppercase tracking-wider text-muted-foreground dark:border-white/12 border-gray-200 dark:text-white text-gray-400 sm:inline-flex">
           <span>⌘</span>
           <span>K</span>
         </kbd>

@@ -562,7 +562,7 @@ export default function ClientDashboardPage() {
                     >
                       <div className="min-w-0">
                         <p className="truncate font-semibold text-navy">{p.title}</p>
-                        <p className="font-mono text-[11px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {p.id}
                         </p>
                       </div>
@@ -611,7 +611,7 @@ export default function ClientDashboardPage() {
                   <CardHeader className="pb-2">
                     <div className="flex flex-wrap items-start justify-between gap-2">
                       <div>
-                        <p className="font-mono text-[11px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {p.id}
                         </p>
                         <CardTitle className="text-base text-navy">
@@ -798,7 +798,7 @@ export default function ClientDashboardPage() {
                     <tr key={p.id} className="hover:bg-slate-50/80">
                       <td className="px-4 py-3 sm:px-6">
                         <p className="font-medium text-navy">{p.title}</p>
-                        <p className="font-mono text-[11px] text-muted-foreground">
+                        <p className="text-[11px] text-muted-foreground">
                           {p.id}
                         </p>
                       </td>
@@ -860,7 +860,7 @@ export default function ClientDashboardPage() {
           {modifyProject && (
             <p className="mt-1 text-sm text-muted-foreground">
               {modifyProject.title}{" "}
-              <span className="font-mono">({modifyProject.id})</span>
+              <span className="">({modifyProject.id})</span>
             </p>
           )}
           <p className="mt-3 text-xs font-medium text-navy">

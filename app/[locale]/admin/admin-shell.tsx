@@ -46,7 +46,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
         await fetch("/api/admin/auth/logout", { method: "POST" });
         window.location.href = `/${locale}/admin/login`;
       }}
-      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-3 py-1.5 font-mono text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
+      className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border/70 bg-card/80 px-3 py-1.5 font-display text-[11px] font-black uppercase tracking-[0.18em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
     >
       <LogOut className="h-3.5 w-3.5" />
       <span className="hidden sm:inline">{label}</span>
@@ -94,6 +94,7 @@ const navDefs = [
   { href: "/admin/analytics", key: "analytics" as const, icon: BarChart3 },
   { href: "/admin/funnel", key: "funnel" as const, icon: BarChart3 },
   { href: "/admin/search-stats", key: "searchStats" as const, icon: Search },
+  { href: "/admin/recommendations", key: "recommendations" as const, icon: Sparkles },
   { href: "/admin/api-usage", key: "apiUsage" as const, icon: KeyRound },
   { href: "/admin/ab-test", key: "abTest" as const, icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
@@ -139,7 +140,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         <span className="text-lg font-black tracking-tight">
           THINK<span className="tkad-home-accent-text">AD</span>
         </span>
-        <span className="rounded-2xl border border-border/60 bg-card/70 px-2 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
+        <span className="rounded-2xl border border-border/60 bg-card/70 px-2 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
           ADMIN
         </span>
       </div>
@@ -154,7 +155,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
               href={`/${locale}${item.href}`}
               onClick={() => setSidebarOpen(false)}
               className={[
-                "group flex items-center gap-3 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-mono text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-[1px] hover:border-border",
+                "group flex items-center gap-3 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-display text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-all hover:-translate-y-[1px] hover:border-border",
                 active
                   ? "dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] shadow-[0_18px_70px_rgba(0,0,0,0.18)]"
                   : "",
@@ -170,7 +171,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       <div className="relative border-t border-border/60 p-3">
         <Link
           href={`/${locale}`}
-          className="flex items-center gap-2 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-mono text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
+          className="flex items-center gap-2 rounded-[14px] border border-border/70 bg-card/60 px-3 py-2.5 font-display text-[12px] font-black uppercase tracking-[0.12em] text-foreground shadow-sm backdrop-blur transition-colors hover:bg-card"
         >
           <ArrowLeft className="h-4 w-4" />
           {tNav("backToSite")}
@@ -180,7 +181,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen bg-background text-foreground">
+    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen bg-background font-sans text-foreground">
       <aside className="hidden w-72 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
@@ -203,7 +204,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </button>
-          <h1 className="min-w-0 flex-1 truncate font-mono text-[12px] font-bold uppercase tracking-[0.18em]">
+          <h1 className="min-w-0 flex-1 truncate font-display text-xs font-medium uppercase tracking-[0.18em]">
             {navItems.find((n) => isActive(n.href))?.label ?? "관리자"}
           </h1>
           <ThemeToggle className="rounded-full border border-border/70 bg-card/70 shadow-sm backdrop-blur" />

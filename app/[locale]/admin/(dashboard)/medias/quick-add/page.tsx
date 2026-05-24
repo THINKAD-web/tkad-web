@@ -195,12 +195,12 @@ export default function AdminMediaQuickAddPage() {
         <div>
           <Link
             href="/admin/medias"
-            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
+            className="mb-2 inline-flex items-center gap-1 border-b-2 border-border pb-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:text-primary hover:border-primary"
           >
             <ArrowLeft className="h-4 w-4" />
             매체 목록
           </Link>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ MEDIA QUICK ADD ]
           </p>
           <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
@@ -247,7 +247,7 @@ export default function AdminMediaQuickAddPage() {
             <code className="rounded bg-slate-100 px-1">nw_*</code>)는 대상이 아닙니다.
           </p>
           {reclassifyMsg ? (
-            <p className="border-2 border-border bg-muted/60 px-3 py-2 font-mono text-[11px] tracking-tight text-foreground">
+            <p className="border-2 border-border bg-muted/60 px-3 py-2 text-[11px] tracking-tight text-foreground">
               {reclassifyMsg}
             </p>
           ) : null}
@@ -300,7 +300,7 @@ export default function AdminMediaQuickAddPage() {
               setSubmitError(null);
             }}
             placeholder='{ "media_name": "...", "full_address": "...", "city": "서울", ... } 또는 [ {...}, {...} ]'
-            className="min-h-[420px] font-mono text-sm"
+            className="min-h-[420px] text-sm"
             spellCheck={false}
           />
           {parseState.kind === "syntax" && (
@@ -470,7 +470,7 @@ function PreviewCard({
               {preview.tags.slice(0, 16).map((t) => (
                 <span
                   key={t}
-                  className="rounded-full border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.12em] text-foreground"
+                  className="rounded-full border-2 border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.12em] text-foreground"
                 >
                   {t}
                 </span>

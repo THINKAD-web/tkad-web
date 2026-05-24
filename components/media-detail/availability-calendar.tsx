@@ -284,7 +284,7 @@ export function MediaAvailabilityCalendar({
     >
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             [ {t("eyebrow")} ]
           </p>
           <h2
@@ -297,7 +297,7 @@ export function MediaAvailabilityCalendar({
             />
             {t("title")}
           </h2>
-          <p className="mt-1 max-w-xl font-mono text-[11px] tracking-tight text-muted-foreground">
+          <p className="mt-1 max-w-xl text-[11px] tracking-tight text-muted-foreground">
             {`// `}
             {t("desc")}
           </p>
@@ -325,7 +325,7 @@ export function MediaAvailabilityCalendar({
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <span className="min-w-[96px] text-center font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-foreground">
+          <span className="min-w-[96px] text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
             {viewMonth.getFullYear()}.
             {String(viewMonth.getMonth() + 1).padStart(2, "0")}
           </span>
@@ -350,7 +350,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickThisMonth}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickThisMonth")}
         </button>
@@ -358,7 +358,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickNextMonth}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickNextMonth")}
         </button>
@@ -366,7 +366,7 @@ export function MediaAvailabilityCalendar({
           type="button"
           disabled={loading}
           onClick={onQuickTwoWeeks}
-          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-mono text-[10px] font-bold uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
+          className="rounded-full border border-border/80 bg-card/80 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground transition-colors hover:border-accent hover:text-accent disabled:opacity-40"
         >
           {t("quickTwoWeeks")}
         </button>
@@ -374,18 +374,18 @@ export function MediaAvailabilityCalendar({
 
       <div className="mt-6">
         {loading ? (
-          <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
+          <div className="flex items-center justify-center gap-2 rounded-[24px] border border-border/80 bg-muted/40 px-4 py-12 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
             <Loader2 className="h-4 w-4 animate-spin" />
             {t("loading")}
           </div>
         ) : error ? (
-          <p className="rounded-[22px] border border-accent/60 bg-card/80 px-4 py-3 font-mono text-[11px] tracking-tight text-accent shadow-xs backdrop-blur">
+          <p className="rounded-[22px] border border-accent/60 bg-card/80 px-4 py-3 text-[11px] tracking-tight text-accent shadow-xs backdrop-blur">
             {`// `}
             {t("error")}
           </p>
         ) : (
           <>
-            <p className="mb-3 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+            <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {rangeStart && !rangeEnd
                 ? t("rangeSelectEnd")
                 : t("rangeSelectStart")}
@@ -398,7 +398,7 @@ export function MediaAvailabilityCalendar({
                     <div
                       key={d}
                       className={cn(
-                        "font-mono text-[8px] font-black uppercase tracking-[0.2em]",
+                        "font-display text-[8px] font-black uppercase tracking-[0.2em]",
                         i === 6
                           ? "text-accent"
                           : i === 5
@@ -502,7 +502,7 @@ export function MediaAvailabilityCalendar({
               </div>
             </div>
 
-            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-mono text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
+            <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 font-display text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
               <span className="inline-flex items-center gap-2">
                 <span className="inline-block h-3 w-3 border border-border bg-card" />
                 {t("legendAvailable")}
@@ -536,7 +536,7 @@ export function MediaAvailabilityCalendar({
                   className="rounded-[18px] border border-border/80 bg-muted/30 px-4 py-3"
                   aria-live="polite"
                 >
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                     {t("rangeLabel")}
                   </p>
                   {rangeComplete && rangeStart && rangeEnd ? (
@@ -570,7 +570,7 @@ export function MediaAvailabilityCalendar({
                       </span>
                     </p>
                   )}
-                  <p className="mt-1 font-mono text-[10px] text-muted-foreground">
+                  <p className="mt-1 text-[10px] text-muted-foreground">
                     {mediaName}
                   </p>
                 </div>
@@ -580,19 +580,19 @@ export function MediaAvailabilityCalendar({
                 {contactHref ? (
                   <Link
                     href={contactHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-foreground bg-foreground px-4 py-2.5 text-center font-mono text-[10px] font-black uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-foreground bg-foreground px-4 py-2.5 text-center font-display text-[10px] font-black uppercase tracking-[0.2em] text-background transition-opacity hover:opacity-90"
                   >
                     {t("ctaInquiryPeriod")}
                   </Link>
                 ) : (
-                  <span className="inline-flex cursor-not-allowed items-center justify-center rounded-[14px] border border-border/50 bg-muted/40 px-4 py-2.5 font-mono text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
+                  <span className="inline-flex cursor-not-allowed items-center justify-center rounded-[14px] border border-border/50 bg-muted/40 px-4 py-2.5 font-display text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground">
                     {t("ctaInquiryPeriod")}
                   </span>
                 )}
                 {instantBookingEligible && bookHref ? (
                   <Link
                     href={bookHref}
-                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-accent bg-accent px-4 py-2.5 text-center font-mono text-[10px] font-black uppercase tracking-[0.2em] text-accent-foreground transition-opacity hover:opacity-95"
+                    className="inline-flex items-center justify-center gap-2 rounded-[14px] border border-accent bg-accent px-4 py-2.5 text-center font-display text-[10px] font-black uppercase tracking-[0.2em] text-accent-foreground transition-opacity hover:opacity-95"
                   >
                     {t("ctaInstantBook")}
                   </Link>

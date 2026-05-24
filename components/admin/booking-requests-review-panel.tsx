@@ -147,7 +147,7 @@ export function AdminBookingRequestsReviewPanel() {
         ) : error ? (
           <p className="text-sm text-rose-600">{error}</p>
         ) : items.length === 0 ? (
-          <p className="py-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+          <p className="py-4 text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {`// 현재 대기 중인 신청이 없습니다`}
           </p>
         ) : (
@@ -164,22 +164,22 @@ export function AdminBookingRequestsReviewPanel() {
                       <p className="font-bold text-foreground dark:text-hero-fg">
                         {it.mediaName}
                       </p>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         {it.mediaLocation}
                       </span>
                     </div>
                     <p className="text-xs text-foreground dark:text-hero-fg">
-                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                      <span className="font-display uppercase tracking-[0.14em] text-muted-foreground">
                         기간:
                       </span>{" "}
                       {fmt(it.startsAt)} → {fmt(it.endsAt)}{" "}
-                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                      <span className="font-display uppercase tracking-[0.14em] text-muted-foreground">
                         / 예산:
                       </span>{" "}
                       {fmtBudget(it.budgetWon)}
                     </p>
                     <p className="text-xs text-foreground dark:text-hero-fg">
-                      <span className="font-mono uppercase tracking-[0.14em] text-muted-foreground">
+                      <span className="font-display uppercase tracking-[0.14em] text-muted-foreground">
                         신청자:
                       </span>{" "}
                       {it.requesterName}
@@ -207,7 +207,7 @@ export function AdminBookingRequestsReviewPanel() {
                         {it.notes}
                       </p>
                     ) : null}
-                    <p className="font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
                       신청: {fmt(it.createdAt)}
                     </p>
                   </div>

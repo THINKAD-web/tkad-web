@@ -64,7 +64,7 @@ export function SeoContextualLinks({
       className="rounded-2xl border border-border/80 bg-card/40 p-4"
       aria-label={title}
     >
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
         {title}
       </p>
       <ul className="mt-3 flex flex-wrap gap-2">

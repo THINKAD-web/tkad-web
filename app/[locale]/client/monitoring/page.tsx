@@ -38,11 +38,10 @@ import {
   type CampaignMapPin,
 } from "@/lib/campaign-monitoring-mock";
 import {
-  CampaignMonitoringMap,
-  campaignMapProviderLabel,
-  getCampaignMonitoringMapProvider,
-  mediaLabel,
-} from "@/components/campaign-monitoring-map";
+  DarkCampaignMap,
+  getPublicMapProviderLabel,
+} from "@/components/public-map/dark-campaign-map";
+import { campaignMapProviderLabel, mediaLabel } from "@/components/campaign-monitoring-map";
 import { cn } from "@/lib/utils";
 
 function formatImp(n: number, isKo: boolean) {
@@ -197,12 +196,7 @@ export default function ClientMonitoringPage() {
                 {isKo ? "실시간 캠페인 모니터링" : "Live campaign monitoring"}
               </h1>
               <p className="text-xs text-muted-foreground">
-                {client.company} · {campaignMapProviderLabel(isKo)}
-                {getCampaignMonitoringMapProvider() === "kakao"
-                  ? isKo
-                    ? " · 카카오맵 JavaScript"
-                    : " · Kakao Maps JavaScript"
-                  : null}
+                {client.company} · {getPublicMapProviderLabel(isKo)}
               </p>
             </div>
           </div>
@@ -352,7 +346,7 @@ export default function ClientMonitoringPage() {
 
         <div className="grid gap-6 lg:grid-cols-5">
           <div className="space-y-3 lg:col-span-3">
-            <CampaignMonitoringMap
+            <DarkCampaignMap
               pins={pins}
               selectedId={selectedPinId}
               onSelectPin={onSelectPin}
@@ -445,7 +439,7 @@ function PinDetailCard({ pin, isKo }: { pin: CampaignMapPin; isKo: boolean }) {
       <CardContent className="space-y-4 text-sm">
         <div className="flex flex-wrap items-center gap-2 text-xs text-navy/70">
           <MapPin className="h-3.5 w-3.5 shrink-0 text-gold-dark" />
-          <span className="font-mono">
+          <span className="">
             {pin.lat.toFixed(5)}, {pin.lng.toFixed(5)}
           </span>
         </div>

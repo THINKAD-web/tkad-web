@@ -1,7 +1,6 @@
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { AbHeroImpression } from "@/components/ab/ab-tracker";
-import { HomeHeroMarquee } from "@/components/home/home-hero-marquee";
 import { HomeHeroMapSlot } from "@/components/home/home-hero-map-slot";
 import { HomeHeroCta } from "@/components/home/home-hero-cta";
 import { getServerAbVariant } from "@/lib/ab-server";
@@ -10,19 +9,15 @@ import { fetchHomeHeroInventoryStats } from "@/lib/home-hero-stats";
 import type { HomeHeroMapPin } from "@/lib/public-media-catalog";
 import { accentTag } from "@/lib/render-accent-title";
 
-const HERO_MIN_HEIGHT = "calc(100dvh - var(--nav-height, 4rem))";
-const MARQUEE_MASK =
-  "linear-gradient(to right, transparent, black 10%, black 90%, transparent)";
+const HERO_MIN_HEIGHT = "min(100dvh, 720px)";
 
 type Props = {
   locale: string;
-  marqueeImageUrls: string[];
   mapPins: HomeHeroMapPin[];
 };
 
 export async function HomeHeroServer({
   locale,
-  marqueeImageUrls,
   mapPins,
 }: Props) {
   const t = await getTranslations("homePage");
@@ -50,34 +45,15 @@ export async function HomeHeroServer({
       <AbHeroImpression page="/" />
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 z-0 flex h-full w-full items-center justify-center overflow-hidden opacity-[0.32] blur-[2px]"
-        style={{
-          maskImage: MARQUEE_MASK,
-          WebkitMaskImage: MARQUEE_MASK,
-          maskSize: "100% 100%",
-          WebkitMaskSize: "100% 100%",
-        }}
-      >
-        <HomeHeroMarquee imageUrls={marqueeImageUrls} />
-      </div>
-
-      <div aria-hidden className="absolute inset-0 z-[1] hidden tkad-neon-depth dark:block" />
-      <div aria-hidden className="absolute inset-0 z-[1] hidden opacity-20 tkad-neon-grid dark:block" />
-      <div
-        aria-hidden
-        className="absolute inset-0 z-[1] hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
-      />
-      <div
-        aria-hidden
-        className="absolute inset-0 z-[1] bg-gradient-to-b from-gray-50/20 via-gray-50/60 to-gray-100 dark:bg-[linear-gradient(to_bottom,rgba(5,5,10,0.55),rgba(5,5,10,0.82),rgba(5,5,10,0.94))]"
+        className="absolute inset-0 z-[1] bg-gradient-to-b from-gray-50 via-gray-50/95 to-gray-100 dark:bg-[linear-gradient(to_bottom,rgba(5,5,10,0.92),rgba(5,5,10,0.98))]"
       />
 
-        <div className="relative z-[2] mx-auto w-full max-w-7xl px-6 py-10 lg:px-8">
+        <div className="relative z-[2] mx-auto w-full max-w-6xl px-4 py-8 sm:px-6 sm:py-10">
           <div className="flex flex-wrap items-center gap-3">
             {liveItems.map((item) => (
               <div
                 key={item.label}
-                className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-100 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-gray-700 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-white"
+                className="inline-flex items-center gap-2 rounded-2xl border border-gray-200 bg-gray-100 px-3 py-2 font-display text-xs font-medium uppercase tracking-widest text-gray-700 backdrop-blur-sm dark:border-white/20 dark:bg-white/10 dark:text-white"
               >
                 {item.live ? (
                   <span className="inline-flex items-center gap-1.5">
@@ -93,18 +69,18 @@ export async function HomeHeroServer({
                 <span className="tabular-nums text-gray-900 dark:text-white">{item.value}</span>
               </div>
             ))}
-            <p className="hidden font-mono text-[11px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/50 sm:block">
+            <p className="hidden font-display text-xs font-medium uppercase tracking-widest text-gray-400 dark:text-white/50 sm:block">
               {t("heroVerifiedOnly")}
             </p>
           </div>
 
-          <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
-            <div className="flex flex-col gap-6">
-              <p className="font-mono text-xs tracking-widest text-gray-400 dark:text-white/50">
+          <div className="mt-6 grid grid-cols-1 items-center gap-8 lg:grid-cols-2 lg:gap-10">
+            <div className="flex flex-col gap-5">
+              <p className="text-xs tracking-widest text-gray-400 dark:text-white/50">
                 {t("heroEyebrow")}
               </p>
 
-              <h1 className="text-balance text-5xl font-black leading-tight tracking-tight lg:text-6xl">
+              <h1 className="text-balance text-4xl font-black leading-tight tracking-tight sm:text-5xl lg:text-6xl">
                 {t.rich("heroTitleLine1", { accent: accentTag })}
                 <br />
                 {t("heroTitleLine2")}
@@ -131,7 +107,7 @@ export async function HomeHeroServer({
                 {tags.map((tag) => (
                   <span
                     key={tag}
-                    className="border dark:border-white/20 border-gray-300 px-3 py-1 font-mono text-xs uppercase tracking-wide dark:text-white text-gray-500"
+                    className="border dark:border-white/20 border-gray-300 px-3 py-1 font-display text-xs uppercase tracking-wide dark:text-white text-gray-500"
                   >
                     {tag}
                   </span>
@@ -143,6 +119,7 @@ export async function HomeHeroServer({
               pins={mapPins}
               mapTitle={t("heroMapTitle")}
               mapHint={t("heroMapHint", { count: mapPins.length })}
+              className="max-h-[220px] sm:max-h-[260px] lg:max-h-none"
             />
           </div>
         </div>

@@ -102,6 +102,7 @@ export function FooterBrutal() {
     { href: "/privacy", label: t("footer.privacy") },
     { href: "/terms", label: t("footer.terms") },
     { href: "/refund", label: t("footer.refund") },
+    { href: "/guarantee", label: t("footer.guarantee") },
   ] as const;
 
   return (
@@ -125,7 +126,7 @@ export function FooterBrutal() {
             <div>
               <Link
                 href="/"
-                className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+                className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
               >
                 THINK
                 <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
@@ -135,7 +136,7 @@ export function FooterBrutal() {
               <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
                 {t("footer.description")}
               </p>
-              <div className="mt-3 space-y-1 font-mono text-[11px] text-gray-500 dark:text-white/50">
+              <div className="mt-3 space-y-1 text-[11px] text-gray-500 dark:text-white/50">
                 <p>{t("footer.companyNameShort")}</p>
                 <p>{t("footer.bizNumber")}</p>
               </div>
@@ -217,7 +218,7 @@ export function FooterBrutal() {
             <div>
               <Link
                 href="/"
-                className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+                className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
               >
                 THINK
                 <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">

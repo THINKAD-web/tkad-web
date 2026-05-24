@@ -3,7 +3,7 @@ import type { AppUserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { issueEmailVerification } from "@/lib/email-verification";
-import { rateLimit } from "@/lib/rate-limit";
+import { enforceRateLimit } from "@/lib/rate-limit";
 import {
   USER_SESSION_COOKIE,
   createSessionRecord,
@@ -52,15 +52,13 @@ const Body = z.object({
   inviteRefUserId: z.string().min(8).max(64).optional(),
 });
 
-const limiter = rateLimit({ limit: 5, windowMs: 60 * 60 * 1000 });
 
 export async function POST(req: Request) {
   try {
     const ip = getClientIp(req);
-    if (!limiter.check(`register:${ip}`)) {
-      return apiError("RATE_LIMITED", 429, {
-        message: "너무 많은 요청입니다. 잠시 후 다시 시도해주세요.",
-      });
+    const rl = await enforceRateLimit("authRegister", ip);
+    if (!rl.ok) {
+      return apiError("RATE_LIMITED", rl.status, { message: rl.message });
     }
 
     const body = await readJson(req);

@@ -45,7 +45,7 @@ export function HomeVerificationSteps() {
               {/* Big step number */}
               <div
                 aria-hidden
-                className="pointer-events-none absolute right-4 top-3 font-mono text-[44px] font-black leading-none tracking-tight dark:text-white text-gray-300"
+                className="pointer-events-none absolute right-4 top-3 text-[44px] font-black leading-none tracking-tight dark:text-white text-gray-300"
               >
                 {item.step}
               </div>
@@ -69,7 +69,7 @@ export function HomeVerificationSteps() {
                   </motion.div>
 
                   <div className="min-w-0">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       STEP {item.step}
                     </p>
                     <h3 className="mt-1 text-lg font-black tracking-tight dark:text-white text-gray-900">

@@ -577,11 +577,7 @@ export default function AdminNetworkEditor(props: Props) {
         <button
           type="button"
           onClick={() => setActiveTab("form")}
-          className={`flex-1 rounded-md px-3 py-1.5 ${
-            activeTab === "form"
-              ? "border-2 border-border bg-card text-foreground shadow-sm"
-              : "text-slate-500 hover:bg-slate-100"
-          }`}
+          className={`flex-1 rounded-md px-3 py-1.5 ${ activeTab === "form" ? "border-2 border-border bg-card text-foreground shadow-sm" : "text-slate-500 hover:bg-slate-100" }`}
         >
           폼 편집
         </button>
@@ -591,11 +587,7 @@ export default function AdminNetworkEditor(props: Props) {
             setActiveTab("json");
             ensureJsonInitialized();
           }}
-          className={`flex-1 rounded-md px-3 py-1.5 ${
-            activeTab === "json"
-              ? "border-2 border-border bg-card text-foreground shadow-sm"
-              : "text-slate-500 hover:bg-slate-100"
-          }`}
+          className={`flex-1 rounded-md px-3 py-1.5 ${ activeTab === "json" ? "border-2 border-border bg-card text-foreground shadow-sm" : "text-slate-500 hover:bg-slate-100" }`}
         >
           JSON 편집
         </button>
@@ -611,7 +603,7 @@ export default function AdminNetworkEditor(props: Props) {
               value={jsonText}
               onChange={(e) => onJsonChange(e.target.value)}
               spellCheck={false}
-              className="min-h-[420px] font-mono text-xs leading-relaxed"
+              className="min-h-[420px] text-xs leading-relaxed"
               placeholder="{ ... }"
             />
             {jsonError && (
@@ -751,7 +743,7 @@ export default function AdminNetworkEditor(props: Props) {
             <p className="text-xs text-slate-500">{t("packageOptionsHint")}</p>
             <Textarea
               rows={5}
-              className="font-mono text-xs"
+              className="text-xs"
               value={packageOptionsText}
               onChange={(e) => setPackageOptionsText(e.target.value)}
               placeholder="[]"

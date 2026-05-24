@@ -283,7 +283,7 @@ export default function PartnerPortalPage() {
             <header>
               <div className="mb-2 flex flex-wrap gap-2">
                 <span className="border-0 bg-hero-void/90 dark:text-white text-gray-900">{t("loginBadge")}</span>
-                <span className="border-2 border-border bg-card px-2 py-0.5 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-foreground">
+                <span className="border-2 border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
                   {t("loginPartnerOnly")}
                 </span>
               </div>
@@ -317,7 +317,7 @@ export default function PartnerPortalPage() {
                       {t("email")}
                     </label>
                     <input
-                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="email"
                       autoComplete="email"
                       value={email}
@@ -330,7 +330,7 @@ export default function PartnerPortalPage() {
                       {t("password")}
                     </label>
                     <input
-                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                       type="password"
                       autoComplete="current-password"
                       value={password}
@@ -373,7 +373,7 @@ export default function PartnerPortalPage() {
                     </p>
                   </div>
                   <input
-                      className="h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
@@ -603,7 +603,7 @@ export default function PartnerPortalPage() {
                     <div key={c.id} className="border-2 border-border bg-card">
                       <header className="pb-2">
                         <div className="flex flex-wrap items-start justify-between gap-2">
-                          <p className="font-mono text-[11px] text-muted-foreground">
+                          <p className="text-[11px] text-muted-foreground">
                             {c.id}
                           </p>
                           <span className={cn("border-0", st.className)}>
@@ -776,7 +776,7 @@ export default function PartnerPortalPage() {
               {partner.sharedCampaigns.map((c) => (
                 <div key={c.id} className="border-2 border-border bg-card">
                   <header className="border-b-2 border-border p-5">
-                    <p className="font-mono text-[11px] text-muted-foreground">
+                    <p className="text-[11px] text-muted-foreground">
                       {c.id}
                     </p>
                     <h3 className="text-base text-foreground">
@@ -889,7 +889,7 @@ export default function PartnerPortalPage() {
                 {t("mediaName")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.name}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, name: e.target.value }))
@@ -901,7 +901,7 @@ export default function PartnerPortalPage() {
                 {t("mediaType")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.type}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, type: e.target.value }))
@@ -913,7 +913,7 @@ export default function PartnerPortalPage() {
                 {t("mediaLocation")}
               </label>
               <textarea
-                      className="mt-1 min-h-[72px] w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="mt-1 min-h-[72px] w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 value={mediaForm.location}
                 onChange={(e) =>
                   setMediaForm((f) => ({ ...f, location: e.target.value }))
@@ -925,7 +925,7 @@ export default function PartnerPortalPage() {
                 {t("mediaPanels")}
               </label>
               <input
-                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                      className="mt-1 h-11 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
                 inputMode="numeric"
                 value={mediaForm.panelCount}
                 onChange={(e) =>

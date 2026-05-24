@@ -1,5 +1,20 @@
 // Shared types/constants for media networks (safe for client components)
 
+import type { MediaItem } from "@/lib/media-data";
+import {
+  mediaItemDetailPath,
+  mediaPublicSlug,
+  shouldRedirectMediaIdToSlug,
+  isMediaCuid,
+} from "@/lib/media-slug";
+
+export {
+  mediaItemDetailPath,
+  mediaPublicSlug,
+  shouldRedirectMediaIdToSlug,
+  isMediaCuid,
+};
+
 export const NETWORK_CATALOG_ID_PREFIX = "nw_";
 
 export const NETWORK_TYPE_CODES = [
@@ -34,12 +49,6 @@ export function parseNetworkRawId(catalogId: string): string | null {
   if (!catalogId.startsWith(NETWORK_CATALOG_ID_PREFIX)) return null;
   const rest = catalogId.slice(NETWORK_CATALOG_ID_PREFIX.length);
   return rest.length > 0 ? rest : null;
-}
-
-export function mediaItemDetailPath(id: string): string {
-  const raw = parseNetworkRawId(id);
-  if (raw) return `/media/network/${raw}`;
-  return `/media/${id}`;
 }
 
 export function inferRegionCodeFromLabels(labels: string[]): string {
@@ -111,8 +120,6 @@ export function computeNetworkMonthlyPrice(
   }
   return 0;
 }
-
-import type { MediaItem } from "@/lib/media-data";
 
 export function computeNetworkMonthlyFromMediaItem(
   m: MediaItem,

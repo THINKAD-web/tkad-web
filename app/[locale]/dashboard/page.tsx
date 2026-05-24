@@ -173,7 +173,7 @@ export default function AdvertiserDashboardPage() {
           />
           <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
             <div className="min-w-0">
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.24em] dark:text-white text-gray-500">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-500">
                 {isKo ? "// 광고주 포털" : "// Advertiser portal"}
               </p>
               <h1 className="mt-3 text-[clamp(2rem,4vw,3.25rem)] font-[950] leading-[0.95] tracking-[-0.05em] dark:text-white text-gray-900">
@@ -213,7 +213,7 @@ export default function AdvertiserDashboardPage() {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 font-mono text-xs font-bold uppercase tracking-[0.14em] backdrop-blur transition-all sm:py-5 sm:text-[13px]",
+                    "tkad-glass-surface flex items-center justify-center gap-2 rounded-[22px] border px-4 py-4 font-display text-xs font-medium uppercase tracking-[0.14em] backdrop-blur transition-all sm:py-5 sm:text-[13px]",
                     "text-foreground hover:-translate-y-0.5 hover:border-primary/30",
                     "muted" in item && item.muted && "text-muted-foreground",
                   )}
@@ -257,7 +257,7 @@ export default function AdvertiserDashboardPage() {
                       type="button"
                       onClick={() => setTab(t.key)}
                       className={cn(
-                        "shrink-0 rounded-full border px-4 py-2 font-mono text-xs font-bold uppercase tracking-[0.16em] transition-all sm:px-5 sm:py-2.5 sm:text-[13px]",
+                        "shrink-0 rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all sm:px-5 sm:py-2.5 sm:text-[13px]",
                         tab === t.key
                           ? "border-primary/45 bg-primary/15 text-primary"
                           : "border-border bg-muted/30 text-muted-foreground hover:border-primary/25 hover:text-foreground",
@@ -305,14 +305,14 @@ export default function AdvertiserDashboardPage() {
                         <span className="text-lg font-bold text-foreground">
                           {row.title}
                         </span>
-                        <span className="font-mono text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground">
                           {row.date.slice(0, 10)}
                         </span>
                       </div>
                       <p className="mt-3 text-base leading-relaxed text-muted-foreground">
                         {row.body}
                       </p>
-                      <p className="mt-4 font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                      <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">
                         {row.status}
                       </p>
                     </article>

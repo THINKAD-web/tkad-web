@@ -20,12 +20,13 @@ import {
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import { MediaCatalogListCard } from "@/components/media/media-catalog-list-card";
 import { MediaScarcitySection } from "@/components/media-scarcity-section";
 import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summary";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { INDUSTRY_BUDGET_SESSION_KEY } from "@/lib/industry-landing";
 import { BtnBlock } from "@/components/brutalist";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   CategoryExploreHero,
   CategoryHeroCtaRow,
@@ -100,7 +101,25 @@ import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { MobileMediaBrowseBar } from "@/components/mobile/mobile-media-browse-bar";
+import { MobilePullToRefresh } from "@/components/mobile/mobile-pull-to-refresh";
 import { KEYWORD_FILTER_SEARCH_DEBOUNCE_MS } from "@/lib/media-keyword-filter-logic";
+import {
+  MediaCategoryBrowseChips,
+  type BrowseCategoryChip,
+} from "@/components/media-category-browse-chips";
+import { MediaCategoryFilterPanel } from "@/components/media-category-filter-panel";
+import { CategoryButtonGrid } from "@/components/category/category-button-grid";
+import {
+  HOME_MEDIA_TYPE_GRID,
+  HOME_TARGET_GRID,
+} from "@/lib/category-grid-config";
+import {
+  chipToCategorySlugs,
+  mediaMatchesCategorySlugs,
+  mediaMatchesTargetSlugs,
+} from "@/lib/media-categories";
+import { mediaMatchesCategorySlug } from "@/lib/media-category-landing";
 
 function subscribeMediaLg(cb: () => void) {
   const mq = window.matchMedia("(min-width: 1024px)");
@@ -128,9 +147,19 @@ export default function MediaBrowseClient({
   const t = useTranslations();
   const tMedia = useTranslations("media");
   const locale = useLocale();
+  const router = useRouter();
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
+  const catFromUrl = searchParams.get("cat") ?? "";
+  const targetFromUrl = searchParams.get("target") ?? "";
+  const chipFromUrl = (searchParams.get("chip") ?? "all") as BrowseCategoryChip;
+  const instantFromUrl = searchParams.get("instant") === "1";
+
+  const [categoryChip, setCategoryChip] = useState<BrowseCategoryChip>("all");
+  const [selectedMediaSlugs, setSelectedMediaSlugs] = useState<string[]>([]);
+  const [selectedTargetSlugs, setSelectedTargetSlugs] = useState<string[]>([]);
+  const [categoryFiltersOpen, setCategoryFiltersOpen] = useState(false);
 
   const [searchTarget, setSearchTarget] = useState<string | null>(null);
   const [catalogSearchQuery, setCatalogSearchQuery] = useState("");
@@ -150,8 +179,9 @@ export default function MediaBrowseClient({
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("mediaCatalogLayout");
       if (saved === "grid" || saved === "compact") return saved;
+      if (window.matchMedia("(max-width: 767px)").matches) return "compact";
     }
-    return "grid";
+    return "compact";
   });
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
@@ -181,6 +211,7 @@ export default function MediaBrowseClient({
     | "ratingDesc"
   >("default");
   const [instantOnlyFilter, setInstantOnlyFilter] = useState(false);
+  const [mobileRegionChip, setMobileRegionChip] = useState("");
   const { summary: availabilitySummary } = useMediaAvailabilitySummary();
 
   /**
@@ -243,6 +274,25 @@ export default function MediaBrowseClient({
     setCatalogSearchQuery(next);
     setDebouncedCatalogSearch(next);
   }, [qFromUrl]);
+
+  useEffect(() => {
+    if (chipFromUrl && chipFromUrl !== "all") {
+      setCategoryChip(chipFromUrl);
+    }
+    if (catFromUrl) {
+      setSelectedMediaSlugs(
+        catFromUrl.split(",").map((s) => s.trim()).filter(Boolean),
+      );
+    }
+    if (targetFromUrl) {
+      setSelectedTargetSlugs(
+        targetFromUrl.split(",").map((s) => s.trim()).filter(Boolean),
+      );
+    }
+    if (instantFromUrl) {
+      setInstantOnlyFilter(true);
+    }
+  }, [catFromUrl, targetFromUrl, chipFromUrl, instantFromUrl]);
 
   const filterState = useMemo(
     () => ({
@@ -325,12 +375,42 @@ export default function MediaBrowseClient({
     return data;
   }, [effectiveCatalog, searchTarget, debouncedCatalogSearch]);
 
+  const categoryChipSlugs = useMemo(
+    () => chipToCategorySlugs(categoryChip),
+    [categoryChip],
+  );
+
+  const categoryFiltered = useMemo(() => {
+    let data = searchFiltered;
+    if (categoryChipSlugs.length > 0) {
+      data = data.filter((m) =>
+        categoryChipSlugs.some((slug) => mediaMatchesCategorySlug(m, slug)),
+      );
+    }
+    if (selectedMediaSlugs.length > 0) {
+      data = data.filter((m) =>
+        mediaMatchesCategorySlugs(m.mediaCategory, selectedMediaSlugs),
+      );
+    }
+    if (selectedTargetSlugs.length > 0) {
+      data = data.filter((m) =>
+        mediaMatchesTargetSlugs(m.targetCategory, selectedTargetSlugs),
+      );
+    }
+    return data;
+  }, [
+    searchFiltered,
+    categoryChipSlugs,
+    selectedMediaSlugs,
+    selectedTargetSlugs,
+  ]);
+
   const advancedFiltered = useMemo(
     () =>
-      searchFiltered.filter((m) =>
+      categoryFiltered.filter((m) =>
         passesMediaAdvancedFilters(m, filterState, bounds),
       ),
-    [searchFiltered, filterState, bounds],
+    [categoryFiltered, filterState, bounds],
   );
 
   const strictPrecisionFiltered = useMemo(
@@ -353,14 +433,37 @@ export default function MediaBrowseClient({
   const filtered = useMemo(() => {
     if (strictPrecisionFiltered.length > 0) return strictPrecisionFiltered;
     if (advancedFiltered.length > 0) return advancedFiltered;
+    if (categoryFiltered.length > 0) return categoryFiltered;
     if (searchFiltered.length > 0) return searchFiltered;
     return effectiveCatalog;
   }, [
     strictPrecisionFiltered,
     advancedFiltered,
+    categoryFiltered,
     searchFiltered,
     effectiveCatalog,
   ]);
+
+  const toggleMediaCategorySlug = useCallback((slug: string) => {
+    setSelectedMediaSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+    setCatalogPage(1);
+  }, []);
+
+  const toggleTargetCategorySlug = useCallback((slug: string) => {
+    setSelectedTargetSlugs((prev) =>
+      prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug],
+    );
+    setCatalogPage(1);
+  }, []);
+
+  const clearCategoryFilters = useCallback(() => {
+    setCategoryChip("all");
+    setSelectedMediaSlugs([]);
+    setSelectedTargetSlugs([]);
+    setCatalogPage(1);
+  }, []);
 
   const sortedFiltered = useMemo(() => {
     const arr = [...filtered];
@@ -393,13 +496,22 @@ export default function MediaBrowseClient({
   }, [filtered, sortBy]);
 
   const catalogListForDisplay = useMemo(() => {
-    if (!instantOnlyFilter || !availabilitySummary?.items) {
-      return sortedFiltered;
+    let base = sortedFiltered;
+    if (instantOnlyFilter && availabilitySummary?.items) {
+      base = sortedFiltered.filter(
+        (m) => availabilitySummary.items[m.id]?.tier === "instant",
+      );
     }
-    return sortedFiltered.filter(
-      (m) => availabilitySummary.items[m.id]?.tier === "instant",
-    );
-  }, [sortedFiltered, instantOnlyFilter, availabilitySummary]);
+    if (mobileRegionChip.trim()) {
+      const chip = mobileRegionChip.toLowerCase();
+      base = base.filter((m) =>
+        [m.region, m.district, m.city, m.name, m.nameEn].some((v) =>
+          v?.toLowerCase().includes(chip),
+        ),
+      );
+    }
+    return base;
+  }, [sortedFiltered, instantOnlyFilter, availabilitySummary, mobileRegionChip]);
 
   /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드·지도 최소 노출 유지 */
   const { gridDisplayList, catalogMinPadActive } = useMemo(() => {
@@ -439,6 +551,7 @@ export default function MediaBrowseClient({
     sortBy,
     filters,
     instantOnlyFilter,
+    mobileRegionChip,
   ]);
 
   const pagedCatalog = useMemo(() => {
@@ -526,9 +639,28 @@ export default function MediaBrowseClient({
     setMapPopupOpen(true);
   }, []);
 
+  const handleMobileRefresh = useCallback(async () => {
+    router.refresh();
+    await new Promise((r) => setTimeout(r, 400));
+  }, [router]);
+
+  const sortOptions = useMemo(
+    () => [
+      { value: "default", label: t("media.sortDefault") },
+      { value: "newest", label: t("media.sortNewest") },
+      { value: "priceAsc", label: t("media.sortPriceAsc") },
+      { value: "priceDesc", label: t("media.sortPriceDesc") },
+      { value: "trafficDesc", label: t("media.sortTrafficDesc") },
+      { value: "ratingDesc", label: t("media.sortRatingDesc") },
+    ],
+    [t],
+  );
+
   return (
+    <MobilePullToRefresh onRefresh={handleMobileRefresh}>
     <>
       {hideHero ? null : (
+        <div className="hidden md:block">
         <CategoryExploreHero
           code="// 01 · MEDIA"
           showBeta
@@ -589,10 +721,47 @@ export default function MediaBrowseClient({
             </Link>
           </CategoryHeroCtaRow>
         </CategoryExploreHero>
+        </div>
       )}
 
-      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-10 sm:py-14">
+      <section className="tkad-media-browse-main border-t border-border/60 bg-card py-6 sm:py-14 md:py-10">
+        <MobileMediaBrowseBar
+          isKo={isKo}
+          locale={locale}
+          activeChip={mobileRegionChip}
+          onChipChange={(chip) => {
+            setMobileRegionChip(chip);
+            setCatalogPage(1);
+          }}
+          categoryChip={categoryChip}
+          onCategoryChange={(chip) => {
+            setCategoryChip(chip);
+            setCatalogPage(1);
+          }}
+          sortBy={sortBy}
+          onSortChange={(v) => setSortBy(v as typeof sortBy)}
+          onFilterOpen={() => setCategoryFiltersOpen(true)}
+          cardLayout={catalogCardLayout}
+          onCardLayoutChange={setCatalogCardLayout}
+          resultCount={gridDisplayList.length}
+        />
         <div className="ui-container">
+            <div className="hidden md:block">
+              <div className="mb-8 space-y-8">
+                <CategoryButtonGrid
+                  items={HOME_MEDIA_TYPE_GRID}
+                  locale={locale}
+                  title={isKo ? "매체 유형" : "Media types"}
+                  layout="row"
+                />
+                <CategoryButtonGrid
+                  items={HOME_TARGET_GRID}
+                  locale={locale}
+                  title={isKo ? "캠페인 목적" : "Campaign goals"}
+                  layout="row"
+                />
+              </div>
+            </div>
             <div className="flex flex-col gap-6">
               <MediaScarcitySection
                 catalog={effectiveCatalog}
@@ -620,12 +789,51 @@ export default function MediaBrowseClient({
                 </p>
               </aside>
 
+              <MediaCategoryBrowseChips
+                locale={locale}
+                active={categoryChip}
+                onChange={(chip) => {
+                  setCategoryChip(chip);
+                  setCatalogPage(1);
+                }}
+                className="px-0.5"
+              />
+
+              <div className="flex flex-col gap-6 lg:flex-row">
+                {lgUp ? (
+                  <div className="hidden w-64 shrink-0 lg:block">
+                    <MediaCategoryFilterPanel
+                      locale={locale}
+                      selectedMediaSlugs={selectedMediaSlugs}
+                      selectedTargetSlugs={selectedTargetSlugs}
+                      onToggleMedia={toggleMediaCategorySlug}
+                      onToggleTarget={toggleTargetCategorySlug}
+                      onClear={clearCategoryFilters}
+                      className="sticky top-24 rounded-2xl border border-border bg-card p-4"
+                    />
+                  </div>
+                ) : null}
+
+                <div className="min-w-0 flex-1">
+              {!lgUp ? (
+                <div className="mb-4">
+                  <BtnBlock
+                    type="button"
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setCategoryFiltersOpen(true)}
+                  >
+                    {isKo ? "카테고리·목적 필터" : "Category filters"}
+                  </BtnBlock>
+                </div>
+              ) : null}
+
               {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
               <div className="hidden flex-col gap-3">
                 <button
                   type="button"
                   onClick={togglePrecisionFilters}
-                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
+                  className="inline-flex w-full items-center justify-center gap-2 border-2 border-border bg-card px-4 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background sm:w-auto sm:self-start"
                 >
                   {precisionFiltersOpen
                     ? t("media.advancedFiltersHide")
@@ -641,7 +849,7 @@ export default function MediaBrowseClient({
                     <p className="text-[15px] font-bold leading-snug tracking-tight text-foreground sm:text-base">
                       {t("media.advancedFiltersCollapsedHint")}
                     </p>
-                    <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersCollapsedSubhint")}
                     </p>
                   </div>
@@ -651,10 +859,10 @@ export default function MediaBrowseClient({
               {lgUp && precisionFiltersOpen ? (
                 <div className="space-y-4">
                   <div className="border-2 border-border bg-card px-5 py-4">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       [ {t("media.advancedFiltersSectionLabel")} ]
                     </p>
-                    <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
                     <p className="mt-3 text-sm leading-relaxed text-foreground">
@@ -678,7 +886,7 @@ export default function MediaBrowseClient({
                     <SheetTitle className="text-left text-base font-bold tracking-tight text-foreground">
                       {t("media.advancedFiltersSectionLabel")}
                     </SheetTitle>
-                    <p className="font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <p className="text-[11px] tracking-tight text-muted-foreground">
                       {t("media.advancedFiltersSectionSubtext")}
                     </p>
                     <p className="pt-1 text-[12px] leading-relaxed text-foreground">
@@ -696,6 +904,45 @@ export default function MediaBrowseClient({
                       className="w-full"
                     >
                       필터 적용하기
+                    </BtnBlock>
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <Sheet
+                open={categoryFiltersOpen && !lgUp}
+                onOpenChange={setCategoryFiltersOpen}
+              >
+                <SheetContent
+                  side="bottom"
+                  showCloseButton
+                  className="max-h-[85vh] overflow-y-auto border-t-2 border-border bg-card p-4"
+                >
+                  <SheetHeader className="pb-3 text-left">
+                    <SheetTitle>
+                      {isKo ? "카테고리·캠페인 목적" : "Categories"}
+                    </SheetTitle>
+                  </SheetHeader>
+                  <MediaCategoryFilterPanel
+                    locale={locale}
+                    selectedMediaSlugs={selectedMediaSlugs}
+                    selectedTargetSlugs={selectedTargetSlugs}
+                    onToggleMedia={toggleMediaCategorySlug}
+                    onToggleTarget={toggleTargetCategorySlug}
+                    onClear={() => {
+                      clearCategoryFilters();
+                      setCategoryFiltersOpen(false);
+                    }}
+                  />
+                  <div className="sticky bottom-0 mt-4 border-t border-border bg-card pt-3">
+                    <BtnBlock
+                      type="button"
+                      variant="primary"
+                      size="md"
+                      className="w-full"
+                      onClick={() => setCategoryFiltersOpen(false)}
+                    >
+                      {isKo ? "적용" : "Apply"}
                     </BtnBlock>
                   </div>
                 </SheetContent>
@@ -796,11 +1043,7 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("list")}
-                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                          browseMode === "list"
-                            ? "bg-hero-void text-hero-fg"
-                            : "text-foreground hover:bg-muted"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${ browseMode === "list" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
                       >
                         <LayoutList className="h-3.5 w-3.5" />
                         {t("media.browseViewList")}
@@ -808,11 +1051,7 @@ export default function MediaBrowseClient({
                       <button
                         type="button"
                         onClick={() => setBrowseMode("map")}
-                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-mono text-[11px] uppercase tracking-[0.18em] transition-colors ${
-                          browseMode === "map"
-                            ? "bg-hero-void text-hero-fg"
-                            : "text-foreground hover:bg-muted"
-                        }`}
+                        className={`inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${ browseMode === "map" ? "bg-hero-void text-hero-fg" : "text-foreground hover:bg-muted" }`}
                       >
                         <MapIcon className="h-3.5 w-3.5" />
                         {t("media.browseViewMap")}
@@ -870,7 +1109,7 @@ export default function MediaBrowseClient({
                     className="mb-4 flex flex-col gap-3 border-2 border-accent bg-card px-4 py-3 text-sm leading-relaxed text-foreground sm:flex-row sm:items-center sm:justify-between"
                   >
                     <p className="min-w-0">
-                      <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                      <span className="mr-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                         {`// RELAXED`}
                       </span>
                       {tMedia("precisionFilterRelaxedBanner")}
@@ -893,7 +1132,7 @@ export default function MediaBrowseClient({
                     role="status"
                     className="mb-4 border-2 border-border bg-muted px-4 py-3 text-sm leading-relaxed text-foreground"
                   >
-                    <span className="mr-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    <span className="mr-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       {`// PADDED`}
                     </span>
                     {tMedia("catalogMinPadBanner", {
@@ -905,7 +1144,7 @@ export default function MediaBrowseClient({
 
                 {gridDisplayList.length === 0 ? (
                   <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 border-2 border-border bg-muted px-6 py-20 text-center sm:px-10">
-                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                       {`// 0 RESULTS`}
                     </p>
                     <p className="max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
@@ -954,7 +1193,7 @@ export default function MediaBrowseClient({
                                     ? mapSelectedMedia.name
                                     : mapSelectedMedia.nameEn}
                                 </h3>
-                                <p className="mt-1.5 font-mono text-sm font-bold tabular-nums text-foreground">
+                                <p className="mt-1.5 font-display text-sm font-bold tabular-nums text-foreground">
                                   {formatCatalogPriceFieldWon(mapSelectedMedia.price)}
                                   <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                                     ·{" "}
@@ -965,7 +1204,7 @@ export default function MediaBrowseClient({
                                     )}
                                   </span>
                                 </p>
-                                <p className="mt-1.5 flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                                <p className="mt-1.5 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                                   <Users
                                     className="h-3 w-3 shrink-0 text-accent"
                                     aria-hidden
@@ -989,7 +1228,7 @@ export default function MediaBrowseClient({
                             </div>
                             <div className="flex flex-wrap gap-2 p-3 sm:p-4 sm:pt-3">
                               <BtnBlock
-                                href={mediaItemDetailPath(mapSelectedMedia.id)}
+                                href={mediaItemDetailPath(mapSelectedMedia)}
                                 variant="secondary"
                                 size="sm"
                                 className="flex-1 min-w-[8rem]"
@@ -1033,10 +1272,13 @@ export default function MediaBrowseClient({
                 ) : (
                   <>
                     {catalogCardLayout === "grid" ? (
-                  <div className="grid grid-cols-2 gap-0 lg:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3 px-4 md:grid-cols-2 md:gap-0 md:px-0 lg:grid-cols-3">
                     {pagedCatalog.map((media) => (
-                      <MediaCatalogGridCard
+                      <div
                         key={media.id}
+                        className="transition-transform duration-150 active:scale-[0.98] md:active:scale-100"
+                      >
+                      <MediaCatalogGridCard
                         variant="link"
                         media={media}
                         isKo={isKo}
@@ -1072,43 +1314,73 @@ export default function MediaBrowseClient({
                           </label>
                         }
                       />
+                      </div>
                     ))}
                   </div>
                     ) : (
-                  <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
-                    {pagedCatalog.map((media) => (
-                      <MediaCatalogCompactLinkRow
-                        key={media.id}
-                        media={media}
-                        isKo={isKo}
-                        href={mediaItemDetailPath(media.id)}
-                        imagePreparingLabel={t("media.imagePreparing")}
-                        popularIds={popularIds}
-                        leadingSlot={
-                          <label
-                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            title={t("media.compareToggleAria")}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isInCompare(media.id)}
-                              onChange={() => toggleCompare(media)}
-                              disabled={
-                                media.catalogSource === "network" ||
-                                (!isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                  <div className="flex flex-col gap-2 px-4 md:gap-0 md:px-0">
+                    {pagedCatalog.map((media, index) => (
+                      <div key={media.id}>
+                        <div className="md:hidden">
+                          {catalogCardLayout === "compact" ? (
+                            <MediaCatalogListCard
+                              media={media}
+                              isKo={isKo}
+                              imagePreparingLabel={t("media.imagePreparing")}
+                              rank={
+                                sortBy === "default" || sortBy === "ratingDesc"
+                                  ? (catalogPage - 1) * catalogPageSize + index + 1
+                                  : undefined
                               }
-                              aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 accent-cta"
                             />
-                          </label>
-                        }
-                      />
+                          ) : (
+                            <MediaCatalogGridCard
+                              variant="link"
+                              media={media}
+                              isKo={isKo}
+                              denseMobile
+                              imagePreparingLabel={t("media.imagePreparing")}
+                              popularIds={popularIds}
+                              availabilityTier={
+                                availabilitySummary?.items[media.id]?.tier
+                              }
+                            />
+                          )}
+                        </div>
+                        <div className="hidden md:block">
+                          <MediaCatalogCompactLinkRow
+                            media={media}
+                            isKo={isKo}
+                            href={mediaItemDetailPath(media)}
+                            imagePreparingLabel={t("media.imagePreparing")}
+                            popularIds={popularIds}
+                            leadingSlot={
+                              <label
+                                className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
+                                title={t("media.compareToggleAria")}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isInCompare(media.id)}
+                                  onChange={() => toggleCompare(media)}
+                                  disabled={
+                                    media.catalogSource === "network" ||
+                                    (!isInCompare(media.id) &&
+                                      compareItems.length >= COMPARE_MAX_ITEMS)
+                                  }
+                                  aria-label={t("media.compareToggleAria")}
+                                  className="h-4 w-4 accent-cta"
+                                />
+                              </label>
+                            }
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
                     )}
@@ -1154,6 +1426,8 @@ export default function MediaBrowseClient({
                   </>
                 )}
               </div>
+                </div>
+              </div>
             </div>
 
           <RecentlyViewedMedia locale={locale} />
@@ -1170,5 +1444,6 @@ export default function MediaBrowseClient({
         <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
       ) : null}
     </>
+    </MobilePullToRefresh>
   );
 }

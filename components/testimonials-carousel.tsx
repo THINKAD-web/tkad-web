@@ -88,10 +88,10 @@ export function TestimonialsCarousel({ items }: Props) {
                   <div className="truncate text-sm font-bold tracking-tight text-foreground">
                     {isKo ? t.nameKo : t.nameEn}
                   </div>
-                  <div className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+                  <div className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                     {isKo ? t.roleKo : t.roleEn}
                   </div>
-                  <div className="mt-1 flex items-center gap-1.5 font-mono text-[11px] tracking-tight text-muted-foreground">
+                  <div className="mt-1 flex items-center gap-1.5 text-[11px] tracking-tight text-muted-foreground">
                     {t.logoUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
                       <img src={t.logoUrl} alt="" className="h-4 w-auto" />
@@ -111,7 +111,7 @@ export function TestimonialsCarousel({ items }: Props) {
                 className="mb-6 inline-flex w-fit items-center gap-2 rounded-2xl border border-border/60 bg-muted/50 px-3 py-1.5 shadow-sm dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 dark:shadow-[0_18px_72px_rgba(0,0,0,0.65)]"
                 aria-label={isKo ? "성과 수치" : "Key outcome"}
               >
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                   {isKo ? "RESULT" : "RESULT"}
                 </span>
                 <span className="tkad-home-accent-text text-sm font-extrabold tracking-tight">
@@ -141,7 +141,7 @@ export function TestimonialsCarousel({ items }: Props) {
                 {t.caseHref && (
                   <Link
                     href={t.caseHref}
-                    className="font-mono text-[11px] font-black uppercase tracking-[0.18em] text-primary hover:text-primary/80"
+                    className="font-display text-[11px] font-black uppercase tracking-[0.18em] text-primary hover:text-primary/80"
                   >
                     {isKo ? "사례 →" : "Case →"}
                   </Link>

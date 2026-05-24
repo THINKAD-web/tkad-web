@@ -63,7 +63,7 @@ export default function CompareBar({ items, locale, onClear }: Props) {
           >
             ✓
           </span>
-          <span className="min-w-0 font-mono text-xs font-bold uppercase tabular-nums tracking-[0.12em] text-hero-fg/95 sm:text-sm">
+          <span className="min-w-0 font-display text-xs font-medium uppercase tabular-nums tracking-[0.12em] text-hero-fg/95 sm:text-sm">
             {t("compareFloatingSelected", { count })}
             <span className="sr-only">
               {" "}

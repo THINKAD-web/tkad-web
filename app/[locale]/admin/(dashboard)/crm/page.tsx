@@ -251,11 +251,11 @@ export default function AdminCrmPage() {
   return (
     <div className="space-y-6 text-foreground">
       <div>
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           [ CRM ]
         </p>
         <h2 className="mt-2 text-xl font-bold tracking-tight">{t("title")}</h2>
-        <p className="mt-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+        <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
           {`// `}{t("subtitle")}
         </p>
       </div>

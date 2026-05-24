@@ -33,6 +33,7 @@ import {
   type HomeBudgetIndustry,
   type HomeBudgetRegion,
 } from "@/lib/home-budget-recommend";
+import { TurnstileWidget } from "@/components/turnstile";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const RecommendCartBar = dynamic(
@@ -70,6 +71,9 @@ export default function RecommendPageClient({
   const [fullList, setFullList] = useState<ScoredMedia[] | null>(null);
   const [lastPayload, setLastPayload] =
     useState<MediaAiRecommendFormSubmit | null>(null);
+  const [analysisSeed, setAnalysisSeed] = useState(0);
+  const [recommendLogId, setRecommendLogId] = useState<string | null>(null);
+  const [captchaToken, setCaptchaToken] = useState("");
 
   const top3 = useMemo(() => {
     if (!fullList?.length) return [];
@@ -84,47 +88,84 @@ export default function RecommendPageClient({
   const quoteHref = `/quote?media=${encodeURIComponent(quoteQueryPicked)}`;
 
   const runAnalysis = useCallback(
-    (payload: MediaAiRecommendFormSubmit) => {
+    async (payload: MediaAiRecommendFormSubmit, seed = 0) => {
       setPhase("loading");
-      window.setTimeout(() => {
-        try {
-          const poolRegion = filterCatalogByRegionCodes(
-            catalog,
-            payload.regionCodes,
-          );
-          const q = payload.searchQuery.trim().toLowerCase();
-          const poolFiltered =
-            q.length > 0
-              ? poolRegion.filter((m) => matchesMediaTextQuery(m, q))
-              : poolRegion;
-          /** 검색으로만 비면 지역 풀, 지역까지 비면 전체 카탈로그. 보강은 지역 풀 → 전체 순 */
-          const baseCatalog =
-            poolFiltered.length > 0 ? poolFiltered : catalog;
-          const paddingSource =
-            poolRegion.length > 0 ? poolRegion : catalog;
-          let scored = recommendMedia(
-            payload.input,
-            baseCatalog,
-            paddingSource,
-          );
-          if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
-            scored = recommendMedia(
-              payload.input,
-              poolRegion,
-              paddingSource,
-            );
+      try {
+        const res = await fetch("/api/recommend", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            input: payload.input,
+            seed,
+            limit: 30,
+            locale,
+            useClaude: true,
+            turnstileToken: captchaToken || undefined,
+          }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          items?: Array<{
+            mediaId: string;
+            score: number;
+            reasons: { ko: string; en: string }[];
+            oneLine?: string;
+          }>;
+          logId?: string;
+        };
+
+        if (data.ok && data.items?.length) {
+          const byId = new Map(catalog.map((m) => [m.id, m]));
+          const scored: ScoredMedia[] = [];
+          for (const item of data.items) {
+            const media = byId.get(item.mediaId);
+            if (!media) continue;
+            scored.push({
+              item: media,
+              score: item.score,
+              reasons: item.reasons?.length ?
+                item.reasons
+              : [
+                  {
+                    ko: item.oneLine ?? "조건 기반 추천",
+                    en: item.oneLine ?? "Rule-based match",
+                  },
+                ],
+            });
           }
+          setRecommendLogId(data.logId ?? null);
           setFullList(scored);
           setPhase(scored.length > 0 ? "dashboard" : "noResults");
-        } catch (e) {
-          console.error("[recommend] runAnalysis", e);
-          setFullList(null);
-          setPhase("form");
-          toast("error", tr("analysisFailed"));
+          return;
         }
-      }, 900);
+
+        /** API 실패 시 클라이언트 폴백 (동일 카탈로그·결정론적) */
+        const poolRegion = filterCatalogByRegionCodes(
+          catalog,
+          payload.regionCodes,
+        );
+        const q = payload.searchQuery.trim().toLowerCase();
+        const poolFiltered =
+          q.length > 0 ?
+            poolRegion.filter((m) => matchesMediaTextQuery(m, q))
+          : poolRegion;
+        const baseCatalog =
+          poolFiltered.length > 0 ? poolFiltered : catalog;
+        const paddingSource = poolRegion.length > 0 ? poolRegion : catalog;
+        let scored = recommendMedia(payload.input, baseCatalog, paddingSource);
+        if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
+          scored = recommendMedia(payload.input, poolRegion, paddingSource);
+        }
+        setFullList(scored);
+        setPhase(scored.length > 0 ? "dashboard" : "noResults");
+      } catch (e) {
+        console.error("[recommend] runAnalysis", e);
+        setFullList(null);
+        setPhase("form");
+        toast("error", tr("analysisFailed"));
+      }
     },
-    [catalog, toast, tr],
+    [catalog, toast, tr, locale],
   );
 
   const handleFormSubmit = useCallback(
@@ -248,20 +289,15 @@ export default function RecommendPageClient({
 
   const handleRemix = useCallback(() => {
     if (!lastPayload) return;
-    const tweaked: MediaAiRecommendFormSubmit = {
-      ...lastPayload,
-      input: {
-        ...lastPayload.input,
-        budgetMaxMan: Math.round(lastPayload.input.budgetMaxMan * 1.1),
-      },
-    };
-    runAnalysis(tweaked);
-  }, [lastPayload, runAnalysis]);
+    const nextSeed = analysisSeed + 1;
+    setAnalysisSeed(nextSeed);
+    runAnalysis(lastPayload, nextSeed);
+  }, [lastPayload, runAnalysis, analysisSeed]);
 
   if (catalog.length === 0) {
     return (
       <div className="border-t-2 border-border bg-card">
-        <div className="mx-auto max-w-2xl px-4 py-20 text-center font-mono text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
+        <div className="mx-auto max-w-2xl px-4 py-20 text-center font-display text-[12px] uppercase tracking-[0.18em] text-muted-foreground">
           {`// `}
           {t("media.ai.emptyCatalog")}
         </div>
@@ -303,7 +339,7 @@ export default function RecommendPageClient({
           ) : null}
           {autoFromUrl === "1" && phase === "dashboard" && top3.length > 0 ? (
             <div className="mb-8 rounded-2xl border-2 border-accent/40 bg-muted/50 px-5 py-4">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 [ {isKo ? "홈에서 선택한 조건" : "From home widget"} ]
               </p>
               <p className="mt-2 text-sm font-bold text-foreground">
@@ -328,10 +364,15 @@ export default function RecommendPageClient({
             </div>
           ) : null}
           {phase === "form" && autoFromUrl !== "1" && (
-            <MediaAiRecommendForm
-              locale={locale}
-              onSubmit={handleFormSubmit}
-            />
+            <>
+              <MediaAiRecommendForm
+                locale={locale}
+                onSubmit={handleFormSubmit}
+              />
+              <div className="mx-auto mt-4 max-w-xl">
+                <TurnstileWidget onVerify={setCaptchaToken} />
+              </div>
+            </>
           )}
 
           {phase === "loading" && (
@@ -357,7 +398,7 @@ export default function RecommendPageClient({
 
           {phase === "noResults" && (
             <div className="mx-auto max-w-lg border-2 border-border bg-muted p-8 text-center">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-hermes">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
                 [ NO RESULTS ]
               </p>
               <p className="mt-4 text-sm font-medium leading-relaxed text-foreground">
@@ -382,12 +423,12 @@ export default function RecommendPageClient({
             <div className="space-y-6">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
                     [ FULL LIST ]
                   </p>
                   <h2 className="mt-1 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                     {t("media.ai.results")}{" "}
-                    <span className="font-mono text-muted-foreground">({fullList.length})</span>
+                    <span className="text-muted-foreground">({fullList.length})</span>
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
@@ -413,7 +454,7 @@ export default function RecommendPageClient({
 
               {top3.length > 0 && (
                 <div className="rounded-[24px] border-2 border-accent bg-muted/60 px-5 py-4 shadow-sm backdrop-blur">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                     [ TOP 3 PICKS ]
                   </p>
                   <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
@@ -428,14 +469,14 @@ export default function RecommendPageClient({
                         className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
                       >
                         <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] font-mono text-[11px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
+                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] text-[11px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
                             {i + 1}
                           </span>
                           <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? s.item.name : s.item.nameEn}
                           </span>
                         </span>
-                        <span className="shrink-0 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
+                        <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
                           {isKo ? `${s.score}점 궁합` : `MATCH ${s.score}`}
                         </span>
                       </li>
@@ -453,17 +494,17 @@ export default function RecommendPageClient({
                     <p className="text-base font-bold leading-tight tracking-tight text-foreground">
                       {isKo ? s.item.name : s.item.nameEn}
                     </p>
-                    <p className="mt-2 line-clamp-2 font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="mt-2 line-clamp-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{isKo ? s.item.location : s.item.locationEn}
                     </p>
-                    <ul className="mt-3 space-y-1 font-mono text-[11px] tracking-tight text-muted-foreground">
+                    <ul className="mt-3 space-y-1 text-[11px] tracking-tight text-muted-foreground">
                       {s.reasons.slice(0, 3).map((r, i) => (
                         <li key={i}>· {isKo ? r.ko : r.en}</li>
                       ))}
                     </ul>
                     <Link
-                      href={mediaItemDetailPath(s.item.id)}
-                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:border-accent hover:text-accent"
+                      href={mediaItemDetailPath(s.item)}
+                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:border-accent hover:text-accent"
                     >
                       {isKo ? "상세 보기" : "Details"} →
                     </Link>
@@ -553,12 +594,12 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           </div>
 
           <div className="pointer-events-none absolute -bottom-4 left-1/2 -translate-x-1/2">
-            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white/30 px-3 py-1 font-mono text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
+            <div className="rounded-2xl border border-white/16 dark:bg-black bg-white/30 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-800 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur">
               TKAD BOT
             </div>
           </div>
         </div>
-        <p className="mt-6 text-center font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
+        <p className="mt-6 text-center font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
           [ {isKo ? "EXPLORING MEDIA UNIVERSE" : "EXPLORING MEDIA UNIVERSE"} ]
         </p>
         <p className="text-center text-sm font-bold leading-snug tracking-tight dark:text-white text-gray-900">
@@ -585,7 +626,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
           <div className="h-3 w-3/5 rounded-full dark:bg-white/10 bg-gray-100" />
         </div>
       </div>
-      <p className="text-center font-mono text-[11px] leading-relaxed tracking-tight dark:text-white text-gray-600">
+      <p className="text-center text-[11px] leading-relaxed tracking-tight dark:text-white text-gray-600">
         {`// `}{messages[step]}
       </p>
     </div>

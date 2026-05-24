@@ -8,6 +8,7 @@
 import { getPrisma } from "@/lib/prisma";
 import {
   normalizeCommunityCategory,
+  resolveCommunityCategoryWhere,
   type CommunityCategory,
 } from "@/lib/community/types";
 
@@ -79,12 +80,7 @@ export async function adminListPosts(
   const where: Record<string, unknown> = {};
   if (opts.status && opts.status !== "all") where.status = opts.status;
   if (opts.category) {
-    where.category =
-      opts.category === "qna"
-        ? { in: ["qna", "qa"] }
-        : opts.category === "networking"
-          ? { in: ["networking", "recommend"] }
-          : opts.category;
+    where.category = resolveCommunityCategoryWhere(opts.category);
   }
   if (opts.hasReports) where.reportCount = { gt: 0 };
 
@@ -106,7 +102,7 @@ export async function adminListPosts(
   return {
     items: rows.map((r) => ({
       id: r.id,
-      category: normalizeCommunityCategory(r.category) ?? "qna",
+      category: normalizeCommunityCategory(r.category) ?? "free",
       title: r.title,
       bodyExcerpt: excerpt(r.body),
       authorName: r.authorName,

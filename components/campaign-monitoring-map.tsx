@@ -12,12 +12,11 @@ import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { CampaignMapPin, CampaignMapMediaType } from "@/lib/campaign-monitoring-mock";
 
-type MapProvider = "kakao" | "google" | "fallback";
+type MapProvider = "google" | "fallback";
 
+/** @deprecated 공개 페이지는 `DarkCampaignMap` / `DarkMapView` 사용. Kakao는 어드민 전용. */
 export function getCampaignMonitoringMapProvider(): MapProvider {
-  const k = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY;
   const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-  if (typeof k === "string" && k.trim().length > 0) return "kakao";
   if (typeof g === "string" && g.trim().length > 0) return "google";
   return "fallback";
 }
@@ -530,42 +529,11 @@ export function CampaignMonitoringMap({
     if (pins.length === 0) return;
 
     if (provider === "google") return mountGoogle();
-    if (provider === "kakao") return mountKakao();
     return undefined;
-  }, [mountGoogle, mountKakao, pinLayoutKey, pins.length, provider]);
+  }, [mountGoogle, pinLayoutKey, pins.length, provider]);
 
   useEffect(() => {
     if (!selectedId) return;
-    if (provider === "kakao") {
-      // If Kakao is ready, refresh marker images to reflect selection.
-      // (Safe no-op when MarkerImage isn't available yet.)
-      const mapsAny = (window as unknown as { kakao?: { maps?: unknown } }).kakao
-        ?.maps as
-        | {
-            MarkerImage?: new (
-              src: string,
-              size: unknown,
-              opts?: { offset?: unknown },
-            ) => unknown;
-            Size?: new (w: number, h: number) => unknown;
-            Point?: new (x: number, y: number) => unknown;
-          }
-        | undefined;
-      if (!mapsAny?.MarkerImage || !mapsAny?.Size || !mapsAny?.Point) return;
-      for (const p of pins) {
-        const mk = markerByIdRef.current[p.id];
-        if (!mk?.setImage) continue;
-        const tone = pinToneForMediaType(p.mediaType);
-        const src = pinDataUrl(tone, p.id === selectedId);
-        const img = new mapsAny.MarkerImage(
-          src,
-          new mapsAny.Size(40, 48),
-          { offset: new mapsAny.Point(20, 48) },
-        );
-        mk.setImage(img);
-      }
-      return;
-    }
     if (provider === "google") {
       const mapsAny = (window as unknown as { google?: { maps?: unknown } }).google
         ?.maps as
@@ -606,14 +574,6 @@ export function CampaignMonitoringMap({
     // 선택된 핀이 있을 때만: 그 위치로 zoom in
     const pin = pins.find((p) => p.id === selectedId);
     if (!pin) return;
-
-    if (provider === "kakao") {
-      const ctx = kakaoMapCtxRef.current;
-      if (!ctx) return;
-      ctx.map.setCenter(new ctx.LatLng(pin.lat, pin.lng));
-      ctx.map.setLevel(7);
-      return;
-    }
 
     if (provider === "google") {
       const ctx = googleMapCtxRef.current;
@@ -712,13 +672,11 @@ export function CampaignMonitoringMap({
       />
       {showFooterCaption ? (
         <p className="border-t border-navy/10 bg-white px-3 py-2 text-[11px] text-muted-foreground">
-          {provider === "kakao"
+          {provider === "google"
             ? isKo
-              ? "카카오맵 · 핀을 눌러 매체 상세를 확인하세요."
-              : "Kakao Map · tap a pin for placement details."
-            : isKo
               ? "Google 지도 · 핀을 눌러 매체 상세를 확인하세요."
-              : "Google Maps · tap a pin for placement details."}
+              : "Google Maps · tap a pin for placement details."
+            : null}
         </p>
       ) : null}
     </div>
@@ -727,7 +685,6 @@ export function CampaignMonitoringMap({
 
 export function campaignMapProviderLabel(isKo: boolean): string {
   const p = getCampaignMonitoringMapProvider();
-  if (p === "kakao") return isKo ? "카카오맵" : "Kakao Map";
   if (p === "google") return isKo ? "Google 지도" : "Google Maps";
   return isKo ? "데모 지도" : "Demo map";
 }

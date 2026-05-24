@@ -22,7 +22,7 @@ export function ServicesFaq({ title, items, className }: Props) {
 
   return (
     <div className={cn("tkad-services-faq", className)}>
-      <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
         [ FAQ ]
       </p>
       <h2 className="mt-2 text-2xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-3xl">
@@ -43,7 +43,7 @@ export function ServicesFaq({ title, items, className }: Props) {
                   >
                     <span
                       aria-hidden
-                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 font-mono text-[11px] font-bold text-cyan-200"
+                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 text-[11px] font-bold text-cyan-200"
                     >
                       Q
                     </span>
@@ -68,7 +68,7 @@ export function ServicesFaq({ title, items, className }: Props) {
                       <div className="tkad-services-faq-answer flex items-start gap-3 border-t dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-5 pb-4 pt-4 sm:px-6 sm:pb-5">
                         <span
                           aria-hidden
-                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 font-mono text-[11px] font-bold dark:text-white text-gray-800"
+                          className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 text-[11px] font-bold dark:text-white text-gray-800"
                         >
                           A
                         </span>

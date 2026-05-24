@@ -115,7 +115,7 @@ export function MediaCard({
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1] group-focus-within:scale-[1.1]"
           />
         ) : (
-          <div className="flex h-full w-full items-center justify-center font-mono text-[11px] uppercase tracking-[0.22em] text-muted-foreground">
+          <div className="flex h-full w-full items-center justify-center font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ no image ]
           </div>
         )}
@@ -127,7 +127,7 @@ export function MediaCard({
         {topRight ? (
           <div
             className={cn(
-              "absolute right-0 top-0 z-10 px-2.5 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-900",
+              "absolute right-0 top-0 z-10 px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-900",
               topRightClass,
               premium ? "rounded-bl-2xl border-b border-l border-border/60" : "border-b-2 border-l-2 border-border",
             )}
@@ -156,7 +156,7 @@ export function MediaCard({
         )}
       >
         {(index !== undefined || type) && (
-          <div className="flex items-center justify-between font-mono text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
+          <div className="flex items-center justify-between font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
             {index !== undefined ? (
               <span className="text-foreground">[{String(index).padStart(2, "0")}]</span>
             ) : (
@@ -184,7 +184,7 @@ export function MediaCard({
         {price ? (
           <p
             className={cn(
-              "mt-1 min-w-0 max-w-full font-mono font-black tabular-nums text-foreground",
+              "mt-1 min-w-0 max-w-full font-display font-black tabular-nums text-foreground",
               premium
                 ? compact
                   ? "break-words text-[clamp(0.8125rem,7cqi,1.375rem)] leading-[1.12] tracking-tight"

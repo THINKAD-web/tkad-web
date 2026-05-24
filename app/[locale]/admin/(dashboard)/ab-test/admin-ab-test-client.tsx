@@ -112,7 +112,7 @@ export default function AdminAbTestClient() {
                 <CardHeader>
                   <CardTitle className="text-base">{label}</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-3 font-mono text-sm">
+                <CardContent className="space-y-3 text-sm">
                   <p>
                     히어로 노출:{" "}
                     <span className="font-bold tabular-nums">

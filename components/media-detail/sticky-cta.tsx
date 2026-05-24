@@ -121,7 +121,7 @@ export function MediaStickyCta({
         {t("quote")}
       </BtnBlock>
       {entries.length > 0 ? (
-        <p className="text-center font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+        <p className="text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
           {isKo
             ? `// 비교함 ${entries.length}/${COMPARE_MAX_ITEMS}`
             : `// Compare ${entries.length}/${COMPARE_MAX_ITEMS}`}

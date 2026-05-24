@@ -150,3 +150,85 @@ export function refundPolicySections(isKo: boolean): LegalSection[] {
     },
   ];
 }
+
+export function guaranteePolicySections(isKo: boolean): LegalSection[] {
+  if (isKo) {
+    return [
+      {
+        title: "1. 성과 데이터 보증 개요",
+        paragraphs: [
+          "THINKAD 싱커드는 OOH 광고의 효과를 데이터로 증명합니다. 플래너 예측·집행 후 실측·인증 사진을 연계해 광고주가 성과를 검증할 수 있도록 합니다.",
+          "「📊 성과 데이터 보증」 배지는 집행 5회 이상, 리뷰 3개 이상, 평균 평점 4.0 이상, 현장 인증 사진 보유 매체에 부여됩니다.",
+        ],
+      },
+      {
+        title: "2. 예측 정확도",
+        paragraphs: [
+          "플래너 노출·도달 추정치는 매체 유동·단가·과거 집행 실측을 반영한 내부 모델입니다. 플랫폼 예측 정확도는 최근 완료 캠페인(인증 사진 포함)의 예측 대비 실측 오차를 누적해 산출합니다.",
+          "완료 리포트에는 「예측 노출」과 「실측 노출」을 함께 표시하며, 인증 사진이 업로드될수록 실측치가 확정됩니다.",
+        ],
+      },
+      {
+        title: "3. 성과 미달 시 환불 조건",
+        paragraphs: [
+          "계약서·견적서에 「성과 보증」 조항이 명시된 캠페인에 한해 적용됩니다.",
+          "집행 완료 후 플래너·계약서에 기재된 예측 노출 대비 실측 노출이 80% 미만인 경우, 미달분에 해당하는 광고비를 환불·크레딧으로 보상할 수 있습니다.",
+          "환불 산정은 인증 사진·GPS·촬영 일시가 확인된 실측 데이터를 기준으로 하며, 천재지변·매체사 귀책 외 광고주 사유(소재 지연·조기 종료 등)는 제외됩니다.",
+          "환불 요청: 집행 종료 후 14일 이내, sales@tkad.co.kr 또는 고객센터(02-515-2772)로 캠페인 ID·완료 리포트·미달 근거를 제출해 주세요.",
+        ],
+      },
+      {
+        title: "4. 인증 사진 미제공 시 페널티",
+        paragraphs: [
+          "매체사·현장 담당자는 집행 기간 중 합의된 횟수 이상 현장 인증 사진을 업로드해야 합니다.",
+          "인증 사진 미제공·허위 업로드가 확인되면 해당 매체의 「성과 데이터 보증」 배지가 즉시 해제되며, 반복 시 매체 노출·즉시 예약 등급이 하향 조정될 수 있습니다.",
+          "광고주에게 인증 사진이 제공되지 않아 실측 검증이 불가능한 경우, 회사는 대체 실측(유동 데이터·제3자 리포트)을 제공하거나, 미인증 기간에 대한 부분 환불을 검토합니다.",
+        ],
+      },
+      {
+        title: "5. 면책",
+        paragraphs: [
+          "예측치는 참고용이며, 개별 캠페인의 성과 보증·환불은 별도 계약 조항 및 본 정책에 따릅니다. 법무 검토 전 임시 정책이며, 정식 오픈 시 개별 고지됩니다.",
+        ],
+      },
+    ];
+  }
+  return [
+    {
+      title: "1. Performance data guarantee",
+      paragraphs: [
+        "THINKAD proves OOH impact with data — planner forecasts, post-flight measurements, and field proof photos.",
+        "The 📊 Performance data guaranteed badge is awarded when a medium has 5+ flights, 3+ reviews, 4.0+ average rating, and certified field photos.",
+      ],
+    },
+    {
+      title: "2. Prediction accuracy",
+      paragraphs: [
+        "Planner reach/impression estimates use traffic, pricing, and historical verified flights. Platform accuracy is computed from recent completed campaigns with proof photos.",
+        "Completion reports show predicted vs. measured impressions; proof uploads finalize measured numbers.",
+      ],
+    },
+    {
+      title: "3. Refund when performance falls short",
+      paragraphs: [
+        "Applies only to campaigns with an explicit performance guarantee in the contract or quote.",
+        "If measured impressions are below 80% of the contracted/planner prediction after flight, the shortfall may be refunded or credited.",
+        "Claims must be filed within 14 days of campaign end with campaign ID and completion report.",
+      ],
+    },
+    {
+      title: "4. Penalties for missing proof photos",
+      paragraphs: [
+        "Media owners must upload agreed field proof photos during the flight period.",
+        "Missing or fraudulent proof may revoke the performance badge and lower listing priority.",
+        "If proof is unavailable, THINKAD may provide alternative measurement or partial refund for unverified periods.",
+      ],
+    },
+    {
+      title: "5. Disclaimer",
+      paragraphs: [
+        "Forecasts are indicative; binding guarantees follow individual contracts. This is a pre-legal-review template.",
+      ],
+    },
+  ];
+}

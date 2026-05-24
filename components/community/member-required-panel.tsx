@@ -27,7 +27,7 @@ export function CommunityMemberRequiredPanel({
         className,
       )}
     >
-      <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
         [ MEMBERS ONLY ]
       </p>
       <h2 className="mt-3 flex items-center gap-2 text-xl font-bold tracking-tight dark:text-white text-gray-900">
@@ -38,7 +38,7 @@ export function CommunityMemberRequiredPanel({
       <div className="mt-6 flex flex-wrap gap-3">
         <Link
           href={loginHref}
-          className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+          className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
         >
           {isKo ? "로그인하고 계속하기" : "Sign in to continue"}
           <ArrowRight className="h-3.5 w-3.5" />

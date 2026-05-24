@@ -88,8 +88,8 @@ function LiveBar({
   ];
 
   const chipClass = darkHero
-    ? "inline-flex items-center gap-2 rounded-lg border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest dark:text-white text-gray-900 backdrop-blur-sm"
-    : "inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm";
+    ? "inline-flex items-center gap-2 rounded-lg border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-3 py-2 font-display text-xs font-medium uppercase tracking-widest dark:text-white text-gray-900 backdrop-blur-sm"
+    : "inline-flex items-center gap-2 rounded-lg border border-border/60 bg-background/80 px-3 py-2 font-display text-xs font-medium uppercase tracking-widest text-foreground shadow-sm backdrop-blur-sm";
   const mutedClass = darkHero ? "dark:text-white text-gray-500" : "text-muted-foreground";
   const valueClass = darkHero ? "tabular-nums dark:text-white text-gray-900" : "tabular-nums text-foreground";
 
@@ -110,7 +110,7 @@ function LiveBar({
       ))}
       <p
         className={cn(
-          "hidden font-mono text-[11px] font-bold uppercase tracking-widest sm:block",
+          "hidden font-display text-xs font-medium uppercase tracking-widest sm:block",
           mutedClass,
         )}
       >
@@ -190,7 +190,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
 
         <div className="mt-8 grid grid-cols-1 items-center gap-12 lg:grid-cols-2">
           <div className="flex flex-col gap-6">
-            <p className={cn("font-mono text-xs tracking-widest", mutedClass)}>
+            <p className={cn(" text-xs tracking-widest", mutedClass)}>
               {t("heroEyebrow")}
             </p>
 
@@ -233,7 +233,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
                 <span
                   key={tag}
                   className={cn(
-                    "border px-3 py-1 font-mono text-xs uppercase tracking-wide",
+                    "border px-3 py-1 font-display text-xs uppercase tracking-wide",
                     darkHero ? "dark:border-white/20 border-gray-300 dark:text-white text-gray-500" : "border-foreground/30 text-muted-foreground",
                   )}
                 >
@@ -246,7 +246,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
           <div className="w-full min-w-0">
             <p
               className={cn(
-                "mb-3 font-mono text-[11px] font-bold uppercase tracking-widest",
+                "mb-3 font-display text-xs font-medium uppercase tracking-widest",
                 mutedClass,
               )}
             >
@@ -262,7 +262,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
             </div>
             <p
               className={cn(
-                "mt-3 font-mono text-[10px] font-semibold uppercase tracking-wider",
+                "mt-3 font-display text-[10px] font-semibold uppercase tracking-wider",
                 mutedClass,
               )}
             >

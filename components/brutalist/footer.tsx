@@ -77,7 +77,7 @@ export function BrutalFooter({
         </div>
       </div>
 
-      <div className="relative border-t border-gray-200 bg-white/80 px-6 py-5 text-center font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-gray-500 backdrop-blur dark:border-gray-800 dark:bg-black/40 dark:text-white/60">
+      <div className="relative border-t border-gray-200 bg-white/80 px-6 py-5 text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-gray-500 backdrop-blur dark:border-gray-800 dark:bg-black/40 dark:text-white/60">
         <span>
           {copyright ??
             `© ${new Date().getFullYear()} THINKAD — All rights reserved`}
@@ -99,7 +99,7 @@ function BrandCell({
     <div className="rounded-[28px] bg-white p-8 shadow-lg ring-1 ring-gray-200/80 dark:bg-white/5 dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)] dark:ring-white/10 tkad-neon-border">
       <Link
         href="/"
-        className="inline-block font-mono text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+        className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
       >
         THINK
         <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
@@ -109,7 +109,7 @@ function BrandCell({
       <div className="mt-4 max-w-xs space-y-3 text-sm leading-relaxed text-gray-700 dark:text-white/90">
         <p className="font-medium text-gray-800 dark:text-white">{description}</p>
         {brandMeta ? (
-          <div className="font-mono text-[11px] text-gray-500 dark:text-white/50">
+          <div className="text-[11px] text-gray-500 dark:text-white/50">
             {brandMeta}
           </div>
         ) : null}
@@ -125,7 +125,7 @@ function ColumnCell({
 }) {
   return (
     <div className="rounded-[28px] bg-white p-8 shadow-lg ring-1 ring-gray-200/80 dark:bg-white/5 dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)] dark:ring-white/10 tkad-neon-border">
-      <h3 className="mb-4 font-mono text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white">
+      <h3 className="mb-4 font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white">
         {col.title}
       </h3>
       <ul className="space-y-2.5">

@@ -17,6 +17,11 @@ import {
   computeAvgVisibility,
 } from "@/lib/campaign-kpis";
 import {
+  computeCampaignPredictionVariance,
+  formatImpressionsCompact,
+  formatVariancePct,
+} from "@/lib/prediction-accuracy";
+import {
   CampaignReportDocument,
   CampaignReportHero,
   ReportBody,
@@ -133,6 +138,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
   const stats = computeCampaignBaseStats(data.mediaBookings);
   const totalAmount2 = computeCampaignTotalAmount(data.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount2);
+  const predictionVariance = computeCampaignPredictionVariance(
+    data.mediaBookings,
+    data.proofPhotos?.length ?? 0,
+  );
 
   // NOTE: 규칙 준수(새 산식/평가/추천 금지)를 위해 "매체별 추정 CPM" 등
   // 추가 계산(안분/추정) 기반 효율 분석 섹션은 표시하지 않습니다.
@@ -483,7 +492,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
 
               {distribution?.types?.length ? (
                 <div className="mt-4 space-y-2">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-muted)]">
                     [ 매체 유형 분포 (요약) ]
                   </p>
                   {distribution.types.slice(0, 6).map(([label, count], i) => {
@@ -504,6 +513,43 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
             </ReportSection>
           )}
 
+          {predictionVariance && (
+            <ReportSection>
+              <SectionTitle>예측 vs 실측</SectionTitle>
+              <StatGrid cols={3}>
+                <StatCard
+                  label="예측 노출"
+                  value={formatImpressionsCompact(
+                    predictionVariance.predictedImpressions,
+                  )}
+                  suffix="회"
+                />
+                <StatCard
+                  label="실측 노출"
+                  value={formatImpressionsCompact(
+                    predictionVariance.actualImpressions,
+                  )}
+                  suffix="회"
+                  variant="accent"
+                />
+                <StatCard
+                  label="오차율"
+                  value={formatVariancePct(predictionVariance.variancePct, "ko")}
+                  variant={
+                    Math.abs(predictionVariance.variancePct) <= 10
+                      ? "accent"
+                      : "default"
+                  }
+                />
+              </StatGrid>
+              <SectionNote>
+                {predictionVariance.hasProofData
+                  ? "현장 인증 사진·매체 실측 데이터를 반영한 집행 후 노출입니다. 예측 모델(유동 × 0.4)과 비교해 플랫폼 예측 정확도를 누적 개선합니다."
+                  : "인증 사진이 업로드되면 실측 노출이 보정·확정됩니다. 현재는 매체 DB 기준 추정치입니다."}
+              </SectionNote>
+            </ReportSection>
+          )}
+
           {/* EFFECT DASHBOARD (charts) — planner chart components reused */}
           {plannerKpis && (
             <ReportSection>
@@ -511,7 +557,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <div className="grid gap-3 lg:grid-cols-2">
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 도달 구조 ]
                     </p>
                   </div>
@@ -527,7 +573,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 </div>
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 유형별 일유동 ]
                     </p>
                   </div>
@@ -542,7 +588,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               </div>
               <div className="tkad-glass-surface mt-6 overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                 <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                  <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                     [ 지역 분포 ]
                   </p>
                 </div>
@@ -569,7 +615,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <div className="grid gap-3 lg:grid-cols-2">
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체별 일유동 TOP ]
                     </p>
                   </div>
@@ -583,7 +629,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 </div>
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체별 노출 TOP ]
                     </p>
                   </div>
@@ -618,7 +664,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <div className="grid gap-3 lg:grid-cols-3">
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 예약 상태 분포 ]
                     </p>
                   </div>
@@ -632,7 +678,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 </div>
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 문서 상태 분포 ]
                     </p>
                   </div>
@@ -646,7 +692,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 </div>
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 가시성 TOP ]
                     </p>
                   </div>
@@ -669,7 +715,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <div className="grid gap-3 lg:grid-cols-2">
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 일정 이벤트 종류 ]
                     </p>
                   </div>
@@ -683,7 +729,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 </div>
                 <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                   <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체 시작 월 ]
                     </p>
                   </div>
@@ -706,10 +752,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                             <div className="tkad-glass-surface overflow-hidden rounded-[22px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)] backdrop-blur-md">
                 <div className="border-b border-[color:var(--cr-border-soft)] px-4 py-3">
                   <div className="flex flex-wrap items-baseline justify-between gap-2">
-                    <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--cr-fg-subtle)]">
                       [ 매체 집행 타임라인 ]
                     </p>
-                    <p className="font-mono text-[10px] text-[color:var(--cr-fg-subtle)]">
+                    <p className="text-[10px] text-[color:var(--cr-fg-subtle)]">
                       {`// `}표시: {timeline.rows.length}/{timeline.total} · {timeline.minLabel} → {timeline.maxLabel}
                     </p>
                   </div>
@@ -719,10 +765,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     {timeline.rows.map((r) => (
                       <div key={r.key} className="grid grid-cols-[160px_1fr] gap-3">
                         <div className="min-w-0">
-                          <p className="truncate font-mono text-[10px] font-bold text-[color:var(--cr-fg)]">
+                          <p className="truncate text-[10px] font-bold text-[color:var(--cr-fg)]">
                             {r.label}
                           </p>
-                          <p className="font-mono text-[9px] text-[color:var(--cr-fg-subtle)]">
+                          <p className="text-[9px] text-[color:var(--cr-fg-subtle)]">
                             {fmtShort(r.startsAt)} ~ {fmtShort(r.endsAt)}
                           </p>
                         </div>
@@ -747,7 +793,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       </div>
                     ))}
                   </div>
-                  <p className="mt-3 font-mono text-[10px] text-[color:var(--cr-fg-subtle)]">
+                  <p className="mt-3 text-[10px] text-[color:var(--cr-fg-subtle)]">
                     {`// `}집행 시작/종료 일자를 막대로만 표시합니다. (추가 계산/평가 없음)
                   </p>
                 </div>
@@ -882,14 +928,14 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                     <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.type ?? "—"}</td>
                     <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.region ?? "—"}</td>
                     <td className="px-3 py-2 text-[10px] text-[color:var(--cr-fg-table)]">{b.location}</td>
-                    <td className="px-3 py-2 font-mono text-[10px] tabular-nums text-[color:var(--cr-fg-table)]">
+                    <td className="px-3 py-2 text-[10px] tabular-nums text-[color:var(--cr-fg-table)]">
                       {fmtDate(b.startsAt)} ~ {fmtDate(b.endsAt)}
                       <span className="ml-1 text-[color:var(--cr-fg-dim)]">({diffDays(b.startsAt, b.endsAt)}일)</span>
                     </td>
-                    <td className="px-3 py-2 font-mono text-[10px] font-semibold tabular-nums">
+                    <td className="px-3 py-2 text-[10px] font-semibold tabular-nums">
                       {b.dailyFootTraffic ? `${b.dailyFootTraffic.toLocaleString()}` : "—"}
                     </td>
-                    <td className="px-3 py-2 font-mono text-[10px] tabular-nums">
+                    <td className="px-3 py-2 text-[10px] tabular-nums">
                       {b.visibilityScore != null && b.visibilityScore > 0
                         ? `${b.visibilityScore} / 4`
                         : "—"}
@@ -924,7 +970,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                           <span className="text-sm font-bold text-[color:var(--cr-fg)]">{e.title}</span>
                           <NeonBadge>{scheduleKindKo(e.kind || "—")}</NeonBadge>
                         </div>
-                        <p className="mt-1.5 font-mono text-[11px] tabular-nums text-[color:var(--cr-fg-subtle)]">
+                        <p className="mt-1.5 text-[11px] tabular-nums text-[color:var(--cr-fg-subtle)]">
                           {fmtDate(e.startsAt)} — {fmtDate(e.endsAt)}
                         </p>
                       </div>
@@ -941,11 +987,11 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
               <NeonTable headers={["구분", "항목", "금액", "상태"]}>
                 {data.financialDocs.map((f, i) => (
                   <tr key={i} className={i % 2 === 0 ? "bg-[var(--cr-row-even)]" : "bg-[var(--cr-row-odd)]"}>
-                    <td className="px-3 py-2.5 font-mono text-[11px] text-[color:var(--cr-fg-subtle)]">
+                    <td className="px-3 py-2.5 text-[11px] text-[color:var(--cr-fg-subtle)]">
                       {formatFinancialDocKindKo(f.kind)}
                     </td>
                     <td className="px-3 py-2.5 font-semibold">{f.title}</td>
-                    <td className="px-3 py-2.5 font-mono font-semibold tabular-nums">
+                    <td className="px-3 py-2.5 font-semibold tabular-nums">
                       {f.amountKrw ? fmtAmount(f.amountKrw) : "—"}
                     </td>
                     <td className="px-3 py-2.5 text-[11px] text-[color:var(--cr-fg-subtle)]">
@@ -955,10 +1001,10 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                 ))}
                 {totalAmount > 0 ? (
                   <tr className="bg-[image:var(--cr-sum-row)]">
-                    <td colSpan={2} className="px-3 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-[#22d3ee]">
+                    <td colSpan={2} className="px-3 py-3 font-display text-xs font-medium uppercase tracking-[0.16em] text-[#22d3ee]">
                       [ 합계 ]
                     </td>
-                    <td className="px-3 py-3 font-mono text-base font-extrabold tabular-nums text-[#22d3ee]">
+                    <td className="px-3 py-3 text-base font-extrabold tabular-nums text-[#22d3ee]">
                       {fmtAmount(totalAmount)}
                     </td>
                     <td className="px-3 py-3" />
@@ -985,7 +1031,7 @@ const CampaignReportPreview = forwardRef<HTMLDivElement, { data: CampaignReportD
                       className="block h-40 w-full object-cover"
                     />
                     {p.caption ? (
-                      <p className="border-t border-[color:var(--cr-border-soft)] bg-[var(--cr-surface-soft)] px-3 py-2 font-mono text-[10px] text-[color:var(--cr-fg-body)]">
+                      <p className="border-t border-[color:var(--cr-border-soft)] bg-[var(--cr-surface-soft)] px-3 py-2 text-[10px] text-[color:var(--cr-fg-body)]">
                         {`// `}
                         {p.caption}
                       </p>
@@ -1120,7 +1166,7 @@ function CampaignTrafficBlock({
         {labels.map((label, i) => (
           <div
             key={i}
-            className="flex-1 text-center font-mono text-[8px] font-medium text-[color:var(--cr-fg-dim)]"
+            className="flex-1 text-center text-[8px] font-medium text-[color:var(--cr-fg-dim)]"
           >
             {label}
           </div>

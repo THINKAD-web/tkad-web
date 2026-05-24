@@ -5,7 +5,10 @@ import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
 
-const STORAGE_KEY = "tkad-launch-banner-dismissed-v1";
+const DISMISS_KEY = "tkad-launch-banner-dismissed-v2";
+const START_KEY = "tkad-launch-banner-start-v2";
+/** 배너 자동 숨김 — 첫 노출 기준 7일 */
+const AUTO_HIDE_MS = 7 * 24 * 60 * 60 * 1000;
 
 export function HomeLaunchBanner() {
   const locale = useLocale();
@@ -14,7 +17,16 @@ export function HomeLaunchBanner() {
 
   useEffect(() => {
     try {
-      if (localStorage.getItem(STORAGE_KEY) === "1") return;
+      if (localStorage.getItem(DISMISS_KEY) === "1") return;
+
+      let startRaw = localStorage.getItem(START_KEY);
+      if (!startRaw) {
+        startRaw = String(Date.now());
+        localStorage.setItem(START_KEY, startRaw);
+      }
+      const start = Number(startRaw);
+      if (Number.isFinite(start) && Date.now() - start > AUTO_HIDE_MS) return;
+
       setVisible(true);
     } catch {
       setVisible(true);
@@ -45,7 +57,7 @@ export function HomeLaunchBanner() {
         aria-label={isKo ? "배너 닫기" : "Dismiss banner"}
         onClick={() => {
           try {
-            localStorage.setItem(STORAGE_KEY, "1");
+            localStorage.setItem(DISMISS_KEY, "1");
           } catch {
             /* ignore */
           }

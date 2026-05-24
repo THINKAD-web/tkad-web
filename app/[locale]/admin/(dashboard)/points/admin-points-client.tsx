@@ -199,7 +199,7 @@ export default function AdminPointsClient() {
               {users.map((u) => (
                 <tr key={u.id} className="border-t">
                   <td className="px-3 py-2">{u.name}</td>
-                  <td className="px-3 py-2 font-mono text-xs">{u.email}</td>
+                  <td className="px-3 py-2 text-xs">{u.email}</td>
                   <td className="px-3 py-2 text-right tabular-nums">
                     {(u.userPoint?.balance ?? 0).toLocaleString()}P
                   </td>

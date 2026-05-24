@@ -175,7 +175,7 @@ export function MediaDetailExecutionPanel({
                 className="flex flex-wrap items-baseline justify-between gap-2 text-sm"
               >
                 <span className="dark:text-white/80 text-gray-700">{opt.label}</span>
-                <span className="font-mono font-bold tabular-nums dark:text-white text-gray-900">
+                <span className="font-display font-bold tabular-nums dark:text-white text-gray-900">
                   {formatCatalogPriceFieldWon(opt.price)}
                 </span>
               </li>

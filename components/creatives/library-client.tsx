@@ -85,7 +85,7 @@ export function CreativeLibraryClient() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="이름·파일명·태그 검색"
-            className="h-10 w-full bg-transparent font-mono text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            className="h-10 w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           {search ? (
             <button
@@ -170,7 +170,7 @@ function EmptyState() {
       </BtnBlock>
       <Link
         href="/creatives/guide"
-        className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground"
+        className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground hover:text-foreground"
       >
         규격 가이드 보기 →
       </Link>
@@ -199,7 +199,7 @@ function Stat({
       )}
     >
       <div className="flex items-center justify-between">
-        <span className={cn("font-mono text-[10px] font-bold uppercase tracking-[0.22em]", accent ? "text-accent" : "text-muted-foreground")}>
+        <span className={cn("font-display text-xs font-medium uppercase tracking-[0.22em]", accent ? "text-accent" : "text-muted-foreground")}>
           {label}
         </span>
         {Icon ? <Icon className={cn("h-3.5 w-3.5", accent ? "text-accent" : "text-muted-foreground")} /> : null}
@@ -225,7 +225,7 @@ function FilterPill({
   onChange: (v: string) => void;
 }) {
   return (
-    <label className="inline-flex h-10 items-center gap-1.5 rounded-md border-2 border-border bg-card px-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground">
+    <label className="inline-flex h-10 items-center gap-1.5 rounded-md border-2 border-border bg-card px-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground">
       {Icon ? <Icon className="h-3.5 w-3.5 text-muted-foreground" /> : null}
       <span className="text-muted-foreground">{label}</span>
       <select

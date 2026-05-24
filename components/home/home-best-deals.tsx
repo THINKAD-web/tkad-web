@@ -74,7 +74,7 @@ export function HomeBestDeals({
           return (
             <li key={m.id} className="list-none">
               <MediaCard
-                href={mediaItemDetailPath(m.id)}
+                href={mediaItemDetailPath(m)}
                 imageSrc={getPrimaryMediaImageUrl(m)}
                 imageAlt={name}
                 type={typeLabel}
@@ -90,7 +90,7 @@ export function HomeBestDeals({
                     <p className="text-xs font-medium text-muted-foreground">
                       {isKo ? "월 집행가" : "Monthly rate"}
                     </p>
-                    <p className="font-mono text-[clamp(0.875rem,7cqi,1.375rem)] font-black tabular-nums leading-tight tracking-tight text-foreground">
+                    <p className="font-display text-[clamp(0.875rem,7cqi,1.375rem)] font-black tabular-nums leading-tight tracking-tight text-foreground">
                       {priceText}
                     </p>
                   </div>

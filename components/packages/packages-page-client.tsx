@@ -75,10 +75,10 @@ export function PackagesPageClient({ packages }: Props) {
                   key={stat.label}
                   className={cn("category-hero-stat-card", categoryHeroStatCardClass)}
                 >
-                  <dt className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                  <dt className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                     {stat.label}
                   </dt>
-                  <dd className="mt-2 bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text font-mono text-2xl font-black tracking-tight text-transparent sm:text-3xl">
+                  <dd className="mt-2 bg-gradient-to-r from-violet-500 to-cyan-400 bg-clip-text text-2xl font-black tracking-tight text-transparent sm:text-3xl">
                     {stat.value}
                   </dd>
                 </div>
@@ -103,7 +103,7 @@ export function PackagesPageClient({ packages }: Props) {
                 type="button"
                 onClick={() => setActive(f.key)}
                 className={cn(
-                  "inline-flex h-10 items-center gap-1.5 rounded-full px-4 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-all",
+                  "inline-flex h-10 items-center gap-1.5 rounded-full px-4 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all",
                   isActive
                     ? `bg-gradient-to-r ${f.tone} dark:text-white text-gray-900 shadow-[0_10px_24px_rgba(139,92,246,0.28)]`
                     : "border border-foreground/10 dark:bg-white/6 bg-gray-500 text-foreground/80 hover:border-foreground/20 hover:text-foreground dark:border-white/10 border-gray-200 dark:bg-white/[0.04] dark:text-white text-gray-700 dark:hover:bg-white/[0.08]",
@@ -115,7 +115,7 @@ export function PackagesPageClient({ packages }: Props) {
               </button>
             );
           })}
-          <span className="ml-auto font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+          <span className="ml-auto font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
             {visible.length} / {packages.length}
           </span>
         </div>
@@ -164,7 +164,7 @@ export function PackagesPageClient({ packages }: Props) {
           />
           <div className="relative grid grid-cols-1 gap-6 sm:grid-cols-[1.4fr,1fr] sm:items-center">
             <div>
-              <p className="font-mono text-[11px] font-bold uppercase tracking-[0.28em] dark:text-white text-gray-600">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.28em] dark:text-white text-gray-600">
                 {t("custom.eyebrow")}
               </p>
               <h2 className="mt-3 text-3xl font-black leading-[1.05] tracking-[-0.03em] sm:text-4xl">

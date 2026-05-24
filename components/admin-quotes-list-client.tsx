@@ -344,7 +344,7 @@ export default function AdminQuotesListClient() {
                 <tbody>
                   {quotes.map((row) => (
                     <tr key={row.id} className="border-b border-border/10 dark:border-hero-fg/10">
-                      <td className="px-3 py-2 font-mono text-xs font-medium text-foreground dark:text-hero-fg">
+                      <td className="px-3 py-2 text-xs font-medium text-foreground dark:text-hero-fg">
                         {row.quoteNumber}
                       </td>
                       <td className="px-3 py-2">

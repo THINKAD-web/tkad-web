@@ -5,7 +5,7 @@ import dynamic from "next/dynamic";
 import { ClipboardCheck, Crosshair, LayoutList } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { cn } from "@/lib/utils";
-import type { MapBounds, MapMarker } from "./kakao-map-view";
+import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
@@ -40,7 +40,7 @@ function NeonLoadingCard({ label }: { label: string }) {
         className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.28),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_left,rgba(236,72,153,0.18),transparent_60%)]"
       />
       <div className="relative flex w-full max-w-sm flex-col items-center gap-4">
-        <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700">
+        <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
           LOADING
         </div>
         <div className="text-sm font-semibold dark:text-white text-gray-800">{label}</div>
@@ -52,7 +52,7 @@ function NeonLoadingCard({ label }: { label: string }) {
   );
 }
 
-const KakaoMapView = dynamic(() => import("./kakao-map-view"), {
+const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
   ssr: false,
   loading: () => (
     <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
@@ -493,7 +493,7 @@ export default function MediaMapPageClient() {
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">
-            <KakaoMapView
+            <DarkMapView
               markers={markers}
               selectedId={selectedId}
               hoveredId={hoveredId}
@@ -543,7 +543,7 @@ export default function MediaMapPageClient() {
               type="button"
               onClick={startSurveyMode}
               className={cn(
-                "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
+                "pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border px-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all max-md:h-9 max-md:justify-center max-md:px-2.5",
                 surveyMode
                   ? "border-cyan-400/50 bg-cyan-400/20"
                   : "dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 hover:dark:bg-black bg-white/70",
@@ -557,7 +557,7 @@ export default function MediaMapPageClient() {
               type="button"
               onClick={handleLocateMe}
               disabled={locating}
-              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 disabled:opacity-60 max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0"
+              className="pointer-events-auto inline-flex h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 disabled:opacity-60 max-md:h-9 max-md:w-9 max-md:justify-center max-md:px-0"
               aria-label={isKo ? "내 주변" : "Near me"}
             >
               <Crosshair className={`h-3.5 w-3.5 md:h-3.5 ${locating ? "animate-pulse" : ""}`} />
@@ -565,7 +565,7 @@ export default function MediaMapPageClient() {
             </button>
             <Link
               href="/media"
-              className="pointer-events-auto hidden h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-mono text-[11px] font-bold uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 md:inline-flex"
+              className="pointer-events-auto hidden h-10 items-center gap-1.5 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 px-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.55)] backdrop-blur transition-all hover:dark:bg-black bg-white/70 md:inline-flex"
               aria-label={isKo ? "목록으로" : "List view"}
             >
               <LayoutList className="h-3.5 w-3.5" />
@@ -743,13 +743,7 @@ export default function MediaMapPageClient() {
           {items.map((it) => (
             <li
               key={it.id}
-              className={`group rounded-[18px] border bg-card/80 text-card-foreground overflow-hidden cursor-pointer transition-all hover:shadow-md backdrop-blur ${
-                selectedId === it.id
-                  ? "border-primary ring-2 ring-primary/20 shadow-md"
-                  : hoveredId === it.id
-                    ? "border-primary/60 shadow-md"
-                    : "border-border/70 hover:border-primary/40"
-              }`}
+              className={`group rounded-[18px] border bg-card/80 text-card-foreground overflow-hidden cursor-pointer transition-all hover:shadow-md backdrop-blur ${ selectedId === it.id ? "border-primary ring-2 ring-primary/20 shadow-md" : hoveredId === it.id ? "border-primary/60 shadow-md" : "border-border/70 hover:border-primary/40" }`}
               onClick={() => handleSelect(it.id)}
               onMouseEnter={() => setHoveredId(it.id)}
               onMouseLeave={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
@@ -787,11 +781,7 @@ export default function MediaMapPageClient() {
                         e.stopPropagation();
                         toggleCompare(it);
                       }}
-                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
-                        isInCompare(it.id)
-                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15"
-                      }`}
+                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${ isInCompare(it.id) ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black" : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15" }`}
                       aria-label={isInCompare(it.id) ? "선택 해제" : "선택"}
                     >
                       {isInCompare(it.id) ? "선택됨" : "선택"}
@@ -802,11 +792,7 @@ export default function MediaMapPageClient() {
                         e.stopPropagation();
                         toggleCart(it.id);
                       }}
-                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${
-                        inCart(it.id)
-                          ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black"
-                          : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15"
-                      }`}
+                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${ inCart(it.id) ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black" : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15" }`}
                       aria-label={inCart(it.id) ? "담기 해제" : "담기"}
                     >
                       {inCart(it.id) ? "담김" : "담기"}

@@ -91,6 +91,7 @@ export default async function MediaLayout({
         locale,
         catalog.map((m) => ({
           id: m.id,
+          slug: m.slug,
           name: m.name,
           nameEn: m.nameEn,
           location: m.location,

@@ -162,7 +162,7 @@ export function BookingRequestModal({
       <div className="relative w-full max-w-xl border-2 border-border bg-card">
         <div className="flex items-center justify-between border-b-2 border-border px-5 py-4">
           <div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ {t("eyebrow")} ]
             </p>
             <h3
@@ -172,7 +172,7 @@ export function BookingRequestModal({
               <CalIcon className="mr-1.5 inline-block h-4 w-4 text-accent" aria-hidden />
               {t("title")}
             </h3>
-            <p className="mt-1 line-clamp-1 font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+            <p className="mt-1 line-clamp-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               {`// `}{mediaName}
             </p>
           </div>
@@ -190,7 +190,7 @@ export function BookingRequestModal({
           {/* 시작 / 종료 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("startsAt")} *
               </span>
               <input
@@ -198,11 +198,11 @@ export function BookingRequestModal({
                 required
                 value={startsAt}
                 onChange={(e) => setStartsAt(e.target.value)}
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("endsAt")} *
               </span>
               <input
@@ -210,13 +210,13 @@ export function BookingRequestModal({
                 required
                 value={endsAt}
                 onChange={(e) => setEndsAt(e.target.value)}
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
 
           {overlapsBlocked ? (
-            <p className="flex items-start gap-2 border-2 border-accent bg-accent/10 px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
+            <p className="flex items-start gap-2 border-2 border-accent bg-accent/10 px-3 py-2 text-[11px] tracking-tight text-accent">
               <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
               {t("overlapWarning")}
             </p>
@@ -225,7 +225,7 @@ export function BookingRequestModal({
           {/* 이름 / 이메일 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("name")} *
               </span>
               <input
@@ -235,11 +235,11 @@ export function BookingRequestModal({
                 onChange={(e) => setName(e.target.value)}
                 placeholder={t("namePlaceholder")}
                 maxLength={80}
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("email")} *
               </span>
               {/* type="text" + inputMode — Safari/iOS 의 type="email" 검증 회피
@@ -252,7 +252,7 @@ export function BookingRequestModal({
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="example@domain.com"
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
@@ -260,7 +260,7 @@ export function BookingRequestModal({
           {/* 연락처 / 예산 */}
           <div className="grid gap-3 sm:grid-cols-2">
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("phone")}
               </span>
               <input
@@ -271,11 +271,11 @@ export function BookingRequestModal({
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="010-1234-5678"
                 maxLength={40}
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
             <label className="block">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("budget")}
               </span>
               <input
@@ -285,14 +285,14 @@ export function BookingRequestModal({
                 value={budgetMan}
                 onChange={(e) => setBudgetMan(e.target.value)}
                 placeholder={t("budgetPlaceholder")}
-                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+                className="mt-1 w-full border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
               />
             </label>
           </div>
 
           {/* 메모 */}
           <label className="block">
-            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {t("notes")}
             </span>
             <textarea
@@ -301,7 +301,7 @@ export function BookingRequestModal({
               placeholder={t("notesPlaceholder")}
               maxLength={2000}
               rows={3}
-              className="mt-1 w-full resize-y border-2 border-border bg-card px-3 py-2 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
+              className="mt-1 w-full resize-y border-2 border-border bg-card px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
             />
           </label>
 
@@ -318,7 +318,7 @@ export function BookingRequestModal({
           {/* Turnstile */}
           {turnstileEnabled ? (
             <div>
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                 {t("captcha")}
               </p>
               <div className="mt-1">
@@ -340,7 +340,7 @@ export function BookingRequestModal({
           </label>
 
           {error ? (
-            <p className="border-2 border-accent bg-card px-3 py-2 font-mono text-[11px] tracking-tight text-accent">
+            <p className="border-2 border-accent bg-card px-3 py-2 text-[11px] tracking-tight text-accent">
               {`// `}{error}
             </p>
           ) : null}
@@ -350,7 +350,7 @@ export function BookingRequestModal({
             <button
               type="submit"
               disabled={!canSubmit}
-              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex items-center gap-2 border-2 border-accent bg-accent px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (
                 <>
@@ -364,7 +364,7 @@ export function BookingRequestModal({
             <button
               type="button"
               onClick={onClose}
-              className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
+              className="inline-flex items-center gap-2 border-2 border-border bg-card px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:bg-foreground hover:text-background"
             >
               {t("cancel")}
             </button>

@@ -31,7 +31,7 @@ export async function HomeVerificationStepsServer() {
               className="group relative h-full rounded-[28px] dark:bg-white/6 bg-gray-50 p-5 backdrop-blur transition-all hover:-translate-y-1 tkad-neon-border tkad-neon-glow sm:p-7 lg:p-8"
             >
               <div className="mb-6 flex items-center justify-between">
-                <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [{item.step}]
                 </span>
                 <Icon

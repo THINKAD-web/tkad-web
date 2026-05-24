@@ -46,7 +46,7 @@ export function ReportAccessGate({
       <div className="absolute inset-0 flex items-center justify-center rounded-2xl dark:bg-black bg-white/45 backdrop-blur-[2px]">
         <div className="mx-4 max-w-sm rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/70 px-6 py-8 text-center shadow-xl">
           <Lock className="mx-auto h-8 w-8 text-cyan-300/90" aria-hidden />
-          <p className="mt-3 font-mono text-[10px] font-bold uppercase tracking-[0.2em] dark:text-white text-gray-400">
+          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-400">
             {isEnterprise ? "ENTERPRISE" : "PRO"}
           </p>
           <h3 className="mt-2 text-base font-black dark:text-white text-gray-900">{title}</h3>

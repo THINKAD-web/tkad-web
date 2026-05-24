@@ -8,7 +8,7 @@ import Spinner from "@/components/spinner";
 import { useToast } from "@/components/toast-provider";
 
 const inputCls =
-  "h-11 w-full border-2 border-border bg-card px-3 font-mono text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
+  "h-11 w-full border-2 border-border bg-card px-3  text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none";
 
 export type LeadData = {
   company: string;
@@ -91,7 +91,7 @@ export function LeadCaptureModal({
             <div className="mb-4 flex h-14 w-14 items-center justify-center border-2 border-accent bg-accent text-accent-foreground">
               <CheckCircle className="h-8 w-8" />
             </div>
-            <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
               [ SUBMITTED ]
             </p>
             <h3
@@ -100,7 +100,7 @@ export function LeadCaptureModal({
             >
               {isKo ? "접수되었습니다!" : "You are all set!"}
             </h3>
-            <p className="mt-3 font-mono text-[12px] tracking-tight text-muted-foreground">
+            <p className="mt-3 text-[12px] tracking-tight text-muted-foreground">
               {`// `}{isKo
                 ? "입력하신 이메일로 자료를 보내드립니다."
                 : "We will send the materials to the email you provided."}
@@ -109,7 +109,7 @@ export function LeadCaptureModal({
         ) : (
           <>
             <div className="mb-6">
-              <div className="mb-3 inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent-foreground">
+              <div className="mb-3 inline-flex items-center gap-1.5 border-2 border-border bg-accent px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground">
                 <Download className="h-3.5 w-3.5" />
                 {isKo ? "자료 다운로드" : "Download"}
               </div>
@@ -119,7 +119,7 @@ export function LeadCaptureModal({
               >
                 {displayTitle}
               </h3>
-              <p className="mt-2 font-mono text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+              <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                 {`// `}{displayDescription}
               </p>
             </div>

@@ -21,6 +21,7 @@ export async function GET() {
         trialStartedAt: true,
         trialEndsAt: true,
         proTrialEndsAt: true,
+        createdAt: true,
       },
     });
 
@@ -53,6 +54,7 @@ export async function GET() {
       trialDaysLeft: planUser ? (trialDaysLeft(planUser) ?? 0) : 0,
       trialProgressPct: planUser ? trialProgressPct(planUser) : 0,
       pointBalance,
+      createdAt: row?.createdAt?.toISOString() ?? null,
     });
   } catch (e) {
     return apiServerError(e, "auth/session");

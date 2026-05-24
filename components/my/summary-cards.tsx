@@ -39,15 +39,15 @@ export function SummaryCards({ favorites, inProgress, totalQuotes }: Props) {
             className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
           >
             <div className="mb-3 flex items-center justify-between">
-              <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
                 [ {c.label} ]
               </span>
               <span className="flex h-8 w-8 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
                 <Icon className="h-4 w-4" strokeWidth={2.5} />
               </span>
             </div>
-            <p className="text-xs font-mono text-muted-foreground mb-1">{c.labelKo}</p>
-            <div className="font-mono text-3xl font-bold tabular-nums text-foreground">
+            <p className="text-xs text-muted-foreground mb-1">{c.labelKo}</p>
+            <div className="font-display text-3xl font-bold tabular-nums text-foreground">
               {values[c.key]}
             </div>
           </article>

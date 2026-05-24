@@ -220,7 +220,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
             ) : null}
 
             <section className="tkad-media-links-footer border-t border-border/80 py-12">
-              <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
                 {isKo ? "다른 유형" : "Other formats"}
               </p>
               <ul className="mt-4 flex flex-wrap gap-2">

@@ -1,31 +1,46 @@
 /**
- * Community 입력 검증 — 외부 라이브러리 의존 없음 (zod 도 안 씀, 가벼운 manual 검증).
- *
- * 모든 검증 결과는 `{ ok: true, value } | { ok: false, error: string }` 형식.
+ * Community 입력 검증
  */
 
 import {
   COMMUNITY_CATEGORIES,
+  COMMUNITY_INDUSTRY_OPTIONS,
   COMMUNITY_LIMITS,
+  COMMUNITY_REGION_OPTIONS,
   normalizeCommunityCategory,
   type CommunityCategory,
 } from "@/lib/community/types";
+import {
+  asExecutionReviewMetadata,
+  asMediaRecommendMetadata,
+  type CommunityPostMetadataInput,
+} from "@/lib/community/post-metadata";
 
 export type ValidatePostInput = {
   category?: unknown;
   title?: unknown;
   body?: unknown;
+  metadata?: unknown;
 };
 
 export type ValidatedPostInput = {
   category: CommunityCategory;
   title: string;
   body: string;
+  metadata: CommunityPostMetadataInput;
 };
 
 export type Result<T> =
   | { ok: true; value: T }
   | { ok: false; error: string; field?: string };
+
+function parseMetadataInput(raw: unknown): CommunityPostMetadataInput {
+  if (raw == null) return null;
+  if (typeof raw === "object" && !Array.isArray(raw)) {
+    return raw as Record<string, unknown>;
+  }
+  return null;
+}
 
 export function validateCommunityPostInput(
   input: ValidatePostInput,
@@ -61,12 +76,49 @@ export function validateCommunityPostInput(
       field: "body",
     };
   }
+
+  const metadata = parseMetadataInput(input.metadata);
+
+  if (cat === "media_recommend") {
+    const rec = asMediaRecommendMetadata(metadata);
+    if (!rec) {
+      return {
+        ok: false,
+        error: "예산, 지역, 업종을 모두 입력해주세요.",
+        field: "metadata",
+      };
+    }
+    const regionOk = COMMUNITY_REGION_OPTIONS.some((r) => r.value === rec.region);
+    const industryOk = COMMUNITY_INDUSTRY_OPTIONS.some(
+      (i) => i.value === rec.industry,
+    );
+    if (!regionOk || !industryOk) {
+      return {
+        ok: false,
+        error: "지역 또는 업종 선택이 올바르지 않습니다.",
+        field: "metadata",
+      };
+    }
+  }
+
+  if (cat === "execution_review") {
+    const rev = asExecutionReviewMetadata(metadata);
+    if (!rev) {
+      return {
+        ok: false,
+        error: "집행 매체와 별점(1–5)을 선택해주세요.",
+        field: "metadata",
+      };
+    }
+  }
+
   return {
     ok: true,
     value: {
       category: cat,
       title,
       body,
+      metadata,
     },
   };
 }

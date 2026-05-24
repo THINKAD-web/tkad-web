@@ -9,6 +9,7 @@ import {
   isGuestFavorite,
   toggleGuestFavorite,
 } from "@/lib/favorites-client";
+import { hapticMedium } from "@/lib/haptic";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -94,6 +95,7 @@ export function MediaFavoriteButton({
         }
         setFavorited(result.favorited);
         if (result.favorited) {
+          hapticMedium();
           toast.success(t("added", { name: displayName }));
         } else {
           toast.warning(t("removed"));
@@ -116,6 +118,7 @@ export function MediaFavoriteButton({
         const next = data.data.favorited as boolean;
         setFavorited(next);
         if (next) {
+          hapticMedium();
           toast.success(t("added", { name: displayName }));
         } else {
           toast.warning(t("removed"));
@@ -144,6 +147,7 @@ export function MediaFavoriteButton({
         void toggle();
       }}
       disabled={pending || favorited === null}
+      data-media-favorite-id={mediaId}
       className={cn(
         "inline-flex items-center justify-center rounded-md border border-border transition-colors disabled:opacity-50",
         shellClass,

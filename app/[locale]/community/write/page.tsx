@@ -5,6 +5,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { pageAlternates } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { ArrowLeft, Shield, Sparkles, Users } from "lucide-react";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { CommunityWriteForm } from "@/components/community/write-form";
 import { CommunityMemberRequiredPanel } from "@/components/community/member-required-panel";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -36,6 +37,7 @@ export default async function CommunityWritePage({ params }: Props) {
   setRequestLocale(locale);
   const isKo = locale === "ko";
   const me = await getCurrentUser();
+  const catalog = await fetchPublicMediaCatalog().catch(() => []);
 
   return (
     <HomeLandingDayNight>
@@ -43,7 +45,7 @@ export default async function CommunityWritePage({ params }: Props) {
         <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
-            className="inline-flex items-center gap-2 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
+            className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
           >
             <ArrowLeft className="h-3.5 w-3.5" />
             {isKo ? "커뮤니티 목록" : "Community list"}
@@ -78,14 +80,14 @@ export default async function CommunityWritePage({ params }: Props) {
               <div className="mt-8 flex flex-wrap gap-3">
                 <Link
                   href="/community/policy"
-                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
                 >
                   <Shield className="h-3.5 w-3.5" />
                   {isKo ? "운영 정책 보기" : "Read policy"}
                 </Link>
                 <Link
                   href="/community/members"
-                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
+                  className="inline-flex items-center gap-2 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/20 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900"
                 >
                   <Users className="h-3.5 w-3.5" />
                   {isKo ? "활동 멤버 보기" : "Browse members"}
@@ -95,7 +97,7 @@ export default async function CommunityWritePage({ params }: Props) {
 
             <div className="grid gap-4">
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// 작성 기준" : "// posting rules"}
                 </p>
                 <div className="mt-4 space-y-3 text-sm leading-relaxed dark:text-white">
@@ -108,7 +110,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 <div className="flex items-start gap-3">
                   <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                   <div>
-                    <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                       {isKo ? "// 추천 주제" : "// strong post angles"}
                     </p>
                     <p className="mt-2 text-sm leading-relaxed dark:text-white">
@@ -129,6 +131,7 @@ export default async function CommunityWritePage({ params }: Props) {
               {me ? (
                 <CommunityWriteForm
                   locale={locale}
+                  catalog={catalog}
                   currentUser={{
                     name: me.name,
                     company: me.company,
@@ -152,7 +155,7 @@ export default async function CommunityWritePage({ params }: Props) {
 
             <aside className="grid gap-4 self-start">
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 backdrop-blur tkad-neon-border">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// 작성 흐름" : "// workflow"}
                 </p>
                 <ol className="mt-4 space-y-3 text-sm leading-relaxed dark:text-white">
@@ -162,7 +165,7 @@ export default async function CommunityWritePage({ params }: Props) {
                 </ol>
               </div>
               <div className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-5 backdrop-blur">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// note" : "// note"}
                 </p>
                 <p className="mt-3 text-sm leading-relaxed dark:text-white">

@@ -1,6 +1,7 @@
 "use client";
 
-import { useMemo, useState, type ReactNode } from "react";
+import { useMemo, useState, useEffect, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { CasesFilterHub } from "@/components/cases/cases-filter-hub";
 import { CaseStudyCard } from "@/components/cases/case-study-card";
 import { Sparkles } from "lucide-react";
@@ -10,6 +11,8 @@ import { resolveCasesCatalogView } from "@/lib/cases-catalog-layout";
 import {
   emptyCaseFilters,
   hasActiveCaseFilters,
+  CASE_INDUSTRY_TAGS,
+  type CaseIndustryTag,
 } from "@/lib/success-case-hub";
 
 type Props = {
@@ -26,8 +29,26 @@ export function CasesCatalogSection({
 }: Props) {
   const t = useTranslations("cases");
   const isKo = locale === "ko" || locale.startsWith("ko");
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState(emptyCaseFilters);
   const [query, setQuery] = useState("");
+
+  useEffect(() => {
+    const industry = searchParams.get("industry");
+    const q = searchParams.get("q") ?? "";
+    setQuery(q);
+    if (
+      industry &&
+      CASE_INDUSTRY_TAGS.includes(industry as CaseIndustryTag)
+    ) {
+      setFilters({
+        ...emptyCaseFilters(),
+        industries: new Set([industry as CaseIndustryTag]),
+      });
+    } else {
+      setFilters(emptyCaseFilters());
+    }
+  }, [searchParams]);
 
   const active = hasActiveCaseFilters(filters, query);
   const { filtered, recommended, gridCases } = useMemo(
@@ -58,7 +79,7 @@ export function CasesCatalogSection({
           {recommended.length > 0 ? (
             <section className="mb-12">
               <div className="mb-5">
-                <p className="flex items-center gap-2 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-[#a855f7]">
+                <p className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                   <Sparkles className="h-3.5 w-3.5" />
                   [ {t("recommendedTitle")} ]
                 </p>

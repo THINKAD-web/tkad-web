@@ -29,7 +29,7 @@ export function AdminDashboardCharts({
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
       <div className="rounded-2xl border border-border/60 bg-card/50 p-4 backdrop-blur">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           [ 최근 4주 문의 추이 ]
         </p>
         <div className="mt-4 h-56 w-full">
@@ -71,12 +71,12 @@ export function AdminDashboardCharts({
       </div>
 
       <div className="rounded-2xl border border-border/60 bg-card/50 p-4 backdrop-blur">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
           [ 문의 유형별 ]
         </p>
         <div className="mt-4 flex h-56 flex-col items-center sm:flex-row sm:gap-4">
           {pieData.length === 0 ? (
-            <p className="flex flex-1 items-center justify-center font-mono text-xs text-muted-foreground">
+            <p className="flex flex-1 items-center justify-center text-xs text-muted-foreground">
               {`// `}최근 문의 데이터 없음
             </p>
           ) : (
@@ -127,7 +127,7 @@ export function AdminDashboardCharts({
                       />
                       <span className="truncate">{d.label}</span>
                     </span>
-                    <span className="font-mono font-bold tabular-nums">
+                    <span className="font-display font-bold tabular-nums">
                       {d.count}
                     </span>
                   </li>

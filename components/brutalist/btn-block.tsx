@@ -70,7 +70,7 @@ export function BtnBlock(props: LinkProps | ButtonProps) {
     "aria-label": ariaLabel,
   } = props;
   const cls = cn(
-    "inline-flex items-center justify-center gap-2 border-2 font-mono font-bold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
+    "inline-flex items-center justify-center gap-2 border-2 font-display font-bold uppercase tracking-[0.18em] transition-colors duration-150 disabled:opacity-40 disabled:cursor-not-allowed",
     sizeClass[size],
     variantClass[variant],
     className,

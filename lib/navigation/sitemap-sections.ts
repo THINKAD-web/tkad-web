@@ -51,16 +51,36 @@ export function buildSitemapSections(
     contactLabel,
   } = input;
 
+  const mediaTypeLinks: SitemapLink[] = [
+    { href: "/media/category/subway", label: "지하철 광고" },
+    { href: "/media/category/bus", label: "버스 광고" },
+    { href: "/media/category/billboard", label: "전광판 광고" },
+    { href: "/media/category/campus", label: "대학가 광고" },
+    { href: "/media/category/dooh", label: "DOOH 광고" },
+    { href: "/media/category/local", label: "로컬 매체" },
+  ];
+
+  const targetLinks: SitemapLink[] = [
+    { href: "/target/brand", label: "브랜드 캠페인" },
+    { href: "/target/fandom", label: "팬덤 광고" },
+    { href: "/target/public", label: "지자체 광고" },
+    { href: "/target/small_business", label: "로컬·소상공인" },
+    { href: "/target/university", label: "대학교 캠페인" },
+  ];
+
   return [
     {
       id: "discovery",
       title: discovery.label,
-      links: groupLinks(discovery),
+      links: [
+        ...groupLinks(discovery),
+        { href: "/media/category/subway", label: "매체 유형별" },
+      ],
     },
     {
       id: "planning",
       title: planning.label,
-      links: groupLinks(planning),
+      links: [...groupLinks(planning), ...targetLinks],
     },
     {
       id: "creative",
@@ -90,6 +110,7 @@ export function buildSitemapSections(
         { href: "/services", label: servicesLabel },
         { href: "/register/media", label: mediaRegisterLabel },
         { href: "/contact", label: contactLabel },
+        ...mediaTypeLinks.slice(0, 3),
       ],
     },
   ];

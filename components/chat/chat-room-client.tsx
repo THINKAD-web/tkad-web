@@ -262,7 +262,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
                 isSystem && "mx-auto max-w-full items-center",
               )}
             >
-              <span className="mb-0.5 text-[10px] font-mono uppercase tracking-wider text-muted-foreground">
+              <span className="mb-0.5 text-[10px] font-display uppercase tracking-wider text-muted-foreground">
                 {m.displayLabel}
                 {m.isAutoReply ? ` · ${t("autoReply")}` : ""}
               </span>

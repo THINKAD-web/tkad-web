@@ -44,15 +44,15 @@ function ChartTooltip({
   return (
     <div className="rounded-2xl border border-border/80 bg-card/90 px-3 py-2 text-xs shadow-[0_24px_80px_rgba(0,0,0,0.28)] backdrop-blur">
       <p className="max-w-[220px] font-bold tracking-tight text-foreground">{p.name}</p>
-      <p className="mt-1 font-mono text-[11px] tabular-nums text-muted-foreground">
+      <p className="mt-1 text-[11px] tabular-nums text-muted-foreground">
         {isKo ? "추천 점수" : "Fit score"}: <span className="text-foreground">{p.x}</span>
       </p>
-      <p className="font-mono text-[11px] tabular-nums text-muted-foreground">
+      <p className="text-[11px] tabular-nums text-muted-foreground">
         {isKo ? "월간 노출(추정)" : "Est. monthly reach"}:{" "}
         <span className="text-foreground">{p.y.toLocaleString()}</span>
       </p>
       {p.rank <= 3 ? (
-        <p className="mt-1 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-accent">
+        <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
           [ TOP {p.rank} ]
         </p>
       ) : null}
@@ -106,7 +106,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
   if (!data.length || !hasReach) {
     return (
       <div
-        className="flex min-h-[280px] items-center justify-center border-2 border-border bg-muted px-4 text-center font-mono text-[11px] uppercase tracking-[0.18em] text-muted-foreground"
+        className="flex min-h-[280px] items-center justify-center border-2 border-border bg-muted px-4 text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground"
         role="img"
         aria-label={tr("resultChartAria")}
       >
@@ -126,7 +126,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
     >
       <div className="mb-2 flex flex-wrap items-end justify-between gap-2 px-1">
         <div>
-          <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
             [ {isKo ? "추천 차트" : "RECOMMENDATION CHART"} ]
           </p>
           <p className="mt-1 text-sm font-bold tracking-tight text-foreground">
@@ -134,11 +134,11 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
             <span className="h-2 w-2 rounded-full bg-[var(--hermes)] opacity-80" />
             {isKo ? "후보" : "Candidates"}
           </span>
-          <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
+          <span className="inline-flex items-center gap-2 rounded-full border border-border/80 bg-card/80 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground shadow-xs backdrop-blur">
             <span className="h-2.5 w-2.5 rounded-full bg-[var(--hermes)] shadow-[0_0_0_2px_rgba(236,72,153,0.22),0_0_24px_rgba(236,72,153,0.32)]" />
             TOP 3
           </span>

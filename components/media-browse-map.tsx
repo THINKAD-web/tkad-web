@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { CampaignMonitoringMap } from "@/components/campaign-monitoring-map";
+import { DarkCampaignMap } from "@/components/public-map/dark-campaign-map";
 import { mediaItemsToCampaignPins } from "@/lib/media-data";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -40,7 +40,7 @@ export default function MediaBrowseMap({
     [onSelectId],
   );
   return (
-    <CampaignMonitoringMap
+    <DarkCampaignMap
       pins={pins}
       selectedId={selectedId}
       onSelectPin={handleSelectPin}
@@ -50,7 +50,6 @@ export default function MediaBrowseMap({
       showFooterCaption={showFooterCaption}
       centerOverride={centerOverride ?? null}
       zoomOverride={zoomOverride ?? null}
-      pinMetaById={pinMetaById}
     />
   );
 }

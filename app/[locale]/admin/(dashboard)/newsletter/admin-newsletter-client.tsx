@@ -189,7 +189,7 @@ export function AdminNewsletterClient() {
         <button
           type="button"
           onClick={() => setTab("subscribers")}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${
             tab === "subscribers"
               ? "bg-primary text-primary-foreground"
               : "bg-muted/50 text-muted-foreground hover:text-foreground"
@@ -201,7 +201,7 @@ export function AdminNewsletterClient() {
         <button
           type="button"
           onClick={() => setTab("dispatches")}
-          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-mono text-[11px] font-bold uppercase tracking-[0.18em] transition-colors ${
+          className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors ${
             tab === "dispatches"
               ? "bg-primary text-primary-foreground"
               : "bg-muted/50 text-muted-foreground hover:text-foreground"
@@ -226,7 +226,7 @@ export function AdminNewsletterClient() {
                 key={k}
                 type="button"
                 onClick={() => setStatusFilter(k)}
-                className={`rounded-full border px-3 py-1 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-colors ${
+                className={`rounded-full border px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.16em] transition-colors ${
                   statusFilter === k
                     ? "border-primary bg-primary/10 text-primary"
                     : "border-border bg-card text-muted-foreground hover:text-foreground"
@@ -235,7 +235,7 @@ export function AdminNewsletterClient() {
                 {label}
               </button>
             ))}
-            <span className="ml-auto font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+            <span className="ml-auto font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
               활성 {activeCount} · 합계 {subscribers.length}
             </span>
           </div>
@@ -254,25 +254,25 @@ export function AdminNewsletterClient() {
                 <table className="w-full min-w-[44rem] border-collapse text-left text-sm">
                   <thead>
                     <tr className="bg-muted text-muted-foreground">
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Email
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Locale
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Source
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Status
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Last sent
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]">
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]">
                         Joined
                       </th>
-                      <th className="px-3 py-2 font-mono text-[10px] uppercase tracking-[0.16em]" />
+                      <th className="px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em]" />
                     </tr>
                   </thead>
                   <tbody>
@@ -284,15 +284,15 @@ export function AdminNewsletterClient() {
                         <td className="px-3 py-2 font-bold text-foreground">
                           {s.email}
                         </td>
-                        <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
                           {s.locale}
                         </td>
-                        <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
                           {s.source ?? "—"}
                         </td>
                         <td className="px-3 py-2">
                           <span
-                            className={`inline-flex items-center rounded-full border px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.16em] ${
+                            className={`inline-flex items-center rounded-full border px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] ${
                               s.isActive
                                 ? "border-emerald-500 bg-emerald-50 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-300"
                                 : "border-border bg-muted text-muted-foreground"
@@ -301,12 +301,12 @@ export function AdminNewsletterClient() {
                             {s.isActive ? "active" : "unsubscribed"}
                           </span>
                         </td>
-                        <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
                           {s.lastSentAt
                             ? new Date(s.lastSentAt).toLocaleDateString("ko-KR")
                             : "—"}
                         </td>
-                        <td className="px-3 py-2 font-mono text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2 text-[11px] text-muted-foreground">
                           {new Date(s.createdAt).toLocaleDateString("ko-KR")}
                         </td>
                         <td className="px-3 py-2 text-right">
@@ -314,7 +314,7 @@ export function AdminNewsletterClient() {
                             <button
                               type="button"
                               onClick={() => removeSubscriber(s.id)}
-                              className="inline-flex items-center gap-1 rounded border border-border bg-card px-2 py-0.5 font-mono text-[10px] uppercase tracking-[0.14em] text-muted-foreground hover:border-destructive hover:text-destructive"
+                              className="inline-flex items-center gap-1 rounded border border-border bg-card px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground hover:border-destructive hover:text-destructive"
                             >
                               <X className="h-3 w-3" />
                               해지
@@ -342,7 +342,7 @@ export function AdminNewsletterClient() {
             </p>
             <div className="mt-4 grid grid-cols-1 gap-3">
               <label className="block">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   제목
                 </span>
                 <input
@@ -351,11 +351,11 @@ export function AdminNewsletterClient() {
                   onChange={(e) => setSubject(e.target.value)}
                   maxLength={200}
                   placeholder="2026년 5월 OOH 트렌드 리포트"
-                  className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+                  className="mt-1 h-10 w-full rounded-md border border-border bg-card px-3 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </label>
               <label className="block">
-                <span className="font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   본문 (마크다운: # ## ### · - 단락)
                 </span>
                 <textarea
@@ -364,32 +364,32 @@ export function AdminNewsletterClient() {
                   onChange={(e) => setBodyMd(e.target.value)}
                   maxLength={20_000}
                   placeholder={`# 5월 OOH 트렌드\n\n## 인기 매체\n- 강남대로 미디어월\n- 시청역 LED\n\n## 평균 CPM 추이\n…`}
-                  className="mt-1 w-full resize-y rounded-md border border-border bg-card px-3 py-2 font-mono text-sm text-foreground focus:border-primary focus:outline-none"
+                  className="mt-1 w-full resize-y rounded-md border border-border bg-card px-3 py-2 text-sm text-foreground focus:border-primary focus:outline-none"
                 />
               </label>
               <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <label className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Locale
                   <select
                     value={localeFilter}
                     onChange={(e) =>
                       setLocaleFilter(e.target.value as typeof localeFilter)
                     }
-                    className="rounded border border-border bg-card px-2 py-1 font-mono text-xs text-foreground"
+                    className="rounded border border-border bg-card px-2 py-1 text-xs text-foreground"
                   >
                     <option value="all">all</option>
                     <option value="ko">ko</option>
                     <option value="en">en</option>
                   </select>
                 </label>
-                <label className="inline-flex flex-1 items-center gap-2 font-mono text-[10px] uppercase tracking-[0.18em] text-muted-foreground">
+                <label className="inline-flex flex-1 items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                   Notes
                   <input
                     type="text"
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     placeholder="발송 메모(외부 노출 X)"
-                    className="h-8 flex-1 rounded border border-border bg-card px-2 font-mono text-xs text-foreground"
+                    className="h-8 flex-1 rounded border border-border bg-card px-2 text-xs text-foreground"
                   />
                 </label>
               </div>
@@ -398,7 +398,7 @@ export function AdminNewsletterClient() {
                   type="button"
                   onClick={dryRun}
                   disabled={sendBusy}
-                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-foreground hover:bg-muted disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md border border-border bg-card px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-foreground hover:bg-muted disabled:opacity-50"
                 >
                   대상 미리보기
                 </button>
@@ -406,7 +406,7 @@ export function AdminNewsletterClient() {
                   type="button"
                   onClick={send}
                   disabled={sendBusy}
-                  className="inline-flex items-center gap-1.5 rounded-md border-2 border-primary bg-primary px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.16em] text-primary-foreground hover:opacity-95 disabled:opacity-50"
+                  className="inline-flex items-center gap-1.5 rounded-md border-2 border-primary bg-primary px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] text-primary-foreground hover:opacity-95 disabled:opacity-50"
                 >
                   {sendBusy ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -417,7 +417,7 @@ export function AdminNewsletterClient() {
                 </button>
               </div>
               {dryRunInfo ? (
-                <div className="rounded-md border border-primary bg-primary/10 p-3 font-mono text-xs">
+                <div className="rounded-md border border-primary bg-primary/10 p-3 text-xs">
                   발송 대상 {dryRunInfo.recipientCount}명. 샘플:{" "}
                   {dryRunInfo.sample.join(", ") || "—"}
                 </div>
@@ -430,7 +430,7 @@ export function AdminNewsletterClient() {
               <h2 className="text-base font-bold tracking-tight text-foreground">
                 발송 이력
               </h2>
-              <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                 최근 {dispatches.length}건
               </span>
             </header>
@@ -448,15 +448,15 @@ export function AdminNewsletterClient() {
                   <li key={d.id} className="space-y-1 p-4">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className="font-bold text-foreground">{d.subject}</span>
-                      <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-muted-foreground">
+                      <span className="font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                         {new Date(d.createdAt).toLocaleString("ko-KR")}
                       </span>
-                      <span className="ml-auto font-mono text-[11px] tabular-nums">
+                      <span className="ml-auto text-[11px] tabular-nums">
                         성공 {d.successCount}/{d.recipientCount}
                         {d.failedCount > 0 ? ` · 실패 ${d.failedCount}` : ""}
                       </span>
                     </div>
-                    <p className="line-clamp-2 font-mono text-[11px] text-muted-foreground">
+                    <p className="line-clamp-2 text-[11px] text-muted-foreground">
                       {d.bodyMd.slice(0, 240)}
                     </p>
                   </li>

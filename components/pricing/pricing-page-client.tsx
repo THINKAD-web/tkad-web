@@ -67,14 +67,10 @@ export function PricingPageClient({
         return (
           <article
             key={key}
-            className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${
-              highlighted
-                ? "border-cyan-400/40 dark:bg-white/10 bg-gray-100 tkad-neon-border shadow-[0_0_40px_rgba(34,211,238,0.12)]"
-                : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"
-            }`}
+            className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${ highlighted ? "border-cyan-400/40 dark:bg-white/10 bg-gray-100 tkad-neon-border shadow-[0_0_40px_rgba(34,211,238,0.12)]" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50" }`}
           >
             {highlighted ? (
-              <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-0.5 font-mono text-[10px] font-bold uppercase tracking-wider text-cyan-200">
+              <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-cyan-200">
                 <Sparkles className="h-3 w-3" aria-hidden />
                 {isKo ? "인기" : "Popular"}
               </p>

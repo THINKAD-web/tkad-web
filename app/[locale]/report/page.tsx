@@ -78,7 +78,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
   const filterPill = (active: boolean) =>
     cn(
-      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-mono text-[11px] font-bold uppercase tracking-[0.16em] transition-all",
+      "inline-flex items-center justify-center rounded-full px-4 py-2.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all",
       active
         ? "tkad-neon-cta dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)]"
         : "border border-border bg-card text-foreground hover:border-primary/40 hover:bg-muted/80 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 dark:hover:border-white/22 dark:hover:dark:bg-white/10 bg-gray-100",
@@ -116,7 +116,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
           <div className="ui-container">
             {reports.length === 0 ? (
               <div className="mx-auto max-w-xl rounded-[28px] border border-border bg-card p-10 text-center shadow-[0_24px_80px_rgba(0,0,0,0.08)] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:backdrop-blur-md dark:shadow-[0_36px_140px_rgba(0,0,0,0.72)]">
-                <p className="font-mono text-[11px] font-bold uppercase tracking-[0.2em] text-primary">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">
                   [ {isKo ? "준비 중" : "Coming soon"} ]
                 </p>
                 <p className="mt-4 text-lg font-bold text-foreground">
@@ -154,7 +154,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                           />
                         ) : (
                           <div className="flex h-full w-full items-end p-4">
-                            <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-800">
+                            <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800">
                               THINKAD REPORT
                             </span>
                           </div>
@@ -162,12 +162,12 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                       </div>
                       <article className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-mono text-[10px] font-bold uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
+                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
                             {labelForReportCategory(r.category, isKo)}
                           </span>
                           <time
                             dateTime={r.publishedAt?.toISOString()}
-                            className="font-mono text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
+                            className="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
                           >
                             {formatPublished(r.publishedAt, locale)}
                           </time>
@@ -185,7 +185,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
 
                 {totalPages > 1 ? (
                   <nav
-                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-mono text-[12px] font-bold uppercase tracking-[0.14em] dark:border-white/10 border-gray-200"
+                    className="mt-12 flex flex-wrap items-center justify-center gap-3 border-t border-border pt-10 font-display text-xs font-medium uppercase tracking-[0.14em] dark:border-white/10 border-gray-200"
                     aria-label={isKo ? "페이지" : "Pagination"}
                   >
                     {curPage > 1 ? (

@@ -27,7 +27,7 @@ export function SectionHeading({
       )}
     >
       {eyebrow ? (
-        <p className="mb-3 font-mono text-[10px] font-bold uppercase tracking-[0.22em] text-accent">
+        <p className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ {eyebrow} ]
         </p>
       ) : null}
@@ -40,7 +40,7 @@ export function SectionHeading({
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-4 font-mono text-sm leading-relaxed tracking-tight text-muted-foreground sm:text-base">
+        <p className="mt-4 text-sm leading-relaxed tracking-tight text-muted-foreground sm:text-base">
           {`// `}{subtitle}
         </p>
       ) : null}

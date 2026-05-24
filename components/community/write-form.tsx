@@ -1,20 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import {
   COMMUNITY_CATEGORIES,
   COMMUNITY_CATEGORY_LABELS,
+  COMMUNITY_INDUSTRY_OPTIONS,
   COMMUNITY_LIMITS,
+  COMMUNITY_REGION_OPTIONS,
   fallbackCommunityRoleFromAppRole,
   normalizeCommunityMemberRole,
   type CommunityCategory,
 } from "@/lib/community/types";
-import { Send } from "lucide-react";
+import type { MediaItem } from "@/lib/media-data";
+import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
+import { Send, Star } from "lucide-react";
 import { RoleBadge } from "@/components/community/role-badge";
 
 type Props = {
   locale: string;
+  catalog: MediaItem[];
   currentUser: {
     name: string;
     company: string | null;
@@ -23,16 +28,30 @@ type Props = {
   };
 };
 
-export function CommunityWriteForm({ locale, currentUser }: Props) {
+export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
   const router = useRouter();
-  const [category, setCategory] = useState<CommunityCategory>("qna");
+  const isKo = locale === "ko";
+  const isAdmin = currentUser.role === "admin";
+  const [category, setCategory] = useState<CommunityCategory>("free");
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
+  const [budgetWon, setBudgetWon] = useState("");
+  const [region, setRegion] = useState("seoul_gangnam");
+  const [industry, setIndustry] = useState("indFb");
+  const [selectedMedia, setSelectedMedia] = useState<MediaItem | null>(null);
+  const [rating, setRating] = useState(5);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
   const memberRole =
     normalizeCommunityMemberRole(currentUser.communityRole) ??
     fallbackCommunityRoleFromAppRole(currentUser.role);
+
+  const visibleCategories = useMemo(
+    () =>
+      COMMUNITY_CATEGORIES.filter((c) => c !== "notice" || isAdmin),
+    [isAdmin],
+  );
 
   const titleOk =
     title.trim().length > 0 &&
@@ -40,7 +59,30 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
   const bodyOk =
     body.trim().length >= COMMUNITY_LIMITS.POST_BODY_MIN &&
     body.trim().length <= COMMUNITY_LIMITS.POST_BODY_MAX;
-  const canSubmit = titleOk && bodyOk && !busy;
+  const recommendOk =
+    category !== "media_recommend" ||
+    (Number(budgetWon) > 0 && region && industry);
+  const reviewOk =
+    category !== "execution_review" || (selectedMedia != null && rating >= 1);
+  const canSubmit = titleOk && bodyOk && recommendOk && reviewOk && !busy;
+
+  const buildMetadata = () => {
+    if (category === "media_recommend") {
+      return {
+        budgetWon: Math.round(Number(budgetWon)),
+        region,
+        industry,
+      };
+    }
+    if (category === "execution_review" && selectedMedia) {
+      return {
+        mediaId: selectedMedia.id,
+        mediaName: selectedMedia.name,
+        rating,
+      };
+    }
+    return null;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,12 +97,14 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           category,
           title: title.trim(),
           body: body.trim(),
+          metadata: buildMetadata(),
         }),
       });
       const data = (await res.json()) as {
         ok?: boolean;
         id?: string;
         error?: string;
+        pointsAwarded?: number;
       };
       if (!res.ok || !data.ok || !data.id) {
         setError(data.error || "글을 저장하지 못했습니다.");
@@ -77,7 +121,7 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="rounded-[26px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-5 shadow-[0_28px_100px_rgba(0,0,0,0.55)] backdrop-blur tkad-neon-border">
-        <p className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 작성자 ]
         </p>
         <div className="mt-3 flex flex-wrap items-center gap-2">
@@ -86,24 +130,21 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           </span>
           <RoleBadge role={memberRole} locale={locale} />
           {currentUser.company ? (
-            <span className="font-mono text-[11px] uppercase tracking-[0.18em] dark:text-white">
+            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
               {currentUser.company}
             </span>
           ) : null}
         </div>
-        <p className="mt-2 text-sm leading-relaxed dark:text-white">
-          회원 프로필 기반으로 게시되며, 익명 작성은 지원하지 않습니다.
-        </p>
       </div>
 
       <div>
         <label className="block">
-          <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+          <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
             [ 카테고리 ]
           </span>
         </label>
         <div className="mt-3 flex flex-wrap gap-3">
-          {COMMUNITY_CATEGORIES.map((cat) => {
+          {visibleCategories.map((cat) => {
             const labels = COMMUNITY_CATEGORY_LABELS[cat];
             const active = category === cat;
             return (
@@ -111,17 +152,13 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-mono text-[11px] font-bold uppercase tracking-[0.22em] transition-colors ${
-                  active
-                    ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]"
-                    : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100"
-                }`}
+                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ active ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
               >
-                <span>{labels.ko}</span>
+                <span>
+                  {labels.emoji} {labels.ko}
+                </span>
                 <span
-                  className={`font-mono text-[9px] tracking-tight ${
-                    active ? "dark:text-white text-gray-600" : "dark:text-white"
-                  }`}
+                  className={`text-[9px] tracking-tight ${ active ? "dark:text-white text-gray-600" : "dark:text-white" }`}
                   style={{ textTransform: "none", letterSpacing: 0 }}
                 >
                   {labels.description.ko}
@@ -132,8 +169,113 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
         </div>
       </div>
 
+      {category === "media_recommend" ? (
+        <div className="grid gap-4 rounded-[24px] border dark:border-violet-400/30 border-violet-200 dark:bg-violet-500/5 bg-violet-50/50 p-5">
+          <p className="text-sm font-semibold dark:text-violet-200 text-violet-800">
+            {isKo
+              ? "AI 추천을 위해 아래 항목을 입력해주세요."
+              : "Fill in the fields below for AI recommendations."}
+          </p>
+          <label className="block">
+            <span className="text-xs font-semibold dark:text-white text-gray-700">
+              {isKo ? "월 예산 (원)" : "Monthly budget (KRW)"}
+            </span>
+            <input
+              type="number"
+              min={100_000}
+              step={100_000}
+              value={budgetWon}
+              onChange={(e) => setBudgetWon(e.target.value)}
+              placeholder="1000000"
+              required
+              className="mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 px-4 py-2.5 text-sm dark:bg-white/6 bg-white"
+            />
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold dark:text-white text-gray-700">
+              {isKo ? "희망 지역" : "Region"}
+            </span>
+            <select
+              value={region}
+              onChange={(e) => setRegion(e.target.value)}
+              className="mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 px-4 py-2.5 text-sm dark:bg-white/6 bg-white"
+            >
+              {COMMUNITY_REGION_OPTIONS.map((r) => (
+                <option key={r.value} value={r.value}>
+                  {isKo ? r.ko : r.en}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="text-xs font-semibold dark:text-white text-gray-700">
+              {isKo ? "업종" : "Industry"}
+            </span>
+            <select
+              value={industry}
+              onChange={(e) => setIndustry(e.target.value)}
+              className="mt-2 w-full rounded-xl border dark:border-white/12 border-gray-200 px-4 py-2.5 text-sm dark:bg-white/6 bg-white"
+            >
+              {COMMUNITY_INDUSTRY_OPTIONS.map((i) => (
+                <option key={i.value} value={i.value}>
+                  {isKo ? i.ko : i.en}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+      ) : null}
+
+      {category === "execution_review" ? (
+        <div className="grid gap-4 rounded-[24px] border dark:border-emerald-400/30 border-emerald-200 dark:bg-emerald-500/5 bg-emerald-50/50 p-5">
+          <p className="text-sm font-semibold dark:text-emerald-200 text-emerald-800">
+            {isKo
+              ? "집행 매체를 선택하면 매체 리뷰로도 등록되며 200P가 지급됩니다."
+              : "Select the media — also posted as a review (+200P)."}
+          </p>
+          <div>
+            <span className="text-xs font-semibold dark:text-white text-gray-700">
+              {isKo ? "집행 매체" : "Media"}
+            </span>
+            <div className="mt-2">
+              <MediaSearchAutocomplete
+                catalog={catalog}
+                locale={locale}
+                onSelect={(m) => setSelectedMedia(m)}
+                placeholder={isKo ? "매체명 검색…" : "Search media…"}
+              />
+            </div>
+            {selectedMedia ? (
+              <p className="mt-2 text-sm dark:text-white text-gray-700">
+                ✓ {selectedMedia.name}
+              </p>
+            ) : null}
+          </div>
+          <div>
+            <span className="text-xs font-semibold dark:text-white text-gray-700">
+              {isKo ? "별점" : "Rating"}
+            </span>
+            <div className="mt-2 flex gap-1">
+              {[1, 2, 3, 4, 5].map((n) => (
+                <button
+                  key={n}
+                  type="button"
+                  onClick={() => setRating(n)}
+                  className="rounded p-1"
+                  aria-label={`${n} stars`}
+                >
+                  <Star
+                    className={`h-6 w-6 ${ n <= rating ? "fill-amber-400 text-amber-400" : "text-gray-300" }`}
+                  />
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      ) : null}
+
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 제목 ]
         </span>
         <input
@@ -145,27 +287,33 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
           required
           className="mt-3 w-full rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-3 text-base font-bold dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums dark:text-white">
-          {title.length} / {COMMUNITY_LIMITS.POST_TITLE_MAX}
-        </p>
       </label>
 
       <label className="block">
-        <span className="font-mono text-[10px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-500">
+        <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [ 본문 ]
         </span>
         <textarea
           value={body}
           onChange={(e) => setBody(e.target.value)}
           rows={12}
-          placeholder={`본문을 입력해주세요. (${COMMUNITY_LIMITS.POST_BODY_MIN}-${COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}자)\n\n· 최근 진행한 캠페인 인사이트\n· 매체 운영이나 집행 관련 질문\n· 협업 파트너를 찾는 네트워킹 글\n· 성과와 시행착오를 정리한 후기`}
+          placeholder={
+            category === "media_recommend"
+              ? isKo
+                ? "캠페인 목표, 희망 기간, 추가 조건 등을 적어주세요."
+                : "Describe campaign goals, timing, and constraints."
+              : category === "execution_review"
+                ? isKo
+                  ? "집행 기간, 성과, 아쉬운 점, 다음에 시도할 것 등을 적어주세요."
+                  : "Share timing, results, lessons learned."
+                : isKo
+                  ? "본문을 입력해주세요."
+                  : "Write your post."
+          }
           maxLength={COMMUNITY_LIMITS.POST_BODY_MAX}
           required
           className="mt-3 w-full resize-y rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-4 py-4 text-sm dark:text-white text-gray-900 placeholder:dark:text-white focus:border-white/22 focus:outline-none"
         />
-        <p className="mt-1 text-right font-mono text-[10px] tabular-nums dark:text-white">
-          {body.length} / {COMMUNITY_LIMITS.POST_BODY_MAX.toLocaleString()}
-        </p>
       </label>
 
       <input
@@ -178,22 +326,19 @@ export function CommunityWriteForm({ locale, currentUser }: Props) {
       />
 
       {error ? (
-        <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-4 py-3 font-mono text-[11px] tracking-tight text-rose-200">
-          {`// `}
+        <p className="rounded-2xl border border-rose-400/35 bg-[rgba(127,29,29,0.24)] px-4 py-3 text-sm text-rose-200">
           {error}
         </p>
       ) : null}
 
-      <div className="flex flex-wrap gap-3">
-        <button
-          type="submit"
-          disabled={!canSubmit}
-          className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-mono text-[11px] font-bold uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          <Send className="h-3.5 w-3.5" />
-          {busy ? "전송 중…" : "글 등록"}
-        </button>
-      </div>
+      <button
+        type="submit"
+        disabled={!canSubmit}
+        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 disabled:opacity-50"
+      >
+        <Send className="h-3.5 w-3.5" />
+        {busy ? "전송 중…" : "글 등록"}
+      </button>
     </form>
   );
 }
