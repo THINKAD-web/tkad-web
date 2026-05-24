@@ -7,7 +7,6 @@ import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import TopLoader from "@/components/top-loader";
 import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
 import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate";
-import { PwaInstallBanner } from "@/components/pwa-install-banner";
 import { MobileAppChrome } from "@/components/mobile/mobile-app-chrome";
 import { CommandPaletteProvider } from "@/components/navigation/command-palette-provider";
 import { ContextNavAsideShell } from "@/components/navigation/context-nav-sidebar";
@@ -55,7 +54,6 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
             </div>
           </div>
         </div>
-        <PwaInstallBanner />
       </CommandPaletteProvider>
     </ToastProvider>
   );

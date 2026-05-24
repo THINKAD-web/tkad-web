@@ -5,10 +5,10 @@ import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import {
-  Compass,
   Home,
   LayoutGrid,
   MessageCircle,
+  Search,
   User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -37,8 +37,10 @@ const TABS: TabDef[] = [
     id: "explore",
     href: "/media",
     labelKey: "explore",
-    icon: Compass,
-    match: (p) => p.startsWith("/media") && !p.startsWith("/media-owner"),
+    icon: Search,
+    match: (p) =>
+      (p.startsWith("/media") && !p.startsWith("/media-owner")) ||
+      p.startsWith("/search"),
   },
   {
     id: "planner",
@@ -71,7 +73,7 @@ const LABELS: Record<string, { ko: string; en: string }> = {
   explore: { ko: "탐색", en: "Explore" },
   planner: { ko: "플래너", en: "Planner" },
   contact: { ko: "문의", en: "Contact" },
-  my: { ko: "내정보", en: "My" },
+  my: { ko: "MY", en: "MY" },
 };
 
 function isHiddenPath(pathname: string | null): boolean {
@@ -110,7 +112,7 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 block h-16 border-t border-gray-200 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:hidden"
+      className="fixed bottom-0 left-0 right-0 z-40 block h-16 border-t border-gray-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-white/10 dark:bg-gray-950/95 md:hidden"
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label={isKo ? "하단 탭 메뉴" : "Bottom tab navigation"}
     >
@@ -126,20 +128,21 @@ export function BottomTabBar() {
               <li key={tab.href} className="flex flex-1 justify-center">
                 <Link
                   href={tab.href}
-                  className={cn(
-                    "relative -translate-y-2 flex flex-col items-center transition-transform duration-150 active:scale-95",
-                  )}
+                  className="relative -translate-y-2 flex flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                   onClick={() => hapticLight()}
                 >
-                  <span
-                    className={cn(
-                      "flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-white shadow-lg shadow-violet-500/30",
-                    )}
-                  >
+                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/30">
                     <Icon className="h-6 w-6" strokeWidth={2.25} />
                   </span>
-                  <span className="mt-1 text-[10px] font-semibold text-gray-900 dark:text-white">
+                  <span
+                    className={cn(
+                      "mt-1 text-[10px] font-semibold",
+                      active
+                        ? "text-violet-600 dark:text-violet-300"
+                        : "text-gray-900 dark:text-white",
+                    )}
+                  >
                     {label}
                   </span>
                 </Link>
@@ -151,34 +154,28 @@ export function BottomTabBar() {
             <li key={tab.href} className="flex flex-1 justify-center">
               <Link
                 href={tab.href}
-                className="flex flex-col items-center pb-2 pt-1 transition-transform duration-150 active:scale-95"
+                className="flex flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
                 aria-current={active ? "page" : undefined}
                 onClick={() => hapticLight()}
               >
                 <span className="relative">
                   <Icon
                     className={cn(
-                      "h-5 w-5",
+                      "h-5 w-5 transition-colors duration-200",
                       active
-                        ? "text-gray-900 dark:text-white"
-                        : "text-gray-500 dark:text-white/50",
+                        ? "text-violet-600 dark:text-violet-300"
+                        : "text-gray-400 dark:text-white/40",
                     )}
                     strokeWidth={active ? 2.25 : 2}
                   />
                   <TabBadge count={badgeCount} />
-                  {active ? (
-                    <span
-                      className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-violet-500"
-                      aria-hidden
-                    />
-                  ) : null}
                 </span>
                 <span
                   className={cn(
-                    "mt-1 text-[10px]",
+                    "mt-1 text-[10px] transition-colors duration-200",
                     active
-                      ? "font-semibold text-gray-900 dark:text-white"
-                      : "text-gray-500 dark:text-white/50",
+                      ? "font-semibold text-violet-600 dark:text-violet-300"
+                      : "text-gray-400 dark:text-white/40",
                   )}
                 >
                   {label}

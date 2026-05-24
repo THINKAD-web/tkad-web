@@ -2,84 +2,98 @@
 
 import { useRef } from "react";
 import { Link } from "@/i18n/navigation";
-import { Map as MapIcon } from "lucide-react";
+import { Filter, LayoutGrid, Map as MapIcon, Rows3 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useHorizontalScrollGesture } from "@/lib/use-horizontal-scroll-gesture";
+import { RegionImageChips } from "@/components/region/region-image-chips";
+import { MediaCategoryBrowseChips } from "@/components/media-category-browse-chips";
+import type { BrowseCategoryChip } from "@/lib/media-categories";
+import type { MediaCatalogCardLayout } from "@/components/media-catalog-shared";
 
-const DEFAULT_CHIPS_KO = [
-  "전체",
-  "강남",
-  "홍대",
-  "성수",
-  "부산",
-  "잠실",
-  "명동",
-  "판교",
-  "신촌",
-  "이태원",
-];
+const SORT_TABS_KO = [
+  { value: "default", label: "인기순" },
+  { value: "newest", label: "최신순" },
+  { value: "priceAsc", label: "저가순" },
+  { value: "ratingDesc", label: "평점순" },
+] as const;
 
-const DEFAULT_CHIPS_EN = [
-  "All",
-  "Gangnam",
-  "Hongdae",
-  "Seongsu",
-  "Busan",
-  "Jamsil",
-  "Myeongdong",
-  "Pangyo",
-  "Sinchon",
-  "Itaewon",
-];
+const SORT_TABS_EN = [
+  { value: "default", label: "Popular" },
+  { value: "newest", label: "Newest" },
+  { value: "priceAsc", label: "Price ↑" },
+  { value: "ratingDesc", label: "Rating" },
+] as const;
 
 type Props = {
   isKo: boolean;
+  locale: string;
   activeChip: string;
   onChipChange: (chip: string) => void;
+  categoryChip: BrowseCategoryChip;
+  onCategoryChange: (chip: BrowseCategoryChip) => void;
   sortBy: string;
   onSortChange: (value: string) => void;
-  sortOptions: { value: string; label: string }[];
+  onFilterOpen?: () => void;
+  cardLayout?: MediaCatalogCardLayout;
+  onCardLayoutChange?: (layout: MediaCatalogCardLayout) => void;
   resultCount?: number;
 };
 
 export function MobileMediaBrowseBar({
   isKo,
+  locale,
   activeChip,
   onChipChange,
+  categoryChip,
+  onCategoryChange,
   sortBy,
   onSortChange,
-  sortOptions,
+  onFilterOpen,
+  cardLayout = "compact",
+  onCardLayoutChange,
   resultCount,
 }: Props) {
-  const scrollRef = useRef<HTMLUListElement>(null);
-  useHorizontalScrollGesture(scrollRef);
+  const sortScrollRef = useRef<HTMLUListElement>(null);
+  useHorizontalScrollGesture(sortScrollRef);
 
-  const chips = isKo ? DEFAULT_CHIPS_KO : DEFAULT_CHIPS_EN;
-  const allLabel = chips[0];
+  const sortTabs = isKo ? SORT_TABS_KO : SORT_TABS_EN;
 
   return (
-    <div className="space-y-3 md:hidden">
+    <div className="space-y-4 md:hidden">
+      <div className="px-4">
+        <MediaCategoryBrowseChips
+          locale={locale}
+          active={categoryChip}
+          onChange={onCategoryChange}
+        />
+      </div>
+
+      <RegionImageChips
+        locale={locale}
+        onSelect={onChipChange}
+        activeQuery={activeChip}
+        className="px-4"
+      />
+
       <ul
-        ref={scrollRef}
-        className="flex list-none gap-2 overflow-x-auto overscroll-x-contain px-4 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [-webkit-overflow-scrolling:touch] [touch-action:pan-x] [&::-webkit-scrollbar]:hidden"
-        style={{ overscrollBehavior: "contain" }}
+        ref={sortScrollRef}
+        className="flex list-none gap-2 overflow-x-auto px-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
-        {chips.map((chip) => {
-          const isAll = chip === allLabel;
-          const active = activeChip === chip || (activeChip === "" && isAll);
+        {sortTabs.map((tab) => {
+          const active = sortBy === tab.value;
           return (
-            <li key={chip} className="shrink-0">
+            <li key={tab.value} className="shrink-0">
               <button
                 type="button"
-                onClick={() => onChipChange(isAll ? "" : chip)}
+                onClick={() => onSortChange(tab.value)}
                 className={cn(
-                  "whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-transform duration-150 active:scale-95",
+                  "whitespace-nowrap rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors",
                   active
-                    ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
-                    : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
+                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-900"
+                    : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
                 )}
               >
-                {chip}
+                {tab.label}
               </button>
             </li>
           );
@@ -87,29 +101,58 @@ export function MobileMediaBrowseBar({
       </ul>
 
       <div className="flex items-center justify-between gap-2 px-4">
-        <label className="inline-flex min-w-0 flex-1 items-center gap-2 rounded-xl border border-gray-200 bg-white px-3 py-2 dark:border-white/10 dark:bg-gray-950">
-          <span className="shrink-0 text-xs text-gray-500 dark:text-white/50">
-            {isKo ? "정렬" : "Sort"}
-          </span>
-          <select
-            className="min-w-0 flex-1 bg-transparent text-sm font-medium text-gray-900 focus:outline-none dark:text-white"
-            value={sortBy}
-            onChange={(e) => onSortChange(e.target.value)}
+        <span className="inline-flex items-center gap-1 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white">
+          {activeChip || (isKo ? "전국" : "All regions")}
+        </span>
+        <div className="flex items-center gap-2">
+          {onCardLayoutChange ? (
+            <div className="inline-flex overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
+              <button
+                type="button"
+                aria-label={isKo ? "리스트형" : "List view"}
+                onClick={() => onCardLayoutChange("compact")}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center",
+                  cardLayout === "compact"
+                    ? "bg-violet-500 text-white"
+                    : "bg-white text-gray-600 dark:bg-gray-950 dark:text-white/70",
+                )}
+              >
+                <Rows3 className="h-4 w-4" />
+              </button>
+              <button
+                type="button"
+                aria-label={isKo ? "그리드형" : "Grid view"}
+                onClick={() => onCardLayoutChange("grid")}
+                className={cn(
+                  "flex h-9 w-9 items-center justify-center border-l border-gray-200 dark:border-white/10",
+                  cardLayout === "grid"
+                    ? "bg-violet-500 text-white"
+                    : "bg-white text-gray-600 dark:bg-gray-950 dark:text-white/70",
+                )}
+              >
+                <LayoutGrid className="h-4 w-4" />
+              </button>
+            </div>
+          ) : null}
+          {onFilterOpen ? (
+            <button
+              type="button"
+              onClick={onFilterOpen}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white"
+            >
+              <Filter className="h-4 w-4" />
+              {isKo ? "필터" : "Filter"}
+            </button>
+          ) : null}
+          <Link
+            href="/media/map"
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white"
           >
-            {sortOptions.map((opt) => (
-              <option key={opt.value} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
-          </select>
-        </label>
-        <Link
-          href="/media/map"
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 transition-transform duration-150 active:scale-95 dark:border-white/10 dark:bg-gray-950 dark:text-white"
-        >
-          <MapIcon className="h-4 w-4 text-violet-500" />
-          {isKo ? "지도 보기" : "Map"}
-        </Link>
+            <MapIcon className="h-4 w-4 text-violet-500" />
+            {isKo ? "지도" : "Map"}
+          </Link>
+        </div>
       </div>
 
       {resultCount != null ? (

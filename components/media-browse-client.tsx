@@ -20,6 +20,7 @@ import {
 } from "lucide-react";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import { MediaCatalogListCard } from "@/components/media/media-catalog-list-card";
 import { MediaScarcitySection } from "@/components/media-scarcity-section";
 import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summary";
 import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
@@ -177,8 +178,9 @@ export default function MediaBrowseClient({
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("mediaCatalogLayout");
       if (saved === "grid" || saved === "compact") return saved;
+      if (window.matchMedia("(max-width: 767px)").matches) return "compact";
     }
-    return "grid";
+    return "compact";
   });
   const [catalogPage, setCatalogPage] = useState(1);
   const [catalogPageSize, setCatalogPageSize] = useState(12);
@@ -719,30 +721,24 @@ export default function MediaBrowseClient({
       )}
 
       <section className="tkad-media-browse-main border-t border-border/60 bg-card py-6 sm:py-14 md:py-10">
-        <div className="ui-container md:hidden">
-          <div className="mb-6 space-y-6">
-            <CategoryButtonGrid
-              items={HOME_MEDIA_TYPE_GRID}
-              locale={locale}
-              title={isKo ? "매체 유형" : "Media types"}
-            />
-            <CategoryButtonGrid
-              items={HOME_TARGET_GRID}
-              locale={locale}
-              title={isKo ? "캠페인 목적" : "Campaign goals"}
-            />
-          </div>
-        </div>
         <MobileMediaBrowseBar
           isKo={isKo}
+          locale={locale}
           activeChip={mobileRegionChip}
           onChipChange={(chip) => {
             setMobileRegionChip(chip);
             setCatalogPage(1);
           }}
+          categoryChip={categoryChip}
+          onCategoryChange={(chip) => {
+            setCategoryChip(chip);
+            setCatalogPage(1);
+          }}
           sortBy={sortBy}
           onSortChange={(v) => setSortBy(v as typeof sortBy)}
-          sortOptions={sortOptions}
+          onFilterOpen={() => setCategoryFiltersOpen(true)}
+          cardLayout={catalogCardLayout}
+          onCardLayoutChange={setCatalogCardLayout}
           resultCount={gridDisplayList.length}
         />
         <div className="ui-container">
@@ -1318,40 +1314,69 @@ export default function MediaBrowseClient({
                     ))}
                   </div>
                     ) : (
-                  <div className={MEDIA_CATALOG_COMPACT_GRID_CLASS}>
-                    {pagedCatalog.map((media) => (
-                      <MediaCatalogCompactLinkRow
-                        key={media.id}
-                        media={media}
-                        isKo={isKo}
-                        href={mediaItemDetailPath(media)}
-                        imagePreparingLabel={t("media.imagePreparing")}
-                        popularIds={popularIds}
-                        leadingSlot={
-                          <label
-                            className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
-                            onClick={(e) => {
-                              e.preventDefault();
-                              e.stopPropagation();
-                            }}
-                            onKeyDown={(e) => e.stopPropagation()}
-                            title={t("media.compareToggleAria")}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={isInCompare(media.id)}
-                              onChange={() => toggleCompare(media)}
-                              disabled={
-                                media.catalogSource === "network" ||
-                                (!isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                  <div className="flex flex-col gap-2 px-4 md:gap-0 md:px-0">
+                    {pagedCatalog.map((media, index) => (
+                      <div key={media.id}>
+                        <div className="md:hidden">
+                          {catalogCardLayout === "compact" ? (
+                            <MediaCatalogListCard
+                              media={media}
+                              isKo={isKo}
+                              imagePreparingLabel={t("media.imagePreparing")}
+                              rank={
+                                sortBy === "default" || sortBy === "ratingDesc"
+                                  ? (catalogPage - 1) * catalogPageSize + index + 1
+                                  : undefined
                               }
-                              aria-label={t("media.compareToggleAria")}
-                              className="h-4 w-4 accent-cta"
                             />
-                          </label>
-                        }
-                      />
+                          ) : (
+                            <MediaCatalogGridCard
+                              variant="link"
+                              media={media}
+                              isKo={isKo}
+                              denseMobile
+                              imagePreparingLabel={t("media.imagePreparing")}
+                              popularIds={popularIds}
+                              availabilityTier={
+                                availabilitySummary?.items[media.id]?.tier
+                              }
+                            />
+                          )}
+                        </div>
+                        <div className="hidden md:block">
+                          <MediaCatalogCompactLinkRow
+                            media={media}
+                            isKo={isKo}
+                            href={mediaItemDetailPath(media)}
+                            imagePreparingLabel={t("media.imagePreparing")}
+                            popularIds={popularIds}
+                            leadingSlot={
+                              <label
+                                className="flex h-9 w-9 cursor-pointer select-none items-center justify-center border-2 border-border bg-card"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                }}
+                                onKeyDown={(e) => e.stopPropagation()}
+                                title={t("media.compareToggleAria")}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isInCompare(media.id)}
+                                  onChange={() => toggleCompare(media)}
+                                  disabled={
+                                    media.catalogSource === "network" ||
+                                    (!isInCompare(media.id) &&
+                                      compareItems.length >= COMPARE_MAX_ITEMS)
+                                  }
+                                  aria-label={t("media.compareToggleAria")}
+                                  className="h-4 w-4 accent-cta"
+                                />
+                              </label>
+                            }
+                          />
+                        </div>
+                      </div>
                     ))}
                   </div>
                     )}

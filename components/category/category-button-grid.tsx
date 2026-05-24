@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { CategoryGridItem } from "@/lib/category-grid-config";
+import { getCategoryIcon } from "@/lib/category-icons";
 
 type Props = {
   items: CategoryGridItem[];
@@ -34,39 +35,40 @@ export function CategoryButtonGrid({
       <div
         className={cn(
           layout === "row"
-            ? "grid grid-cols-4 gap-2 sm:grid-cols-8 sm:gap-3"
-            : "grid grid-cols-4 gap-2 sm:gap-3",
+            ? "grid grid-cols-4 gap-3 sm:grid-cols-8 sm:gap-4"
+            : "grid grid-cols-4 gap-3 sm:gap-4",
         )}
       >
         {items.map((item) => {
           const label = isKo ? item.labelKo : item.labelEn;
           const matchKey = item.matchSlug ?? item.slug;
           const active = activeSlug != null && activeSlug === matchKey;
+          const Icon = getCategoryIcon(item.iconName);
 
           return (
             <Link
               key={item.slug}
               href={item.href}
-              className={cn(
-                "group flex aspect-square flex-col items-center justify-center gap-1 rounded-2xl border bg-white p-2 text-center transition-all",
-                "hover:-translate-y-0.5 hover:shadow-md active:scale-[0.98]",
-                "dark:bg-white/5",
-                active
-                  ? "border-transparent bg-gradient-to-br from-violet-500/10 to-cyan-400/10 ring-2 ring-violet-500/60"
-                  : "border-gray-200 dark:border-white/12",
-                layout === "row" && "sm:aspect-auto sm:min-h-[5.5rem] sm:py-4",
-              )}
+              className="group flex flex-col items-center gap-1 transition-transform duration-150 active:scale-95"
             >
+              <div
+                className={cn(
+                  "flex h-16 w-16 items-center justify-center rounded-full transition-colors",
+                  active
+                    ? "bg-violet-100 text-violet-600 dark:bg-violet-500/20 dark:text-violet-300"
+                    : "bg-gray-100 text-gray-700 group-hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:group-hover:bg-white/15",
+                )}
+              >
+                <Icon className="h-7 w-7" strokeWidth={1.75} aria-hidden />
+              </div>
               <span
                 className={cn(
-                  "leading-none",
-                  layout === "row" ? "text-3xl sm:text-4xl" : "text-2xl sm:text-3xl",
+                  "max-w-[4.5rem] text-center text-xs leading-tight",
+                  active
+                    ? "font-semibold text-violet-600 dark:text-violet-300"
+                    : "text-gray-600 dark:text-white/60",
                 )}
-                aria-hidden
               >
-                {item.icon}
-              </span>
-              <span className="text-[10px] font-bold leading-tight text-gray-900 dark:text-white sm:text-xs">
                 {label}
               </span>
             </Link>

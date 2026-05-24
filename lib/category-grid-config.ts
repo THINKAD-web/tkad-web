@@ -1,8 +1,10 @@
 /** 홈·매체 탐색용 카테고리 버튼 그리드 정의 */
 
+import type { CategoryIconName } from "@/lib/category-icons";
+
 export type CategoryGridItem = {
   slug: string;
-  icon: string;
+  iconName: CategoryIconName;
   labelKo: string;
   labelEn: string;
   href: string;
@@ -11,50 +13,110 @@ export type CategoryGridItem = {
 };
 
 export const HOME_MEDIA_TYPE_GRID: CategoryGridItem[] = [
-  { slug: "subway", icon: "🚇", labelKo: "지하철", labelEn: "Subway", href: "/media/category/subway" },
-  { slug: "bus", icon: "🚌", labelKo: "버스", labelEn: "Bus", href: "/media/category/bus" },
-  { slug: "billboard", icon: "📺", labelKo: "전광판", labelEn: "Billboard", href: "/media/category/billboard" },
-  { slug: "dooh", icon: "💡", labelKo: "DOOH", labelEn: "DOOH", href: "/media/category/dooh" },
-  { slug: "campus", icon: "🎓", labelKo: "대학가", labelEn: "Campus", href: "/media/category/campus" },
-  { slug: "retail", icon: "🛍", labelKo: "쇼핑몰", labelEn: "Mall", href: "/media/category/retail" },
   {
-    slug: "convenience",
-    icon: "🏪",
-    labelKo: "카페·편의점",
-    labelEn: "Café & C-store",
-    href: "/media/category/convenience",
+    slug: "subway",
+    iconName: "Train",
+    labelKo: "지하철",
+    labelEn: "Subway",
+    href: "/media/category/subway",
+  },
+  {
+    slug: "bus",
+    iconName: "Bus",
+    labelKo: "버스",
+    labelEn: "Bus",
+    href: "/media/category/bus",
+  },
+  {
+    slug: "billboard",
+    iconName: "Monitor",
+    labelKo: "전광판",
+    labelEn: "Billboard",
+    href: "/media/category/billboard",
+  },
+  {
+    slug: "dooh",
+    iconName: "Tv2",
+    labelKo: "DOOH",
+    labelEn: "DOOH",
+    href: "/media/category/dooh",
+  },
+  {
+    slug: "campus",
+    iconName: "GraduationCap",
+    labelKo: "대학가",
+    labelEn: "Campus",
+    href: "/media/category/campus",
+  },
+  {
+    slug: "retail",
+    iconName: "ShoppingBag",
+    labelKo: "쇼핑몰",
+    labelEn: "Mall",
+    href: "/media/category/retail",
   },
   {
     slug: "bus_shelter",
-    icon: "🚏",
+    iconName: "MapPin",
     labelKo: "쉘터",
     labelEn: "Shelter",
     href: "/media/category/bus_shelter",
   },
+  {
+    slug: "local",
+    iconName: "Home",
+    labelKo: "로컬",
+    labelEn: "Local",
+    href: "/media/category/local",
+  },
 ];
 
 export const HOME_TARGET_GRID: CategoryGridItem[] = [
-  { slug: "brand", icon: "🏢", labelKo: "기업 브랜드", labelEn: "Brand", href: "/target/brand" },
-  { slug: "fandom", icon: "🎤", labelKo: "팬덤", labelEn: "Fandom", href: "/special/fandom" },
-  { slug: "event", icon: "🎉", labelKo: "팝업·이벤트", labelEn: "Pop-up", href: "/target/event" },
+  {
+    slug: "brand",
+    iconName: "Building2",
+    labelKo: "기업 브랜드",
+    labelEn: "Brand",
+    href: "/target/brand",
+  },
+  {
+    slug: "fandom",
+    iconName: "Heart",
+    labelKo: "팬덤",
+    labelEn: "Fandom",
+    href: "/special/fandom",
+  },
+  {
+    slug: "event",
+    iconName: "Sparkles",
+    labelKo: "팝업·이벤트",
+    labelEn: "Pop-up",
+    href: "/target/event",
+  },
   {
     slug: "small_business",
-    icon: "🏘",
+    iconName: "MapPin",
     labelKo: "동네",
     labelEn: "Local",
     href: "/target/small_business",
   },
   {
     slug: "university",
-    icon: "🎓",
+    iconName: "BookOpen",
     labelKo: "대학 캠퍼스",
     labelEn: "University",
     href: "/target/university",
   },
-  { slug: "public", icon: "🏛", labelKo: "지자체", labelEn: "Public", href: "/target/public" },
+  {
+    slug: "public",
+    iconName: "Landmark",
+    labelKo: "지자체",
+    labelEn: "Public",
+    href: "/target/public",
+  },
   {
     slug: "seasonal",
-    icon: "🌸",
+    iconName: "Calendar",
     labelKo: "시즌",
     labelEn: "Seasonal",
     href: "/target/event",
@@ -62,25 +124,10 @@ export const HOME_TARGET_GRID: CategoryGridItem[] = [
   },
   {
     slug: "global",
-    icon: "🌐",
+    iconName: "Globe",
     labelKo: "글로벌",
     labelEn: "Global",
     href: "/target/brand",
     matchSlug: "brand",
   },
-];
-
-/** 홈 가로 스크롤 칩 — 대표 4개씩 */
-export const HOME_MEDIA_TYPE_CHIPS: CategoryGridItem[] = [
-  HOME_MEDIA_TYPE_GRID[0]!,
-  HOME_MEDIA_TYPE_GRID[2]!,
-  HOME_MEDIA_TYPE_GRID[4]!,
-  HOME_MEDIA_TYPE_GRID[3]!,
-];
-
-export const HOME_TARGET_CHIPS: CategoryGridItem[] = [
-  HOME_TARGET_GRID[1]!,
-  HOME_TARGET_GRID[2]!,
-  HOME_TARGET_GRID[3]!,
-  HOME_TARGET_GRID[0]!,
 ];

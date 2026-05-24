@@ -11,10 +11,10 @@ const RECENT_KEY = "tkad-mobile-recent-searches";
 const MAX_RECENT = 5;
 
 const POPULAR_KO = [
-  "강남역 LED",
-  "홍대 빌보드",
+  "강남 전광판",
+  "홍대 DOOH",
+  "팬덤 광고",
   "지하철 광고",
-  "버스정류장",
   "성수 팝업",
   "부산 해운대",
 ];

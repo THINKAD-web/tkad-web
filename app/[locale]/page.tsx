@@ -3,26 +3,22 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { pageAlternates } from "@/lib/seo";
 import { type MediaItem } from "@/lib/media-data";
-import {
-  fetchHomeHeroVisualAssets,
-  fetchHomeWeeklyPopularMedia,
-} from "@/lib/public-media-catalog";
+import { fetchHomeWeeklyPopularMedia } from "@/lib/public-media-catalog";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
 import { mergeMediaTrustFromCatalog } from "@/lib/media-trust-catalog";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-import { HomeHeroServer } from "@/components/home/home-hero-server";
-import { HomeMediaHorizontalScroll } from "@/components/home/home-media-horizontal-scroll";
+import { HomeSearchHero } from "@/components/home/home-search-hero";
 import { HomeAppearanceShell } from "@/components/home/home-appearance-shell";
 import { HomeLaunchBanner } from "@/components/home/home-launch-banner";
 import {
   HomeCategorySection,
   HomePopularMediaHeader,
-  HomeQuickEntry,
+  HomePopularMediaList,
   HomeTrustStrip,
 } from "@/components/home/home-simple-sections";
 
-/** 홈 — ISR 60초 (히어로·매체 그리드·통계 크롤러 노출) */
+/** 홈 — ISR 60초 */
 export const revalidate = 60;
 
 export async function generateMetadata({
@@ -33,11 +29,11 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   const title = isKo
-    ? "THINKAD 싱커드 — 한국 OOH 광고 플랫폼"
-    : "THINKAD Syncad — Korea OOH advertising platform";
+    ? "THINKAD — 검증 OOH 매체 마켓플레이스"
+    : "THINKAD — Verified OOH media marketplace";
   const description = isKo
-    ? "500+ 검증 매체. AI 플래너로 3분 견적, 전국 옥외광고 매체 검색·비교·상담까지 한 곳에서."
-    : "500+ verified media. Get a 3-minute estimate with AI Planner — search, compare, and consult OOH nationwide.";
+    ? "500+ 검증 매체. 지역·유형별 큐레이션, 평점·집행 이력 기반 신뢰 마켓플레이스."
+    : "500+ verified media. Curated by region and type — trust scores, ratings, and execution history.";
   return {
     title: { absolute: title },
     description,
@@ -55,9 +51,10 @@ export default async function HomePage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
 
-  const [weeklyPopularCatalog, heroVisuals, fullCatalog] = await Promise.all([
+  const t = await getTranslations({ locale, namespace: "media" });
+
+  const [weeklyPopularCatalog, fullCatalog] = await Promise.all([
     fetchHomeWeeklyPopularMedia(),
-    fetchHomeHeroVisualAssets(),
     fetchPublicMediaCatalog(),
   ]);
 
@@ -72,55 +69,31 @@ export default async function HomePage({ params }: Props) {
     locale,
   );
 
-  return (
-    <HomeContent
-      locale={locale}
-      weeklyPopularItems={weeklyPopularItems}
-      heroVisuals={heroVisuals}
-    />
-  );
-}
-
-function HomeContent({
-  locale,
-  weeklyPopularItems,
-  heroVisuals,
-}: {
-  locale: string;
-  weeklyPopularItems: MediaItem[];
-  heroVisuals: Awaited<ReturnType<typeof fetchHomeHeroVisualAssets>>;
-}) {
   const popularItems = weeklyPopularItems.slice(0, 6);
 
   return (
     <HomeAppearanceShell>
       <HomeLaunchBanner />
 
-      {/* 섹션 1 — 히어로 */}
-      <HomeHeroServer locale={locale} mapPins={heroVisuals.mapPins} />
+      {/* 섹션 1 — 검색 히어로 */}
+      <HomeSearchHero locale={locale} />
 
-      {/* 섹션 2 — 빠른 진입 */}
-      <HomeQuickEntry locale={locale} />
-
-      {/* 섹션 3 — 카테고리 */}
+      {/* 섹션 2 — 카테고리 아이콘 그리드 */}
       <HomeCategorySection locale={locale} />
 
-      {/* 섹션 4 — 인기 매체 */}
+      {/* 섹션 3 — 이번 주 인기 매체 (리스트형) */}
       {popularItems.length > 0 ? (
-        <section className="pb-10 pt-4">
+        <section className="pb-8 pt-2">
           <HomePopularMediaHeader locale={locale} />
-          <div className="mt-4">
-            <HomeMediaHorizontalScroll
-              items={popularItems}
-              locale={locale}
-              rows={1}
-              density="compact"
-            />
-          </div>
+          <HomePopularMediaList
+            items={popularItems}
+            locale={locale}
+            imagePreparingLabel={t("imagePreparing")}
+          />
         </section>
       ) : null}
 
-      {/* 섹션 5 — 신뢰 지표 */}
+      {/* 섹션 4 — 신뢰 지표 */}
       <HomeTrustStrip locale={locale} />
     </HomeAppearanceShell>
   );
