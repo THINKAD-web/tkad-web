@@ -39,13 +39,12 @@ export function SubpageRelatedChips() {
   const isKo = locale === "ko";
 
   const group = useMemo(() => resolveSubpageChips(pathname), [pathname]);
-
-  if (isHiddenPath(pathname) || !group) return null;
-
   const search = useMemo(
     () => new URLSearchParams(searchParams.toString()),
     [searchParams],
   );
+
+  if (isHiddenPath(pathname) || !group) return null;
 
   return (
     <div
