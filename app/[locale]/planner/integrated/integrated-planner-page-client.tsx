@@ -10,7 +10,12 @@ import {
   Send,
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
+import {
+  PageSubNav,
+  PLANNER_SUB_NAV_ITEMS,
+} from "@/components/navigation/page-sub-nav";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
 import PlannerMediaSelector from "@/components/planner-media-selector";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
@@ -269,7 +274,8 @@ export default function IntegratedPlannerPageClient({
   }
 
   return (
-    <div className="tkad-planner-neon min-h-screen bg-background pb-20">
+    <HomeLandingDayNight>
+    <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-background pb-20">
       <CategoryExploreHero
         code="INTEGRATED PLANNER"
         headlineBefore={isKo ? "OOH + " : "OOH + "}
@@ -277,6 +283,13 @@ export default function IntegratedPlannerPageClient({
         headlineAfter={isKo ? " 캠페인 플래너" : " Campaign Planner"}
         subtitle={ti("subtitle")}
         showBeta
+      />
+
+      <PageSubNav
+        items={PLANNER_SUB_NAV_ITEMS}
+        locale={locale}
+        className="mx-auto max-w-7xl px-4 pb-4 sm:px-6"
+        data-screenshot="planner-sub-nav"
       />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
@@ -583,5 +596,6 @@ export default function IntegratedPlannerPageClient({
         </p>
       </div>
     </div>
+    </HomeLandingDayNight>
   );
 }

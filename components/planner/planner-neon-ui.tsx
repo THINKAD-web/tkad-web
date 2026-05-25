@@ -61,42 +61,46 @@ export function PlannerProGate({
   isKo,
   children,
   className,
+  minHeightClass = "min-h-[12rem]",
 }: {
   isPro: boolean;
   isKo: boolean;
   children: ReactNode;
   className?: string;
+  minHeightClass?: string;
 }) {
   return (
-    <div className={cn("relative", className)}>
+    <div className={cn("relative", minHeightClass, className)}>
       <div
         className={cn(
-          !isPro && "pointer-events-none select-none blur-sm",
+          !isPro && "pointer-events-none select-none blur-sm opacity-60",
         )}
       >
         {children}
       </div>
       {!isPro ? (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/60 backdrop-blur-sm dark:bg-black/60"
+          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm dark:bg-black/70"
           aria-hidden={false}
         >
-          <div className="p-6 text-center">
-            <p className="mb-1 text-lg font-bold dark:text-white text-gray-900">
-              {isKo ? "PRO 전용 기능" : "PRO feature"}
-            </p>
-            <p className="mb-4 text-sm dark:text-white/60 text-gray-500">
-              {isKo
-                ? "상세 효과 시뮬레이션은 PRO 플랜에서 제공됩니다"
-                : "Detailed effect simulation is available on PRO"}
-            </p>
-            <Link href="/pricing" className={plannerNeon.cta}>
-              {isKo ? "PRO 시작하기 →" : "Start PRO →"}
-            </Link>
-            <p className="mt-2 text-xs dark:text-white/30 text-gray-400">
-              {isKo ? "지금 가입하면 14일 무료 체험" : "14-day free trial on signup"}
-            </p>
-          </div>
+          <Lock className="mb-3 h-8 w-8 text-violet-400" aria-hidden />
+          <p className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+            {isKo ? "PRO 전용 기능" : "PRO feature"}
+          </p>
+          <p className="mb-4 px-4 text-center text-sm text-gray-500 dark:text-white/60">
+            {isKo
+              ? "상세 효과 분석은 PRO 플랜에서 제공됩니다"
+              : "Detailed effect analysis is available on PRO"}
+          </p>
+          <Link
+            href="/pricing"
+            className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-2.5 text-sm font-medium text-white"
+          >
+            {isKo ? "PRO 무료 체험 시작 →" : "Start PRO free trial →"}
+          </Link>
+          <p className="mt-2 text-xs text-gray-400 dark:text-white/30">
+            {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
+          </p>
         </div>
       ) : null}
     </div>

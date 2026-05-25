@@ -937,8 +937,9 @@ function enrichMediaCatalogItem(m: MediaItem): MediaItem {
 export const mediaData: MediaItem[] = rawMediaCatalog.map(enrichMediaCatalogItem);
 
 export const typeLabels: Record<string, { ko: string; en: string }> = {
-  digital: { ko: "디지털", en: "Digital" },
+  digital: { ko: "DOOH", en: "DOOH" },
   static: { ko: "고정형", en: "Static" },
+  fixed: { ko: "고정형", en: "Static" },
   mobile: { ko: "이동형", en: "Mobile" },
   network: { ko: "네트워크/패키지", en: "Network / package" },
 };

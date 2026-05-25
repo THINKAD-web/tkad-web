@@ -150,39 +150,39 @@ export default async function BlogSeoPostPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <article className="min-h-screen bg-muted py-12 sm:py-16">
+        <article className="min-h-screen bg-gray-50 py-12 dark:bg-[#020202] sm:py-16">
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-500"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "블로그 목록" : "Back to blog"}
             </Link>
 
-            <header className="mt-6 border-2 border-border bg-card p-6 sm:p-8">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                {`// ${post.publishedAt}`}
+            <header className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-8">
+              <p className="text-xs font-medium uppercase tracking-widest text-violet-400">
+                {post.publishedAt}
               </p>
-              <h1 className="mt-3 text-2xl font-bold tracking-tight text-foreground sm:text-4xl">
+              <h1 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
                 {title}
               </h1>
-              <p className="mt-4 text-sm leading-relaxed text-muted-foreground sm:text-base">
+              <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-white/70 sm:text-base">
                 {description}
               </p>
             </header>
 
-            <div className="mt-8 border-2 border-border bg-card p-6 sm:p-8">
+            <div className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-8">
               {post.sections.map((s, i) => renderSection(s, isKo, i))}
 
               {faqs.length > 0 ? (
-                <section className="mt-10 border-t-2 border-border pt-8">
-                  <h2 className="text-lg font-bold text-foreground">FAQ</h2>
+                <section className="mt-10 border-t border-gray-100 pt-8 dark:border-white/10">
+                  <h2 className="text-lg font-bold text-gray-900 dark:text-white">FAQ</h2>
                   <dl className="mt-4 space-y-4">
                     {faqs.map((f) => (
                       <div key={f.q}>
-                        <dt className="font-semibold text-foreground">{f.q}</dt>
-                        <dd className="mt-1 text-sm text-muted-foreground">{f.a}</dd>
+                        <dt className="font-semibold text-gray-900 dark:text-white">{f.q}</dt>
+                        <dd className="mt-1 text-sm text-gray-600 dark:text-white/70">{f.a}</dd>
                       </div>
                     ))}
                   </dl>
@@ -191,8 +191,8 @@ export default async function BlogSeoPostPage({ params }: Props) {
             </div>
 
             {relatedMedia.length > 0 ? (
-              <section className="mt-8 border-2 border-border bg-card p-6">
-                <h2 className="text-lg font-bold text-foreground">
+              <section className="mt-8 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5">
+                <h2 className="text-lg font-bold text-gray-900 dark:text-white">
                   {isKo ? "관련 매체" : "Related media"}
                 </h2>
                 <ul className="mt-4 space-y-2">
@@ -200,11 +200,11 @@ export default async function BlogSeoPostPage({ params }: Props) {
                     <li key={m.id}>
                       <Link
                         href={`/media/${m.id}`}
-                        className="text-sm font-semibold text-accent hover:underline"
+                        className="text-sm font-semibold text-violet-500 hover:underline"
                       >
                         {isKo ? m.name : m.nameEn || m.name}
                       </Link>
-                      <span className="ml-2 text-xs text-muted-foreground">
+                      <span className="ml-2 text-xs text-gray-500 dark:text-white/50">
                         {isKo ? m.location : m.locationEn || m.location}
                       </span>
                     </li>

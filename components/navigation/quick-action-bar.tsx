@@ -3,7 +3,7 @@
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { LayoutGrid, MessageCircle, Plus, Search } from "lucide-react";
+import { MessageCircle, Plus, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 function isHiddenPath(pathname: string | null): boolean {
@@ -18,6 +18,23 @@ function isHiddenPath(pathname: string | null): boolean {
   );
 }
 
+function isMediaDetailPath(pathname: string): boolean {
+  return (
+    /^\/media\/[^/]+$/.test(pathname) &&
+    !pathname.startsWith("/media/map") &&
+    !pathname.startsWith("/media/category") &&
+    !pathname.startsWith("/media/type") &&
+    !pathname.startsWith("/media/region") &&
+    !pathname.startsWith("/media/area") &&
+    !pathname.startsWith("/media/network") &&
+    !pathname.startsWith("/media/packages") &&
+    !pathname.startsWith("/media/favorites") &&
+    !pathname.startsWith("/media/compare") &&
+    !pathname.startsWith("/media/submit") &&
+    !pathname.startsWith("/media/keyword-filter")
+  );
+}
+
 const MOBILE_ACTIONS = [
   {
     id: "media",
@@ -25,7 +42,7 @@ const MOBILE_ACTIONS = [
     labelKo: "매체검색",
     labelEn: "Media",
     match: (p: string) =>
-      (p.startsWith("/media") && !p.startsWith("/media-owner")) ||
+      (p.startsWith("/media") && !p.startsWith("/media-owner") && !isMediaDetailPath(p)) ||
       p.startsWith("/search"),
   },
   {
@@ -44,6 +61,30 @@ const MOBILE_ACTIONS = [
   },
 ] as const;
 
+const DETAIL_ACTIONS = [
+  {
+    id: "compare",
+    href: "/compare",
+    labelKo: "매체비교",
+    labelEn: "Compare",
+    match: (p: string) => p.startsWith("/compare"),
+  },
+  {
+    id: "favorites",
+    href: "/media/favorites",
+    labelKo: "관심매체",
+    labelEn: "Saved",
+    match: (p: string) => p.startsWith("/media/favorites"),
+  },
+  {
+    id: "recommend",
+    href: "/recommend",
+    labelKo: "AI매체추천",
+    labelEn: "AI pick",
+    match: (p: string) => p.startsWith("/recommend"),
+  },
+] as const;
+
 export function QuickActionBarMobile() {
   const pathname = usePathname() ?? "/";
   const locale = useLocale();
@@ -51,13 +92,16 @@ export function QuickActionBarMobile() {
 
   if (isHiddenPath(pathname)) return null;
 
+  const onDetail = isMediaDetailPath(pathname);
+  const actions = onDetail ? DETAIL_ACTIONS : MOBILE_ACTIONS;
+
   return (
     <div
       className="fixed bottom-16 left-0 right-0 z-30 border-t border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:hidden"
       data-screenshot="quick-actions-mobile"
     >
       <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
-        {MOBILE_ACTIONS.map((action) => {
+        {actions.map((action) => {
           const active = action.match(pathname);
           const label = isKo ? action.labelKo : action.labelEn;
           return (
@@ -122,4 +166,4 @@ export function QuickActionBarDesktop() {
 }
 
 /** Icons exported for potential reuse */
-export { Search, LayoutGrid, MessageCircle };
+export { Search, MessageCircle };

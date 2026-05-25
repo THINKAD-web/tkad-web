@@ -12,6 +12,7 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
 import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
+import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
 
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
@@ -156,9 +157,19 @@ export function FooterBrutal() {
                       ·
                     </span>
                   ) : null}
-                  <Link href={link.href} className={coreLinkClass}>
-                    {link.label}
-                  </Link>
+                  {link.href === "/contact" ? (
+                    <button
+                      type="button"
+                      onClick={() => openContactChannelSheet()}
+                      className={coreLinkClass}
+                    >
+                      {link.label}
+                    </button>
+                  ) : (
+                    <Link href={link.href} className={coreLinkClass}>
+                      {link.label}
+                    </Link>
+                  )}
                 </span>
               ))}
             </nav>
@@ -261,15 +272,26 @@ export function FooterBrutal() {
               aria-label={t("footer.coreNavLabel")}
               className="flex flex-wrap gap-2"
             >
-              {mobileCoreLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
-                >
-                  {link.label}
-                </Link>
-              ))}
+              {mobileCoreLinks.map((link) =>
+                link.href === "/contact" ? (
+                  <button
+                    key={link.href}
+                    type="button"
+                    onClick={() => openContactChannelSheet()}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
+                  >
+                    {link.label}
+                  </button>
+                ) : (
+                  <Link
+                    key={link.href}
+                    href={link.href}
+                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
+                  >
+                    {link.label}
+                  </Link>
+                ),
+              )}
             </nav>
           </div>
         </div>

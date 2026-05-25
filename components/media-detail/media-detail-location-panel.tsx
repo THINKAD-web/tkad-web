@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
+import { NearbyPoiSection } from "@/components/media/nearby-poi-section";
 import type { MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
 
@@ -30,17 +31,7 @@ export function MediaDetailLocationPanel({
 
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : media.nameEn || media.name)},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
-
-  const poiItems = useMemo(() => {
-    const items: string[] = [];
-    if (media.nearbyStations?.length) {
-      items.push(...media.nearbyStations.slice(0, 4));
-    }
-    if (media.nearbyLandmarks?.length) {
-      items.push(...media.nearbyLandmarks.slice(0, 4));
-    }
-    return items.slice(0, 6);
-  }, [media.nearbyLandmarks, media.nearbyStations]);
+  const addressText = isKo ? media.location : media.locationEn || media.location;
 
   return (
     <div className={cn("space-y-6", className)}>
@@ -99,21 +90,12 @@ export function MediaDetailLocationPanel({
           </div>
         </div>
 
-        {poiItems.length > 0 ? (
-          <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
-            <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
-              {isKo ? "주변 POI" : "Nearby POI"}
-            </p>
-            <ul className="space-y-1.5 text-sm dark:text-white/75 text-gray-700">
-              {poiItems.map((item) => (
-                <li key={item} className="flex items-start gap-2">
-                  <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400" aria-hidden />
-                  {item}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ) : null}
+        <NearbyPoiSection
+          lat={media.lat}
+          lng={media.lng}
+          address={addressText}
+          isKo={isKo}
+        />
       </div>
 
       <RoadviewCard

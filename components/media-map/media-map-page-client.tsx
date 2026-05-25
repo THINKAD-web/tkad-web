@@ -22,6 +22,10 @@ import {
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
+import {
+  PageSubNav,
+  MEDIA_SUB_NAV_ITEMS,
+} from "@/components/navigation/page-sub-nav";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
@@ -487,6 +491,13 @@ export default function MediaMapPageClient() {
         }
         compactOnMobile
         className="border-b dark:border-white/10 border-gray-200"
+      />
+
+      <PageSubNav
+        items={MEDIA_SUB_NAV_ITEMS}
+        locale={locale}
+        className="border-b px-4 py-3 dark:border-white/10 border-gray-200 sm:px-6"
+        data-screenshot="media-sub-nav"
       />
 
       <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">

@@ -1,10 +1,8 @@
 "use client";
 
 import { HomeHubGridSection } from "@/components/home/home-hub-grid-section";
-import {
-  HOME_HUB_EXTRA_SECTION,
-  HOME_HUB_SECTIONS,
-} from "@/lib/navigation/home-hub-grid-config";
+import { HomeHubMoreLinks } from "@/components/home/home-hub-more-links";
+import { HOME_HUB_SECTIONS } from "@/lib/navigation/home-hub-grid-config";
 
 type Props = { locale: string };
 
@@ -17,7 +15,7 @@ export function HomeHubNavigationSection({ locale }: Props) {
       {HOME_HUB_SECTIONS.map((section) => (
         <HomeHubGridSection key={section.id} section={section} locale={locale} />
       ))}
-      <HomeHubGridSection section={HOME_HUB_EXTRA_SECTION} locale={locale} />
+      <HomeHubMoreLinks locale={locale} />
     </section>
   );
 }

@@ -4,7 +4,8 @@ export const revalidate = 0;
 import { Suspense } from "react";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import MediaBrowseClient from "@/components/media-browse-client";
+import { MediaBrowseCatalogServer } from "@/components/media/media-browse-catalog-server";
+import { MediaBrowseFiltersClient } from "@/components/media/media-browse-filters-client";
 import { MediaLandingLinksFooter } from "@/components/media-landing-links-footer";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
@@ -28,8 +29,9 @@ export default async function MediaPage({ params }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <MediaBrowseCatalogServer catalog={catalog} locale={locale} />
         <Suspense fallback={null}>
-          <MediaBrowseClient catalog={catalog} />
+          <MediaBrowseFiltersClient catalog={catalog} />
         </Suspense>
         <MediaLandingLinksFooter
           locale={locale}

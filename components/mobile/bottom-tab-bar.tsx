@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/haptic";
 import { useMobileTabBadges } from "@/hooks/use-mobile-tab-badges";
+import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
 
 type TabDef = {
   id: "home" | "explore" | "planner" | "contact" | "my";
@@ -146,6 +147,45 @@ export function BottomTabBar() {
                     {label}
                   </span>
                 </Link>
+              </li>
+            );
+          }
+
+          if (tab.id === "contact") {
+            return (
+              <li key={tab.id} className="flex flex-1 justify-center">
+                <button
+                  type="button"
+                  onClick={() => {
+                    hapticLight();
+                    openContactChannelSheet();
+                  }}
+                  className="flex flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                  aria-current={active ? "page" : undefined}
+                >
+                  <span className="relative">
+                    <Icon
+                      className={cn(
+                        "h-5 w-5 transition-colors duration-200",
+                        active
+                          ? "text-violet-600 dark:text-violet-300"
+                          : "text-gray-400 dark:text-white/40",
+                      )}
+                      strokeWidth={active ? 2.25 : 2}
+                    />
+                    <TabBadge count={badgeCount} />
+                  </span>
+                  <span
+                    className={cn(
+                      "mt-1 text-[10px] transition-colors duration-200",
+                      active
+                        ? "font-semibold text-violet-600 dark:text-violet-300"
+                        : "text-gray-400 dark:text-white/40",
+                    )}
+                  >
+                    {label}
+                  </span>
+                </button>
               </li>
             );
           }

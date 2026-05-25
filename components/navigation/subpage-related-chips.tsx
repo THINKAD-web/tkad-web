@@ -29,7 +29,19 @@ function chipActive(
   search: URLSearchParams,
 ): boolean {
   if (chip.match) return chip.match(pathname, search);
-  return pathname === chip.href || pathname.startsWith(`${chip.href}/`);
+  const chipPath = chip.href.split("?")[0] ?? chip.href;
+  return pathname === chipPath || pathname.startsWith(`${chipPath}/`);
+}
+
+/** next-intl Link — pathname와 query 분리 (문자열 `?` href는 soft navigation 오류 유발) */
+function chipLinkHref(
+  href: string,
+): string | { pathname: string; query: Record<string, string> } {
+  const qIndex = href.indexOf("?");
+  if (qIndex === -1) return href;
+  const pathname = href.slice(0, qIndex);
+  const query = Object.fromEntries(new URLSearchParams(href.slice(qIndex + 1)));
+  return { pathname, query };
 }
 
 export function SubpageRelatedChips() {
@@ -58,7 +70,7 @@ export function SubpageRelatedChips() {
           return (
             <Link
               key={chip.id}
-              href={chip.href}
+              href={chipLinkHref(chip.href)}
               scroll={chip.href.includes("#") ? false : undefined}
               className={cn(
                 "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors",

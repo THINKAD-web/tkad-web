@@ -48,7 +48,11 @@ export function mediaMatchesCategorySlug(
 }
 
 export function mediaMatchesTargetSlug(m: MediaItem, slug: string): boolean {
-  return (m.targetCategory ?? []).includes(slug);
+  const cats = m.targetCategory ?? [];
+  if (cats.includes(slug)) return true;
+  if (slug === "seasonal" && cats.includes("event")) return true;
+  if (slug === "global" && cats.includes("brand")) return true;
+  return false;
 }
 
 export function filterCatalogByCategorySlug(

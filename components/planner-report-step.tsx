@@ -14,7 +14,6 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
-import { formatCpmKrw } from "@/lib/media-price-format";
 import {
   captureElementAsPng,
   defaultPlannerPdfFilename,
@@ -25,21 +24,17 @@ import {
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
 import PlannerReportPreview from "@/components/planner-report-preview";
-import {
-  PlannerImpressionsLineChart,
-  PlannerRoiLineChart,
-  PlannerDailyReachBarChart,
-  PlannerCpmCompareChart,
-  PlannerMonthCompareChart,
-} from "@/components/planner-charts";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
+  PlannerProGate,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
+import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
+import { useIsPro } from "@/hooks/use-is-pro";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 
@@ -175,6 +170,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
+  const { isPro, loading: proLoading } = useIsPro();
   const derived = usePlannerReportDerived(props);
 
   const [loading, setLoading] = useState(true);
@@ -429,7 +425,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   ]);
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8">
+    <div
+      className="mx-auto w-full max-w-7xl space-y-8"
+      data-screenshot="planner-report-unified"
+    >
       <div className="space-y-2 text-center">
         <PlannerNeonLabel>Step 6 / Report</PlannerNeonLabel>
         <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
@@ -438,190 +437,257 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         <p className={plannerNeon.subtext}>{t("stepReportDesc")}</p>
       </div>
 
-      <div
-        className={cn(
-          "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-          "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
-        )}
-      >
-        <PlannerReportPreview
-          ref={previewRef}
-          isKo={props.isKo}
-          goalTitle={props.goalTitle}
-          budgetNum={props.budgetNum}
-          periodDisplay={derived.periodDisplay}
-          regionsText={props.regionsText}
-          categoriesText={props.categoriesText}
-          ageText={props.ageText}
-          industryText={props.industryText}
-          portfolio={props.portfolio}
-          metrics={props.metrics}
-          reachCorePct={props.reachCorePct}
-          reachExtendedPct={props.reachExtendedPct}
-          budgetAllocation={derived.budgetAllocation}
-          blendedCpmKrw={derived.blendedCpmKrw}
-          effectSummaryLines={derived.effectSummaryLines}
-          generatedAt={snapshotAt}
-          logoUrl={props.logoUrl}
-          mediaPlacements={props.mediaPlacements}
-        />
-      </div>
+      <PlannerReportInfoCard isKo={props.isKo} />
 
-      <PlannerEffectSimulationPanel
-        isKo={props.isKo}
-        portfolio={props.portfolio}
-        budgetMan={props.budgetNum}
-        months={props.months}
-        totalImpressionsFromMetrics={
-          props.metrics?.estimatedTotalImpressions ?? null
-        }
-      />
-
-      <PlannerReportPremiumBlock
-        isKo={props.isKo}
-        portfolio={props.portfolio}
-        budgetMan={props.budgetNum}
-        months={props.months}
-        regionsText={props.regionsText}
-        goal={props.campaignGoal}
-        industryText={props.industryText}
-      />
-
-      <PlannerNeonCard>
-        <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
-          <div>
-            <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
-            <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-              {t("reportPdfDocumentTitle")}
-            </h3>
-            <p className={cn("mt-1", plannerNeon.subtext)}>
-              {t("reportPreviewDesc")}
-            </p>
-          </div>
-          <div className="flex flex-wrap items-center gap-2">
-            <PlannerPdfDownloadGate
-              isKo={props.isKo}
-              onAllowedDownload={downloadPdf}
-            >
-              {({ onDownloadClick, pdfAllowed, checking }) => (
-                <BtnBlock
-                  variant="secondary"
-                  size="md"
-                  onClick={onDownloadClick}
-                  disabled={loading || downloading || capturing || checking}
-                >
-                  {downloading ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : !pdfAllowed ? (
-                    <Lock className="h-4 w-4" />
-                  ) : (
-                    <FileDown className="h-4 w-4" />
-                  )}
-                  {!pdfAllowed
-                    ? props.isKo
-                      ? "PDF 보고서 저장 (PRO)"
-                      : "Save PDF (PRO)"
-                    : t("reportDownloadPdf")}
-                </BtnBlock>
-              )}
-            </PlannerPdfDownloadGate>
-            <BtnBlock
-              variant="secondary"
-              size="md"
-              onClick={() => void captureReportPng()}
-              disabled={loading || capturing || downloading}
-            >
-              {capturing ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Camera className="h-4 w-4" />
-              )}
-              {t("reportCapturePng")}
-            </BtnBlock>
-            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-              <input
-                type="email"
-                placeholder={props.isKo ? "이메일 주소" : "Email address"}
-                value={userEmail}
-                onChange={(e) => {
-                  setUserEmail(e.target.value);
-                  setEmailSent(false);
-                }}
-                className={cn(
-                  "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
-                  "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                  "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
-                  "focus:border-violet-400/60 focus:outline-none sm:w-56",
-                )}
-              />
-              <BtnBlock
-                variant="accent"
-                size="md"
-                onClick={() => void sendEmailReport()}
-                disabled={emailSending}
-              >
-                {emailSending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Mail className="h-4 w-4" />
-                )}
-                {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-              </BtnBlock>
-            </div>
-            {error ? (
-              <BtnBlock
-                variant="primary"
-                size="md"
-                onClick={() => {
-                  setError(null);
-                  setRetryKey((k) => k + 1);
-                }}
-              >
-                <RefreshCw className="h-4 w-4" />
-                {t("reportRetryPdf")}
-              </BtnBlock>
-            ) : null}
-          </div>
+      {/* 공개 영역 — 캠페인·매체·대략적 노출 */}
+      <div className="space-y-4">
+        <div
+          className={cn(
+            "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
+            "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
+          )}
+        >
+          <PlannerReportPreview
+            ref={previewRef}
+            isKo={props.isKo}
+            goalTitle={props.goalTitle}
+            budgetNum={props.budgetNum}
+            periodDisplay={derived.periodDisplay}
+            regionsText={props.regionsText}
+            categoriesText={props.categoriesText}
+            ageText={props.ageText}
+            industryText={props.industryText}
+            portfolio={props.portfolio}
+            metrics={props.metrics}
+            reachCorePct={props.reachCorePct}
+            reachExtendedPct={props.reachExtendedPct}
+            budgetAllocation={derived.budgetAllocation}
+            blendedCpmKrw={derived.blendedCpmKrw}
+            effectSummaryLines={derived.effectSummaryLines}
+            generatedAt={snapshotAt}
+            logoUrl={props.logoUrl}
+            mediaPlacements={props.mediaPlacements}
+          />
         </div>
-        {loading ? (
-          <div
-            className={cn(
-              "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
-              plannerNeon.subtext,
-            )}
-          >
-            <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
-            {t("reportGenerating")}
-          </div>
-        ) : error ? (
-          <div className="px-5 py-6 sm:px-6">
-            <PlannerNeonLabel>Error</PlannerNeonLabel>
-            <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
-            <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
-              {t("reportPdfErrorHint")}
+
+        {props.metrics ? (
+          <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
+            <p className={plannerNeon.kpiLabel}>
+              {props.isKo ? "총 예상 노출수 (대략)" : "Est. total impressions (approx.)"}
+            </p>
+            <p className={cn("mt-2 text-3xl font-bold tabular-nums text-cyan-400")}>
+              {props.metrics.estimatedTotalImpressions.toLocaleString()}
             </p>
           </div>
         ) : null}
-      </PlannerNeonCard>
+
+        {!proLoading && !isPro ? (
+          <p className="text-center text-sm text-gray-500 dark:text-white/55">
+            {props.isKo
+              ? "더 자세한 분석을 원하시면 PRO로 시작하세요"
+              : "Upgrade to PRO for detailed analysis"}
+          </p>
+        ) : null}
+      </div>
+
+      {/* PRO 블러 섹션 1 — 노출 패턴 */}
+      {!proLoading ? (
+        <section className="space-y-3">
+          <PlannerNeonLabel>
+            {props.isKo ? "노출 패턴 분석" : "Exposure patterns"}
+          </PlannerNeonLabel>
+          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[16rem]">
+            <PlannerReportPremiumBlock
+              isKo={props.isKo}
+              portfolio={props.portfolio}
+              budgetMan={props.budgetNum}
+              months={props.months}
+              regionsText={props.regionsText}
+              goal={props.campaignGoal}
+              industryText={props.industryText}
+            />
+          </PlannerProGate>
+        </section>
+      ) : null}
+
+      {/* PRO 블러 섹션 2 — 효과 시뮬레이션 */}
+      {!proLoading ? (
+        <section className="space-y-3">
+          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[14rem]">
+            <PlannerEffectSimulationPanel
+              isKo={props.isKo}
+              portfolio={props.portfolio}
+              budgetMan={props.budgetNum}
+              months={props.months}
+              totalImpressionsFromMetrics={
+                props.metrics?.estimatedTotalImpressions ?? null
+              }
+              skipProGate
+              variant="metrics-only"
+            />
+          </PlannerProGate>
+        </section>
+      ) : null}
+
+      {/* PRO 블러 섹션 3 — 예산 배분 */}
+      {!proLoading ? (
+        <section className="space-y-3">
+          <PlannerNeonLabel>
+            {props.isKo ? "예산 배분 분석" : "Budget allocation"}
+          </PlannerNeonLabel>
+          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[14rem]">
+            <PlannerEffectSimulationPanel
+              isKo={props.isKo}
+              portfolio={props.portfolio}
+              budgetMan={props.budgetNum}
+              months={props.months}
+              totalImpressionsFromMetrics={
+                props.metrics?.estimatedTotalImpressions ?? null
+              }
+              skipProGate
+              variant="budget-only"
+            />
+          </PlannerProGate>
+        </section>
+      ) : null}
+
+      {/* PRO 블러 섹션 4 — PDF */}
+      {!proLoading ? (
+        <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[10rem]">
+          <PlannerNeonCard>
+            <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
+              <div>
+                <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
+                <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
+                  {t("reportPdfDocumentTitle")}
+                </h3>
+                <p className={cn("mt-1", plannerNeon.subtext)}>
+                  {t("reportPreviewDesc")}
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <PlannerPdfDownloadGate
+                  isKo={props.isKo}
+                  onAllowedDownload={downloadPdf}
+                >
+                  {({ onDownloadClick, pdfAllowed, checking }) => (
+                    <BtnBlock
+                      variant="secondary"
+                      size="md"
+                      onClick={onDownloadClick}
+                      disabled={loading || downloading || capturing || checking}
+                    >
+                      {downloading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : !pdfAllowed ? (
+                        <Lock className="h-4 w-4" />
+                      ) : (
+                        <FileDown className="h-4 w-4" />
+                      )}
+                      {!pdfAllowed
+                        ? props.isKo
+                          ? "PDF 보고서 저장 (PRO)"
+                          : "Save PDF (PRO)"
+                        : t("reportDownloadPdf")}
+                    </BtnBlock>
+                  )}
+                </PlannerPdfDownloadGate>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  onClick={() => void captureReportPng()}
+                  disabled={loading || capturing || downloading}
+                >
+                  {capturing ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Camera className="h-4 w-4" />
+                  )}
+                  {t("reportCapturePng")}
+                </BtnBlock>
+                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                  <input
+                    type="email"
+                    placeholder={props.isKo ? "이메일 주소" : "Email address"}
+                    value={userEmail}
+                    onChange={(e) => {
+                      setUserEmail(e.target.value);
+                      setEmailSent(false);
+                    }}
+                    className={cn(
+                      "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
+                      "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                      "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
+                      "focus:border-violet-400/60 focus:outline-none sm:w-56",
+                    )}
+                  />
+                  <BtnBlock
+                    variant="accent"
+                    size="md"
+                    onClick={() => void sendEmailReport()}
+                    disabled={emailSending}
+                  >
+                    {emailSending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Mail className="h-4 w-4" />
+                    )}
+                    {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
+                  </BtnBlock>
+                </div>
+                {error ? (
+                  <BtnBlock
+                    variant="primary"
+                    size="md"
+                    onClick={() => {
+                      setError(null);
+                      setRetryKey((k) => k + 1);
+                    }}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                    {t("reportRetryPdf")}
+                  </BtnBlock>
+                ) : null}
+              </div>
+            </div>
+            {loading ? (
+              <div
+                className={cn(
+                  "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
+                  plannerNeon.subtext,
+                )}
+              >
+                <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+                {t("reportGenerating")}
+              </div>
+            ) : error ? (
+              <div className="px-5 py-6 sm:px-6">
+                <PlannerNeonLabel>Error</PlannerNeonLabel>
+                <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
+                <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
+                  {t("reportPdfErrorHint")}
+                </p>
+              </div>
+            ) : null}
+          </PlannerNeonCard>
+        </PlannerProGate>
+      ) : null}
     </div>
   );
 }
 
-/** 대시보드(7단계) 하단: 요약 미리보기 + PDF 다운로드(클릭 시 생성) */
+/** 대시보드(7단계) 하단: PDF 다운로드만 (상세 보고서는 6단계 통합) */
 export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
+  const { isPro, loading: proLoading } = useIsPro();
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] = useState(false);
-  const [capturing, setCapturing] = useState(false);
   const compactPreviewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
-  const [userEmail, setUserEmail] = useState("");
-  const [emailSending, setEmailSending] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
 
   const downloadPdf = useCallback(async () => {
     setDownloading(true);
@@ -649,141 +715,26 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     } finally {
       setDownloading(false);
     }
-  }, [
-    t,
-    tCommon,
-    toast,
-  ]);
+  }, [t, tCommon, toast]);
 
-  const captureReportPngCompact = useCallback(async () => {
-    const el =
-      document.getElementById("planner-report-content") ?? compactPreviewRef.current;
-    if (!el) {
-      toast("error", tCommon("pdfGenerationFailed"));
-      return;
-    }
-    setCapturing(true);
-    try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const name = props.isKo
-        ? `싱커드_플래너보고서_${ymd}.png`
-        : `THINKAD_planner_${ymd}.png`;
-      await captureElementAsPng(el, name);
-      toast("success", t("reportImageSaved"));
-    } catch (e) {
-      console.error("[planner-capture compact]", e);
-      toast("error", tCommon("pdfGenerationFailed"));
-    } finally {
-      setCapturing(false);
-    }
-  }, [props.isKo, t, tCommon, toast]);
-
-  const sendEmailReport = useCallback(async () => {
-    const email = userEmail.trim();
-    if (
-      !email ||
-      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
-    ) {
-      toast("error", props.isKo ? "올바른 이메일을 입력하세요" : "Please enter a valid email");
-      return;
-    }
-    setEmailSending(true);
-    setEmailSent(false);
-    try {
-      let screenshotBase64 = "";
-      try {
-        const reportEl =
-          document.getElementById("planner-report-content") ??
-          compactPreviewRef.current;
-        if (reportEl) {
-          const canvas = await html2canvas(reportEl, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-          });
-          screenshotBase64 = canvas.toDataURL("image/png");
-        }
-      } catch (e) {
-        console.error("[planner-email] compact screenshot failed", e);
-      }
-
-      const res = await fetch("/api/planner/email-report", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          userEmail: email,
-          goalTitle: props.goalTitle,
-          budgetNum: props.budgetNum,
-          periodDisplay: derived.periodDisplay,
-          regionsText: props.regionsText,
-          categoriesText: props.categoriesText,
-          ageText: props.ageText,
-          industryText: props.industryText,
-          mediaList: props.portfolio.map((m) => ({
-            name: props.isKo ? m.name : (m.nameEn || m.name),
-            price: m.price,
-            location: m.location,
-          })),
-          metrics: props.metrics,
-          screenshot: screenshotBase64,
-        }),
-      });
-      if (!res.ok) {
-        throw new Error("email failed");
-      }
-      setEmailSent(true);
-      toast(
-        "success",
-        props.isKo
-          ? "이메일로 보고서가 발송되었습니다"
-          : "Report has been sent by email",
-      );
-    } catch {
-      toast(
-        "error",
-        props.isKo
-          ? "이메일 발송에 실패했습니다"
-          : "Failed to send email report",
-      );
-    } finally {
-      setEmailSending(false);
-    }
-  }, [
-    userEmail,
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    derived.periodDisplay,
-    toast,
-  ]);
+  if (proLoading) return null;
 
   return (
-    <PlannerNeonCard>
-      <div className={plannerNeon.cardHeader}>
-        <PlannerNeonLabel>Report Preview</PlannerNeonLabel>
-        <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-          {t("reportPreviewTitle")}
-        </h3>
-        <p className={cn("mt-1", plannerNeon.subtext)}>{t("reportCompactDesc")}</p>
-      </div>
-      <div className="space-y-6 p-5 sm:p-6">
-        <div
-          className={cn(
-            "flex justify-center rounded-xl border p-3 sm:p-5",
-            "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
-          )}
-        >
-          {/* PDF: 보고서 + 효과측정 스냅샷을 한 번에 캡처 */}
-          <div ref={compactPreviewRef} className="w-full max-w-[240mm] space-y-6">
+    <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[8rem]">
+      <PlannerNeonCard>
+        <div className={plannerNeon.cardHeader}>
+          <PlannerNeonLabel>PDF Export</PlannerNeonLabel>
+          <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
+            {t("reportPdfDocumentTitle")}
+          </h3>
+          <p className={cn("mt-1", plannerNeon.subtext)}>
+            {props.isKo
+              ? "6단계 통합 보고서를 PDF로 저장합니다. 상세 차트·시뮬레이션은 PRO에 포함됩니다."
+              : "Save the step-6 unified report as PDF. Detailed charts require PRO."}
+          </p>
+        </div>
+        <div className="sr-only" aria-hidden>
+          <div ref={compactPreviewRef} id="planner-report-content">
             <PlannerReportPreview
               isKo={props.isKo}
               goalTitle={props.goalTitle}
@@ -804,203 +755,9 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               logoUrl={props.logoUrl}
               mediaPlacements={props.mediaPlacements}
             />
-
-            {/* [PATCH-P3-01] Reach·Frequency·CPM·OTS 시뮬레이션 패널 + recharts 예산 파이 */}
-            <PlannerEffectSimulationPanel
-              isKo={props.isKo}
-              portfolio={props.portfolio}
-              budgetMan={props.budgetNum}
-              months={props.months}
-              totalImpressionsFromMetrics={
-                props.metrics?.estimatedTotalImpressions ?? null
-              }
-            />
-
-            <PlannerReportPremiumBlock
-              isKo={props.isKo}
-              portfolio={props.portfolio}
-              budgetMan={props.budgetNum}
-              months={props.months}
-              regionsText={props.regionsText}
-              goal={props.campaignGoal}
-              industryText={props.industryText}
-            />
-
-            {props.metrics ? (
-              <div className="border-2 border-bx-black bg-bx-white">
-                <div className="border-b-2 border-bx-black p-5">
-                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                    [ EFFECT DASHBOARD SNAPSHOT ]
-                  </p>
-                  <p className="mt-2 text-[11px] tracking-tight text-bx-gray-dim">
-                    {`// `}
-                    {props.isKo
-                      ? "보고서(플랜) + 효과측정(시뮬레이션) 내용을 한 번에 출력합니다."
-                      : "Print the plan report + simulation dashboard in one PDF."}
-                  </p>
-                </div>
-
-                <div className="space-y-6 p-5">
-                  {(() => {
-                    const budgetKrw = props.budgetNum * 10_000;
-                    const estReach = Math.round(
-                      props.metrics!.estimatedTotalImpressions * 0.75,
-                    );
-                    const estCpm =
-                      props.metrics!.estimatedTotalImpressions > 0
-                        ? Math.round(
-                            (budgetKrw /
-                              props.metrics!.estimatedTotalImpressions) *
-                              1000,
-                          )
-                        : 0;
-                    return (
-                      <div className="grid grid-cols-1 gap-0 sm:grid-cols-2 lg:grid-cols-4">
-                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
-                            [ {t("kpiImpressions")} ]
-                          </p>
-                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-accent">
-                            {props.metrics!.estimatedTotalImpressions.toLocaleString()}
-                          </p>
-                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
-                            {t("kpiImpressionsHint")}
-                          </p>
-                        </div>
-                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
-                            [ {t("kpiReach")} ]
-                          </p>
-                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-black">
-                            {estReach.toLocaleString()}
-                          </p>
-                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
-                            {t("kpiReachHint")}
-                          </p>
-                        </div>
-                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-white p-4">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-gray-dim">
-                            [ {t("kpiCpm")} ]
-                          </p>
-                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-black">
-                            {formatCpmKrw(estCpm, props.isKo ? "ko" : "en")}
-                          </p>
-                          <p className="mt-1 text-[10px] tracking-tight text-bx-gray-dim">
-                            {t("kpiCpmHint")}
-                          </p>
-                        </div>
-                        <div className="-mt-[2px] -ml-[2px] border-2 border-bx-black bg-bx-black p-4 text-bx-white">
-                          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                            [ {t("kpiRoi")} ]
-                          </p>
-                          <p className="mt-2 font-display text-2xl font-bold tabular-nums text-bx-accent">
-                            {props.metrics!.roiExpected}
-                            {t("roiUnit")}
-                          </p>
-                          <p className="mt-1 text-[10px] tracking-tight text-bx-white/65">
-                            {t("kpiRoiHint")}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })()}
-
-                  <div className="border-2 border-bx-black bg-bx-white">
-                    <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                        [ {t("chartDailyBarTitle")} ]
-                      </p>
-                    </div>
-                    <div className="p-5">
-                      <PlannerDailyReachBarChart
-                        data={derived.dailyBars}
-                        title={t("chartDailyBarTitle")}
-                        valueLabel={t("chartDailyBarAxis")}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="grid gap-0 lg:grid-cols-2">
-                    <div className="border-2 border-bx-black bg-bx-white">
-                      <div className="border-b-2 border-bx-black p-5">
-                        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                          [ {t("chartCpmTitle")} ]
-                        </p>
-                      </div>
-                      <div className="p-5">
-                        <PlannerCpmCompareChart
-                          data={props.cpmBars}
-                          title={t("chartCpmTitle")}
-                          unitLabel={t("chartCpmUnit")}
-                        />
-                      </div>
-                    </div>
-                    <div className="-ml-[2px] border-2 border-bx-black bg-bx-white">
-                      <div className="border-b-2 border-bx-black p-5">
-                        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                          [ {t("chartMonthCompareTitle")} ]
-                        </p>
-                      </div>
-                      <div className="p-5">
-                        <PlannerMonthCompareChart
-                          data={props.monthCompare.map((x) => ({
-                            months: x.months,
-                            total: x.totalImpressions,
-                          }))}
-                          title={t("chartMonthCompareTitle")}
-                          barLabels={[
-                            t("monthCompare1"),
-                            t("monthCompare3"),
-                            t("monthCompare6"),
-                          ]}
-                        />
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="border-2 border-bx-black bg-bx-white">
-                    <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                        [ {t("chartImpLineTitle")} ]
-                      </p>
-                    </div>
-                    <div className="p-5">
-                      <PlannerImpressionsLineChart
-                        data={props.metrics!.cumulativeByMonth}
-                        isKo={props.isKo}
-                        title={t("chartImpLineTitle")}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="border-2 border-bx-black bg-bx-white">
-                    <div className="border-b-2 border-bx-black p-5">
-                      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-bx-accent">
-                        [ {t("chartRoiLineTitle")} ]
-                      </p>
-                      <p className="mt-1 text-[11px] tracking-tight text-bx-gray-dim">
-                        {t("chartRoiLineHint")}
-                      </p>
-                    </div>
-                    <div className="p-5">
-                      <PlannerRoiLineChart
-                        data={props.metrics!.roiByMonth}
-                        isKo={props.isKo}
-                        title={t("chartRoiLineTitle")}
-                        hint={t("chartRoiLineHint")}
-                        legendConservative={t("roiConservative")}
-                        legendExpected={t("roiExpected")}
-                        legendOptimistic={t("roiOptimistic")}
-                        roiUnit={t("roiUnit")}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
-        <div className="flex flex-wrap gap-2 border-t-2 border-border pt-6">
+        <div className="flex flex-wrap gap-2 p-5 sm:p-6">
           <PlannerPdfDownloadGate
             isKo={props.isKo}
             onAllowedDownload={() => void downloadPdf()}
@@ -1010,7 +767,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 variant="accent"
                 size="md"
                 onClick={onDownloadClick}
-                disabled={downloading || capturing || checking}
+                disabled={downloading || checking}
               >
                 {downloading ? (
                   <Loader2 className="h-4 w-4 animate-spin" />
@@ -1027,51 +784,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
               </BtnBlock>
             )}
           </PlannerPdfDownloadGate>
-          <BtnBlock
-            variant="secondary"
-            size="md"
-            onClick={() => void captureReportPngCompact()}
-            disabled={downloading || capturing}
-          >
-            {capturing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Camera className="h-4 w-4" />
-            )}
-            {t("reportCapturePng")}
-          </BtnBlock>
-          <div className="flex flex-wrap items-center gap-2">
-            <input
-              type="email"
-              placeholder={props.isKo ? "이메일 주소" : "Email address"}
-              value={userEmail}
-              onChange={(e) => {
-                setUserEmail(e.target.value);
-                setEmailSent(false);
-              }}
-              className={cn(
-                "h-10 w-full min-w-[12rem] rounded-xl border px-3 text-sm sm:w-52",
-                "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
-                "focus:border-violet-400/60 focus:outline-none",
-              )}
-            />
-            <BtnBlock
-              variant="secondary"
-              size="md"
-              onClick={() => void sendEmailReport()}
-              disabled={emailSending}
-            >
-              {emailSending ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Mail className="h-4 w-4" />
-              )}
-              {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-            </BtnBlock>
-          </div>
         </div>
-      </div>
-    </PlannerNeonCard>
+      </PlannerNeonCard>
+    </PlannerProGate>
   );
 }

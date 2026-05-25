@@ -98,9 +98,14 @@ import { useIsPro } from "@/hooks/use-is-pro";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
+  PlannerProGate,
   PlannerTrialBanner,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
+import {
+  PageSubNav,
+  PLANNER_SUB_NAV_ITEMS,
+} from "@/components/navigation/page-sub-nav";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { useTeamPermissions } from "@/lib/use-team-permissions";
@@ -178,7 +183,7 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
   const landingAppearance = useTkadAppearance();
-  const { showTrialBanner } = useIsPro();
+  const { showTrialBanner, isPro, loading: proLoading } = useIsPro();
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -774,6 +779,13 @@ export default function PlannerPageClient({
           subtitle={t("subtitle")}
         />
 
+        <PageSubNav
+          items={PLANNER_SUB_NAV_ITEMS}
+          locale={locale}
+          className="mx-auto max-w-7xl px-4 pb-4 sm:px-6"
+          data-screenshot="planner-sub-nav"
+        />
+
         <PlannerNeonPageBody
           appearance={landingAppearance}
           className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
@@ -1358,62 +1370,18 @@ export default function PlannerPageClient({
                   {t(industryKey)}
                 </p>
 
-                {/* PR-7: 핵심 KPI 4장 — Impressions / Reach / CPM / ROI(기대) */}
-                {(() => {
-                  const budgetKrw = budgetNum * 10_000;
-                  const estReach = Math.round(
-                    metrics.estimatedTotalImpressions * 0.75,
-                  );
-                  const estCpm =
-                    metrics.estimatedTotalImpressions > 0
-                      ? Math.round(
-                          (budgetKrw /
-                            metrics.estimatedTotalImpressions) *
-                            1000,
-                        )
-                      : 0;
-                  return (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
-                        <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
-                          {metrics.estimatedTotalImpressions.toLocaleString()}
-                        </p>
-                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                          {t("kpiImpressionsHint")}
-                        </p>
-                      </div>
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("kpiReach")}</p>
-                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
-                          {estReach.toLocaleString()}
-                        </p>
-                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                          {t("kpiReachHint")}
-                        </p>
-                      </div>
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("kpiCpm")}</p>
-                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
-                          {formatCpmKrw(estCpm, isKo ? "ko" : "en")}
-                        </p>
-                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                          {t("kpiCpmHint")}
-                        </p>
-                      </div>
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("kpiRoi")}</p>
-                        <p className="mt-2 text-2xl font-bold tabular-nums text-violet-400">
-                          {metrics.roiExpected}
-                          {t("roiUnit")}
-                        </p>
-                        <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                          {t("kpiRoiHint")}
-                        </p>
-                      </div>
-                    </div>
-                  );
-                })()}
+                {/* 공개: 총 예상 노출수만 */}
+                {metrics ? (
+                  <div className={cn(plannerNeon.kpiCard, "max-w-sm")}>
+                    <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
+                    <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
+                      {metrics.estimatedTotalImpressions.toLocaleString()}
+                    </p>
+                    <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
+                      {t("kpiImpressionsHint")}
+                    </p>
+                  </div>
+                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
@@ -1478,6 +1446,13 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
+                {!proLoading ? (
+                  <PlannerProGate
+                    isPro={isPro}
+                    isKo={isKo}
+                    minHeightClass="min-h-[20rem]"
+                    className="space-y-3"
+                  >
                 <div className="grid gap-3 lg:grid-cols-2">
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
@@ -1674,6 +1649,9 @@ export default function PlannerPageClient({
                     />
                   </div>
                 </div>
+
+                  </PlannerProGate>
+                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />

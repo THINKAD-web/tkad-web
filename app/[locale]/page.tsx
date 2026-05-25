@@ -2,21 +2,21 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import type { Metadata } from "next";
 import { pageAlternates } from "@/lib/seo";
-import { type MediaItem } from "@/lib/media-data";
-import { fetchHomeWeeklyPopularMedia } from "@/lib/public-media-catalog";
+import {
+  fetchHomeNewMedia,
+  fetchHomeWeeklyPopularMedia,
+  fetchPublicMediaCatalog,
+} from "@/lib/public-media-catalog";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
 import { mergeMediaTrustFromCatalog } from "@/lib/media-trust-catalog";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-import { HomeSearchHero } from "@/components/home/home-search-hero";
 import { HomeAppearanceShell } from "@/components/home/home-appearance-shell";
-import { HomeLaunchBanner } from "@/components/home/home-launch-banner";
+import { HomeHeroBannerSlider } from "@/components/home/home-hero-banner-slider";
 import {
   HomeCategorySection,
-  HomePopularMediaHeader,
-  HomePopularMediaList,
   HomeTrustStrip,
 } from "@/components/home/home-simple-sections";
+import { HomeMediaHorizontalSection } from "@/components/home/home-media-horizontal-scroll";
 import { HomeHubNavigationSection } from "@/components/home/home-hub-navigation";
 
 /** 홈 — ISR 60초 */
@@ -54,8 +54,9 @@ export default async function HomePage({ params }: Props) {
 
   const t = await getTranslations({ locale, namespace: "media" });
 
-  const [weeklyPopularCatalog, fullCatalog] = await Promise.all([
-    fetchHomeWeeklyPopularMedia(),
+  const [weeklyPopularCatalog, newMediaCatalog, fullCatalog] = await Promise.all([
+    fetchHomeWeeklyPopularMedia(10),
+    fetchHomeNewMedia(10),
     fetchPublicMediaCatalog(),
   ]);
 
@@ -70,34 +71,49 @@ export default async function HomePage({ params }: Props) {
     locale,
   );
 
-  const popularItems = weeklyPopularItems.slice(0, 6);
+  const popularItems = weeklyPopularItems.slice(0, 10);
+
+  const newMediaWithTrust = mergeMediaTrustFromCatalog(
+    newMediaCatalog,
+    fullCatalog,
+  );
+  const newItems = newMediaWithTrust.slice(0, 10);
+
+  const isKo = locale.startsWith("ko");
 
   return (
     <HomeAppearanceShell>
-      <HomeLaunchBanner />
+      {/* 1. 히어로 배너 슬라이더 */}
+      <HomeHeroBannerSlider locale={locale} />
 
-      {/* 섹션 1 — 검색 히어로 */}
-      <HomeSearchHero locale={locale} />
-
-      {/* 섹션 2 — 카테고리 아이콘 그리드 */}
+      {/* 2. 매체 유형 + 캠페인 목적 */}
       <HomeCategorySection locale={locale} />
 
-      {/* 섹션 2b — 전체 페이지 허브 버튼 */}
+      {/* 3. 이번 주 인기 매체 (가로 스크롤) */}
+      <HomeMediaHorizontalSection
+        title={isKo ? "이번 주 인기 매체" : "Popular this week"}
+        viewAllLabel={isKo ? "전체 보기" : "View all"}
+        viewAllHref="/media?sort=popular"
+        items={popularItems}
+        locale={locale}
+        imagePreparingLabel={t("imagePreparing")}
+      />
+
+      {/* 4. 새로 등록된 매체 (가로 스크롤) */}
+      <HomeMediaHorizontalSection
+        title={isKo ? "새로 등록된 매체" : "Newly listed"}
+        viewAllLabel={isKo ? "전체 보기" : "View all"}
+        viewAllHref="/media?sort=newest"
+        items={newItems}
+        locale={locale}
+        imagePreparingLabel={t("imagePreparing")}
+        badge="new"
+      />
+
+      {/* 5. 허브 네비게이션 */}
       <HomeHubNavigationSection locale={locale} />
 
-      {/* 섹션 3 — 이번 주 인기 매체 (리스트형) */}
-      {popularItems.length > 0 ? (
-        <section className="pb-8 pt-2">
-          <HomePopularMediaHeader locale={locale} />
-          <HomePopularMediaList
-            items={popularItems}
-            locale={locale}
-            imagePreparingLabel={t("imagePreparing")}
-          />
-        </section>
-      ) : null}
-
-      {/* 섹션 4 — 신뢰 지표 */}
+      {/* 6. 신뢰 지표 + 파트너 */}
       <HomeTrustStrip locale={locale} />
     </HomeAppearanceShell>
   );

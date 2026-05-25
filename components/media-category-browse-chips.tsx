@@ -65,16 +65,7 @@ export function MediaCategoryBrowseChips({
 
 export function chipLandingHref(chip: BrowseCategoryChip): string | null {
   if (chip === "all") return null;
-  const map: Partial<Record<BrowseCategoryChip, string>> = {
-    subway: "/media/category/subway",
-    bus: "/media/category/bus",
-    billboard: "/media/category/billboard",
-    dooh: "/media/category/dooh",
-    campus: "/media/category/campus",
-    retail: "/media/category/retail",
-    local: "/media/category/local",
-  };
-  return map[chip] ?? `/media/category/${chip}`;
+  return `/media?category=${chip}`;
 }
 
 export { categoryLabel };

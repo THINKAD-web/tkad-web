@@ -4,7 +4,6 @@ import { ThemeProvider as NextThemesProvider, useTheme } from "next-themes";
 import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef } from "react";
 import {
-  THEME_STORAGE_KEY,
   clearExpiredManualTheme,
   dispatchThemeAutoChanged,
   getManualTheme,
@@ -81,11 +80,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   return (
     <NextThemesProvider
       attribute="class"
-      defaultTheme="dark"
+      defaultTheme="light"
       enableSystem={false}
       themes={["light", "dark"]}
       disableTransitionOnChange
-      storageKey={THEME_STORAGE_KEY}
     >
       <ThemeAutoController />
       {children}

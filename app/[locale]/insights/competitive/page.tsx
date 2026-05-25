@@ -3,6 +3,7 @@ import { CompetitiveDashboardClient } from "@/components/insights/competitive-da
 import { checkReportAccess } from "@/lib/report-access";
 import { getCurrentUser } from "@/lib/user-session";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { buildCompetitiveDashboardTeaser } from "@/lib/insights/competitive-dashboard-data";
 import { pageAlternates } from "@/lib/seo";
 import type { Metadata } from "next";
@@ -33,12 +34,16 @@ export default async function CompetitiveInsightsPage({ params }: Props) {
   const teaser = await buildCompetitiveDashboardTeaser({ isKo });
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
-      <CompetitiveDashboardClient
-        isKo={isKo}
-        access={access}
-        teaser={teaser}
-      />
-    </main>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon">
+        <main className="mx-auto max-w-6xl px-4 py-10 sm:py-14">
+          <CompetitiveDashboardClient
+            isKo={isKo}
+            access={access}
+            teaser={teaser}
+          />
+        </main>
+      </div>
+    </HomeLandingDayNight>
   );
 }

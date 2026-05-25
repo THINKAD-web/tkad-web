@@ -294,6 +294,30 @@ export const TARGET_CATEGORIES: TargetNode[] = [
     recommendedSlugs: ["campus_board", "campus_cafe", "neighborhood_board"],
     seoKeywordsKo: ["대학교 광고", "캠퍼스 마케팅"],
   },
+  {
+    id: "seasonal",
+    slug: "seasonal",
+    nameKo: "시즌·연말 캠페인",
+    nameEn: "Seasonal campaigns",
+    icon: "📅",
+    order: 8,
+    descriptionKo: "연말·명절·시즌 프로모션, 한정 기간 집행",
+    descriptionEn: "Holiday, seasonal, and limited-time campaigns",
+    recommendedSlugs: ["media_pole", "mall_digital", "roadside_billboard"],
+    seoKeywordsKo: ["시즌 광고", "연말 옥외광고", "시즌 캠페인"],
+  },
+  {
+    id: "global",
+    slug: "global",
+    nameKo: "글로벌·해외 브랜드",
+    nameEn: "Global brands",
+    icon: "🌏",
+    order: 9,
+    descriptionKo: "해외 브랜드 런칭, K-콘텐츠·관광 연계 캠페인",
+    descriptionEn: "International launches and tourism-linked OOH",
+    recommendedSlugs: ["media_pole", "roadside_billboard", "airport_rail"],
+    seoKeywordsKo: ["글로벌 브랜드 광고", "해외 브랜드 옥외광고", "K-콘텐츠 광고"],
+  },
 ];
 
 /** Flat list including all nodes */
@@ -465,6 +489,8 @@ export function inferTargetCategoriesFromText(input: {
   if (/축제|문화|지역/i.test(hay)) out.add("regional");
   if (/동네|소상공|매장|오픈/i.test(hay)) out.add("small_business");
   if (/이벤트|팝업|pop-up|season/i.test(hay)) out.add("event");
+  if (/시즌|seasonal|연말|명절|holiday/i.test(hay)) out.add("seasonal");
+  if (/글로벌|global|international|해외|관광|tourist/i.test(hay)) out.add("global");
   if (/대학|캠퍼스|학생|20대|mz/i.test(hay)) out.add("university");
 
   return [...out];

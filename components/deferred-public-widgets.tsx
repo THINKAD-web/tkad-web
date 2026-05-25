@@ -6,6 +6,7 @@
  * markup that depends on browser-only state.
  */
 import dynamic from "next/dynamic";
+import { ContactChannelProvider } from "@/components/contact/contact-channel-provider";
 
 const FloatingSupportDock = dynamic(
   () => import("@/components/floating-support-dock"),
@@ -21,10 +22,10 @@ const PwaCatalogSync = dynamic(
 );
 export default function DeferredPublicWidgets() {
   return (
-    <>
+    <ContactChannelProvider>
       <PwaCatalogSync />
       <RecentlyViewedSync />
       <FloatingSupportDock />
-    </>
+    </ContactChannelProvider>
   );
 }

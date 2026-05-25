@@ -23,7 +23,7 @@ export async function generateMetadata({
     : "Search 500+ verified OOH media across Korea by region, format, and budget — Gangnam, Hongdae, Seongsu, and more.";
   const ogTitle = title;
   return {
-    title,
+    title: { absolute: title },
     description,
     keywords: isKo
       ? [

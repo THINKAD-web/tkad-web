@@ -8,6 +8,11 @@ import { MessageCircle } from "lucide-react";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { usePageScrollEdges } from "@/lib/use-page-scroll-edges";
 import { cn } from "@/lib/utils";
+import { RecentlyViewedFloatingPanel } from "@/components/recently-viewed-floating-panel";
+import {
+  readRecentlyViewedRecords,
+  subscribeRecentlyViewedChanged,
+} from "@/lib/recently-viewed";
 
 const SupportAiChatModal = dynamic(
   () =>
@@ -42,6 +47,7 @@ export default function FloatingSupportDock() {
   const isKo = locale === "ko";
   const tChat = useTranslations("supportChat");
   const [aiOpen, setAiOpen] = useState(false);
+  const [hasRecent, setHasRecent] = useState(false);
   const { mounted } = usePageScrollEdges();
 
   const hidden =
@@ -53,25 +59,37 @@ export default function FloatingSupportDock() {
     setAiOpen(false);
   }, [pathname]);
 
+  useEffect(() => {
+    const refresh = () => setHasRecent(readRecentlyViewedRecords().length > 0);
+    refresh();
+    return subscribeRecentlyViewedChanged(refresh);
+  }, []);
+
   if (hidden) return null;
 
   return (
     <>
       <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
 
-      {/* 모바일: 카카오 1개 (작게) */}
+      {/* 모바일 */}
       <div
         className={cn(
-          "fixed bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3 z-50 md:hidden",
+          "md:hidden",
           !mounted && "pointer-events-none opacity-0",
         )}
-        aria-label={isKo ? "카카오 상담" : "Kakao support"}
       >
+        {hasRecent ? (
+          <RecentlyViewedFloatingPanel className="fixed bottom-20 right-4 z-50" />
+        ) : null}
         <a
           href={KAKAO_CHANNEL_PUBLIC_URL}
           target="_blank"
           rel="noopener noreferrer"
-          className={cn(mobileFabClass, "bg-[#FEE500] text-[#191600]")}
+          className={cn(
+            mobileFabClass,
+            "fixed z-50 bg-[#FEE500] text-[#191600]",
+            hasRecent ? "bottom-6 right-4" : "bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3",
+          )}
           aria-label={tChat("kakaoCta")}
           title={tChat("kakaoCta")}
         >
@@ -79,10 +97,10 @@ export default function FloatingSupportDock() {
         </a>
       </div>
 
-      {/* 데스크탑: 채팅 + 카카오 */}
+      {/* 데스크탑: 최근 조회 + AI + 카카오 */}
       <div
         className={cn(
-          "fixed bottom-6 right-4 z-50 hidden flex-col gap-3 md:flex",
+          "fixed bottom-6 right-4 z-50 hidden flex-col items-end gap-3 md:flex",
           !mounted && "pointer-events-none opacity-0",
         )}
         style={{
@@ -91,6 +109,9 @@ export default function FloatingSupportDock() {
         }}
         aria-label={isKo ? "상담 버튼" : "Support buttons"}
       >
+        {hasRecent ? (
+          <RecentlyViewedFloatingPanel className="w-72" />
+        ) : null}
         <button
           type="button"
           onClick={() => setAiOpen(true)}

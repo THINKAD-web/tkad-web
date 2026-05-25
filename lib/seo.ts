@@ -74,8 +74,11 @@ export function defaultOgImages(
  * - 로컬/폴백: tkad.co.kr
  */
 function resolvePublicSiteUrl(): string {
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.VERCEL_ENV === "production") {
     return OG_PRODUCTION_ORIGIN;
+  }
+  if (process.env.VERCEL_ENV === "preview") {
+    return "https://tkad-web.vercel.app";
   }
   const explicit =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||

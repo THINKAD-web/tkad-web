@@ -29,9 +29,6 @@ import { BtnBlock } from "@/components/brutalist";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   CategoryExploreHero,
-  CategoryHeroCtaRow,
-  categoryHeroCtaPrimaryClass,
-  categoryHeroCtaSecondaryClass,
 } from "@/components/category-explore-hero";
 import { cn } from "@/lib/utils";
 import {
@@ -109,17 +106,18 @@ import {
   type BrowseCategoryChip,
 } from "@/components/media-category-browse-chips";
 import { MediaCategoryFilterPanel } from "@/components/media-category-filter-panel";
-import { CategoryButtonGrid } from "@/components/category/category-button-grid";
-import {
-  HOME_MEDIA_TYPE_GRID,
-  HOME_TARGET_GRID,
-} from "@/lib/category-grid-config";
 import {
   chipToCategorySlugs,
   mediaMatchesCategorySlugs,
   mediaMatchesTargetSlugs,
+  BROWSE_CATEGORY_CHIPS,
 } from "@/lib/media-categories";
-import { mediaMatchesCategorySlug } from "@/lib/media-category-landing";
+import { mediaMatchesCategorySlug, mediaMatchesTargetSlug } from "@/lib/media-category-landing";
+import { MediaBrowseRegionFilter } from "@/components/media/media-browse-region-filter";
+import {
+  PageSubNav,
+  MEDIA_SUB_NAV_ITEMS,
+} from "@/components/navigation/page-sub-nav";
 
 function subscribeMediaLg(cb: () => void) {
   const mq = window.matchMedia("(min-width: 1024px)");
@@ -152,7 +150,10 @@ export default function MediaBrowseClient({
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
   const catFromUrl = searchParams.get("cat") ?? "";
+  const categoryFromUrl = searchParams.get("category") ?? "";
   const targetFromUrl = searchParams.get("target") ?? "";
+  const sortFromUrl = searchParams.get("sort") ?? "";
+  const regionFromUrl = searchParams.get("region") ?? "";
   const chipFromUrl = (searchParams.get("chip") ?? "all") as BrowseCategoryChip;
   const instantFromUrl = searchParams.get("instant") === "1";
 
@@ -189,6 +190,7 @@ export default function MediaBrowseClient({
   const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
   const skipFirstComparePersist = useRef(true);
+  const urlHydratedRef = useRef(false);
   const popularIds = useMemo(
     () =>
       new Set(
@@ -212,6 +214,8 @@ export default function MediaBrowseClient({
   >("default");
   const [instantOnlyFilter, setInstantOnlyFilter] = useState(false);
   const [mobileRegionChip, setMobileRegionChip] = useState("");
+  const [activeRegionId, setActiveRegionId] = useState("all");
+  const [activeSubRegionId, setActiveSubRegionId] = useState("");
   const { summary: availabilitySummary } = useMediaAvailabilitySummary();
 
   /**
@@ -222,6 +226,13 @@ export default function MediaBrowseClient({
    */
   const effectiveCatalog = useMemo(() => {
     const arr = [...catalog];
+    const hasUrlFilters =
+      qFromUrl ||
+      catFromUrl ||
+      categoryFromUrl ||
+      targetFromUrl ||
+      (chipFromUrl && chipFromUrl !== "all");
+    if (hasUrlFilters) return arr;
     for (let i = arr.length - 1; i > 0; i--) {
       const j = Math.floor(Math.random() * (i + 1));
       [arr[i], arr[j]] = [arr[j], arr[i]];
@@ -279,10 +290,17 @@ export default function MediaBrowseClient({
     if (chipFromUrl && chipFromUrl !== "all") {
       setCategoryChip(chipFromUrl);
     }
-    if (catFromUrl) {
-      setSelectedMediaSlugs(
-        catFromUrl.split(",").map((s) => s.trim()).filter(Boolean),
-      );
+    const catParts = [catFromUrl, categoryFromUrl]
+      .flatMap((s) => s.split(","))
+      .map((s) => s.trim())
+      .filter(Boolean);
+    if (catParts.length > 0) {
+      const first = catParts[0]!;
+      if ((BROWSE_CATEGORY_CHIPS as readonly string[]).includes(first)) {
+        setCategoryChip(first as BrowseCategoryChip);
+      } else {
+        setSelectedMediaSlugs(catParts);
+      }
     }
     if (targetFromUrl) {
       setSelectedTargetSlugs(
@@ -292,7 +310,37 @@ export default function MediaBrowseClient({
     if (instantFromUrl) {
       setInstantOnlyFilter(true);
     }
-  }, [catFromUrl, targetFromUrl, chipFromUrl, instantFromUrl]);
+    if (regionFromUrl) {
+      setMobileRegionChip(regionFromUrl);
+      if (/강남|서초/.test(regionFromUrl)) {
+        setActiveRegionId("seoul");
+        setActiveSubRegionId("gangnam");
+      } else if (/마포|홍대/.test(regionFromUrl)) {
+        setActiveRegionId("seoul");
+        setActiveSubRegionId("mapo");
+      } else if (/성동|성수/.test(regionFromUrl)) {
+        setActiveRegionId("seoul");
+        setActiveSubRegionId("seongdong");
+      } else if (/중구|도심/.test(regionFromUrl)) {
+        setActiveRegionId("seoul");
+        setActiveSubRegionId("downtown");
+      } else if (regionFromUrl.includes("서울")) {
+        setActiveRegionId("seoul");
+      } else if (regionFromUrl.includes("경기")) {
+        setActiveRegionId("gyeonggi");
+      } else if (regionFromUrl.includes("부산")) {
+        setActiveRegionId("busan");
+      } else if (regionFromUrl.includes("대구")) {
+        setActiveRegionId("daegu");
+      }
+    }
+    if (sortFromUrl === "newest") setSortBy("newest");
+    else if (sortFromUrl === "price_asc") setSortBy("priceAsc");
+    else if (sortFromUrl === "price_desc") setSortBy("priceDesc");
+    else if (sortFromUrl === "rating") setSortBy("ratingDesc");
+    else if (sortFromUrl === "popular") setSortBy("default");
+    urlHydratedRef.current = true;
+  }, [catFromUrl, categoryFromUrl, targetFromUrl, chipFromUrl, instantFromUrl, regionFromUrl, sortFromUrl]);
 
   const filterState = useMemo(
     () => ({
@@ -389,12 +437,12 @@ export default function MediaBrowseClient({
     }
     if (selectedMediaSlugs.length > 0) {
       data = data.filter((m) =>
-        mediaMatchesCategorySlugs(m.mediaCategory, selectedMediaSlugs),
+        selectedMediaSlugs.some((slug) => mediaMatchesCategorySlug(m, slug)),
       );
     }
     if (selectedTargetSlugs.length > 0) {
       data = data.filter((m) =>
-        mediaMatchesTargetSlugs(m.targetCategory, selectedTargetSlugs),
+        selectedTargetSlugs.some((slug) => mediaMatchesTargetSlug(m, slug)),
       );
     }
     return data;
@@ -429,18 +477,46 @@ export default function MediaBrowseClient({
     precisionSelectionsActive &&
     advancedFiltered.length > 0;
 
-  /** 정밀 → 고급 → 검색 순으로 적용하되, 모두 0건이면 전체 목록 */
+  const filtersActive = useMemo(
+    () =>
+      categoryChip !== "all" ||
+      selectedMediaSlugs.length > 0 ||
+      selectedTargetSlugs.length > 0 ||
+      !!debouncedCatalogSearch.trim() ||
+      !!mobileRegionChip.trim() ||
+      instantOnlyFilter ||
+      budgetMin > PRECISION_BUDGET_MIN_MAN ||
+      budgetMax < PRECISION_BUDGET_MAX_MAN ||
+      precisionSelectionsActive,
+    [
+      categoryChip,
+      selectedMediaSlugs,
+      selectedTargetSlugs,
+      debouncedCatalogSearch,
+      mobileRegionChip,
+      instantOnlyFilter,
+      budgetMin,
+      budgetMax,
+      precisionSelectionsActive,
+    ],
+  );
+
+  /** 정밀 → 고급 → 카테고리 순. 필터 활성 시 0건 폴백 금지 */
   const filtered = useMemo(() => {
     if (strictPrecisionFiltered.length > 0) return strictPrecisionFiltered;
+    if (precisionSelectionsActive && advancedFiltered.length > 0) {
+      return advancedFiltered;
+    }
     if (advancedFiltered.length > 0) return advancedFiltered;
     if (categoryFiltered.length > 0) return categoryFiltered;
-    if (searchFiltered.length > 0) return searchFiltered;
+    if (filtersActive) return [];
     return effectiveCatalog;
   }, [
     strictPrecisionFiltered,
+    precisionSelectionsActive,
     advancedFiltered,
     categoryFiltered,
-    searchFiltered,
+    filtersActive,
     effectiveCatalog,
   ]);
 
@@ -491,7 +567,14 @@ export default function MediaBrowseClient({
           return bt - at;
         });
       default:
-        return arr;
+        return arr.sort((a, b) => {
+          const ap = a.popularityScore ?? 0;
+          const bp = b.popularityScore ?? 0;
+          if (bp !== ap) return bp - ap;
+          const at = a.createdAt ? Date.parse(a.createdAt) : 0;
+          const bt = b.createdAt ? Date.parse(b.createdAt) : 0;
+          return bt - at;
+        });
     }
   }, [filtered, sortBy]);
 
@@ -516,6 +599,7 @@ export default function MediaBrowseClient({
   /** 필터 결과가 적을 때 카탈로그에서 부족분만큼 덧붙여 그리드·지도 최소 노출 유지 */
   const { gridDisplayList, catalogMinPadActive } = useMemo(() => {
     if (
+      filtersActive ||
       catalogListForDisplay.length >= MEDIA_BROWSE_GRID_MIN_ITEMS ||
       effectiveCatalog.length < MEDIA_BROWSE_GRID_MIN_ITEMS
     ) {
@@ -532,7 +616,7 @@ export default function MediaBrowseClient({
       gridDisplayList: [...catalogListForDisplay, ...extras],
       catalogMinPadActive: extras.length > 0,
     };
-  }, [catalogListForDisplay, effectiveCatalog]);
+  }, [catalogListForDisplay, effectiveCatalog, filtersActive]);
 
   useEffect(() => {
     // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
@@ -573,7 +657,7 @@ export default function MediaBrowseClient({
     return () => window.removeEventListener("keydown", onKey);
   }, [browseMode, mapSelectedId]);
 
-  const resetFilters = () => {
+  const resetFilters = useCallback(() => {
     setSearchTarget(null);
     setCatalogSearchQuery("");
     setDebouncedCatalogSearch("");
@@ -581,8 +665,70 @@ export default function MediaBrowseClient({
     setSortBy("default");
     setBudgetMin(PRECISION_BUDGET_MIN_MAN);
     setBudgetMax(PRECISION_BUDGET_MAX_MAN);
+    setInstantOnlyFilter(false);
+    setMobileRegionChip("");
+    setActiveRegionId("all");
+    setActiveSubRegionId("");
+    setCategoryChip("all");
+    setSelectedMediaSlugs([]);
+    setSelectedTargetSlugs([]);
     resetAdvancedFilters();
-  };
+    setCatalogPage(1);
+    router.replace("/media", { scroll: false });
+  }, [resetAdvancedFilters, router]);
+
+  useEffect(() => {
+    if (!urlHydratedRef.current) return;
+
+    const params = new URLSearchParams();
+    const q = catalogSearchQuery.trim();
+    if (q) params.set("q", q);
+
+    if (categoryChip !== "all") {
+      params.set("category", categoryChip);
+    } else if (selectedMediaSlugs.length > 0) {
+      params.set("category", selectedMediaSlugs.join(","));
+    }
+
+    if (selectedTargetSlugs.length > 0) {
+      params.set("target", selectedTargetSlugs.join(","));
+    }
+
+    if (mobileRegionChip.trim()) {
+      params.set("region", mobileRegionChip.trim());
+    }
+
+    if (instantOnlyFilter) params.set("instant", "1");
+
+    if (sortBy === "newest") params.set("sort", "newest");
+    else if (sortBy === "priceAsc") params.set("sort", "price_asc");
+    else if (sortBy === "priceDesc") params.set("sort", "price_desc");
+    else if (sortBy === "ratingDesc") params.set("sort", "rating");
+
+    if (budgetMin > PRECISION_BUDGET_MIN_MAN) {
+      params.set("minPrice", String(budgetMin * 10000));
+    }
+    if (budgetMax < PRECISION_BUDGET_MAX_MAN) {
+      params.set("maxPrice", String(budgetMax * 10000));
+    }
+
+    const qs = params.toString();
+    const currentQs = searchParams.toString();
+    if (qs === currentQs) return;
+    router.replace(qs ? `/media?${qs}` : "/media", { scroll: false });
+  }, [
+    catalogSearchQuery,
+    categoryChip,
+    selectedMediaSlugs,
+    selectedTargetSlugs,
+    mobileRegionChip,
+    instantOnlyFilter,
+    sortBy,
+    budgetMin,
+    budgetMax,
+    router,
+    searchParams,
+  ]);
 
   const togglePrecisionFilters = useCallback(() => {
     setPrecisionFiltersOpen((o) => !o);
@@ -687,40 +833,13 @@ export default function MediaBrowseClient({
               />
             </div>
           </div>
-          <CategoryHeroCtaRow className="mx-auto mt-2 w-full max-w-xl flex-row gap-1.5 sm:mt-2.5 sm:gap-2">
-            <Link
-              href="/media/packages"
-              className={cn(
-                categoryHeroCtaSecondaryClass,
-                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-5 sm:text-sm",
-              )}
-            >
-              <Sparkles className="hidden h-3.5 w-3.5 shrink-0 text-violet-300 sm:inline" aria-hidden />
-              {tMedia("packagesBrowseLink")}
-              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 dark:text-white text-gray-700 sm:inline" aria-hidden />
-            </Link>
-            <Link
-              href="/contact"
-              className={cn(
-                categoryHeroCtaPrimaryClass,
-                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
-              )}
-            >
-              {tMedia("heroCtaProposal")}
-              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 sm:inline sm:h-4 sm:w-4" aria-hidden />
-            </Link>
-            <Link
-              href="/planner"
-              className={cn(
-                categoryHeroCtaSecondaryClass,
-                "h-10 min-w-0 flex-1 justify-center gap-1 whitespace-nowrap px-2 text-[10px] sm:h-11 sm:flex-none sm:gap-2 sm:px-6 sm:text-sm",
-              )}
-            >
-              {tMedia("heroCtaPlanner")}
-              <ArrowRight className="hidden h-3.5 w-3.5 shrink-0 dark:text-white text-gray-700 sm:inline sm:h-4 sm:w-4" aria-hidden />
-            </Link>
-          </CategoryHeroCtaRow>
         </CategoryExploreHero>
+        <PageSubNav
+          items={MEDIA_SUB_NAV_ITEMS}
+          locale={locale}
+          className="mx-auto max-w-6xl px-4 pb-4 sm:px-6"
+          data-screenshot="media-sub-nav"
+        />
         </div>
       )}
 
@@ -746,22 +865,6 @@ export default function MediaBrowseClient({
           resultCount={gridDisplayList.length}
         />
         <div className="ui-container">
-            <div className="hidden md:block">
-              <div className="mb-8 space-y-8">
-                <CategoryButtonGrid
-                  items={HOME_MEDIA_TYPE_GRID}
-                  locale={locale}
-                  title={isKo ? "매체 유형" : "Media types"}
-                  layout="row"
-                />
-                <CategoryButtonGrid
-                  items={HOME_TARGET_GRID}
-                  locale={locale}
-                  title={isKo ? "캠페인 목적" : "Campaign goals"}
-                  layout="row"
-                />
-              </div>
-            </div>
             <div className="flex flex-col gap-6">
               <MediaScarcitySection
                 catalog={effectiveCatalog}
@@ -789,6 +892,81 @@ export default function MediaBrowseClient({
                 </p>
               </aside>
 
+              <div className="hidden md:block">
+                <MediaBrowseRegionFilter
+                  locale={locale}
+                  activeRegion={activeRegionId}
+                  activeSubRegion={activeSubRegionId}
+                  onRegionChange={(query, regionId) => {
+                    setActiveRegionId(regionId);
+                    setActiveSubRegionId("");
+                    setMobileRegionChip(query);
+                    setCatalogPage(1);
+                  }}
+                  onSubRegionChange={(query, subId) => {
+                    setActiveSubRegionId(subId);
+                    setMobileRegionChip(query);
+                    setCatalogPage(1);
+                  }}
+                  className="mb-4"
+                />
+                <div className="mb-4 rounded-2xl border border-border bg-card p-4">
+                  <p className="mb-2 text-sm font-semibold text-foreground">
+                    {isKo ? "가격 범위" : "Price range"}
+                  </p>
+                  <p className="mb-3 text-xs tabular-nums text-violet-600 dark:text-violet-400">
+                    ₩{(budgetMin * 10000).toLocaleString()} ~ ₩
+                    {(budgetMax * 10000).toLocaleString()}
+                  </p>
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+                    <label className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
+                      {isKo ? "최소 (100만원)" : "Min (₩1M)"}
+                      <input
+                        type="range"
+                        min={0}
+                        max={5000}
+                        step={100}
+                        value={budgetMin}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          setBudgetMin(Math.min(v, budgetMax));
+                          setCatalogPage(1);
+                        }}
+                        className="w-full accent-violet-500"
+                      />
+                    </label>
+                    <label className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
+                      {isKo ? "최대 (100만원)" : "Max (₩1M)"}
+                      <input
+                        type="range"
+                        min={0}
+                        max={5000}
+                        step={100}
+                        value={budgetMax}
+                        onChange={(e) => {
+                          const v = Number(e.target.value);
+                          setBudgetMax(Math.max(v, budgetMin));
+                          setCatalogPage(1);
+                        }}
+                        className="w-full accent-violet-500"
+                      />
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              {filtersActive ? (
+                <div className="mb-4 flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={resetFilters}
+                    className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300"
+                  >
+                    {isKo ? "필터 초기화 ×" : "Reset filters ×"}
+                  </button>
+                </div>
+              ) : null}
+
               <MediaCategoryBrowseChips
                 locale={locale}
                 active={categoryChip}
@@ -796,7 +974,7 @@ export default function MediaBrowseClient({
                   setCategoryChip(chip);
                   setCatalogPage(1);
                 }}
-                className="px-0.5"
+                className="hidden px-0.5 md:flex"
               />
 
               <div className="flex flex-col gap-6 lg:flex-row">
@@ -815,19 +993,6 @@ export default function MediaBrowseClient({
                 ) : null}
 
                 <div className="min-w-0 flex-1">
-              {!lgUp ? (
-                <div className="mb-4">
-                  <BtnBlock
-                    type="button"
-                    variant="secondary"
-                    size="sm"
-                    onClick={() => setCategoryFiltersOpen(true)}
-                  >
-                    {isKo ? "카테고리·목적 필터" : "Category filters"}
-                  </BtnBlock>
-                </div>
-              ) : null}
-
               {/* #MEDIA-1: 정밀필터 진입점 숨김 (코드 보존) */}
               <div className="hidden flex-col gap-3">
                 <button
@@ -1143,19 +1308,21 @@ export default function MediaBrowseClient({
                 ) : null}
 
                 {gridDisplayList.length === 0 ? (
-                  <div className="flex min-h-[32rem] flex-col items-center justify-center gap-8 border-2 border-border bg-muted px-6 py-20 text-center sm:px-10">
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                      {`// 0 RESULTS`}
+                  <div className="flex min-h-[24rem] flex-col items-center justify-center gap-6 rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center dark:border-white/10 dark:bg-white/5 sm:px-10">
+                    <p className="text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                      {isKo ? "조건에 맞는 매체가 없어요" : "No media matches your filters"}
                     </p>
-                    <p className="max-w-2xl text-3xl font-bold leading-[1.05] tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-                      {tMedia("catalogBrowseEmptyTitle")}
+                    <p className="max-w-md text-sm text-gray-500 dark:text-white/60">
+                      {isKo ? "필터를 조정해보세요" : "Try adjusting your filters"}
                     </p>
-                    <p className="max-w-xl text-base leading-relaxed text-muted-foreground sm:text-lg">
-                      {tMedia("catalogBrowseEmptySubtitle")}
-                    </p>
-                    <BtnBlock onClick={resetFilters} variant="primary" size="lg">
-                      {tMedia("resetAllBrowseFiltersProminent")}
-                    </BtnBlock>
+                    <div className="flex flex-wrap justify-center gap-3">
+                      <BtnBlock onClick={resetFilters} variant="secondary" size="md">
+                        {isKo ? "필터 초기화 ×" : "Reset filters ×"}
+                      </BtnBlock>
+                      <BtnBlock href="/recommend" variant="primary" size="md">
+                        {isKo ? "AI 매체 추천 써보기 →" : "Try AI recommend →"}
+                      </BtnBlock>
+                    </div>
                   </div>
                 ) : browseMode === "map" ? (
                   <div className="relative">

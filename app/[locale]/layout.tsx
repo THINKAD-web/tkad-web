@@ -6,7 +6,6 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
 import {
   defaultOgImages,
-  OG_PRODUCTION_ORIGIN,
   pageAlternates,
   siteKeywords,
   siteUrl,
@@ -49,7 +48,10 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
-  const base = new URL(OG_PRODUCTION_ORIGIN);
+  const metadataBase =
+    process.env.VERCEL_ENV === "production"
+      ? new URL("https://tkad.co.kr")
+      : new URL("https://tkad-web.vercel.app");
 
   const titleDefault =
     locale === "ko"
@@ -73,7 +75,7 @@ export async function generateMetadata({
       template: "%s | THINKAD",
     },
     description,
-    metadataBase: base,
+    metadataBase,
     keywords: siteKeywords(locale),
     authors: [{ name: "THINKAD 싱커드", url: siteUrl }],
     creator: "THINKAD 싱커드",
@@ -149,14 +151,12 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   return (
     <html lang={locale} suppressHydrationWarning>
-      <head>
-        <script
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-        />
-      </head>
       <body
         className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans antialiased`}
       >
+        <script
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+        />
         <JsonLd data={structuredData} />
         <WebVitalsReporter />
         <SpeedInsightsLoader />
