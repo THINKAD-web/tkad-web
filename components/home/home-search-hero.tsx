@@ -1,6 +1,6 @@
 "use client";
 
-import { useRouter } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { Search } from "lucide-react";
 import { useMobileSearch } from "@/components/mobile/mobile-search-context";
 import { cn } from "@/lib/utils";
@@ -24,11 +24,17 @@ type Props = {
   className?: string;
 };
 
+function isHomePath(pathname: string | null): boolean {
+  return pathname === "/" || pathname === "";
+}
+
 export function HomeSearchHero({ locale, className }: Props) {
   const isKo = locale.startsWith("ko");
+  const pathname = usePathname();
   const { openSearch } = useMobileSearch();
   const router = useRouter();
   const regions = isKo ? POPULAR_REGIONS_KO : POPULAR_REGIONS_EN;
+  const showRegionChips = !isHomePath(pathname);
 
   const handleRegionSelect = (query: string) => {
     if (!query) {
@@ -62,18 +68,20 @@ export function HomeSearchHero({ locale, className }: Props) {
           </span>
         </button>
 
-        <div className="mt-3 flex flex-wrap gap-2">
-          {regions.map((region) => (
-            <button
-              key={region.label}
-              type="button"
-              onClick={() => handleRegionSelect(region.query)}
-              className="rounded-full bg-gray-100 px-3.5 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-violet-100 hover:text-violet-700 dark:bg-white/10 dark:text-white/80 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
-            >
-              {region.label}
-            </button>
-          ))}
-        </div>
+        {showRegionChips ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {regions.map((region) => (
+              <button
+                key={region.label}
+                type="button"
+                onClick={() => handleRegionSelect(region.query)}
+                className="rounded-full bg-gray-100 px-3.5 py-1.5 text-xs font-semibold text-gray-700 transition-colors hover:bg-violet-100 hover:text-violet-700 dark:bg-white/10 dark:text-white/80 dark:hover:bg-violet-500/20 dark:hover:text-violet-200"
+              >
+                {region.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
     </section>
   );

@@ -62,7 +62,7 @@ export function PageSubNav({
               "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
               active
                 ? "bg-violet-500 text-white shadow-sm"
-                : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
+                : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
             )}
             aria-current={active ? "page" : undefined}
           >
@@ -130,7 +130,7 @@ export const PLANNER_SUB_NAV_ITEMS: PageSubNavItem[] = [
   {
     id: "recommend",
     href: "/recommend",
-    labelKo: "AI매체추천",
+    labelKo: "AI추천",
     labelEn: "AI recommend",
     icon: Sparkles,
   },

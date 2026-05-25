@@ -90,15 +90,6 @@ export function MobileHeader({
           <span className="tkad-home-accent-text text-lg font-black">AD</span>
         </Link>
         <div className="flex items-center gap-0.5">
-          <button
-            type="button"
-            onClick={() => openSearch()}
-            className={iconBtn}
-            aria-label={isKo ? "검색" : "Search"}
-            data-tour="search"
-          >
-            <Search className="h-5 w-5" />
-          </button>
           <Link
             href="/my/notifications"
             className={iconBtn}

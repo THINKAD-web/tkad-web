@@ -56,6 +56,51 @@ export function PlannerNeonCard({
   return <div className={cn(plannerNeon.card, className)}>{children}</div>;
 }
 
+export function PlannerProTeaserStats({
+  isKo,
+  totalImpressions,
+  reachCorePct,
+  roiExpected,
+}: {
+  isKo: boolean;
+  totalImpressions: number;
+  reachCorePct: number;
+  roiExpected?: number;
+}) {
+  return (
+    <div
+      className="mb-4 grid grid-cols-3 gap-2 blur-xl sm:gap-3"
+      aria-hidden
+    >
+      <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
+        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+          {isKo ? "총 노출" : "Impressions"}
+        </p>
+        <p className="mt-1 text-lg font-bold tabular-nums text-cyan-400 sm:text-xl">
+          {totalImpressions.toLocaleString()}
+        </p>
+      </div>
+      <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
+        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+          {isKo ? "도달률" : "Reach"}
+        </p>
+        <p className="mt-1 text-lg font-bold tabular-nums text-violet-400 sm:text-xl">
+          {reachCorePct}%
+        </p>
+      </div>
+      <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
+        <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
+          ROI
+        </p>
+        <p className="mt-1 text-lg font-bold tabular-nums text-pink-400 sm:text-xl">
+          {roiExpected ?? "—"}
+          {roiExpected != null ? "x" : ""}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export function PlannerProGate({
   isPro,
   isKo,
@@ -73,7 +118,7 @@ export function PlannerProGate({
     <div className={cn("relative", minHeightClass, className)}>
       <div
         className={cn(
-          !isPro && "pointer-events-none select-none blur-sm opacity-60",
+          !isPro && "pointer-events-none select-none blur-md opacity-70",
         )}
       >
         {children}
@@ -83,14 +128,18 @@ export function PlannerProGate({
           className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm dark:bg-black/70"
           aria-hidden={false}
         >
-          <Lock className="mb-3 h-8 w-8 text-violet-400" aria-hidden />
           <p className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
-            {isKo ? "PRO 전용 기능" : "PRO feature"}
-          </p>
-          <p className="mb-4 px-4 text-center text-sm text-gray-500 dark:text-white/60">
             {isKo
-              ? "상세 효과 분석은 PRO 플랜에서 제공됩니다"
-              : "Detailed effect analysis is available on PRO"}
+              ? "🔒 결과를 확인하려면 PRO가 필요해요"
+              : "🔒 PRO required to view results"}
+          </p>
+          <p className="mb-1 px-4 text-center text-sm text-gray-500 dark:text-white/60">
+            {isKo
+              ? "노출 예측·시뮬레이션·PDF 보고서 포함"
+              : "Includes exposure forecast, simulation & PDF report"}
+          </p>
+          <p className="mb-4 text-xs text-gray-400 dark:text-white/45">
+            {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
           </p>
           <Link
             href="/pricing"
@@ -98,9 +147,6 @@ export function PlannerProGate({
           >
             {isKo ? "PRO 무료 체험 시작 →" : "Start PRO free trial →"}
           </Link>
-          <p className="mt-2 text-xs text-gray-400 dark:text-white/30">
-            {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
-          </p>
         </div>
       ) : null}
     </div>

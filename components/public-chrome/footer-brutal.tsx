@@ -95,10 +95,6 @@ export function FooterBrutal() {
     { href: "/contact", label: t("footer.coreContact") },
   ] as const;
 
-  const mobileCoreLinks = coreLinks.filter(
-    (link) => link.href === "/media" || link.href === "/contact",
-  );
-
   const legalLinks = [
     { href: "/privacy", label: t("footer.privacy") },
     { href: "/terms", label: t("footer.terms") },
@@ -106,12 +102,50 @@ export function FooterBrutal() {
     { href: "/guarantee", label: t("footer.guarantee") },
   ] as const;
 
+  const mobileLegalLinks = legalLinks.filter(
+    (link) => link.href !== "/guarantee",
+  );
+
+  const mobileLinkClass =
+    "transition-colors hover:text-gray-600 dark:hover:text-white/50";
+
   return (
     <>
       <footer
         id="site-footer"
         className="tkad-site-footer relative shrink-0 overflow-hidden border-t border-gray-200 bg-gray-50 text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
       >
+        {/* Mobile — 간단 푸터 (하단 탭바 위) */}
+        <div
+          className="border-t border-gray-200 dark:border-gray-800 md:hidden"
+          data-screenshot="mobile-footer"
+        >
+          <div className="px-4 pt-4 text-center text-xs text-gray-400 dark:text-white/30">
+            <p>
+              © {year} {t("footer.companyNameShort")} · 사업자번호 319-86-00382
+            </p>
+            <p className="mt-1.5">
+              {mobileLegalLinks.map((link, index) => (
+                <span key={link.href}>
+                  {index > 0 ? (
+                    <span className="mx-1.5" aria-hidden>
+                      ·
+                    </span>
+                  ) : null}
+                  <Link href={link.href} className={mobileLinkClass}>
+                    {link.label}
+                  </Link>
+                </span>
+              ))}
+            </p>
+          </div>
+          {/* 퀵 액션 바 + 하단 탭바 여백 */}
+          <div className="h-14" aria-hidden />
+          <div className="pb-20" aria-hidden />
+        </div>
+
+        {/* Desktop — 기존 푸터 */}
+        <div className="hidden md:block">
         <div
           aria-hidden
           className="absolute inset-0 hidden dark:block tkad-neon-depth"
@@ -122,8 +156,7 @@ export function FooterBrutal() {
         />
 
         <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          {/* Desktop */}
-          <div className="hidden md:grid md:grid-cols-3 md:items-start md:gap-10">
+          <div className="grid grid-cols-3 items-start gap-10">
             <div>
               <Link
                 href="/"
@@ -223,77 +256,6 @@ export function FooterBrutal() {
               </p>
             </div>
           </div>
-
-          {/* Mobile */}
-          <div className="space-y-5 md:hidden">
-            <div>
-              <Link
-                href="/"
-                className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
-              >
-                THINK
-                <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
-                  AD
-                </span>
-              </Link>
-              <p className="mt-2 text-sm text-gray-700 dark:text-white/80">
-                {t("footer.description")}
-              </p>
-            </div>
-
-            <div className="space-y-1 text-sm text-gray-600 dark:text-white/70">
-              <p>
-                <a
-                  href={`tel:${t("footer.phone").replace(/-/g, "")}`}
-                  className="transition hover:text-gray-900 dark:hover:text-white"
-                >
-                  {t("footer.phone")}
-                </a>
-              </p>
-              <p>
-                <a
-                  href={`mailto:${CONTACT_EMAIL}`}
-                  className="transition hover:text-gray-900 dark:hover:text-white"
-                >
-                  {CONTACT_EMAIL}
-                </a>
-              </p>
-              <p className="pt-1">
-                <Link
-                  href="/guide/how-to-use"
-                  className="text-sm font-medium text-primary underline-offset-2 hover:underline"
-                >
-                  {t("footer.usageGuideLink")}
-                </Link>
-              </p>
-            </div>
-
-            <nav
-              aria-label={t("footer.coreNavLabel")}
-              className="flex flex-wrap gap-2"
-            >
-              {mobileCoreLinks.map((link) =>
-                link.href === "/contact" ? (
-                  <button
-                    key={link.href}
-                    type="button"
-                    onClick={() => openContactChannelSheet()}
-                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
-                  >
-                    {link.label}
-                  </button>
-                ) : (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="rounded-lg border border-gray-200 px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/80 dark:hover:border-white/25 dark:hover:text-white"
-                  >
-                    {link.label}
-                  </Link>
-                ),
-              )}
-            </nav>
-          </div>
         </div>
 
         <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
@@ -319,6 +281,7 @@ export function FooterBrutal() {
               </button>
             </div>
           </div>
+        </div>
         </div>
       </footer>
 
