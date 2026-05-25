@@ -1,91 +1,56 @@
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 
-type LinkItem = { href: string; labelKo: string; labelEn: string };
-
-const STUDIO_LINKS: LinkItem[] = [
-  { href: "/creatives", labelKo: "소재 라이브러리", labelEn: "Creative library" },
+const groups = [
   {
-    href: "/creatives/playlists",
-    labelKo: "DOOH 플레이리스트",
-    labelEn: "DOOH playlists",
+    label: "스튜디오",
+    links: [
+      { text: "소재 라이브러리", href: "/ko/creatives" },
+      { text: "DOOH 플레이리스트", href: "/ko/creatives/playlists" },
+      { text: "크리에이티브 스튜디오", href: "/ko/creatives/upload" },
+    ],
   },
   {
-    href: "/creatives/upload",
-    labelKo: "크리에이티브 스튜디오",
-    labelEn: "Creative studio",
-  },
-];
-
-const INFO_LINKS: LinkItem[] = [
-  { href: "/community", labelKo: "커뮤니티", labelEn: "Community" },
-  { href: "/academy", labelKo: "아카데미", labelEn: "Academy" },
-  { href: "/faq", labelKo: "FAQ", labelEn: "FAQ" },
-  { href: "/glossary", labelKo: "용어집", labelEn: "Glossary" },
-  { href: "/about", labelKo: "회사소개", labelEn: "About" },
-  { href: "/developers", labelKo: "개발자 API", labelEn: "Developers API" },
-  { href: "/points", labelKo: "포인트샵", labelEn: "Points shop" },
-  {
-    href: "/register/media",
-    labelKo: "매체 등록 신청",
-    labelEn: "List your media",
+    label: "정보·커뮤니티",
+    links: [
+      { text: "커뮤니티", href: "/ko/community" },
+      { text: "아카데미", href: "/ko/academy" },
+      { text: "FAQ", href: "/ko/faq" },
+      { text: "용어집", href: "/ko/glossary" },
+      { text: "회사소개", href: "/ko/about" },
+      { text: "개발자 API", href: "/ko/developers" },
+      { text: "포인트샵", href: "/ko/points" },
+      { text: "매체 등록 신청", href: "/ko/register/media" },
+      { text: "요금 안내", href: "/ko/pricing" },
+    ],
   },
 ];
 
-function LinkRow({
-  items,
-  isKo,
-}: {
-  items: LinkItem[];
-  isKo: boolean;
-}) {
+export function HomeMoreLinks() {
   return (
-    <div className="flex flex-wrap gap-x-3 gap-y-2">
-      {items.map((item, index) => (
-        <span key={item.href} className="inline-flex items-center">
-          {index > 0 ? (
-            <span className="mr-3 text-gray-300 dark:text-white/20" aria-hidden>
-              ·
-            </span>
-          ) : null}
-          <Link
-            href={item.href}
-            className="text-sm text-gray-400 transition hover:text-gray-900 dark:text-white/40 dark:hover:text-white"
-          >
-            {isKo ? item.labelKo : item.labelEn}
-          </Link>
-        </span>
-      ))}
-    </div>
-  );
-}
-
-type Props = { locale: string };
-
-export function HomeMoreLinks({ locale }: Props) {
-  const isKo = locale.startsWith("ko");
-
-  return (
-    <section
-      className="border-b border-gray-100 py-6 dark:border-white/5"
-      data-screenshot="home-more-links"
-    >
-      <p className="text-sm font-semibold text-gray-900 dark:text-white">
-        {isKo ? "더 많은 서비스" : "More services"}
-      </p>
-      <div className="mt-4 space-y-4">
-        <div>
-          <p className="mb-2 text-xs font-medium text-gray-400 dark:text-white/45">
-            {isKo ? "스튜디오" : "Studio"}
-          </p>
-          <LinkRow items={STUDIO_LINKS} isKo={isKo} />
-        </div>
-        <div>
-          <p className="mb-2 text-xs font-medium text-gray-400 dark:text-white/45">
-            {isKo ? "커뮤니티·정보" : "Community & info"}
-          </p>
-          <LinkRow items={INFO_LINKS} isKo={isKo} />
-        </div>
+    <div className="border-t border-gray-100 px-4 py-4 dark:border-white/5">
+      <h3 className="mb-3 text-sm font-semibold tracking-wider text-gray-400 uppercase dark:text-white/50">
+        더 보기
+      </h3>
+      <div className="space-y-3">
+        {groups.map((group) => (
+          <div key={group.label}>
+            <p className="mb-1.5 text-xs font-medium text-gray-400 dark:text-white/30">
+              {group.label}
+            </p>
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5">
+              {group.links.map((link) => (
+                <Link
+                  key={link.href}
+                  href={link.href}
+                  className="text-sm text-gray-500 transition-colors hover:text-gray-900 dark:text-white/50 dark:hover:text-white"
+                >
+                  {link.text}
+                </Link>
+              ))}
+            </div>
+          </div>
+        ))}
       </div>
-    </section>
+    </div>
   );
 }

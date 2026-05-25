@@ -1,210 +1,112 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
-import { Link } from "@/i18n/navigation";
-import {
-  ArrowRight,
-  BarChart3,
-  FileText,
-  Heart,
-  Monitor,
-  Search,
-  Sparkles,
-} from "lucide-react";
-import { cn } from "@/lib/utils";
+import { useState, useEffect } from "react";
+import Link from "next/link";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 
-type Banner = {
-  id: string;
-  bgClass: string;
-  titleKo: string;
-  titleEn: string;
-  subKo: string;
-  subEn: string;
-  ctaKo: string;
-  ctaEn: string;
-  href: string;
-  illustration?: "billboard" | "steps" | "fandom";
-  steps?: { icon: typeof Search; labelKo: string; labelEn: string }[];
-};
-
-const BANNERS: Banner[] = [
+const banners = [
   {
-    id: "launch",
-    bgClass: "bg-gradient-to-r from-violet-600 to-cyan-500",
-    titleKo: "🎉 정식 오픈 기념",
-    titleEn: "🎉 Official launch",
-    subKo: "첫 30명 PRO 1개월 무료 체험",
-    subEn: "First 30 users get 1 month PRO free",
-    ctaKo: "지금 신청하기",
-    ctaEn: "Apply now",
-    href: "/pricing",
-    illustration: "billboard",
+    id: 1,
+    bg: "from-violet-600 via-purple-600 to-cyan-500",
+    badge: "🎉 정식 오픈 기념",
+    title: "첫 30명 PRO",
+    titleHighlight: "1개월 무료",
+    sub: "지금 가입하면 상세 데이터·PDF 보고서 모두 무료",
+    cta: "지금 신청하기",
+    href: "/ko/pricing",
   },
   {
-    id: "guide",
-    bgClass: "bg-gradient-to-r from-gray-900 to-violet-900",
-    titleKo: "처음이세요?",
-    titleEn: "New here?",
-    subKo: "매체 검색 → 플래너 → 견적 요청",
-    subEn: "Search media → Planner → Get a quote",
-    ctaKo: "사용 가이드",
-    ctaEn: "View guide",
-    href: "/guide/how-to-use",
-    illustration: "steps",
-    steps: [
-      { icon: Search, labelKo: "매체 검색", labelEn: "Search" },
-      { icon: BarChart3, labelKo: "플래너", labelEn: "Planner" },
-      { icon: FileText, labelKo: "견적 요청", labelEn: "Quote" },
-    ],
+    id: 2,
+    bg: "from-gray-900 via-slate-800 to-violet-900",
+    badge: "📖 이용 방법",
+    title: "3분이면",
+    titleHighlight: "충분해요",
+    sub: "매체 검색 → AI 플래너 → 견적 요청",
+    cta: "사용 가이드 보기",
+    href: "/ko/guide/how-to-use",
   },
   {
-    id: "fandom",
-    bgClass: "bg-gradient-to-r from-pink-600 to-violet-600",
-    titleKo: "아이돌 생일광고",
-    titleEn: "Idol birthday ads",
-    subKo: "강남역·홍대·코엑스 팬덤 광고 전문",
-    subEn: "Fandom OOH at Gangnam, Hongdae & COEX",
-    ctaKo: "매체 보기",
-    ctaEn: "Browse media",
-    href: "/special/fandom",
-    illustration: "fandom",
+    id: 3,
+    bg: "from-pink-600 via-rose-500 to-violet-600",
+    badge: "🎤 팬덤 광고",
+    title: "아이돌 생일광고",
+    titleHighlight: "전문 플랫폼",
+    sub: "강남역·홍대·코엑스 팬덤 광고 매체 한눈에",
+    cta: "매체 보기",
+    href: "/ko/special/fandom",
   },
 ];
 
-function BannerIllustration({ type }: { type: Banner["illustration"] }) {
-  if (type === "billboard") {
-    return (
-      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-full w-36 items-end justify-center pr-4 md:flex md:w-48">
-        <div className="relative mb-4 rounded-xl border border-white/20 bg-white/10 p-3 backdrop-blur-sm">
-          <Monitor className="h-16 w-16 text-white/90" aria-hidden />
-        </div>
-      </div>
-    );
-  }
-  if (type === "fandom") {
-    return (
-      <div className="pointer-events-none absolute bottom-0 right-0 hidden h-full w-36 items-end justify-center pr-4 md:flex md:w-48">
-        <Heart className="mb-6 h-20 w-20 fill-pink-300/30 text-pink-200/50" aria-hidden />
-      </div>
-    );
-  }
-  return null;
-}
-
-type Props = { locale: string };
-
-export function HomeHeroBanner({ locale }: Props) {
-  const isKo = locale.startsWith("ko");
-  const [index, setIndex] = useState(0);
-  const touchStartX = useRef<number | null>(null);
-
-  const goTo = useCallback((i: number) => {
-    setIndex((i + BANNERS.length) % BANNERS.length);
-  }, []);
+export function HomeHeroBanner() {
+  const [current, setCurrent] = useState(0);
 
   useEffect(() => {
-    const id = window.setInterval(() => {
-      setIndex((i) => (i + 1) % BANNERS.length);
+    const timer = setInterval(() => {
+      setCurrent((prev) => (prev + 1) % banners.length);
     }, 5000);
-    return () => window.clearInterval(id);
+    return () => clearInterval(timer);
   }, []);
 
-  const banner = BANNERS[index]!;
+  const banner = banners[current]!;
 
   return (
-    <section
-      className="pt-4 md:pt-6"
-      data-screenshot="home-hero-banner"
-      aria-roledescription="carousel"
-      aria-label={isKo ? "프로모션 배너" : "Promo banners"}
-    >
+    <div className="px-4 pt-4 pb-2">
       <div
-        className={cn(
-          "relative h-44 overflow-hidden rounded-2xl md:h-56",
-          banner.bgClass,
-        )}
-        onTouchStart={(e) => {
-          touchStartX.current = e.touches[0]?.clientX ?? null;
-        }}
-        onTouchEnd={(e) => {
-          const start = touchStartX.current;
-          touchStartX.current = null;
-          if (start == null) return;
-          const end = e.changedTouches[0]?.clientX ?? start;
-          const delta = end - start;
-          if (Math.abs(delta) < 40) return;
-          if (delta < 0) goTo(index + 1);
-          else goTo(index - 1);
-        }}
+        className={`relative h-44 overflow-hidden rounded-2xl bg-gradient-to-r md:h-56 ${banner.bg}`}
       >
-        <BannerIllustration type={banner.illustration} />
-        <div className="relative flex h-full max-w-xl flex-col justify-between p-5 sm:p-6">
-          <div className="min-w-0">
-            <h2 className="text-lg font-bold text-white sm:text-xl md:text-2xl">
-              {isKo ? banner.titleKo : banner.titleEn}
+        <div className="absolute inset-0 flex flex-col justify-between p-5">
+          <span className="w-fit rounded-full bg-white/20 px-3 py-1 text-xs font-medium text-white/80">
+            {banner.badge}
+          </span>
+          <div>
+            <h2 className="text-2xl font-bold leading-tight text-white md:text-3xl">
+              {banner.title}
+              <br />
+              <span className="text-yellow-300">{banner.titleHighlight}</span>
             </h2>
-            <p className="mt-1 text-sm text-white/90 sm:text-base">
-              {isKo ? banner.subKo : banner.subEn}
-            </p>
-            {banner.steps ? (
-              <div className="mt-3 flex flex-wrap items-center gap-1.5 text-[11px] font-medium text-white/90 sm:text-xs">
-                {banner.steps.map((step, i) => {
-                  const Icon = step.icon;
-                  return (
-                    <span key={step.labelKo} className="flex items-center gap-1.5">
-                      {i > 0 ? (
-                        <ArrowRight
-                          className="h-3 w-3 shrink-0 text-white/50"
-                          aria-hidden
-                        />
-                      ) : null}
-                      <span className="inline-flex items-center gap-1 rounded-lg bg-white/10 px-2 py-1">
-                        <Icon className="h-3 w-3" aria-hidden />
-                        {isKo ? step.labelKo : step.labelEn}
-                      </span>
-                    </span>
-                  );
-                })}
-              </div>
-            ) : null}
+            <p className="mt-1 mb-3 text-sm text-white/70">{banner.sub}</p>
+            <Link
+              href={banner.href}
+              className="inline-flex items-center gap-1 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition hover:bg-gray-100"
+            >
+              {banner.cta} →
+            </Link>
           </div>
-          <Link
-            href={banner.href}
-            className="inline-flex w-fit items-center gap-1.5 rounded-xl bg-white/20 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition-colors hover:bg-white/30"
-          >
-            {isKo ? banner.ctaKo : banner.ctaEn}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </Link>
         </div>
-        {banner.illustration === "steps" ? (
-          <Sparkles
-            className="pointer-events-none absolute right-4 top-4 h-8 w-8 text-white/20 md:hidden"
-            aria-hidden
-          />
-        ) : null}
+
+        <button
+          type="button"
+          onClick={() =>
+            setCurrent((prev) => (prev - 1 + banners.length) % banners.length)
+          }
+          className="absolute left-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white"
+          aria-label="Previous banner"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setCurrent((prev) => (prev + 1) % banners.length)}
+          className="absolute right-2 top-1/2 flex h-7 w-7 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white"
+          aria-label="Next banner"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+
+        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-1.5">
+          {banners.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => setCurrent(i)}
+              className={`h-1.5 rounded-full transition-all ${
+                i === current ? "w-4 bg-white" : "w-1.5 bg-white/40"
+              }`}
+              aria-label={`Banner ${i + 1}`}
+            />
+          ))}
+        </div>
       </div>
-      <div
-        className="mt-3 flex justify-center gap-2"
-        role="tablist"
-        aria-label={isKo ? "배너 선택" : "Select banner"}
-      >
-        {BANNERS.map((b, i) => (
-          <button
-            key={b.id}
-            type="button"
-            role="tab"
-            aria-selected={i === index}
-            aria-label={`${isKo ? "배너" : "Banner"} ${i + 1}`}
-            onClick={() => goTo(i)}
-            className={cn(
-              "h-2 rounded-full transition-all",
-              i === index
-                ? "w-6 bg-violet-500"
-                : "w-2 bg-gray-300 dark:bg-white/25",
-            )}
-          />
-        ))}
-      </div>
-    </section>
+    </div>
   );
 }

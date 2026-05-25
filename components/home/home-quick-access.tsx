@@ -1,91 +1,85 @@
-import { Link } from "@/i18n/navigation";
+import Link from "next/link";
 import {
+  Search,
+  Map,
+  Sparkles,
+  Package,
   BarChart3,
   Link2,
-  Map,
   MessageSquare,
-  Package,
-  Search,
-  Sparkles,
   Zap,
-  type LucideIcon,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
 
-type QuickItem = {
-  href: string;
-  labelKo: string;
-  labelEn: string;
-  icon: LucideIcon;
-};
-
-const MEDIA_ITEMS: QuickItem[] = [
-  { href: "/media", labelKo: "매체검색", labelEn: "Search", icon: Search },
-  { href: "/media/map", labelKo: "지도탐색", labelEn: "Map", icon: Map },
-  { href: "/recommend", labelKo: "AI추천", labelEn: "AI pick", icon: Sparkles },
-  { href: "/media/packages", labelKo: "패키지", labelEn: "Packages", icon: Package },
-];
-
-const PLANNER_ITEMS: QuickItem[] = [
-  { href: "/planner", labelKo: "플래너", labelEn: "Planner", icon: BarChart3 },
+const items = [
   {
-    href: "/planner/integrated",
-    labelKo: "통합플래너",
-    labelEn: "Integrated",
+    label: "매체검색",
+    icon: Search,
+    href: "/ko/media",
+    color: "text-violet-500",
+  },
+  {
+    label: "지도탐색",
+    icon: Map,
+    href: "/ko/media/map",
+    color: "text-cyan-500",
+  },
+  {
+    label: "AI추천",
+    icon: Sparkles,
+    href: "/ko/recommend",
+    color: "text-pink-500",
+  },
+  {
+    label: "패키지",
+    icon: Package,
+    href: "/ko/media/packages",
+    color: "text-amber-500",
+  },
+  {
+    label: "플래너",
+    icon: BarChart3,
+    href: "/ko/planner",
+    color: "text-emerald-500",
+  },
+  {
+    label: "통합플래너",
     icon: Link2,
+    href: "/ko/planner/integrated",
+    color: "text-blue-500",
   },
-  { href: "/contact", labelKo: "견적문의", labelEn: "Quote", icon: MessageSquare },
   {
-    href: "/media?instant=1",
-    labelKo: "즉시예약",
-    labelEn: "Instant",
+    label: "견적문의",
+    icon: MessageSquare,
+    href: "/ko/contact",
+    color: "text-rose-500",
+  },
+  {
+    label: "즉시예약",
     icon: Zap,
+    href: "/ko/media?instant=1",
+    color: "text-orange-500",
   },
 ];
 
-function QuickButton({ item, isKo }: { item: QuickItem; isKo: boolean }) {
-  const Icon = item.icon;
+export function HomeQuickAccess() {
   return (
-    <Link
-      href={item.href}
-      className="flex flex-col items-center gap-1.5 active:scale-95"
-    >
-      <div
-        className={cn(
-          "flex h-14 w-14 items-center justify-center rounded-2xl",
-          "bg-gray-100 transition-all hover:bg-gray-200",
-          "dark:bg-white/8 dark:hover:bg-white/15",
-        )}
-      >
-        <Icon className="h-6 w-6 text-violet-600 dark:text-violet-400" aria-hidden />
-      </div>
-      <span className="text-center text-xs font-medium text-gray-600 dark:text-white/70">
-        {isKo ? item.labelKo : item.labelEn}
-      </span>
-    </Link>
-  );
-}
-
-type Props = { locale: string };
-
-export function HomeQuickAccess({ locale }: Props) {
-  const isKo = locale.startsWith("ko");
-  const allItems = [...MEDIA_ITEMS, ...PLANNER_ITEMS];
-
-  return (
-    <section
-      className="border-b border-gray-100 py-6 dark:border-white/5"
-      data-screenshot="home-quick-access"
-    >
-      <div
-        className={cn(
-          "grid grid-cols-4 gap-4 md:grid-cols-8 md:gap-3",
-        )}
-      >
-        {allItems.map((item) => (
-          <QuickButton key={item.href} item={item} isKo={isKo} />
+    <div className="px-4 py-4">
+      <div className="grid grid-cols-4 gap-2 md:grid-cols-8">
+        {items.map((item) => (
+          <Link
+            key={item.href}
+            href={item.href}
+            className="group flex flex-col items-center gap-1.5"
+          >
+            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8">
+              <item.icon className={`h-6 w-6 ${item.color}`} />
+            </div>
+            <span className="text-center text-xs leading-tight font-medium text-gray-600 dark:text-white/70">
+              {item.label}
+            </span>
+          </Link>
         ))}
       </div>
-    </section>
+    </div>
   );
 }

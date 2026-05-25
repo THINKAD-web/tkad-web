@@ -1,148 +1,37 @@
+import Link from "next/link";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
-import { Star } from "lucide-react";
-import { getTranslations } from "next-intl/server";
-import {
-  fetchHomeMediaForScroll,
-  type HomeMediaFetchType,
-} from "@/lib/home-media-fetch";
-import {
-  getPrimaryMediaImageUrl,
-  type MediaItem,
-  typeLabels,
-} from "@/lib/media-data";
-import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
-import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
-import { cn } from "@/lib/utils";
+import { ChevronRight, Star, CheckCircle } from "lucide-react";
+import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 
-type Props = {
-  locale: string;
+interface Props {
   title: string;
   subtitle?: string;
   viewAllHref: string;
-  fetchType: HomeMediaFetchType;
-  limit?: number;
-};
-
-function badgeForType(
-  fetchType: HomeMediaFetchType,
-): "BEST" | "NEW" | null {
-  if (fetchType === "recommended") return "BEST";
-  if (fetchType === "newest") return "NEW";
-  return null;
+  media: HomeCatalogMediaItem[];
 }
 
-function MediaCard({
-  media,
-  locale,
-  imagePreparingLabel,
-  badge,
-  priority,
-}: {
-  media: MediaItem;
-  locale: string;
-  imagePreparingLabel: string;
-  badge: "BEST" | "NEW" | null;
-  priority?: boolean;
-}) {
-  const isKo = locale.startsWith("ko");
-  const name = isKo ? media.name : media.nameEn || media.name;
-  const location = isKo ? media.location : media.locationEn || media.location;
-  const typeLabel =
-    typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
-  const price =
-    media.price > 0 ? formatCatalogPriceFieldWon(media.price, locale) : null;
-  const rawUrl = getPrimaryMediaImageUrl(media);
-  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
-  const rating = media.averageRating;
-
-  return (
-    <Link
-      href={mediaItemDetailPath(media)}
-      className={cn(
-        "group relative w-40 shrink-0 snap-start overflow-hidden rounded-2xl border shadow-sm",
-        "border-gray-100 bg-white dark:border-white/10 dark:bg-white/5",
-        "md:w-48",
-      )}
-    >
-      {badge ? (
-        <span
-          className={cn(
-            "absolute left-2 top-2 z-10 rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-white",
-            badge === "NEW" ? "bg-emerald-500" : "bg-violet-500",
-          )}
-        >
-          {badge}
-        </span>
-      ) : null}
-      <div className="relative h-28 w-full overflow-hidden bg-gray-100 dark:bg-white/5">
-        {resolved?.src ? (
-          <Image
-            src={resolved.src}
-            alt={name}
-            fill
-            className="object-cover transition-transform group-hover:scale-105"
-            sizes="(max-width: 768px) 160px, 192px"
-            priority={priority}
-            unoptimized={resolved.unoptimized}
-          />
-        ) : (
-          <span className="flex h-full items-center justify-center px-2 text-center text-[11px] text-gray-400">
-            {imagePreparingLabel}
-          </span>
-        )}
-      </div>
-      <div className="p-3">
-        <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
-          {name}
-        </p>
-        <p className="mt-0.5 truncate text-xs text-gray-400 dark:text-white/50">
-          {location} · {typeLabel}
-        </p>
-        {rating != null && rating > 0 ? (
-          <p className="mt-1 flex items-center gap-0.5 text-xs text-amber-500">
-            <Star className="h-3 w-3 fill-current" aria-hidden />
-            {rating.toFixed(1)}
-          </p>
-        ) : null}
-        {price ? (
-          <p className="mt-1 text-sm font-bold text-violet-500 dark:text-violet-400">
-            {price}
-          </p>
-        ) : null}
-      </div>
-    </Link>
-  );
+function formatPrice(price?: number) {
+  if (!price) return null;
+  const man = Math.round(price / 10000);
+  if (man >= 10000) return `₩${(man / 10000).toFixed(1)}억`;
+  return `₩${man.toLocaleString()}만`;
 }
 
-export async function HomeMediaScroll({
-  locale,
+export function HomeMediaScroll({
   title,
   subtitle,
   viewAllHref,
-  fetchType,
-  limit = 10,
+  media,
 }: Props) {
-  const t = await getTranslations({ locale, namespace: "media" });
-  const isKo = locale.startsWith("ko");
-  const items = await fetchHomeMediaForScroll(fetchType, limit);
-
-  if (items.length === 0) return null;
-
-  const badge = badgeForType(fetchType);
-  const viewAllLabel = isKo ? "전체보기" : "View all";
+  if (!media || media.length === 0) return null;
 
   return (
-    <section
-      className="border-b border-gray-100 py-6 dark:border-white/5"
-      data-screenshot={`home-scroll-${fetchType}`}
-    >
-      <div className="mb-3 flex items-end justify-between gap-3">
-        <div className="min-w-0">
-          <h2 className="text-base font-bold text-gray-900 dark:text-white">
+    <div className="py-4">
+      <div className="mb-3 flex items-center justify-between px-4">
+        <div>
+          <h3 className="text-base font-bold text-gray-900 dark:text-white">
             {title}
-          </h2>
+          </h3>
           {subtitle ? (
             <p className="mt-0.5 text-xs text-gray-400 dark:text-white/50">
               {subtitle}
@@ -151,29 +40,82 @@ export async function HomeMediaScroll({
         </div>
         <Link
           href={viewAllHref}
-          className="shrink-0 text-xs font-medium text-violet-400 hover:text-violet-300"
+          className="flex items-center gap-0.5 text-xs font-medium text-violet-400"
         >
-          {viewAllLabel} →
+          전체보기 <ChevronRight className="h-3 w-3" />
         </Link>
       </div>
-      <div
-        className={cn(
-          "flex gap-3 overflow-x-auto pb-2",
-          "snap-x snap-mandatory [-ms-overflow-style:none] [scrollbar-width:none]",
-          "[&::-webkit-scrollbar]:hidden",
-        )}
-      >
-        {items.map((media, i) => (
-          <MediaCard
-            key={media.id}
-            media={media}
-            locale={locale}
-            imagePreparingLabel={t("imagePreparing")}
-            badge={badge}
-            priority={i < 4}
-          />
-        ))}
+
+      <div className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+        {media.map((item, idx) => {
+          const href = item.slug
+            ? `/ko/media/${item.slug}`
+            : `/ko/media/${item.id}`;
+          return (
+            <Link
+              key={item.id}
+              href={href}
+              className="w-40 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-white/5 md:w-48"
+            >
+              <div className="relative h-28 bg-gray-100 dark:bg-gray-800">
+                {item.thumbnailUrl ? (
+                  <Image
+                    src={item.thumbnailUrl}
+                    alt={item.name}
+                    fill
+                    className="object-cover"
+                    sizes="192px"
+                    priority={idx < 4}
+                    unoptimized
+                  />
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
+                    이미지 없음
+                  </div>
+                )}
+                <div className="absolute top-2 left-2 flex flex-col gap-1">
+                  {idx === 0 ? (
+                    <span className="rounded-md bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-gray-900">
+                      BEST
+                    </span>
+                  ) : null}
+                  {item.isInstantBooking ? (
+                    <span className="rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                      즉시예약
+                    </span>
+                  ) : null}
+                </div>
+              </div>
+
+              <div className="p-3">
+                <div className="mb-1 flex items-center gap-1">
+                  <CheckCircle className="h-3 w-3 shrink-0 text-blue-400" />
+                  <p className="truncate text-sm leading-tight font-semibold text-gray-900 dark:text-white">
+                    {item.name}
+                  </p>
+                </div>
+                <p className="mb-1.5 text-xs text-gray-400 dark:text-white/40">
+                  {[item.region, item.type].filter(Boolean).join(" · ")}
+                </p>
+                {item.reviewAvg && item.reviewAvg > 0 ? (
+                  <div className="mb-1 flex items-center gap-1">
+                    <Star className="h-3 w-3 fill-amber-400 text-amber-400" />
+                    <span className="text-xs text-gray-500 dark:text-white/60">
+                      {item.reviewAvg.toFixed(1)}
+                      {item.reviewCount ? ` (${item.reviewCount})` : ""}
+                    </span>
+                  </div>
+                ) : null}
+                {formatPrice(item.price) ? (
+                  <p className="text-sm font-bold text-violet-400">
+                    {formatPrice(item.price)}/월
+                  </p>
+                ) : null}
+              </div>
+            </Link>
+          );
+        })}
       </div>
-    </section>
+    </div>
   );
 }

@@ -96,3 +96,47 @@ export async function getPublishedReportBySlug(slug: string) {
     throw e;
   }
 }
+
+export type HomeReportItem = {
+  id: string;
+  slug?: string;
+  title: string;
+  thumbnailUrl?: string;
+  publishedAt?: string;
+  category?: string;
+};
+
+/** 홈 콘텐츠 피드 — 발행된 리포트 목록 */
+export async function fetchPublishedReports({
+  limit,
+}: {
+  limit: number;
+}): Promise<HomeReportItem[]> {
+  try {
+    const { reports } = await listPublishedReports({ pageSize: limit, page: 1 });
+    if (reports.length > 0) {
+      return reports.map((row) => ({
+        id: row.id,
+        slug: row.slug,
+        title: row.title,
+        thumbnailUrl: row.thumbnail ?? undefined,
+        publishedAt: row.publishedAt?.toISOString(),
+        category: row.category,
+      }));
+    }
+
+    const { getPublishedInsightReports } = await import(
+      "@/lib/public-content-queries"
+    );
+    const insights = await getPublishedInsightReports();
+    return insights.slice(0, limit).map((row) => ({
+      id: row.id,
+      slug: row.slug ?? undefined,
+      title: row.titleKo,
+      publishedAt: row.publishedIso,
+      category: row.verticalTags[0],
+    }));
+  } catch {
+    return [];
+  }
+}
