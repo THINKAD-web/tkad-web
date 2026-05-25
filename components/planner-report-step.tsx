@@ -31,9 +31,11 @@ import {
   PlannerNeonCard,
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProTeaserStats,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
+import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { useIsPro } from "@/hooks/use-is-pro";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
@@ -439,238 +441,225 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
 
       <PlannerReportInfoCard isKo={props.isKo} />
 
-      {/* 공개 영역 — 캠페인·매체·대략적 노출 */}
-      <div className="space-y-4">
-        <div
-          className={cn(
-            "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-            "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
-          )}
-        >
-          <PlannerReportPreview
-            ref={previewRef}
-            isKo={props.isKo}
-            goalTitle={props.goalTitle}
-            budgetNum={props.budgetNum}
-            periodDisplay={derived.periodDisplay}
-            regionsText={props.regionsText}
-            categoriesText={props.categoriesText}
-            ageText={props.ageText}
-            industryText={props.industryText}
-            portfolio={props.portfolio}
-            metrics={props.metrics}
-            reachCorePct={props.reachCorePct}
-            reachExtendedPct={props.reachExtendedPct}
-            budgetAllocation={derived.budgetAllocation}
-            blendedCpmKrw={derived.blendedCpmKrw}
-            effectSummaryLines={derived.effectSummaryLines}
-            generatedAt={snapshotAt}
-            logoUrl={props.logoUrl}
-            mediaPlacements={props.mediaPlacements}
-          />
-        </div>
+      <PlannerReportFreeSummary
+        isKo={props.isKo}
+        goalTitle={props.goalTitle}
+        budgetNum={props.budgetNum}
+        periodDisplay={derived.periodDisplay}
+        regionsText={props.regionsText}
+        categoriesText={props.categoriesText}
+        ageText={props.ageText}
+        industryText={props.industryText}
+        portfolio={props.portfolio}
+      />
 
-        {props.metrics ? (
-          <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
-            <p className={plannerNeon.kpiLabel}>
-              {props.isKo ? "총 예상 노출수 (대략)" : "Est. total impressions (approx.)"}
-            </p>
-            <p className={cn("mt-2 text-3xl font-bold tabular-nums text-cyan-400")}>
-              {props.metrics.estimatedTotalImpressions.toLocaleString()}
-            </p>
-          </div>
-        ) : null}
-
-        {!proLoading && !isPro ? (
-          <p className="text-center text-sm text-gray-500 dark:text-white/55">
-            {props.isKo
-              ? "더 자세한 분석을 원하시면 PRO로 시작하세요"
-              : "Upgrade to PRO for detailed analysis"}
-          </p>
-        ) : null}
-      </div>
-
-      {/* PRO 블러 섹션 1 — 노출 패턴 */}
+      {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
       {!proLoading ? (
-        <section className="space-y-3">
-          <PlannerNeonLabel>
-            {props.isKo ? "노출 패턴 분석" : "Exposure patterns"}
-          </PlannerNeonLabel>
-          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[16rem]">
-            <PlannerReportPremiumBlock
-              isKo={props.isKo}
-              portfolio={props.portfolio}
-              budgetMan={props.budgetNum}
-              months={props.months}
-              regionsText={props.regionsText}
-              goal={props.campaignGoal}
-              industryText={props.industryText}
-            />
-          </PlannerProGate>
-        </section>
-      ) : null}
-
-      {/* PRO 블러 섹션 2 — 효과 시뮬레이션 */}
-      {!proLoading ? (
-        <section className="space-y-3">
-          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[14rem]">
-            <PlannerEffectSimulationPanel
-              isKo={props.isKo}
-              portfolio={props.portfolio}
-              budgetMan={props.budgetNum}
-              months={props.months}
-              totalImpressionsFromMetrics={
-                props.metrics?.estimatedTotalImpressions ?? null
-              }
-              skipProGate
-              variant="metrics-only"
-            />
-          </PlannerProGate>
-        </section>
-      ) : null}
-
-      {/* PRO 블러 섹션 3 — 예산 배분 */}
-      {!proLoading ? (
-        <section className="space-y-3">
-          <PlannerNeonLabel>
-            {props.isKo ? "예산 배분 분석" : "Budget allocation"}
-          </PlannerNeonLabel>
-          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[14rem]">
-            <PlannerEffectSimulationPanel
-              isKo={props.isKo}
-              portfolio={props.portfolio}
-              budgetMan={props.budgetNum}
-              months={props.months}
-              totalImpressionsFromMetrics={
-                props.metrics?.estimatedTotalImpressions ?? null
-              }
-              skipProGate
-              variant="budget-only"
-            />
-          </PlannerProGate>
-        </section>
-      ) : null}
-
-      {/* PRO 블러 섹션 4 — PDF */}
-      {!proLoading ? (
-        <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[10rem]">
-          <PlannerNeonCard>
-            <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
-              <div>
-                <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
-                <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-                  {t("reportPdfDocumentTitle")}
-                </h3>
-                <p className={cn("mt-1", plannerNeon.subtext)}>
-                  {t("reportPreviewDesc")}
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                <PlannerPdfDownloadGate
+        <section className="space-y-3" data-screenshot="planner-pro-blur">
+          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[24rem]">
+            <div className="space-y-6">
+              {props.metrics ? (
+                <PlannerProTeaserStats
                   isKo={props.isKo}
-                  onAllowedDownload={downloadPdf}
-                >
-                  {({ onDownloadClick, pdfAllowed, checking }) => (
+                  totalImpressions={props.metrics.estimatedTotalImpressions}
+                  reachCorePct={props.reachCorePct}
+                  roiExpected={props.metrics.roiExpected}
+                />
+              ) : null}
+
+              <div
+                className={cn(
+                  "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
+                  "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
+                )}
+              >
+                <PlannerReportPreview
+                  ref={previewRef}
+                  isKo={props.isKo}
+                  goalTitle={props.goalTitle}
+                  budgetNum={props.budgetNum}
+                  periodDisplay={derived.periodDisplay}
+                  regionsText={props.regionsText}
+                  categoriesText={props.categoriesText}
+                  ageText={props.ageText}
+                  industryText={props.industryText}
+                  portfolio={props.portfolio}
+                  metrics={props.metrics}
+                  reachCorePct={props.reachCorePct}
+                  reachExtendedPct={props.reachExtendedPct}
+                  budgetAllocation={derived.budgetAllocation}
+                  blendedCpmKrw={derived.blendedCpmKrw}
+                  effectSummaryLines={derived.effectSummaryLines}
+                  generatedAt={snapshotAt}
+                  logoUrl={props.logoUrl}
+                  mediaPlacements={props.mediaPlacements}
+                />
+              </div>
+
+              {props.metrics ? (
+                <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
+                  <p className={plannerNeon.kpiLabel}>
+                    {props.isKo ? "총 예상 노출수 (대략)" : "Est. total impressions (approx.)"}
+                  </p>
+                  <p className={cn("mt-2 text-3xl font-bold tabular-nums text-cyan-400")}>
+                    {props.metrics.estimatedTotalImpressions.toLocaleString()}
+                  </p>
+                </div>
+              ) : null}
+
+              <PlannerReportPremiumBlock
+                isKo={props.isKo}
+                portfolio={props.portfolio}
+                budgetMan={props.budgetNum}
+                months={props.months}
+                regionsText={props.regionsText}
+                goal={props.campaignGoal}
+                industryText={props.industryText}
+              />
+              <PlannerEffectSimulationPanel
+                isKo={props.isKo}
+                portfolio={props.portfolio}
+                budgetMan={props.budgetNum}
+                months={props.months}
+                totalImpressionsFromMetrics={
+                  props.metrics?.estimatedTotalImpressions ?? null
+                }
+                skipProGate
+                variant="metrics-only"
+              />
+              <PlannerEffectSimulationPanel
+                isKo={props.isKo}
+                portfolio={props.portfolio}
+                budgetMan={props.budgetNum}
+                months={props.months}
+                totalImpressionsFromMetrics={
+                  props.metrics?.estimatedTotalImpressions ?? null
+                }
+                skipProGate
+                variant="budget-only"
+              />
+
+              <PlannerNeonCard>
+                <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
+                  <div>
+                    <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
+                    <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
+                      {t("reportPdfDocumentTitle")}
+                    </h3>
+                    <p className={cn("mt-1", plannerNeon.subtext)}>
+                      {t("reportPreviewDesc")}
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-2">
+                    <PlannerPdfDownloadGate
+                      isKo={props.isKo}
+                      onAllowedDownload={downloadPdf}
+                    >
+                      {({ onDownloadClick, pdfAllowed, checking }) => (
+                        <BtnBlock
+                          variant="secondary"
+                          size="md"
+                          onClick={onDownloadClick}
+                          disabled={loading || downloading || capturing || checking}
+                        >
+                          {downloading ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : !pdfAllowed ? (
+                            <Lock className="h-4 w-4" />
+                          ) : (
+                            <FileDown className="h-4 w-4" />
+                          )}
+                          {!pdfAllowed
+                            ? props.isKo
+                              ? "🔒 플래너 보고서 PDF 저장"
+                              : "🔒 Save planner report PDF"
+                            : props.isKo
+                              ? "플래너 보고서 PDF 저장"
+                              : t("reportDownloadPdf")}
+                        </BtnBlock>
+                      )}
+                    </PlannerPdfDownloadGate>
                     <BtnBlock
                       variant="secondary"
                       size="md"
-                      onClick={onDownloadClick}
-                      disabled={loading || downloading || capturing || checking}
+                      onClick={() => void captureReportPng()}
+                      disabled={loading || capturing || downloading}
                     >
-                      {downloading ? (
+                      {capturing ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : !pdfAllowed ? (
-                        <Lock className="h-4 w-4" />
                       ) : (
-                        <FileDown className="h-4 w-4" />
+                        <Camera className="h-4 w-4" />
                       )}
-                      {!pdfAllowed
-                        ? props.isKo
-                          ? "PDF 보고서 저장 (PRO)"
-                          : "Save PDF (PRO)"
-                        : t("reportDownloadPdf")}
+                      {t("reportCapturePng")}
                     </BtnBlock>
-                  )}
-                </PlannerPdfDownloadGate>
-                <BtnBlock
-                  variant="secondary"
-                  size="md"
-                  onClick={() => void captureReportPng()}
-                  disabled={loading || capturing || downloading}
-                >
-                  {capturing ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Camera className="h-4 w-4" />
-                  )}
-                  {t("reportCapturePng")}
-                </BtnBlock>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <input
-                    type="email"
-                    placeholder={props.isKo ? "이메일 주소" : "Email address"}
-                    value={userEmail}
-                    onChange={(e) => {
-                      setUserEmail(e.target.value);
-                      setEmailSent(false);
-                    }}
-                    className={cn(
-                      "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
-                      "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                      "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
-                      "focus:border-violet-400/60 focus:outline-none sm:w-56",
-                    )}
-                  />
-                  <BtnBlock
-                    variant="accent"
-                    size="md"
-                    onClick={() => void sendEmailReport()}
-                    disabled={emailSending}
-                  >
-                    {emailSending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Mail className="h-4 w-4" />
-                    )}
-                    {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-                  </BtnBlock>
+                    <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+                      <input
+                        type="email"
+                        placeholder={props.isKo ? "이메일 주소" : "Email address"}
+                        value={userEmail}
+                        onChange={(e) => {
+                          setUserEmail(e.target.value);
+                          setEmailSent(false);
+                        }}
+                        className={cn(
+                          "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
+                          "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
+                          "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
+                          "focus:border-violet-400/60 focus:outline-none sm:w-56",
+                        )}
+                      />
+                      <BtnBlock
+                        variant="accent"
+                        size="md"
+                        onClick={() => void sendEmailReport()}
+                        disabled={emailSending}
+                      >
+                        {emailSending ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Mail className="h-4 w-4" />
+                        )}
+                        {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
+                      </BtnBlock>
+                    </div>
+                    {error ? (
+                      <BtnBlock
+                        variant="primary"
+                        size="md"
+                        onClick={() => {
+                          setError(null);
+                          setRetryKey((k) => k + 1);
+                        }}
+                      >
+                        <RefreshCw className="h-4 w-4" />
+                        {t("reportRetryPdf")}
+                      </BtnBlock>
+                    ) : null}
+                  </div>
                 </div>
-                {error ? (
-                  <BtnBlock
-                    variant="primary"
-                    size="md"
-                    onClick={() => {
-                      setError(null);
-                      setRetryKey((k) => k + 1);
-                    }}
+                {loading ? (
+                  <div
+                    className={cn(
+                      "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
+                      plannerNeon.subtext,
+                    )}
                   >
-                    <RefreshCw className="h-4 w-4" />
-                    {t("reportRetryPdf")}
-                  </BtnBlock>
+                    <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
+                    {t("reportGenerating")}
+                  </div>
+                ) : error ? (
+                  <div className="px-5 py-6 sm:px-6">
+                    <PlannerNeonLabel>Error</PlannerNeonLabel>
+                    <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
+                    <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
+                      {t("reportPdfErrorHint")}
+                    </p>
+                  </div>
                 ) : null}
-              </div>
+              </PlannerNeonCard>
             </div>
-            {loading ? (
-              <div
-                className={cn(
-                  "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
-                  plannerNeon.subtext,
-                )}
-              >
-                <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
-                {t("reportGenerating")}
-              </div>
-            ) : error ? (
-              <div className="px-5 py-6 sm:px-6">
-                <PlannerNeonLabel>Error</PlannerNeonLabel>
-                <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
-                <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
-                  {t("reportPdfErrorHint")}
-                </p>
-              </div>
-            ) : null}
-          </PlannerNeonCard>
-        </PlannerProGate>
+          </PlannerProGate>
+        </section>
       ) : null}
     </div>
   );
@@ -681,7 +670,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
-  const { isPro, loading: proLoading } = useIsPro();
+  const { loading: proLoading } = useIsPro();
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] = useState(false);
   const compactPreviewRef = useRef<HTMLDivElement>(null);
@@ -720,72 +709,72 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   if (proLoading) return null;
 
   return (
-    <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[8rem]">
-      <PlannerNeonCard>
-        <div className={plannerNeon.cardHeader}>
-          <PlannerNeonLabel>PDF Export</PlannerNeonLabel>
-          <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-            {t("reportPdfDocumentTitle")}
-          </h3>
-          <p className={cn("mt-1", plannerNeon.subtext)}>
-            {props.isKo
-              ? "6단계 통합 보고서를 PDF로 저장합니다. 상세 차트·시뮬레이션은 PRO에 포함됩니다."
-              : "Save the step-6 unified report as PDF. Detailed charts require PRO."}
-          </p>
-        </div>
-        <div className="sr-only" aria-hidden>
-          <div ref={compactPreviewRef} id="planner-report-content">
-            <PlannerReportPreview
-              isKo={props.isKo}
-              goalTitle={props.goalTitle}
-              budgetNum={props.budgetNum}
-              periodDisplay={derived.periodDisplay}
-              regionsText={props.regionsText}
-              categoriesText={props.categoriesText}
-              ageText={props.ageText}
-              industryText={props.industryText}
-              portfolio={props.portfolio}
-              metrics={props.metrics}
-              reachCorePct={props.reachCorePct}
-              reachExtendedPct={props.reachExtendedPct}
-              budgetAllocation={derived.budgetAllocation}
-              blendedCpmKrw={derived.blendedCpmKrw}
-              effectSummaryLines={derived.effectSummaryLines}
-              generatedAt={snapshotAt}
-              logoUrl={props.logoUrl}
-              mediaPlacements={props.mediaPlacements}
-            />
-          </div>
-        </div>
-        <div className="flex flex-wrap gap-2 p-5 sm:p-6">
-          <PlannerPdfDownloadGate
+    <PlannerNeonCard>
+      <div className={plannerNeon.cardHeader}>
+        <PlannerNeonLabel>PDF Export</PlannerNeonLabel>
+        <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
+          {t("reportPdfDocumentTitle")}
+        </h3>
+        <p className={cn("mt-1", plannerNeon.subtext)}>
+          {props.isKo
+            ? "통합 플래너 보고서를 PDF로 저장합니다."
+            : "Save the unified planner report as PDF."}
+        </p>
+      </div>
+      <div className="sr-only" aria-hidden>
+        <div ref={compactPreviewRef} id="planner-report-content">
+          <PlannerReportPreview
             isKo={props.isKo}
-            onAllowedDownload={() => void downloadPdf()}
-          >
-            {({ onDownloadClick, pdfAllowed, checking }) => (
-              <BtnBlock
-                variant="accent"
-                size="md"
-                onClick={onDownloadClick}
-                disabled={downloading || checking}
-              >
-                {downloading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : !pdfAllowed ? (
-                  <Lock className="h-4 w-4" />
-                ) : (
-                  <FileDown className="h-4 w-4" />
-                )}
-                {!pdfAllowed
-                  ? props.isKo
-                    ? "PDF 보고서 저장 (PRO)"
-                    : "Save PDF (PRO)"
-                  : t("reportDownloadPdf")}
-              </BtnBlock>
-            )}
-          </PlannerPdfDownloadGate>
+            goalTitle={props.goalTitle}
+            budgetNum={props.budgetNum}
+            periodDisplay={derived.periodDisplay}
+            regionsText={props.regionsText}
+            categoriesText={props.categoriesText}
+            ageText={props.ageText}
+            industryText={props.industryText}
+            portfolio={props.portfolio}
+            metrics={props.metrics}
+            reachCorePct={props.reachCorePct}
+            reachExtendedPct={props.reachExtendedPct}
+            budgetAllocation={derived.budgetAllocation}
+            blendedCpmKrw={derived.blendedCpmKrw}
+            effectSummaryLines={derived.effectSummaryLines}
+            generatedAt={snapshotAt}
+            logoUrl={props.logoUrl}
+            mediaPlacements={props.mediaPlacements}
+          />
         </div>
-      </PlannerNeonCard>
-    </PlannerProGate>
+      </div>
+      <div className="flex flex-wrap gap-2 p-5 sm:p-6">
+        <PlannerPdfDownloadGate
+          isKo={props.isKo}
+          onAllowedDownload={() => void downloadPdf()}
+        >
+          {({ onDownloadClick, pdfAllowed, checking }) => (
+            <BtnBlock
+              variant="accent"
+              size="md"
+              onClick={onDownloadClick}
+              disabled={downloading || checking}
+            >
+              {downloading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : !pdfAllowed ? (
+                <Lock className="h-4 w-4" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              {!pdfAllowed
+                ? props.isKo
+                  ? "🔒 플래너 보고서 PDF 저장"
+                  : "🔒 Save planner report PDF"
+                : props.isKo
+                  ? "플래너 보고서 PDF 저장"
+                  : t("reportDownloadPdf")}
+            </BtnBlock>
+          )}
+        </PlannerPdfDownloadGate>
+      </div>
+    </PlannerNeonCard>
   );
 }

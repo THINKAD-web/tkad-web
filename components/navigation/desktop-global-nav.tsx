@@ -148,12 +148,17 @@ function MoreDropdownPanel({
     </div>
   );
 }
+function isHomePath(pathname: string): boolean {
+  return pathname === "/" || pathname === "";
+}
+
 export function DesktopGlobalNav() {
   const pathname = usePathname() ?? "/";
   const locale = useLocale();
   const isKo = locale === "ko";
   const palette = useCommandPaletteOptional();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
+  const isHome = isHomePath(pathname);
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
   const isMediaActive =
@@ -237,8 +242,10 @@ export function DesktopGlobalNav() {
           <button
             type="button"
             onClick={() => palette?.setOpen(true)}
-            className={headerChromeIconButtonClass}
+            className={cn(headerChromeIconButtonClass, isHome && "hidden")}
             aria-label={isKo ? "검색 (Cmd+K)" : "Search (Cmd+K)"}
+            aria-hidden={isHome}
+            tabIndex={isHome ? -1 : undefined}
             data-tour="search"
           >
             <Search className="h-4 w-4" />

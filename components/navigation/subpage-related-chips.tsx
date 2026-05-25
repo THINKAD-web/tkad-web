@@ -13,7 +13,10 @@ import {
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
+  const normalized = pathname.replace(/\/$/, "") || "/";
   return (
+    normalized === "/media" ||
+    pathname.startsWith("/planner") ||
     pathname.includes("/admin") ||
     pathname.includes("/login") ||
     pathname.includes("/register") ||

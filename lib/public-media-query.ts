@@ -10,6 +10,7 @@ export type PublicMediaSort =
   | "default";
 
 export type PublicMediaQueryParams = {
+  q?: string | null;
   category?: string | null;
   target?: string | null;
   region?: string | null;
@@ -24,23 +25,38 @@ export type PublicMediaQueryParams = {
 export function buildPublicMediaWhere(
   params: PublicMediaQueryParams,
 ): Prisma.MediaWhereInput {
-  const where: Prisma.MediaWhereInput = { isActive: true };
+  const and: Prisma.MediaWhereInput[] = [{ isActive: true }];
 
   if (params.category?.trim()) {
-    where.mediaCategory = { has: params.category.trim() };
+    and.push({ mediaCategory: { has: params.category.trim() } });
   }
   if (params.target?.trim()) {
-    where.targetCategory = { has: params.target.trim() };
+    and.push({ targetCategory: { has: params.target.trim() } });
   }
   if (params.region?.trim()) {
     const region = params.region.trim();
-    where.OR = [
-      { region: { contains: region, mode: "insensitive" } },
-      { city: { contains: region, mode: "insensitive" } },
-      { district: { contains: region, mode: "insensitive" } },
-      { regionZone: { contains: region, mode: "insensitive" } },
-    ];
+    and.push({
+      OR: [
+        { region: { contains: region, mode: "insensitive" } },
+        { city: { contains: region, mode: "insensitive" } },
+        { district: { contains: region, mode: "insensitive" } },
+        { regionZone: { contains: region, mode: "insensitive" } },
+      ],
+    });
   }
+  if (params.q?.trim()) {
+    const q = params.q.trim();
+    and.push({
+      OR: [
+        { name: { contains: q, mode: "insensitive" } },
+        { region: { contains: q, mode: "insensitive" } },
+        { city: { contains: q, mode: "insensitive" } },
+        { district: { contains: q, mode: "insensitive" } },
+        { type: { contains: q, mode: "insensitive" } },
+      ],
+    });
+  }
+
   const priceFilter: { gte?: number; lte?: number } = {};
   if (params.minPrice != null && Number.isFinite(params.minPrice)) {
     priceFilter.gte = params.minPrice;
@@ -49,13 +65,13 @@ export function buildPublicMediaWhere(
     priceFilter.lte = params.maxPrice;
   }
   if (Object.keys(priceFilter).length > 0) {
-    where.price = priceFilter;
+    and.push({ price: priceFilter });
   }
   if (params.available === true) {
-    where.availability = "available";
+    and.push({ availability: "available" });
   }
 
-  return where;
+  return and.length === 1 ? and[0]! : { AND: and };
 }
 
 export function buildPublicMediaOrderBy(
@@ -101,6 +117,7 @@ export function parsePublicMediaQuery(
       : null;
 
   return {
+    q: sp.get("q"),
     category: sp.get("category") ?? sp.get("cat"),
     target: sp.get("target"),
     region: sp.get("region"),

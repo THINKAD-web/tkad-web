@@ -99,6 +99,7 @@ import {
   PlannerNeonCard,
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProTeaserStats,
   PlannerTrialBanner,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
@@ -106,6 +107,8 @@ import {
   PageSubNav,
   PLANNER_SUB_NAV_ITEMS,
 } from "@/components/navigation/page-sub-nav";
+import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
+import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { useTeamPermissions } from "@/lib/use-team-permissions";
@@ -779,12 +782,14 @@ export default function PlannerPageClient({
           subtitle={t("subtitle")}
         />
 
-        <PageSubNav
-          items={PLANNER_SUB_NAV_ITEMS}
-          locale={locale}
-          className="mx-auto max-w-7xl px-4 pb-4 sm:px-6"
-          data-screenshot="planner-sub-nav"
-        />
+        <div className="sticky top-14 z-20 border-b border-gray-200 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#020202]/95">
+          <PageSubNav
+            items={PLANNER_SUB_NAV_ITEMS}
+            locale={locale}
+            className="mx-auto max-w-7xl px-4 py-2 sm:px-6"
+            data-screenshot="planner-sub-nav"
+          />
+        </div>
 
         <PlannerNeonPageBody
           appearance={landingAppearance}
@@ -1340,48 +1345,44 @@ export default function PlannerPageClient({
               </div>
             ) : metrics ? (
               <>
-                <PredictionAccuracyBanner
-                  accuracy={predictionAccuracy}
+                <PlannerReportInfoCard isKo={isKo} />
+
+                <PlannerReportFreeSummary
                   isKo={isKo}
+                  goalTitle={goalTitle}
+                  budgetNum={budgetNum}
+                  periodDisplay={`${months}${isKo ? "개월" : " mo"}`}
+                  regionsText={regionsSummary}
+                  categoriesText={categoriesSummary}
+                  ageText={t(ageKey)}
+                  industryText={t(industryKey)}
+                  portfolio={portfolio}
                 />
 
-                <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
-                      {t("estimatedModelBadge")}
-                    </span>
-                    <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
-                      {t("estimatedModelHint")}
-                    </span>
-                  </div>
+                {!proLoading ? (
+                  <div data-screenshot="planner-pro-blur">
+                  <PlannerProGate
+                    isPro={isPro}
+                    isKo={isKo}
+                    minHeightClass="min-h-[28rem]"
+                    className="space-y-3"
+                  >
+                <PlannerProTeaserStats
+                  isKo={isKo}
+                  totalImpressions={metrics.estimatedTotalImpressions}
+                  reachCorePct={reachSplit.corePct}
+                  roiExpected={metrics.roiExpected}
+                />
+
+                <div className={cn(plannerNeon.kpiCard, "max-w-sm")}>
+                  <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
+                  <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
+                    {metrics.estimatedTotalImpressions.toLocaleString()}
+                  </p>
+                  <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
+                    {t("kpiImpressionsHint")}
+                  </p>
                 </div>
-
-                <p className={cn(plannerNeon.card, "rounded-[22px] px-4 py-3 text-sm")}>
-                  <PlannerNeonLabel className="mr-2 inline">
-                    {t("targetSummaryLabel")}
-                  </PlannerNeonLabel>
-                  {(() => {
-                    const g = GOALS.find((x) => x.key === campaignGoal);
-                    return g ? t(g.titleKey) : "—";
-                  })()}
-                  {" · "}
-                  {t("ageLabel")}: {t(ageKey)} · {t("industryLabel")}:{" "}
-                  {t(industryKey)}
-                </p>
-
-                {/* 공개: 총 예상 노출수만 */}
-                {metrics ? (
-                  <div className={cn(plannerNeon.kpiCard, "max-w-sm")}>
-                    <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
-                    <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
-                      {metrics.estimatedTotalImpressions.toLocaleString()}
-                    </p>
-                    <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                      {t("kpiImpressionsHint")}
-                    </p>
-                  </div>
-                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
@@ -1446,13 +1447,23 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                {!proLoading ? (
-                  <PlannerProGate
-                    isPro={isPro}
-                    isKo={isKo}
-                    minHeightClass="min-h-[20rem]"
-                    className="space-y-3"
-                  >
+                <PredictionAccuracyBanner
+                  accuracy={predictionAccuracy}
+                  isKo={isKo}
+                />
+
+                <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
+                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
+                      {t("estimatedModelBadge")}
+                    </span>
+                    <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
+                      {t("estimatedModelHint")}
+                    </span>
+                  </div>
+                </div>
+
                 <div className="grid gap-3 lg:grid-cols-2">
                   <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                     <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
@@ -1650,7 +1661,29 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
+                <PlannerReportPdfCompact
+                  isKo={isKo}
+                  campaignGoal={campaignGoal}
+                  goalTitle={goalTitle}
+                  budgetNum={budgetNum}
+                  months={months}
+                  regionsText={regionsSummary}
+                  categoriesText={categoriesSummary}
+                  ageText={t(ageKey)}
+                  industryText={t(industryKey)}
+                  portfolio={portfolio}
+                  matchedCount={filtered.length}
+                  monthCompare={monthCompare}
+                  cpmBars={cpmBars}
+                  metrics={metrics}
+                  reachCorePct={reachSplit.corePct}
+                  reachExtendedPct={reachSplit.extendedPct}
+                  logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                  mediaPlacements={mediaPlacements}
+                />
+
                   </PlannerProGate>
+                  </div>
                 ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
@@ -1709,27 +1742,6 @@ export default function PlannerPageClient({
                     </div>
                   </div>
                 </div>
-
-                <PlannerReportPdfCompact
-                  isKo={isKo}
-                  campaignGoal={campaignGoal}
-                  goalTitle={goalTitle}
-                  budgetNum={budgetNum}
-                  months={months}
-                  regionsText={regionsSummary}
-                  categoriesText={categoriesSummary}
-                  ageText={t(ageKey)}
-                  industryText={t(industryKey)}
-                  portfolio={portfolio}
-                  matchedCount={filtered.length}
-                  monthCompare={monthCompare}
-                  cpmBars={cpmBars}
-                  metrics={metrics}
-                  reachCorePct={reachSplit.corePct}
-                  reachExtendedPct={reachSplit.extendedPct}
-                  logoUrl={creativeUploadedUrl || creativeObjectUrl}
-                  mediaPlacements={mediaPlacements}
-                />
               </>
             ) : null}
 

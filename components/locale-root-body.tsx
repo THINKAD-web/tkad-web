@@ -46,9 +46,7 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
                 <MobileAppChrome>{children}</MobileAppChrome>
               </main>
               <ConditionalPublicChrome>
-                <div className="hidden md:block">
-                  <FooterBrutal />
-                </div>
+                <FooterBrutal />
                 <DeferredPublicWidgetsGate />
               </ConditionalPublicChrome>
             </div>

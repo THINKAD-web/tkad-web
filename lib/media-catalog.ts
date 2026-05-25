@@ -2,6 +2,7 @@ import {
   fetchHomeFeaturedMedia,
   fetchHomeNewMedia,
   fetchHomeWeeklyPopularMedia,
+  prismaMediaToMediaItem,
 } from "@/lib/public-media-catalog";
 import {
   getPrimaryMediaImageUrl,
@@ -10,6 +11,12 @@ import {
 } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import {
+  buildPublicMediaOrderBy,
+  buildPublicMediaWhere,
+  type PublicMediaSort,
+} from "@/lib/public-media-query";
 
 export type HomeCatalogMediaItem = {
   id: string;
@@ -25,7 +32,12 @@ export type HomeCatalogMediaItem = {
   popularityScore?: number;
 };
 
-export type MediaCatalogSort = "recommended" | "popular" | "newest";
+export type MediaCatalogSort =
+  | "recommended"
+  | "popular"
+  | "newest"
+  | "price_asc"
+  | "price_desc";
 
 function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
   const rawUrl = getPrimaryMediaImageUrl(item);
@@ -47,11 +59,67 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
   };
 }
 
+function usesFilteredQuery(opts: {
+  sort: MediaCatalogSort;
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
+}): boolean {
+  return (
+    Boolean(opts.category || opts.target || opts.region || opts.q) ||
+    opts.sort === "price_asc" ||
+    opts.sort === "price_desc"
+  );
+}
+
+async function fetchFilteredMediaCatalog(opts: {
+  sort: MediaCatalogSort;
+  limit: number;
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
+}): Promise<HomeCatalogMediaItem[]> {
+  if (!isDatabaseConfigured()) {
+    return [];
+  }
+
+  try {
+    const db = getPrisma();
+    const where = buildPublicMediaWhere({
+      category: opts.category,
+      target: opts.target,
+      region: opts.region,
+      q: opts.q,
+    });
+    const orderBy = buildPublicMediaOrderBy(opts.sort as PublicMediaSort);
+    const rows = await db.media.findMany({
+      where,
+      orderBy,
+      take: opts.limit,
+    });
+    return rows.map((row) => mapMediaItem(prismaMediaToMediaItem(row)));
+  } catch (e) {
+    console.error("[fetchPublicMediaCatalog] filtered query failed", e);
+    return [];
+  }
+}
+
 export async function fetchPublicMediaCatalog(opts: {
   sort: MediaCatalogSort;
   limit?: number;
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
 }): Promise<HomeCatalogMediaItem[]> {
   const limit = opts.limit ?? 10;
+
+  if (usesFilteredQuery(opts)) {
+    return fetchFilteredMediaCatalog({ ...opts, limit });
+  }
+
   let rows: MediaItem[] = [];
 
   switch (opts.sort) {
