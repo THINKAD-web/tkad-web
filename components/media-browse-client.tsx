@@ -338,7 +338,8 @@ export default function MediaBrowseClient({
     else if (sortFromUrl === "price_asc") setSortBy("priceAsc");
     else if (sortFromUrl === "price_desc") setSortBy("priceDesc");
     else if (sortFromUrl === "rating") setSortBy("ratingDesc");
-    else if (sortFromUrl === "popular") setSortBy("default");
+    else if (sortFromUrl === "popular" || sortFromUrl === "recommended")
+      setSortBy("default");
     urlHydratedRef.current = true;
   }, [catFromUrl, categoryFromUrl, targetFromUrl, chipFromUrl, instantFromUrl, regionFromUrl, sortFromUrl]);
 

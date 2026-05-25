@@ -2,6 +2,7 @@ import type { Prisma } from "@prisma/client";
 
 export type PublicMediaSort =
   | "popular"
+  | "recommended"
   | "newest"
   | "price_asc"
   | "price_desc"
@@ -61,6 +62,8 @@ export function buildPublicMediaOrderBy(
   sort: PublicMediaSort | null | undefined,
 ): Prisma.MediaOrderByWithRelationInput[] {
   switch (sort) {
+    case "recommended":
+      return [{ featuredOrder: "asc" }, { popularityScore: "desc" }];
     case "newest":
       return [{ createdAt: "desc" }];
     case "price_asc":
@@ -88,6 +91,7 @@ export function parsePublicMediaQuery(
   const sortRaw = sp.get("sort");
   const sort =
     sortRaw === "newest" ||
+    sortRaw === "recommended" ||
     sortRaw === "price_asc" ||
     sortRaw === "price_desc" ||
     sortRaw === "rating" ||
