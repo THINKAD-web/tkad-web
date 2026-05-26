@@ -2,9 +2,19 @@
 
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import { MessageCircle, Plus, Search } from "lucide-react";
+import {
+  Heart,
+  Megaphone,
+  MessageCircle,
+  Plus,
+  Search,
+  ShoppingCart,
+} from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCart } from "@/lib/cart";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -71,7 +81,7 @@ const DETAIL_ACTIONS = [
   },
   {
     id: "favorites",
-    href: "/media/favorites",
+    href: "/my?tab=favorites",
     labelKo: "관심매체",
     labelEn: "Saved",
     match: (p: string) => p.startsWith("/media/favorites"),
@@ -84,6 +94,17 @@ const DETAIL_ACTIONS = [
     match: (p: string) => p.startsWith("/recommend"),
   },
 ] as const;
+
+type DesktopQuickAction = {
+  id: string;
+  href: string;
+  labelKo: string;
+  labelEn: string;
+  icon: LucideIcon;
+  match: (pathname: string, tab: string | null) => boolean;
+  variant?: "neon" | "outline";
+  badge?: number;
+};
 
 export function QuickActionBarMobile() {
   const pathname = usePathname() ?? "/";
@@ -111,7 +132,7 @@ export function QuickActionBarMobile() {
               className={cn(
                 "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
                 active
-                  ? "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
+                  ? "tkad-neon-cta-clean text-white"
                   : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
               )}
               aria-current={active ? "page" : undefined}
@@ -127,57 +148,115 @@ export function QuickActionBarMobile() {
 
 export function QuickActionBarDesktop({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const newPlanLabel = isKo ? "새 플랜" : "New plan";
-  const quoteLabel = isKo ? "견적 문의" : "Get quote";
+  const { ids: cartIds } = useCart();
+  const tab = searchParams.get("tab");
 
   if (isHiddenPath(pathname)) return null;
 
+  const actions: DesktopQuickAction[] = [
+    {
+      id: "campaigns",
+      href: "/my?tab=campaigns",
+      labelKo: "내 캠페인",
+      labelEn: "Campaigns",
+      icon: Megaphone,
+      match: (p, t) =>
+        p.startsWith("/dashboard") ||
+        (p.startsWith("/my") && (t === "campaigns" || t == null)),
+    },
+    {
+      id: "favorites",
+      href: "/my?tab=favorites",
+      labelKo: "관심매체",
+      labelEn: "Saved",
+      icon: Heart,
+      match: (p, t) =>
+        p.startsWith("/media/favorites") || (p.startsWith("/my") && t === "favorites"),
+    },
+    {
+      id: "cart",
+      href: "/cart",
+      labelKo: "장바구니",
+      labelEn: "Cart",
+      icon: ShoppingCart,
+      match: (p) => p.startsWith("/cart"),
+      badge: cartIds.length,
+    },
+    {
+      id: "planner",
+      href: "/planner",
+      labelKo: "새 플랜",
+      labelEn: "New plan",
+      icon: Plus,
+      variant: "neon",
+      match: (p) => p.startsWith("/planner"),
+    },
+    {
+      id: "quote",
+      href: "/quote",
+      labelKo: "견적 문의",
+      labelEn: "Get quote",
+      icon: MessageCircle,
+      variant: "outline",
+      match: (p) => p.startsWith("/quote") || p.startsWith("/contact"),
+    },
+  ];
+
   return (
     <div
-      className="hidden shrink-0 flex-col gap-2 border-t border-gray-200 p-2 dark:border-white/10 md:flex"
+      className="hidden shrink-0 flex-col gap-1.5 border-t border-gray-200 p-2 dark:border-white/10 md:flex"
       data-screenshot="quick-actions-desktop"
     >
-      <Link
-        href="/planner"
-        title={compact ? newPlanLabel : undefined}
-        aria-label={compact ? newPlanLabel : undefined}
-        className={cn(
-          "tkad-neon-cta-clean flex items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white transition-transform hover:-translate-y-0.5",
-          compact ? "px-2 py-2.5 text-lg" : "px-3 py-2.5",
-        )}
-      >
-        {compact ? (
-          <span aria-hidden>✨</span>
-        ) : (
-          <>
-            <Plus className="h-4 w-4" aria-hidden />
-            {newPlanLabel}
-          </>
-        )}
-      </Link>
-      <Link
-        href="/quote"
-        title={compact ? quoteLabel : undefined}
-        aria-label={compact ? quoteLabel : undefined}
-        className={cn(
-          "flex items-center justify-center gap-2 rounded-lg border text-sm font-medium transition-colors",
-          compact ? "px-2 py-2.5 text-lg" : "px-3 py-2.5",
-          pathname.startsWith("/quote")
-            ? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-200"
-            : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/5",
-        )}
-      >
-        {compact ? (
-          <span aria-hidden>💬</span>
-        ) : (
-          <>
-            <MessageCircle className="h-4 w-4" aria-hidden />
-            {quoteLabel}
-          </>
-        )}
-      </Link>
+      {actions.map((action) => {
+        const active = action.match(pathname, tab);
+        const label = isKo ? action.labelKo : action.labelEn;
+        const Icon = action.icon;
+        const isNeon = action.variant === "neon" || active;
+
+        return (
+          <Link
+            key={action.id}
+            href={action.href}
+            title={compact ? label : undefined}
+            aria-label={compact ? label : undefined}
+            className={cn(
+              "relative flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors",
+              compact ? "px-2 py-2.5" : "px-3 py-2.5",
+              isNeon
+                ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
+                : action.variant === "outline"
+                  ? cn(
+                      "border font-medium",
+                      active
+                        ? "border-cyan-400/40 bg-cyan-400/10 text-gray-900 dark:text-white [&_svg]:text-cyan-500 dark:[&_svg]:text-cyan-300"
+                        : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/5 [&_svg]:text-gray-500 dark:[&_svg]:text-white/55",
+                    )
+                  : cn(
+                      active
+                        ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
+                        : "text-gray-700 hover:bg-gray-50 dark:text-white/80 dark:hover:bg-white/5 [&_svg]:text-gray-500 dark:[&_svg]:text-white/55",
+                    ),
+            )}
+            aria-current={active ? "page" : undefined}
+          >
+            <Icon className="h-4 w-4 shrink-0" aria-hidden />
+            {!compact ? <span className="min-w-0 flex-1 truncate text-left">{label}</span> : null}
+            {!compact && action.badge != null && action.badge > 0 ? (
+              <span className="rounded-full bg-white/20 px-1.5 py-0.5 text-[10px] font-bold tabular-nums text-white">
+                {action.badge > 99 ? "99+" : action.badge}
+              </span>
+            ) : null}
+            {compact && action.badge != null && action.badge > 0 ? (
+              <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
+                {action.badge > 9 ? "9+" : action.badge}
+              </span>
+            ) : null}
+          </Link>
+        );
+      })}
     </div>
   );
 }

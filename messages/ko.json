@@ -132,24 +132,20 @@
     "beta": "BETA",
     "groups": {
       "discovery": {
-        "label": "매체",
-        "labelEn": "Media"
+        "label": "발견하기",
+        "labelEn": "Discovery"
       },
       "planning": {
-        "label": "플래너",
-        "labelEn": "Planner"
-      },
-      "creative": {
-        "label": "스튜디오",
-        "labelEn": "Studio"
+        "label": "기획하기",
+        "labelEn": "Planning"
       },
       "insights": {
-        "label": "콘텐츠",
-        "labelEn": "Content"
+        "label": "인사이트 & 교육",
+        "labelEn": "Insights & Learning"
       },
-      "academy": {
-        "label": "가이드",
-        "labelEn": "Guide"
+      "studio": {
+        "label": "스튜디오",
+        "labelEn": "Studio"
       }
     },
     "items": {
@@ -166,11 +162,11 @@
         "desc": "목표·예산에 맞는 AI 추천"
       },
       "media-planner": {
-        "label": "미디어 플래너",
+        "label": "OOH 캠페인 플래너",
         "desc": "예산·기간·매체 조합 설계"
       },
       "integrated-planner": {
-        "label": "통합 캠페인 플래너",
+        "label": "통합 미디어 플래너",
         "desc": "OOH + 디지털(SA·DA) 연계 기획"
       },
       "package-proposal": {
@@ -204,6 +200,10 @@
       "academy-content": {
         "label": "교육 콘텐츠",
         "desc": "광고주·실무 교육"
+      },
+      "academy-home": {
+        "label": "아카데미",
+        "desc": "Academy · OOH 학습 허브"
       },
       "advertiser-guide": {
         "label": "광고주 가이드",

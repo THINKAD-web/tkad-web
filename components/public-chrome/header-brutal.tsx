@@ -1,7 +1,7 @@
 "use client";
 
 /**
- * Desktop global header — simplified top nav (매체 · 플래너 · 패키지 · 더보기).
+ * Desktop global header — 4-category nav (발견하기 · 기획하기 · 인사이트 & 교육 · 스튜디오).
  */
 
 import { DesktopGlobalNav } from "@/components/navigation/desktop-global-nav";

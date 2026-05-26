@@ -14,10 +14,8 @@ export type MediaMapView = {
 };
 
 export type MediaMapFilter = {
-  type?: string;
+  category?: string;
   region?: string;
-  priceMin?: string;
-  priceMax?: string;
   q?: string;
   sort?: string;
 };
@@ -25,7 +23,7 @@ export type MediaMapFilter = {
 export type MediaMapUrlState = MediaMapView & MediaMapFilter;
 
 const NUM_FIELDS = ["lat", "lng", "zoom"] as const;
-const STRING_FIELDS = ["type", "region", "priceMin", "priceMax", "q", "sort"] as const;
+const STRING_FIELDS = ["category", "region", "q", "sort"] as const;
 
 /**
  * 현재 페이지의 URL 에서 상태를 파싱.
@@ -61,6 +59,11 @@ export function parseMediaMapUrlState(
     const raw = searchParams.get(key);
     if (raw == null || raw === "") continue;
     out[key] = raw.slice(0, 80);
+  }
+  // legacy `type` → category
+  if (!out.category) {
+    const legacyType = searchParams.get("type");
+    if (legacyType?.trim()) out.category = legacyType.trim().slice(0, 80);
   }
   return out;
 }

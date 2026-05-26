@@ -1,12 +1,39 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import { useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { ChevronDown, Gift, LogOut, Megaphone, Sparkles, User as UserIcon, Users } from "lucide-react";
+import { useEffect, useRef, useState, useTransition } from "react";
+import { useLocale, useTranslations } from "next-intl";
+import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import {
+  BookOpen,
+  ChevronDown,
+  Gift,
+  Globe,
+  LogOut,
+  Megaphone,
+  Moon,
+  Sparkles,
+  Sun,
+  User as UserIcon,
+  Users,
+} from "lucide-react";
+import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
+import {
+  headerChromeIconGhostClass,
+  headerChromeMenuItemClass,
+} from "@/components/public-chrome/header-chrome-buttons";
+import { openHomeOnboardingTour } from "@/lib/home-tour";
+import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
 
-type SessionUser = { id: string; email: string; name: string; role: string; pointBalance?: number };
+type SessionUser = {
+  id: string;
+  email: string;
+  name: string;
+  role: string;
+  pointBalance?: number;
+  plan?: string;
+  trialDaysLeft?: number;
+};
 
 export function HeaderProfileDropdown({
   session,
@@ -14,7 +41,6 @@ export function HeaderProfileDropdown({
   myPageLabel,
   campaignsLabel,
   logoutLabel,
-  pointsLabel,
   pointsShopLabel,
   referralLabel,
 }: {
@@ -28,8 +54,26 @@ export function HeaderProfileDropdown({
   referralLabel?: string;
 }) {
   const locale = useLocale();
+  const isKo = locale === "ko";
+  const tGuide = useTranslations("auth");
+  const router = useRouter();
+  const pathname = usePathname();
+  const { resolvedTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLDivElement>(null);
+
+  const days = session.trialDaysLeft ?? 0;
+  const showPro =
+    session.plan === "PRO" ||
+    session.plan === "PRO_TRIAL" ||
+    session.plan === "ENTERPRISE" ||
+    days > 0;
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const logout = async () => {
     setOpen(false);
@@ -47,103 +91,141 @@ export function HeaderProfileDropdown({
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
+  const close = () => setOpen(false);
+
+  const switchLocale = () => {
+    const next = locale === "ko" ? "en" : "ko";
+    startTransition(() => {
+      if (pathname == null || pathname === "") return;
+      router.replace(pathname, { locale: next });
+    });
+    close();
+  };
+
+  const toggleTheme = () => {
+    const isDark = resolvedTheme === "dark";
+    const next = isDark ? "light" : "dark";
+    setManualTheme(next);
+    setTheme(next);
+  };
+
   return (
     <div ref={rootRef} className="relative">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className={cn(
-          "inline-flex h-9 items-center gap-1 rounded-full border border-transparent px-2 transition-colors",
-          "text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/10",
-          open && "bg-gray-100 dark:bg-white/10",
-        )}
+        className={cn(headerChromeIconGhostClass, open && "bg-gray-100 dark:bg-white/10")}
         aria-expanded={open}
         aria-haspopup="menu"
-        aria-label={session.name}
+        aria-label={myPageLabel}
       >
-        <UserIcon
-          className="h-4 w-4 shrink-0 text-gray-700 dark:text-white"
-          strokeWidth={2}
-        />
-        <ChevronDown
-          className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
-        />
+        <UserIcon className="h-[18px] w-[18px]" strokeWidth={2} />
       </button>
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] min-w-[11.5rem] overflow-hidden rounded-xl border border-border/60 bg-background py-1 shadow-lg dark:border-white/12 border-gray-200 dark:bg-[#0a0a12]"
+          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]"
         >
-          <p className="truncate px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground dark:text-white">
+          <p className="truncate px-3 py-2 text-xs font-semibold text-gray-500 dark:text-white/50">
             {session.name}
           </p>
+
+          {showPro ? (
+            <Link
+              href="/points"
+              role="menuitem"
+              onClick={() => {
+                close();
+                onNavigate?.();
+              }}
+              className="mx-2 mb-1 flex items-center gap-2 rounded-lg tkad-neon-cta-clean px-3 py-2 text-xs font-bold text-white"
+            >
+              <Sparkles className="h-3.5 w-3.5 text-white" />
+              {days > 0
+                ? isKo
+                  ? `PRO 체험 D-${days}`
+                  : `PRO trial D-${days}`
+                : "PRO"}
+            </Link>
+          ) : null}
+
           {typeof session.pointBalance === "number" ? (
             <Link
               href="/points"
               role="menuitem"
               onClick={() => {
-                setOpen(false);
+                close();
                 onNavigate?.();
               }}
-              className="flex items-center gap-2 border-b border-border/60 px-3 py-2.5 text-sm font-bold text-primary transition-colors hover:bg-muted dark:border-white/10 dark:hover:dark:bg-white/8 bg-gray-100"
+              className={cn(headerChromeMenuItemClass, "font-bold text-cyan-600 dark:text-cyan-300")}
             >
               <Sparkles className="h-4 w-4" />
               ✦ {session.pointBalance.toLocaleString()}P
             </Link>
           ) : null}
-          <Link
-            href="/my"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
-          >
-            <UserIcon className="h-4 w-4 text-gray-600 dark:text-white/80" />
+
+          <Link href="/my" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
+            <UserIcon className="h-4 w-4 opacity-70" />
             {myPageLabel}
           </Link>
-          <Link
-            href="/points"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
-          >
+          <Link href="/dashboard" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
+            <Megaphone className="h-4 w-4 opacity-70" />
+            {campaignsLabel}
+          </Link>
+          <Link href="/points" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
             <Gift className="h-4 w-4 opacity-70" />
             {pointsShopLabel ?? "포인트 샵"}
           </Link>
-          <Link
-            href="/my/referral"
-            role="menuitem"
-            onClick={() => {
-              setOpen(false);
-              onNavigate?.();
-            }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
-          >
+          <Link href="/my/referral" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
             <Users className="h-4 w-4 opacity-70" />
             {referralLabel ?? "친구 초대"}
           </Link>
-          <Link
-            href="/dashboard"
+
+          <div className="my-1 border-t border-gray-100 dark:border-white/10" />
+
+          <button
+            type="button"
             role="menuitem"
             onClick={() => {
-              setOpen(false);
-              onNavigate?.();
+              openHomeOnboardingTour();
+              close();
             }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
+            className={headerChromeMenuItemClass}
           >
-            <Megaphone className="h-4 w-4 text-gray-600 dark:text-white/80" />
-            {campaignsLabel}
-          </Link>
+            <BookOpen className="h-4 w-4 opacity-70" />
+            {tGuide("usageGuide")}
+          </button>
+          <button type="button" role="menuitem" onClick={switchLocale} disabled={isPending} className={headerChromeMenuItemClass}>
+            <Globe className="h-4 w-4 opacity-70" />
+            {locale === "ko" ? "English" : "한국어"}
+          </button>
+          {mounted ? (
+            <button type="button" role="menuitem" onClick={toggleTheme} className={headerChromeMenuItemClass}>
+              {resolvedTheme === "dark" ? (
+                <Sun className="h-4 w-4 opacity-70" />
+              ) : (
+                <Moon className="h-4 w-4 opacity-70" />
+              )}
+              {resolvedTheme === "dark"
+                ? isKo
+                  ? "라이트 모드"
+                  : "Light mode"
+                : isKo
+                  ? "다크 모드"
+                  : "Dark mode"}
+              {isAutoThemeMode() ? (
+                <span className="ml-auto text-[10px] text-gray-400">{isKo ? "자동" : "Auto"}</span>
+              ) : null}
+            </button>
+          ) : null}
+
+          <div className="my-1 border-t border-gray-100 dark:border-white/10" />
+
           <button
             type="button"
             role="menuitem"
             onClick={() => void logout()}
-            className="flex w-full items-center gap-2 border-t border-border/60 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:border-white/10 border-gray-200 dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
+            className={cn(headerChromeMenuItemClass, "text-red-600 dark:text-red-400")}
           >
             <LogOut className="h-4 w-4 opacity-70" />
             {logoutLabel}

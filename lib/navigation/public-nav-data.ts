@@ -1,6 +1,5 @@
 import type { LucideIcon } from "lucide-react";
 import {
-  BarChart3,
   BookMarked,
   BookOpen,
   ClipboardList,
@@ -19,13 +18,12 @@ import {
   Wand2,
 } from "lucide-react";
 
-/** 메인 카테고리 ID — 5개 고정 */
+/** 메인 카테고리 ID — 4개 고정 */
 export type PublicNavGroupId =
   | "discovery"
   | "planning"
-  | "creative"
   | "insights"
-  | "academy";
+  | "studio";
 
 export type PublicNavItemId =
   | "media-search"
@@ -38,9 +36,9 @@ export type PublicNavItemId =
   | "dooh-playlists"
   | "creative-studio"
   | "trend-report"
-  | "competitive-intel"
   | "success-cases"
   | "academy-content"
+  | "academy-home"
   | "advertiser-guide";
 
 export type PublicNavItemDef = {
@@ -86,33 +84,23 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     ],
   },
   {
-    id: "creative",
-    icon: Palette,
-    items: [
-      { id: "creative-library", href: "/creatives", icon: Images, beta: true },
-      { id: "dooh-playlists", href: "/creatives/playlists", icon: ListVideo, beta: true },
-      { id: "creative-studio", href: "/creatives/upload", icon: Wand2, beta: true },
-    ],
-  },
-  {
     id: "insights",
     icon: LineChart,
     items: [
       { id: "trend-report", href: "/report", icon: LineChart },
-      {
-        id: "competitive-intel",
-        href: "/insights/competitive",
-        icon: BarChart3,
-      },
       { id: "success-cases", href: "/cases", icon: Trophy },
+      { id: "academy-content", href: "/academy", icon: GraduationCap },
+      { id: "academy-home", href: "/academy#academy-basics", icon: BookOpen },
+      { id: "advertiser-guide", href: "/guides", icon: BookMarked },
     ],
   },
   {
-    id: "academy",
-    icon: GraduationCap,
+    id: "studio",
+    icon: Palette,
     items: [
-      { id: "academy-content", href: "/academy", icon: BookOpen },
-      { id: "advertiser-guide", href: "/guides", icon: BookMarked },
+      { id: "creative-library", href: "/creatives", icon: Images, beta: true },
+      { id: "creative-studio", href: "/creatives/upload", icon: Wand2, beta: true },
+      { id: "dooh-playlists", href: "/creatives/playlists", icon: ListVideo, beta: true },
     ],
   },
 ];

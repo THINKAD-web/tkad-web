@@ -48,13 +48,14 @@ export function HeaderProTrialChip() {
     <Link
       href="/points"
       className={cn(
-        "hidden h-9 items-center gap-1 rounded-full px-3 text-xs font-bold md:inline-flex",
-        "bg-gradient-to-r from-violet-600 to-cyan-500 text-white shadow-sm",
+        "hidden h-9 items-center gap-1.5 rounded-full px-3.5 text-xs font-bold md:inline-flex",
+        "tkad-neon-cta-clean text-white shadow-[0_4px_16px_rgba(124,58,237,0.22)]",
         "transition-transform hover:scale-[1.02] active:scale-95",
+        "[&_svg]:text-white",
       )}
     >
-      <Sparkles className="h-3.5 w-3.5" aria-hidden />
-      <span>{label}</span>
+      <Sparkles className="h-3.5 w-3.5 text-white" aria-hidden />
+      <span className="text-white">{label}</span>
     </Link>
   );
 }

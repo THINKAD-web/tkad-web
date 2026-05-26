@@ -16,6 +16,15 @@ export const headerChromeIconButtonClass = cn(
   "h-10 w-10 rounded-xl",
 );
 
+/** 헤더 우측 — 가벼운 고스트 아이콘 (밀도 낮춤) */
+export const headerChromeIconGhostClass = cn(
+  "relative inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+  "text-gray-600 transition-colors hover:bg-gray-100/90 dark:text-white/70 dark:hover:bg-white/10",
+);
+
+export const headerChromeMenuItemClass =
+  "flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 dark:text-white/90 dark:hover:bg-white/8";
+
 export const headerChromeTextButtonClass = cn(
   headerChromeBase,
   headerChromeHover,

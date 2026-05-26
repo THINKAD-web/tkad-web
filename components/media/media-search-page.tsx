@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useLocale } from "next-intl";
 import {
   Search,
   Star,
@@ -12,49 +13,38 @@ import {
   LayoutGrid,
   AlignJustify,
 } from "lucide-react";
-import { typeLabels } from "@/lib/media-data";
+import CompareBar from "@/components/compare-bar";
+import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS } from "@/components/floating-selection-bar";
+import { typeLabels, type MediaItem } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import {
+  entriesToCompareMediaItems,
+  getCompareCartEntries,
+  setCompareCartEntries,
+  subscribeCompareCart,
+  type CompareCartEntry,
+} from "@/lib/compare-cart-client";
+import { useCart } from "@/lib/cart";
+import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  MEDIA_CHIP_ACTIVE,
+  MEDIA_CHIP_INACTIVE,
+  MEDIA_REGION_CHIPS,
+  MEDIA_SEARCH_SORT_OPTIONS,
+  MEDIA_TARGET_CHIPS,
+  MEDIA_TYPE_CHIPS,
+} from "@/lib/media-discovery-filter-chips";
 
-const TYPE_CHIPS = [
-  { label: "전체", value: "", icon: "" },
-  { label: "지하철", value: "subway", icon: "🚇" },
-  { label: "버스", value: "bus", icon: "🚌" },
-  { label: "전광판", value: "billboard", icon: "📺" },
-  { label: "DOOH", value: "dooh", icon: "💡" },
-  { label: "대학가", value: "campus", icon: "🎓" },
-  { label: "쇼핑몰", value: "retail", icon: "🏬" },
-  { label: "쉘터", value: "bus_shelter", icon: "🚏" },
-  { label: "로컬", value: "local", icon: "🏘" },
-];
-
-const TARGET_CHIPS = [
-  { label: "전체", value: "", icon: "" },
-  { label: "브랜드", value: "brand", icon: "🏢" },
-  { label: "팬덤", value: "fandom", icon: "🎤" },
-  { label: "팝업", value: "event", icon: "🛍" },
-  { label: "동네", value: "small_business", icon: "🏘" },
-  { label: "대학", value: "university", icon: "🎓" },
-  { label: "지자체", value: "public", icon: "🏛" },
-];
-
-const REGION_CHIPS = [
-  { label: "전체", value: "" },
-  { label: "강남", value: "강남" },
-  { label: "홍대", value: "홍대" },
-  { label: "성수", value: "성수" },
-  { label: "도심", value: "도심" },
-  { label: "부산", value: "부산" },
-  { label: "대구", value: "대구" },
-];
-
-const SORT_OPTIONS = [
-  { label: "인기순", value: "popular" },
-  { label: "최신순", value: "newest" },
-  { label: "저가순", value: "price_asc" },
-  { label: "고가순", value: "price_desc" },
-];
+const CHIP_ACTIVE = MEDIA_CHIP_ACTIVE;
+const CHIP_INACTIVE = MEDIA_CHIP_INACTIVE;
+const TYPE_CHIPS = MEDIA_TYPE_CHIPS;
+const TARGET_CHIPS = MEDIA_TARGET_CHIPS;
+const REGION_CHIPS = MEDIA_REGION_CHIPS;
+const SORT_OPTIONS = MEDIA_SEARCH_SORT_OPTIONS;
 
 type ViewMode = "feed" | "card" | "compact";
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
@@ -133,6 +123,23 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
   };
 }
 
+function catalogItemToMediaItem(item: HomeCatalogMediaItem): MediaItem {
+  return {
+    id: item.id,
+    name: item.name,
+    nameEn: item.name,
+    location: item.region ?? "",
+    locationEn: item.region ?? "",
+    region: "seoul",
+    type: "digital",
+    price: item.price ?? 0,
+    lat: 0,
+    lng: 0,
+    dailyFootTraffic: 0,
+    sampleImages: item.thumbnailUrl ? [item.thumbnailUrl] : [],
+  };
+}
+
 interface Props {
   initialMedia: HomeCatalogMediaItem[];
   initialCategory?: string;
@@ -146,6 +153,9 @@ export function MediaSearchPage({
   initialTarget,
   initialRegion,
 }: Props) {
+  const locale = useLocale();
+  const toast = useAppToast();
+  const { ids: cartIds, toggle: toggleCartId } = useCart();
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState(initialCategory || "");
   const [target, setTarget] = useState(initialTarget || "");
@@ -155,6 +165,66 @@ export function MediaSearchPage({
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
   const [loading, setLoading] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
+  const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
+    [],
+  );
+
+  useEffect(() => {
+    setCompareEntriesState(getCompareCartEntries());
+    return subscribeCompareCart(() => {
+      setCompareEntriesState(getCompareCartEntries());
+    });
+  }, []);
+
+  const isInCompare = useCallback(
+    (id: string) => compareEntries.some((e) => e.id === id),
+    [compareEntries],
+  );
+
+  const toggleCompare = useCallback((item: HomeCatalogMediaItem) => {
+    const prev = getCompareCartEntries();
+    const exists = prev.some((e) => e.id === item.id);
+    const next = exists
+      ? prev.filter((e) => e.id !== item.id)
+      : [...prev, { id: item.id, name: item.name, nameEn: item.name }];
+    setCompareCartEntries(next);
+  }, []);
+
+  const toggleCart = useCallback(
+    (item: HomeCatalogMediaItem) => {
+      const inCart = cartIds.includes(item.id);
+      toggleCartId(item.id);
+      if (inCart) {
+        toast.warning(
+          item.name
+            ? `${item.name}이(가) 장바구니에서 제거되었습니다.`
+            : "장바구니에서 제거되었습니다.",
+        );
+      } else {
+        toast.success(
+          item.name
+            ? `${item.name}이(가) 장바구니에 담겼습니다.`
+            : "매체가 장바구니에 담겼습니다.",
+        );
+      }
+    },
+    [cartIds, toggleCartId, toast],
+  );
+
+  const isInCart = useCallback(
+    (id: string) => cartIds.includes(id),
+    [cartIds],
+  );
+
+  const searchCatalog = useMemo<MediaItem[]>(
+    () => media.map(catalogItemToMediaItem),
+    [media],
+  );
+
+  const compareItems = useMemo(
+    () => entriesToCompareMediaItems(compareEntries, searchCatalog),
+    [compareEntries, searchCatalog],
+  );
 
   const fetchMedia = useCallback(async () => {
     setLoading(true);
@@ -223,6 +293,7 @@ export function MediaSearchPage({
     item.slug ? `/ko/media/${item.slug}` : `/ko/media/${item.id}`;
 
   return (
+    <>
     <div className="min-h-screen bg-gray-50 pb-24 dark:bg-[#020202]">
       <div className="space-y-3 px-4 pt-4">
         {/* ── 검색창 ── */}
@@ -233,7 +304,7 @@ export function MediaSearchPage({
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="매체명·지역·유형 검색"
-            className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-500/30 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
+            className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
           />
           {query ? (
             <button
@@ -248,7 +319,7 @@ export function MediaSearchPage({
 
         {/* ── 매체 유형 칩 ── */}
         <div>
-          <p className="mb-2 text-xs font-bold text-violet-600 dark:text-violet-400">
+          <p className="tkad-home-accent-text mb-2 text-xs font-bold">
             어떤 매체?
           </p>
           <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
@@ -259,11 +330,10 @@ export function MediaSearchPage({
                 onClick={() =>
                   setCategory(category === chip.value ? "" : chip.value)
                 }
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-                  category === chip.value
-                    ? "bg-violet-500 text-white"
-                    : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70"
-                }`}
+                className={cn(
+                  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                  category === chip.value ? CHIP_ACTIVE : CHIP_INACTIVE,
+                )}
               >
                 {chip.icon ? `${chip.icon} ` : ""}
                 {chip.label}
@@ -347,11 +417,10 @@ export function MediaSearchPage({
                     type="button"
                     onClick={() => handleViewModeChange(mode.id)}
                     title={mode.label}
-                    className={`flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all ${
-                      viewMode === mode.id
-                        ? "bg-violet-500 text-white"
-                        : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70"
-                    }`}
+                    className={cn(
+                      "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
+                      viewMode === mode.id ? CHIP_ACTIVE : CHIP_INACTIVE,
+                    )}
                   >
                     <Icon className="h-3.5 w-3.5" />
                     <span className="hidden sm:inline">{mode.label}</span>
@@ -383,6 +452,18 @@ export function MediaSearchPage({
           <p className="text-sm text-gray-500 dark:text-white/50">
             {loading ? "검색 중..." : `매체 ${media.length}개`}
           </p>
+          <div className="flex items-center gap-2 text-xs">
+            {cartIds.length > 0 ? (
+              <span className="tkad-home-accent-text font-medium">
+                담김 {cartIds.length}
+              </span>
+            ) : null}
+            {compareEntries.length > 0 ? (
+              <span className="font-medium text-gray-700 dark:text-white">
+                선택 {compareEntries.length}
+              </span>
+            ) : null}
+          </div>
         </div>
       </div>
 
@@ -450,7 +531,7 @@ export function MediaSearchPage({
                 setTarget("");
                 setRegion("");
               }}
-              className="text-sm text-violet-400 underline"
+              className="tkad-home-accent-text text-sm underline"
             >
               필터 초기화
             </button>
@@ -486,11 +567,25 @@ export function MediaSearchPage({
                   <p className="mt-1 text-xs text-gray-400 dark:text-white/40">
                     {[item.region, item.type].filter(Boolean).join(" · ")}
                   </p>
-                  {formatPrice(item.price) ? (
-                    <p className="mt-2 text-sm font-bold text-violet-400">
-                      {formatPrice(item.price)}/월
-                    </p>
-                  ) : null}
+                  <div className="mt-2 flex items-center justify-between gap-2">
+                    {formatPrice(item.price) ? (
+                      <p className="tkad-home-accent-text text-sm font-bold">
+                        {formatPrice(item.price)}/월
+                      </p>
+                    ) : (
+                      <span />
+                    )}
+                    <div className="flex items-center gap-1">
+                      <MediaCompareSelectButton
+                        selected={isInCompare(item.id)}
+                        onToggle={() => toggleCompare(item)}
+                      />
+                      <MediaCartAddButton
+                        inCart={isInCart(item.id)}
+                        onToggle={() => toggleCart(item)}
+                      />
+                    </div>
+                  </div>
                 </div>
               </Link>
             );
@@ -531,6 +626,16 @@ export function MediaSearchPage({
                     {formatPrice(item.price) ? "/월" : ""}
                   </p>
                 </div>
+                <MediaCompareSelectButton
+                  selected={isInCompare(item.id)}
+                  onToggle={() => toggleCompare(item)}
+                  className="flex-shrink-0"
+                />
+                <MediaCartAddButton
+                  inCart={isInCart(item.id)}
+                  onToggle={() => toggleCart(item)}
+                  className="flex-shrink-0"
+                />
                 {item.isInstantBooking ? (
                   <span className="flex-shrink-0 rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
                     즉시예약
@@ -596,17 +701,29 @@ export function MediaSearchPage({
                       </span>
                     </div>
                   ) : null}
-                  <div className="flex items-center justify-between">
-                    {formatPrice(item.price) ? (
-                      <p className="text-base font-bold text-violet-400">
-                        {formatPrice(item.price)}/월
-                      </p>
-                    ) : null}
-                    {item.isInstantBooking ? (
-                      <span className="rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                        즉시예약
-                      </span>
-                    ) : null}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex min-w-0 items-center gap-2">
+                      {formatPrice(item.price) ? (
+                        <p className="tkad-home-accent-text text-base font-bold">
+                          {formatPrice(item.price)}/월
+                        </p>
+                      ) : null}
+                      {item.isInstantBooking ? (
+                        <span className="rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
+                          즉시예약
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="flex shrink-0 items-center gap-1">
+                      <MediaCompareSelectButton
+                        selected={isInCompare(item.id)}
+                        onToggle={() => toggleCompare(item)}
+                      />
+                      <MediaCartAddButton
+                        inCart={isInCart(item.id)}
+                        onToggle={() => toggleCart(item)}
+                      />
+                    </div>
                   </div>
                 </div>
               </Link>
@@ -626,5 +743,16 @@ export function MediaSearchPage({
         </div>
       ) : null}
     </div>
+
+    <CompareBar
+      variant="light"
+      items={compareItems}
+      locale={locale}
+      onClear={() => setCompareCartEntries([])}
+    />
+    {compareEntries.length > 0 ? (
+      <div className={FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS} aria-hidden />
+    ) : null}
+    </>
   );
 }

@@ -6,33 +6,49 @@ import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { TopNavLink } from "@/lib/navigation/desktop-top-nav";
+import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
+import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
 
 type Props = {
   links: TopNavLink[];
   className?: string;
 };
 
+type PreviewItem = {
+  id: string;
+  name: string;
+  region: string;
+  imageUrl?: string;
+};
+
+function mapPreviewItem(m: MediaItem): PreviewItem | null {
+  const rawUrl = getPrimaryMediaImageUrl(m);
+  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
+  if (!resolved?.src) return null;
+  return {
+    id: m.id,
+    name: m.name,
+    region: m.region ?? m.district ?? m.city ?? "",
+    imageUrl: resolved.src,
+  };
+}
+
 export function MediaNavHoverPanel({ links, className }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const [preview, setPreview] = useState<
-    { id: string; name: string; region: string; imageUrl?: string }[]
-  >([]);
+  const [preview, setPreview] = useState<PreviewItem[]>([]);
 
   useEffect(() => {
     fetch("/api/public/media-catalog")
       .then((r) => r.json())
       .then((data) => {
-        const items = Array.isArray(data) ? data : data?.items ?? [];
+        const items: MediaItem[] = Array.isArray(data) ? data : data?.items ?? [];
         if (!Array.isArray(items)) return;
-        setPreview(
-          items.slice(0, 3).map((m: { id: string; name: string; region?: string; imageUrl?: string; images?: string[] }) => ({
-            id: m.id,
-            name: m.name,
-            region: m.region ?? "",
-            imageUrl: m.imageUrl ?? m.images?.[0],
-          })),
-        );
+        const featured = items
+          .map(mapPreviewItem)
+          .filter((item): item is PreviewItem => item != null)
+          .slice(0, 3);
+        setPreview(featured);
       })
       .catch(() => setPreview([]));
   }, []);
@@ -54,7 +70,10 @@ export function MediaNavHoverPanel({ links, className }: Props) {
                 className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
               >
                 {Icon ? (
-                  <Icon className="mt-0.5 h-5 w-5 shrink-0 text-violet-500" aria-hidden />
+                  <Icon
+                    className="mt-0.5 h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-300"
+                    aria-hidden
+                  />
                 ) : null}
                 <span>
                   <span className="block text-sm font-semibold text-gray-900 dark:text-white">
@@ -86,9 +105,14 @@ export function MediaNavHoverPanel({ links, className }: Props) {
               className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
             >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-white/10">
-                {m.imageUrl ? (
-                  <Image src={m.imageUrl} alt="" fill className="object-cover" sizes="48px" />
-                ) : null}
+                <Image
+                  src={m.imageUrl!}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="48px"
+                  unoptimized={m.imageUrl!.includes("/api/bunny-media")}
+                />
               </div>
               <span className="min-w-0">
                 <span className="block truncate text-sm font-medium text-gray-900 dark:text-white">

@@ -11,7 +11,7 @@ type Props = {
 };
 
 /**
- * 데스크톱(lg+) 고정 사이드바 — 5개 메인 카테고리 아코디언 + 문의 CTA.
+ * 데스크톱(lg+) 고정 사이드바 — 4개 메인 카테고리 아코디언 + 문의 CTA.
  */
 export function PublicNavAside({ className }: Props) {
   const t = useTranslations();

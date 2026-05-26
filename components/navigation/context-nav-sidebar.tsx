@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
@@ -49,14 +49,19 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
         active
-          ? "bg-violet-500/10 font-semibold dark:bg-white/8"
+          ? "bg-cyan-400/10 font-semibold dark:bg-white/8"
           : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/5",
-        compact && "justify-center px-2",
+        compact && "justify-center px-2 py-2.5",
       )}
     >
       {Icon ? (
         <Icon
-          className={cn("h-4 w-4 shrink-0", active && "tkad-home-accent-text")}
+          className={cn(
+            "h-4 w-4 shrink-0",
+            active
+              ? "text-cyan-600 dark:text-cyan-300"
+              : "text-gray-500 dark:text-white/55",
+          )}
           aria-hidden
         />
       ) : null}
@@ -65,7 +70,7 @@ function SidebarLink({
           <span
             className={cn(
               "min-w-0 flex-1 truncate",
-              active ? "tkad-home-accent-text" : undefined,
+              active && "tkad-home-accent-text font-semibold",
             )}
           >
             {label}
@@ -201,7 +206,9 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
     >
       <ContextNavSidebar collapsed={collapsed} hoverExpanded={hoverExpanded} />
 
-      <QuickActionBarDesktop compact={compact} />
+      <Suspense fallback={null}>
+        <QuickActionBarDesktop compact={compact} />
+      </Suspense>
 
       <div className="mt-auto shrink-0 border-t border-gray-200 p-2 dark:border-white/10">
         <button

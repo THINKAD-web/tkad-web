@@ -61,7 +61,7 @@ export function PageSubNav({
             className={cn(
               "flex shrink-0 items-center gap-2 whitespace-nowrap rounded-xl px-4 py-2.5 text-sm font-medium transition-colors",
               active
-                ? "bg-violet-500 text-white shadow-sm"
+                ? "tkad-neon-cta-clean text-white shadow-sm"
                 : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
             )}
             aria-current={active ? "page" : undefined}

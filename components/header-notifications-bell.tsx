@@ -6,7 +6,7 @@ import { useLocale } from "next-intl";
 import { Bell } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
-import { headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
+import { headerChromeIconButtonClass, headerChromeIconGhostClass, headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 
 type NotificationItem = {
   id: string;
@@ -26,10 +26,12 @@ export function HeaderNotificationsBell({
   onNavigate,
   variant = "icon",
   className,
+  compact = false,
 }: {
   onNavigate?: () => void;
   variant?: "icon" | "menu";
   className?: string;
+  compact?: boolean;
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -147,7 +149,11 @@ export function HeaderNotificationsBell({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-all duration-150 hover:bg-secondary/60 hover:text-violet-600 active:scale-95 dark:hover:text-cyan-300"
+        className={cn(
+          "relative",
+          compact ? headerChromeIconGhostClass : headerChromeIconButtonClass,
+          className,
+        )}
         aria-label={aria}
         aria-expanded={open}
         aria-haspopup="true"

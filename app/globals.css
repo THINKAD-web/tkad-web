@@ -2524,6 +2524,13 @@ html:not(.dark) .tkad-nav-chrome {
   color: rgb(255 255 255) !important;
 }
 
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean,
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean span,
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean svg {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
 /* 헤더 안 `text-foreground` 유틸이 테마 토큰 꼬임으로 어두워지는 경우 밝은 잉크로 통일 */
 .dark .tkad-nav-chrome .text-foreground {
   color: rgb(248 250 252 / 0.96) !important;

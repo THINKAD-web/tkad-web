@@ -76,9 +76,8 @@ export function FooterBrutal() {
     return buildSitemapSections({
       discovery: byId("discovery"),
       planning: byId("planning"),
-      creative: byId("creative"),
+      studio: byId("studio"),
       insights: byId("insights"),
-      academy: byId("academy"),
       industryGuideLabel: t("footer.industryGuide"),
       webinarLabel: t("footer.sitemapWebinar"),
       companyTitle: t("footer.sitemapCompany"),

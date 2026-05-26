@@ -2,7 +2,6 @@
 
 import { Suspense, type ReactNode } from "react";
 import { BottomTabBar } from "@/components/mobile/bottom-tab-bar";
-import { MobileAutoHeader } from "@/components/mobile/mobile-auto-header";
 import { MobileSearchModal } from "@/components/mobile/mobile-search-modal";
 import { MobileSearchProvider } from "@/components/mobile/mobile-search-context";
 import { MobileDetailChromeProvider } from "@/components/mobile/mobile-detail-chrome-context";
@@ -28,7 +27,6 @@ export function MobileAppChrome({ children }: Props) {
         <PushHapticListener />
         <PwaSplashScreen />
         <div className="flex min-h-0 flex-1 flex-col md:contents">
-          <MobileAutoHeader />
           <Suspense fallback={null}>
             <SubpageRelatedChips />
           </Suspense>

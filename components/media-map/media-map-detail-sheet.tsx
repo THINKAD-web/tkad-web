@@ -195,68 +195,62 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
       : "border border-border bg-card text-foreground hover:bg-muted",
   );
 
-  const ctaAccent = cn(
-    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold dark:text-white text-gray-900 shadow-sm transition-transform hover:-translate-y-0.5",
-    "bg-gradient-to-r from-violet-500 to-cyan-400",
-  );
+  const ctaAccent =
+    "tkad-neon-cta-clean inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5";
 
   if (variant === "dock") {
     return (
-      <div className="px-3 py-3 sm:px-4">
-        <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-400/70">
-          {isKo ? "선택한 매체" : "Selected"}
-        </p>
-        <div className="flex gap-3">
+      <div className="px-3 py-2">
+        <div className="flex gap-2.5">
           {item.image ? (
-            <div className="h-[4.5rem] w-24 shrink-0 overflow-hidden rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 sm:w-28">
+            <div className="h-14 w-[4.25rem] shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/5">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img src={item.image} alt="" className="h-full w-full object-cover" />
             </div>
           ) : (
-            <div className="flex h-[4.5rem] w-24 shrink-0 items-center justify-center rounded-xl border border-dashed dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 text-[9px] dark:text-white sm:w-28">
+            <div className="flex h-14 w-[4.25rem] shrink-0 items-center justify-center rounded-lg border border-dashed border-gray-200 bg-gray-50 text-[8px] text-gray-400 dark:border-white/15 dark:bg-white/5 dark:text-white/40">
               NO IMG
             </div>
           )}
           <div className="min-w-0 flex-1">
-            <div className="flex items-start justify-between gap-2">
+            <div className="flex items-start justify-between gap-1.5">
               <div className="min-w-0">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-violet-300/90">
+                <p className="tkad-home-accent-text text-[10px] font-bold uppercase tracking-[0.14em]">
                   {item.type}
                 </p>
-                <h2 className="mt-0.5 line-clamp-2 text-sm font-bold leading-snug dark:text-white text-gray-900 sm:text-base">
+                <h2 className="mt-0.5 line-clamp-1 text-sm font-bold leading-snug text-gray-900 dark:text-white">
                   {item.name}
                 </h2>
-                <p className="mt-0.5 line-clamp-1 text-[11px] dark:text-white text-gray-500">{regionLine}</p>
+                <p className="mt-0.5 line-clamp-1 text-[10px] text-gray-500 dark:text-white/55">
+                  {regionLine}
+                </p>
               </div>
               <button
                 type="button"
                 onClick={onClose}
-                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-gray-200 bg-gray-50 text-gray-600 transition-colors hover:bg-gray-100 dark:border-white/12 dark:bg-white/5 dark:text-white dark:hover:bg-white/10"
                 aria-label={isKo ? "닫기" : "Close"}
               >
-                <X className="h-4 w-4" />
+                <X className="h-3.5 w-3.5" />
               </button>
             </div>
-            <p className="mt-2 text-sm font-bold tabular-nums text-cyan-300">
+            <p className="tkad-home-accent-text mt-1 text-xs font-bold tabular-nums">
               {formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en")}
             </p>
           </div>
         </div>
-        <div className="mt-3 grid grid-cols-2 gap-2">
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
           <Link
             href={`/media/${item.id}`}
             target="_blank"
             rel="noopener noreferrer"
-            className={cn(ctaPrimary, "text-xs")}
+            className="inline-flex items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
           >
             {isKo ? "상세 보기" : "Details"}
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
+            <ExternalLink className="h-3 w-3" aria-hidden />
           </Link>
-          <Link
-            href={`/contact?media=${encodeURIComponent(item.id)}`}
-            className={cn(ctaAccent, "text-xs")}
-          >
-            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
+          <Link href={`/contact?media=${encodeURIComponent(item.id)}`} className={cn(ctaAccent, "px-2.5 py-2 text-[11px]")}>
+            <MessageCircle className="h-3 w-3" aria-hidden />
             {isKo ? "문의" : "Contact"}
           </Link>
         </div>
@@ -284,7 +278,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
               <div className="min-w-0">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.16em] text-primary">
+                <p className="tkad-home-accent-text font-display text-xs font-medium uppercase tracking-[0.16em]">
                   {item.type}
                 </p>
                 <h2 className="mt-0.5 line-clamp-2 text-base font-bold leading-snug text-foreground">
@@ -301,7 +295,7 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
                 <X className="h-4 w-4" />
               </button>
             </div>
-            <p className="mt-2 text-sm font-bold text-primary tabular-nums">
+            <p className="tkad-home-accent-text mt-2 text-sm font-bold tabular-nums">
               {formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en")}
             </p>
           </div>
@@ -467,12 +461,13 @@ export function MediaMapDetailSheet({
         aria-label={item.name}
         className={cn(
           "pointer-events-auto absolute inset-x-0 bottom-0 z-[25]",
-          "mx-2 mb-2 max-h-[min(42dvh,280px)] overflow-hidden rounded-2xl sm:mx-3 sm:mb-3",
-          "border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/8 bg-gray-1008 shadow-[0_-16px_48px_rgba(0,0,0,0.55)] backdrop-blur-xl",
+          "mx-2 mb-2 max-h-[min(28dvh,168px)] overflow-hidden rounded-xl sm:mx-3 sm:mb-3",
+          "border border-gray-200 bg-white/95 shadow-[0_-6px_20px_rgba(15,23,42,0.1)] backdrop-blur-md",
+          "dark:border-white/12 dark:bg-[#0a0a12]/95 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.55)]",
         )}
       >
-        <div className="flex justify-center pt-2">
-          <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
+        <div className="flex justify-center pt-1.5">
+          <span className="h-0.5 w-8 rounded-full bg-gray-300 dark:bg-white/25" aria-hidden />
         </div>
         <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="dock" />
       </div>

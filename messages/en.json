@@ -132,24 +132,20 @@
     "beta": "BETA",
     "groups": {
       "discovery": {
-        "label": "Discover",
+        "label": "Discovery",
         "labelEn": "Discovery"
       },
       "planning": {
-        "label": "Plan",
+        "label": "Planning",
         "labelEn": "Planning"
       },
-      "creative": {
-        "label": "Create",
-        "labelEn": "Creative"
-      },
       "insights": {
-        "label": "Insights",
-        "labelEn": "Insights"
+        "label": "Insights & Learning",
+        "labelEn": "Insights & Learning"
       },
-      "academy": {
-        "label": "Learn",
-        "labelEn": "Academy"
+      "studio": {
+        "label": "Studio",
+        "labelEn": "Studio"
       }
     },
     "items": {
@@ -166,11 +162,11 @@
         "desc": "Goal and budget-based AI picks"
       },
       "media-planner": {
-        "label": "Media planner",
-        "desc": "Budget, timeline, and mix"
+        "label": "OOH campaign planner",
+        "desc": "Budget, timeline, and media mix"
       },
       "integrated-planner": {
-        "label": "Integrated campaign planner",
+        "label": "Integrated media planner",
         "desc": "OOH + digital (SA/DA) linkage"
       },
       "package-proposal": {
@@ -202,8 +198,12 @@
         "desc": "Campaign case studies"
       },
       "academy-content": {
-        "label": "Learning hub",
+        "label": "Learning content",
         "desc": "Advertiser education"
+      },
+      "academy-home": {
+        "label": "Academy",
+        "desc": "OOH learning hub"
       },
       "advertiser-guide": {
         "label": "Advertiser guides",

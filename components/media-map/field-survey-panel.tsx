@@ -188,7 +188,7 @@ export function FieldSurveyPanel({
             type="button"
             disabled={visits.length === 0}
             onClick={() => void exportPdf()}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-violet-500 py-2.5 text-xs font-bold dark:text-white text-gray-900 disabled:opacity-40"
+            className="tkad-neon-cta-clean flex flex-1 items-center justify-center gap-1.5 rounded-xl py-2.5 text-xs font-bold text-white disabled:opacity-40"
           >
             <FileDown className="h-3.5 w-3.5" />
             {isKo ? "답사 보고서 PDF" : "Survey PDF"}

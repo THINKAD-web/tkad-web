@@ -2,15 +2,23 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { ClipboardCheck, Crosshair, LayoutList } from "lucide-react";
+import { ClipboardCheck, Crosshair, LayoutList, Search, X } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
-import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
+import {
+  MEDIA_CHIP_ACTIVE,
+  MEDIA_CHIP_INACTIVE,
+  MEDIA_REGION_CHIPS,
+  MEDIA_SEARCH_SORT_OPTIONS,
+  MEDIA_TYPE_CHIPS,
+} from "@/lib/media-discovery-filter-chips";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
-import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
+import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS } from "@/components/floating-selection-bar";
 import type { MediaItem } from "@/lib/media-data";
 import {
   entriesToCompareMediaItems,
@@ -65,12 +73,10 @@ type Item = MapMapItem;
 type Facets = { regions: string[]; types: string[] };
 
 type Filter = {
-  type: string;
+  category: string;
   region: string;
-  priceMin: string;
-  priceMax: string;
   q: string;
-  sort: "default" | "newest" | "priceAsc" | "priceDesc" | "trafficDesc";
+  sort: "popular" | "newest" | "price_asc" | "price_desc";
 };
 
 const CART_KEY = "tkad-media-cart-v1";
@@ -127,12 +133,16 @@ export default function MediaMapPageClient() {
   const [filter, setFilter] = useState<Filter>(() => {
     const init = initialUrl.current;
     return {
-      type: init?.type ?? "",
+      category: init?.category ?? "",
       region: init?.region ?? "",
-      priceMin: init?.priceMin ?? "",
-      priceMax: init?.priceMax ?? "",
       q: init?.q ?? "",
-      sort: (init?.sort as Filter["sort"]) ?? "default",
+      sort: (() => {
+        const s = init?.sort;
+        if (s === "newest" || s === "price_asc" || s === "price_desc") return s;
+        if (s === "priceAsc") return "price_asc";
+        if (s === "priceDesc") return "price_desc";
+        return "popular";
+      })(),
     };
   });
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -140,7 +150,6 @@ export default function MediaMapPageClient() {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [cartIds, setCartIds] = useState<string[]>([]);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
-  const [filtersExpanded, setFiltersExpanded] = useState(false);
   /** 마지막으로 idle 한 지도 중심/줌 — URL 동기화용 */
   const [view, setView] = useState<{ lat: number; lng: number; zoom: number } | null>(
     () => {
@@ -179,20 +188,6 @@ export default function MediaMapPageClient() {
     return null;
   });
   const itemsRef = useRef<Item[]>([]);
-  const shuffleSeedRef = useRef<number>(
-    Math.floor(Date.now() + Math.random() * 1_000_000),
-  );
-
-  const stableKey = useCallback((id: string) => {
-    // simple stable hash for session-seeded shuffle
-    let h = 2166136261;
-    const s = `${shuffleSeedRef.current}:${id}`;
-    for (let i = 0; i < s.length; i++) {
-      h ^= s.charCodeAt(i);
-      h = Math.imul(h, 16777619);
-    }
-    return h >>> 0;
-  }, []);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -224,13 +219,10 @@ export default function MediaMapPageClient() {
         lat: view?.lat,
         lng: view?.lng,
         zoom: view?.zoom,
-        type: filter.type || undefined,
+        category: filter.category || undefined,
         region: filter.region || undefined,
-        priceMin: filter.priceMin || undefined,
-        priceMax: filter.priceMax || undefined,
         q: filter.q || undefined,
-        sort:
-          filter.sort && filter.sort !== "default" ? filter.sort : undefined,
+        sort: filter.sort !== "popular" ? filter.sort : undefined,
       });
       replaceUrlSearch(next);
     }, 300);
@@ -241,10 +233,8 @@ export default function MediaMapPageClient() {
     view?.lat,
     view?.lng,
     view?.zoom,
-    filter.type,
+    filter.category,
     filter.region,
-    filter.priceMin,
-    filter.priceMax,
     filter.q,
     filter.sort,
   ]);
@@ -262,12 +252,10 @@ export default function MediaMapPageClient() {
           qs.set("neLat", String(b.neLat));
           qs.set("neLng", String(b.neLng));
         }
-        if (f.type) qs.set("type", f.type);
+        if (f.category) qs.set("category", f.category);
         if (f.region) qs.set("region", f.region);
-        if (f.priceMin) qs.set("priceMin", f.priceMin);
-        if (f.priceMax) qs.set("priceMax", f.priceMax);
         if (f.q) qs.set("q", f.q);
-        if (f.sort && f.sort !== "default") qs.set("sort", f.sort);
+        if (f.sort) qs.set("sort", f.sort);
 
         const res = await fetch(`/api/media/map?${qs.toString()}`, { cache: "no-store" });
         const ct = res.headers.get("content-type") ?? "";
@@ -281,10 +269,7 @@ export default function MediaMapPageClient() {
           return;
         }
         if (data?.ok && data.data) {
-          let next = Array.isArray(data.data.items) ? data.data.items : [];
-          if (f.sort === "default" && next.length > 1) {
-            next = [...next].sort((a, b) => stableKey(a.id) - stableKey(b.id));
-          }
+          const next = Array.isArray(data.data.items) ? data.data.items : [];
           setItems(next);
           setFacets(
             data.data.facets ?? {
@@ -297,7 +282,7 @@ export default function MediaMapPageClient() {
         setLoading(false);
       }
     },
-    [stableKey],
+    [],
   );
 
   useEffect(() => {
@@ -395,6 +380,21 @@ export default function MediaMapPageClient() {
     () => entriesToCompareMediaItems(compareEntries, mapCatalog),
     [compareEntries, mapCatalog],
   );
+
+  const activeFilterCount = useMemo(
+    () =>
+      [filter.category, filter.region, filter.q].filter(Boolean).length,
+    [filter],
+  );
+
+  const clearFilters = useCallback(() => {
+    setFilter((f) => ({
+      ...f,
+      category: "",
+      region: "",
+      q: "",
+    }));
+  }, []);
 
   const toggleCompare = useCallback(
     (it: Item) => {
@@ -559,35 +559,86 @@ export default function MediaMapPageClient() {
         </div>
 
         {/* 매체 리스트 — 모바일: 지도·미리보기 아래 */}
-        <aside className="order-3 w-full border-t border-border/60 bg-card md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto">
-          <div className="sticky top-0 z-10 border-b border-border/60 bg-card/95 backdrop-blur-md p-3 space-y-3 md:p-4">
-            <div className="tkad-media-map-search-pill group relative flex h-12 items-center rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 shadow-sm backdrop-blur-md transition-all hover:dark:border-white/18 border-gray-300 focus-within:border-white/22 focus-within:ring-2 focus-within:ring-primary/25 focus-within:shadow-md">
-            <svg
-              className="ml-4 h-[18px] w-[18px] flex-none dark:text-white text-gray-600 transition-colors group-focus-within:dark:text-white text-gray-800"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <circle cx="11" cy="11" r="8" />
-              <path d="m21 21-4.3-4.3" />
-            </svg>
-            <input
-              type="search"
-              placeholder="매체명 · 지역으로 검색"
-              value={filter.q}
-              onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
-              className="tkad-media-map-search-input h-full w-full bg-transparent px-4 pl-3 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white text-gray-500 outline-none"
-            />
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <div className="flex flex-wrap items-center gap-2">
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
-                <span className="dark:text-white text-gray-600">정렬</span>
+        <aside className="order-3 w-full border-t border-gray-200/80 bg-gray-50 md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto dark:border-white/10 dark:bg-[#020202]">
+          <div className="sticky top-0 z-10 space-y-3 border-b border-gray-200/80 bg-gray-50/95 p-3 text-gray-900 backdrop-blur-md md:p-4 dark:border-white/10 dark:bg-[#020202]/95 dark:text-white">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-white/30" />
+              <input
+                type="search"
+                placeholder="매체명·지역·유형 검색"
+                value={filter.q}
+                onChange={(e) => setFilter((f) => ({ ...f, q: e.target.value }))}
+                className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder:text-white/30"
+              />
+              {filter.q ? (
+                <button
+                  type="button"
+                  onClick={() => setFilter((f) => ({ ...f, q: "" }))}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  aria-label={isKo ? "검색어 지우기" : "Clear search"}
+                >
+                  <X className="h-4 w-4 text-gray-400 dark:text-white/40" />
+                </button>
+              ) : null}
+            </div>
+
+            <div>
+              <p className="tkad-home-accent-text mb-2 text-xs font-bold">
+                {isKo ? "어떤 매체?" : "Media type"}
+              </p>
+              <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
+                {MEDIA_TYPE_CHIPS.map((chip) => (
+                  <button
+                    key={chip.value || "all"}
+                    type="button"
+                    onClick={() =>
+                      setFilter((f) => ({
+                        ...f,
+                        category: f.category === chip.value ? "" : chip.value,
+                      }))
+                    }
+                    className={cn(
+                      "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                      filter.category === chip.value
+                        ? MEDIA_CHIP_ACTIVE
+                        : MEDIA_CHIP_INACTIVE,
+                    )}
+                  >
+                    {chip.icon ? `${chip.icon} ` : ""}
+                    {chip.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div>
+              <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+                {isKo ? "어디서?" : "Region"}
+              </p>
+              <div className="flex items-center gap-2">
+                <div className="scrollbar-hide flex flex-1 gap-2 overflow-x-auto pb-0.5">
+                  {MEDIA_REGION_CHIPS.map((chip) => (
+                    <button
+                      key={chip.value || "all"}
+                      type="button"
+                      onClick={() =>
+                        setFilter((f) => ({
+                          ...f,
+                          region: f.region === chip.value ? "" : chip.value,
+                        }))
+                      }
+                      className={cn(
+                        "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                        filter.region === chip.value
+                          ? "bg-cyan-500 text-white"
+                          : MEDIA_CHIP_INACTIVE,
+                      )}
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
                 <select
-                  className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
                   value={filter.sort}
                   onChange={(e) =>
                     setFilter((f) => ({
@@ -595,139 +646,65 @@ export default function MediaMapPageClient() {
                       sort: e.target.value as Filter["sort"],
                     }))
                   }
+                  className="flex-shrink-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
                 >
-                  <option value="default">랜덤</option>
-                  <option value="newest">최신</option>
-                  <option value="priceAsc">가격 낮은순</option>
-                  <option value="priceDesc">가격 높은순</option>
-                  <option value="trafficDesc">가시성 높은순</option>
-                </select>
-              </label>
-
-              <label className="tkad-media-map-top-filter inline-flex items-center gap-2 rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-3 py-2 text-xs font-semibold dark:text-white text-gray-900 shadow-sm backdrop-blur">
-                <span className="dark:text-white text-gray-600">타입</span>
-                <select
-                  className="border-l dark:border-white/12 border-gray-200 bg-transparent pl-2 text-xs font-semibold dark:text-white text-gray-900 focus:outline-none"
-                  value={filter.type}
-                  onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
-                >
-                  <option value="">전체</option>
-                  {facets.types.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
+                  {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
                     </option>
                   ))}
                 </select>
-              </label>
+              </div>
             </div>
 
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              {loading ? (
-                <span className="inline-flex items-center gap-2 rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-2.5 py-1 text-[11px] font-semibold dark:text-white text-gray-700 backdrop-blur">
-                  <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
-                  불러오는 중…
-                </span>
-              ) : (
-                <span>{`${items.length}개`}</span>
-              )}
-              {cartIds.length > 0 ? (
-                <span className="font-medium text-primary">담김 {cartIds.length}</span>
-              ) : null}
-              {compareEntries.length > 0 ? (
-                <span className="font-medium dark:text-white text-gray-700">
-                  선택 {compareEntries.length}
-                </span>
-              ) : null}
-            </div>
-          </div>
-          {/* #MAP-2: 검색창 아래 필터 영역 숨김 (코드는 보존) */}
-          <div className="hidden items-center justify-between gap-2">
-            <button
-              type="button"
-              onClick={() => setFiltersExpanded((v) => !v)}
-              aria-expanded={filtersExpanded}
-              className="inline-flex items-center gap-1.5 rounded-full border border-border/80 bg-background px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:border-primary/40 hover:text-primary"
-            >
-              <svg
-                viewBox="0 0 20 20"
-                fill="currentColor"
-                className={`h-3.5 w-3.5 transition-transform ${filtersExpanded ? "rotate-180" : ""}`}
-                aria-hidden
+            {activeFilterCount > 0 ? (
+              <button
+                type="button"
+                onClick={clearFilters}
+                className="flex items-center gap-1 text-xs text-rose-400"
               >
-                <path d="M5.23 7.21a.75.75 0 011.06.02L10 11.06l3.71-3.83a.75.75 0 011.08 1.04l-4.25 4.39a.75.75 0 01-1.08 0L5.21 8.27a.75.75 0 01.02-1.06z" />
-              </svg>
-              {filtersExpanded ? "필터 접기" : "필터 더보기"}
-              {(filter.type || filter.region || filter.priceMin || filter.priceMax) && (
-                <span className="ml-0.5 inline-flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[9px] font-bold dark:text-white text-gray-900">
-                  {[filter.type, filter.region, filter.priceMin, filter.priceMax].filter(Boolean).length}
-                </span>
-              )}
-            </button>
-            <div className="flex items-center gap-2 text-xs text-gray-500">
-              {loading ? (
-                <Spinner size="sm" label="불러오는 중…" />
-              ) : (
-                <span>{`${items.length}개 매체`}</span>
-              )}
-              {cartIds.length > 0 && (
-                <span className="font-medium text-primary">담김 {cartIds.length}</span>
-              )}
+                <X className="h-3 w-3" />
+                {isKo ? "필터 초기화" : "Clear filters"} ({activeFilterCount})
+              </button>
+            ) : null}
+
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-gray-500 dark:text-white/50">
+                {loading
+                  ? isKo
+                    ? "검색 중..."
+                    : "Loading..."
+                  : isKo
+                    ? `매체 ${items.length}개`
+                    : `${items.length} media`}
+              </p>
+              <div className="flex items-center gap-2 text-xs text-gray-600 dark:text-white/70">
+                {cartIds.length > 0 ? (
+                  <span className="tkad-home-accent-text font-medium">
+                    담김 {cartIds.length}
+                  </span>
+                ) : null}
+                {compareEntries.length > 0 ? (
+                  <span className="font-medium text-gray-700 dark:text-white">
+                    선택 {compareEntries.length}
+                  </span>
+                ) : null}
+              </div>
             </div>
           </div>
-
-          {filtersExpanded && false && (
-            <div className="space-y-2 rounded-2xl border border-dashed border-border/70 bg-muted/40 p-2.5">
-              <div className="flex gap-2">
-                <select
-                  value={filter.type}
-                  onChange={(e) => setFilter((f) => ({ ...f, type: e.target.value }))}
-                  className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                >
-                  <option value="">유형 전체</option>
-                  {facets.types.map((t) => (
-                    <option key={t} value={t}>
-                      {t}
-                    </option>
-                  ))}
-                </select>
-                <select
-                  value={filter.region}
-                  onChange={(e) => setFilter((f) => ({ ...f, region: e.target.value }))}
-                  className="flex-1 h-10 px-2 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                >
-                  <option value="">지역 전체</option>
-                  {facets.regions.map((r) => (
-                    <option key={r} value={r}>
-                      {r}
-                    </option>
-                  ))}
-                </select>
-              </div>
-              <div className="flex gap-2">
-                <input
-                  type="number"
-                  placeholder="최소 가격"
-                  value={filter.priceMin}
-                  onChange={(e) => setFilter((f) => ({ ...f, priceMin: e.target.value }))}
-                  className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                />
-                <input
-                  type="number"
-                  placeholder="최대 가격"
-                  value={filter.priceMax}
-                  onChange={(e) => setFilter((f) => ({ ...f, priceMax: e.target.value }))}
-                  className="flex-1 h-10 px-3 border border-border rounded-lg text-sm bg-background focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary"
-                />
-              </div>
-            </div>
-          )}
-        </div>
 
         <ul className="grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
           {items.map((it) => (
             <li
               key={it.id}
-              className={`group rounded-[18px] border bg-card/80 text-card-foreground overflow-hidden cursor-pointer transition-all hover:shadow-md backdrop-blur ${ selectedId === it.id ? "border-primary ring-2 ring-primary/20 shadow-md" : hoveredId === it.id ? "border-primary/60 shadow-md" : "border-border/70 hover:border-primary/40" }`}
+              className={cn(
+                "group cursor-pointer overflow-hidden rounded-[18px] border bg-card/80 text-card-foreground backdrop-blur transition-all hover:shadow-md",
+                selectedId === it.id
+                  ? "border-violet-400/50 shadow-[0_0_0_2px_rgba(139,92,246,0.15)] ring-2 ring-violet-400/25"
+                  : hoveredId === it.id
+                    ? "border-cyan-400/40 shadow-md"
+                    : "border-border/70 hover:border-violet-300/40",
+              )}
               onClick={() => handleSelect(it.id)}
               onMouseEnter={() => setHoveredId(it.id)}
               onMouseLeave={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
@@ -755,32 +732,18 @@ export default function MediaMapPageClient() {
                   {[it.region, it.district].filter(Boolean).join(" · ") || it.location}
                 </div>
                 <div className="flex items-center justify-between pt-0.5">
-                  <span className="text-xs font-bold text-primary tabular-nums">
+                  <span className="tkad-home-accent-text text-xs font-bold tabular-nums">
                     {formatPrice(it.price, it.pricePeriod, locale)}
                   </span>
-                  <div className="flex items-center gap-1.5">
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCompare(it);
-                      }}
-                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${ isInCompare(it.id) ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black" : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15" }`}
-                      aria-label={isInCompare(it.id) ? "선택 해제" : "선택"}
-                    >
-                      {isInCompare(it.id) ? "선택됨" : "선택"}
-                    </button>
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        toggleCart(it.id);
-                      }}
-                      className={`inline-flex items-center justify-center rounded-full border px-2.5 py-1 text-[10px] font-semibold backdrop-blur transition-colors ${ inCart(it.id) ? "border-border/80 bg-card text-foreground shadow-sm dark:border-white/14 border-gray-200 dark:bg-white dark:text-black" : "border-border/70 bg-card/80 text-foreground hover:bg-card dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800 dark:hover:dark:bg-black bg-white/15" }`}
-                      aria-label={inCart(it.id) ? "담기 해제" : "담기"}
-                    >
-                      {inCart(it.id) ? "담김" : "담기"}
-                    </button>
+                  <div className="flex items-center gap-1">
+                    <MediaCompareSelectButton
+                      selected={isInCompare(it.id)}
+                      onToggle={() => toggleCompare(it)}
+                    />
+                    <MediaCartAddButton
+                      inCart={inCart(it.id)}
+                      onToggle={() => toggleCart(it.id)}
+                    />
                   </div>
                 </div>
               </div>
@@ -799,6 +762,7 @@ export default function MediaMapPageClient() {
       </div>
 
       <CompareBar
+        variant="light"
         items={compareItems}
         locale={typeof document !== "undefined" ? document.documentElement.lang || "ko" : "ko"}
         onClear={() => {
@@ -806,7 +770,7 @@ export default function MediaMapPageClient() {
         }}
       />
       {compareEntries.length > 0 ? (
-        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
+        <div className={FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS} aria-hidden />
       ) : null}
     </>
   );

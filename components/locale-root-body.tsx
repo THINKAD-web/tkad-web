@@ -33,7 +33,7 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
         <div className="flex min-h-0 flex-1 flex-col">
           <ConditionalPublicChrome>
             <TopLoader />
-            <div className="hidden md:block">{header}</div>
+            {header}
           </ConditionalPublicChrome>
 
           <div className="flex min-h-0 flex-1 flex-col md:flex-row">

@@ -50,7 +50,7 @@ function resolveGroup(group: PublicNavGroupDef, t: NavTranslator): ResolvedPubli
   };
 }
 
-/** i18n이 적용된 5개 메인 카테고리 트리 */
+/** i18n이 적용된 4개 메인 카테고리 트리 */
 export function buildPublicNavGroups(t: NavTranslator): ResolvedPublicNavGroup[] {
   return PUBLIC_NAV_GROUPS.map((g) => resolveGroup(g, t));
 }
@@ -85,7 +85,8 @@ export function findActiveNavGroupId(
   const path = pathname.split("?")[0] ?? pathname;
   for (const group of groups) {
     for (const item of group.items) {
-      if (path === item.href || (item.href !== "/" && path.startsWith(`${item.href}/`))) {
+      const base = item.href.split("#")[0]?.split("?")[0] ?? item.href;
+      if (path === base || (base !== "/" && path.startsWith(`${base}/`))) {
         return group.id;
       }
     }

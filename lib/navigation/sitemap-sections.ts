@@ -15,9 +15,8 @@ export type SitemapSection = {
 type BuildSitemapSectionsInput = {
   discovery: ResolvedPublicNavGroup;
   planning: ResolvedPublicNavGroup;
-  creative: ResolvedPublicNavGroup;
+  studio: ResolvedPublicNavGroup;
   insights: ResolvedPublicNavGroup;
-  academy: ResolvedPublicNavGroup;
   industryGuideLabel: string;
   webinarLabel: string;
   companyTitle: string;
@@ -33,16 +32,15 @@ function groupLinks(group: ResolvedPublicNavGroup): SitemapLink[] {
   }));
 }
 
-/** 사이트맵 모달 6섹션 그리드 — PUBLIC_NAV_GROUPS 와 동기화 */
+/** 사이트맵 모달 — PUBLIC_NAV_GROUPS 와 동기화 */
 export function buildSitemapSections(
   input: BuildSitemapSectionsInput,
 ): SitemapSection[] {
   const {
     discovery,
     planning,
-    creative,
+    studio,
     insights,
-    academy,
     industryGuideLabel,
     webinarLabel,
     companyTitle,
@@ -83,9 +81,9 @@ export function buildSitemapSections(
       links: [...groupLinks(planning), ...targetLinks],
     },
     {
-      id: "creative",
-      title: creative.label,
-      links: groupLinks(creative),
+      id: "studio",
+      title: studio.label,
+      links: groupLinks(studio),
     },
     {
       id: "insights",
@@ -93,13 +91,6 @@ export function buildSitemapSections(
       links: [
         ...groupLinks(insights),
         { href: "/industry/beauty", label: industryGuideLabel },
-      ],
-    },
-    {
-      id: "academy",
-      title: academy.label,
-      links: [
-        ...groupLinks(academy),
         { href: "/academy#academy-webinars", label: webinarLabel },
       ],
     },

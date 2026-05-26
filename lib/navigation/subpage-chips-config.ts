@@ -245,25 +245,11 @@ export const SUBPAGE_CHIP_GROUPS: SubpageChipGroup[] = [
     matchPath: (p) => p.startsWith("/my"),
     chips: [
       {
-        id: "campaigns",
-        labelKo: "내 캠페인",
-        labelEn: "Campaigns",
-        href: "/my?tab=campaigns",
-        match: (_, sp) => (sp.get("tab") ?? "campaigns") === "campaigns",
-      },
-      {
         id: "quotes",
         labelKo: "견적내역",
         labelEn: "Quotes",
-        href: "/quote",
-        match: (p) => p.startsWith("/quote"),
-      },
-      {
-        id: "favorites",
-        labelKo: "찜한매체",
-        labelEn: "Favorites",
-        href: "/my?tab=favorites",
-        match: (_, sp) => sp.get("tab") === "favorites",
+        href: "/my/booking-requests",
+        match: (p) => p.startsWith("/my/booking-requests"),
       },
       {
         id: "planner",

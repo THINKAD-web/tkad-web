@@ -214,7 +214,7 @@ export function CommandPalette({ open, onClose }: Props) {
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     idx === activeIdx
-                      ? "bg-violet-500/10 dark:bg-white/8"
+                      ? "bg-cyan-400/10 dark:bg-white/8"
                       : "hover:bg-gray-100 dark:hover:bg-white/5",
                   )}
                 >
@@ -228,7 +228,7 @@ export function CommandPalette({ open, onClose }: Props) {
                       row.group.includes("검색") ? (
                       <Search className="h-4 w-4 text-gray-500" />
                     ) : (
-                      <Zap className="h-4 w-4 text-violet-500" />
+                      <Zap className="h-4 w-4 tkad-home-accent-text" />
                     )}{" "}
                   </span>{" "}
                   <span className="min-w-0 flex-1">

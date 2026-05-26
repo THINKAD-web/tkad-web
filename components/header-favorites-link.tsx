@@ -5,11 +5,17 @@ import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { Heart } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { cn } from "@/lib/utils";
+import {
+  headerChromeIconButtonClass,
+  headerChromeIconGhostClass,
+  headerMobileMenuRowClass,
+} from "@/components/public-chrome/header-chrome-buttons";
+import { FAVORITES_CHANGE_EVENT } from "@/lib/favorites-constants";
 import {
   getGuestFavoriteIds,
   subscribeFavorites,
 } from "@/lib/favorites-client";
-import { FAVORITES_CHANGE_EVENT } from "@/lib/favorites-constants";
 
 function useGuestFavoriteCount() {
   return useSyncExternalStore(
@@ -23,10 +29,12 @@ export function HeaderFavoritesLink({
   onNavigate,
   variant = "icon",
   className,
+  compact = false,
 }: {
   onNavigate?: () => void;
   variant?: "icon" | "menu";
   className?: string;
+  compact?: boolean;
 }) {
   const t = useTranslations("media.favorites");
   const pathname = usePathname();
@@ -83,7 +91,7 @@ export function HeaderFavoritesLink({
         <Heart className="h-4 w-4 shrink-0" strokeWidth={2} />
         <span className="flex-1">{t("menuLabel")}</span>
         {count > 0 ? (
-          <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900 dark:from-violet-500 dark:to-cyan-400">
+          <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-500 px-1 text-[10px] font-bold text-white ring-1 ring-white/80 dark:ring-[#05050a]">
             {count > 99 ? "99+" : count}
           </span>
         ) : null}
@@ -95,12 +103,16 @@ export function HeaderFavoritesLink({
     <Link
       href={favoritesHref}
       onClick={onNavigate}
-      className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground hover:text-violet-600 hover:bg-secondary/60 active:scale-95 transition-all duration-150 dark:hover:text-cyan-300"
+      className={cn(
+        "relative",
+        compact ? headerChromeIconGhostClass : headerChromeIconButtonClass,
+        className,
+      )}
       aria-label={aria}
     >
       <Heart className="h-4 w-4" strokeWidth={2} />
       {count > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
+        <span className="absolute -right-0.5 -top-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-cyan-500 px-1 text-[10px] font-bold text-white ring-1 ring-white/80 dark:ring-[#05050a]">
           {count > 99 ? "99+" : count}
         </span>
       )}

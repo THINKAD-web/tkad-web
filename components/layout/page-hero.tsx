@@ -20,9 +20,7 @@ export function PageHero({
       </p>
       <h1 className="mb-2 text-3xl font-bold leading-tight text-gray-900 dark:text-white md:text-4xl">
         {title}
-        <span className="bg-gradient-to-r from-violet-400 to-cyan-400 bg-clip-text text-transparent">
-          {highlight}
-        </span>
+        <span className="tkad-home-accent-text">{highlight}</span>
         {titleEnd}
       </h1>
       <p className="text-sm text-gray-500 dark:text-white/50">{description}</p>

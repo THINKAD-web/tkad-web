@@ -2,19 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { Megaphone, ShoppingCart, User as UserIcon } from "lucide-react";
+import { Megaphone, User as UserIcon } from "lucide-react";
 import {
   headerChromeSignupButtonClass,
   headerChromeTextButtonClass,
   headerMobileMenuRowClass,
 } from "@/components/public-chrome/header-chrome-buttons";
-import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
-import { useCart } from "@/lib/cart";
+import { HeaderAccountActions } from "@/components/header-account-actions";
+import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 import { HeaderFavoritesLink } from "@/components/header-favorites-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
-import { FavoritesSessionSync } from "@/components/favorites-session-sync";
+import { HeaderCartLink } from "@/components/header-cart-link";
 
 type Session = {
   id: string;
@@ -57,10 +57,8 @@ export function HeaderUserMenu({
   onNavigate?: () => void;
   variant?: "inline" | "menu";
 }) {
-  const locale = useLocale();
   const t = useTranslations("auth");
   const { session, loaded } = useSession();
-  const { ids } = useCart();
 
   if (!loaded) return null;
 
@@ -78,20 +76,7 @@ export function HeaderUserMenu({
           variant="menu"
           className={menuRowClass}
         />
-        <Link
-          href="/cart"
-          onClick={onNavigate}
-          className={menuRowClass}
-          aria-label={`${locale === "ko" ? "장바구니" : "Cart"}${ids.length > 0 ? ` (${ids.length})` : ""}`}
-        >
-          <ShoppingCart className="h-4 w-4 shrink-0" strokeWidth={2} />
-          <span className="flex-1">{locale === "ko" ? "장바구니" : "Cart"}</span>
-          {ids.length > 0 ? (
-            <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900 dark:from-violet-500 dark:to-cyan-400">
-              {ids.length}
-            </span>
-          ) : null}
-        </Link>
+        <HeaderCartLink onNavigate={onNavigate} variant="menu" className={menuRowClass} />
         {session ? (
           <>
             <Link href="/my" onClick={onNavigate} className={menuRowClass}>
@@ -132,68 +117,5 @@ export function HeaderUserMenu({
     );
   }
 
-  return (
-    <div className="flex items-center gap-1.5">
-      <FavoritesSessionSync />
-      <HeaderFavoritesLink onNavigate={onNavigate} />
-      <HeaderNotificationsBell onNavigate={onNavigate} />
-      <Link
-        href="/cart"
-        onClick={onNavigate}
-        className="relative inline-flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground transition-all duration-150 hover:bg-secondary/60 hover:text-violet-600 active:scale-95 dark:hover:text-cyan-300"
-        aria-label={`${locale === "ko" ? "장바구니" : "Cart"}${ids.length > 0 ? ` (${ids.length})` : ""}`}
-      >
-        <ShoppingCart className="h-4 w-4" strokeWidth={2} />
-        {ids.length > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 shadow-[0_2px_10px_rgba(124,58,237,0.38)] ring-1 ring-white/30 dark:from-violet-500 dark:to-cyan-400 dark:shadow-[0_0_14px_rgba(34,211,238,0.28)] dark:ring-white/20">
-            {ids.length}
-          </span>
-        )}
-      </Link>
-      {session ? (
-        <>
-          <Link
-            href="/dashboard"
-            onClick={onNavigate}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
-          >
-            <Megaphone
-              className="h-4 w-4 shrink-0 text-gray-700 dark:text-white"
-              strokeWidth={2}
-            />
-            <span className="hidden sm:inline">{t("myCampaigns")}</span>
-          </Link>
-          <HeaderProfileDropdown
-            session={session}
-            onNavigate={onNavigate}
-            myPageLabel={t("myPage")}
-            campaignsLabel={t("myCampaigns")}
-            logoutLabel={t("logout")}
-            pointsShopLabel={t("pointsShop")}
-            referralLabel={t("referralInvite")}
-          />
-        </>
-      ) : (
-        <>
-          <Link
-            href="/guide/how-to-use"
-            onClick={onNavigate}
-            className="inline-flex h-9 items-center rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100"
-          >
-            {t("usageGuide")}
-          </Link>
-          <Link
-            href="/login"
-            onClick={onNavigate}
-            className={headerChromeTextButtonClass}
-          >
-            {t("login")}
-          </Link>
-          <Link href="/signup" onClick={onNavigate} className={headerChromeSignupButtonClass}>
-            {t("signup")}
-          </Link>
-        </>
-      )}
-    </div>
-  );
+  return <HeaderAccountActions onNavigate={onNavigate} />;
 }
