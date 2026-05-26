@@ -26,6 +26,12 @@ export type HomeCatalogMediaItem = {
   name: string;
   type?: string;
   region?: string;
+  location?: string;
+  size?: string;
+  dailyFootTraffic?: number;
+  visibilityScore?: number;
+  features?: string;
+  advertiserHistory?: string;
   price?: number;
   pricePeriod?: MediaPricePeriodKey;
   thumbnailUrl?: string;
@@ -54,6 +60,22 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
     name: item.name,
     type: typeLabel,
     region: item.region ?? item.district ?? item.city,
+    location: item.location?.trim() || undefined,
+    size: item.size?.trim() || undefined,
+    dailyFootTraffic:
+      item.dailyFootTraffic && item.dailyFootTraffic > 0
+        ? item.dailyFootTraffic
+        : undefined,
+    visibilityScore:
+      item.visibilityScore != null && item.visibilityScore > 0
+        ? item.visibilityScore
+        : undefined,
+    features:
+      item.features?.trim() ||
+      item.catalogDescription?.trim() ||
+      item.description?.trim() ||
+      undefined,
+    advertiserHistory: item.advertiserHistory?.trim() || undefined,
     price: display.priceWon > 0 ? display.priceWon : undefined,
     pricePeriod: display.period,
     thumbnailUrl: resolved?.src ?? undefined,

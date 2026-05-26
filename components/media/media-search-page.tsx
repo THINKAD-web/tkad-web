@@ -14,9 +14,9 @@ import {
   AlignJustify,
 } from "lucide-react";
 import CompareBar from "@/components/compare-bar";
+import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
@@ -75,6 +75,22 @@ function formatPriceLabel(
   );
 }
 
+function formatFeedFootTraffic(value?: number) {
+  if (!value || value <= 0) return null;
+  return `일 ${value.toLocaleString("ko-KR")}명+`;
+}
+
+function feedHighlightChips(item: HomeCatalogMediaItem) {
+  const chips: string[] = [];
+  if (item.size) chips.push(item.size);
+  const foot = formatFeedFootTraffic(item.dailyFootTraffic);
+  if (foot) chips.push(foot);
+  if (item.visibilityScore != null && item.visibilityScore > 0) {
+    chips.push(`가시성 ${item.visibilityScore}`);
+  }
+  return chips;
+}
+
 function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
   const price = typeof raw.price === "number" ? raw.price : 0;
   const sampleImages = Array.isArray(raw.sampleImages)
@@ -129,6 +145,27 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
     name: item.name,
     type: typeLabel,
     region: item.region,
+    location:
+      (typeof raw.location === "string" && raw.location.trim()) || undefined,
+    size: (typeof raw.size === "string" && raw.size.trim()) || undefined,
+    dailyFootTraffic:
+      typeof raw.dailyFootTraffic === "number" && raw.dailyFootTraffic > 0
+        ? raw.dailyFootTraffic
+        : undefined,
+    visibilityScore:
+      typeof raw.visibilityScore === "number" && raw.visibilityScore > 0
+        ? raw.visibilityScore
+        : undefined,
+    features:
+      (typeof raw.features === "string" && raw.features.trim()) ||
+      (typeof raw.catalogDescription === "string" &&
+        raw.catalogDescription.trim()) ||
+      (typeof raw.description === "string" && raw.description.trim()) ||
+      undefined,
+    advertiserHistory:
+      (typeof raw.advertiserHistory === "string" &&
+        raw.advertiserHistory.trim()) ||
+      undefined,
     price: display.priceWon > 0 ? display.priceWon : undefined,
     pricePeriod: display.period,
     thumbnailUrl: item.image,
@@ -347,7 +384,7 @@ export function MediaSearchPage({
 
   return (
     <>
-    <div className="min-h-screen bg-gray-50 pb-24 dark:bg-[#020202]">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#020202]">
       <div className="space-y-3 px-4 pt-4">
         {/* ── 검색창 ── */}
         <div className="relative">
@@ -388,8 +425,7 @@ export function MediaSearchPage({
                   category === chip.value ? CHIP_ACTIVE : CHIP_INACTIVE,
                 )}
               >
-                {chip.icon ? `${chip.icon} ` : ""}
-                {chip.label}
+                <MediaFilterChipLabel label={chip.label} icon={chip.icon} />
               </button>
             ))}
           </div>
@@ -414,8 +450,7 @@ export function MediaSearchPage({
                     : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70"
                 }`}
               >
-                {chip.icon ? `${chip.icon} ` : ""}
-                {chip.label}
+                <MediaFilterChipLabel label={chip.label} icon={chip.icon} />
               </button>
             ))}
           </div>
@@ -524,10 +559,11 @@ export function MediaSearchPage({
       <div
         className={cn(
           "mt-3 px-4",
-          viewMode === "feed" && "space-y-3",
+          viewMode === "feed" && "space-y-4",
           viewMode === "card" &&
             "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
           viewMode === "compact" && "divide-y divide-gray-100 dark:divide-white/5",
+          compareEntries.length > 0 && !hasMore && "pb-16 md:pb-12",
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
@@ -547,9 +583,9 @@ export function MediaSearchPage({
                   className={cn(
                     "bg-gray-200 dark:bg-white/10",
                     viewMode === "card"
-                      ? "h-32 w-full"
+                      ? "aspect-square w-full"
                       : viewMode === "feed"
-                        ? "h-28 w-32 flex-shrink-0 rounded-xl"
+                        ? "h-36 w-36 flex-shrink-0 rounded-xl md:h-44 md:w-44"
                         : "h-12 w-16 flex-shrink-0 rounded-xl",
                   )}
                 />
@@ -598,7 +634,7 @@ export function MediaSearchPage({
                 href={href}
                 className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5"
               >
-                <div className="relative h-32 w-full bg-gray-100 dark:bg-gray-800">
+                <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                   {item.thumbnailUrl ? (
                     <Image
                       src={item.thumbnailUrl}
@@ -699,20 +735,27 @@ export function MediaSearchPage({
         ) : (
           media.map((item, idx) => {
             const href = getMediaHref(item);
+            const highlights = feedHighlightChips(item);
+            const locationLine =
+              item.location &&
+              item.location !== item.region &&
+              !item.location.includes(item.region ?? "")
+                ? item.location
+                : null;
             return (
               <Link
                 key={item.id}
                 href={href}
-                className="flex gap-4 rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5"
+                className="flex gap-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5 md:gap-6"
               >
-                <div className="relative h-28 w-32 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
+                <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 md:h-44 md:w-44">
                   {item.thumbnailUrl ? (
                     <Image
                       src={item.thumbnailUrl}
                       alt={item.name}
                       fill
                       className="object-cover"
-                      sizes="128px"
+                      sizes="(max-width: 768px) 144px, 176px"
                     />
                   ) : (
                     <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
@@ -721,7 +764,7 @@ export function MediaSearchPage({
                   )}
                   {idx < 3 ? (
                     <div
-                      className={`absolute left-1 top-1 flex h-5 w-5 items-center justify-center rounded-md text-xs font-bold text-white ${
+                      className={`absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-white ${
                         idx === 0
                           ? "bg-amber-500"
                           : idx === 1
@@ -734,18 +777,45 @@ export function MediaSearchPage({
                   ) : null}
                 </div>
 
-                <div className="min-w-0 flex-1">
-                  <div className="mb-1 flex items-center gap-1">
-                    <CheckCircle className="h-4 w-4 flex-shrink-0 text-blue-400" />
-                    <p className="truncate text-base font-bold text-gray-900 dark:text-white">
+                <div className="min-w-0 flex-1 py-0.5">
+                  <div className="mb-1.5 flex items-start gap-1.5">
+                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-400" />
+                    <p className="line-clamp-2 text-lg font-bold leading-snug text-gray-900 dark:text-white">
                       {item.name}
                     </p>
                   </div>
-                  <p className="mb-2 text-sm text-gray-400 dark:text-white/40">
+                  <p className="mb-2 text-sm text-gray-500 dark:text-white/45">
                     {[item.region, item.type].filter(Boolean).join(" · ")}
                   </p>
+                  {locationLine ? (
+                    <p className="mb-2 line-clamp-1 text-sm text-gray-500 dark:text-white/45">
+                      {locationLine}
+                    </p>
+                  ) : null}
+                  {highlights.length > 0 ? (
+                    <div className="mb-2 flex flex-wrap gap-1.5">
+                      {highlights.map((chip) => (
+                        <span
+                          key={chip}
+                          className="rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-white/8 dark:text-white/65"
+                        >
+                          {chip}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                  {item.features ? (
+                    <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-gray-600 dark:text-white/55">
+                      {item.features}
+                    </p>
+                  ) : null}
+                  {item.advertiserHistory ? (
+                    <p className="mb-2 line-clamp-1 text-xs text-gray-400 dark:text-white/35">
+                      집행 {item.advertiserHistory}
+                    </p>
+                  ) : null}
                   {item.reviewAvg && item.reviewAvg > 0 ? (
-                    <div className="mb-2 flex items-center gap-1">
+                    <div className="mb-3 flex items-center gap-1">
                       <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
                       <span className="text-sm text-gray-500 dark:text-white/50">
                         {item.reviewAvg.toFixed(1)}
@@ -754,9 +824,9 @@ export function MediaSearchPage({
                     </div>
                   ) : null}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 items-center gap-2">
+                    <div className="flex min-w-0 flex-wrap items-center gap-2">
                       {renderPrice(item) ? (
-                        <p className="tkad-home-accent-text text-base font-bold">
+                        <p className="tkad-home-accent-text text-lg font-bold">
                           {renderPrice(item)}
                         </p>
                       ) : null}
@@ -785,7 +855,12 @@ export function MediaSearchPage({
       </div>
 
       {hasMore && !loading ? (
-        <div className="mt-4 px-4">
+        <div
+          className={cn(
+            "mt-4 px-4",
+            compareEntries.length > 0 && "pb-20 md:pb-16",
+          )}
+        >
           <button
             type="button"
             onClick={handleLoadMore}
@@ -804,9 +879,6 @@ export function MediaSearchPage({
       locale={locale}
       onClear={() => setCompareCartEntries([])}
     />
-    {compareEntries.length > 0 ? (
-      <div className={FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS} aria-hidden />
-    ) : null}
     </>
   );
 }

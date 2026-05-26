@@ -55,9 +55,9 @@ export function HomeMediaScroll({
             <Link
               key={item.id}
               href={href}
-              className="w-40 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-white/5 md:w-48"
+              className="w-44 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-white/5 md:w-56"
             >
-              <div className="relative h-28 bg-gray-100 dark:bg-gray-800">
+              <div className="relative h-36 bg-gray-100 dark:bg-gray-800 md:h-40">
                 {item.thumbnailUrl ? (
                   <Image
                     src={item.thumbnailUrl}
@@ -74,11 +74,6 @@ export function HomeMediaScroll({
                   </div>
                 )}
                 <div className="absolute top-2 left-2 flex flex-col gap-1">
-                  {idx === 0 ? (
-                    <span className="rounded-md bg-amber-400 px-1.5 py-0.5 text-[10px] font-bold text-gray-900">
-                      BEST
-                    </span>
-                  ) : null}
                   {item.isInstantBooking ? (
                     <span className="rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
                       즉시예약
@@ -87,7 +82,7 @@ export function HomeMediaScroll({
                 </div>
               </div>
 
-              <div className="p-3">
+              <div className="p-3.5">
                 <div className="mb-1 flex items-center gap-1">
                   <CheckCircle className="h-3 w-3 shrink-0 text-blue-400" />
                   <p className="truncate text-sm leading-tight font-semibold text-gray-900 dark:text-white">

@@ -17,6 +17,7 @@ import {
   MEDIA_SEARCH_SORT_OPTIONS,
   MEDIA_TYPE_CHIPS,
 } from "@/lib/media-discovery-filter-chips";
+import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
@@ -595,8 +596,7 @@ export default function MediaMapPageClient() {
                         : MEDIA_CHIP_INACTIVE,
                     )}
                   >
-                    {chip.icon ? `${chip.icon} ` : ""}
-                    {chip.label}
+                    <MediaFilterChipLabel label={chip.label} icon={chip.icon} />
                   </button>
                 ))}
               </div>
