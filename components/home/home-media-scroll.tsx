@@ -40,7 +40,7 @@ export function HomeMediaScroll({
         </div>
         <Link
           href={viewAllHref}
-          className="flex items-center gap-0.5 text-xs font-medium text-violet-400"
+          className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
         >
           전체보기 <ChevronRight className="h-3 w-3" />
         </Link>
@@ -107,7 +107,7 @@ export function HomeMediaScroll({
                   </div>
                 ) : null}
                 {formatPrice(item.price) ? (
-                  <p className="text-sm font-bold text-violet-400">
+                  <p className="text-sm font-bold tkad-home-accent-text">
                     {formatPrice(item.price)}/월
                   </p>
                 ) : null}

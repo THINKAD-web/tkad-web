@@ -60,20 +60,27 @@ export function OnboardingProgressBar() {
   return (
     <Link
       href="/onboarding"
-      className="block border-b border-[#ff6b2c]/30 bg-[#ff6b2c]/10 px-4 py-2.5 transition-colors hover:bg-[#ff6b2c]/15"
+      className="group block border-b border-cyan-500/25 bg-gradient-to-r from-cyan-500/[0.07] via-violet-500/[0.05] to-pink-500/[0.07] px-4 py-2.5 transition-colors hover:from-cyan-500/10 hover:via-violet-500/8 hover:to-pink-500/10 dark:border-white/10 dark:from-cyan-500/12 dark:via-violet-500/10 dark:to-pink-500/12 dark:bg-[#05050a]/90"
     >
       <div className="mx-auto flex max-w-6xl flex-col gap-2 sm:flex-row sm:items-center sm:gap-4">
-        <p className="min-w-0 flex-1 text-sm font-semibold dark:text-white text-gray-800">
-          {t("progressMessage", { percent: pct })}
+        <p className="min-w-0 flex-1 text-sm font-semibold text-gray-800 dark:text-white/90">
+          {t.rich("progressMessage", {
+            percent: pct,
+            accent: (chunks) => (
+              <span className="tkad-home-accent-text font-bold tabular-nums">
+                {chunks}
+              </span>
+            ),
+          })}
         </p>
         <div className="flex flex-1 items-center gap-3 sm:max-w-md">
-          <div className="h-2 flex-1 overflow-hidden rounded-full dark:bg-white/10 bg-gray-100">
+          <div className="h-2 flex-1 overflow-hidden rounded-full border border-cyan-500/20 bg-gray-100 dark:border-white/10 dark:bg-white/10">
             <div
-              className="h-full rounded-full bg-[#ff6b2c] transition-all duration-500"
+              className="h-full rounded-full bg-gradient-to-r from-cyan-400 via-violet-400 to-pink-400 shadow-[0_0_10px_rgba(34,211,238,0.35)] transition-all duration-500"
               style={{ width: `${Math.max(pct, 8)}%` }}
             />
           </div>
-          <span className="shrink-0 text-xs font-bold text-[#ff6b2c]">
+          <span className="shrink-0 text-xs font-bold tabular-nums text-cyan-600 dark:text-cyan-400">
             {pct}%
           </span>
         </div>

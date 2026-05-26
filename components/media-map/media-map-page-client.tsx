@@ -21,11 +21,6 @@ import {
 } from "@/lib/compare-cart-client";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
-import {
-  PageSubNav,
-  MEDIA_SUB_NAV_ITEMS,
-} from "@/components/navigation/page-sub-nav";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
@@ -478,29 +473,7 @@ export default function MediaMapPageClient() {
 
   return (
     <>
-      <CategoryExploreHero
-        code="// 02 · MAP"
-        showBeta
-        headlineBefore={isKo ? "지도로 찾는 " : "Find "}
-        headlineGradient={isKo ? "옥외광고" : "OOH on the map"}
-        headlineAfter={isKo ? "" : ""}
-        subtitle={
-          isKo
-            ? "위치·유형·가격으로 필터링하고, 핀을 눌러 매체 요약을 확인하세요. 전체 상세는 새 탭에서 열립니다."
-            : "Filter by location, type, and price. Tap a pin for a quick summary—open full details in a new tab."
-        }
-        compactOnMobile
-        className="border-b dark:border-white/10 border-gray-200"
-      />
-
-      <PageSubNav
-        items={MEDIA_SUB_NAV_ITEMS}
-        locale={locale}
-        className="border-b px-4 py-3 dark:border-white/10 border-gray-200 sm:px-6"
-        data-screenshot="media-sub-nav"
-      />
-
-      <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
+    <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">

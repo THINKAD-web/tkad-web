@@ -19,7 +19,14 @@ const defaultToggleClass = headerChromeIconButtonClass;
  * Light / Dark 토글. 자동 모드일 때 ☀️/🌙 + "자동" 표시.
  * 클릭 시 수동 모드(자정까지 유지).
  */
-export function ThemeToggle({ className }: { className?: string }) {
+export function ThemeToggle({
+  className,
+  variant = "labeled",
+}: {
+  className?: string;
+  /** Header icon buttons: icon-only (no overflow / click steal) */
+  variant?: "labeled" | "icon";
+}) {
   const { resolvedTheme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
   const [autoMode, setAutoMode] = useState(true);
@@ -43,7 +50,13 @@ export function ThemeToggle({ className }: { className?: string }) {
       window.removeEventListener(THEME_AUTO_CHANGED_EVENT, onAutoChanged);
   }, [syncAutoMode]);
 
-  const cls = cn(defaultToggleClass, "relative gap-0.5", className);
+  const iconOnly = variant === "icon";
+  const cls = cn(
+    defaultToggleClass,
+    "relative",
+    iconOnly ? "gap-0" : "gap-0.5",
+    className,
+  );
 
   if (!mounted) {
     return (
@@ -89,10 +102,16 @@ export function ThemeToggle({ className }: { className?: string }) {
           <Sun className="h-4 w-4" />
         )}
       </span>
-      {autoMode ? (
+      {autoMode && !iconOnly ? (
         <span className="text-[9px] font-semibold leading-none text-violet-600 dark:text-violet-300">
           자동
         </span>
+      ) : null}
+      {autoMode && iconOnly ? (
+        <span
+          className="absolute bottom-1.5 right-1.5 h-1.5 w-1.5 rounded-full bg-cyan-400 ring-1 ring-white/80 dark:ring-[#05050a]/80"
+          aria-hidden
+        />
       ) : null}
     </button>
   );

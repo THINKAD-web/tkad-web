@@ -125,10 +125,12 @@ export function QuickActionBarMobile() {
   );
 }
 
-export function QuickActionBarDesktop() {
+export function QuickActionBarDesktop({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
   const locale = useLocale();
   const isKo = locale === "ko";
+  const newPlanLabel = isKo ? "새 플랜" : "New plan";
+  const quoteLabel = isKo ? "견적 문의" : "Get quote";
 
   if (isHiddenPath(pathname)) return null;
 
@@ -139,27 +141,42 @@ export function QuickActionBarDesktop() {
     >
       <Link
         href="/planner"
+        title={compact ? newPlanLabel : undefined}
+        aria-label={compact ? newPlanLabel : undefined}
         className={cn(
-          "flex items-center justify-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold transition-colors",
-          pathname.startsWith("/planner")
-            ? "bg-violet-500 text-white"
-            : "bg-violet-600 text-white hover:bg-violet-500",
+          "tkad-neon-cta-clean flex items-center justify-center gap-2 rounded-lg text-sm font-semibold text-white transition-transform hover:-translate-y-0.5",
+          compact ? "px-2 py-2.5 text-lg" : "px-3 py-2.5",
         )}
       >
-        <Plus className="h-4 w-4" aria-hidden />
-        {isKo ? "새 플랜" : "New plan"}
+        {compact ? (
+          <span aria-hidden>✨</span>
+        ) : (
+          <>
+            <Plus className="h-4 w-4" aria-hidden />
+            {newPlanLabel}
+          </>
+        )}
       </Link>
       <Link
         href="/quote"
+        title={compact ? quoteLabel : undefined}
+        aria-label={compact ? quoteLabel : undefined}
         className={cn(
-          "flex items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-sm font-medium transition-colors",
+          "flex items-center justify-center gap-2 rounded-lg border text-sm font-medium transition-colors",
+          compact ? "px-2 py-2.5 text-lg" : "px-3 py-2.5",
           pathname.startsWith("/quote")
             ? "border-violet-300 bg-violet-50 text-violet-700 dark:border-violet-500/40 dark:bg-violet-500/15 dark:text-violet-200"
             : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/5",
         )}
       >
-        <MessageCircle className="h-4 w-4" aria-hidden />
-        {isKo ? "견적 문의" : "Get quote"}
+        {compact ? (
+          <span aria-hidden>💬</span>
+        ) : (
+          <>
+            <MessageCircle className="h-4 w-4" aria-hidden />
+            {quoteLabel}
+          </>
+        )}
       </Link>
     </div>
   );

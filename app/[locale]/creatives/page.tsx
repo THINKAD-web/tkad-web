@@ -16,17 +16,15 @@ export default async function CreativesLibraryPage({
 
   return (
     <CreativesShell
-      eyebrow=""
-      title=""
-      categoryHero={{
-        code: "// 06 · CREATIVES",
-        showBeta: true,
-        headlineBefore: isKo ? "소재를 올리고 " : "Upload creatives and ",
-        headlineGradient: isKo ? "바로 집행" : "go live",
-        subtitle: isKo
-          ? "광고 집행에 사용할 이미지·영상 소재를 업로드하고, 즉시예약과 플레이리스트에서 재사용할 수 있습니다."
-          : "Upload images and videos once, then reuse them across instant bookings and playlists.",
+      pageHero={{
+        eyebrow: "// 01 · STUDIO",
+        title: "소재를 올리고 ",
+        highlight: "바로 집행",
+        description: isKo
+          ? "OOH 광고 소재를 업로드하고 DOOH 화면에서 미리보기"
+          : "Upload OOH creatives and preview them on DOOH screens.",
       }}
+      subTabPath="/creatives"
       isKo={isKo}
     >
       <CreativeLibraryClient />

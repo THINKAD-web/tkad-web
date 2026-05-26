@@ -1,44 +1,32 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { usePathname } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
-import { ArrowLeft, BookOpen, Film, ListMusic, Upload } from "lucide-react";
+import { PageHero, type PageHeroProps } from "@/components/layout/page-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
+import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type CreativesCategoryHero = {
-  code: string;
-  headlineBefore: string;
-  headlineGradient: string;
-  headlineAfter?: string;
-  subtitle: string;
-  showBeta?: boolean;
-};
-
 /**
- * `/creatives/*` 모든 페이지가 공유하는 네온 셸 (히어로 + 좌측 네브).
- *
- * 디자인:
- *  - 다크 히어로 + `tkad-neon-depth/grid` (compare/planner 와 동일)
- *  - 본문은 라이트 모드에서도 라이트 카드로 변환되도록 `tkad-glass-surface` 사용
- *  - 하위 페이지마다 title/eyebrow/right slot 지정
+ * `/creatives/*` 모든 페이지가 공유하는 셸 (PageHero + SubTabs + 본문).
  */
 export function CreativesShell({
+  pageHero,
+  subTabPath,
   eyebrow,
   title,
   description,
-  categoryHero,
   rightSlot,
   children,
   showBackToLibrary = false,
   isKo = true,
 }: {
-  eyebrow: string;
-  title: ReactNode;
+  pageHero?: PageHeroProps;
+  subTabPath?: string;
+  eyebrow?: string;
+  title?: ReactNode;
   description?: ReactNode;
-  categoryHero?: CreativesCategoryHero;
   rightSlot?: ReactNode;
   children: ReactNode;
   showBackToLibrary?: boolean;
@@ -47,56 +35,52 @@ export function CreativesShell({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
-        {categoryHero ? (
-          <CategoryExploreHero
-            code={categoryHero.code}
-            showBeta={categoryHero.showBeta}
-            headlineBefore={categoryHero.headlineBefore}
-            headlineGradient={categoryHero.headlineGradient}
-            headlineAfter={categoryHero.headlineAfter}
-            subtitle={categoryHero.subtitle}
-            className="border-b dark:border-white/10 border-gray-200"
-          >
-            <div className="flex flex-col items-center gap-4">
-              {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
-              <CreativesSubNav className="justify-center" />
-            </div>
-          </CategoryExploreHero>
+        {pageHero ? (
+          <>
+            <PageHero {...pageHero} />
+            <SubTabsBar group="studio" currentPath={subTabPath ?? "/creatives"} />
+            {rightSlot ? (
+              <div className="flex justify-end px-4 pb-4">{rightSlot}</div>
+            ) : null}
+          </>
         ) : (
-        <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.12),rgba(0,0,0,0.55),rgba(0,0,0,0.92))]"
-          />
-          <div className="relative mx-auto max-w-7xl px-4 pb-12 pt-12 sm:px-6 sm:pb-16 sm:pt-16 lg:px-8 lg:pb-20 lg:pt-20">
-            {showBackToLibrary ? (
-              <Link
-                href="/creatives"
-                className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600 transition-colors hover:dark:text-white text-gray-900"
-              >
-                <ArrowLeft className="h-3.5 w-3.5" aria-hidden /> {isKo ? "라이브러리로" : "Library"}
-              </Link>
-            ) : null}
-            <p className={cn("font-display text-xs font-medium uppercase tracking-[0.28em] dark:text-white text-gray-600", showBackToLibrary ? "mt-3" : null)}>
-              {eyebrow}
-            </p>
-            <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
-              <h1 className="text-balance text-3xl font-black tracking-[-0.04em] dark:text-white text-gray-900 sm:text-4xl lg:text-5xl">
-                {title}
-              </h1>
-              {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
+          <section className="relative overflow-hidden border-b border-gray-200 bg-gray-50 text-gray-900 dark:border-white/10 dark:bg-[#05050a] dark:text-white">
+            <div className="relative mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-6 sm:pt-10">
+              {showBackToLibrary ? (
+                <Link
+                  href="/creatives"
+                  className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-gray-600 transition-colors hover:text-gray-900 dark:text-white/70 dark:hover:text-white"
+                >
+                  <ArrowLeft className="h-3.5 w-3.5" aria-hidden />{" "}
+                  {isKo ? "라이브러리로" : "Library"}
+                </Link>
+              ) : null}
+              {eyebrow ? (
+                <p
+                  className={cn(
+                    "font-display text-xs font-medium uppercase tracking-[0.28em] text-gray-600 dark:text-white/60",
+                    showBackToLibrary ? "mt-3" : null,
+                  )}
+                >
+                  {eyebrow}
+                </p>
+              ) : null}
+              {title ? (
+                <div className="mt-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between sm:gap-6">
+                  <h1 className="text-balance text-3xl font-black tracking-[-0.04em] text-gray-900 dark:text-white sm:text-4xl">
+                    {title}
+                  </h1>
+                  {rightSlot ? <div className="shrink-0">{rightSlot}</div> : null}
+                </div>
+              ) : null}
+              {description ? (
+                <p className="mt-4 max-w-2xl text-sm leading-relaxed text-gray-700 dark:text-white/70 sm:text-base">
+                  {description}
+                </p>
+              ) : null}
             </div>
-            {description ? (
-              <p className="mt-4 max-w-2xl text-sm leading-relaxed dark:text-white text-gray-700 sm:text-base">
-                {description}
-              </p>
-            ) : null}
-
-            <CreativesSubNav className="mt-6" />
-          </div>
-        </section>
+            <SubTabsBar group="studio" currentPath={subTabPath ?? "/creatives/upload"} />
+          </section>
         )}
 
         <section className="bg-card py-10 sm:py-14">
@@ -104,48 +88,5 @@ export function CreativesShell({
         </section>
       </div>
     </HomeLandingDayNight>
-  );
-}
-
-const SUBNAV: Array<{
-  href: string;
-  label: string;
-  icon: typeof Film;
-}> = [
-  { href: "/creatives", label: "라이브러리", icon: Film },
-  { href: "/creatives/upload", label: "업로드", icon: Upload },
-  { href: "/creatives/playlists", label: "플레이리스트", icon: ListMusic },
-  { href: "/creatives/guide", label: "규격 가이드", icon: BookOpen },
-];
-
-function CreativesSubNav({ className }: { className?: string }) {
-  const pathname = usePathname();
-  // pathname 은 /ko/creatives/... 또는 /en/creatives/... 형태 — locale 제거 후 비교
-  const stripped = pathname?.replace(/^\/[a-z]{2}/, "") || "";
-
-  return (
-    <nav className={cn("flex flex-wrap gap-2", className)} aria-label="크리에이티브 메뉴">
-      {SUBNAV.map((item) => {
-        const isActive =
-          item.href === "/creatives"
-            ? stripped === "/creatives"
-            : stripped.startsWith(item.href);
-        return (
-          <Link
-            key={item.href}
-            href={item.href}
-            className={cn(
-              "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-all",
-              isActive
-                ? "border-white/30 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_36px_rgba(0,0,0,0.45)]"
-                : "dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:text-white text-gray-900",
-            )}
-          >
-            <item.icon className="h-3.5 w-3.5" aria-hidden />
-            {item.label}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }

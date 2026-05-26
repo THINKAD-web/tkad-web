@@ -16,8 +16,9 @@ import {
   buildCollectionPageJsonLd,
 } from "@/lib/structured-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import {
-  CategoryExploreHero,
   CategoryHeroCtaRow,
   categoryHeroCtaPrimaryClass,
   categoryHeroCtaSecondaryClass,
@@ -174,15 +175,14 @@ export default async function GuidesIndexPage({ params }: Props) {
 
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
-          <CategoryExploreHero
-            code={`// ${isKo ? "초보자 가이드" : "BEGINNER GUIDE"}`}
-            headlineBefore={isKo ? "OOH 광고, " : "OOH ads, "}
-            headlineGradient={isKo ? "처음이세요?" : "new here?"}
-            subtitle={
-              isKo ? BEGINNER_GUIDE_META.heroSubtitleKo : BEGINNER_GUIDE_META.heroSubtitleEn
-            }
-            showBeta={false}
-          >
+          <PageHero
+            eyebrow="// 04 · CONTENT"
+            title="광고주를 위한 "
+            highlight="실전 가이드"
+            description="OOH 광고 기획부터 집행까지 단계별로 안내해드립니다"
+          />
+          <SubTabsBar group="content" currentPath="/guides" />
+          <div className="border-b border-white/10 px-4 pb-6">
             <CategoryHeroCtaRow>
               <Link href="/media" className={categoryHeroCtaPrimaryClass}>
                 {isKo ? "매체 탐색하기" : "Browse media"}
@@ -193,7 +193,7 @@ export default async function GuidesIndexPage({ params }: Props) {
                 <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
               </Link>
             </CategoryHeroCtaRow>
-          </CategoryExploreHero>
+          </div>
 
           <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
             <NeonSectionHead

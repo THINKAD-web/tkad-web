@@ -20,11 +20,16 @@ const PwaCatalogSync = dynamic(
   () => import("@/components/pwa-catalog-sync").then((m) => ({ default: m.PwaCatalogSync })),
   { ssr: false },
 );
+const HomeOnboardingTour = dynamic(
+  () => import("@/components/home/home-onboarding-tour"),
+  { ssr: false },
+);
 export default function DeferredPublicWidgets() {
   return (
     <ContactChannelProvider>
       <PwaCatalogSync />
       <RecentlyViewedSync />
+      <HomeOnboardingTour />
       <FloatingSupportDock />
     </ContactChannelProvider>
   );

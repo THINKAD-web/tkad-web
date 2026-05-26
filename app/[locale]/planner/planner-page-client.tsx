@@ -13,7 +13,9 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabs } from "@/components/layout/sub-tabs";
+import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import {
   ChevronLeft,
   ChevronRight,
@@ -103,10 +105,6 @@ import {
   PlannerTrialBanner,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
-import {
-  PageSubNav,
-  PLANNER_SUB_NAV_ITEMS,
-} from "@/components/navigation/page-sub-nav";
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import type { HomeAppearance } from "@/lib/home-appearance";
@@ -739,13 +737,13 @@ export default function PlannerPageClient({
     return (
       <HomeLandingDayNight>
         <div className="tkad-landing-neon">
-          <CategoryExploreHero
-          code="// 05 · PLANNER"
-          showBeta
-          headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
-          headlineGradient={isKo ? "미디어 플랜" : "your budget"}
-          subtitle={t("subtitle")}
-        />
+          <PageHero
+            eyebrow="// 01 · PLANNING"
+            title="예산에 맞는 "
+            highlight="미디어 플랜"
+            description="AI가 최적 매체 조합과 예상 성과를 3분 안에 제안"
+          />
+          <SubTabs tabs={PLANNING_TABS} currentPath="/planner" />
 
           <PlannerNeonPageBody
             appearance={landingAppearance}
@@ -774,22 +772,13 @@ export default function PlannerPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon">
-        <CategoryExploreHero
-          code="// 05 · PLANNER"
-          showBeta
-          headlineBefore={isKo ? "예산에 맞는 " : "Media plans for "}
-          headlineGradient={isKo ? "미디어 플랜" : "your budget"}
-          subtitle={t("subtitle")}
+        <PageHero
+          eyebrow="// 01 · PLANNING"
+          title="예산에 맞는 "
+          highlight="미디어 플랜"
+          description="AI가 최적 매체 조합과 예상 성과를 3분 안에 제안"
         />
-
-        <div className="sticky top-14 z-20 border-b border-gray-200 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#020202]/95">
-          <PageSubNav
-            items={PLANNER_SUB_NAV_ITEMS}
-            locale={locale}
-            className="mx-auto max-w-7xl px-4 py-2 sm:px-6"
-            data-screenshot="planner-sub-nav"
-          />
-        </div>
+        <SubTabs tabs={PLANNING_TABS} currentPath="/planner" />
 
         <PlannerNeonPageBody
           appearance={landingAppearance}

@@ -49,15 +49,27 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
         active
-          ? "bg-violet-500/10 font-semibold text-violet-700 dark:bg-white/8 dark:text-white"
+          ? "bg-violet-500/10 font-semibold dark:bg-white/8"
           : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/5",
         compact && "justify-center px-2",
       )}
     >
-      {Icon ? <Icon className="h-4 w-4 shrink-0" aria-hidden /> : null}
+      {Icon ? (
+        <Icon
+          className={cn("h-4 w-4 shrink-0", active && "tkad-home-accent-text")}
+          aria-hidden
+        />
+      ) : null}
       {!compact ? (
         <>
-          <span className="min-w-0 flex-1 truncate">{label}</span>
+          <span
+            className={cn(
+              "min-w-0 flex-1 truncate",
+              active ? "tkad-home-accent-text" : undefined,
+            )}
+          >
+            {label}
+          </span>
           {item.badge != null && Number(item.badge) > 0 ? (
             <span className="rounded-full bg-red-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
               {item.badge}
@@ -172,7 +184,7 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
 
   if (!mounted) return null;
 
-  const wide = !collapsed || hoverExpanded;
+  const compact = collapsed && !hoverExpanded;
 
   return (
     <aside
@@ -189,7 +201,7 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
     >
       <ContextNavSidebar collapsed={collapsed} hoverExpanded={hoverExpanded} />
 
-      <QuickActionBarDesktop />
+      <QuickActionBarDesktop compact={compact} />
 
       <div className="mt-auto shrink-0 border-t border-gray-200 p-2 dark:border-white/10">
         <button

@@ -10,6 +10,11 @@ import {
   Zap,
 } from "lucide-react";
 
+const NEON_ICON_GLOW: Record<string, string> = {
+  "text-violet-500": "drop-shadow-[0_0_8px_rgba(139,92,246,0.55)]",
+  "text-cyan-500": "drop-shadow-[0_0_8px_rgba(34,211,238,0.55)]",
+};
+
 const items = [
   {
     label: "매체검색",
@@ -72,7 +77,9 @@ export function HomeQuickAccess() {
             className="group flex flex-col items-center gap-1.5"
           >
             <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8">
-              <item.icon className={`h-6 w-6 ${item.color}`} />
+              <item.icon
+                className={`h-6 w-6 ${item.color} ${NEON_ICON_GLOW[item.color] ?? ""}`}
+              />
             </div>
             <span className="text-center text-xs leading-tight font-medium text-gray-600 dark:text-white/70">
               {item.label}

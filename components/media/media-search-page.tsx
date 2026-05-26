@@ -5,9 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import {
   Search,
-  Map,
-  Sparkles,
-  Package,
   Star,
   CheckCircle,
   X,
@@ -19,13 +16,6 @@ import { typeLabels } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 import { cn } from "@/lib/utils";
-
-const SUB_TABS = [
-  { label: "매체검색", href: "/ko/media", icon: Search },
-  { label: "지도탐색", href: "/ko/media/map", icon: Map },
-  { label: "AI추천", href: "/ko/recommend", icon: Sparkles },
-  { label: "패키지", href: "/ko/media/packages", icon: Package },
-];
 
 const TYPE_CHIPS = [
   { label: "전체", value: "", icon: "" },
@@ -234,26 +224,6 @@ export function MediaSearchPage({
 
   return (
     <div className="min-h-screen bg-gray-50 pb-24 dark:bg-[#020202]">
-      {/* ── 서브 카테고리 탭 ── */}
-      <div className="sticky top-14 z-20 border-b border-gray-200 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#020202]/95">
-        <div className="scrollbar-hide flex gap-1 overflow-x-auto px-4 py-2">
-          {SUB_TABS.map((tab) => (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={`flex items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all ${
-                tab.label === "매체검색"
-                  ? "bg-violet-500 text-white"
-                  : "text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-white/70 hover:dark:bg-white/15"
-              }`}
-            >
-              <tab.icon className="h-4 w-4" />
-              {tab.label}
-            </Link>
-          ))}
-        </div>
-      </div>
-
       <div className="space-y-3 px-4 pt-4">
         {/* ── 검색창 ── */}
         <div className="relative">

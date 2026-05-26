@@ -13,7 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { ReportCategory } from "@prisma/client";
 import { ContentNotifySignup } from "@/components/content-notify-signup";
-import { ReportListHero } from "@/components/report/report-list-hero";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 
 export const dynamic = "force-dynamic";
 
@@ -90,8 +91,13 @@ export default async function ReportListPage({ params, searchParams }: ListProps
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <ReportListHero />
-
+        <PageHero
+          eyebrow="// 01 · CONTENT"
+          title="OOH 시장 "
+          highlight="트렌드 리포트"
+          description="최신 OOH 광고 트렌드와 시장 인사이트를 확인하세요"
+        />
+        <SubTabsBar group="content" currentPath="/report" />
 
         <section className="border-b border-border bg-muted/30 py-8 dark:border-white/10 border-gray-200 dark:bg-[#070712]">
           <div className="ui-container">

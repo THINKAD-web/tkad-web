@@ -3011,7 +3011,7 @@
     "stepLabel": "단계 {current} / {total}",
     "saveError": "저장에 실패했습니다. 다시 시도해주세요.",
     "industryRequired": "업종을 하나 이상 선택해주세요.",
-    "progressMessage": "프로필 완성도 {percent}% — 완성하면 맞춤 추천이 더 정확해져요",
+    "progressMessage": "프로필 완성도 <accent>{percent}%</accent> — 완성하면 맞춤 추천이 더 정확해져요",
     "step1Title": "어떤 목적으로 사용하실 건가요?",
     "step1Desc": "맞춤 기능과 추천에 활용됩니다.",
     "roleAdvertiser": "광고주",

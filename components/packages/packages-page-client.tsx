@@ -7,8 +7,10 @@ import { ArrowRight, Check, Sparkles } from "lucide-react";
 import type { ResolvedMediaPackage } from "@/lib/media-packages";
 import type { PackagePurpose } from "@/data/packages";
 import { PackageCard } from "@/components/packages/package-card";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabs } from "@/components/layout/sub-tabs";
+import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import {
-  CategoryExploreHero,
   CategoryHeroCtaRow,
   categoryHeroCtaPrimaryClass,
   categoryHeroCtaSecondaryClass,
@@ -42,12 +44,16 @@ export function PackagesPageClient({ packages }: Props) {
 
   return (
     <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
-      <CategoryExploreHero
-        code="// 03 · PACKAGES"
-        headlineBefore={isKo ? "목적에 맞는 " : "OOH packages for "}
-        headlineGradient={isKo ? "OOH 패키지" : "your goals"}
-        subtitle={t("hero.subtitle")}
-      >
+      <PageHero
+        eyebrow="// 03 · PLANNING"
+        title="목적에 맞는 "
+        highlight="OOH 패키지"
+        description="검증된 매체 조합 패키지로 빠르게 시작하세요"
+      />
+      <SubTabs tabs={PLANNING_TABS} currentPath="/media/packages" />
+
+      <section className="border-b border-black/[0.04] px-4 pb-8 dark:border-white/[0.06]">
+        <div className="mx-auto max-w-3xl text-center">
             <CategoryHeroCtaRow>
               <a href="#package-grid" className={categoryHeroCtaPrimaryClass}>
                 {t("hero.ctaPrimary")} <ArrowRight className="h-4 w-4" aria-hidden />
@@ -56,7 +62,7 @@ export function PackagesPageClient({ packages }: Props) {
                 {t("hero.ctaSecondary")} <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
             </CategoryHeroCtaRow>
-            <dl className="mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6 mx-auto">
+            <dl className="mx-auto mt-12 grid w-full max-w-3xl grid-cols-3 gap-3 sm:gap-6">
               {[
                 {
                   label: t("hero.stat1Label"),
@@ -84,8 +90,8 @@ export function PackagesPageClient({ packages }: Props) {
                 </div>
               ))}
             </dl>
-      </CategoryExploreHero>
-
+        </div>
+      </section>
 
       {/* Filter tabs */}
       <section

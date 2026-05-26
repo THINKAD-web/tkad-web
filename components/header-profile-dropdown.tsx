@@ -53,15 +53,18 @@ export function HeaderProfileDropdown({
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex h-9 items-center gap-1 rounded-full border border-transparent px-2 text-muted-foreground transition-colors",
-          "hover:bg-secondary/60 hover:text-foreground dark:text-white text-gray-700 dark:hover:dark:bg-white/10 bg-gray-100 dark:hover:dark:text-white text-gray-900",
-          open && "bg-secondary/60 dark:bg-white/10 bg-gray-100",
+          "inline-flex h-9 items-center gap-1 rounded-full border border-transparent px-2 transition-colors",
+          "text-gray-700 hover:bg-gray-100 dark:text-white dark:hover:bg-white/10",
+          open && "bg-gray-100 dark:bg-white/10",
         )}
         aria-expanded={open}
         aria-haspopup="menu"
         aria-label={session.name}
       >
-        <UserIcon className="h-4 w-4 shrink-0" strokeWidth={2} />
+        <UserIcon
+          className="h-4 w-4 shrink-0 text-gray-700 dark:text-white"
+          strokeWidth={2}
+        />
         <ChevronDown
           className={cn("h-3.5 w-3.5 transition-transform", open && "rotate-180")}
         />
@@ -95,9 +98,9 @@ export function HeaderProfileDropdown({
               setOpen(false);
               onNavigate?.();
             }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
+            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
           >
-            <UserIcon className="h-4 w-4 opacity-70" />
+            <UserIcon className="h-4 w-4 text-gray-600 dark:text-white/80" />
             {myPageLabel}
           </Link>
           <Link
@@ -131,9 +134,9 @@ export function HeaderProfileDropdown({
               setOpen(false);
               onNavigate?.();
             }}
-            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-foreground transition-colors hover:bg-muted dark:text-white text-gray-900 dark:hover:dark:bg-white/8 bg-gray-100"
+            className="flex items-center gap-2 px-3 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:text-white dark:hover:bg-white/10"
           >
-            <Megaphone className="h-4 w-4 opacity-70" />
+            <Megaphone className="h-4 w-4 text-gray-600 dark:text-white/80" />
             {campaignsLabel}
           </Link>
           <button

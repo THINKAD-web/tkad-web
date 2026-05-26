@@ -3,8 +3,9 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import {
-  CategoryExploreHero,
   CategoryHeroCtaRow,
   categoryHeroCtaPrimaryClass,
   categoryHeroCtaSecondaryClass,
@@ -42,13 +43,14 @@ export async function CasesPageContent({ locale, cases }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <CategoryExploreHero
-          code="// 01 · CASES"
-          showBeta
-          headlineBefore={isKo ? "브랜드가 선택한 " : "Brands chose "}
-          headlineGradient={isKo ? "성공 사례 허브" : "success story hub"}
-          subtitle={empty ? t("cases.reportHeroSubtitle") : t("cases.subtitle")}
-        >
+        <PageHero
+          eyebrow="// 02 · CONTENT"
+          title="브랜드가 선택한 "
+          highlight="성공 사례"
+          description="실제 집행된 OOH 캠페인의 전략과 성과를 확인하세요"
+        />
+        <SubTabsBar group="content" currentPath="/cases" />
+        <div className="border-b border-white/10 px-4 pb-6">
           <CategoryHeroCtaRow>
             <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
               {t("cases.reportCtaQuote")}
@@ -59,9 +61,9 @@ export async function CasesPageContent({ locale, cases }: Props) {
               <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
-        </CategoryExploreHero>
+        </div>
 
-        <NeonSection className="pb-0 pt-40 sm:pb-0 sm:pt-48">
+        <NeonSection className="pb-0 pt-8 sm:pb-0 sm:pt-12">
           {empty ? (
             <div className="space-y-14">
               <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed dark:text-white text-gray-800 sm:text-xl">

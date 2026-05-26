@@ -2968,7 +2968,7 @@
     "stepLabel": "Step {current} / {total}",
     "saveError": "Could not save. Please try again.",
     "industryRequired": "Select at least one industry.",
-    "progressMessage": "Profile {percent}% complete — finish for better recommendations",
+    "progressMessage": "Profile <accent>{percent}%</accent> complete — finish for better recommendations",
     "step1Title": "How will you use Syncad?",
     "step1Desc": "We use this to personalize features and picks.",
     "roleAdvertiser": "Advertiser",

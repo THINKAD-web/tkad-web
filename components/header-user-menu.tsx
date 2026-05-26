@@ -155,9 +155,12 @@ export function HeaderUserMenu({
           <Link
             href="/dashboard"
             onClick={onNavigate}
-            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-foreground transition-colors hover:bg-secondary/60 dark:text-white text-gray-900 dark:hover:dark:bg-white/10 bg-gray-100"
+            className="inline-flex h-9 items-center gap-1.5 rounded-full px-3 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-100 dark:bg-white/10 dark:text-white dark:hover:bg-white/15"
           >
-            <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
+            <Megaphone
+              className="h-4 w-4 shrink-0 text-gray-700 dark:text-white"
+              strokeWidth={2}
+            />
             <span className="hidden sm:inline">{t("myCampaigns")}</span>
           </Link>
           <HeaderProfileDropdown

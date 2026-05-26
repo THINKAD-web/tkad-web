@@ -9,8 +9,10 @@ import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabs } from "@/components/layout/sub-tabs";
+import { DISCOVERY_TABS } from "@/lib/navigation/sub-page-tabs";
 import {
-  CategoryExploreHero,
   CategoryHeroCtaRow,
   categoryHeroCtaPrimaryClass,
   categoryHeroCtaSecondaryClass,
@@ -308,27 +310,23 @@ export default function RecommendPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
-        <CategoryExploreHero
-          code="// 04 · RECOMMEND"
-          showBeta
-          headlineBefore={isKo ? "AI가 추천하는 " : "AI-recommended "}
-          headlineGradient={isKo ? "맞춤 매체" : "media picks"}
-          subtitle={
-            isKo
-              ? "몇 가지 정보만 알려주시면, TKAD Bot이 캠페인에 꼭 맞는 매체들을 찾아드려요."
-              : tr("heroSubtitle")
-          }
-        >
-            <CategoryHeroCtaRow>
-              <Link href="/media" className={categoryHeroCtaPrimaryClass}>
-                {isKo ? "매체 검색으로 먼저 보기" : "Browse media catalog"}
-              </Link>
-              <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
-                {isKo ? "플래너로 설계하기" : "Plan with Planner"}
-              </Link>
-            </CategoryHeroCtaRow>
-        </CategoryExploreHero>
-
+        <PageHero
+          eyebrow="// 03 · DISCOVERY"
+          title="AI가 추천하는 "
+          highlight="맞춤 매체"
+          description="목표·예산·업종 조건에 맞는 매체를 AI가 자동 추천"
+        />
+        <SubTabs tabs={DISCOVERY_TABS} currentPath="/recommend" />
+        <div className="border-b border-border/60 px-4 pb-6">
+          <CategoryHeroCtaRow>
+            <Link href="/media" className={categoryHeroCtaPrimaryClass}>
+              {isKo ? "매체 검색으로 먼저 보기" : "Browse media catalog"}
+            </Link>
+            <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
+              {isKo ? "플래너로 설계하기" : "Plan with Planner"}
+            </Link>
+          </CategoryHeroCtaRow>
+        </div>
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="ui-container">

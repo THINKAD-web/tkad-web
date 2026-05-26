@@ -6,7 +6,9 @@ import { useTranslations, useLocale } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import Modal from "@/components/ui/modal";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabs } from "@/components/layout/sub-tabs";
+import { CONTENT_TABS } from "@/lib/navigation/sub-page-tabs";
 import {
   Calendar,
   Download,
@@ -259,13 +261,13 @@ export default function AcademyPageClient({
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon pb-4 sm:pb-6">
-        <CategoryExploreHero
-          code="// 03 · ACADEMY"
-          headlineBefore={isKo ? "OOH 광고를 " : "Learn OOH "}
-          headlineGradient={isKo ? "제대로 배우다" : "the right way"}
-          subtitle={t("heroSubtitle")}
+        <PageHero
+          eyebrow="// 03 · CONTENT"
+          title="OOH 광고를 "
+          highlight="제대로 배우다"
+          description="광고 초보자도 쉽게 이해하는 OOH 교육 콘텐츠"
         />
-
+        <SubTabs tabs={CONTENT_TABS} currentPath="/academy" />
 
         <section className="bg-card py-8 text-foreground">
           <div className="mx-auto grid max-w-7xl gap-0 px-4 sm:grid-cols-2 lg:grid-cols-4 sm:px-6 lg:px-8">

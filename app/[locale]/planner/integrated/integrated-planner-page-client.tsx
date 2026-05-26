@@ -11,11 +11,9 @@ import {
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
-import {
-  PageSubNav,
-  PLANNER_SUB_NAV_ITEMS,
-} from "@/components/navigation/page-sub-nav";
+import { PageHero } from "@/components/layout/page-hero";
+import { SubTabs } from "@/components/layout/sub-tabs";
+import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
 import PlannerMediaSelector from "@/components/planner-media-selector";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
@@ -276,21 +274,13 @@ export default function IntegratedPlannerPageClient({
   return (
     <HomeLandingDayNight>
     <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-background pb-20">
-      <CategoryExploreHero
-        code="INTEGRATED PLANNER"
-        headlineBefore={isKo ? "OOH + " : "OOH + "}
-        headlineGradient={isKo ? "디지털 통합" : "Digital Integrated"}
-        headlineAfter={isKo ? " 캠페인 플래너" : " Campaign Planner"}
-        subtitle={ti("subtitle")}
-        showBeta
+      <PageHero
+        eyebrow="// 02 · PLANNING"
+        title="OOH + 디지털 "
+        highlight="통합 플래너"
+        description="온·오프라인 통합 캠페인을 한 번에 설계하세요"
       />
-
-      <PageSubNav
-        items={PLANNER_SUB_NAV_ITEMS}
-        locale={locale}
-        className="mx-auto max-w-7xl px-4 pb-4 sm:px-6"
-        data-screenshot="planner-sub-nav"
-      />
+      <SubTabs tabs={PLANNING_TABS} currentPath="/planner/integrated" />
 
       <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
         {wizardStep <= LAST_STEP ? (

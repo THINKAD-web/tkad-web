@@ -20,7 +20,7 @@ export function HomeContentFeed({ reports, cases }: Props) {
             </h3>
             <Link
               href="/ko/report"
-              className="flex items-center gap-0.5 text-xs font-medium text-violet-400"
+              className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
             >
               전체보기 <ChevronRight className="h-3 w-3" />
             </Link>
@@ -48,7 +48,7 @@ export function HomeContentFeed({ reports, cases }: Props) {
                     />
                   ) : null}
                   {item.category ? (
-                    <span className="absolute top-2 left-2 rounded-full bg-violet-500 px-2 py-0.5 text-[10px] text-white">
+                    <span className="absolute top-2 left-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] text-white shadow-[0_0_10px_rgba(139,92,246,0.35)]">
                       {item.category}
                     </span>
                   ) : null}
@@ -77,7 +77,7 @@ export function HomeContentFeed({ reports, cases }: Props) {
             </h3>
             <Link
               href="/ko/cases"
-              className="flex items-center gap-0.5 text-xs font-medium text-violet-400"
+              className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
             >
               전체보기 <ChevronRight className="h-3 w-3" />
             </Link>
@@ -103,7 +103,7 @@ export function HomeContentFeed({ reports, cases }: Props) {
                     />
                   ) : null}
                   {item.industry ? (
-                    <span className="absolute top-2 left-2 rounded-full bg-cyan-500 px-2 py-0.5 text-[10px] text-white">
+                    <span className="absolute top-2 left-2 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 px-2 py-0.5 text-[10px] text-white shadow-[0_0_10px_rgba(34,211,238,0.35)]">
                       {item.industry}
                     </span>
                   ) : null}
@@ -113,7 +113,7 @@ export function HomeContentFeed({ reports, cases }: Props) {
                     {item.title || item.brandName}
                   </p>
                   {item.summary ? (
-                    <p className="mt-1 truncate text-[11px] text-cyan-600 dark:text-cyan-400">
+                    <p className="mt-1 truncate text-[11px] tkad-home-accent-text">
                       {item.summary}
                     </p>
                   ) : null}

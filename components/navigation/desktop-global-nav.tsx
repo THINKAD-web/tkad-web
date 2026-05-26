@@ -5,7 +5,6 @@ import { useLocale } from "next-intl";
 import { ChevronDown, HelpCircle, Search } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeaderUserMenu } from "@/components/header-user-menu";
-import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { HeaderProTrialChip } from "@/components/navigation/header-pro-trial-chip";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
 import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
@@ -78,7 +77,7 @@ function NavDropdown({
         className={cn(
           "inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
           active
-            ? "text-violet-600 dark:text-violet-300"
+            ? "tkad-home-accent-text font-semibold"
             : "text-gray-700 hover:bg-gray-100 dark:text-white/80 dark:hover:bg-white/5",
         )}
         aria-expanded={open}
@@ -135,7 +134,7 @@ function MoreDropdownPanel({
                   >
                     {" "}
                     {Icon ? (
-                      <Icon className="h-4 w-4 shrink-0 text-violet-500" />
+                      <Icon className="h-4 w-4 shrink-0 tkad-home-accent-text" />
                     ) : null}{" "}
                     {isKo ? item.labelKo : item.labelEn}{" "}
                   </Link>{" "}
@@ -148,9 +147,6 @@ function MoreDropdownPanel({
     </div>
   );
 }
-function isHomePath(pathname: string): boolean {
-  return pathname === "/" || pathname === "";
-}
 
 export function DesktopGlobalNav() {
   const pathname = usePathname() ?? "/";
@@ -158,7 +154,6 @@ export function DesktopGlobalNav() {
   const isKo = locale === "ko";
   const palette = useCommandPaletteOptional();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
-  const isHome = isHomePath(pathname);
   const isActive = (href: string) =>
     pathname === href || pathname.startsWith(`${href}/`);
   const isMediaActive =
@@ -204,7 +199,7 @@ export function DesktopGlobalNav() {
               return (
                 <NavDropdown
                   key={item.id}
-                  label={`${label} ▼`}
+                  label={label}
                   open={openMenu === item.id}
                   onOpen={() => setOpenMenu(item.id)}
                   onClose={() => setOpenMenu(null)}
@@ -225,7 +220,7 @@ export function DesktopGlobalNav() {
                   className={cn(
                     "rounded-lg px-3 py-2 text-sm font-semibold transition-colors",
                     isActive(item.href)
-                      ? "text-violet-600 dark:text-violet-300"
+                      ? "tkad-home-accent-text font-semibold"
                       : "text-gray-700 hover:bg-gray-100 dark:text-white/80 dark:hover:bg-white/5",
                   )}
                 >
@@ -237,15 +232,13 @@ export function DesktopGlobalNav() {
             return null;
           })}{" "}
         </nav>{" "}
-        <div className="ml-auto flex shrink-0 items-center gap-1.5">
+        <div className="relative z-10 ml-auto flex shrink-0 items-center gap-1.5">
           {" "}
           <button
             type="button"
             onClick={() => palette?.setOpen(true)}
-            className={cn(headerChromeIconButtonClass, isHome && "hidden")}
+            className={headerChromeIconButtonClass}
             aria-label={isKo ? "검색 (Cmd+K)" : "Search (Cmd+K)"}
-            aria-hidden={isHome}
-            tabIndex={isHome ? -1 : undefined}
             data-tour="search"
           >
             <Search className="h-4 w-4" />
@@ -259,9 +252,13 @@ export function DesktopGlobalNav() {
           >
             <HelpCircle className="h-4 w-4" />
           </button>
-          <HeaderNotificationsBell /> <HeaderProTrialChip /> <HeaderUserMenu />{" "}
-          <LanguageToggle />{" "}
-          <ThemeToggle className={headerChromeIconButtonClass} />{" "}
+          <HeaderProTrialChip />
+          <HeaderUserMenu />
+          <LanguageToggle />
+          <ThemeToggle
+            className={headerChromeIconButtonClass}
+            variant="icon"
+          />
         </div>{" "}
       </div>{" "}
     </header>

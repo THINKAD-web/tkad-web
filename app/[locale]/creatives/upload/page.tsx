@@ -16,23 +16,15 @@ export default async function CreativeUploadPage({
 
   return (
     <CreativesShell
-      eyebrow={`[ ${isKo ? "소재 업로드" : "Upload Creative"} ]`}
-      title={
-        isKo ? (
-          <>
-            <span className="tkad-home-accent-text">소재</span>를 업로드하세요
-          </>
-        ) : (
-          <>
-            Upload a <span className="tkad-home-accent-text">creative</span>
-          </>
-        )
-      }
-      description={
-        isKo
-          ? "매체 유형을 먼저 고르면 권장 규격에 맞춰 자동으로 안내합니다. Cloudinary 직접 업로드(서명 방식)로 빠르게 처리됩니다."
-          : "Pick a media type to get spec hints. Files upload directly to Cloudinary via signed URLs."
-      }
+      pageHero={{
+        eyebrow: "// 03 · STUDIO",
+        title: "크리에이티브 ",
+        highlight: "스튜디오",
+        description: isKo
+          ? "매체 유형을 고르면 권장 규격에 맞춰 안내합니다. Cloudinary 직접 업로드로 빠르게 처리됩니다."
+          : "Pick a media type for spec hints. Files upload directly to Cloudinary via signed URLs.",
+      }}
+      subTabPath="/creatives/upload"
       showBackToLibrary
       isKo={isKo}
     >
