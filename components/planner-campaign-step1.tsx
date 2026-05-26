@@ -97,7 +97,7 @@ export default function PlannerCampaignStep1({
       <motion.aside
         className={cn(
           plannerNeon.card,
-          "overflow-hidden dark:bg-gradient-to-br dark:from-violet-950/40 dark:to-cyan-950/20",
+          "tkad-planner-step1-aside overflow-hidden",
         )}
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
@@ -126,21 +126,21 @@ export default function PlannerCampaignStep1({
                 : {}
             }
           >
-            <div className="aspect-[2.35/1] w-full dark:bg-[#020202]/80 bg-gray-100">
+            <div className="tkad-planner-step1-preview-frame aspect-[2.35/1] w-full bg-gray-100 dark:bg-[#020202]/80">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
                 <div className="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                   OOH
                 </div>
-                <p className={cn("text-center text-sm font-bold sm:text-base", plannerNeon.headline)}>
+                <p className="text-center text-sm font-bold text-foreground sm:text-base">
                   {t("step1VisualFrameLabel")}
                 </p>
-                <p className={cn("max-w-[14rem] text-center text-xs leading-snug", plannerNeon.subtext)}>
+                <p className="max-w-[14rem] text-center text-xs leading-snug text-muted-foreground">
                   {t("step1VisualHint")}
                 </p>
               </div>
             </div>
           </motion.div>
-          <p className={cn("text-xs leading-relaxed", plannerNeon.subtext)}>
+          <p className="text-xs leading-relaxed text-muted-foreground">
             {t("step1VisualDesc")}
           </p>
         </div>

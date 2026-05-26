@@ -2,6 +2,7 @@
 
 import { Link, usePathname } from "@/i18n/navigation";
 import type { LucideIcon } from "lucide-react";
+import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 import { cn } from "@/lib/utils";
 
 export interface SubTab {
@@ -9,6 +10,7 @@ export interface SubTab {
   href: string;
   icon: LucideIcon;
   match?: (pathname: string) => boolean;
+  beta?: boolean;
 }
 
 interface SubTabsProps {
@@ -53,6 +55,7 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
             >
               <Icon className="h-4 w-4" aria-hidden />
               {tab.label}
+              {tab.beta ? <NavBetaBadge className="ml-0.5" /> : null}
             </Link>
           );
         })}

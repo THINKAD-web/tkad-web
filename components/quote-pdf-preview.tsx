@@ -1,10 +1,16 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
+
+const STAMP_URL =
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/%5B%E1%84%89%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%A5%E1%84%83%E1%85%B3%5D%20%E1%84%83%E1%85%A9%E1%84%8C%E1%85%A1%E1%86%BC.png";
+
+/** html2canvas 캡처용 same-origin 프록시 (CORS·403 방지) */
+const STAMP_CAPTURE_SRC = `/api/image-proxy?url=${encodeURIComponent(STAMP_URL)}`;
 
 export type QuotePdfPreviewRow = {
   id: string;
@@ -15,6 +21,10 @@ export type QuotePdfPreviewRow = {
   unitPriceWon: number;
   /** 라인 합계 (원). */
   lineTotalWon: number;
+  /** 단가 기간 라벨 (예: 2주, 월) */
+  unitPeriodLabel?: string;
+  /** 집행 기간 라벨 (행별) */
+  executionPeriodLabel?: string;
   /** 추가 스펙 */
   size?: string | null;
   dailyFootTraffic?: number | null;
@@ -50,6 +60,18 @@ function formatManWon(won: number, locale: string): string {
   return `₩${num} (10K KRW)`;
 }
 
+/** PDF 섹션 라벨 — html2canvas 호환 (background-clip:text 미사용) */
+function NeonSectionTag({ children }: { children: ReactNode }) {
+  return (
+    <span
+      className="font-display text-xs font-medium uppercase tracking-[0.22em]"
+      style={{ color: "#5b21b6" }}
+    >
+      {children}
+    </span>
+  );
+}
+
 export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
   function QuotePdfPreview(
     {
@@ -83,14 +105,35 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       <div
         ref={ref}
         className={cn(
-          "relative box-border border-2 border-navy bg-white text-navy antialiased",
-          "w-[210mm] max-w-[210mm] min-h-[297mm] px-10 py-9 text-[11px] leading-snug",
+          "relative box-border overflow-hidden border-2 border-navy bg-white text-navy antialiased",
+          "w-[210mm] max-w-[210mm] min-h-[297mm] py-9 pl-11 pr-10 text-[11px] leading-snug",
         )}
-        style={{ fontFamily: "system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif" }}
+        style={{
+          fontFamily: "system-ui, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif",
+          width: "210mm",
+          maxWidth: "210mm",
+        }}
       >
+        {/* 네온 사이드 액센트 */}
+        <div
+          aria-hidden
+          className="absolute bottom-0 left-0 top-0 w-2"
+          style={{
+            background: "linear-gradient(to bottom, #7C3AED, #06B6D4)",
+          }}
+        />
+
         {isPremium ? (
           <div className="pointer-events-none absolute left-0 right-0 top-0 h-3 bg-gold" />
-        ) : null}
+        ) : (
+          <div
+            aria-hidden
+            className="pointer-events-none absolute left-2 right-0 top-0 h-0.5 opacity-80"
+            style={{
+              background: "linear-gradient(90deg, #7C3AED, #06B6D4, transparent)",
+            }}
+          />
+        )}
 
         <header
           className={cn(
@@ -98,9 +141,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           )}
         >
           <div className="min-w-0 flex-1">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-              [ {t("pdfIssuerLine")} ]
-            </p>
+            <NeonSectionTag>[ {t("pdfIssuerLine")} ]</NeonSectionTag>
             <h1 className="mt-3 text-2xl font-bold tracking-tight text-navy">
               {t("pdfDocHeading")}
             </h1>
@@ -121,7 +162,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 className={cn(
                   "flex h-12 w-28 items-center justify-center border-2 font-display text-xs font-medium uppercase tracking-[0.22em]",
                   isPremium
-                    ? "border-gold bg-gold dark:text-white text-gray-900"
+                    ? "border-gold bg-gold text-gray-900"
                     : "border-navy bg-white text-navy",
                 )}
               >
@@ -132,10 +173,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         </header>
 
         <section className="mt-6 grid gap-0 sm:grid-cols-2">
-          <div className="-mt-[2px] -ml-[2px] border-2 border-navy p-4">
-            <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-              [ {t("pdfClientSection")} ]
-            </h2>
+          <div className="-ml-[2px] -mt-[2px] border-2 border-navy p-4">
+            <NeonSectionTag>[ {t("pdfClientSection")} ]</NeonSectionTag>
             <dl className="mt-3 space-y-1.5 text-[11px]">
               <div className="flex gap-2">
                 <dt className="w-16 shrink-0 text-slate-500">{t("company")}</dt>
@@ -161,19 +200,12 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               ) : null}
             </dl>
           </div>
-          <div className="-mt-[2px] -ml-[2px] border-2 border-navy p-4">
-            <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-              [ {t("pdfCampaignSection")} ]
-            </h2>
+          <div className="-ml-[2px] -mt-[2px] border-2 border-navy p-4">
+            <NeonSectionTag>[ {t("pdfCampaignSection")} ]</NeonSectionTag>
             <dl className="mt-3 space-y-1.5 text-[11px]">
               <div className="flex gap-2">
                 <dt className="w-20 shrink-0 text-slate-500">{t("period")}</dt>
-                <dd className="font-bold text-navy">
-                  {periodLabel} ·{" "}
-                  {periodUnitLabel
-                    ? `${periodMonths}${periodUnitLabel}`
-                    : t("pdfMonthsUnit", { n: periodMonths })}
-                </dd>
+                <dd className="font-bold text-navy">{periodLabel}</dd>
               </div>
               <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
                 {`// `}{t("pdfAmountUnitNote")}
@@ -183,29 +215,29 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         </section>
 
         <section className="mt-8">
-          <h2 className="mb-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-            [ {t("pdfMediaSection")} ]
-          </h2>
+          <div className="mb-3">
+            <NeonSectionTag>[ {t("pdfMediaSection")} ]</NeonSectionTag>
+          </div>
           <div className="overflow-hidden border-2 border-navy">
             <table className="w-full border-collapse text-left text-[10px]">
               <thead>
-                <tr className="bg-navy font-display text-xs font-medium uppercase tracking-[0.18em] text-gold-dark">
-                  <th className="w-14 border-b-2 border-navy px-1.5 py-2 font-bold">
+                <tr className="bg-navy font-display text-xs font-medium uppercase tracking-[0.18em]">
+                  <th className="w-14 border-b-2 border-navy px-1.5 py-2 font-bold text-cyan-300">
                     {t("pdfColThumb")}
                   </th>
-                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold">
+                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold text-cyan-300">
                     {t("pdfColName")}
                   </th>
-                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold">
+                  <th className="border-b-2 border-navy px-1.5 py-2 font-bold text-cyan-300">
                     {t("pdfColLocation")}
                   </th>
-                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 font-bold">
+                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 font-bold text-cyan-300">
                     {t("pdfColPeriod")}
                   </th>
-                  <th className="w-20 border-b-2 border-navy px-1.5 py-2 text-right font-bold">
-                    {t("pdfColUnit")}
+                  <th className="w-20 border-b-2 border-navy px-1.5 py-2 text-right font-bold text-cyan-300">
+                    {t("pdfColUnitGeneric")}
                   </th>
-                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 text-right font-bold">
+                  <th className="w-24 border-b-2 border-navy px-1.5 py-2 text-right font-bold text-cyan-300">
                     {t("pdfColAmount")}
                   </th>
                 </tr>
@@ -214,20 +246,37 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 {rows.map((row, idx) => (
                   <tr
                     key={row.id}
-                    className={cn(
-                      "border-b border-navy align-top",
-                      idx % 2 === 0 ? "bg-white" : "bg-slate-50",
-                    )}
+                    className="border-b border-navy align-top"
+                    style={{
+                      backgroundColor: idx % 2 === 0 ? "#ffffff" : "#f8fafc",
+                    }}
                   >
                     <td className="px-1.5 py-2">
-                      <div className="h-12 w-12 overflow-hidden border-2 border-navy bg-slate-50">
+                      <div
+                        className="h-12 w-12 overflow-hidden border-2 border-navy"
+                        style={{
+                          width: 48,
+                          height: 48,
+                          overflow: "hidden",
+                          flexShrink: 0,
+                          backgroundColor: "#f8fafc",
+                        }}
+                      >
                         {row.thumbUrl ? (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={row.thumbUrl}
                             alt=""
+                            loading="eager"
+                            decoding="sync"
                             referrerPolicy="no-referrer"
                             className="h-full w-full object-cover"
+                            style={{
+                              display: "block",
+                              width: "100%",
+                              height: "100%",
+                              objectFit: "cover",
+                            }}
                           />
                         ) : (
                           <div className="flex h-full w-full items-center justify-center text-[8px] text-slate-500">
@@ -247,11 +296,18 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       </div>
                     </td>
                     <td className="px-1.5 py-2 text-navy">{row.location}</td>
-                    <td className="px-1.5 py-2 text-navy">{periodLabel}</td>
-                    <td className="px-1.5 py-2 text-right tabular-nums">
-                      {formatManWon(row.unitPriceWon, locale)}
+                    <td className="px-1.5 py-2 text-navy">
+                      {row.executionPeriodLabel ?? periodLabel}
                     </td>
-                    <td className="px-1.5 py-2 text-right font-bold tabular-nums text-navy">
+                    <td className="px-1.5 py-2 text-right tabular-nums">
+                      <div>{formatManWon(row.unitPriceWon, locale)}</div>
+                      {row.unitPeriodLabel ? (
+                        <div className="text-[9px] font-medium text-slate-500">
+                          / {row.unitPeriodLabel}
+                        </div>
+                      ) : null}
+                    </td>
+                    <td className="px-1.5 py-2 text-right font-bold tabular-nums text-violet-700">
                       {formatManWon(row.lineTotalWon, locale)}
                     </td>
                   </tr>
@@ -275,11 +331,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 {formatManWon(vatWon, locale)}
               </span>
             </div>
-            <div className="-mt-[2px] flex justify-between gap-4 border-2 border-gold bg-navy px-3 py-3">
-              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
+            <div
+              className="-mt-[2px] flex justify-between gap-4 border-2 px-3 py-3 text-white"
+              style={{
+                borderColor: "#7C3AED",
+                background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+              }}
+            >
+              <span className="font-display text-xs font-medium uppercase tracking-[0.22em]">
                 [ {t("pdfTotal")} ]
               </span>
-              <span className="text-base font-bold tabular-nums text-gold-dark">
+              <span className="text-base font-bold tabular-nums">
                 {formatManWon(grandTotalWon, locale)}
               </span>
             </div>
@@ -290,18 +352,33 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           <p className="font-display">{`// `}{t("pdfValidity")}</p>
           <div className="mt-6 grid gap-6 sm:grid-cols-2">
             <div>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-                [ {t("pdfSignature")} ]
-              </p>
+              <NeonSectionTag>[ {t("pdfSignature")} ]</NeonSectionTag>
               <div className="mt-8 border-b-2 border-navy" />
             </div>
-            <div className="text-right sm:text-left">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-gold-dark">
-                [ {t("pdfFooterCompany")} ]
-              </p>
+            <div className="relative pr-20 text-right sm:text-left">
+              <NeonSectionTag>[ {t("pdfFooterCompany")} ]</NeonSectionTag>
               <p className="mt-2 text-navy">{t("pdfFooterTel")}</p>
               <p className="mt-0.5 text-navy">{CONTACT_EMAIL}</p>
               <p className="mt-3 text-slate-500">{t("pdfFooterNote")}</p>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={STAMP_CAPTURE_SRC}
+                alt=""
+                loading="eager"
+                decoding="sync"
+                className="pointer-events-none absolute bottom-0 right-0 h-[72px] w-[72px] object-contain opacity-[0.85]"
+                style={{
+                  position: "absolute",
+                  bottom: 0,
+                  right: 0,
+                  width: 72,
+                  height: 72,
+                  objectFit: "contain",
+                  opacity: 0.85,
+                  transform: "rotate(-3deg)",
+                }}
+                referrerPolicy="no-referrer"
+              />
             </div>
           </div>
         </footer>

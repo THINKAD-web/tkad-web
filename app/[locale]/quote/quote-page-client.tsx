@@ -66,6 +66,13 @@ import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import {
+  buildQuoteWizardLineContext,
+  inferQuoteCampaignPeriodFromMedia,
+  isQuoteCampaignPeriodKey,
+  resolveQuoteMediaPricePeriod,
+  type QuoteCampaignPeriodKey,
+} from "@/lib/quote-wizard-pricing";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
@@ -80,9 +87,27 @@ const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOGO_MAX_BYTES = 600 * 1024;
 
-type PeriodKey = "1month" | "3months" | "6months" | "12months";
+async function runWithQuotePdfExport(
+  el: HTMLElement | null,
+  work: () => Promise<void>,
+) {
+  if (!el) throw new Error("no preview");
+  const wrap = el.closest("[data-quote-pdf-scale-wrap]");
+  wrap?.setAttribute("data-quote-pdf-exporting", "true");
+  await new Promise<void>((r) =>
+    requestAnimationFrame(() => requestAnimationFrame(() => r())),
+  );
+  await new Promise<void>((r) => setTimeout(r, 80));
+  try {
+    await work();
+  } finally {
+    wrap?.removeAttribute("data-quote-pdf-exporting");
+  }
+}
 
-const PERIOD_MONTHS: Record<PeriodKey, number> = {
+type PeriodKey = QuoteCampaignPeriodKey;
+
+const PERIOD_MONTHS: Record<Exclude<PeriodKey, "2weeks">, number> = {
   "1month": 1,
   "3months": 3,
   "6months": 6,
@@ -163,11 +188,22 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     setSelectedIds(new Set(matchedIds));
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
+    let poIdx = 0;
     if (matchedIds.length === 1 && Number.isFinite(po) && po >= 0) {
       const m = catalog.find((x) => x.id === matchedIds[0]);
       const n = m?.priceOptions?.length ?? 0;
       if (n > 0) {
-        setMediaPriceOptionIndex({ [matchedIds[0]]: Math.min(po, n - 1) });
+        poIdx = Math.min(po, n - 1);
+        setMediaPriceOptionIndex({ [matchedIds[0]]: poIdx });
+      }
+    }
+    const periodParam = params.get("period");
+    if (periodParam && isQuoteCampaignPeriodKey(periodParam)) {
+      setPeriod(periodParam);
+    } else if (matchedIds.length === 1) {
+      const m = catalog.find((x) => x.id === matchedIds[0]);
+      if (m) {
+        setPeriod(inferQuoteCampaignPeriodFromMedia(m, poIdx));
       }
     }
   }, [catalog]);
@@ -292,28 +328,42 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     return sortedCatalog.slice(start, start + mediaPageSize);
   }, [sortedCatalog, mediaPage, mediaPageSize]);
 
-  const monthlyCost = useMemo(
+  const periodMonths =
+    period === "2weeks" ? 0 : PERIOD_MONTHS[period];
+  const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+
+  const quoteLineContexts = useMemo(
     () =>
-      selectedMedia.reduce((sum, m) => {
-        if (m.catalogSource === "network") {
-          const opt = networkQuoteOptions[m.id];
-          const u = opt?.units ?? m.networkMinUnits ?? 1;
-          return sum + catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(m, u));
-        }
-        const opts = m.priceOptions;
-        const idx = mediaPriceOptionIndex[m.id] ?? 0;
-        if (opts?.length && opts[idx]) {
-          return sum + catalogPriceFieldToPriceMan(opts[idx].price);
-        }
-        return sum + catalogPriceFieldToPriceMan(m.price);
-      }, 0),
-    [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex],
+      selectedMedia.map((m) => {
+        const isNw = m.catalogSource === "network";
+        const opt = networkQuoteOptions[m.id];
+        return buildQuoteWizardLineContext(m, {
+          isKo,
+          campaignPeriod: period,
+          campaignPeriodLabel: periodLabel,
+          priceOptionIndex: mediaPriceOptionIndex[m.id] ?? 0,
+          networkUnits: isNw ? opt?.units ?? m.networkMinUnits ?? 1 : undefined,
+        });
+      }),
+    [
+      selectedMedia,
+      networkQuoteOptions,
+      mediaPriceOptionIndex,
+      isKo,
+      period,
+      periodLabel,
+    ],
   );
 
-  const periodMonths = PERIOD_MONTHS[period];
-  const totalCost = monthlyCost * periodMonths;
+  const unitPriceSumMan = useMemo(
+    () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
+    [quoteLineContexts],
+  );
 
-  const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+  const totalCost = useMemo(
+    () => quoteLineContexts.reduce((sum, line) => sum + line.lineTotalMan, 0),
+    [quoteLineContexts],
+  );
 
   const budgetMinN = useMemo(() => {
     const n = parseInt(form.budgetMin, 10);
@@ -328,17 +378,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
   const pdfPreviewRows = useMemo(() => {
-    return selectedMedia.map((m) => {
+    return selectedMedia.map((m, idx) => {
       const isNw = m.catalogSource === "network";
       const opt = networkQuoteOptions[m.id];
       const units = isNw ? opt?.units ?? m.networkMinUnits ?? 1 : 0;
       const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
       const priceOpt = !isNw ? m.priceOptions?.[poIdx] : undefined;
-      const lineMonthly = isNw
-        ? catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(m, units))
-        : priceOpt
-          ? catalogPriceFieldToPriceMan(priceOpt.price)
-          : catalogPriceFieldToPriceMan(m.price);
+      const line = quoteLineContexts[idx];
       const baseName = (isKo ? m.name : (m.nameEn || m.name)) || m.name;
       let name = baseName;
       if (isNw && units) {
@@ -359,14 +405,22 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         thumbUrl: getPrimaryMediaImageUrl(m),
         name,
         location,
-        unitPriceWon: Math.round(lineMonthly * 10_000),
-        lineTotalWon: Math.round(lineMonthly * periodMonths * 10_000),
+        unitPriceWon: Math.round(line.unitPriceMan * 10_000),
+        lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+        unitPeriodLabel: line.unitPeriodLabel,
+        executionPeriodLabel: line.executionPeriodLabel,
         size: m.size ?? undefined,
         dailyFootTraffic: m.dailyFootTraffic ?? undefined,
         operatingHours: m.operatingHours ?? undefined,
       };
     });
-  }, [selectedMedia, networkQuoteOptions, mediaPriceOptionIndex, isKo, periodMonths]);
+  }, [
+    selectedMedia,
+    networkQuoteOptions,
+    mediaPriceOptionIndex,
+    isKo,
+    quoteLineContexts,
+  ]);
 
   /** 사용자 견적 PDF 미리보기는 원 단위로 모든 금액 전달 (만원 round 누적 손실 방지). */
   const pdfSubtotalWon = useMemo(() => Math.round(totalCost * 10_000), [totalCost]);
@@ -374,6 +428,39 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const pdfGrandTotalWon = useMemo(
     () => pdfSubtotalWon + pdfVatWon,
     [pdfSubtotalWon, pdfVatWon],
+  );
+
+  const quotePdfPreviewProps = useMemo(
+    () => ({
+      template,
+      customerLogoSrc: logoDataUrl,
+      company: form.company,
+      contactName: form.name,
+      contactPhone: form.phone,
+      contactEmail: form.email,
+      periodLabel,
+      periodMonths,
+      rows: pdfPreviewRows,
+      subtotalWon: pdfSubtotalWon,
+      vatWon: pdfVatWon,
+      grandTotalWon: pdfGrandTotalWon,
+      issuedAt: quoteIssuedAt,
+    }),
+    [
+      template,
+      logoDataUrl,
+      form.company,
+      form.name,
+      form.phone,
+      form.email,
+      periodLabel,
+      periodMonths,
+      pdfPreviewRows,
+      pdfSubtotalWon,
+      pdfVatWon,
+      pdfGrandTotalWon,
+      quoteIssuedAt,
+    ],
   );
 
   const toggleMedia = useCallback((id: string) => {
@@ -602,7 +689,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const filename = isKo
         ? `싱커드_견적서_${ymd}.pdf`
         : `THINKAD_quote_${ymd}.pdf`;
-      await downloadQuotePdfFromElement(el, filename);
+      await runWithQuotePdfExport(el, async () => {
+        await downloadQuotePdfFromElement(el, filename);
+      });
       toast("success", t("quote.pdfDownloaded"));
     } catch (e) {
       console.error("[quote pdf download]", e);
@@ -614,14 +703,27 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const [capturing, setCapturing] = useState(false);
   const handleCapture = async () => {
+    if (selectedMedia.length === 0) {
+      toast("warning", t("quote.noMediaSelected"));
+      return;
+    }
     const el = pdfPreviewRef.current;
-    if (!el) return;
+    if (!el) {
+      toast("error", t("quote.pdfError"));
+      return;
+    }
     setCapturing(true);
     try {
       const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await captureElementAsPng(el, isKo ? `싱커드_견적서_${ymd}.png` : `THINKAD_quote_${ymd}.png`);
+      await runWithQuotePdfExport(el, async () => {
+        await captureElementAsPng(
+          el,
+          isKo ? `싱커드_견적서_${ymd}.png` : `THINKAD_quote_${ymd}.png`,
+        );
+      });
       toast("success", t("quote.imageSaved"));
-    } catch {
+    } catch (e) {
+      console.error("[quote png capture]", e);
       toast("error", t("quote.pdfError"));
     } finally {
       setCapturing(false);
@@ -647,7 +749,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         toast("error", t("quote.pdfError"));
         return;
       }
-      const pdfBase64 = await quoteElementToPdfBase64(el);
+      let pdfBase64 = "";
+      await runWithQuotePdfExport(el, async () => {
+        pdfBase64 = await quoteElementToPdfBase64(el);
+      });
       const res = await fetch("/api/quote/email-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -720,20 +825,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                       window.scrollTo({ top: 0, behavior: "smooth" });
                     }}
                     className={cn(
-                      "flex h-12 w-12 items-center justify-center rounded-2xl border-2  text-base font-black backdrop-blur transition-colors sm:h-14 sm:w-14 sm:text-lg",
-                      "border-border bg-card text-foreground/70 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-400",
-                      step === n &&
-                        "border-accent bg-accent text-accent-foreground shadow-[0_6px_24px_rgba(67,56,202,0.32)] dark:border-white/16 dark:bg-white/12 dark:text-white text-gray-900 dark:shadow-[0_0_0_1px_rgba(34,211,238,0.24),0_24px_80px_rgba(0,0,0,0.45)]",
-                      step > n &&
-                        "border-accent/50 bg-accent/10 text-foreground hover:bg-accent/20 dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-700 dark:hover:dark:bg-white/10 bg-gray-100",
+                      "tkad-quote-wizard-step-btn flex h-12 w-12 items-center justify-center rounded-2xl border-2 text-base font-black backdrop-blur transition-colors sm:h-14 sm:w-14 sm:text-lg",
+                      step === n && "tkad-quote-wizard-step-btn-active",
+                      step > n && "tkad-quote-wizard-step-btn-done",
                     )}
                   >
                     {step > n ? "✓" : n}
                   </button>
                   <span
                     className={cn(
-                      "hidden max-w-[100px] font-display text-xs font-medium uppercase tracking-[0.18em] sm:block",
-                      step === n ? "text-foreground" : "text-muted-foreground",
+                      "tkad-quote-wizard-step-label hidden max-w-[100px] font-display text-xs font-medium uppercase tracking-[0.18em] sm:block",
+                      step === n && "tkad-quote-wizard-step-label-active",
                     )}
                   >
                     {stepLabels[n - 1]}
@@ -751,7 +853,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-10 xl:grid-cols-[1fr_26rem]">
             <div className="order-2 min-w-0 lg:order-1">
-              <div className="tkad-glass-surface tkad-neon-border relative min-h-[380px] overflow-hidden rounded-[32px] border dark:border-white/10 border-gray-200 sm:min-h-[420px]">
+              <div className="tkad-glass-surface tkad-neon-border relative min-h-[380px] overflow-x-clip overflow-y-visible rounded-[32px] border dark:border-white/10 border-gray-200 sm:min-h-[420px]">
                 <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                 <div className="relative border-b dark:border-white/10 border-gray-200 p-6 sm:p-8">
                   <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
@@ -908,6 +1010,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     : `Select ${media.nameEn}`
                                 }
                                 priceMan={displayPrice}
+                                pricePeriod={resolveQuoteMediaPricePeriod(
+                                  media,
+                                  poIdx,
+                                  isNw,
+                                )}
                               />
                               {checked && isNw ? (
                                 <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">
@@ -1055,7 +1162,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         className={cn(
                                           "absolute right-1 top-1 z-20 flex size-7 items-center justify-center border-2 text-[10px] font-bold",
                                           checked
-                                            ? "border-accent bg-accent text-accent-foreground"
+                                            ? "border-accent bg-accent text-white"
                                             : "border-border bg-card text-foreground",
                                         )}
                                         aria-hidden
@@ -1071,7 +1178,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                             : (typeLabel?.en ?? media.type)}
                                         </span>
                                         {popularIds.has(media.id) ? (
-                                          <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground">
+                                          <span className="inline-flex shrink-0 items-center gap-0.5 border-2 border-accent bg-accent px-1.5 py-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-white">
                                             <Flame className="h-2 w-2 sm:h-2.5 sm:w-2.5" />
                                             {isKo ? "인기" : "Hot"}
                                           </span>
@@ -1092,7 +1199,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                           ·{" "}
                                           {tMedia(
                                             mediaPricePeriodTranslationKey(
-                                              media.pricePeriod,
+                                              resolveQuoteMediaPricePeriod(
+                                                media,
+                                                poIdxC,
+                                                isNw,
+                                              ),
                                             ),
                                           )}
                                         </span>
@@ -1266,6 +1377,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
                           aria-label={t("quote.period")}
                         >
+                          <option value="2weeks">{t("quote.periods.2weeks")}</option>
                           <option value="1month">{t("quote.periods.1month")}</option>
                           <option value="3months">{t("quote.periods.3months")}</option>
                           <option value="6months">{t("quote.periods.6months")}</option>
@@ -1289,14 +1401,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             className={cn(
                               "-mt-[2px] -ml-[2px] border-2 p-5 text-left transition-colors",
                               template === "default"
-                                ? "border-accent bg-accent text-accent-foreground"
+                                ? "border-accent bg-accent text-white"
                                 : "border-border bg-card text-foreground hover:bg-muted",
                             )}
                           >
                             <LayoutTemplate
                               className={cn(
                                 "mb-3 h-8 w-8",
-                                template === "default" ? "text-hero-fg" : "text-accent",
+                                template === "default" ? "text-white" : "text-accent",
                               )}
                             />
                             <p className="font-display text-xs font-medium uppercase tracking-[0.22em]">
@@ -1308,7 +1420,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             <p
                               className={cn(
                                 "mt-2  text-[11px] tracking-tight",
-                                template === "default" ? "text-hero-fg/85" : "text-muted-foreground",
+                                template === "default" ? "text-white/85" : "text-muted-foreground",
                               )}
                             >
                               {t("quote.templateDefaultDesc")}
@@ -1320,14 +1432,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             className={cn(
                               "-mt-[2px] -ml-[2px] border-2 p-5 text-left transition-colors",
                               template === "premium"
-                                ? "border-accent bg-accent text-accent-foreground"
+                                ? "border-accent bg-accent text-white"
                                 : "border-border bg-card text-foreground hover:bg-muted",
                             )}
                           >
                             <Sparkles
                               className={cn(
                                 "mb-3 h-8 w-8",
-                                template === "premium" ? "text-hero-fg" : "text-accent",
+                                template === "premium" ? "text-white" : "text-accent",
                               )}
                             />
                             <p className="font-display text-xs font-medium uppercase tracking-[0.22em]">
@@ -1339,7 +1451,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             <p
                               className={cn(
                                 "mt-2  text-[11px] tracking-tight",
-                                template === "premium" ? "text-hero-fg/85" : "text-muted-foreground",
+                                template === "premium" ? "text-white/85" : "text-muted-foreground",
                               )}
                             >
                               {t("quote.templatePremiumDesc")}
@@ -1411,23 +1523,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           </div>
                           <div className="relative p-4 sm:p-6 lg:p-8">
                             <div className="overflow-x-auto rounded-[24px] bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-white/20 sm:p-5">
-                              <div className="mx-auto w-fit max-w-full origin-top scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.65]">
-                                <QuotePdfPreview
-                                  ref={pdfPreviewRef}
-                                  template={template}
-                                  customerLogoSrc={logoDataUrl}
-                                  company={form.company}
-                                  contactName={form.name}
-                                  contactPhone={form.phone}
-                                  contactEmail={form.email}
-                                  periodLabel={periodLabel}
-                                  periodMonths={periodMonths}
-                                  rows={pdfPreviewRows}
-                                  subtotalWon={pdfSubtotalWon}
-                                  vatWon={pdfVatWon}
-                                  grandTotalWon={pdfGrandTotalWon}
-                                  issuedAt={quoteIssuedAt}
-                                />
+                              <div
+                                data-quote-pdf-scale-wrap
+                                className="mx-auto w-fit max-w-full origin-top scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.65]"
+                              >
+                                <QuotePdfPreview ref={pdfPreviewRef} {...quotePdfPreviewProps} />
                               </div>
                             </div>
                           </div>
@@ -1616,6 +1716,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           </h3>
                         </div>
                         <form
+                          id="quote-wizard-form"
                           className="relative space-y-5 px-6 py-6 sm:space-y-6 sm:px-8 sm:py-8"
                           onSubmit={handleSubmit}
                           noValidate
@@ -1814,12 +1915,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   <div className="space-y-5 p-6 sm:p-7">
                     <div>
                       <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
-                        [ {t("quote.perMonth")} ]
+                        [ {t("quote.unitPriceSum")} ]
                       </p>
                       <p className="mt-2 font-display text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
                         {isKo
-                          ? `${monthlyCost.toLocaleString()}만원`
-                          : `₩${(monthlyCost * 10_000).toLocaleString()}`}
+                          ? `${Math.round(unitPriceSumMan).toLocaleString()}만원`
+                          : `₩${Math.round(unitPriceSumMan * 10_000).toLocaleString()}`}
                       </p>
                     </div>
                     <div className="border-t dark:border-white/10 border-gray-200 pt-4">
@@ -1829,8 +1930,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </span>
                         <span className="tkad-home-accent-text font-display text-3xl font-bold tabular-nums sm:text-4xl">
                           {isKo
-                            ? `${totalCost.toLocaleString()}만원`
-                            : `₩${(totalCost * 10_000).toLocaleString()}`}
+                            ? `${Math.round(totalCost).toLocaleString()}만원`
+                            : `₩${Math.round(totalCost * 10_000).toLocaleString()}`}
                         </span>
                       </div>
                     </div>
@@ -1851,6 +1952,52 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           </div>
         </div>
       </section>
+
+      {step === 4 && !submitted ? (
+        <FloatingSelectionBar
+          open
+          variant="neon"
+          ariaLabel={isKo ? "견적서 제출 작업" : "Quote submission actions"}
+        >
+          <div className="flex flex-col gap-2.5 sm:flex-row sm:items-center sm:justify-end">
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={() => {
+                document
+                  .getElementById("quote-pdf-email")
+                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+              }}
+            >
+              <Mail className="h-4 w-4" />
+              {t("quote.sendPdfEmail")}
+            </BtnBlock>
+            <BtnBlock
+              variant="accent"
+              size="md"
+              disabled={loading}
+              onClick={() =>
+                (
+                  document.getElementById(
+                    "quote-wizard-form",
+                  ) as HTMLFormElement | null
+                )?.requestSubmit()
+              }
+            >
+              {loading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Send className="h-4 w-4" />
+              )}
+              {loading ? t("quote.submitting") : t("quote.submit")}
+            </BtnBlock>
+          </div>
+        </FloatingSelectionBar>
+      ) : null}
+
+      {step === 4 && !submitted ? (
+        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
+      ) : null}
 
       <FloatingSelectionBar
         open={quoteBarOpen}

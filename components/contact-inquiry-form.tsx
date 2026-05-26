@@ -10,7 +10,6 @@ import { useToast } from "@/components/toast-provider";
 import Spinner from "@/components/spinner";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
-import { getMediaPackageBySlug } from "@/data/packages";
 import {
   buildPlannerContactMessage,
   isSavedPlannerPlanId,
@@ -112,7 +111,7 @@ export default function ContactInquiryForm() {
   const periodPrefillDone = useRef(false);
   const quotePrefillDone = useRef(false);
   const [packageRef, setPackageRef] = useState<
-    ReturnType<typeof getMediaPackageBySlug> | undefined
+    { slug: string; name: string } | undefined
   >(undefined);
   const packagePrefillDone = useRef<string | null>(null);
 
@@ -277,23 +276,61 @@ export default function ContactInquiryForm() {
     if (!packageSlug?.trim()) return;
     const slug = packageSlug.trim();
     if (packagePrefillDone.current === slug) return;
-    const pkg = getMediaPackageBySlug(slug);
-    if (!pkg) return;
-    packagePrefillDone.current = slug;
-    setPackageRef(pkg);
-    const title = isKo ? pkg.nameKo : pkg.nameEn;
-    const mediaList = pkg.mediaIds.join(", ");
-    const snippet = t("packageRefMessageTemplate", { title, mediaList });
-    if (getValues("additionalNotes").trim() === "") {
-      setValue("additionalNotes", snippet, { shouldDirty: true });
-    }
-    if (!getValues("inquiryType")) {
+
+    const packageNameParam = searchParams.get("packageName")?.trim() ?? "";
+
+    let cancelled = false;
+    void (async () => {
+      let title = packageNameParam;
+      let mediaList = "";
+
+      try {
+        const res = await fetch(
+          `/api/public/packages/${encodeURIComponent(slug)}/media`,
+          { cache: "no-store" },
+        );
+        if (res.ok) {
+          const data = (await res.json()) as {
+            package?: { name?: string };
+            media?: { id: string }[];
+          };
+          if (!cancelled) {
+            title = packageNameParam || data.package?.name?.trim() || slug;
+            mediaList = Array.isArray(data.media)
+              ? data.media.map((m) => m.id).join(", ")
+              : "";
+          }
+        }
+      } catch {
+        /* fallback below */
+      }
+
+      if (cancelled) return;
+      if (!title) title = slug;
+
+      packagePrefillDone.current = slug;
+      setPackageRef({ slug, name: title });
+
+      const autoMessage = isKo
+        ? `${title} 패키지 견적을 요청합니다.\n\n`
+        : `Requesting a quote for the ${title} package.\n\n`;
+      const snippet = mediaList
+        ? t("packageRefMessageTemplate", { title, mediaList })
+        : autoMessage;
+
+      if (getValues("additionalNotes").trim() === "") {
+        setValue("additionalNotes", snippet, { shouldDirty: true });
+      }
       setValue("inquiryType", "media_quote", {
         shouldValidate: true,
         shouldDirty: true,
       });
-    }
-  }, [getValues, isKo, packageSlug, setValue, t]);
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [getValues, isKo, packageSlug, searchParams, setValue, t]);
 
   useEffect(() => {
     if (!planIdParam || !isSavedPlannerPlanId(planIdParam)) {
@@ -826,7 +863,7 @@ export default function ContactInquiryForm() {
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
           <p className="mt-1 text-xs dark:text-white text-gray-400">
-            {"// "}{isKo ? packageRef.nameKo : packageRef.nameEn}
+            {"// "}{packageRef.name}
           </p>
           <Link
             href="/media/packages"

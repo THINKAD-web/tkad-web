@@ -41,6 +41,8 @@ type Common = {
   popularIds?: ReadonlySet<string>;
   /** 카탈로그 `price`와 동일 만원 단위 (네트워크 월 환산 등) */
   priceMan?: number;
+  /** `priceMan` 지정 시 함께 넘기면 기간 라벨(2주/월 등) 정확히 표시 */
+  pricePeriod?: MediaItem["pricePeriod"];
   showPricePeriod?: boolean;
   className?: string;
   denseMobile?: boolean;
@@ -77,10 +79,11 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   // priceMan / media.price 폴백은 기존 동작 유지 (호출부 데이터 단위에 의존).
   const rawPrice = cheapest?.priceWon ?? props.priceMan ?? media.price;
   const priceWon = cheapest?.priceWon ?? catalogPriceFieldToWon(rawPrice);
-  const displayPeriod = cheapest?.period ?? media.pricePeriod;
+  const displayPeriod =
+    props.pricePeriod ?? cheapest?.period ?? media.pricePeriod;
+  const showPricePeriod =
+    props.showPricePeriod ?? (!!cheapest || props.pricePeriod != null);
   const tl = typeLabels[media.type];
-  // 가장 저렴한 옵션 사용 시에는 단가 단위(월/주/일) 명시 — 비교 혼동 방지
-  const showPricePeriod = props.showPricePeriod ?? !!cheapest;
 
   const thumbnailOverlays = (
     <>

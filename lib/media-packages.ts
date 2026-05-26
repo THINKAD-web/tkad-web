@@ -107,8 +107,6 @@ export function resolveAllMediaPackages(
     .map((p) => resolveMediaPackage(p, catalog));
 }
 
-export function buildPackageContactHref(slug: string): string {
-  return `/contact?package=${encodeURIComponent(slug)}`;
-}
+export { buildPackageContactHref } from "@/lib/media-package-url";
 
 export { getMediaPackageBySlug, type PackageIndustryBadge };

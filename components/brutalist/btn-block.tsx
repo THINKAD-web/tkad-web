@@ -25,9 +25,9 @@ const variantClass: Record<BtnBlockVariant, string> = {
   secondary:
     "bg-card text-foreground border-border hover:bg-foreground hover:text-background",
   dark: "bg-hero-void text-hero-fg border-border hover:bg-muted hover:border-border",
-  /* accent: 주황 배경은 라이트/다크 모두 동일 (브랜드 색). 텍스트는 항상 흰색 유지. */
+  /* accent: 주황/보라 배경 — 라이트·다크 모두 흰색 텍스트. planner-neon day 에서 text-white 뒤집힘 방지. */
   accent:
-    "bg-accent dark:text-white text-gray-900 border-accent hover:bg-foreground hover:border-border hover:text-background hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98]",
+    "tkad-planner-wizard-btn-accent bg-accent text-white border-accent hover:bg-foreground hover:border-border hover:text-background hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98]",
 };
 
 const sizeClass: Record<BtnBlockSize, string> = {

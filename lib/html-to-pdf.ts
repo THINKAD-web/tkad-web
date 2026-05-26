@@ -92,9 +92,146 @@ function flattenModernColorsToInline(clonedDoc: Document, cloned: HTMLElement) {
   }
 }
 
+function fixBackgroundClipTextForCapture(cloned: HTMLElement) {
+  cloned.querySelectorAll<HTMLElement>(".tkad-home-accent-text").forEach((el) => {
+    el.style.backgroundImage = "none";
+    el.style.backgroundClip = "border-box";
+    el.style.setProperty("-webkit-background-clip", "border-box");
+    el.style.color = "#5b21b6";
+    el.style.setProperty("-webkit-text-fill-color", "#5b21b6");
+  });
+}
+
+function stripStylesheetsInClone(clonedDoc: Document) {
+  clonedDoc.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
+    node.parentNode?.removeChild(node);
+  });
+}
+
+function inlineComputedStylesForCapture(clonedDoc: Document, root: HTMLElement) {
+  const win = clonedDoc.defaultView;
+  if (!win) return;
+
+  const PROPS = [
+    "box-sizing",
+    "display",
+    "position",
+    "top",
+    "right",
+    "bottom",
+    "left",
+    "z-index",
+    "float",
+    "width",
+    "height",
+    "min-width",
+    "min-height",
+    "max-width",
+    "max-height",
+    "margin-top",
+    "margin-right",
+    "margin-bottom",
+    "margin-left",
+    "padding-top",
+    "padding-right",
+    "padding-bottom",
+    "padding-left",
+    "border-top-width",
+    "border-right-width",
+    "border-bottom-width",
+    "border-left-width",
+    "border-top-style",
+    "border-right-style",
+    "border-bottom-style",
+    "border-left-style",
+    "border-top-color",
+    "border-right-color",
+    "border-bottom-color",
+    "border-left-color",
+    "border-radius",
+    "flex",
+    "flex-grow",
+    "flex-shrink",
+    "flex-basis",
+    "flex-direction",
+    "flex-wrap",
+    "align-items",
+    "align-self",
+    "justify-content",
+    "justify-items",
+    "gap",
+    "row-gap",
+    "column-gap",
+    "grid-template-columns",
+    "grid-template-rows",
+    "grid-column",
+    "grid-row",
+    "font-family",
+    "font-size",
+    "font-weight",
+    "font-style",
+    "line-height",
+    "letter-spacing",
+    "text-align",
+    "text-transform",
+    "text-decoration-line",
+    "white-space",
+    "word-break",
+    "vertical-align",
+    "overflow",
+    "overflow-x",
+    "overflow-y",
+    "object-fit",
+    "object-position",
+    "opacity",
+    "visibility",
+    "transform",
+    "transform-origin",
+    "background-color",
+    "background-image",
+    "background-size",
+    "background-position",
+    "background-repeat",
+    "box-shadow",
+    "table-layout",
+    "border-collapse",
+    "border-spacing",
+    "list-style-type",
+    "pointer-events",
+    "color",
+    "-webkit-text-fill-color",
+  ] as const;
+
+  const nodes: HTMLElement[] = [
+    root,
+    ...Array.from(root.querySelectorAll<HTMLElement>("*")),
+  ];
+
+  for (const el of nodes) {
+    let cs: CSSStyleDeclaration;
+    try {
+      cs = win.getComputedStyle(el);
+    } catch {
+      continue;
+    }
+    for (const prop of PROPS) {
+      try {
+        const val = cs.getPropertyValue(prop);
+        if (!val) continue;
+        if (prop === "background-image" && val === "none") continue;
+        el.style.setProperty(prop, val);
+      } catch {
+        /* ignore */
+      }
+    }
+  }
+}
+
 function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement) {
   try {
     flattenModernColorsToInline(clonedDoc, cloned);
+    inlineComputedStylesForCapture(clonedDoc, cloned);
+    fixBackgroundClipTextForCapture(cloned);
     // inline style에 남은 잔존 color 함수 치환
     cloned.querySelectorAll<HTMLElement>("*").forEach((el) => {
       const s = el.getAttribute("style");
@@ -108,6 +245,7 @@ function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement)
         );
       }
     });
+    stripStylesheetsInClone(clonedDoc);
   } catch {
     /* ignore */
   }
@@ -157,6 +295,9 @@ async function preloadImagesAsProxyDataUrls(element: HTMLElement): Promise<void>
     imgs.map(async (img) => {
       const src = (img.getAttribute("src") ?? img.src ?? "").trim();
       if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
+      if (src.startsWith("/api/image-proxy") || src.startsWith("/api/bunny-media/")) {
+        return;
+      }
       let u: URL;
       try {
         u = new URL(src, window.location.href);
@@ -186,6 +327,24 @@ async function preloadImagesAsProxyDataUrls(element: HTMLElement): Promise<void>
   );
 }
 
+async function waitForImagesInElement(element: HTMLElement): Promise<void> {
+  const imgs = Array.from(element.querySelectorAll("img"));
+  await Promise.all(
+    imgs.map(
+      (img) =>
+        new Promise<void>((resolve) => {
+          if (img.complete && img.naturalWidth > 0) {
+            resolve();
+            return;
+          }
+          const done = () => resolve();
+          img.addEventListener("load", done, { once: true });
+          img.addEventListener("error", done, { once: true });
+        }),
+    ),
+  );
+}
+
 async function waitForFontsAndPaint(): Promise<void> {
   if (typeof document === "undefined") return;
   try {
@@ -209,6 +368,7 @@ async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
   }
 
   await preloadImagesAsProxyDataUrls(element);
+  await waitForImagesInElement(element);
   await waitForFontsAndPaint();
 
   const rect = element.getBoundingClientRect();
@@ -343,6 +503,7 @@ export async function captureElementAsPng(
   filename = "THINKAD-capture.png",
 ): Promise<void> {
   await preloadImagesAsProxyDataUrls(element);
+  await waitForImagesInElement(element);
   await waitForFontsAndPaint();
   const html2canvas = (await import("html2canvas")).default;
   const canvas = await html2canvas(element, {

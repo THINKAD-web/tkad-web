@@ -1288,9 +1288,126 @@ html.dark .tkad-media-detail-hero,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean *,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta * {
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-wizard-btn-accent,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-wizard-btn-accent * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+/* 견적 마법사 — 단계 숫자 버튼 (라이트 모드 가독성) */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn {
+  border-color: rgb(226 232 240);
+  background: rgb(248 250 252);
+  color: rgb(71 85 105);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
+  border-color: #4338ca;
+  background: #4338ca;
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+  box-shadow: 0 6px 24px rgb(67 56 202 / 0.32);
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
+  border-color: rgb(99 102 241 / 0.45);
+  background: rgb(238 242 255);
+  color: rgb(67 56 202);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
+  background: rgb(224 231 255);
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-label {
+  color: rgb(100 116 139);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-label-active {
+  color: rgb(15 23 42);
+  -webkit-text-fill-color: currentColor;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn {
+  border-color: rgb(255 255 255 / 0.12);
+  background: rgb(255 255 255 / 0.06);
+  color: rgb(255 255 255 / 0.55);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
+  border-color: rgb(255 255 255 / 0.16);
+  background: rgb(255 255 255 / 0.12);
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+  box-shadow:
+    0 0 0 1px rgb(34 211 238 / 0.24),
+    0 24px 80px rgb(0 0 0 / 0.45);
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
+  border-color: rgb(99 102 241 / 0.5);
+  background: rgb(99 102 241 / 0.1);
+  color: rgb(255 255 255 / 0.92);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
+  background: rgb(99 102 241 / 0.2);
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-label {
+  color: rgb(255 255 255 / 0.55);
+  -webkit-text-fill-color: currentColor;
+}
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-label-active {
+  color: rgb(255 255 255 / 0.92);
+  -webkit-text-fill-color: currentColor;
+}
+
+/* 견적 PDF 캡처 — scale 해제 후 html2canvas 캡처 (opacity 0 이면 캡처가 빈 페이지가 됨) */
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] {
+  position: fixed !important;
+  left: 0 !important;
+  top: 0 !important;
+  z-index: -9999 !important;
+  transform: none !important;
+  scale: none !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  width: max-content !important;
+  max-width: none !important;
+}
+
+/* Step 1 미리보기 카드 — appearance 기준 배경·대비 (Tailwind dark: 와 분리) */
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-aside {
+  background: linear-gradient(
+    145deg,
+    rgb(46 16 101 / 0.42),
+    rgb(22 78 99 / 0.28)
+  ) !important;
+  border-color: rgb(255 255 255 / 0.12) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-step1-aside {
+  background: linear-gradient(
+    145deg,
+    rgb(245 243 255 / 0.98),
+    rgb(236 254 255 / 0.92)
+  ) !important;
+  border-color: rgb(15 23 42 / 0.1) !important;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-preview-frame {
+  background-color: rgb(2 2 2 / 0.82) !important;
+  border-color: rgb(255 255 255 / 0.1) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-step1-preview-frame {
+  background-color: rgb(241 245 249 / 0.96) !important;
+  border-color: rgb(15 23 42 / 0.08) !important;
 }
 
 /* 히어로는 라이트 배경 + text-gray-900 — 예전 “항상 다크 히어로”용 흰 글자 강제 제거 */
@@ -1830,6 +1947,41 @@ html:not(.dark) .tkad-glass-surface [class*="text-white/"],
 html:not(.dark) .tkad-glass-surface-soft [class*="text-white/"] {
   color: var(--home-muted, #64748b) !important;
   -webkit-text-fill-color: currentColor !important;
+}
+
+/* 글래스 패널·플래너/견적 위저드 — accent·primary·그라데이션 CTA는 라이트에서도 흰색 라벨 유지 */
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .tkad-planner-wizard-btn-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .tkad-planner-wizard-btn-accent *,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent.text-white,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent.text-white *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary.bg-primary,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary.bg-primary *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent *,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .bg-accent,
+.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .bg-accent *,
+html:not(.dark) .tkad-glass-surface .tkad-planner-wizard-btn-accent,
+html:not(.dark) .tkad-glass-surface .tkad-planner-wizard-btn-accent *,
+html:not(.dark) .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent,
+html:not(.dark) .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent *,
+html:not(.dark) .tkad-glass-surface .bg-accent.text-white,
+html:not(.dark) .tkad-glass-surface .bg-accent.text-white *,
+html:not(.dark) .tkad-glass-surface-soft .bg-accent.text-white,
+html:not(.dark) .tkad-glass-surface-soft .bg-accent.text-white *,
+html:not(.dark) .tkad-planner-neon .bg-accent,
+html:not(.dark) .tkad-planner-neon .bg-accent *,
+html:not(.dark) .tkad-planner-neon .border-primary.bg-primary,
+html:not(.dark) .tkad-planner-neon .border-primary.bg-primary *,
+html:not(.dark) .tkad-planner-neon .tkad-planner-gradient-cta,
+html:not(.dark) .tkad-planner-neon .tkad-planner-gradient-cta * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
 html:not(.dark) .tkad-glass-surface .text-cyan-300,
@@ -2586,10 +2738,17 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean svg {
 
 /* Header text safety: `text-white` 유틸만 보정. `dark:text-white*` 는 클래스 문자열에
    `text-white`가 포함돼 매칭되지만 라이트 모드에선 비활성 — 여기까지 덮으면
-   반투명 드롭다운 위에서 글자만 선명한 잉크로 고정돼 배경과 충돌한다. */
-html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]) {
+   반투명 드롭다운 위에서 글자만 선명한 잉크로 고정돼 배경과 충돌한다.
+   네온 CTA pill(활성 대메뉴)은 그라데이션 위 흰 글자 유지. */
+html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]):not(.tkad-neon-cta-clean) {
   color: var(--foreground) !important;
   -webkit-text-fill-color: var(--foreground) !important;
+}
+
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean,
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
 /* ── Premium Service card hover ── */

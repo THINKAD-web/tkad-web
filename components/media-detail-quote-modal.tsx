@@ -10,6 +10,9 @@ import {
   formatCatalogPriceKrwLong,
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import {
+  inferQuoteCampaignPeriodFromMedia,
+} from "@/lib/quote-wizard-pricing";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -34,10 +37,12 @@ function MediaDetailQuoteModalBody({
   const selected = hasOpts ? opts[safeIdx] : undefined;
 
   const quoteHref = useMemo(() => {
-    const q = `/quote?media=${encodeURIComponent(media.id)}`;
-    if (!hasOpts) return q;
-    return `${q}&po=${safeIdx}`;
-  }, [media.id, hasOpts, safeIdx]);
+    const q = new URLSearchParams();
+    q.set("media", media.id);
+    if (hasOpts) q.set("po", String(safeIdx));
+    q.set("period", inferQuoteCampaignPeriodFromMedia(media, safeIdx));
+    return `/quote?${q.toString()}`;
+  }, [media, hasOpts, safeIdx, selected]);
 
   const contactHref = useMemo(() => {
     const q = `/contact?media=${encodeURIComponent(media.id)}`;

@@ -22,10 +22,10 @@ function isMobileDetailPath(pathname: string): boolean {
   );
 }
 
-function navItemClass(active: boolean) {
+function navItemClass(active: boolean, open: boolean) {
   return cn(
     "inline-flex min-h-8 items-center gap-0.5 rounded-full px-3 py-1.5 text-[13px] font-semibold leading-none transition-colors",
-    active
+    active || open
       ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
       : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/8",
   );
@@ -67,14 +67,14 @@ function NavDropdown({
         type="button"
         onMouseEnter={onOpen}
         onClick={() => (open ? onClose() : onOpen())}
-        className={navItemClass(!!active)}
+        className={navItemClass(!!active, open)}
         aria-expanded={open}
       >
         {label}
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 transition-transform",
-            active && "text-white",
+            (active || open) && "text-white",
             open && "rotate-180",
           )}
         />

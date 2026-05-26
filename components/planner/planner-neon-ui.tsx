@@ -11,16 +11,16 @@ export const plannerNeon = {
   card: "rounded-2xl border shadow-sm dark:bg-white/5 bg-white dark:border-white/10 border-gray-100",
   cardHeader: "border-b dark:border-white/10 border-gray-100 p-5 sm:p-6",
   label:
-    "text-xs font-semibold tracking-widest uppercase dark:text-cyan-400/60 text-cyan-600/60",
-  headline: "font-bold dark:text-white text-gray-900",
-  subtext: "text-sm dark:text-white/50 text-gray-500",
+    "text-xs font-semibold tracking-widest uppercase text-cyan-700/80 dark:text-cyan-300/80",
+  headline: "font-bold text-foreground",
+  subtext: "text-sm text-muted-foreground",
   kpiCard:
     "rounded-xl border dark:bg-white/5 bg-violet-50 dark:border-white/10 border-violet-100 p-4",
   kpiValue: "text-2xl font-bold tabular-nums dark:text-white text-gray-900",
   kpiLabel: "text-xs dark:text-white/40 text-gray-400",
-  cta: "inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-500 to-cyan-400 text-white rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90",
+  cta: "inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-500 to-cyan-400 text-white tkad-planner-gradient-cta rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90",
   ctaSm:
-    "inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-500 to-cyan-400 text-white rounded-xl px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90",
+    "inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-500 to-cyan-400 text-white tkad-planner-gradient-cta rounded-xl px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90",
   selectChip:
     "rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors touch-manipulation",
   selectChipActive:

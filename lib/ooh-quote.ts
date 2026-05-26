@@ -1,6 +1,11 @@
 import { OoHQuoteStatus, type OoHQuote } from "@prisma/client";
+import {
+  QUOTE_CAMPAIGN_PERIOD_CONFIG,
+  type QuoteCampaignPeriodKey,
+} from "@/lib/quote-wizard-pricing";
 
 export const OOH_PERIOD_MONTHS: Record<string, number> = {
+  "2weeks": 0,
   "1month": 1,
   "3months": 3,
   "6months": 6,
@@ -14,12 +19,14 @@ export function periodLabelFromKey(
   const isKo = locale !== "en";
   const k = periodKey ?? "1month";
   const labelsKo: Record<string, string> = {
+    "2weeks": "2주",
     "1month": "1개월",
     "3months": "3개월",
     "6months": "6개월",
     "12months": "12개월",
   };
   const labelsEn: Record<string, string> = {
+    "2weeks": "2 weeks",
     "1month": "1 month",
     "3months": "3 months",
     "6months": "6 months",
@@ -32,9 +39,14 @@ export function estimateEndDate(
   start: Date,
   periodKey: string | null | undefined,
 ): Date {
-  const m = OOH_PERIOD_MONTHS[periodKey ?? "1month"] ?? 1;
+  const key = (periodKey ?? "1month") as QuoteCampaignPeriodKey;
+  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[key];
   const d = new Date(start.getTime());
-  d.setMonth(d.getMonth() + m);
+  if (cfg?.months == null) {
+    d.setDate(d.getDate() + (cfg?.days ?? 14));
+    return d;
+  }
+  d.setMonth(d.getMonth() + cfg.months);
   return d;
 }
 

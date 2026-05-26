@@ -20,8 +20,9 @@ export async function onRequestError(
   err: unknown,
   request: { path: string; method: string },
 ) {
-  const { logOpsError } = await import("@/lib/tracking/record");
   const message = err instanceof Error ? err.message : String(err);
+  if (process.env.NEXT_RUNTIME !== "nodejs") return;
+  const { logOpsError } = await import("@/lib/tracking/log-ops-error");
   await logOpsError({
     tag: "request_error",
     path: request.path,

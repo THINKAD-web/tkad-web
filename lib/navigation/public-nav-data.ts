@@ -1,7 +1,6 @@
 import type { LucideIcon } from "lucide-react";
 import {
   BookMarked,
-  BookOpen,
   ClipboardList,
   Compass,
   GraduationCap,
@@ -38,7 +37,6 @@ export type PublicNavItemId =
   | "trend-report"
   | "success-cases"
   | "academy-content"
-  | "academy-home"
   | "advertiser-guide";
 
 export type PublicNavItemDef = {
@@ -87,10 +85,9 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "insights",
     icon: LineChart,
     items: [
-      { id: "trend-report", href: "/report", icon: LineChart },
-      { id: "success-cases", href: "/cases", icon: Trophy },
-      { id: "academy-content", href: "/academy", icon: GraduationCap },
-      { id: "academy-home", href: "/academy#academy-basics", icon: BookOpen },
+      { id: "trend-report", href: "/report", icon: LineChart, beta: true },
+      { id: "success-cases", href: "/cases", icon: Trophy, beta: true },
+      { id: "academy-content", href: "/academy", icon: GraduationCap, beta: true },
       { id: "advertiser-guide", href: "/guides", icon: BookMarked },
     ],
   },

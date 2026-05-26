@@ -2925,3 +2925,35 @@ model RecommendationLog {
   @@index([source, createdAt(sort: Desc)])
   @@map("recommendation_logs")
 }
+
+/// OOH 패키지 큐레이션 — 동적 필터로 매체 자동 매칭
+model MediaPackage {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  name        String
+  subtitle    String
+  description String   @db.Text
+  heroColor   String   @map("hero_color")
+  icon        String
+  order       Int      @default(0)
+  isActive    Boolean  @default(true) @map("is_active")
+
+  filterRegion   String[] @default([]) @map("filter_region")
+  filterCategory String[] @default([]) @map("filter_category")
+  filterTarget   String[] @default([]) @map("filter_target")
+  filterMaxPrice Int?     @map("filter_max_price")
+  filterMinPrice Int?     @map("filter_min_price")
+  sortBy         String   @default("popular") @map("sort_by")
+
+  badgeText      String?  @map("badge_text")
+  guideSteps     Json?    @map("guide_steps")
+  faqs           Json?
+  targetIndustry String[] @default([]) @map("target_industry")
+  avgBudget      String?  @map("avg_budget")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([isActive, order])
+  @@map("media_packages")
+}

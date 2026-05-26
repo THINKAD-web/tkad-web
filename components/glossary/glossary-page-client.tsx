@@ -75,16 +75,16 @@ export function GlossaryPageClient() {
 
   return (
     <NeonPageShell>
-      <section className="relative overflow-hidden bg-[#05050a] py-16 tkad-neon-depth tkad-neon-grid sm:py-20">
+      <section className="relative overflow-hidden bg-gray-50 py-16 text-gray-900 tkad-neon-depth tkad-neon-grid dark:bg-[#05050a] dark:text-white sm:py-20">
         <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-medium uppercase tracking-widest text-violet-400">
+          <p className="text-xs font-medium uppercase tracking-widest text-violet-600 dark:text-violet-400">
             {isKo ? "용어집" : "Glossary"}
           </p>
-          <h1 className={cn("mt-3 flex items-center gap-3", neonTitleClass, "text-white")}>
-            <BookOpen className="h-8 w-8 text-violet-400" aria-hidden />
+          <h1 className={cn("mt-3 flex items-center gap-3", neonTitleClass)}>
+            <BookOpen className="h-8 w-8 text-violet-600 dark:text-violet-400" aria-hidden />
             {isKo ? "옥외광고 용어집" : "OOH Advertising Glossary"}
           </h1>
-          <p className={cn("mt-4 max-w-2xl", neonSubtitleClass, "text-white/65")}>
+          <p className={cn("mt-4 max-w-2xl", neonSubtitleClass)}>
             {isKo
               ? `OOH·DOOH·CPM·GRP 등 캠페인 기획 시 자주 쓰는 ${GLOSSARY_TERMS.length}개 핵심 용어`
               : `${GLOSSARY_TERMS.length} essential terms for OOH campaign planning`}

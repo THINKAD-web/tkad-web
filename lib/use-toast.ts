@@ -1,5 +1,6 @@
 "use client";
 
+import { useMemo } from "react";
 import { useToast as useBaseToast } from "@/components/toast-provider";
 
 type Variant = "success" | "error" | "warning";
@@ -21,13 +22,16 @@ function format(input: ToastInput): { type: Variant; message: string } {
 
 export function useAppToast() {
   const { toast } = useBaseToast();
-  return {
-    show: (input: ToastInput) => {
-      const { type, message } = format(input);
-      toast(type, message);
-    },
-    success: (msg: string) => toast("success", msg),
-    error: (msg: string) => toast("error", msg),
-    warning: (msg: string) => toast("warning", msg),
-  };
+  return useMemo(
+    () => ({
+      show: (input: ToastInput) => {
+        const { type, message } = format(input);
+        toast(type, message);
+      },
+      success: (msg: string) => toast("success", msg),
+      error: (msg: string) => toast("error", msg),
+      warning: (msg: string) => toast("warning", msg),
+    }),
+    [toast],
+  );
 }

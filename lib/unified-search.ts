@@ -1,4 +1,4 @@
-import { MEDIA_PACKAGES, type MediaPackageDefinition } from "@/data/packages";
+import { MEDIA_PACKAGE_SEED_DATA } from "@/lib/media-package-seed-data";
 import type { AcademyLesson } from "@/lib/academy-content";
 import type { InsightReport } from "@/lib/insights-reports";
 import { matchesMediaTextQuery, type MediaItem } from "@/lib/media-data";
@@ -48,19 +48,19 @@ export type UnifiedSearchResults = {
 
 const DEFAULT_PER_SECTION = 3;
 
-function packageHaystack(p: MediaPackageDefinition, isKo: boolean): string {
+function packageHaystack(
+  p: (typeof MEDIA_PACKAGE_SEED_DATA)[number],
+): string {
   return [
-    p.nameKo,
-    p.nameEn,
-    p.taglineKo,
-    p.taglineEn,
-    p.descriptionKo,
-    p.descriptionEn,
-    p.regionLabelKo,
-    p.regionLabelEn,
-    p.recommendReasonKo,
-    p.recommendReasonEn,
-    ...p.purposes,
+    p.name,
+    p.subtitle,
+    p.description,
+    p.badgeText ?? "",
+    p.avgBudget ?? "",
+    ...p.targetIndustry,
+    ...p.filterRegion,
+    ...p.filterCategory,
+    ...p.filterTarget,
   ].join(" ");
 }
 
@@ -133,16 +133,16 @@ function searchPackages(
   limit: number,
   isKo: boolean,
 ): UnifiedSearchHit[] {
-  return MEDIA_PACKAGES.filter((p) =>
-    matchesTextQuery(packageHaystack(p, isKo), lower),
+  return MEDIA_PACKAGE_SEED_DATA.filter((p) =>
+    matchesTextQuery(packageHaystack(p), lower),
   )
     .slice(0, limit)
     .map((p) => ({
       kind: "package" as const,
       id: p.slug,
-      title: isKo ? p.nameKo : p.nameEn,
-      subtitle: isKo ? p.taglineKo : p.taglineEn,
-      href: `/media/packages`,
+      title: p.name,
+      subtitle: p.subtitle,
+      href: `/media/packages/${encodeURIComponent(p.slug)}`,
     }));
 }
 

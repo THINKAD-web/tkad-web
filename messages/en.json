@@ -201,10 +201,6 @@
         "label": "Learning content",
         "desc": "Advertiser education"
       },
-      "academy-home": {
-        "label": "Academy",
-        "desc": "OOH learning hub"
-      },
       "advertiser-guide": {
         "label": "Advertiser guides",
         "desc": "By region and media type"
@@ -1237,6 +1233,7 @@
     "period": "Campaign Period",
     "periodPlaceholder": "Select period",
     "periods": {
+      "2weeks": "2 Weeks",
       "1month": "1 Month",
       "3months": "3 Months",
       "6months": "6 Months",
@@ -1249,6 +1246,7 @@
     "estimatedCost": "Estimated Cost",
     "estimatedCostDesc": "Based on selected media and period",
     "perMonth": "/ month",
+    "unitPriceSum": "Unit price total",
     "total": "Total Estimated Cost",
     "company": "Company",
     "companyPlaceholder": "Enter company name",
@@ -1327,6 +1325,7 @@
     "pdfColLocation": "Location",
     "pdfColPeriod": "Period",
     "pdfColUnit": "Monthly",
+    "pdfColUnitGeneric": "Unit price",
     "pdfColAmount": "Subtotal",
     "pdfSupply": "Subtotal (supply value)",
     "pdfVat": "VAT (10%)",

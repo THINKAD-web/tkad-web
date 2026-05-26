@@ -93,7 +93,7 @@ export function PublicNavSidebar({
                   className={cn(
                     "flex h-7 w-7 shrink-0 items-center justify-center rounded-md border transition-colors md:h-8 md:w-8",
                     groupActive
-                      ? "border-cyan-400/35 bg-cyan-400/10 tkad-home-accent-text dark:border-cyan-400/35"
+                      ? "border-cyan-400/35 bg-cyan-400/10 text-cyan-600 dark:border-cyan-400/35 dark:text-cyan-300"
                       : "border-gray-200 bg-gray-50 text-gray-600 dark:border-white/12 dark:bg-white/5 dark:text-white/70",
                   )}
                 >

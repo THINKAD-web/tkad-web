@@ -17,6 +17,8 @@ export function CaseDetailMobileChromeSync({ title, shareDescription }: Props) {
   const isKo = locale === "ko";
   const toast = useAppToast();
   const detailChrome = useMobileDetailChromeOptional();
+  const setDetailChrome = detailChrome?.setDetailChrome;
+  const clearDetailChrome = detailChrome?.clearDetailChrome;
 
   const sheetItems = useMemo((): ActionSheetItem[] => {
     const shareUrl =
@@ -63,10 +65,14 @@ export function CaseDetailMobileChromeSync({ title, shareDescription }: Props) {
   }, [isKo, locale, shareDescription, title, toast]);
 
   useEffect(() => {
-    if (!detailChrome) return;
-    detailChrome.setDetailChrome({ title, sheetItems });
-    return () => detailChrome.clearDetailChrome();
-  }, [detailChrome, sheetItems, title]);
+    if (!setDetailChrome) return;
+    setDetailChrome({ title, sheetItems });
+  }, [setDetailChrome, sheetItems, title]);
+
+  useEffect(() => {
+    if (!clearDetailChrome) return;
+    return () => clearDetailChrome();
+  }, [clearDetailChrome]);
 
   return null;
 }

@@ -1151,7 +1151,12 @@ export default function PlannerPageClient({
                 <ChevronLeft className="h-4 w-4" />
                 {t("back")}
               </BtnBlock>
-              <BtnBlock variant="accent" size="md" onClick={goNext}>
+              <BtnBlock
+                variant="accent"
+                size="md"
+                className="tkad-planner-wizard-btn-accent"
+                onClick={goNext}
+              >
                 {wizardStep === 6 ? (
                   <>
                     {t("viewEffectDashboard")}

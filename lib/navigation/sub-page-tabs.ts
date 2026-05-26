@@ -44,19 +44,14 @@ export const PLANNING_TABS: SubTab[] = [
 ];
 
 export const CONTENT_TABS: SubTab[] = [
-  { label: "트렌드 리포트", href: "/report", icon: FileText },
-  { label: "성공 사례", href: "/cases", icon: Trophy },
+  { label: "트렌드 리포트", href: "/report", icon: FileText, beta: true },
+  { label: "성공 사례", href: "/cases", icon: Trophy, beta: true },
   {
     label: "교육 콘텐츠",
     href: "/academy",
     icon: GraduationCap,
+    beta: true,
     match: (p) => p === "/academy" || p.startsWith("/academy/learn"),
-  },
-  {
-    label: "아카데미",
-    href: "/academy#academy-basics",
-    icon: BookOpen,
-    match: (p) => p.startsWith("/academy"),
   },
   { label: "광고주 가이드", href: "/guides", icon: BookOpen },
 ];

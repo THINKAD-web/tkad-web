@@ -4,6 +4,7 @@ import {
   createContext,
   useCallback,
   useContext,
+  useMemo,
   useState,
   type ReactNode,
 } from "react";
@@ -69,11 +70,13 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
       setToasts((prev) => [...prev, { id, type, message }]);
       setTimeout(() => remove(id), 3000);
     },
-    [remove]
+    [remove],
   );
 
+  const value = useMemo(() => ({ toast }), [toast]);
+
   return (
-    <ToastContext value={{ toast }}>
+    <ToastContext value={value}>
       {children}
       <div
         aria-live="polite"

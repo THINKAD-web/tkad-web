@@ -13,6 +13,7 @@ import {
   KNOWN_TARGET_SLUGS,
 } from "@/lib/media-category-landing";
 import { KNOWN_SPECIAL_SLUGS } from "@/lib/special-media-landings";
+import { fetchMediaPackageSlugs } from "@/lib/media-package-db";
 
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
@@ -246,6 +247,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     (slug) => sitemapEntry(`/special/${slug}`),
   );
 
+  let packagePart: MetadataRoute.Sitemap = [];
+  try {
+    const slugs = await fetchMediaPackageSlugs();
+    packagePart = slugs.map((slug) => sitemapEntry(`/media/packages/${slug}`));
+  } catch {
+    /* ignore */
+  }
+
   const blogSeoPart: MetadataRoute.Sitemap = BLOG_SEO_POSTS.map((p) =>
     sitemapEntry(
       `/blog/${p.slug}`,
@@ -261,6 +270,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...mediaCategoryPart,
     ...targetCategoryPart,
     ...specialMediaPart,
+    ...packagePart,
     ...blogSeoPart,
     ...regionLandingPart,
     ...typeLandingPart,

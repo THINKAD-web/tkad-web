@@ -31,11 +31,22 @@ export function MobileDetailChromeProvider({ children }: { children: ReactNode }
   const [detail, setDetail] = useState<DetailChromeState>(defaultState);
 
   const setDetailChrome = useCallback((patch: Partial<DetailChromeState>) => {
-    setDetail((prev) => ({ ...prev, ...patch }));
+    setDetail((prev) => {
+      const nextTitle = patch.title !== undefined ? patch.title : prev.title;
+      const nextItems =
+        patch.sheetItems !== undefined ? patch.sheetItems : prev.sheetItems;
+      if (prev.title === nextTitle && prev.sheetItems === nextItems) {
+        return prev;
+      }
+      return { title: nextTitle, sheetItems: nextItems };
+    });
   }, []);
 
   const clearDetailChrome = useCallback(() => {
-    setDetail(defaultState);
+    setDetail((prev) => {
+      if (!prev.title && prev.sheetItems.length === 0) return prev;
+      return defaultState;
+    });
   }, []);
 
   const value = useMemo(

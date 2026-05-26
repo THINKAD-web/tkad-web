@@ -28,6 +28,8 @@ const DEFAULT_ALLOWED_HOSTS = [
   ".imgur.com",
   "thinkad.kr",
   ".thinkad.kr",
+  ".b-cdn.net",
+  "tkad-cdn.b-cdn.net",
 ];
 
 const MAX_BYTES = 15 * 1024 * 1024;
