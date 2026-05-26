@@ -215,6 +215,45 @@ export function mediaDetailPricePeriodTranslationKey(
   }
 }
 
+export function formatMediaPriceWithPeriodSuffix(
+  price: number,
+  period: MediaPricePeriodKey | string | null | undefined,
+  locale = "ko-KR",
+): string {
+  const won = catalogPriceFieldToWon(price);
+  if (won <= 0) {
+    return locale.startsWith("ko") ? "문의" : "Inquire";
+  }
+  const priceLabel = formatMediaPriceCompactWon(won, locale);
+  const periodLabel = formatPricePeriodShortLabel(
+    period,
+    locale.startsWith("ko") ? "ko" : "en",
+  );
+  return `${priceLabel}/${periodLabel}`;
+}
+
+/** 목록·지도 공통 — priceOptions 포함 최저가 + 표시 기간 */
+export function resolveMediaDisplayPrice(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+): { priceWon: number; period: MediaPricePeriodKey } {
+  const cheapest = getCheapestMediaPriceOption(media);
+  if (cheapest) {
+    return { priceWon: cheapest.priceWon, period: cheapest.period };
+  }
+  return {
+    priceWon: catalogPriceFieldToWon(media.price ?? 0),
+    period: normalizeMediaPricePeriod(media.pricePeriod),
+  };
+}
+
+export function formatMediaDisplayPrice(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+  locale = "ko-KR",
+): string {
+  const { priceWon, period } = resolveMediaDisplayPrice(media);
+  return formatMediaPriceWithPeriodSuffix(priceWon, period, locale);
+}
+
 /**
  * 매체의 priceOptions + 기본 price 중 가장 저렴한 옵션 반환.
  */

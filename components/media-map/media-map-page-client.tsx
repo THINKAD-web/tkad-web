@@ -4,6 +4,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import { ClipboardCheck, Crosshair, LayoutList, Search, X } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
+import {
+  formatMediaPriceWithPeriodSuffix,
+} from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import { useAppToast } from "@/lib/use-toast";
@@ -29,7 +32,6 @@ import {
 } from "@/lib/compare-cart-client";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
@@ -98,18 +100,7 @@ function writeCart(ids: string[]) {
 }
 
 function formatPrice(v: number, period: string, locale: string): string {
-  const price = formatCatalogPriceFieldWon(v, locale);
-  const p =
-    period === "month"
-      ? "/월"
-      : period === "week"
-        ? "/주"
-        : period === "biweekly"
-          ? "/격주"
-          : period === "day"
-            ? "/일"
-            : "";
-  return `${price}${p}`;
+  return formatMediaPriceWithPeriodSuffix(v, period, locale);
 }
 
 /** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */

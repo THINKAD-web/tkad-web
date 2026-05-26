@@ -1,5 +1,5 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import {
   matchesMapCatalogFilter,
   sortMapCatalogItems,
@@ -29,6 +29,7 @@ function parseSort(raw: string | null): PublicMediaSort {
 }
 
 function toMapItem(m: MediaItem) {
+  const display = resolveMediaDisplayPrice(m);
   return {
     id: m.id,
     name: m.name,
@@ -38,8 +39,8 @@ function toMapItem(m: MediaItem) {
     district: m.district ?? null,
     type: m.type,
     subCategory: m.subCategory ?? null,
-    price: catalogPriceFieldToWon(m.price ?? 0),
-    pricePeriod: m.pricePeriod ?? "month",
+    price: display.priceWon,
+    pricePeriod: display.period,
     createdAt: m.createdAt ?? null,
     lat: m.lat,
     lng: m.lng,

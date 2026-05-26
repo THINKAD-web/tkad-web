@@ -5,21 +5,10 @@ import { X, ExternalLink, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
 
 function formatPrice(v: number, period: string, locale: string): string {
-  const price = formatCatalogPriceFieldWon(v, locale);
-  const p =
-    period === "month"
-      ? "/월"
-      : period === "week"
-        ? "/주"
-        : period === "biweekly"
-          ? "/격주"
-          : period === "day"
-            ? "/일"
-            : "";
-  return `${price}${p}`;
+  return formatMediaPriceWithPeriodSuffix(v, period, locale);
 }
 
 function formatCompact(n: number): string {

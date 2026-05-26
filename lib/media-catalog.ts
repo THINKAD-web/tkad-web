@@ -7,10 +7,12 @@ import {
 import {
   getPrimaryMediaImageUrl,
   type MediaItem,
+  type MediaPricePeriodKey,
   typeLabels,
 } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   buildPublicMediaOrderBy,
@@ -25,6 +27,7 @@ export type HomeCatalogMediaItem = {
   type?: string;
   region?: string;
   price?: number;
+  pricePeriod?: MediaPricePeriodKey;
   thumbnailUrl?: string;
   reviewAvg?: number;
   reviewCount?: number;
@@ -43,6 +46,7 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
   const rawUrl = getPrimaryMediaImageUrl(item);
   const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
   const typeLabel = typeLabels[item.type]?.ko ?? item.type;
+  const display = resolveMediaDisplayPrice(item);
 
   return {
     id: item.id,
@@ -50,7 +54,8 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
     name: item.name,
     type: typeLabel,
     region: item.region ?? item.district ?? item.city,
-    price: item.price > 0 ? item.price : undefined,
+    price: display.priceWon > 0 ? display.priceWon : undefined,
+    pricePeriod: display.period,
     thumbnailUrl: resolved?.src ?? undefined,
     reviewAvg: item.averageRating,
     reviewCount: item.reviewCount,
@@ -73,7 +78,7 @@ function usesFilteredQuery(opts: {
   );
 }
 
-async function fetchFilteredMediaCatalog(opts: {
+export async function fetchFilteredMediaCatalog(opts: {
   sort: MediaCatalogSort;
   limit: number;
   category?: string;
@@ -137,4 +142,26 @@ export async function fetchPublicMediaCatalog(opts: {
   }
 
   return rows.map(mapMediaItem);
+}
+
+export async function countPublicMediaCatalog(opts: {
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
+}): Promise<number> {
+  if (!isDatabaseConfigured()) return 0;
+  try {
+    const db = getPrisma();
+    const where = buildPublicMediaWhere({
+      category: opts.category,
+      target: opts.target,
+      region: opts.region,
+      q: opts.q,
+    });
+    return await db.media.count({ where });
+  } catch (e) {
+    console.error("[countPublicMediaCatalog]", e);
+    return 0;
+  }
 }

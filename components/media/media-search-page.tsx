@@ -17,7 +17,7 @@ import CompareBar from "@/components/compare-bar";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS } from "@/components/floating-selection-bar";
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import { typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 import {
@@ -30,6 +30,11 @@ import {
 import { useCart } from "@/lib/cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
+import {
+  formatMediaPriceWithPeriodSuffix,
+  normalizeMediaPricePeriod,
+  resolveMediaDisplayPrice,
+} from "@/lib/media-price-format";
 import {
   MEDIA_CHIP_ACTIVE,
   MEDIA_CHIP_INACTIVE,
@@ -55,11 +60,19 @@ const VIEW_MODES: { id: ViewMode; label: string; icon: typeof List }[] = [
   { id: "compact", label: "컴팩트", icon: AlignJustify },
 ];
 
-function formatPrice(price?: number) {
+const PAGE_SIZE = 30;
+
+function formatPriceLabel(
+  price?: number,
+  period?: string,
+  locale = "ko-KR",
+) {
   if (!price) return null;
-  const man = Math.round(price / 10000);
-  if (man >= 10000) return `₩${(man / 10000).toFixed(1)}억`;
-  return `₩${man.toLocaleString()}만`;
+  return formatMediaPriceWithPeriodSuffix(
+    price,
+    normalizeMediaPricePeriod(period),
+    locale,
+  );
 }
 
 function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
@@ -73,6 +86,17 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
       : sampleImages[0] ?? undefined;
   const typeKey = typeof raw.type === "string" ? raw.type : "";
   const typeLabel = typeLabels[typeKey as keyof typeof typeLabels]?.ko ?? typeKey;
+
+  const priceOptions = Array.isArray(raw.priceOptions)
+    ? (raw.priceOptions as MediaPriceOption[])
+    : undefined;
+  const display = resolveMediaDisplayPrice({
+    price,
+    pricePeriod: normalizeMediaPricePeriod(
+      typeof raw.pricePeriod === "string" ? raw.pricePeriod : undefined,
+    ),
+    priceOptions,
+  });
 
   const item = {
     id: String(raw.id ?? ""),
@@ -105,7 +129,8 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
     name: item.name,
     type: typeLabel,
     region: item.region,
-    price: item.price > 0 ? item.price : undefined,
+    price: display.priceWon > 0 ? display.priceWon : undefined,
+    pricePeriod: display.period,
     thumbnailUrl: item.image,
     reviewAvg: item.averageRating,
     reviewCount: item.reviewCount,
@@ -142,6 +167,7 @@ function catalogItemToMediaItem(item: HomeCatalogMediaItem): MediaItem {
 
 interface Props {
   initialMedia: HomeCatalogMediaItem[];
+  initialTotal?: number;
   initialCategory?: string;
   initialTarget?: string;
   initialRegion?: string;
@@ -149,6 +175,7 @@ interface Props {
 
 export function MediaSearchPage({
   initialMedia,
+  initialTotal,
   initialCategory,
   initialTarget,
   initialRegion,
@@ -163,7 +190,10 @@ export function MediaSearchPage({
   const [sort, setSort] = useState("popular");
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
+  const [total, setTotal] = useState(initialTotal ?? initialMedia.length);
+  const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [initialLoad, setInitialLoad] = useState(true);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
@@ -226,37 +256,49 @@ export function MediaSearchPage({
     [compareEntries, searchCatalog],
   );
 
-  const fetchMedia = useCallback(async () => {
-    setLoading(true);
-    try {
-      const params = new URLSearchParams();
-      if (query) params.set("q", query);
-      if (category) params.set("category", category);
-      if (target) params.set("target", target);
-      if (region) params.set("region", region);
-      params.set("sort", sort);
-      params.set("limit", "30");
+  const fetchMedia = useCallback(
+    async (opts: { page: number; append: boolean }) => {
+      if (opts.append) setLoadingMore(true);
+      else setLoading(true);
+      try {
+        const params = new URLSearchParams();
+        if (query) params.set("q", query);
+        if (category) params.set("category", category);
+        if (target) params.set("target", target);
+        if (region) params.set("region", region);
+        params.set("sort", sort);
+        params.set("page", String(opts.page));
+        params.set("limit", String(PAGE_SIZE));
 
-      const res = await fetch(`/api/public/media?${params}`);
-      if (res.ok) {
-        const json = (await res.json()) as {
-          data?: Record<string, unknown>[];
-          media?: Record<string, unknown>[];
-        };
-        const rows = Array.isArray(json.data)
-          ? json.data
-          : Array.isArray(json.media)
-            ? json.media
-            : [];
-        setMedia(rows.map((row) => mapApiMediaItem(row)));
+        const res = await fetch(`/api/public/media?${params}`);
+        if (res.ok) {
+          const json = (await res.json()) as {
+            data?: Record<string, unknown>[];
+            media?: Record<string, unknown>[];
+            pagination?: { total?: number };
+          };
+          const rows = Array.isArray(json.data)
+            ? json.data
+            : Array.isArray(json.media)
+              ? json.media
+              : [];
+          const mapped = rows.map((row) => mapApiMediaItem(row));
+          setTotal(json.pagination?.total ?? mapped.length);
+          setMedia((prev) => (opts.append ? [...prev, ...mapped] : mapped));
+          setPage(opts.page);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        if (opts.append) setLoadingMore(false);
+        else setLoading(false);
+        setInitialLoad(false);
       }
-    } catch (e) {
-      console.error(e);
-    } finally {
-      setLoading(false);
-      setInitialLoad(false);
-    }
-  }, [query, category, target, region, sort]);
+    },
+    [query, category, target, region, sort],
+  );
+
+  const hasMore = media.length < total;
 
   useEffect(() => {
     try {
@@ -283,9 +325,20 @@ export function MediaSearchPage({
       setInitialLoad(false);
       return;
     }
-    const timer = setTimeout(fetchMedia, 300);
+    const timer = setTimeout(() => {
+      void fetchMedia({ page: 1, append: false });
+    }, 300);
     return () => clearTimeout(timer);
   }, [fetchMedia, initialLoad]);
+
+  const handleLoadMore = () => {
+    if (loading || loadingMore || !hasMore) return;
+    void fetchMedia({ page: page + 1, append: true });
+  };
+
+  const priceLocale = locale.startsWith("ko") ? "ko-KR" : "en-US";
+  const renderPrice = (item: HomeCatalogMediaItem) =>
+    formatPriceLabel(item.price, item.pricePeriod, priceLocale);
 
   const activeFilterCount = [category, target, region].filter(Boolean).length;
 
@@ -450,7 +503,7 @@ export function MediaSearchPage({
         {/* ── 결과 수 ── */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-gray-500 dark:text-white/50">
-            {loading ? "검색 중..." : `매체 ${media.length}개`}
+            {loading ? "검색 중..." : `매체 ${media.length}${total > media.length ? ` / ${total}` : ""}개`}
           </p>
           <div className="flex items-center gap-2 text-xs">
             {cartIds.length > 0 ? (
@@ -568,9 +621,9 @@ export function MediaSearchPage({
                     {[item.region, item.type].filter(Boolean).join(" · ")}
                   </p>
                   <div className="mt-2 flex items-center justify-between gap-2">
-                    {formatPrice(item.price) ? (
+                    {renderPrice(item) ? (
                       <p className="tkad-home-accent-text text-sm font-bold">
-                        {formatPrice(item.price)}/월
+                        {renderPrice(item)}
                       </p>
                     ) : (
                       <span />
@@ -593,7 +646,7 @@ export function MediaSearchPage({
         ) : viewMode === "compact" ? (
           media.map((item) => {
             const href = getMediaHref(item);
-            const meta = [item.region, item.type, formatPrice(item.price)]
+            const meta = [item.region, item.type, renderPrice(item)]
               .filter(Boolean)
               .join(" · ");
             return (
@@ -623,7 +676,6 @@ export function MediaSearchPage({
                   </p>
                   <p className="truncate text-xs text-gray-400 dark:text-white/40">
                     {meta}
-                    {formatPrice(item.price) ? "/월" : ""}
                   </p>
                 </div>
                 <MediaCompareSelectButton
@@ -703,9 +755,9 @@ export function MediaSearchPage({
                   ) : null}
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex min-w-0 items-center gap-2">
-                      {formatPrice(item.price) ? (
+                      {renderPrice(item) ? (
                         <p className="tkad-home-accent-text text-base font-bold">
-                          {formatPrice(item.price)}/월
+                          {renderPrice(item)}
                         </p>
                       ) : null}
                       {item.isInstantBooking ? (
@@ -732,13 +784,15 @@ export function MediaSearchPage({
         )}
       </div>
 
-      {media.length >= 30 && !loading ? (
+      {hasMore && !loading ? (
         <div className="mt-4 px-4">
           <button
             type="button"
-            className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
+            onClick={handleLoadMore}
+            disabled={loadingMore}
+            className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
           >
-            더 많은 매체 보기
+            {loadingMore ? "불러오는 중…" : "더 많은 매체 보기"}
           </button>
         </div>
       ) : null}

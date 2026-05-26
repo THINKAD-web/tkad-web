@@ -1,7 +1,10 @@
 import { MediaSearchPage } from "@/components/media/media-search-page";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
-import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
+import {
+  countPublicMediaCatalog,
+  fetchFilteredMediaCatalog,
+} from "@/lib/media-catalog";
 
 export const revalidate = 60;
 
@@ -12,13 +15,22 @@ type Props = {
 export default async function MediaPage({ searchParams }: Props) {
   const sp = await searchParams;
 
-  const initialMedia = await fetchPublicMediaCatalog({
-    sort: "popular",
-    limit: 20,
+  const catalogOpts = {
+    sort: "popular" as const,
+    limit: 30,
     category: sp.category,
     target: sp.target,
     region: sp.region,
-  }).catch(() => []);
+  };
+
+  const [initialMedia, initialTotal] = await Promise.all([
+    fetchFilteredMediaCatalog(catalogOpts).catch(() => []),
+    countPublicMediaCatalog({
+      category: sp.category,
+      target: sp.target,
+      region: sp.region,
+    }).catch(() => 0),
+  ]);
 
   return (
     <>
@@ -32,6 +44,7 @@ export default async function MediaPage({ searchParams }: Props) {
       <SubTabsBar group="discovery" currentPath="/media" />
       <MediaSearchPage
         initialMedia={initialMedia}
+        initialTotal={initialTotal}
         initialCategory={sp.category}
         initialTarget={sp.target}
         initialRegion={sp.region}
