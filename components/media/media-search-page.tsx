@@ -563,7 +563,6 @@ export function MediaSearchPage({
           viewMode === "card" &&
             "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
           viewMode === "compact" && "divide-y divide-gray-100 dark:divide-white/5",
-          compareEntries.length > 0 && !hasMore && "pb-16 md:pb-12",
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
@@ -855,12 +854,7 @@ export function MediaSearchPage({
       </div>
 
       {hasMore && !loading ? (
-        <div
-          className={cn(
-            "mt-4 px-4",
-            compareEntries.length > 0 && "pb-20 md:pb-16",
-          )}
-        >
+        <div className="mt-4 px-4">
           <button
             type="button"
             onClick={handleLoadMore}

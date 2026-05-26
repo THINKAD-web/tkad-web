@@ -30,7 +30,7 @@ export const FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS =
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
  * 나타날 때 슬라이드업, 사라질 때 슬라이드다운 (AnimatePresence).
- * 푸터가 보이면 자동으로 숨김.
+ * 푸터·모바일 탭 위치에 맞춰 하단 고정.
  */
 export function FloatingSelectionBar({
   open,
@@ -92,6 +92,13 @@ export function FloatingSelectionBar({
   }, [aboveMobileChrome, open]);
 
   const visible = open;
+  /** 푸터가 보일 때는 푸터 상단에 맞추고, 그 외에는 모바일 탭·퀵액션 위 */
+  const barBottom =
+    footerOverlap > 0
+      ? footerOverlap
+      : aboveMobileChrome
+        ? mobileChromeHeight
+        : 0;
 
   return (
     <AnimatePresence initial={false}>
@@ -126,7 +133,7 @@ export function FloatingSelectionBar({
             compact ? "px-2 pb-1 sm:px-3 sm:pb-1.5" : "px-2 pb-2 sm:px-4 sm:pb-3",
             className,
           )}
-          style={{ bottom: footerOverlap + mobileChromeHeight }}
+          style={{ bottom: barBottom }}
         >
           <div
             className={cn(
