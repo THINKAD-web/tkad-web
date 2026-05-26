@@ -83,6 +83,8 @@ const nextConfig: NextConfig = {
   },
   experimental: {
     optimizePackageImports: ["lucide-react", "recharts"],
+    /** Vercel 2-core builders: lower peak RSS during webpack compile */
+    webpackMemoryOptimizations: true,
   },
   webpack(config, { dev, isServer }) {
     config.resolve ??= {};
@@ -90,6 +92,10 @@ const nextConfig: NextConfig = {
     const alias = config.resolve.alias as Record<string, string>;
     // Home `~/package.json` shadowing: always resolve tailwind from this repo
     alias.tailwindcss = path.join(projectRoot, "node_modules/tailwindcss");
+
+    if (!dev) {
+      config.parallelism = 1;
+    }
 
     if (!dev && !isServer) {
       if (Array.isArray(config.optimization?.minimizer)) {

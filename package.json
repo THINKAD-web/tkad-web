@@ -8,7 +8,7 @@
     "dev:webpack": "next dev --webpack",
     "dev:clean": "node scripts/dev-reset.mjs && next dev",
     "build": "prisma generate && next build --webpack",
-    "vercel-build": "prisma generate && next build --webpack",
+    "vercel-build": "prisma generate && NODE_OPTIONS='--max-old-space-size=6144' next build --webpack",
     "start": "next start",
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",

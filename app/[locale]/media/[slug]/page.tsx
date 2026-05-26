@@ -73,7 +73,7 @@ export const dynamicParams = true;
 /** Vercel build: pre-render top media only; rest ISR on demand. */
 const BUILD_STATIC_SLUG_LIMIT =
   process.env.VERCEL === "1"
-    ? Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 40)
+    ? Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 24)
     : undefined;
 
 export async function generateStaticParams() {

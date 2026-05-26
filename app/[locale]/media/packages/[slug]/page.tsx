@@ -25,7 +25,10 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
+  if (process.env.VERCEL === "1") return [];
   const slugs = await fetchMediaPackageSlugs();
   return slugs.flatMap((slug) => [
     { locale: "ko", slug },
