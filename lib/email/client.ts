@@ -30,10 +30,17 @@ const transporter =
       })
     : null;
 
+function envTrim(key: string): string {
+  return process.env[key]?.trim() ?? "";
+}
+
+export function resendFromAddress(): string | null {
+  const from = envTrim("RESEND_FROM");
+  return from || null;
+}
+
 export function isResendConfigured(): boolean {
-  return !!(
-    process.env.RESEND_API_KEY?.trim() && process.env.RESEND_FROM?.trim()
-  );
+  return !!(envTrim("RESEND_API_KEY") && resendFromAddress());
 }
 
 export function isSmtpConfigured(): boolean {
@@ -46,7 +53,7 @@ export function isEmailConfigured(): boolean {
 }
 
 function resendClient(): Resend | null {
-  const key = process.env.RESEND_API_KEY?.trim();
+  const key = envTrim("RESEND_API_KEY");
   if (!key) return null;
   return new Resend(key);
 }
@@ -79,7 +86,7 @@ export async function sendEmail({
     try {
       const body = resendBody(text, html);
       const { error } = await resend.emails.send({
-        from: process.env.RESEND_FROM!,
+        from: resendFromAddress()!,
         to,
         subject,
         ...body,
@@ -112,35 +119,40 @@ export async function sendEmail({
   }
 }
 
+export type SendEmailResult = { sent: boolean; error?: string };
+
 /** Returns whether the message was accepted by the provider. */
 export async function sendEmailWithResult(
   params: SendEmailParams,
-): Promise<{ sent: boolean }> {
+): Promise<SendEmailResult> {
   if (isResendConfigured()) {
     const resend = resendClient();
-    if (!resend) return { sent: false };
+    if (!resend) return { sent: false, error: "Resend client unavailable" };
     try {
       const body = resendBody(params.text, params.html);
       const { error } = await resend.emails.send({
-        from: process.env.RESEND_FROM!,
+        from: resendFromAddress()!,
         to: params.to,
         subject: params.subject,
         ...body,
       });
       if (error) {
         console.error("[email] Resend:", error);
-        return { sent: false };
+        return { sent: false, error: error.message };
       }
       return { sent: true };
     } catch (err) {
       console.error("[email] Resend failed:", err);
-      return { sent: false };
+      return {
+        sent: false,
+        error: err instanceof Error ? err.message : "Resend send failed",
+      };
     }
   }
 
-  if (!transporter) return { sent: false };
+  if (!transporter) return { sent: false, error: "SMTP not configured" };
 
-  const from = process.env.SMTP_FROM!;
+  const from = envTrim("SMTP_FROM");
 
   try {
     await transporter.sendMail({
@@ -153,7 +165,10 @@ export async function sendEmailWithResult(
     return { sent: true };
   } catch (err) {
     console.error("[email] Failed to send email:", err);
-    return { sent: false };
+    return {
+      sent: false,
+      error: err instanceof Error ? err.message : "SMTP send failed",
+    };
   }
 }
 
@@ -182,7 +197,7 @@ export async function sendEmailWithPdfAttachment({
     if (!resend) throw new Error("Email not configured");
     const body = resendBody(text, html);
     const { error } = await resend.emails.send({
-      from: process.env.RESEND_FROM!,
+      from: resendFromAddress()!,
       to,
       subject,
       ...body,

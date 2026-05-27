@@ -150,6 +150,10 @@ export function MySettingsPageClient() {
         toast.error(json?.error?.message ?? (isKo ? "재발송 실패" : "Resend failed"));
         return;
       }
+      if (json.data?.sent === false) {
+        toast.error(isKo ? "인증 메일 발송에 실패했습니다." : "Failed to send verification email.");
+        return;
+      }
       toast.success(isKo ? "인증 메일을 보냈습니다." : "Verification email sent.");
     } finally {
       setResending(false);

@@ -68,9 +68,19 @@ export async function POST(req: Request) {
     }
 
     const locale = parsed.data.locale ?? row.locale ?? "ko";
-    const { sent } = await issueEmailVerification(user.id, locale);
+    const { sent, error } = await issueEmailVerification(user.id, locale);
 
-    return apiOk({ sent });
+    if (!sent) {
+      return apiError("EMAIL_SEND_FAILED", 502, {
+        message:
+          error?.includes("testing emails") || error?.includes("own email")
+            ? "테스트 발신 주소(@resend.dev)는 Resend 계정 이메일로만 발송됩니다. Vercel에 인증된 도메인 발신 주소(RESEND_FROM)를 설정해 주세요."
+            : "인증 메일 발송에 실패했습니다. 잠시 후 다시 시도하거나 관리자에게 문의해 주세요.",
+        detail: error,
+      });
+    }
+
+    return apiOk({ sent: true });
   } catch (e) {
     return apiServerError(e, "auth/verify-email/resend");
   }
