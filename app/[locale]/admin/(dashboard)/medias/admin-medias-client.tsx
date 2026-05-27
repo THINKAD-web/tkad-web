@@ -1450,6 +1450,20 @@ export default function AdminMediasClient({
       ),
     [runBulkForSelected, patchMediaJson],
   );
+  const bulkInstantBookingOn = useCallback(
+    () =>
+      void runBulkForSelected("즉시 예약 켜기", (m) =>
+        patchMediaJson(m.id, { instantBookingEnabled: true }),
+      ),
+    [runBulkForSelected, patchMediaJson],
+  );
+  const bulkInstantBookingOff = useCallback(
+    () =>
+      void runBulkForSelected("즉시 예약 끄기", (m) =>
+        patchMediaJson(m.id, { instantBookingEnabled: false }),
+      ),
+    [runBulkForSelected, patchMediaJson],
+  );
 
   const bulkFeaturedOrderByList = useCallback(async () => {
     const ordered = filtered.filter((m) => selectedIds.has(m.id));
@@ -2058,6 +2072,26 @@ export default function AdminMediasClient({
                     onClick={() => bulkDeactivate()}
                   >
                     비활성화
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={bulkBusy}
+                    className="h-7 text-[11px] border-violet-500/40 text-violet-700 dark:text-violet-300"
+                    onClick={() => bulkInstantBookingOn()}
+                  >
+                    즉시예약 켜기
+                  </Button>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="xs"
+                    disabled={bulkBusy}
+                    className="h-7 text-[11px] border-violet-500/40 text-violet-700 dark:text-violet-300"
+                    onClick={() => bulkInstantBookingOff()}
+                  >
+                    즉시예약 끄기
                   </Button>
                   <Button
                     type="button"

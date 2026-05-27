@@ -416,7 +416,7 @@ export function MediaSearchPage({
 
   return (
     <>
-    <div className="min-h-screen bg-gray-50 dark:bg-[#020202]">
+    <div className="bg-gray-50 dark:bg-[#020202]">
       <div className="space-y-3 px-4 pt-4">
         {/* ── 검색창 ── */}
         <div className="relative">
@@ -596,7 +596,6 @@ export function MediaSearchPage({
             "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
           viewMode === "compact" &&
             "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-3 xl:grid-cols-4",
-          compareEntries.length > 0 && !hasMore && "pb-16 md:pb-12",
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
@@ -784,12 +783,7 @@ export function MediaSearchPage({
       </div>
 
       {hasMore && !loading ? (
-        <div
-          className={cn(
-            "mt-4 px-4",
-            compareEntries.length > 0 && "pb-20 md:pb-16",
-          )}
-        >
+        <div className="mt-4 px-4">
           <button
             type="button"
             onClick={handleLoadMore}

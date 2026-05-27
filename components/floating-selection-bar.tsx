@@ -92,6 +92,13 @@ export function FloatingSelectionBar({
   }, [aboveMobileChrome, open]);
 
   const visible = open;
+  /** 푸터가 보일 때는 푸터 상단에 맞추고, 그 외에는 모바일 탭·퀵액션 위 */
+  const barBottom =
+    footerOverlap > 0
+      ? footerOverlap
+      : aboveMobileChrome
+        ? mobileChromeHeight
+        : 0;
 
   return (
     <AnimatePresence initial={false}>
@@ -126,7 +133,7 @@ export function FloatingSelectionBar({
             compact ? "px-2 pb-1 sm:px-3 sm:pb-1.5" : "px-2 pb-2 sm:px-4 sm:pb-3",
             className,
           )}
-          style={{ bottom: footerOverlap + mobileChromeHeight }}
+          style={{ bottom: barBottom }}
         >
           <div
             className={cn(

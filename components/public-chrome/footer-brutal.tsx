@@ -136,9 +136,8 @@ export function FooterBrutal() {
               ))}
             </p>
           </div>
-          {/* 퀵 액션 바 + 하단 탭바 여백 */}
-          <div className="h-14" aria-hidden />
-          <div className="pb-20" aria-hidden />
+          {/* 하단 탭바 + 퀵 액션 바 (fixed) 클리어런스 */}
+          <div className="h-[7.25rem]" aria-hidden />
         </div>
 
         {/* Desktop — 기존 푸터 */}
