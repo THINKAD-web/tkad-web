@@ -33,6 +33,11 @@ export default function DeployTestPage() {
       ok: !!process.env.RESEND_API_KEY,
     },
     {
+      label: "RESEND_FROM",
+      value: process.env.RESEND_FROM?.trim() ? "set" : "not set",
+      ok: !!process.env.RESEND_FROM?.trim(),
+    },
+    {
       label: "CLOUDINARY",
       value:
         process.env.CLOUDINARY_URL || process.env.CLOUDINARY_CLOUD_NAME

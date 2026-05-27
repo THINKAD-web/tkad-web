@@ -39,6 +39,12 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
         );
         return;
       }
+      if (data.data?.sent === false) {
+        setError(
+          isKo ? "인증 메일 발송에 실패했습니다." : "Failed to send verification email.",
+        );
+        return;
+      }
       setSent(true);
     } catch {
       setError(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");

@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { sendEmail, isEmailConfigured } from "@/lib/email/client";
+import { sendEmailWithResult, isEmailConfigured } from "@/lib/email/client";
 import { getVerifyEmailContent } from "@/lib/email/verify-email";
 import { generateSecureToken, hashToken } from "@/lib/secure-token";
 import { siteUrl } from "@/lib/seo";
@@ -9,7 +9,7 @@ const TOKEN_TTL_MS = 24 * 60 * 60 * 1000;
 export async function issueEmailVerification(
   userId: string,
   locale = "ko",
-): Promise<{ sent: boolean }> {
+): Promise<{ sent: boolean; error?: string }> {
   const token = generateSecureToken();
   const tokenHash = hashToken(token);
   const expiresAt = new Date(Date.now() + TOKEN_TTL_MS);
@@ -37,8 +37,11 @@ export async function issueEmailVerification(
     locale: loc,
   });
 
-  await sendEmail({ to: user.email, subject, html, text });
-  return { sent: true };
+  const result = await sendEmailWithResult({ to: user.email, subject, html, text });
+  if (!result.sent) {
+    console.error("[email-verification] send failed:", result.error);
+  }
+  return result;
 }
 
 export type VerifyEmailResult =
