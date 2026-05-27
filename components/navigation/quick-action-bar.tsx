@@ -15,7 +15,6 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
-import { RecentlyViewedFloatingPanel } from "@/components/recently-viewed-floating-panel";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -133,14 +132,13 @@ export function QuickActionBarMobile() {
       className="fixed bottom-16 left-0 right-0 z-30 border-t border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:hidden"
       data-screenshot="quick-actions-mobile"
     >
-      <div className="mx-auto grid max-w-lg grid-cols-3 items-end gap-2">
+      <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
         {actions.map((action) => {
           const active = action.match(pathname, tab);
           const label = isKo ? action.labelKo : action.labelEn;
-          const showRecentAbove = !onDetail && action.id === "favorites";
-
-          const actionLink = (
+          return (
             <Link
+              key={action.id}
               href={action.href}
               className={cn(
                 "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
@@ -152,19 +150,6 @@ export function QuickActionBarMobile() {
             >
               {label}
             </Link>
-          );
-
-          if (showRecentAbove) {
-            return (
-              <div key={action.id} className="flex flex-col items-stretch gap-1.5">
-                <RecentlyViewedFloatingPanel embedded />
-                {actionLink}
-              </div>
-            );
-          }
-
-          return (
-            <div key={action.id}>{actionLink}</div>
           );
         })}
       </div>

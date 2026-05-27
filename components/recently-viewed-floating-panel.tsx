@@ -20,14 +20,7 @@ function formatPrice(price: number, isKo: boolean) {
   return `${formatCatalogPriceFieldWon(price, isKo ? "ko" : "en")}${isKo ? "/월" : "/mo"}`;
 }
 
-export function RecentlyViewedFloatingPanel({
-  className,
-  embedded = false,
-}: {
-  className?: string;
-  /** 모바일 퀵액션 바 등 고정 위치 대신 위쪽에 붙일 때 */
-  embedded?: boolean;
-}) {
+export function RecentlyViewedFloatingPanel({ className }: { className?: string }) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [records, setRecords] = useState<RecentlyViewedRecord[]>([]);
@@ -48,7 +41,7 @@ export function RecentlyViewedFloatingPanel({
   const collapsedLabel = isKo ? `최근 본 매체 (${count})` : `Recent (${count})`;
 
   if (!expanded) {
-    const collapsedButton = (
+    return (
       <button
         type="button"
         onClick={() => setExpanded(true)}
@@ -56,51 +49,35 @@ export function RecentlyViewedFloatingPanel({
         aria-label={collapsedLabel}
         className={cn(
           "group flex items-center justify-center overflow-hidden rounded-full border shadow-lg transition-all duration-200",
-          embedded
-            ? "h-9 w-9"
-            : "h-10 !w-10 md:!h-14 md:!w-14 hover:!w-auto hover:gap-1.5 hover:px-3 md:hover:px-4",
-          !embedded && "hover:scale-105 active:scale-95",
+          "h-10 !w-10 md:!h-14 md:!w-14",
+          "hover:!w-auto hover:gap-1.5 hover:px-3 md:hover:px-4",
+          "hover:scale-105 active:scale-95",
           "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400/50",
           "bg-white border-gray-200 text-sm font-medium text-gray-800",
           "dark:bg-gray-900 dark:border-white/10 dark:text-white",
-          !embedded && className,
+          className,
         )}
         data-screenshot="recently-viewed-collapsed"
         aria-expanded={false}
       >
         <Eye
-          className={cn(
-            "shrink-0 text-gray-700 dark:text-white",
-            embedded ? "h-4 w-4" : "h-5 w-5 md:h-6 md:w-6",
-          )}
+          className="h-5 w-5 shrink-0 md:h-6 md:w-6 text-gray-700 dark:text-white"
           strokeWidth={2.25}
           aria-hidden
         />
-        {!embedded ? (
-          <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-[10rem] group-hover:opacity-100">
-            {collapsedLabel}
-          </span>
-        ) : null}
+        <span className="max-w-0 overflow-hidden whitespace-nowrap opacity-0 transition-all duration-200 group-hover:max-w-[10rem] group-hover:opacity-100">
+          {collapsedLabel}
+        </span>
       </button>
     );
-
-    if (embedded) {
-      return (
-        <div className={cn("relative flex w-full justify-center", className)}>
-          {collapsedButton}
-        </div>
-      );
-    }
-
-    return collapsedButton;
   }
 
-  const expandedPanel = (
+  return (
     <div
       className={cn(
         "w-64 overflow-hidden rounded-2xl border shadow-xl",
         "bg-white border-gray-200 dark:bg-gray-900 dark:border-white/10",
-        !embedded && className,
+        className,
       )}
       data-screenshot="recently-viewed-expanded"
     >
@@ -161,16 +138,4 @@ export function RecentlyViewedFloatingPanel({
       </Link>
     </div>
   );
-
-  if (embedded) {
-    return (
-      <div className={cn("relative h-9 w-full", className)}>
-        <div className="absolute bottom-full right-0 z-50 mb-2 w-64 max-w-[min(16rem,calc(100vw-2rem))]">
-          {expandedPanel}
-        </div>
-      </div>
-    );
-  }
-
-  return expandedPanel;
 }

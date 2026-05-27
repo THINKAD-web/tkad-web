@@ -68,6 +68,18 @@ export default function FloatingSupportDock() {
     <>
       <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
 
+      {/* 모바일: 최근 본 매체 (퀵액션 바 위, 우측 플로팅) */}
+      <div
+        className={cn(
+          "md:hidden",
+          !mounted && "pointer-events-none opacity-0",
+        )}
+      >
+        {hasRecent ? (
+          <RecentlyViewedFloatingPanel className="fixed bottom-[7.25rem] right-4 z-50" />
+        ) : null}
+      </div>
+
       {/* 데스크탑: 최근 조회 + AI + 카카오 */}
       <div
         className={cn(
