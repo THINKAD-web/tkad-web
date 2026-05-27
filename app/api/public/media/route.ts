@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { prismaMediaToMediaItem } from "@/lib/public-media-catalog";
+import { attachMediaTrustToMediaItems } from "@/lib/media-trust-catalog";
 import {
   buildPublicMediaOrderBy,
   buildPublicMediaWhere,
@@ -41,7 +42,8 @@ export async function GET(request: NextRequest) {
       db.media.count({ where }),
     ]);
 
-    const data = rows.map(prismaMediaToMediaItem);
+    const base = rows.map(prismaMediaToMediaItem);
+    const data = await attachMediaTrustToMediaItems(base);
 
     return Response.json({
       data,

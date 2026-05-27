@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { MediaSearchPage } from "@/components/media/media-search-page";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
@@ -42,13 +43,15 @@ export default async function MediaPage({ searchParams }: Props) {
         description="500+ 검증 매체를 유형·지역·목적별로 탐색하세요"
       />
       <SubTabsBar group="discovery" currentPath="/media" />
-      <MediaSearchPage
-        initialMedia={initialMedia}
-        initialTotal={initialTotal}
-        initialCategory={sp.category}
-        initialTarget={sp.target}
-        initialRegion={sp.region}
-      />
+      <Suspense fallback={null}>
+        <MediaSearchPage
+          initialMedia={initialMedia}
+          initialTotal={initialTotal}
+          initialCategory={sp.category}
+          initialTarget={sp.target}
+          initialRegion={sp.region}
+        />
+      </Suspense>
     </>
   );
 }

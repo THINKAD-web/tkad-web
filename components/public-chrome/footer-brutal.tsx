@@ -12,8 +12,6 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
 import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
-import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
-
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 function InstagramIcon({ className }: { className?: string }) {
@@ -88,10 +86,10 @@ export function FooterBrutal() {
   }, [navGroups, t]);
 
   const coreLinks = [
-    { href: "/media", label: t("footer.coreMediaSearch") },
-    { href: "/planner", label: t("footer.corePlanner") },
-    { href: "/media/packages", label: t("footer.corePackages") },
-    { href: "/contact", label: t("footer.coreContact") },
+    { href: "/about", label: t("footer.coreAbout") },
+    { href: "/points", label: t("footer.corePointsShop") },
+    { href: "/register/media", label: t("footer.mediaPartnerRegister") },
+    { href: "/developers", label: t("footer.coreDeveloperApi") },
   ] as const;
 
   const legalLinks = [
@@ -169,10 +167,9 @@ export function FooterBrutal() {
               <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
                 {t("footer.description")}
               </p>
-              <div className="mt-3 space-y-1 text-[11px] text-gray-500 dark:text-white/50">
-                <p>{t("footer.companyNameShort")}</p>
-                <p>{t("footer.bizNumber")}</p>
-              </div>
+              <p className="mt-3 text-[11px] text-gray-500 dark:text-white/50">
+                {t("footer.bizNumber")}
+              </p>
             </div>
 
             <nav
@@ -189,19 +186,9 @@ export function FooterBrutal() {
                       ·
                     </span>
                   ) : null}
-                  {link.href === "/contact" ? (
-                    <button
-                      type="button"
-                      onClick={() => openContactChannelSheet()}
-                      className={coreLinkClass}
-                    >
-                      {link.label}
-                    </button>
-                  ) : (
-                    <Link href={link.href} className={coreLinkClass}>
-                      {link.label}
-                    </Link>
-                  )}
+                  <Link href={link.href} className={coreLinkClass}>
+                    {link.label}
+                  </Link>
                 </span>
               ))}
             </nav>

@@ -13,6 +13,7 @@ export type ScoredDigitalChannel = {
   budgetPct: number;
   reasonKo: string;
   reasonEn: string;
+  estimatedImpressions: number;
 };
 
 export type DigitalRecommendResult = {
@@ -24,6 +25,7 @@ export type DigitalRecommendResult = {
   primaryRegionLabelKo: string;
   primaryRegionLabelEn: string;
   brandLiftMultiplier: number;
+  totalDigitalBudgetMan: number;
 };
 
 const REGION_LABELS_KO: Record<string, string> = {
@@ -86,10 +88,22 @@ function scoreChannel(
   const goalKey = goal ?? "brand";
   const affinity = channel.goalAffinity[goalKey] ?? 0.75;
   const regionBoost = regions.length > 0 ? 1 : 0.85;
-  const localBoost = goal === "local" && channel.id === "naver_gfa" ? 1.08 : 1;
-  const launchBoost = goal === "launch" && channel.id === "kakao_moment" ? 1.06 : 1;
-  const brandBoost = goal === "brand" && channel.id === "meta_ig" ? 1.05 : 1;
-  return affinity * regionBoost * localBoost * launchBoost * brandBoost * 100;
+  const localBoost =
+    goal === "local" && (channel.id === "naver" || channel.id === "daangn")
+      ? 1.08
+      : 1;
+  const launchBoost =
+    goal === "launch" && (channel.id === "kakao" || channel.id === "google")
+      ? 1.06
+      : 1;
+  const brandBoost =
+    goal === "brand" && (channel.id === "meta" || channel.id === "tiktok")
+      ? 1.05
+      : 1;
+  const eventBoost = goal === "event" && channel.id === "tiktok" ? 1.07 : 1;
+  return (
+    affinity * regionBoost * localBoost * launchBoost * brandBoost * eventBoost * 100
+  );
 }
 
 export function recommendDigitalChannels(opts: {
@@ -98,39 +112,53 @@ export function recommendDigitalChannels(opts: {
   portfolio: MediaItem[];
   budgetMan: number;
   digitalBudgetPct: number;
+  selectedChannelIds: DigitalChannelId[];
 }): DigitalRecommendResult {
-  const { goal, regions, portfolio, digitalBudgetPct } = opts;
+  const { goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedChannelIds } =
+    opts;
   const primaryRegion = regions[0] ?? "seoul";
   const regionKo = regionLabelKo(primaryRegion, portfolio);
   const regionEn = regionLabelEn(primaryRegion, portfolio);
-
   const oohMediaName = portfolio[0]?.name ?? `${regionKo} OOH`;
 
-  const scored = DIGITAL_CHANNELS.map((channel) => {
-    const score = scoreChannel(channel, goal, regions);
-    return { channel, score };
-  }).sort((a, b) => b.score - a.score);
+  const pool =
+    selectedChannelIds.length > 0
+      ? DIGITAL_CHANNELS.filter((c) => selectedChannelIds.includes(c.id))
+      : DIGITAL_CHANNELS;
+
+  const scored = pool
+    .map((channel) => ({
+      channel,
+      score: scoreChannel(channel, goal, regions),
+    }))
+    .sort((a, b) => b.score - a.score);
 
   const totalScore = scored.reduce((s, x) => s + x.score, 0) || 1;
+  const digitalBudgetMan = Math.round(budgetMan * (digitalBudgetPct / 100));
+
   const channels: ScoredDigitalChannel[] = scored.map(({ channel, score }) => {
-    const budgetPct = Math.round((score / totalScore) * digitalBudgetPct);
-    const reasonKo =
-      channel.id === "naver_gfa"
-        ? `${regionKo} 지역 검색·배너 타겟 — OOH 노출 후 브랜드 검색 전환`
-        : channel.id === "kakao_moment"
-          ? `${regionKo} 거주·방문 타겟 — 모바일 리마인드`
-          : `${regionKo} 연령·관심사 타겟 — 비주얼 브랜딩`;
-    const reasonEn =
-      channel.id === "naver_gfa"
-        ? `${regionEn} geo search & display — post-OOH brand search`
-        : channel.id === "kakao_moment"
-          ? `${regionEn} geo behavioral — mobile reminder`
-          : `${regionEn} age & interest — visual branding`;
-    return { channel, score, budgetPct, reasonKo, reasonEn };
+    const shareOfDigital = score / totalScore;
+    const budgetPct = Math.round(shareOfDigital * digitalBudgetPct);
+    const channelBudgetMan = Math.max(
+      1,
+      Math.round(digitalBudgetMan * shareOfDigital),
+    );
+    const budgetWon = channelBudgetMan * 10_000;
+    const estimatedImpressions = Math.round(
+      (budgetWon / Math.max(channel.avgCpmWon, 1)) * 1000,
+    );
+    return {
+      channel,
+      score,
+      budgetPct,
+      reasonKo: channel.synergyKo,
+      reasonEn: channel.synergyEn,
+      estimatedImpressions,
+    };
   });
 
-  const synergyMessageKo = `${oohMediaName} 집행 중 → ${regionKo} 지역 ${channels[0]?.channel.nameKo ?? "디지털"} 동시 집행 시 브랜드 리프트 ${OOH_DIGITAL_SYNERGY_LIFT}배 향상 (리서치 기반)`;
-  const synergyMessageEn = `While running ${oohMediaName} → combined ${regionEn} ${channels[0]?.channel.nameEn ?? "digital"} lift brand impact ${OOH_DIGITAL_SYNERGY_LIFT}× (research benchmark)`;
+  const synergyMessageKo = `${oohMediaName} 집행 중 → ${regionKo} ${channels[0]?.channel.nameKo ?? "디지털"} 연계 시 브랜드 리프트 ${OOH_DIGITAL_SYNERGY_LIFT}배 (추정)`;
+  const synergyMessageEn = `While running ${oohMediaName} → ${regionEn} + ${channels[0]?.channel.nameEn ?? "digital"} estimated ${OOH_DIGITAL_SYNERGY_LIFT}× brand lift`;
 
   return {
     channels,
@@ -141,9 +169,10 @@ export function recommendDigitalChannels(opts: {
     primaryRegionLabelKo: regionKo,
     primaryRegionLabelEn: regionEn,
     brandLiftMultiplier: OOH_DIGITAL_SYNERGY_LIFT,
+    totalDigitalBudgetMan: digitalBudgetMan,
   };
 }
 
 export function defaultDigitalChannelIds(): DigitalChannelId[] {
-  return DIGITAL_CHANNELS.map((c) => c.id);
+  return ["naver", "kakao", "meta"];
 }

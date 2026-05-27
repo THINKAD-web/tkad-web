@@ -23,7 +23,10 @@ import {
   type IntegratedWizardStep,
 } from "@/lib/planner/integrated-types";
 import { defaultDigitalChannelIds } from "@/lib/planner/recommend-digital";
-import type { DigitalChannelId } from "@/lib/planner/digital-channels";
+import {
+  normalizeDigitalChannelIds,
+  type DigitalChannelId,
+} from "@/lib/planner/digital-channels";
 
 export const INTEGRATED_PLANNER_STORAGE_KEY = "tkad-planner-integrated-v1";
 
@@ -233,6 +236,12 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           industryKey: isPlannerIndustryKey(p.industryKey)
             ? p.industryKey
             : current.industryKey,
+          digitalChannelIds:
+            p.digitalChannelIds && p.digitalChannelIds.length > 0
+              ? normalizeDigitalChannelIds(
+                  p.digitalChannelIds as unknown as string[],
+                )
+              : current.digitalChannelIds,
         };
       },
     },

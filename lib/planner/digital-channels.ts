@@ -1,14 +1,48 @@
-/** 온라인 광고 채널 — OOH 연계 통합 플래너용 (벤치마크 기반 추정) */
-export type DigitalChannelId = "naver_gfa" | "kakao_moment" | "meta_ig";
+/** 온라인 광고 플랫폼 — OOH 연계 통합 플래너용 (벤치마크 기반 추정) */
+export type DigitalChannelId =
+  | "naver"
+  | "kakao"
+  | "google"
+  | "meta"
+  | "daangn"
+  | "tiktok";
+
+/** @deprecated persisted store 마이그레이션용 */
+const LEGACY_CHANNEL_IDS: Record<string, DigitalChannelId> = {
+  naver_gfa: "naver",
+  kakao_moment: "kakao",
+  meta_ig: "meta",
+};
+
+export function normalizeDigitalChannelId(
+  id: string,
+): DigitalChannelId | null {
+  if (LEGACY_CHANNEL_IDS[id]) return LEGACY_CHANNEL_IDS[id];
+  if (DIGITAL_CHANNELS.some((c) => c.id === id)) return id as DigitalChannelId;
+  return null;
+}
+
+export function normalizeDigitalChannelIds(ids: string[]): DigitalChannelId[] {
+  const out: DigitalChannelId[] = [];
+  for (const raw of ids) {
+    const n = normalizeDigitalChannelId(raw);
+    if (n && !out.includes(n)) out.push(n);
+  }
+  return out;
+}
 
 export type DigitalChannel = {
   id: DigitalChannelId;
   nameKo: string;
   nameEn: string;
-  vendorKo: string;
-  vendorEn: string;
-  targetingKo: string;
-  targetingEn: string;
+  descriptionKo: string;
+  descriptionEn: string;
+  icon: string;
+  color: string;
+  textColor?: string;
+  synergyKo: string;
+  synergyEn: string;
+  badge?: string;
   /** 평균 CPC (원) — 업계 벤치마크 */
   avgCpcWon: number;
   /** 평균 CPM (원) */
@@ -21,13 +55,15 @@ export type DigitalChannel = {
 
 export const DIGITAL_CHANNELS: DigitalChannel[] = [
   {
-    id: "naver_gfa",
+    id: "naver",
     nameKo: "네이버 GFA",
     nameEn: "Naver GFA",
-    vendorKo: "네이버",
-    vendorEn: "Naver",
-    targetingKo: "지역·연령·관심사 타겟 배너",
-    targetingEn: "Geo, age & interest banner ads",
+    descriptionKo: "지역·연령·성별 정밀 타겟",
+    descriptionEn: "Precise geo, age & gender targeting",
+    icon: "N",
+    color: "#03C75A",
+    synergyKo: "OOH 집행 지역 동일 타겟 설정",
+    synergyEn: "Mirror OOH flight geo targeting",
     avgCpcWon: 420,
     avgCpmWon: 7200,
     ctr: 0.012,
@@ -40,13 +76,16 @@ export const DIGITAL_CHANNELS: DigitalChannel[] = [
     },
   },
   {
-    id: "kakao_moment",
+    id: "kakao",
     nameKo: "카카오 모먼트",
     nameEn: "Kakao Moment",
-    vendorKo: "카카오",
-    vendorEn: "Kakao",
-    targetingKo: "지역·행동·재타겟팅",
-    targetingEn: "Geo, behavioral & retargeting",
+    descriptionKo: "카카오톡 연동, 생활권 타겟",
+    descriptionEn: "KakaoTalk-linked life-zone targeting",
+    icon: "K",
+    color: "#FEE500",
+    textColor: "#000000",
+    synergyKo: "OOH 노출 후 카카오 리타겟",
+    synergyEn: "Kakao retargeting after OOH exposure",
     avgCpcWon: 380,
     avgCpmWon: 6500,
     ctr: 0.014,
@@ -59,13 +98,36 @@ export const DIGITAL_CHANNELS: DigitalChannel[] = [
     },
   },
   {
-    id: "meta_ig",
-    nameKo: "인스타그램 / 메타",
-    nameEn: "Instagram / Meta",
-    vendorKo: "Meta",
-    vendorEn: "Meta",
-    targetingKo: "지역·연령·관심사·룩얼라이크",
-    targetingEn: "Geo, age, interests & lookalike",
+    id: "google",
+    nameKo: "구글/유튜브",
+    nameEn: "Google / YouTube",
+    descriptionKo: "광범위 도달, 영상 광고",
+    descriptionEn: "Broad reach & video ads",
+    icon: "G",
+    color: "#4285F4",
+    synergyKo: "OOH 소재 영상으로 유튜브 연동",
+    synergyEn: "Repurpose OOH creative on YouTube",
+    avgCpcWon: 480,
+    avgCpmWon: 8200,
+    ctr: 0.011,
+    goalAffinity: {
+      brand: 0.88,
+      launch: 0.92,
+      local: 0.8,
+      sales: 0.86,
+      event: 0.85,
+    },
+  },
+  {
+    id: "meta",
+    nameKo: "메타 (인스타/페이스북)",
+    nameEn: "Meta (Instagram / Facebook)",
+    descriptionKo: "MZ 타겟, 피드·스토리 광고",
+    descriptionEn: "Gen MZ feed & story placements",
+    icon: "M",
+    color: "#0866FF",
+    synergyKo: "OOH 비주얼 소재 재활용",
+    synergyEn: "Reuse OOH visual assets",
     avgCpcWon: 520,
     avgCpmWon: 8900,
     ctr: 0.009,
@@ -77,9 +139,57 @@ export const DIGITAL_CHANNELS: DigitalChannel[] = [
       event: 0.9,
     },
   },
+  {
+    id: "daangn",
+    nameKo: "당근마켓",
+    nameEn: "Karrot (Daangn)",
+    descriptionKo: "동네 반경 타겟, 로컬 최강",
+    descriptionEn: "Hyper-local radius targeting",
+    icon: "🥕",
+    color: "#FF7E36",
+    synergyKo: "OOH 집행 반경 1km 완벽 매칭",
+    synergyEn: "1km radius match to OOH flight",
+    badge: "추천",
+    avgCpcWon: 350,
+    avgCpmWon: 5800,
+    ctr: 0.016,
+    goalAffinity: {
+      brand: 0.75,
+      launch: 0.8,
+      local: 0.98,
+      sales: 0.94,
+      event: 0.82,
+    },
+  },
+  {
+    id: "tiktok",
+    nameKo: "틱톡 Ads",
+    nameEn: "TikTok Ads",
+    descriptionKo: "Z세대 특화, 숏폼 영상",
+    descriptionEn: "Gen Z short-form video",
+    icon: "T",
+    color: "#000000",
+    synergyKo: "OOH 소재 숏폼으로 바이럴",
+    synergyEn: "OOH-to-short-form viral loop",
+    avgCpcWon: 450,
+    avgCpmWon: 7600,
+    ctr: 0.013,
+    goalAffinity: {
+      brand: 0.86,
+      launch: 0.9,
+      local: 0.72,
+      sales: 0.8,
+      event: 0.95,
+    },
+  },
 ];
 
-export function getDigitalChannel(id: DigitalChannelId): DigitalChannel | undefined {
+/** UI·문서용 별칭 */
+export const DIGITAL_PLATFORMS = DIGITAL_CHANNELS;
+
+export function getDigitalChannel(
+  id: DigitalChannelId,
+): DigitalChannel | undefined {
   return DIGITAL_CHANNELS.find((c) => c.id === id);
 }
 

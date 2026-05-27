@@ -19,6 +19,11 @@ import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-distr
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 import { notifyFavoriteUsersMediaAvailability } from "@/lib/notifications";
 import { notifyFavoriteUsersPriceChange } from "@/lib/notifications-price";
+import {
+  bunnyPublicUrlsRemoved,
+  collectMediaImageUrls,
+  deleteBunnyPublicUrls,
+} from "@/lib/bunny-storage";
 
 export const dynamic = "force-dynamic";
 
@@ -244,6 +249,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return json({ error: "isActive must be boolean" }, 400);
     }
     data.isActive = body.isActive;
+  }
+
+  if (body.instantBookingEnabled !== undefined) {
+    if (typeof body.instantBookingEnabled !== "boolean") {
+      return json({ error: "instantBookingEnabled must be boolean" }, 400);
+    }
+    data.instantBookingEnabled = body.instantBookingEnabled;
   }
 
   if (body.isFeatured !== undefined) {
@@ -510,6 +522,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (locNorm.city) data.city = locNorm.city;
   if (locNorm.district) data.district = locNorm.district;
 
+  let bunnyUrlsToPurge: string[] = [];
+  if (body.extractedImages !== undefined || body.image !== undefined) {
+    const nextImage =
+      body.image !== undefined
+        ? String(body.image ?? "").trim() || null
+        : existing.image;
+    const nextExtracted =
+      body.extractedImages !== undefined
+        ? (body.extractedImages as string[])
+        : existing.extractedImages;
+    bunnyUrlsToPurge = bunnyPublicUrlsRemoved(
+      collectMediaImageUrls(existing.image, existing.extractedImages),
+      collectMediaImageUrls(nextImage, nextExtracted),
+    );
+  }
+
   try {
     const media = await db.$transaction(async (tx) => {
       const updated = await tx.media.update({
@@ -560,6 +588,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     } catch {
       /* revalidatePath는 일부 환경에서만 동작 */
     }
+    if (bunnyUrlsToPurge.length > 0) {
+      void deleteBunnyPublicUrls(bunnyUrlsToPurge);
+    }
     return json({ media });
   } catch (err) {
     // 기존 구현은 모든 오류를 404로 감춰서(Prisma 스키마 불일치 포함) 디버깅이 어려웠음.
@@ -578,8 +609,19 @@ export async function DELETE(request: NextRequest, { params }: Params) {
   if (deny) return deny;
   const { id } = await params;
   const db = getPrisma();
+  const existing = await db.media.findUnique({ where: { id } });
+  if (!existing) return json({ error: "Not found" }, 404);
+
+  const bunnyUrls = collectMediaImageUrls(
+    existing.image,
+    existing.extractedImages,
+  );
+
   try {
     await db.media.delete({ where: { id } });
+    if (bunnyUrls.length > 0) {
+      void deleteBunnyPublicUrls(bunnyUrls);
+    }
     return json({ ok: true });
   } catch {
     return json({ error: "Not found" }, 404);

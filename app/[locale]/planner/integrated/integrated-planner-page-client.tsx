@@ -188,8 +188,16 @@ export default function IntegratedPlannerPageClient({
         portfolio,
         budgetMan: budgetNum,
         digitalBudgetPct,
+        selectedChannelIds: digitalChannelIds,
       }),
-    [campaignGoal, regions, portfolio, budgetNum, digitalBudgetPct],
+    [
+      campaignGoal,
+      regions,
+      portfolio,
+      budgetNum,
+      digitalBudgetPct,
+      digitalChannelIds,
+    ],
   );
 
   const integratedMetrics = useMemo(
@@ -512,6 +520,7 @@ export default function IntegratedPlannerPageClient({
               <IntegratedReportStep
                 isKo={isKo}
                 goalTitle={goalTitle}
+                goal={campaignGoal}
                 budgetNum={budgetNum}
                 periodDisplay={periodDisplay}
                 regionsText={regionsText}

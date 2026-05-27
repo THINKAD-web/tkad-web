@@ -240,6 +240,8 @@ model Media {
   autoPopulatedAt       DateTime? @map("auto_populated_at")
 
   availability  MediaAvailability @default(available) @map("availability")
+  /// 공개 상세·즉시 예약 CTA — 어드민 매체 관리 「노출」에서 수동 on/off
+  instantBookingEnabled Boolean @default(false) @map("instant_booking_enabled")
   isActive      Boolean           @default(true) @map("is_active")
   /// 홈(`page.tsx`) 추천 영역 — `fetchHomeFeaturedMedia`가 `isFeatured=true` 우선 조회
   isFeatured    Boolean           @default(false) @map("is_featured")

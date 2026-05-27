@@ -50,6 +50,8 @@ export type AdminMediaDto = {
   isVerified: boolean;
   autoPopulatedAt: string | null;
   availability: MediaAvailability;
+  /** 즉시 예약 CTA — 어드민 「노출」에서 수동 on/off */
+  instantBookingEnabled: boolean;
   /** 목록 노출·운영 on/off (예약 가용과 별개) */
   isActive: boolean;
   /** 홈 추천 매체 */
@@ -229,6 +231,12 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
       "auto_populated_at",
     ),
     availability,
+    instantBookingEnabled: pickBool(
+      r,
+      "instantBookingEnabled",
+      "instant_booking_enabled",
+      false,
+    ),
     isActive,
     isFeatured: pickBool(r, "isFeatured", "is_featured", false),
     featuredOrder: pickInt(r, "featuredOrder", "featured_order"),
@@ -314,6 +322,7 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     isVerified: m.isVerified,
     autoPopulatedAt: m.autoPopulatedAt?.toISOString() ?? null,
     availability: m.availability as MediaAvailability,
+    instantBookingEnabled: m.instantBookingEnabled,
     isActive: m.isActive,
     isFeatured: m.isFeatured,
     featuredOrder: m.featuredOrder,

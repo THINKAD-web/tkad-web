@@ -143,7 +143,7 @@ export function MediaDetailHeroSection({
       <div className="mb-5 hidden items-start justify-between gap-3 md:flex">
         <Link
           href="/media"
-          className="inline-flex items-center gap-1.5 rounded-xl border dark:border-white/15 border-gray-200 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white/80 text-gray-600 transition hover:dark:bg-white/8 bg-gray-50 hover:dark:text-white text-gray-900"
+          className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-700 transition hover:bg-gray-100 hover:text-gray-900 dark:border-white/15 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12 dark:hover:text-white"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
           {labels.back}

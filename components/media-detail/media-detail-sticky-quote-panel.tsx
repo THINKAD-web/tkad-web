@@ -146,7 +146,7 @@ export function MediaDetailStickyQuotePanel({
                 void navigator.clipboard?.writeText(window.location.href);
               }
             }}
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl border dark:border-white/12 border-gray-200 px-3 text-xs font-medium dark:text-white/70 text-gray-600 transition hover:dark:bg-white/8 bg-gray-50"
+            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/12 dark:bg-white/8 dark:text-white/85 dark:hover:bg-white/12"
           >
             <Share2 className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "공유" : "Share"}

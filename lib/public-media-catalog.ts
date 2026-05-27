@@ -165,6 +165,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       | "reserved"
       | "maintenance"
       | undefined,
+    instantBookingEnabled: m.instantBookingEnabled ?? false,
     subCategory: m.subCategory?.trim() || undefined,
     mediaCategory: m.mediaCategory?.length ? [...m.mediaCategory] : undefined,
     targetCategory: m.targetCategory?.length ? [...m.targetCategory] : undefined,

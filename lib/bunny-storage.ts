@@ -87,6 +87,47 @@ export function bunnyPathFromPublicUrl(publicUrl: string): string | null {
   return path || null;
 }
 
+/** 매체 `image` + `extractedImages` 에서 고유 URL 목록 */
+export function collectMediaImageUrls(
+  image: string | null | undefined,
+  extractedImages: string[] | null | undefined,
+): string[] {
+  const urls = new Set<string>();
+  const primary = image?.trim();
+  if (primary) urls.add(primary);
+  for (const raw of extractedImages ?? []) {
+    const u = raw?.trim();
+    if (u) urls.add(u);
+  }
+  return [...urls];
+}
+
+/** 저장 후 Bunny 에서만 제거할 URL (다른 매체가 쓰는 URL 은 호출 측에서 제외) */
+export function bunnyPublicUrlsRemoved(
+  previous: string[],
+  next: string[],
+): string[] {
+  const nextSet = new Set(next.map((u) => u.trim()).filter(Boolean));
+  return previous.filter((u) => {
+    const t = u.trim();
+    return t && !nextSet.has(t) && bunnyPathFromPublicUrl(t) != null;
+  });
+}
+
+/** Bunny CDN 자산 URL 일괄 삭제 (실패 시 로그만, throw 안 함) */
+export async function deleteBunnyPublicUrls(urls: string[]): Promise<void> {
+  if (!isBunnyStorageConfigured() || urls.length === 0) return;
+  for (const url of urls) {
+    const path = bunnyPathFromPublicUrl(url);
+    if (!path) continue;
+    try {
+      await deleteFromBunnyStorage(path);
+    } catch (e) {
+      console.warn("[bunny-storage] delete skipped", { url, path, err: e });
+    }
+  }
+}
+
 export async function deleteFromBunnyStorage(path: string): Promise<void> {
   const zone = process.env.BUNNY_STORAGE_ZONE?.trim();
   const key = process.env.BUNNY_STORAGE_API_KEY?.trim();

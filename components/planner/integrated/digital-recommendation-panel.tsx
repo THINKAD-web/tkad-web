@@ -5,14 +5,19 @@ import { useTranslations } from "next-intl";
 import { Check, Sparkles, TrendingUp } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
+  defaultDigitalChannelIds,
   recommendDigitalChannels,
   type ScoredDigitalChannel,
 } from "@/lib/planner/recommend-digital";
 import {
+  DIGITAL_CHANNELS,
+  type DigitalChannel,
+  type DigitalChannelId,
+} from "@/lib/planner/digital-channels";
+import {
   selectIntegratedBudgetNum,
   useIntegratedPlannerStore,
 } from "@/lib/planner/integrated-store";
-import type { DigitalChannelId } from "@/lib/planner/digital-channels";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -24,6 +29,79 @@ type Props = {
   portfolio: MediaItem[];
   isKo: boolean;
 };
+
+function PlatformCard({
+  channel,
+  scored,
+  active,
+  isKo,
+  onToggle,
+}: {
+  channel: DigitalChannel;
+  scored?: ScoredDigitalChannel;
+  active: boolean;
+  isKo: boolean;
+  onToggle: () => void;
+}) {
+  const iconColor = channel.textColor ?? "#ffffff";
+
+  return (
+    <button
+      type="button"
+      onClick={onToggle}
+      className={cn(
+        "relative flex w-full flex-col rounded-2xl border p-4 text-left transition-transform",
+        "hover:scale-[1.02] active:scale-[0.98]",
+        active
+          ? "border-violet-500/50 bg-violet-500/10 ring-2 ring-violet-500/30"
+          : "border-gray-200 bg-white dark:border-white/10 dark:bg-white/5",
+      )}
+    >
+      <span
+        className={cn(
+          "absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border-2",
+          active
+            ? "border-violet-500 bg-violet-500 text-white"
+            : "border-gray-300 bg-transparent dark:border-white/20",
+        )}
+      >
+        {active ? <Check className="h-3 w-3" /> : null}
+      </span>
+
+      {channel.badge ? (
+        <span className="absolute left-3 top-3 rounded-full bg-orange-500/90 px-2 py-0.5 text-[10px] font-bold text-white">
+          {channel.badge}
+        </span>
+      ) : null}
+
+      <span
+        className="flex h-10 w-10 items-center justify-center rounded-xl text-sm font-black"
+        style={{ backgroundColor: channel.color, color: iconColor }}
+      >
+        {channel.icon}
+      </span>
+
+      <span className="mt-3 pr-6 text-sm font-bold text-gray-900 dark:text-white">
+        {isKo ? channel.nameKo : channel.nameEn}
+      </span>
+      <span className="mt-1 text-xs text-gray-500 dark:text-white/50">
+        {isKo ? channel.descriptionKo : channel.descriptionEn}
+      </span>
+      <span className="mt-2 text-xs font-medium text-violet-600 dark:text-violet-300">
+        {isKo ? channel.synergyKo : channel.synergyEn}
+      </span>
+
+      {active && scored ? (
+        <span className="mt-2 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+          {isKo ? "추천 비중" : "Suggested share"} {scored.budgetPct}%
+          {" · "}
+          {isKo ? "예상 노출" : "Est. impressions"}{" "}
+          {scored.estimatedImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
+        </span>
+      ) : null}
+    </button>
+  );
+}
 
 export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props) {
   const t = useTranslations("plannerIntegrated");
@@ -48,14 +126,24 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
         portfolio,
         budgetMan,
         digitalBudgetPct,
+        selectedChannelIds: selectedIds,
       }),
-    [goal, regions, portfolio, budgetMan, digitalBudgetPct],
+    [goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedIds],
+  );
+
+  const scoredById = useMemo(
+    () => new Map(result.channels.map((row) => [row.channel.id, row])),
+    [result.channels],
   );
 
   const isSelected = (id: DigitalChannelId) => selectedIds.includes(id);
 
-  const handleSelectAll = () => {
-    setDigitalChannelIds(result.channels.map((c) => c.channel.id));
+  const handleSelectRecommended = () => {
+    const top = [...result.channels]
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 4)
+      .map((c) => c.channel.id);
+    setDigitalChannelIds(top.length ? top : defaultDigitalChannelIds());
   };
 
   return (
@@ -99,7 +187,7 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
             </span>
             <span className="text-cyan-400">
               {t("digitalLabel")} {result.digitalBudgetPct}% (
-              {Math.round(budgetMan * (result.digitalBudgetPct / 100)).toLocaleString()}
+              {result.totalDigitalBudgetMan.toLocaleString()}
               {isKo ? "만원" : "M KRW"})
             </span>
           </div>
@@ -120,10 +208,15 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
                   : result.primaryRegionLabelEn,
               })}
             </p>
+            <p className="text-xs text-muted-foreground">
+              {isKo
+                ? `선택 ${selectedIds.length}개 · 보고서에는 선택한 플랫폼만 포함됩니다`
+                : `${selectedIds.length} selected · report includes chosen platforms only`}
+            </p>
           </div>
           <button
             type="button"
-            onClick={handleSelectAll}
+            onClick={handleSelectRecommended}
             className={cn(
               plannerNeon.selectChip,
               plannerNeon.selectChipIdle,
@@ -131,58 +224,22 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
             )}
           >
             <Sparkles className="mr-1.5 inline h-3.5 w-3.5" />
-            {t("selectAllDigital")}
+            {isKo ? "AI 추천 4개 선택" : "Select top 4 (AI)"}
           </button>
         </div>
 
-        <ul className="divide-y dark:divide-white/8 divide-gray-100">
-          {result.channels.map((row: ScoredDigitalChannel) => {
-            const active = isSelected(row.channel.id);
-            return (
-              <li key={row.channel.id}>
-                <button
-                  type="button"
-                  onClick={() => toggleChannel(row.channel.id)}
-                  className={cn(
-                    "flex w-full items-start gap-4 px-5 py-4 text-left transition-colors sm:px-6",
-                    active
-                      ? "bg-violet-500/8 dark:bg-violet-500/12"
-                      : "hover:bg-muted/40",
-                  )}
-                >
-                  <span
-                    className={cn(
-                      "mt-0.5 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2",
-                      active
-                        ? "border-violet-500 bg-violet-500 text-white"
-                        : "border-border bg-card",
-                    )}
-                  >
-                    {active ? <Check className="h-3.5 w-3.5" /> : null}
-                  </span>
-                  <span className="min-w-0 flex-1">
-                    <span className="flex flex-wrap items-center gap-2">
-                      <span className="font-bold text-foreground dark:text-white">
-                        {isKo ? row.channel.nameKo : row.channel.nameEn}
-                      </span>
-                      <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-600 dark:text-cyan-300">
-                        {isKo ? row.channel.targetingKo : row.channel.targetingEn}
-                      </span>
-                    </span>
-                    <span className="mt-1 block text-xs text-muted-foreground">
-                      {isKo ? row.reasonKo : row.reasonEn}
-                    </span>
-                    <span className="mt-2 block text-xs font-semibold text-violet-600 dark:text-violet-300">
-                      {t("channelBudgetPct", { pct: row.budgetPct })}
-                      {" · "}
-                      CPC ₩{row.channel.avgCpcWon.toLocaleString()}
-                    </span>
-                  </span>
-                </button>
-              </li>
-            );
-          })}
-        </ul>
+        <div className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3">
+          {DIGITAL_CHANNELS.map((channel) => (
+            <PlatformCard
+              key={channel.id}
+              channel={channel}
+              scored={scoredById.get(channel.id)}
+              active={isSelected(channel.id)}
+              isKo={isKo}
+              onToggle={() => toggleChannel(channel.id)}
+            />
+          ))}
+        </div>
       </PlannerNeonCard>
     </div>
   );

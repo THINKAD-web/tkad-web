@@ -1,23 +1,25 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import {
   Search,
-  Star,
-  CheckCircle,
   X,
   List,
   LayoutGrid,
   AlignJustify,
 } from "lucide-react";
+import { MediaCompactRow } from "@/components/media/media-compact-row";
+import { MediaFeedCard } from "@/components/media/media-feed-card";
 import CompareBar from "@/components/compare-bar";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
+import { dedupeImageUrls, typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
+import { filterDisplayableMediaImageUrls } from "@/lib/optimized-image-url";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 import {
@@ -166,20 +168,43 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
       (typeof raw.advertiserHistory === "string" &&
         raw.advertiserHistory.trim()) ||
       undefined,
+    trustScore:
+      typeof raw.trustScore === "number" && raw.trustScore >= 0
+        ? raw.trustScore
+        : undefined,
+    executionCount:
+      typeof raw.executionCount === "number" && raw.executionCount >= 0
+        ? raw.executionCount
+        : undefined,
+    lastExecutionMonthsAgo:
+      typeof raw.lastExecutionMonthsAgo === "number"
+        ? raw.lastExecutionMonthsAgo
+        : raw.lastExecutionMonthsAgo === null
+          ? null
+          : undefined,
     price: display.priceWon > 0 ? display.priceWon : undefined,
     pricePeriod: display.period,
     thumbnailUrl: item.image,
+    galleryImages: filterDisplayableMediaImageUrls(
+      dedupeImageUrls(
+        [item.image, ...sampleImages].filter(
+          (u): u is string => typeof u === "string" && u.length > 0,
+        ),
+      ),
+    ).slice(0, 6),
     reviewAvg: item.averageRating,
     reviewCount: item.reviewCount,
     isInstantBooking: isInstantBookingEligible({
-      type: item.type,
-      price: item.price,
-      pricePeriod: item.pricePeriod as "month" | "week" | "day" | "biweekly" | undefined,
-      availability: item.availability as
-        | "available"
-        | "reserved"
-        | "maintenance"
-        | undefined,
+      instantBookingEnabled:
+        typeof raw.instantBookingEnabled === "boolean"
+          ? raw.instantBookingEnabled
+          : typeof raw.instant_booking_enabled === "boolean"
+            ? raw.instant_booking_enabled
+            : false,
+      availability:
+        typeof raw.availability === "string"
+          ? (raw.availability as "available" | "reserved" | "maintenance")
+          : undefined,
       catalogSource: item.catalogSource as "network" | undefined,
     }).eligible,
   };
@@ -218,6 +243,7 @@ export function MediaSearchPage({
   initialRegion,
 }: Props) {
   const locale = useLocale();
+  const searchParams = useSearchParams();
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
   const [query, setQuery] = useState("");
@@ -242,6 +268,12 @@ export function MediaSearchPage({
       setCompareEntriesState(getCompareCartEntries());
     });
   }, []);
+
+  useEffect(() => {
+    setCategory(searchParams.get("category") ?? "");
+    setTarget(searchParams.get("target") ?? "");
+    setRegion(searchParams.get("region") ?? "");
+  }, [searchParams]);
 
   const isInCompare = useCallback(
     (id: string) => compareEntries.some((e) => e.id === id),
@@ -559,47 +591,72 @@ export function MediaSearchPage({
       <div
         className={cn(
           "mt-3 px-4",
-          viewMode === "feed" && "space-y-4",
+          viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
-          viewMode === "compact" && "divide-y divide-gray-100 dark:divide-white/5",
+          viewMode === "compact" &&
+            "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-3 xl:grid-cols-4",
+          compareEntries.length > 0 && !hasMore && "pb-16 md:pb-12",
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
         {loading ? (
-          Array.from({ length: 6 }).map((_, i) => (
+          Array.from({
+            length: viewMode === "compact" ? 16 : 6,
+          }).map((_, i) => (
             <div
               key={i}
               className={cn(
                 "animate-pulse",
                 viewMode === "card"
                   ? "overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10"
-                  : "flex gap-3",
+                  : viewMode === "feed"
+                    ? "space-y-3 py-4"
+                    : viewMode === "compact"
+                      ? "flex min-h-[2.625rem] items-center gap-2"
+                      : "flex gap-3",
               )}
             >
-              {viewMode !== "compact" ? (
-                <div
-                  className={cn(
-                    "bg-gray-200 dark:bg-white/10",
-                    viewMode === "card"
-                      ? "aspect-square w-full"
-                      : viewMode === "feed"
-                        ? "h-36 w-36 flex-shrink-0 rounded-xl md:h-44 md:w-44"
-                        : "h-12 w-16 flex-shrink-0 rounded-xl",
-                  )}
-                />
+              {viewMode === "feed" ? (
+                <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/10 md:flex-row md:items-stretch">
+                  <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 dark:bg-white/10 md:w-[48%] md:aspect-auto md:min-h-[12rem]" />
+                  <div className="space-y-2">
+                    <div className="h-3 w-12 rounded bg-gray-200 dark:bg-white/10" />
+                    <div className="h-5 w-4/5 rounded bg-gray-200 dark:bg-white/10" />
+                    <div className="h-16 w-full rounded-xl bg-gray-200 dark:bg-white/10" />
+                    <div className="grid grid-cols-3 gap-1.5">
+                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
+                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
+                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
+                    </div>
+                  </div>
+                </div>
+              ) : viewMode === "compact" ? (
+                <>
+                  <div className="h-9 w-11 shrink-0 rounded-md bg-gray-200 dark:bg-white/10" />
+                  <div className="min-w-0 flex-1 space-y-1">
+                    <div className="h-3 w-4/5 rounded bg-gray-200 dark:bg-white/10" />
+                    <div className="h-2.5 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
+                  </div>
+                </>
               ) : (
-                <div className="h-12 w-16 flex-shrink-0 rounded-xl bg-gray-200 dark:bg-white/10" />
+                <>
+                  <div
+                    className={cn(
+                      "bg-gray-200 dark:bg-white/10",
+                      viewMode === "card"
+                        ? "aspect-square w-full"
+                        : "h-12 w-16 flex-shrink-0 rounded-xl",
+                    )}
+                  />
+                  {viewMode === "card" ? (
+                    <div className="space-y-2 p-3">
+                      <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-white/10" />
+                      <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
+                    </div>
+                  ) : null}
+                </>
               )}
-              <div
-                className={cn(
-                  "space-y-2",
-                  viewMode === "card" ? "p-3" : "flex-1 pt-1",
-                )}
-              >
-                <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-white/10" />
-                <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
-              </div>
             </div>
           ))
         ) : media.length === 0 ? (
@@ -681,58 +738,25 @@ export function MediaSearchPage({
         ) : viewMode === "compact" ? (
           media.map((item) => {
             const href = getMediaHref(item);
-            const meta = [item.region, item.type, renderPrice(item)]
+            const priceLabel = renderPrice(item);
+            const metaLine = [item.region, item.type, priceLabel]
               .filter(Boolean)
               .join(" · ");
             return (
-              <Link
+              <MediaCompactRow
                 key={item.id}
+                item={item}
                 href={href}
-                className="flex items-center gap-2.5 border-b border-gray-100 py-2.5 dark:border-white/5"
-              >
-                <div className="relative h-12 w-16 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800">
-                  {item.thumbnailUrl ? (
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
-                      준비중
-                    </div>
-                  )}
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="truncate text-sm font-medium text-gray-900 dark:text-white">
-                    {item.name}
-                  </p>
-                  <p className="truncate text-xs text-gray-400 dark:text-white/40">
-                    {meta}
-                  </p>
-                </div>
-                <MediaCompareSelectButton
-                  selected={isInCompare(item.id)}
-                  onToggle={() => toggleCompare(item)}
-                  className="flex-shrink-0"
-                />
-                <MediaCartAddButton
-                  inCart={isInCart(item.id)}
-                  onToggle={() => toggleCart(item)}
-                  className="flex-shrink-0"
-                />
-                {item.isInstantBooking ? (
-                  <span className="flex-shrink-0 rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                    즉시예약
-                  </span>
-                ) : null}
-              </Link>
+                metaLine={metaLine}
+                inCompare={isInCompare(item.id)}
+                inCart={isInCart(item.id)}
+                onToggleCompare={() => toggleCompare(item)}
+                onToggleCart={() => toggleCart(item)}
+              />
             );
           })
         ) : (
-          media.map((item, idx) => {
+          media.map((item) => {
             const href = getMediaHref(item);
             const highlights = feedHighlightChips(item);
             const locationLine =
@@ -742,119 +766,30 @@ export function MediaSearchPage({
                 ? item.location
                 : null;
             return (
-              <Link
+              <MediaFeedCard
                 key={item.id}
+                item={item}
                 href={href}
-                className="flex gap-5 rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5 md:gap-6"
-              >
-                <div className="relative h-36 w-36 flex-shrink-0 overflow-hidden rounded-xl bg-gray-100 dark:bg-gray-800 md:h-44 md:w-44">
-                  {item.thumbnailUrl ? (
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.name}
-                      fill
-                      className="object-cover"
-                      sizes="(max-width: 768px) 144px, 176px"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
-                      준비중
-                    </div>
-                  )}
-                  {idx < 3 ? (
-                    <div
-                      className={`absolute left-1.5 top-1.5 flex h-6 w-6 items-center justify-center rounded-md text-xs font-bold text-white ${
-                        idx === 0
-                          ? "bg-amber-500"
-                          : idx === 1
-                            ? "bg-gray-400"
-                            : "bg-amber-700"
-                      }`}
-                    >
-                      {idx + 1}
-                    </div>
-                  ) : null}
-                </div>
-
-                <div className="min-w-0 flex-1 py-0.5">
-                  <div className="mb-1.5 flex items-start gap-1.5">
-                    <CheckCircle className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-400" />
-                    <p className="line-clamp-2 text-lg font-bold leading-snug text-gray-900 dark:text-white">
-                      {item.name}
-                    </p>
-                  </div>
-                  <p className="mb-2 text-sm text-gray-500 dark:text-white/45">
-                    {[item.region, item.type].filter(Boolean).join(" · ")}
-                  </p>
-                  {locationLine ? (
-                    <p className="mb-2 line-clamp-1 text-sm text-gray-500 dark:text-white/45">
-                      {locationLine}
-                    </p>
-                  ) : null}
-                  {highlights.length > 0 ? (
-                    <div className="mb-2 flex flex-wrap gap-1.5">
-                      {highlights.map((chip) => (
-                        <span
-                          key={chip}
-                          className="rounded-md bg-gray-100 px-2 py-0.5 text-xs text-gray-600 dark:bg-white/8 dark:text-white/65"
-                        >
-                          {chip}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  {item.features ? (
-                    <p className="mb-2 line-clamp-2 text-sm leading-relaxed text-gray-600 dark:text-white/55">
-                      {item.features}
-                    </p>
-                  ) : null}
-                  {item.advertiserHistory ? (
-                    <p className="mb-2 line-clamp-1 text-xs text-gray-400 dark:text-white/35">
-                      집행 {item.advertiserHistory}
-                    </p>
-                  ) : null}
-                  {item.reviewAvg && item.reviewAvg > 0 ? (
-                    <div className="mb-3 flex items-center gap-1">
-                      <Star className="h-3.5 w-3.5 fill-amber-400 text-amber-400" />
-                      <span className="text-sm text-gray-500 dark:text-white/50">
-                        {item.reviewAvg.toFixed(1)}
-                        {item.reviewCount ? ` (${item.reviewCount})` : ""}
-                      </span>
-                    </div>
-                  ) : null}
-                  <div className="flex items-center justify-between gap-2">
-                    <div className="flex min-w-0 flex-wrap items-center gap-2">
-                      {renderPrice(item) ? (
-                        <p className="tkad-home-accent-text text-lg font-bold">
-                          {renderPrice(item)}
-                        </p>
-                      ) : null}
-                      {item.isInstantBooking ? (
-                        <span className="rounded-md bg-emerald-500 px-1.5 py-0.5 text-[10px] font-medium text-white">
-                          즉시예약
-                        </span>
-                      ) : null}
-                    </div>
-                    <div className="flex shrink-0 items-center gap-1">
-                      <MediaCompareSelectButton
-                        selected={isInCompare(item.id)}
-                        onToggle={() => toggleCompare(item)}
-                      />
-                      <MediaCartAddButton
-                        inCart={isInCart(item.id)}
-                        onToggle={() => toggleCart(item)}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Link>
+                highlights={highlights}
+                locationLine={locationLine}
+                isKo={locale === "ko"}
+                inCompare={isInCompare(item.id)}
+                inCart={isInCart(item.id)}
+                onToggleCompare={() => toggleCompare(item)}
+                onToggleCart={() => toggleCart(item)}
+              />
             );
           })
         )}
       </div>
 
       {hasMore && !loading ? (
-        <div className="mt-4 px-4">
+        <div
+          className={cn(
+            "mt-4 px-4",
+            compareEntries.length > 0 && "pb-20 md:pb-16",
+          )}
+        >
           <button
             type="button"
             onClick={handleLoadMore}

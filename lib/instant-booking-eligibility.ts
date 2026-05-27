@@ -1,6 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 
-/** 월 집행 비용 상한 (원) — 소액 DOOH 즉시 예약 대상 */
+/** 월 집행 비용 상한 (원) — 레거시·참고용 (어드민 수동 토글이 우선) */
 export const INSTANT_BOOKING_MAX_MONTHLY_WON = 5_000_000;
 
 export type InstantBookingEligibility = {
@@ -9,11 +9,13 @@ export type InstantBookingEligibility = {
   reasonEn?: string;
 };
 
+type InstantBookingMedia = Pick<
+  MediaItem,
+  "availability" | "catalogSource" | "instantBookingEnabled"
+>;
+
 export function isInstantBookingEligible(
-  media: Pick<
-    MediaItem,
-    "type" | "price" | "pricePeriod" | "availability" | "catalogSource"
-  >,
+  media: InstantBookingMedia,
 ): InstantBookingEligibility {
   if (media.catalogSource === "network") {
     return {
@@ -22,26 +24,19 @@ export function isInstantBookingEligible(
       reasonEn: "Instant booking is not available for network packages.",
     };
   }
-  if (media.type !== "digital") {
+  if (!media.instantBookingEnabled) {
     return {
       eligible: false,
-      reasonKo: "디지털(DOOH) 매체만 즉시 예약할 수 있습니다.",
-      reasonEn: "Instant booking is only for digital (DOOH) media.",
+      reasonKo:
+        "즉시 예약이 꺼져 있습니다. 어드민 매체 관리 → 노출에서 켜 주세요.",
+      reasonEn: "Instant booking is disabled for this media in admin.",
     };
   }
   if (media.availability && media.availability !== "available") {
     return {
       eligible: false,
-      reasonKo: "현재 예약 가능 상태가 아닙니다.",
-      reasonEn: "This media is not available for booking.",
-    };
-  }
-  const monthly = normalizeMonthlyPriceWon(media.price, media.pricePeriod);
-  if (monthly > INSTANT_BOOKING_MAX_MONTHLY_WON) {
-    return {
-      eligible: false,
-      reasonKo: `월 ${(INSTANT_BOOKING_MAX_MONTHLY_WON / 1_000_000).toFixed(0)}백만원 이하 매체만 즉시 예약됩니다.`,
-      reasonEn: `Instant booking is limited to media under ₩${INSTANT_BOOKING_MAX_MONTHLY_WON.toLocaleString()}/month.`,
+      reasonKo: "가용 상태가 「예약가능」일 때만 즉시 예약됩니다.",
+      reasonEn: "Instant booking requires availability set to available.",
     };
   }
   return { eligible: true };

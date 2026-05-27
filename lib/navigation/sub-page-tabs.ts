@@ -9,6 +9,7 @@ import {
   Palette,
   Search,
   Sparkles,
+  Target,
   Trophy,
   Tv2,
   Wand2,
@@ -24,10 +25,18 @@ export const DISCOVERY_TABS: SubTab[] = [
       p === "/media" ||
       (p.startsWith("/media") &&
         !p.startsWith("/media/map") &&
-        !p.startsWith("/media/packages")),
+        !p.startsWith("/media/packages") &&
+        !p.startsWith("/media/targets")),
   },
   { label: "지도에서 찾기", href: "/media/map", icon: Map },
   { label: "AI 매체 추천", href: "/recommend", icon: Sparkles },
+  {
+    label: "캠페인 목적",
+    href: "/media/targets",
+    icon: Target,
+    match: (p) =>
+      p === "/media/targets" || p.startsWith("/media/targets/"),
+  },
 ];
 
 export const PLANNING_TABS: SubTab[] = [

@@ -100,6 +100,7 @@ const navDefs = [
   { href: "/admin/reports/new", key: "trendReports" as const, icon: FileText },
   { href: "/admin/academy/new", key: "academyNew" as const, icon: Sparkles },
   { href: "/admin/content", key: "content" as const, icon: FileText },
+  { href: "/admin/content-seed", key: "contentSeed" as const, icon: Sparkles },
   { href: "/admin/ai-content", key: "aiContent" as const, icon: Sparkles },
 ];
 

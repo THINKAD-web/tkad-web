@@ -1029,12 +1029,16 @@ export default function AdminMediasClient({
   );
 
   const deleteBunnyImage = useCallback(async (url: string) => {
-    await fetch("/api/admin/upload/bunny/delete", {
+    const res = await fetch("/api/admin/upload/bunny/delete", {
       method: "POST",
       credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ url }),
     });
+    if (!res.ok) {
+      const data = (await res.json().catch(() => ({}))) as { error?: string };
+      throw new Error(data.error || "Bunny 이미지 삭제에 실패했습니다.");
+    }
   }, []);
 
   const queryHandledRef = useRef(false);
@@ -1194,6 +1198,31 @@ export default function AdminMediasClient({
       setMedias((prev) =>
         prev.map((x) => (x.id === m.id ? { ...x, isActive: next } : x)),
       );
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
+  const toggleInstantBooking = useCallback(async (m: AdminMediaDto) => {
+    listFetchGenRef.current += 1;
+    const next = !m.instantBookingEnabled;
+    try {
+      const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ instantBookingEnabled: next }),
+      });
+      if (!result.ok) {
+        setListError(result.message);
+        return;
+      }
+      const data = result.data as { media?: unknown };
+      const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+      if (row) {
+        setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+        setListError(null);
+      }
     } catch {
       /* ignore */
     }
@@ -1497,6 +1526,7 @@ export default function AdminMediasClient({
       "운영시간",
       "이미지수",
       "가용상태",
+      "즉시예약",
       "공개목록",
       "THINKAD검증(공개)",
       "추천(홈)",
@@ -1519,6 +1549,7 @@ export default function AdminMediasClient({
       m.operatingHours ?? "",
       String((m.extractedImages ?? []).length),
       m.availability,
+      m.instantBookingEnabled ? "Y" : "",
       m.isActive ? "활성" : "비활성",
       m.isVerified ? "Y" : "",
       m.isFeatured ? "Y" : "",
@@ -2174,6 +2205,33 @@ export default function AdminMediasClient({
                                   ))}
                                 </select>
                               </label>
+                              <div className="flex shrink-0 flex-col items-center gap-1">
+                                <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
+                                  즉시예약
+                                </span>
+                                <button
+                                  type="button"
+                                  title={
+                                    media.instantBookingEnabled
+                                      ? "즉시 예약 끄기"
+                                      : "즉시 예약 켜기"
+                                  }
+                                  onClick={() => void toggleInstantBooking(media)}
+                                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                                    media.instantBookingEnabled
+                                      ? "bg-violet-500"
+                                      : "bg-slate-300"
+                                  }`}
+                                >
+                                  <span
+                                    className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                                      media.instantBookingEnabled
+                                        ? "translate-x-[18px]"
+                                        : "translate-x-0.5"
+                                    }`}
+                                  />
+                                </button>
+                              </div>
                               <div className="shrink-0">
                                 <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
                                   홈
@@ -2327,7 +2385,7 @@ export default function AdminMediasClient({
                     <th className="w-12 px-1 py-2.5 text-center">조회</th>
                     <th className="w-12 px-1 py-2.5 text-center">찜</th>
                     <th className="w-12 px-1 py-2.5 text-center">문의</th>
-                    <th className="w-44 px-2 py-2.5 text-center">노출</th>
+                    <th className="w-56 px-2 py-2.5 text-center">노출</th>
                     <th className="w-11 px-1.5 py-2.5 text-center">검증</th>
                     <th className="w-11 px-1.5 py-2.5 text-center">추천</th>
                     <th className="w-14 px-1.5 py-2.5 text-center">순서</th>
@@ -2475,6 +2533,38 @@ export default function AdminMediasClient({
                                 ))}
                               </select>
                             </label>
+                            <div className="flex shrink-0 flex-col items-center gap-1">
+                              <span className="text-[10px] font-medium text-muted-foreground">
+                                즉시예약
+                              </span>
+                              <button
+                                type="button"
+                                title={
+                                  media.instantBookingEnabled
+                                    ? "즉시 예약 끄기"
+                                    : "즉시 예약 켜기 (가용=예약가능 필요)"
+                                }
+                                aria-label={
+                                  media.instantBookingEnabled
+                                    ? "즉시 예약 끄기"
+                                    : "즉시 예약 켜기"
+                                }
+                                onClick={() => void toggleInstantBooking(media)}
+                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+                                  media.instantBookingEnabled
+                                    ? "bg-violet-500"
+                                    : "bg-slate-300"
+                                }`}
+                              >
+                                <span
+                                  className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+                                    media.instantBookingEnabled
+                                      ? "translate-x-[18px]"
+                                      : "translate-x-0.5"
+                                  }`}
+                                />
+                              </button>
+                            </div>
                           </div>
                         </td>
                         <td className="px-1.5 py-2.5 text-center align-middle">

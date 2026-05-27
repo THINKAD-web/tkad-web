@@ -1,4 +1,3 @@
-import dynamic from "next/dynamic";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
@@ -7,12 +6,6 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { SectionHeading } from "@/components/section-heading";
 import { AnimatedCard } from "@/components/animated-card";
 import { Timeline } from "@/components/timeline";
-
-const AboutHeroStats = dynamic(() =>
-  import("@/components/about-hero-stats").then((m) => ({
-    default: m.AboutHeroStats,
-  })),
-);
 
 type Props = {
   params: Promise<{ locale: string }>;
@@ -99,16 +92,6 @@ function AboutContent({
           <p className="mx-auto mt-8 max-w-3xl text-xl font-semibold leading-snug text-white sm:text-2xl lg:text-3xl lg:leading-tight">
             {t("about.heroSlogan")}
           </p>
-          <AboutHeroStats
-            labels={{
-              founded: t("about.statFoundedLabel"),
-              campaigns: t("about.statCampaignsLabel"),
-              media: t("about.statMediaLabel"),
-            }}
-            foundedYear="2016"
-            campaignsEnd={250}
-            mediaEnd={500}
-          />
         </div>
       </section>
 

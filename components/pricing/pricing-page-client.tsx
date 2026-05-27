@@ -13,6 +13,10 @@ type Props = {
   showTrial?: boolean;
 };
 
+/** appearance day/night — `tkad-pricing-outline-btn` (globals.css) */
+const planOutlineBtnClass =
+  "tkad-pricing-outline-btn mt-8 flex h-11 items-center justify-center rounded-xl border text-sm font-bold transition-colors";
+
 const PLANS = {
   free: {
     priceKo: "무료",
@@ -99,7 +103,7 @@ export function PricingPageClient({
             {key === "free" ? (
               <Link
                 href={loggedIn ? "/media" : "/register"}
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border dark:border-white/14 border-gray-200 text-sm font-bold dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
+                className={planOutlineBtnClass}
               >
                 {loggedIn ? (isKo ? "매체 탐색" : "Browse media") : isKo ? "무료 가입" : "Sign up free"}
               </Link>
@@ -107,7 +111,7 @@ export function PricingPageClient({
             {key === "enterprise" ? (
               <Link
                 href="/contact"
-                className="mt-8 flex h-11 items-center justify-center rounded-xl border dark:border-white/14 border-gray-200 text-sm font-bold dark:text-white text-gray-900 hover:dark:bg-white/10 bg-gray-100"
+                className={planOutlineBtnClass}
               >
                 {isKo ? "엔터프라이즈 문의" : "Contact sales"}
               </Link>
@@ -144,7 +148,7 @@ export function PricingPageClient({
             </p>
             <Link
               href="/login?redirect=/pricing"
-              className="tkad-neon-cta-clean mt-4 inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-black dark:text-white text-gray-900"
+              className="tkad-neon-cta-clean mt-4 inline-flex h-11 items-center justify-center rounded-xl px-6 text-sm font-black text-white [-webkit-text-fill-color:currentColor]"
             >
               {isKo ? "로그인" : "Sign in"}
             </Link>

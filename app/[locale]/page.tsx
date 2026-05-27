@@ -3,7 +3,6 @@ import { HomeQuickAccess } from "@/components/home/home-quick-access";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
 import { HomeMoreLinks } from "@/components/home/home-more-links";
-import { HomeTrustBar } from "@/components/home/home-trust-bar";
 import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
 import { fetchPublishedReports } from "@/lib/report-queries";
 import { fetchPublishedCases } from "@/lib/case-queries";
@@ -65,11 +64,8 @@ export default async function HomePage() {
       {/* 섹션 6: 콘텐츠 피드 (트렌드 리포트 + 성공 사례) */}
       <HomeContentFeed reports={reportItems} cases={caseItems} />
 
-      {/* 섹션 7: 더보기 링크 */}
+      {/* 섹션 7: 정보·커뮤니티 */}
       <HomeMoreLinks />
-
-      {/* 섹션 8: 신뢰 지표 */}
-      <HomeTrustBar />
     </main>
   );
 }

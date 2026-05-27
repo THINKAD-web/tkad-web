@@ -167,6 +167,8 @@ export interface MediaItem {
   performanceGuaranteed?: boolean;
   /** 이동형(`mobile`) 서비스 구역 — 전국 시·군·구 행정코드(5자리). 공개 지도 폴리곤에 사용 */
   coverageDistrictCodes?: string[];
+  /** 어드민 매체 관리 — 즉시 예약 CTA 수동 on/off (DB `instant_booking_enabled`) */
+  instantBookingEnabled?: boolean;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {

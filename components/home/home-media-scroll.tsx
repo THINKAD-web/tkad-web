@@ -55,16 +55,16 @@ export function HomeMediaScroll({
             <Link
               key={item.id}
               href={href}
-              className="w-44 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-white/5 md:w-56"
+              className="w-48 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-95 dark:border-white/10 dark:bg-white/5 sm:w-52 md:w-60"
             >
-              <div className="relative h-36 bg-gray-100 dark:bg-gray-800 md:h-40">
+              <div className="relative h-40 bg-gray-100 dark:bg-gray-800 md:h-44">
                 {item.thumbnailUrl ? (
                   <Image
                     src={item.thumbnailUrl}
                     alt={item.name}
                     fill
                     className="object-cover"
-                    sizes="192px"
+                    sizes="(max-width: 768px) 192px, 240px"
                     priority={idx < 4}
                     unoptimized
                   />
@@ -82,7 +82,7 @@ export function HomeMediaScroll({
                 </div>
               </div>
 
-              <div className="p-3.5">
+              <div className="p-4">
                 <div className="mb-1 flex items-center gap-1">
                   <CheckCircle className="h-3 w-3 shrink-0 text-blue-400" />
                   <p className="truncate text-sm leading-tight font-semibold text-gray-900 dark:text-white">

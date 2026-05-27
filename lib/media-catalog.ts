@@ -5,13 +5,17 @@ import {
   prismaMediaToMediaItem,
 } from "@/lib/public-media-catalog";
 import {
+  dedupeImageUrls,
   getPrimaryMediaImageUrl,
   type MediaItem,
   type MediaPricePeriodKey,
   typeLabels,
 } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
-import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import {
+  filterDisplayableMediaImageUrls,
+  resolveCatalogImageSrc,
+} from "@/lib/optimized-image-url";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -32,9 +36,14 @@ export type HomeCatalogMediaItem = {
   visibilityScore?: number;
   features?: string;
   advertiserHistory?: string;
+  trustScore?: number;
+  executionCount?: number;
+  lastExecutionMonthsAgo?: number | null;
   price?: number;
   pricePeriod?: MediaPricePeriodKey;
   thumbnailUrl?: string;
+  /** 피드·갤러리용 (최대 6장, 썸네일 포함) */
+  galleryImages?: string[];
   reviewAvg?: number;
   reviewCount?: number;
   isInstantBooking?: boolean;
@@ -76,12 +85,28 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
       item.description?.trim() ||
       undefined,
     advertiserHistory: item.advertiserHistory?.trim() || undefined,
+    trustScore:
+      item.trustScore != null && item.trustScore >= 0
+        ? item.trustScore
+        : undefined,
+    executionCount:
+      item.executionCount != null && item.executionCount >= 0
+        ? item.executionCount
+        : undefined,
+    lastExecutionMonthsAgo: item.lastExecutionMonthsAgo ?? undefined,
     price: display.priceWon > 0 ? display.priceWon : undefined,
     pricePeriod: display.period,
     thumbnailUrl: resolved?.src ?? undefined,
+    galleryImages: filterDisplayableMediaImageUrls(
+      dedupeImageUrls(item.sampleImages ?? []),
+    ).slice(0, 6),
     reviewAvg: item.averageRating,
     reviewCount: item.reviewCount,
-    isInstantBooking: isInstantBookingEligible(item).eligible,
+    isInstantBooking: isInstantBookingEligible({
+      instantBookingEnabled: item.instantBookingEnabled ?? false,
+      availability: item.availability,
+      catalogSource: item.catalogSource,
+    }).eligible,
     popularityScore: item.popularityScore,
   };
 }
