@@ -73,12 +73,17 @@ export async function POST(req: Request) {
     if (!sent) {
       const isTestSender =
         error?.includes("testing emails") || error?.includes("own email");
+      const isDomainUnverified =
+        error?.includes("domain is not verified") ||
+        error?.includes("verify a domain");
       return apiError("EMAIL_SEND_FAILED", 502, {
-        message: isTestSender
-          ? "테스트 발신 주소(@resend.dev)는 Resend 계정 이메일로만 발송됩니다. Vercel에 인증된 도메인 발신 주소(RESEND_FROM)를 설정해 주세요."
-          : error?.includes("invalid")
-            ? "이메일 API 키가 유효하지 않습니다. Vercel의 RESEND_API_KEY를 Resend 대시보드에서 새로 발급해 주세요."
-            : "인증 메일 발송에 실패했습니다. 잠시 후 다시 시도하거나 관리자에게 문의해 주세요.",
+        message: isDomainUnverified
+          ? "발신 도메인(thinkad.kr)이 Resend에서 아직 인증되지 않았습니다. resend.com/domains 에서 DNS 레코드를 추가·인증한 뒤 다시 시도해 주세요."
+          : isTestSender
+            ? "테스트 발신 주소(@resend.dev)는 Resend 계정 이메일로만 발송됩니다. Vercel에 인증된 도메인 발신 주소(RESEND_FROM)를 설정해 주세요."
+            : error?.includes("invalid")
+              ? "이메일 API 키가 유효하지 않습니다. Vercel의 RESEND_API_KEY를 Resend 대시보드에서 새로 발급해 주세요."
+              : "인증 메일 발송에 실패했습니다. 잠시 후 다시 시도하거나 관리자에게 문의해 주세요.",
       });
     }
 
