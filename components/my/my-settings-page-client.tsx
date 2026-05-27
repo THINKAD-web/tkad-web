@@ -234,7 +234,7 @@ export function MySettingsPageClient() {
             </p>
             <div className="mt-3 flex flex-wrap items-center gap-2">
               {verified ? (
-                <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-200">
+                <span className="inline-flex items-center gap-1 rounded-lg border border-emerald-600/25 bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-800 dark:border-emerald-400/30 dark:bg-emerald-500/10 dark:text-emerald-200">
                   <CheckCircle2 className="h-3.5 w-3.5" />
                   {isKo ? "인증 완료" : "Verified"}
                 </span>
