@@ -429,7 +429,9 @@ export function MyHubPageClient() {
 
         <section className="py-8 sm:py-12 lg:py-14">
           <div className="relative mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
-          {me.needsEmailVerification && <EmailVerificationBanner />}
+          {me.needsEmailVerification && (
+            <EmailVerificationBanner onVerified={() => void reloadMe()} />
+          )}
 
           {me.plan === "PRO_TRIAL" && (me.trialDaysLeft ?? 0) > 0 && (
             <ProTrialBanner

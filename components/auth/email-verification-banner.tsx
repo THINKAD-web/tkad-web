@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Link } from "@/i18n/navigation";
-import { Mail, X } from "lucide-react";
+import { Mail, RefreshCw, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
@@ -10,13 +10,15 @@ import { cn } from "@/lib/utils";
 type Props = {
   className?: string;
   onDismiss?: () => void;
+  onVerified?: () => void;
 };
 
-export function EmailVerificationBanner({ className, onDismiss }: Props) {
+export function EmailVerificationBanner({ className, onDismiss, onVerified }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const [dismissed, setDismissed] = useState(false);
   const [sending, setSending] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -50,6 +52,30 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
       setError(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");
     } finally {
       setSending(false);
+    }
+  }
+
+  async function refreshStatus() {
+    setRefreshing(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/auth/session", { cache: "no-store" });
+      const data = await res.json();
+      if (!data.ok || !data.data) {
+        setError(isKo ? "상태 확인에 실패했습니다." : "Failed to check status.");
+        return;
+      }
+      if (!data.data.needsEmailVerification) {
+        onVerified?.();
+        setDismissed(true);
+        onDismiss?.();
+        return;
+      }
+      setError(isKo ? "아직 인증되지 않았습니다." : "Not verified yet.");
+    } catch {
+      setError(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -91,8 +117,17 @@ export function EmailVerificationBanner({ className, onDismiss }: Props) {
         <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
+            onClick={() => void refreshStatus()}
+            disabled={sending || refreshing}
+            className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
+          >
+            {refreshing ? <Spinner size="sm" /> : <RefreshCw className="h-3.5 w-3.5" />}
+            Refresh
+          </button>
+          <button
+            type="button"
             onClick={() => void resend()}
-            disabled={sending || sent}
+            disabled={sending || refreshing || sent}
             className="inline-flex items-center gap-1.5 rounded-lg border border-border bg-card/90 px-3 py-1.5 text-xs font-semibold text-foreground transition-colors hover:bg-muted/60 disabled:opacity-60 dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/15"
           >
             {sending && <Spinner size="sm" />}

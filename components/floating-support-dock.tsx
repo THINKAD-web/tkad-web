@@ -35,9 +35,6 @@ function KakaoTalkIcon({ className }: { className?: string }) {
   );
 }
 
-const mobileFabClass =
-  "flex h-10 w-10 items-center justify-center rounded-full shadow-md transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
-
 const desktopFabClass =
   "flex h-14 w-14 items-center justify-center rounded-full shadow-lg transition-transform hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
 
@@ -70,32 +67,6 @@ export default function FloatingSupportDock() {
   return (
     <>
       <SupportAiChatModal open={aiOpen} onClose={() => setAiOpen(false)} />
-
-      {/* 모바일 */}
-      <div
-        className={cn(
-          "md:hidden",
-          !mounted && "pointer-events-none opacity-0",
-        )}
-      >
-        {hasRecent ? (
-          <RecentlyViewedFloatingPanel className="fixed bottom-20 right-4 z-50" />
-        ) : null}
-        <a
-          href={KAKAO_CHANNEL_PUBLIC_URL}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(
-            mobileFabClass,
-            "fixed z-50 bg-[#FEE500] text-[#191600]",
-            hasRecent ? "bottom-6 right-4" : "bottom-[calc(4.5rem+env(safe-area-inset-bottom,0px))] right-3",
-          )}
-          aria-label={tChat("kakaoCta")}
-          title={tChat("kakaoCta")}
-        >
-          <KakaoTalkIcon className="h-5 w-5" />
-        </a>
-      </div>
 
       {/* 데스크탑: 최근 조회 + AI + 카카오 */}
       <div

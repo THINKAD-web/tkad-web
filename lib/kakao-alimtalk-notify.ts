@@ -70,7 +70,7 @@ export async function notifyProTrialExpiringSoon(input: {
 }): Promise<SendAlimtalkResult> {
   return sendAlimtalk({
     to: input.phone,
-    templateCode: "TKAD_PRO_TRIAL_EXPIRING",
+    templateCode: "UL_1338",
     recvName: input.name,
     variables: {
       name: input.name,

@@ -105,9 +105,6 @@ export async function generateMetadata({
       },
     },
     ...(googleVer ? { verification: { google: googleVer } } : {}),
-    ...(naverVer
-      ? { other: { "naver-site-verification": naverVer } }
-      : {}),
     openGraph: {
       type: "website",
       locale: locale === "ko" ? "ko_KR" : "en_US",
@@ -129,6 +126,7 @@ export async function generateMetadata({
       description,
     },
     other: {
+      ...(naverVer ? { "naver-site-verification": naverVer } : {}),
       "theme-color": "#020202",
       "msapplication-TileColor": "#020202",
     },

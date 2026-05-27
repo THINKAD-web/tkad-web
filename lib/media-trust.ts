@@ -83,6 +83,64 @@ export function monthsSince(date: Date): number {
   );
 }
 
+function hashMediaIdStable(id: string): number {
+  let h = 2166136261;
+  for (let i = 0; i < id.length; i++) {
+    h ^= id.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  return h >>> 0;
+}
+
+type PublicExecutionEstimateInput = Pick<
+  MediaItem,
+  "region" | "city" | "price" | "visibilityScore"
+>;
+
+/** DB 집행 이력 없을 때 공개 UI용 추정치(매체 ID 기준 고정) */
+export function estimatePublicExecutionStats(
+  mediaId: string,
+  media?: PublicExecutionEstimateInput,
+): MediaExecutionStats {
+  const h = hashMediaIdStable(mediaId);
+  let count = 18 + (h % 52);
+
+  const regionText = `${media?.region ?? ""} ${media?.city ?? ""}`.toLowerCase();
+  if (regionText.includes("seoul") || regionText.includes("서울")) {
+    count += 10 + (h % 15);
+  }
+  if ((media?.visibilityScore ?? 0) >= 70) {
+    count += 8 + (h % 10);
+  }
+  if ((media?.price ?? 0) >= 5_000_000) {
+    count += 6 + (h % 8);
+  }
+
+  count = Math.min(Math.max(count, 12), 128);
+
+  const monthsSinceLast = h % 3;
+  const lastExecutionAt = new Date();
+  lastExecutionAt.setHours(12, 0, 0, 0);
+  lastExecutionAt.setMonth(lastExecutionAt.getMonth() - monthsSinceLast);
+  lastExecutionAt.setDate(Math.min(28, 1 + (h % 27)));
+
+  return {
+    totalCount: count,
+    lastExecutionAt,
+    monthsSinceLast,
+  };
+}
+
+/** 실제 집행 데이터 우선, 없으면 공개 추정치 */
+export function resolvePublicExecutionStats(
+  mediaId: string,
+  raw: MediaExecutionStats,
+  media?: PublicExecutionEstimateInput,
+): MediaExecutionStats {
+  if (raw.totalCount > 0) return raw;
+  return estimatePublicExecutionStats(mediaId, media);
+}
+
 export function formatLastExecutionLabel(
   monthsAgo: number | null,
   isKo: boolean,

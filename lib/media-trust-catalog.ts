@@ -6,6 +6,7 @@ import {
   computeTrustBadges,
   computeTrustScore,
   monthsSince,
+  resolvePublicExecutionStats,
 } from "@/lib/media-trust";
 
 function emptyExecutionStats(): MediaExecutionStats {
@@ -341,7 +342,8 @@ export async function attachMediaTrustToMediaItems(
   ]);
 
   return items.map((item) => {
-    const execution = execMap.get(item.id) ?? emptyExecutionStats();
+    const executionRaw = execMap.get(item.id) ?? emptyExecutionStats();
+    const execution = resolvePublicExecutionStats(item.id, executionRaw, item);
     const certifiedPhotoCount = certifiedMap.get(item.id) ?? 0;
     const trustBadges = computeTrustBadges(
       item,

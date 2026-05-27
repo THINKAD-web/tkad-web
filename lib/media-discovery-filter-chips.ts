@@ -3,6 +3,7 @@ import {
   Building2,
   Bus,
   BusFront,
+  Globe2,
   GraduationCap,
   Landmark,
   MapPin,
@@ -46,6 +47,12 @@ export const MEDIA_TARGET_CHIPS: readonly FilterChip[] = [
   { label: "동네", value: "small_business", icon: MapPin },
   { label: "대학", value: "university", icon: GraduationCap },
   { label: "지자체", value: "public", icon: Landmark },
+];
+
+/** /media/targets — 전체 목적 + 지역 프로모션 */
+export const MEDIA_TARGET_PAGE_CHIPS: readonly FilterChip[] = [
+  ...MEDIA_TARGET_CHIPS.filter((chip) => chip.value !== ""),
+  { label: "지역", value: "regional", icon: Globe2 },
 ];
 
 export const MEDIA_REGION_CHIPS = [

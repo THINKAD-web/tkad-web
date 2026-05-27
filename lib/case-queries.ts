@@ -1,5 +1,6 @@
 import { getLatestPublishedSuccessCases } from "@/lib/public-content-queries";
 import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
+import { cleanSummary } from "@/lib/content-card-visuals";
 
 export type HomeCaseItem = {
   id: string;
@@ -22,9 +23,10 @@ export async function fetchPublishedCases({
     const rows = await getLatestPublishedSuccessCases(locale, limit);
     return rows.map((row) => {
       const metric = row.highlightMetrics[0];
-      const summary = metric
+      const rawSummary = metric
         ? formatCaseStudyMetricValue(metric, locale)
         : row.summaryKo;
+      const summary = rawSummary ? cleanSummary(rawSummary) : undefined;
 
       return {
         id: row.id,

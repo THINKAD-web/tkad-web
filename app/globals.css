@@ -2771,6 +2771,125 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
+/* ── Mobile bottom tab bar — neon icon chips (Lucide + emoji) ── */
+.tkad-mobile-tab-icon-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.375rem;
+  height: 2.375rem;
+  border-radius: 0.875rem;
+  border: 1px solid rgb(168 85 247 / 0.14);
+  background: linear-gradient(
+    145deg,
+    rgb(168 85 247 / 0.06),
+    rgb(34 211 238 / 0.04),
+    rgb(236 72 153 / 0.03)
+  );
+  box-shadow:
+    0 0 12px rgb(124 58 237 / 0.06),
+    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  transition:
+    box-shadow 0.2s ease,
+    border-color 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.tkad-mobile-tab-icon-wrap[data-active="true"] {
+  border-color: rgb(168 85 247 / 0.42);
+  background: linear-gradient(
+    135deg,
+    rgb(168 85 247 / 0.28),
+    rgb(34 211 238 / 0.22),
+    rgb(236 72 153 / 0.18)
+  );
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.08),
+    0 0 18px rgb(168 85 247 / 0.28),
+    0 0 12px rgb(34 211 238 / 0.2),
+    0 0 10px rgb(236 72 153 / 0.12);
+}
+
+.tkad-mobile-tab-icon-wrap[data-active="true"]::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    135deg,
+    rgb(168 85 247 / 0.85),
+    rgb(34 211 238 / 0.75),
+    rgb(236 72 153 / 0.65)
+  );
+  -webkit-mask:
+    linear-gradient(#000 0 0) content-box,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0.55;
+  pointer-events: none;
+}
+
+.tkad-mobile-tab-icon {
+  position: relative;
+  z-index: 1;
+  color: rgb(124 58 237 / 0.55);
+  filter:
+    drop-shadow(0 0 4px rgb(168 85 247 / 0.22))
+    drop-shadow(0 0 6px rgb(34 211 238 / 0.12));
+  transition:
+    color 0.2s ease,
+    filter 0.2s ease,
+    transform 0.2s ease;
+}
+
+.tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
+  color: rgb(196 181 253);
+  filter:
+    drop-shadow(0 0 5px rgb(168 85 247 / 0.75))
+    drop-shadow(0 0 8px rgb(34 211 238 / 0.55))
+    drop-shadow(0 0 10px rgb(236 72 153 / 0.35));
+}
+
+html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="false"] {
+  border-color: rgb(124 58 237 / 0.16);
+  background: linear-gradient(
+    145deg,
+    rgb(168 85 247 / 0.08),
+    rgb(34 211 238 / 0.05),
+    rgb(255 255 255 / 0.72)
+  );
+}
+
+html:not(.dark) .tkad-mobile-tab-icon {
+  color: rgb(109 40 217 / 0.45);
+}
+
+html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
+  color: rgb(109 40 217);
+  filter:
+    drop-shadow(0 0 4px rgb(168 85 247 / 0.55))
+    drop-shadow(0 0 8px rgb(34 211 238 / 0.35));
+}
+
+.dark .tkad-mobile-tab-icon-wrap[data-active="false"] .tkad-mobile-tab-icon {
+  color: rgb(34 211 238 / 0.42);
+}
+
+.dark .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
+  color: rgb(103 232 249);
+}
+
+.tkad-mobile-tab-fab .tkad-mobile-tab-icon {
+  color: rgb(255 255 255);
+  filter:
+    drop-shadow(0 0 6px rgb(255 255 255 / 0.45))
+    drop-shadow(0 0 10px rgb(34 211 238 / 0.35));
+}
+
 /* ── Premium Service card hover ── */
 .service-card {
   transition: transform 0.3s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s cubic-bezier(0.22, 1, 0.36, 1);

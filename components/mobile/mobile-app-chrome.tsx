@@ -33,7 +33,9 @@ export function MobileAppChrome({ children }: Props) {
           <div className="flex flex-col tkad-mobile-scroll md:pb-0">
             {children}
           </div>
-          <QuickActionBarMobile />
+          <Suspense fallback={null}>
+            <QuickActionBarMobile />
+          </Suspense>
           <BottomTabBar />
           <MobileSearchModal />
         </div>

@@ -4,7 +4,7 @@ import { issueEmailVerification } from "@/lib/email-verification";
 import { userNeedsEmailVerification } from "@/lib/user-email";
 import { prisma } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
-import { isEmailConfigured } from "@/lib/email/client";
+import { isEmailConfigured, resendFromAddress } from "@/lib/email/client";
 import {
   apiError,
   apiOk,
@@ -71,6 +71,8 @@ export async function POST(req: Request) {
     const { sent, error } = await issueEmailVerification(user.id, locale);
 
     if (!sent) {
+      const fromDomain =
+        resendFromAddress()?.match(/@([^>\s]+)/)?.[1] ?? "발신 도메인";
       const isTestSender =
         error?.includes("testing emails") || error?.includes("own email");
       const isDomainUnverified =
@@ -78,7 +80,7 @@ export async function POST(req: Request) {
         error?.includes("verify a domain");
       return apiError("EMAIL_SEND_FAILED", 502, {
         message: isDomainUnverified
-          ? "발신 도메인(thinkad.kr)이 Resend에서 아직 인증되지 않았습니다. resend.com/domains 에서 DNS 레코드를 추가·인증한 뒤 다시 시도해 주세요."
+          ? `발신 도메인(${fromDomain})이 Resend에서 아직 인증되지 않았습니다. resend.com/domains 에서 DNS 레코드를 추가·인증한 뒤 다시 시도해 주세요.`
           : isTestSender
             ? "테스트 발신 주소(@resend.dev)는 Resend 계정 이메일로만 발송됩니다. Vercel에 인증된 도메인 발신 주소(RESEND_FROM)를 설정해 주세요."
             : error?.includes("invalid")

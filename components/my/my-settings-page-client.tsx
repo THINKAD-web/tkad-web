@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { ArrowLeft, CheckCircle2, Loader2, Mail, Trash2 } from "lucide-react";
+import { ArrowLeft, CheckCircle2, Loader2, Mail, RefreshCw, Trash2 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { BtnBlock } from "@/components/brutalist";
 import { FullPageSpinner } from "@/components/ui/spinner";
@@ -53,6 +53,7 @@ export function MySettingsPageClient() {
   const [passwordSaving, setPasswordSaving] = useState(false);
 
   const [resending, setResending] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
   const [deletePassword, setDeletePassword] = useState("");
   const [deleteConfirm, setDeleteConfirm] = useState(false);
@@ -134,6 +135,25 @@ export function MySettingsPageClient() {
       setData((d) => (d ? { ...d, hasPassword: true } : d));
     } finally {
       setPasswordSaving(false);
+    }
+  }
+
+  async function refreshVerificationStatus() {
+    setRefreshing(true);
+    try {
+      const row = await load();
+      if (!row) return;
+      setData(row);
+      setName(row.name);
+      setCompany(row.company ?? "");
+      setPhone(row.phone ?? "");
+      if (row.emailVerifiedAt) {
+        toast.success(isKo ? "이메일 인증이 확인되었습니다." : "Email verification confirmed.");
+      } else if (row.needsEmailVerification) {
+        toast.warning(isKo ? "아직 인증되지 않았습니다." : "Email is not verified yet.");
+      }
+    } finally {
+      setRefreshing(false);
     }
   }
 
@@ -239,15 +259,30 @@ export function MySettingsPageClient() {
                   {isKo ? "인증 완료" : "Verified"}
                 </span>
               ) : data.needsEmailVerification ? (
-                <button
-                  type="button"
-                  onClick={() => void resendVerification()}
-                  disabled={resending}
-                  className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
-                >
-                  {resending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-                  {isKo ? "인증 메일 재발송" : "Resend verification"}
-                </button>
+                <>
+                  <button
+                    type="button"
+                    onClick={() => void resendVerification()}
+                    disabled={resending || refreshing}
+                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
+                  >
+                    {resending && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+                    {isKo ? "인증 메일 재발송" : "Resend verification"}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => void refreshVerificationStatus()}
+                    disabled={resending || refreshing}
+                    className="inline-flex items-center gap-2 rounded-lg border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1.5 text-xs font-semibold dark:text-white text-gray-900 hover:bg-white/15 disabled:opacity-60"
+                  >
+                    {refreshing ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <RefreshCw className="h-3.5 w-3.5" />
+                    )}
+                    Refresh
+                  </button>
+                </>
               ) : null}
             </div>
           </section>
