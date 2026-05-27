@@ -1,206 +1,165 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import {
-  ArrowRight,
-  BookOpen,
-  ChevronLeft,
-  ChevronRight,
-  Heart,
-  Sparkles,
-  type LucideIcon,
-} from "lucide-react";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type BannerSlide = {
-  id: string;
-  eyebrow: string;
-  Icon: LucideIcon;
-  title: string;
-  titleHighlight: string;
-  sub: string;
-  cta: string;
-  href: string;
-  /** decorative gradient orb tones */
-  orb: "violet" | "indigo" | "rose";
-};
+const BANNER_IMAGES = [
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0fa1cb83-dc2e-45ee-9210-4c2f433cbaa1.jpg",
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0f795047-667e-4291-8495-1c41eb6e5afe.png",
+] as const;
 
-const banners: BannerSlide[] = [
+const banners = [
   {
-    id: "pro",
-    eyebrow: "정식 오픈 기념",
-    Icon: Sparkles,
+    image: BANNER_IMAGES[0],
+    badge: "🎉 정식 오픈 기념",
     title: "첫 30명 PRO",
-    titleHighlight: "1개월 무료",
-    sub: "상세 데이터·PDF 보고서까지 — 가입 즉시 체험",
+    highlight: "1개월 무료",
+    sub: "지금 가입하면 상세 데이터·PDF 보고서 무료",
     cta: "지금 신청하기",
     href: "/pricing",
-    orb: "violet",
   },
   {
-    id: "guide",
-    eyebrow: "시작 가이드",
-    Icon: BookOpen,
-    title: "3분이면",
-    titleHighlight: "충분해요",
-    sub: "매체 검색 → AI 플래너 → 견적 요청까지 한 흐름",
-    cta: "사용 가이드 보기",
-    href: "/guide/how-to-use",
-    orb: "indigo",
+    image: BANNER_IMAGES[1],
+    badge: "📺 전국 500+ 매체",
+    title: "검증된",
+    highlight: "광고매체",
+    sub: "강남부터 부산까지 실제 집행 데이터 기반",
+    cta: "매체 탐색하기",
+    href: "/media",
   },
   {
-    id: "fandom",
-    eyebrow: "팬덤 광고",
-    Icon: Heart,
+    image: BANNER_IMAGES[2],
+    badge: "🎤 팬덤 광고",
     title: "아이돌 생일광고",
-    titleHighlight: "전문 플랫폼",
-    sub: "강남·홍대·코엑스 — 팬덤 매체를 한곳에서",
+    highlight: "전문 플랫폼",
+    sub: "강남역·홍대·코엑스 팬덤 광고 매체 한눈에",
     cta: "매체 보기",
     href: "/special/fandom",
-    orb: "rose",
   },
-];
-
-const orbClass: Record<BannerSlide["orb"], string> = {
-  violet:
-    "bg-[radial-gradient(circle_at_30%_20%,rgba(168,85,247,0.45),transparent_55%),radial-gradient(circle_at_85%_75%,rgba(34,211,238,0.35),transparent_50%)]",
-  indigo:
-    "bg-[radial-gradient(circle_at_20%_30%,rgba(99,102,241,0.5),transparent_55%),radial-gradient(circle_at_90%_60%,rgba(56,189,248,0.28),transparent_48%)]",
-  rose:
-    "bg-[radial-gradient(circle_at_25%_25%,rgba(236,72,153,0.45),transparent_52%),radial-gradient(circle_at_80%_70%,rgba(139,92,246,0.35),transparent_50%)]",
-};
-
-function SlideContent({
-  slide,
-  active,
-}: {
-  slide: BannerSlide;
-  active: boolean;
-}) {
-  const Icon = slide.Icon;
-  return (
-    <div
-      className={cn(
-        "absolute inset-0 flex flex-col transition-opacity duration-700 ease-out",
-        active ? "z-10 opacity-100" : "pointer-events-none z-0 opacity-0",
-      )}
-      aria-hidden={!active}
-    >
-      <div
-        className={cn("pointer-events-none absolute inset-0", orbClass[slide.orb])}
-        aria-hidden
-      />
-      <div
-        className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,rgba(5,5,10,0.2)_0%,rgba(5,5,10,0.65)_55%,rgba(5,5,10,0.92)_100%)]"
-        aria-hidden
-      />
-
-      <div className="relative flex flex-1 items-center justify-center px-3 pb-11 pt-3 sm:px-5">
-        <div className="flex w-full max-w-xl items-center gap-3 sm:max-w-2xl sm:gap-4 md:max-w-3xl md:gap-5">
-          <div className="min-w-0 flex-1 text-center">
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-[11px] font-semibold tracking-wide text-white/90 backdrop-blur-md">
-              <Icon className="h-3.5 w-3.5 text-cyan-300/90" aria-hidden />
-              {slide.eyebrow}
-            </span>
-
-            <h2 className="mt-2 text-balance text-xl font-black leading-[1.12] tracking-tight text-white sm:mt-2.5 sm:text-2xl md:text-[1.75rem]">
-              {slide.title}{" "}
-              <span className="tkad-home-accent-text">{slide.titleHighlight}</span>
-            </h2>
-            <p className="mt-1.5 text-xs leading-relaxed text-white/72 sm:text-sm">
-              {slide.sub}
-            </p>
-          </div>
-
-          <Link
-            href={slide.href}
-            tabIndex={active ? 0 : -1}
-            className={cn(
-              "tkad-neon-cta-clean inline-flex h-9 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-[16px] px-3.5 text-xs font-bold text-white shadow-[0_8px_32px_rgba(124,58,237,0.35)] transition-transform hover:-translate-y-0.5 active:scale-[0.98] sm:h-10 sm:rounded-[18px] sm:px-4 sm:text-sm md:h-11 md:gap-2 md:px-5",
-              !active && "pointer-events-none",
-            )}
-          >
-            {slide.cta}
-            <ArrowRight className="h-3.5 w-3.5 sm:h-4 sm:w-4" aria-hidden />
-          </Link>
-        </div>
-      </div>
-    </div>
-  );
-}
+] as const;
 
 export function HomeHeroBanner() {
   const [current, setCurrent] = useState(0);
+  const [isAnimating, setIsAnimating] = useState(false);
 
-  const go = useCallback((delta: number) => {
-    setCurrent((prev) => (prev + delta + banners.length) % banners.length);
+  const goTo = useCallback((index: number) => {
+    setCurrent((index + banners.length) % banners.length);
   }, []);
 
+  const next = useCallback(() => {
+    if (isAnimating) return;
+    setIsAnimating(true);
+    setCurrent((prev) => (prev + 1) % banners.length);
+    setTimeout(() => setIsAnimating(false), 500);
+  }, [isAnimating]);
+
   useEffect(() => {
-    const timer = setInterval(() => go(1), 6000);
+    const timer = setInterval(next, 5000);
     return () => clearInterval(timer);
-  }, [go]);
+  }, [next]);
+
+  const banner = banners[current];
 
   return (
     <div className="px-4 pt-4 pb-2">
       <div
-        className="tkad-neon-border relative h-[11.5rem] overflow-hidden rounded-[22px] border border-white/10 bg-[#05050a] shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:h-48 md:h-56"
+        className="relative h-52 overflow-hidden rounded-2xl md:h-72"
         role="region"
         aria-roledescription="carousel"
         aria-label="프로모션"
       >
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-neon-depth"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-[0.18] tkad-neon-grid"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.06] mix-blend-overlay"
-        />
-
-        {banners.map((slide, i) => (
-          <SlideContent key={slide.id} slide={slide} active={i === current} />
+        {banners.map((b, i) => (
+          <div
+            key={b.href}
+            className={cn(
+              "absolute inset-0 transition-opacity duration-700",
+              i === current ? "opacity-100" : "opacity-0",
+            )}
+            aria-hidden={i !== current}
+          >
+            <Image
+              src={b.image}
+              alt=""
+              fill
+              className="object-cover"
+              priority={i === 0}
+              sizes="(max-width: 768px) 100vw, 800px"
+            />
+          </div>
         ))}
 
-        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-2.5">
-          <button
-            type="button"
-            onClick={() => go(-1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/90 backdrop-blur-md transition hover:bg-black/55 hover:text-white"
-            aria-label="이전 배너"
-          >
-            <ChevronLeft className="h-4 w-4" />
-          </button>
-          <div className="flex items-center gap-1.5 px-1">
-            {banners.map((slide, i) => (
-              <button
-                key={slide.id}
-                type="button"
-                onClick={() => setCurrent(i)}
-                className={cn(
-                  "h-1.5 rounded-full transition-all duration-300",
-                  i === current
-                    ? "w-7 bg-gradient-to-r from-violet-400 to-cyan-400"
-                    : "w-1.5 bg-white/35 hover:bg-white/55",
-                )}
-                aria-label={`${slide.eyebrow} 배너`}
-                aria-current={i === current ? "true" : undefined}
-              />
-            ))}
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/50 to-black/20"
+        />
+        <div
+          aria-hidden
+          className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"
+        />
+
+        <div className="absolute inset-0 flex flex-col justify-between p-5">
+          <div>
+            <span className="inline-flex items-center rounded-full border border-white/20 bg-white/15 px-3 py-1 text-xs font-medium text-white/90 backdrop-blur-sm">
+              {banner.badge}
+            </span>
           </div>
-          <button
-            type="button"
-            onClick={() => go(1)}
-            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-black/40 text-white/90 backdrop-blur-md transition hover:bg-black/55 hover:text-white"
-            aria-label="다음 배너"
-          >
-            <ChevronRight className="h-4 w-4" />
-          </button>
+
+          <div>
+            <h2 className="mb-1 text-2xl font-bold leading-tight text-white md:text-3xl">
+              {banner.title}{" "}
+              <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">
+                {banner.highlight}
+              </span>
+            </h2>
+            <p className="mb-4 text-sm text-white/70">{banner.sub}</p>
+            <Link
+              href={banner.href}
+              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-100 active:scale-95"
+            >
+              {banner.cta} →
+            </Link>
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => goTo(current - 1)}
+          className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
+          aria-label="이전 배너"
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <button
+          type="button"
+          onClick={() => goTo(current + 1)}
+          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
+          aria-label="다음 배너"
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
+          {banners.map((b, i) => (
+            <button
+              key={b.href}
+              type="button"
+              onClick={() => goTo(i)}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                i === current ? "w-6 bg-white" : "w-1.5 bg-white/40",
+              )}
+              aria-label={`${b.badge} 배너`}
+              aria-current={i === current ? "true" : undefined}
+            />
+          ))}
+        </div>
+
+        <div className="absolute right-4 top-4 rounded-full bg-black/30 px-2 py-0.5 text-xs text-white/60 backdrop-blur-sm">
+          {current + 1} / {banners.length}
         </div>
       </div>
     </div>

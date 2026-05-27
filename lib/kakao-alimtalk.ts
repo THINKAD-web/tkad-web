@@ -20,7 +20,12 @@ export const ALIMTALK_TEMPLATE_CODES = [
   "TKAD_OWNER_SETTLEMENT_DONE",
   "TKAD_PROOF_PHOTO_UPLOADED",
   "TKAD_MEDIA_APPLICATION_APPROVED",
-  "TKAD_PRO_TRIAL_EXPIRING",
+  "UL_1338",
+] as const;
+
+/** 알리고 미등록 — 알림톡 생략, SMS(LMS)만 발송 */
+export const SMS_ONLY_ALIMTALK_TEMPLATE_CODES = [
+  "TKAD_INQUIRY_RECEIVED",
 ] as const;
 
 export type AlimtalkTemplateCode = (typeof ALIMTALK_TEMPLATE_CODES)[number];
@@ -74,8 +79,8 @@ export const ALIMTALK_TEMPLATE_DEFAULTS: Record<
     subject: "매체 승인",
     body: "등록하신 매체「#{mediaName}」이 승인·노출되었습니다.\n#{link}",
   },
-  TKAD_PRO_TRIAL_EXPIRING: {
-    subject: "PRO 체험 만료 예정",
+  UL_1338: {
+    subject: "싱커드 PRO 체험 만료 알림",
     body: "#{name}님, PRO 체험이 3일 후 종료됩니다.\n계속 이용하시려면 구독해주세요 → #{link}",
   },
 };
@@ -92,7 +97,7 @@ export const ALIMTALK_TEMPLATE_LABELS: Record<AlimtalkTemplateCode, string> = {
   TKAD_OWNER_SETTLEMENT_DONE: "매체사·정산 완료",
   TKAD_PROOF_PHOTO_UPLOADED: "인증 사진 업로드",
   TKAD_MEDIA_APPLICATION_APPROVED: "매체사·승인 완료",
-  TKAD_PRO_TRIAL_EXPIRING: "PRO 체험 만료 예정",
+  UL_1338: "싱커드 PRO 체험 만료 알림",
 };
 
 export type SendAlimtalkParams = {
@@ -339,6 +344,24 @@ export async function sendAlimtalk(
       recvName: params.recvName,
     });
     return { sent: false, channel: "noop", detail: "not_configured" };
+  }
+
+  const smsOnly = (
+    SMS_ONLY_ALIMTALK_TEMPLATE_CODES as readonly string[]
+  ).includes(params.templateCode);
+  if (smsOnly) {
+    try {
+      return await sendSmsFallback(
+        cfg,
+        phone,
+        content.message,
+        content.subject,
+      );
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : String(e);
+      console.error("[kakao-alimtalk] SMS-only send error:", msg);
+      return { sent: false, channel: "sms", error: msg };
+    }
   }
 
   try {

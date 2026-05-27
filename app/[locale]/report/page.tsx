@@ -13,6 +13,8 @@ import {
 import { cn } from "@/lib/utils";
 import type { ReportCategory } from "@prisma/client";
 import { ContentNotifySignup } from "@/components/content-notify-signup";
+import { ContentCardGradientThumb } from "@/components/content/content-card-gradient-thumb";
+import { estimateReadMinutes, cleanSummary } from "@/lib/content-card-visuals";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 
@@ -26,20 +28,6 @@ function reportListHref(category: ReportCategory | null, page: number) {
   if (page > 1) qs.set("page", String(page));
   const q = qs.toString();
   return q ? `/report?${q}` : "/report";
-}
-
-function thumbPlaceholderClass(category: ReportCategory): string {
-  switch (category) {
-    case "TREND":
-      return "bg-gradient-to-br from-violet-600 via-fuchsia-600 to-[#05050a]";
-    case "REGION":
-      return "bg-gradient-to-br from-sky-500 via-cyan-700 to-[#05050a]";
-    case "GUIDE":
-      return "bg-gradient-to-br from-amber-500 via-orange-700 to-[#05050a]";
-    case "CAMPAIGN":
-    default:
-      return "bg-gradient-to-br from-emerald-600 via-teal-800 to-[#05050a]";
-  }
 }
 
 function formatPublished(d: Date | null, locale: string): string {
@@ -145,44 +133,37 @@ export default async function ReportListPage({ params, searchParams }: ListProps
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
                   {reports.map((r) => (
                     <Link key={r.id} href={`/report/${r.slug}`} className={cardShell}>
-                      <div
-                        className={cn(
-                          "relative aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-white/10 border-gray-200",
-                          r.thumbnail ? "" : thumbPlaceholderClass(r.category),
-                        )}
-                      >
-                        {r.thumbnail ? (
-                          // eslint-disable-next-line @next/next/no-img-element
-                          <img
-                            src={r.thumbnail}
-                            alt=""
-                            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-[1.02]"
-                          />
-                        ) : (
-                          <div className="flex h-full w-full items-end p-4">
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800">
-                              THINKAD REPORT
+                      <div className="relative aspect-[16/9] w-full overflow-hidden border-b border-border dark:border-white/10 border-gray-200">
+                        <ContentCardGradientThumb
+                          thumbnailUrl={r.thumbnail}
+                          alt={r.title}
+                          category={r.category}
+                          className="absolute inset-0 h-full w-full"
+                          badge={
+                            <span className="absolute top-3 left-3 inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary backdrop-blur-sm dark:border-white/15 dark:bg-black/45 dark:text-white">
+                              {labelForReportCategory(r.category, isKo)}
                             </span>
-                          </div>
-                        )}
+                          }
+                        />
                       </div>
                       <article className="flex flex-1 flex-col gap-3 p-5 sm:p-6">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="inline-flex rounded-full border border-primary/25 bg-primary/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-800">
-                            {labelForReportCategory(r.category, isKo)}
-                          </span>
                           <time
                             dateTime={r.publishedAt?.toISOString()}
                             className="font-display text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground"
                           >
                             {formatPublished(r.publishedAt, locale)}
                           </time>
+                          <span className="text-xs text-violet-400">
+                            {estimateReadMinutes(r.title, r.summary)}
+                            {isKo ? "분 읽기" : " min read"}
+                          </span>
                         </div>
                         <h2 className="line-clamp-2 text-xl font-bold leading-snug tracking-tight text-foreground dark:text-white text-gray-900">
                           {r.title}
                         </h2>
                         <p className="line-clamp-3 flex-1 text-sm leading-relaxed text-muted-foreground dark:text-white text-gray-600">
-                          {r.summary}
+                          {cleanSummary(r.summary)}
                         </p>
                       </article>
                     </Link>

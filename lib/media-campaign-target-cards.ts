@@ -1,12 +1,12 @@
 import type { LucideIcon } from "lucide-react";
 import {
   Building2,
+  Globe2,
   GraduationCap,
-  Heart,
-  Home,
   Landmark,
   MapPin,
-  Sparkles,
+  Mic2,
+  ShoppingBag,
 } from "lucide-react";
 
 export type CampaignTargetCard = {
@@ -37,7 +37,7 @@ export const MEDIA_CAMPAIGN_TARGET_CARDS: CampaignTargetCard[] = [
     title: "팬덤/엔터",
     description: "아이돌 생일·팬클럽 응원",
     recommendation: "강남역·홍대·코엑스",
-    icon: Heart,
+    icon: Mic2,
     cardClass: "bg-pink-500/10 border-pink-500/20",
     iconWrapClass: "bg-pink-500/15 text-pink-600 dark:text-pink-300",
     accentTextClass: "text-pink-600 dark:text-pink-400",
@@ -48,7 +48,7 @@ export const MEDIA_CAMPAIGN_TARGET_CARDS: CampaignTargetCard[] = [
     title: "팝업·이벤트",
     description: "팝업 스토어·한정 캠페인",
     recommendation: "성수·홍대 DOOH",
-    icon: Sparkles,
+    icon: ShoppingBag,
     cardClass: "bg-cyan-500/10 border-cyan-500/20",
     iconWrapClass: "bg-cyan-500/15 text-cyan-600 dark:text-cyan-300",
     accentTextClass: "text-cyan-600 dark:text-cyan-400",
@@ -69,7 +69,7 @@ export const MEDIA_CAMPAIGN_TARGET_CARDS: CampaignTargetCard[] = [
     title: "동네/소상공인",
     description: "동네 매장·오픈 행사",
     recommendation: "버스쉘터·로컬 빌보드",
-    icon: Home,
+    icon: MapPin,
     cardClass: "bg-emerald-500/10 border-emerald-500/20",
     iconWrapClass: "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
     accentTextClass: "text-emerald-600 dark:text-emerald-400",
@@ -91,7 +91,7 @@ export const MEDIA_CAMPAIGN_TARGET_CARDS: CampaignTargetCard[] = [
     title: "지역 프로모션",
     description: "지역 축제·문화행사",
     recommendation: "지역 빌보드·쉘터",
-    icon: MapPin,
+    icon: Globe2,
     cardClass: "bg-rose-500/10 border-rose-500/20",
     iconWrapClass: "bg-rose-500/15 text-rose-600 dark:text-rose-300",
     accentTextClass: "text-rose-600 dark:text-rose-400",

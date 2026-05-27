@@ -15,6 +15,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
+import { RecentlyViewedFloatingPanel } from "@/components/recently-viewed-floating-panel";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -45,55 +46,64 @@ function isMediaDetailPath(pathname: string): boolean {
   );
 }
 
-const MOBILE_ACTIONS = [
-  {
-    id: "media",
-    href: "/media",
-    labelKo: "매체검색",
-    labelEn: "Media",
-    match: (p: string) =>
-      (p.startsWith("/media") && !p.startsWith("/media-owner") && !isMediaDetailPath(p)) ||
-      p.startsWith("/search"),
-  },
-  {
-    id: "planner",
-    href: "/planner",
-    labelKo: "플래너",
-    labelEn: "Planner",
-    match: (p: string) => p.startsWith("/planner"),
-  },
-  {
-    id: "quote",
-    href: "/quote",
-    labelKo: "견적문의",
-    labelEn: "Quote",
-    match: (p: string) => p.startsWith("/quote") || p.startsWith("/contact"),
-  },
-] as const;
+type QuickActionItem = {
+  id: string;
+  href: string;
+  labelKo: string;
+  labelEn: string;
+  match: (pathname: string, tab: string | null) => boolean;
+};
 
-const DETAIL_ACTIONS = [
+const MOBILE_ACTIONS: QuickActionItem[] = [
   {
-    id: "compare",
-    href: "/compare",
-    labelKo: "매체비교",
-    labelEn: "Compare",
-    match: (p: string) => p.startsWith("/compare"),
-  },
-  {
-    id: "favorites",
-    href: "/my?tab=favorites",
-    labelKo: "관심매체",
-    labelEn: "Saved",
-    match: (p: string) => p.startsWith("/media/favorites"),
+    id: "packages",
+    href: "/packages",
+    labelKo: "패키지제안",
+    labelEn: "Packages",
+    match: (p) =>
+      p.startsWith("/packages") || p.startsWith("/media/packages"),
   },
   {
     id: "recommend",
     href: "/recommend",
     labelKo: "AI매체추천",
     labelEn: "AI pick",
-    match: (p: string) => p.startsWith("/recommend"),
+    match: (p) => p.startsWith("/recommend"),
   },
-] as const;
+  {
+    id: "favorites",
+    href: "/my?tab=favorites",
+    labelKo: "저장한매체",
+    labelEn: "Saved",
+    match: (p, tab) =>
+      p.startsWith("/media/favorites") ||
+      (p.startsWith("/my") && tab === "favorites"),
+  },
+];
+
+const DETAIL_ACTIONS: QuickActionItem[] = [
+  {
+    id: "compare",
+    href: "/compare",
+    labelKo: "매체비교",
+    labelEn: "Compare",
+    match: (p) => p.startsWith("/compare"),
+  },
+  {
+    id: "favorites",
+    href: "/my?tab=favorites",
+    labelKo: "관심매체",
+    labelEn: "Saved",
+    match: (p) => p.startsWith("/media/favorites"),
+  },
+  {
+    id: "recommend",
+    href: "/recommend",
+    labelKo: "AI매체추천",
+    labelEn: "AI pick",
+    match: (p) => p.startsWith("/recommend"),
+  },
+];
 
 type DesktopQuickAction = {
   id: string;
@@ -108,8 +118,10 @@ type DesktopQuickAction = {
 
 export function QuickActionBarMobile() {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tab = searchParams.get("tab");
 
   if (isHiddenPath(pathname)) return null;
 
@@ -121,13 +133,14 @@ export function QuickActionBarMobile() {
       className="fixed bottom-16 left-0 right-0 z-30 border-t border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:hidden"
       data-screenshot="quick-actions-mobile"
     >
-      <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
+      <div className="mx-auto grid max-w-lg grid-cols-3 items-end gap-2">
         {actions.map((action) => {
-          const active = action.match(pathname);
+          const active = action.match(pathname, tab);
           const label = isKo ? action.labelKo : action.labelEn;
-          return (
+          const showRecentAbove = !onDetail && action.id === "favorites";
+
+          const actionLink = (
             <Link
-              key={action.id}
               href={action.href}
               className={cn(
                 "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
@@ -139,6 +152,19 @@ export function QuickActionBarMobile() {
             >
               {label}
             </Link>
+          );
+
+          if (showRecentAbove) {
+            return (
+              <div key={action.id} className="flex flex-col items-stretch gap-1.5">
+                <RecentlyViewedFloatingPanel embedded />
+                {actionLink}
+              </div>
+            );
+          }
+
+          return (
+            <div key={action.id}>{actionLink}</div>
           );
         })}
       </div>

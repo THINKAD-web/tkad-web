@@ -77,6 +77,11 @@ const LABELS: Record<string, { ko: string; en: string }> = {
   my: { ko: "MY", en: "MY" },
 };
 
+const TAB_LABEL_ACTIVE = "tkad-home-accent-text font-semibold";
+
+const TAB_LABEL_INACTIVE =
+  "text-violet-500/45 dark:text-cyan-300/35";
+
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
   return (
@@ -92,8 +97,51 @@ function isHiddenPath(pathname: string | null): boolean {
 function TabBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -top-1.5 -right-2 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-gray-950">
+    <span className="absolute -top-1.5 -right-2 z-10 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-violet-600 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_10px_rgba(236,72,153,0.45)] ring-2 ring-white dark:ring-[#05050a]">
       {count > 99 ? "99+" : count}
+    </span>
+  );
+}
+
+function TabNeonIcon({
+  Icon,
+  active,
+  badgeCount,
+  variant = "chip",
+}: {
+  Icon: typeof Home;
+  active: boolean;
+  badgeCount: number;
+  variant?: "chip" | "fab";
+}) {
+  const glyph = (
+    <Icon
+      className={cn(
+        "tkad-mobile-tab-icon",
+        variant === "fab" ? "h-6 w-6" : "h-5 w-5",
+      )}
+      strokeWidth={active ? 2.25 : 2}
+      aria-hidden
+    />
+  );
+
+  if (variant === "fab") {
+    return glyph;
+  }
+
+  return (
+    <span
+      className="tkad-mobile-tab-icon-wrap"
+      data-active={active ? "true" : "false"}
+    >
+      {glyph}
+      {active ? (
+        <span
+          aria-hidden
+          className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-500 shadow-[0_0_8px_rgba(34,211,238,0.7)]"
+        />
+      ) : null}
+      <TabBadge count={badgeCount} />
     </span>
   );
 }
@@ -113,10 +161,20 @@ export function BottomTabBar() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-40 block h-16 border-t border-gray-200 bg-white/95 backdrop-blur-md transition-colors duration-200 dark:border-white/10 dark:bg-gray-950/95 md:hidden"
+      className={cn(
+        "fixed bottom-0 left-0 right-0 z-40 block h-[4.25rem] md:hidden",
+        "border-t border-gray-200/70 bg-white/90 backdrop-blur-xl",
+        "shadow-[0_-6px_40px_rgba(15,23,42,0.08),0_0_24px_rgba(168,85,247,0.06)]",
+        "dark:border-white/10 dark:bg-[#05050a]/92",
+        "dark:shadow-[0_-8px_48px_rgba(0,0,0,0.55),0_0_28px_rgba(124,58,237,0.1)]",
+      )}
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label={isKo ? "하단 탭 메뉴" : "Bottom tab navigation"}
     >
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent dark:via-cyan-400/40"
+      />
       <ul className="mx-auto flex h-full max-w-lg items-end justify-around px-1">
         {TABS.map((tab) => {
           const active = tab.match(pathname ?? "");
@@ -126,22 +184,25 @@ export function BottomTabBar() {
 
           if (tab.emphasized) {
             return (
-              <li key={tab.href} className="flex flex-1 justify-center">
+              <li key={tab.href} className="flex min-w-0 flex-1 justify-center">
                 <Link
                   href={tab.href}
-                  className="relative -translate-y-2 flex flex-col items-center transition-all duration-200 active:scale-95"
+                  className="tkad-mobile-tab-fab relative -translate-y-2 flex w-full max-w-[4.5rem] flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                   onClick={() => hapticLight()}
                 >
-                  <span className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-violet-600 text-white shadow-lg shadow-violet-500/30">
-                    <Icon className="h-6 w-6" strokeWidth={2.25} />
+                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab flex h-14 w-14 items-center justify-center rounded-full">
+                    <TabNeonIcon
+                      Icon={Icon}
+                      active={active}
+                      badgeCount={0}
+                      variant="fab"
+                    />
                   </span>
                   <span
                     className={cn(
-                      "mt-1 text-[10px] font-semibold",
-                      active
-                        ? "text-violet-600 dark:text-violet-300"
-                        : "text-gray-900 dark:text-white",
+                      "mt-1 text-[10px]",
+                      active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
                     )}
                   >
                     {label}
@@ -153,34 +214,25 @@ export function BottomTabBar() {
 
           if (tab.id === "contact") {
             return (
-              <li key={tab.id} className="flex flex-1 justify-center">
+              <li key={tab.id} className="flex min-w-0 flex-1 justify-center">
                 <button
                   type="button"
                   onClick={() => {
                     hapticLight();
                     openContactChannelSheet();
                   }}
-                  className="flex flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                  className="flex w-full max-w-[4.5rem] flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                 >
-                  <span className="relative">
-                    <Icon
-                      className={cn(
-                        "h-5 w-5 transition-colors duration-200",
-                        active
-                          ? "text-violet-600 dark:text-violet-300"
-                          : "text-gray-400 dark:text-white/40",
-                      )}
-                      strokeWidth={active ? 2.25 : 2}
-                    />
-                    <TabBadge count={badgeCount} />
-                  </span>
+                  <TabNeonIcon
+                    Icon={Icon}
+                    active={active}
+                    badgeCount={badgeCount}
+                  />
                   <span
                     className={cn(
                       "mt-1 text-[10px] transition-colors duration-200",
-                      active
-                        ? "font-semibold text-violet-600 dark:text-violet-300"
-                        : "text-gray-400 dark:text-white/40",
+                      active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
                     )}
                   >
                     {label}
@@ -191,31 +243,22 @@ export function BottomTabBar() {
           }
 
           return (
-            <li key={tab.href} className="flex flex-1 justify-center">
+            <li key={tab.href} className="flex min-w-0 flex-1 justify-center">
               <Link
                 href={tab.href}
-                className="flex flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                className="flex w-full max-w-[4.5rem] flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
                 aria-current={active ? "page" : undefined}
                 onClick={() => hapticLight()}
               >
-                <span className="relative">
-                  <Icon
-                    className={cn(
-                      "h-5 w-5 transition-colors duration-200",
-                      active
-                        ? "text-violet-600 dark:text-violet-300"
-                        : "text-gray-400 dark:text-white/40",
-                    )}
-                    strokeWidth={active ? 2.25 : 2}
-                  />
-                  <TabBadge count={badgeCount} />
-                </span>
+                <TabNeonIcon
+                  Icon={Icon}
+                  active={active}
+                  badgeCount={badgeCount}
+                />
                 <span
                   className={cn(
                     "mt-1 text-[10px] transition-colors duration-200",
-                    active
-                      ? "font-semibold text-violet-600 dark:text-violet-300"
-                      : "text-gray-400 dark:text-white/40",
+                    active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
                   )}
                 >
                   {label}
