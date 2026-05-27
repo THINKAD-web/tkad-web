@@ -42,7 +42,10 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
             </ConditionalPublicChrome>
 
             <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <main id="main-content" className="tkad-app-ui flex min-h-0 flex-1 flex-col">
+              <main
+                id="main-content"
+                className="tkad-app-ui flex flex-col md:min-h-0 md:flex-1"
+              >
                 <MobileAppChrome>{children}</MobileAppChrome>
               </main>
               <ConditionalPublicChrome>

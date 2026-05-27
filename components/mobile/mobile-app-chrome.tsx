@@ -26,11 +26,11 @@ export function MobileAppChrome({ children }: Props) {
         <MobileKeyboardProvider />
         <PushHapticListener />
         <PwaSplashScreen />
-        <div className="flex min-h-0 flex-1 flex-col md:contents">
+        <div className="flex flex-col md:contents">
           <Suspense fallback={null}>
             <SubpageRelatedChips />
           </Suspense>
-          <div className="flex min-h-0 flex-1 flex-col pb-28 md:pb-0 tkad-mobile-scroll">
+          <div className="flex flex-col tkad-mobile-scroll md:pb-0">
             {children}
           </div>
           <QuickActionBarMobile />

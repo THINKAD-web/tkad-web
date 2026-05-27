@@ -22,7 +22,6 @@ import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
-import { FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS } from "@/components/floating-selection-bar";
 import type { MediaItem } from "@/lib/media-data";
 import {
   entriesToCompareMediaItems,
@@ -760,9 +759,6 @@ export default function MediaMapPageClient() {
           setCompareCartEntries([]);
         }}
       />
-      {compareEntries.length > 0 ? (
-        <div className={FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS} aria-hidden />
-      ) : null}
     </>
   );
 }

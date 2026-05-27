@@ -34,7 +34,7 @@ export function MediaDetailPageLayout({
   const [active, setActive] = useState<MediaDetailTabId>(tabs[0]?.id ?? "location");
 
   return (
-    <div className={cn("pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-16", className)}>
+    <div className={cn("pb-[calc(7.25rem+env(safe-area-inset-bottom))] lg:pb-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
