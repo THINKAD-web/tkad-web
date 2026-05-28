@@ -12,6 +12,7 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
 import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
+import { useMediaMinWidth } from "@/lib/use-media-min-width";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
 function InstagramIcon({ className }: { className?: string }) {
@@ -60,6 +61,7 @@ const iconLinkClass =
 export function FooterBrutal() {
   const t = useTranslations();
   const locale = useLocale();
+  const isMdUp = useMediaMinWidth(768);
   const [sitemapOpen, setSitemapOpen] = useState(false);
   const year = new Date().getFullYear();
 
@@ -108,169 +110,175 @@ export function FooterBrutal() {
   const mobileLinkClass =
     "transition-colors hover:text-gray-600 dark:hover:text-white/50";
 
-  return (
-    <>
-      <footer
-        id="site-footer"
-        className="tkad-site-footer relative shrink-0 overflow-hidden border-t border-gray-200 bg-gray-50 text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+  const mobileFooter = (
+    <footer
+      id="site-footer"
+      className="tkad-site-footer relative shrink-0 overflow-hidden border-t border-gray-200 bg-gray-50 text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+    >
+      <div
+        className="border-t border-gray-200 dark:border-gray-800"
+        data-screenshot="mobile-footer"
       >
-        {/* Mobile — 간단 푸터 (하단 탭바 위) */}
-        <div
-          className="border-t border-gray-200 dark:border-gray-800 md:hidden"
-          data-screenshot="mobile-footer"
-        >
-          <div className="px-4 pt-4 text-center text-xs text-gray-400 dark:text-white/30">
-            <p>
-              © {year} {t("footer.companyNameShort")} · 사업자번호 319-86-00382
-            </p>
-            <p className="mt-1.5">
-              {mobileLegalLinks.map((link, index) => (
-                <span key={link.href}>
-                  {index > 0 ? (
-                    <span className="mx-1.5" aria-hidden>
-                      ·
-                    </span>
-                  ) : null}
-                  <Link href={link.href} className={mobileLinkClass}>
-                    {link.label}
-                  </Link>
-                </span>
-              ))}
-            </p>
-          </div>
-          {/* 하단 탭바 + 퀵 액션 바 (fixed) 클리어런스 */}
-          <div className="h-[7.25rem]" aria-hidden />
-        </div>
-
-        {/* Desktop — 기존 푸터 */}
-        <div className="hidden md:block">
-        <div
-          aria-hidden
-          className="absolute inset-0 hidden dark:block tkad-neon-depth"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 hidden opacity-15 dark:block tkad-neon-grid"
-        />
-
-        <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-3 items-start gap-10">
-            <div>
-              <Link
-                href="/"
-                className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
-              >
-                THINK
-                <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
-                  AD
-                </span>
-              </Link>
-              <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
-                {t("footer.description")}
-              </p>
-              <p className="mt-3 text-[11px] text-gray-500 dark:text-white/50">
-                {t("footer.bizNumber")}
-              </p>
-            </div>
-
-            <nav
-              aria-label={t("footer.coreNavLabel")}
-              className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-center"
-            >
-              {coreLinks.map((link, index) => (
-                <span key={link.href} className="inline-flex items-center">
-                  {index > 0 ? (
-                    <span
-                      className="mx-2 text-gray-300 dark:text-white/20"
-                      aria-hidden
-                    >
-                      ·
-                    </span>
-                  ) : null}
-                  <Link href={link.href} className={coreLinkClass}>
-                    {link.label}
-                  </Link>
-                </span>
-              ))}
-            </nav>
-
-            <div className="text-right">
-              <ul className="space-y-1.5 text-sm text-gray-600 dark:text-white/70">
-                <li>
-                  <a
-                    href={`tel:${t("footer.phone").replace(/-/g, "")}`}
-                    className="transition hover:text-gray-900 dark:hover:text-white"
-                  >
-                    {t("footer.phone")}
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href={`mailto:${CONTACT_EMAIL}`}
-                    className="transition hover:text-gray-900 dark:hover:text-white"
-                  >
-                    {CONTACT_EMAIL}
-                  </a>
-                </li>
-              </ul>
-              <div className="mt-4 flex justify-end gap-2">
-                <a
-                  href={KAKAO_CHANNEL_PUBLIC_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={iconLinkClass}
-                  aria-label={t("footer.kakaoChannel")}
-                >
-                  <KakaoIcon className="h-4 w-4" />
-                </a>
-                <a
-                  href={INSTAGRAM_URL}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={iconLinkClass}
-                  aria-label="Instagram"
-                >
-                  <InstagramIcon className="h-4 w-4" />
-                </a>
-              </div>
-              <p className="mt-4 text-right">
-                <Link
-                  href="/guide/how-to-use"
-                  className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-                >
-                  {t("footer.usageGuideLink")}
-                </Link>
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
-          <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-            <span className="text-xs text-gray-500 dark:text-white/50">
-              {t("footer.copyrightShort", { year })}
-            </span>
-            <span className="hidden text-gray-300 dark:text-white/20 sm:inline" aria-hidden>
-              ·
-            </span>
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-              {legalLinks.map((link) => (
-                <Link key={link.href} href={link.href} className={legalLinkClass}>
+        <div className="px-4 pt-4 text-center text-xs text-gray-400 dark:text-white/30">
+          <p>
+            © {year} {t("footer.companyNameShort")} · 사업자번호 319-86-00382
+          </p>
+          <p className="mt-1.5">
+            {mobileLegalLinks.map((link, index) => (
+              <span key={link.href}>
+                {index > 0 ? (
+                  <span className="mx-1.5" aria-hidden>
+                    ·
+                  </span>
+                ) : null}
+                <Link href={link.href} className={mobileLinkClass}>
                   {link.label}
                 </Link>
-              ))}
-              <button
-                type="button"
-                onClick={() => setSitemapOpen(true)}
-                className="rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-400 transition hover:text-gray-700 dark:border-white/10 dark:text-white/40 dark:hover:text-white"
+              </span>
+            ))}
+          </p>
+        </div>
+        <div className="h-[7.25rem]" aria-hidden />
+      </div>
+    </footer>
+  );
+
+  const desktopFooter = (
+    <footer
+      id="site-footer"
+      className="tkad-site-footer relative shrink-0 overflow-hidden border-t border-gray-200 bg-gray-50 text-gray-900 dark:border-gray-800 dark:bg-gray-950 dark:text-white"
+    >
+      <div
+        aria-hidden
+        className="absolute inset-0 hidden dark:block tkad-neon-depth"
+      />
+      <div
+        aria-hidden
+        className="absolute inset-0 hidden opacity-15 dark:block tkad-neon-grid"
+      />
+
+      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-3 items-start gap-10">
+          <div>
+            <Link
+              href="/"
+              className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+            >
+              THINK
+              <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
+                AD
+              </span>
+            </Link>
+            <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
+              {t("footer.description")}
+            </p>
+            <p className="mt-3 text-[11px] text-gray-500 dark:text-white/50">
+              {t("footer.bizNumber")}
+            </p>
+          </div>
+
+          <nav
+            aria-label={t("footer.coreNavLabel")}
+            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-center"
+          >
+            {coreLinks.map((link, index) => (
+              <span key={link.href} className="inline-flex items-center">
+                {index > 0 ? (
+                  <span
+                    className="mx-2 text-gray-300 dark:text-white/20"
+                    aria-hidden
+                  >
+                    ·
+                  </span>
+                ) : null}
+                <Link href={link.href} className={coreLinkClass}>
+                  {link.label}
+                </Link>
+              </span>
+            ))}
+          </nav>
+
+          <div className="text-right">
+            <ul className="space-y-1.5 text-sm text-gray-600 dark:text-white/70">
+              <li>
+                <a
+                  href={`tel:${t("footer.phone").replace(/-/g, "")}`}
+                  className="transition hover:text-gray-900 dark:hover:text-white"
+                >
+                  {t("footer.phone")}
+                </a>
+              </li>
+              <li>
+                <a
+                  href={`mailto:${CONTACT_EMAIL}`}
+                  className="transition hover:text-gray-900 dark:hover:text-white"
+                >
+                  {CONTACT_EMAIL}
+                </a>
+              </li>
+            </ul>
+            <div className="mt-4 flex justify-end gap-2">
+              <a
+                href={KAKAO_CHANNEL_PUBLIC_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={iconLinkClass}
+                aria-label={t("footer.kakaoChannel")}
               >
-                ⊞ {t("footer.sitemap")}
-              </button>
+                <KakaoIcon className="h-4 w-4" />
+              </a>
+              <a
+                href={INSTAGRAM_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={iconLinkClass}
+                aria-label="Instagram"
+              >
+                <InstagramIcon className="h-4 w-4" />
+              </a>
             </div>
+            <p className="mt-4 text-right">
+              <Link
+                href="/guide/how-to-use"
+                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
+              >
+                {t("footer.usageGuideLink")}
+              </Link>
+            </p>
           </div>
         </div>
+      </div>
+
+      <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
+          <span className="text-xs text-gray-500 dark:text-white/50">
+            {t("footer.copyrightShort", { year })}
+          </span>
+          <span className="hidden text-gray-300 dark:text-white/20 sm:inline" aria-hidden>
+            ·
+          </span>
+          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
+            {legalLinks.map((link) => (
+              <Link key={link.href} href={link.href} className={legalLinkClass}>
+                {link.label}
+              </Link>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSitemapOpen(true)}
+              className="rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-400 transition hover:text-gray-700 dark:border-white/10 dark:text-white/40 dark:hover:text-white"
+            >
+              ⊞ {t("footer.sitemap")}
+            </button>
+          </div>
         </div>
-      </footer>
+      </div>
+    </footer>
+  );
+
+  return (
+    <>
+      {isMdUp ? desktopFooter : mobileFooter}
 
       <SitemapModal
         open={sitemapOpen}

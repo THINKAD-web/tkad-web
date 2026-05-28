@@ -1,13 +1,11 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { MediaCard } from "@/components/brutalist/media-card";
-import {
-  getPrimaryMediaImageUrl,
-  typeLabels,
-} from "@/lib/media-data";
+import { MediaCard } from "@/components/media/media-card";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
+import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
 import type { BudgetCuration } from "@/lib/budget-tool-curations";
 import { CategoryExploreHero } from "@/components/category-explore-hero";
 
@@ -60,24 +58,20 @@ export function BudgetToolClient({
             ) : (
               <ul className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {c.items.map((m) => {
-                  const name = isKo ? m.name : m.nameEn || m.name;
-                  const location = isKo ? m.location : m.locationEn || m.location;
-                  const typeLabel =
-                    typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
-                  const price =
+                  const priceLabel =
                     m.price > 0
                       ? formatCatalogPriceFieldWon(m.price, locale)
-                      : undefined;
+                      : null;
                   return (
                     <li key={m.id} className="list-none">
                       <MediaCard
+                        mode="card"
+                        item={mapMediaItemToHomeCatalog(m)}
                         href={mediaItemDetailPath(m)}
-                        imageSrc={getPrimaryMediaImageUrl(m)}
-                        imageAlt={name}
-                        type={typeLabel}
-                        name={name}
-                        location={location}
-                        price={price}
+                        priceLabel={priceLabel}
+                        isKo={isKo}
+                        showPlanButton
+                        {...mediaCardStaticHandlers}
                       />
                     </li>
                   );

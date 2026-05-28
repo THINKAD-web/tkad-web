@@ -1,9 +1,7 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import Link from "next/link";
-import Image from "next/image";
 import { useLocale } from "next-intl";
 import {
   Search,
@@ -12,19 +10,14 @@ import {
   LayoutGrid,
   AlignJustify,
 } from "lucide-react";
-import { MediaCompactRow } from "@/components/media/media-compact-row";
-import { MediaFeedCard } from "@/components/media/media-feed-card";
+import { MediaCard } from "@/components/media/media-card";
 import CompareBar from "@/components/compare-bar";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
-import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
-import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
-import { dedupeImageUrls, typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
-import { filterDisplayableMediaImageUrls } from "@/lib/optimized-image-url";
-import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
+import type { MediaItem } from "@/lib/media-data";
+import {
+  mapMediaItemToHomeCatalog,
+} from "@/lib/media-catalog-map";
 import {
   entriesToCompareMediaItems,
   getCompareCartEntries,
@@ -39,7 +32,6 @@ import { withSearchParamsSuspense } from "@/components/with-search-params-suspen
 import {
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
-  resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
 import {
   MEDIA_CHIP_ACTIVE,
@@ -97,130 +89,6 @@ function feedHighlightChips(item: HomeCatalogMediaItem) {
   return chips;
 }
 
-function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
-  const price = typeof raw.price === "number" ? raw.price : 0;
-  const sampleImages = Array.isArray(raw.sampleImages)
-    ? raw.sampleImages.filter((x): x is string => typeof x === "string")
-    : [];
-  const image =
-    typeof raw.image === "string"
-      ? raw.image
-      : sampleImages[0] ?? undefined;
-  const typeKey = typeof raw.type === "string" ? raw.type : "";
-  const typeLabel = typeLabels[typeKey as keyof typeof typeLabels]?.ko ?? typeKey;
-
-  const priceOptions = Array.isArray(raw.priceOptions)
-    ? (raw.priceOptions as MediaPriceOption[])
-    : undefined;
-  const display = resolveMediaDisplayPrice({
-    price,
-    pricePeriod: normalizeMediaPricePeriod(
-      typeof raw.pricePeriod === "string" ? raw.pricePeriod : undefined,
-    ),
-    priceOptions,
-  });
-
-  const item = {
-    id: String(raw.id ?? ""),
-    slug: typeof raw.slug === "string" ? raw.slug : undefined,
-    name: String(raw.name ?? ""),
-    type: typeKey,
-    region:
-      (typeof raw.region === "string" && raw.region) ||
-      (typeof raw.district === "string" && raw.district) ||
-      (typeof raw.city === "string" && raw.city) ||
-      undefined,
-    price,
-    image,
-    sampleImages,
-    pricePeriod:
-      typeof raw.pricePeriod === "string" ? raw.pricePeriod : undefined,
-    availability:
-      typeof raw.availability === "string" ? raw.availability : undefined,
-    catalogSource:
-      typeof raw.catalogSource === "string" ? raw.catalogSource : undefined,
-    averageRating:
-      typeof raw.averageRating === "number" ? raw.averageRating : undefined,
-    reviewCount:
-      typeof raw.reviewCount === "number" ? raw.reviewCount : undefined,
-  };
-
-  return {
-    id: item.id,
-    slug: item.slug,
-    name: item.name,
-    type: typeLabel,
-    region: item.region,
-    location:
-      (typeof raw.location === "string" && raw.location.trim()) || undefined,
-    size: (typeof raw.size === "string" && raw.size.trim()) || undefined,
-    dailyFootTraffic:
-      typeof raw.dailyFootTraffic === "number" && raw.dailyFootTraffic > 0
-        ? raw.dailyFootTraffic
-        : undefined,
-    visibilityScore:
-      typeof raw.visibilityScore === "number" && raw.visibilityScore > 0
-        ? raw.visibilityScore
-        : undefined,
-    features:
-      (typeof raw.features === "string" && raw.features.trim()) ||
-      (typeof raw.catalogDescription === "string" &&
-        raw.catalogDescription.trim()) ||
-      (typeof raw.description === "string" && raw.description.trim()) ||
-      undefined,
-    advertiserHistory:
-      (typeof raw.advertiserHistory === "string" &&
-        raw.advertiserHistory.trim()) ||
-      undefined,
-    trustScore:
-      typeof raw.trustScore === "number" && raw.trustScore >= 0
-        ? raw.trustScore
-        : undefined,
-    executionCount:
-      typeof raw.executionCount === "number" && raw.executionCount >= 0
-        ? raw.executionCount
-        : undefined,
-    lastExecutionMonthsAgo:
-      typeof raw.lastExecutionMonthsAgo === "number"
-        ? raw.lastExecutionMonthsAgo
-        : raw.lastExecutionMonthsAgo === null
-          ? null
-          : undefined,
-    price: display.priceWon > 0 ? display.priceWon : undefined,
-    pricePeriod: display.period,
-    thumbnailUrl: item.image,
-    galleryImages: filterDisplayableMediaImageUrls(
-      dedupeImageUrls(
-        [item.image, ...sampleImages].filter(
-          (u): u is string => typeof u === "string" && u.length > 0,
-        ),
-      ),
-    ).slice(0, 6),
-    reviewAvg: item.averageRating,
-    reviewCount: item.reviewCount,
-    isInstantBooking: isInstantBookingEligible({
-      instantBookingEnabled:
-        typeof raw.instantBookingEnabled === "boolean"
-          ? raw.instantBookingEnabled
-          : typeof raw.instant_booking_enabled === "boolean"
-            ? raw.instant_booking_enabled
-            : false,
-      availability:
-        typeof raw.availability === "string"
-          ? (raw.availability as "available" | "reserved" | "maintenance")
-          : undefined,
-      catalogSource: item.catalogSource as "network" | undefined,
-    }).eligible,
-    isVerified:
-      raw.isVerified === true ||
-      raw.isVerified === "true" ||
-      raw.verified === true,
-    trustBadges: Array.isArray(raw.trustBadges)
-      ? (raw.trustBadges as HomeCatalogMediaItem["trustBadges"])
-      : undefined,
-  };
-}
-
 function catalogItemToMediaItem(item: HomeCatalogMediaItem): MediaItem {
   return {
     id: item.id,
@@ -244,6 +112,12 @@ interface Props {
   initialCategory?: string;
   initialTarget?: string;
   initialRegion?: string;
+  /** 플래너 Step 4 임베드 — 동일 카드 + 플랜 담기 */
+  plannerMode?: boolean;
+  embedded?: boolean;
+  plannerSelectedIds?: string[];
+  onPlannerToggleMedia?: (mediaId: string) => void;
+  onPlannerNext?: () => void;
 }
 
 function MediaSearchPageInner({
@@ -252,6 +126,11 @@ function MediaSearchPageInner({
   initialCategory,
   initialTarget,
   initialRegion,
+  plannerMode = false,
+  embedded = false,
+  plannerSelectedIds = [],
+  onPlannerToggleMedia,
+  onPlannerNext,
 }: Props) {
   const locale = useLocale();
   const searchParams = useSearchParams();
@@ -268,7 +147,7 @@ function MediaSearchPageInner({
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
-  const [initialLoad, setInitialLoad] = useState(true);
+  const catalogFetchGeneration = useRef(0);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
   );
@@ -349,20 +228,21 @@ function MediaSearchPageInner({
         params.set("sort", sort);
         params.set("page", String(opts.page));
         params.set("limit", String(PAGE_SIZE));
+        if (plannerMode) params.set("plannerMode", "true");
 
-        const res = await fetch(`/api/public/media?${params}`);
+        const res = await fetch(`/api/public/media?${params}`, {
+          cache: "no-store",
+        });
         if (res.ok) {
-          const json = (await res.json()) as {
-            data?: Record<string, unknown>[];
-            media?: Record<string, unknown>[];
-            pagination?: { total?: number };
-          };
+          const json = (await res.json()) as PublicMediaListResponse;
           const rows = Array.isArray(json.data)
             ? json.data
             : Array.isArray(json.media)
               ? json.media
               : [];
-          const mapped = rows.map((row) => mapApiMediaItem(row));
+          const mapped = rows.map((row) =>
+            mapMediaItemToHomeCatalog(row as MediaItem),
+          );
           setTotal(json.pagination?.total ?? mapped.length);
           setMedia((prev) => (opts.append ? [...prev, ...mapped] : mapped));
           setPage(opts.page);
@@ -372,10 +252,9 @@ function MediaSearchPageInner({
       } finally {
         if (opts.append) setLoadingMore(false);
         else setLoading(false);
-        setInitialLoad(false);
       }
     },
-    [query, category, target, region, sort],
+    [query, category, target, region, sort, plannerMode],
   );
 
   const hasMore = media.length < total;
@@ -401,15 +280,15 @@ function MediaSearchPageInner({
   };
 
   useEffect(() => {
-    if (initialLoad) {
-      setInitialLoad(false);
-      return;
-    }
+    catalogFetchGeneration.current += 1;
+    const generation = catalogFetchGeneration.current;
+    const debounceMs = generation === 1 ? 0 : 300;
     const timer = setTimeout(() => {
+      if (catalogFetchGeneration.current !== generation) return;
       void fetchMedia({ page: 1, append: false });
-    }, 300);
+    }, debounceMs);
     return () => clearTimeout(timer);
-  }, [fetchMedia, initialLoad]);
+  }, [fetchMedia]);
 
   const handleLoadMore = () => {
     if (loading || loadingMore || !hasMore) return;
@@ -423,11 +302,94 @@ function MediaSearchPageInner({
   const activeFilterCount = [category, target, region].filter(Boolean).length;
 
   const getMediaHref = (item: HomeCatalogMediaItem) =>
-    item.slug ? `/ko/media/${item.slug}` : `/ko/media/${item.id}`;
+    item.slug
+      ? `/${locale}/media/${item.slug}`
+      : `/${locale}/media/${item.id}`;
+
+  const isKo = locale === "ko";
+
+  const renderMediaCard = (item: HomeCatalogMediaItem) => {
+    const href = getMediaHref(item);
+    const priceLabel = renderPrice(item);
+    const inPlan = plannerSelectedIds.includes(item.id);
+    const togglePlan = () => onPlannerToggleMedia?.(item.id);
+
+    if (viewMode === "compact") {
+      const metaLine = [item.region, item.type, priceLabel]
+        .filter(Boolean)
+        .join(" · ");
+      return (
+        <MediaCard
+          key={item.id}
+          mode="compact"
+          item={item}
+          href={href}
+          metaLine={metaLine}
+          isKo={isKo}
+          inCompare={isInCompare(item.id)}
+          inCart={isInCart(item.id)}
+          onToggleCompare={() => toggleCompare(item)}
+          onToggleCart={() => toggleCart(item)}
+          plannerMode={plannerMode}
+          isInPlan={inPlan}
+          onTogglePlan={plannerMode ? togglePlan : undefined}
+        />
+      );
+    }
+
+    if (viewMode === "card") {
+      return (
+        <MediaCard
+          key={item.id}
+          mode="card"
+          item={item}
+          href={href}
+          priceLabel={priceLabel}
+          isKo={isKo}
+          inCompare={isInCompare(item.id)}
+          inCart={isInCart(item.id)}
+          onToggleCompare={() => toggleCompare(item)}
+          onToggleCart={() => toggleCart(item)}
+          plannerMode={plannerMode}
+          isInPlan={inPlan}
+          onTogglePlan={plannerMode ? togglePlan : undefined}
+          showPlanButton={!plannerMode}
+        />
+      );
+    }
+
+    const highlights = feedHighlightChips(item);
+    const locationLine =
+      item.location &&
+      item.location !== item.region &&
+      !item.location.includes(item.region ?? "")
+        ? item.location
+        : null;
+
+    return (
+      <MediaCard
+        key={item.id}
+        mode="feed"
+        item={item}
+        href={href}
+        highlights={highlights}
+        locationLine={locationLine}
+        isKo={isKo}
+        inCompare={isInCompare(item.id)}
+        inCart={isInCart(item.id)}
+        onToggleCompare={() => toggleCompare(item)}
+        onToggleCart={() => toggleCart(item)}
+        plannerMode={plannerMode}
+        isInPlan={inPlan}
+        onTogglePlan={plannerMode ? togglePlan : undefined}
+        showPlanButton={!plannerMode}
+      />
+    );
+  };
 
   return (
     <>
-    <div className="bg-gray-50 dark:bg-[#020202]">
+    <div className={cn(!embedded && "bg-gray-50 dark:bg-[#020202]")}>
       <div className="space-y-3 px-4 pt-4">
         {/* ── 검색창 ── */}
         <div className="relative">
@@ -691,120 +653,8 @@ function MediaSearchPageInner({
               필터 초기화
             </button>
           </div>
-        ) : viewMode === "card" ? (
-          media.map((item) => {
-            const href = getMediaHref(item);
-            const isKo = locale === "ko";
-            return (
-              <Link
-                key={item.id}
-                href={href}
-                className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5"
-              >
-                <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                  {item.thumbnailUrl ? (
-                    <Image
-                      src={item.thumbnailUrl}
-                      alt={item.name}
-                      fill
-                      className="rounded-t-2xl object-cover"
-                      sizes="(max-width: 768px) 50vw, 25vw"
-                    />
-                  ) : (
-                    <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
-                      준비중
-                    </div>
-                  )}
-                  <MediaThumbnailTrustOverlay
-                    item={item}
-                    isKo={isKo}
-                    variant="card"
-                  />
-                </div>
-                <div className="p-3">
-                  <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
-                    {item.name}
-                  </p>
-                  <p className="mt-1 text-xs text-gray-400 dark:text-white/40">
-                    {[item.region, item.type].filter(Boolean).join(" · ")}
-                  </p>
-                  <div className="mt-2 space-y-2">
-                    {renderPrice(item) ? (
-                      <p className="tkad-home-accent-text text-sm font-bold">
-                        {renderPrice(item)}
-                      </p>
-                    ) : null}
-                    <div className="flex items-stretch gap-1">
-                      <PlanCartAddButton
-                        item={planCartItemFromCatalog(item, "search")}
-                        addedFrom="search"
-                        compact
-                        gridInline
-                        className="min-w-0 flex-1 !h-8 !px-1 !text-[10px]"
-                      />
-                      <MediaCompareSelectButton
-                        selected={isInCompare(item.id)}
-                        onToggle={() => toggleCompare(item)}
-                        gridInline
-                        className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
-                      />
-                      <MediaCartAddButton
-                        inCart={isInCart(item.id)}
-                        onToggle={() => toggleCart(item)}
-                        gridInline
-                        className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </Link>
-            );
-          })
-        ) : viewMode === "compact" ? (
-          media.map((item) => {
-            const href = getMediaHref(item);
-            const priceLabel = renderPrice(item);
-            const metaLine = [item.region, item.type, priceLabel]
-              .filter(Boolean)
-              .join(" · ");
-            return (
-              <MediaCompactRow
-                key={item.id}
-                item={item}
-                href={href}
-                metaLine={metaLine}
-                inCompare={isInCompare(item.id)}
-                inCart={isInCart(item.id)}
-                onToggleCompare={() => toggleCompare(item)}
-                onToggleCart={() => toggleCart(item)}
-              />
-            );
-          })
         ) : (
-          media.map((item) => {
-            const href = getMediaHref(item);
-            const highlights = feedHighlightChips(item);
-            const locationLine =
-              item.location &&
-              item.location !== item.region &&
-              !item.location.includes(item.region ?? "")
-                ? item.location
-                : null;
-            return (
-              <MediaFeedCard
-                key={item.id}
-                item={item}
-                href={href}
-                highlights={highlights}
-                locationLine={locationLine}
-                isKo={locale === "ko"}
-                inCompare={isInCompare(item.id)}
-                inCart={isInCart(item.id)}
-                onToggleCompare={() => toggleCompare(item)}
-                onToggleCart={() => toggleCart(item)}
-              />
-            );
-          })
+          media.map((item) => renderMediaCard(item))
         )}
       </div>
 
@@ -822,12 +672,34 @@ function MediaSearchPageInner({
       ) : null}
     </div>
 
+    {plannerMode ? (
+      <div className="sticky bottom-0 z-20 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95">
+        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
+          <p className="text-sm font-semibold text-gray-800 dark:text-white">
+            {isKo
+              ? `담긴 매체 ${plannerSelectedIds.length}개`
+              : `${plannerSelectedIds.length} in plan`}
+          </p>
+          <button
+            type="button"
+            onClick={onPlannerNext}
+            disabled={plannerSelectedIds.length === 0}
+            className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-40"
+          >
+            {isKo ? "다음 →" : "Next →"}
+          </button>
+        </div>
+      </div>
+    ) : null}
+
+    {!plannerMode ? (
     <CompareBar
       variant="light"
       items={compareItems}
       locale={locale}
       onClear={() => setCompareCartEntries([])}
     />
+    ) : null}
     </>
   );
 }

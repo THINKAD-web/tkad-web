@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Eye, MapPin, MessageCircle } from "lucide-react";
+import { Eye, MapPin, MessageCircle, Check, Plus } from "lucide-react";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
@@ -14,7 +14,8 @@ import {
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -35,6 +36,11 @@ type Props = {
   inCart: boolean;
   onToggleCompare: () => void;
   onToggleCart: () => void;
+  plannerMode?: boolean;
+  isInPlan?: boolean;
+  onTogglePlan?: () => void;
+  rank?: number;
+  showPlanButton?: boolean;
 };
 
 const feedSecondaryPillClass =
@@ -117,10 +123,16 @@ export function MediaFeedCard({
   inCart,
   onToggleCompare,
   onToggleCart,
+  plannerMode = false,
+  isInPlan = false,
+  onTogglePlan,
+  rank,
+  showPlanButton = true,
 }: Props) {
   const media = catalogToMediaItem(item);
   const images = collectGalleryImages(item);
   const heroSrc = images[0];
+  const heroImage = heroSrc ? catalogThumbnailImageProps(heroSrc) : null;
   const extraImages = images.length - 1;
 
   const metrics = resolvePerformanceMetrics(media);
@@ -144,18 +156,59 @@ export function MediaFeedCard({
   return (
     <article className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
       <div className="flex flex-col gap-4 p-4 sm:gap-5 md:flex-row md:items-stretch">
+        {plannerMode && onTogglePlan ? (
+          <button
+            type="button"
+            onClick={onTogglePlan}
+            className="relative block min-h-0 shrink-0 text-left md:w-[48%] lg:w-[50%]"
+          >
+            <div className="relative aspect-[4/3] h-full w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800 md:aspect-auto md:rounded-2xl">
+              {rank != null ? (
+                <span className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-xs font-black text-white shadow-md">
+                  {rank}
+                </span>
+              ) : null}
+              {heroImage ? (
+                <Image
+                  src={heroImage.src}
+                  alt={item.name}
+                  fill
+                  className="object-cover"
+                  sizes="(max-width: 768px) 100vw, min(58vw, 560px)"
+                  unoptimized={heroImage.unoptimized}
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-xs text-gray-300 dark:text-white/25">
+                  {isKo ? "이미지 준비중" : "No image"}
+                </div>
+              )}
+              <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="feed" />
+              {extraImages > 0 ? (
+                <span className="absolute bottom-3 right-3 rounded-lg bg-black/60 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
+                  +{extraImages}
+                </span>
+              ) : null}
+            </div>
+          </button>
+        ) : (
         <Link
           href={href}
           className="relative block min-h-0 shrink-0 md:w-[48%] lg:w-[50%]"
         >
           <div className="relative aspect-[4/3] h-full w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800 md:aspect-auto md:rounded-2xl">
-            {heroSrc ? (
+            {rank != null ? (
+              <span className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-xs font-black text-white shadow-md">
+                {rank}
+              </span>
+            ) : null}
+            {heroImage ? (
               <Image
-                src={heroSrc}
+                src={heroImage.src}
                 alt={item.name}
                 fill
                 className="object-cover"
                 sizes="(max-width: 768px) 100vw, min(58vw, 560px)"
+                unoptimized={heroImage.unoptimized}
               />
             ) : (
               <div className="flex h-full items-center justify-center text-xs text-gray-300 dark:text-white/25">
@@ -174,6 +227,7 @@ export function MediaFeedCard({
             ) : null}
           </div>
         </Link>
+        )}
 
         <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:gap-3">
           <div>
@@ -265,43 +319,72 @@ export function MediaFeedCard({
           </div>
 
           <div className="mt-1 space-y-2 border-t border-gray-100 pt-3 dark:border-white/8">
-            <div className="grid grid-cols-2 gap-2">
-              <MediaQuoteCtaButton
-                media={media}
-                variant="feed"
-                className="min-w-0 w-full flex-none"
-              />
-              <Link
-                href={href}
-                className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 dark:border-white/14 dark:bg-white/6 dark:text-white/90 dark:hover:bg-white/10"
+            {plannerMode && onTogglePlan ? (
+              <button
+                type="button"
+                onClick={onTogglePlan}
+                className={cn(
+                  "flex w-full items-center justify-center gap-1.5 rounded-xl py-2.5 text-sm font-semibold transition-colors",
+                  isInPlan
+                    ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
+                    : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+                )}
               >
-                <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-                {isKo ? "문의하기" : "Inquire"}
-              </Link>
-            </div>
-            <PlanCartAddButton
-              item={planCartItemFromCatalog(item, "search")}
-              addedFrom="search"
-              compact
-              className="w-full"
-            />
-            <div className="flex items-center gap-2">
-              <MediaCompareSelectButton
-                selected={inCompare}
-                onToggle={onToggleCompare}
-                className={feedSecondaryPillClass}
-              />
-              <MediaCartAddButton
-                inCart={inCart}
-                onToggle={onToggleCart}
-                className={feedSecondaryPillClass}
-              />
-              <MediaFavoriteButton
-                mediaId={item.id}
-                mediaName={item.name}
-                className="h-8 w-8 shrink-0 justify-center rounded-lg border border-gray-200 dark:border-white/14"
-              />
-            </div>
+                {isInPlan ? (
+                  <>
+                    <Check className="h-4 w-4" />
+                    {isKo ? "담김 ✓" : "Added ✓"}
+                  </>
+                ) : (
+                  <>
+                    <Plus className="h-4 w-4" />
+                    {isKo ? "+ 플랜 담기" : "+ Add to plan"}
+                  </>
+                )}
+              </button>
+            ) : (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  <MediaQuoteCtaButton
+                    media={media}
+                    variant="feed"
+                    className="min-w-0 w-full flex-none"
+                  />
+                  <Link
+                    href={href}
+                    className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 dark:border-white/14 dark:bg-white/6 dark:text-white/90 dark:hover:bg-white/10"
+                  >
+                    <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                    {isKo ? "문의하기" : "Inquire"}
+                  </Link>
+                </div>
+                {showPlanButton ? (
+                  <PlanCartAddButton
+                    item={planCartItemFromCatalog(item, "search")}
+                    addedFrom="search"
+                    compact
+                    className="w-full"
+                  />
+                ) : null}
+                <div className="flex items-center gap-2">
+                  <MediaCompareSelectButton
+                    selected={inCompare}
+                    onToggle={onToggleCompare}
+                    className={feedSecondaryPillClass}
+                  />
+                  <MediaCartAddButton
+                    inCart={inCart}
+                    onToggle={onToggleCart}
+                    className={feedSecondaryPillClass}
+                  />
+                  <MediaFavoriteButton
+                    mediaId={item.id}
+                    mediaName={item.name}
+                    className="h-8 w-8 shrink-0 justify-center rounded-lg border border-gray-200 dark:border-white/14"
+                  />
+                </div>
+              </>
+            )}
           </div>
         </div>
       </div>

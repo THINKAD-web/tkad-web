@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
-import { MediaCard } from "@/components/brutalist/media-card";
+import { MediaCard } from "@/components/media/media-card";
+import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
+import type { HomeCatalogMediaItem } from "@/types/media";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { cn } from "@/lib/utils";
@@ -26,6 +28,17 @@ type PreviewItem = {
   imageSrc?: string | null;
   isVerified?: boolean;
 };
+
+function previewToCatalog(m: PreviewItem): HomeCatalogMediaItem {
+  return {
+    id: m.id,
+    name: m.name,
+    type: m.type ?? "",
+    location: m.location,
+    thumbnailUrl: m.imageSrc ?? undefined,
+    isVerified: m.isVerified,
+  };
+}
 
 type WizardStep = 1 | 2 | 3 | 4;
 
@@ -463,24 +476,14 @@ export function OnboardingWizard({
                       {preview.map((m, i) => (
                         <li key={m.id} className="list-none">
                           <MediaCard
+                            mode="card"
+                            item={previewToCatalog(m)}
                             href={m.href}
-                            imageSrc={m.imageSrc}
-                            imageAlt={m.name}
-                            index={String(i + 1).padStart(2, "0")}
-                            type={m.type}
-                            name={m.name}
-                            location={m.location}
-                            price={m.price}
-                            premium
-                            glowTheme="purple"
-                            density="compact"
-                            topRight={
-                              m.isVerified ? (
-                                <span className="normal-case tracking-wide">
-                                  {isKo ? "검증" : "Verified"}
-                                </span>
-                              ) : undefined
-                            }
+                            priceLabel={m.price}
+                            isKo={isKo}
+                            rank={i + 1}
+                            showPlanButton
+                            {...mediaCardStaticHandlers}
                           />
                         </li>
                       ))}

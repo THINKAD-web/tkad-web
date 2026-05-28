@@ -10,12 +10,9 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { regionLabel } from "@/lib/media-keyword-landing";
-import {
-  getPrimaryMediaImageUrl,
-  type MediaItem,
-  typeLabels,
-} from "@/lib/media-data";
+import { type MediaItem, typeLabels } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -135,7 +132,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
               name={name}
               metaLine={metaLine}
               priceLabel={renderPriceLabel(m, locale)}
-              imageUrl={getPrimaryMediaImageUrl(m)}
+              imageUrl={mapMediaItemToHomeCatalog(m).thumbnailUrl ?? null}
               isKo={isKo}
               planItem={planCartItemFromMediaItem(m, "search")}
               inCompare={isInCompare(m.id)}

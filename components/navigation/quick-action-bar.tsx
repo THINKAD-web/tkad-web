@@ -57,14 +57,6 @@ type QuickActionItem = {
 
 const MOBILE_ACTIONS: QuickActionItem[] = [
   {
-    id: "packages",
-    href: "/packages",
-    labelKo: "패키지제안",
-    labelEn: "Packages",
-    match: (p) =>
-      p.startsWith("/packages") || p.startsWith("/media/packages"),
-  },
-  {
     id: "recommend",
     href: "/recommend",
     labelKo: "AI매체추천",
@@ -77,6 +69,14 @@ const MOBILE_ACTIONS: QuickActionItem[] = [
     labelKo: "내 플랜",
     labelEn: "My plan",
     match: (p) => p.startsWith("/my/plan"),
+  },
+  {
+    id: "packages",
+    href: "/packages",
+    labelKo: "패키지제안",
+    labelEn: "Packages",
+    match: (p) =>
+      p.startsWith("/packages") || p.startsWith("/media/packages"),
   },
 ];
 
@@ -137,10 +137,6 @@ function QuickActionBarMobileInner() {
         {actions.map((action) => {
           const active = action.match(pathname, tab);
           const label = isKo ? action.labelKo : action.labelEn;
-          const planLabel =
-            action.id === "plan" && planCount > 0
-              ? `${label} ${planCount > 9 ? "9+" : planCount}`
-              : label;
           const isPlan = action.id === "plan";
           return (
             <Link
@@ -155,15 +151,8 @@ function QuickActionBarMobileInner() {
                     : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
               )}
               aria-current={active ? "page" : undefined}
-              aria-label={
-                action.id === "plan" && planCount > 0
-                  ? isKo
-                    ? `내 플랜 ${planCount}개`
-                    : `My plan ${planCount} items`
-                  : undefined
-              }
             >
-              {action.id === "plan" ? planLabel : label}
+              {label}
             </Link>
           );
         })}

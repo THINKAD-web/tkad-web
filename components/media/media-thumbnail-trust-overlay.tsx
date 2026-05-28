@@ -2,7 +2,7 @@
 
 import { ShieldCheck, Zap } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 
 type OverlayItem = Pick<
   HomeCatalogMediaItem,

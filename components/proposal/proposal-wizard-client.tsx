@@ -10,12 +10,15 @@ import {
   Sparkles,
   Wand2,
 } from "lucide-react";
+import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { CategoryExploreHero } from "@/components/category-explore-hero";
+import { PageHero } from "@/components/layout/page-hero";
 import { BtnBlock } from "@/components/brutalist";
 import { ProposalResultDisplay } from "@/components/proposal/proposal-result-display";
 import type { MediaItem } from "@/lib/media-data";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import type { HomeAppearance } from "@/lib/home-appearance";
 import {
   recommendPlannerMedia,
   type RecommendationContext,
@@ -37,18 +40,52 @@ import {
 import { cn } from "@/lib/utils";
 
 const glassCard =
-  "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur sm:p-6";
+  "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-white/12 dark:bg-white/5 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-6";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30 px-3 py-2.5 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20";
+  "mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20 dark:border-white/14 dark:bg-black/40 dark:text-white dark:placeholder:text-white/40";
 
 const labelClass =
-  "block font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500";
+  "block font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/70";
 
 function goalToPlanner(goal: ProposalGoal): PlannerCampaignGoal {
   if (goal === "awareness") return "brand";
   if (goal === "conversion") return "sales";
   return "event";
+}
+
+function ProposalNeonPageBody({
+  appearance,
+  className,
+  children,
+}: {
+  appearance: HomeAppearance;
+  className?: string;
+  children: ReactNode;
+}) {
+  const inner = (
+    <div className={cn("tkad-planner-neon", className)}>{children}</div>
+  );
+  if (appearance === "night") {
+    return (
+      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div className="relative">{inner}</div>
+      </div>
+    );
+  }
+  return inner;
 }
 
 type Props = {
@@ -63,6 +100,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
   const searchParams = useSearchParams();
   const fromPlanner = searchParams.get("fromPlanner") === "1";
   const plannerPrefillDone = useRef(false);
+  const landingAppearance = useTkadAppearance();
 
   const [step, setStep] = useState(1);
   const [plannerPrefillNotice, setPlannerPrefillNotice] = useState(false);
@@ -267,16 +305,29 @@ export default function ProposalWizardClient({ catalog }: Props) {
   if (result) {
     return (
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
-          <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300">
-              [ {t("resultEyebrow")} ]
-            </p>
-            <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">
-              {result.input.campaignName}
-            </h1>
-            <p className="mt-1 text-sm dark:text-white text-gray-500">{result.input.brandName}</p>
-            <div className="mt-8">
+        <div className="tkad-landing-neon">
+          <PageHero
+            eyebrow={`// ${t("heroEyebrow")}`}
+            title=""
+            highlight={t("heroTitle")}
+            description={t("heroDesc")}
+          />
+          <ProposalNeonPageBody
+            appearance={landingAppearance}
+            className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+          >
+            <div className="mx-auto max-w-3xl space-y-8">
+              <div>
+                <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-700 dark:text-cyan-300">
+                  [ {t("resultEyebrow")} ]
+                </p>
+                <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
+                  {result.input.campaignName}
+                </h1>
+                <p className="mt-1 text-sm text-gray-600 dark:text-white/70">
+                  {result.input.brandName}
+                </p>
+              </div>
               <ProposalResultDisplay
                 input={result.input}
                 proposal={result.proposal}
@@ -284,8 +335,6 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 sharePath={result.id ? `/proposal/${result.id}` : undefined}
                 isKo={isKo}
               />
-            </div>
-            <div className="mt-8">
               <button
                 type="button"
                 onClick={() => setResult(null)}
@@ -294,7 +343,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 {t("editAgain")}
               </button>
             </div>
-          </div>
+          </ProposalNeonPageBody>
         </div>
       </HomeLandingDayNight>
     );
@@ -302,42 +351,46 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
-        <CategoryExploreHero
-          code={`// ${t("heroEyebrow")}`}
-          headlineBefore=""
-          headlineGradient={t("heroTitle")}
-          subtitle={t("heroDesc")}
+      <div className="tkad-landing-neon">
+        <PageHero
+          eyebrow={`// ${t("heroEyebrow")}`}
+          title=""
+          highlight={t("heroTitle")}
+          description={t("heroDesc")}
         />
 
-        <div className="relative mx-auto max-w-2xl px-4 sm:px-6">
-          <div className="mb-8 flex justify-center gap-2">
-            {[1, 2, 3].map((n) => (
-              <span
-                key={n}
-                className={cn(
-                  "h-2 w-12 rounded-full transition-colors",
-                  step === n
-                    ? "bg-gradient-to-r from-violet-500 to-cyan-400"
-                    : step > n
-                      ? "bg-cyan-400/40"
-                      : "bg-white/15",
-                )}
-                aria-hidden
-              />
-            ))}
-          </div>
+        <ProposalNeonPageBody
+          appearance={landingAppearance}
+          className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+        >
+          <div className="mx-auto max-w-3xl space-y-8">
+            <div className="flex justify-center gap-2">
+              {[1, 2, 3].map((n) => (
+                <span
+                  key={n}
+                  className={cn(
+                    "h-2 w-12 rounded-full transition-colors",
+                    step === n
+                      ? "bg-gradient-to-r from-violet-500 to-cyan-400"
+                      : step > n
+                        ? "bg-cyan-400/40"
+                        : "bg-gray-200 dark:bg-white/15",
+                  )}
+                  aria-hidden
+                />
+              ))}
+            </div>
 
-          {plannerPrefillNotice ? (
-            <p
-              className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm text-emerald-100/90"
-              role="status"
-            >
-              {t("prefilledFromPlanner")}
-            </p>
-          ) : null}
+            {plannerPrefillNotice ? (
+              <p
+                className="rounded-xl border border-emerald-400/30 bg-emerald-50 px-4 py-3 text-center text-sm text-emerald-900 dark:bg-emerald-500/10 dark:text-emerald-100/90"
+                role="status"
+              >
+                {t("prefilledFromPlanner")}
+              </p>
+            ) : null}
 
-          <div className={cn(glassCard, "relative overflow-hidden")}>
+            <div className={cn(glassCard, "relative overflow-hidden")}>
             <div
               aria-hidden
               className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
@@ -449,8 +502,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                           goal === val
-                            ? "border-cyan-400/50 bg-cyan-400/15 text-cyan-200"
-                            : "dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:dark:bg-white/10 bg-gray-100",
+                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-800 dark:border-cyan-400/50 dark:bg-cyan-400/15 dark:text-cyan-200"
+                            : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-white/14 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10",
                         )}
                       >
                         {label}
@@ -473,7 +526,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
             {step === 3 ? (
               <div className="relative space-y-4">
                 <h2 className="text-lg font-bold dark:text-white text-gray-900">{t("step3Title")}</h2>
-                <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 p-3">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3 dark:border-white/10 dark:bg-black/30">
                   <p className={labelClass}>{t("loadPlanner")}</p>
                   <div className="mt-2 flex flex-wrap gap-2">
                     <input
@@ -486,7 +539,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                       variant="secondary"
                       size="sm"
                       onClick={() => void loadPlannerPlan()}
-                      className="dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900"
+                      className="border-gray-200 bg-white text-gray-900 dark:border-white/14 dark:bg-white/8 dark:text-white"
                     >
                       {t("loadPlannerBtn")}
                     </BtnBlock>
@@ -496,7 +549,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   <BtnBlock
                     variant="accent"
                     size="sm"
-                    className="!dark:text-white text-gray-900"
+                    className="!text-gray-900 dark:!text-white"
                     onClick={applyAiRecommend}
                   >
                     <Sparkles className="h-4 w-4" />
@@ -504,7 +557,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   </BtnBlock>
                   <Link
                     href="/media"
-                    className="inline-flex items-center text-xs font-semibold text-cyan-400 hover:underline"
+                    className="inline-flex items-center text-xs font-semibold text-cyan-700 hover:underline dark:text-cyan-400"
                   >
                     {t("browseMedia")}
                   </Link>
@@ -520,8 +573,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors",
                             selected
-                              ? "border-cyan-400/40 bg-cyan-400/10 dark:text-white text-gray-900"
-                              : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100",
+                              ? "border-cyan-500/40 bg-cyan-50 text-gray-900 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-white"
+                              : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10",
                           )}
                         >
                           <span className="min-w-0 truncate font-medium">
@@ -530,7 +583,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           <span
                             className={cn(
                               "shrink-0  text-[10px]",
-                              selected ? "text-cyan-300" : "dark:text-white text-gray-400",
+                              selected ? "text-cyan-700 dark:text-cyan-300" : "text-gray-400 dark:text-white/50",
                             )}
                           >
                             {selected ? "✓" : "+"}
@@ -540,14 +593,14 @@ export default function ProposalWizardClient({ catalog }: Props) {
                     );
                   })}
                 </ul>
-                <p className="text-[10px] dark:text-white">
+                <p className="text-[10px] text-gray-600 dark:text-white/70">
                   {t("selectedCount", { count: mediaIds.length })}
                 </p>
               </div>
             ) : null}
 
             {genError ? (
-              <p className="relative mt-4 rounded-lg border border-rose-500/30 bg-rose-500/10 px-3 py-2 text-sm text-rose-200">
+              <p className="relative mt-4 rounded-lg border border-rose-500/30 bg-rose-50 px-3 py-2 text-sm text-rose-800 dark:bg-rose-500/10 dark:text-rose-200">
                 {genError}
               </p>
             ) : null}
@@ -558,7 +611,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   variant="secondary"
                   size="md"
                   onClick={() => setStep((s) => s - 1)}
-                  className="dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900"
+                  className="border-gray-200 bg-white text-gray-900 dark:border-white/14 dark:bg-white/8 dark:text-white"
                 >
                   <ChevronLeft className="h-4 w-4" />
                   {t("back")}
@@ -570,7 +623,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!text-gray-900 dark:!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
                   disabled={
                     (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
                   }
@@ -583,7 +636,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!text-gray-900 dark:!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
                   disabled={!step3Valid || generating}
                   onClick={() => void onGenerate()}
                 >
@@ -597,7 +650,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
               )}
             </div>
           </div>
-        </div>
+          </div>
+        </ProposalNeonPageBody>
       </div>
     </HomeLandingDayNight>
   );

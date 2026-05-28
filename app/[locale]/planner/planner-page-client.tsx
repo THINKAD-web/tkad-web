@@ -25,7 +25,6 @@ import {
   Send,
   Wallet,
   CalendarRange,
-  ArrowRight,
   Sparkles,
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -40,23 +39,22 @@ import {
   reachSplitForGoal,
   comparePlansByDuration,
   portfolioFromManualSelection,
-  matchesPlannerCategory,
   plannerBlendCpmKrw,
 } from "@/lib/planner-logic";
+import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
-import PlannerMediaSelector from "@/components/planner-media-selector";
+import { MediaSearchPage } from "@/components/media/media-search-page";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import PlannerTips from "@/components/planner-tips";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
-import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
-import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
@@ -217,6 +215,22 @@ export default function PlannerPageClient({
   const setAgeKey = usePlannerStore((s) => s.setAgeKey);
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+
+  const plannerCatalogItems = useMemo(
+    () => catalog.map((m) => mapMediaItemToHomeCatalog(m)),
+    [catalog],
+  );
+
+  const togglePlannerMedia = useCallback(
+    (mediaId: string) => {
+      setCampaignMediaIds((prev) =>
+        prev.includes(mediaId)
+          ? prev.filter((id) => id !== mediaId)
+          : [...prev, mediaId],
+      );
+    },
+    [setCampaignMediaIds],
+  );
   const setCreativeObjectUrl = usePlannerStore((s) => s.setCreativeObjectUrl);
   const setCreativeUploadedUrl = usePlannerStore(
     (s) => s.setCreativeUploadedUrl,
@@ -246,20 +260,16 @@ export default function PlannerPageClient({
   );
 
   /** Step4 AI 추천: 엄격 필터 결과가 비어도 등록 매체가 보이도록 완화 풀 (직접 탐색은 기존 `catalog`) */
-  const recommendationCatalog = useMemo(() => {
-    if (filtered.length > 0) return filtered;
-    if (selectedRegions.size > 0) {
-      const byRegion = catalog.filter((m) => selectedRegions.has(m.region));
-      if (byRegion.length > 0) return byRegion;
-    }
-    if (categories.size > 0) {
-      const byCat = catalog.filter((m) =>
-        [...categories].some((c) => matchesPlannerCategory(m, c)),
-      );
-      if (byCat.length > 0) return byCat;
-    }
-    return catalog;
-  }, [filtered, catalog, selectedRegions, categories]);
+  const recommendationCatalog = useMemo(
+    () =>
+      buildPlannerRecommendationCatalog(
+        catalog,
+        filtered,
+        selectedRegions,
+        categories,
+      ),
+    [filtered, catalog, selectedRegions, categories],
+  );
 
   const selectedMediaForSimulation = useMemo(() => {
     if (campaignMediaIds.length === 0) return [];
@@ -775,13 +785,7 @@ export default function PlannerPageClient({
 
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <div
-            className={cn(
-              "mx-auto space-y-8",
-              // 매체 선택·소재 업로드·보고서 단계는 넓은 캔버스 필요
-              wizardStep === 4 || wizardStep === 5 || wizardStep === 6
-                ? "max-w-7xl"
-                : "max-w-3xl",
-            )}
+            className="mx-auto max-w-3xl space-y-8"
           >
             <PlannerTips
               wizardStep={wizardStep}
@@ -1075,25 +1079,15 @@ export default function PlannerPageClient({
                   </h3>
                   <p className={plannerNeon.subtext}>{t("recommendBrowseDesc")}</p>
                 </div>
-                <PlannerMediaSelector
-                  catalog={catalog}
-                  campaignMediaIds={campaignMediaIds}
-                  setCampaignMediaIds={setCampaignMediaIds}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
+                <MediaSearchPage
+                  embedded
+                  plannerMode
+                  initialMedia={plannerCatalogItems}
+                  initialTotal={catalog.length}
+                  plannerSelectedIds={campaignMediaIds}
+                  onPlannerToggleMedia={togglePlannerMedia}
+                  onPlannerNext={goNext}
                 />
-                {selectedMediaForSimulation.length > 0 ? (
-                  <div className="flex justify-end pt-2">
-                    <PlanCartBulkAddButton
-                      items={selectedMediaForSimulation.map((m) =>
-                        planCartItemFromMediaItem(m, "planner"),
-                      )}
-                      label={
-                        isKo ? "선택 매체 플랜에 추가" : "Add selection to plan"
-                      }
-                    />
-                  </div>
-                ) : null}
               </div>
             ) : null}
 
@@ -1162,7 +1156,7 @@ export default function PlannerPageClient({
             </div>
           </div>
         ) : (
-          <div className="space-y-8">
+          <div className="mx-auto max-w-3xl space-y-8">
             <PlannerTips
               wizardStep={7}
               campaignGoal={campaignGoal}
@@ -1180,75 +1174,21 @@ export default function PlannerPageClient({
                 <ChevronLeft className="h-4 w-4" />
                 {t("editInputs")}
               </BtnBlock>
-              <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-                {teamPerms.hasTeam && teamPerms.canUsePlanner ? (
-                  <label className="flex w-full items-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-700 sm:w-auto">
-                    <input
-                      type="checkbox"
-                      checked={shareWithTeam}
-                      onChange={(e) => setShareWithTeam(e.target.checked)}
-                      className="h-4 w-4 rounded border-white/30"
-                    />
-                    <span>
-                      {isKo
-                        ? `${teamPerms.teamName ?? "팀"}과 공유`
-                        : `Share with ${teamPerms.teamName ?? "team"}`}
-                    </span>
-                  </label>
-                ) : null}
-                <BtnBlock
-                  variant="primary"
-                  size="md"
-                  onClick={() => void savePlan("share")}
-                  disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
-                >
-                  <Download className="h-4 w-4" />
-                  {saving ? t("savingInProgress") : t("ctaSave")}
-                </BtnBlock>
-                <BtnBlock
-                  variant="secondary"
-                  size="md"
-                  onClick={() => void savePlan("draft")}
-                  disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
-                >
-                  <Download className="h-4 w-4" />
-                  {t("ctaSaveDraft24h")}
-                </BtnBlock>
-                <BtnBlock href={compareHref} variant="secondary" size="md">
-                  <GitCompare className="h-4 w-4" />
-                  {t("ctaCompareSelection")}
-                </BtnBlock>
-                <BtnBlock
-                  href="/proposal?fromPlanner=1"
-                  variant="secondary"
-                  size="md"
-                  className="w-full border-emerald-400/35 bg-emerald-500/10 sm:w-auto"
-                >
-                  <Sparkles className="h-4 w-4 text-emerald-400" />
-                  {t("ctaCreateProposal")}
-                </BtnBlock>
-                <div className="flex w-full flex-col sm:w-auto">
-                  <BtnBlock
-                    variant="accent"
-                    size="lg"
-                    className="min-h-14 w-full !dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
-                    onClick={() => void goToContactQuote()}
-                    disabled={
-                      saving ||
-                      navigatingContact ||
-                      (teamPerms.loaded && !teamPerms.canContactOrPay)
-                    }
-                  >
-                    <Send className="h-5 w-5" />
-                    {navigatingContact
-                      ? t("savingInProgress")
-                      : t("ctaQuoteWithPlan")}
-                  </BtnBlock>
-                  <p className="mt-2 text-center text-xs text-muted-foreground">
-                    {t("quoteTrustLine")}
-                  </p>
-                </div>
-              </div>
+              {teamPerms.hasTeam && teamPerms.canUsePlanner ? (
+                <label className="flex w-full items-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-700 sm:w-auto">
+                  <input
+                    type="checkbox"
+                    checked={shareWithTeam}
+                    onChange={(e) => setShareWithTeam(e.target.checked)}
+                    className="h-4 w-4 rounded border-white/30"
+                  />
+                  <span>
+                    {isKo
+                      ? `${teamPerms.teamName ?? "팀"}과 공유`
+                      : `Share with ${teamPerms.teamName ?? "team"}`}
+                  </span>
+                </label>
+              ) : null}
             </div>
 
             {shareUrl ? (
@@ -1421,8 +1361,8 @@ export default function PlannerPageClient({
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />
                   <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
-                  <div className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-                    <div className="max-w-xl space-y-2">
+                  <div className="relative space-y-5">
+                    <div className="space-y-2">
                       <PlannerNeonLabel>Next Step</PlannerNeonLabel>
                       <h3 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                         {t("ctaBannerTitle")}
@@ -1431,42 +1371,63 @@ export default function PlannerPageClient({
                         {t("ctaBannerDesc")}
                       </p>
                     </div>
-                    <div className="flex w-full flex-col gap-3 sm:w-auto sm:min-w-[280px]">
-                      <div>
-                        <BtnBlock
-                          variant="accent"
-                          size="lg"
-                          className="min-h-14 w-full !dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
-                          onClick={() => void goToContactQuote()}
-                          disabled={navigatingContact}
-                        >
-                          <Send className="h-5 w-5" />
-                          {navigatingContact
-                            ? t("savingInProgress")
-                            : t("ctaQuoteWithPlan")}
-                          <ArrowRight className="h-5 w-5" />
-                        </BtnBlock>
-                        <p className="mt-2 text-center text-xs text-muted-foreground">
-                          {t("quoteTrustLine")}
-                        </p>
-                      </div>
+                    <div className="space-y-3">
                       <BtnBlock
-                        variant="secondary"
-                        size="lg"
+                        variant="accent"
+                        size="md"
+                        className="w-full bg-gradient-to-r from-violet-500 to-cyan-400 font-bold text-white shadow-md shadow-violet-500/25"
+                        onClick={() => void goToContactQuote()}
+                        disabled={
+                          navigatingContact ||
+                          (teamPerms.loaded && !teamPerms.canContactOrPay)
+                        }
+                      >
+                        <Send className="h-4 w-4" />
+                        {navigatingContact
+                          ? t("savingInProgress")
+                          : t("ctaQuoteWithPlan")}
+                      </BtnBlock>
+                      <p className="text-center text-xs text-muted-foreground">
+                        {t("quoteTrustLine")}
+                      </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2">
+                      <BtnBlock
+                        variant="primary"
+                        size="sm"
                         className="w-full"
                         onClick={() => void savePlan("share")}
                         disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
                       >
-                        <Download className="h-4 w-4" />
+                        <Download className="h-3.5 w-3.5" />
                         {saving ? t("savingInProgress") : t("ctaSave")}
+                      </BtnBlock>
+                      <BtnBlock
+                        variant="secondary"
+                        size="sm"
+                        className="w-full dark:text-white"
+                        onClick={() => void savePlan("draft")}
+                        disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
+                      >
+                        <Download className="h-3.5 w-3.5" />
+                        {t("ctaSaveDraft24h")}
+                      </BtnBlock>
+                      <BtnBlock
+                        href={compareHref}
+                        variant="secondary"
+                        size="sm"
+                        className="w-full dark:text-white"
+                      >
+                        <GitCompare className="h-3.5 w-3.5" />
+                        {t("ctaCompareSelection")}
                       </BtnBlock>
                       <BtnBlock
                         href="/proposal?fromPlanner=1"
                         variant="secondary"
-                        size="lg"
-                        className="w-full border-emerald-400/35 bg-emerald-500/10"
+                        size="sm"
+                        className="w-full border-emerald-400/35 bg-emerald-500/10 dark:text-white"
                       >
-                        <Sparkles className="h-4 w-4 text-emerald-400" />
+                        <Sparkles className="h-3.5 w-3.5 text-emerald-400" />
                         {t("ctaCreateProposal")}
                       </BtnBlock>
                     </div>

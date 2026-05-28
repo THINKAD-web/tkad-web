@@ -129,18 +129,28 @@ export default function QuotePreviewView({
   const toast = useAppToast();
 
   const onDownload = async () => {
-    if (!captureRef.current || !quote) return;
+    if (!quote) return;
     setDownloading(true);
     try {
-      const { downloadPdfFromHtmlElement } = await import("@/lib/html-to-pdf");
-      await downloadPdfFromHtmlElement(
-        captureRef.current,
-        `THINKAD-견적서-${quote.id.slice(-8)}.pdf`,
-      );
+      const res = await fetch(`/api/quote/${quote.id}/pdf`, { cache: "no-store" });
+      if (!res.ok) {
+        throw new Error(`PDF HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `THINKAD-견적서-${quote.id.slice(-8)}.pdf`;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
       toast.success("PDF를 다운로드했습니다.");
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       console.error("[quote preview] pdf export failed", e);
+      toast.error("PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
       window.alert(`PDF 생성 실패\n${msg}`);
     } finally {
       setDownloading(false);
@@ -234,7 +244,7 @@ export default function QuotePreviewView({
                   ? `오류: ${err}`
                   : "잠시 후 다시 시도해주세요."}
             </p>
-            <Link href="/media/map" className={cn(plannerNeon.cta, "mt-6 inline-flex")}>
+            <Link href="/media" className={cn(plannerNeon.cta, "mt-6 inline-flex")}>
               매체 탐색하러 가기
             </Link>
           </div>
@@ -247,8 +257,8 @@ export default function QuotePreviewView({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-24 sm:px-6">
-        <div className="mx-auto max-w-4xl">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-24 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl">
           <Link
             href="/my"
             className="group mb-6 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 transition-colors hover:text-violet-600 dark:text-white/55 dark:hover:text-violet-300"
@@ -304,7 +314,7 @@ export default function QuotePreviewView({
             </div>
           </header>
 
-          <div ref={captureRef} className="space-y-4">
+          <div ref={captureRef} className="space-y-4 print:bg-white">
             <PlannerNeonCard className="overflow-hidden">
               <div className={plannerNeon.cardHeader}>
                 <PlannerNeonLabel>캠페인 정보</PlannerNeonLabel>

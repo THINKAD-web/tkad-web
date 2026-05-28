@@ -4,19 +4,7 @@ import {
   fetchHomeWeeklyPopularMedia,
   prismaMediaToMediaItem,
 } from "@/lib/public-media-catalog";
-import {
-  dedupeImageUrls,
-  getPrimaryMediaImageUrl,
-  type MediaItem,
-  type MediaPricePeriodKey,
-  typeLabels,
-} from "@/lib/media-data";
-import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
-import {
-  filterDisplayableMediaImageUrls,
-  resolveCatalogImageSrc,
-} from "@/lib/optimized-image-url";
-import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
+import type { MediaItem } from "@/lib/media-data";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   buildPublicMediaOrderBy,
@@ -24,98 +12,17 @@ import {
   type PublicMediaSort,
 } from "@/lib/public-media-query";
 import { attachMediaTrustToMediaItems } from "@/lib/media-trust-catalog";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
+import type {
+  HomeCatalogMediaItem,
+  MediaCatalogSort,
+} from "@/lib/media-catalog-types";
 
-export type HomeCatalogMediaItem = {
-  id: string;
-  slug?: string;
-  name: string;
-  type?: string;
-  region?: string;
-  location?: string;
-  size?: string;
-  dailyFootTraffic?: number;
-  visibilityScore?: number;
-  features?: string;
-  advertiserHistory?: string;
-  trustScore?: number;
-  executionCount?: number;
-  lastExecutionMonthsAgo?: number | null;
-  price?: number;
-  pricePeriod?: MediaPricePeriodKey;
-  thumbnailUrl?: string;
-  /** 피드·갤러리용 (최대 6장, 썸네일 포함) */
-  galleryImages?: string[];
-  reviewAvg?: number;
-  reviewCount?: number;
-  isInstantBooking?: boolean;
-  popularityScore?: number;
-  /** THINKAD 현장 검증 완료 */
-  isVerified?: boolean;
-  trustBadges?: import("@/lib/media-trust").MediaTrustBadge[];
-};
-
-export type MediaCatalogSort =
-  | "recommended"
-  | "popular"
-  | "newest"
-  | "price_asc"
-  | "price_desc";
-
-function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
-  const rawUrl = getPrimaryMediaImageUrl(item);
-  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
-  const typeLabel = typeLabels[item.type]?.ko ?? item.type;
-  const display = resolveMediaDisplayPrice(item);
-
-  return {
-    id: item.id,
-    slug: item.slug,
-    name: item.name,
-    type: typeLabel,
-    region: item.region ?? item.district ?? item.city,
-    location: item.location?.trim() || undefined,
-    size: item.size?.trim() || undefined,
-    dailyFootTraffic:
-      item.dailyFootTraffic && item.dailyFootTraffic > 0
-        ? item.dailyFootTraffic
-        : undefined,
-    visibilityScore:
-      item.visibilityScore != null && item.visibilityScore > 0
-        ? item.visibilityScore
-        : undefined,
-    features:
-      item.features?.trim() ||
-      item.catalogDescription?.trim() ||
-      item.description?.trim() ||
-      undefined,
-    advertiserHistory: item.advertiserHistory?.trim() || undefined,
-    trustScore:
-      item.trustScore != null && item.trustScore >= 0
-        ? item.trustScore
-        : undefined,
-    executionCount:
-      item.executionCount != null && item.executionCount >= 0
-        ? item.executionCount
-        : undefined,
-    lastExecutionMonthsAgo: item.lastExecutionMonthsAgo ?? undefined,
-    price: display.priceWon > 0 ? display.priceWon : undefined,
-    pricePeriod: display.period,
-    thumbnailUrl: resolved?.src ?? undefined,
-    galleryImages: filterDisplayableMediaImageUrls(
-      dedupeImageUrls(item.sampleImages ?? []),
-    ).slice(0, 6),
-    reviewAvg: item.averageRating,
-    reviewCount: item.reviewCount,
-    isInstantBooking: isInstantBookingEligible({
-      instantBookingEnabled: item.instantBookingEnabled ?? false,
-      availability: item.availability,
-      catalogSource: item.catalogSource,
-    }).eligible,
-    popularityScore: item.popularityScore,
-    isVerified: item.isVerified === true,
-    trustBadges: item.trustBadges,
-  };
-}
+export type { HomeCatalogMediaItem, MediaCatalogSort } from "@/lib/media-catalog-types";
+export {
+  mapMediaItemToHomeCatalog,
+  catalogThumbnailImageProps,
+} from "@/lib/media-catalog-map";
 
 function usesFilteredQuery(opts: {
   sort: MediaCatalogSort;
@@ -160,7 +67,7 @@ export async function fetchFilteredMediaCatalog(opts: {
     const enriched = await attachMediaTrustToMediaItems(
       rows.map((row) => prismaMediaToMediaItem(row)),
     );
-    return enriched.map(mapMediaItem);
+    return enriched.map(mapMediaItemToHomeCatalog);
   } catch (e) {
     console.error("[fetchPublicMediaCatalog] filtered query failed", e);
     return [];
@@ -197,7 +104,7 @@ export async function fetchPublicMediaCatalog(opts: {
       rows = [];
   }
 
-  return rows.map(mapMediaItem);
+  return rows.map(mapMediaItemToHomeCatalog);
 }
 
 export async function countPublicMediaCatalog(opts: {

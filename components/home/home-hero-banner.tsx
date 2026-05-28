@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const BANNER_IMAGES = [
@@ -125,32 +124,17 @@ export function HomeHeroBanner() {
           </div>
         </div>
 
-        <button
-          type="button"
-          onClick={() => goTo(current - 1)}
-          className="absolute left-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
-          aria-label="이전 배너"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <button
-          type="button"
-          onClick={() => goTo(current + 1)}
-          className="absolute right-3 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full border border-white/20 bg-black/40 text-white backdrop-blur-sm transition hover:bg-black/60"
-          aria-label="다음 배너"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
-
-        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-1.5">
+        <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2">
           {banners.map((b, i) => (
             <button
               key={b.href}
               type="button"
               onClick={() => goTo(i)}
               className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                i === current ? "w-6 bg-white" : "w-1.5 bg-white/40",
+                "rounded-full transition-all duration-300",
+                i === current
+                  ? "h-2 w-8 bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
+                  : "h-2 w-2 bg-white/45 hover:bg-white/70",
               )}
               aria-label={`${b.badge} 배너`}
               aria-current={i === current ? "true" : undefined}

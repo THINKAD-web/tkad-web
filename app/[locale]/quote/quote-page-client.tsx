@@ -41,6 +41,7 @@ import {
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
+import { QuoteMediaSelectCard } from "@/components/quote/quote-media-select-card";
 import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
 import {
   FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS,
@@ -977,7 +978,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
-                      <div className={MEDIA_CATALOG_GRID_CLASS}>
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
                         {pagedCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const nwOpt = networkQuoteOptions[media.id];
@@ -997,24 +998,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               : media.price;
                           return (
                             <div key={media.id} className="space-y-2">
-                              <MediaCatalogGridCard
-                                variant="selectable"
+                              <QuoteMediaSelectCard
                                 media={media}
                                 isKo={isKo}
-                                imagePreparingLabel={tMedia("imagePreparing")}
                                 selected={checked}
-                                onToggleSelected={() => toggleMedia(media.id)}
-                                selectionAriaLabel={
-                                  isKo
-                                    ? `${media.name} 선택`
-                                    : `Select ${media.nameEn}`
-                                }
                                 priceMan={displayPrice}
                                 pricePeriod={resolveQuoteMediaPricePeriod(
                                   media,
                                   poIdx,
                                   isNw,
                                 )}
+                                onToggle={() => toggleMedia(media.id)}
                               />
                               {checked && isNw ? (
                                 <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">

@@ -1,4 +1,4 @@
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { MediaItem } from "@/lib/media-data";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 

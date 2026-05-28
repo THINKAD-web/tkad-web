@@ -21,7 +21,7 @@ export type BtnBlockSize = "sm" | "md" | "lg";
 
 const variantClass: Record<BtnBlockVariant, string> = {
   primary:
-    "bg-hero-void text-hero-fg border-border hover:bg-accent hover:border-accent hover:dark:text-white text-gray-900",
+    "bg-hero-void text-hero-fg border-border hover:bg-accent hover:border-accent hover:text-white",
   secondary:
     "bg-card text-foreground border-border hover:bg-foreground hover:text-background",
   dark: "bg-hero-void text-hero-fg border-border hover:bg-muted hover:border-border",

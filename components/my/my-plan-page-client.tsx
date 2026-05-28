@@ -269,16 +269,25 @@ export function MyPlanPageClient() {
                 ))}
               </section>
 
-              <div className="flex flex-col gap-3 sm:flex-row">
+              <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <BtnBlock
                   type="button"
                   variant="accent"
                   size="lg"
-                  className="flex-1 rounded-2xl"
+                  className="flex-1 rounded-2xl sm:min-w-[14rem]"
                   onClick={() => void handleQuoteRequest()}
                 >
                   {isKo ? "이 플랜으로 견적 요청하기" : "Request quote for this plan"}
                   <ArrowRight className="ml-2 inline h-4 w-4" />
+                </BtnBlock>
+                <BtnBlock
+                  href="/planner"
+                  variant="secondary"
+                  size="lg"
+                  className="flex-1 rounded-2xl sm:min-w-[14rem]"
+                >
+                  <Sparkles className="mr-2 inline h-4 w-4" />
+                  {isKo ? "플래너로 설계하기" : "Design in planner"}
                 </BtnBlock>
                 <BtnBlock
                   type="button"

@@ -1,17 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
-import { Button } from "@/components/ui/button";
-import { Monitor } from "lucide-react";
-import type { MediaItem } from "@/lib/media-data";
-import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import { MediaCard } from "@/components/media/media-card";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
+import type { MediaItem } from "@/types/media";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
+  formatMediaPriceWithPeriodSuffix,
+  normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { cn } from "@/lib/utils";
 
 export function MediaPinPopup({
   media,
@@ -24,82 +23,41 @@ export function MediaPinPopup({
   isSelected?: boolean;
   onToggleSelect?: (mediaId: string) => void;
 }) {
-  const tMedia = useTranslations("media");
   if (!media) return null;
 
-  const u = getPrimaryMediaImageUrl(media);
+  const catalogItem = mapMediaItemToHomeCatalog(media);
+  const href = mediaItemDetailPath(media);
+  const priceLabel = media.price
+    ? formatMediaPriceWithPeriodSuffix(
+        media.price,
+        normalizeMediaPricePeriod(media.pricePeriod),
+        isKo ? "ko-KR" : "en-US",
+      )
+    : null;
+  const metaLine = [formatMediaLocationShort(media, isKo), priceLabel]
+    .filter(Boolean)
+    .join(" · ");
 
   return (
     <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 p-3 pb-[max(0.75rem,env(safe-area-inset-bottom))] sm:p-4">
-      <div className="pointer-events-auto mx-auto max-w-xl overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl">
-        <div className="flex gap-3 p-3">
-          <div className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-slate-100">
-            {u ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={u} alt="" className="h-full w-full object-cover" />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-navy/30">
-                <Monitor className="h-7 w-7" />
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-extrabold text-navy">
-              {isKo ? media.name : (media.nameEn || media.name)}
-            </p>
-            <p className="mt-0.5 line-clamp-1 text-xs text-muted-foreground">
-              {formatMediaLocationShort(media, isKo)}
-            </p>
-            <p className="mt-1 text-sm font-bold text-gold-dark">
-              {formatCatalogPriceFieldWon(media.price)}
-              <span className="ml-1 text-[11px] font-semibold text-navy/55">
-                · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
-              </span>
-            </p>
-          </div>
-          <div className="flex shrink-0 flex-col gap-1.5">
-            {onToggleSelect && (
-              <Button
-                size="sm"
-                onClick={(e) => {
-                  e.preventDefault();
-                  e.stopPropagation();
-                  onToggleSelect(media.id);
-                }}
-                className={`w-full rounded-full text-xs font-bold ${
-                  isSelected
-                    ? "border border-gold bg-white text-gold hover:bg-white/90"
-                    : "bg-gold text-navy hover:bg-gold-dark"
-                }`}
-              >
-                {isSelected
-                  ? isKo
-                    ? "✓ 선택됨"
-                    : "✓ Selected"
-                  : isKo
-                    ? "+ 비교 추가"
-                    : "+ Add to compare"}
-              </Button>
-            )}
-            <Link href={mediaItemDetailPath(media)}>
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full rounded-full text-xs font-bold"
-              >
-                {isKo ? "상세" : "Details"}
-              </Button>
-            </Link>
-            <Link href={`/quote?media=${media.id}`}>
-              <Button
-                size="sm"
-                className="w-full rounded-full bg-gold text-xs font-bold text-navy hover:bg-gold-dark"
-              >
-                {isKo ? "견적" : "Quote"}
-              </Button>
-            </Link>
-          </div>
-        </div>
+      <div
+        className={cn(
+          "pointer-events-auto mx-auto max-w-xl overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-2xl dark:border-white/10 dark:bg-gray-950",
+          onToggleSelect ? "pb-2" : "",
+        )}
+      >
+        <MediaCard
+          mode="compact"
+          item={catalogItem}
+          href={href}
+          metaLine={metaLine}
+          isKo={isKo}
+          inCompare={Boolean(isSelected)}
+          inCart={false}
+          onToggleCompare={() => onToggleSelect?.(media.id)}
+          onToggleCart={() => {}}
+          showPlanButton={false}
+        />
       </div>
     </div>
   );

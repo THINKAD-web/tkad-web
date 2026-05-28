@@ -9,6 +9,12 @@ import {
   type RecommendReasonKey,
   type ScoredMedia,
 } from "@/lib/planner/recommend";
+import type {
+  PlannerAgeKey,
+  PlannerCampaignGoal,
+  PlannerCategory,
+  PlannerIndustryKey,
+} from "@/lib/planner/types";
 import {
   selectBudgetNum,
   usePlannerStore,
@@ -43,12 +49,27 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   neighborhoodHotspot: "border-border bg-muted text-foreground",
 };
 
+export type PlannerRecommendationStoreBinding = {
+  goal: PlannerCampaignGoal | null;
+  regions: string[];
+  categories: PlannerCategory[];
+  ageKey: PlannerAgeKey;
+  industryKey: PlannerIndustryKey;
+  budgetMan: number;
+  months: number;
+  campaignMediaIds: string[];
+  setCampaignMediaIds: (updater: (prev: string[]) => string[]) => void;
+};
+
 type Props = {
   catalog: MediaItem[];
   isKo: boolean;
   regionLabel: (region: string) => string;
   /** 추천 개수 상한 (기본 5) */
   limit?: number;
+  /** 통합 플래너 등 외부 store — 미전달 시 OOH `usePlannerStore` */
+  store?: PlannerRecommendationStoreBinding;
+  planCartAddedFrom?: "planner" | "search";
 };
 
 export function PlannerRecommendationPanel({
@@ -56,18 +77,31 @@ export function PlannerRecommendationPanel({
   isKo,
   regionLabel,
   limit = 5,
+  store,
+  planCartAddedFrom = "planner",
 }: Props) {
   const t = useTranslations("planner");
   const locale = useLocale();
-  const goal = usePlannerStore((s) => s.campaignGoal);
-  const regions = usePlannerStore((s) => s.regions);
-  const categories = usePlannerStore((s) => s.categories);
-  const ageKey = usePlannerStore((s) => s.ageKey);
-  const industryKey = usePlannerStore((s) => s.industryKey);
-  const budgetMan = usePlannerStore(selectBudgetNum);
-  const months = usePlannerStore((s) => s.months);
-  const selectedIds = usePlannerStore((s) => s.campaignMediaIds);
-  const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const plannerGoal = usePlannerStore((s) => s.campaignGoal);
+  const plannerRegions = usePlannerStore((s) => s.regions);
+  const plannerCategories = usePlannerStore((s) => s.categories);
+  const plannerAgeKey = usePlannerStore((s) => s.ageKey);
+  const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
+  const plannerBudgetMan = usePlannerStore(selectBudgetNum);
+  const plannerMonths = usePlannerStore((s) => s.months);
+  const plannerSelectedIds = usePlannerStore((s) => s.campaignMediaIds);
+  const plannerSetCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+
+  const goal = store?.goal ?? plannerGoal;
+  const regions = store?.regions ?? plannerRegions;
+  const categories = store?.categories ?? plannerCategories;
+  const ageKey = store?.ageKey ?? plannerAgeKey;
+  const industryKey = store?.industryKey ?? plannerIndustryKey;
+  const budgetMan = store?.budgetMan ?? plannerBudgetMan;
+  const months = store?.months ?? plannerMonths;
+  const selectedIds = store?.campaignMediaIds ?? plannerSelectedIds;
+  const setCampaignMediaIds =
+    store?.setCampaignMediaIds ?? plannerSetCampaignMediaIds;
 
   const [loading, setLoading] = useState(true);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -227,9 +261,9 @@ export function PlannerRecommendationPanel({
   const planBulkItems = useMemo(
     () =>
       recommendations.map(({ media }) =>
-        planCartItemFromMediaItem(media, "planner"),
+        planCartItemFromMediaItem(media, planCartAddedFrom),
       ),
-    [recommendations],
+    [recommendations, planCartAddedFrom],
   );
 
   return (
@@ -431,7 +465,7 @@ export function PlannerRecommendationPanel({
                     )}
                   </button>
                   <PlanCartAddButton
-                    item={planCartItemFromMediaItem(media, "planner")}
+                    item={planCartItemFromMediaItem(media, planCartAddedFrom)}
                     addedFrom="planner"
                     compact
                     className="w-full"

@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
+import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { HomeMediaScrollCard } from "@/components/home/home-media-scroll-card";
 
 interface Props {

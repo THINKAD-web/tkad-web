@@ -15,7 +15,8 @@ import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
 import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
-import PlannerMediaSelector from "@/components/planner-media-selector";
+import { MediaSearchPage } from "@/components/media/media-search-page";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import {
@@ -40,6 +41,7 @@ import {
   filterPlannerMediaMulti,
   portfolioFromManualSelection,
 } from "@/lib/planner-logic";
+import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
@@ -53,10 +55,14 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { IntegratedPlannerStepper } from "@/components/planner/integrated/integrated-stepper";
-import { IntegratedOohRecommendationPanel } from "@/components/planner/integrated/integrated-ooh-recommendation-panel";
+import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { IntegratedDigitalRecommendationPanel } from "@/components/planner/integrated/digital-recommendation-panel";
 import { IntegratedReportStep } from "@/components/planner/integrated/integrated-report-step";
 import { IntegratedCampaignDashboard } from "@/components/planner/integrated/integrated-dashboard";
+import PlannerTips from "@/components/planner-tips";
+import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import type { HomeAppearance } from "@/lib/home-appearance";
+import type { ReactNode } from "react";
 
 const GOALS: {
   key: PlannerCampaignGoal;
@@ -84,6 +90,40 @@ type Props = {
   databaseEmpty: boolean;
 };
 
+function IntegratedPlannerPageBody({
+  appearance,
+  className,
+  children,
+}: {
+  appearance: HomeAppearance;
+  className?: string;
+  children: ReactNode;
+}) {
+  const inner = (
+    <div className={cn("tkad-planner-neon", className)}>{children}</div>
+  );
+  if (appearance === "night") {
+    return (
+      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
+        />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+        />
+        <div className="relative">{inner}</div>
+      </div>
+    );
+  }
+  return inner;
+}
+
 export default function IntegratedPlannerPageClient({
   catalog,
   databaseEmpty,
@@ -94,6 +134,7 @@ export default function IntegratedPlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
+  const landingAppearance = useTkadAppearance();
 
   const wizardStep = useIntegratedPlannerStore((s) => s.wizardStep);
   const campaignGoal = useIntegratedPlannerStore((s) => s.campaignGoal);
@@ -126,6 +167,23 @@ export default function IntegratedPlannerPageClient({
   const setCampaignMediaIds = useIntegratedPlannerStore(
     (s) => s.setCampaignMediaIds,
   );
+
+  const plannerCatalogItems = useMemo(
+    () => catalog.map((m) => mapMediaItemToHomeCatalog(m)),
+    [catalog],
+  );
+
+  const togglePlannerMedia = useCallback(
+    (mediaId: string) => {
+      setCampaignMediaIds((prev) =>
+        prev.includes(mediaId)
+          ? prev.filter((id) => id !== mediaId)
+          : [...prev, mediaId],
+      );
+    },
+    [setCampaignMediaIds],
+  );
+
   const setCreativeObjectUrl = useIntegratedPlannerStore(
     (s) => s.setCreativeObjectUrl,
   );
@@ -145,6 +203,52 @@ export default function IntegratedPlannerPageClient({
     () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
     [catalog, selectedRegions, categories],
   );
+
+  const recommendationCatalog = useMemo(
+    () =>
+      buildPlannerRecommendationCatalog(
+        catalog,
+        filtered,
+        selectedRegions,
+        categories,
+      ),
+    [catalog, filtered, selectedRegions, categories],
+  );
+
+  const recommendationStore = useMemo(
+    () => ({
+      goal: campaignGoal,
+      regions,
+      categories: categoriesArr,
+      ageKey,
+      industryKey,
+      budgetMan: budgetNum,
+      months,
+      campaignMediaIds,
+      setCampaignMediaIds,
+    }),
+    [
+      campaignGoal,
+      regions,
+      categoriesArr,
+      ageKey,
+      industryKey,
+      budgetNum,
+      months,
+      campaignMediaIds,
+      setCampaignMediaIds,
+    ],
+  );
+
+  const categoriesSummary = useMemo(() => {
+    if (categoriesArr.length === 0) return isKo ? "전체" : "All";
+    const labelByKey: Record<string, string> = {
+      digital: t("catDigital"),
+      static: t("catStatic"),
+      mobile: t("catMobile"),
+    };
+    return categoriesArr.map((c) => labelByKey[c] ?? c).join(isKo ? ", " : ", ");
+  }, [categoriesArr, isKo, t]);
 
   const regionCounts = useMemo(
     () => countPlannerMediaByRegion(catalog, categories),
@@ -281,7 +385,7 @@ export default function IntegratedPlannerPageClient({
 
   return (
     <HomeLandingDayNight>
-    <div className="tkad-landing-neon tkad-planner-neon min-h-screen bg-background pb-20">
+    <div className="tkad-landing-neon">
       <PageHero
         eyebrow="// 02 · PLANNING"
         title="OOH + 디지털 "
@@ -290,7 +394,10 @@ export default function IntegratedPlannerPageClient({
       />
       <SubTabs tabs={PLANNING_TABS} currentPath="/planner/integrated" />
 
-      <div className="mx-auto max-w-7xl px-4 pt-8 sm:px-6">
+      <IntegratedPlannerPageBody
+        appearance={landingAppearance}
+        className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+      >
         {wizardStep <= LAST_STEP ? (
           <IntegratedPlannerStepper
             currentStep={wizardStep}
@@ -303,12 +410,16 @@ export default function IntegratedPlannerPageClient({
         ) : null}
 
         {wizardStep <= LAST_STEP ? (
-          <div
-            className={cn(
-              "mx-auto space-y-8",
-              wizardStep >= 4 ? "max-w-7xl" : "max-w-3xl",
-            )}
-          >
+          <div className="mx-auto max-w-3xl space-y-8">
+            <PlannerTips
+              variant="integrated"
+              wizardStep={wizardStep}
+              campaignGoal={campaignGoal}
+              campaignMediaCount={campaignMediaIds.length}
+              hasCreative={Boolean(creativeObjectUrl || creativeUploadedUrl)}
+              budgetNum={budgetNum}
+            />
+
             {wizardStep === 1 ? (
               <PlannerCampaignStep1
                 campaignGoal={campaignGoal}
@@ -464,23 +575,36 @@ export default function IntegratedPlannerPageClient({
 
             {wizardStep === 4 ? (
               <div className="space-y-6">
-                <div>
+                <div className="space-y-2 text-center sm:text-left">
                   <PlannerNeonLabel>{ti("step4Label")}</PlannerNeonLabel>
-                  <h2 className={cn("text-xl font-bold", plannerNeon.headline)}>
+                  <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                     {t("stepMediaTitle")}
                   </h2>
+                  <p className={plannerNeon.subtext}>{t("stepMediaDesc")}</p>
                 </div>
-                <IntegratedOohRecommendationPanel
-                  catalog={filtered.length ? filtered : catalog}
+
+                <PlannerRecommendationPanel
+                  catalog={recommendationCatalog}
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
+                  store={recommendationStore}
                 />
-                <PlannerMediaSelector
-                  catalog={filtered.length ? filtered : catalog}
-                  campaignMediaIds={campaignMediaIds}
-                  setCampaignMediaIds={setCampaignMediaIds}
-                  isKo={isKo}
-                  regionLabel={mediaRegionLabel}
+
+                <div className="space-y-2 border-t dark:border-white/10 border-gray-100 pt-6">
+                  <PlannerNeonLabel>Manual Browse</PlannerNeonLabel>
+                  <h3 className={cn("text-base", plannerNeon.headline)}>
+                    {t("recommendBrowseTitle")}
+                  </h3>
+                  <p className={plannerNeon.subtext}>{t("recommendBrowseDesc")}</p>
+                </div>
+                <MediaSearchPage
+                  embedded
+                  plannerMode
+                  initialMedia={plannerCatalogItems}
+                  initialTotal={catalog.length}
+                  plannerSelectedIds={campaignMediaIds}
+                  onPlannerToggleMedia={togglePlannerMedia}
+                  onPlannerNext={goNext}
                 />
               </div>
             ) : null}
@@ -519,18 +643,24 @@ export default function IntegratedPlannerPageClient({
             {wizardStep === 7 && integratedMetrics ? (
               <IntegratedReportStep
                 isKo={isKo}
+                campaignGoal={campaignGoal}
                 goalTitle={goalTitle}
-                goal={campaignGoal}
                 budgetNum={budgetNum}
+                months={months}
                 periodDisplay={periodDisplay}
                 regionsText={regionsText}
+                categoriesText={categoriesSummary}
+                ageText={t(ageKey)}
+                industryText={t(industryKey)}
                 portfolio={portfolio}
                 digitalResult={digitalResult}
                 metrics={integratedMetrics}
+                logoUrl={creativeUploadedUrl || creativeObjectUrl}
+                mediaPlacements={mediaPlacements}
               />
             ) : null}
 
-            <div className="flex justify-between gap-3 pb-8">
+            <div className="flex flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
               <BtnBlock
                 variant="secondary"
                 size="md"
@@ -561,7 +691,15 @@ export default function IntegratedPlannerPageClient({
             </div>
           </div>
         ) : integratedMetrics ? (
-          <div className="mx-auto max-w-7xl space-y-8">
+          <div className="mx-auto max-w-3xl space-y-8">
+            <PlannerTips
+              variant="integrated"
+              wizardStep={8}
+              campaignGoal={campaignGoal}
+              campaignMediaCount={campaignMediaIds.length}
+              hasCreative={Boolean(creativeObjectUrl || creativeUploadedUrl)}
+              budgetNum={budgetNum}
+            />
             <div className="flex flex-wrap items-center justify-between gap-3">
               <BtnBlock
                 variant="secondary"
@@ -598,7 +736,7 @@ export default function IntegratedPlannerPageClient({
             {t("title")}
           </Link>
         </p>
-      </div>
+      </IntegratedPlannerPageBody>
     </div>
     </HomeLandingDayNight>
   );

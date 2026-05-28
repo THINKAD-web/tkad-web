@@ -28,7 +28,8 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { MediaCard } from "@/components/media/media-card";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
@@ -187,14 +188,27 @@ export default function MediaAiRecommendDashboard({
                 : "From top to bottom: the three strongest matches from this run."}
             </p>
             <div className="mt-3 space-y-3">
-              {top3.map((s, i) => (
-                <Top3DashCard
-                  key={s.item.id}
-                  scored={s}
-                  rank={i + 1}
-                  isKo={isKo}
-                />
-              ))}
+              {top3.map((s, i) => {
+                const reason = isKo ? s.reasons[0]?.ko : s.reasons[0]?.en;
+                return (
+                  <MediaCard
+                    key={s.item.id}
+                    mode="feed"
+                    item={mapMediaItemToHomeCatalog(s.item)}
+                    href={mediaItemDetailPath(s.item)}
+                    highlights={[]}
+                    locationLine={formatMediaLocationShort(s.item, isKo)}
+                    isKo={isKo}
+                    rank={i + 1}
+                    showPlanButton
+                    recommendReason={reason}
+                    inCompare={false}
+                    inCart={false}
+                    onToggleCompare={() => {}}
+                    onToggleCart={() => {}}
+                  />
+                );
+              })}
             </div>
           </div>
         </section>
@@ -215,53 +229,31 @@ export default function MediaAiRecommendDashboard({
                 ? "TOP 3 외에도 탐험 중 눈에 띈 매체들이에요."
                 : "Beyond the TOP 3, these also stood out during exploration."}
             </p>
-            <div className="mt-5 grid grid-cols-1 gap-0 sm:grid-cols-2 xl:grid-cols-3">
-              {scored.slice(3, 8).map((s) => (
-                <div
-                  key={s.item.id}
-                  className="-mt-[2px] -ml-[2px] flex flex-col border-2 border-border bg-card p-4 transition-colors hover:bg-muted"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
-                      {isKo ? s.item.name : s.item.nameEn}
-                    </p>
-                    <span className="border-2 border-accent bg-accent px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground">
-                      {isKo ? `${s.score}점` : `M${s.score}`}
-                    </span>
-                  </div>
-                  <p className="mt-2 line-clamp-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                    {`// `}{formatMediaLocationShort(s.item, isKo)}
-                  </p>
-                  <dl className="mt-3 flex items-center justify-between border-t-2 border-border pt-3 text-[11px] tracking-tight text-muted-foreground">
-                    <div>
-                      <dt className="sr-only">CPM</dt>
-                      <dd>
-                        {isKo ? "예상 CPM" : "Est. CPM"}{" "}
-                        <span className="font-bold text-foreground">
-                          {(() => {
-                            const cpm = estimatedCpmWon(s.item);
-                            return cpm != null && Number.isFinite(cpm)
-                              ? `₩${Math.round(cpm).toLocaleString()}`
-                              : "—";
-                          })()}
-                        </span>
-                      </dd>
-                    </div>
-                    <Link
-                      href={mediaItemDetailPath(s.item)}
-                      className="font-bold uppercase tracking-[0.18em] text-foreground transition-colors hover:text-accent"
-                    >
-                      {isKo ? "자세히" : "Details"} →
-                    </Link>
-                  </dl>
-                  <PlanCartAddButton
-                    item={planCartItemFromMediaItem(s.item, "ai_recommend")}
-                    addedFrom="ai_recommend"
-                    compact
-                    className="mt-3 w-full"
+            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
+              {scored.slice(3, 8).map((s, idx) => {
+                const catalogItem = mapMediaItemToHomeCatalog(s.item);
+                const reason = isKo
+                  ? s.reasons[0]?.ko
+                  : s.reasons[0]?.en;
+                return (
+                  <MediaCard
+                    key={s.item.id}
+                    mode="feed"
+                    item={catalogItem}
+                    href={mediaItemDetailPath(s.item)}
+                    highlights={[]}
+                    locationLine={formatMediaLocationShort(s.item, isKo)}
+                    isKo={isKo}
+                    rank={idx + 4}
+                    showPlanButton
+                    recommendReason={reason}
+                    inCompare={false}
+                    inCart={false}
+                    onToggleCompare={() => {}}
+                    onToggleCart={() => {}}
                   />
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
@@ -413,283 +405,6 @@ export default function MediaAiRecommendDashboard({
             </BtnBlock>
           </div>
         </div>
-      </div>
-    </div>
-  );
-}
-
-function Top3DashCard({
-  scored,
-  rank,
-  isKo,
-}: {
-  scored: ScoredMedia;
-  rank: number;
-  isKo: boolean;
-}) {
-  const tr = useTranslations("recommend");
-  const tMedia = useTranslations("media");
-  const m = scored.item;
-  const tl = typeLabels[m.type];
-  const monthly = estimatedMonthlyImpressions(m);
-  const cpm = estimatedCpmWon(m);
-
-  const scoreLabel = (() => {
-    if (!isKo) {
-      if (scored.score >= 90) return `Match ${scored.score}/100 · on fire!`;
-      if (scored.score >= 80) return `Match ${scored.score}/100 · strong fit`;
-      return `Match ${scored.score}/100`;
-    }
-    if (scored.score >= 90) return `${scored.score}점 궁합 폭발!`;
-    if (scored.score >= 80) return `${scored.score}점, 찰떡 조합이에요`;
-    return `${scored.score}점 궁합`;
-  })();
-
-  const goldBadge =
-    rank === 1
-      ? isKo
-        ? "오늘의 행운 매체"
-        : "Today's lucky pick"
-      : rank === 2
-        ? isKo
-          ? "숨겨진 보석"
-          : "Hidden gem"
-        : isKo
-          ? "팬덤 최적"
-          : "Fandom favorite";
-
-  const maddyTagline = (() => {
-    if (!isKo) {
-      if (rank === 1) {
-        return "TKAD bot: This is your main hero screen — the one people will point at and say, \"Ah, that campaign.\" Chaltteok-level chemistry here.";
-      }
-      if (rank === 2) {
-        return "TKAD bot: A rock-solid co-star that quietly boosts reach right next to your hero slot. Think of it as your reliable partner in the route.";
-      }
-      return "TKAD bot: Perfect for hype-heavy, fandom-focused bursts and celebratory moments — this one loves buzz and fan cameras.";
-    }
-    if (rank === 1) {
-      return "오늘 탐험의 진짜 MVP예요. 지나가는 사람들이 딱 한 번만 봐도 \"아, 그 광고\" 하고 기억할 메인 스포트라이트로 추천해요. 궁합 폭발!";
-    }
-    if (rank === 2) {
-      return "메인 옆에서 든든히 받쳐주는 서브 스크린이에요. 노출·가성비를 동시에 챙기고 싶을 때 '찰떡 조합'으로 붙이기 좋은 친구예요.";
-    }
-    return "팬덤·이벤트성 캠페인에 특히 강한 매체예요. 인증샷, 후기, 바이럴까지 한 번에 노릴 수 있는 숨겨진 보석 타입이라, 팬들이 모이는 날에 딱이에요.";
-  })();
-
-  const accentRank = rank === 1;
-
-  return (
-    <div
-      className={cn(
-        "relative flex flex-col overflow-hidden rounded-[24px] border-2 border-border bg-card p-4",
-        accentRank &&
-          "dark:border-white/14 border-gray-200 bg-white text-gray-900 shadow-sm dark:bg-[#05050a] dark:text-white dark:shadow-[0_28px_120px_rgba(0,0,0,0.55)] shadow-[0_28px_120px_rgba(0,0,0,0.55)]",
-      )}
-    >
-      {accentRank ? (
-        <>
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 tkad-neon-depth" />
-          <div aria-hidden className="pointer-events-none absolute inset-0 z-0 opacity-25 tkad-neon-grid" />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-0 tkad-hero-noise opacity-[0.08] mix-blend-overlay"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 z-0 bg-[linear-gradient(165deg,rgba(168,85,247,0.24)_0%,rgba(34,211,238,0.08)_40%,rgba(236,72,153,0.10)_100%)]"
-          />
-        </>
-      ) : null}
-      <div className="relative z-10">
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span
-              className={cn(
-                "flex h-8 w-8 shrink-0 items-center justify-center  text-sm font-black",
-                accentRank
-                  ? "rounded-full border border-white/22 bg-white/12 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)] backdrop-blur"
-                  : "border-2 border-border bg-accent text-accent-foreground",
-              )}
-            >
-              {rank}
-            </span>
-            <span
-              className={cn(
-                "inline-flex items-center gap-1 px-2 py-0.5 font-display text-[10px] font-black uppercase tracking-[0.18em]",
-                accentRank
-                  ? "rounded-xl border border-white/22 dark:bg-black bg-white/25 dark:text-white text-gray-900 backdrop-blur"
-                  : "border-2 border-border bg-hero-void text-accent",
-              )}
-            >
-              <Trophy className="h-3 w-3" />
-              {tr("resultRank", { n: rank })}
-            </span>
-          </div>
-          <span
-            className={cn(
-              "px-2 py-0.5 font-display text-[10px] font-black uppercase tracking-[0.18em]",
-              accentRank
-                ? "rounded-xl border border-white/22 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.2)] backdrop-blur"
-                : "border-2 border-accent bg-accent text-accent-foreground",
-            )}
-          >
-            {goldBadge}
-          </span>
-        </div>
-      <p
-        className={cn(
-          "mt-3 line-clamp-2 text-sm font-bold leading-snug tracking-tight",
-          accentRank ? "dark:text-white text-gray-900" : "text-foreground",
-        )}
-      >
-        {isKo ? m.name : (m.nameEn || m.name)}
-      </p>
-      <p
-        className={cn(
-          "mt-1 font-display text-xs font-medium uppercase tracking-[0.18em]",
-          accentRank ? "dark:text-white text-gray-700" : "text-muted-foreground",
-        )}
-      >
-        [ {isKo ? tl.ko : tl.en} ]
-      </p>
-
-      <div className="mt-3 space-y-1.5">
-        <div
-          className={cn(
-            "flex items-center justify-between gap-2  text-[11px] tracking-tight",
-            accentRank ? "dark:text-white text-gray-800" : "text-muted-foreground",
-          )}
-        >
-          <span className="inline-flex items-center gap-1">
-            <Star className="h-3 w-3" />
-            {tr("resultFitLabel")}
-          </span>
-          <span
-            className={cn(
-              "tabular-nums font-bold",
-              accentRank ? "dark:text-white text-gray-900" : "text-accent",
-            )}
-          >
-            {scoreLabel}
-          </span>
-        </div>
-        <div
-          className={cn(
-            "h-3 w-full border-2",
-            accentRank
-              ? "dark:border-white/18 border-gray-300 dark:bg-black bg-white/20"
-              : "border-border bg-card",
-          )}
-        >
-          <div
-            className={cn(
-              "h-full",
-              accentRank
-                ? "bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
-                : "bg-accent",
-            )}
-            style={{ width: `${Math.min(100, Math.max(0, scored.score))}%` }}
-          />
-        </div>
-      </div>
-
-      <p
-        className={cn(
-          "mt-3  text-[11px] leading-relaxed tracking-tight",
-          accentRank ? "dark:text-white text-gray-800" : "text-muted-foreground",
-        )}
-      >
-        {`// `}{maddyTagline}
-      </p>
-
-      <dl
-        className={cn(
-          "mt-4 space-y-2 border-t-2 pt-3  text-xs",
-          accentRank ? "dark:border-white/18 border-gray-300" : "border-border",
-        )}
-      >
-        <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
-            {tr("resultEstImpressions")}
-          </dt>
-          <dd
-            className={cn(
-              "tabular-nums font-bold",
-              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
-            )}
-          >
-            {monthly > 0 ? monthly.toLocaleString() : "—"}
-          </dd>
-        </div>
-        <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
-            {tr("resultCpmLabel")}
-          </dt>
-          <dd
-            className={cn(
-              "tabular-nums font-bold",
-              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
-            )}
-          >
-            {cpm != null && Number.isFinite(cpm)
-              ? `₩${Math.round(cpm).toLocaleString()}`
-              : "—"}
-          </dd>
-        </div>
-        <div className="flex justify-between gap-2">
-          <dt className={accentRank ? "dark:text-white text-gray-600" : "text-muted-foreground"}>
-            {isKo ? "가격" : "Price"}
-          </dt>
-          <dd
-            className={cn(
-              "tabular-nums font-bold",
-              accentRank ? "dark:text-white text-gray-900" : "text-foreground",
-            )}
-          >
-            {formatCatalogPriceFieldWon(m.price)}
-            <span
-              className={cn(
-                "ml-1 text-[10px] font-normal",
-                accentRank ? "dark:text-white text-gray-500" : "text-muted-foreground",
-              )}
-            >
-              · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
-            </span>
-          </dd>
-        </div>
-      </dl>
-
-      <p
-        className={cn(
-          "mt-3 flex items-start gap-1 font-display text-xs font-medium uppercase tracking-[0.18em]",
-          accentRank ? "dark:text-white text-gray-700" : "text-muted-foreground",
-        )}
-      >
-        <MapPin className="mt-0.5 h-3 w-3 shrink-0" />
-        <span className="line-clamp-2">
-          {formatMediaLocationShort(m, isKo)}
-        </span>
-      </p>
-
-      <Link
-        href={mediaItemDetailPath(m)}
-        className={cn(
-          "mt-4 inline-flex w-fit items-center gap-1 border-2 px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-          accentRank
-            ? "border-white/22 dark:bg-white/10 bg-gray-100 dark:text-white text-gray-900 backdrop-blur hover:border-white/30 hover:bg-white/16"
-            : "border-border bg-card text-foreground hover:bg-foreground hover:text-background",
-        )}
-      >
-        {isKo ? "상세 보기" : "Details"}
-        <span aria-hidden>→</span>
-      </Link>
-      <PlanCartAddButton
-        item={planCartItemFromMediaItem(m, "ai_recommend")}
-        addedFrom="ai_recommend"
-        compact
-        className="mt-2 w-full"
-      />
       </div>
     </div>
   );

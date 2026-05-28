@@ -11,7 +11,17 @@ type Props = {
   campaignMediaCount: number;
   hasCreative: boolean;
   budgetNum: number;
+  /** 통합 플래너(7입력+8대시보드) — 단계 번호를 OOH 플래너 tip 규칙에 매핑 */
+  variant?: "planner" | "integrated";
 };
+
+function integratedPlannerTipStep(wizardStep: number): number {
+  if (wizardStep <= 4) return wizardStep;
+  if (wizardStep === 5) return 5;
+  if (wizardStep === 6) return 5;
+  if (wizardStep === 7) return 6;
+  return 7;
+}
 
 export default function PlannerTips({
   wizardStep,
@@ -19,32 +29,37 @@ export default function PlannerTips({
   campaignMediaCount,
   hasCreative,
   budgetNum,
+  variant = "planner",
 }: Props) {
   const t = useTranslations("planner");
 
-  // 6단계 재배치: 1=목표, 2=타깃·지역, 3=예산·기간, 4=매체선택, 5=로고, 6=보고서, 7=결과 대시보드
-  const tipKey =
-    wizardStep === 1 && !campaignGoal
+  const step =
+    variant === "integrated" ? integratedPlannerTipStep(wizardStep) : wizardStep;
+  const isIntegratedDigital = variant === "integrated" && wizardStep === 5;
+
+  const tipKey = isIntegratedDigital
+    ? "tipIntegratedDigital"
+    : step === 1 && !campaignGoal
       ? "tipStep1"
-      : wizardStep === 1
+      : step === 1
         ? "tipStep1Done"
-        : wizardStep === 2
+        : step === 2
           ? "tipStep5"
-          : wizardStep === 3 && budgetNum < 500
+          : step === 3 && budgetNum < 500
             ? "tipStep4Budget"
-            : wizardStep === 3
+            : step === 3
               ? "tipStep4Budget"
-              : wizardStep === 4 && campaignMediaCount === 0
+              : step === 4 && campaignMediaCount === 0
                 ? "tipStep2"
-                : wizardStep === 4
+                : step === 4
                   ? "tipStep2Done"
-                  : wizardStep === 5 && !hasCreative
+                  : step === 5 && !hasCreative
                     ? "tipStep3"
-                    : wizardStep === 5
+                    : step === 5
                       ? "tipStep3Done"
-                      : wizardStep === 6
+                      : step === 6
                         ? "tipStep6"
-                        : wizardStep === 7
+                        : step === 7
                           ? "tipStep7"
                           : "tipDefault";
 

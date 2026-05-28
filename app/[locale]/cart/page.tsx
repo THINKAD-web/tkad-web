@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, type FormEvent } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useCart } from "@/lib/cart";
-import { Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
@@ -38,7 +37,6 @@ export default function CartPage() {
   const [endDate, setEndDate] = useState("");
   const [budgetMax, setBudgetMax] = useState("");
 
-  const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // 로그인 사용자 정보 자동 입력
@@ -86,48 +84,16 @@ export default function CartPage() {
 
   const total = useMemo(() => items.reduce((s, m) => s + m.price, 0), [items]);
 
-  async function handleSubmit(e: FormEvent) {
+  function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
-    if (items.length === 0) {
+    const mediaIds =
+      items.length > 0 ? items.map((i) => i.id) : ids.filter(Boolean);
+    if (mediaIds.length === 0) {
       setError("장바구니가 비어있습니다.");
       return;
     }
-    setSubmitting(true);
-    try {
-      const res = await fetch("/api/quote/create", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          mediaIds: items.map((i) => i.id),
-          clientName,
-          clientEmail,
-          clientPhone: clientPhone || undefined,
-          clientCompany: clientCompany || undefined,
-          period,
-          startDate: startDate || undefined,
-          endDate: endDate || undefined,
-          budgetMax: budgetMax ? Number(budgetMax) : undefined,
-          locale: "ko",
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok || !data.ok) {
-        const msg = data?.error?.message ?? "견적서 생성에 실패했습니다.";
-        setError(msg);
-        toast.error(msg);
-        return;
-      }
-      clear();
-      toast.success("견적서가 생성되었습니다.");
-      router.push(`/quote/${data.data.id}/preview`);
-    } catch {
-      const msg = "네트워크 오류가 발생했습니다.";
-      setError(msg);
-      toast.error(msg);
-    } finally {
-      setSubmitting(false);
-    }
+    router.push(`/quote?media=${mediaIds.join(",")}`);
   }
 
   function handleRemove(id: string, name?: string) {
@@ -177,7 +143,7 @@ export default function CartPage() {
               </p>
               <div className="mt-8 flex justify-center">
                 <Link
-                  href="/media/map"
+                  href="/media"
                   className="inline-flex h-14 items-center justify-center rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-8 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] backdrop-blur transition-transform hover:-translate-y-0.5 hover:dark:bg-white/10"
                 >
                   매체 탐색하러 가기
@@ -416,14 +382,13 @@ export default function CartPage() {
 
                     <button
                       type="submit"
-                      disabled={submitting || items.length === 0}
+                      disabled={items.length === 0 && ids.length === 0}
                       className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-6 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-50"
                     >
-                      {submitting && <Spinner size="sm" />}
-                      {submitting ? "생성 중…" : "견적서 생성"}
+                      견적 요청하기
                     </button>
                     <p className="text-center font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white">
-                      {`// `}{submitting ? "processing" : "secure request"}
+                      {`// `}quote wizard · media pre-selected
                     </p>
                     </div>
                   </form>

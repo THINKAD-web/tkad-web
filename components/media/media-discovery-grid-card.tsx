@@ -7,6 +7,7 @@ import { MediaCompareSelectButton } from "@/components/media/media-compare-selec
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import type { PlanCartItem } from "@/lib/plan-cart";
+import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 
 type Props = {
   href: string;
@@ -42,6 +43,8 @@ export function MediaDiscoveryGridCard({
   isInstantBooking,
   imagePriority = false,
 }: Props) {
+  const thumbUnoptimized = imageUrl ? shouldUseUnoptimizedImage(imageUrl) : false;
+
   return (
     <Link
       href={href}
@@ -56,6 +59,7 @@ export function MediaDiscoveryGridCard({
             className="object-cover"
             sizes="(max-width: 768px) 50vw, 33vw"
             priority={imagePriority}
+            unoptimized={thumbUnoptimized}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
