@@ -6,6 +6,10 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  getKakaoMapAppKey,
+  loadKakaoMapsSdk,
+} from "@/lib/kakao-maps-admin";
 import { cn } from "@/lib/utils";
 
 export type MapMarker = {
@@ -53,10 +57,6 @@ declare global {
   interface Window {
     kakao: unknown;
   }
-}
-
-function kakaoMapsSdkUrl(appkey: string) {
-  return `https://dapi.kakao.com/v2/maps/sdk.js?appkey=${encodeURIComponent(appkey)}&autoload=false&libraries=clusterer`;
 }
 
 /**
@@ -387,61 +387,6 @@ function zoomClusterIn(
   }
 }
 
-const SDK_LOAD_FAILED_KO =
-  "카카오 지도 SDK를 불러오지 못했습니다. JavaScript 키(NEXT_PUBLIC_KAKAO_MAP_APP_KEY)·카카오 디벨로퍼스 「JS SDK 도메인」에 브라우저 주소와 동일한 origin(예: http://localhost:3000, http://localhost:3004)을 등록·.env 변경 후 dev 재시작·네트워크를 확인하세요.";
-
-function loadKakaoSdk(appkey: string): Promise<void> {
-  const sdkUrl = kakaoMapsSdkUrl(appkey);
-  return new Promise((resolve, reject) => {
-    if (typeof window === "undefined") {
-      reject(new Error("SSR"));
-      return;
-    }
-    type MapsApi = { load: (cb: () => void) => void };
-    const mapsApi = (): MapsApi | undefined =>
-      (window as unknown as { kakao?: { maps?: MapsApi } }).kakao?.maps;
-
-    const runKakaoLoad = () => {
-      const maps = mapsApi();
-      if (maps?.load) {
-        maps.load(() => resolve());
-        return;
-      }
-      reject(
-        new Error(
-          "kakao.maps 가 없습니다. JavaScript 키와 Web 사이트 도메인을 카카오 디벨로퍼스에서 확인하세요.",
-        ),
-      );
-    };
-
-    if (mapsApi()?.load) {
-      runKakaoLoad();
-      return;
-    }
-
-    const existing = document.querySelector<HTMLScriptElement>(
-      `script[data-kakao-sdk="1"]`,
-    );
-    if (existing) {
-      const onScriptError = () => reject(new Error(SDK_LOAD_FAILED_KO));
-      existing.addEventListener("load", runKakaoLoad, { once: true });
-      existing.addEventListener("error", onScriptError, { once: true });
-      queueMicrotask(() => {
-        if (mapsApi()?.load) runKakaoLoad();
-      });
-      return;
-    }
-
-    const s = document.createElement("script");
-    s.src = sdkUrl;
-    s.async = true;
-    s.dataset.kakaoSdk = "1";
-    s.onload = () => runKakaoLoad();
-    s.onerror = () => reject(new Error(SDK_LOAD_FAILED_KO));
-    document.head.appendChild(s);
-  });
-}
-
 export default function KakaoMapView({
   markers,
   selectedId,
@@ -528,7 +473,7 @@ export default function KakaoMapView({
 
   // This effect intentionally boots Kakao SDK once per mount.
   useEffect(() => {
-    const appkey = process.env.NEXT_PUBLIC_KAKAO_MAP_APP_KEY?.trim();
+    const appkey = getKakaoMapAppKey();
     if (!appkey) {
       queueMicrotask(() => {
         setSdkError(
@@ -557,7 +502,7 @@ export default function KakaoMapView({
       }
     };
 
-    loadKakaoSdk(appkey)
+    loadKakaoMapsSdk({ appkey, libraries: "clusterer" })
       .then(() => {
         if (cancelled || !containerRef.current) return;
         try {

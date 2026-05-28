@@ -9,6 +9,13 @@ type Props = {
   mediaName: string;
 };
 
+/** Kakao 로드뷰 링크 — `/link/roadview/위도,경도` 만 지원 (이름 파라미터 없음) */
+function kakaoRoadviewHref(lat: number, lng: number): string {
+  const y = Number(lat.toFixed(7));
+  const x = Number(lng.toFixed(7));
+  return `https://map.kakao.com/link/roadview/${y},${x}`;
+}
+
 /**
  * 로드뷰 — Kakao SDK 없이 외부 링크로 연결 (공개 페이지는 Carto 다크 지도 사용).
  */
@@ -17,9 +24,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
 
   if (lat == null || lng == null) return null;
 
-  const externalHref = `https://map.kakao.com/link/roadview/${encodeURIComponent(
-    mediaName,
-  )},${lat},${lng}`;
+  const externalHref = kakaoRoadviewHref(lat, lng);
 
   return (
     <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5">
@@ -37,6 +42,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           href={externalHref}
           target="_blank"
           rel="noopener noreferrer"
+          aria-label={t("iframeTitle", { name: mediaName })}
           className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-600 transition hover:bg-violet-500/20 dark:text-violet-300"
         >
           {t("openExternal")}

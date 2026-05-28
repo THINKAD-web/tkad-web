@@ -4,12 +4,12 @@ import { useEffect, useRef, useCallback, useState, useMemo } from "react";
 import { MapPin } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  getAdminKakaoMapAppKey,
-  loadAdminKakaoMapsSdk,
+  getKakaoMapAppKey,
+  loadKakaoMapsSdk,
 } from "@/lib/kakao-maps-admin";
 
 function getAdminMapProvider(): "kakao" | "google" | "fallback" {
-  if (getAdminKakaoMapAppKey()) return "kakao";
+  if (getKakaoMapAppKey()) return "kakao";
   const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (typeof g === "string" && g.trim().length > 0) return "google";
   return "fallback";
@@ -69,6 +69,7 @@ export default function AdminMediaDraggableMap({
   const onDragRef = useRef(onPositionChange);
   const skipEmitRef = useRef(false);
   const [mapReady, setMapReady] = useState(false);
+  const [sdkError, setSdkError] = useState<string | null>(null);
 
   const kakaoRef = useRef<{
     map: {
@@ -113,14 +114,28 @@ export default function AdminMediaDraggableMap({
 
   const mountKakao = useCallback(() => {
     const el = containerRef.current;
-    const appKey = getAdminKakaoMapAppKey();
+    const appKey = getKakaoMapAppKey();
     if (!el || !appKey) return;
 
     let cancelled = false;
+    let resizeObserver: ResizeObserver | null = null;
+
+    const fireRelayout = (map: { relayout?: () => void } | null) => {
+      if (!map || typeof map.relayout !== "function") return;
+      try {
+        map.relayout();
+      } catch {
+        /* noop */
+      }
+    };
+
     void (async () => {
       try {
-        await loadAdminKakaoMapsSdk(appKey);
-      } catch {
+        await loadKakaoMapsSdk({ appkey: appKey });
+      } catch (e) {
+        if (!cancelled) {
+          setSdkError(e instanceof Error ? e.message : "Kakao SDK load failed");
+        }
         return;
       }
       if (cancelled || !containerRef.current) return;
@@ -133,6 +148,7 @@ export default function AdminMediaDraggableMap({
               Map: new (node: HTMLElement, opts: { center: unknown; level: number }) => {
                 setCenter: (p: unknown) => void;
                 setLevel: (n: number) => void;
+                relayout?: () => void;
               };
               LatLng: new (lat: number, lng: number) => unknown;
               Marker: new (opts: {
@@ -155,33 +171,65 @@ export default function AdminMediaDraggableMap({
         }
       ).kakao?.maps;
 
-      if (!K) return;
+      if (!K) {
+        if (!cancelled) setSdkError("kakao.maps 를 불러오지 못했습니다.");
+        return;
+      }
 
       K.load(() => {
         if (cancelled || !containerRef.current) return;
-        const { lat: lat0, lng: lng0 } = coordsRef.current;
-        const map = new K.Map(el, {
-          center: new K.LatLng(lat0, lng0),
-          level: 4,
-        });
-        const marker = new K.Marker({
-          position: new K.LatLng(lat0, lng0),
-          map,
-          draggable: true,
-        });
-        kakaoRef.current = { map, marker, LatLng: K.LatLng };
-        K.event.addListener(marker, "dragend", () => {
-          if (skipEmitRef.current) return;
-          const p = marker.getPosition();
-          onDragRef.current(p.getLat(), p.getLng());
-        });
-        setMapReady(true);
+        try {
+          containerRef.current.innerHTML = "";
+          const { lat: lat0, lng: lng0 } = coordsRef.current;
+          const map = new K.Map(containerRef.current, {
+            center: new K.LatLng(lat0, lng0),
+            level: 4,
+          });
+          const marker = new K.Marker({
+            position: new K.LatLng(lat0, lng0),
+            map,
+            draggable: true,
+          });
+          kakaoRef.current = { map, marker, LatLng: K.LatLng };
+          K.event.addListener(marker, "dragend", () => {
+            if (skipEmitRef.current) return;
+            const p = marker.getPosition();
+            onDragRef.current(p.getLat(), p.getLng());
+          });
+
+          if (typeof ResizeObserver !== "undefined" && containerRef.current) {
+            resizeObserver = new ResizeObserver(() => {
+              if (!cancelled) fireRelayout(map);
+            });
+            resizeObserver.observe(containerRef.current);
+          }
+
+          requestAnimationFrame(() => {
+            if (!cancelled) fireRelayout(map);
+          });
+          window.setTimeout(() => {
+            if (!cancelled) fireRelayout(map);
+          }, 280);
+
+          if (!cancelled) {
+            setSdkError(null);
+            setMapReady(true);
+          }
+        } catch (e) {
+          if (!cancelled) {
+            setSdkError(
+              e instanceof Error ? e.message : "지도 초기화에 실패했습니다.",
+            );
+          }
+        }
       });
 
       cleanupRef.current = () => {
+        resizeObserver?.disconnect();
+        resizeObserver = null;
         kakaoRef.current = null;
         setMapReady(false);
-        el.innerHTML = "";
+        if (containerRef.current) containerRef.current.innerHTML = "";
       };
     })();
 
@@ -428,6 +476,11 @@ export default function AdminMediaDraggableMap({
 
   return (
     <div className={cn("overflow-hidden rounded-lg border border-navy/10", className)}>
+      {sdkError ? (
+        <p className="border-b border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+          {sdkError}
+        </p>
+      ) : null}
       <div
         ref={containerRef}
         className="w-full bg-slate-100"
