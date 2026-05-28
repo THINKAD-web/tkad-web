@@ -19,4 +19,6 @@ export type MapMapItem = {
   dailyFootTraffic?: number | null;
   impressions?: number | null;
   cpm?: number | null;
+  isVerified?: boolean;
+  isInstantBooking?: boolean;
 };

@@ -5,6 +5,8 @@ import { Share2 } from "lucide-react";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import type { MediaItem } from "@/lib/media-data";
 import {
   calculateMediaQuoteByDays,
@@ -124,6 +126,12 @@ export function MediaDetailStickyQuotePanel({
         <MediaDetailAddToCart
           mediaId={media.id}
           mediaName={displayName}
+          className="w-full"
+        />
+
+        <PlanCartAddButton
+          item={planCartItemFromMediaItem(media, "search")}
+          addedFrom="search"
           className="w-full"
         />
 

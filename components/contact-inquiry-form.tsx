@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import { useForm, type FieldPath } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSearchParams } from "next/navigation";
@@ -19,6 +20,23 @@ import {
   type SavedPlannerPlanJson,
 } from "@/lib/planner/contact-prefill";
 import { buildProposalContactMessage } from "@/lib/proposal/contact-prefill";
+import { PlanCartContactSummary } from "@/components/plan/plan-cart-contact-summary";
+import { PlannerContactSummary } from "@/components/plan/planner-contact-summary";
+import {
+  buildPlanTransferContactMessage,
+  clearPlanTransferData,
+  planTransferBudgetToContactBudgetV2,
+  planTransferFromParam,
+  planTransferGoalToContactGoals,
+  readPlanTransferData,
+  type PlanTransferData,
+} from "@/lib/planner-contact-transfer";
+import {
+  buildPlanCartContactMessage,
+  planCartBudgetToContactBudgetV2,
+  planCartGoalToContactGoals,
+} from "@/lib/plan-cart-contact-prefill";
+import { getPlanCart, planCartMonthlyTotal } from "@/lib/plan-cart";
 import {
   isSavedCampaignProposalId,
   type CampaignProposalOutput,
@@ -70,7 +88,7 @@ type TurnstileWindow = Window &
     };
   };
 
-export default function ContactInquiryForm() {
+function ContactInquiryForm() {
   const t = useTranslations("contact");
   const tForm = useTranslations("contactForm");
   const tPlanner = useTranslations("planner");
@@ -108,8 +126,14 @@ export default function ContactInquiryForm() {
   const fromParam = searchParams.get("from");
   const toParam = searchParams.get("to");
   const quoteParam = searchParams.get("quote");
+  const isPlanCartPrefill = fromParam?.trim() === "plan";
+  const planTransferFrom = planTransferFromParam(fromParam);
+  const isPlanTransferPrefill = planTransferFrom != null;
   const periodPrefillDone = useRef(false);
   const quotePrefillDone = useRef(false);
+  const planCartPrefillDone = useRef(false);
+  const planTransferPrefillDone = useRef(false);
+  const [planTransfer, setPlanTransfer] = useState<PlanTransferData | null>(null);
   const [packageRef, setPackageRef] = useState<
     { slug: string; name: string } | undefined
   >(undefined);
@@ -160,6 +184,10 @@ export default function ContactInquiryForm() {
   useEffect(() => {
     periodPrefillDone.current = false;
   }, [fromParam, toParam]);
+
+  useEffect(() => {
+    planCartPrefillDone.current = false;
+  }, [fromParam]);
 
   useEffect(() => {
     quotePrefillDone.current = false;
@@ -216,6 +244,9 @@ export default function ContactInquiryForm() {
 
   useEffect(() => {
     if (periodPrefillDone.current) return;
+    if (fromParam?.trim() === "plan") return;
+    if (fromParam?.trim() === "planner") return;
+    if (fromParam?.trim() === "ai" || fromParam?.trim() === "ai_recommend") return;
     const start = parseYmdLocal(fromParam?.trim() ?? "");
     if (!start) return;
     periodPrefillDone.current = true;
@@ -235,6 +266,79 @@ export default function ContactInquiryForm() {
       setValue("inquiryType", "media_quote", { shouldValidate: true, shouldDirty: true });
     }
   }, [fromParam, toParam, getValues, isKo, locale, setValue]);
+
+  useEffect(() => {
+    if (!isPlanCartPrefill || planCartPrefillDone.current) return;
+    const cart = getPlanCart();
+    if (cart.items.length === 0) return;
+    planCartPrefillDone.current = true;
+
+    const message = buildPlanCartContactMessage(cart, isKo);
+    setValue("additionalNotes", message, { shouldDirty: true });
+
+    const goals = planCartGoalToContactGoals(cart.campaignGoal);
+    if (goals.length > 0) {
+      setValue("campaignGoals", goals, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    const monthly = planCartMonthlyTotal(cart);
+    if (monthly > 0) {
+      setValue("budget", planCartBudgetToContactBudgetV2(monthly), {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    setValue("inquiryType", "media_quote", {
+      shouldValidate: true,
+      shouldDirty: true,
+    });
+  }, [isPlanCartPrefill, isKo, setValue]);
+
+  useEffect(() => {
+    planTransferPrefillDone.current = false;
+  }, [fromParam]);
+
+  useEffect(() => {
+    if (!isPlanTransferPrefill || planTransferPrefillDone.current) return;
+    const stored = readPlanTransferData();
+    if (!stored) return;
+    planTransferPrefillDone.current = true;
+    setPlanTransfer(stored);
+    clearPlanTransferData();
+
+    const message = buildPlanTransferContactMessage(stored, isKo);
+    setValue("additionalNotes", message, { shouldDirty: true });
+    setValue("mediaIds", stored.mediaIds, { shouldDirty: true });
+
+    const goals = planTransferGoalToContactGoals(stored.goal);
+    if (goals.length > 0) {
+      setValue("campaignGoals", goals, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+    }
+
+    if (stored.totalBudget > 0) {
+      setValue(
+        "budget",
+        planTransferBudgetToContactBudgetV2(
+          stored.totalBudget,
+          stored.duration,
+        ),
+        { shouldValidate: true, shouldDirty: true },
+      );
+    }
+
+    setValue(
+      "inquiryType",
+      stored.source === "ai_recommend" ? "media_quote" : "campaign_plan",
+      { shouldValidate: true, shouldDirty: true },
+    );
+  }, [isPlanTransferPrefill, isKo, setValue]);
 
   useEffect(() => {
     mediaPrefillDone.current = false;
@@ -333,6 +437,7 @@ export default function ContactInquiryForm() {
   }, [getValues, isKo, packageSlug, searchParams, setValue, t]);
 
   useEffect(() => {
+    if (isPlanTransferPrefill) return;
     if (!planIdParam || !isSavedPlannerPlanId(planIdParam)) {
       return;
     }
@@ -747,9 +852,16 @@ export default function ContactInquiryForm() {
           ...data,
           locale,
           turnstileToken,
-          mediaIds: mediaIdParam
-            ? mediaIdParam.split(/[,，\s]+/).filter(Boolean)
-            : undefined,
+          mediaIds:
+            planTransfer?.mediaIds?.length
+              ? planTransfer.mediaIds
+              : data.mediaIds?.length
+                ? data.mediaIds
+                : mediaIdParam
+                  ? mediaIdParam.split(/[,，\s]+/).filter(Boolean)
+                  : undefined,
+          planDuration: planTransfer?.duration,
+          planSource: planTransfer?.source,
         }),
       });
       if (!res.ok) {
@@ -856,7 +968,11 @@ export default function ContactInquiryForm() {
         {tForm("stepLabel", { current: step + 1, total: 4 })}
       </p>
 
-      {packageRef ? (
+      {isPlanCartPrefill ? (
+        <PlanCartContactSummary />
+      ) : planTransfer ? (
+        <PlannerContactSummary plan={planTransfer} />
+      ) : packageRef ? (
         <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
             [ PACKAGE REFERENCE ]
@@ -1254,3 +1370,5 @@ export default function ContactInquiryForm() {
     </form>
   );
 }
+
+export default withSearchParamsSuspense(ContactInquiryForm);

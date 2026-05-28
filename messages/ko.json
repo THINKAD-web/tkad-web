@@ -161,6 +161,10 @@
         "label": "AI 매체 추천",
         "desc": "목표·예산에 맞는 AI 추천"
       },
+      "campaign-targets": {
+        "label": "캠페인 목적",
+        "desc": "브랜드·프로모션·런칭 등 목적별 탐색"
+      },
       "media-planner": {
         "label": "OOH 캠페인 플래너",
         "desc": "예산·기간·매체 조합 설계"
@@ -272,7 +276,9 @@
     "pointsShop": "포인트 샵",
     "referralInvite": "친구 초대",
     "kakaoLogin": "카카오로 시작하기",
-    "naverLogin": "네이버로 로그인",
+    "naverLogin": "네이버로 시작하기",
+    "googleLogin": "Google로 계속하기",
+    "googleConnecting": "Google 연결 중…",
     "backToLogin": "로그인으로 돌아가기",
     "orEmail": "또는 이메일로",
     "usageGuide": "사용법"
@@ -1881,7 +1887,7 @@
     "monthCompare1": "1개월",
     "monthCompare3": "3개월",
     "monthCompare6": "6개월",
-    "ctaQuoteWithPlan": "이 플랜으로 견적 받기",
+    "ctaQuoteWithPlan": "이 플랜으로 견적 요청하기 →",
     "quoteTrustLine": "평균 24시간 내 연락",
     "ctaSaveDraft24h": "24시간 임시 링크",
     "savedToastDraft24h": "24시간 유효 임시 링크가 저장되었습니다. URL이 클립보드에 복사됐습니다.",
@@ -2031,6 +2037,7 @@
     "sitemap": "사이트맵",
     "sitemapClose": "사이트맵 닫기",
     "sitemapCompany": "회사",
+    "sitemapOtherSearch": "기타 검색",
     "sitemapWebinar": "웨비나",
     "servicesIntro": "서비스 소개",
     "coreNavLabel": "주요 메뉴",
@@ -3006,7 +3013,7 @@
     "personalizedCtaPlanner": "AI 플래너 써보기"
   },
   "onboarding": {
-    "kicker": "Welcome",
+    "kicker": "ONBOARDING",
     "title": "프로필 설정",
     "skip": "건너뛰기",
     "next": "다음",
@@ -3015,6 +3022,9 @@
     "saveError": "저장에 실패했습니다. 다시 시도해주세요.",
     "industryRequired": "업종을 하나 이상 선택해주세요.",
     "progressMessage": "프로필 완성도 <accent>{percent}%</accent> — 완성하면 맞춤 추천이 더 정확해져요",
+    "progressKicker": "Profile",
+    "progressLabel": "완성도",
+    "progressCta": "완성하기",
     "step1Title": "어떤 목적으로 사용하실 건가요?",
     "step1Desc": "맞춤 기능과 추천에 활용됩니다.",
     "roleAdvertiser": "광고주",

@@ -6,7 +6,6 @@ import {
   clearKakaoPending,
   communityRoleFromSignupRole,
   readKakaoPending,
-  type KakaoSignupRole,
 } from "@/lib/kakao-oauth-pending";
 import {
   apiError,
@@ -17,11 +16,20 @@ import {
   readJson,
 } from "@/lib/api-response";
 import { rateLimit } from "@/lib/rate-limit";
+import { normalizeSignupStartRole } from "@/lib/signup-start-roles";
+import { seedSignupOnboardingPreference } from "@/lib/signup-start-roles-server";
 
 export const runtime = "nodejs";
 
 const Body = z.object({
-  role: z.enum(["ADVERTISER", "MEDIA_OWNER"]),
+  role: z.string().transform((value, ctx) => {
+    const normalized = normalizeSignupStartRole(value);
+    if (!normalized) {
+      ctx.addIssue({ code: z.ZodIssueCode.custom, message: "invalid role" });
+      return z.NEVER;
+    }
+    return normalized;
+  }),
 });
 
 const limiter = rateLimit({ limit: 10, windowMs: 60 * 1000 });
@@ -48,7 +56,7 @@ export async function POST(req: Request) {
     const parsed = Body.safeParse(body);
     if (!parsed.success) return apiZodError(parsed.error);
 
-    const signupRole = parsed.data.role as KakaoSignupRole;
+    const signupRole = parsed.data.role;
     const communityRole = communityRoleFromSignupRole(signupRole);
     const appRole = appRoleFromSignupRole(signupRole);
 
@@ -82,6 +90,10 @@ export async function POST(req: Request) {
     }
 
     await clearKakaoPending();
+
+    void seedSignupOnboardingPreference(created.userId, signupRole).catch(
+      (err) => console.error("[auth/kakao/complete] onboarding preference", err),
+    );
 
     return apiOk({
       id: created.userId,

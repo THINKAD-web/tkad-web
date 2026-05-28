@@ -2,24 +2,31 @@
 
 import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { KakaoLoginButton } from "@/components/auth/kakao-login-button";
-import { NaverLoginButton } from "@/components/auth/naver-login-button";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { resolveOAuthLoginErrorMessage } from "@/lib/oauth-login-errors";
 
 function LoginForm() {
   const t = useTranslations("auth");
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const router = useRouter();
   const search = useSearchParams();
   const redirect = search.get("redirect") || "/my";
+  const oauthError = resolveOAuthLoginErrorMessage(
+    search.get("error"),
+    search.get("provider"),
+    isKo,
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(oauthError);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -74,14 +81,14 @@ function LoginForm() {
                   로그인
                 </h1>
                 <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
-                  {`// `}THINKAD 계정으로 로그인하세요
+                  {`// `}
+                  {isKo
+                    ? "Google·카카오·네이버 간편 로그인 또는 이메일 로그인"
+                    : "Sign in with Google, Kakao, Naver, or email"}
                 </p>
               </div>
 
-              <div className="space-y-3">
-                <KakaoLoginButton />
-                <NaverLoginButton />
-              </div>
+              <SocialAuthButtons />
 
               <div className="relative py-1">
                 <div className="absolute inset-0 flex items-center" aria-hidden>

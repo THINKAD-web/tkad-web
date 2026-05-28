@@ -1,4 +1,5 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import {
   matchesMapCatalogFilter,
@@ -50,6 +51,12 @@ function toMapItem(m: MediaItem) {
     dailyFootTraffic: m.dailyFootTraffic ?? null,
     impressions: m.impressions ?? null,
     cpm: m.cpm ?? null,
+    isVerified: m.isVerified === true,
+    isInstantBooking: isInstantBookingEligible({
+      instantBookingEnabled: m.instantBookingEnabled ?? false,
+      availability: m.availability,
+      catalogSource: m.catalogSource,
+    }).eligible,
   };
 }
 

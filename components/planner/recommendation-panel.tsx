@@ -26,6 +26,9 @@ import {
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
 import { formatMediaCategoryBadges } from "@/lib/media-category-badges";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -221,6 +224,14 @@ export function PlannerRecommendationPanel({
     });
   };
 
+  const planBulkItems = useMemo(
+    () =>
+      recommendations.map(({ media }) =>
+        planCartItemFromMediaItem(media, "planner"),
+      ),
+    [recommendations],
+  );
+
   return (
     <PlannerNeonCard className="border-violet-400/20">
       <div className="flex flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
@@ -262,6 +273,11 @@ export function PlannerRecommendationPanel({
           >
             {t("recommendAddAll")}
           </button>
+          <PlanCartBulkAddButton
+            items={planBulkItems}
+            label={isKo ? "추천 전체 플랜에 추가" : "Add all to plan"}
+            className="!h-auto !px-4 !py-2 !text-xs"
+          />
         </div>
       </div>
       <div className="p-5 sm:p-6">
@@ -414,6 +430,12 @@ export function PlannerRecommendationPanel({
                       </>
                     )}
                   </button>
+                  <PlanCartAddButton
+                    item={planCartItemFromMediaItem(media, "planner")}
+                    addedFrom="planner"
+                    compact
+                    className="w-full"
+                  />
                 </li>
               );
             })}

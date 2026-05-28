@@ -1,17 +1,13 @@
 "use client";
 
 import { useMemo, useState, useEffect } from "react";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import type { MediaItem } from "@/lib/media-data";
 import { MapPin } from "lucide-react";
+import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { SectionHead } from "@/components/brutalist/section-head";
-
-const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
-  ssr: false,
-});
 
 export default function MediaDetailExtras({
   media,
@@ -142,10 +138,10 @@ export default function MediaDetailExtras({
         </div>
         <div className="min-w-0 flex-1 overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-sm backdrop-blur lg:min-w-0 lg:flex-[1.15]">
           <p className="border-b border-border/70 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            [ {isKo ? "다크 지도" : "Dark map"} ]
+            [ {isKo ? "카카오 지도" : "Kakao map"} ]
           </p>
           <div className="h-[400px]">
-            <DarkMapView
+            <MediaDetailKakaoMap
               markers={[
                 {
                   id: media.id,
@@ -158,12 +154,10 @@ export default function MediaDetailExtras({
               ]}
               selectedId={mapSelectedId}
               onSelect={(id) => setMapSelectedId(id)}
-              onBoundsChange={() => {}}
               center={{ lat: media.lat, lng: media.lng }}
               zoom={4}
               coverageGeoJson={effectiveCoverageGeoJson}
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
-              disableCluster
             />
           </div>
         </div>

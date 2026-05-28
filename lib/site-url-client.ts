@@ -5,6 +5,6 @@ export function getClientSiteUrl(): string {
   }
   return (
     process.env.NEXT_PUBLIC_SITE_URL?.trim()?.replace(/\/$/, "") ||
-    "https://thinkad.co.kr"
+    "https://app.tkad.co.kr"
   );
 }

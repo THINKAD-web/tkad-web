@@ -10,6 +10,7 @@ import {
   msUntilNextLocalMidnight,
   resolveAutoTheme,
   resolveEffectiveTheme,
+  THEME_STORAGE_KEY,
 } from "@/lib/theme-auto";
 
 function ThemeAutoController() {
@@ -77,6 +78,10 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("unhandledrejection", onUnhandled);
   }, []);
 
+  // FOUC 방지는 ThemeInitScript(useServerInsertedHTML)가 담당.
+  // next-themes 내장 script는 React 19 경고·중복 실행을 막기 위해 비활성.
+  const nextThemesScriptProps = { type: "application/json" } as const;
+
   return (
     <NextThemesProvider
       attribute="class"
@@ -84,6 +89,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       enableSystem={false}
       themes={["light", "dark"]}
       disableTransitionOnChange
+      storageKey={THEME_STORAGE_KEY}
+      scriptProps={nextThemesScriptProps}
     >
       <ThemeAutoController />
       {children}

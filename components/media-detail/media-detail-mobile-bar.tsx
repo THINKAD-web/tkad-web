@@ -2,6 +2,8 @@
 
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import type { MediaItem } from "@/lib/media-data";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
@@ -47,6 +49,12 @@ export function MediaDetailMobileBar({
           mediaName={displayName}
           triggerLabel={isKo ? "문의하기 →" : "Inquire →"}
           className="shrink-0 border-0 bg-gradient-to-r from-violet-500 to-cyan-400 px-4 text-gray-900 dark:text-white"
+        />
+        <PlanCartAddButton
+          item={planCartItemFromMediaItem(media, "search")}
+          addedFrom="search"
+          compact
+          className="shrink-0"
         />
         <MediaFavoriteButton
           mediaId={media.id}

@@ -15,9 +15,16 @@ import {
   Loader2,
   ArrowRight,
 } from "lucide-react";
-import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import {
+  PlannerNeonCard,
+  PlannerNeonLabel,
+  plannerNeon,
+} from "@/components/planner/planner-neon-ui";
+import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
 import { useAppToast } from "@/lib/use-toast";
+import { cn } from "@/lib/utils";
 
 type Media = {
   id: string;
@@ -62,15 +69,18 @@ function VerificationBadge({ score }: { score: number }) {
   const tier = score >= 4 ? "4/4" : score >= 3 ? "3/4" : score >= 2 ? "2/4" : "1/4";
   const variant =
     score >= 4
-      ? "border-accent bg-accent text-accent-foreground"
+      ? "border-violet-400/50 bg-violet-500/15 text-violet-200"
       : score >= 3
-        ? "border-border bg-hero-void text-accent"
-        : "border-border bg-card text-muted-foreground";
+        ? "border-cyan-400/40 bg-cyan-500/10 text-cyan-200"
+        : "border-gray-200/80 bg-gray-100 text-gray-600 dark:border-white/12 dark:bg-white/5 dark:text-white/70";
   return (
     <span
-      className={`inline-flex items-center gap-1 border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] ${variant}`}
+      className={cn(
+        "inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+        variant,
+      )}
     >
-      <ShieldCheck className="w-3 h-3" />
+      <ShieldCheck className="h-3 w-3" aria-hidden />
       {tier}
     </span>
   );
@@ -87,14 +97,14 @@ function InfoRow({
 }) {
   return (
     <div className="flex items-start gap-3">
-      <span className="flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-accent text-accent-foreground">
-        <Icon className="w-4 h-4" />
+      <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl border border-violet-200/80 bg-violet-50 text-violet-700 dark:border-violet-400/30 dark:bg-violet-500/15 dark:text-violet-200">
+        <Icon className="h-4 w-4" aria-hidden />
       </span>
       <div className="min-w-0">
-        <dt className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-          [ {label} ]
-        </dt>
-        <dd className="mt-1 break-words text-sm font-bold text-foreground">{value}</dd>
+        <dt className={cn(plannerNeon.label, "!text-[10px]")}>{label}</dt>
+        <dd className="mt-1 break-words text-sm font-bold text-gray-900 dark:text-white">
+          {value}
+        </dd>
       </div>
     </div>
   );
@@ -202,197 +212,196 @@ export default function QuotePreviewView({
   }, [quoteId]);
 
   if (loading) {
-    return <FullPageSpinner label="견적서 불러오는 중…" />;
+    return <NeonFullPageSpinner label="견적서 불러오는 중…" />;
   }
 
   if (err || !quote) {
     const isNotFound = err?.startsWith("NOT_FOUND");
     return (
-      <div className="max-w-4xl mx-auto px-4 py-10">
-        <EmptyState
-          icon="⚠️"
-          title="견적서를 불러올 수 없습니다"
-          description={
-            isNotFound
-              ? "요청한 견적서를 찾을 수 없습니다. 링크를 다시 확인해주세요."
-              : err
-                ? `오류: ${err}`
-                : "잠시 후 다시 시도해주세요."
-          }
-          action={
-            <Link
-              href="/media/map"
-              className="inline-flex items-center gap-2 border-2 border-border bg-card px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background"
-            >
+      <HomeLandingDayNight>
+        <div className="tkad-landing-neon tkad-planner-neon flex min-h-[calc(100vh-72px)] items-center justify-center px-4 py-10">
+          <div className="tkad-glass-surface tkad-neon-border w-full max-w-lg rounded-[28px] border p-8 text-center backdrop-blur-md">
+            <p className="text-3xl" aria-hidden>
+              ⚠️
+            </p>
+            <h1 className="mt-4 text-lg font-black text-gray-900 dark:text-white">
+              견적서를 불러올 수 없습니다
+            </h1>
+            <p className="mt-2 text-sm text-gray-500 dark:text-white/60">
+              {isNotFound
+                ? "요청한 견적서를 찾을 수 없습니다. 링크를 다시 확인해주세요."
+                : err
+                  ? `오류: ${err}`
+                  : "잠시 후 다시 시도해주세요."}
+            </p>
+            <Link href="/media/map" className={cn(plannerNeon.cta, "mt-6 inline-flex")}>
               매체 탐색하러 가기
             </Link>
-          }
-        />
-      </div>
+          </div>
+        </div>
+      </HomeLandingDayNight>
     );
   }
 
   const canProceed = showProceedCta && quote.status === "sent";
 
   return (
-    <div className="min-h-[calc(100vh-72px)] bg-card">
-      <div className="max-w-4xl mx-auto px-4 py-8 sm:py-10">
-        <Link
-          href="/my"
-          className="group mb-6 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:text-accent"
-        >
-          <ChevronLeft className="w-4 h-4 group-hover:-translate-x-0.5 transition-transform" />
-          대시보드로
-        </Link>
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-24 sm:px-6">
+        <div className="mx-auto max-w-4xl">
+          <Link
+            href="/my"
+            className="group mb-6 inline-flex items-center gap-1 text-xs font-semibold uppercase tracking-[0.18em] text-gray-500 transition-colors hover:text-violet-600 dark:text-white/55 dark:hover:text-violet-300"
+          >
+            <ChevronLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
+            대시보드로
+          </Link>
 
-        <header className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-              [ QUOTE / #{quote.id.slice(-8).toUpperCase()} ]
-            </p>
-            <div className="mt-2 flex items-center gap-3">
-              <h1 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
-                견적서 #{quote.id.slice(-8)}
-              </h1>
-              <QuoteStatusBadge status={quote.status} />
+          <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+            <div>
+              <PlannerNeonLabel>Quote / #{quote.id.slice(-8).toUpperCase()}</PlannerNeonLabel>
+              <div className="mt-2 flex flex-wrap items-center gap-3">
+                <h1 className="text-2xl font-black tracking-tight text-gray-900 dark:text-white sm:text-3xl">
+                  견적서 #{quote.id.slice(-8)}
+                </h1>
+                <QuoteStatusBadge status={quote.status} />
+              </div>
+              <p className="mt-2 text-xs text-gray-500 dark:text-white/50">
+                생성일 {formatDate(quote.createdAt)}
+              </p>
             </div>
-            <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-              {`// `}생성일 {formatDate(quote.createdAt)}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <button
-              type="button"
-              onClick={() => void onDownload()}
-              disabled={downloading}
-              className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border bg-card px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground transition-colors hover:bg-foreground hover:text-background disabled:opacity-60"
-            >
-              {downloading ? (
-                <Loader2 className="w-4 h-4 animate-spin" />
-              ) : (
-                <Download className="w-4 h-4" />
-              )}
-              {downloading ? "PDF 생성 중…" : "PDF 다운로드"}
-            </button>
-            {canProceed && (
+            <div className="flex flex-wrap gap-2">
               <button
                 type="button"
-                onClick={() => void onProceed()}
-                disabled={proceeding}
-                className="inline-flex h-11 items-center justify-center gap-2 border-2 border-accent bg-accent px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent-foreground transition-colors hover:bg-foreground hover:border-border disabled:opacity-60"
+                onClick={() => void onDownload()}
+                disabled={downloading}
+                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
               >
-                {proceeding ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
+                {downloading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                 ) : (
-                  <>
-                    진행 요청
-                    <ArrowRight className="w-4 h-4" />
-                  </>
+                  <Download className="h-4 w-4" aria-hidden />
                 )}
+                {downloading ? "PDF 생성 중…" : "PDF 다운로드"}
               </button>
-            )}
-          </div>
-        </header>
-
-        <div ref={captureRef} className="space-y-0 bg-card">
-          <section className="border-2 border-border bg-card p-5 sm:p-6">
-            <h2 className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-              [ 캠페인 정보 ]
-            </h2>
-            <dl className="grid grid-cols-1 gap-x-6 gap-y-5 text-sm sm:grid-cols-2">
-              <InfoRow icon={UserIcon} label="담당자" value={quote.clientName} />
-              <InfoRow icon={Building2} label="회사" value={quote.clientCompany ?? "-"} />
-              <InfoRow icon={Mail} label="이메일" value={quote.clientEmail} />
-              <InfoRow icon={Calendar} label="기간" value={quote.period} />
-              {quote.startDate && (
-                <InfoRow
-                  icon={Calendar}
-                  label="집행 일정"
-                  value={`${formatDate(quote.startDate)} ~ ${formatDate(quote.endDate)}`}
-                />
-              )}
-              {quote.budgetMax != null && (
-                <InfoRow icon={Wallet} label="예산" value={formatKRW(quote.budgetMax)} />
-              )}
-            </dl>
-          </section>
-
-          <section className="-mt-[2px] overflow-hidden border-2 border-border bg-card">
-            <header className="flex items-center justify-between border-b-2 border-border px-5 py-4 sm:px-6">
-              <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                [ 선택한 매체 ]
-              </h2>
-              <span className="font-display text-[11px] font-bold tabular-nums text-foreground">
-                {quote.medias.length}개
-              </span>
-            </header>
-            <ul>
-              {quote.medias.map((m, idx) => (
-                <li
-                  key={m.id}
-                  className={`group flex gap-3 p-4 transition-colors hover:bg-muted sm:gap-4 sm:p-5 ${ idx > 0 ? "border-t-2 border-border" : "" }`}
+              {canProceed ? (
+                <button
+                  type="button"
+                  onClick={() => void onProceed()}
+                  disabled={proceeding}
+                  className={cn(plannerNeon.cta, "h-11 disabled:opacity-60")}
                 >
-                  {m.image ? (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={m.image}
-                      alt=""
-                      className="h-20 w-20 shrink-0 border-2 border-border object-cover sm:h-24 sm:w-24"
-                    />
+                  {proceeding ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
                   ) : (
-                    <div className="h-20 w-20 shrink-0 border-2 border-border bg-muted sm:h-24 sm:w-24" />
+                    <>
+                      진행 요청
+                      <ArrowRight className="h-4 w-4" aria-hidden />
+                    </>
                   )}
-                  <div className="min-w-0 flex-1">
-                    <div className="mb-1 flex items-start justify-between gap-2">
-                      <Link
-                        href={`/media/${m.id}`}
-                        className="truncate text-sm font-bold tracking-tight text-foreground hover:text-accent sm:text-base"
-                      >
-                        {m.name}
-                      </Link>
-                      <VerificationBadge score={m.visibilityScore} />
-                    </div>
-                    <p className="mb-2 truncate font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      {`// `}{m.location}
-                    </p>
-                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      <span className="border-2 border-border bg-card px-1.5 py-0.5 font-bold">
-                        {m.type}
-                      </span>
-                      {m.dailyFootTraffic != null && (
-                        <span className="inline-flex items-center gap-1">
-                          <Eye className="w-3 h-3" />
-                          일 유동 {new Intl.NumberFormat("ko-KR").format(m.dailyFootTraffic)}
-                        </span>
-                      )}
-                    </div>
-                    <div className="font-display text-sm font-bold tabular-nums text-accent">
-                      {formatKRW(m.price)}
-                    </div>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </section>
-
-          <section className="-mt-[2px] border-2 border-accent bg-hero-void p-5 text-hero-fg sm:p-6">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                  [ 총 견적 ]
-                </p>
-                <div className="mt-2 font-display text-3xl font-bold tabular-nums text-accent sm:text-4xl">
-                  {formatKRW(quote.totalAmount)}
-                </div>
-              </div>
-              <Wallet className="w-10 h-10 text-accent/40" />
+                </button>
+              ) : null}
             </div>
-            <p className="mt-4 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg/65">
-              {`// `}VAT 별도 · {quote.medias.length}개 매체 합산 · {quote.period}
-            </p>
-          </section>
+          </header>
+
+          <div ref={captureRef} className="space-y-4">
+            <PlannerNeonCard className="overflow-hidden">
+              <div className={plannerNeon.cardHeader}>
+                <PlannerNeonLabel>캠페인 정보</PlannerNeonLabel>
+              </div>
+              <dl className="grid grid-cols-1 gap-x-6 gap-y-5 p-5 text-sm sm:grid-cols-2 sm:p-6">
+                <InfoRow icon={UserIcon} label="담당자" value={quote.clientName} />
+                <InfoRow icon={Building2} label="회사" value={quote.clientCompany ?? "-"} />
+                <InfoRow icon={Mail} label="이메일" value={quote.clientEmail} />
+                <InfoRow icon={Calendar} label="기간" value={quote.period} />
+                {quote.startDate ? (
+                  <InfoRow
+                    icon={Calendar}
+                    label="집행 일정"
+                    value={`${formatDate(quote.startDate)} ~ ${formatDate(quote.endDate)}`}
+                  />
+                ) : null}
+                {quote.budgetMax != null ? (
+                  <InfoRow icon={Wallet} label="예산" value={formatKRW(quote.budgetMax)} />
+                ) : null}
+              </dl>
+            </PlannerNeonCard>
+
+            <PlannerNeonCard className="overflow-hidden">
+              <header className="flex items-center justify-between border-b border-gray-100 px-5 py-4 dark:border-white/10 sm:px-6">
+                <PlannerNeonLabel>선택한 매체</PlannerNeonLabel>
+                <span className="text-xs font-bold tabular-nums text-gray-700 dark:text-white/80">
+                  {quote.medias.length}개
+                </span>
+              </header>
+              <ul className="divide-y divide-gray-100 dark:divide-white/10">
+                {quote.medias.map((m) => (
+                  <li
+                    key={m.id}
+                    className="group flex gap-3 p-4 transition-colors hover:bg-violet-50/50 dark:hover:bg-white/[0.03] sm:gap-4 sm:p-5"
+                  >
+                    {m.image ? (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={m.image}
+                        alt=""
+                        className="h-20 w-20 shrink-0 rounded-xl border border-gray-200 object-cover dark:border-white/10 sm:h-24 sm:w-24"
+                      />
+                    ) : (
+                      <div className="h-20 w-20 shrink-0 rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-white/5 sm:h-24 sm:w-24" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                      <div className="mb-1 flex items-start justify-between gap-2">
+                        <Link
+                          href={`/media/${m.id}`}
+                          className="truncate text-sm font-bold tracking-tight text-gray-900 hover:text-violet-600 dark:text-white dark:hover:text-violet-300 sm:text-base"
+                        >
+                          {m.name}
+                        </Link>
+                        <VerificationBadge score={m.visibilityScore} />
+                      </div>
+                      <p className="mb-2 truncate text-xs text-gray-500 dark:text-white/50">
+                        {m.location}
+                      </p>
+                      <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/45">
+                        <span className="rounded-full border border-gray-200 bg-gray-50 px-2 py-0.5 dark:border-white/10 dark:bg-white/5">
+                          {m.type}
+                        </span>
+                        {m.dailyFootTraffic != null ? (
+                          <span className="inline-flex items-center gap-1">
+                            <Eye className="h-3 w-3" aria-hidden />
+                            일 유동 {new Intl.NumberFormat("ko-KR").format(m.dailyFootTraffic)}
+                          </span>
+                        ) : null}
+                      </div>
+                      <div className="text-sm font-bold tabular-nums text-violet-600 dark:text-violet-300">
+                        {formatKRW(m.price)}
+                      </div>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </PlannerNeonCard>
+
+            <div className="tkad-planner-dark-surface overflow-hidden rounded-2xl border border-violet-400/30 bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-5 text-white sm:p-6">
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-300">
+                    총 견적
+                  </p>
+                  <div className="mt-2 font-display text-3xl font-black tabular-nums sm:text-4xl">
+                    {formatKRW(quote.totalAmount)}
+                  </div>
+                </div>
+                <Wallet className="h-10 w-10 shrink-0 text-cyan-300/50" aria-hidden />
+              </div>
+              <p className="mt-4 text-xs text-white/60">
+                VAT 별도 · {quote.medias.length}개 매체 합산 · {quote.period}
+              </p>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
+    </HomeLandingDayNight>
   );
 }

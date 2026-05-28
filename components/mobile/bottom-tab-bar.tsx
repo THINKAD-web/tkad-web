@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { usePathname } from "@/i18n/navigation";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import {
@@ -126,7 +126,12 @@ function TabNeonIcon({
   );
 
   if (variant === "fab") {
-    return glyph;
+    return (
+      <span className="relative inline-flex">
+        {glyph}
+        <TabBadge count={badgeCount} />
+      </span>
+    );
   }
 
   return (
@@ -148,6 +153,7 @@ function TabNeonIcon({
 
 export function BottomTabBar() {
   const pathname = usePathname();
+  const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
   const badges = useMobileTabBadges();
@@ -183,19 +189,26 @@ export function BottomTabBar() {
           const badgeCount = tab.badgeKey ? badges[tab.badgeKey] : 0;
 
           if (tab.emphasized) {
+            const planCount = badges.planner;
             return (
               <li key={tab.href} className="flex min-w-0 flex-1 justify-center">
                 <Link
-                  href={tab.href}
+                  href={planCount > 0 ? "/my/plan" : tab.href}
+                  onClick={(e) => {
+                    hapticLight();
+                    if (planCount > 0) {
+                      e.preventDefault();
+                      router.push("/my/plan");
+                    }
+                  }}
                   className="tkad-mobile-tab-fab relative -translate-y-2 flex w-full max-w-[4.5rem] flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
-                  onClick={() => hapticLight()}
                 >
-                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab flex h-14 w-14 items-center justify-center rounded-full">
+                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab relative flex h-14 w-14 items-center justify-center rounded-full">
                     <TabNeonIcon
                       Icon={Icon}
                       active={active}
-                      badgeCount={0}
+                      badgeCount={planCount}
                       variant="fab"
                     />
                   </span>

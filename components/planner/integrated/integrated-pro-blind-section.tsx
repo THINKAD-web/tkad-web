@@ -41,7 +41,7 @@ export function IntegratedProBlindSection({
 
       {!isPro ? (
         <div
-          className="absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-black/60 to-black/90 p-6"
+          className="tkad-planner-dark-surface absolute inset-0 z-10 flex flex-col items-center justify-center bg-gradient-to-b from-transparent via-black/60 to-black/90 p-6"
           aria-hidden={false}
         >
           <div className="text-center">
@@ -52,7 +52,7 @@ export function IntegratedProBlindSection({
             <p className="mb-4 text-sm leading-relaxed text-white/60">{body}</p>
             <Link
               href="/pricing"
-              className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-semibold text-white"
+              className="tkad-neon-cta inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-semibold text-white"
             >
               {isKo ? "PRO 14일 무료 체험 →" : "Start 14-day PRO trial →"}
             </Link>

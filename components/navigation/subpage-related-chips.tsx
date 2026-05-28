@@ -6,6 +6,7 @@ import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import {
   resolveSubpageChips,
   type SubpageChipDef,
@@ -47,7 +48,7 @@ function chipLinkHref(
   return { pathname, query };
 }
 
-export function SubpageRelatedChips() {
+function SubpageRelatedChipsInner() {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -91,3 +92,5 @@ export function SubpageRelatedChips() {
     </div>
   );
 }
+
+export const SubpageRelatedChips = withSearchParamsSuspense(SubpageRelatedChipsInner);

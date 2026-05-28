@@ -9,7 +9,8 @@
       "items": [
         { "id": "media-search", "href": "/media" },
         { "id": "map-search", "href": "/media/map" },
-        { "id": "ai-recommend", "href": "/recommend", "beta": true }
+        { "id": "ai-recommend", "href": "/recommend", "beta": true },
+        { "id": "campaign-targets", "href": "/media/targets" }
       ]
     },
     {

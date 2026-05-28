@@ -6,7 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
@@ -30,6 +30,11 @@ import {
   type AiRecommendInput,
 } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
+import {
+  estimatedCpmWon,
+  estimatedMonthlyImpressions,
+} from "@/lib/ai-recommend-metrics";
+import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import {
   buildHomeBudgetRecommendInput,
   type HomeBudgetIndustry,
@@ -77,6 +82,9 @@ export default function RecommendPageClient({
   const [recommendLogId, setRecommendLogId] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
 
+  const router = useRouter();
+  const [navigatingQuote, setNavigatingQuote] = useState(false);
+
   const top3 = useMemo(() => {
     if (!fullList?.length) return [];
     return fullList.slice(0, 3);
@@ -88,6 +96,49 @@ export default function RecommendPageClient({
       : top3.map((s) => s.item.id).join(",");
 
   const quoteHref = `/quote?media=${encodeURIComponent(quoteQueryPicked)}`;
+
+  const goToContactQuote = useCallback(() => {
+    const picked =
+      cartItems.length > 0 ? cartItems : top3.map((s) => s.item);
+    if (picked.length === 0) {
+      toast(
+        "error",
+        isKo ? "추천 매체가 없습니다." : "No recommendations yet.",
+      );
+      return;
+    }
+    const duration = lastPayload?.input.preferredPeriodWeeks
+      ? Math.max(1, Math.round(lastPayload.input.preferredPeriodWeeks / 4))
+      : 1;
+    const monthlyWon = picked.reduce((s, m) => s + (m.price || 0), 0);
+    const estimatedReach =
+      picked.reduce((s, m) => s + estimatedMonthlyImpressions(m), 0) *
+      duration;
+    const cpmValues = picked
+      .map((m) => estimatedCpmWon(m))
+      .filter((v): v is number => v != null && Number.isFinite(v));
+    const estimatedCpm =
+      cpmValues.length > 0
+        ? cpmValues.reduce((a, b) => a + b, 0) / cpmValues.length
+        : undefined;
+
+    savePlanTransferData({
+      mediaIds: picked.map((m) => m.id),
+      mediaNames: picked.map((m) =>
+        isKo ? m.name : m.nameEn || m.name,
+      ),
+      totalBudget: monthlyWon * duration,
+      duration,
+      region: lastPayload?.regionCodes.join(", ") || undefined,
+      goal: lastPayload?.input.goal,
+      estimatedReach,
+      estimatedCpm,
+      source: "ai_recommend",
+    });
+    setNavigatingQuote(true);
+    router.push("/contact?from=ai");
+    setNavigatingQuote(false);
+  }, [cartItems, top3, lastPayload, isKo, router, toast]);
 
   const runAnalysis = useCallback(
     async (payload: MediaAiRecommendFormSubmit, seed = 0) => {
@@ -353,11 +404,14 @@ export default function RecommendPageClient({
                 >
                   {isKo ? "전체 결과 보기" : "View all results"}
                 </BtnBlock>
-                <Link href={quoteHref}>
-                  <BtnBlock variant="accent" size="md">
-                    {isKo ? "견적 받기" : "Get a quote"}
-                  </BtnBlock>
-                </Link>
+                <BtnBlock
+                  variant="accent"
+                  size="md"
+                  onClick={goToContactQuote}
+                  disabled={navigatingQuote}
+                >
+                  {isKo ? "이 플랜으로 견적 요청하기 →" : "Request quote with this plan →"}
+                </BtnBlock>
               </div>
             </div>
           ) : null}
@@ -385,6 +439,8 @@ export default function RecommendPageClient({
               scored={fullList}
               top3={top3}
               quoteHref={quoteHref}
+              onRequestQuote={goToContactQuote}
+              quoteBusy={navigatingQuote}
               onBackToForm={() => {
                 setPhase("form");
                 setFullList(null);

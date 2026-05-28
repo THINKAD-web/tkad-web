@@ -13,6 +13,7 @@ import {
   Palette,
   Search,
   Sparkles,
+  Target,
   Trophy,
   Wand2,
 } from "lucide-react";
@@ -28,6 +29,7 @@ export type PublicNavItemId =
   | "media-search"
   | "map-search"
   | "ai-recommend"
+  | "campaign-targets"
   | "media-planner"
   | "integrated-planner"
   | "package-proposal"
@@ -65,6 +67,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
       { id: "media-search", href: "/media", icon: Search },
       { id: "map-search", href: "/media/map", icon: MapPin },
       { id: "ai-recommend", href: "/recommend", icon: Sparkles, beta: true },
+      { id: "campaign-targets", href: "/media/targets", icon: Target },
     ],
   },
   {

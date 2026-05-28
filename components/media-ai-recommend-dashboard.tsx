@@ -28,6 +28,9 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
 type Props = {
   locale: string;
@@ -37,6 +40,8 @@ type Props = {
   onBackToForm: () => void;
   onViewFullList: () => void;
   onRemix: () => void;
+  onRequestQuote?: () => void;
+  quoteBusy?: boolean;
 };
 
 export default function MediaAiRecommendDashboard({
@@ -47,6 +52,8 @@ export default function MediaAiRecommendDashboard({
   onBackToForm,
   onViewFullList,
   onRemix,
+  onRequestQuote,
+  quoteBusy = false,
 }: Props) {
   const tr = useTranslations("recommend");
   const isKo = locale === "ko";
@@ -54,6 +61,12 @@ export default function MediaAiRecommendDashboard({
 
   const mapItems = useMemo(
     () => scored.map((s) => s.item),
+    [scored],
+  );
+
+  const planBulkItems = useMemo(
+    () =>
+      scored.map((s) => planCartItemFromMediaItem(s.item, "ai_recommend")),
     [scored],
   );
 
@@ -241,6 +254,12 @@ export default function MediaAiRecommendDashboard({
                       {isKo ? "자세히" : "Details"} →
                     </Link>
                   </dl>
+                  <PlanCartAddButton
+                    item={planCartItemFromMediaItem(s.item, "ai_recommend")}
+                    addedFrom="ai_recommend"
+                    compact
+                    className="mt-3 w-full"
+                  />
                 </div>
               ))}
             </div>
@@ -370,15 +389,27 @@ export default function MediaAiRecommendDashboard({
                 <Share2 className="h-4 w-4" />
                 {isKo ? "공유" : "Share"}
               </BtnBlock>
+              <PlanCartBulkAddButton
+                items={planBulkItems}
+                label={isKo ? "추천 매체 전체 플랜에 추가" : "Add all to plan"}
+                className="w-full sm:w-auto"
+              />
             </div>
             <BtnBlock
-              href={quoteHref}
               variant="accent"
               size="md"
               className="w-full sm:w-auto"
+              onClick={onRequestQuote}
+              disabled={!onRequestQuote || quoteBusy}
             >
               <Calculator className="h-5 w-5" />
-              {isKo ? "이 조합으로 견적" : "Get a quote"}
+              {quoteBusy
+                ? isKo
+                  ? "이동 중…"
+                  : "Opening…"
+                : isKo
+                  ? "이 플랜으로 견적 요청하기 →"
+                  : "Request quote with this plan →"}
             </BtnBlock>
           </div>
         </div>
@@ -653,6 +684,12 @@ function Top3DashCard({
         {isKo ? "상세 보기" : "Details"}
         <span aria-hidden>→</span>
       </Link>
+      <PlanCartAddButton
+        item={planCartItemFromMediaItem(m, "ai_recommend")}
+        addedFrom="ai_recommend"
+        compact
+        className="mt-2 w-full"
+      />
       </div>
     </div>
   );

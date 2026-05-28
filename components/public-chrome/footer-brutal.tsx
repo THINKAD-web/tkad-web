@@ -5,7 +5,7 @@
  */
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { CONTACT_EMAIL } from "@/lib/constants";
@@ -59,6 +59,7 @@ const iconLinkClass =
 
 export function FooterBrutal() {
   const t = useTranslations();
+  const locale = useLocale();
   const [sitemapOpen, setSitemapOpen] = useState(false);
   const year = new Date().getFullYear();
 
@@ -72,18 +73,19 @@ export function FooterBrutal() {
     };
 
     return buildSitemapSections({
+      locale,
       discovery: byId("discovery"),
       planning: byId("planning"),
       studio: byId("studio"),
       insights: byId("insights"),
       industryGuideLabel: t("footer.industryGuide"),
-      webinarLabel: t("footer.sitemapWebinar"),
       companyTitle: t("footer.sitemapCompany"),
+      otherSearchTitle: t("footer.sitemapOtherSearch"),
       servicesLabel: t("footer.servicesIntro"),
       mediaRegisterLabel: t("footer.mediaPartnerRegister"),
       contactLabel: t("nav.contact"),
     });
-  }, [navGroups, t]);
+  }, [locale, navGroups, t]);
 
   const coreLinks = [
     { href: "/about", label: t("footer.coreAbout") },

@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { ClipboardCheck, Crosshair, LayoutList, Search, X } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import {
@@ -18,10 +19,13 @@ import {
   MEDIA_TYPE_CHIPS,
 } from "@/lib/media-discovery-filter-chips";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
+import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import type { MediaItem } from "@/lib/media-data";
 import {
   entriesToCompareMediaItems,
@@ -687,52 +691,91 @@ export default function MediaMapPageClient() {
           {items.map((it) => (
             <li
               key={it.id}
+              role="button"
+              tabIndex={0}
               className={cn(
-                "group cursor-pointer overflow-hidden rounded-[18px] border bg-card/80 text-card-foreground backdrop-blur transition-all hover:shadow-md",
+                "cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5",
                 selectedId === it.id
-                  ? "border-violet-400/50 shadow-[0_0_0_2px_rgba(139,92,246,0.15)] ring-2 ring-violet-400/25"
+                  ? "border-violet-400/50 ring-2 ring-violet-400/25"
                   : hoveredId === it.id
-                    ? "border-cyan-400/40 shadow-md"
-                    : "border-border/70 hover:border-violet-300/40",
+                    ? "border-cyan-400/40"
+                    : "",
               )}
               onClick={() => handleSelect(it.id)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  handleSelect(it.id);
+                }
+              }}
               onMouseEnter={() => setHoveredId(it.id)}
               onMouseLeave={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
               onFocus={() => setHoveredId(it.id)}
               onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
             >
-              <div className="relative aspect-[4/3] bg-secondary">
+              <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
                 {it.image ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
+                  <Image
                     src={it.image}
                     alt={it.name}
-                    className="w-full h-full object-cover group-hover:scale-[1.02] transition-transform"
+                    fill
+                    className="object-cover"
+                    sizes="(max-width: 768px) 50vw, 280px"
                   />
-                ) : null}
-                <span className="absolute top-2 left-2 inline-flex items-center gap-1 rounded-full bg-card/90 text-card-foreground/85 backdrop-blur-sm px-2 py-0.5 text-[10px] font-semibold shadow-sm">
-                  {it.type}
-                </span>
+                ) : (
+                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
+                    {isKo ? "준비중" : "No image"}
+                  </div>
+                )}
+                <MediaThumbnailTrustOverlay
+                  item={{
+                    isVerified: it.isVerified,
+                    isInstantBooking: it.isInstantBooking,
+                  }}
+                  isKo={isKo}
+                  variant="card"
+                />
               </div>
-              <div className="p-2.5 space-y-1">
-                <div className="text-[13px] font-semibold text-card-foreground line-clamp-1 leading-snug">
+              <div className="p-3">
+                <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
                   {it.name}
-                </div>
-                <div className="text-[11px] text-muted-foreground line-clamp-1">
-                  {[it.region, it.district].filter(Boolean).join(" · ") || it.location}
-                </div>
-                <div className="flex items-center justify-between pt-0.5">
-                  <span className="tkad-home-accent-text text-xs font-bold tabular-nums">
+                </p>
+                <p className="mt-1 text-xs text-gray-400 dark:text-white/40">
+                  {[it.region, it.type].filter(Boolean).join(" · ")}
+                </p>
+                <div className="mt-2 space-y-2">
+                  <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
                     {formatPrice(it.price, it.pricePeriod, locale)}
-                  </span>
-                  <div className="flex items-center gap-1">
+                  </p>
+                  <div className="flex items-stretch gap-1">
+                    <PlanCartAddButton
+                      item={planCartItemFromCatalog(
+                        {
+                          id: it.id,
+                          name: it.name,
+                          type: it.type,
+                          region: it.region,
+                          price: it.price,
+                          thumbnailUrl: it.image ?? undefined,
+                        },
+                        "search",
+                      )}
+                      addedFrom="search"
+                      compact
+                      gridInline
+                      className="min-w-0 flex-1 !h-8 !px-1 !text-[10px]"
+                    />
                     <MediaCompareSelectButton
                       selected={isInCompare(it.id)}
                       onToggle={() => toggleCompare(it)}
+                      gridInline
+                      className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
                     />
                     <MediaCartAddButton
                       inCart={inCart(it.id)}
                       onToggle={() => toggleCart(it.id)}
+                      gridInline
+                      className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
                     />
                   </div>
                 </div>

@@ -10,6 +10,7 @@ import {
   Package,
   Search,
   Sparkles,
+  Target,
   Trophy,
   Wand2,
 } from "lucide-react";
@@ -65,6 +66,15 @@ export const TOP_NAV_ITEMS: TopNavItemDef[] = [
         descKo: "조건 자동 매칭",
         descEn: "Auto-match by goals",
         icon: Sparkles,
+      },
+      {
+        id: "campaign-targets",
+        labelKo: "캠페인 목적",
+        labelEn: "Campaign goals",
+        href: "/media/targets",
+        descKo: "목적별 매체 탐색",
+        descEn: "Browse by campaign goal",
+        icon: Target,
       },
     ],
   },

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Download, Loader2, Radio } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
@@ -21,7 +21,7 @@ type Item = {
   lastPayment: { provider: string; status: string; amount: number } | null;
 };
 
-export default function AdminInstantBookingsPage() {
+function AdminInstantBookingsPage() {
   const searchParams = useSearchParams();
   const highlightId = searchParams.get("id");
   const [items, setItems] = useState<Item[]>([]);
@@ -166,5 +166,13 @@ export default function AdminInstantBookingsPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function AdminInstantBookingsPageWithSuspense() {
+  return (
+    <Suspense fallback={null}>
+      <AdminInstantBookingsPage />
+    </Suspense>
   );
 }

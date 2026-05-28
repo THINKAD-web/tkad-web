@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
@@ -38,7 +38,7 @@ function fmt(iso: string | Date): string {
 
 type ApiErrorBody = { error?: string; code?: string; message?: string };
 
-export default function AdminMediaApplicationsPage() {
+function AdminMediaApplicationsPage() {
   const t = useTranslations("adminApplications");
   const pathname = usePathname();
   const router = useRouter();
@@ -384,5 +384,13 @@ export default function AdminMediaApplicationsPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AdminMediaApplicationsPageWithSuspense() {
+  return (
+    <Suspense fallback={null}>
+      <AdminMediaApplicationsPage />
+    </Suspense>
   );
 }

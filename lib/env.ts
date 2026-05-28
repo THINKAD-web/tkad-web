@@ -36,4 +36,4 @@ export function getEnv(key: string, fallback?: string): string {
 }
 
 export const SITE_URL =
-  process.env.SITE_URL?.trim() || "https://tkad.co.kr";
+  process.env.SITE_URL?.trim() || "https://app.tkad.co.kr";

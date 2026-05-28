@@ -28,6 +28,7 @@ export type CreateInquiryQuoteDraftInput = {
   startDateRaw?: string;
   regions?: ContactRegion[];
   budgetCode?: ContactBudgetV2;
+  durationMonths?: number;
 };
 
 async function resolveMediaForIntent(
@@ -94,8 +95,11 @@ export async function createInquiryQuoteDraft(
     intent.startDate && intent.startDate.getTime() > Date.now() - 86_400_000
       ? intent.startDate
       : new Date();
+  const durationDays = input.durationMonths
+    ? Math.max(28, input.durationMonths * 30)
+    : intent.durationDays;
   const end = new Date(start.getTime());
-  end.setDate(end.getDate() + intent.durationDays - 1);
+  end.setDate(end.getDate() + durationDays - 1);
 
   const calculated = await calculateQuoteFromMediaIds(db, {
     mediaIds: mediaRows.map((m) => m.id),
@@ -141,8 +145,12 @@ export async function createInquiryQuoteDraft(
         issuedAt: calculated.issuedAt,
       },
       adminNote: locale === "ko"
-        ? "문의 접수 시 자동 생성된 견적 초안입니다. 검토 후 발송하세요."
-        : "Auto-generated draft from contact inquiry. Review before sending.",
+        ? input.durationMonths
+          ? `문의 접수 시 자동 생성된 견적 초안 (${input.durationMonths}개월). 검토 후 발송하세요.`
+          : "문의 접수 시 자동 생성된 견적 초안입니다. 검토 후 발송하세요."
+        : input.durationMonths
+          ? `Auto-generated draft (${input.durationMonths} mo). Review before sending.`
+          : "Auto-generated draft from contact inquiry. Review before sending.",
     },
   });
 

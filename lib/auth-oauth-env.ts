@@ -1,9 +1,18 @@
 /**
- * 카카오/네이버 OAuth + NextAuth 에 필요한 환경변수 검증.
+ * 소셜 OAuth + NextAuth 에 필요한 환경변수 검증.
  * Vercel 등 production 에서 누락 시 NextAuth "server configuration" 오류를 방지합니다.
  */
 
-export type OAuthProvider = "kakao" | "naver";
+import {
+  readGoogleOAuthClientId,
+  readGoogleOAuthClientSecret,
+  readKakaoOAuthClientId,
+  readKakaoOAuthClientSecret,
+  readNaverOAuthClientId,
+  readNaverOAuthClientSecret,
+} from "@/lib/oauth-credentials";
+
+export type OAuthProvider = "kakao" | "naver" | "google";
 
 export type AuthEnvIssue = {
   key: string;
@@ -13,20 +22,7 @@ export type AuthEnvIssue = {
 const PROVIDER_LABEL: Record<OAuthProvider, string> = {
   kakao: "카카오",
   naver: "네이버",
-};
-
-const PROVIDER_ENV: Record<
-  OAuthProvider,
-  { clientId: string; clientSecret: string }
-> = {
-  kakao: {
-    clientId: "KAKAO_CLIENT_ID",
-    clientSecret: "KAKAO_CLIENT_SECRET",
-  },
-  naver: {
-    clientId: "NAVER_CLIENT_ID",
-    clientSecret: "NAVER_CLIENT_SECRET",
-  },
+  google: "Google",
 };
 
 /** NextAuth JWT/쿠키 서명 + OAuth pending 쿠키 HMAC */
@@ -50,23 +46,21 @@ export function isAuthSecretConfigured(): boolean {
 }
 
 export function isKakaoOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.KAKAO_CLIENT_ID?.trim() &&
-      process.env.KAKAO_CLIENT_SECRET?.trim(),
-  );
+  return Boolean(readKakaoOAuthClientId() && readKakaoOAuthClientSecret());
 }
 
 export function isNaverOAuthConfigured(): boolean {
-  return Boolean(
-    process.env.NAVER_CLIENT_ID?.trim() &&
-      process.env.NAVER_CLIENT_SECRET?.trim(),
-  );
+  return Boolean(readNaverOAuthClientId() && readNaverOAuthClientSecret());
+}
+
+export function isGoogleOAuthConfigured(): boolean {
+  return Boolean(readGoogleOAuthClientId() && readGoogleOAuthClientSecret());
 }
 
 export function isProviderConfigured(provider: OAuthProvider): boolean {
-  return provider === "kakao"
-    ? isKakaoOAuthConfigured()
-    : isNaverOAuthConfigured();
+  if (provider === "kakao") return isKakaoOAuthConfigured();
+  if (provider === "naver") return isNaverOAuthConfigured();
+  return isGoogleOAuthConfigured();
 }
 
 export function collectAuthSecretIssues(): AuthEnvIssue[] {
@@ -85,19 +79,53 @@ export function collectProviderIssues(
   provider: OAuthProvider,
 ): AuthEnvIssue[] {
   const issues: AuthEnvIssue[] = [];
-  const { clientId, clientSecret } = PROVIDER_ENV[provider];
   const label = PROVIDER_LABEL[provider];
 
-  if (!process.env[clientId]?.trim()) {
+  if (provider === "kakao") {
+    const clientId = readKakaoOAuthClientId();
+    const clientSecret = readKakaoOAuthClientSecret();
+
+    if (!clientId) {
+      issues.push({
+        key: "KAKAO_CLIENT_ID",
+        messageKo: `KAKAO_CLIENT_ID 또는 KAKAO_REST_API_KEY 누락 (${label} 로그인)`,
+      });
+    }
+    if (!clientSecret) {
+      issues.push({
+        key: "KAKAO_CLIENT_SECRET",
+        messageKo: `KAKAO_CLIENT_SECRET 누락 (${label} 개발자 콘솔 → 보안 → Client Secret)`,
+      });
+    }
+    return issues;
+  }
+
+  if (provider === "google") {
+    if (!readGoogleOAuthClientId()) {
+      issues.push({
+        key: "GOOGLE_CLIENT_ID",
+        messageKo: `GOOGLE_CLIENT_ID 환경변수 누락 (${label} 로그인)`,
+      });
+    }
+    if (!readGoogleOAuthClientSecret()) {
+      issues.push({
+        key: "GOOGLE_CLIENT_SECRET",
+        messageKo: `GOOGLE_CLIENT_SECRET 환경변수 누락 (${label} Cloud Console)`,
+      });
+    }
+    return issues;
+  }
+
+  if (!readNaverOAuthClientId()) {
     issues.push({
-      key: clientId,
-      messageKo: `${clientId} 환경변수 누락 (${label} 로그인 설정 오류)`,
+      key: "NAVER_CLIENT_ID",
+      messageKo: `NAVER_CLIENT_ID 환경변수 누락 (${label} 로그인 설정 오류)`,
     });
   }
-  if (!process.env[clientSecret]?.trim()) {
+  if (!readNaverOAuthClientSecret()) {
     issues.push({
-      key: clientSecret,
-      messageKo: `${clientSecret} 환경변수 누락 (${label} 로그인 설정 오류)`,
+      key: "NAVER_CLIENT_SECRET",
+      messageKo: `NAVER_CLIENT_SECRET 환경변수 누락 (${label} 로그인 설정 오류)`,
     });
   }
 
@@ -110,8 +138,22 @@ export function collectOAuthLoginIssues(
   return [...collectAuthSecretIssues(), ...collectProviderIssues(provider)];
 }
 
-export function oauthLoginUserMessage(provider: OAuthProvider): string {
+export function oauthLoginUserMessage(
+  provider: OAuthProvider,
+  issues?: AuthEnvIssue[],
+): string {
   const label = PROVIDER_LABEL[provider];
+  const missingSecret = issues?.some((i) => i.key.endsWith("_CLIENT_SECRET"));
+  const missingId = issues?.some(
+    (i) => i.key.endsWith("_CLIENT_ID") || i.key === "KAKAO_CLIENT_ID",
+  );
+
+  if (provider === "kakao" && missingSecret && !missingId) {
+    return `${label} Client Secret(KAKAO_CLIENT_SECRET)이 설정되지 않았습니다. 관리자에게 문의해주세요.`;
+  }
+  if (missingId && missingSecret) {
+    return `${label} 로그인 키가 설정되지 않았습니다. 관리자에게 문의해주세요.`;
+  }
   return `${label} 로그인 설정 오류. 관리자에게 문의해주세요.`;
 }
 
@@ -132,7 +174,7 @@ export function checkOAuthLoginConfig(
   return {
     ok: false,
     issues,
-    userMessage: oauthLoginUserMessage(provider),
+    userMessage: oauthLoginUserMessage(provider, issues),
   };
 }
 
@@ -169,10 +211,22 @@ export function checkNextAuthConfig(): NextAuthConfigCheck {
 export const OAUTH_VERCEL_ENV_KEYS = [
   "AUTH_SECRET",
   "USER_SESSION_SECRET",
+  "GOOGLE_CLIENT_ID",
+  "GOOGLE_CLIENT_SECRET",
   "KAKAO_CLIENT_ID",
   "KAKAO_CLIENT_SECRET",
+  "KAKAO_REST_API_KEY",
   "NAVER_CLIENT_ID",
   "NAVER_CLIENT_SECRET",
   "NEXT_PUBLIC_SITE_URL",
   "DATABASE_URL",
 ] as const;
+
+export {
+  readGoogleOAuthClientId,
+  readGoogleOAuthClientSecret,
+  readKakaoOAuthClientId,
+  readKakaoOAuthClientSecret,
+  readNaverOAuthClientId,
+  readNaverOAuthClientSecret,
+};

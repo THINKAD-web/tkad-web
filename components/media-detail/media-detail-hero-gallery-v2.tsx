@@ -1,16 +1,12 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import dynamic from "next/dynamic";
 import { ZoomIn } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-lightbox";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 import { cn } from "@/lib/utils";
-
-const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
-  ssr: false,
-});
 
 type MapMarker = {
   id: string;
@@ -84,14 +80,11 @@ export function MediaDetailHeroGalleryV2({
           </button>
         ) : mapFallback ? (
           <div className="absolute inset-0">
-            <DarkMapView
+            <MediaDetailKakaoMap
               markers={[mapFallback]}
               selectedId={mapFallback.id}
-              onSelect={() => {}}
-              onBoundsChange={() => {}}
               center={{ lat: mapFallback.lat, lng: mapFallback.lng }}
               zoom={4}
-              disableCluster
             />
           </div>
         ) : (

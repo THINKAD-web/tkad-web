@@ -3,6 +3,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 import { cn } from "@/lib/utils";
@@ -28,21 +30,21 @@ export function MediaCompactRow({
   onToggleCart,
 }: Props) {
   return (
-    <Link
-      href={href}
+    <div
       className={cn(
-        "flex min-h-[2.625rem] items-center gap-2 rounded-lg px-1 py-1 transition-colors",
+        "flex min-h-[3rem] items-center gap-2.5 rounded-lg px-1.5 py-1 transition-colors",
         "hover:bg-gray-50 active:bg-gray-100/80 dark:hover:bg-white/[0.04] dark:active:bg-white/[0.06]",
       )}
     >
-      <div className="relative h-9 w-11 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+      <Link href={href} className="flex min-w-0 flex-1 items-center gap-2.5">
+      <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
         {item.thumbnailUrl ? (
           <Image
             src={item.thumbnailUrl}
             alt=""
             fill
             className="object-cover"
-            sizes="44px"
+            sizes="56px"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[9px] text-gray-300 dark:text-white/20">
@@ -61,16 +63,15 @@ export function MediaCompactRow({
           </p>
         ) : null}
       </div>
+      </Link>
 
       <div className="flex shrink-0 items-center gap-0.5">
-        {item.isInstantBooking ? (
-          <span
-            className="mr-0.5 hidden h-4 shrink-0 items-center rounded bg-emerald-500 px-1 text-[9px] font-medium leading-none text-white md:inline-flex"
-            title="즉시예약"
-          >
-            즉시
-          </span>
-        ) : null}
+        <PlanCartAddButton
+          item={planCartItemFromCatalog(item, "search")}
+          addedFrom="search"
+          compact
+          className="!h-[1.125rem] !px-1.5 !text-[8px]"
+        />
         <MediaCompareSelectButton
           selected={inCompare}
           onToggle={onToggleCompare}
@@ -82,6 +83,6 @@ export function MediaCompactRow({
           className="!h-[1.125rem] !px-1.5 !text-[8px]"
         />
       </div>
-    </Link>
+    </div>
   );
 }

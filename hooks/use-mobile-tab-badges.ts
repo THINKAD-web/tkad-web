@@ -2,13 +2,19 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { usePathname } from "@/i18n/navigation";
+import {
+  getPlanCartCount,
+  PLAN_CART_CHANGE_EVENT,
+  PLAN_CART_KEY,
+} from "@/lib/plan-cart";
 
 type TabBadges = {
   contact: number;
   my: number;
+  planner: number;
 };
 
-const DEFAULT_BADGES: TabBadges = { contact: 0, my: 0 };
+const DEFAULT_BADGES: TabBadges = { contact: 0, my: 0, planner: 0 };
 
 const BADGE_REFRESH_MS = 60_000;
 
@@ -16,17 +22,23 @@ const BADGE_REFRESH_MS = 60_000;
  * Fetches unread counts for bottom tab badges.
  * - my: `/api/my/notifications` → unreadCount
  * - contact: chat rooms awaiting advertiser reply
+ * - planner: plan cart item count (localStorage)
  */
 export function useMobileTabBadges(): TabBadges {
   const pathname = usePathname();
   const [badges, setBadges] = useState<TabBadges>(DEFAULT_BADGES);
 
+  const refreshPlanCount = useCallback(() => {
+    setBadges((prev) => ({ ...prev, planner: getPlanCartCount() }));
+  }, []);
+
   const refresh = useCallback(async () => {
+    refreshPlanCount();
     try {
       const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
       const sessionData = await sessionRes.json();
       if (!sessionData?.ok || !sessionData.data) {
-        setBadges(DEFAULT_BADGES);
+        setBadges((prev) => ({ contact: 0, my: 0, planner: prev.planner }));
         return;
       }
 
@@ -50,11 +62,29 @@ export function useMobileTabBadges(): TabBadges {
         ).length;
       }
 
-      setBadges({ contact: contactCount, my: myCount });
+      setBadges((prev) => ({
+        contact: contactCount,
+        my: myCount,
+        planner: prev.planner,
+      }));
     } catch {
-      setBadges(DEFAULT_BADGES);
+      setBadges((prev) => ({ contact: 0, my: 0, planner: prev.planner }));
     }
-  }, []);
+  }, [refreshPlanCount]);
+
+  useEffect(() => {
+    refreshPlanCount();
+    const onPlanChange = () => refreshPlanCount();
+    const onStorage = (e: StorageEvent) => {
+      if (e.key === PLAN_CART_KEY) refreshPlanCount();
+    };
+    window.addEventListener(PLAN_CART_CHANGE_EVENT, onPlanChange);
+    window.addEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener(PLAN_CART_CHANGE_EVENT, onPlanChange);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, [refreshPlanCount]);
 
   useEffect(() => {
     void refresh();

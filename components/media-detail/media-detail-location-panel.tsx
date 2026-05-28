@@ -1,17 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
+import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import { NearbyPoiSection } from "@/components/media/nearby-poi-section";
 import type { MediaItem } from "@/lib/media-data";
 import { cn } from "@/lib/utils";
-
-const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
-  ssr: false,
-});
 
 type Props = {
   media: MediaItem;
@@ -37,7 +33,7 @@ export function MediaDetailLocationPanel({
     <div className={cn("space-y-6", className)}>
       <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white shadow-sm">
         <div className="h-80 min-h-[20rem] w-full sm:h-96">
-          <DarkMapView
+          <MediaDetailKakaoMap
             markers={[
               {
                 id: media.id,
@@ -50,10 +46,8 @@ export function MediaDetailLocationPanel({
             ]}
             selectedId={selectedId}
             onSelect={(id) => setSelectedId(id)}
-            onBoundsChange={() => {}}
             center={{ lat: media.lat, lng: media.lng }}
             zoom={4}
-            disableCluster
           />
         </div>
       </div>

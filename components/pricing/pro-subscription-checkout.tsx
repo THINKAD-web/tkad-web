@@ -10,6 +10,7 @@ import {
   isTossPaymentsConfigured,
 } from "@/lib/toss-payments-client";
 import { PRO_MONTHLY_KRW } from "@/lib/report-pricing-constants";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 type Props = {
   isKo: boolean;
@@ -17,7 +18,7 @@ type Props = {
   customerEmail: string;
 };
 
-export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: Props) {
+function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const widgetRef = useRef<Awaited<ReturnType<typeof loadPaymentWidget>> | null>(null);
@@ -158,3 +159,7 @@ export function ProSubscriptionCheckout({ isKo, customerName, customerEmail }: P
     </div>
   );
 }
+
+export const ProSubscriptionCheckout = withSearchParamsSuspense(
+  ProSubscriptionCheckoutInner,
+);

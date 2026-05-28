@@ -3,12 +3,13 @@
 import { useLocale, useTranslations } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useState } from "react";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 type Props = {
   className?: string;
 };
 
-export function KakaoLoginButton({ className }: Props) {
+function KakaoLoginButtonInner({ className }: Props) {
   const t = useTranslations("auth");
   const locale = useLocale();
   const search = useSearchParams();
@@ -45,3 +46,5 @@ export function KakaoLoginButton({ className }: Props) {
     </button>
   );
 }
+
+export const KakaoLoginButton = withSearchParamsSuspense(KakaoLoginButtonInner);

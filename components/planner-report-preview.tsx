@@ -117,7 +117,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
         "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white text-foreground",
       )}
     >
-      <div className="rounded-xl bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-7 text-white sm:p-10">
+      <div className="tkad-planner-dark-surface rounded-xl bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-7 text-white sm:p-10">
         <PlannerNeonLabel className="!text-cyan-400/80">Thinkad Planner</PlannerNeonLabel>
         <h3 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
           {t("reportPdfTitle")}

@@ -23,7 +23,6 @@ import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { MediaCatalogListCard } from "@/components/media/media-catalog-list-card";
 import { MediaScarcitySection } from "@/components/media-scarcity-section";
 import { useMediaAvailabilitySummary } from "@/lib/use-media-availability-summary";
-import { FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS } from "@/components/floating-selection-bar";
 import { INDUSTRY_BUDGET_SESSION_KEY } from "@/lib/industry-landing";
 import { BtnBlock } from "@/components/brutalist";
 import { Link, useRouter } from "@/i18n/navigation";
@@ -1607,10 +1606,6 @@ export default function MediaBrowseClient({
         locale={locale}
         onClear={() => setCompareItems([])}
       />
-
-      {compareItems.length > 0 ? (
-        <div className={FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS} aria-hidden />
-      ) : null}
     </>
     </MobilePullToRefresh>
   );

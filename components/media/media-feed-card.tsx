@@ -5,12 +5,15 @@ import Image from "next/image";
 import { Eye, MapPin, MessageCircle } from "lucide-react";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import {
   MediaExecutionSummary,
   MediaTrustScoreBadge,
 } from "@/components/media/media-trust-score";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
+import { MediaFavoriteButton } from "@/components/media-favorite-button";
+import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog";
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
@@ -34,8 +37,8 @@ type Props = {
   onToggleCart: () => void;
 };
 
-const feedActionPillClass =
-  "h-9 shrink-0 rounded-xl px-2.5 text-xs font-semibold";
+const feedSecondaryPillClass =
+  "h-8 flex-1 rounded-lg px-2 text-[11px] font-semibold";
 
 function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
   return {
@@ -159,6 +162,11 @@ export function MediaFeedCard({
                 {isKo ? "이미지 준비중" : "No image"}
               </div>
             )}
+            <MediaThumbnailTrustOverlay
+              item={item}
+              isKo={isKo}
+              variant="feed"
+            />
             {extraImages > 0 ? (
               <span className="absolute bottom-3 right-3 rounded-lg bg-black/60 px-2 py-1 text-xs font-semibold text-white backdrop-blur-sm">
                 +{extraImages}
@@ -256,31 +264,44 @@ export function MediaFeedCard({
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2">
-            <Link
-              href={href}
-              className="inline-flex h-9 flex-1 min-w-[7rem] items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 dark:border-white/14 dark:bg-white/6 dark:text-white/90 dark:hover:bg-white/10 sm:flex-none sm:px-4"
-            >
-              <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-              {isKo ? "문의하기" : "Inquire"}
-              <span aria-hidden>→</span>
-            </Link>
-            <MediaQuoteCtaButton media={media} variant="feed" />
-            <MediaCompareSelectButton
-              selected={inCompare}
-              onToggle={onToggleCompare}
-              className={feedActionPillClass}
+          <div className="mt-1 space-y-2 border-t border-gray-100 pt-3 dark:border-white/8">
+            <div className="grid grid-cols-2 gap-2">
+              <MediaQuoteCtaButton
+                media={media}
+                variant="feed"
+                className="min-w-0 w-full flex-none"
+              />
+              <Link
+                href={href}
+                className="inline-flex h-9 w-full min-w-0 items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 dark:border-white/14 dark:bg-white/6 dark:text-white/90 dark:hover:bg-white/10"
+              >
+                <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                {isKo ? "문의하기" : "Inquire"}
+              </Link>
+            </div>
+            <PlanCartAddButton
+              item={planCartItemFromCatalog(item, "search")}
+              addedFrom="search"
+              compact
+              className="w-full"
             />
-            <MediaCartAddButton
-              inCart={inCart}
-              onToggle={onToggleCart}
-              className={feedActionPillClass}
-            />
-            <MediaFavoriteButton
-              mediaId={item.id}
-              mediaName={item.name}
-              className="h-9 w-9 shrink-0 justify-center rounded-xl border border-gray-200 dark:border-white/14"
-            />
+            <div className="flex items-center gap-2">
+              <MediaCompareSelectButton
+                selected={inCompare}
+                onToggle={onToggleCompare}
+                className={feedSecondaryPillClass}
+              />
+              <MediaCartAddButton
+                inCart={inCart}
+                onToggle={onToggleCart}
+                className={feedSecondaryPillClass}
+              />
+              <MediaFavoriteButton
+                mediaId={item.id}
+                mediaName={item.name}
+                className="h-8 w-8 shrink-0 justify-center rounded-lg border border-gray-200 dark:border-white/14"
+              />
+            </div>
           </div>
         </div>
       </div>

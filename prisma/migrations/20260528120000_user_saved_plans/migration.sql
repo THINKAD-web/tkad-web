@@ -1,0 +1,19 @@
+-- CreateTable
+CREATE TABLE "user_saved_plans" (
+    "id" TEXT NOT NULL,
+    "user_id" TEXT NOT NULL,
+    "items" JSONB NOT NULL DEFAULT '[]',
+    "campaign_goal" TEXT,
+    "total_budget" INTEGER,
+    "duration" INTEGER,
+    "updated_at" TIMESTAMP(3) NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT "user_saved_plans_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "user_saved_plans_user_id_key" ON "user_saved_plans"("user_id");
+
+-- AddForeignKey
+ALTER TABLE "user_saved_plans" ADD CONSTRAINT "user_saved_plans_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -85,7 +86,7 @@ function statusBadgeClass(code: InquiryAdminStatusCode): string {
   }
 }
 
-export default function AdminInquiryListItem({
+function AdminInquiryListItem({
   item,
   initiallyOpen = false,
 }: Props) {
@@ -251,6 +252,13 @@ export default function AdminInquiryListItem({
               </Badge>
             </div>
             <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
+              <Link
+                href={`/admin/inquiries/${item.id}`}
+                className="font-semibold text-primary hover:underline"
+                onClick={(e) => e.stopPropagation()}
+              >
+                상세
+              </Link>
               <span>{open ? "접기" : "열기"}</span>
               <ChevronDown
                 className={`h-4 w-4 transition-transform ${open ? "rotate-180" : ""}`}
@@ -496,3 +504,5 @@ export default function AdminInquiryListItem({
     </li>
   );
 }
+
+export default withSearchParamsSuspense(AdminInquiryListItem);

@@ -2,13 +2,16 @@
 
 import { Suspense, useState, type FormEvent } from "react";
 import { useSearchParams } from "next/navigation";
+import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { cn } from "@/lib/utils";
-import type { CommunityMemberRole } from "@/lib/community/types";
 import { getOrCreateTrackingSessionId } from "@/lib/tracking/client";
+import { SignupStartRolePicker } from "@/components/auth/signup-start-role-picker";
+import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
+import { resolveOAuthLoginErrorMessage } from "@/lib/oauth-login-errors";
+import type { SignupStartRole } from "@/lib/signup-start-roles";
 
 export default function RegisterPage() {
   return (
@@ -27,35 +30,24 @@ export default function RegisterPage() {
 }
 
 function RegisterPageInner() {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const router = useRouter();
   const searchParams = useSearchParams();
   const inviteRefUserId = searchParams.get("ref")?.trim() ?? "";
+  const oauthError = resolveOAuthLoginErrorMessage(
+    searchParams.get("error"),
+    searchParams.get("provider"),
+    isKo,
+  );
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   const [company, setCompany] = useState("");
-  const [communityRole, setCommunityRole] =
-    useState<CommunityMemberRole>("ADVERTISER");
-
-  const signupRoleOptions: {
-    value: CommunityMemberRole;
-    title: string;
-    desc: string;
-  }[] = [
-    {
-      value: "ADVERTISER",
-      title: "광고주로 시작하기",
-      desc: "캠페인·매체 탐색·플래너",
-    },
-    {
-      value: "MEDIA",
-      title: "매체사로 시작하기",
-      desc: "매체 등록·부킹·송출 관리",
-    },
-  ];
+  const [startRole, setStartRole] = useState<SignupStartRole>("ADVERTISER");
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(oauthError);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -74,7 +66,7 @@ function RegisterPageInner() {
           password,
           name,
           company: company || undefined,
-          communityRole,
+          startRole,
           sessionId: getOrCreateTrackingSessionId() || undefined,
           inviteRefUserId: inviteRefUserId || undefined,
         }),
@@ -123,7 +115,21 @@ function RegisterPageInner() {
                   회원가입
                 </h1>
                 <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
-                  {`// `}THINKAD 계정을 만들어보세요
+                  {`// `}
+                  {isKo
+                    ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
+                    : "Sign up with Google, Kakao, Naver, or email"}
+                </p>
+              </div>
+
+              <SocialAuthButtons />
+
+              <div className="relative py-1">
+                <div className="absolute inset-0 flex items-center" aria-hidden>
+                  <div className="w-full border-t dark:border-white/12 border-gray-200" />
+                </div>
+                <p className="relative text-center font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white">
+                  {isKo ? "또는 이메일로" : "Or with email"}
                 </p>
               </div>
 
@@ -181,31 +187,11 @@ function RegisterPageInner() {
                 </Field>
 
                 <Field label="시작 역할" htmlFor="role-advertiser" hint="(필수)">
-                  <div className="space-y-2" role="radiogroup" aria-label="시작 역할">
-                    {signupRoleOptions.map((opt) => (
-                      <button
-                        key={opt.value}
-                        id={opt.value === "ADVERTISER" ? "role-advertiser" : undefined}
-                        type="button"
-                        role="radio"
-                        aria-checked={communityRole === opt.value}
-                        onClick={() => setCommunityRole(opt.value)}
-                        className={cn(
-                          "w-full rounded-[18px] border px-4 py-3 text-left transition-all",
-                          communityRole === opt.value
-                            ? "border-white/28 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
-                            : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
-                        )}
-                      >
-                        <p className="text-sm font-bold tracking-tight">
-                          {opt.title}
-                        </p>
-                        <p className="mt-1 text-[11px] dark:text-white text-gray-500">
-                          {opt.desc}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
+                  <SignupStartRolePicker
+                    value={startRole}
+                    onChange={setStartRole}
+                    ariaLabel="시작 역할"
+                  />
                 </Field>
 
                 {error && (

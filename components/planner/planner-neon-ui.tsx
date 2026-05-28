@@ -125,28 +125,30 @@ export function PlannerProGate({
       </div>
       {!isPro ? (
         <div
-          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/70 backdrop-blur-sm dark:bg-black/70"
+          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/75 p-4 backdrop-blur-sm dark:bg-black/70"
           aria-hidden={false}
         >
-          <p className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
-            {isKo
-              ? "🔒 결과를 확인하려면 PRO가 필요해요"
-              : "🔒 PRO required to view results"}
-          </p>
-          <p className="mb-1 px-4 text-center text-sm text-gray-500 dark:text-white/60">
-            {isKo
-              ? "노출 예측·시뮬레이션·PDF 보고서 포함"
-              : "Includes exposure forecast, simulation & PDF report"}
-          </p>
-          <p className="mb-4 text-xs text-gray-400 dark:text-white/45">
-            {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
-          </p>
-          <Link
-            href="/pricing"
-            className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-2.5 text-sm font-medium text-white"
-          >
-            {isKo ? "PRO 무료 체험 시작 →" : "Start PRO free trial →"}
-          </Link>
+          <div className="max-w-sm rounded-2xl border border-gray-200 bg-white px-6 py-5 text-center shadow-lg dark:border-white/10 dark:bg-gray-950/95">
+            <p className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
+              {isKo
+                ? "🔒 결과를 확인하려면 PRO가 필요해요"
+                : "🔒 PRO required to view results"}
+            </p>
+            <p className="mb-1 text-center text-sm text-gray-600 dark:text-white/70">
+              {isKo
+                ? "노출 예측·시뮬레이션·PDF 보고서 포함"
+                : "Includes exposure forecast, simulation & PDF report"}
+            </p>
+            <p className="mb-4 text-xs text-gray-500 dark:text-white/50">
+              {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
+            </p>
+            <Link
+              href="/pricing"
+              className="tkad-neon-cta inline-flex rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-2.5 text-sm font-medium text-white"
+            >
+              {isKo ? "PRO 무료 체험 시작 →" : "Start PRO free trial →"}
+            </Link>
+          </div>
         </div>
       ) : null}
     </div>

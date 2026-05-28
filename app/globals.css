@@ -1283,6 +1283,18 @@ html.dark .tkad-media-detail-hero,
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* PDF/통합 보고서 등 의도적 다크 그라데이션 표면 — day에서도 밝은 글자 유지 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface [class*="text-white"] {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface [class*="text-violet"] {
+  color: rgb(196 181 253) !important;
+  -webkit-text-fill-color: rgb(196 181 253) !important;
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary *,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean,

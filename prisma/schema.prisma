@@ -1510,6 +1510,7 @@ model User {
   chatRoomsAsAdvertiser   ChatRoom[] @relation("ChatAdvertiser")
   chatRoomsAsOwner        ChatRoom[] @relation("ChatOwner")
   chatMessages            ChatMessage[]
+  savedMediaPlan          UserSavedPlan?
 
   referredByUserId String? @map("referred_by_user_id")
   referredBy       User?   @relation("UserReferrals", fields: [referredByUserId], references: [id], onDelete: SetNull)
@@ -1885,6 +1886,22 @@ model UserFavoriteMedia {
   @@unique([userId, mediaId])
   @@index([mediaId])
   @@map("user_favorite_medias")
+}
+
+/// 로그인 사용자 플랜 장바구니 (매체 견적용)
+model UserSavedPlan {
+  id        String   @id @default(cuid())
+  userId    String   @unique @map("user_id")
+  items     Json     @default("[]")
+  goal      String?  @map("campaign_goal")
+  budget    Int?     @map("total_budget")
+  duration  Int?
+  updatedAt DateTime @updatedAt @map("updated_at")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_saved_plans")
 }
 
 /// 로그인 사용자 최근 본 매체 (다기기 동기화, 최대 20개는 앱 레이어에서 유지)

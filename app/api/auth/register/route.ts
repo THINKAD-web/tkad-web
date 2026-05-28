@@ -1,5 +1,4 @@
 import { z } from "zod";
-import type { AppUserRole } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { hashPassword } from "@/lib/password";
 import { issueEmailVerification } from "@/lib/email-verification";
@@ -22,21 +21,13 @@ import { touchVisitorJourney } from "@/lib/visitor-journey";
 import { ensureMediaOwnerProfile } from "@/lib/media-owner-incentives";
 import { buildTrialGrantData } from "@/lib/check-plan";
 import { awardPoints, processReferralSignup } from "@/lib/points";
+import { ONBOARDING_ROLES } from "@/lib/onboarding-types";
+import {
+  resolveSignupStartRole,
+} from "@/lib/signup-start-roles";
+import { seedSignupOnboardingPreference } from "@/lib/signup-start-roles-server";
 
 export const runtime = "nodejs";
-
-const COMMUNITY_SIGNUP_ROLES = [
-  "ADVERTISER",
-  "MEDIA",
-  "AGENCY",
-  "FREELANCER",
-] as const;
-
-function appRoleForCommunityRole(cr: (typeof COMMUNITY_SIGNUP_ROLES)[number]): AppUserRole {
-  if (cr === "MEDIA") return "owner";
-  if (cr === "AGENCY") return "agency";
-  return "advertiser";
-}
 
 const Body = z.object({
   email: z.string().email().max(254),
@@ -45,7 +36,7 @@ const Body = z.object({
   phone: z.string().max(20).optional(),
   company: z.string().max(80).optional(),
   locale: z.enum(["ko", "en", "zh", "ja"]).default("ko"),
-  communityRole: z.enum(COMMUNITY_SIGNUP_ROLES).default("ADVERTISER"),
+  startRole: z.enum(ONBOARDING_ROLES).default("ADVERTISER"),
   sessionId: z.string().min(8).max(64).optional(),
   referralCode: z.string().max(16).optional(),
   /** 친구 초대 userId (?ref=) */
@@ -74,7 +65,7 @@ export async function POST(req: Request) {
       phone,
       company,
       locale,
-      communityRole,
+      startRole,
       sessionId,
       referralCode,
       inviteRefUserId,
@@ -87,8 +78,9 @@ export async function POST(req: Request) {
       });
     }
 
+    const { communityRole, appRole, onboardingRole } =
+      resolveSignupStartRole(startRole);
     const passwordHash = await hashPassword(password);
-    const appRole = appRoleForCommunityRole(communityRole);
     const trial = buildTrialGrantData();
     const user = await prisma.user.create({
       data: {
@@ -129,6 +121,10 @@ export async function POST(req: Request) {
         metadata: { email: user.email },
       });
     }
+
+    void seedSignupOnboardingPreference(user.id, onboardingRole).catch((err) =>
+      console.error("[auth/register] onboarding preference", err),
+    );
 
     if (communityRole === "MEDIA" || user.role === "owner") {
       void ensureMediaOwnerProfile(user.id, referralCode).catch((err) =>

@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
+  ArrowLeft,
   Clock,
   Heart,
   LayoutList,
@@ -170,11 +171,27 @@ export function MyHubPageClient() {
   const reloadMe = useCallback(async () => {
     const res = await fetch("/api/auth/session", { cache: "no-store" });
     const data = await res.json();
-    if (data.ok && data.data) setMe(data.data);
+    if (data.ok && data.data) {
+      setMe((prev) => {
+        const next = data.data as Me;
+        if (
+          prev &&
+          prev.id === next.id &&
+          prev.email === next.email &&
+          prev.name === next.name &&
+          prev.role === next.role &&
+          prev.plan === next.plan &&
+          prev.pointBalance === next.pointBalance &&
+          prev.needsEmailVerification === next.needsEmailVerification
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    }
   }, []);
 
   const reloadMobileStats = useCallback(async () => {
-    await reloadMe();
     try {
       const [favRes, planRes, bookingRes] = await Promise.all([
         fetch("/api/my/favorites", { cache: "no-store" }),
@@ -184,19 +201,19 @@ export function MyHubPageClient() {
       const favData = await favRes.json();
       const planData = await planRes.json();
       const bookingData = await bookingRes.json();
-      if (favData.ok && Array.isArray(favData.data)) {
-        setFavorites(favData.data);
+      if (favData.ok && Array.isArray(favData.data?.items)) {
+        setFavorites(favData.data.items);
       }
-      if (planData.ok && Array.isArray(planData.data)) {
-        setPlannerPlans(planData.data);
+      if (planData.ok && Array.isArray(planData.data?.items)) {
+        setPlannerPlans(planData.data.items);
       }
-      if (bookingData.ok && Array.isArray(bookingData.data)) {
-        setInquiryCount(bookingData.data.length);
+      if (bookingData.ok && Array.isArray(bookingData.data?.items)) {
+        setInquiryCount(bookingData.data.items.length);
       }
     } catch {
       /* non-fatal */
     }
-  }, [reloadMe]);
+  }, []);
 
   const tabDefs = useMemo(
     () => [
@@ -232,9 +249,9 @@ export function MyHubPageClient() {
   }, [router]);
 
   useEffect(() => {
-    if (!me) return;
+    if (!me?.id) return;
     void reloadMobileStats();
-  }, [me, reloadMobileStats]);
+  }, [me?.id, reloadMobileStats]);
 
   useEffect(() => {
     if (!me) return;
@@ -255,19 +272,26 @@ export function MyHubPageClient() {
   }, [me, campaignFilter]);
 
   useEffect(() => {
-    if (!me) return;
+    if (!me?.id) return;
     let cancelled = false;
     setFavLoading(true);
     (async () => {
-      const res = await fetch("/api/my/favorites", { cache: "no-store" });
-      const data = await res.json();
-      if (!cancelled && data.ok) setFavorites(data.data.items);
-      if (!cancelled) setFavLoading(false);
+      try {
+        const res = await fetch("/api/my/favorites", { cache: "no-store" });
+        const data = await res.json();
+        if (!cancelled && data.ok && Array.isArray(data.data?.items)) {
+          setFavorites(data.data.items);
+        }
+      } catch {
+        /* non-fatal */
+      } finally {
+        if (!cancelled) setFavLoading(false);
+      }
     })();
     return () => {
       cancelled = true;
     };
-  }, [me]);
+  }, [me?.id]);
 
   useEffect(() => {
     if (!me) return;
@@ -369,19 +393,105 @@ export function MyHubPageClient() {
     favorites.map((f) => f.id),
   );
 
+  const favoritesPanel = (
+    <>
+      <div className="tkad-neon-surface relative mb-6 overflow-hidden rounded-[28px] px-5 py-6 sm:mb-8 sm:px-8 sm:py-10">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
+          {isKo ? "// 찜한 매체" : "// Saved media"}
+        </p>
+        <h2 className="mt-3 text-balance text-xl font-[950] leading-tight tracking-[-0.05em] text-foreground sm:text-3xl">
+          {isKo ? (
+            <>
+              관심 매체를{" "}
+              <span className="tkad-home-accent-text">플래너</span>에 담아보세요
+            </>
+          ) : (
+            <>
+              Add saved media to your{" "}
+              <span className="tkad-home-accent-text">planner</span>
+            </>
+          )}
+        </h2>
+        <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+          {isKo
+            ? "관심 매체를 모아 플래너·견적으로 이어가세요."
+            : "Collect saved placements and move into planner or quotes."}
+        </p>
+      </div>
+      {favLoading ? (
+        <div className="py-16 text-center">
+          <Spinner size="md" label={t("favorites.loading")} />
+        </div>
+      ) : favorites.length === 0 ? (
+        <EmptyState
+          icon="⭐"
+          title={t("favorites.emptyTitle")}
+          description={t("favorites.emptyDesc")}
+          action={
+            <Link href="/media" className={myHubPrimaryBtn}>
+              {t("favorites.emptyCta")}
+            </Link>
+          }
+        />
+      ) : (
+        <>
+          <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {favorites.map((m) => (
+              <MyHubMediaGridCard
+                key={m.id}
+                item={m}
+                isKo={isKo}
+                onRemove={removeFavorite}
+              />
+            ))}
+          </ul>
+          <div className="mt-6 flex justify-center">
+            <Link href={plannerPlannerHref} className={myHubPrimaryBtn}>
+              <Sparkles className="mr-2 h-4 w-4" />
+              {t("favorites.plannerCta")}
+            </Link>
+          </div>
+        </>
+      )}
+    </>
+  );
+
   return (
     <>
-      <MobileMyHubView
-        me={me}
-        stats={{
-          favorites: favorites.length,
-          inquiries: inquiryCount,
-          plans: plannerPlans.length,
-        }}
-        isKo={isKo}
-        onRefresh={reloadMobileStats}
-        onLogout={logout}
-      />
+      {tab === "campaigns" ? (
+        <MobileMyHubView
+          me={me}
+          stats={{
+            favorites: favorites.length,
+            inquiries: inquiryCount,
+            plans: plannerPlans.length,
+          }}
+          isKo={isKo}
+          onRefresh={async () => {
+            await reloadMe();
+            await reloadMobileStats();
+          }}
+          onLogout={logout}
+        />
+      ) : (
+        <div className="md:hidden">
+          <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-gray-950">
+            <Link
+              href="/my?tab=campaigns"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-white/70"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              {isKo ? "마이페이지" : "My hub"}
+            </Link>
+            <h1 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
+              {tabDefs.find((d) => d.key === tab)?.label ?? t("tabs.favorites")}
+            </h1>
+          </div>
+          {tab === "favorites" ? (
+            <div className="px-4 py-6">{favoritesPanel}</div>
+          ) : null}
+        </div>
+      )}
 
       <HomeLandingDayNight portal>
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell hidden min-h-[calc(100dvh-4rem)] md:block">
@@ -524,67 +634,7 @@ export function MyHubPageClient() {
 
           {tab === "favorites" && (
             <section aria-labelledby="my-favorites-heading">
-              <div className="tkad-neon-surface relative mb-8 overflow-hidden rounded-[28px] px-6 py-8 sm:px-8 sm:py-10">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
-                  {isKo ? "// 찜한 매체" : "// Saved media"}
-                </p>
-                <h2
-                  id="my-favorites-heading"
-                  className="mt-3 text-balance text-2xl font-[950] leading-tight tracking-[-0.05em] text-foreground sm:text-3xl"
-                >
-                  {isKo ? (
-                    <>
-                      관심 매체를{" "}
-                      <span className="tkad-home-accent-text">플래너</span>에 담아보세요
-                    </>
-                  ) : (
-                    <>
-                      Add saved media to your{" "}
-                      <span className="tkad-home-accent-text">planner</span>
-                    </>
-                  )}
-                </h2>
-                <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-                  {isKo
-                    ? "관심 매체를 모아 플래너·견적으로 이어가세요."
-                    : "Collect saved placements and move into planner or quotes."}
-                </p>
-              </div>
-              {favLoading ? (
-                <div className="py-16 text-center">
-                  <Spinner size="md" label={t("favorites.loading")} />
-                </div>
-              ) : favorites.length === 0 ? (
-                <EmptyState
-                  icon="⭐"
-                  title={t("favorites.emptyTitle")}
-                  description={t("favorites.emptyDesc")}
-                  action={
-                    <Link href="/media" className={myHubPrimaryBtn}>
-                      {t("favorites.emptyCta")}
-                    </Link>
-                  }
-                />
-              ) : (
-                <>
-                  <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-                    {favorites.map((m) => (
-                      <MyHubMediaGridCard
-                        key={m.id}
-                        item={m}
-                        isKo={isKo}
-                        onRemove={removeFavorite}
-                      />
-                    ))}
-                  </ul>
-                  <div className="mt-6 flex justify-center">
-                    <Link href={plannerPlannerHref} className={myHubPrimaryBtn}>
-                      <Sparkles className="mr-2 h-4 w-4" />
-                      {t("favorites.plannerCta")}
-                    </Link>
-                  </div>
-                </>
-              )}
+              {favoritesPanel}
             </section>
           )}
 

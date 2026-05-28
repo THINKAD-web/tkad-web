@@ -6,6 +6,7 @@ import { useSearchParams } from "next/navigation";
 import { Search } from "lucide-react";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 type Props = {
   className?: string;
@@ -68,7 +69,7 @@ function HeaderMediaSearchField({
   );
 }
 
-export function HeaderMediaSearch(props: Props) {
+function HeaderMediaSearchInner(props: Props) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const urlQ = pathname === "/media" ? (searchParams.get("q") ?? "") : "";
@@ -78,3 +79,5 @@ export function HeaderMediaSearch(props: Props) {
     <HeaderMediaSearchField key={syncKey} defaultQuery={urlQ} {...props} />
   );
 }
+
+export const HeaderMediaSearch = withSearchParamsSuspense(HeaderMediaSearchInner);

@@ -10,6 +10,7 @@ type RouteContext = { params: Promise<{ nextauth: string[] }> };
 
 function providerFromPath(segments: string[] | undefined): OAuthProvider | null {
   const joined = (segments ?? []).join("/");
+  if (joined.includes("google")) return "google";
   if (joined.includes("kakao")) return "kakao";
   if (joined.includes("naver")) return "naver";
   return null;

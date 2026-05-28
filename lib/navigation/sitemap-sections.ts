@@ -12,14 +12,48 @@ export type SitemapSection = {
   links: SitemapLink[];
 };
 
+/** SEO 랜딩 — 사이트맵 하단 "기타 검색" */
+const SEO_SEARCH_LINKS: {
+  href: string;
+  labelKo: string;
+  labelEn: string;
+}[] = [
+  { href: "/media", labelKo: "매체 유형별", labelEn: "Browse by media type" },
+  { href: "/target/brand", labelKo: "브랜드 캠페인", labelEn: "Brand campaigns" },
+  {
+    href: "/target/small_business",
+    labelKo: "로컬·소상공인",
+    labelEn: "Local & small business",
+  },
+  {
+    href: "/target/university",
+    labelKo: "대학교 캠페인",
+    labelEn: "University campaigns",
+  },
+  { href: "/target/public", labelKo: "지자체 광고", labelEn: "Public sector ads" },
+  { href: "/target/fandom", labelKo: "팬덤 광고", labelEn: "Fandom ads" },
+  { href: "/media/category/bus", labelKo: "버스 광고", labelEn: "Bus advertising" },
+  {
+    href: "/media/category/subway",
+    labelKo: "지하철 광고",
+    labelEn: "Subway advertising",
+  },
+  {
+    href: "/media/category/billboard",
+    labelKo: "전광판 광고",
+    labelEn: "Billboard advertising",
+  },
+];
+
 type BuildSitemapSectionsInput = {
+  locale: string;
   discovery: ResolvedPublicNavGroup;
   planning: ResolvedPublicNavGroup;
   studio: ResolvedPublicNavGroup;
   insights: ResolvedPublicNavGroup;
   industryGuideLabel: string;
-  webinarLabel: string;
   companyTitle: string;
+  otherSearchTitle: string;
   servicesLabel: string;
   mediaRegisterLabel: string;
   contactLabel: string;
@@ -32,53 +66,42 @@ function groupLinks(group: ResolvedPublicNavGroup): SitemapLink[] {
   }));
 }
 
+function seoSearchLinks(locale: string): SitemapLink[] {
+  const isKo = locale.startsWith("ko");
+  return SEO_SEARCH_LINKS.map((link) => ({
+    href: link.href,
+    label: isKo ? link.labelKo : link.labelEn,
+  }));
+}
+
 /** 사이트맵 모달 — PUBLIC_NAV_GROUPS 와 동기화 */
 export function buildSitemapSections(
   input: BuildSitemapSectionsInput,
 ): SitemapSection[] {
   const {
+    locale,
     discovery,
     planning,
     studio,
     insights,
     industryGuideLabel,
-    webinarLabel,
     companyTitle,
+    otherSearchTitle,
     servicesLabel,
     mediaRegisterLabel,
     contactLabel,
   } = input;
 
-  const mediaTypeLinks: SitemapLink[] = [
-    { href: "/media/category/subway", label: "지하철 광고" },
-    { href: "/media/category/bus", label: "버스 광고" },
-    { href: "/media/category/billboard", label: "전광판 광고" },
-    { href: "/media/category/campus", label: "대학가 광고" },
-    { href: "/media/category/dooh", label: "DOOH 광고" },
-    { href: "/media/category/local", label: "로컬 매체" },
-  ];
-
-  const targetLinks: SitemapLink[] = [
-    { href: "/target/brand", label: "브랜드 캠페인" },
-    { href: "/target/fandom", label: "팬덤 광고" },
-    { href: "/target/public", label: "지자체 광고" },
-    { href: "/target/small_business", label: "로컬·소상공인" },
-    { href: "/target/university", label: "대학교 캠페인" },
-  ];
-
   return [
     {
       id: "discovery",
       title: discovery.label,
-      links: [
-        ...groupLinks(discovery),
-        { href: "/media/category/subway", label: "매체 유형별" },
-      ],
+      links: groupLinks(discovery),
     },
     {
       id: "planning",
       title: planning.label,
-      links: [...groupLinks(planning), ...targetLinks],
+      links: groupLinks(planning),
     },
     {
       id: "studio",
@@ -91,7 +114,6 @@ export function buildSitemapSections(
       links: [
         ...groupLinks(insights),
         { href: "/industry/beauty", label: industryGuideLabel },
-        { href: "/academy#academy-webinars", label: webinarLabel },
       ],
     },
     {
@@ -101,8 +123,12 @@ export function buildSitemapSections(
         { href: "/services", label: servicesLabel },
         { href: "/register/media", label: mediaRegisterLabel },
         { href: "/contact", label: contactLabel },
-        ...mediaTypeLinks.slice(0, 3),
       ],
+    },
+    {
+      id: "other-search",
+      title: otherSearchTitle,
+      links: seoSearchLinks(locale),
     },
   ];
 }

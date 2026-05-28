@@ -7,11 +7,12 @@ import { useRouter, Link } from "@/i18n/navigation";
 import { Users } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 const gradientBtn =
   "inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-3 text-sm font-semibold dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(124,58,237,0.35)] transition-opacity hover:opacity-95 disabled:opacity-50";
 
-export function JoinTeamClient() {
+function JoinTeamClientInner() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const locale = useLocale();
@@ -149,3 +150,5 @@ export function JoinTeamClient() {
     </HomeLandingDayNight>
   );
 }
+
+export const JoinTeamClient = withSearchParamsSuspense(JoinTeamClientInner);

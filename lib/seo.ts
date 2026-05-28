@@ -4,8 +4,8 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
-/** Kakao/messenger crawlers must fetch OG images from the production origin. */
-export const OG_PRODUCTION_ORIGIN = "https://tkad.co.kr";
+/** Kakao/messenger crawlers must fetch OG images from the live app origin. */
+export const OG_PRODUCTION_ORIGIN = "https://app.tkad.co.kr";
 
 export function ogImageUrl(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
@@ -68,22 +68,19 @@ export function defaultOgImages(
 }
 
 /**
- * 절대 URL(OG, sitemap, JSON-LD, canonical)의 기준.
- * - 운영: Vercel에 `NEXT_PUBLIC_SITE_URL`(권장) 또는 `SITE_URL` = **실제 도메인** (예: https://example.com)
- * - 미설정 + Vercel 프리뷰: `VERCEL_URL` 기준 https://… (프리뷰용)
- * - 로컬/폴백: tkad.co.kr
+ * 절대 URL(OG, sitemap, JSON-LD, canonical, 이메일 링크)의 기준.
+ * - `NEXT_PUBLIC_SITE_URL` / `SITE_URL` 우선 (운영·프리뷰·로컬 공통)
+ * - 미설정 + Vercel 프리뷰: tkad-web.vercel.app
+ * - 폴백: app.tkad.co.kr (루트 tkad.co.kr 은 Cafe24 — 앱 미호스팅)
  */
 function resolvePublicSiteUrl(): string {
-  if (process.env.VERCEL_ENV === "production") {
-    return OG_PRODUCTION_ORIGIN;
-  }
-  if (process.env.VERCEL_ENV === "preview") {
-    return "https://tkad-web.vercel.app";
-  }
   const explicit =
     process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
     process.env.SITE_URL?.trim();
   if (explicit) return explicit.replace(/\/$/, "");
+  if (process.env.VERCEL_ENV === "preview") {
+    return "https://tkad-web.vercel.app";
+  }
   const vercel = process.env.VERCEL_URL?.trim();
   if (vercel) {
     const host = vercel.replace(/^https?:\/\//, "").replace(/\/$/, "");
@@ -162,7 +159,7 @@ export async function allPublicSitemapPaths(): Promise<
 
 /**
  * hreflang alternates + canonical.
- * `canonical` 은 metadataBase(siteUrl) 기준 상대 경로 → 운영 시 https://tkad.co.kr/ko/… 절대 URL.
+ * `canonical` 은 metadataBase(siteUrl) 기준 상대 경로 → 운영 시 https://app.tkad.co.kr/ko/… 절대 URL.
  * vercel.app 프리뷰는 NEXT_PUBLIC_SITE_URL 미설정 시 VERCEL_URL 기준이므로 프로덕션에 도메인 고정 권장.
  */
 export function pageAlternates(

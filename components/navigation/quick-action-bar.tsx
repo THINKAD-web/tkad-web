@@ -15,6 +15,8 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
+import { usePlanCart } from "@/hooks/use-plan-cart";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -70,13 +72,11 @@ const MOBILE_ACTIONS: QuickActionItem[] = [
     match: (p) => p.startsWith("/recommend"),
   },
   {
-    id: "favorites",
-    href: "/my?tab=favorites",
-    labelKo: "저장한매체",
-    labelEn: "Saved",
-    match: (p, tab) =>
-      p.startsWith("/media/favorites") ||
-      (p.startsWith("/my") && tab === "favorites"),
+    id: "plan",
+    href: "/my/plan",
+    labelKo: "내 플랜",
+    labelEn: "My plan",
+    match: (p) => p.startsWith("/my/plan"),
   },
 ];
 
@@ -115,12 +115,13 @@ type DesktopQuickAction = {
   badge?: number;
 };
 
-export function QuickActionBarMobile() {
+function QuickActionBarMobileInner() {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const locale = useLocale();
   const isKo = locale === "ko";
   const tab = searchParams.get("tab");
+  const { count: planCount } = usePlanCart();
 
   if (isHiddenPath(pathname)) return null;
 
@@ -136,19 +137,33 @@ export function QuickActionBarMobile() {
         {actions.map((action) => {
           const active = action.match(pathname, tab);
           const label = isKo ? action.labelKo : action.labelEn;
+          const planLabel =
+            action.id === "plan" && planCount > 0
+              ? `${label} ${planCount > 9 ? "9+" : planCount}`
+              : label;
+          const isPlan = action.id === "plan";
           return (
             <Link
               key={action.id}
               href={action.href}
               className={cn(
                 "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
-                active
-                  ? "tkad-neon-cta-clean text-white"
-                  : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
+                isPlan && planCount > 0 && !active
+                  ? "border border-violet-300/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 text-white shadow-sm shadow-violet-500/20"
+                  : active
+                    ? "tkad-neon-cta-clean text-white"
+                    : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
               )}
               aria-current={active ? "page" : undefined}
+              aria-label={
+                action.id === "plan" && planCount > 0
+                  ? isKo
+                    ? `내 플랜 ${planCount}개`
+                    : `My plan ${planCount} items`
+                  : undefined
+              }
             >
-              {label}
+              {action.id === "plan" ? planLabel : label}
             </Link>
           );
         })}
@@ -157,7 +172,7 @@ export function QuickActionBarMobile() {
   );
 }
 
-export function QuickActionBarDesktop({ compact = false }: { compact?: boolean }) {
+function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const locale = useLocale();
@@ -274,3 +289,6 @@ export function QuickActionBarDesktop({ compact = false }: { compact?: boolean }
 
 /** Icons exported for potential reuse */
 export { Search, MessageCircle };
+
+export const QuickActionBarMobile = withSearchParamsSuspense(QuickActionBarMobileInner);
+export const QuickActionBarDesktop = withSearchParamsSuspense(QuickActionBarDesktopInner);

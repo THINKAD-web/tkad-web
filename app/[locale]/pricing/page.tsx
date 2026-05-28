@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { CreditCard } from "lucide-react";
 import { routing } from "@/i18n/routing";
@@ -73,13 +74,15 @@ export default async function PricingPage({ params, searchParams }: Props) {
               {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
             </p>
           ) : null}
-          <PricingPageClient
-            isKo={isKo}
-            loggedIn={Boolean(user)}
-            userName={user?.name}
-            userEmail={user?.email}
-            showTrial={sp.trial === "1" || !user}
-          />
+          <Suspense fallback={null}>
+            <PricingPageClient
+              isKo={isKo}
+              loggedIn={Boolean(user)}
+              userName={user?.name}
+              userEmail={user?.email}
+              showTrial={sp.trial === "1" || !user}
+            />
+          </Suspense>
         </NeonSection>
       </div>
     </HomeLandingDayNight>

@@ -7,7 +7,9 @@ import {
   Map,
   Package,
   Palette,
+  RefreshCw,
   Search,
+  Shield,
   Sparkles,
   Target,
   Trophy,
@@ -63,6 +65,18 @@ export const CONTENT_TABS: SubTab[] = [
     match: (p) => p === "/academy" || p.startsWith("/academy/learn"),
   },
   { label: "광고주 가이드", href: "/guides", icon: BookOpen },
+];
+
+export const POLICY_TABS: SubTab[] = [
+  { label: "이용약관", href: "/terms", icon: FileText },
+  { label: "개인정보처리방침", href: "/privacy", icon: Shield },
+  { label: "환불 정책", href: "/refund", icon: RefreshCw },
+  {
+    label: "성과 보증",
+    href: "/guarantee",
+    icon: BarChart3,
+    match: (p) => p === "/guarantee" || p.startsWith("/guarantee/"),
+  },
 ];
 
 export const STUDIO_TABS: SubTab[] = [

@@ -1,51 +1,161 @@
-import { MediaCard } from "@/components/brutalist/media-card";
+"use client";
+
+import { useCallback, useEffect, useMemo, useState } from "react";
+import CompareBar from "@/components/compare-bar";
+import { MediaDiscoveryGridCard } from "@/components/media/media-discovery-grid-card";
+import {
+  entriesToCompareMediaItems,
+  getCompareCartEntries,
+  setCompareCartEntries,
+  subscribeCompareCart,
+  type CompareCartEntry,
+} from "@/lib/compare-cart-client";
+import { regionLabel } from "@/lib/media-keyword-landing";
 import {
   getPrimaryMediaImageUrl,
   type MediaItem,
   typeLabels,
 } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import {
+  formatMediaPriceWithPeriodSuffix,
+  normalizeMediaPricePeriod,
+  resolveMediaDisplayPrice,
+} from "@/lib/media-price-format";
+import { useCart } from "@/lib/cart";
+import { useAppToast } from "@/lib/use-toast";
 
 type Props = {
   items: MediaItem[];
   locale: string;
 };
 
+function renderPriceLabel(item: MediaItem, locale: string): string | null {
+  const display = resolveMediaDisplayPrice(item);
+  if (display.priceWon <= 0) return null;
+  return formatMediaPriceWithPeriodSuffix(
+    display.priceWon,
+    normalizeMediaPricePeriod(display.period),
+    locale,
+  );
+}
+
 /**
- * 지역·유형·로컬 SEO 랜딩용 정적 매체 그리드 (SSG-safe, useSearchParams 없음).
- * 전체 필터·지도 탐색은 `/media` 로 안내.
+ * 지역·유형·로컬 SEO 랜딩용 매체 그리드 — `/media` 카드 뷰와 동일 UI.
  */
 export function MediaKeywordLandingCatalog({ items, locale }: Props) {
   const isKo = locale === "ko" || locale.startsWith("ko");
+  const toast = useAppToast();
+  const { ids: cartIds, toggle: toggleCartId } = useCart();
+  const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
+    [],
+  );
+
+  useEffect(() => {
+    setCompareEntriesState(getCompareCartEntries());
+    return subscribeCompareCart(() => {
+      setCompareEntriesState(getCompareCartEntries());
+    });
+  }, []);
+
+  const isInCompare = useCallback(
+    (id: string) => compareEntries.some((e) => e.id === id),
+    [compareEntries],
+  );
+
+  const toggleCompare = useCallback((item: MediaItem) => {
+    const prev = getCompareCartEntries();
+    const exists = prev.some((e) => e.id === item.id);
+    const next = exists
+      ? prev.filter((e) => e.id !== item.id)
+      : [
+          ...prev,
+          {
+            id: item.id,
+            name: item.name,
+            nameEn: item.nameEn || item.name,
+          },
+        ];
+    setCompareCartEntries(next);
+  }, []);
+
+  const toggleCart = useCallback(
+    (item: MediaItem) => {
+      const inCart = cartIds.includes(item.id);
+      toggleCartId(item.id);
+      if (inCart) {
+        toast.warning(
+          item.name
+            ? `${item.name}이(가) 장바구니에서 제거되었습니다.`
+            : "장바구니에서 제거되었습니다.",
+        );
+      } else {
+        toast.success(
+          item.name
+            ? `${item.name}이(가) 장바구니에 담겼습니다.`
+            : "매체가 장바구니에 담겼습니다.",
+        );
+      }
+    },
+    [cartIds, toggleCartId, toast],
+  );
+
+  const isInCart = useCallback(
+    (id: string) => cartIds.includes(id),
+    [cartIds],
+  );
+
+  const compareItems = useMemo(
+    () => entriesToCompareMediaItems(compareEntries, items),
+    [compareEntries, items],
+  );
 
   return (
-    <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-      {items.map((m, index) => {
-        const name = isKo ? m.name : m.nameEn || m.name;
-        const location = isKo ? m.location : m.locationEn || m.location;
-        const typeLabel = typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
-        const price =
-          m.price > 0 ? formatCatalogPriceFieldWon(m.price, locale) : undefined;
+    <>
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-3">
+        {items.map((m, index) => {
+          const name = isKo ? m.name : m.nameEn || m.name;
+          const typeLabel =
+            typeLabels[m.type]?.[isKo ? "ko" : "en"] ?? m.type;
+          const metaLine = [regionLabel(m.region, locale), typeLabel]
+            .filter(Boolean)
+            .join(" · ");
+          const instant = isInstantBookingEligible({
+            instantBookingEnabled: m.instantBookingEnabled ?? false,
+            availability: m.availability,
+            catalogSource: m.catalogSource,
+          }).eligible;
 
-        return (
-          <li key={m.id} className="list-none">
-            <MediaCard
+          return (
+            <MediaDiscoveryGridCard
+              key={m.id}
               href={mediaItemDetailPath(m)}
-              imageSrc={getPrimaryMediaImageUrl(m)}
-              imageAlt={name}
-              imagePriority={index < 6}
-              type={typeLabel}
               name={name}
-              location={location}
-              price={price}
-              premium
-              glowTheme="purple"
-              className="h-full"
+              metaLine={metaLine}
+              priceLabel={renderPriceLabel(m, locale)}
+              imageUrl={getPrimaryMediaImageUrl(m)}
+              isKo={isKo}
+              planItem={planCartItemFromMediaItem(m, "search")}
+              inCompare={isInCompare(m.id)}
+              inCart={isInCart(m.id)}
+              onToggleCompare={() => toggleCompare(m)}
+              onToggleCart={() => toggleCart(m)}
+              isVerified={m.isVerified === true}
+              isInstantBooking={instant}
+              imagePriority={index < 6}
             />
-          </li>
-        );
-      })}
-    </ul>
+          );
+        })}
+      </div>
+
+      <CompareBar
+        variant="light"
+        items={compareItems}
+        locale={locale}
+        onClear={() => setCompareCartEntries([])}
+      />
+    </>
   );
 }

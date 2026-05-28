@@ -103,6 +103,8 @@ export async function POST(request: NextRequest) {
   let leadBudgetCode: ContactBudgetV2 | undefined;
   let leadIndustry: ContactIndustry | undefined;
   let leadStartDateRaw = "";
+  let planDurationMonths: number | undefined;
+  let planSource: string | undefined;
 
   if (isContactLeadV2Payload(raw)) {
     const parsed = contactLeadSchema.safeParse({ ...raw, locale, turnstileToken });
@@ -133,6 +135,13 @@ export async function POST(request: NextRequest) {
     leadBudgetCode = lead.budget;
     leadStartDateRaw = lead.startDate?.trim() ?? "";
     leadIndustry = lead.industry;
+    const rawDuration = raw.planDuration;
+    if (typeof rawDuration === "number" && rawDuration > 0) {
+      planDurationMonths = Math.round(rawDuration);
+    }
+    if (typeof raw.planSource === "string") {
+      planSource = raw.planSource.trim();
+    }
   } else {
     const name = typeof raw.name === "string" ? raw.name : "";
     const phone = typeof raw.phone === "string" ? raw.phone : "";
@@ -257,6 +266,7 @@ export async function POST(request: NextRequest) {
           startDateRaw: leadStartDateRaw,
           regions: leadRegions,
           budgetCode: leadBudgetCode,
+          durationMonths: planDurationMonths,
         }).catch((err) => {
           console.error("[contact] inquiry quote draft:", err);
         });

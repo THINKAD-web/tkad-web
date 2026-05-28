@@ -1,0 +1,144 @@
+"use client";
+
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, useRouter } from "@/i18n/navigation";
+import { BtnBlock } from "@/components/brutalist";
+import { Spinner } from "@/components/ui/spinner";
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { SignupStartRolePicker } from "@/components/auth/signup-start-role-picker";
+import type { GoogleSignupRole } from "@/lib/google-oauth-pending";
+
+function GoogleRegisterForm() {
+  const t = useTranslations("auth");
+  const router = useRouter();
+  const search = useSearchParams();
+  const redirect = search.get("redirect") || "/my";
+
+  const [role, setRole] = useState<GoogleSignupRole>("ADVERTISER");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleComplete() {
+    setError(null);
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth/google/complete", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.ok) {
+        const code = data?.error?.code;
+        setError(
+          code === "GOOGLE_PENDING_EXPIRED"
+            ? "Google 인증이 만료되었습니다. 로그인 페이지에서 다시 시도해주세요."
+            : code === "EMAIL_IN_USE"
+              ? "이미 가입된 계정입니다. 이메일 로그인을 이용해주세요."
+              : data?.error?.message ?? "가입 완료에 실패했습니다.",
+        );
+        return;
+      }
+      const { trackGaEvent } = await import("@/lib/ga-events");
+      trackGaEvent("sign_up", { method: "google" });
+      const dest = data.data?.redirect || redirect;
+      router.push(dest === "/my" ? "/onboarding" : dest);
+      router.refresh();
+    } catch {
+      setError("네트워크 오류가 발생했습니다.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <HomeLandingDayNight>
+      <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
+        <AuthCardShell>
+          <div className="mb-6 text-center">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
+              [ GOOGLE SIGNUP ]
+            </p>
+            <h1 className="mt-2 text-2xl font-black tracking-tight dark:text-white text-gray-900">
+              Google 계정 가입
+            </h1>
+            <p className="mt-2 text-[12px] tracking-tight dark:text-white text-gray-500">
+              {`// `}역할을 선택하면 가입이 완료됩니다
+            </p>
+          </div>
+
+          <SignupStartRolePicker
+            value={role}
+            onChange={setRole}
+            ariaLabel="가입 역할"
+          />
+
+          {error && (
+            <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">
+              {`// `}
+              {error}
+            </div>
+          )}
+
+          <BtnBlock
+            type="button"
+            variant="accent"
+            size="lg"
+            disabled={loading}
+            onClick={handleComplete}
+            className="mt-4 w-full rounded-[22px] border dark:border-white/14 border-gray-200 bg-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+          >
+            {loading && <Spinner size="sm" />}
+            {loading ? "가입 중…" : "가입 완료"}
+          </BtnBlock>
+
+          <p className="mt-6 text-center text-[12px] tracking-tight dark:text-white text-gray-500">
+            {`// `}
+            <Link
+              href="/login"
+              className="border-b dark:border-white/20 border-gray-300 pb-0.5 font-bold dark:text-white text-gray-900 transition-colors hover:border-white/35"
+            >
+              {t("backToLogin")}
+            </Link>
+          </p>
+        </AuthCardShell>
+      </div>
+    </HomeLandingDayNight>
+  );
+}
+
+function AuthCardShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
+      <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
+        <AuthCardDecor />
+        <div className="relative">{children}</div>
+      </div>
+    </div>
+  );
+}
+
+function AuthCardDecor() {
+  return (
+    <>
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+      />
+    </>
+  );
+}
+
+export default function GoogleRegisterPage() {
+  return (
+    <Suspense fallback={null}>
+      <GoogleRegisterForm />
+    </Suspense>
+  );
+}

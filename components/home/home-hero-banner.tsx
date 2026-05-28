@@ -8,8 +8,8 @@ import { cn } from "@/lib/utils";
 
 const BANNER_IMAGES = [
   "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0fa1cb83-dc2e-45ee-9210-4c2f433cbaa1.jpg",
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0f795047-667e-4291-8495-1c41eb6e5afe.png",
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/fe54ed23-7265-4441-8fe0-d4c13c1666dd.jpg",
+  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/fb57b678-5924-49fb-859f-28358e9b5efc.png",
 ] as const;
 
 const banners = [

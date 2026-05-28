@@ -1,10 +1,15 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 
+import type { AppUserRole } from "@prisma/client";
+import type { CommunityMemberRole } from "@/lib/community/types";
+import type { SignupStartRole } from "@/lib/signup-start-roles";
+import { resolveSignupStartRole } from "@/lib/signup-start-roles";
+
 export const KAKAO_PENDING_COOKIE = "tkad_kakao_oauth_pending";
 const MAX_AGE_SEC = 60 * 15;
 
-export type KakaoSignupRole = "ADVERTISER" | "MEDIA_OWNER";
+export type KakaoSignupRole = SignupStartRole;
 
 export type KakaoPendingPayload = {
   v: 1;
@@ -125,15 +130,13 @@ export async function clearKakaoPending(): Promise<void> {
   cookieStore.delete(KAKAO_PENDING_COOKIE);
 }
 
-/** MEDIA_OWNER → Prisma `MEDIA` community role + `owner` app role */
+/** 가입 시작 역할 → Prisma community + app role */
 export function communityRoleFromSignupRole(
   role: KakaoSignupRole,
-): "ADVERTISER" | "MEDIA" {
-  return role === "MEDIA_OWNER" ? "MEDIA" : "ADVERTISER";
+): CommunityMemberRole {
+  return resolveSignupStartRole(role).communityRole;
 }
 
-export function appRoleFromSignupRole(
-  role: KakaoSignupRole,
-): "advertiser" | "owner" {
-  return role === "MEDIA_OWNER" ? "owner" : "advertiser";
+export function appRoleFromSignupRole(role: KakaoSignupRole): AppUserRole {
+  return resolveSignupStartRole(role).appRole;
 }

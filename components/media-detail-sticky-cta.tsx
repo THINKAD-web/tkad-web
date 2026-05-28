@@ -6,6 +6,8 @@ import { BarChart3, Bolt, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { ChatStartButton } from "@/components/chat/chat-start-button";
 import { MediaQuickInquiryActions } from "@/components/media-quick-inquiry-actions";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import type { MediaItem } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
@@ -75,6 +77,12 @@ export default function MediaDetailStickyCta({
             location={location}
             imageUrl={heroImage || undefined}
             compact
+          />
+          <PlanCartAddButton
+            item={planCartItemFromMediaItem(media, "search")}
+            addedFrom="search"
+            compact
+            className="w-full"
           />
           <ChatStartButton
             mediaId={media.id}

@@ -6,6 +6,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   selected: boolean;
   onToggle: () => void;
+  /** 그리드 카드 — 짧은 라벨 (선택+ / 선택✓) */
+  gridInline?: boolean;
   className?: string;
 };
 
@@ -13,6 +15,7 @@ type Props = {
 export function MediaCompareSelectButton({
   selected,
   onToggle,
+  gridInline = false,
   className,
 }: Props) {
   return (
@@ -26,7 +29,7 @@ export function MediaCompareSelectButton({
       className={cn(mediaActionPillClass(selected), className)}
       aria-label={selected ? "선택 해제" : "선택"}
     >
-      선택
+      {gridInline ? (selected ? "선택✓" : "선택+") : "선택"}
     </button>
   );
 }

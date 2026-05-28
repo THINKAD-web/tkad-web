@@ -1,0 +1,107 @@
+"use client";
+
+import Image from "next/image";
+import { Link } from "@/i18n/navigation";
+import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import type { PlanCartItem } from "@/lib/plan-cart";
+
+type Props = {
+  href: string;
+  name: string;
+  metaLine: string;
+  priceLabel: string | null;
+  imageUrl: string | null;
+  isKo: boolean;
+  planItem: Omit<PlanCartItem, "addedAt">;
+  inCompare: boolean;
+  inCart: boolean;
+  onToggleCompare: () => void;
+  onToggleCart: () => void;
+  isVerified?: boolean;
+  isInstantBooking?: boolean;
+  imagePriority?: boolean;
+};
+
+/** `/media` 카드 뷰와 동일 — 썸네일·검증/즉시·플랜+/선택+/담기+ */
+export function MediaDiscoveryGridCard({
+  href,
+  name,
+  metaLine,
+  priceLabel,
+  imageUrl,
+  isKo,
+  planItem,
+  inCompare,
+  inCart,
+  onToggleCompare,
+  onToggleCart,
+  isVerified,
+  isInstantBooking,
+  imagePriority = false,
+}: Props) {
+  return (
+    <Link
+      href={href}
+      className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5"
+    >
+      <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+        {imageUrl ? (
+          <Image
+            src={imageUrl}
+            alt={name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 33vw"
+            priority={imagePriority}
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
+            {isKo ? "준비중" : "No image"}
+          </div>
+        )}
+        <MediaThumbnailTrustOverlay
+          item={{ isVerified, isInstantBooking }}
+          isKo={isKo}
+          variant="card"
+        />
+      </div>
+      <div className="p-3">
+        <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+          {name}
+        </p>
+        <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
+        <div className="mt-2 space-y-2">
+          {priceLabel ? (
+            <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
+              {priceLabel}
+            </p>
+          ) : null}
+          <div className="flex items-stretch gap-1">
+            <PlanCartAddButton
+              item={planItem}
+              addedFrom="search"
+              compact
+              gridInline
+              className="min-w-0 flex-1 !h-8 !px-1 !text-[10px]"
+            />
+            <MediaCompareSelectButton
+              selected={inCompare}
+              onToggle={onToggleCompare}
+              gridInline
+              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+            />
+            <MediaCartAddButton
+              inCart={inCart}
+              onToggle={onToggleCart}
+              gridInline
+              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+            />
+          </div>
+        </div>
+      </div>
+    </Link>
+  );
+}

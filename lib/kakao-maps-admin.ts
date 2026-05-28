@@ -1,7 +1,7 @@
 /**
- * 어드민 매체 등록 전용 — Kakao Maps JavaScript SDK 로더.
- * `NEXT_PUBLIC_KAKAO_MAP_APP_KEY` 는 이 모듈(및 admin 지도 컴포넌트)에서만 사용하세요.
- * 공개 사용자 지도는 Leaflet/Carto 다크 타일(`components/public-map/dark-map-view.tsx`)을 사용합니다.
+ * Kakao Maps JavaScript SDK 로더.
+ * `NEXT_PUBLIC_KAKAO_MAP_APP_KEY` — 매체 상세·어드민·(레거시) 공개 지도 목록.
+ * 공개 매체 목록/탐색 지도는 Leaflet/Carto (`components/public-map/dark-map-view.tsx`).
  */
 
 export function getAdminKakaoMapAppKey(): string | null {

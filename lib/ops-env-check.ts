@@ -21,6 +21,8 @@ const CHECKS: Array<{
   { key: "RESEND_API_KEY", label: "이메일 (Resend)", required: false },
   { key: "KAKAO_CLIENT_ID", label: "Kakao OAuth", required: false },
   { key: "KAKAO_CLIENT_SECRET", label: "Kakao OAuth secret", required: false },
+  { key: "GOOGLE_CLIENT_ID", label: "Google OAuth", required: false },
+  { key: "GOOGLE_CLIENT_SECRET", label: "Google OAuth secret", required: false },
   { key: "NAVER_CLIENT_ID", label: "Naver OAuth", required: false },
   { key: "NAVER_CLIENT_SECRET", label: "Naver OAuth secret", required: false },
   { key: "DATABASE_URL", label: "PostgreSQL", required: true },
@@ -36,7 +38,34 @@ const CHECKS: Array<{
   { key: "CRON_SECRET", label: "Cron 인증", required: false },
 ];
 
+import {
+  readKakaoOAuthClientId,
+  readKakaoOAuthClientSecret,
+  readNaverOAuthClientId,
+  readNaverOAuthClientSecret,
+  readGoogleOAuthClientId,
+  readGoogleOAuthClientSecret,
+} from "@/lib/oauth-credentials";
+
 function isConfigured(key: string): boolean {
+  if (key === "KAKAO_CLIENT_ID") {
+    return Boolean(readKakaoOAuthClientId());
+  }
+  if (key === "KAKAO_CLIENT_SECRET") {
+    return Boolean(readKakaoOAuthClientSecret());
+  }
+  if (key === "NAVER_CLIENT_ID") {
+    return Boolean(readNaverOAuthClientId());
+  }
+  if (key === "NAVER_CLIENT_SECRET") {
+    return Boolean(readNaverOAuthClientSecret());
+  }
+  if (key === "GOOGLE_CLIENT_ID") {
+    return Boolean(readGoogleOAuthClientId());
+  }
+  if (key === "GOOGLE_CLIENT_SECRET") {
+    return Boolean(readGoogleOAuthClientSecret());
+  }
   const v = process.env[key]?.trim();
   if (v) return true;
   if (key === "KAKAO_ALIMTALK_API_KEY") {

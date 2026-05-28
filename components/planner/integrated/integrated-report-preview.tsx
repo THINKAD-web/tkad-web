@@ -25,7 +25,9 @@ type Props = {
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-lg font-black text-gray-900">{children}</h2>
+    <h2 className="text-lg font-black text-gray-900 dark:text-gray-100">
+      {children}
+    </h2>
   );
 }
 
@@ -66,9 +68,10 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
         className={cn(
           "box-border w-full max-w-[240mm] space-y-8 rounded-2xl border p-6 antialiased",
           "border-gray-200 bg-white text-gray-900",
+          "dark:border-white/10 dark:bg-white/5 dark:text-gray-100",
         )}
       >
-        <div className="rounded-xl bg-gradient-to-br from-violet-950 via-[#0a0a12] to-cyan-950 p-8 text-white">
+        <div className="tkad-planner-dark-surface rounded-xl bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-8 text-white">
           <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">
             THINKAD Integrated Campaign
           </p>
@@ -113,7 +116,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           </dl>
           <table className="mt-4 w-full border-collapse text-sm">
             <thead>
-              <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500">
+              <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
                 <th className="p-2">{isKo ? "매체" : "Media"}</th>
                 <th className="p-2">{isKo ? "지역" : "Region"}</th>
                 <th className="p-2">{isKo ? "유형" : "Type"}</th>
@@ -121,7 +124,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
             </thead>
             <tbody>
               {portfolio.map((m) => (
-                <tr key={m.id} className="border-b">
+                <tr key={m.id} className="border-b dark:border-white/10">
                   <td className="p-2 font-medium">{m.name}</td>
                   <td className="p-2">{m.region ?? "—"}</td>
                   <td className="p-2">{m.type}</td>
@@ -136,7 +139,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           <SectionTitle>
             {isKo ? "B. 디지털 예산 배분" : "B. Digital budget allocation"}
           </SectionTitle>
-          <p className="mt-2 text-sm text-gray-600">
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-400">
             {isKo
               ? `총 디지털 예산 추천: OOH 대비 ${digitalPctLabel}% (${digitalResult.totalDigitalBudgetMan.toLocaleString()}만원)`
               : `Suggested digital share: ${digitalPctLabel}% of total (${digitalResult.totalDigitalBudgetMan.toLocaleString()}M KRW)`}
@@ -150,7 +153,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           ) : (
             <table className="mt-4 w-full border-collapse text-sm">
               <thead>
-                <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500">
+                <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
                   <th className="p-2">{isKo ? "플랫폼" : "Platform"}</th>
                   <th className="p-2">{isKo ? "비중" : "Share"}</th>
                   <th className="p-2">{isKo ? "예상 노출" : "Est. impressions"}</th>
@@ -158,7 +161,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
               </thead>
               <tbody>
                 {digitalResult.channels.map((row) => (
-                  <tr key={row.channel.id} className="border-b">
+                  <tr key={row.channel.id} className="border-b dark:border-white/10">
                     <td className="p-2 font-medium">
                       {isKo ? row.channel.nameKo : row.channel.nameEn}
                     </td>
@@ -180,17 +183,17 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           isPro={isPro}
           isKo={isKo}
           title={isKo ? "OOH × 디지털 시너지" : "OOH × digital synergy"}
-          className="border border-gray-200 bg-gray-50/80"
+          className="border border-gray-200 bg-gray-50/80 dark:border-white/10 dark:bg-white/5"
         >
           <section className="p-5">
             <SectionTitle>
               {isKo ? "C. OOH × 디지털 시너지 효과" : "C. Cross-media synergy"}
             </SectionTitle>
-            <ul className="mt-3 space-y-2 text-sm text-gray-700">
+            <ul className="mt-3 space-y-2 text-sm text-gray-700 dark:text-gray-300">
               {proInsights.mediaSynergyStrategies.map((row) => (
-                <li key={row.mediaName} className="rounded-lg bg-white px-3 py-2">
+                <li key={row.mediaName} className="rounded-lg bg-white px-3 py-2 dark:bg-white/5">
                   <span className="font-semibold">{row.mediaName}</span>
-                  <span className="mt-1 block text-gray-600">
+                  <span className="mt-1 block text-gray-600 dark:text-gray-400">
                     {isKo ? row.strategyKo : row.strategyEn}
                   </span>
                 </li>
@@ -222,7 +225,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           isPro={isPro}
           isKo={isKo}
           title={isKo ? "통합 CPM 분석" : "Blended CPM analysis"}
-          className="border border-gray-200 bg-gray-50/80"
+          className="border border-gray-200 bg-gray-50/80 dark:border-white/10 dark:bg-white/5"
         >
           <section className="p-5">
             <SectionTitle>
@@ -230,13 +233,13 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
             </SectionTitle>
             <table className="mt-4 w-full border-collapse text-sm">
               <tbody>
-                <tr className="border-b">
+                <tr className="border-b dark:border-white/10">
                   <td className="p-2 text-gray-500">OOH CPM</td>
                   <td className="p-2 text-right font-bold tabular-nums">
                     ₩{proInsights.oohCpm.toLocaleString()}
                   </td>
                 </tr>
-                <tr className="border-b">
+                <tr className="border-b dark:border-white/10">
                   <td className="p-2 text-gray-500">
                     {isKo ? "디지털 CPM" : "Digital CPM"}
                   </td>
@@ -244,7 +247,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                     ₩{proInsights.digitalCpm.toLocaleString()}
                   </td>
                 </tr>
-                <tr className="border-b">
+                <tr className="border-b dark:border-white/10">
                   <td className="p-2 text-gray-500">
                     {isKo ? "통합 효율 점수" : "Efficiency score"}
                   </td>
@@ -254,7 +257,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 </tr>
               </tbody>
             </table>
-            <p className="mt-3 text-sm text-gray-600">
+            <p className="mt-3 text-sm text-gray-600 dark:text-gray-400">
               {isKo
                 ? proInsights.competitiveAdvantageKo
                 : proInsights.competitiveAdvantageEn}
@@ -267,14 +270,14 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           isPro={isPro}
           isKo={isKo}
           title={isKo ? "ROI 예측" : "ROI forecast"}
-          className="border border-gray-200 bg-gray-50/80"
+          className="border border-gray-200 bg-gray-50/80 dark:border-white/10 dark:bg-white/5"
         >
           <section className="p-5">
             <SectionTitle>
               {isKo ? "E. ROI 예측" : "E. ROI forecast"}
             </SectionTitle>
             <dl className="mt-4 grid grid-cols-3 gap-3 text-center">
-              <div className="rounded-xl bg-white p-3">
+              <div className="rounded-xl bg-white p-3 dark:bg-white/5">
                 <dt className="text-xs text-gray-500">
                   {isKo ? "브랜드 리프트" : "Brand lift"}
                 </dt>
@@ -282,7 +285,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                   +{proInsights.brandLiftPct}%
                 </dd>
               </div>
-              <div className="rounded-xl bg-white p-3">
+              <div className="rounded-xl bg-white p-3 dark:bg-white/5">
                 <dt className="text-xs text-gray-500">
                   {isKo ? "전환 기여" : "Conversion"}
                 </dt>
@@ -290,7 +293,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                   {proInsights.conversionContributionPct}%
                 </dd>
               </div>
-              <div className="rounded-xl bg-white p-3">
+              <div className="rounded-xl bg-white p-3 dark:bg-white/5">
                 <dt className="text-xs text-gray-500">
                   {isKo ? "효율 등급" : "Grade"}
                 </dt>
@@ -299,7 +302,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 </dd>
               </div>
             </dl>
-            <p className="mt-4 text-sm text-gray-600">
+            <p className="mt-4 text-sm text-gray-600 dark:text-gray-400">
               {isKo
                 ? `통합 ROAS ${metrics.integratedRoasConservative}~${metrics.integratedRoasOptimistic}배 (보수~낙관)`
                 : `Integrated ROAS ${metrics.integratedRoasConservative}–${metrics.integratedRoasOptimistic}×`}
@@ -312,15 +315,15 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           isPro={isPro}
           isKo={isKo}
           title={isKo ? "AI 최적화 제안" : "AI optimization"}
-          className="border border-gray-200 bg-gray-50/80"
+          className="border border-gray-200 bg-gray-50/80 dark:border-white/10 dark:bg-white/5"
         >
           <section className="p-5">
             <SectionTitle>
               {isKo ? "F. AI 최적화 제안" : "F. AI optimization"}
             </SectionTitle>
-            <div className="mt-3 space-y-4 text-sm text-gray-700">
+            <div className="mt-3 space-y-4 text-sm text-gray-700 dark:text-gray-300">
               <div>
-                <p className="font-bold text-gray-900">
+                <p className="font-bold text-gray-900 dark:text-gray-100">
                   {isKo ? "예산 재배분" : "Budget reallocation"}
                 </p>
                 <ul className="mt-1 list-disc pl-5">
@@ -333,7 +336,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 </ul>
               </div>
               <div>
-                <p className="font-bold text-gray-900">
+                <p className="font-bold text-gray-900 dark:text-gray-100">
                   {isKo ? "시즌·시간대 전략" : "Season & daypart"}
                 </p>
                 <p className="mt-1">
@@ -341,7 +344,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 </p>
               </div>
               <div>
-                <p className="font-bold text-gray-900">
+                <p className="font-bold text-gray-900 dark:text-gray-100">
                   {isKo ? "다음 캠페인" : "Next flight"}
                 </p>
                 <p className="mt-1">
@@ -352,7 +355,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           </section>
         </IntegratedProBlindSection>
 
-        <p className="text-[10px] text-gray-500">
+        <p className="text-[10px] text-gray-500 dark:text-gray-400">
           {isKo
             ? "본 제안서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체·플랫폼 재고에 따라 달라질 수 있습니다."
             : "This proposal uses THINKAD internal estimates; actual delivery may vary by inventory."}

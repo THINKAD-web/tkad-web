@@ -1,7 +1,13 @@
 import NextAuth from "next-auth";
+import Google from "next-auth/providers/google";
 import Kakao from "next-auth/providers/kakao";
 import type { KakaoProfile } from "@auth/core/providers/kakao";
 import { establishUserSession } from "@/lib/establish-user-session";
+import { resolveGoogleSignIn } from "@/lib/google-auth";
+import {
+  GOOGLE_AUTH_LOCALE_COOKIE,
+  GOOGLE_AUTH_REDIRECT_COOKIE,
+} from "@/lib/google-auth-redirect";
 import { resolveKakaoSignIn } from "@/lib/kakao-auth";
 import {
   KAKAO_AUTH_LOCALE_COOKIE,
@@ -15,8 +21,15 @@ import {
 } from "@/lib/naver-auth-redirect";
 import {
   checkNextAuthConfig,
+  isGoogleOAuthConfigured,
   isKakaoOAuthConfigured,
   isNaverOAuthConfigured,
+  readGoogleOAuthClientId,
+  readGoogleOAuthClientSecret,
+  readKakaoOAuthClientId,
+  readKakaoOAuthClientSecret,
+  readNaverOAuthClientId,
+  readNaverOAuthClientSecret,
 } from "@/lib/auth-oauth-env";
 
 const nextAuthConfig = checkNextAuthConfig();
@@ -30,19 +43,27 @@ if (!nextAuthConfig.ok) {
 }
 
 const providers = [
+  ...(isGoogleOAuthConfigured()
+    ? [
+        Google({
+          clientId: readGoogleOAuthClientId()!,
+          clientSecret: readGoogleOAuthClientSecret()!,
+        }),
+      ]
+    : []),
   ...(isKakaoOAuthConfigured()
     ? [
         Kakao({
-          clientId: process.env.KAKAO_CLIENT_ID!,
-          clientSecret: process.env.KAKAO_CLIENT_SECRET!,
+          clientId: readKakaoOAuthClientId()!,
+          clientSecret: readKakaoOAuthClientSecret()!,
         }),
       ]
     : []),
   ...(isNaverOAuthConfigured()
     ? [
         NaverProvider({
-          clientId: process.env.NAVER_CLIENT_ID!,
-          clientSecret: process.env.NAVER_CLIENT_SECRET!,
+          clientId: readNaverOAuthClientId()!,
+          clientSecret: readNaverOAuthClientSecret()!,
         }),
       ]
     : []),
@@ -57,6 +78,50 @@ export const { handlers, signIn, auth } = NextAuth({
     async signIn({ account, profile }) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+
+      if (account?.provider === "google") {
+        if (!isGoogleOAuthConfigured()) return false;
+        if (!account.providerAccountId) return false;
+
+        const redirect =
+          cookieStore.get(GOOGLE_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
+        const locale =
+          cookieStore.get(GOOGLE_AUTH_LOCALE_COOKIE)?.value ?? "ko";
+
+        const result = await resolveGoogleSignIn({
+          providerAccountId: account.providerAccountId,
+          profile: profile as {
+            sub?: string;
+            email?: string | null;
+            email_verified?: boolean;
+            name?: string | null;
+            picture?: string | null;
+            given_name?: string | null;
+            family_name?: string | null;
+          },
+          accessToken: account.access_token,
+          refreshToken: account.refresh_token,
+          expiresAt: account.expires_at ?? undefined,
+          redirect,
+        });
+
+        if (result.type === "existing") {
+          const ok = await establishUserSession(result.userId, result.role);
+          if (!ok) return false;
+          cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
+          cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
+          return true;
+        }
+
+        if (result.type === "pending") {
+          cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
+          cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
+          const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
+          return `/${locale}/register/google?redirect=${encodeURIComponent(safeRedirect)}`;
+        }
+
+        return false;
+      }
 
       if (account?.provider === "kakao") {
         if (!isKakaoOAuthConfigured()) return false;
@@ -138,6 +203,7 @@ export const { handlers, signIn, auth } = NextAuth({
       return false;
     },
     async redirect({ url, baseUrl }) {
+      if (url.includes("/register/google")) return url;
       if (url.includes("/register/kakao")) return url;
       if (url.includes("/register/naver")) return url;
       if (url.startsWith("/")) return `${baseUrl}${url}`;

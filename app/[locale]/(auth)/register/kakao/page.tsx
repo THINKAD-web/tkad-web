@@ -7,25 +7,8 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { Spinner } from "@/components/ui/spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { cn } from "@/lib/utils";
+import { SignupStartRolePicker } from "@/components/auth/signup-start-role-picker";
 import type { KakaoSignupRole } from "@/lib/kakao-oauth-pending";
-
-const ROLE_OPTIONS: {
-  value: KakaoSignupRole;
-  titleKo: string;
-  descKo: string;
-}[] = [
-  {
-    value: "ADVERTISER",
-    titleKo: "광고주로 시작하기",
-    descKo: "캠페인·매체 탐색·플래너",
-  },
-  {
-    value: "MEDIA_OWNER",
-    titleKo: "매체사로 시작하기",
-    descKo: "매체 등록·부킹·송출 관리",
-  },
-];
 
 function KakaoRegisterForm() {
   const t = useTranslations("auth");
@@ -84,30 +67,11 @@ function KakaoRegisterForm() {
             </p>
           </div>
 
-          <div className="space-y-3" role="radiogroup" aria-label="가입 역할">
-            {ROLE_OPTIONS.map((opt) => (
-              <button
-                key={opt.value}
-                type="button"
-                role="radio"
-                aria-checked={role === opt.value}
-                onClick={() => setRole(opt.value)}
-                className={cn(
-                  "w-full rounded-[18px] border px-4 py-4 text-left transition-all",
-                  role === opt.value
-                    ? "border-white/28 bg-white/14 dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(0,0,0,0.45)]"
-                    : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/25 dark:text-white text-gray-600 hover:border-white/16 hover:dark:text-white text-gray-800",
-                )}
-              >
-                <p className="text-sm font-bold tracking-tight">
-                  {opt.titleKo}
-                </p>
-                <p className="mt-1 text-[11px] dark:text-white text-gray-500">
-                  {opt.descKo}
-                </p>
-              </button>
-            ))}
-          </div>
+          <SignupStartRolePicker
+            value={role}
+            onChange={setRole}
+            ariaLabel="가입 역할"
+          />
 
           {error && (
             <div className="mt-4 rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-[12px] tracking-tight dark:text-white text-gray-800">

@@ -9,7 +9,13 @@ import { fetchPublishedCases } from "@/lib/case-queries";
 
 export const revalidate = 60;
 
-export default async function HomePage() {
+export default async function HomePage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
   const [recommended, popular, newest, reports, cases] =
     await Promise.allSettled([
       fetchPublicMediaCatalog({ sort: "recommended", limit: 10 }),
@@ -43,6 +49,7 @@ export default async function HomePage() {
         subtitle="AI가 선별한 이번 주 추천"
         viewAllHref="/ko/media?sort=recommended"
         media={recommendedMedia}
+        locale={locale}
       />
 
       {/* 섹션 4: 인기 매체 */}
@@ -51,6 +58,7 @@ export default async function HomePage() {
         subtitle="가장 많이 문의된 매체"
         viewAllHref="/ko/media?sort=popular"
         media={popularMedia}
+        locale={locale}
       />
 
       {/* 섹션 5: 새로 등록된 매체 */}
@@ -59,6 +67,7 @@ export default async function HomePage() {
         subtitle="이번 주 새로 등록"
         viewAllHref="/ko/media?sort=newest"
         media={newestMedia}
+        locale={locale}
       />
 
       {/* 섹션 6: 콘텐츠 피드 (트렌드 리포트 + 성공 사례) */}

@@ -23,11 +23,9 @@ import {
   GitCompare,
   Layers,
   Send,
-  TrendingUp,
   Wallet,
   CalendarRange,
   ArrowRight,
-  MessageCircle,
   Sparkles,
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
@@ -38,44 +36,36 @@ import {
   computePlannerMetrics,
   selectPlannerPortfolio,
   computeBudgetBlurbParts,
-  portfolioDailyByCategory,
   estimateCpmByCategory,
-  budgetSplitByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
   portfolioFromManualSelection,
   matchesPlannerCategory,
+  plannerBlendCpmKrw,
 } from "@/lib/planner-logic";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
-import {
-  PlannerImpressionsLineChart,
-  PlannerRoiLineChart,
-  PlannerDailyReachBarChart,
-  PlannerReachDonutChart,
-  PlannerBudgetPieChart,
-  PlannerCpmCompareChart,
-  PlannerMonthCompareChart,
-} from "@/components/planner-charts";
-import { PredictionAccuracyBanner } from "@/components/planner/prediction-accuracy-banner";
-import type { PlatformPredictionAccuracy } from "@/lib/prediction-accuracy";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import PlannerCampaignStep1 from "@/components/planner-campaign-step1";
 import PlannerMediaSelector from "@/components/planner-media-selector";
 import PlannerTips from "@/components/planner-tips";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
-import PlannerReportStep, {
-  PlannerReportPdfCompact,
-} from "@/components/planner-report-step";
+import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
+import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import { savePlanTransferData } from "@/lib/planner-contact-transfer";
+import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
+import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import {
   CompositePreview,
   DEFAULT_LOGO_PLACEMENT,
 } from "@/components/planner/composite-preview";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
+import type { PlatformPredictionAccuracy } from "@/lib/prediction-accuracy";
 import {
   PLANNER_AGE_KEYS,
   PLANNER_BUDGET_MAX,
@@ -323,15 +313,6 @@ export default function PlannerPageClient({
     [filtered, budgetNum],
   );
 
-  const dailyBars = useMemo(() => {
-    const pts = portfolioDailyByCategory(portfolio);
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.daily,
-    }));
-  }, [portfolio, isKo]);
-
   const cpmBars = useMemo(() => {
     const pts = estimateCpmByCategory(filtered);
     return pts.map((p) => ({
@@ -341,30 +322,12 @@ export default function PlannerPageClient({
     }));
   }, [filtered, isKo]);
 
-  const pieSlices = useMemo(() => {
-    const pts = budgetSplitByCategory(portfolio);
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      pct: p.pct,
-    }));
-  }, [portfolio, isKo]);
-
   const reachSplit = reachSplitForGoal(campaignGoal);
 
   const goalTitle = useMemo(() => {
     const g = GOALS.find((x) => x.key === campaignGoal);
     return g ? t(g.titleKey) : "—";
   }, [campaignGoal, t]);
-
-  const roiMax = metrics
-    ? Math.max(
-        metrics.roiOptimistic,
-        metrics.roiExpected,
-        metrics.roiConservative,
-        0.1,
-      )
-    : 1;
 
   const compareHref = useMemo(() => {
     const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
@@ -602,56 +565,6 @@ export default function PlannerPageClient({
     [savedPlanId, shareWithTeam],
   );
 
-  const goToContactQuote = useCallback(async () => {
-    if (navigatingContact || saving) return;
-    if (teamPerms.loaded && !teamPerms.canContactOrPay) {
-      toast(
-        "error",
-        isKo
-          ? "뷰어 권한은 견적 요청을 할 수 없습니다."
-          : "Viewers cannot request quotes.",
-      );
-      return;
-    }
-    setNavigatingContact(true);
-    try {
-      let planId = savedPlanId;
-      if (!planId) {
-        setSaving(true);
-        planId = await persistPlan("share");
-        if (planId) {
-          setSavedPlanId(planId);
-          const origin =
-            typeof window !== "undefined" ? window.location.origin : "";
-          const url = `${origin}/${locale}/planner/shared/${planId}`;
-          setShareUrl(url);
-        }
-        setSaving(false);
-      }
-      if (!planId) {
-        toast(
-          "error",
-          isKo ? "플랜 저장에 실패했습니다." : "Could not save your plan.",
-        );
-        return;
-      }
-      router.push(`/contact?plan=${planId}`);
-    } finally {
-      setNavigatingContact(false);
-    }
-  }, [
-    isKo,
-    locale,
-    navigatingContact,
-    persistPlan,
-    router,
-    savedPlanId,
-    saving,
-    toast,
-    teamPerms.loaded,
-    teamPerms.canContactOrPay,
-  ]);
-
   const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
     if (saving) return;
     setSaving(true);
@@ -714,6 +627,71 @@ export default function PlannerPageClient({
         .join(", "),
     [categories, t],
   );
+
+  const goToContactQuote = useCallback(() => {
+    if (navigatingContact) return;
+    if (teamPerms.loaded && !teamPerms.canContactOrPay) {
+      toast(
+        "error",
+        isKo
+          ? "뷰어 권한은 견적 요청을 할 수 없습니다."
+          : "Viewers cannot request quotes.",
+      );
+      return;
+    }
+
+    const mediaList =
+      selectedMediaForSimulation.length > 0
+        ? selectedMediaForSimulation
+        : portfolio;
+    if (mediaList.length === 0) {
+      toast(
+        "error",
+        isKo ? "선택된 매체가 없습니다." : "No media selected.",
+      );
+      return;
+    }
+
+    const monthlyWon = mediaList.reduce((s, m) => s + (m.price || 0), 0);
+    savePlanTransferData({
+      mediaIds: mediaList.map((m) => m.id),
+      mediaNames: mediaList.map((m) =>
+        isKo ? m.name : m.nameEn || m.name,
+      ),
+      totalBudget: monthlyWon * months,
+      duration: months,
+      region: regionsSummary,
+      goal: goalTitle,
+      estimatedReach: metrics?.estimatedTotalImpressions,
+      estimatedCpm: (() => {
+        if (mediaList.length === 0) return undefined;
+        const cpm = plannerBlendCpmKrw(
+          mediaList,
+          metrics?.estimatedMonthlyImpressions ?? 0,
+        );
+        return cpm != null && Number.isFinite(cpm) ? cpm : undefined;
+      })(),
+      source: "planner",
+    });
+
+    setNavigatingContact(true);
+    router.push("/contact?from=planner");
+    setNavigatingContact(false);
+  }, [
+    goalTitle,
+    isKo,
+    metrics?.estimatedMonthlyImpressions,
+    metrics?.estimatedTotalImpressions,
+    months,
+    navigatingContact,
+    portfolio,
+    regionsSummary,
+    router,
+    selectedMediaForSimulation,
+    teamPerms.canContactOrPay,
+    teamPerms.loaded,
+    toast,
+  ]);
 
   const goNext = useCallback(() => {
     const check = canProceedFromStep(
@@ -1104,6 +1082,18 @@ export default function PlannerPageClient({
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                 />
+                {selectedMediaForSimulation.length > 0 ? (
+                  <div className="flex justify-end pt-2">
+                    <PlanCartBulkAddButton
+                      items={selectedMediaForSimulation.map((m) =>
+                        planCartItemFromMediaItem(m, "planner"),
+                      )}
+                      label={
+                        isKo ? "선택 매체 플랜에 추가" : "Add selection to plan"
+                      }
+                    />
+                  </div>
+                ) : null}
               </div>
             ) : null}
 
@@ -1353,31 +1343,6 @@ export default function PlannerPageClient({
                   portfolio={portfolio}
                 />
 
-                {!proLoading ? (
-                  <div data-screenshot="planner-pro-blur">
-                  <PlannerProGate
-                    isPro={isPro}
-                    isKo={isKo}
-                    minHeightClass="min-h-[28rem]"
-                    className="space-y-3"
-                  >
-                <PlannerProTeaserStats
-                  isKo={isKo}
-                  totalImpressions={metrics.estimatedTotalImpressions}
-                  reachCorePct={reachSplit.corePct}
-                  roiExpected={metrics.roiExpected}
-                />
-
-                <div className={cn(plannerNeon.kpiCard, "max-w-sm")}>
-                  <p className={plannerNeon.kpiLabel}>{t("kpiImpressions")}</p>
-                  <p className="mt-2 text-2xl font-bold tabular-nums text-cyan-400">
-                    {metrics.estimatedTotalImpressions.toLocaleString()}
-                  </p>
-                  <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
-                    {t("kpiImpressionsHint")}
-                  </p>
-                </div>
-
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
@@ -1385,11 +1350,6 @@ export default function PlannerPageClient({
                     <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
                       {t("comboTitle")}
                     </h3>
-                    <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
-                      {manualIntersectedPortfolio.length > 0
-                        ? t("comboHintManual")
-                        : t("comboHint")}
-                    </p>
                   </div>
                   <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
                     {portfolio.map((m) => (
@@ -1401,9 +1361,7 @@ export default function PlannerPageClient({
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
                           mediaName={isKo ? m.name : m.nameEn || m.name}
-                          logoUrl={
-                            creativeUploadedUrl || creativeObjectUrl
-                          }
+                          logoUrl={creativeUploadedUrl || creativeObjectUrl}
                           placement={
                             mediaPlacements[m.id] ?? DEFAULT_LOGO_PLACEMENT
                           }
@@ -1414,269 +1372,49 @@ export default function PlannerPageClient({
                           <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? m.name : (m.nameEn || m.name) || m.name}
                           </p>
-                          <p className={cn("mt-1 text-xs uppercase tracking-widest", plannerNeon.subtext)}>
-                            {tm(`regions.${m.region}`)} ·{" "}
-                            {isKo
-                              ? m.location.slice(0, 40)
-                              : (m.locationEn || m.location).slice(0, 40)}
-                          </p>
                           <p className="mt-2 text-sm font-bold tabular-nums text-violet-400">
                             {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
-                            <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                              /{isKo ? "월" : "mo"}
-                            </span>
                           </p>
-                          {(() => {
-                            const badge = priceOptionBadge(m);
-                            if (!badge) return null;
-                            return (
-                              <p className={cn("mt-1 text-[10px] font-medium", plannerNeon.kpiLabel)}>
-                                {badge}
-                              </p>
-                            );
-                          })()}
                         </div>
                       </Link>
                     ))}
                   </div>
                 </div>
 
-                <PredictionAccuracyBanner
-                  accuracy={predictionAccuracy}
-                  isKo={isKo}
-                />
-
-                <div className="tkad-glass-surface relative flex flex-col gap-2 overflow-hidden rounded-[22px] px-4 py-3 text-sm text-foreground sm:flex-row sm:items-center sm:justify-between">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-2.5 py-1 font-display text-[10px] font-black uppercase tracking-[0.18em] text-foreground backdrop-blur">
-                      {t("estimatedModelBadge")}
-                    </span>
-                    <span className="min-w-0 text-left text-xs leading-relaxed sm:text-sm">
-                      {t("estimatedModelHint")}
-                    </span>
-                  </div>
-                </div>
-
-                <div className="grid gap-3 lg:grid-cols-2">
-                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
-                      <PlannerNeonLabel>{t("results")}</PlannerNeonLabel>
-                    </div>
-                    <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2">
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("matchedMedia")}</p>
-                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
-                          {filtered.length}
-                          <span className={cn("ml-1 text-base", plannerNeon.subtext)}>
-                            {t("countUnit")}
-                          </span>
-                        </p>
-                      </div>
-                      <div className={plannerNeon.kpiCard}>
-                        <p className={plannerNeon.kpiLabel}>{t("avgMonthlySlot")}</p>
-                        <p className={cn("mt-2 text-2xl font-bold tabular-nums", plannerNeon.kpiValue)}>
-                          {formatCatalogPriceFieldWon(
-                            Math.round(metrics.avgMonthlyPrice),
-                            isKo ? "ko" : "en",
-                          )}
-                          <span className={cn("ml-1 text-sm", plannerNeon.subtext)}>
-                            /{isKo ? "월" : "mo"}
-                          </span>
-                        </p>
-                      </div>
-                      <div className={cn(plannerNeon.kpiCard, "sm:col-span-2")}>
-                        <p className={plannerNeon.kpiLabel}>{t("estMonthlyImp")}</p>
-                        <p className={cn("mt-2 text-xl font-bold tabular-nums", plannerNeon.kpiValue)}>
-                          {metrics.estimatedMonthlyImpressions.toLocaleString()}
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
-                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <PlannerReachDonutChart
-                      corePct={reachSplit.corePct}
-                      extendedPct={reachSplit.extendedPct}
-                      title={t("chartReachTitle")}
-                      coreLabel={t("reachCore")}
-                      extendedLabel={t("reachExtended")}
-                    />
-                  </div>
-                </div>
-
-                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <PlannerNeonLabel className="p-5 pb-0">
-                      {t("chartDailyBarTitle")}
-                    </PlannerNeonLabel>
-                  </div>
-                  <div className="relative p-5">
-                    <PlannerDailyReachBarChart
-                      data={dailyBars}
-                      title={t("chartDailyBarTitle")}
-                      valueLabel={t("chartDailyBarAxis")}
-                    />
-                  </div>
-                </div>
-
-                <div className="grid gap-3 lg:grid-cols-2">
-                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6">
-                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <PlannerBudgetPieChart
-                      data={pieSlices}
-                      title={t("chartBudgetPieTitle")}
-                      unitLabel={t("chartBudgetPieUnit")}
-                    />
-                  </div>
-                  <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                    <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                    <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                      <PlannerNeonLabel className="p-5 pb-0">
-                        {t("chartCpmTitle")}
-                      </PlannerNeonLabel>
-                    </div>
-                    <div className="relative p-5">
-                      <PlannerCpmCompareChart
-                        data={cpmBars}
-                        title={t("chartCpmTitle")}
-                        unitLabel={t("chartCpmUnit")}
+                {!proLoading ? (
+                  <div data-screenshot="planner-pro-blur">
+                    <PlannerProGate
+                      isPro={isPro}
+                      isKo={isKo}
+                      minHeightClass="min-h-[20rem]"
+                      className="space-y-4"
+                    >
+                      <PlannerProTeaserStats
+                        isKo={isKo}
+                        totalImpressions={metrics.estimatedTotalImpressions}
+                        reachCorePct={reachSplit.corePct}
+                        roiExpected={metrics.roiExpected}
                       />
-                    </div>
-                  </div>
-                </div>
-
-                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <PlannerNeonLabel className="p-5 pb-0">
-                      {t("chartMonthCompareTitle")}
-                    </PlannerNeonLabel>
-                  </div>
-                  <div className="relative p-5">
-                    <PlannerMonthCompareChart
-                      data={monthCompare.map((x) => ({
-                        months: x.months,
-                        total: x.totalImpressions,
-                      }))}
-                      title={t("chartMonthCompareTitle")}
-                      barLabels={[
-                        t("monthCompare1"),
-                        t("monthCompare3"),
-                        t("monthCompare6"),
-                      ]}
-                    />
-                  </div>
-                </div>
-
-                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <PlannerNeonLabel className="p-5 pb-0">ROI</PlannerNeonLabel>
-                    <h3 className={cn("mt-2 flex items-center gap-2 px-5 text-lg", plannerNeon.headline)}>
-                      <TrendingUp className="h-5 w-5 text-violet-400" />
-                      {t("roiTitle")}
-                    </h3>
-                  </div>
-                  <div className="relative space-y-4 p-5">
-                    {(
-                      [
-                        ["roiConservative", metrics.roiConservative],
-                        ["roiExpected", metrics.roiExpected],
-                        ["roiOptimistic", metrics.roiOptimistic],
-                      ] as const
-                    ).map(([labelKey, val]) => (
-                      <div key={labelKey}>
-                        <div className="mb-1 flex justify-between text-sm">
-                          <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
-                            {t(labelKey)}
-                          </span>
-                          <span className="font-display font-bold tabular-nums text-primary">
-                            {val}
-                            {t("roiUnit")}
-                          </span>
-                        </div>
-                        <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/10 border-gray-200 dark:bg-black bg-white dark:bg-white/10 bg-gray-100">
-                          <div
-                            className="h-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all duration-500"
-                            style={{
-                              width: `${Math.min(100, (val / roiMax) * 100)}%`,
-                            }}
-                          />
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <PlannerNeonLabel className="p-5 pb-0">
-                      {t("chartImpLineTitle")}
-                    </PlannerNeonLabel>
-                    <p className={cn("mt-1 px-5 text-sm", plannerNeon.subtext)}>
-                      {t("chartImpTitle")}
-                    </p>
-                  </div>
-                  <div className="relative p-5">
-                    <PlannerImpressionsLineChart
-                      data={metrics.cumulativeByMonth}
-                      isKo={isKo}
-                      title={t("chartImpLineTitle")}
-                    />
-                  </div>
-                </div>
-
-                <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
-                  <div className="relative border-b dark:border-white/10 border-gray-200 p-5">
-                    <PlannerNeonLabel className="p-5 pb-0">
-                      {t("chartRoiLineTitle")}
-                    </PlannerNeonLabel>
-                    <p className={cn("mt-1 px-5 text-sm", plannerNeon.subtext)}>
-                      {t("chartRoiLineHint")}
-                    </p>
-                  </div>
-                  <div className="relative p-5">
-                    <PlannerRoiLineChart
-                      data={metrics.roiByMonth}
-                      isKo={isKo}
-                      title={t("chartRoiLineTitle")}
-                      hint={t("chartRoiLineHint")}
-                      legendConservative={t("roiConservative")}
-                      legendExpected={t("roiExpected")}
-                      legendOptimistic={t("roiOptimistic")}
-                      roiUnit={t("roiUnit")}
-                    />
-                  </div>
-                </div>
-
-                <PlannerReportPdfCompact
-                  isKo={isKo}
-                  campaignGoal={campaignGoal}
-                  goalTitle={goalTitle}
-                  budgetNum={budgetNum}
-                  months={months}
-                  regionsText={regionsSummary}
-                  categoriesText={categoriesSummary}
-                  ageText={t(ageKey)}
-                  industryText={t(industryKey)}
-                  portfolio={portfolio}
-                  matchedCount={filtered.length}
-                  monthCompare={monthCompare}
-                  cpmBars={cpmBars}
-                  metrics={metrics}
-                  reachCorePct={reachSplit.corePct}
-                  reachExtendedPct={reachSplit.extendedPct}
-                  logoUrl={creativeUploadedUrl || creativeObjectUrl}
-                  mediaPlacements={mediaPlacements}
-                />
-
-                  </PlannerProGate>
+                      <PlannerReportPremiumBlock
+                        isKo={isKo}
+                        portfolio={portfolio}
+                        budgetMan={budgetNum}
+                        months={months}
+                        regionsText={regionsSummary}
+                        goal={campaignGoal}
+                        industryText={t(industryKey)}
+                      />
+                      <PlannerEffectSimulationPanel
+                        isKo={isKo}
+                        portfolio={portfolio}
+                        budgetMan={budgetNum}
+                        months={months}
+                        totalImpressionsFromMetrics={
+                          metrics.estimatedTotalImpressions
+                        }
+                        skipProGate
+                      />
+                    </PlannerProGate>
                   </div>
                 ) : null}
 
@@ -1700,7 +1438,7 @@ export default function PlannerPageClient({
                           size="lg"
                           className="min-h-14 w-full !dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-black shadow-lg shadow-violet-500/30"
                           onClick={() => void goToContactQuote()}
-                          disabled={saving || navigatingContact}
+                          disabled={navigatingContact}
                         >
                           <Send className="h-5 w-5" />
                           {navigatingContact
@@ -1713,6 +1451,16 @@ export default function PlannerPageClient({
                         </p>
                       </div>
                       <BtnBlock
+                        variant="secondary"
+                        size="lg"
+                        className="w-full"
+                        onClick={() => void savePlan("share")}
+                        disabled={saving || (teamPerms.loaded && !teamPerms.canUsePlanner)}
+                      >
+                        <Download className="h-4 w-4" />
+                        {saving ? t("savingInProgress") : t("ctaSave")}
+                      </BtnBlock>
+                      <BtnBlock
                         href="/proposal?fromPlanner=1"
                         variant="secondary"
                         size="lg"
@@ -1720,18 +1468,6 @@ export default function PlannerPageClient({
                       >
                         <Sparkles className="h-4 w-4 text-emerald-400" />
                         {t("ctaCreateProposal")}
-                      </BtnBlock>
-                      <p className="-mt-1 text-center text-xs text-muted-foreground">
-                        {t("ctaCreateProposalHint")}
-                      </p>
-                      <BtnBlock
-                        href="/contact"
-                        variant="secondary"
-                        size="lg"
-                        className="w-full"
-                      >
-                        <MessageCircle className="h-4 w-4" />
-                        {t("ctaContact")}
                       </BtnBlock>
                     </div>
                   </div>

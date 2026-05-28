@@ -31,7 +31,17 @@ const nextConfig: NextConfig = {
       {
         source: "/:path*",
         has: [{ type: "host", value: "tkad-web.vercel.app" }],
-        destination: "https://tkad.co.kr/:path*",
+        destination: "https://app.tkad.co.kr/:path*",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ko|en)/guarantee/guarante",
+        destination: "/:locale/guarantee",
+        permanent: true,
+      },
+      {
+        source: "/guarantee/guarante",
+        destination: "/guarantee",
         permanent: true,
       },
     ];

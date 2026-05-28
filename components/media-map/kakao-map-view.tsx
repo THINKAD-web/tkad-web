@@ -1,8 +1,8 @@
 "use client";
 
 /**
- * @deprecated 공개 페이지는 `components/public-map/dark-map-view.tsx` 를 사용하세요.
- * Kakao Maps SDK — 레거시 참조용. 신규 코드에서 import 하지 마세요.
+ * Kakao Maps JavaScript SDK — 매체 상세·어드민·레거시 지도 목록.
+ * 환경 변수: `NEXT_PUBLIC_KAKAO_MAP_APP_KEY`
  */
 
 import { useCallback, useEffect, useRef, useState } from "react";

@@ -23,6 +23,7 @@ import {
   buildPublicMediaWhere,
   type PublicMediaSort,
 } from "@/lib/public-media-query";
+import { attachMediaTrustToMediaItems } from "@/lib/media-trust-catalog";
 
 export type HomeCatalogMediaItem = {
   id: string;
@@ -48,6 +49,9 @@ export type HomeCatalogMediaItem = {
   reviewCount?: number;
   isInstantBooking?: boolean;
   popularityScore?: number;
+  /** THINKAD 현장 검증 완료 */
+  isVerified?: boolean;
+  trustBadges?: import("@/lib/media-trust").MediaTrustBadge[];
 };
 
 export type MediaCatalogSort =
@@ -108,6 +112,8 @@ function mapMediaItem(item: MediaItem): HomeCatalogMediaItem {
       catalogSource: item.catalogSource,
     }).eligible,
     popularityScore: item.popularityScore,
+    isVerified: item.isVerified === true,
+    trustBadges: item.trustBadges,
   };
 }
 
@@ -151,7 +157,10 @@ export async function fetchFilteredMediaCatalog(opts: {
       orderBy,
       take: opts.limit,
     });
-    return rows.map((row) => mapMediaItem(prismaMediaToMediaItem(row)));
+    const enriched = await attachMediaTrustToMediaItems(
+      rows.map((row) => prismaMediaToMediaItem(row)),
+    );
+    return enriched.map(mapMediaItem);
   } catch (e) {
     console.error("[fetchPublicMediaCatalog] filtered query failed", e);
     return [];

@@ -17,7 +17,10 @@ import { MediaFeedCard } from "@/components/media/media-feed-card";
 import CompareBar from "@/components/compare-bar";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { dedupeImageUrls, typeLabels, type MediaItem, type MediaPriceOption } from "@/lib/media-data";
 import { filterDisplayableMediaImageUrls } from "@/lib/optimized-image-url";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
@@ -32,6 +35,7 @@ import {
 import { useCart } from "@/lib/cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
+import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import {
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
@@ -207,6 +211,13 @@ function mapApiMediaItem(raw: Record<string, unknown>): HomeCatalogMediaItem {
           : undefined,
       catalogSource: item.catalogSource as "network" | undefined,
     }).eligible,
+    isVerified:
+      raw.isVerified === true ||
+      raw.isVerified === "true" ||
+      raw.verified === true,
+    trustBadges: Array.isArray(raw.trustBadges)
+      ? (raw.trustBadges as HomeCatalogMediaItem["trustBadges"])
+      : undefined,
   };
 }
 
@@ -235,7 +246,7 @@ interface Props {
   initialRegion?: string;
 }
 
-export function MediaSearchPage({
+function MediaSearchPageInner({
   initialMedia,
   initialTotal,
   initialCategory,
@@ -612,7 +623,7 @@ export function MediaSearchPage({
                   : viewMode === "feed"
                     ? "space-y-3 py-4"
                     : viewMode === "compact"
-                      ? "flex min-h-[2.625rem] items-center gap-2"
+                      ? "flex min-h-[3rem] items-center gap-2.5"
                       : "flex gap-3",
               )}
             >
@@ -632,7 +643,7 @@ export function MediaSearchPage({
                 </div>
               ) : viewMode === "compact" ? (
                 <>
-                  <div className="h-9 w-11 shrink-0 rounded-md bg-gray-200 dark:bg-white/10" />
+                  <div className="h-11 w-14 shrink-0 rounded-lg bg-gray-200 dark:bg-white/10" />
                   <div className="min-w-0 flex-1 space-y-1">
                     <div className="h-3 w-4/5 rounded bg-gray-200 dark:bg-white/10" />
                     <div className="h-2.5 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
@@ -683,6 +694,7 @@ export function MediaSearchPage({
         ) : viewMode === "card" ? (
           media.map((item) => {
             const href = getMediaHref(item);
+            const isKo = locale === "ko";
             return (
               <Link
                 key={item.id}
@@ -703,6 +715,11 @@ export function MediaSearchPage({
                       준비중
                     </div>
                   )}
+                  <MediaThumbnailTrustOverlay
+                    item={item}
+                    isKo={isKo}
+                    variant="card"
+                  />
                 </div>
                 <div className="p-3">
                   <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
@@ -711,22 +728,31 @@ export function MediaSearchPage({
                   <p className="mt-1 text-xs text-gray-400 dark:text-white/40">
                     {[item.region, item.type].filter(Boolean).join(" · ")}
                   </p>
-                  <div className="mt-2 flex items-center justify-between gap-2">
+                  <div className="mt-2 space-y-2">
                     {renderPrice(item) ? (
                       <p className="tkad-home-accent-text text-sm font-bold">
                         {renderPrice(item)}
                       </p>
-                    ) : (
-                      <span />
-                    )}
-                    <div className="flex items-center gap-1">
+                    ) : null}
+                    <div className="flex items-stretch gap-1">
+                      <PlanCartAddButton
+                        item={planCartItemFromCatalog(item, "search")}
+                        addedFrom="search"
+                        compact
+                        gridInline
+                        className="min-w-0 flex-1 !h-8 !px-1 !text-[10px]"
+                      />
                       <MediaCompareSelectButton
                         selected={isInCompare(item.id)}
                         onToggle={() => toggleCompare(item)}
+                        gridInline
+                        className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
                       />
                       <MediaCartAddButton
                         inCart={isInCart(item.id)}
                         onToggle={() => toggleCart(item)}
+                        gridInline
+                        className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
                       />
                     </div>
                   </div>
@@ -805,3 +831,5 @@ export function MediaSearchPage({
     </>
   );
 }
+
+export const MediaSearchPage = withSearchParamsSuspense(MediaSearchPageInner);

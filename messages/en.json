@@ -161,6 +161,10 @@
         "label": "AI media picks",
         "desc": "Goal and budget-based AI picks"
       },
+      "campaign-targets": {
+        "label": "Campaign goals",
+        "desc": "Browse by brand, promo, launch, and more"
+      },
       "media-planner": {
         "label": "OOH campaign planner",
         "desc": "Budget, timeline, and media mix"
@@ -273,6 +277,8 @@
     "referralInvite": "Invite friends",
     "kakaoLogin": "Continue with Kakao",
     "naverLogin": "Continue with Naver",
+    "googleLogin": "Continue with Google",
+    "googleConnecting": "Connecting to Google…",
     "backToLogin": "Back to login",
     "orEmail": "Or with email",
     "usageGuide": "How to use"
@@ -2031,6 +2037,7 @@
     "sitemap": "Sitemap",
     "sitemapClose": "Close sitemap",
     "sitemapCompany": "Company",
+    "sitemapOtherSearch": "More to explore",
     "sitemapWebinar": "Webinars",
     "servicesIntro": "About our services",
     "coreNavLabel": "Quick links",
@@ -2963,7 +2970,7 @@
     "personalizedCtaPlanner": "Try AI Planner"
   },
   "onboarding": {
-    "kicker": "Welcome",
+    "kicker": "ONBOARDING",
     "title": "Set up your profile",
     "skip": "Skip",
     "next": "Next",
@@ -2972,6 +2979,9 @@
     "saveError": "Could not save. Please try again.",
     "industryRequired": "Select at least one industry.",
     "progressMessage": "Profile <accent>{percent}%</accent> complete — finish for better recommendations",
+    "progressKicker": "Profile",
+    "progressLabel": "Completion",
+    "progressCta": "Complete",
     "step1Title": "How will you use Syncad?",
     "step1Desc": "We use this to personalize features and picks.",
     "roleAdvertiser": "Advertiser",

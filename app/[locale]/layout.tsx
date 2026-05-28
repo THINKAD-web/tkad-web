@@ -13,7 +13,7 @@ import {
 import { buildStructuredDataGraph } from "@/lib/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
-import { THEME_INIT_SCRIPT } from "@/lib/theme-auto";
+import { ThemeInitScript } from "@/components/theme-init-script";
 import LocaleRootBody from "@/components/locale-root-body";
 import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
@@ -152,9 +152,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       <body
         className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans antialiased`}
       >
-        <script
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
-        />
+        <ThemeInitScript />
         <JsonLd data={structuredData} />
         <WebVitalsReporter />
         <SpeedInsightsLoader />

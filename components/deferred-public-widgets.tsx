@@ -7,6 +7,7 @@
  */
 import dynamic from "next/dynamic";
 import { ContactChannelProvider } from "@/components/contact/contact-channel-provider";
+import { PlanCartSessionSync } from "@/components/plan/plan-cart-session-sync";
 
 const FloatingSupportDock = dynamic(
   () => import("@/components/floating-support-dock"),
@@ -27,6 +28,7 @@ const HomeOnboardingTour = dynamic(
 export default function DeferredPublicWidgets() {
   return (
     <ContactChannelProvider>
+      <PlanCartSessionSync />
       <PwaCatalogSync />
       <RecentlyViewedSync />
       <HomeOnboardingTour />

@@ -525,18 +525,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   props.metrics?.estimatedTotalImpressions ?? null
                 }
                 skipProGate
-                variant="metrics-only"
-              />
-              <PlannerEffectSimulationPanel
-                isKo={props.isKo}
-                portfolio={props.portfolio}
-                budgetMan={props.budgetNum}
-                months={props.months}
-                totalImpressionsFromMetrics={
-                  props.metrics?.estimatedTotalImpressions ?? null
-                }
-                skipProGate
-                variant="budget-only"
               />
 
               <PlannerNeonCard>
