@@ -6,7 +6,7 @@ import {
   sortMapCatalogItems,
   type MapCatalogFilterParams,
 } from "@/lib/public-media-map-filter";
-import type { MediaItem } from "@/lib/media-data";
+import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { apiOk, apiServerError } from "@/lib/api-response";
 
@@ -45,7 +45,7 @@ function toMapItem(m: MediaItem) {
     createdAt: m.createdAt ?? null,
     lat: m.lat,
     lng: m.lng,
-    image: m.sampleImages?.[0] ?? null,
+    image: getPrimaryMediaImageUrl(m),
     availability: m.availability ?? null,
     visibilityScore: m.visibilityScore ?? 0,
     dailyFootTraffic: m.dailyFootTraffic ?? null,

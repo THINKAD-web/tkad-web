@@ -87,7 +87,9 @@ export function mapMapItemToHomeCatalog(
     location: item.location,
     price: item.price > 0 ? item.price : undefined,
     pricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
-    thumbnailUrl: item.image ?? undefined,
+    thumbnailUrl: item.image
+      ? (resolveCatalogImageSrc(item.image)?.src ?? item.image)
+      : undefined,
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,
     dailyFootTraffic: item.dailyFootTraffic ?? undefined,

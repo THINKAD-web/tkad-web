@@ -36,6 +36,7 @@ import {
 } from "@/lib/compare-cart-client";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
+import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
@@ -688,7 +689,9 @@ export default function MediaMapPageClient() {
           </div>
 
         <ul className="grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-          {items.map((it) => (
+          {items.map((it) => {
+            const thumb = catalogThumbnailImageProps(it.image);
+            return (
             <li
               key={it.id}
               role="button"
@@ -714,13 +717,14 @@ export default function MediaMapPageClient() {
               onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
             >
               <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                {it.image ? (
+                {thumb ? (
                   <Image
-                    src={it.image}
+                    src={thumb.src}
                     alt={it.name}
                     fill
                     className="object-cover"
                     sizes="(max-width: 768px) 50vw, 280px"
+                    unoptimized={thumb.unoptimized}
                   />
                 ) : (
                   <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
@@ -781,7 +785,8 @@ export default function MediaMapPageClient() {
                 </div>
               </div>
             </li>
-          ))}
+            );
+          })}
           {items.length === 0 && !loading && (
             <li className="col-span-2 p-8 text-center">
               <div className="text-3xl mb-2">🔍</div>

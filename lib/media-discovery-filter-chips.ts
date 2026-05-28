@@ -65,6 +65,33 @@ export const MEDIA_REGION_CHIPS = [
   { label: "대구", value: "대구" },
 ] as const;
 
+/** UI 지역 칩 → DB 텍스트 필드 검색용 동의어 (홍대: location·마포구 등) */
+export const MEDIA_REGION_CHIP_ALIASES: Record<string, readonly string[]> = {
+  강남: ["강남", "gangnam", "테헤란", "역삼", "논현", "신사", "청담", "강남구"],
+  홍대: [
+    "홍대",
+    "hongdae",
+    "홍익",
+    "홍대입구",
+    "합정",
+    "상수",
+    "연남",
+    "망원",
+    "마포",
+  ],
+  성수: ["성수", "seongsu", "성동", "연무장", "성수동"],
+  도심: ["도심", "명동", "광화문", "종로", "을지로", "시청", "세종대로", "중구"],
+  부산: ["부산", "busan", "해운대", "서면", "남포", "부산광역시"],
+  대구: ["대구", "daegu", "동성로", "대구광역시"],
+};
+
+export function expandMediaRegionChip(value: string): string[] {
+  const trimmed = value.trim();
+  if (!trimmed) return [];
+  const aliases = MEDIA_REGION_CHIP_ALIASES[trimmed];
+  return aliases ? [...aliases] : [trimmed];
+}
+
 export const MEDIA_SEARCH_SORT_OPTIONS = [
   { label: "인기순", value: "popular" },
   { label: "최신순", value: "newest" },

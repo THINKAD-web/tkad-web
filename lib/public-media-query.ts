@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 
 export type PublicMediaSort =
   | "popular"
@@ -34,14 +35,18 @@ export function buildPublicMediaWhere(
     and.push({ targetCategory: { has: params.target.trim() } });
   }
   if (params.region?.trim()) {
-    const region = params.region.trim();
+    const aliases = expandMediaRegionChip(params.region);
     and.push({
-      OR: [
-        { region: { contains: region, mode: "insensitive" } },
-        { city: { contains: region, mode: "insensitive" } },
-        { district: { contains: region, mode: "insensitive" } },
-        { regionZone: { contains: region, mode: "insensitive" } },
-      ],
+      OR: aliases.flatMap((alias) => [
+        { region: { contains: alias, mode: "insensitive" } },
+        { city: { contains: alias, mode: "insensitive" } },
+        { district: { contains: alias, mode: "insensitive" } },
+        { regionZone: { contains: alias, mode: "insensitive" } },
+        { location: { contains: alias, mode: "insensitive" } },
+        { name: { contains: alias, mode: "insensitive" } },
+        { nearbyStations: { contains: alias, mode: "insensitive" } },
+        { nearbyLandmarks: { contains: alias, mode: "insensitive" } },
+      ]),
     });
   }
   if (params.q?.trim()) {

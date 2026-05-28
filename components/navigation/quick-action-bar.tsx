@@ -15,7 +15,6 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useCart } from "@/lib/cart";
-import { usePlanCart } from "@/hooks/use-plan-cart";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 function isHiddenPath(pathname: string | null): boolean {
@@ -121,7 +120,6 @@ function QuickActionBarMobileInner() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const tab = searchParams.get("tab");
-  const { count: planCount } = usePlanCart();
 
   if (isHiddenPath(pathname)) return null;
 
@@ -137,18 +135,15 @@ function QuickActionBarMobileInner() {
         {actions.map((action) => {
           const active = action.match(pathname, tab);
           const label = isKo ? action.labelKo : action.labelEn;
-          const isPlan = action.id === "plan";
           return (
             <Link
               key={action.id}
               href={action.href}
               className={cn(
                 "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
-                isPlan && planCount > 0 && !active
-                  ? "border border-violet-300/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 text-white shadow-sm shadow-violet-500/20"
-                  : active
-                    ? "tkad-neon-cta-clean text-white"
-                    : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
+                active
+                  ? "tkad-neon-cta-clean text-white"
+                  : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
               )}
               aria-current={active ? "page" : undefined}
             >

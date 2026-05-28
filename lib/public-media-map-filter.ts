@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
+import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 
 export type MapCatalogFilterParams = {
   category?: string | null;
@@ -36,12 +37,20 @@ export function matchesMapCatalogFilter(
 
   const region = params.region?.trim();
   if (region) {
-    const match =
-      includesInsensitive(m.region, region) ||
-      includesInsensitive(m.city, region) ||
-      includesInsensitive(m.district, region) ||
-      includesInsensitive(m.regionZone, region) ||
-      includesInsensitive(m.location, region);
+    const aliases = expandMediaRegionChip(region);
+    const match = aliases.some((alias) => {
+      const needle = alias.toLowerCase();
+      return (
+        includesInsensitive(m.region, needle) ||
+        includesInsensitive(m.city, needle) ||
+        includesInsensitive(m.district, needle) ||
+        includesInsensitive(m.regionZone, needle) ||
+        includesInsensitive(m.location, needle) ||
+        includesInsensitive(m.name, needle) ||
+        includesInsensitive(m.nearbyStations, needle) ||
+        includesInsensitive(m.nearbyLandmarks, needle)
+      );
+    });
     if (!match) return false;
   }
 
