@@ -182,7 +182,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
-    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen bg-background font-sans text-foreground">
+    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen overflow-x-clip bg-background font-sans text-foreground">
       <aside className="hidden w-72 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
@@ -195,8 +195,8 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         </div>
       )}
 
-      <div className="flex flex-1 flex-col">
-        <header className="relative flex h-14 items-center gap-3 border-b border-border/60 bg-card/70 px-4 backdrop-blur md:px-6">
+      <div className="flex min-w-0 flex-1 flex-col">
+        <header className="relative flex h-14 min-w-0 items-center gap-3 border-b border-border/60 bg-card/70 px-4 backdrop-blur md:px-6">
           <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid" />
           <button
             type="button"
@@ -211,7 +211,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           <ThemeToggle className="rounded-full border border-border/70 bg-card/70 shadow-sm backdrop-blur" />
           <SignOutButton locale={locale} label={tNav("signOut")} />
         </header>
-        <main className="flex-1 overflow-y-auto p-4 md:p-6">{children}</main>
+        <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
   );

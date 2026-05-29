@@ -83,7 +83,7 @@ export default function MediaAiRecommendDashboard({
   }, [top3]);
 
   return (
-    <div className="border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
+    <div className="overflow-x-clip border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
       <div className="space-y-10">
         {/* 상단 헤더 — TKAD bot 테마 */}
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">

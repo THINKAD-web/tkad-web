@@ -610,8 +610,8 @@ export default function MediaMapPageClient() {
               <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
                 {isKo ? "어디서?" : "Region"}
               </p>
-              <div className="flex items-center gap-2">
-                <div className="scrollbar-hide flex flex-1 gap-2 overflow-x-auto pb-0.5">
+              <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+                <div className="scrollbar-hide flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
                   {MEDIA_REGION_CHIPS.map((chip) => (
                     <button
                       key={chip.value || "all"}
@@ -641,7 +641,7 @@ export default function MediaMapPageClient() {
                       sort: e.target.value as Filter["sort"],
                     }))
                   }
-                  className="flex-shrink-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
+                  className="flex-shrink-0 self-end rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none dark:border-white/10 dark:bg-white/8 dark:text-white/70 sm:self-auto"
                 >
                   {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>

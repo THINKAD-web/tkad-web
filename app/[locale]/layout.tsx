@@ -48,10 +48,8 @@ export async function generateMetadata({
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
-  const metadataBase =
-    process.env.VERCEL_ENV === "production"
-      ? new URL("https://tkad.co.kr")
-      : new URL("https://tkad-web.vercel.app");
+  /** 앱 실제 origin (app.tkad.co.kr). tkad.co.kr 은 Cafe24 — OG 이미지 404 원인이었음 */
+  const metadataBase = new URL(siteUrl);
 
   const titleDefault =
     locale === "ko"
@@ -124,6 +122,10 @@ export async function generateMetadata({
       creator: "@thinkad_kr",
       title: titleDefault,
       description,
+      images: defaultOgImages(locale, {
+        ko: "THINKAD 싱커드 — 대한민국 No.1 OOH 광고 에이전시",
+        en: "THINKAD — Korea's leading OOH advertising agency",
+      }),
     },
     other: {
       ...(naverVer ? { "naver-site-verification": naverVer } : {}),

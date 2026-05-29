@@ -390,7 +390,7 @@ function MediaSearchPageInner({
   return (
     <>
     <div className={cn(!embedded && "bg-gray-50 dark:bg-[#020202]")}>
-      <div className="space-y-3 px-4 pt-4">
+      <div className="min-w-0 space-y-3 overflow-x-clip px-4 pt-4">
         {/* ── 검색창 ── */}
         <div className="relative">
           <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-white/30" />
@@ -466,8 +466,8 @@ function MediaSearchPageInner({
           <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
             어디서?
           </p>
-          <div className="flex items-center gap-2">
-            <div className="scrollbar-hide flex flex-1 gap-2 overflow-x-auto">
+          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
+            <div className="scrollbar-hide flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
               {REGION_CHIPS.map((chip) => (
                 <button
                   key={chip.value || "all"}
@@ -486,6 +486,7 @@ function MediaSearchPageInner({
               ))}
             </div>
 
+            <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
             <select
               value={sort}
               onChange={(e) => setSort(e.target.value)}
@@ -520,6 +521,7 @@ function MediaSearchPageInner({
                   </button>
                 );
               })}
+            </div>
             </div>
           </div>
         </div>

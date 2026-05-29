@@ -1,0 +1,18 @@
+import { ImageResponse } from "next/og";
+import { ogSize, OgLayout } from "@/lib/og-helpers";
+import { ogForRoute } from "@/lib/og-route-copy";
+
+export const alt =
+  "THINKAD OOH 시작 가이드 | THINKAD OOH getting started guide";
+export const size = ogSize;
+export const contentType = "image/png";
+
+export default async function Image({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  const c = ogForRoute("guides", locale);
+  return new ImageResponse(<OgLayout {...c} />, { ...size });
+}

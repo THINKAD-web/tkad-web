@@ -10,7 +10,8 @@ import {
   BEGINNER_TIMELINE,
 } from "@/lib/guides-beginner-content";
 import { listGuideMeta } from "@/lib/guides-data";
-import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
 import {
   buildBreadcrumbJsonLd,
   buildCollectionPageJsonLd,
@@ -52,7 +53,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: isKo ? BEGINNER_GUIDE_META.keywordsKo : BEGINNER_GUIDE_META.keywordsEn,
     alternates: pageAlternates(locale, "/guides"),
-    openGraph: { title, description, type: "article" },
+    openGraph: {
+      title,
+      description,
+      type: "article",
+      images: segmentOpenGraphImages(
+        locale,
+        "guides",
+        ogAltForRoute("guides"),
+      ),
+    },
     twitter: { card: "summary_large_image", title, description },
   };
 }

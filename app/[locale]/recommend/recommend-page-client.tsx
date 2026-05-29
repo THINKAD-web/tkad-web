@@ -360,7 +360,7 @@ export default function RecommendPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page overflow-x-clip">
         <PageHero
           eyebrow="// 03 · DISCOVERY"
           title="AI가 추천하는 "

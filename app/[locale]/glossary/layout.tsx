@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { GLOSSARY_TERMS } from "@/lib/glossary-data";
 
@@ -41,7 +42,16 @@ export async function generateMetadata({
           "programmatic DOOH",
         ],
     alternates: pageAlternates(locale, "/glossary"),
-    openGraph: { title, description, type: "website" },
+    openGraph: {
+      title,
+      description,
+      type: "website",
+      images: segmentOpenGraphImages(
+        locale,
+        "glossary",
+        ogAltForRoute("glossary"),
+      ),
+    },
     twitter: { card: "summary_large_image", title, description },
   };
 }

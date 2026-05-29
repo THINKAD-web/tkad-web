@@ -430,7 +430,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   };
 
   return (
-    <div className="w-full max-w-none">
+    <div className="w-full max-w-none overflow-x-clip">
       <div className="border-2 border-border bg-card text-foreground">
         <div className="border-b-2 border-border p-6">
           <div className="flex items-start justify-between gap-3">

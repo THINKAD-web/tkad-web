@@ -29,7 +29,7 @@ export default function RecommendCartBar({
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-border bg-card">
-      <div className="mx-auto flex max-w-7xl items-center gap-4 px-4 py-3 sm:px-6 lg:px-8">
+      <div className="mx-auto flex max-w-7xl flex-col gap-3 px-4 py-3 sm:flex-row sm:items-center sm:gap-4 sm:px-6 lg:px-8">
         <div className="flex shrink-0 items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
           <ShoppingCart className="h-4 w-4 text-accent" />
           {t("cartTitle")}{" "}
@@ -38,7 +38,7 @@ export default function RecommendCartBar({
           </span>
         </div>
 
-        <div className="flex flex-1 items-center gap-2 overflow-x-auto">
+        <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto">
           {items.map((media) => (
             <div
               key={media.id}
@@ -59,7 +59,7 @@ export default function RecommendCartBar({
           ))}
         </div>
 
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
           <BtnBlock variant="secondary" size="sm" onClick={onClear}>
             {t("cartClear")}
           </BtnBlock>

@@ -4,12 +4,37 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 
 export const OG_DIM = { width: 1200, height: 630 } as const;
 
-/** Kakao/messenger crawlers must fetch OG images from the live app origin. */
+/** 앱 프로덕션 origin 폴백 (루트 tkad.co.kr 은 Cafe24) */
 export const OG_PRODUCTION_ORIGIN = "https://app.tkad.co.kr";
 
+/**
+ * 절대 URL(OG, sitemap, JSON-LD, canonical, 이메일 링크)의 기준.
+ * - `NEXT_PUBLIC_SITE_URL` / `SITE_URL` 우선 (운영·프리뷰·로컬 공통)
+ * - 미설정 + Vercel 프리뷰: tkad-web.vercel.app
+ * - 폴백: app.tkad.co.kr (루트 tkad.co.kr 은 Cafe24 — 앱 미호스팅)
+ */
+function resolvePublicSiteUrl(): string {
+  const explicit =
+    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim();
+  if (explicit) return explicit.replace(/\/$/, "");
+  if (process.env.VERCEL_ENV === "preview") {
+    return "https://tkad-web.vercel.app";
+  }
+  const vercel = process.env.VERCEL_URL?.trim();
+  if (vercel) {
+    const host = vercel.replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return `https://${host}`;
+  }
+  return OG_PRODUCTION_ORIGIN;
+}
+
+export const siteUrl = resolvePublicSiteUrl();
+
+/** Kakao/messenger crawlers — OG 이미지는 반드시 앱 origin(siteUrl) 절대 URL */
 export function ogImageUrl(path: string): string {
   const p = path.startsWith("/") ? path : `/${path}`;
-  return `${OG_PRODUCTION_ORIGIN}${p}`;
+  return `${siteUrl.replace(/\/$/, "")}${p}`;
 }
 
 const SITE_KEYWORDS = {
@@ -66,30 +91,6 @@ export function defaultOgImages(
     },
   ];
 }
-
-/**
- * 절대 URL(OG, sitemap, JSON-LD, canonical, 이메일 링크)의 기준.
- * - `NEXT_PUBLIC_SITE_URL` / `SITE_URL` 우선 (운영·프리뷰·로컬 공통)
- * - 미설정 + Vercel 프리뷰: tkad-web.vercel.app
- * - 폴백: app.tkad.co.kr (루트 tkad.co.kr 은 Cafe24 — 앱 미호스팅)
- */
-function resolvePublicSiteUrl(): string {
-  const explicit =
-    process.env.NEXT_PUBLIC_SITE_URL?.trim() ||
-    process.env.SITE_URL?.trim();
-  if (explicit) return explicit.replace(/\/$/, "");
-  if (process.env.VERCEL_ENV === "preview") {
-    return "https://tkad-web.vercel.app";
-  }
-  const vercel = process.env.VERCEL_URL?.trim();
-  if (vercel) {
-    const host = vercel.replace(/^https?:\/\//, "").replace(/\/$/, "");
-    return `https://${host}`;
-  }
-  return OG_PRODUCTION_ORIGIN;
-}
-
-export const siteUrl = resolvePublicSiteUrl();
 
 export function siteKeywords(locale: string): string[] {
   return locale === "ko" ? [...SITE_KEYWORDS.ko] : [...SITE_KEYWORDS.en];

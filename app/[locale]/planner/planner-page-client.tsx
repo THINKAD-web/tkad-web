@@ -724,7 +724,7 @@ export default function PlannerPageClient({
   if (databaseEmpty && catalog.length === 0) {
     return (
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon">
+        <div className="tkad-landing-neon overflow-x-clip">
           <PageHero
             eyebrow="// 01 · PLANNING"
             title="예산에 맞는 "
@@ -759,7 +759,7 @@ export default function PlannerPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon">
+      <div className="tkad-landing-neon overflow-x-clip">
         <PageHero
           eyebrow="// 01 · PLANNING"
           title="예산에 맞는 "

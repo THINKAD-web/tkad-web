@@ -7,7 +7,8 @@ import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
 import { getPublishedGuideBySlug } from "@/lib/public-auto-content";
 import { DbGuideArticlePage } from "@/components/guides/db-guide-article-page";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
-import { pageAlternates, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
 import { regionLabel, typeLabel } from "@/lib/media-keyword-landing";
 import { ArrowRight, BookText, Calendar } from "lucide-react";
 
@@ -35,6 +36,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         type: "article",
         publishedTime: dbGuide.publishedAt?.toISOString(),
         modifiedTime: dbGuide.updatedAt.toISOString(),
+        images: segmentOpenGraphImages(
+          locale,
+          "guides",
+          ogAltForRoute("guides"),
+        ),
       },
     };
   }
@@ -54,6 +60,11 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       type: "article",
       publishedTime: guide.publishedAt,
       modifiedTime: guide.updatedAt ?? guide.publishedAt,
+      images: segmentOpenGraphImages(
+        locale,
+        "guides",
+        ogAltForRoute("guides"),
+      ),
     },
     twitter: { card: "summary_large_image", title, description },
     robots: guide.draft

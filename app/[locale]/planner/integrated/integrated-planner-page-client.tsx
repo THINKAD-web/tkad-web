@@ -385,7 +385,7 @@ export default function IntegratedPlannerPageClient({
 
   return (
     <HomeLandingDayNight>
-    <div className="tkad-landing-neon">
+    <div className="tkad-landing-neon overflow-x-clip">
       <PageHero
         eyebrow="// 02 · PLANNING"
         title="OOH + 디지털 "

@@ -241,6 +241,42 @@ const routes = {
       subtitle: "Planning, selection, and flight management",
     },
   },
+  glossary: {
+    ko: {
+      badge: "Glossary",
+      title: "옥외광고 용어집",
+      subtitle: "OOH · DOOH · CPM · GRP 등 캠페인 필수 용어",
+    },
+    en: {
+      badge: "Glossary",
+      title: "OOH glossary",
+      subtitle: "OOH, DOOH, CPM, GRP — essential campaign terms",
+    },
+  },
+  guides: {
+    ko: {
+      badge: "Guides",
+      title: "OOH 광고 시작 가이드",
+      subtitle: "처음 옥외광고를 시작하는 분을 위한 단계별 안내",
+    },
+    en: {
+      badge: "Guides",
+      title: "OOH getting started guide",
+      subtitle: "Step-by-step help for your first outdoor campaign",
+    },
+  },
+  map: {
+    ko: {
+      badge: "Map",
+      title: "지도에서 찾는 옥외광고",
+      subtitle: "위치 기반으로 주변 OOH 매체를 탐색",
+    },
+    en: {
+      badge: "Map",
+      title: "Find OOH on the map",
+      subtitle: "Discover nearby outdoor media by location",
+    },
+  },
 } as const;
 
 export type OgRouteId = keyof typeof routes;
