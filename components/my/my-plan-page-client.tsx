@@ -14,6 +14,7 @@ import {
   planCartAddedFromLabel,
   planCartMonthlyTotal,
 } from "@/lib/plan-cart";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -214,7 +215,7 @@ export function MyPlanPageClient() {
                   <span className="font-black tkad-home-accent-text">
                     {formatWon(periodTotal)}
                     <span className="ml-1 text-xs font-normal text-gray-400">
-                      {isKo ? "(VAT 별도)" : "(VAT excl.)"}
+                      {isKo ? "(제작비·부가세 별도)" : "(Production & VAT extra)"}
                     </span>
                   </span>
                 </div>
@@ -253,6 +254,7 @@ export function MyPlanPageClient() {
                         {formatWon(item.price)}
                         {isKo ? "/월" : "/mo"}
                       </p>
+                      <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                       <span className="mt-1 inline-block rounded-full dark:bg-white/10 bg-gray-200 px-2 py-0.5 text-[10px] font-semibold dark:text-white/70 text-gray-600">
                         {planCartAddedFromLabel(item.addedFrom, isKo)}
                       </span>

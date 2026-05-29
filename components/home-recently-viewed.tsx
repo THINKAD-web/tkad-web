@@ -9,6 +9,7 @@ import {
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
 import { typeLabels } from "@/lib/media-data";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import ScrollAnimate from "@/components/scroll-animate";
 import { cn } from "@/lib/utils";
@@ -110,6 +111,7 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                     <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
                       {formatCatalogPriceFieldWon(media.price)}
                     </p>
+                    <MediaPriceExclNote isKo={isKo} />
                   </div>
                 </Link>
               </ScrollAnimate>

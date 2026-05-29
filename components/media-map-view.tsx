@@ -39,6 +39,7 @@ import {
   getPrimaryMediaImageUrl,
 } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -333,6 +334,7 @@ export function MediaMapView({
                             </span>
                           </div>
                         </div>
+                        <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                         <div className="mt-2.5 border-t border-navy/10 pt-2.5">
                           <ShareButtons
                             compact

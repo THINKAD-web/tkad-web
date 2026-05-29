@@ -5,6 +5,7 @@ import { Calculator } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import { calculateMediaQuoteByDays, formatWonShort } from "@/lib/compare-quote";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
@@ -84,6 +85,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
           ? `기준 단가 ${formatCatalogPriceFieldWon(media.price, localeTag)} · 실제 견적은 옵션·시즌에 따라 달라질 수 있습니다.`
           : `List ${formatCatalogPriceFieldWon(media.price, localeTag)} · Final quote may vary by option and season.`}
       </p>
+      <MediaPriceExclNote isKo={isKo} className="mt-1" />
 
       <div className="mt-4 flex flex-wrap gap-2">
         {DAY_PRESETS.map((d) => (

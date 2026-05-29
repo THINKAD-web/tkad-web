@@ -14,6 +14,7 @@ import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-t
 import type { HomeCatalogMediaItem } from "@/types/media";
 import type { MediaCardMode } from "@/types/media";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { cn } from "@/lib/utils";
 
 export type MediaCardProps = {
@@ -93,7 +94,10 @@ function MediaCardGrid({
         </p>
         <div className="mt-2 space-y-2">
           {priceLabel ? (
-            <p className="tkad-home-accent-text text-sm font-bold">{priceLabel}</p>
+            <div>
+              <p className="tkad-home-accent-text text-sm font-bold">{priceLabel}</p>
+              <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+            </div>
           ) : null}
           {plannerMode && onTogglePlan ? (
             <button

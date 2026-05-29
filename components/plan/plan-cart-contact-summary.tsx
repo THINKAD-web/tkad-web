@@ -6,6 +6,7 @@ import {
   PLAN_CART_GOAL_OPTIONS,
   planCartMonthlyTotal,
 } from "@/lib/plan-cart";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export function PlanCartContactSummary() {
@@ -48,6 +49,7 @@ export function PlanCartContactSummary() {
           {isKo ? "개월" : " mo"} / {isKo ? "목표" : "Goal"}: {goalLabel}
         </p>
       </div>
+      <MediaPriceExclNote isKo={isKo} className="mt-2" />
     </div>
   );
 }

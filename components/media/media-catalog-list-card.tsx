@@ -14,8 +14,9 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { useTranslations } from "next-intl";
 import { pickTrustBadgesForThumbnail } from "@/lib/media-trust";
+import { useTranslations } from "next-intl";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 
 type Props = {
   media: MediaItem;
@@ -128,6 +129,7 @@ export function MediaCatalogListCard({
                 </span>
               ) : null}
             </p>
+            <MediaPriceExclNote isKo={isKo} className="mt-0.5 text-right" />
             {hotBadge ? (
               <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-300">
                 {isKo ? "인기" : "Hot"}

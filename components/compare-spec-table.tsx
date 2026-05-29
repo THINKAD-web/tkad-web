@@ -18,6 +18,7 @@ import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
 const KNOWN_REGION_CODES = new Set([
@@ -268,6 +269,7 @@ export function CompareSpecTable({
                         <p className="mt-1 font-display text-[10px] font-bold tabular-nums leading-tight text-accent sm:text-[11px]">
                           {formatCatalogPriceFieldWon(m.price, locale)}
                         </p>
+                        <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                       </div>
                     </div>
                     <Link
@@ -341,6 +343,7 @@ export function CompareSpecTable({
           </tbody>
         </table>
       </div>
+      <MediaPriceExclNote isKo={isKo} className="mt-2 px-1" />
     </div>
   );
 }

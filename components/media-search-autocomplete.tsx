@@ -9,6 +9,7 @@ import {
   type MediaItem,
 } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -216,12 +217,15 @@ export default function MediaSearchAutocomplete({
                   {isKo ? typeLabels[media.type]?.ko : typeLabels[media.type]?.en}
                 </div>
               </div>
-              <span className="shrink-0 text-right text-[11px] font-semibold leading-tight text-gold-dark">
-                {formatCatalogPriceFieldWon(media.price)}
-                <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
-                  · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+              <div className="shrink-0 text-right">
+                <span className="text-[11px] font-semibold leading-tight text-gold-dark">
+                  {formatCatalogPriceFieldWon(media.price)}
+                  <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
+                    · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
+                  </span>
                 </span>
-              </span>
+                <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+              </div>
             </button>
           ))}
         </div>

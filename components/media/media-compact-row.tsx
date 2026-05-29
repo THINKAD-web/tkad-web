@@ -9,6 +9,7 @@ import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -73,6 +74,8 @@ export function MediaCompactRow({
         {metaLine ? (
           <p className="truncate text-[10px] text-gray-500 dark:text-white/45">
             {metaLine}
+            <span className="mx-1 text-gray-300 dark:text-white/25">·</span>
+            <MediaPriceExclNote inline className="text-[9px]" />
           </p>
         ) : null}
       </div>

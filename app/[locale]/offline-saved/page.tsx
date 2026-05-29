@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLocale } from "next-intl";
 import { useSavedMediaList } from "@/components/pwa-save-offline-button";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
@@ -52,6 +53,7 @@ export default function OfflineSavedMediaPage() {
                         ? ` · ${formatCatalogPriceFieldWon(m.price)}`
                         : ""}
                     </p>
+                    {m.price > 0 ? <MediaPriceExclNote isKo={isKo} className="mt-0.5" /> : null}
                   </div>
                 </Link>
               </li>

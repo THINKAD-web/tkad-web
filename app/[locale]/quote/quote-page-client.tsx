@@ -62,6 +62,7 @@ import {
   passesMediaAdvancedFilters,
 } from "@/lib/media-filter-advanced";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   catalogPriceFieldToPriceMan,
   formatCatalogPriceFieldWon,
@@ -1202,6 +1203,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                           )}
                                         </span>
                                       </p>
+                                      <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                                     </div>
                                   </div>
                                 </label>

@@ -7,6 +7,7 @@ import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import type { MediaItem } from "@/lib/media-data";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -43,6 +44,7 @@ export function MediaDetailMobileBar({
           <p className="truncate text-[10px] text-gray-500 dark:text-white/45">
             {periodLabel}
           </p>
+          <MediaPriceExclNote isKo={isKo} className="truncate" />
         </div>
         <MediaInquiryDialog
           mediaId={media.id}

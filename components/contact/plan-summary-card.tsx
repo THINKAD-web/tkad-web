@@ -4,6 +4,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { planCartMonthlyTotal } from "@/lib/plan-cart";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
@@ -51,6 +52,7 @@ function PlanSummaryCardInner() {
           </span>
         ) : null}
       </p>
+      <MediaPriceExclNote isKo={isKo} className="mt-2" />
     </div>
   );
 }

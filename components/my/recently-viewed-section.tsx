@@ -2,15 +2,19 @@
 
 import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import { Clock } from "lucide-react";
 import {
   readRecentlyViewedRecords,
   subscribeRecentlyViewedChanged,
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export function RecentlyViewedSection() {
+  const locale = useLocale();
+  const isKo = locale.startsWith("ko");
   const [items, setItems] = useState<RecentlyViewedRecord[]>([]);
   const [loaded, setLoaded] = useState(false);
 
@@ -60,6 +64,7 @@ export function RecentlyViewedSection() {
             <p className="mt-1 text-[10px] tabular-nums text-foreground">
               {formatCatalogPriceFieldWon(m.price)}
             </p>
+            <MediaPriceExclNote isKo={isKo} />
           </Link>
         ))}
       </div>

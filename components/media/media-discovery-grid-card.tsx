@@ -7,6 +7,7 @@ import { MediaCompareSelectButton } from "@/components/media/media-compare-selec
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import type { PlanCartItem } from "@/lib/plan-cart";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 
 type Props = {
@@ -79,9 +80,12 @@ export function MediaDiscoveryGridCard({
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
         <div className="mt-2 space-y-2">
           {priceLabel ? (
-            <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
-              {priceLabel}
-            </p>
+            <div>
+              <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
+                {priceLabel}
+              </p>
+              <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+            </div>
           ) : null}
           <div className="flex items-stretch gap-1">
             <PlanCartAddButton

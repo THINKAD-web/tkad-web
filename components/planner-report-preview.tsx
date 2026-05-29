@@ -9,6 +9,7 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import { DEFAULT_LOGO_PLACEMENT } from "@/components/planner/composite-preview";
 import { aggregatePortfolioTraffic } from "@/lib/portfolio-traffic";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatBudgetManwon,
   formatCatalogPriceFieldWon,
@@ -264,6 +265,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                         /{formatPricePeriodShortLabel(m.pricePeriod, isKo ? "ko" : "en")}
                       </span>
                     </p>
+                    <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                     {(() => {
                       const badge = priceOptionBadge(m);
                       if (!badge) return null;

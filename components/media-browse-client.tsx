@@ -93,6 +93,7 @@ import {
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -1371,6 +1372,7 @@ export default function MediaBrowseClient({
                                     )}
                                   </span>
                                 </p>
+                                <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                                 <p className="mt-1.5 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                                   <Users
                                     className="h-3 w-3 shrink-0 text-accent"

@@ -24,6 +24,7 @@ import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import type { MediaItem } from "@/lib/media-data";
@@ -748,9 +749,12 @@ export default function MediaMapPageClient() {
                   {[it.region, it.type].filter(Boolean).join(" · ")}
                 </p>
                 <div className="mt-2 space-y-2">
-                  <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
-                    {formatPrice(it.price, it.pricePeriod, locale)}
-                  </p>
+                  <div>
+                    <p className="tkad-home-accent-text text-sm font-bold tabular-nums">
+                      {formatPrice(it.price, it.pricePeriod, locale)}
+                    </p>
+                    <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+                  </div>
                   <div className="flex items-stretch gap-1">
                     <PlanCartAddButton
                       item={planCartItemFromCatalog(

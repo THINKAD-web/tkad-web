@@ -4,6 +4,10 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import {
+  optimizeHeroMarqueeUrl,
+  shouldUseUnoptimizedImage,
+} from "@/lib/optimized-image-url";
 
 const BANNER_IMAGES = [
   "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
@@ -71,7 +75,9 @@ export function HomeHeroBanner() {
         aria-roledescription="carousel"
         aria-label="프로모션"
       >
-        {banners.map((b, i) => (
+        {banners.map((b, i) => {
+          const src = optimizeHeroMarqueeUrl(b.image) ?? b.image;
+          return (
           <div
             key={b.href}
             className={cn(
@@ -81,15 +87,17 @@ export function HomeHeroBanner() {
             aria-hidden={i !== current}
           >
             <Image
-              src={b.image}
+              src={src}
               alt=""
               fill
               className="object-cover"
               priority={i === 0}
               sizes="(max-width: 768px) 100vw, 1280px"
+              unoptimized={shouldUseUnoptimizedImage(src)}
             />
           </div>
-        ))}
+          );
+        })}
 
         <div
           aria-hidden

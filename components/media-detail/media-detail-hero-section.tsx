@@ -16,6 +16,7 @@ import {
   formatMediaPriceWonWithSymbol,
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaExecutionSummary, MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaTrustBadges } from "@/components/media/media-trust-badges";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
@@ -215,6 +216,7 @@ export function MediaDetailHeroSection({
             <p className="mt-1 text-[11px] dark:text-white/50 text-gray-500">
               {labels.periodLabel}
             </p>
+            <MediaPriceExclNote isKo={isKo} className="mt-1" />
           </div>
 
           <div className="grid grid-cols-3 gap-2">

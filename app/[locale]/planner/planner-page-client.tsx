@@ -77,6 +77,7 @@ import {
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   formatCpmKrw,
@@ -1315,6 +1316,7 @@ export default function PlannerPageClient({
                           <p className="mt-2 text-sm font-bold tabular-nums text-violet-400">
                             {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                           </p>
+                          <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                         </div>
                       </Link>
                     ))}

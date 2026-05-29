@@ -6,6 +6,7 @@ import {
   typeLabels,
 } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
@@ -74,9 +75,12 @@ function MediaScrollCard({
           {location} · {typeLabel}
         </p>
         {price ? (
-          <p className="mt-1.5 text-sm font-bold text-violet-500 dark:text-violet-400">
-            {price}
-          </p>
+          <>
+            <p className="mt-1.5 text-sm font-bold text-violet-500 dark:text-violet-400">
+              {price}
+            </p>
+            <MediaPriceExclNote isKo={isKo} />
+          </>
         ) : null}
         {rating != null && rating > 0 ? (
           <p className="mt-1 flex items-center gap-0.5 text-xs text-amber-500">

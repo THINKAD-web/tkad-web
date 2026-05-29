@@ -7,6 +7,7 @@ import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { typeLabels } from "@/lib/media-data";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -62,6 +63,7 @@ export function AiChatbotMediaCards({
                   · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                 </span>
               </p>
+              <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
               <p className="mt-0.5 text-[10px] text-navy/45">
                 {isKo ? typeLabels[m.type]?.ko : typeLabels[m.type]?.en}
               </p>

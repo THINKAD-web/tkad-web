@@ -4,6 +4,7 @@ import { Sparkles, Trophy } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import { pickCpmWinner } from "@/lib/compare-quote";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
@@ -65,6 +66,7 @@ export function CompareWinnerCard({ items, isKo, className }: Props) {
               </dd>
             </div>
           </dl>
+          <MediaPriceExclNote isKo={isKo} className="mt-2" />
         </div>
         <p className="shrink-0 rounded-full border border-emerald-400/30 bg-emerald-500/10 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-emerald-700 dark:text-emerald-300">
           {isKo ? "AI · CPM 효율" : "AI · CPM efficiency"}

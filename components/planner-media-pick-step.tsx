@@ -10,6 +10,7 @@ import {
 import { useTranslations } from "next-intl";
 import { GripVertical, Plus, Search, Trash2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   formatCatalogPricesSumWon,
@@ -249,6 +250,7 @@ export default function PlannerMediaPickStep({
                           {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                           <span className="text-navy/60">/{isKo ? "월" : "mo"}</span>
                         </p>
+                        <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                       </div>
                       <Button
                         type="button"

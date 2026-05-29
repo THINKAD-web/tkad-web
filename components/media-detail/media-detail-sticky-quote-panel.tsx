@@ -12,9 +12,8 @@ import {
   calculateMediaQuoteByDays,
   formatWonShort,
 } from "@/lib/compare-quote";
-import {
-  formatCatalogPriceFieldWon,
-} from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -68,6 +67,7 @@ export function MediaDetailStickyQuotePanel({
       <p className="text-[11px] dark:text-white/45 text-gray-500">
         {periodLabel}
       </p>
+      <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
 
       <div className="mt-5 space-y-3 border-t dark:border-white/10 border-gray-100 pt-5">
         <p className="text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">

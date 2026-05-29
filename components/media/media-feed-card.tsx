@@ -3,8 +3,9 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Eye, MapPin, MessageCircle, Check, Plus } from "lucide-react";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import {
@@ -296,6 +297,7 @@ export function MediaFeedCard({
             <p className="mt-0.5 text-[11px] text-gray-500 dark:text-white/50">
               {periodLabel}
             </p>
+            <MediaPriceExclNote isKo={isKo} className="mt-1" />
           </div>
 
           <div className="grid grid-cols-3 gap-1.5">

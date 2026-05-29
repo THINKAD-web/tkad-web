@@ -7,7 +7,11 @@ import { Link } from "@/i18n/navigation";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
-import { formatCatalogPriceFieldWon, mediaPricePeriodTranslationKey } from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import {
+  formatCatalogPriceFieldWon,
+  mediaPricePeriodTranslationKey,
+} from "@/lib/media-price-format";
 import {
   clearRecentlyViewed,
   fetchRecentlyViewedItems,
@@ -147,6 +151,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
+                <MediaPriceExclNote isKo={isKo} />
               </div>
             </Link>
           );

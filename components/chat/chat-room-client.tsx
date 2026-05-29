@@ -7,6 +7,7 @@ import {
   ADVERTISER_QUICK_REPLIES_KO,
   OWNER_QUICK_REPLIES_KO,
 } from "@/lib/chat-constants";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import { FileText, Loader2, Paperclip, Send } from "lucide-react";
@@ -239,6 +240,7 @@ export function ChatRoomClient({ roomId }: { roomId: string }) {
                 ? ` · ${room.media.width}×${room.media.height}`
                 : ""}
             </p>
+            <MediaPriceExclNote isKo={locale.startsWith("ko")} className="mt-0.5" />
           </div>
         </div>
         {room.side === "owner" && !room.ownerReplied && room.slaDueAt ? (

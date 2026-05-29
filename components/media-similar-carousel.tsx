@@ -14,6 +14,7 @@ import {
   type SimilarSortKey,
   typeLabels,
 } from "@/lib/media-data";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -211,6 +212,7 @@ export default function MediaSimilarCarousel({
                     · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
                   </span>
                 </p>
+                <MediaPriceExclNote isKo={isKo} />
                 {distanceKm != null && Number.isFinite(distanceKm) ? (
                   <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                     {t("similarDistance", {

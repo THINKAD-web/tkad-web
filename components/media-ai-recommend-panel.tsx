@@ -35,6 +35,7 @@ import {
 } from "@/lib/ai-media-recommend";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -606,6 +607,7 @@ function AiResultCard({
             · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
           </span>
         </div>
+        <MediaPriceExclNote isKo={isKo} className={cn(compact && "text-center")} />
         <div
           className={cn(
             "flex flex-wrap gap-2 border-t border-slate-100 pt-3",

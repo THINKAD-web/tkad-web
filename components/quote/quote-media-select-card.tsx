@@ -3,7 +3,11 @@
 import Image from "next/image";
 import { Check } from "lucide-react";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
-import { mapMediaItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import {
+  mapMediaItemToHomeCatalog,
+  catalogThumbnailImageProps,
+} from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/lib/media-data";
 import {
   formatMediaPriceWonWithSymbol,
@@ -102,14 +106,17 @@ export function QuoteMediaSelectCard({
         </p>
         <p className="mt-1 text-xs text-gray-400 dark:text-white/40">{metaLine}</p>
         {priceLabel ? (
-          <p className="mt-2 text-sm font-bold tabular-nums tkad-home-accent-text">
-            {priceLabel}
-            {pricePeriod && pricePeriod !== "month" ? (
-              <span className="ml-1 text-[10px] font-medium text-gray-500 dark:text-white/45">
-                ({isKo ? "옵션" : "opt"})
-              </span>
-            ) : null}
-          </p>
+          <div className="mt-2">
+            <p className="text-sm font-bold tabular-nums tkad-home-accent-text">
+              {priceLabel}
+              {pricePeriod && pricePeriod !== "month" ? (
+                <span className="ml-1 text-[10px] font-medium text-gray-500 dark:text-white/45">
+                  ({isKo ? "옵션" : "opt"})
+                </span>
+              ) : null}
+            </p>
+            <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+          </div>
         ) : null}
       </div>
     </button>

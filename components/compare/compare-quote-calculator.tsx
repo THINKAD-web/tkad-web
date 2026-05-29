@@ -14,6 +14,7 @@ import {
   formatWonShort,
   type QuoteDurationUnit,
 } from "@/lib/compare-quote";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
@@ -327,6 +328,8 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
               </dd>
             </div>
           </dl>
+
+          <MediaPriceExclNote isKo={isKo} className="mt-3" />
 
           <div className="mt-6 flex flex-col gap-2 sm:flex-row">
             <BtnBlock

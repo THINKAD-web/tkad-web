@@ -4,9 +4,8 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Monitor, Ruler } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
-import {
-  formatCatalogPriceFieldWon,
-} from "@/lib/media-price-format";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -181,6 +180,7 @@ export function MediaDetailExecutionPanel({
               </li>
             ))}
           </ul>
+          <MediaPriceExclNote isKo={isKo} className="mt-2" />
         </div>
       ) : null}
 

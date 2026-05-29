@@ -2,12 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useLocale } from "next-intl";
 import { WifiOff } from "lucide-react";
 import {
   readOfflineRecentMediaCards,
   type OfflineRecentMediaCard,
 } from "@/lib/recently-viewed-offline";
 import { useSavedMediaList } from "@/components/pwa-save-offline-button";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export function OfflineClient() {
@@ -131,6 +133,8 @@ function OfflineRetry() {
 
 
 function OfflineMediaCard({ media }: { media: OfflineRecentMediaCard }) {
+  const locale = useLocale();
+  const isKo = locale.startsWith("ko");
   const src = media.imageUrl || "/media-placeholder/01.svg";
   return (
     <li>
@@ -154,6 +158,9 @@ function OfflineMediaCard({ media }: { media: OfflineRecentMediaCard }) {
               ? ` · ${formatCatalogPriceFieldWon(media.price)}`
               : ""}
           </p>
+          {media.price != null && media.price > 0 ? (
+            <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+          ) : null}
         </div>
       </Link>
     </li>

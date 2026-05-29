@@ -10,6 +10,7 @@ import {
   subscribeRecentlyViewedChanged,
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
@@ -124,6 +125,7 @@ export function RecentlyViewedFloatingPanel({ className }: { className?: string 
                 <p className="text-xs tabular-nums text-violet-600 dark:text-violet-300">
                   {formatPrice(item.price, isKo)}
                 </p>
+                {item.price > 0 ? <MediaPriceExclNote isKo={isKo} className="mt-0.5" /> : null}
               </div>
             </Link>
           </li>

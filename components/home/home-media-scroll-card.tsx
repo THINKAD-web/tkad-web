@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Star } from "lucide-react";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 
@@ -67,9 +68,12 @@ export function HomeMediaScrollCard({
             </div>
           ) : null}
           {formatPrice(item.price) ? (
-            <p className="text-sm font-bold tkad-home-accent-text">
-              {formatPrice(item.price)}/월
-            </p>
+            <div>
+              <p className="text-sm font-bold tkad-home-accent-text">
+                {formatPrice(item.price)}/월
+              </p>
+              <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+            </div>
           ) : null}
         </div>
       </Link>

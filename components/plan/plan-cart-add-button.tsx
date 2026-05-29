@@ -23,13 +23,18 @@ export function PlanCartAddButton({
   className,
 }: Props) {
   const toast = useAppToast();
-  const { has, add } = usePlanCart();
+  const { has, add, remove } = usePlanCart();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation();
     e.preventDefault();
+    if (inPlan) {
+      remove(item.mediaId);
+      toast.success(`${item.mediaName}을(를) 플랜에서 뺐어요`);
+      return;
+    }
     const result = add(payload);
     if (result.ok && result.added) {
       toast.success(`${item.mediaName}이(가) 플랜에 추가됐어요 ✓`);
@@ -55,7 +60,7 @@ export function PlanCartAddButton({
         className,
       )}
       aria-pressed={inPlan}
-      aria-label={inPlan ? "플랜에 담김" : "플랜에 담기"}
+      aria-label={inPlan ? "플랜에서 빼기" : "플랜에 담기"}
     >
       {gridInline ? (
         inPlan ? (

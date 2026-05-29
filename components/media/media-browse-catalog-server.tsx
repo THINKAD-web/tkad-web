@@ -5,6 +5,7 @@ import {
   typeLabels,
 } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -92,12 +93,15 @@ export async function MediaBrowseCatalogServer({
                       {location}
                     </p>
                     {price ? (
-                      <p className="mt-1.5 text-sm font-bold tabular-nums text-foreground">
-                        {price}
-                        <span className="ml-1 text-[10px] font-normal uppercase tracking-wider text-muted-foreground">
-                          · {tMedia(periodKey)}
-                        </span>
-                      </p>
+                      <>
+                        <p className="mt-1.5 text-sm font-bold tabular-nums text-foreground">
+                          {price}
+                          <span className="ml-1 text-[10px] font-normal uppercase tracking-wider text-muted-foreground">
+                            · {tMedia(periodKey)}
+                          </span>
+                        </p>
+                        <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+                      </>
                     ) : null}
                   </div>
                 </Link>

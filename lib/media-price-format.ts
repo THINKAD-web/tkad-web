@@ -215,6 +215,11 @@ export function mediaDetailPricePeriodTranslationKey(
   }
 }
 
+/** 공개 매체·광고 단가 안내 — 제작비·부가세 별도 */
+export function mediaPriceExclNoteText(isKo = true): string {
+  return isKo ? "제작비·부가세 별도" : "Production & VAT extra";
+}
+
 export function formatMediaPriceWithPeriodSuffix(
   price: number,
   period: MediaPricePeriodKey | string | null | undefined,
