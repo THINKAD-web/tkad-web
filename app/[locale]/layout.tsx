@@ -53,12 +53,12 @@ export async function generateMetadata({
 
   const titleDefault =
     locale === "ko"
-      ? "THINKAD | 싱커드 - 한국 OOH 광고 에이전시"
-      : "THINKAD | Korea OOH Advertising Agency";
+      ? "THINKAD 싱커드 — 전국 OOH 광고 플랫폼"
+      : "THINKAD — Nationwide OOH advertising platform";
   const description =
     locale === "ko"
-      ? "대한민국 No.1 OOH 광고 에이전시. 전국 500+ 검증된 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 계약~사후관리 원스톱 서비스."
-      : "Korea's leading OOH agency. Search 500+ verified OOH media nationwide, data-driven campaign consulting, and end-to-end execution.";
+      ? "전국 500+ 검증 OOH 매체, AI 플래너, 전자계약까지 — 데이터 기반 옥외광고 원스톱."
+      : "500+ verified OOH media, AI planner, and e-contract — data-driven outdoor advertising.";
 
   const googleVer =
     process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
@@ -70,7 +70,7 @@ export async function generateMetadata({
   return {
     title: {
       default: titleDefault,
-      template: "%s | THINKAD",
+      template: locale === "ko" ? "%s — THINKAD 싱커드" : "%s — THINKAD",
     },
     description,
     metadataBase,

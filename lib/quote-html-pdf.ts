@@ -3,6 +3,9 @@
  */
 export {
   htmlElementToPdf as quoteElementToPdf,
+  htmlElementsToPdf as quoteElementsToPdf,
   downloadPdfFromHtmlElement as downloadQuotePdfFromElement,
+  downloadPdfFromHtmlElements as downloadQuotePdfFromElements,
   htmlElementToPdfBase64 as quoteElementToPdfBase64,
+  htmlElementsToPdfBase64 as quoteElementsToPdfBase64,
 } from "@/lib/html-to-pdf";

@@ -63,7 +63,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ogAltForRoute("guides"),
       ),
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title: title,
+      description,
+      images: segmentOpenGraphImages(
+        locale,
+        "guides",
+        ogAltForRoute("guides"),
+      ),
+    },
   };
 }
 

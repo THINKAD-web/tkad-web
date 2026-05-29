@@ -35,7 +35,6 @@ import {
   useMemo,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useRef,
   useSyncExternalStore,
 } from "react";
@@ -45,6 +44,7 @@ import {
   setCompareCartEntries,
   subscribeCompareCart,
   entriesToCompareMediaItems,
+  type CompareCartEntry,
 } from "@/lib/compare-cart-client";
 
 const RecentlyViewedMedia = dynamic(
@@ -188,8 +188,7 @@ export default function MediaBrowseClient({
   const [catalogPageSize, setCatalogPageSize] = useState(12);
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [mapPopupOpen, setMapPopupOpen] = useState(false);
-  const [compareItems, setCompareItems] = useState<MediaItem[]>([]);
-  const skipFirstComparePersist = useRef(true);
+  const [compareEntries, setCompareEntries] = useState<CompareCartEntry[]>([]);
   const urlHydratedRef = useRef(false);
   const popularIds = useMemo(
     () =>
@@ -361,33 +360,17 @@ export default function MediaBrowseClient({
     [],
   );
 
-  useLayoutEffect(() => {
-    setCompareItems(
-      entriesToCompareMediaItems(getCompareCartEntries(), effectiveCatalog),
-    );
-  }, [effectiveCatalog]);
-
   useEffect(() => {
+    setCompareEntries(getCompareCartEntries());
     return subscribeCompareCart(() => {
-      setCompareItems(
-        entriesToCompareMediaItems(getCompareCartEntries(), effectiveCatalog),
-      );
+      setCompareEntries(getCompareCartEntries());
     });
-  }, [effectiveCatalog]);
+  }, []);
 
-  useEffect(() => {
-    if (skipFirstComparePersist.current) {
-      skipFirstComparePersist.current = false;
-      return;
-    }
-    setCompareCartEntries(
-      compareItems.map((m) => ({
-        id: m.id,
-        name: m.name,
-        nameEn: m.nameEn,
-      })),
-    );
-  }, [compareItems]);
+  const compareItems = useMemo(
+    () => entriesToCompareMediaItems(compareEntries, effectiveCatalog),
+    [compareEntries, effectiveCatalog],
+  );
 
   // localStorage에 browseMode 저장
   useEffect(() => {
@@ -749,26 +732,39 @@ export default function MediaBrowseClient({
   };
 
   const toggleCompare = useCallback((media: MediaItem) => {
-    setCompareItems((prev) => {
-      const exists = prev.find((m) => m.id === media.id);
-      if (exists) return prev.filter((m) => m.id !== media.id);
-      if (prev.length >= COMPARE_MAX_ITEMS) return prev;
-      return [...prev, media];
-    });
+    const prev = getCompareCartEntries();
+    const exists = prev.some((e) => e.id === media.id);
+    if (exists) {
+      setCompareCartEntries(prev.filter((e) => e.id !== media.id));
+      return;
+    }
+    if (prev.length >= COMPARE_MAX_ITEMS) return;
+    setCompareCartEntries([
+      ...prev,
+      {
+        id: media.id,
+        name: media.name,
+        nameEn: media.nameEn || media.name,
+      },
+    ]);
   }, []);
 
   const addManyToCompare = useCallback((items: MediaItem[]) => {
-    setCompareItems((prev) => {
-      const next = [...prev];
-      for (const m of items) {
-        if (next.length >= COMPARE_MAX_ITEMS) break;
-        if (!next.some((x) => x.id === m.id)) next.push(m);
+    const next = [...getCompareCartEntries()];
+    for (const m of items) {
+      if (next.length >= COMPARE_MAX_ITEMS) break;
+      if (!next.some((e) => e.id === m.id)) {
+        next.push({
+          id: m.id,
+          name: m.name,
+          nameEn: m.nameEn || m.name,
+        });
       }
-      return next;
-    });
+    }
+    setCompareCartEntries(next);
   }, []);
 
-  const isInCompare = (id: string) => compareItems.some((m) => m.id === id);
+  const isInCompare = (id: string) => compareEntries.some((e) => e.id === id);
 
   const mapSelectedMedia =
     mapSelectedId != null
@@ -1257,7 +1253,7 @@ export default function MediaBrowseClient({
                           {isKo ? "전체선택" : "Select page"}
                         </BtnBlock>
                         <BtnBlock
-                          onClick={() => setCompareItems([])}
+                          onClick={() => setCompareCartEntries([])}
                           disabled={compareItems.length === 0}
                           variant="secondary"
                           size="sm"
@@ -1606,7 +1602,7 @@ export default function MediaBrowseClient({
       <CompareBar
         items={compareItems}
         locale={locale}
-        onClear={() => setCompareItems([])}
+        onClear={() => setCompareCartEntries([])}
       />
     </>
     </MobilePullToRefresh>

@@ -38,6 +38,10 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description,
+      images: caseStudyOpenGraphImages(locale, slug, {
+        ko: `${title} — THINKAD OOH 케이스 스터디`,
+        en: `${title} — THINKAD OOH case study`,
+      }),
     },
   };
 }

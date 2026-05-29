@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import {
   COMMUNITY_CATEGORY_LABELS,
@@ -50,13 +50,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: post.title,
     description: post.bodyExcerpt,
     alternates: pageAlternates(locale, `/community/post/${id}`),
-    openGraph: {
+    ...buildShareMetadata({
+      locale,
       title: post.title,
       description: post.bodyExcerpt,
+      path: `/community/post/${id}`,
       type: "article",
-      publishedTime: post.createdAt,
-      modifiedTime: post.updatedAt,
-    },
+    }),
     robots: { index: false, follow: false },
   };
 }

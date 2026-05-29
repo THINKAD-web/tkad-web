@@ -14,7 +14,7 @@ import {
   isIndustrySlug,
   type IndustrySlug,
 } from "@/lib/industry-landing";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
@@ -63,8 +63,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, `/industry/${slug}`),
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/industry/${slug}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

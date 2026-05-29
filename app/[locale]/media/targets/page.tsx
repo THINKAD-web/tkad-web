@@ -5,7 +5,7 @@ import { MediaCampaignTargetsGrid } from "@/components/media/media-campaign-targ
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { setRequestLocale } from "next-intl/server";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -23,7 +23,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/media/targets"),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/media/targets",
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

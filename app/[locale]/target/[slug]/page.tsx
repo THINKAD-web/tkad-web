@@ -17,7 +17,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -65,7 +65,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       ? [...(node.seoKeywordsKo ?? []), "옥외광고", "THINKAD"]
       : ["OOH", "THINKAD", decoded],
     alternates: pageAlternates(locale, `/target/${slug}`),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/target/${slug}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

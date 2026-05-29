@@ -17,7 +17,11 @@ import {
 } from "@/lib/media-seo";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
 import { buildMediaImageAlt } from "@/lib/media-image-seo";
-import { mediaOpenGraphImages, pageAlternates } from "@/lib/seo";
+import {
+  buildShareMetadata,
+  mediaDetailShareImages,
+  pageAlternates,
+} from "@/lib/seo";
 import {
   buildMediaDetailSeoLinks,
   SeoContextualLinks,
@@ -93,28 +97,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const keywords = buildMediaMetaKeywordsList(media, locale, 28);
 
   const imageAlt = buildMediaImageAlt(media, locale);
-  const ogImages = mediaOpenGraphImages(locale, String(media.id), {
-    ko: imageAlt,
-    en: imageAlt,
-  });
+  const ogImages = mediaDetailShareImages(
+    locale,
+    String(media.id),
+    getPrimaryMediaImageUrl(media),
+    { ko: imageAlt, en: imageAlt },
+  );
   const canonicalPath = mediaItemDetailPath(media);
   return {
     title,
     description,
     keywords,
     alternates: pageAlternates(locale, canonicalPath),
-    openGraph: {
+    ...buildShareMetadata({
+      locale,
       title,
       description,
+      path: canonicalPath,
       type: "website",
+      alt: { ko: imageAlt, en: imageAlt },
       images: ogImages,
-    },
-    twitter: {
-      card: "summary_large_image",
-      title,
-      description,
-      images: ogImages,
-    },
+    }),
   };
 }
 

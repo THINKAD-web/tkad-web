@@ -4,7 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { CreditCard } from "lucide-react";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
@@ -34,7 +34,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/pricing"),
-    openGraph: { title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/pricing",
+    }),
   };
 }
 

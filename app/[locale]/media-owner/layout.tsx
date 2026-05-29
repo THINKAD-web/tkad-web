@@ -33,6 +33,15 @@ export async function generateMetadata({
         en: "THINKAD media owner portal",
       }),
     },
+    twitter: {
+      card: "summary_large_image",
+      title: `${title} | THINKAD`,
+      description,
+      images: defaultOgImages(locale, {
+        ko: "THINKAD 매체사 포털",
+        en: "THINKAD media owner portal",
+      }),
+    },
   };
 }
 

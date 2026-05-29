@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { ArrowLeft, Shield, Sparkles, Users } from "lucide-react";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
@@ -27,6 +27,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/community/write"),
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/community/write",
+    }),
     // 작성 폼은 인덱싱 X
     robots: { index: false, follow: false },
   };

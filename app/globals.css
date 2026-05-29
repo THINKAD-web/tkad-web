@@ -1898,6 +1898,32 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   background: #05050a;
 }
 
+/* `/compare` 하단 액션 — night/day 모두 라벨 대비 (text-gray-900·bg-foreground 혼합 방지) */
+.tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
+.tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid * {
+  border: 2px solid rgb(255 255 255 / 0.88) !important;
+  background: rgb(255 255 255) !important;
+  color: rgb(12 12 24) !important;
+  -webkit-text-fill-color: rgb(12 12 24) !important;
+  box-shadow: 0 12px 40px rgb(0 0 0 / 0.35);
+}
+
+.tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary,
+.tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary * {
+  border: 1px solid rgb(255 255 255 / 0.18) !important;
+  background: rgb(255 255 255 / 0.1) !important;
+  color: rgb(255 255 255 / 0.94) !important;
+  -webkit-text-fill-color: rgb(255 255 255 / 0.94) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary * {
+  border-color: rgb(15 23 42 / 0.14) !important;
+  background: rgb(248 250 252 / 0.95) !important;
+  color: rgb(15 23 42 / 0.92) !important;
+  -webkit-text-fill-color: rgb(15 23 42 / 0.92) !important;
+}
+
 /* `/media/*` 하단 링크(매체 찾기) — 라이트에서 text-white 대비 보정 */
 .tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white"] {
   color: var(--home-ink) !important;

@@ -4,7 +4,7 @@ import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { GUARANTEE_PAGE_META } from "@/lib/guarantee-page-content";
-import { pageAlternates, serializeJsonLd } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
@@ -40,8 +40,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: [...(isKo ? GUARANTEE_PAGE_META.keywordsKo : GUARANTEE_PAGE_META.keywordsEn)],
     alternates: pageAlternates(locale, "/guarantee"),
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/guarantee",
+      type: "article",
+    }),
   };
 }
 

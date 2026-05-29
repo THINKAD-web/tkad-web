@@ -6,7 +6,7 @@ import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublishedEducationBySlug } from "@/lib/public-auto-content";
 import { InsightMarkdownBody } from "@/components/insights/markdown-body";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, siteUrl } from "@/lib/seo";
 import { ArrowLeft, GraduationCap } from "lucide-react";
 
 export const dynamic = "force-dynamic";
@@ -30,13 +30,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: article.tags,
     alternates: pageAlternates(locale, `/academy/learn/${slug}`),
-    openGraph: {
+    ...buildShareMetadata({
+      locale,
       title,
       description,
+      path: `/academy/learn/${slug}`,
       type: "article",
-      publishedTime: article.publishedAt?.toISOString(),
-      modifiedTime: article.updatedAt.toISOString(),
-    },
+      image: { kind: "segment", segment: "academy" },
+    }),
   };
 }
 

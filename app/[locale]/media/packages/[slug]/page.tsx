@@ -18,7 +18,7 @@ import {
   fetchMediaPackageSlugs,
 } from "@/lib/media-package-db";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 
 type Props = {
@@ -50,6 +50,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, `/media/packages/${slug}`),
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/media/packages/${slug}`,
+      alt: { ko: pkg.name, en: pkg.name },
+      image: { kind: "package", locale, slug },
+    }),
   };
 }
 

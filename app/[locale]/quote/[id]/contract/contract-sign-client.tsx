@@ -117,11 +117,25 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
   if (!session) {
     return (
-      <div className="mx-auto max-w-lg border-2 border-accent bg-card py-10 text-center">
+      <div className="mx-auto max-w-lg space-y-6 border-2 border-border bg-card px-6 py-10 text-center">
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ UNAVAILABLE ]
         </p>
-        <p className="mt-3 px-4 text-sm text-foreground">{t("unavailable")}</p>
+        <h1 className="text-xl font-bold tracking-tight text-foreground">
+          {t("notAvailableTitle")}
+        </h1>
+        <p className="text-sm text-muted-foreground">{t("notAvailableBody")}</p>
+        <p className="text-[11px] tracking-tight text-muted-foreground">
+          {`// `}{t("unavailable")}
+        </p>
+        <div className="flex flex-col items-center gap-3">
+          <BtnBlock href={`/quote/${quoteId}/status`} variant="accent" size="md">
+            {t("backToStatus")}
+          </BtnBlock>
+          <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
+            {t("backQuote")}
+          </BtnBlock>
+        </div>
       </div>
     );
   }
@@ -151,8 +165,8 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
             <FileDown className="h-4 w-4" />
             {t("downloadSigned")}
           </a>
-          <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
-            {t("backQuote")}
+          <BtnBlock href={`/quote/${quoteId}/status`} variant="secondary" size="md">
+            {t("backToStatus")}
           </BtnBlock>
         </div>
       </div>
@@ -161,12 +175,15 @@ export default function ContractSignClient({ quoteId }: { quoteId: string }) {
 
   if (!session.canSign) {
     return (
-      <div className="mx-auto max-w-lg border-2 border-border bg-muted py-10 text-center">
+      <div className="mx-auto max-w-lg space-y-6 border-2 border-border bg-muted px-6 py-10 text-center">
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
           [ NOT READY ]
         </p>
-        <p className="mt-3 px-4 text-sm text-foreground">{t("notYet")}</p>
-        <div className="mt-6 flex justify-center">
+        <h1 className="text-lg font-bold text-foreground">{t("notYet")}</h1>
+        <div className="flex flex-col items-center gap-3">
+          <BtnBlock href={`/quote/${quoteId}/status`} variant="accent" size="md">
+            {t("backToStatus")}
+          </BtnBlock>
           <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
             {t("backQuote")}
           </BtnBlock>

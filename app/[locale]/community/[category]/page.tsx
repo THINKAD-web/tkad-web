@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import {
   COMMUNITY_CATEGORY_LABELS,
   normalizeCommunityCategory,
@@ -30,7 +30,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, `/community/${category}`),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/community/${category}`,
+    }),
   };
 }
 

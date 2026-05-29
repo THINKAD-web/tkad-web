@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 import { Shield, AlertTriangle, FileText, Users } from "lucide-react";
@@ -20,7 +20,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/community/policy"),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/community/policy",
+    }),
     robots: { index: true, follow: true },
   };
 }

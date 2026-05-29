@@ -42,7 +42,11 @@ import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
 import { QuoteMediaSelectCard } from "@/components/quote/quote-media-select-card";
-import MediaSearchAutocomplete from "@/components/media-search-autocomplete";
+import {
+  MediaManualBrowseFilters,
+  type MediaManualBrowseViewMode,
+} from "@/components/media/media-manual-browse-filters";
+import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
 import {
   FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS,
   FloatingSelectionBar,
@@ -51,7 +55,6 @@ import {
   MEDIA_CATALOG_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_GRID_CLASS,
   MEDIA_CATALOG_COMPACT_ROW_OUTER_CLASS,
-  MediaCatalogGridCompactToggle,
 } from "@/components/media-catalog-shared";
 import { PerPageSelect } from "@/components/per-page-select";
 import { useMediaCatalogFilters } from "@/lib/use-media-catalog-filters";
@@ -78,10 +81,15 @@ import {
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
-import { QuotePdfPreview } from "@/components/quote-pdf-preview";
+import { QuotePdfPreview } from "@/components/quote/quote-preview";
+import {
+  QuotePremium,
+} from "@/components/quote/quote-premium";
 import {
   downloadQuotePdfFromElement,
+  downloadQuotePdfFromElements,
   quoteElementToPdfBase64,
+  quoteElementsToPdfBase64,
 } from "@/lib/quote-html-pdf";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
 
@@ -133,6 +141,7 @@ type WizardStep = 1 | 2 | 3 | 4;
 
 export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const t = useTranslations();
+  const tPlanner = useTranslations("planner");
   const tMedia = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -140,7 +149,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [step, setStep] = useState<WizardStep>(1);
   const [period, setPeriod] = useState<PeriodKey>("1month");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [mediaLayout, setMediaLayout] = useState<"grid" | "compact">("grid");
+  const [browseViewMode, setBrowseViewMode] =
+    useState<MediaManualBrowseViewMode>("card");
+  const [browseCategory, setBrowseCategory] = useState("");
+  const [browseTarget, setBrowseTarget] = useState("");
+  const [browseRegion, setBrowseRegion] = useState("");
   const [mediaPage, setMediaPage] = useState(1);
   const [mediaPageSize, setMediaPageSize] = useState(12);
   const [mediaTextFilter, setMediaTextFilter] = useState("");
@@ -153,9 +166,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   >({});
   const mediaQueryApplied = useRef(false);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
-  const [sortBy, setSortBy] = useState<
-    "default" | "priceAsc" | "priceDesc" | "trafficDesc"
-  >("default");
+  const [discoverySort, setDiscoverySort] = useState("popular");
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
   const [emailHoneypot, setEmailHoneypot] = useState("");
 
@@ -296,39 +307,58 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   );
 
   const filteredCatalog = useMemo(() => {
+    const chipFiltered = filterMediaByDiscoveryChips(catalog, {
+      category: browseCategory,
+      target: browseTarget,
+      region: browseRegion,
+    });
     const q = mediaTextFilter.trim().toLowerCase();
-    return catalog.filter((m) => {
+    return chipFiltered.filter((m) => {
       if (!passesMediaAdvancedFilters(m, filterState, bounds)) return false;
       if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
       return true;
     });
-  }, [catalog, mediaTextFilter, filterState, bounds]);
+  }, [
+    catalog,
+    browseCategory,
+    browseTarget,
+    browseRegion,
+    mediaTextFilter,
+    filterState,
+    bounds,
+  ]);
 
   const sortedCatalog = useMemo(() => {
     const arr = [...filteredCatalog];
-    switch (sortBy) {
-      case "priceAsc":
+    switch (discoverySort) {
+      case "price_asc":
         return arr.sort((a, b) => a.price - b.price);
-      case "priceDesc":
+      case "price_desc":
         return arr.sort((a, b) => b.price - a.price);
-      case "trafficDesc":
+      case "newest":
+        return arr.sort((a, b) => {
+          const ta = a.createdAt ? Date.parse(a.createdAt) : 0;
+          const tb = b.createdAt ? Date.parse(b.createdAt) : 0;
+          return tb - ta;
+        });
+      case "popular":
         return arr.sort(
-          (a, b) => (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0),
+          (a, b) => (b.popularityScore ?? 0) - (a.popularityScore ?? 0),
         );
       default:
         return arr;
     }
-  }, [filteredCatalog, sortBy]);
+  }, [filteredCatalog, discoverySort]);
 
-  const mediaPageCount = useMemo(
-    () => Math.max(1, Math.ceil(sortedCatalog.length / mediaPageSize)),
-    [sortedCatalog.length, mediaPageSize],
+  const mediaLayout =
+    browseViewMode === "compact" ? "compact" : "grid";
+
+  const pagedCatalog = useMemo(
+    () => sortedCatalog.slice(0, mediaPage * mediaPageSize),
+    [sortedCatalog, mediaPage, mediaPageSize],
   );
 
-  const pagedCatalog = useMemo(() => {
-    const start = (mediaPage - 1) * mediaPageSize;
-    return sortedCatalog.slice(start, start + mediaPageSize);
-  }, [sortedCatalog, mediaPage, mediaPageSize]);
+  const hasMoreMedia = mediaPage * mediaPageSize < sortedCatalog.length;
 
   const periodMonths =
     period === "2weeks" ? 0 : PERIOD_MONTHS[period];
@@ -377,6 +407,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   }, [form.budgetMax]);
 
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
+  const premiumPdfExportRef = useRef<HTMLDivElement>(null);
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
   const pdfPreviewRows = useMemo(() => {
@@ -462,6 +493,75 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       pdfVatWon,
       pdfGrandTotalWon,
       quoteIssuedAt,
+    ],
+  );
+
+  const quotePremiumDateLabel = useMemo(
+    () =>
+      new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+      }).format(quoteIssuedAt),
+    [isKo, quoteIssuedAt],
+  );
+
+  const quotePremiumRegion = useMemo(() => {
+    const parts = [
+      ...new Set(
+        selectedMedia
+          .map((m) => (isKo ? m.region : m.region) || m.location)
+          .filter(Boolean),
+      ),
+    ];
+    return parts.slice(0, 4).join(", ") || undefined;
+  }, [selectedMedia, isKo]);
+
+  const quotePremiumProps = useMemo(
+    () => ({
+      customerName: form.company.trim() || form.name.trim(),
+      contactName: form.name.trim(),
+      brandName: form.company.trim() || form.name.trim(),
+      version: "v1.0",
+      dateLabel: quotePremiumDateLabel,
+      durationLabel: periodLabel,
+      periodKey: period,
+      periodMonths,
+      region: quotePremiumRegion,
+      goal: isKo ? "브랜드 인지도 · OOH 집행" : "Brand awareness · OOH",
+      mediaItems: pdfPreviewRows.map((row) => ({
+        id: row.id,
+        name: row.name,
+        location: row.location,
+        thumbUrl: row.thumbUrl,
+        lineTotalWon: row.lineTotalWon,
+        dailyFootTraffic: row.dailyFootTraffic ?? null,
+        size: row.size ?? null,
+        unitPriceWon: row.unitPriceWon,
+        unitPeriodLabel: row.unitPeriodLabel ?? null,
+        executionPeriodLabel: row.executionPeriodLabel ?? null,
+      })),
+      subtotalWon: pdfSubtotalWon,
+      vatWon: pdfVatWon,
+      grandTotalWon: pdfGrandTotalWon,
+      contactPhone: form.phone,
+      contactEmail: form.email,
+    }),
+    [
+      form.name,
+      form.company,
+      form.phone,
+      form.email,
+      quotePremiumRegion,
+      isKo,
+      quotePremiumDateLabel,
+      periodLabel,
+      period,
+      periodMonths,
+      pdfPreviewRows,
+      pdfSubtotalWon,
+      pdfVatWon,
+      pdfGrandTotalWon,
     ],
   );
 
@@ -682,18 +782,38 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       await new Promise<void>((r) =>
         requestAnimationFrame(() => requestAnimationFrame(() => r())),
       );
-      const el = pdfPreviewRef.current;
-      if (!el) {
-        toast("error", t("quote.pdfError"));
-        return;
-      }
       const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
       const filename = isKo
         ? `싱커드_견적서_${ymd}.pdf`
         : `THINKAD_quote_${ymd}.pdf`;
-      await runWithQuotePdfExport(el, async () => {
-        await downloadQuotePdfFromElement(el, filename);
-      });
+
+      if (template === "premium") {
+        const root = premiumPdfExportRef.current;
+        const page1 = root?.querySelector<HTMLElement>(
+          '[data-quote-premium-page="1"]',
+        );
+        const page2 = root?.querySelector<HTMLElement>(
+          '[data-quote-premium-page="2"]',
+        );
+        if (!page1 || !page2) {
+          toast("error", t("quote.pdfError"));
+          return;
+        }
+        await runWithQuotePdfExport(page1, async () => {
+          await downloadQuotePdfFromElements([page1, page2], filename, {
+            timeoutMs: 60_000,
+          });
+        });
+      } else {
+        const el = pdfPreviewRef.current;
+        if (!el) {
+          toast("error", t("quote.pdfError"));
+          return;
+        }
+        await runWithQuotePdfExport(el, async () => {
+          await downloadQuotePdfFromElement(el, filename);
+        });
+      }
       toast("success", t("quote.pdfDownloaded"));
     } catch (e) {
       console.error("[quote pdf download]", e);
@@ -709,7 +829,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       toast("warning", t("quote.noMediaSelected"));
       return;
     }
-    const el = pdfPreviewRef.current;
+    const el =
+      template === "premium"
+        ? premiumPdfExportRef.current?.querySelector<HTMLElement>(
+            '[data-quote-premium-page="1"]',
+          ) ?? null
+        : pdfPreviewRef.current;
     if (!el) {
       toast("error", t("quote.pdfError"));
       return;
@@ -746,15 +871,34 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       await new Promise<void>((r) =>
         requestAnimationFrame(() => requestAnimationFrame(() => r())),
       );
-      const el = pdfPreviewRef.current;
-      if (!el) {
-        toast("error", t("quote.pdfError"));
-        return;
-      }
       let pdfBase64 = "";
-      await runWithQuotePdfExport(el, async () => {
-        pdfBase64 = await quoteElementToPdfBase64(el);
-      });
+      if (template === "premium") {
+        const root = premiumPdfExportRef.current;
+        const page1 = root?.querySelector<HTMLElement>(
+          '[data-quote-premium-page="1"]',
+        );
+        const page2 = root?.querySelector<HTMLElement>(
+          '[data-quote-premium-page="2"]',
+        );
+        if (!page1 || !page2) {
+          toast("error", t("quote.pdfError"));
+          return;
+        }
+        await runWithQuotePdfExport(page1, async () => {
+          pdfBase64 = await quoteElementsToPdfBase64([page1, page2], {
+            timeoutMs: 60_000,
+          });
+        });
+      } else {
+        const el = pdfPreviewRef.current;
+        if (!el) {
+          toast("error", t("quote.pdfError"));
+          return;
+        }
+        await runWithQuotePdfExport(el, async () => {
+          pdfBase64 = await quoteElementToPdfBase64(el);
+        });
+      }
       const res = await fetch("/api/quote/email-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -878,62 +1022,47 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         {`// `}{t("quote.selectMediaDesc")}
                       </p>
                       <div className="flex flex-col gap-6">
-                        <div>
-                          <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                            [ {t("common.search")} ]
-                          </label>
-                          <MediaSearchAutocomplete
-                            locale={locale}
-                            catalog={catalog}
-                            onSelect={(m) => toggleMedia(m.id)}
-                            onSearchSubmit={(q) =>
-                              setMediaTextFilter(q.trim())
-                            }
-                            onQueryChange={(q) => {
-                              if (!q.trim()) setMediaTextFilter("");
-                            }}
-                            searchButtonLabel={t("media.searchButton")}
-                          />
-                        </div>
-                        <div className="min-w-0">
-                          <div className="mb-6 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-                            <div className="text-sm text-muted-foreground">
-                              {t("media.results")}: {sortedCatalog.length}
-                            </div>
-                            <div className="flex flex-wrap items-center gap-2">
-                              <label className="inline-flex items-center gap-2 border-2 border-border bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
-                                <span className="text-muted-foreground">
-                                  {t("media.sortLabel")}
-                                </span>
-                                <select
-                                  className="max-w-[10rem] border-l-2 border-border bg-muted px-2 py-0.5 text-[11px] font-bold focus:border-accent focus:outline-none"
-                                  value={sortBy}
-                                  onChange={(e) =>
-                                    setSortBy(
-                                      e.target.value as typeof sortBy,
-                                    )
-                                  }
-                                >
-                                  <option value="default">
-                                    {t("media.sortDefault")}
-                                  </option>
-                                  <option value="priceAsc">
-                                    {t("media.sortPriceAsc")}
-                                  </option>
-                                  <option value="priceDesc">
-                                    {t("media.sortPriceDesc")}
-                                  </option>
-                                  <option value="trafficDesc">
-                                    {t("media.sortTrafficDesc")}
-                                  </option>
-                                </select>
-                              </label>
-                              <MediaCatalogGridCompactToggle
-                                layout={mediaLayout}
-                                onLayoutChange={setMediaLayout}
-                                gridLabel={t("media.browseCardLayoutGrid")}
-                                compactLabel={t("media.browseCardLayoutCompact")}
-                              />
+                        <MediaManualBrowseFilters
+                          isKo={isKo}
+                          showSectionHeader
+                          sectionEyebrow="Manual Browse"
+                          sectionTitle={tPlanner("recommendBrowseTitle")}
+                          sectionDesc={tPlanner("recommendBrowseDesc")}
+                          query={mediaTextFilter}
+                          onQueryChange={(q) => {
+                            setMediaTextFilter(q);
+                            setMediaPage(1);
+                          }}
+                          category={browseCategory}
+                          onCategoryChange={(v) => {
+                            setBrowseCategory(v);
+                            setMediaPage(1);
+                          }}
+                          target={browseTarget}
+                          onTargetChange={(v) => {
+                            setBrowseTarget(v);
+                            setMediaPage(1);
+                          }}
+                          region={browseRegion}
+                          onRegionChange={(v) => {
+                            setBrowseRegion(v);
+                            setMediaPage(1);
+                          }}
+                          sort={discoverySort}
+                          onSortChange={(v) => {
+                            setDiscoverySort(v);
+                            setMediaPage(1);
+                          }}
+                          viewMode={browseViewMode}
+                          onViewModeChange={(mode) => {
+                            setBrowseViewMode(mode);
+                            setMediaPage(1);
+                          }}
+                          resultCount={sortedCatalog.length}
+                          totalCount={catalog.length}
+                          selectedCount={selectedIds.size}
+                          toolbarEnd={
+                            <>
                               <PerPageSelect
                                 value={mediaPageSize}
                                 onChange={(next) => {
@@ -941,45 +1070,58 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   setMediaPage(1);
                                 }}
                               />
-                              <div className="inline-flex border-2 border-border bg-card">
+                              <div className="inline-flex overflow-hidden rounded-xl border border-gray-200 dark:border-white/10">
                                 <button
                                   type="button"
-                                  className={cn(
-                                    "inline-flex items-center gap-1.5 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors disabled:opacity-40",
-                                    selectedIds.size > 0 ? "text-foreground hover:bg-muted" : "text-muted-foreground",
-                                  )}
+                                  className="px-2.5 py-1.5 text-[11px] font-semibold text-gray-700 transition hover:bg-gray-50 disabled:opacity-40 dark:text-white/80 dark:hover:bg-white/10"
                                   onClick={() => {
-                                    const ids = pagedCatalog.map((m) => m.id);
-                                    setSelectedIds(new Set(ids));
+                                    setSelectedIds(
+                                      new Set(pagedCatalog.map((m) => m.id)),
+                                    );
                                   }}
                                   disabled={pagedCatalog.length === 0}
                                 >
-                                  {isKo ? "전체선택" : "Select all"}
+                                  {isKo ? "페이지 전체선택" : "Select page"}
                                 </button>
                                 <button
                                   type="button"
-                                  className="inline-flex items-center gap-1.5 border-l-2 border-border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground transition-colors hover:bg-muted disabled:opacity-40"
+                                  className="border-l border-gray-200 px-2.5 py-1.5 text-[11px] font-semibold text-gray-500 transition hover:bg-gray-50 disabled:opacity-40 dark:border-white/10 dark:text-white/60 dark:hover:bg-white/10"
                                   onClick={() => setSelectedIds(new Set())}
                                   disabled={selectedIds.size === 0}
                                 >
-                                  {isKo ? "전체삭제" : "Clear all"}
+                                  {isKo ? "선택 해제" : "Clear"}
                                 </button>
                               </div>
-                              <div className="inline-flex items-center gap-2 border-2 border-accent bg-card px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
-                                <ShieldCheck className="h-4 w-4" aria-hidden />
-                                <span>
-                                  {tMedia("browseCatalogVerifiedBadge")}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
+                            </>
+                          }
+                        />
 
+                        <p className="flex items-center gap-2 text-xs text-gray-500 dark:text-white/50">
+                          <ShieldCheck
+                            className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-300"
+                            aria-hidden
+                          />
+                          {tMedia("browseCatalogVerifiedBadge")}
+                          <span className="text-gray-400 dark:text-white/35">·</span>
+                          <span className="text-gray-400 dark:text-white/45">
+                            {tMedia("browseCatalogVerifiedListHint")}
+                          </span>
+                        </p>
+
+                        <div className="min-w-0">
                       {filteredCatalog.length === 0 ? (
                         <div className="flex h-64 items-center justify-center border-2 border-border bg-muted font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                           {isKo ? "조건에 맞는 매체가 없습니다." : "No media matches your filters."}
                         </div>
                       ) : mediaLayout === "grid" ? (
-                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+                      <div
+                        className={cn(
+                          "grid gap-3",
+                          browseViewMode === "feed"
+                            ? "grid-cols-1"
+                            : "grid-cols-2 md:grid-cols-3 xl:grid-cols-4",
+                        )}
+                      >
                         {pagedCatalog.map((media) => {
                           const checked = selectedIds.has(media.id);
                           const nwOpt = networkQuoteOptions[media.id];
@@ -1308,49 +1450,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       )}
 
-                      {filteredCatalog.length > 0 && (
-                        <div className="mt-4 flex flex-col gap-2 border-t-2 border-border pt-4 sm:flex-row sm:items-center sm:justify-between">
-                          <div className="flex items-center justify-center gap-3">
-                            <BtnBlock
-                              variant="secondary"
-                              size="sm"
-                              disabled={mediaPage <= 1}
-                              onClick={() =>
-                                setMediaPage((p) => Math.max(1, p - 1))
-                              }
-                            >
-                              <ChevronLeft className="h-3.5 w-3.5" />
-                              {t("media.pagePrev")}
-                            </BtnBlock>
-                            <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                              {t("media.pageSummary", {
-                                from:
-                                  filteredCatalog.length === 0
-                                    ? 0
-                                    : (mediaPage - 1) * mediaPageSize + 1,
-                                to: Math.min(
-                                  mediaPage * mediaPageSize,
-                                  filteredCatalog.length,
-                                ),
-                                total: filteredCatalog.length,
-                              })}
-                            </span>
-                            <BtnBlock
-                              variant="secondary"
-                              size="sm"
-                              disabled={mediaPage >= mediaPageCount}
-                              onClick={() =>
-                                setMediaPage((p) =>
-                                  Math.min(mediaPageCount, p + 1),
-                                )
-                              }
-                            >
-                              {t("media.pageNext")}
-                              <ChevronRight className="h-3.5 w-3.5" />
-                            </BtnBlock>
-                          </div>
+                      {hasMoreMedia ? (
+                        <div className="mt-4 border-t border-gray-100 pt-4 dark:border-white/10">
+                          <button
+                            type="button"
+                            onClick={() => setMediaPage((p) => p + 1)}
+                            className="w-full rounded-2xl border border-gray-200 py-3 text-sm font-semibold text-gray-700 transition hover:bg-gray-50 dark:border-white/10 dark:text-white/80 dark:hover:bg-white/5"
+                          >
+                            {tMedia("loadMoreBrowse")}
+                          </button>
                         </div>
-                      )}
+                      ) : null}
                         </div>
                       </div>
                     </>
@@ -1514,19 +1624,59 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {t("quote.pdfPreviewTitle")}
                             </h3>
                             <p className="mt-2 text-[11px] tracking-tight text-muted-foreground sm:text-xs">
-                              {`// `}{t("quote.pdfPreviewHint")}
+                              {`// `}
+                              {template === "premium"
+                                ? isKo
+                                  ? "PDF는 1페이지 광고 제안서 + 2페이지 공식 견적서(도장)로 저장됩니다."
+                                  : "PDF saves as page 1 proposal + page 2 official quote (stamp)."
+                                : t("quote.pdfPreviewHint")}
                             </p>
                           </div>
                           <div className="relative p-4 sm:p-6 lg:p-8">
-                            <div className="overflow-x-auto rounded-[24px] bg-white p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 ring-white/20 sm:p-5">
+                            <div
+                              className={cn(
+                                "overflow-x-auto rounded-[24px] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 sm:p-5",
+                                template === "premium"
+                                  ? "bg-[#0a0a14] ring-white/10"
+                                  : "bg-white ring-white/20",
+                              )}
+                            >
                               <div
                                 data-quote-pdf-scale-wrap
-                                className="mx-auto w-fit max-w-full origin-top scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.65]"
+                                className={cn(
+                                  "mx-auto w-fit max-w-full origin-top",
+                                  template === "premium"
+                                    ? "scale-[0.46] sm:scale-[0.54] md:scale-[0.6] lg:scale-[0.68]"
+                                    : "scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.65]",
+                                )}
                               >
-                                <QuotePdfPreview ref={pdfPreviewRef} {...quotePdfPreviewProps} />
+                                {template === "premium" ? (
+                                  <QuotePremium {...quotePremiumProps} />
+                                ) : (
+                                  <QuotePdfPreview
+                                    ref={pdfPreviewRef}
+                                    {...quotePdfPreviewProps}
+                                  />
+                                )}
                               </div>
                             </div>
                           </div>
+                        </div>
+                      ) : null}
+
+                      {step === 4 &&
+                      template === "premium" &&
+                      selectedMedia.length > 0 &&
+                      !submitted ? (
+                        <div
+                          aria-hidden
+                          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] h-0 w-0 overflow-hidden"
+                          data-quote-premium-pdf-export
+                        >
+                          <QuotePremium
+                            ref={premiumPdfExportRef}
+                            {...quotePremiumProps}
+                          />
                         </div>
                       ) : null}
 

@@ -1087,7 +1087,6 @@ export default function PlannerPageClient({
                   initialTotal={catalog.length}
                   plannerSelectedIds={campaignMediaIds}
                   onPlannerToggleMedia={togglePlannerMedia}
-                  onPlannerNext={goNext}
                 />
               </div>
             ) : null}

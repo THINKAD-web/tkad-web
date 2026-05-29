@@ -5,7 +5,7 @@ import { getCurrentUser } from "@/lib/user-session";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { buildCompetitiveDashboardTeaser } from "@/lib/insights/competitive-dashboard-data";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
@@ -15,12 +15,21 @@ type Props = { params: Promise<{ locale: string }> };
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
+  const title = isKo ? "OOH 경쟁 분석 · PRO" : "OOH competitive intel · PRO";
+  const description = isKo
+    ? "업종별·지역별 OOH 집행 현황, 시즌 트렌드 히트맵 — THINKAD PRO 전용"
+    : "Industry & region OOH flight intel, seasonal heatmap — THINKAD PRO";
   return {
-    title: isKo ? "OOH 경쟁 분석 · PRO" : "OOH competitive intel · PRO",
-    description: isKo
-      ? "업종별·지역별 OOH 집행 현황, 시즌 트렌드 히트맵 — THINKAD PRO 전용"
-      : "Industry & region OOH flight intel, seasonal heatmap — THINKAD PRO",
+    title,
+    description,
     alternates: pageAlternates(locale, "/insights/competitive"),
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/insights/competitive",
+      image: { kind: "segment", segment: "insights" },
+    }),
     robots: { index: false, follow: true },
   };
 }

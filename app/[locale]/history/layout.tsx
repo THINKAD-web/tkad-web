@@ -30,6 +30,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description,
+      images: segmentOpenGraphImages(locale, "history", ogAltForRoute("history")),
     },
   };
 }

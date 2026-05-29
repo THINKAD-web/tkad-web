@@ -63,7 +63,7 @@ function MediaCardGrid({
 
   const body = (
     <>
-      <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+      <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-800">
         {rank != null ? (
           <span className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-xs font-black text-white shadow-md">
             {rank}
@@ -85,20 +85,22 @@ function MediaCardGrid({
         )}
         <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="card" />
       </div>
-      <div className="p-3">
-        <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
+      <div className="flex min-h-0 flex-1 flex-col p-3">
+        <p className="line-clamp-2 min-h-[2.5rem] text-sm font-semibold leading-snug text-gray-900 dark:text-white">
           {item.name}
         </p>
-        <p className="mt-1 text-xs text-gray-400 dark:text-white/40">
-          {[item.region, item.type].filter(Boolean).join(" · ")}
+        <p className="mt-1 line-clamp-1 min-h-4 text-xs text-gray-400 dark:text-white/40">
+          {[item.region, item.type].filter(Boolean).join(" · ") || "\u00a0"}
         </p>
-        <div className="mt-2 space-y-2">
+        <div className="mt-auto space-y-2 pt-2">
           {priceLabel ? (
-            <div>
+            <div className="min-h-[2.25rem]">
               <p className="tkad-home-accent-text text-sm font-bold">{priceLabel}</p>
               <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
             </div>
-          ) : null}
+          ) : (
+            <div className="min-h-[2.25rem]" aria-hidden />
+          )}
           {plannerMode && onTogglePlan ? (
             <button
               type="button"
@@ -108,7 +110,7 @@ function MediaCardGrid({
                 onTogglePlan();
               }}
               className={cn(
-                "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-xs font-semibold transition-colors",
+                "flex h-9 w-full items-center justify-center gap-1.5 rounded-xl text-xs font-semibold transition-colors",
                 isInPlan
                   ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
                   : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
@@ -127,7 +129,7 @@ function MediaCardGrid({
               )}
             </button>
           ) : showPlanButton ? (
-            <div className="flex items-stretch gap-1">
+            <div className="flex h-8 items-stretch gap-1">
               <PlanCartAddButton
                 item={planCartItemFromCatalog(item, "search")}
                 addedFrom="search"
@@ -158,15 +160,19 @@ function MediaCardGrid({
     </>
   );
 
+  const shellClass = cn(
+    "flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5",
+    className,
+  );
+
   if (plannerMode && onTogglePlan) {
     return (
-      <div
-        className={cn(
-          "overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5",
-          className,
-        )}
-      >
-        <button type="button" onClick={onTogglePlan} className="w-full text-left">
+      <div className={shellClass}>
+        <button
+          type="button"
+          onClick={onTogglePlan}
+          className="flex h-full w-full flex-col text-left"
+        >
           {body}
         </button>
       </div>
@@ -177,8 +183,8 @@ function MediaCardGrid({
     <Link
       href={href}
       className={cn(
-        "overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5",
-        className,
+        shellClass,
+        "transition-shadow hover:shadow-md active:scale-[0.99]",
       )}
     >
       {body}
@@ -242,7 +248,9 @@ export function MediaCard(props: MediaCardProps) {
   }
 
   if (!recommendReason?.trim()) {
-    return <div className={className}>{card}</div>;
+    return (
+      <div className={cn(mode === "card" && "h-full min-h-0", className)}>{card}</div>
+    );
   }
 
   return (

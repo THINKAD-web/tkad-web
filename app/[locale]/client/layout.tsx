@@ -35,6 +35,10 @@ export async function generateMetadata({
       card: "summary_large_image",
       title: ogTitle,
       description,
+      images: defaultOgImages(locale, {
+        ko: "THINKAD 클라이언트 포털",
+        en: "THINKAD client portal",
+      }),
     },
   };
 }

@@ -34,6 +34,8 @@ export type QuotePdfPreviewRow = {
 
 type Props = {
   template: QuoteTemplateId;
+  /** 공식 견적서 등 제목 오버라이드 (예: 공식 견적서) */
+  documentHeading?: string;
   customerLogoSrc: string | null;
   company: string;
   contactName: string;
@@ -76,6 +78,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
   function QuotePdfPreview(
     {
       template,
+      documentHeading,
       customerLogoSrc,
       company,
       contactName,
@@ -143,7 +146,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           <div className="min-w-0 flex-1">
             <NeonSectionTag>[ {t("pdfIssuerLine")} ]</NeonSectionTag>
             <h1 className="mt-3 text-2xl font-bold tracking-tight text-navy">
-              {t("pdfDocHeading")}
+              {documentHeading?.trim() || t("pdfDocHeading")}
             </h1>
             <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-slate-500">
               {`// `}{t("pdfIssueDate")}: {dateStr}

@@ -13,7 +13,7 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { MediaKeywordLandingCatalog } from "@/components/media-keyword-landing-catalog";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
@@ -76,8 +76,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           "THINKAD",
         ],
     alternates: pageAlternates(locale, `/media/area/${area}`),
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/media/area/${area}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

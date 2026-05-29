@@ -31,8 +31,13 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: title,
       description,
+      images: segmentOpenGraphImages(
+        locale,
+        "media/map",
+        ogAltForRoute("map"),
+      ),
     },
   };
 }

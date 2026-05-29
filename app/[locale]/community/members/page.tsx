@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import {
   getCommunityMemberDirectoryStats,
   listCommunityMembersPaginated,
@@ -52,7 +52,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/community/members"),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/community/members",
+    }),
   };
 }
 

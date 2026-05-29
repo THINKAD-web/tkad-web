@@ -271,12 +271,12 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
               <CompareQuoteCalculator items={visibleItems} isKo={isKo} />
 
               <div className="mt-10 flex flex-col items-stretch gap-4 sm:mt-12 sm:items-center md:gap-5">
-                <div className="flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
+                <div className="tkad-compare-action-bar flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
                   <BtnBlock
                     href={buildPlannerHrefWithMediaIds(items.map((m) => m.id))}
                     variant="accent"
                     size="md"
-                    className="w-full min-h-12 justify-center rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[12rem]"
+                    className="tkad-neon-cta-clean w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[12rem]"
                   >
                     {isKo ? "이 조합으로 플래너 시작" : "Start planner with selection"}
                   </BtnBlock>
@@ -284,7 +284,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     href={`/quote?media=${items.map((m) => m.id).join(",")}`}
                     variant="accent"
                     size="md"
-                    className="w-full min-h-12 justify-center rounded-[22px] border-2 border-foreground/85 bg-foreground text-background transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/85 dark:bg-white dark:text-black"
+                    className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem]"
                   >
                     {isKo ? "견적 요청" : "Request a quote"}
                   </BtnBlock>
@@ -294,7 +294,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     size="md"
                     disabled={quotePdfLoading}
                     onClick={() => void handleQuotePdfDownload()}
-                    className="w-full min-h-12 justify-center rounded-[22px] border-2 border-foreground/85 bg-foreground text-background transition-all hover:-translate-y-0.5 hover:opacity-95 sm:w-auto sm:min-w-[16rem] disabled:opacity-50 dark:border-white/85 dark:bg-white dark:text-black"
+                    className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[16rem] disabled:opacity-50"
                   >
                     {quotePdfLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -311,7 +311,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     size="md"
                     disabled={comparePdfLoading}
                     onClick={() => void handleComparePdfDownload()}
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/12"
+                    className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
                   >
                     {comparePdfLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />
@@ -326,7 +326,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                     size="md"
                     disabled={captureLoading}
                     onClick={() => void handleCaptureImage()}
-                    className="w-full min-h-12 justify-center rounded-[22px] border border-border bg-card text-foreground backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-muted sm:w-auto sm:min-w-[10rem] disabled:opacity-50 dark:border-white/12 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 dark:hover:bg-white/12"
+                    className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
                   >
                     {captureLoading ? (
                       <Loader2 className="h-4 w-4 animate-spin" />

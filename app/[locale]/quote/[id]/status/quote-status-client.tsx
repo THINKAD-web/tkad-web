@@ -3,7 +3,9 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
-import { Loader2, Check, Circle } from "lucide-react";
+import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
+import { QuoteStatusTimeline } from "@/components/quote/quote-status-timeline";
+import { Loader2 } from "lucide-react";
 
 type QuotePublic = {
   id: string;
@@ -11,24 +13,9 @@ type QuotePublic = {
   invoiceSentAt: string | null;
   contractDocUrl: string | null;
   invoiceDocUrl: string | null;
+  contractSigned: boolean;
+  canSignContract: boolean;
 };
-
-/** `lib/ooh-quote` ORDER와 동일한 인덱스 */
-const STATUS_ORDER = [
-  "draft",
-  "sent",
-  "booking_requested",
-  "booking_pending",
-  "booking_confirmed",
-  "invoice_sent",
-  "payment_pending",
-  "payment_confirmed",
-  "contract_confirmed",
-  "in_progress",
-  "completed",
-] as const;
-
-const MILESTONE_MIN_LEVEL = [1, 2, 4, 5, 7, 8] as const;
 
 export default function QuoteStatusClient({
   quoteId,
@@ -103,17 +90,8 @@ export default function QuoteStatusClient({
     );
   }
 
-  const level = (STATUS_ORDER as readonly string[]).indexOf(quote.status);
-  const safeLevel = level >= 0 ? level : 0;
-
-  const milestoneLabels = [
-    t("milestone_quoteSent"),
-    t("milestone_bookingRequest"),
-    t("milestone_bookingConfirmed"),
-    t("milestone_invoice"),
-    t("milestone_payment"),
-    t("milestone_contract"),
-  ];
+  const showContractBlock =
+    quote.contractSigned || quote.status === "booking_confirmed";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6">
@@ -138,40 +116,22 @@ export default function QuoteStatusClient({
             {t("timeline")}
           </h2>
         </div>
-        <div className="space-y-4 p-5">
-          {milestoneLabels.map((label, i) => {
-            const min = MILESTONE_MIN_LEVEL[i];
-            const done = safeLevel >= min;
-            return (
-              <div key={label} className="flex items-start gap-3">
-                <div
-                  className={
-                    done
-                      ? "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-accent bg-accent text-accent-foreground"
-                      : "mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center border-2 border-border bg-card text-muted-foreground"
-                  }
-                >
-                  {done ? (
-                    <Check className="h-4 w-4" />
-                  ) : (
-                    <Circle className="h-3 w-3" />
-                  )}
-                </div>
-                <div>
-                  <p
-                    className={
-                      "text-sm font-bold " +
-                      (done ? "text-foreground" : "text-muted-foreground")
-                    }
-                  >
-                    {label}
-                  </p>
-                </div>
-              </div>
-            );
-          })}
+        <div className="p-5">
+          <QuoteStatusTimeline
+            status={quote.status}
+            contractSigned={quote.contractSigned}
+          />
         </div>
       </div>
+
+      {showContractBlock ? (
+        <QuoteContractCta
+          quoteId={quote.id}
+          status={quote.status}
+          contractSigned={quote.contractSigned}
+          canSignContract={quote.canSignContract}
+        />
+      ) : null}
 
       {quote.invoiceSentAt || quote.invoiceDocUrl ? (
         <div className="border-2 border-accent bg-card p-4 text-sm text-foreground">

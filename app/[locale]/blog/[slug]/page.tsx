@@ -11,7 +11,7 @@ import {
   type BlogSection,
 } from "@/lib/blog-seo-posts";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
-import { pageAlternates, serializeJsonLd } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import {
   buildBlogSeoLinks,
@@ -92,8 +92,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: isKo ? post.keywordsKo : post.keywordsEn,
     alternates: pageAlternates(locale, `/blog/${slug}`),
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/blog/${slug}`,
+      type: "article",
+      image: { kind: "segment", segment: "blog" },
+    }),
   };
 }
 

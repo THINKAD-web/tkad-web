@@ -23,6 +23,7 @@ import {
 } from "@/components/planner/planner-neon-ui";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
+import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -43,6 +44,8 @@ type Media = {
 type Quote = {
   id: string;
   status: string;
+  contractSigned?: boolean;
+  canSignContract?: boolean;
   clientName: string;
   clientEmail: string;
   clientCompany: string | null;
@@ -254,6 +257,8 @@ export default function QuotePreviewView({
   }
 
   const canProceed = showProceedCta && quote.status === "sent";
+  const showContractCta =
+    quote.contractSigned === true || quote.status === "booking_confirmed";
 
   return (
     <HomeLandingDayNight>
@@ -313,6 +318,15 @@ export default function QuotePreviewView({
               ) : null}
             </div>
           </header>
+
+          {showContractCta ? (
+            <QuoteContractCta
+              quoteId={quote.id}
+              status={quote.status}
+              contractSigned={quote.contractSigned === true}
+              canSignContract={quote.canSignContract !== false}
+            />
+          ) : null}
 
           <div ref={captureRef} className="space-y-4 print:bg-white">
             <PlannerNeonCard className="overflow-hidden">

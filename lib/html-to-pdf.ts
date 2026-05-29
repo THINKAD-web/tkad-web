@@ -362,11 +362,38 @@ async function waitForFontsAndPaint(): Promise<void> {
 /**
  * DOM 노드를 A4 세로 PDF로 래스터화 (한글은 스타일된 HTML 이미지로 보존).
  */
-async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
-  if (typeof window === "undefined") {
-    throw new Error("htmlElementToPdf is browser-only");
-  }
+function resolveElementPdfBackground(element: HTMLElement): string {
+  return (
+    element.getAttribute("data-quote-pdf-background") ??
+    element.dataset.quotePdfBackground ??
+    "#ffffff"
+  );
+}
 
+function isDarkPdfBackground(bg: string): boolean {
+  return bg.trim().toLowerCase() !== "#ffffff";
+}
+
+function hexToRgb(hex: string): { r: number; g: number; b: number } {
+  const raw = hex.replace("#", "").trim();
+  if (raw.length === 3) {
+    return {
+      r: parseInt(raw[0]! + raw[0], 16),
+      g: parseInt(raw[1]! + raw[1], 16),
+      b: parseInt(raw[2]! + raw[2], 16),
+    };
+  }
+  if (raw.length >= 6) {
+    return {
+      r: parseInt(raw.slice(0, 2), 16),
+      g: parseInt(raw.slice(2, 4), 16),
+      b: parseInt(raw.slice(4, 6), 16),
+    };
+  }
+  return { r: 255, g: 255, b: 255 };
+}
+
+async function elementToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
   await preloadImagesAsProxyDataUrls(element);
   await waitForImagesInElement(element);
   await waitForFontsAndPaint();
@@ -374,15 +401,15 @@ async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
   const rect = element.getBoundingClientRect();
   const w = Math.max(1, Math.round(element.scrollWidth || rect.width));
   const h = Math.max(1, Math.round(element.scrollHeight || rect.height));
+  const pdfBg = resolveElementPdfBackground(element);
 
-  let canvas: HTMLCanvasElement;
   try {
-    canvas = await html2canvas(element, {
+    return await html2canvas(element, {
       scale: 2,
       useCORS: true,
       allowTaint: false,
       logging: false,
-      backgroundColor: "#ffffff",
+      backgroundColor: pdfBg,
       width: w,
       height: h,
       windowWidth: w,
@@ -400,26 +427,102 @@ async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
     });
     throw e;
   }
+}
+
+/** 한 요소를 A4 한 페이지에 맞춰 PDF에 추가 */
+function addCanvasAsSingleA4Page(
+  pdf: import("jspdf").jsPDF,
+  canvas: HTMLCanvasElement,
+  pdfBg: string,
+  isFirstPage: boolean,
+): void {
+  if (!isFirstPage) {
+    pdf.addPage();
+  }
+
+  const pageWidth = pdf.internal.pageSize.getWidth();
+  const pageHeight = pdf.internal.pageSize.getHeight();
+  const useDarkCapture = isDarkPdfBackground(pdfBg);
+  const { r, g, b } = hexToRgb(pdfBg);
+  pdf.setFillColor(r, g, b);
+  pdf.rect(0, 0, pageWidth, pageHeight, "F");
+
+  const imgFormat = useDarkCapture ? "PNG" : "JPEG";
+  const imgData = canvas.toDataURL(
+    useDarkCapture ? "image/png" : "image/jpeg",
+    useDarkCapture ? 1 : 0.92,
+  );
+
+  let drawW = pageWidth;
+  let drawH = (canvas.height * pageWidth) / canvas.width;
+  if (drawH > pageHeight) {
+    drawH = pageHeight;
+    drawW = (canvas.width * pageHeight) / canvas.height;
+  }
+  const offsetX = (pageWidth - drawW) / 2;
+  const offsetY = (pageHeight - drawH) / 2;
+  pdf.addImage(imgData, imgFormat, offsetX, offsetY, drawW, drawH);
+}
+
+async function htmlElementsToPdfInner(
+  elements: HTMLElement[],
+): Promise<import("jspdf").jsPDF> {
+  if (typeof window === "undefined") {
+    throw new Error("htmlElementsToPdf is browser-only");
+  }
+  if (elements.length === 0) {
+    throw new Error("htmlElementsToPdf: no elements");
+  }
+
+  const { default: JsPDF } = await import("jspdf");
+  const pdf = new JsPDF({ orientation: "p", unit: "mm", format: "a4" });
+
+  for (let i = 0; i < elements.length; i++) {
+    const el = elements[i]!;
+    const canvas = await elementToCanvas(el);
+    addCanvasAsSingleA4Page(
+      pdf,
+      canvas,
+      resolveElementPdfBackground(el),
+      i === 0,
+    );
+  }
+
+  return pdf;
+}
+
+async function htmlElementToPdfInner(element: HTMLElement): Promise<jsPDF> {
+  if (typeof window === "undefined") {
+    throw new Error("htmlElementToPdf is browser-only");
+  }
+
+  const canvas = await elementToCanvas(element);
+  const pdfBg = resolveElementPdfBackground(element);
+  const useDarkCapture = isDarkPdfBackground(pdfBg);
 
   const { default: JsPDF } = await import("jspdf");
   const pdf = new JsPDF({ orientation: "p", unit: "mm", format: "a4" });
   const pageWidth = pdf.internal.pageSize.getWidth();
   const pageHeight = pdf.internal.pageSize.getHeight();
 
-  const imgData = canvas.toDataURL("image/jpeg", 0.92);
+  const imgFormat = useDarkCapture ? "PNG" : "JPEG";
+  const imgData = canvas.toDataURL(
+    useDarkCapture ? "image/png" : "image/jpeg",
+    useDarkCapture ? 1 : 0.92,
+  );
   const imgWidth = pageWidth;
   const imgHeight = (canvas.height * pageWidth) / canvas.width;
 
   let heightLeft = imgHeight;
   let position = 0;
 
-  pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+  pdf.addImage(imgData, imgFormat, 0, position, imgWidth, imgHeight);
   heightLeft -= pageHeight;
 
   while (heightLeft > 0) {
     position = heightLeft - imgHeight;
     pdf.addPage();
-    pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
+    pdf.addImage(imgData, imgFormat, 0, position, imgWidth, imgHeight);
     heightLeft -= pageHeight;
   }
 
@@ -437,6 +540,22 @@ export async function htmlElementToPdf(
   const work = htmlElementToPdfInner(element);
   if (timeoutMs > 0) {
     return withTimeout(work, timeoutMs, "htmlElementToPdf");
+  }
+  return work;
+}
+
+/** 여러 DOM 블록을 각각 A4 1페이지로 PDF 병합 */
+export async function htmlElementsToPdf(
+  elements: HTMLElement[],
+  options?: HtmlElementToPdfOptions,
+): Promise<jsPDF> {
+  const timeoutMs =
+    options?.timeoutMs !== undefined
+      ? options.timeoutMs
+      : HTML_TO_PDF_DEFAULT_TIMEOUT_MS;
+  const work = htmlElementsToPdfInner(elements);
+  if (timeoutMs > 0) {
+    return withTimeout(work, timeoutMs, "htmlElementsToPdf");
   }
   return work;
 }
@@ -472,12 +591,7 @@ function pdfToBlob(pdf: jsPDF): Blob {
 /**
  * PDF 파일 다운로드 (FileSaver 우선, 실패 시 Blob 링크).
  */
-export async function downloadPdfFromHtmlElement(
-  element: HTMLElement,
-  filename: string,
-  options?: HtmlElementToPdfOptions,
-): Promise<void> {
-  const pdf = await htmlElementToPdf(element, options);
+async function savePdfDownload(pdf: jsPDF, filename: string): Promise<void> {
   const safeName =
     filename.replace(/[/\\?%*:|"<>]/g, "-").trim() ||
     `THINKAD-${Date.now()}.pdf`;
@@ -495,6 +609,24 @@ export async function downloadPdfFromHtmlElement(
       triggerBlobDownload(blob, `THINKAD_export_${ymd}.pdf`);
     }
   }
+}
+
+export async function downloadPdfFromHtmlElement(
+  element: HTMLElement,
+  filename: string,
+  options?: HtmlElementToPdfOptions,
+): Promise<void> {
+  const pdf = await htmlElementToPdf(element, options);
+  await savePdfDownload(pdf, filename);
+}
+
+export async function downloadPdfFromHtmlElements(
+  elements: HTMLElement[],
+  filename: string,
+  options?: HtmlElementToPdfOptions,
+): Promise<void> {
+  const pdf = await htmlElementsToPdf(elements, options);
+  await savePdfDownload(pdf, filename);
 }
 
 /** 화면 캡처 → PNG 이미지로 다운로드 */
@@ -531,6 +663,16 @@ export async function htmlElementToPdfBase64(
   options?: HtmlElementToPdfOptions,
 ): Promise<string> {
   const pdf = await htmlElementToPdf(element, options);
+  const uri = pdf.output("datauristring") as string;
+  const i = uri.indexOf(",");
+  return i >= 0 ? uri.slice(i + 1) : uri;
+}
+
+export async function htmlElementsToPdfBase64(
+  elements: HTMLElement[],
+  options?: HtmlElementToPdfOptions,
+): Promise<string> {
+  const pdf = await htmlElementsToPdf(elements, options);
   const uri = pdf.output("datauristring") as string;
   const i = uri.indexOf(",");
   return i >= 0 ? uri.slice(i + 1) : uri;

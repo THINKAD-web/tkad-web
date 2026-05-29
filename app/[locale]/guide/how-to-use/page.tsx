@@ -8,7 +8,7 @@ import {
   HOW_TO_USE_META,
   HOW_TO_USE_STEPS,
 } from "@/lib/guide-how-to-use-content";
-import { pageAlternates, serializeJsonLd } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
@@ -44,8 +44,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     description,
     keywords: isKo ? HOW_TO_USE_META.keywordsKo : HOW_TO_USE_META.keywordsEn,
     alternates: pageAlternates(locale, "/guide/how-to-use"),
-    openGraph: { title, description, type: "article" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/guide/how-to-use",
+      type: "article",
+    }),
   };
 }
 

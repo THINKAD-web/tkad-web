@@ -1,7 +1,11 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
-import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import {
+  buildShareMetadata,
+  pageAlternates,
+  segmentOpenGraphImages,
+} from "@/lib/seo";
 import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
@@ -46,16 +50,14 @@ export async function generateMetadata({
           "THINKAD",
         ],
     alternates: pageAlternates(locale, "/media"),
-    openGraph: {
+    ...buildShareMetadata({
+      locale,
       title: ogTitle,
       description,
-      images: segmentOpenGraphImages(locale, "media", ogAltForRoute("media")),
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: ogTitle,
-      description,
-    },
+      path: "/media",
+      alt: ogAltForRoute("media"),
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

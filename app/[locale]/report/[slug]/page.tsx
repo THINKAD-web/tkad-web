@@ -11,7 +11,7 @@ import { COMMUNITY_CATEGORY_LABELS } from "@/lib/community/types";
 import { cn } from "@/lib/utils";
 import { InsightMarkdownBody } from "@/components/insights/markdown-body";
 import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -39,20 +39,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     description: row.summary.slice(0, 220),
     alternates: pageAlternates(locale, `/report/${slug}`),
     robots: isKo ? { index: true, follow: true } : { index: false, follow: true },
-    openGraph: {
+    ...buildShareMetadata({
+      locale,
       title: row.title,
       description: row.summary.slice(0, 200),
-      url,
+      path: `/report/${slug}`,
       type: "article",
-      publishedTime: row.publishedAt?.toISOString(),
-      modifiedTime: row.updatedAt.toISOString(),
-      siteName: "THINKAD",
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: row.title,
-      description: row.summary.slice(0, 200),
-    },
+      image: { kind: "segment", segment: "report" },
+    }),
   };
 }
 

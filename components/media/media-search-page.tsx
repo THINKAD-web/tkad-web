@@ -2,17 +2,13 @@
 
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
-import {
-  Search,
-  X,
-  List,
-  LayoutGrid,
-  AlignJustify,
-} from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
 import { MediaCard } from "@/components/media/media-card";
+import {
+  MediaManualBrowseFilters,
+  type MediaManualBrowseViewMode,
+} from "@/components/media/media-manual-browse-filters";
 import CompareBar from "@/components/compare-bar";
-import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -33,30 +29,9 @@ import {
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
-import {
-  MEDIA_CHIP_ACTIVE,
-  MEDIA_CHIP_INACTIVE,
-  MEDIA_REGION_CHIPS,
-  MEDIA_SEARCH_SORT_OPTIONS,
-  MEDIA_TARGET_CHIPS,
-  MEDIA_TYPE_CHIPS,
-} from "@/lib/media-discovery-filter-chips";
 
-const CHIP_ACTIVE = MEDIA_CHIP_ACTIVE;
-const CHIP_INACTIVE = MEDIA_CHIP_INACTIVE;
-const TYPE_CHIPS = MEDIA_TYPE_CHIPS;
-const TARGET_CHIPS = MEDIA_TARGET_CHIPS;
-const REGION_CHIPS = MEDIA_REGION_CHIPS;
-const SORT_OPTIONS = MEDIA_SEARCH_SORT_OPTIONS;
-
-type ViewMode = "feed" | "card" | "compact";
+type ViewMode = MediaManualBrowseViewMode;
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
-
-const VIEW_MODES: { id: ViewMode; label: string; icon: typeof List }[] = [
-  { id: "feed", label: "피드", icon: List },
-  { id: "card", label: "카드", icon: LayoutGrid },
-  { id: "compact", label: "컴팩트", icon: AlignJustify },
-];
 
 const PAGE_SIZE = 30;
 
@@ -117,7 +92,6 @@ interface Props {
   embedded?: boolean;
   plannerSelectedIds?: string[];
   onPlannerToggleMedia?: (mediaId: string) => void;
-  onPlannerNext?: () => void;
 }
 
 function MediaSearchPageInner({
@@ -130,9 +104,9 @@ function MediaSearchPageInner({
   embedded = false,
   plannerSelectedIds = [],
   onPlannerToggleMedia,
-  onPlannerNext,
 }: Props) {
   const locale = useLocale();
+  const tMedia = useTranslations("media");
   const searchParams = useSearchParams();
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
@@ -299,8 +273,6 @@ function MediaSearchPageInner({
   const renderPrice = (item: HomeCatalogMediaItem) =>
     formatPriceLabel(item.price, item.pricePeriod, priceLocale);
 
-  const activeFilterCount = [category, target, region].filter(Boolean).length;
-
   const getMediaHref = (item: HomeCatalogMediaItem) =>
     item.slug
       ? `/${locale}/media/${item.slug}`
@@ -339,22 +311,24 @@ function MediaSearchPageInner({
 
     if (viewMode === "card") {
       return (
-        <MediaCard
-          key={item.id}
-          mode="card"
-          item={item}
-          href={href}
-          priceLabel={priceLabel}
-          isKo={isKo}
-          inCompare={isInCompare(item.id)}
-          inCart={isInCart(item.id)}
-          onToggleCompare={() => toggleCompare(item)}
-          onToggleCart={() => toggleCart(item)}
-          plannerMode={plannerMode}
-          isInPlan={inPlan}
-          onTogglePlan={plannerMode ? togglePlan : undefined}
-          showPlanButton={!plannerMode}
-        />
+        <div key={item.id} className="h-full min-h-0">
+          <MediaCard
+            mode="card"
+            item={item}
+            href={href}
+            priceLabel={priceLabel}
+            isKo={isKo}
+            className="h-full"
+            inCompare={isInCompare(item.id)}
+            inCart={isInCart(item.id)}
+            onToggleCompare={() => toggleCompare(item)}
+            onToggleCart={() => toggleCart(item)}
+            plannerMode={plannerMode}
+            isInPlan={inPlan}
+            onTogglePlan={plannerMode ? togglePlan : undefined}
+            showPlanButton={!plannerMode}
+          />
+        </div>
       );
     }
 
@@ -390,176 +364,29 @@ function MediaSearchPageInner({
   return (
     <>
     <div className={cn(!embedded && "bg-gray-50 dark:bg-[#020202]")}>
-      <div className="min-w-0 space-y-3 overflow-x-clip px-4 pt-4">
-        {/* ── 검색창 ── */}
-        <div className="relative">
-          <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-white/30" />
-          <input
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="매체명·지역·유형 검색"
-            className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => setQuery("")}
-              className="absolute right-3 top-1/2 -translate-y-1/2"
-            >
-              <X className="h-4 w-4 text-gray-400 dark:text-white/40" />
-            </button>
-          ) : null}
-        </div>
-
-        {/* ── 매체 유형 칩 ── */}
-        <div>
-          <p className="tkad-home-accent-text mb-2 text-xs font-bold">
-            어떤 매체?
-          </p>
-          <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
-            {TYPE_CHIPS.map((chip) => (
-              <button
-                key={chip.value || "all"}
-                type="button"
-                onClick={() =>
-                  setCategory(category === chip.value ? "" : chip.value)
-                }
-                className={cn(
-                  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
-                  category === chip.value ? CHIP_ACTIVE : CHIP_INACTIVE,
-                )}
-              >
-                <MediaFilterChipLabel label={chip.label} icon={chip.icon} />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 캠페인 목적 칩 ── */}
-        <div>
-          <p className="mb-2 text-xs font-bold text-pink-600 dark:text-pink-400">
-            왜 광고해?
-          </p>
-          <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
-            {TARGET_CHIPS.map((chip) => (
-              <button
-                key={chip.value || "all"}
-                type="button"
-                onClick={() =>
-                  setTarget(target === chip.value ? "" : chip.value)
-                }
-                className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-                  target === chip.value
-                    ? "bg-pink-500 text-white"
-                    : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70"
-                }`}
-              >
-                <MediaFilterChipLabel label={chip.label} icon={chip.icon} />
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* ── 지역 + 정렬 + 뷰 모드 ── */}
-        <div>
-          <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
-            어디서?
-          </p>
-          <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:items-center">
-            <div className="scrollbar-hide flex min-w-0 flex-1 gap-2 overflow-x-auto pb-0.5">
-              {REGION_CHIPS.map((chip) => (
-                <button
-                  key={chip.value || "all"}
-                  type="button"
-                  onClick={() =>
-                    setRegion(region === chip.value ? "" : chip.value)
-                  }
-                  className={`whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all ${
-                    region === chip.value
-                      ? "bg-cyan-500 text-white"
-                      : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70"
-                  }`}
-                >
-                  {chip.label}
-                </button>
-              ))}
-            </div>
-
-            <div className="flex shrink-0 items-center gap-2 self-end sm:self-auto">
-            <select
-              value={sort}
-              onChange={(e) => setSort(e.target.value)}
-              className="flex-shrink-0 rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
-            >
-              {SORT_OPTIONS.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-
-            <div
-              className="flex flex-shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10"
-              data-screenshot="media-view-mode"
-            >
-              {VIEW_MODES.map((mode) => {
-                const Icon = mode.icon;
-                return (
-                  <button
-                    key={mode.id}
-                    type="button"
-                    onClick={() => handleViewModeChange(mode.id)}
-                    title={mode.label}
-                    className={cn(
-                      "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
-                      viewMode === mode.id ? CHIP_ACTIVE : CHIP_INACTIVE,
-                    )}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                    <span className="hidden sm:inline">{mode.label}</span>
-                  </button>
-                );
-              })}
-            </div>
-            </div>
-          </div>
-        </div>
-
-        {/* ── 필터 초기화 ── */}
-        {activeFilterCount > 0 ? (
-          <button
-            type="button"
-            onClick={() => {
-              setCategory("");
-              setTarget("");
-              setRegion("");
-            }}
-            className="flex items-center gap-1 text-xs text-rose-400"
-          >
-            <X className="h-3 w-3" />
-            필터 초기화 ({activeFilterCount})
-          </button>
-        ) : null}
-
-        {/* ── 결과 수 ── */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-gray-500 dark:text-white/50">
-            {loading ? "검색 중..." : `매체 ${media.length}${total > media.length ? ` / ${total}` : ""}개`}
-          </p>
-          <div className="flex items-center gap-2 text-xs">
-            {cartIds.length > 0 ? (
-              <span className="tkad-home-accent-text font-medium">
-                담김 {cartIds.length}
-              </span>
-            ) : null}
-            {compareEntries.length > 0 ? (
-              <span className="font-medium text-gray-700 dark:text-white">
-                선택 {compareEntries.length}
-              </span>
-            ) : null}
-          </div>
-        </div>
+      <div className="min-w-0 overflow-x-clip px-4 pt-4">
+        <MediaManualBrowseFilters
+          isKo={isKo}
+          query={query}
+          onQueryChange={setQuery}
+          category={category}
+          onCategoryChange={setCategory}
+          target={target}
+          onTargetChange={setTarget}
+          region={region}
+          onRegionChange={setRegion}
+          sort={sort}
+          onSortChange={setSort}
+          viewMode={viewMode}
+          onViewModeChange={handleViewModeChange}
+          resultCount={media.length}
+          totalCount={total}
+          loading={loading}
+          compareCount={plannerMode ? 0 : compareEntries.length}
+          cartCount={plannerMode ? 0 : cartIds.length}
+          selectedCount={plannerMode ? plannerSelectedIds.length : 0}
+          selectionVariant={plannerMode ? "plan" : "default"}
+        />
       </div>
 
       {/* ── 매체 목록 ── */}
@@ -568,7 +395,7 @@ function MediaSearchPageInner({
           "mt-3 px-4",
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
-            "grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
+            "grid auto-rows-fr grid-cols-2 items-stretch gap-3 md:grid-cols-3 lg:grid-cols-4",
           viewMode === "compact" &&
             "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-3 xl:grid-cols-4",
         )}
@@ -668,31 +495,15 @@ function MediaSearchPageInner({
             disabled={loadingMore}
             className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
           >
-            {loadingMore ? "불러오는 중…" : "더 많은 매체 보기"}
+            {loadingMore
+              ? isKo
+                ? "불러오는 중…"
+                : "Loading…"
+              : tMedia("loadMoreBrowse")}
           </button>
         </div>
       ) : null}
     </div>
-
-    {plannerMode ? (
-      <div className="sticky bottom-0 z-20 border-t border-gray-200 bg-white/95 px-4 py-3 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95">
-        <div className="mx-auto flex max-w-3xl items-center justify-between gap-3">
-          <p className="text-sm font-semibold text-gray-800 dark:text-white">
-            {isKo
-              ? `담긴 매체 ${plannerSelectedIds.length}개`
-              : `${plannerSelectedIds.length} in plan`}
-          </p>
-          <button
-            type="button"
-            onClick={onPlannerNext}
-            disabled={plannerSelectedIds.length === 0}
-            className="rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2 text-sm font-bold text-white disabled:opacity-40"
-          >
-            {isKo ? "다음 →" : "Next →"}
-          </button>
-        </div>
-      </div>
-    ) : null}
 
     {!plannerMode ? (
     <CompareBar

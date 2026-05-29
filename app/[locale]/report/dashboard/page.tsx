@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ReportDashboardClient } from "@/components/report/report-dashboard-client";
 import { CategoryHeroBetaBadge } from "@/components/category-explore-hero";
 import type { Metadata } from "next";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -14,13 +15,23 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
+  const title = isKo
+    ? "OOH 트렌드 대시보드 | THINKAD"
+    : "OOH Trend Dashboard | THINKAD";
+  const description = isKo
+    ? "이번 달 인기 매체, 매체 유형 비중, 신규 등록 매체, 평균 CPM 트렌드를 한눈에."
+    : "Top media, type share, new listings and CPM trend at a glance.";
   return {
-    title: isKo
-      ? "OOH 트렌드 대시보드 | THINKAD"
-      : "OOH Trend Dashboard | THINKAD",
-    description: isKo
-      ? "이번 달 인기 매체, 매체 유형 비중, 신규 등록 매체, 평균 CPM 트렌드를 한눈에."
-      : "Top media, type share, new listings and CPM trend at a glance.",
+    title,
+    description,
+    alternates: pageAlternates(locale, "/report/dashboard"),
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/report/dashboard",
+      image: { kind: "segment", segment: "report" },
+    }),
   };
 }
 

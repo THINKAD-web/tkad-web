@@ -3,7 +3,7 @@ import { setRequestLocale } from "next-intl/server";
 import { routing } from "@/i18n/routing";
 import { DevelopersPageClient } from "@/components/developers/developers-page-client";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates, siteUrl } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, siteUrl } from "@/lib/seo";
 import { DEVELOPERS_BASE_URL } from "@/lib/developers-docs-content";
 
 type Props = { params: Promise<{ locale: string }> };
@@ -26,7 +26,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, "/developers"),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "/developers",
+    }),
   };
 }
 

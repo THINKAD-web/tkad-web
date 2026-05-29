@@ -38,9 +38,13 @@ export async function GET(
 
   try {
     const db = getPrisma();
-    const row = await db.ooHQuote.findUnique({ where: { id } });
+    const row = await db.ooHQuote.findUnique({
+      where: { id },
+      include: { oohContract: true },
+    });
     if (!row) return json({ error: "Not found" }, { status: 404 });
-    return json({ quote: serializeOoHQuotePublic(row) });
+    const { oohContract, ...quote } = row;
+    return json({ quote: serializeOoHQuotePublic(quote, oohContract) });
   } catch (e) {
     console.error("[quote GET]", e);
     return json({ error: "Failed" }, { status: 500 });

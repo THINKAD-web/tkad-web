@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { getCommunityMemberProfile } from "@/lib/community/queries";
 import { getCurrentUser } from "@/lib/user-session";
 import { RoleBadge } from "@/components/community/role-badge";
@@ -55,7 +55,12 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, `/community/profile/${id}`),
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/community/profile/${id}`,
+    }),
   };
 }
 

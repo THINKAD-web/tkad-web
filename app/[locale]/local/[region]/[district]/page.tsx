@@ -17,7 +17,7 @@ import {
   matchesLocalSeoLanding,
   type LocalSeoLanding,
 } from "@/lib/local-seo-landings";
-import { pageAlternates, serializeJsonLd } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
@@ -97,8 +97,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           "THINKAD",
         ],
     alternates: pageAlternates(locale, path),
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/local/${region}/${district}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

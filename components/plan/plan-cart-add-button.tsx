@@ -60,7 +60,7 @@ export function PlanCartAddButton({
         className,
       )}
       aria-pressed={inPlan}
-      aria-label={inPlan ? "플랜에서 빼기" : "플랜에 담기"}
+      aria-label={inPlan ? "미디어 플랜에서 빼기" : "미디어 플랜에 담기"}
     >
       {gridInline ? (
         inPlan ? (
@@ -69,11 +69,11 @@ export function PlanCartAddButton({
           <>플랜+</>
         )
       ) : inPlan ? (
-        <>담김 ✓</>
+        <>미디어 플랜 담김 ✓</>
       ) : (
         <>
           <Plus className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          플랜 담기
+          미디어 플랜 담기
         </>
       )}
     </button>

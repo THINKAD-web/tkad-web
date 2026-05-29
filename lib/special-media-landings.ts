@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { buildShareMetadata } from "@/lib/seo";
 import type { MediaItem } from "@/lib/media-data";
 
 export type SpecialHotspot = {
@@ -248,6 +249,12 @@ export function specialLandingMetadata(
     keywords: isKo
       ? [...config.seoKeywordsKo, "THINKAD", "싱커드", "옥외광고"]
       : ["THINKAD", "OOH", "fandom ads", config.slug],
-    openGraph: { title, description, type: "website" },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/special/${config.slug}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }

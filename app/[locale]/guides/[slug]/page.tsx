@@ -42,6 +42,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           ogAltForRoute("guides"),
         ),
       },
+      twitter: {
+        card: "summary_large_image",
+        title: dbGuide.titleKo,
+        description: dbGuide.metaDescription ?? dbGuide.excerptKo ?? "",
+        images: segmentOpenGraphImages(
+          locale,
+          "guides",
+          ogAltForRoute("guides"),
+        ),
+      },
     };
   }
   const guide = getGuideBySlug(slug);
@@ -66,7 +76,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         ogAltForRoute("guides"),
       ),
     },
-    twitter: { card: "summary_large_image", title, description },
+    twitter: {
+      card: "summary_large_image",
+      title: title,
+      description,
+      images: segmentOpenGraphImages(
+          locale,
+          "guides",
+          ogAltForRoute("guides"),
+      ),
+    },
     robots: guide.draft
       ? { index: false, follow: false }
       : { index: true, follow: true },

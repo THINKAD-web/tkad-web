@@ -1,4 +1,4 @@
-import { OoHQuoteStatus, type OoHQuote } from "@prisma/client";
+import { OoHQuoteStatus, OohContractStatus, type OoHQuote } from "@prisma/client";
 import {
   QUOTE_CAMPAIGN_PERIOD_CONFIG,
   type QuoteCampaignPeriodKey,
@@ -69,9 +69,22 @@ export type OoHQuotePublicJson = {
   contractConfirmedAt: string | null;
   contractDocUrl: string | null;
   invoiceDocUrl: string | null;
+  contractStatus: OohContractStatus | null;
+  contractSigned: boolean;
+  canSignContract: boolean;
 };
 
-export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
+export function serializeOoHQuotePublic(
+  row: OoHQuote,
+  contract?: { status: OohContractStatus } | null,
+): OoHQuotePublicJson {
+  const contractSigned =
+    contract?.status === OohContractStatus.signed ||
+    contract?.status === OohContractStatus.confirmed;
+  const canSignContract =
+    row.status === OoHQuoteStatus.booking_confirmed &&
+    (!contract || contract.status === OohContractStatus.pending);
+
   return {
     id: row.id,
     status: row.status,
@@ -91,6 +104,9 @@ export function serializeOoHQuotePublic(row: OoHQuote): OoHQuotePublicJson {
     contractConfirmedAt: row.contractConfirmedAt?.toISOString() ?? null,
     contractDocUrl: row.contractDocUrl,
     invoiceDocUrl: row.invoiceDocUrl,
+    contractStatus: contract?.status ?? null,
+    contractSigned,
+    canSignContract,
   };
 }
 

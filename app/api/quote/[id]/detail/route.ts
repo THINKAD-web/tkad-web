@@ -1,3 +1,4 @@
+import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
@@ -12,7 +13,10 @@ export async function GET(
 ) {
   try {
     const { id } = await ctx.params;
-    const quote = await prisma.ooHQuote.findUnique({ where: { id } });
+    const quote = await prisma.ooHQuote.findUnique({
+      where: { id },
+      include: { oohContract: true },
+    });
     if (!quote) {
       return apiError("NOT_FOUND", 404, {
         message: "제안서를 찾을 수 없습니다.",
@@ -36,9 +40,20 @@ export async function GET(
         impressions: m.impressions ?? null,
       }));
 
+    const contract = quote.oohContract;
+    const contractSigned =
+      contract?.status === OohContractStatus.signed ||
+      contract?.status === OohContractStatus.confirmed;
+    const canSignContract =
+      quote.status === OoHQuoteStatus.booking_confirmed &&
+      (!contract || contract.status === OohContractStatus.pending);
+
     return apiOk({
       id: quote.id,
       status: quote.status,
+      contractStatus: contract?.status ?? null,
+      contractSigned,
+      canSignContract,
       clientName: quote.clientName,
       clientEmail: quote.clientEmail,
       clientCompany: quote.clientCompany,

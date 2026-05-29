@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { buildShareMetadata } from "@/lib/seo";
 
 export async function generateMetadata({
   params,
@@ -8,8 +9,14 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
+  const title = isKo ? "캠페인 대시보드" : "Campaign dashboard";
+  const description = isKo
+    ? "THINKAD 클라이언트 캠페인 대시보드"
+    : "THINKAD client campaign dashboard";
   return {
-    title: isKo ? "캠페인 대시보드" : "Campaign dashboard",
+    title,
+    description,
+    ...buildShareMetadata({ locale, title, description, path: "/client/dashboard" }),
     robots: { index: false, follow: false },
   };
 }

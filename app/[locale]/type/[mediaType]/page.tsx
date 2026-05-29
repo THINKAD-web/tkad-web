@@ -15,7 +15,7 @@ import {
   matchesMarketingMediaType,
   type MarketingMediaTypeSlug,
 } from "@/lib/marketing-media-types";
-import { pageAlternates, serializeJsonLd } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, serializeJsonLd } from "@/lib/seo";
 import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
@@ -74,8 +74,13 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title,
     description,
     alternates: pageAlternates(locale, `/type/${mediaType}`),
-    openGraph: { title, description, type: "website" },
-    twitter: { card: "summary_large_image", title, description },
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: `/type/${mediaType}`,
+      image: { kind: "segment", segment: "media" },
+    }),
   };
 }
 

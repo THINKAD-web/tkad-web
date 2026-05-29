@@ -604,7 +604,6 @@ export default function IntegratedPlannerPageClient({
                   initialTotal={catalog.length}
                   plannerSelectedIds={campaignMediaIds}
                   onPlannerToggleMedia={togglePlannerMedia}
-                  onPlannerNext={goNext}
                 />
               </div>
             ) : null}
