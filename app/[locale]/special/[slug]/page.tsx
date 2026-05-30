@@ -22,12 +22,17 @@ import {
   SpecialMapSection,
   SpecialMediaGridSection,
 } from "@/components/special/special-landing-sections";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
+export const revalidate = 3600;
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
+  if (deferCatalogLandingStaticGeneration()) return [];
   return KNOWN_SPECIAL_SLUGS.flatMap((slug) => [
     { locale: "ko", slug },
     { locale: "en", slug },

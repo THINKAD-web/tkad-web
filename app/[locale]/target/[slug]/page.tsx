@@ -28,12 +28,17 @@ import {
   TargetLandingGuide,
 } from "@/components/media-category-landing-sections";
 import { Target } from "lucide-react";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
+export const revalidate = 3600;
+export const dynamicParams = true;
+
 export async function generateStaticParams() {
+  if (deferCatalogLandingStaticGeneration()) return [];
   return KNOWN_TARGET_SLUGS.flatMap((slug) => [
     { locale: "ko", slug },
     { locale: "en", slug },

@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -266,7 +267,9 @@ async function appendNetworksIfAny(base: MediaItem[]): Promise<MediaItem[]> {
 }
 
 /** 비브라우즈 페이지·API용. `/media` 목록은 `fetchMediaBrowseCatalog()`(`lib/media-browse-catalog`) 사용. */
-export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
+export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCatalog(): Promise<
+  MediaItem[]
+> {
   const forceMockOnly =
     process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "1" ||
     process.env.PUBLIC_MEDIA_FORCE_MOCK_CATALOG === "true";
@@ -299,7 +302,7 @@ export async function fetchPublicMediaCatalog(): Promise<MediaItem[]> {
     );
     return appendNetworksIfAny([]);
   }
-}
+});
 
 /**
  * 홈 추천 매체 (`app/[locale]/page.tsx` TOP 3·Verified 그리드).

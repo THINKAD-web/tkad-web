@@ -31,14 +31,17 @@ import { IndustryBudgetCalculator } from "@/components/industry/industry-budget-
 import { IndustryFaq } from "@/components/industry/industry-faq";
 import { IndustryOtherLinks } from "@/components/industry/industry-other-links";
 import { IndustryPackageLinks } from "@/components/industry/industry-package-links";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
 export const revalidate = 3600;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
+  if (deferCatalogLandingStaticGeneration()) return [];
   return routing.locales.flatMap((locale) =>
     INDUSTRY_SLUGS.map((slug) => ({ locale, slug })),
   );

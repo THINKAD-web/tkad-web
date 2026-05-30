@@ -26,14 +26,17 @@ import { MediaKeywordLandingCatalog } from "@/components/media-keyword-landing-c
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = {
   params: Promise<{ locale: string; region: string; district: string }>;
 };
 
 export const revalidate = 3600;
+export const dynamicParams = true;
 
 export function generateStaticParams() {
+  if (deferCatalogLandingStaticGeneration()) return [];
   return routing.locales.flatMap((locale) =>
     LOCAL_SEO_LANDINGS.map((l) => ({
       locale,

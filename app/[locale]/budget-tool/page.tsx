@@ -6,8 +6,12 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { curateAllBudgetTiers } from "@/lib/budget-tool-curations";
 import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 export const revalidate = 300;
+export const dynamic = deferCatalogLandingStaticGeneration()
+  ? "force-dynamic"
+  : "auto";
 
 type Props = { params: Promise<{ locale: string }> };
 
