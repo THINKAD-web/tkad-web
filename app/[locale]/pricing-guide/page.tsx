@@ -7,7 +7,11 @@ import { buildPricingGuideStats, seoZoneKeywords,
 } from "@/lib/pricing-guide-stats";
 import { formatManWon } from "@/lib/media-price-transparency";
 import { Link } from "@/i18n/navigation";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night"; export const revalidate = 3600; type Props = { params: Promise<{ locale: string }> }; export async function generateMetadata({ params }: Props): Promise<Metadata> { const locale = await resolveLocaleParam(params); const isKo = locale === "ko"; const kw = seoZoneKeywords(); return { title: isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD", description: isKo ? "강남 전광판 광고비, 지역별 평균 단가, 매체 유형별 가격 범위와 시즌·협상 팁을 공개합니다." : "Public OOH price ranges by media type and Seoul districts, with season and negotiation tips.", keywords: [ ...siteKeywords(locale), ...(isKo ? kw.ko : kw.en), ], alternates: pageAlternates(locale, "/pricing-guide"),
+import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+
+export const dynamic = "force-dynamic";
+
+type Props = { params: Promise<{ locale: string }> }; export async function generateMetadata({ params }: Props): Promise<Metadata> { const locale = await resolveLocaleParam(params); const isKo = locale === "ko"; const kw = seoZoneKeywords(); return { title: isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD", description: isKo ? "강남 전광판 광고비, 지역별 평균 단가, 매체 유형별 가격 범위와 시즌·협상 팁을 공개합니다." : "Public OOH price ranges by media type and Seoul districts, with season and negotiation tips.", keywords: [ ...siteKeywords(locale), ...(isKo ? kw.ko : kw.en), ], alternates: pageAlternates(locale, "/pricing-guide"),
     ...buildShareMetadata({
       locale,
       title: isKo ? "옥외광고 가격 가이드 · 지역별 단가 | THINKAD" : "OOH pricing guide · rates by district | THINKAD",

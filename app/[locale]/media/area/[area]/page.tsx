@@ -31,6 +31,8 @@ type Props = {
  * 운영 안전: DB(fetchPublicMediaCatalog) source of truth. 0건이면 notFound.
  */
 
+export const dynamic = "force-dynamic";
+
 function matchArea(
   m: { city?: string; district?: string },
   decodedArea: string,

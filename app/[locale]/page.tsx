@@ -10,7 +10,7 @@ import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
 import { fetchPublishedReports } from "@/lib/report-queries";
 import { fetchPublishedCases } from "@/lib/case-queries";
 
-export const revalidate = 60;
+export const dynamic = "force-dynamic";
 
 export async function generateMetadata({
   params,

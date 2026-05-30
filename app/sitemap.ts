@@ -15,6 +15,9 @@ import {
 import { KNOWN_SPECIAL_SLUGS } from "@/lib/special-media-landings";
 import { fetchMediaPackageSlugs } from "@/lib/media-package-db";
 
+/** Build-time catalog fetch on Vercel can exceed the 45m deploy limit. */
+export const dynamic = "force-dynamic";
+
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 

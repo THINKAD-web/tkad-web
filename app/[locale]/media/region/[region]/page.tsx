@@ -34,6 +34,8 @@ type Props = {
  *   - SEO 콘텐츠는 텍스트 템플릿 (AI 생성 X)
  */
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, region } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));

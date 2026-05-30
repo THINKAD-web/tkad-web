@@ -32,6 +32,8 @@ type Props = {
  * 템플릿 (AI 생성 X), 알 수 없는 슬러그 + 0건 → notFound.
  */
 
+export const dynamic = "force-dynamic";
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, type } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));

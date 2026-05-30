@@ -5,8 +5,7 @@ import type { MediaItem } from "@/lib/media-data";
 
 type SearchParams = { ids?: string | string[] };
 
-/** 관리자 매체 저장 시 revalidatePath 로 무효화; ISR 타이트하게 두지 않음 */
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
 
 export default async function ComparePage({
   searchParams,

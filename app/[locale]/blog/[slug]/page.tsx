@@ -21,7 +21,7 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 export function generateStaticParams() {
   return routing.locales.flatMap((locale) =>
