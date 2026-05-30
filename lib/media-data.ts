@@ -222,6 +222,25 @@ export function getSimilarMedia(item: MediaItem, limit = 4): MediaItem[] {
   return getSimilarMediaFromCatalog(mediaData, item, limit);
 }
 
+/**
+ * Similar-carousel sort pool — same region first, capped so full catalog is not
+ * serialized to the client (Vercel RSC payload limit).
+ */
+export function buildSimilarSortCatalog(
+  catalog: readonly MediaItem[],
+  item: MediaItem,
+  maxItems = 64,
+): MediaItem[] {
+  const peers = catalog.filter(
+    (m) => m.id !== item.id && m.region === item.region,
+  );
+  const pool =
+    peers.length >= 16
+      ? peers
+      : catalog.filter((m) => m.id !== item.id);
+  return pool.slice(0, maxItems);
+}
+
 export function getSimilarMediaFromCatalog(
   catalog: MediaItem[],
   item: MediaItem,

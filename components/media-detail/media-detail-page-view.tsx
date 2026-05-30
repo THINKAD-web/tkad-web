@@ -21,7 +21,8 @@ type SimilarItem = Parameters<typeof MediaSimilarCarousel>[0]["items"][number];
 
 type Props = {
   media: MediaItem;
-  catalog: MediaItem[];
+  /** Capped peer list for client-side similar sorting (not the full catalog). */
+  similarSortCatalog?: readonly MediaItem[];
   locale: string;
   isKo: boolean;
   typeLabel: string;
@@ -84,7 +85,7 @@ type Props = {
 
 export function MediaDetailPageView({
   media,
-  catalog,
+  similarSortCatalog,
   locale,
   isKo,
   typeLabel,
@@ -219,9 +220,9 @@ export function MediaDetailPageView({
               isKo={isKo}
               title={labels.similarTitle}
               sortable={
-                media.keywordFilter
-                  ? undefined
-                  : { catalog, currentMedia: media, limit: 4 }
+                similarSortCatalog && similarSortCatalog.length > 0
+                  ? { catalog: similarSortCatalog, currentMedia: media, limit: 4 }
+                  : undefined
               }
             />
           }

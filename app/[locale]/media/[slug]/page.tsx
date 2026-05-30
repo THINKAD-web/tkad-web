@@ -6,6 +6,7 @@ import {
   buildCaseStudyGalleryItems,
   getMediaDetailGalleryUrls,
   getPrimaryMediaImageUrl,
+  buildSimilarSortCatalog,
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
@@ -72,8 +73,9 @@ import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 export const dynamicParams = true;
+export const maxDuration = 60;
 
 export async function generateStaticParams() {
   if (deferCatalogLandingStaticGeneration()) return [];
@@ -130,11 +132,30 @@ export default async function MediaDetailPage({ params }: Props) {
   if (shouldRedirectMediaIdToSlug(slugParam, media)) {
     permanentRedirect(`/${locale}${mediaItemDetailPath(media)}`);
   }
-  [media] = await attachReviewStatsToMediaItems([media]);
-  media = await enrichMediaWithTrust(media);
+  try {
+    [media] = await attachReviewStatsToMediaItems([media]);
+  } catch (e) {
+    console.error("[media-detail] review stats failed", media.id, e);
+  }
+  try {
+    media = await enrichMediaWithTrust(media);
+  } catch (e) {
+    console.error("[media-detail] trust enrich failed", media.id, e);
+  }
 
-  const catalog = await fetchPublicMediaCatalog();
-  const user = await getCurrentUser();
+  let catalog: Awaited<ReturnType<typeof fetchPublicMediaCatalog>> = [];
+  try {
+    catalog = await fetchPublicMediaCatalog();
+  } catch (e) {
+    console.error("[media-detail] catalog fetch failed", media.id, e);
+  }
+
+  let user: Awaited<ReturnType<typeof getCurrentUser>> = null;
+  try {
+    user = await getCurrentUser();
+  } catch (e) {
+    console.error("[media-detail] session lookup failed", e);
+  }
   const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
   const competitorAccess = await checkReportAccess(user?.id ?? null, "competitor");
   let analyticsReport: MediaAnalyticsReport;
@@ -152,15 +173,20 @@ export default async function MediaDetailPage({ params }: Props) {
       media.trafficPattern ?? null,
     );
   }
-  const relatedCases = await getSuccessCasesForMedia(media.id, 6, locale, {
-    location: media.location,
-    locationEn: media.locationEn,
-    district: media.district,
-    region: media.region,
-    name: media.name,
-    nearbyStations: media.nearbyStations,
-    nearbyLandmarks: media.nearbyLandmarks,
-  });
+  let relatedCases: Awaited<ReturnType<typeof getSuccessCasesForMedia>> = [];
+  try {
+    relatedCases = await getSuccessCasesForMedia(media.id, 6, locale, {
+      location: media.location,
+      locationEn: media.locationEn,
+      district: media.district,
+      region: media.region,
+      name: media.name,
+      nearbyStations: media.nearbyStations,
+      nearbyLandmarks: media.nearbyLandmarks,
+    });
+  } catch (e) {
+    console.error("[media-detail] related cases failed", media.id, e);
+  }
   const t = await getTranslations({ locale, namespace: "media.detail" });
   const tMedia = await getTranslations({ locale, namespace: "media" });
   const isKo = locale === "ko";
@@ -179,6 +205,9 @@ export default async function MediaDetailPage({ params }: Props) {
     ? getSimilarKeywordFilterMediaItems(media.id, 4)
     : getSimilarMediaFromCatalog(catalog, media, 4);
   const similar = attachRecommendReason(similarRaw, "similar_profile", locale);
+  const similarSortCatalog = media.keywordFilter
+    ? undefined
+    : buildSimilarSortCatalog(catalog, media);
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
   const caseStudyItems = buildCaseStudyGalleryItems(media);
@@ -264,7 +293,7 @@ export default async function MediaDetailPage({ params }: Props) {
 
       <MediaDetailPageView
         media={media}
-        catalog={catalog}
+        similarSortCatalog={similarSortCatalog}
         locale={locale}
         isKo={isKo}
         typeLabel={typeLabel}
