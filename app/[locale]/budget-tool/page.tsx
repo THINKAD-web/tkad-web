@@ -6,12 +6,10 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { curateAllBudgetTiers } from "@/lib/budget-tool-curations";
 import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 export const revalidate = 300;
-export const dynamic = deferCatalogLandingStaticGeneration()
-  ? "force-dynamic"
-  : "auto";
+/** Live catalog curation — must be a static literal for Next.js segment config. */
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ locale: string }> };
 

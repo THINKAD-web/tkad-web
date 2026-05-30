@@ -7,6 +7,7 @@ import IntegratedPlannerPageClient from "./integrated-planner-page-client";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 
 export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ locale: string }> };
 

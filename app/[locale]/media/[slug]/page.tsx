@@ -68,20 +68,19 @@ import {
   mediaItemDetailPath,
   shouldRedirectMediaIdToSlug,
 } from "@/lib/media-slug";
+import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
 export const revalidate = 3600;
 export const dynamicParams = true;
 
-/** Vercel build: pre-render top media only; rest ISR on demand. */
-const BUILD_STATIC_SLUG_LIMIT =
-  process.env.VERCEL === "1"
-    ? Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 12)
-    : undefined;
-
 export async function generateStaticParams() {
-  const slugs = await getMediaSlugsForStaticBuild(BUILD_STATIC_SLUG_LIMIT);
+  if (deferCatalogLandingStaticGeneration()) return [];
+  const vercelLimit = Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 0);
+  const slugLimit =
+    process.env.VERCEL === "1" && vercelLimit > 0 ? vercelLimit : undefined;
+  const slugs = await getMediaSlugsForStaticBuild(slugLimit);
   const keywordIds = getAllKeywordFilterMediaIds().map(String);
   const merged = [...new Set([...slugs, ...keywordIds])];
   return merged.map((slug) => ({ slug }));

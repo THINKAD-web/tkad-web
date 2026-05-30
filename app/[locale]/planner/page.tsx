@@ -4,6 +4,7 @@ import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { getPlatformPredictionAccuracy } from "@/lib/prediction-accuracy-server";
 
 export const revalidate = 3600;
+export const dynamic = "force-dynamic";
 
 /**
  * 미디어 플래너: 서버에서 Prisma 활성 매체만 조회해 클라이언트에 전달합니다.
