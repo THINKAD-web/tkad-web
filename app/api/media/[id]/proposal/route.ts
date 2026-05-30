@@ -1,0 +1,71 @@
+import { NextRequest, NextResponse } from "next/server";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { prismaMediaToMediaItem } from "@/lib/public-media-catalog";
+import { generateMediaProposalPdf } from "@/lib/generate-media-proposal";
+import { mediaProposalDownloadFilename } from "@/lib/media-proposal-filename";
+import { getCurrentUser } from "@/lib/user-session";
+import { checkReportAccess } from "@/lib/report-access";
+
+export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+
+type Params = { params: Promise<{ id: string }> };
+
+function asciiFilename(name: string): string {
+  return name.replace(/[^\x20-\x7E]/g, "_").replace(/_+/g, "_") || "proposal.pdf";
+}
+
+export async function GET(request: NextRequest, { params }: Params) {
+  const { id } = await params;
+
+  if (!isDatabaseConfigured()) {
+    return NextResponse.json({ error: "Database unavailable" }, { status: 503 });
+  }
+
+  const db = getPrisma();
+  const row = await db.media.findFirst({
+    where: { id, isActive: true },
+    include: {
+      advertiserExecutions: {
+        select: { advertiserName: true },
+        orderBy: { createdAt: "desc" },
+      },
+    },
+  });
+
+  if (!row) {
+    return NextResponse.json({ error: "Media not found" }, { status: 404 });
+  }
+
+  const proposalUrl = row.proposalUrl?.trim();
+  if (proposalUrl) {
+    return NextResponse.redirect(proposalUrl, 302);
+  }
+
+  const user = await getCurrentUser();
+  const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
+  const includeProDetails = detailAccess.allowed;
+
+  const locale =
+    request.nextUrl.searchParams.get("locale")?.trim().toLowerCase() ?? "ko";
+  const isKo = !locale.startsWith("en");
+
+  const media = prismaMediaToMediaItem(row);
+  const pdf = await generateMediaProposalPdf({
+    media,
+    isKo,
+    includeProDetails,
+  });
+
+  const filename = mediaProposalDownloadFilename(media, isKo);
+  const encoded = encodeURIComponent(filename);
+
+  return new NextResponse(new Uint8Array(pdf), {
+    status: 200,
+    headers: {
+      "Content-Type": "application/pdf",
+      "Content-Disposition": `attachment; filename="${asciiFilename(filename)}"; filename*=UTF-8''${encoded}`,
+      "Cache-Control": "private, max-age=3600",
+    },
+  });
+}

@@ -11,6 +11,7 @@ import { MediaDetailLocationPanel } from "@/components/media-detail/media-detail
 import { MediaDetailTrafficPanel } from "@/components/media-detail/media-detail-traffic-panel";
 import { MediaDetailExecutionPanel } from "@/components/media-detail/media-detail-execution-panel";
 import { MediaDetailStickyQuotePanel } from "@/components/media-detail/media-detail-sticky-quote-panel";
+import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-proposal-card";
 import { MediaDetailMobileBar } from "@/components/media-detail/media-detail-mobile-bar";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
@@ -199,8 +200,17 @@ export function MediaDetailPageView({
             <MediaDetailStickyQuotePanel
               media={media}
               isKo={isKo}
+              pageLocale={locale}
               displayName={displayName}
               periodLabel={periodLabel}
+            />
+          }
+          mobileProposal={
+            <MediaDetailProposalCard
+              media={media}
+              isKo={isKo}
+              locale={locale}
+              className="lg:hidden"
             />
           }
           similarSection={

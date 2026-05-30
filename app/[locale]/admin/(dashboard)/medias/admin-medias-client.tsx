@@ -38,6 +38,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
+import { AdminMediaProposalUpload } from "@/components/admin/admin-media-proposal-upload";
 import {
   AdminMediaQualityToolbar,
   MediaQualityScoreBadge,
@@ -54,8 +55,10 @@ import { Link } from "@/i18n/navigation";
 import type { AdminMediaDto, MediaAvailability } from "@/lib/admin-media-dto";
 import {
   AdminMediaCategoryFields,
+  browseFieldsFromDto,
   mergeMediaCategoryForm,
   splitMediaCategoryForm,
+  validateBrowseFields,
 } from "@/components/admin/admin-media-category-fields";
 import type { MediaEngagementMap } from "@/lib/admin-media-engagement";
 import {
@@ -212,6 +215,10 @@ type AdminMediaForm = {
   pastAdvertisers: string;
   /** 이동형 — 전국 시·군·구 행정코드(5자리) 다중 선택 */
   coverageDistrictCodes: string[];
+  browseMainCategory: string;
+  browseSubCategory: string;
+  browseRegionMain: string;
+  browseRegionSub: string;
 };
 
 function galleryUrlsFromForm(form: AdminMediaForm): string[] {
@@ -276,6 +283,10 @@ const emptyForm: AdminMediaForm = {
   effectMemo: "",
   pastAdvertisers: "",
   coverageDistrictCodes: [],
+  browseMainCategory: "",
+  browseSubCategory: "",
+  browseRegionMain: "",
+  browseRegionSub: "",
 };
 
 type PriceOptDraft = {
@@ -391,6 +402,7 @@ function validatePriceOptionsJsonField(raw: string): string | null {
 
 function apiToForm(m: AdminMediaDto): AdminMediaForm {
   const { parentSlug, subSlugs } = splitMediaCategoryForm(m.mediaCategory ?? []);
+  const browse = browseFieldsFromDto(m);
   return {
     name: m.name,
     nameEn: m.nameEn ?? "",
@@ -440,6 +452,10 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     effectMemo: m.effectMemo ?? "",
     pastAdvertisers: m.pastAdvertisers ?? "",
     coverageDistrictCodes: [...(m.coverageDistrictCodes ?? [])],
+    browseMainCategory: browse.browseMain,
+    browseSubCategory: browse.browseSub,
+    browseRegionMain: browse.regionMain,
+    browseRegionSub: browse.regionSub,
   };
 }
 
@@ -496,9 +512,15 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     height: form.height.trim() || null,
     description: form.description.trim() || null,
     subCategory: form.subCategory.trim() || null,
+    mediaMainCategory: form.browseMainCategory.trim() || null,
+    mediaSubCategory: form.browseSubCategory.trim() || null,
+    regionMain: form.browseRegionMain.trim() || null,
+    regionSub: form.browseRegionSub.trim() || null,
     mediaCategory: mergeMediaCategoryForm(
       form.mediaCategoryParent,
       form.mediaCategorySubs,
+      form.browseMainCategory.trim() || undefined,
+      form.browseSubCategory.trim() || undefined,
     ),
     targetCategory: [...form.targetCategories],
     tags,
@@ -1090,6 +1112,14 @@ export default function AdminMediasClient({
     const poErr = validatePriceOptionsJsonField(form.priceOptionsJson);
     if (poErr) {
       setSaveError(poErr);
+      return;
+    }
+    const browseErr = validateBrowseFields(
+      form.browseMainCategory,
+      form.browseSubCategory,
+    );
+    if (browseErr) {
+      setSaveError(browseErr);
       return;
     }
     listFetchGenRef.current += 1;
@@ -3433,6 +3463,30 @@ export default function AdminMediasClient({
                 />
               </div>
               <AdminMediaCategoryFields
+                browseMain={form.browseMainCategory}
+                browseSub={form.browseSubCategory}
+                regionMain={form.browseRegionMain}
+                regionSub={form.browseRegionSub}
+                onBrowseMainChange={(slug) =>
+                  setForm((f) => ({
+                    ...f,
+                    browseMainCategory: slug,
+                    browseSubCategory: "",
+                  }))
+                }
+                onBrowseSubChange={(slug) =>
+                  setForm((f) => ({ ...f, browseSubCategory: slug }))
+                }
+                onRegionMainChange={(slug) =>
+                  setForm((f) => ({
+                    ...f,
+                    browseRegionMain: slug,
+                    browseRegionSub: "",
+                  }))
+                }
+                onRegionSubChange={(slug) =>
+                  setForm((f) => ({ ...f, browseRegionSub: slug }))
+                }
                 parentSlug={form.mediaCategoryParent}
                 subSlugs={form.mediaCategorySubs}
                 targetSlugs={form.targetCategories}
@@ -3662,6 +3716,26 @@ export default function AdminMediasClient({
                 onDeleteRemote={deleteBunnyImage}
                 busy={formImageUploadBusy}
               />
+              {editing ? (
+                <AdminMediaProposalUpload
+                  mediaId={editing.id}
+                  initial={{
+                    proposalUrl: editing.proposalUrl,
+                    proposalFileName: editing.proposalFileName,
+                    hasProposal: editing.hasProposal,
+                  }}
+                  onUpdated={(next) => {
+                    setMedias((prev) =>
+                      prev.map((m) =>
+                        m.id === editing.id ? { ...m, ...next } : m,
+                      ),
+                    );
+                    setEditing((cur) =>
+                      cur && cur.id === editing.id ? { ...cur, ...next } : cur,
+                    );
+                  }}
+                />
+              ) : null}
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   설명

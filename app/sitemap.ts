@@ -18,6 +18,18 @@ import { fetchMediaPackageSlugs } from "@/lib/media-package-db";
 const buildTime = new Date();
 const origin = siteUrl.replace(/\/$/, "");
 
+/** SEO 필수 인덱스 URL — sitemapPaths 누락 시에도 항상 포함 */
+const CRITICAL_SITEMAP_PATHS = [
+  "",
+  "/media",
+  "/planner",
+  "/media/packages",
+  "/special/fandom",
+  "/report",
+  "/cases",
+  "/about",
+] as const;
+
 type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 
 function sitemapPriority(path: string): number {
@@ -76,7 +88,11 @@ function sitemapEntry(
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const staticPart = sitemapPaths.map((p) => sitemapEntry(p));
+  const staticPathSet = new Set<string>([
+    ...sitemapPaths,
+    ...CRITICAL_SITEMAP_PATHS,
+  ]);
+  const staticPart = [...staticPathSet].map((p) => sitemapEntry(p));
 
   let casePart: MetadataRoute.Sitemap = [];
   try {

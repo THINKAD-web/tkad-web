@@ -1,10 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { handlers } from "@/lib/auth";
+import { resolveAuthOrigin } from "@/lib/auth-url";
 import {
   checkNextAuthConfig,
   checkOAuthLoginConfig,
   type OAuthProvider,
 } from "@/lib/auth-oauth-env";
+import { oauthConfigErrorRedirect } from "@/lib/oauth-redirect-error";
 
 type RouteContext = { params: Promise<{ nextauth: string[] }> };
 
@@ -16,6 +18,28 @@ function providerFromPath(segments: string[] | undefined): OAuthProvider | null 
   return null;
 }
 
+function guardFailureResponse(
+  req: NextRequest,
+  provider: OAuthProvider | null,
+  message: string,
+): Response {
+  if (req.method === "GET") {
+    const locale =
+      req.nextUrl.searchParams.get("locale")?.trim() === "en" ? "en" : "ko";
+    const redirect =
+      req.nextUrl.searchParams.get("callbackUrl")?.includes("/en/")
+        ? "/my"
+        : "/my";
+    return oauthConfigErrorRedirect(
+      resolveAuthOrigin(req.nextUrl.origin),
+      locale,
+      provider ?? "kakao",
+      redirect,
+    );
+  }
+  return NextResponse.json({ error: message }, { status: 500 });
+}
+
 async function guardAuthRequest(
   req: NextRequest,
   ctx: RouteContext,
@@ -23,7 +47,7 @@ async function guardAuthRequest(
 ): Promise<Response> {
   const base = checkNextAuthConfig();
   if (!base.ok) {
-    return NextResponse.json({ error: base.userMessage }, { status: 500 });
+    return guardFailureResponse(req, null, base.userMessage);
   }
 
   const segments = (await ctx.params).nextauth;
@@ -31,11 +55,24 @@ async function guardAuthRequest(
   if (provider) {
     const oauth = checkOAuthLoginConfig(provider);
     if (!oauth.ok) {
-      return NextResponse.json({ error: oauth.userMessage }, { status: 500 });
+      return guardFailureResponse(req, provider, oauth.userMessage);
     }
   }
 
-  return handler(req);
+  try {
+    return await handler(req);
+  } catch (err) {
+    console.error("[nextauth] handler error:", err);
+    const msg =
+      err instanceof Error ? err.message : "Authentication handler failed";
+    if (req.method === "GET" && provider) {
+      return guardFailureResponse(req, provider, msg);
+    }
+    return NextResponse.json(
+      { error: "로그인 처리 중 오류가 발생했습니다." },
+      { status: 500 },
+    );
+  }
 }
 
 export async function GET(req: NextRequest, ctx: RouteContext) {

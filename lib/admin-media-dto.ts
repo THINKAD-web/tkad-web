@@ -70,6 +70,13 @@ export type AdminMediaDto = {
   }> | null;
   /** 이동형 매체 서비스 구역 — 전국 시·군·구 5자리 행정구역 코드 */
   coverageDistrictCodes: string[];
+  proposalUrl: string | null;
+  proposalFileName: string | null;
+  hasProposal: boolean;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+  regionMain: string | null;
+  regionSub: string | null;
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];
@@ -252,6 +259,13 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
       "coverageDistrictCodes",
       "coverage_district_codes",
     ),
+    proposalUrl: pickStr(r, "proposalUrl", "proposal_url"),
+    proposalFileName: pickStr(r, "proposalFileName", "proposal_file_name"),
+    hasProposal: pickBool(r, "hasProposal", "has_proposal", false),
+    mediaMainCategory: pickStr(r, "mediaMainCategory", "media_main_category"),
+    mediaSubCategory: pickStr(r, "mediaSubCategory", "media_sub_category"),
+    regionMain: pickStr(r, "regionMain", "region_main"),
+    regionSub: pickStr(r, "regionSub", "region_sub"),
   };
 }
 
@@ -332,5 +346,12 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
       ? m.priceOptions as Array<{ label: string; price: number; period?: string }>
       : null,
     coverageDistrictCodes: m.coverageDistrictCodes ?? [],
+    proposalUrl: m.proposalUrl,
+    proposalFileName: m.proposalFileName,
+    hasProposal: m.hasProposal,
+    mediaMainCategory: m.mediaMainCategory,
+    mediaSubCategory: m.mediaSubCategory,
+    regionMain: m.regionMain,
+    regionSub: m.regionSub,
   };
 }

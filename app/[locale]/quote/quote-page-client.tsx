@@ -151,9 +151,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [browseViewMode, setBrowseViewMode] =
     useState<MediaManualBrowseViewMode>("card");
-  const [browseCategory, setBrowseCategory] = useState("");
+  const [browseMainCategory, setBrowseMainCategory] = useState("");
+  const [browseSubCategory, setBrowseSubCategory] = useState("");
   const [browseTarget, setBrowseTarget] = useState("");
-  const [browseRegion, setBrowseRegion] = useState("");
+  const [browseRegionMain, setBrowseRegionMain] = useState("");
+  const [browseRegionSub, setBrowseRegionSub] = useState("");
+  const [browsePriceMin, setBrowsePriceMin] = useState("");
+  const [browsePriceMax, setBrowsePriceMax] = useState("");
+  const [browseFeatures, setBrowseFeatures] = useState("");
   const [mediaPage, setMediaPage] = useState(1);
   const [mediaPageSize, setMediaPageSize] = useState(12);
   const [mediaTextFilter, setMediaTextFilter] = useState("");
@@ -308,9 +313,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const filteredCatalog = useMemo(() => {
     const chipFiltered = filterMediaByDiscoveryChips(catalog, {
-      category: browseCategory,
+      mainCategory: browseMainCategory,
+      subCategory: browseSubCategory,
       target: browseTarget,
-      region: browseRegion,
+      regionMain: browseRegionMain,
+      regionSub: browseRegionSub,
+      priceMin: browsePriceMin,
+      priceMax: browsePriceMax,
+      features: browseFeatures,
     });
     const q = mediaTextFilter.trim().toLowerCase();
     return chipFiltered.filter((m) => {
@@ -320,9 +330,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     });
   }, [
     catalog,
-    browseCategory,
+    browseMainCategory,
+    browseSubCategory,
     browseTarget,
-    browseRegion,
+    browseRegionMain,
+    browseRegionSub,
+    browsePriceMin,
+    browsePriceMax,
+    browseFeatures,
     mediaTextFilter,
     filterState,
     bounds,
@@ -1033,9 +1048,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             setMediaTextFilter(q);
                             setMediaPage(1);
                           }}
-                          category={browseCategory}
-                          onCategoryChange={(v) => {
-                            setBrowseCategory(v);
+                          mainCategory={browseMainCategory}
+                          onMainCategoryChange={(v) => {
+                            setBrowseMainCategory(v);
+                            setMediaPage(1);
+                          }}
+                          subCategory={browseSubCategory}
+                          onSubCategoryChange={(v) => {
+                            setBrowseSubCategory(v);
                             setMediaPage(1);
                           }}
                           target={browseTarget}
@@ -1043,9 +1063,29 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             setBrowseTarget(v);
                             setMediaPage(1);
                           }}
-                          region={browseRegion}
-                          onRegionChange={(v) => {
-                            setBrowseRegion(v);
+                          regionMain={browseRegionMain}
+                          onRegionMainChange={(v) => {
+                            setBrowseRegionMain(v);
+                            setMediaPage(1);
+                          }}
+                          regionSub={browseRegionSub}
+                          onRegionSubChange={(v) => {
+                            setBrowseRegionSub(v);
+                            setMediaPage(1);
+                          }}
+                          priceMin={browsePriceMin}
+                          onPriceMinChange={(v) => {
+                            setBrowsePriceMin(v);
+                            setMediaPage(1);
+                          }}
+                          priceMax={browsePriceMax}
+                          onPriceMaxChange={(v) => {
+                            setBrowsePriceMax(v);
+                            setMediaPage(1);
+                          }}
+                          features={browseFeatures}
+                          onFeaturesChange={(v) => {
+                            setBrowseFeatures(v);
                             setMediaPage(1);
                           }}
                           sort={discoverySort}

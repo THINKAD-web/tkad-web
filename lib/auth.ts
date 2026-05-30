@@ -31,6 +31,9 @@ import {
   readNaverOAuthClientId,
   readNaverOAuthClientSecret,
 } from "@/lib/auth-oauth-env";
+import { ensureAuthEnvDefaults } from "@/lib/auth-url";
+
+ensureAuthEnvDefaults();
 
 const nextAuthConfig = checkNextAuthConfig();
 const authSecretValue = nextAuthConfig.ok ? nextAuthConfig.secret : undefined;
@@ -71,6 +74,7 @@ const providers = [
 
 export const { handlers, signIn, auth } = NextAuth({
   trustHost: true,
+  basePath: "/api/auth",
   secret: authSecretValue,
   providers,
   session: { strategy: "jwt", maxAge: 60 * 10 },

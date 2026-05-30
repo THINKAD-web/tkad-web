@@ -180,6 +180,14 @@ model Media {
   subCategory           String?   @map("sub_category")
   /// 매체 카테고리 slug 배열 (대·소분류, `MediaCategory.slug`)
   mediaCategory         String[]  @default([]) @map("media_category")
+  /// 공개 /media browse 대분류 (`lib/media-browse-categories.ts`)
+  mediaMainCategory     String?   @map("media_main_category")
+  /// 공개 /media browse 소분류
+  mediaSubCategory      String?   @map("media_sub_category")
+  /// 공개 /media browse 시도 (`lib/media-browse-regions.ts`)
+  regionMain            String?   @map("region_main")
+  /// 공개 /media browse 세부 지역
+  regionSub             String?   @map("region_sub")
   /// 적합 캠페인 타겟 slug 배열 (`TargetCategory.slug`)
   targetCategory        String[]  @default([]) @map("target_category")
   tags                  String[]  @default([])
@@ -257,6 +265,13 @@ model Media {
   popularityScore     Int       @default(0) @map("popularity_score")
   popularityUpdatedAt DateTime? @map("popularity_updated_at")
 
+  /// BunnyCDN 등 외부 PDF URL (매체 제안서)
+  proposalUrl      String? @map("proposal_url")
+  /// 다운로드 시 파일명 (예: `강남_LED_제안서.pdf`)
+  proposalFileName String? @map("proposal_file_name")
+  /// 운영자 업로드 제안서 보유 여부
+  hasProposal      Boolean @default(false) @map("has_proposal")
+
   /// 매체 소유자(매체사) — 포털 `/media-owner`
   ownerUserId String? @map("owner_user_id")
 
@@ -282,6 +297,8 @@ model Media {
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
   @@index([isActive, popularityScore(sort: Desc)])
+  @@index([mediaMainCategory, mediaSubCategory])
+  @@index([regionMain, regionSub])
   @@index([ownerUserId])
   @@map("media")
 }

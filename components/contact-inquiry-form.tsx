@@ -106,7 +106,8 @@ function ContactInquiryForm() {
   const casePrefillDone = useRef<string | null>(null);
   const academyTopic = searchParams.get("topic") === "academy";
   const academyPrefillDone = useRef(false);
-  const mediaIdParam = searchParams.get("media");
+  const mediaIdParam =
+    searchParams.get("media") ?? searchParams.get("mediaId");
   const mediaPrefillDone = useRef(false);
   const typeParam = searchParams.get("type");
   const typePrefillDone = useRef(false);
@@ -363,8 +364,23 @@ function ContactInquiryForm() {
         shouldValidate: true,
         shouldDirty: true,
       });
+    } else if (raw === "proposal") {
+      typePrefillDone.current = true;
+      setValue("inquiryType", "media_quote", {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
+      const snippet = isKo
+        ? "[매체 제안서 요청]\n맞춤 제안서(PDF)를 요청합니다.\n"
+        : "[Media proposal request]\nI'd like a tailored proposal PDF.\n";
+      const cur = getValues("additionalNotes").trim();
+      if (!cur.includes("[매체 제안서") && !cur.includes("[Media proposal")) {
+        setValue("additionalNotes", cur ? `${snippet}\n${cur}` : snippet, {
+          shouldDirty: true,
+        });
+      }
     }
-  }, [setValue, typeParam]);
+  }, [getValues, isKo, setValue, typeParam]);
 
   useEffect(() => {
     planPrefillDone.current = null;

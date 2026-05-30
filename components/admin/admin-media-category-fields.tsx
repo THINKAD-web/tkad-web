@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import {
   getChildCategories,
   getTopMediaCategories,
@@ -7,9 +8,23 @@ import {
   categoryLabel,
   targetLabel,
 } from "@/lib/media-categories";
+import {
+  MEDIA_CATEGORIES,
+  browseCategoryLabel,
+  isValidBrowseSub,
+} from "@/lib/media-browse-categories";
+import { MEDIA_BROWSE_REGIONS, browseRegionLabel } from "@/lib/media-browse-regions";
 
 type Props = {
   locale?: string;
+  browseMain: string;
+  browseSub: string;
+  regionMain: string;
+  regionSub: string;
+  onBrowseMainChange: (slug: string) => void;
+  onBrowseSubChange: (slug: string) => void;
+  onRegionMainChange: (slug: string) => void;
+  onRegionSubChange: (slug: string) => void;
   parentSlug: string;
   subSlugs: string[];
   targetSlugs: string[];
@@ -20,6 +35,14 @@ type Props = {
 
 export function AdminMediaCategoryFields({
   locale = "ko",
+  browseMain,
+  browseSub,
+  regionMain,
+  regionSub,
+  onBrowseMainChange,
+  onBrowseSubChange,
+  onRegionMainChange,
+  onRegionSubChange,
   parentSlug,
   subSlugs,
   targetSlugs,
@@ -27,50 +50,150 @@ export function AdminMediaCategoryFields({
   onToggleSub,
   onToggleTarget,
 }: Props) {
+  const [legacyOpen, setLegacyOpen] = useState(false);
   const tops = getTopMediaCategories();
   const children = parentSlug ? getChildCategories(parentSlug) : [];
+  const browseSubs = MEDIA_CATEGORIES.find((m) => m.id === browseMain)?.sub ?? [];
+  const regionSubs =
+    MEDIA_BROWSE_REGIONS.find((r) => r.id === regionMain)?.sub ?? [];
 
   return (
     <div className="space-y-4 rounded-xl border border-border bg-muted/40 p-4">
       <div>
-        <p className="mb-2 text-xs font-semibold text-foreground">매체 카테고리</p>
-        <label className="mb-1 block text-[11px] text-muted-foreground">
-          대분류
-        </label>
-        <select
-          value={parentSlug}
-          onChange={(e) => onParentChange(e.target.value)}
-          className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
-        >
-          <option value="">선택…</option>
-          {tops.map((t) => (
-            <option key={t.slug} value={t.slug}>
-              {categoryLabel(t.slug, locale)}
-            </option>
-          ))}
-        </select>
+        <p className="mb-2 text-xs font-semibold text-foreground">
+          공개 탐색 카테고리 (Browse)
+        </p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-muted-foreground">
+              대분류
+            </span>
+            <select
+              value={browseMain}
+              onChange={(e) => {
+                onBrowseMainChange(e.target.value);
+                onBrowseSubChange("");
+              }}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">선택…</option>
+              {MEDIA_CATEGORIES.map((m) => (
+                <option key={m.id} value={m.id}>
+                  {browseCategoryLabel(m.id, locale, "main")}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-muted-foreground">
+              소분류
+            </span>
+            <select
+              value={browseSub}
+              disabled={!browseMain}
+              onChange={(e) => onBrowseSubChange(e.target.value)}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
+            >
+              <option value="">선택…</option>
+              {browseSubs.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {browseCategoryLabel(s.id, locale, "sub", browseMain)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
       </div>
 
-      {children.length > 0 ? (
-        <div>
-          <p className="mb-2 text-[11px] text-muted-foreground">소분류 (복수)</p>
-          <div className="flex flex-wrap gap-2">
-            {children.map((c) => (
-              <label
-                key={c.slug}
-                className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs"
-              >
-                <input
-                  type="checkbox"
-                  checked={subSlugs.includes(c.slug)}
-                  onChange={() => onToggleSub(c.slug)}
-                />
-                {categoryLabel(c.slug, locale)}
-              </label>
-            ))}
-          </div>
+      <div>
+        <p className="mb-2 text-xs font-semibold text-foreground">Browse 지역</p>
+        <div className="grid gap-3 sm:grid-cols-2">
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-muted-foreground">
+              시·도
+            </span>
+            <select
+              value={regionMain}
+              onChange={(e) => {
+                onRegionMainChange(e.target.value);
+                onRegionSubChange("");
+              }}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">선택…</option>
+              {MEDIA_BROWSE_REGIONS.map((r) => (
+                <option key={r.id} value={r.id}>
+                  {browseRegionLabel(r.id, locale, "main")}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label className="block">
+            <span className="mb-1 block text-[11px] text-muted-foreground">
+              세부 지역
+            </span>
+            <select
+              value={regionSub}
+              disabled={!regionMain}
+              onChange={(e) => onRegionSubChange(e.target.value)}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm disabled:opacity-50"
+            >
+              <option value="">선택…</option>
+              {regionSubs.map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.label}
+                </option>
+              ))}
+            </select>
+          </label>
         </div>
-      ) : null}
+      </div>
+
+      <details
+        open={legacyOpen}
+        onToggle={(e) => setLegacyOpen(e.currentTarget.open)}
+        className="rounded-lg border border-dashed border-border bg-card/50 p-3"
+      >
+        <summary className="cursor-pointer text-xs font-semibold text-muted-foreground">
+          SEO 카테고리 (legacy, 선택)
+        </summary>
+        <div className="mt-3 space-y-3">
+          <div>
+            <label className="mb-1 block text-[11px] text-muted-foreground">
+              SEO 대분류
+            </label>
+            <select
+              value={parentSlug}
+              onChange={(e) => onParentChange(e.target.value)}
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+            >
+              <option value="">선택…</option>
+              {tops.map((t) => (
+                <option key={t.slug} value={t.slug}>
+                  {categoryLabel(t.slug, locale)}
+                </option>
+              ))}
+            </select>
+          </div>
+          {children.length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {children.map((c) => (
+                <label
+                  key={c.slug}
+                  className="inline-flex cursor-pointer items-center gap-1.5 rounded-md border border-border bg-card px-2 py-1 text-xs"
+                >
+                  <input
+                    type="checkbox"
+                    checked={subSlugs.includes(c.slug)}
+                    onChange={() => onToggleSub(c.slug)}
+                  />
+                  {categoryLabel(c.slug, locale)}
+                </label>
+              ))}
+            </div>
+          ) : null}
+        </div>
+      </details>
 
       <div>
         <p className="mb-2 text-xs font-semibold text-foreground">
@@ -99,8 +222,12 @@ export function AdminMediaCategoryFields({
 export function mergeMediaCategoryForm(
   parentSlug: string,
   subSlugs: string[],
+  browseMain?: string,
+  browseSub?: string,
 ): string[] {
   const out = new Set<string>();
+  if (browseMain) out.add(browseMain);
+  if (browseSub) out.add(browseSub);
   if (parentSlug) out.add(parentSlug);
   subSlugs.forEach((s) => out.add(s));
   return [...out];
@@ -111,7 +238,41 @@ export function splitMediaCategoryForm(slugs: string[]): {
   subSlugs: string[];
 } {
   const tops = new Set(getTopMediaCategories().map((t) => t.slug));
+  const browseIds = new Set(MEDIA_CATEGORIES.map((m) => m.id));
   const parent = slugs.find((s) => tops.has(s)) ?? "";
-  const subs = slugs.filter((s) => !tops.has(s));
+  const subs = slugs.filter(
+    (s) => !tops.has(s) && !browseIds.has(s) && !MEDIA_CATEGORIES.some(
+      (m) => m.sub.some((sub) => sub.id === s),
+    ),
+  );
   return { parentSlug: parent, subSlugs: subs };
+}
+
+export function browseFieldsFromDto(m: {
+  mediaMainCategory?: string | null;
+  mediaSubCategory?: string | null;
+  regionMain?: string | null;
+  regionSub?: string | null;
+}): {
+  browseMain: string;
+  browseSub: string;
+  regionMain: string;
+  regionSub: string;
+} {
+  return {
+    browseMain: m.mediaMainCategory?.trim() ?? "",
+    browseSub: m.mediaSubCategory?.trim() ?? "",
+    regionMain: m.regionMain?.trim() ?? "",
+    regionSub: m.regionSub?.trim() ?? "",
+  };
+}
+
+export function validateBrowseFields(
+  browseMain: string,
+  browseSub: string,
+): string | null {
+  if (browseSub && browseMain && !isValidBrowseSub(browseMain, browseSub)) {
+    return "Browse 소분류가 대분류와 맞지 않습니다.";
+  }
+  return null;
 }

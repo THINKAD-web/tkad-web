@@ -18,6 +18,8 @@ type Props = {
   tabs: TabDef[];
   panels: Record<MediaDetailTabId, ReactNode>;
   sidebar?: ReactNode;
+  /** 모바일에서 탭 위에 표시 (사이드바 대체) */
+  mobileProposal?: ReactNode;
   similarSection?: ReactNode;
   belowFold?: ReactNode;
   className?: string;
@@ -27,6 +29,7 @@ export function MediaDetailPageLayout({
   tabs,
   panels,
   sidebar,
+  mobileProposal,
   similarSection,
   belowFold,
   className,
@@ -38,6 +41,9 @@ export function MediaDetailPageLayout({
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
+            {mobileProposal ? (
+              <div className="mb-6">{mobileProposal}</div>
+            ) : null}
             <div
               role="tablist"
               aria-label="Media detail sections"

@@ -112,6 +112,30 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     }
     data.mediaCategory = body.mediaCategory;
   }
+  if (body.mediaMainCategory !== undefined) {
+    data.mediaMainCategory =
+      body.mediaMainCategory === null
+        ? null
+        : String(body.mediaMainCategory).trim() || null;
+  }
+  if (body.mediaSubCategory !== undefined) {
+    data.mediaSubCategory =
+      body.mediaSubCategory === null
+        ? null
+        : String(body.mediaSubCategory).trim() || null;
+  }
+  if (body.regionMain !== undefined) {
+    data.regionMain =
+      body.regionMain === null
+        ? null
+        : String(body.regionMain).trim() || null;
+  }
+  if (body.regionSub !== undefined) {
+    data.regionSub =
+      body.regionSub === null
+        ? null
+        : String(body.regionSub).trim() || null;
+  }
   if (body.targetCategory !== undefined) {
     if (
       !Array.isArray(body.targetCategory) ||

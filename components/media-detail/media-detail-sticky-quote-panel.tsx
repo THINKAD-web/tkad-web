@@ -13,12 +13,14 @@ import {
   formatWonShort,
 } from "@/lib/compare-quote";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-proposal-card";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
   isKo: boolean;
+  pageLocale: string;
   displayName: string;
   periodLabel: string;
   className?: string;
@@ -27,6 +29,7 @@ type Props = {
 export function MediaDetailStickyQuotePanel({
   media,
   isKo,
+  pageLocale,
   displayName,
   periodLabel,
   className,
@@ -115,6 +118,12 @@ export function MediaDetailStickyQuotePanel({
             </p>
           ) : null}
         </div>
+
+        <MediaDetailProposalCard
+          media={media}
+          isKo={isKo}
+          locale={pageLocale}
+        />
 
         <MediaInquiryDialog
           mediaId={media.id}

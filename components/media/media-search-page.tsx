@@ -29,6 +29,8 @@ import {
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
+import { useRouter, usePathname } from "@/i18n/navigation";
 
 type ViewMode = MediaManualBrowseViewMode;
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
@@ -108,13 +110,44 @@ function MediaSearchPageInner({
   const locale = useLocale();
   const tMedia = useTranslations("media");
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
-  const [query, setQuery] = useState("");
-  const [category, setCategory] = useState(initialCategory || "");
-  const [target, setTarget] = useState(initialTarget || "");
-  const [region, setRegion] = useState(initialRegion || "");
-  const [sort, setSort] = useState("popular");
+
+  const initialFromUrl = useMemo(() => {
+    const legacyCat =
+      searchParams.get("category") ?? initialCategory ?? "";
+    const resolved = resolveBrowseCategoryParams({
+      mainCategory: searchParams.get("mainCategory"),
+      subCategory: searchParams.get("subCategory"),
+      category: legacyCat,
+    });
+    return {
+      mainCategory: resolved.mainCategory ?? "",
+      subCategory: resolved.subCategory ?? "",
+      target: searchParams.get("target") ?? initialTarget ?? "",
+      regionMain: searchParams.get("regionMain") ?? "",
+      regionSub: searchParams.get("regionSub") ?? "",
+      regionLegacy: searchParams.get("region") ?? initialRegion ?? "",
+      priceMin: searchParams.get("priceMin") ?? "",
+      priceMax: searchParams.get("priceMax") ?? "",
+      features: searchParams.get("features") ?? "",
+    };
+  }, [searchParams, initialCategory, initialTarget, initialRegion]);
+
+  const [query, setQuery] = useState(searchParams.get("q") ?? "");
+  const [mainCategory, setMainCategory] = useState(
+    initialFromUrl.mainCategory,
+  );
+  const [subCategory, setSubCategory] = useState(initialFromUrl.subCategory);
+  const [target, setTarget] = useState(initialFromUrl.target);
+  const [regionMain, setRegionMain] = useState(initialFromUrl.regionMain);
+  const [regionSub, setRegionSub] = useState(initialFromUrl.regionSub);
+  const [priceMin, setPriceMin] = useState(initialFromUrl.priceMin);
+  const [priceMax, setPriceMax] = useState(initialFromUrl.priceMax);
+  const [features, setFeatures] = useState(initialFromUrl.features);
+  const [sort, setSort] = useState(searchParams.get("sort") ?? "popular");
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
   const [total, setTotal] = useState(initialTotal ?? initialMedia.length);
@@ -134,10 +167,56 @@ function MediaSearchPageInner({
   }, []);
 
   useEffect(() => {
-    setCategory(searchParams.get("category") ?? "");
+    const legacyCat = searchParams.get("category") ?? "";
+    const resolved = resolveBrowseCategoryParams({
+      mainCategory: searchParams.get("mainCategory"),
+      subCategory: searchParams.get("subCategory"),
+      category: legacyCat,
+    });
+    setMainCategory(resolved.mainCategory ?? "");
+    setSubCategory(resolved.subCategory ?? "");
     setTarget(searchParams.get("target") ?? "");
-    setRegion(searchParams.get("region") ?? "");
+    setRegionMain(searchParams.get("regionMain") ?? "");
+    setRegionSub(searchParams.get("regionSub") ?? "");
+    setQuery(searchParams.get("q") ?? "");
+    setPriceMin(searchParams.get("priceMin") ?? "");
+    setPriceMax(searchParams.get("priceMax") ?? "");
+    setFeatures(searchParams.get("features") ?? "");
+    const sortParam = searchParams.get("sort");
+    if (sortParam) setSort(sortParam);
   }, [searchParams]);
+
+  useEffect(() => {
+    if (plannerMode || embedded) return;
+    const params = new URLSearchParams();
+    if (query.trim()) params.set("q", query.trim());
+    if (mainCategory) params.set("mainCategory", mainCategory);
+    if (subCategory) params.set("subCategory", subCategory);
+    if (target) params.set("target", target);
+    if (regionMain) params.set("regionMain", regionMain);
+    if (regionSub) params.set("regionSub", regionSub);
+    if (priceMin.trim()) params.set("priceMin", priceMin.trim());
+    if (priceMax.trim()) params.set("priceMax", priceMax.trim());
+    if (features.trim()) params.set("features", features.trim());
+    if (sort && sort !== "popular") params.set("sort", sort);
+    const qs = params.toString();
+    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+  }, [
+    query,
+    mainCategory,
+    subCategory,
+    target,
+    regionMain,
+    regionSub,
+    priceMin,
+    priceMax,
+    features,
+    sort,
+    plannerMode,
+    embedded,
+    pathname,
+    router,
+  ]);
 
   const isInCompare = useCallback(
     (id: string) => compareEntries.some((e) => e.id === id),
@@ -196,9 +275,14 @@ function MediaSearchPageInner({
       try {
         const params = new URLSearchParams();
         if (query) params.set("q", query);
-        if (category) params.set("category", category);
+        if (mainCategory) params.set("mainCategory", mainCategory);
+        if (subCategory) params.set("subCategory", subCategory);
         if (target) params.set("target", target);
-        if (region) params.set("region", region);
+        if (regionMain) params.set("regionMain", regionMain);
+        if (regionSub) params.set("regionSub", regionSub);
+        if (priceMin.trim()) params.set("priceMin", priceMin.trim());
+        if (priceMax.trim()) params.set("priceMax", priceMax.trim());
+        if (features.trim()) params.set("features", features.trim());
         params.set("sort", sort);
         params.set("page", String(opts.page));
         params.set("limit", String(PAGE_SIZE));
@@ -228,7 +312,19 @@ function MediaSearchPageInner({
         else setLoading(false);
       }
     },
-    [query, category, target, region, sort, plannerMode],
+    [
+      query,
+      mainCategory,
+      subCategory,
+      target,
+      regionMain,
+      regionSub,
+      priceMin,
+      priceMax,
+      features,
+      sort,
+      plannerMode,
+    ],
   );
 
   const hasMore = media.length < total;
@@ -369,12 +465,22 @@ function MediaSearchPageInner({
           isKo={isKo}
           query={query}
           onQueryChange={setQuery}
-          category={category}
-          onCategoryChange={setCategory}
+          mainCategory={mainCategory}
+          onMainCategoryChange={setMainCategory}
+          subCategory={subCategory}
+          onSubCategoryChange={setSubCategory}
           target={target}
           onTargetChange={setTarget}
-          region={region}
-          onRegionChange={setRegion}
+          regionMain={regionMain}
+          onRegionMainChange={setRegionMain}
+          regionSub={regionSub}
+          onRegionSubChange={setRegionSub}
+          priceMin={priceMin}
+          onPriceMinChange={setPriceMin}
+          priceMax={priceMax}
+          onPriceMaxChange={setPriceMax}
+          features={features}
+          onFeaturesChange={setFeatures}
           sort={sort}
           onSortChange={setSort}
           viewMode={viewMode}
@@ -473,9 +579,14 @@ function MediaSearchPageInner({
               type="button"
               onClick={() => {
                 setQuery("");
-                setCategory("");
+                setMainCategory("");
+                setSubCategory("");
                 setTarget("");
-                setRegion("");
+                setRegionMain("");
+                setRegionSub("");
+                setPriceMin("");
+                setPriceMax("");
+                setFeatures("");
               }}
               className="tkad-home-accent-text text-sm underline"
             >

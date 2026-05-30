@@ -160,6 +160,14 @@ export async function POST(request: NextRequest) {
   if (tags !== undefined) data.tags = tags;
   const mediaCategory = optStrArr(body.mediaCategory);
   if (mediaCategory !== undefined) data.mediaCategory = mediaCategory;
+  const mediaMainCategory = optStr(body.mediaMainCategory);
+  if (mediaMainCategory !== undefined) data.mediaMainCategory = mediaMainCategory;
+  const mediaSubCategory = optStr(body.mediaSubCategory);
+  if (mediaSubCategory !== undefined) data.mediaSubCategory = mediaSubCategory;
+  const regionMain = optStr(body.regionMain);
+  if (regionMain !== undefined) data.regionMain = regionMain;
+  const regionSub = optStr(body.regionSub);
+  if (regionSub !== undefined) data.regionSub = regionSub;
   const targetCategory = optStrArr(body.targetCategory);
   if (targetCategory !== undefined) data.targetCategory = targetCategory;
   const dist = optStr(body.district);

@@ -1,3 +1,6 @@
+import type { Metadata } from "next";
+import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
 import { HomeQuickAccess } from "@/components/home/home-quick-access";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
@@ -8,6 +11,33 @@ import { fetchPublishedReports } from "@/lib/report-queries";
 import { fetchPublishedCases } from "@/lib/case-queries";
 
 export const revalidate = 60;
+
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}): Promise<Metadata> {
+  const locale = await resolveLocaleParam(params);
+  const isKo = locale === "ko";
+  const title = isKo
+    ? "THINKAD 싱커드 — 전국 OOH 광고 플랫폼"
+    : "THINKAD — Nationwide OOH advertising platform";
+  const description = isKo
+    ? "전국 500+ 검증 OOH 매체, AI 플래너, 전자계약까지 — 데이터 기반 옥외광고 원스톱."
+    : "500+ verified OOH media, AI planner, and e-contract — data-driven outdoor advertising.";
+  return {
+    title: { absolute: title },
+    description,
+    alternates: pageAlternates(locale, ""),
+    ...buildShareMetadata({
+      locale,
+      title,
+      description,
+      path: "",
+      image: { kind: "default" },
+    }),
+  };
+}
 
 export default async function HomePage({
   params,

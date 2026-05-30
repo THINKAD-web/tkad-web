@@ -65,6 +65,14 @@ export interface MediaItem {
   subCategory?: string;
   /** 매체 카테고리 slug 배열 (DB `media_category`) */
   mediaCategory?: string[];
+  /** Browse 대분류 (`lib/media-browse-categories.ts`) */
+  mediaMainCategory?: string;
+  /** Browse 소분류 */
+  mediaSubCategory?: string;
+  /** Browse 시도 */
+  regionMain?: string;
+  /** Browse 세부 지역 */
+  regionSub?: string;
   /** 적합 캠페인 타겟 slug 배열 (DB `target_category`) */
   targetCategory?: string[];
   /** 검색·표시용 태그 */
@@ -104,6 +112,10 @@ export interface MediaItem {
   visibilityScore?: number;
   /** 공개 카탈로그 Verified 리본 (DB `is_verified`, 관리자 지정) */
   isVerified?: boolean;
+  /** BunnyCDN 등 업로드 제안서 URL */
+  proposalUrl?: string;
+  proposalFileName?: string;
+  hasProposal?: boolean;
   features?: string;
   featuresEn?: string;
   dailyExposure?: string;

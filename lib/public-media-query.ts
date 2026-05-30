@@ -1,4 +1,6 @@
 import type { Prisma } from "@prisma/client";
+import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
+import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 
 export type PublicMediaSort =
@@ -13,28 +15,70 @@ export type PublicMediaSort =
 export type PublicMediaQueryParams = {
   q?: string | null;
   category?: string | null;
+  mainCategory?: string | null;
+  subCategory?: string | null;
   target?: string | null;
   region?: string | null;
+  regionMain?: string | null;
+  regionSub?: string | null;
   minPrice?: number | null;
   maxPrice?: number | null;
+  priceMin?: number | null;
+  priceMax?: number | null;
+  features?: string | null;
   available?: boolean | null;
+  operatingHours?: string | null;
   sort?: PublicMediaSort | null;
   page?: number;
   limit?: number;
 };
+
+function parseFeatures(featuresRaw: string | null | undefined): string[] {
+  if (!featuresRaw?.trim()) return [];
+  return featuresRaw
+    .split(/[,，]/)
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean);
+}
 
 export function buildPublicMediaWhere(
   params: PublicMediaQueryParams,
 ): Prisma.MediaWhereInput {
   const and: Prisma.MediaWhereInput[] = [{ isActive: true }];
 
-  if (params.category?.trim()) {
+  const resolved = resolveBrowseCategoryParams({
+    mainCategory: params.mainCategory,
+    subCategory: params.subCategory,
+    category: params.category,
+  });
+
+  if (resolved.mainCategory) {
+    and.push({ mediaMainCategory: resolved.mainCategory });
+  }
+  if (resolved.subCategory) {
+    and.push({ mediaSubCategory: resolved.subCategory });
+  }
+
+  if (
+    params.category?.trim() &&
+    !resolved.mainCategory &&
+    !resolved.subCategory
+  ) {
     and.push({ mediaCategory: { has: params.category.trim() } });
   }
+
   if (params.target?.trim()) {
     and.push({ targetCategory: { has: params.target.trim() } });
   }
-  if (params.region?.trim()) {
+
+  if (params.regionMain?.trim()) {
+    and.push({ regionMain: params.regionMain.trim() });
+  }
+  if (params.regionSub?.trim()) {
+    and.push({ regionSub: params.regionSub.trim() });
+  }
+
+  if (params.region?.trim() && !params.regionMain && !params.regionSub) {
     const aliases = expandMediaRegionChip(params.region);
     and.push({
       OR: aliases.flatMap((alias) => [
@@ -42,6 +86,8 @@ export function buildPublicMediaWhere(
         { city: { contains: alias, mode: "insensitive" } },
         { district: { contains: alias, mode: "insensitive" } },
         { regionZone: { contains: alias, mode: "insensitive" } },
+        { regionMain: { contains: alias, mode: "insensitive" } },
+        { regionSub: { contains: alias, mode: "insensitive" } },
         { location: { contains: alias, mode: "insensitive" } },
         { name: { contains: alias, mode: "insensitive" } },
         { nearbyStations: { contains: alias, mode: "insensitive" } },
@@ -49,6 +95,7 @@ export function buildPublicMediaWhere(
       ]),
     });
   }
+
   if (params.q?.trim()) {
     const q = params.q.trim();
     and.push({
@@ -62,18 +109,48 @@ export function buildPublicMediaWhere(
     });
   }
 
+  const minPrice = params.minPrice ?? params.priceMin;
+  const maxPrice = params.maxPrice ?? params.priceMax;
   const priceFilter: { gte?: number; lte?: number } = {};
-  if (params.minPrice != null && Number.isFinite(params.minPrice)) {
-    priceFilter.gte = params.minPrice;
+  if (minPrice != null && Number.isFinite(minPrice)) {
+    priceFilter.gte = minPrice;
   }
-  if (params.maxPrice != null && Number.isFinite(params.maxPrice)) {
-    priceFilter.lte = params.maxPrice;
+  if (maxPrice != null && Number.isFinite(maxPrice)) {
+    priceFilter.lte = maxPrice;
   }
   if (Object.keys(priceFilter).length > 0) {
     and.push({ price: priceFilter });
   }
+
   if (params.available === true) {
     and.push({ availability: "available" });
+  }
+
+  const features = parseFeatures(params.features);
+  for (const f of features) {
+    if (f === "instant_booking" || f === "instant") {
+      and.push({ instantBookingEnabled: true });
+    } else if (f === "network") {
+      and.push({
+        OR: [
+          { mediaMainCategory: "network" },
+          { type: { contains: "network", mode: "insensitive" } },
+        ],
+      });
+    } else if (f === "24h" || f === "24hours") {
+      and.push({
+        operatingHours: { contains: "24", mode: "insensitive" },
+      });
+    }
+  }
+
+  if (params.operatingHours?.trim()) {
+    and.push({
+      operatingHours: {
+        contains: params.operatingHours.trim(),
+        mode: "insensitive",
+      },
+    });
   }
 
   return and.length === 1 ? and[0]! : { AND: and };
@@ -124,10 +201,18 @@ export function parsePublicMediaQuery(
   return {
     q: sp.get("q"),
     category: sp.get("category") ?? sp.get("cat"),
+    mainCategory: sp.get("mainCategory"),
+    subCategory: sp.get("subCategory"),
     target: sp.get("target"),
     region: sp.get("region"),
+    regionMain: sp.get("regionMain"),
+    regionSub: sp.get("regionSub"),
     minPrice: parseNum(sp.get("minPrice")),
     maxPrice: parseNum(sp.get("maxPrice")),
+    priceMin: parseNum(sp.get("priceMin")),
+    priceMax: parseNum(sp.get("priceMax")),
+    features: sp.get("features"),
+    operatingHours: sp.get("operatingHours"),
     available:
       sp.get("available") === "true"
         ? true

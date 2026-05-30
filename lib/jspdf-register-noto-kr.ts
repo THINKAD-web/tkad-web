@@ -13,8 +13,9 @@ import { NOTO_KR_FONT_FAMILY } from "@/lib/jspdf-kr-font-constants";
 
 /** VFS 등록 시 파일명과 바이트가 일치해야 함 — 후보 파일마다 별도 이름 사용 */
 export const NOTO_KR_FONT_CANDIDATES = [
-  "NotoSansKR-Regular.otf",
   "NotoSansKR-Regular.ttf",
+  "Pretendard-Regular.ttf",
+  "NotoSansKR-Regular.otf",
 ] as const;
 
 function isVerboseFontLog(): boolean {
@@ -180,6 +181,15 @@ export function attachNotoSansKrBuffer(
       vfsFileName,
       NOTO_KR_FONT_FAMILY,
       "normal",
+      undefined,
+      "Identity-H",
+    );
+    // jsPDF has no synthetic bold for embedded CJK — register same TTF as bold
+    // so setFont(fam, "bold") does not fall back to Helvetica (garbled Korean).
+    doc.addFont(
+      vfsFileName,
+      NOTO_KR_FONT_FAMILY,
+      "bold",
       undefined,
       "Identity-H",
     );

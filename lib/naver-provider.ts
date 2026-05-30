@@ -27,22 +27,31 @@ export default function NaverProvider(
     },
     token: {
       url: "https://nid.naver.com/oauth2.0/token",
-      async request({
-        provider,
-        params,
-      }: {
-        provider: { clientId?: string; clientSecret?: string; callbackUrl: string };
+      async request(context: {
+        provider: {
+          clientId?: string;
+          clientSecret?: string;
+          callbackUrl: string;
+        };
         params: Record<string, unknown>;
       }) {
+        const { provider, params } = context;
+        const clientId = provider.clientId;
+        const clientSecret = provider.clientSecret;
+        const redirectUri = provider.callbackUrl;
+        if (!clientId || !clientSecret || !redirectUri) {
+          throw new Error("Naver OAuth client credentials or callback URL missing");
+        }
+
         const url = new URL("https://nid.naver.com/oauth2.0/token");
         url.searchParams.set("grant_type", "authorization_code");
-        url.searchParams.set("client_id", provider.clientId!);
-        url.searchParams.set("client_secret", provider.clientSecret!);
+        url.searchParams.set("client_id", clientId);
+        url.searchParams.set("client_secret", clientSecret);
         url.searchParams.set("code", String(params.code ?? ""));
         if (params.state) {
           url.searchParams.set("state", String(params.state));
         }
-        url.searchParams.set("redirect_uri", provider.callbackUrl);
+        url.searchParams.set("redirect_uri", redirectUri);
 
         const response = await fetch(url.toString(), { method: "GET" });
         const tokens = (await response.json()) as {

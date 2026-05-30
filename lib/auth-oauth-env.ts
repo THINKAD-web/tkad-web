@@ -210,6 +210,8 @@ export function checkNextAuthConfig(): NextAuthConfigCheck {
 /** Vercel 등록용 — OAuth 로그인에 필요한 키 목록 */
 export const OAUTH_VERCEL_ENV_KEYS = [
   "AUTH_SECRET",
+  "AUTH_URL",
+  "NEXTAUTH_URL",
   "USER_SESSION_SECRET",
   "GOOGLE_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
@@ -219,6 +221,7 @@ export const OAUTH_VERCEL_ENV_KEYS = [
   "NAVER_CLIENT_ID",
   "NAVER_CLIENT_SECRET",
   "NEXT_PUBLIC_SITE_URL",
+  "SITE_URL",
   "DATABASE_URL",
 ] as const;
 

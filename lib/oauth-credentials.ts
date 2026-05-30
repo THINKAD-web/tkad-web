@@ -6,21 +6,34 @@
 export function readKakaoOAuthClientId(): string | undefined {
   return (
     process.env.KAKAO_CLIENT_ID?.trim() ||
+    process.env.AUTH_KAKAO_ID?.trim() ||
     process.env.KAKAO_REST_API_KEY?.trim() ||
     undefined
   );
 }
 
 export function readKakaoOAuthClientSecret(): string | undefined {
-  return process.env.KAKAO_CLIENT_SECRET?.trim() || undefined;
+  return (
+    process.env.KAKAO_CLIENT_SECRET?.trim() ||
+    process.env.AUTH_KAKAO_SECRET?.trim() ||
+    undefined
+  );
 }
 
 export function readNaverOAuthClientId(): string | undefined {
-  return process.env.NAVER_CLIENT_ID?.trim() || undefined;
+  return (
+    process.env.NAVER_CLIENT_ID?.trim() ||
+    process.env.AUTH_NAVER_ID?.trim() ||
+    undefined
+  );
 }
 
 export function readNaverOAuthClientSecret(): string | undefined {
-  return process.env.NAVER_CLIENT_SECRET?.trim() || undefined;
+  return (
+    process.env.NAVER_CLIENT_SECRET?.trim() ||
+    process.env.AUTH_NAVER_SECRET?.trim() ||
+    undefined
+  );
 }
 
 export function readGoogleOAuthClientId(): string | undefined {
