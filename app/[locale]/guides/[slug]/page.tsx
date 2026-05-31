@@ -4,11 +4,8 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
-import {
-  getPublishedGuideArticles,
-  getPublishedGuideBySlug,
-} from "@/lib/public-auto-content";
-import { SEO_GUIDE_TOPICS } from "@/lib/seo-content/seo-guide-topics";
+import { getPublishedGuideBySlug } from "@/lib/public-auto-content";
+import { SEO_GUIDE_SLUGS, SEO_GUIDE_TOPICS } from "@/lib/seo-content/seo-guide-topics";
 import { DbGuideArticlePage } from "@/components/guides/db-guide-article-page";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
@@ -20,12 +17,9 @@ type Props = {
   params: Promise<{ locale: string; slug: string }>;
 };
 
-export async function generateStaticParams() {
-  const dbGuides = await getPublishedGuideArticles();
-  const slugs = new Set([
-    ...GUIDES.map((g) => g.slug),
-    ...dbGuides.map((g) => g.slug),
-  ]);
+/** Build-time DB fetch omitted — Vercel 8GB builders OOM/timeout 방지; slugs are known constants. */
+export function generateStaticParams() {
+  const slugs = new Set([...GUIDES.map((g) => g.slug), ...SEO_GUIDE_SLUGS]);
   return [...slugs].map((slug) => ({ slug }));
 }
 
