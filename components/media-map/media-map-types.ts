@@ -21,4 +21,5 @@ export type MapMapItem = {
   cpm?: number | null;
   isVerified?: boolean;
   isInstantBooking?: boolean;
+  installLocations?: Array<{ label: string; lat: number; lng: number }>;
 };

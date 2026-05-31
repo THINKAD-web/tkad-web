@@ -24,6 +24,14 @@ import {
   collectMediaImageUrls,
   deleteBunnyPublicUrls,
 } from "@/lib/bunny-storage";
+import {
+  parseInstallLocationsBody,
+  parseMediaInstallLocations,
+  resolveMediaCoordsForSave,
+  type MediaInstallLocation,
+} from "@/lib/media-install-locations";
+import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
+import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 
 export const dynamic = "force-dynamic";
 
@@ -44,7 +52,10 @@ export async function GET(request: NextRequest, { params }: Params) {
   });
   if (!media) return json({ error: "Not found" }, 404);
   const [mediaWithCoverage] = await attachCoverageDistrictCodesById(db, [media]);
-  return json({ media: mediaWithCoverage });
+  const [mediaWithExtras] = await attachInstallLocationsById(db, [
+    mediaWithCoverage,
+  ]);
+  return json({ media: mediaWithExtras });
 }
 
 export async function PATCH(request: NextRequest, { params }: Params) {
@@ -64,6 +75,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (!existing) return json({ error: "Not found" }, 404);
 
   const data: Prisma.MediaUpdateInput = {};
+  let installLocationsToPersist: MediaInstallLocation[] | null | undefined;
   if (body.name != null) data.name = String(body.name).trim();
   if (body.nameEn !== undefined)
     data.nameEn = String(body.nameEn ?? "").trim() || null;
@@ -179,6 +191,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       const n = Number(body.longitude);
       data.longitude = Number.isFinite(n) ? n : null;
     }
+  }
+  if (body.installLocations !== undefined) {
+    const parsed = parseInstallLocationsBody(body.installLocations);
+    if (!parsed.ok) return json({ error: parsed.error }, 400);
+    installLocationsToPersist = parsed.value;
   }
   if (body.priceNote !== undefined)
     data.priceNote = String(body.priceNote ?? "").trim() || null;
@@ -404,6 +421,26 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           : existing.longitude;
   }
 
+  let mergedInstalls = parseMediaInstallLocations(existing.installLocations);
+  if (body.installLocations !== undefined) {
+    const parsed = parseInstallLocationsBody(body.installLocations);
+    if (!parsed.ok) return json({ error: parsed.error }, 400);
+    mergedInstalls = parsed.value ?? [];
+    installLocationsToPersist = parsed.value;
+  }
+
+  const coordsResolved = resolveMediaCoordsForSave({
+    installLocations: mergedInstalls.length > 0 ? mergedInstalls : null,
+    latitude: mergedLat,
+    longitude: mergedLng,
+  });
+  mergedLat = coordsResolved.latitude;
+  mergedLng = coordsResolved.longitude;
+  if (mergedInstalls.length > 0 || body.installLocations !== undefined) {
+    data.latitude = coordsResolved.latitude;
+    data.longitude = coordsResolved.longitude;
+  }
+
   const mergedNearby =
     "nearbyFacilities" in body
       ? body.nearbyFacilities === null || body.nearbyFacilities === undefined
@@ -562,6 +599,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     );
   }
 
+  delete (data as { installLocations?: unknown }).installLocations;
+
   try {
     const media = await db.$transaction(async (tx) => {
       const updated = await tx.media.update({
@@ -571,8 +610,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       if (coverageCodesForSql !== undefined) {
         await persistMediaCoverageDistrictCodes(tx, id, coverageCodesForSql);
       }
+      if (installLocationsToPersist !== undefined) {
+        await persistMediaInstallLocations(tx, id, installLocationsToPersist);
+      }
       return updated;
     });
+    const [withCov] = await attachCoverageDistrictCodesById(db, [media]);
+    const [mediaForClient] = await attachInstallLocationsById(db, [withCov]);
     if (isAdminAuthDebugEnabled()) {
       console.log("[admin-api] media PATCH persisted", {
         id: media.id,
@@ -615,7 +659,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
     }
-    return json({ media });
+    return json({ media: mediaForClient });
   } catch (err) {
     // 기존 구현은 모든 오류를 404로 감춰서(Prisma 스키마 불일치 포함) 디버깅이 어려웠음.
     // 운영/개발 모두에서 최소한의 힌트를 제공한다.

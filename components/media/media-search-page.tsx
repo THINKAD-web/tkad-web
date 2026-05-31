@@ -1,5 +1,6 @@
 "use client";
 
+import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -31,6 +32,15 @@ import {
 } from "@/lib/media-price-format";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { useRouter, usePathname } from "@/i18n/navigation";
+import { MediaPinPopup } from "@/components/media-pin-popup";
+import {
+  mediaItemHasMapCoordinates,
+  resolveMediaIdFromMapPinId,
+} from "@/lib/media-detail-map-markers";
+
+const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
+  ssr: false,
+});
 
 type ViewMode = MediaManualBrowseViewMode;
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
@@ -66,25 +76,9 @@ function feedHighlightChips(item: HomeCatalogMediaItem) {
   return chips;
 }
 
-function catalogItemToMediaItem(item: HomeCatalogMediaItem): MediaItem {
-  return {
-    id: item.id,
-    name: item.name,
-    nameEn: item.name,
-    location: item.region ?? "",
-    locationEn: item.region ?? "",
-    region: "seoul",
-    type: "digital",
-    price: item.price ?? 0,
-    lat: 0,
-    lng: 0,
-    dailyFootTraffic: 0,
-    sampleImages: item.thumbnailUrl ? [item.thumbnailUrl] : [],
-  };
-}
-
 interface Props {
   initialMedia: HomeCatalogMediaItem[];
+  initialCatalogItems?: MediaItem[];
   initialTotal?: number;
   initialCategory?: string;
   initialTarget?: string;
@@ -98,6 +92,7 @@ interface Props {
 
 function MediaSearchPageInner({
   initialMedia,
+  initialCatalogItems = [],
   initialTotal,
   initialCategory,
   initialTarget,
@@ -150,6 +145,11 @@ function MediaSearchPageInner({
   const [sort, setSort] = useState(searchParams.get("sort") ?? "popular");
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
+  const [catalogItems, setCatalogItems] =
+    useState<MediaItem[]>(initialCatalogItems);
+  const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
+  const [mapPopupOpen, setMapPopupOpen] = useState(false);
+  const [mapHeightPx, setMapHeightPx] = useState(520);
   const [total, setTotal] = useState(initialTotal ?? initialMedia.length);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -258,14 +258,29 @@ function MediaSearchPageInner({
     [cartIds],
   );
 
-  const searchCatalog = useMemo<MediaItem[]>(
-    () => media.map(catalogItemToMediaItem),
-    [media],
+  const mapDisplayItems = useMemo(
+    () => catalogItems.filter(mediaItemHasMapCoordinates),
+    [catalogItems],
   );
 
+  const mapSelectedMedia = useMemo(() => {
+    if (mapSelectedId == null) return null;
+    const mediaId = resolveMediaIdFromMapPinId(mapSelectedId);
+    return catalogItems.find((m) => m.id === mediaId) ?? null;
+  }, [catalogItems, mapSelectedId]);
+
+  const handleMapSelectId = useCallback((id: string | null) => {
+    if (id == null) {
+      setMapPopupOpen(false);
+      return;
+    }
+    setMapSelectedId(id);
+    setMapPopupOpen(true);
+  }, []);
+
   const compareItems = useMemo(
-    () => entriesToCompareMediaItems(compareEntries, searchCatalog),
-    [compareEntries, searchCatalog],
+    () => entriesToCompareMediaItems(compareEntries, catalogItems),
+    [compareEntries, catalogItems],
   );
 
   const fetchMedia = useCallback(
@@ -298,11 +313,13 @@ function MediaSearchPageInner({
             : Array.isArray(json.media)
               ? json.media
               : [];
-          const mapped = rows.map((row) =>
-            mapMediaItemToHomeCatalog(row as MediaItem),
-          );
+          const items = rows as MediaItem[];
+          const mapped = items.map((row) => mapMediaItemToHomeCatalog(row));
           setTotal(json.pagination?.total ?? mapped.length);
           setMedia((prev) => (opts.append ? [...prev, ...mapped] : mapped));
+          setCatalogItems((prev) =>
+            opts.append ? [...prev, ...items] : items,
+          );
           setPage(opts.page);
         }
       } catch (e) {
@@ -332,13 +349,42 @@ function MediaSearchPageInner({
   useEffect(() => {
     try {
       const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
-      if (stored === "feed" || stored === "card" || stored === "compact") {
+      if (
+        stored === "feed" ||
+        stored === "card" ||
+        stored === "compact" ||
+        stored === "map"
+      ) {
         setViewMode(stored);
+        return;
+      }
+      const legacyBrowse = localStorage.getItem("mediaBrowseMode");
+      if (legacyBrowse === "map") {
+        setViewMode("map");
       }
     } catch {
       /* ignore */
     }
   }, []);
+
+  useEffect(() => {
+    const updateMapHeight = () => {
+      if (typeof window === "undefined") return;
+      setMapHeightPx(Math.min(Math.round(window.innerHeight * 0.72), 640));
+    };
+    updateMapHeight();
+    window.addEventListener("resize", updateMapHeight);
+    return () => window.removeEventListener("resize", updateMapHeight);
+  }, []);
+
+  useEffect(() => {
+    if (viewMode !== "map" || mapSelectedId == null) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMapPopupOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [viewMode, mapSelectedId]);
 
   const handleViewModeChange = (mode: ViewMode) => {
     setViewMode(mode);
@@ -495,7 +541,72 @@ function MediaSearchPageInner({
         />
       </div>
 
-      {/* ── 매체 목록 ── */}
+      {/* ── 매체 목록 / 지도 ── */}
+      {viewMode === "map" ? (
+        <div
+          className="relative mt-3 px-4"
+          data-screenshot="media-view-map"
+        >
+          {loading ? (
+            <div
+              className="animate-pulse rounded-2xl border border-gray-100 bg-gray-200 dark:border-white/10 dark:bg-white/10"
+              style={{ height: mapHeightPx, minHeight: 360 }}
+            />
+          ) : mapDisplayItems.length === 0 ? (
+            <div className="flex min-h-[24rem] flex-col items-center justify-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center dark:border-white/10 dark:bg-white/5">
+              <p className="text-lg font-semibold text-gray-900 dark:text-white">
+                {isKo
+                  ? "지도에 표시할 매체가 없습니다"
+                  : "No media with map coordinates"}
+              </p>
+              <p className="text-sm text-gray-500 dark:text-white/60">
+                {isKo
+                  ? "필터를 조정하거나 목록 보기로 전환해 보세요"
+                  : "Adjust filters or switch to list view"}
+              </p>
+            </div>
+          ) : (
+            <div className="relative">
+              <MediaBrowseMap
+                items={mapDisplayItems}
+                locale={locale}
+                selectedId={mapSelectedId}
+                onSelectId={handleMapSelectId}
+                fixedMapHeightPx={mapHeightPx}
+                showFooterCaption={false}
+              />
+              {mapPopupOpen && mapSelectedMedia ? (
+                <MediaPinPopup
+                  media={mapSelectedMedia}
+                  isKo={isKo}
+                  isSelected={isInCompare(mapSelectedMedia.id)}
+                  onToggleSelect={(id) => {
+                    const row = media.find((m) => m.id === id);
+                    if (row) toggleCompare(row);
+                  }}
+                />
+              ) : null}
+            </div>
+          )}
+          {hasMore && !loading ? (
+            <div className="mt-4">
+              <button
+                type="button"
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
+              >
+                {loadingMore
+                  ? isKo
+                    ? "불러오는 중…"
+                    : "Loading…"
+                  : tMedia("loadMoreBrowse")}
+              </button>
+            </div>
+          ) : null}
+        </div>
+      ) : (
+      <>
       <div
         className={cn(
           "mt-3 px-4",
@@ -503,7 +614,7 @@ function MediaSearchPageInner({
           viewMode === "card" &&
             "grid auto-rows-fr grid-cols-2 items-stretch gap-3 md:grid-cols-3 lg:grid-cols-4",
           viewMode === "compact" &&
-            "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-3 xl:grid-cols-4",
+            "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
@@ -614,6 +725,8 @@ function MediaSearchPageInner({
           </button>
         </div>
       ) : null}
+      </>
+      )}
     </div>
 
     {!plannerMode ? (

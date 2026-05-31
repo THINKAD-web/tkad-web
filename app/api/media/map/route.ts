@@ -1,4 +1,5 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { mediaItemIntersectsMapBounds } from "@/lib/media-detail-map-markers";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import {
@@ -57,6 +58,13 @@ function toMapItem(m: MediaItem) {
       availability: m.availability,
       catalogSource: m.catalogSource,
     }).eligible,
+    installLocations: m.installLocations?.length
+      ? m.installLocations.map((p) => ({
+          label: p.label,
+          lat: p.lat,
+          lng: p.lng,
+        }))
+      : undefined,
   };
 }
 
@@ -87,19 +95,30 @@ export async function GET(req: Request) {
     const all = await fetchPublicMediaCatalog();
 
     const filtered = all.filter((m) => {
-      const lat = Number(m.lat);
-      const lng = Number(m.lng);
-      if (
-        !Number.isFinite(lat) ||
-        !Number.isFinite(lng) ||
-        Math.abs(lat) > 90 ||
-        Math.abs(lng) > 180
-      ) {
-        return false;
-      }
+      const hasValidCoord =
+        Number.isFinite(m.lat) &&
+        Number.isFinite(m.lng) &&
+        Math.abs(m.lat) <= 90 &&
+        Math.abs(m.lng) <= 180;
+      const hasInstallCoords = (m.installLocations ?? []).some(
+        (p) =>
+          Number.isFinite(p.lat) &&
+          Number.isFinite(p.lng) &&
+          Math.abs(p.lat) <= 90 &&
+          Math.abs(p.lng) <= 180,
+      );
+      if (!hasValidCoord && !hasInstallCoords) return false;
       if (swLat != null && neLat != null && swLng != null && neLng != null) {
-        if (lat < swLat || lat > neLat) return false;
-        if (lng < swLng || lng > neLng) return false;
+        if (
+          !mediaItemIntersectsMapBounds(m, {
+            swLat,
+            neLat,
+            swLng,
+            neLng,
+          })
+        ) {
+          return false;
+        }
       }
       return matchesMapCatalogFilter(m, filterParams);
     });

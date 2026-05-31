@@ -17,6 +17,8 @@ type Props = {
   zoom?: number;
   coverageGeoJson?: unknown | null;
   fitCoverageBounds?: boolean;
+  /** 소수 핀(상세·복수 설치) — 클러스터 합쳐짐 방지 */
+  disableCluster?: boolean;
 };
 
 /** 매체 상세 — 단일/소수 핀 카카오 지도 (Leaflet 대신) */
@@ -29,6 +31,7 @@ export function MediaDetailKakaoMap({
   zoom = 4,
   coverageGeoJson = null,
   fitCoverageBounds = false,
+  disableCluster = false,
 }: Props) {
   return (
     <KakaoMapView
@@ -40,6 +43,7 @@ export function MediaDetailKakaoMap({
       zoom={zoom}
       coverageGeoJson={coverageGeoJson}
       fitCoverageBounds={fitCoverageBounds}
+      disableCluster={disableCluster}
       monochromeTiles
     />
   );

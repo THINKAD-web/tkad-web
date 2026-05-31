@@ -73,16 +73,77 @@ import {
   inferShortRegionLabelFromCodes,
   sigunguListForSido,
 } from "@/lib/geo/korea-sgg-coverage";
+import {
+  normalizeInstallLocationsFromInput,
+  resolveMediaCoordsForSave,
+} from "@/lib/media-install-locations";
 
-const AdminMediaDraggableMap = dynamic(
-  () => import("@/components/admin-media-draggable-map"),
+const AdminMediaInstallLocationsMap = dynamic(
+  () => import("@/components/admin-media-install-locations-map"),
   {
     ssr: false,
     loading: () => (
-      <div className="h-[260px] animate-pulse rounded-2xl bg-slate-100" />
+      <div className="h-[280px] animate-pulse rounded-2xl bg-slate-100" />
     ),
   },
 );
+
+type InstallLocationRow = {
+  key: string;
+  label: string;
+  location: string;
+  latitude: string;
+  longitude: string;
+};
+
+function newInstallRow(partial?: Partial<InstallLocationRow>): InstallLocationRow {
+  return {
+    key:
+      partial?.key ??
+      `loc-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+    label: partial?.label ?? "",
+    location: partial?.location ?? "",
+    latitude: partial?.latitude ?? "",
+    longitude: partial?.longitude ?? "",
+  };
+}
+
+function installRowsFromDto(m: AdminMediaDto): InstallLocationRow[] {
+  const installs = m.installLocations ?? [];
+  if (installs.length > 0) {
+    return installs.map((p, i) =>
+      newInstallRow({
+        key: `loc-${i}`,
+        label: p.label,
+        location: p.location ?? "",
+        latitude: String(p.latitude),
+        longitude: String(p.longitude),
+      }),
+    );
+  }
+  if (m.latitude != null && m.longitude != null) {
+    return [
+      newInstallRow({
+        key: "loc-0",
+        label: "",
+        location: m.location,
+        latitude: String(m.latitude),
+        longitude: String(m.longitude),
+      }),
+    ];
+  }
+  return [newInstallRow()];
+}
+
+function syncLegacyLatLngFromRows(
+  rows: InstallLocationRow[],
+): Pick<AdminMediaForm, "latitude" | "longitude"> {
+  const first = rows.find(
+    (r) => parseOptFloat(r.latitude) != null && parseOptFloat(r.longitude) != null,
+  );
+  if (!first) return { latitude: "", longitude: "" };
+  return { latitude: first.latitude, longitude: first.longitude };
+}
 
 type MediaSortOrder =
   | "updated"
@@ -177,6 +238,8 @@ type AdminMediaForm = {
   price: number;
   latitude: string;
   longitude: string;
+  /** 복수 설치 지점 (휴게소 상·하행 등) */
+  installLocations: InstallLocationRow[];
   nearbyFacilities: string;
   nearbyStations: string;
   nearbyLandmarks: string;
@@ -249,6 +312,7 @@ const emptyForm: AdminMediaForm = {
   price: 0,
   latitude: "",
   longitude: "",
+  installLocations: [newInstallRow()],
   nearbyFacilities: "",
   nearbyStations: "",
   nearbyLandmarks: "",
@@ -412,8 +476,13 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     region: m.region,
     type: m.type,
     price: m.price,
-    latitude: m.latitude != null ? String(m.latitude) : "",
-    longitude: m.longitude != null ? String(m.longitude) : "",
+    ...(() => {
+      const installLocations = installRowsFromDto(m);
+      return {
+        installLocations,
+        ...syncLegacyLatLngFromRows(installLocations),
+      };
+    })(),
     nearbyFacilities: m.nearbyFacilities ?? "",
     nearbyStations: m.nearbyStations ?? "",
     nearbyLandmarks: m.nearbyLandmarks ?? "",
@@ -531,8 +600,20 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     nearbyLandmarks: form.nearbyLandmarks.trim() || null,
     addressVerified: form.addressVerified,
     isVerified: form.isVerified,
-    latitude: parseOptFloat(form.latitude),
-    longitude: parseOptFloat(form.longitude),
+    ...(() => {
+      const installLocs =
+        normalizeInstallLocationsFromInput(form.installLocations) ?? [];
+      const resolved = resolveMediaCoordsForSave({
+        installLocations: installLocs.length > 0 ? installLocs : null,
+        latitude: parseOptFloat(form.latitude),
+        longitude: parseOptFloat(form.longitude),
+      });
+      return {
+        installLocations: resolved.installLocations,
+        latitude: resolved.latitude,
+        longitude: resolved.longitude,
+      };
+    })(),
     priceNote: form.priceNote.trim() || null,
     priceOptions,
     widthM: parseOptFloat(form.widthM),
@@ -713,6 +794,7 @@ export default function AdminMediasClient({
   const [nearbyPreviewLoading, setNearbyPreviewLoading] = useState(false);
   const [geoLookupLoading, setGeoLookupLoading] = useState(false);
   const [geoLookupError, setGeoLookupError] = useState<string | null>(null);
+  const [activeInstallKey, setActiveInstallKey] = useState<string | null>(null);
   const [coverageSidoFilter, setCoverageSidoFilter] = useState("서울특별시");
   const [coverageSigunguSearch, setCoverageSigunguSearch] = useState("");
 
@@ -819,31 +901,80 @@ export default function AdminMediasClient({
         setGeoLookupError("좌표가 없습니다.");
         return;
       }
-      setForm((f) => ({
-        ...f,
-        latitude: String(data.latitude),
-        longitude: String(data.longitude),
-        city: data.city ?? f.city,
-        district: data.district ?? f.district,
-        region:
-          typeof data.region === "string" && data.region
-            ? data.region
-            : f.region,
-      }));
+      setForm((f) => {
+        const targetKey =
+          activeInstallKey ?? f.installLocations[0]?.key ?? newInstallRow().key;
+        const nextRows =
+          f.installLocations.length > 0
+            ? f.installLocations.map((r) =>
+                r.key === targetKey
+                  ? {
+                      ...r,
+                      latitude: String(data.latitude),
+                      longitude: String(data.longitude),
+                      location: r.location.trim() || f.location.trim(),
+                    }
+                  : r,
+              )
+            : [
+                newInstallRow({
+                  key: targetKey,
+                  latitude: String(data.latitude),
+                  longitude: String(data.longitude),
+                  location: f.location.trim(),
+                }),
+              ];
+        return {
+          ...f,
+          installLocations: nextRows,
+          ...syncLegacyLatLngFromRows(nextRows),
+          city: data.city ?? f.city,
+          district: data.district ?? f.district,
+          region:
+            typeof data.region === "string" && data.region
+              ? data.region
+              : f.region,
+        };
+      });
     } catch {
       setGeoLookupError("주소 검색 요청 실패");
     } finally {
       setGeoLookupLoading(false);
     }
-  }, [form.location]);
+  }, [form.location, activeInstallKey]);
 
-  const onMapPositionChange = useCallback((lat: number, lng: number) => {
-    setForm((f) => ({
-      ...f,
-      latitude: lat.toFixed(6),
-      longitude: lng.toFixed(6),
-    }));
+  const onInstallPointMove = useCallback((id: string, lat: number, lng: number) => {
+    setForm((f) => {
+      const nextRows = f.installLocations.map((r) =>
+        r.key === id
+          ? { ...r, latitude: lat.toFixed(6), longitude: lng.toFixed(6) }
+          : r,
+      );
+      return {
+        ...f,
+        installLocations: nextRows,
+        ...syncLegacyLatLngFromRows(nextRows),
+      };
+    });
   }, []);
+
+  const installMapPoints = useMemo(
+    () =>
+      form.installLocations
+        .map((r) => {
+          const lat = parseOptFloat(r.latitude);
+          const lng = parseOptFloat(r.longitude);
+          if (lat == null || lng == null) return null;
+          return {
+            id: r.key,
+            label: r.label.trim() || undefined,
+            latitude: lat,
+            longitude: lng,
+          };
+        })
+        .filter((p): p is NonNullable<typeof p> => p != null),
+    [form.installLocations],
+  );
 
   useEffect(() => {
     if (!modalOpen) {
@@ -851,13 +982,26 @@ export default function AdminMediasClient({
       setGeoLookupError(null);
       setNearbyPreviewLoading(false);
       setGeoLookupLoading(false);
+      setActiveInstallKey(null);
     }
   }, [modalOpen]);
 
   useEffect(() => {
     if (!modalOpen) return;
-    const lat = parseOptFloat(form.latitude);
-    const lng = parseOptFloat(form.longitude);
+    const firstKey = form.installLocations[0]?.key ?? null;
+    setActiveInstallKey((prev) => {
+      if (prev && form.installLocations.some((r) => r.key === prev)) return prev;
+      return firstKey;
+    });
+  }, [modalOpen, editing?.id, form.installLocations]);
+
+  useEffect(() => {
+    if (!modalOpen) return;
+    const activeRow =
+      form.installLocations.find((r) => r.key === activeInstallKey) ??
+      form.installLocations[0];
+    const lat = parseOptFloat(activeRow?.latitude ?? form.latitude);
+    const lng = parseOptFloat(activeRow?.longitude ?? form.longitude);
     if (lat == null || lng == null) {
       setNearbyPreview(null);
       return;
@@ -866,7 +1010,14 @@ export default function AdminMediasClient({
       void fetchNearbyPreview(lat, lng);
     }, 480);
     return () => clearTimeout(t);
-  }, [modalOpen, form.latitude, form.longitude, fetchNearbyPreview]);
+  }, [
+    modalOpen,
+    form.latitude,
+    form.longitude,
+    form.installLocations,
+    activeInstallKey,
+    fetchNearbyPreview,
+  ]);
 
   const loadMedias = useCallback(async (opts?: { showSpinner?: boolean }) => {
     const showSpinner = opts?.showSpinner ?? false;
@@ -2934,62 +3085,288 @@ export default function AdminMediasClient({
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   위치(주소) *
                 </label>
-                <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
-                  <Input
-                    className="flex-1"
-                    value={form.location}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, location: e.target.value }))
-                    }
-                    onBlur={() => {
-                      if (form.location.trim()) void onGeocodeFromAddress();
-                    }}
-                    placeholder="서울 강남구 테헤란로 123"
-                  />
+                <Input
+                  value={form.location}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, location: e.target.value }))
+                  }
+                  placeholder="경기도 가평군 설악면 미사리로540번길 51"
+                />
+                <p className="mt-1 text-[10px] text-muted-foreground">
+                  카탈로그·검색에 쓰는 대표 주소입니다. 실제 설치 좌표는 아래
+                  「설치 지점」에서 방향별로 넣습니다.
+                </p>
+              </div>
+
+              <div className="space-y-3 rounded-xl border border-border bg-muted/30 p-3">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <p className="text-xs font-semibold text-foreground">
+                    설치 지점 (방향별 좌표)
+                  </p>
                   <Button
                     type="button"
                     variant="outline"
-                    className="shrink-0 border-2 border-border bg-card text-foreground hover:bg-muted/50"
-                    disabled={geoLookupLoading || !form.location.trim()}
-                    onClick={() => void onGeocodeFromAddress()}
+                    size="xs"
+                    className="h-7 gap-1 text-[11px]"
+                    onClick={() => {
+                      const row = newInstallRow();
+                      setForm((f) => ({
+                        ...f,
+                        installLocations: [...f.installLocations, row],
+                      }));
+                      setActiveInstallKey(row.key);
+                    }}
                   >
-                    {geoLookupLoading ? (
-                      <>
-                        <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                        변환 중…
-                      </>
-                    ) : (
-                      "좌표 변환"
-                    )}
+                    <Plus className="h-3 w-3" />
+                    지점 추가
                   </Button>
                 </div>
-                {geoLookupError && (
-                  <p className="mt-1 text-xs text-amber-700">{geoLookupError}</p>
-                )}
-                {form.latitude && form.longitude ? (
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    좌표: {form.latitude}, {form.longitude}
-                    {form.city ? ` · ${form.city}` : ""}
-                    {form.district ? ` ${form.district}` : ""}
-                  </p>
-                ) : (
-                  <p className="mt-1 text-[10px] text-muted-foreground">
-                    주소 입력 후 포커스를 벗어나면 카카오 API로 좌표·시·구가 자동 설정됩니다.
-                  </p>
-                )}
+                <ul className="space-y-3">
+                  {form.installLocations.map((row, idx) => {
+                    const isActive = row.key === activeInstallKey;
+                    return (
+                      <li
+                        key={row.key}
+                        className={`rounded-lg border p-3 ${
+                          isActive
+                            ? "border-primary/50 bg-card ring-1 ring-primary/20"
+                            : "border-border bg-card/80"
+                        }`}
+                      >
+                        <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+                          <button
+                            type="button"
+                            className="text-left text-[11px] font-medium text-foreground"
+                            onClick={() => setActiveInstallKey(row.key)}
+                          >
+                            지점 {idx + 1}
+                            {isActive ? (
+                              <span className="ml-1.5 text-primary">· 선택됨</span>
+                            ) : null}
+                          </button>
+                          {form.installLocations.length > 1 ? (
+                            <Button
+                              type="button"
+                              variant="ghost"
+                              size="xs"
+                              className="h-6 text-[10px] text-red-600"
+                              onClick={() => {
+                                setForm((f) => {
+                                  const next = f.installLocations.filter(
+                                    (r) => r.key !== row.key,
+                                  );
+                                  const rows =
+                                    next.length > 0 ? next : [newInstallRow()];
+                                  return {
+                                    ...f,
+                                    installLocations: rows,
+                                    ...syncLegacyLatLngFromRows(rows),
+                                  };
+                                });
+                                if (activeInstallKey === row.key) {
+                                  setActiveInstallKey(
+                                    form.installLocations.find(
+                                      (r) => r.key !== row.key,
+                                    )?.key ?? null,
+                                  );
+                                }
+                              }}
+                            >
+                              삭제
+                            </Button>
+                          ) : null}
+                        </div>
+                        <div className="grid gap-2 sm:grid-cols-2">
+                          <div className="sm:col-span-2">
+                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                              방향·라벨 (예: 춘천방향, 서울방향)
+                            </label>
+                            <Input
+                              className="h-8 text-sm"
+                              value={row.label}
+                              onFocus={() => setActiveInstallKey(row.key)}
+                              onChange={(e) =>
+                                setForm((f) => ({
+                                  ...f,
+                                  installLocations: f.installLocations.map((r) =>
+                                    r.key === row.key
+                                      ? { ...r, label: e.target.value }
+                                      : r,
+                                  ),
+                                }))
+                              }
+                              placeholder="춘천방향"
+                            />
+                          </div>
+                          <div className="sm:col-span-2">
+                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                              지점 주소 (선택)
+                            </label>
+                            <div className="flex gap-2">
+                              <Input
+                                className="h-8 flex-1 text-sm"
+                                value={row.location}
+                                onFocus={() => setActiveInstallKey(row.key)}
+                                onChange={(e) =>
+                                  setForm((f) => ({
+                                    ...f,
+                                    installLocations: f.installLocations.map(
+                                      (r) =>
+                                        r.key === row.key
+                                          ? { ...r, location: e.target.value }
+                                          : r,
+                                    ),
+                                  }))
+                                }
+                                placeholder={form.location || "주소"}
+                              />
+                              <Button
+                                type="button"
+                                variant="outline"
+                                size="xs"
+                                className="h-8 shrink-0 text-[10px]"
+                                disabled={
+                                  geoLookupLoading ||
+                                  !(row.location.trim() || form.location.trim())
+                                }
+                                onClick={() => {
+                                  setActiveInstallKey(row.key);
+                                  const q = row.location.trim() || form.location.trim();
+                                  if (!q) return;
+                                  setGeoLookupError(null);
+                                  setGeoLookupLoading(true);
+                                  void fetch("/api/admin/geo/lookup", {
+                                    method: "POST",
+                                    credentials: "include",
+                                    headers: { "Content-Type": "application/json" },
+                                    body: JSON.stringify({ query: q }),
+                                  })
+                                    .then(async (res) => {
+                                      const data = (await res.json()) as {
+                                        error?: string;
+                                        latitude?: number;
+                                        longitude?: number;
+                                        city?: string;
+                                        district?: string;
+                                      };
+                                      if (
+                                        !res.ok ||
+                                        data.latitude == null ||
+                                        data.longitude == null
+                                      ) {
+                                        setGeoLookupError(
+                                          data.error ?? "주소를 찾지 못했습니다.",
+                                        );
+                                        return;
+                                      }
+                                      setForm((f) => {
+                                        const nextRows = f.installLocations.map(
+                                          (r) =>
+                                            r.key === row.key
+                                              ? {
+                                                  ...r,
+                                                  latitude: String(data.latitude),
+                                                  longitude: String(data.longitude),
+                                                  location: q,
+                                                }
+                                              : r,
+                                        );
+                                        return {
+                                          ...f,
+                                          installLocations: nextRows,
+                                          ...syncLegacyLatLngFromRows(nextRows),
+                                          city: data.city ?? f.city,
+                                          district: data.district ?? f.district,
+                                        };
+                                      });
+                                    })
+                                    .catch(() =>
+                                      setGeoLookupError("주소 검색 요청 실패"),
+                                    )
+                                    .finally(() => setGeoLookupLoading(false));
+                                }}
+                              >
+                                좌표
+                              </Button>
+                            </div>
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                              위도
+                            </label>
+                            <Input
+                              className="h-8 text-sm"
+                              inputMode="decimal"
+                              value={row.latitude}
+                              onFocus={() => setActiveInstallKey(row.key)}
+                              onChange={(e) =>
+                                setForm((f) => {
+                                  const nextRows = f.installLocations.map((r) =>
+                                    r.key === row.key
+                                      ? { ...r, latitude: e.target.value }
+                                      : r,
+                                  );
+                                  return {
+                                    ...f,
+                                    installLocations: nextRows,
+                                    ...syncLegacyLatLngFromRows(nextRows),
+                                  };
+                                })
+                              }
+                            />
+                          </div>
+                          <div>
+                            <label className="mb-1 block text-[10px] text-muted-foreground">
+                              경도
+                            </label>
+                            <Input
+                              className="h-8 text-sm"
+                              inputMode="decimal"
+                              value={row.longitude}
+                              onFocus={() => setActiveInstallKey(row.key)}
+                              onChange={(e) =>
+                                setForm((f) => {
+                                  const nextRows = f.installLocations.map((r) =>
+                                    r.key === row.key
+                                      ? { ...r, longitude: e.target.value }
+                                      : r,
+                                  );
+                                  return {
+                                    ...f,
+                                    installLocations: nextRows,
+                                    ...syncLegacyLatLngFromRows(nextRows),
+                                  };
+                                })
+                              }
+                            />
+                          </div>
+                        </div>
+                      </li>
+                    );
+                  })}
+                </ul>
+                {geoLookupError ? (
+                  <p className="text-xs text-amber-700">{geoLookupError}</p>
+                ) : null}
+                <p className="text-[10px] text-muted-foreground">
+                  휴게소처럼 상·하행이 나뉘면 「지점 추가」로 춘천방향·서울방향을
+                  각각 넣으세요. 지도에 핀이 모두 표시됩니다.
+                </p>
               </div>
 
-              <AdminMediaDraggableMap
-                latitude={parseOptFloat(form.latitude)}
-                longitude={parseOptFloat(form.longitude)}
-                onPositionChange={onMapPositionChange}
-                heightPx={260}
-                coverageDistrictCodes={
-                  form.type.trim() === "mobile"
-                    ? form.coverageDistrictCodes
-                    : undefined
-                }
-              />
+              {installMapPoints.length > 0 ? (
+                <AdminMediaInstallLocationsMap
+                  points={installMapPoints}
+                  activePointId={activeInstallKey}
+                  onActivePointChange={setActiveInstallKey}
+                  onPointPositionChange={onInstallPointMove}
+                  heightPx={300}
+                />
+              ) : (
+                <p className="rounded-lg border border-dashed border-border px-3 py-6 text-center text-xs text-muted-foreground">
+                  설치 지점에 위·경도를 입력하면 지도에 핀이 표시됩니다.
+                </p>
+              )}
 
               <div className="rounded-2xl border-2 border-border bg-muted p-3 bg-muted/60">
                 <div className="mb-2 flex items-center gap-2 text-xs font-semibold text-foreground">

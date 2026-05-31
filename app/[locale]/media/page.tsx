@@ -5,7 +5,9 @@ import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import {
   countPublicMediaCatalog,
   fetchFilteredMediaCatalog,
+  fetchFilteredMediaCatalogItems,
 } from "@/lib/media-catalog";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 
 export const revalidate = 60;
 
@@ -24,14 +26,15 @@ export default async function MediaPage({ searchParams }: Props) {
     region: sp.region,
   };
 
-  const [initialMedia, initialTotal] = await Promise.all([
-    fetchFilteredMediaCatalog(catalogOpts).catch(() => []),
+  const [initialCatalogItems, initialTotal] = await Promise.all([
+    fetchFilteredMediaCatalogItems(catalogOpts).catch(() => []),
     countPublicMediaCatalog({
       category: sp.category,
       target: sp.target,
       region: sp.region,
     }).catch(() => 0),
   ]);
+  const initialMedia = initialCatalogItems.map(mapMediaItemToHomeCatalog);
 
   return (
     <>
@@ -46,6 +49,7 @@ export default async function MediaPage({ searchParams }: Props) {
       <Suspense fallback={null}>
         <MediaSearchPage
           initialMedia={initialMedia}
+          initialCatalogItems={initialCatalogItems}
           initialTotal={initialTotal}
           initialCategory={sp.category}
           initialTarget={sp.target}

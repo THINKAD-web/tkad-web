@@ -51,6 +51,8 @@ type Props = {
   fitCoverageBounds?: boolean;
   /** 타일만 흑백 — 마커·클러스터 핀 이미지는 컬러 유지 */
   monochromeTiles?: boolean;
+  /** true면 마커를 지도에 직접 올려 근접 핀도 각각 표시 */
+  disableCluster?: boolean;
 };
 
 declare global {
@@ -402,6 +404,7 @@ export default function KakaoMapView({
   coverageGeoJson = null,
   fitCoverageBounds = false,
   monochromeTiles = false,
+  disableCluster = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
@@ -524,7 +527,7 @@ export default function KakaoMapView({
             resizeObserver.observe(containerRef.current);
           }
 
-          if (typeof kakao.maps.MarkerClusterer === "function") {
+          if (!disableCluster && typeof kakao.maps.MarkerClusterer === "function") {
             // minLevel 낮을수록(숫자 작을수록) 더 확대된 상태에서도 클러스터가 동작 — 겹침 숫자 노출 증가
             const clusterer = new kakao.maps.MarkerClusterer({
               map,

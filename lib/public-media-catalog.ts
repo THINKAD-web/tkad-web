@@ -17,7 +17,8 @@ import {
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
-import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
+import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
+import { parseMediaInstallLocations } from "@/lib/media-install-locations";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
@@ -215,6 +216,17 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       Array.isArray(m.coverageDistrictCodes) && m.coverageDistrictCodes.length
         ? [...m.coverageDistrictCodes]
         : undefined,
+    installLocations: (() => {
+      const row = m as typeof m & { installLocations?: unknown };
+      const parsed = parseMediaInstallLocations(row.installLocations);
+      if (parsed.length === 0) return undefined;
+      return parsed.map((p) => ({
+        label: p.label,
+        location: p.location,
+        lat: p.latitude,
+        lng: p.longitude,
+      }));
+    })(),
     dailyExposure:
       m.impressions != null ? String(m.impressions) : undefined,
     sampleImages: imgs.length > 0 ? imgs : [],
@@ -285,7 +297,7 @@ export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCata
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
-    const rowsWithCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
     const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
     const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
     const withReviews = await attachReviewStatsToMediaItems(dbItems);
@@ -321,7 +333,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (featured.length > 0) {
-      const featuredWithCoverage = await attachCoverageDistrictCodesById(
+      const featuredWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         featured,
       );
@@ -340,7 +352,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (fallback.length > 0) {
-      const fallbackWithCoverage = await attachCoverageDistrictCodesById(
+      const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         fallback,
       );
@@ -378,7 +390,7 @@ export async function fetchHomeWeeklyPopularMedia(
       rows = [...rows, ...extra];
     }
     if (rows.length === 0) return [];
-    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
     return withCoverage.map(prismaMediaToMediaItem);
   } catch (e) {
     console.warn(
@@ -400,7 +412,7 @@ export async function fetchHomeNewMedia(max = 6): Promise<MediaItem[]> {
       take: max,
       include: catalogInclude,
     });
-    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
     return withCoverage.map(prismaMediaToMediaItem);
   } catch {
     return [];
@@ -424,7 +436,7 @@ export async function fetchHomeInstantBookingMedia(
       take: 48,
       include: catalogInclude,
     });
-    const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
     const items = withCoverage
       .map(prismaMediaToMediaItem)
       .filter((m) => isInstantBookingEligible(m).eligible);
@@ -446,7 +458,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       include: catalogInclude,
     });
     if (popular.length > 0) {
-      const popularWithCoverage = await attachCoverageDistrictCodesById(
+      const popularWithCoverage = await attachPublicMediaCatalogExtras(
         db,
         popular,
       );
@@ -473,7 +485,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       take: max,
       include: catalogInclude,
     });
-    const fallbackWithCoverage = await attachCoverageDistrictCodesById(
+    const fallbackWithCoverage = await attachPublicMediaCatalogExtras(
       db,
       fallback,
     );
@@ -612,7 +624,7 @@ export async function fetchPlannerMediaCatalog(): Promise<{
     if (rows.length === 0) {
       return { catalog: [], databaseEmpty: true };
     }
-    const rowsWithCoverage = await attachCoverageDistrictCodesById(db, rows);
+    const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
     return {
       catalog: rowsWithCoverage.map(prismaMediaToMediaItem),
       databaseEmpty: false,
@@ -651,7 +663,7 @@ export async function resolveMediaForDetail(
       },
     });
     if (!row) return null;
-    const [rowWithCoverage] = await attachCoverageDistrictCodesById(db, [row]);
+    const [rowWithCoverage] = await attachPublicMediaCatalogExtras(db, [row]);
     return prismaMediaToMediaItem(rowWithCoverage);
   } catch {
     return null;

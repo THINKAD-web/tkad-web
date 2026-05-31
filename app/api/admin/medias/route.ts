@@ -14,6 +14,13 @@ import {
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
+import {
+  parseInstallLocationsBody,
+  resolveMediaCoordsForSave,
+  type MediaInstallLocation,
+} from "@/lib/media-install-locations";
+import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
+import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
@@ -92,7 +99,11 @@ export async function GET(request: NextRequest) {
     take,
   });
   const mediasWithCoverage = await attachCoverageDistrictCodesById(db, medias);
-  return json({ medias: mediasWithCoverage });
+  const mediasWithExtras = await attachInstallLocationsById(
+    db,
+    mediasWithCoverage,
+  );
+  return json({ medias: mediasWithExtras });
 }
 
 export async function POST(request: NextRequest) {
@@ -140,6 +151,8 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  let installLocationsToPersist: MediaInstallLocation[] | null | undefined;
+
   const data: Prisma.MediaCreateInput = {
     name,
     nameEn: String(body.nameEn ?? "").trim() || null,
@@ -180,6 +193,19 @@ export async function POST(request: NextRequest) {
   if (lat !== undefined) data.latitude = lat;
   const lng = optNum(body.longitude);
   if (lng !== undefined) data.longitude = lng;
+  if (body.installLocations !== undefined) {
+    const parsed = parseInstallLocationsBody(body.installLocations);
+    if (!parsed.ok) return json({ error: parsed.error }, 400);
+    installLocationsToPersist = parsed.value;
+    const resolved = resolveMediaCoordsForSave({
+      installLocations: parsed.value,
+      latitude: data.latitude ?? null,
+      longitude: data.longitude ?? null,
+    });
+    data.latitude = resolved.latitude;
+    data.longitude = resolved.longitude;
+  }
+  delete (data as { installLocations?: unknown }).installLocations;
   const pn = optStr(body.priceNote);
   if (pn !== undefined) data.priceNote = pn;
   const po = normalizePriceOptionsForPrisma(body);
@@ -304,8 +330,13 @@ export async function POST(request: NextRequest) {
         m.id,
         type === "mobile" ? covNorm : [],
       );
+      if (installLocationsToPersist !== undefined) {
+        await persistMediaInstallLocations(tx, m.id, installLocationsToPersist);
+      }
       return m;
     });
+    const [withCov] = await attachCoverageDistrictCodesById(db, [media]);
+    const [mediaForClient] = await attachInstallLocationsById(db, [withCov]);
 
     await db.mediaPriceSnapshot.create({
       data: {
@@ -334,7 +365,7 @@ export async function POST(request: NextRequest) {
       /* optional */
     }
 
-    return json({ media }, 201);
+    return json({ media: mediaForClient }, 201);
   } catch (err) {
     console.error("[admin-api] media POST failed", err);
     return json({ error: prismaMediaPostErrorMessage(err) }, 500);

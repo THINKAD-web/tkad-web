@@ -46,6 +46,7 @@ import {
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { resolveMediaIdFromMapPinId } from "@/lib/media-detail-map-markers";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
@@ -116,7 +117,10 @@ export function MediaMapView({
 
   const mapSelectedMedia = useMemo(() => {
     if (mapSelectedId == null) return null;
-    return filtered.find((m) => m.id === mapSelectedId) ?? null;
+    return (
+      filtered.find((m) => m.id === resolveMediaIdFromMapPinId(mapSelectedId)) ??
+      null
+    );
   }, [filtered, mapSelectedId]);
 
   const searchPlaceholder = isKo

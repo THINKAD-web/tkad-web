@@ -9,6 +9,8 @@ export type CampaignMapMediaType =
 
 export type CampaignMapPin = {
   id: string;
+  /** 핀 클릭 시 매체 카드 연결용 (복수 설치 핀은 `id`가 `mediaId-install-N`) */
+  mediaId: string;
   projectId: string;
   lat: number;
   lng: number;
@@ -30,6 +32,7 @@ export type CampaignMapPin = {
 const PINS_P2026_001: readonly CampaignMapPin[] = [
   {
     id: "pin-gangnam-digital",
+    mediaId: "pin-gangnam-digital",
     projectId: "P-2026-001",
     lat: 37.4979,
     lng: 127.0276,
@@ -47,6 +50,7 @@ const PINS_P2026_001: readonly CampaignMapPin[] = [
   },
   {
     id: "pin-coex-billboard",
+    mediaId: "pin-coex-billboard",
     projectId: "P-2026-001",
     lat: 37.5113,
     lng: 127.059,
@@ -64,6 +68,7 @@ const PINS_P2026_001: readonly CampaignMapPin[] = [
   },
   {
     id: "pin-teheran-led",
+    mediaId: "pin-teheran-led",
     projectId: "P-2026-001",
     lat: 37.5012,
     lng: 127.0365,
@@ -81,6 +86,7 @@ const PINS_P2026_001: readonly CampaignMapPin[] = [
   },
   {
     id: "pin-bus-shelter",
+    mediaId: "pin-bus-shelter",
     projectId: "P-2026-001",
     lat: 37.5089,
     lng: 127.0631,

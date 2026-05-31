@@ -197,6 +197,8 @@ model Media {
   coverageDistrictCodes String[]  @default([]) @map("coverage_district_codes")
   latitude              Float?
   longitude             Float?
+  /// 복수 설치 지점 — `[{ label, location?, latitude, longitude }]`. 공개 지도·어드민 핀 복수 표시.
+  installLocations      Json?     @map("install_locations")
   priceNote             String?   @map("price_note")
   widthM                Float?    @map("width_m")
   heightM               Float?    @map("height_m")

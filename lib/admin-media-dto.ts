@@ -1,4 +1,8 @@
 import type { Media } from "@prisma/client";
+import {
+  parseMediaInstallLocations,
+  type MediaInstallLocation,
+} from "@/lib/media-install-locations";
 
 export type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -24,6 +28,8 @@ export type AdminMediaDto = {
   city: string | null;
   latitude: number | null;
   longitude: number | null;
+  /** 복수 설치 지점 (휴게소 상·하행 등) */
+  installLocations: MediaInstallLocation[];
   priceNote: string | null;
   widthM: number | null;
   heightM: number | null;
@@ -206,6 +212,9 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     city: pickStr(r, "city", "city"),
     latitude: pickNum(r, "latitude", "latitude"),
     longitude: pickNum(r, "longitude", "longitude"),
+    installLocations: parseMediaInstallLocations(
+      r.installLocations ?? r.install_locations,
+    ),
     priceNote: pickStr(r, "priceNote", "price_note"),
     widthM: pickNum(r, "widthM", "width_m"),
     heightM: pickNum(r, "heightM", "height_m"),
@@ -312,6 +321,15 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     city: m.city,
     latitude: m.latitude,
     longitude: m.longitude,
+    installLocations: (() => {
+      const row = m as Media & { installLocations?: unknown };
+      const raw = row.installLocations;
+      if (Array.isArray(raw) && raw.length > 0) {
+        const parsed = parseMediaInstallLocations(raw);
+        if (parsed.length > 0) return parsed;
+      }
+      return parseMediaInstallLocations(raw);
+    })(),
     priceNote: m.priceNote,
     widthM: m.widthM,
     heightM: m.heightM,

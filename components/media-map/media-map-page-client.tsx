@@ -10,6 +10,10 @@ import {
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
+import {
+  mapMarkersForMapCatalogItem,
+  resolveMediaIdFromMapPinId,
+} from "@/lib/media-detail-map-markers";
 import { useAppToast } from "@/lib/use-toast";
 import {
   MEDIA_CHIP_ACTIVE,
@@ -291,15 +295,7 @@ export default function MediaMapPageClient() {
   }, [bounds, filter, fetchItems]);
 
   const markers: MapMarker[] = useMemo(
-    () =>
-      items.map((i) => ({
-        id: i.id,
-        name: i.name,
-        lat: i.lat,
-        lng: i.lng,
-        price: i.price,
-        type: i.type,
-      })),
+    () => items.flatMap((i) => mapMarkersForMapCatalogItem(i)),
     [items],
   );
 
@@ -309,7 +305,8 @@ export default function MediaMapPageClient() {
       setSelectedItem(null);
       return;
     }
-    const hit = items.find((i) => i.id === selectedId);
+    const mediaId = resolveMediaIdFromMapPinId(selectedId);
+    const hit = items.find((i) => i.id === mediaId);
     if (hit) setSelectedItem(hit);
   }, [selectedId, items]);
 
@@ -317,7 +314,8 @@ export default function MediaMapPageClient() {
   // itemsRef를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
   const handleSelect = useCallback((id: string) => {
     setSelectedId(id);
-    const item = itemsRef.current.find((i) => i.id === id);
+    const mediaId = resolveMediaIdFromMapPinId(id);
+    const item = itemsRef.current.find((i) => i.id === mediaId);
     if (item) setSelectedItem(item);
   }, []);
 
@@ -699,9 +697,9 @@ export default function MediaMapPageClient() {
               tabIndex={0}
               className={cn(
                 "cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5",
-                selectedId === it.id
+                resolveMediaIdFromMapPinId(selectedId ?? "") === it.id
                   ? "border-violet-400/50 ring-2 ring-violet-400/25"
-                  : hoveredId === it.id
+                  : resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id
                     ? "border-cyan-400/40"
                     : "",
               )}

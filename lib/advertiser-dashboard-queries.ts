@@ -201,6 +201,7 @@ export async function fetchAdvertiserCampaignDetail(
     const mapType = mediaTypeToMapType(m.type);
     pins.push({
       id: m.id,
+      mediaId: m.id,
       projectId: c.id,
       lat: m.latitude,
       lng: m.longitude,

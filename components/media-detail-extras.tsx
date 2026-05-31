@@ -3,6 +3,10 @@
 import { useMemo, useState, useEffect } from "react";
 import { useTranslations } from "next-intl";
 import type { MediaItem } from "@/lib/media-data";
+import {
+  mapCenterForMediaDetail,
+  mapMarkersForMediaDetail,
+} from "@/lib/media-detail-map-markers";
 import { MapPin } from "lucide-react";
 import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
@@ -35,8 +39,23 @@ export default function MediaDetailExtras({
 }) {
   const isKo = locale === "ko";
   const tMedia = useTranslations("media");
-  const [mapSelectedId, setMapSelectedId] = useState<string | null>(media.id);
+  const mapMarkers = useMemo(
+    () => mapMarkersForMediaDetail(media, isKo),
+    [media, isKo],
+  );
+  const mapCenter = useMemo(
+    () => mapCenterForMediaDetail(media, mapMarkers),
+    [media, mapMarkers],
+  );
+  const mapZoom = mapMarkers.length > 1 ? 5 : 4;
+  const [mapSelectedId, setMapSelectedId] = useState<string | null>(
+    () => mapMarkers[0]?.id ?? media.id,
+  );
   const [coverageGeoJson, setCoverageGeoJson] = useState<unknown | null>(null);
+
+  useEffect(() => {
+    setMapSelectedId(mapMarkers[0]?.id ?? media.id);
+  }, [media.id, mapMarkers]);
 
   const coverageCodesKey = useMemo(() => {
     if (media.type !== "mobile" || !media.coverageDistrictCodes?.length) return "";
@@ -142,22 +161,14 @@ export default function MediaDetailExtras({
           </p>
           <div className="h-[400px]">
             <MediaDetailKakaoMap
-              markers={[
-                {
-                  id: media.id,
-                  name: isKo ? media.name : (media.nameEn || media.name),
-                  lat: media.lat,
-                  lng: media.lng,
-                  price: Number(media.price ?? 0),
-                  type: media.type,
-                },
-              ]}
+              markers={mapMarkers}
               selectedId={mapSelectedId}
               onSelect={(id) => setMapSelectedId(id)}
-              center={{ lat: media.lat, lng: media.lng }}
-              zoom={4}
+              center={mapCenter}
+              zoom={mapZoom}
               coverageGeoJson={effectiveCoverageGeoJson}
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
+              disableCluster={mapMarkers.length <= 8}
             />
           </div>
         </div>

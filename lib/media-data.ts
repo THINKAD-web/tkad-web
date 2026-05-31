@@ -89,6 +89,13 @@ export interface MediaItem {
   pricePeriod?: MediaPricePeriodKey;
   lat: number;
   lng: number;
+  /** 복수 설치 지점 (휴게소 상·하행 등, DB `install_locations`) */
+  installLocations?: Array<{
+    label: string;
+    location?: string;
+    lat: number;
+    lng: number;
+  }>;
   dailyFootTraffic: number;
   /** 월간·기간 예상 노출(건). DB `impressions`와 동일 의미로 사용 */
   monthlyFootTraffic?: number;
@@ -454,25 +461,54 @@ export function mediaItemsToCampaignPins(
   items: readonly MediaItem[],
 ): CampaignMapPin[] {
   const gallery = (m: MediaItem) => resolveMediaGallery(m)[0] ?? "";
-  const raw = items.map((m) => ({ lat: m.lat, lng: m.lng }));
+  const expanded = items.flatMap((m) => {
+    const installs = m.installLocations;
+    if (installs && installs.length > 0) {
+      return installs.map((p, i) => ({
+        media: m,
+        index: i,
+        count: installs.length,
+        lat: p.lat,
+        lng: p.lng,
+        label: p.label.trim(),
+      }));
+    }
+    return [
+      {
+        media: m,
+        index: 0,
+        count: 1,
+        lat: m.lat,
+        lng: m.lng,
+        label: "",
+      },
+    ];
+  });
+  const raw = expanded.map((e) => ({ lat: e.lat, lng: e.lng }));
   const adjusted = adjustOverlappingMapCoords(raw);
-  return items.map((m, i) => {
-    const lat = adjusted[i].lat;
-    const lng = adjusted[i].lng;
+  return expanded.map((e, i) => {
+    const m = e.media;
+    const lat = adjusted[i]!.lat;
+    const lng = adjusted[i]!.lng;
     const { x, y } = latLngToFallbackPercent(lat, lng);
     const won = m.price;
     const capKo = `${m.location} · ${won.toLocaleString()}원/${periodAbbrevKo(m.pricePeriod)}`;
     const capEn = `${m.locationEn} · ₩${won.toLocaleString()}/${periodAbbrevEn(m.pricePeriod)}`;
+    const spotKo = e.label ? `${m.name} · ${e.label}` : m.name;
+    const spotEn = e.label
+      ? `${m.nameEn || m.name} · ${e.label}`
+      : m.nameEn || m.name;
     return {
-      id: String(m.id),
+      id: e.count > 1 ? `${m.id}-install-${e.index}` : String(m.id),
+      mediaId: String(m.id),
       projectId: "media-browse",
       lat,
       lng,
       fallbackX: x,
       fallbackY: y,
       mediaType: mediaTypeToMapType(m.type),
-      spotNameKo: m.name,
-      spotNameEn: m.nameEn,
+      spotNameKo: spotKo,
+      spotNameEn: spotEn,
       creativeCaptionKo: capKo,
       creativeCaptionEn: capEn,
       imageUrl: gallery(m),

@@ -7,6 +7,7 @@ import {
   List,
   LayoutGrid,
   AlignJustify,
+  Map as MapIcon,
   ChevronDown,
   Monitor,
   Train,
@@ -34,7 +35,7 @@ import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { PlannerNeonLabel } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 
-export type MediaManualBrowseViewMode = "feed" | "card" | "compact";
+export type MediaManualBrowseViewMode = "feed" | "card" | "compact" | "map";
 
 const MAIN_ICONS: Record<string, LucideIcon> = {
   Monitor,
@@ -81,6 +82,7 @@ const VIEW_MODES: {
   { id: "feed", labelKo: "피드", labelEn: "Feed", icon: List },
   { id: "card", labelKo: "카드", labelEn: "Card", icon: LayoutGrid },
   { id: "compact", labelKo: "컴팩트", labelEn: "Compact", icon: AlignJustify },
+  { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
 type Props = {

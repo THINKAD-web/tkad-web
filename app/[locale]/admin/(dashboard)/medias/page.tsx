@@ -5,6 +5,8 @@ import {
 } from "@/lib/admin-media-dto";
 import { loadMediaEngagementMap } from "@/lib/admin-media-engagement";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
+import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import AdminMediasClient from "./admin-medias-client";
 
 export const dynamic = "force-dynamic";
@@ -26,7 +28,9 @@ export default async function AdminMediasPage() {
         }),
         loadMediaEngagementMap(),
       ]);
-      initialMedias = rows.map(prismaMediaToAdminDto);
+      const withCoverage = await attachCoverageDistrictCodesById(db, rows);
+      const withExtras = await attachInstallLocationsById(db, withCoverage);
+      initialMedias = withExtras.map(prismaMediaToAdminDto);
       initialEngagement = engagement;
     } catch {
       initialListError = "서버에서 매체 목록을 불러오지 못했습니다.";

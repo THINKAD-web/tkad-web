@@ -92,6 +92,7 @@ import {
 } from "@/lib/use-media-catalog-filters";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { resolveMediaIdFromMapPinId } from "@/lib/media-detail-map-markers";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
@@ -606,7 +607,11 @@ export default function MediaBrowseClient({
     // 팝업이 열려있을 때만 선택된 매체가 리스트에 있는지 검증
     // (팝업이 닫혀있으면 선택 상태 유지)
     if (!mapPopupOpen || mapSelectedId == null) return;
-    if (!gridDisplayList.some((m) => m.id === mapSelectedId))
+    if (
+      !gridDisplayList.some(
+        (m) => m.id === resolveMediaIdFromMapPinId(mapSelectedId),
+      )
+    )
       setMapSelectedId(null);
   }, [gridDisplayList, mapSelectedId, mapPopupOpen]);
 
@@ -768,7 +773,9 @@ export default function MediaBrowseClient({
 
   const mapSelectedMedia =
     mapSelectedId != null
-      ? gridDisplayList.find((m) => m.id === mapSelectedId) ?? null
+      ? gridDisplayList.find(
+          (m) => m.id === resolveMediaIdFromMapPinId(mapSelectedId),
+        ) ?? null
       : null;
 
   const handleMapSelectId = useCallback((id: string | null) => {

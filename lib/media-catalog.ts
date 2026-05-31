@@ -12,6 +12,7 @@ import {
   type PublicMediaSort,
 } from "@/lib/public-media-query";
 import { attachMediaTrustToMediaItems } from "@/lib/media-trust-catalog";
+import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import type {
   HomeCatalogMediaItem,
@@ -38,14 +39,14 @@ function usesFilteredQuery(opts: {
   );
 }
 
-export async function fetchFilteredMediaCatalog(opts: {
+async function fetchFilteredMediaItemRows(opts: {
   sort: MediaCatalogSort;
   limit: number;
   category?: string;
   target?: string;
   region?: string;
   q?: string;
-}): Promise<HomeCatalogMediaItem[]> {
+}): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) {
     return [];
   }
@@ -64,14 +65,38 @@ export async function fetchFilteredMediaCatalog(opts: {
       orderBy,
       take: opts.limit,
     });
-    const enriched = await attachMediaTrustToMediaItems(
-      rows.map((row) => prismaMediaToMediaItem(row)),
+    const rowsWithExtras = await attachPublicMediaCatalogExtras(db, rows);
+    return attachMediaTrustToMediaItems(
+      rowsWithExtras.map((row) => prismaMediaToMediaItem(row)),
     );
-    return enriched.map(mapMediaItemToHomeCatalog);
   } catch (e) {
     console.error("[fetchPublicMediaCatalog] filtered query failed", e);
     return [];
   }
+}
+
+/** `/media` 지도 모드 — 좌표·설치 지점 포함 풀 `MediaItem` */
+export async function fetchFilteredMediaCatalogItems(opts: {
+  sort: MediaCatalogSort;
+  limit: number;
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
+}): Promise<MediaItem[]> {
+  return fetchFilteredMediaItemRows(opts);
+}
+
+export async function fetchFilteredMediaCatalog(opts: {
+  sort: MediaCatalogSort;
+  limit: number;
+  category?: string;
+  target?: string;
+  region?: string;
+  q?: string;
+}): Promise<HomeCatalogMediaItem[]> {
+  const items = await fetchFilteredMediaItemRows(opts);
+  return items.map(mapMediaItemToHomeCatalog);
 }
 
 export async function fetchPublicMediaCatalog(opts: {

@@ -618,7 +618,7 @@ export function CampaignMonitoringMap({
           </div>
           {pins.map((p) => {
             const active = selectedId === p.id;
-            const meta = pinMetaById?.[p.id];
+            const meta = pinMetaById?.[p.mediaId];
             const tone = meta?.tone ?? "blue";
             const isNow = meta?.nowBadge === true;
             const popular = meta?.popular === true;
