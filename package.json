@@ -11,6 +11,7 @@
     "vercel-build": "prisma generate && SKIP_CATALOG_HEAVY_SSG=1 NODE_OPTIONS='--max-old-space-size=4608' next build --webpack",
     "start": "next start",
     "lint": "eslint",
+    "typecheck": "tsc --noEmit",
     "seed": "npx tsx prisma/seed.ts",
     "seed:packages": "npx tsx scripts/seed-packages.ts",
     "seed:seo-content": "npx tsx scripts/seed-seo-content.ts",

@@ -26,6 +26,14 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const projectRoot = path.dirname(fileURLToPath(import.meta.url));
 
 const nextConfig: NextConfig = {
+  /**
+   * Vercel 8GB builders: webpack compile + `tsc` in one process often hits the 45m
+   * build limit (logs stop at "Running TypeScript …"). Typecheck locally / in CI via
+   * `npm run typecheck`.
+   */
+  typescript: {
+    ignoreBuildErrors: process.env.VERCEL === "1",
+  },
   async redirects() {
     return [
       {
