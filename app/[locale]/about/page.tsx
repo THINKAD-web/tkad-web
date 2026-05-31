@@ -1,294 +1,81 @@
+import type { Metadata } from "next";
+import { setRequestLocale } from "next-intl/server";
+import { routing } from "@/i18n/routing";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
-import { getTranslations, setRequestLocale } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
-import { BarChart3, Globe, Heart, Users } from "lucide-react";
+import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { ogAltForRoute } from "@/lib/og-route-copy";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
-import { SectionHeading } from "@/components/section-heading";
-import { AnimatedCard } from "@/components/animated-card";
-import { Timeline } from "@/components/timeline";
+import { PageHero } from "@/components/layout/page-hero";
+import { AboutPageSections } from "@/components/about/about-page-sections";
 
-type Props = {
-  params: Promise<{ locale: string }>;
-};
+type Props = { params: Promise<{ locale: string }> };
+
+const ABOUT_META_KO = {
+  title: "회사소개 — 국내 최초 OOH 단가 투명화 | THINKAD 싱커드",
+  description:
+    "싱커드는 2014년부터 국내 최초로 옥외광고 단가를 투명하게 공개했습니다. " +
+    "10년의 신뢰가 AI 플랫폼으로 진화합니다.",
+  openGraphTitle: "싱커드 회사소개 — 국내 최초 OOH 단가 투명화",
+  openGraphDescription: "2014년부터 시작된 OOH 광고 혁신의 이야기",
+} as const;
+
+const ABOUT_META_EN = {
+  title: "About — Korea's first transparent OOH rates | THINKAD",
+  description:
+    "Since 2014, THINKAD has published OOH advertising rates transparently — " +
+    "a decade of trust evolving into an AI platform.",
+  openGraphTitle: "About THINKAD — transparent OOH rates since 2014",
+  openGraphDescription: "The story of OOH innovation from 2014 to today",
+} as const;
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
+
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = await resolveLocaleParam(params);
+  const isKo = locale === "ko";
+  const meta = isKo ? ABOUT_META_KO : ABOUT_META_EN;
+
+  return {
+    title: meta.title,
+    description: meta.description,
+    alternates: pageAlternates(locale, "/about"),
+    openGraph: {
+      title: meta.openGraphTitle,
+      description: meta.openGraphDescription,
+      images: segmentOpenGraphImages(locale, "about", ogAltForRoute("about")),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: meta.openGraphTitle,
+      description: meta.description,
+      images: segmentOpenGraphImages(locale, "about", ogAltForRoute("about")),
+    },
+  };
+}
 
 export default async function AboutPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const t = await getTranslations();
-
-  return <AboutContent locale={locale} t={t} />;
-}
-
-function AboutContent({
-  locale,
-  t,
-}: {
-  locale: string;
-  t: Awaited<ReturnType<typeof getTranslations>>;
-}) {
   const isKo = locale === "ko";
-
-  const values = [
-    { icon: BarChart3, ...getValueTranslation(t, "value1") },
-    { icon: Heart, ...getValueTranslation(t, "value2") },
-    { icon: Globe, ...getValueTranslation(t, "value3") },
-  ];
-
-  const historyItems = [
-    { label: "2016", title: t("about.history2016") },
-    { label: "2017", title: t("about.history2017") },
-    { label: "2019", title: t("about.history2019") },
-    { label: "2022", title: t("about.history2022") },
-    { label: "2025", title: t("about.history2025") },
-  ];
-
-  const teamMembers = [
-    {
-      nameKo: "김민지",
-      nameEn: "Minji Kim",
-      roleKo: "미디어 플래닝 리드",
-      roleEn: "Media Planning Lead",
-      bioKo:
-        "국내 주요 상권 분석과 매체 믹스 전략 수립을 담당하는 OOH 플래닝 전문가.",
-      bioEn:
-        "OOH planning expert in charge of key district analysis and media mix strategy.",
-      initials: "MK",
-    },
-    {
-      nameKo: "박준호",
-      nameEn: "Junho Park",
-      roleKo: "데이터 & AI 리드",
-      roleEn: "Data & AI Lead",
-      bioKo:
-        "유동인구 데이터, 노출도, 성과 분석을 기반으로 한 AI 추천 엔진을 개발합니다.",
-      bioEn:
-        "Builds AI recommendation engines based on traffic data, exposure, and performance analytics.",
-      initials: "JP",
-    },
-    {
-      nameKo: "이수연",
-      nameEn: "Suyeon Lee",
-      roleKo: "크리에이티브 디렉터",
-      roleEn: "Creative Director",
-      bioKo:
-        "브랜드 스토리를 공간과 매체에 녹여내는 OOH 크리에이티브 디렉션을 총괄합니다.",
-      bioEn:
-        "Oversees OOH creative direction that blends brand stories into spaces and media.",
-      initials: "SL",
-    },
-  ];
 
   return (
     <HomeLandingDayNight>
-    <div className="tkad-landing-neon tkad-planner-neon dark:bg-[#020202] bg-gray-50">
-      <section className="relative overflow-hidden bg-[#05050a] py-28 tkad-neon-depth tkad-neon-grid sm:py-36">
-        <div className="relative mx-auto max-w-5xl px-4 text-center sm:px-6 lg:px-8">
-          <h1 className="text-3xl font-bold tracking-tight text-white sm:text-4xl lg:text-5xl">
-            {isKo ? "생각하는 광고회사, 싱커드" : t("about.title")}
-          </h1>
-          <p className="mt-3 text-base text-white/70 sm:text-lg">
-            {t("about.subtitle")}
-          </p>
-          <p className="mx-auto mt-8 max-w-3xl text-xl font-semibold leading-snug text-white sm:text-2xl lg:text-3xl lg:leading-tight">
-            {t("about.heroSlogan")}
-          </p>
-        </div>
-      </section>
-
-      <section className="py-20 sm:py-24 dark:bg-[#020202] bg-gray-50">
-        <div className="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
-          <SectionHeading
-            eyebrow={t("about.storyEyebrow")}
-            title={t("about.storyTitle")}
-            align="center"
-            className="mb-16"
-          />
-
-          <div className="space-y-6">
-            <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-10">
-              <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-gray-900 dark:text-white">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-bold text-white">
-                  01
-                </span>
-                {isKo ? "싱커드 소개" : "About THINKAD"}
-              </h3>
-              <p className="leading-relaxed text-gray-600 dark:text-white/70">
-                {isKo
-                  ? "싱커드는 창의적인 미디어렙을 목표로 인정받는 종합 마케팅 솔루션 회사입니다. 다양한 광고 매체를 활용하여 효과적인 광고마케팅을 제안하고, 모든 직원들이 책임감을 갖고 광고주의 입장에서 생각하는 광고주가 가장 선호하는 미디어렙으로 자리매김 하겠습니다."
-                  : "THINKAD is a comprehensive marketing solutions company recognized as a creative media rep. We propose effective advertising marketing utilizing various media, and all employees take responsibility to think from the advertiser's perspective."}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-10">
-              <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-gray-900 dark:text-white">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-bold text-white">
-                  02
-                </span>
-                {isKo ? "우리의 철학" : "Our Philosophy"}
-              </h3>
-              <blockquote className="mb-4 border-l-4 border-violet-400/50 pl-4 font-medium italic text-violet-600 dark:text-violet-300">
-                {isKo
-                  ? '"지금 눈에 보이는 부분만이 광고대행사의 실력을 말해주는 것은 아닙니다."'
-                  : "“What you see now is not the only measure of an agency’s capabilities.”"}
-              </blockquote>
-              <p className="leading-relaxed text-gray-600 dark:text-white/70">
-                {isKo
-                  ? "싱커드는 빈틈없는 전략과 정확한 타깃설정, 효과적인 커뮤니케이션으로 광고주의 시각으로 브랜드 전략을 구상합니다. 전문화된 각 조직의 기능과 아이디어를 효율적으로 통합하여 소비자를 실질적으로 움직일 수 있는 마케팅 커뮤니케이션을 지향하며, 이를 통해 광고주와 브랜드의 가치를 극대화하고 있습니다."
-                  : "THINKAD designs brand strategies from the advertiser's perspective with seamless strategy, precise targeting, and effective communication. We integrate the functions and ideas of specialized organizations efficiently to create marketing communications that truly move consumers, maximizing the value of advertisers and brands."}
-              </p>
-            </div>
-
-            <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-10">
-              <h3 className="mb-4 flex items-center gap-3 text-lg font-bold text-gray-900 dark:text-white">
-                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-bold text-white">
-                  03
-                </span>
-                Full Media Solution
-              </h3>
-              <p className="mb-4 leading-relaxed text-muted-foreground">
-                {isKo
-                  ? "싱커드는 오픈, 공유, 확산이라는 새로운 법칙의 중심에 서 있는 소비자와의 소통을 위해 끊임없는 열정으로 전략적인 Full Media Solution을 제공합니다. 기업의 브랜드뿐 아니라, 공공기관 등 퍼블릭 분야에서 실험적인 광고회사로 이름을 알리고 있습니다."
-                  : "THINKAD provides strategic Full Media Solutions with endless passion for communication with consumers at the center of the new rules of openness, sharing, and diffusion. We are known as an experimental advertising company not only for corporate brands but also in the public sector."}
-              </p>
-              <p className="leading-relaxed text-gray-600 dark:text-white/70">
-                {isKo
-                  ? "세상을 우리 브랜드에 중독되게 하기 위해 온-오프라인 광고의 경계를 넘어선 캠페인을 진행합니다. 싱커드는 국내외 온·오프라인 광고를 기획 및 집행하는 캠페인 에이전시로서 일반 광고회사가 아닌 당신의 브랜드 파트너로서 당신의 시작, 당신의 위기, 당신의 성공을 언제나 함께 하겠습니다."
-                  : "To make the world addicted to our brand, we conduct campaigns that transcend the boundaries of online and offline advertising. As a campaign agency that plans and executes domestic and international on/offline advertising, THINKAD will always be with you as your brand partner—through your start, your challenges, and your success."}
-              </p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 sm:py-24 dark:bg-[#05050a] bg-white">
-        <div className="ui-container">
-          <div className="grid items-start gap-14 lg:grid-cols-2 lg:gap-20">
-            <div className="lg:sticky lg:top-28">
-              <SectionHeading
-                eyebrow={t("about.historyEyebrow")}
-                title={t("about.historyTitle")}
-                subtitle={t("about.historyDescription")}
-                align="left"
-                className="max-w-xl"
-              />
-            </div>
-            <Timeline items={historyItems} />
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 sm:py-24 dark:bg-[#020202] bg-gray-50">
-        <div className="ui-container">
-          <SectionHeading
-            eyebrow={t("about.valuesEyebrow")}
-            title={t("about.valuesTitle")}
-            subtitle={t("about.valuesLead")}
-            className="mb-16"
-          />
-          <div className="grid gap-6 md:grid-cols-3">
-            {values.map((v, i) => (
-              <AnimatedCard key={v.title} delay={i * 100}>
-                <div className="h-full rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                  <div className="mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500/20 to-cyan-400/20">
-                    <v.icon className="h-7 w-7 text-violet-500" aria-hidden />
-                  </div>
-                  <h3 className="text-lg font-bold text-gray-900 dark:text-white">{v.title}</h3>
-                  <p className="mt-3 text-base leading-relaxed text-gray-600 dark:text-white/70">
-                    {v.description}
-                  </p>
-                </div>
-              </AnimatedCard>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-20 sm:py-24 dark:bg-[#05050a] bg-white">
-        <div className="ui-container">
-          <div className="mx-auto max-w-3xl text-center">
-            <Users className="mx-auto h-12 w-12 text-violet-500" aria-hidden />
-            <h2 className="mt-4 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
-              {t("about.teamTitle")}
-            </h2>
-            <p className="mt-4 leading-relaxed text-gray-600 dark:text-white/70">
-              {t("about.teamDescription")}
-            </p>
-          </div>
-
-          <div className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {teamMembers.map((member, i) => {
-              const name = isKo ? member.nameKo : member.nameEn;
-              const role = isKo ? member.roleKo : member.roleEn;
-              const bio = isKo ? member.bioKo : member.bioEn;
-
-              return (
-                <AnimatedCard key={member.nameEn} delay={i * 90}>
-                  <div className="h-full rounded-2xl border border-gray-100 bg-white p-5 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:shadow-md dark:border-white/10 dark:bg-white/5">
-                    <div className="flex items-center gap-3">
-                      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-sm font-bold text-white shadow-sm">
-                        {member.initials}
-                      </div>
-                      <div className="text-left">
-                        <div className="text-sm font-bold text-gray-900 dark:text-white">{name}</div>
-                        <div className="text-xs font-semibold text-violet-500 dark:text-violet-400">
-                          {role}
-                        </div>
-                      </div>
-                    </div>
-                    <p className="mt-4 text-sm leading-relaxed text-gray-600 dark:text-white/70">
-                      {bio}
-                    </p>
-                  </div>
-                </AnimatedCard>
-              );
-            })}
-          </div>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden bg-[#05050a] py-20 sm:py-24 tkad-neon-depth tkad-neon-grid">
-        <div className="mx-auto max-w-4xl px-4 text-center sm:px-6 lg:px-8">
-          <Globe className="mx-auto h-12 w-12 text-cyan-400" aria-hidden />
-          <h2 className="mt-4 text-2xl font-bold text-white sm:text-3xl">
-            {t("about.globalTitle")}
-          </h2>
-          <p className="mt-4 leading-relaxed text-white/65">
-            {t("about.globalDescription")}
-          </p>
-        </div>
-      </section>
-
-      <section className="relative overflow-hidden py-20 sm:py-24">
-        <div
-          className="absolute inset-0 bg-gradient-to-r from-violet-600 via-purple-600 to-cyan-500"
-          aria-hidden
+      <div className="tkad-landing-neon tkad-planner-neon bg-gray-50 dark:bg-[#0A0A0A]">
+        <PageHero
+          eyebrow="// ABOUT THINKAD"
+          title={isKo ? "광고판을 " : "We made billboards "}
+          highlight={isKo ? "투명하게" : "transparent"}
+          titleEnd={isKo ? " 만든 회사" : ""}
+          description={
+            isKo
+              ? "2014년부터 국내 최초로 OOH 단가를 공개해온 싱커드가 AI 플랫폼으로 진화합니다"
+              : "Since 2014, THINKAD pioneered transparent OOH pricing in Korea — now evolving into an AI platform"
+          }
         />
-        <div className="relative mx-auto max-w-2xl px-4 text-center sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-bold tracking-tight text-white sm:text-3xl">
-            {t("about.ctaTitle")}
-          </h2>
-          <p className="mt-4 text-base leading-relaxed text-white/85 sm:text-lg">
-            {t("about.ctaSubtitle")}
-          </p>
-          <Link
-            href="/contact"
-            className="mt-10 inline-flex rounded-xl bg-white px-10 py-3 text-sm font-semibold text-violet-700 shadow-lg transition hover:bg-white/95"
-          >
-            {t("about.ctaButton")}
-          </Link>
-        </div>
-      </section>
-    </div>
+        <AboutPageSections isKo={isKo} />
+      </div>
     </HomeLandingDayNight>
   );
-}
-
-function getValueTranslation(
-  t: Awaited<ReturnType<typeof getTranslations>>,
-  key: string,
-) {
-  return {
-    title: t(`about.${key}.title`),
-    description: t(`about.${key}.description`),
-  };
 }

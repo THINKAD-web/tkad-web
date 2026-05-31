@@ -9,37 +9,38 @@ import {
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
 
-const BANNER_IMAGES = [
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/fe54ed23-7265-4441-8fe0-d4c13c1666dd.jpg",
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/fb57b678-5924-49fb-859f-28358e9b5efc.png",
-] as const;
-
 const banners = [
   {
-    image: BANNER_IMAGES[0],
-    badge: "🎉 정식 오픈 기념",
-    title: "첫 30명 PRO",
-    highlight: "1개월 무료",
-    sub: "지금 가입하면 상세 데이터·PDF 보고서 무료",
-    cta: "지금 신청하기",
-    href: "/pricing",
-  },
-  {
-    image: BANNER_IMAGES[1],
-    badge: "📺 전국 500+ 매체",
-    title: "검증된",
-    highlight: "광고매체",
-    sub: "강남부터 부산까지 실제 집행 데이터 기반",
+    id: 1,
+    image:
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
+    badge: "🏆 국내 최초",
+    title: "OOH 단가",
+    highlight: "투명화",
+    titleEnd: " 10년",
+    sub: "수십 곳에 전화하던 시대는 끝났습니다",
     cta: "매체 탐색하기",
     href: "/media",
   },
   {
-    image: BANNER_IMAGES[2],
+    id: 2,
+    image:
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0fa1cb83-dc2e-45ee-9210-4c2f433cbaa1.jpg",
+    badge: "✨ AI 플래너",
+    title: "3분이면",
+    highlight: "캠페인 완성",
+    sub: "AI가 최적 매체를 추천하고 견적까지 자동으로",
+    cta: "플래너 시작하기",
+    href: "/planner",
+  },
+  {
+    id: 3,
+    image:
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0f795047-667e-4291-8495-1c41eb6e5afe.png",
     badge: "🎤 팬덤 광고",
     title: "아이돌 생일광고",
     highlight: "전문 플랫폼",
-    sub: "강남역·홍대·코엑스 팬덤 광고 매체 한눈에",
+    sub: "강남역·홍대·코엑스 팬덤 매체 한눈에",
     cta: "매체 보기",
     href: "/special/fandom",
   },
@@ -79,7 +80,7 @@ export function HomeHeroBanner() {
           const src = optimizeHeroMarqueeUrl(b.image) ?? b.image;
           return (
           <div
-            key={b.href}
+            key={b.id}
             className={cn(
               "absolute inset-0 transition-opacity duration-700",
               i === current ? "opacity-100" : "opacity-0",
@@ -121,6 +122,7 @@ export function HomeHeroBanner() {
               <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">
                 {banner.highlight}
               </span>
+              {"titleEnd" in banner && banner.titleEnd ? banner.titleEnd : null}
             </h2>
             <p className="mb-4 text-sm text-white/70 md:mb-6 md:text-base lg:text-lg lg:text-white/80">
               {banner.sub}
@@ -137,7 +139,7 @@ export function HomeHeroBanner() {
         <div className="absolute bottom-4 left-1/2 flex -translate-x-1/2 gap-2 md:bottom-6 md:gap-2.5">
           {banners.map((b, i) => (
             <button
-              key={b.href}
+              key={b.id}
               type="button"
               onClick={() => goTo(i)}
               className={cn(

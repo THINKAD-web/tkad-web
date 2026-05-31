@@ -10,6 +10,8 @@ import {
   BEGINNER_TIMELINE,
 } from "@/lib/guides-beginner-content";
 import { listGuideMeta } from "@/lib/guides-data";
+import { getPublishedGuideArticles } from "@/lib/public-auto-content";
+import { SEO_GUIDE_SLUGS } from "@/lib/seo-content/seo-guide-topics";
 import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import {
@@ -40,22 +42,33 @@ export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
 
+const GUIDES_INDEX_META_KO = {
+  title: "옥외광고 가이드 — 처음부터 끝까지 | THINKAD 싱커드",
+  description:
+    "옥외광고 기획부터 집행, 효과 측정까지 단계별 완전 가이드. 초보자도 쉽게 따라할 수 있습니다.",
+  openGraphTitle: "옥외광고 가이드 | THINKAD 싱커드",
+} as const;
+
+const GUIDES_INDEX_META_EN = {
+  title: "OOH advertising guides — start to finish | THINKAD",
+  description:
+    "Step-by-step OOH guides from planning and buying to measurement. Easy for first-time advertisers.",
+  openGraphTitle: "OOH guides | THINKAD",
+} as const;
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
-  const title = isKo ? BEGINNER_GUIDE_META.titleKo : BEGINNER_GUIDE_META.titleEn;
-  const description = isKo
-    ? BEGINNER_GUIDE_META.descriptionKo
-    : BEGINNER_GUIDE_META.descriptionEn;
+  const meta = isKo ? GUIDES_INDEX_META_KO : GUIDES_INDEX_META_EN;
 
   return {
-    title,
-    description,
+    title: meta.title,
+    description: meta.description,
     keywords: isKo ? BEGINNER_GUIDE_META.keywordsKo : BEGINNER_GUIDE_META.keywordsEn,
     alternates: pageAlternates(locale, "/guides"),
     openGraph: {
-      title,
-      description,
+      title: meta.openGraphTitle,
+      description: meta.description,
       type: "article",
       images: segmentOpenGraphImages(
         locale,
@@ -65,8 +78,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     },
     twitter: {
       card: "summary_large_image",
-      title: title,
-      description,
+      title: meta.openGraphTitle,
+      description: meta.description,
       images: segmentOpenGraphImages(
         locale,
         "guides",
@@ -121,6 +134,10 @@ export default async function GuidesIndexPage({ params }: Props) {
   const isKo = locale === "ko";
 
   const otherGuides = listGuideMeta().filter((g) => !g.draft);
+  const publishedDbGuides = await getPublishedGuideArticles();
+  const seoGuides = publishedDbGuides.filter((g) =>
+    SEO_GUIDE_SLUGS.includes(g.slug as (typeof SEO_GUIDE_SLUGS)[number]),
+  );
 
   const ld = [
     buildBreadcrumbJsonLd(locale, [
@@ -133,12 +150,20 @@ export default async function GuidesIndexPage({ params }: Props) {
       description: isKo
         ? BEGINNER_GUIDE_META.descriptionKo
         : BEGINNER_GUIDE_META.descriptionEn,
-      items: otherGuides.map((g) => ({
-        name: isKo ? g.titleKo : g.titleEn,
-        path: `/guides/${g.slug}`,
-        description: isKo ? g.descriptionKo : g.descriptionEn,
-        datePublished: g.publishedAt,
-      })),
+      items: [
+        ...seoGuides.map((g) => ({
+          name: g.titleKo,
+          path: `/guides/${g.slug}`,
+          description: g.excerptKo,
+          datePublished: g.publishedAt?.toISOString(),
+        })),
+        ...otherGuides.map((g) => ({
+          name: isKo ? g.titleKo : g.titleEn,
+          path: `/guides/${g.slug}`,
+          description: isKo ? g.descriptionKo : g.descriptionEn,
+          datePublished: g.publishedAt,
+        })),
+      ],
     }),
     buildArticleJsonLd(locale),
     buildFaqJsonLd(locale),
@@ -183,6 +208,7 @@ export default async function GuidesIndexPage({ params }: Props) {
     plannerCta: isKo ? "AI 플래너 써보기" : "Try AI planner",
     contactCta: isKo ? "무료 컨설팅 신청" : "Free consultation",
     moreGuides: isKo ? "지역별 심화 가이드" : "Regional deep-dive guides",
+    seoGuides: isKo ? "키워드 가이드" : "Keyword guides",
   };
 
   return (
@@ -195,10 +221,14 @@ export default async function GuidesIndexPage({ params }: Props) {
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
           <PageHero
-            eyebrow="// 04 · CONTENT"
-            title="광고주를 위한 "
-            highlight="실전 가이드"
-            description="OOH 광고 기획부터 집행까지 단계별로 안내해드립니다"
+            eyebrow="// GUIDES"
+            title={isKo ? "옥외광고 " : "OOH "}
+            highlight={isKo ? "완전 가이드" : "guides"}
+            description={
+              isKo
+                ? "기획부터 집행, 효과 측정까지 단계별로 안내합니다"
+                : "Planning, execution, and measurement — step by step"
+            }
           />
           <SubTabsBar group="content" currentPath="/guides" />
           <div className="border-b border-white/10 px-4 pb-6">
@@ -213,6 +243,27 @@ export default async function GuidesIndexPage({ params }: Props) {
               </Link>
             </CategoryHeroCtaRow>
           </div>
+
+          {seoGuides.length > 0 ? (
+            <NeonSection className="pt-10 pb-8 sm:pt-14">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
+                [ {sectionCopy.seoGuides} ]
+              </p>
+              <ul className="mt-4 grid gap-3 sm:grid-cols-2">
+                {seoGuides.map((g) => (
+                  <li key={g.slug}>
+                    <Link
+                      href={`/guides/${g.slug}`}
+                      className="flex items-center justify-between gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:dark:bg-white/10 hover:bg-gray-100"
+                    >
+                      <span className="min-w-0 truncate">{g.titleKo}</span>
+                      <ArrowRight className="h-4 w-4 shrink-0 dark:text-white text-gray-400" />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </NeonSection>
+          ) : null}
 
           <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
             <NeonSectionHead

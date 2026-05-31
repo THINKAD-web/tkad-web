@@ -1306,6 +1306,20 @@ model GuideArticle {
   @@map("guide_articles")
 }
 
+/// SEO FAQ — Claude 생성 후 DB 저장 (`/faq`)
+model Faq {
+  id        String   @id @default(cuid())
+  question  String
+  answer    String   @db.Text
+  category  String
+  order     Int      @default(0) @map("sort_order")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@unique([category, order])
+  @@index([category])
+  @@map("faqs")
+}
+
 model SuccessCase {
   id            String    @id @default(cuid())
   campaignId    String?   @unique @map("campaign_id")

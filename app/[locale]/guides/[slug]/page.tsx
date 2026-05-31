@@ -4,7 +4,11 @@ import { setRequestLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getGuideBySlug, GUIDES } from "@/lib/guides-data";
-import { getPublishedGuideBySlug } from "@/lib/public-auto-content";
+import {
+  getPublishedGuideArticles,
+  getPublishedGuideBySlug,
+} from "@/lib/public-auto-content";
+import { SEO_GUIDE_TOPICS } from "@/lib/seo-content/seo-guide-topics";
 import { DbGuideArticlePage } from "@/components/guides/db-guide-article-page";
 import { buildBreadcrumbJsonLd } from "@/lib/structured-data";
 import { pageAlternates, segmentOpenGraphImages, serializeJsonLd, siteUrl } from "@/lib/seo";
@@ -17,7 +21,12 @@ type Props = {
 };
 
 export async function generateStaticParams() {
-  return GUIDES.map((g) => ({ slug: g.slug }));
+  const dbGuides = await getPublishedGuideArticles();
+  const slugs = new Set([
+    ...GUIDES.map((g) => g.slug),
+    ...dbGuides.map((g) => g.slug),
+  ]);
+  return [...slugs].map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -25,14 +34,21 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   const dbGuide = await getPublishedGuideBySlug(slug);
   if (dbGuide) {
+    const seoTopic = SEO_GUIDE_TOPICS.find((t) => t.slug === slug);
+    const title =
+      seoTopic?.titleKo ?? dbGuide.titleKo;
+    const description =
+      dbGuide.metaDescription ??
+      dbGuide.excerptKo?.slice(0, 160) ??
+      "";
     return {
-      title: `${dbGuide.titleKo} | THINKAD`,
-      description: dbGuide.metaDescription ?? dbGuide.excerptKo?.slice(0, 160) ?? "",
+      title: `${title} | THINKAD 싱커드`,
+      description,
       keywords: dbGuide.tags,
       alternates: pageAlternates(locale, `/guides/${slug}`),
       openGraph: {
-        title: dbGuide.titleKo,
-        description: dbGuide.metaDescription ?? dbGuide.excerptKo,
+        title,
+        description,
         type: "article",
         publishedTime: dbGuide.publishedAt?.toISOString(),
         modifiedTime: dbGuide.updatedAt.toISOString(),
@@ -44,8 +60,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       },
       twitter: {
         card: "summary_large_image",
-        title: dbGuide.titleKo,
-        description: dbGuide.metaDescription ?? dbGuide.excerptKo ?? "",
+        title,
+        description,
         images: segmentOpenGraphImages(
           locale,
           "guides",

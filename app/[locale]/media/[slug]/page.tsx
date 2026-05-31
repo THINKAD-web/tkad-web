@@ -5,24 +5,21 @@ import { getTranslations, setRequestLocale } from "next-intl/server";
 import {
   buildCaseStudyGalleryItems,
   getMediaDetailGalleryUrls,
-  getPrimaryMediaImageUrl,
   buildSimilarSortCatalog,
   getSimilarMediaFromCatalog,
   typeLabels,
 } from "@/lib/media-data";
 import { mediaItemToRecentlyViewedRecord } from "@/lib/recently-viewed";
-import {
-  buildMediaMetaDescription,
-  buildMediaMetaKeywordsList,
-  buildMediaPageTitle,
-} from "@/lib/media-seo";
+import { buildMediaMetaKeywordsList } from "@/lib/media-seo";
 import { attachRecommendReason } from "@/lib/media-recommend-reasons";
 import { buildMediaImageAlt } from "@/lib/media-image-seo";
 import {
-  buildShareMetadata,
-  mediaDetailShareImages,
-  pageAlternates,
-} from "@/lib/seo";
+  buildMediaOgDescription,
+  buildMediaOgShortDescription,
+  buildMediaOgTitle,
+  resolveMediaOgImageUrl,
+} from "@/lib/media-og-metadata";
+import { pageAlternates, siteNameForLocale } from "@/lib/seo";
 import {
   buildMediaDetailSeoLinks,
   SeoContextualLinks,
@@ -91,34 +88,46 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const { slug } = await params;
-  const media = await resolveMediaForDetail(slug);
-  if (!media) return { title: "Media" };
-  const title = buildMediaPageTitle(media, locale);
-  const description = buildMediaMetaDescription(media, locale);
-  const keywords = buildMediaMetaKeywordsList(media, locale, 28);
+  const media = await resolveMediaForDetail(slug).catch(() => null);
+  if (!media) return {};
 
+  const ogImage = resolveMediaOgImageUrl(media);
+  const title = buildMediaOgTitle(media, locale);
+  const description = buildMediaOgDescription(media, locale);
+  const ogDescription = buildMediaOgShortDescription(media, locale);
+  const keywords = buildMediaMetaKeywordsList(media, locale, 28);
   const imageAlt = buildMediaImageAlt(media, locale);
-  const ogImages = mediaDetailShareImages(
-    locale,
-    String(media.id),
-    getPrimaryMediaImageUrl(media),
-    { ko: imageAlt, en: imageAlt },
-  );
   const canonicalPath = mediaItemDetailPath(media);
+  const displayName =
+    locale === "ko" || locale.startsWith("ko")
+      ? media.name
+      : media.nameEn || media.name;
+
   return {
     title,
     description,
     keywords,
     alternates: pageAlternates(locale, canonicalPath),
-    ...buildShareMetadata({
-      locale,
-      title,
-      description,
-      path: canonicalPath,
+    openGraph: {
+      title: displayName,
+      description: ogDescription,
+      images: [
+        {
+          url: ogImage,
+          width: 1200,
+          height: 630,
+          alt: imageAlt,
+        },
+      ],
       type: "website",
-      alt: { ko: imageAlt, en: imageAlt },
-      images: ogImages,
-    }),
+      siteName: siteNameForLocale(locale),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: displayName,
+      description: ogDescription,
+      images: [ogImage],
+    },
   };
 }
 
