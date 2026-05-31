@@ -27,7 +27,13 @@ const CRITICAL_SITEMAP_PATHS = [
   "/media",
   "/planner",
   "/media/packages",
+  "/media/targets",
   "/special/fandom",
+  "/special/popup",
+  "/special/campus",
+  "/special/local",
+  "/faq",
+  "/guides",
   "/report",
   "/cases",
   "/about",
@@ -38,32 +44,40 @@ type ChangeFreq = NonNullable<MetadataRoute.Sitemap[number]["changeFrequency"]>;
 function sitemapPriority(path: string): number {
   if (path === "") return 1;
   if (path === "/media" || path === "/packages" || path === "/media/packages")
-    return 1;
-  if (path === "/planner" || path === "/cases" || path === "/report") return 0.8;
-  if (path.startsWith("/industry/") || path.startsWith("/local/")) return 0.7;
-  if (path === "/academy" || path.startsWith("/guides")) return 0.6;
-  if (path.startsWith("/cases/")) return 0.75;
-  if (path.startsWith("/media/")) return 0.72;
-  if (path.startsWith("/target/")) return 0.72;
-  if (path.startsWith("/special/")) return 0.75;
-  if (path.startsWith("/report/")) return 0.72;
-  if (path.startsWith("/insights/")) return 0.72;
-  return 0.8;
+    return 0.9;
+  if (path === "/faq" || path === "/guides" || path.startsWith("/guides/"))
+    return 0.8;
+  if (path.startsWith("/media/") && !path.startsWith("/media/packages"))
+    return 0.7;
+  if (
+    path === "/planner" ||
+    path === "/cases" ||
+    path === "/report" ||
+    path.startsWith("/cases/") ||
+    path.startsWith("/report/") ||
+    path.startsWith("/insights/")
+  )
+    return 0.75;
+  if (
+    path.startsWith("/industry/") ||
+    path.startsWith("/local/") ||
+    path.startsWith("/special/") ||
+    path.startsWith("/target/")
+  )
+    return 0.7;
+  if (path === "/academy" || path === "/about") return 0.65;
+  return 0.6;
 }
 
 function sitemapChangeFrequency(path: string): ChangeFreq {
-  if (path === "/media" || path === "/report" || path.startsWith("/report/"))
-    return "daily";
-  if (
-    path === "/cases" ||
-    path.startsWith("/cases/") ||
-    path === "/academy" ||
-    path.startsWith("/guides")
-  )
+  if (path === "" || path === "/media") return "daily";
+  if (path === "/faq" || path === "/guides" || path.startsWith("/guides/"))
     return "weekly";
+  if (path.startsWith("/media/")) return "weekly";
+  if (path === "/report" || path.startsWith("/report/")) return "daily";
+  if (path === "/cases" || path.startsWith("/cases/")) return "weekly";
   if (path.startsWith("/industry/") || path.startsWith("/local/"))
     return "monthly";
-  if (path === "") return "daily";
   return "weekly";
 }
 

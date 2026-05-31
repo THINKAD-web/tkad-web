@@ -13,6 +13,7 @@
     "lint": "eslint",
     "seed": "npx tsx prisma/seed.ts",
     "seed:packages": "npx tsx scripts/seed-packages.ts",
+    "seed:seo-content": "npx tsx scripts/seed-seo-content.ts",
     "db:check": "node scripts/db-check.mjs",
     "db:push": "node scripts/ensure-database-url.mjs && prisma db push",
     "db:migrate": "node scripts/ensure-database-url.mjs && prisma migrate deploy",
