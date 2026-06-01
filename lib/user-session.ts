@@ -1,5 +1,6 @@
 import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { readOAuthHmacSecretOrDev } from "@/lib/oauth-hmac-secret";
 import { prisma } from "@/lib/prisma";
 import type { AppUserRole } from "@prisma/client";
 
@@ -8,15 +9,7 @@ export const USER_SESSION_COOKIE = "tkad_user_session";
 const MAX_AGE_SEC = 60 * 60 * 24 * 7;
 
 function sessionSecret(): string | null {
-  const s =
-    process.env.USER_SESSION_SECRET?.trim() ||
-    process.env.AUTH_SECRET?.trim() ||
-    process.env.NEXTAUTH_SECRET?.trim();
-  if (s) return s;
-  if (process.env.NODE_ENV !== "production") {
-    return "dev-user-session-secret-change-in-prod";
-  }
-  return null;
+  return readOAuthHmacSecretOrDev();
 }
 
 function signPayload(payload: string, secret: string): string {

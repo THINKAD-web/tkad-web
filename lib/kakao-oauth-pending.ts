@@ -4,6 +4,7 @@ import { cookies } from "next/headers";
 import type { AppUserRole } from "@prisma/client";
 import type { CommunityMemberRole } from "@/lib/community/types";
 import type { SignupStartRole } from "@/lib/signup-start-roles";
+import { readOAuthHmacSecretOrDev } from "@/lib/oauth-hmac-secret";
 import { resolveSignupStartRole } from "@/lib/signup-start-roles";
 
 export const KAKAO_PENDING_COOKIE = "tkad_kakao_oauth_pending";
@@ -25,14 +26,7 @@ export type KakaoPendingPayload = {
 };
 
 function pendingSecret(): string | null {
-  const s =
-    process.env.AUTH_SECRET?.trim() ||
-    process.env.USER_SESSION_SECRET?.trim();
-  if (s) return s;
-  if (process.env.NODE_ENV !== "production") {
-    return "dev-kakao-pending-secret";
-  }
-  return null;
+  return readOAuthHmacSecretOrDev();
 }
 
 function signPayload(payload: string, secret: string): string {

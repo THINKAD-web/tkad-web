@@ -8,6 +8,9 @@ import {
 } from "@/lib/auth-oauth-env";
 import { oauthConfigErrorRedirect } from "@/lib/oauth-redirect-error";
 
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
+
 type RouteContext = { params: Promise<{ nextauth: string[] }> };
 
 function providerFromPath(segments: string[] | undefined): OAuthProvider | null {
@@ -65,7 +68,18 @@ async function guardAuthRequest(
     console.error("[nextauth] handler error:", err);
     const msg =
       err instanceof Error ? err.message : "Authentication handler failed";
+    const segments = (await ctx.params).nextauth;
+    const isCallback = (segments ?? []).some((s) => s === "callback");
     if (req.method === "GET" && provider) {
+      if (isCallback) {
+        const locale =
+          req.nextUrl.searchParams.get("locale")?.trim() === "en" ? "en" : "ko";
+        const origin = resolveAuthOrigin(req.nextUrl.origin);
+        const url = new URL(`/${locale}/login`, origin);
+        url.searchParams.set("error", "oauth_signin_failed");
+        url.searchParams.set("provider", provider);
+        return NextResponse.redirect(url.toString());
+      }
       return guardFailureResponse(req, provider, msg);
     }
     return NextResponse.json(

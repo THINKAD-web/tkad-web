@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { readOAuthHmacSecretOrDev } from "@/lib/oauth-hmac-secret";
 
 export const NAVER_PENDING_COOKIE = "tkad_naver_oauth_pending";
 const MAX_AGE_SEC = 60 * 15;
@@ -24,14 +25,7 @@ export type NaverPendingPayload = {
 };
 
 function pendingSecret(): string | null {
-  const s =
-    process.env.AUTH_SECRET?.trim() ||
-    process.env.USER_SESSION_SECRET?.trim();
-  if (s) return s;
-  if (process.env.NODE_ENV !== "production") {
-    return "dev-naver-pending-secret";
-  }
-  return null;
+  return readOAuthHmacSecretOrDev();
 }
 
 function signPayload(payload: string, secret: string): string {

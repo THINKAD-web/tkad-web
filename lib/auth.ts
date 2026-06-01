@@ -82,125 +82,141 @@ export const { handlers, signIn, auth } = NextAuth({
     async signIn({ account, profile }) {
       const { cookies } = await import("next/headers");
       const cookieStore = await cookies();
+      if (!account?.providerAccountId) return false;
+      const provider = account.provider;
 
-      if (account?.provider === "google") {
-        if (!isGoogleOAuthConfigured()) return false;
-        if (!account.providerAccountId) return false;
+      try {
+        if (provider === "google") {
+          if (!isGoogleOAuthConfigured()) return false;
 
-        const redirect =
-          cookieStore.get(GOOGLE_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
-        const locale =
-          cookieStore.get(GOOGLE_AUTH_LOCALE_COOKIE)?.value ?? "ko";
+          const redirect =
+            cookieStore.get(GOOGLE_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
+          const locale =
+            cookieStore.get(GOOGLE_AUTH_LOCALE_COOKIE)?.value ?? "ko";
 
-        const result = await resolveGoogleSignIn({
-          providerAccountId: account.providerAccountId,
-          profile: profile as {
-            sub?: string;
-            email?: string | null;
-            email_verified?: boolean;
-            name?: string | null;
-            picture?: string | null;
-            given_name?: string | null;
-            family_name?: string | null;
-          },
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expiresAt: account.expires_at ?? undefined,
-          redirect,
-        });
+          const result = await resolveGoogleSignIn({
+            providerAccountId: account.providerAccountId,
+            profile: profile as {
+              sub?: string;
+              email?: string | null;
+              email_verified?: boolean;
+              name?: string | null;
+              picture?: string | null;
+              given_name?: string | null;
+              family_name?: string | null;
+            },
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at ?? undefined,
+            redirect,
+          });
 
-        if (result.type === "existing") {
-          const ok = await establishUserSession(result.userId, result.role);
-          if (!ok) return false;
-          cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
-          return true;
+          if (result.type === "existing") {
+            const ok = await establishUserSession(result.userId, result.role);
+            if (!ok) {
+              console.error("[auth/google] establishUserSession failed");
+              return false;
+            }
+            cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
+            return true;
+          }
+
+          if (result.type === "pending") {
+            cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
+            const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
+            return `/${locale}/register/google?redirect=${encodeURIComponent(safeRedirect)}`;
+          }
+
+          console.error("[auth/google] signIn rejected:", result);
+          return false;
         }
 
-        if (result.type === "pending") {
-          cookieStore.delete(GOOGLE_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(GOOGLE_AUTH_LOCALE_COOKIE);
-          const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
-          return `/${locale}/register/google?redirect=${encodeURIComponent(safeRedirect)}`;
+        if (provider === "kakao") {
+          if (!isKakaoOAuthConfigured()) return false;
+
+          const redirect =
+            cookieStore.get(KAKAO_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
+          const locale =
+            cookieStore.get(KAKAO_AUTH_LOCALE_COOKIE)?.value ?? "ko";
+
+          const result = await resolveKakaoSignIn({
+            providerAccountId: account.providerAccountId,
+            profile: profile as unknown as KakaoProfile,
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at ?? undefined,
+            redirect,
+          });
+
+          if (result.type === "existing") {
+            const ok = await establishUserSession(result.userId, result.role);
+            if (!ok) {
+              console.error("[auth/kakao] establishUserSession failed");
+              return false;
+            }
+            cookieStore.delete(KAKAO_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(KAKAO_AUTH_LOCALE_COOKIE);
+            return true;
+          }
+
+          if (result.type === "pending") {
+            cookieStore.delete(KAKAO_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(KAKAO_AUTH_LOCALE_COOKIE);
+            const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
+            return `/${locale}/register/kakao?redirect=${encodeURIComponent(safeRedirect)}`;
+          }
+
+          console.error("[auth/kakao] signIn rejected:", result);
+          return false;
         }
 
-        return false;
-      }
+        if (provider === "naver") {
+          if (!isNaverOAuthConfigured()) return false;
 
-      if (account?.provider === "kakao") {
-        if (!isKakaoOAuthConfigured()) return false;
-        if (!account.providerAccountId) return false;
+          const redirect =
+            cookieStore.get(NAVER_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
+          const locale =
+            cookieStore.get(NAVER_AUTH_LOCALE_COOKIE)?.value ?? "ko";
 
-        const redirect =
-          cookieStore.get(KAKAO_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
-        const locale =
-          cookieStore.get(KAKAO_AUTH_LOCALE_COOKIE)?.value ?? "ko";
+          const result = await resolveNaverSignIn({
+            providerAccountId: account.providerAccountId,
+            profile: profile as {
+              id?: string;
+              email?: string | null;
+              name?: string | null;
+              image?: string | null;
+            },
+            accessToken: account.access_token,
+            refreshToken: account.refresh_token,
+            expiresAt: account.expires_at ?? undefined,
+            redirect,
+          });
 
-        const result = await resolveKakaoSignIn({
-          providerAccountId: account.providerAccountId,
-          profile: profile as unknown as KakaoProfile,
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expiresAt: account.expires_at ?? undefined,
-          redirect,
-        });
+          if (result.type === "existing") {
+            const ok = await establishUserSession(result.userId, result.role);
+            if (!ok) {
+              console.error("[auth/naver] establishUserSession failed");
+              return false;
+            }
+            cookieStore.delete(NAVER_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(NAVER_AUTH_LOCALE_COOKIE);
+            return true;
+          }
 
-        if (result.type === "existing") {
-          const ok = await establishUserSession(result.userId, result.role);
-          if (!ok) return false;
-          cookieStore.delete(KAKAO_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(KAKAO_AUTH_LOCALE_COOKIE);
-          return true;
+          if (result.type === "pending") {
+            cookieStore.delete(NAVER_AUTH_REDIRECT_COOKIE);
+            cookieStore.delete(NAVER_AUTH_LOCALE_COOKIE);
+            const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
+            return `/${locale}/register/naver?redirect=${encodeURIComponent(safeRedirect)}`;
+          }
+
+          console.error("[auth/naver] signIn rejected:", result);
+          return false;
         }
-
-        if (result.type === "pending") {
-          cookieStore.delete(KAKAO_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(KAKAO_AUTH_LOCALE_COOKIE);
-          const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
-          return `/${locale}/register/kakao?redirect=${encodeURIComponent(safeRedirect)}`;
-        }
-
-        return false;
-      }
-
-      if (account?.provider === "naver") {
-        if (!isNaverOAuthConfigured()) return false;
-        if (!account.providerAccountId) return false;
-
-        const redirect =
-          cookieStore.get(NAVER_AUTH_REDIRECT_COOKIE)?.value ?? "/my";
-        const locale =
-          cookieStore.get(NAVER_AUTH_LOCALE_COOKIE)?.value ?? "ko";
-
-        const result = await resolveNaverSignIn({
-          providerAccountId: account.providerAccountId,
-          profile: profile as {
-            id?: string;
-            email?: string | null;
-            name?: string | null;
-            image?: string | null;
-          },
-          accessToken: account.access_token,
-          refreshToken: account.refresh_token,
-          expiresAt: account.expires_at ?? undefined,
-          redirect,
-        });
-
-        if (result.type === "existing") {
-          const ok = await establishUserSession(result.userId, result.role);
-          if (!ok) return false;
-          cookieStore.delete(NAVER_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(NAVER_AUTH_LOCALE_COOKIE);
-          return true;
-        }
-
-        if (result.type === "pending") {
-          cookieStore.delete(NAVER_AUTH_REDIRECT_COOKIE);
-          cookieStore.delete(NAVER_AUTH_LOCALE_COOKIE);
-          const safeRedirect = redirect.startsWith("/") ? redirect : "/my";
-          return `/${locale}/register/naver?redirect=${encodeURIComponent(safeRedirect)}`;
-        }
-
+      } catch (err) {
+        console.error(`[auth/${provider ?? "unknown"}] signIn callback error:`, err);
         return false;
       }
 

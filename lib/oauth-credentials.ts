@@ -6,6 +6,7 @@
 export function readKakaoOAuthClientId(): string | undefined {
   return (
     process.env.KAKAO_CLIENT_ID?.trim() ||
+    process.env.KAKAO_LOGIN_CLIENT_ID?.trim() ||
     process.env.AUTH_KAKAO_ID?.trim() ||
     process.env.KAKAO_REST_API_KEY?.trim() ||
     undefined
@@ -15,6 +16,7 @@ export function readKakaoOAuthClientId(): string | undefined {
 export function readKakaoOAuthClientSecret(): string | undefined {
   return (
     process.env.KAKAO_CLIENT_SECRET?.trim() ||
+    process.env.KAKAO_LOGIN_CLIENT_SECRET?.trim() ||
     process.env.AUTH_KAKAO_SECRET?.trim() ||
     undefined
   );
@@ -39,6 +41,7 @@ export function readNaverOAuthClientSecret(): string | undefined {
 export function readGoogleOAuthClientId(): string | undefined {
   return (
     process.env.GOOGLE_CLIENT_ID?.trim() ||
+    process.env.GOOGLE_OAUTH_CLIENT_ID?.trim() ||
     process.env.AUTH_GOOGLE_ID?.trim() ||
     undefined
   );
@@ -47,6 +50,7 @@ export function readGoogleOAuthClientId(): string | undefined {
 export function readGoogleOAuthClientSecret(): string | undefined {
   return (
     process.env.GOOGLE_CLIENT_SECRET?.trim() ||
+    process.env.GOOGLE_OAUTH_CLIENT_SECRET?.trim() ||
     process.env.AUTH_GOOGLE_SECRET?.trim() ||
     undefined
   );

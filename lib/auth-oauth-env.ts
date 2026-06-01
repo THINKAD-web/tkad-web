@@ -30,6 +30,7 @@ export function readAuthSecret(): string | undefined {
   return (
     process.env.AUTH_SECRET?.trim() ||
     process.env.USER_SESSION_SECRET?.trim() ||
+    process.env.NEXTAUTH_SECRET?.trim() ||
     undefined
   );
 }
@@ -65,11 +66,11 @@ export function isProviderConfigured(provider: OAuthProvider): boolean {
 
 export function collectAuthSecretIssues(): AuthEnvIssue[] {
   const issues: AuthEnvIssue[] = [];
-  if (!process.env.AUTH_SECRET?.trim() && !process.env.USER_SESSION_SECRET?.trim()) {
+  if (!readAuthSecret()) {
     issues.push({
       key: "AUTH_SECRET",
       messageKo:
-        "AUTH_SECRET 또는 USER_SESSION_SECRET 환경변수가 설정되지 않았습니다.",
+        "AUTH_SECRET, USER_SESSION_SECRET, 또는 NEXTAUTH_SECRET 환경변수가 설정되지 않았습니다.",
     });
   }
   return issues;
@@ -210,11 +211,14 @@ export function checkNextAuthConfig(): NextAuthConfigCheck {
 /** Vercel 등록용 — OAuth 로그인에 필요한 키 목록 */
 export const OAUTH_VERCEL_ENV_KEYS = [
   "AUTH_SECRET",
+  "NEXTAUTH_SECRET",
   "AUTH_URL",
   "NEXTAUTH_URL",
   "USER_SESSION_SECRET",
   "GOOGLE_CLIENT_ID",
+  "GOOGLE_OAUTH_CLIENT_ID",
   "GOOGLE_CLIENT_SECRET",
+  "GOOGLE_OAUTH_CLIENT_SECRET",
   "KAKAO_CLIENT_ID",
   "KAKAO_CLIENT_SECRET",
   "KAKAO_REST_API_KEY",
