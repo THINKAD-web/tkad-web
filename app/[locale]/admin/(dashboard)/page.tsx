@@ -17,8 +17,6 @@ import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts"
 import { AdminWebVitalsCard } from "@/components/admin/admin-web-vitals-card";
 import { AdminBrokenImagesCard } from "@/components/admin/admin-broken-images-card";
 import { loadWebVitalsSummary } from "@/lib/web-vitals-summary";
-import { scanBrokenMediaImages } from "@/lib/media-image-health";
-import type { MediaImageHealthResult } from "@/lib/media-image-health";
 
 export const dynamic = "force-dynamic";
 
@@ -100,16 +98,9 @@ function FeedList({
 export default async function AdminOverviewPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   const prefix = `/${locale}`;
-  const [data, webVitals, imageHealth] = await Promise.all([
+  const [data, webVitals] = await Promise.all([
     loadAdminDashboardData(locale),
     loadWebVitalsSummary(7),
-    scanBrokenMediaImages().catch(
-      (): MediaImageHealthResult => ({
-        scanned: 0,
-        broken: [],
-        checkedAt: new Date().toISOString(),
-      }),
-    ),
   ]);
 
   const quickActions = [
@@ -230,7 +221,7 @@ export default async function AdminOverviewPage({ params }: Props) {
 
       <AdminWebVitalsCard summary={webVitals} />
 
-      <AdminBrokenImagesCard locale={locale} result={imageHealth} />
+      <AdminBrokenImagesCard locale={locale} />
 
       {data.configured ? (
         <AdminDashboardCharts

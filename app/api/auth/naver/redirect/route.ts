@@ -1,10 +1,7 @@
-import { NextResponse } from "next/server";
 import { checkOAuthLoginConfig } from "@/lib/auth-oauth-env";
 import { resolveAuthOrigin } from "@/lib/auth-url";
-import {
-  applyNaverAuthCookies,
-  sanitizeAuthRedirect,
-} from "@/lib/naver-auth-redirect";
+import { sanitizeAuthRedirect } from "@/lib/naver-auth-redirect";
+import { startOAuthSignIn } from "@/lib/oauth-signin-start";
 import { oauthConfigErrorRedirect } from "@/lib/oauth-redirect-error";
 
 export const runtime = "nodejs";
@@ -23,10 +20,5 @@ export async function GET(req: Request) {
   }
 
   const callbackUrl = `${authOrigin}/${locale}${redirect}`;
-  const signInUrl = new URL("/api/auth/signin/naver", authOrigin);
-  signInUrl.searchParams.set("callbackUrl", callbackUrl);
-
-  const res = NextResponse.redirect(signInUrl.toString());
-  applyNaverAuthCookies(res, redirect, locale);
-  return res;
+  await startOAuthSignIn("naver", { callbackUrl, redirect, locale });
 }

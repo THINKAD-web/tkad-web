@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
@@ -147,7 +148,9 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
   const messages = await getMessages();
-  const structuredData = buildStructuredDataGraph(locale);
+  const headerStore = await headers();
+  const isAdminRoute = headerStore.get("x-tkad-admin-route") === "1";
+  const structuredData = isAdminRoute ? null : buildStructuredDataGraph(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -155,18 +158,18 @@ export default async function LocaleLayout({ children, params }: Props) {
         className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans antialiased`}
       >
         <ThemeInitScript />
-        <JsonLd data={structuredData} />
-        <WebVitalsReporter />
-        <SpeedInsightsLoader />
+        {structuredData ? <JsonLd data={structuredData} /> : null}
+        {!isAdminRoute ? <WebVitalsReporter /> : null}
+        {!isAdminRoute ? <SpeedInsightsLoader /> : null}
         <PublicAnalyticsLoader />
-        <AbGaVariantSync />
+        {!isAdminRoute ? <AbGaVariantSync /> : null}
         <ThemeProvider>
           <NextIntlClientProvider
             locale={locale}
             messages={messages}
             timeZone="Asia/Seoul"
           >
-            <OpsAnalyticsTracker />
+            {!isAdminRoute ? <OpsAnalyticsTracker /> : null}
             <LocaleRootBody
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"

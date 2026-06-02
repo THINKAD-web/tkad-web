@@ -1,6 +1,16 @@
 # Search Console / 서치어드바이저 인증
 
-## Google (메타 태그)
+## Google (DNS TXT — tkad.co.kr Vercel DNS)
+
+루트 도메인 `@` TXT:
+
+```
+google-site-verification=FI7xVJqHr8-tGYIqNHZOeeoErc__5WwvitOm_lQIMoo
+```
+
+(Vercel: `vercel dns add tkad.co.kr @ TXT "google-site-verification=..."`)
+
+## Google (메타 태그 — 대안)
 
 Vercel 환경 변수:
 
@@ -14,9 +24,13 @@ Search Console에서 `googleXXXXXXXX.html` 을 받았다면 이 폴더(`public/`
 
 ## 네이버 (메타 태그)
 
+Vercel Production `NEXT_PUBLIC_NAVER_SITE_VERIFICATION`:
+
 ```
-NEXT_PUBLIC_NAVER_SITE_VERIFICATION=발급코드
+ce507d6ae12455e2d660a0fecd6f810d6671ec1d
 ```
+
+`<head>` 출력: `<meta name="naver-site-verification" content="..." />` (`app/[locale]/layout.tsx`)
 
 ## Sitemap ping
 

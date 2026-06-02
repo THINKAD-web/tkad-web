@@ -3,4 +3,4 @@ Allow: /
 Disallow: /admin/
 Disallow: /api/
 
-Sitemap: https://app.tkad.co.kr/sitemap.xml
+Sitemap: https://tkad.co.kr/sitemap.xml

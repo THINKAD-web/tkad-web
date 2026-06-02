@@ -126,6 +126,11 @@ export async function loadAdminDashboardData(
 
   const fourWeeksAgo = new Date(now.getTime() - 28 * 86400000);
 
+  const weekBoundaries = [0, 1, 2, 3].map((weeksAgo) => ({
+    gte: new Date(now.getTime() - (weeksAgo + 1) * 7 * 86400000),
+    lt: new Date(now.getTime() - weeksAgo * 7 * 86400000),
+  }));
+
   const [
     inquiriesThisMonth,
     inquiriesLastMonth,
@@ -139,7 +144,10 @@ export async function loadAdminDashboardData(
     recentUsers,
     recentApps,
     inquiries60d,
-    weeklyRaw,
+    week0Count,
+    week1Count,
+    week2Count,
+    week3Count,
   ] = await Promise.all([
     db.contactInquiry.count({
       where: { createdAt: { gte: thisMonthStart } },
@@ -213,9 +221,17 @@ export async function loadAdminDashboardData(
       select: { message: true, createdAt: true, inquiryType: true },
       take: 3000,
     }),
-    db.contactInquiry.findMany({
-      where: { createdAt: { gte: fourWeeksAgo } },
-      select: { createdAt: true },
+    db.contactInquiry.count({
+      where: { createdAt: { gte: weekBoundaries[3]!.gte, lt: weekBoundaries[3]!.lt } },
+    }),
+    db.contactInquiry.count({
+      where: { createdAt: { gte: weekBoundaries[2]!.gte, lt: weekBoundaries[2]!.lt } },
+    }),
+    db.contactInquiry.count({
+      where: { createdAt: { gte: weekBoundaries[1]!.gte, lt: weekBoundaries[1]!.lt } },
+    }),
+    db.contactInquiry.count({
+      where: { createdAt: { gte: weekBoundaries[0]!.gte, lt: weekBoundaries[0]!.lt } },
     }),
   ]);
 
@@ -342,15 +358,7 @@ export async function loadAdminDashboardData(
     badge: a.status,
   }));
 
-  const weekCounts = [0, 0, 0, 0];
-  for (const row of weeklyRaw) {
-    const weeksAgo = Math.floor(
-      (now.getTime() - row.createdAt.getTime()) / (7 * 86400000),
-    );
-    if (weeksAgo >= 0 && weeksAgo < 4) {
-      weekCounts[3 - weeksAgo] += 1;
-    }
-  }
+  const weekCounts = [week3Count, week2Count, week1Count, week0Count];
   const weekLabels = ["3주 전", "2주 전", "1주 전", "이번 주"];
   const weeklyInquiries: WeeklyInquiryPoint[] = weekCounts.map((count, i) => ({
     key: `w${i}`,

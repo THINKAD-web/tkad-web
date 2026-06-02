@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import ToastProvider from "@/components/toast-provider";
 import { PointToastListener } from "@/components/points/point-toast-listener";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
@@ -18,10 +19,27 @@ type Props = {
   children: ReactNode;
 };
 
+function isAdminPathname(pathname: string | null): boolean {
+  return pathname != null && /\/(?:ko|en)\/admin(?:\/|$)/.test(pathname);
+}
+
 /**
  * `[locale]/layout` 에서 대부분의 클라이언트 UI를 한 모듈로 묶어 Webpack RSC 청크 꼬임을 줄임.
+ * Admin 은 자체 AdminShell 이 있으므로 공개용 모바일/네비 chrome 은 생략합니다.
  */
 export default function LocaleRootBody({ skipLinkLabel, header, children }: Props) {
+  const pathname = usePathname();
+  const isAdmin = isAdminPathname(pathname);
+
+  if (isAdmin) {
+    return (
+      <ToastProvider>
+        <PointToastListener />
+        {children}
+      </ToastProvider>
+    );
+  }
+
   return (
     <ToastProvider>
       <CommandPaletteProvider>

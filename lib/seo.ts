@@ -18,14 +18,14 @@ export type OgImageList = OgImageDescriptor[];
 export const DEFAULT_OG_CDN_IMAGE =
   "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg";
 
-/** 앱 프로덕션 origin 폴백 (루트 tkad.co.kr 은 Cafe24) */
-export const OG_PRODUCTION_ORIGIN = "https://app.tkad.co.kr";
+/** 앱 프로덕션 origin 폴백 */
+export const OG_PRODUCTION_ORIGIN = "https://tkad.co.kr";
 
 /**
  * 절대 URL(OG, sitemap, JSON-LD, canonical, 이메일 링크)의 기준.
  * - `NEXT_PUBLIC_SITE_URL` / `SITE_URL` 우선 (운영·프리뷰·로컬 공통)
  * - 미설정 + Vercel 프리뷰: tkad-web.vercel.app
- * - 폴백: app.tkad.co.kr (루트 tkad.co.kr 은 Cafe24 — 앱 미호스팅)
+ * - 폴백: tkad.co.kr
  */
 function resolvePublicSiteUrl(): string {
   const explicit =
