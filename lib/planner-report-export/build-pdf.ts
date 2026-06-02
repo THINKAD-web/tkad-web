@@ -1,5 +1,6 @@
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
+import { CONTACT_EMAIL } from "@/lib/constants";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
 
 /**
@@ -51,13 +52,16 @@ export async function buildPlannerReportPdf(
 
   function footer() {
     const pages = doc.getNumberOfPages();
-    for (let i = 1; i <= pages; i++) {
+    // 표지(1p) 제외, 본문 페이지에만 푸터.
+    for (let i = 2; i <= pages; i++) {
       doc.setPage(i);
       doc.setFont(FONT, "normal");
       doc.setFontSize(7);
       setText(GRAY_500);
-      doc.text("THINKAD", M, pageH - 8);
-      doc.text(`${i} / ${pages}`, pageW - M, pageH - 8, { align: "right" });
+      doc.text("THINKAD CAMPAIGN PLANNER", M, pageH - 8);
+      doc.text(`${i - 1} / ${pages - 1}`, pageW - M, pageH - 8, {
+        align: "right",
+      });
     }
   }
 
@@ -72,38 +76,65 @@ export async function buildPlannerReportPdf(
     y += 9;
   }
 
-  // ── 헤더 배너 ──
+  const subtitle =
+    p.kind === "integrated"
+      ? isKo
+        ? "OOH + 디지털 통합 캠페인 제안서"
+        : "OOH + Digital integrated campaign"
+      : isKo
+        ? "OOH 미디어 캠페인 플랜"
+        : "OOH media campaign plan";
+
+  // ── 표지 페이지 ──
   setFill(VIOLET);
-  doc.rect(0, 0, pageW, 34, "F");
+  doc.rect(0, 0, pageW, pageH, "F");
   setFill(CYAN);
-  doc.rect(0, 34, pageW, 1.8, "F");
+  doc.rect(0, 0, pageW, 3, "F");
 
   doc.setFont(FONT, "normal");
   doc.setTextColor(214, 199, 255);
-  doc.setFontSize(8);
-  doc.text("THINKAD CAMPAIGN PLANNER", M, 12);
+  doc.setFontSize(11);
+  doc.text("THINKAD CAMPAIGN PLANNER", M, 70);
 
   doc.setTextColor(255, 255, 255);
-  doc.setFontSize(17);
-  doc.text(p.documentTitle, M, 23);
+  doc.setFontSize(30);
+  const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
+  doc.text(titleLines, M, 88);
 
-  doc.setFontSize(8);
+  setFill(CYAN);
+  doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
+
+  doc.setFontSize(13);
   doc.setTextColor(225, 220, 245);
-  doc.text(p.generatedAt, pageW - M, 12, { align: "right" });
+  doc.text(subtitle, M, 104 + titleLines.length * 11);
+
+  doc.setFontSize(10);
+  doc.setTextColor(200, 188, 240);
+  doc.text(p.generatedAt, M, pageH - 28);
   doc.text(
-    p.kind === "integrated"
-      ? isKo
-        ? "OOH + 디지털 통합 제안"
-        : "OOH + Digital integrated"
-      : isKo
-        ? "OOH 미디어 플랜"
-        : "OOH media plan",
-    pageW - M,
-    18,
-    { align: "right" },
+    `THINKAD (싱커드)   ·   ${CONTACT_EMAIL}   ·   02-515-2772`,
+    M,
+    pageH - 21,
   );
 
-  y = 44;
+  doc.addPage();
+  y = 0;
+
+  // ── 본문 헤더 배너 ──
+  setFill(VIOLET);
+  doc.rect(0, 0, pageW, 26, "F");
+  setFill(CYAN);
+  doc.rect(0, 26, pageW, 1.4, "F");
+
+  doc.setFont(FONT, "normal");
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(13);
+  doc.text(p.documentTitle, M, 13);
+  doc.setFontSize(8);
+  doc.setTextColor(225, 220, 245);
+  doc.text(p.generatedAt, pageW - M, 13, { align: "right" });
+
+  y = 38;
 
   // ── 캠페인 요약 (라벨/값 2열) ──
   const summary: Array<[string, string]> = [

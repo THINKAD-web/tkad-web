@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useMemo, useRef, useState } from "react";
-import html2canvas from "html2canvas";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Camera, FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
+import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -14,13 +13,12 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
-import { captureElementAsPng } from "@/lib/html-to-pdf";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
-import PlannerReportPreview from "@/components/planner-report-preview";
+import { PlannerReportDocument } from "@/components/planner/report-document";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
@@ -171,14 +169,34 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
   const [userEmail, setUserEmail] = useState("");
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [capturing, setCapturing] = useState(false);
+
+  const payload = useMemo(
+    () =>
+      buildOohReportPayload({
+        isKo: props.isKo,
+        goalTitle: props.goalTitle,
+        budgetMan: props.budgetNum,
+        periodDisplay: derived.periodDisplay,
+        regionsText: props.regionsText,
+        categoriesText: props.categoriesText,
+        ageText: props.ageText,
+        industryText: props.industryText,
+        portfolio: props.portfolio,
+        metrics: props.metrics,
+        reachCorePct: props.reachCorePct,
+        blendedCpmKrw: derived.blendedCpmKrw,
+        budgetAllocation: derived.budgetAllocation,
+        effectSummaryLines: derived.effectSummaryLines,
+        generatedAt: snapshotAt,
+      }),
+    [props, derived, snapshotAt],
+  );
 
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
@@ -186,23 +204,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       setDownloading(format);
       setError(null);
       try {
-        const payload = buildOohReportPayload({
-          isKo: props.isKo,
-          goalTitle: props.goalTitle,
-          budgetMan: props.budgetNum,
-          periodDisplay: derived.periodDisplay,
-          regionsText: props.regionsText,
-          categoriesText: props.categoriesText,
-          ageText: props.ageText,
-          industryText: props.industryText,
-          portfolio: props.portfolio,
-          metrics: props.metrics,
-          reachCorePct: props.reachCorePct,
-          blendedCpmKrw: derived.blendedCpmKrw,
-          budgetAllocation: derived.budgetAllocation,
-          effectSummaryLines: derived.effectSummaryLines,
-          generatedAt: snapshotAt,
-        });
         await downloadPlannerReport(format, payload);
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
@@ -215,34 +216,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, props, derived, snapshotAt, t, tCommon, toast],
+    [downloading, payload, t, tCommon, toast],
   );
-
-  const captureReportPng = useCallback(async () => {
-    const el =
-      document.getElementById("planner-report-content") ?? previewRef.current;
-    if (!el) {
-      toast("error", tCommon("pdfGenerationFailed"));
-      return;
-    }
-    setCapturing(true);
-    try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const name = props.isKo
-        ? `싱커드_플래너보고서_${ymd}.png`
-        : `THINKAD_planner_${ymd}.png`;
-      await captureElementAsPng(el, name);
-      toast("success", t("reportImageSaved"));
-    } catch (e) {
-      console.error("[planner-capture]", e);
-      toast("error", tCommon("pdfGenerationFailed"));
-    } finally {
-      setCapturing(false);
-    }
-  }, [props.isKo, t, tCommon, toast]);
 
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
@@ -256,22 +231,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     setEmailSending(true);
     setEmailSent(false);
     try {
-      let screenshotBase64 = "";
-      try {
-        const reportEl =
-          document.getElementById("planner-report-content") ?? previewRef.current;
-        if (reportEl) {
-          const canvas = await html2canvas(reportEl, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-          });
-          screenshotBase64 = canvas.toDataURL("image/png");
-        }
-      } catch (e) {
-        console.error("[planner-email] screenshot failed", e);
-      }
-
       const res = await fetch("/api/planner/email-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -290,7 +249,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             location: m.location,
           })),
           metrics: props.metrics,
-          screenshot: screenshotBase64,
+          screenshot: "",
         }),
       });
       if (!res.ok) {
@@ -369,33 +328,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 />
               ) : null}
 
-              <div
-                className={cn(
-                  "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-                  "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
-                )}
-              >
-                <PlannerReportPreview
-                  ref={previewRef}
-                  isKo={props.isKo}
-                  goalTitle={props.goalTitle}
-                  budgetNum={props.budgetNum}
-                  periodDisplay={derived.periodDisplay}
-                  regionsText={props.regionsText}
-                  categoriesText={props.categoriesText}
-                  ageText={props.ageText}
-                  industryText={props.industryText}
-                  portfolio={props.portfolio}
-                  metrics={props.metrics}
-                  reachCorePct={props.reachCorePct}
-                  reachExtendedPct={props.reachExtendedPct}
-                  budgetAllocation={derived.budgetAllocation}
-                  blendedCpmKrw={derived.blendedCpmKrw}
-                  effectSummaryLines={derived.effectSummaryLines}
-                  generatedAt={snapshotAt}
-                  logoUrl={props.logoUrl}
-                  mediaPlacements={props.mediaPlacements}
-                />
+              <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
+                <PlannerReportDocument payload={payload} />
               </div>
 
               {props.metrics ? (
@@ -450,7 +384,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                           variant="secondary"
                           size="md"
                           onClick={onDownloadClick}
-                          disabled={downloading !== null || capturing || checking}
+                          disabled={downloading !== null || checking}
                         >
                           {downloading === "pdf" ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -478,7 +412,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                           variant="secondary"
                           size="md"
                           onClick={onDownloadClick}
-                          disabled={downloading !== null || capturing || checking}
+                          disabled={downloading !== null || checking}
                         >
                           {downloading === "pptx" ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
@@ -497,19 +431,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                         </BtnBlock>
                       )}
                     </PlannerPdfDownloadGate>
-                    <BtnBlock
-                      variant="secondary"
-                      size="md"
-                      onClick={() => void captureReportPng()}
-                      disabled={capturing || downloading !== null}
-                    >
-                      {capturing ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Camera className="h-4 w-4" />
-                      )}
-                      {t("reportCapturePng")}
-                    </BtnBlock>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <input
                         type="email"

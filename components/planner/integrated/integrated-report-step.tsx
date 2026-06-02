@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FileDown, Loader2, Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -15,7 +15,7 @@ import { buildIntegratedReportPayload } from "@/lib/planner-report-export/payloa
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
 import { useIsPro } from "@/hooks/use-is-pro";
-import IntegratedReportPreview from "@/components/planner/integrated/integrated-report-preview";
+import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
@@ -52,7 +52,6 @@ export function IntegratedReportStep(props: Props) {
   const tPlanner = useTranslations("planner");
   const { toast } = useToast();
   const { isPro, loading: proLoading } = useIsPro();
-  const previewRef = useRef<HTMLDivElement>(null);
   const [downloading, setDownloading] = useState<PlannerReportExportFormat | null>(
     null,
   );
@@ -64,27 +63,32 @@ export function IntegratedReportStep(props: Props) {
     day: "numeric",
   }).format(new Date());
 
+  const payload = useMemo(
+    () =>
+      buildIntegratedReportPayload({
+        isKo: props.isKo,
+        goal: props.campaignGoal,
+        goalTitle: props.goalTitle,
+        budgetMan: props.budgetNum,
+        periodDisplay: props.periodDisplay,
+        regionsText: props.regionsText,
+        categoriesText: props.categoriesText,
+        ageText: props.ageText,
+        industryText: props.industryText,
+        portfolio: props.portfolio,
+        digitalResult: props.digitalResult,
+        metrics: props.metrics,
+        generatedAt,
+        includeProSections: isPro,
+      }),
+    [props, generatedAt, isPro],
+  );
+
   const handleDownload = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (!isPro || downloading) return;
       setDownloading(format);
       try {
-        const payload = buildIntegratedReportPayload({
-          isKo: props.isKo,
-          goal: props.campaignGoal,
-          goalTitle: props.goalTitle,
-          budgetMan: props.budgetNum,
-          periodDisplay: props.periodDisplay,
-          regionsText: props.regionsText,
-          categoriesText: props.categoriesText,
-          ageText: props.ageText,
-          industryText: props.industryText,
-          portfolio: props.portfolio,
-          digitalResult: props.digitalResult,
-          metrics: props.metrics,
-          generatedAt,
-          includeProSections: isPro,
-        });
         await downloadPlannerReport(format, payload);
         toast("success", t("pdfDownloaded"));
       } catch {
@@ -93,7 +97,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [isPro, downloading, props, generatedAt, toast, t],
+    [isPro, downloading, payload, toast, t],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
@@ -136,26 +140,8 @@ export function IntegratedReportStep(props: Props) {
                 roiExpected={props.metrics.integratedRoasExpected}
               />
 
-              <div
-                className={cn(
-                  "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-                  "border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-white/[0.03]",
-                )}
-              >
-                <IntegratedReportPreview
-                  ref={previewRef}
-                  isKo={props.isKo}
-                  goalTitle={props.goalTitle}
-                  goal={props.campaignGoal}
-                  budgetNum={props.budgetNum}
-                  periodDisplay={props.periodDisplay}
-                  regionsText={props.regionsText}
-                  portfolio={props.portfolio}
-                  digitalResult={props.digitalResult}
-                  metrics={props.metrics}
-                  isPro={isPro}
-                  generatedAt={generatedAt}
-                />
+              <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
+                <PlannerReportDocument payload={payload} />
               </div>
 
               <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
