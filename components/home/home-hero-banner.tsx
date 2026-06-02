@@ -8,8 +8,22 @@ import {
   optimizeHeroMarqueeUrl,
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
+import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
+import { proTrialSignupSubKo } from "@/lib/pro-trial-marketing";
 
 const banners = [
+  {
+    id: 0,
+    image:
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0f795047-667e-4291-8495-1c41eb6e5afe.png",
+    badge: "✨ 신규 가입",
+    title: "PRO",
+    highlight: `${PRO_TRIAL_DAYS}일 무료`,
+    titleEnd: "",
+    sub: proTrialSignupSubKo(),
+    cta: "무료 가입하기",
+    href: "/register",
+  },
   {
     id: 1,
     image:

@@ -3,15 +3,15 @@
 import { useEffect, useRef, useState, useTransition } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
-import { BookOpen, Globe, Moon, MoreHorizontal, Sun } from "lucide-react";
+import { BookOpen, ChevronRight, Globe, Moon, MoreHorizontal, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
   headerChromeIconGhostClass,
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
-import { openHomeOnboardingTour } from "@/lib/home-tour";
 import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
+import { HeaderUsageGuideMenuPanel } from "@/components/header-usage-guide-menu";
 
 export function HeaderGuestMenu() {
   const locale = useLocale();
@@ -21,6 +21,7 @@ export function HeaderGuestMenu() {
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [menuPanel, setMenuPanel] = useState<"main" | "usage">("main");
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -36,7 +37,10 @@ export function HeaderGuestMenu() {
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
-  const close = () => setOpen(false);
+  const close = () => {
+    setOpen(false);
+    setMenuPanel("main");
+  };
 
   return (
     <div ref={rootRef} className="relative">
@@ -50,17 +54,24 @@ export function HeaderGuestMenu() {
         <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={2} />
       </button>
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-52 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]">
+        <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]">
+          {menuPanel === "usage" ? (
+            <HeaderUsageGuideMenuPanel
+              isKo={isKo}
+              onClose={close}
+              onBack={() => setMenuPanel("main")}
+              title={t("usageGuide")}
+            />
+          ) : (
+            <>
           <button
             type="button"
-            onClick={() => {
-              openHomeOnboardingTour();
-              close();
-            }}
+            onClick={() => setMenuPanel("usage")}
             className={headerChromeMenuItemClass}
           >
             <BookOpen className="h-4 w-4 opacity-70" />
-            {t("usageGuide")}
+            <span className="min-w-0 flex-1 text-left">{t("usageGuide")}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
           </button>
           <button
             type="button"
@@ -106,6 +117,8 @@ export function HeaderGuestMenu() {
           <Link href="/login" onClick={close} className={headerChromeMenuItemClass}>
             {t("login")}
           </Link>
+            </>
+          )}
         </div>
       ) : null}
     </div>

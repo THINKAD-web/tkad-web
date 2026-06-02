@@ -29,7 +29,8 @@ export function trialDaysLeft(user: PlanCheckUser): number | null {
   if (!ends) return null;
   const ms = new Date(ends).getTime() - Date.now();
   if (ms <= 0) return 0;
-  return Math.ceil(ms / MS_DAY);
+  const days = Math.floor(ms / MS_DAY);
+  return Math.min(PRO_TRIAL_DAYS, days);
 }
 
 export function trialProgressPct(user: PlanCheckUser): number {

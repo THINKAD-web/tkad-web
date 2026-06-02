@@ -32,10 +32,13 @@ import {
 } from "@/components/media-catalog-shared";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { useIsPro } from "@/hooks/use-is-pro";
+import { PlannerProGate } from "@/components/planner/planner-neon-ui";
 
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { isPro } = useIsPro();
   const tMedia = useTranslations("media");
   const t = useTranslations();
   const tCommon = useTranslations("common");
@@ -252,96 +255,106 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
               <CompareRadarChart items={visibleItems} isKo={isKo} className="mb-6" />
 
-              <div
-                ref={comparePdfRef}
-                className={cn("tkad-glass-surface p-1 sm:p-2", "bg-card/80 text-foreground")}
-              >
-                <CompareSpecTable items={visibleItems} isKo={isKo} />
-              </div>
-
-              {/* [PATCH-P2-03] 화면에 보이지 않는 견적서 PDF 캡처 영역 */}
-              <CompareQuotePdf
-                ref={quotePdfRef}
-                items={visibleItems}
+              <PlannerProGate
+                isPro={isPro}
                 isKo={isKo}
-                issuedAt={issuedStamp.ymdDot}
-                quoteRef={quoteRef}
-              />
-
-              <CompareQuoteCalculator items={visibleItems} isKo={isKo} />
-
-              <div className="mt-10 flex flex-col items-stretch gap-4 sm:mt-12 sm:items-center md:gap-5">
-                <div className="tkad-compare-action-bar flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
-                  <BtnBlock
-                    href={buildPlannerHrefWithMediaIds(items.map((m) => m.id))}
-                    variant="accent"
-                    size="md"
-                    className="tkad-neon-cta-clean w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[12rem]"
-                  >
-                    {isKo ? "이 조합으로 플래너 시작" : "Start planner with selection"}
-                  </BtnBlock>
-                  <BtnBlock
-                    href={`/quote?media=${items.map((m) => m.id).join(",")}`}
-                    variant="accent"
-                    size="md"
-                    className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem]"
-                  >
-                    {isKo ? "견적 요청" : "Request a quote"}
-                  </BtnBlock>
-                  <BtnBlock
-                    type="button"
-                    variant="accent"
-                    size="md"
-                    disabled={quotePdfLoading}
-                    onClick={() => void handleQuotePdfDownload()}
-                    className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[16rem] disabled:opacity-50"
-                  >
-                    {quotePdfLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <FileDown className="h-4 w-4" />
-                    )}
-                    {isKo
-                      ? "선택 매체 견적서 다운로드 (PDF)"
-                      : "Download Quote PDF"}
-                  </BtnBlock>
-                  <BtnBlock
-                    type="button"
-                    variant="secondary"
-                    size="md"
-                    disabled={comparePdfLoading}
-                    onClick={() => void handleComparePdfDownload()}
-                    className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
-                  >
-                    {comparePdfLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <FileDown className="h-4 w-4" />
-                    )}
-                    {isKo ? "비교표 PDF" : "Spec table PDF"}
-                  </BtnBlock>
-                  <BtnBlock
-                    type="button"
-                    variant="secondary"
-                    size="md"
-                    disabled={captureLoading}
-                    onClick={() => void handleCaptureImage()}
-                    className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
-                  >
-                    {captureLoading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Camera className="h-4 w-4" />
-                    )}
-                    {isKo ? "이미지 저장" : "Save Image"}
-                  </BtnBlock>
+                minHeightClass="min-h-[20rem]"
+                className="space-y-6"
+              >
+                <div
+                  ref={comparePdfRef}
+                  className={cn(
+                    "tkad-glass-surface p-1 sm:p-2",
+                    "bg-card/80 text-foreground",
+                  )}
+                >
+                  <CompareSpecTable items={visibleItems} isKo={isKo} />
                 </div>
-                <p className="text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                  {isKo
-                    ? "견적·상세: 위 매체 ID가 그대로 전달됩니다."
-                    : "Quote and detail links pass the same media IDs."}
-                </p>
-              </div>
+
+                {/* [PATCH-P2-03] 화면에 보이지 않는 견적서 PDF 캡처 영역 */}
+                <CompareQuotePdf
+                  ref={quotePdfRef}
+                  items={visibleItems}
+                  isKo={isKo}
+                  issuedAt={issuedStamp.ymdDot}
+                  quoteRef={quoteRef}
+                />
+
+                <CompareQuoteCalculator items={visibleItems} isKo={isKo} />
+
+                <div className="mt-10 flex flex-col items-stretch gap-4 sm:mt-12 sm:items-center md:gap-5">
+                  <div className="tkad-compare-action-bar flex w-full max-w-4xl flex-col gap-2.5 sm:flex-row sm:flex-wrap sm:justify-center sm:gap-3">
+                    <BtnBlock
+                      href={buildPlannerHrefWithMediaIds(items.map((m) => m.id))}
+                      variant="accent"
+                      size="md"
+                      className="tkad-neon-cta-clean w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[12rem]"
+                    >
+                      {isKo ? "이 조합으로 플래너 시작" : "Start planner with selection"}
+                    </BtnBlock>
+                    <BtnBlock
+                      href={`/quote?media=${items.map((m) => m.id).join(",")}`}
+                      variant="accent"
+                      size="md"
+                      className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem]"
+                    >
+                      {isKo ? "견적 요청" : "Request a quote"}
+                    </BtnBlock>
+                    <BtnBlock
+                      type="button"
+                      variant="accent"
+                      size="md"
+                      disabled={quotePdfLoading}
+                      onClick={() => void handleQuotePdfDownload()}
+                      className="tkad-compare-cta-solid w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[16rem] disabled:opacity-50"
+                    >
+                      {quotePdfLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileDown className="h-4 w-4" />
+                      )}
+                      {isKo
+                        ? "선택 매체 견적서 다운로드 (PDF)"
+                        : "Download Quote PDF"}
+                    </BtnBlock>
+                    <BtnBlock
+                      type="button"
+                      variant="secondary"
+                      size="md"
+                      disabled={comparePdfLoading}
+                      onClick={() => void handleComparePdfDownload()}
+                      className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
+                    >
+                      {comparePdfLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileDown className="h-4 w-4" />
+                      )}
+                      {isKo ? "비교표 PDF" : "Spec table PDF"}
+                    </BtnBlock>
+                    <BtnBlock
+                      type="button"
+                      variant="secondary"
+                      size="md"
+                      disabled={captureLoading}
+                      onClick={() => void handleCaptureImage()}
+                      className="tkad-compare-cta-secondary w-full min-h-12 justify-center rounded-[22px] normal-case tracking-normal sm:w-auto sm:min-w-[10rem] disabled:opacity-50"
+                    >
+                      {captureLoading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Camera className="h-4 w-4" />
+                      )}
+                      {isKo ? "이미지 저장" : "Save Image"}
+                    </BtnBlock>
+                  </div>
+                  <p className="text-center font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                    {isKo
+                      ? "견적·상세: 위 매체 ID가 그대로 전달됩니다."
+                      : "Quote and detail links pass the same media IDs."}
+                  </p>
+                </div>
+              </PlannerProGate>
             </div>
             </div>
           </div>

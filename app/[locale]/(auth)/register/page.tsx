@@ -12,6 +12,10 @@ import { SignupStartRolePicker } from "@/components/auth/signup-start-role-picke
 import { SocialAuthButtons } from "@/components/auth/social-auth-buttons";
 import { resolveOAuthLoginErrorMessage } from "@/lib/oauth-login-errors";
 import type { SignupStartRole } from "@/lib/signup-start-roles";
+import {
+  proTrialSignupHeadlineEn,
+  proTrialSignupHeadlineKo,
+} from "@/lib/pro-trial-marketing";
 
 export default function RegisterPage() {
   return (
@@ -119,6 +123,9 @@ function RegisterPageInner() {
                   {isKo
                     ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
                     : "Sign up with Google, Kakao, Naver, or email"}
+                </p>
+                <p className="mt-2 text-center text-xs font-semibold text-violet-600 dark:text-violet-300">
+                  {isKo ? proTrialSignupHeadlineKo() : proTrialSignupHeadlineEn()}
                 </p>
               </div>
 

@@ -6,6 +6,7 @@ import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   BookOpen,
   ChevronDown,
+  ChevronRight,
   Gift,
   Globe,
   LogOut,
@@ -22,8 +23,8 @@ import {
   headerChromeIconGhostClass,
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
-import { openHomeOnboardingTour } from "@/lib/home-tour";
 import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
+import { HeaderUsageGuideMenuPanel } from "@/components/header-usage-guide-menu";
 
 type SessionUser = {
   id: string;
@@ -60,6 +61,7 @@ export function HeaderProfileDropdown({
   const pathname = usePathname();
   const { resolvedTheme, setTheme } = useTheme();
   const [open, setOpen] = useState(false);
+  const [menuPanel, setMenuPanel] = useState<"main" | "usage">("main");
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
   const rootRef = useRef<HTMLDivElement>(null);
@@ -91,7 +93,14 @@ export function HeaderProfileDropdown({
     return () => document.removeEventListener("mousedown", onDoc);
   }, [open]);
 
-  const close = () => setOpen(false);
+  useEffect(() => {
+    if (!open) setMenuPanel("main");
+  }, [open]);
+
+  const close = () => {
+    setOpen(false);
+    setMenuPanel("main");
+  };
 
   const switchLocale = () => {
     const next = locale === "ko" ? "en" : "ko";
@@ -124,8 +133,20 @@ export function HeaderProfileDropdown({
       {open ? (
         <div
           role="menu"
-          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-56 overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]"
+          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]"
         >
+          {menuPanel === "usage" ? (
+            <HeaderUsageGuideMenuPanel
+              isKo={isKo}
+              onClose={() => {
+                close();
+                onNavigate?.();
+              }}
+              onBack={() => setMenuPanel("main")}
+              title={tGuide("usageGuide")}
+            />
+          ) : (
+            <>
           <p className="truncate px-3 py-2 text-xs font-semibold text-gray-500 dark:text-white/50">
             {session.name}
           </p>
@@ -186,14 +207,12 @@ export function HeaderProfileDropdown({
           <button
             type="button"
             role="menuitem"
-            onClick={() => {
-              openHomeOnboardingTour();
-              close();
-            }}
+            onClick={() => setMenuPanel("usage")}
             className={headerChromeMenuItemClass}
           >
             <BookOpen className="h-4 w-4 opacity-70" />
-            {tGuide("usageGuide")}
+            <span className="min-w-0 flex-1 text-left">{tGuide("usageGuide")}</span>
+            <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
           </button>
           <button type="button" role="menuitem" onClick={switchLocale} disabled={isPending} className={headerChromeMenuItemClass}>
             <Globe className="h-4 w-4 opacity-70" />
@@ -230,6 +249,8 @@ export function HeaderProfileDropdown({
             <LogOut className="h-4 w-4 opacity-70" />
             {logoutLabel}
           </button>
+            </>
+          )}
         </div>
       ) : null}
     </div>

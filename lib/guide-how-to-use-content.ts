@@ -62,7 +62,7 @@ export const HOW_TO_USE_STEPS: HowToUseStep[] = [
     ],
     ctaKo: "비교 기능 써보기 →",
     ctaEn: "Try compare →",
-    href: "/media",
+    href: "/compare",
   },
   {
     step: "03",
