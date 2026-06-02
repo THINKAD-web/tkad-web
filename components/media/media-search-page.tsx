@@ -609,7 +609,7 @@ function MediaSearchPageInner({
       <>
       <div
         className={cn(
-          "mt-3 px-4",
+          "mt-3 min-w-0 overflow-x-clip px-4",
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             "grid auto-rows-fr grid-cols-2 items-stretch gap-3 md:grid-cols-3 lg:grid-cols-4",

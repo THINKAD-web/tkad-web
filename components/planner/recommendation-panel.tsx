@@ -341,7 +341,7 @@ export function PlannerRecommendationPanel({
                 <li
                   key={media.id}
                   className={cn(
-                    "flex flex-col gap-2 rounded-xl border p-4 transition-colors",
+                    "flex min-w-0 flex-col gap-2 rounded-xl border p-4 transition-colors",
                     selected
                       ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
                       : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white hover:border-violet-300/40",
@@ -363,7 +363,7 @@ export function PlannerRecommendationPanel({
                         {oneLine}
                       </p>
                     ) : null}
-                    <p className="mt-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="mt-1 break-words font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                       {`// `}{regionLabel(media.region)} ·{" "}
                       {(isKo
                         ? media.location
