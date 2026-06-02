@@ -92,6 +92,30 @@ function flattenModernColorsToInline(clonedDoc: Document, cloned: HTMLElement) {
   }
 }
 
+/**
+ * 라이트 배경(#ffffff) PDF 캡처 시 클론 문서를 강제로 라이트 모드로 전환한다.
+ * next-themes 가 `html.dark` 클래스(+ color-scheme)를 토글하므로, 다크 모드에서
+ * 보고서를 캡처하면 `dark:` 변형이 적용된 computed style(거의 흰 글씨/투명 배경)이
+ * onclone 에서 inline 으로 박혀 흰 배경에 흰 글씨가 되는 문제가 있다.
+ * `getComputedStyle` 을 읽기 전(= flatten/inline 이전)에 클론에서 `dark` 를 제거해
+ * 라이트 변형이 해석되도록 한다. (의도적 다크 배경 PDF 는 호출부에서 제외)
+ */
+function forceCloneLightMode(clonedDoc: Document) {
+  try {
+    const docEl = clonedDoc.documentElement;
+    docEl.classList.remove("dark");
+    docEl.style.colorScheme = "light";
+    docEl.style.setProperty("color-scheme", "light");
+    const body = clonedDoc.body;
+    if (body) {
+      body.classList.remove("dark");
+      body.style.colorScheme = "light";
+    }
+  } catch {
+    /* ignore */
+  }
+}
+
 function fixBackgroundClipTextForCapture(cloned: HTMLElement) {
   cloned.querySelectorAll<HTMLElement>(".tkad-home-accent-text").forEach((el) => {
     el.style.backgroundImage = "none";
@@ -227,8 +251,14 @@ function inlineComputedStylesForCapture(clonedDoc: Document, root: HTMLElement) 
   }
 }
 
-function replaceUntrustedImagesInClone(clonedDoc: Document, cloned: HTMLElement) {
+function replaceUntrustedImagesInClone(
+  clonedDoc: Document,
+  cloned: HTMLElement,
+  opts?: { forceLight?: boolean },
+) {
   try {
+    // 라이트 배경 캡처면 computed style 을 읽기 전에 다크 모드를 해제한다.
+    if (opts?.forceLight) forceCloneLightMode(clonedDoc);
     flattenModernColorsToInline(clonedDoc, cloned);
     inlineComputedStylesForCapture(clonedDoc, cloned);
     fixBackgroundClipTextForCapture(cloned);
@@ -402,6 +432,7 @@ async function elementToCanvas(element: HTMLElement): Promise<HTMLCanvasElement>
   const w = Math.max(1, Math.round(element.scrollWidth || rect.width));
   const h = Math.max(1, Math.round(element.scrollHeight || rect.height));
   const pdfBg = resolveElementPdfBackground(element);
+  const forceLight = !isDarkPdfBackground(pdfBg);
 
   try {
     return await html2canvas(element, {
@@ -417,7 +448,8 @@ async function elementToCanvas(element: HTMLElement): Promise<HTMLCanvasElement>
       scrollX: 0,
       scrollY: -window.scrollY,
       imageTimeout: 20_000,
-      onclone: replaceUntrustedImagesInClone,
+      onclone: (doc, el) =>
+        replaceUntrustedImagesInClone(doc, el, { forceLight }),
     });
   } catch (e) {
     console.error("[html-to-pdf] html2canvas failed", {
@@ -647,7 +679,8 @@ export async function captureElementAsPng(
     scrollX: 0,
     scrollY: -window.scrollY,
     imageTimeout: 20_000,
-    onclone: replaceUntrustedImagesInClone,
+    onclone: (doc, el) =>
+      replaceUntrustedImagesInClone(doc, el, { forceLight: true }),
   });
   const blob = await new Promise<Blob | null>((resolve) => {
     canvas.toBlob((b) => resolve(b), "image/png");
