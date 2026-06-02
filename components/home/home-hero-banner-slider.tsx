@@ -10,6 +10,10 @@ import {
   Zap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import {
+  proTrialSignupHeadlineEn,
+  proTrialSignupHeadlineKo,
+} from "@/lib/pro-trial-marketing";
 
 type Banner = {
   id: string;
@@ -29,13 +33,13 @@ const BANNERS: Banner[] = [
     id: "launch",
     bgClass:
       "bg-gradient-to-br from-violet-600 via-purple-600 to-cyan-500",
-    titleKo: "🎉 정식 오픈 기념",
-    titleEn: "🎉 Official launch",
-    subKo: "첫 30명 PRO 1개월 무료 체험",
-    subEn: "First 30 users get 1 month PRO free",
-    ctaKo: "지금 신청하기",
-    ctaEn: "Apply now",
-    href: "/pricing",
+    titleKo: "🎉 신규 가입 혜택",
+    titleEn: "🎉 New signup benefit",
+    subKo: proTrialSignupHeadlineKo(),
+    subEn: proTrialSignupHeadlineEn(),
+    ctaKo: "무료 가입하기",
+    ctaEn: "Sign up free",
+    href: "/register",
   },
   {
     id: "guide",

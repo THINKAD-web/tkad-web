@@ -1924,6 +1924,18 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   -webkit-text-fill-color: rgb(15 23 42 / 0.92) !important;
 }
 
+/* day + html:not(.dark) — .bg-accent 흰 글자 규칙보다 우선 (흰 배경·흰 글자 충돌 방지) */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid *,
+html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
+html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid * {
+  border: 2px solid rgb(234 88 12 / 0.45) !important;
+  background: rgb(255 98 0) !important;
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+  box-shadow: 0 10px 28px rgb(255 98 0 / 0.28);
+}
+
 /* `/media/*` 하단 링크(매체 찾기) — 라이트에서 text-white 대비 보정 */
 .tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white"] {
   color: var(--home-ink) !important;

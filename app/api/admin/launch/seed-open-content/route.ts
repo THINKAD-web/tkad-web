@@ -1,6 +1,8 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
+import { proTrialSignupHeadlineKo } from "@/lib/pro-trial-marketing";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +41,7 @@ export async function POST(request: NextRequest) {
       titleEn: "THINKAD Official Launch — A New Standard for Korea OOH",
       summaryKo: [
         "THINKAD 싱커드 정식 오픈 — 데이터 기반 OOH 기획·500+ 검증 매체",
-        "오픈 기념: 첫 30명 무료 컨설팅 + PRO 1개월 체험",
+        `오픈 기념: ${proTrialSignupHeadlineKo()}`,
       ],
       marketTrendKo: [
         "한국 OOH 시장은 디지털·데이터 결합 수요가 빠르게 성장 중",
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
 THINKAD 싱커드가 한국 OOH 시장을 위한 **데이터·기획·집행 원스톱** 플랫폼으로 정식 오픈했습니다.
 
 ### 오픈 이벤트
-- **첫 30명**: 무료 컨설팅 + PRO 1개월 체험 — [요금제](/pricing)
+- **신규 가입**: PRO ${PRO_TRIAL_DAYS}일 무료 체험 — [요금제](/pricing)
 
 ### 지금 바로
 - [AI 플래너](/planner) · [성공 사례](/cases)
@@ -71,7 +73,7 @@ THINKAD 싱커드가 한국 OOH 시장을 위한 **데이터·기획·집행 원
     reportId: report.id,
     slug: report.slug,
     eventCopy: {
-      banner: "🎉 정식 오픈! 첫 30명 PRO 무료 체험 신청하기 →",
+      banner: `🎉 ${proTrialSignupHeadlineKo()} →`,
       pricingHref: "/pricing",
     },
   });

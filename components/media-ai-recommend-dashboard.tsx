@@ -2,7 +2,6 @@
 
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import {
   Calculator,
@@ -14,22 +13,13 @@ import {
   Share2,
 } from "lucide-react";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
-import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-} from "@/lib/ai-recommend-metrics";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
-import { typeLabels } from "@/lib/media-data";
-import { formatMediaLocationShort } from "@/lib/media-location-format";
-import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
-import { MediaCard } from "@/components/media/media-card";
-import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
+import {
+  RECOMMEND_MEDIA_GRID_CLASS,
+  RecommendScoredMediaCard,
+} from "@/components/media-ai-recommend-scored-card";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
@@ -122,8 +112,8 @@ export default function MediaAiRecommendDashboard({
           </div>
         </header>
 
-        {/* 상단 주요 영역: 지도 + TOP3 */}
-        <section className="grid gap-0 lg:grid-cols-[minmax(0,1.1fr)_minmax(0,1fr)]">
+        {/* 상단 주요 영역: 지도(전폭) + TOP3(가로 그리드) */}
+        <section className="space-y-6">
           {/* 지도 영역 */}
           <div className="space-y-3 border-2 border-border bg-card p-5">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -176,40 +166,30 @@ export default function MediaAiRecommendDashboard({
             )}
           </div>
 
-          {/* TOP 3 — 세로 스택 카드 */}
-          <div className="-ml-[2px] -mt-[2px] space-y-3 border-2 border-border bg-muted p-5 lg:mt-0">
-            <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Trophy className="h-4 w-4 text-accent" />
-              [ {isKo ? "TKAD BOT TOP 3" : "TKAD BOT TOP 3"} ]
-            </h3>
-            <p className="text-[11px] leading-relaxed tracking-tight text-muted-foreground">
-              {`// `}{isKo
-                ? "위에서부터 순서대로, 이번 탐험에서 가장 궁합이 좋았던 매체들이에요."
-                : "From top to bottom: the three strongest matches from this run."}
-            </p>
-            <div className="mt-3 space-y-3">
-              {top3.map((s, i) => {
-                const reason = isKo ? s.reasons[0]?.ko : s.reasons[0]?.en;
-                return (
-                  <MediaCard
-                    key={s.item.id}
-                    mode="feed"
-                    item={mapMediaItemToHomeCatalog(s.item)}
-                    href={mediaItemDetailPath(s.item)}
-                    highlights={[]}
-                    locationLine={formatMediaLocationShort(s.item, isKo)}
-                    isKo={isKo}
-                    rank={i + 1}
-                    showPlanButton
-                    recommendReason={reason}
-                    inCompare={false}
-                    inCart={false}
-                    onToggleCompare={() => {}}
-                    onToggleCart={() => {}}
-                  />
-                );
-              })}
+          {/* TOP 3 — 좁은 사이드 컬럼 대신 반응형 가로 그리드 */}
+          <div className="space-y-4 border-2 border-border bg-muted p-5 sm:p-6">
+            <div>
+              <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+                <Trophy className="h-4 w-4 text-accent" />
+                [ {isKo ? "TKAD BOT TOP 3" : "TKAD BOT TOP 3"} ]
+              </h3>
+              <p className="mt-2 text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-xs">
+                {`// `}{isKo
+                  ? "왼쪽부터 순서대로, 이번 탐험에서 가장 궁합이 좋았던 매체들이에요."
+                  : "Left to right: the three strongest matches from this run."}
+              </p>
             </div>
+            <ul className={RECOMMEND_MEDIA_GRID_CLASS}>
+              {top3.map((s, i) => (
+                <RecommendScoredMediaCard
+                  key={s.item.id}
+                  scored={s}
+                  rank={i + 1}
+                  isKo={isKo}
+                  locale={locale}
+                />
+              ))}
+            </ul>
           </div>
         </section>
 
@@ -229,32 +209,17 @@ export default function MediaAiRecommendDashboard({
                 ? "TOP 3 외에도 탐험 중 눈에 띈 매체들이에요."
                 : "Beyond the TOP 3, these also stood out during exploration."}
             </p>
-            <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">
-              {scored.slice(3, 8).map((s, idx) => {
-                const catalogItem = mapMediaItemToHomeCatalog(s.item);
-                const reason = isKo
-                  ? s.reasons[0]?.ko
-                  : s.reasons[0]?.en;
-                return (
-                  <MediaCard
-                    key={s.item.id}
-                    mode="feed"
-                    item={catalogItem}
-                    href={mediaItemDetailPath(s.item)}
-                    highlights={[]}
-                    locationLine={formatMediaLocationShort(s.item, isKo)}
-                    isKo={isKo}
-                    rank={idx + 4}
-                    showPlanButton
-                    recommendReason={reason}
-                    inCompare={false}
-                    inCart={false}
-                    onToggleCompare={() => {}}
-                    onToggleCart={() => {}}
-                  />
-                );
-              })}
-            </div>
+            <ul className={cn("mt-5", RECOMMEND_MEDIA_GRID_CLASS)}>
+              {scored.slice(3, 8).map((s, idx) => (
+                <RecommendScoredMediaCard
+                  key={s.item.id}
+                  scored={s}
+                  rank={idx + 4}
+                  isKo={isKo}
+                  locale={locale}
+                />
+              ))}
+            </ul>
           </section>
         )}
 

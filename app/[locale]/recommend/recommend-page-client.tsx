@@ -6,17 +6,12 @@ import { useSearchParams } from "next/navigation";
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useToast } from "@/components/toast-provider";
 import { motion } from "framer-motion";
-import { Link, useRouter } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
 import { DISCOVERY_TABS } from "@/lib/navigation/sub-page-tabs";
-import {
-  CategoryHeroCtaRow,
-  categoryHeroCtaPrimaryClass,
-  categoryHeroCtaSecondaryClass,
-} from "@/components/category-explore-hero";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -41,7 +36,11 @@ import {
   type HomeBudgetRegion,
 } from "@/lib/home-budget-recommend";
 import { TurnstileWidget } from "@/components/turnstile";
-import { mediaItemDetailPath } from "@/lib/media-network-types";
+import {
+  RECOMMEND_MEDIA_GRID_CLASS,
+  RecommendScoredMediaCard,
+  RecommendTop3PickRow,
+} from "@/components/media-ai-recommend-scored-card";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -368,16 +367,6 @@ export default function RecommendPageClient({
           description="목표·예산·업종 조건에 맞는 매체를 AI가 자동 추천"
         />
         <SubTabs tabs={DISCOVERY_TABS} currentPath="/recommend" />
-        <div className="border-b border-border/60 px-4 pb-6">
-          <CategoryHeroCtaRow>
-            <Link href="/media" className={categoryHeroCtaPrimaryClass}>
-              {isKo ? "매체 검색으로 먼저 보기" : "Browse media catalog"}
-            </Link>
-            <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
-              {isKo ? "플래너로 설계하기" : "Plan with Planner"}
-            </Link>
-          </CategoryHeroCtaRow>
-        </div>
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="ui-container">
@@ -516,53 +505,28 @@ export default function RecommendPageClient({
                       ? "TKAD bot의 TOP 3 강추 발견"
                       : "TKAD bot's TOP 3 picks"}
                   </p>
-                  <ol className="mt-3 space-y-2">
+                  <ol className="mt-3 space-y-1">
                     {top3.map((s, i) => (
-                      <li
+                      <RecommendTop3PickRow
                         key={s.item.id}
-                        className="flex items-center justify-between gap-2 border-t-2 border-border pt-2"
-                      >
-                        <span className="inline-flex min-w-0 items-center gap-2">
-                          <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] text-[11px] font-black dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.25)]">
-                            {i + 1}
-                          </span>
-                          <span className="line-clamp-1 text-sm font-bold tracking-tight text-foreground">
-                            {isKo ? s.item.name : s.item.nameEn}
-                          </span>
-                        </span>
-                        <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
-                          {isKo ? `${s.score}점 궁합` : `MATCH ${s.score}`}
-                        </span>
-                      </li>
+                        scored={s}
+                        index={i}
+                        isKo={isKo}
+                      />
                     ))}
                   </ol>
                 </div>
               )}
 
-              <ul className="grid grid-cols-1 gap-0 sm:grid-cols-2">
-                {fullList.map((s) => (
-                  <li
+              <ul className={RECOMMEND_MEDIA_GRID_CLASS}>
+                {fullList.map((s, index) => (
+                  <RecommendScoredMediaCard
                     key={s.item.id}
-                    className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-5 transition-colors hover:bg-muted"
-                  >
-                    <p className="text-base font-bold leading-tight tracking-tight text-foreground">
-                      {isKo ? s.item.name : s.item.nameEn}
-                    </p>
-                    <p className="mt-2 line-clamp-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                      {`// `}{isKo ? s.item.location : s.item.locationEn}
-                    </p>
-                    <ul className="mt-3 space-y-1 text-[11px] tracking-tight text-muted-foreground">
-                      {s.reasons.slice(0, 3).map((r, i) => (
-                        <li key={i}>· {isKo ? r.ko : r.en}</li>
-                      ))}
-                    </ul>
-                    <Link
-                      href={mediaItemDetailPath(s.item)}
-                      className="mt-4 inline-flex items-center gap-1 border-b-2 border-border pb-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground transition-colors hover:border-accent hover:text-accent"
-                    >
-                      {isKo ? "상세 보기" : "Details"} →
-                    </Link>
-                  </li>
+                    scored={s}
+                    rank={index < 3 ? index + 1 : undefined}
+                    isKo={isKo}
+                    locale={locale}
+                  />
                 ))}
               </ul>
             </div>

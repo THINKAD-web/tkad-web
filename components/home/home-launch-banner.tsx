@@ -4,6 +4,10 @@ import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { X } from "lucide-react";
 import { useEffect, useState } from "react";
+import {
+  proTrialSignupHeadlineEn,
+  proTrialSignupHeadlineKo,
+} from "@/lib/pro-trial-marketing";
 
 const DISMISS_KEY = "tkad-launch-banner-dismissed-v2";
 const START_KEY = "tkad-launch-banner-start-v2";
@@ -47,8 +51,8 @@ export function HomeLaunchBanner() {
       >
         <span aria-hidden>🎉</span>
         {isKo
-          ? "정식 오픈! 첫 30명 PRO 무료 체험 신청하기"
-          : "Official launch — First 30 get free PRO trial"}
+          ? `${proTrialSignupHeadlineKo()} →`
+          : `${proTrialSignupHeadlineEn()} →`}
         <span aria-hidden>→</span>
       </Link>
       <button
