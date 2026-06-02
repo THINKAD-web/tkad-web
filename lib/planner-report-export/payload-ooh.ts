@@ -24,8 +24,10 @@ export type BuildOohPayloadArgs = {
   portfolio: MediaItem[];
   metrics: PlannerMetrics | null;
   reachCorePct: number;
+  reachExtendedPct: number;
   blendedCpmKrw: number | null;
   budgetAllocation: { label: string; pct: number; valueWon: number }[];
+  cpmBars: { key: string; label: string; value: number }[];
   effectSummaryLines: string[];
   generatedAt: string;
 };
@@ -58,7 +60,41 @@ export function buildOohReportPayload(
     });
   }
 
+  // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
+  const charts = {
+    budgetSplit: a.budgetAllocation
+      .filter((s) => s.valueWon > 0)
+      .map((s) => ({ label: s.label, value: s.valueWon })),
+    cpmBars: a.cpmBars
+      .filter((c) => c.value > 0)
+      .map((c) => ({ label: c.label, value: c.value })),
+    reachSummary: a.metrics
+      ? [
+          { label: isKo ? "월 노출" : "Monthly", value: a.metrics.estimatedMonthlyImpressions },
+          { label: isKo ? "총 노출" : "Total", value: a.metrics.estimatedTotalImpressions },
+        ].filter((d) => d.value > 0)
+      : [],
+  };
+
+  // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
   const sections: PlannerExportSection[] = [];
+  if (a.portfolio.length && a.metrics) {
+    const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
+    sections.push({
+      title: isKo ? "전략 요약" : "Strategy summary",
+      lines: [
+        isKo
+          ? `왜 이 구성인가 · ${a.regionsText} 핵심 동선의 ${a.portfolio.length}개 매체로 ${a.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`
+          : `Why · ${a.portfolio.length} media across ${a.regionsText} balance reach and efficiency for the "${a.goalTitle}" objective.`,
+        isKo
+          ? `예상 효과 · 총 ${fmt(a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
+          : `Impact · ${fmt(a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
+        isKo
+          ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+          : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+      ],
+    });
+  }
   if (a.budgetAllocation.length) {
     sections.push({
       title: isKo ? "예산 배분 (유형별)" : "Budget allocation (by type)",
@@ -78,6 +114,7 @@ export function buildOohReportPayload(
     kind: "ooh",
     isKo,
     documentTitle: isKo ? "OOH 옥외광고 플래너 보고서" : "OOH Media Plan Report",
+    campaignName: a.goalTitle,
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
     budgetMan: a.budgetMan,
@@ -87,6 +124,7 @@ export function buildOohReportPayload(
     ageText: a.ageText,
     industryText: a.industryText,
     kpis,
+    charts,
     portfolio: a.portfolio.map((m) => ({
       name: m.name,
       region: m.region ?? "—",

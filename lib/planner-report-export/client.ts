@@ -1,8 +1,9 @@
 "use client";
 
-import type {
-  PlannerReportExportFormat,
-  PlannerReportExportPayload,
+import {
+  plannerReportFileBase,
+  type PlannerReportExportFormat,
+  type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 
 /**
@@ -28,8 +29,7 @@ export async function downloadPlannerReport(
     throw new Error(`export ${format} failed (${res.status})${detail ? `: ${detail}` : ""}`);
   }
   const blob = await res.blob();
-  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const name = `thinkad-${payload.kind === "integrated" ? "integrated-" : ""}plan-${stamp}.${format}`;
+  const name = `${plannerReportFileBase(payload)}.${format}`;
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
   a.href = url;

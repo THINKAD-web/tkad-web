@@ -23,6 +23,102 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
+/** THINKAD 워드마크 (white THINK + cyan AD) — 표지/헤더 로고 */
+function ThinkadWordmark({ className }: { className?: string }) {
+  return (
+    <span
+      className={cn(
+        "inline-flex items-baseline font-display font-black tracking-tight",
+        className,
+      )}
+    >
+      <span className="text-white">THINK</span>
+      <span className="text-cyan-300">AD</span>
+    </span>
+  );
+}
+
+const CHART_COLORS = ["#7C3AED", "#0891B2", "#EC4899", "#10B981", "#F59E0B"];
+
+function DonutChart({
+  data,
+}: {
+  data: { label: string; value: number }[];
+}) {
+  const total = data.reduce((s, d) => s + d.value, 0);
+  if (total <= 0) return null;
+  const R = 56;
+  const C = 2 * Math.PI * R;
+  const fracs = data.map((d) => d.value / total);
+  const offsets = fracs.map(
+    (_, i) => fracs.slice(0, i).reduce((a, b) => a + b, 0) * C,
+  );
+  return (
+    <div className="flex items-center gap-4">
+      <svg width="140" height="140" viewBox="0 0 140 140" className="shrink-0">
+        <g transform="translate(70,70) rotate(-90)">
+          <circle r={R} fill="none" stroke="#EEF0F4" strokeWidth="20" />
+          {data.map((d, i) => (
+            <circle
+              key={d.label}
+              r={R}
+              fill="none"
+              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              strokeWidth="20"
+              strokeDasharray={`${fracs[i]! * C} ${C - fracs[i]! * C}`}
+              strokeDashoffset={-offsets[i]!}
+            />
+          ))}
+        </g>
+      </svg>
+      <ul className="min-w-0 space-y-1.5">
+        {data.map((d, i) => (
+          <li key={d.label} className="flex items-center gap-2 text-sm">
+            <span
+              className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm"
+              style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
+            />
+            <span className="min-w-0 truncate text-gray-700">{d.label}</span>
+            <span className="ml-auto font-semibold tabular-nums text-gray-900">
+              {Math.round((d.value / total) * 100)}%
+            </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function BarChart({
+  data,
+  color = CHART_COLORS[0],
+  isKo,
+}: {
+  data: { label: string; value: number }[];
+  color?: string;
+  isKo: boolean;
+}) {
+  const max = Math.max(1, ...data.map((d) => d.value));
+  return (
+    <div className="space-y-2.5">
+      {data.map((d) => (
+        <div key={d.label} className="flex items-center gap-3 text-sm">
+          <span className="w-20 shrink-0 truncate text-gray-600 sm:w-28">{d.label}</span>
+          <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
+            <div
+              className="h-full rounded-full"
+              style={{ width: `${Math.max(2, (d.value / max) * 100)}%`, background: color }}
+            />
+          </div>
+          <span className="w-24 shrink-0 text-right font-semibold tabular-nums text-gray-900">
+            {d.value.toLocaleString(isKo ? "ko-KR" : "en-US")}
+          </span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
 export const PlannerReportDocument = forwardRef<
   HTMLDivElement,
   { payload: PlannerReportExportPayload; className?: string }
@@ -48,10 +144,13 @@ export const PlannerReportDocument = forwardRef<
     >
       {/* 표지 헤더 */}
       <div className="bg-gradient-to-br from-violet-600 via-violet-700 to-violet-800 px-6 py-7 sm:px-9 sm:py-9">
-        <p className="font-display text-[11px] font-semibold uppercase tracking-[0.22em] text-violet-200">
-          THINKAD CAMPAIGN PLANNER
-        </p>
-        <h2 className="mt-2 text-2xl font-black leading-tight text-white sm:text-3xl">
+        <div className="flex items-center justify-between gap-3">
+          <ThinkadWordmark className="text-lg sm:text-xl" />
+          <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200">
+            CAMPAIGN PLANNER
+          </span>
+        </div>
+        <h2 className="mt-5 text-2xl font-black leading-tight text-white sm:text-3xl">
           {p.documentTitle}
         </h2>
         <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-violet-100">
@@ -101,6 +200,42 @@ export const PlannerReportDocument = forwardRef<
               </div>
             ))}
           </div>
+        ) : null}
+
+        {/* 성과 요약 차트 */}
+        {p.charts &&
+        ((p.charts.budgetSplit?.length ?? 0) > 0 ||
+          (p.charts.cpmBars?.length ?? 0) > 0 ||
+          (p.charts.reachSummary?.length ?? 0) > 0) ? (
+          <section className="space-y-4">
+            <SectionHeading>{isKo ? "성과 요약" : "Performance summary"}</SectionHeading>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "예산 배분" : "Budget allocation"}
+                  </p>
+                  <DonutChart data={p.charts.budgetSplit} />
+                </div>
+              ) : null}
+              {p.charts.reachSummary && p.charts.reachSummary.length > 0 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "노출 요약" : "Impressions"}
+                  </p>
+                  <BarChart data={p.charts.reachSummary} color="#0891B2" isKo={isKo} />
+                </div>
+              ) : null}
+            </div>
+            {p.charts.cpmBars && p.charts.cpmBars.length > 0 ? (
+              <div className="rounded-xl border border-gray-200 p-4">
+                <p className="mb-3 text-xs font-semibold text-gray-500">
+                  {isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)"}
+                </p>
+                <BarChart data={p.charts.cpmBars} color="#7C3AED" isKo={isKo} />
+              </div>
+            ) : null}
+          </section>
         ) : null}
 
         {/* 선택 매체 구성 */}

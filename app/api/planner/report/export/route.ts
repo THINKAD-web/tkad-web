@@ -1,8 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
   isPlannerReportExportPayload,
+  plannerReportFileBase,
   type PlannerReportExportFormat,
 } from "@/lib/planner-report-export/types";
+
+/** Content-Disposition: ASCII fallback + RFC 5987 UTF-8 (한글 파일명 지원) */
+function contentDisposition(filename: string): string {
+  const ascii = filename.replace(/[^\x20-\x7E]/g, "_").replace(/"/g, "");
+  const utf8 = encodeURIComponent(filename);
+  return `attachment; filename="${ascii}"; filename*=UTF-8''${utf8}`;
+}
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -35,8 +43,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid payload." }, { status: 400 });
   }
 
-  const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-  const base = `thinkad-${payload.kind === "integrated" ? "integrated-" : ""}plan-${stamp}`;
+  const base = plannerReportFileBase(payload);
 
   try {
     if (format === "pdf") {
@@ -48,7 +55,7 @@ export async function POST(request: NextRequest) {
         status: 200,
         headers: {
           "Content-Type": "application/pdf",
-          "Content-Disposition": `attachment; filename="${base}.pdf"`,
+          "Content-Disposition": contentDisposition(`${base}.pdf`),
           "Cache-Control": "private, no-store",
         },
       });
@@ -63,7 +70,7 @@ export async function POST(request: NextRequest) {
       headers: {
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.presentationml.presentation",
-        "Content-Disposition": `attachment; filename="${base}.pptx"`,
+        "Content-Disposition": contentDisposition(`${base}.pptx`),
         "Cache-Control": "private, no-store",
       },
     });

@@ -31,24 +31,36 @@ export async function buildPlannerReportPptx(
   const face = isKo ? "Malgun Gothic" : "Arial";
   const W = 13.33;
 
+  const CYAN_LT = "7CDCEB";
+  const wordmark = (size: number) => [
+    { text: "THINK", options: { color: WHITE, bold: true } },
+    { text: "AD", options: { color: CYAN_LT, bold: true } },
+  ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
+
   // ── 1. 표지 ──
   const cover = pptx.addSlide();
   cover.background = { color: VIOLET };
-  cover.addText("THINKAD CAMPAIGN PLANNER", {
-    x: 0.7, y: 1.6, w: 12, h: 0.4, fontFace: face,
-    fontSize: 12, color: "D6C7FF", charSpacing: 2,
+  cover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
+  cover.addText("CAMPAIGN PLANNER", {
+    x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
+    fontSize: 12, color: "D6C7FF", charSpacing: 3,
   });
   cover.addText(p.documentTitle, {
-    x: 0.7, y: 2.1, w: 12, h: 1.4, fontFace: face,
-    fontSize: 40, bold: true, color: WHITE,
+    x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
+    fontSize: 38, bold: true, color: WHITE,
   });
+  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.0, w: 2.2, h: 0.06, fill: { color: CYAN } });
   cover.addText(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
       : isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan",
-    { x: 0.7, y: 3.5, w: 12, h: 0.5, fontFace: face, fontSize: 18, color: "E1DCF5" },
+    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: "E1DCF5" },
   );
-  cover.addShape(pptx.ShapeType.rect, { x: 0.72, y: 4.3, w: 2.2, h: 0.06, fill: { color: CYAN } });
+  if (p.clientName) {
+    cover.addText(`${p.clientName} ${isKo ? "귀중" : ""}`.trim(), {
+      x: 0.7, y: 6.0, w: 12, h: 0.4, fontFace: face, fontSize: 14, color: WHITE,
+    });
+  }
   cover.addText(p.generatedAt, {
     x: 0.7, y: 6.6, w: 12, h: 0.4, fontFace: face, fontSize: 12, color: "CFC8EC",
   });
@@ -61,8 +73,9 @@ export async function buildPlannerReportPptx(
     slide.addText(label, {
       x: 0.6, y: 0.12, w: 9, h: 0.66, fontFace: face, fontSize: 20, bold: true, color: WHITE,
     });
-    slide.addText("THINKAD", {
-      x: W - 3.1, y: 0.28, w: 2.5, h: 0.4, fontFace: face, fontSize: 12,
+    const sub = [p.campaignName, p.generatedAt].filter(Boolean).join("  ·  ");
+    slide.addText(sub, {
+      x: W - 5.1, y: 0.3, w: 4.5, h: 0.35, fontFace: face, fontSize: 11,
       color: "E1DCF5", align: "right",
     });
   }
@@ -94,6 +107,41 @@ export async function buildPlannerReportPptx(
     s2.addText(k.label, { x: 8.4, y: ky + 0.12, w: 4.1, h: 0.3, fontFace: face, fontSize: 10, color: GRAY });
     s2.addText(k.value, { x: 8.4, y: ky + 0.42, w: 4.1, h: 0.55, fontFace: face, fontSize: 20, bold: true, color: VIOLET });
   });
+
+  // ── 2.5 성과 요약 차트 (네이티브, 편집 가능) ──
+  const ch = p.charts;
+  if (
+    ch &&
+    ((ch.budgetSplit?.length ?? 0) > 0 ||
+      (ch.cpmBars?.length ?? 0) > 0 ||
+      (ch.reachSummary?.length ?? 0) > 0)
+  ) {
+    const sc = pptx.addSlide();
+    header(sc, isKo ? "성과 요약" : "Performance summary");
+    const palette = ["7C3AED", "0891B2", "EC4899", "10B981", "F59E0B"];
+    if (ch.budgetSplit && ch.budgetSplit.length) {
+      sc.addText(isKo ? "예산 배분" : "Budget allocation", {
+        x: 0.6, y: 1.15, w: 6, h: 0.3, fontFace: face, fontSize: 12, color: "6B7280", bold: true,
+      });
+      sc.addChart(
+        pptx.ChartType.doughnut,
+        [{ name: isKo ? "예산" : "Budget", labels: ch.budgetSplit.map((d) => d.label), values: ch.budgetSplit.map((d) => d.value) }],
+        { x: 0.6, y: 1.5, w: 6.0, h: 4.8, showLegend: true, legendPos: "r", showValue: false, showPercent: true, chartColors: palette, holeSize: 55, dataLabelColor: "FFFFFF", dataLabelFontSize: 11 },
+      );
+    }
+    const rightCharts: Array<{ title: string; data: { label: string; value: number }[]; color: string }> = [];
+    if (ch.reachSummary?.length) rightCharts.push({ title: isKo ? "노출 요약" : "Impressions", data: ch.reachSummary, color: "0891B2" });
+    if (ch.cpmBars?.length) rightCharts.push({ title: isKo ? "CPM 비교 (원)" : "CPM (KRW)", data: ch.cpmBars, color: "7C3AED" });
+    rightCharts.forEach((rc, i) => {
+      const y = 1.15 + i * 2.7;
+      sc.addText(rc.title, { x: 7.0, y, w: 5.7, h: 0.3, fontFace: face, fontSize: 12, color: "6B7280", bold: true });
+      sc.addChart(
+        pptx.ChartType.bar,
+        [{ name: rc.title, labels: rc.data.map((d) => d.label), values: rc.data.map((d) => d.value) }],
+        { x: 7.0, y: y + 0.35, w: 5.9, h: 2.2, barDir: "bar", showLegend: false, showValue: true, chartColors: [rc.color], valAxisHidden: true, catAxisLabelColor: "374151", dataLabelFontSize: 10 },
+      );
+    });
+  }
 
   // ── 3. 매체 구성 ──
   const s3 = pptx.addSlide();
