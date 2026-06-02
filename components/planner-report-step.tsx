@@ -1,9 +1,8 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import html2canvas from "html2canvas";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Camera, FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
+import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -14,16 +13,12 @@ import {
   type PlannerMetrics,
 } from "@/lib/planner-logic";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
-import {
-  captureElementAsPng,
-  defaultPlannerPdfFilename,
-  downloadPdfFromHtmlElement,
-  htmlElementToPdf,
-  HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
-} from "@/lib/html-to-pdf";
+import { downloadPlannerReport } from "@/lib/planner-report-export/client";
+import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
-import PlannerReportPreview from "@/components/planner-report-preview";
+import { PlannerReportDocument } from "@/components/planner/report-document";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
@@ -39,10 +34,6 @@ import { PlannerReportFreeSummary } from "@/components/planner/planner-report-fr
 import { useIsPro } from "@/hooks/use-is-pro";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
-
-function isPdfTimeoutError(e: unknown): boolean {
-  return e instanceof Error && /timed out/i.test(e.message);
-}
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -175,172 +166,60 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const { isPro, loading: proLoading } = useIsPro();
   const derived = usePlannerReportDerived(props);
 
-  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [retryKey, setRetryKey] = useState(0);
-  const [downloading, setDownloading] = useState(false);
-  const urlRef = useRef<string | null>(null);
-  const previewRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] =
+    useState<PlannerReportExportFormat | null>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
   const [userEmail, setUserEmail] = useState("");
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
-  const [capturing, setCapturing] = useState(false);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      setLoading(true);
+  const payload = useMemo(
+    () =>
+      buildOohReportPayload({
+        isKo: props.isKo,
+        goalTitle: props.goalTitle,
+        budgetMan: props.budgetNum,
+        periodDisplay: derived.periodDisplay,
+        regionsText: props.regionsText,
+        categoriesText: props.categoriesText,
+        ageText: props.ageText,
+        industryText: props.industryText,
+        portfolio: props.portfolio,
+        metrics: props.metrics,
+        reachCorePct: props.reachCorePct,
+        reachExtendedPct: props.reachExtendedPct,
+        blendedCpmKrw: derived.blendedCpmKrw,
+        budgetAllocation: derived.budgetAllocation,
+        cpmBars: derived.cpmBars,
+        effectSummaryLines: derived.effectSummaryLines,
+        generatedAt: snapshotAt,
+      }),
+    [props, derived, snapshotAt],
+  );
+
+  const handleExport = useCallback(
+    async (format: PlannerReportExportFormat) => {
+      if (downloading) return;
+      setDownloading(format);
       setError(null);
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      const el = previewRef.current;
-      if (!el) {
-        if (!cancelled) setLoading(false);
-        return;
-      }
       try {
-        const doc = await htmlElementToPdf(el, {
-          timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
-        });
-        if (cancelled) return;
-        const blob = doc.output("blob");
-        const nextUrl = URL.createObjectURL(blob);
-        if (urlRef.current) URL.revokeObjectURL(urlRef.current);
-        urlRef.current = nextUrl;
-      } catch (e) {
-        console.error("[planner-pdf html2canvas]", e);
-        if (!cancelled) {
-          const timedOut = isPdfTimeoutError(e);
-          setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
-          toast(
-            "error",
-            timedOut ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
-          );
-        }
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-      if (urlRef.current) {
-        URL.revokeObjectURL(urlRef.current);
-        urlRef.current = null;
-      }
-    };
-  }, [
-    props.isKo,
-    props.goalTitle,
-    props.budgetNum,
-    props.months,
-    props.regionsText,
-    props.categoriesText,
-    props.ageText,
-    props.industryText,
-    props.portfolio,
-    props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
-    derived,
-    retryKey,
-    snapshotAt,
-    t,
-    tCommon,
-    toast,
-  ]);
-
-  const downloadPdf = useCallback(() => {
-    const asciiName = defaultPlannerPdfFilename();
-    const liveBlobUrl = urlRef.current;
-
-    /** 미리보기와 동일 Blob — `urlRef`가 진실( effect 정리로 state `pdfUrl`이 revoke URL을 가질 수 있음) */
-    if (liveBlobUrl && !loading && !error) {
-      setDownloading(true);
-      try {
-        const a = document.createElement("a");
-        a.href = liveBlobUrl;
-        a.download = asciiName;
-        a.rel = "noopener";
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
+        await downloadPlannerReport(format, payload);
+        const { trackGaEvent } = await import("@/lib/ga-events");
+        trackGaEvent("pdf_download", { source: `planner_report_${format}` });
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
-        console.error("[planner-pdf download from preview blob]", e);
+        console.error("[planner-report-export]", e);
         setError(t("reportPdfError"));
         toast("error", tCommon("pdfGenerationFailed"));
       } finally {
-        setDownloading(false);
+        setDownloading(null);
       }
-      return;
-    }
-
-    void (async () => {
-      setDownloading(true);
-      try {
-        await new Promise<void>((r) =>
-          requestAnimationFrame(() => requestAnimationFrame(() => r())),
-        );
-        const el = previewRef.current;
-        if (!el) {
-          toast("error", tCommon("pdfGenerationFailed"));
-          return;
-        }
-        await downloadPdfFromHtmlElement(el, asciiName, {
-          timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
-        });
-        const { trackGaEvent } = await import("@/lib/ga-events");
-        trackGaEvent("pdf_download", { source: "planner_report" });
-        toast("success", t("reportPdfDownloaded"));
-      } catch (e) {
-        console.error("[planner-pdf download regenerate]", e);
-        const timedOut = isPdfTimeoutError(e);
-        setError(timedOut ? t("reportPdfTimeout") : t("reportPdfError"));
-        toast(
-          "error",
-          timedOut ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
-        );
-      } finally {
-        setDownloading(false);
-      }
-    })();
-  }, [
-    loading,
-    error,
-    t,
-    tCommon,
-    toast,
-  ]);
-
-  const captureReportPng = useCallback(async () => {
-    const el =
-      document.getElementById("planner-report-content") ?? previewRef.current;
-    if (!el) {
-      toast("error", tCommon("pdfGenerationFailed"));
-      return;
-    }
-    setCapturing(true);
-    try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const name = props.isKo
-        ? `싱커드_플래너보고서_${ymd}.png`
-        : `THINKAD_planner_${ymd}.png`;
-      await captureElementAsPng(el, name);
-      toast("success", t("reportImageSaved"));
-    } catch (e) {
-      console.error("[planner-capture]", e);
-      toast("error", tCommon("pdfGenerationFailed"));
-    } finally {
-      setCapturing(false);
-    }
-  }, [props.isKo, t, tCommon, toast]);
+    },
+    [downloading, payload, t, tCommon, toast],
+  );
 
   const sendEmailReport = useCallback(async () => {
     const email = userEmail.trim();
@@ -354,22 +233,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     setEmailSending(true);
     setEmailSent(false);
     try {
-      let screenshotBase64 = "";
-      try {
-        const reportEl =
-          document.getElementById("planner-report-content") ?? previewRef.current;
-        if (reportEl) {
-          const canvas = await html2canvas(reportEl, {
-            scale: 2,
-            useCORS: true,
-            logging: false,
-          });
-          screenshotBase64 = canvas.toDataURL("image/png");
-        }
-      } catch (e) {
-        console.error("[planner-email] screenshot failed", e);
-      }
-
       const res = await fetch("/api/planner/email-report", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -388,7 +251,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             location: m.location,
           })),
           metrics: props.metrics,
-          screenshot: screenshotBase64,
+          screenshot: "",
         }),
       });
       if (!res.ok) {
@@ -467,33 +330,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 />
               ) : null}
 
-              <div
-                className={cn(
-                  "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-                  "dark:border-white/10 border-gray-200 dark:bg-white/[0.03] bg-gray-100",
-                )}
-              >
-                <PlannerReportPreview
-                  ref={previewRef}
-                  isKo={props.isKo}
-                  goalTitle={props.goalTitle}
-                  budgetNum={props.budgetNum}
-                  periodDisplay={derived.periodDisplay}
-                  regionsText={props.regionsText}
-                  categoriesText={props.categoriesText}
-                  ageText={props.ageText}
-                  industryText={props.industryText}
-                  portfolio={props.portfolio}
-                  metrics={props.metrics}
-                  reachCorePct={props.reachCorePct}
-                  reachExtendedPct={props.reachExtendedPct}
-                  budgetAllocation={derived.budgetAllocation}
-                  blendedCpmKrw={derived.blendedCpmKrw}
-                  effectSummaryLines={derived.effectSummaryLines}
-                  generatedAt={snapshotAt}
-                  logoUrl={props.logoUrl}
-                  mediaPlacements={props.mediaPlacements}
-                />
+              <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
+                <PlannerReportDocument payload={payload} />
               </div>
 
               {props.metrics ? (
@@ -541,16 +379,16 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                   <div className="flex flex-wrap items-center gap-2">
                     <PlannerPdfDownloadGate
                       isKo={props.isKo}
-                      onAllowedDownload={downloadPdf}
+                      onAllowedDownload={() => void handleExport("pdf")}
                     >
                       {({ onDownloadClick, pdfAllowed, checking }) => (
                         <BtnBlock
                           variant="secondary"
                           size="md"
                           onClick={onDownloadClick}
-                          disabled={loading || downloading || capturing || checking}
+                          disabled={downloading !== null || checking}
                         >
-                          {downloading ? (
+                          {downloading === "pdf" ? (
                             <Loader2 className="h-4 w-4 animate-spin" />
                           ) : !pdfAllowed ? (
                             <Lock className="h-4 w-4" />
@@ -567,19 +405,34 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                         </BtnBlock>
                       )}
                     </PlannerPdfDownloadGate>
-                    <BtnBlock
-                      variant="secondary"
-                      size="md"
-                      onClick={() => void captureReportPng()}
-                      disabled={loading || capturing || downloading}
+                    <PlannerPdfDownloadGate
+                      isKo={props.isKo}
+                      onAllowedDownload={() => void handleExport("pptx")}
                     >
-                      {capturing ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <Camera className="h-4 w-4" />
+                      {({ onDownloadClick, pdfAllowed, checking }) => (
+                        <BtnBlock
+                          variant="secondary"
+                          size="md"
+                          onClick={onDownloadClick}
+                          disabled={downloading !== null || checking}
+                        >
+                          {downloading === "pptx" ? (
+                            <Loader2 className="h-4 w-4 animate-spin" />
+                          ) : !pdfAllowed ? (
+                            <Lock className="h-4 w-4" />
+                          ) : (
+                            <FileDown className="h-4 w-4" />
+                          )}
+                          {!pdfAllowed
+                            ? props.isKo
+                              ? "🔒 보고서 PPT 저장"
+                              : "🔒 Save report PPT"
+                            : props.isKo
+                              ? "보고서 PPT 저장"
+                              : "Save report PPT"}
+                        </BtnBlock>
                       )}
-                      {t("reportCapturePng")}
-                    </BtnBlock>
+                    </PlannerPdfDownloadGate>
                     <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                       <input
                         type="email"
@@ -614,10 +467,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                       <BtnBlock
                         variant="primary"
                         size="md"
-                        onClick={() => {
-                          setError(null);
-                          setRetryKey((k) => k + 1);
-                        }}
+                        onClick={() => setError(null)}
                       >
                         <RefreshCw className="h-4 w-4" />
                         {t("reportRetryPdf")}
@@ -625,17 +475,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                     ) : null}
                   </div>
                 </div>
-                {loading ? (
-                  <div
-                    className={cn(
-                      "flex min-h-[8rem] items-center justify-center gap-3 py-8 text-sm",
-                      plannerNeon.subtext,
-                    )}
-                  >
-                    <Loader2 className="h-5 w-5 animate-spin text-violet-400" />
-                    {t("reportGenerating")}
-                  </div>
-                ) : error ? (
+                {error ? (
                   <div className="px-5 py-6 sm:px-6">
                     <PlannerNeonLabel>Error</PlannerNeonLabel>
                     <p className={cn("mt-2 font-bold", plannerNeon.headline)}>{error}</p>
@@ -660,39 +500,51 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const { toast } = useToast();
   const { loading: proLoading } = useIsPro();
   const derived = usePlannerReportDerived(props);
-  const [downloading, setDownloading] = useState(false);
-  const compactPreviewRef = useRef<HTMLDivElement>(null);
+  const [downloading, setDownloading] =
+    useState<PlannerReportExportFormat | null>(null);
   const [snapshotAt] = useState(() =>
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
 
-  const downloadPdf = useCallback(async () => {
-    setDownloading(true);
-    try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      const el = compactPreviewRef.current;
-      if (!el) {
+  const handleExport = useCallback(
+    async (format: PlannerReportExportFormat) => {
+      if (downloading) return;
+      setDownloading(format);
+      try {
+        const payload = buildOohReportPayload({
+          isKo: props.isKo,
+          goalTitle: props.goalTitle,
+          budgetMan: props.budgetNum,
+          periodDisplay: derived.periodDisplay,
+          regionsText: props.regionsText,
+          categoriesText: props.categoriesText,
+          ageText: props.ageText,
+          industryText: props.industryText,
+          portfolio: props.portfolio,
+          metrics: props.metrics,
+          reachCorePct: props.reachCorePct,
+          reachExtendedPct: props.reachExtendedPct,
+          blendedCpmKrw: derived.blendedCpmKrw,
+          budgetAllocation: derived.budgetAllocation,
+          cpmBars: derived.cpmBars,
+          effectSummaryLines: derived.effectSummaryLines,
+          generatedAt: snapshotAt,
+        });
+        await downloadPlannerReport(format, payload);
+        const { trackGaEvent } = await import("@/lib/ga-events");
+        trackGaEvent("pdf_download", {
+          source: `planner_report_compact_${format}`,
+        });
+        toast("success", t("reportPdfDownloaded"));
+      } catch (e) {
+        console.error("[planner-report-export compact]", e);
         toast("error", tCommon("pdfGenerationFailed"));
-        return;
+      } finally {
+        setDownloading(null);
       }
-      await downloadPdfFromHtmlElement(el, defaultPlannerPdfFilename(), {
-        timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
-      });
-      const { trackGaEvent } = await import("@/lib/ga-events");
-      trackGaEvent("pdf_download", { source: "planner_report_compact" });
-      toast("success", t("reportPdfDownloaded"));
-    } catch (e) {
-      console.error("[planner-pdf compact]", e);
-      toast(
-        "error",
-        isPdfTimeoutError(e) ? t("reportPdfTimeout") : tCommon("pdfGenerationFailed"),
-      );
-    } finally {
-      setDownloading(false);
-    }
-  }, [t, tCommon, toast]);
+    },
+    [downloading, props, derived, snapshotAt, t, tCommon, toast],
+  );
 
   if (proLoading) return null;
 
@@ -709,43 +561,19 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             : "Save the unified planner report as PDF."}
         </p>
       </div>
-      <div className="sr-only" aria-hidden>
-        <div ref={compactPreviewRef} id="planner-report-content">
-          <PlannerReportPreview
-            isKo={props.isKo}
-            goalTitle={props.goalTitle}
-            budgetNum={props.budgetNum}
-            periodDisplay={derived.periodDisplay}
-            regionsText={props.regionsText}
-            categoriesText={props.categoriesText}
-            ageText={props.ageText}
-            industryText={props.industryText}
-            portfolio={props.portfolio}
-            metrics={props.metrics}
-            reachCorePct={props.reachCorePct}
-            reachExtendedPct={props.reachExtendedPct}
-            budgetAllocation={derived.budgetAllocation}
-            blendedCpmKrw={derived.blendedCpmKrw}
-            effectSummaryLines={derived.effectSummaryLines}
-            generatedAt={snapshotAt}
-            logoUrl={props.logoUrl}
-            mediaPlacements={props.mediaPlacements}
-          />
-        </div>
-      </div>
       <div className="flex flex-wrap gap-2 p-5 sm:p-6">
         <PlannerPdfDownloadGate
           isKo={props.isKo}
-          onAllowedDownload={() => void downloadPdf()}
+          onAllowedDownload={() => void handleExport("pdf")}
         >
           {({ onDownloadClick, pdfAllowed, checking }) => (
             <BtnBlock
               variant="accent"
               size="md"
               onClick={onDownloadClick}
-              disabled={downloading || checking}
+              disabled={downloading !== null || checking}
             >
-              {downloading ? (
+              {downloading === "pdf" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
               ) : !pdfAllowed ? (
                 <Lock className="h-4 w-4" />
@@ -759,6 +587,34 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
                 : props.isKo
                   ? "플래너 보고서 PDF 저장"
                   : t("reportDownloadPdf")}
+            </BtnBlock>
+          )}
+        </PlannerPdfDownloadGate>
+        <PlannerPdfDownloadGate
+          isKo={props.isKo}
+          onAllowedDownload={() => void handleExport("pptx")}
+        >
+          {({ onDownloadClick, pdfAllowed, checking }) => (
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={onDownloadClick}
+              disabled={downloading !== null || checking}
+            >
+              {downloading === "pptx" ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : !pdfAllowed ? (
+                <Lock className="h-4 w-4" />
+              ) : (
+                <FileDown className="h-4 w-4" />
+              )}
+              {!pdfAllowed
+                ? props.isKo
+                  ? "🔒 보고서 PPT 저장"
+                  : "🔒 Save report PPT"
+                : props.isKo
+                  ? "보고서 PPT 저장"
+                  : "Save report PPT"}
             </BtnBlock>
           )}
         </PlannerPdfDownloadGate>

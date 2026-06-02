@@ -1,0 +1,98 @@
+/**
+ * 플래너 보고서 서버 출력(PDF·PPTX) 공용 페이로드.
+ *
+ * 화면(클라이언트)에서 이미 계산된 표시값을 직렬화해 서버로 전달한다.
+ * 서버 빌더는 이 payload 만으로 문서를 그린다 (재계산·DOM 캡처 없음).
+ * → html2canvas 가 Tailwind v4 oklch/그라데이션을 검정으로 폴백하던 문제를
+ *   원천 차단하고, 한글 벡터 텍스트 + 기기 무관 동일 레이아웃을 보장한다.
+ */
+
+export type PlannerExportKpi = { label: string; value: string };
+
+export type PlannerExportMediaRow = {
+  name: string;
+  region: string;
+  type: string;
+  priceLabel?: string;
+};
+
+export type PlannerExportDigitalRow = {
+  platform: string;
+  sharePct: number;
+  impressions: number;
+};
+
+export type PlannerExportSection = { title: string; lines: string[] };
+
+/** 차트 1개 항목 (라벨 + 수치) */
+export type PlannerExportChartDatum = { label: string; value: number };
+
+/** 웹·PDF·PPTX 공용 차트 데이터 (동일 숫자로 3포맷 렌더) */
+export type PlannerExportCharts = {
+  /** 예산 배분 — 도넛 (OOH vs 디지털 / 유형별) */
+  budgetSplit?: PlannerExportChartDatum[];
+  /** CPM 비교 — 가로 막대 (원 단위) */
+  cpmBars?: PlannerExportChartDatum[];
+  /** 노출·도달 요약 — 가로 막대 */
+  reachSummary?: PlannerExportChartDatum[];
+};
+
+export type PlannerReportExportPayload = {
+  /** ooh = 클래식 플래너, integrated = 통합 플래너 */
+  kind: "ooh" | "integrated";
+  isKo: boolean;
+  documentTitle: string;
+  /** slim 헤더·표지용 캠페인명 (없으면 목표명 사용) */
+  campaignName?: string;
+  /** slim 헤더용 클라이언트명 (선택) */
+  clientName?: string;
+  generatedAt: string;
+  goalTitle: string;
+  /** 총 캠페인 예산 (만원 단위) */
+  budgetMan: number;
+  periodDisplay: string;
+  regionsText: string;
+  categoriesText: string;
+  ageText: string;
+  industryText: string;
+  kpis: PlannerExportKpi[];
+  charts?: PlannerExportCharts;
+  portfolio: PlannerExportMediaRow[];
+  /** 통합 플래너 전용 — 디지털 채널 배분 */
+  digital?: PlannerExportDigitalRow[];
+  digitalSummary?: string;
+  /** PRO 인사이트 등 추가 섹션 (제목 + 불릿) */
+  sections?: PlannerExportSection[];
+  disclaimer: string;
+};
+
+export type PlannerReportExportFormat = "pdf" | "pptx";
+
+/**
+ * 파일명 규칙: `THINKAD_{캠페인명}_제안서_{YYYY-MM-DD}` (+확장자).
+ * OS 금지문자·공백 정리. 클라이언트(blob download)·서버(Content-Disposition) 공용.
+ */
+export function plannerReportFileBase(p: PlannerReportExportPayload): string {
+  const date = new Date().toISOString().slice(0, 10);
+  const camp = (p.campaignName || p.goalTitle || (p.isKo ? "캠페인" : "campaign"))
+    .replace(/[\\/:*?"<>|]+/g, "")
+    .replace(/\s+/g, "_")
+    .slice(0, 48);
+  const word = p.isKo ? "제안서" : "proposal";
+  return `THINKAD_${camp}_${word}_${date}`;
+}
+
+/** 페이로드 유효성 — 라우트에서 신뢰 경계로 사용 */
+export function isPlannerReportExportPayload(
+  v: unknown,
+): v is PlannerReportExportPayload {
+  if (!v || typeof v !== "object") return false;
+  const p = v as Record<string, unknown>;
+  return (
+    (p.kind === "ooh" || p.kind === "integrated") &&
+    typeof p.isKo === "boolean" &&
+    typeof p.documentTitle === "string" &&
+    Array.isArray(p.kpis) &&
+    Array.isArray(p.portfolio)
+  );
+}

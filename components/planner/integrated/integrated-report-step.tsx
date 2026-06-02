@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FileDown, Loader2, Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -10,10 +10,12 @@ import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import { reachSplitForGoal } from "@/lib/planner-logic";
 import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
 import type { DigitalRecommendResult } from "@/lib/planner/recommend-digital";
-import { downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
+import { downloadPlannerReport } from "@/lib/planner-report-export/client";
+import { buildIntegratedReportPayload } from "@/lib/planner-report-export/payload-integrated";
+import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
 import { useIsPro } from "@/hooks/use-is-pro";
-import IntegratedReportPreview from "@/components/planner/integrated/integrated-report-preview";
+import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
@@ -50,8 +52,9 @@ export function IntegratedReportStep(props: Props) {
   const tPlanner = useTranslations("planner");
   const { toast } = useToast();
   const { isPro, loading: proLoading } = useIsPro();
-  const previewRef = useRef<HTMLDivElement>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<PlannerReportExportFormat | null>(
+    null,
+  );
 
   const generatedAt = new Intl.DateTimeFormat(props.isKo ? "ko-KR" : "en-US", {
     timeZone: "Asia/Seoul",
@@ -60,23 +63,42 @@ export function IntegratedReportStep(props: Props) {
     day: "numeric",
   }).format(new Date());
 
-  const handleDownload = useCallback(async () => {
-    if (!isPro) return;
-    if (!previewRef.current) return;
-    setDownloading(true);
-    try {
-      const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await downloadPdfFromHtmlElement(
-        previewRef.current,
-        `thinkad-integrated-plan-${stamp}.pdf`,
-      );
-      toast("success", t("pdfDownloaded"));
-    } catch {
-      toast("error", t("pdfFailed"));
-    } finally {
-      setDownloading(false);
-    }
-  }, [isPro, toast, t]);
+  const payload = useMemo(
+    () =>
+      buildIntegratedReportPayload({
+        isKo: props.isKo,
+        goal: props.campaignGoal,
+        goalTitle: props.goalTitle,
+        budgetMan: props.budgetNum,
+        periodDisplay: props.periodDisplay,
+        regionsText: props.regionsText,
+        categoriesText: props.categoriesText,
+        ageText: props.ageText,
+        industryText: props.industryText,
+        portfolio: props.portfolio,
+        digitalResult: props.digitalResult,
+        metrics: props.metrics,
+        generatedAt,
+        includeProSections: isPro,
+      }),
+    [props, generatedAt, isPro],
+  );
+
+  const handleDownload = useCallback(
+    async (format: PlannerReportExportFormat) => {
+      if (!isPro || downloading) return;
+      setDownloading(format);
+      try {
+        await downloadPlannerReport(format, payload);
+        toast("success", t("pdfDownloaded"));
+      } catch {
+        toast("error", t("pdfFailed"));
+      } finally {
+        setDownloading(null);
+      }
+    },
+    [isPro, downloading, payload, toast, t],
+  );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
 
@@ -118,26 +140,8 @@ export function IntegratedReportStep(props: Props) {
                 roiExpected={props.metrics.integratedRoasExpected}
               />
 
-              <div
-                className={cn(
-                  "mx-auto flex w-full justify-center rounded-2xl border p-4 sm:p-6 lg:p-8",
-                  "border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-white/[0.03]",
-                )}
-              >
-                <IntegratedReportPreview
-                  ref={previewRef}
-                  isKo={props.isKo}
-                  goalTitle={props.goalTitle}
-                  goal={props.campaignGoal}
-                  budgetNum={props.budgetNum}
-                  periodDisplay={props.periodDisplay}
-                  regionsText={props.regionsText}
-                  portfolio={props.portfolio}
-                  digitalResult={props.digitalResult}
-                  metrics={props.metrics}
-                  isPro={isPro}
-                  generatedAt={generatedAt}
-                />
+              <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
+                <PlannerReportDocument payload={payload} />
               </div>
 
               <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
@@ -174,19 +178,34 @@ export function IntegratedReportStep(props: Props) {
               </div>
               <div className="flex flex-wrap gap-2">
                 {isPro ? (
-                  <BtnBlock
-                    variant="accent"
-                    size="md"
-                    onClick={() => void handleDownload()}
-                    disabled={downloading || proLoading}
-                  >
-                    {downloading ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <FileDown className="h-4 w-4" />
-                    )}
-                    {t("downloadPdf")}
-                  </BtnBlock>
+                  <>
+                    <BtnBlock
+                      variant="accent"
+                      size="md"
+                      onClick={() => void handleDownload("pdf")}
+                      disabled={downloading !== null || proLoading}
+                    >
+                      {downloading === "pdf" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileDown className="h-4 w-4" />
+                      )}
+                      {t("downloadPdf")}
+                    </BtnBlock>
+                    <BtnBlock
+                      variant="secondary"
+                      size="md"
+                      onClick={() => void handleDownload("pptx")}
+                      disabled={downloading !== null || proLoading}
+                    >
+                      {downloading === "pptx" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <FileDown className="h-4 w-4" />
+                      )}
+                      {props.isKo ? "PPT 내려받기" : "Download PPT"}
+                    </BtnBlock>
+                  </>
                 ) : (
                   <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
                     <BtnBlock variant="secondary" size="md" disabled>
