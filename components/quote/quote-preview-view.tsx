@@ -14,6 +14,7 @@ import {
   Eye,
   Loader2,
   ArrowRight,
+  Lock,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import {
@@ -26,6 +27,7 @@ import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
 import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
+import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 
 type Media = {
   id: string;
@@ -323,32 +325,58 @@ export default function QuotePreviewView({
               </div>
               {/* 다운로드 형식 */}
               <div className="flex flex-wrap gap-2">
-                <button
-                  type="button"
-                  onClick={() => void onDownload("pdf")}
-                  disabled={downloading !== null}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                <PlannerPdfDownloadGate
+                  isKo
+                  onAllowedDownload={() => void onDownload("pdf")}
                 >
-                  {downloading === "pdf" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Download className="h-4 w-4" aria-hidden />
+                  {({ onDownloadClick, pdfAllowed, checking }) => (
+                    <button
+                      type="button"
+                      onClick={onDownloadClick}
+                      disabled={downloading !== null || checking}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                    >
+                      {downloading === "pdf" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      ) : !pdfAllowed ? (
+                        <Lock className="h-4 w-4" aria-hidden />
+                      ) : (
+                        <Download className="h-4 w-4" aria-hidden />
+                      )}
+                      {downloading === "pdf"
+                        ? "생성 중…"
+                        : !pdfAllowed
+                          ? "🔒 견적서 PDF (PRO)"
+                          : "견적서 PDF 다운로드"}
+                    </button>
                   )}
-                  {downloading === "pdf" ? "생성 중…" : "PDF 다운로드"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => void onDownload("pptx")}
-                  disabled={downloading !== null}
-                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                </PlannerPdfDownloadGate>
+                <PlannerPdfDownloadGate
+                  isKo
+                  onAllowedDownload={() => void onDownload("pptx")}
                 >
-                  {downloading === "pptx" ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <Download className="h-4 w-4" aria-hidden />
+                  {({ onDownloadClick, pdfAllowed, checking }) => (
+                    <button
+                      type="button"
+                      onClick={onDownloadClick}
+                      disabled={downloading !== null || checking}
+                      className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                    >
+                      {downloading === "pptx" ? (
+                        <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                      ) : !pdfAllowed ? (
+                        <Lock className="h-4 w-4" aria-hidden />
+                      ) : (
+                        <Download className="h-4 w-4" aria-hidden />
+                      )}
+                      {downloading === "pptx"
+                        ? "생성 중…"
+                        : !pdfAllowed
+                          ? "🔒 견적서 PPT (PRO)"
+                          : "견적서 PPT 다운로드"}
+                    </button>
                   )}
-                  {downloading === "pptx" ? "생성 중…" : "PPT 다운로드"}
-                </button>
+                </PlannerPdfDownloadGate>
               {canProceed ? (
                 <button
                   type="button"

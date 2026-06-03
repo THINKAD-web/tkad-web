@@ -1,6 +1,7 @@
 import type { PrismaClient } from "@prisma/client";
 import { calculateQuoteFromMediaIds } from "@/lib/quote-calculator";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { estimateEndDate, periodLabelFromKey } from "@/lib/ooh-quote";
 import type { QuoteExportPayload, QuoteExportTemplate } from "@/lib/quote-export/types";
 
 /** OoHQuote 에서 필요한 필드만 */
@@ -95,6 +96,42 @@ export function quoteTemplateFromRow(
   row: Pick<QuoteExportSourceRow, "pdfTemplate">,
 ): "basic" | "premium" {
   return row.pdfTemplate === "premium" ? "premium" : "basic";
+}
+
+/** 견적 마법사 Step 4 — DB 저장 전 초안 (OoHQuote 행 없이 동일 페이로드) */
+export type QuoteWizardExportInput = {
+  mediaIds: string[];
+  periodKey: string;
+  locale: string;
+  template: QuoteExportTemplate;
+  clientName: string;
+  clientEmail: string;
+  clientPhone?: string | null;
+  clientCompany?: string | null;
+};
+
+export async function buildQuoteExportPayloadFromWizard(
+  db: Pick<PrismaClient, "media">,
+  input: QuoteWizardExportInput,
+): Promise<QuoteExportPayload> {
+  const isKo = input.locale !== "en";
+  const startDate = new Date();
+  const endDate = estimateEndDate(startDate, input.periodKey);
+  const row: QuoteExportSourceRow = {
+    id: `draft${Date.now().toString(36)}`,
+    clientName: input.clientName || (isKo ? "담당자" : "Contact"),
+    clientEmail: input.clientEmail || "",
+    clientPhone: input.clientPhone ?? null,
+    clientCompany: input.clientCompany ?? null,
+    mediaIds: input.mediaIds,
+    period: periodLabelFromKey(input.periodKey, input.locale),
+    periodKey: input.periodKey,
+    startDate,
+    endDate,
+    locale: input.locale,
+    pdfTemplate: input.template === "premium" ? "premium" : "default",
+  };
+  return buildQuoteExportPayload(db, row, input.template);
 }
 
 /** 발송/이메일 공용 — 행 → 신규 디자인 PDF base64 (모든 견적 경로 통일) */

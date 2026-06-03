@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import { Download, MessageCircle, Share2 } from "lucide-react";
+import { Download, Lock, MessageCircle, Share2 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { downloadPdfFromHtmlElement } from "@/lib/html-to-pdf";
@@ -10,6 +10,7 @@ import { proposalPdfFilename } from "@/lib/proposal/pdf-filename";
 import type { CampaignProposalOutput, ProposalInput } from "@/lib/proposal/types";
 import { ProposalPdfContent } from "@/components/proposal/proposal-pdf-content";
 import { cn } from "@/lib/utils";
+import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 
 const glassCard =
   "rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 shadow-[0_12px_40px_rgba(0,0,0,0.35)] backdrop-blur";
@@ -56,16 +57,34 @@ export function ProposalResultDisplay({
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-3">
-        <BtnBlock
-          variant="accent"
-          size="md"
-          className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
-          onClick={() => void onPdf()}
-          disabled={pdfBusy}
-        >
-          <Download className="h-4 w-4" />
-          {pdfBusy ? t("pdfGenerating") : t("downloadPdf")}
-        </BtnBlock>
+        <PlannerPdfDownloadGate isKo={isKo} onAllowedDownload={() => void onPdf()}>
+          {({ onDownloadClick, pdfAllowed, checking }) => (
+            <BtnBlock
+              variant="accent"
+              size="md"
+              className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
+              onClick={onDownloadClick}
+              disabled={pdfBusy || checking}
+            >
+              {pdfBusy ? (
+                <Download className="h-4 w-4 animate-spin" />
+              ) : !pdfAllowed ? (
+                <Lock className="h-4 w-4" />
+              ) : (
+                <Download className="h-4 w-4" />
+              )}
+              {pdfBusy
+                ? t("pdfGenerating")
+                : !pdfAllowed
+                  ? isKo
+                    ? "🔒 제안서 PDF (PRO)"
+                    : "🔒 Proposal PDF (PRO)"
+                  : isKo
+                    ? "제안서 PDF 다운로드"
+                    : t("downloadPdf")}
+            </BtnBlock>
+          )}
+        </PlannerPdfDownloadGate>
         {proposalId ? (
           <BtnBlock href={contactHref} variant="primary" size="md">
             <MessageCircle className="h-4 w-4" />

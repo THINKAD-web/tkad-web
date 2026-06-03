@@ -785,9 +785,7 @@ export default function PlannerPageClient({
         ) : null}
 
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
-          <div
-            className="mx-auto max-w-3xl space-y-8"
-          >
+          <div className="mx-auto min-w-0 max-w-3xl space-y-8 overflow-x-clip">
             <PlannerTips
               wizardStep={wizardStep}
               campaignGoal={campaignGoal}
@@ -1058,7 +1056,7 @@ export default function PlannerPageClient({
 
             {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6 overflow-x-clip">
                 <div className="space-y-2 text-center sm:text-left">
                   <PlannerNeonLabel>Step 4 / Media Selection</PlannerNeonLabel>
                   <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>

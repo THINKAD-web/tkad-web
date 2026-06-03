@@ -37,12 +37,20 @@ export async function GET(request: NextRequest, { params }: Params) {
     return NextResponse.json({ error: "Media not found" }, { status: 404 });
   }
 
+  const user = await getCurrentUser();
+  const pdfAccess = await checkReportAccess(user?.id ?? null, "planner_pdf");
+  if (!pdfAccess.allowed) {
+    return NextResponse.json(
+      { error: pdfAccess.reason === "login" ? "Login required" : "PRO required" },
+      { status: pdfAccess.reason === "login" ? 401 : 403 },
+    );
+  }
+
   const proposalUrl = row.proposalUrl?.trim();
   if (proposalUrl) {
     return NextResponse.redirect(proposalUrl, 302);
   }
 
-  const user = await getCurrentUser();
   const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
   const includeProDetails = detailAccess.allowed;
 

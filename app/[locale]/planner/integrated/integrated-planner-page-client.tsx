@@ -410,7 +410,7 @@ export default function IntegratedPlannerPageClient({
         ) : null}
 
         {wizardStep <= LAST_STEP ? (
-          <div className="mx-auto max-w-3xl space-y-8">
+          <div className="mx-auto min-w-0 max-w-3xl space-y-8 overflow-x-clip">
             <PlannerTips
               variant="integrated"
               wizardStep={wizardStep}
@@ -574,7 +574,7 @@ export default function IntegratedPlannerPageClient({
             ) : null}
 
             {wizardStep === 4 ? (
-              <div className="space-y-6">
+              <div className="min-w-0 space-y-6 overflow-x-clip">
                 <div className="space-y-2 text-center sm:text-left">
                   <PlannerNeonLabel>{ti("step4Label")}</PlannerNeonLabel>
                   <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
@@ -690,7 +690,7 @@ export default function IntegratedPlannerPageClient({
             </div>
           </div>
         ) : integratedMetrics ? (
-          <div className="mx-auto max-w-3xl space-y-8">
+          <div className="mx-auto min-w-0 max-w-3xl space-y-8 overflow-x-clip">
             <PlannerTips
               variant="integrated"
               wizardStep={8}

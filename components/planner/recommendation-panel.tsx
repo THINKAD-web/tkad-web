@@ -267,9 +267,9 @@ export function PlannerRecommendationPanel({
   );
 
   return (
-    <PlannerNeonCard className="border-violet-400/20">
-      <div className="flex flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
-        <div className="space-y-1">
+    <PlannerNeonCard className="min-w-0 overflow-x-clip border-violet-400/20">
+      <div className="flex min-w-0 flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
+        <div className="min-w-0 space-y-1">
           <PlannerNeonLabel>{t("recommendEyebrow")}</PlannerNeonLabel>
           <h3
             className={cn(
@@ -282,7 +282,7 @@ export function PlannerRecommendationPanel({
           </h3>
           <p className={plannerNeon.subtext}>{t("recommendDesc")}</p>
         </div>
-        <div className="flex flex-wrap gap-2">
+        <div className="flex min-w-0 flex-wrap gap-2">
           <button
             type="button"
             onClick={() => setRefreshTick((n) => n + 1)}
@@ -314,7 +314,7 @@ export function PlannerRecommendationPanel({
           />
         </div>
       </div>
-      <div className="p-5 sm:p-6">
+      <div className="min-w-0 overflow-x-clip p-5 sm:p-6">
         {loading ? (
           <div
             className={cn(
@@ -332,7 +332,7 @@ export function PlannerRecommendationPanel({
             {t("recommendEmpty")}
           </p>
         ) : (
-          <ul className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+          <ul className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
             {recommendations.map(({ media, reasons }) => {
               const selected = isSelected(media.id);
               const matchScore = matchScores[media.id];

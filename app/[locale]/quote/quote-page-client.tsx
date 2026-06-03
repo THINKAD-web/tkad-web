@@ -22,6 +22,7 @@ import {
   Mail,
   ShieldCheck,
   Flame,
+  Lock,
 } from "lucide-react";
 import {
   useState,
@@ -82,16 +83,10 @@ import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { QuotePdfPreview } from "@/components/quote/quote-preview";
-import {
-  QuotePremium,
-} from "@/components/quote/quote-premium";
-import {
-  downloadQuotePdfFromElement,
-  downloadQuotePdfFromElements,
-  quoteElementToPdfBase64,
-  quoteElementsToPdfBase64,
-} from "@/lib/quote-html-pdf";
+import { QuotePremium } from "@/components/quote/quote-premium";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
+import type { QuoteExportFormat } from "@/lib/quote-export/types";
+import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -283,7 +278,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const router = useRouter();
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
+  const [downloading, setDownloading] = useState<QuoteExportFormat | null>(null);
   const [emailPdfLoading, setEmailPdfLoading] = useState(false);
   const [quoteIssuedAt] = useState(() => new Date());
 
@@ -422,7 +417,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   }, [form.budgetMax]);
 
   const pdfPreviewRef = useRef<HTMLDivElement>(null);
-  const premiumPdfExportRef = useRef<HTMLDivElement>(null);
   const quoteFloatingStashRef = useRef<MediaItem[]>([]);
 
   const pdfPreviewRows = useMemo(() => {
@@ -787,54 +781,94 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       ? "border-red-400 focus:border-red-500 focus:ring-red-200"
       : "";
 
-  const handleDownloadPdf = async () => {
+  const exportTemplate = template === "premium" ? "premium" : "basic";
+
+  const exportQuoteDraft = useCallback(
+    async (format: QuoteExportFormat) => {
+      const res = await fetch("/api/quote/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format,
+          template: exportTemplate,
+          locale: isKo ? "ko" : "en",
+          mediaIds: selectedMedia.map((m) => m.id),
+          periodKey: period,
+          clientName: form.name.trim(),
+          clientEmail: form.email.trim(),
+          clientPhone: form.phone.trim() || null,
+          clientCompany: form.company.trim() || null,
+        }),
+        cache: "no-store",
+      });
+      if (!res.ok) {
+        if (res.status === 401 || res.status === 403) {
+          throw new Error("PRO_REQUIRED");
+        }
+        throw new Error(`${format.toUpperCase()} HTTP ${res.status}`);
+      }
+      const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const m = cd.match(/filename\*=UTF-8''([^;]+)/i);
+      const name = m
+        ? decodeURIComponent(m[1]!)
+        : `THINKAD_견적서_${new Date().toISOString().slice(0, 10)}.${format}`;
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = name;
+      a.rel = "noopener";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      return name;
+    },
+    [
+      exportTemplate,
+      form.company,
+      form.email,
+      form.name,
+      form.phone,
+      isKo,
+      period,
+      selectedMedia,
+    ],
+  );
+
+  const runQuoteExport = async (format: QuoteExportFormat) => {
     if (selectedMedia.length === 0) {
       toast("warning", t("quote.noMediaSelected"));
       return;
     }
-    setDownloading(true);
+    setDownloading(format);
     try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
+      const name = await exportQuoteDraft(format);
+      toast(
+        "success",
+        format === "pdf"
+          ? t("quote.pdfDownloaded") + (name ? ` · ${name}` : "")
+          : (isKo ? "PPT 다운로드 완료" : "PPT downloaded") +
+              (name ? ` · ${name}` : ""),
       );
-      const ymd = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      const filename = isKo
-        ? `싱커드_견적서_${ymd}.pdf`
-        : `THINKAD_quote_${ymd}.pdf`;
-
-      if (template === "premium") {
-        const root = premiumPdfExportRef.current;
-        const page1 = root?.querySelector<HTMLElement>(
-          '[data-quote-premium-page="1"]',
-        );
-        const page2 = root?.querySelector<HTMLElement>(
-          '[data-quote-premium-page="2"]',
-        );
-        if (!page1 || !page2) {
-          toast("error", t("quote.pdfError"));
-          return;
-        }
-        await runWithQuotePdfExport(page1, async () => {
-          await downloadQuotePdfFromElements([page1, page2], filename, {
-            timeoutMs: 60_000,
-          });
-        });
-      } else {
-        const el = pdfPreviewRef.current;
-        if (!el) {
-          toast("error", t("quote.pdfError"));
-          return;
-        }
-        await runWithQuotePdfExport(el, async () => {
-          await downloadQuotePdfFromElement(el, filename);
-        });
-      }
-      toast("success", t("quote.pdfDownloaded"));
     } catch (e) {
-      console.error("[quote pdf download]", e);
-      toast("error", t("quote.pdfError"));
+      console.error(`[quote ${format} download]`, e);
+      const proRequired =
+        e instanceof Error && e.message === "PRO_REQUIRED";
+      toast(
+        proRequired ? "warning" : "error",
+        proRequired
+          ? isKo
+            ? "견적서 다운로드는 PRO 전용입니다."
+            : "Quote export requires PRO."
+          : format === "pdf"
+            ? t("quote.pdfError")
+            : isKo
+              ? "PPT 생성에 실패했습니다."
+              : "PPT export failed.",
+      );
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
@@ -846,9 +880,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     const el =
       template === "premium"
-        ? premiumPdfExportRef.current?.querySelector<HTMLElement>(
-            '[data-quote-premium-page="1"]',
-          ) ?? null
+        ? (pdfPreviewRef.current?.closest("[data-quote-pdf-scale-wrap]") ??
+            document.querySelector("[data-quote-pdf-scale-wrap]")
+          )?.querySelector<HTMLElement>('[data-quote-premium-page="1"]') ?? null
         : pdfPreviewRef.current;
     if (!el) {
       toast("error", t("quote.pdfError"));
@@ -883,37 +917,46 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     setEmailPdfLoading(true);
     try {
-      await new Promise<void>((r) =>
-        requestAnimationFrame(() => requestAnimationFrame(() => r())),
-      );
-      let pdfBase64 = "";
-      if (template === "premium") {
-        const root = premiumPdfExportRef.current;
-        const page1 = root?.querySelector<HTMLElement>(
-          '[data-quote-premium-page="1"]',
-        );
-        const page2 = root?.querySelector<HTMLElement>(
-          '[data-quote-premium-page="2"]',
-        );
-        if (!page1 || !page2) {
+      const exportRes = await fetch("/api/quote/export", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          format: "pdf",
+          template: exportTemplate,
+          locale: isKo ? "ko" : "en",
+          mediaIds: selectedMedia.map((m) => m.id),
+          periodKey: period,
+          clientName: form.name.trim(),
+          clientEmail: form.email.trim(),
+          clientPhone: form.phone.trim() || null,
+          clientCompany: form.company.trim() || null,
+        }),
+        cache: "no-store",
+      });
+      if (!exportRes.ok) {
+        if (exportRes.status === 401 || exportRes.status === 403) {
+          toast(
+            "warning",
+            isKo
+              ? "견적서 PDF는 로그인 후 PRO에서 이용할 수 있습니다."
+              : "Sign in with PRO to email quote PDFs.",
+          );
+        } else {
           toast("error", t("quote.pdfError"));
-          return;
         }
-        await runWithQuotePdfExport(page1, async () => {
-          pdfBase64 = await quoteElementsToPdfBase64([page1, page2], {
-            timeoutMs: 60_000,
-          });
-        });
-      } else {
-        const el = pdfPreviewRef.current;
-        if (!el) {
-          toast("error", t("quote.pdfError"));
-          return;
-        }
-        await runWithQuotePdfExport(el, async () => {
-          pdfBase64 = await quoteElementToPdfBase64(el);
-        });
+        return;
       }
+      const pdfBlob = await exportRes.blob();
+      const pdfBase64 = await new Promise<string>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const data = String(reader.result ?? "");
+          const b64 = data.includes(",") ? data.split(",")[1]! : data;
+          resolve(b64);
+        };
+        reader.onerror = () => reject(reader.error);
+        reader.readAsDataURL(pdfBlob);
+      });
       const res = await fetch("/api/quote/email-pdf", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -1649,7 +1692,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 4 && !submitted && (
-                    <div className="space-y-8">
+                    <div className="min-w-0 space-y-8 overflow-x-clip">
                       {selectedMedia.length > 0 ? (
                         <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
                           <div
@@ -1667,9 +1710,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {`// `}
                               {template === "premium"
                                 ? isKo
-                                  ? "PDF는 1페이지 광고 제안서 + 2페이지 공식 견적서(도장)로 저장됩니다."
-                                  : "PDF saves as page 1 proposal + page 2 official quote (stamp)."
-                                : t("quote.pdfPreviewHint")}
+                                  ? "다운로드·이메일 PDF/PPT는 서버에서 생성됩니다. (제안서 표지 + 공식 견적서)"
+                                  : "PDF/PPT downloads use server export (proposal cover + official quote)."
+                                : isKo
+                                  ? "다운로드·이메일 PDF/PPT는 신규 견적서 디자인으로 서버에서 생성됩니다."
+                                  : "PDF/PPT use the new server-rendered quote design."}
                             </p>
                           </div>
                           <div className="relative p-4 sm:p-6 lg:p-8">
@@ -1701,22 +1746,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               </div>
                             </div>
                           </div>
-                        </div>
-                      ) : null}
-
-                      {step === 4 &&
-                      template === "premium" &&
-                      selectedMedia.length > 0 &&
-                      !submitted ? (
-                        <div
-                          aria-hidden
-                          className="pointer-events-none fixed left-[-12000px] top-0 z-[-1] h-0 w-0 overflow-hidden"
-                          data-quote-premium-pdf-export
-                        >
-                          <QuotePremium
-                            ref={premiumPdfExportRef}
-                            {...quotePremiumProps}
-                          />
                         </div>
                       ) : null}
 
@@ -1812,28 +1841,87 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               {t("quote.pdfDocumentTitle")}
                             </h3>
                             <p className="mt-2 text-[11px] tracking-tight text-muted-foreground sm:text-xs">
-                              {`// `}{t("quote.pdfDocumentDesc")}
+                              {`// `}
+                              {isKo
+                                ? "견적서 PDF·PPT 다운로드·이메일 전송은 PRO 전용입니다. (14일 무료 체험)"
+                                : "Quote PDF/PPT download and email require PRO. (14-day trial)"}
                             </p>
                           </div>
-                          <div className="flex w-full flex-col gap-2.5 sm:w-auto sm:min-w-[min(100%,22rem)] md:min-w-[28rem]">
-                            <BtnBlock
-                              variant="secondary"
-                              size="md"
-                              onClick={handleDownloadPdf}
-                              disabled={
-                                downloading || selectedMedia.length === 0
-                              }
-                              className="w-full rounded-[18px] sm:w-auto"
-                            >
-                              {downloading ? (
-                                <Loader2 className="h-4 w-4 animate-spin" />
-                              ) : (
-                                <FileDown className="h-4 w-4" />
-                              )}
-                              {downloading
-                                ? t("quote.generatingPdf")
-                                : t("quote.downloadPdf")}
-                            </BtnBlock>
+                          <div className="flex w-full min-w-0 flex-col gap-2.5 sm:w-auto sm:min-w-[min(100%,22rem)] md:min-w-[28rem]">
+                            <div className="flex w-full min-w-0 flex-col gap-2.5 sm:flex-row sm:flex-wrap">
+                              <PlannerPdfDownloadGate
+                                isKo={isKo}
+                                onAllowedDownload={() => void runQuoteExport("pdf")}
+                              >
+                                {({ onDownloadClick, pdfAllowed, checking }) => (
+                                  <BtnBlock
+                                    variant="secondary"
+                                    size="md"
+                                    onClick={onDownloadClick}
+                                    disabled={
+                                      downloading !== null ||
+                                      selectedMedia.length === 0 ||
+                                      checking
+                                    }
+                                    className="w-full min-w-0 rounded-[18px] sm:w-auto"
+                                  >
+                                    {downloading === "pdf" ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : !pdfAllowed ? (
+                                      <Lock className="h-4 w-4" />
+                                    ) : (
+                                      <FileDown className="h-4 w-4" />
+                                    )}
+                                    {downloading === "pdf"
+                                      ? t("quote.generatingPdf")
+                                      : !pdfAllowed
+                                        ? isKo
+                                          ? "🔒 견적서 PDF (PRO)"
+                                          : "🔒 Quote PDF (PRO)"
+                                        : isKo
+                                          ? "견적서 PDF 다운로드"
+                                          : "Download quote PDF"}
+                                  </BtnBlock>
+                                )}
+                              </PlannerPdfDownloadGate>
+                              <PlannerPdfDownloadGate
+                                isKo={isKo}
+                                onAllowedDownload={() => void runQuoteExport("pptx")}
+                              >
+                                {({ onDownloadClick, pdfAllowed, checking }) => (
+                                  <BtnBlock
+                                    variant="secondary"
+                                    size="md"
+                                    onClick={onDownloadClick}
+                                    disabled={
+                                      downloading !== null ||
+                                      selectedMedia.length === 0 ||
+                                      checking
+                                    }
+                                    className="w-full min-w-0 rounded-[18px] sm:w-auto"
+                                  >
+                                    {downloading === "pptx" ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : !pdfAllowed ? (
+                                      <Lock className="h-4 w-4" />
+                                    ) : (
+                                      <FileDown className="h-4 w-4" />
+                                    )}
+                                    {downloading === "pptx"
+                                      ? isKo
+                                        ? "PPT 생성 중…"
+                                        : "Generating PPT…"
+                                      : !pdfAllowed
+                                        ? isKo
+                                          ? "🔒 견적서 PPT (PRO)"
+                                          : "🔒 Quote PPT (PRO)"
+                                        : isKo
+                                          ? "견적서 PPT 다운로드"
+                                          : "Download quote PPT"}
+                                  </BtnBlock>
+                                )}
+                              </PlannerPdfDownloadGate>
+                            </div>
                             <BtnBlock
                               variant="secondary"
                               size="md"
@@ -1841,7 +1929,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                               disabled={
                                 capturing || selectedMedia.length === 0
                               }
-                              className="w-full rounded-[18px] sm:w-auto"
+                              className="w-full min-w-0 rounded-[18px] sm:w-auto"
                             >
                               {capturing ? (
                                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -1864,25 +1952,39 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 }
                                 className="h-12 w-full min-w-0 rounded-[18px] border-2 border-border bg-card/80 px-4 text-sm text-foreground backdrop-blur-sm placeholder:text-muted-foreground focus:border-primary focus:outline-none sm:min-w-[14rem]"
                               />
-                              <BtnBlock
-                                variant="accent"
-                                size="md"
-                                onClick={handleEmailPdf}
-                                disabled={
-                                  emailPdfLoading ||
-                                  selectedMedia.length === 0
-                                }
-                                className="w-full shrink-0 rounded-[18px] sm:w-auto"
+                              <PlannerPdfDownloadGate
+                                isKo={isKo}
+                                onAllowedDownload={() => void handleEmailPdf()}
                               >
-                                {emailPdfLoading ? (
-                                  <Loader2 className="h-4 w-4 animate-spin" />
-                                ) : (
-                                  <Mail className="h-4 w-4" />
+                                {({ onDownloadClick, pdfAllowed, checking }) => (
+                                  <BtnBlock
+                                    variant="accent"
+                                    size="md"
+                                    onClick={onDownloadClick}
+                                    disabled={
+                                      emailPdfLoading ||
+                                      selectedMedia.length === 0 ||
+                                      checking
+                                    }
+                                    className="w-full shrink-0 rounded-[18px] sm:w-auto"
+                                  >
+                                    {emailPdfLoading ? (
+                                      <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : !pdfAllowed ? (
+                                      <Lock className="h-4 w-4" />
+                                    ) : (
+                                      <Mail className="h-4 w-4" />
+                                    )}
+                                    {emailPdfLoading
+                                      ? t("quote.sendingPdf")
+                                      : !pdfAllowed
+                                        ? isKo
+                                          ? "🔒 PDF 이메일 (PRO)"
+                                          : "🔒 Email PDF (PRO)"
+                                        : t("quote.sendPdfEmail")}
+                                  </BtnBlock>
                                 )}
-                                {emailPdfLoading
-                                  ? t("quote.sendingPdf")
-                                  : t("quote.sendPdfEmail")}
-                              </BtnBlock>
+                              </PlannerPdfDownloadGate>
                             </div>
                           </div>
                         </div>
