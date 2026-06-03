@@ -126,37 +126,46 @@ export default function QuotePreviewView({
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
-  const [downloading, setDownloading] = useState(false);
+  const [template, setTemplate] = useState<"basic" | "premium">("basic");
+  const [downloading, setDownloading] = useState<"pdf" | "pptx" | null>(null);
   const [proceeding, setProceeding] = useState(false);
   const captureRef = useRef<HTMLDivElement | null>(null);
   const toast = useAppToast();
 
-  const onDownload = async () => {
-    if (!quote) return;
-    setDownloading(true);
+  const onDownload = async (format: "pdf" | "pptx") => {
+    if (!quote || downloading) return;
+    setDownloading(format);
     try {
-      const res = await fetch(`/api/quote/${quote.id}/pdf`, { cache: "no-store" });
+      const res = await fetch(
+        `/api/quote/${quote.id}/${format}?template=${template}`,
+        { cache: "no-store" },
+      );
       if (!res.ok) {
-        throw new Error(`PDF HTTP ${res.status}`);
+        throw new Error(`${format.toUpperCase()} HTTP ${res.status}`);
       }
       const blob = await res.blob();
+      const cd = res.headers.get("Content-Disposition") ?? "";
+      const m = cd.match(/filename\*=UTF-8''([^;]+)/i);
+      const name = m
+        ? decodeURIComponent(m[1]!)
+        : `THINKAD_견적서_${quote.id.slice(-8)}.${format}`;
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `THINKAD-견적서-${quote.id.slice(-8)}.pdf`;
+      a.download = name;
       a.rel = "noopener";
       document.body.appendChild(a);
       a.click();
       a.remove();
       URL.revokeObjectURL(url);
-      toast.success("PDF를 다운로드했습니다.");
+      toast.success(`${format.toUpperCase()} 다운로드 완료 · ${name}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
-      console.error("[quote preview] pdf export failed", e);
-      toast.error("PDF 생성에 실패했습니다. 잠시 후 다시 시도해주세요.");
-      window.alert(`PDF 생성 실패\n${msg}`);
+      console.error("[quote preview] export failed", e);
+      toast.error(`${format.toUpperCase()} 생성에 실패했습니다. 잠시 후 다시 시도해주세요.`);
+      window.alert(`생성 실패\n${msg}`);
     } finally {
-      setDownloading(false);
+      setDownloading(null);
     }
   };
 
@@ -285,20 +294,61 @@ export default function QuotePreviewView({
                 생성일 {formatDate(quote.createdAt)}
               </p>
             </div>
-            <div className="flex flex-wrap gap-2">
-              <button
-                type="button"
-                onClick={() => void onDownload()}
-                disabled={downloading}
-                className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+            <div className="flex flex-col items-stretch gap-3 sm:items-end">
+              {/* 템플릿 선택 */}
+              <div
+                className="inline-flex rounded-xl border border-gray-200 p-0.5 dark:border-white/12"
+                role="group"
+                aria-label="견적서 템플릿"
               >
-                {downloading ? (
-                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                ) : (
-                  <Download className="h-4 w-4" aria-hidden />
-                )}
-                {downloading ? "PDF 생성 중…" : "PDF 다운로드"}
-              </button>
+                {([
+                  ["basic", "기본 견적서"],
+                  ["premium", "프리미엄"],
+                ] as const).map(([val, label]) => (
+                  <button
+                    key={val}
+                    type="button"
+                    onClick={() => setTemplate(val)}
+                    aria-pressed={template === val}
+                    className={cn(
+                      "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors",
+                      template === val
+                        ? "bg-violet-600 text-white"
+                        : "text-gray-600 hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5",
+                    )}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+              {/* 다운로드 형식 */}
+              <div className="flex flex-wrap gap-2">
+                <button
+                  type="button"
+                  onClick={() => void onDownload("pdf")}
+                  disabled={downloading !== null}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                >
+                  {downloading === "pdf" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Download className="h-4 w-4" aria-hidden />
+                  )}
+                  {downloading === "pdf" ? "생성 중…" : "PDF 다운로드"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => void onDownload("pptx")}
+                  disabled={downloading !== null}
+                  className="inline-flex h-11 items-center justify-center gap-2 rounded-xl border border-gray-200 bg-white px-5 text-xs font-semibold text-gray-800 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/12 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10"
+                >
+                  {downloading === "pptx" ? (
+                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                  ) : (
+                    <Download className="h-4 w-4" aria-hidden />
+                  )}
+                  {downloading === "pptx" ? "생성 중…" : "PPT 다운로드"}
+                </button>
               {canProceed ? (
                 <button
                   type="button"
@@ -316,6 +366,7 @@ export default function QuotePreviewView({
                   )}
                 </button>
               ) : null}
+              </div>
             </div>
           </header>
 
