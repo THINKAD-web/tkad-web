@@ -15,7 +15,7 @@ import {
   OOH_PERIOD_MONTHS,
   periodLabelFromKey,
 } from "@/lib/ooh-quote";
-import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
+import { quotePdfBase64FromRow } from "@/lib/quote-export/build-payload";
 import {
   adminOohQuoteUrl,
   sendTelegramMessage,
@@ -204,19 +204,7 @@ export async function POST(request: NextRequest) {
     let pdfEmailed = false;
     if (clientEmailNorm && isEmailConfigured()) {
       try {
-        const pdfBase64 = await ooHQuotePdfToBase64(db, {
-          clientCompany: ooh.clientCompany,
-          clientName: ooh.clientName,
-          period: ooh.period,
-          periodKey: ooh.periodKey,
-          budgetMin: ooh.budgetMin,
-          budgetMax: ooh.budgetMax,
-          pdfTemplate: ooh.pdfTemplate,
-          locale: ooh.locale,
-          mediaIds: ooh.mediaIds,
-          totalAmount: ooh.totalAmount,
-          networkSelections: ooh.networkSelections ?? undefined,
-        });
+        const pdfBase64 = await quotePdfBase64FromRow(db, ooh);
         const isKo = localeStr === "ko";
         await sendEmailWithPdfAttachment({
           to: clientEmailNorm,

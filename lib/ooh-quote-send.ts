@@ -4,7 +4,7 @@ import {
   isEmailConfigured,
   sendEmailWithPdfAttachment,
 } from "@/lib/email/client";
-import { ooHQuotePdfToBase64 } from "@/lib/server-ooh-quote-pdf";
+import { quotePdfBase64FromRow } from "@/lib/quote-export/build-payload";
 import { notifyQuoteSent } from "@/lib/kakao-alimtalk-notify";
 import { notifyUserByEmail } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
@@ -39,23 +39,7 @@ export async function sendOoHQuoteToClient(
   let emailed = false;
 
   if (clientEmail && isEmailConfigured()) {
-    const pdfBase64 = await ooHQuotePdfToBase64(db, {
-      clientCompany: ooh.clientCompany,
-      clientName: ooh.clientName,
-      period: ooh.period,
-      periodKey: ooh.periodKey,
-      budgetMin: ooh.budgetMin,
-      budgetMax: ooh.budgetMax,
-      pdfTemplate: ooh.pdfTemplate,
-      locale: ooh.locale,
-      mediaIds: ooh.mediaIds,
-      totalAmount: ooh.totalAmount,
-      networkSelections: ooh.networkSelections ?? undefined,
-      quoteBreakdown: ooh.quoteBreakdown ?? undefined,
-      validUntil: ooh.validUntil,
-      startDate: ooh.startDate,
-      endDate: ooh.endDate,
-    });
+    const pdfBase64 = await quotePdfBase64FromRow(db, ooh);
 
     const previewPath = `/${localeStr}/quote/${ooh.id}/preview`;
     const isKo = localeStr === "ko";

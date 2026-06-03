@@ -39,14 +39,19 @@ export async function GET(
     const row = await db.ooHQuote.findUnique({ where: { id } });
     if (!row) return new NextResponse("Not found", { status: 404 });
 
-    // 신규 템플릿(기본/프리미엄) — 서버 jsPDF (보고서와 동일 방식)
-    if (template === "basic" || template === "premium") {
-      const { buildQuoteExportPayload } = await import(
+    // 모든 경로 신규 디자인 통일 — 서버 jsPDF (보고서와 동일 방식).
+    // template 미지정 시 행의 pdfTemplate(기본/프리미엄) 따름.
+    try {
+      const { buildQuoteExportPayload, quoteTemplateFromRow } = await import(
         "@/lib/quote-export/build-payload"
       );
       const { buildQuotePdf } = await import("@/lib/quote-export/build-pdf");
       const { quoteExportFileBase } = await import("@/lib/quote-export/types");
-      const payload = await buildQuoteExportPayload(db, row, template);
+      const tmpl =
+        template === "basic" || template === "premium"
+          ? template
+          : quoteTemplateFromRow(row);
+      const payload = await buildQuoteExportPayload(db, row, tmpl);
       const bytes = await buildQuotePdf(payload);
       return new NextResponse(new Blob([bytes as BlobPart]), {
         status: 200,
@@ -58,6 +63,9 @@ export async function GET(
           "Cache-Control": "no-store, private",
         },
       });
+    } catch (newErr) {
+      // 신규 빌더 실패 시 레거시 빌더로 폴백 (클라이언트 대면 문서 500 방지)
+      console.error("[quote pdf GET] new builder failed, fallback to legacy", newErr);
     }
 
     const localeKo = !row.locale || row.locale.toLowerCase().startsWith("ko");
