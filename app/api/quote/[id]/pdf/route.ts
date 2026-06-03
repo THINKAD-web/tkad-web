@@ -25,6 +25,7 @@ export async function GET(
   }
 
   const { id } = await ctx.params;
+  const template = new URL(request.url).searchParams.get("template");
   if (!id || !CUID_RE.test(id)) {
     return new NextResponse("Not found", { status: 404 });
   }
@@ -37,6 +38,27 @@ export async function GET(
     const db = getPrisma();
     const row = await db.ooHQuote.findUnique({ where: { id } });
     if (!row) return new NextResponse("Not found", { status: 404 });
+
+    // 신규 템플릿(기본/프리미엄) — 서버 jsPDF (보고서와 동일 방식)
+    if (template === "basic" || template === "premium") {
+      const { buildQuoteExportPayload } = await import(
+        "@/lib/quote-export/build-payload"
+      );
+      const { buildQuotePdf } = await import("@/lib/quote-export/build-pdf");
+      const { quoteExportFileBase } = await import("@/lib/quote-export/types");
+      const payload = await buildQuoteExportPayload(db, row, template);
+      const bytes = await buildQuotePdf(payload);
+      return new NextResponse(new Blob([bytes as BlobPart]), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": attachmentContentDisposition(
+            `${quoteExportFileBase(payload)}.pdf`,
+          ),
+          "Cache-Control": "no-store, private",
+        },
+      });
+    }
 
     const localeKo = !row.locale || row.locale.toLowerCase().startsWith("ko");
     let buf: Buffer;
