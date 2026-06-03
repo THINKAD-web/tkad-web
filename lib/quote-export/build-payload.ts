@@ -16,6 +16,7 @@ export type QuoteExportSourceRow = {
   startDate: Date | null;
   endDate: Date | null;
   locale: string | null;
+  pdfTemplate?: string | null;
 };
 
 const DAY = 86_400_000;
@@ -87,4 +88,22 @@ export async function buildQuoteExportPayload(
     },
     stampUrl: process.env.QUOTE_STAMP_URL || undefined,
   };
+}
+
+/** OoHQuote.pdfTemplate → 템플릿 결정 (premium 외에는 basic) */
+export function quoteTemplateFromRow(
+  row: Pick<QuoteExportSourceRow, "pdfTemplate">,
+): "basic" | "premium" {
+  return row.pdfTemplate === "premium" ? "premium" : "basic";
+}
+
+/** 발송/이메일 공용 — 행 → 신규 디자인 PDF base64 (모든 견적 경로 통일) */
+export async function quotePdfBase64FromRow(
+  db: Pick<PrismaClient, "media">,
+  row: QuoteExportSourceRow,
+): Promise<string> {
+  const payload = await buildQuoteExportPayload(db, row, quoteTemplateFromRow(row));
+  const { buildQuotePdf } = await import("@/lib/quote-export/build-pdf");
+  const bytes = await buildQuotePdf(payload);
+  return Buffer.from(bytes).toString("base64");
 }
