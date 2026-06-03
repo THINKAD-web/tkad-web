@@ -3,6 +3,13 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import { MediaDetailCard } from "@/components/document/media-detail-card";
+import {
+  documentCardClass,
+  DocumentGradientHero,
+  DocumentSectionHeading,
+} from "@/components/document/document-layout";
+import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -10,32 +17,8 @@ import type { PlannerReportExportPayload } from "@/lib/planner-report-export/typ
  * 라이트 테마 고정(제안서 문서), 표는 가로 스크롤 래퍼로 모바일 넘침 방지.
  */
 
-function SectionHeading({ children }: { children: React.ReactNode }) {
-  return (
-    <h3 className="flex items-center gap-2 text-base font-bold tracking-tight text-gray-900">
-      <span className="inline-block h-4 w-1.5 rounded-full bg-violet-600" />
-      {children}
-    </h3>
-  );
-}
-
 function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
-}
-
-/** THINKAD 워드마크 (white THINK + cyan AD) — 표지/헤더 로고 */
-function ThinkadWordmark({ className }: { className?: string }) {
-  return (
-    <span
-      className={cn(
-        "inline-flex items-baseline font-display font-black tracking-tight",
-        className,
-      )}
-    >
-      <span className="text-white">THINK</span>
-      <span className="text-cyan-300">AD</span>
-    </span>
-  );
 }
 
 const CHART_COLORS = ["#7C3AED", "#0891B2", "#EC4899", "#10B981", "#F59E0B"];
@@ -137,42 +120,26 @@ export const PlannerReportDocument = forwardRef<
   return (
     <div
       ref={ref}
-      className={cn(
-        "mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm",
-        className,
-      )}
+      className={cn(documentCardClass, className)}
     >
-      {/* 표지 헤더 */}
-      <div className="bg-gradient-to-br from-violet-600 via-violet-700 to-violet-800 px-6 py-7 sm:px-9 sm:py-9">
-        <div className="flex items-center justify-between gap-3">
-          <ThinkadWordmark className="text-lg sm:text-xl" />
-          <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200">
-            CAMPAIGN PLANNER
-          </span>
-        </div>
-        <h2 className="mt-5 text-2xl font-black leading-tight text-white sm:text-3xl">
-          {p.documentTitle}
-        </h2>
-        <div className="mt-2 flex flex-wrap items-center gap-x-2.5 gap-y-1 text-sm text-violet-100">
-          <span>
-            {p.kind === "integrated"
-              ? isKo
-                ? "OOH + 디지털 통합 제안"
-                : "OOH + Digital integrated"
-              : isKo
-                ? "OOH 미디어 플랜"
-                : "OOH media plan"}
-          </span>
-          <span aria-hidden>·</span>
-          <span>{p.generatedAt}</span>
-        </div>
-        <div className="mt-5 h-1 w-16 rounded-full bg-cyan-400" />
-      </div>
+      <DocumentGradientHero
+        badge="CAMPAIGN PLANNER"
+        title={p.documentTitle}
+        subtitle={`${
+          p.kind === "integrated"
+            ? isKo
+              ? "OOH + 디지털 통합 제안"
+              : "OOH + Digital integrated"
+            : isKo
+              ? "OOH 미디어 플랜"
+              : "OOH media plan"
+        } · ${p.generatedAt}`}
+      />
 
       <div className="space-y-9 px-6 py-8 sm:px-9">
         {/* 캠페인 개요 */}
         <section className="space-y-4">
-          <SectionHeading>{isKo ? "캠페인 개요" : "Campaign overview"}</SectionHeading>
+          <DocumentSectionHeading>{isKo ? "캠페인 개요" : "Campaign overview"}</DocumentSectionHeading>
           <dl className="grid grid-cols-2 gap-x-6 gap-y-4 sm:grid-cols-3">
             {summary.map(([label, value]) => (
               <div key={label} className="min-w-0">
@@ -208,7 +175,7 @@ export const PlannerReportDocument = forwardRef<
           (p.charts.cpmBars?.length ?? 0) > 0 ||
           (p.charts.reachSummary?.length ?? 0) > 0) ? (
           <section className="space-y-4">
-            <SectionHeading>{isKo ? "성과 요약" : "Performance summary"}</SectionHeading>
+            <DocumentSectionHeading>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
             <div className="grid gap-6 sm:grid-cols-2">
               {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
@@ -239,51 +206,52 @@ export const PlannerReportDocument = forwardRef<
         ) : null}
 
         {/* 선택 매체 구성 */}
-        <section className="space-y-3">
-          <SectionHeading>{isKo ? "선택 매체 구성" : "Selected media"}</SectionHeading>
-          <div className="overflow-x-auto rounded-xl border border-gray-200">
-            <table className="w-full min-w-[34rem] border-collapse text-sm">
-              <thead>
-                <tr className="bg-violet-600 text-left text-xs font-semibold uppercase tracking-wide text-white">
-                  <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
-                  <th className="px-3 py-2.5">{isKo ? "지역" : "Region"}</th>
-                  <th className="px-3 py-2.5">{isKo ? "유형" : "Type"}</th>
-                  <th className="px-3 py-2.5 text-right">{isKo ? "비용" : "Price"}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {p.portfolio.length === 0 ? (
-                  <tr>
-                    <td colSpan={4} className="px-3 py-6 text-center text-gray-500">
-                      {isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected."}
-                    </td>
-                  </tr>
-                ) : (
-                  p.portfolio.map((m, i) => (
-                    <tr
-                      key={`${m.name}-${i}`}
-                      className={cn("border-t border-gray-100", i % 2 ? "bg-gray-50/70" : "bg-white")}
-                    >
-                      <td className="px-3 py-2.5 font-medium text-gray-900">{m.name}</td>
-                      <td className="px-3 py-2.5 text-gray-600">{m.region}</td>
-                      <td className="px-3 py-2.5 text-gray-600">{m.type}</td>
-                      <td className="px-3 py-2.5 text-right font-medium text-gray-900">
-                        {m.priceLabel ?? "—"}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+        <section className="space-y-4 py-2">
+          <DocumentSectionHeading>{isKo ? "매체 구성" : "Media lineup"}</DocumentSectionHeading>
+          {p.portfolio.length === 0 ? (
+            <p className="rounded-xl border border-gray-200 bg-[#F8F9FC] px-4 py-8 text-center text-sm text-gray-500">
+              {isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected."}
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {p.portfolio.map((m, i) => {
+                const detail: DocumentMediaDetail = {
+                  id: m.id ?? `row-${i}`,
+                  name: m.name,
+                  location: m.location,
+                  thumbUrl: m.thumbUrl,
+                  categoryLabel: m.categoryLabel,
+                  size: m.size,
+                  operatingHours: m.operatingHours,
+                  dailyTraffic: m.dailyTraffic,
+                  broadcastLabel: m.broadcastLabel,
+                  monthlyPriceLabel: m.monthlyPriceLabel ?? m.priceLabel,
+                  lineTotalLabel: m.lineTotalLabel,
+                  recommendReason: m.recommendReason,
+                  exposureContributionPct: m.exposureContributionPct,
+                  budgetContributionPct: m.budgetContributionPct,
+                };
+                return (
+                  <li key={detail.id}>
+                    <MediaDetailCard
+                      detail={detail}
+                      isKo={isKo}
+                      showContribution
+                      portfolioSize={p.portfolio.length}
+                    />
+                  </li>
+                );
+              })}
+            </ul>
+          )}
         </section>
 
         {/* 디지털 예산 배분 */}
         {p.digital && p.digital.length ? (
           <section className="space-y-3">
-            <SectionHeading>
+            <DocumentSectionHeading>
               {isKo ? "디지털 예산 배분" : "Digital budget allocation"}
-            </SectionHeading>
+            </DocumentSectionHeading>
             {p.digitalSummary ? (
               <p className="text-sm text-gray-600">{p.digitalSummary}</p>
             ) : null}
@@ -321,7 +289,7 @@ export const PlannerReportDocument = forwardRef<
         {(p.sections ?? []).map((sec) =>
           sec.lines.length ? (
             <section key={sec.title} className="space-y-3">
-              <SectionHeading>{sec.title}</SectionHeading>
+              <DocumentSectionHeading>{sec.title}</DocumentSectionHeading>
               <ul className="space-y-2">
                 {sec.lines.map((line, i) => (
                   <li key={i} className="flex gap-2.5 text-sm leading-relaxed text-gray-700">

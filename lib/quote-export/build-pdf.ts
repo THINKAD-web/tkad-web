@@ -1,6 +1,7 @@
 import type { jsPDF } from "jspdf";
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
+import { formatDocumentManWon, truncateDocText } from "@/lib/document-text";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 
 const VIOLET = [124, 58, 237] as const;
@@ -17,11 +18,8 @@ const DARK_CARD = [22, 22, 34] as const;
 const RED = [200, 30, 40] as const;
 const WHITE = [255, 255, 255] as const;
 
-const M = 16;
-
-function won(n: number, isKo: boolean): string {
-  return `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
-}
+const M = 15;
+const HERO_H = 44;
 
 /** 직인: 이미지가 있으면 임베드, 없으면 빨간 원형 도장 도형 폴백 */
 async function fetchStampDataUrl(url?: string): Promise<string | null> {
@@ -72,81 +70,133 @@ async function drawStamp(
       doc.addImage(data, "PNG", cx - 13, cy - 13, 26, 26, undefined, "FAST", -3);
       return;
     } catch {
-      /* fall through to drawn seal */
+      /* fall through */
     }
   }
   drawFallbackSeal(doc, font, cx, cy, p.isKo);
 }
 
-/** 매체 내역 테이블 (양 템플릿 공용) — 라이트 카드 위 */
-function drawMediaTable(
+function drawWordmark(
+  doc: jsPDF,
+  font: string,
+  x: number,
+  baseY: number,
+  size: number,
+  onDark: boolean,
+) {
+  doc.setFont(font, "normal");
+  doc.setFontSize(size);
+  doc.setTextColor(255, 255, 255);
+  doc.text("THINK", x, baseY);
+  const w = doc.getTextWidth("THINK");
+  if (onDark) doc.setTextColor(CYAN_LT[0], CYAN_LT[1], CYAN_LT[2]);
+  else doc.setTextColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.text("AD", x + w, baseY);
+}
+
+function sectionTitle(doc: jsPDF, font: string, label: string, y: number): number {
+  doc.setFont(font, "normal");
+  doc.setFontSize(11);
+  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.rect(M, y, 1.6, 5.2, "F");
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.text(label, M + 4, y + 4.6);
+  return y + 9;
+}
+
+function drawQuoteHero(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  pageW: number,
+  badge: string,
+  title: string,
+): number {
+  doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+  doc.rect(0, 0, pageW, HERO_H, "F");
+  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.rect(0, HERO_H, pageW, 1.2, "F");
+
+  drawWordmark(doc, font, M, 14, 14, true);
+  doc.setFontSize(7.5);
+  doc.setTextColor(214, 199, 255);
+  doc.text(badge, pageW - M, 14, { align: "right" });
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(20);
+  doc.text(title, M, 28);
+  doc.setFontSize(9);
+  doc.setTextColor(225, 220, 245);
+  const sub = `${p.periodLabel} · ${p.issuedAt}`;
+  doc.text(sub, M, 36);
+  doc.setFontSize(8);
+  doc.text(`No. ${p.quoteNo}`, pageW - M, 36, { align: "right" });
+  doc.text(`${p.isKo ? "유효" : "Valid"} ${p.validUntil}`, pageW - M, 41, { align: "right" });
+
+  return HERO_H + 6;
+}
+
+/** 매체 카드 목록 (미리보기 MediaDetailCard 와 동일 정보 밀도) */
+function drawMediaCards(
   doc: jsPDF,
   font: string,
   p: QuoteExportPayload,
   x: number,
   yStart: number,
   w: number,
+  pageH: number,
 ): number {
   const isKo = p.isKo;
   let y = yStart;
-  const cols = [
-    { label: isKo ? "매체" : "Media", w: w * 0.42, align: "left" as const },
-    { label: isKo ? "위치" : "Location", w: w * 0.28, align: "left" as const },
-    { label: isKo ? "단가" : "Unit", w: w * 0.15, align: "right" as const },
-    { label: isKo ? "소계" : "Subtotal", w: w * 0.15, align: "right" as const },
-  ];
-  // header
-  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-  doc.rect(x, y, w, 8, "F");
-  doc.setFont(font, "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(255, 255, 255);
-  let cx = x + 2.5;
-  for (const c of cols) {
-    doc.text(c.label, c.align === "right" ? cx + c.w - 5 : cx, y + 5.4, {
-      align: c.align,
-    });
-    cx += c.w;
-  }
-  y += 8;
 
-  doc.setFontSize(8.5);
   if (p.lines.length === 0) {
+    doc.setFontSize(9);
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-    doc.text(isKo ? "선택된 매체가 없습니다." : "No media.", x + 3, y + 5);
-    return y + 9;
+    doc.text(isKo ? "선택된 매체가 없습니다." : "No media selected.", x + 2, y + 5);
+    return y + 10;
   }
-  p.lines.forEach((line, i) => {
-    const nameLines = doc.splitTextToSize(line.name, cols[0]!.w - 4) as string[];
-    const rh = Math.max(8, nameLines.length * 4.2 + 3.5);
-    if (i % 2 === 1) {
-      doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
-      doc.rect(x, y, w, rh, "F");
+
+  for (const line of p.lines) {
+    const specLines = [
+      line.location,
+      line.categoryLabel,
+      line.size ? `${isKo ? "규격" : "Size"} ${line.size}` : null,
+      line.operatingHours
+        ? `${isKo ? "운영" : "Hours"} ${line.operatingHours}`
+        : null,
+      line.dailyTraffic
+        ? `${isKo ? "일일 노출" : "Daily"} ${line.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}`
+        : null,
+      line.broadcastLabel
+        ? truncateDocText(line.broadcastLabel, 60)
+        : null,
+    ].filter(Boolean) as string[];
+
+    const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
+    const body = [line.name, ...specLines, priceLine].join("\n");
+    const lines = doc.splitTextToSize(body, w - 8) as string[];
+    const rh = Math.max(16, lines.length * 4.1 + 8);
+
+    if (y + rh > pageH - 28) {
+      doc.addPage();
+      y = M;
     }
-    let ccx = x + 2.5;
-    doc.setTextColor(INK[0], INK[1], INK[2]);
-    doc.text(nameLines.slice(0, 2), ccx, y + 5);
-    ccx += cols[0]!.w;
-    doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
-    doc.text(
-      (doc.splitTextToSize(line.location || "—", cols[1]!.w - 4) as string[]).slice(0, 1),
-      ccx,
-      y + 5,
-    );
-    ccx += cols[1]!.w;
-    doc.setTextColor(INK[0], INK[1], INK[2]);
-    doc.text(won(line.unitPriceWon, isKo), ccx + cols[2]!.w - 5, y + 5, { align: "right" });
-    ccx += cols[2]!.w;
-    doc.text(won(line.lineSupplyWon, isKo), ccx + cols[3]!.w - 5, y + 5, { align: "right" });
-    y += rh;
+
+    doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
     doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
-    doc.setLineWidth(0.1);
-    doc.line(x, y, x + w, y);
-  });
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, w, rh, 2, 2, "FD");
+
+    doc.setFont(font, "normal");
+    doc.setFontSize(9);
+    doc.setTextColor(INK[0], INK[1], INK[2]);
+    doc.text(lines.slice(0, 10), x + 4, y + 5.5);
+    y += rh + 3;
+  }
   return y;
 }
 
-/** 합계 박스 (공급가/VAT/합계) */
+/** 합계 — 만원 표기 (미리보기와 동일) */
 function drawTotals(
   doc: jsPDF,
   font: string,
@@ -154,28 +204,38 @@ function drawTotals(
   x: number,
   y: number,
   w: number,
+  pageH: number,
 ): number {
   const isKo = p.isKo;
-  const boxX = x + w * 0.42;
-  const boxW = w - w * 0.42;
+  if (y + 32 > pageH - 20) {
+    doc.addPage();
+    y = M;
+  }
+
+  const boxX = x + w * 0.38;
+  const boxW = w - w * 0.38;
   const rows: Array<[string, string, boolean]> = [
-    [isKo ? "공급가액" : "Supply", won(p.supplyWon, isKo), false],
-    [isKo ? "부가세 (10%)" : "VAT (10%)", won(p.vatWon, isKo), false],
-    [isKo ? "합계 금액" : "Total", won(p.totalWon, isKo), true],
+    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), false],
+    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), false],
+    [
+      isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)",
+      formatDocumentManWon(p.totalWon, isKo),
+      true,
+    ],
   ];
   let ry = y;
   doc.setFont(font, "normal");
   rows.forEach(([label, val, accent]) => {
     if (accent) {
       doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-      doc.roundedRect(boxX, ry, boxW, 11, 1.5, 1.5, "F");
+      doc.roundedRect(boxX, ry, boxW, 12, 1.5, 1.5, "F");
       doc.setTextColor(235, 230, 255);
       doc.setFontSize(9);
-      doc.text(label, boxX + 4, ry + 7);
+      doc.text(label, boxX + 4, ry + 7.5);
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(13);
-      doc.text(val, boxX + boxW - 4, ry + 7.5, { align: "right" });
-      ry += 13;
+      doc.setFontSize(12);
+      doc.text(val, boxX + boxW - 4, ry + 8, { align: "right" });
+      ry += 14;
     } else {
       doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
       doc.setFontSize(9);
@@ -189,88 +249,85 @@ function drawTotals(
   return ry;
 }
 
-function drawWordmark(doc: jsPDF, font: string, x: number, baseY: number, size: number, onDark: boolean) {
-  doc.setFont(font, "normal");
-  doc.setFontSize(size);
-  doc.setTextColor(255, 255, 255);
-  doc.text("THINK", x, baseY);
-  const w = doc.getTextWidth("THINK");
-  if (onDark) doc.setTextColor(CYAN_LT[0], CYAN_LT[1], CYAN_LT[2]);
-  else doc.setTextColor(CYAN[0], CYAN[1], CYAN[2]);
-  doc.text("AD", x + w, baseY);
+function drawClientCampaign(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  y: number,
+  pageW: number,
+): number {
+  const isKo = p.isKo;
+  const half = (pageW - M * 2 - 6) / 2;
+
+  y = sectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
+  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+  doc.roundedRect(M, y, half, 22, 2, 2, "F");
+  doc.setFontSize(8);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(isKo ? "회사" : "Company", M + 4, y + 6);
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFontSize(10);
+  doc.text(p.clientCompany || "—", M + 4, y + 12);
+  doc.setFontSize(8);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  const contact = [
+    p.clientName && `${isKo ? "담당" : "Attn"} ${p.clientName}`,
+    p.clientPhone,
+    p.clientEmail,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  doc.text(
+    (doc.splitTextToSize(contact || "—", half - 8) as string[]).slice(0, 2),
+    M + 4,
+    y + 18,
+  );
+
+  const rx = M + half + 6;
+  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+  doc.roundedRect(rx, y, half, 22, 2, 2, "F");
+  doc.setFontSize(8);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(isKo ? "캠페인" : "Campaign", rx + 4, y + 6);
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFontSize(10);
+  doc.text(p.periodLabel, rx + 4, y + 12);
+  doc.setFontSize(7.5);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(
+    isKo ? "금액 단위: 만원 (₩10,000)" : "Amounts in 10K KRW",
+    rx + 4,
+    y + 18,
+  );
+
+  return y + 28;
 }
 
-/** ── 기본 견적서 (라이트) ── */
+/** ── 기본 견적서 (라이트 · 플래너 보고서 톤) ── */
 async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - M * 2;
   const isKo = p.isKo;
 
-  // 좌측 보라 사이드바
-  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-  doc.rect(0, 0, 6, pageH, "F");
+  let y = drawQuoteHero(
+    doc,
+    font,
+    p,
+    pageW,
+    "ADVERTISING QUOTE",
+    isKo ? "광고 견적서" : "Advertising Quote",
+  );
 
-  // 헤더
-  drawWordmark(doc, font, M, 18, 16, false);
-  doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(22);
-  doc.text(isKo ? "광고 견적서" : "Advertising Quote", M, 32);
-
-  doc.setFontSize(8.5);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(`No. ${p.quoteNo}`, pageW - M, 16, { align: "right" });
-  doc.text(`${isKo ? "발행일" : "Issued"} ${p.issuedAt}`, pageW - M, 22, { align: "right" });
-  doc.text(`${isKo ? "유효기간" : "Valid until"} ${p.validUntil}`, pageW - M, 28, { align: "right" });
-
-  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
-  doc.setLineWidth(0.3);
-  doc.line(M, 38, pageW - M, 38);
-
-  // 수신 / 발행
-  let y = 48;
-  doc.setFontSize(8);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(isKo ? "수신" : "To", M, y);
-  doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(13);
-  doc.text(`${p.clientCompany}  ${isKo ? "귀중" : ""}`.trim(), M, y + 7);
-  doc.setFontSize(8.5);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  const contactBits = [
-    p.clientName && `${isKo ? "담당" : "Attn"}: ${p.clientName}`,
-    p.clientEmail,
-    p.clientPhone,
-  ].filter(Boolean);
-  doc.text(contactBits.join("   |   "), M, y + 13);
-
-  const rx = pageW / 2 + 6;
-  doc.setFontSize(8);
-  doc.text(isKo ? "발행" : "From", rx, y);
-  doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(11);
-  doc.text(p.issuer.company, rx, y + 7);
-  doc.setFontSize(8);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(`${p.issuer.email}  |  ${p.issuer.phone}`, rx, y + 12.5);
-
-  y += 24;
-  doc.setFontSize(8);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(`${isKo ? "집행 기간" : "Flight"}: ${p.periodLabel}`, M, y);
+  y = drawClientCampaign(doc, font, p, y, pageW);
+  y = sectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
+  y = drawMediaCards(doc, font, p, M, y, contentW, pageH);
   y += 6;
+  y = sectionTitle(doc, font, isKo ? "합계" : "Total", y);
+  drawTotals(doc, font, p, M, y, contentW, pageH);
 
-  // 매체 테이블
-  y = drawMediaTable(doc, font, p, M, y, contentW);
-  y += 8;
-
-  // 합계
-  drawTotals(doc, font, p, M, y, contentW);
-
-  // 직인 (우하단)
   await drawStamp(doc, font, p, pageW - M - 16, pageH - 34);
 
-  // 푸터
   doc.setFontSize(7);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
   doc.text(p.issuer.address, M, pageH - 10);
@@ -283,17 +340,15 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload) {
   );
 }
 
-/** ── 프리미엄 견적서 (다크 제안서) ── */
+/** ── 프리미엄: P1 다크 제안 · P2 공식 견적(라이트) ── */
 async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - M * 2;
   const isKo = p.isKo;
 
-  // page 1 — 다크 히어로 + 통계
   doc.setFillColor(DARK_BG[0], DARK_BG[1], DARK_BG[2]);
   doc.rect(0, 0, pageW, pageH, "F");
-  // 그라디언트 느낌의 상단 밴드
   doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
   doc.rect(0, 0, pageW, 70, "F");
   doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
@@ -310,12 +365,19 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
   doc.setTextColor(225, 220, 245);
   doc.text(`${p.clientCompany} ${isKo ? "귀중" : ""}`.trim(), M, 62);
 
-  // 통계 카드
   const stats: Array<[string, string]> = [
     [isKo ? "선정 매체" : "Media", `${p.lines.length}${isKo ? "개" : ""}`],
-    [isKo ? "예상 노출" : "Impressions", p.totalImpressions > 0 ? p.totalImpressions.toLocaleString(isKo ? "ko-KR" : "en-US") : "—"],
-    [isKo ? "블렌디드 CPM" : "Blended CPM", p.blendedCpmWon ? won(p.blendedCpmWon, isKo) : "—"],
-    [isKo ? "합계 금액" : "Total", won(p.totalWon, isKo)],
+    [
+      isKo ? "예상 노출" : "Impressions",
+      p.totalImpressions > 0
+        ? p.totalImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")
+        : "—",
+    ],
+    [
+      isKo ? "블렌디드 CPM" : "Blended CPM",
+      p.blendedCpmWon ? formatDocumentManWon(p.blendedCpmWon, isKo) : "—",
+    ],
+    [isKo ? "합계 금액" : "Total", formatDocumentManWon(p.totalWon, isKo)],
   ];
   let sy = 84;
   const cardW = (contentW - 9) / 2;
@@ -334,7 +396,6 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
     doc.text((doc.splitTextToSize(s[1], cardW - 10) as string[]).slice(0, 1), xx + 5, sy + 17);
   });
 
-  // 선정 매체 하이라이트 (다크)
   let hy = sy + 36;
   doc.setFontSize(11);
   doc.setTextColor(255, 255, 255);
@@ -354,50 +415,30 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
   doc.setTextColor(150, 150, 170);
   doc.text(`No. ${p.quoteNo}  ·  ${p.issuedAt}`, M, pageH - 10);
 
-  // page 2 — 공식 견적서 (라이트 카드)
   doc.addPage();
-  doc.setFillColor(DARK_BG[0], DARK_BG[1], DARK_BG[2]);
-  doc.rect(0, 0, pageW, pageH, "F");
-  // 라이트 카드
-  const cardX = M - 4;
-  const cardY = 16;
-  const cardWidth = pageW - (M - 4) * 2;
   doc.setFillColor(WHITE[0], WHITE[1], WHITE[2]);
-  doc.roundedRect(cardX, cardY, cardWidth, pageH - 32, 3, 3, "F");
+  doc.rect(0, 0, pageW, pageH, "F");
 
-  const ix = cardX + 8;
-  const iw = cardWidth - 16;
-  let y = cardY + 14;
-  drawWordmark(doc, font, ix, y, 13, false);
-  doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(15);
-  doc.text(isKo ? "공식 견적서" : "Official Quote", ix, y + 9);
-  doc.setFontSize(8);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(`No. ${p.quoteNo}`, cardX + cardWidth - 8, y, { align: "right" });
-  doc.text(`${isKo ? "발행" : "Issued"} ${p.issuedAt}`, cardX + cardWidth - 8, y + 5, { align: "right" });
-  doc.text(`${isKo ? "유효" : "Valid"} ${p.validUntil}`, cardX + cardWidth - 8, y + 10, { align: "right" });
-
-  y += 18;
-  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
-  doc.setLineWidth(0.3);
-  doc.line(ix, y, ix + iw, y);
+  let y = drawQuoteHero(
+    doc,
+    font,
+    p,
+    pageW,
+    "PREMIUM QUOTE",
+    isKo ? "공식 견적서" : "Official Quote",
+  );
+  y = drawClientCampaign(doc, font, p, y, pageW);
+  y = sectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
+  y = drawMediaCards(doc, font, p, M, y, contentW, pageH);
   y += 6;
-  doc.setFontSize(8.5);
-  doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
-  doc.text(`${isKo ? "수신" : "To"}: ${p.clientCompany}`, ix, y);
-  doc.text(`${isKo ? "기간" : "Flight"}: ${p.periodLabel}`, cardX + cardWidth - 8, y, { align: "right" });
-  y += 7;
+  y = sectionTitle(doc, font, isKo ? "합계" : "Total", y);
+  drawTotals(doc, font, p, M, y, contentW, pageH);
 
-  y = drawMediaTable(doc, font, p, ix, y, iw);
-  y += 8;
-  drawTotals(doc, font, p, ix, y, iw);
-
-  await drawStamp(doc, font, p, cardX + cardWidth - 22, cardY + (pageH - 32) - 26);
+  await drawStamp(doc, font, p, pageW - M - 16, pageH - 34);
 
   doc.setFontSize(7);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(`${p.issuer.company}  ·  ${p.issuer.email}  ·  ${p.issuer.phone}`, ix, cardY + (pageH - 32) - 8);
+  doc.text(`${p.issuer.company}  ·  ${p.issuer.email}  ·  ${p.issuer.phone}`, M, pageH - 8);
 }
 
 export async function buildQuotePdf(p: QuoteExportPayload): Promise<Uint8Array> {

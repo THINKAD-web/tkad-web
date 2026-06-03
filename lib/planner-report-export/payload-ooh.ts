@@ -1,16 +1,14 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import {
+  computePortfolioContributions,
+  mediaItemToExportRow,
+} from "@/lib/document-media-detail";
 import type {
   PlannerExportSection,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
-
-function priceLabel(m: MediaItem, isKo: boolean): string {
-  if (!m.price || m.price <= 0) return isKo ? "문의" : "Inquire";
-  return isKo
-    ? `${m.price.toLocaleString("ko-KR")}원`
-    : `${m.price.toLocaleString("en-US")} KRW`;
-}
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -30,6 +28,7 @@ export type BuildOohPayloadArgs = {
   cpmBars: { key: string; label: string; value: number }[];
   effectSummaryLines: string[];
   generatedAt: string;
+  months?: number;
 };
 
 export function buildOohReportPayload(
@@ -125,12 +124,18 @@ export function buildOohReportPayload(
     industryText: a.industryText,
     kpis,
     charts,
-    portfolio: a.portfolio.map((m) => ({
-      name: m.name,
-      region: m.region ?? "—",
-      type: m.type ?? "—",
-      priceLabel: priceLabel(m, isKo),
-    })),
+    portfolio: (() => {
+      const months = Math.max(1, a.months ?? 1);
+      const contributions = computePortfolioContributions(a.portfolio, months);
+      return a.portfolio.map((m) =>
+        mediaItemToExportRow(m, isKo, {
+          months,
+          contributions,
+          lineTotalWon:
+            m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
+        }),
+      );
+    })(),
     sections,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."

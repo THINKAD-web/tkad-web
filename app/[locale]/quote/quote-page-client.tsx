@@ -39,6 +39,7 @@ import {
   typeLabels,
   type MediaItem,
 } from "@/lib/media-data";
+import { mediaToDocumentDetail } from "@/lib/document-media-detail";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MediaCatalogGridCard } from "@/components/media-catalog-grid-card";
@@ -82,6 +83,7 @@ import {
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
+import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { QuotePdfPreview } from "@/components/quote/quote-preview";
 import { QuotePremium } from "@/components/quote/quote-premium";
 import { captureElementAsPng } from "@/lib/html-to-pdf";
@@ -442,18 +444,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
               : "Regions: all"
             : opt.regionScope
           : (isKo ? m.location : (m.locationEn || m.location)) || m.location;
+      const detail = mediaToDocumentDetail(m, {
+        isKo,
+        lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+      });
       return {
         id: m.id,
-        thumbUrl: getPrimaryMediaImageUrl(m),
+        thumbUrl: detail.thumbUrl ?? getPrimaryMediaImageUrl(m),
         name,
         location,
         unitPriceWon: Math.round(line.unitPriceMan * 10_000),
         lineTotalWon: Math.round(line.lineTotalMan * 10_000),
         unitPeriodLabel: line.unitPeriodLabel,
         executionPeriodLabel: line.executionPeriodLabel,
-        size: m.size ?? undefined,
-        dailyFootTraffic: m.dailyFootTraffic ?? undefined,
-        operatingHours: m.operatingHours ?? undefined,
+        size: detail.size,
+        dailyFootTraffic: detail.dailyTraffic,
+        operatingHours: detail.operatingHours,
+        categoryLabel: detail.categoryLabel,
+        broadcastLabel: detail.broadcastLabel,
       };
     });
   }, [
@@ -546,6 +554,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         lineTotalWon: row.lineTotalWon,
         dailyFootTraffic: row.dailyFootTraffic ?? null,
         size: row.size ?? null,
+        categoryLabel: row.categoryLabel ?? null,
+        operatingHours: row.operatingHours ?? null,
+        broadcastLabel: row.broadcastLabel ?? null,
+        mediaTypeLabel: row.categoryLabel ?? null,
         unitPriceWon: row.unitPriceWon,
         unitPeriodLabel: row.unitPeriodLabel ?? null,
         executionPeriodLabel: row.executionPeriodLabel ?? null,
@@ -1694,19 +1706,15 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   {step === 4 && !submitted && (
                     <div className="min-w-0 space-y-8 overflow-x-clip">
                       {selectedMedia.length > 0 ? (
-                        <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
-                          <div
-                            aria-hidden
-                            className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
-                          />
-                          <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
-                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
+                        <section className="space-y-4">
+                          <div className="space-y-2">
+                            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                               {isKo ? "[ PDF 미리보기 ]" : "[ PDF PREVIEW ]"}
                             </p>
-                            <h3 className="mt-3 text-xl font-bold tracking-tight text-foreground sm:text-2xl">
+                            <h3 className="text-xl font-bold tracking-tight text-foreground sm:text-2xl">
                               {t("quote.pdfPreviewTitle")}
                             </h3>
-                            <p className="mt-2 text-[11px] tracking-tight text-muted-foreground sm:text-xs">
+                            <p className="text-[11px] tracking-tight text-muted-foreground sm:text-xs">
                               {`// `}
                               {template === "premium"
                                 ? isKo
@@ -1717,23 +1725,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   : "PDF/PPT use the new server-rendered quote design."}
                             </p>
                           </div>
-                          <div className="relative p-4 sm:p-6 lg:p-8">
-                            <div
-                              className={cn(
-                                "overflow-x-auto rounded-[24px] p-3 shadow-[0_24px_80px_rgba(0,0,0,0.28)] ring-1 sm:p-5",
-                                template === "premium"
-                                  ? "bg-[#0a0a14] ring-white/10"
-                                  : "bg-white ring-white/20",
-                              )}
-                            >
+                          <div className="min-w-0 overflow-x-auto">
+                            <DocumentPreviewFrame>
                               <div
                                 data-quote-pdf-scale-wrap
-                                className={cn(
-                                  "mx-auto w-fit max-w-full origin-top",
-                                  template === "premium"
-                                    ? "scale-[0.46] sm:scale-[0.54] md:scale-[0.6] lg:scale-[0.68]"
-                                    : "scale-[0.42] sm:scale-[0.52] md:scale-[0.58] lg:scale-[0.65]",
-                                )}
+                                className="w-full min-w-0"
                               >
                                 {template === "premium" ? (
                                   <QuotePremium {...quotePremiumProps} />
@@ -1744,9 +1740,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                   />
                                 )}
                               </div>
-                            </div>
+                            </DocumentPreviewFrame>
                           </div>
-                        </div>
+                        </section>
                       ) : null}
 
                       <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">

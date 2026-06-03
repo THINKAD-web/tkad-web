@@ -9,11 +9,25 @@
 
 export type PlannerExportKpi = { label: string; value: string };
 
+/** @see lib/document-media-detail.ts — 화면·PDF·PPTX 동일 필드 */
 export type PlannerExportMediaRow = {
+  id?: string;
   name: string;
-  region: string;
-  type: string;
+  region?: string;
+  type?: string;
   priceLabel?: string;
+  location?: string;
+  thumbUrl?: string | null;
+  categoryLabel?: string;
+  size?: string;
+  operatingHours?: string;
+  dailyTraffic?: number;
+  broadcastLabel?: string;
+  monthlyPriceLabel?: string;
+  lineTotalLabel?: string;
+  recommendReason?: string;
+  exposureContributionPct?: number;
+  budgetContributionPct?: number;
 };
 
 export type PlannerExportDigitalRow = {

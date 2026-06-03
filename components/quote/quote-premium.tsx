@@ -4,6 +4,15 @@ import { forwardRef, useMemo, type CSSProperties } from "react";
 import { useLocale } from "next-intl";
 import { Check, Mail, Phone } from "lucide-react";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { MediaDetailCard } from "@/components/document/media-detail-card";
+import {
+  documentCardClass,
+  DocumentGradientHero,
+  DocumentSectionHeading,
+} from "@/components/document/document-layout";
+import type { DocumentMediaDetail } from "@/lib/document-media-detail";
+import { formatDocumentManWon } from "@/lib/document-text";
+import { cn } from "@/lib/utils";
 import {
   computeQuotePremiumMetrics,
   formatCompactMetric,
@@ -59,33 +68,32 @@ type ThemeTokens = {
   emptyChip: string;
 };
 
-/** Page 1 제안서 — 항상 다크 대시보드 (사이트 헤더 다크모드와 별개) */
+/** Page 1 — 히어로만 다크 그라디언트, 본문 카드는 라이트 */
 const PROPOSAL_TOKENS: ThemeTokens = {
-  pageBg: "#0a0a14",
-  pageBorder: "#22222e",
-  topBar: "#555555",
+  pageBg: "#F8F9FC",
+  pageBorder: "#E5E7EB",
+  topBar: "#6B7280",
   card: {
-    background: "rgba(255,255,255,0.035)",
-    border: "1px solid rgba(255,255,255,0.08)",
+    background: "#FFFFFF",
+    border: "1px solid #E5E7EB",
     borderRadius: 12,
     padding: 18,
-    backdropFilter: "blur(8px)",
-    WebkitBackdropFilter: "blur(8px)",
+    boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
   },
-  sectionTitle: "#c4b5fd",
-  label: "rgba(255,255,255,0.45)",
-  value: "#ffffff",
-  durationValue: "#a78bfa",
-  bodyMuted: "rgba(255,255,255,0.45)",
-  tableHead: "rgba(255,255,255,0.45)",
-  tableCell: "rgba(255,255,255,0.9)",
-  tableCellMuted: "rgba(255,255,255,0.7)",
-  tableBorder: "rgba(255,255,255,0.06)",
-  whyTitle: "rgba(255,255,255,0.9)",
-  whySub: "rgba(255,255,255,0.45)",
-  contactMuted: "rgba(255,255,255,0.65)",
-  footer: "rgba(255,255,255,0.25)",
-  emptyChip: "rgba(255,255,255,0.4)",
+  sectionTitle: "#7C3AED",
+  label: "#6B7280",
+  value: "#111827",
+  durationValue: "#7C3AED",
+  bodyMuted: "#6B7280",
+  tableHead: "#9CA3AF",
+  tableCell: "#111827",
+  tableCellMuted: "#6B7280",
+  tableBorder: "#F0F0F0",
+  whyTitle: "#111827",
+  whySub: "#6B7280",
+  contactMuted: "#374151",
+  footer: "#9CA3AF",
+  emptyChip: "#9CA3AF",
 };
 
 function RoiChart() {
@@ -148,10 +156,7 @@ function ThinkadLogo() {
 }
 
 function formatManWon(won: number, isKo: boolean): string {
-  const man = Math.round(won / 10_000);
-  const num = man.toLocaleString(isKo ? "ko-KR" : "en-US");
-  if (isKo) return `₩${num}만원`;
-  return `₩${num} (10K KRW)`;
+  return formatDocumentManWon(won, isKo);
 }
 
 function formatIssuedDateDots(date: Date, isKo: boolean): string {
@@ -298,16 +303,20 @@ function QuotePremiumOfficialPage({
         footer: "// Valid for 14 days from issue date",
       };
 
+  const heroSubtitle = `${displayDuration} · ${isKo ? "견적번호" : "Quote"} #${quoteNo} · ${isKo ? "발행" : "Issued"} ${issuedDots}`;
+
   return (
     <div
       id="quote-premium-official"
       data-quote-premium-page="2"
       data-quote-pdf-background="#ffffff"
-      className="quote-premium-official relative box-border overflow-hidden antialiased"
+      className={cn(
+        "quote-premium-official box-border w-full min-w-0 antialiased",
+        documentCardClass,
+        "max-w-[794px]",
+      )}
       style={{
-        width: 794,
         minHeight: 1123,
-        background: "#ffffff",
         color: "#111827",
         fontFamily: "var(--font-pretendard), Pretendard, system-ui, sans-serif",
         WebkitPrintColorAdjust: "exact",
@@ -319,288 +328,169 @@ function QuotePremiumOfficialPage({
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
         }
-        @media print {
-          #quote-premium-official {
-            background: #ffffff !important;
-          }
-        }
       `}</style>
 
-      <div
-        aria-hidden
-        className="absolute bottom-0 left-0 top-0 w-[5px]"
-        style={{
-          background: "linear-gradient(180deg, #7C3AED 0%, #06B6D4 100%)",
-        }}
+      <DocumentGradientHero
+        badge="PREMIUM QUOTE"
+        title={isKo ? "공식 견적서" : "Official Quote"}
+        subtitle={heroSubtitle}
+        topAccent="gold"
       />
 
-      <div className="relative px-8 pb-8 pt-7 pl-10">
-        <header className="flex items-start justify-between gap-4">
-          <div>
-            <p
-              className="text-[18px] font-bold tracking-tight"
-              style={{ color: "#111111" }}
-            >
-              THINKAD
-            </p>
-            <p className="mt-0.5 text-[11px]" style={{ color: "#6B7280" }}>
-              {isKo ? "싱커드 · 광고 견적서" : "THINKAD · Advertising Quote"}
-            </p>
-          </div>
-          <div className="text-right">
-            <p
-              className="text-[42px] font-bold leading-none"
-              style={{ color: "#F3F4F6" }}
-            >
-              {copy.docTitle}
-            </p>
-            <p className="mt-2 text-[11px]" style={{ color: "#6B7280" }}>
-              {isKo ? "견적번호" : "Quote No."}: #{quoteNo}
-            </p>
-            <p className="text-[11px]" style={{ color: "#6B7280" }}>
-              {isKo ? "발행일" : "Issued"}: {issuedDots}
-            </p>
-          </div>
-        </header>
-
-        <div className="mt-5 h-px w-full" style={{ background: "#F3F4F6" }} />
-
-        <section className="mt-6 grid grid-cols-2 gap-8">
-          <div>
-            <p
-              className="text-[9px] font-bold tracking-[0.2em]"
-              style={{ color: "#7C3AED" }}
-            >
-              {copy.billTo}
-            </p>
-            <p className="mt-2 text-[15px] font-bold text-[#111827]">
-              {customerName.trim() || "—"}
-            </p>
-            {contactName?.trim() ? (
-              <p className="mt-1 text-[12px] text-[#6B7280]">
-                {isKo ? "담당자" : "Contact"}: {contactName.trim()}
-              </p>
-            ) : null}
-            {contactPhone?.trim() ? (
-              <p className="text-[12px] text-[#6B7280]">
-                {isKo ? "연락처" : "Tel"}: {contactPhone.trim()}
-              </p>
-            ) : null}
+      <div className="space-y-8 px-8 py-8">
+        <section className="space-y-4">
+          <DocumentSectionHeading>{copy.billTo}</DocumentSectionHeading>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-gray-200 bg-[#F8F9FC] p-4 sm:grid-cols-4">
+            <div className="min-w-0 sm:col-span-2">
+              <dt className="text-xs font-medium text-gray-500">
+                {isKo ? "회사" : "Company"}
+              </dt>
+              <dd className="mt-0.5 text-sm font-semibold text-gray-900">
+                {customerName.trim() || "—"}
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">
+                {isKo ? "담당" : "Contact"}
+              </dt>
+              <dd className="mt-0.5 text-sm text-gray-900">
+                {contactName?.trim() || "—"}
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">
+                {isKo ? "연락처" : "Tel"}
+              </dt>
+              <dd className="mt-0.5 text-sm text-gray-900">
+                {contactPhone?.trim() || "—"}
+              </dd>
+            </div>
             {contactEmail?.trim() ? (
-              <p className="text-[12px] text-[#6B7280]">
-                {isKo ? "이메일" : "Email"}: {contactEmail.trim()}
-              </p>
-            ) : null}
-          </div>
-          <div>
-            <p
-              className="text-[9px] font-bold tracking-[0.2em]"
-              style={{ color: "#06B6D4" }}
-            >
-              {copy.campaign}
-            </p>
-            <dl className="mt-2 space-y-1 text-[12px] text-[#374151]">
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-[#6B7280]">{copy.duration}</dt>
-                <dd className="font-medium">{displayDuration}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-[#6B7280]">{copy.region}</dt>
-                <dd className="font-medium">{region?.trim() || "—"}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-[#6B7280]">{copy.goal}</dt>
-                <dd className="font-medium">{goal?.trim() || "—"}</dd>
-              </div>
-              <div className="flex gap-2">
-                <dt className="w-20 shrink-0 text-[#6B7280]">
-                  {isKo ? "금액 단위" : "Unit"}
+              <div className="min-w-0 sm:col-span-2">
+                <dt className="text-xs font-medium text-gray-500">
+                  {isKo ? "이메일" : "Email"}
                 </dt>
-                <dd className="font-medium">{copy.unitNote}</dd>
+                <dd className="mt-0.5 break-all text-sm text-gray-900">
+                  {contactEmail.trim()}
+                </dd>
               </div>
-            </dl>
-          </div>
+            ) : null}
+          </dl>
         </section>
 
-        <div
-          className="mt-6 grid grid-cols-3 gap-4 rounded-lg px-4 py-3 text-center text-[12px]"
-          style={{ background: "#F9FAFB" }}
-        >
-          <div>
-            <p className="text-[10px] text-[#9CA3AF]">{copy.barDuration}</p>
-            <p className="mt-1 font-bold text-[#111827]">{displayDuration}</p>
-          </div>
-          <div>
-            <p className="text-[10px] text-[#9CA3AF]">{copy.barMedia}</p>
-            <p className="mt-1 font-bold text-[#111827]">
-              {mediaItems.length}
-              {isKo ? "개" : ""}
-            </p>
-          </div>
-          <div>
-            <p className="text-[10px] text-[#9CA3AF]">{copy.barValidity}</p>
-            <p className="mt-1 font-bold text-[#111827]">{copy.validityDays}</p>
-          </div>
-        </div>
+        <section className="space-y-4">
+          <DocumentSectionHeading>{copy.campaign}</DocumentSectionHeading>
+          <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-gray-200 bg-[#F8F9FC] p-4 sm:grid-cols-4">
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">{copy.duration}</dt>
+              <dd className="mt-0.5 text-sm font-semibold text-gray-900">
+                {displayDuration}
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">{copy.region}</dt>
+              <dd className="mt-0.5 text-sm text-gray-900">
+                {region?.trim() || "—"}
+              </dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">{copy.goal}</dt>
+              <dd className="mt-0.5 text-sm text-gray-900">{goal?.trim() || "—"}</dd>
+            </div>
+            <div className="min-w-0">
+              <dt className="text-xs font-medium text-gray-500">
+                {isKo ? "유효기간" : "Validity"}
+              </dt>
+              <dd className="mt-0.5 text-sm text-gray-900">{copy.validityDays}</dd>
+            </div>
+          </dl>
+        </section>
 
-        <section className="mt-8">
-          <table className="w-full border-collapse text-left">
-            <thead>
-              <tr
-                style={{
-                  borderBottom: "2px solid #7C3AED",
-                  color: "#9CA3AF",
-                  fontSize: 9,
-                  letterSpacing: "0.08em",
-                  textTransform: "uppercase",
-                }}
-              >
-                <th className="pb-2 pr-2 font-medium">{copy.colNo}</th>
-                <th className="pb-2 pr-2 font-medium">{copy.colMedia}</th>
-                <th className="pb-2 pr-2 font-medium">{copy.colLocation}</th>
-                <th className="pb-2 pr-2 font-medium">{copy.colSpec}</th>
-                <th className="pb-2 pr-2 font-medium">{copy.colPeriod}</th>
-                <th className="pb-2 pr-2 text-right font-medium">
-                  {copy.colUnit}
-                </th>
-                <th className="pb-2 text-right font-medium">{copy.colSub}</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mediaItems.map((row, idx) => {
+        <section className="space-y-4">
+          <DocumentSectionHeading>
+            {isKo ? "매체 내역" : "Media lineup"}
+          </DocumentSectionHeading>
+          {mediaItems.length === 0 ? (
+            <p className="rounded-xl border border-gray-200 bg-[#F8F9FC] px-4 py-8 text-center text-sm text-gray-500">
+              —
+            </p>
+          ) : (
+            <ul className="space-y-4">
+              {mediaItems.map((row) => {
                 const unitWon =
                   row.unitPriceWon && row.unitPriceWon > 0
                     ? row.unitPriceWon
                     : row.lineTotalWon;
-                const periodCell =
-                  row.executionPeriodLabel?.trim() || displayDuration;
-                const specParts = [
-                  row.mediaTypeLabel,
-                  row.size,
-                ].filter(Boolean);
+                const detail: DocumentMediaDetail = {
+                  id: row.id,
+                  name: row.name,
+                  location: row.location,
+                  thumbUrl: row.thumbUrl,
+                  categoryLabel: row.categoryLabel ?? row.mediaTypeLabel ?? undefined,
+                  size: row.size ?? undefined,
+                  operatingHours: row.operatingHours ?? undefined,
+                  dailyTraffic: row.dailyFootTraffic ?? undefined,
+                  broadcastLabel: row.broadcastLabel ?? undefined,
+                  monthlyPriceLabel: formatManWon(unitWon, isKo),
+                  lineTotalLabel: formatManWon(row.lineTotalWon, isKo),
+                };
                 return (
-                  <tr
-                    key={row.id}
-                    style={{ borderBottom: "1px solid #F3F4F6" }}
-                  >
-                    <td className="py-3 pr-2 align-top text-[11px] text-[#6B7280]">
-                      {idx + 1}
-                    </td>
-                    <td className="py-3 pr-2 align-top">
-                      <div className="flex gap-2">
-                        <div
-                          className="h-10 w-10 shrink-0 overflow-hidden rounded-lg"
-                          style={{ background: "#F3F4F6" }}
-                        >
-                          {row.thumbUrl ? (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img
-                              src={row.thumbUrl}
-                              alt=""
-                              className="h-full w-full object-cover"
-                              loading="eager"
-                              decoding="sync"
-                              referrerPolicy="no-referrer"
-                            />
-                          ) : null}
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-bold text-[#111827]">
-                            {row.name}
-                          </p>
-                          {specParts.length > 0 ? (
-                            <p className="mt-0.5 text-[11px] text-[#6B7280]">
-                              {specParts.join(" · ")}
-                            </p>
-                          ) : null}
-                        </div>
-                      </div>
-                    </td>
-                    <td className="max-w-[88px] py-3 pr-2 align-top text-[11px] text-[#374151]">
-                      {row.location}
-                    </td>
-                    <td className="py-3 pr-2 align-top text-[11px] text-[#374151]">
-                      {row.size?.trim() || "—"}
-                    </td>
-                    <td className="py-3 pr-2 align-top text-[11px] text-[#374151]">
-                      {periodCell}
-                    </td>
-                    <td className="py-3 pr-2 align-top text-right text-[11px] tabular-nums text-[#374151]">
-                      {formatManWon(unitWon, isKo)}
-                    </td>
-                    <td
-                      className="py-3 align-top text-right text-[12px] font-bold tabular-nums"
-                      style={{ color: "#7C3AED" }}
-                    >
-                      {formatManWon(row.lineTotalWon, isKo)}
-                    </td>
-                  </tr>
+                  <li key={row.id}>
+                    <MediaDetailCard detail={detail} isKo={isKo} compact />
+                  </li>
                 );
               })}
-            </tbody>
-          </table>
+            </ul>
+          )}
         </section>
 
-        <section className="mt-8 flex justify-end">
-          <div className="w-full max-w-[300px] space-y-2 text-[12px]">
-            <div className="flex justify-between gap-4 text-[#6B7280]">
-              <span>{copy.supply}</span>
-              <span className="tabular-nums">
+        <section className="space-y-4">
+          <DocumentSectionHeading>{copy.total}</DocumentSectionHeading>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+              <p className="text-[11px] font-medium text-gray-500">{copy.supply}</p>
+              <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
                 {formatManWon(subtotalWon, isKo)}
-              </span>
+              </p>
             </div>
-            <div className="flex justify-between gap-4 text-[#6B7280]">
-              <span>{copy.vat}</span>
-              <span className="tabular-nums">{formatManWon(vatWon, isKo)}</span>
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+              <p className="text-[11px] font-medium text-gray-500">{copy.vat}</p>
+              <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
+                {formatManWon(vatWon, isKo)}
+              </p>
             </div>
             <div
-              className="flex items-center justify-between gap-4 rounded-lg px-5 py-3.5 text-[16px] font-bold text-white"
+              className="col-span-2 rounded-xl border border-violet-200 p-3.5 sm:col-span-1"
               style={{
-                background:
-                  "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+                background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
               }}
             >
-              <span>{copy.total}</span>
-              <span className="tabular-nums">
+              <p className="text-[11px] font-medium text-violet-100">{copy.total}</p>
+              <p className="mt-1 font-display text-xl font-black tabular-nums text-white">
                 {formatManWon(grandTotalWon, isKo)}
-              </span>
+              </p>
             </div>
           </div>
         </section>
 
-        <section className="mt-10 grid grid-cols-2 gap-8">
+        <section className="grid grid-cols-2 gap-8 border-t border-gray-100 pt-8">
           <div>
-            <p
-              className="text-[9px] font-bold tracking-[0.2em]"
-              style={{ color: "#7C3AED" }}
-            >
-              {copy.signTitle}
-            </p>
-            <div className="mt-4 space-y-4 text-[11px] text-[#6B7280]">
+            <p className="text-xs font-semibold text-violet-700">{copy.signTitle}</p>
+            <div className="mt-4 space-y-4 text-[11px] text-gray-500">
               {[copy.signName, copy.signSig, copy.signDate].map((label) => (
                 <div key={label}>
                   <span>{label}</span>
-                  <div
-                    className="mt-2 h-8 border-b"
-                    style={{ borderColor: "#E5E7EB" }}
-                  />
+                  <div className="mt-2 h-8 border-b border-gray-200" />
                 </div>
               ))}
             </div>
           </div>
-          <div className="relative min-h-[140px] pr-20">
-            <p
-              className="text-[9px] font-bold tracking-[0.2em]"
-              style={{ color: "#06B6D4" }}
-            >
-              {copy.issuer}
-            </p>
-            <p className="mt-2 text-[13px] font-bold text-[#111827]">
-              {copy.issuerName}
-            </p>
-            <p className="mt-2 text-[11px] text-[#374151]">Tel: 02-515-2772</p>
-            <p className="text-[11px] text-[#374151]">Email: sales@tkad.co.kr</p>
-            <p className="mt-1 text-[11px] text-[#6B7280]">
+          <div className="relative min-h-[120px] pr-20">
+            <p className="text-xs font-semibold text-violet-700">{copy.issuer}</p>
+            <p className="mt-2 text-sm font-bold text-gray-900">{copy.issuerName}</p>
+            <p className="mt-2 text-[11px] text-gray-600">Tel: 02-515-2772</p>
+            <p className="text-[11px] text-gray-600">Email: sales@tkad.co.kr</p>
+            <p className="mt-1 text-[11px] text-gray-500">
               {isKo
                 ? "주소: 서울 성동구 뚝섬로17가길 48"
                 : "48, Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul"}
@@ -612,21 +502,13 @@ function QuotePremiumOfficialPage({
               loading="eager"
               decoding="sync"
               referrerPolicy="no-referrer"
-              className="pointer-events-none absolute bottom-0 right-0 object-contain"
-              style={{
-                width: 72,
-                height: 72,
-                opacity: 0.85,
-                transform: "rotate(-3deg)",
-              }}
+              className="pointer-events-none absolute bottom-0 right-0 h-[72px] w-[72px] object-contain opacity-[0.85]"
+              style={{ transform: "rotate(-3deg)" }}
             />
           </div>
         </section>
 
-        <footer
-          className="mt-10 rounded-lg py-3 text-center text-[10px]"
-          style={{ background: "#F9FAFB", color: "#6B7280" }}
-        >
+        <footer className="rounded-lg bg-[#F9FAFB] py-3 text-center text-[10px] text-gray-500">
           {copy.footer}
         </footer>
       </div>
@@ -701,7 +583,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
           reach: "도달",
           impression: "노출",
           duration: "기간",
-          mediaList: "선정 매체",
+          mediaList: "선정 매체 상세",
           exposure: "예상 노출·비용",
           mediaCol: "매체",
           imprCol: "노출",
@@ -763,16 +645,15 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
         };
 
     return (
-      <div ref={ref} className="quote-premium-export-root flex w-[794px] max-w-full flex-col">
+      <div ref={ref} className="quote-premium-export-root flex w-full min-w-0 max-w-[794px] flex-col">
         <div
           id="quote-premium-proposal"
           data-quote-premium-page="1"
-          data-quote-pdf-background={tokens.pageBg}
-          className="quote-premium-proposal box-border overflow-hidden antialiased"
+          data-quote-pdf-background="#F8F9FC"
+          className="quote-premium-proposal box-border w-full min-w-0 overflow-hidden antialiased"
           style={{
-            width: 794,
             minHeight: 1123,
-            background: tokens.pageBg,
+            background: "#F8F9FC",
             border: `1px solid ${tokens.pageBorder}`,
             borderRadius: 16,
             color: tokens.value,
@@ -938,38 +819,6 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                 className="text-xs font-bold tracking-[0.12em]"
                 style={{ color: tokens.sectionTitle }}
               >
-                {copy.mediaList}
-              </h2>
-              <div className="mt-3 flex max-h-[148px] flex-wrap gap-1.5 overflow-hidden">
-                {mediaItems.map((m) => (
-                  <span
-                    key={m.id}
-                    className="rounded-full px-2.5 py-1 text-[10px] font-semibold text-white"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(124,58,237,0.85) 0%, rgba(6,182,212,0.65) 100%)",
-                      border: "1px solid rgba(255,255,255,0.12)",
-                    }}
-                  >
-                    {m.name}
-                  </span>
-                ))}
-              </div>
-              {mediaItems.length === 0 ? (
-                <p
-                  className="mt-3 text-xs"
-                  style={{ color: tokens.emptyChip }}
-                >
-                  —
-                </p>
-              ) : null}
-            </div>
-
-            <div style={tokens.card}>
-              <h2
-                className="text-xs font-bold tracking-[0.12em]"
-                style={{ color: tokens.sectionTitle }}
-              >
                 {copy.exposure}
               </h2>
               <table className="mt-3 w-full text-left text-[10px]">
@@ -1106,6 +955,51 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
               </p>
             </div>
           </div>
+
+          <section className="space-y-3 px-4 pb-4">
+            <h2
+              className="text-xs font-bold tracking-[0.12em]"
+              style={{ color: tokens.sectionTitle }}
+            >
+              {copy.mediaList}
+            </h2>
+            <ul className="space-y-3">
+              {mediaItems.length === 0 ? (
+                <p className="text-xs" style={{ color: tokens.emptyChip }}>
+                  —
+                </p>
+              ) : (
+                mediaItems.map((m) => {
+                  const detail: DocumentMediaDetail = {
+                    id: m.id,
+                    name: m.name,
+                    location: m.location,
+                    thumbUrl: m.thumbUrl,
+                    categoryLabel: m.categoryLabel ?? m.mediaTypeLabel ?? undefined,
+                    size: m.size ?? undefined,
+                    operatingHours: m.operatingHours ?? undefined,
+                    dailyTraffic: m.dailyFootTraffic ?? undefined,
+                    broadcastLabel: m.broadcastLabel ?? undefined,
+                    monthlyPriceLabel: m.unitPriceWon
+                      ? formatManWon(m.unitPriceWon, isKo)
+                      : undefined,
+                    lineTotalLabel: formatManWon(m.lineTotalWon, isKo),
+                    recommendReason:
+                      m.recommendReason ??
+                      (isKo
+                        ? "캠페인 목표·동선에 맞춘 핵심 노출 지점"
+                        : "Key placement aligned with campaign routes"),
+                  };
+                  return (
+                    <li key={m.id}>
+                      <MediaDetailCard detail={detail} isKo={isKo} />
+                    </li>
+                  );
+                })
+              )}
+            </ul>
+          </section>
+
           <div
             className="quote-premium-page-break"
             style={{ pageBreakAfter: "always" }}
@@ -1114,7 +1008,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
         </div>
 
         <div
-          className="mt-8 border-t-2 border-dashed border-white/25 print:hidden"
+          className="mt-8 border-t-2 border-dashed border-[#E5E7EB] print:hidden"
           role="separator"
           aria-hidden
         />

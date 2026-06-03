@@ -1413,6 +1413,24 @@ html.dark .tkad-media-detail-hero,
   max-width: none !important;
 }
 
+/* PNG 캡처 시 A4/프리미엄 고정 폭 복원 (화면에서는 w-full) */
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] .quote-pdf-preview-doc {
+  width: 210mm !important;
+  max-width: 210mm !important;
+  min-height: 297mm !important;
+}
+
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] .quote-premium-export-root {
+  width: 794px !important;
+  max-width: 794px !important;
+}
+
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] .quote-premium-proposal,
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] .quote-premium-official {
+  width: 794px !important;
+  max-width: 794px !important;
+}
+
 /* Step 1 미리보기 카드 — appearance 기준 배경·대비 (Tailwind dark: 와 분리) */
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-aside {
   background: linear-gradient(

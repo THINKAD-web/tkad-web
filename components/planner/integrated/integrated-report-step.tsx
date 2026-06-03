@@ -80,6 +80,7 @@ export function IntegratedReportStep(props: Props) {
         metrics: props.metrics,
         generatedAt,
         includeProSections: isPro,
+        months: props.months,
       }),
     [props, generatedAt, isPro],
   );

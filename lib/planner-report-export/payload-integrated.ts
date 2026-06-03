@@ -3,17 +3,15 @@ import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics
 import type { DigitalRecommendResult } from "@/lib/planner/recommend-digital";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import { computeIntegratedProInsights } from "@/lib/planner/integrated-report-insights";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import {
+  computePortfolioContributions,
+  mediaItemToExportRow,
+} from "@/lib/document-media-detail";
 import type {
   PlannerExportSection,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
-
-function priceLabel(m: MediaItem, isKo: boolean): string {
-  if (!m.price || m.price <= 0) return isKo ? "문의" : "Inquire";
-  return isKo
-    ? `${m.price.toLocaleString("ko-KR")}원`
-    : `${m.price.toLocaleString("en-US")} KRW`;
-}
 
 export type BuildIntegratedPayloadArgs = {
   isKo: boolean;
@@ -30,6 +28,7 @@ export type BuildIntegratedPayloadArgs = {
   metrics: IntegratedCampaignMetrics;
   generatedAt: string;
   includeProSections: boolean;
+  months?: number;
 };
 
 export function buildIntegratedReportPayload(
@@ -138,12 +137,18 @@ export function buildIntegratedReportPayload(
     industryText: a.industryText,
     kpis,
     charts,
-    portfolio: a.portfolio.map((mm) => ({
-      name: mm.name,
-      region: mm.region ?? "—",
-      type: mm.type ?? "—",
-      priceLabel: priceLabel(mm, isKo),
-    })),
+    portfolio: (() => {
+      const months = Math.max(1, a.months ?? 1);
+      const contributions = computePortfolioContributions(a.portfolio, months);
+      return a.portfolio.map((mm) =>
+        mediaItemToExportRow(mm, isKo, {
+          months,
+          contributions,
+          lineTotalWon:
+            mm.price > 0 ? catalogPriceFieldToWon(mm.price) * months : undefined,
+        }),
+      );
+    })(),
     digital: a.digitalResult.channels.map((c) => ({
       platform: isKo ? c.channel.nameKo : c.channel.nameEn,
       sharePct: c.budgetPct,

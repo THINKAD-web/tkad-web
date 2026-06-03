@@ -155,18 +155,27 @@ export async function buildPlannerReportPptx(
   const mediaBody =
     p.portfolio.length === 0
       ? [[{ text: isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.", options: { colspan: 4, color: GRAY, fontFace: face, fontSize: 12, align: "center" as const } }]]
-      : p.portfolio.slice(0, 16).map((r, i) => {
+      : p.portfolio.slice(0, 12).map((r, i) => {
           const fill = i % 2 ? { color: LIGHT } : { color: WHITE };
+          const spec = [
+            r.location,
+            r.size,
+            r.operatingHours,
+            r.monthlyPriceLabel,
+          ]
+            .filter(Boolean)
+            .join(" · ");
+          const nameCell = spec ? `${r.name}\n${spec}` : r.name || "—";
           return [
-            { text: r.name || "—", options: { fill, color: INK, fontFace: face, fontSize: 11 } },
-            { text: r.region || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 11 } },
-            { text: r.type || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 11 } },
-            { text: r.priceLabel || "—", options: { fill, color: INK, fontFace: face, fontSize: 11 } },
+            { text: nameCell, options: { fill, color: INK, fontFace: face, fontSize: 10 } },
+            { text: r.region || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
+            { text: r.categoryLabel || r.type || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
+            { text: r.lineTotalLabel || r.priceLabel || "—", options: { fill, color: INK, fontFace: face, fontSize: 10 } },
           ];
         });
   s3.addTable([mediaHead, ...mediaBody], {
-    x: 0.6, y: 1.25, w: 12.1, colW: [6.0, 2.2, 2.2, 1.7],
-    border: { type: "solid", color: "E4E6EC", pt: 0.5 }, rowH: 0.34, valign: "middle",
+    x: 0.6, y: 1.25, w: 12.1, colW: [6.2, 2.0, 2.0, 1.9],
+    border: { type: "solid", color: "E4E6EC", pt: 0.5 }, rowH: 0.42, valign: "middle",
   });
 
   // ── 4. 디지털 배분 (통합) ──

@@ -356,82 +356,72 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
-  // ── 매체 포트폴리오 테이블 ──
-  sectionTitle(isKo ? "선택 매체 구성" : "Selected media");
+  // ── 매체 구성 (디테일 카드) ──
+  sectionTitle(isKo ? "매체 구성" : "Media lineup");
   {
-    const cols = [
-      { key: "name", label: isKo ? "매체" : "Media", w: contentW * 0.46 },
-      { key: "region", label: isKo ? "지역" : "Region", w: contentW * 0.18 },
-      { key: "type", label: isKo ? "유형" : "Type", w: contentW * 0.18 },
-      { key: "priceLabel", label: isKo ? "비용" : "Price", w: contentW * 0.18 },
-    ] as const;
-
-    const drawHeader = () => {
-      setFill(VIOLET);
-      doc.rect(M, y, contentW, 7, "F");
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      let cx = M + 2;
-      for (const c of cols) {
-        doc.text(c.label, cx, y + 4.8);
-        cx += c.w;
-      }
-      y += 7;
-    };
-    drawHeader();
-
-    doc.setFontSize(8.5);
+    doc.setFont(FONT, "normal");
     if (p.portfolio.length === 0) {
+      ensure(10);
       setText(GRAY_500);
+      doc.setFontSize(9);
       doc.text(
         isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.",
         M + 2,
         y + 5,
       );
-      y += 9;
+      y += 12;
     } else {
-      p.portfolio.forEach((row, idx) => {
-        const nameLines = doc.splitTextToSize(
-          row.name || "—",
-          cols[0].w - 3,
-        ) as string[];
-        const rh = Math.max(7, nameLines.length * 4 + 3);
-        ensure(rh);
-        if (idx % 2 === 1) {
-          setFill(GRAY_50);
-          doc.rect(M, y, contentW, rh, "F");
+      p.portfolio.forEach((row) => {
+        const specLines = [
+          row.location,
+          row.categoryLabel,
+          row.size ? `${isKo ? "규격" : "Size"} ${row.size}` : null,
+          row.operatingHours
+            ? `${isKo ? "운영" : "Hours"} ${row.operatingHours}`
+            : null,
+          row.dailyTraffic
+            ? `${isKo ? "일일 노출" : "Daily"} ${row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}`
+            : null,
+          row.broadcastLabel,
+          row.monthlyPriceLabel
+            ? `${isKo ? "월 단가" : "Monthly"} ${row.monthlyPriceLabel}`
+            : null,
+          row.lineTotalLabel
+            ? `${isKo ? "집행 소계" : "Subtotal"} ${row.lineTotalLabel}`
+            : null,
+        ].filter(Boolean) as string[];
+        if (p.portfolio.length > 1) {
+          const contrib =
+            row.exposureContributionPct != null || row.budgetContributionPct != null
+              ? [
+                  row.exposureContributionPct != null
+                    ? `${isKo ? "노출 기여" : "Exposure"} ${row.exposureContributionPct}%`
+                    : null,
+                  row.budgetContributionPct != null
+                    ? `${isKo ? "예산 비중" : "Budget"} ${row.budgetContributionPct}%`
+                    : null,
+                ]
+                  .filter(Boolean)
+                  .join(" · ")
+              : "";
+          if (contrib) specLines.push(contrib);
         }
-        setText(INK);
-        let cx = M + 2;
-        doc.text(nameLines.slice(0, 2), cx, y + 4.6);
-        cx += cols[0].w;
-        setText(GRAY_600);
-        doc.text(
-          (doc.splitTextToSize(row.region || "—", cols[1].w - 3) as string[]).slice(0, 1),
-          cx,
-          y + 4.6,
-        );
-        cx += cols[1].w;
-        doc.text(
-          (doc.splitTextToSize(row.type || "—", cols[2].w - 3) as string[]).slice(0, 1),
-          cx,
-          y + 4.6,
-        );
-        cx += cols[2].w;
-        setText(INK);
-        doc.text(
-          (doc.splitTextToSize(row.priceLabel || "—", cols[3].w - 3) as string[]).slice(0, 1),
-          cx,
-          y + 4.6,
-        );
-        y += rh;
+
+        const block = [row.name, ...specLines].join("\n");
+        const lines = doc.splitTextToSize(block, contentW - 6) as string[];
+        const rh = Math.max(14, lines.length * 4.2 + 6);
+        ensure(rh + 4);
+        setFill(GRAY_50);
         setDraw(GRAY_200);
-        doc.setLineWidth(0.1);
-        doc.line(M, y, pageW - M, y);
+        doc.setLineWidth(0.2);
+        doc.roundedRect(M, y, contentW, rh, 2, 2, "FD");
+        setText(INK);
+        doc.setFontSize(9);
+        doc.text(lines.slice(0, 8), M + 3, y + 5.5);
+        y += rh + 4;
       });
     }
-    y += 6;
+    y += 4;
   }
 
   // ── 디지털 배분 (통합) ──

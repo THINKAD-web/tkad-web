@@ -18,6 +18,7 @@ import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
+import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { PlannerReportDocument } from "@/components/planner/report-document";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -196,6 +197,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         cpmBars: derived.cpmBars,
         effectSummaryLines: derived.effectSummaryLines,
         generatedAt: snapshotAt,
+        months: props.months,
       }),
     [props, derived, snapshotAt],
   );
@@ -330,9 +332,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 />
               ) : null}
 
-              <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
+              <DocumentPreviewFrame>
                 <PlannerReportDocument payload={payload} />
-              </div>
+              </DocumentPreviewFrame>
 
               {props.metrics ? (
                 <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
@@ -529,6 +531,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           cpmBars: derived.cpmBars,
           effectSummaryLines: derived.effectSummaryLines,
           generatedAt: snapshotAt,
+          months: props.months,
         });
         await downloadPlannerReport(format, payload);
         const { trackGaEvent } = await import("@/lib/ga-events");

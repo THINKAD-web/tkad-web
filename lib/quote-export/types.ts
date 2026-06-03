@@ -8,11 +8,20 @@ export type QuoteExportTemplate = "basic" | "premium";
 export type QuoteExportFormat = "pdf" | "pptx";
 
 export type QuoteExportLine = {
+  mediaId?: string;
   name: string;
   location: string;
   unitPriceWon: number;
   lineSupplyWon: number;
   impressions?: number;
+  thumbUrl?: string | null;
+  size?: string;
+  operatingHours?: string;
+  dailyTraffic?: number;
+  broadcastLabel?: string;
+  categoryLabel?: string;
+  mediaTypeLabel?: string;
+  recommendReason?: string;
 };
 
 export type QuoteExportPayload = {

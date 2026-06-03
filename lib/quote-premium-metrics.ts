@@ -10,6 +10,10 @@ export type QuotePremiumMediaInput = {
   size?: string | null;
   /** 공식 견적서 — 유형 라벨 */
   mediaTypeLabel?: string | null;
+  categoryLabel?: string | null;
+  operatingHours?: string | null;
+  broadcastLabel?: string | null;
+  recommendReason?: string | null;
   unitPriceWon?: number;
   unitPeriodLabel?: string | null;
   executionPeriodLabel?: string | null;
