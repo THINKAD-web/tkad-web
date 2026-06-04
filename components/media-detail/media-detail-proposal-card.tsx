@@ -55,13 +55,9 @@ export function MediaDetailProposalCard({
               </span>
             </p>
             <p className="text-xs text-gray-400 dark:text-white/50">
-              {hasUploadedProposal
-                ? isKo
-                  ? "PDF · 운영자 제공 제안서"
-                  : "PDF · Official proposal"
-                : isKo
-                  ? "PDF · 매체 상세 정보 및 단가 포함"
-                  : "PDF · Media specs & pricing"}
+              {isKo
+                ? "PDF · 사진 · 상권 · 유동인구 · 단가"
+                : "PDF · photos · trade area · footfall · pricing"}
             </p>
           </div>
         </div>
