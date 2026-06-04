@@ -46,11 +46,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     );
   }
 
-  const proposalUrl = row.proposalUrl?.trim();
-  if (proposalUrl) {
-    return NextResponse.redirect(proposalUrl, 302);
-  }
-
+  // 항상 고급 자동 제안서를 생성 (운영자 업로드 proposalUrl 리다이렉트 제거)
   const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
   const includeProDetails = detailAccess.allowed;
 
@@ -63,6 +59,9 @@ export async function GET(request: NextRequest, { params }: Params) {
     media,
     isKo,
     includeProDetails,
+    trafficPattern:
+      (row.trafficPattern as Parameters<typeof generateMediaProposalPdf>[0]["trafficPattern"]) ??
+      null,
   });
 
   const filename = mediaProposalDownloadFilename(media, isKo);
@@ -73,7 +72,7 @@ export async function GET(request: NextRequest, { params }: Params) {
     headers: {
       "Content-Type": "application/pdf",
       "Content-Disposition": `attachment; filename="${asciiFilename(filename)}"; filename*=UTF-8''${encoded}`,
-      "Cache-Control": "private, max-age=3600",
+      "Cache-Control": "private, max-age=86400",
     },
   });
 }
