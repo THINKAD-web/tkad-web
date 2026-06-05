@@ -1,7 +1,14 @@
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { fetchMediaImageDataUrl } from "@/lib/server-media-image";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+
+function dataUrlImageFormat(d: string): "PNG" | "WEBP" | "JPEG" {
+  if (d.startsWith("data:image/png")) return "PNG";
+  if (d.startsWith("data:image/webp")) return "WEBP";
+  return "JPEG";
+}
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -357,6 +364,23 @@ export async function buildPlannerReportPdf(
   }
 
   // ── 매체 구성 (디테일 카드) ──
+  // 포트폴리오 썸네일 사전 로드 (서버 fetch — BunnyCDN 등)
+  const thumbUrls = [
+    ...new Set(
+      p.portfolio
+        .map((r) => r.thumbUrl)
+        .filter((u): u is string => Boolean(u)),
+    ),
+  ];
+  const thumbEntries = await Promise.all(
+    thumbUrls.map(
+      async (u) => [u, await fetchMediaImageDataUrl(u)] as const,
+    ),
+  );
+  const thumbs = new Map<string, string>(
+    thumbEntries.filter((e): e is readonly [string, string] => Boolean(e[1])),
+  );
+
   sectionTitle(isKo ? "매체 구성" : "Media lineup");
   {
     doc.setFont(FONT, "normal");
@@ -372,6 +396,7 @@ export async function buildPlannerReportPdf(
       y += 12;
     } else {
       p.portfolio.forEach((row) => {
+        const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
         const specLines = [
           row.location,
           row.categoryLabel,
@@ -407,17 +432,34 @@ export async function buildPlannerReportPdf(
           if (contrib) specLines.push(contrib);
         }
 
+        const thumbW = thumb ? 22 : 0;
+        const textX = M + 3 + thumbW;
+        const textW = contentW - 6 - thumbW;
         const block = [row.name, ...specLines].join("\n");
-        const lines = doc.splitTextToSize(block, contentW - 6) as string[];
-        const rh = Math.max(14, lines.length * 4.2 + 6);
+        const lines = doc.splitTextToSize(block, textW) as string[];
+        const rh = Math.max(thumb ? 22 : 14, lines.length * 4.2 + 6);
         ensure(rh + 4);
         setFill(GRAY_50);
         setDraw(GRAY_200);
         doc.setLineWidth(0.2);
         doc.roundedRect(M, y, contentW, rh, 2, 2, "FD");
+        if (thumb) {
+          try {
+            doc.addImage(
+              thumb,
+              dataUrlImageFormat(thumb),
+              M + 2,
+              y + 2,
+              thumbW - 3,
+              rh - 4,
+            );
+          } catch {
+            /* skip broken image */
+          }
+        }
         setText(INK);
         doc.setFontSize(9);
-        doc.text(lines.slice(0, 8), M + 3, y + 5.5);
+        doc.text(lines.slice(0, 8), textX, y + 5.5);
         y += rh + 4;
       });
     }

@@ -8,12 +8,12 @@ import {
   catalogPriceFieldToWon,
   mediaDetailPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
-import { fetchKakaoStaticMapBase64 } from "@/lib/kakao-static-map";
+import { fetchStaticMapDataUrl } from "@/lib/static-map";
 import {
   krFontFamily,
   ensureKrFontForServerPdf,
 } from "@/lib/jspdf-register-noto-kr";
-import { resolvePublicMediaImageUrl } from "@/lib/optimized-image-url";
+import { fetchMediaImageDataUrl } from "@/lib/server-media-image";
 import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
 import {
   resolveTrafficPattern,
@@ -27,7 +27,7 @@ const MX = 16;
 const CW = PAGE_W - MX * 2;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 /** Bump when PDF layout/font logic changes (invalidates stale cache). */
-const CACHE_VERSION = "v3-light";
+const CACHE_VERSION = "v4-img";
 
 // 플래너 보고서와 통일된 라이트 팔레트
 const VIOLET: [number, number, number] = [124, 58, 237];
@@ -100,17 +100,7 @@ function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
   return "JPEG";
 }
 async function fetchImageDataUrl(url: string): Promise<string | null> {
-  const resolved = resolvePublicMediaImageUrl(url) ?? url;
-  try {
-    const res = await fetch(resolved, { cache: "no-store" });
-    if (!res.ok) return null;
-    const buf = Buffer.from(await res.arrayBuffer());
-    const ct = res.headers.get("content-type") ?? "image/jpeg";
-    const mime = ct.split(";")[0]?.trim() || "image/jpeg";
-    return `data:${mime};base64,${buf.toString("base64")}`;
-  } catch {
-    return null;
-  }
+  return fetchMediaImageDataUrl(url);
 }
 
 /** 페이지 머리말/꼬리말 (라이트) */
@@ -448,17 +438,18 @@ export async function generateMediaProposalPdf(
 
   // ── 위치 지도 ──
   y = sectionTitle(doc, fam, hasKr, isKo ? "위치 안내" : "Location Map", y);
-  const mapB64 = await fetchKakaoStaticMapBase64({
+  const mapDataUrl = await fetchStaticMapDataUrl({
     lat: media.lat,
     lng: media.lng,
     width: 600,
     height: 300,
+    zoom: 15,
   });
   const mapH = 48;
   y = addPageIfNeeded(doc, fam, hasKr, y, mapH + 6);
-  if (mapB64) {
+  if (mapDataUrl) {
     try {
-      doc.addImage(`data:image/png;base64,${mapB64}`, "PNG", MX, y, CW, mapH);
+      doc.addImage(mapDataUrl, "PNG", MX, y, CW, mapH);
       doc.setDrawColor(...LINE);
       doc.setLineWidth(0.3);
       doc.roundedRect(MX, y, CW, mapH, 2, 2, "S");
