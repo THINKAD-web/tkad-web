@@ -2,6 +2,9 @@ import { NextResponse } from "next/server";
 import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
 import { completeGrokChatbot } from "@/lib/ai-chatbot-grok";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { getCurrentUser } from "@/lib/user-session";
+import { getClientIp } from "@/lib/api-response";
+import { logChatbotTurn } from "@/lib/chatbot-log";
 
 export const maxDuration = 60;
 
@@ -63,13 +66,24 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  const { message, history, locale: localeRaw } = body as {
+  const {
+    message,
+    history,
+    locale: localeRaw,
+    sessionId: sessionIdRaw,
+    pageUrl: pageUrlRaw,
+  } = body as {
     message?: unknown;
     history?: unknown;
     locale?: unknown;
+    sessionId?: unknown;
+    pageUrl?: unknown;
   };
 
   const locale = localeRaw === "en" ? "en" : "ko";
+  const sessionId =
+    typeof sessionIdRaw === "string" ? sessionIdRaw.slice(0, 64) : "";
+  const pageUrl = typeof pageUrlRaw === "string" ? pageUrlRaw : null;
 
   const normalized = normalizeMessages(String(message ?? ""), history);
   if (!normalized.ok) {
@@ -86,12 +100,36 @@ export async function POST(req: Request) {
   const system = buildAiChatbotSystemPromptWithTools(locale);
 
   try {
-    const { reply, media } = await completeGrokChatbot({
+    const { reply, media, tokensUsed, model } = await completeGrokChatbot({
       systemPrompt: system,
       messages: normalized.messages,
       catalog,
       locale,
     });
+
+    // 대화 로그 저장 (관리자 대시보드용) — 실패해도 응답엔 영향 없음
+    if (sessionId) {
+      try {
+        const user = await getCurrentUser();
+        await logChatbotTurn({
+          sessionId,
+          userId: user?.id ?? null,
+          userName: user?.name ?? null,
+          userEmail: user?.email ?? null,
+          ip: getClientIp(req),
+          userAgent: req.headers.get("user-agent"),
+          pageUrl,
+          locale,
+          model,
+          userMessage: String(message ?? ""),
+          assistantMessage: reply,
+          tokensUsed,
+        });
+      } catch (logErr) {
+        console.error("[api/chat] log failed", logErr);
+      }
+    }
+
     return NextResponse.json({ reply, media });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

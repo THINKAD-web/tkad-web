@@ -19,6 +19,7 @@ import {
   ContactRound,
   Database,
   FileText,
+  Bot,
   Calculator,
   ClipboardList,
   CalendarCheck,
@@ -65,6 +66,7 @@ type NavKey =
   | "inquiries"
   | "biddings"
   | "chatMonitor"
+  | "chatbotLogs"
   | "pipeline"
   | "crmRecords"
   | "forecast"
@@ -113,6 +115,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/inquiries", key: "inquiries", icon: MessageSquareText },
   { href: "/admin/biddings", key: "biddings", icon: ClipboardList },
   { href: "/admin/chat", key: "chatMonitor", icon: Inbox },
+  { href: "/admin/chatbot", key: "chatbotLogs", icon: Bot },
   { href: "/admin/pipeline", key: "pipeline", icon: Kanban },
   { href: "/admin/crm-records", key: "crmRecords", icon: ContactRound },
   { href: "/admin/forecast", key: "forecast", icon: TrendingUp },
@@ -213,6 +216,7 @@ const navGroupDefs: {
     itemKeys: [
       "inquiries",
       "chatMonitor",
+      "chatbotLogs",
       "users",
       "pipeline",
       "crmRecords",
