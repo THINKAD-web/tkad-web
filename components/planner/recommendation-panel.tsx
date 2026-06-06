@@ -398,13 +398,13 @@ export function PlannerRecommendationPanel({
                     }
                     if (items.length === 0) return null;
                     return (
-                      <p className="inline-flex flex-wrap items-center gap-x-3 gap-y-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                        <Users className="h-3 w-3 text-primary" aria-hidden />
-                        <span>{items[0]}</span>
+                      <p className="flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
+                        <Users className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                        <span className="break-words">{items[0]}</span>
                         {items[1] ? (
                           <>
-                            <Eye className="h-3 w-3 text-primary" aria-hidden />
-                            <span>{items[1]}</span>
+                            <Eye className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                            <span className="break-words">{items[1]}</span>
                           </>
                         ) : null}
                         {items[2] ? <span>· {items[2]}</span> : null}

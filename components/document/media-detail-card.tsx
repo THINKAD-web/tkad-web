@@ -89,20 +89,22 @@ export function MediaDetailCard({
     showContribution &&
     (portfolioSize == null || portfolioSize > 1) &&
     (detail.exposureContributionPct != null || detail.budgetContributionPct != null);
-  const imgW = compact ? 120 : 160;
-  const imgH = compact ? 90 : 120;
 
   return (
     <article
       className={cn(
-        "flex gap-4 rounded-xl border bg-white p-5 shadow-sm",
+        "flex gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
         className,
       )}
       style={{ borderColor: LIGHT.border, background: LIGHT.bg }}
     >
       <div
-        className="relative shrink-0 overflow-hidden rounded-xl shadow-sm"
-        style={{ width: imgW, height: imgH, background: LIGHT.bgAlt }}
+        className={cn(
+          // 고정 4:3 비율 박스 — 폭만 반응형, 세로 늘어남 불가
+          "relative aspect-[4/3] shrink-0 self-start overflow-hidden rounded-xl shadow-sm",
+          compact ? "w-24 sm:w-28" : "w-28 sm:w-40",
+        )}
+        style={{ background: LIGHT.bgAlt }}
       >
         {detail.thumbUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
