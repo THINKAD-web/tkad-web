@@ -90,20 +90,39 @@ function resolveDailyTraffic(m: DocumentMediaDetailSource): number | undefined {
   return undefined;
 }
 
+/** 송출/스펙 텍스트에서 raw 숫자 잔재 제거 + 큰 원금액을 만원 표기로 정리 */
+function cleanSpecText(s: string): string {
+  return s
+    .replace(/\s*[·,]\s*\d{4,}\s*$/g, "") // 끝에 붙은 raw 숫자 (· 1200000)
+    .replace(/\s*·\s*\d{4,}(?=\s*·)/g, "") // 중간 raw 숫자 토큰
+    .replace(
+      /(\d{7,})\s*원/g,
+      (_m, n: string) =>
+        `₩${Math.round(Number(n) / 10000).toLocaleString("ko-KR")}만`,
+    ) // 7자리+ 원 → 만원
+    .replace(/\s{2,}/g, " ")
+    .replace(/\s*·\s*$/g, "")
+    .trim();
+}
+
 function resolveBroadcastLabel(m: DocumentMediaDetailSource, isKo: boolean): string | undefined {
   const kf = "keywordFilter" in m ? m.keywordFilter : undefined;
   const durations = kf?.duration?.filter(Boolean) ?? [];
   const exposure = kf?.exposureTime?.filter(Boolean) ?? [];
-  const parts: string[] = [];
-  if (durations.length) parts.push(durations.join(" · "));
+  const rawParts: string[] = [];
+  if (durations.length) rawParts.push(durations.join(" · "));
   const optDesc =
     "priceOptions" in m && m.priceOptions?.[0]?.description?.trim()
       ? m.priceOptions[0].description.trim()
       : undefined;
-  if (optDesc) parts.push(optDesc);
+  if (optDesc) rawParts.push(optDesc);
   if ("dailyExposure" in m && (m as MediaItem).dailyExposure?.trim()) {
-    parts.push((m as MediaItem).dailyExposure!.trim());
+    rawParts.push((m as MediaItem).dailyExposure!.trim());
   }
+  // raw 숫자 정리 + 순수 숫자 파트 제거
+  const parts = rawParts
+    .map(cleanSpecText)
+    .filter((p) => p.length > 0 && !/^[\d,]+$/.test(p));
   if (!parts.length && exposure.length) {
     return isKo ? `노출: ${exposure.join(" · ")}` : `Exposure: ${exposure.join(" · ")}`;
   }

@@ -66,7 +66,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
         ref={ref}
         id="integrated-planner-report-content"
         className={cn(
-          "box-border w-full max-w-[240mm] space-y-8 rounded-2xl border p-6 antialiased",
+          "box-border w-full max-w-[240mm] space-y-8 overflow-x-hidden break-words rounded-2xl border p-6 antialiased",
           "border-gray-200 bg-white text-gray-900",
           "dark:border-white/10 dark:bg-white/5 dark:text-gray-100",
         )}
@@ -86,7 +86,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           <SectionTitle>
             {isKo ? "A. OOH 매체 기본 정보" : "A. OOH media overview"}
           </SectionTitle>
-          <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+          <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
             <div>
               <dt className="text-gray-500">{isKo ? "목표" : "Goal"}</dt>
               <dd className="font-semibold">{goalTitle}</dd>
@@ -114,7 +114,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
               </dd>
             </div>
           </dl>
-          <table className="mt-4 w-full border-collapse text-sm">
+          <table className="mt-4 w-full table-fixed border-collapse break-words text-sm">
             <thead>
               <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
                 <th className="p-2">{isKo ? "매체" : "Media"}</th>
@@ -151,7 +151,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 : "No digital platforms selected."}
             </p>
           ) : (
-            <table className="mt-4 w-full border-collapse text-sm">
+            <table className="mt-4 w-full table-fixed border-collapse break-words text-sm">
               <thead>
                 <tr className="border-b bg-gray-50 text-left text-xs uppercase text-gray-500 dark:border-white/10 dark:bg-white/5 dark:text-gray-400">
                   <th className="p-2">{isKo ? "플랫폼" : "Platform"}</th>
@@ -199,7 +199,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 </li>
               ))}
             </ul>
-            <dl className="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <dl className="mt-4 grid grid-cols-1 gap-3 text-sm sm:grid-cols-2">
               <div>
                 <dt className="text-gray-500">
                   {isKo ? "크로스미디어 도달 증폭" : "Reach amplification"}
@@ -231,7 +231,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
             <SectionTitle>
               {isKo ? "D. 통합 CPM 분석" : "D. Integrated CPM analysis"}
             </SectionTitle>
-            <table className="mt-4 w-full border-collapse text-sm">
+            <table className="mt-4 w-full table-fixed border-collapse break-words text-sm">
               <tbody>
                 <tr className="border-b dark:border-white/10">
                   <td className="p-2 text-gray-500">OOH CPM</td>

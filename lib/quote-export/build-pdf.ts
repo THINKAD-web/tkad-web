@@ -2,7 +2,14 @@ import type { jsPDF } from "jspdf";
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { formatDocumentManWon, truncateDocText } from "@/lib/document-text";
+import { fetchMediaImageDataUrl } from "@/lib/server-media-image";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
+
+function dataUrlImageFormat(d: string): "PNG" | "WEBP" | "JPEG" {
+  if (d.startsWith("data:image/png")) return "PNG";
+  if (d.startsWith("data:image/webp")) return "WEBP";
+  return "JPEG";
+}
 
 const VIOLET = [124, 58, 237] as const;
 const VIOLET_DK = [76, 29, 149] as const;
@@ -145,6 +152,7 @@ function drawMediaCards(
   yStart: number,
   w: number,
   pageH: number,
+  thumbs: Map<string, string>,
 ): number {
   const isKo = p.isKo;
   let y = yStart;
@@ -157,6 +165,10 @@ function drawMediaCards(
   }
 
   for (const line of p.lines) {
+    const thumb = line.thumbUrl ? thumbs.get(line.thumbUrl) : undefined;
+    const tW = thumb ? 18 : 0;
+    const textX = x + 4 + tW;
+    const textW = w - 8 - tW;
     const specLines = [
       line.location,
       line.categoryLabel,
@@ -174,8 +186,8 @@ function drawMediaCards(
 
     const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
     const body = [line.name, ...specLines, priceLine].join("\n");
-    const lines = doc.splitTextToSize(body, w - 8) as string[];
-    const rh = Math.max(16, lines.length * 4.1 + 8);
+    const lines = doc.splitTextToSize(body, textW) as string[];
+    const rh = Math.max(thumb ? 22 : 16, lines.length * 4.1 + 8);
 
     if (y + rh > pageH - 28) {
       doc.addPage();
@@ -187,10 +199,18 @@ function drawMediaCards(
     doc.setLineWidth(0.2);
     doc.roundedRect(x, y, w, rh, 2, 2, "FD");
 
+    if (thumb) {
+      try {
+        doc.addImage(thumb, dataUrlImageFormat(thumb), x + 2, y + 2, tW - 2.5, rh - 4);
+      } catch {
+        /* skip broken image */
+      }
+    }
+
     doc.setFont(font, "normal");
     doc.setFontSize(9);
     doc.setTextColor(INK[0], INK[1], INK[2]);
-    doc.text(lines.slice(0, 10), x + 4, y + 5.5);
+    doc.text(lines.slice(0, 10), textX, y + 5.5);
     y += rh + 3;
   }
   return y;
@@ -304,7 +324,7 @@ function drawClientCampaign(
 }
 
 /** ── 기본 견적서 (라이트 · 플래너 보고서 톤) ── */
-async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload) {
+async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload, thumbs: Map<string, string>) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - M * 2;
@@ -321,7 +341,7 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload) {
 
   y = drawClientCampaign(doc, font, p, y, pageW);
   y = sectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
-  y = drawMediaCards(doc, font, p, M, y, contentW, pageH);
+  y = drawMediaCards(doc, font, p, M, y, contentW, pageH, thumbs);
   y += 6;
   y = sectionTitle(doc, font, isKo ? "합계" : "Total", y);
   drawTotals(doc, font, p, M, y, contentW, pageH);
@@ -341,7 +361,7 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload) {
 }
 
 /** ── 프리미엄: P1 다크 제안 · P2 공식 견적(라이트) ── */
-async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
+async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload, thumbs: Map<string, string>) {
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const contentW = pageW - M * 2;
@@ -429,7 +449,7 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload) {
   );
   y = drawClientCampaign(doc, font, p, y, pageW);
   y = sectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
-  y = drawMediaCards(doc, font, p, M, y, contentW, pageH);
+  y = drawMediaCards(doc, font, p, M, y, contentW, pageH, thumbs);
   y += 6;
   y = sectionTitle(doc, font, isKo ? "합계" : "Total", y);
   drawTotals(doc, font, p, M, y, contentW, pageH);
@@ -447,10 +467,23 @@ export async function buildQuotePdf(p: QuoteExportPayload): Promise<Uint8Array> 
   const hasKr = registerNotoSansKrIfAvailable(doc);
   const font = krFontFamily(hasKr);
 
+  // 매체 썸네일 사전 로드 (서버 fetch — BunnyCDN 등)
+  const thumbUrls = [
+    ...new Set(
+      p.lines.map((l) => l.thumbUrl).filter((u): u is string => Boolean(u)),
+    ),
+  ];
+  const thumbEntries = await Promise.all(
+    thumbUrls.map(async (u) => [u, await fetchMediaImageDataUrl(u)] as const),
+  );
+  const thumbs = new Map<string, string>(
+    thumbEntries.filter((e): e is readonly [string, string] => Boolean(e[1])),
+  );
+
   if (p.template === "premium") {
-    await buildPremium(doc, font, p);
+    await buildPremium(doc, font, p, thumbs);
   } else {
-    await buildBasic(doc, font, p);
+    await buildBasic(doc, font, p, thumbs);
   }
 
   const ab = doc.output("arraybuffer") as ArrayBuffer;
