@@ -1678,6 +1678,29 @@ model ChatLog {
   @@map("chat_logs")
 }
 
+/// 공개 AI 챗봇(Grok) 대화 로그 — 관리자 대시보드용 (비로그인 포함)
+model ChatbotLog {
+  id         String   @id @default(cuid())
+  sessionId  String   @map("session_id")
+  userId     String?  @map("user_id")
+  userName   String?  @map("user_name")
+  userEmail  String?  @map("user_email")
+  role       String   @db.VarChar(16)
+  message    String   @db.Text
+  ip         String?
+  userAgent  String?  @map("user_agent")
+  pageUrl    String?  @map("page_url")
+  tokensUsed Int?     @map("tokens_used")
+  model      String?
+  locale     String   @default("ko") @db.VarChar(8)
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@index([sessionId, createdAt])
+  @@index([createdAt])
+  @@index([userId])
+  @@map("chatbot_logs")
+}
+
 /// 가입 온보딩·맞춤 추천용 프로필
 model UserPreference {
   id                    String    @id @default(cuid())

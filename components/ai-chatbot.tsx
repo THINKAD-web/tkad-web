@@ -34,6 +34,26 @@ export type ChatTurn = {
 
 const SUGGESTION_KEYS = ["suggestion1", "suggestion2", "suggestion3"] as const;
 
+const CHATBOT_SESSION_KEY = "tkad-chatbot-session-id";
+
+/** 챗봇 세션 ID — 탭 세션 동안 유지(관리자 로그 그룹핑용) */
+function getChatbotSessionId(): string {
+  if (typeof window === "undefined") return "";
+  try {
+    let id = window.sessionStorage.getItem(CHATBOT_SESSION_KEY);
+    if (!id) {
+      id =
+        typeof crypto !== "undefined" && crypto.randomUUID
+          ? crypto.randomUUID()
+          : `s_${Date.now()}_${Math.random().toString(36).slice(2)}`;
+      window.sessionStorage.setItem(CHATBOT_SESSION_KEY, id);
+    }
+    return id;
+  } catch {
+    return "";
+  }
+}
+
 type PanelTab = "chat" | "compare" | "inquiry";
 
 export type AiChatbotProps = {
@@ -129,6 +149,11 @@ export default function AiChatbot({
             message: text,
             history,
             locale: locale === "en" ? "en" : "ko",
+            sessionId: getChatbotSessionId(),
+            pageUrl:
+              typeof window !== "undefined"
+                ? window.location.pathname + window.location.search
+                : null,
           }),
         });
         const data = (await res.json()) as {

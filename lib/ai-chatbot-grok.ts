@@ -65,7 +65,12 @@ export async function completeGrokChatbot(params: {
   catalog: MediaItem[];
   locale: "ko" | "en";
   maxToolRounds?: number;
-}): Promise<{ reply: string; media: AiChatbotMediaCard[] }> {
+}): Promise<{
+  reply: string;
+  media: AiChatbotMediaCard[];
+  tokensUsed: number;
+  model: string;
+}> {
   const apiKey = process.env.XAI_API_KEY?.trim();
   if (!apiKey) {
     throw new Error("XAI_API_KEY is not set");
@@ -88,6 +93,7 @@ export async function completeGrokChatbot(params: {
 
   const collectedCards: AiChatbotMediaCard[] = [];
   const maxRounds = params.maxToolRounds ?? 5;
+  let totalTokens = 0;
 
   for (let round = 0; round < maxRounds; round++) {
     const response = await fetch(XAI_CHAT_URL, {
@@ -123,7 +129,9 @@ export async function completeGrokChatbot(params: {
 
     const data = raw as {
       choices?: Array<{ message?: GrokMessage; finish_reason?: string }>;
+      usage?: { total_tokens?: number };
     };
+    totalTokens += data.usage?.total_tokens ?? 0;
     const choice = data.choices?.[0];
     const msg = choice?.message;
     if (!msg || typeof msg !== "object") {
@@ -168,6 +176,8 @@ export async function completeGrokChatbot(params: {
     return {
       reply,
       media: dedupeMediaCards(collectedCards).slice(0, 6),
+      tokensUsed: totalTokens,
+      model,
     };
   }
 
@@ -177,5 +187,7 @@ export async function completeGrokChatbot(params: {
         ? "도구 호출이 너무 많이 이어졌습니다. 질문을 짧게 나누어 다시 시도해 주세요."
         : "Too many tool steps. Please try a shorter question.",
     media: dedupeMediaCards(collectedCards).slice(0, 6),
+    tokensUsed: totalTokens,
+    model,
   };
 }
