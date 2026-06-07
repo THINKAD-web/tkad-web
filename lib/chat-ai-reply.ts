@@ -1,4 +1,5 @@
-import { getAnthropicClient, resolveModel } from "@/lib/ai-content-generator";
+import { getAnthropicClient } from "@/lib/ai-content-generator";
+import { AI_MODELS } from "@/lib/ai-models";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export async function generateChatAiOwnerReply(input: {
@@ -23,7 +24,7 @@ export async function generateChatAiOwnerReply(input: {
 
   try {
     const res = await client.messages.create({
-      model: resolveModel(),
+      model: AI_MODELS.chatReply,
       max_tokens: 350,
       messages: [
         {

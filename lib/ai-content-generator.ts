@@ -16,6 +16,13 @@ import prisma, {
 /** Default Claude 3.5 Sonnet snapshot; override with ANTHROPIC_MODEL. */
 export const ANTHROPIC_DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
 
+/** 콘텐츠 생성 출력 상한 — 비용 절감(출력 토큰이 비용 대부분). env 로 조정. */
+export const CONTENT_MAX_TOKENS =
+  Number(process.env.CONTENT_MAX_TOKENS ?? "4096") || 4096;
+/** 장문(리포트·아카데미) 상한. */
+export const CONTENT_MAX_TOKENS_LONG =
+  Number(process.env.CONTENT_MAX_TOKENS_LONG ?? "6144") || 6144;
+
 const TREND_TOOL = "emit_trend_report" as const;
 const ACADEMY_TOOL = "emit_academy_lesson" as const;
 const SUCCESS_CASE_TOOL = "emit_success_case" as const;
@@ -645,7 +652,7 @@ export async function generateTrendReport(
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 16384,
+      max_tokens: CONTENT_MAX_TOKENS_LONG,
       system,
       tools: [trendReportTool()],
       tool_choice: { type: "tool", name: TREND_TOOL },
@@ -724,7 +731,7 @@ export async function generateAcademyLesson(
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 16384,
+      max_tokens: CONTENT_MAX_TOKENS_LONG,
       system,
       tools: [academyLessonTool()],
       tool_choice: { type: "tool", name: ACADEMY_TOOL },
@@ -808,7 +815,7 @@ ${JSON.stringify(metrics, null, 2)}`;
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 8192,
+      max_tokens: CONTENT_MAX_TOKENS,
       system,
       tools: [successCaseTool()],
       tool_choice: { type: "tool", name: SUCCESS_CASE_TOOL },
@@ -924,7 +931,7 @@ ${json}
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 8192,
+      max_tokens: CONTENT_MAX_TOKENS,
       system,
       tools: [successCaseTool()],
       tool_choice: { type: "tool", name: SUCCESS_CASE_TOOL },
@@ -1024,7 +1031,7 @@ ${json}
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 8192,
+      max_tokens: CONTENT_MAX_TOKENS,
       system,
       tools: [campaignCompletionReportTool()],
       tool_choice: { type: "tool", name: CAMPAIGN_COMPLETION_TOOL },

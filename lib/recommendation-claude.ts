@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { MatchedMedia, MatchingInput } from "@/lib/matching-engine";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
-import { ANTHROPIC_DEFAULT_MODEL } from "@/lib/ai-content-generator";
+import { AI_MODELS } from "@/lib/ai-models";
 
 export type ClaudeRecommendation = {
   mediaId: string;
@@ -72,7 +72,7 @@ ${JSON.stringify(payload, null, 2)}
 
   try {
     const res = await anthropic.messages.create({
-      model: process.env.ANTHROPIC_MODEL?.trim() || ANTHROPIC_DEFAULT_MODEL,
+      model: AI_MODELS.recommendation,
       max_tokens: 1200,
       system,
       messages: [{ role: "user", content: user }],

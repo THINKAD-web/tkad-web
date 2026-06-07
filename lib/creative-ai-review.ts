@@ -1,4 +1,5 @@
-import { getAnthropicClient, resolveModel } from "@/lib/ai-content-generator";
+import { getAnthropicClient } from "@/lib/ai-content-generator";
+import { AI_MODELS } from "@/lib/ai-models";
 
 export type CreativeAiCheck = {
   id: string;
@@ -86,7 +87,7 @@ async function visionReview(imageUrl: string): Promise<{
   if (!client) return null;
   try {
     const res = await client.messages.create({
-      model: resolveModel(),
+      model: AI_MODELS.creativeReview,
       max_tokens: 400,
       messages: [
         {
