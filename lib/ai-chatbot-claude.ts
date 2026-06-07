@@ -6,10 +6,10 @@ import {
   type AiChatbotMediaCard,
 } from "@/lib/ai-chatbot-tools";
 import { getAnthropicClient } from "@/lib/ai-content-generator";
+import { AI_MODELS } from "@/lib/ai-models";
 
 /** 공개 챗봇 모델 — 비용 최소화를 위해 Haiku 기본 (CHATBOT_MODEL 로 override) */
-export const CHATBOT_MODEL =
-  process.env.CHATBOT_MODEL?.trim() || "claude-haiku-4-5-20251001";
+export const CHATBOT_MODEL = AI_MODELS.chatbot;
 const CHATBOT_MAX_TOKENS = Number(process.env.CHATBOT_MAX_TOKENS ?? "1024") || 1024;
 
 function dedupeMediaCards(cards: AiChatbotMediaCard[]): AiChatbotMediaCard[] {
