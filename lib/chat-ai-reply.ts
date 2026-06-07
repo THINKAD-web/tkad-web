@@ -1,5 +1,6 @@
 import { getAnthropicClient } from "@/lib/ai-content-generator";
 import { AI_MODELS } from "@/lib/ai-models";
+import { logAiUsage } from "@/lib/ai-usage-log";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export async function generateChatAiOwnerReply(input: {
@@ -38,6 +39,13 @@ Advertiser asked: ${input.advertiserMessage}
 Reply in 2-4 short sentences.`,
         },
       ],
+    });
+    void logAiUsage({
+      type: "chat_reply",
+      model: AI_MODELS.chatReply,
+      tokensUsed:
+        (res.usage?.input_tokens ?? 0) + (res.usage?.output_tokens ?? 0),
+      note: "support chat auto-reply",
     });
     const text =
       res.content[0]?.type === "text" ? res.content[0].text.trim() : "";

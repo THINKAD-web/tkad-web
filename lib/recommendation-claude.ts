@@ -2,6 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { MatchedMedia, MatchingInput } from "@/lib/matching-engine";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { AI_MODELS } from "@/lib/ai-models";
+import { logAiUsage } from "@/lib/ai-usage-log";
 
 export type ClaudeRecommendation = {
   mediaId: string;
@@ -76,6 +77,13 @@ ${JSON.stringify(payload, null, 2)}
       max_tokens: 1200,
       system,
       messages: [{ role: "user", content: user }],
+    });
+    void logAiUsage({
+      type: "recommendation",
+      model: AI_MODELS.recommendation,
+      tokensUsed:
+        (res.usage?.input_tokens ?? 0) + (res.usage?.output_tokens ?? 0),
+      note: "planner recommend rerank",
     });
 
     const text = res.content
