@@ -1701,6 +1701,15 @@ model ChatbotLog {
   @@map("chatbot_logs")
 }
 
+/// 사이트 단순 key-value 설정 (예: chatbot_status = active|maintenance)
+model SiteSetting {
+  key       String   @id
+  value     String
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("site_settings")
+}
+
 /// 가입 온보딩·맞춤 추천용 프로필
 model UserPreference {
   id                    String    @id @default(cuid())

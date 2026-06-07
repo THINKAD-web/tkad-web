@@ -114,6 +114,40 @@ export function AdminChatbotDashboard() {
   const [loading, setLoading] = useState(true);
   const [detail, setDetail] = useState<DetailResponse | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [botStatus, setBotStatus] = useState<"active" | "maintenance" | null>(null);
+  const [savingStatus, setSavingStatus] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/api/admin/chatbot/status", { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { status?: "active" | "maintenance" }) => {
+        if (!cancelled) setBotStatus(d.status ?? "active");
+      })
+      .catch(() => {});
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const toggleStatus = async (next: "active" | "maintenance") => {
+    if (savingStatus || next === botStatus) return;
+    setSavingStatus(true);
+    try {
+      const res = await fetch("/api/admin/chatbot/status", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: next }),
+      });
+      const d = (await res.json()) as { ok?: boolean; status?: string; error?: string };
+      if (res.ok && d.ok) setBotStatus(next);
+      else window.alert(d.error || "상태 변경 실패");
+    } catch {
+      window.alert("네트워크 오류");
+    } finally {
+      setSavingStatus(false);
+    }
+  };
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -162,6 +196,49 @@ export function AdminChatbotDashboard() {
 
   return (
     <div className="space-y-5">
+      {/* 챗봇 상태 토글 */}
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+        <div className="flex items-center gap-2">
+          <span
+            className={
+              "h-2.5 w-2.5 rounded-full " +
+              (botStatus === "maintenance" ? "bg-amber-500" : "bg-emerald-500")
+            }
+          />
+          <span className="text-sm font-bold">챗봇 상태</span>
+          <span className="text-xs text-muted-foreground">
+            {botStatus === "maintenance"
+              ? "점검 중 — 사용자에게 점검 안내가 표시됩니다"
+              : botStatus === "active"
+                ? "사용 중"
+                : "확인 중…"}
+          </span>
+        </div>
+        <div className="inline-flex rounded-xl border border-gray-200 p-0.5 dark:border-white/10">
+          {([
+            ["active", "사용중"],
+            ["maintenance", "점검중"],
+          ] as const).map(([val, label]) => (
+            <button
+              key={val}
+              type="button"
+              disabled={savingStatus}
+              onClick={() => void toggleStatus(val)}
+              className={
+                "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors disabled:opacity-50 " +
+                (botStatus === val
+                  ? val === "maintenance"
+                    ? "bg-amber-500 text-white"
+                    : "bg-emerald-600 text-white"
+                  : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/5")
+              }
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* 통계 카드 */}
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-6">
         <StatCard label="오늘 대화" value={(stats?.todayTurns ?? 0).toLocaleString()} sub="질문 수" />
