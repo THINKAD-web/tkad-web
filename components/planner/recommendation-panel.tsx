@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Sparkles, Plus, Check, RefreshCw, Eye, Users } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
+import { trackEvent } from "@/lib/ga-events";
 import {
   recommendPlannerMedia,
   type RecommendReasonKey,
@@ -245,12 +246,15 @@ export function PlannerRecommendationPanel({
   const isSelected = (id: string) => selectedIds.includes(id);
 
   const handleToggle = (id: string) => {
-    setCampaignMediaIds((prev) =>
-      prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id],
-    );
+    setCampaignMediaIds((prev) => {
+      const adding = !prev.includes(id);
+      if (adding) trackEvent("add_to_plan", { media_id: id, source: "recommend" });
+      return adding ? [...prev, id] : prev.filter((x) => x !== id);
+    });
   };
 
   const handleAddAll = () => {
+    trackEvent("add_to_plan", { source: "recommend_all" });
     setCampaignMediaIds((prev) => {
       const merged = new Set(prev);
       for (const r of recommendations) merged.add(r.media.id);

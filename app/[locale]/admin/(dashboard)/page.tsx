@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { loadAdminDashboardData } from "@/lib/admin-dashboard-data";
+import { loadAdminTodayMetrics } from "@/lib/admin-today-metrics";
 import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts";
 import { AdminWebVitalsCard } from "@/components/admin/admin-web-vitals-card";
 import { AdminBrokenImagesCard } from "@/components/admin/admin-broken-images-card";
@@ -98,10 +99,19 @@ function FeedList({
 export default async function AdminOverviewPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   const prefix = `/${locale}`;
-  const [data, webVitals] = await Promise.all([
+  const [data, webVitals, today] = await Promise.all([
     loadAdminDashboardData(locale),
     loadWebVitalsSummary(7),
+    loadAdminTodayMetrics(),
   ]);
+
+  const todayCards = [
+    { label: "신규 가입", value: today.signups, icon: Users },
+    { label: "문의", value: today.inquiries, icon: MessageSquareText },
+    { label: "견적 요청", value: today.quotes, icon: Calculator },
+    { label: "챗봇 세션", value: today.chatbotSessions, icon: Monitor },
+    { label: "플랜 생성", value: today.plans, icon: ClipboardList },
+  ];
 
   const quickActions = [
     {
@@ -144,6 +154,38 @@ export default async function AdminOverviewPage({ params }: Props) {
           </p>
         </div>
       </header>
+
+      {/* 오늘의 핵심 지표 — 자체 DB 기반 (GA4 와 별개) */}
+      <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
+        <div className="mb-3 flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold tracking-tight">오늘의 핵심 지표</h2>
+          <a
+            href="https://analytics.google.com/analytics/web/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1 rounded-lg border border-border/60 px-2.5 py-1 text-[11px] font-semibold text-muted-foreground transition hover:bg-muted/40"
+          >
+            상세 방문자 분석은 GA4에서
+            <ArrowRight className="h-3 w-3" />
+          </a>
+        </div>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+          {todayCards.map(({ label, value, icon: Icon }) => (
+            <div
+              key={label}
+              className="rounded-xl border border-border/50 bg-background/40 p-3"
+            >
+              <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+                <Icon className="h-3.5 w-3.5" />
+                {label}
+              </div>
+              <p className="mt-1 text-2xl font-black tabular-nums text-cyan-500 dark:text-cyan-300">
+                {today.configured ? value.toLocaleString() : "—"}
+              </p>
+            </div>
+          ))}
+        </div>
+      </section>
 
       {data.alerts.length > 0 ? (
         <section className="rounded-2xl border border-red-500/35 bg-red-500/10 p-4 backdrop-blur">
