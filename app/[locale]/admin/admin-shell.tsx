@@ -20,6 +20,7 @@ import {
   Database,
   FileText,
   Bot,
+  Coins,
   Calculator,
   ClipboardList,
   CalendarCheck,
@@ -93,6 +94,7 @@ type NavKey =
   | "searchStats"
   | "recommendations"
   | "apiUsage"
+  | "aiUsage"
   | "abTest"
   | "trendReports"
   | "academyNew"
@@ -142,6 +144,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/search-stats", key: "searchStats", icon: Search },
   { href: "/admin/recommendations", key: "recommendations", icon: Sparkles },
   { href: "/admin/api-usage", key: "apiUsage", icon: KeyRound },
+  { href: "/admin/ai-usage", key: "aiUsage", icon: Coins },
   { href: "/admin/ab-test", key: "abTest", icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports", icon: FileText },
   { href: "/admin/academy/new", key: "academyNew", icon: Sparkles },
@@ -249,7 +252,7 @@ const navGroupDefs: {
   {
     id: "settings",
     labelKey: "groupSettings",
-    itemKeys: ["operatorManual", "apiUsage"],
+    itemKeys: ["operatorManual", "apiUsage", "aiUsage"],
   },
 ];
 

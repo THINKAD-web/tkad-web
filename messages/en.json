@@ -2225,7 +2225,8 @@
     "searchStats": "Search stats",
     "recommendations": "AI recommendations",
     "abTest": "A/B test",
-    "apiUsage": "API usage"
+    "apiUsage": "API usage",
+    "aiUsage": "AI usage"
   },
   "search": {
     "modalTitle": "Unified search",
