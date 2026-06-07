@@ -43,7 +43,8 @@ export async function GET(request: NextRequest) {
     : {};
   const where = { ...rangeWhere, ...searchWhere };
 
-  const db = getPrisma();
+  try {
+    const db = getPrisma();
 
   const now = new Date();
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -165,4 +166,9 @@ export async function GET(request: NextRequest) {
     pageSize: PAGE_SIZE,
     hasMore,
   });
+  } catch (e) {
+    // chatbot_logs 테이블 미생성(마이그레이션 전) 등 — 빈 데이터로 폴백
+    console.error("[admin chatbot logs] query failed", e instanceof Error ? e.message : e);
+    return json({ configured: true, stats: null, sessions: [], page, pageSize: PAGE_SIZE, hasMore: false });
+  }
 }
