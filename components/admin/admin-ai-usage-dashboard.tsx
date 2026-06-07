@@ -18,12 +18,38 @@ type ModelRow = {
   tokens: number;
   estCostUsd: number;
 };
+type DailyPoint = { date: string; tokens: number; costUsd: number };
 type Resp = {
   configured: boolean;
   totals: { tokens: number; calls: number; estCostUsd: number } | null;
   byFeature: FeatureRow[];
   byModel: ModelRow[];
+  daily: DailyPoint[];
 };
+
+function DailyCostChart({ daily }: { daily: DailyPoint[] }) {
+  const pts = daily.slice(-30);
+  const max = Math.max(...pts.map((p) => p.costUsd), 0.0001);
+  return (
+    <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
+      <p className="mb-3 text-sm font-bold">일자별 추정 비용 (최근 30일)</p>
+      <div className="flex h-28 items-end gap-[3px]">
+        {pts.map((p) => (
+          <div
+            key={p.date}
+            title={`${p.date} · $${p.costUsd.toFixed(4)} · ${num(p.tokens)} tok`}
+            className="group flex-1 rounded-t bg-violet-500/80 transition-colors hover:bg-violet-600"
+            style={{ height: `${Math.max(2, (p.costUsd / max) * 100)}%` }}
+          />
+        ))}
+      </div>
+      <div className="mt-1.5 flex justify-between text-[10px] text-muted-foreground">
+        <span>{pts[0]?.date.slice(5)}</span>
+        <span>{pts[pts.length - 1]?.date.slice(5)}</span>
+      </div>
+    </div>
+  );
+}
 
 type Period = "today" | "7d" | "30d" | "all";
 const PERIODS: { key: Period; label: string }[] = [
@@ -104,6 +130,10 @@ export function AdminAiUsageDashboard() {
         <Card label="총 토큰" value={num(totals?.tokens ?? 0)} />
         <Card label="총 호출" value={num(totals?.calls ?? 0)} />
       </div>
+
+      {data && data.daily && data.daily.length > 0 ? (
+        <DailyCostChart daily={data.daily} />
+      ) : null}
 
       {loading && !data ? (
         <div className="py-10 text-center text-muted-foreground">
