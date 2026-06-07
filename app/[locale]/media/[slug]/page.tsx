@@ -57,6 +57,7 @@ import {
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import { MediaReviewsSection } from "@/components/media-detail/media-reviews-section";
 import TrackMediaView from "@/components/track-media-view";
+import { EventOnMount } from "@/components/analytics/event-on-mount";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { MediaDetailPageView } from "@/components/media-detail/media-detail-page-view";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
@@ -290,6 +291,10 @@ export default async function MediaDetailPage({ params }: Props) {
           price: media.price,
           imageUrl: heroImage || undefined,
         }}
+      />
+      <EventOnMount
+        event="view_media"
+        params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
       />
       <script
         type="application/ld+json"

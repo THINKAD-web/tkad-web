@@ -2,6 +2,7 @@
 
 import { Download, FileText, Loader2, Lock } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
+import { trackEvent } from "@/lib/ga-events";
 import { mediaProposalDownloadFilename } from "@/lib/media-proposal-filename";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 
@@ -26,6 +27,7 @@ export function MediaDetailProposalCard({
   const proposalHref = `/api/media/${encodeURIComponent(media.id)}/proposal?locale=${encodeURIComponent(locale)}`;
 
   const triggerDownload = () => {
+    trackEvent("download_proposal", { media_id: media.id, media_name: media.name });
     const a = document.createElement("a");
     a.href = proposalHref;
     a.download = downloadName;

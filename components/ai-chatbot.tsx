@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { trackEvent } from "@/lib/ga-events";
 import {
   BarChart3,
   Bot,
@@ -140,6 +141,11 @@ export default function AiChatbot({
       };
       setMessages((m) => [...m, userMsg]);
       setLoading(true);
+      trackEvent("use_chatbot", {
+        page:
+          typeof window !== "undefined" ? window.location.pathname : undefined,
+        locale: locale === "en" ? "en" : "ko",
+      });
       try {
         const history = messages.map(({ role, content }) => ({ role, content }));
         const res = await fetch("/api/chat", {

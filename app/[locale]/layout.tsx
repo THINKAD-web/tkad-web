@@ -19,6 +19,8 @@ import LocaleRootBody from "@/components/locale-root-body";
 import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
+import { GaTracker } from "@/components/analytics/ga-tracker";
+import { Suspense } from "react";
 import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
 import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
@@ -162,6 +164,11 @@ export default async function LocaleLayout({ children, params }: Props) {
         {!isAdminRoute ? <WebVitalsReporter /> : null}
         {!isAdminRoute ? <SpeedInsightsLoader /> : null}
         <PublicAnalyticsLoader />
+        {!isAdminRoute ? (
+          <Suspense fallback={null}>
+            <GaTracker />
+          </Suspense>
+        ) : null}
         {!isAdminRoute ? <AbGaVariantSync /> : null}
         <ThemeProvider>
           <NextIntlClientProvider
