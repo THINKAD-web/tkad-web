@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
-import { completeGrokChatbot } from "@/lib/ai-chatbot-grok";
+import { completeClaudeChatbot } from "@/lib/ai-chatbot-claude";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
 import { getClientIp } from "@/lib/api-response";
 import { logChatbotTurn } from "@/lib/chatbot-log";
+import { getChatbotStatus } from "@/lib/chatbot-status";
 
 export const maxDuration = 60;
 
@@ -15,7 +16,8 @@ type HistoryItem = { role: ChatRole; content: string };
 type ChatTurn = { role: "user" | "assistant"; content: string };
 
 const MAX_MESSAGE_CHARS = 2_500;
-const MAX_HISTORY = 16;
+// 비용 절감: 최근 10개 메시지만 모델에 전송
+const MAX_HISTORY = 10;
 const MAX_CONTENT_STRIP = 12_000;
 
 function normalizeMessages(
@@ -85,6 +87,17 @@ export async function POST(req: Request) {
     typeof sessionIdRaw === "string" ? sessionIdRaw.slice(0, 64) : "";
   const pageUrl = typeof pageUrlRaw === "string" ? pageUrlRaw : null;
 
+  // 점검 모드면 즉시 안내 (모델 호출 안 함 → 비용 0)
+  if ((await getChatbotStatus()) === "maintenance") {
+    return NextResponse.json({
+      maintenance: true,
+      reply:
+        locale === "ko"
+          ? "🔧 챗봇이 현재 점검 중입니다. 잠시 후 다시 이용해 주세요."
+          : "🔧 The chatbot is under maintenance. Please try again later.",
+    });
+  }
+
   const normalized = normalizeMessages(String(message ?? ""), history);
   if (!normalized.ok) {
     return NextResponse.json({ error: normalized.error }, { status: 400 });
@@ -100,7 +113,7 @@ export async function POST(req: Request) {
   const system = buildAiChatbotSystemPromptWithTools(locale);
 
   try {
-    const { reply, media, tokensUsed, model } = await completeGrokChatbot({
+    const { reply, media, tokensUsed, model } = await completeClaudeChatbot({
       systemPrompt: system,
       messages: normalized.messages,
       catalog,
@@ -133,7 +146,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ reply, media });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("XAI_API_KEY")) {
+    if (msg.includes("ANTHROPIC_API_KEY")) {
       return NextResponse.json(
         { error: "AI is not configured on this server." },
         { status: 503 },

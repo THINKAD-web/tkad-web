@@ -83,6 +83,7 @@ export default function AiChatbot({
   );
   const [panelTab, setPanelTab] = useState<PanelTab>("chat");
   const [input, setInput] = useState("");
+  const [maintenance, setMaintenance] = useState(false);
   const [messages, setMessages] = useState<ChatTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -166,10 +167,12 @@ export default function AiChatbot({
           reply?: string;
           media?: AiChatbotMediaCard[];
           error?: string;
+          maintenance?: boolean;
         };
         if (!res.ok) {
           throw new Error(data.error || t("errorGeneric"));
         }
+        if (data.maintenance) setMaintenance(true);
         const reply = data.reply?.trim() || "…";
         const media = Array.isArray(data.media) ? data.media : undefined;
         setMessages((m) => [
@@ -398,6 +401,11 @@ export default function AiChatbot({
                     <FileText className="h-3.5 w-3.5 shrink-0" />
                     <span className="truncate">{t("quoteCta")}</span>
                   </BtnBlock>
+                  {maintenance ? (
+                    <p className="mb-2 rounded-[14px] border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-300">
+                      🔧 {locale === "en" ? "The chatbot is under maintenance." : "챗봇이 현재 점검 중입니다."}
+                    </p>
+                  ) : null}
                   <div className="flex min-w-0 gap-0">
                     <textarea
                       ref={inputRef}
@@ -411,12 +419,12 @@ export default function AiChatbot({
                       }}
                       placeholder={t("placeholder")}
                       rows={2}
-                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15"
-                      disabled={loading}
+                      className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[18px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white text-gray-400 focus:dark:border-white/20 border-gray-300 focus:ring-2 focus:ring-white/15 disabled:opacity-50"
+                      disabled={loading || maintenance}
                     />
                     <button
                       type="button"
-                      disabled={loading || !input.trim()}
+                      disabled={loading || maintenance || !input.trim()}
                       onClick={() => void send()}
                       aria-label={t("send")}
                       className="-ml-2 flex h-11 w-11 shrink-0 items-center justify-center rounded-[18px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-all hover:-translate-y-0.5 hover:opacity-95 disabled:pointer-events-none disabled:opacity-40"
