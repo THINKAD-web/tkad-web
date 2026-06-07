@@ -1,28 +1,51 @@
 /**
- * 모델별 토큰 단가(추정, USD per 1M tokens, input+output 블렌디드).
- * 로그의 tokensUsed 는 input+output 합산이라 블렌디드 단가로 비용을 추정한다.
- * 실제 단가와 다를 수 있어 어디서나 "추정"으로 표기할 것.
+ * 모델별 토큰 단가 — 실제 공시가(USD per 1M tokens, input/output 분리).
+ * 로그의 tokensUsed 는 input+output 합산만 있으므로, 가정 출력 비율
+ * (AI_OUTPUT_TOKEN_RATIO, 기본 0.30)로 블렌디드 단가를 계산해 추정한다.
+ *
+ * 공시가(2026 기준, 변동 가능):
+ *  - Claude Haiku 4.5 : in $1   / out $5
+ *  - Claude Sonnet 4.5: in $3   / out $15
+ *  - Claude Opus      : in $15  / out $75
+ *  - xAI Grok-3       : in $3   / out $15 (근사)
  */
-const BLENDED_USD_PER_1M: Array<{ match: RegExp; usd: number; label: string }> = [
-  { match: /haiku/i, usd: 2.5, label: "Haiku" },
-  { match: /sonnet/i, usd: 9, label: "Sonnet" },
-  { match: /opus/i, usd: 45, label: "Opus" },
-  { match: /grok/i, usd: 9, label: "Grok" },
+type Rate = { match: RegExp; inUsd: number; outUsd: number; label: string };
+
+const RATES: Rate[] = [
+  { match: /haiku/i, inUsd: 1, outUsd: 5, label: "Haiku" },
+  { match: /sonnet/i, inUsd: 3, outUsd: 15, label: "Sonnet" },
+  { match: /opus/i, inUsd: 15, outUsd: 75, label: "Opus" },
+  { match: /grok/i, inUsd: 3, outUsd: 15, label: "Grok" },
 ];
-const DEFAULT_USD_PER_1M = 9;
+const DEFAULT_RATE: Rate = { match: /.*/, inUsd: 3, outUsd: 15, label: "기타" };
+
+/** 합산 토큰 중 출력 토큰이 차지하는 가정 비율 */
+const OUTPUT_RATIO = (() => {
+  const v = Number(process.env.AI_OUTPUT_TOKEN_RATIO ?? "0.3");
+  return Number.isFinite(v) && v >= 0 && v <= 1 ? v : 0.3;
+})();
+
+function rateFor(model: string | null | undefined): Rate {
+  if (!model) return DEFAULT_RATE;
+  return RATES.find((r) => r.match.test(model)) ?? DEFAULT_RATE;
+}
 
 export function modelFamilyLabel(model: string | null | undefined): string {
   if (!model) return "기타";
-  return BLENDED_USD_PER_1M.find((r) => r.match.test(model))?.label ?? model;
+  return RATES.find((r) => r.match.test(model))?.label ?? model;
 }
 
+/** 블렌디드 단가(USD per 1M) = in*(1-r) + out*r */
 export function blendedUsdPer1M(model: string | null | undefined): number {
-  if (!model) return DEFAULT_USD_PER_1M;
-  return BLENDED_USD_PER_1M.find((r) => r.match.test(model))?.usd ?? DEFAULT_USD_PER_1M;
+  const r = rateFor(model);
+  return r.inUsd * (1 - OUTPUT_RATIO) + r.outUsd * OUTPUT_RATIO;
 }
 
-/** 토큰 수 → 추정 비용(USD) */
-export function estimateCostUsd(model: string | null | undefined, tokens: number): number {
+/** 합산 토큰 → 추정 비용(USD) */
+export function estimateCostUsd(
+  model: string | null | undefined,
+  tokens: number,
+): number {
   return (tokens / 1_000_000) * blendedUsdPer1M(model);
 }
 

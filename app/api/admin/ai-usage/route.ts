@@ -143,5 +143,59 @@ export async function GET(request: NextRequest) {
     estCostUsd: round(rows.reduce((s, r) => s + r.estCostUsd, 0)),
   };
 
-  return json({ configured: true, period, totals, byFeature, byModel });
+  // ── 일자별 추이 (KST, 차트 윈도우는 최대 60일) ──
+  const chartFrom = (() => {
+    const sixtyAgo = new Date();
+    sixtyAgo.setDate(sixtyAgo.getDate() - 59);
+    sixtyAgo.setHours(0, 0, 0, 0);
+    return from && from > sixtyAgo ? from : sixtyAgo;
+  })();
+  const kstDay = (d: Date) =>
+    new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(d); // YYYY-MM-DD
+
+  const dailyMap = new Map<string, { tokens: number; costUsd: number }>();
+  const addDaily = (createdAt: Date, model: string | null, tokens: number) => {
+    const day = kstDay(createdAt);
+    const cur = dailyMap.get(day) ?? { tokens: 0, costUsd: 0 };
+    cur.tokens += tokens;
+    cur.costUsd += estimateCostUsd(model, tokens);
+    dailyMap.set(day, cur);
+  };
+  try {
+    const gRows = await db.generationLog.findMany({
+      where: { createdAt: { gte: chartFrom } },
+      select: { createdAt: true, model: true, tokensUsed: true },
+    });
+    for (const r of gRows) addDaily(r.createdAt, r.model, r.tokensUsed ?? 0);
+  } catch {
+    /* table missing */
+  }
+  try {
+    const cRows = await db.chatbotLog.findMany({
+      where: { role: "assistant", createdAt: { gte: chartFrom } },
+      select: { createdAt: true, model: true, tokensUsed: true },
+    });
+    for (const r of cRows) addDaily(r.createdAt, r.model, r.tokensUsed ?? 0);
+  } catch {
+    /* table missing */
+  }
+
+  // 빈 날짜 0 으로 채워 연속 추이
+  const daily: Array<{ date: string; tokens: number; costUsd: number }> = [];
+  for (
+    let d = new Date(chartFrom);
+    d <= new Date();
+    d.setDate(d.getDate() + 1)
+  ) {
+    const day = kstDay(d);
+    const v = dailyMap.get(day) ?? { tokens: 0, costUsd: 0 };
+    daily.push({ date: day, tokens: v.tokens, costUsd: round(v.costUsd) });
+  }
+
+  return json({ configured: true, period, totals, byFeature, byModel, daily });
 }
