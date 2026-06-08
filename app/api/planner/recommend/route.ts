@@ -7,6 +7,7 @@ import {
   plannerContextToMatching,
 } from "@/lib/recommendation-adapters";
 import { getCurrentUser } from "@/lib/user-session";
+import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
 import {
   PLANNER_AGE_KEYS,
   PLANNER_INDUSTRY_KEYS,
@@ -50,6 +51,23 @@ export async function POST(request: NextRequest) {
 
   if (!limiter.check(ip)) {
     return json({ ok: false, error: "rate_limited" }, { status: 429 });
+  }
+
+  // 일일 AI 한도 (비로그인 1 / 로그인 5 / PRO 30) + 어뷰징 방지
+  const aiUser = await getCurrentUser();
+  const aiRl = await enforceAiRateLimit(request, aiUser?.id ?? null);
+  if (!aiRl.allowed) {
+    return json(
+      {
+        ok: false,
+        rateLimited: true,
+        reason: aiRl.reason,
+        message: aiRateMessage(aiRl.reason, true),
+        remaining: 0,
+        limit: aiRl.limit,
+      },
+      { status: 429 },
+    );
   }
 
   let body: unknown;
