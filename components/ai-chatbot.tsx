@@ -84,6 +84,11 @@ export default function AiChatbot({
   const [panelTab, setPanelTab] = useState<PanelTab>("chat");
   const [input, setInput] = useState("");
   const [maintenance, setMaintenance] = useState(false);
+  const [remaining, setRemaining] = useState<number | null>(null);
+  const [rateLimit, setRateLimit] = useState<{
+    reason: "guest_limit" | "user_limit" | "abuse";
+    message: string;
+  } | null>(null);
   const [messages, setMessages] = useState<ChatTurn[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -168,11 +173,24 @@ export default function AiChatbot({
           media?: AiChatbotMediaCard[];
           error?: string;
           maintenance?: boolean;
+          rateLimited?: boolean;
+          reason?: "guest_limit" | "user_limit" | "abuse";
+          message?: string;
+          remaining?: number;
         };
+        if (res.status === 429 && data.rateLimited) {
+          setRateLimit({ reason: data.reason ?? "abuse", message: data.message ?? "" });
+          setMessages((m) => [
+            ...m,
+            { role: "assistant", content: data.message ?? "잠시 후 다시 시도해주세요.", ts: Date.now() },
+          ]);
+          return;
+        }
         if (!res.ok) {
           throw new Error(data.error || t("errorGeneric"));
         }
         if (data.maintenance) setMaintenance(true);
+        if (typeof data.remaining === "number") setRemaining(data.remaining);
         const reply = data.reply?.trim() || "…";
         const media = Array.isArray(data.media) ? data.media : undefined;
         setMessages((m) => [
@@ -404,6 +422,41 @@ export default function AiChatbot({
                   {maintenance ? (
                     <p className="mb-2 rounded-[14px] border border-amber-400/40 bg-amber-500/10 px-3 py-2 text-xs font-medium text-amber-600 dark:text-amber-300">
                       🔧 {locale === "en" ? "The chatbot is under maintenance." : "챗봇이 현재 점검 중입니다."}
+                    </p>
+                  ) : null}
+                  {rateLimit ? (
+                    <div className="mb-2 rounded-[14px] border border-violet-400/40 bg-violet-500/10 px-3 py-2.5">
+                      <p className="text-xs font-medium dark:text-white text-gray-800">
+                        {rateLimit.message}
+                      </p>
+                      {rateLimit.reason === "guest_limit" ? (
+                        <a
+                          href={`/${locale === "en" ? "en" : "ko"}/login`}
+                          className="mt-2 inline-flex rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white"
+                        >
+                          {locale === "en" ? "Sign in" : "로그인하기"}
+                        </a>
+                      ) : rateLimit.reason === "user_limit" ? (
+                        <div className="mt-2 flex flex-wrap gap-2">
+                          <a
+                            href={`/${locale === "en" ? "en" : "ko"}/contact`}
+                            className="inline-flex rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white"
+                          >
+                            {locale === "en" ? "Talk to an expert →" : "전문가 상담 받기 →"}
+                          </a>
+                          <a
+                            href={`/${locale === "en" ? "en" : "ko"}/pricing`}
+                            className="inline-flex rounded-lg border border-violet-400/50 px-3 py-1.5 text-xs font-bold text-violet-700 dark:text-violet-200"
+                          >
+                            PRO
+                          </a>
+                        </div>
+                      ) : null}
+                    </div>
+                  ) : null}
+                  {remaining != null && remaining >= 0 && !rateLimit ? (
+                    <p className="mb-1 text-right text-[11px] text-gray-400 dark:text-white/40">
+                      {locale === "en" ? `AI uses left today: ${remaining}` : `오늘 남은 AI 이용: ${remaining}회`}
                     </p>
                   ) : null}
                   <div className="flex min-w-0 gap-0">

@@ -367,7 +367,7 @@ export function PlannerRecommendationPanel({
                         {oneLine}
                       </p>
                     ) : null}
-                    <p className="mt-1 break-words font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                    <p className="mt-1 break-words font-display text-[11px] font-medium uppercase tracking-tight text-muted-foreground">
                       {`// `}{regionLabel(media.region)} ·{" "}
                       {(isKo
                         ? media.location
@@ -401,18 +401,23 @@ export function PlannerRecommendationPanel({
                       );
                     }
                     if (items.length === 0) return null;
+                    // 모바일: 세로 스택 / sm+: 한 줄 wrap. (uppercase·letter-spacing 제거로 폭 초과 방지)
                     return (
-                      <p className="flex w-full min-w-0 flex-wrap items-center gap-x-3 gap-y-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
-                        <Users className="h-3 w-3 shrink-0 text-primary" aria-hidden />
-                        <span className="break-words">{items[0]}</span>
-                        {items[1] ? (
-                          <>
-                            <Eye className="h-3 w-3 shrink-0 text-primary" aria-hidden />
-                            <span className="break-words">{items[1]}</span>
-                          </>
-                        ) : null}
-                        {items[2] ? <span>· {items[2]}</span> : null}
-                      </p>
+                      <div className="flex w-full min-w-0 flex-col gap-0.5 text-[11px] font-medium tabular-nums text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3">
+                        {items.map((it, i) => (
+                          <span
+                            key={it}
+                            className="inline-flex min-w-0 items-center gap-1 break-words"
+                          >
+                            {i === 0 ? (
+                              <Users className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                            ) : i === 1 ? (
+                              <Eye className="h-3 w-3 shrink-0 text-primary" aria-hidden />
+                            ) : null}
+                            {it}
+                          </span>
+                        ))}
+                      </div>
                     );
                   })()}
                   {reasons.length > 0 ? (

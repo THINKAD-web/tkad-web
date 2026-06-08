@@ -7,6 +7,7 @@ import {
 import { getCurrentUser } from "@/lib/user-session";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import { enforceRateLimit } from "@/lib/rate-limit";
+import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
 import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import { recommendRequestSchema } from "@/lib/schemas/recommend";
 import { postInternalAlert } from "@/lib/internal-webhook";
@@ -29,6 +30,23 @@ export async function POST(request: NextRequest) {
   const rl = await enforceRateLimit("recommend", ip);
   if (!rl.ok) {
     return json({ ok: false, error: "rate_limited", message: rl.message }, { status: 429 });
+  }
+
+  // 일일 AI 한도 (비로그인 1 / 로그인 5 / PRO 30) + 어뷰징 방지
+  const aiUser = await getCurrentUser();
+  const aiRl = await enforceAiRateLimit(request, aiUser?.id ?? null);
+  if (!aiRl.allowed) {
+    return json(
+      {
+        ok: false,
+        rateLimited: true,
+        reason: aiRl.reason,
+        message: aiRateMessage(aiRl.reason, true),
+        remaining: 0,
+        limit: aiRl.limit,
+      },
+      { status: 429 },
+    );
   }
 
   let body: unknown;
