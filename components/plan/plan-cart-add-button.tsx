@@ -52,7 +52,7 @@ export function PlanCartAddButton({
       type="button"
       onClick={handleClick}
       className={cn(
-        "inline-flex items-center justify-center gap-1 rounded-xl border font-semibold transition active:scale-95",
+        "inline-flex max-w-full items-center justify-center gap-1 whitespace-normal rounded-xl border font-semibold transition active:scale-95",
         compact ? "h-9 px-2.5 text-xs" : "h-10 px-3 text-xs",
         inPlan
           ? "border-violet-500/40 bg-violet-500 text-white shadow-sm shadow-violet-500/25"

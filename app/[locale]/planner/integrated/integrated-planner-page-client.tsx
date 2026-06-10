@@ -597,14 +597,16 @@ export default function IntegratedPlannerPageClient({
                   </h3>
                   <p className={plannerNeon.subtext}>{t("recommendBrowseDesc")}</p>
                 </div>
-                <MediaSearchPage
-                  embedded
-                  plannerMode
-                  initialMedia={plannerCatalogItems}
-                  initialTotal={catalog.length}
-                  plannerSelectedIds={campaignMediaIds}
-                  onPlannerToggleMedia={togglePlannerMedia}
-                />
+                <div className="min-w-0 max-w-full overflow-x-clip">
+                  <MediaSearchPage
+                    embedded
+                    plannerMode
+                    initialMedia={plannerCatalogItems}
+                    initialTotal={catalog.length}
+                    plannerSelectedIds={campaignMediaIds}
+                    onPlannerToggleMedia={togglePlannerMedia}
+                  />
+                </div>
               </div>
             ) : null}
 

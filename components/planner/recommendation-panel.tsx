@@ -426,7 +426,7 @@ export function PlannerRecommendationPanel({
                         <span
                           key={r.key}
                           className={cn(
-                            "border-2 px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em]",
+                            "max-w-full break-words border-2 px-2 py-0.5 font-display text-[11px] font-medium normal-case tracking-normal sm:text-xs sm:uppercase sm:tracking-[0.12em]",
                             REASON_COLORS[r.key],
                           )}
                         >

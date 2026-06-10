@@ -503,10 +503,17 @@ function MediaSearchPageInner({
     );
   };
 
+  const edgePad = embedded || plannerMode ? "px-0" : "px-4";
+
   return (
     <>
-    <div className={cn(!embedded && "bg-gray-50 dark:bg-[#020202]")}>
-      <div className="min-w-0 overflow-x-clip px-4 pt-4">
+    <div
+      className={cn(
+        "min-w-0 w-full max-w-full",
+        !embedded && "bg-gray-50 dark:bg-[#020202]",
+      )}
+    >
+      <div className={cn("min-w-0 overflow-x-clip pt-4", edgePad)}>
         <MediaManualBrowseFilters
           isKo={isKo}
           query={query}
@@ -544,7 +551,7 @@ function MediaSearchPageInner({
       {/* ── 매체 목록 / 지도 ── */}
       {viewMode === "map" ? (
         <div
-          className="relative mt-3 px-4"
+          className={cn("relative mt-3 min-w-0 overflow-x-clip", edgePad)}
           data-screenshot="media-view-map"
         >
           {loading ? (
@@ -609,10 +616,16 @@ function MediaSearchPageInner({
       <>
       <div
         className={cn(
-          "mt-3 min-w-0 overflow-x-clip px-4",
+          "mt-3 min-w-0 overflow-x-clip",
+          edgePad,
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
-            "grid auto-rows-fr grid-cols-2 items-stretch gap-3 md:grid-cols-3 lg:grid-cols-4",
+            cn(
+              "grid auto-rows-fr items-stretch gap-3",
+              plannerMode
+                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
+                : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+            ),
           viewMode === "compact" &&
             "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
         )}
@@ -710,7 +723,7 @@ function MediaSearchPageInner({
       </div>
 
       {hasMore && !loading ? (
-        <div className="mt-4 px-4">
+        <div className={cn("mt-4", edgePad)}>
           <button
             type="button"
             onClick={handleLoadMore}

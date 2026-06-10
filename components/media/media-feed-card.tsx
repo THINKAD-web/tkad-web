@@ -152,8 +152,8 @@ export function MediaFeedCard({
     item.trustScore != null || item.executionCount != null;
 
   return (
-    <article className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
-      <div className="flex flex-col gap-4 p-4 sm:gap-5 md:flex-row md:items-stretch">
+    <article className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+      <div className="flex min-w-0 flex-col gap-4 p-4 sm:gap-5 md:flex-row md:items-stretch">
         {plannerMode && onTogglePlan ? (
           <button
             type="button"
@@ -284,7 +284,7 @@ export function MediaFeedCard({
             <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
               {isKo ? "가격" : "Price"}
             </p>
-            <p className="mt-0.5 font-display text-2xl font-black tabular-nums text-gray-900 dark:text-white">
+            <p className="mt-0.5 break-all font-display text-xl font-black tabular-nums text-gray-900 sm:text-2xl dark:text-white">
               {item.price && item.price > 0
                 ? formatCatalogPriceFieldWon(item.price, isKo ? "ko-KR" : "en-US")
                 : isKo
@@ -297,7 +297,7 @@ export function MediaFeedCard({
             <MediaPriceExclNote isKo={isKo} className="mt-1" />
           </div>
 
-          <div className="grid grid-cols-3 gap-1.5">
+          <div className="grid grid-cols-1 gap-1.5 min-[420px]:grid-cols-3">
             <FeedKpiChip
               label={isKo ? "월 노출" : "Monthly reach"}
               value={formatMonthlyExposure(metrics.monthlyImpressions, isKo)}

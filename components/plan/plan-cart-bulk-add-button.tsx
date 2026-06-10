@@ -39,7 +39,7 @@ export function PlanCartBulkAddButton({ items, label, className }: Props) {
       size="md"
       onClick={handleClick}
       className={cn(
-        "inline-flex items-center gap-2 rounded-2xl border dark:border-white/12 border-gray-200",
+        "inline-flex max-w-full items-center gap-2 whitespace-normal !normal-case !tracking-normal rounded-2xl border text-center dark:border-white/12 border-gray-200",
         className,
       )}
     >

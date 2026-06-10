@@ -462,12 +462,12 @@ export function MediaManualBrowseFilters({
         ) : null}
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
         <select
           value={sort}
           onChange={(e) => onSortChange(e.target.value)}
           aria-label={isKo ? "정렬" : "Sort"}
-          className="rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
+          className="min-w-0 w-full max-w-full rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none sm:w-auto dark:border-white/10 dark:bg-white/8 dark:text-white/70"
         >
           {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
             <option key={opt.value} value={opt.value}>
@@ -477,7 +477,7 @@ export function MediaManualBrowseFilters({
         </select>
 
         <div
-          className="flex overflow-hidden rounded-xl border border-gray-200 dark:border-white/10"
+          className="scrollbar-hide flex min-w-0 w-full max-w-full overflow-x-auto rounded-xl border border-gray-200 sm:w-auto dark:border-white/10"
           data-screenshot="media-view-mode"
         >
           {VIEW_MODES.map((mode) => {
