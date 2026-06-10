@@ -20,6 +20,7 @@ import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import { GaTracker } from "@/components/analytics/ga-tracker";
+import { PwaAutoUpdate } from "@/components/pwa-auto-update";
 import { Suspense } from "react";
 import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { WebVitalsReporter } from "@/components/web-vitals-reporter";
@@ -163,6 +164,7 @@ export default async function LocaleLayout({ children, params }: Props) {
         {structuredData ? <JsonLd data={structuredData} /> : null}
         {!isAdminRoute ? <WebVitalsReporter /> : null}
         {!isAdminRoute ? <SpeedInsightsLoader /> : null}
+        <PwaAutoUpdate />
         <PublicAnalyticsLoader />
         {!isAdminRoute ? (
           <Suspense fallback={null}>
