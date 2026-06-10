@@ -1,4 +1,8 @@
-import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
+import type {
+  MediaItem,
+  MediaPriceOption,
+  MediaPricePeriodKey,
+} from "@/lib/media-data";
 
 /**
  * DB `Media.price` / 카탈로그 가격 필드 → 원(KRW).
@@ -213,6 +217,87 @@ export function mediaDetailPricePeriodTranslationKey(
     default:
       return "pricePeriodDisplayMonth";
   }
+}
+
+/** 번역 키 없이 기간 문구 직접 반환 (priceOptions 카드 등) */
+export function formatMediaDetailPricePeriodDisplay(
+  period: MediaPricePeriodKey | string | null | undefined,
+  locale: string,
+): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  switch (normalizeMediaPricePeriod(period)) {
+    case "biweekly":
+      return isKo ? "2주" : "2 weeks";
+    case "week":
+      return isKo ? "4주" : "4 weeks";
+    case "day":
+      return isKo ? "1일" : "1 day";
+    default:
+      return isKo ? "1개월" : "1 month";
+  }
+}
+
+function extractDurationLabelFromPriceOptionLabel(
+  label: string,
+  locale: string,
+): string | null {
+  const text = label.trim();
+  if (!text) return null;
+  const isKo = locale === "ko" || locale.startsWith("ko");
+
+  if (isKo) {
+    const month = text.match(/(\d+)\s*개월/);
+    if (month) return `${month[1]}개월`;
+    const week = text.match(/(\d+)\s*주/);
+    if (week) return `${week[1]}주`;
+    const day = text.match(/(\d+)\s*일/);
+    if (day) return `${day[1]}일`;
+    return null;
+  }
+
+  const month = text.match(/(\d+)\s*months?/i);
+  if (month) {
+    return `${month[1]} month${month[1] === "1" ? "" : "s"}`;
+  }
+  const week = text.match(/(\d+)\s*weeks?/i);
+  if (week) {
+    return `${week[1]} week${week[1] === "1" ? "" : "s"}`;
+  }
+  const day = text.match(/(\d+)\s*days?/i);
+  if (day) {
+    return `${day[1]} day${day[1] === "1" ? "" : "s"}`;
+  }
+  return null;
+}
+
+/**
+ * priceOption 카드 금액 하단 기간 — 옵션 `period` 또는 라벨(예: 20초 3일)에서 추론.
+ * 라벨에 기간이 있는데 `period`가 없으면 매체 기본 `pricePeriod`(1개월)로 떨어지지 않음.
+ */
+export function resolveMediaPriceOptionPeriodLabel(
+  option: Pick<MediaPriceOption, "label" | "period">,
+  fallbackPeriod: MediaPricePeriodKey | string | null | undefined,
+  locale: string,
+): string | null {
+  if (option.period) {
+    return formatMediaDetailPricePeriodDisplay(option.period, locale);
+  }
+
+  const fromLabel = extractDurationLabelFromPriceOptionLabel(
+    option.label,
+    locale,
+  );
+  if (fromLabel) return fromLabel;
+
+  if (
+    /(\d+\s*(?:일|주|개월)|\d+\s*(?:days?|weeks?|months?))/i.test(
+      option.label,
+    )
+  ) {
+    return null;
+  }
+
+  return formatMediaDetailPricePeriodDisplay(fallbackPeriod, locale);
 }
 
 /** 공개 매체·광고 단가 안내 — 제작비·부가세 별도 */

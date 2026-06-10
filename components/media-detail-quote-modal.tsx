@@ -9,6 +9,7 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   formatCatalogPriceKrwLong,
   mediaDetailPricePeriodTranslationKey,
+  resolveMediaPriceOptionPeriodLabel,
 } from "@/lib/media-price-format";
 import {
   inferQuoteCampaignPeriodFromMedia,
@@ -105,6 +106,11 @@ function MediaDetailQuoteModalBody({
           <div className="flex max-h-[min(52vh,22rem)] flex-col gap-2 overflow-y-auto pr-0.5">
             {opts.map((o, i) => {
               const selectedCard = safeIdx === i;
+              const periodLabel = resolveMediaPriceOptionPeriodLabel(
+                o,
+                media.pricePeriod,
+                locale,
+              );
               return (
                 <button
                   key={`${o.label}-${i}`}
@@ -137,13 +143,11 @@ function MediaDetailQuoteModalBody({
                   <span className="mt-1.5 block text-lg font-black tabular-nums tracking-tight dark:text-white text-gray-900 sm:text-xl">
                     {formatCatalogPriceKrwLong(o.price, locale)}
                   </span>
-                  <span className="mt-1.5 font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
-                    {t(
-                      mediaDetailPricePeriodTranslationKey(
-                        o.period ?? media.pricePeriod,
-                      ),
-                    )}
-                  </span>
+                  {periodLabel ? (
+                    <span className="mt-1.5 font-display text-xs font-medium uppercase tracking-wider dark:text-white text-gray-500">
+                      {periodLabel}
+                    </span>
+                  ) : null}
                   {o.description?.trim() ? (
                     <span className="mt-2 block border-t dark:border-white/10 border-gray-200 pt-2 text-[11px] leading-relaxed dark:text-white text-gray-600">
                       {o.description}
