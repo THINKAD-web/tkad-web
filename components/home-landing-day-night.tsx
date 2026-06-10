@@ -18,7 +18,7 @@ export function HomeLandingDayNight({ children, portal, className }: Props) {
   return (
     <div
       className={cn(
-        "tkad-home-appearance flex min-h-0 flex-1 flex-col",
+        "tkad-home-appearance flex min-h-0 w-full min-w-0 flex-1 flex-col",
         portal && "tkad-portal-appearance",
         className,
       )}

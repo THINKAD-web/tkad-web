@@ -25,7 +25,8 @@ function isHiddenPath(pathname: string | null): boolean {
     pathname.includes("/register") ||
     pathname.includes("/signup") ||
     pathname.includes("/reset-password") ||
-    pathname.includes("/forgot-password")
+    pathname.includes("/forgot-password") ||
+    pathname.startsWith("/planner")
   );
 }
 

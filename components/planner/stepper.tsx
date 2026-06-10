@@ -25,21 +25,21 @@ export function PlannerStepper({
 }: Props) {
   return (
     <div
-      className="mb-10 flex flex-col items-center gap-4"
+      className="mb-10 flex w-full min-w-0 max-w-full flex-col items-center gap-4"
       role="group"
       aria-label={stepOfLabel}
     >
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
+      <p className="max-w-full px-1 text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {stepOfLabel} ]
       </p>
-      <ol className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-3">
+      <ol className="scrollbar-hide flex max-w-full items-center justify-start gap-1 overflow-x-auto px-1 py-0.5 sm:flex-wrap sm:justify-center sm:gap-3 sm:overflow-visible">
         {STEP_NUMBERS.map((s) => {
           const isCurrent = currentStep === s;
           const isComplete = currentStep > s;
           const label = stepLabels?.[s];
           const clickable = Boolean(onStepClick) && (isComplete || isCurrent);
           return (
-            <li key={s} className="flex items-center gap-1.5 sm:gap-3">
+            <li key={s} className="flex shrink-0 items-center gap-1.5 sm:gap-3">
               {clickable ? (
                 <button
                   type="button"

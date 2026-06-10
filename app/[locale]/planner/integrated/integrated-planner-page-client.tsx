@@ -100,11 +100,13 @@ function IntegratedPlannerPageBody({
   children: ReactNode;
 }) {
   const inner = (
-    <div className={cn("tkad-planner-neon", className)}>{children}</div>
+    <div className={cn("tkad-planner-neon w-full min-w-0 max-w-full", className)}>
+      {children}
+    </div>
   );
   if (appearance === "night") {
     return (
-      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
+      <div className="relative w-full min-w-0 overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-neon-depth"
@@ -117,7 +119,7 @@ function IntegratedPlannerPageBody({
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
         />
-        <div className="relative">{inner}</div>
+        <div className="relative w-full min-w-0">{inner}</div>
       </div>
     );
   }
@@ -385,7 +387,7 @@ export default function IntegratedPlannerPageClient({
 
   return (
     <HomeLandingDayNight>
-    <div className="tkad-landing-neon overflow-x-clip">
+    <div className="tkad-landing-neon w-full min-w-0 overflow-x-clip pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
       <PageHero
         eyebrow="// 02 · PLANNING"
         title="OOH + 디지털 "
@@ -396,7 +398,7 @@ export default function IntegratedPlannerPageClient({
 
       <IntegratedPlannerPageBody
         appearance={landingAppearance}
-        className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+        className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
       >
         {wizardStep <= LAST_STEP ? (
           <IntegratedPlannerStepper
@@ -410,7 +412,7 @@ export default function IntegratedPlannerPageClient({
         ) : null}
 
         {wizardStep <= LAST_STEP ? (
-          <div className="mx-auto min-w-0 max-w-3xl space-y-8 overflow-x-clip">
+          <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
             <PlannerTips
               variant="integrated"
               wizardStep={wizardStep}
@@ -661,10 +663,11 @@ export default function IntegratedPlannerPageClient({
               />
             ) : null}
 
-            <div className="flex flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
+            <div className="flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
               <BtnBlock
                 variant="secondary"
                 size="md"
+                className="w-full min-w-0 sm:w-auto"
                 onClick={goPrevStep}
                 disabled={wizardStep <= 1}
               >
@@ -674,7 +677,7 @@ export default function IntegratedPlannerPageClient({
               <BtnBlock
                 variant="accent"
                 size="md"
-                className="tkad-planner-wizard-btn-accent"
+                className="tkad-planner-wizard-btn-accent w-full min-w-0 sm:w-auto"
                 onClick={goNext}
               >
                 {wizardStep === LAST_STEP ? (
@@ -692,7 +695,7 @@ export default function IntegratedPlannerPageClient({
             </div>
           </div>
         ) : integratedMetrics ? (
-          <div className="mx-auto min-w-0 max-w-3xl space-y-8 overflow-x-clip">
+          <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
             <PlannerTips
               variant="integrated"
               wizardStep={8}
