@@ -286,7 +286,7 @@ export function PlannerRecommendationPanel({
           </h3>
           <p className={plannerNeon.subtext}>{t("recommendDesc")}</p>
         </div>
-        <div className="flex min-w-0 flex-wrap gap-2">
+        <div className="grid w-full min-w-0 grid-cols-1 gap-2 sm:flex sm:w-auto sm:flex-wrap">
           <button
             type="button"
             onClick={() => setRefreshTick((n) => n + 1)}
@@ -294,7 +294,7 @@ export function PlannerRecommendationPanel({
             className={cn(
               plannerNeon.selectChip,
               plannerNeon.selectChipIdle,
-              "px-4 py-2 disabled:opacity-50",
+              "w-full justify-center whitespace-nowrap px-4 py-2 disabled:opacity-50 sm:w-auto",
             )}
           >
             <RefreshCw
@@ -307,14 +307,14 @@ export function PlannerRecommendationPanel({
             type="button"
             onClick={handleAddAll}
             disabled={loading || recommendations.length === 0}
-            className={cn(plannerNeon.ctaSm, "disabled:opacity-50")}
+            className={cn(plannerNeon.ctaSm, "w-full justify-center whitespace-nowrap disabled:opacity-50 sm:w-auto")}
           >
             {t("recommendAddAll")}
           </button>
           <PlanCartBulkAddButton
             items={planBulkItems}
             label={isKo ? "추천 전체 플랜에 추가" : "Add all to plan"}
-            className="!h-auto !px-4 !py-2 !text-xs"
+            className="!h-auto w-full justify-center !px-4 !py-2 !text-xs sm:w-auto"
           />
         </div>
       </div>

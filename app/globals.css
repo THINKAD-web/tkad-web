@@ -541,6 +541,13 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 모바일 가로 스크롤(레이아웃 넘침) 전역 가드 — clip 은 sticky 를 깨지 않음 */
+html,
+body {
+  overflow-x: clip;
+  max-width: 100%;
+}
+
 /* ── Marquee (logos) ── */
 .tkad-marquee {
   display: flex;
