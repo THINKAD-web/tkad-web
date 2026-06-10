@@ -76,7 +76,8 @@ export function BookingRequestModal({
     (window.location.hostname === "tkad.co.kr" ||
       window.location.hostname === "www.tkad.co.kr");
   const turnstileEnabled =
-    isProductionDomain && !!process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY;
+    isProductionDomain &&
+    (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim().length ?? 0) >= 20;
 
   // 유효성 (UI 단)
   const datesValid = (() => {

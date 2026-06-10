@@ -1,6 +1,7 @@
 "use client";
 
 import { Turnstile } from "@marsidev/react-turnstile";
+import { isTurnstileSiteKeyConfigured } from "@/lib/turnstile-config";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -14,7 +15,7 @@ type Props = {
  */
 export function TurnstileWidget({ onVerify, className }: Props) {
   const siteKey = process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim();
-  if (!siteKey) return null;
+  if (!isTurnstileSiteKeyConfigured(siteKey)) return null;
 
   return (
     <div className={cn("flex justify-center", className)}>

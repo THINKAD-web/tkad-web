@@ -82,7 +82,11 @@ export async function POST(request: NextRequest) {
       body: `reason=${turnstile.reason} ip=${ip}`,
     }).catch(() => {});
     return json(
-      { error: "보안 확인이 필요합니다.", reason: turnstile.reason },
+      {
+        error: "turnstile_failed",
+        message: "보안 확인이 필요합니다.",
+        reason: turnstile.reason,
+      },
       { status: 401 },
     );
   }

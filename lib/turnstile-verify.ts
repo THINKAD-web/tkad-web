@@ -3,6 +3,11 @@
  * @see https://developers.cloudflare.com/turnstile/get-started/server-side-validation/
  */
 
+import {
+  isTurnstileSecretConfigured,
+  readTurnstileSecret,
+} from "@/lib/turnstile-config";
+
 /**
  * Turnstile site key 가 등록된 운영 도메인 목록.
  * vercel.app preview / localhost 등 다른 호스트에서는 Turnstile 우회.
@@ -25,13 +30,15 @@ export function shouldRequireTurnstile(hostHeader: string | null | undefined): b
 export async function verifyTurnstileToken(
   token: string | undefined,
   remoteip: string | undefined,
-): Promise<{ ok: true } | { ok: false; reason: string }> {
-  const secret = process.env.TURNSTILE_SECRET_KEY?.trim();
-  if (!secret) {
+): Promise<{ ok: true; bypassed?: boolean } | { ok: false; reason: string }> {
+  const secret = readTurnstileSecret();
+  if (!isTurnstileSecretConfigured(secret)) {
     if (process.env.NODE_ENV === "production") {
-      return { ok: false, reason: "turnstile_not_configured" };
+      console.warn(
+        "[turnstile] TURNSTILE_SECRET_KEY not configured — verification bypassed",
+      );
     }
-    return { ok: true };
+    return { ok: true, bypassed: true };
   }
   if (!token?.trim()) {
     return { ok: false, reason: "missing_token" };

@@ -154,7 +154,8 @@ function ContactInquiryForm() {
     typeof window !== "undefined" &&
     (window.location.hostname === "tkad.co.kr" ||
       window.location.hostname === "www.tkad.co.kr");
-  const turnstileEnabled = isProductionDomain && !!siteKey;
+  const turnstileEnabled =
+    isProductionDomain && siteKey.length >= 20;
 
   const {
     register,
@@ -887,12 +888,18 @@ function ContactInquiryForm() {
         }
         let errMsg = tForm("toastError");
         try {
-          const j = (await res.json()) as { error?: string };
+          const j = (await res.json()) as {
+            error?: string;
+            reason?: string;
+          };
           if (j.error === "save_failed") {
             errMsg = tForm("toastSaveFailed");
           } else if (j.error === "service_unavailable") {
             errMsg = tForm("toastServiceUnavailable");
-          } else if (j.error === "turnstile_failed") {
+          } else if (
+            j.error === "turnstile_failed" ||
+            j.reason === "turnstile_not_configured"
+          ) {
             errMsg = tForm("toastTurnstileFailed");
           } else if (j.error === "validation_failed") {
             errMsg = tForm("toastValidation");
