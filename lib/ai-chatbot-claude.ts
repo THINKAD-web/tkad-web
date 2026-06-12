@@ -25,7 +25,6 @@ function dedupeMediaCards(cards: AiChatbotMediaCard[]): AiChatbotMediaCard[] {
 
 /**
  * 싱커드 공개 AI 챗봇 — Claude Haiku (tool calling: 매체 검색/추천).
- * 기존 Grok 구현(`completeGrokChatbot`)과 동일한 입출력 인터페이스.
  */
 export async function completeClaudeChatbot(params: {
   systemPrompt: string;
