@@ -212,13 +212,17 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                 >
                   <div className="relative h-20 w-24 shrink-0 overflow-hidden rounded-lg border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-gray-100">
                     {src ? (
-                      // eslint-disable-next-line @next/next/no-img-element -- 외부·Cloudinary URL 등 임의 도메인
-                      <img
-                        src={src}
-                        alt=""
-                        className="absolute inset-0 h-full w-full object-cover"
-                        loading="lazy"
-                        decoding="async"
+                      // html2canvas(PDF)는 object-fit 을 무시해 <img> 를 늘려 비율을
+                      // 깨뜨린다. background-size:cover 의 div 로 렌더해 비율을 보존.
+                      <div
+                        aria-hidden
+                        className="absolute inset-0"
+                        style={{
+                          backgroundImage: `url("${src}")`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          backgroundRepeat: "no-repeat",
+                        }}
                       />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center font-display text-[9px] uppercase tracking-[0.18em] text-muted-foreground">
@@ -253,13 +257,14 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                     <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
                       {name}
                     </p>
-                    <p className={cn("mt-1 line-clamp-2 text-xs", plannerNeon.subtext)}>
+                    <p className={cn("mt-1 line-clamp-2 text-[11px] leading-relaxed", plannerNeon.subtext)}>
                       {loc}
                     </p>
-                    <p className={cn("mt-1 text-xs uppercase tracking-widest", plannerNeon.kpiLabel)}>
+                    <span className="mt-1.5 inline-block rounded-md bg-violet-500/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-500 dark:text-violet-300">
                       {typeLabel(m)}
-                    </p>
-                    <p className="mt-1 text-sm font-bold tabular-nums text-violet-400">
+                    </span>
+                    <div className="my-2 border-t dark:border-white/10 border-gray-200" />
+                    <p className="text-sm font-bold tabular-nums text-violet-500 dark:text-violet-400">
                       {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                       <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                         /{formatPricePeriodShortLabel(m.pricePeriod, isKo ? "ko" : "en")}

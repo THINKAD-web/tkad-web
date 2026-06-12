@@ -107,13 +107,16 @@ export function MediaDetailCard({
         style={{ background: LIGHT.bgAlt }}
       >
         {detail.thumbUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
-            src={detail.thumbUrl}
-            alt=""
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
+          // html2canvas(PDF)는 object-fit 을 무시하므로 background-size:cover 로 렌더
+          <div
+            aria-hidden
+            className="absolute inset-0"
+            style={{
+              backgroundImage: `url("${detail.thumbUrl}")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-[10px] font-medium uppercase tracking-widest text-[#9CA3AF]">
@@ -260,17 +263,20 @@ export function MediaDetailTableRow({
       <td className="px-2 py-4">
         <div className="flex gap-3">
           <div
-            className="h-14 w-14 shrink-0 overflow-hidden rounded-xl border shadow-sm"
+            className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl border shadow-sm"
             style={{ borderColor: LIGHT.border, background: LIGHT.bgAlt }}
           >
             {detail.thumbUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={detail.thumbUrl}
-                alt=""
-                className="h-full w-full object-cover"
-                loading="eager"
-                decoding="sync"
+              // html2canvas(PDF)는 object-fit 을 무시하므로 background-size:cover 로 렌더
+              <div
+                aria-hidden
+                className="absolute inset-0"
+                style={{
+                  backgroundImage: `url("${detail.thumbUrl}")`,
+                  backgroundSize: "cover",
+                  backgroundPosition: "center",
+                  backgroundRepeat: "no-repeat",
+                }}
               />
             ) : null}
           </div>

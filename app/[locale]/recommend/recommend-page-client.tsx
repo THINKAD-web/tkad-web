@@ -83,6 +83,8 @@ export default function RecommendPageClient({
 
   const router = useRouter();
   const [navigatingQuote, setNavigatingQuote] = useState(false);
+  const [creatingQuote, setCreatingQuote] = useState(false);
+  const handledCreateQuoteRef = useRef(false);
 
   const top3 = useMemo(() => {
     if (!fullList?.length) return [];
@@ -138,6 +140,120 @@ export default function RecommendPageClient({
     router.push("/contact?from=ai");
     setNavigatingQuote(false);
   }, [cartItems, top3, lastPayload, isKo, router, toast]);
+
+  /**
+   * 추천 결과로 견적서를 직접 생성하고 미리보기로 이동.
+   * 비로그인 시 매체 ID 를 redirect 에 실어 로그인 후 `?createQuote=<ids>` 로 복귀해 생성을 재개.
+   */
+  const createQuoteFromRecommend = useCallback(
+    async (idsOverride?: string[]) => {
+      if (creatingQuote) return;
+      const picked =
+        idsOverride && idsOverride.length > 0
+          ? catalog.filter((m) => idsOverride.includes(m.id))
+          : cartItems.length > 0
+            ? cartItems
+            : top3.map((s) => s.item);
+      if (picked.length === 0) {
+        toast(
+          "error",
+          isKo ? "추천 매체가 없습니다." : "No recommendations yet.",
+        );
+        return;
+      }
+
+      setCreatingQuote(true);
+      try {
+        let user:
+          | { name?: string; email?: string; company?: string | null }
+          | null = null;
+        try {
+          const sessionRes = await fetch("/api/auth/session", {
+            cache: "no-store",
+          });
+          const sessionData = await sessionRes.json();
+          if (sessionData?.ok && sessionData.data?.email) {
+            user = sessionData.data;
+          }
+        } catch {
+          /* ignore */
+        }
+
+        if (!user?.email) {
+          const ids = picked.map((m) => m.id).join(",");
+          toast(
+            "info",
+            isKo
+              ? "견적서 생성을 위해 로그인이 필요합니다. 로그인 후 이어서 진행됩니다."
+              : "Please sign in to generate a quote — we'll resume right after.",
+          );
+          router.push(
+            `/login?redirect=${encodeURIComponent(`/recommend?createQuote=${ids}`)}`,
+          );
+          return;
+        }
+
+        const duration = lastPayload?.input.preferredPeriodWeeks
+          ? Math.max(
+              1,
+              Math.round(lastPayload.input.preferredPeriodWeeks / 4),
+            )
+          : 1;
+        const period = isKo
+          ? `${duration}개월`
+          : `${duration} month${duration > 1 ? "s" : ""}`;
+        const totalBudgetWon =
+          picked.reduce((s, m) => s + (m.price || 0), 0) * duration;
+
+        const res = await fetch("/api/quote/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            mediaIds: picked.map((m) => m.id),
+            clientName: user.name || user.email,
+            clientEmail: user.email,
+            clientCompany: user.company || undefined,
+            period,
+            budgetMax: totalBudgetWon > 0 ? totalBudgetWon : undefined,
+            locale: isKo ? "ko" : "en",
+          }),
+        });
+        const data = (await res.json()) as {
+          ok?: boolean;
+          data?: { id?: string };
+        };
+        if (!res.ok || !data?.ok || !data.data?.id) {
+          throw new Error("quote create failed");
+        }
+        router.push(`/quote/${data.data.id}/preview`);
+      } catch (e) {
+        console.error("[recommend.createQuote] error", e);
+        toast(
+          "error",
+          isKo
+            ? "견적서 생성에 실패했습니다. 잠시 후 다시 시도해 주세요."
+            : "Could not create the quote. Please try again.",
+        );
+        setCreatingQuote(false);
+      }
+    },
+    [cartItems, top3, catalog, lastPayload, creatingQuote, isKo, router, toast],
+  );
+
+  // 로그인 후 `?createQuote=<ids>` 로 복귀하면 해당 매체로 견적 생성을 재개.
+  useEffect(() => {
+    const param = searchParams.get("createQuote");
+    if (!param) return;
+    if (handledCreateQuoteRef.current) return;
+    handledCreateQuoteRef.current = true;
+    const ids = param.split(",").map((s) => s.trim()).filter(Boolean);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("createQuote");
+      window.history.replaceState({}, "", url.toString());
+    }
+    if (ids.length > 0) void createQuoteFromRecommend(ids);
+  }, [searchParams, createQuoteFromRecommend]);
 
   const runAnalysis = useCallback(
     async (payload: MediaAiRecommendFormSubmit, seed = 0) => {
@@ -396,10 +512,24 @@ export default function RecommendPageClient({
                 <BtnBlock
                   variant="accent"
                   size="md"
+                  onClick={() => void createQuoteFromRecommend()}
+                  disabled={creatingQuote}
+                >
+                  {creatingQuote
+                    ? isKo
+                      ? "견적서 생성 중..."
+                      : "Creating quote..."
+                    : isKo
+                      ? "이 플랜으로 견적서 만들기 →"
+                      : "Create a quote with this plan →"}
+                </BtnBlock>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
                   onClick={goToContactQuote}
                   disabled={navigatingQuote}
                 >
-                  {isKo ? "이 플랜으로 견적 요청하기 →" : "Request quote with this plan →"}
+                  {isKo ? "전문가 상담 받기" : "Talk to an expert"}
                 </BtnBlock>
               </div>
             </div>
@@ -429,6 +559,8 @@ export default function RecommendPageClient({
               top3={top3}
               quoteHref={quoteHref}
               onRequestQuote={goToContactQuote}
+              onCreateQuote={() => void createQuoteFromRecommend()}
+              creatingQuote={creatingQuote}
               quoteBusy={navigatingQuote}
               onBackToForm={() => {
                 setPhase("form");

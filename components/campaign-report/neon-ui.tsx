@@ -304,12 +304,16 @@ export function ThumbGrid({
           key={`${x.tag}-${i}`}
           className="relative overflow-hidden rounded-[14px] border border-[color:var(--cr-border)] bg-[var(--cr-surface)]"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={x.url}
-            alt=""
-            crossOrigin="anonymous"
-            className="block h-24 w-full object-cover"
+          {/* html2canvas(PDF)는 object-fit 을 무시하므로 background-size:cover 로 렌더 */}
+          <div
+            aria-hidden
+            className="block h-24 w-full"
+            style={{
+              backgroundImage: `url("${x.url}")`,
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+              backgroundRepeat: "no-repeat",
+            }}
           />
           <span className="absolute left-0 top-0 rounded-br-[10px] border border-[color:var(--cr-border)] bg-[var(--cr-thumb-badge-bg)] px-2 py-1 font-display text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--cr-accent)] backdrop-blur">
             [ {x.tag} ]

@@ -5,6 +5,7 @@ import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import {
   Calculator,
+  FileText,
   LayoutList,
   MapPin,
   Sparkles,
@@ -32,6 +33,8 @@ type Props = {
   onViewFullList: () => void;
   onRemix: () => void;
   onRequestQuote?: () => void;
+  onCreateQuote?: () => void;
+  creatingQuote?: boolean;
   quoteBusy?: boolean;
 };
 
@@ -44,6 +47,8 @@ export default function MediaAiRecommendDashboard({
   onViewFullList,
   onRemix,
   onRequestQuote,
+  onCreateQuote,
+  creatingQuote = false,
   quoteBusy = false,
 }: Props) {
   const tr = useTranslations("recommend");
@@ -352,22 +357,40 @@ export default function MediaAiRecommendDashboard({
                 className="w-full sm:w-auto"
               />
             </div>
-            <BtnBlock
-              variant="accent"
-              size="md"
-              className="w-full sm:w-auto"
-              onClick={onRequestQuote}
-              disabled={!onRequestQuote || quoteBusy}
-            >
-              <Calculator className="h-5 w-5" />
-              {quoteBusy
-                ? isKo
-                  ? "이동 중…"
-                  : "Opening…"
-                : isKo
-                  ? "이 플랜으로 견적 요청하기 →"
-                  : "Request quote with this plan →"}
-            </BtnBlock>
+            <div className="flex flex-col gap-2 sm:flex-row">
+              <BtnBlock
+                variant="accent"
+                size="md"
+                className="w-full sm:w-auto"
+                onClick={onCreateQuote}
+                disabled={!onCreateQuote || creatingQuote}
+              >
+                <FileText className="h-5 w-5" />
+                {creatingQuote
+                  ? isKo
+                    ? "견적서 생성 중…"
+                    : "Creating quote…"
+                  : isKo
+                    ? "이 플랜으로 견적서 만들기 →"
+                    : "Create a quote with this plan →"}
+              </BtnBlock>
+              <BtnBlock
+                variant="secondary"
+                size="md"
+                className="w-full sm:w-auto"
+                onClick={onRequestQuote}
+                disabled={!onRequestQuote || quoteBusy}
+              >
+                <Calculator className="h-5 w-5" />
+                {quoteBusy
+                  ? isKo
+                    ? "이동 중…"
+                    : "Opening…"
+                  : isKo
+                    ? "전문가 상담 받기"
+                    : "Talk to an expert"}
+              </BtnBlock>
+            </div>
           </div>
         </div>
       </div>

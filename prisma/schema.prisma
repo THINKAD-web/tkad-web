@@ -616,6 +616,16 @@ model Campaign {
   ownerUserId       String?        @map("owner_user_id")
   /// 완료 보고서 PDF 생성 시각 (광고주 알림용)
   reportGeneratedAt DateTime?      @map("report_generated_at")
+  /// 어드민·매체사 수기 입력 실측 노출수 (집행 후 실적)
+  actualImpressions Int?           @map("actual_impressions")
+  /// 어드민·매체사 수기 입력 실측 도달수 (집행 후 실적)
+  actualReach       Int?           @map("actual_reach")
+  /// 실적 입력 시각 (광고주 대시보드 '예측 vs 실제' 노출 기준)
+  actualEnteredAt   DateTime?      @map("actual_entered_at")
+  /// 실적 입력 주체 User.id
+  actualEnteredById String?        @map("actual_entered_by_id")
+  /// 실적 입력 출처 — "admin" | "media_owner"
+  actualSource      String?        @map("actual_source") @db.VarChar(16)
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")
 

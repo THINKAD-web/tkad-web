@@ -45,6 +45,13 @@ export type CampaignAnalyticsData = {
     frequency: number;
     cpm: number | null;
   };
+  /** 어드민·매체사 수기 입력 실측 실적. 미입력 시 null. */
+  actual: {
+    impressions: number | null;
+    reach: number | null;
+    enteredAt: string | null;
+    source: string | null;
+  } | null;
   dailySeries: CampaignAnalyticsDailyPoint[];
   mediaShares: CampaignAnalyticsMediaShare[];
   regionShares: CampaignAnalyticsRegionShare[];
@@ -200,6 +207,10 @@ function mapCampaignToAnalytics(c: {
   startDate: Date | null;
   endDate: Date | null;
   clientCompany: string;
+  actualImpressions: number | null;
+  actualReach: number | null;
+  actualEnteredAt: Date | null;
+  actualSource: string | null;
   proofPhotos: { id: string; imageUrl: string; caption: string | null }[];
   financialDocs: { amountKrw: number | null }[];
   mediaBookings: {
@@ -265,6 +276,14 @@ function mapCampaignToAnalytics(c: {
       frequency: plannerKpis?.avgFrequency ?? 6,
       cpm: plannerKpis?.blendedCpm ?? null,
     },
+    actual: c.actualEnteredAt
+      ? {
+          impressions: c.actualImpressions,
+          reach: c.actualReach,
+          enteredAt: c.actualEnteredAt.toISOString(),
+          source: c.actualSource,
+        }
+      : null,
     dailySeries,
     mediaShares,
     regionShares,

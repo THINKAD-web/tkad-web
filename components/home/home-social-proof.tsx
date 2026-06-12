@@ -4,6 +4,7 @@ import { useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useTrustMetrics } from "@/lib/use-trust-metrics";
 
 type Stat = {
   value: string;
@@ -12,36 +13,37 @@ type Stat = {
   href: string;
 };
 
-const STATS: Stat[] = [
-  {
-    value: "500+",
-    labelKo: "검증 매체",
-    labelEn: "Verified media",
-    href: "/media",
-  },
-  {
-    value: "129+",
-    labelKo: "활성 브랜드",
-    labelEn: "Active brands",
-    href: "/cases",
-  },
-  {
-    value: "24시간",
-    labelKo: "평균 응답",
-    labelEn: "Avg. response",
-    href: "/contact",
-  },
-  {
-    value: "1.8억",
-    labelKo: "누적 노출",
-    labelEn: "Total impressions",
-    href: "/media",
-  },
-];
-
 export function HomeSocialProof() {
   const locale = useLocale();
   const isKo = locale.startsWith("ko");
+  const metrics = useTrustMetrics();
+
+  const stats: Stat[] = [
+    {
+      value: metrics?.mediaCount ?? "500+",
+      labelKo: "검증 매체",
+      labelEn: "Verified media",
+      href: "/media",
+    },
+    {
+      value: metrics?.brandCount ?? "129+",
+      labelKo: "활성 브랜드",
+      labelEn: "Active brands",
+      href: "/cases",
+    },
+    {
+      value: "24시간",
+      labelKo: "평균 응답",
+      labelEn: "Avg. response",
+      href: "/contact",
+    },
+    {
+      value: "1.8억",
+      labelKo: "누적 노출",
+      labelEn: "Total impressions",
+      href: "/media",
+    },
+  ];
 
   return (
     <section
@@ -49,7 +51,7 @@ export function HomeSocialProof() {
       aria-label={isKo ? "신뢰 지표" : "Trust metrics"}
     >
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-        {STATS.map((s) => (
+        {stats.map((s) => (
           <Link
             key={s.href + s.value}
             href={s.href}

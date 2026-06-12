@@ -186,6 +186,8 @@ export async function listOwnerCampaigns(ownerUserId: string) {
           name: true,
           clientCompany: true,
           status: true,
+          actualImpressions: true,
+          actualReach: true,
         },
       },
     },
@@ -227,6 +229,8 @@ export async function listOwnerCampaigns(ownerUserId: string) {
         ? (proofMap.get(b.campaignId) ?? 0)
         : 0,
       canUploadProof: Boolean(b.campaignId),
+      actualImpressions: b.campaign?.actualImpressions ?? null,
+      actualReach: b.campaign?.actualReach ?? null,
     };
   });
 }
