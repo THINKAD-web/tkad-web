@@ -106,6 +106,35 @@ function scoreChannel(
   );
 }
 
+/** 채널별 시너지 설명 — 당근·버즈빌은 OOH 매체/지역 맥락으로 강조 */
+function channelReasonKo(
+  channel: DigitalChannel,
+  oohMediaName: string,
+  regionKo: string,
+): string {
+  if (channel.id === "daangn") {
+    return `${oohMediaName} + ${regionKo} 반경 1km 당근 광고 = 같은 사람에게 오프라인·온라인 이중 노출`;
+  }
+  if (channel.id === "buzzvil") {
+    return `${oohMediaName} 노출 직후 폰 잠금화면에서 한 번 더 — 일 2억 노출로 리타겟`;
+  }
+  return channel.synergyKo;
+}
+
+function channelReasonEn(
+  channel: DigitalChannel,
+  oohMediaName: string,
+  regionEn: string,
+): string {
+  if (channel.id === "daangn") {
+    return `${oohMediaName} + Karrot ads within 1km of ${regionEn} = the same people reached both offline & online`;
+  }
+  if (channel.id === "buzzvil") {
+    return `Right after ${oohMediaName}, retarget on the phone lockscreen — 200M daily impressions`;
+  }
+  return channel.synergyEn;
+}
+
 export function recommendDigitalChannels(opts: {
   goal: PlannerCampaignGoal | null;
   regions: string[];
@@ -151,8 +180,8 @@ export function recommendDigitalChannels(opts: {
       channel,
       score,
       budgetPct,
-      reasonKo: channel.synergyKo,
-      reasonEn: channel.synergyEn,
+      reasonKo: channelReasonKo(channel, oohMediaName, regionKo),
+      reasonEn: channelReasonEn(channel, oohMediaName, regionEn),
       estimatedImpressions,
     };
   });
