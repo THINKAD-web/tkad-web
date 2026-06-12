@@ -1,9 +1,16 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useMemo, useState, type ReactNode } from "react";
+import {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useTranslations } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
   ArrowLeft,
@@ -13,10 +20,15 @@ import {
   Users,
   Clock,
   Sparkles,
+  Globe,
+  ChevronDown,
+  FileText,
+  Layers,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
   NETWORK_TYPE_LABELS,
+  computeNetworkMonthlyPrice,
 } from "@/lib/media-network-types";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -53,6 +65,9 @@ export type NetworkDetailPayload = {
     name: string;
     address: string | null;
     fullAddress: string | null;
+    regionMain?: string | null;
+    regionSub?: string | null;
+    unitCount?: number | null;
     priceNote: string | null;
     dailyFootfall: number | null;
     note: string | null;
@@ -83,6 +98,7 @@ export default function MediaNetworkDetailClient({
   const t = useTranslations("networkMedia");
   const tDetail = useTranslations("media.detail");
   const isKo = locale === "ko";
+  const router = useRouter();
   const typeLb = NETWORK_TYPE_LABELS[data.type] ?? {
     ko: data.type,
     en: data.type,
@@ -217,6 +233,10 @@ export default function MediaNetworkDetailClient({
               </Button>
             </Link>
             <div className="flex flex-wrap gap-2">
+              <Badge className="gap-1 bg-violet-600 text-white">
+                <Globe className="h-3 w-3" />
+                {isKo ? "네트워크 매체" : "Network media"}
+              </Badge>
               <Badge className="bg-gold text-navy">
                 {t("sitesCount", { count: data.totalLocations })}
               </Badge>
@@ -328,8 +348,48 @@ export default function MediaNetworkDetailClient({
         </div>
       </section>
 
+      {/* 0) 핵심 카드 3개 + 가격 계산기 */}
+      <section className="bg-white pt-10">
+        <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+            <NetworkStatCard
+              label={isKo ? "대당 단가" : "Per unit"}
+              value={
+                data.pricePerUnit != null
+                  ? `₩${data.pricePerUnit.toLocaleString()}`
+                  : data.pricePackage != null
+                    ? `₩${data.pricePackage.toLocaleString()}`
+                    : "—"
+              }
+              sub={isKo ? "월 기준" : "/ month"}
+              accent
+            />
+            <NetworkStatCard
+              label={isKo ? "총 설치 개소" : "Total sites"}
+              value={`${data.totalLocations.toLocaleString()}${isKo ? "개소" : ""}`}
+              sub={
+                isKo
+                  ? `${data.regions.length}개 지역`
+                  : `${data.regions.length} regions`
+              }
+            />
+            <NetworkStatCard
+              label={isKo ? "최소 수량" : "Min. units"}
+              value={`${data.minUnits.toLocaleString()}${isKo ? "대~" : "+"}`}
+              sub={isKo ? "최소 집행 단위" : "minimum order"}
+            />
+          </div>
+
+          <NetworkPriceCalculator
+            data={data}
+            isKo={isKo}
+            router={router}
+          />
+        </div>
+      </section>
+
       {/* 1) 위치 지도 섹션 */}
-      <section className="bg-white pb-16">
+      <section className="bg-white pb-16 pt-12">
         <div className="mx-auto max-w-4xl px-4 pt-4 sm:px-6 lg:px-8">
           <div className="mb-4 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -684,6 +744,15 @@ export default function MediaNetworkDetailClient({
 
 
 
+      {/* 5) 패키지 추천 */}
+      <NetworkPackages data={data} isKo={isKo} quoteHref={quoteHref} />
+
+      {/* 6) 지역별 설치 현황 */}
+      <RegionInstallTable data={data} isKo={isKo} />
+
+      {/* 7) FAQ */}
+      <NetworkFaq data={data} isKo={isKo} />
+
       {similar.length > 0 && (
         <section className="bg-white pb-20">
           <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
@@ -696,6 +765,540 @@ export default function MediaNetworkDetailClient({
         </section>
       )}
     </>
+  );
+}
+
+/** 핵심 통계 카드 */
+function NetworkStatCard({
+  label,
+  value,
+  sub,
+  accent,
+}: {
+  label: string;
+  value: string;
+  sub?: string;
+  accent?: boolean;
+}) {
+  return (
+    <div
+      className={`rounded-2xl border p-5 ${
+        accent
+          ? "border-gold/40 bg-gold/8"
+          : "border-navy/10 bg-white shadow-sm shadow-navy/5"
+      }`}
+    >
+      <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+        {label}
+      </p>
+      <p
+        className={`mt-1.5 text-2xl font-black tabular-nums tracking-tight ${
+          accent ? "text-gold-dark" : "text-navy"
+        }`}
+      >
+        {value}
+      </p>
+      {sub ? (
+        <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>
+      ) : null}
+    </div>
+  );
+}
+
+const NETWORK_PERIODS = [1, 3, 6] as const;
+
+/** 가격 계산기 — 수량/기간 선택 → 월·총액 자동 계산 → 견적 생성 */
+function NetworkPriceCalculator({
+  data,
+  isKo,
+  router,
+}: {
+  data: NetworkDetailPayload;
+  isKo: boolean;
+  router: ReturnType<typeof useRouter>;
+}) {
+  const minUnits = Math.max(1, data.minUnits || 1);
+  const sliderMax = Math.max(minUnits * 10, data.totalLocations || 0, 1000);
+  const [units, setUnits] = useState<number>(minUnits);
+  const [months, setMonths] = useState<number>(1);
+  const [busy, setBusy] = useState(false);
+
+  const monthly = useMemo(
+    () =>
+      computeNetworkMonthlyPrice(
+        {
+          pricePackage: data.pricePackage,
+          pricePerUnit: data.pricePerUnit,
+          minUnits,
+          packageOptions: data.tiers,
+        },
+        units,
+      ),
+    [data.pricePackage, data.pricePerUnit, data.tiers, minUnits, units],
+  );
+  const total = monthly * months;
+
+  const clampUnits = (n: number) =>
+    Math.max(minUnits, Math.min(sliderMax, Math.round(n) || minUnits));
+
+  const createQuote = useCallback(async () => {
+    if (busy) return;
+    setBusy(true);
+    try {
+      let user: { name?: string; email?: string; company?: string | null } | null =
+        null;
+      try {
+        const sres = await fetch("/api/auth/session", { cache: "no-store" });
+        const sd = await sres.json();
+        if (sd?.ok && sd.data?.email) user = sd.data;
+      } catch {
+        /* ignore */
+      }
+      const period = isKo ? `${months}개월` : `${months} month${months > 1 ? "s" : ""}`;
+      if (!user?.email) {
+        const back = `/media/network/${encodeURIComponent(
+          data.catalogId,
+        )}?createQuote=1&units=${units}`;
+        router.push(`/login?redirect=${encodeURIComponent(back)}`);
+        return;
+      }
+      const res = await fetch("/api/quote/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaIds: [data.catalogId],
+          networkUnits: { [data.catalogId]: units },
+          clientName: user.name || user.email,
+          clientEmail: user.email,
+          clientCompany: user.company || undefined,
+          period,
+          budgetMax: total > 0 ? total : undefined,
+          locale: isKo ? "ko" : "en",
+        }),
+      });
+      const d = (await res.json()) as { ok?: boolean; data?: { id?: string } };
+      if (!res.ok || !d?.ok || !d.data?.id) throw new Error("create failed");
+      router.push(`/quote/${d.data.id}/preview`);
+    } catch {
+      router.push(
+        `/quote?media=${encodeURIComponent(data.catalogId)}&units=${units}`,
+      );
+    } finally {
+      setBusy(false);
+    }
+  }, [busy, data.catalogId, isKo, months, router, total, units]);
+
+  // 로그인 후 ?createQuote=1 복귀 시 수량 복원 + 자동 견적 생성
+  const resumedRef = useRef(false);
+  useEffect(() => {
+    if (resumedRef.current || typeof window === "undefined") return;
+    const sp = new URLSearchParams(window.location.search);
+    if (sp.get("createQuote") !== "1") return;
+    resumedRef.current = true;
+    const u = Number(sp.get("units"));
+    if (Number.isFinite(u) && u > 0) setUnits(clampUnits(u));
+    const url = new URL(window.location.href);
+    url.searchParams.delete("createQuote");
+    window.history.replaceState({}, "", url.toString());
+    void createQuote();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  return (
+    <div className="mt-5 rounded-3xl border border-gold/40 bg-gradient-to-br from-gold-light/40 via-white to-white p-5 shadow-lg shadow-navy/5 sm:p-7">
+      <div className="flex items-center gap-2">
+        <Calculator className="h-5 w-5 text-gold-dark" />
+        <h2 className="text-lg font-bold text-navy sm:text-xl">
+          {isKo ? "가격 계산기" : "Price calculator"}
+        </h2>
+      </div>
+      <p className="mt-1 text-sm text-muted-foreground">
+        {isKo
+          ? "수량과 기간을 선택하면 월 비용과 총액이 자동 계산됩니다."
+          : "Pick units and duration to see monthly and total cost."}
+      </p>
+
+      {/* 수량 */}
+      <div className="mt-5">
+        <div className="flex items-end justify-between gap-3">
+          <label className="text-sm font-semibold text-navy">
+            {isKo ? "설치 수량" : "Units"}
+          </label>
+          <div className="flex items-center gap-1.5">
+            <input
+              type="number"
+              min={minUnits}
+              max={sliderMax}
+              value={units}
+              onChange={(e) => setUnits(clampUnits(Number(e.target.value)))}
+              className="w-28 rounded-lg border border-navy/15 bg-white px-3 py-1.5 text-right text-sm font-bold tabular-nums text-navy outline-none focus:border-gold"
+            />
+            <span className="text-sm text-muted-foreground">
+              {isKo ? "대" : "units"}
+            </span>
+          </div>
+        </div>
+        <input
+          type="range"
+          min={minUnits}
+          max={sliderMax}
+          step={Math.max(1, Math.round(minUnits))}
+          value={units}
+          onChange={(e) => setUnits(clampUnits(Number(e.target.value)))}
+          className="mt-3 w-full cursor-pointer accent-gold"
+          aria-label={isKo ? "설치 수량" : "Units"}
+        />
+        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
+          <span>{minUnits.toLocaleString()}</span>
+          <span>{sliderMax.toLocaleString()}+</span>
+        </div>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {[10, 100, 1000, 10000].map((q) => (
+            <button
+              key={q}
+              type="button"
+              onClick={() => setUnits(clampUnits(q))}
+              className="rounded-full border border-navy/15 bg-white px-3 py-1 text-xs font-semibold text-navy hover:border-gold"
+            >
+              {q.toLocaleString()}
+              {isKo ? "대" : ""}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 기간 */}
+      <div className="mt-5">
+        <label className="text-sm font-semibold text-navy">
+          {isKo ? "집행 기간" : "Duration"}
+        </label>
+        <div className="mt-2 flex gap-2">
+          {NETWORK_PERIODS.map((m) => (
+            <button
+              key={m}
+              type="button"
+              onClick={() => setMonths(m)}
+              className={`flex-1 rounded-xl border px-3 py-2 text-sm font-semibold transition-colors ${
+                months === m
+                  ? "border-gold bg-gold/15 text-gold-dark"
+                  : "border-navy/15 bg-white text-navy hover:border-navy/30"
+              }`}
+            >
+              {isKo ? `${m}개월` : `${m} mo`}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* 결과 */}
+      <div className="mt-5 rounded-2xl border border-navy/10 bg-white p-4">
+        <div className="flex items-center justify-between">
+          <span className="text-sm text-muted-foreground">
+            {isKo ? "월 비용" : "Monthly"}
+          </span>
+          <span className="text-lg font-bold tabular-nums text-navy">
+            ₩{monthly.toLocaleString()}
+          </span>
+        </div>
+        <div className="mt-2 flex items-center justify-between border-t border-navy/10 pt-2">
+          <span className="text-sm font-semibold text-navy">
+            {isKo ? `총액 (${months}개월)` : `Total (${months} mo)`}
+          </span>
+          <span className="text-2xl font-black tabular-nums text-gold-dark">
+            ₩{total.toLocaleString()}
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          {isKo ? "부가세 별도 · 구간 단가 적용" : "VAT excl. · tiered pricing"}
+        </p>
+      </div>
+
+      <Button
+        type="button"
+        disabled={busy}
+        onClick={() => void createQuote()}
+        className="mt-4 w-full bg-gold py-6 text-base font-bold text-navy hover:bg-gold-dark"
+      >
+        <FileText className="mr-2 h-4 w-4" />
+        {busy
+          ? isKo
+            ? "견적서 생성 중…"
+            : "Creating…"
+          : isKo
+            ? "이 구성으로 견적 받기"
+            : "Get a quote for this setup"}
+      </Button>
+    </div>
+  );
+}
+
+/** 패키지 추천 3개 (스타터/스탠다드/프리미엄) */
+function NetworkPackages({
+  data,
+  isKo,
+  quoteHref,
+}: {
+  data: NetworkDetailPayload;
+  isKo: boolean;
+  quoteHref: string;
+}) {
+  const minUnits = Math.max(1, data.minUnits || 1);
+  const monthlyFor = (u: number) =>
+    computeNetworkMonthlyPrice(
+      {
+        pricePackage: data.pricePackage,
+        pricePerUnit: data.pricePerUnit,
+        minUnits,
+        packageOptions: data.tiers,
+      },
+      u,
+    );
+
+  // tier 가 있으면 tier 기반, 없으면 minUnits 배수로 3구간 구성
+  const bands =
+    data.tiers.length >= 3
+      ? [data.tiers[0], data.tiers[Math.floor(data.tiers.length / 2)], data.tiers[data.tiers.length - 1]]
+      : [
+          { units: minUnits, price: monthlyFor(minUnits) },
+          { units: minUnits * 10, price: monthlyFor(minUnits * 10) },
+          { units: minUnits * 50, price: monthlyFor(minUnits * 50) },
+        ];
+
+  const meta = isKo
+    ? [
+        { name: "스타터", desc: "소규모 테스트 집행" },
+        { name: "스탠다드", desc: "지역 집중 캠페인", popular: true },
+        { name: "프리미엄", desc: "전국 대규모 노출" },
+      ]
+    : [
+        { name: "Starter", desc: "Small test run" },
+        { name: "Standard", desc: "Regional campaign", popular: true },
+        { name: "Premium", desc: "Nationwide reach" },
+      ];
+
+  return (
+    <section className="bg-slate-50/70 py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-6 flex items-center gap-2">
+          <Layers className="h-5 w-5 text-gold-dark" />
+          <h2 className="text-xl font-bold tracking-tight text-navy sm:text-2xl">
+            {isKo ? "패키지 추천" : "Recommended packages"}
+          </h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          {bands.map((b, i) => {
+            const m = meta[i];
+            return (
+              <div
+                key={m.name}
+                className={`relative rounded-2xl border p-5 ${
+                  m.popular
+                    ? "border-gold bg-white shadow-lg shadow-gold/20 ring-2 ring-gold/30"
+                    : "border-navy/10 bg-white shadow-sm"
+                }`}
+              >
+                {m.popular ? (
+                  <span className="absolute -top-2.5 left-5 rounded-full bg-gold px-2.5 py-0.5 text-[11px] font-bold text-navy">
+                    {isKo ? "인기" : "Popular"}
+                  </span>
+                ) : null}
+                <p className="text-sm font-bold text-navy">{m.name}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">{m.desc}</p>
+                <p className="mt-3 text-2xl font-black tabular-nums text-gold-dark">
+                  ₩{b.price.toLocaleString()}
+                  <span className="text-xs font-normal text-muted-foreground">
+                    {isKo ? "/월" : "/mo"}
+                  </span>
+                </p>
+                <p className="mt-1 text-xs text-navy">
+                  {b.units.toLocaleString()}
+                  {isKo ? "대 기준" : " units"}
+                </p>
+                <Button
+                  asChild
+                  variant="outline"
+                  className="mt-4 w-full border-gold/40 font-semibold text-gold-dark hover:bg-gold/10"
+                >
+                  <Link href={`${quoteHref}&units=${b.units}`}>
+                    {isKo ? "견적 받기" : "Get quote"}
+                  </Link>
+                </Button>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/** 지역별 설치 현황 테이블 (시도/세부지역, 접기/펼치기) */
+function RegionInstallTable({
+  data,
+  isKo,
+}: {
+  data: NetworkDetailPayload;
+  isKo: boolean;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  const rows = useMemo(() => {
+    const map = new Map<
+      string,
+      { main: string; sub: string; units: number }
+    >();
+    for (const l of data.locations) {
+      const main = (l.regionMain ?? "").trim() || (isKo ? "기타" : "Other");
+      const sub = (l.regionSub ?? "").trim() || "—";
+      const key = `${main}|${sub}`;
+      const units = Math.max(1, l.unitCount ?? 1);
+      const cur = map.get(key);
+      if (cur) cur.units += units;
+      else map.set(key, { main, sub, units });
+    }
+    return Array.from(map.values()).sort(
+      (a, b) => b.units - a.units || a.main.localeCompare(b.main),
+    );
+  }, [data.locations, isKo]);
+
+  if (rows.length === 0) return null;
+  const visible = expanded ? rows : rows.slice(0, 8);
+  const totalUnits = rows.reduce((s, r) => s + r.units, 0);
+
+  return (
+    <section className="bg-white py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <div className="mb-4 flex items-center gap-2">
+          <MapPin className="h-5 w-5 text-gold-dark" />
+          <h2 className="text-xl font-bold tracking-tight text-navy sm:text-2xl">
+            {isKo ? "지역별 설치 현황" : "Installation by region"}
+          </h2>
+        </div>
+        <div className="overflow-hidden rounded-2xl border border-navy/10">
+          <table className="w-full text-sm">
+            <thead>
+              <tr className="bg-slate-50 text-left text-xs uppercase tracking-wide text-muted-foreground">
+                <th className="px-4 py-2.5 font-semibold">{isKo ? "시도" : "Region"}</th>
+                <th className="px-4 py-2.5 font-semibold">{isKo ? "세부지역" : "District"}</th>
+                <th className="px-4 py-2.5 text-right font-semibold">{isKo ? "개소 수" : "Sites"}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {visible.map((r) => (
+                <tr key={`${r.main}-${r.sub}`} className="border-t border-navy/8">
+                  <td className="px-4 py-2.5 font-medium text-navy">{r.main}</td>
+                  <td className="px-4 py-2.5 text-navy/80">{r.sub}</td>
+                  <td className="px-4 py-2.5 text-right font-bold tabular-nums text-navy">
+                    {r.units.toLocaleString()}
+                    {isKo ? "개소" : ""}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+            <tfoot>
+              <tr className="border-t border-navy/15 bg-gold/8">
+                <td className="px-4 py-2.5 font-bold text-navy" colSpan={2}>
+                  {isKo ? "합계" : "Total"}
+                </td>
+                <td className="px-4 py-2.5 text-right font-black tabular-nums text-gold-dark">
+                  {totalUnits.toLocaleString()}
+                  {isKo ? "개소" : ""}
+                </td>
+              </tr>
+            </tfoot>
+          </table>
+        </div>
+        {rows.length > 8 ? (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="mt-3 inline-flex items-center gap-1.5 text-sm font-semibold text-gold-dark hover:underline"
+          >
+            <ChevronDown
+              className={`h-4 w-4 transition-transform ${expanded ? "rotate-180" : ""}`}
+            />
+            {expanded
+              ? isKo
+                ? "접기"
+                : "Collapse"
+              : isKo
+                ? `전체 ${rows.length}개 지역 보기`
+                : `Show all ${rows.length} regions`}
+          </button>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
+/** 네트워크 매체 FAQ */
+function NetworkFaq({
+  data,
+  isKo,
+}: {
+  data: NetworkDetailPayload;
+  isKo: boolean;
+}) {
+  const items = isKo
+    ? [
+        {
+          q: "최소 몇 대부터 집행할 수 있나요?",
+          a: `최소 ${data.minUnits.toLocaleString()}대부터 집행 가능하며, 수량이 늘수록 대당 단가가 유리해집니다.`,
+        },
+        {
+          q: "지점(설치 위치)을 직접 고를 수 있나요?",
+          a: "지역(시도/세부지역) 단위로 선택 가능하며, 특정 지점 지정은 견적 단계에서 협의합니다.",
+        },
+        {
+          q: "소재 교체나 집행 기간 연장이 가능한가요?",
+          a: "월 단위 계약을 기본으로 하며, 기간 연장·소재 교체는 담당 매니저를 통해 진행됩니다.",
+        },
+        {
+          q: "견적은 어떻게 받나요?",
+          a: "위 가격 계산기에서 수량·기간을 선택하고 ‘이 구성으로 견적 받기’를 누르면 견적서가 생성됩니다.",
+        },
+      ]
+    : [
+        {
+          q: "What is the minimum order?",
+          a: `From ${data.minUnits.toLocaleString()} units. The more units, the better the per-unit rate.`,
+        },
+        {
+          q: "Can I choose specific locations?",
+          a: "You can target by region; specific sites are arranged during quoting.",
+        },
+        {
+          q: "Can I extend the period or swap creatives?",
+          a: "Monthly contracts by default; extensions and swaps go through your manager.",
+        },
+        {
+          q: "How do I get a quote?",
+          a: "Use the calculator above and click ‘Get a quote for this setup’.",
+        },
+      ];
+
+  return (
+    <section className="bg-slate-50/70 py-12">
+      <div className="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+        <h2 className="mb-5 text-xl font-bold tracking-tight text-navy sm:text-2xl">
+          FAQ
+        </h2>
+        <div className="space-y-2">
+          {items.map((it) => (
+            <details
+              key={it.q}
+              className="group rounded-xl border border-navy/10 bg-white px-4 py-3"
+            >
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-3 text-sm font-semibold text-navy">
+                {it.q}
+                <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform group-open:rotate-180" />
+              </summary>
+              <p className="mt-2 text-sm leading-relaxed text-navy/80">{it.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </section>
   );
 }
 

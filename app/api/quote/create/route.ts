@@ -2,6 +2,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import {
   apiError,
   apiOk,
@@ -23,6 +24,8 @@ const Body = z.object({
   endDate: z.string().optional(),
   budgetMin: z.number().int().nonnegative().optional(),
   budgetMax: z.number().int().nonnegative().optional(),
+  /** 네트워크 매체 선택 수량 — { [catalogId]: units }. 가격은 구간/단가로 환산. */
+  networkUnits: z.record(z.string(), z.number().int().positive()).optional(),
   locale: z.enum(["ko", "en"]).default("ko"),
 });
 
@@ -45,6 +48,7 @@ export async function POST(req: Request) {
       endDate,
       budgetMin,
       budgetMax,
+      networkUnits,
       locale,
     } = parsed.data;
 
@@ -56,10 +60,16 @@ export async function POST(req: Request) {
       });
     }
 
-    const totalAmount = picked.reduce(
-      (sum, m) => sum + catalogPriceFieldToWon(m.price ?? 0),
-      0,
-    );
+    // 네트워크 매체는 선택 수량(units)으로 월 단가를 환산, 일반 매체는 표시 단가 사용.
+    const totalAmount = picked.reduce((sum, m) => {
+      if (m.catalogSource === "network") {
+        const units = networkUnits?.[m.id];
+        if (units && units > 0) {
+          return sum + computeNetworkMonthlyFromMediaItem(m, units);
+        }
+      }
+      return sum + catalogPriceFieldToWon(m.price ?? 0);
+    }, 0);
 
     const quote = await prisma.ooHQuote.create({
       data: {

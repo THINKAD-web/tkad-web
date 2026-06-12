@@ -44,6 +44,9 @@ export type SerializedNetwork = {
     name: string;
     address: string | null;
     fullAddress: string | null;
+    regionMain: string | null;
+    regionSub: string | null;
+    unitCount: number | null;
     latitude: number | null;
     longitude: number | null;
     priceNote: string | null;
@@ -56,6 +59,9 @@ type LocRow = {
   name: string;
   address: string;
   fullAddress: string;
+  regionMain: string;
+  regionSub: string;
+  unitCount: string;
   lat: string;
   lng: string;
   priceNote: string;
@@ -68,6 +74,9 @@ function emptyLocRow(): LocRow {
     name: "",
     address: "",
     fullAddress: "",
+    regionMain: "",
+    regionSub: "",
+    unitCount: "1",
     lat: "",
     lng: "",
     priceNote: "",
@@ -146,6 +155,9 @@ export default function AdminNetworkEditor(props: Props) {
         name: l.name,
         address: l.address ?? "",
         fullAddress: l.fullAddress ?? "",
+        regionMain: l.regionMain ?? "",
+        regionSub: l.regionSub ?? "",
+        unitCount: l.unitCount != null ? String(l.unitCount) : "1",
         lat: l.latitude != null ? String(l.latitude) : "",
         lng: l.longitude != null ? String(l.longitude) : "",
         priceNote: l.priceNote ?? "",
@@ -189,6 +201,9 @@ export default function AdminNetworkEditor(props: Props) {
         name: r.name.trim(),
         address: r.address.trim() || null,
         fullAddress: r.fullAddress.trim() || null,
+        regionMain: r.regionMain.trim() || null,
+        regionSub: r.regionSub.trim() || null,
+        unitCount: Math.max(1, Math.round(Number(r.unitCount) || 1)),
         latitude: r.lat.trim() === "" ? null : Number(r.lat),
         longitude: r.lng.trim() === "" ? null : Number(r.lng),
         priceNote: r.priceNote.trim() || null,
@@ -449,6 +464,9 @@ export default function AdminNetworkEditor(props: Props) {
             name: p.name,
             address: p.address ?? "",
             fullAddress: p.address ?? "",
+            regionMain: p.regionMain ?? "",
+            regionSub: p.regionSub ?? "",
+            unitCount: String(p.unitCount ?? 1),
             lat: p.latitude != null ? String(p.latitude) : "",
             lng: p.longitude != null ? String(p.longitude) : "",
             priceNote: "",
