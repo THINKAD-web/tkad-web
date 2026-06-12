@@ -95,6 +95,7 @@ type NavKey =
   | "recommendations"
   | "apiUsage"
   | "aiUsage"
+  | "trustMetrics"
   | "abTest"
   | "trendReports"
   | "academyNew"
@@ -145,6 +146,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/recommendations", key: "recommendations", icon: Sparkles },
   { href: "/admin/api-usage", key: "apiUsage", icon: KeyRound },
   { href: "/admin/ai-usage", key: "aiUsage", icon: Coins },
+  { href: "/admin/trust-metrics", key: "trustMetrics", icon: TrendingUp },
   { href: "/admin/ab-test", key: "abTest", icon: FlaskConical },
   { href: "/admin/reports/new", key: "trendReports", icon: FileText },
   { href: "/admin/academy/new", key: "academyNew", icon: Sparkles },
@@ -252,7 +254,7 @@ const navGroupDefs: {
   {
     id: "settings",
     labelKey: "groupSettings",
-    itemKeys: ["operatorManual", "apiUsage", "aiUsage"],
+    itemKeys: ["operatorManual", "apiUsage", "aiUsage", "trustMetrics"],
   },
 ];
 

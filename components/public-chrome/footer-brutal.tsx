@@ -12,6 +12,7 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
 import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
+import { TrustMetricsInline } from "@/components/trust-metrics-inline";
 import { useMediaMinWidth } from "@/lib/use-media-min-width";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
@@ -247,6 +248,11 @@ export function FooterBrutal() {
             </p>
           </div>
         </div>
+      </div>
+
+      {/* 신뢰 지표 (자동 집계) */}
+      <div className="relative border-t border-gray-200 px-4 py-3 dark:border-gray-800">
+        <TrustMetricsInline className="mx-auto max-w-7xl text-center text-xs text-gray-500 dark:text-white/50" />
       </div>
 
       <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">

@@ -2226,7 +2226,8 @@
     "recommendations": "AI 추천",
     "abTest": "A/B 테스트",
     "apiUsage": "API 사용량",
-    "aiUsage": "AI 사용량"
+    "aiUsage": "AI 사용량",
+    "trustMetrics": "신뢰 지표"
   },
   "search": {
     "modalTitle": "통합 검색",

@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { getTrustMetrics, formatTrustCount } from "@/lib/trust-metrics";
 import { MediaSearchPage } from "@/components/media/media-search-page";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
@@ -35,6 +36,8 @@ export default async function MediaPage({ searchParams }: Props) {
     }).catch(() => 0),
   ]);
   const initialMedia = initialCatalogItems.map(mapMediaItemToHomeCatalog);
+  const trust = await getTrustMetrics();
+  const verifiedLabel = formatTrustCount(trust.mediaCount);
 
   return (
     <>
@@ -43,7 +46,7 @@ export default async function MediaPage({ searchParams }: Props) {
         title="전국 "
         highlight="OOH 매체"
         titleEnd=" 검색"
-        description="500+ 검증 매체를 유형·지역·목적별로 탐색하세요"
+        description={`${verifiedLabel} 검증 매체를 유형·지역·목적별로 탐색하세요`}
       />
       <SubTabsBar group="discovery" currentPath="/media" />
       <Suspense fallback={null}>
