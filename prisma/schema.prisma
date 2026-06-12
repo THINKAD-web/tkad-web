@@ -1088,6 +1088,12 @@ model MediaNetworkLocation {
   name          String
   address       String?
   fullAddress   String? @map("full_address")
+  /// 시도 (예: 서울, 경기) — 지역별 설치 현황 집계용
+  regionMain    String? @map("region_main")
+  /// 세부지역 (예: 강남구) — 지역별 설치 현황 집계용
+  regionSub     String? @map("region_sub")
+  /// 해당 지점 설치 대수
+  unitCount     Int     @default(1) @map("unit_count")
   latitude      Float?
   longitude     Float?
   priceNote     String? @map("price_note") @db.Text
@@ -1098,6 +1104,7 @@ model MediaNetworkLocation {
 
   @@index([networkId])
   @@index([mediaId])
+  @@index([regionMain])
   @@map("media_network_locations")
 }
 

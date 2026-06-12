@@ -47,6 +47,10 @@ export function MediaCatalogListCard({
     ? (typeLabels[media.type]?.ko ?? media.type)
     : (typeLabels[media.type]?.en ?? media.type);
 
+  const isNetwork = media.catalogSource === "network";
+  const networkSites = media.networkTotalLocations ?? 0;
+  const networkPerUnit = media.networkPricePerUnit ?? null;
+
   const location = formatMediaLocationShort(media, isKo);
   const hasRating =
     media.reviewCount != null &&
@@ -92,10 +96,18 @@ export function MediaCatalogListCard({
       <div className="flex min-w-0 flex-1 flex-col justify-between gap-1 py-0.5">
         <div className="min-w-0 space-y-0.5">
           <h3 className="line-clamp-1 text-sm font-bold text-gray-900 dark:text-white">
+            {isNetwork ? (
+              <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-violet-100 px-1 py-0.5 align-middle text-[10px] font-bold text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
+                <span aria-hidden>🌐</span>
+                {isKo ? "네트워크" : "Network"}
+              </span>
+            ) : null}
             {isKo ? media.name : (media.nameEn || media.name)}
           </h3>
           <p className="line-clamp-1 text-xs text-gray-500 dark:text-white/50">
-            {location} · {typeLabel}
+            {isNetwork && networkSites > 0
+              ? `${isKo ? "전국" : "Nationwide"} ${networkSites.toLocaleString()}${isKo ? "개소" : " sites"} · ${typeLabel}`
+              : `${location} · ${typeLabel}`}
           </p>
           {hasRating ? (
             <p className="flex items-center gap-1 text-xs font-medium text-amber-600 dark:text-amber-400">
@@ -122,12 +134,23 @@ export function MediaCatalogListCard({
           <MediaTrustGradeBadges media={media} isKo={isKo} compact />
           <div className="ml-auto shrink-0 text-right">
             <p className="text-base font-black tabular-nums text-gray-900 dark:text-white">
-              {formatMediaPriceWonWithSymbol(priceWon)}
-              {showPricePeriod ? (
-                <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
-                  /{periodLabel}
-                </span>
-              ) : null}
+              {isNetwork && networkPerUnit != null && networkPerUnit > 0 ? (
+                <>
+                  {formatMediaPriceWonWithSymbol(networkPerUnit)}
+                  <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
+                    {isKo ? "/대·월" : "/unit·mo"}
+                  </span>
+                </>
+              ) : (
+                <>
+                  {formatMediaPriceWonWithSymbol(priceWon)}
+                  {showPricePeriod ? (
+                    <span className="ml-0.5 text-[10px] font-normal text-gray-500 dark:text-white/50">
+                      /{periodLabel}
+                    </span>
+                  ) : null}
+                </>
+              )}
             </p>
             <MediaPriceExclNote isKo={isKo} className="mt-0.5 text-right" />
             {hotBadge ? (
