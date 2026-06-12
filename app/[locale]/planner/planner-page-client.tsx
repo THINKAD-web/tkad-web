@@ -26,6 +26,7 @@ import {
   Wallet,
   CalendarRange,
   Sparkles,
+  FileText,
 } from "lucide-react";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import type { MediaItem } from "@/lib/media-data";
@@ -70,6 +71,7 @@ import {
   PLANNER_BUDGET_MIN,
   PLANNER_INDUSTRY_KEYS,
   PLANNER_LAST_INPUT_STEP,
+  PLANNER_RESULT_STEP,
   type PlannerCampaignGoal,
   type PlannerCategory,
   type PlannerMapRegion,
@@ -363,6 +365,7 @@ export default function PlannerPageClient({
   const teamPerms = useTeamPermissions();
   const router = useRouter();
   const [navigatingContact, setNavigatingContact] = useState(false);
+  const [creatingQuote, setCreatingQuote] = useState(false);
 
 
   // PR-D: 매체 상세 ?addMedia= · 찜 목록 ?mediaIds= 로 Step 4 사전 선택
@@ -370,8 +373,10 @@ export default function PlannerPageClient({
   const addMediaId = searchParams.get("addMedia");
   const mediaIdsParam = searchParams.get("mediaIds");
   const loadPlanParam = searchParams.get("loadPlan");
+  const createQuoteParam = searchParams.get("createQuote");
   const handledQueryRef = useRef<string | null>(null);
   const handledLoadPlanRef = useRef<string | null>(null);
+  const handledCreateQuoteRef = useRef(false);
 
   const stripPlannerQueryKeys = useCallback((keys: string[]) => {
     if (typeof window === "undefined") return;
@@ -705,6 +710,121 @@ export default function PlannerPageClient({
     teamPerms.loaded,
     toast,
   ]);
+
+  /**
+   * 플랜 데이터로 견적서를 직접 생성하고 미리보기로 이동.
+   * 견적은 발신자 식별이 필요하므로 로그인 세션을 요구한다.
+   * 비로그인 시 로그인 페이지로 보낸 뒤 `?createQuote=1` 로 복귀시켜 생성을 이어간다.
+   */
+  const createQuoteFromPlan = useCallback(async () => {
+    if (creatingQuote) return;
+    if (teamPerms.loaded && !teamPerms.canContactOrPay) {
+      toast(
+        "error",
+        isKo
+          ? "뷰어 권한은 견적서를 만들 수 없습니다."
+          : "Viewers cannot create quotes.",
+      );
+      return;
+    }
+
+    const mediaList =
+      selectedMediaForSimulation.length > 0
+        ? selectedMediaForSimulation
+        : portfolio;
+    if (mediaList.length === 0) {
+      toast("error", isKo ? "선택된 매체가 없습니다." : "No media selected.");
+      return;
+    }
+
+    setCreatingQuote(true);
+    try {
+      let user:
+        | { name?: string; email?: string; company?: string | null }
+        | null = null;
+      try {
+        const sessionRes = await fetch("/api/auth/session", {
+          cache: "no-store",
+        });
+        const sessionData = await sessionRes.json();
+        if (sessionData?.ok && sessionData.data?.email) {
+          user = sessionData.data;
+        }
+      } catch {
+        /* ignore */
+      }
+
+      if (!user?.email) {
+        toast(
+          "info",
+          isKo
+            ? "견적서 생성을 위해 로그인이 필요합니다. 로그인 후 이어서 진행됩니다."
+            : "Please sign in to generate a quote — we'll resume right after.",
+        );
+        router.push(
+          `/login?redirect=${encodeURIComponent("/planner?createQuote=1")}`,
+        );
+        return;
+      }
+
+      const period = isKo
+        ? `${months}개월`
+        : `${months} month${months > 1 ? "s" : ""}`;
+      const totalBudgetWon = budgetNum * months * 10_000;
+
+      const res = await fetch("/api/quote/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          mediaIds: mediaList.map((m) => m.id),
+          clientName: user.name || user.email,
+          clientEmail: user.email,
+          clientCompany: user.company || undefined,
+          period,
+          budgetMax: totalBudgetWon > 0 ? totalBudgetWon : undefined,
+          locale: isKo ? "ko" : "en",
+        }),
+      });
+      const data = (await res.json()) as {
+        ok?: boolean;
+        data?: { id?: string };
+      };
+      if (!res.ok || !data?.ok || !data.data?.id) {
+        throw new Error("quote create failed");
+      }
+      router.push(`/quote/${data.data.id}/preview`);
+    } catch (e) {
+      console.error("[planner.createQuote] error", e);
+      toast(
+        "error",
+        isKo
+          ? "견적서 생성에 실패했습니다. 잠시 후 다시 시도해 주세요."
+          : "Could not create the quote. Please try again.",
+      );
+      setCreatingQuote(false);
+    }
+  }, [
+    budgetNum,
+    creatingQuote,
+    isKo,
+    months,
+    portfolio,
+    router,
+    selectedMediaForSimulation,
+    teamPerms.canContactOrPay,
+    teamPerms.loaded,
+    toast,
+  ]);
+
+  // 로그인 후 `?createQuote=1` 로 복귀하면 결과 단계로 이동 후 견적 생성을 재개.
+  useEffect(() => {
+    if (createQuoteParam !== "1") return;
+    if (handledCreateQuoteRef.current) return;
+    handledCreateQuoteRef.current = true;
+    stripPlannerQueryKeys(["createQuote"]);
+    setWizardStep(PLANNER_RESULT_STEP);
+    void createQuoteFromPlan();
+  }, [createQuoteParam, stripPlannerQueryKeys, setWizardStep, createQuoteFromPlan]);
 
   const goNext = useCallback(() => {
     const check = canProceedFromStep(
@@ -1380,6 +1500,21 @@ export default function PlannerPageClient({
                         variant="accent"
                         size="md"
                         className="w-full bg-gradient-to-r from-violet-500 to-cyan-400 font-bold text-white shadow-md shadow-violet-500/25"
+                        onClick={() => void createQuoteFromPlan()}
+                        disabled={
+                          creatingQuote ||
+                          (teamPerms.loaded && !teamPerms.canContactOrPay)
+                        }
+                      >
+                        <FileText className="h-4 w-4" />
+                        {creatingQuote
+                          ? t("creatingQuote")
+                          : t("ctaCreateQuoteFromPlan")}
+                      </BtnBlock>
+                      <BtnBlock
+                        variant="secondary"
+                        size="md"
+                        className="w-full dark:text-white"
                         onClick={() => void goToContactQuote()}
                         disabled={
                           navigatingContact ||
@@ -1389,7 +1524,7 @@ export default function PlannerPageClient({
                         <Send className="h-4 w-4" />
                         {navigatingContact
                           ? t("savingInProgress")
-                          : t("ctaQuoteWithPlan")}
+                          : t("ctaExpertConsult")}
                       </BtnBlock>
                       <p className="text-center text-xs text-muted-foreground">
                         {t("quoteTrustLine")}
