@@ -5,6 +5,7 @@ export type DigitalChannelId =
   | "google"
   | "meta"
   | "daangn"
+  | "buzzvil"
   | "tiktok";
 
 /** @deprecated persisted store 마이그레이션용 */
@@ -159,6 +160,28 @@ export const DIGITAL_CHANNELS: DigitalChannel[] = [
       local: 0.98,
       sales: 0.94,
       event: 0.82,
+    },
+  },
+  {
+    id: "buzzvil",
+    nameKo: "버즈빌",
+    nameEn: "Buzzvil",
+    descriptionKo: "잠금화면 리워드 광고, 일 2억 노출",
+    descriptionEn: "Lockscreen reward ads · 200M daily impressions",
+    icon: "B",
+    color: "#6366F1",
+    synergyKo: "OOH 노출 후 폰 잠금화면 리타겟",
+    synergyEn: "Retarget on phone lockscreen after OOH exposure",
+    // 잠금화면 리워드 — 초대형 노출·저단가 (대량 인지)
+    avgCpcWon: 260,
+    avgCpmWon: 3200,
+    ctr: 0.018,
+    goalAffinity: {
+      brand: 0.9,
+      launch: 0.88,
+      local: 0.7,
+      sales: 0.78,
+      event: 0.84,
     },
   },
   {
