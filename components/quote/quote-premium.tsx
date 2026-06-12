@@ -13,6 +13,7 @@ import {
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { formatDocumentManWon } from "@/lib/document-text";
 import { cn } from "@/lib/utils";
+import { useTrustMetrics } from "@/lib/use-trust-metrics";
 import {
   computeQuotePremiumMetrics,
   formatCompactMetric,
@@ -543,6 +544,8 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
     const locale = useLocale();
     const isKo = locale.startsWith("ko");
     const tokens = PROPOSAL_TOKENS;
+    const trustMetrics = useTrustMetrics();
+    const verifiedMediaLabel = trustMetrics?.mediaCount ?? "500+";
 
     const metrics = useMemo(
       () =>
@@ -594,7 +597,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
           whyItems: [
             {
               title: "검증된 매체 데이터",
-              sub: "현장 검증 500+ 매체",
+              sub: `현장 검증 ${verifiedMediaLabel} 매체`,
             },
             {
               title: "AI 기반 최적 매체 믹스",
@@ -629,7 +632,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
           whyItems: [
             {
               title: "Verified media data",
-              sub: "500+ field-verified placements",
+              sub: `${verifiedMediaLabel} field-verified placements`,
             },
             {
               title: "AI-optimized media mix",

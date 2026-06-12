@@ -1,32 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
-
-type Formatted = {
-  mediaCount: string;
-  brandCount: string;
-  campaignCount: string;
-};
+import { useTrustMetrics } from "@/lib/use-trust-metrics";
 
 /** 푸터 등에서 신뢰 지표 한 줄 노출 (공개 API 자동 집계값). */
 export function TrustMetricsInline({ className }: { className?: string }) {
   const locale = useLocale();
   const isKo = locale.startsWith("ko");
-  const [m, setM] = useState<Formatted | null>(null);
-
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/trust-metrics", { cache: "force-cache" })
-      .then((r) => r.json())
-      .then((d: { formatted?: Formatted }) => {
-        if (!cancelled && d.formatted) setM(d.formatted);
-      })
-      .catch(() => {});
-    return () => {
-      cancelled = true;
-    };
-  }, []);
+  const m = useTrustMetrics();
 
   if (!m) return null;
 
@@ -42,7 +23,5 @@ export function TrustMetricsInline({ className }: { className?: string }) {
         `${m.brandCount} active brands`,
       ];
 
-  return (
-    <p className={className}>{parts.join(" · ")}</p>
-  );
+  return <p className={className}>{parts.join(" · ")}</p>;
 }

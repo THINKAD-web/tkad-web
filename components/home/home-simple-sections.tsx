@@ -7,6 +7,7 @@ import {
 } from "@/lib/category-grid-config";
 import { MediaCatalogListCard } from "@/components/media/media-catalog-list-card";
 import type { MediaItem } from "@/lib/media-data";
+import { getTrustMetrics, formatTrustCount } from "@/lib/trust-metrics";
 
 type CategorySectionProps = { locale: string };
 
@@ -29,8 +30,11 @@ export function HomeCategorySection({ locale }: CategorySectionProps) {
   );
 }
 
-export function HomeTrustStrip({ locale }: { locale: string }) {
+export async function HomeTrustStrip({ locale }: { locale: string }) {
   const isKo = locale.startsWith("ko");
+  const trust = await getTrustMetrics();
+  const verifiedLabel = formatTrustCount(trust.mediaCount);
+  const brandLabel = formatTrustCount(trust.brandCount);
   const partners = [
     "Samsung",
     "Hyundai",
@@ -46,9 +50,9 @@ export function HomeTrustStrip({ locale }: { locale: string }) {
     <section className="border-t border-gray-200 bg-gray-50 px-4 py-10 dark:border-white/10 dark:bg-[#020202] sm:px-6">
       <div className="mx-auto max-w-6xl text-center">
         <p className="text-lg font-black tabular-nums tracking-tight text-gray-900 dark:text-white sm:text-xl">
-          {isKo ? "500+ 검증 매체" : "500+ verified media"}
+          {isKo ? `${verifiedLabel} 검증 매체` : `${verifiedLabel} verified media`}
           <span className="mx-2 text-gray-300 dark:text-white/20">·</span>
-          {isKo ? "443+ 활성 브랜드" : "443+ active brands"}
+          {isKo ? `${brandLabel} 활성 브랜드` : `${brandLabel} active brands`}
           <span className="mx-2 text-gray-300 dark:text-white/20">·</span>
           {isKo ? "24H 응답" : "24h response"}
         </p>

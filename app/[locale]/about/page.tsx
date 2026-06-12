@@ -7,6 +7,7 @@ import { ogAltForRoute } from "@/lib/og-route-copy";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { AboutPageSections } from "@/components/about/about-page-sections";
+import { getTrustMetrics, formatTrustCount } from "@/lib/trust-metrics";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -59,6 +60,8 @@ export default async function AboutPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const isKo = locale === "ko";
+  const trust = await getTrustMetrics();
+  const verifiedLabel = formatTrustCount(trust.mediaCount);
 
   return (
     <HomeLandingDayNight>
@@ -74,7 +77,7 @@ export default async function AboutPage({ params }: Props) {
               : "Since 2014, THINKAD pioneered transparent OOH pricing in Korea — now evolving into an AI platform"
           }
         />
-        <AboutPageSections isKo={isKo} />
+        <AboutPageSections isKo={isKo} verifiedLabel={verifiedLabel} />
       </div>
     </HomeLandingDayNight>
   );

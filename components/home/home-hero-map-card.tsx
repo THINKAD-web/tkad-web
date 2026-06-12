@@ -15,6 +15,7 @@ import {
   PUBLIC_DARK_MAP_TILE_URL,
 } from "@/lib/public-dark-map-config";
 import { useTranslations } from "next-intl";
+import { useTrustMetrics } from "@/lib/use-trust-metrics";
 
 const ACCENT = "#22d3ee";
 
@@ -37,6 +38,7 @@ type Props = {
 
 export default function HomeHeroMapCard({ pins }: Props) {
   const t = useTranslations("homePage");
+  const metrics = useTrustMetrics();
   const validPins = useMemo(
     () =>
       pins.filter(
@@ -97,7 +99,7 @@ export default function HomeHeroMapCard({ pins }: Props) {
 
       <div className="grid shrink-0 grid-cols-3 gap-2 border-t border-border bg-muted/50 px-4 py-3">
         {[
-          { k: t("heroMapStatVerified"), v: "500+" },
+          { k: t("heroMapStatVerified"), v: metrics?.mediaCount ?? "500+" },
           { k: t("heroMapStatPartners"), v: "100+" },
           { k: t("heroMapStatResponse"), v: "24h" },
         ].map((s) => (

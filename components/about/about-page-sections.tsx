@@ -12,9 +12,9 @@ import {
 import { ArrowRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-type Props = { isKo: boolean };
+type Props = { isKo: boolean; verifiedLabel: string };
 
-export function AboutPageSections({ isKo }: Props) {
+export function AboutPageSections({ isKo, verifiedLabel }: Props) {
   const storyParagraphs = isKo
     ? [
         "옥외광고를 하려면 수십 개 대행사에 전화해야 했습니다.\n단가는 물어봐야 알 수 있었고,\n같은 매체도 대행사마다 가격이 달랐습니다.",
@@ -88,7 +88,7 @@ export function AboutPageSections({ isKo }: Props) {
         {
           icon: "🏆",
           title: "검증된 데이터",
-          body: "추정이 아닌 실제 집행 데이터\n현장 검증 500+ 매체\n10년간 쌓인 실거래 단가",
+          body: `추정이 아닌 실제 집행 데이터\n현장 검증 ${verifiedLabel} 매체\n10년간 쌓인 실거래 단가`,
         },
         {
           icon: "🤖",
@@ -105,7 +105,7 @@ export function AboutPageSections({ isKo }: Props) {
         {
           icon: "🏆",
           title: "Verified data",
-          body: "Real execution data, not estimates\n500+ field-verified media\nA decade of transaction pricing",
+          body: `Real execution data, not estimates\n${verifiedLabel} field-verified media\nA decade of transaction pricing`,
         },
         {
           icon: "🤖",
@@ -253,8 +253,8 @@ export function AboutPageSections({ isKo }: Props) {
             </h2>
             <p className="mx-auto mt-4 max-w-lg whitespace-pre-line text-sm leading-relaxed text-white/90 md:text-base">
               {isKo
-                ? "500+ 검증 매체를 직접 검색하고\nAI 플래너로 3분 만에 캠페인을 설계하세요"
-                : "Browse 500+ verified media\nand plan a campaign in 3 minutes with AI planner"}
+                ? `${verifiedLabel} 검증 매체를 직접 검색하고\nAI 플래너로 3분 만에 캠페인을 설계하세요`
+                : `Browse ${verifiedLabel} verified media\nand plan a campaign in 3 minutes with AI planner`}
             </p>
             <CategoryHeroCtaRow className="mt-8 justify-center">
               <Link
