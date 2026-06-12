@@ -23,6 +23,8 @@ type CampaignRow = {
   status: string;
   proofPhotoCount: number;
   canUploadProof?: boolean;
+  actualImpressions: number | null;
+  actualReach: number | null;
 };
 
 export function MediaOwnerCampaignsClient() {
@@ -152,10 +154,108 @@ export function MediaOwnerCampaignsClient() {
                   {isKo ? "인증 사진" : "Proof"} ({r.proofPhotoCount})
                 </button>
               </div>
+              {r.canUploadProof ? (
+                <OwnerActualsForm row={r} isKo={isKo} onSaved={load} />
+              ) : null}
             </li>
           ))}
         </ul>
       )}
+    </div>
+  );
+}
+
+function OwnerActualsForm({
+  row,
+  isKo,
+  onSaved,
+}: {
+  row: CampaignRow;
+  isKo: boolean;
+  onSaved: () => Promise<void> | void;
+}) {
+  const toast = useAppToast();
+  const [imp, setImp] = useState(
+    row.actualImpressions != null ? String(row.actualImpressions) : "",
+  );
+  const [reach, setReach] = useState(
+    row.actualReach != null ? String(row.actualReach) : "",
+  );
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    setSaving(true);
+    try {
+      const res = await fetch(
+        `/api/media-owner/campaigns/${row.campaignId}/actuals`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            actualImpressions: imp.trim() === "" ? null : imp.trim(),
+            actualReach: reach.trim() === "" ? null : reach.trim(),
+          }),
+        },
+      );
+      const json = await res.json();
+      if (!res.ok || !json.ok) {
+        toast.error(isKo ? "저장 실패" : "Save failed");
+        return;
+      }
+      toast.success(
+        isKo ? "실적이 저장되었습니다." : "Actuals saved.",
+      );
+      await onSaved();
+    } catch (e) {
+      toast.error(e instanceof Error ? e.message : "Error");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="mt-3 border-t dark:border-white/10 border-gray-200 pt-3">
+      <p className="text-xs font-semibold dark:text-white text-gray-700">
+        {isKo ? "집행 실적 입력" : "Enter actuals"}
+        <span className="ml-1 font-normal dark:text-white/50 text-gray-400">
+          {isKo ? "(집행 종료 후 · 광고주에게 예측 대비 표시)" : "(after flight · shown vs prediction)"}
+        </span>
+      </p>
+      <div className="mt-2 flex flex-wrap items-end gap-2">
+        <label className="flex flex-col">
+          <span className="text-[10px] dark:text-white/55 text-gray-400">
+            {isKo ? "실제 노출수" : "Impressions"}
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={imp}
+            onChange={(e) => setImp(e.target.value)}
+            className="mt-0.5 w-32 rounded-lg border dark:border-white/15 border-gray-200 bg-transparent px-2 py-1.5 text-sm tabular-nums outline-none dark:text-white text-gray-900"
+          />
+        </label>
+        <label className="flex flex-col">
+          <span className="text-[10px] dark:text-white/55 text-gray-400">
+            {isKo ? "실제 도달수" : "Reach"}
+          </span>
+          <input
+            type="number"
+            min={0}
+            value={reach}
+            onChange={(e) => setReach(e.target.value)}
+            className="mt-0.5 w-32 rounded-lg border dark:border-white/15 border-gray-200 bg-transparent px-2 py-1.5 text-sm tabular-nums outline-none dark:text-white text-gray-900"
+          />
+        </label>
+        <button
+          type="button"
+          disabled={saving}
+          onClick={() => void save()}
+          className="inline-flex h-9 items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 px-3 text-xs font-bold dark:text-white text-gray-900 hover:dark:bg-white/5 bg-gray-50 disabled:opacity-50"
+        >
+          {saving ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
+          {isKo ? "저장" : "Save"}
+        </button>
+      </div>
     </div>
   );
 }
