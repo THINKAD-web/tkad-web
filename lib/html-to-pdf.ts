@@ -311,6 +311,22 @@ function replaceUntrustedImagesInClone(
     ph.style.flexShrink = "0";
     img.replaceWith(ph);
   });
+
+  // 안전망: 프록시되지 않은 외부 background-image 는 캔버스 오염을 막기 위해
+  // 회색 플레이스홀더로 중화한다 (data/blob/same-origin 은 통과).
+  cloned.querySelectorAll<HTMLElement>("*").forEach((el) => {
+    const src = extractCssUrl(el.style.backgroundImage || "");
+    if (!src || src.startsWith("data:") || src.startsWith("blob:")) return;
+    try {
+      const origin = clonedDoc.defaultView?.location?.origin;
+      const u = new URL(src, clonedDoc.defaultView?.location?.href);
+      if (origin && u.origin === origin) return;
+    } catch {
+      /* ignore */
+    }
+    el.style.backgroundImage = "none";
+    el.style.backgroundColor = "#e2e8f0";
+  });
 }
 
 /**
@@ -352,6 +368,66 @@ async function preloadImagesAsProxyDataUrls(element: HTMLElement): Promise<void>
         if (dataUrl) img.src = dataUrl;
       } catch {
         /* ignore */
+      }
+    }),
+  );
+}
+
+/**
+ * html2canvas(1.4.1) 는 `object-fit` 을 무시하고 `<img>` 를 박스에 강제로 늘려
+ * 비율을 깨뜨린다. 이를 피하려 매체 카드 썸네일은 `background-size: cover` 의
+ * `<div>` 로 렌더한다. 그 background 의 외부 http(s) URL 도 CORS 오염을 막기 위해
+ * 캡처 전에 `/api/image-proxy` 로 가져와 data URL 로 치환한다.
+ */
+function extractCssUrl(bg: string): string | null {
+  const m = bg.match(/url\(\s*["']?([^"')]+)["']?\s*\)/i);
+  return m ? m[1]!.trim() : null;
+}
+
+async function preloadBackgroundImagesAsProxyDataUrls(
+  element: HTMLElement,
+): Promise<void> {
+  if (typeof window === "undefined") return;
+  const nodes: HTMLElement[] = [
+    element,
+    ...Array.from(element.querySelectorAll<HTMLElement>("*")),
+  ];
+  await Promise.all(
+    nodes.map(async (el) => {
+      const raw = el.style.backgroundImage || "";
+      const src = extractCssUrl(raw);
+      if (!src) return;
+      if (src.startsWith("data:") || src.startsWith("blob:")) return;
+      if (
+        src.startsWith("/api/image-proxy") ||
+        src.startsWith("/api/bunny-media/")
+      ) {
+        return;
+      }
+      let u: URL;
+      try {
+        u = new URL(src, window.location.href);
+      } catch {
+        return;
+      }
+      if (u.origin === window.location.origin) return;
+      if (u.protocol !== "http:" && u.protocol !== "https:") return;
+      try {
+        const proxied = `/api/image-proxy?url=${encodeURIComponent(u.toString())}`;
+        const res = await fetch(proxied, { cache: "force-cache" });
+        if (!res.ok) return;
+        const blob = await res.blob();
+        if (!blob.type.startsWith("image/")) return;
+        const dataUrl: string = await new Promise((resolve, reject) => {
+          const fr = new FileReader();
+          fr.onload = () =>
+            resolve(typeof fr.result === "string" ? fr.result : "");
+          fr.onerror = () => reject(fr.error ?? new Error("FileReader error"));
+          fr.readAsDataURL(blob);
+        });
+        if (dataUrl) el.style.backgroundImage = `url("${dataUrl}")`;
+      } catch {
+        /* ignore — onclone 안전망이 외부 background 를 중화한다 */
       }
     }),
   );
@@ -425,6 +501,7 @@ function hexToRgb(hex: string): { r: number; g: number; b: number } {
 
 async function elementToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
   await preloadImagesAsProxyDataUrls(element);
+  await preloadBackgroundImagesAsProxyDataUrls(element);
   await waitForImagesInElement(element);
   await waitForFontsAndPaint();
 
