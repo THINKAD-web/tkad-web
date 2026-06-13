@@ -25,7 +25,8 @@
     "generate:pwa-icons": "node scripts/generate-pwa-icons.mjs",
     "cursor:prompt": "tsx scripts/cursor-agent.mts",
     "cursor:agent": "CURSOR_AGENT_MODE=agent tsx scripts/cursor-agent.mts",
-    "screenshots:hub": "node scripts/capture-hub-screenshots.mjs"
+    "screenshots:hub": "node scripts/capture-hub-screenshots.mjs",
+    "smoke": "tsx scripts/smoke-test.ts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
