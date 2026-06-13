@@ -68,6 +68,7 @@ import {
   shouldRedirectMediaIdToSlug,
 } from "@/lib/media-slug";
 import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
+import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -434,6 +435,7 @@ export default async function MediaDetailPage({ params }: Props) {
           </>
         }
       />
+      <ExitSurveyBanner surface="media_detail" />
     </>
   );
 }
