@@ -1436,6 +1436,23 @@ model GenerationLog {
   @@map("generation_logs")
 }
 
+/// AI 호출 통합 사용량 — 기능·모델·입출력 토큰 단위 집계 (비차단 로깅)
+/// feature: chatbot | recommendation | content | creative_review | chat_reply
+model AiUsageLog {
+  id           String   @id @default(cuid())
+  feature      String
+  model        String
+  inputTokens  Int      @default(0) @map("input_tokens")
+  outputTokens Int      @default(0) @map("output_tokens")
+  userId       String?  @map("user_id")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  @@index([feature])
+  @@index([createdAt])
+  @@index([model])
+  @@map("ai_usage_logs")
+}
+
 enum AppUserRole {
   advertiser
   agency

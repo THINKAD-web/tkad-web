@@ -36,6 +36,8 @@ export async function completeClaudeChatbot(params: {
   reply: string;
   media: AiChatbotMediaCard[];
   tokensUsed: number;
+  inputTokens: number;
+  outputTokens: number;
   model: string;
 }> {
   const client = getAnthropicClient(); // ANTHROPIC_API_KEY 없으면 throw
@@ -53,6 +55,8 @@ export async function completeClaudeChatbot(params: {
 
   const collectedCards: AiChatbotMediaCard[] = [];
   let totalTokens = 0;
+  let totalInputTokens = 0;
+  let totalOutputTokens = 0;
   const maxRounds = params.maxToolRounds ?? 4;
 
   for (let round = 0; round < maxRounds; round++) {
@@ -63,6 +67,8 @@ export async function completeClaudeChatbot(params: {
       tools,
       messages,
     });
+    totalInputTokens += res.usage?.input_tokens ?? 0;
+    totalOutputTokens += res.usage?.output_tokens ?? 0;
     totalTokens +=
       (res.usage?.input_tokens ?? 0) + (res.usage?.output_tokens ?? 0);
 
@@ -97,6 +103,8 @@ export async function completeClaudeChatbot(params: {
       reply,
       media: dedupeMediaCards(collectedCards).slice(0, 6),
       tokensUsed: totalTokens,
+      inputTokens: totalInputTokens,
+      outputTokens: totalOutputTokens,
       model: CHATBOT_MODEL,
     };
   }
@@ -108,6 +116,8 @@ export async function completeClaudeChatbot(params: {
         : "Too many tool steps. Please try a shorter question.",
     media: dedupeMediaCards(collectedCards).slice(0, 6),
     tokensUsed: totalTokens,
+    inputTokens: totalInputTokens,
+    outputTokens: totalOutputTokens,
     model: CHATBOT_MODEL,
   };
 }
