@@ -1,6 +1,6 @@
 import { getAnthropicClient } from "@/lib/ai-content-generator";
 import { AI_MODELS } from "@/lib/ai-models";
-import { logAiUsage } from "@/lib/ai-usage-log";
+import { logAiUsage, recordAiUsage } from "@/lib/ai-usage-log";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 export async function generateChatAiOwnerReply(input: {
@@ -46,6 +46,12 @@ Reply in 2-4 short sentences.`,
       tokensUsed:
         (res.usage?.input_tokens ?? 0) + (res.usage?.output_tokens ?? 0),
       note: "support chat auto-reply",
+    });
+    void recordAiUsage({
+      feature: "chat_reply",
+      model: AI_MODELS.chatReply,
+      inputTokens: res.usage?.input_tokens ?? 0,
+      outputTokens: res.usage?.output_tokens ?? 0,
     });
     const text =
       res.content[0]?.type === "text" ? res.content[0].text.trim() : "";

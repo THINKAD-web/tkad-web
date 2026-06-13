@@ -28,3 +28,31 @@ export async function logAiUsage(entry: {
     console.error("[ai-usage-log]", e instanceof Error ? e.message : e);
   }
 }
+
+/**
+ * AI 호출 통합 사용량 기록 — AiUsageLog(ai_usage_logs). 입력/출력 토큰 분리.
+ * 비차단: 실패해도 호출 흐름에 영향 없음.
+ */
+export async function recordAiUsage(entry: {
+  /** chatbot | recommendation | content | creative_review | chat_reply */
+  feature: string;
+  model: string;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
+  userId?: string | null;
+}): Promise<void> {
+  if (!isDatabaseConfigured()) return;
+  try {
+    await getPrisma().aiUsageLog.create({
+      data: {
+        feature: entry.feature,
+        model: entry.model,
+        inputTokens: Math.max(0, Math.round(entry.inputTokens ?? 0)),
+        outputTokens: Math.max(0, Math.round(entry.outputTokens ?? 0)),
+        userId: entry.userId ?? null,
+      },
+    });
+  } catch (e) {
+    console.error("[ai-usage]", e instanceof Error ? e.message : e);
+  }
+}

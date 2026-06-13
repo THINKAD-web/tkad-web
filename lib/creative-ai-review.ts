@@ -1,6 +1,6 @@
 import { getAnthropicClient } from "@/lib/ai-content-generator";
 import { AI_MODELS } from "@/lib/ai-models";
-import { logAiUsage } from "@/lib/ai-usage-log";
+import { logAiUsage, recordAiUsage } from "@/lib/ai-usage-log";
 
 export type CreativeAiCheck = {
   id: string;
@@ -114,6 +114,12 @@ async function visionReview(imageUrl: string): Promise<{
       tokensUsed:
         (res.usage?.input_tokens ?? 0) + (res.usage?.output_tokens ?? 0),
       note: "creative 1st review",
+    });
+    void recordAiUsage({
+      feature: "creative_review",
+      model: AI_MODELS.creativeReview,
+      inputTokens: res.usage?.input_tokens ?? 0,
+      outputTokens: res.usage?.output_tokens ?? 0,
     });
     const text =
       res.content[0]?.type === "text" ? res.content[0].text.trim() : "";

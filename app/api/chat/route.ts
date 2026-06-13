@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
 import { completeClaudeChatbot } from "@/lib/ai-chatbot-claude";
+import { recordAiUsage } from "@/lib/ai-usage-log";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
 import { getClientIp } from "@/lib/api-response";
@@ -130,11 +131,21 @@ export async function POST(req: Request) {
   const system = buildAiChatbotSystemPromptWithTools(locale);
 
   try {
-    const { reply, media, tokensUsed, model } = await completeClaudeChatbot({
-      systemPrompt: system,
-      messages: normalized.messages,
-      catalog,
-      locale,
+    const { reply, media, tokensUsed, inputTokens, outputTokens, model } =
+      await completeClaudeChatbot({
+        systemPrompt: system,
+        messages: normalized.messages,
+        catalog,
+        locale,
+      });
+
+    // 통합 사용량 로그 (비차단)
+    void recordAiUsage({
+      feature: "chatbot",
+      model,
+      inputTokens,
+      outputTokens,
+      userId: user?.id ?? null,
     });
 
     // 대화 로그 저장 (관리자 대시보드용) — 실패해도 응답엔 영향 없음

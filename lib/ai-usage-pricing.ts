@@ -49,11 +49,58 @@ export function estimateCostUsd(
   return (tokens / 1_000_000) * blendedUsdPer1M(model);
 }
 
+// ── 환경변수 기반 정확 단가(입력/출력 분리, USD per 1M tokens) ──
+function envNum(key: string, fallback: number): number {
+  const v = Number(process.env[key]);
+  return Number.isFinite(v) && v >= 0 ? v : fallback;
+}
+
+type IoRate = { in: number; out: number };
+
+/** 모델 패밀리별 입력/출력 단가. ANTHROPIC_{FAMILY}_{INPUT|OUTPUT}_PER_1M 로 override. */
+function ioRateFor(model: string | null | undefined): IoRate {
+  const m = (model ?? "").toLowerCase();
+  if (/haiku/.test(m)) {
+    return {
+      in: envNum("ANTHROPIC_HAIKU_INPUT_PER_1M", 1),
+      out: envNum("ANTHROPIC_HAIKU_OUTPUT_PER_1M", 5),
+    };
+  }
+  if (/opus/.test(m)) {
+    return {
+      in: envNum("ANTHROPIC_OPUS_INPUT_PER_1M", 15),
+      out: envNum("ANTHROPIC_OPUS_OUTPUT_PER_1M", 75),
+    };
+  }
+  // sonnet · 기타 기본
+  return {
+    in: envNum("ANTHROPIC_SONNET_INPUT_PER_1M", 3),
+    out: envNum("ANTHROPIC_SONNET_OUTPUT_PER_1M", 15),
+  };
+}
+
+/** 입력/출력 토큰 → 정확 비용(USD). 단가는 환경변수 우선. */
+export function costUsdFromIO(
+  model: string | null | undefined,
+  inputTokens: number,
+  outputTokens: number,
+): number {
+  const r = ioRateFor(model);
+  return (inputTokens / 1_000_000) * r.in + (outputTokens / 1_000_000) * r.out;
+}
+
+/** USD → KRW 환산 (ANTHROPIC_USD_KRW, 기본 1,450) */
+export const USD_KRW = envNum("ANTHROPIC_USD_KRW", 1450);
+export function usdToKrw(usd: number): number {
+  return Math.round(usd * USD_KRW);
+}
+
 /** 기능 type → 한글 라벨 */
 export function featureLabel(type: string): string {
   const map: Record<string, string> = {
     chatbot: "공개 챗봇",
     recommendation: "AI 추천",
+    content: "콘텐츠 생성",
     chat_reply: "상담 답변",
     creative_review: "크리에이티브 검토",
     trend_report: "트렌드 리포트",

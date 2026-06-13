@@ -12,6 +12,7 @@ import prisma, {
   getPrisma,
   isDatabaseConfigured,
 } from "@/lib/prisma";
+import { recordAiUsage } from "@/lib/ai-usage-log";
 
 /** Default Claude 3.5 Sonnet snapshot; override with ANTHROPIC_MODEL. */
 export const ANTHROPIC_DEFAULT_MODEL = "claude-sonnet-4-5-20250929";
@@ -181,9 +182,20 @@ async function appendGenerationLog(entry: {
   response?: string | null;
   model: string;
   tokensUsed?: number | null;
+  inputTokens?: number | null;
+  outputTokens?: number | null;
   status: string;
   errorMsg?: string | null;
 }): Promise<void> {
+  // 통합 사용량 로그(AiUsageLog) — 성공 호출만, 비차단.
+  if (entry.status === "success") {
+    void recordAiUsage({
+      feature: "content",
+      model: entry.model,
+      inputTokens: entry.inputTokens ?? 0,
+      outputTokens: entry.outputTokens ?? 0,
+    });
+  }
   if (!isDatabaseConfigured()) return;
   try {
     await prisma.generationLog.create({
@@ -694,6 +706,8 @@ export async function generateTrendReport(
       response: JSON.stringify(raw),
       model,
       tokensUsed: usageTotal(message),
+      inputTokens: message.usage?.input_tokens ?? 0,
+      outputTokens: message.usage?.output_tokens ?? 0,
       status: "success",
     });
 
@@ -767,6 +781,8 @@ export async function generateAcademyLesson(
       response: JSON.stringify(raw),
       model,
       tokensUsed: usageTotal(message),
+      inputTokens: message.usage?.input_tokens ?? 0,
+      outputTokens: message.usage?.output_tokens ?? 0,
       status: "success",
     });
 
@@ -840,6 +856,8 @@ ${JSON.stringify(metrics, null, 2)}`;
       response: JSON.stringify(raw),
       model,
       tokensUsed: usageTotal(message),
+      inputTokens: message.usage?.input_tokens ?? 0,
+      outputTokens: message.usage?.output_tokens ?? 0,
       status: "success",
     });
 
@@ -956,6 +974,8 @@ ${json}
       response: JSON.stringify(raw),
       model,
       tokensUsed: usageTotal(message),
+      inputTokens: message.usage?.input_tokens ?? 0,
+      outputTokens: message.usage?.output_tokens ?? 0,
       status: "success",
     });
 
@@ -1050,6 +1070,8 @@ ${json}
       response: JSON.stringify(raw),
       model,
       tokensUsed: usageTotal(message),
+      inputTokens: message.usage?.input_tokens ?? 0,
+      outputTokens: message.usage?.output_tokens ?? 0,
       status: "success",
     });
 
