@@ -1453,6 +1453,22 @@ model AiUsageLog {
   @@map("ai_usage_logs")
 }
 
+/// 이탈 시점 1클릭 마이크로 설문 — 사용자가 "어렵다"를 구체적으로 구분
+/// surface: media_detail | planner / answer: found | lost | complex
+model ExitSurveyResponse {
+  id        String   @id @default(cuid())
+  surface   String
+  answer    String
+  path      String?
+  sessionId String?  @map("session_id")
+  userId    String?  @map("user_id")
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([surface, createdAt])
+  @@index([answer])
+  @@map("exit_survey_responses")
+}
+
 enum AppUserRole {
   advertiser
   agency

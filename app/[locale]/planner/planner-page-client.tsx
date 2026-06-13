@@ -13,6 +13,7 @@ import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
 import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
@@ -1582,6 +1583,7 @@ export default function PlannerPageClient({
         )}
         </PlannerNeonPageBody>
       </div>
+      <ExitSurveyBanner surface="planner" />
     </HomeLandingDayNight>
   );
 }

@@ -1,6 +1,7 @@
 import { getAdvertiserFunnelStats } from "@/lib/funnel-analytics";
 import { AdminFunnelDashboard } from "@/components/admin/admin-funnel-dashboard";
 import { AdminConversionFunnel } from "@/components/admin/admin-conversion-funnel";
+import { AdminExitSurveyCard } from "@/components/admin/admin-exit-survey-card";
 
 export const dynamic = "force-dynamic";
 
@@ -20,6 +21,8 @@ export default async function AdminFunnelPage({ params }: Props) {
       </div>
 
       <AdminConversionFunnel />
+
+      <AdminExitSurveyCard />
 
       <div className="pt-2">
         <h2 className="text-lg font-bold tracking-tight">광고주 여정 (상세)</h2>
