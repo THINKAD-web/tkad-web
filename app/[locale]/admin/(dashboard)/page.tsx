@@ -17,6 +17,7 @@ import { loadAdminTodayMetrics } from "@/lib/admin-today-metrics";
 import { AdminDashboardCharts } from "@/components/admin/admin-dashboard-charts";
 import { AdminWebVitalsCard } from "@/components/admin/admin-web-vitals-card";
 import { AdminBrokenImagesCard } from "@/components/admin/admin-broken-images-card";
+import { AdminSystemStatusCard } from "@/components/admin/admin-system-status-card";
 import { loadWebVitalsSummary } from "@/lib/web-vitals-summary";
 
 export const dynamic = "force-dynamic";
@@ -260,6 +261,8 @@ export default async function AdminOverviewPage({ params }: Props) {
           ))}
         </div>
       </section>
+
+      <AdminSystemStatusCard />
 
       <AdminWebVitalsCard summary={webVitals} />
 
