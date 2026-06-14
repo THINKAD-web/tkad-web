@@ -85,6 +85,19 @@ export async function recordConversion(input: RecordConversionInput): Promise<vo
       metadata: (input.metadata ?? undefined) as Prisma.InputJsonValue | undefined,
     },
   });
+
+  // 상세 조회수 누적 — 인기 폴백 정렬용. 비차단(실패해도 전환 기록엔 영향 없음).
+  // media_view 비콘은 클라이언트에서만 발생하므로 봇은 자연 제외.
+  if (input.type === "media_view" && input.mediaId) {
+    try {
+      await db.media.update({
+        where: { id: input.mediaId.slice(0, 64) },
+        data: { viewCount: { increment: 1 } },
+      });
+    } catch {
+      /* 매체 없음·컬럼 미적용 시 무시 */
+    }
+  }
 }
 
 export async function countActiveSessions(now = new Date()): Promise<number> {

@@ -12,6 +12,31 @@ export const POPULARITY_WEIGHTS = {
 /** 최종 popularityScore = 7일×0.6 + 30일×0.4 */
 export const POPULARITY_BLEND = { days7: 0.6, days30: 0.4 } as const;
 
+/**
+ * 즉석 인기 폴백 점수 — cron `popularityScore` 가 아직 0 일 때 사용.
+ * 누적 조회수 + 매체 본연의 노출/가시성 신호로 의미 있는 차등 정렬을 만든다.
+ * (popularityScore 가 쌓이면 그 값이 우선)
+ */
+export function mediaPopularityFallbackScore(m: {
+  popularityScore?: number | null;
+  viewCount?: number | null;
+  visibilityScore?: number | null;
+  dailyFootfall?: number | null;
+  impressions?: number | null;
+  instantBookingEnabled?: boolean | null;
+}): number {
+  const real = m.popularityScore ?? 0;
+  // 실제 참여 점수가 있으면 그것을 크게 우선 (폴백 신호보다 항상 위)
+  if (real > 0) return 1_000_000 + real;
+  return (
+    (m.viewCount ?? 0) * 5 +
+    (m.visibilityScore ?? 0) * 3 +
+    (m.dailyFootfall ?? 0) / 1000 +
+    (m.impressions ?? 0) / 20000 +
+    (m.instantBookingEnabled ? 40 : 0)
+  );
+}
+
 type EngagementCounts = {
   favorites: number;
   inquiries: number;

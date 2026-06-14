@@ -46,21 +46,29 @@ export default async function HomePage({
 }) {
   const { locale } = await params;
 
-  const [recommended, popular, newest, reports, cases] =
-    await Promise.allSettled([
-      fetchPublicMediaCatalog({ sort: "recommended", limit: 10 }),
-      fetchPublicMediaCatalog({ sort: "popular", limit: 10 }),
-      fetchPublicMediaCatalog({ sort: "newest", limit: 10 }),
-      fetchPublishedReports({ limit: 6 }),
-      fetchPublishedCases({ limit: 6 }),
-    ]);
+  // 추천 → 인기(추천 제외) → 신규(추천+인기 제외) 순으로 중복 없이 구성.
+  const recommendedMedia = await fetchPublicMediaCatalog({
+    sort: "recommended",
+    limit: 10,
+  }).catch(() => []);
+  const recIds = recommendedMedia.map((m) => m.id);
 
-  const recommendedMedia =
-    recommended.status === "fulfilled" ? recommended.value : [];
-  const popularMedia = popular.status === "fulfilled" ? popular.value : [];
-  const newestMedia = newest.status === "fulfilled" ? newest.value : [];
-  const reportItems = reports.status === "fulfilled" ? reports.value : [];
-  const caseItems = cases.status === "fulfilled" ? cases.value : [];
+  const popularMedia = await fetchPublicMediaCatalog({
+    sort: "popular",
+    limit: 10,
+    excludeIds: recIds,
+  }).catch(() => []);
+  const popIds = popularMedia.map((m) => m.id);
+
+  const [newestMedia, reportItems, caseItems] = await Promise.all([
+    fetchPublicMediaCatalog({
+      sort: "newest",
+      limit: 10,
+      excludeIds: [...recIds, ...popIds],
+    }).catch(() => []),
+    fetchPublishedReports({ limit: 6 }).catch(() => []),
+    fetchPublishedCases({ limit: 6 }).catch(() => []),
+  ]);
 
   return (
     <main

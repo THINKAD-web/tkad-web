@@ -106,6 +106,8 @@ export async function fetchPublicMediaCatalog(opts: {
   target?: string;
   region?: string;
   q?: string;
+  /** 다른 홈 섹션과 중복 제거 (인기/신규에 적용) */
+  excludeIds?: string[];
 }): Promise<HomeCatalogMediaItem[]> {
   const limit = opts.limit ?? 10;
 
@@ -113,6 +115,7 @@ export async function fetchPublicMediaCatalog(opts: {
     return fetchFilteredMediaCatalog({ ...opts, limit });
   }
 
+  const excludeIds = opts.excludeIds ?? [];
   let rows: MediaItem[] = [];
 
   switch (opts.sort) {
@@ -120,10 +123,10 @@ export async function fetchPublicMediaCatalog(opts: {
       rows = await fetchHomeFeaturedMedia(limit);
       break;
     case "popular":
-      rows = await fetchHomeWeeklyPopularMedia(limit);
+      rows = await fetchHomeWeeklyPopularMedia(limit, excludeIds);
       break;
     case "newest":
-      rows = await fetchHomeNewMedia(limit);
+      rows = await fetchHomeNewMedia(limit, excludeIds);
       break;
     default:
       rows = [];
