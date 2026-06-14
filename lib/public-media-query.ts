@@ -169,11 +169,17 @@ export function buildPublicMediaOrderBy(
     case "price_desc":
       return [{ price: "desc" }];
     case "rating":
-      return [{ popularityScore: "desc" }, { updatedAt: "desc" }];
+      return [{ popularityScore: "desc" }, { viewCount: "desc" }, { updatedAt: "desc" }];
     case "popular":
     case "default":
     default:
-      return [{ popularityScore: "desc" }, { updatedAt: "desc" }];
+      // popularityScore(크론) 우선, 미축적 시 누적 조회수·가시성으로 차등
+      return [
+        { popularityScore: "desc" },
+        { viewCount: "desc" },
+        { visibilityScore: "desc" },
+        { updatedAt: "desc" },
+      ];
   }
 }
 

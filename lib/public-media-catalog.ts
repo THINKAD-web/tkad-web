@@ -1,4 +1,5 @@
 import { cache } from "react";
+import { mediaPopularityFallbackScore } from "@/lib/media-popularity";
 import type { Media, MediaAdvertiserExecution } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -364,33 +365,34 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
   }
 }
 
-/** 홈 — 이번 주 인기 (`popularityScore` 상위). */
+/**
+ * 홈 — 이번 주 인기. cron `popularityScore` 상위 우선,
+ * 아직 데이터가 없으면 조회수·가시성·노출 기반 폴백 점수로 차등 정렬.
+ * `excludeIds` 로 추천/신규 섹션과 중복 제거.
+ */
 export async function fetchHomeWeeklyPopularMedia(
   max = 6,
+  excludeIds: string[] = [],
 ): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) return [];
   try {
     const db = getPrisma();
-    let rows = await db.media.findMany({
-      where: { isActive: true, popularityScore: { gt: 0 } },
+    // 폴백 점수를 위해 충분한 풀을 가져와 JS 에서 가중 정렬.
+    const pool = await db.media.findMany({
+      where: {
+        isActive: true,
+        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
+      },
       orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
-      take: max,
+      take: Math.max(max * 6, 60),
       include: catalogInclude,
     });
-    if (rows.length < max) {
-      const extra = await db.media.findMany({
-        where: {
-          isActive: true,
-          id: { notIn: rows.map((r) => r.id) },
-        },
-        orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
-        take: max - rows.length,
-        include: catalogInclude,
-      });
-      rows = [...rows, ...extra];
-    }
-    if (rows.length === 0) return [];
-    const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
+    if (pool.length === 0) return [];
+    const ranked = [...pool].sort(
+      (a, b) => mediaPopularityFallbackScore(b) - mediaPopularityFallbackScore(a),
+    );
+    const top = ranked.slice(0, max);
+    const withCoverage = await attachPublicMediaCatalogExtras(db, top);
     return withCoverage.map(prismaMediaToMediaItem);
   } catch (e) {
     console.warn(
@@ -401,14 +403,21 @@ export async function fetchHomeWeeklyPopularMedia(
   }
 }
 
-/** 홈 — 새로 등록 (`createdAt` 최신). */
-export async function fetchHomeNewMedia(max = 6): Promise<MediaItem[]> {
+/** 홈 — 새로 등록 (`createdAt` 최신). `excludeIds` 로 다른 섹션과 중복 제거. */
+export async function fetchHomeNewMedia(
+  max = 6,
+  excludeIds: string[] = [],
+): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) return [];
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true },
-      orderBy: { createdAt: "desc" },
+      where: {
+        isActive: true,
+        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
+      },
+      // createdAt 동률(대량 시드) 대비 id 보조 정렬로 안정적 최신순.
+      orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: max,
       include: catalogInclude,
     });

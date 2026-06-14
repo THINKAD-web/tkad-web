@@ -266,6 +266,8 @@ model Media {
   /// 7일·30일 참여 지표 가중 합산 (`lib/media-popularity.ts`, 일일 cron 갱신)
   popularityScore     Int       @default(0) @map("popularity_score")
   popularityUpdatedAt DateTime? @map("popularity_updated_at")
+  /// 누적 상세 조회수 (media_view 비콘으로 즉시 증가, 봇 제외) — 인기 폴백 정렬용
+  viewCount           Int       @default(0) @map("view_count")
 
   /// BunnyCDN 등 외부 PDF URL (매체 제안서)
   proposalUrl      String? @map("proposal_url")
