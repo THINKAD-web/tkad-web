@@ -20,6 +20,7 @@ config({ path: ".env.local" });
 
 const base =
   process.argv.find((a) => a.startsWith("--base="))?.slice(7) ??
+  process.env.SMOKE_BASE_URL ??
   process.env.HEALTH_CHECK_BASE_URL ??
   "https://app.tkad.co.kr";
 const useBrowser = process.argv.includes("--browser");

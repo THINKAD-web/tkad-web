@@ -25,6 +25,9 @@ export const HEALTH_PAGE_ROUTES: string[] = [
   "/ko/my",
   "/ko/special/fandom",
   "/ko/special/popup",
+  "/ko/special/campus",
+  "/ko/special/local",
+  "/ko/studio/proposal",
 ];
 
 /** 모바일 가로 넘침 검사 대상 (375px) — 재발 잦은 핵심 화면 위주 */
