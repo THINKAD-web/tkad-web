@@ -24,6 +24,7 @@ function authOk(request: NextRequest): boolean {
 
 function resolveBase(request: NextRequest): string {
   const env =
+    process.env.SMOKE_BASE_URL?.trim() ||
     process.env.HEALTH_CHECK_BASE_URL?.trim() ||
     process.env.NEXT_PUBLIC_SITE_URL?.trim();
   if (env) return env;
