@@ -28,6 +28,9 @@ export const NETWORK_TYPE_CODES = [
   "subway_station",
   "elevator",
   "shopping_mall",
+  "bookstore",
+  "office",
+  "hospital",
 ] as const;
 
 export type NetworkTypeCode = (typeof NETWORK_TYPE_CODES)[number];
@@ -43,7 +46,25 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   subway_station: { ko: "지하철 역사 광고판", en: "Subway station ads" },
   elevator: { ko: "건물/오피스 엘리베이터", en: "Building elevator" },
   shopping_mall: { ko: "쇼핑몰/백화점 디지털 사이니지", en: "Shopping mall DOOH" },
+  bookstore: { ko: "교보문고·서점", en: "Bookstore" },
+  office: { ko: "오피스·빌딩", en: "Office building" },
+  hospital: { ko: "병원·의료", en: "Hospital" },
 };
+
+/** `/media/network` 목록 필터 칩 (대표 유형) */
+export const NETWORK_BROWSE_TYPE_CHIPS = [
+  { value: "", labelKo: "전체", labelEn: "All", icon: "Network" },
+  { value: "campus_kiosk", labelKo: "대학교", labelEn: "Campus", icon: "GraduationCap" },
+  { value: "convenience_store", labelKo: "편의점", labelEn: "Convenience", icon: "Coffee" },
+  { value: "elevator", labelKo: "엘리베이터", labelEn: "Elevator", icon: "Building2" },
+  { value: "bookstore", labelKo: "교보문고", labelEn: "Bookstore", icon: "Landmark" },
+  { value: "office", labelKo: "오피스", labelEn: "Office", icon: "Building2" },
+  { value: "hospital", labelKo: "병원", labelEn: "Hospital", icon: "Landmark" },
+  { value: "apartment", labelKo: "아파트", labelEn: "Apartment", icon: "Building2" },
+  { value: "bus_shelter", labelKo: "버스쉘터", labelEn: "Bus shelter", icon: "MapPin" },
+  { value: "subway_station", labelKo: "지하철", labelEn: "Subway", icon: "Train" },
+  { value: "shopping_mall", labelKo: "쇼핑몰", labelEn: "Mall", icon: "ShoppingBag" },
+] as const;
 
 export type NetworkPackageTier = { units: number; price: number };
 

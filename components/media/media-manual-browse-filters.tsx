@@ -32,6 +32,7 @@ import {
 } from "@/lib/media-discovery-filter-chips";
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
+import { NETWORK_BROWSE_TYPE_CHIPS } from "@/lib/media-network-types";
 import { PlannerNeonLabel } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 
@@ -122,6 +123,10 @@ type Props = {
   sectionDesc?: string;
   toolbarEnd?: ReactNode;
   className?: string;
+  /** network: `/media/network` 전용 유형 칩 */
+  variant?: "media" | "network";
+  networkType?: string;
+  onNetworkTypeChange?: (v: string) => void;
 };
 
 export function MediaManualBrowseFilters({
@@ -161,6 +166,9 @@ export function MediaManualBrowseFilters({
   sectionDesc,
   toolbarEnd,
   className,
+  variant = "media",
+  networkType = "",
+  onNetworkTypeChange,
 }: Props) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const locale = isKo ? "ko" : "en";
@@ -169,14 +177,14 @@ export function MediaManualBrowseFilters({
   const activeRegion = MEDIA_BROWSE_REGIONS.find((r) => r.id === regionMain);
 
   const activeFilterCount = [
-    mainCategory,
-    subCategory,
-    target,
+    variant === "network" ? networkType : mainCategory,
+    variant === "media" ? subCategory : "",
+    variant === "media" ? target : "",
     regionMain,
     regionSub,
     priceMin,
     priceMax,
-    features,
+    variant === "media" ? features : "",
   ].filter(Boolean).length;
 
   const total = totalCount;
@@ -186,8 +194,12 @@ export function MediaManualBrowseFilters({
       ? "검색 중…"
       : "Searching…"
     : isKo
-      ? `매체 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
-      : `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} media`;
+      ? variant === "network"
+        ? `네트워크 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
+        : `매체 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
+      : variant === "network"
+        ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} networks`
+        : `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} media`;
 
   const toggleFeature = (value: string) => {
     const parts = new Set(
@@ -234,7 +246,11 @@ export function MediaManualBrowseFilters({
           value={query}
           onChange={(e) => onQueryChange(e.target.value)}
           placeholder={
-            isKo ? "매체명·지역·유형 검색" : "Search name, region, type"
+            isKo
+              ? variant === "network"
+                ? "네트워크명·지역·유형 검색"
+                : "매체명·지역·유형 검색"
+              : "Search name, region, type"
           }
           className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
         />
@@ -252,40 +268,67 @@ export function MediaManualBrowseFilters({
 
       <div data-screenshot="media-main-category">
         <p className="tkad-home-accent-text mb-2 text-xs font-bold">
-          {isKo ? "어떤 매체?" : "Media type"}
+          {isKo
+            ? variant === "network"
+              ? "네트워크 유형"
+              : "어떤 매체?"
+            : variant === "network"
+              ? "Network type"
+              : "Media type"}
         </p>
         <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
-          {MEDIA_CATEGORIES.map((main) => {
-            const Icon = MAIN_ICONS[main.icon] ?? Monitor;
-            const selected = mainCategory === main.id;
-            return (
-              <button
-                key={main.id}
-                type="button"
-                onClick={() => {
-                  if (selected) {
-                    onMainCategoryChange("");
-                    onSubCategoryChange("");
-                  } else {
-                    onMainCategoryChange(main.id);
-                    onSubCategoryChange("");
-                  }
-                }}
-                className={cn(
-                  "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
-                  selected
-                    ? MAIN_COLOR_ACTIVE[main.color] ?? MEDIA_CHIP_ACTIVE
-                    : MEDIA_CHIP_INACTIVE,
-                )}
-              >
-                <Icon className="h-3.5 w-3.5" aria-hidden />
-                {isKo ? main.label : main.labelEn ?? main.label}
-              </button>
-            );
-          })}
+          {variant === "network"
+            ? NETWORK_BROWSE_TYPE_CHIPS.map((chip) => {
+                const Icon = MAIN_ICONS[chip.icon] ?? Network;
+                const selected = networkType === chip.value;
+                return (
+                  <button
+                    key={chip.value || "all"}
+                    type="button"
+                    onClick={() =>
+                      onNetworkTypeChange?.(selected ? "" : chip.value)
+                    }
+                    className={cn(
+                      "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                      selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" aria-hidden />
+                    {isKo ? chip.labelKo : chip.labelEn}
+                  </button>
+                );
+              })
+            : MEDIA_CATEGORIES.map((main) => {
+                const Icon = MAIN_ICONS[main.icon] ?? Monitor;
+                const selected = mainCategory === main.id;
+                return (
+                  <button
+                    key={main.id}
+                    type="button"
+                    onClick={() => {
+                      if (selected) {
+                        onMainCategoryChange("");
+                        onSubCategoryChange("");
+                      } else {
+                        onMainCategoryChange(main.id);
+                        onSubCategoryChange("");
+                      }
+                    }}
+                    className={cn(
+                      "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                      selected
+                        ? MAIN_COLOR_ACTIVE[main.color] ?? MEDIA_CHIP_ACTIVE
+                        : MEDIA_CHIP_INACTIVE,
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" aria-hidden />
+                    {isKo ? main.label : main.labelEn ?? main.label}
+                  </button>
+                );
+              })}
         </div>
 
-        {activeMain ? (
+        {variant === "media" && activeMain ? (
           <div
             className="mt-2 flex flex-wrap gap-2 rounded-xl border border-gray-100 bg-gray-50/80 p-2 dark:border-white/10 dark:bg-white/5"
             data-screenshot="media-sub-category"
@@ -312,6 +355,7 @@ export function MediaManualBrowseFilters({
         ) : null}
       </div>
 
+      {variant === "media" ? (
       <div>
         <p className="mb-2 text-xs font-bold text-pink-600 dark:text-pink-400">
           {isKo ? "왜 광고해?" : "Campaign goal"}
@@ -334,6 +378,7 @@ export function MediaManualBrowseFilters({
           ))}
         </div>
       </div>
+      ) : null}
 
       <div data-screenshot="media-region-filter">
         <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
@@ -439,24 +484,26 @@ export function MediaManualBrowseFilters({
               <p className="mb-1.5 text-[10px] font-medium text-gray-500 dark:text-white/45">
                 {isKo ? "매체 특성" : "Features"}
               </p>
-              <div className="flex flex-wrap gap-2">
-                {FEATURE_CHIPS.map((chip) => {
-                  const selected = featureSet.has(chip.value);
-                  return (
-                    <button
-                      key={chip.value}
-                      type="button"
-                      onClick={() => toggleFeature(chip.value)}
-                      className={cn(
-                        "rounded-full px-3 py-1 text-xs font-medium transition-all",
-                        selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
-                      )}
-                    >
-                      {isKo ? chip.labelKo : chip.labelEn}
-                    </button>
-                  );
-                })}
-              </div>
+              {variant === "media" ? (
+                <div className="flex flex-wrap gap-2">
+                  {FEATURE_CHIPS.map((chip) => {
+                    const selected = featureSet.has(chip.value);
+                    return (
+                      <button
+                        key={chip.value}
+                        type="button"
+                        onClick={() => toggleFeature(chip.value)}
+                        className={cn(
+                          "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                          selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+                        )}
+                      >
+                        {isKo ? chip.labelKo : chip.labelEn}
+                      </button>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           </div>
         ) : null}
