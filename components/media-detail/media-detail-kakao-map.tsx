@@ -19,6 +19,8 @@ type Props = {
   fitCoverageBounds?: boolean;
   /** 소수 핀(상세·복수 설치) — 클러스터 합쳐짐 방지 */
   disableCluster?: boolean;
+  /** 네트워크 다지점 — 모든 핀이 한 화면에 들어오도록 bounds 맞춤 */
+  fitMarkersBounds?: boolean;
 };
 
 /** 매체 상세 — 단일/소수 핀 카카오 지도 (Leaflet 대신) */
@@ -32,6 +34,7 @@ export function MediaDetailKakaoMap({
   coverageGeoJson = null,
   fitCoverageBounds = false,
   disableCluster = false,
+  fitMarkersBounds = false,
 }: Props) {
   return (
     <KakaoMapView
@@ -44,6 +47,7 @@ export function MediaDetailKakaoMap({
       coverageGeoJson={coverageGeoJson}
       fitCoverageBounds={fitCoverageBounds}
       disableCluster={disableCluster}
+      fitMarkersBounds={fitMarkersBounds}
       monochromeTiles
     />
   );

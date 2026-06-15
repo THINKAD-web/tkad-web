@@ -53,6 +53,8 @@ type Props = {
   monochromeTiles?: boolean;
   /** true면 마커를 지도에 직접 올려 근접 핀도 각각 표시 */
   disableCluster?: boolean;
+  /** true면 모든 마커가 한 화면에 들어오도록 LatLngBounds 로 맞춤(네트워크 다지점용) */
+  fitMarkersBounds?: boolean;
 };
 
 declare global {
@@ -422,6 +424,7 @@ export default function KakaoMapView({
   fitCoverageBounds = false,
   monochromeTiles = false,
   disableCluster = false,
+  fitMarkersBounds = false,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
@@ -852,6 +855,32 @@ export default function KakaoMapView({
       coveragePolygonsRef.current = [];
     };
   }, [mapReady, coverageGeoJson, coverageSig, fitCoverageBounds]);
+
+  // 네트워크 다지점 — 모든 마커가 한 화면에 들어오도록 bounds 맞춤.
+  // (단일/소수 1개면 center+zoom 그대로 — 단일 매체 회귀 없음)
+  useEffect(() => {
+    if (!mapReady || !fitMarkersBounds) return;
+    const valid = markers.filter(
+      (m) =>
+        Number.isFinite(m.lat) &&
+        Number.isFinite(m.lng) &&
+        Math.abs(m.lat) <= 90 &&
+        Math.abs(m.lng) <= 180,
+    );
+    if (valid.length < 2) return;
+    const kakao = getKakaoSdk();
+    const map = mapRef.current as {
+      setBounds?: (...args: unknown[]) => void;
+    } | null;
+    if (!kakao?.maps || !map?.setBounds) return;
+    try {
+      const bounds = new kakao.maps.LatLngBounds();
+      for (const m of valid) bounds.extend(new kakao.maps.LatLng(m.lat, m.lng));
+      map.setBounds(bounds, 56, 56, 56, 56);
+    } catch {
+      /* ignore */
+    }
+  }, [mapReady, fitMarkersBounds, markers]);
 
   // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
   // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.
