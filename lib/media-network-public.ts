@@ -170,6 +170,17 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
         lat: l.latitude!,
         lng: l.longitude!,
       })),
+    // 전체 지점(좌표 null 포함) — 지점 목록/합계용
+    networkLocations: n.locations.map((l) => ({
+      name: l.name,
+      address: l.fullAddress ?? l.address ?? undefined,
+      regionMain: l.regionMain ?? undefined,
+      regionSub: l.regionSub ?? undefined,
+      unitCount: Math.max(1, l.unitCount ?? 1),
+      dailyFootfall: l.dailyFootfall ?? undefined,
+      lat: l.latitude ?? undefined,
+      lng: l.longitude ?? undefined,
+    })),
     sampleImages: imgs.length > 0 ? imgs : [],
     catalogSource: "network",
     networkSubtype: n.type,

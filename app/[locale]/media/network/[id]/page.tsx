@@ -164,10 +164,17 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
     }
   })();
 
+  const totalUnits = row.locations.reduce(
+    (s, l) => s + (l.unitCount ?? 1),
+    0,
+  );
   const heroTags = [
     typeLabel,
     row.totalLocations > 0
       ? `${row.totalLocations.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "개소" : " sites"}`
+      : null,
+    totalUnits > row.locations.length
+      ? `${isKo ? "총 " : ""}${totalUnits.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "구좌" : " units"}`
       : null,
     media.targetAge,
   ].filter((x): x is string => Boolean(x && String(x).trim()));

@@ -96,6 +96,20 @@ export interface MediaItem {
     lat: number;
     lng: number;
   }>;
+  /**
+   * 네트워크 매체 전체 지점 목록 — 좌표 null 지점도 포함(목록엔 보이고 지도엔 제외).
+   * `installLocations`(좌표 보유분, 지도 마커용)와 별개로 목록·합계용.
+   */
+  networkLocations?: Array<{
+    name: string;
+    address?: string;
+    regionMain?: string;
+    regionSub?: string;
+    unitCount: number;
+    dailyFootfall?: number;
+    lat?: number;
+    lng?: number;
+  }>;
   dailyFootTraffic: number;
   /** 월간·기간 예상 노출(건). DB `impressions`와 동일 의미로 사용 */
   monthlyFootTraffic?: number;

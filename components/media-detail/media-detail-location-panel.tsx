@@ -37,9 +37,24 @@ export function MediaDetailLocationPanel({
     [media, mapMarkers],
   );
   const mapZoom = mapMarkers.length > 1 ? 5 : 4;
+  const isNetwork = media.catalogSource === "network";
+  const netLocations = media.networkLocations ?? [];
+  const totalUnits = useMemo(
+    () => netLocations.reduce((s, l) => s + (l.unitCount || 1), 0),
+    [netLocations],
+  );
   const [selectedId, setSelectedId] = useState<string | null>(
     () => mapMarkers[0]?.id ?? media.id,
   );
+
+  /** 지점 목록 행 클릭 → 좌표 있으면 해당 마커 선택(지도 pan) */
+  const focusLocationOnMap = (loc: { lat?: number; lng?: number }) => {
+    if (loc.lat == null || loc.lng == null) return;
+    const mk = mapMarkers.find(
+      (m) => Math.abs(m.lat - loc.lat!) < 1e-6 && Math.abs(m.lng - loc.lng!) < 1e-6,
+    );
+    if (mk) setSelectedId(mk.id);
+  };
 
   useEffect(() => {
     setSelectedId(mapMarkers[0]?.id ?? media.id);
@@ -102,10 +117,79 @@ export function MediaDetailLocationPanel({
             onSelect={(id) => setSelectedId(id)}
             center={mapCenter}
             zoom={mapZoom}
-            disableCluster={mapMarkers.length <= 8}
+            disableCluster={
+              isNetwork ? mapMarkers.length <= 1 : mapMarkers.length <= 8
+            }
+            fitMarkersBounds={isNetwork && mapMarkers.length > 1}
           />
         </div>
       </div>
+
+      {isNetwork && netLocations.length > 0 ? (
+        <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white">
+          <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300/80">
+              <MapPin className="h-3.5 w-3.5" aria-hidden />
+              {isKo ? "설치 지점" : "Locations"}
+            </p>
+            <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
+              {isKo
+                ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}구좌`
+                : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
+            </p>
+          </div>
+          <ul className="max-h-80 divide-y divide-gray-100 overflow-y-auto dark:divide-white/8">
+            {netLocations.map((loc, i) => {
+              const hasCoord = loc.lat != null && loc.lng != null;
+              const region = [loc.regionMain, loc.regionSub]
+                .filter(Boolean)
+                .join(" ");
+              return (
+                <li key={`${loc.name}-${i}`}>
+                  <button
+                    type="button"
+                    onClick={() => focusLocationOnMap(loc)}
+                    disabled={!hasCoord}
+                    className={cn(
+                      "flex w-full items-start justify-between gap-3 px-4 py-2.5 text-left transition-colors",
+                      hasCoord
+                        ? "hover:bg-violet-50 dark:hover:bg-white/5"
+                        : "cursor-default",
+                    )}
+                  >
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
+                        {loc.name}
+                      </p>
+                      <p className="mt-0.5 truncate text-xs dark:text-white/55 text-gray-500">
+                        {region ? `${region} · ` : ""}
+                        {loc.address ?? (isKo ? "주소 미등록" : "No address")}
+                      </p>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <p className="text-xs font-bold tabular-nums text-violet-600 dark:text-violet-300">
+                        {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                        {isKo ? "구좌" : "u"}
+                      </p>
+                      {loc.dailyFootfall ? (
+                        <p className="text-[11px] dark:text-white/45 text-gray-400">
+                          {isKo ? "일 " : ""}
+                          {loc.dailyFootfall.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                        </p>
+                      ) : null}
+                      {!hasCoord ? (
+                        <p className="text-[10px] text-amber-500">
+                          {isKo ? "지도 미표시" : "no map"}
+                        </p>
+                      ) : null}
+                    </div>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ) : null}
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
