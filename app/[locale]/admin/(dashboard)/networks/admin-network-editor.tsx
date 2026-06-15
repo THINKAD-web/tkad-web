@@ -14,6 +14,10 @@ import {
   NETWORK_TYPE_LABELS,
 } from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
+import {
+  buildNetworkCreateBody,
+  parseAndBuildNetworkCreateBodyFromObject,
+} from "@/lib/network-quick-add";
 
 export type SerializedNetwork = {
   id: string;
@@ -514,8 +518,17 @@ export default function AdminNetworkEditor(props: Props) {
 
     const body =
       activeTab === "json"
-        ? jsonParsed
+        ? (() => {
+            const built = parseAndBuildNetworkCreateBodyFromObject(jsonParsed);
+            if (!built.ok) {
+              setError(built.error);
+              return null;
+            }
+            return buildNetworkCreateBody(built.data!) as Record<string, unknown>;
+          })()
         : buildFormBody();
+
+    if (!body) return;
 
     setSubmitting(true);
     try {

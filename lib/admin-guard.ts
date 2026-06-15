@@ -5,6 +5,7 @@ import {
 } from "@/lib/admin-session";
 import { isAdminRequestAuthorized } from "@/lib/require-admin-request";
 import { isDatabaseConfigured } from "@/lib/prisma";
+import { prismaErrorDetail } from "@/lib/prisma-error-detail";
 
 export function json(data: unknown, status = 200) {
   const headers = new Headers();
@@ -17,15 +18,23 @@ export function adminUnauthorized() {
 }
 
 export function adminDbUnavailable() {
-  return json({ error: "database_error", code: "DATABASE_NOT_CONFIGURED" }, 503);
+  return json(
+    {
+      error:
+        "DB 연결 미설정 (DATABASE_URL). Vercel 환경 변수를 확인하세요.",
+      code: "DATABASE_NOT_CONFIGURED",
+    },
+    503,
+  );
 }
 
 /** Prisma/query failures — always JSON so admin clients do not parse HTML as JSON. */
 export function adminDbQueryFailed(e: unknown) {
   console.error("[admin] database query failed", e);
+  const detail = prismaErrorDetail(e);
   return json(
     {
-      error: "database_error",
+      error: detail ?? "database_error",
       code: "DATABASE_QUERY_FAILED",
     },
     503,

@@ -1,30 +1,21 @@
 import type { MediaNetwork, MediaNetworkLocation } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { dedupeImageUrls, type MediaItem } from "@/lib/media-data";
+import {
+  NETWORK_TYPE_CODES,
+  NETWORK_TYPE_LABELS,
+  type NetworkTypeCode,
+  type NetworkPackageTier,
+} from "@/lib/media-network-types";
+
+export {
+  NETWORK_TYPE_CODES,
+  NETWORK_TYPE_LABELS,
+  type NetworkTypeCode,
+  type NetworkPackageTier,
+};
 
 export const NETWORK_CATALOG_ID_PREFIX = "nw_";
-
-export type NetworkPackageTier = { units: number; price: number };
-
-export const NETWORK_TYPE_CODES = [
-  "bus_shelter",
-  "apartment",
-  "subway_pillar",
-  "convenience_store",
-  "golf_course",
-  "highway_rest",
-] as const;
-
-export type NetworkTypeCode = (typeof NETWORK_TYPE_CODES)[number];
-
-export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
-  bus_shelter: { ko: "버스 정류장", en: "Bus shelter" },
-  apartment: { ko: "아파트", en: "Apartment" },
-  subway_pillar: { ko: "지하철 기둥", en: "Subway pillar" },
-  convenience_store: { ko: "편의점 앞", en: "Convenience store" },
-  golf_course: { ko: "골프장", en: "Golf course" },
-  highway_rest: { ko: "고속도로 휴게소", en: "Highway rest area" },
-};
 
 export function networkCatalogId(rawId: string): string {
   return rawId.startsWith(NETWORK_CATALOG_ID_PREFIX)

@@ -21,9 +21,11 @@ import {
 } from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
 import {
+  buildNetworkCreateBody,
   inferRegionsFromAddresses,
   parseNetworkQuickAddJson,
 } from "@/lib/network-quick-add";
+import { NetworkQuickAddAiTab } from "@/components/admin/network-quick-add-ai-tab";
 
 const SAMPLE_FULL_JSON = `{
   "name": "수도권 버스쉘터 패키지",
@@ -39,7 +41,7 @@ const SAMPLE_FULL_JSON = `{
   ]
 }`;
 
-type Mode = "fullJson" | "fields";
+type Mode = "ai" | "fullJson" | "fields";
 
 type LocRow = { name: string; address: string; lat: string; lng: string };
 
@@ -53,7 +55,7 @@ export default function AdminNetworkQuickAddClient() {
   const router = useRouter();
   const csvRef = useRef<HTMLInputElement>(null);
 
-  const [mode, setMode] = useState<Mode>("fullJson");
+  const [mode, setMode] = useState<Mode>("ai");
   const [fullJsonText, setFullJsonText] = useState("");
   const [name, setName] = useState("");
   const [nameEn, setNameEn] = useState("");
@@ -238,30 +240,10 @@ export default function AdminNetworkQuickAddClient() {
           ? fromTable
           : r.data.locations;
 
-    const addrs = mergedLocs.map((l) => l.address ?? "").filter(Boolean);
-    const regions =
-      r.data.regions.length > 0
-        ? r.data.regions
-        : inferRegionsFromAddresses(addrs);
-    const totalLocations = mergedLocs.length;
-
-    return {
-      name: r.data.name,
-      nameEn: r.data.nameEn,
-      description: r.data.description,
-      type: r.data.type,
-      pricePerUnit: r.data.pricePerUnit,
-      pricePackage: r.data.pricePackage,
-      minUnits: r.data.minUnits,
-      image: r.data.image,
-      galleryImages: r.data.galleryImages,
-      features: r.data.features,
-      packageOptions: r.data.packageOptions,
-      isActive: r.data.isActive,
-      regions,
-      totalLocations,
+    return buildNetworkCreateBody({
+      ...r.data,
       locations: mergedLocs,
-    };
+    });
   }, [
     name,
     nameEn,
@@ -275,9 +257,47 @@ export default function AdminNetworkQuickAddClient() {
     isEn,
   ]);
 
+  const registerNetwork = useCallback(
+    async (body: Record<string, unknown>) => {
+      setError(null);
+      setSubmitting(true);
+      try {
+        const res = await fetch("/api/admin/networks", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+        const t = await res.text().catch(() => "");
+        if (!res.ok) {
+          let msg = isEn ? "Create failed" : "등록 실패";
+          try {
+            const j = JSON.parse(t) as { error?: string; code?: string };
+            if (j.error) msg = j.error;
+            else if (j.code === "DATABASE_NOT_CONFIGURED") {
+              msg = isEn
+                ? "Database not configured (DATABASE_URL)"
+                : "DB 연결 미설정 (DATABASE_URL)";
+            }
+          } catch {
+            if (t.trim()) msg = t.slice(0, 300);
+          }
+          setError(msg);
+          return;
+        }
+        const data = JSON.parse(t || "{}") as { network?: { id: string } };
+        if (data.network?.id) {
+          router.push(`/admin/networks/${data.network.id}`);
+        }
+      } catch (e) {
+        setError(e instanceof Error ? e.message : String(e));
+      } finally {
+        setSubmitting(false);
+      }
+    },
+    [router, isEn],
+  );
+
   const submit = useCallback(async () => {
-    setError(null);
-    setSubmitting(true);
     try {
       let body: Record<string, unknown>;
       if (mode === "fullJson") {
@@ -289,42 +309,23 @@ export default function AdminNetworkQuickAddClient() {
                 ? "Paste valid JSON."
                 : "JSON을 입력하세요.",
           );
-          setSubmitting(false);
           return;
         }
         const d = parseFull.data;
-        const regionsAuto = inferRegionsFromAddresses(
-          d.locations.map((l) => l.address ?? "").filter(Boolean),
-        );
-        body = {
-          ...d,
-          totalLocations: d.locations.length,
-          regions: d.regions.length > 0 ? d.regions : regionsAuto,
-        };
+        body = buildNetworkCreateBody(d);
       } else {
         body = buildBodyFromFields();
       }
-
-      const res = await fetch("/api/admin/networks", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-      if (!res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { error?: string };
-        setError(j.error ?? (isEn ? "Create failed" : "등록 실패"));
-        return;
-      }
-      const data = (await res.json()) as { network?: { id: string } };
-      if (data.network?.id) {
-        router.push(`/admin/networks/${data.network.id}`);
-      }
+      await registerNetwork(body);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
-    } finally {
-      setSubmitting(false);
     }
-  }, [mode, parseFull, buildBodyFromFields, router, isEn]);
+  }, [mode, parseFull, buildBodyFromFields, registerNetwork, isEn]);
+
+  const onEditAiJson = useCallback((json: string) => {
+    setFullJsonText(json);
+    setMode("fullJson");
+  }, []);
 
   return (
     <div className="mx-auto max-w-4xl space-y-6 p-4 md:p-8">
@@ -339,12 +340,12 @@ export default function AdminNetworkQuickAddClient() {
 
       <div>
         <h1 className="text-2xl font-bold tracking-tight text-slate-900">
-          {isEn ? "Quick add network (JSON / CSV)" : "네트워크 빠른 등록 (JSON / CSV)"}
+          {isEn ? "Quick add network" : "네트워크 빠른 등록"}
         </h1>
         <p className="mt-1 text-sm text-slate-600">
           {isEn
-            ? "Bulk create a network: full JSON, or form fields + locations JSON array / CSV. Regions and site count are filled from locations when omitted."
-            : "전체 JSON 한 번에 등록하거나, 기본 필드 + locations JSON·CSV로 등록합니다. regions·totalLocations는 지점 정보에서 자동 반영됩니다."}
+            ? "Describe in plain language (AI), paste full JSON, or use form fields + locations CSV."
+            : "말로 설명하면 AI가 JSON을 작성합니다. 전체 JSON 붙여넣기·개별 필드 입력도 가능합니다."}
         </p>
       </div>
 
@@ -356,6 +357,14 @@ export default function AdminNetworkQuickAddClient() {
       )}
 
       <div className="flex flex-wrap gap-2">
+        <Button
+          type="button"
+          variant={mode === "ai" ? "default" : "outline"}
+          size="sm"
+          onClick={() => setMode("ai")}
+        >
+          {isEn ? "AI draft" : "AI로 작성"}
+        </Button>
         <Button
           type="button"
           variant={mode === "fullJson" ? "default" : "outline"}
@@ -374,7 +383,14 @@ export default function AdminNetworkQuickAddClient() {
         </Button>
       </div>
 
-      {mode === "fullJson" ? (
+      {mode === "ai" ? (
+        <NetworkQuickAddAiTab
+          isEn={isEn}
+          submitting={submitting}
+          onRegister={registerNetwork}
+          onEditJson={onEditAiJson}
+        />
+      ) : mode === "fullJson" ? (
         <Card>
           <CardHeader>
             <CardTitle className="text-base">
@@ -669,17 +685,19 @@ export default function AdminNetworkQuickAddClient() {
         </>
       )}
 
-      <Button
-        type="button"
-        className="w-full sm:w-auto"
-        disabled={submitting}
-        onClick={submit}
-      >
-        {submitting ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-        ) : null}
-        {isEn ? "Create network" : "네트워크 등록"}
-      </Button>
+      {mode !== "ai" ? (
+        <Button
+          type="button"
+          className="w-full sm:w-auto"
+          disabled={submitting}
+          onClick={submit}
+        >
+          {submitting ? (
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          ) : null}
+          {isEn ? "Create network" : "네트워크 등록"}
+        </Button>
+      ) : null}
     </div>
   );
 }

@@ -24,6 +24,10 @@ export const NETWORK_TYPE_CODES = [
   "convenience_store",
   "golf_course",
   "highway_rest",
+  "campus_kiosk",
+  "subway_station",
+  "elevator",
+  "shopping_mall",
 ] as const;
 
 export type NetworkTypeCode = (typeof NETWORK_TYPE_CODES)[number];
@@ -35,6 +39,10 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   convenience_store: { ko: "편의점 앞", en: "Convenience store" },
   golf_course: { ko: "골프장", en: "Golf course" },
   highway_rest: { ko: "고속도로 휴게소", en: "Highway rest area" },
+  campus_kiosk: { ko: "대학 캠퍼스 키오스크", en: "Campus kiosk" },
+  subway_station: { ko: "지하철 역사 광고판", en: "Subway station ads" },
+  elevator: { ko: "건물/오피스 엘리베이터", en: "Building elevator" },
+  shopping_mall: { ko: "쇼핑몰/백화점 디지털 사이니지", en: "Shopping mall DOOH" },
 };
 
 export type NetworkPackageTier = { units: number; price: number };

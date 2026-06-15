@@ -1,40 +1,72 @@
 import { NextRequest } from "next/server";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import {
+  coerceNetworkInt,
+  normalizePriceManWon,
+  normalizePricePackageFields,
+  parseAndBuildNetworkCreateBodyFromObject,
+  type NetworkCreateBody,
+} from "@/lib/network-quick-add";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-function str(v: unknown, fallback = ""): string {
-  return typeof v === "string" ? v.trim() : fallback;
+function toPackageOptions(
+  raw: unknown,
+): Prisma.NullableJsonNullValueInput | Prisma.InputJsonValue | undefined {
+  if (raw === undefined) return undefined;
+  if (raw === null) return Prisma.DbNull;
+  return raw as Prisma.InputJsonValue;
 }
 
-function optInt(v: unknown): number | undefined {
-  if (v === undefined || v === null || v === "") return undefined;
-  const n = Math.round(Number(v));
-  return Number.isFinite(n) ? n : undefined;
-}
-
-function strArr(v: unknown): string[] {
-  if (!Array.isArray(v)) return [];
-  return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim());
-}
-
-function coalescePackageOptions(
-  v: unknown,
-): { ok: true; value: Prisma.InputJsonValue | null | undefined } | { ok: false; error: string } {
-  if (v === undefined) return { ok: true, value: undefined };
-  if (v === null) return { ok: true, value: null };
-  if (typeof v === "string") {
-    const t = v.trim();
-    if (!t) return { ok: true, value: null };
-    try {
-      return { ok: true, value: JSON.parse(t) as Prisma.InputJsonValue };
-    } catch {
-      return { ok: false, error: "Invalid packageOptions JSON" };
-    }
-  }
-  return { ok: true, value: v as Prisma.InputJsonValue };
+function toPrismaCreateData(
+  d: NetworkCreateBody,
+): Prisma.MediaNetworkCreateInput {
+  const pkg = normalizePricePackageFields(d.pricePackage, d.priceNote);
+  return {
+    name: d.name,
+    nameEn: d.nameEn,
+    description: d.description,
+    type: d.type,
+    pricePerUnit: normalizePriceManWon(coerceNetworkInt(d.pricePerUnit)),
+    pricePackage: pkg.pricePackage,
+    priceNote: pkg.priceNote,
+    minUnits: Math.max(1, coerceNetworkInt(d.minUnits) ?? 1),
+    totalLocations: Math.max(0, coerceNetworkInt(d.totalLocations) ?? 0),
+    regions: d.regions,
+    city: d.city,
+    district: d.district,
+    image: d.image,
+    galleryImages: d.galleryImages,
+    features: d.features,
+    packageOptions: toPackageOptions(d.packageOptions),
+    visibilityScore: coerceNetworkInt(d.visibilityScore),
+    dailyFootfall: coerceNetworkInt(d.dailyFootfall),
+    targetAge: d.targetAge,
+    effectMemo: d.effectMemo,
+    operatingHours: d.operatingHours,
+    tags: d.tags,
+    isActive: d.isActive,
+    locations:
+      d.locations.length > 0
+        ? {
+            create: d.locations.map((l) => ({
+              name: l.name,
+              address: l.address,
+              fullAddress: l.fullAddress,
+              regionMain: l.regionMain,
+              regionSub: l.regionSub,
+              unitCount: Math.max(1, coerceNetworkInt(l.unitCount) ?? 1),
+              latitude: l.latitude,
+              longitude: l.longitude,
+              priceNote: l.priceNote,
+              dailyFootfall: coerceNetworkInt(l.dailyFootfall),
+              note: l.note,
+            })),
+          }
+        : undefined,
+  };
 }
 
 export async function GET(request: NextRequest) {
@@ -57,88 +89,22 @@ export async function POST(request: NextRequest) {
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
-  if (!body || typeof body !== "object") {
-    return json({ error: "Invalid body" }, 400);
-  }
-  const o = body as Record<string, unknown>;
-  const name = str(o.name);
-  const type = str(o.type);
-  if (!name || !type) {
-    return json({ error: "name and type required" }, 400);
-  }
-  const totalLocations = optInt(o.totalLocations) ?? 0;
-  const minUnits = optInt(o.minUnits) ?? 1;
-  const locationsRaw = Array.isArray(o.locations) ? o.locations : [];
-  const locCreate: Prisma.MediaNetworkLocationCreateWithoutNetworkInput[] = [];
-  for (const x of locationsRaw) {
-    if (!x || typeof x !== "object") continue;
-    const l = x as Record<string, unknown>;
-    const locName = str(l.name);
-    if (!locName) continue;
-    const lat = l.latitude != null ? Number(l.latitude) : null;
-    const lng = l.longitude != null ? Number(l.longitude) : null;
-    locCreate.push({
-      name: locName,
-      address: str(l.address) || null,
-      fullAddress: str(l.fullAddress) || null,
-      regionMain: str(l.regionMain) || null,
-      regionSub: str(l.regionSub) || null,
-      unitCount: Math.max(1, optInt(l.unitCount) ?? 1),
-      latitude: lat != null && Number.isFinite(lat) ? lat : null,
-      longitude: lng != null && Number.isFinite(lng) ? lng : null,
-      priceNote: str(l.priceNote) || null,
-      dailyFootfall: optInt(l.dailyFootfall) ?? null,
-      note: str(l.note) || null,
-    });
-  }
 
-  let packageOptions:
-    | Prisma.NullableJsonNullValueInput
-    | Prisma.InputJsonValue
-    | undefined = undefined;
-  if ("packageOptions" in o) {
-    const r = coalescePackageOptions(o.packageOptions);
-    if (!r.ok) return json({ error: r.error }, 400);
-    packageOptions =
-      r.value === undefined
-        ? undefined
-        : r.value === null
-          ? Prisma.DbNull
-          : r.value;
+  const built = parseAndBuildNetworkCreateBodyFromObject(body);
+  if (!built.ok) {
+    return json({ error: built.error }, 400);
   }
+  const payload = built.body!;
 
   const db = getPrisma();
-  const created = await db.mediaNetwork.create({
-    data: {
-      name,
-      nameEn: str(o.nameEn) || null,
-      description: str(o.description) || null,
-      type,
-      pricePerUnit: optInt(o.pricePerUnit) ?? null,
-      pricePackage: optInt(o.pricePackage) ?? null,
-      priceNote: str(o.priceNote) || null,
-      minUnits: Math.max(1, minUnits),
-      totalLocations: Math.max(0, totalLocations),
-      regions: strArr(o.regions),
-      city: str(o.city) || null,
-      district: str(o.district) || null,
-      image: str(o.image) || null,
-      galleryImages: strArr(o.galleryImages),
-      features: str(o.features) || null,
-      packageOptions,
-      visibilityScore: optInt(o.visibilityScore) ?? null,
-      dailyFootfall: optInt(o.dailyFootfall) ?? null,
-      targetAge: str(o.targetAge) || null,
-      effectMemo: str(o.effectMemo) || null,
-      operatingHours: str(o.operatingHours) || null,
-      tags: strArr(o.tags),
-      isActive: o.isActive === false ? false : true,
-      locations:
-        locCreate.length > 0
-          ? { create: locCreate }
-          : undefined,
-    },
-    include: { locations: true },
-  });
-  return json({ network: created }, 201);
+  try {
+    const created = await db.mediaNetwork.create({
+      data: toPrismaCreateData(payload),
+      include: { locations: true },
+    });
+    return json({ network: created }, 201);
+  } catch (e) {
+    console.error("[admin/networks POST]", e);
+    return adminDbQueryFailed(e);
+  }
 }
