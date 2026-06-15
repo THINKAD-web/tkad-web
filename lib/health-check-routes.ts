@@ -63,14 +63,17 @@ export const HEALTH_API_CHECKS: ApiCheck[] = [
   { name: "chat endpoint", path: "/api/chat", method: "GET" },
 ];
 
-/** 본문에 등장하면 깨진 페이지로 간주하는 텍스트 */
+/**
+ * 본문에 등장하면 깨진 페이지로 간주하는 텍스트.
+ * i18n 번들(messages/ko.json error.* 등)과 겹치지 않는 실제 런타임/프레임워크 에러만.
+ */
 export const HEALTH_ERROR_TEXTS: string[] = [
-  "SYSTEM ERROR",
-  "일시적 오류",
+  "An error occurred in the Server Components render",
   "Application error: a client-side exception",
+  "DYNAMIC_SERVER_USAGE",
   "Internal Server Error",
   "500 - Internal",
-  "This page could not be found",
+  "Unhandled Runtime Error",
 ];
 
 export type HealthCheckRow = {

@@ -5,6 +5,7 @@ import {
   GraduationCap,
   Link2,
   Map,
+  Network,
   Package,
   Palette,
   RefreshCw,
@@ -28,8 +29,10 @@ export const DISCOVERY_TABS: SubTab[] = [
       (p.startsWith("/media") &&
         !p.startsWith("/media/map") &&
         !p.startsWith("/media/packages") &&
+        !p.startsWith("/media/network") &&
         !p.startsWith("/media/targets")),
   },
+  { label: "네트워크 매체", href: "/media/network", icon: Network },
   { label: "지도에서 찾기", href: "/media/map", icon: Map },
   { label: "AI 매체 추천", href: "/recommend", icon: Sparkles },
   {
