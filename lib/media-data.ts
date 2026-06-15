@@ -444,7 +444,8 @@ function periodAbbrevEn(p?: MediaPricePeriodKey): string {
 function mediaTypeToMapType(type: string): CampaignMapMediaType {
   if (type === "static") return "billboard";
   if (type === "mobile") return "transport";
-  if (type === "digital" || type === "network") return "digital";
+  if (type === "network") return "special";
+  if (type === "digital") return "digital";
   if (type === "billboard" || type === "highway") return "billboard";
   if (
     type === "premium" ||

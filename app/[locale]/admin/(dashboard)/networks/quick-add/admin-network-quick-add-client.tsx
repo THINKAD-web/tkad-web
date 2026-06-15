@@ -28,16 +28,30 @@ import {
 import { NetworkQuickAddAiTab } from "@/components/admin/network-quick-add-ai-tab";
 
 const SAMPLE_FULL_JSON = `{
-  "name": "수도권 버스쉘터 패키지",
-  "nameEn": "Capital area bus shelters",
-  "type": "bus_shelter",
+  "media_name": "수도권 버스쉘터 패키지",
+  "name_en": "Capital area bus shelters",
+  "sub_category": "버스쉘터",
   "description": "주요 거점 정류장 디지털 패널",
-  "minUnits": 10,
-  "pricePerUnit": 45,
-  "pricePackage": null,
+  "tags": ["버스쉘터", "가로변", "디지털"],
+  "full_address": "서울 강남구 강남대로 396",
+  "city": "서울",
+  "district": "강남구",
+  "latitude": 37.498,
+  "longitude": 127.028,
+  "price_per_month": 45,
+  "price_note": "VAT 별도 · 면당 만원/월",
+  "min_units": 10,
+  "daily_footfall": 6500,
+  "visibility_score": 88,
+  "target_age": "20–40대",
+  "operating_hours": "06:00–24:00",
+  "effect_memo": "역세권 고유동 노출",
+  "extracted_images": [
+    "https://res.cloudinary.com/demo/image/upload/w_800/sample.jpg"
+  ],
   "locations": [
-    { "name": "강남역 1번", "address": "서울 강남구 강남대로 396", "latitude": 37.498, "longitude": 127.028 },
-    { "name": "홍대입구", "address": "서울 마포구 양화로 188" }
+    { "name": "강남역 1번", "full_address": "서울 강남구 강남대로 396", "latitude": 37.498, "longitude": 127.028 },
+    { "name": "홍대입구", "full_address": "서울 마포구 양화로 188" }
   ]
 }`;
 
@@ -344,8 +358,8 @@ export default function AdminNetworkQuickAddClient() {
         </h1>
         <p className="mt-1 text-sm text-slate-600">
           {isEn
-            ? "Describe in plain language (AI), paste full JSON, or use form fields + locations CSV."
-            : "말로 설명하면 AI가 JSON을 작성합니다. 전체 JSON 붙여넣기·개별 필드 입력도 가능합니다."}
+            ? "Describe in plain language (AI), paste JSON (same snake_case fields as media quick-add), or use form fields + locations CSV."
+            : "말로 설명하면 AI가 JSON을 작성합니다. 일반 매체 빠른 등록과 동일한 JSON 키(media_name, full_address, price_per_month 등)로 붙여넣을 수 있습니다."}
         </p>
       </div>
 
@@ -398,6 +412,11 @@ export default function AdminNetworkQuickAddClient() {
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-3">
+            <p className="text-xs text-slate-500">
+              {isEn
+                ? "Use the same basic keys as /admin/medias/quick-add (media_name, full_address, price_per_month, …). Add network-only fields: sub_category or type, locations[], min_units."
+                : "기본 필드는 /admin/medias/quick-add 와 동일합니다 (media_name, full_address, price_per_month 등). 네트워크 전용: sub_category 또는 type, locations[], min_units."}
+            </p>
             <Textarea
               rows={18}
               className="text-xs"
@@ -444,16 +463,18 @@ export default function AdminNetworkQuickAddClient() {
             <CardContent className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2 sm:col-span-2">
                 <label className="text-sm font-medium text-slate-700">
-                  name *
+                  media_name *
                 </label>
                 <Input value={name} onChange={(e) => setName(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <label className="text-sm font-medium text-slate-700">nameEn</label>
+                <label className="text-sm font-medium text-slate-700">name_en</label>
                 <Input value={nameEn} onChange={(e) => setNameEn(e.target.value)} />
               </div>
               <div className="grid gap-2">
-                <label className="text-sm font-medium text-slate-700">type *</label>
+                <label className="text-sm font-medium text-slate-700">
+                  type * ({isEn ? "network code" : "네트워크 유형"})
+                </label>
                 <select
                   className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
                   value={type}
@@ -478,7 +499,7 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-slate-700">
-                  minUnits
+                  min_units
                 </label>
                 <Input
                   inputMode="numeric"
@@ -488,7 +509,7 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-slate-700">
-                  pricePerUnit (만원)
+                  price_per_month ({isEn ? "man-won/unit" : "만원/면"})
                 </label>
                 <Input
                   inputMode="numeric"
@@ -498,7 +519,7 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2 sm:col-span-2">
                 <label className="text-sm font-medium text-slate-700">
-                  pricePackage (만원)
+                  price_package ({isEn ? "man-won" : "만원"})
                 </label>
                 <Input
                   inputMode="numeric"

@@ -181,7 +181,7 @@ export function inferRegionSubFromAddress(address: string): string | null {
 function normalizeLocation(o: Record<string, unknown>): NetworkQuickAddLocationParsed | null {
   const name = str(o.name);
   if (!name) return null;
-  const address = str(o.address) || null;
+  const address = str(o.address) || str(o.full_address) || null;
   const lat = optNum(o.latitude ?? o.lat);
   const lng = optNum(o.longitude ?? o.lng ?? o.lon);
   const unitCountRaw = optInt(o.unitCount ?? o.units);
@@ -200,7 +200,7 @@ function normalizeLocation(o: Record<string, unknown>): NetworkQuickAddLocationP
   return {
     name,
     address,
-    fullAddress: str(o.fullAddress) || null,
+    fullAddress: str(o.fullAddress) || str(o.full_address) || null,
     latitude: lat != null && Number.isFinite(lat) ? lat : null,
     longitude: lng != null && Number.isFinite(lng) ? lng : null,
     unitCount,
@@ -223,56 +223,260 @@ function normalizeLocations(raw: unknown): NetworkQuickAddLocationParsed[] {
   return out;
 }
 
+/** `sub_category`·설명 텍스트 → 네트워크 `type` 코드 */
+export function inferNetworkTypeFromSubCategory(text: string): string | null {
+  const t = text.trim();
+  if (!t) return null;
+  const rules: Array<[RegExp, string]> = [
+    [/버스\s*쉘터|버스쉘터|정류장|bus[\s_-]?shelter/i, "bus_shelter"],
+    [/아파트|apartment/i, "apartment"],
+    [/지하철\s*기둥|역사\s*기둥|subway[\s_-]?pillar/i, "subway_pillar"],
+    [/지하철|역사|subway[\s_-]?station/i, "subway_station"],
+    [/편의점|convenience/i, "convenience_store"],
+    [/골프|golf/i, "golf_course"],
+    [/휴게소|고속도로|highway/i, "highway_rest"],
+    [/캠퍼스|대학|campus|키오스크|kiosk/i, "campus_kiosk"],
+    [/엘리베이터|elevator/i, "elevator"],
+    [/쇼핑몰|백화점|shopping[\s_-]?mall|mall/i, "shopping_mall"],
+    [/교보|서점|bookstore/i, "bookstore"],
+    [/오피스|office|빌딩/i, "office"],
+    [/병원|hospital|의료/i, "hospital"],
+  ];
+  for (const [re, code] of rules) {
+    if (re.test(t)) return code;
+  }
+  return null;
+}
+
+function resolveNetworkType(o: Record<string, unknown>): string {
+  const explicit = str(o.type);
+  if (explicit && TYPE_SET.has(explicit)) return explicit;
+  const networkType = str(o.network_type);
+  if (networkType && TYPE_SET.has(networkType)) return networkType;
+  const sub = str(o.sub_category);
+  if (sub) {
+    const fromSub = inferNetworkTypeFromSubCategory(sub);
+    if (fromSub) return fromSub;
+  }
+  const fromText = inferNetworkTypeFromSubCategory(
+    `${str(o.name)} ${str(o.media_name)} ${str(o.description)} ${sub}`,
+  );
+  if (fromText) return fromText;
+  return explicit;
+}
+
+/**
+ * 일반 매체 quick-add(JSON snake_case)와 동일한 키를 네트워크 등록 필드로 정규화.
+ * camelCase 네트워크 전용 키도 그대로 허용.
+ */
+export function normalizeNetworkQuickAddInput(
+  o: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...o };
+
+  const pickStr = (...keys: string[]): string => {
+    for (const k of keys) {
+      const v = out[k];
+      if (typeof v === "string" && v.trim()) return v.trim();
+    }
+    return "";
+  };
+
+  const setIfMissing = (key: string, value: unknown) => {
+    if (
+      (out[key] === undefined || out[key] === null || out[key] === "") &&
+      value !== undefined &&
+      value !== null &&
+      value !== ""
+    ) {
+      out[key] = value;
+    }
+  };
+
+  setIfMissing("name", pickStr("name", "media_name"));
+  setIfMissing("nameEn", pickStr("nameEn", "name_en"));
+  setIfMissing("type", pickStr("type", "network_type"));
+  setIfMissing("description", pickStr("description"));
+  setIfMissing("priceNote", pickStr("priceNote", "price_note"));
+  setIfMissing("targetAge", pickStr("targetAge", "target_age"));
+  setIfMissing("operatingHours", pickStr("operatingHours", "operating_hours"));
+  setIfMissing("effectMemo", pickStr("effectMemo", "effect_memo"));
+  setIfMissing("features", pickStr("features"));
+  setIfMissing("city", pickStr("city"));
+  setIfMissing("district", pickStr("district"));
+
+  if (out.pricePerUnit == null && out.price_per_unit != null) {
+    out.pricePerUnit = out.price_per_unit;
+  }
+  if (out.pricePerUnit == null && out.price_per_month != null) {
+    out.pricePerUnit = out.price_per_month;
+  }
+  if (out.pricePackage == null && out.price_package != null) {
+    out.pricePackage = out.price_package;
+  }
+  if (out.minUnits == null && out.min_units != null) {
+    out.minUnits = out.min_units;
+  }
+  if (out.visibilityScore == null && out.visibility_score != null) {
+    out.visibilityScore = out.visibility_score;
+  }
+  if (out.dailyFootfall == null && out.daily_footfall != null) {
+    out.dailyFootfall = out.daily_footfall;
+  }
+  if (out.packageOptions == null && out.package_options != null) {
+    out.packageOptions = out.package_options;
+  }
+
+  const extracted = out.extracted_images ?? out.extractedImages;
+  if (Array.isArray(extracted)) {
+    const imgs = extracted.filter(
+      (x): x is string => typeof x === "string" && x.trim().length > 0,
+    );
+    if (imgs.length > 0) {
+      setIfMissing("image", imgs[0]);
+      if (
+        !Array.isArray(out.galleryImages) ||
+        (out.galleryImages as unknown[]).length === 0
+      ) {
+        out.galleryImages = imgs;
+      }
+    }
+  }
+  setIfMissing("image", pickStr("image"));
+
+  const fullAddress = pickStr("full_address", "fullAddress");
+  const lat = out.latitude ?? out.lat;
+  const lng = out.longitude ?? out.lng ?? out.lon;
+
+  if (Array.isArray(out.locations)) {
+    out.locations = out.locations.map((item) => {
+      if (!item || typeof item !== "object") return item;
+      const l = { ...(item as Record<string, unknown>) };
+      if (!str(l.address) && typeof l.full_address === "string") {
+        l.address = l.full_address.trim();
+      }
+      if (!str(l.fullAddress) && typeof l.full_address === "string") {
+        l.fullAddress = l.full_address.trim();
+      }
+      if (l.latitude == null && l.lat != null) l.latitude = l.lat;
+      if (l.longitude == null && (l.lng != null || l.lon != null)) {
+        l.longitude = l.lng ?? l.lon;
+      }
+      if (l.unitCount == null && l.units != null) l.unitCount = l.units;
+      if (l.dailyFootfall == null && l.daily_footfall != null) {
+        l.dailyFootfall = l.daily_footfall;
+      }
+      return l;
+    });
+  } else if (fullAddress) {
+    const netName = pickStr("name", "media_name") || fullAddress;
+    out.locations = [
+      {
+        name: netName,
+        address: fullAddress,
+        full_address: fullAddress,
+        latitude: lat ?? null,
+        longitude: lng ?? null,
+      },
+    ];
+  }
+
+  return out;
+}
+
+function unwrapNetworkQuickAddRoot(
+  root: unknown,
+):
+  | { ok: true; obj: Record<string, unknown> }
+  | { ok: false; error: string } {
+  if (Array.isArray(root)) {
+    if (root.length === 0) {
+      return { ok: false, error: "등록할 항목이 없습니다." };
+    }
+    const first = root[0];
+    if (!first || typeof first !== "object" || Array.isArray(first)) {
+      return { ok: false, error: "[#1] 항목은 객체여야 합니다." };
+    }
+    return { ok: true, obj: first as Record<string, unknown> };
+  }
+  if (root !== null && typeof root === "object") {
+    const o = root as Record<string, unknown>;
+    if (Array.isArray(o.items)) {
+      if (o.items.length === 0) {
+        return { ok: false, error: "items 배열이 비어 있습니다." };
+      }
+      const first = o.items[0];
+      if (!first || typeof first !== "object" || Array.isArray(first)) {
+        return { ok: false, error: "items[0]은 객체여야 합니다." };
+      }
+      return { ok: true, obj: first as Record<string, unknown> };
+    }
+    return { ok: true, obj: o };
+  }
+  return { ok: false, error: "최상위는 객체 또는 배열이어야 합니다." };
+}
+
+/** Parse textarea → one object (일반 매체 quick-add와 동일: 객체·배열·`items` 래퍼). */
+export function parseNetworkQuickAddJsonText(
+  text: string,
+): { ok: true; raw: Record<string, unknown> } | { ok: false; error: string } {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    return { ok: false, error: "JSON 내용이 비어 있습니다." };
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(trimmed) as unknown;
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : "JSON 파싱 오류";
+    return { ok: false, error: `JSON 문법 오류: ${msg}` };
+  }
+  const unwrapped = unwrapNetworkQuickAddRoot(parsed);
+  if (!unwrapped.ok) return unwrapped;
+  return { ok: true, raw: unwrapped.obj };
+}
+
 export type ParseNetworkQuickAddResult =
   | { ok: true; data: NetworkQuickAddParsed }
   | { ok: false; error: string };
 
-/**
- * 관리자용 네트워크 일괄 JSON.
- * `totalLocations`·`regions` 생략 시 locations 기준으로 자동 채움.
- */
-export function parseNetworkQuickAddJson(text: string): ParseNetworkQuickAddResult {
-  let root: unknown;
-  try {
-    root = JSON.parse(text) as unknown;
-  } catch {
-    return { ok: false, error: "JSON 파싱 실패" };
+function parseNetworkQuickAddObject(
+  o: Record<string, unknown>,
+): ParseNetworkQuickAddResult {
+  const normalized = normalizeNetworkQuickAddInput(o);
+  const name = str(normalized.name);
+  const type = resolveNetworkType(normalized);
+  if (!name) {
+    return { ok: false, error: "media_name(또는 name) 필수" };
   }
-  if (!root || typeof root !== "object") {
-    return { ok: false, error: "객체 형식의 JSON이 필요합니다." };
-  }
-  const o = root as Record<string, unknown>;
-  const name = str(o.name);
-  const type = str(o.type);
-  if (!name) return { ok: false, error: "name 필수" };
   if (!type || !TYPE_SET.has(type)) {
     return {
       ok: false,
-      error: `type 필수 — 허용: ${NETWORK_TYPE_CODES.join(", ")}`,
+      error: `type(또는 sub_category) 필수 — 허용: ${NETWORK_TYPE_CODES.join(", ")}`,
     };
   }
 
-  const locPayload = normalizeLocations(o.locations);
+  const locPayload = normalizeLocations(normalized.locations);
 
   const addressesForInfer = locPayload
     .map((l) => l.address ?? "")
     .filter(Boolean);
   const inferredRegions = inferRegionsFromAddresses(addressesForInfer);
 
-  const regionsManual = strArr(o.regions);
+  const regionsManual = strArr(normalized.regions);
   const regions =
     regionsManual.length > 0 ? regionsManual : inferredRegions;
 
-  const totalFromJson = optNum(o.totalLocations);
+  const totalFromJson = optNum(normalized.totalLocations);
   const totalLocations =
     totalFromJson != null && totalFromJson >= 0
       ? Math.round(totalFromJson)
       : locPayload.length;
 
   let packageOptions: unknown = null;
-  if ("packageOptions" in o && o.packageOptions != null) {
-    if (typeof o.packageOptions === "string") {
-      const t = o.packageOptions.trim();
+  if ("packageOptions" in normalized && normalized.packageOptions != null) {
+    if (typeof normalized.packageOptions === "string") {
+      const t = normalized.packageOptions.trim();
       if (t) {
         try {
           packageOptions = JSON.parse(t) as unknown;
@@ -281,49 +485,63 @@ export function parseNetworkQuickAddJson(text: string): ParseNetworkQuickAddResu
         }
       }
     } else {
-      packageOptions = o.packageOptions;
+      packageOptions = normalized.packageOptions;
     }
   }
 
-  const minUnitsRaw = optNum(o.minUnits);
+  const minUnitsRaw = optNum(normalized.minUnits);
   const minUnits =
     minUnitsRaw != null && minUnitsRaw >= 1 ? Math.round(minUnitsRaw) : 1;
 
-  const priceNoteBase = str(o.priceNote) || null;
-  const pkg = normalizePricePackageFields(o.pricePackage, priceNoteBase);
+  const priceNoteBase = str(normalized.priceNote) || null;
+  const pkg = normalizePricePackageFields(
+    normalized.pricePackage,
+    priceNoteBase,
+  );
 
   return {
     ok: true,
     data: {
       name,
-      nameEn: str(o.nameEn) || null,
-      description: str(o.description) || null,
+      nameEn: str(normalized.nameEn) || null,
+      description: str(normalized.description) || null,
       type,
-      pricePerUnit: normalizePriceManWon(optNum(o.pricePerUnit)),
+      pricePerUnit: normalizePriceManWon(optNum(normalized.pricePerUnit)),
       pricePackage: pkg.pricePackage,
       priceNote: pkg.priceNote,
       minUnits,
-      image: str(o.image) || null,
-      galleryImages: strArr(o.galleryImages),
-      features: str(o.features) || null,
+      image: str(normalized.image) || null,
+      galleryImages: strArr(normalized.galleryImages),
+      features: str(normalized.features) || null,
       packageOptions:
         packageOptions != null
           ? normalizePackageOptions(packageOptions)
           : packageOptions,
-      isActive: o.isActive === false ? false : true,
+      isActive: normalized.isActive === false ? false : true,
       regions,
       totalLocations,
-      city: str(o.city) || null,
-      district: str(o.district) || null,
-      visibilityScore: optInt(o.visibilityScore),
-      dailyFootfall: optInt(o.dailyFootfall),
-      targetAge: str(o.targetAge) || null,
-      effectMemo: str(o.effectMemo) || null,
-      operatingHours: str(o.operatingHours) || null,
-      tags: strArr(o.tags),
+      city: str(normalized.city) || null,
+      district: str(normalized.district) || null,
+      visibilityScore: optInt(normalized.visibilityScore),
+      dailyFootfall: optInt(normalized.dailyFootfall),
+      targetAge: str(normalized.targetAge) || null,
+      effectMemo: str(normalized.effectMemo) || null,
+      operatingHours: str(normalized.operatingHours) || null,
+      tags: strArr(normalized.tags),
       locations: locPayload,
     },
   };
+}
+
+/**
+ * 관리자용 네트워크 일괄 JSON.
+ * 일반 매체 quick-add와 동일한 snake_case 기본 필드 + 네트워크 전용 필드(locations 등).
+ * `totalLocations`·`regions` 생략 시 locations 기준으로 자동 채움.
+ */
+export function parseNetworkQuickAddJson(text: string): ParseNetworkQuickAddResult {
+  const parsed = parseNetworkQuickAddJsonText(text);
+  if (!parsed.ok) return parsed;
+  return parseNetworkQuickAddObject(parsed.raw);
 }
 
 /** 파싱 결과 → 네트워크 등록 API body (regions/totalLocations 자동 보정) */
@@ -354,8 +572,13 @@ export function parseAndBuildNetworkCreateBody(
 export function parseAndBuildNetworkCreateBodyFromObject(
   root: unknown,
 ): ParseNetworkQuickAddResult & { body?: NetworkCreateBody } {
-  if (!root || typeof root !== "object") {
-    return { ok: false, error: "객체 형식의 JSON이 필요합니다." };
-  }
-  return parseAndBuildNetworkCreateBody(JSON.stringify(root));
+  const unwrapped = unwrapNetworkQuickAddRoot(root);
+  if (!unwrapped.ok) return unwrapped;
+  const parsed = parseNetworkQuickAddObject(unwrapped.obj);
+  if (!parsed.ok) return parsed;
+  return {
+    ok: true,
+    data: parsed.data,
+    body: buildNetworkCreateBody(parsed.data),
+  };
 }
