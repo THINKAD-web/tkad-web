@@ -31,6 +31,8 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
+import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
+import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { MediaPinPopup } from "@/components/media-pin-popup";
 import {
@@ -83,6 +85,9 @@ interface Props {
   initialCategory?: string;
   initialTarget?: string;
   initialRegion?: string;
+  /** `/media/network` — 네트워크 매체 전용 카탈로그 */
+  catalogVariant?: "media" | "network";
+  initialNetworkType?: string;
   /** 플래너 Step 4 임베드 — 동일 카드 + 플랜 담기 */
   plannerMode?: boolean;
   embedded?: boolean;
@@ -97,6 +102,8 @@ function MediaSearchPageInner({
   initialCategory,
   initialTarget,
   initialRegion,
+  catalogVariant = "media",
+  initialNetworkType,
   plannerMode = false,
   embedded = false,
   plannerSelectedIds = [],
@@ -142,6 +149,9 @@ function MediaSearchPageInner({
   const [priceMin, setPriceMin] = useState(initialFromUrl.priceMin);
   const [priceMax, setPriceMax] = useState(initialFromUrl.priceMax);
   const [features, setFeatures] = useState(initialFromUrl.features);
+  const [networkType, setNetworkType] = useState(
+    searchParams.get("networkType") ?? initialNetworkType ?? "",
+  );
   const [sort, setSort] = useState(searchParams.get("sort") ?? "popular");
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
@@ -182,6 +192,7 @@ function MediaSearchPageInner({
     setPriceMin(searchParams.get("priceMin") ?? "");
     setPriceMax(searchParams.get("priceMax") ?? "");
     setFeatures(searchParams.get("features") ?? "");
+    setNetworkType(searchParams.get("networkType") ?? "");
     const sortParam = searchParams.get("sort");
     if (sortParam) setSort(sortParam);
   }, [searchParams]);
@@ -198,6 +209,9 @@ function MediaSearchPageInner({
     if (priceMin.trim()) params.set("priceMin", priceMin.trim());
     if (priceMax.trim()) params.set("priceMax", priceMax.trim());
     if (features.trim()) params.set("features", features.trim());
+    if (catalogVariant === "network" && networkType) {
+      params.set("networkType", networkType);
+    }
     if (sort && sort !== "popular") params.set("sort", sort);
     const qs = params.toString();
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
@@ -212,6 +226,8 @@ function MediaSearchPageInner({
     priceMax,
     features,
     sort,
+    catalogVariant,
+    networkType,
     plannerMode,
     embedded,
     pathname,
@@ -283,6 +299,20 @@ function MediaSearchPageInner({
     [compareEntries, catalogItems],
   );
 
+  const resolveRegionMainLabel = useCallback((id: string) => {
+    if (!id) return "";
+    return MEDIA_BROWSE_REGIONS.find((r) => r.id === id)?.label ?? id;
+  }, []);
+
+  const resolveRegionSubLabel = useCallback(
+    (mainId: string, subId: string) => {
+      if (!subId) return "";
+      const main = MEDIA_BROWSE_REGIONS.find((r) => r.id === mainId);
+      return main?.sub.find((s) => s.id === subId)?.label ?? subId;
+    },
+    [],
+  );
+
   const fetchMedia = useCallback(
     async (opts: { page: number; append: boolean }) => {
       if (opts.append) setLoadingMore(true);
@@ -290,20 +320,42 @@ function MediaSearchPageInner({
       try {
         const params = new URLSearchParams();
         if (query) params.set("q", query);
-        if (mainCategory) params.set("mainCategory", mainCategory);
-        if (subCategory) params.set("subCategory", subCategory);
-        if (target) params.set("target", target);
-        if (regionMain) params.set("regionMain", regionMain);
-        if (regionSub) params.set("regionSub", regionSub);
+        if (catalogVariant === "network") {
+          if (networkType) params.set("networkType", networkType);
+        } else {
+          if (mainCategory) params.set("mainCategory", mainCategory);
+          if (subCategory) params.set("subCategory", subCategory);
+          if (target) params.set("target", target);
+          if (features.trim()) params.set("features", features.trim());
+        }
+        if (regionMain) {
+          params.set(
+            "regionMain",
+            catalogVariant === "network"
+              ? resolveRegionMainLabel(regionMain)
+              : regionMain,
+          );
+        }
+        if (regionSub) {
+          params.set(
+            "regionSub",
+            catalogVariant === "network"
+              ? resolveRegionSubLabel(regionMain, regionSub)
+              : regionSub,
+          );
+        }
         if (priceMin.trim()) params.set("priceMin", priceMin.trim());
         if (priceMax.trim()) params.set("priceMax", priceMax.trim());
-        if (features.trim()) params.set("features", features.trim());
         params.set("sort", sort);
         params.set("page", String(opts.page));
         params.set("limit", String(PAGE_SIZE));
         if (plannerMode) params.set("plannerMode", "true");
 
-        const res = await fetch(`/api/public/media?${params}`, {
+        const apiPath =
+          catalogVariant === "network"
+            ? "/api/public/media-network"
+            : "/api/public/media";
+        const res = await fetch(`${apiPath}?${params}`, {
           cache: "no-store",
         });
         if (res.ok) {
@@ -331,6 +383,8 @@ function MediaSearchPageInner({
     },
     [
       query,
+      catalogVariant,
+      networkType,
       mainCategory,
       subCategory,
       target,
@@ -341,6 +395,8 @@ function MediaSearchPageInner({
       features,
       sort,
       plannerMode,
+      resolveRegionMainLabel,
+      resolveRegionSubLabel,
     ],
   );
 
@@ -415,10 +471,10 @@ function MediaSearchPageInner({
   const renderPrice = (item: HomeCatalogMediaItem) =>
     formatPriceLabel(item.price, item.pricePeriod, priceLocale);
 
-  const getMediaHref = (item: HomeCatalogMediaItem) =>
-    item.slug
-      ? `/${locale}/media/${item.slug}`
-      : `/${locale}/media/${item.id}`;
+  const getMediaHref = (item: HomeCatalogMediaItem) => {
+    const path = mediaItemDetailPath(item.id);
+    return `/${locale}${path}`;
+  };
 
   const isKo = locale === "ko";
 
@@ -516,6 +572,9 @@ function MediaSearchPageInner({
       <div className={cn("min-w-0 overflow-x-clip pt-4", edgePad)}>
         <MediaManualBrowseFilters
           isKo={isKo}
+          variant={catalogVariant}
+          networkType={networkType}
+          onNetworkTypeChange={setNetworkType}
           query={query}
           onQueryChange={setQuery}
           mainCategory={mainCategory}

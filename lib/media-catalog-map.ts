@@ -4,6 +4,7 @@ import {
   type MediaItem,
   typeLabels,
 } from "@/lib/media-data";
+import { NETWORK_TYPE_LABELS } from "@/lib/media-network-types";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import {
   filterDisplayableMediaImageUrls,
@@ -19,7 +20,10 @@ import type { MapMapItem } from "@/components/media-map/media-map-types";
 export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem {
   const rawUrl = getPrimaryMediaImageUrl(item);
   const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
-  const typeLabel = typeLabels[item.type]?.ko ?? item.type;
+  const typeLabel =
+    item.catalogSource === "network" && item.networkSubtype
+      ? (NETWORK_TYPE_LABELS[item.networkSubtype]?.ko ?? typeLabels.network?.ko ?? item.type)
+      : (typeLabels[item.type]?.ko ?? item.type);
   const display = resolveMediaDisplayPrice(item);
 
   return {

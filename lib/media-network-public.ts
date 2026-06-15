@@ -119,11 +119,21 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
   const region = inferRegionCodeFromLabels(n.regions);
   const locSummary =
     n.regions.length > 0 ? n.regions.join(", ") : "전국 네트워크";
-  const displayPrice = defaultDisplayMonthlyPrice(n);
+  const displayPriceMan = defaultDisplayMonthlyPrice(n);
+  const displayPriceWon = displayPriceMan > 0 ? displayPriceMan * 10_000 : 0;
   const centerLat =
     n.locations.find((l) => l.latitude != null)?.latitude ?? 37.5665;
   const centerLng =
     n.locations.find((l) => l.longitude != null)?.longitude ?? 126.978;
+
+  const footfall =
+    n.dailyFootfall ??
+    (n.locations.length > 0
+      ? Math.round(
+          n.locations.reduce((s, l) => s + (l.dailyFootfall ?? 0), 0) /
+            Math.max(1, n.locations.filter((l) => (l.dailyFootfall ?? 0) > 0).length || 1),
+        )
+      : 0);
 
   return {
     id,
@@ -133,16 +143,33 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     locationEn: locSummary,
     region,
     subCategory: n.type,
-    tags: ["network", n.type],
+    tags: ["network", n.type, ...(n.tags ?? [])],
     type: "network",
-    price: displayPrice,
+    price: displayPriceWon,
     pricePeriod: "month",
     lat: centerLat,
     lng: centerLng,
-    dailyFootTraffic: 0,
-    monthlyFootTraffic: undefined,
+    dailyFootTraffic: footfall > 0 ? footfall : 0,
+    monthlyFootTraffic: footfall > 0 ? footfall * 30 : undefined,
+    visibilityScore: n.visibilityScore ?? undefined,
+    targetAge: n.targetAge ?? undefined,
+    operatingHours: n.operatingHours ?? undefined,
+    catalogDescription: n.description ?? undefined,
+    description: n.description ?? undefined,
     features: n.description ?? n.features ?? undefined,
     featuresEn: n.description ?? n.features ?? undefined,
+    priceNote: n.priceNote ?? undefined,
+    city: n.city ?? undefined,
+    district: n.district ?? undefined,
+    regionMain: n.regions[0] ?? n.city ?? undefined,
+    installLocations: n.locations
+      .filter((l) => l.latitude != null && l.longitude != null)
+      .map((l) => ({
+        label: l.name,
+        location: l.fullAddress ?? l.address ?? undefined,
+        lat: l.latitude!,
+        lng: l.longitude!,
+      })),
     sampleImages: imgs.length > 0 ? imgs : [],
     catalogSource: "network",
     networkSubtype: n.type,
