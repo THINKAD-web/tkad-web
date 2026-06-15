@@ -109,7 +109,10 @@ export function NetworkHero({ isKo, stats }: Props) {
                 </span>
               </button>
             ) : (
-              <MediaImagePlaceholder className="h-full w-full" />
+              <MediaImagePlaceholder
+                className="h-full w-full"
+                label={isKo ? "이미지 준비 중" : "Image coming soon"}
+              />
             )}
           </div>
 

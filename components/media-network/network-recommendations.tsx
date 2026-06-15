@@ -66,7 +66,11 @@ export function NetworkRecommendations({ isKo, networks }: Props) {
                     loading="lazy"
                   />
                 ) : (
-                  <MediaImagePlaceholder className="h-full w-full" />
+                  <MediaImagePlaceholder
+                    className="h-full w-full"
+                    label={isKo ? "이미지 없음" : "No image"}
+                    size="sm"
+                  />
                 )}
               </div>
               <div className="flex min-w-0 flex-1 flex-col gap-2">
