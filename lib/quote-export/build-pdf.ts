@@ -2,14 +2,8 @@ import type { jsPDF } from "jspdf";
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { formatDocumentManWon, truncateDocText } from "@/lib/document-text";
-import { fetchMediaImageDataUrl } from "@/lib/server-media-image";
+import { dataUrlImageFormat, loadExportThumbMap } from "@/lib/export-media-images";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
-
-function dataUrlImageFormat(d: string): "PNG" | "WEBP" | "JPEG" {
-  if (d.startsWith("data:image/png")) return "PNG";
-  if (d.startsWith("data:image/webp")) return "WEBP";
-  return "JPEG";
-}
 
 const VIOLET = [124, 58, 237] as const;
 const VIOLET_DK = [76, 29, 149] as const;
@@ -467,18 +461,7 @@ export async function buildQuotePdf(p: QuoteExportPayload): Promise<Uint8Array> 
   const hasKr = registerNotoSansKrIfAvailable(doc);
   const font = krFontFamily(hasKr);
 
-  // 매체 썸네일 사전 로드 (서버 fetch — BunnyCDN 등)
-  const thumbUrls = [
-    ...new Set(
-      p.lines.map((l) => l.thumbUrl).filter((u): u is string => Boolean(u)),
-    ),
-  ];
-  const thumbEntries = await Promise.all(
-    thumbUrls.map(async (u) => [u, await fetchMediaImageDataUrl(u)] as const),
-  );
-  const thumbs = new Map<string, string>(
-    thumbEntries.filter((e): e is readonly [string, string] => Boolean(e[1])),
-  );
+  const thumbs = await loadExportThumbMap(p.lines);
 
   if (p.template === "premium") {
     await buildPremium(doc, font, p, thumbs);

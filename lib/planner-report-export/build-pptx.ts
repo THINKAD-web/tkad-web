@@ -1,4 +1,8 @@
-import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import { loadExportThumbMap } from "@/lib/export-media-images";
+import type {
+  PlannerExportMediaRow,
+  PlannerReportExportPayload,
+} from "@/lib/planner-report-export/types";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -143,40 +147,116 @@ export async function buildPlannerReportPptx(
     });
   }
 
-  // ── 3. 매체 구성 ──
-  const s3 = pptx.addSlide();
-  header(s3, isKo ? "선택 매체 구성" : "Selected media");
-  const mediaHead = [
-    { text: isKo ? "매체" : "Media", options: { fill: { color: VIOLET }, color: WHITE, bold: true, fontFace: face, fontSize: 12 } },
-    { text: isKo ? "지역" : "Region", options: { fill: { color: VIOLET }, color: WHITE, bold: true, fontFace: face, fontSize: 12 } },
-    { text: isKo ? "유형" : "Type", options: { fill: { color: VIOLET }, color: WHITE, bold: true, fontFace: face, fontSize: 12 } },
-    { text: isKo ? "비용" : "Price", options: { fill: { color: VIOLET }, color: WHITE, bold: true, fontFace: face, fontSize: 12 } },
-  ];
-  const mediaBody =
-    p.portfolio.length === 0
-      ? [[{ text: isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.", options: { colspan: 4, color: GRAY, fontFace: face, fontSize: 12, align: "center" as const } }]]
-      : p.portfolio.slice(0, 12).map((r, i) => {
-          const fill = i % 2 ? { color: LIGHT } : { color: WHITE };
-          const spec = [
-            r.location,
-            r.size,
-            r.operatingHours,
-            r.monthlyPriceLabel,
-          ]
-            .filter(Boolean)
-            .join(" · ");
-          const nameCell = spec ? `${r.name}\n${spec}` : r.name || "—";
-          return [
-            { text: nameCell, options: { fill, color: INK, fontFace: face, fontSize: 10 } },
-            { text: r.region || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
-            { text: r.categoryLabel || r.type || "—", options: { fill, color: GRAY, fontFace: face, fontSize: 10 } },
-            { text: r.lineTotalLabel || r.priceLabel || "—", options: { fill, color: INK, fontFace: face, fontSize: 10 } },
-          ];
+  // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
+  const thumbs = await loadExportThumbMap(p.portfolio);
+
+  function mediaRichLines(row: PlannerExportMediaRow) {
+    type Part = { text: string; options: Record<string, unknown> };
+    const parts: Part[] = [
+      { text: `${row.name}\n`, options: { bold: true, color: INK, fontSize: 12 } },
+    ];
+    for (const line of [row.location, row.categoryLabel].filter(Boolean) as string[]) {
+      parts.push({ text: `${line}\n`, options: { color: GRAY, fontSize: 10 } });
+    }
+    if (row.dailyTraffic) {
+      parts.push({
+        text: `${isKo ? "일일 노출" : "Daily"} ${row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}\n`,
+        options: { color: CYAN, bold: true, fontSize: 10 },
+      });
+    }
+    if (row.monthlyPriceLabel) {
+      parts.push({
+        text: `${isKo ? "월 단가" : "Monthly"} ${row.monthlyPriceLabel}\n`,
+        options: { color: VIOLET, bold: true, fontSize: 10 },
+      });
+    }
+    if (row.lineTotalLabel) {
+      parts.push({
+        text: `${isKo ? "집행 소계" : "Subtotal"} ${row.lineTotalLabel}\n`,
+        options: { color: VIOLET, bold: true, fontSize: 10 },
+      });
+    }
+    if (p.portfolio.length > 1) {
+      const contrib = [
+        row.exposureContributionPct != null
+          ? `${isKo ? "노출 기여" : "Exposure"} ${row.exposureContributionPct}%`
+          : null,
+        row.budgetContributionPct != null
+          ? `${isKo ? "예산 비중" : "Budget"} ${row.budgetContributionPct}%`
+          : null,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      if (contrib) {
+        parts.push({ text: contrib, options: { color: CYAN, bold: true, fontSize: 10 } });
+      }
+    }
+    return parts.map((p) => ({
+      ...p,
+      options: { ...p.options, fontFace: face },
+    }));
+  }
+
+  const portfolio = p.portfolio.slice(0, 12);
+  if (portfolio.length === 0) {
+    const s3 = pptx.addSlide();
+    header(s3, isKo ? "매체 구성" : "Media lineup");
+    s3.addText(isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.", {
+      x: 0.7, y: 2.2, w: 12, h: 0.5, fontFace: face, fontSize: 14, color: GRAY, align: "center",
+    });
+  } else {
+    const perSlide = 2;
+    for (let i = 0; i < portfolio.length; i += perSlide) {
+      const chunk = portfolio.slice(i, i + perSlide);
+      const slide = pptx.addSlide();
+      header(
+        slide,
+        i === 0
+          ? isKo
+            ? "매체 구성"
+            : "Media lineup"
+          : isKo
+            ? "매체 구성 (계속)"
+            : "Media lineup (cont.)",
+      );
+      chunk.forEach((row, idx) => {
+        const cardY = 1.2 + idx * 2.95;
+        slide.addShape(pptx.ShapeType.roundRect, {
+          x: 0.55,
+          y: cardY,
+          w: 12.2,
+          h: 2.75,
+          fill: { color: LIGHT },
+          rectRadius: 0.08,
+          line: { color: "E4E6EC", width: 0.75 },
         });
-  s3.addTable([mediaHead, ...mediaBody], {
-    x: 0.6, y: 1.25, w: 12.1, colW: [6.2, 2.0, 2.0, 1.9],
-    border: { type: "solid", color: "E4E6EC", pt: 0.5 }, rowH: 0.42, valign: "middle",
-  });
+        const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+        if (thumb) {
+          slide.addImage({ data: thumb, x: 0.75, y: cardY + 0.2, w: 2.35, h: 2.35, sizing: { type: "cover", w: 2.35, h: 2.35 } });
+        } else {
+          slide.addShape(pptx.ShapeType.roundRect, {
+            x: 0.75,
+            y: cardY + 0.2,
+            w: 2.35,
+            h: 2.35,
+            fill: { color: WHITE },
+            rectRadius: 0.06,
+            line: { color: "E4E6EC", width: 0.5 },
+          });
+          slide.addText(isKo ? "이미지 없음" : "No image", {
+            x: 0.75, y: cardY + 1.1, w: 2.35, h: 0.4, fontFace: face, fontSize: 9, color: GRAY, align: "center",
+          });
+        }
+        slide.addText(mediaRichLines(row), {
+          x: 3.35,
+          y: cardY + 0.25,
+          w: 9.1,
+          h: 2.4,
+          valign: "top",
+        });
+      });
+    }
+  }
 
   // ── 4. 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {

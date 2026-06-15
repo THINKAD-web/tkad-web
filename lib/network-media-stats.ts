@@ -51,6 +51,17 @@ export type NetworkMapPoint = {
   networkName: string;
 };
 
+export type NetworkFeaturedItem = {
+  id: string;
+  name: string;
+  nameEn: string | null;
+  image: string | null;
+  pricePerUnit: number;
+  totalLocations: number;
+  minUnits: number;
+  type: string;
+};
+
 export type NetworkMediaStats = {
   regions: NetworkRegionStat[];
   mapPoints: NetworkMapPoint[];
@@ -59,6 +70,9 @@ export type NetworkMediaStats = {
   totalUnits: number;
   networkCount: number;
   heroImage: string | null;
+  galleryImages: string[];
+  featuredNetworks: NetworkFeaturedItem[];
+  minUnitsTypical: number;
 };
 
 export function normalizeNetworkRegionKey(

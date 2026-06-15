@@ -16,14 +16,17 @@ export function NetworkCTA({ isKo }: Props) {
       <div
         className={cn(
           NETWORK_NEON_PANEL,
-          "relative overflow-hidden border-violet-500/25 bg-gradient-to-br from-violet-600/12 via-[#05050a] to-cyan-600/10 py-12 text-center dark:from-violet-600/15 sm:py-16",
+          "relative overflow-hidden border-violet-500/20 bg-gradient-to-br from-violet-50 via-white to-cyan-50 py-12 text-center dark:border-violet-500/25 dark:from-violet-600/10 dark:via-white/5 dark:to-cyan-600/10 sm:py-16",
         )}
       >
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-25 tkad-neon-grid"
+          className="pointer-events-none absolute inset-0 opacity-10 tkad-neon-grid dark:opacity-25"
         />
-        <div aria-hidden className="pointer-events-none absolute inset-0 tkad-neon-depth opacity-60" />
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 tkad-neon-depth opacity-30 dark:opacity-60"
+        />
         <h2 className="relative text-2xl font-black text-gray-900 dark:text-white sm:text-3xl">
           {isKo ? "전국 네트워크 집행, 지금 시작하세요" : "Launch your nationwide network campaign"}
         </h2>

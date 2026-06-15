@@ -18,6 +18,9 @@ function emptyStats(): NetworkMediaStats {
     totalUnits: 0,
     networkCount: 0,
     heroImage: null,
+    galleryImages: [],
+    featuredNetworks: [],
+    minUnitsTypical: 1,
   };
 }
 
@@ -32,8 +35,13 @@ export async function getNetworkMediaStats(): Promise<NetworkMediaStats> {
         select: {
           id: true,
           name: true,
+          nameEn: true,
+          type: true,
           pricePerUnit: true,
+          minUnits: true,
+          totalLocations: true,
           image: true,
+          galleryImages: true,
         },
         orderBy: { updatedAt: "desc" },
       }),
@@ -143,6 +151,29 @@ export async function getNetworkMediaStats(): Promise<NetworkMediaStats> {
             ) / Math.max(1, networks.length),
           ) || DEFAULT_UNIT_PRICE_MAN;
 
+    const gallerySet = new Set<string>();
+    const featuredNetworks = networks.slice(0, 8).map((n) => {
+      if (n.image) gallerySet.add(n.image);
+      for (const g of n.galleryImages ?? []) {
+        if (g?.trim()) gallerySet.add(g.trim());
+      }
+      return {
+        id: n.id,
+        name: n.name,
+        nameEn: n.nameEn,
+        image: n.image,
+        pricePerUnit: n.pricePerUnit ?? DEFAULT_UNIT_PRICE_MAN,
+        totalLocations: n.totalLocations,
+        minUnits: n.minUnits,
+        type: n.type,
+      };
+    });
+
+    const minUnitsTypical =
+      networks.length > 0
+        ? Math.min(...networks.map((n) => Math.max(1, n.minUnits)))
+        : 1;
+
     return {
       regions,
       mapPoints,
@@ -151,6 +182,9 @@ export async function getNetworkMediaStats(): Promise<NetworkMediaStats> {
       totalUnits,
       networkCount: networks.length,
       heroImage: networks.find((n) => n.image)?.image ?? null,
+      galleryImages: [...gallerySet].slice(0, 12),
+      featuredNetworks,
+      minUnitsTypical,
     };
   } catch {
     return emptyStats();
