@@ -185,6 +185,8 @@ type TkadPinVariant =
   | "staticSelected"
   | "mobile"
   | "mobileSelected"
+  | "network"
+  | "networkSelected"
   | "office"
   | "officeSelected";
 
@@ -201,6 +203,8 @@ const TKAD_PIN: Record<
   staticSelected: { path: "data", w: 44, h: 52 },
   mobile: { path: "data", w: 40, h: 48 },
   mobileSelected: { path: "data", w: 44, h: 52 },
+  network: { path: "data", w: 40, h: 48 },
+  networkSelected: { path: "data", w: 44, h: 52 },
   office: { path: "data", w: 40, h: 48 },
   officeSelected: { path: "data", w: 44, h: 52 },
 };
@@ -252,6 +256,15 @@ function pinColorForType(type: string): {
       ink: "#05050a",
     };
   }
+  if (t.includes("network")) {
+    return {
+      fill: "#a855f7",
+      stroke: "#ead6ff",
+      text: "#0a0a0c",
+      glow: "rgba(168,85,247,0.55)",
+      ink: "#05050a",
+    };
+  }
   return {
     fill: "#22d3ee",
     stroke: "#22d3ee",
@@ -267,6 +280,7 @@ function pinLetterForType(type: string): string {
   if (t.includes("digital")) return "D";
   if (t.includes("static")) return "S";
   if (t.includes("mobile")) return "M";
+  if (t.includes("network")) return "N";
   return "•";
 }
 
@@ -325,13 +339,14 @@ function tkadPinMarkerImage(
   });
 }
 
-type MediaPinBase = "digital" | "static" | "mobile" | "office" | "default";
+type MediaPinBase = "digital" | "static" | "mobile" | "network" | "office" | "default";
 
 const pinImageCache = new Map<string, unknown>();
 
 function mediaPinBaseType(type: string): MediaPinBase {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) return "office";
+  if (t.includes("network")) return "network";
   if (t.includes("digital")) return "digital";
   if (t.includes("static")) return "static";
   if (t.includes("mobile")) return "mobile";
@@ -341,12 +356,14 @@ function mediaPinBaseType(type: string): MediaPinBase {
 function mediaPinVariant(base: MediaPinBase, highlighted: boolean): TkadPinVariant {
   if (highlighted) {
     if (base === "office") return "officeSelected";
+    if (base === "network") return "networkSelected";
     if (base === "digital") return "digitalSelected";
     if (base === "static") return "staticSelected";
     if (base === "mobile") return "mobileSelected";
     return "selected";
   }
   if (base === "office") return "office";
+  if (base === "network") return "network";
   if (base === "digital") return "digital";
   if (base === "static") return "static";
   if (base === "mobile") return "mobile";

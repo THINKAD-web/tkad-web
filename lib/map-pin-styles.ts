@@ -20,6 +20,9 @@ export function pinColorForType(type: string): {
   if (t.includes("mobile")) {
     return { fill: "#fb7185", stroke: "#ffd3db", text: "#0a0a0c" };
   }
+  if (t.includes("network")) {
+    return { fill: "#a855f7", stroke: "#ead6ff", text: "#0a0a0c" };
+  }
   return { fill: "#a855f7", stroke: "#ead6ff", text: "#0a0a0c" };
 }
 
@@ -29,6 +32,7 @@ export function pinLetterForType(type: string): string {
   if (t.includes("digital")) return "D";
   if (t.includes("static")) return "S";
   if (t.includes("mobile")) return "M";
+  if (t.includes("network")) return "N";
   return "•";
 }
 
