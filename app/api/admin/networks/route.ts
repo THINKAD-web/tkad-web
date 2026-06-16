@@ -3,7 +3,7 @@ import { assertAdminDb, adminDbQueryFailed, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import {
   coerceNetworkInt,
-  normalizePriceManWon,
+  normalizePriceWon,
   normalizePricePackageFields,
   parseAndBuildNetworkCreateBodyFromObject,
   type NetworkCreateBody,
@@ -29,7 +29,7 @@ function toPrismaCreateData(
     nameEn: d.nameEn,
     description: d.description,
     type: d.type,
-    pricePerUnit: normalizePriceManWon(coerceNetworkInt(d.pricePerUnit)),
+    pricePerUnit: normalizePriceWon(coerceNetworkInt(d.pricePerUnit)),
     pricePackage: pkg.pricePackage,
     priceNote: pkg.priceNote,
     minUnits: Math.max(1, coerceNetworkInt(d.minUnits) ?? 1),

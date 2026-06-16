@@ -9,8 +9,9 @@ import {
 } from "@/lib/media-network-types";
 import { resolveTrafficPattern } from "@/lib/media-traffic-estimate";
 
-function manWonToWon(man: number): number {
-  return Math.round(man * 10_000);
+/** 가격은 DB·코드 전반에서 원 단위로 통일됨(과거 ×10,000 변환 제거). */
+function priceWon(won: number): number {
+  return Math.round(won);
 }
 
 function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
@@ -20,7 +21,7 @@ function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
   for (const t of tiers) {
     out.push({
       label: `${t.units.toLocaleString("ko-KR")}면 패키지`,
-      price: manWonToWon(t.price),
+      price: priceWon(t.price),
       period: "month",
       description: `월 ${t.units}면 기준`,
     });
@@ -29,7 +30,7 @@ function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
   if (n.pricePerUnit != null && n.pricePerUnit > 0) {
     out.push({
       label: "개당 단가",
-      price: manWonToWon(n.pricePerUnit),
+      price: priceWon(n.pricePerUnit),
       period: "month",
       description: `최소 ${Math.max(1, n.minUnits)}면`,
     });
@@ -38,7 +39,7 @@ function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
   if (n.pricePackage != null && n.pricePackage > 0 && tiers.length === 0) {
     out.push({
       label: "패키지",
-      price: manWonToWon(n.pricePackage),
+      price: priceWon(n.pricePackage),
       period: "month",
     });
   }
