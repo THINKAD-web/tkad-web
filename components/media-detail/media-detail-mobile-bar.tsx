@@ -36,21 +36,30 @@ export function MediaDetailMobileBar({
       ariaLabel={isKo ? "빠른 문의" : "Quick inquiry"}
       className={cn("lg:hidden", className)}
     >
-      <div className="mx-auto flex max-w-lg items-center gap-3">
+      <div className="mx-auto flex max-w-lg items-center gap-2">
+        {/* 가격: ₩금액 1줄 + 기간 인라인, 보조문구는 아래 캡션 */}
         <div className="min-w-0 flex-1">
-          <p className="truncate font-display text-sm font-bold tabular-nums text-gray-900 dark:text-white">
-            {formatCatalogPriceFieldWon(media.price, locale)}
+          <p className="font-display text-base font-bold leading-tight tabular-nums text-gray-900 dark:text-white">
+            <span className="whitespace-nowrap">
+              {formatCatalogPriceFieldWon(media.price, locale)}
+            </span>
+            <span className="ml-1 text-[11px] font-medium text-gray-500 dark:text-white/45">
+              / {periodLabel}
+            </span>
           </p>
-          <p className="truncate text-[10px] text-gray-500 dark:text-white/45">
-            {periodLabel}
-          </p>
-          <MediaPriceExclNote isKo={isKo} className="truncate" />
+          <MediaPriceExclNote
+            isKo={isKo}
+            className="mt-0.5 text-[10px] leading-tight text-gray-400 dark:text-white/40"
+          />
         </div>
-        <MediaInquiryDialog
+
+        {/* 보조 액션: 아이콘으로 축소 */}
+        <MediaFavoriteButton
           mediaId={media.id}
-          mediaName={displayName}
-          triggerLabel={isKo ? "문의하기 →" : "Inquire →"}
-          className="shrink-0 border-0 bg-gradient-to-r from-violet-500 to-cyan-400 px-4 text-gray-900 dark:text-white"
+          mediaName={media.name}
+          mediaNameEn={media.nameEn}
+          compact
+          className="shrink-0"
         />
         <PlanCartAddButton
           item={planCartItemFromMediaItem(media, "search")}
@@ -58,12 +67,13 @@ export function MediaDetailMobileBar({
           compact
           className="shrink-0"
         />
-        <MediaFavoriteButton
+
+        {/* 주 CTA */}
+        <MediaInquiryDialog
           mediaId={media.id}
-          mediaName={media.name}
-          mediaNameEn={media.nameEn}
-          compact
-          className="shrink-0"
+          mediaName={displayName}
+          triggerLabel={isKo ? "문의하기" : "Inquire"}
+          className="shrink-0 border-0 bg-gradient-to-r from-violet-500 to-cyan-400 px-5 font-semibold text-gray-900 dark:text-white"
         />
       </div>
     </FloatingSelectionBar>
