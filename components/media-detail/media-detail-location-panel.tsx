@@ -56,6 +56,52 @@ export function MediaDetailLocationPanel({
     if (mk) setSelectedId(mk.id);
   };
 
+  /** 단일/네트워크 공용 지점 목록 행 (단일 매체는 1행) */
+  const locationRows = useMemo<
+    Array<{
+      name: string;
+      region?: string;
+      address?: string;
+      unitCount?: number;
+      dailyFootfall?: number;
+      lat?: number;
+      lng?: number;
+    }>
+  >(() => {
+    if (netLocations.length > 0) {
+      return netLocations.map((l) => ({
+        name: l.name,
+        region: [l.regionMain, l.regionSub].filter(Boolean).join(" ") || undefined,
+        address: l.address,
+        unitCount: l.unitCount,
+        dailyFootfall: l.dailyFootfall,
+        lat: l.lat,
+        lng: l.lng,
+      }));
+    }
+    if ((media.installLocations?.length ?? 0) > 1) {
+      return media.installLocations!.map((l) => ({
+        name: l.label,
+        address: l.location,
+        lat: l.lat,
+        lng: l.lng,
+      }));
+    }
+    const hasCoord =
+      Number.isFinite(media.lat) &&
+      Number.isFinite(media.lng) &&
+      !(media.lat === 0 && media.lng === 0);
+    return [
+      {
+        name: isKo ? media.name : media.nameEn || media.name,
+        region: regionDisplay,
+        address: isKo ? media.location : media.locationEn || media.location,
+        lat: hasCoord ? media.lat : undefined,
+        lng: hasCoord ? media.lng : undefined,
+      },
+    ];
+  }, [netLocations, media, isKo, regionDisplay]);
+
   useEffect(() => {
     setSelectedId(mapMarkers[0]?.id ?? media.id);
   }, [media.id, mapMarkers]);
@@ -87,29 +133,6 @@ export function MediaDetailLocationPanel({
   return (
     <div className={cn("space-y-6", className)}>
       <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white shadow-sm">
-        {mapMarkers.length > 1 ? (
-          <ul className="flex flex-wrap gap-2 border-b dark:border-white/10 border-gray-200 px-3 py-2">
-            {mapMarkers.map((mk) => {
-              const active = selectedId === mk.id;
-              return (
-                <li key={mk.id}>
-                  <button
-                    type="button"
-                    onClick={() => setSelectedId(mk.id)}
-                    className={cn(
-                      "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
-                      active
-                        ? "border-violet-500/50 bg-violet-500/15 text-violet-700 dark:text-violet-200"
-                        : "border-gray-200 bg-white dark:border-white/15 dark:bg-white/5",
-                    )}
-                  >
-                    {mk.name}
-                  </button>
-                </li>
-              );
-            })}
-          </ul>
-        ) : null}
         <div className="h-80 min-h-[20rem] w-full sm:h-96">
           <MediaDetailKakaoMap
             markers={mapMarkers}
@@ -125,25 +148,24 @@ export function MediaDetailLocationPanel({
         </div>
       </div>
 
-      {isNetwork && netLocations.length > 0 ? (
+      {locationRows.length > 0 ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
             <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300/80">
               <MapPin className="h-3.5 w-3.5" aria-hidden />
-              {isKo ? "설치 지점" : "Locations"}
+              {isNetwork ? (isKo ? "설치 지점" : "Locations") : isKo ? "위치" : "Location"}
             </p>
-            <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
-              {isKo
-                ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}구좌`
-                : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
-            </p>
+            {isNetwork ? (
+              <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
+                {isKo
+                  ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}구좌`
+                  : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
+              </p>
+            ) : null}
           </div>
           <ul className="max-h-80 divide-y divide-gray-100 overflow-y-auto dark:divide-white/8">
-            {netLocations.map((loc, i) => {
+            {locationRows.map((loc, i) => {
               const hasCoord = loc.lat != null && loc.lng != null;
-              const region = [loc.regionMain, loc.regionSub]
-                .filter(Boolean)
-                .join(" ");
               return (
                 <li key={`${loc.name}-${i}`}>
                   <button
@@ -162,15 +184,17 @@ export function MediaDetailLocationPanel({
                         {loc.name}
                       </p>
                       <p className="mt-0.5 truncate text-xs dark:text-white/55 text-gray-500">
-                        {region ? `${region} · ` : ""}
+                        {loc.region ? `${loc.region} · ` : ""}
                         {loc.address ?? (isKo ? "주소 미등록" : "No address")}
                       </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <p className="text-xs font-bold tabular-nums text-violet-600 dark:text-violet-300">
-                        {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                        {isKo ? "구좌" : "u"}
-                      </p>
+                      {loc.unitCount != null ? (
+                        <p className="text-xs font-bold tabular-nums text-violet-600 dark:text-violet-300">
+                          {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                          {isKo ? "구좌" : "u"}
+                        </p>
+                      ) : null}
                       {loc.dailyFootfall ? (
                         <p className="text-[11px] dark:text-white/45 text-gray-400">
                           {isKo ? "일 " : ""}
