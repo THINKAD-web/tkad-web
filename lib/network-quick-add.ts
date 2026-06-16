@@ -95,12 +95,13 @@ function strArr(v: unknown): string[] {
     .map((x) => x.trim());
 }
 
-/** 원 단위(≥10만) → 만원. 이미 만원 단위면 그대로. */
-export function normalizePriceManWon(v: number | null): number | null {
+/**
+ * 가격은 원 단위로 그대로 저장(일반 매체와 통일). 입력값을 정수 원으로만 정규화.
+ * (과거에는 만원 단위로 ÷10,000 변환했으나, 표시 ×10,000 과 함께 제거됨.)
+ */
+export function normalizePriceWon(v: number | null): number | null {
   if (v == null || !Number.isFinite(v)) return null;
-  const n = Math.round(v);
-  if (n >= 100_000) return Math.round(n / 10_000);
-  return n;
+  return Math.round(v);
 }
 
 export function normalizePricePackageFields(
@@ -112,7 +113,7 @@ export function normalizePricePackageFields(
   }
   const asNum = optNum(rawPackage);
   if (asNum != null) {
-    return { pricePackage: normalizePriceManWon(asNum), priceNote };
+    return { pricePackage: normalizePriceWon(asNum), priceNote };
   }
   const label = str(rawPackage);
   if (!label) return { pricePackage: null, priceNote };
@@ -129,7 +130,7 @@ function normalizePackageOptions(raw: unknown): unknown {
     const o = item as Record<string, unknown>;
     const price = optNum(o.price);
     if (price == null) return item;
-    return { ...o, price: normalizePriceManWon(price) };
+    return { ...o, price: normalizePriceWon(price) };
   });
 }
 
@@ -506,7 +507,7 @@ function parseNetworkQuickAddObject(
       nameEn: str(normalized.nameEn) || null,
       description: str(normalized.description) || null,
       type,
-      pricePerUnit: normalizePriceManWon(optNum(normalized.pricePerUnit)),
+      pricePerUnit: normalizePriceWon(optNum(normalized.pricePerUnit)),
       pricePackage: pkg.pricePackage,
       priceNote: pkg.priceNote,
       minUnits,

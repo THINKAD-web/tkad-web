@@ -38,8 +38,8 @@ const SAMPLE_FULL_JSON = `{
   "district": "강남구",
   "latitude": 37.498,
   "longitude": 127.028,
-  "price_per_month": 45,
-  "price_note": "VAT 별도 · 면당 만원/월",
+  "price_per_month": 450000,
+  "price_note": "VAT 별도 · 면당 원/월",
   "min_units": 10,
   "daily_footfall": 6500,
   "visibility_score": 88,
@@ -509,7 +509,7 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-slate-700">
-                  price_per_month ({isEn ? "man-won/unit" : "만원/면"})
+                  price_per_month ({isEn ? "KRW/unit" : "원/면"})
                 </label>
                 <Input
                   inputMode="numeric"
@@ -519,7 +519,7 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2 sm:col-span-2">
                 <label className="text-sm font-medium text-slate-700">
-                  price_package ({isEn ? "man-won" : "만원"})
+                  price_package ({isEn ? "KRW" : "원"})
                 </label>
                 <Input
                   inputMode="numeric"

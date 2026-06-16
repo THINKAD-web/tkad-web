@@ -60,7 +60,7 @@ export function parsePackageOptions(raw: unknown): NetworkPackageTier[] {
   return out;
 }
 
-/** 카드/견적 기본 표시 월액(만원): 패키지가 있으면 우선, 없으면 개당×최소단위 */
+/** 카드/견적 기본 표시 월액(원): 패키지가 있으면 우선, 없으면 개당×최소단위 */
 export function defaultDisplayMonthlyPrice(n: {
   pricePackage: number | null;
   pricePerUnit: number | null;
@@ -119,8 +119,8 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
   const region = inferRegionCodeFromLabels(n.regions);
   const locSummary =
     n.regions.length > 0 ? n.regions.join(", ") : "전국 네트워크";
-  const displayPriceMan = defaultDisplayMonthlyPrice(n);
-  const displayPriceWon = displayPriceMan > 0 ? displayPriceMan * 10_000 : 0;
+  // 가격은 DB·코드 전반에서 원 단위로 통일(일반 매체와 동일). 과거 ×10,000 표시 변환 제거.
+  const displayPriceWon = defaultDisplayMonthlyPrice(n);
   const centerLat =
     n.locations.find((l) => l.latitude != null)?.latitude ?? 37.5665;
   const centerLng =

@@ -64,15 +64,15 @@ function networkDraftTool(): Anthropic.Tool {
         },
         pricePerUnit: {
           type: "number",
-          description: "면(지점)당 월 단가, 만원",
+          description: "면(지점)당 월 단가, 원 (예: 300000 = 30만원)",
         },
         pricePackage: {
           type: "number",
-          description: "고정 패키지 월 가격, 만원 (선택)",
+          description: "고정 패키지 월 가격, 원 (선택)",
         },
         packageOptions: {
           type: "array",
-          description: "수량별 패키지 가격 [{units, price}] 만원",
+          description: "수량별 패키지 가격 [{units, price}] price는 원 단위",
           items: {
             type: "object",
             additionalProperties: false,
@@ -147,9 +147,9 @@ const SYSTEM = `You are a THINKAD OOH network media catalog assistant for Korean
 Convert informal Korean (or English) descriptions into structured network media registration data.
 
 Rules:
-- All monetary values are in **만원 (10,000 KRW) per month** unless clearly a one-time fee.
-- If the user gives package tiers (e.g. 50 units = 1500만, 100 units = 2800만), fill packageOptions with {units, price}.
-- If only per-unit price is given, set pricePerUnit.
+- All monetary values are in **KRW (원) per month** unless clearly a one-time fee. Convert "만원" to 원 (1만원 = 10000).
+- If the user gives package tiers (e.g. 50 units = 1500만 → price: 15000000, 100 units = 2800만 → price: 28000000), fill packageOptions with {units, price}.
+- If only per-unit price is given, set pricePerUnit (in 원).
 - Pick the best matching type code from the allowed list.
 - description and features should be concise Korean marketing copy (2–4 sentences total across both).
 - locations are OPTIONAL. If area names are given, create one location per area with realistic name, address, lat/lng.

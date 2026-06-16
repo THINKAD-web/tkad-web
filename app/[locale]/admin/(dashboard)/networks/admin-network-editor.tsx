@@ -116,9 +116,6 @@ export default function AdminNetworkEditor(props: Props) {
   const [nameEn, setNameEn] = useState(init?.nameEn ?? "");
   const [description, setDescription] = useState(init?.description ?? "");
   const [type, setType] = useState(init?.type ?? "bus_shelter");
-  const [totalLocations, setTotalLocations] = useState(
-    String(init?.totalLocations ?? ""),
-  );
   const [regionsText, setRegionsText] = useState(
     (init?.regions ?? []).join(", "),
   );
@@ -128,30 +125,30 @@ export default function AdminNetworkEditor(props: Props) {
   const [pricePackage, setPricePackage] = useState(
     init?.pricePackage != null ? String(init.pricePackage) : "",
   );
-  const [priceNote] = useState(init?.priceNote ?? "");
+  const [priceNote, setPriceNote] = useState(init?.priceNote ?? "");
   const [minUnits, setMinUnits] = useState(String(init?.minUnits ?? 1));
   const [packageOptionsText, setPackageOptionsText] = useState(
     serializePackageOptions(init?.packageOptions),
   );
-  const [city] = useState(init?.city ?? "");
-  const [district] = useState(init?.district ?? "");
+  const [city, setCity] = useState(init?.city ?? "");
+  const [district, setDistrict] = useState(init?.district ?? "");
   const [image, setImage] = useState(init?.image ?? "");
   const [galleryText, setGalleryText] = useState(
     (init?.galleryImages ?? []).join("\n"),
   );
   const [features, setFeatures] = useState(init?.features ?? "");
-  const [visibilityScore] = useState(
+  const [visibilityScore, setVisibilityScore] = useState(
     init?.visibilityScore != null ? String(init.visibilityScore) : "",
   );
-  const [dailyFootfall] = useState(
+  const [dailyFootfall, setDailyFootfall] = useState(
     init?.dailyFootfall != null ? String(init.dailyFootfall) : "",
   );
-  const [targetAge] = useState(init?.targetAge ?? "");
-  const [effectMemo] = useState(init?.effectMemo ?? "");
-  const [operatingHours] = useState(
+  const [targetAge, setTargetAge] = useState(init?.targetAge ?? "");
+  const [effectMemo, setEffectMemo] = useState(init?.effectMemo ?? "");
+  const [operatingHours, setOperatingHours] = useState(
     init?.operatingHours ?? "",
   );
-  const [tagsText] = useState((init?.tags ?? []).join(", "));
+  const [tagsText, setTagsText] = useState((init?.tags ?? []).join(", "));
   const [isActive, setIsActive] = useState(init?.isActive ?? true);
   const [locRows, setLocRows] = useState<LocRow[]>(() => {
     if (init?.locations?.length) {
@@ -230,6 +227,29 @@ export default function AdminNetworkEditor(props: Props) {
       }));
   }, [locRows]);
 
+  /** 개별 위치 행에서 자동 집계 — 지점 수(개소)·총 구좌 수·이름 누락 경고 */
+  const locStats = (() => {
+    const named = locRows.filter((r) => r.name.trim());
+    const siteCount = named.length;
+    const unitTotal = named.reduce(
+      (s, r) => s + Math.max(1, Math.round(Number(r.unitCount) || 1)),
+      0,
+    );
+    // 이름은 비었지만 다른 정보(주소·좌표·유동인구 등)가 입력된 행 → 저장 시 누락되므로 경고
+    const blankWithData = locRows.filter(
+      (r) =>
+        !r.name.trim() &&
+        (r.address.trim() ||
+          r.fullAddress.trim() ||
+          r.lat.trim() ||
+          r.lng.trim() ||
+          r.dailyFootfall.trim() ||
+          r.priceNote.trim() ||
+          r.note.trim()),
+    ).length;
+    return { siteCount, unitTotal, blankWithData };
+  })();
+
   const parsePackageOptionsField = useCallback((): unknown => {
     const s = packageOptionsText.trim();
     if (!s) return null;
@@ -244,7 +264,9 @@ export default function AdminNetworkEditor(props: Props) {
   }, [tagsText]);
 
   const buildFormBody = useCallback(() => {
-    const tl = Math.max(0, Math.round(Number(totalLocations) || 0));
+    const locations = buildLocationsPayload();
+    // 총 지점 수(개소)는 개별 위치 행 기준으로 자동 산출 — 자유 입력 제거로 110/103 불일치 차단
+    const tl = locations.length;
     const mu = Math.max(1, Math.round(Number(minUnits) || 1));
     const ppu =
       pricePerUnit.trim() === ""
@@ -288,14 +310,13 @@ export default function AdminNetworkEditor(props: Props) {
       operatingHours: operatingHours.trim() || null,
       tags: tagsArray(),
       isActive,
-      locations: buildLocationsPayload(),
+      locations,
     };
   }, [
     name,
     nameEn,
     description,
     type,
-    totalLocations,
     regionsArr,
     pricePerUnit,
     pricePackage,
@@ -696,16 +717,22 @@ export default function AdminNetworkEditor(props: Props) {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
-          <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
+          <div className="grid gap-2 sm:grid-cols-3 sm:gap-4">
             <div className="grid gap-2">
               <label className="text-sm font-medium text-slate-700">
-                {t("totalLocations")}
+                {t("siteCountAuto")}
               </label>
-              <Input
-                inputMode="numeric"
-                value={totalLocations}
-                onChange={(e) => setTotalLocations(e.target.value)}
-              />
+              <div className="flex h-10 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold tabular-nums text-slate-700">
+                {locStats.siteCount.toLocaleString(locale === "en" ? "en-US" : "ko-KR")}
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("unitTotalAuto")}
+              </label>
+              <div className="flex h-10 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold tabular-nums text-violet-700">
+                {locStats.unitTotal.toLocaleString(locale === "en" ? "en-US" : "ko-KR")}
+              </div>
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium text-slate-700">
@@ -718,6 +745,7 @@ export default function AdminNetworkEditor(props: Props) {
               />
             </div>
           </div>
+          <p className="-mt-2 text-xs text-slate-500">{t("autoFromLocations")}</p>
           <div className="grid gap-2">
             <label className="text-sm font-medium text-slate-700">
               {t("regions")}
@@ -767,6 +795,16 @@ export default function AdminNetworkEditor(props: Props) {
               />
             </div>
           </div>
+          <p className="-mt-2 text-xs text-amber-600">{t("priceUnitHint")}</p>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">
+              {t("priceNote")}
+            </label>
+            <Input
+              value={priceNote}
+              onChange={(e) => setPriceNote(e.target.value)}
+            />
+          </div>
           <div className="grid gap-2">
             <label className="text-sm font-medium text-slate-700">
               {t("packageOptions")}
@@ -778,6 +816,88 @@ export default function AdminNetworkEditor(props: Props) {
               value={packageOptionsText}
               onChange={(e) => setPackageOptionsText(e.target.value)}
               placeholder="[]"
+            />
+          </div>
+        </CardContent>
+          </Card>
+
+          <Card>
+        <CardHeader>
+          <CardTitle className="text-base">{t("targeting")}</CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid gap-2 sm:grid-cols-2 sm:gap-4">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("targetAge")}
+              </label>
+              <Input
+                value={targetAge}
+                onChange={(e) => setTargetAge(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("dailyFootfall")}
+              </label>
+              <Input
+                inputMode="numeric"
+                value={dailyFootfall}
+                onChange={(e) => setDailyFootfall(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("visibilityScore")}
+              </label>
+              <Input
+                inputMode="numeric"
+                value={visibilityScore}
+                onChange={(e) => setVisibilityScore(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("operatingHours")}
+              </label>
+              <Input
+                value={operatingHours}
+                onChange={(e) => setOperatingHours(e.target.value)}
+              />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("city")}
+              </label>
+              <Input value={city} onChange={(e) => setCity(e.target.value)} />
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {t("district")}
+              </label>
+              <Input
+                value={district}
+                onChange={(e) => setDistrict(e.target.value)}
+              />
+            </div>
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">
+              {t("tags")}
+            </label>
+            <Input
+              value={tagsText}
+              onChange={(e) => setTagsText(e.target.value)}
+            />
+          </div>
+          <div className="grid gap-2">
+            <label className="text-sm font-medium text-slate-700">
+              {t("effectMemo")}
+            </label>
+            <Textarea
+              rows={2}
+              value={effectMemo}
+              onChange={(e) => setEffectMemo(e.target.value)}
             />
           </div>
         </CardContent>
@@ -968,6 +1088,12 @@ export default function AdminNetworkEditor(props: Props) {
         </CardHeader>
         <CardContent className="space-y-3">
           <p className="text-xs text-slate-500">{t("csvHint")}</p>
+          {locStats.blankWithData > 0 && (
+            <div className="flex items-start gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-800">
+              <AlertCircle className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+              {t("blankRowWarning", { count: locStats.blankWithData })}
+            </div>
+          )}
           <div className="space-y-2">
             {locRows.map((row, i) => (
               <div
@@ -1033,6 +1159,18 @@ export default function AdminNetworkEditor(props: Props) {
                     }
                   />
                 </div>
+                <Input
+                  placeholder={t("locUnitCount")}
+                  inputMode="numeric"
+                  value={row.unitCount}
+                  onChange={(e) =>
+                    setLocRows((rows) =>
+                      rows.map((r, j) =>
+                        j === i ? { ...r, unitCount: e.target.value } : r,
+                      ),
+                    )
+                  }
+                />
                 <Input
                   placeholder="지점별 가격 메모"
                   value={row.priceNote}
