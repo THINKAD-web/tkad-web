@@ -89,7 +89,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { input, seed = 0, limit = 10, sessionId, locale, useClaude } =
+  const { input, seed = 0, limit = 10, sessionId, locale, useClaude, excludeNetwork } =
     parsed.data;
   const isKo = (locale ?? "ko").startsWith("ko");
   const matchingInput = aiInputToMatching(input as AiRecommendInput, seed);
@@ -108,6 +108,7 @@ export async function POST(request: NextRequest) {
       source: "recommend",
       limit,
       useClaude,
+      excludeNetwork,
       isKo,
       userId,
       sessionId: sessionId ?? null,

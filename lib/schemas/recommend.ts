@@ -29,6 +29,8 @@ export const recommendRequestSchema = z.object({
   sessionId: z.string().max(64).optional(),
   locale: z.string().max(8).optional(),
   useClaude: z.boolean().optional(),
+  /** v1: AI 자유입력 모드는 네트워크 매체를 후보에서 제외(MediaNetwork 목적분류 부재) */
+  excludeNetwork: z.boolean().optional(),
   captchaToken: z.string().min(1).optional(),
   turnstileToken: z.string().min(1).optional(),
 });

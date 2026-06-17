@@ -15,6 +15,9 @@ import { DISCOVERY_TABS } from "@/lib/navigation/sub-page-tabs";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
+import RecommendAiFreetext from "@/components/recommend/recommend-ai-freetext";
+import { Sparkles, SlidersHorizontal } from "lucide-react";
+import { cn } from "@/lib/utils";
 import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
 import type { MediaItem } from "@/lib/media-data";
 import { matchesMediaTextQuery } from "@/lib/media-data";
@@ -74,6 +77,8 @@ export default function RecommendPageClient({
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("form");
+  /** 입력 방식: 기존 구조화 폼 / AI 자유입력(PRO) */
+  const [inputMode, setInputMode] = useState<"structured" | "ai">("structured");
   const [fullList, setFullList] = useState<ScoredMedia[] | null>(null);
   const [lastPayload, setLastPayload] =
     useState<MediaAiRecommendFormSubmit | null>(null);
@@ -256,8 +261,18 @@ export default function RecommendPageClient({
   }, [searchParams, createQuoteFromRecommend]);
 
   const runAnalysis = useCallback(
-    async (payload: MediaAiRecommendFormSubmit, seed = 0) => {
+    async (
+      payload: MediaAiRecommendFormSubmit,
+      seed = 0,
+      opts?: { excludeNetwork?: boolean },
+    ) => {
       setPhase("loading");
+      // v1 AI 자유입력: 네트워크 매체 제외(서버 후보 + 클라 폴백 모두 일관 적용)
+      const effectiveCatalog = opts?.excludeNetwork
+        ? catalog.filter(
+            (m) => m.catalogSource !== "network" && m.type !== "network",
+          )
+        : catalog;
       try {
         const res = await fetch("/api/recommend", {
           method: "POST",
@@ -268,6 +283,7 @@ export default function RecommendPageClient({
             limit: 30,
             locale,
             useClaude: true,
+            excludeNetwork: opts?.excludeNetwork || undefined,
             turnstileToken: captchaToken || undefined,
           }),
         });
@@ -283,7 +299,7 @@ export default function RecommendPageClient({
         };
 
         if (data.ok && data.items?.length) {
-          const byId = new Map(catalog.map((m) => [m.id, m]));
+          const byId = new Map(effectiveCatalog.map((m) => [m.id, m]));
           const scored: ScoredMedia[] = [];
           for (const item of data.items) {
             const media = byId.get(item.mediaId);
@@ -309,7 +325,7 @@ export default function RecommendPageClient({
 
         /** API 실패 시 클라이언트 폴백 (동일 카탈로그·결정론적) */
         const poolRegion = filterCatalogByRegionCodes(
-          catalog,
+          effectiveCatalog,
           payload.regionCodes,
         );
         const q = payload.searchQuery.trim().toLowerCase();
@@ -318,8 +334,8 @@ export default function RecommendPageClient({
             poolRegion.filter((m) => matchesMediaTextQuery(m, q))
           : poolRegion;
         const baseCatalog =
-          poolFiltered.length > 0 ? poolFiltered : catalog;
-        const paddingSource = poolRegion.length > 0 ? poolRegion : catalog;
+          poolFiltered.length > 0 ? poolFiltered : effectiveCatalog;
+        const paddingSource = poolRegion.length > 0 ? poolRegion : effectiveCatalog;
         let scored = recommendMedia(payload.input, baseCatalog, paddingSource);
         if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
           scored = recommendMedia(payload.input, poolRegion, paddingSource);
@@ -340,6 +356,20 @@ export default function RecommendPageClient({
     (payload: MediaAiRecommendFormSubmit) => {
       setLastPayload(payload);
       runAnalysis(payload);
+    },
+    [runAnalysis],
+  );
+
+  /** AI 자유입력 확인 완료 → 네트워크 제외(v1)로 추천 실행 */
+  const handleAiConfirm = useCallback(
+    (input: AiRecommendInput) => {
+      const payload: MediaAiRecommendFormSubmit = {
+        input,
+        regionCodes: [],
+        searchQuery: "",
+      };
+      setLastPayload(payload);
+      runAnalysis(payload, 0, { excludeNetwork: true });
     },
     [runAnalysis],
   );
@@ -536,13 +566,63 @@ export default function RecommendPageClient({
           ) : null}
           {phase === "form" && autoFromUrl !== "1" && (
             <>
-              <MediaAiRecommendForm
-                locale={locale}
-                onSubmit={handleFormSubmit}
-              />
-              <div className="mx-auto mt-4 max-w-xl">
-                <TurnstileWidget onVerify={setCaptchaToken} />
+              {/* 입력 방식 토글: 구조화 입력 / AI 자유입력 */}
+              <div className="mx-auto mb-4 flex max-w-xl gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1 text-sm font-medium dark:border-white/10 dark:bg-white/5">
+                <button
+                  type="button"
+                  onClick={() => setInputMode("structured")}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 transition-colors",
+                    inputMode === "structured"
+                      ? "bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white"
+                      : "text-gray-500 dark:text-white/55",
+                  )}
+                >
+                  <SlidersHorizontal className="h-4 w-4" />
+                  {isKo ? "구조화 입력" : "Structured"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setInputMode("ai")}
+                  className={cn(
+                    "flex flex-1 items-center justify-center gap-1.5 rounded-xl px-3 py-2 transition-colors",
+                    inputMode === "ai"
+                      ? "bg-white text-gray-900 shadow-sm dark:bg-white/10 dark:text-white"
+                      : "text-gray-500 dark:text-white/55",
+                  )}
+                >
+                  <Sparkles className="h-4 w-4 text-violet-500" />
+                  {isKo ? "AI 자유입력" : "AI free-text"}
+                  <span className="rounded bg-violet-500/15 px-1 text-[9px] font-bold uppercase text-violet-600 dark:text-violet-300">
+                    PRO
+                  </span>
+                </button>
               </div>
+
+              {inputMode === "ai" ? (
+                <div className="mx-auto max-w-xl space-y-3">
+                  <RecommendAiFreetext
+                    locale={locale}
+                    onConfirm={handleAiConfirm}
+                  />
+                  {/* v1 안내: 일반 매체 기준 추천(네트워크 매체 추후 추가) */}
+                  <p className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-[11px] leading-relaxed text-cyan-800 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-200/90">
+                    {isKo
+                      ? "현재 일반 매체 기준으로 추천됩니다. 네트워크 매체는 추후 추가될 예정입니다."
+                      : "Recommendations currently cover standard media only. Network media will be added soon."}
+                  </p>
+                </div>
+              ) : (
+                <>
+                  <MediaAiRecommendForm
+                    locale={locale}
+                    onSubmit={handleFormSubmit}
+                  />
+                  <div className="mx-auto mt-4 max-w-xl">
+                    <TurnstileWidget onVerify={setCaptchaToken} />
+                  </div>
+                </>
+              )}
             </>
           )}
 
