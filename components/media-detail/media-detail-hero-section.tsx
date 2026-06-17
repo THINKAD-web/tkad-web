@@ -110,11 +110,9 @@ export function MediaDetailHeroSection({
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
       </span>
     )
-  ) : hasPriceOptions && primaryPriceOption ? (
-    <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
-      {formatCatalogPriceFieldWon(primaryPriceOption.price)}
-    </span>
   ) : (
+    // 일반·네트워크 매체: 스티키 바와 동일한 기준 월 단가(media.price)를 헤드라인으로 통일.
+    // 패키지 옵션은 실행 탭 "가격 옵션" 영역에 별도 표시되어 기본가와 혼동되지 않는다.
     <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
       {formatCatalogPriceFieldWon(media.price)}
     </span>

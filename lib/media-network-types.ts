@@ -104,6 +104,22 @@ export function parsePackageOptions(raw: unknown): NetworkPackageTier[] {
   return out;
 }
 
+/**
+ * units 없이 price 만 있는 패키지 옵션도 가격으로 인식(헤드라인 표시용).
+ * parsePackageOptions 는 tier 계산용이라 units>0 을 강제하지만, 가격 표시에서는
+ * units 누락 데이터까지 살려야 ₩0 폴백을 막을 수 있다. 가격 오름차순 반환.
+ */
+export function loosePackagePrices(raw: unknown): number[] {
+  if (!Array.isArray(raw)) return [];
+  const out: number[] = [];
+  for (const x of raw) {
+    if (!x || typeof x !== "object") continue;
+    const price = Math.round(Number((x as Record<string, unknown>).price));
+    if (Number.isFinite(price) && price > 0) out.push(price);
+  }
+  return out.sort((a, b) => a - b);
+}
+
 export function defaultDisplayMonthlyPrice(n: {
   pricePackage: number | null;
   pricePerUnit: number | null;
@@ -112,6 +128,9 @@ export function defaultDisplayMonthlyPrice(n: {
 }): number {
   const tiers = parsePackageOptions(n.packageOptions);
   if (tiers.length > 0) return tiers[0].price;
+  // 패키지 우선: units 없는 packageOptions·pricePackage 를 pricePerUnit 보다 먼저 사용
+  const loose = loosePackagePrices(n.packageOptions);
+  if (loose.length > 0) return loose[0];
   if (n.pricePackage != null && n.pricePackage > 0) return n.pricePackage;
   const u = Math.max(1, n.minUnits);
   const p = n.pricePerUnit;
