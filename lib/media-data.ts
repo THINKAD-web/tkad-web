@@ -26,6 +26,10 @@ export type MediaPriceOption = {
   period?: MediaPricePeriodKey | string;
   /** 옵션 부가 설명 (집행 단위·노출 횟수 등) */
   description?: string;
+  /** 설치 대수·면 수 (네트워크 패키지) */
+  units?: number;
+  /** 포함 지점 목록 (콤마 구분) */
+  stores?: string;
 };
 
 /** `data/media-items-keyword-filter.json`에서 합성 상세에만 쓰는 메타 */

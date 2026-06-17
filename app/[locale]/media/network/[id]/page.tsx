@@ -39,6 +39,7 @@ import {
   networkDetailTypeLabel,
   networkRowToDetailMediaItem,
 } from "@/lib/network-media-detail";
+import { networkInventoryUnitSuffix } from "@/lib/media-network-types";
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
@@ -173,7 +174,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
       ? `${row.totalLocations.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "개소" : " sites"}`
       : null,
     totalUnits > row.locations.length
-      ? `${isKo ? "총 " : ""}${totalUnits.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "구좌" : " units"}`
+      ? `${isKo ? "총 " : ""}${totalUnits.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? networkInventoryUnitSuffix(row.type, true) : " units"}`
       : null,
     media.targetAge,
   ].filter((x): x is string => Boolean(x && String(x).trim()));

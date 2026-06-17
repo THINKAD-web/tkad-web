@@ -55,6 +55,8 @@ type Props = {
   disableCluster?: boolean;
   /** true면 모든 마커가 한 화면에 들어오도록 LatLngBounds 로 맞춤(네트워크 다지점용) */
   fitMarkersBounds?: boolean;
+  /** 마커/목록 선택 시 panTo 와 함께 적용할 줌 레벨 (카카오: 숫자가 작을수록 확대) */
+  zoomOnSelect?: number;
 };
 
 declare global {
@@ -68,6 +70,9 @@ declare global {
  * calculator 는 아래 TKAD_CLUSTER_CALCULATOR 와 길이(스타일 단계)를 맞출 것
  */
 const TKAD_CLUSTER_CALCULATOR = [5, 14, 35, 90] as const;
+/** MarkerClusterer `minLevel` 과 동기화 — 이보다 확대(숫자↓)되면 개별 마커 노출 */
+const TKAD_CLUSTER_MIN_LEVEL = 5;
+const TKAD_CLUSTER_UNCLUSTER_LEVEL = TKAD_CLUSTER_MIN_LEVEL - 1;
 
 const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
   const mk = (px: number, fs: string, accent: string, glow: string) => {
@@ -385,27 +390,256 @@ function cachedPinMarkerImage(
   return img;
 }
 
-/** 클러스터 탭 시 항상 줌인만 (setBounds 는 분산이 크면 오히려 줌아웃됨). */
+type KakaoMapFocusApi = {
+  getLevel?: () => number;
+  setLevel?: (next: number, opts?: { anchor?: unknown }) => void;
+  setCenter?: (pos: unknown) => void;
+  panTo?: (pos: unknown) => void;
+  getBounds?: () => { contain?: (p: unknown) => boolean };
+  getCenter?: () => { getLat: () => number; getLng: () => number };
+  setBounds?: (
+    bounds: unknown,
+    padTop?: number,
+    padRight?: number,
+    padBottom?: number,
+    padLeft?: number,
+  ) => void;
+  relayout?: () => void;
+};
+
+type KakaoMapsBoundsApi = {
+  maps: { LatLngBounds: new () => { extend: (p: unknown) => void } };
+};
+
+function isPositionInMapBounds(
+  bounds: {
+    contain?: (p: unknown) => boolean;
+    getSouthWest?: () => { getLat: () => number; getLng: () => number };
+    getNorthEast?: () => { getLat: () => number; getLng: () => number };
+  },
+  pos: { getLat: () => number; getLng: () => number },
+): boolean {
+  try {
+    if (bounds.contain) return bounds.contain(pos);
+    const sw = bounds.getSouthWest?.();
+    const ne = bounds.getNorthEast?.();
+    if (!sw || !ne) return false;
+    const lat = pos.getLat();
+    const lng = pos.getLng();
+    return (
+      lat >= sw.getLat() &&
+      lat <= ne.getLat() &&
+      lng >= sw.getLng() &&
+      lng <= ne.getLng()
+    );
+  } catch {
+    return false;
+  }
+}
+
+function runAfterMapIdle(
+  map: unknown,
+  kakao: { maps?: { event?: { addListener?: Function; removeListener?: Function } } },
+  fn: () => void,
+) {
+  const eventApi = kakao.maps?.event;
+  if (!eventApi?.addListener || !eventApi?.removeListener) {
+    requestAnimationFrame(fn);
+    return;
+  }
+  const listener = eventApi.addListener(map, "idle", () => {
+    eventApi.removeListener!(map, "idle", listener);
+    fn();
+  });
+}
+
+function forceUnclusterLevel(map: KakaoMapFocusApi) {
+  const level = map.getLevel?.() ?? TKAD_CLUSTER_MIN_LEVEL + 1;
+  if (level > TKAD_CLUSTER_UNCLUSTER_LEVEL) {
+    map.setLevel?.(TKAD_CLUSTER_UNCLUSTER_LEVEL);
+  }
+}
+function latLngDist2(
+  a: { getLat: () => number; getLng: () => number },
+  b: { getLat: () => number; getLng: () => number },
+): number {
+  const dLat = a.getLat() - b.getLat();
+  const dLng = a.getLng() - b.getLng();
+  return dLat * dLat + dLng * dLng;
+}
+
+/** 줌/이동 후 viewport 안에 마커가 최소 1개는 남도록 보정 */
+function ensureAtLeastOneMarkerVisible(
+  map: KakaoMapFocusApi,
+  kakao: KakaoMapsBoundsApi,
+  positions: unknown[],
+  focusPos: unknown,
+  padding = 72,
+) {
+  const relayout = () => {
+    try {
+      map.relayout?.();
+    } catch {
+      /* noop */
+    }
+  };
+
+  if (positions.length === 0) {
+    relayout();
+    return;
+  }
+
+  const getBounds = map.getBounds;
+  if (!getBounds) {
+    relayout();
+    return;
+  }
+
+  let bounds: { contain?: (p: unknown) => boolean };
+  try {
+    bounds = getBounds();
+  } catch {
+    relayout();
+    return;
+  }
+
+  const anyVisible = positions.some((p) =>
+    isPositionInMapBounds(bounds, p as { getLat: () => number; getLng: () => number }),
+  );
+
+  if (anyVisible) {
+    relayout();
+    return;
+  }
+
+  const mapCenter = map.getCenter?.();
+  let target = focusPos ?? positions[0];
+  if (mapCenter && positions.length > 1) {
+    let best = positions[0];
+    let bestD = Infinity;
+    for (const p of positions) {
+      const pos = p as { getLat: () => number; getLng: () => number };
+      const d = latLngDist2(mapCenter, pos);
+      if (d < bestD) {
+        bestD = d;
+        best = p;
+      }
+    }
+    target = best;
+  }
+
+  if (positions.length === 1) {
+    map.setCenter?.(target);
+    relayout();
+    return;
+  }
+
+  try {
+    const b = new kakao.maps.LatLngBounds();
+    for (const p of positions) b.extend(p);
+    if (focusPos) b.extend(focusPos);
+    map.setBounds?.(b, padding, padding, padding, padding);
+  } catch {
+    map.setCenter?.(target);
+  }
+  relayout();
+}
+
+/** anchor 없이 setCenter+setLevel — panTo/anchor 조합 시 핀이 화면 밖으로 밀리는 경우 방지 */
+function focusMapOnPosition(
+  map: KakaoMapFocusApi,
+  kakao: KakaoMapsBoundsApi,
+  focusPos: unknown,
+  targetLevel: number,
+  visiblePositions: unknown[],
+) {
+  const level = Math.max(1, Math.min(14, targetLevel));
+  if (typeof map.setCenter === "function") map.setCenter(focusPos);
+  else map.panTo?.(focusPos);
+  map.setLevel?.(level);
+
+  requestAnimationFrame(() => {
+    ensureAtLeastOneMarkerVisible(map, kakao, visiblePositions, focusPos);
+  });
+}
+
+/** 클러스터 탭 → 줌인 후 개별 마커가 화면에 보이도록 */
 function zoomClusterIn(
-  map: {
-    getLevel: () => number;
-    setLevel: (next: number, opts?: { anchor?: unknown }) => void;
-    panTo: (pos: unknown) => void;
+  map: KakaoMapFocusApi,
+  kakao: KakaoMapsBoundsApi & {
+    maps?: { event?: { addListener?: Function; removeListener?: Function } };
   },
   center: unknown,
-  markerCount: number,
+  markerPositions: unknown[],
+  onAfterZoom?: () => void,
 ) {
-  const current = map.getLevel();
-  const steps =
-    markerCount >= 80 ? 1 : markerCount >= 30 ? 2 : markerCount >= 10 ? 3 : 4;
-  const target = Math.max(1, current - steps);
-  const next = target < current ? target : Math.max(1, current - 1);
-  if (center) {
-    map.panTo(center);
-    map.setLevel(next, { anchor: center });
-  } else {
-    map.setLevel(next);
+  const finish = () => {
+    forceUnclusterLevel(map);
+    onAfterZoom?.();
+    try {
+      map.relayout?.();
+    } catch {
+      /* noop */
+    }
+  };
+
+  if (markerPositions.length === 0) {
+    finish();
+    return;
   }
+
+  if (markerPositions.length === 1) {
+    const pos = markerPositions[0];
+    map.setCenter?.(pos);
+    const current = map.getLevel?.() ?? 8;
+    map.setLevel?.(Math.max(1, Math.min(current - 2, TKAD_CLUSTER_UNCLUSTER_LEVEL)));
+    runAfterMapIdle(map, kakao, finish);
+    return;
+  }
+
+  const bounds = new kakao.maps.LatLngBounds();
+  for (const p of markerPositions) bounds.extend(p);
+
+  let spanLat = 0;
+  let spanLng = 0;
+  try {
+    const b = bounds as {
+      getSouthWest?: () => { getLat: () => number; getLng: () => number };
+      getNorthEast?: () => { getLat: () => number; getLng: () => number };
+    };
+    const sw = b.getSouthWest?.();
+    const ne = b.getNorthEast?.();
+    if (sw && ne) {
+      spanLat = Math.abs(ne.getLat() - sw.getLat());
+      spanLng = Math.abs(ne.getLng() - sw.getLng());
+    }
+  } catch {
+    /* noop */
+  }
+
+  // 근거리 클러스터 — bounds 맞춤으로 핀들이 화면에 들어오게
+  const compact = spanLat < 0.35 && spanLng < 0.35;
+
+  if (compact && map.setBounds) {
+    map.setBounds(bounds, 56, 56, 56, 56);
+    runAfterMapIdle(map, kakao, () => {
+      ensureAtLeastOneMarkerVisible(map, kakao, markerPositions, center);
+      finish();
+    });
+    return;
+  }
+
+  // 전국 단위 등 넓은 클러스터 — 단계 줌 + 가까운 마커로 보정
+  const current = map.getLevel?.() ?? 8;
+  const steps = markerPositions.length >= 30 ? 2 : 3;
+  const next = Math.max(TKAD_CLUSTER_UNCLUSTER_LEVEL, current - steps);
+  const focus = center ?? markerPositions[0];
+  if (focus) map.setCenter?.(focus);
+  map.setLevel?.(next);
+  runAfterMapIdle(map, kakao, () => {
+    ensureAtLeastOneMarkerVisible(map, kakao, markerPositions, focus);
+    finish();
+  });
 }
 
 export default function KakaoMapView({
@@ -425,6 +659,7 @@ export default function KakaoMapView({
   monochromeTiles = false,
   disableCluster = false,
   fitMarkersBounds = false,
+  zoomOnSelect,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
@@ -553,7 +788,7 @@ export default function KakaoMapView({
               map,
               averageCenter: true,
               // 더 가까운 줌(레벨↓)에서도 숫자 클러스터 유지
-              minLevel: 5,
+              minLevel: TKAD_CLUSTER_MIN_LEVEL,
               gridSize: 100,
               disableClickZoom: true,
               calculator: [...TKAD_CLUSTER_CALCULATOR],
@@ -570,8 +805,25 @@ export default function KakaoMapView({
               const centerLatLng = c.getCenter?.();
               const markersIn =
                 typeof c.getMarkers === "function" ? (c.getMarkers() ?? []) : [];
-              const count = Math.max(1, markersIn.length);
-              zoomClusterIn(map, centerLatLng, count);
+              const positions = markersIn
+                .map((mk) =>
+                  (mk as { getPosition?: () => unknown }).getPosition?.(),
+                )
+                .filter(Boolean);
+              zoomClusterIn(
+                map as KakaoMapFocusApi,
+                kakao,
+                centerLatLng,
+                positions,
+                () => {
+                  try {
+                    const redraw = (clusterer as { redraw?: () => void }).redraw;
+                    if (typeof redraw === "function") redraw();
+                  } catch {
+                    /* noop */
+                  }
+                },
+              );
             };
             kakao.maps.event.addListener(clusterer, "clusterclick", clusterClickHandler);
           } else {
@@ -902,14 +1154,28 @@ export default function KakaoMapView({
       const lng = m ? Number(m.lng) : NaN;
       if (!m || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
-      const panTo = (map as { panTo?: (pos: unknown) => void } | null)?.panTo;
-      if (typeof panTo === "function") {
-        panTo(new kakao.maps.LatLng(lat, lng));
+      const pos = new kakao.maps.LatLng(lat, lng);
+      const allPositions = markersRef.current
+        .filter(
+          (mk) =>
+            Number.isFinite(mk.lat) &&
+            Number.isFinite(mk.lng) &&
+            Math.abs(mk.lat) <= 90 &&
+            Math.abs(mk.lng) <= 180,
+        )
+        .map((mk) => new kakao.maps.LatLng(mk.lat, mk.lng));
+
+      const mapApi = map as KakaoMapFocusApi;
+      if (zoomOnSelect != null) {
+        focusMapOnPosition(mapApi, kakao, pos, zoomOnSelect, [pos, ...allPositions]);
+      } else {
+        mapApi.setCenter?.(pos);
+        mapApi.panTo?.(pos);
       }
     } catch (e) {
       console.error("[KakaoMapView] panTo failed", e);
     }
-  }, [selectedId, mapReady]);
+  }, [selectedId, mapReady, zoomOnSelect]);
 
   // 외부 programmaticView (URL 하이드레이션 / "내 주변" 클릭 등) 반영
   useEffect(() => {

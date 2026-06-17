@@ -68,6 +68,66 @@ export const NETWORK_BROWSE_TYPE_CHIPS = [
 
 export type NetworkPackageTier = { units: number; price: number };
 
+/** packageOptions JSON 행 — label/description/stores 포함 */
+export type NetworkPackageOptionRow = {
+  units?: number;
+  price: number;
+  label?: string;
+  description?: string;
+  period?: string;
+  stores?: string;
+};
+
+export function parseFullPackageOptions(raw: unknown): NetworkPackageOptionRow[] {
+  if (!Array.isArray(raw)) return [];
+  const out: NetworkPackageOptionRow[] = [];
+  for (const x of raw) {
+    if (!x || typeof x !== "object") continue;
+    const o = x as Record<string, unknown>;
+    const price = Math.round(Number(o.price));
+    if (!Number.isFinite(price) || price < 0) continue;
+    const unitsRaw = o.units;
+    const units =
+      unitsRaw != null && unitsRaw !== ""
+        ? Math.round(Number(unitsRaw))
+        : undefined;
+    const label = typeof o.label === "string" ? o.label.trim() : undefined;
+    const description =
+      typeof o.description === "string" ? o.description.trim() : undefined;
+    const period = typeof o.period === "string" ? o.period.trim() : undefined;
+    const stores = typeof o.stores === "string" ? o.stores.trim() : undefined;
+    const hasUnits = units != null && Number.isFinite(units) && units > 0;
+    const hasMeta = Boolean(label || description || period || stores);
+    if (hasUnits || price > 0 || hasMeta) {
+      out.push({
+        units: hasUnits ? units : undefined,
+        price,
+        label: label || undefined,
+        description: description || undefined,
+        period: period || undefined,
+        stores: stores || undefined,
+      });
+    }
+  }
+  out.sort((a, b) => {
+    if (a.units != null && b.units != null) return a.units - b.units;
+    if (a.units != null) return -1;
+    if (b.units != null) return 1;
+    return a.price - b.price;
+  });
+  return out;
+}
+
+/** 네트워크 지점·설치 수량 단위 (DB unit_count = 설치 대수) */
+export function networkInventoryUnitSuffix(
+  networkType: string | undefined,
+  isKo: boolean,
+): string {
+  if (!isKo) return "";
+  if (networkType === "elevator") return "기";
+  return "대";
+}
+
 export function networkCatalogId(rawId: string): string {
   return rawId.startsWith(NETWORK_CATALOG_ID_PREFIX)
     ? rawId

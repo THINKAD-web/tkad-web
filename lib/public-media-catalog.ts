@@ -145,7 +145,26 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
           typeof (item as { description?: unknown }).description === "string"
             ? (item as { description: string }).description.trim() || undefined
             : undefined;
-        normalized.push({ label, price, period, description });
+        const unitsRaw = (item as { units?: unknown }).units;
+        const units =
+          unitsRaw != null && unitsRaw !== ""
+            ? Math.round(Number(unitsRaw))
+            : undefined;
+        const stores =
+          typeof (item as { stores?: unknown }).stores === "string"
+            ? (item as { stores: string }).stores.trim() || undefined
+            : undefined;
+        normalized.push({
+          label,
+          price,
+          period,
+          description,
+          units:
+            units != null && Number.isFinite(units) && units > 0
+              ? units
+              : undefined,
+          stores,
+        });
       }
       return normalized.length ? normalized : undefined;
     } catch {

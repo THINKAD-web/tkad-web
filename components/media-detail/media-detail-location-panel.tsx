@@ -1,11 +1,12 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { MapPin } from "lucide-react";
 import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import { NearbyPoiSection } from "@/components/media/nearby-poi-section";
+import type { MapMarker } from "@/components/public-map/map-types";
 import type { MediaItem } from "@/lib/media-data";
 import {
   mapCenterForMediaDetail,
@@ -13,6 +14,27 @@ import {
   resolveMediaIdFromMapPinId,
 } from "@/lib/media-detail-map-markers";
 import { cn } from "@/lib/utils";
+import { networkInventoryUnitSuffix } from "@/lib/media-network-types";
+
+/** 카카오 지도 — 선택 시 클로즈업 (작을수록 확대) */
+const LOCATION_FOCUS_ZOOM = 4;
+
+function coordsMatch(
+  a: { lat: number; lng: number },
+  b: { lat: number; lng: number },
+  eps = 1e-5,
+): boolean {
+  return Math.abs(a.lat - b.lat) < eps && Math.abs(a.lng - b.lng) < eps;
+}
+
+function markerIdForLocationRow(
+  loc: { lat?: number; lng?: number },
+  mapMarkers: MapMarker[],
+): string | null {
+  if (loc.lat == null || loc.lng == null) return null;
+  const mk = mapMarkers.find((m) => coordsMatch(m, { lat: loc.lat!, lng: loc.lng! }));
+  return mk?.id ?? null;
+}
 
 type Props = {
   media: MediaItem;
@@ -46,14 +68,18 @@ export function MediaDetailLocationPanel({
   const [selectedId, setSelectedId] = useState<string | null>(
     () => mapMarkers[0]?.id ?? media.id,
   );
+  const [focusActive, setFocusActive] = useState(false);
+  const listRef = useRef<HTMLUListElement>(null);
 
-  /** 지점 목록 행 클릭 → 좌표 있으면 해당 마커 선택(지도 pan) */
+  const selectMarker = useCallback((id: string) => {
+    setFocusActive(true);
+    setSelectedId(id);
+  }, []);
+
+  /** 지점 목록 행 클릭 → 해당 마커 선택 + 지도 클로즈업 */
   const focusLocationOnMap = (loc: { lat?: number; lng?: number }) => {
-    if (loc.lat == null || loc.lng == null) return;
-    const mk = mapMarkers.find(
-      (m) => Math.abs(m.lat - loc.lat!) < 1e-6 && Math.abs(m.lng - loc.lng!) < 1e-6,
-    );
-    if (mk) setSelectedId(mk.id);
+    const id = markerIdForLocationRow(loc, mapMarkers);
+    if (id) selectMarker(id);
   };
 
   /** 단일/네트워크 공용 지점 목록 행 (단일 매체는 1행) */
@@ -104,7 +130,24 @@ export function MediaDetailLocationPanel({
 
   useEffect(() => {
     setSelectedId(mapMarkers[0]?.id ?? media.id);
+    setFocusActive(false);
   }, [media.id, mapMarkers]);
+
+  /** 지도 마커 선택 시 목록에서 해당 행으로 스크롤 */
+  useEffect(() => {
+    if (!focusActive || !selectedId || !listRef.current) return;
+    const mk = mapMarkers.find((m) => m.id === selectedId);
+    if (!mk) return;
+    const idx = locationRows.findIndex(
+      (loc) =>
+        loc.lat != null &&
+        loc.lng != null &&
+        coordsMatch({ lat: loc.lat, lng: loc.lng }, mk),
+    );
+    if (idx < 0) return;
+    const row = listRef.current.children[idx] as HTMLElement | undefined;
+    row?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+  }, [focusActive, selectedId, locationRows, mapMarkers]);
 
   const selectedMarker = useMemo(
     () => mapMarkers.find((m) => m.id === selectedId) ?? mapMarkers[0],
@@ -124,6 +167,7 @@ export function MediaDetailLocationPanel({
   const mapLng = selectedMarker?.lng ?? media.lng;
   const spotName = selectedMarker?.name ?? (isKo ? media.name : media.nameEn || media.name);
 
+  const unitSuffix = networkInventoryUnitSuffix(media.type, isKo);
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(spotName)},${mapLat},${mapLng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLng}`;
   const addressText =
@@ -137,13 +181,12 @@ export function MediaDetailLocationPanel({
           <MediaDetailKakaoMap
             markers={mapMarkers}
             selectedId={selectedId}
-            onSelect={(id) => setSelectedId(id)}
+            onSelect={selectMarker}
             center={mapCenter}
             zoom={mapZoom}
-            disableCluster={
-              isNetwork ? mapMarkers.length <= 1 : mapMarkers.length <= 8
-            }
-            fitMarkersBounds={isNetwork && mapMarkers.length > 1}
+            disableCluster={mapMarkers.length <= 8}
+            fitMarkersBounds={isNetwork && mapMarkers.length > 1 && !focusActive}
+            zoomOnSelect={focusActive ? LOCATION_FOCUS_ZOOM : undefined}
           />
         </div>
       </div>
@@ -158,14 +201,20 @@ export function MediaDetailLocationPanel({
             {isNetwork ? (
               <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
                 {isKo
-                  ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}구좌`
+                  ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}${unitSuffix}`
                   : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
               </p>
             ) : null}
           </div>
-          <ul className="max-h-80 divide-y divide-gray-100 overflow-y-auto dark:divide-white/8">
+          <ul
+            ref={listRef}
+            className="max-h-80 divide-y divide-gray-100 overflow-y-auto dark:divide-white/8"
+          >
             {locationRows.map((loc, i) => {
               const hasCoord = loc.lat != null && loc.lng != null;
+              const rowMarkerId = markerIdForLocationRow(loc, mapMarkers);
+              const isRowSelected =
+                focusActive && rowMarkerId != null && rowMarkerId === selectedId;
               return (
                 <li key={`${loc.name}-${i}`}>
                   <button
@@ -177,6 +226,8 @@ export function MediaDetailLocationPanel({
                       hasCoord
                         ? "hover:bg-violet-50 dark:hover:bg-white/5"
                         : "cursor-default",
+                      isRowSelected &&
+                        "bg-violet-50 ring-1 ring-inset ring-violet-300/60 dark:bg-violet-500/10 dark:ring-violet-400/40",
                     )}
                   >
                     <div className="min-w-0">
@@ -192,7 +243,7 @@ export function MediaDetailLocationPanel({
                       {loc.unitCount != null ? (
                         <p className="text-xs font-bold tabular-nums text-violet-600 dark:text-violet-300">
                           {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                          {isKo ? "구좌" : "u"}
+                          {isKo ? unitSuffix : "u"}
                         </p>
                       ) : null}
                       {loc.dailyFootfall ? (

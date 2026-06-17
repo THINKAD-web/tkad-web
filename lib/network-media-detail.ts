@@ -6,7 +6,7 @@ import {
 import {
   NETWORK_TYPE_LABELS,
   loosePackagePrices,
-  parsePackageOptions,
+  parseFullPackageOptions,
 } from "@/lib/media-network-types";
 import { resolveTrafficPattern } from "@/lib/media-traffic-estimate";
 
@@ -16,21 +16,40 @@ function priceWon(won: number): number {
 }
 
 function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
-  const tiers = parsePackageOptions(n.packageOptions);
+  const rows = parseFullPackageOptions(n.packageOptions);
   const out: MediaPriceOption[] = [];
 
-  // 패키지 우선: priceOptions[0] 이 헤드라인가가 되므로 패키지를 먼저 넣는다.
-  if (tiers.length > 0) {
-    for (const t of tiers) {
-      out.push({
-        label: `${t.units.toLocaleString("ko-KR")}면 패키지`,
-        price: priceWon(t.price),
-        period: "month",
-        description: `월 ${t.units}면 기준`,
-      });
+  if (rows.length > 0) {
+    let looseIdx = 0;
+    const looseTotal = rows.filter((r) => !r.units).length;
+    for (const row of rows) {
+      if (row.units != null && row.units > 0) {
+        out.push({
+          label:
+            row.label ||
+            `${row.units.toLocaleString("ko-KR")}면 패키지`,
+          price: priceWon(row.price),
+          period: row.period || "month",
+          description:
+            row.description ||
+            (row.label ? undefined : `월 ${row.units.toLocaleString("ko-KR")}면 기준`),
+          units: row.units,
+          stores: row.stores,
+        });
+      } else if (row.price > 0 || row.label || row.description) {
+        looseIdx += 1;
+        out.push({
+          label:
+            row.label ||
+            (looseTotal > 1 ? `패키지 ${looseIdx}` : "패키지"),
+          price: priceWon(row.price),
+          period: row.period || "month",
+          description: row.description,
+          stores: row.stores,
+        });
+      }
     }
   } else {
-    // units 없는 packageOptions 도 가격으로 노출(헤드라인이 pricePerUnit 으로 떨어지지 않게)
     const loose = loosePackagePrices(n.packageOptions);
     loose.forEach((price, i) => {
       out.push({

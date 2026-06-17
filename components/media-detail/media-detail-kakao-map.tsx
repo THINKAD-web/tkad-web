@@ -21,6 +21,8 @@ type Props = {
   disableCluster?: boolean;
   /** 네트워크 다지점 — 모든 핀이 한 화면에 들어오도록 bounds 맞춤 */
   fitMarkersBounds?: boolean;
+  /** 선택 시 클로즈업 줌 (카카오 레벨, 작을수록 확대) */
+  zoomOnSelect?: number;
 };
 
 /** 매체 상세 — 단일/소수 핀 카카오 지도 (Leaflet 대신) */
@@ -35,6 +37,7 @@ export function MediaDetailKakaoMap({
   fitCoverageBounds = false,
   disableCluster = false,
   fitMarkersBounds = false,
+  zoomOnSelect,
 }: Props) {
   return (
     <KakaoMapView
@@ -48,6 +51,7 @@ export function MediaDetailKakaoMap({
       fitCoverageBounds={fitCoverageBounds}
       disableCluster={disableCluster}
       fitMarkersBounds={fitMarkersBounds}
+      zoomOnSelect={zoomOnSelect}
       monochromeTiles
     />
   );

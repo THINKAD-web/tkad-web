@@ -5,7 +5,11 @@ import type { LucideIcon } from "lucide-react";
 import { Monitor, Ruler } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  resolveMediaPriceOptionPeriodLabel,
+} from "@/lib/media-price-format";
+import { networkInventoryUnitSuffix } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -167,18 +171,64 @@ export function MediaDetailExecutionPanel({
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
             {isKo ? "가격 옵션" : "Price options"}
           </p>
-          <ul className="space-y-2">
-            {priceOptions.map((opt, idx) => (
-              <li
-                key={`${opt.label}-${idx}`}
-                className="flex flex-wrap items-baseline justify-between gap-2 text-sm"
-              >
-                <span className="dark:text-white/80 text-gray-700">{opt.label}</span>
-                <span className="font-display font-bold tabular-nums dark:text-white text-gray-900">
-                  {formatCatalogPriceFieldWon(opt.price)}
-                </span>
-              </li>
-            ))}
+          <ul className="space-y-3">
+            {priceOptions.map((opt, idx) => {
+              const periodLabel = resolveMediaPriceOptionPeriodLabel(
+                opt,
+                media.pricePeriod,
+                isKo ? "ko" : "en",
+              );
+              const unitSuffix = networkInventoryUnitSuffix(media.type, isKo);
+              const unitsLine =
+                opt.units != null && opt.units > 0
+                  ? isKo
+                    ? `${opt.units.toLocaleString("ko-KR")}${unitSuffix || "대"}`
+                    : `${opt.units.toLocaleString("en-US")} units`
+                  : null;
+              const metaLine = [periodLabel, unitsLine, opt.description?.trim()]
+                .filter(Boolean)
+                .join(" · ");
+              const hasStores = Boolean(opt.stores?.trim());
+
+              return (
+                <li
+                  key={`${opt.label}-${idx}`}
+                  className="rounded-xl border dark:border-white/8 border-gray-100 dark:bg-black/15 bg-gray-50/80 px-3 py-2.5"
+                >
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                    <span className="font-medium dark:text-white/85 text-gray-800">
+                      {opt.label}
+                    </span>
+                    <span className="font-display font-bold tabular-nums dark:text-white text-gray-900">
+                      {formatCatalogPriceFieldWon(opt.price)}
+                    </span>
+                  </div>
+                  {metaLine ? (
+                    <p className="mt-1 text-xs leading-relaxed dark:text-white/55 text-gray-500">
+                      {metaLine}
+                    </p>
+                  ) : null}
+                  {hasStores ? (
+                    <details className="group/stores mt-2">
+                      <summary
+                        className={cn(
+                          "cursor-pointer list-none text-xs font-semibold dark:text-violet-300/90 text-violet-700",
+                          "[&::-webkit-details-marker]:hidden",
+                        )}
+                      >
+                        <span className="inline-flex items-center gap-1">
+                          {isKo ? "포함 지점 보기" : "View locations"}
+                          <span className="transition group-open/stores:rotate-180">▾</span>
+                        </span>
+                      </summary>
+                      <p className="mt-1.5 text-xs leading-relaxed dark:text-white/65 text-gray-600">
+                        {opt.stores}
+                      </p>
+                    </details>
+                  ) : null}
+                </li>
+              );
+            })}
           </ul>
           <MediaPriceExclNote isKo={isKo} className="mt-2" />
         </div>

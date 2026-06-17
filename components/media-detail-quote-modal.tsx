@@ -153,6 +153,16 @@ function MediaDetailQuoteModalBody({
                       {o.description}
                     </span>
                   ) : null}
+                  {o.stores?.trim() ? (
+                    <details className="mt-2 border-t dark:border-white/10 border-gray-200 pt-2">
+                      <summary className="cursor-pointer list-none text-[11px] font-semibold dark:text-violet-300/90 text-violet-700 [&::-webkit-details-marker]:hidden">
+                        {isKo ? "포함 지점 보기" : "View locations"}
+                      </summary>
+                      <span className="mt-1.5 block text-[11px] leading-relaxed dark:text-white/70 text-gray-600">
+                        {o.stores}
+                      </span>
+                    </details>
+                  ) : null}
                 </button>
               );
             })}
