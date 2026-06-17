@@ -4,6 +4,7 @@ import { dedupeImageUrls, type MediaItem } from "@/lib/media-data";
 import {
   NETWORK_TYPE_CODES,
   NETWORK_TYPE_LABELS,
+  loosePackagePrices,
   type NetworkTypeCode,
   type NetworkPackageTier,
 } from "@/lib/media-network-types";
@@ -69,6 +70,9 @@ export function defaultDisplayMonthlyPrice(n: {
 }): number {
   const tiers = parsePackageOptions(n.packageOptions);
   if (tiers.length > 0) return tiers[0].price;
+  // 패키지 우선: units 없는 packageOptions·pricePackage 를 pricePerUnit 보다 먼저 사용
+  const loose = loosePackagePrices(n.packageOptions);
+  if (loose.length > 0) return loose[0];
   if (n.pricePackage != null && n.pricePackage > 0) return n.pricePackage;
   const u = Math.max(1, n.minUnits);
   const p = n.pricePerUnit;

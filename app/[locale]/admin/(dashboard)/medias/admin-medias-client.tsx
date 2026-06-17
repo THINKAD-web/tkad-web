@@ -1922,7 +1922,6 @@ export default function AdminMediasClient({
               { value: "digital", label: "디지털" },
               { value: "static", label: "고정형" },
               { value: "mobile", label: "이동형" },
-              { value: "network", label: "네트워크" },
             ].map((opt) => (
               <button
                 key={opt.value}
@@ -1940,6 +1939,15 @@ export default function AdminMediasClient({
                 {opt.label}
               </button>
             ))}
+            {/* 네트워크 매체는 별도 테이블(MediaNetwork)이므로 이 목록(Media)에서 필터하지 않고
+                전용 관리 화면으로 이동시킨다. */}
+            <Link
+              href="/admin/networks"
+              className="inline-flex items-center gap-1 rounded-full border-2 border-border bg-card px-2.5 py-1 text-xs font-semibold text-foreground transition-colors hover:bg-muted/50"
+            >
+              네트워크
+              <ChevronRight className="h-3 w-3" aria-hidden />
+            </Link>
           </div>
           <div className="flex w-full min-w-0 flex-col gap-1.5 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <div className="relative w-full min-w-0 sm:w-52 sm:flex-none">

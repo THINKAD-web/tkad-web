@@ -5,6 +5,7 @@ import {
 } from "@/lib/media-network-public";
 import {
   NETWORK_TYPE_LABELS,
+  loosePackagePrices,
   parsePackageOptions,
 } from "@/lib/media-network-types";
 import { resolveTrafficPattern } from "@/lib/media-traffic-estimate";
@@ -18,29 +19,38 @@ function buildPriceOptions(n: MediaNetworkWithLocs): MediaPriceOption[] {
   const tiers = parsePackageOptions(n.packageOptions);
   const out: MediaPriceOption[] = [];
 
-  for (const t of tiers) {
-    out.push({
-      label: `${t.units.toLocaleString("ko-KR")}면 패키지`,
-      price: priceWon(t.price),
-      period: "month",
-      description: `월 ${t.units}면 기준`,
+  // 패키지 우선: priceOptions[0] 이 헤드라인가가 되므로 패키지를 먼저 넣는다.
+  if (tiers.length > 0) {
+    for (const t of tiers) {
+      out.push({
+        label: `${t.units.toLocaleString("ko-KR")}면 패키지`,
+        price: priceWon(t.price),
+        period: "month",
+        description: `월 ${t.units}면 기준`,
+      });
+    }
+  } else {
+    // units 없는 packageOptions 도 가격으로 노출(헤드라인이 pricePerUnit 으로 떨어지지 않게)
+    const loose = loosePackagePrices(n.packageOptions);
+    loose.forEach((price, i) => {
+      out.push({
+        label: loose.length > 1 ? `패키지 ${i + 1}` : "패키지",
+        price: priceWon(price),
+        period: "month",
+      });
     });
+    if (n.pricePackage != null && n.pricePackage > 0) {
+      out.push({ label: "패키지", price: priceWon(n.pricePackage), period: "month" });
+    }
   }
 
+  // 개당 단가는 항상 마지막 — 패키지가 있으면 헤드라인을 차지하지 않는다.
   if (n.pricePerUnit != null && n.pricePerUnit > 0) {
     out.push({
       label: "개당 단가",
       price: priceWon(n.pricePerUnit),
       period: "month",
       description: `최소 ${Math.max(1, n.minUnits)}면`,
-    });
-  }
-
-  if (n.pricePackage != null && n.pricePackage > 0 && tiers.length === 0) {
-    out.push({
-      label: "패키지",
-      price: priceWon(n.pricePackage),
-      period: "month",
     });
   }
 
