@@ -19,6 +19,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { parseNetworkRawId } from "@/lib/media-network-public";
 
 export const dynamic = "force-dynamic";
 
@@ -101,6 +102,32 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 
   const db = getPrisma();
+
+  // 네트워크 매체(nw_ 접두사)는 Media 테이블이 아닌 MediaNetwork 기준으로 분기.
+  // 네트워크는 지점별 예약 모델이 없어 캘린더를 단일 "전체 가용"으로 취급(차단 범위 없음).
+  const networkRawId = parseNetworkRawId(mediaId);
+  if (networkRawId) {
+    const network = await db.mediaNetwork.findFirst({
+      where: { id: networkRawId, isActive: true },
+      select: { id: true },
+    });
+    if (!network) {
+      return Response.json({ error: "Media not found" }, { status: 404 });
+    }
+    return Response.json(
+      {
+        mediaId,
+        from: ymd(fromDate),
+        to: ymd(cappedTo),
+        blockedRanges: [],
+      },
+      {
+        headers: {
+          "cache-control": "public, max-age=30, stale-while-revalidate=60",
+        },
+      },
+    );
+  }
 
   // 매체 존재 확인 (404 응답으로 광고주에게 정확한 피드백)
   const media = await db.media.findUnique({

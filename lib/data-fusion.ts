@@ -307,7 +307,13 @@ export async function getFusedMediaData(
   media: MediaItem,
   opts?: { forceRefresh?: boolean },
 ): Promise<FusedMediaData> {
-  if (isDatabaseConfigured() && !opts?.forceRefresh) {
+  // 네트워크 매체(nw_ 접두사)는 media_data_fusion.media_id 가 Media FK 라
+  // 캐시 upsert 시 FK 위반 → 에러를 삼켜 fusion 결과까지 버려졌다.
+  // 캐시(읽기/쓰기)를 명시적으로 건너뛰고 즉석 계산 결과를 반환한다.
+  const isNetwork =
+    media.catalogSource === "network" || media.id.startsWith("nw_");
+
+  if (isDatabaseConfigured() && !opts?.forceRefresh && !isNetwork) {
     const db = getPrisma();
     try {
       const cached = await db.mediaDataFusion.findUnique({
@@ -326,7 +332,7 @@ export async function getFusedMediaData(
 
   const fused = await fuseMediaData(media);
 
-  if (isDatabaseConfigured()) {
+  if (isDatabaseConfigured() && !isNetwork) {
     const db = getPrisma();
     try {
       await db.mediaDataFusion.upsert({
