@@ -8,7 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Loader2, AlertCircle, Upload, ImagePlus } from "lucide-react";
+import { ArrowLeft, Loader2, AlertCircle, Upload } from "lucide-react";
+import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
 import {
   NETWORK_TYPE_CODES,
   NETWORK_TYPE_LABELS,
@@ -107,8 +108,6 @@ export default function AdminNetworkEditor(props: Props) {
   const locale = useLocale();
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
-  const primaryImageInputRef = useRef<HTMLInputElement>(null);
-  const galleryImageInputRef = useRef<HTMLInputElement>(null);
 
   const init = props.mode === "edit" ? props.initial : null;
 
@@ -400,78 +399,37 @@ export default function AdminNetworkEditor(props: Props) {
     return upJson.url;
   }, []);
 
-  const onPrimaryImageFile = useCallback(
-    async (file: File | null) => {
-      if (!file || !file.type.startsWith("image/")) return;
+  // /media 갤러리 편집기와 동일: 여러 장 업로드 + 순서 변경(드래그). 성공한 URL 배열을 반환.
+  const uploadGalleryFiles = useCallback(
+    async (files: File[]): Promise<string[]> => {
+      const images = files.filter((f) => f.type.startsWith("image/"));
+      if (images.length === 0) return [];
       setImageUploadBusy(true);
       setError(null);
+      const urls: string[] = [];
+      const errors: string[] = [];
       try {
-        const url = await uploadFileToBunny(file);
-        setImage(url);
-      } catch (e) {
-        setError(
-          e instanceof Error
-            ? e.message
-            : "대표 이미지 업로드에 실패했습니다.",
-        );
-      } finally {
-        setImageUploadBusy(false);
-      }
-    },
-    [uploadFileToBunny],
-  );
-
-  const onGalleryFiles = useCallback(
-    async (files: FileList | null) => {
-      if (!files || files.length === 0) return;
-      const images = Array.from(files).filter((f) =>
-        f.type.startsWith("image/"),
-      );
-      if (images.length === 0) return;
-      setImageUploadBusy(true);
-      setError(null);
-      try {
-        const urls: string[] = [];
-        const errors: string[] = [];
-        // 각 파일을 하나씩 업로드하되, 하나 실패해도 나머지는 계속 진행
+        // 하나 실패해도 나머지는 계속 진행
         for (const file of images) {
           try {
-            const url = await uploadFileToBunny(file);
-            urls.push(url);
+            urls.push(await uploadFileToBunny(file));
           } catch (fileError) {
             errors.push(
               `${file.name}: ${fileError instanceof Error ? fileError.message : "업로드 실패"}`,
             );
           }
         }
-        // 성공한 URL이 있으면 추가
-        if (urls.length > 0) {
-          setGalleryText((prev) => {
-            const existing = prev
-              .split(/[\n,]/)
-              .map((s) => s.trim())
-              .filter(Boolean);
-            const next = [...existing, ...urls];
-            return next.join("\n");
-          });
-        }
-        // 에러 메시지 표시
-        if (errors.length > 0) {
-          setError(
-            errors.length === images.length
-              ? "모든 이미지 업로드에 실패했습니다.\n" + errors.join("\n")
-              : `${images.length - errors.length}개 업로드 성공, ${errors.length}개 실패:\n${errors.join("\n")}`,
-          );
-        }
-      } catch (e) {
-        setError(
-          e instanceof Error
-            ? e.message
-            : "갤러리 이미지 업로드에 실패했습니다.",
-        );
       } finally {
         setImageUploadBusy(false);
       }
+      if (errors.length > 0) {
+        setError(
+          urls.length === 0
+            ? "모든 이미지 업로드에 실패했습니다.\n" + errors.join("\n")
+            : `${urls.length}개 업로드 성공, ${errors.length}개 실패:\n${errors.join("\n")}`,
+        );
+      }
+      return urls;
     },
     [uploadFileToBunny],
   );
@@ -910,139 +868,25 @@ export default function AdminNetworkEditor(props: Props) {
         <CardContent className="space-y-4">
           <div className="grid gap-2">
             <label className="text-sm font-medium text-slate-700">
-              {t("imageUrl")}
+              이미지 (여러 장 업로드 · 드래그로 순서 변경 · 첫 번째가 대표)
             </label>
-            <div className="flex gap-2">
-              <Input
-                className="flex-1"
-                value={image}
-                onChange={(e) => setImage(e.target.value)}
-              />
-              <input
-                ref={primaryImageInputRef}
-                type="file"
-                accept="image/*"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0] ?? null;
-                  e.target.value = "";
-                  void onPrimaryImageFile(file);
-                }}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={imageUploadBusy}
-                onClick={() => primaryImageInputRef.current?.click()}
-              >
-                {imageUploadBusy ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <Upload className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                업로드
-              </Button>
-            </div>
-          </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-slate-700">
-              {t("galleryUrls")}
-            </label>
-            <Textarea
-              rows={3}
-              value={galleryText}
-              onChange={(e) => setGalleryText(e.target.value)}
-            />
-            <input
-              ref={galleryImageInputRef}
-              type="file"
-              accept="image/*"
-              multiple
-              className="hidden"
-              onChange={(e) => {
-                const files = e.target.files;
-                e.target.value = "";
-                void onGalleryFiles(files);
+            <MediaGalleryEditor
+              urls={
+                image.trim()
+                  ? [
+                      image.trim(),
+                      ...galleryArr().filter((u) => u !== image.trim()),
+                    ]
+                  : galleryArr()
+              }
+              onChange={(urls) => {
+                setImage(urls[0] ?? "");
+                setGalleryText(urls.slice(1).join("\n"));
               }}
+              onUploadFiles={uploadGalleryFiles}
+              busy={imageUploadBusy}
             />
-            <div className="flex flex-wrap gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                disabled={imageUploadBusy}
-                onClick={() => galleryImageInputRef.current?.click()}
-              >
-                {imageUploadBusy ? (
-                  <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
-                ) : (
-                  <ImagePlus className="mr-1.5 h-3.5 w-3.5" />
-                )}
-                파일에서 추가
-              </Button>
-            </div>
           </div>
-          {image && (
-            <div className="space-y-1">
-              <p className="text-xs font-medium text-slate-600">대표 이미지 미리보기</p>
-              <div className="flex items-center gap-3">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={image}
-                  alt="대표 이미지 미리보기"
-                  className="h-20 w-32 rounded-md object-cover"
-                />
-                <Button
-                  type="button"
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setImage("")}
-                >
-                  삭제
-                </Button>
-              </div>
-            </div>
-          )}
-          {galleryText.trim() && (
-            <div className="space-y-2">
-              <p className="text-xs font-medium text-slate-600">갤러리 미리보기</p>
-              <div className="flex flex-wrap gap-3">
-                {galleryText
-                  .split(/[\n,]/)
-                  .map((s) => s.trim())
-                  .filter(Boolean)
-                  .map((url) => (
-                    <div
-                      key={url}
-                      className="relative flex h-20 w-28 items-center justify-center overflow-hidden rounded-md border border-slate-200 bg-slate-50"
-                    >
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img
-                        src={url}
-                        alt="갤러리 이미지"
-                        className="h-full w-full object-cover"
-                      />
-                      <button
-                        type="button"
-                        className="absolute right-1 top-1 rounded-full bg-white/90 px-1.5 py-0.5 text-[10px] text-slate-700 shadow-sm"
-                        onClick={() =>
-                          setGalleryText((prev) =>
-                            prev
-                              .split(/[\n,]/)
-                              .map((s) => s.trim())
-                              .filter((u) => u && u !== url)
-                              .join("\n"),
-                          )
-                        }
-                      >
-                        삭제
-                      </button>
-                    </div>
-                  ))}
-              </div>
-            </div>
-          )}
           <div className="grid gap-2">
             <label className="text-sm font-medium text-slate-700">
               {t("features")}
