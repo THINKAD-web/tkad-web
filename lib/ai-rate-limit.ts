@@ -156,6 +156,55 @@ export async function enforceAiRateLimit(
   });
 }
 
+/**
+ * AI 플랜 생성(Sonnet) 전용 쿼터 — 호출당 비용이 큰 Sonnet 을 별도 한도로 분리.
+ * 추천(Haiku) 공용 쿼터(`tkad:ai:usage:*`)와 **절대 섞이지 않게** 별도 네임스페이스(`tkad:ai:plan:*`) 사용.
+ * PRO 전용 기능이므로 비PRO 는 0(라우트에서 별도 403 하드 게이트로도 차단).
+ */
+const PLAN_DAILY_PRO = 5;
+
+export async function enforceAiPlanRateLimit(
+  req: Request,
+  userId: string | null,
+  isProOverride?: boolean,
+): Promise<AiRateResult> {
+  const id = aiRateIdentity(req, userId);
+  const pro = isProOverride ?? (await resolveIsPro(userId));
+  const limit = pro ? PLAN_DAILY_PRO : 0;
+
+  if (!id.ua || BOT_RE.test(id.ua)) {
+    return { allowed: false, remaining: 0, limit, reason: "abuse" };
+  }
+  if (limit <= 0) {
+    return {
+      allowed: false,
+      remaining: 0,
+      limit,
+      reason: id.isLoggedIn ? "user_limit" : "guest_limit",
+    };
+  }
+
+  const now = new Date();
+  const day = now.toISOString().slice(0, 10);
+  const hour = now.toISOString().slice(0, 13);
+
+  // 시간당 어뷰징 (IP 기준) — 플랜 전용 키
+  const hourCount = await incr(`tkad:ai:plan:hourly:${id.ipOnlyHash}:${hour}`, 3600);
+  if (hourCount > HOURLY_ABUSE) {
+    return { allowed: false, remaining: 0, limit, reason: "abuse" };
+  }
+
+  // 일일 플랜 quota — 추천 쿼터와 분리된 네임스페이스
+  const count = await incr(`tkad:ai:plan:${id.identifier}:${day}`, 86400);
+  const allowed = count <= limit;
+  return {
+    allowed,
+    remaining: Math.max(0, limit - count),
+    limit,
+    reason: allowed ? undefined : "user_limit",
+  };
+}
+
 export function aiRateMessage(reason: AiRateReason | undefined, isKo: boolean): string {
   if (reason === "guest_limit") {
     return isKo

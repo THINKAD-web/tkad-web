@@ -16,6 +16,7 @@ import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
 import RecommendAiFreetext from "@/components/recommend/recommend-ai-freetext";
+import RecommendAiPlanPanel from "@/components/recommend/recommend-ai-plan-panel";
 import { Sparkles, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
@@ -650,6 +651,25 @@ export default function RecommendPageClient({
               onRemix={handleRemix}
             />
           )}
+
+          {/* AI 자유입력 모드 전용 — 추천을 실제 집행 플랜으로 확장(PRO) */}
+          {phase === "dashboard" &&
+            inputMode === "ai" &&
+            lastPayload &&
+            fullList &&
+            fullList.length > 0 && (
+              <div className="mx-auto mt-2 max-w-3xl">
+                <RecommendAiPlanPanel
+                  locale={locale}
+                  brief={lastPayload.input}
+                  mediaItems={
+                    cartItems.length > 0
+                      ? cartItems
+                      : fullList.slice(0, 8).map((s) => s.item)
+                  }
+                />
+              </div>
+            )}
 
           {phase === "noResults" && (
             <div className="mx-auto max-w-lg border-2 border-border bg-muted p-8 text-center">
