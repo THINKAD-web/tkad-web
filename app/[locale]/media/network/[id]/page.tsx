@@ -18,7 +18,6 @@ import { pageAlternates } from "@/lib/seo";
 import {
   buildMediaBreadcrumbJsonLd,
   buildMediaPlaceJsonLd,
-  buildMediaProductJsonLd,
 } from "@/lib/structured-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { mediaDetailPricePeriodTranslationKey } from "@/lib/media-price-format";
@@ -187,7 +186,6 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
 
   const imageAlt = buildMediaImageAlt(media, locale);
   const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
-  const productJsonLd = buildMediaProductJsonLd(media, locale);
   const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
 
   return (
@@ -210,7 +208,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([placeJsonLd, productJsonLd, breadcrumbJsonLd]),
+          __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
         }}
       />
 

@@ -5,8 +5,7 @@ import {
   collectMediaSeoKeywordStrings,
 } from "@/lib/media-seo";
 import { mediaItemDetailPath } from "@/lib/media-slug";
-import { getPrimaryMediaImageUrl, typeLabels, type MediaItem } from "@/lib/media-data";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import type { PublicSuccessCaseDetail } from "@/lib/success-case-public";
 import { CONTACT_EMAIL } from "@/lib/constants";
 
@@ -116,8 +115,8 @@ export function buildStructuredDataGraph(locale: string) {
 
 /**
  * 매체 상세 페이지용 Place JSON-LD.
- * Google Rich Results 의 LocalBusiness/Place 호환 형식.
- * `aggregateRating` 은 visibilityScore 0–100 → 1–5 스케일로 변환.
+ * Google Rich Results 의 Place / 지역 비즈니스 맥락용.
+ * (Review·Product 리치 결과는 실제 리뷰/판매 데이터 없이 넣지 않음)
  */
 export function buildMediaPlaceJsonLd(
   media: MediaItem,
@@ -151,81 +150,10 @@ export function buildMediaPlaceJsonLd(
       longitude: media.lng,
     };
   }
-  if (typeof media.visibilityScore === "number" && media.visibilityScore > 0) {
-    const ratingValue = Math.max(
-      1,
-      Math.min(5, Number((media.visibilityScore / 20).toFixed(1))),
-    );
-    data.aggregateRating = {
-      "@type": "AggregateRating",
-      ratingValue,
-      bestRating: 5,
-      worstRating: 1,
-      ratingCount: Math.max(1, media.visibilityScore),
-    };
-  }
 
   const kw = collectMediaSeoKeywordStrings(media, locale, 28);
   if (kw.length) {
     data.keywords = kw.join(", ");
-  }
-
-  return data;
-}
-
-/**
- * 매체 상세 — Product + Offer JSON-LD (가격·위치·매체명).
- * Place 스키마와 함께 사용합니다.
- */
-export function buildMediaProductJsonLd(
-  media: MediaItem,
-  locale: string,
-): Record<string, unknown> {
-  const isKo = locale === "ko";
-  const name = isKo ? media.name : media.nameEn || media.name;
-  const description = buildMediaSeoJsonDescription(media, locale, 1100);
-  const image = getPrimaryMediaImageUrl(media);
-  const url = `${siteUrl}/${locale}${mediaItemDetailPath(media)}`;
-  const locationLabel = isKo
-    ? media.location
-    : media.locationEn || media.location;
-
-  const data: Record<string, unknown> = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "@id": `${url}#product`,
-    name,
-    description,
-    url,
-    sku: media.id,
-    brand: { "@id": ORG_ID },
-    category: typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? "OOH Media",
-  };
-
-  if (image) data.image = image;
-
-  if (media.price > 0) {
-    data.offers = {
-      "@type": "Offer",
-      price: catalogPriceFieldToWon(media.price),
-      priceCurrency: "KRW",
-      availability: "https://schema.org/InStock",
-      url,
-      seller: { "@id": ORG_ID },
-      ...(locationLabel
-        ? {
-            availableAtOrFrom: {
-              "@type": "Place",
-              name: locationLabel,
-              address: {
-                "@type": "PostalAddress",
-                streetAddress: locationLabel,
-                addressCountry: "KR",
-              },
-            },
-          }
-        : {}),
-    };
   }
 
   return data;

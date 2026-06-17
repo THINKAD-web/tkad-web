@@ -27,7 +27,6 @@ import {
 import {
   buildMediaBreadcrumbJsonLd,
   buildMediaPlaceJsonLd,
-  buildMediaProductJsonLd,
 } from "@/lib/structured-data";
 import {
   getAllKeywordFilterMediaIds,
@@ -277,7 +276,6 @@ export default async function MediaDetailPage({ params }: Props) {
   const seoContextPills = buildMediaDetailSeoLinks(media, locale);
 
   const placeJsonLd = buildMediaPlaceJsonLd(media, locale);
-  const productJsonLd = buildMediaProductJsonLd(media, locale);
   const breadcrumbJsonLd = buildMediaBreadcrumbJsonLd(media, locale);
 
   return (
@@ -299,10 +297,8 @@ export default async function MediaDetailPage({ params }: Props) {
       />
       <script
         type="application/ld+json"
-        // SEO: Place + BreadcrumbList JSON-LD. dangerouslySetInnerHTML 는
-        // 매체 데이터에서 생성된 안전한 객체이므로 XSS 위험 없음.
         dangerouslySetInnerHTML={{
-          __html: JSON.stringify([placeJsonLd, productJsonLd, breadcrumbJsonLd]),
+          __html: JSON.stringify([placeJsonLd, breadcrumbJsonLd]),
         }}
       />
 
