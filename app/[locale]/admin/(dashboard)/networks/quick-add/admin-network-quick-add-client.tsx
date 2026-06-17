@@ -16,8 +16,8 @@ import {
   MapPin,
 } from "lucide-react";
 import {
-  NETWORK_TYPE_CODES,
-  NETWORK_TYPE_LABELS,
+  NETWORK_CATALOG_TYPES,
+  NETWORK_CATALOG_TYPE_LABELS,
 } from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
 import {
@@ -73,7 +73,7 @@ export default function AdminNetworkQuickAddClient() {
   const [fullJsonText, setFullJsonText] = useState("");
   const [name, setName] = useState("");
   const [nameEn, setNameEn] = useState("");
-  const [type, setType] = useState<string>("bus_shelter");
+  const [type, setType] = useState<string>("mobile");
   const [description, setDescription] = useState("");
   const [minUnits, setMinUnits] = useState("1");
   const [pricePerUnit, setPricePerUnit] = useState("");
@@ -473,16 +473,16 @@ export default function AdminNetworkQuickAddClient() {
               </div>
               <div className="grid gap-2">
                 <label className="text-sm font-medium text-slate-700">
-                  type * ({isEn ? "network code" : "네트워크 유형"})
+                  type * ({isEn ? "digital | static | mobile" : "디지털 · 고정형 · 이동형"})
                 </label>
                 <select
                   className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
                   value={type}
                   onChange={(e) => setType(e.target.value)}
                 >
-                  {NETWORK_TYPE_CODES.map((code) => (
+                  {NETWORK_CATALOG_TYPES.map((code) => (
                     <option key={code} value={code}>
-                      {NETWORK_TYPE_LABELS[code]?.[isEn ? "en" : "ko"] ?? code}
+                      {NETWORK_CATALOG_TYPE_LABELS[code]?.[isEn ? "en" : "ko"] ?? code}
                     </option>
                   ))}
                 </select>

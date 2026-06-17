@@ -167,7 +167,11 @@ export function MediaDetailLocationPanel({
   const mapLng = selectedMarker?.lng ?? media.lng;
   const spotName = selectedMarker?.name ?? (isKo ? media.name : media.nameEn || media.name);
 
-  const unitSuffix = networkInventoryUnitSuffix(media.type, isKo);
+  const unitSuffix = networkInventoryUnitSuffix(
+    media.networkSubtype ?? media.type,
+    isKo,
+    media.tags,
+  );
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(spotName)},${mapLat},${mapLng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLng}`;
   const addressText =

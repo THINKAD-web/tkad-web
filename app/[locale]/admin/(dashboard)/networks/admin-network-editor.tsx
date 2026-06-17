@@ -11,8 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { ArrowLeft, Loader2, AlertCircle, Upload } from "lucide-react";
 import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
 import {
-  NETWORK_TYPE_CODES,
-  NETWORK_TYPE_LABELS,
+  NETWORK_CATALOG_TYPES,
+  NETWORK_CATALOG_TYPE_LABELS,
+  resolveNetworkCatalogType,
 } from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
 import {
@@ -114,7 +115,9 @@ export default function AdminNetworkEditor(props: Props) {
   const [name, setName] = useState(init?.name ?? "");
   const [nameEn, setNameEn] = useState(init?.nameEn ?? "");
   const [description, setDescription] = useState(init?.description ?? "");
-  const [type, setType] = useState(init?.type ?? "bus_shelter");
+  const [type, setType] = useState(
+    () => resolveNetworkCatalogType(init?.type ?? "digital"),
+  );
   const [regionsText, setRegionsText] = useState(
     (init?.regions ?? []).join(", "),
   );
@@ -656,9 +659,9 @@ export default function AdminNetworkEditor(props: Props) {
               value={type}
               onChange={(e) => setType(e.target.value)}
             >
-              {NETWORK_TYPE_CODES.map((code) => (
+              {NETWORK_CATALOG_TYPES.map((code) => (
                 <option key={code} value={code}>
-                  {NETWORK_TYPE_LABELS[code]?.[
+                  {NETWORK_CATALOG_TYPE_LABELS[code]?.[
                     locale === "en" ? "en" : "ko"
                   ] ?? code}
                 </option>

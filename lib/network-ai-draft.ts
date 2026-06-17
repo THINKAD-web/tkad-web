@@ -3,8 +3,8 @@ import { AI_MODELS } from "@/lib/ai-models";
 import { getAnthropicClient } from "@/lib/ai-content-generator";
 import { recordAiUsage } from "@/lib/ai-usage-log";
 import {
-  NETWORK_TYPE_CODES,
-  NETWORK_TYPE_LABELS,
+  NETWORK_CATALOG_TYPES,
+  NETWORK_CATALOG_TYPE_LABELS,
 } from "@/lib/media-network-types";
 import {
   parseNetworkQuickAddJson,
@@ -54,8 +54,8 @@ function networkDraftTool(): Anthropic.Tool {
         nameEn: { type: "string", description: "영문 이름 (선택)" },
         type: {
           type: "string",
-          enum: [...NETWORK_TYPE_CODES],
-          description: "네트워크 유형 코드",
+          enum: [...NETWORK_CATALOG_TYPES],
+          description: "카탈로그 유형: digital | static | mobile",
         },
         description: { type: "string", description: "상세 설명" },
         minUnits: {
@@ -126,8 +126,8 @@ function extractToolInput<T>(message: Anthropic.Message, toolName: string): T {
 }
 
 function buildTypeGuide(): string {
-  return NETWORK_TYPE_CODES.map(
-    (code) => `- ${code}: ${NETWORK_TYPE_LABELS[code]?.ko ?? code}`,
+  return NETWORK_CATALOG_TYPES.map(
+    (code) => `- ${code}: ${NETWORK_CATALOG_TYPE_LABELS[code]?.ko ?? code}`,
   ).join("\n");
 }
 

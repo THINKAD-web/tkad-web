@@ -144,7 +144,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
 
   const galleryImages = getMediaDetailGalleryUrls(media);
   const heroImage = galleryImages[0] ?? "";
-  const typeLabel = networkDetailTypeLabel(row.type, isKo);
+  const typeLabel = networkDetailTypeLabel(row.type, isKo, row.tags);
   const featuresText = isKo ? media.features : media.featuresEn;
   const performanceMetrics = resolvePerformanceMetrics(media);
 
@@ -174,7 +174,7 @@ export default async function MediaNetworkDetailPage({ params }: Props) {
       ? `${row.totalLocations.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "개소" : " sites"}`
       : null,
     totalUnits > row.locations.length
-      ? `${isKo ? "총 " : ""}${totalUnits.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? networkInventoryUnitSuffix(row.type, true) : " units"}`
+      ? `${isKo ? "총 " : ""}${totalUnits.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? networkInventoryUnitSuffix(row.type, true, row.tags) : " units"}`
       : null,
     media.targetAge,
   ].filter((x): x is string => Boolean(x && String(x).trim()));

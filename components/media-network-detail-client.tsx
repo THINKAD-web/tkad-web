@@ -27,8 +27,11 @@ import {
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import {
+  NETWORK_CATALOG_TYPE_LABELS,
   NETWORK_TYPE_LABELS,
   computeNetworkMonthlyPrice,
+  resolveNetworkCatalogType,
+  resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -99,10 +102,16 @@ export default function MediaNetworkDetailClient({
   const tDetail = useTranslations("media.detail");
   const isKo = locale === "ko";
   const router = useRouter();
-  const typeLb = NETWORK_TYPE_LABELS[data.type] ?? {
-    ko: data.type,
-    en: data.type,
-  };
+  const catalog = resolveNetworkCatalogType(data.type);
+  const catalogLb = NETWORK_CATALOG_TYPE_LABELS[catalog];
+  const venue = resolveNetworkVenueCode(data.type, data.tags);
+  const venueLb = venue ? NETWORK_TYPE_LABELS[venue] : null;
+  const typeLb = venueLb
+    ? {
+        ko: `${catalogLb.ko} · ${venueLb.ko}`,
+        en: `${catalogLb.en} · ${venueLb.en}`,
+      }
+    : catalogLb;
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
 
   const thumbPool = useMemo(

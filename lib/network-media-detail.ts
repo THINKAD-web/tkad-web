@@ -4,9 +4,12 @@ import {
   type MediaNetworkWithLocs,
 } from "@/lib/media-network-public";
 import {
+  NETWORK_CATALOG_TYPE_LABELS,
   NETWORK_TYPE_LABELS,
   loosePackagePrices,
   parseFullPackageOptions,
+  resolveNetworkCatalogType,
+  resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
 import { resolveTrafficPattern } from "@/lib/media-traffic-estimate";
 
@@ -83,7 +86,10 @@ export function networkRowToDetailMediaItem(
   const base = prismaNetworkToMediaItem(n);
   const { pattern } = resolveTrafficPattern(null, "network", base.region);
   const priceOptions = buildPriceOptions(n);
-  const typeLabel = NETWORK_TYPE_LABELS[n.type];
+  const typeLabel = (() => {
+    const venue = resolveNetworkVenueCode(n.type, n.tags);
+    return venue ? NETWORK_TYPE_LABELS[venue] : null;
+  })();
 
   return {
     ...base,
@@ -116,8 +122,18 @@ export function networkRowToDetailMediaItem(
 export function networkDetailTypeLabel(
   type: string,
   isKo: boolean,
+  tags?: readonly string[] | null,
 ): string {
-  const lb = NETWORK_TYPE_LABELS[type];
-  if (!lb) return type;
-  return isKo ? lb.ko : lb.en;
+  const catalog = resolveNetworkCatalogType(type);
+  const catalogLb = NETWORK_CATALOG_TYPE_LABELS[catalog];
+  const venue = resolveNetworkVenueCode(type, tags);
+  const venueLb = venue ? NETWORK_TYPE_LABELS[venue] : null;
+
+  if (venueLb) {
+    return isKo
+      ? `${catalogLb.ko} · ${venueLb.ko}`
+      : `${catalogLb.en} · ${venueLb.en}`;
+  }
+
+  return isKo ? catalogLb.ko : catalogLb.en;
 }

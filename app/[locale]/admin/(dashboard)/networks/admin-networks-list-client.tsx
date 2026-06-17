@@ -7,7 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Pencil, Trash2, Loader2, AlertCircle, MapPin } from "lucide-react";
-import { NETWORK_TYPE_LABELS } from "@/lib/media-network-types";
+import {
+  NETWORK_CATALOG_TYPE_LABELS,
+  resolveNetworkCatalogType,
+} from "@/lib/media-network-types";
 
 export type AdminNetworkListRow = {
   id: string;
@@ -70,8 +73,11 @@ export default function AdminNetworksListClient({
     [t],
   );
 
-  const typeLabel = (code: string) =>
-    NETWORK_TYPE_LABELS[code]?.[locale === "en" ? "en" : "ko"] ?? code;
+  const typeLabel = (code: string) => {
+    const catalog = resolveNetworkCatalogType(code);
+    const lb = NETWORK_CATALOG_TYPE_LABELS[catalog];
+    return lb?.[locale === "en" ? "en" : "ko"] ?? code;
+  };
 
   return (
     <div className="space-y-6 p-4 md:p-8">

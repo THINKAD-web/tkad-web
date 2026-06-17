@@ -4,7 +4,12 @@ import {
   type MediaItem,
   typeLabels,
 } from "@/lib/media-data";
-import { NETWORK_TYPE_LABELS } from "@/lib/media-network-types";
+import {
+  NETWORK_CATALOG_TYPE_LABELS,
+  resolveNetworkCatalogType,
+  resolveNetworkVenueCode,
+  NETWORK_TYPE_LABELS,
+} from "@/lib/media-network-types";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import {
   filterDisplayableMediaImageUrls,
@@ -21,8 +26,20 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
   const rawUrl = getPrimaryMediaImageUrl(item);
   const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
   const typeLabel =
-    item.catalogSource === "network" && item.networkSubtype
-      ? (NETWORK_TYPE_LABELS[item.networkSubtype]?.ko ?? typeLabels.network?.ko ?? item.type)
+    item.catalogSource === "network"
+      ? (() => {
+          const catalog = resolveNetworkCatalogType(item.networkSubtype ?? item.subCategory);
+          const catalogLb = NETWORK_CATALOG_TYPE_LABELS[catalog];
+          const venue = resolveNetworkVenueCode(
+            item.networkSubtype ?? item.subCategory,
+            item.tags,
+          );
+          const venueLb = venue ? NETWORK_TYPE_LABELS[venue] : null;
+          if (venueLb) {
+            return `${catalogLb.ko} · ${venueLb.ko}`;
+          }
+          return catalogLb.ko;
+        })()
       : (typeLabels[item.type]?.ko ?? item.type);
   const display = resolveMediaDisplayPrice(item);
 

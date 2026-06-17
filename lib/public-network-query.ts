@@ -1,5 +1,6 @@
 import type { Prisma } from "@prisma/client";
 import type { MediaCatalogSort } from "@/lib/media-catalog-types";
+import { networkDbTypesForCatalogFilter } from "@/lib/media-network-types";
 
 export type PublicNetworkQuery = {
   networkType?: string;
@@ -37,7 +38,8 @@ export function buildPublicNetworkWhere(
   const and: Prisma.MediaNetworkWhereInput[] = [{ isActive: true }];
 
   if (params.networkType) {
-    and.push({ type: params.networkType });
+    const types = networkDbTypesForCatalogFilter(params.networkType);
+    and.push(types.length > 1 ? { type: { in: types } } : { type: types[0] });
   }
 
   if (params.regionMain) {

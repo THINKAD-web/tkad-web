@@ -1,4 +1,15 @@
-import { NETWORK_TYPE_CODES } from "@/lib/media-network-types";
+import {
+  CATALOG_MEDIA_TYPES,
+  inferCatalogTypeFromMediaContent,
+  isValidCatalogMediaType,
+} from "@/lib/media-auto-categorize";
+import {
+  NETWORK_TYPE_CODES,
+  inferNetworkVenueFromSubCategory,
+  isNetworkVenueCode,
+  networkVenueTag,
+  resolveNetworkCatalogType,
+} from "@/lib/media-network-types";
 
 export type NetworkQuickAddLocationInput = {
   name: string;
@@ -71,7 +82,70 @@ export function coerceNetworkInt(v: unknown): number | null {
   return null;
 }
 
-const TYPE_SET = new Set<string>(NETWORK_TYPE_CODES as unknown as string[]);
+const VENUE_SET = new Set<string>(NETWORK_TYPE_CODES as unknown as string[]);
+
+type ResolvedNetworkType = {
+  catalogType: string;
+  venueCode: string | null;
+};
+
+function resolveNetworkTypeInput(o: Record<string, unknown>): ResolvedNetworkType {
+  const explicit = str(o.type);
+  const sub = str(o.sub_category);
+  const name = str(o.name) || str(o.media_name);
+  const description = str(o.description);
+  const tags = strArr(o.tags);
+
+  if (isValidCatalogMediaType(explicit)) {
+    const venue =
+      (sub && isNetworkVenueCode(sub) ? sub : null) ??
+      inferNetworkVenueFromSubCategory(sub);
+    return { catalogType: explicit.toLowerCase(), venueCode: venue };
+  }
+
+  if (explicit && VENUE_SET.has(explicit)) {
+    return {
+      catalogType: resolveNetworkCatalogType(explicit),
+      venueCode: explicit,
+    };
+  }
+
+  const networkType = str(o.network_type);
+  if (networkType && VENUE_SET.has(networkType)) {
+    return {
+      catalogType: resolveNetworkCatalogType(networkType),
+      venueCode: networkType,
+    };
+  }
+
+  const venueFromSub = inferNetworkVenueFromSubCategory(sub);
+  if (venueFromSub) {
+    return {
+      catalogType: resolveNetworkCatalogType(venueFromSub),
+      venueCode: venueFromSub,
+    };
+  }
+
+  const fromText = inferNetworkVenueFromSubCategory(
+    `${name} ${description} ${sub}`,
+  );
+  if (fromText) {
+    return {
+      catalogType: resolveNetworkCatalogType(fromText),
+      venueCode: fromText,
+    };
+  }
+
+  const catalog = inferCatalogTypeFromMediaContent({
+    subCategory: sub,
+    name,
+    description,
+    location: str(o.full_address) || str(o.location),
+    tags,
+  });
+
+  return { catalogType: catalog, venueCode: null };
+}
 
 function str(v: unknown): string {
   return typeof v === "string" ? v.trim() : "";
@@ -224,8 +298,8 @@ function normalizeLocations(raw: unknown): NetworkQuickAddLocationParsed[] {
   return out;
 }
 
-/** `sub_category`·설명 텍스트 → 네트워크 `type` 코드 */
-export function inferNetworkTypeFromSubCategory(text: string): string | null {
+/** `sub_category`·설명 텍스트 → 레거시 세부 장소 코드 */
+export function inferNetworkVenueFromSubCategory(text: string): string | null {
   const t = text.trim();
   if (!t) return null;
   const rules: Array<[RegExp, string]> = [
@@ -249,22 +323,8 @@ export function inferNetworkTypeFromSubCategory(text: string): string | null {
   return null;
 }
 
-function resolveNetworkType(o: Record<string, unknown>): string {
-  const explicit = str(o.type);
-  if (explicit && TYPE_SET.has(explicit)) return explicit;
-  const networkType = str(o.network_type);
-  if (networkType && TYPE_SET.has(networkType)) return networkType;
-  const sub = str(o.sub_category);
-  if (sub) {
-    const fromSub = inferNetworkTypeFromSubCategory(sub);
-    if (fromSub) return fromSub;
-  }
-  const fromText = inferNetworkTypeFromSubCategory(
-    `${str(o.name)} ${str(o.media_name)} ${str(o.description)} ${sub}`,
-  );
-  if (fromText) return fromText;
-  return explicit;
-}
+/** @deprecated `inferNetworkVenueFromSubCategory` 사용 */
+export const inferNetworkTypeFromSubCategory = inferNetworkVenueFromSubCategory;
 
 /**
  * 일반 매체 quick-add(JSON snake_case)와 동일한 키를 네트워크 등록 필드로 정규화.
@@ -446,16 +506,22 @@ function parseNetworkQuickAddObject(
 ): ParseNetworkQuickAddResult {
   const normalized = normalizeNetworkQuickAddInput(o);
   const name = str(normalized.name);
-  const type = resolveNetworkType(normalized);
+  const resolvedType = resolveNetworkTypeInput(normalized);
+  const type = resolvedType.catalogType;
   if (!name) {
     return { ok: false, error: "media_name(또는 name) 필수" };
   }
-  if (!type || !TYPE_SET.has(type)) {
+  if (!isValidCatalogMediaType(type)) {
     return {
       ok: false,
-      error: `type(또는 sub_category) 필수 — 허용: ${NETWORK_TYPE_CODES.join(", ")}`,
+      error: `type(또는 sub_category) 필수 — 허용: ${CATALOG_MEDIA_TYPES.join(", ")} (sub_category로 자동 추론 가능)`,
     };
   }
+
+  const baseTags = strArr(normalized.tags);
+  const tags = resolvedType.venueCode
+    ? [...new Set([...baseTags, networkVenueTag(resolvedType.venueCode)])]
+    : baseTags;
 
   const locPayload = normalizeLocations(normalized.locations);
 
@@ -528,7 +594,7 @@ function parseNetworkQuickAddObject(
       targetAge: str(normalized.targetAge) || null,
       effectMemo: str(normalized.effectMemo) || null,
       operatingHours: str(normalized.operatingHours) || null,
-      tags: strArr(normalized.tags),
+      tags,
       locations: locPayload,
     },
   };

@@ -178,7 +178,11 @@ export function MediaDetailExecutionPanel({
                 media.pricePeriod,
                 isKo ? "ko" : "en",
               );
-              const unitSuffix = networkInventoryUnitSuffix(media.type, isKo);
+              const unitSuffix = networkInventoryUnitSuffix(
+                media.networkSubtype ?? media.type,
+                isKo,
+                media.tags,
+              );
               const unitsLine =
                 opt.units != null && opt.units > 0
                   ? isKo

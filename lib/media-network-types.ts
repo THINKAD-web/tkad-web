@@ -2,6 +2,11 @@
 
 import type { MediaItem } from "@/lib/media-data";
 import {
+  CATALOG_MEDIA_TYPES,
+  type CatalogMediaType,
+  isValidCatalogMediaType,
+} from "@/lib/media-auto-categorize";
+import {
   mediaItemDetailPath,
   mediaPublicSlug,
   shouldRedirectMediaIdToSlug,
@@ -17,6 +22,20 @@ export {
 
 export const NETWORK_CATALOG_ID_PREFIX = "nw_";
 
+/** 공개·등록 기본 분류 — 일반 `/media` 와 동일 */
+export const NETWORK_CATALOG_TYPES = CATALOG_MEDIA_TYPES;
+export type NetworkCatalogType = CatalogMediaType;
+
+export const NETWORK_CATALOG_TYPE_LABELS: Record<
+  NetworkCatalogType,
+  { ko: string; en: string }
+> = {
+  digital: { ko: "디지털", en: "Digital" },
+  static: { ko: "고정형", en: "Static" },
+  mobile: { ko: "이동형", en: "Mobile" },
+};
+
+/** 레거시 세부 장소 코드 (DB·태그 호환) */
 export const NETWORK_TYPE_CODES = [
   "bus_shelter",
   "apartment",
@@ -35,6 +54,78 @@ export const NETWORK_TYPE_CODES = [
 
 export type NetworkTypeCode = (typeof NETWORK_TYPE_CODES)[number];
 
+const NETWORK_VENUE_CATALOG_MAP: Record<NetworkTypeCode, NetworkCatalogType> = {
+  bus_shelter: "mobile",
+  apartment: "static",
+  subway_pillar: "mobile",
+  convenience_store: "digital",
+  golf_course: "static",
+  highway_rest: "static",
+  campus_kiosk: "digital",
+  subway_station: "mobile",
+  elevator: "digital",
+  shopping_mall: "digital",
+  bookstore: "digital",
+  office: "digital",
+  hospital: "digital",
+};
+
+const VENUE_CODE_SET = new Set<string>(NETWORK_TYPE_CODES as unknown as string[]);
+
+export function isNetworkVenueCode(v: string): v is NetworkTypeCode {
+  return VENUE_CODE_SET.has(v.trim().toLowerCase());
+}
+
+/** DB `type` 또는 태그 → 카탈로그 유형 (digital | static | mobile) */
+export function resolveNetworkCatalogType(
+  rawType: string | null | undefined,
+): NetworkCatalogType {
+  const t = (rawType ?? "").trim().toLowerCase();
+  if (isValidCatalogMediaType(t)) return t;
+  if (isNetworkVenueCode(t)) return NETWORK_VENUE_CATALOG_MAP[t];
+  return "digital";
+}
+
+/** 목록 필터 — 카탈로그 유형에 해당하는 DB type 값들 */
+export function networkDbTypesForCatalogFilter(filter: string): string[] {
+  const f = filter.trim().toLowerCase();
+  if (!f) return [];
+  if (isValidCatalogMediaType(f)) {
+    const legacy = NETWORK_TYPE_CODES.filter(
+      (code) => NETWORK_VENUE_CATALOG_MAP[code] === f,
+    );
+    return [f, ...legacy];
+  }
+  if (isNetworkVenueCode(f)) return [f];
+  return [f];
+}
+
+export function networkVenueTag(venueCode: string): string {
+  return `venue:${venueCode}`;
+}
+
+export function parseNetworkVenueFromTags(
+  tags: readonly string[] | null | undefined,
+): NetworkTypeCode | null {
+  if (!tags?.length) return null;
+  for (const t of tags) {
+    if (typeof t !== "string") continue;
+    const m = /^venue:(.+)$/.exec(t.trim());
+    if (m && isNetworkVenueCode(m[1])) return m[1] as NetworkTypeCode;
+  }
+  return null;
+}
+
+/** DB type + tags → 세부 장소 코드 (없으면 null) */
+export function resolveNetworkVenueCode(
+  dbType: string | null | undefined,
+  tags?: readonly string[] | null,
+): NetworkTypeCode | null {
+  const t = (dbType ?? "").trim().toLowerCase();
+  if (isNetworkVenueCode(t)) return t;
+  return parseNetworkVenueFromTags(tags);
+}
+
 export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   bus_shelter: { ko: "버스 정류장", en: "Bus shelter" },
   apartment: { ko: "아파트", en: "Apartment" },
@@ -51,19 +142,12 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   hospital: { ko: "병원·의료", en: "Hospital" },
 };
 
-/** `/media/network` 목록 필터 칩 (대표 유형) */
+/** `/media/network` 목록 필터 — 일반 `/media` 와 동일 3분류 */
 export const NETWORK_BROWSE_TYPE_CHIPS = [
   { value: "", labelKo: "전체", labelEn: "All", icon: "Network" },
-  { value: "campus_kiosk", labelKo: "대학교", labelEn: "Campus", icon: "GraduationCap" },
-  { value: "convenience_store", labelKo: "편의점", labelEn: "Convenience", icon: "Coffee" },
-  { value: "elevator", labelKo: "엘리베이터", labelEn: "Elevator", icon: "Building2" },
-  { value: "bookstore", labelKo: "교보문고", labelEn: "Bookstore", icon: "Landmark" },
-  { value: "office", labelKo: "오피스", labelEn: "Office", icon: "Building2" },
-  { value: "hospital", labelKo: "병원", labelEn: "Hospital", icon: "Landmark" },
-  { value: "apartment", labelKo: "아파트", labelEn: "Apartment", icon: "Building2" },
-  { value: "bus_shelter", labelKo: "버스쉘터", labelEn: "Bus shelter", icon: "MapPin" },
-  { value: "subway_station", labelKo: "지하철", labelEn: "Subway", icon: "Train" },
-  { value: "shopping_mall", labelKo: "쇼핑몰", labelEn: "Mall", icon: "ShoppingBag" },
+  { value: "digital", labelKo: "디지털", labelEn: "Digital", icon: "Monitor" },
+  { value: "static", labelKo: "고정형", labelEn: "Static", icon: "MapPin" },
+  { value: "mobile", labelKo: "이동형", labelEn: "Mobile", icon: "Train" },
 ] as const;
 
 export type NetworkPackageTier = { units: number; price: number };
@@ -122,9 +206,11 @@ export function parseFullPackageOptions(raw: unknown): NetworkPackageOptionRow[]
 export function networkInventoryUnitSuffix(
   networkType: string | undefined,
   isKo: boolean,
+  tags?: readonly string[] | null,
 ): string {
   if (!isKo) return "";
-  if (networkType === "elevator") return "기";
+  const venue = resolveNetworkVenueCode(networkType, tags);
+  if (venue === "elevator") return "기";
   return "대";
 }
 
