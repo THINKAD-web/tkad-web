@@ -230,8 +230,13 @@ export const PlannerReportDocument = forwardRef<
             <div className="grid gap-6 sm:grid-cols-2">
               {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                  <p className="mb-1 text-xs font-semibold text-gray-500">
                     {isKo ? "예산 배분" : "Budget allocation"}
+                  </p>
+                  <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                    {isKo
+                      ? "선택 매체 월 단가 합 — 돈이 어디로 쓰이는지"
+                      : "Share of selected media monthly rates (where spend goes)"}
                   </p>
                   <DonutChart data={p.charts.budgetSplit} />
                 </div>
@@ -248,6 +253,11 @@ export const PlannerReportDocument = forwardRef<
                       <p className="mb-2.5 text-[11px] font-semibold text-gray-500">
                         {isKo ? "유형별 노출 비중" : "Impression share by type"}
                       </p>
+                      <p className="mb-2.5 text-[10px] leading-snug text-gray-400">
+                        {isKo
+                          ? "CPM이 낮은 유형일수록 같은 예산 대비 노출이 많아집니다"
+                          : "Lower CPM types deliver more impressions per won spent"}
+                      </p>
                       <ShareBarChart data={p.charts.impressionSplit} />
                     </div>
                   ) : null}
@@ -256,8 +266,13 @@ export const PlannerReportDocument = forwardRef<
             </div>
             {p.charts.cpmBars && p.charts.cpmBars.length > 0 ? (
               <div className="rounded-xl border border-gray-200 p-4">
-                <p className="mb-3 text-xs font-semibold text-gray-500">
+                <p className="mb-1 text-xs font-semibold text-gray-500">
                   {isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)"}
+                </p>
+                <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                  {isKo
+                    ? "유형별 천 회당 비용 — 예산 비중과 노출 비중은 다를 수 있음"
+                    : "Cost per 1,000 impressions by type — budget share ≠ impression share"}
                 </p>
                 <BarChart data={p.charts.cpmBars} colorByRow isKo={isKo} />
               </div>
