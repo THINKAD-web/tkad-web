@@ -2,7 +2,8 @@ import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import {
-  dataUrlImageFormat,
+  addPdfThumbImage,
+  EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
 import type {
@@ -367,7 +368,7 @@ export async function buildPlannerReportPdf(
   const thumbs = await loadExportThumbMap(p.portfolio);
 
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
-    const thumbW = thumb ? 22 : 0;
+    const thumbW = thumb ? EXPORT_THUMB_BOX_MM.w + 2 : 0;
     const textX = M + 3 + thumbW;
     const textW = contentW - 6 - thumbW;
     const lines: Array<{ text: string; color: readonly number[]; bold?: boolean }> =
@@ -419,25 +420,17 @@ export async function buildPlannerReportPdf(
       if (contrib) lines.push({ text: contrib, color: CYAN, bold: true });
     }
 
-    const rh = Math.max(thumb ? 24 : 16, lines.length * 4.4 + 8);
+    const rh = Math.max(
+      thumb ? EXPORT_THUMB_BOX_MM.h + 4 : 16,
+      lines.length * 4.4 + 8,
+    );
     ensure(rh + 4);
     setFill(GRAY_50);
     setDraw(GRAY_200);
     doc.setLineWidth(0.2);
     doc.roundedRect(M, y, contentW, rh, 2, 2, "FD");
     if (thumb) {
-      try {
-        doc.addImage(
-          thumb,
-          dataUrlImageFormat(thumb),
-          M + 2,
-          y + 2,
-          thumbW - 3,
-          rh - 4,
-        );
-      } catch {
-        /* skip */
-      }
+      addPdfThumbImage(doc, thumb, M + 2, y + 2);
     }
     let ty = y + 5.5;
     for (const line of lines) {

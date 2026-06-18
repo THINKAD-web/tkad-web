@@ -116,6 +116,7 @@ type Props = {
   loading?: boolean;
   selectedCount?: number;
   selectionVariant?: "default" | "plan";
+  onSelectedSummaryClick?: () => void;
   compareCount?: number;
   cartCount?: number;
   showSectionHeader?: boolean;
@@ -159,6 +160,7 @@ export function MediaManualBrowseFilters({
   loading = false,
   selectedCount = 0,
   selectionVariant = "default",
+  onSelectedSummaryClick,
   compareCount = 0,
   cartCount = 0,
   showSectionHeader = false,
@@ -640,15 +642,31 @@ export function MediaManualBrowseFilters({
         <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {selectedCount > 0 ? (
-            <span className="font-medium text-violet-600 dark:text-violet-300">
-              {selectionVariant === "plan"
-                ? isKo
-                  ? `플랜에 담김 ${selectedCount}개`
-                  : `${selectedCount} in plan`
-                : isKo
-                  ? `선택 ${selectedCount}`
-                  : `${selectedCount} selected`}
-            </span>
+            onSelectedSummaryClick ? (
+              <button
+                type="button"
+                onClick={onSelectedSummaryClick}
+                className="font-medium text-violet-600 underline decoration-violet-400/50 underline-offset-2 hover:text-violet-500 dark:text-violet-300 dark:hover:text-violet-200"
+              >
+                {selectionVariant === "plan"
+                  ? isKo
+                    ? `선택됨 ${selectedCount}개 · 보기`
+                    : `${selectedCount} selected · view`
+                  : isKo
+                    ? `선택 ${selectedCount} · 보기`
+                    : `${selectedCount} selected · view`}
+              </button>
+            ) : (
+              <span className="font-medium text-violet-600 dark:text-violet-300">
+                {selectionVariant === "plan"
+                  ? isKo
+                    ? `선택됨 ${selectedCount}개`
+                    : `${selectedCount} selected`
+                  : isKo
+                    ? `선택 ${selectedCount}`
+                    : `${selectedCount} selected`}
+              </span>
+            )
           ) : null}
           {cartCount > 0 ? (
             <span className="tkad-home-accent-text font-medium">

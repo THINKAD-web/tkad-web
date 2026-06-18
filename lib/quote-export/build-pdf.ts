@@ -2,7 +2,11 @@ import type { jsPDF } from "jspdf";
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
 import { formatDocumentManWon, truncateDocText } from "@/lib/document-text";
-import { dataUrlImageFormat, loadExportThumbMap } from "@/lib/export-media-images";
+import {
+  addPdfThumbImage,
+  EXPORT_THUMB_BOX_MM,
+  loadExportThumbMap,
+} from "@/lib/export-media-images";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 
 const VIOLET = [124, 58, 237] as const;
@@ -160,7 +164,7 @@ function drawMediaCards(
 
   for (const line of p.lines) {
     const thumb = line.thumbUrl ? thumbs.get(line.thumbUrl) : undefined;
-    const tW = thumb ? 18 : 0;
+    const tW = thumb ? EXPORT_THUMB_BOX_MM.w + 2 : 0;
     const textX = x + 4 + tW;
     const textW = w - 8 - tW;
     const specLines = [
@@ -181,7 +185,10 @@ function drawMediaCards(
     const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
     const body = [line.name, ...specLines, priceLine].join("\n");
     const lines = doc.splitTextToSize(body, textW) as string[];
-    const rh = Math.max(thumb ? 22 : 16, lines.length * 4.1 + 8);
+    const rh = Math.max(
+      thumb ? EXPORT_THUMB_BOX_MM.h + 4 : 16,
+      lines.length * 4.1 + 8,
+    );
 
     if (y + rh > pageH - 28) {
       doc.addPage();
@@ -194,11 +201,7 @@ function drawMediaCards(
     doc.roundedRect(x, y, w, rh, 2, 2, "FD");
 
     if (thumb) {
-      try {
-        doc.addImage(thumb, dataUrlImageFormat(thumb), x + 2, y + 2, tW - 2.5, rh - 4);
-      } catch {
-        /* skip broken image */
-      }
+      addPdfThumbImage(doc, thumb, x + 2, y + 2);
     }
 
     doc.setFont(font, "normal");
