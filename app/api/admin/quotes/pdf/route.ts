@@ -1,12 +1,12 @@
 import { NextRequest } from "next/server";
 import { assertAdmin } from "@/lib/admin-guard";
+import { getPrisma } from "@/lib/prisma";
 import {
-  adminFormalQuotePdfBuffer,
-  type AdminFormalQuotePdfParams,
-  type AdminFormalQuotePdfRow,
-} from "@/lib/build-admin-formal-quote-pdf";
+  buildQuoteExportPayloadFromAdminDraft,
+  type AdminQuoteDraftExportRow,
+} from "@/lib/quote-export/build-payload";
+import { buildQuotePdf } from "@/lib/quote-export/build-pdf";
 import { attachmentContentDisposition } from "@/lib/content-disposition";
-import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
 
 export const dynamic = "force-dynamic";
 
@@ -20,25 +20,20 @@ function jsonErr(msg: string, status: number) {
   });
 }
 
-function parseRow(r: unknown): AdminFormalQuotePdfRow | null {
+function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
   if (!r || typeof r !== "object") return null;
   const o = r as Record<string, unknown>;
   const name = String(o.name ?? "").trim();
   if (!name) return null;
-  const spec = String(o.spec ?? "").trim() || "—";
   const period = String(o.period ?? "").trim() || "—";
   const unitPriceWon = Math.round(Number(o.unitPriceWon));
-  const quantity = Math.max(1, Math.round(Number(o.quantity)) || 1);
   const lineTotalWon = Math.round(Number(o.lineTotalWon));
   if (!Number.isFinite(unitPriceWon) || !Number.isFinite(lineTotalWon)) return null;
-  return {
-    name,
-    spec,
-    period,
-    unitPriceWon,
-    quantity,
-    lineTotalWon,
-  };
+  const mediaId =
+    typeof o.mediaId === "string" && o.mediaId.trim() ? o.mediaId.trim() : null;
+  const location =
+    typeof o.location === "string" && o.location.trim() ? o.location.trim() : undefined;
+  return { mediaId, name, period, unitPriceWon, lineTotalWon, location };
 }
 
 export async function POST(request: NextRequest) {
@@ -56,7 +51,7 @@ export async function POST(request: NextRequest) {
   if (!Array.isArray(rowsRaw) || rowsRaw.length === 0) {
     return jsonErr("rows required", 400);
   }
-  const rows: AdminFormalQuotePdfRow[] = [];
+  const rows: AdminQuoteDraftExportRow[] = [];
   for (const r of rowsRaw) {
     const row = parseRow(r);
     if (!row) return jsonErr("Invalid row", 400);
@@ -78,54 +73,36 @@ export async function POST(request: NextRequest) {
   }
 
   const periodLabel = String(body.periodLabel ?? "").trim() || "—";
-  const vatIncluded = Boolean(body.vatIncluded);
-
-  const discountTotalWon = Math.max(0, Math.round(Number(body.discountTotalWon)));
-  const discountSummary =
-    typeof body.discountSummary === "string" ? body.discountSummary.trim() : undefined;
-
-  const linesSubtotalWon = Math.round(Number(body.linesSubtotalWon));
   const supplyWon = Math.round(Number(body.supplyWon));
   const vatWon = Math.round(Number(body.vatWon));
   const totalWon = Math.round(Number(body.totalWon));
-  if (
-    !Number.isFinite(linesSubtotalWon) ||
-    !Number.isFinite(supplyWon) ||
-    !Number.isFinite(vatWon) ||
-    !Number.isFinite(totalWon)
-  ) {
+  if (!Number.isFinite(supplyWon) || !Number.isFinite(vatWon) || !Number.isFinite(totalWon)) {
     return jsonErr("Invalid totals", 400);
   }
 
-  const logoFromBody =
-    typeof body.logoDataUrl === "string" && body.logoDataUrl.startsWith("data:image/")
-      ? body.logoDataUrl
-      : null;
-
-  const params: AdminFormalQuotePdfParams = {
-    isKo: body.isKo !== false,
-    logoDataUrl: logoFromBody ?? loadThinkadLogoDataUrl(),
-    quoteNumber,
-    issueDate,
-    validUntil,
-    clientCompany,
-    clientName,
-    clientPhone,
-    clientEmail:
-      typeof body.clientEmail === "string" ? body.clientEmail.trim() : undefined,
-    periodLabel,
-    vatIncluded,
-    discountTotalWon,
-    discountSummary: discountSummary || undefined,
-    rows,
-    linesSubtotalWon,
-    supplyWon,
-    vatWon,
-    totalWon,
-  };
-
+  const db = getPrisma();
   try {
-    const buf = await adminFormalQuotePdfBuffer(params);
+    const payload = await buildQuoteExportPayloadFromAdminDraft(
+      db,
+      {
+        quoteNumber,
+        issueDate,
+        validUntil,
+        clientCompany,
+        clientName,
+        clientPhone,
+        clientEmail:
+          typeof body.clientEmail === "string" ? body.clientEmail.trim() : undefined,
+        periodLabel,
+        isKo: body.isKo !== false,
+        supplyWon,
+        vatWon,
+        totalWon,
+        rows,
+      },
+      "basic",
+    );
+    const buf = await buildQuotePdf(payload);
     const safeNum = quoteNumber.replace(/[^\w.-]+/g, "_");
     const filename = `thinkad-quote-${safeNum}.pdf`;
     return new Response(new Uint8Array(buf), {

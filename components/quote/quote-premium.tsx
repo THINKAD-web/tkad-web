@@ -20,11 +20,7 @@ import {
   formatKrw,
   type QuotePremiumMediaInput,
 } from "@/lib/quote-premium-metrics";
-
-const STAMP_URL =
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/%5B%EC%8B%B1%EC%BB%A4%EB%93%9C%5D%20%EB%8F%84%EC%9E%A5.png";
-
-const STAMP_CAPTURE_SRC = `/api/image-proxy?url=${encodeURIComponent(STAMP_URL)}`;
+import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 
 export type QuotePremiumProps = {
   /** BILL TO 회사명 */
@@ -496,13 +492,7 @@ function QuotePremiumOfficialPage({
                 ? "주소: 서울 성동구 뚝섬로17가길 48"
                 : "48, Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul"}
             </p>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={STAMP_CAPTURE_SRC}
-              alt=""
-              loading="eager"
-              decoding="sync"
-              referrerPolicy="no-referrer"
+            <QuoteStampImage
               className="pointer-events-none absolute bottom-0 right-0 h-[72px] w-[72px] object-contain opacity-[0.85]"
               style={{ transform: "rotate(-3deg)" }}
             />

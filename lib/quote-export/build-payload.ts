@@ -1,9 +1,10 @@
-import type { PrismaClient } from "@prisma/client";
+import type { PrismaClient, Quote, QuoteItem } from "@prisma/client";
 import { calculateQuoteFromMediaIds } from "@/lib/quote-calculator";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { estimateEndDate, periodLabelFromKey } from "@/lib/ooh-quote";
 import { mediaToDocumentDetail } from "@/lib/document-media-detail";
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
+import { getQuoteStampUrl } from "@/lib/quote-stamp";
 import type { QuoteExportPayload, QuoteExportTemplate } from "@/lib/quote-export/types";
 import type { QuoteExportLine } from "@/lib/quote-export/types";
 
@@ -108,7 +109,203 @@ export async function buildQuoteExportPayload(
         ? "서울 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호"
         : "Seongsu, Seongdong-gu, Seoul, Korea",
     },
-    stampUrl: process.env.QUOTE_STAMP_URL || undefined,
+    stampUrl: getQuoteStampUrl(),
+  };
+}
+
+function quoteIssuerBlock(isKo: boolean) {
+  return {
+    company: isKo ? "주식회사 싱커드 (THINKAD)" : "THINKAD Inc.",
+    email: CONTACT_EMAIL,
+    phone: "02-515-2772",
+    address: isKo
+      ? "서울 성동구 뚝섬로17가길 48 성수에이원지식산업센터 1102호"
+      : "Seongsu, Seongdong-gu, Seoul, Korea",
+  };
+}
+
+function formatQuoteExportDate(d: Date, isKo: boolean): string {
+  return new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(d);
+}
+
+async function loadMediaMapForExport(
+  db: Pick<PrismaClient, "media">,
+  mediaIds: string[],
+) {
+  const ids = [...new Set(mediaIds.filter((id) => id && !id.startsWith("custom-")))];
+  if (ids.length === 0) return new Map<string, Awaited<ReturnType<typeof db.media.findMany>>[number]>();
+  const mediaRows = await db.media.findMany({
+    where: { id: { in: ids }, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      location: true,
+      width: true,
+      height: true,
+      operatingHours: true,
+      dailyFootfall: true,
+      impressions: true,
+      image: true,
+      extractedImages: true,
+      mediaMainCategory: true,
+      mediaSubCategory: true,
+      type: true,
+      priceOptions: true,
+    },
+  });
+  return new Map(mediaRows.map((m) => [m.id, m]));
+}
+
+/** Admin 저장 견적 → 공개 견적서와 동일 PDF 페이로드 */
+export async function buildQuoteExportPayloadFromAdminQuote(
+  db: Pick<PrismaClient, "media">,
+  quote: Quote & { items: QuoteItem[] },
+  template: QuoteExportTemplate = "basic",
+): Promise<QuoteExportPayload> {
+  const isKo = quote.isKo;
+  const sep = " · ";
+  const ci = quote.clientName.indexOf(sep);
+  const clientCompany =
+    ci === -1 ? quote.clientName : quote.clientName.slice(0, ci).trim() || quote.clientName;
+  const clientContact =
+    ci === -1 ? "—" : quote.clientName.slice(ci + sep.length).trim() || "—";
+
+  const mediaIds = quote.items
+    .map((it) => it.mediaId)
+    .filter((id): id is string => !!id && !id.startsWith("custom-"));
+  const mediaById = await loadMediaMapForExport(db, mediaIds);
+
+  const periods = [...new Set(quote.items.map((i) => i.period))];
+  const periodLabel =
+    periods.length === 0 ? "—" : periods.length <= 2 ? periods.join(", ") : `${periods[0]} 외`;
+
+  const lines: QuoteExportLine[] = quote.items.map((it) => {
+    const media = it.mediaId ? mediaById.get(it.mediaId) : undefined;
+    const location = media?.location ?? "—";
+    return mapQuoteExportLine(
+      {
+        mediaId: it.mediaId ?? it.id,
+        mediaName: it.mediaName,
+        location,
+        unitPriceWon: it.unitPrice,
+        lineSupplyWon: it.amount,
+        impressions: media?.impressions ?? 0,
+      },
+      media,
+      isKo,
+    );
+  });
+
+  const totalImpressions = lines.reduce((s, l) => s + (l.impressions || 0), 0);
+  const supplyWon = Math.max(0, quote.subtotal - quote.discount);
+
+  return {
+    template,
+    isKo,
+    quoteNo: quote.quoteNumber,
+    issuedAt: formatQuoteExportDate(quote.createdAt, isKo),
+    validUntil: formatQuoteExportDate(quote.validUntil, isKo),
+    clientCompany,
+    clientName: clientContact,
+    clientEmail: quote.clientEmail ?? undefined,
+    clientPhone: quote.clientPhone ?? undefined,
+    periodLabel,
+    lines,
+    supplyWon,
+    vatWon: quote.tax,
+    totalWon: quote.total,
+    totalImpressions,
+    blendedCpmWon:
+      totalImpressions > 0
+        ? Math.round((supplyWon / totalImpressions) * 1000)
+        : null,
+    issuer: quoteIssuerBlock(isKo),
+    stampUrl: getQuoteStampUrl(),
+  };
+}
+
+export type AdminQuoteDraftExportRow = {
+  mediaId?: string | null;
+  name: string;
+  period: string;
+  unitPriceWon: number;
+  lineTotalWon: number;
+  location?: string;
+};
+
+/** Admin 견적 초안(저장 전) POST — 동일 디자인 PDF */
+export async function buildQuoteExportPayloadFromAdminDraft(
+  db: Pick<PrismaClient, "media">,
+  input: {
+    quoteNumber: string;
+    issueDate: string;
+    validUntil: string;
+    clientCompany: string;
+    clientName: string;
+    clientPhone: string;
+    clientEmail?: string;
+    periodLabel: string;
+    isKo: boolean;
+    supplyWon: number;
+    vatWon: number;
+    totalWon: number;
+    rows: AdminQuoteDraftExportRow[];
+  },
+  template: QuoteExportTemplate = "basic",
+): Promise<QuoteExportPayload> {
+  const mediaIds = input.rows
+    .map((r) => r.mediaId)
+    .filter((id): id is string => !!id && !id.startsWith("custom-"));
+  const mediaById = await loadMediaMapForExport(db, mediaIds);
+
+  const lines: QuoteExportLine[] = input.rows.map((r) => {
+    const media = r.mediaId ? mediaById.get(r.mediaId) : undefined;
+    const location = r.location?.trim() || media?.location || "—";
+    return mapQuoteExportLine(
+      {
+        mediaId: r.mediaId ?? r.name,
+        mediaName: r.name,
+        location,
+        unitPriceWon: r.unitPriceWon,
+        lineSupplyWon: r.lineTotalWon,
+        impressions: media?.impressions ?? 0,
+      },
+      media,
+      input.isKo,
+    );
+  });
+
+  const totalImpressions = lines.reduce((s, l) => s + (l.impressions || 0), 0);
+  const issue = new Date(`${input.issueDate.slice(0, 10)}T12:00:00`);
+  const valid = new Date(`${input.validUntil.slice(0, 10)}T12:00:00`);
+
+  return {
+    template,
+    isKo: input.isKo,
+    quoteNo: input.quoteNumber,
+    issuedAt: formatQuoteExportDate(issue, input.isKo),
+    validUntil: formatQuoteExportDate(valid, input.isKo),
+    clientCompany: input.clientCompany,
+    clientName: input.clientName,
+    clientEmail: input.clientEmail,
+    clientPhone: input.clientPhone,
+    periodLabel: input.periodLabel,
+    lines,
+    supplyWon: input.supplyWon,
+    vatWon: input.vatWon,
+    totalWon: input.totalWon,
+    totalImpressions,
+    blendedCpmWon:
+      totalImpressions > 0
+        ? Math.round((input.supplyWon / totalImpressions) * 1000)
+        : null,
+    issuer: quoteIssuerBlock(input.isKo),
+    stampUrl: getQuoteStampUrl(),
   };
 }
 

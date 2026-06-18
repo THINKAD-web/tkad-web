@@ -7,6 +7,7 @@ import {
   EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
+import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 
 const VIOLET = [124, 58, 237] as const;
@@ -20,15 +21,16 @@ const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
 const DARK_BG = [10, 10, 18] as const;
 const DARK_CARD = [22, 22, 34] as const;
-const RED = [200, 30, 40] as const;
 const WHITE = [255, 255, 255] as const;
 
 const M = 15;
 const HERO_H = 44;
 
-/** 직인: 이미지가 있으면 임베드, 없으면 빨간 원형 도장 도형 폴백 */
-async function fetchStampDataUrl(url?: string): Promise<string | null> {
-  if (!url) return null;
+/** 직인: 로컬 public/brand → 원격 URL 순. 없으면 생략 (가짜 도장 미표시). */
+async function resolveStampDataUrl(url?: string): Promise<string | null> {
+  const local = loadQuoteStampDataUrl();
+  if (local) return local;
+  if (!url || url.startsWith("/")) return null;
   try {
     const res = await fetch(url, { cache: "force-cache" });
     if (!res.ok) return null;
@@ -42,43 +44,20 @@ async function fetchStampDataUrl(url?: string): Promise<string | null> {
   }
 }
 
-function drawFallbackSeal(
-  doc: jsPDF,
-  font: string,
-  cx: number,
-  cy: number,
-  isKo: boolean,
-) {
-  doc.setDrawColor(RED[0], RED[1], RED[2]);
-  doc.setLineWidth(1.1);
-  doc.circle(cx, cy, 12, "S");
-  doc.setLineWidth(0.4);
-  doc.circle(cx, cy, 9.5, "S");
-  doc.setTextColor(RED[0], RED[1], RED[2]);
-  doc.setFont(font, "normal");
-  doc.setFontSize(7);
-  doc.text("THINKAD", cx, cy - 1.5, { align: "center" });
-  doc.setFontSize(9);
-  doc.text(isKo ? "직인" : "SEAL", cx, cy + 4, { align: "center" });
-}
-
 async function drawStamp(
   doc: jsPDF,
-  font: string,
+  _font: string,
   p: QuoteExportPayload,
   cx: number,
   cy: number,
 ) {
-  const data = await fetchStampDataUrl(p.stampUrl);
-  if (data) {
-    try {
-      doc.addImage(data, "PNG", cx - 13, cy - 13, 26, 26, undefined, "FAST", -3);
-      return;
-    } catch {
-      /* fall through */
-    }
+  const data = await resolveStampDataUrl(p.stampUrl);
+  if (!data) return;
+  try {
+    doc.addImage(data, "PNG", cx - 13, cy - 13, 26, 26, undefined, "FAST", -3);
+  } catch {
+    /* stamp optional */
   }
-  drawFallbackSeal(doc, font, cx, cy, p.isKo);
 }
 
 function drawWordmark(

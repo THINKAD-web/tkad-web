@@ -1,4 +1,6 @@
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
+import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { getQuoteStampUrl } from "@/lib/quote-stamp";
 
 const VIOLET = "7C3AED";
 const CYAN = "0891B2";
@@ -9,16 +11,18 @@ const LIGHT = "F1F1F7";
 const WHITE = "FFFFFF";
 const DARK = "0A0A12";
 const DARK_CARD = "161622";
-const RED = "C81E28";
 
 function won(n: number, isKo: boolean): string {
   return `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
 }
 
-async function stampDataUrl(url?: string): Promise<string | null> {
-  if (!url) return null;
+async function resolveStampDataUrl(url?: string): Promise<string | null> {
+  const local = loadQuoteStampDataUrl();
+  if (local) return local;
+  const remote = url && !url.startsWith("/") ? url : getQuoteStampUrl();
+  if (!remote || remote.startsWith("/")) return null;
   try {
-    const res = await fetch(url, { cache: "force-cache" });
+    const res = await fetch(remote, { cache: "force-cache" });
     if (!res.ok) return null;
     const ct = res.headers.get("content-type") || "image/png";
     if (!ct.startsWith("image/")) return null;
@@ -40,7 +44,7 @@ export async function buildQuotePptx(p: QuoteExportPayload): Promise<Uint8Array>
   const isKo = p.isKo;
   const face = isKo ? "Malgun Gothic" : "Arial";
   const W = 13.33;
-  const stamp = await stampDataUrl(p.stampUrl);
+  const stamp = await resolveStampDataUrl(p.stampUrl);
 
   const wordmark = (size: number, onDark: boolean) =>
     [
@@ -49,12 +53,8 @@ export async function buildQuotePptx(p: QuoteExportPayload): Promise<Uint8Array>
     ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
   function addStamp(slide: ReturnType<typeof pptx.addSlide>, x: number, y: number) {
-    if (stamp) {
-      slide.addImage({ data: stamp, x, y, w: 1.1, h: 1.1, rotate: 357 });
-    } else {
-      slide.addShape(pptx.ShapeType.ellipse, { x, y, w: 1.1, h: 1.1, line: { color: RED, width: 1.5 }, fill: { type: "solid", color: "FFFFFF", transparency: 100 } });
-      slide.addText(isKo ? "THINKAD\n직인" : "THINKAD\nSEAL", { x, y, w: 1.1, h: 1.1, align: "center", valign: "middle", fontFace: face, fontSize: 9, color: RED, bold: true });
-    }
+    if (!stamp) return;
+    slide.addImage({ data: stamp, x, y, w: 1.1, h: 1.1, rotate: 357 });
   }
 
   const mediaTableRows = () => {

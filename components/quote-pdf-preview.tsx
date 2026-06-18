@@ -13,12 +13,7 @@ import {
   DocumentSectionHeading,
 } from "@/components/document/document-layout";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
-
-const STAMP_URL =
-  "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/%5B%E1%84%89%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%A5%E1%84%83%E1%85%B3%5D%20%E1%84%83%E1%85%A9%E1%84%8C%E1%85%A1%E1%86%BC.png";
-
-/** html2canvas 캡처용 same-origin 프록시 (CORS·403 방지) */
-const STAMP_CAPTURE_SRC = `/api/image-proxy?url=${encodeURIComponent(STAMP_URL)}`;
+import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 
 export type QuotePdfPreviewRow = {
   id: string;
@@ -252,15 +247,9 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 <p className="mt-2 text-gray-900">{t("pdfFooterTel")}</p>
                 <p className="text-gray-900">{CONTACT_EMAIL}</p>
                 <p className="mt-2 text-gray-500">{t("pdfFooterNote")}</p>
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={STAMP_CAPTURE_SRC}
-                  alt=""
-                  loading="eager"
-                  decoding="sync"
+                <QuoteStampImage
                   className="pointer-events-none absolute bottom-0 right-0 h-[72px] w-[72px] object-contain opacity-[0.85]"
                   style={{ transform: "rotate(-3deg)" }}
-                  referrerPolicy="no-referrer"
                 />
               </div>
             </div>
