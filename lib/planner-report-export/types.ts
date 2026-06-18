@@ -38,8 +38,13 @@ export type PlannerExportDigitalRow = {
 
 export type PlannerExportSection = { title: string; lines: string[] };
 
-/** 차트 1개 항목 (라벨 + 수치) */
-export type PlannerExportChartDatum = { label: string; value: number };
+/** 차트 1개 항목 (라벨 + 수치 + 유형별 색상 키) */
+export type PlannerExportChartDatum = {
+  label: string;
+  value: number;
+  /** static | digital | mobile | network | ooh — 색상 일관성용 */
+  colorKey?: string;
+};
 
 /** 웹·PDF·PPTX 공용 차트 데이터 (동일 숫자로 3포맷 렌더) */
 export type PlannerExportCharts = {

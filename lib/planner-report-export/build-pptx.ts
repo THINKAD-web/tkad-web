@@ -3,6 +3,11 @@ import type {
   PlannerExportMediaRow,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
+import {
+  plannerMediaPageButtonLabel,
+  plannerMediaPageUrl,
+} from "@/lib/planner-report-export/media-page-url";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -32,13 +37,14 @@ function addShapeBarChart(
     x: number;
     y: number;
     w: number;
-    rows: { label: string; value: number }[];
+    rows: { label: string; value: number; colorKey?: string }[];
     color: string;
     face: string;
     fmt: (n: number) => string;
+    colorByRow?: boolean;
   },
 ): number {
-  const { title, x, y, w, rows, color, face, fmt } = opts;
+  const { title, x, y, w, rows, color, face, fmt, colorByRow = false } = opts;
   slide.addText(title, {
     x,
     y,
@@ -80,7 +86,7 @@ function addShapeBarChart(
       y: rowY + 0.04,
       w: Math.max(0.1, (barMaxW * row.value) / max),
       h: 0.26,
-      fill: { color },
+      fill: { color: colorByRow ? plannerChartColorPptx(row.colorKey, i) : color },
       rectRadius: 0.05,
     });
     slide.addText(fmt(row.value), {
@@ -104,8 +110,7 @@ function addBudgetSplitShapes(
   x: number,
   y: number,
   w: number,
-  rows: { label: string; value: number }[],
-  palette: string[],
+  rows: { label: string; value: number; colorKey?: string }[],
   face: string,
   isKo: boolean,
 ): number {
@@ -122,7 +127,7 @@ function addBudgetSplitShapes(
       y: barY,
       w: segW,
       h: barH,
-      fill: { color: palette[i % palette.length]! },
+      fill: { color: plannerChartColorPptx(d.colorKey, i) },
       line: { color: "E4E6EC", width: 0.25 },
     });
     bx += segW;
@@ -134,7 +139,7 @@ function addBudgetSplitShapes(
       y: ly,
       w: 0.16,
       h: 0.16,
-      fill: { color: palette[i % palette.length]! },
+      fill: { color: plannerChartColorPptx(d.colorKey, i) },
     });
     slide.addText(
       `${d.label}  ${Math.round((d.value / total) * 100)}%  (₩${d.value.toLocaleString(isKo ? "ko-KR" : "en-US")})`,
@@ -253,7 +258,6 @@ export async function buildPlannerReportPptx(
   ) {
     const sc = pptx.addSlide();
     header(sc, isKo ? "성과 요약" : "Performance summary");
-    const palette = ["7C3AED", "0891B2", "EC4899", "10B981", "F59E0B"];
 
     if (ch.budgetSplit && ch.budgetSplit.length) {
       sc.addText(isKo ? "예산 배분" : "Budget allocation", {
@@ -266,7 +270,7 @@ export async function buildPlannerReportPptx(
         color: GRAY,
         bold: true,
       });
-      addBudgetSplitShapes(sc, pptx, 0.6, 1.15, 5.8, ch.budgetSplit, palette, face, isKo);
+      addBudgetSplitShapes(sc, pptx, 0.6, 1.15, 5.8, ch.budgetSplit, face, isKo);
     }
 
     let rightY = 1.15;
@@ -292,6 +296,7 @@ export async function buildPlannerReportPptx(
         color: VIOLET,
         face,
         fmt: (n) => `₩${fmtImp(n, isKo)}`,
+        colorByRow: true,
       });
     }
   }
@@ -408,9 +413,38 @@ export async function buildPlannerReportPptx(
           x: 3.35,
           y: cardY + 0.25,
           w: 9.1,
-          h: 2.4,
+          h: 2.05,
           valign: "top",
         });
+        const mediaUrl = plannerMediaPageUrl(row.id, isKo);
+        if (mediaUrl) {
+          const btnLabel = plannerMediaPageButtonLabel(isKo);
+          const btnW = 2.45;
+          const btnH = 0.34;
+          const btnX = 0.55 + 12.2 - btnW - 0.22;
+          const btnY = cardY + 2.75 - btnH - 0.2;
+          slide.addShape(pptx.ShapeType.roundRect, {
+            x: btnX,
+            y: btnY,
+            w: btnW,
+            h: btnH,
+            fill: { color: VIOLET },
+            rectRadius: 0.06,
+            hyperlink: { url: mediaUrl },
+          });
+          slide.addText(btnLabel, {
+            x: btnX,
+            y: btnY,
+            w: btnW,
+            h: btnH,
+            fontFace: face,
+            fontSize: 9,
+            color: WHITE,
+            align: "center",
+            valign: "middle",
+            hyperlink: { url: mediaUrl },
+          });
+        }
       });
     }
   }

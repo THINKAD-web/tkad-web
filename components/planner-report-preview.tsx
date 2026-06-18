@@ -28,6 +28,7 @@ export type PlannerReportPreviewBudgetSlice = {
   label: string;
   pct: number;
   valueWon: number;
+  actualWon?: number;
 };
 
 type Props = {
@@ -364,8 +365,12 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                     {row.label}
                   </span>
                   <span className={cn("tabular-nums", plannerNeon.subtext)}>
-                    {row.pct}% · {formatMediaPrice(row.valueWon, isKo ? "ko" : "en")}
-                    {isKo ? "/월" : "/mo"}
+                    {row.pct}%
+                    {row.actualWon != null && row.actualWon > 0
+                      ? ` · ${formatMediaPrice(row.actualWon, isKo ? "ko" : "en")}${isKo ? "/월" : "/mo"}`
+                      : isKo
+                        ? " · 단가 문의"
+                        : " · Price on request"}
                   </span>
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/10 bg-gray-200">

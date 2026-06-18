@@ -8,6 +8,7 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
   plannerBlendCpmKrw,
+  portfolioCpmByCategory,
   portfolioDailyByCategory,
   type PlannerCampaignGoal,
   type PlannerMetrics,
@@ -51,8 +52,8 @@ export type PlannerReportSharedProps = {
   matchedCount: number;
   /** Step 7과 동일: 1/3/6개월 총 노출 비교 */
   monthCompare: { months: number; totalImpressions: number }[];
-  /** Step 7과 동일: 유형별 예상 CPM (필터 결과 기반) */
-  cpmBars: { key: string; label: string; value: number }[];
+  /** @deprecated 보고서는 portfolio 기준 cpmBars 를 내부 계산 — 하위 호환용 */
+  cpmBars?: { key: string; label: string; value: number }[];
   metrics: PlannerMetrics | null;
   reachCorePct: number;
   reachExtendedPct: number;
@@ -79,9 +80,20 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
   const budgetAllocation = useMemo(() => {
     const slices = budgetSplitByCategory(props.portfolio);
     return slices.map((s) => ({
+      key: s.key,
       label: props.isKo ? s.labelKo : s.labelEn,
       pct: s.pct,
       valueWon: s.value,
+      actualWon: s.actualWon,
+    }));
+  }, [props.portfolio, props.isKo]);
+
+  const cpmBars = useMemo(() => {
+    const pts = portfolioCpmByCategory(props.portfolio);
+    return pts.map((p) => ({
+      key: p.key,
+      label: props.isKo ? p.labelKo : p.labelEn,
+      value: p.cpm,
     }));
   }, [props.portfolio, props.isKo]);
 
@@ -144,7 +156,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       budgetAllocation,
       blendedCpmKrw,
       dailyBars,
-      cpmBars: props.cpmBars,
+      cpmBars,
       effectSummaryLines,
       contact,
     }),
@@ -153,7 +165,7 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       budgetAllocation,
       blendedCpmKrw,
       dailyBars,
-      props.cpmBars,
+      cpmBars,
       effectSummaryLines,
       contact,
     ],

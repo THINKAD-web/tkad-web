@@ -52,12 +52,28 @@ export function buildIntegratedReportPayload(
       : 0;
   const charts = {
     budgetSplit: [
-      { label: isKo ? "OOH" : "OOH", value: Math.max(0, m.oohBudgetMan) },
-      { label: isKo ? "디지털" : "Digital", value: Math.max(0, m.digitalBudgetMan) },
+      {
+        label: isKo ? "OOH" : "OOH",
+        value: Math.max(0, m.oohBudgetMan),
+        colorKey: "ooh",
+      },
+      {
+        label: isKo ? "디지털" : "Digital",
+        value: Math.max(0, m.digitalBudgetMan),
+        colorKey: "digital",
+      },
     ].filter((d) => d.value > 0),
     cpmBars: [
-      { label: isKo ? "OOH CPM" : "OOH CPM", value: m.oohCpmKrw ?? 0 },
-      { label: isKo ? "디지털 CPM" : "Digital CPM", value: digitalCpm },
+      {
+        label: isKo ? "OOH CPM" : "OOH CPM",
+        value: m.oohCpmKrw ?? 0,
+        colorKey: "ooh",
+      },
+      {
+        label: isKo ? "디지털 CPM" : "Digital CPM",
+        value: digitalCpm,
+        colorKey: "digital",
+      },
     ].filter((d) => d.value > 0),
     reachSummary: [
       { label: isKo ? "OOH 노출" : "OOH", value: Math.max(0, m.oohImpressions) },

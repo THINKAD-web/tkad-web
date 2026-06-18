@@ -294,11 +294,48 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
   return out.sort((a, b) => a.cpm - b.cpm);
 }
 
+/** 선택 포트폴리오 기준 유형별 CPM — 보고서·성과 요약용 (필터 카탈로그와 분리) */
+export function portfolioCpmByCategory(portfolio: MediaItem[]): CpmBarPoint[] {
+  const groups = new Map<string, MediaItem[]>();
+  for (const m of portfolio) {
+    const list = groups.get(m.type) ?? [];
+    list.push(m);
+    groups.set(m.type, list);
+  }
+  const out: CpmBarPoint[] = [];
+  for (const [key, list] of groups) {
+    const cpms: number[] = [];
+    for (const m of list) {
+      const priceWon = catalogPriceFieldToWon(m.price);
+      const monthlyImp = Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
+      if (priceWon > 0 && monthlyImp > 0) {
+        cpms.push(Math.round(priceWon / (monthlyImp / 1000)));
+      }
+    }
+    const cpm =
+      cpms.length > 0
+        ? Math.round(cpms.reduce((a, b) => a + b, 0) / cpms.length)
+        : (estimateCpmByCategory(list)[0]?.cpm ?? 0);
+    if (cpm > 0) {
+      out.push({
+        key,
+        labelKo: TYPE_META[key]?.labelKo ?? key,
+        labelEn: TYPE_META[key]?.labelEn ?? key,
+        cpm,
+      });
+    }
+  }
+  return out.sort((a, b) => a.cpm - b.cpm);
+}
+
 export type BudgetPieSlice = {
   key: string;
   labelKo: string;
   labelEn: string;
+  /** 차트 세그먼트 가중치(0원 매체는 폴백 반영) */
   value: number;
+  /** 실제 월 단가 합(원) — 표시용 */
+  actualWon: number;
   pct: number;
 };
 
@@ -306,18 +343,41 @@ export function budgetSplitByCategory(
   portfolio: MediaItem[],
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
-  const sums = new Map<string, number>();
+
+  // 가격 0/미입력("문의") 매체는 합산 0 → payload valueWon>0 필터에서 유형 전체가 빠져
+  // 도넛이 한 유형(보통 디지털) 100%로 쏠림. 평균 단가를 폴백 가중치로 pct만 보정.
+  const positivePrices = portfolio
+    .map((m) => catalogPriceFieldToWon(m.price))
+    .filter((won) => won > 0);
+  const fallbackWon =
+    positivePrices.length > 0
+      ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
+      : 1;
+  const weightOf = (m: MediaItem): number => {
+    const won = catalogPriceFieldToWon(m.price);
+    return won > 0 ? won : fallbackWon;
+  };
+
+  const weightSums = new Map<string, number>();
+  const wonSums = new Map<string, number>();
   for (const m of portfolio) {
-    sums.set(m.type, (sums.get(m.type) ?? 0) + catalogPriceFieldToWon(m.price));
+    weightSums.set(m.type, (weightSums.get(m.type) ?? 0) + weightOf(m));
+    wonSums.set(
+      m.type,
+      (wonSums.get(m.type) ?? 0) + catalogPriceFieldToWon(m.price),
+    );
   }
-  const total = [...sums.values()].reduce((a, b) => a + b, 0) || 1;
-  return [...sums.entries()]
-    .map(([key, value]) => ({
+  const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
+  return [...weightSums.entries()]
+    .map(([key, weight]) => ({
       key,
       labelKo: TYPE_META[key]?.labelKo ?? key,
       labelEn: TYPE_META[key]?.labelEn ?? key,
-      value,
-      pct: Math.round((value / total) * 1000) / 10,
+      // 차트 세그먼트 크기 — 0원 매체도 폴백 가중치로 포함
+      value: weight,
+      // 텍스트·KPI용 실제 월 단가 합
+      actualWon: wonSums.get(key) ?? 0,
+      pct: Math.round((weight / totalWeight) * 1000) / 10,
     }))
     .sort((a, b) => b.value - a.value);
 }

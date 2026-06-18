@@ -24,7 +24,13 @@ export type BuildOohPayloadArgs = {
   reachCorePct: number;
   reachExtendedPct: number;
   blendedCpmKrw: number | null;
-  budgetAllocation: { label: string; pct: number; valueWon: number }[];
+  budgetAllocation: {
+    key: string;
+    label: string;
+    pct: number;
+    valueWon: number;
+    actualWon?: number;
+  }[];
   cpmBars: { key: string; label: string; value: number }[];
   effectSummaryLines: string[];
   generatedAt: string;
@@ -63,10 +69,18 @@ export function buildOohReportPayload(
   const charts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
-      .map((s) => ({ label: s.label, value: s.valueWon })),
+      .map((s) => ({
+        label: s.label,
+        value: s.valueWon,
+        colorKey: s.key,
+      })),
     cpmBars: a.cpmBars
       .filter((c) => c.value > 0)
-      .map((c) => ({ label: c.label, value: c.value })),
+      .map((c) => ({
+        label: c.label,
+        value: c.value,
+        colorKey: c.key,
+      })),
     reachSummary: a.metrics
       ? [
           { label: isKo ? "월 노출" : "Monthly", value: a.metrics.estimatedMonthlyImpressions },
@@ -97,9 +111,15 @@ export function buildOohReportPayload(
   if (a.budgetAllocation.length) {
     sections.push({
       title: isKo ? "예산 배분 (유형별)" : "Budget allocation (by type)",
-      lines: a.budgetAllocation.map(
-        (s) => `${s.label} — ${s.pct}% (₩${s.valueWon.toLocaleString()})`,
-      ),
+      lines: a.budgetAllocation.map((s) => {
+        const wonLabel =
+          (s.actualWon ?? 0) > 0
+            ? `₩${(s.actualWon ?? 0).toLocaleString()}`
+            : isKo
+              ? "단가 문의"
+              : "Price on request";
+        return `${s.label} — ${s.pct}% (${wonLabel})`;
+      }),
     });
   }
   if (a.effectSummaryLines.length) {

@@ -2,12 +2,14 @@
 
 import {
   Clock,
+  ExternalLink,
   MapPin,
   Ruler,
   Tag,
   Users,
   Radio,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 
@@ -30,6 +32,8 @@ type Props = {
   /** 포트폴리오 매체 수 — 1개면 기여도 막대 숨김 */
   portfolioSize?: number;
   compact?: boolean;
+  /** 설정 시 카드 전체가 매체 상세 페이지로 연결됨 */
+  mediaPageHref?: string;
 };
 
 function SpecRow({
@@ -84,20 +88,20 @@ export function MediaDetailCard({
   showContribution = false,
   portfolioSize,
   compact = false,
+  mediaPageHref,
 }: Props) {
   const showContributionBars =
     showContribution &&
     (portfolioSize == null || portfolioSize > 1) &&
     (detail.exposureContributionPct != null || detail.budgetContributionPct != null);
 
-  return (
-    <article
-      className={cn(
-        "flex gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
-        className,
-      )}
-      style={{ borderColor: LIGHT.border, background: LIGHT.bg }}
-    >
+  const cardClassName = cn(
+    "flex gap-3 overflow-hidden rounded-xl border bg-white p-4 shadow-sm sm:gap-4 sm:p-5",
+    className,
+  );
+
+  const inner = (
+    <>
       <div
         className={cn(
           // 고정 4:3 비율 박스 — 폭만 반응형, 세로 늘어남 불가
@@ -228,7 +232,28 @@ export function MediaDetailCard({
             ) : null}
           </div>
         ) : null}
+
+        {mediaPageHref ? (
+          <div className="flex justify-end border-t pt-3" style={{ borderColor: LIGHT.divider }}>
+            <Link
+              href={mediaPageHref}
+              className="inline-flex items-center gap-1.5 rounded-lg bg-[#7C3AED] px-3.5 py-2 text-xs font-semibold text-white no-underline transition hover:bg-[#6D28D9]"
+            >
+              {isKo ? "매체 상세 보기" : "View media page"}
+              <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            </Link>
+          </div>
+        ) : null}
       </div>
+    </>
+  );
+
+  return (
+    <article
+      className={cardClassName}
+      style={{ borderColor: LIGHT.border, background: LIGHT.bg }}
+    >
+      {inner}
     </article>
   );
 }

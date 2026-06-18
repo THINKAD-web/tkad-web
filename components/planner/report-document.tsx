@@ -2,8 +2,9 @@
 
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import type { PlannerReportExportPayload, PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
+import { plannerChartColor } from "@/lib/planner-chart-colors";
 import {
   documentCardClass,
   DocumentGradientHero,
@@ -23,10 +24,14 @@ function fmtBudget(man: number, isKo: boolean) {
 
 const CHART_COLORS = ["#7C3AED", "#0891B2", "#EC4899", "#10B981", "#F59E0B"];
 
+function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
+  return plannerChartColor(d.colorKey, index);
+}
+
 function DonutChart({
   data,
 }: {
-  data: { label: string; value: number }[];
+  data: PlannerExportChartDatum[];
 }) {
   const total = data.reduce((s, d) => s + d.value, 0);
   if (total <= 0) return null;
@@ -46,7 +51,7 @@ function DonutChart({
               key={d.label}
               r={R}
               fill="none"
-              stroke={CHART_COLORS[i % CHART_COLORS.length]}
+              stroke={chartDatumColor(d, i)}
               strokeWidth="20"
               strokeDasharray={`${fracs[i]! * C} ${C - fracs[i]! * C}`}
               strokeDashoffset={-offsets[i]!}
@@ -59,7 +64,7 @@ function DonutChart({
           <li key={d.label} className="flex items-center gap-2 text-sm">
             <span
               className="inline-block h-2.5 w-2.5 shrink-0 rounded-sm"
-              style={{ background: CHART_COLORS[i % CHART_COLORS.length] }}
+              style={{ background: chartDatumColor(d, i) }}
             />
             <span className="min-w-0 truncate text-gray-700">{d.label}</span>
             <span className="ml-auto font-semibold tabular-nums text-gray-900">
@@ -75,22 +80,28 @@ function DonutChart({
 function BarChart({
   data,
   color = CHART_COLORS[0],
+  colorByRow = false,
   isKo,
 }: {
-  data: { label: string; value: number }[];
+  data: PlannerExportChartDatum[];
   color?: string;
+  /** true면 각 행의 colorKey 로 막대 색 지정 (CPM·예산 유형 비교) */
+  colorByRow?: boolean;
   isKo: boolean;
 }) {
   const max = Math.max(1, ...data.map((d) => d.value));
   return (
     <div className="space-y-2.5">
-      {data.map((d) => (
+      {data.map((d, i) => (
         <div key={d.label} className="flex items-center gap-3 text-sm">
           <span className="w-20 shrink-0 truncate text-gray-600 sm:w-28">{d.label}</span>
           <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
             <div
               className="h-full rounded-full"
-              style={{ width: `${Math.max(2, (d.value / max) * 100)}%`, background: color }}
+              style={{
+                width: `${Math.max(2, (d.value / max) * 100)}%`,
+                background: colorByRow ? chartDatumColor(d, i) : color,
+              }}
             />
           </div>
           <span className="w-24 shrink-0 text-right font-semibold tabular-nums text-gray-900">
@@ -199,7 +210,7 @@ export const PlannerReportDocument = forwardRef<
                 <p className="mb-3 text-xs font-semibold text-gray-500">
                   {isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)"}
                 </p>
-                <BarChart data={p.charts.cpmBars} color="#7C3AED" isKo={isKo} />
+                <BarChart data={p.charts.cpmBars} colorByRow isKo={isKo} />
               </div>
             ) : null}
           </section>
@@ -215,8 +226,10 @@ export const PlannerReportDocument = forwardRef<
           ) : (
             <ul className="space-y-4">
               {p.portfolio.map((m, i) => {
+                const mediaId = m.id;
+                const hasMediaLink = Boolean(mediaId && !String(mediaId).startsWith("row-"));
                 const detail: DocumentMediaDetail = {
-                  id: m.id ?? `row-${i}`,
+                  id: mediaId ?? `row-${i}`,
                   name: m.name,
                   location: m.location,
                   thumbUrl: m.thumbUrl,
@@ -238,6 +251,7 @@ export const PlannerReportDocument = forwardRef<
                       isKo={isKo}
                       showContribution
                       portfolioSize={p.portfolio.length}
+                      mediaPageHref={hasMediaLink ? `/media/${mediaId}` : undefined}
                     />
                   </li>
                 );

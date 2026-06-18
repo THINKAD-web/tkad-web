@@ -10,6 +10,10 @@ import type {
   PlannerExportMediaRow,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import {
+  plannerMediaPageButtonLabel,
+  plannerMediaPageUrl,
+} from "@/lib/planner-report-export/media-page-url";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -25,15 +29,6 @@ const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
 const GRAY_100 = [238, 240, 244] as const;
 const CYAN_LIGHT = [120, 220, 235] as const;
-
-/** 차트 팔레트 (웹 CHART_COLORS 와 동일) */
-const PALETTE = [
-  [124, 58, 237],
-  [8, 145, 178],
-  [236, 72, 153],
-  [16, 185, 129],
-  [245, 158, 11],
-] as const;
 
 const M = 15;
 
@@ -112,14 +107,14 @@ export async function buildPlannerReportPdf(
     cy: number,
     rOut: number,
     rIn: number,
-    segs: { label: string; value: number }[],
+    segs: { label: string; value: number; colorKey?: string }[],
   ) {
     const total = segs.reduce((s, d) => s + d.value, 0);
     if (total <= 0) return;
     let a0 = -Math.PI / 2;
     segs.forEach((seg, i) => {
       const a1 = a0 + (seg.value / total) * 2 * Math.PI;
-      const c = PALETTE[i % PALETTE.length]!;
+      const c = plannerChartColorRgb(seg.colorKey, i);
       doc.setFillColor(c[0]!, c[1]!, c[2]!);
       const steps = Math.max(2, Math.ceil((a1 - a0) / 0.1));
       for (let s = 0; s < steps; s++) {
@@ -145,15 +140,16 @@ export async function buildPlannerReportPdf(
   function drawBars(
     x: number,
     w: number,
-    rows: { label: string; value: number }[],
+    rows: { label: string; value: number; colorKey?: string }[],
     color: readonly number[],
+    perRowColor = false,
   ) {
     const max = Math.max(1, ...rows.map((r) => r.value));
     const labelW = 30;
     const valW = 26;
     const barX = x + labelW;
     const barW = w - labelW - valW;
-    for (const row of rows) {
+    rows.forEach((row, i) => {
       ensure(7);
       doc.setFont(FONT, "normal");
       doc.setFontSize(8);
@@ -165,12 +161,13 @@ export async function buildPlannerReportPdf(
       );
       doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
       doc.roundedRect(barX, y, barW, 3.2, 1, 1, "F");
-      doc.setFillColor(color[0]!, color[1]!, color[2]!);
+      const barRgb = perRowColor ? plannerChartColorRgb(row.colorKey, i) : color;
+      doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
       doc.roundedRect(barX, y, Math.max(2, (barW * row.value) / max), 3.2, 1, 1, "F");
       setText(INK);
       doc.text(fmtImp(row.value, isKo), x + w, y + 3, { align: "right" });
       y += 7;
-    }
+    });
   }
 
   const subtitle =
@@ -326,7 +323,7 @@ export async function buildPlannerReportPdf(
       const total = ch.budgetSplit.reduce((s, d) => s + d.value, 0) || 1;
       let ly = y + 12;
       ch.budgetSplit.forEach((d, i) => {
-        const c = PALETTE[i % PALETTE.length]!;
+        const c = plannerChartColorRgb(d.colorKey, i);
         doc.setFillColor(c[0]!, c[1]!, c[2]!);
         doc.rect(M + 50, ly - 2.6, 3, 3, "F");
         setText(GRAY_600);
@@ -358,7 +355,7 @@ export async function buildPlannerReportPdf(
       setText(GRAY_500);
       doc.text(isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)", M, y + 2);
       y += 5;
-      drawBars(M, contentW, ch.cpmBars, VIOLET);
+      drawBars(M, contentW, ch.cpmBars, VIOLET, true);
       y += 3;
     }
     y += 4;
@@ -420,9 +417,12 @@ export async function buildPlannerReportPdf(
       if (contrib) lines.push({ text: contrib, color: CYAN, bold: true });
     }
 
+    const mediaUrl = plannerMediaPageUrl(row.id, isKo);
+    const btnH = mediaUrl ? 7 : 0;
+
     const rh = Math.max(
       thumb ? EXPORT_THUMB_BOX_MM.h + 4 : 16,
-      lines.length * 4.4 + 8,
+      lines.length * 4.4 + 8 + btnH,
     );
     ensure(rh + 4);
     setFill(GRAY_50);
@@ -440,6 +440,19 @@ export async function buildPlannerReportPdf(
       const wrapped = doc.splitTextToSize(line.text, textW) as string[];
       doc.text(wrapped.slice(0, 2), textX, ty);
       ty += wrapped.length * 4.2 + 0.8;
+    }
+    if (mediaUrl) {
+      const btnLabel = plannerMediaPageButtonLabel(isKo);
+      const btnW = 44;
+      const btnX = M + contentW - btnW - 3;
+      const btnY = y + rh - 6;
+      setFill(VIOLET);
+      doc.roundedRect(btnX, btnY, btnW, 5.2, 1.2, 1.2, "F");
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(255, 255, 255);
+      doc.text(btnLabel, btnX + btnW / 2, btnY + 3.6, { align: "center" });
+      doc.link(btnX, btnY, btnW, 5.2, { url: mediaUrl });
     }
     y += rh + 4;
   }
