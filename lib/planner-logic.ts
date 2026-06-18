@@ -306,9 +306,26 @@ export function budgetSplitByCategory(
   portfolio: MediaItem[],
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
+
+  // 가격이 0/미입력("문의" 등)인 매체는 그대로 두면 예산 비중 0 → payload 의 valueWon>0
+  // 필터에서 통째로 누락되어 도넛이 한 유형(보통 디지털) 100% 로 쏠린다(고정형 누락 버그).
+  // → 가격 있는 매체들의 평균 단가를 폴백 가중치로 부여해 모든 유형이 배분에 반영되게 한다.
+  // (가격이 모두 있는 일반 플랜은 폴백이 적용되지 않아 동작 동일 — 회귀 없음.)
+  const positivePrices = portfolio
+    .map((m) => catalogPriceFieldToWon(m.price))
+    .filter((won) => won > 0);
+  const fallbackWon =
+    positivePrices.length > 0
+      ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
+      : 1;
+  const weightOf = (m: MediaItem): number => {
+    const won = catalogPriceFieldToWon(m.price);
+    return won > 0 ? won : fallbackWon;
+  };
+
   const sums = new Map<string, number>();
   for (const m of portfolio) {
-    sums.set(m.type, (sums.get(m.type) ?? 0) + catalogPriceFieldToWon(m.price));
+    sums.set(m.type, (sums.get(m.type) ?? 0) + weightOf(m));
   }
   const total = [...sums.values()].reduce((a, b) => a + b, 0) || 1;
   return [...sums.entries()]
