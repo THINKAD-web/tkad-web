@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { useTranslations } from "next-intl";
 import { X } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
+import { orderPlannerSelectedMedia } from "@/lib/planner-logic";
 import {
   formatCatalogPriceFieldWon,
   formatCatalogPricesSumWon,
@@ -15,6 +16,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   catalog: MediaItem[];
   campaignMediaIds: string[];
+  /** 검색 API에서만 로드된 매체 (서버 catalog 보강) */
+  supplementalById?: Record<string, MediaItem>;
   onRemove: (mediaId: string) => void;
   onClearAll: () => void;
   isKo: boolean;
@@ -25,6 +28,7 @@ type Props = {
 export function PlannerSelectedMediaBar({
   catalog,
   campaignMediaIds,
+  supplementalById = {},
   onRemove,
   onClearAll,
   isKo,
@@ -33,19 +37,18 @@ export function PlannerSelectedMediaBar({
 }: Props) {
   const t = useTranslations("planner");
 
-  const byId = useMemo(
-    () => new Map(catalog.map((m) => [m.id, m])),
-    [catalog],
-  );
-
-  const entries = useMemo(
-    () =>
-      campaignMediaIds.map((id) => ({
-        id,
-        media: byId.get(id) ?? null,
-      })),
-    [campaignMediaIds, byId],
-  );
+  const entries = useMemo(() => {
+    const ordered = orderPlannerSelectedMedia(
+      catalog,
+      campaignMediaIds,
+      supplementalById,
+    );
+    const byId = new Map(ordered.map((m) => [m.id, m]));
+    return campaignMediaIds.map((id) => ({
+      id,
+      media: byId.get(id) ?? null,
+    }));
+  }, [campaignMediaIds, catalog, supplementalById]);
 
   const monthlyTotal = useMemo(
     () =>

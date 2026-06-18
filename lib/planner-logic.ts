@@ -194,9 +194,23 @@ export function computePlannerPortfolioBudgetStatus(
 
 /**
  * 설계·보고서용 포트폴리오.
- * - 직접 선택: 담은 매체 전부 (예산 초과는 별도 안내)
+ * - 직접 선택: 담은 매체 전부 (지역·유형 필터와 무관, 예산 초과는 별도 안내)
  * - 미선택: 예산 내 AI 자동 조합 (상한 PLANNER_AUTO_PORTFOLIO_MAX_ITEMS)
  */
+export function orderPlannerSelectedMedia(
+  catalog: readonly MediaItem[],
+  campaignMediaIds: readonly string[],
+  supplementalById: Readonly<Record<string, MediaItem>> = {},
+): MediaItem[] {
+  const byId = new Map(catalog.map((m) => [m.id, m]));
+  const out: MediaItem[] = [];
+  for (const id of campaignMediaIds) {
+    const m = byId.get(id) ?? supplementalById[id];
+    if (m) out.push(m);
+  }
+  return out;
+}
+
 export function resolvePlannerPortfolio(args: {
   campaignMediaIds: readonly string[];
   selectedMediaOrdered: readonly MediaItem[];
@@ -213,13 +227,17 @@ export function resolvePlannerPortfolio(args: {
     months,
     mediaSelectionExplicit,
   } = args;
-  if (filtered.length === 0 || months <= 0 || budgetMan < PLANNER_BUDGET_MIN) {
+  if (months <= 0 || budgetMan < PLANNER_BUDGET_MIN) {
     return [];
   }
+  /** 직접 선택 — 필터·예산으로 잘리지 않음 (구버전 manualIntersect+auto 폴백 버그 방지) */
   if (campaignMediaIds.length > 0) {
     return [...selectedMediaOrdered];
   }
-  if (mediaSelectionExplicit && campaignMediaIds.length === 0) {
+  if (mediaSelectionExplicit) {
+    return [];
+  }
+  if (filtered.length === 0) {
     return [];
   }
   return selectPlannerPortfolio(

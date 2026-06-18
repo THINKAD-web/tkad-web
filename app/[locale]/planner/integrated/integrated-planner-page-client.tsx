@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -40,6 +40,7 @@ import {
   countPlannerMediaByRegion,
   filterPlannerMediaMulti,
   resolvePlannerPortfolio,
+  orderPlannerSelectedMedia,
   computePlannerPortfolioBudgetStatus,
 } from "@/lib/planner-logic";
 import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
@@ -177,8 +178,17 @@ export default function IntegratedPlannerPageClient({
     [catalog],
   );
 
+  const [mediaCacheById, setMediaCacheById] = useState<Record<string, MediaItem>>(
+    {},
+  );
+
   const togglePlannerMedia = useCallback(
-    (mediaId: string) => {
+    (mediaId: string, media?: MediaItem) => {
+      if (media) {
+        setMediaCacheById((prev) =>
+          prev[media.id] === media ? prev : { ...prev, [media.id]: media },
+        );
+      }
       setCampaignMediaIds((prev) =>
         prev.includes(mediaId)
           ? prev.filter((id) => id !== mediaId)
@@ -270,6 +280,16 @@ export default function IntegratedPlannerPageClient({
     [catalog, categories],
   );
 
+  const selectedMediaOrdered = useMemo(
+    () =>
+      orderPlannerSelectedMedia(
+        catalog,
+        campaignMediaIds,
+        mediaCacheById,
+      ),
+    [campaignMediaIds, catalog, mediaCacheById],
+  );
+
   const portfolio = useMemo(
     () =>
       resolvePlannerPortfolio({
@@ -287,13 +307,6 @@ export default function IntegratedPlannerPageClient({
     () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
     [portfolio, budgetNum, months],
   );
-
-  const selectedMediaOrdered = useMemo(() => {
-    const byId = new Map(catalog.map((m) => [m.id, m]));
-    return campaignMediaIds
-      .map((id) => byId.get(id))
-      .filter((m): m is MediaItem => Boolean(m));
-  }, [campaignMediaIds, catalog]);
 
   const digitalResult = useMemo(
     () =>

@@ -20,6 +20,7 @@ export {
   comparePlansByDuration,
   portfolioFromManualSelection,
   resolvePlannerPortfolio,
+  orderPlannerSelectedMedia,
   computePlannerPortfolioBudgetStatus,
   PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
 } from "@/lib/planner-logic";

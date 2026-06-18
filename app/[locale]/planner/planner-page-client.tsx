@@ -40,6 +40,7 @@ import {
   reachSplitForGoal,
   comparePlansByDuration,
   resolvePlannerPortfolio,
+  orderPlannerSelectedMedia,
   computePlannerPortfolioBudgetStatus,
   PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
   plannerBlendCpmKrw,
@@ -235,8 +236,17 @@ export default function PlannerPageClient({
     [catalog],
   );
 
+  const [mediaCacheById, setMediaCacheById] = useState<Record<string, MediaItem>>(
+    {},
+  );
+
   const togglePlannerMedia = useCallback(
-    (mediaId: string) => {
+    (mediaId: string, media?: MediaItem) => {
+      if (media) {
+        setMediaCacheById((prev) =>
+          prev[media.id] === media ? prev : { ...prev, [media.id]: media },
+        );
+      }
       setCampaignMediaIds((prev) =>
         prev.includes(mediaId)
           ? prev.filter((id) => id !== mediaId)
@@ -296,16 +306,15 @@ export default function PlannerPageClient({
     [filtered, catalog, selectedRegions, categories],
   );
 
-  const selectedMediaForSimulation = useMemo(() => {
-    if (campaignMediaIds.length === 0) return [];
-    const byId = new Map(catalog.map((m) => [m.id, m]));
-    const out: MediaItem[] = [];
-    for (const id of campaignMediaIds) {
-      const m = byId.get(id);
-      if (m) out.push(m);
-    }
-    return out;
-  }, [campaignMediaIds, catalog]);
+  const selectedMediaForSimulation = useMemo(
+    () =>
+      orderPlannerSelectedMedia(
+        catalog,
+        campaignMediaIds,
+        mediaCacheById,
+      ),
+    [campaignMediaIds, catalog, mediaCacheById],
+  );
 
   const metrics = useMemo(() => {
     if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
@@ -340,6 +349,10 @@ export default function PlannerPageClient({
   );
 
   const isAutoPortfolio = campaignMediaIds.length === 0;
+  const unresolvedMediaCount = Math.max(
+    0,
+    campaignMediaIds.length - selectedMediaForSimulation.length,
+  );
 
   const blurbParts = useMemo(
     () => computeBudgetBlurbParts(filtered, budgetNum, months),
@@ -1263,6 +1276,7 @@ export default function PlannerPageClient({
 
                 <PlannerSelectedMediaBar
                   catalog={catalog}
+                  supplementalById={mediaCacheById}
                   campaignMediaIds={campaignMediaIds}
                   onRemove={removePlannerMedia}
                   onClearAll={clearPlannerMedia}
@@ -1333,6 +1347,7 @@ export default function PlannerPageClient({
                 portfolioMonthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
                 portfolioMonthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
                 isAutoPortfolio={isAutoPortfolio}
+                unresolvedMediaCount={unresolvedMediaCount}
               />
             ) : null}
 
@@ -1504,6 +1519,7 @@ export default function PlannerPageClient({
                   monthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
                   isAutoMix={isAutoPortfolio}
                   autoMixMax={PLANNER_AUTO_PORTFOLIO_MAX_ITEMS}
+                  unresolvedCount={unresolvedMediaCount}
                 />
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">

@@ -15,6 +15,8 @@ type Props = {
   /** AI 자동 조합 여부 */
   isAutoMix?: boolean;
   autoMixMax?: number;
+  /** ID는 있으나 카탈로그에서 찾지 못한 개수 */
+  unresolvedCount?: number;
   className?: string;
 };
 
@@ -27,6 +29,7 @@ export function PlannerPortfolioNotice({
   monthlyBudgetMan,
   isAutoMix = false,
   autoMixMax = 12,
+  unresolvedCount = 0,
   className,
 }: Props) {
   const lines: string[] = [];
@@ -34,8 +37,8 @@ export function PlannerPortfolioNotice({
   if (isAutoMix) {
     lines.push(
       isKo
-        ? `AI가 예산·효율 기준으로 최대 ${autoMixMax}개 매체를 자동 조합했습니다. 직접 선택하려면 4단계에서 매체를 담아 주세요.`
-        : `Up to ${autoMixMax} media were auto-picked for your budget. Add media manually in step 4 to override.`,
+        ? `직접 선택한 매체가 없어 AI가 예산·효율 기준으로 최대 ${autoMixMax}개 매체를 자동 조합했습니다. 4단계에서 매체를 담으면 그 구성이 보고서에 반영됩니다.`
+        : `No manual picks — AI auto-selected up to ${autoMixMax} media for your budget. Add media in step 4 to override.`,
     );
   } else if (selectedCount > 0 && inPlanCount === selectedCount) {
     lines.push(
@@ -51,6 +54,14 @@ export function PlannerPortfolioNotice({
     );
   }
 
+  if (unresolvedCount > 0) {
+    lines.push(
+      isKo
+        ? `${unresolvedCount}개 매체 정보를 불러오지 못했습니다. 페이지를 새로고침하거나 4단계에서 다시 담아 주세요.`
+        : `Could not load ${unresolvedCount} media. Refresh or re-add them in step 4.`,
+    );
+  }
+
   if (overBudget) {
     lines.push(
       isKo
@@ -61,7 +72,11 @@ export function PlannerPortfolioNotice({
 
   if (lines.length === 0) return null;
 
-  const isWarning = overBudget || (selectedCount > inPlanCount && !isAutoMix);
+  const isWarning =
+    overBudget ||
+    unresolvedCount > 0 ||
+    isAutoMix ||
+    (selectedCount > inPlanCount && !isAutoMix);
 
   return (
     <div

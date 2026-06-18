@@ -93,7 +93,7 @@ interface Props {
   plannerMode?: boolean;
   embedded?: boolean;
   plannerSelectedIds?: string[];
-  onPlannerToggleMedia?: (mediaId: string) => void;
+  onPlannerToggleMedia?: (mediaId: string, media?: MediaItem) => void;
   onPlannerClearMedia?: () => void;
 }
 
@@ -485,7 +485,10 @@ function MediaSearchPageInner({
     const href = getMediaHref(item);
     const priceLabel = renderPrice(item);
     const inPlan = plannerSelectedIds.includes(item.id);
-    const togglePlan = () => onPlannerToggleMedia?.(item.id);
+    const togglePlan = () => {
+      const raw = catalogItems.find((m) => m.id === item.id);
+      onPlannerToggleMedia?.(item.id, raw);
+    };
 
     if (viewMode === "compact") {
       const metaLine = [item.region, item.type, priceLabel]

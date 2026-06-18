@@ -67,6 +67,7 @@ export type PlannerReportSharedProps = {
   portfolioMonthlyTotalMan?: number;
   portfolioMonthlyBudgetMan?: number;
   isAutoPortfolio?: boolean;
+  unresolvedMediaCount?: number;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -363,6 +364,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         monthlyTotalMan={props.portfolioMonthlyTotalMan ?? 0}
         monthlyBudgetMan={props.portfolioMonthlyBudgetMan ?? 0}
         isAutoMix={props.isAutoPortfolio}
+        unresolvedCount={props.unresolvedMediaCount ?? 0}
       />
 
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
