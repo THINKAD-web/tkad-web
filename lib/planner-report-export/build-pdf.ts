@@ -17,6 +17,7 @@ import {
 import { addPdfMediaDetailLink } from "@/lib/planner-report-export/draw-media-link";
 import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 
 /**
@@ -204,6 +205,61 @@ export async function buildPlannerReportPdf(
       doc.text(fmtImp(row.value, isKo), x + w, y + 3, { align: "right" });
       y += 7;
     });
+  }
+
+  function drawPerformanceGuide(guide: PlannerPerformanceGuide) {
+    const colCount = guide.table.headers.length;
+    const labelColW = 34;
+    const dataColW = (contentW - labelColW) / Math.max(1, colCount - 1);
+    const rowH = 6.5;
+
+    ensure(10 + guide.bullets.length * 8);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(9);
+    setText(VIOLET);
+    doc.text(guide.title, M, y + 3);
+    y += 7;
+
+    doc.setFillColor(248, 245, 255);
+    doc.roundedRect(M, y, contentW, rowH + guide.table.rows.length * rowH + 2, 2, 2, "F");
+
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(7.5);
+    setText(VIOLET);
+    guide.table.headers.forEach((h, i) => {
+      const x =
+        i === 0 ? M + 2 : M + labelColW + (i - 1) * dataColW + 1;
+      const w = i === 0 ? labelColW - 2 : dataColW - 2;
+      doc.text(h, x, y + 4.5, { maxWidth: w });
+    });
+    y += rowH;
+
+    doc.setFont(FONT, "normal");
+    guide.table.rows.forEach((row) => {
+      setText(GRAY_600);
+      doc.text(row.label, M + 2, y + 4.5, { maxWidth: labelColW - 3 });
+      row.cells.forEach((cell, i) => {
+        setText(INK);
+        doc.setFont(FONT, "bold");
+        doc.text(cell, M + labelColW + i * dataColW + 1, y + 4.5, {
+          maxWidth: dataColW - 2,
+        });
+        doc.setFont(FONT, "normal");
+      });
+      y += rowH;
+    });
+    y += 5;
+
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8);
+    setText(GRAY_600);
+    for (const line of guide.bullets) {
+      const wrapped = doc.splitTextToSize(`• ${line}`, contentW - 4) as string[];
+      ensure(wrapped.length * 4.5 + 2);
+      doc.text(wrapped, M + 2, y + 3);
+      y += wrapped.length * 4.2 + 1.5;
+    }
+    y += 3;
   }
 
   const subtitle =
@@ -406,6 +462,9 @@ export async function buildPlannerReportPdf(
       y += 5;
       drawBars(M, contentW, ch.cpmBars, VIOLET, true);
       y += 3;
+    }
+    if (ch.performanceGuide) {
+      drawPerformanceGuide(ch.performanceGuide);
     }
     y += 4;
   }

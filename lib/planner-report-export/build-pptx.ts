@@ -5,6 +5,7 @@ import type {
 } from "@/lib/planner-report-export/types";
 import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
+import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
@@ -301,6 +302,60 @@ export async function buildPlannerReportPptx(
         colorByRow: true,
       });
     }
+  }
+
+  if (ch?.performanceGuide) {
+    const g = ch.performanceGuide;
+    const gSlide = pptx.addSlide();
+    header(gSlide, g.title);
+    const colCount = g.table.headers.length;
+    const colW = Array.from({ length: colCount }, (_, i) =>
+      i === 0 ? 2.4 : (12.1 - 2.4) / Math.max(1, colCount - 1),
+    );
+    const tableBody = [
+      g.table.headers.map((h, i) => ({
+        text: h,
+        options: {
+          fill: { color: "F5F3FF" },
+          color: VIOLET,
+          bold: true,
+          fontSize: 11,
+          fontFace: face,
+        },
+      })),
+      ...g.table.rows.map((row) => [
+        {
+          text: row.label,
+          options: { color: GRAY, bold: true, fontSize: 10, fontFace: face },
+        },
+        ...row.cells.map((cell) => ({
+          text: cell,
+          options: { color: INK, bold: true, fontSize: 10, fontFace: face },
+        })),
+      ]),
+    ];
+    gSlide.addTable(tableBody, {
+      x: 0.6,
+      y: 1.15,
+      w: 12.1,
+      colW,
+      border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+      rowH: 0.38,
+      valign: "middle",
+    });
+    gSlide.addText(
+      g.bullets.map((b) => `• ${b}`).join("\n\n"),
+      {
+        x: 0.6,
+        y: 2.55,
+        w: 12.1,
+        h: 4.2,
+        fontFace: face,
+        fontSize: 10,
+        color: INK,
+        valign: "top",
+      },
+    );
   }
 
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──

@@ -7,6 +7,8 @@
  *   원천 차단하고, 한글 벡터 텍스트 + 기기 무관 동일 레이아웃을 보장한다.
  */
 
+import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
+
 export type PlannerExportKpi = { label: string; value: string };
 
 /** @see lib/document-media-detail.ts — 화면·PDF·PPTX 동일 필드 */
@@ -58,6 +60,8 @@ export type PlannerExportCharts = {
   reachSummary?: PlannerExportChartDatum[];
   /** 유형별 월 노출 비중 — 예산 배분과 대비 */
   impressionSplit?: PlannerExportChartDatum[];
+  /** 예산·노출·CPM 차이 설명 (웹·PDF·PPT 공용) */
+  performanceGuide?: PlannerPerformanceGuide;
 };
 
 export type PlannerReportExportPayload = {

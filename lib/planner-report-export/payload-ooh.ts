@@ -11,8 +11,10 @@ import {
 } from "@/lib/document-media-detail";
 import type {
   PlannerExportSection,
+  PlannerExportCharts,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -84,7 +86,7 @@ export function buildOohReportPayload(
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
-  const charts = {
+  const charts: PlannerExportCharts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
       .map((s) => ({
@@ -132,6 +134,16 @@ export function buildOohReportPayload(
         }))
       : [],
   };
+
+  const performanceGuide = buildPerformanceChartGuide(
+    isKo,
+    charts.budgetSplit.map((s) => ({ label: s.label, pct: s.pct ?? 0 })),
+    charts.impressionSplit.map((s) => ({ label: s.label, pct: s.pct ?? 0 })),
+    charts.cpmBars.map((c) => ({ label: c.label, value: c.value })),
+  );
+  if (performanceGuide) {
+    charts.performanceGuide = performanceGuide;
+  }
 
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
   const sections: PlannerExportSection[] = [];

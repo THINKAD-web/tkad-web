@@ -3,6 +3,7 @@
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
 import type { PlannerReportExportPayload, PlannerExportChartDatum } from "@/lib/planner-report-export/types";
+import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import { plannerChartColor } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
@@ -110,6 +111,58 @@ function DonutChart({
             <span className="ml-auto font-semibold tabular-nums text-gray-900">
               {chartDatumPct(d, total)}
             </span>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+function PerformanceGuideBlock({ guide }: { guide: PlannerPerformanceGuide }) {
+  return (
+    <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-4 sm:p-5">
+      <p className="text-sm font-semibold text-violet-900">{guide.title}</p>
+      <div className="mt-3 overflow-x-auto rounded-lg border border-violet-100 bg-white">
+        <table className="w-full min-w-[16rem] border-collapse text-sm">
+          <thead>
+            <tr className="border-b border-violet-100 bg-violet-50/80 text-left text-xs font-semibold text-violet-800">
+              {guide.table.headers.map((h) => (
+                <th key={h} className="px-3 py-2.5 first:min-w-[5.5rem]">
+                  {h}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {guide.table.rows.map((row) => (
+              <tr
+                key={row.label}
+                className="border-b border-gray-100 last:border-0"
+              >
+                <td className="px-3 py-2.5 font-medium text-gray-600">
+                  {row.label}
+                </td>
+                {row.cells.map((cell, i) => (
+                  <td
+                    key={`${row.label}-${i}`}
+                    className="px-3 py-2.5 tabular-nums font-semibold text-gray-900"
+                  >
+                    {cell}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      <ul className="mt-4 space-y-2.5">
+        {guide.bullets.map((line, i) => (
+          <li
+            key={i}
+            className="flex gap-2.5 text-sm leading-relaxed text-violet-950/90"
+          >
+            <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500" />
+            <span className="break-words">{line}</span>
           </li>
         ))}
       </ul>
@@ -276,6 +329,9 @@ export const PlannerReportDocument = forwardRef<
                 </p>
                 <BarChart data={p.charts.cpmBars} colorByRow isKo={isKo} />
               </div>
+            ) : null}
+            {p.charts.performanceGuide ? (
+              <PerformanceGuideBlock guide={p.charts.performanceGuide} />
             ) : null}
           </section>
         ) : null}
