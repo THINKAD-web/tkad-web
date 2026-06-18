@@ -39,7 +39,8 @@ import { canProceedIntegratedStep } from "@/lib/planner/integrated-validation";
 import {
   countPlannerMediaByRegion,
   filterPlannerMediaMulti,
-  portfolioFromManualSelection,
+  resolvePlannerPortfolio,
+  computePlannerPortfolioBudgetStatus,
 } from "@/lib/planner-logic";
 import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
@@ -269,27 +270,23 @@ export default function IntegratedPlannerPageClient({
     [catalog, categories],
   );
 
-  const manualIntersectedPortfolio = useMemo(() => {
-    if (campaignMediaIds.length === 0) return [];
-    const byId = new Map(catalog.map((m) => [m.id, m]));
-    const allowed = new Set(filtered.map((m) => m.id));
-    const ordered: MediaItem[] = [];
-    for (const id of campaignMediaIds) {
-      const m = byId.get(id);
-      if (m && allowed.has(id)) ordered.push(m);
-    }
-    return ordered;
-  }, [campaignMediaIds, catalog, filtered]);
+  const portfolio = useMemo(
+    () =>
+      resolvePlannerPortfolio({
+        campaignMediaIds,
+        selectedMediaOrdered,
+        filtered,
+        budgetMan: budgetNum,
+        months,
+        mediaSelectionExplicit: campaignMediaIds.length > 0,
+      }),
+    [campaignMediaIds, selectedMediaOrdered, filtered, budgetNum, months],
+  );
 
-  const portfolio = useMemo(() => {
-    if (manualIntersectedPortfolio.length === 0 || budgetNum < PLANNER_BUDGET_MIN)
-      return [];
-    return portfolioFromManualSelection(
-      manualIntersectedPortfolio,
-      budgetNum,
-      months,
-    );
-  }, [manualIntersectedPortfolio, budgetNum, months]);
+  const portfolioBudgetStatus = useMemo(
+    () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
+    [portfolio, budgetNum, months],
+  );
 
   const selectedMediaOrdered = useMemo(() => {
     const byId = new Map(catalog.map((m) => [m.id, m]));

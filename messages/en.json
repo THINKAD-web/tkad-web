@@ -1886,7 +1886,7 @@
     "pkgValueDesc": "Seoul + Busan + nationwide network · broad mix",
     "comboTitle": "Suggested media mix",
     "comboHint": "Illustrative picks for your budget. These items are pre-selected on the quote form.",
-    "comboHintManual": "Uses the order from step 2. Only items that match later filters are included; slots are trimmed to fit the budget.",
+    "comboHintManual": "Media added in step 4 are included in the plan, report, and quote. You’ll see a notice if monthly rates exceed the budget.",
     "chartDailyBarTitle": "Daily foot traffic by type (sum)",
     "chartDailyBarAxis": "people/day (est.)",
     "chartReachTitle": "Estimated reach split",

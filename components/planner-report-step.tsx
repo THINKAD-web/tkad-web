@@ -33,6 +33,7 @@ import {
 } from "@/components/planner/planner-neon-ui";
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
+import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
 import { useIsPro } from "@/hooks/use-is-pro";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
@@ -60,6 +61,12 @@ export type PlannerReportSharedProps = {
   /** PR-9: PDF 내 합성 로고 이미지용 */
   logoUrl?: string | null;
   mediaPlacements?: Record<string, CompositeLogoPlacement>;
+  /** 4단계에서 직접 담은 매체 수 (설계 포함 안내용) */
+  selectedMediaCount?: number;
+  portfolioOverBudget?: boolean;
+  portfolioMonthlyTotalMan?: number;
+  portfolioMonthlyBudgetMan?: number;
+  isAutoPortfolio?: boolean;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -346,6 +353,16 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         ageText={props.ageText}
         industryText={props.industryText}
         portfolio={props.portfolio}
+      />
+
+      <PlannerPortfolioNotice
+        isKo={props.isKo}
+        selectedCount={props.selectedMediaCount ?? props.portfolio.length}
+        inPlanCount={props.portfolio.length}
+        overBudget={props.portfolioOverBudget ?? false}
+        monthlyTotalMan={props.portfolioMonthlyTotalMan ?? 0}
+        monthlyBudgetMan={props.portfolioMonthlyBudgetMan ?? 0}
+        isAutoMix={props.isAutoPortfolio}
       />
 
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}

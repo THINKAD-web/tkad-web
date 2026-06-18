@@ -162,6 +162,74 @@ export function computePortfolioReportMetrics(
   return { monthlyImpressions, totalImpressions, blendedCpmKrw };
 }
 
+/** AI 자동 조합 상한 (직접 선택 시에는 적용하지 않음) */
+export const PLANNER_AUTO_PORTFOLIO_MAX_ITEMS = 12;
+
+export function computePlannerPortfolioMonthlyMan(
+  portfolio: readonly MediaItem[],
+): number {
+  return portfolio.reduce(
+    (s, m) => s + catalogPriceFieldToPriceMan(m.price),
+    0,
+  );
+}
+
+export function computePlannerPortfolioBudgetStatus(
+  portfolio: readonly MediaItem[],
+  budgetMan: number,
+  months: number,
+): {
+  monthlyTotalMan: number;
+  monthlyBudgetMan: number;
+  overBudget: boolean;
+} {
+  const monthlyBudgetMan = months > 0 ? budgetMan / months : budgetMan;
+  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(portfolio);
+  return {
+    monthlyTotalMan,
+    monthlyBudgetMan,
+    overBudget: monthlyTotalMan > monthlyBudgetMan + 0.01,
+  };
+}
+
+/**
+ * 설계·보고서용 포트폴리오.
+ * - 직접 선택: 담은 매체 전부 (예산 초과는 별도 안내)
+ * - 미선택: 예산 내 AI 자동 조합 (상한 PLANNER_AUTO_PORTFOLIO_MAX_ITEMS)
+ */
+export function resolvePlannerPortfolio(args: {
+  campaignMediaIds: readonly string[];
+  selectedMediaOrdered: readonly MediaItem[];
+  filtered: readonly MediaItem[];
+  budgetMan: number;
+  months: number;
+  mediaSelectionExplicit: boolean;
+}): MediaItem[] {
+  const {
+    campaignMediaIds,
+    selectedMediaOrdered,
+    filtered,
+    budgetMan,
+    months,
+    mediaSelectionExplicit,
+  } = args;
+  if (filtered.length === 0 || months <= 0 || budgetMan < PLANNER_BUDGET_MIN) {
+    return [];
+  }
+  if (campaignMediaIds.length > 0) {
+    return [...selectedMediaOrdered];
+  }
+  if (mediaSelectionExplicit && campaignMediaIds.length === 0) {
+    return [];
+  }
+  return selectPlannerPortfolio(
+    [...filtered],
+    budgetMan,
+    months,
+    PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
+  );
+}
+
 export function selectPlannerPortfolio(
   filtered: MediaItem[],
   budgetMan: number,

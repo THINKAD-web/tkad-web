@@ -19,4 +19,7 @@ export {
   reachSplitForGoal,
   comparePlansByDuration,
   portfolioFromManualSelection,
+  resolvePlannerPortfolio,
+  computePlannerPortfolioBudgetStatus,
+  PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
 } from "@/lib/planner-logic";

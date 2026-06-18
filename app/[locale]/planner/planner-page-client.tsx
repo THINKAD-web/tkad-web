@@ -35,12 +35,13 @@ import {
   filterPlannerMediaMulti,
   countPlannerMediaByRegion,
   computePlannerMetrics,
-  selectPlannerPortfolio,
   computeBudgetBlurbParts,
   estimateCpmByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
-  portfolioFromManualSelection,
+  resolvePlannerPortfolio,
+  computePlannerPortfolioBudgetStatus,
+  PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
   plannerBlendCpmKrw,
 } from "@/lib/planner-logic";
 import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
@@ -58,6 +59,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
+import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -305,18 +307,6 @@ export default function PlannerPageClient({
     return out;
   }, [campaignMediaIds, catalog]);
 
-  const manualIntersectedPortfolio = useMemo(() => {
-    if (campaignMediaIds.length === 0) return [];
-    const byId = new Map(catalog.map((m) => [m.id, m]));
-    const allowed = new Set(filtered.map((m) => m.id));
-    const ordered: MediaItem[] = [];
-    for (const id of campaignMediaIds) {
-      const m = byId.get(id);
-      if (m && allowed.has(id)) ordered.push(m);
-    }
-    return ordered;
-  }, [campaignMediaIds, catalog, filtered]);
-
   const metrics = useMemo(() => {
     if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
     return computePlannerMetrics(filtered, budgetNum, months, {
@@ -324,27 +314,32 @@ export default function PlannerPageClient({
     });
   }, [filtered, budgetNum, months, campaignGoal]);
 
-  const portfolio = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return [];
-    if (manualIntersectedPortfolio.length > 0) {
-      return portfolioFromManualSelection(
-        manualIntersectedPortfolio,
-        budgetNum,
+  const portfolio = useMemo(
+    () =>
+      resolvePlannerPortfolio({
+        campaignMediaIds,
+        selectedMediaOrdered: selectedMediaForSimulation,
+        filtered,
+        budgetMan: budgetNum,
         months,
-      );
-    }
-    if (mediaSelectionExplicit && campaignMediaIds.length === 0) {
-      return [];
-    }
-    return selectPlannerPortfolio(filtered, budgetNum, months, 6);
-  }, [
-    filtered,
-    budgetNum,
-    months,
-    manualIntersectedPortfolio,
-    mediaSelectionExplicit,
-    campaignMediaIds.length,
-  ]);
+        mediaSelectionExplicit,
+      }),
+    [
+      filtered,
+      budgetNum,
+      months,
+      campaignMediaIds,
+      selectedMediaForSimulation,
+      mediaSelectionExplicit,
+    ],
+  );
+
+  const portfolioBudgetStatus = useMemo(
+    () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
+    [portfolio, budgetNum, months],
+  );
+
+  const isAutoPortfolio = campaignMediaIds.length === 0;
 
   const blurbParts = useMemo(
     () => computeBudgetBlurbParts(filtered, budgetNum, months),
@@ -1333,6 +1328,11 @@ export default function PlannerPageClient({
                 reachExtendedPct={reachSplit.extendedPct}
                 logoUrl={creativeUploadedUrl || creativeObjectUrl}
                 mediaPlacements={mediaPlacements}
+                selectedMediaCount={campaignMediaIds.length}
+                portfolioOverBudget={portfolioBudgetStatus.overBudget}
+                portfolioMonthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
+                portfolioMonthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
+                isAutoPortfolio={isAutoPortfolio}
               />
             ) : null}
 
@@ -1495,13 +1495,35 @@ export default function PlannerPageClient({
                   portfolio={portfolio}
                 />
 
+                <PlannerPortfolioNotice
+                  isKo={isKo}
+                  selectedCount={campaignMediaIds.length}
+                  inPlanCount={portfolio.length}
+                  overBudget={portfolioBudgetStatus.overBudget}
+                  monthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
+                  monthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
+                  isAutoMix={isAutoPortfolio}
+                  autoMixMax={PLANNER_AUTO_PORTFOLIO_MAX_ITEMS}
+                />
+
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
                     <PlannerNeonLabel>Portfolio</PlannerNeonLabel>
                     <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
-                      {t("comboTitle")}
+                      {campaignMediaIds.length > 0
+                        ? isKo
+                          ? `선택 매체 구성 (${portfolio.length})`
+                          : `Selected lineup (${portfolio.length})`
+                        : t("comboTitle")}
                     </h3>
+                    <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
+                      {campaignMediaIds.length > 0
+                        ? isKo
+                          ? "4단계에서 담은 매체가 설계·보고서에 그대로 반영됩니다."
+                          : "Media added in step 4 are included in the plan and report."
+                        : t("comboHint")}
+                    </p>
                   </div>
                   <div className="relative grid grid-cols-1 gap-3 p-4 sm:grid-cols-2 lg:grid-cols-3">
                     {portfolio.map((m) => (
