@@ -8,6 +8,7 @@ import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
+import { shortMediaUrl } from "@/lib/planner-report-export/draw-media-link";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -388,13 +389,17 @@ export async function buildPlannerReportPptx(
         });
         const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
         if (thumb) {
-          slide.addImage({
-            data: thumb,
-            x: 0.75,
-            y: cardY + 0.2,
-            w: THUMB_W_IN,
-            h: THUMB_H_IN,
-          });
+          try {
+            slide.addImage({
+              data: thumb,
+              x: 0.75,
+              y: cardY + 0.2,
+              w: THUMB_W_IN,
+              h: THUMB_H_IN,
+            });
+          } catch {
+            /* broken thumb — skip */
+          }
         } else {
           slide.addShape(pptx.ShapeType.roundRect, {
             x: 0.75,
@@ -419,18 +424,18 @@ export async function buildPlannerReportPptx(
         const mediaUrl = plannerMediaPageUrl(row.id, isKo);
         if (mediaUrl) {
           const btnLabel = plannerMediaPageButtonLabel(isKo);
-          const btnW = 2.45;
-          const btnH = 0.34;
+          const btnW = 2.55;
+          const btnH = 0.32;
           const btnX = 0.55 + 12.2 - btnW - 0.22;
-          const btnY = cardY + 2.75 - btnH - 0.2;
+          const btnY = cardY + 2.75 - btnH - 0.42;
           slide.addShape(pptx.ShapeType.roundRect, {
             x: btnX,
             y: btnY,
             w: btnW,
             h: btnH,
-            fill: { color: VIOLET },
+            fill: { color: WHITE },
+            line: { color: VIOLET, width: 1.25 },
             rectRadius: 0.06,
-            hyperlink: { url: mediaUrl },
           });
           slide.addText(btnLabel, {
             x: btnX,
@@ -439,9 +444,21 @@ export async function buildPlannerReportPptx(
             h: btnH,
             fontFace: face,
             fontSize: 9,
-            color: WHITE,
+            color: VIOLET,
+            bold: true,
             align: "center",
             valign: "middle",
+            hyperlink: { url: mediaUrl },
+          });
+          slide.addText(shortMediaUrl(mediaUrl), {
+            x: btnX - 0.15,
+            y: btnY + btnH + 0.04,
+            w: btnW + 0.3,
+            h: 0.22,
+            fontFace: face,
+            fontSize: 7,
+            color: CYAN,
+            align: "right",
             hyperlink: { url: mediaUrl },
           });
         }

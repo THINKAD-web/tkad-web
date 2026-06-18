@@ -17,16 +17,29 @@ export async function downloadPlannerReport(
   const res = await fetch("/api/planner/report/export", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
+    credentials: "same-origin",
     body: JSON.stringify({ format, payload }),
   });
   if (!res.ok) {
-    let detail = "";
+    let message = "";
     try {
-      detail = ((await res.json()) as { detail?: string }).detail ?? "";
+      const j = (await res.json()) as { error?: string; detail?: string };
+      message = j.detail?.trim() || j.error?.trim() || "";
     } catch {
       /* ignore */
     }
-    throw new Error(`export ${format} failed (${res.status})${detail ? `: ${detail}` : ""}`);
+    throw new Error(
+      message || `export ${format} failed (${res.status})`,
+    );
+  }
+  const contentType = res.headers.get("content-type") ?? "";
+  const expectPdf = format === "pdf";
+  const expectPptx = format === "pptx";
+  if (expectPdf && !contentType.includes("application/pdf")) {
+    throw new Error("Invalid PDF response from server.");
+  }
+  if (expectPptx && !contentType.includes("presentationml")) {
+    throw new Error("Invalid PPTX response from server.");
   }
   const blob = await res.blob();
   const name = `${plannerReportFileBase(payload)}.${format}`;

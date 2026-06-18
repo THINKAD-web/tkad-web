@@ -14,6 +14,7 @@ import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
+import { addPdfMediaDetailLink } from "@/lib/planner-report-export/draw-media-link";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -418,11 +419,11 @@ export async function buildPlannerReportPdf(
     }
 
     const mediaUrl = plannerMediaPageUrl(row.id, isKo);
-    const btnH = mediaUrl ? 7 : 0;
+    const linkBlockH = mediaUrl ? 11 : 0;
 
     const rh = Math.max(
       thumb ? EXPORT_THUMB_BOX_MM.h + 4 : 16,
-      lines.length * 4.4 + 8 + btnH,
+      lines.length * 4.4 + 8 + linkBlockH,
     );
     ensure(rh + 4);
     setFill(GRAY_50);
@@ -442,17 +443,19 @@ export async function buildPlannerReportPdf(
       ty += wrapped.length * 4.2 + 0.8;
     }
     if (mediaUrl) {
-      const btnLabel = plannerMediaPageButtonLabel(isKo);
-      const btnW = 44;
+      const btnW = 48;
       const btnX = M + contentW - btnW - 3;
-      const btnY = y + rh - 6;
-      setFill(VIOLET);
-      doc.roundedRect(btnX, btnY, btnW, 5.2, 1.2, 1.2, "F");
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(8);
-      doc.setTextColor(255, 255, 255);
-      doc.text(btnLabel, btnX + btnW / 2, btnY + 3.6, { align: "center" });
-      doc.link(btnX, btnY, btnW, 5.2, { url: mediaUrl });
+      const btnY = y + rh - linkBlockH + 1;
+      addPdfMediaDetailLink(doc, {
+        x: btnX,
+        y: btnY,
+        w: btnW,
+        label: plannerMediaPageButtonLabel(isKo),
+        url: mediaUrl,
+        font: FONT,
+        violet: VIOLET,
+        cyan: CYAN,
+      });
     }
     y += rh + 4;
   }

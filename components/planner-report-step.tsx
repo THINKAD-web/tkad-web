@@ -226,8 +226,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         toast("success", t("reportPdfDownloaded"));
       } catch (e) {
         console.error("[planner-report-export]", e);
-        setError(t("reportPdfError"));
-        toast("error", tCommon("pdfGenerationFailed"));
+        const detail = e instanceof Error ? e.message : "";
+        setError(detail || t("reportPdfError"));
+        toast("error", detail || tCommon("pdfGenerationFailed"));
       } finally {
         setDownloading(null);
       }

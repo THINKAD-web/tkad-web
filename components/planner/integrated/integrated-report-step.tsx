@@ -92,8 +92,10 @@ export function IntegratedReportStep(props: Props) {
       try {
         await downloadPlannerReport(format, payload);
         toast("success", t("pdfDownloaded"));
-      } catch {
-        toast("error", t("pdfFailed"));
+      } catch (e) {
+        console.error("[integrated-report-export]", e);
+        const detail = e instanceof Error ? e.message : "";
+        toast("error", detail || t("pdfFailed"));
       } finally {
         setDownloading(null);
       }

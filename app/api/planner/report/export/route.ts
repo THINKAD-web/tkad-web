@@ -14,6 +14,7 @@ function contentDisposition(filename: string): string {
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 /**
  * 플래너 보고서 서버 출력 — PDF(jsPDF) / PPTX(pptxgenjs).

@@ -84,10 +84,17 @@ export async function loadExportThumbMap(
   ];
   const thumbEntries = await Promise.all(
     thumbUrls.map(async (u) => {
-      const raw = await fetchMediaImageDataUrl(u);
-      if (!raw) return [u, raw] as const;
-      const cropped = await coverCropThumbDataUrl(raw);
-      return [u, cropped] as const;
+      try {
+        const raw = await Promise.race([
+          fetchMediaImageDataUrl(u),
+          new Promise<null>((resolve) => setTimeout(() => resolve(null), 12_000)),
+        ]);
+        if (!raw) return [u, raw] as const;
+        const cropped = await coverCropThumbDataUrl(raw);
+        return [u, cropped] as const;
+      } catch {
+        return [u, null] as const;
+      }
     }),
   );
   return new Map<string, string>(
