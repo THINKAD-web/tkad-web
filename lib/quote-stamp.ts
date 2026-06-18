@@ -1,6 +1,3 @@
-import { existsSync } from "node:fs";
-import { join } from "node:path";
-
 /** 브라우저·서버 공용 정적 직인 경로 (public/brand/thinkad-stamp.png) */
 export const QUOTE_STAMP_PUBLIC_PATH = "/brand/thinkad-stamp.png";
 
@@ -8,15 +5,10 @@ export const QUOTE_STAMP_PUBLIC_PATH = "/brand/thinkad-stamp.png";
 export const QUOTE_STAMP_CDN_URL =
   "https://tkad-cdn.b-cdn.net/tkad/admin/2026/06/%5B%E1%84%89%E1%85%B5%E1%86%BC%E1%84%8F%E1%85%A5%E1%84%83%E1%85%B3%5D%20%E1%84%83%E1%85%A9%E1%84%8C%E1%85%A1%E1%86%BC.png";
 
-function localStampExists(): boolean {
-  return existsSync(join(process.cwd(), "public", "brand", "thinkad-stamp.png"));
-}
-
-/** 견적서·PDF·PPTX에 쓸 직인 URL (환경변수 > 로컬 정적 > CDN) */
+/** 견적서 페이로드·프록시용 직인 URL (환경변수 > CDN). 로컬 파일은 서버 PDF에서만 quote-pdf-assets 경유 */
 export function getQuoteStampUrl(): string {
   const fromEnv = process.env.QUOTE_STAMP_URL?.trim();
   if (fromEnv) return fromEnv;
-  if (localStampExists()) return QUOTE_STAMP_PUBLIC_PATH;
   return QUOTE_STAMP_CDN_URL;
 }
 
