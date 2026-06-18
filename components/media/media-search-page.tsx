@@ -35,6 +35,7 @@ import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { MediaPinPopup } from "@/components/media-pin-popup";
+import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import {
   mediaItemHasMapCoordinates,
   resolveMediaIdFromMapPinId,
@@ -93,6 +94,7 @@ interface Props {
   embedded?: boolean;
   plannerSelectedIds?: string[];
   onPlannerToggleMedia?: (mediaId: string) => void;
+  onPlannerClearMedia?: () => void;
 }
 
 function MediaSearchPageInner({
@@ -108,6 +110,7 @@ function MediaSearchPageInner({
   embedded = false,
   plannerSelectedIds = [],
   onPlannerToggleMedia,
+  onPlannerClearMedia,
 }: Props) {
   const locale = useLocale();
   const tMedia = useTranslations("media");
@@ -559,6 +562,12 @@ function MediaSearchPageInner({
     );
   };
 
+  const scrollToPlannerSelection = useCallback(() => {
+    document
+      .getElementById("planner-browse-selected-media")
+      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, []);
+
   const edgePad = embedded || plannerMode ? "px-0" : "px-4";
 
   return (
@@ -604,7 +613,27 @@ function MediaSearchPageInner({
           cartCount={plannerMode ? 0 : cartIds.length}
           selectedCount={plannerMode ? plannerSelectedIds.length : 0}
           selectionVariant={plannerMode ? "plan" : "default"}
+          onSelectedSummaryClick={
+            plannerMode && plannerSelectedIds.length > 0
+              ? scrollToPlannerSelection
+              : undefined
+          }
         />
+
+        {plannerMode &&
+        plannerSelectedIds.length > 0 &&
+        onPlannerClearMedia &&
+        onPlannerToggleMedia ? (
+          <PlannerSelectedMediaBar
+            id="planner-browse-selected-media"
+            catalog={initialCatalogItems}
+            campaignMediaIds={plannerSelectedIds}
+            onRemove={onPlannerToggleMedia}
+            onClearAll={onPlannerClearMedia}
+            isKo={isKo}
+            className="mt-3"
+          />
+        ) : null}
       </div>
 
       {/* ── 매체 목록 / 지도 ── */}

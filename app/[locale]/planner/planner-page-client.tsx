@@ -57,6 +57,7 @@ import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
+import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -242,6 +243,17 @@ export default function PlannerPageClient({
     },
     [setCampaignMediaIds],
   );
+
+  const removePlannerMedia = useCallback(
+    (mediaId: string) => {
+      setCampaignMediaIds((prev) => prev.filter((id) => id !== mediaId));
+    },
+    [setCampaignMediaIds],
+  );
+
+  const clearPlannerMedia = useCallback(() => {
+    setCampaignMediaIds([]);
+  }, [setCampaignMediaIds]);
   const setCreativeObjectUrl = usePlannerStore((s) => s.setCreativeObjectUrl);
   const setCreativeUploadedUrl = usePlannerStore(
     (s) => s.setCreativeUploadedUrl,
@@ -1254,6 +1266,14 @@ export default function PlannerPageClient({
                   <p className={plannerNeon.subtext}>{t("stepMediaDesc")}</p>
                 </div>
 
+                <PlannerSelectedMediaBar
+                  catalog={catalog}
+                  campaignMediaIds={campaignMediaIds}
+                  onRemove={removePlannerMedia}
+                  onClearAll={clearPlannerMedia}
+                  isKo={isKo}
+                />
+
                 <PlannerRecommendationPanel
                   catalog={recommendationCatalog}
                   isKo={isKo}
@@ -1272,9 +1292,11 @@ export default function PlannerPageClient({
                     embedded
                     plannerMode
                     initialMedia={plannerCatalogItems}
+                    initialCatalogItems={catalog}
                     initialTotal={catalog.length}
                     plannerSelectedIds={campaignMediaIds}
                     onPlannerToggleMedia={togglePlannerMedia}
+                    onPlannerClearMedia={clearPlannerMedia}
                   />
                 </div>
               </div>
