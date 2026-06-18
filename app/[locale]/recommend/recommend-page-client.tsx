@@ -33,6 +33,8 @@ import {
   estimatedMonthlyImpressions,
 } from "@/lib/ai-recommend-metrics";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
+import { planCartMaxItems } from "@/lib/plan-cart-limits";
+import { useIsPro } from "@/hooks/use-is-pro";
 import {
   buildHomeBudgetRecommendInput,
   type HomeBudgetIndustry,
@@ -50,8 +52,6 @@ const RecommendCartBar = dynamic(
   { ssr: false },
 );
 
-const CART_MAX = 12;
-
 type Phase = "form" | "loading" | "dashboard" | "noResults" | "list";
 
 export default function RecommendPageClient({
@@ -64,6 +64,8 @@ export default function RecommendPageClient({
   const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { isPro } = useIsPro();
+  const cartMax = planCartMaxItems(isPro);
   const searchParams = useSearchParams();
   const similarCampaignId = searchParams.get("similar")?.trim() ?? "";
   const similarPrefillDone = useRef<string | null>(null);
@@ -445,7 +447,7 @@ export default function RecommendPageClient({
         const idSet = new Set(mediaIds);
         const matched = catalog.filter((m) => idSet.has(m.id));
         if (matched.length > 0) {
-          setCartItems(matched.slice(0, CART_MAX));
+          setCartItems(matched.slice(0, cartMax));
         }
 
         const period =
@@ -483,7 +485,7 @@ export default function RecommendPageClient({
     return () => {
       cancelled = true;
     };
-  }, [similarCampaignId, catalog, isKo]);
+  }, [similarCampaignId, catalog, isKo, cartMax]);
 
   const handleRemix = useCallback(() => {
     if (!lastPayload) return;
@@ -749,7 +751,7 @@ export default function RecommendPageClient({
       <RecommendCartBar
         items={cartItems}
         locale={locale}
-        maxItems={CART_MAX}
+        maxItems={cartMax}
         onRemove={(id) =>
           setCartItems((prev) => prev.filter((m) => m.id !== id))
         }

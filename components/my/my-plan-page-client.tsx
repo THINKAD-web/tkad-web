@@ -14,6 +14,7 @@ import {
   planCartAddedFromLabel,
   planCartMonthlyTotal,
 } from "@/lib/plan-cart";
+import { buildMyPlanPlannerHref } from "@/lib/plan-cart-planner-bridge";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { useAppToast } from "@/lib/use-toast";
@@ -39,6 +40,9 @@ export function MyPlanPageClient() {
   const monthlyTotal = useMemo(() => planCartMonthlyTotal(cart), [cart]);
   const duration = cart.duration ?? 1;
   const periodTotal = monthlyTotal * duration;
+  const plannerHref = buildMyPlanPlannerHref(
+    cart.items.map((item) => item.mediaId),
+  );
 
   function formatWon(amount: number) {
     if (amount <= 0) return isKo ? "문의" : "Inquire";
@@ -283,7 +287,7 @@ export function MyPlanPageClient() {
                   <ArrowRight className="ml-2 inline h-4 w-4" />
                 </BtnBlock>
                 <BtnBlock
-                  href="/planner"
+                  href={plannerHref}
                   variant="secondary"
                   size="lg"
                   className="flex-1 rounded-2xl sm:min-w-[14rem]"

@@ -22,6 +22,8 @@ import {
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import { hydratePlannerFromSavedPlan } from "@/lib/planner/hydrate-from-saved-plan";
+import { hydratePlannerFromPlanCart } from "@/lib/plan-cart-planner-bridge";
+import type { PlanCart } from "@/lib/plan-cart";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록
@@ -48,6 +50,11 @@ export type PlannerStoreState = {
   creativeUploadedUrl: string | null;
   /** 매체별 로고 배치 좌표 (Canvas 편집 결과). key = media id. persist 포함. */
   mediaPlacements: Record<string, CompositeLogoPlacement>;
+  /**
+   * Step 4 에서 사용자가 매체 선택을 건드렸으면 true.
+   * true 이고 campaignMediaIds 가 비어 있으면 portfolio 자동조합을 하지 않음.
+   */
+  mediaSelectionExplicit: boolean;
 };
 
 export type PlannerStoreActions = {
@@ -78,6 +85,8 @@ export type PlannerStoreActions = {
   reset: () => void;
   /** 저장된 공유 플랜 JSON으로 입력 상태 복원 */
   importFromSavedPlan: (plan: SavedPlannerPlanJson) => void;
+  /** 내 플랜 카트 → 플래너 입력 교체 (옛 세션 매체와 merge 하지 않음) */
+  importFromPlanCart: (cart: PlanCart) => void;
 };
 
 export type PlannerStore = PlannerStoreState & PlannerStoreActions;
@@ -95,6 +104,7 @@ const INITIAL_STATE: PlannerStoreState = {
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
   mediaPlacements: {},
+  mediaSelectionExplicit: false,
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -177,6 +187,7 @@ export const usePlannerStore = create<PlannerStore>()(
             typeof action === "function"
               ? action(s.campaignMediaIds)
               : [...action],
+          mediaSelectionExplicit: true,
         })),
 
       setCreativeObjectUrl: (action) =>
@@ -233,6 +244,25 @@ export const usePlannerStore = create<PlannerStore>()(
           wizardStep: 1,
           creativeObjectUrl: null,
         }),
+
+      importFromPlanCart: (cart) =>
+        set((s) => {
+          const patch = hydratePlannerFromPlanCart(cart);
+          const ids = patch.campaignMediaIds ?? [];
+          const placements: Record<string, CompositeLogoPlacement> = {};
+          for (const id of ids) {
+            const p = s.mediaPlacements[id];
+            if (p) placements[id] = p;
+          }
+          return {
+            ...patch,
+            campaignMediaIds: ids,
+            mediaPlacements: placements,
+            mediaSelectionExplicit: true,
+            wizardStep: 4,
+            creativeObjectUrl: null,
+          };
+        }),
     }),
     {
       name: PLANNER_STORAGE_KEY,
@@ -254,6 +284,7 @@ export const usePlannerStore = create<PlannerStore>()(
         campaignMediaIds: state.campaignMediaIds,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
+        mediaSelectionExplicit: state.mediaSelectionExplicit,
       }),
       /**
        * 레거시 포맷:
@@ -309,6 +340,8 @@ export const usePlannerStore = create<PlannerStore>()(
             (id): id is string => typeof id === "string",
           );
         }
+
+        merged.mediaSelectionExplicit = raw.mediaSelectionExplicit === true;
 
         if (typeof raw.creativeUploadedUrl === "string") {
           merged.creativeUploadedUrl = raw.creativeUploadedUrl;

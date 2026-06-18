@@ -58,6 +58,7 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
+import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import {
@@ -206,6 +207,9 @@ export default function PlannerPageClient({
   const ageKey = usePlannerStore((s) => s.ageKey);
   const industryKey = usePlannerStore((s) => s.industryKey);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
+  const mediaSelectionExplicit = usePlannerStore(
+    (s) => s.mediaSelectionExplicit,
+  );
   const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
   const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
@@ -221,6 +225,7 @@ export default function PlannerPageClient({
   const setAgeKey = usePlannerStore((s) => s.setAgeKey);
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const importFromPlanCart = usePlannerStore((s) => s.importFromPlanCart);
 
   const plannerCatalogItems = useMemo(
     () => catalog.map((m) => mapMediaItemToHomeCatalog(m)),
@@ -316,8 +321,18 @@ export default function PlannerPageClient({
         months,
       );
     }
+    if (mediaSelectionExplicit && campaignMediaIds.length === 0) {
+      return [];
+    }
     return selectPlannerPortfolio(filtered, budgetNum, months, 6);
-  }, [filtered, budgetNum, months, manualIntersectedPortfolio]);
+  }, [
+    filtered,
+    budgetNum,
+    months,
+    manualIntersectedPortfolio,
+    mediaSelectionExplicit,
+    campaignMediaIds.length,
+  ]);
 
   const blurbParts = useMemo(
     () => computeBudgetBlurbParts(filtered, budgetNum, months),
@@ -369,15 +384,30 @@ export default function PlannerPageClient({
   const [creatingQuote, setCreatingQuote] = useState(false);
 
 
-  // PR-D: 매체 상세 ?addMedia= · 찜 목록 ?mediaIds= 로 Step 4 사전 선택
+  // PR-D: 매체 상세 ?addMedia= · 찜 목록 ?mediaIds= · 내 플랜 ?from=plan
   const searchParams = useSearchParams();
   const addMediaId = searchParams.get("addMedia");
   const mediaIdsParam = searchParams.get("mediaIds");
+  const fromPlanParam = searchParams.get("from");
   const loadPlanParam = searchParams.get("loadPlan");
   const createQuoteParam = searchParams.get("createQuote");
   const handledQueryRef = useRef<string | null>(null);
+  const handledFromPlanRef = useRef(false);
   const handledLoadPlanRef = useRef<string | null>(null);
   const handledCreateQuoteRef = useRef(false);
+  const [plannerStoreReady, setPlannerStoreReady] = useState(() =>
+    usePlannerStore.persist.hasHydrated(),
+  );
+
+  useEffect(() => {
+    if (usePlannerStore.persist.hasHydrated()) {
+      setPlannerStoreReady(true);
+      return;
+    }
+    return usePlannerStore.persist.onFinishHydration(() => {
+      setPlannerStoreReady(true);
+    });
+  }, []);
 
   const stripPlannerQueryKeys = useCallback((keys: string[]) => {
     if (typeof window === "undefined") return;
@@ -386,7 +416,41 @@ export default function PlannerPageClient({
     window.history.replaceState({}, "", url.toString());
   }, []);
 
+  /** 내 플랜 → 플래너: persist 재수화 후 카트로 교체 (옛 세션 merge 금지) */
   useEffect(() => {
+    if (!plannerStoreReady) return;
+    if (fromPlanParam !== "plan") return;
+    if (handledFromPlanRef.current) return;
+    handledFromPlanRef.current = true;
+
+    const cart = getPlanCart();
+    importFromPlanCart(cart);
+    handledQueryRef.current = "from:plan";
+
+    const count = cart.items.length;
+    toast(
+      "success",
+      isKo
+        ? count > 0
+          ? `내 플랜 매체 ${count}개로 플래너를 시작합니다.`
+          : "내 플랜 설정으로 플래너를 시작합니다."
+        : count > 0
+          ? `Starting planner with ${count} media from My plan.`
+          : "Starting planner with your My plan settings.",
+    );
+    stripPlannerQueryKeys(["from", "mediaIds", "addMedia"]);
+  }, [
+    plannerStoreReady,
+    fromPlanParam,
+    importFromPlanCart,
+    isKo,
+    stripPlannerQueryKeys,
+    toast,
+  ]);
+
+  useEffect(() => {
+    if (!plannerStoreReady) return;
+    if (fromPlanParam === "plan") return;
     const batchKey = mediaIdsParam
       ? `mediaIds:${mediaIdsParam}`
       : addMediaId
@@ -448,6 +512,8 @@ export default function PlannerPageClient({
     );
     stripPlannerQueryKeys(["addMedia"]);
   }, [
+    plannerStoreReady,
+    fromPlanParam,
     addMediaId,
     mediaIdsParam,
     catalog,

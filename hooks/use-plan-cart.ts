@@ -8,6 +8,7 @@ import {
   getPlanCart,
   getPlanCartCount,
   isInPlanCart,
+  planCartMaxItems,
   PLAN_CART_CHANGE_EVENT,
   PLAN_CART_KEY,
   removeFromPlanCart,
@@ -17,6 +18,7 @@ import {
   type PlanCart,
   type PlanCartItem,
 } from "@/lib/plan-cart";
+import { useIsPro } from "@/hooks/use-is-pro";
 
 const EMPTY_PLAN_CART: PlanCart = {
   items: [],
@@ -25,6 +27,8 @@ const EMPTY_PLAN_CART: PlanCart = {
 
 export function usePlanCart() {
   const [cart, setCart] = useState<PlanCart>(EMPTY_PLAN_CART);
+  const { isPro } = useIsPro();
+  const maxItems = planCartMaxItems(isPro);
 
   useEffect(() => {
     const sync = () => setCart(getPlanCart());
@@ -46,14 +50,14 @@ export function usePlanCart() {
 
   const add = useCallback(
     (item: Omit<PlanCartItem, "addedAt">): AddToPlanCartResult =>
-      addToPlanCart(item),
-    [],
+      addToPlanCart(item, maxItems),
+    [maxItems],
   );
 
   const addMany = useCallback(
     (items: Omit<PlanCartItem, "addedAt">[]): BulkAddToPlanCartResult =>
-      addManyToPlanCart(items),
-    [],
+      addManyToPlanCart(items, maxItems),
+    [maxItems],
   );
 
   const remove = useCallback((mediaId: string) => {
@@ -83,6 +87,7 @@ export function usePlanCart() {
   return {
     cart,
     count: cart.items.length,
+    maxItems,
     add,
     addMany,
     remove,
