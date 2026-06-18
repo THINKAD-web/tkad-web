@@ -10,7 +10,8 @@ export type PlannerCategory = "digital" | "static" | "mobile";
 /** DB `Media.type` · 레거시 값 → 플래너 유형 (매칭용) */
 export type PlannerMediaKind = "digital" | "static" | "mobile" | "network";
 
-const TRANSIT_MOBILE_SUBCATEGORIES = new Set([
+/** 차량·차내·기내 등 실제로 움직이는 매체 (등록 type 미기입 레거시용) */
+const TRULY_MOBILE_SUBCATEGORIES = new Set([
   "bus_interior",
   "bus_exterior",
   "bus_wrap",
@@ -18,10 +19,16 @@ const TRANSIT_MOBILE_SUBCATEGORIES = new Set([
   "taxi_interior",
   "taxi_exterior",
   "subway_train",
-  "subway_station",
-  "subway_platform",
+  "subway_incar",
   "inflight",
   "ferry",
+]);
+
+/** 역사·터미널 등 고정 설치 교통 매체 (레거시 type 없을 때 디지털 추정) */
+const FIXED_SITE_SUBCATEGORIES = new Set([
+  "subway_station",
+  "subway_platform",
+  "subway_screendoor",
   "ktx_terminal",
   "airport",
 ]);
@@ -37,25 +44,32 @@ export type PlannerMediaKindInput = Pick<
   | "tags"
 >;
 
-/** browse·DB 메타 + type 문자열 — 보고서 고정형/이동형 분류 */
+/**
+ * 보고서 유형(디지털/고정형/이동형) 분류.
+ * 1순위: 매체 등록 시 선택한 `type` (admin: 디지털·고정형·이동형 3종).
+ * 2순위: type 미입력 레거시만 서브카테고리·이름 휴리스틱.
+ * Browse `transit` 등 메인카테고리는 보고서 유형을 바꾸지 않음.
+ */
 export function resolvePlannerMediaKind(
   item: PlannerMediaKindInput,
 ): PlannerMediaKind | null {
-  const main = (item.mediaMainCategory ?? "").trim().toLowerCase();
+  const fromType = normalizeMediaTypeForPlanner(item.type);
+  if (fromType) return fromType;
+
   const sub = (item.mediaSubCategory ?? item.subCategory ?? "")
     .trim()
     .toLowerCase();
 
-  if (main === "transit") return "mobile";
-  if (sub && TRANSIT_MOBILE_SUBCATEGORIES.has(sub)) return "mobile";
-
-  const fromType = normalizeMediaTypeForPlanner(item.type);
-  if (fromType) return fromType;
+  if (sub && TRULY_MOBILE_SUBCATEGORIES.has(sub)) return "mobile";
+  if (sub && FIXED_SITE_SUBCATEGORIES.has(sub)) return "digital";
 
   const hay = [item.name, item.nameEn, ...(item.tags ?? [])]
     .filter(Boolean)
     .join(" ");
-  if (/버스|bus|지하철|subway|택시|taxi|랩핑|wrap|transit|vehicle/i.test(hay)) {
+  if (/버스|bus|택시|taxi|랩핑|vehicle[\s_-]?wrap|bus[\s_-]?wrap/i.test(hay)) {
+    return "mobile";
+  }
+  if (/차내|in[\s-]?car|subway\s*train|기내|inflight|비행|항공/i.test(hay)) {
     return "mobile";
   }
 
@@ -92,12 +106,10 @@ export function normalizeMediaTypeForPlanner(
   }
   if (
     t === "mobile" ||
-    t === "transit" ||
     t === "bus" ||
     t === "bus_interior" ||
     t === "bus_exterior" ||
     t === "bus_wrap" ||
-    t === "subway" ||
     t === "transport" ||
     t === "vehicle"
   ) {
@@ -108,7 +120,7 @@ export function normalizeMediaTypeForPlanner(
     return "static";
   }
   if (/디지털|dooh|ooh|사이니지|signage|led|전광/.test(t)) return "digital";
-  if (/이동|버스|택시|지하철|랩핑|transit|vehicle/.test(t)) return "mobile";
+  if (/이동|버스|택시|랩핑|vehicle|차내|기내|inflight|비행/.test(t)) return "mobile";
   return null;
 }
 
