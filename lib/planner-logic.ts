@@ -129,7 +129,6 @@ export function countPlannerMediaByRegion(
   return out;
 }
 
-/** 예산 대비 효율로 조합 추천 (월 합산 단가가 spend 상한에 맞게) */
 /** 포트폴리오 월 단가(만원) 대비 예상 월간 노출로 블렌드 CPM(원/천회) 추정 */
 export function plannerBlendCpmKrw(
   portfolio: readonly MediaItem[],
@@ -140,7 +139,27 @@ export function plannerBlendCpmKrw(
     (s, m) => s + catalogPriceFieldToWon(m.price),
     0,
   );
+  if (wonPerMonth <= 0) return null;
   return Math.round(wonPerMonth / (estimatedMonthlyImpressions / 1000));
+}
+
+/** 보고서 성과 요약 — 선택 포트폴리오 기준 노출·CPM (차트·KPI 정합) */
+export function computePortfolioReportMetrics(
+  portfolio: readonly MediaItem[],
+  months: number,
+): {
+  monthlyImpressions: number;
+  totalImpressions: number;
+  blendedCpmKrw: number | null;
+} {
+  const monthlyImpressions = portfolio.reduce(
+    (s, m) => s + Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30)),
+    0,
+  );
+  const m = Math.max(1, months);
+  const totalImpressions = monthlyImpressions * m;
+  const blendedCpmKrw = plannerBlendCpmKrw(portfolio, monthlyImpressions);
+  return { monthlyImpressions, totalImpressions, blendedCpmKrw };
 }
 
 export function selectPlannerPortfolio(
@@ -368,17 +387,25 @@ export function budgetSplitByCategory(
     );
   }
   const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
+  const totalActual = [...wonSums.values()].reduce((a, b) => a + b, 0);
+  /** 실제 단가 합이 있으면 도넛·%는 실제 월 예산 기준 (0원 유형은 제외) */
+  const useActual = totalActual > 0;
+  const totalSegment = useActual ? totalActual : totalWeight;
+
   return [...weightSums.entries()]
-    .map(([key, weight]) => ({
-      key,
-      labelKo: TYPE_META[key]?.labelKo ?? key,
-      labelEn: TYPE_META[key]?.labelEn ?? key,
-      // 차트 세그먼트 크기 — 0원 매체도 폴백 가중치로 포함
-      value: weight,
-      // 텍스트·KPI용 실제 월 단가 합
-      actualWon: wonSums.get(key) ?? 0,
-      pct: Math.round((weight / totalWeight) * 1000) / 10,
-    }))
+    .map(([key, weight]) => {
+      const actualWon = wonSums.get(key) ?? 0;
+      const segmentValue = useActual ? actualWon : weight;
+      return {
+        key,
+        labelKo: TYPE_META[key]?.labelKo ?? key,
+        labelEn: TYPE_META[key]?.labelEn ?? key,
+        value: segmentValue,
+        actualWon,
+        pct: Math.round((segmentValue / totalSegment) * 1000) / 10,
+      };
+    })
+    .filter((s) => s.value > 0)
     .sort((a, b) => b.value - a.value);
 }
 

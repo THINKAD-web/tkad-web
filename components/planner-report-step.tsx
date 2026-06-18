@@ -7,7 +7,7 @@ import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
 import {
   budgetSplitByCategory,
-  plannerBlendCpmKrw,
+  computePortfolioReportMetrics,
   portfolioCpmByCategory,
   portfolioDailyByCategory,
   type PlannerCampaignGoal,
@@ -97,13 +97,14 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     }));
   }, [props.portfolio, props.isKo]);
 
-  const blendedCpmKrw = useMemo(() => {
-    if (!props.metrics) return null;
-    return plannerBlendCpmKrw(
-      props.portfolio,
-      props.metrics.estimatedMonthlyImpressions,
-    );
-  }, [props.metrics, props.portfolio]);
+  const portfolioReport = useMemo(
+    () => computePortfolioReportMetrics(props.portfolio, props.months),
+    [props.portfolio, props.months],
+  );
+  const usePortfolioReach =
+    props.portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;
+
+  const blendedCpmKrw = portfolioReport.blendedCpmKrw;
 
   const dailyBars = useMemo(() => {
     const pts = portfolioDailyByCategory(props.portfolio);
@@ -115,13 +116,19 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
   }, [props.portfolio, props.isKo]);
 
   const effectSummaryLines = useMemo(() => {
-    if (!props.metrics) return [];
+    if (!props.metrics && portfolioReport.monthlyImpressions <= 0) return [];
+    const monthlyImp = usePortfolioReach
+      ? portfolioReport.monthlyImpressions
+      : (props.metrics?.estimatedMonthlyImpressions ?? 0);
+    const totalImp = usePortfolioReach
+      ? portfolioReport.totalImpressions
+      : (props.metrics?.estimatedTotalImpressions ?? 0);
     const lines: string[] = [
       t("reportSummaryImpMonthly", {
-        n: props.metrics.estimatedMonthlyImpressions.toLocaleString(),
+        n: monthlyImp.toLocaleString(),
       }),
       t("reportSummaryImpTotal", {
-        n: props.metrics.estimatedTotalImpressions.toLocaleString(),
+        n: totalImp.toLocaleString(),
       }),
       t("reportSummaryReach", {
         core: props.reachCorePct,
@@ -133,12 +140,22 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
         t("reportSummaryCpm", { n: blendedCpmKrw.toLocaleString() }),
       );
     }
-    lines.push(
-      t("reportSummaryRoi", { n: props.metrics.roiExpected }),
-      t("reportSummaryDisclaimerShort"),
-    );
+    if (props.metrics) {
+      lines.push(
+        t("reportSummaryRoi", { n: props.metrics.roiExpected }),
+      );
+    }
+    lines.push(t("reportSummaryDisclaimerShort"));
     return lines;
-  }, [props.metrics, props.reachCorePct, props.reachExtendedPct, blendedCpmKrw, t]);
+  }, [
+    props.metrics,
+    props.reachCorePct,
+    props.reachExtendedPct,
+    blendedCpmKrw,
+    portfolioReport,
+    usePortfolioReach,
+    t,
+  ]);
 
   const contact = useMemo(
     () => ({

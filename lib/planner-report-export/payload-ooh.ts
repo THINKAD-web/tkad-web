@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
+import { computePortfolioReportMetrics } from "@/lib/planner-logic";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   computePortfolioContributions,
@@ -42,13 +43,25 @@ export function buildOohReportPayload(
 ): PlannerReportExportPayload {
   const isKo = a.isKo;
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const portfolioMetrics = computePortfolioReportMetrics(
+    a.portfolio,
+    a.months ?? 1,
+  );
+  const usePortfolioReach =
+    a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
 
   const kpis: PlannerReportExportPayload["kpis"] = [];
-  if (a.metrics) {
+  if (a.metrics || usePortfolioReach) {
     kpis.push({
       label: isKo ? "총 예상 노출" : "Est. impressions",
-      value: fmt(a.metrics.estimatedTotalImpressions),
+      value: fmt(
+        usePortfolioReach
+          ? portfolioMetrics.totalImpressions
+          : (a.metrics?.estimatedTotalImpressions ?? 0),
+      ),
     });
+  }
+  if (a.metrics) {
     kpis.push({
       label: isKo ? "기대 ROI" : "Expected ROI",
       value: `${a.metrics.roiExpected}${isKo ? "배" : "×"}`,
@@ -58,10 +71,12 @@ export function buildOohReportPayload(
     label: isKo ? "핵심 타깃 도달" : "Core reach",
     value: `${a.reachCorePct}%`,
   });
-  if (a.blendedCpmKrw && a.blendedCpmKrw > 0) {
+  const blendedForKpi =
+    portfolioMetrics.blendedCpmKrw ?? a.blendedCpmKrw ?? null;
+  if (blendedForKpi && blendedForKpi > 0) {
     kpis.push({
       label: isKo ? "블렌디드 CPM" : "Blended CPM",
-      value: `₩${a.blendedCpmKrw.toLocaleString()}`,
+      value: `₩${blendedForKpi.toLocaleString()}`,
     });
   }
 
@@ -81,12 +96,29 @@ export function buildOohReportPayload(
         value: c.value,
         colorKey: c.key,
       })),
-    reachSummary: a.metrics
+    reachSummary: usePortfolioReach
       ? [
-          { label: isKo ? "월 노출" : "Monthly", value: a.metrics.estimatedMonthlyImpressions },
-          { label: isKo ? "총 노출" : "Total", value: a.metrics.estimatedTotalImpressions },
+          {
+            label: isKo ? "월 노출" : "Monthly",
+            value: portfolioMetrics.monthlyImpressions,
+          },
+          {
+            label: isKo ? "총 노출" : "Total",
+            value: portfolioMetrics.totalImpressions,
+          },
         ].filter((d) => d.value > 0)
-      : [],
+      : a.metrics
+        ? [
+            {
+              label: isKo ? "월 노출" : "Monthly",
+              value: a.metrics.estimatedMonthlyImpressions,
+            },
+            {
+              label: isKo ? "총 노출" : "Total",
+              value: a.metrics.estimatedTotalImpressions,
+            },
+          ].filter((d) => d.value > 0)
+        : [],
   };
 
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
@@ -100,8 +132,8 @@ export function buildOohReportPayload(
           ? `왜 이 구성인가 · ${a.regionsText} 핵심 동선의 ${a.portfolio.length}개 매체로 ${a.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`
           : `Why · ${a.portfolio.length} media across ${a.regionsText} balance reach and efficiency for the "${a.goalTitle}" objective.`,
         isKo
-          ? `예상 효과 · 총 ${fmt(a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
-          : `Impact · ${fmt(a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
+          ? `예상 효과 · 총 ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
+          : `Impact · ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
         isKo
           ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
           : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
