@@ -23,7 +23,7 @@ export function PlanCartAddButton({
   className,
 }: Props) {
   const toast = useAppToast();
-  const { has, add, remove } = usePlanCart();
+  const { has, add, remove, maxItems } = usePlanCart();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 
@@ -44,7 +44,7 @@ export function PlanCartAddButton({
       toast.warning("이미 플랜에 있습니다");
       return;
     }
-    toast.error("플랜은 최대 10개 매체까지 가능합니다");
+    toast.error(`플랜은 최대 ${maxItems}개 매체까지 가능합니다`);
   }
 
   return (

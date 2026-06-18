@@ -2,8 +2,9 @@ import { z } from "zod";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
+import { resolveIsPro } from "@/lib/ai-rate-limit";
 import {
-  PLAN_CART_MAX_ITEMS,
+  planCartMaxItems,
   type PlanCartItem,
 } from "@/lib/plan-cart";
 import {
@@ -28,13 +29,15 @@ const PlanCartItemSchema = z.object({
   addedAt: z.string(),
 });
 
-const SyncBodySchema = z.object({
-  items: z.array(PlanCartItemSchema).max(PLAN_CART_MAX_ITEMS),
-  campaignGoal: z.string().optional(),
-  totalBudget: z.number().optional(),
-  duration: z.number().int().positive().optional(),
-  updatedAt: z.string().optional(),
-});
+function syncBodySchema(maxItems: number) {
+  return z.object({
+    items: z.array(PlanCartItemSchema).max(maxItems),
+    campaignGoal: z.string().optional(),
+    totalBudget: z.number().optional(),
+    duration: z.number().int().positive().optional(),
+    updatedAt: z.string().optional(),
+  });
+}
 
 function parseItems(raw: unknown): PlanCartItem[] {
   if (!Array.isArray(raw)) return [];
@@ -45,12 +48,13 @@ function parseItems(raw: unknown): PlanCartItem[] {
 function mergeItems(
   local: PlanCartItem[],
   remote: PlanCartItem[],
+  maxItems: number,
 ): PlanCartItem[] {
   const byId = new Map<string, PlanCartItem>();
   for (const item of [...remote, ...local]) {
     if (!byId.has(item.mediaId)) byId.set(item.mediaId, item);
   }
-  return Array.from(byId.values()).slice(0, PLAN_CART_MAX_ITEMS);
+  return Array.from(byId.values()).slice(0, maxItems);
 }
 
 export async function GET() {
@@ -95,7 +99,8 @@ export async function POST(req: Request) {
 
     const body = await readJson(req);
     if (!body) return apiError("INVALID_JSON", 400);
-    const parsed = SyncBodySchema.safeParse(body);
+    const maxItems = planCartMaxItems(await resolveIsPro(user.id));
+    const parsed = syncBodySchema(maxItems).safeParse(body);
     if (!parsed.success) return apiZodError(parsed.error);
 
     const existing = await prisma.userSavedPlan.findUnique({
@@ -103,7 +108,7 @@ export async function POST(req: Request) {
     });
 
     const remoteItems = existing ? parseItems(existing.items) : [];
-    const mergedItems = mergeItems(parsed.data.items, remoteItems);
+    const mergedItems = mergeItems(parsed.data.items, remoteItems, maxItems);
 
     const localUpdated = parsed.data.updatedAt
       ? Date.parse(parsed.data.updatedAt)

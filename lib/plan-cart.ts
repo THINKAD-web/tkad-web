@@ -1,7 +1,19 @@
 /** 플랜 장바구니 — localStorage `tkad_plan_cart` */
 
+import {
+  PLAN_CART_MAX_ITEMS,
+  PLAN_CART_MAX_ITEMS_FREE,
+  planCartMaxItems,
+} from "@/lib/plan-cart-limits";
+
+export {
+  PLAN_CART_MAX_ITEMS,
+  PLAN_CART_MAX_ITEMS_FREE,
+  PLAN_CART_MAX_ITEMS_PRO,
+  planCartMaxItems,
+} from "@/lib/plan-cart-limits";
+
 export const PLAN_CART_KEY = "tkad_plan_cart";
-export const PLAN_CART_MAX_ITEMS = 10;
 export const PLAN_CART_CHANGE_EVENT = "tkad:plan-cart-changed";
 
 export type PlanCartAddedFrom =
@@ -149,12 +161,15 @@ export function replacePlanCart(cart: PlanCart): void {
   });
 }
 
-export function addToPlanCart(item: Omit<PlanCartItem, "addedAt">): AddToPlanCartResult {
+export function addToPlanCart(
+  item: Omit<PlanCartItem, "addedAt">,
+  maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
+): AddToPlanCartResult {
   const cart = getPlanCart();
   if (cart.items.some((i) => i.mediaId === item.mediaId)) {
     return { ok: true, added: false, reason: "duplicate" };
   }
-  if (cart.items.length >= PLAN_CART_MAX_ITEMS) {
+  if (cart.items.length >= maxItems) {
     return { ok: false, reason: "max_reached" };
   }
   writeCart({
@@ -169,12 +184,13 @@ export function addToPlanCart(item: Omit<PlanCartItem, "addedAt">): AddToPlanCar
 
 export function addManyToPlanCart(
   items: Omit<PlanCartItem, "addedAt">[],
+  maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
 ): BulkAddToPlanCartResult {
   let added = 0;
   let skippedDuplicate = 0;
   let skippedMax = 0;
   for (const item of items) {
-    const result = addToPlanCart(item);
+    const result = addToPlanCart(item, maxItems);
     if (result.ok && result.added) added += 1;
     else if (result.ok && !result.added) skippedDuplicate += 1;
     else skippedMax += 1;
