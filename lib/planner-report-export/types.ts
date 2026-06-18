@@ -44,6 +44,8 @@ export type PlannerExportChartDatum = {
   value: number;
   /** static | digital | mobile | network | ooh — 색상 일관성용 */
   colorKey?: string;
+  /** 도넛·범례 % — value 합산과 별도로 소수 1자리 표시용 */
+  pct?: number;
 };
 
 /** 웹·PDF·PPTX 공용 차트 데이터 (동일 숫자로 3포맷 렌더) */
@@ -54,6 +56,8 @@ export type PlannerExportCharts = {
   cpmBars?: PlannerExportChartDatum[];
   /** 노출·도달 요약 — 가로 막대 */
   reachSummary?: PlannerExportChartDatum[];
+  /** 유형별 월 노출 비중 — 예산 배분과 대비 */
+  impressionSplit?: PlannerExportChartDatum[];
 };
 
 export type PlannerReportExportPayload = {

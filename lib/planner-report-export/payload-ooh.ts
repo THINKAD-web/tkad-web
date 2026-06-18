@@ -1,6 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
-import { computePortfolioReportMetrics } from "@/lib/planner-logic";
+import {
+  computePortfolioReportMetrics,
+  impressionShareByCategory,
+} from "@/lib/planner-logic";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   computePortfolioContributions,
@@ -88,6 +91,7 @@ export function buildOohReportPayload(
         label: s.label,
         value: s.valueWon,
         colorKey: s.key,
+        pct: s.pct,
       })),
     cpmBars: a.cpmBars
       .filter((c) => c.value > 0)
@@ -119,6 +123,14 @@ export function buildOohReportPayload(
             },
           ].filter((d) => d.value > 0)
         : [],
+    impressionSplit: usePortfolioReach
+      ? impressionShareByCategory(a.portfolio).map((s) => ({
+          label: isKo ? s.labelKo : s.labelEn,
+          value: s.value,
+          colorKey: s.key,
+          pct: s.pct,
+        }))
+      : [],
   };
 
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──

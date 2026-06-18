@@ -12,12 +12,13 @@ import {
 import {
   budgetSplitByCategory,
   computeAdvancedPlannerMetrics,
+  formatPlannerSharePct,
   type BudgetPieSlice,
 } from "@/lib/planner-logic";
 import type { MediaItem } from "@/lib/media-data";
 import {
   formatCpmKrw,
-  formatMediaPrice,
+  formatMediaPriceCompactWon,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import { useIsPro } from "@/hooks/use-is-pro";
@@ -82,6 +83,7 @@ export function PlannerEffectSimulationPanel({
         key: s.key,
         label: isKo ? s.labelKo : s.labelEn,
         value: s.value,
+        actualWon: s.actualWon,
         pct: s.pct,
       })),
     [budgetSlices, isKo],
@@ -171,9 +173,14 @@ export function PlannerEffectSimulationPanel({
                     color: "#fff",
                   }}
                   formatter={(value: number, _name: string, item) => {
-                    const pct = (item?.payload as { pct?: number })?.pct;
+                    const payload = item?.payload as {
+                      pct?: number;
+                      actualWon?: number;
+                    };
+                    const won = payload?.actualWon ?? value;
+                    const pct = payload?.pct;
                     return [
-                      `${formatMediaPrice(value, localeTag)}${pct != null ? ` (${pct}%)` : ""}`,
+                      `${formatMediaPriceCompactWon(won, localeTag)}${pct != null ? ` (${formatPlannerSharePct(pct)})` : ""}`,
                       "",
                     ];
                   }}
@@ -199,10 +206,10 @@ export function PlannerEffectSimulationPanel({
                   {s.label}
                 </span>
                 <span className="shrink-0 tabular-nums dark:text-white/50 text-gray-500">
-                  {formatMediaPrice(s.value, localeTag)}
+                  {formatMediaPriceCompactWon(s.actualWon || s.value, localeTag)}
                 </span>
-                <span className="w-10 shrink-0 text-right font-semibold tabular-nums dark:text-white text-gray-900">
-                  {s.pct}%
+                <span className="w-12 shrink-0 text-right font-semibold tabular-nums dark:text-white text-gray-900">
+                  {formatPlannerSharePct(s.pct)}
                 </span>
               </li>
             ))}

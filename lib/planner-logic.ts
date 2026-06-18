@@ -265,11 +265,52 @@ const TYPE_META: Record<
   network: { labelKo: "네트워크", labelEn: "Network" },
 };
 
+/** 보고서·성과 요약 차트용 — network→digital 등 유형 통합 키 */
+export function plannerReportCategoryKey(m: MediaItem): string {
+  const norm = normalizeMediaTypeForPlanner(m.type);
+  if (norm === "network" || norm === "digital") return "digital";
+  if (norm === "static") return "static";
+  if (norm === "mobile") return "mobile";
+  const raw = m.type?.trim();
+  return raw && TYPE_META[raw] ? raw : "static";
+}
+
+function groupPortfolioByReportCategory(
+  portfolio: readonly MediaItem[],
+): Map<string, MediaItem[]> {
+  const groups = new Map<string, MediaItem[]>();
+  for (const m of portfolio) {
+    const key = plannerReportCategoryKey(m);
+    const list = groups.get(key) ?? [];
+    list.push(m);
+    groups.set(key, list);
+  }
+  return groups;
+}
+
+function monthlyImpressionsOf(m: MediaItem): number {
+  return Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
+}
+
+/** 비중 % — 도넛·범례·시뮬레이션 공통 (소수 1자리) */
+export function formatPlannerSharePct(pct: number): string {
+  const rounded = Math.round(pct * 10) / 10;
+  return `${rounded.toLocaleString("en-US", {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  })}%`;
+}
+
+function sharePctOf(part: number, total: number): number {
+  if (total <= 0) return 0;
+  return Math.round((part / total) * 1000) / 10;
+}
+
 export function portfolioDailyByCategory(portfolio: MediaItem[]): CategoryBarPoint[] {
   const sums = new Map<string, number>();
-  for (const m of portfolio) {
-    const t = m.type;
-    sums.set(t, (sums.get(t) ?? 0) + m.dailyFootTraffic);
+  for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
+    const daily = list.reduce((s, m) => s + (m.dailyFootTraffic ?? 0), 0);
+    sums.set(key, daily);
   }
   return [...sums.entries()]
     .map(([key, daily]) => ({
@@ -313,28 +354,22 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
   return out.sort((a, b) => a.cpm - b.cpm);
 }
 
-/** 선택 포트폴리오 기준 유형별 CPM — 보고서·성과 요약용 (필터 카탈로그와 분리) */
+/** 선택 포트폴리오 기준 유형별 CPM — 예산·노출 가중 (단순 평균 아님) */
 export function portfolioCpmByCategory(portfolio: MediaItem[]): CpmBarPoint[] {
-  const groups = new Map<string, MediaItem[]>();
-  for (const m of portfolio) {
-    const list = groups.get(m.type) ?? [];
-    list.push(m);
-    groups.set(m.type, list);
-  }
   const out: CpmBarPoint[] = [];
-  for (const [key, list] of groups) {
-    const cpms: number[] = [];
+  for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
+    let priceWon = 0;
+    let monthlyImp = 0;
     for (const m of list) {
-      const priceWon = catalogPriceFieldToWon(m.price);
-      const monthlyImp = Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
-      if (priceWon > 0 && monthlyImp > 0) {
-        cpms.push(Math.round(priceWon / (monthlyImp / 1000)));
-      }
+      priceWon += catalogPriceFieldToWon(m.price);
+      monthlyImp += monthlyImpressionsOf(m);
     }
-    const cpm =
-      cpms.length > 0
-        ? Math.round(cpms.reduce((a, b) => a + b, 0) / cpms.length)
-        : (estimateCpmByCategory(list)[0]?.cpm ?? 0);
+    let cpm = 0;
+    if (priceWon > 0 && monthlyImp > 0) {
+      cpm = Math.round(priceWon / (monthlyImp / 1000));
+    } else {
+      cpm = estimateCpmByCategory(list)[0]?.cpm ?? 0;
+    }
     if (cpm > 0) {
       out.push({
         key,
@@ -380,10 +415,11 @@ export function budgetSplitByCategory(
   const weightSums = new Map<string, number>();
   const wonSums = new Map<string, number>();
   for (const m of portfolio) {
-    weightSums.set(m.type, (weightSums.get(m.type) ?? 0) + weightOf(m));
+    const key = plannerReportCategoryKey(m);
+    weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
     wonSums.set(
-      m.type,
-      (wonSums.get(m.type) ?? 0) + catalogPriceFieldToWon(m.price),
+      key,
+      (wonSums.get(key) ?? 0) + catalogPriceFieldToWon(m.price),
     );
   }
   const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
@@ -402,9 +438,33 @@ export function budgetSplitByCategory(
         labelEn: TYPE_META[key]?.labelEn ?? key,
         value: segmentValue,
         actualWon,
-        pct: Math.round((segmentValue / totalSegment) * 1000) / 10,
+        pct: sharePctOf(segmentValue, totalSegment),
       };
     })
+    .filter((s) => s.value > 0)
+    .sort((a, b) => b.value - a.value);
+}
+
+/** 유형별 월 노출 비중 — 예산 배분과 대비해 효율 차이를 설명 */
+export function impressionShareByCategory(
+  portfolio: MediaItem[],
+): BudgetPieSlice[] {
+  if (portfolio.length === 0) return [];
+  const impSums = new Map<string, number>();
+  for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
+    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m), 0);
+    impSums.set(key, imp);
+  }
+  const total = [...impSums.values()].reduce((a, b) => a + b, 0) || 1;
+  return [...impSums.entries()]
+    .map(([key, imp]) => ({
+      key,
+      labelKo: TYPE_META[key]?.labelKo ?? key,
+      labelEn: TYPE_META[key]?.labelEn ?? key,
+      value: imp,
+      actualWon: imp,
+      pct: sharePctOf(imp, total),
+    }))
     .filter((s) => s.value > 0)
     .sort((a, b) => b.value - a.value);
 }

@@ -15,6 +15,9 @@ import {
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
 import { addPdfMediaDetailLink } from "@/lib/planner-report-export/draw-media-link";
+import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
+import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -135,6 +138,38 @@ export async function buildPlannerReportPdf(
     });
     doc.setFillColor(255, 255, 255);
     doc.circle(cx, cy, rIn, "F");
+  }
+
+  /** 가로 막대 — 비중(%) 표시 */
+  function drawShareBars(
+    x: number,
+    w: number,
+    rows: PlannerExportChartDatum[],
+  ) {
+    const labelW = 30;
+    const valW = 20;
+    const barX = x + labelW;
+    const barW = w - labelW - valW;
+    rows.forEach((row, i) => {
+      ensure(7);
+      const pct = row.pct ?? 0;
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8);
+      setText(GRAY_600);
+      doc.text(
+        (doc.splitTextToSize(row.label, labelW - 2) as string[]).slice(0, 1),
+        x,
+        y + 3,
+      );
+      doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
+      doc.roundedRect(barX, y, barW, 3.2, 1, 1, "F");
+      const barRgb = plannerChartColorRgb(row.colorKey, i);
+      doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
+      doc.roundedRect(barX, y, Math.max(2, (barW * pct) / 100), 3.2, 1, 1, "F");
+      setText(INK);
+      doc.text(formatPlannerSharePct(pct), x + w, y + 3, { align: "right" });
+      y += 7;
+    });
   }
 
   /** 가로 막대 차트 */
@@ -331,7 +366,7 @@ export async function buildPlannerReportPdf(
         doc.setFontSize(8.5);
         const label = (doc.splitTextToSize(d.label, contentW - 75) as string[])[0] ?? d.label;
         doc.text(
-          `${label}   ${Math.round((d.value / total) * 100)}%`,
+          `${label}   ${formatPlannerSharePct(d.pct ?? (d.value / total) * 100)}`,
           M + 55,
           ly,
         );
@@ -348,6 +383,19 @@ export async function buildPlannerReportPdf(
       y += 5;
       drawBars(M, contentW, ch.reachSummary, CYAN);
       y += 3;
+      if (ch.impressionSplit && ch.impressionSplit.length) {
+        ensure(6 + ch.impressionSplit.length * 7);
+        doc.setFontSize(8);
+        setText(GRAY_500);
+        doc.text(
+          isKo ? "유형별 노출 비중" : "Impression share by type",
+          M,
+          y + 2,
+        );
+        y += 5;
+        drawShareBars(M, contentW, ch.impressionSplit);
+        y += 3;
+      }
     }
 
     if (ch.cpmBars && ch.cpmBars.length) {

@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import type { PlannerReportExportPayload, PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import { plannerChartColor } from "@/lib/planner-chart-colors";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
 import {
   documentCardClass,
   DocumentGradientHero,
@@ -26,6 +27,45 @@ const CHART_COLORS = ["#7C3AED", "#0891B2", "#EC4899", "#10B981", "#F59E0B"];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);
+}
+
+function chartDatumPct(d: PlannerExportChartDatum, total: number): string {
+  const pct = d.pct ?? (total > 0 ? (d.value / total) * 100 : 0);
+  return formatPlannerSharePct(pct);
+}
+
+function ShareBarChart({
+  data,
+}: {
+  data: PlannerExportChartDatum[];
+}) {
+  if (data.length === 0) return null;
+  return (
+    <div className="space-y-2.5">
+      {data.map((d, i) => {
+        const pct = d.pct ?? 0;
+        return (
+          <div key={d.label} className="flex items-center gap-3 text-sm">
+            <span className="w-20 shrink-0 truncate text-gray-600 sm:w-28">
+              {d.label}
+            </span>
+            <div className="h-3 min-w-0 flex-1 overflow-hidden rounded-full bg-gray-100">
+              <div
+                className="h-full rounded-full"
+                style={{
+                  width: `${Math.max(2, pct)}%`,
+                  background: chartDatumColor(d, i),
+                }}
+              />
+            </div>
+            <span className="w-14 shrink-0 text-right font-semibold tabular-nums text-gray-900">
+              {formatPlannerSharePct(pct)}
+            </span>
+          </div>
+        );
+      })}
+    </div>
+  );
 }
 
 function DonutChart({
@@ -68,7 +108,7 @@ function DonutChart({
             />
             <span className="min-w-0 truncate text-gray-700">{d.label}</span>
             <span className="ml-auto font-semibold tabular-nums text-gray-900">
-              {Math.round((d.value / total) * 100)}%
+              {chartDatumPct(d, total)}
             </span>
           </li>
         ))}
@@ -202,6 +242,15 @@ export const PlannerReportDocument = forwardRef<
                     {isKo ? "노출 요약" : "Impressions"}
                   </p>
                   <BarChart data={p.charts.reachSummary} color="#0891B2" isKo={isKo} />
+                  {p.charts.impressionSplit &&
+                  p.charts.impressionSplit.length > 0 ? (
+                    <div className="mt-4 border-t border-gray-100 pt-4">
+                      <p className="mb-2.5 text-[11px] font-semibold text-gray-500">
+                        {isKo ? "유형별 노출 비중" : "Impression share by type"}
+                      </p>
+                      <ShareBarChart data={p.charts.impressionSplit} />
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>

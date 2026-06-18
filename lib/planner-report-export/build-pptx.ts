@@ -4,6 +4,7 @@ import type {
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
 import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
@@ -111,7 +112,7 @@ function addBudgetSplitShapes(
   x: number,
   y: number,
   w: number,
-  rows: { label: string; value: number; colorKey?: string }[],
+  rows: { label: string; value: number; colorKey?: string; pct?: number }[],
   face: string,
   isKo: boolean,
 ): number {
@@ -143,7 +144,7 @@ function addBudgetSplitShapes(
       fill: { color: plannerChartColorPptx(d.colorKey, i) },
     });
     slide.addText(
-      `${d.label}  ${Math.round((d.value / total) * 100)}%  (₩${d.value.toLocaleString(isKo ? "ko-KR" : "en-US")})`,
+      `${d.label}  ${formatPlannerSharePct(d.pct ?? (d.value / total) * 100)}  (₩${d.value.toLocaleString(isKo ? "ko-KR" : "en-US")})`,
       {
         x: x + 0.24,
         y: ly - 0.02,
