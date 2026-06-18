@@ -8,7 +8,7 @@
     "dev:webpack": "next dev --webpack",
     "dev:clean": "node scripts/dev-reset.mjs && next dev",
     "build": "prisma generate && next build --webpack",
-    "vercel-build": "prisma generate && node scripts/vercel-migrate-deploy.mjs && SKIP_CATALOG_HEAVY_SSG=1 NODE_OPTIONS='--max-old-space-size=4608' next build --webpack",
+    "vercel-build": "prisma generate && node scripts/vercel-migrate-deploy.mjs && SKIP_CATALOG_HEAVY_SSG=1 NODE_OPTIONS='--max-old-space-size=3584' next build --webpack",
     "db:migrate:prod": "prisma migrate deploy",
     "db:migrate:vercel-prod": "tsx scripts/migrate-vercel-production-db.ts",
     "start": "next start",
