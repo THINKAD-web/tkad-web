@@ -4,6 +4,7 @@ import { X, ShoppingCart } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import type { MediaItem } from "@/lib/media-data";
+import { formatPlanCartCountLabel } from "@/lib/plan-cart-limits";
 
 type Props = {
   items: MediaItem[];
@@ -34,7 +35,7 @@ export default function RecommendCartBar({
           <ShoppingCart className="h-4 w-4 text-accent" />
           {t("cartTitle")}{" "}
           <span className="text-muted-foreground">
-            ({items.length}/{maxItems})
+            ({formatPlanCartCountLabel(items.length, maxItems, isKo)})
           </span>
         </div>
 

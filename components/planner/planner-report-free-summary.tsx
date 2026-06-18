@@ -33,15 +33,15 @@ export function PlannerReportFreeSummary({
         <PlannerNeonLabel className="mb-2 block">
           {isKo ? "캠페인 정보" : "Campaign info"}
         </PlannerNeonLabel>
-        <p className={plannerNeon.headline}>{goalTitle}</p>
-        <p className={cn("mt-2", plannerNeon.subtext)}>
+        <p className="text-base font-bold text-gray-900 dark:text-white">{goalTitle}</p>
+        <p className="mt-2 text-sm text-gray-700 dark:text-white/85">
           {isKo ? "예산" : "Budget"}: ₩{budgetNum.toLocaleString()}
           {isKo ? "만" : "M"} · {periodDisplay}
         </p>
-        <p className={cn("mt-1", plannerNeon.subtext)}>
+        <p className="mt-1 text-sm text-gray-700 dark:text-white/85">
           {regionsText} · {categoriesText}
         </p>
-        <p className={cn("mt-1", plannerNeon.subtext)}>
+        <p className="mt-1 text-sm text-gray-700 dark:text-white/85">
           {ageText} · {industryText}
         </p>
       </div>
@@ -54,7 +54,7 @@ export function PlannerReportFreeSummary({
           {portfolio.map((m) => (
             <li
               key={m.id}
-              className="text-sm font-medium text-gray-800 dark:text-white/90"
+              className="text-sm font-semibold leading-snug text-gray-900 dark:text-white"
             >
               · {isKo ? m.name : m.nameEn || m.name}
             </li>

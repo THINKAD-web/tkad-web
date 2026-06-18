@@ -51,13 +51,13 @@ function KakaoIcon({ className }: { className?: string }) {
 }
 
 const coreLinkClass =
-  "text-sm font-medium text-gray-600 transition hover:text-gray-900 dark:text-white/70 dark:hover:text-white";
+  "text-xs font-medium text-gray-600 transition hover:text-gray-900 dark:text-white/70 dark:hover:text-white";
 
 const legalLinkClass =
   "text-xs text-gray-500 transition hover:text-gray-700 dark:text-white/50 dark:hover:text-white/80";
 
 const iconLinkClass =
-  "inline-flex h-9 w-9 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/60 dark:hover:border-white/25 dark:hover:text-white";
+  "inline-flex h-8 w-8 items-center justify-center rounded-full border border-gray-200 text-gray-600 transition hover:border-gray-300 hover:text-gray-900 dark:border-white/15 dark:text-white/60 dark:hover:border-white/25 dark:hover:text-white";
 
 export function FooterBrutal() {
   const t = useTranslations();
@@ -158,29 +158,29 @@ export function FooterBrutal() {
         className="absolute inset-0 hidden opacity-15 dark:block tkad-neon-grid"
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-12 sm:px-6 lg:px-8">
-        <div className="grid grid-cols-3 items-start gap-10">
+      <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+        <div className="grid grid-cols-3 items-start gap-6 lg:gap-8">
           <div>
             <Link
               href="/"
-              className="inline-block font-display text-[12px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
+              className="inline-block font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white"
             >
               THINK
               <span className="bg-[linear-gradient(135deg,#a855f7_0%,#22d3ee_55%,#ec4899_100%)] bg-clip-text text-transparent">
                 AD
               </span>
             </Link>
-            <p className="mt-3 text-sm font-medium text-gray-800 dark:text-white/90">
+            <p className="mt-1.5 text-xs font-medium leading-snug text-gray-700 dark:text-white/80">
               {t("footer.description")}
             </p>
-            <p className="mt-3 text-[11px] text-gray-500 dark:text-white/50">
+            <p className="mt-1 text-[10px] text-gray-500 dark:text-white/45">
               {t("footer.bizNumber")}
             </p>
           </div>
 
           <nav
             aria-label={t("footer.coreNavLabel")}
-            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-2 text-center"
+            className="flex flex-wrap items-center justify-center gap-x-1 gap-y-1.5 text-center"
           >
             {coreLinks.map((link, index) => (
               <span key={link.href} className="inline-flex items-center">
@@ -200,7 +200,7 @@ export function FooterBrutal() {
           </nav>
 
           <div className="text-right">
-            <ul className="space-y-1.5 text-sm text-gray-600 dark:text-white/70">
+            <ul className="space-y-0.5 text-xs text-gray-600 dark:text-white/70">
               <li>
                 <a
                   href={`tel:${t("footer.phone").replace(/-/g, "")}`}
@@ -218,7 +218,7 @@ export function FooterBrutal() {
                 </a>
               </li>
             </ul>
-            <div className="mt-4 flex justify-end gap-2">
+            <div className="mt-2 flex justify-end gap-1.5">
               <a
                 href={KAKAO_CHANNEL_PUBLIC_URL}
                 target="_blank"
@@ -226,7 +226,7 @@ export function FooterBrutal() {
                 className={iconLinkClass}
                 aria-label={t("footer.kakaoChannel")}
               >
-                <KakaoIcon className="h-4 w-4" />
+                <KakaoIcon className="h-3.5 w-3.5" />
               </a>
               <a
                 href={INSTAGRAM_URL}
@@ -235,14 +235,11 @@ export function FooterBrutal() {
                 className={iconLinkClass}
                 aria-label="Instagram"
               >
-                <InstagramIcon className="h-4 w-4" />
+                <InstagramIcon className="h-3.5 w-3.5" />
               </a>
             </div>
-            <p className="mt-4 text-right">
-              <Link
-                href="/guide/how-to-use"
-                className="text-xs font-medium text-primary underline-offset-2 hover:underline"
-              >
+            <p className="mt-2 text-right">
+              <Link href="/guide/how-to-use" className="tkad-neon-guide-link text-[11px]">
                 {t("footer.usageGuideLink")}
               </Link>
             </p>
@@ -250,32 +247,30 @@ export function FooterBrutal() {
         </div>
       </div>
 
-      {/* 신뢰 지표 (자동 집계) */}
-      <div className="relative border-t border-gray-200 px-4 py-3 dark:border-gray-800">
-        <TrustMetricsInline className="mx-auto max-w-7xl text-center text-xs text-gray-500 dark:text-white/50" />
-      </div>
-
-      <div className="relative border-t border-gray-200 bg-white/80 px-4 py-4 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
-        <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:flex-wrap sm:justify-center">
-          <span className="text-xs text-gray-500 dark:text-white/50">
-            {t("footer.copyrightShort", { year })}
-          </span>
-          <span className="hidden text-gray-300 dark:text-white/20 sm:inline" aria-hidden>
-            ·
-          </span>
-          <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-2">
-            {legalLinks.map((link) => (
-              <Link key={link.href} href={link.href} className={legalLinkClass}>
-                {link.label}
-              </Link>
-            ))}
-            <button
-              type="button"
-              onClick={() => setSitemapOpen(true)}
-              className="rounded-lg border border-gray-200 px-3 py-1 text-xs text-gray-400 transition hover:text-gray-700 dark:border-white/10 dark:text-white/40 dark:hover:text-white"
-            >
-              ⊞ {t("footer.sitemap")}
-            </button>
+      <div className="relative border-t border-gray-200 bg-white/80 px-4 py-2.5 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
+        <div className="mx-auto flex max-w-7xl flex-col items-center gap-2">
+          <TrustMetricsInline className="text-center text-[11px] text-gray-500 dark:text-white/45" />
+          <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
+            <span className="text-[11px] text-gray-500 dark:text-white/50">
+              {t("footer.copyrightShort", { year })}
+            </span>
+            <span className="hidden text-gray-300 dark:text-white/20 sm:inline" aria-hidden>
+              ·
+            </span>
+            <div className="flex flex-wrap items-center justify-center gap-x-2.5 gap-y-1">
+              {legalLinks.map((link) => (
+                <Link key={link.href} href={link.href} className={legalLinkClass}>
+                  {link.label}
+                </Link>
+              ))}
+              <button
+                type="button"
+                onClick={() => setSitemapOpen(true)}
+                className="rounded-md border border-gray-200 px-2 py-0.5 text-[11px] text-gray-400 transition hover:text-gray-700 dark:border-white/10 dark:text-white/40 dark:hover:text-white"
+              >
+                ⊞ {t("footer.sitemap")}
+              </button>
+            </div>
           </div>
         </div>
       </div>

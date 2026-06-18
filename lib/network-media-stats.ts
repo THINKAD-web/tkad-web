@@ -80,13 +80,19 @@ export function normalizeNetworkRegionKey(
   regionSub: string | null,
 ): string {
   const hay = `${regionMain ?? ""} ${regionSub ?? ""}`;
+  if (
+    /부산|busan|해운대|광안리|서면|센텀|남포|금정구|연제구|수영구|부산진구|해운대구|동래구|사하구|사상구/i.test(
+      hay,
+    )
+  ) {
+    return "busan";
+  }
   if (/서울/.test(hay)) return "seoul";
   if (/경기/.test(hay)) return "gyeonggi";
   if (/인천/.test(hay)) return "incheon";
-  if (/부산/.test(hay)) return "busan";
-  if (/대구/.test(hay)) return "daegu";
-  if (/대전/.test(hay)) return "daejeon";
-  if (/광주/.test(hay)) return "gwangju";
+  if (/(?:^|[^가-힣])대구|대구광역시|daegu/i.test(hay)) return "daegu";
+  if (/대전|daejeon/i.test(hay)) return "daejeon";
+  if (/광주|gwangju/i.test(hay)) return "gwangju";
   if (/제주/.test(hay)) return "jeju";
   return "other";
 }

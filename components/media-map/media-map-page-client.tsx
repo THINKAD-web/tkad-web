@@ -71,14 +71,17 @@ function NeonLoadingCard({ label }: { label: string }) {
   );
 }
 
-const DarkMapView = dynamic(() => import("@/components/public-map/dark-map-view"), {
-  ssr: false,
-  loading: () => (
-    <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
-      <NeonLoadingCard label="지도 불러오는 중…" />
-    </div>
-  ),
-});
+const KakaoMapView = dynamic(
+  () => import("@/components/media-map/kakao-map-view"),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
+        <NeonLoadingCard label="카카오 지도 불러오는 중…" />
+      </div>
+    ),
+  },
+);
 
 type Item = MapMapItem;
 
@@ -472,7 +475,7 @@ export default function MediaMapPageClient() {
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">
-            <DarkMapView
+            <KakaoMapView
               markers={markers}
               selectedId={selectedId}
               hoveredId={hoveredId}
@@ -482,6 +485,7 @@ export default function MediaMapPageClient() {
               programmaticView={programmaticView}
               userLocation={userLocation}
               monochromeTiles
+              zoomOnSelect={4}
             />
           </div>
 

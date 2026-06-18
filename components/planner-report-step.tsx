@@ -37,6 +37,11 @@ import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-n
 import { useIsPro } from "@/hooks/use-is-pro";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+import type {
+  PlannerExportChartDatum,
+  PlannerExportRegionBreakdown,
+} from "@/lib/planner-report-export/types";
+import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -68,6 +73,14 @@ export type PlannerReportSharedProps = {
   portfolioMonthlyBudgetMan?: number;
   isAutoPortfolio?: boolean;
   unresolvedMediaCount?: number;
+  /** 내 플랜 보고서 — 지역별 예산·효과 */
+  regionBreakdown?: PlannerExportRegionBreakdown[];
+  regionBudgetCharts?: PlannerExportChartDatum[];
+  regionImpressionCharts?: PlannerExportChartDatum[];
+  /** 내 플랜 보고서 등 — PRO 없이도 미리보기·시뮬 텍스트 선명 표시 */
+  unlockReportPreview?: boolean;
+  /** 보고서 활동 로그 출처 (PDF/PPT 다운로드 추적) */
+  activitySource?: PlanReportActivitySource;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -202,6 +215,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const tCommon = useTranslations("common");
   const { toast } = useToast();
   const { isPro, loading: proLoading } = useIsPro();
+  const previewUnlocked = props.unlockReportPreview === true;
+  const showProPreview = previewUnlocked || isPro;
   const derived = usePlannerReportDerived(props);
 
   const [error, setError] = useState<string | null>(null);
@@ -235,6 +250,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         effectSummaryLines: derived.effectSummaryLines,
         generatedAt: snapshotAt,
         months: props.months,
+        regionBreakdown: props.regionBreakdown,
+        regionBudgetCharts: props.regionBudgetCharts,
+        regionImpressionCharts: props.regionImpressionCharts,
       }),
     [props, derived, snapshotAt],
   );
@@ -245,7 +263,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       setDownloading(format);
       setError(null);
       try {
-        await downloadPlannerReport(format, payload);
+        await downloadPlannerReport(format, payload, {
+          activitySource: props.activitySource,
+        });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
         toast("success", t("reportPdfDownloaded"));
@@ -370,9 +390,9 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
       {!proLoading ? (
         <section className="space-y-3" data-screenshot="planner-pro-blur">
-          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[24rem]">
+          <PlannerProGate isPro={showProPreview} isKo={props.isKo} minHeightClass="min-h-[24rem]">
             <div className="space-y-6">
-              {props.metrics ? (
+              {props.metrics && !previewUnlocked ? (
                 <PlannerProTeaserStats
                   isKo={props.isKo}
                   totalImpressions={props.metrics.estimatedTotalImpressions}
@@ -581,8 +601,13 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           effectSummaryLines: derived.effectSummaryLines,
           generatedAt: snapshotAt,
           months: props.months,
+          regionBreakdown: props.regionBreakdown,
+          regionBudgetCharts: props.regionBudgetCharts,
+          regionImpressionCharts: props.regionImpressionCharts,
         });
-        await downloadPlannerReport(format, payload);
+        await downloadPlannerReport(format, payload, {
+          activitySource: props.activitySource,
+        });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", {
           source: `planner_report_compact_${format}`,

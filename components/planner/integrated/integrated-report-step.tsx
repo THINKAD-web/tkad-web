@@ -90,7 +90,9 @@ export function IntegratedReportStep(props: Props) {
       if (!isPro || downloading) return;
       setDownloading(format);
       try {
-        await downloadPlannerReport(format, payload);
+        await downloadPlannerReport(format, payload, {
+          activitySource: "integrated_planner",
+        });
         toast("success", t("pdfDownloaded"));
       } catch (e) {
         console.error("[integrated-report-export]", e);

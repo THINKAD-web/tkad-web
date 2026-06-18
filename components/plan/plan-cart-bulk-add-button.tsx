@@ -15,7 +15,7 @@ type Props = {
 
 export function PlanCartBulkAddButton({ items, label, className }: Props) {
   const toast = useAppToast();
-  const { addMany, maxItems } = usePlanCart();
+  const { addMany } = usePlanCart();
 
   function handleClick() {
     if (items.length === 0) {
@@ -28,7 +28,7 @@ export function PlanCartBulkAddButton({ items, label, className }: Props) {
     } else if (result.skippedDuplicate === items.length) {
       toast.warning("선택한 매체가 이미 모두 플랜에 있습니다");
     } else {
-      toast.error(`플랜은 최대 ${maxItems}개 매체까지 가능합니다`);
+      toast.error("플랜에 더 담을 수 없습니다");
     }
   }
 

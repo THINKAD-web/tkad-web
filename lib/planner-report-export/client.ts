@@ -5,6 +5,7 @@ import {
   type PlannerReportExportFormat,
   type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
 
 /**
  * 서버에 보고서 payload 를 보내 PDF/PPTX 바이너리를 받아 다운로드한다.
@@ -13,12 +14,17 @@ import {
 export async function downloadPlannerReport(
   format: PlannerReportExportFormat,
   payload: PlannerReportExportPayload,
+  options?: { activitySource?: PlanReportActivitySource },
 ): Promise<void> {
   const res = await fetch("/api/planner/report/export", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     credentials: "same-origin",
-    body: JSON.stringify({ format, payload }),
+    body: JSON.stringify({
+      format,
+      payload,
+      activitySource: options?.activitySource,
+    }),
   });
   if (!res.ok) {
     let message = "";

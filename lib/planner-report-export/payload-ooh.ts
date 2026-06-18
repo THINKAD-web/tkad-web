@@ -10,11 +10,18 @@ import {
   mediaItemToExportRow,
 } from "@/lib/document-media-detail";
 import type {
+  PlannerExportChartDatum,
+  PlannerExportRegionBreakdown,
   PlannerExportSection,
   PlannerExportCharts,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
+import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
+import {
+  flattenPlanCartReportGroups,
+  groupPlanCartReportPortfolio,
+} from "@/lib/plan-cart-report/sort-portfolio";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -41,6 +48,9 @@ export type BuildOohPayloadArgs = {
   effectSummaryLines: string[];
   generatedAt: string;
   months?: number;
+  regionBreakdown?: PlannerExportRegionBreakdown[];
+  regionBudgetCharts?: PlannerExportChartDatum[];
+  regionImpressionCharts?: PlannerExportChartDatum[];
 };
 
 export function buildOohReportPayload(
@@ -133,13 +143,18 @@ export function buildOohReportPayload(
           pct: s.pct,
         }))
       : [],
+    regionBudgetSplit: a.regionBudgetCharts,
+    regionImpressionSplit: a.regionImpressionCharts,
   };
 
   const performanceGuide = buildPerformanceChartGuide(
     isKo,
-    charts.budgetSplit.map((s) => ({ label: s.label, pct: s.pct ?? 0 })),
-    charts.impressionSplit.map((s) => ({ label: s.label, pct: s.pct ?? 0 })),
-    charts.cpmBars.map((c) => ({ label: c.label, value: c.value })),
+    (charts.budgetSplit ?? []).map((s) => ({ label: s.label, pct: s.pct ?? 0 })),
+    (charts.impressionSplit ?? []).map((s) => ({
+      label: s.label,
+      pct: s.pct ?? 0,
+    })),
+    (charts.cpmBars ?? []).map((c) => ({ label: c.label, value: c.value })),
   );
   if (performanceGuide) {
     charts.performanceGuide = performanceGuide;
@@ -184,11 +199,24 @@ export function buildOohReportPayload(
       lines: a.effectSummaryLines,
     });
   }
+  if (a.regionBreakdown && a.regionBreakdown.length > 1) {
+    sections.push({
+      title: isKo ? "지역별 예산·효과" : "Budget & impact by region",
+      lines: regionalBreakdownSectionLines(a.regionBreakdown, isKo),
+    });
+  }
 
   return {
     kind: "ooh",
     isKo,
-    documentTitle: isKo ? "OOH 옥외광고 플래너 보고서" : "OOH Media Plan Report",
+    documentTitle:
+      a.regionBreakdown && a.regionBreakdown.length > 0
+        ? isKo
+          ? "내 플랜 매체 제안 보고서"
+          : "My plan media report"
+        : isKo
+          ? "OOH 옥외광고 플래너 보고서"
+          : "OOH Media Plan Report",
     campaignName: a.goalTitle,
     generatedAt: a.generatedAt,
     goalTitle: a.goalTitle,
@@ -200,10 +228,20 @@ export function buildOohReportPayload(
     industryText: a.industryText,
     kpis,
     charts,
+    regionBreakdown: a.regionBreakdown,
     portfolio: (() => {
       const months = Math.max(1, a.months ?? 1);
-      const contributions = computePortfolioContributions(a.portfolio, months);
-      return a.portfolio.map((m) =>
+      const groups = a.regionBreakdown?.length
+        ? groupPlanCartReportPortfolio(a.portfolio, isKo)
+        : null;
+      const orderedPortfolio = groups
+        ? flattenPlanCartReportGroups(groups)
+        : a.portfolio;
+      const contributions = computePortfolioContributions(
+        orderedPortfolio,
+        months,
+      );
+      const rows = orderedPortfolio.map((m) =>
         mediaItemToExportRow(m, isKo, {
           months,
           contributions,
@@ -211,6 +249,36 @@ export function buildOohReportPayload(
             m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
         }),
       );
+      return rows;
+    })(),
+    portfolioGroups: (() => {
+      if (!a.regionBreakdown?.length) return undefined;
+      const months = Math.max(1, a.months ?? 1);
+      const groups = groupPlanCartReportPortfolio(a.portfolio, isKo);
+      const orderedPortfolio = flattenPlanCartReportGroups(groups);
+      const contributions = computePortfolioContributions(
+        orderedPortfolio,
+        months,
+      );
+      const rowByKey = new Map<string, ReturnType<typeof mediaItemToExportRow>>();
+      for (const m of orderedPortfolio) {
+        rowByKey.set(
+          m.id,
+          mediaItemToExportRow(m, isKo, {
+            months,
+            contributions,
+            lineTotalWon:
+              m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
+          }),
+        );
+      }
+      return groups.map((group) => ({
+        regionLabel: group.regionLabel,
+        categories: group.categories.map((cat) => ({
+          categoryLabel: cat.categoryLabel,
+          items: cat.items.map((m) => rowByKey.get(m.id)!).filter(Boolean),
+        })),
+      }));
     })(),
     sections,
     disclaimer: isKo

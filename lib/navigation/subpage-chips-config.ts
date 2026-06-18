@@ -252,9 +252,25 @@ export const SUBPAGE_CHIP_GROUPS: SubpageChipGroup[] = [
         match: (p) => p.startsWith("/my/booking-requests"),
       },
       {
+        id: "plan-cart",
+        labelKo: "내 플랜",
+        labelEn: "My plan",
+        href: "/my/plan",
+        match: (p) =>
+          p === "/my/plan" ||
+          p.startsWith("/my/plan/report"),
+      },
+      {
+        id: "plan-saved",
+        labelKo: "저장된 플랜",
+        labelEn: "Saved plans",
+        href: "/my/plan/saved",
+        match: (p) => p.startsWith("/my/plan/saved"),
+      },
+      {
         id: "planner",
-        labelKo: "내 플래너",
-        labelEn: "My planner",
+        labelKo: "저장 플래너",
+        labelEn: "Planner saves",
         href: "/my?tab=planner",
         match: (_, sp) => sp.get("tab") === "planner",
       },

@@ -2,6 +2,7 @@
 
 import { useLocale } from "next-intl";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { mapPlanCartGoalToPlanner } from "@/lib/plan-cart-planner-bridge";
 import {
   PLAN_CART_GOAL_OPTIONS,
   planCartMonthlyTotal,
@@ -18,8 +19,9 @@ export function PlanCartContactSummary() {
 
   const monthly = planCartMonthlyTotal(cart);
   const duration = cart.duration ?? 1;
+  const goalKey = mapPlanCartGoalToPlanner(cart.campaignGoal) ?? cart.campaignGoal;
   const goalLabel =
-    PLAN_CART_GOAL_OPTIONS.find((g) => g.value === cart.campaignGoal)?.[
+    PLAN_CART_GOAL_OPTIONS.find((g) => g.value === goalKey)?.[
       isKo ? "ko" : "en"
     ] ?? (isKo ? "미정" : "TBD");
 

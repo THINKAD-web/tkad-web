@@ -101,7 +101,8 @@ type NavKey =
   | "academyNew"
   | "content"
   | "contentSeed"
-  | "aiContent";
+  | "aiContent"
+  | "planSnapshots";
 
 type NavDef = {
   href: string;
@@ -130,6 +131,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/campaigns", key: "campaigns", icon: Megaphone },
   { href: "/admin/calendar", key: "campaignCalendar", icon: CalendarCheck },
   { href: "/admin/community", key: "community", icon: MessageSquareText },
+  { href: "/admin/plan-snapshots", key: "planSnapshots", icon: ClipboardList },
   { href: "/admin/applications", key: "mediaApplications", icon: ClipboardList },
   { href: "/admin/leads/media", key: "mediaLeads", icon: Radar },
   { href: "/admin/media-owner", key: "mediaOwnerOps", icon: CalendarCheck },
@@ -226,6 +228,7 @@ const navGroupDefs: {
       "pipeline",
       "crmRecords",
       "crm",
+      "planSnapshots",
     ],
   },
   {

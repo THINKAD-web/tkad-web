@@ -4,17 +4,21 @@ import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
-import { ArrowRight, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowRight, ChevronDown, ChevronUp, GripVertical, Sparkles, Trash2, X } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { BtnBlock } from "@/components/brutalist";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import {
   PLAN_CART_DURATION_OPTIONS,
-  PLAN_CART_GOAL_OPTIONS,
   planCartAddedFromLabel,
   planCartMonthlyTotal,
 } from "@/lib/plan-cart";
-import { buildMyPlanPlannerHref } from "@/lib/plan-cart-planner-bridge";
+import {
+  buildMyPlanPlannerHref,
+  mapPlanCartGoalToPlanner,
+} from "@/lib/plan-cart-planner-bridge";
+import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
+import { SavePlanButton } from "@/components/my/save-plan-button";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { useAppToast } from "@/lib/use-toast";
@@ -25,9 +29,11 @@ export function MyPlanPageClient() {
   const isKo = locale === "ko";
   const router = useRouter();
   const toast = useAppToast();
-  const { cart, remove, clear, updateMeta } = usePlanCart();
+  const { cart, remove, clear, updateMeta, reorder } = usePlanCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
+  const [draggingId, setDraggingId] = useState<string | null>(null);
+  const [dragOverId, setDragOverId] = useState<string | null>(null);
 
   useEffect(() => {
     setBudgetInput(
@@ -43,6 +49,8 @@ export function MyPlanPageClient() {
   const plannerHref = buildMyPlanPlannerHref(
     cart.items.map((item) => item.mediaId),
   );
+  const reportHref = "/my/plan/report";
+  const selectedGoal = mapPlanCartGoalToPlanner(cart.campaignGoal);
 
   function formatWon(amount: number) {
     if (amount <= 0) return isKo ? "문의" : "Inquire";
@@ -79,6 +87,24 @@ export function MyPlanPageClient() {
     toast.success(isKo ? "플랜을 초기화했습니다." : "Plan cleared.");
   }
 
+  function handleDropOnItem(targetMediaId: string) {
+    if (!draggingId || draggingId === targetMediaId) return;
+    const fromIndex = cart.items.findIndex((i) => i.mediaId === draggingId);
+    const toIndex = cart.items.findIndex((i) => i.mediaId === targetMediaId);
+    if (fromIndex < 0 || toIndex < 0) return;
+    reorder(fromIndex, toIndex);
+    setDraggingId(null);
+    setDragOverId(null);
+  }
+
+  function moveItem(mediaId: string, direction: "up" | "down") {
+    const index = cart.items.findIndex((i) => i.mediaId === mediaId);
+    if (index < 0) return;
+    const nextIndex = direction === "up" ? index - 1 : index + 1;
+    if (nextIndex < 0 || nextIndex >= cart.items.length) return;
+    reorder(index, nextIndex);
+  }
+
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
@@ -92,9 +118,17 @@ export function MyPlanPageClient() {
             </h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
               {isKo
-                ? "담은 매체로 견적을 요청하세요"
-                : "Request a quote for your selected media"}
+                ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장된 플랜」 탭에서 확인할 수 있습니다."
+                : "Generate a report or request a quote. After saving, open the Saved plans tab."}
             </p>
+            <div className="mt-3">
+              <Link
+                href="/my/plan/saved"
+                className="text-xs font-semibold text-violet-600 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-100"
+              >
+                {isKo ? "저장된 플랜 보기 →" : "View saved plans →"}
+              </Link>
+            </div>
           </div>
 
           {cart.items.length === 0 ? (
@@ -132,23 +166,11 @@ export function MyPlanPageClient() {
                     <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
                       {isKo ? "목표" : "Goal"}
                     </label>
-                    <div className="flex flex-wrap gap-2">
-                      {PLAN_CART_GOAL_OPTIONS.map((g) => (
-                        <button
-                          key={g.value}
-                          type="button"
-                          onClick={() => updateMeta({ campaignGoal: g.value })}
-                          className={cn(
-                            "rounded-full px-3 py-1.5 text-xs font-semibold transition",
-                            cart.campaignGoal === g.value
-                              ? "bg-violet-500 text-white"
-                              : "dark:bg-white/10 bg-gray-100 dark:text-white/80 text-gray-700",
-                          )}
-                        >
-                          {isKo ? g.ko : g.en}
-                        </button>
-                      ))}
-                    </div>
+                    <PlannerCampaignGoalGrid
+                      compact
+                      selected={selectedGoal}
+                      onSelect={(key) => updateMeta({ campaignGoal: key })}
+                    />
                   </div>
                   <div>
                     <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
@@ -180,10 +202,10 @@ export function MyPlanPageClient() {
                           type="button"
                           onClick={() => updateMeta({ duration: d.value })}
                           className={cn(
-                            "rounded-full px-3 py-1.5 text-xs font-semibold transition",
+                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
                             (cart.duration ?? 1) === d.value
-                              ? "bg-cyan-500 text-white"
-                              : "dark:bg-white/10 bg-gray-100 dark:text-white/80 text-gray-700",
+                              ? "tkad-plan-cart-chip-active bg-cyan-600 shadow-sm ring-1 ring-cyan-400/40"
+                              : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
                           )}
                         >
                           {isKo ? d.ko : d.en}
@@ -228,14 +250,76 @@ export function MyPlanPageClient() {
 
               <div className="min-w-0 space-y-6">
               <section className="space-y-3">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/50">
-                  {isKo ? `담긴 매체 (${cart.items.length})` : `Media (${cart.items.length})`}
-                </p>
-                {cart.items.map((item) => (
+                <div className="flex flex-wrap items-end justify-between gap-2">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/50">
+                    {isKo ? `담긴 매체 (${cart.items.length})` : `Media (${cart.items.length})`}
+                  </p>
+                  <p className="text-[11px] text-gray-500 dark:text-white/45">
+                    {isKo
+                      ? "드래그하거나 ↑↓로 순서 변경 · 보고서에 반영됩니다"
+                      : "Drag or use ↑↓ to reorder · reflected in report"}
+                  </p>
+                </div>
+                {cart.items.map((item, index) => (
                   <article
                     key={item.mediaId}
-                    className="flex gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-3"
+                    draggable
+                    onDragStart={() => setDraggingId(item.mediaId)}
+                    onDragEnd={() => {
+                      setDraggingId(null);
+                      setDragOverId(null);
+                    }}
+                    onDragOver={(e) => {
+                      e.preventDefault();
+                      if (draggingId && draggingId !== item.mediaId) {
+                        setDragOverId(item.mediaId);
+                      }
+                    }}
+                    onDragLeave={() => {
+                      if (dragOverId === item.mediaId) setDragOverId(null);
+                    }}
+                    onDrop={(e) => {
+                      e.preventDefault();
+                      handleDropOnItem(item.mediaId);
+                    }}
+                    className={cn(
+                      "flex gap-2 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-3 transition",
+                      draggingId === item.mediaId && "opacity-60",
+                      dragOverId === item.mediaId &&
+                        draggingId !== item.mediaId &&
+                        "ring-2 ring-violet-400/70",
+                    )}
                   >
+                    <div className="flex shrink-0 flex-col items-center gap-0.5">
+                      <button
+                        type="button"
+                        className="flex h-7 w-7 cursor-grab items-center justify-center rounded-lg dark:bg-white/10 bg-gray-200 text-gray-500 active:cursor-grabbing dark:text-white/55"
+                        aria-label={isKo ? "순서 변경" : "Reorder"}
+                        onMouseDown={(e) => e.stopPropagation()}
+                      >
+                        <GripVertical className="h-4 w-4" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={() => moveItem(item.mediaId, "up")}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className="flex h-6 w-7 items-center justify-center rounded-md dark:bg-white/10 bg-gray-200 text-gray-600 disabled:opacity-30 dark:text-white/70"
+                        aria-label={isKo ? "위로" : "Move up"}
+                      >
+                        <ChevronUp className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === cart.items.length - 1}
+                        onClick={() => moveItem(item.mediaId, "down")}
+                        onMouseDown={(e) => e.stopPropagation()}
+                        className="flex h-6 w-7 items-center justify-center rounded-md dark:bg-white/10 bg-gray-200 text-gray-600 disabled:opacity-30 dark:text-white/70"
+                        aria-label={isKo ? "아래로" : "Move down"}
+                      >
+                        <ChevronDown className="h-3.5 w-3.5" aria-hidden />
+                      </button>
+                    </div>
                     <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800">
                       {item.thumbnailUrl ? (
                         <Image
@@ -248,7 +332,7 @@ export function MyPlanPageClient() {
                       ) : null}
                     </div>
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold dark:text-white text-gray-900">
+                      <p className="text-sm font-bold leading-snug break-words dark:text-white text-gray-900">
                         {item.mediaName}
                       </p>
                       <p className="text-xs text-gray-500 dark:text-white/50">
@@ -266,6 +350,7 @@ export function MyPlanPageClient() {
                     <button
                       type="button"
                       onClick={() => remove(item.mediaId)}
+                      onMouseDown={(e) => e.stopPropagation()}
                       className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl dark:bg-white/10 bg-gray-200 dark:text-white/70 text-gray-600"
                       aria-label={isKo ? "삭제" : "Remove"}
                     >
@@ -277,13 +362,12 @@ export function MyPlanPageClient() {
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
                 <BtnBlock
-                  type="button"
+                  href={reportHref}
                   variant="accent"
                   size="lg"
                   className="flex-1 rounded-2xl sm:min-w-[14rem]"
-                  onClick={() => void handleQuoteRequest()}
                 >
-                  {isKo ? "이 플랜으로 견적 요청하기" : "Request quote for this plan"}
+                  {isKo ? "보고서 생성하기" : "Generate report"}
                   <ArrowRight className="ml-2 inline h-4 w-4" />
                 </BtnBlock>
                 <BtnBlock
@@ -293,8 +377,24 @@ export function MyPlanPageClient() {
                   className="flex-1 rounded-2xl sm:min-w-[14rem]"
                 >
                   <Sparkles className="mr-2 inline h-4 w-4" />
-                  {isKo ? "플래너로 설계하기" : "Design in planner"}
+                  {isKo ? "플래너로 설계" : "Open planner"}
                 </BtnBlock>
+                <BtnBlock
+                  type="button"
+                  variant="secondary"
+                  size="lg"
+                  className="rounded-2xl"
+                  onClick={() => void handleQuoteRequest()}
+                >
+                  {isKo ? "견적 요청" : "Request quote"}
+                  <ArrowRight className="ml-2 inline h-4 w-4" />
+                </BtnBlock>
+                <SavePlanButton
+                  cart={cart}
+                  isKo={isKo}
+                  className="rounded-2xl"
+                  redirectAfterSave
+                />
                 <BtnBlock
                   type="button"
                   variant="secondary"
@@ -321,8 +421,8 @@ export function MyPlanPageClient() {
             </p>
             <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
               {isKo
-                ? "담긴 매체와 설정이 모두 삭제됩니다."
-                : "All selected media and settings will be removed."}
+                ? "담긴 매체와 설정만 삭제됩니다. 이미 저장한 플랜은 「저장된 플랜」에 그대로 남습니다."
+                : "Only clears the current cart. Saved snapshots remain under Saved plans."}
             </p>
             <div className="mt-6 flex gap-3">
               <BtnBlock

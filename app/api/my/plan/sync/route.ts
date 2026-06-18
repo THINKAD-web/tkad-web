@@ -45,16 +45,42 @@ function parseItems(raw: unknown): PlanCartItem[] {
   return parsed.success ? parsed.data : [];
 }
 
-function mergeItems(
+/** 동일 시각 충돌 시에만 합집합 (다른 탭에서 동시 추가 등) */
+function mergeItemsUnion(
   local: PlanCartItem[],
   remote: PlanCartItem[],
   maxItems: number,
 ): PlanCartItem[] {
-  const byId = new Map<string, PlanCartItem>();
-  for (const item of [...remote, ...local]) {
-    if (!byId.has(item.mediaId)) byId.set(item.mediaId, item);
+  const seen = new Set<string>();
+  const out: PlanCartItem[] = [];
+
+  for (const item of local) {
+    if (seen.has(item.mediaId)) continue;
+    seen.add(item.mediaId);
+    out.push(item);
   }
-  return Array.from(byId.values()).slice(0, maxItems);
+  for (const item of remote) {
+    if (seen.has(item.mediaId)) continue;
+    seen.add(item.mediaId);
+    out.push(item);
+  }
+  return out.slice(0, maxItems);
+}
+
+function resolveSyncedItems(
+  local: PlanCartItem[],
+  remote: PlanCartItem[],
+  maxItems: number,
+  localUpdated: number,
+  remoteUpdated: number,
+): PlanCartItem[] {
+  if (remote.length === 0) return local.slice(0, maxItems);
+  if (local.length === 0 && localUpdated === 0) {
+    return remote.slice(0, maxItems);
+  }
+  if (localUpdated > remoteUpdated) return local.slice(0, maxItems);
+  if (remoteUpdated > localUpdated) return remote.slice(0, maxItems);
+  return mergeItemsUnion(local, remote, maxItems);
 }
 
 export async function GET() {
@@ -108,13 +134,20 @@ export async function POST(req: Request) {
     });
 
     const remoteItems = existing ? parseItems(existing.items) : [];
-    const mergedItems = mergeItems(parsed.data.items, remoteItems, maxItems);
 
     const localUpdated = parsed.data.updatedAt
       ? Date.parse(parsed.data.updatedAt)
       : 0;
     const remoteUpdated = existing ? existing.updatedAt.getTime() : 0;
     const useLocalMeta = localUpdated >= remoteUpdated;
+
+    const mergedItems = resolveSyncedItems(
+      parsed.data.items,
+      remoteItems,
+      maxItems,
+      localUpdated,
+      remoteUpdated,
+    );
 
     const goal = useLocalMeta
       ? parsed.data.campaignGoal ?? existing?.goal ?? null

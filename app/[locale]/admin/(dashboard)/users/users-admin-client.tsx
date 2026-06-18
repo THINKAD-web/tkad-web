@@ -170,14 +170,22 @@ export default function UsersAdminClient() {
                       </div>
                     </td>
                     <td className="px-4 py-3">
-                      {(u.role === "advertiser" || u.role === "agency") && (
+                      <div className="flex flex-col gap-1">
+                        {(u.role === "advertiser" || u.role === "agency") && (
+                          <Link
+                            href={`/${locale}/admin/customers/${u.id}`}
+                            className="text-xs text-primary underline-offset-2 hover:underline"
+                          >
+                            프로필
+                          </Link>
+                        )}
                         <Link
-                          href={`/${locale}/admin/customers/${u.id}`}
-                          className="text-xs text-primary underline-offset-2 hover:underline"
+                          href={`/${locale}/admin/plan-snapshots?userId=${u.id}`}
+                          className="text-xs text-cyan-700 underline-offset-2 hover:underline dark:text-cyan-400"
                         >
-                          프로필
+                          플랜·활동
                         </Link>
-                      )}
+                      </div>
                     </td>
                   </tr>
                 ))}

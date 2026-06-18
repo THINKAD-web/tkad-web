@@ -17,19 +17,23 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "캠페인 타임라인" : "Campaign timeline"} ]
         </p>
-        <div className="relative mt-4 h-12 rounded-2xl bg-muted/40">
+        <div className="mt-4 space-y-3">
           {insights.gantt.map((row) => (
-            <div
-              key={row.mediaId}
-              className="absolute top-1 bottom-1 flex items-center overflow-hidden rounded-md px-2 text-[10px] font-bold dark:text-white text-gray-900"
-              style={{
-                left: `${row.startPct}%`,
-                width: `${row.widthPct}%`,
-                backgroundColor: row.color,
-              }}
-              title={row.name}
-            >
-              <span className="truncate">{row.name}</span>
+            <div key={row.mediaId} className="space-y-1.5">
+              <p className="text-sm font-semibold leading-snug text-foreground">
+                {row.name}
+              </p>
+              <div className="relative h-7 overflow-hidden rounded-lg bg-muted/60">
+                <div
+                  className="absolute inset-y-0 rounded-md shadow-sm"
+                  style={{
+                    left: `${row.startPct}%`,
+                    width: `${Math.max(row.widthPct, 4)}%`,
+                    backgroundColor: row.color,
+                  }}
+                  aria-hidden
+                />
+              </div>
             </div>
           ))}
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Link, usePathname } from "@/i18n/navigation";
+import { Link } from "@/i18n/navigation";
 import type { LucideIcon } from "lucide-react";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 import { cn } from "@/lib/utils";
@@ -15,7 +15,8 @@ export interface SubTab {
 
 interface SubTabsProps {
   tabs: SubTab[];
-  currentPath?: string;
+  /** Locale-free path used for active tab matching (e.g. `/planner`). */
+  currentPath: string;
 }
 
 function isTabActive(tab: SubTab, pathname: string): boolean {
@@ -27,9 +28,6 @@ function isTabActive(tab: SubTab, pathname: string): boolean {
 }
 
 export function SubTabs({ tabs, currentPath }: SubTabsProps) {
-  const pathname = usePathname() ?? "";
-  const activePath = currentPath ?? pathname;
-
   return (
     <div
       className={cn(
@@ -39,7 +37,7 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
     >
       <div className="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-2">
         {tabs.map((tab) => {
-          const isActive = isTabActive(tab, activePath);
+          const isActive = isTabActive(tab, currentPath);
           const Icon = tab.icon;
           return (
             <Link

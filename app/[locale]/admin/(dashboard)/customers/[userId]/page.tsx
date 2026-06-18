@@ -10,6 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Building2, Clock, Wallet } from "lucide-react";
 import { PIPELINE_STAGE_LABEL } from "@/lib/crm-pipeline";
 import type { SalesPipelineStage } from "@prisma/client";
+import { AdminUserPlanActivityPanel } from "@/components/admin/admin-user-plan-activity-panel";
 
 const TAG_PRESETS = ["VIP", "재계약", "잠재고객"];
 
@@ -235,6 +236,8 @@ export default function AdminCustomerProfilePage() {
           </div>
         </CardContent>
       </Card>
+
+      <AdminUserPlanActivityPanel userId={user.id} locale={locale} />
 
       <Card>
         <CardHeader>

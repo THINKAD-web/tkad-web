@@ -9,6 +9,16 @@ import {
 export function mapPlanCartGoalToPlanner(
   goal?: string,
 ): PlannerCampaignGoal | null {
+  if (!goal) return null;
+  if (
+    goal === "brand" ||
+    goal === "launch" ||
+    goal === "event" ||
+    goal === "sales" ||
+    goal === "local"
+  ) {
+    return goal;
+  }
   switch (goal) {
     case "brand_awareness":
       return "brand";

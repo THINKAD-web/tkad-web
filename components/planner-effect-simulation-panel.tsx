@@ -252,7 +252,7 @@ export function PlannerEffectSimulationPanel({
                 key={row.id}
                 className="border-b dark:border-white/5 border-gray-50 dark:text-white/80 text-gray-700"
               >
-                <td className="max-w-[10rem] truncate px-2 py-2 font-medium">
+                <td className="min-w-[8rem] max-w-[14rem] px-2 py-2 font-semibold leading-snug break-words text-gray-900 dark:text-white">
                   {row.name}
                 </td>
                 <td className="px-2 py-2">{row.type}</td>

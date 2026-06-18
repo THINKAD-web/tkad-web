@@ -288,15 +288,6 @@ export default function AdminQuoteNewClient() {
     [startDate, endDate],
   );
 
-  const discountSummary = useMemo(() => {
-    if (totals.discountTotalWon <= 0) return undefined;
-    const parts: string[] = [];
-    if (dpct > 0) parts.push(isKo ? `할인율 ${dpct}%` : `${dpct}% off`);
-    if (dwon > 0) parts.push(formatWon(dwon));
-    if (parts.length === 0) return undefined;
-    return isKo ? `할인 (${parts.join(" · ")})` : `Discount (${parts.join(" · ")})`;
-  }, [totals.discountTotalWon, dpct, dwon, isKo]);
-
   const lineItems = useMemo(() => {
     const list: {
       mediaId: string;
@@ -356,19 +347,6 @@ export default function AdminQuoteNewClient() {
     factorForPeriod,
     selectedPrice,
   ]);
-
-  const pdfPostRows = useMemo(
-    () =>
-      lineItems.map((it) => ({
-        name: it.mediaName,
-        spec: it.spec,
-        period: it.period,
-        unitPriceWon: it.unitPrice,
-        quantity: it.quantity,
-        lineTotalWon: it.amount,
-      })),
-    [lineItems],
-  );
 
   const pdfPeriodUnit = useMemo(() => {
     const periods = new Set<PeriodKey>();
@@ -490,83 +468,22 @@ export default function AdminQuoteNewClient() {
     }
     setPdfLoading(true);
     try {
-      // 먼저 서버 API 시도
-      try {
-        const res = await fetch("/api/admin/quotes/pdf", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            quoteNumber: displayQuoteNumber,
-            issueDate: issueDatePdf,
-            validUntil: validUntilPdf,
-            clientCompany: clientCompany.trim(),
-            clientName: clientName.trim(),
-            clientPhone: clientPhone.trim(),
-            clientEmail: clientEmail.trim() || undefined,
-            periodLabel: campaignPeriodLabel,
-            vatIncluded,
-            discountTotalWon: totals.discountTotalWon,
-            discountSummary,
-            rows: pdfPostRows,
-            linesSubtotalWon: totals.linesSubtotalWon,
-            supplyWon: totals.supplyWon,
-            vatWon: totals.vatWon,
-            totalWon: totals.totalWon,
-            isKo,
-          }),
-        });
-        if (res.ok) {
-          const ct = res.headers.get("content-type") ?? "";
-          if (ct.includes("application/pdf")) {
-            const blob = await res.blob();
-            if (blob.size >= 64) {
-              const url = URL.createObjectURL(blob);
-              const a = document.createElement("a");
-              a.href = url;
-              a.download = `thinkad-quote-${displayQuoteNumber}.pdf`;
-              a.click();
-              URL.revokeObjectURL(url);
-              return; // 성공!
-            }
-          }
-        }
-      } catch {
-        // 서버 API 실패, 클라이언트 방식 진행
-      }
-
-      // 클라이언트 사이드에서 미리보기 이미지로 PDF 생성
-      const { default: html2canvas } = await import("html2canvas");
-      const { jsPDF } = await import("jspdf");
-
-      // 임시로 미리보기 표시
       setShowPreview(true);
-
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await new Promise<void>((r) => setTimeout(r, 120));
 
       const element = document.getElementById("quote-preview");
       if (!element) throw new Error("미리보기를 찾을 수 없습니다");
 
-      const canvas = await html2canvas(element, {
-        backgroundColor: "#ffffff",
-        scale: 2,
-        allowTaint: true,
-        useCORS: true,
+      const { downloadQuotePdfFromElement, runWithQuotePdfExport } = await import(
+        "@/lib/quote-html-pdf"
+      );
+      await runWithQuotePdfExport(element, async () => {
+        await downloadQuotePdfFromElement(
+          element,
+          `thinkad-quote-${displayQuoteNumber}.pdf`,
+        );
       });
-
-      const imgData = canvas.toDataURL("image/png");
-      const pdf = new jsPDF({
-        orientation: "portrait",
-        unit: "mm",
-        format: "a4",
-      });
-
-      const imgWidth = 190;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      pdf.addImage(imgData, "PNG", 10, 10, imgWidth, imgHeight);
-
-      pdf.save(`thinkad-quote-${displayQuoteNumber}.pdf`);
-      toast("success", "견적서 PDF가 다운로드되었습니다");
+      toast("success", isKo ? "견적서 PDF가 다운로드되었습니다" : "Quote PDF downloaded");
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("pdfFailed");
       setPdfError(msg);
@@ -581,15 +498,7 @@ export default function AdminQuoteNewClient() {
     clientCompany,
     clientName,
     clientPhone,
-    clientEmail,
     displayQuoteNumber,
-    issueDatePdf,
-    validUntilPdf,
-    campaignPeriodLabel,
-    vatIncluded,
-    totals,
-    discountSummary,
-    pdfPostRows,
     isKo,
     t,
     tCommon,
@@ -1215,7 +1124,12 @@ export default function AdminQuoteNewClient() {
                       const { captureElementAsPng } = await import(
                         "@/lib/html-to-pdf"
                       );
-                      await captureElementAsPng(el, `quote-${displayQuoteNumber}.png`);
+                      const { runWithQuotePdfExport } = await import(
+                        "@/lib/quote-html-pdf"
+                      );
+                      await runWithQuotePdfExport(el, async () => {
+                        await captureElementAsPng(el, `quote-${displayQuoteNumber}.png`);
+                      });
                     } catch (e) {
                       console.error("[admin-quote-new] PNG capture failed", e);
                       window.alert(
@@ -1234,13 +1148,14 @@ export default function AdminQuoteNewClient() {
                     try {
                       const el = document.getElementById("quote-preview");
                       if (!el) return;
-                      const { downloadPdfFromHtmlElement } = await import(
-                        "@/lib/html-to-pdf"
-                      );
-                      await downloadPdfFromHtmlElement(
-                        el,
-                        `quote-${displayQuoteNumber}.pdf`,
-                      );
+                      const { downloadQuotePdfFromElement, runWithQuotePdfExport } =
+                        await import("@/lib/quote-html-pdf");
+                      await runWithQuotePdfExport(el, async () => {
+                        await downloadQuotePdfFromElement(
+                          el,
+                          `quote-${displayQuoteNumber}.pdf`,
+                        );
+                      });
                     } catch (e) {
                       console.error("[admin-quote-new] PDF download failed", e);
                       window.alert(
@@ -1258,7 +1173,7 @@ export default function AdminQuoteNewClient() {
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto rounded-xl border border-border/10 bg-slate-100/90 p-4 dark:border-hero-fg/15 dark:bg-card/5 md:p-6">
-              <div className="mx-auto w-fit max-w-full">
+              <div className="mx-auto w-fit max-w-full" data-quote-pdf-scale-wrap>
                 <div id="quote-preview">
                   <QuotePdfPreview
                     template="default"

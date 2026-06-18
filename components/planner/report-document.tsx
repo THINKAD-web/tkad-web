@@ -2,7 +2,11 @@
 
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
-import type { PlannerReportExportPayload, PlannerExportChartDatum } from "@/lib/planner-report-export/types";
+import type {
+  PlannerReportExportPayload,
+  PlannerExportChartDatum,
+  PlannerExportMediaRow,
+} from "@/lib/planner-report-export/types";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import { plannerChartColor } from "@/lib/planner-chart-colors";
@@ -19,6 +23,54 @@ import type { DocumentMediaDetail } from "@/lib/document-media-detail";
  * "화면에서 보는 것 = 내려받는 것" 을 보장하기 위한 단일 표현 컴포넌트.
  * 라이트 테마 고정(제안서 문서), 표는 가로 스크롤 래퍼로 모바일 넘침 방지.
  */
+
+function exportRowToDetail(
+  row: PlannerExportMediaRow,
+  index: number,
+): DocumentMediaDetail {
+  const mediaId = row.id;
+  return {
+    id: mediaId ?? `row-${index}`,
+    name: row.name,
+    location: row.location,
+    thumbUrl: row.thumbUrl,
+    categoryLabel: row.categoryLabel,
+    size: row.size,
+    operatingHours: row.operatingHours,
+    dailyTraffic: row.dailyTraffic,
+    broadcastLabel: row.broadcastLabel,
+    monthlyPriceLabel: row.monthlyPriceLabel ?? row.priceLabel,
+    lineTotalLabel: row.lineTotalLabel,
+    recommendReason: row.recommendReason,
+    exposureContributionPct: row.exposureContributionPct,
+    budgetContributionPct: row.budgetContributionPct,
+  };
+}
+
+function MediaLineupCard({
+  row,
+  index,
+  isKo,
+  portfolioSize,
+}: {
+  row: PlannerExportMediaRow;
+  index: number;
+  isKo: boolean;
+  portfolioSize: number;
+}) {
+  const mediaId = row.id;
+  const hasMediaLink = Boolean(mediaId && !String(mediaId).startsWith("row-"));
+  const detail = exportRowToDetail(row, index);
+  return (
+    <MediaDetailCard
+      detail={detail}
+      isKo={isKo}
+      showContribution
+      portfolioSize={portfolioSize}
+      mediaPageHref={hasMediaLink ? `/media/${mediaId}` : undefined}
+    />
+  );
+}
 
 function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
@@ -336,6 +388,73 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
+        {p.regionBreakdown && p.regionBreakdown.length > 0 ? (
+          <section className="space-y-4">
+            <DocumentSectionHeading>
+              {isKo ? "지역별 예산 · 효과" : "Budget & impact by region"}
+            </DocumentSectionHeading>
+            <div className="grid gap-6 sm:grid-cols-2">
+              {p.charts?.regionBudgetSplit &&
+              p.charts.regionBudgetSplit.length > 1 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "지역별 예산 비중" : "Budget share by region"}
+                  </p>
+                  <DonutChart data={p.charts.regionBudgetSplit} />
+                </div>
+              ) : null}
+              {p.charts?.regionImpressionSplit &&
+              p.charts.regionImpressionSplit.length > 1 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "지역별 노출 비중" : "Impression share by region"}
+                  </p>
+                  <ShareBarChart data={p.charts.regionImpressionSplit} />
+                </div>
+              ) : null}
+            </div>
+            <div className="overflow-x-auto rounded-xl border border-gray-200">
+              <table className="w-full min-w-[32rem] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
+                    <th className="px-3 py-2.5">{isKo ? "지역" : "Region"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "월 예산" : "Monthly"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "월 노출" : "Monthly imp."}</th>
+                    <th className="px-3 py-2.5">{isKo ? "추정 도달" : "Reach"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {p.regionBreakdown.map((row) => (
+                    <tr key={row.regionKey} className="border-b border-gray-100">
+                      <td className="px-3 py-2.5 font-medium text-gray-900">
+                        {row.label}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
+                        {row.mediaCount}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-900">
+                        ₩{row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                        <span className="ml-1 text-xs text-gray-500">
+                          ({formatPlannerSharePct(row.budgetPct)})
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-900">
+                        {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
+                        {row.uniqueReach > 0
+                          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+
         {/* 선택 매체 구성 */}
         <section className="space-y-4 py-2">
           <DocumentSectionHeading>{isKo ? "매체 구성" : "Media lineup"}</DocumentSectionHeading>
@@ -343,39 +462,47 @@ export const PlannerReportDocument = forwardRef<
             <p className="rounded-xl border border-gray-200 bg-[#F8F9FC] px-4 py-8 text-center text-sm text-gray-500">
               {isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected."}
             </p>
+          ) : p.portfolioGroups?.length ? (
+            <div className="space-y-8">
+              {p.portfolioGroups.map((group) => (
+                <div key={group.regionLabel} className="space-y-4">
+                  <h4 className="border-b border-violet-100 pb-2 text-base font-bold text-gray-900">
+                    {group.regionLabel}
+                  </h4>
+                  {group.categories.map((cat) => (
+                    <div key={`${group.regionLabel}-${cat.categoryLabel}`} className="space-y-3">
+                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600">
+                        {cat.categoryLabel}
+                      </p>
+                      <ul className="space-y-4">
+                        {cat.items.map((row, i) => (
+                          <li key={row.id ?? `${group.regionLabel}-${cat.categoryLabel}-${i}`}>
+                            <MediaLineupCard
+                              row={row}
+                              index={i}
+                              isKo={isKo}
+                              portfolioSize={p.portfolio.length}
+                            />
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </div>
+              ))}
+            </div>
           ) : (
             <ul className="space-y-4">
-              {p.portfolio.map((m, i) => {
-                const mediaId = m.id;
-                const hasMediaLink = Boolean(mediaId && !String(mediaId).startsWith("row-"));
-                const detail: DocumentMediaDetail = {
-                  id: mediaId ?? `row-${i}`,
-                  name: m.name,
-                  location: m.location,
-                  thumbUrl: m.thumbUrl,
-                  categoryLabel: m.categoryLabel,
-                  size: m.size,
-                  operatingHours: m.operatingHours,
-                  dailyTraffic: m.dailyTraffic,
-                  broadcastLabel: m.broadcastLabel,
-                  monthlyPriceLabel: m.monthlyPriceLabel ?? m.priceLabel,
-                  lineTotalLabel: m.lineTotalLabel,
-                  recommendReason: m.recommendReason,
-                  exposureContributionPct: m.exposureContributionPct,
-                  budgetContributionPct: m.budgetContributionPct,
-                };
-                return (
-                  <li key={detail.id}>
-                    <MediaDetailCard
-                      detail={detail}
-                      isKo={isKo}
-                      showContribution
-                      portfolioSize={p.portfolio.length}
-                      mediaPageHref={hasMediaLink ? `/media/${mediaId}` : undefined}
-                    />
-                  </li>
-                );
-              })}
+              {p.portfolio.map((m, i) => (
+                <li key={m.id ?? `row-${i}`}>
+                  <MediaLineupCard
+                    row={m}
+                    index={i}
+                    isKo={isKo}
+                    portfolioSize={p.portfolio.length}
+                  />
+                </li>
+              ))}
             </ul>
           )}
         </section>

@@ -1,68 +1,89 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
-import { getPlanCart, replacePlanCart } from "@/lib/plan-cart";
+import {
+  applySyncedPlanCart,
+  getPlanCart,
+  PLAN_CART_CHANGE_EVENT,
+} from "@/lib/plan-cart";
+import { pushPlanCartToServer } from "@/lib/plan-cart-server-sync";
 
-/** 로그인 시 localStorage 플랜 → DB 동기화, DB가 더 최신이면 병합 */
+function parseUpdatedAt(iso: string | undefined): number {
+  if (!iso) return 0;
+  const ms = Date.parse(iso);
+  return Number.isFinite(ms) ? ms : 0;
+}
+
+/** 로그인 시 localStorage 플랜 ↔ DB 동기화 (삭제·추가·순서 반영) */
 export function PlanCartSessionSync() {
-  const pathname = usePathname();
-  const syncedRef = useRef(false);
+  const loggedInRef = useRef(false);
+  const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const syncGenerationRef = useRef(0);
+  const applyingFromServerRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-        const sessionData = await sessionRes.json();
-        if (cancelled || !sessionData?.ok || !sessionData.data) {
-          syncedRef.current = false;
-          return;
-        }
-        if (syncedRef.current) return;
 
-        const local = getPlanCart();
-        const res = await fetch("/api/my/plan/sync", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            items: local.items,
-            campaignGoal: local.campaignGoal,
-            totalBudget: local.totalBudget,
-            duration: local.duration,
-            updatedAt: local.updatedAt,
-          }),
+    async function syncCart(): Promise<void> {
+      if (!loggedInRef.current || cancelled) return;
+
+      const cartAtStart = getPlanCart();
+      const sentUpdatedAt = cartAtStart.updatedAt;
+      const sentUpdatedMs = parseUpdatedAt(sentUpdatedAt);
+      const generation = ++syncGenerationRef.current;
+
+      const merged = await pushPlanCartToServer(cartAtStart);
+      if (cancelled || generation !== syncGenerationRef.current) return;
+      if (!merged) return;
+
+      const cartNow = getPlanCart();
+      const nowUpdatedMs = parseUpdatedAt(cartNow.updatedAt);
+      if (nowUpdatedMs > sentUpdatedMs) {
+        void syncCart();
+        return;
+      }
+
+      applyingFromServerRef.current = true;
+      applySyncedPlanCart(merged);
+      queueMicrotask(() => {
+        applyingFromServerRef.current = false;
+      });
+    }
+
+    async function ensureSession() {
+      try {
+        const sessionRes = await fetch("/api/auth/session", {
+          cache: "no-store",
         });
-        if (!res.ok || cancelled) return;
-        const data = (await res.json()) as {
-          ok?: boolean;
-          data?: {
-            items: typeof local.items;
-            campaignGoal?: string;
-            totalBudget?: number;
-            duration?: number;
-            updatedAt: string;
-          };
-        };
-        if (data?.ok && data.data) {
-          const merged = {
-            items: data.data.items.length > 0 ? data.data.items : local.items,
-            campaignGoal: data.data.campaignGoal ?? local.campaignGoal,
-            totalBudget: data.data.totalBudget ?? local.totalBudget,
-            duration: data.data.duration ?? local.duration,
-            updatedAt: data.data.updatedAt,
-          };
-          replacePlanCart(merged);
-        }
-        syncedRef.current = true;
+        const sessionData = await sessionRes.json();
+        if (cancelled) return;
+        const loggedIn = Boolean(sessionData?.ok && sessionData.data);
+        loggedInRef.current = loggedIn;
+        if (!loggedIn) return;
+        await syncCart();
       } catch {
         /* ignore */
       }
-    })();
+    }
+
+    void ensureSession();
+
+    const onCartChange = () => {
+      if (!loggedInRef.current || applyingFromServerRef.current) return;
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+      syncTimerRef.current = setTimeout(() => {
+        void syncCart();
+      }, 400);
+    };
+
+    window.addEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);
     return () => {
       cancelled = true;
+      syncGenerationRef.current += 1;
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+      window.removeEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);
     };
-  }, [pathname]);
+  }, []);
 
   return null;
 }

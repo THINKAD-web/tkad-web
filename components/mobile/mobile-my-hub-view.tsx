@@ -98,8 +98,8 @@ export function MobileMyHubView({
       icon: Megaphone,
     },
     {
-      href: "/my?tab=planner",
-      label: isKo ? "내 플래너" : "My planner",
+      href: "/my/plan",
+      label: isKo ? "내 플랜" : "My plan",
       icon: LayoutList,
     },
     {

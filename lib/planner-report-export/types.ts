@@ -60,8 +60,35 @@ export type PlannerExportCharts = {
   reachSummary?: PlannerExportChartDatum[];
   /** 유형별 월 노출 비중 — 예산 배분과 대비 */
   impressionSplit?: PlannerExportChartDatum[];
+  /** 지역별 월 예산 비중 (내 플랜 보고서) */
+  regionBudgetSplit?: PlannerExportChartDatum[];
+  /** 지역별 월 노출 비중 (내 플랜 보고서) */
+  regionImpressionSplit?: PlannerExportChartDatum[];
   /** 예산·노출·CPM 차이 설명 (웹·PDF·PPT 공용) */
   performanceGuide?: PlannerPerformanceGuide;
+};
+
+/** 지역별 예산·효과 요약 (내 플랜 보고서) */
+export type PlannerExportRegionBreakdown = {
+  regionKey: string;
+  label: string;
+  mediaCount: number;
+  monthlyBudgetWon: number;
+  periodBudgetWon: number;
+  budgetPct: number;
+  monthlyImpressions: number;
+  totalImpressions: number;
+  impressionPct: number;
+  uniqueReach: number;
+  cpmKrw: number | null;
+};
+
+export type PlannerExportPortfolioGroup = {
+  regionLabel: string;
+  categories: {
+    categoryLabel: string;
+    items: PlannerExportMediaRow[];
+  }[];
 };
 
 export type PlannerReportExportPayload = {
@@ -85,6 +112,10 @@ export type PlannerReportExportPayload = {
   kpis: PlannerExportKpi[];
   charts?: PlannerExportCharts;
   portfolio: PlannerExportMediaRow[];
+  /** 내 플랜 보고서 — 지역 → 유형별 매체 구성 */
+  portfolioGroups?: PlannerExportPortfolioGroup[];
+  /** 지역별 예산·효과 표 (내 플랜 보고서) */
+  regionBreakdown?: PlannerExportRegionBreakdown[];
   /** 통합 플래너 전용 — 디지털 채널 배분 */
   digital?: PlannerExportDigitalRow[];
   digitalSummary?: string;

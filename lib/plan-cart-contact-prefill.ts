@@ -4,6 +4,7 @@ import {
   PLAN_CART_GOAL_OPTIONS,
   type PlanCart,
 } from "@/lib/plan-cart";
+import { mapPlanCartGoalToPlanner } from "@/lib/plan-cart-planner-bridge";
 import type {
   ContactBudgetV2,
   ContactCampaignGoal,
@@ -11,9 +12,13 @@ import type {
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 
 const PLAN_CART_GOAL_TO_CONTACT: Record<string, ContactCampaignGoal> = {
+  brand: "brand_awareness",
+  launch: "product_launch",
+  event: "event_promo",
+  sales: "store_traffic",
+  local: "store_traffic",
   brand_awareness: "brand_awareness",
   product_launch: "product_launch",
-  event: "event_promo",
   conversion: "store_traffic",
 };
 
@@ -39,7 +44,9 @@ export function planCartBudgetToContactBudgetV2(
 
 function goalLabel(goal: string | undefined, isKo: boolean): string {
   if (!goal) return isKo ? "미정" : "TBD";
-  const found = PLAN_CART_GOAL_OPTIONS.find((g) => g.value === goal);
+  const plannerKey = mapPlanCartGoalToPlanner(goal);
+  const lookup = plannerKey ?? goal;
+  const found = PLAN_CART_GOAL_OPTIONS.find((g) => g.value === lookup);
   if (!found) return goal;
   return isKo ? found.ko : found.en;
 }

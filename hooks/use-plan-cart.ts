@@ -12,6 +12,7 @@ import {
   PLAN_CART_CHANGE_EVENT,
   PLAN_CART_KEY,
   removeFromPlanCart,
+  reorderPlanCartItems,
   savePlanCartMeta,
   type AddToPlanCartResult,
   type BulkAddToPlanCartResult,
@@ -64,6 +65,10 @@ export function usePlanCart() {
     removeFromPlanCart(mediaId);
   }, []);
 
+  const reorder = useCallback((fromIndex: number, toIndex: number) => {
+    reorderPlanCartItems(fromIndex, toIndex);
+  }, []);
+
   const clear = useCallback(() => {
     clearPlanCart();
   }, []);
@@ -91,6 +96,7 @@ export function usePlanCart() {
     add,
     addMany,
     remove,
+    reorder,
     clear,
     updateMeta,
     has,

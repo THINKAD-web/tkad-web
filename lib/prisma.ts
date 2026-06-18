@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import type { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 import { config as loadEnv } from "dotenv";
-import { statSync } from "node:fs";
+import { statSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { Pool } from "pg";
 import {
@@ -45,6 +45,26 @@ function readPrismaClientBundleMtimeMs(): number | null {
   }
 }
 
+function bustPrismaClientModuleCache(): void {
+  if (process.env.NODE_ENV === "production") return;
+  const roots = [
+    join(process.cwd(), "node_modules", "@prisma", "client"),
+    join(process.cwd(), "node_modules", ".prisma", "client"),
+  ];
+  for (const key of Object.keys(require.cache)) {
+    if (roots.some((root) => key.startsWith(root))) {
+      delete require.cache[key];
+    }
+  }
+}
+
+function loadPrismaClientCtor(): typeof PrismaClient {
+  // prisma generate 후 dev HMR 없이도 최신 delegate 로드
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const mod = require("@prisma/client") as typeof import("@prisma/client");
+  return mod.PrismaClient;
+}
+
 function createPrismaClient(): PrismaClient {
   const rawUrl = ensureDatabaseUrlEnv();
   if (!rawUrl) {
@@ -58,7 +78,8 @@ function createPrismaClient(): PrismaClient {
     max: Number(process.env.DATABASE_POOL_MAX || 15),
   });
 
-  return new PrismaClient({
+  const PrismaClientCtor = loadPrismaClientCtor();
+  return new PrismaClientCtor({
     adapter: new PrismaPg(pool),
     log:
       process.env.NODE_ENV === "development"
@@ -67,29 +88,51 @@ function createPrismaClient(): PrismaClient {
   });
 }
 
+function generatedClientHasSavedPlanCart(): boolean {
+  try {
+    const p = join(process.cwd(), "node_modules", ".prisma", "client", "index.d.ts");
+    return readFileSync(p, "utf8").includes("savedPlanCart");
+  } catch {
+    return false;
+  }
+}
+
+function shouldRefreshPrismaSingleton(client: PrismaClient): boolean {
+  const bundleMtime = readPrismaClientBundleMtimeMs();
+  const createdMtime = globalThis.__prismaClientBundleMtimeMs;
+  if (bundleMtime != null && createdMtime != null && bundleMtime > createdMtime) {
+    return true;
+  }
+  if (process.env.NODE_ENV === "production") return false;
+  const record = client as unknown as Record<string, unknown>;
+  if (record.savedPlanCart !== undefined) return false;
+  return generatedClientHasSavedPlanCart();
+}
+
+function invalidatePrismaSingleton(): void {
+  const stale = globalThis.prisma;
+  globalThis.prisma = undefined;
+  devPrismaDatabaseUrl = undefined;
+  globalThis.__prismaClientBundleMtimeMs = undefined;
+  bustPrismaClientModuleCache();
+  if (stale) void stale.$disconnect().catch(() => {});
+}
+
+/** dev: prisma generate 직후 싱글톤·모듈 캐시 초기화 */
+export function refreshPrismaClient(): PrismaClient {
+  invalidatePrismaSingleton();
+  return getPrisma();
+}
+
 export function getPrisma(): PrismaClient {
   if (process.env.NODE_ENV !== "production") {
     ensureLocalDatabaseEnvFromFiles();
     const cs = resolveDatabaseUrl();
     if (globalThis.prisma && devPrismaDatabaseUrl !== cs) {
-      const stale = globalThis.prisma;
-      globalThis.prisma = undefined;
-      devPrismaDatabaseUrl = undefined;
-      globalThis.__prismaClientBundleMtimeMs = undefined;
-      void stale.$disconnect().catch(() => {});
+      invalidatePrismaSingleton();
     }
-    const bundleMtime = readPrismaClientBundleMtimeMs();
-    const createdMtime = globalThis.__prismaClientBundleMtimeMs;
-    if (
-      globalThis.prisma &&
-      bundleMtime != null &&
-      createdMtime != null &&
-      bundleMtime > createdMtime
-    ) {
-      const stale = globalThis.prisma;
-      globalThis.prisma = undefined;
-      globalThis.__prismaClientBundleMtimeMs = undefined;
-      void stale.$disconnect().catch(() => {});
+    if (globalThis.prisma && shouldRefreshPrismaSingleton(globalThis.prisma)) {
+      invalidatePrismaSingleton();
     }
   }
   if (globalThis.prisma) return globalThis.prisma;

@@ -1596,6 +1596,8 @@ model User {
   chatRoomsAsOwner        ChatRoom[] @relation("ChatOwner")
   chatMessages            ChatMessage[]
   savedMediaPlan          UserSavedPlan?
+  savedPlanCarts          SavedPlanCart[]
+  planReportActivities    PlanReportActivity[]
 
   referredByUserId String? @map("referred_by_user_id")
   referredBy       User?   @relation("UserReferrals", fields: [referredByUserId], references: [id], onDelete: SetNull)
@@ -2019,6 +2021,65 @@ model UserSavedPlan {
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("user_saved_plans")
+}
+
+/// 사용자가 저장한 플랜 카트 스냅샷 (보고서·사례·커뮤니티 파이프라인용)
+model SavedPlanCart {
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  title         String    @db.VarChar(200)
+  description   String?   @db.Text
+  source        String    @default("plan_cart") @db.VarChar(32)
+  items         Json      @default("[]")
+  campaignGoal  String?   @map("campaign_goal") @db.VarChar(32)
+  totalBudget   Int?      @map("total_budget")
+  duration      Int?
+  reportSummary Json?     @map("report_summary")
+  mediaCount    Int       @default(0) @map("media_count")
+  regionsText   String?   @map("regions_text") @db.VarChar(500)
+  goalTitle     String?   @map("goal_title") @db.VarChar(120)
+  status        String    @default("saved") @db.VarChar(32)
+  publishIntent String?   @map("publish_intent") @db.VarChar(32)
+  adminNote     String?   @map("admin_note") @db.Text
+  /// 사례로 승격된 SuccessCase.id
+  promotedSuccessCaseId    String?   @map("promoted_success_case_id")
+  /// 커뮤니티로 승격된 CommunityPost.id
+  promotedCommunityPostId  String?   @map("promoted_community_post_id")
+  promotedAt               DateTime? @map("promoted_at")
+  /// 사용자가 저장 플랜을 내 플랜으로 불러온 횟수
+  restoreCount             Int       @default(0) @map("restore_count")
+  lastRestoredAt           DateTime? @map("last_restored_at")
+  deletedAt     DateTime? @map("deleted_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, deletedAt, createdAt(sort: Desc)])
+  @@index([status])
+  @@index([publishIntent])
+  @@map("saved_plan_carts")
+}
+
+/// 내 플랜·플래너 보고서 조회·PDF/PPTX 다운로드 이력 (관리자 검토용)
+model PlanReportActivity {
+  id          String   @id @default(cuid())
+  userId      String   @map("user_id")
+  eventType   String   @map("event_type") @db.VarChar(32)
+  source      String   @db.VarChar(32)
+  format      String?  @db.VarChar(16)
+  mediaCount  Int      @default(0) @map("media_count")
+  goalTitle   String?  @map("goal_title") @db.VarChar(120)
+  regionsText String?  @map("regions_text") @db.VarChar(500)
+  reportTitle String?  @map("report_title") @db.VarChar(200)
+  createdAt   DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, createdAt(sort: Desc)])
+  @@index([eventType])
+  @@index([source])
+  @@map("plan_report_activities")
 }
 
 /// 로그인 사용자 최근 본 매체 (다기기 동기화, 최대 20개는 앱 레이어에서 유지)

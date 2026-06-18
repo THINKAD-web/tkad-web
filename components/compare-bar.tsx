@@ -11,6 +11,7 @@ import {
 } from "@/components/floating-selection-bar";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { formatPlanCartBadgeCount } from "@/lib/plan-cart-limits";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import { useTranslations } from "next-intl";
@@ -59,7 +60,7 @@ function PlanCartBarLink({
     >
       <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
       {isKo ? "내 플랜" : "My plan"}
-      <span className="tabular-nums">{count > 9 ? "9+" : count}</span>
+      <span className="tabular-nums">{formatPlanCartBadgeCount(count)}</span>
     </Link>
   );
 }
@@ -257,7 +258,7 @@ export default function CompareBar({
               size="sm"
               className={cn(blockClass, "hidden whitespace-nowrap md:inline-flex")}
             >
-              {isKo ? "내 플랜" : "My plan"} ({planCount > 9 ? "9+" : planCount})
+              {isKo ? "내 플랜" : "My plan"} ({formatPlanCartBadgeCount(planCount)})
             </BtnBlock>
           ) : null}
           {hasCompareSelection ? (

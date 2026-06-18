@@ -10,16 +10,10 @@ import {
   PlannerNeonLabel,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
-
-type GoalDef = {
-  key: PlannerCampaignGoal;
-  titleKey: string;
-  descKey: string;
-};
+import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
 
 type Props = {
   campaignGoal: PlannerCampaignGoal | null;
-  goals: readonly GoalDef[];
   onSelectGoal: (key: PlannerCampaignGoal) => void;
 };
 
@@ -28,14 +22,8 @@ const list = {
   hidden: {},
 };
 
-const item = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0 },
-};
-
 export default function PlannerCampaignStep1({
   campaignGoal,
-  goals,
   onSelectGoal,
 }: Props) {
   const t = useTranslations("planner");
@@ -58,38 +46,14 @@ export default function PlannerCampaignStep1({
         </div>
         <div className="p-5 sm:p-6">
           <motion.div
-            className="grid grid-cols-1 gap-3 sm:grid-cols-2"
-            variants={list}
             initial="hidden"
             animate="visible"
+            variants={list}
           >
-            {goals.map(({ key, titleKey, descKey }) => (
-              <motion.div key={key} variants={item}>
-                <button
-                  type="button"
-                  onClick={() => onSelectGoal(key)}
-                  className={cn(
-                    plannerNeon.selectChip,
-                    "h-full w-full p-5 text-left",
-                    campaignGoal === key
-                      ? plannerNeon.selectChipActive
-                      : plannerNeon.selectChipIdle,
-                  )}
-                >
-                  <p className="font-bold tracking-tight">{t(titleKey)}</p>
-                  <p
-                    className={cn(
-                      "mt-2 text-xs leading-relaxed",
-                      campaignGoal === key
-                        ? "dark:text-white/70 text-gray-600"
-                        : plannerNeon.subtext,
-                    )}
-                  >
-                    {t(descKey)}
-                  </p>
-                </button>
-              </motion.div>
-            ))}
+            <PlannerCampaignGoalGrid
+              selected={campaignGoal}
+              onSelect={onSelectGoal}
+            />
           </motion.div>
         </div>
       </PlannerNeonCard>

@@ -6,7 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowLeft, CheckCircle2, Loader2, Mail, RefreshCw, Trash2 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { BtnBlock } from "@/components/brutalist";
-import { FullPageSpinner } from "@/components/ui/spinner";
+import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -207,7 +207,12 @@ export function MySettingsPageClient() {
   }
 
   if (loading || !data) {
-    return <FullPageSpinner label={isKo ? "설정 불러오는 중…" : "Loading settings…"} />;
+    return (
+      <NeonFullPageSpinner
+        label={isKo ? "설정 불러오는 중…" : "Loading settings…"}
+        portal
+      />
+    );
   }
 
   const verified = !!data.emailVerifiedAt;

@@ -23,7 +23,7 @@ export function PlanCartAddButton({
   className,
 }: Props) {
   const toast = useAppToast();
-  const { has, add, remove, maxItems } = usePlanCart();
+  const { has, add, remove } = usePlanCart();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 
@@ -37,14 +37,16 @@ export function PlanCartAddButton({
     }
     const result = add(payload);
     if (result.ok && result.added) {
-      toast.success(`${item.mediaName}이(가) 플랜에 추가됐어요 ✓`);
+      toast.success(
+        `${item.mediaName}이(가) 내 플랜에 담겼어요. 내 플랜에서 확인할 수 있어요.`,
+      );
       return;
     }
     if (result.ok && !result.added) {
       toast.warning("이미 플랜에 있습니다");
       return;
     }
-    toast.error(`플랜은 최대 ${maxItems}개 매체까지 가능합니다`);
+    toast.error("플랜에 더 담을 수 없습니다");
   }
 
   return (
@@ -60,7 +62,7 @@ export function PlanCartAddButton({
         className,
       )}
       aria-pressed={inPlan}
-      aria-label={inPlan ? "미디어 플랜에서 빼기" : "미디어 플랜에 담기"}
+      aria-label={inPlan ? "플랜에서 빼기" : "플랜에 담기"}
     >
       {gridInline ? (
         inPlan ? (
@@ -69,11 +71,11 @@ export function PlanCartAddButton({
           <>플랜+</>
         )
       ) : inPlan ? (
-        <>미디어 플랜 담김 ✓</>
+        <>플랜 ✓</>
       ) : (
         <>
           <Plus className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          미디어 플랜 담기
+          플랜
         </>
       )}
     </button>

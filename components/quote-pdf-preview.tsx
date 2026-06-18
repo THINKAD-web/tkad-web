@@ -214,13 +214,13 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
                 <p className="text-[11px] font-medium text-gray-500">{t("pdfSupply")}</p>
-                <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
+                <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
                   {formatDocumentManWon(subtotalWon, isKo)}
                 </p>
               </div>
               <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
                 <p className="text-[11px] font-medium text-gray-500">{t("pdfVat")}</p>
-                <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
+                <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
                   {formatDocumentManWon(vatWon, isKo)}
                 </p>
               </div>
@@ -233,7 +233,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 <p className="text-[11px] font-medium text-violet-100">
                   {isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}
                 </p>
-                <p className="mt-1 font-display text-xl font-black tabular-nums text-white">
+                <p className="quote-pdf-amount mt-1 text-xl font-bold tabular-nums text-white">
                   {formatDocumentManWon(grandTotalWon, isKo)}
                 </p>
               </div>

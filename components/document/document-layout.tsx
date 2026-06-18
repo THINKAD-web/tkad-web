@@ -9,7 +9,7 @@ export const documentPreviewFrameClass =
 
 /** 플래너·견적 문서 카드 (흰색 A4/보고서 본문) */
 export const documentCardClass =
-  "mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm";
+  "tkad-document-light-surface mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm";
 
 export function DocumentPreviewFrame({
   children,
@@ -78,7 +78,7 @@ export function DocumentGradientHero({
   return (
     <div
       className={cn(
-        "relative bg-gradient-to-br from-violet-600 via-violet-700 to-violet-800 px-6 py-7 sm:px-9 sm:py-9",
+        "tkad-planner-dark-surface relative bg-gradient-to-br from-violet-600 via-violet-700 to-violet-800 px-6 py-7 sm:px-9 sm:py-9",
         className,
       )}
     >
@@ -91,9 +91,11 @@ export function DocumentGradientHero({
           {badge}
         </span>
       </div>
-      <h2 className="mt-5 text-2xl font-black leading-tight text-white sm:text-3xl">{title}</h2>
+      <h2 className="mt-5 text-2xl font-black leading-tight text-white sm:text-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]">
+        {title}
+      </h2>
       {subtitle ? (
-        <p className="mt-2 text-sm text-violet-100">{subtitle}</p>
+        <p className="mt-2 text-sm font-medium text-white/90">{subtitle}</p>
       ) : null}
       <div className="mt-5 h-1 w-16 rounded-full bg-cyan-400" aria-hidden />
     </div>

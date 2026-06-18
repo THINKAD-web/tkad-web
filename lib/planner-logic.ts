@@ -3,11 +3,64 @@ import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
+import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
 /** DB `Media.type` · 레거시 값 → 플래너 유형 (매칭용) */
 export type PlannerMediaKind = "digital" | "static" | "mobile" | "network";
+
+const TRANSIT_MOBILE_SUBCATEGORIES = new Set([
+  "bus_interior",
+  "bus_exterior",
+  "bus_wrap",
+  "vehicle_wrap",
+  "taxi_interior",
+  "taxi_exterior",
+  "subway_train",
+  "subway_station",
+  "subway_platform",
+  "inflight",
+  "ferry",
+  "ktx_terminal",
+  "airport",
+]);
+
+export type PlannerMediaKindInput = Pick<
+  MediaItem,
+  | "type"
+  | "subCategory"
+  | "mediaSubCategory"
+  | "mediaMainCategory"
+  | "name"
+  | "nameEn"
+  | "tags"
+>;
+
+/** browse·DB 메타 + type 문자열 — 보고서 고정형/이동형 분류 */
+export function resolvePlannerMediaKind(
+  item: PlannerMediaKindInput,
+): PlannerMediaKind | null {
+  const main = (item.mediaMainCategory ?? "").trim().toLowerCase();
+  const sub = (item.mediaSubCategory ?? item.subCategory ?? "")
+    .trim()
+    .toLowerCase();
+
+  if (main === "transit") return "mobile";
+  if (sub && TRANSIT_MOBILE_SUBCATEGORIES.has(sub)) return "mobile";
+
+  const fromType = normalizeMediaTypeForPlanner(item.type);
+  if (fromType) return fromType;
+
+  const hay = [item.name, item.nameEn, ...(item.tags ?? [])]
+    .filter(Boolean)
+    .join(" ");
+  if (/버스|bus|지하철|subway|택시|taxi|랩핑|wrap|transit|vehicle/i.test(hay)) {
+    return "mobile";
+  }
+
+  return null;
+}
 
 export function normalizeMediaTypeForPlanner(
   type: string | undefined | null,
@@ -17,6 +70,8 @@ export function normalizeMediaTypeForPlanner(
   if (t === "network") return "network";
   if (
     t === "digital" ||
+    t === "dooh" ||
+    t === "ooh" ||
     t === "ooh_digital" ||
     t === "led" ||
     t === "signage" ||
@@ -39,12 +94,21 @@ export function normalizeMediaTypeForPlanner(
     t === "mobile" ||
     t === "transit" ||
     t === "bus" ||
+    t === "bus_interior" ||
+    t === "bus_exterior" ||
+    t === "bus_wrap" ||
     t === "subway" ||
     t === "transport" ||
     t === "vehicle"
   ) {
     return "mobile";
   }
+  if (t === "fixed" || t === "고정형" || t === "고정") return "static";
+  if (/고정|빌보드|billboard|wallscape|포스터/.test(t) && !/digital|dooh|디지털/.test(t)) {
+    return "static";
+  }
+  if (/디지털|dooh|ooh|사이니지|signage|led|전광/.test(t)) return "digital";
+  if (/이동|버스|택시|지하철|랩핑|transit|vehicle/.test(t)) return "mobile";
   return null;
 }
 
@@ -69,7 +133,7 @@ export function matchesPlannerCategory(
   item: MediaItem,
   cat: PlannerCategory,
 ): boolean {
-  const norm = normalizeMediaTypeForPlanner(item.type);
+  const norm = resolvePlannerMediaKind(item);
   if (cat === "digital")
     return norm === "digital" || norm === "network";
   if (cat === "static") return norm === "static";
@@ -349,16 +413,16 @@ const TYPE_META: Record<
   static: { labelKo: "고정형", labelEn: "Static" },
   mobile: { labelKo: "이동형", labelEn: "Mobile" },
   network: { labelKo: "네트워크", labelEn: "Network" },
+  other: { labelKo: "기타", labelEn: "Other" },
 };
 
 /** 보고서·성과 요약 차트용 — network→digital 등 유형 통합 키 */
 export function plannerReportCategoryKey(m: MediaItem): string {
-  const norm = normalizeMediaTypeForPlanner(m.type);
+  const norm = resolvePlannerMediaKind(m);
   if (norm === "network" || norm === "digital") return "digital";
   if (norm === "static") return "static";
   if (norm === "mobile") return "mobile";
-  const raw = m.type?.trim();
-  return raw && TYPE_META[raw] ? raw : "static";
+  return "other";
 }
 
 function groupPortfolioByReportCategory(

@@ -469,6 +469,64 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
+  if (p.regionBreakdown && p.regionBreakdown.length > 0) {
+    sectionTitle(isKo ? "지역별 예산 · 효과" : "Budget & impact by region");
+    if (ch?.regionBudgetSplit && ch.regionBudgetSplit.length > 1) {
+      ensure(46);
+      doc.setFontSize(8);
+      setText(GRAY_500);
+      doc.text(isKo ? "지역별 예산 비중" : "Budget by region", M, y + 2);
+      const cx = M + 22;
+      const cy = y + 26;
+      drawDonut(cx, cy, 18, 10, ch.regionBudgetSplit);
+      y += 50;
+    }
+    if (ch?.regionImpressionSplit && ch.regionImpressionSplit.length > 1) {
+      ensure(6 + ch.regionImpressionSplit.length * 7);
+      doc.setFontSize(8);
+      setText(GRAY_500);
+      doc.text(isKo ? "지역별 노출 비중" : "Impressions by region", M, y + 2);
+      y += 5;
+      drawShareBars(M, contentW, ch.regionImpressionSplit);
+      y += 3;
+    }
+    const cols = isKo
+      ? ["지역", "매체", "월 예산", "월 노출", "도달"]
+      : ["Region", "Media", "Monthly", "Imp/mo", "Reach"];
+    const cw = [28, 14, 38, 32, 28];
+    ensure(8 + p.regionBreakdown.length * 7);
+    doc.setFontSize(8);
+    setText(GRAY_500);
+    let dx = M;
+    cols.forEach((h, i) => {
+      doc.text(h, dx, y + 2);
+      dx += cw[i] ?? 24;
+    });
+    y += 6;
+    doc.setFont(FONT, "normal");
+    for (const row of p.regionBreakdown) {
+      ensure(7);
+      dx = M;
+      const cells = [
+        row.label,
+        String(row.mediaCount),
+        `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
+        row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
+        row.uniqueReach > 0
+          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
+          : "—",
+      ];
+      cells.forEach((cell, i) => {
+        setText(i === 0 ? INK : GRAY_600);
+        const line = (doc.splitTextToSize(cell, (cw[i] ?? 24) - 2) as string[])[0] ?? cell;
+        doc.text(line, dx, y + 2);
+        dx += cw[i] ?? 24;
+      });
+      y += 7;
+    }
+    y += 4;
+  }
+
   // ── 매체 구성 (디테일 카드) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
 

@@ -4,6 +4,13 @@ import {
   plannerReportFileBase,
   type PlannerReportExportFormat,
 } from "@/lib/planner-report-export/types";
+import { getCurrentUser } from "@/lib/user-session";
+import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
+import {
+  PLAN_REPORT_ACTIVITY_SOURCES,
+  resolveSourceFromExportPayload,
+  type PlanReportActivitySource,
+} from "@/lib/plan-report-activity/types";
 
 /** Content-Disposition: ASCII fallback + RFC 5987 UTF-8 (한글 파일명 지원) */
 function contentDisposition(filename: string): string {
@@ -29,9 +36,10 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { format, payload } = (body ?? {}) as {
+  const { format, payload, activitySource } = (body ?? {}) as {
     format?: PlannerReportExportFormat;
     payload?: unknown;
+    activitySource?: PlanReportActivitySource;
   };
 
   if (format !== "pdf" && format !== "pptx") {
@@ -46,12 +54,35 @@ export async function POST(request: NextRequest) {
 
   const base = plannerReportFileBase(payload);
 
+  const logExport = () => {
+    void getCurrentUser().then((user) => {
+      if (!user) return;
+      const source =
+        activitySource &&
+        (PLAN_REPORT_ACTIVITY_SOURCES as readonly string[]).includes(
+          activitySource,
+        )
+          ? activitySource
+          : resolveSourceFromExportPayload(payload);
+      logPlanReportActivityFireAndForget(user.id, {
+        eventType: format === "pdf" ? "pdf_export" : "pptx_export",
+        source,
+        format,
+        mediaCount: payload.portfolio?.length ?? 0,
+        goalTitle: payload.goalTitle,
+        regionsText: payload.regionsText,
+        reportTitle: payload.documentTitle || payload.campaignName,
+      });
+    });
+  };
+
   try {
     if (format === "pdf") {
       const { buildPlannerReportPdf } = await import(
         "@/lib/planner-report-export/build-pdf"
       );
       const bytes = await buildPlannerReportPdf(payload);
+      logExport();
       return new NextResponse(new Blob([bytes as BlobPart]), {
         status: 200,
         headers: {
@@ -66,6 +97,7 @@ export async function POST(request: NextRequest) {
       "@/lib/planner-report-export/build-pptx"
     );
     const bytes = await buildPlannerReportPptx(payload);
+    logExport();
     return new NextResponse(new Blob([bytes as BlobPart]), {
       status: 200,
       headers: {

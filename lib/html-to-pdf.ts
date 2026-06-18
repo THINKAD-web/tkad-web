@@ -126,6 +126,19 @@ function fixBackgroundClipTextForCapture(cloned: HTMLElement) {
   });
 }
 
+/** Space Grotesk + font-black 합성 시 html2canvas 에 취소선처럼 보이는 글리치 방지 */
+function fixQuotePdfAmountFonts(cloned: HTMLElement) {
+  const fam =
+    "var(--font-pretendard), 'Pretendard', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif";
+  cloned.querySelectorAll<HTMLElement>(".quote-pdf-amount").forEach((el) => {
+    el.style.fontFamily = fam;
+    el.style.fontWeight = "700";
+    el.style.textDecoration = "none";
+    el.style.setProperty("-webkit-text-fill-color", "");
+    el.style.letterSpacing = "0";
+  });
+}
+
 function stripStylesheetsInClone(clonedDoc: Document) {
   clonedDoc.querySelectorAll('link[rel="stylesheet"], style').forEach((node) => {
     node.parentNode?.removeChild(node);
@@ -262,6 +275,7 @@ function replaceUntrustedImagesInClone(
     flattenModernColorsToInline(clonedDoc, cloned);
     inlineComputedStylesForCapture(clonedDoc, cloned);
     fixBackgroundClipTextForCapture(cloned);
+    fixQuotePdfAmountFonts(cloned);
     // inline style에 남은 잔존 color 함수 치환
     cloned.querySelectorAll<HTMLElement>("*").forEach((el) => {
       const s = el.getAttribute("style");

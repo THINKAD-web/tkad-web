@@ -85,6 +85,7 @@ import {
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
+import { resolveWizardStepAfterPlanCartImport } from "@/lib/planner/plan-cart-import";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
@@ -145,19 +146,7 @@ function PlannerNeonPageBody({
   return inner;
 }
 
-const GOALS: {
-  key: PlannerCampaignGoal;
-  titleKey: string;
-  descKey: string;
-}[] = [
-  { key: "brand", titleKey: "goalBrand", descKey: "goalBrandDesc" },
-  { key: "launch", titleKey: "goalLaunch", descKey: "goalLaunchDesc" },
-  { key: "event", titleKey: "goalEvent", descKey: "goalEventDesc" },
-  { key: "sales", titleKey: "goalSales", descKey: "goalSalesDesc" },
-  { key: "local", titleKey: "goalLocal", descKey: "goalLocalDesc" },
-];
-
-const CATEGORIES: {
+import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs"; {
   key: PlannerCategory;
   labelKey: "catDigital" | "catStatic" | "catMobile";
 }[] = [
@@ -376,7 +365,7 @@ export default function PlannerPageClient({
   const reachSplit = reachSplitForGoal(campaignGoal);
 
   const goalTitle = useMemo(() => {
-    const g = GOALS.find((x) => x.key === campaignGoal);
+    const g = PLANNER_CAMPAIGN_GOAL_DEFS.find((x) => x.key === campaignGoal);
     return g ? t(g.titleKey) : "—";
   }, [campaignGoal, t]);
 
@@ -445,24 +434,37 @@ export default function PlannerPageClient({
 
     const cart = getPlanCart();
     importFromPlanCart(cart);
+    const afterImport = usePlannerStore.getState();
+    const targetStep = resolveWizardStepAfterPlanCartImport(afterImport);
+    setWizardStep(targetStep);
     handledQueryRef.current = "from:plan";
 
     const count = cart.items.length;
+    const onReport = targetStep === PLANNER_RESULT_STEP;
     toast(
       "success",
       isKo
         ? count > 0
-          ? `내 플랜 매체 ${count}개로 플래너를 시작합니다.`
-          : "내 플랜 설정으로 플래너를 시작합니다."
+          ? onReport
+            ? `내 플랜 매체 ${count}개로 보고서를 준비했습니다.`
+            : `내 플랜 매체 ${count}개로 플래너를 시작합니다.`
+          : onReport
+            ? "내 플랜 설정으로 보고서를 준비했습니다."
+            : "내 플랜 설정으로 플래너를 시작합니다."
         : count > 0
-          ? `Starting planner with ${count} media from My plan.`
-          : "Starting planner with your My plan settings.",
+          ? onReport
+            ? `Report ready with ${count} media from My plan.`
+            : `Starting planner with ${count} media from My plan.`
+          : onReport
+            ? "Report ready from your My plan settings."
+            : "Starting planner with your My plan settings.",
     );
     stripPlannerQueryKeys(["from", "mediaIds", "addMedia"]);
   }, [
     plannerStoreReady,
     fromPlanParam,
     importFromPlanCart,
+    setWizardStep,
     isKo,
     stripPlannerQueryKeys,
     toast,
@@ -568,11 +570,18 @@ export default function PlannerPageClient({
         if (cancelled || !data.planJson) return;
         importFromSavedPlan(data.planJson);
         setSavedPlanId(loadPlanParam);
-        const mediaCount = data.planJson.campaignMediaIds?.length ?? 0;
-        setWizardStep(mediaCount > 0 ? 4 : 2);
+        const afterImport = usePlannerStore.getState();
+        const targetStep = resolveWizardStepAfterPlanCartImport(afterImport);
+        setWizardStep(targetStep);
         toast(
           "success",
-          isKo ? "저장된 플랜을 불러왔습니다." : "Saved plan loaded.",
+          isKo
+            ? targetStep === PLANNER_RESULT_STEP
+              ? "저장된 플랜 보고서를 불러왔습니다."
+              : "저장된 플랜을 불러왔습니다."
+            : targetStep === PLANNER_RESULT_STEP
+              ? "Saved plan report loaded."
+              : "Saved plan loaded.",
         );
         stripPlannerQueryKeys(["loadPlan"]);
       } catch {
@@ -1009,7 +1018,6 @@ export default function PlannerPageClient({
                 {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
                 <PlannerCampaignStep1
                   campaignGoal={campaignGoal}
-                  goals={GOALS}
                   onSelectGoal={setCampaignGoal}
                 />
               </>
@@ -1348,6 +1356,7 @@ export default function PlannerPageClient({
                 portfolioMonthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
                 isAutoPortfolio={isAutoPortfolio}
                 unresolvedMediaCount={unresolvedMediaCount}
+                activitySource="planner"
               />
             ) : null}
 

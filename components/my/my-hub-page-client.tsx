@@ -50,6 +50,7 @@ import { syncRecentlyViewedWithServer } from "@/lib/recently-viewed-sync";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import { MobileMyHubView } from "@/components/mobile/mobile-my-hub-view";
+import { usePlanCart } from "@/hooks/use-plan-cart";
 
 type Me = {
   id: string;
@@ -167,6 +168,7 @@ export function MyHubPageClient() {
   const [recentLoading, setRecentLoading] = useState(true);
 
   const [inquiryCount, setInquiryCount] = useState(0);
+  const { cart: planCart } = usePlanCart();
 
   const reloadMe = useCallback(async () => {
     const res = await fetch("/api/auth/session", { cache: "no-store" });
@@ -643,6 +645,29 @@ export function MyHubPageClient() {
               <h2 id="my-planner-heading" className="sr-only">
                 {t("tabs.planner")}
               </h2>
+              {planCart.items.length > 0 ? (
+                <div className={cn(myHubGlassCard, "mb-6")}>
+                  <p className="text-sm font-bold text-foreground">
+                    {isKo
+                      ? `담은 매체 ${planCart.items.length}개`
+                      : `${planCart.items.length} media in your plan`}
+                  </p>
+                  <p className="mt-1 text-xs text-muted-foreground">
+                    {isKo
+                      ? "「미디어 플랜 담기」로 추가한 매체입니다. 보고서는 플래너에서 생성됩니다."
+                      : "Media added via “Add to plan”. Open the planner to generate your report."}
+                  </p>
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <Link href="/my/plan" className={myHubOutlineBtn}>
+                      {isKo ? "내 플랜 보기" : "View my plan"}
+                    </Link>
+                    <Link href="/my/plan/report" className={myHubPrimaryBtn}>
+                      <Sparkles className="mr-2 h-4 w-4" />
+                      {isKo ? "보고서 생성" : "Generate report"}
+                    </Link>
+                  </div>
+                </div>
+              ) : null}
               {plannerLoading ? (
                 <div className="py-16 text-center">
                   <Spinner size="md" label={t("planner.loading")} />

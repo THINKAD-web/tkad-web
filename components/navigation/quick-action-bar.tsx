@@ -262,7 +262,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
             ) : null}
             {compact && action.badge != null && action.badge > 0 ? (
               <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[9px] font-bold text-white">
-                {action.badge > 9 ? "9+" : action.badge}
+                {action.badge > 99 ? "99+" : action.badge}
               </span>
             ) : null}
           </Link>

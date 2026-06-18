@@ -724,6 +724,46 @@ html:not(.dark) .tkad-neon-grid {
     0 0 20px rgba(34, 211, 238, 0.14);
 }
 
+/* 푸터 사용 가이드 — 네온 링크 */
+.tkad-neon-guide-link {
+  display: inline-block;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+  background-image: linear-gradient(
+    105deg,
+    #22d3ee 0%,
+    #a855f7 42%,
+    #fb923c 88%
+  );
+  background-size: 100% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  filter: drop-shadow(0 0 6px rgba(34, 211, 238, 0.45))
+    drop-shadow(0 0 14px rgba(168, 85, 247, 0.28))
+    drop-shadow(0 0 20px rgba(251, 146, 60, 0.2));
+  transition:
+    filter 0.2s ease,
+    transform 0.2s ease;
+}
+.tkad-neon-guide-link:hover {
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.7))
+    drop-shadow(0 0 20px rgba(168, 85, 247, 0.45))
+    drop-shadow(0 0 28px rgba(251, 146, 60, 0.35));
+  transform: translateY(-1px);
+}
+
+/* 풀페이지 네온 스피너 링 */
+.tkad-neon-spinner-ring {
+  border-color: rgb(255 255 255 / 0.12);
+  border-top-color: #22d3ee;
+  box-shadow:
+    0 0 18px rgba(34, 211, 238, 0.35),
+    0 0 32px rgba(168, 85, 247, 0.2),
+    inset 0 0 12px rgba(34, 211, 238, 0.08);
+}
+
 /* Neon landing scope: keep rest of app stable */
 .tkad-landing-neon {
   --accent: #a855f7;
@@ -1302,6 +1342,26 @@ html.dark .tkad-media-detail-hero,
   -webkit-text-fill-color: rgb(196 181 253) !important;
 }
 
+/* 보고서·견적 흰 문서 본문 — planner-neon 글자색 재매핑과 격리 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface {
+  color: rgb(17 24 39) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"],
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
+  -webkit-text-fill-color: currentColor !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta *,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary *,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean,
@@ -1333,6 +1393,13 @@ html.dark .tkad-media-detail-hero,
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
   box-shadow: 0 6px 24px rgb(67 56 202 / 0.32);
+}
+
+/* 내 플랜 — 선택 칩(보라·시안 배경)은 day에서도 흰 글자 유지 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-plan-cart-chip-active,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-plan-cart-chip-active * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
   border-color: rgb(99 102 241 / 0.45);

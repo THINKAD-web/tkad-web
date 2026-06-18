@@ -111,7 +111,9 @@ export function getPlanCart(): PlanCart {
   if (!isBrowser()) return EMPTY_CART();
   try {
     const raw = window.localStorage.getItem(PLAN_CART_KEY);
-    if (!raw) return EMPTY_CART();
+    if (!raw) {
+      return { items: [], updatedAt: "" };
+    }
     const parsed = JSON.parse(raw) as Partial<PlanCart>;
     const items = Array.isArray(parsed.items)
       ? parsed.items
@@ -161,6 +163,20 @@ export function replacePlanCart(cart: PlanCart): void {
   });
 }
 
+/** 서버 동기화 응답 반영 — updatedAt 을 서버 값 그대로 유지 */
+export function applySyncedPlanCart(cart: PlanCart): void {
+  if (!isBrowser()) return;
+  const next: PlanCart = {
+    ...cart,
+    items: cart.items
+      .map((i) => normalizeItem(i))
+      .filter((x): x is PlanCartItem => x !== null),
+    updatedAt: cart.updatedAt || new Date().toISOString(),
+  };
+  window.localStorage.setItem(PLAN_CART_KEY, JSON.stringify(next));
+  emitChange(next);
+}
+
 export function addToPlanCart(
   item: Omit<PlanCartItem, "addedAt">,
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
@@ -206,6 +222,24 @@ export function removeFromPlanCart(mediaId: string): void {
   });
 }
 
+export function reorderPlanCartItems(fromIndex: number, toIndex: number): void {
+  const cart = getPlanCart();
+  if (
+    fromIndex < 0 ||
+    toIndex < 0 ||
+    fromIndex >= cart.items.length ||
+    toIndex >= cart.items.length ||
+    fromIndex === toIndex
+  ) {
+    return;
+  }
+  const items = [...cart.items];
+  const [moved] = items.splice(fromIndex, 1);
+  if (!moved) return;
+  items.splice(toIndex, 0, moved);
+  writeCart({ ...cart, items });
+}
+
 export function clearPlanCart(): void {
   writeCart(EMPTY_CART());
 }
@@ -223,10 +257,11 @@ export function planCartMonthlyTotal(cart: PlanCart = getPlanCart()): number {
 }
 
 export const PLAN_CART_GOAL_OPTIONS = [
-  { value: "brand_awareness", ko: "브랜드 인지도", en: "Brand awareness" },
-  { value: "product_launch", ko: "신제품 론칭", en: "Product launch" },
-  { value: "event", ko: "이벤트", en: "Event" },
-  { value: "conversion", ko: "전환", en: "Conversion" },
+  { value: "brand", ko: "브랜드 인지도", en: "Brand awareness" },
+  { value: "launch", ko: "신제품 런칭", en: "Product launch" },
+  { value: "event", ko: "이벤트 홍보", en: "Event promotion" },
+  { value: "sales", ko: "실적·전환", en: "Performance" },
+  { value: "local", ko: "로컬 도달", en: "Local reach" },
 ] as const;
 
 export const PLAN_CART_DURATION_OPTIONS = [
