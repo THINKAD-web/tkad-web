@@ -1,4 +1,4 @@
-import { loadExportThumbMap } from "@/lib/export-media-images";
+import { EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
   PlannerReportExportPayload,
@@ -19,6 +19,137 @@ const WHITE = "FFFFFF";
 function fmtImp(n: number, isKo: boolean): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
   return n.toLocaleString(isKo ? "ko-KR" : "en-US");
+}
+
+type PptxSlide = ReturnType<InstanceType<typeof import("pptxgenjs")["default"]>["addSlide"]>;
+
+/** Keynote·Google Slides 호환 — 네이티브 addChart 대신 도형 막대 */
+function addShapeBarChart(
+  slide: PptxSlide,
+  pptx: InstanceType<typeof import("pptxgenjs").default>,
+  opts: {
+    title: string;
+    x: number;
+    y: number;
+    w: number;
+    rows: { label: string; value: number }[];
+    color: string;
+    face: string;
+    fmt: (n: number) => string;
+  },
+): number {
+  const { title, x, y, w, rows, color, face, fmt } = opts;
+  slide.addText(title, {
+    x,
+    y,
+    w,
+    h: 0.3,
+    fontFace: face,
+    fontSize: 12,
+    color: GRAY,
+    bold: true,
+  });
+  const labelW = 1.35;
+  const valW = 1.05;
+  const barX = x + labelW;
+  const barMaxW = w - labelW - valW;
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  rows.forEach((row, i) => {
+    const rowY = y + 0.38 + i * 0.58;
+    slide.addText(row.label, {
+      x,
+      y: rowY,
+      w: labelW,
+      h: 0.35,
+      fontFace: face,
+      fontSize: 10,
+      color: GRAY,
+      valign: "middle",
+    });
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: barX,
+      y: rowY + 0.04,
+      w: barMaxW,
+      h: 0.26,
+      fill: { color: LIGHT },
+      rectRadius: 0.05,
+      line: { color: "E4E6EC", width: 0.5 },
+    });
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: barX,
+      y: rowY + 0.04,
+      w: Math.max(0.1, (barMaxW * row.value) / max),
+      h: 0.26,
+      fill: { color },
+      rectRadius: 0.05,
+    });
+    slide.addText(fmt(row.value), {
+      x: x + w - valW,
+      y: rowY,
+      w: valW,
+      h: 0.35,
+      fontFace: face,
+      fontSize: 10,
+      color: INK,
+      align: "right",
+      valign: "middle",
+    });
+  });
+  return y + 0.38 + rows.length * 0.58 + 0.15;
+}
+
+function addBudgetSplitShapes(
+  slide: PptxSlide,
+  pptx: InstanceType<typeof import("pptxgenjs").default>,
+  x: number,
+  y: number,
+  w: number,
+  rows: { label: string; value: number }[],
+  palette: string[],
+  face: string,
+  isKo: boolean,
+): number {
+  const total = rows.reduce((s, d) => s + d.value, 0) || 1;
+  const barY = y + 0.45;
+  const barH = 0.38;
+  const barW = w * 0.92;
+  let bx = x;
+  rows.forEach((d, i) => {
+    const segW = (barW * d.value) / total;
+    if (segW < 0.02) return;
+    slide.addShape(pptx.ShapeType.rect, {
+      x: bx,
+      y: barY,
+      w: segW,
+      h: barH,
+      fill: { color: palette[i % palette.length]! },
+      line: { color: "E4E6EC", width: 0.25 },
+    });
+    bx += segW;
+  });
+  rows.forEach((d, i) => {
+    const ly = barY + barH + 0.22 + i * 0.4;
+    slide.addShape(pptx.ShapeType.rect, {
+      x,
+      y: ly,
+      w: 0.16,
+      h: 0.16,
+      fill: { color: palette[i % palette.length]! },
+    });
+    slide.addText(
+      `${d.label}  ${Math.round((d.value / total) * 100)}%  (₩${d.value.toLocaleString(isKo ? "ko-KR" : "en-US")})`,
+      {
+        x: x + 0.24,
+        y: ly - 0.02,
+        w: w - 0.3,
+        h: 0.32,
+        fontFace: face,
+        fontSize: 11,
+        color: INK,
+      },
+    );
+  });
+  return barY + barH + 0.22 + rows.length * 0.4 + 0.1;
 }
 
 export async function buildPlannerReportPptx(
@@ -112,7 +243,7 @@ export async function buildPlannerReportPptx(
     s2.addText(k.value, { x: 8.4, y: ky + 0.42, w: 4.1, h: 0.55, fontFace: face, fontSize: 20, bold: true, color: VIOLET });
   });
 
-  // ── 2.5 성과 요약 차트 (네이티브, 편집 가능) ──
+  // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──
   const ch = p.charts;
   if (
     ch &&
@@ -123,32 +254,52 @@ export async function buildPlannerReportPptx(
     const sc = pptx.addSlide();
     header(sc, isKo ? "성과 요약" : "Performance summary");
     const palette = ["7C3AED", "0891B2", "EC4899", "10B981", "F59E0B"];
+
     if (ch.budgetSplit && ch.budgetSplit.length) {
       sc.addText(isKo ? "예산 배분" : "Budget allocation", {
-        x: 0.6, y: 1.15, w: 6, h: 0.3, fontFace: face, fontSize: 12, color: "6B7280", bold: true,
+        x: 0.6,
+        y: 1.15,
+        w: 6,
+        h: 0.3,
+        fontFace: face,
+        fontSize: 12,
+        color: GRAY,
+        bold: true,
       });
-      sc.addChart(
-        pptx.ChartType.doughnut,
-        [{ name: isKo ? "예산" : "Budget", labels: ch.budgetSplit.map((d) => d.label), values: ch.budgetSplit.map((d) => d.value) }],
-        { x: 0.6, y: 1.5, w: 6.0, h: 4.8, showLegend: true, legendPos: "r", showValue: false, showPercent: true, chartColors: palette, holeSize: 55, dataLabelColor: "FFFFFF", dataLabelFontSize: 11 },
-      );
+      addBudgetSplitShapes(sc, pptx, 0.6, 1.15, 5.8, ch.budgetSplit, palette, face, isKo);
     }
-    const rightCharts: Array<{ title: string; data: { label: string; value: number }[]; color: string }> = [];
-    if (ch.reachSummary?.length) rightCharts.push({ title: isKo ? "노출 요약" : "Impressions", data: ch.reachSummary, color: "0891B2" });
-    if (ch.cpmBars?.length) rightCharts.push({ title: isKo ? "CPM 비교 (원)" : "CPM (KRW)", data: ch.cpmBars, color: "7C3AED" });
-    rightCharts.forEach((rc, i) => {
-      const y = 1.15 + i * 2.7;
-      sc.addText(rc.title, { x: 7.0, y, w: 5.7, h: 0.3, fontFace: face, fontSize: 12, color: "6B7280", bold: true });
-      sc.addChart(
-        pptx.ChartType.bar,
-        [{ name: rc.title, labels: rc.data.map((d) => d.label), values: rc.data.map((d) => d.value) }],
-        { x: 7.0, y: y + 0.35, w: 5.9, h: 2.2, barDir: "bar", showLegend: false, showValue: true, chartColors: [rc.color], valAxisHidden: true, catAxisLabelColor: "374151", dataLabelFontSize: 10 },
-      );
-    });
+
+    let rightY = 1.15;
+    if (ch.reachSummary?.length) {
+      rightY = addShapeBarChart(sc, pptx, {
+        title: isKo ? "노출 요약" : "Impressions",
+        x: 7.0,
+        y: rightY,
+        w: 5.9,
+        rows: ch.reachSummary,
+        color: CYAN,
+        face,
+        fmt: (n) => fmtImp(n, isKo),
+      });
+    }
+    if (ch.cpmBars?.length) {
+      addShapeBarChart(sc, pptx, {
+        title: isKo ? "CPM 비교 (원)" : "CPM (KRW)",
+        x: 7.0,
+        y: ch.reachSummary?.length ? rightY + 0.15 : rightY,
+        w: 5.9,
+        rows: ch.cpmBars,
+        color: VIOLET,
+        face,
+        fmt: (n) => `₩${fmtImp(n, isKo)}`,
+      });
+    }
   }
 
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
+  const THUMB_W_IN = 2.35;
+  const THUMB_H_IN = (THUMB_W_IN * EXPORT_THUMB_BOX_MM.h) / EXPORT_THUMB_BOX_MM.w;
 
   function mediaRichLines(row: PlannerExportMediaRow) {
     type Part = { text: string; options: Record<string, unknown> };
@@ -232,13 +383,19 @@ export async function buildPlannerReportPptx(
         });
         const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
         if (thumb) {
-          slide.addImage({ data: thumb, x: 0.75, y: cardY + 0.2, w: 2.35, h: 2.35, sizing: { type: "cover", w: 2.35, h: 2.35 } });
+          slide.addImage({
+            data: thumb,
+            x: 0.75,
+            y: cardY + 0.2,
+            w: THUMB_W_IN,
+            h: THUMB_H_IN,
+          });
         } else {
           slide.addShape(pptx.ShapeType.roundRect, {
             x: 0.75,
             y: cardY + 0.2,
-            w: 2.35,
-            h: 2.35,
+            w: THUMB_W_IN,
+            h: THUMB_H_IN,
             fill: { color: WHITE },
             rectRadius: 0.06,
             line: { color: "E4E6EC", width: 0.5 },
