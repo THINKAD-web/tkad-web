@@ -1,10 +1,9 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
-import { adminFormalQuotePdfBuffer } from "@/lib/build-admin-formal-quote-pdf";
-import { quoteToPdfParams } from "@/lib/admin-sales-quote";
+import { buildQuoteExportPayloadFromAdminQuote } from "@/lib/quote-export/build-payload";
+import { buildQuotePdf } from "@/lib/quote-export/build-pdf";
 import { attachmentContentDisposition } from "@/lib/content-disposition";
-import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
 
 export const dynamic = "force-dynamic";
 
@@ -26,10 +25,9 @@ export async function GET(request: NextRequest, ctx: Ctx) {
     });
   }
 
-  const logo = loadThinkadLogoDataUrl();
-  const params = quoteToPdfParams(q, { logoDataUrl: logo });
   try {
-    const buf = await adminFormalQuotePdfBuffer(params);
+    const payload = await buildQuoteExportPayloadFromAdminQuote(db, q, "basic");
+    const buf = await buildQuotePdf(payload);
     const filename = `thinkad-quote-${q.quoteNumber.replace(/[^\w.-]+/g, "_")}.pdf`;
     return new Response(new Uint8Array(buf), {
       status: 200,

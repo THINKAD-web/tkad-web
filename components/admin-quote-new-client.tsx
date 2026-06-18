@@ -468,21 +468,54 @@ export default function AdminQuoteNewClient() {
     }
     setPdfLoading(true);
     try {
-      setShowPreview(true);
-      await new Promise<void>((r) => setTimeout(r, 120));
-
-      const element = document.getElementById("quote-preview");
-      if (!element) throw new Error("미리보기를 찾을 수 없습니다");
-
-      const { downloadQuotePdfFromElement, runWithQuotePdfExport } = await import(
-        "@/lib/quote-html-pdf"
-      );
-      await runWithQuotePdfExport(element, async () => {
-        await downloadQuotePdfFromElement(
-          element,
-          `thinkad-quote-${displayQuoteNumber}.pdf`,
-        );
+      const res = await fetch("/api/admin/quotes/pdf", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          quoteNumber: displayQuoteNumber,
+          issueDate: issueDatePdf,
+          validUntil: validUntilPdf,
+          clientCompany: clientCompany.trim(),
+          clientName: clientName.trim(),
+          clientPhone: clientPhone.trim(),
+          clientEmail: clientEmail.trim() || undefined,
+          periodLabel: campaignPeriodLabel,
+          isKo,
+          supplyWon: totals.supplyWon,
+          vatWon: totals.vatWon,
+          totalWon: totals.totalWon,
+          rows: lineItems.map((it) => {
+            const m = medias.find((x) => x.id === it.mediaId);
+            return {
+              mediaId: it.mediaId.startsWith("custom-") ? null : it.mediaId,
+              name: it.mediaName,
+              period: it.period,
+              unitPriceWon: it.unitPrice,
+              lineTotalWon: it.amount,
+              location: m?.location,
+            };
+          }),
+        }),
       });
+      if (!res.ok) {
+        const raw: unknown = await res.json().catch(() => null);
+        const msg =
+          typeof raw === "object" &&
+          raw !== null &&
+          "error" in raw &&
+          typeof (raw as { error?: unknown }).error === "string"
+            ? (raw as { error: string }).error
+            : t("pdfFailed");
+        throw new Error(msg);
+      }
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `thinkad-quote-${displayQuoteNumber}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
       toast("success", isKo ? "견적서 PDF가 다운로드되었습니다" : "Quote PDF downloaded");
     } catch (e) {
       const msg = e instanceof Error ? e.message : t("pdfFailed");
@@ -498,7 +531,14 @@ export default function AdminQuoteNewClient() {
     clientCompany,
     clientName,
     clientPhone,
+    clientEmail,
     displayQuoteNumber,
+    issueDatePdf,
+    validUntilPdf,
+    campaignPeriodLabel,
+    totals,
+    lineItems,
+    medias,
     isKo,
     t,
     tCommon,
@@ -1144,25 +1184,7 @@ export default function AdminQuoteNewClient() {
                 </button>
                 <button
                   type="button"
-                  onClick={async () => {
-                    try {
-                      const el = document.getElementById("quote-preview");
-                      if (!el) return;
-                      const { downloadQuotePdfFromElement, runWithQuotePdfExport } =
-                        await import("@/lib/quote-html-pdf");
-                      await runWithQuotePdfExport(el, async () => {
-                        await downloadQuotePdfFromElement(
-                          el,
-                          `quote-${displayQuoteNumber}.pdf`,
-                        );
-                      });
-                    } catch (e) {
-                      console.error("[admin-quote-new] PDF download failed", e);
-                      window.alert(
-                        `PDF 생성 실패\n${e instanceof Error ? e.message : String(e)}`,
-                      );
-                    }
-                  }}
+                  onClick={() => void downloadPdf()}
                   className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground dark:text-hero-fg hover:bg-slate-50"
                 >
                   <Download className="h-4 w-4" />

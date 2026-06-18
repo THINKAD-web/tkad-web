@@ -1,9 +1,8 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
-import { adminFormalQuotePdfBuffer } from "@/lib/build-admin-formal-quote-pdf";
-import { quoteToPdfParams } from "@/lib/admin-sales-quote";
-import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
+import { buildQuoteExportPayloadFromAdminQuote } from "@/lib/quote-export/build-payload";
+import { buildQuotePdf } from "@/lib/quote-export/build-pdf";
 import {
   isEmailConfigured,
   sendEmailWithPdfAttachment,
@@ -59,13 +58,11 @@ export async function POST(request: NextRequest, ctx: Ctx) {
         ? `[THINKAD] 견적서 ${q.quoteNumber}`
         : `[THINKAD] Quote ${q.quoteNumber}`;
 
-  const logo = loadThinkadLogoDataUrl();
-  const params = quoteToPdfParams(q, { logoDataUrl: logo });
-
   let pdfBase64: string;
   try {
-    const buf = await adminFormalQuotePdfBuffer(params);
-    pdfBase64 = buf.toString("base64");
+    const payload = await buildQuoteExportPayloadFromAdminQuote(db, q, "basic");
+    const buf = await buildQuotePdf(payload);
+    pdfBase64 = Buffer.from(buf).toString("base64");
   } catch (e) {
     console.error("[admin-quotes send-email pdf]", e);
     return json({ error: "PDF build failed" }, 500);
