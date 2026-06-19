@@ -18,12 +18,43 @@ export type MediaMapFilter = {
   region?: string;
   q?: string;
   sort?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  mainCategory?: string;
+  subCategory?: string;
+  target?: string;
+  regionMain?: string;
+  regionSub?: string;
+  priceMin?: string;
+  priceMax?: string;
+  features?: string;
 };
 
 export type MediaMapUrlState = MediaMapView & MediaMapFilter;
 
-const NUM_FIELDS = ["lat", "lng", "zoom"] as const;
-const STRING_FIELDS = ["category", "region", "q", "sort"] as const;
+const VIEW_NUM_FIELDS = ["lat", "lng", "zoom"] as const;
+const PRICE_NUM_FIELDS = ["minPrice", "maxPrice"] as const;
+const STRING_FIELDS = [
+  "category",
+  "region",
+  "q",
+  "sort",
+  "mainCategory",
+  "subCategory",
+  "target",
+  "regionMain",
+  "regionSub",
+  "priceMin",
+  "priceMax",
+  "features",
+] as const;
+
+function parsePositiveInt(raw: string | null): number | undefined {
+  if (raw == null || raw === "") return undefined;
+  const n = Number(raw);
+  if (!Number.isFinite(n) || n < 0) return undefined;
+  return Math.round(n);
+}
 
 /**
  * 현재 페이지의 URL 에서 상태를 파싱.
@@ -33,12 +64,25 @@ export function parseMediaMapUrlState(
   searchParams: URLSearchParams,
 ): MediaMapUrlState {
   const out: MediaMapUrlState = {};
-  for (const key of NUM_FIELDS) {
+  for (const key of VIEW_NUM_FIELDS) {
     const raw = searchParams.get(key);
     if (raw == null) continue;
     const n = Number(raw);
     if (!Number.isFinite(n)) continue;
     out[key] = n;
+  }
+  for (const key of PRICE_NUM_FIELDS) {
+    const n = parsePositiveInt(searchParams.get(key));
+    if (n != null) out[key] = n;
+  }
+  if (
+    out.minPrice != null &&
+    out.maxPrice != null &&
+    out.maxPrice < out.minPrice
+  ) {
+    const lo = out.minPrice;
+    out.minPrice = out.maxPrice;
+    out.maxPrice = lo;
   }
   if (
     out.lat != null &&
@@ -81,6 +125,12 @@ export function buildMediaMapSearchString(state: MediaMapUrlState): string {
   }
   if (state.zoom != null && Number.isFinite(state.zoom)) {
     sp.set("zoom", String(Math.round(state.zoom)));
+  }
+  if (state.minPrice != null && Number.isFinite(state.minPrice) && state.minPrice >= 0) {
+    sp.set("minPrice", String(Math.round(state.minPrice)));
+  }
+  if (state.maxPrice != null && Number.isFinite(state.maxPrice) && state.maxPrice >= 0) {
+    sp.set("maxPrice", String(Math.round(state.maxPrice)));
   }
   for (const key of STRING_FIELDS) {
     const v = state[key];

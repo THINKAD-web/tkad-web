@@ -25,20 +25,20 @@ export function MediaCampaignTargetsGrid() {
 
   return (
     <div className="pb-8">
-      <div className="px-4 pb-5">
-        <p className="mb-2 text-xs font-bold text-pink-600 dark:text-pink-400">
+      <div className="px-4 pb-6 pt-1">
+        <p className="mb-3 text-xs font-bold tracking-wide text-pink-600 dark:text-pink-400">
           왜 광고해?
         </p>
-        <div className="scrollbar-hide flex gap-2 overflow-x-auto pb-1">
+        <div className="flex flex-wrap gap-2">
           {MEDIA_TARGET_PAGE_CHIPS.map((chip) => (
             <button
               key={chip.value}
               type="button"
               onClick={() => goToTarget(chip.value)}
               className={cn(
-                "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                "rounded-full px-3.5 py-2 text-sm font-medium transition-all",
                 activeSlug === chip.value
-                  ? "bg-pink-500 text-white"
+                  ? "bg-pink-500 text-white shadow-sm shadow-pink-500/20"
                   : MEDIA_CHIP_INACTIVE,
               )}
             >
@@ -48,7 +48,7 @@ export function MediaCampaignTargetsGrid() {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 px-4 md:grid-cols-4">
+      <div className="grid grid-cols-1 gap-3 px-4 sm:grid-cols-2 md:grid-cols-3 md:gap-4 lg:grid-cols-4">
         {MEDIA_CAMPAIGN_TARGET_CARDS.map((card) => {
           const Icon = card.icon;
           return (
@@ -64,7 +64,7 @@ export function MediaCampaignTargetsGrid() {
                 }
               }}
               className={cn(
-                "cursor-pointer rounded-2xl border p-4 transition-transform hover:scale-[1.02] active:scale-[0.98]",
+                "cursor-pointer rounded-2xl border p-4 transition-transform hover:scale-[1.01] active:scale-[0.99] sm:p-5",
                 card.cardClass,
                 activeSlug === card.slug && "ring-2 ring-pink-500/40",
               )}

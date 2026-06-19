@@ -1335,6 +1335,8 @@ export default function MediaBrowseClient({
                       locale={locale}
                       selectedId={mapSelectedId}
                       onSelectId={handleMapSelectId}
+                      fixedMapHeightPx={420}
+                      showFooterCaption={false}
                     />
                     {mapSelectedMedia && mapPopupOpen ? (
                       <div className="pointer-events-none absolute bottom-0 left-0 right-0 z-20 flex justify-center p-3 sm:p-4">

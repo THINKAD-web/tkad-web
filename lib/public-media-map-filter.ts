@@ -1,6 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
+import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 
 export type MapCatalogFilterParams = {
   category?: string | null;
@@ -8,6 +9,8 @@ export type MapCatalogFilterParams = {
   region?: string | null;
   q?: string | null;
   sort?: PublicMediaSort | null;
+  minPrice?: number | null;
+  maxPrice?: number | null;
 };
 
 function includesInsensitive(
@@ -69,6 +72,21 @@ export function matchesMapCatalogFilter(
       .join(" ")
       .toLowerCase();
     if (!hay.includes(q)) return false;
+  }
+
+  const minPrice = params.minPrice;
+  const maxPrice = params.maxPrice;
+  if (
+    (minPrice != null && Number.isFinite(minPrice)) ||
+    (maxPrice != null && Number.isFinite(maxPrice))
+  ) {
+    const { priceWon } = resolveMediaDisplayPrice(m);
+    if (minPrice != null && Number.isFinite(minPrice) && priceWon < minPrice) {
+      return false;
+    }
+    if (maxPrice != null && Number.isFinite(maxPrice) && priceWon > maxPrice) {
+      return false;
+    }
   }
 
   return true;

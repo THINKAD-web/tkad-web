@@ -179,7 +179,7 @@ export function MediaMapView({
             centerOverride={geoCenter}
             zoomOverride={geoCenter ? 13 : null}
             pinMetaById={pinMetaById}
-            className="touch-pan-y"
+            className="touch-none"
           />
           <MediaPinPopup
             media={mapSelectedMedia}

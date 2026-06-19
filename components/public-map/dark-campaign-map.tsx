@@ -61,7 +61,10 @@ export function DarkCampaignMap({
     <div className={cn("flex flex-col", className)}>
       <div
         className="relative w-full overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200"
-        style={{ height: fixedMapHeightPx ?? undefined, minHeight: fixedMapHeightPx ?? 360 }}
+        style={{
+          height: fixedMapHeightPx ?? "min(56vh, 480px)",
+          minHeight: fixedMapHeightPx ?? 360,
+        }}
       >
         <DarkMapView
           markers={markers}

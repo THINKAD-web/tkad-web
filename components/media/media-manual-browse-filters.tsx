@@ -125,6 +125,8 @@ type Props = {
   sectionDesc?: string;
   toolbarEnd?: ReactNode;
   className?: string;
+  /** false면 보기 모드(피드/카드/지도) 토글 숨김 — `/media/map` 등 */
+  showViewModes?: boolean;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -169,6 +171,7 @@ export function MediaManualBrowseFilters({
   sectionDesc,
   toolbarEnd,
   className,
+  showViewModes = true,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
@@ -595,6 +598,7 @@ export function MediaManualBrowseFilters({
           ))}
         </select>
 
+        {showViewModes ? (
         <div
           className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
           data-screenshot="media-view-mode"
@@ -620,6 +624,7 @@ export function MediaManualBrowseFilters({
             );
           })}
         </div>
+        ) : null}
 
         {toolbarEnd}
       </div>

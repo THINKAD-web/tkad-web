@@ -2377,6 +2377,20 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
   color: var(--home-muted) !important;
 }
 
+/* `/media/map` 바텀시트 문의 CTA — day 랜딩의 text-white 덮어쓰기 예외 */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta *,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-media-map-sheet-cta,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-media-map-sheet-cta * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta {
+  border-color: rgb(91 33 182 / 0.45) !important;
+  background: rgb(109 40 217) !important;
+}
+
 .tkad-home-appearance[data-appearance="night"] .tkad-media-main-tabs {
   border-color: rgb(255 255 255 / 0.12) !important;
   background: rgb(255 255 255 / 0.06) !important;

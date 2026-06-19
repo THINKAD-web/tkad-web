@@ -1,17 +1,88 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { X, ExternalLink, MessageCircle } from "lucide-react";
+import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
-import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
+import { formatMediaPriceWithPeriodSuffix, formatMediaPriceCompactWon } from "@/lib/media-price-format";
 import { MediaCard } from "@/components/media/media-card";
-import { mapMapItemToHomeCatalog } from "@/lib/media-catalog-map";
+import { mapMapItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
+import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
+import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS } from "@/components/floating-selection-bar";
+
+type AvailabilitySummary = {
+  status: "loading" | "available" | "partial" | "busy" | "unknown";
+  label: string;
+};
 
 function formatPrice(v: number, period: string, locale: string): string {
   return formatMediaPriceWithPeriodSuffix(v, period, locale);
+}
+
+function MapDetailMetric({
+  label,
+  value,
+}: {
+  label: string;
+  value: string;
+}) {
+  return (
+    <div className="min-w-0 rounded-md border border-gray-100 bg-gray-50/80 px-2 py-1.5 text-center dark:border-white/8 dark:bg-white/[0.04]">
+      <dt className="truncate text-[10px] text-gray-500 dark:text-white/45">{label}</dt>
+      <dd className="mt-0.5 truncate text-xs font-bold tabular-nums text-gray-900 dark:text-white">
+        {value}
+      </dd>
+    </div>
+  );
+}
+
+function formatMapImpressions(item: MapMapItem, isKo: boolean): string | null {
+  const n =
+    item.impressions ??
+    (item.dailyFootTraffic && item.dailyFootTraffic > 0
+      ? item.dailyFootTraffic * 30
+      : 0);
+  if (!n || n <= 0) return null;
+  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
+  if (isKo && n >= 10_000) return `${Math.round(n / 10_000)}만`;
+  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
+  return n.toLocaleString(isKo ? "ko-KR" : "en-US");
+}
+
+function formatMapCpm(item: MapMapItem, locale: string): string | null {
+  if (item.cpm && item.cpm > 0) {
+    return formatMediaPriceCompactWon(Math.round(item.cpm), locale);
+  }
+  const imp =
+    item.impressions ??
+    (item.dailyFootTraffic && item.dailyFootTraffic > 0
+      ? item.dailyFootTraffic * 30
+      : 0);
+  if (imp > 0 && item.price > 0) {
+    const cpm = (item.price / imp) * 1000;
+    return formatMediaPriceCompactWon(Math.round(cpm), locale);
+  }
+  return null;
+}
+
+function availabilityTone(status: AvailabilitySummary["status"]): string {
+  switch (status) {
+    case "available":
+      return "text-emerald-700 dark:text-emerald-400";
+    case "partial":
+      return "text-amber-700 dark:text-amber-400";
+    case "busy":
+      return "text-rose-700 dark:text-rose-400";
+    default:
+      return "text-gray-600 dark:text-white/70";
+  }
 }
 
 function monthRangeYmd(): { from: string; to: string } {
@@ -24,16 +95,15 @@ function monthRangeYmd(): { from: string; to: string } {
   return { from, to };
 }
 
-type AvailabilitySummary = {
-  status: "loading" | "available" | "partial" | "busy" | "unknown";
-  label: string;
-};
-
 type DetailProps = {
   item: MapMapItem;
   onClose: () => void;
   isKo?: boolean;
-  variant: "sheet" | "inline" | "dock";
+  variant: "sheet" | "inline" | "dock" | "bottom-sheet";
+  inCompare?: boolean;
+  inCart?: boolean;
+  onToggleCompare?: () => void;
+  onToggleCart?: () => void;
 };
 
 function CloseButton({
@@ -60,8 +130,75 @@ function CloseButton({
   );
 }
 
-function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps) {
-  const dark = variant === "sheet" || variant === "dock";
+function MapDetailQuickActions({
+  item,
+  inCompare,
+  inCart,
+  onToggleCompare,
+  onToggleCart,
+  size = "compact",
+}: {
+  item: MapMapItem;
+  inCompare?: boolean;
+  inCart?: boolean;
+  onToggleCompare?: () => void;
+  onToggleCart?: () => void;
+  size?: "compact" | "comfortable";
+}) {
+  const btnClass =
+    size === "comfortable"
+      ? "min-w-0 flex-1 !h-9 !rounded-lg !px-2 !text-xs"
+      : "min-w-0 flex-1 !h-8 !px-1 !text-[10px]";
+
+  return (
+    <div className={cn("flex items-stretch gap-1.5", size === "comfortable" ? "mt-3" : "mt-2")}>
+      <PlanCartAddButton
+        item={planCartItemFromCatalog(
+          {
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            region: item.region,
+            price: item.price,
+            thumbnailUrl: item.image ?? undefined,
+          },
+          "search",
+        )}
+        addedFrom="search"
+        compact
+        gridInline
+        className={btnClass}
+      />
+      {onToggleCompare ? (
+        <MediaCompareSelectButton
+          selected={inCompare ?? false}
+          onToggle={onToggleCompare}
+          gridInline
+          className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
+        />
+      ) : null}
+      {onToggleCart ? (
+        <MediaCartAddButton
+          inCart={inCart ?? false}
+          onToggle={onToggleCart}
+          gridInline
+          className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
+        />
+      ) : null}
+    </div>
+  );
+}
+
+function MediaMapDetailBody({
+  item,
+  onClose,
+  isKo = true,
+  variant,
+  inCompare,
+  inCart,
+  onToggleCompare,
+  onToggleCart,
+}: DetailProps) {
   const catalogItem = useMemo(() => mapMapItemToHomeCatalog(item), [item]);
   const href = `/media/${item.id}`;
   const priceLabel = formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en");
@@ -73,7 +210,10 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
     label: isKo ? "이번 달 예약 현황 확인 중…" : "Checking this month…",
   });
 
+  const showAvailability = variant === "sheet";
+
   useEffect(() => {
+    if (!showAvailability) return;
     const { from, to } = monthRangeYmd();
     let cancelled = false;
     setAvailability({
@@ -122,49 +262,113 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
     return () => {
       cancelled = true;
     };
-  }, [item.id, isKo]);
+  }, [item.id, isKo, showAvailability]);
 
-  const calendarDots = useMemo(() => {
-    const daysInMonth = new Date(
-      new Date().getFullYear(),
-      new Date().getMonth() + 1,
-      0,
-    ).getDate();
-    const today = new Date().getDate();
-    return Array.from({ length: Math.min(14, daysInMonth - today + 1) }, (_, i) => {
-      const day = today + i;
-      const tone =
-        availability.status === "available"
-          ? "bg-emerald-500"
-          : availability.status === "partial"
-            ? i % 3 === 0
-              ? "bg-amber-500"
-              : "bg-emerald-400"
-            : availability.status === "busy"
-              ? "bg-rose-500"
-              : "bg-muted-foreground/40";
-      return { day, tone };
-    });
-  }, [availability.status]);
-
-  const ctaPrimary = cn(
-    "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold transition-colors",
-    dark
-      ? "border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 hover:bg-white/12"
-      : "border border-border bg-card text-foreground hover:bg-muted",
+  const linkRow = (comfortable = false) => (
+    <div className={cn("grid grid-cols-2 gap-2", comfortable ? "mt-4" : "mt-3")}>
+      <Link
+        href={href}
+        target="_blank"
+        rel="noopener noreferrer"
+        className={cn(
+          "inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12",
+          comfortable ? "min-h-10 px-3 py-2" : "px-3 py-2.5",
+        )}
+      >
+        {isKo ? "상세 보기" : "Details"}
+        <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      </Link>
+      <Link
+        href={`/contact?media=${encodeURIComponent(item.id)}`}
+        className={cn(
+          "tkad-media-map-sheet-cta inline-flex items-center justify-center gap-1.5 rounded-xl border border-violet-700/30 bg-violet-700 text-sm font-semibold text-white shadow-sm shadow-violet-900/25 transition-colors hover:bg-violet-800",
+          comfortable ? "min-h-10 px-3 py-2" : "min-h-11 px-3 py-2.5 font-bold",
+        )}
+      >
+        <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        {isKo ? "문의하기" : "Contact"}
+      </Link>
+    </div>
   );
 
-  const ctaAccent =
-    "tkad-neon-cta-clean inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-transform hover:-translate-y-0.5";
-
-  if (variant === "dock") {
+  if (variant === "bottom-sheet") {
+    const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
     return (
-      <div className="relative px-3 py-2">
-        <CloseButton
-          onClose={onClose}
-          isKo={isKo}
-          className="absolute right-2 top-2 z-10 h-7 w-7"
+      <div className="px-3 pb-3 pt-0">
+        <Link
+          href={href}
+          className="flex items-center gap-2.5 rounded-lg transition-colors active:bg-gray-50 dark:active:bg-white/5"
+        >
+          <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
+            {thumb ? (
+              <Image
+                src={thumb.src}
+                alt=""
+                fill
+                className="object-cover"
+                sizes="56px"
+                unoptimized={thumb.unoptimized}
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
+                —
+              </div>
+            )}
+          </div>
+          <div className="min-w-0 flex-1">
+            <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900 dark:text-white">
+              {item.name}
+            </p>
+            <p className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-white/50">
+              {regionLine}
+            </p>
+            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
+              <p className="text-xs font-bold tabular-nums text-gray-900 dark:text-white">
+                {priceLabel}
+              </p>
+              <MediaPriceExclNote isKo={isKo} className="text-[10px]" />
+            </div>
+          </div>
+        </Link>
+        <MapDetailQuickActions
+          item={item}
+          inCompare={inCompare}
+          inCart={inCart}
+          onToggleCompare={onToggleCompare}
+          onToggleCart={onToggleCart}
+          size="compact"
         />
+        <div className="mt-2 grid grid-cols-2 gap-1.5">
+          <Link
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+          >
+            {isKo ? "상세 보기" : "Details"}
+            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+          </Link>
+          <Link
+            href={`/contact?media=${encodeURIComponent(item.id)}`}
+            className="tkad-media-map-sheet-cta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 text-xs font-semibold text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800"
+          >
+            <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
+            {isKo ? "문의하기" : "Contact"}
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (variant === "inline") {
+    return (
+      <div className="px-4 py-3">
+        <div className="mb-2 flex items-center justify-between gap-2">
+          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-white/50">
+            {isKo ? "선택한 매체" : "Selected"}
+          </p>
+          <CloseButton onClose={onClose} isKo={isKo} className="h-8 w-8" />
+        </div>
         <MediaCard
           mode="compact"
           item={catalogItem}
@@ -174,130 +378,257 @@ function MediaMapDetailBody({ item, onClose, isKo = true, variant }: DetailProps
           showPlanButton={false}
           {...mediaCardStaticHandlers}
         />
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
-          <Link
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white px-2.5 py-2 text-[11px] font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
-          >
-            {isKo ? "상세 보기" : "Details"}
-            <ExternalLink className="h-3 w-3" aria-hidden />
-          </Link>
-          <Link href={`/contact?media=${encodeURIComponent(item.id)}`} className={cn(ctaAccent, "px-2.5 py-2 text-[11px]")}>
-            <MessageCircle className="h-3 w-3" aria-hidden />
-            {isKo ? "문의" : "Contact"}
-          </Link>
-        </div>
+        <MapDetailQuickActions
+          item={item}
+          inCompare={inCompare}
+          inCart={inCart}
+          onToggleCompare={onToggleCompare}
+          onToggleCart={onToggleCart}
+        />
+        {linkRow()}
       </div>
     );
   }
 
-  if (variant === "inline") {
-    return (
-      <div className="px-3 py-4 sm:px-4">
-        <div className="mb-2.5 flex items-center justify-between gap-2">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-            {isKo ? "선택한 매체" : "Selected"}
-          </p>
-          <CloseButton onClose={onClose} isKo={isKo} className="h-8 w-8" />
-        </div>
-        <MediaCard
-          mode="feed"
-          item={catalogItem}
-          href={href}
-          locationLine={regionLine}
-          isKo={isKo}
-          showPlanButton={false}
-          {...mediaCardStaticHandlers}
-        />
+  if (variant === "sheet") {
+    const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
+    const locale = isKo ? "ko" : "en";
+    const impressions = formatMapImpressions(item, isKo);
+    const cpm = formatMapCpm(item, locale);
+    const visibility =
+      item.visibilityScore > 0 ? String(item.visibilityScore) : null;
+    const metrics = [
+      impressions
+        ? { label: isKo ? "월 노출" : "Monthly reach", value: impressions }
+        : null,
+      cpm ? { label: "CPM", value: cpm } : null,
+      visibility
+        ? { label: isKo ? "가시성" : "Visibility", value: visibility }
+        : null,
+    ].filter((m): m is { label: string; value: string } => m != null);
 
-        <div className="mt-3 rounded-xl border border-border/70 bg-muted/40 p-3">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
-            {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
+    return (
+      <>
+        <div className="flex items-start gap-2 border-b border-gray-200 px-3 py-2.5 dark:border-white/10">
+          <p className="min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-white">
+            {item.name}
           </p>
-          <p className="mt-1.5 text-sm text-foreground">{availability.label}</p>
-          <div className="mt-3 flex flex-wrap gap-1">
-            {calendarDots.map((d) => (
-              <span
-                key={d.day}
-                title={`${d.day}${isKo ? "일" : ""}`}
-                className={cn("h-2 w-2 rounded-full", d.tone)}
-              />
-            ))}
+          <CloseButton onClose={onClose} isKo={isKo} className="h-8 w-8 shrink-0" />
+        </div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-3">
+          <Link
+            href={href}
+            className="flex gap-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]"
+          >
+            <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
+              {thumb ? (
+                <Image
+                  src={thumb.src}
+                  alt=""
+                  fill
+                  className="object-cover"
+                  sizes="80px"
+                  unoptimized={thumb.unoptimized}
+                />
+              ) : (
+                <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
+                  —
+                </div>
+              )}
+            </div>
+            <div className="min-w-0 flex-1">
+              {(item.isInstantBooking || item.isVerified) && (
+                <div className="mb-1 flex flex-wrap gap-1">
+                  {item.isInstantBooking ? (
+                    <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-800 dark:bg-violet-500/20 dark:text-violet-200">
+                      {isKo ? "즉시예약" : "Instant"}
+                    </span>
+                  ) : null}
+                  {item.isVerified ? (
+                    <span className="rounded bg-emerald-100 px-1.5 py-0.5 text-[10px] font-semibold text-emerald-800 dark:bg-emerald-500/20 dark:text-emerald-200">
+                      {isKo ? "검증" : "Verified"}
+                    </span>
+                  ) : null}
+                </div>
+              )}
+              <p className="truncate text-xs text-gray-500 dark:text-white/50">
+                {[catalogItem.type, regionLine].filter(Boolean).join(" · ")}
+              </p>
+              <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+                <p className="text-sm font-bold tabular-nums text-gray-900 dark:text-white">
+                  {priceLabel}
+                </p>
+                <MediaPriceExclNote isKo={isKo} className="text-[10px]" />
+              </div>
+            </div>
+          </Link>
+
+          {metrics.length > 0 ? (
+            <dl
+              className={cn(
+                "mt-3 grid gap-2",
+                metrics.length === 3 ? "grid-cols-3" : "grid-cols-2",
+              )}
+            >
+              {metrics.map((m) => (
+                <MapDetailMetric key={m.label} label={m.label} value={m.value} />
+              ))}
+            </dl>
+          ) : null}
+
+          <p
+            className={cn(
+              "mt-2.5 text-xs leading-snug",
+              availabilityTone(availability.status),
+            )}
+          >
+            <span className="font-medium text-gray-500 dark:text-white/45">
+              {isKo ? "가용" : "Avail."}
+            </span>{" "}
+            {availability.label}
+          </p>
+
+          <MapDetailQuickActions
+            item={item}
+            inCompare={inCompare}
+            inCart={inCart}
+            onToggleCompare={onToggleCompare}
+            onToggleCart={onToggleCart}
+            size="compact"
+          />
+        </div>
+        <div className="shrink-0 border-t border-gray-200 px-3 py-2.5 dark:border-white/10">
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+            >
+              {isKo ? "상세 보기" : "Details"}
+              <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
+            </Link>
+            <Link
+              href={`/contact?media=${encodeURIComponent(item.id)}`}
+              className="tkad-media-map-sheet-cta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 text-xs font-semibold text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800"
+            >
+              <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
+              {isKo ? "문의하기" : "Contact"}
+            </Link>
           </div>
         </div>
-
-        <div className="mt-3 grid grid-cols-2 gap-2">
-          <Link href={href} target="_blank" rel="noopener noreferrer" className={ctaPrimary}>
-            {isKo ? "전체 상세 보기 →" : "Full details →"}
-            <ExternalLink className="h-3.5 w-3.5" aria-hidden />
-          </Link>
-          <Link href={`/contact?media=${encodeURIComponent(item.id)}`} className={ctaAccent}>
-            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-            {isKo ? "문의하기" : "Contact"}
-          </Link>
-        </div>
-      </div>
+      </>
     );
   }
 
   return (
+    <div className="relative px-3 py-2">
+      <CloseButton
+        onClose={onClose}
+        isKo={isKo}
+        className="absolute right-2 top-2 z-10 h-7 w-7"
+      />
+      <MediaCard
+        mode="compact"
+        item={catalogItem}
+        href={href}
+        metaLine={metaLine}
+        isKo={isKo}
+        showPlanButton={false}
+        {...mediaCardStaticHandlers}
+      />
+      <MapDetailQuickActions
+        item={item}
+        inCompare={inCompare}
+        inCart={inCart}
+        onToggleCompare={onToggleCompare}
+        onToggleCart={onToggleCart}
+      />
+      {linkRow()}
+    </div>
+  );
+}
+
+const BOTTOM_SHEET_DISMISS_DRAG_PX = 72;
+
+function MediaMapBottomSheetShell({
+  item,
+  onClose,
+  isKo,
+  className,
+  children,
+}: {
+  item: MapMapItem;
+  onClose: () => void;
+  isKo: boolean;
+  className?: string;
+  children: ReactNode;
+}) {
+  const dragStartY = useRef<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  const resetDrag = () => {
+    dragStartY.current = null;
+    setDragging(false);
+    setDragOffset(0);
+  };
+
+  const handleTouchStart = (clientY: number) => {
+    dragStartY.current = clientY;
+    setDragging(true);
+  };
+
+  const handleTouchMove = (clientY: number) => {
+    if (dragStartY.current == null) return;
+    const delta = Math.max(0, clientY - dragStartY.current);
+    setDragOffset(delta);
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffset >= BOTTOM_SHEET_DISMISS_DRAG_PX) {
+      onClose();
+    }
+    resetDrag();
+  };
+
+  return (
     <>
-      <div className="flex justify-center pt-2 md:hidden">
-        <span className="h-1 w-10 rounded-full bg-white/25" aria-hidden />
-      </div>
-      <div className="flex items-center justify-end gap-3 border-b dark:border-white/10 border-gray-200 px-4 py-3">
-        <CloseButton onClose={onClose} isKo={isKo} className="h-9 w-9" />
-      </div>
-      <div className="flex-1 overflow-y-auto px-4 py-4">
-        <MediaCard
-          mode="feed"
-          item={catalogItem}
-          href={href}
-          locationLine={regionLine}
-          isKo={isKo}
-          showPlanButton={false}
-          {...mediaCardStaticHandlers}
-        />
-
-        <div className="mt-4 rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-3">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.14em] dark:text-white">
-            {isKo ? "가용 캘린더 (이번 달)" : "Availability (this month)"}
-          </p>
-          <p className="mt-1.5 text-sm dark:text-white text-gray-700">{availability.label}</p>
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {calendarDots.map((d) => (
-              <span
-                key={d.day}
-                title={`${d.day}${isKo ? "일" : ""}`}
-                className={cn(
-                  "h-2 w-2 rounded-full",
-                  d.tone.replace("emerald-500", "emerald-400/80").replace("amber-500", "amber-400/80").replace("rose-500", "rose-400/70"),
-                )}
-              />
-            ))}
-          </div>
+      <div
+        className="pointer-events-none fixed inset-0 z-[85] bg-black/10 md:hidden"
+        aria-hidden
+      />
+      <div
+        id="media-map-mobile-bottom-sheet"
+        role="dialog"
+        aria-label={item.name}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-[90] md:hidden",
+          "rounded-t-xl border-t border-gray-200 bg-white shadow-[0_-8px_32px_rgba(0,0,0,0.14)]",
+          "dark:border-white/10 dark:bg-[#0a0a12]",
+          !dragging && "transition-transform duration-300 ease-out",
+          className,
+        )}
+        style={dragOffset > 0 ? { transform: `translateY(${dragOffset}px)` } : undefined}
+      >
+        <div
+          className="relative flex shrink-0 cursor-grab items-center justify-center px-3 pb-1 pt-1.5 active:cursor-grabbing"
+          onTouchStart={(e) => handleTouchStart(e.touches[0]?.clientY ?? 0)}
+          onTouchMove={(e) => handleTouchMove(e.touches[0]?.clientY ?? 0)}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={resetDrag}
+        >
+          <div
+            aria-hidden
+            className="h-1 w-9 rounded-full bg-gray-300 dark:bg-white/25"
+          />
+          <CloseButton
+            onClose={onClose}
+            isKo={isKo}
+            className="absolute right-2 top-1 h-7 w-7"
+          />
         </div>
-      </div>
-
-      <div className="flex flex-col gap-2 border-t dark:border-white/10 border-gray-200 p-4 sm:flex-row">
-        <Link
-          href={href}
-          target="_blank"
-          rel="noopener noreferrer"
-          className={cn(ctaPrimary, "sm:flex-1")}
-        >
-          {isKo ? "전체 상세 보기 →" : "Full details →"}
-          <ExternalLink className="h-4 w-4" aria-hidden />
-        </Link>
-        <Link
-          href={`/contact?media=${encodeURIComponent(item.id)}`}
-          className={cn(ctaAccent, "sm:flex-1")}
-        >
-          <MessageCircle className="h-4 w-4" aria-hidden />
-          {isKo ? "문의하기" : "Contact"}
-        </Link>
+        {children}
       </div>
     </>
   );
@@ -308,20 +639,59 @@ export function MediaMapDetailSheet({
   onClose,
   isKo = true,
   variant = "dock",
+  className,
+  inCompare,
+  inCart,
+  onToggleCompare,
+  onToggleCart,
+  floatingBarOffset = false,
 }: {
   item: MapMapItem;
   onClose: () => void;
   isKo?: boolean;
-  variant?: "sheet" | "inline" | "dock";
+  variant?: "sheet" | "inline" | "dock" | "bottom-sheet";
+  className?: string;
+  inCompare?: boolean;
+  inCart?: boolean;
+  onToggleCompare?: () => void;
+  onToggleCart?: () => void;
+  /** 하단 CompareBar·내 플랜 바가 열려 있을 때 겹침 방지 */
+  floatingBarOffset?: boolean;
 }) {
+  const bodyProps = {
+    item,
+    onClose,
+    isKo,
+    inCompare,
+    inCart,
+    onToggleCompare,
+    onToggleCart,
+  };
+
+  if (variant === "bottom-sheet") {
+    return (
+      <MediaMapBottomSheetShell
+        item={item}
+        onClose={onClose}
+        isKo={isKo}
+        className={className}
+      >
+        <MediaMapDetailBody {...bodyProps} variant="bottom-sheet" />
+      </MediaMapBottomSheetShell>
+    );
+  }
+
   if (variant === "inline") {
     return (
       <section
         id="media-map-mobile-preview"
-        className="order-2 w-full border-y border-border/80 bg-card shadow-[0_-8px_24px_rgba(0,0,0,0.06)] md:hidden"
+        className={cn(
+          "order-2 w-full border-y border-gray-200 bg-white dark:border-white/10 dark:bg-[#0a0a12]",
+          className,
+        )}
         aria-label={item.name}
       >
-        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="inline" />
+        <MediaMapDetailBody {...bodyProps} variant="inline" />
       </section>
     );
   }
@@ -334,15 +704,13 @@ export function MediaMapDetailSheet({
         aria-label={item.name}
         className={cn(
           "pointer-events-auto absolute inset-x-0 bottom-0 z-[25]",
-          "mx-2 mb-2 max-h-[min(28dvh,168px)] overflow-hidden rounded-xl sm:mx-3 sm:mb-3",
-          "border border-gray-200 bg-white/95 shadow-[0_-6px_20px_rgba(15,23,42,0.1)] backdrop-blur-md",
-          "dark:border-white/12 dark:bg-[#0a0a12]/95 dark:shadow-[0_-16px_48px_rgba(0,0,0,0.55)]",
+          "mx-2 mb-2 max-h-[min(36dvh,220px)] overflow-y-auto rounded-xl sm:mx-3 sm:mb-3",
+          "border border-gray-200 bg-white/95 shadow-lg backdrop-blur-md",
+          "dark:border-white/12 dark:bg-[#0a0a12]/95",
+          className,
         )}
       >
-        <div className="flex justify-center pt-1.5">
-          <span className="h-0.5 w-8 rounded-full bg-gray-300 dark:bg-white/25" aria-hidden />
-        </div>
-        <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="dock" />
+        <MediaMapDetailBody {...bodyProps} variant="dock" />
       </div>
     );
   }
@@ -353,12 +721,17 @@ export function MediaMapDetailSheet({
       aria-modal
       aria-label={item.name}
       className={cn(
-        "pointer-events-auto fixed z-[100004] flex flex-col overflow-hidden",
-        "border dark:border-white/10 border-gray-200 dark:bg-black bg-white/90 shadow-[0_24px_80px_rgba(0,0,0,0.65)] backdrop-blur-xl",
-        "inset-x-auto bottom-4 right-4 top-4 w-[min(420px,calc(100%-2rem))] rounded-2xl",
+        "pointer-events-auto fixed z-[80] hidden flex-col overflow-hidden md:flex",
+        "border border-gray-200 bg-white shadow-xl",
+        "right-4 w-[min(336px,calc(100%-2rem))] max-h-[min(68vh,440px)] rounded-xl",
+        floatingBarOffset
+          ? FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS
+          : "bottom-4",
+        "dark:border-white/10 dark:bg-[#0a0a12]",
+        className,
       )}
     >
-      <MediaMapDetailBody item={item} onClose={onClose} isKo={isKo} variant="sheet" />
+      <MediaMapDetailBody {...bodyProps} variant="sheet" />
     </div>
   );
 }

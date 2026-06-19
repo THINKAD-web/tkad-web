@@ -55,7 +55,9 @@ type Props = {
   disableCluster?: boolean;
   /** true면 모든 마커가 한 화면에 들어오도록 LatLngBounds 로 맞춤(네트워크 다지점용) */
   fitMarkersBounds?: boolean;
-  /** 마커/목록 선택 시 panTo 와 함께 적용할 줌 레벨 (카카오: 숫자가 작을수록 확대) */
+  /** 마커/목록 선택 시 panTo 만 수행 (줌 레벨은 변경하지 않음) */
+  panOnSelect?: boolean;
+  /** 선택 시 panTo + 줌 레벨 적용 (카카오: 숫자가 작을수록 확대). 매체 상세 등 클로즈업용 */
   zoomOnSelect?: number;
 };
 
@@ -122,7 +124,14 @@ type KakaoSdk = {
   maps: {
     Map: new (
       container: HTMLElement,
-      opts: { center: unknown; level: number },
+      opts: {
+        center: unknown;
+        level: number;
+        scrollwheel?: boolean;
+        draggable?: boolean;
+        disableDoubleClickZoom?: boolean;
+        keyboardShortcuts?: boolean;
+      },
     ) => {
       getBounds: () => {
         getSouthWest: () => { getLat: () => number; getLng: () => number };
@@ -133,6 +142,7 @@ type KakaoSdk = {
       setBounds: (...args: unknown[]) => void;
       panTo: (pos: unknown) => void;
       relayout?: () => void;
+      addControl?: (control: unknown, position: number) => void;
     };
     LatLng: new (lat: number, lng: number) => unknown;
     LatLngBounds: new () => { extend: (pos: unknown) => void };
@@ -173,6 +183,13 @@ type KakaoSdk = {
     event: {
       addListener: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void;
       removeListener?: (target: unknown, type: string, handler: (...args: unknown[]) => void) => void;
+    };
+    ZoomControl?: new () => unknown;
+    ControlPosition?: {
+      TOPRIGHT?: number;
+      RIGHT?: number;
+      LEFT?: number;
+      TOPLEFT?: number;
     };
   };
 };
@@ -552,11 +569,14 @@ function focusMapOnPosition(
   focusPos: unknown,
   targetLevel: number,
   visiblePositions: unknown[],
+  opts?: { ensureVisible?: boolean },
 ) {
   const level = Math.max(1, Math.min(14, targetLevel));
   if (typeof map.setCenter === "function") map.setCenter(focusPos);
   else map.panTo?.(focusPos);
   map.setLevel?.(level);
+
+  if (opts?.ensureVisible === false) return;
 
   requestAnimationFrame(() => {
     ensureAtLeastOneMarkerVisible(map, kakao, visiblePositions, focusPos);
@@ -659,6 +679,7 @@ export default function KakaoMapView({
   monochromeTiles = false,
   disableCluster = false,
   fitMarkersBounds = false,
+  panOnSelect = true,
   zoomOnSelect,
 }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -673,10 +694,16 @@ export default function KakaoMapView({
   const onViewChangeRef = useRef(onViewChange);
   const markersRef = useRef<MapMarker[]>(markers);
   const lastProgrammaticNonceRef = useRef<number | null>(null);
+  const lastAutoFocusKeyRef = useRef<string | null>(null);
+  const userViewportAdjustedRef = useRef(false);
+  const programmaticApplyRef = useRef(false);
+  const mapGestureActiveRef = useRef(false);
+  const lastContainerSizeRef = useRef<{ w: number; h: number } | null>(null);
   const [sdkError, setSdkError] = useState<string | null>(null);
   /** SDK 비동기 로드 후 지도 인스턴스가 생긴 뒤에만 true — markers effect 가 한 번 더 돌게 함 */
   const [mapReady, setMapReady] = useState(false);
   const coveragePolygonsRef = useRef<Array<{ setMap: (m: unknown) => void }>>([]);
+  const styledTileImagesRef = useRef<WeakSet<HTMLImageElement>>(new WeakSet());
   const coverageSig =
     coverageGeoJson == null ? "" : JSON.stringify(coverageGeoJson);
 
@@ -696,6 +723,16 @@ export default function KakaoMapView({
     markersRef.current = markers;
   }, [markers]);
 
+  useEffect(() => {
+    lastAutoFocusKeyRef.current = null;
+    userViewportAdjustedRef.current = false;
+  }, [selectedId]);
+
+  const markUserViewportAdjusted = useCallback(() => {
+    if (programmaticApplyRef.current) return;
+    userViewportAdjustedRef.current = true;
+  }, []);
+
   const isMarkerMapImage = useCallback((img: HTMLImageElement) => {
     const src = img.getAttribute("src") ?? "";
     return (
@@ -709,13 +746,16 @@ export default function KakaoMapView({
     const root = containerRef.current;
     if (!root || !monochromeTiles) return;
     root.querySelectorAll("img").forEach((img) => {
+      if (styledTileImagesRef.current.has(img)) return;
       if (isMarkerMapImage(img)) {
         img.style.filter = "none";
         img.dataset.tkadMarker = "1";
+        styledTileImagesRef.current.add(img);
         return;
       }
       if (img.dataset.tkadMarker === "1") return;
       img.style.filter = "grayscale(1) contrast(1.08) brightness(1.03)";
+      styledTileImagesRef.current.add(img);
     });
   }, [isMarkerMapImage, monochromeTiles]);
 
@@ -724,9 +764,19 @@ export default function KakaoMapView({
     const root = containerRef.current;
     if (!root) return;
     applyMonochromeTiles();
-    const observer = new MutationObserver(() => applyMonochromeTiles());
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+    const observer = new MutationObserver(() => {
+      if (debounce) return;
+      debounce = setTimeout(() => {
+        debounce = null;
+        applyMonochromeTiles();
+      }, 48);
+    });
     observer.observe(root, { childList: true, subtree: true, attributes: true, attributeFilter: ["src"] });
-    return () => observer.disconnect();
+    return () => {
+      if (debounce) clearTimeout(debounce);
+      observer.disconnect();
+    };
   }, [mapReady, monochromeTiles, applyMonochromeTiles]);
 
   // This effect intentionally boots Kakao SDK once per mount.
@@ -743,6 +793,9 @@ export default function KakaoMapView({
 
     let cancelled = false;
     let idleHandler: (() => void) | null = null;
+    let gestureStartHandler: (() => void) | null = null;
+    let zoomChangedHandler: (() => void) | null = null;
+    let dragEndHandler: (() => void) | null = null;
     let idleDebounce: ReturnType<typeof setTimeout> | null = null;
     let clusterClickHandler: ((cluster: unknown) => void) | null = null;
     let resizeObserver: ResizeObserver | null = null;
@@ -772,14 +825,45 @@ export default function KakaoMapView({
           const map = new kakao.maps.Map(containerRef.current, {
             center: new kakao.maps.LatLng(center.lat, center.lng),
             level: zoom,
+            scrollwheel: true,
+            draggable: true,
+            disableDoubleClickZoom: false,
+            keyboardShortcuts: true,
           });
           mapRef.current = map;
 
+          if (typeof kakao.maps.ZoomControl === "function" && map.addControl) {
+            const zoomControl = new kakao.maps.ZoomControl();
+            map.addControl(
+              zoomControl,
+              kakao.maps.ControlPosition?.LEFT ??
+                kakao.maps.ControlPosition?.TOPLEFT ??
+                0,
+            );
+          }
+
           if (typeof ResizeObserver !== "undefined" && containerRef.current) {
-            resizeObserver = new ResizeObserver(() => {
-              if (!cancelled) fireRelayout();
+            resizeObserver = new ResizeObserver((entries) => {
+              const rect = entries[0]?.contentRect;
+              if (!rect || cancelled) return;
+              const { width, height } = rect;
+              const last = lastContainerSizeRef.current;
+              if (
+                last &&
+                Math.abs(last.w - width) < 2 &&
+                Math.abs(last.h - height) < 2
+              ) {
+                return;
+              }
+              lastContainerSizeRef.current = { w: width, h: height };
+              if (mapGestureActiveRef.current) return;
+              window.requestAnimationFrame(() => {
+                if (!cancelled) fireRelayout();
+              });
             });
             resizeObserver.observe(containerRef.current);
+            const parent = containerRef.current.parentElement;
+            if (parent) resizeObserver.observe(parent);
           }
 
           if (!disableCluster && typeof kakao.maps.MarkerClusterer === "function") {
@@ -875,8 +959,30 @@ export default function KakaoMapView({
               fireBounds();
             }, 140);
           };
-          idleHandler = fireBoundsDebounced;
-          kakao.maps.event.addListener(map, "idle", fireBoundsDebounced);
+
+          gestureStartHandler = () => {
+            mapGestureActiveRef.current = true;
+            markUserViewportAdjusted();
+          };
+          zoomChangedHandler = () => {
+            markUserViewportAdjusted();
+          };
+          dragEndHandler = () => {
+            mapGestureActiveRef.current = false;
+            markUserViewportAdjusted();
+          };
+
+          idleHandler = () => {
+            mapGestureActiveRef.current = false;
+            fireRelayout();
+            fireBoundsDebounced();
+          };
+
+          kakao.maps.event.addListener(map, "dragstart", gestureStartHandler);
+          kakao.maps.event.addListener(map, "zoom_start", gestureStartHandler);
+          kakao.maps.event.addListener(map, "zoom_changed", zoomChangedHandler);
+          kakao.maps.event.addListener(map, "dragend", dragEndHandler);
+          kakao.maps.event.addListener(map, "idle", idleHandler);
           fireBounds();
           requestAnimationFrame(() => {
             if (!cancelled) fireRelayout();
@@ -906,6 +1012,31 @@ export default function KakaoMapView({
           /* noop */
         }
       }
+      if (mapInst && gestureStartHandler && kw?.maps?.event?.removeListener) {
+        try {
+          kw.maps.event.removeListener(mapInst, "dragstart", gestureStartHandler);
+          kw.maps.event.removeListener(mapInst, "zoom_start", gestureStartHandler);
+        } catch {
+          /* noop */
+        }
+      }
+      if (mapInst && zoomChangedHandler && kw?.maps?.event?.removeListener) {
+        try {
+          kw.maps.event.removeListener(mapInst, "zoom_changed", zoomChangedHandler);
+        } catch {
+          /* noop */
+        }
+      }
+      if (mapInst && dragEndHandler && kw?.maps?.event?.removeListener) {
+        try {
+          kw.maps.event.removeListener(mapInst, "dragend", dragEndHandler);
+        } catch {
+          /* noop */
+        }
+      }
+      gestureStartHandler = null;
+      zoomChangedHandler = null;
+      dragEndHandler = null;
       idleHandler = null;
       const clusterer = clustererRef.current as {
         clear?: () => void;
@@ -961,7 +1092,6 @@ export default function KakaoMapView({
       const existing = markerObjsRef.current;
       const variantById = pinVariantByIdRef.current;
       const nextIds = new Set(markers.map((m) => m.id));
-      const highlightId = hoveredId ?? selectedId;
 
       for (const [id, m] of existing) {
         if (!nextIds.has(id)) {
@@ -979,7 +1109,7 @@ export default function KakaoMapView({
         const lng = Number(mk.lng);
         if (!Number.isFinite(lat) || !Number.isFinite(lng)) continue;
         const base = mediaPinBaseType(mk.type);
-        const variant = mediaPinVariant(base, mk.id === highlightId);
+        const variant = mediaPinVariant(base, false);
         const marker = new kakao.maps.Marker({
           position: new kakao.maps.LatLng(lat, lng),
           title: mk.name,
@@ -994,21 +1124,19 @@ export default function KakaoMapView({
 
       if (clusterer?.addMarkers && toAdd.length) {
         clusterer.addMarkers(toAdd);
-        requestAnimationFrame(() => {
+        if (!mapGestureActiveRef.current) {
           try {
-            const relayout = (map as { relayout?: () => void } | null)?.relayout;
-            if (typeof relayout === "function") relayout();
             const redraw = clusterer?.redraw as (() => void) | undefined;
             if (typeof redraw === "function") redraw();
           } catch {
             /* noop */
           }
-        });
+        }
       }
     } catch (e) {
       console.error("[KakaoMapView] markers sync failed", e);
     }
-  }, [markers, mapReady, hoveredId, selectedId]);
+  }, [markers, mapReady]);
 
   useEffect(() => {
     if (!mapReady) return;
@@ -1149,33 +1277,31 @@ export default function KakaoMapView({
       infoWindowRef.current = null;
 
       if (!selectedId) return;
+      if (!panOnSelect && zoomOnSelect == null) return;
+
+      const focusKey = `${selectedId}:${zoomOnSelect ?? "pan"}`;
+      if (lastAutoFocusKeyRef.current === focusKey) return;
+      lastAutoFocusKeyRef.current = focusKey;
+
       const m = markersRef.current.find((x) => x.id === selectedId);
       const lat = m ? Number(m.lat) : NaN;
       const lng = m ? Number(m.lng) : NaN;
       if (!m || !Number.isFinite(lat) || !Number.isFinite(lng)) return;
 
       const pos = new kakao.maps.LatLng(lat, lng);
-      const allPositions = markersRef.current
-        .filter(
-          (mk) =>
-            Number.isFinite(mk.lat) &&
-            Number.isFinite(mk.lng) &&
-            Math.abs(mk.lat) <= 90 &&
-            Math.abs(mk.lng) <= 180,
-        )
-        .map((mk) => new kakao.maps.LatLng(mk.lat, mk.lng));
-
       const mapApi = map as KakaoMapFocusApi;
       if (zoomOnSelect != null) {
-        focusMapOnPosition(mapApi, kakao, pos, zoomOnSelect, [pos, ...allPositions]);
+        focusMapOnPosition(mapApi, kakao, pos, zoomOnSelect, [pos], {
+          ensureVisible: false,
+        });
       } else {
-        mapApi.setCenter?.(pos);
         mapApi.panTo?.(pos);
+        if (!mapApi.panTo) mapApi.setCenter?.(pos);
       }
     } catch (e) {
       console.error("[KakaoMapView] panTo failed", e);
     }
-  }, [selectedId, mapReady, zoomOnSelect]);
+  }, [selectedId, mapReady, panOnSelect, zoomOnSelect]);
 
   // 외부 programmaticView (URL 하이드레이션 / "내 주변" 클릭 등) 반영
   useEffect(() => {
@@ -1192,13 +1318,20 @@ export default function KakaoMapView({
     const kakao = getKakaoSdk();
     if (!map || !kakao?.maps) return;
     try {
+      programmaticApplyRef.current = true;
       const pos = new kakao.maps.LatLng(programmaticView.lat, programmaticView.lng);
       map.panTo?.(pos);
       if (typeof map.setLevel === "function") {
         map.setLevel(programmaticView.zoom);
       }
+      userViewportAdjustedRef.current = false;
+      lastAutoFocusKeyRef.current = null;
     } catch (e) {
       console.error("[KakaoMapView] programmaticView failed", e);
+    } finally {
+      window.setTimeout(() => {
+        programmaticApplyRef.current = false;
+      }, 0);
     }
   }, [programmaticView, mapReady]);
 
@@ -1289,13 +1422,13 @@ export default function KakaoMapView({
   return (
     <div
       className={cn(
-        "tkad-kakao-map-root relative h-full w-full min-h-[200px] text-[#0a0a0c] [color-scheme:light]",
+        "tkad-kakao-map-root relative h-full w-full min-h-[200px] touch-manipulation text-[#0a0a0c] [color-scheme:light]",
         monochromeTiles && "tkad-kakao-map-root--mono",
       )}
     >
-      <div ref={containerRef} className="h-full w-full min-h-[200px]" />
+      <div ref={containerRef} className="h-full w-full min-h-[200px] touch-manipulation" />
       {!mapReady && (
-        <div className="absolute inset-0 flex items-center justify-center dark:bg-black bg-white/25 p-4">
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center dark:bg-black bg-white/25 p-4">
           <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 px-6 py-8 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
             <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
             <div

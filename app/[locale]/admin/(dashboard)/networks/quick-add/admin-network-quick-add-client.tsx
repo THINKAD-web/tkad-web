@@ -227,25 +227,28 @@ export default function AdminNetworkQuickAddClient() {
 
     const fromTable = locRows
       .filter((row) => row.name.trim())
-      .map((row) => ({
-        name: row.name.trim(),
-        address: row.address.trim() || null,
-        latitude:
-          row.lat.trim() === "" ? null : Number(row.lat),
-        longitude:
-          row.lng.trim() === "" ? null : Number(row.lng),
-      }))
-      .map((row) => ({
-        ...row,
-        latitude:
-          row.latitude != null && Number.isFinite(row.latitude)
-            ? row.latitude
-            : null,
-        longitude:
-          row.longitude != null && Number.isFinite(row.longitude)
-            ? row.longitude
-            : null,
-      }));
+      .map((row) => {
+        const address = row.address.trim() || null;
+        const latitude =
+          row.lat.trim() === "" ? null : Number(row.lat);
+        const longitude =
+          row.lng.trim() === "" ? null : Number(row.lng);
+        return {
+          name: row.name.trim(),
+          address,
+          fullAddress: address,
+          latitude:
+            latitude != null && Number.isFinite(latitude) ? latitude : null,
+          longitude:
+            longitude != null && Number.isFinite(longitude) ? longitude : null,
+          unitCount: 1,
+          regionMain: null,
+          regionSub: null,
+          dailyFootfall: null,
+          priceNote: null,
+          note: null,
+        };
+      });
 
     const mergedLocs =
       fromTable.length > 0 && r.data.locations.length > 0
