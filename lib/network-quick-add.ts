@@ -5,7 +5,6 @@ import {
 } from "@/lib/media-auto-categorize";
 import {
   NETWORK_TYPE_CODES,
-  inferNetworkVenueFromSubCategory,
   isNetworkVenueCode,
   networkVenueTag,
   resolveNetworkCatalogType,

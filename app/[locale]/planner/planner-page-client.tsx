@@ -857,7 +857,7 @@ export default function PlannerPageClient({
 
       if (!user?.email) {
         toast(
-          "info",
+          "warning",
           isKo
             ? "견적서 생성을 위해 로그인이 필요합니다. 로그인 후 이어서 진행됩니다."
             : "Please sign in to generate a quote — we'll resume right after.",

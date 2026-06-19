@@ -188,6 +188,8 @@ type KakaoSdk = {
     ControlPosition?: {
       TOPRIGHT?: number;
       RIGHT?: number;
+      LEFT?: number;
+      TOPLEFT?: number;
     };
   };
 };
@@ -830,7 +832,7 @@ export default function KakaoMapView({
           });
           mapRef.current = map;
 
-          if (typeof kakao.maps.ZoomControl === "function") {
+          if (typeof kakao.maps.ZoomControl === "function" && map.addControl) {
             const zoomControl = new kakao.maps.ZoomControl();
             map.addControl(
               zoomControl,
