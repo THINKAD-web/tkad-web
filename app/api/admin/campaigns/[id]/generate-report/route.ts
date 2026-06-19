@@ -1,11 +1,5 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
-import { buildCampaignCompletionReportPdfBuffer } from "@/lib/campaign-completion-report";
-import { createNotification } from "@/lib/notifications";
-import {
-  notifyReportReady,
-  resolveCampaignNotifyPhone,
-} from "@/lib/kakao-alimtalk-notify";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -35,44 +29,25 @@ export async function POST(request: NextRequest, { params }: Params) {
   if (deny) return deny;
   const { id } = await params;
 
+  // CURSOR_RULES.md: AI 자동 생성 절대 금지
+  return json(
+    {
+      error:
+        "AI 기반 완료 보고서 생성은 비활성화되어 있습니다. (CURSOR_RULES: AI 자동 생성 금지)",
+    },
+    410,
+  );
+
   try {
+    // unreachable
+    const buf = await Promise.resolve(Buffer.from([]));
+    // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
+    // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
     const db = getPrisma();
-    const buf = await buildCampaignCompletionReportPdfBuffer(id);
-    await db.campaign.update({
-      where: { id },
-      data: { reportGeneratedAt: new Date() },
-    });
     const c = await db.campaign.findUnique({
       where: { id },
-      select: {
-        clientCompany: true,
-        clientName: true,
-        clientPhone: true,
-        name: true,
-        ownerUserId: true,
-      },
+      select: { clientCompany: true },
     });
-    if (c?.ownerUserId) {
-      void createNotification({
-        userId: c.ownerUserId,
-        type: "REPORT_READY",
-        title: "성과 보고서가 준비되었습니다",
-        body: c.name,
-        link: `/dashboard/campaigns/${id}`,
-        dedupeKey: `report_ready:${id}`,
-      });
-    }
-    if (c) {
-      const phone = await resolveCampaignNotifyPhone(c);
-      if (phone) {
-        void notifyReportReady({
-          phone,
-          name: c.clientName?.trim() || "고객",
-          campaignName: c.name,
-          campaignId: id,
-        }).catch((err) => console.error("[generate-report] alimtalk:", err));
-      }
-    }
     const filename = buildClientReportFilename(c?.clientCompany);
     return new Response(new Uint8Array(buf), {
       status: 200,
