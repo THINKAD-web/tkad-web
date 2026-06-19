@@ -3,6 +3,7 @@ import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import {
   catalogPriceFieldToPriceMan,
   formatPricePeriodShortLabel,
+  inferMediaPricePeriodFromPriceOption,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 
@@ -51,7 +52,7 @@ export function inferQuoteCampaignPeriodFromMedia(
 ): QuoteCampaignPeriodKey {
   const opt = media.priceOptions?.[priceOptionIndex];
   return pricePeriodToQuoteCampaignPeriod(
-    normalizeMediaPricePeriod(opt?.period ?? media.pricePeriod),
+    inferMediaPricePeriodFromPriceOption(opt, media.pricePeriod),
   );
 }
 
@@ -70,8 +71,10 @@ export function resolveQuoteMediaPricePeriod(
   isNetwork: boolean,
 ): MediaPricePeriodKey {
   if (isNetwork) return "month";
-  const opt = media.priceOptions?.[priceOptionIndex];
-  return normalizeMediaPricePeriod(opt?.period ?? media.pricePeriod);
+  return inferMediaPricePeriodFromPriceOption(
+    media.priceOptions?.[priceOptionIndex],
+    media.pricePeriod,
+  );
 }
 
 /** 캠페인 기간 × 매체 단가 주기 → 집행 회수 */

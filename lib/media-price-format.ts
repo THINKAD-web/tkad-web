@@ -270,24 +270,53 @@ function extractDurationLabelFromPriceOptionLabel(
   return null;
 }
 
+function inferMediaPricePeriodKeyFromOptionLabel(
+  label: string,
+): MediaPricePeriodKey | null {
+  const text = label.trim();
+  if (!text) return null;
+  if (/(\d+)\s*일/.test(text) || /(\d+)\s*days?/i.test(text)) return "day";
+  if (/(\d+)\s*주/.test(text) || /(\d+)\s*weeks?/i.test(text)) return "week";
+  if (/(\d+)\s*개월/.test(text) || /(\d+)\s*months?/i.test(text)) return "month";
+  if (/2\s*주|biweekly|bi-weekly/i.test(text)) return "biweekly";
+  return null;
+}
+
+/**
+ * priceOption 단가 주기 — 라벨(예: 최소 7일 패키지)이 `period`보다 구체적이면 라벨 우선.
+ */
+export function inferMediaPricePeriodFromPriceOption(
+  option: Pick<MediaPriceOption, "label" | "period"> | null | undefined,
+  fallbackPeriod: MediaPricePeriodKey | string | null | undefined,
+): MediaPricePeriodKey {
+  if (option?.label?.trim()) {
+    const fromLabel = inferMediaPricePeriodKeyFromOptionLabel(option.label);
+    if (fromLabel) return fromLabel;
+  }
+  if (option?.period) {
+    return normalizeMediaPricePeriod(option.period);
+  }
+  return normalizeMediaPricePeriod(fallbackPeriod);
+}
+
 /**
  * priceOption 카드 금액 하단 기간 — 옵션 `period` 또는 라벨(예: 20초 3일)에서 추론.
- * 라벨에 기간이 있는데 `period`가 없으면 매체 기본 `pricePeriod`(1개월)로 떨어지지 않음.
+ * 라벨에 기간이 있으면 `period`(또는 매체 기본 month)보다 라벨을 우선한다.
  */
 export function resolveMediaPriceOptionPeriodLabel(
   option: Pick<MediaPriceOption, "label" | "period">,
   fallbackPeriod: MediaPricePeriodKey | string | null | undefined,
   locale: string,
 ): string | null {
-  if (option.period) {
-    return formatMediaDetailPricePeriodDisplay(option.period, locale);
-  }
-
   const fromLabel = extractDurationLabelFromPriceOptionLabel(
     option.label,
     locale,
   );
   if (fromLabel) return fromLabel;
+
+  if (option.period) {
+    return formatMediaDetailPricePeriodDisplay(option.period, locale);
+  }
 
   if (
     /(\d+\s*(?:일|주|개월)|\d+\s*(?:days?|weeks?|months?))/i.test(

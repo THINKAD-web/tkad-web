@@ -260,8 +260,16 @@ function BarChart({
 
 export const PlannerReportDocument = forwardRef<
   HTMLDivElement,
-  { payload: PlannerReportExportPayload; className?: string }
->(function PlannerReportDocument({ payload: p, className }, ref) {
+  {
+    payload: PlannerReportExportPayload;
+    className?: string;
+    editableTitle?: boolean;
+    onDocumentTitleChange?: (title: string) => void;
+  }
+>(function PlannerReportDocument(
+  { payload: p, className, editableTitle, onDocumentTitleChange },
+  ref,
+) {
   const isKo = p.isKo;
   const summary: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
@@ -290,6 +298,12 @@ export const PlannerReportDocument = forwardRef<
               ? "OOH 미디어 플랜"
               : "OOH media plan"
         } · ${p.generatedAt}`}
+        titleEditable={editableTitle}
+        onTitleChange={onDocumentTitleChange}
+        titlePlaceholder={
+          isKo ? "보고서 제목을 입력하세요" : "Enter report title"
+        }
+        titleAriaLabel={isKo ? "보고서 제목" : "Report title"}
       />
 
       <div className="space-y-9 px-6 py-8 sm:px-9">

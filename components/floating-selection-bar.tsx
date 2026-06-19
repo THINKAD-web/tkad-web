@@ -27,6 +27,10 @@ export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
 export const FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS =
   "h-[4.75rem] bg-transparent sm:h-[3.75rem]";
 
+/** md+ 컴팩트 하단 바 높이 — 지도 상세 시트 등 `bottom` 오프셋 계산용 */
+export const FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS =
+  "bottom-[calc(3.75rem+1rem)]";
+
 /**
  * 매체 비교/견적 등 선택 시 하단 고정 바.
  * 나타날 때 슬라이드업, 사라질 때 슬라이드다운 (AnimatePresence).

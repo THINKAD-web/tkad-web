@@ -67,6 +67,10 @@ export function DocumentGradientHero({
   subtitle,
   className,
   topAccent,
+  titleEditable = false,
+  onTitleChange,
+  titlePlaceholder,
+  titleAriaLabel = "Report title",
 }: {
   badge: string;
   title: string;
@@ -74,7 +78,15 @@ export function DocumentGradientHero({
   className?: string;
   /** 프리미엄 견적 상단 골드 띠 */
   topAccent?: "gold" | "none";
+  /** 미리보기에서 제목 직접 수정 */
+  titleEditable?: boolean;
+  onTitleChange?: (value: string) => void;
+  titlePlaceholder?: string;
+  titleAriaLabel?: string;
 }) {
+  const titleClassName =
+    "mt-5 w-full text-2xl font-black leading-tight text-white sm:text-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]";
+
   return (
     <div
       className={cn(
@@ -91,9 +103,22 @@ export function DocumentGradientHero({
           {badge}
         </span>
       </div>
-      <h2 className="mt-5 text-2xl font-black leading-tight text-white sm:text-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]">
-        {title}
-      </h2>
+      {titleEditable && onTitleChange ? (
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => onTitleChange(e.target.value)}
+          maxLength={120}
+          placeholder={titlePlaceholder}
+          aria-label={titleAriaLabel}
+          className={cn(
+            titleClassName,
+            "border-0 bg-transparent p-0 placeholder:text-white/45 focus:rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400/70",
+          )}
+        />
+      ) : (
+        <h2 className={titleClassName}>{title}</h2>
+      )}
       {subtitle ? (
         <p className="mt-2 text-sm font-medium text-white/90">{subtitle}</p>
       ) : null}

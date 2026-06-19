@@ -146,7 +146,9 @@ function PlannerNeonPageBody({
   return inner;
 }
 
-import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs"; {
+import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs";
+
+const CATEGORIES: {
   key: PlannerCategory;
   labelKey: "catDigital" | "catStatic" | "catMobile";
 }[] = [
@@ -404,16 +406,19 @@ export default function PlannerPageClient({
   const handledFromPlanRef = useRef(false);
   const handledLoadPlanRef = useRef<string | null>(null);
   const handledCreateQuoteRef = useRef(false);
-  const [plannerStoreReady, setPlannerStoreReady] = useState(() =>
-    usePlannerStore.persist.hasHydrated(),
-  );
+  const [plannerStoreReady, setPlannerStoreReady] = useState(false);
 
   useEffect(() => {
-    if (usePlannerStore.persist.hasHydrated()) {
+    const persist = usePlannerStore.persist;
+    if (!persist) {
       setPlannerStoreReady(true);
       return;
     }
-    return usePlannerStore.persist.onFinishHydration(() => {
+    if (persist.hasHydrated()) {
+      setPlannerStoreReady(true);
+      return;
+    }
+    return persist.onFinishHydration(() => {
       setPlannerStoreReady(true);
     });
   }, []);

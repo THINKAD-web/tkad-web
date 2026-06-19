@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { FileDown, Loader2, Lock, Mail, RefreshCw } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
@@ -257,13 +257,27 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [props, derived, snapshotAt],
   );
 
+  const [documentTitle, setDocumentTitle] = useState(payload.documentTitle);
+
+  useEffect(() => {
+    setDocumentTitle(payload.documentTitle);
+  }, [payload.documentTitle]);
+
+  const exportPayload = useMemo(
+    () => ({
+      ...payload,
+      documentTitle: documentTitle.trim() || payload.documentTitle,
+    }),
+    [payload, documentTitle],
+  );
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
       setDownloading(format);
       setError(null);
       try {
-        await downloadPlannerReport(format, payload, {
+        await downloadPlannerReport(format, exportPayload, {
           activitySource: props.activitySource,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
@@ -278,7 +292,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, payload, t, tCommon, toast],
+    [downloading, exportPayload, props.activitySource, t, tCommon, toast],
   );
 
   const sendEmailReport = useCallback(async () => {
@@ -402,7 +416,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               ) : null}
 
               <DocumentPreviewFrame>
-                <PlannerReportDocument payload={payload} />
+                <PlannerReportDocument
+                  payload={exportPayload}
+                  editableTitle
+                  onDocumentTitleChange={setDocumentTitle}
+                />
               </DocumentPreviewFrame>
 
               {props.metrics ? (

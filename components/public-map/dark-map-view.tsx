@@ -53,11 +53,37 @@ type Props = {
 function MapResizeFix() {
   const map = useMap();
   useEffect(() => {
-    const raf = window.requestAnimationFrame(() => map.invalidateSize());
-    const t = window.setTimeout(() => map.invalidateSize(), 150);
+    const invalidate = () => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {
+        /* noop */
+      }
+    };
+
+    const raf = window.requestAnimationFrame(invalidate);
+    const t1 = window.setTimeout(invalidate, 150);
+    const t2 = window.setTimeout(invalidate, 450);
+
+    const container = map.getContainer();
+    const resizeObserver =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(() => {
+            window.requestAnimationFrame(invalidate);
+          })
+        : null;
+    resizeObserver?.observe(container);
+    if (container.parentElement) {
+      resizeObserver?.observe(container.parentElement);
+    }
+
+    window.addEventListener("resize", invalidate);
     return () => {
       window.cancelAnimationFrame(raf);
-      window.clearTimeout(t);
+      window.clearTimeout(t1);
+      window.clearTimeout(t2);
+      resizeObserver?.disconnect();
+      window.removeEventListener("resize", invalidate);
     };
   }, [map]);
   return null;
@@ -182,7 +208,7 @@ export default function DarkMapView({
   return (
     <div
       className={cn(
-        "tkad-dark-map-root relative h-full w-full min-h-[200px]",
+        "tkad-dark-map-root relative h-full w-full min-h-[200px] touch-none",
         className,
       )}
     >
@@ -192,9 +218,13 @@ export default function DarkMapView({
         minZoom={5}
         maxZoom={18}
         style={{ height: "100%", width: "100%" }}
-        className="z-0 h-full w-full"
+        className="z-0 h-full w-full touch-none"
         scrollWheelZoom
+        touchZoom
+        doubleClickZoom
+        dragging
         zoomControl
+        zoomAnimation
       >
         <TileLayer
           url={PUBLIC_DARK_MAP_TILE_URL}

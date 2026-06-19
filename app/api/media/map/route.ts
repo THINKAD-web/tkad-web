@@ -2,8 +2,8 @@ import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { mediaItemIntersectsMapBounds } from "@/lib/media-detail-map-markers";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
+import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
 import {
-  matchesMapCatalogFilter,
   sortMapCatalogItems,
   type MapCatalogFilterParams,
 } from "@/lib/public-media-map-filter";
@@ -84,17 +84,46 @@ export async function GET(req: Request) {
     const neLat = parseFloatOrNull(sp.get("neLat"));
     const neLng = parseFloatOrNull(sp.get("neLng"));
 
+    const minPrice =
+      parseFloatOrNull(sp.get("minPrice")) ??
+      parseFloatOrNull(sp.get("priceMin"));
+    const maxPrice =
+      parseFloatOrNull(sp.get("maxPrice")) ??
+      parseFloatOrNull(sp.get("priceMax"));
+
     const filterParams: MapCatalogFilterParams = {
       category: sp.get("category")?.trim() || sp.get("type")?.trim() || null,
       target: sp.get("target")?.trim() || null,
       region: sp.get("region")?.trim() || null,
       q: sp.get("q")?.trim() || null,
       sort: parseSort(sp.get("sort")),
+      minPrice,
+      maxPrice,
+    };
+
+    const chipFilterOpts = {
+      category: filterParams.category ?? undefined,
+      mainCategory: sp.get("mainCategory")?.trim() || undefined,
+      subCategory: sp.get("subCategory")?.trim() || undefined,
+      target: filterParams.target ?? undefined,
+      region: filterParams.region ?? undefined,
+      regionMain: sp.get("regionMain")?.trim() || undefined,
+      regionSub: sp.get("regionSub")?.trim() || undefined,
+      priceMin:
+        sp.get("priceMin")?.trim() ||
+        (minPrice != null ? String(minPrice) : undefined),
+      priceMax:
+        sp.get("priceMax")?.trim() ||
+        (maxPrice != null ? String(maxPrice) : undefined),
+      features: sp.get("features")?.trim() || undefined,
+      query: filterParams.q ?? undefined,
     };
 
     const all = await fetchPublicMediaCatalog();
 
-    const filtered = all.filter((m) => {
+    const filterMatched = filterMediaByDiscoveryChips(all, chipFilterOpts);
+
+    const filtered = filterMatched.filter((m) => {
       const hasValidCoord =
         Number.isFinite(m.lat) &&
         Number.isFinite(m.lng) &&
@@ -120,7 +149,7 @@ export async function GET(req: Request) {
           return false;
         }
       }
-      return matchesMapCatalogFilter(m, filterParams);
+      return true;
     });
 
     const items = sortMapCatalogItems(filtered, filterParams.sort).map(toMapItem);
@@ -135,6 +164,7 @@ export async function GET(req: Request) {
     return apiOk({
       items,
       total: items.length,
+      matchTotal: filterMatched.length,
       facets: { regions: distinctRegions, types: distinctTypes },
     });
   } catch (e) {

@@ -3,6 +3,7 @@ import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { prismaMediaToAdminDto } from "@/lib/admin-media-dto";
+import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
 import { getPrisma } from "@/lib/prisma";
 import {
   attachCoverageDistrictCodesById,
@@ -18,6 +19,32 @@ import {
 export const dynamic = "force-dynamic";
 
 type Params = { params: Promise<{ id: string }> };
+
+/** `OOH (복제)`, `OOH (복제 2)` 접미사 제거 후 기본명 */
+function stripDuplicateNameSuffix(name: string): string {
+  return name.replace(/\s*\(복제(?:\s+\d+)?\)\s*$/u, "").trim();
+}
+
+async function resolveDuplicateMediaName(
+  db: ReturnType<typeof getPrisma>,
+  sourceName: string,
+): Promise<string> {
+  const root = stripDuplicateNameSuffix(sourceName) || sourceName.trim() || "매체";
+  const rows = await db.media.findMany({
+    where: { name: { startsWith: root } },
+    select: { name: true },
+  });
+  const used = new Set(rows.map((r) => r.name));
+
+  const first = `${root} (복제)`;
+  if (!used.has(first)) return first;
+
+  for (let i = 2; i < 500; i++) {
+    const candidate = `${root} (복제 ${i})`;
+    if (!used.has(candidate)) return candidate;
+  }
+  return `${root} (복제 ${Date.now()})`;
+}
 
 export async function POST(request: NextRequest, { params }: Params) {
   const deny = assertAdminDb(request);
@@ -35,10 +62,12 @@ export async function POST(request: NextRequest, { params }: Params) {
   const installMap = await readMediaInstallLocationsByIds(db, [id]);
   const installLocations = installMap.get(id) ?? [];
 
-  const copyName = `${source.name.replace(/\s*\(복제\)\s*$/u, "")} (복제)`;
+  const copyName = await resolveDuplicateMediaName(db, source.name);
+  const copySlug = await assignUniqueMediaSlug(db, copyName, source.nameEn);
 
   const {
     id: _id,
+    slug: _slug,
     createdAt: _c,
     updatedAt: _u,
     installLocations: _installLocations,
@@ -50,6 +79,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       data: {
         ...rest,
         name: copyName,
+        slug: copySlug,
         isActive: false,
         isFeatured: false,
         featuredOrder: null,
@@ -93,7 +123,7 @@ export async function POST(request: NextRequest, { params }: Params) {
       e.code === "P2002"
     ) {
       return json(
-        { error: "동일한 매체명이 이미 있습니다. 이름을 변경해 주세요." },
+        { error: "복제본을 저장할 수 없습니다. 잠시 후 다시 시도해 주세요." },
         409,
       );
     }

@@ -57,53 +57,54 @@ function MediaDetailQuoteModalBody({
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12 sm:h-14",
-    "rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95",
+    "rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 touch-manipulation",
   );
   const secondaryLinkClass = cn(
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12",
-    "rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12",
+    "rounded-[18px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur transition-all hover:-translate-y-0.5 hover:bg-white/12 touch-manipulation",
   );
 
   return (
-    <div className="relative px-4 pb-5 pt-9 dark:text-white text-gray-900 sm:px-6 sm:pb-6 sm:pt-10">
+    <div className="relative flex min-h-0 w-full flex-1 flex-col">
       <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
       />
 
-      <div className="relative mb-4 flex items-start gap-3 border-b dark:border-white/10 border-gray-200 pb-4">
-        <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
-          <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
-        </span>
-        <div className="min-w-0">
-          <h2
-            id="media-quote-modal-title"
-            className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-600"
-          >
-            [ {t("quoteModalTitle")} ]
-          </h2>
-          <p className="mt-1.5 text-base font-black leading-snug dark:text-white text-gray-900 sm:text-lg">
-            {mediaTitle}
-          </p>
+      <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-9 pb-4 sm:px-6 sm:pt-10">
+        <div className="mb-4 flex items-start gap-3 border-b dark:border-white/10 border-gray-200 pb-4">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-[16px] border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.45)] backdrop-blur">
+            <Sparkles className="h-5 w-5" strokeWidth={1.75} aria-hidden />
+          </span>
+          <div className="min-w-0">
+            <h2
+              id="media-quote-modal-title"
+              className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-600"
+            >
+              [ {t("quoteModalTitle")} ]
+            </h2>
+            <p className="mt-1.5 text-base font-black leading-snug dark:text-white text-gray-900 sm:text-lg">
+              {mediaTitle}
+            </p>
+          </div>
         </div>
-      </div>
-      <p className="relative mb-4 text-sm leading-relaxed dark:text-white text-gray-700">
-        {t("quoteModalDescription")}
-      </p>
+        <p className="mb-4 text-sm leading-relaxed dark:text-white text-gray-700">
+          {t("quoteModalDescription")}
+        </p>
 
-      {hasOpts ? (
-        <div
-          className="relative mb-5 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
-          role="radiogroup"
-          aria-label={t("quoteModalPriceOptionLabel")}
-        >
-          <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
-            [ {t("quoteModalPriceOptionLabel")} ]
-          </p>
-          <div className="flex max-h-[min(52vh,22rem)] flex-col gap-2 overflow-y-auto pr-0.5">
+        {hasOpts ? (
+          <div
+            className="mb-2 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
+            role="radiogroup"
+            aria-label={t("quoteModalPriceOptionLabel")}
+          >
+            <p className="mb-2 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
+              [ {t("quoteModalPriceOptionLabel")} ]
+            </p>
+            <div className="flex flex-col gap-2">
             {opts.map((o, i) => {
               const selectedCard = safeIdx === i;
               const periodLabel = resolveMediaPriceOptionPeriodLabel(
@@ -199,23 +200,27 @@ function MediaDetailQuoteModalBody({
         </div>
       )}
 
-      <div className="flex flex-col gap-2 sm:gap-2.5">
-        <Link
-          href={quoteHref}
-          onClick={onClose}
-          className={primaryLinkClass}
-        >
-          <Calculator className="h-5 w-5 shrink-0" aria-hidden />
-          {t("quoteModalPrimary")}
-        </Link>
-        <Link
-          href={contactHref}
-          onClick={onClose}
-          className={secondaryLinkClass}
-        >
-          <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
-          {t("quoteModalContact")}
-        </Link>
+      </div>
+
+      <div className="relative z-10 shrink-0 border-t dark:border-white/10 border-gray-200 bg-black/40 px-4 py-3 backdrop-blur-md dark:bg-black/55 sm:px-6 sm:py-4 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+        <div className="flex flex-col gap-2 sm:gap-2.5">
+          <Link
+            href={quoteHref}
+            onClick={onClose}
+            className={primaryLinkClass}
+          >
+            <Calculator className="h-5 w-5 shrink-0" aria-hidden />
+            {t("quoteModalPrimary")}
+          </Link>
+          <Link
+            href={contactHref}
+            onClick={onClose}
+            className={secondaryLinkClass}
+          >
+            <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
+            {t("quoteModalContact")}
+          </Link>
+        </div>
       </div>
     </div>
   );
@@ -234,7 +239,7 @@ export default function MediaDetailQuoteModal({
     <Modal
       open={open}
       onClose={onClose}
-      className="tkad-glass-surface max-w-lg overflow-hidden"
+      className="tkad-glass-surface flex max-h-[min(92dvh,920px)] max-w-lg flex-col overflow-hidden p-0 sm:max-h-[90vh]"
       ariaLabelledBy="media-quote-modal-title"
     >
       {open ? (
