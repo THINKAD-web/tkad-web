@@ -39,6 +39,7 @@ import {
   Mail,
   Gift,
   ChevronDown,
+  Shield,
   type LucideIcon,
 } from "lucide-react";
 
@@ -102,7 +103,8 @@ type NavKey =
   | "content"
   | "contentSeed"
   | "aiContent"
-  | "planSnapshots";
+  | "planSnapshots"
+  | "memberEntitlements";
 
 type NavDef = {
   href: string;
@@ -155,6 +157,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/content", key: "content", icon: FileText },
   { href: "/admin/content-seed", key: "contentSeed", icon: Sparkles },
   { href: "/admin/ai-content", key: "aiContent", icon: Sparkles },
+  { href: "/admin/entitlements", key: "memberEntitlements", icon: Shield },
 ];
 
 type NavGroupId =
@@ -257,7 +260,7 @@ const navGroupDefs: {
   {
     id: "settings",
     labelKey: "groupSettings",
-    itemKeys: ["operatorManual", "apiUsage", "aiUsage", "trustMetrics"],
+    itemKeys: ["operatorManual", "memberEntitlements", "apiUsage", "aiUsage", "trustMetrics"],
   },
 ];
 
