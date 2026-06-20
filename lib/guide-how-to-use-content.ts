@@ -1,3 +1,8 @@
+import {
+  proPriceFaqAnswerEn,
+  proPriceFaqAnswerKo,
+} from "@/lib/entitlements/pricing";
+
 export const HOW_TO_USE_META = {
   titleKo: "THINKAD 싱커드 사용법 — OOH 광고 시작하기",
   titleEn: "How to use THINKAD — Start OOH advertising",
@@ -169,10 +174,8 @@ export const HOW_TO_USE_FAQS: HowToUseFaq[] = [
   {
     questionKo: "PRO 플랜 가격이 얼마인가요?",
     questionEn: "How much does PRO cost?",
-    answerKo:
-      "월 99,000원이며, 포인트로도 이용 가능합니다. 지금 가입하면 14일 무료 체험이 제공됩니다.",
-    answerEn:
-      "₩99,000/month, or redeem with points. New signups get a 14-day free trial.",
+    answerKo: proPriceFaqAnswerKo(),
+    answerEn: proPriceFaqAnswerEn(),
   },
   {
     questionKo: "광고 집행을 직접 도와주나요?",

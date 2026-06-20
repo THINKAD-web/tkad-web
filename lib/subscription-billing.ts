@@ -1,7 +1,7 @@
 import { randomBytes } from "node:crypto";
 import type { SubscriptionStatus } from "@prisma/client";
 import { confirmTossPayment } from "@/lib/toss-payments";
-import { PRO_MONTHLY_KRW } from "@/lib/report-access";
+import { discountedProPriceKrw } from "@/lib/entitlements/pricing";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -43,6 +43,7 @@ function addOneMonth(from = new Date()): Date {
 export async function createProCheckout(userId: string) {
   const orderId = generateSubscriptionOrderId();
   const endDate = addOneMonth();
+  const amountKrw = discountedProPriceKrw();
 
   const sub = await prisma.subscription.create({
     data: {
@@ -50,12 +51,12 @@ export async function createProCheckout(userId: string) {
       plan: "PRO",
       status: "PAST_DUE",
       orderId,
-      amountKrw: PRO_MONTHLY_KRW,
+      amountKrw,
       endDate,
     },
   });
 
-  return { subscriptionId: sub.id, orderId, amount: PRO_MONTHLY_KRW };
+  return { subscriptionId: sub.id, orderId, amount: amountKrw };
 }
 
 /** 결제 완료 후 Subscription + User.plan 동기화 */
