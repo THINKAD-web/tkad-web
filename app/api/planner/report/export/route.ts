@@ -4,7 +4,7 @@ import {
   plannerReportFileBase,
   type PlannerReportExportFormat,
 } from "@/lib/planner-report-export/types";
-import { getCurrentUser } from "@/lib/user-session";
+import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
 import {
   PLAN_REPORT_ACTIVITY_SOURCES,
@@ -29,6 +29,16 @@ export const maxDuration = 60;
  * (html2canvas DOM 캡처 방식 대체 — oklch/그라데이션 검정 폴백·모바일 폭 캡처 문제 제거)
  */
 export async function POST(request: NextRequest) {
+  const pdfAccess = await requirePlannerPdfAccess();
+  if (!pdfAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+      },
+      { status: pdfAccess.status },
+    );
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -55,8 +65,8 @@ export async function POST(request: NextRequest) {
   const base = plannerReportFileBase(payload);
 
   const logExport = () => {
-    void getCurrentUser().then((user) => {
-      if (!user) return;
+    const userId = pdfAccess.userId;
+    if (userId) {
       const source =
         activitySource &&
         (PLAN_REPORT_ACTIVITY_SOURCES as readonly string[]).includes(
@@ -64,7 +74,7 @@ export async function POST(request: NextRequest) {
         )
           ? activitySource
           : resolveSourceFromExportPayload(payload);
-      logPlanReportActivityFireAndForget(user.id, {
+      logPlanReportActivityFireAndForget(userId, {
         eventType: format === "pdf" ? "pdf_export" : "pptx_export",
         source,
         format,
@@ -73,7 +83,7 @@ export async function POST(request: NextRequest) {
         regionsText: payload.regionsText,
         reportTitle: payload.documentTitle || payload.campaignName,
       });
-    });
+    }
   };
 
   try {
