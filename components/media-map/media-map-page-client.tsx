@@ -10,6 +10,7 @@ import {
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
+import type { MapViewCommand } from "@/components/media-map/kakao-map-view";
 import {
   mapMarkersForMapCatalogItem,
   resolveMediaIdFromMapPinId,
@@ -96,6 +97,9 @@ const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const CART_KEY = "tkad-media-cart-v1";
 
+/** 마커/카드 선택 시 클로즈업 줌(카카오 레벨, 작을수록 확대). 현재보다 확대만 적용. */
+const MARKER_FOCUS_ZOOM = 4;
+
 function readCart(): string[] {
   if (typeof window === "undefined") return [];
   try {
@@ -163,25 +167,42 @@ export default function MediaMapPageClient() {
   const [surveyCheckedIds, setSurveyCheckedIds] = useState<Set<string>>(
     () => new Set(),
   );
-  /** "내 주변" / URL 하이드레이션으로 지도 중심·줌을 강제 이동시킬 때 사용 */
-  const [programmaticView, setProgrammaticView] = useState<{
-    lat: number;
-    lng: number;
-    zoom: number;
-    nonce: number;
-  } | null>(() => {
+  // 단일 명령형 뷰 채널(KakaoMapView.command) — 모든 지도 이동(focus)을 한 곳에서 nonce 로
+  // 보낸다. 기존 programmaticView/panOnSelect 의 effect 경쟁(드래그·줌 리셋, 마커 클릭 줌인
+  // 누락)을 제거. "내 주변"·지역 이동·답사·URL 하이드레이션·마커 선택이 모두 이 채널을 경유.
+  const cmdNonceRef = useRef(0);
+  const [mapCommand, setMapCommand] = useState<MapViewCommand>(() => {
     const init = initialUrl.current;
     if (init && init.lat != null && init.lng != null) {
+      cmdNonceRef.current = 1;
       return {
+        type: "focusMarker",
         lat: init.lat,
         lng: init.lng,
-        zoom: init.zoom ?? 8,
+        level: init.zoom ?? 8,
         nonce: 1,
       };
     }
     return null;
   });
+  const emitMapCommand = useCallback(
+    (cmd: { lat: number; lng: number; level: number }) => {
+      cmdNonceRef.current += 1;
+      setMapCommand({
+        type: "focusMarker",
+        lat: cmd.lat,
+        lng: cmd.lng,
+        level: cmd.level,
+        nonce: cmdNonceRef.current,
+      });
+    },
+    [],
+  );
   const itemsRef = useRef<Item[]>([]);
+  const markersRef = useRef<MapMarker[]>([]);
+  const viewRef = useRef<{ lat: number; lng: number; zoom: number } | null>(
+    null,
+  );
   const listItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const regionPanSkipRef = useRef(true);
 
@@ -195,13 +216,8 @@ export default function MediaMapPageClient() {
     const bf = initMapBrowseFiltersFromUrl(init);
     const mapView = resolveBrowseRegionMapView(bf.regionMain, bf.regionSub);
     if (!mapView) return;
-    setProgrammaticView({
-      lat: mapView.lat,
-      lng: mapView.lng,
-      zoom: mapView.zoom,
-      nonce: Date.now(),
-    });
-  }, []);
+    emitMapCommand({ lat: mapView.lat, lng: mapView.lng, level: mapView.zoom });
+  }, [emitMapCommand]);
 
   useEffect(() => {
     setCartIds(readCart());
@@ -321,13 +337,8 @@ export default function MediaMapPageClient() {
       browseFilters.regionSub,
     );
     if (!mapView) return;
-    setProgrammaticView({
-      lat: mapView.lat,
-      lng: mapView.lng,
-      zoom: mapView.zoom,
-      nonce: Date.now(),
-    });
-  }, [browseFilters.regionMain, browseFilters.regionSub]);
+    emitMapCommand({ lat: mapView.lat, lng: mapView.lng, level: mapView.zoom });
+  }, [browseFilters.regionMain, browseFilters.regionSub, emitMapCommand]);
 
   const markers: MapMarker[] = useMemo(() => {
     const fromItems = items.flatMap((i) => mapMarkersForMapCatalogItem(i));
@@ -338,6 +349,10 @@ export default function MediaMapPageClient() {
     const extra = selectedPins.filter((m) => !existingIds.has(m.id));
     return extra.length > 0 ? [...fromItems, ...extra] : fromItems;
   }, [items, selectedItem]);
+
+  useEffect(() => {
+    markersRef.current = markers;
+  }, [markers]);
 
   // selected를 state에 pin — bounds 변경으로 items가 갱신돼도 팝업 유지
   useEffect(() => {
@@ -361,13 +376,31 @@ export default function MediaMapPageClient() {
   }, [selectedId, items]);
 
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
-  // itemsRef를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
-  const handleSelect = useCallback((id: string) => {
-    setSelectedId(id);
-    const mediaId = resolveMediaIdFromMapPinId(id);
-    const item = itemsRef.current.find((i) => i.id === mediaId);
-    if (item) setSelectedItem(item);
-  }, []);
+  // itemsRef/markersRef 를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
+  const handleSelect = useCallback(
+    (id: string) => {
+      setSelectedId(id);
+      const mediaId = resolveMediaIdFromMapPinId(id);
+      const item = itemsRef.current.find((i) => i.id === mediaId);
+      if (item) setSelectedItem(item);
+      // 선택한 핀으로 클로즈업(pan + zoom-in). 명령 채널의 focusMarker 가 단일 실행.
+      // 현재보다 확대만 — 이미 가까우면 줌아웃하지 않는다.
+      // 지도 마커 클릭은 핀 id 가 정확히 일치하고, 목록 카드 클릭(매체 id)은 복수 설치
+      // 매체의 첫 핀으로 폴백한다.
+      const mk =
+        markersRef.current.find((m) => m.id === id) ??
+        markersRef.current.find(
+          (m) => resolveMediaIdFromMapPinId(m.id) === mediaId,
+        );
+      if (mk) {
+        const cur = viewRef.current?.zoom;
+        const level =
+          cur != null ? Math.min(cur, MARKER_FOCUS_ZOOM) : MARKER_FOCUS_ZOOM;
+        emitMapCommand({ lat: mk.lat, lng: mk.lng, level });
+      }
+    },
+    [emitMapCommand],
+  );
 
   const selected = selectedItem;
 
@@ -475,12 +508,7 @@ export default function MediaMapPageClient() {
           return;
         }
         setUserLocation({ lat, lng });
-        setProgrammaticView({
-          lat,
-          lng,
-          zoom: 5,
-          nonce: Date.now(),
-        });
+        emitMapCommand({ lat, lng, level: 5 });
         toast.success("현위치를 지도에 표시했습니다.");
         setLocating(false);
       },
@@ -495,7 +523,7 @@ export default function MediaMapPageClient() {
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
-  }, [toast]);
+  }, [toast, emitMapCommand]);
 
   const startSurveyMode = useCallback(() => {
     setSurveyMode(true);
@@ -520,6 +548,11 @@ export default function MediaMapPageClient() {
     [],
   );
 
+  // 마커 선택 시 클로즈업 줌을 "현재보다 확대만"으로 계산하기 위해 최신 view 를 ref 로 보관
+  useEffect(() => {
+    viewRef.current = view;
+  }, [view]);
+
   return (
     <>
     <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
@@ -533,10 +566,9 @@ export default function MediaMapPageClient() {
               onSelect={handleSelect}
               onBoundsChange={setBounds}
               onViewChange={handleViewChange}
-              programmaticView={programmaticView}
+              command={mapCommand}
               userLocation={userLocation}
               monochromeTiles
-              panOnSelect
             />
           </div>
 
@@ -565,12 +597,7 @@ export default function MediaMapPageClient() {
               onClose={() => setSurveyMode(false)}
               onLocationTick={setUserLocation}
               onCenterMap={(loc) =>
-                setProgrammaticView({
-                  lat: loc.lat,
-                  lng: loc.lng,
-                  zoom: 4,
-                  nonce: Date.now(),
-                })
+                emitMapCommand({ lat: loc.lat, lng: loc.lng, level: 4 })
               }
               checkedIds={surveyCheckedIds}
               onCheckedChange={setSurveyCheckedIds}
