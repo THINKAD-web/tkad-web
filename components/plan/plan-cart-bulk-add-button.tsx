@@ -4,8 +4,10 @@ import { ListPlus } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
 
 type Props = {
   items: Omit<PlanCartItem, "addedAt">[];
@@ -15,6 +17,8 @@ type Props = {
 
 export function PlanCartBulkAddButton({ items, label, className }: Props) {
   const toast = useAppToast();
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const { addMany } = usePlanCart();
 
   function handleClick() {
@@ -28,7 +32,7 @@ export function PlanCartBulkAddButton({ items, label, className }: Props) {
     } else if (result.skippedDuplicate === items.length) {
       toast.warning("선택한 매체가 이미 모두 플랜에 있습니다");
     } else {
-      toast.error("플랜에 더 담을 수 없습니다");
+      toast.error(cartCompareLimitToastMessage(isKo));
     }
   }
 

@@ -45,7 +45,6 @@ import {
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { resolveMediaIdFromMapPinId } from "@/lib/media-detail-map-markers";
 
 const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
@@ -70,6 +69,7 @@ type Props = {
   onQueryChange: (q: string) => void;
   popularIds: ReadonlySet<string>;
   compareItemCount: number;
+  compareMaxItems: number;
   toggleCompare: (m: MediaItem) => void;
   isInCompare: (id: string) => boolean;
 };
@@ -89,6 +89,7 @@ export function MediaMapView({
   onQueryChange,
   popularIds,
   compareItemCount,
+  compareMaxItems,
   toggleCompare,
   isInCompare,
 }: Props) {
@@ -292,7 +293,7 @@ export function MediaMapView({
                             disabled={
                               media.catalogSource === "network" ||
                               (!inCompare &&
-                                compareItemCount >= COMPARE_MAX_ITEMS)
+                                compareItemCount >= compareMaxItems)
                             }
                             aria-label={t("media.compareToggleAria")}
                             className="h-3.5 w-3.5 rounded border-navy/30 text-gold accent-gold"

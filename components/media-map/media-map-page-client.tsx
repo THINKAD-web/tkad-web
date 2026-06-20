@@ -29,6 +29,8 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
@@ -133,6 +135,7 @@ function readInitialUrlState() {
 export default function MediaMapPageClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { maxItems: compareMax } = useCartCompareMax();
   const router = useRouter();
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   const [items, setItems] = useState<Item[]>([]);
@@ -230,11 +233,11 @@ export default function MediaMapPageClient() {
   }, []);
 
   useEffect(() => {
-    setCompareEntriesState(getCompareCartEntries());
+    setCompareEntriesState(getCompareCartEntries(compareMax));
     return subscribeCompareCart(() => {
-      setCompareEntriesState(getCompareCartEntries());
+      setCompareEntriesState(getCompareCartEntries(compareMax));
     });
-  }, []);
+  }, [compareMax]);
 
   // URL 상태 동기화 — view + filter 변경 시 history.replaceState
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -457,8 +460,8 @@ export default function MediaMapPageClient() {
   }, [items, selectedItem]);
 
   const compareItems = useMemo<MediaItem[]>(
-    () => entriesToCompareMediaItems(compareEntries, mapCatalog),
-    [compareEntries, mapCatalog],
+    () => entriesToCompareMediaItems(compareEntries, mapCatalog, compareMax),
+    [compareEntries, mapCatalog, compareMax],
   );
 
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
@@ -480,14 +483,25 @@ export default function MediaMapPageClient() {
 
   const toggleCompare = useCallback(
     (it: Item) => {
-      const prev = getCompareCartEntries();
+      const prev = getCompareCartEntries(compareMax);
       const exists = prev.some((e) => e.id === it.id);
-      const next = exists
-        ? prev.filter((e) => e.id !== it.id)
-        : [...prev, { id: it.id, name: it.name, nameEn: it.name }];
-      setCompareCartEntries(next);
+      if (exists) {
+        setCompareCartEntries(
+          prev.filter((e) => e.id !== it.id),
+          compareMax,
+        );
+        return;
+      }
+      if (prev.length >= compareMax) {
+        toast.error(cartCompareLimitToastMessage(isKo));
+        return;
+      }
+      setCompareCartEntries(
+        [...prev, { id: it.id, name: it.name, nameEn: it.name }],
+        compareMax,
+      );
     },
-    [],
+    [compareMax, isKo, toast],
   );
 
   // "내 주변" 버튼 — Geolocation API
@@ -796,7 +810,7 @@ export default function MediaMapPageClient() {
         items={compareItems}
         locale={typeof document !== "undefined" ? document.documentElement.lang || "ko" : "ko"}
         onClear={() => {
-          setCompareCartEntries([]);
+          setCompareCartEntries([], compareMax);
         }}
       />
     </>

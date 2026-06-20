@@ -33,7 +33,7 @@ import {
   mediaToMapPosition,
   type ScoredMedia,
 } from "@/lib/ai-media-recommend";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
@@ -74,10 +74,12 @@ export default function MediaAiRecommendPanel({
   toggleCompare,
   isInCompare,
   addManyToCompare,
-  maxSelectionItems = COMPARE_MAX_ITEMS,
+  maxSelectionItems,
   labelOverrides,
 }: Props) {
   void regionOptions;
+  const { maxItems: tierMax } = useCartCompareMax();
+  const maxItems = maxSelectionItems ?? tierMax;
   const t = useTranslations();
   const tr = useTranslations("recommend");
   const isKo = locale === "ko";
@@ -131,8 +133,8 @@ export default function MediaAiRecommendPanel({
 
   const top3Ids = useMemo(() => {
     if (!results?.length) return [];
-    return results.slice(0, maxSelectionItems).map((s) => s.item.id);
-  }, [results, maxSelectionItems]);
+    return results.slice(0, maxItems).map((s) => s.item.id);
+  }, [results, maxItems]);
 
   const quoteQueryPicked =
     compareItems.length > 0
@@ -141,8 +143,8 @@ export default function MediaAiRecommendPanel({
 
   const addTop3ToCompare = useCallback(() => {
     if (!results?.length) return;
-    addManyToCompare(results.slice(0, maxSelectionItems).map((s) => s.item));
-  }, [results, addManyToCompare, maxSelectionItems]);
+    addManyToCompare(results.slice(0, maxItems).map((s) => s.item));
+  }, [results, addManyToCompare, maxItems]);
 
   const top3Dash = useMemo(
     () => results?.slice(0, 3) ?? [],
@@ -377,7 +379,7 @@ export default function MediaAiRecommendPanel({
                   onToggleCompare={() => toggleCompare(s.item)}
                   disableCompare={
                     !isInCompare(s.item.id) &&
-                    compareItems.length >= maxSelectionItems
+                    compareItems.length >= maxItems
                   }
                   addCompareLabel={addCompareLabel}
                   quoteLabel={quoteSingleLabel}

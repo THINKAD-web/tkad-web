@@ -22,6 +22,8 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import { useCart } from "@/lib/cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -119,6 +121,8 @@ function MediaSearchPageInner({
   const pathname = usePathname();
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
+  const { maxItems: compareMax } = useCartCompareMax();
+  const isKo = locale === "ko" || locale.startsWith("ko");
 
   const initialFromUrl = useMemo(() => {
     const legacyCat =
@@ -173,11 +177,11 @@ function MediaSearchPageInner({
   );
 
   useEffect(() => {
-    setCompareEntriesState(getCompareCartEntries());
+    setCompareEntriesState(getCompareCartEntries(compareMax));
     return subscribeCompareCart(() => {
-      setCompareEntriesState(getCompareCartEntries());
+      setCompareEntriesState(getCompareCartEntries(compareMax));
     });
-  }, []);
+  }, [compareMax]);
 
   useEffect(() => {
     const legacyCat = searchParams.get("category") ?? "";
@@ -242,14 +246,31 @@ function MediaSearchPageInner({
     [compareEntries],
   );
 
-  const toggleCompare = useCallback((item: HomeCatalogMediaItem) => {
-    const prev = getCompareCartEntries();
-    const exists = prev.some((e) => e.id === item.id);
-    const next = exists
-      ? prev.filter((e) => e.id !== item.id)
-      : [...prev, { id: item.id, name: item.name, nameEn: item.name }];
-    setCompareCartEntries(next);
-  }, []);
+  const toggleCompare = useCallback(
+    (item: HomeCatalogMediaItem) => {
+      const prev = getCompareCartEntries(compareMax);
+      const exists = prev.some((e) => e.id === item.id);
+      if (exists) {
+        setCompareCartEntries(
+          prev.filter((e) => e.id !== item.id),
+          compareMax,
+        );
+        return;
+      }
+      if (prev.length >= compareMax) {
+        toast.error(cartCompareLimitToastMessage(isKo));
+        return;
+      }
+      setCompareCartEntries(
+        [
+          ...prev,
+          { id: item.id, name: item.name, nameEn: item.name },
+        ],
+        compareMax,
+      );
+    },
+    [compareMax, isKo, toast],
+  );
 
   const toggleCart = useCallback(
     (item: HomeCatalogMediaItem) => {
@@ -298,8 +319,8 @@ function MediaSearchPageInner({
   }, []);
 
   const compareItems = useMemo(
-    () => entriesToCompareMediaItems(compareEntries, catalogItems),
-    [compareEntries, catalogItems],
+    () => entriesToCompareMediaItems(compareEntries, catalogItems, compareMax),
+    [compareEntries, catalogItems, compareMax],
   );
 
   const resolveRegionMainLabel = useCallback((id: string) => {
@@ -478,8 +499,6 @@ function MediaSearchPageInner({
     const path = mediaItemDetailPath(item.id);
     return `/${locale}${path}`;
   };
-
-  const isKo = locale === "ko";
 
   const renderMediaCard = (item: HomeCatalogMediaItem) => {
     const href = getMediaHref(item);
@@ -838,7 +857,7 @@ function MediaSearchPageInner({
       variant="light"
       items={compareItems}
       locale={locale}
-      onClear={() => setCompareCartEntries([])}
+      onClear={() => setCompareCartEntries([], compareMax)}
     />
     ) : null}
     </>

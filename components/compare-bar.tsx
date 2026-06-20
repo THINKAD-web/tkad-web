@@ -9,8 +9,9 @@ import {
   FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS,
   FloatingSelectionBar,
 } from "@/components/floating-selection-bar";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
 import { usePlanCart } from "@/hooks/use-plan-cart";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { isCartCompareUnlimited } from "@/lib/entitlements/limits";
 import { formatPlanCartBadgeCount } from "@/lib/plan-cart-limits";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
@@ -78,6 +79,7 @@ export default function CompareBar({
   const t = useTranslations("media");
   const pathname = usePathname();
   const { count: planCount } = usePlanCart();
+  const { maxItems: compareMax } = useCartCompareMax();
   const isKo = locale === "ko";
   const isLight = variant === "light";
   const hidePlanOnPage = pathname?.includes("/my/plan") ?? false;
@@ -105,6 +107,9 @@ export default function CompareBar({
   const quoteHref = `/quote?media=${ids}${onlyPo}`;
 
   const count = displayItems.length;
+  const compareLimitLabel = isCartCompareUnlimited(compareMax)
+    ? String(count)
+    : `${count}/${compareMax}`;
   const canCompare = count >= 2;
 
   const blockClass =
@@ -143,7 +148,7 @@ export default function CompareBar({
                     {t("compareFloatingSelected", { count })}
                     <span className="sr-only">
                       {" "}
-                      ({count}/{COMPARE_MAX_ITEMS})
+                      ({compareLimitLabel})
                     </span>
                   </span>
                 </>
@@ -237,7 +242,7 @@ export default function CompareBar({
                 {t("compareFloatingSelected", { count })}
                 <span className="sr-only">
                   {" "}
-                  ({count}/{COMPARE_MAX_ITEMS})
+                  ({compareLimitLabel})
                 </span>
               </span>
             </>

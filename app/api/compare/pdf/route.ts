@@ -1,12 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
 import { comparePdfBuffer, type ComparePdfMediaRow } from "@/lib/build-compare-pdf";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { cartCompareMaxItems } from "@/lib/entitlements/limits";
+import { resolveIsPro } from "@/lib/ai-rate-limit";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { getCurrentUser } from "@/lib/user-session";
 import type { MediaItem } from "@/lib/media-data";
 
 export const dynamic = "force-dynamic";
 
-function parseIds(raw: string | null): string[] {
+function parseIds(raw: string | null, maxItems: number): string[] {
   if (!raw?.trim()) return [];
   const seen = new Set<string>();
   const out: string[] = [];
@@ -15,7 +17,7 @@ function parseIds(raw: string | null): string[] {
     if (!id || seen.has(id)) continue;
     seen.add(id);
     out.push(id);
-    if (out.length >= COMPARE_MAX_ITEMS) break;
+    if (out.length >= maxItems) break;
   }
   return out;
 }
@@ -43,8 +45,11 @@ function mediaToPdfRow(m: MediaItem, isKo: boolean): ComparePdfMediaRow {
 }
 
 export async function GET(request: NextRequest) {
+  const user = await getCurrentUser();
+  const isPro = await resolveIsPro(user?.id ?? null);
+  const maxItems = cartCompareMaxItems(isPro);
   const { searchParams } = new URL(request.url);
-  const ids = parseIds(searchParams.get("ids"));
+  const ids = parseIds(searchParams.get("ids"), maxItems);
   if (ids.length < 2) {
     return NextResponse.json(
       { error: "At least two valid media ids are required." },

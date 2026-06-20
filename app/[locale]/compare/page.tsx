@@ -1,6 +1,8 @@
 import ComparePageClient from "@/components/compare-page-client";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { cartCompareMaxItems } from "@/lib/entitlements/limits";
+import { resolveIsPro } from "@/lib/ai-rate-limit";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { getCurrentUser } from "@/lib/user-session";
 import type { MediaItem } from "@/lib/media-data";
 
 type SearchParams = { ids?: string | string[] };
@@ -15,12 +17,15 @@ export default async function ComparePage({
   const sp = await searchParams;
   const raw = sp.ids;
   const idsParam = Array.isArray(raw) ? raw[0] : raw ?? "";
+  const user = await getCurrentUser();
+  const isPro = await resolveIsPro(user?.id ?? null);
+  const maxItems = cartCompareMaxItems(isPro);
   const catalog = await fetchPublicMediaCatalog();
   const idList = idsParam
     .split(",")
     .map((s) => s.trim())
     .filter(Boolean)
-    .slice(0, COMPARE_MAX_ITEMS);
+    .slice(0, maxItems);
 
   let items: MediaItem[] = [];
 

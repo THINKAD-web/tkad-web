@@ -5,6 +5,11 @@ import { useTranslations } from "next-intl";
 import { Bolt, Check, GitCompareArrows, Send, Sparkles } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { useToast } from "@/components/toast-provider";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import {
+  cartCompareLimitToastMessage,
+  isCartCompareUnlimited,
+} from "@/lib/entitlements/limits";
 import {
   COMPARE_CART_CHANGE_EVENT,
   getCompareCartEntries,
@@ -12,7 +17,6 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 
 type Props = {
   mediaId: string;
@@ -35,29 +39,39 @@ export function MediaStickyCta({
 }: Props) {
   const t = useTranslations("mediaDetail.cta");
   const { toast } = useToast();
+  const { maxItems: compareMax } = useCartCompareMax();
   const [entries, setEntries] = useState<CompareCartEntry[]>([]);
 
-  useEffect(() => subscribeCompareCart(() => setEntries(getCompareCartEntries())), []);
+  useEffect(
+    () =>
+      subscribeCompareCart(() =>
+        setEntries(getCompareCartEntries(compareMax)),
+      ),
+    [compareMax],
+  );
   const [hydrated, setHydrated] = useState(false);
   if (!hydrated) {
     setHydrated(true);
     if (typeof window !== "undefined") {
-      const initial = getCompareCartEntries();
+      const initial = getCompareCartEntries(compareMax);
       if (initial.length !== entries.length) setEntries(initial);
     }
   }
 
   const inCart = entries.some((e) => e.id === mediaId);
-  const isFull = entries.length >= COMPARE_MAX_ITEMS && !inCart;
+  const isFull = entries.length >= compareMax && !inCart;
 
   const toggleCompare = () => {
     if (inCart) {
-      setCompareCartEntries(entries.filter((e) => e.id !== mediaId));
+      setCompareCartEntries(
+        entries.filter((e) => e.id !== mediaId),
+        compareMax,
+      );
       toast("success", t("compareRemoved"));
       return;
     }
     if (isFull) {
-      toast("error", t("compareFull", { max: COMPARE_MAX_ITEMS }));
+      toast("error", cartCompareLimitToastMessage(isKo));
       return;
     }
     const next: CompareCartEntry = {
@@ -65,10 +79,14 @@ export function MediaStickyCta({
       name: mediaName,
       nameEn: mediaNameEn || mediaName,
     };
-    setCompareCartEntries([...entries, next]);
+    setCompareCartEntries([...entries, next], compareMax);
     toast("success", t("compareAdded"));
     window.dispatchEvent(new Event(COMPARE_CART_CHANGE_EVENT));
   };
+
+  const countSuffix = isCartCompareUnlimited(compareMax)
+    ? String(entries.length)
+    : `${entries.length}/${compareMax}`;
 
   return (
     <div className="hidden flex-col gap-2 md:flex">
@@ -122,9 +140,7 @@ export function MediaStickyCta({
       </BtnBlock>
       {entries.length > 0 ? (
         <p className="text-center font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-          {isKo
-            ? `// 비교함 ${entries.length}/${COMPARE_MAX_ITEMS}`
-            : `// Compare ${entries.length}/${COMPARE_MAX_ITEMS}`}
+          {isKo ? `// 비교함 ${countSuffix}` : `// Compare ${countSuffix}`}
         </p>
       ) : null}
     </div>
