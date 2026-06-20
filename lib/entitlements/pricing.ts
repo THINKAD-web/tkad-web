@@ -1,10 +1,31 @@
 import { PRO_MONTHLY_KRW, PRO_TRIAL_DAYS } from "@/lib/entitlements/constants";
 
 /**
- * PRO 월 구독 상시 할인율 (0 = 할인 없음, 20 = 20% 할인).
- * 이 값만 변경하면 가격표·결제·문구가 함께 반영됩니다.
+ * PRO 월 구독 상시 할인율 기본값 (0 = 할인 없음, 20 = 20% 할인).
+ * 런타임 활성 값은 `getProDiscountPercent()` — preview 등에서 env로 오버라이드 가능.
  */
 export const PRO_DISCOUNT_PERCENT = 0;
+
+function parseProDiscountPercentEnv(raw: string | undefined): number | null {
+  if (raw === undefined || raw.trim() === "") return null;
+  const n = Number(raw);
+  if (!Number.isFinite(n)) return null;
+  return Math.max(0, Math.min(100, Math.floor(n)));
+}
+
+/**
+ * 활성 PRO 할인율 (%). 코드 기본값 `PRO_DISCOUNT_PERCENT`(0).
+ *
+ * Preview 검증: Vercel Preview 환경에만 `NEXT_PUBLIC_PRO_DISCOUNT_PERCENT=20`.
+ * 서버 결제·클라이언트 가격표가 동일 값을 쓰도록 NEXT_PUBLIC 접두사 사용.
+ * (선택) `PRO_DISCOUNT_PERCENT` — 서버 전용 오버라이드, NEXT_PUBLIC보다 우선.
+ */
+export function getProDiscountPercent(): number {
+  const fromEnv =
+    parseProDiscountPercentEnv(process.env.PRO_DISCOUNT_PERCENT) ??
+    parseProDiscountPercentEnv(process.env.NEXT_PUBLIC_PRO_DISCOUNT_PERCENT);
+  return fromEnv ?? PRO_DISCOUNT_PERCENT;
+}
 
 export type ProPriceDisplay = {
   listPriceKrw: number;
@@ -15,7 +36,7 @@ export type ProPriceDisplay = {
 
 /** 정수 원 — Toss 청구·DB 저장용 */
 export function discountedProPriceKrw(
-  percent: number = PRO_DISCOUNT_PERCENT,
+  percent: number = getProDiscountPercent(),
 ): number {
   if (percent <= 0) return PRO_MONTHLY_KRW;
   const raw = PRO_MONTHLY_KRW * (1 - percent / 100);
@@ -23,7 +44,7 @@ export function discountedProPriceKrw(
 }
 
 export function getProPriceDisplay(
-  percent: number = PRO_DISCOUNT_PERCENT,
+  percent: number = getProDiscountPercent(),
 ): ProPriceDisplay {
   const discountPercent = Math.max(0, Math.min(100, Math.floor(percent)));
   const hasDiscount = discountPercent > 0;

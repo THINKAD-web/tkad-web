@@ -6,6 +6,7 @@ export {
 } from "@/lib/entitlements/constants";
 export {
   PRO_DISCOUNT_PERCENT,
+  getProDiscountPercent,
   discountedProPriceKrw,
   getProPriceDisplay,
   formatProMonthlyPriceKo,
