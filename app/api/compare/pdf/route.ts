@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { comparePdfBuffer, type ComparePdfMediaRow } from "@/lib/build-compare-pdf";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 import type { MediaItem } from "@/lib/media-data";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,16 @@ function mediaToPdfRow(m: MediaItem, isKo: boolean): ComparePdfMediaRow {
 }
 
 export async function GET(request: NextRequest) {
+  const pdfAccess = await requirePlannerPdfAccess();
+  if (!pdfAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+      },
+      { status: pdfAccess.status },
+    );
+  }
+
   const { searchParams } = new URL(request.url);
   const ids = parseIds(searchParams.get("ids"));
   if (ids.length < 2) {

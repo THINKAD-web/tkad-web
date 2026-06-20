@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { rateLimit } from "@/lib/rate-limit";
 import { sendEmailWithPdfAttachment } from "@/lib/email/client";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,16 @@ export async function POST(request: NextRequest) {
     return json(
       { error: "Too many requests. Please try again later." },
       { status: 429 },
+    );
+  }
+
+  const pdfAccess = await requirePlannerPdfAccess();
+  if (!pdfAccess.allowed) {
+    return json(
+      {
+        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+      },
+      { status: pdfAccess.status },
     );
   }
 
