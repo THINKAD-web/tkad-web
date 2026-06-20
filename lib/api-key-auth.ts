@@ -3,17 +3,17 @@ import type { NextRequest } from "next/server";
 import type { ApiKey, ApiKeyPlan } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getClientIp } from "@/lib/api-response";
+import {
+  ANOMALY_REQUESTS_PER_MINUTE,
+  API_KEY_MONTHLY_LIMITS,
+} from "@/lib/entitlements/constants";
 
 export const API_KEY_PREFIX = "tkad_sk_";
 
-export const PLAN_MONTHLY_LIMITS: Record<ApiKeyPlan, number | null> = {
-  FREE: 1000,
-  PRO: 10_000,
-  ENTERPRISE: null,
-};
+export const PLAN_MONTHLY_LIMITS: Record<ApiKeyPlan, number | null> =
+  API_KEY_MONTHLY_LIMITS;
 
-/** 분당 요청 수가 이 값을 넘으면 이상 트래픽으로 표시 */
-export const ANOMALY_REQUESTS_PER_MINUTE = 100;
+export { ANOMALY_REQUESTS_PER_MINUTE };
 
 export function hashApiKey(raw: string): string {
   return createHash("sha256").update(raw).digest("hex");
