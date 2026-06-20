@@ -12,8 +12,17 @@ export const PRO_TRIAL_DAYS = 14;
 /** FREE 회원 플래너 PDF 1회 무료 (리드 수집) */
 export const FREE_PLANNER_PDF_LIMIT = 1;
 
-/** 내 플랜·추천 카트 — 현재 실질 무제한 (PR-C에서 tier별 한도 복원 예정) */
+/** FREE 플래너 입력 허용 마지막 단계 (Step 7 결과·시뮬은 PRO) */
+export const FREE_PLANNER_INPUT_LAST_STEP = 6;
+
+/** FREE 회원 플랜·추천 카트 최대 개수 */
+export const PLAN_CART_MAX_ITEMS_FREE = 10;
+
+/** 내 플랜·추천 카트 — PRO·Enterprise 무제한 */
 export const PLAN_CART_UNLIMITED = Number.MAX_SAFE_INTEGER;
+
+/** PRO·Enterprise 플랜·추천 카트 최대 개수 */
+export const PLAN_CART_MAX_ITEMS_PRO = PLAN_CART_UNLIMITED;
 
 /** 일일 AI 사용 한도 (guest / 로그인 FREE / PRO) */
 export const AI_DAILY_LIMITS = { guest: 1, user: 5, pro: 30 } as const;

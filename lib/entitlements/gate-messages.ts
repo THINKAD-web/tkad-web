@@ -35,12 +35,12 @@ function isUnlimitedCount(n: number): boolean {
 }
 
 export function formatEntitlementLimit(
-  n: number,
+  n: number | null,
   isKo: boolean,
   unitKo: string,
   unitEn: string,
 ): string {
-  if (isUnlimitedCount(n)) {
+  if (n === null || isUnlimitedCount(n)) {
     return isKo ? "무제한" : "Unlimited";
   }
   return isKo
