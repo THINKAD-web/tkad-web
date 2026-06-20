@@ -29,7 +29,7 @@ import {
   Sparkles,
   FileText,
 } from "lucide-react";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
 import type { MediaItem } from "@/lib/media-data";
 import {
   filterPlannerMediaMulti,
@@ -371,11 +371,13 @@ export default function PlannerPageClient({
     return g ? t(g.titleKey) : "—";
   }, [campaignGoal, t]);
 
+  const { maxItems: compareMax } = useCartCompareMax();
+
   const compareHref = useMemo(() => {
-    const ids = Array.from(campaignMediaIds).slice(0, COMPARE_MAX_ITEMS);
+    const ids = Array.from(campaignMediaIds).slice(0, compareMax);
     const q = ids.join(",");
     return q ? `/compare?ids=${q}` : "/compare";
-  }, [campaignMediaIds]);
+  }, [campaignMediaIds, compareMax]);
 
   const applyPreset = useCallback(
     (id: "premium" | "national" | "value") => {

@@ -3,8 +3,10 @@
 import { Plus } from "lucide-react";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
+import { useLocale } from "next-intl";
 
 type Props = {
   item: Omit<PlanCartItem, "addedAt">;
@@ -23,6 +25,8 @@ export function PlanCartAddButton({
   className,
 }: Props) {
   const toast = useAppToast();
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const { has, add, remove } = usePlanCart();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
@@ -46,7 +50,7 @@ export function PlanCartAddButton({
       toast.warning("이미 플랜에 있습니다");
       return;
     }
-    toast.error("플랜에 더 담을 수 없습니다");
+    toast.error(cartCompareLimitToastMessage(isKo));
   }
 
   return (

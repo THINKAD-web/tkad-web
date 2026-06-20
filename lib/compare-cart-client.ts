@@ -1,5 +1,4 @@
 import type { MediaItem } from "@/lib/media-data";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 
 export type CompareCartEntry = { id: string; name: string; nameEn: string };
 
@@ -7,38 +6,50 @@ const STORAGE_KEY = "tkad-compare-cart-v1";
 
 export const COMPARE_CART_CHANGE_EVENT = "tkad-compare-cart-change";
 
-export function getCompareCartEntries(): CompareCartEntry[] {
+function clampEntries(
+  entries: CompareCartEntry[],
+  maxItems: number,
+): CompareCartEntry[] {
+  return entries.slice(0, maxItems);
+}
+
+export function getCompareCartEntries(maxItems: number): CompareCartEntry[] {
   if (typeof window === "undefined") return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return [];
     const parsed = JSON.parse(raw) as unknown;
     if (!Array.isArray(parsed)) return [];
-    return parsed
-      .filter(
-        (x): x is CompareCartEntry =>
-          x !== null &&
-          typeof x === "object" &&
-          typeof (x as CompareCartEntry).id === "string" &&
-          typeof (x as CompareCartEntry).name === "string",
-      )
-      .map((x) => ({
-        id: x.id,
-        name: x.name,
-        nameEn:
-          typeof x.nameEn === "string" && x.nameEn.trim()
-            ? x.nameEn
-            : x.name,
-      }))
-      .slice(0, COMPARE_MAX_ITEMS);
+    return clampEntries(
+      parsed
+        .filter(
+          (x): x is CompareCartEntry =>
+            x !== null &&
+            typeof x === "object" &&
+            typeof (x as CompareCartEntry).id === "string" &&
+            typeof (x as CompareCartEntry).name === "string",
+        )
+        .map((x) => ({
+          id: x.id,
+          name: x.name,
+          nameEn:
+            typeof x.nameEn === "string" && x.nameEn.trim()
+              ? x.nameEn
+              : x.name,
+        })),
+      maxItems,
+    );
   } catch {
     return [];
   }
 }
 
-export function setCompareCartEntries(entries: CompareCartEntry[]): void {
+export function setCompareCartEntries(
+  entries: CompareCartEntry[],
+  maxItems: number,
+): void {
   if (typeof window === "undefined") return;
-  const next = entries.slice(0, COMPARE_MAX_ITEMS);
+  const next = clampEntries(entries, maxItems);
   let prevSerialized = "";
   try {
     prevSerialized = localStorage.getItem(STORAGE_KEY) ?? "";
@@ -88,8 +99,9 @@ export function minimalMediaFromCompareEntry(e: CompareCartEntry): MediaItem {
 export function entriesToCompareMediaItems(
   entries: CompareCartEntry[],
   catalog: MediaItem[],
+  maxItems: number,
 ): MediaItem[] {
-  return entries.slice(0, COMPARE_MAX_ITEMS).map((e) => {
+  return clampEntries(entries, maxItems).map((e) => {
     const full = catalog.find((m) => m.id === e.id);
     return full ?? minimalMediaFromCompareEntry(e);
   });

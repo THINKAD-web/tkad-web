@@ -15,6 +15,7 @@ import {
   readSidebarCollapsed,
   writeSidebarCollapsed,
 } from "@/lib/navigation/nav-sidebar-prefs";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
 import {
   getCompareCartEntries,
   subscribeCompareCart,
@@ -95,11 +96,14 @@ export function ContextNavSidebar({ collapsed, hoverExpanded }: Props) {
   const [compareCount, setCompareCount] = useState(0);
   const [savedPlansCount, setSavedPlansCount] = useState<number | null>(null);
 
+  const { maxItems: compareMax } = useCartCompareMax();
+
   useEffect(() => {
-    const sync = () => setCompareCount(getCompareCartEntries().length);
+    const sync = () =>
+      setCompareCount(getCompareCartEntries(compareMax).length);
     sync();
     return subscribeCompareCart(sync);
-  }, []);
+  }, [compareMax]);
 
   useEffect(() => {
     fetch("/api/my/planner-plans", { cache: "no-store" })

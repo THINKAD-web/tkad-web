@@ -91,7 +91,9 @@ import {
   useMediaCatalogFilters,
 } from "@/lib/use-media-catalog-filters";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { useAppToast } from "@/lib/use-toast";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import { resolveMediaIdFromMapPinId } from "@/lib/media-detail-map-markers";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
@@ -148,6 +150,8 @@ export default function MediaBrowseClient({
   const locale = useLocale();
   const router = useRouter();
   const isKo = locale === "ko";
+  const toast = useAppToast();
+  const { maxItems: compareMax } = useCartCompareMax();
   const searchParams = useSearchParams();
   const qFromUrl = searchParams.get("q") ?? "";
   const catFromUrl = searchParams.get("cat") ?? "";
@@ -362,15 +366,15 @@ export default function MediaBrowseClient({
   );
 
   useEffect(() => {
-    setCompareEntries(getCompareCartEntries());
+    setCompareEntries(getCompareCartEntries(compareMax));
     return subscribeCompareCart(() => {
-      setCompareEntries(getCompareCartEntries());
+      setCompareEntries(getCompareCartEntries(compareMax));
     });
-  }, []);
+  }, [compareMax]);
 
   const compareItems = useMemo(
-    () => entriesToCompareMediaItems(compareEntries, effectiveCatalog),
-    [compareEntries, effectiveCatalog],
+    () => entriesToCompareMediaItems(compareEntries, effectiveCatalog, compareMax),
+    [compareEntries, effectiveCatalog, compareMax],
   );
 
   // localStorage에 browseMode 저장
@@ -737,27 +741,33 @@ export default function MediaBrowseClient({
   };
 
   const toggleCompare = useCallback((media: MediaItem) => {
-    const prev = getCompareCartEntries();
+    const prev = getCompareCartEntries(compareMax);
     const exists = prev.some((e) => e.id === media.id);
     if (exists) {
-      setCompareCartEntries(prev.filter((e) => e.id !== media.id));
+      setCompareCartEntries(prev.filter((e) => e.id !== media.id), compareMax);
       return;
     }
-    if (prev.length >= COMPARE_MAX_ITEMS) return;
-    setCompareCartEntries([
-      ...prev,
-      {
-        id: media.id,
-        name: media.name,
-        nameEn: media.nameEn || media.name,
-      },
-    ]);
-  }, []);
+    if (prev.length >= compareMax) {
+      toast.error(cartCompareLimitToastMessage(isKo));
+      return;
+    }
+    setCompareCartEntries(
+      [
+        ...prev,
+        {
+          id: media.id,
+          name: media.name,
+          nameEn: media.nameEn || media.name,
+        },
+      ],
+      compareMax,
+    );
+  }, [compareMax, isKo, toast]);
 
   const addManyToCompare = useCallback((items: MediaItem[]) => {
-    const next = [...getCompareCartEntries()];
+    const next = [...getCompareCartEntries(compareMax)];
     for (const m of items) {
-      if (next.length >= COMPARE_MAX_ITEMS) break;
+      if (next.length >= compareMax) break;
       if (!next.some((e) => e.id === m.id)) {
         next.push({
           id: m.id,
@@ -766,8 +776,8 @@ export default function MediaBrowseClient({
         });
       }
     }
-    setCompareCartEntries(next);
-  }, []);
+    setCompareCartEntries(next, compareMax);
+  }, [compareMax]);
 
   const isInCompare = (id: string) => compareEntries.some((e) => e.id === id);
 
@@ -1260,7 +1270,7 @@ export default function MediaBrowseClient({
                           {isKo ? "전체선택" : "Select page"}
                         </BtnBlock>
                         <BtnBlock
-                          onClick={() => setCompareCartEntries([])}
+                          onClick={() => setCompareCartEntries([], compareMax)}
                           disabled={compareItems.length === 0}
                           variant="secondary"
                           size="sm"
@@ -1480,7 +1490,7 @@ export default function MediaBrowseClient({
                               disabled={
                                 media.catalogSource === "network" ||
                                 (!isInCompare(media.id) &&
-                                  compareItems.length >= COMPARE_MAX_ITEMS)
+                                  compareItems.length >= compareMax)
                               }
                               aria-label={t("media.compareToggleAria")}
                               className="h-3.5 w-3.5 accent-cta sm:h-4 sm:w-4"
@@ -1545,7 +1555,7 @@ export default function MediaBrowseClient({
                                   disabled={
                                     media.catalogSource === "network" ||
                                     (!isInCompare(media.id) &&
-                                      compareItems.length >= COMPARE_MAX_ITEMS)
+                                      compareItems.length >= compareMax)
                                   }
                                   aria-label={t("media.compareToggleAria")}
                                   className="h-4 w-4 accent-cta"
@@ -1611,7 +1621,7 @@ export default function MediaBrowseClient({
       <CompareBar
         items={compareItems}
         locale={locale}
-        onClear={() => setCompareCartEntries([])}
+        onClear={() => setCompareCartEntries([], compareMax)}
       />
     </>
     </MobilePullToRefresh>

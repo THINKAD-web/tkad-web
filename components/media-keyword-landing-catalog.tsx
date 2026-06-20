@@ -10,6 +10,8 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import { cartCompareLimitToastMessage } from "@/lib/entitlements/limits";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { regionLabel } from "@/lib/media-keyword-landing";
 import { type MediaItem, typeLabels } from "@/lib/media-data";
@@ -46,37 +48,52 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
   const isKo = locale === "ko" || locale.startsWith("ko");
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
+  const { maxItems: compareMax } = useCartCompareMax();
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
   );
 
   useEffect(() => {
-    setCompareEntriesState(getCompareCartEntries());
+    setCompareEntriesState(getCompareCartEntries(compareMax));
     return subscribeCompareCart(() => {
-      setCompareEntriesState(getCompareCartEntries());
+      setCompareEntriesState(getCompareCartEntries(compareMax));
     });
-  }, []);
+  }, [compareMax]);
 
   const isInCompare = useCallback(
     (id: string) => compareEntries.some((e) => e.id === id),
     [compareEntries],
   );
 
-  const toggleCompare = useCallback((item: MediaItem) => {
-    const prev = getCompareCartEntries();
-    const exists = prev.some((e) => e.id === item.id);
-    const next = exists
-      ? prev.filter((e) => e.id !== item.id)
-      : [
+  const toggleCompare = useCallback(
+    (item: MediaItem) => {
+      const prev = getCompareCartEntries(compareMax);
+      const exists = prev.some((e) => e.id === item.id);
+      if (exists) {
+        setCompareCartEntries(
+          prev.filter((e) => e.id !== item.id),
+          compareMax,
+        );
+        return;
+      }
+      if (prev.length >= compareMax) {
+        toast.error(cartCompareLimitToastMessage(isKo));
+        return;
+      }
+      setCompareCartEntries(
+        [
           ...prev,
           {
             id: item.id,
             name: item.name,
             nameEn: item.nameEn || item.name,
           },
-        ];
-    setCompareCartEntries(next);
-  }, []);
+        ],
+        compareMax,
+      );
+    },
+    [compareMax, isKo, toast],
+  );
 
   const toggleCart = useCallback(
     (item: MediaItem) => {
@@ -105,8 +122,8 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
   );
 
   const compareItems = useMemo(
-    () => entriesToCompareMediaItems(compareEntries, items),
-    [compareEntries, items],
+    () => entriesToCompareMediaItems(compareEntries, items, compareMax),
+    [compareEntries, items, compareMax],
   );
 
   return (
@@ -151,7 +168,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
         variant="light"
         items={compareItems}
         locale={locale}
-        onClear={() => setCompareCartEntries([])}
+        onClear={() => setCompareCartEntries([], compareMax)}
       />
     </>
   );

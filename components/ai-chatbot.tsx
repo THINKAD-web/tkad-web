@@ -18,7 +18,8 @@ import { AiChatbotMessage } from "@/components/ai-chatbot-message";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import { cn } from "@/lib/utils";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
+import { useCartCompareMax } from "@/hooks/use-cart-compare-max";
+import { isCartCompareUnlimited } from "@/lib/entitlements/limits";
 import {
   getCompareCartEntries,
   setCompareCartEntries,
@@ -93,6 +94,7 @@ export default function AiChatbot({
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [compareEntries, setCompareEntries] = useState<CompareCartEntry[]>([]);
+  const { maxItems: compareMax } = useCartCompareMax();
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
   const lastReadCountRef = useRef(0);
@@ -105,8 +107,8 @@ export default function AiChatbot({
     !open && messages.length > lastReadCountRef.current;
 
   const refreshCompare = useCallback(() => {
-    setCompareEntries(getCompareCartEntries());
-  }, []);
+    setCompareEntries(getCompareCartEntries(compareMax));
+  }, [compareMax]);
 
   useEffect(() => {
     refreshCompare();
@@ -219,15 +221,19 @@ export default function AiChatbot({
   };
 
   const removeCompare = (id: string) => {
-    const next = getCompareCartEntries().filter((e) => e.id !== id);
-    setCompareCartEntries(next);
+    const next = getCompareCartEntries(compareMax).filter((e) => e.id !== id);
+    setCompareCartEntries(next, compareMax);
     setCompareEntries(next);
   };
 
   const clearCompare = () => {
-    setCompareCartEntries([]);
+    setCompareCartEntries([], compareMax);
     setCompareEntries([]);
   };
+
+  const compareCountMax = isCartCompareUnlimited(compareMax)
+    ? compareEntries.length
+    : compareMax;
 
   const tabs: { id: PanelTab; label: string }[] = [
     { id: "chat", label: t("tabChat") },
@@ -500,7 +506,7 @@ export default function AiChatbot({
                   <span className="ml-auto font-display text-[11px] font-bold tabular-nums dark:text-white text-gray-700">
                     {t("compareCount", {
                       count: compareEntries.length,
-                      max: COMPARE_MAX_ITEMS,
+                      max: compareCountMax,
                     })}
                   </span>
                 </div>
