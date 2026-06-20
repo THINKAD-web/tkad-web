@@ -26,7 +26,8 @@ export const FEATURE_MIN_LEVEL: Record<
   EntitlementAccessLevel
 > = {
   media_spec: "MEMBER",
-  planner_result: "MEMBER",
+  /** FREE — Step 1~6 입력만; Step 7 결과·시뮬은 PRO (pricing·UI 게이트와 동기) */
+  planner_result: "PRO",
   detail_data: "PRO",
   planner_pdf: "PRO",
   competitor: "PRO",

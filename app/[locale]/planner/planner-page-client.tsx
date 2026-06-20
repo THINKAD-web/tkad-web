@@ -95,6 +95,7 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -174,7 +175,11 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
   const landingAppearance = useTkadAppearance();
-  const { showTrialBanner, isPro, loading: proLoading } = useIsPro();
+  const { showTrialBanner } = useIsPro();
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+  } = useFeatureAccess("planner_result");
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -1586,14 +1591,14 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                {!proLoading ? (
-                  <div data-screenshot="planner-pro-blur">
-                    <PlannerProGate
-                      isPro={isPro}
-                      isKo={isKo}
-                      minHeightClass="min-h-[20rem]"
-                      className="space-y-4"
-                    >
+                <div data-screenshot="planner-pro-blur">
+                  <PlannerProGate
+                    isPro={plannerResultAllowed}
+                    loading={plannerResultLoading}
+                    isKo={isKo}
+                    minHeightClass="min-h-[20rem]"
+                    className="space-y-4"
+                  >
                       <PlannerProTeaserStats
                         isKo={isKo}
                         totalImpressions={metrics.estimatedTotalImpressions}
@@ -1621,7 +1626,6 @@ export default function PlannerPageClient({
                       />
                     </PlannerProGate>
                   </div>
-                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />

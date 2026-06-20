@@ -13,6 +13,8 @@ type Props = {
   /** When true, show content blurred behind overlay */
   gated?: boolean;
   className?: string;
+  /** 권한 API 로딩 중 — 거부 오버레이·블러 억제 */
+  loading?: boolean;
 };
 
 export function ReportAccessGate({
@@ -22,7 +24,20 @@ export function ReportAccessGate({
   children,
   gated = true,
   className = "",
+  loading = false,
 }: Props) {
+  if (loading) {
+    return (
+      <div
+        className={`relative ${className}`}
+        aria-busy="true"
+        aria-label={isKo ? "접근 권한 확인 중" : "Checking access"}
+      >
+        <div className="min-h-[12rem] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80" />
+      </div>
+    );
+  }
+
   if (access.allowed) {
     return <div className={className}>{children}</div>;
   }

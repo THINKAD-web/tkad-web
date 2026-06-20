@@ -1,8 +1,8 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 
 type Props = {
   isKo: boolean;
@@ -14,29 +14,31 @@ type Props = {
   }) => ReactNode;
 };
 
-/** PDF 다운로드 PRO 전용 — FREE는 /pricing 이동 */
+/** PDF 다운로드 PRO 전용 — entitlements `planner_pdf` 와 서버 게이트 동기 */
 export function PlannerPdfDownloadGate({
-  isKo,
+  isKo: _isKo,
   onAllowedDownload,
   children,
 }: Props) {
   const router = useRouter();
-  const { isPro, loading } = useIsPro();
+  const { allowed: pdfAllowed, loading: checking } =
+    useFeatureAccess("planner_pdf");
 
   const onDownloadClick = useCallback(() => {
-    if (isPro) {
+    if (checking) return;
+    if (pdfAllowed) {
       onAllowedDownload();
       return;
     }
     router.push("/pricing");
-  }, [isPro, onAllowedDownload, router]);
+  }, [checking, pdfAllowed, onAllowedDownload, router]);
 
   return (
     <>
       {children({
         onDownloadClick,
-        pdfAllowed: isPro,
-        checking: loading,
+        pdfAllowed: checking ? false : pdfAllowed,
+        checking,
       })}
     </>
   );
