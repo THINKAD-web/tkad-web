@@ -122,8 +122,6 @@
 :root {
   /* BrutalNav: mobile h-14 (components/brutalist/nav.tsx) */
   --nav-height: 3.5rem;
-  /* PublicNavAside — lg+ 고정 사이드바 (components/public-chrome/public-nav-aside.tsx) */
-  --tkad-nav-sidebar-width: 13.75rem;
   --radius: 0.5rem;
   --hermes: #ff6200;
   --hermes-muted: color-mix(in srgb, var(--hermes) 55%, white);
@@ -1052,8 +1050,7 @@ html.dark .tkad-home-hero-neo,
 }
 
 /* 라이트 테마 — 카테고리 BETA (헤더 드롭다운·모바일·데스크톱 사이드바) */
-html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge,
-html:not(.dark) .tkad-public-nav-aside .category-hero-beta-badge {
+html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge {
   color: rgb(46 16 101) !important;
   -webkit-text-fill-color: currentColor !important;
   background-color: rgb(196 181 253) !important;
@@ -2796,17 +2793,6 @@ html:not(.dark) .group:hover .tkad-catalog-card-shell {
     0 32px 72px rgba(0, 0, 0, 0.65),
     0 0 0 1px rgba(255, 98, 0, 0.35),
     0 0 60px rgba(255, 98, 0, 0.22);
-}
-
-/* 공개 사이드바 — 헤더와 동일 토큰·다크 글래스 */
-.dark .tkad-public-nav-aside {
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  color: rgb(248 250 252 / 0.96) !important;
-}
-
-html:not(.dark) .tkad-public-nav-aside {
-  color: var(--foreground);
 }
 
 /* 공개 헤더 — 글래스/블러는 다크만 (라이트에선 본문이 비쳐 메뉴 글자가 뭉개짐) */
