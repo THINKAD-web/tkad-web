@@ -217,8 +217,8 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
           },
           {
             id: "contact",
-            labelKo: "무료 견적",
-            labelEn: "Free quote",
+            labelKo: "문의하기",
+            labelEn: "Contact us",
             href: "/contact",
             icon: FileText,
           },
