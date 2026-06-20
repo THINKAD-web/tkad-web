@@ -4,3 +4,4 @@ export * from "@/lib/entitlements/features";
 export * from "@/lib/entitlements/gate-ui";
 export * from "@/lib/entitlements/pricing";
 export * from "@/lib/entitlements/matrix";
+export * from "@/lib/entitlements/gate-messages";

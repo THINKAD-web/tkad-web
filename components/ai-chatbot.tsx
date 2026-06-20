@@ -16,7 +16,9 @@ import {
 import { BtnBlock } from "@/components/brutalist";
 import { AiChatbotMessage } from "@/components/ai-chatbot-message";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
-import { cn } from "@/lib/utils";
+import { Link } from "@/i18n/navigation";
+import { buildAiLimitMessage } from "@/lib/entitlements/gate-messages";
+import { TierGateInlineNotice } from "@/components/entitlements/tier-gate-panel";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import {
@@ -424,36 +426,31 @@ export default function AiChatbot({
                       🔧 {locale === "en" ? "The chatbot is under maintenance." : "챗봇이 현재 점검 중입니다."}
                     </p>
                   ) : null}
-                  {rateLimit ? (
-                    <div className="mb-2 rounded-[14px] border border-violet-400/40 bg-violet-500/10 px-3 py-2.5">
-                      <p className="text-xs font-medium dark:text-white text-gray-800">
-                        {rateLimit.message}
-                      </p>
-                      {rateLimit.reason === "guest_limit" ? (
-                        <a
-                          href={`/${locale === "en" ? "en" : "ko"}/login`}
-                          className="mt-2 inline-flex rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white"
-                        >
-                          {locale === "en" ? "Sign in" : "로그인하기"}
-                        </a>
-                      ) : rateLimit.reason === "user_limit" ? (
-                        <div className="mt-2 flex flex-wrap gap-2">
-                          <a
-                            href={`/${locale === "en" ? "en" : "ko"}/contact`}
+                  {rateLimit ? (() => {
+                    const isKo = locale !== "en";
+                    const limitMsg = buildAiLimitMessage(rateLimit.reason, isKo);
+                    return (
+                      <div className="mb-2 space-y-2">
+                        <TierGateInlineNotice message={limitMsg} />
+                        <div className="flex flex-wrap gap-2">
+                          <Link
+                            href={limitMsg.primaryCta.href}
                             className="inline-flex rounded-lg bg-violet-600 px-3 py-1.5 text-xs font-bold text-white"
                           >
-                            {locale === "en" ? "Talk to an expert →" : "전문가 상담 받기 →"}
-                          </a>
-                          <a
-                            href={`/${locale === "en" ? "en" : "ko"}/pricing`}
-                            className="inline-flex rounded-lg border border-violet-400/50 px-3 py-1.5 text-xs font-bold text-violet-700 dark:text-violet-200"
-                          >
-                            PRO
-                          </a>
+                            {limitMsg.primaryCta.label}
+                          </Link>
+                          {limitMsg.secondaryCta ? (
+                            <Link
+                              href={limitMsg.secondaryCta.href}
+                              className="inline-flex rounded-lg border border-violet-400/50 px-3 py-1.5 text-xs font-bold text-violet-700 dark:text-violet-200"
+                            >
+                              {limitMsg.secondaryCta.label}
+                            </Link>
+                          ) : null}
                         </div>
-                      ) : null}
-                    </div>
-                  ) : null}
+                      </div>
+                    );
+                  })() : null}
                   {remaining != null && remaining >= 0 && !rateLimit ? (
                     <p className="mb-1 text-right text-[11px] text-gray-400 dark:text-white/40">
                       {locale === "en" ? `AI uses left today: ${remaining}` : `오늘 남은 AI 이용: ${remaining}회`}

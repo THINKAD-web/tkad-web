@@ -38,7 +38,7 @@ import { PlannerProGate } from "@/components/planner/planner-neon-ui";
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { allowed: comparePro, loading: compareProLoading } =
+  const { allowed: comparePro, loading: compareProLoading, access: compareAccess } =
     useFeatureAccess("detail_data");
   const tMedia = useTranslations("media");
   const t = useTranslations();
@@ -260,6 +260,8 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
                 isPro={comparePro}
                 loading={compareProLoading}
                 isKo={isKo}
+                access={compareAccess}
+                feature="detail_data"
                 minHeightClass="min-h-[20rem]"
                 className="space-y-6"
               >

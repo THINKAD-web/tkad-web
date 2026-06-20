@@ -3,6 +3,9 @@
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import type { AccessCheckResult, ReportFeature } from "@/lib/report-access-shared";
+import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
+import { TierGateOverlay } from "@/components/entitlements/tier-gate-panel";
 import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
 
@@ -109,6 +112,8 @@ export function PlannerProGate({
   className,
   minHeightClass = "min-h-[12rem]",
   loading = false,
+  access,
+  feature = "planner_result",
 }: {
   isPro: boolean;
   isKo: boolean;
@@ -117,6 +122,9 @@ export function PlannerProGate({
   minHeightClass?: string;
   /** PRO 판정 로딩 중 — 블러·CTA 없이 중립 스켈레톤 */
   loading?: boolean;
+  /** entitlements access — 맥락 안내용 (useFeatureAccess.access) */
+  access?: AccessCheckResult;
+  feature?: ReportFeature;
 }) {
   if (loading) {
     return (
@@ -130,44 +138,31 @@ export function PlannerProGate({
     );
   }
 
+  if (isPro) {
+    return (
+      <div className={cn("relative", minHeightClass, className)}>{children}</div>
+    );
+  }
+
+  const gateAccess: AccessCheckResult =
+    access ??
+    ({
+      allowed: false,
+      level: "MEMBER",
+      reason: "upgrade",
+    } satisfies AccessCheckResult);
+
+  const message = buildFeatureGateMessage({ feature, access: gateAccess, isKo });
+
   return (
-    <div className={cn("relative", minHeightClass, className)}>
-      <div
-        className={cn(
-          !isPro && "pointer-events-none select-none blur-md opacity-70",
-        )}
-      >
-        {children}
-      </div>
-      {!isPro ? (
-        <div
-          className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-white/75 p-4 backdrop-blur-sm dark:bg-black/70"
-          aria-hidden={false}
-        >
-          <div className="max-w-sm rounded-2xl border border-gray-200 bg-white px-6 py-5 text-center shadow-lg dark:border-white/10 dark:bg-gray-950/95">
-            <p className="mb-1 text-lg font-bold text-gray-900 dark:text-white">
-              {isKo
-                ? "🔒 결과를 확인하려면 PRO가 필요해요"
-                : "🔒 PRO required to view results"}
-            </p>
-            <p className="mb-1 text-center text-sm text-gray-600 dark:text-white/70">
-              {isKo
-                ? "노출 예측·시뮬레이션·PDF 보고서 포함"
-                : "Includes exposure forecast, simulation & PDF report"}
-            </p>
-            <p className="mb-4 text-xs text-gray-500 dark:text-white/50">
-              {plannerProGateTrialHint(isKo)}
-            </p>
-            <Link
-              href="/pricing"
-              className="tkad-neon-cta inline-flex rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 py-2.5 text-sm font-medium text-white"
-            >
-              {isKo ? "PRO 무료 체험 시작 →" : "Start PRO free trial →"}
-            </Link>
-          </div>
-        </div>
-      ) : null}
-    </div>
+    <TierGateOverlay
+      message={message}
+      className={className}
+      minHeightClass={minHeightClass}
+      blurContent
+    >
+      {children}
+    </TierGateOverlay>
   );
 }
 

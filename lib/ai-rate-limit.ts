@@ -6,6 +6,7 @@ import {
   AI_DAILY_LIMITS,
   AI_HOURLY_ABUSE_LIMIT,
 } from "@/lib/entitlements/constants";
+import { aiRateMessage as aiRateMessageFromEntitlements } from "@/lib/entitlements/gate-messages";
 
 /** 일일 AI 사용 한도 */
 const DAILY = AI_DAILY_LIMITS;
@@ -161,17 +162,5 @@ export async function enforceAiRateLimit(
 }
 
 export function aiRateMessage(reason: AiRateReason | undefined, isKo: boolean): string {
-  if (reason === "guest_limit") {
-    return isKo
-      ? "오늘 무료 AI 이용을 모두 사용했어요. 로그인하면 매일 5회까지 이용 가능합니다."
-      : "You've used today's free AI quota. Sign in for up to 5 uses per day.";
-  }
-  if (reason === "user_limit") {
-    return isKo
-      ? "오늘 AI 분석을 모두 사용했어요. 더 많은 분석이 필요하면 전문가 상담을 받아보세요."
-      : "You've used today's AI quota. Need more? Talk to our experts.";
-  }
-  return isKo
-    ? "잠시 후 다시 시도해주세요."
-    : "Please try again in a moment.";
+  return aiRateMessageFromEntitlements(reason, isKo);
 }
