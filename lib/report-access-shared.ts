@@ -1,15 +1,8 @@
 import type { ReportAccessLevel } from "@prisma/client";
+import type { ReportFeature } from "@/lib/entitlements/features";
 
-export type ReportFeature =
-  | "planner_pdf"
-  | "detail_data"
-  | "competitor"
-  | "api"
-  | "planner_result"
-  | "media_spec"
-  | "simulation_full"
-  | "whitelabel"
-  | "market_dashboard";
+export type { ReportFeature } from "@/lib/entitlements/features";
+export { rankLevel } from "@/lib/entitlements/features";
 
 export type AccessCheckResult = {
   allowed: boolean;
@@ -17,17 +10,6 @@ export type AccessCheckResult = {
   reason?: "login" | "upgrade" | "enterprise" | "trial_expired";
   trialDaysLeft?: number;
 };
-
-const LEVEL_RANK: Record<ReportAccessLevel, number> = {
-  FREE: 0,
-  MEMBER: 1,
-  PRO: 2,
-  ENTERPRISE: 3,
-};
-
-export function rankLevel(level: ReportAccessLevel): number {
-  return LEVEL_RANK[level];
-}
 
 export function featureLabel(feature: ReportFeature, isKo: boolean): string {
   const labels: Record<ReportFeature, { ko: string; en: string }> = {

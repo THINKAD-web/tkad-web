@@ -1,5 +1,10 @@
-/** 내 플랜·추천 카트 — 매체 비교함(`COMPARE_MAX_ITEMS`)과 동일하게 실질 무제한 */
-const PLAN_CART_UNLIMITED = Number.MAX_SAFE_INTEGER;
+import {
+  PLAN_CART_UNLIMITED,
+} from "@/lib/entitlements/constants";
+
+export {
+  PLAN_CART_UNLIMITED,
+} from "@/lib/entitlements/constants";
 
 export const PLAN_CART_MAX_ITEMS_FREE = PLAN_CART_UNLIMITED;
 export const PLAN_CART_MAX_ITEMS_PRO = PLAN_CART_UNLIMITED;
