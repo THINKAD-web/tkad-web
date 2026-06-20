@@ -2,3 +2,5 @@
 export * from "@/lib/entitlements/constants";
 export * from "@/lib/entitlements/features";
 export * from "@/lib/entitlements/gate-ui";
+export * from "@/lib/entitlements/pricing";
+export * from "@/lib/entitlements/gate-ui";

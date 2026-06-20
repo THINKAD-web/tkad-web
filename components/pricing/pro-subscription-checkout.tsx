@@ -9,7 +9,6 @@ import {
   getTossClientKey,
   isTossPaymentsConfigured,
 } from "@/lib/toss-payments-client";
-import { PRO_MONTHLY_KRW } from "@/lib/report-pricing-constants";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 type Props = {
@@ -26,6 +25,7 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
   const [paying, setPaying] = useState(false);
   const [confirming, setConfirming] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
+  const [chargeAmount, setChargeAmount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const clientKey = getTossClientKey();
@@ -49,11 +49,12 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
         }
         if (cancelled) return;
         setOrderId(data.data.orderId);
+        setChargeAmount(data.data.amount);
 
         const widget = await loadPaymentWidget(clientKey!, ANONYMOUS);
         if (cancelled) return;
         await widget.renderPaymentMethods("#pro-payment-method", {
-          value: PRO_MONTHLY_KRW,
+          value: data.data.amount,
         });
         await widget.renderAgreement("#pro-agreement");
         widgetRef.current = widget;
@@ -128,7 +129,7 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
       {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
       <button
         type="button"
-        disabled={!ready || paying || !orderId}
+        disabled={!ready || paying || !orderId || chargeAmount == null}
         onClick={async () => {
           if (!widgetRef.current || !orderId) return;
           setPaying(true);

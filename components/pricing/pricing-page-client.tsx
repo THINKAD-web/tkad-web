@@ -2,8 +2,9 @@
 
 import { Link } from "@/i18n/navigation";
 import { Check, Sparkles } from "lucide-react";
-import { PRO_MONTHLY_KRW, PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
+import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
 import { ProUpgradePanel } from "@/components/pricing/pro-upgrade-panel";
+import { ProMonthlyPriceDisplay } from "@/components/pricing/pro-monthly-price";
 import { useIsPro } from "@/hooks/use-is-pro";
 
 type Props = {
@@ -23,8 +24,6 @@ const planCtaPrimaryClass =
 
 const PLANS = {
   free: {
-    priceKo: "무료",
-    priceEn: "Free",
     featuresKo: [
       "매체 목록·기본 스펙 조회",
       "플래너 Step 1~2 (조건 입력)",
@@ -37,8 +36,6 @@ const PLANS = {
     ],
   },
   pro: {
-    priceKo: `월 ₩${PRO_MONTHLY_KRW.toLocaleString()}`,
-    priceEn: `₩${PRO_MONTHLY_KRW.toLocaleString()}/mo`,
     featuresKo: [
       "플래너 PDF 보고서 무제한",
       "상세 유동인구·경쟁 매체 비교",
@@ -53,8 +50,6 @@ const PLANS = {
     ],
   },
   enterprise: {
-    priceKo: "문의",
-    priceEn: "Contact us",
     featuresKo: ["API 접근", "화이트라벨 보고서", "전담 담당자", "맞춤 데이터 리포트"],
     featuresEn: ["API access", "White-label reports", "Dedicated manager", "Custom data reports"],
   },
@@ -93,9 +88,19 @@ export function PricingPageClient({
               <h2 className="text-xl font-black uppercase dark:text-white text-gray-900">
                 {key === "free" ? "FREE" : key === "pro" ? "PRO" : "ENTERPRISE"}
               </h2>
-              <p className="mt-2 text-2xl font-black text-cyan-700 dark:text-cyan-200">
-                {isKo ? plan.priceKo : plan.priceEn}
-              </p>
+              {key === "pro" ? (
+                <div className="mt-2">
+                  <ProMonthlyPriceDisplay isKo={isKo} />
+                </div>
+              ) : key === "free" ? (
+                <p className="mt-2 text-2xl font-black text-cyan-700 dark:text-cyan-200">
+                  {isKo ? "무료" : "Free"}
+                </p>
+              ) : (
+                <p className="mt-2 text-2xl font-black text-cyan-700 dark:text-cyan-200">
+                  {isKo ? "문의" : "Contact us"}
+                </p>
+              )}
               {key === "pro" && showTrial && !isPro ? (
                 <p className="mt-2 text-xs font-semibold text-pink-700 dark:text-pink-200">
                   {isKo
