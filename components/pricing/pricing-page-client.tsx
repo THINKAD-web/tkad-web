@@ -1,8 +1,10 @@
 "use client";
 
+import { useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { Check, Sparkles } from "lucide-react";
 import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
+import { getPricingGuestFootnote, getPricingPlans } from "@/lib/entitlements/pricing-plans";
 import { ProUpgradePanel } from "@/components/pricing/pro-upgrade-panel";
 import { ProMonthlyPriceDisplay } from "@/components/pricing/pro-monthly-price";
 import { useIsPro } from "@/hooks/use-is-pro";
@@ -22,39 +24,6 @@ const planOutlineBtnClass =
 const planCtaPrimaryClass =
   "tkad-neon-cta-clean mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-black text-white";
 
-const PLANS = {
-  free: {
-    featuresKo: [
-      "매체 목록·기본 스펙 조회",
-      "플래너 Step 1~2 (조건 입력)",
-      "비교·찜하기 (로그인)",
-    ],
-    featuresEn: [
-      "Media list & basic specs",
-      "Planner steps 1–2 (inputs)",
-      "Compare & favorites (signed in)",
-    ],
-  },
-  pro: {
-    featuresKo: [
-      "플래너 PDF 보고서 무제한",
-      "상세 유동인구·경쟁 매체 비교",
-      "OTS·Reach·빈도 시뮬레이션 전체",
-      "캠페인 제안서 자동 생성",
-    ],
-    featuresEn: [
-      "Unlimited planner PDF reports",
-      "Detailed footfall & competitor data",
-      "Full OTS·Reach·frequency simulation",
-      "Auto-generated campaign proposals",
-    ],
-  },
-  enterprise: {
-    featuresKo: ["API 접근", "화이트라벨 보고서", "전담 담당자", "맞춤 데이터 리포트"],
-    featuresEn: ["API access", "White-label reports", "Dedicated manager", "Custom data reports"],
-  },
-};
-
 function scrollToProUpgrade() {
   document.getElementById("pro-upgrade")?.scrollIntoView({ behavior: "smooth", block: "start" });
 }
@@ -67,12 +36,14 @@ export function PricingPageClient({
   showTrial,
 }: Props) {
   const { isPro, refresh, loading: planLoading } = useIsPro();
+  const plans = useMemo(() => getPricingPlans(isKo), [isKo]);
+  const guestFootnote = useMemo(() => getPricingGuestFootnote(isKo), [isKo]);
 
   return (
     <div className="space-y-8">
       <div className="grid gap-6 lg:grid-cols-3">
-        {(["free", "pro", "enterprise"] as const).map((key) => {
-          const plan = PLANS[key];
+        {plans.map((plan) => {
+          const key = plan.id;
           const highlighted = key === "pro";
           return (
             <article
@@ -114,10 +85,23 @@ export function PricingPageClient({
                 </p>
               ) : null}
               <ul className="mt-6 space-y-2">
-                {(isKo ? plan.featuresKo : plan.featuresEn).map((f) => (
-                  <li key={f} className="flex gap-2 text-sm dark:text-white text-gray-800">
-                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-300" aria-hidden />
-                    {f}
+                {plan.features.map((f) => (
+                  <li
+                    key={f.id}
+                    className="flex gap-2 text-sm dark:text-white text-gray-800"
+                  >
+                    <Check
+                      className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-300"
+                      aria-hidden
+                    />
+                    <span className="min-w-0 flex-1">
+                      {f.text}
+                      {f.comingSoon ? (
+                        <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                          {isKo ? "준비 중" : "Coming soon"}
+                        </span>
+                      ) : null}
+                    </span>
                   </li>
                 ))}
               </ul>
@@ -158,6 +142,10 @@ export function PricingPageClient({
           );
         })}
       </div>
+
+      <p className="text-center text-xs leading-relaxed text-gray-500 dark:text-white/50">
+        {guestFootnote}
+      </p>
 
       <ProUpgradePanel
         isKo={isKo}

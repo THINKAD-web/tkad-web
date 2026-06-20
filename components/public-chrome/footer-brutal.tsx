@@ -5,6 +5,7 @@
  */
 
 import { useMemo, useState } from "react";
+import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
@@ -62,6 +63,7 @@ const iconLinkClass =
 export function FooterBrutal() {
   const t = useTranslations();
   const locale = useLocale();
+  const pathname = usePathname();
   const isMdUp = useMediaMinWidth(768);
   const [sitemapOpen, setSitemapOpen] = useState(false);
   const year = new Date().getFullYear();
@@ -90,12 +92,19 @@ export function FooterBrutal() {
     });
   }, [locale, navGroups, t]);
 
-  const coreLinks = [
-    { href: "/about", label: t("footer.coreAbout") },
-    { href: "/points", label: t("footer.corePointsShop") },
-    { href: "/register/media", label: t("footer.mediaPartnerRegister") },
-    { href: "/developers", label: t("footer.coreDeveloperApi") },
-  ] as const;
+  const onPricingPage = pathname.includes("/pricing");
+  const pricingCtaHref = onPricingPage ? "/pricing#pro-upgrade" : "/pricing";
+
+  const coreLinks = useMemo(
+    () => [
+      { href: "/about", label: t("footer.coreAbout") },
+      { href: "/points", label: t("footer.corePointsShop") },
+      { href: pricingCtaHref, label: t("footer.corePricingCta") },
+      { href: "/register/media", label: t("footer.mediaPartnerRegister") },
+      { href: "/developers", label: t("footer.coreDeveloperApi") },
+    ],
+    [pricingCtaHref, t],
+  );
 
   const legalLinks = [
     { href: "/privacy", label: t("footer.privacy") },

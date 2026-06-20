@@ -1,19 +1,20 @@
 import {
+  PLAN_CART_MAX_ITEMS_FREE,
+  PLAN_CART_MAX_ITEMS_PRO,
   PLAN_CART_UNLIMITED,
 } from "@/lib/entitlements/constants";
 
 export {
+  PLAN_CART_MAX_ITEMS_FREE,
+  PLAN_CART_MAX_ITEMS_PRO,
   PLAN_CART_UNLIMITED,
 } from "@/lib/entitlements/constants";
 
-export const PLAN_CART_MAX_ITEMS_FREE = PLAN_CART_UNLIMITED;
-export const PLAN_CART_MAX_ITEMS_PRO = PLAN_CART_UNLIMITED;
-
 /** @deprecated FREE 한도 — 서버·레거시 호환용 */
-export const PLAN_CART_MAX_ITEMS = PLAN_CART_UNLIMITED;
+export const PLAN_CART_MAX_ITEMS = PLAN_CART_MAX_ITEMS_FREE;
 
-export function planCartMaxItems(_isPro?: boolean): number {
-  return PLAN_CART_UNLIMITED;
+export function planCartMaxItems(isPro?: boolean): number {
+  return isPro ? PLAN_CART_MAX_ITEMS_PRO : PLAN_CART_MAX_ITEMS_FREE;
 }
 
 /** UI: 무제한이면 `12개`, 한도 있으면 `12/30` */
