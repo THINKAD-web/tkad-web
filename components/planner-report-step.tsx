@@ -34,7 +34,7 @@ import {
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type {
@@ -214,9 +214,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
-  const { isPro, loading: proLoading } = useIsPro();
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+  } = useFeatureAccess("planner_result");
   const previewUnlocked = props.unlockReportPreview === true;
-  const showProPreview = previewUnlocked || isPro;
+  const showProPreview = previewUnlocked || plannerResultAllowed;
   const derived = usePlannerReportDerived(props);
 
   const [error, setError] = useState<string | null>(null);
@@ -402,9 +405,13 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       />
 
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
-      {!proLoading ? (
-        <section className="space-y-3" data-screenshot="planner-pro-blur">
-          <PlannerProGate isPro={showProPreview} isKo={props.isKo} minHeightClass="min-h-[24rem]">
+      <section className="space-y-3" data-screenshot="planner-pro-blur">
+        <PlannerProGate
+          isPro={showProPreview}
+          loading={plannerResultLoading && !previewUnlocked}
+          isKo={props.isKo}
+          minHeightClass="min-h-[24rem]"
+        >
             <div className="space-y-6">
               {props.metrics && !previewUnlocked ? (
                 <PlannerProTeaserStats
@@ -577,7 +584,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             </div>
           </PlannerProGate>
         </section>
-      ) : null}
     </div>
   );
 }
@@ -587,7 +593,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
-  const { loading: proLoading } = useIsPro();
+  const { allowed: pdfAllowed, loading: pdfAccessLoading } =
+    useFeatureAccess("planner_pdf");
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
@@ -641,7 +648,16 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     [downloading, props, derived, snapshotAt, t, tCommon, toast],
   );
 
-  if (proLoading) return null;
+  if (pdfAccessLoading) {
+    return (
+      <div
+        className="min-h-[8rem] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80"
+        aria-busy="true"
+      />
+    );
+  }
+
+  if (!pdfAllowed && !props.unlockReportPreview) return null;
 
   return (
     <PlannerNeonCard>

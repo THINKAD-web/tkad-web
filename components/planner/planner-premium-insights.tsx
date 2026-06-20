@@ -8,9 +8,15 @@ type Props = {
   insights: PlannerPremiumInsights;
   isKo: boolean;
   access: AccessCheckResult;
+  loading?: boolean;
 };
 
-export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
+export function PlannerPremiumInsightsPanel({
+  insights,
+  isKo,
+  access,
+  loading = false,
+}: Props) {
   const content = (
     <div className="space-y-8 border-2 border-border bg-card p-5 sm:p-6">
       <div>
@@ -109,7 +115,12 @@ export function PlannerPremiumInsightsPanel({ insights, isKo, access }: Props) {
   );
 
   return (
-    <ReportAccessGate access={access} feature="simulation_full" isKo={isKo}>
+    <ReportAccessGate
+      access={access}
+      feature="simulation_full"
+      isKo={isKo}
+      loading={loading}
+    >
       {content}
     </ReportAccessGate>
   );

@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 import { Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
 
 /** 플래너 네온 UI 공통 클래스 */
@@ -107,13 +108,28 @@ export function PlannerProGate({
   children,
   className,
   minHeightClass = "min-h-[12rem]",
+  loading = false,
 }: {
   isPro: boolean;
   isKo: boolean;
   children: ReactNode;
   className?: string;
   minHeightClass?: string;
+  /** PRO 판정 로딩 중 — 블러·CTA 없이 중립 스켈레톤 */
+  loading?: boolean;
 }) {
+  if (loading) {
+    return (
+      <div
+        className={cn("relative", minHeightClass, className)}
+        aria-busy="true"
+        aria-label={isKo ? "접근 권한 확인 중" : "Checking access"}
+      >
+        <div className="h-full min-h-[inherit] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80" />
+      </div>
+    );
+  }
+
   return (
     <div className={cn("relative", minHeightClass, className)}>
       <div
@@ -140,7 +156,7 @@ export function PlannerProGate({
                 : "Includes exposure forecast, simulation & PDF report"}
             </p>
             <p className="mb-4 text-xs text-gray-500 dark:text-white/50">
-              {isKo ? "지금 가입하면 14일 무료" : "14-day free trial on signup"}
+              {plannerProGateTrialHint(isKo)}
             </p>
             <Link
               href="/pricing"
@@ -166,9 +182,7 @@ export function PlannerTrialBanner({ isKo }: { isKo: boolean }) {
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <p className="text-sm font-medium dark:text-white/90 text-gray-800">
-          {isKo
-            ? "✨ 지금 가입하면 상세 효과 시뮬레이션 14일 무료"
-            : "✨ Sign up for 14 days of detailed effect simulation free"}
+          {plannerTrialBannerText(isKo)}
         </p>
         <Link href="/pricing" className={cn(plannerNeon.ctaSm, "shrink-0")}>
           {isKo ? "무료 체험 시작하기 →" : "Start free trial →"}

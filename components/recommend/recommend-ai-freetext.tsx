@@ -170,8 +170,18 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
     onConfirm(input);
   }, [draft, isKo, onConfirm]);
 
+  // ── PRO 판정 로딩: 업그레이드 CTA 플래시 방지 ──
+  if (proLoading) {
+    return (
+      <div
+        className="min-h-[10rem] animate-pulse rounded-2xl border border-gray-100 bg-gray-100/80 dark:border-white/8 dark:bg-white/5"
+        aria-busy="true"
+      />
+    );
+  }
+
   // ── 비PRO: 업그레이드 CTA ──
-  if (!proLoading && !isPro) {
+  if (!isPro) {
     return (
       <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-6 text-center dark:border-violet-500/30 dark:bg-violet-500/10">
         <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/15">
