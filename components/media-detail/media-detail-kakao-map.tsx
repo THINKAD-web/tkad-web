@@ -2,6 +2,7 @@
 
 import dynamic from "next/dynamic";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
+import type { MapViewCommand } from "@/components/media-map/kakao-map-view";
 
 const KakaoMapView = dynamic(
   () => import("@/components/media-map/kakao-map-view"),
@@ -23,6 +24,8 @@ type Props = {
   fitMarkersBounds?: boolean;
   /** 선택 시 클로즈업 줌 (카카오 레벨, 작을수록 확대) */
   zoomOnSelect?: number;
+  /** 단일 명령형 뷰 채널 (넘기면 레거시 fit/panTo effect 비활성) */
+  command?: MapViewCommand;
 };
 
 /** 매체 상세 — 단일/소수 핀 카카오 지도 (Leaflet 대신) */
@@ -38,6 +41,7 @@ export function MediaDetailKakaoMap({
   disableCluster = false,
   fitMarkersBounds = false,
   zoomOnSelect,
+  command,
 }: Props) {
   return (
     <KakaoMapView
@@ -52,6 +56,7 @@ export function MediaDetailKakaoMap({
       disableCluster={disableCluster}
       fitMarkersBounds={fitMarkersBounds}
       zoomOnSelect={zoomOnSelect}
+      command={command}
       monochromeTiles
     />
   );

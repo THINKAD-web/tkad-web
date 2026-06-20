@@ -28,6 +28,18 @@ export type MapBounds = {
   neLng: number;
 };
 
+/**
+ * 단일 명령형 뷰 채널 — "지도에 무엇을 시킬지"를 한 곳(부모)에서 nonce 로 보낸다.
+ * 여러 effect 가 prop 토글로 경쟁하던 구조를 대체. `command` 를 넘기는 소비자는
+ * 레거시 뷰 effect(fitMarkersBounds/selectedId panTo)가 자동 비활성화된다.
+ * - fitMarkers(auto): 사용자가 한 번이라도 지도를 조작하면(userViewportAdjustedRef) 무시.
+ * - focusMarker: 명시적 사용자 의도 → 실행(programmatic) 후 사용자 조정 상태로 표시.
+ */
+export type MapViewCommand =
+  | { type: "fitMarkers"; auto?: boolean; nonce: number }
+  | { type: "focusMarker"; lat: number; lng: number; level: number; nonce: number }
+  | null;
+
 type Props = {
   markers: MapMarker[];
   selectedId: string | null;
@@ -59,6 +71,8 @@ type Props = {
   panOnSelect?: boolean;
   /** 선택 시 panTo + 줌 레벨 적용 (카카오: 숫자가 작을수록 확대). 매체 상세 등 클로즈업용 */
   zoomOnSelect?: number;
+  /** 단일 명령형 뷰 채널. 넘기면 레거시 뷰 effect(fitMarkersBounds/selectedId panTo) 비활성. */
+  command?: MapViewCommand;
 };
 
 declare global {
@@ -506,15 +520,15 @@ function ensureAtLeastOneMarkerVisible(
     return;
   }
 
-  const getBounds = map.getBounds;
-  if (!getBounds) {
+  if (typeof map.getBounds !== "function") {
     relayout();
     return;
   }
 
   let bounds: { contain?: (p: unknown) => boolean };
   try {
-    bounds = getBounds();
+    // 반드시 map 에 바인딩해 호출 — 메서드를 떼어내 호출하면 Kakao 내부 this 손실로 throw.
+    bounds = map.getBounds();
   } catch {
     relayout();
     return;
@@ -681,7 +695,10 @@ export default function KakaoMapView({
   fitMarkersBounds = false,
   panOnSelect = true,
   zoomOnSelect,
+  command,
 }: Props) {
+  /** 명령 채널 사용 여부(레거시 뷰 effect 비활성 판단) */
+  const usesCommandChannel = command !== undefined;
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<unknown>(null);
   const markerObjsRef = useRef<Map<string, unknown>>(new Map());
@@ -1239,6 +1256,7 @@ export default function KakaoMapView({
   // 네트워크 다지점 — 모든 마커가 한 화면에 들어오도록 bounds 맞춤.
   // (단일/소수 1개면 center+zoom 그대로 — 단일 매체 회귀 없음)
   useEffect(() => {
+    if (usesCommandChannel) return; // 명령 채널 사용 시 비활성 (executor 가 담당)
     if (!mapReady || !fitMarkersBounds) return;
     const valid = markers.filter(
       (m) =>
@@ -1260,11 +1278,12 @@ export default function KakaoMapView({
     } catch {
       /* ignore */
     }
-  }, [mapReady, fitMarkersBounds, markers]);
+  }, [mapReady, fitMarkersBounds, markers, usesCommandChannel]);
 
   // #MAP-1: 미니 팝업(CustomOverlay) 비활성화. 마커 선택 시 panTo만 수행.
   // 상세는 사이드 카드(media-map-page-client.tsx) 또는 onMarkerDetail 라우팅으로 노출.
   useEffect(() => {
+    if (usesCommandChannel) return; // 명령 채널 사용 시 뷰 이동은 executor 가 전담
     if (!mapReady) return;
     const map = mapRef.current as unknown;
     if (!map) return;
@@ -1301,7 +1320,55 @@ export default function KakaoMapView({
     } catch (e) {
       console.error("[KakaoMapView] panTo failed", e);
     }
-  }, [selectedId, mapReady, panOnSelect, zoomOnSelect]);
+  }, [selectedId, mapReady, panOnSelect, zoomOnSelect, usesCommandChannel]);
+
+  // ── 단일 명령형 뷰 채널 executor ──
+  // 모든 뷰 이동(fit/focus)을 한 곳에서 실행. fitMarkers(auto) 는 사용자가 지도를 직접
+  // 조작한 뒤엔(userViewportAdjustedRef) 무시. focusMarker 는 명시적 사용자 의도로 실행하고
+  // 이후 사용자 조정 상태로 표시 → effect 경쟁/리셋 구조 제거. main 의 제스처 신호 재사용.
+  useEffect(() => {
+    if (!usesCommandChannel || !command || !mapReady) return;
+    const map = mapRef.current as KakaoMapFocusApi | null;
+    const kakao = getKakaoSdk();
+    if (!map || !kakao?.maps) return;
+    try {
+      if (command.type === "fitMarkers") {
+        if (command.auto && userViewportAdjustedRef.current) return; // 채널 내장 게이트
+        const valid = markersRef.current.filter(
+          (m) =>
+            Number.isFinite(m.lat) &&
+            Number.isFinite(m.lng) &&
+            Math.abs(m.lat) <= 90 &&
+            Math.abs(m.lng) <= 180,
+        );
+        if (valid.length === 0) return;
+        // zero-area 가드: 단일/동일좌표면 setBounds(과도 줌·오류) 대신 setCenter
+        if (valid.length === 1) {
+          map.setCenter?.(new kakao.maps.LatLng(valid[0].lat, valid[0].lng));
+          return;
+        }
+        const bounds = new kakao.maps.LatLngBounds();
+        for (const m of valid) bounds.extend(new kakao.maps.LatLng(m.lat, m.lng));
+        programmaticApplyRef.current = true;
+        map.setBounds?.(bounds, 56, 56, 56, 56);
+        window.setTimeout(() => {
+          programmaticApplyRef.current = false;
+        }, 0);
+      } else if (command.type === "focusMarker") {
+        const pos = new kakao.maps.LatLng(command.lat, command.lng);
+        programmaticApplyRef.current = true;
+        map.setCenter?.(pos);
+        map.setLevel?.(Math.max(1, Math.min(14, command.level)));
+        // 명시적 사용자 의도 → 이후 auto fit 차단
+        userViewportAdjustedRef.current = true;
+        window.setTimeout(() => {
+          programmaticApplyRef.current = false;
+        }, 0);
+      }
+    } catch (e) {
+      console.error("[KakaoMapView] view command failed", e);
+    }
+  }, [command, mapReady, usesCommandChannel]);
 
   // 외부 programmaticView (URL 하이드레이션 / "내 주변" 클릭 등) 반영
   useEffect(() => {
