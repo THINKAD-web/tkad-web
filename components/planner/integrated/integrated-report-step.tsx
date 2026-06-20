@@ -51,8 +51,11 @@ export function IntegratedReportStep(props: Props) {
   const t = useTranslations("plannerIntegrated");
   const tPlanner = useTranslations("planner");
   const { toast } = useToast();
-  const { allowed: plannerResultAllowed, loading: plannerResultLoading } =
-    useFeatureAccess("planner_result");
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+    access: plannerResultAccess,
+  } = useFeatureAccess("planner_result");
   const { allowed: pdfAllowed, loading: pdfAccessLoading } =
     useFeatureAccess("planner_pdf");
   const [downloading, setDownloading] = useState<PlannerReportExportFormat | null>(
@@ -142,6 +145,8 @@ export function IntegratedReportStep(props: Props) {
           isPro={plannerResultAllowed}
           loading={plannerResultLoading}
           isKo={props.isKo}
+          access={plannerResultAccess}
+          feature="planner_result"
           minHeightClass="min-h-[24rem]"
         >
             <div className="space-y-6">

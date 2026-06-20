@@ -46,7 +46,7 @@ export function MediaDetailTrafficPanel({
   competitorAccess,
   recentBrands,
 }: Props) {
-  const { allowed: detailPro, loading: detailProLoading } =
+  const { allowed: detailPro, loading: detailProLoading, access: detailAccessGate } =
     useFeatureAccess("detail_data");
 
   return (
@@ -67,6 +67,8 @@ export function MediaDetailTrafficPanel({
         isPro={detailPro}
         loading={detailProLoading}
         isKo={isKo}
+        access={detailAccessGate}
+        feature="detail_data"
       >
         <div className="space-y-6">
           <MediaDetailPerformance metrics={performanceMetrics} />

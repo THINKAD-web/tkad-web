@@ -60,7 +60,7 @@ export function PlannerEffectSimulationPanel({
   skipProGate = false,
   variant = "full",
 }: Props) {
-  const { allowed: simAllowed, loading: simLoading } =
+  const { allowed: simAllowed, loading: simLoading, access: simAccess } =
     useFeatureAccess("simulation_full");
 
   const advanced = useMemo(
@@ -364,6 +364,8 @@ export function PlannerEffectSimulationPanel({
             isPro={simAllowed}
             loading={simLoading}
             isKo={isKo}
+            access={simAccess}
+            feature="simulation_full"
           >
             {proDetail}
           </PlannerProGate>

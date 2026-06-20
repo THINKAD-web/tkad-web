@@ -217,6 +217,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const {
     allowed: plannerResultAllowed,
     loading: plannerResultLoading,
+    access: plannerResultAccess,
   } = useFeatureAccess("planner_result");
   const previewUnlocked = props.unlockReportPreview === true;
   const showProPreview = previewUnlocked || plannerResultAllowed;
@@ -410,6 +411,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           isPro={showProPreview}
           loading={plannerResultLoading && !previewUnlocked}
           isKo={props.isKo}
+          access={plannerResultAccess}
+          feature="planner_result"
           minHeightClass="min-h-[24rem]"
         >
             <div className="space-y-6">

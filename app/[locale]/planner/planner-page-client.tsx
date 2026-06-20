@@ -179,6 +179,7 @@ export default function PlannerPageClient({
   const {
     allowed: plannerResultAllowed,
     loading: plannerResultLoading,
+    access: plannerResultAccess,
   } = useFeatureAccess("planner_result");
 
   const priceOptionBadge = useCallback(
@@ -1596,6 +1597,8 @@ export default function PlannerPageClient({
                     isPro={plannerResultAllowed}
                     loading={plannerResultLoading}
                     isKo={isKo}
+                    access={plannerResultAccess}
+                    feature="planner_result"
                     minHeightClass="min-h-[20rem]"
                     className="space-y-4"
                   >
