@@ -189,7 +189,7 @@ export function HeaderProfileDropdown({
             <UserIcon className="h-4 w-4 opacity-70" />
             {myPageLabel}
           </Link>
-          <Link href="/dashboard" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
+          <Link href="/my?tab=campaigns" role="menuitem" onClick={() => { close(); onNavigate?.(); }} className={headerChromeMenuItemClass}>
             <Megaphone className="h-4 w-4 opacity-70" />
             {campaignsLabel}
           </Link>

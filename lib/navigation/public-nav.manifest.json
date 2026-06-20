@@ -9,7 +9,7 @@
       "items": [
         { "id": "media-search", "href": "/media" },
         { "id": "map-search", "href": "/media/map" },
-        { "id": "ai-recommend", "href": "/recommend", "beta": true },
+        { "id": "media-network", "href": "/media/network" },
         { "id": "campaign-targets", "href": "/media/targets" }
       ]
     },
@@ -19,7 +19,8 @@
       "items": [
         { "id": "media-planner", "href": "/planner", "beta": true },
         { "id": "integrated-planner", "href": "/planner/integrated", "beta": true },
-        { "id": "package-proposal", "href": "/media/packages" }
+        { "id": "package-proposal", "href": "/media/packages" },
+        { "id": "ai-recommend", "href": "/recommend", "beta": true }
       ]
     },
     {

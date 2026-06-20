@@ -9,6 +9,7 @@ import {
   LineChart,
   ListVideo,
   MapPin,
+  Network,
   Package,
   Palette,
   Search,
@@ -28,11 +29,12 @@ export type PublicNavGroupId =
 export type PublicNavItemId =
   | "media-search"
   | "map-search"
-  | "ai-recommend"
+  | "media-network"
   | "campaign-targets"
   | "media-planner"
   | "integrated-planner"
   | "package-proposal"
+  | "ai-recommend"
   | "creative-library"
   | "dooh-playlists"
   | "creative-studio"
@@ -66,7 +68,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     items: [
       { id: "media-search", href: "/media", icon: Search },
       { id: "map-search", href: "/media/map", icon: MapPin },
-      { id: "ai-recommend", href: "/recommend", icon: Sparkles, beta: true },
+      { id: "media-network", href: "/media/network", icon: Network },
       { id: "campaign-targets", href: "/media/targets", icon: Target },
     ],
   },
@@ -82,6 +84,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
         beta: true,
       },
       { id: "package-proposal", href: "/media/packages", icon: Package },
+      { id: "ai-recommend", href: "/recommend", icon: Sparkles, beta: true },
     ],
   },
   {

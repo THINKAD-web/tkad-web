@@ -157,9 +157,9 @@
         "label": "지도에서 찾기",
         "desc": "위치·반경 기반 탐색"
       },
-      "ai-recommend": {
-        "label": "AI 매체 추천",
-        "desc": "목표·예산에 맞는 AI 추천"
+      "media-network": {
+        "label": "네트워크 매체",
+        "desc": "버스·지하철 등 네트워크 단위 탐색"
       },
       "campaign-targets": {
         "label": "캠페인 목적",
@@ -176,6 +176,10 @@
       "package-proposal": {
         "label": "패키지 제안",
         "desc": "목적·지역별 검증 패키지"
+      },
+      "ai-recommend": {
+        "label": "AI 매체 추천",
+        "desc": "목표·예산에 맞는 AI 추천"
       },
       "creative-library": {
         "label": "소재 라이브러리",

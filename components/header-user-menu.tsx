@@ -83,7 +83,7 @@ export function HeaderUserMenu({
               <UserIcon className="h-4 w-4 shrink-0" strokeWidth={2} />
               <span>{t("myPage")}</span>
             </Link>
-            <Link href="/dashboard" onClick={onNavigate} className={menuRowClass}>
+            <Link href="/my?tab=campaigns" onClick={onNavigate} className={menuRowClass}>
               <Megaphone className="h-4 w-4 shrink-0" strokeWidth={2} />
               <span>{t("myCampaigns")}</span>
             </Link>

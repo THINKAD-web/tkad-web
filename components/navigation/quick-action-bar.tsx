@@ -72,7 +72,7 @@ const MOBILE_ACTIONS: QuickActionItem[] = [
   },
   {
     id: "packages",
-    href: "/packages",
+    href: "/media/packages",
     labelKo: "패키지제안",
     labelEn: "Packages",
     match: (p) =>
@@ -208,11 +208,11 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
     {
       id: "quote",
       href: "/quote",
-      labelKo: "견적 문의",
-      labelEn: "Get quote",
+      labelKo: "견적서 작성",
+      labelEn: "Create quote",
       icon: MessageCircle,
       variant: "outline",
-      match: (p) => p.startsWith("/quote") || p.startsWith("/contact"),
+      match: (p) => p.startsWith("/quote"),
     },
   ];
 

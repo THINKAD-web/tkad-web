@@ -157,9 +157,9 @@
         "label": "Map search",
         "desc": "Browse by location"
       },
-      "ai-recommend": {
-        "label": "AI media picks",
-        "desc": "Goal and budget-based AI picks"
+      "media-network": {
+        "label": "Network media",
+        "desc": "Browse bus, subway, and network bundles"
       },
       "campaign-targets": {
         "label": "Campaign goals",
@@ -176,6 +176,10 @@
       "package-proposal": {
         "label": "Package proposals",
         "desc": "Curated bundles by goal"
+      },
+      "ai-recommend": {
+        "label": "AI media picks",
+        "desc": "AI matches to your goals and budget"
       },
       "creative-library": {
         "label": "Creative library",
