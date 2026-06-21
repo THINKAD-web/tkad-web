@@ -39,6 +39,29 @@ const scenarios = [
       goal: "conversion",
     },
   },
+  {
+    name: "D: 800만/홍대/엔터/MZ · 고려",
+    input: {
+      monthlyBudgetWon: 8_000_000,
+      regions: ["hongdae", "홍대"],
+      industry: "entertainment",
+      targets: ["mz"],
+      durationMonths: 2,
+      goal: "consideration",
+    },
+  },
+  {
+    name: "E: 1000만/강남/뷰티 · 런칭 태그",
+    input: {
+      monthlyBudgetWon: 10_000_000,
+      regions: ["gangnam", "강남"],
+      industry: "beauty",
+      targets: ["millennial"],
+      durationMonths: 1,
+      goal: "awareness",
+      goalTags: ["launch"],
+    },
+  },
 ];
 
 const catalog = await fetchPublicMediaCatalog();

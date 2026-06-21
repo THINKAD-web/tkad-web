@@ -12,7 +12,11 @@ import { aiInputToMatching } from "@/lib/recommendation-adapters";
  * 4. `score >= MIN_SCORE` 우선, 부족 시 상위 랭킹으로 최소 MIN_RESULTS(5)건 보장, 상위 30건.
  * 5. 후보 풀이 비었거나 5개 미만이면 `paddingCatalog`(또는 동일 카탈로그)에서 보강.
  */
-export type CampaignGoal = "awareness" | "consideration" | "launch";
+export type CampaignGoal =
+  | "awareness"
+  | "consideration"
+  | "launch"
+  | "conversion";
 
 export type TargetAudience = "genz" | "millennial" | "family" | "biz" | "mass";
 
@@ -300,6 +304,11 @@ function goalRawPoints(goal: CampaignGoal, m: MediaItem): number {
   if (goal === "launch") {
     if (m.type === "digital" || m.dailyFootTraffic >= 300000) return 88;
     return 52;
+  }
+  if (goal === "conversion") {
+    if (m.type === "mobile" || m.type === "subway") return 86;
+    if ((m.targetCategory ?? []).includes("small_business")) return 90;
+    return 58;
   }
   return 50;
 }
