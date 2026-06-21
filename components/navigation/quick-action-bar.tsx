@@ -4,18 +4,11 @@ import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import {
-  Heart,
-  Megaphone,
-  MessageCircle,
-  Plus,
-  Search,
-  ShoppingCart,
-} from "lucide-react";
+import { Heart, MessageCircle, Plus, Search } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { useCart } from "@/lib/cart";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+import { FAVORITES_NAV_LABEL, PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -66,8 +59,8 @@ const MOBILE_ACTIONS: QuickActionItem[] = [
   {
     id: "plan",
     href: "/my/plan",
-    labelKo: "내 플랜",
-    labelEn: "My plan",
+    labelKo: PLAN_NAV_LABELS.cart.ko,
+    labelEn: PLAN_NAV_LABELS.cart.en,
     match: (p) => p.startsWith("/my/plan"),
   },
   {
@@ -91,8 +84,8 @@ const DETAIL_ACTIONS: QuickActionItem[] = [
   {
     id: "favorites",
     href: "/my?tab=favorites",
-    labelKo: "관심매체",
-    labelEn: "Saved",
+    labelKo: FAVORITES_NAV_LABEL.ko,
+    labelEn: FAVORITES_NAV_LABEL.en,
     match: (p) => p.startsWith("/media/favorites"),
   },
   {
@@ -162,45 +155,16 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
   const searchParams = useSearchParams();
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { ids: cartIds } = useCart();
   const tab = searchParams.get("tab");
 
   if (isHiddenPath(pathname)) return null;
 
   const actions: DesktopQuickAction[] = [
     {
-      id: "campaigns",
-      href: "/my?tab=campaigns",
-      labelKo: "내 캠페인",
-      labelEn: "Campaigns",
-      icon: Megaphone,
-      match: (p, t) =>
-        p.startsWith("/dashboard") ||
-        (p.startsWith("/my") && (t === "campaigns" || t == null)),
-    },
-    {
-      id: "favorites",
-      href: "/my?tab=favorites",
-      labelKo: "관심매체",
-      labelEn: "Saved",
-      icon: Heart,
-      match: (p, t) =>
-        p.startsWith("/media/favorites") || (p.startsWith("/my") && t === "favorites"),
-    },
-    {
-      id: "cart",
-      href: "/cart",
-      labelKo: "장바구니",
-      labelEn: "Cart",
-      icon: ShoppingCart,
-      match: (p) => p.startsWith("/cart"),
-      badge: cartIds.length,
-    },
-    {
       id: "planner",
       href: "/planner",
-      labelKo: "새 플랜",
-      labelEn: "New plan",
+      labelKo: PLAN_NAV_LABELS.newPlan.ko,
+      labelEn: PLAN_NAV_LABELS.newPlan.en,
       icon: Plus,
       variant: "neon",
       match: (p) => p.startsWith("/planner"),

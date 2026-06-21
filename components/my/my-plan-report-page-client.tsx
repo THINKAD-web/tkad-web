@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
@@ -15,6 +15,7 @@ import { BtnBlock } from "@/components/brutalist";
 import { trackPlanReportActivity } from "@/lib/plan-report-activity/client";
 
 export function MyPlanReportPageClient() {
+  const tPlan = useTranslations("planNav");
   const locale = useLocale();
   const isKo = locale === "ko";
   const { cart } = usePlanCart();
@@ -71,7 +72,7 @@ export function MyPlanReportPageClient() {
               className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              {isKo ? "내 플랜" : "My plan"}
+              {tPlan("cart")}
             </Link>
             <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
               [ MY PLAN REPORT ]
@@ -141,7 +142,7 @@ export function MyPlanReportPageClient() {
                   }}
                 />
                 <BtnBlock href="/my/plan/saved" variant="secondary">
-                  {isKo ? "저장된 플랜" : "Saved plans"}
+                  {tPlan("saved")}
                 </BtnBlock>
               </div>
               <PlanCartRegionalBreakdown

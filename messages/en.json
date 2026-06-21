@@ -287,14 +287,23 @@
     "orEmail": "Or with email",
     "usageGuide": "How to use"
   },
+  "planNav": {
+    "cart": "Selected media",
+    "saved": "Saved plans",
+    "plannerResults": "Planner results",
+    "newPlan": "New plan"
+  },
+  "favoritesNav": {
+    "label": "Favorite media"
+  },
   "myHub": {
     "loading": "Loading your hub…",
     "greeting": "Hello, {name}",
     "logout": "Log out",
     "tabs": {
       "campaigns": "My campaigns",
-      "favorites": "Saved media",
-      "planner": "My planner",
+      "favorites": "Favorite media",
+      "planner": "Planner results",
       "recent": "Recently viewed",
       "points": "Points history",
       "team": "Team"
@@ -934,9 +943,9 @@
     "compareAvailabilityMaintenance": "🔴 Maintenance",
     "compareStartPlanner": "Start Planner",
     "favorites": {
-      "headerAria": "Saved media",
-      "headerAriaCount": "{count} saved media",
-      "menuLabel": "Saved media",
+      "headerAria": "Favorite media",
+      "headerAriaCount": "{count} favorite media",
+      "menuLabel": "Favorite media",
       "guestMax": "Guests can save up to {max} items.",
       "added": "Saved {name}.",
       "removed": "Removed from saved list.",

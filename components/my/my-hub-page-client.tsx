@@ -132,6 +132,8 @@ export function MyHubPageClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("myHub");
+  const tPlan = useTranslations("planNav");
+  const tFav = useTranslations("favoritesNav");
   const toast = useAppToast();
 
   const [me, setMe] = useState<Me | null>(null);
@@ -399,7 +401,7 @@ export function MyHubPageClient() {
     <>
       <div className="tkad-neon-surface relative mb-6 overflow-hidden rounded-[28px] px-5 py-6 sm:mb-8 sm:px-8 sm:py-10">
         <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
-          {isKo ? "// 찜한 매체" : "// Saved media"}
+          {isKo ? `// ${tFav("label")}` : `// ${tFav("label")}`}
         </p>
         <h2 className="mt-3 text-balance text-xl font-[950] leading-tight tracking-[-0.05em] text-foreground sm:text-3xl">
           {isKo ? (
@@ -659,7 +661,7 @@ export function MyHubPageClient() {
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link href="/my/plan" className={myHubOutlineBtn}>
-                      {isKo ? "내 플랜 보기" : "View my plan"}
+                      {isKo ? `${tPlan("cart")} 보기` : `View ${tPlan("cart")}`}
                     </Link>
                     <Link href="/my/plan/report" className={myHubPrimaryBtn}>
                       <Sparkles className="mr-2 h-4 w-4" />
