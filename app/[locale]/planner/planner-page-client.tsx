@@ -61,7 +61,10 @@ import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
-import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
+import { PlannerScenarioPresets } from "@/components/planner/planner-scenario-presets";
+import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
+import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
 import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
@@ -209,6 +212,8 @@ export default function PlannerPageClient({
   const months = usePlannerStore((s) => s.months);
   const ageKey = usePlannerStore((s) => s.ageKey);
   const industryKey = usePlannerStore((s) => s.industryKey);
+  const seoulZones = usePlannerStore((s) => s.seoulZones);
+  const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
   const mediaSelectionExplicit = usePlannerStore(
     (s) => s.mediaSelectionExplicit,
@@ -227,6 +232,13 @@ export default function PlannerPageClient({
   const setMonths = usePlannerStore((s) => s.setMonths);
   const setAgeKey = usePlannerStore((s) => s.setAgeKey);
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
+  const toggleSeoulZone = usePlannerStore((s) => s.toggleSeoulZone);
+  const clearSeoulZones = usePlannerStore((s) => s.clearSeoulZones);
+  const applySuggestedSeoulZones = usePlannerStore(
+    (s) => s.applySuggestedSeoulZones,
+  );
+  const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
+  const applyScenarioPreset = usePlannerStore((s) => s.applyScenarioPreset);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
   const importFromPlanCart = usePlannerStore((s) => s.importFromPlanCart);
 
@@ -289,8 +301,19 @@ export default function PlannerPageClient({
   );
 
   const filtered = useMemo(
-    () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
-    [catalog, selectedRegions, categories],
+    () =>
+      filterPlannerMediaMulti(
+        catalog,
+        selectedRegions,
+        categories,
+        seoulZones,
+      ),
+    [catalog, selectedRegions, categories, seoulZones],
+  );
+
+  const suggestedSeoulZones = useMemo(
+    () => suggestSeoulZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
   );
 
   /** Step4 AI 추천: 엄격 필터 결과가 비어도 등록 매체가 보이도록 완화 풀 (직접 탐색은 기존 `catalog`) */
@@ -327,11 +350,13 @@ export default function PlannerPageClient({
         recommendCtx: {
           goal: campaignGoal,
           regions,
+          seoulZones,
           categories: categoriesArr,
           ageKey,
           industryKey,
           budgetMan: budgetNum,
           months,
+          goalFollowUp,
         },
       }),
     [
@@ -340,9 +365,11 @@ export default function PlannerPageClient({
       months,
       campaignGoal,
       regions,
+      seoulZones,
       categoriesArr,
       ageKey,
       industryKey,
+      goalFollowUp,
       campaignMediaIds,
       selectedMediaForSimulation,
       mediaSelectionExplicit,
@@ -355,6 +382,7 @@ export default function PlannerPageClient({
     return computePlannerMetrics(source, budgetNum, months, {
       campaignGoal,
       industryKey,
+      goalFollowUp,
     });
   }, [
     portfolio,
@@ -363,6 +391,7 @@ export default function PlannerPageClient({
     months,
     campaignGoal,
     industryKey,
+    goalFollowUp,
   ]);
 
   const cpmBars = useMemo(() => {
@@ -765,13 +794,15 @@ export default function PlannerPageClient({
     [t, tm],
   );
 
-  const regionsSummary = useMemo(
-    () =>
-      [...selectedRegions]
-        .map((r) => mapLabel(r as PlannerMapRegion))
-        .join(", "),
-    [selectedRegions, mapLabel],
-  );
+  const regionsSummary = useMemo(() => {
+    const parts = [...selectedRegions].map((r) =>
+      mapLabel(r as PlannerMapRegion),
+    );
+    if (selectedRegions.has("seoul") && seoulZones.length > 0) {
+      parts.push(formatSeoulZonesText(seoulZones, isKo));
+    }
+    return parts.join(", ");
+  }, [selectedRegions, mapLabel, seoulZones, isKo]);
 
   const categoriesSummary = useMemo(
     () =>
@@ -1119,6 +1150,33 @@ export default function PlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
+                {selectedRegions.has("seoul") ? (
+                  <PlannerSeoulZoneChips
+                    selected={seoulZones}
+                    suggested={suggestedSeoulZones}
+                    isKo={isKo}
+                    onToggle={toggleSeoulZone}
+                    onClear={clearSeoulZones}
+                    onApplySuggested={applySuggestedSeoulZones}
+                  />
+                ) : null}
+
+                <PlannerGoalFollowUpPanel
+                  goal={campaignGoal}
+                  followUp={goalFollowUp}
+                  onChange={setGoalFollowUp}
+                />
+
+                <PlannerScenarioPresets
+                  onApply={(id) => {
+                    applyScenarioPreset(id);
+                    toast(
+                      "success",
+                      isKo ? "시나리오 추천 세팅을 적용했습니다." : "Scenario preset applied.",
+                    );
+                  }}
+                />
+
                 <PlannerNeonCard>
                   <div className={plannerNeon.cardHeader}>
                     <PlannerNeonLabel>{t("packagesTitle")}</PlannerNeonLabel>
@@ -1381,6 +1439,9 @@ export default function PlannerPageClient({
                 ageText={t(ageKey)}
                 industryText={t(industryKey)}
                 industryKey={industryKey}
+                campaignGoal={campaignGoal}
+                seoulZones={seoulZones}
+                goalFollowUp={goalFollowUp}
                 portfolio={portfolio}
                 matchedCount={filtered.length}
                 monthCompare={monthCompare}
