@@ -76,15 +76,14 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     id: "planning",
     icon: ClipboardList,
     items: [
-      { id: "media-planner", href: "/planner", icon: Lightbulb, beta: true },
+      { id: "media-planner", href: "/planner", icon: Lightbulb },
       {
         id: "integrated-planner",
         href: "/planner/integrated",
         icon: Sparkles,
-        beta: true,
       },
       { id: "package-proposal", href: "/media/packages", icon: Package },
-      { id: "ai-recommend", href: "/recommend", icon: Sparkles, beta: true },
+      { id: "ai-recommend", href: "/recommend", icon: Sparkles },
     ],
   },
   {

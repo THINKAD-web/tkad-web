@@ -123,6 +123,7 @@ export function PlannerRecommendationPanel({
       region: number;
       industry: number;
       target: number;
+      category?: number;
       popularity: number;
     },
   ): RecommendReasonKey[] {
@@ -131,7 +132,7 @@ export function PlannerRecommendationPanel({
     if (breakdown.region >= 15) keys.push("matchRegion");
     if (breakdown.industry >= 10) keys.push("industryFit");
     if (breakdown.target >= 12) keys.push("ageMatch");
-    if (breakdown.category >= 12) keys.push("goalFit");
+    if ((breakdown.category ?? 0) >= 12) keys.push("goalFit");
     if (breakdown.popularity >= 5) keys.push("highVisibility");
     return keys.length > 0 ? keys : ["goalFit"];
   }
@@ -231,11 +232,13 @@ export function PlannerRecommendationPanel({
               {
                 goal,
                 regions,
+                seoulZones,
                 categories,
                 ageKey,
                 industryKey,
                 budgetMan,
                 months,
+                goalFollowUp,
               },
               limit,
               refreshTick,
@@ -256,11 +259,13 @@ export function PlannerRecommendationPanel({
             {
               goal,
               regions,
+              seoulZones,
               categories,
               ageKey,
               industryKey,
               budgetMan,
               months,
+              goalFollowUp,
             },
             limit,
             refreshTick,

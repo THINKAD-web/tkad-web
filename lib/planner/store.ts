@@ -34,6 +34,7 @@ import {
 import { hydratePlannerFromSavedPlan } from "@/lib/planner/hydrate-from-saved-plan";
 import { hydratePlannerFromPlanCart } from "@/lib/plan-cart-planner-bridge";
 import type { PlanCart } from "@/lib/plan-cart";
+import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록

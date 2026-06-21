@@ -17,10 +17,10 @@
       "id": "planning",
       "icon": "clipboard-list",
       "items": [
-        { "id": "media-planner", "href": "/planner", "beta": true },
-        { "id": "integrated-planner", "href": "/planner/integrated", "beta": true },
+        { "id": "media-planner", "href": "/planner" },
+        { "id": "integrated-planner", "href": "/planner/integrated" },
         { "id": "package-proposal", "href": "/media/packages" },
-        { "id": "ai-recommend", "href": "/recommend", "beta": true }
+        { "id": "ai-recommend", "href": "/recommend" }
       ]
     },
     {
