@@ -109,7 +109,26 @@ export function PlannerRecommendationPanel({
   const [recommendations, setRecommendations] = useState<ScoredMedia[]>([]);
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
   const [oneLines, setOneLines] = useState<Record<string, string>>({});
+  const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const fetchRef = useRef(0);
+
+  function reasonKeysFromBreakdown(
+    breakdown: {
+      budget: number;
+      region: number;
+      industry: number;
+      target: number;
+      popularity: number;
+    },
+  ): RecommendReasonKey[] {
+    const keys: RecommendReasonKey[] = [];
+    if (breakdown.budget >= 20) keys.push("budgetEfficient");
+    if (breakdown.region >= 15) keys.push("matchRegion");
+    if (breakdown.industry >= 10) keys.push("goalFit");
+    if (breakdown.target >= 12) keys.push("ageMatch");
+    if (breakdown.popularity >= 5) keys.push("highVisibility");
+    return keys.length > 0 ? keys : ["goalFit"];
+  }
 
   const depsKey = useMemo(
     () =>
@@ -150,10 +169,20 @@ export function PlannerRecommendationPanel({
           });
           const data = (await res.json()) as {
             ok?: boolean;
+            claudeUsed?: boolean;
             items?: Array<{
               mediaId: string;
               score: number;
               oneLine?: string;
+              reasoning?: string;
+              expectedImpact?: string;
+              breakdown?: {
+                budget: number;
+                region: number;
+                industry: number;
+                target: number;
+                popularity: number;
+              };
             }>;
           };
           if (id !== fetchRef.current) return;
@@ -161,25 +190,31 @@ export function PlannerRecommendationPanel({
             const byId = new Map(catalog.map((m) => [m.id, m]));
             const scores: Record<string, number> = {};
             const lines: Record<string, string> = {};
+            const narrative: Record<string, string> = {};
             const recs: ScoredMedia[] = [];
             for (const item of data.items) {
               const media = byId.get(item.mediaId);
               if (!media) continue;
               scores[media.id] = item.score;
-              if (item.oneLine) lines[media.id] = item.oneLine;
+              if (item.reasoning) narrative[media.id] = item.reasoning;
+              const summary = item.expectedImpact ?? item.oneLine;
+              if (summary && summary !== item.reasoning) {
+                lines[media.id] = summary;
+              }
+              const reasonKeys =
+                item.breakdown ?
+                  reasonKeysFromBreakdown(item.breakdown)
+                : item.score >= 70 ? (["goalFit"] as RecommendReasonKey[]) : [];
               recs.push({
                 media,
                 score: item.score / 100,
-                reasons: [
-                  ...(item.score >= 70 ?
-                    [{ key: "goalFit" as RecommendReasonKey, weight: 0.7 }]
-                  : []),
-                ],
+                reasons: reasonKeys.map((key) => ({ key, weight: 0.5 })),
               });
             }
             setRecommendations(recs);
             setMatchScores(scores);
             setOneLines(lines);
+            setReasonings(narrative);
           } else {
             const fallback = recommendPlannerMedia(
               catalog,
@@ -202,6 +237,7 @@ export function PlannerRecommendationPanel({
               ),
             );
             setOneLines({});
+            setReasonings({});
           }
         } catch {
           if (id !== fetchRef.current) return;
@@ -341,6 +377,7 @@ export function PlannerRecommendationPanel({
               const selected = isSelected(media.id);
               const matchScore = matchScores[media.id];
               const oneLine = oneLines[media.id];
+              const reasoning = reasonings[media.id];
               return (
                 <li
                   key={media.id}
@@ -360,6 +397,11 @@ export function PlannerRecommendationPanel({
                         {isKo ?
                           `매칭도 ${matchScore}점`
                         : `Match ${matchScore}/100`}
+                      </p>
+                    ) : null}
+                    {reasoning ? (
+                      <p className="mt-2 text-xs leading-relaxed text-foreground/90">
+                        {reasoning}
                       </p>
                     ) : null}
                     {oneLine ? (

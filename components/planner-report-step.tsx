@@ -13,6 +13,11 @@ import {
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
+import type {
+  PlannerAgeKey,
+  PlannerCategory,
+  PlannerIndustryKey,
+} from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -34,6 +39,7 @@ import {
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
+import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
@@ -81,6 +87,13 @@ export type PlannerReportSharedProps = {
   unlockReportPreview?: boolean;
   /** 보고서 활동 로그 출처 (PDF/PPT 다운로드 추적) */
   activitySource?: PlanReportActivitySource;
+  /** 제안 논리(Claude) API 요청용 — 미전달 시 블록 숨김 */
+  narrativeContext?: {
+    regions: string[];
+    categories: PlannerCategory[];
+    ageKey: PlannerAgeKey;
+    industryKey: PlannerIndustryKey | null;
+  };
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -404,6 +417,20 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         isAutoMix={props.isAutoPortfolio}
         unresolvedCount={props.unresolvedMediaCount ?? 0}
       />
+
+      {props.narrativeContext && props.portfolio.length > 0 ? (
+        <PlannerProposalNarrative
+          isKo={props.isKo}
+          goal={props.campaignGoal}
+          regions={props.narrativeContext.regions}
+          categories={props.narrativeContext.categories}
+          ageKey={props.narrativeContext.ageKey}
+          industryKey={props.narrativeContext.industryKey}
+          budgetMan={props.budgetNum}
+          months={props.months}
+          portfolio={props.portfolio}
+        />
+      ) : null}
 
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
       <section className="space-y-3" data-screenshot="planner-pro-blur">

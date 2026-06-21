@@ -1,23 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { rateLimit } from "@/lib/rate-limit";
-import { runRecommendation } from "@/lib/recommendation-service";
-import {
-  matchedToApiItems,
-  plannerContextToMatching,
-} from "@/lib/recommendation-adapters";
+import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import { generatePlannerProposalNarrative } from "@/lib/recommendation-claude";
+import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { getCurrentUser } from "@/lib/user-session";
 import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
 import {
   PLANNER_AGE_KEYS,
   PLANNER_INDUSTRY_KEYS,
 } from "@/lib/planner/types";
-import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import type { PlannerCampaignGoal, PlannerCategory } from "@/lib/planner/types";
 
 export const dynamic = "force-dynamic";
 
-const limiter = rateLimit({ limit: 60, windowMs: 60_000 });
+const limiter = rateLimit({ limit: 30, windowMs: 60_000 });
 
 const Body = z.object({
   goal: z
@@ -30,11 +29,8 @@ const Body = z.object({
   industryKey: z.enum(PLANNER_INDUSTRY_KEYS).nullable().optional(),
   budgetMan: z.number().min(0).max(1_000_000),
   months: z.number().int().min(1).max(36),
-  seed: z.number().int().min(0).max(9999).optional(),
-  limit: z.number().int().min(1).max(15).optional(),
-  sessionId: z.string().max(64).optional(),
+  mediaIds: z.array(z.string()).min(1).max(20),
   locale: z.string().max(8).optional(),
-  useClaude: z.boolean().optional(),
 });
 
 function json(body: unknown, init?: ResponseInit) {
@@ -45,6 +41,11 @@ function json(body: unknown, init?: ResponseInit) {
 }
 
 export async function POST(request: NextRequest) {
+  const claudeUsed = isPlannerClaudeEnabled();
+  if (!claudeUsed) {
+    return json({ ok: true, claudeUsed: false, sentences: null });
+  }
+
   const ip =
     request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
     request.headers.get("x-real-ip") ??
@@ -54,7 +55,6 @@ export async function POST(request: NextRequest) {
     return json({ ok: false, error: "rate_limited" }, { status: 429 });
   }
 
-  // 일일 AI 한도 (비로그인 1 / 로그인 5 / PRO 30) + 어뷰징 방지
   const aiUser = await getCurrentUser();
   const aiRl = await enforceAiRateLimit(request, aiUser?.id ?? null);
   if (!aiRl.allowed) {
@@ -64,8 +64,6 @@ export async function POST(request: NextRequest) {
         rateLimited: true,
         reason: aiRl.reason,
         message: aiRateMessage(aiRl.reason, true),
-        remaining: 0,
-        limit: aiRl.limit,
       },
       { status: 429 },
     );
@@ -95,8 +93,6 @@ export async function POST(request: NextRequest) {
     months: d.months,
   };
 
-  const matchingInput = plannerContextToMatching(ctx, d.seed ?? 0);
-
   let userId: string | null = null;
   try {
     const user = await getCurrentUser();
@@ -106,36 +102,37 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { recommendations, cached, logId, claudeUsed } = await runRecommendation({
-      input: matchingInput,
-      source: "planner",
-      limit: d.limit ?? 5,
-      useClaude: d.useClaude ?? isPlannerClaudeEnabled(),
-      isKo,
-      userId,
-      sessionId: d.sessionId ?? null,
-    });
+    const catalog = await fetchPublicMediaCatalog();
+    const byId = new Map(catalog.map((m) => [m.id, m]));
+    const portfolio = d.mediaIds
+      .map((id) => byId.get(id))
+      .filter((m): m is NonNullable<typeof m> => Boolean(m))
+      .map((m) => ({
+        mediaId: m.id,
+        name: m.name,
+        type: m.type,
+        monthlyPriceWon: catalogPriceFieldToWon(m.price),
+      }));
 
-    const industry =
-      d.industryKey ?
-        d.industryKey.replace(/^ind/, "").toLowerCase()
-      : "other";
-    const items = matchedToApiItems(
-      recommendations,
-      industry,
-      [matchingInput.targets[0] ?? "mass"],
+    if (portfolio.length === 0) {
+      return json({ ok: true, claudeUsed: true, sentences: null });
+    }
+
+    const matchingInput = plannerContextToMatching(ctx, 0);
+    const sentences = await generatePlannerProposalNarrative(
+      matchingInput,
+      portfolio,
       isKo,
+      { source: "planner", userId, cached: false },
     );
 
     return json({
       ok: true,
-      cached,
-      logId,
-      claudeUsed,
-      items,
+      claudeUsed: true,
+      sentences,
     });
   } catch (e) {
-    console.error("[api/planner/recommend]", e);
-    return json({ ok: false, error: "server_error" }, { status: 500 });
+    console.error("[api/planner/proposal-narrative]", e);
+    return json({ ok: true, claudeUsed: true, sentences: null });
   }
 }

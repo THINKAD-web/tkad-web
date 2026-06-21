@@ -61,6 +61,7 @@ import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
+import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -1382,6 +1383,12 @@ export default function PlannerPageClient({
                 isAutoPortfolio={isAutoPortfolio}
                 unresolvedMediaCount={unresolvedMediaCount}
                 activitySource="planner"
+                narrativeContext={{
+                  regions,
+                  categories: categoriesArr,
+                  ageKey,
+                  industryKey,
+                }}
               />
             ) : null}
 
@@ -1554,6 +1561,18 @@ export default function PlannerPageClient({
                   isAutoMix={isAutoPortfolio}
                   autoMixMax={PLANNER_AUTO_PORTFOLIO_MAX_ITEMS}
                   unresolvedCount={unresolvedMediaCount}
+                />
+
+                <PlannerProposalNarrative
+                  isKo={isKo}
+                  goal={campaignGoal}
+                  regions={regions}
+                  categories={categoriesArr}
+                  ageKey={ageKey}
+                  industryKey={industryKey}
+                  budgetMan={budgetNum}
+                  months={months}
+                  portfolio={portfolio}
                 />
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">

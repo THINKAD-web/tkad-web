@@ -1945,6 +1945,9 @@
     "recommendAdd": "담기",
     "recommendAdded": "담김",
     "recommendAddAll": "전체 담기",
+    "proposalNarrativeEyebrow": "[ 제안 논리 ]",
+    "proposalNarrativeTitle": "왜 이 조합인가",
+    "proposalNarrativeLoading": "캠페인 조건을 바탕으로 제안 논리를 작성 중입니다...",
     "recommendBrowseTitle": "더 찾아보기",
     "recommendBrowseDesc": "추천 외에도 직접 검색해서 매체를 선택할 수 있습니다.",
     "recommendReason": {

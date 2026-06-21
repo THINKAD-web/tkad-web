@@ -7,7 +7,15 @@ import {
   setCachedRecommendations,
 } from "@/lib/recommendation-cache";
 import { enrichWithClaude } from "@/lib/recommendation-claude";
+import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+
+function resolveUseClaude(opts: RunRecommendationOpts): boolean {
+  if (opts.useClaude === true) return true;
+  if (opts.useClaude === false) return false;
+  if (opts.source === "planner") return isPlannerClaudeEnabled();
+  return true;
+}
 
 export type RunRecommendationOpts = {
   input: MatchingInput;
@@ -26,20 +34,24 @@ export type RunRecommendationResult = {
   recommendations: MatchedMedia[];
   cached: boolean;
   logId?: string;
+  claudeUsed: boolean;
 };
 
 export async function runRecommendation(
   opts: RunRecommendationOpts,
 ): Promise<RunRecommendationResult> {
   const limit = opts.limit ?? 10;
+  const useClaude = resolveUseClaude(opts);
   // 네트워크 제외 시 캐시 키를 분리해 일반(네트워크 포함) 결과와 섞이지 않게 한다.
   const cacheSource = opts.excludeNetwork ? `${opts.source}:nonet` : opts.source;
-  const key = recommendationCacheKey(opts.input, cacheSource, limit);
+  const key = recommendationCacheKey(opts.input, cacheSource, limit, {
+    useClaude,
+  });
 
   if (!opts.skipCache) {
     const cached = getCachedRecommendations(key);
     if (cached) {
-      return { recommendations: cached, cached: true };
+      return { recommendations: cached, cached: true, claudeUsed: useClaude };
     }
   }
 
@@ -53,11 +65,16 @@ export async function runRecommendation(
     : fullCatalog;
   let recommendations = matchMediaCatalog(catalog, opts.input, limit);
 
-  if (opts.useClaude !== false) {
+  if (useClaude) {
     recommendations = await enrichWithClaude(
       opts.input,
       recommendations,
       opts.isKo ?? true,
+      {
+        source: opts.source,
+        userId: opts.userId ?? null,
+        cached: false,
+      },
     );
   }
 
@@ -72,7 +89,10 @@ export async function runRecommendation(
           userId: opts.userId ?? null,
           sessionId: opts.sessionId ?? null,
           source: opts.source,
-          input: opts.input as object,
+          input: {
+            ...(opts.input as object),
+            _meta: { claudeUsed: useClaude, cached: false },
+          } as object,
           recommendations: recommendations.map((r) => ({
             mediaId: r.media.id,
             score: r.score,
@@ -88,7 +108,7 @@ export async function runRecommendation(
     }
   }
 
-  return { recommendations, cached: false, logId };
+  return { recommendations, cached: false, logId, claudeUsed: useClaude };
 }
 
 export async function markRecommendationSelection(
