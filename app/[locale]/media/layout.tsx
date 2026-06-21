@@ -20,11 +20,11 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   const title = isKo
-    ? "전국 OOH 매체 검색 | THINKAD 싱커드"
-    : "OOH media search nationwide | THINKAD";
+    ? "옥외광고 매체 검색 — 전광판·지하철·버스 단가 비교"
+    : "OOH media search — billboard, subway & bus pricing";
   const description = isKo
-    ? "강남, 홍대, 성수 등 전국 500+ 검증된 옥외광고 매체를 지역·유형·예산별로 검색하세요."
-    : "Search 500+ verified OOH media across Korea by region, format, and budget — Gangnam, Hongdae, Seongsu, and more.";
+    ? "전광판·지하철·버스·DOOH 등 전국 500+ 검증 매체를 월 단가·지역·유형별로 비교하고 즉시 견적하세요. THINKAD 싱커드."
+    : "Compare 500+ verified billboards, subway, bus, and DOOH media by monthly rate, region, and format — get instant quotes on THINKAD.";
   const ogTitle = title;
   return {
     title: { absolute: title },

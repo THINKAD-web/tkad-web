@@ -8,6 +8,12 @@ import {
   targetLabel,
 } from "@/lib/media-categories";
 import type { MediaItem } from "@/lib/media-data";
+import {
+  isTier1MediaCategorySlug,
+  tier1CategoryHeroTitle,
+  tier1CategoryLandingDescription,
+  tier1CategoryLandingTitle,
+} from "@/lib/seo-landing-copy";
 
 export const KNOWN_MEDIA_CATEGORY_SLUGS = flattenMediaCategories().map(
   (c) => c.slug,
@@ -76,12 +82,18 @@ export function categoryLandingTitle(
   locale: string,
   count: number,
 ): string {
+  if (isTier1MediaCategorySlug(slug)) {
+    const tier1 = tier1CategoryLandingTitle(slug, locale, count);
+    if (tier1) return tier1;
+  }
   const label = categoryLabel(slug, locale);
   const isKo = locale.startsWith("ko");
   if (isKo) {
-    return `${label} 광고 추천 매체 | THINKAD 싱커드`;
+    const countPart = count > 0 ? ` ${count}개` : "";
+    return `${label} 광고 단가${countPart} 비교 | THINKAD`;
   }
-  return `${label} OOH media — ${count} verified · THINKAD`;
+  const countPart = count > 0 ? ` — ${count} verified` : "";
+  return `${label} OOH pricing${countPart} | THINKAD`;
 }
 
 export function categoryLandingDescription(
@@ -89,6 +101,10 @@ export function categoryLandingDescription(
   locale: string,
   count: number,
 ): string {
+  if (isTier1MediaCategorySlug(slug)) {
+    const tier1 = tier1CategoryLandingDescription(slug, locale, count);
+    if (tier1) return tier1;
+  }
   const node = getMediaCategoryBySlug(slug);
   const label = categoryLabel(slug, locale);
   const isKo = locale.startsWith("ko");
@@ -97,25 +113,33 @@ export function categoryLandingDescription(
       node?.descriptionKo ??
       node?.heroSubtitleKo ??
       `${label} 광고 매체를 한눈에 비교하세요.`;
-    return `전국 ${label} 광고 ${count}개 매체. ${base}`;
+    const countPart = count > 0 ? `${count}개 ` : "";
+    return `전국 ${label} 광고 ${countPart}매체. 월 단가·위치 비교. ${base} THINKAD 싱커드.`;
   }
   const base =
     node?.descriptionEn ??
     node?.heroSubtitleEn ??
     `Compare ${label.toLowerCase()} OOH media.`;
-  return `${count} ${label} media listings. ${base}`;
+  const countPart = count > 0 ? `${count} ` : "";
+  return `${countPart}${label} media listings. Compare monthly rates and locations. ${base} THINKAD.`;
 }
 
 export function categoryHeroTitle(slug: string, locale: string, count: number): string {
+  if (isTier1MediaCategorySlug(slug)) {
+    const tier1 = tier1CategoryHeroTitle(slug, locale, count);
+    if (tier1) return tier1;
+  }
   const label = categoryLabel(slug, locale);
   const isKo = locale.startsWith("ko");
   if (isKo) {
-    if (slug === "subway") {
-      return `지하철 광고 — 매일 출퇴근하는 ${count > 0 ? count : ""}개 매체`;
-    }
-    return `${label} 광고 — 검증 매체 ${count}개`;
+    const countPart = count > 0 ? `${count}개` : "";
+    return countPart
+      ? `${label} 광고 — 검증 매체 ${countPart}`
+      : `${label} 광고 — 단가·비용 비교`;
   }
-  return `${label} advertising — ${count} verified media`;
+  return count > 0
+    ? `${label} advertising — ${count} verified media`
+    : `${label} advertising — compare pricing`;
 }
 
 export function targetLandingTitle(

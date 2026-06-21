@@ -551,9 +551,28 @@ export function localLandingTitle(
   const isKo = locale === "ko" || locale.startsWith("ko");
   const place = isKo ? landing.placeKo : landing.placeEn;
   if (isKo) {
-    return `${place} 옥외광고 | 전광판·빌보드 견적 | THINKAD`;
+    const countPart = count > 0 ? ` ${count}개 매체` : "";
+    return `${place} 전광판·OOH 광고비${countPart} | THINKAD`;
   }
-  return `${place} OOH advertising | billboards & DOOH | THINKAD`;
+  const countPart = count > 0 ? ` — ${count} placements` : "";
+  return `${place} billboard & OOH ad costs${countPart} | THINKAD`;
+}
+
+export function localLandingHeroTitle(
+  landing: LocalSeoLanding,
+  locale: string,
+  count: number,
+): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  const place = isKo ? landing.placeKo : landing.placeEn;
+  if (isKo) {
+    return count > 0
+      ? `${place} 전광판·OOH 광고비 — 검증 매체 ${count}개`
+      : `${place} 전광판·OOH 광고비 비교`;
+  }
+  return count > 0
+    ? `${place} billboard & OOH costs — ${count} verified media`
+    : `${place} billboard & OOH advertising costs`;
 }
 
 export function localLandingDescription(
@@ -564,9 +583,11 @@ export function localLandingDescription(
   const isKo = locale === "ko" || locale.startsWith("ko");
   const place = isKo ? landing.placeKo : landing.placeEn;
   if (isKo) {
-    return `${place} 핵심 상권 OOH 매체 ${count}개. 신논현·강남대로 전광판 광고비를 THINKAD에서 바로 확인하세요.`;
+    const countPart = count > 0 ? `OOH 매체 ${count}개. ` : "";
+    return `${place} 핵심 상권 ${countPart}전광판·빌보드 광고비를 실시간 단가로 비교하고 즉시 견적하세요. THINKAD 싱커드.`;
   }
-  return `${count} verified OOH placements in ${place}. Compare pricing and request quotes on THINKAD.`;
+  const countPart = count > 0 ? `${count} verified ` : "";
+  return `${countPart}OOH placements in ${place}. Compare billboard & DOOH pricing and request quotes on THINKAD.`;
 }
 
 export function filterCasesForLocalLanding(

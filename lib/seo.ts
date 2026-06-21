@@ -331,6 +331,11 @@ export function siteNameForLocale(locale: string): string {
     : "THINKAD";
 }
 
+/** 하위 페이지 title 템플릿 — 키워드 선행, 브랜드는 뒤로 약하게 */
+export function siteTitleTemplate(locale: string): string {
+  return "%s | THINKAD";
+}
+
 /** openGraph + twitter (summary_large_image) — 모든 공개 페이지에서 images 보장 */
 export function buildShareMetadata(opts: {
   locale: string;

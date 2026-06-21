@@ -9,6 +9,7 @@ import {
   defaultOgImages,
   pageAlternates,
   siteKeywords,
+  siteTitleTemplate,
   siteUrl,
 } from "@/lib/seo";
 import { buildStructuredDataGraph } from "@/lib/structured-data";
@@ -57,12 +58,12 @@ export async function generateMetadata({
 
   const titleDefault =
     locale === "ko"
-      ? "THINKAD 싱커드 — 전국 OOH 광고 플랫폼"
-      : "THINKAD — Nationwide OOH advertising platform";
+      ? "전광판·지하철·버스 옥외광고 단가 비교 | 전국 500+ 매체"
+      : "Billboard, subway & bus OOH pricing | 500+ verified media";
   const description =
     locale === "ko"
-      ? "전국 500+ 검증 OOH 매체, AI 플래너, 전자계약까지 — 데이터 기반 옥외광고 원스톱."
-      : "500+ verified OOH media, AI planner, and e-contract — data-driven outdoor advertising.";
+      ? "실시간 월 단가·예상 노출로 전광판·지하철·버스·DOOH를 비교하고 즉시 견적. THINKAD 싱커드."
+      : "Compare monthly rates and estimated reach for billboards, subway, bus, and DOOH — instant quotes on THINKAD.";
 
   const googleVer =
     process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION?.trim() ||
@@ -74,7 +75,7 @@ export async function generateMetadata({
   return {
     title: {
       default: titleDefault,
-      template: locale === "ko" ? "%s — THINKAD 싱커드" : "%s — THINKAD",
+      template: siteTitleTemplate(locale),
     },
     description,
     metadataBase,

@@ -1,6 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { buildMediaPageTitle } from "@/lib/media-seo";
 import { isBunnyMediaUrl } from "@/lib/optimized-image-url";
 import { ogImageUrl, siteUrl } from "@/lib/seo";
 
@@ -41,8 +42,7 @@ export function resolveMediaOgImageUrl(media: MediaItem): string {
 
 export function buildMediaOgTitle(media: MediaItem, locale: string): string {
   const isKo = locale === "ko" || locale.startsWith("ko");
-  const name = isKo ? media.name : media.nameEn || media.name;
-  return `${name} | THINKAD 싱커드`;
+  return buildMediaPageTitle(media, locale, isKo ? "옥외광고" : "OOH pricing");
 }
 
 export function buildMediaOgDescription(media: MediaItem, locale: string): string {

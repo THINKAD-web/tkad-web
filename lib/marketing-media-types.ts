@@ -196,11 +196,82 @@ export function marketingTypeLandingTitle(
   count: number,
 ): string {
   const isKo = locale === "ko" || locale.startsWith("ko");
-  const label = isKo ? DEFS[slug].labelKo : DEFS[slug].labelEn;
+  const nKo = count > 0 ? `${count}개` : "";
+  const nEn = count > 0 ? String(count) : "";
+
   if (isKo) {
-    return `${label} 매체 ${count}곳 | 견적·비교 | THINKAD`;
+    switch (slug) {
+      case "billboard":
+        return nKo
+          ? `전광판 광고 단가 ${nKo} 비교 | 위치·월 비용·견적 | THINKAD`
+          : "전광판 광고 단가 비교 | 위치·월 비용·견적 | THINKAD";
+      case "subway":
+        return nKo
+          ? `지하철·교통 광고 비용 ${nKo} | 역·노선별 단가 비교 | THINKAD`
+          : "지하철·교통 광고 비용 | 역·노선별 단가 비교 | THINKAD";
+      case "dooh":
+        return nKo
+          ? `디지털·DOOH 광고 단가 ${nKo} | 미디어폴·전광 단가 | THINKAD`
+          : "디지털·DOOH 광고 단가 | 미디어폴·전광 단가 | THINKAD";
+    }
   }
-  return `${label} — ${count} verified placements | THINKAD`;
+
+  switch (slug) {
+    case "billboard":
+      return nEn
+        ? `Billboard ad pricing — ${nEn} placements | THINKAD`
+        : "Billboard ad pricing — compare costs | THINKAD";
+    case "subway":
+      return nEn
+        ? `Subway & transit ad costs — ${nEn} placements | THINKAD`
+        : "Subway & transit ad costs | THINKAD";
+    case "dooh":
+      return nEn
+        ? `DOOH pricing — ${nEn} digital placements | THINKAD`
+        : "DOOH & digital signage pricing | THINKAD";
+  }
+}
+
+export function marketingTypeHeroTitle(
+  slug: MarketingMediaTypeSlug,
+  locale: string,
+  count: number,
+): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  const nKo = count > 0 ? `${count}개` : "";
+  const nEn = count > 0 ? String(count) : "";
+
+  if (isKo) {
+    switch (slug) {
+      case "billboard":
+        return nKo
+          ? `전광판 광고 단가 — ${nKo} 매체 비교`
+          : "전광판 광고 단가 비교";
+      case "subway":
+        return nKo
+          ? `지하철·교통 광고 비용 — ${nKo} 매체`
+          : "지하철·교통 광고 비용 비교";
+      case "dooh":
+        return nKo
+          ? `디지털·DOOH 광고 단가 — ${nKo} 매체`
+          : "디지털·DOOH 광고 단가 비교";
+    }
+  }
+
+  switch (slug) {
+    case "billboard":
+      return nEn
+        ? `Billboard pricing — ${nEn} verified media`
+        : "Billboard ad pricing comparison";
+    case "subway":
+      return nEn
+        ? `Subway & transit costs — ${nEn} placements`
+        : "Subway & transit advertising costs";
+    case "dooh":
+      return nEn
+        ? `DOOH pricing — ${nEn} placements`
+        : "DOOH & digital signage pricing";
+  }
 }
 
 export function marketingTypeLandingDescription(
@@ -210,8 +281,10 @@ export function marketingTypeLandingDescription(
 ): string {
   const isKo = locale === "ko" || locale.startsWith("ko");
   const label = isKo ? DEFS[slug].labelKo : DEFS[slug].labelEn;
+  const countKo = count > 0 ? `${count}개 ` : "";
+  const countEn = count > 0 ? `${count} ` : "";
   if (isKo) {
-    return `${label} 매체 ${count}개. 위치·광고비·예상 노출을 THINKAD에서 바로 비교하고 견적을 요청하세요.`;
+    return `${label} ${countKo}매체. 위치·월 단가·예상 노출을 비교하고 즉시 견적하세요. THINKAD 싱커드.`;
   }
-  return `Compare ${count} ${label} placements — pricing, locations, and quotes on THINKAD.`;
+  return `Compare ${countEn}${label} placements — monthly rates, locations, and quotes on THINKAD.`;
 }
