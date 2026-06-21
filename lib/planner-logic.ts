@@ -3,6 +3,10 @@ import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
+import {
+  normalizeCampaignGoal,
+  type CampaignFunnel,
+} from "@/lib/planner/normalize-campaign-goal";
 import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
@@ -631,20 +635,36 @@ export function impressionShareByCategory(
     .sort((a, b) => b.value - a.value);
 }
 
-/** 목표별 “핵심 도달” 비중(데모, 0–100) */
+/** 목표별 “핵심 도달” 비중(데모, 0–100) — 퍼널 기준 + displayKey 세분 */
 export function reachSplitForGoal(goal: PlannerCampaignGoal | null): {
   corePct: number;
   extendedPct: number;
 } {
-  const table: Record<PlannerCampaignGoal, [number, number]> = {
-    brand: [62, 38],
-    launch: [55, 45],
-    event: [58, 42],
-    sales: [52, 48],
-    local: [68, 32],
+  const funnelTable: Record<CampaignFunnel, [number, number]> = {
+    awareness: [62, 38],
+    consideration: [58, 42],
+    conversion: [52, 48],
   };
-  const row: [number, number] =
-    goal != null && table[goal] != null ? table[goal] : table.brand;
+
+  const displayOverride: Partial<Record<PlannerCampaignGoal, [number, number]>> =
+    {
+      launch: [55, 45],
+      local: [68, 32],
+    };
+
+  if (!goal) {
+    return {
+      corePct: funnelTable.awareness[0],
+      extendedPct: funnelTable.awareness[1],
+    };
+  }
+
+  const normalized = normalizeCampaignGoal(goal);
+  const override = displayOverride[normalized.displayKey];
+  if (override) {
+    return { corePct: override[0], extendedPct: override[1] };
+  }
+  const row = funnelTable[normalized.funnel];
   return { corePct: row[0], extendedPct: row[1] };
 }
 
@@ -671,14 +691,24 @@ export function comparePlansByDuration(
 
 function goalRoiBoost(goal: PlannerCampaignGoal | null): number {
   if (!goal) return 0;
-  const t: Record<PlannerCampaignGoal, number> = {
-    brand: 0.08,
-    launch: 0.12,
-    event: 0.1,
-    sales: 0.15,
-    local: 0.06,
+
+  const funnelBoost: Record<CampaignFunnel, number> = {
+    awareness: 0.08,
+    consideration: 0.1,
+    conversion: 0.12,
   };
-  return t[goal] ?? 0;
+
+  const displayOverride: Partial<Record<PlannerCampaignGoal, number>> = {
+    launch: 0.12,
+    local: 0.06,
+    sales: 0.15,
+    event: 0.1,
+  };
+
+  const normalized = normalizeCampaignGoal(goal);
+  const override = displayOverride[normalized.displayKey];
+  if (override != null) return override;
+  return funnelBoost[normalized.funnel] ?? 0;
 }
 
 /**

@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 export const recommendInputSchema = z.object({
-  goal: z.enum(["awareness", "consideration", "launch"]),
+  goal: z.enum(["awareness", "consideration", "launch", "conversion"]),
   target: z.enum(["genz", "millennial", "family", "biz", "mass"]),
   budgetMaxMan: z.number().min(0).max(1_000_000),
   region: z.string().max(64),

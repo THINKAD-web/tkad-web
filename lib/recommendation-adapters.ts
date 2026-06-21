@@ -1,20 +1,13 @@
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RecommendationContext } from "@/lib/planner/recommend";
+import {
+  matchingGoalFromRaw,
+  matchingGoalTagsFromRaw,
+} from "@/lib/planner/normalize-campaign-goal";
 import type { MatchingInput, MatchedMedia, MatchingGoal } from "@/lib/matching-engine";
 import type { ScoredMedia as AiScoredMedia } from "@/lib/ai-media-recommend";
 import type { ScoredMedia as PlannerScoredMedia } from "@/lib/planner/recommend";
 import { oneLineReason } from "@/lib/matching-engine";
-
-const GOAL_MAP: Record<string, MatchingGoal> = {
-  awareness: "awareness",
-  consideration: "consideration",
-  launch: "launch",
-  brand: "brand",
-  event: "event",
-  sales: "sales",
-  local: "local",
-  conversion: "conversion",
-};
 
 const TARGET_MAP: Record<string, string> = {
   genz: "mz",
@@ -25,14 +18,6 @@ const TARGET_MAP: Record<string, string> = {
   mz: "mz",
   worker: "worker",
   tourist: "tourist",
-};
-
-const PLANNER_GOAL_MAP: Record<string, MatchingGoal> = {
-  brand: "brand",
-  launch: "launch",
-  event: "event",
-  sales: "conversion",
-  local: "local",
 };
 
 const PLANNER_AGE_TO_TARGET: Record<string, string> = {
@@ -51,6 +36,10 @@ const PLANNER_INDUSTRY_MAP: Record<string, string> = {
   indEnt: "entertainment",
   indOther: "other",
 };
+
+function toMatchingGoal(raw: string | null | undefined): MatchingGoal {
+  return matchingGoalFromRaw(raw) as MatchingGoal;
+}
 
 export function aiInputToMatching(
   input: AiRecommendInput,
@@ -72,7 +61,8 @@ export function aiInputToMatching(
       1,
       Math.round((input.preferredPeriodWeeks ?? 4) / 4),
     ),
-    goal: GOAL_MAP[input.goal] ?? "awareness",
+    goal: toMatchingGoal(input.goal),
+    goalTags: matchingGoalTagsFromRaw(input.goal),
     categories:
       input.type && input.type !== "all" ? [input.type] : undefined,
     seed,
@@ -88,6 +78,8 @@ export function plannerContextToMatching(
       (ctx.budgetMan * 10_000) / ctx.months
     : 0;
 
+  const goalRaw = ctx.goal ?? "brand";
+
   return {
     monthlyBudgetWon,
     regions: ctx.regions,
@@ -96,7 +88,8 @@ export function plannerContextToMatching(
     : "other",
     targets: [PLANNER_AGE_TO_TARGET[ctx.ageKey] ?? "mass"],
     durationMonths: Math.max(1, ctx.months),
-    goal: ctx.goal ? (PLANNER_GOAL_MAP[ctx.goal] ?? ctx.goal) : "brand",
+    goal: toMatchingGoal(goalRaw),
+    goalTags: matchingGoalTagsFromRaw(goalRaw),
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,
     seed,
   };
