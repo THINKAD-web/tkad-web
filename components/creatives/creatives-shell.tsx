@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero, type PageHeroProps } from "@/components/layout/page-hero";
+import { PageContainer } from "@/components/layout/page-container";
 import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import { ArrowLeft } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -45,7 +46,7 @@ export function CreativesShell({
           </>
         ) : (
           <section className="relative overflow-hidden border-b border-gray-200 bg-gray-50 text-gray-900 dark:border-white/10 dark:bg-[#05050a] dark:text-white">
-            <div className="relative mx-auto max-w-7xl px-4 pb-6 pt-8 sm:px-6 sm:pt-10">
+            <PageContainer className="pb-6 pt-8 sm:pt-10">
               {showBackToLibrary ? (
                 <Link
                   href="/creatives"
@@ -78,13 +79,13 @@ export function CreativesShell({
                   {description}
                 </p>
               ) : null}
-            </div>
+            </PageContainer>
             <SubTabsBar group="studio" currentPath={subTabPath ?? "/creatives/upload"} />
           </section>
         )}
 
         <section className="bg-card py-10 sm:py-14">
-          <div className="ui-container">{children}</div>
+          <PageContainer>{children}</PageContainer>
         </section>
       </div>
     </HomeLandingDayNight>

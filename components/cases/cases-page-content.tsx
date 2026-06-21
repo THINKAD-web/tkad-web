@@ -11,6 +11,7 @@ import {
   categoryHeroCtaSecondaryClass,
 } from "@/components/category-explore-hero";
 import { NeonSection } from "@/components/landing/neon/neon-section";
+import { PageContainer } from "@/components/layout/page-container";
 import { CasesCatalogGrids } from "@/components/cases/cases-catalog-grids";
 import { CasesCatalogSection } from "@/components/cases/cases-catalog-section";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
@@ -50,7 +51,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
           description="실제 집행된 OOH 캠페인의 전략과 성과를 확인하세요"
         />
         <SubTabsBar group="content" currentPath="/cases" />
-        <div className="border-b border-white/10 px-4 pb-6">
+        <PageContainer className="border-b border-white/10 pb-6">
           <CategoryHeroCtaRow>
             <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
               {t("cases.reportCtaQuote")}
@@ -61,7 +62,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
               <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
             </Link>
           </CategoryHeroCtaRow>
-        </div>
+        </PageContainer>
 
         <NeonSection className="pb-0 pt-8 sm:pb-0 sm:pt-12">
           {empty ? (
