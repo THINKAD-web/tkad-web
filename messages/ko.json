@@ -287,14 +287,23 @@
     "orEmail": "또는 이메일로",
     "usageGuide": "사용법"
   },
+  "planNav": {
+    "cart": "담은 매체",
+    "saved": "저장한 플랜",
+    "plannerResults": "플래너 결과",
+    "newPlan": "새 플랜"
+  },
+  "favoritesNav": {
+    "label": "관심매체"
+  },
   "myHub": {
     "loading": "마이페이지 불러오는 중…",
     "greeting": "안녕하세요, {name}님",
     "logout": "로그아웃",
     "tabs": {
       "campaigns": "내 캠페인",
-      "favorites": "저장한 매체",
-      "planner": "내 플래너",
+      "favorites": "관심매체",
+      "planner": "플래너 결과",
       "recent": "최근 본 매체",
       "points": "포인트 내역",
       "team": "팀 관리"
@@ -935,9 +944,9 @@
     "compareAvailabilityMaintenance": "🔴 점검중",
     "compareStartPlanner": "Planner 시작",
     "favorites": {
-      "headerAria": "찜한 매체",
-      "headerAriaCount": "찜한 매체 {count}개",
-      "menuLabel": "찜한 매체",
+      "headerAria": "관심매체",
+      "headerAriaCount": "관심매체 {count}개",
+      "menuLabel": "관심매체",
       "guestMax": "비회원은 최대 {max}개까지 찜할 수 있습니다.",
       "added": "{name}을(를) 찜했습니다.",
       "removed": "찜 목록에서 제거했습니다.",

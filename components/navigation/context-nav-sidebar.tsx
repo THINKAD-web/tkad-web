@@ -121,8 +121,8 @@ export function ContextNavSidebar({ collapsed, hoverExpanded }: Props) {
       if (item.id === "compare" && compareCount > 0) {
         return { ...item, badge: compareCount };
       }
-      if (item.id === "saved" && savedPlansCount != null && savedPlansCount > 0) {
-        return { ...item, labelKo: `저장한 플랜 (${savedPlansCount})`, labelEn: `Saved plans (${savedPlansCount})` };
+      if (item.id === "planner-results" && savedPlansCount != null && savedPlansCount > 0) {
+        return { ...item, badge: savedPlansCount };
       }
       return item;
     }),

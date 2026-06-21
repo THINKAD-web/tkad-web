@@ -17,6 +17,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { FAVORITES_NAV_LABEL, PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
 import { ProTrialBanner, type ProTrialStatus } from "@/components/my/pro-trial-banner";
 import { MobilePullToRefresh } from "@/components/mobile/mobile-pull-to-refresh";
 
@@ -84,7 +85,7 @@ export function MobileMyHubView({
   const menuItems: MenuItem[] = [
     {
       href: "/my?tab=favorites",
-      label: isKo ? "찜한 매체" : "Saved media",
+      label: isKo ? FAVORITES_NAV_LABEL.ko : FAVORITES_NAV_LABEL.en,
       icon: Heart,
     },
     {
@@ -99,7 +100,7 @@ export function MobileMyHubView({
     },
     {
       href: "/my/plan",
-      label: isKo ? "내 플랜" : "My plan",
+      label: isKo ? PLAN_NAV_LABELS.cart.ko : PLAN_NAV_LABELS.cart.en,
       icon: LayoutList,
     },
     {
@@ -217,7 +218,7 @@ export function MobileMyHubView({
           {/* Activity stats */}
           <div className="grid grid-cols-3 gap-2">
             {[
-              { label: isKo ? "찜" : "Saved", value: stats.favorites },
+              { label: isKo ? FAVORITES_NAV_LABEL.ko : FAVORITES_NAV_LABEL.en, value: stats.favorites },
               { label: isKo ? "문의" : "Inquiries", value: stats.inquiries },
               { label: isKo ? "플랜" : "Plans", value: stats.plans },
             ].map((s) => (

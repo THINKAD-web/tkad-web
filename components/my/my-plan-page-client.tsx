@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowRight, ChevronDown, ChevronUp, GripVertical, Sparkles, Trash2, X } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -25,6 +25,7 @@ import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
 export function MyPlanPageClient() {
+  const tPlan = useTranslations("planNav");
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
@@ -114,19 +115,19 @@ export function MyPlanPageClient() {
               [ MY PLAN ]
             </p>
             <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
-              {isKo ? "내 플랜" : "My plan"}
+              {tPlan("cart")}
             </h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
               {isKo
-                ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장된 플랜」 탭에서 확인할 수 있습니다."
-                : "Generate a report or request a quote. After saving, open the Saved plans tab."}
+                ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장한 플랜」에서 확인할 수 있습니다."
+                : "Generate a report or request a quote. After saving, open Saved plans."}
             </p>
             <div className="mt-3">
               <Link
                 href="/my/plan/saved"
                 className="text-xs font-semibold text-violet-600 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-100"
               >
-                {isKo ? "저장된 플랜 보기 →" : "View saved plans →"}
+                {isKo ? `${tPlan("saved")} 보기 →` : `View ${tPlan("saved")} →`}
               </Link>
             </div>
           </div>

@@ -153,7 +153,7 @@ export function HeaderProfileDropdown({
 
           {showPro ? (
             <Link
-              href="/points"
+              href="/pricing"
               role="menuitem"
               onClick={() => {
                 close();

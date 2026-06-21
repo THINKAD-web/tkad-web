@@ -45,21 +45,23 @@ function useIsMdUp() {
 
 function PlanCartBarLink({
   count,
-  isKo,
+  label,
+  cartLabel,
   className,
 }: {
   count: number;
-  isKo: boolean;
+  label: string;
+  cartLabel: string;
   className?: string;
 }) {
   return (
     <Link
       href="/my/plan"
       className={className}
-      aria-label={isKo ? `내 플랜 ${count}개` : `My plan ${count} items`}
+      aria-label={label}
     >
       <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      {isKo ? "내 플랜" : "My plan"}
+      {cartLabel}
       <span className="tabular-nums">{formatPlanCartBadgeCount(count)}</span>
     </Link>
   );
@@ -76,6 +78,7 @@ export default function CompareBar({
   variant = "default",
 }: Props) {
   const t = useTranslations("media");
+  const tPlan = useTranslations("planNav");
   const pathname = usePathname();
   const { count: planCount } = usePlanCart();
   const isKo = locale === "ko";
@@ -150,8 +153,8 @@ export default function CompareBar({
               ) : showPlanInBar ? (
                 <span className="min-w-0 text-xs font-semibold text-gray-900 dark:text-white sm:text-[13px]">
                   {isKo
-                    ? `내 플랜 · ${planCount}개 매체`
-                    : `My plan · ${planCount} media`}
+                    ? `${tPlan("cart")} · ${planCount}개 매체`
+                    : `${tPlan("cart")} · ${planCount} media`}
                 </span>
               ) : null}
             </div>
@@ -169,7 +172,12 @@ export default function CompareBar({
               {showPlanInBar ? (
                 <PlanCartBarLink
                   count={planCount}
-                  isKo={isKo}
+                  label={
+                    isKo
+                      ? `${tPlan("cart")} ${planCount}개`
+                      : `${tPlan("cart")} ${planCount} items`
+                  }
+                  cartLabel={tPlan("cart")}
                   className={cn(lightPlanBtn, "hidden md:inline-flex")}
                 />
               ) : null}
@@ -244,8 +252,8 @@ export default function CompareBar({
           ) : showPlanInBar ? (
             <span className="min-w-0 font-display text-xs font-medium uppercase tracking-[0.12em] text-hero-fg/95 sm:text-sm">
               {isKo
-                ? `내 플랜 · ${planCount}개 매체`
-                : `My plan · ${planCount} media`}
+                ? `${tPlan("cart")} · ${planCount}개 매체`
+                : `${tPlan("cart")} · ${planCount} media`}
             </span>
           ) : null}
         </div>
@@ -258,7 +266,7 @@ export default function CompareBar({
               size="sm"
               className={cn(blockClass, "hidden whitespace-nowrap md:inline-flex")}
             >
-              {isKo ? "내 플랜" : "My plan"} ({formatPlanCartBadgeCount(planCount)})
+              {tPlan("cart")} ({formatPlanCartBadgeCount(planCount)})
             </BtnBlock>
           ) : null}
           {hasCompareSelection ? (
