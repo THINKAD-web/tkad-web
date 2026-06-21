@@ -6,6 +6,8 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { buildPlanCartReportBundle } from "@/lib/plan-cart-report/build-report";
 import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-breakdown";
@@ -13,6 +15,7 @@ import { SavePlanButton } from "@/components/my/save-plan-button";
 import PlannerReportStep from "@/components/planner-report-step";
 import { BtnBlock } from "@/components/brutalist";
 import { trackPlanReportActivity } from "@/lib/plan-report-activity/client";
+import { cn } from "@/lib/utils";
 
 export function MyPlanReportPageClient() {
   const tPlan = useTranslations("planNav");
@@ -64,8 +67,13 @@ export function MyPlanReportPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
-        <div className="mx-auto max-w-5xl">
+      <div
+        className={cn(
+          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
+          MOBILE_CHROME_BOTTOM_PAD,
+        )}
+      >
+        <PageContainer>
           <div className="mb-8">
             <Link
               href="/my/plan"
@@ -159,7 +167,7 @@ export function MyPlanReportPageClient() {
               />
             </div>
           ) : null}
-        </div>
+        </PageContainer>
       </div>
     </HomeLandingDayNight>
   );

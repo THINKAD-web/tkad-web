@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Bell, CheckCheck } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
 import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -98,7 +99,10 @@ export function NotificationsPageClient() {
 
   return (
     <HomeLandingDayNight portal>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell mx-auto max-w-3xl min-h-[calc(100dvh-4rem)] px-4 py-10 sm:px-6 sm:py-14">
+      <PageContainer
+        variant="prose"
+        className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)] py-10 sm:py-14"
+      >
         <div className="mb-8 flex flex-wrap items-end justify-between gap-4">
           <div>
             <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-300/80">
@@ -205,7 +209,7 @@ export function NotificationsPageClient() {
             ))}
           </ul>
         )}
-      </div>
+      </PageContainer>
     </HomeLandingDayNight>
   );
 }

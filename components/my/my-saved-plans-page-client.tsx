@@ -12,6 +12,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
 import { replacePlanCart } from "@/lib/plan-cart";
 import { pushPlanCartToServer } from "@/lib/plan-cart-server-sync";
@@ -132,8 +134,13 @@ export function MySavedPlansPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
-        <div className="mx-auto max-w-3xl">
+      <div
+        className={cn(
+          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
+          MOBILE_CHROME_BOTTOM_PAD,
+        )}
+      >
+        <PageContainer>
           <Link
             href="/my/plan"
             className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
@@ -280,7 +287,7 @@ export function MySavedPlansPageClient() {
               })}
             </ul>
           )}
-        </div>
+        </PageContainer>
       </div>
     </HomeLandingDayNight>
   );

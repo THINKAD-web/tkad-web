@@ -167,7 +167,7 @@ export function FooterBrutal() {
         className="absolute inset-0 hidden opacity-15 dark:block tkad-neon-grid"
       />
 
-      <div className="relative mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <div className="relative mx-auto max-w-7xl px-4 py-6 md:px-6 lg:px-8">
         <div className="grid grid-cols-3 items-start gap-6 lg:gap-8">
           <div>
             <Link

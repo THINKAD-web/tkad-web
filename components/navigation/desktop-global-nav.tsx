@@ -181,7 +181,7 @@ export function DesktopGlobalNav() {
   return (
     <>
       <header className="tkad-nav-chrome sticky top-0 z-50 w-full border-b border-gray-200/90 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#05050a]/95">
-        <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-3 sm:gap-4 sm:px-4 lg:px-6">
+        <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-4 sm:gap-4 md:px-6 lg:px-8">
           <div className="flex min-w-0 items-center gap-1 sm:gap-2">
             {showMobileBack ? (
               <button
