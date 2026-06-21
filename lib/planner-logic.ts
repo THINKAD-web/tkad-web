@@ -7,6 +7,9 @@ import {
   normalizeCampaignGoal,
   type CampaignFunnel,
 } from "@/lib/planner/normalize-campaign-goal";
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import { matchMediaCatalog } from "@/lib/matching-engine";
 import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
@@ -245,6 +248,9 @@ export function computePortfolioReportMetrics(
 /** AI 자동 조합 상한 (직접 선택 시에는 적용하지 않음) */
 export const PLANNER_AUTO_PORTFOLIO_MAX_ITEMS = 12;
 
+/** matchMediaCatalog 후보 풀 상한 (다양성 pick 전) */
+export const PLANNER_AUTO_PORTFOLIO_POOL_SIZE = 20;
+
 export function computePlannerPortfolioMonthlyMan(
   portfolio: readonly MediaItem[],
 ): number {
@@ -298,6 +304,7 @@ export function resolvePlannerPortfolio(args: {
   budgetMan: number;
   months: number;
   mediaSelectionExplicit: boolean;
+  recommendCtx: RecommendationContext;
 }): MediaItem[] {
   const {
     campaignMediaIds,
@@ -306,6 +313,7 @@ export function resolvePlannerPortfolio(args: {
     budgetMan,
     months,
     mediaSelectionExplicit,
+    recommendCtx,
   } = args;
   if (months <= 0 || budgetMan < PLANNER_BUDGET_MIN) {
     return [];
@@ -320,33 +328,37 @@ export function resolvePlannerPortfolio(args: {
   if (filtered.length === 0) {
     return [];
   }
-  return selectPlannerPortfolio(
+  return selectPlannerPortfolioFromMatching(
     [...filtered],
+    recommendCtx,
     budgetMan,
     months,
     PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
   );
 }
 
-export function selectPlannerPortfolio(
-  filtered: MediaItem[],
+function knapsackPortfolioWithinMonthlyCap(
+  candidates: readonly MediaItem[],
   budgetMan: number,
   months: number,
-  maxItems = 6,
+  maxItems: number,
+  fallbackPool: readonly MediaItem[],
 ): MediaItem[] {
-  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+  if (months <= 0 || budgetMan < 1) return [];
+
   const spendPerMonth = budgetMan / months;
   const cap = spendPerMonth * 0.92;
-  const scored = filtered.map((m) => ({
-    m,
-    score:
-      m.dailyFootTraffic /
-      Math.max(catalogPriceFieldToPriceMan(m.price), 0.01),
-  }));
-  scored.sort((a, b) => b.score - a.score);
+  const seen = new Set<string>();
+  const ordered: MediaItem[] = [];
+  for (const m of candidates) {
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+    ordered.push(m);
+  }
+
   const out: MediaItem[] = [];
   let allocated = 0;
-  for (const { m } of scored) {
+  for (const m of ordered) {
     if (out.length >= maxItems) break;
     const priceMan = catalogPriceFieldToPriceMan(m.price);
     if (allocated + priceMan <= cap) {
@@ -354,11 +366,68 @@ export function selectPlannerPortfolio(
       allocated += priceMan;
     }
   }
-  if (out.length === 0) {
-    const cheapest = [...filtered].sort((a, b) => a.price - b.price)[0];
+
+  if (out.length === 0 && fallbackPool.length > 0) {
+    const cheapest = [...fallbackPool].sort(
+      (a, b) =>
+        catalogPriceFieldToPriceMan(a.price) -
+        catalogPriceFieldToPriceMan(b.price),
+    )[0];
     if (cheapest) out.push(cheapest);
   }
   return out;
+}
+
+/**
+ * 하이브리드 자동 조합 — matchMediaCatalog(목표·연령·업종) + 월예산 92% knapsack.
+ * `PLANNER_AUTO_PORTFOLIO_MAX_ITEMS`(12) 상한 유지.
+ */
+export function selectPlannerPortfolioFromMatching(
+  filtered: MediaItem[],
+  ctx: RecommendationContext,
+  budgetMan: number,
+  months: number,
+  maxItems = PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
+  poolSize = PLANNER_AUTO_PORTFOLIO_POOL_SIZE,
+): MediaItem[] {
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+
+  const matchingInput = plannerContextToMatching(ctx, 0);
+  const matched = matchMediaCatalog(filtered, matchingInput, poolSize);
+  const candidates = matched.map((row) => row.media);
+
+  return knapsackPortfolioWithinMonthlyCap(
+    candidates,
+    budgetMan,
+    months,
+    maxItems,
+    filtered,
+  );
+}
+
+/** 레거시 자동 조합 — 유동인구÷가격 효율 greedy (before/after 비교용). */
+export function selectPlannerPortfolio(
+  filtered: MediaItem[],
+  budgetMan: number,
+  months: number,
+  maxItems = 6,
+): MediaItem[] {
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+  const scored = filtered.map((m) => ({
+    m,
+    score:
+      m.dailyFootTraffic /
+      Math.max(catalogPriceFieldToPriceMan(m.price), 0.01),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  const ordered = scored.map((s) => s.m);
+  return knapsackPortfolioWithinMonthlyCap(
+    ordered,
+    budgetMan,
+    months,
+    maxItems,
+    filtered,
+  );
 }
 
 /** 사용자가 고른 순서를 유지하며 월 예산 상한 내에서 슬롯 구성 */

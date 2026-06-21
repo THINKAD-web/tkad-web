@@ -299,8 +299,28 @@ export default function IntegratedPlannerPageClient({
         budgetMan: budgetNum,
         months,
         mediaSelectionExplicit: campaignMediaIds.length > 0,
+        recommendCtx: {
+          goal: campaignGoal,
+          regions,
+          categories: categoriesArr,
+          ageKey,
+          industryKey,
+          budgetMan: budgetNum,
+          months,
+        },
       }),
-    [campaignMediaIds, selectedMediaOrdered, filtered, budgetNum, months],
+    [
+      campaignMediaIds,
+      selectedMediaOrdered,
+      filtered,
+      budgetNum,
+      months,
+      campaignGoal,
+      regions,
+      categoriesArr,
+      ageKey,
+      industryKey,
+    ],
   );
 
   const portfolioBudgetStatus = useMemo(
