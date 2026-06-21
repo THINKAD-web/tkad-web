@@ -12,6 +12,8 @@ import {
   PLANNER_AGE_KEYS,
   PLANNER_INDUSTRY_KEYS,
 } from "@/lib/planner/types";
+import { PLANNER_SEOUL_ZONE_KEYS } from "@/lib/planner/seoul-zones";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import type { PlannerCampaignGoal, PlannerCategory } from "@/lib/planner/types";
 
@@ -25,9 +27,21 @@ const Body = z.object({
     .nullable()
     .optional(),
   regions: z.array(z.string()).default([]),
+  seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
   categories: z.array(z.string()).default([]),
   ageKey: z.enum(PLANNER_AGE_KEYS).default("ageAll"),
   industryKey: z.enum(PLANNER_INDUSTRY_KEYS).nullable().optional(),
+  goalFollowUp: z
+    .object({
+      launchFocusWeeks: z.number().nullable().optional(),
+      launchTiming: z.enum(["asap", "next_month", "season"]).nullable().optional(),
+      localRadiusKm: z.number().nullable().optional(),
+      localTradeArea: z.string().nullable().optional(),
+      eventDurationDays: z.number().nullable().optional(),
+      conversionChannel: z.enum(["store", "online", "both"]).nullable().optional(),
+      conversionKpi: z.string().nullable().optional(),
+    })
+    .optional(),
   budgetMan: z.number().min(0).max(1_000_000),
   months: z.number().int().min(1).max(36),
   seed: z.number().int().min(0).max(9999).optional(),
@@ -88,11 +102,13 @@ export async function POST(request: NextRequest) {
   const ctx = {
     goal: (d.goal ?? null) as PlannerCampaignGoal | null,
     regions: d.regions,
+    seoulZones: d.seoulZones,
     categories: d.categories as PlannerCategory[],
     ageKey: d.ageKey,
     industryKey: d.industryKey ?? null,
     budgetMan: d.budgetMan,
     months: d.months,
+    goalFollowUp: (d.goalFollowUp ?? {}) as PlannerGoalFollowUp,
   };
 
   const matchingInput = plannerContextToMatching(ctx, d.seed ?? 0);

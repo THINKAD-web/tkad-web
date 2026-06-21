@@ -29,6 +29,8 @@ const PLANNER_AGE_TO_TARGET: Record<string, string> = {
 };
 
 import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
+import { followUpGoalTags } from "@/lib/planner/goal-follow-up";
+import { seoulZonesToMatchingRegions } from "@/lib/planner/seoul-zones";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 function toMatchingGoal(raw: string | null | undefined): MatchingGoal {
@@ -73,10 +75,16 @@ export function plannerContextToMatching(
     : 0;
 
   const goalRaw = ctx.goal ?? "brand";
+  const baseTags = matchingGoalTagsFromRaw(goalRaw);
+  const followTags = followUpGoalTags(ctx.goal, ctx.goalFollowUp ?? {});
+  const goalTags = [...new Set([...baseTags, ...followTags])];
 
   return {
     monthlyBudgetWon,
-    regions: ctx.regions,
+    regions: seoulZonesToMatchingRegions(
+      ctx.regions,
+      ctx.seoulZones ?? [],
+    ),
     industry: ctx.industryKey ?
       (PLANNER_INDUSTRY_TO_MATCHING[ctx.industryKey as PlannerIndustryKey] ??
         "other")
@@ -84,7 +92,7 @@ export function plannerContextToMatching(
     targets: [PLANNER_AGE_TO_TARGET[ctx.ageKey] ?? "mass"],
     durationMonths: Math.max(1, ctx.months),
     goal: toMatchingGoal(goalRaw),
-    goalTags: matchingGoalTagsFromRaw(goalRaw),
+    goalTags: goalTags.length > 0 ? goalTags : undefined,
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,
     seed,
   };
