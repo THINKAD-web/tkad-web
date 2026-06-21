@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { POINT_COSTS, POINT_REWARDS } from "@/lib/points-constants";
@@ -144,7 +145,7 @@ export function PointsPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon mx-auto max-w-3xl px-4 py-10">
+      <PageContainer variant="prose" className="tkad-landing-neon tkad-planner-neon py-10">
         <div className="tkad-glass-surface tkad-neon-border mb-8 rounded-[28px] border p-6 sm:p-8">
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             {t("eyebrow")}
@@ -278,7 +279,7 @@ export function PointsPageClient() {
             {t("referralLink")}
           </Link>
         </p>
-      </div>
+      </PageContainer>
     </HomeLandingDayNight>
   );
 }

@@ -6,6 +6,8 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowRight, ChevronDown, ChevronUp, GripVertical, Sparkles, Trash2, X } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import {
@@ -108,8 +110,13 @@ export function MyPlanPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
-        <div className="mx-auto max-w-5xl">
+      <div
+        className={cn(
+          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
+          MOBILE_CHROME_BOTTOM_PAD,
+        )}
+      >
+        <PageContainer>
           <div className="mb-8">
             <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
               [ MY PLAN ]
@@ -411,7 +418,7 @@ export function MyPlanPageClient() {
               </div>
             </>
           )}
-        </div>
+        </PageContainer>
       </div>
 
       {confirmClear ? (
