@@ -11,6 +11,10 @@ import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 import { haversineKm } from "@/lib/media-data";
 
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+
+export type { RecommendationContext } from "@/lib/planner/recommendation-context";
+
 export type RecommendReasonKey =
   | "matchRegion"
   | "highVisibility"
@@ -29,18 +33,6 @@ export type ScoredMedia = {
   score: number;
   /** 점수 기여도 상위 2–3개. UI 노출용. */
   reasons: RecommendReason[];
-};
-
-export type RecommendationContext = {
-  goal: PlannerCampaignGoal | null;
-  regions: string[];
-  categories: PlannerCategory[];
-  ageKey: PlannerAgeKey;
-  /** Step 2 업종 — 매체 메타·설명 키워드와 느슨 매칭 */
-  industryKey: PlannerIndustryKey | null;
-  /** 만원 단위 예산 */
-  budgetMan: number;
-  months: number;
 };
 
 /**
