@@ -3,6 +3,7 @@
 import { Link } from "@/i18n/navigation";
 import type { LucideIcon } from "lucide-react";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
+import { PageContainer } from "@/components/layout/page-container";
 import { cn } from "@/lib/utils";
 
 export interface SubTab {
@@ -35,29 +36,31 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
         "border-gray-200 bg-white/95 dark:border-white/10 dark:bg-[#020202]/95",
       )}
     >
-      <div className="scrollbar-hide flex gap-2 overflow-x-auto px-4 py-2">
-        {tabs.map((tab) => {
-          const isActive = isTabActive(tab, currentPath);
-          const Icon = tab.icon;
-          return (
-            <Link
-              key={tab.href}
-              href={tab.href}
-              className={cn(
-                "flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all",
-                isActive
-                  ? "tkad-neon-cta-clean text-white shadow-sm"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-white/70 hover:dark:bg-white/15",
-              )}
-              aria-current={isActive ? "page" : undefined}
-            >
-              <Icon className="h-4 w-4" aria-hidden />
-              {tab.label}
-              {tab.beta ? <NavBetaBadge className="ml-0.5" /> : null}
-            </Link>
-          );
-        })}
-      </div>
+      <PageContainer>
+        <div className="scrollbar-hide flex gap-2 overflow-x-auto py-2">
+          {tabs.map((tab) => {
+            const isActive = isTabActive(tab, currentPath);
+            const Icon = tab.icon;
+            return (
+              <Link
+                key={tab.href}
+                href={tab.href}
+                className={cn(
+                  "flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all",
+                  isActive
+                    ? "tkad-neon-cta-clean text-white shadow-sm"
+                    : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-white/70 hover:dark:bg-white/15",
+                )}
+                aria-current={isActive ? "page" : undefined}
+              >
+                <Icon className="h-4 w-4" aria-hidden />
+                {tab.label}
+                {tab.beta ? <NavBetaBadge className="ml-0.5" /> : null}
+              </Link>
+            );
+          })}
+        </div>
+      </PageContainer>
     </div>
   );
 }

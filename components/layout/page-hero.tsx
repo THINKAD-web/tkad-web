@@ -1,3 +1,5 @@
+import { PageContainer } from "@/components/layout/page-container";
+
 export interface PageHeroProps {
   eyebrow: string;
   title: string;
@@ -14,7 +16,7 @@ export function PageHero({
   description,
 }: PageHeroProps) {
   return (
-    <div className="px-4 pt-6 pb-4">
+    <PageContainer className="pt-6 pb-4">
       <p className="mb-2 text-xs tracking-widest uppercase text-cyan-600/60 dark:text-cyan-400/60">
         {eyebrow}
       </p>
@@ -24,6 +26,6 @@ export function PageHero({
         {titleEnd}
       </h1>
       <p className="text-sm text-gray-500 dark:text-white/50">{description}</p>
-    </div>
+    </PageContainer>
   );
 }
