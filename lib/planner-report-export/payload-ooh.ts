@@ -22,6 +22,8 @@ import {
   flattenPlanCartReportGroups,
   groupPlanCartReportPortfolio,
 } from "@/lib/plan-cart-report/sort-portfolio";
+import { industryStrategyLine } from "@/lib/planner/industry-match";
+import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -32,6 +34,7 @@ export type BuildOohPayloadArgs = {
   categoriesText: string;
   ageText: string;
   industryText: string;
+  industryKey?: PlannerIndustryKey | null;
   portfolio: MediaItem[];
   metrics: PlannerMetrics | null;
   reachCorePct: number;
@@ -164,19 +167,26 @@ export function buildOohReportPayload(
   const sections: PlannerExportSection[] = [];
   if (a.portfolio.length && a.metrics) {
     const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
+    const industryLine = industryStrategyLine(
+      isKo,
+      a.industryKey ?? null,
+      a.industryText,
+    );
+    const strategyLines = [
+      isKo
+        ? `왜 이 구성인가 · ${a.regionsText} 핵심 동선의 ${a.portfolio.length}개 매체로 ${a.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`
+        : `Why · ${a.portfolio.length} media across ${a.regionsText} balance reach and efficiency for the "${a.goalTitle}" objective.`,
+      ...(industryLine ? [industryLine] : []),
+      isKo
+        ? `예상 효과 · 총 ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
+        : `Impact · ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
+      isKo
+        ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
+        : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
+    ];
     sections.push({
       title: isKo ? "전략 요약" : "Strategy summary",
-      lines: [
-        isKo
-          ? `왜 이 구성인가 · ${a.regionsText} 핵심 동선의 ${a.portfolio.length}개 매체로 ${a.goalTitle} 목표에 맞춰 노출 효율과 도달을 균형 있게 설계했습니다.`
-          : `Why · ${a.portfolio.length} media across ${a.regionsText} balance reach and efficiency for the "${a.goalTitle}" objective.`,
-        isKo
-          ? `예상 효과 · 총 ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
-          : `Impact · ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
-        isKo
-          ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
-          : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
-      ],
+      lines: strategyLines,
     });
   }
   if (a.budgetAllocation.length) {

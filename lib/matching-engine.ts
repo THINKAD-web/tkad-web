@@ -4,6 +4,7 @@ import {
   getChildCategories,
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
+import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
 
 /** 월 예산·지역·업종·타겟·기간·목표 기반 매체 매칭 (0–100점, 결정론적) */
 export type MatchingGoal =
@@ -290,6 +291,13 @@ function scoreIndustry(m: MediaItem, industryRaw: string): number {
   if (def.keywords.test(hay)) pts = 20;
   else if (def.mediaTypes.some((t) => type.includes(t) || type === t)) pts = 10;
   else if (industry !== "other" && hay.length > 8) pts = 8;
+
+  if (industry !== "other") {
+    const hintBoost = plannerIndustryHintScore(m, industry);
+    if (hintBoost > 0) {
+      pts = Math.min(20, pts + Math.round(hintBoost * 8));
+    }
+  }
   return pts;
 }
 

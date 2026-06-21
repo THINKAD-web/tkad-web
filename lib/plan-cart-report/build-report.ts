@@ -217,6 +217,7 @@ export function buildPlanCartReportBundle(args: {
       categoriesText: inferCategoriesText(portfolioSorted, isKo),
       ageText: isKo ? "전 연령" : "All ages",
       industryText: isKo ? "미지정" : "Not specified",
+      industryKey: null,
       portfolio: portfolioSorted,
       matchedCount: portfolio.length,
       monthCompare: comparePlansByDuration(portfolioSorted, budgetMan, [1, 3, 6]),

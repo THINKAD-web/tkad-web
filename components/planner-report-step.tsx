@@ -59,6 +59,7 @@ export type PlannerReportSharedProps = {
   categoriesText: string;
   ageText: string;
   industryText: string;
+  industryKey?: PlannerIndustryKey | null;
   portfolio: MediaItem[];
   /** Step 7과 동일: 조건에 맞는 전체 후보(필터 결과) */
   matchedCount: number;
@@ -257,6 +258,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         categoriesText: props.categoriesText,
         ageText: props.ageText,
         industryText: props.industryText,
+        industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
         portfolio: props.portfolio,
         metrics: props.metrics,
         reachCorePct: props.reachCorePct,
@@ -646,6 +648,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           categoriesText: props.categoriesText,
           ageText: props.ageText,
           industryText: props.industryText,
+          industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
           portfolio: props.portfolio,
           metrics: props.metrics,
           reachCorePct: props.reachCorePct,
