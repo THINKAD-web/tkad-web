@@ -89,6 +89,8 @@ export function PlannerRecommendationPanel({
   const plannerCategories = usePlannerStore((s) => s.categories);
   const plannerAgeKey = usePlannerStore((s) => s.ageKey);
   const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
+  const plannerSeoulZones = usePlannerStore((s) => s.seoulZones);
+  const plannerGoalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
   const plannerSelectedIds = usePlannerStore((s) => s.campaignMediaIds);
@@ -99,6 +101,8 @@ export function PlannerRecommendationPanel({
   const categories = store?.categories ?? plannerCategories;
   const ageKey = store?.ageKey ?? plannerAgeKey;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
+  const seoulZones = plannerSeoulZones;
+  const goalFollowUp = plannerGoalFollowUp;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
   const selectedIds = store?.campaignMediaIds ?? plannerSelectedIds;
@@ -125,23 +129,26 @@ export function PlannerRecommendationPanel({
     const keys: RecommendReasonKey[] = [];
     if (breakdown.budget >= 20) keys.push("budgetEfficient");
     if (breakdown.region >= 15) keys.push("matchRegion");
-    if (breakdown.industry >= 10) keys.push("goalFit");
+    if (breakdown.industry >= 10) keys.push("industryFit");
     if (breakdown.target >= 12) keys.push("ageMatch");
+    if (breakdown.category >= 12) keys.push("goalFit");
     if (breakdown.popularity >= 5) keys.push("highVisibility");
     return keys.length > 0 ? keys : ["goalFit"];
   }
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
     [
       goal,
       regions,
+      seoulZones,
       categories,
       ageKey,
       industryKey,
       budgetMan,
       months,
+      goalFollowUp,
       refreshTick,
     ],
   );
@@ -158,11 +165,13 @@ export function PlannerRecommendationPanel({
             body: JSON.stringify({
               goal,
               regions,
+              seoulZones,
               categories,
               ageKey,
               industryKey,
               budgetMan,
               months,
+              goalFollowUp,
               seed: refreshTick,
               limit,
               locale,

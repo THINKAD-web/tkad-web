@@ -10,8 +10,11 @@ import {
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { matchMediaCatalog } from "@/lib/matching-engine";
-import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { followUpKpiBoost } from "@/lib/planner/goal-follow-up";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -176,15 +179,19 @@ export function filterPlannerMedia(
   });
 }
 
-/** 다중 지역(OR). `regions`가 비어 있으면 결과 없음. */
+/** 다중 지역(OR). `regions`가 비어 있으면 결과 없음. 서울 하위 상권은 `seoulZones`로 추가 필터. */
 export function filterPlannerMediaMulti(
   items: readonly MediaItem[],
   regions: ReadonlySet<string>,
   categories: ReadonlySet<PlannerCategory>,
+  seoulZones: readonly PlannerSeoulZoneKey[] = [],
 ): MediaItem[] {
   if (categories.size === 0 || regions.size === 0) return [];
   return items.filter((m) => {
     if (!regions.has(m.region)) return false;
+    if (regions.has("seoul") && !mediaMatchesSeoulZones(m, seoulZones)) {
+      return false;
+    }
     for (const c of categories) {
       if (matchesPlannerCategory(m, c)) return true;
     }
@@ -977,6 +984,7 @@ export function computePlannerMetrics(
   options?: {
     campaignGoal?: PlannerCampaignGoal | null;
     industryKey?: PlannerIndustryKey | null;
+    goalFollowUp?: PlannerGoalFollowUp;
   },
 ): PlannerMetrics | null {
   if (media.length === 0 || months <= 0 || budgetMan <= 0) return null;
@@ -1015,6 +1023,10 @@ export function computePlannerMetrics(
 
   const goalBoost = goalRoiBoost(options?.campaignGoal ?? null);
   const indBoost = industryRoiBoost(options?.industryKey ?? null);
+  const followBoost = followUpKpiBoost(
+    options?.campaignGoal ?? null,
+    options?.goalFollowUp ?? {},
+  );
 
   const roiMonthsForScale = Math.max(months, 7 / 30);
   const baseRoi =
@@ -1022,7 +1034,8 @@ export function computePlannerMetrics(
     Math.min(2.2, (budgetMan / (450 * roiMonthsForScale)) * 0.45) +
     mixBonus * 0.4 +
     goalBoost +
-    indBoost;
+    indBoost +
+    followBoost;
 
   const roiExpected = Math.round(baseRoi * 10) / 10;
   const roiConservative = Math.round(baseRoi * 0.82 * 10) / 10;
