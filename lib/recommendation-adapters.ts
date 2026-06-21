@@ -28,14 +28,8 @@ const PLANNER_AGE_TO_TARGET: Record<string, string> = {
   ageAll: "mass",
 };
 
-const PLANNER_INDUSTRY_MAP: Record<string, string> = {
-  indFb: "fnb",
-  indRetail: "retail",
-  indTech: "tech",
-  indFinance: "finance",
-  indEnt: "entertainment",
-  indOther: "other",
-};
+import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
+import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 function toMatchingGoal(raw: string | null | undefined): MatchingGoal {
   return matchingGoalFromRaw(raw) as MatchingGoal;
@@ -84,7 +78,8 @@ export function plannerContextToMatching(
     monthlyBudgetWon,
     regions: ctx.regions,
     industry: ctx.industryKey ?
-      (PLANNER_INDUSTRY_MAP[ctx.industryKey] ?? "other")
+      (PLANNER_INDUSTRY_TO_MATCHING[ctx.industryKey as PlannerIndustryKey] ??
+        "other")
     : "other",
     targets: [PLANNER_AGE_TO_TARGET[ctx.ageKey] ?? "mass"],
     durationMonths: Math.max(1, ctx.months),

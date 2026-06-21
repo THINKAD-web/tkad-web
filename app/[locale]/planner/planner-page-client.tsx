@@ -37,6 +37,7 @@ import {
   computePlannerMetrics,
   computeBudgetBlurbParts,
   estimateCpmByCategory,
+  portfolioCpmByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
   resolvePlannerPortfolio,
@@ -314,13 +315,6 @@ export default function PlannerPageClient({
     [campaignMediaIds, catalog, mediaCacheById],
   );
 
-  const metrics = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
-    return computePlannerMetrics(filtered, budgetNum, months, {
-      campaignGoal,
-    });
-  }, [filtered, budgetNum, months, campaignGoal]);
-
   const portfolio = useMemo(
     () =>
       resolvePlannerPortfolio({
@@ -355,6 +349,34 @@ export default function PlannerPageClient({
     ],
   );
 
+  const metrics = useMemo(() => {
+    const source = portfolio.length > 0 ? portfolio : filtered;
+    if (source.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
+    return computePlannerMetrics(source, budgetNum, months, {
+      campaignGoal,
+      industryKey,
+    });
+  }, [
+    portfolio,
+    filtered,
+    budgetNum,
+    months,
+    campaignGoal,
+    industryKey,
+  ]);
+
+  const cpmBars = useMemo(() => {
+    const pts =
+      portfolio.length > 0
+        ? portfolioCpmByCategory(portfolio)
+        : estimateCpmByCategory(filtered);
+    return pts.map((p) => ({
+      key: p.key,
+      label: isKo ? p.labelKo : p.labelEn,
+      value: p.cpm,
+    }));
+  }, [portfolio, filtered, isKo]);
+
   const portfolioBudgetStatus = useMemo(
     () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
     [portfolio, budgetNum, months],
@@ -375,15 +397,6 @@ export default function PlannerPageClient({
     () => comparePlansByDuration(filtered, budgetNum, [1, 3, 6]),
     [filtered, budgetNum],
   );
-
-  const cpmBars = useMemo(() => {
-    const pts = estimateCpmByCategory(filtered);
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }));
-  }, [filtered, isKo]);
 
   const reachSplit = reachSplitForGoal(campaignGoal);
 
@@ -1367,6 +1380,7 @@ export default function PlannerPageClient({
                 categoriesText={categoriesSummary}
                 ageText={t(ageKey)}
                 industryText={t(industryKey)}
+                industryKey={industryKey}
                 portfolio={portfolio}
                 matchedCount={filtered.length}
                 monthCompare={monthCompare}

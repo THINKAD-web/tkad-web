@@ -43,6 +43,7 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   budgetEfficient: "border-border bg-muted text-foreground",
   /** was bg-foreground + text-primary → 라이트에서 잉크 배경에 잉크 글자, 플래너 토큰에서도 대비 붕괴 */
   goalFit: "border-primary/55 bg-primary/12 text-primary",
+  industryFit: "border-violet-500/55 bg-violet-500/12 text-violet-700 dark:text-violet-300",
   highVisibility: "border-primary bg-card text-primary",
   landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
   transitHotspot: "border-accent bg-accent/10 text-accent",

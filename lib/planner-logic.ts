@@ -11,6 +11,7 @@ import type { RecommendationContext } from "@/lib/planner/recommendation-context
 import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
+import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -953,22 +954,41 @@ export type PlannerMetrics = {
   }[];
 };
 
+function industryRoiBoost(industryKey: PlannerIndustryKey | null | undefined): number {
+  if (!industryKey || industryKey === "indOther") return 0;
+  const map: Partial<Record<PlannerIndustryKey, number>> = {
+    indRetail: 0.04,
+    indFb: 0.03,
+    indTech: 0.02,
+    indFinance: 0.03,
+    indEnt: 0.02,
+  };
+  return map[industryKey] ?? 0;
+}
+
 /**
  * Demo model: budget (만원), period (months), visibility factor for OOH frequency.
+ * `media`는 포트폴리오(선택 매체) 또는 필터 풀 — 노출은 foot-traffic 합 우선(도넛·CPM과 정합).
  */
 export function computePlannerMetrics(
-  filtered: MediaItem[],
+  media: MediaItem[],
   budgetMan: number,
   months: number,
-  options?: { campaignGoal?: PlannerCampaignGoal | null },
+  options?: {
+    campaignGoal?: PlannerCampaignGoal | null;
+    industryKey?: PlannerIndustryKey | null;
+  },
 ): PlannerMetrics | null {
-  if (filtered.length === 0 || months <= 0 || budgetMan <= 0) return null;
+  if (media.length === 0 || months <= 0 || budgetMan <= 0) return null;
+
+  const portReport = computePortfolioReportMetrics(media, months);
+  const useFootTrafficSum = portReport.monthlyImpressions > 0;
 
   const avgMonthlyPriceMan =
-    filtered.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
-    filtered.length;
+    media.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
+    media.length;
   const blendDailyReach =
-    filtered.reduce((s, m) => s + m.dailyFootTraffic, 0) / filtered.length;
+    media.reduce((s, m) => s + (m.dailyFootTraffic ?? 0), 0) / media.length;
 
   const spendPerMonth = budgetMan / months;
   const intensity = Math.min(
@@ -977,28 +997,32 @@ export function computePlannerMetrics(
   );
   const visibility = 0.14 + intensity * 0.1;
 
-  const estimatedMonthlyImpressions = Math.round(
-    blendDailyReach * 30 * visibility * Math.min(1, intensity + 0.25),
-  );
-  const estimatedTotalImpressions = Math.round(
-    estimatedMonthlyImpressions * months,
-  );
+  const estimatedMonthlyImpressions = useFootTrafficSum
+    ? portReport.monthlyImpressions
+    : Math.round(
+        blendDailyReach * 30 * visibility * Math.min(1, intensity + 0.25),
+      );
+  const estimatedTotalImpressions = useFootTrafficSum
+    ? portReport.totalImpressions
+    : Math.round(estimatedMonthlyImpressions * months);
 
   const mixBonus =
-    (filtered.some((m) => m.type === "digital" || m.type === "network")
+    (media.some((m) => m.type === "digital" || m.type === "network")
       ? 0.25
       : 0) +
-    (filtered.some((m) => m.type === "static") ? 0.15 : 0) +
-    (filtered.some((m) => m.type === "mobile") ? 0.1 : 0);
+    (media.some((m) => m.type === "static") ? 0.15 : 0) +
+    (media.some((m) => m.type === "mobile") ? 0.1 : 0);
 
   const goalBoost = goalRoiBoost(options?.campaignGoal ?? null);
+  const indBoost = industryRoiBoost(options?.industryKey ?? null);
 
   const roiMonthsForScale = Math.max(months, 7 / 30);
   const baseRoi =
     2.1 +
     Math.min(2.2, (budgetMan / (450 * roiMonthsForScale)) * 0.45) +
     mixBonus * 0.4 +
-    goalBoost;
+    goalBoost +
+    indBoost;
 
   const roiExpected = Math.round(baseRoi * 10) / 10;
   const roiConservative = Math.round(baseRoi * 0.82 * 10) / 10;
