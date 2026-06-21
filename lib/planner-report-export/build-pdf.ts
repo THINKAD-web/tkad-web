@@ -1,5 +1,4 @@
-import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
-import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
+import { ensureKrFontForServerPdf, krFontFamily } from "@/lib/jspdf-register-noto-kr";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import {
   addPdfThumbImage,
@@ -47,7 +46,7 @@ export async function buildPlannerReportPdf(
 ): Promise<Uint8Array> {
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
-  const hasKr = registerNotoSansKrIfAvailable(doc);
+  const hasKr = await ensureKrFontForServerPdf(doc);
   const FONT = krFontFamily(hasKr);
 
   const pageW = doc.internal.pageSize.getWidth();
