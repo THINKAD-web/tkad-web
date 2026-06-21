@@ -12,6 +12,7 @@ import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { followUpKpiBoost } from "@/lib/planner/goal-follow-up";
+import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
