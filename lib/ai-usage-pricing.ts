@@ -100,6 +100,8 @@ export function featureLabel(type: string): string {
   const map: Record<string, string> = {
     chatbot: "공개 챗봇",
     recommendation: "AI 추천",
+    planner_recommendation: "플래너 매체 추천 (Claude)",
+    planner_proposal_narrative: "플래너 제안 논리 (Claude)",
     content: "콘텐츠 생성",
     chat_reply: "상담 답변",
     creative_review: "크리에이티브 검토",

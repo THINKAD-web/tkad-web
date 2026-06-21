@@ -23,17 +23,20 @@ export function recommendationCacheKey(
   input: MatchingInput,
   source: string,
   limit: number,
+  opts?: { useClaude?: boolean },
 ): string {
   const normalized = {
     source,
     limit,
     catalogVersion: catalogVersionToken,
+    useClaude: opts?.useClaude === true,
     monthlyBudgetWon: Math.round(input.monthlyBudgetWon),
     regions: [...input.regions].sort(),
     industry: input.industry,
     targets: [...input.targets].sort(),
     durationMonths: input.durationMonths,
     goal: input.goal,
+    goalTags: [...(input.goalTags ?? [])].sort(),
     categories: [...(input.categories ?? [])].sort(),
     seed: input.seed ?? 0,
   };

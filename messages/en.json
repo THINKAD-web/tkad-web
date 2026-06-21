@@ -1945,6 +1945,9 @@
     "recommendAdd": "Add",
     "recommendAdded": "Added",
     "recommendAddAll": "Add all",
+    "proposalNarrativeEyebrow": "[ Proposal logic ]",
+    "proposalNarrativeTitle": "Why this mix",
+    "proposalNarrativeLoading": "Drafting proposal logic from your campaign inputs...",
     "recommendBrowseTitle": "Browse more",
     "recommendBrowseDesc": "Search the full catalog and add media to your selection.",
     "recommendReason": {
