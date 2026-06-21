@@ -75,9 +75,15 @@
     @apply py-16 md:py-24;
   }
 
-  /* 컨테이너 */
+  /* 컨테이너 — synced with lib/layout/container-classes.ts + PageContainer */
   .ui-container {
     @apply mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8;
+  }
+  .ui-container-prose {
+    @apply mx-auto w-full max-w-3xl px-4 md:px-6 lg:px-8;
+  }
+  .ui-container-fluid {
+    @apply w-full min-w-0 px-4 md:px-6 lg:px-8;
   }
   .ui-container-narrow {
     @apply mx-auto w-full max-w-4xl px-4 md:px-6 lg:px-8;
