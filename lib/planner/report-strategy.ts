@@ -4,6 +4,7 @@ import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { formatSeoulZonesText } from "@/lib/planner/seoul-zones";
 import { industryStrategyLine } from "@/lib/planner/industry-match";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { formatConversionKpiForReport } from "@/lib/planner/goal-follow-up";
 
 export type ReportStrategyInput = {
   isKo: boolean;
@@ -63,12 +64,11 @@ function followUpLine(input: ReportStrategyInput): string | null {
       ? `집중 기간 · 런칭 후 ${f.launchFocusWeeks}주 구간에 노출 밀도를 높였습니다.`
       : `Focus window · Higher density for ${f.launchFocusWeeks} weeks post-launch.`;
   }
-  if (g === "local" && f.localRadiusKm != null) {
-    const area = f.localTradeArea?.trim();
-    const areaPart = area ? (input.isKo ? ` (${area})` : ` (${area})`) : "";
+  if (g === "local" && f.localTradeArea?.trim()) {
+    const area = f.localTradeArea.trim();
     return input.isKo
-      ? `로컬 반경 · 매장 기준 약 ${f.localRadiusKm}km 생활권${areaPart}을 우선했습니다.`
-      : `Local radius · ~${f.localRadiusKm}km trade area${areaPart} prioritized.`;
+      ? `집중 상권 · ${area} 인근 동선 매체를 우선했습니다. (지역·상권 선택과 함께 참고)`
+      : `Trade area · Prioritized media near ${area} (with your region picks).`;
   }
   if (g === "event" && f.eventDurationDays != null) {
     return input.isKo
@@ -88,10 +88,10 @@ function followUpLine(input: ReportStrategyInput): string | null {
           : input.isKo
             ? "매장+온라인"
             : "store + online";
-    const kpi = f.conversionKpi?.trim();
+    const kpi = formatConversionKpiForReport(f.conversionKpi, input.isKo);
     return input.isKo
-      ? `전환 채널 · ${ch} 중심${kpi ? ` (KPI: ${kpi})` : ""}으로 OOH–디지털 연계를 고려했습니다.`
-      : `Conversion · ${ch} focus${kpi ? ` (KPI: ${kpi})` : ""} with OOH–digital handoff.`;
+      ? `유도 방향 · ${ch} 중심 OOH 배치${kpi ? ` (참고 KPI: ${kpi})` : ""}.`
+      : `OOH focus · ${ch}${kpi ? ` (reference KPI: ${kpi})` : ""}.`;
   }
   return null;
 }

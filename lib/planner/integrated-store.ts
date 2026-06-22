@@ -18,7 +18,18 @@ import {
   type PlannerPresetId,
 } from "@/lib/planner/types";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
+import { districtHintsToSeoulZones } from "@/lib/planner/apply-scenario-portfolio";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import {
+  defaultFollowUpForGoal,
+  normalizeFollowUpForGoal,
+} from "@/lib/planner/goal-follow-up";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import {
+  isPlannerSeoulZoneKey,
+  suggestSeoulZones,
+} from "@/lib/planner/seoul-zones";
 import {
   INTEGRATED_LAST_INPUT_STEP,
   INTEGRATED_RESULT_STEP,
@@ -41,6 +52,8 @@ export type IntegratedPlannerStoreState = {
   months: number;
   ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
+  seoulZones: PlannerSeoulZoneKey[];
+  goalFollowUp: PlannerGoalFollowUp;
   campaignMediaIds: string[];
   digitalChannelIds: DigitalChannelId[];
   digitalBudgetPct: number;
@@ -63,6 +76,10 @@ export type IntegratedPlannerStoreActions = {
   setAgeKeys: (keys: PlannerAgeKey[]) => void;
   toggleAgeKey: (key: PlannerAgeKey) => void;
   setIndustryKey: (key: PlannerIndustryKey) => void;
+  toggleSeoulZone: (zone: PlannerSeoulZoneKey) => void;
+  clearSeoulZones: () => void;
+  applySuggestedSeoulZones: () => void;
+  setGoalFollowUp: (patch: Partial<PlannerGoalFollowUp>) => void;
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
   setCreativeUploadedUrl: (url: string | null) => void;
@@ -88,6 +105,8 @@ const INITIAL: IntegratedPlannerStoreState = {
   months: 3,
   ageKeys: [] as PlannerAgeKey[],
   industryKey: "indOther",
+  seoulZones: [],
+  goalFollowUp: {},
   campaignMediaIds: [],
   digitalChannelIds: defaultDigitalChannelIds(),
   digitalBudgetPct: 30,
@@ -128,7 +147,19 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         if (cur <= 1) return;
         set({ wizardStep: clampStep(cur - 1) });
       },
-      setCampaignGoal: (goal) => set({ campaignGoal: goal }),
+      setCampaignGoal: (goal) =>
+        set((s) => ({
+          campaignGoal: goal,
+          goalFollowUp: normalizeFollowUpForGoal(
+            goal,
+            defaultFollowUpForGoal(goal, s.industryKey),
+          ),
+          ...(!s.seoulZones.length &&
+          s.regions.includes("seoul") &&
+          goal != null
+            ? { seoulZones: suggestSeoulZones(goal, s.industryKey) }
+            : {}),
+        })),
       toggleRegion: (region) =>
         set((s) => ({
           regions: s.regions.includes(region)
@@ -154,7 +185,32 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           else next.add(key);
           return { ageKeys: [...next] };
         }),
-      setIndustryKey: (key) => set({ industryKey: key }),
+      setIndustryKey: (key) =>
+        set((s) => ({
+          industryKey: key,
+          ...(s.regions.includes("seoul") && s.campaignGoal != null
+            ? { seoulZones: suggestSeoulZones(s.campaignGoal, key) }
+            : {}),
+        })),
+      toggleSeoulZone: (zone) =>
+        set((s) => {
+          const next = new Set(s.seoulZones);
+          if (next.has(zone)) next.delete(zone);
+          else next.add(zone);
+          return { seoulZones: [...next] as PlannerSeoulZoneKey[] };
+        }),
+      clearSeoulZones: () => set({ seoulZones: [] }),
+      applySuggestedSeoulZones: () =>
+        set((s) => ({
+          seoulZones: suggestSeoulZones(s.campaignGoal, s.industryKey),
+        })),
+      setGoalFollowUp: (patch) =>
+        set((s) => ({
+          goalFollowUp: normalizeFollowUpForGoal(s.campaignGoal, {
+            ...s.goalFollowUp,
+            ...patch,
+          }),
+        })),
       setCampaignMediaIds: (action) =>
         set((s) => ({
           campaignMediaIds:
@@ -217,7 +273,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         }
       },
       applyScenario: (patch) =>
-        set(() => {
+        set((s) => {
           const regions =
             patch.regions.length > 0 ? [...patch.regions] : ["seoul"];
           const categories =
@@ -226,6 +282,9 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
               : [...PLANNER_DEFAULT_CATEGORIES];
           const months = Math.max(1, Math.min(36, patch.months));
           const campaignMediaIds = [...(patch.campaignMediaIds ?? [])];
+          const seoulZones =
+            patch.seoulZones ??
+            districtHintsToSeoulZones(patch.districtHints ?? []);
 
           return {
             regions,
@@ -233,14 +292,28 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
             budget: String(patch.budgetMan),
             months,
             ...(patch.campaignGoal !== undefined
-              ? { campaignGoal: patch.campaignGoal }
-              : {}),
+              ? {
+                  campaignGoal: patch.campaignGoal,
+                  goalFollowUp: normalizeFollowUpForGoal(
+                    patch.campaignGoal,
+                    patch.goalFollowUp ?? s.goalFollowUp,
+                  ),
+                }
+              : patch.goalFollowUp !== undefined
+                ? {
+                    goalFollowUp: normalizeFollowUpForGoal(
+                      s.campaignGoal,
+                      patch.goalFollowUp,
+                    ),
+                  }
+                : {}),
             ...(patch.industryKey !== undefined
               ? { industryKey: patch.industryKey }
               : {}),
             ...(patch.ageKeys !== undefined
               ? { ageKeys: normalizePlannerAgeKeys(patch.ageKeys) }
               : {}),
+            ...(seoulZones.length > 0 ? { seoulZones } : {}),
             campaignMediaIds,
           };
         }),
@@ -257,6 +330,8 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         months: s.months,
         ageKeys: s.ageKeys,
         industryKey: s.industryKey,
+        seoulZones: s.seoulZones,
+        goalFollowUp: s.goalFollowUp,
         campaignMediaIds: s.campaignMediaIds,
         digitalChannelIds: s.digitalChannelIds,
         digitalBudgetPct: s.digitalBudgetPct,
@@ -284,6 +359,19 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           industryKey: isPlannerIndustryKey(p.industryKey)
             ? p.industryKey
             : current.industryKey,
+          seoulZones: Array.isArray(p.seoulZones)
+            ? p.seoulZones.filter(isPlannerSeoulZoneKey)
+            : current.seoulZones,
+          goalFollowUp:
+            p.goalFollowUp &&
+            typeof p.goalFollowUp === "object" &&
+            !Array.isArray(p.goalFollowUp)
+              ? normalizeFollowUpForGoal(
+                  (p.campaignGoal as PlannerCampaignGoal | null) ??
+                    current.campaignGoal,
+                  p.goalFollowUp as PlannerGoalFollowUp,
+                )
+              : current.goalFollowUp,
           digitalChannelIds:
             p.digitalChannelIds && p.digitalChannelIds.length > 0
               ? normalizeDigitalChannelIds(
