@@ -148,7 +148,7 @@ export function FooterBrutal() {
             ))}
           </p>
         </div>
-        <div className="h-[7.25rem]" aria-hidden />
+        <div className="h-[4.25rem]" aria-hidden />
       </div>
     </footer>
   );

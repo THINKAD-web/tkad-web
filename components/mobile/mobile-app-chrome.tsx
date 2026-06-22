@@ -9,7 +9,6 @@ import { PwaSplashScreen } from "@/components/mobile/pwa-splash-screen";
 import { MobileKeyboardProvider } from "@/components/mobile/mobile-keyboard-provider";
 import { PushHapticListener } from "@/components/mobile/push-haptic-listener";
 import { SubpageRelatedChips } from "@/components/navigation/subpage-related-chips";
-import { QuickActionBarMobile } from "@/components/navigation/quick-action-bar";
 
 type Props = {
   children: ReactNode;
@@ -33,9 +32,6 @@ export function MobileAppChrome({ children }: Props) {
           <div className="flex min-w-0 flex-col overflow-x-clip tkad-mobile-scroll md:pb-0">
             {children}
           </div>
-          <Suspense fallback={null}>
-            <QuickActionBarMobile />
-          </Suspense>
           <BottomTabBar />
           <MobileSearchModal />
         </div>
