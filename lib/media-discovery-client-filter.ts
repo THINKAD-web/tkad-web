@@ -7,23 +7,11 @@ import {
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
+import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import type { MediaItem } from "@/lib/media-data";
 
 function mediaSearchHaystack(m: MediaItem): string {
-  return [
-    m.name,
-    m.nameEn,
-    m.location,
-    m.region,
-    m.city,
-    m.district,
-    m.type,
-    m.nearbyStations,
-    m.nearbyLandmarks,
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  return mediaRegionHaystack(m);
 }
 
 export function matchesBrowseRegion(
@@ -69,6 +57,12 @@ function matchesBrowseCategory(
   if (resolved.mainCategory) {
     if (m.mediaMainCategory === resolved.mainCategory) return true;
     if (m.mediaCategory?.includes(resolved.mainCategory)) return true;
+    if (
+      resolved.mainCategory === "digital" &&
+      (m.catalogSource === "network" || m.type === "network")
+    ) {
+      return true;
+    }
   }
   return matchesCategoryChip(m, legacyCategory);
 }
@@ -151,6 +145,7 @@ export function filterMediaByDiscoveryChips(
     }
     if (
       featureSet.has("network") &&
+      m.catalogSource !== "network" &&
       m.mediaMainCategory !== "network" &&
       !m.type?.toLowerCase().includes("network")
     ) {

@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
   getChildCategories,
   getMediaCategoryBySlug,
@@ -198,25 +199,7 @@ function normalizeRegionKey(raw: string): string {
 }
 
 function mediaHaystack(m: MediaItem): string {
-  return [
-    m.name,
-    m.nameEn,
-    m.location,
-    m.locationEn,
-    m.city,
-    m.district,
-    m.region,
-    m.regionZone,
-    m.subCategory,
-    m.nearbyStations,
-    m.nearbyLandmarks,
-    m.nearbyFacilities,
-    m.features,
-    m.tags?.join(" "),
-  ]
-    .filter(Boolean)
-    .join(" ")
-    .toLowerCase();
+  return mediaRegionHaystack(m);
 }
 
 function monthlyPriceWon(m: MediaItem): number {
@@ -323,6 +306,20 @@ function scoreTarget(
   return best;
 }
 
+function matchesMatchingInputCategory(m: MediaItem, category: string): boolean {
+  const c = category.trim().toLowerCase();
+  if (!c) return true;
+  const t = (m.type ?? "").toLowerCase();
+  if (t === c) return true;
+  if (
+    c === "digital" &&
+    (t === "network" || m.catalogSource === "network")
+  ) {
+    return true;
+  }
+  return false;
+}
+
 function scoreCategory(
   m: MediaItem,
   categories: string[] | undefined,
@@ -336,6 +333,12 @@ function scoreCategory(
 
   for (const c of inputCats) {
     if (mediaCats.includes(c)) best = Math.max(best, 15);
+    if (
+      c === "digital" &&
+      (m.catalogSource === "network" || m.type === "network")
+    ) {
+      best = Math.max(best, 12);
+    }
     const children = getChildCategories(c).map((x) => x.slug);
     if (mediaCats.some((mc) => mc === c || children.includes(mc))) {
       best = Math.max(best, 12);
@@ -599,9 +602,8 @@ export function matchMediaCatalog(
   );
 
   if (categories.length > 0) {
-    const catSet = new Set(categories.map((c) => c.toLowerCase()));
     const filtered = pool.filter((m) =>
-      catSet.has((m.type ?? "").toLowerCase()),
+      categories.some((c) => matchesMatchingInputCategory(m, c)),
     );
     if (filtered.length > 0) pool = filtered;
   }

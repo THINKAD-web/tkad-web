@@ -633,7 +633,8 @@ export async function fetchHomeHeroVisualAssets(): Promise<{
 }
 
 /**
- * 플래너 전용: 활성 매체만. DB 미설정·조회 오류·0건이면 빈 목록(목업 `mediaData` 미사용).
+ * 플래너 전용: 활성 Media + MediaNetwork 병합.
+ * DB 미설정·조회 오류·0건이면 빈 목록(목업 `mediaData` 미사용).
  */
 export async function fetchPlannerMediaCatalog(): Promise<{
   catalog: MediaItem[];
@@ -649,12 +650,14 @@ export async function fetchPlannerMediaCatalog(): Promise<{
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
-    if (rows.length === 0) {
+    const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
+    const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
+    const catalog = await appendNetworksIfAny(dbItems);
+    if (catalog.length === 0) {
       return { catalog: [], databaseEmpty: true };
     }
-    const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
     return {
-      catalog: rowsWithCoverage.map(prismaMediaToMediaItem),
+      catalog,
       databaseEmpty: false,
     };
   } catch {

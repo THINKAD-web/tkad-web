@@ -1502,6 +1502,7 @@ export default function PlannerPageClient({
                   catalog={recommendationCatalog}
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
+                  supplementalById={mediaCacheById}
                 />
 
                 <div className="space-y-2 border-t dark:border-white/10 border-gray-100 pt-6">
