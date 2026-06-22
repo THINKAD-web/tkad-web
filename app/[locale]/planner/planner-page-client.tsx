@@ -1311,6 +1311,7 @@ export default function PlannerPageClient({
                   goal={campaignGoal}
                   followUp={goalFollowUp}
                   onChange={setGoalFollowUp}
+                  isKo={isKo}
                 />
 
                 <PlannerScenarioCards

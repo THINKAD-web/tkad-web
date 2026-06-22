@@ -16,6 +16,8 @@ import type {
   PlannerCategory,
   PlannerIndustryKey,
 } from "@/lib/planner/types";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import {
   selectBudgetNum,
   usePlannerStore,
@@ -59,6 +61,8 @@ export type PlannerRecommendationStoreBinding = {
   industryKey: PlannerIndustryKey;
   budgetMan: number;
   months: number;
+  seoulZones?: PlannerSeoulZoneKey[];
+  goalFollowUp?: PlannerGoalFollowUp;
   campaignMediaIds: string[];
   setCampaignMediaIds: (updater: (prev: string[]) => string[]) => void;
 };
@@ -101,8 +105,8 @@ export function PlannerRecommendationPanel({
   const categories = store?.categories ?? plannerCategories;
   const ageKeys = store?.ageKeys ?? plannerAgeKeys;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
-  const seoulZones = plannerSeoulZones;
-  const goalFollowUp = plannerGoalFollowUp;
+  const seoulZones = store?.seoulZones ?? plannerSeoulZones;
+  const goalFollowUp = store?.goalFollowUp ?? plannerGoalFollowUp;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
   const selectedIds = store?.campaignMediaIds ?? plannerSelectedIds;

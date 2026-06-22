@@ -49,7 +49,7 @@ export const PLANNER_SCENARIO_PRESETS: readonly PlannerScenarioPresetDef[] = [
     regions: ["seoul"],
     seoulZones: ["gangnam", "seongsu"],
     categories: ["digital", "static"],
-    followUp: { launchFocusWeeks: 4, launchTiming: "asap" },
+    followUp: { launchFocusWeeks: 4 },
   },
   {
     id: "localFb",
@@ -60,7 +60,7 @@ export const PLANNER_SCENARIO_PRESETS: readonly PlannerScenarioPresetDef[] = [
     regions: ["seoul"],
     seoulZones: ["hongdae", "myeongdong"],
     categories: ["static", "mobile"],
-    followUp: { localRadiusKm: 3 },
+    followUp: { localTradeArea: "홍대" },
   },
   {
     id: "eventEnt",

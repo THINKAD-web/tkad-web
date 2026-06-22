@@ -68,6 +68,9 @@ import { IntegratedCampaignDashboard } from "@/components/planner/integrated/int
 import PlannerTips from "@/components/planner-tips";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
+import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
+import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { suggestSeoulZones } from "@/lib/planner/seoul-zones";
 import {
   generateScenarios,
   scenarioInputKey,
@@ -160,6 +163,8 @@ export default function IntegratedPlannerPageClient({
   const months = useIntegratedPlannerStore((s) => s.months);
   const ageKeys = useIntegratedPlannerStore((s) => s.ageKeys);
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
+  const seoulZones = useIntegratedPlannerStore((s) => s.seoulZones);
+  const goalFollowUp = useIntegratedPlannerStore((s) => s.goalFollowUp);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
   const digitalChannelIds = useIntegratedPlannerStore((s) => s.digitalChannelIds);
   const digitalBudgetPct = useIntegratedPlannerStore((s) => s.digitalBudgetPct);
@@ -179,6 +184,12 @@ export default function IntegratedPlannerPageClient({
   const setMonths = useIntegratedPlannerStore((s) => s.setMonths);
   const toggleAgeKey = useIntegratedPlannerStore((s) => s.toggleAgeKey);
   const setIndustryKey = useIntegratedPlannerStore((s) => s.setIndustryKey);
+  const toggleSeoulZone = useIntegratedPlannerStore((s) => s.toggleSeoulZone);
+  const clearSeoulZones = useIntegratedPlannerStore((s) => s.clearSeoulZones);
+  const applySuggestedSeoulZones = useIntegratedPlannerStore(
+    (s) => s.applySuggestedSeoulZones,
+  );
+  const setGoalFollowUp = useIntegratedPlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = useIntegratedPlannerStore(
     (s) => s.setCampaignMediaIds,
   );
@@ -235,8 +246,19 @@ export default function IntegratedPlannerPageClient({
   const categories = useMemo(() => new Set(categoriesArr), [categoriesArr]);
 
   const filtered = useMemo(
-    () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
-    [catalog, selectedRegions, categories],
+    () =>
+      filterPlannerMediaMulti(
+        catalog,
+        selectedRegions,
+        categories,
+        seoulZones,
+      ),
+    [catalog, selectedRegions, categories, seoulZones],
+  );
+
+  const suggestedSeoulZones = useMemo(
+    () => suggestSeoulZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
   );
 
   const recommendationCatalog = useMemo(
@@ -259,6 +281,8 @@ export default function IntegratedPlannerPageClient({
       industryKey,
       budgetMan: budgetNum,
       months,
+      goalFollowUp,
+      seoulZones,
       campaignMediaIds,
       setCampaignMediaIds,
     }),
@@ -270,6 +294,8 @@ export default function IntegratedPlannerPageClient({
       industryKey,
       budgetNum,
       months,
+      goalFollowUp,
+      seoulZones,
       campaignMediaIds,
       setCampaignMediaIds,
     ],
@@ -312,11 +338,13 @@ export default function IntegratedPlannerPageClient({
         recommendCtx: {
           goal: campaignGoal,
           regions,
+          seoulZones,
           categories: categoriesArr,
           ageKeys,
           industryKey,
           budgetMan: budgetNum,
           months,
+          goalFollowUp,
         },
       }),
     [
@@ -327,9 +355,11 @@ export default function IntegratedPlannerPageClient({
       months,
       campaignGoal,
       regions,
+      seoulZones,
       categoriesArr,
       ageKeys,
       industryKey,
+      goalFollowUp,
     ],
   );
 
@@ -444,6 +474,7 @@ export default function IntegratedPlannerPageClient({
         campaignGoal,
         industryKey,
         ageKeys,
+        goalFollowUp,
       };
       const mediaIds = resolveScenarioPortfolioMediaIds(catalog, patch);
       applyScenarioAction({ ...patch, campaignMediaIds: mediaIds });
@@ -462,6 +493,7 @@ export default function IntegratedPlannerPageClient({
       campaignGoal,
       industryKey,
       ageKeys,
+      goalFollowUp,
       setWizardStep,
       toast,
       t,
@@ -627,6 +659,17 @@ export default function IntegratedPlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
+                {selectedRegions.has("seoul") ? (
+                  <PlannerSeoulZoneChips
+                    selected={seoulZones}
+                    suggested={suggestedSeoulZones}
+                    isKo={isKo}
+                    onToggle={toggleSeoulZone}
+                    onClear={clearSeoulZones}
+                    onApplySuggested={applySuggestedSeoulZones}
+                  />
+                ) : null}
+
                 <div>
                   <PlannerNeonLabel className="mb-3 block">
                     {t("ageLabel")}
@@ -664,6 +707,13 @@ export default function IntegratedPlannerPageClient({
                     })}
                   </div>
                 </div>
+
+                <PlannerGoalFollowUpPanel
+                  goal={campaignGoal}
+                  followUp={goalFollowUp}
+                  onChange={setGoalFollowUp}
+                  isKo={isKo}
+                />
 
                 <PlannerScenarioCards
                   scenarios={recommendedScenarios}
