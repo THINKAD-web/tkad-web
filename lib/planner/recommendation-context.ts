@@ -14,7 +14,7 @@ export type RecommendationContext = {
   /** 서울 하위 상권 — 빈 배열이면 서울 전체 */
   seoulZones?: readonly PlannerSeoulZoneKey[];
   categories: PlannerCategory[];
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey | null;
   /** 만원 단위 예산 */
   budgetMan: number;

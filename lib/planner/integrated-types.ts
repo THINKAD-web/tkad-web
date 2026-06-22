@@ -19,7 +19,7 @@ export type IntegratedPlannerState = {
   categories: PlannerCategory[];
   budget: string;
   months: number;
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   campaignMediaIds: string[];
   /** 선택된 디지털 채널 */

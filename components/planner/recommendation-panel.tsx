@@ -55,7 +55,7 @@ export type PlannerRecommendationStoreBinding = {
   goal: PlannerCampaignGoal | null;
   regions: string[];
   categories: PlannerCategory[];
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   budgetMan: number;
   months: number;
@@ -87,7 +87,7 @@ export function PlannerRecommendationPanel({
   const plannerGoal = usePlannerStore((s) => s.campaignGoal);
   const plannerRegions = usePlannerStore((s) => s.regions);
   const plannerCategories = usePlannerStore((s) => s.categories);
-  const plannerAgeKey = usePlannerStore((s) => s.ageKey);
+  const plannerAgeKeys = usePlannerStore((s) => s.ageKeys);
   const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
   const plannerSeoulZones = usePlannerStore((s) => s.seoulZones);
   const plannerGoalFollowUp = usePlannerStore((s) => s.goalFollowUp);
@@ -99,7 +99,7 @@ export function PlannerRecommendationPanel({
   const goal = store?.goal ?? plannerGoal;
   const regions = store?.regions ?? plannerRegions;
   const categories = store?.categories ?? plannerCategories;
-  const ageKey = store?.ageKey ?? plannerAgeKey;
+  const ageKeys = store?.ageKeys ?? plannerAgeKeys;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
   const seoulZones = plannerSeoulZones;
   const goalFollowUp = plannerGoalFollowUp;
@@ -139,13 +139,13 @@ export function PlannerRecommendationPanel({
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
     [
       goal,
       regions,
       seoulZones,
       categories,
-      ageKey,
+      ageKeys,
       industryKey,
       budgetMan,
       months,
@@ -168,7 +168,7 @@ export function PlannerRecommendationPanel({
               regions,
               seoulZones,
               categories,
-              ageKey,
+              ageKeys,
               industryKey,
               budgetMan,
               months,
@@ -234,7 +234,7 @@ export function PlannerRecommendationPanel({
                 regions,
                 seoulZones,
                 categories,
-                ageKey,
+                ageKeys,
                 industryKey,
                 budgetMan,
                 months,
@@ -261,7 +261,7 @@ export function PlannerRecommendationPanel({
               regions,
               seoulZones,
               categories,
-              ageKey,
+              ageKeys,
               industryKey,
               budgetMan,
               months,
@@ -283,7 +283,7 @@ export function PlannerRecommendationPanel({
     goal,
     regions,
     categories,
-    ageKey,
+    ageKeys,
     industryKey,
     budgetMan,
     months,

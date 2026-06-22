@@ -9,6 +9,7 @@ import {
 import { getCurrentUser } from "@/lib/user-session";
 import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
 import {
+  normalizePlannerAgeKeys,
   PLANNER_AGE_KEYS,
   PLANNER_INDUSTRY_KEYS,
 } from "@/lib/planner/types";
@@ -29,7 +30,8 @@ const Body = z.object({
   regions: z.array(z.string()).default([]),
   seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
   categories: z.array(z.string()).default([]),
-  ageKey: z.enum(PLANNER_AGE_KEYS).default("ageAll"),
+  ageKey: z.enum(PLANNER_AGE_KEYS).optional(),
+  ageKeys: z.array(z.enum(PLANNER_AGE_KEYS)).optional(),
   industryKey: z.enum(PLANNER_INDUSTRY_KEYS).nullable().optional(),
   goalFollowUp: z
     .object({
@@ -99,12 +101,13 @@ export async function POST(request: NextRequest) {
 
   const d = parsed.data;
   const isKo = (d.locale ?? "ko").startsWith("ko");
+  const ageKeys = normalizePlannerAgeKeys(d.ageKeys ?? d.ageKey ?? []);
   const ctx = {
     goal: (d.goal ?? null) as PlannerCampaignGoal | null,
     regions: d.regions,
     seoulZones: d.seoulZones,
     categories: d.categories as PlannerCategory[],
-    ageKey: d.ageKey,
+    ageKeys,
     industryKey: d.industryKey ?? null,
     budgetMan: d.budgetMan,
     months: d.months,

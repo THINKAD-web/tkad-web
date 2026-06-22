@@ -16,7 +16,8 @@ type PlanJson = {
   categories: string[];
   budget: string;
   months: number;
-  ageKey: string;
+  ageKeys?: string[];
+  ageKey?: string;
   industryKey: string;
   campaignMediaIds: string[];
   creativeUploadedUrl: string | null;

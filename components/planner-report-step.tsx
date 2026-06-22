@@ -48,6 +48,8 @@ import type {
   PlannerExportRegionBreakdown,
 } from "@/lib/planner-report-export/types";
 import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -60,7 +62,6 @@ export type PlannerReportSharedProps = {
   ageText: string;
   industryText: string;
   industryKey?: PlannerIndustryKey | null;
-  campaignGoal?: PlannerCampaignGoal | null;
   seoulZones?: readonly PlannerSeoulZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
@@ -95,7 +96,7 @@ export type PlannerReportSharedProps = {
   narrativeContext?: {
     regions: string[];
     categories: PlannerCategory[];
-    ageKey: PlannerAgeKey;
+    ageKeys: PlannerAgeKey[];
     industryKey: PlannerIndustryKey | null;
   };
 };
@@ -432,7 +433,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           goal={props.campaignGoal}
           regions={props.narrativeContext.regions}
           categories={props.narrativeContext.categories}
-          ageKey={props.narrativeContext.ageKey}
+          ageKey={props.narrativeContext.ageKeys[0] ?? "ageAll"}
           industryKey={props.narrativeContext.industryKey}
           budgetMan={props.budgetNum}
           months={props.months}

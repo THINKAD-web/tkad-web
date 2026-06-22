@@ -9,6 +9,7 @@ import {
   PLANNER_DEFAULT_CATEGORIES,
   isPlannerAgeKey,
   isPlannerIndustryKey,
+  normalizePlannerAgeKeys,
   normalizePlannerCategories,
   type PlannerAgeKey,
   type PlannerCampaignGoal,
@@ -37,7 +38,7 @@ export type IntegratedPlannerStoreState = {
   categories: PlannerCategory[];
   budget: string;
   months: number;
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   campaignMediaIds: string[];
   digitalChannelIds: DigitalChannelId[];
@@ -58,7 +59,8 @@ export type IntegratedPlannerStoreActions = {
   setCategories: (cats: PlannerCategory[]) => void;
   setBudget: (value: string) => void;
   setMonths: (months: number) => void;
-  setAgeKey: (key: PlannerAgeKey) => void;
+  setAgeKeys: (keys: PlannerAgeKey[]) => void;
+  toggleAgeKey: (key: PlannerAgeKey) => void;
   setIndustryKey: (key: PlannerIndustryKey) => void;
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
@@ -82,7 +84,7 @@ const INITIAL: IntegratedPlannerStoreState = {
   categories: [...PLANNER_DEFAULT_CATEGORIES],
   budget: "5000",
   months: 3,
-  ageKey: "ageAll",
+  ageKeys: [] as PlannerAgeKey[],
   industryKey: "indOther",
   campaignMediaIds: [],
   digitalChannelIds: defaultDigitalChannelIds(),
@@ -141,7 +143,15 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
       setCategories: (cats) => set({ categories: cats }),
       setBudget: (value) => set({ budget: value }),
       setMonths: (months) => set({ months }),
-      setAgeKey: (key) => set({ ageKey: key }),
+      setAgeKeys: (keys) => set({ ageKeys: normalizePlannerAgeKeys(keys) }),
+      toggleAgeKey: (key) =>
+        set((s) => {
+          if (key === "ageAll") return { ageKeys: [] };
+          const next = new Set(s.ageKeys);
+          if (next.has(key)) next.delete(key);
+          else next.add(key);
+          return { ageKeys: [...next] };
+        }),
       setIndustryKey: (key) => set({ industryKey: key }),
       setCampaignMediaIds: (action) =>
         set((s) => ({
@@ -215,7 +225,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         categories: s.categories,
         budget: s.budget,
         months: s.months,
-        ageKey: s.ageKey,
+        ageKeys: s.ageKeys,
         industryKey: s.industryKey,
         campaignMediaIds: s.campaignMediaIds,
         digitalChannelIds: s.digitalChannelIds,
@@ -226,13 +236,21 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
       merge: (persisted, current) => {
         const p = persisted as Partial<IntegratedPlannerStoreState> | undefined;
         if (!p) return current;
+        const legacy = p as Partial<IntegratedPlannerStoreState> & {
+          ageKey?: PlannerAgeKey;
+        };
         return {
           ...current,
           ...p,
           wizardStep: 1,
           creativeObjectUrl: null,
           categories: normalizePlannerCategories(p.categories),
-          ageKey: isPlannerAgeKey(p.ageKey) ? p.ageKey : current.ageKey,
+          ageKeys: normalizePlannerAgeKeys(
+            legacy.ageKeys ??
+              (isPlannerAgeKey(legacy.ageKey) && legacy.ageKey !== "ageAll"
+                ? [legacy.ageKey]
+                : []),
+          ),
           industryKey: isPlannerIndustryKey(p.industryKey)
             ? p.industryKey
             : current.industryKey,

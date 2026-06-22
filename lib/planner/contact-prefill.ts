@@ -13,6 +13,7 @@ export type SavedPlannerPlanJson = {
   categories?: string[];
   budget?: string;
   months?: number;
+  ageKeys?: string[];
   ageKey?: string;
   industryKey?: string;
   campaignMediaIds?: string[];

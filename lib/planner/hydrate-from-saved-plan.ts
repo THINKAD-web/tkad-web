@@ -3,6 +3,7 @@ import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 import {
   isPlannerAgeKey,
   isPlannerIndustryKey,
+  normalizePlannerAgeKeys,
   normalizePlannerCategories,
   PLANNER_BUDGET_MIN,
   type PlannerCampaignGoal,
@@ -22,7 +23,9 @@ export function hydratePlannerFromSavedPlan(
         ? plan.budget
         : String(PLANNER_BUDGET_MIN),
     months: typeof plan.months === "number" && plan.months > 0 ? plan.months : 1,
-    ageKey: isPlannerAgeKey(plan.ageKey) ? plan.ageKey : "ageAll",
+    ageKeys: normalizePlannerAgeKeys(
+      plan.ageKeys ?? (isPlannerAgeKey(plan.ageKey) ? plan.ageKey : "ageAll"),
+    ),
     industryKey: isPlannerIndustryKey(plan.industryKey)
       ? plan.industryKey
       : "indOther",

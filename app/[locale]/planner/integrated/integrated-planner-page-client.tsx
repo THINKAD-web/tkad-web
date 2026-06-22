@@ -20,13 +20,16 @@ import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import {
+  buildPlannerRegionOptions,
+  plannerRegionLabel,
+} from "@/lib/planner/planner-regions";
+import {
   PLANNER_AGE_KEYS,
   PLANNER_BUDGET_MAX,
   PLANNER_BUDGET_MIN,
   PLANNER_INDUSTRY_KEYS,
   type PlannerCampaignGoal,
   type PlannerCategory,
-  type PlannerMapRegion,
 } from "@/lib/planner/types";
 import {
   INTEGRATED_LAST_INPUT_STEP as LAST_STEP,
@@ -148,7 +151,7 @@ export default function IntegratedPlannerPageClient({
   const budget = useIntegratedPlannerStore((s) => s.budget);
   const budgetNum = useIntegratedPlannerStore(selectIntegratedBudgetNum);
   const months = useIntegratedPlannerStore((s) => s.months);
-  const ageKey = useIntegratedPlannerStore((s) => s.ageKey);
+  const ageKeys = useIntegratedPlannerStore((s) => s.ageKeys);
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
   const digitalChannelIds = useIntegratedPlannerStore((s) => s.digitalChannelIds);
@@ -167,7 +170,7 @@ export default function IntegratedPlannerPageClient({
   const toggleCategory = useIntegratedPlannerStore((s) => s.toggleCategory);
   const setBudget = useIntegratedPlannerStore((s) => s.setBudget);
   const setMonths = useIntegratedPlannerStore((s) => s.setMonths);
-  const setAgeKey = useIntegratedPlannerStore((s) => s.setAgeKey);
+  const toggleAgeKey = useIntegratedPlannerStore((s) => s.toggleAgeKey);
   const setIndustryKey = useIntegratedPlannerStore((s) => s.setIndustryKey);
   const setCampaignMediaIds = useIntegratedPlannerStore(
     (s) => s.setCampaignMediaIds,
@@ -245,7 +248,7 @@ export default function IntegratedPlannerPageClient({
       goal: campaignGoal,
       regions,
       categories: categoriesArr,
-      ageKey,
+      ageKeys,
       industryKey,
       budgetMan: budgetNum,
       months,
@@ -256,7 +259,7 @@ export default function IntegratedPlannerPageClient({
       campaignGoal,
       regions,
       categoriesArr,
-      ageKey,
+      ageKeys,
       industryKey,
       budgetNum,
       months,
@@ -303,7 +306,7 @@ export default function IntegratedPlannerPageClient({
           goal: campaignGoal,
           regions,
           categories: categoriesArr,
-          ageKey,
+          ageKeys,
           industryKey,
           budgetMan: budgetNum,
           months,
@@ -318,7 +321,7 @@ export default function IntegratedPlannerPageClient({
       campaignGoal,
       regions,
       categoriesArr,
-      ageKey,
+      ageKeys,
       industryKey,
     ],
   );
@@ -370,24 +373,36 @@ export default function IntegratedPlannerPageClient({
     ],
   );
 
+  const regionOptions = useMemo(
+    () =>
+      buildPlannerRegionOptions(regionCounts, locale).map((o) => ({
+        id: o.id,
+        label: isKo ? o.labelKo : o.labelEn,
+        count: o.count,
+      })),
+    [regionCounts, locale, isKo],
+  );
+
+  const ageSummary = useMemo(() => {
+    if (ageKeys.length === 0) return t("ageAll");
+    return ageKeys.map((k) => t(k)).join(", ");
+  }, [ageKeys, t]);
+
   const mapLabel = useCallback(
-    (r: PlannerMapRegion) =>
-      r === "national" ? t("regionNationalShort") : tm(`regions.${r}`),
-    [t, tm],
+    (r: string) =>
+      plannerRegionLabel(r, locale, t("regionNationalShort")),
+    [locale, t],
   );
 
   const mediaRegionLabel = useCallback(
-    (region: string) =>
-      region === "national"
-        ? t("regionNationalShort")
-        : tm(`regions.${region}`),
-    [t, tm],
+    (region: string) => plannerRegionLabel(region, locale, t("regionNationalShort")),
+    [locale, t],
   );
 
   const regionsText = useMemo(
     () =>
       regions
-        .map((r) => mapLabel(r as PlannerMapRegion))
+        .map((r) => mapLabel(r))
         .join(isKo ? ", " : ", "),
     [regions, mapLabel, isKo],
   );
@@ -467,7 +482,6 @@ export default function IntegratedPlannerPageClient({
             {wizardStep === 1 ? (
               <PlannerCampaignStep1
                 campaignGoal={campaignGoal}
-                goals={GOALS}
                 onSelectGoal={setCampaignGoal}
               />
             ) : null}
@@ -499,56 +513,12 @@ export default function IntegratedPlannerPageClient({
                     ))}
                   </div>
                 </PlannerNeonCard>
-                <PlannerRegionMap
-                  selected={selectedRegions}
-                  counts={regionCounts}
-                  onToggle={toggleRegion}
-                  labelFor={mapLabel}
-                  title={t("mapTitle")}
-                  hint={t("mapHint")}
-                  countLabel={(n) => t("mapCount", { count: n })}
-                />
-                <div className="grid gap-3 sm:grid-cols-3">
-                  {(
-                    [
-                      ["premium", "pkgPremium"],
-                      ["national", "pkgNational"],
-                      ["value", "pkgValue"],
-                    ] as const
-                  ).map(([id, titleKey]) => (
-                    <button
-                      key={id}
-                      type="button"
-                      onClick={() => applyPreset(id)}
-                      className={cn(
-                        plannerNeon.selectChip,
-                        plannerNeon.selectChipIdle,
-                        "p-4 text-left",
-                      )}
-                    >
-                      {t(titleKey)}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid gap-4 sm:grid-cols-2">
-                  <div className="flex flex-wrap gap-2">
-                    {PLANNER_AGE_KEYS.map((k) => (
-                      <button
-                        key={k}
-                        type="button"
-                        onClick={() => setAgeKey(k)}
-                        className={cn(
-                          plannerNeon.selectChip,
-                          ageKey === k
-                            ? plannerNeon.selectChipActive
-                            : plannerNeon.selectChipIdle,
-                        )}
-                      >
-                        {t(k)}
-                      </button>
-                    ))}
+
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel>{t("industryLabel")}</PlannerNeonLabel>
                   </div>
-                  <div className="flex flex-wrap gap-2">
+                  <div className="flex flex-wrap gap-2 p-5 sm:p-6">
                     {PLANNER_INDUSTRY_KEYS.map((k) => (
                       <button
                         key={k}
@@ -556,6 +526,7 @@ export default function IntegratedPlannerPageClient({
                         onClick={() => setIndustryKey(k)}
                         className={cn(
                           plannerNeon.selectChip,
+                          "touch-manipulation",
                           industryKey === k
                             ? plannerNeon.selectChipActive
                             : plannerNeon.selectChipIdle,
@@ -565,7 +536,82 @@ export default function IntegratedPlannerPageClient({
                       </button>
                     ))}
                   </div>
+                </PlannerNeonCard>
+
+                <PlannerRegionMap
+                  selected={selectedRegions}
+                  regionOptions={regionOptions}
+                  onToggle={toggleRegion}
+                  title={t("mapTitle")}
+                  hint={t("mapHint")}
+                  countLabel={(n) => t("mapCount", { count: n })}
+                />
+
+                <div>
+                  <PlannerNeonLabel className="mb-3 block">
+                    {t("ageLabel")}
+                  </PlannerNeonLabel>
+                  <p className={cn("mb-3 text-xs", plannerNeon.subtext)}>
+                    {isKo
+                      ? "복수 선택 가능 · 미선택 시 전 연령"
+                      : "Multi-select · empty means all ages"}
+                  </p>
+                  <div className="flex flex-wrap gap-2">
+                    {PLANNER_AGE_KEYS.map((k) => {
+                      const selected =
+                        k === "ageAll"
+                          ? ageKeys.length === 0
+                          : ageKeys.includes(k);
+                      return (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => {
+                            if (k === "ageAll") toggleAgeKey("ageAll");
+                            else toggleAgeKey(k);
+                          }}
+                          className={cn(
+                            plannerNeon.selectChip,
+                            "touch-manipulation",
+                            selected
+                              ? plannerNeon.selectChipActive
+                              : plannerNeon.selectChipIdle,
+                          )}
+                        >
+                          {t(k)}
+                        </button>
+                      );
+                    })}
+                  </div>
                 </div>
+
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel>{t("packagesTitle")}</PlannerNeonLabel>
+                  </div>
+                  <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
+                    {(
+                      [
+                        ["premium", "pkgPremium"],
+                        ["national", "pkgNational"],
+                        ["value", "pkgValue"],
+                      ] as const
+                    ).map(([id, titleKey]) => (
+                      <button
+                        key={id}
+                        type="button"
+                        onClick={() => applyPreset(id)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          plannerNeon.selectChipIdle,
+                          "touch-manipulation p-4 text-left",
+                        )}
+                      >
+                        {t(titleKey)}
+                      </button>
+                    ))}
+                  </div>
+                </PlannerNeonCard>
               </div>
             ) : null}
 
@@ -705,7 +751,7 @@ export default function IntegratedPlannerPageClient({
                 periodDisplay={periodDisplay}
                 regionsText={regionsText}
                 categoriesText={categoriesSummary}
-                ageText={t(ageKey)}
+                ageText={ageSummary}
                 industryText={t(industryKey)}
                 portfolio={portfolio}
                 digitalResult={digitalResult}

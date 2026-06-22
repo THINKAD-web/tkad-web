@@ -4,6 +4,10 @@ import {
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
 import {
+  filterPlannerMediaByRegions,
+  countPlannerMediaByBrowseRegion,
+} from "@/lib/planner/planner-regions";
+import {
   normalizeCampaignGoal,
   type CampaignFunnel,
 } from "@/lib/planner/normalize-campaign-goal";
@@ -180,45 +184,25 @@ export function filterPlannerMedia(
   });
 }
 
-/** 다중 지역(OR). `regions`가 비어 있으면 결과 없음. 서울 하위 상권은 `seoulZones`로 추가 필터. */
+/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. 서울 하위 상권은 `seoulZones`로 추가 필터. */
 export function filterPlannerMediaMulti(
   items: readonly MediaItem[],
   regions: ReadonlySet<string>,
   categories: ReadonlySet<PlannerCategory>,
   seoulZones: readonly PlannerSeoulZoneKey[] = [],
 ): MediaItem[] {
-  if (categories.size === 0 || regions.size === 0) return [];
-  return items.filter((m) => {
-    if (!regions.has(m.region)) return false;
-    if (regions.has("seoul") && !mediaMatchesSeoulZones(m, seoulZones)) {
-      return false;
-    }
-    for (const c of categories) {
-      if (matchesPlannerCategory(m, c)) return true;
-    }
-    return false;
-  });
+  let filtered = filterPlannerMediaByRegions(items, regions, categories);
+  if (regions.has("seoul") && seoulZones.length > 0) {
+    filtered = filtered.filter((m) => mediaMatchesSeoulZones(m, seoulZones));
+  }
+  return filtered;
 }
 
 export function countPlannerMediaByRegion(
   items: readonly MediaItem[],
   categories: ReadonlySet<PlannerCategory>,
 ): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const r of PLANNER_MAP_REGIONS) out[r] = 0;
-  if (categories.size === 0) return out;
-  for (const m of items) {
-    let match = false;
-    for (const c of categories) {
-      if (matchesPlannerCategory(m, c)) {
-        match = true;
-        break;
-      }
-    }
-    if (!match) continue;
-    if (out[m.region] !== undefined) out[m.region] += 1;
-  }
-  return out;
+  return countPlannerMediaByBrowseRegion(items, categories);
 }
 
 /** 포트폴리오 월 단가(만원) 대비 예상 월간 노출로 블렌드 CPM(원/천회) 추정 */

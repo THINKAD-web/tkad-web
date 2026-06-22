@@ -48,6 +48,19 @@ export function isPlannerAgeKey(v: unknown): v is PlannerAgeKey {
   );
 }
 
+/** 단일·배열 저장값 → 복수 연령 (빈 배열 = 전 연령) */
+export function normalizePlannerAgeKeys(raw: unknown): PlannerAgeKey[] {
+  if (Array.isArray(raw)) {
+    const out: PlannerAgeKey[] = [];
+    for (const v of raw) {
+      if (isPlannerAgeKey(v) && v !== "ageAll" && !out.includes(v)) out.push(v);
+    }
+    return out;
+  }
+  if (isPlannerAgeKey(raw) && raw !== "ageAll") return [raw];
+  return [];
+}
+
 export function isPlannerIndustryKey(v: unknown): v is PlannerIndustryKey {
   return (
     typeof v === "string" &&
