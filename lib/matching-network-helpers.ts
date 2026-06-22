@@ -1,10 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToPriceMan, catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
-import {
-  computeNetworkMonthlyFromMediaItem,
-  NETWORK_CATALOG_ID_PREFIX,
-} from "@/lib/media-network-public";
+import { NETWORK_CATALOG_ID_PREFIX } from "@/lib/media-network-types";
 
 /** 카탈로그 합성 네트워크 매체 여부 */
 export function isNetworkCatalogItem(m: MediaItem): boolean {
@@ -15,6 +12,36 @@ export function isNetworkCatalogItem(m: MediaItem): boolean {
   );
 }
 
+/** MediaItem 패키지 구간으로 월 단가(원) — 클라이언트·서버 공용 (prisma/pg 미사용) */
+function computeNetworkMonthlyFromMediaItemFields(
+  m: MediaItem,
+  units: number,
+): number {
+  const minUnits = Math.max(1, m.networkMinUnits ?? 1);
+  const u = Math.max(minUnits, Math.round(units) || minUnits);
+  const tiers = [...(m.networkPackageTiers ?? [])].sort(
+    (a, b) => a.units - b.units,
+  );
+  if (tiers.length > 0) {
+    let best = tiers[0]!;
+    for (const t of tiers) {
+      if (t.units <= u && t.units >= best.units) best = t;
+    }
+    const exact = tiers.find((t) => t.units === u);
+    if (exact) return exact.price;
+    const higher = tiers.find((t) => t.units >= u);
+    if (higher) return higher.price;
+    return tiers[tiers.length - 1]!.price;
+  }
+  if (m.networkPricePerUnit != null && m.networkPricePerUnit > 0) {
+    return m.networkPricePerUnit * u;
+  }
+  if (m.networkPricePackage != null && m.networkPricePackage > 0) {
+    return m.networkPricePackage;
+  }
+  return 0;
+}
+
 /**
  * 매칭·포트폴리오용 네트워크 월 최소 진입가(원).
  * minUnits·패키지 최저 구간 기준 — 전체 패키지가가 아닌 실제 최소 집행 단가.
@@ -22,7 +49,7 @@ export function isNetworkCatalogItem(m: MediaItem): boolean {
 export function effectiveNetworkEntryMonthlyWon(m: MediaItem): number {
   if (!isNetworkCatalogItem(m)) return 0;
   const minUnits = Math.max(1, m.networkMinUnits ?? 1);
-  const fromTiers = computeNetworkMonthlyFromMediaItem(m, minUnits);
+  const fromTiers = computeNetworkMonthlyFromMediaItemFields(m, minUnits);
   if (fromTiers > 0) return fromTiers;
   const display = catalogPriceFieldToWon(m.price);
   return display > 0 ? display : 0;
