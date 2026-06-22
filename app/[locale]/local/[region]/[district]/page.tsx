@@ -12,6 +12,7 @@ import {
   getLocalSeoLanding,
   LOCAL_SEO_LANDINGS,
   localLandingDescription,
+  localLandingHeroTitle,
   localLandingTitle,
   localSeoPath,
   matchesLocalSeoLanding,
@@ -130,7 +131,7 @@ export default async function LocalSeoLandingPage({ params }: Props) {
   }
 
   const filtered = catalog.filter((m) => matchesLocalSeoLanding(m, landing));
-  const title = isKo ? landing.headlineKo : landing.headlineEn;
+  const title = localLandingHeroTitle(landing, locale, filtered.length);
   const description = isKo ? landing.introKo : landing.introEn;
   const traits = isKo ? landing.traitsKo : landing.traitsEn;
   const faqs = isKo ? landing.faqsKo : landing.faqsEn;

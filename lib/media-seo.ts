@@ -1,4 +1,6 @@
-import { typeLabels, type MediaItem } from "@/lib/media-data";
+import type { MediaItem } from "@/lib/media-data";
+import { typeLabels } from "@/lib/media-data";
+import { categoryLabel } from "@/lib/media-categories";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
 const META_DESC_MAX = 158;
@@ -82,21 +84,62 @@ export function collectMediaSeoKeywordStrings(
   return out.slice(0, max);
 }
 
-/** generateMetadata / OG용 제목 (타입 라벨 포함) */
+function resolveMediaSeoTypeLabel(media: MediaItem, locale: string): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  const catSlug = media.mediaCategory?.[0];
+  if (catSlug) {
+    const label = categoryLabel(catSlug, locale);
+    if (label && label !== catSlug) return label;
+  }
+  if (media.subCategory?.trim()) return media.subCategory.trim();
+  const tl = typeLabels[media.type];
+  if (tl) return isKo ? tl.ko : tl.en;
+  return media.type || (isKo ? "옥외광고" : "OOH");
+}
+
+function resolveMediaSeoDistrict(media: MediaItem, locale: string): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  const district = media.district?.trim() || media.city?.trim();
+  if (district) return district;
+  return isKo ? media.location : media.locationEn || media.location;
+}
+
+/** generateMetadata / OG용 제목 (유형·지역·단가 키워드 중심) */
 export function buildMediaPageTitle(
   media: MediaItem,
   locale: string,
-  brand: string = "THINKAD",
+  brand: string = "옥외광고",
 ): string {
-  const isKo = locale === "ko";
+  const isKo = locale === "ko" || locale.startsWith("ko");
   const name = isKo ? media.name : media.nameEn || media.name;
-  const loc = isKo ? media.location : media.locationEn || media.location;
-  const tl = typeLabels[media.type];
-  const typeStr = tl ? (isKo ? tl.ko : tl.en) : media.type;
-  const core = typeStr
-    ? `${name} · ${typeStr} — ${loc} | ${brand}`
-    : `${name} - ${loc} | ${brand}`;
-  return core.length > TITLE_MAX ? `${name} - ${loc} | ${brand}`.slice(0, TITLE_MAX) : core;
+  const district = resolveMediaSeoDistrict(media, locale);
+  const typeStr = resolveMediaSeoTypeLabel(media, locale);
+  const won = catalogPriceFieldToWon(media.price);
+
+  if (isKo) {
+    const pricePart =
+      won > 0
+        ? `월 ${Math.round(won / 10_000).toLocaleString("ko-KR")}만원`
+        : "";
+    const core = pricePart
+      ? `${name} ${typeStr} — ${district} ${pricePart} | ${brand}`
+      : `${name} ${typeStr} — ${district} | ${brand}`;
+    if (core.length <= TITLE_MAX) return core;
+    const fallback = pricePart
+      ? `${name} — ${district} ${pricePart} | ${brand}`
+      : `${name} — ${district} | ${brand}`;
+    return fallback.slice(0, TITLE_MAX);
+  }
+
+  const pricePart =
+    won > 0
+      ? `from ₩${Math.round(won / 10_000).toLocaleString("en-US")}0K/mo`
+      : "";
+  const core = pricePart
+    ? `${name} ${typeStr} — ${district} ${pricePart} | ${brand}`
+    : `${name} ${typeStr} — ${district} | ${brand}`;
+  if (core.length <= TITLE_MAX) return core;
+  return `${name} — ${district} | ${brand}`.slice(0, TITLE_MAX);
 }
 
 function baseLongTextFromMedia(media: MediaItem, isKo: boolean): string {

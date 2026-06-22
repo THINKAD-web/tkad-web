@@ -10,6 +10,7 @@ import {
   isMarketingMediaTypeSlug,
   MARKETING_MEDIA_TYPE_SLUGS,
   marketingTypeDef,
+  marketingTypeHeroTitle,
   marketingTypeLandingDescription,
   marketingTypeLandingTitle,
   matchesMarketingMediaType,
@@ -106,7 +107,8 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
   }
 
   const filtered = catalog.filter((m) => matchesMarketingMediaType(m, mediaType));
-  const title = isKo ? def.labelKo : def.labelEn;
+  const label = isKo ? def.labelKo : def.labelEn;
+  const heroTitle = marketingTypeHeroTitle(mediaType, locale, filtered.length);
   const intro = isKo ? def.introKo : def.introEn;
   const pros = isKo ? def.prosKo : def.prosEn;
   const cons = isKo ? def.consKo : def.consEn;
@@ -128,7 +130,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
   const breadcrumbLd = buildBreadcrumbJsonLd(locale, [
     { name: isKo ? "홈" : "Home", path: "" },
     { name: isKo ? "옥외광고 매체" : "OOH media", path: "/media" },
-    { name: title, path: `/type/${mediaType}` },
+    { name: heroTitle, path: `/type/${mediaType}` },
   ]);
   const faqLd = buildFaqJsonLd(mediaType, locale);
   const jsonLd = faqLd ? [itemListLd, breadcrumbLd, faqLd] : [itemListLd, breadcrumbLd];
@@ -146,7 +148,7 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
         <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
           <MediaKeywordLandingHero
             eyebrow={`// ${isKo ? "매체 유형" : "MEDIA TYPE"}`}
-            title={title}
+            title={heroTitle}
             description={intro}
             icon={<Monitor className="size-7 dark:text-white text-gray-800" aria-hidden />}
             primaryCta={{
@@ -207,8 +209,8 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
               <section>
                 <h2 className="mb-4 text-lg font-bold dark:text-white text-gray-900">
                   {isKo
-                    ? `${title} 매체 ${filtered.length}개`
-                    : `${filtered.length} ${title} placements`}
+                    ? `${label} 매체 ${filtered.length}개`
+                    : `${filtered.length} ${label} placements`}
                 </h2>
                 <MediaKeywordLandingCatalog items={filtered} locale={locale} />
               </section>
