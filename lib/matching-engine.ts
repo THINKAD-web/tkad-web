@@ -2,6 +2,14 @@ import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
+  effectiveNetworkEntryMonthlyWon,
+  isNetworkCatalogItem,
+  networkMatchesMatchingRegions,
+  networkQuotaForLimit,
+  networkReachBonus,
+  networkRegionScoreBoost,
+} from "@/lib/matching-network-helpers";
+import {
   getChildCategories,
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
@@ -203,6 +211,10 @@ function mediaHaystack(m: MediaItem): string {
 }
 
 function monthlyPriceWon(m: MediaItem): number {
+  if (isNetworkCatalogItem(m)) {
+    const entry = effectiveNetworkEntryMonthlyWon(m);
+    if (entry > 0) return entry;
+  }
   const won = catalogPriceFieldToWon(m.price);
   if (won <= 0) return 0;
   const period = (m.pricePeriod ?? "month").toLowerCase();
@@ -215,11 +227,15 @@ function monthlyPriceWon(m: MediaItem): number {
 function scoreBudget(m: MediaItem, monthlyBudgetWon: number): number {
   if (!(monthlyBudgetWon > 0)) return 22;
   const price = monthlyPriceWon(m);
-  if (price <= 0) return 18;
+  if (price <= 0) {
+    return isNetworkCatalogItem(m) ? 12 : 18;
+  }
   const ratio = price / monthlyBudgetWon;
   if (ratio > 1) return -1;
   if (ratio >= 0.8) return 20;
   if (ratio >= 0.1) return 30;
+  // 네트워크 진입 단가(1구좌·최소 패키지)는 예산 내이면 과소평가하지 않음
+  if (isNetworkCatalogItem(m) && ratio > 0) return 26;
   return 15;
 }
 
@@ -239,6 +255,12 @@ function scoreRegion(m: MediaItem, regions: string[]): number {
   }
   if (regions.some((r) => normalizeRegionKey(r) === "national")) {
     best = Math.max(best, 20);
+  }
+  if (isNetworkCatalogItem(m)) {
+    best = Math.max(best, networkRegionScoreBoost(m, regions));
+    if (networkMatchesMatchingRegions(m, regions)) {
+      best = Math.max(best, 20);
+    }
   }
   return best;
 }
@@ -458,7 +480,10 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
       String(input.goal ?? ""),
       input.goalTags,
     ),
-    popularity: scorePopularityTrust(m),
+    popularity: Math.min(
+      10,
+      scorePopularityTrust(m) + networkReachBonus(m),
+    ),
     total: 0,
   };
   breakdown.total = Math.min(
@@ -590,6 +615,83 @@ function selectDiversePortfolio(
   return out.slice(0, limit);
 }
 
+function isSuitableNetworkForMatching(
+  scored: MatchedMedia,
+  input: MatchingInput,
+): boolean {
+  if (!isNetworkCatalogItem(scored.media)) return false;
+  if (scored.breakdown.budget < 0) return false;
+  if (input.regions.length === 0) return true;
+  if (scored.breakdown.region >= 15) return true;
+  return networkMatchesMatchingRegions(scored.media, input.regions);
+}
+
+/** 상위 N개에 네트워크 최소 슬롯 보장 — 적합한 후보가 있을 때만 */
+function applyNetworkRecommendationQuota(
+  picked: MatchedMedia[],
+  allScored: MatchedMedia[],
+  input: MatchingInput,
+  limit: number,
+): MatchedMedia[] {
+  const quota = Math.min(networkQuotaForLimit(limit), limit);
+  let out = [...picked];
+  const existingNw = out.filter((p) => isNetworkCatalogItem(p.media)).length;
+  if (existingNw >= quota) return out.slice(0, limit);
+
+  const suitable = allScored
+    .filter((s) => isSuitableNetworkForMatching(s, input))
+    .filter((s) => !out.some((p) => p.media.id === s.media.id))
+    .sort((a, b) => b.score - a.score);
+
+  let need = quota - existingNw;
+  for (const nw of suitable) {
+    if (need <= 0) break;
+    if (out.length >= limit) {
+      const dropIdx = [...out]
+        .map((x, i) => ({ x, i }))
+        .reverse()
+        .find((e) => !isNetworkCatalogItem(e.x.media))?.i;
+      if (dropIdx == null) break;
+      out[dropIdx] = {
+        ...nw,
+        role: "sub",
+        budgetAllocation: out[dropIdx]?.budgetAllocation ?? 0.1,
+        priority: out[dropIdx]?.priority ?? out.length,
+      };
+    } else {
+      out.push({
+        ...nw,
+        role: "sub",
+        budgetAllocation: 0.1,
+        priority: out.length + 1,
+      });
+    }
+    need--;
+  }
+
+  const allocSum = out.reduce((a, x) => a + x.budgetAllocation, 0);
+  if (allocSum > 0 && Math.abs(allocSum - 1) > 0.01) {
+    for (const x of out) x.budgetAllocation = x.budgetAllocation / allocSum;
+  }
+  return out.slice(0, limit);
+}
+
+function mergeNetworkCandidatesIntoWindow(
+  windowed: MatchedMedia[],
+  rescored: MatchedMedia[],
+  input: MatchingInput,
+  maxExtra = 3,
+): MatchedMedia[] {
+  const ids = new Set(windowed.map((w) => w.media.id));
+  const extras = rescored
+    .filter((s) => isSuitableNetworkForMatching(s, input))
+    .filter((s) => !ids.has(s.media.id))
+    .sort((a, b) => b.score - a.score)
+    .slice(0, maxExtra);
+  if (extras.length === 0) return windowed;
+  return [...windowed, ...extras].sort((a, b) => b.score - a.score);
+}
+
 export function matchMediaCatalog(
   catalog: readonly MediaItem[],
   input: MatchingInput,
@@ -644,11 +746,15 @@ export function matchMediaCatalog(
     seed === 0
       ? 0
       : (deterministicHash("window", seed) % Math.max(1, rescored.length - limit));
-  const windowed = [...rescored]
+  const windowSize = Math.max(limit * 2, 20);
+  let windowed = [...rescored]
     .sort((a, b) => b.score - a.score)
-    .slice(offset, offset + Math.max(limit * 2, 20));
+    .slice(offset, offset + windowSize);
 
-  return selectDiversePortfolio(windowed, limit, seed);
+  windowed = mergeNetworkCandidatesIntoWindow(windowed, rescored, input);
+
+  const picked = selectDiversePortfolio(windowed, limit, seed);
+  return applyNetworkRecommendationQuota(picked, rescored, input, limit);
 }
 
 export function oneLineReason(
