@@ -78,6 +78,17 @@ export function buildPublicNetworkWhere(
         { description: { contains: q, mode: "insensitive" } },
         { features: { contains: q, mode: "insensitive" } },
         { tags: { has: q } },
+        {
+          locations: {
+            some: {
+              OR: [
+                { name: { contains: q, mode: "insensitive" } },
+                { address: { contains: q, mode: "insensitive" } },
+                { fullAddress: { contains: q, mode: "insensitive" } },
+              ],
+            },
+          },
+        },
       ],
     });
   }

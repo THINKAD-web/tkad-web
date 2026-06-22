@@ -113,6 +113,7 @@ export function sortMapCatalogItems(
     default:
       return arr.sort(
         (a, b) =>
+          (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0) ||
           (b.popularityScore ?? 0) - (a.popularityScore ?? 0) ||
           (b.createdAt && a.createdAt
             ? Date.parse(b.createdAt) - Date.parse(a.createdAt)
