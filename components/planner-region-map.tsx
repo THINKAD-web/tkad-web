@@ -1,31 +1,37 @@
 "use client";
 
 import { cn } from "@/lib/utils";
-import type { PlannerMapRegion } from "@/lib/planner-logic";
-import { PLANNER_MAP_REGIONS } from "@/lib/planner-logic";
+import type { PlannerMapAnchorId } from "@/lib/planner/planner-regions";
+import { PLANNER_MAP_ANCHOR_IDS } from "@/lib/planner/planner-regions";
 import {
   PlannerNeonLabel,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 
+export type PlannerRegionChip = {
+  id: string;
+  label: string;
+  count: number;
+};
+
 type Props = {
   selected: ReadonlySet<string>;
-  counts: Record<string, number>;
-  onToggle: (r: PlannerMapRegion) => void;
-  labelFor: (r: PlannerMapRegion) => string;
+  /** 건수 > 0 인 광역 칩 (DB `regionMain` 기준) */
+  regionOptions: PlannerRegionChip[];
+  onToggle: (regionId: string) => void;
   title: string;
   hint: string;
   countLabel: (n: number) => string;
 };
 
 type Zone = {
-  id: PlannerMapRegion;
+  id: PlannerMapAnchorId;
   d: string;
   cx: number;
   cy: number;
 };
 
-const ZONES: Zone[] = [
+const MAP_ZONES: Zone[] = [
   {
     id: "seoul",
     cx: 150,
@@ -54,13 +60,18 @@ const ZONES: Zone[] = [
 
 export function PlannerRegionMap({
   selected,
-  counts,
+  regionOptions,
   onToggle,
-  labelFor,
   title,
   hint,
   countLabel,
 }: Props) {
+  const labelById = new Map(regionOptions.map((o) => [o.id, o.label]));
+  const countById = new Map(regionOptions.map((o) => [o.id, o.count]));
+
+  const mapLabel = (id: PlannerMapAnchorId) =>
+    labelById.get(id) ?? id;
+
   return (
     <div className="space-y-3">
       <div>
@@ -90,20 +101,24 @@ export function PlannerRegionMap({
           >
             KOREA
           </text>
-          {ZONES.map((z) => {
+          {MAP_ZONES.map((z) => {
             const on = selected.has(z.id);
-            const n = counts[z.id] ?? 0;
+            const n = countById.get(z.id) ?? 0;
+            const disabled = n <= 0;
             return (
-              <g key={z.id}>
+              <g key={z.id} opacity={disabled ? 0.35 : 1}>
                 <path
                   d={z.d}
                   className={cn(
-                    "cursor-pointer transition-colors",
+                    "transition-colors",
+                    disabled ? "cursor-not-allowed" : "cursor-pointer",
                     on
                       ? "tkad-planner-map-zone-on fill-violet-500 stroke-[3]"
                       : "tkad-planner-map-zone-off stroke-2",
                   )}
-                  onClick={() => onToggle(z.id)}
+                  onClick={() => {
+                    if (!disabled) onToggle(z.id);
+                  }}
                 />
                 <text
                   x={z.cx}
@@ -114,7 +129,7 @@ export function PlannerRegionMap({
                     on ? "tkad-planner-map-label-active" : "tkad-planner-map-label-idle",
                   )}
                 >
-                  {labelFor(z.id)}
+                  {mapLabel(z.id)}
                 </text>
                 <text
                   x={z.cx}
@@ -132,29 +147,30 @@ export function PlannerRegionMap({
             );
           })}
         </svg>
-        <ul className="mt-4 flex flex-wrap justify-center gap-2">
-          {PLANNER_MAP_REGIONS.map((r) => (
-            <li key={r}>
+        <ul className="mt-4 flex max-h-48 flex-wrap justify-center gap-2 overflow-y-auto overscroll-contain sm:max-h-none">
+          {regionOptions.map((r) => (
+            <li key={r.id}>
               <button
                 type="button"
-                onClick={() => onToggle(r)}
+                onClick={() => onToggle(r.id)}
                 className={cn(
                   plannerNeon.selectChip,
-                  selected.has(r)
+                  "touch-manipulation",
+                  selected.has(r.id)
                     ? plannerNeon.selectChipActive
                     : plannerNeon.selectChipIdle,
                 )}
               >
-                {labelFor(r)}
+                {r.label}
                 <span
                   className={cn(
                     "ml-2 tabular-nums",
-                    selected.has(r)
+                    selected.has(r.id)
                       ? "dark:text-white/70 text-gray-600"
                       : plannerNeon.subtext,
                   )}
                 >
-                  ({counts[r] ?? 0})
+                  ({countLabel(r.count)})
                 </span>
               </button>
             </li>

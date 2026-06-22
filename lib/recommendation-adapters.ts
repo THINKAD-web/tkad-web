@@ -94,7 +94,14 @@ export function plannerContextToMatching(
     industry: ctx.industryKey ?
       (PLANNER_INDUSTRY_MAP[ctx.industryKey] ?? "other")
     : "other",
-    targets: [PLANNER_AGE_TO_TARGET[ctx.ageKey] ?? "mass"],
+    targets:
+      ctx.ageKeys.length > 0
+        ? [
+            ...new Set(
+              ctx.ageKeys.map((k) => PLANNER_AGE_TO_TARGET[k] ?? "mass"),
+            ),
+          ]
+        : ["mass"],
     durationMonths: Math.max(1, ctx.months),
     goal: ctx.goal ? (PLANNER_GOAL_MAP[ctx.goal] ?? ctx.goal) : "brand",
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,

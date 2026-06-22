@@ -3,6 +3,7 @@ import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
+import { filterPlannerMediaByRegions, countPlannerMediaByBrowseRegion } from "@/lib/planner/planner-regions";
 import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
@@ -168,41 +169,20 @@ export function filterPlannerMedia(
   });
 }
 
-/** 다중 지역(OR). `regions`가 비어 있으면 결과 없음. */
+/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. */
 export function filterPlannerMediaMulti(
   items: readonly MediaItem[],
   regions: ReadonlySet<string>,
   categories: ReadonlySet<PlannerCategory>,
 ): MediaItem[] {
-  if (categories.size === 0 || regions.size === 0) return [];
-  return items.filter((m) => {
-    if (!regions.has(m.region)) return false;
-    for (const c of categories) {
-      if (matchesPlannerCategory(m, c)) return true;
-    }
-    return false;
-  });
+  return filterPlannerMediaByRegions(items, regions, categories);
 }
 
 export function countPlannerMediaByRegion(
   items: readonly MediaItem[],
   categories: ReadonlySet<PlannerCategory>,
 ): Record<string, number> {
-  const out: Record<string, number> = {};
-  for (const r of PLANNER_MAP_REGIONS) out[r] = 0;
-  if (categories.size === 0) return out;
-  for (const m of items) {
-    let match = false;
-    for (const c of categories) {
-      if (matchesPlannerCategory(m, c)) {
-        match = true;
-        break;
-      }
-    }
-    if (!match) continue;
-    if (out[m.region] !== undefined) out[m.region] += 1;
-  }
-  return out;
+  return countPlannerMediaByBrowseRegion(items, categories);
 }
 
 /** 포트폴리오 월 단가(만원) 대비 예상 월간 노출로 블렌드 CPM(원/천회) 추정 */

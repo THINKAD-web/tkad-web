@@ -54,7 +54,7 @@ export type PlannerRecommendationStoreBinding = {
   goal: PlannerCampaignGoal | null;
   regions: string[];
   categories: PlannerCategory[];
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   budgetMan: number;
   months: number;
@@ -86,7 +86,7 @@ export function PlannerRecommendationPanel({
   const plannerGoal = usePlannerStore((s) => s.campaignGoal);
   const plannerRegions = usePlannerStore((s) => s.regions);
   const plannerCategories = usePlannerStore((s) => s.categories);
-  const plannerAgeKey = usePlannerStore((s) => s.ageKey);
+  const plannerAgeKeys = usePlannerStore((s) => s.ageKeys);
   const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
@@ -96,7 +96,7 @@ export function PlannerRecommendationPanel({
   const goal = store?.goal ?? plannerGoal;
   const regions = store?.regions ?? plannerRegions;
   const categories = store?.categories ?? plannerCategories;
-  const ageKey = store?.ageKey ?? plannerAgeKey;
+  const ageKeys = store?.ageKeys ?? plannerAgeKeys;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
@@ -113,12 +113,12 @@ export function PlannerRecommendationPanel({
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
     [
       goal,
       regions,
       categories,
-      ageKey,
+      ageKeys,
       industryKey,
       budgetMan,
       months,
@@ -139,7 +139,7 @@ export function PlannerRecommendationPanel({
               goal,
               regions,
               categories,
-              ageKey,
+              ageKeys,
               industryKey,
               budgetMan,
               months,
@@ -187,7 +187,7 @@ export function PlannerRecommendationPanel({
                 goal,
                 regions,
                 categories,
-                ageKey,
+                ageKeys,
                 industryKey,
                 budgetMan,
                 months,
@@ -211,7 +211,7 @@ export function PlannerRecommendationPanel({
               goal,
               regions,
               categories,
-              ageKey,
+              ageKeys,
               industryKey,
               budgetMan,
               months,
@@ -232,7 +232,7 @@ export function PlannerRecommendationPanel({
     goal,
     regions,
     categories,
-    ageKey,
+    ageKeys,
     industryKey,
     budgetMan,
     months,

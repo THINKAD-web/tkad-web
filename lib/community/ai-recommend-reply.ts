@@ -75,7 +75,7 @@ export async function createAiRecommendReply(opts: {
       goal: "brand",
       regions: [toPlannerRegion(meta.region)],
       categories: ["digital", "static", "mobile"],
-      ageKey: "ageAll",
+      ageKeys: [],
       industryKey,
       budgetMan,
       months: 1,

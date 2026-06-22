@@ -26,7 +26,7 @@ function mediaSearchHaystack(m: MediaItem): string {
     .toLowerCase();
 }
 
-function matchesBrowseRegion(
+export function matchesBrowseRegion(
   m: MediaItem,
   regionMain: string,
   regionSub: string,

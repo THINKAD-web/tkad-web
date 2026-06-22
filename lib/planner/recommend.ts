@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import { matchesPlannerCategory } from "@/lib/planner-logic";
+import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -35,7 +36,7 @@ export type RecommendationContext = {
   goal: PlannerCampaignGoal | null;
   regions: string[];
   categories: PlannerCategory[];
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   /** Step 2 업종 — 매체 메타·설명 키워드와 느슨 매칭 */
   industryKey: PlannerIndustryKey | null;
   /** 만원 단위 예산 */
@@ -241,12 +242,24 @@ function hintHitCount(hay: string, hints: string[]): number {
 
 function regionScore(media: MediaItem, regions: string[]): number {
   if (regions.length === 0) return 0.5;
-  if (regions.includes(media.region)) return 1;
-  if (regions.includes("national") && media.region !== "national") return 0.4;
+  if (regions.some((r) => matchesPlannerRegion(media, r))) return 1;
+  if (regions.includes("national") && media.region === "national") return 0.4;
   return 0.1;
 }
 
-function ageScore(ageKey: PlannerAgeKey, targetAge?: string | null): number {
+function ageScoreForKeys(
+  ageKeys: PlannerAgeKey[],
+  targetAge?: string | null,
+): number {
+  if (ageKeys.length === 0) return 0.62;
+  let best = 0;
+  for (const key of ageKeys) {
+    best = Math.max(best, ageScoreSingle(key, targetAge));
+  }
+  return best;
+}
+
+function ageScoreSingle(ageKey: PlannerAgeKey, targetAge?: string | null): number {
   if (ageKey === "ageAll") return 0.62;
   if (!targetAge) return 0.54; // 미디어 `targetAge` 없음 — 매칭 불가, 동률·가시성 편중 완화
   const lower = targetAge.replace(/\s+/g, "");
@@ -470,7 +483,7 @@ export function scoreMedia(
     },
     {
       key: "ageMatch",
-      raw: ageScore(ctx.ageKey, media.targetAge),
+      raw: ageScoreForKeys(ctx.ageKeys, media.targetAge),
       weighted: 0,
     },
     {
@@ -561,10 +574,12 @@ function budgetAffordabilityMultiplier(
   return Math.max(0.22, 0.75 / Math.sqrt(ratio));
 }
 
-/** 연령 타깃이 좁을수록 매체 targetAge 매칭에 더 반응 */
-function ageTargetTilt(ageKey: PlannerAgeKey, targetAge?: string | null): number {
-  if (ageKey === "ageAll") return 1;
-  return 0.9 + 0.14 * ageScore(ageKey, targetAge);
+function ageTargetTilt(
+  ageKeys: PlannerAgeKey[],
+  targetAge?: string | null,
+): number {
+  if (ageKeys.length === 0) return 1;
+  return 0.9 + 0.14 * ageScoreForKeys(ageKeys, targetAge);
 }
 
 function minKmToPicked(

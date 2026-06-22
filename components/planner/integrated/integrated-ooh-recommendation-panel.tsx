@@ -53,7 +53,7 @@ export function IntegratedOohRecommendationPanel({
   const goal = useIntegratedPlannerStore((s) => s.campaignGoal);
   const regions = useIntegratedPlannerStore((s) => s.regions);
   const categories = useIntegratedPlannerStore((s) => s.categories);
-  const ageKey = useIntegratedPlannerStore((s) => s.ageKey);
+  const ageKeys = useIntegratedPlannerStore((s) => s.ageKeys);
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
   const budgetMan = useIntegratedPlannerStore(selectIntegratedBudgetNum);
   const months = useIntegratedPlannerStore((s) => s.months);
@@ -67,8 +67,8 @@ export function IntegratedOohRecommendationPanel({
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKey}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
-    [goal, regions, categories, ageKey, industryKey, budgetMan, months, refreshTick],
+      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
+    [goal, regions, categories, ageKeys, industryKey, budgetMan, months, refreshTick],
   );
 
   useEffect(() => {
@@ -84,11 +84,11 @@ export function IntegratedOohRecommendationPanel({
     () =>
       recommendPlannerMedia(
         catalog,
-        { goal, regions, categories, ageKey, industryKey, budgetMan, months },
+        { goal, regions, categories, ageKeys, industryKey, budgetMan, months },
         5,
         refreshTick,
       ),
-    [catalog, goal, regions, categories, ageKey, industryKey, budgetMan, months, refreshTick],
+    [catalog, goal, regions, categories, ageKeys, industryKey, budgetMan, months, refreshTick],
   );
 
   const isSelected = (id: string) => selectedIds.includes(id);

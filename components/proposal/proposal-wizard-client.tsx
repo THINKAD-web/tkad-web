@@ -19,6 +19,7 @@ import { ProposalResultDisplay } from "@/components/proposal/proposal-result-dis
 import type { MediaItem } from "@/lib/media-data";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import type { HomeAppearance } from "@/lib/home-appearance";
+import type { PlannerAgeKey } from "@/lib/planner/types";
 import {
   recommendPlannerMedia,
   type RecommendationContext,
@@ -134,7 +135,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
       regions: plannerRegions,
       budget,
       months,
-      ageKey,
+      ageKeys,
       industryKey,
       campaignMediaIds,
     } = usePlannerStore.getState();
@@ -151,8 +152,8 @@ export default function ProposalWizardClient({ catalog }: Props) {
     const { startDate: start, endDate: end } = plannerPeriodDates(months);
     setStartDate(start);
     setEndDate(end);
-    if (ageKey !== "ageAll") {
-      setTargetAge(tPlanner(ageKey));
+    if (ageKeys.length > 0) {
+      setTargetAge(ageKeys.map((k) => tPlanner(k)).join(", "));
     }
     setIndustry(tPlanner(industryKey));
     if (campaignMediaIds.length > 0) {
@@ -175,7 +176,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
       goal: goalToPlanner(goal),
       regions,
       categories: [],
-      ageKey: "ageAll",
+      ageKeys: [] as PlannerAgeKey[],
       industryKey: null,
       budgetMan: budgetManwon,
       months: Math.max(

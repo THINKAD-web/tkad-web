@@ -9,6 +9,7 @@ import {
   PLANNER_DEFAULT_CATEGORIES,
   PLANNER_LAST_INPUT_STEP,
   PLANNER_RESULT_STEP,
+  normalizePlannerAgeKeys,
   isPlannerAgeKey,
   isPlannerIndustryKey,
   normalizePlannerCategories,
@@ -30,7 +31,7 @@ import type { PlanCart } from "@/lib/plan-cart";
  * `migrate()` 훅에서 흡수한다. persist 자체 version은 별도 관리.
  */
 export const PLANNER_STORAGE_KEY = "tkad-planner-plan-v2";
-const PLANNER_PERSIST_VERSION = 3;
+const PLANNER_PERSIST_VERSION = 4;
 
 export type PlannerStoreState = {
   wizardStep: PlannerWizardStep;
@@ -41,7 +42,7 @@ export type PlannerStoreState = {
   /** 사용자 원본 입력 유지 (빈 문자열·중간값 허용). 정규화 값은 selector 사용. */
   budget: string;
   months: number;
-  ageKey: PlannerAgeKey;
+  ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   campaignMediaIds: string[];
   /** 로컬 Object URL. 메모리 전용이라 persist 대상에서 제외. */
@@ -68,7 +69,8 @@ export type PlannerStoreActions = {
   setCategories: (cats: PlannerCategory[]) => void;
   setBudget: (value: string) => void;
   setMonths: (months: number) => void;
-  setAgeKey: (key: PlannerAgeKey) => void;
+  setAgeKeys: (keys: PlannerAgeKey[]) => void;
+  toggleAgeKey: (key: PlannerAgeKey) => void;
   setIndustryKey: (key: PlannerIndustryKey) => void;
   /** React `Dispatch<SetStateAction<string[]>>` 호환 — 기존 하위 컴포넌트 시그니처 유지용 */
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
@@ -98,7 +100,7 @@ const INITIAL_STATE: PlannerStoreState = {
   categories: [...PLANNER_DEFAULT_CATEGORIES],
   budget: "5000",
   months: 3,
-  ageKey: "ageAll",
+  ageKeys: [] as PlannerAgeKey[],
   industryKey: "indOther",
   campaignMediaIds: [],
   creativeObjectUrl: null,
@@ -177,7 +179,19 @@ export const usePlannerStore = create<PlannerStore>()(
 
       setMonths: (months) => set({ months }),
 
-      setAgeKey: (key) => set({ ageKey: key }),
+      setAgeKeys: (keys) =>
+        set({
+          ageKeys: normalizePlannerAgeKeys(keys),
+        }),
+
+      toggleAgeKey: (key) =>
+        set((s) => {
+          if (key === "ageAll") return { ageKeys: [] };
+          const next = new Set(s.ageKeys);
+          if (next.has(key)) next.delete(key);
+          else next.add(key);
+          return { ageKeys: [...next] };
+        }),
 
       setIndustryKey: (key) => set({ industryKey: key }),
 
@@ -225,12 +239,19 @@ export const usePlannerStore = create<PlannerStore>()(
           }
           if (id === "national") {
             return {
-              regions: ["seoul", "busan", "jeju"],
+              regions: [
+                "seoul",
+                "gyeonggi",
+                "incheon",
+                "busan",
+                "daegu",
+                "jeju",
+              ],
               categories: [...PLANNER_DEFAULT_CATEGORIES],
             };
           }
           return {
-            regions: ["seoul", "busan", "national"],
+            regions: ["seoul", "gyeonggi", "incheon", "busan", "national"],
             categories: [...PLANNER_DEFAULT_CATEGORIES],
           };
         }),
@@ -279,7 +300,7 @@ export const usePlannerStore = create<PlannerStore>()(
         categories: state.categories,
         budget: state.budget,
         months: state.months,
-        ageKey: state.ageKey,
+        ageKeys: state.ageKeys,
         industryKey: state.industryKey,
         campaignMediaIds: state.campaignMediaIds,
         creativeUploadedUrl: state.creativeUploadedUrl,
@@ -328,7 +349,12 @@ export const usePlannerStore = create<PlannerStore>()(
           merged.campaignGoal = raw.campaignGoal as PlannerCampaignGoal;
         }
 
-        if (isPlannerAgeKey(raw.ageKey)) merged.ageKey = raw.ageKey;
+        if (isPlannerAgeKey(raw.ageKey) && raw.ageKey !== "ageAll") {
+          merged.ageKeys = [raw.ageKey];
+        }
+        merged.ageKeys = normalizePlannerAgeKeys(
+          raw.ageKeys ?? merged.ageKeys,
+        );
         if (isPlannerIndustryKey(raw.industryKey))
           merged.industryKey = raw.industryKey;
 
