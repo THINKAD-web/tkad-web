@@ -2,17 +2,14 @@ import {
   fetchHomeFeaturedMedia,
   fetchHomeNewMedia,
   fetchHomeWeeklyPopularMedia,
-  prismaMediaToMediaItem,
 } from "@/lib/public-media-catalog";
 import type { MediaItem } from "@/lib/media-data";
-import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { isDatabaseConfigured } from "@/lib/prisma";
 import {
-  buildPublicMediaOrderBy,
-  buildPublicMediaWhere,
-  type PublicMediaSort,
-} from "@/lib/public-media-query";
-import { attachMediaTrustToMediaItems } from "@/lib/media-trust-catalog";
-import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
+  countMergedMediaBrowse,
+  queryMergedMediaBrowse,
+  type MergedBrowseQuery,
+} from "@/lib/merged-media-browse";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import type {
   HomeCatalogMediaItem,
@@ -39,52 +36,76 @@ function usesFilteredQuery(opts: {
   );
 }
 
-async function fetchFilteredMediaItemRows(opts: {
+type BrowseListOpts = {
   sort: MediaCatalogSort;
   limit: number;
+  skip?: number;
   category?: string;
+  mainCategory?: string;
+  subCategory?: string;
   target?: string;
   region?: string;
+  regionMain?: string;
+  regionSub?: string;
   q?: string;
-}): Promise<MediaItem[]> {
+  features?: string;
+  priceMin?: number;
+  priceMax?: number;
+};
+
+function toMergedQuery(opts: BrowseListOpts): MergedBrowseQuery {
+  const page =
+    opts.skip != null && opts.skip > 0
+      ? Math.floor(opts.skip / opts.limit) + 1
+      : 1;
+  return {
+    sort: opts.sort,
+    limit: opts.limit,
+    page,
+    category: opts.category,
+    mainCategory: opts.mainCategory,
+    subCategory: opts.subCategory,
+    target: opts.target,
+    region: opts.region,
+    regionMain: opts.regionMain,
+    regionSub: opts.regionSub,
+    q: opts.q,
+    features: opts.features,
+    priceMin: opts.priceMin,
+    priceMax: opts.priceMax,
+  };
+}
+
+async function fetchMergedBrowseItems(opts: BrowseListOpts): Promise<MediaItem[]> {
   if (!isDatabaseConfigured()) {
     return [];
   }
-
   try {
-    const db = getPrisma();
-    const where = buildPublicMediaWhere({
-      category: opts.category,
-      target: opts.target,
-      region: opts.region,
-      q: opts.q,
-    });
-    const orderBy = buildPublicMediaOrderBy(opts.sort as PublicMediaSort);
-    const rows = await db.media.findMany({
-      where,
-      orderBy,
-      take: opts.limit,
-    });
-    const rowsWithExtras = await attachPublicMediaCatalogExtras(db, rows);
-    return attachMediaTrustToMediaItems(
-      rowsWithExtras.map((row) => prismaMediaToMediaItem(row)),
-    );
+    const { data } = await queryMergedMediaBrowse(toMergedQuery(opts));
+    return data;
   } catch (e) {
-    console.error("[fetchPublicMediaCatalog] filtered query failed", e);
+    console.error("[fetchMergedBrowseItems] query failed", e);
     return [];
   }
 }
 
-/** `/media` 지도 모드 — 좌표·설치 지점 포함 풀 `MediaItem` */
+/** `/media` SSR·클라이언트 — 일반+네트워크 병합 카탈로그 */
 export async function fetchFilteredMediaCatalogItems(opts: {
   sort: MediaCatalogSort;
   limit: number;
   category?: string;
+  mainCategory?: string;
+  subCategory?: string;
   target?: string;
   region?: string;
+  regionMain?: string;
+  regionSub?: string;
   q?: string;
+  features?: string;
+  priceMin?: number;
+  priceMax?: number;
 }): Promise<MediaItem[]> {
-  return fetchFilteredMediaItemRows(opts);
+  return fetchMergedBrowseItems({ ...opts, skip: 0 });
 }
 
 export async function fetchFilteredMediaCatalog(opts: {
@@ -95,7 +116,7 @@ export async function fetchFilteredMediaCatalog(opts: {
   region?: string;
   q?: string;
 }): Promise<HomeCatalogMediaItem[]> {
-  const items = await fetchFilteredMediaItemRows(opts);
+  const items = await fetchMergedBrowseItems({ ...opts, skip: 0 });
   return items.map(mapMediaItemToHomeCatalog);
 }
 
@@ -137,20 +158,20 @@ export async function fetchPublicMediaCatalog(opts: {
 
 export async function countPublicMediaCatalog(opts: {
   category?: string;
+  mainCategory?: string;
+  subCategory?: string;
   target?: string;
   region?: string;
+  regionMain?: string;
+  regionSub?: string;
   q?: string;
+  features?: string;
+  priceMin?: number;
+  priceMax?: number;
 }): Promise<number> {
   if (!isDatabaseConfigured()) return 0;
   try {
-    const db = getPrisma();
-    const where = buildPublicMediaWhere({
-      category: opts.category,
-      target: opts.target,
-      region: opts.region,
-      q: opts.q,
-    });
-    return await db.media.count({ where });
+    return await countMergedMediaBrowse(opts);
   } catch (e) {
     console.error("[countPublicMediaCatalog]", e);
     return 0;
