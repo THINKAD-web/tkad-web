@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
@@ -67,6 +67,12 @@ import { IntegratedReportStep } from "@/components/planner/integrated/integrated
 import { IntegratedCampaignDashboard } from "@/components/planner/integrated/integrated-dashboard";
 import PlannerTips from "@/components/planner-tips";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
+import {
+  generateScenarios,
+  scenarioInputKey,
+} from "@/lib/planner/generate-scenarios";
+import type { PlannerScenario } from "@/lib/planner/scenario-types";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import type { ReactNode } from "react";
 
@@ -222,7 +228,7 @@ export default function IntegratedPlannerPageClient({
   const clearMediaPlacement = useIntegratedPlannerStore(
     (s) => s.clearMediaPlacement,
   );
-  const applyPreset = useIntegratedPlannerStore((s) => s.applyPreset);
+  const applyScenarioAction = useIntegratedPlannerStore((s) => s.applyScenario);
 
   const selectedRegions = useMemo(() => new Set(regions), [regions]);
   const categories = useMemo(() => new Set(categoriesArr), [categoriesArr]);
@@ -387,6 +393,61 @@ export default function IntegratedPlannerPageClient({
     if (ageKeys.length === 0) return t("ageAll");
     return ageKeys.map((k) => t(k)).join(", ");
   }, [ageKeys, t]);
+
+  const scenarioInput = useMemo(
+    () => ({
+      goal: campaignGoal,
+      industryKey,
+      regions,
+      ageKeys,
+      locale,
+    }),
+    [campaignGoal, industryKey, regions, ageKeys, locale],
+  );
+
+  const scenarioInputMemoKey = useMemo(
+    () => scenarioInputKey(scenarioInput),
+    [scenarioInput],
+  );
+
+  const recommendedScenarios = useMemo(
+    () => generateScenarios(scenarioInput),
+    [scenarioInput],
+  );
+
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setSelectedScenarioId(null);
+  }, [scenarioInputMemoKey]);
+
+  const scenarioVariantLabels = useMemo(
+    () => ({
+      efficiency: t("scenarioEfficiency"),
+      balanced: t("scenarioBalanced"),
+      premium: t("scenarioPremium"),
+    }),
+    [t],
+  );
+
+  const applyScenario = useCallback(
+    (scenario: PlannerScenario) => {
+      applyScenarioAction({
+        regions: scenario.regions,
+        categories: scenario.categories,
+        budgetMan: scenario.budgetMan,
+        months: scenario.months,
+      });
+      setSelectedScenarioId(scenario.id);
+      toast(
+        "success",
+        isKo ? "시나리오가 적용되었습니다." : "Scenario applied.",
+      );
+    },
+    [applyScenarioAction, toast, isKo],
+  );
 
   const mapLabel = useCallback(
     (r: string) =>
@@ -585,33 +646,16 @@ export default function IntegratedPlannerPageClient({
                   </div>
                 </div>
 
-                <PlannerNeonCard>
-                  <div className={plannerNeon.cardHeader}>
-                    <PlannerNeonLabel>{t("packagesTitle")}</PlannerNeonLabel>
-                  </div>
-                  <div className="grid gap-3 p-5 sm:grid-cols-3 sm:p-6">
-                    {(
-                      [
-                        ["premium", "pkgPremium"],
-                        ["national", "pkgNational"],
-                        ["value", "pkgValue"],
-                      ] as const
-                    ).map(([id, titleKey]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => applyPreset(id)}
-                        className={cn(
-                          plannerNeon.selectChip,
-                          plannerNeon.selectChipIdle,
-                          "touch-manipulation p-4 text-left",
-                        )}
-                      >
-                        {t(titleKey)}
-                      </button>
-                    ))}
-                  </div>
-                </PlannerNeonCard>
+                <PlannerScenarioCards
+                  scenarios={recommendedScenarios}
+                  selectedId={selectedScenarioId}
+                  onSelect={applyScenario}
+                  isKo={isKo}
+                  title={t("scenariosTitle")}
+                  hint={t("scenariosHint")}
+                  applyLabel={t("scenarioApply")}
+                  variantLabels={scenarioVariantLabels}
+                />
               </div>
             ) : null}
 

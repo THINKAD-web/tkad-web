@@ -17,6 +17,7 @@ import {
   type PlannerIndustryKey,
   type PlannerPresetId,
 } from "@/lib/planner/types";
+import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import {
   INTEGRATED_LAST_INPUT_STEP,
@@ -71,6 +72,7 @@ export type IntegratedPlannerStoreActions = {
   setMediaPlacement: (mediaId: string, placement: CompositeLogoPlacement) => void;
   clearMediaPlacement: (mediaId: string) => void;
   applyPreset: (id: PlannerPresetId) => void;
+  applyScenario: (patch: PlannerScenarioApplyPatch) => void;
   reset: () => void;
 };
 
@@ -214,6 +216,17 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           });
         }
       },
+      applyScenario: (patch) =>
+        set({
+          regions:
+            patch.regions.length > 0 ? [...patch.regions] : ["seoul"],
+          categories:
+            patch.categories.length > 0
+              ? [...patch.categories]
+              : [...PLANNER_DEFAULT_CATEGORIES],
+          budget: String(patch.budgetMan),
+          months: Math.max(1, Math.min(36, patch.months)),
+        }),
       reset: () => set({ ...INITIAL }),
     }),
     {
