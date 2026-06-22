@@ -19,7 +19,7 @@ export function highlightReportScanText(text: string): React.ReactNode[] {
       return (
         <strong
           key={`${i}-${part}`}
-          className="font-bold tabular-nums text-violet-600 dark:text-violet-300"
+          className="font-bold tabular-nums text-violet-600"
         >
           {part}
         </strong>
@@ -42,10 +42,10 @@ export function ReportScanLine({ text, className }: ReportScanLineProps) {
     const body = text.slice(dot + 3);
     return (
       <li className={cn("space-y-1.5", className)}>
-        <span className="inline-block rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+        <span className="inline-block rounded-md bg-violet-500/10 px-2 py-0.5 text-[11px] font-bold uppercase tracking-wide text-violet-600">
           {label}
         </span>
-        <p className="text-sm leading-relaxed text-gray-700 dark:text-white/85">
+        <p className="text-sm leading-relaxed text-gray-700">
           {highlightReportScanText(body)}
         </p>
       </li>
@@ -53,7 +53,7 @@ export function ReportScanLine({ text, className }: ReportScanLineProps) {
   }
 
   return (
-    <li className={cn("flex gap-2.5 text-sm leading-relaxed text-gray-700 dark:text-white/85", className)}>
+    <li className={cn("flex gap-2.5 text-sm leading-relaxed text-gray-700", className)}>
       <span
         className="mt-2 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500"
         aria-hidden
