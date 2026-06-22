@@ -1,7 +1,8 @@
 import type { MetadataRoute } from "next";
-import { buildSitemap, SITEMAP_DYNAMIC } from "@/lib/sitemap-build";
+import { buildSitemap } from "@/lib/sitemap-build";
 
-export const dynamic = SITEMAP_DYNAMIC;
+/** Segment config must be a string literal (Next.js static analysis). */
+export const dynamic = "force-dynamic";
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return buildSitemap();

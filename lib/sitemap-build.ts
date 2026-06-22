@@ -21,9 +21,6 @@ import {
 } from "@/lib/media-keyword-landing";
 import { isTier1MediaCategorySlug } from "@/lib/seo-landing-copy";
 
-/** Build-time catalog fetch on Vercel can exceed the 45m deploy limit. */
-export const SITEMAP_DYNAMIC = "force-dynamic" as const;
-
 /** SEO 필수 인덱스 URL — sitemapPaths 누락 시에도 항상 포함 */
 export const CRITICAL_SITEMAP_PATHS = [
   "",
