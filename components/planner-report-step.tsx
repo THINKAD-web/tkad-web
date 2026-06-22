@@ -250,6 +250,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [userEmail, setUserEmail] = useState("");
   const [emailSending, setEmailSending] = useState(false);
   const [emailSent, setEmailSent] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
 
   const payload = useMemo(
     () =>
@@ -332,6 +333,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     }
     setEmailSending(true);
     setEmailSent(false);
+    setEmailError(null);
     try {
       const res = await fetch("/api/planner/email-report", {
         method: "POST",
@@ -350,27 +352,42 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             price: m.price,
             location: m.location,
           })),
-          metrics: props.metrics,
+          metrics: props.metrics
+            ? {
+                ...props.metrics,
+                impressions: props.metrics.estimatedTotalImpressions,
+                reach: Math.round(props.metrics.blendDailyReach * 30),
+              }
+            : undefined,
           screenshot: "",
         }),
       });
+      const data = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        success?: boolean;
+      };
       if (!res.ok) {
-        throw new Error("email failed");
+        const message =
+          res.status === 503
+            ? t("reportEmailNotConfigured")
+            : res.status === 401
+              ? t("reportEmailLoginRequired")
+              : res.status === 403
+                ? t("reportEmailProRequired")
+                : data.error || t("reportEmailFailed");
+        setEmailError(message);
+        toast("error", message);
+        return;
       }
       setEmailSent(true);
       toast(
         "success",
-        props.isKo
-          ? "이메일로 보고서가 발송되었습니다"
-          : "Report has been sent by email",
+        t("reportEmailSentDetail", { email }),
       );
     } catch {
-      toast(
-        "error",
-        props.isKo
-          ? "이메일 발송에 실패했습니다"
-          : "Failed to send email report",
-      );
+      const message = t("reportEmailFailed");
+      setEmailError(message);
+      toast("error", message);
     } finally {
       setEmailSending(false);
     }
@@ -387,6 +404,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     props.metrics,
     derived.periodDisplay,
     toast,
+    t,
   ]);
 
   return (
@@ -576,6 +594,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                         onChange={(e) => {
                           setUserEmail(e.target.value);
                           setEmailSent(false);
+                          setEmailError(null);
                         }}
                         className={cn(
                           "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
@@ -584,20 +603,48 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                           "focus:border-violet-400/60 focus:outline-none sm:w-56",
                         )}
                       />
-                      <BtnBlock
-                        variant="accent"
-                        size="md"
-                        onClick={() => void sendEmailReport()}
-                        disabled={emailSending}
+                      <PlannerPdfDownloadGate
+                        isKo={props.isKo}
+                        onAllowedDownload={() => void sendEmailReport()}
                       >
-                        {emailSending ? (
-                          <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                          <Mail className="h-4 w-4" />
+                        {({ onDownloadClick, pdfAllowed, checking }) => (
+                          <BtnBlock
+                            variant="accent"
+                            size="md"
+                            onClick={onDownloadClick}
+                            disabled={emailSending || checking}
+                          >
+                            {emailSending ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : !pdfAllowed ? (
+                              <Lock className="h-4 w-4" />
+                            ) : (
+                              <Mail className="h-4 w-4" />
+                            )}
+                            {emailSent
+                              ? t("reportEmailSent")
+                              : !pdfAllowed
+                                ? props.isKo
+                                  ? "🔒 이메일로 받기"
+                                  : "🔒 Email report"
+                                : t("reportEmailMe")}
+                          </BtnBlock>
                         )}
-                        {emailSent ? t("reportEmailSent") : t("reportEmailMe")}
-                      </BtnBlock>
+                      </PlannerPdfDownloadGate>
                     </div>
+                    {emailError ? (
+                      <p className="text-sm font-medium text-rose-500" role="alert">
+                        {emailError}
+                      </p>
+                    ) : emailSent ? (
+                      <p className="text-sm text-emerald-600 dark:text-emerald-400" role="status">
+                        {t("reportEmailSentDetail", { email: userEmail.trim() })}
+                      </p>
+                    ) : (
+                      <p className={cn("text-xs", plannerNeon.subtext)}>
+                        {t("reportEmailHint")}
+                      </p>
+                    )}
                     {error ? (
                       <BtnBlock
                         variant="primary"

@@ -3,6 +3,7 @@
 import type { PlannerPremiumInsights } from "@/lib/planner-report-insights";
 import type { AccessCheckResult } from "@/lib/report-access-shared";
 import { ReportAccessGate } from "@/components/report-access-gate";
+import { highlightReportScanText } from "@/components/planner/report-scan-text";
 
 type Props = {
   insights: PlannerPremiumInsights;
@@ -49,8 +50,8 @@ export function PlannerPremiumInsightsPanel({
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ {isKo ? "예산 배분 추천" : "Budget allocation"} ]
         </p>
-        <p className="mt-2 text-sm font-semibold text-foreground">
-          {isKo ? insights.budgetSummaryKo : insights.budgetSummaryEn}
+        <p className="mt-2 text-sm font-semibold leading-relaxed text-foreground">
+          {highlightReportScanText(isKo ? insights.budgetSummaryKo : insights.budgetSummaryEn)}
         </p>
         <ul className="mt-3 space-y-2">
           {insights.budgetRecs.map((r) => (
@@ -59,8 +60,8 @@ export function PlannerPremiumInsightsPanel({
               className="rounded-lg border border-border bg-background px-3 py-2 text-xs"
             >
               <span className="font-bold text-primary">{r.label} {r.pct}%</span>
-              <span className="mt-0.5 block text-muted-foreground">
-                {isKo ? r.reasonKo : r.reasonEn}
+              <span className="mt-1 block text-muted-foreground leading-relaxed">
+                {highlightReportScanText(isKo ? r.reasonKo : r.reasonEn)}
               </span>
             </li>
           ))}
@@ -73,7 +74,7 @@ export function PlannerPremiumInsightsPanel({
             {isKo ? "온라인 광고 비교" : "vs digital ads"}
           </p>
           <p className="mt-2 text-sm leading-relaxed">
-            {isKo ? insights.online.summaryKo : insights.online.summaryEn}
+            {highlightReportScanText(isKo ? insights.online.summaryKo : insights.online.summaryEn)}
           </p>
         </div>
         <div className="rounded-xl border border-border bg-background p-4">

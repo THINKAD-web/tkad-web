@@ -2,6 +2,7 @@
 
 import { forwardRef } from "react";
 import { useTranslations } from "next-intl";
+import { highlightReportScanText } from "@/components/planner/report-scan-text";
 import { Target, Wallet, CalendarRange, MapPin, Layers, Users, Briefcase } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
@@ -395,11 +396,13 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
         <p className={cn("mt-1 text-sm", plannerNeon.subtext)}>
           {t("reportEffectSummaryIntro")}
         </p>
-        <ul className="mt-4 space-y-2 text-sm">
+        <ul className="mt-4 space-y-2.5 text-sm">
           {effectSummaryLines.map((line, i) => (
-            <li key={i} className="flex gap-2">
+            <li key={i} className="flex gap-2 rounded-lg bg-white/50 px-3 py-2 dark:bg-white/5">
               <span className="font-bold text-violet-400">·</span>
-              <span className={plannerNeon.headline}>{line}</span>
+              <span className={cn("min-w-0 leading-relaxed", plannerNeon.headline)}>
+                {highlightReportScanText(line)}
+              </span>
             </li>
           ))}
         </ul>

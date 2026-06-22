@@ -64,12 +64,10 @@ import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
-import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
-import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -112,8 +110,6 @@ import {
   PlannerTrialBanner,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
-import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
-import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
@@ -1573,14 +1569,30 @@ export default function PlannerPageClient({
               hasCreative={Boolean(creativeObjectUrl)}
               budgetNum={budgetNum}
             />
+            <div className="space-y-2 text-center sm:text-left">
+              <PlannerNeonLabel>Step 7 / Effect</PlannerNeonLabel>
+              <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
+                {t("effectDashboardTitle")}
+              </h2>
+              <p className={plannerNeon.subtext}>{t("effectDashboardDesc")}</p>
+            </div>
+
             <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <BtnBlock
+                variant="secondary"
+                size="md"
+                onClick={() => setWizardStep(6)}
+                className="w-full sm:w-auto"
+              >
+                <ChevronLeft className="h-4 w-4" />
+                {t("backToReport")}
+              </BtnBlock>
               <BtnBlock
                 variant="secondary"
                 size="md"
                 onClick={() => setWizardStep(2)}
                 className="w-full sm:w-auto"
               >
-                <ChevronLeft className="h-4 w-4" />
                 {t("editInputs")}
               </BtnBlock>
               {teamPerms.hasTeam && teamPerms.canUsePlanner ? (
@@ -1678,43 +1690,35 @@ export default function PlannerPageClient({
               </div>
             ) : metrics ? (
               <>
-                <PlannerReportInfoCard isKo={isKo} />
-
-                <PlannerReportFreeSummary
-                  isKo={isKo}
-                  goalTitle={goalTitle}
-                  budgetNum={budgetNum}
-                  periodDisplay={`${months}${isKo ? "개월" : " mo"}`}
-                  regionsText={regionsSummary}
-                  categoriesText={categoriesSummary}
-                  ageText={ageSummary}
-                  industryText={t(industryKey)}
-                  portfolio={portfolio}
-                />
-
-                <PlannerPortfolioNotice
-                  isKo={isKo}
-                  selectedCount={campaignMediaIds.length}
-                  inPlanCount={portfolio.length}
-                  overBudget={portfolioBudgetStatus.overBudget}
-                  monthlyTotalMan={portfolioBudgetStatus.monthlyTotalMan}
-                  monthlyBudgetMan={portfolioBudgetStatus.monthlyBudgetMan}
-                  isAutoMix={isAutoPortfolio}
-                  autoMixMax={PLANNER_AUTO_PORTFOLIO_MAX_ITEMS}
-                  unresolvedCount={unresolvedMediaCount}
-                />
-
-                <PlannerProposalNarrative
-                  isKo={isKo}
-                  goal={campaignGoal}
-                  regions={regions}
-                  categories={categoriesArr}
-                  ageKey={ageKeys[0] ?? "ageAll"}
-                  industryKey={industryKey}
-                  budgetMan={budgetNum}
-                  months={months}
-                  portfolio={portfolio}
-                />
+                {metrics ? (
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    <div className={plannerNeon.kpiCard}>
+                      <p className={plannerNeon.kpiLabel}>
+                        {isKo ? "총 예상 노출" : "Est. impressions"}
+                      </p>
+                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-cyan-400")}>
+                        {metrics.estimatedTotalImpressions.toLocaleString()}
+                      </p>
+                    </div>
+                    <div className={plannerNeon.kpiCard}>
+                      <p className={plannerNeon.kpiLabel}>
+                        {isKo ? "핵심 도달" : "Core reach"}
+                      </p>
+                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-violet-400")}>
+                        {reachSplit.corePct}%
+                      </p>
+                    </div>
+                    <div className={plannerNeon.kpiCard}>
+                      <p className={plannerNeon.kpiLabel}>
+                        {isKo ? "기대 ROI" : "Expected ROI"}
+                      </p>
+                      <p className={cn("mt-1 text-xl font-bold tabular-nums", plannerNeon.kpiValue)}>
+                        {metrics.roiExpected}
+                        {isKo ? "배" : "×"}
+                      </p>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />

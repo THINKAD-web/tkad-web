@@ -135,6 +135,10 @@ export async function sendEmailWithResult(
         to: params.to,
         subject: params.subject,
         ...body,
+        attachments: params.attachments?.map((a) => ({
+          filename: a.filename,
+          content: Buffer.from(a.content, a.encoding || "base64"),
+        })),
       });
       if (error) {
         console.error("[email] Resend:", error);
@@ -161,6 +165,13 @@ export async function sendEmailWithResult(
       subject: params.subject,
       text: params.text,
       html: params.html,
+      attachments: params.attachments?.map((a) => ({
+        filename: a.filename,
+        content: Buffer.from(a.content, a.encoding || "base64"),
+        contentType: a.filename.endsWith(".png")
+          ? "image/png"
+          : "application/octet-stream",
+      })),
     });
     return { sent: true };
   } catch (err) {

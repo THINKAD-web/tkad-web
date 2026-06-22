@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
-import { sendEmail, isEmailConfigured } from "@/lib/email/client";
+import { sendEmailWithResult, isEmailConfigured } from "@/lib/email/client";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { normalizeEmailReportMetrics } from "@/lib/planner/email-report-metrics";
 import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 
 type MediaItem = {
@@ -77,6 +78,8 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Missing goalTitle" }, { status: 400 });
   }
 
+  const normalizedMetrics = normalizeEmailReportMetrics(metrics);
+
   const html = buildPlannerReportHtml({
     goalTitle,
     budgetNum,
@@ -86,7 +89,7 @@ export async function POST(request: NextRequest) {
     ageText,
     industryText,
     mediaList,
-    metrics,
+    metrics: normalizedMetrics,
   });
 
   const attachments =
@@ -101,19 +104,28 @@ export async function POST(request: NextRequest) {
       : [];
 
   try {
-    await sendEmail({
+    const userResult = await sendEmailWithResult({
       to: userEmail,
       subject: `[싱커드] 미디어 플래너 보고서 - ${goalTitle}`,
       html,
       attachments,
     });
+    if (!userResult.sent) {
+      return NextResponse.json(
+        { error: userResult.error ?? "Failed to send email" },
+        { status: 500 },
+      );
+    }
 
-    await sendEmail({
+    const adminResult = await sendEmailWithResult({
       to: CONTACT_EMAIL,
       subject: `[플래너 보고서 요청] ${userEmail} - ${goalTitle}`,
       html,
       attachments,
     });
+    if (!adminResult.sent) {
+      console.error("[planner email] admin copy failed:", adminResult.error);
+    }
 
     return NextResponse.json({ success: true });
   } catch (e) {
