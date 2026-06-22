@@ -1,6 +1,11 @@
 import type { Prisma } from "@prisma/client";
 import type { MediaCatalogSort } from "@/lib/media-catalog-types";
 import { networkDbTypesForCatalogFilter } from "@/lib/media-network-types";
+import {
+  browseRegionMainIdToLabel,
+  normalizeBrowseRegionMainId,
+  normalizeBrowseRegionSubId,
+} from "@/lib/network-location-enrich";
 
 export type PublicNetworkQuery = {
   networkType?: string;
@@ -43,13 +48,24 @@ export function buildPublicNetworkWhere(
   }
 
   if (params.regionMain) {
+    const raw = params.regionMain.trim();
+    const mainId = normalizeBrowseRegionMainId(raw) ?? raw;
+    const mainLabel = browseRegionMainIdToLabel(mainId) ?? raw;
     and.push({
       OR: [
-        { regions: { has: params.regionMain } },
-        { city: { contains: params.regionMain, mode: "insensitive" } },
+        { regions: { has: mainLabel } },
+        { regions: { has: mainId } },
+        { regions: { has: raw } },
+        { city: { contains: raw, mode: "insensitive" } },
         {
           locations: {
-            some: { regionMain: { equals: params.regionMain, mode: "insensitive" } },
+            some: {
+              OR: [
+                { regionMain: { equals: mainId, mode: "insensitive" } },
+                { regionMain: { equals: mainLabel, mode: "insensitive" } },
+                { regionMain: { equals: raw, mode: "insensitive" } },
+              ],
+            },
           },
         },
       ],
@@ -57,12 +73,23 @@ export function buildPublicNetworkWhere(
   }
 
   if (params.regionSub) {
+    const raw = params.regionSub.trim();
+    const mainHint = params.regionMain
+      ? normalizeBrowseRegionMainId(params.regionMain) ??
+        params.regionMain.trim()
+      : null;
+    const subId = normalizeBrowseRegionSubId(raw, mainHint) ?? raw;
     and.push({
       OR: [
-        { district: { contains: params.regionSub, mode: "insensitive" } },
+        { district: { contains: raw, mode: "insensitive" } },
         {
           locations: {
-            some: { regionSub: { contains: params.regionSub, mode: "insensitive" } },
+            some: {
+              OR: [
+                { regionSub: { contains: subId, mode: "insensitive" } },
+                { regionSub: { contains: raw, mode: "insensitive" } },
+              ],
+            },
           },
         },
       ],

@@ -9,6 +9,7 @@ import {
   networkVenueTag,
   resolveNetworkCatalogType,
 } from "@/lib/media-network-types";
+import { enrichNetworkLocation, resolveNetworkRegionsArray } from "@/lib/network-location-enrich";
 
 export type NetworkQuickAddLocationInput = {
   name: string;
@@ -255,35 +256,20 @@ export function inferRegionSubFromAddress(address: string): string | null {
 function normalizeLocation(o: Record<string, unknown>): NetworkQuickAddLocationParsed | null {
   const name = str(o.name);
   if (!name) return null;
-  const address = str(o.address) || str(o.full_address) || null;
-  const lat = optNum(o.latitude ?? o.lat);
-  const lng = optNum(o.longitude ?? o.lng ?? o.lon);
-  const unitCountRaw = optInt(o.unitCount ?? o.units);
-  const unitCount =
-    unitCountRaw != null && unitCountRaw >= 1 ? unitCountRaw : 1;
-
-  let regionMain = str(o.regionMain) || null;
-  let regionSub = str(o.regionSub) || null;
-  if (address) {
-    if (!regionMain) regionMain = inferRegionMainFromAddress(address);
-    if (!regionSub) regionSub = inferRegionSubFromAddress(address);
-  }
-
-  const dailyFootfall = optInt(o.dailyFootfall);
-
-  return {
+  const enriched = enrichNetworkLocation({
     name,
-    address,
+    address: str(o.address) || str(o.full_address) || null,
     fullAddress: str(o.fullAddress) || str(o.full_address) || null,
-    latitude: lat != null && Number.isFinite(lat) ? lat : null,
-    longitude: lng != null && Number.isFinite(lng) ? lng : null,
-    unitCount,
-    regionMain,
-    regionSub,
-    dailyFootfall: dailyFootfall != null && dailyFootfall >= 0 ? dailyFootfall : null,
+    latitude: optNum(o.latitude ?? o.lat),
+    longitude: optNum(o.longitude ?? o.lng ?? o.lon),
+    unitCount: optInt(o.unitCount ?? o.units),
+    regionMain: str(o.regionMain) || null,
+    regionSub: str(o.regionSub) || null,
+    dailyFootfall: optInt(o.dailyFootfall),
     priceNote: str(o.priceNote) || null,
     note: str(o.note) || null,
-  };
+  });
+  return enriched;
 }
 
 function normalizeLocations(raw: unknown): NetworkQuickAddLocationParsed[] {
@@ -524,14 +510,11 @@ function parseNetworkQuickAddObject(
 
   const locPayload = normalizeLocations(normalized.locations);
 
-  const addressesForInfer = locPayload
-    .map((l) => l.address ?? "")
-    .filter(Boolean);
-  const inferredRegions = inferRegionsFromAddresses(addressesForInfer);
-
   const regionsManual = strArr(normalized.regions);
-  const regions =
-    regionsManual.length > 0 ? regionsManual : inferredRegions;
+  const regions = resolveNetworkRegionsArray(
+    regionsManual.length > 0 ? regionsManual : undefined,
+    locPayload,
+  );
 
   const totalFromJson = optNum(normalized.totalLocations);
   const totalLocations =

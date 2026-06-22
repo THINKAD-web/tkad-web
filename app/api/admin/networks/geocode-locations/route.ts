@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { geocodeAddressWithKakao } from "@/lib/kakao-address-geocode";
+import { browseRegionsFromGeocodeHit } from "@/lib/network-location-enrich";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,8 @@ export async function POST(request: NextRequest) {
     address: string | null;
     latitude: number | null;
     longitude: number | null;
+    regionMain: string | null;
+    regionSub: string | null;
     geocodeQuery?: string | null;
   }> = [];
 
@@ -47,17 +50,29 @@ export async function POST(request: NextRequest) {
         address: null,
         latitude: null,
         longitude: null,
+        regionMain: null,
+        regionSub: null,
         geocodeQuery: null,
       });
       continue;
     }
 
     const hit = await geocodeAddressWithKakao(addrNorm);
+    const regions = hit
+      ? browseRegionsFromGeocodeHit({
+          city: hit.city,
+          district: hit.district,
+          addressName: hit.addressName,
+        })
+      : { regionMain: null, regionSub: null };
+
     out.push({
       name,
       address: addrNorm,
       latitude: hit?.latitude ?? null,
       longitude: hit?.longitude ?? null,
+      regionMain: regions.regionMain,
+      regionSub: regions.regionSub,
       geocodeQuery: hit?.addressName ?? addrNorm,
     });
   }

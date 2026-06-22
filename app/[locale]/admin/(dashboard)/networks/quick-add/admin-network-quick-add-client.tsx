@@ -25,6 +25,7 @@ import {
   inferRegionsFromAddresses,
   parseNetworkQuickAddJson,
 } from "@/lib/network-quick-add";
+import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
 import { NetworkQuickAddAiTab } from "@/components/admin/network-quick-add-ai-tab";
 
 const SAMPLE_FULL_JSON = `{
@@ -57,10 +58,17 @@ const SAMPLE_FULL_JSON = `{
 
 type Mode = "ai" | "fullJson" | "fields";
 
-type LocRow = { name: string; address: string; lat: string; lng: string };
+type LocRow = {
+  name: string;
+  address: string;
+  lat: string;
+  lng: string;
+  regionMain: string;
+  regionSub: string;
+};
 
 function emptyRow(): LocRow {
-  return { name: "", address: "", lat: "", lng: "" };
+  return { name: "", address: "", lat: "", lng: "", regionMain: "", regionSub: "" };
 }
 
 export default function AdminNetworkQuickAddClient() {
@@ -111,12 +119,23 @@ export default function AdminNetworkQuickAddClient() {
         const parsed = parseNetworkLocationsCsv(text);
         setLocRows((prev) => {
           const base = prev.some((r) => r.name.trim()) ? prev : [];
-          const add: LocRow[] = parsed.map((p) => ({
-            name: p.name,
-            address: p.address ?? "",
-            lat: p.latitude != null ? String(p.latitude) : "",
-            lng: p.longitude != null ? String(p.longitude) : "",
-          }));
+          const add: LocRow[] = parsed.map((p) => {
+            const address = p.address ?? "";
+            const regions = address
+              ? resolveBrowseRegionIds({ address })
+              : {
+                  regionMain: p.regionMain,
+                  regionSub: p.regionSub,
+                };
+            return {
+              name: p.name,
+              address,
+              lat: p.latitude != null ? String(p.latitude) : "",
+              lng: p.longitude != null ? String(p.longitude) : "",
+              regionMain: p.regionMain ?? regions.regionMain ?? "",
+              regionSub: p.regionSub ?? regions.regionSub ?? "",
+            };
+          });
           const merged = [...base, ...add];
           updatePreviewFromLocations(
             merged
@@ -161,6 +180,8 @@ export default function AdminNetworkQuickAddClient() {
           address: string | null;
           latitude: number | null;
           longitude: number | null;
+          regionMain?: string | null;
+          regionSub?: string | null;
         }>;
         error?: string;
       };
@@ -181,6 +202,8 @@ export default function AdminNetworkQuickAddClient() {
             lng:
               hit.longitude != null ? String(hit.longitude) : r.lng,
             address: hit.address ?? r.address,
+            regionMain: hit.regionMain ?? r.regionMain,
+            regionSub: hit.regionSub ?? r.regionSub,
           };
         }),
       );
@@ -242,8 +265,8 @@ export default function AdminNetworkQuickAddClient() {
           longitude:
             longitude != null && Number.isFinite(longitude) ? longitude : null,
           unitCount: 1,
-          regionMain: null,
-          regionSub: null,
+          regionMain: row.regionMain.trim() || null,
+          regionSub: row.regionSub.trim() || null,
           dailyFootfall: null,
           priceNote: null,
           note: null,
@@ -626,6 +649,8 @@ export default function AdminNetworkQuickAddClient() {
                     <tr className="border-b text-xs text-slate-500">
                       <th className="py-2 pr-2">name *</th>
                       <th className="py-2 pr-2">address</th>
+                      <th className="py-2 pr-2">regionMain</th>
+                      <th className="py-2 pr-2">regionSub</th>
                       <th className="py-2 pr-2">lat</th>
                       <th className="py-2 pr-2">lng</th>
                     </tr>
@@ -659,6 +684,53 @@ export default function AdminNetworkQuickAddClient() {
                             onChange={(e) => {
                               const next = [...locRows];
                               next[i] = { ...row, address: e.target.value };
+                              setLocRows(next);
+                            }}
+                            onBlur={(e) => {
+                              const addr = e.target.value.trim();
+                              if (!addr || row.regionMain.trim()) return;
+                              const regions = resolveBrowseRegionIds({ address: addr });
+                              if (!regions.regionMain && !regions.regionSub) return;
+                              setLocRows((prev) =>
+                                prev.map((r, j) =>
+                                  j === i
+                                    ? {
+                                        ...r,
+                                        regionMain:
+                                          r.regionMain.trim() ||
+                                          regions.regionMain ||
+                                          "",
+                                        regionSub:
+                                          r.regionSub.trim() ||
+                                          regions.regionSub ||
+                                          "",
+                                      }
+                                    : r,
+                                ),
+                              );
+                            }}
+                          />
+                        </td>
+                        <td className="py-1.5 pr-2">
+                          <Input
+                            className="h-8 text-xs"
+                            placeholder="seoul"
+                            value={row.regionMain}
+                            onChange={(e) => {
+                              const next = [...locRows];
+                              next[i] = { ...row, regionMain: e.target.value };
+                              setLocRows(next);
+                            }}
+                          />
+                        </td>
+                        <td className="py-1.5 pr-2">
+                          <Input
+                            className="h-8 text-xs"
+                            placeholder="seoul_gangnam"
+                            value={row.regionSub}
+                            onChange={(e) => {
+                              const next = [...locRows];
+                              next[i] = { ...row, regionSub: e.target.value };
                               setLocRows(next);
                             }}
                           />

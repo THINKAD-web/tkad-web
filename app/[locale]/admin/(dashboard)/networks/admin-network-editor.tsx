@@ -20,6 +20,7 @@ import {
   buildNetworkCreateBody,
   parseAndBuildNetworkCreateBodyFromObject,
 } from "@/lib/network-quick-add";
+import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
 
 export type SerializedNetwork = {
   id: string;
@@ -107,6 +108,7 @@ type Props =
 export default function AdminNetworkEditor(props: Props) {
   const t = useTranslations("adminNetworks");
   const locale = useLocale();
+  const isKo = !locale.startsWith("en");
   const router = useRouter();
   const fileRef = useRef<HTMLInputElement>(null);
 
@@ -437,6 +439,24 @@ export default function AdminNetworkEditor(props: Props) {
     [uploadFileToBunny],
   );
 
+  const prefillLocationRegions = useCallback((index: number, address: string) => {
+    const addr = address.trim();
+    if (!addr) return;
+    setLocRows((rows) =>
+      rows.map((r, j) => {
+        if (j !== index) return r;
+        if (r.regionMain.trim() && r.regionSub.trim()) return r;
+        const regions = resolveBrowseRegionIds({ address: addr });
+        if (!regions.regionMain && !regions.regionSub) return r;
+        return {
+          ...r,
+          regionMain: r.regionMain.trim() || regions.regionMain || "",
+          regionSub: r.regionSub.trim() || regions.regionSub || "",
+        };
+      }),
+    );
+  }, []);
+
   const onCsv = useCallback(
     (file: File | null) => {
       if (!file) return;
@@ -446,19 +466,25 @@ export default function AdminNetworkEditor(props: Props) {
         const parsed = parseNetworkLocationsCsv(text);
         setLocRows((prev) => {
           const base = prev.some((r) => r.name.trim()) ? prev : [];
-          const add: LocRow[] = parsed.map((p) => ({
-            name: p.name,
-            address: p.address ?? "",
-            fullAddress: p.address ?? "",
-            regionMain: p.regionMain ?? "",
-            regionSub: p.regionSub ?? "",
-            unitCount: String(p.unitCount ?? 1),
-            lat: p.latitude != null ? String(p.latitude) : "",
-            lng: p.longitude != null ? String(p.longitude) : "",
-            priceNote: "",
-            dailyFootfall: "",
-            note: "",
-          }));
+          const add: LocRow[] = parsed.map((p) => {
+            const address = p.address ?? "";
+            const inferred = address
+              ? resolveBrowseRegionIds({ address })
+              : { regionMain: null, regionSub: null };
+            return {
+              name: p.name,
+              address,
+              fullAddress: p.address ?? "",
+              regionMain: p.regionMain ?? inferred.regionMain ?? "",
+              regionSub: p.regionSub ?? inferred.regionSub ?? "",
+              unitCount: String(p.unitCount ?? 1),
+              lat: p.latitude != null ? String(p.latitude) : "",
+              lng: p.longitude != null ? String(p.longitude) : "",
+              priceNote: "",
+              dailyFootfall: "",
+              note: "",
+            };
+          });
           return [...base, ...add];
         });
       };
@@ -968,6 +994,7 @@ export default function AdminNetworkEditor(props: Props) {
                       ),
                     )
                   }
+                  onBlur={(e) => prefillLocationRegions(i, e.target.value)}
                   className="sm:col-span-2"
                 />
                 <Input
@@ -980,7 +1007,37 @@ export default function AdminNetworkEditor(props: Props) {
                       ),
                     )
                   }
+                  onBlur={(e) =>
+                    prefillLocationRegions(
+                      i,
+                      e.target.value || row.address,
+                    )
+                  }
                   className="sm:col-span-2"
+                />
+                <Input
+                  placeholder={isKo ? "시도 (seoul)" : "Region main (seoul)"}
+                  value={row.regionMain}
+                  onChange={(e) =>
+                    setLocRows((rows) =>
+                      rows.map((r, j) =>
+                        j === i ? { ...r, regionMain: e.target.value } : r,
+                      ),
+                    )
+                  }
+                />
+                <Input
+                  placeholder={
+                    isKo ? "구군 (seoul_gangnam)" : "Region sub (seoul_gangnam)"
+                  }
+                  value={row.regionSub}
+                  onChange={(e) =>
+                    setLocRows((rows) =>
+                      rows.map((r, j) =>
+                        j === i ? { ...r, regionSub: e.target.value } : r,
+                      ),
+                    )
+                  }
                 />
                 <Input
                   placeholder={t("lat")}
