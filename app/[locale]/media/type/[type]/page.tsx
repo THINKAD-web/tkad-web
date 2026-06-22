@@ -14,7 +14,11 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { buildShareMetadata, pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, pageAlternatesForCanonical } from "@/lib/seo";
+import {
+  technicalTypeLandingCanonicalPath,
+  technicalTypeLandingUsesExternalCanonical,
+} from "@/lib/seo-canonical-landings";
 import { MediaKeywordLandingCatalog } from "@/components/media-keyword-landing-catalog";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
@@ -50,6 +54,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = typeLandingTitle(decodedType, locale, count);
   const description = typeLandingDescription(decodedType, locale, count);
   const label = typeLabel(decodedType, locale);
+  const canonicalPath = technicalTypeLandingCanonicalPath(decodedType);
+  const alternates = technicalTypeLandingUsesExternalCanonical(decodedType)
+    ? pageAlternatesForCanonical(locale, canonicalPath)
+    : pageAlternates(locale, `/media/type/${type}`);
 
   return {
     title,
@@ -71,7 +79,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
           "outdoor advertising",
           "THINKAD",
         ],
-    alternates: pageAlternates(locale, `/media/type/${type}`),
+    alternates,
     ...buildShareMetadata({
       locale,
       title,
