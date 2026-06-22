@@ -93,8 +93,6 @@ export type PlannerReportSharedProps = {
   regionBreakdown?: PlannerExportRegionBreakdown[];
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
-  /** 내 플랜 보고서 등 — PRO 없이도 미리보기·시뮬 텍스트 선명 표시 */
-  unlockReportPreview?: boolean;
   /** 보고서 활동 로그 출처 (PDF/PPT 다운로드 추적) */
   activitySource?: PlanReportActivitySource;
   /** 제안 논리(Claude) API 요청용 — 미전달 시 블록 숨김 */
@@ -245,8 +243,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     loading: plannerResultLoading,
     access: plannerResultAccess,
   } = useFeatureAccess("planner_result");
-  const previewUnlocked = props.unlockReportPreview === true;
-  const showProPreview = previewUnlocked || plannerResultAllowed;
   const derived = usePlannerReportDerived(props);
 
   const [error, setError] = useState<string | null>(null);
@@ -478,15 +474,15 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
       <section className="space-y-3" data-screenshot="planner-pro-blur">
         <PlannerProGate
-          isPro={showProPreview}
-          loading={plannerResultLoading && !previewUnlocked}
+          isPro={plannerResultAllowed}
+          loading={plannerResultLoading}
           isKo={props.isKo}
           access={plannerResultAccess}
           feature="planner_result"
           minHeightClass="min-h-[24rem]"
         >
             <div className="space-y-6">
-              {props.metrics && !previewUnlocked ? (
+              {props.metrics && !plannerResultAllowed ? (
                 <PlannerProTeaserStats
                   isKo={props.isKo}
                   totalImpressions={props.metrics.estimatedTotalImpressions}
@@ -763,7 +759,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     );
   }
 
-  if (!pdfAllowed && !props.unlockReportPreview) return null;
+  if (!pdfAllowed) return null;
 
   return (
     <PlannerNeonCard>
