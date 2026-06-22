@@ -3,7 +3,9 @@ import {
   listBrowseRegionMains,
   type BrowseRegionMain,
 } from "@/lib/media-browse-regions";
+import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { matchesBrowseRegion } from "@/lib/media-discovery-client-filter";
+import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
   matchesPlannerCategory,
   type PlannerCategory,
@@ -56,6 +58,29 @@ export function matchesPlannerRegion(
 
   if (id === "national" && legacy === "national" && !media.regionMain?.trim()) {
     return true;
+  }
+
+  if (media.catalogSource === "network" || media.id.startsWith("nw_")) {
+    const hay = mediaRegionHaystack(media);
+    const aliases = expandBrowseRegionSub(id);
+    if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
+      return true;
+    }
+    for (const loc of media.networkLocations ?? []) {
+      if (loc.regionMain?.trim() === id) return true;
+      if (loc.regionSub?.trim() === id) return true;
+      if (
+        loc.regionMain &&
+        matchesBrowseRegion(
+          { ...media, regionMain: loc.regionMain, regionSub: loc.regionSub },
+          id,
+          "",
+          "",
+        )
+      ) {
+        return true;
+      }
+    }
   }
 
   return false;

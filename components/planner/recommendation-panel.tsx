@@ -76,7 +76,22 @@ type Props = {
   /** 통합 플래너 등 외부 store — 미전달 시 OOH `usePlannerStore` */
   store?: PlannerRecommendationStoreBinding;
   planCartAddedFrom?: "planner" | "search";
+  /** API 추천 ID resolve 폴백 (캐시·외부 추가 매체) */
+  supplementalById?: Record<string, MediaItem>;
 };
+
+function buildCatalogById(
+  catalog: MediaItem[],
+  supplementalById?: Record<string, MediaItem>,
+): Map<string, MediaItem> {
+  const byId = new Map(catalog.map((m) => [m.id, m]));
+  if (supplementalById) {
+    for (const [id, item] of Object.entries(supplementalById)) {
+      if (!byId.has(id)) byId.set(id, item);
+    }
+  }
+  return byId;
+}
 
 export function PlannerRecommendationPanel({
   catalog,
@@ -85,6 +100,7 @@ export function PlannerRecommendationPanel({
   limit = 5,
   store,
   planCartAddedFrom = "planner",
+  supplementalById,
 }: Props) {
   const t = useTranslations("planner");
   const locale = useLocale();
@@ -158,6 +174,11 @@ export function PlannerRecommendationPanel({
     ],
   );
 
+  const catalogById = useMemo(
+    () => buildCatalogById(catalog, supplementalById),
+    [catalog, supplementalById],
+  );
+
   useEffect(() => {
     const id = ++fetchRef.current;
     setLoading(true);
@@ -202,14 +223,17 @@ export function PlannerRecommendationPanel({
           };
           if (id !== fetchRef.current) return;
           if (data.ok && data.items?.length) {
-            const byId = new Map(catalog.map((m) => [m.id, m]));
             const scores: Record<string, number> = {};
             const lines: Record<string, string> = {};
             const narrative: Record<string, string> = {};
             const recs: ScoredMedia[] = [];
+            const unresolvedIds: string[] = [];
             for (const item of data.items) {
-              const media = byId.get(item.mediaId);
-              if (!media) continue;
+              const media = catalogById.get(item.mediaId);
+              if (!media) {
+                unresolvedIds.push(item.mediaId);
+                continue;
+              }
               scores[media.id] = item.score;
               if (item.reasoning) narrative[media.id] = item.reasoning;
               const summary = item.expectedImpact ?? item.oneLine;
@@ -226,10 +250,37 @@ export function PlannerRecommendationPanel({
                 reasons: reasonKeys.map((key) => ({ key, weight: 0.5 })),
               });
             }
-            setRecommendations(recs);
-            setMatchScores(scores);
-            setOneLines(lines);
-            setReasonings(narrative);
+            if (unresolvedIds.length > 0 && recs.length === 0) {
+              const fallback = recommendPlannerMedia(
+                catalog,
+                {
+                  goal,
+                  regions,
+                  seoulZones,
+                  categories,
+                  ageKeys,
+                  industryKey,
+                  budgetMan,
+                  months,
+                  goalFollowUp,
+                },
+                limit,
+                refreshTick,
+              );
+              setRecommendations(fallback);
+              setMatchScores(
+                Object.fromEntries(
+                  fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
+                ),
+              );
+              setOneLines({});
+              setReasonings({});
+            } else {
+              setRecommendations(recs);
+              setMatchScores(scores);
+              setOneLines(lines);
+              setReasonings(narrative);
+            }
           } else {
             const fallback = recommendPlannerMedia(
               catalog,
@@ -284,6 +335,7 @@ export function PlannerRecommendationPanel({
   }, [
     depsKey,
     catalog,
+    catalogById,
     goal,
     regions,
     categories,

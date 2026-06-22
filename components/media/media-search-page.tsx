@@ -32,6 +32,7 @@ import {
 } from "@/lib/media-price-format";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
+import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { MediaPinPopup } from "@/components/media-pin-popup";
@@ -321,6 +322,35 @@ function MediaSearchPageInner({
       if (opts.append) setLoadingMore(true);
       else setLoading(true);
       try {
+        if (plannerMode) {
+          const source = initialCatalogItems;
+          const filtered = filterMediaByDiscoveryChips(source, {
+            mainCategory,
+            subCategory,
+            target,
+            regionMain,
+            regionSub,
+            priceMin,
+            priceMax,
+            features,
+            query: query.trim(),
+          });
+          const sorted = [...filtered].sort((a, b) => {
+            if (sort === "price_asc") return (a.price ?? 0) - (b.price ?? 0);
+            if (sort === "price_desc") return (b.price ?? 0) - (a.price ?? 0);
+            return (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0);
+          });
+          const pageSize = PAGE_SIZE;
+          const end = opts.page * pageSize;
+          const slice = sorted.slice(0, end);
+          const mapped = slice.map((row) => mapMediaItemToHomeCatalog(row));
+          setTotal(sorted.length);
+          setMedia(mapped);
+          setCatalogItems(slice);
+          setPage(opts.page);
+          return;
+        }
+
         const params = new URLSearchParams();
         if (query) params.set("q", query);
         if (catalogVariant === "network") {
@@ -398,6 +428,7 @@ function MediaSearchPageInner({
       features,
       sort,
       plannerMode,
+      initialCatalogItems,
       resolveRegionMainLabel,
       resolveRegionSubLabel,
     ],
