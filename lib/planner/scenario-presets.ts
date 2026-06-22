@@ -60,7 +60,7 @@ export const PLANNER_SCENARIO_PRESETS: readonly PlannerScenarioPresetDef[] = [
     regions: ["seoul"],
     seoulZones: ["hongdae", "myeongdong"],
     categories: ["static", "mobile"],
-    followUp: { localTradeArea: "홍대" },
+    followUp: {},
   },
   {
     id: "eventEnt",

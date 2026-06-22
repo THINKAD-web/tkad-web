@@ -22,16 +22,7 @@ export function isConversionKpiPreset(
   );
 }
 
-/** 로컬 목표 상권 힌트 칩 (서울 상권 키와 동일 라벨) */
-export const LOCAL_TRADE_AREA_CHIPS = [
-  "gangnam",
-  "hongdae",
-  "myeongdong",
-  "seongsu",
-  "yeouido",
-] as const;
-
-/** Step 2 조건부 후속 — 전부 optional (미입력 허용) */
+/** 로컬 목표 상권은 Step 2 `seoulZones` 칩으로 일원화 — follow-up 미사용 */
 export type PlannerGoalFollowUp = {
   launchFocusWeeks?: number | null;
   /** @deprecated UI 미노출 — persist 호환만 */
@@ -55,7 +46,7 @@ export function defaultFollowUpForGoal(
     case "launch":
       return { launchFocusWeeks: 4 };
     case "local":
-      return { localTradeArea: null };
+      return {};
     case "event":
       return { eventDurationDays: 7 };
     case "sales":
@@ -77,9 +68,7 @@ export function normalizeFollowUpForGoal(
         launchFocusWeeks: raw.launchFocusWeeks ?? d.launchFocusWeeks ?? null,
       };
     case "local":
-      return {
-        localTradeArea: raw.localTradeArea?.trim() || null,
-      };
+      return {};
     case "event":
       return {
         eventDurationDays: raw.eventDurationDays ?? d.eventDurationDays ?? null,

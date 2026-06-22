@@ -28,6 +28,11 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
+import type {
+  AppliedPlannerScenario,
+  ScenarioVariant,
+} from "@/lib/planner/scenario-types";
+import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 
 type Props = {
   isKo: boolean;
@@ -45,6 +50,8 @@ type Props = {
   metrics: IntegratedCampaignMetrics;
   logoUrl?: string | null;
   mediaPlacements?: Record<string, CompositeLogoPlacement>;
+  appliedScenario?: AppliedPlannerScenario | null;
+  scenarioVariantLabels?: Record<ScenarioVariant, string>;
 };
 
 export function IntegratedReportStep(props: Props) {
@@ -127,6 +134,14 @@ export function IntegratedReportStep(props: Props) {
       </div>
 
       <IntegratedReportInfoCard isKo={props.isKo} />
+
+      {props.appliedScenario && props.scenarioVariantLabels ? (
+        <PlannerScenarioContextBanner
+          scenario={props.appliedScenario}
+          isKo={props.isKo}
+          variantLabels={props.scenarioVariantLabels}
+        />
+      ) : null}
 
       <PlannerReportFreeSummary
         isKo={props.isKo}

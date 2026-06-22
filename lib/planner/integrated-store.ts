@@ -18,6 +18,7 @@ import {
   type PlannerPresetId,
 } from "@/lib/planner/types";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
+import type { AppliedPlannerScenario } from "@/lib/planner/scenario-types";
 import { districtHintsToSeoulZones } from "@/lib/planner/apply-scenario-portfolio";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
@@ -60,6 +61,8 @@ export type IntegratedPlannerStoreState = {
   creativeObjectUrl: string | null;
   creativeUploadedUrl: string | null;
   mediaPlacements: Record<string, CompositeLogoPlacement>;
+  /** 시나리오 카드 적용 시 보고서 맥락. 수동 진행 시 null */
+  appliedScenario: AppliedPlannerScenario | null;
 };
 
 export type IntegratedPlannerStoreActions = {
@@ -113,6 +116,7 @@ const INITIAL: IntegratedPlannerStoreState = {
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
   mediaPlacements: {},
+  appliedScenario: null,
 };
 
 function clampStep(n: number): IntegratedWizardStep {
@@ -315,6 +319,9 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
               : {}),
             ...(seoulZones.length > 0 ? { seoulZones } : {}),
             campaignMediaIds,
+            ...(patch.appliedScenario !== undefined
+              ? { appliedScenario: patch.appliedScenario }
+              : {}),
           };
         }),
       reset: () => set({ ...INITIAL }),
@@ -337,6 +344,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         digitalBudgetPct: s.digitalBudgetPct,
         creativeUploadedUrl: s.creativeUploadedUrl,
         mediaPlacements: s.mediaPlacements,
+        appliedScenario: s.appliedScenario,
       }),
       merge: (persisted, current) => {
         const p = persisted as Partial<IntegratedPlannerStoreState> | undefined;
@@ -378,6 +386,23 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
                   p.digitalChannelIds as unknown as string[],
                 )
               : current.digitalChannelIds,
+          appliedScenario:
+            p.appliedScenario &&
+            typeof p.appliedScenario === "object" &&
+            !Array.isArray(p.appliedScenario) &&
+            typeof p.appliedScenario.id === "string" &&
+            typeof p.appliedScenario.variant === "string" &&
+            typeof p.appliedScenario.labelKo === "string" &&
+            typeof p.appliedScenario.labelEn === "string"
+              ? {
+                  id: p.appliedScenario.id,
+                  variant: p.appliedScenario.variant,
+                  labelKo: p.appliedScenario.labelKo,
+                  labelEn: p.appliedScenario.labelEn,
+                  descriptionKo: p.appliedScenario.descriptionKo ?? "",
+                  descriptionEn: p.appliedScenario.descriptionEn ?? "",
+                }
+              : current.appliedScenario,
         };
       },
     },

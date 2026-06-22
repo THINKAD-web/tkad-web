@@ -50,6 +50,11 @@ import type {
 import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import type {
+  AppliedPlannerScenario,
+  ScenarioVariant,
+} from "@/lib/planner/scenario-types";
+import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -99,6 +104,9 @@ export type PlannerReportSharedProps = {
     ageKeys: PlannerAgeKey[];
     industryKey: PlannerIndustryKey | null;
   };
+  /** 시나리오 카드 적용 시 보고서 상단 맥락. 수동 진행 시 null */
+  appliedScenario?: AppliedPlannerScenario | null;
+  scenarioVariantLabels?: Record<ScenarioVariant, string>;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -403,6 +411,14 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       </div>
 
       <PlannerReportInfoCard isKo={props.isKo} />
+
+      {props.appliedScenario && props.scenarioVariantLabels ? (
+        <PlannerScenarioContextBanner
+          scenario={props.appliedScenario}
+          isKo={props.isKo}
+          variantLabels={props.scenarioVariantLabels}
+        />
+      ) : null}
 
       <PlannerReportFreeSummary
         isKo={props.isKo}

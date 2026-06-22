@@ -165,6 +165,7 @@ export default function IntegratedPlannerPageClient({
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
   const seoulZones = useIntegratedPlannerStore((s) => s.seoulZones);
   const goalFollowUp = useIntegratedPlannerStore((s) => s.goalFollowUp);
+  const appliedScenario = useIntegratedPlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
   const digitalChannelIds = useIntegratedPlannerStore((s) => s.digitalChannelIds);
   const digitalBudgetPct = useIntegratedPlannerStore((s) => s.digitalBudgetPct);
@@ -477,7 +478,18 @@ export default function IntegratedPlannerPageClient({
         goalFollowUp,
       };
       const mediaIds = resolveScenarioPortfolioMediaIds(catalog, patch);
-      applyScenarioAction({ ...patch, campaignMediaIds: mediaIds });
+      applyScenarioAction({
+        ...patch,
+        campaignMediaIds: mediaIds,
+        appliedScenario: {
+          id: scenario.id,
+          variant: scenario.variant,
+          labelKo: scenario.labelKo,
+          labelEn: scenario.labelEn,
+          descriptionKo: scenario.descriptionKo,
+          descriptionEn: scenario.descriptionEn,
+        },
+      });
       setSelectedScenarioId(scenario.id);
       setWizardStep(4);
       toast(
@@ -871,6 +883,8 @@ export default function IntegratedPlannerPageClient({
                 metrics={integratedMetrics}
                 logoUrl={creativeUploadedUrl || creativeObjectUrl}
                 mediaPlacements={mediaPlacements}
+                appliedScenario={appliedScenario}
+                scenarioVariantLabels={scenarioVariantLabels}
               />
             ) : null}
 
