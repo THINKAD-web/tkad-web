@@ -17,6 +17,7 @@ import {
   DocumentSectionHeading,
 } from "@/components/document/document-layout";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
+import { ReportScanLine } from "@/components/planner/report-scan-text";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -565,12 +566,9 @@ export const PlannerReportDocument = forwardRef<
           sec.lines.length ? (
             <section key={sec.title} className="space-y-3">
               <DocumentSectionHeading>{sec.title}</DocumentSectionHeading>
-              <ul className="space-y-2">
+              <ul className="space-y-3 rounded-xl border border-gray-200 bg-gray-50/60 p-4">
                 {sec.lines.map((line, i) => (
-                  <li key={i} className="flex gap-2.5 text-sm leading-relaxed text-gray-700">
-                    <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500" />
-                    <span className="break-words">{line}</span>
-                  </li>
+                  <ReportScanLine key={i} text={line} />
                 ))}
               </ul>
             </section>

@@ -16,6 +16,7 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
+import { highlightReportScanText } from "@/components/planner/report-scan-text";
 
 export type PlannerProposalNarrativeProps = {
   isKo: boolean;
@@ -135,9 +136,11 @@ export function PlannerProposalNarrative({
               {t("proposalNarrativeLoading")}
             </p>
           ) : (
-            <ol className="mt-3 list-decimal space-y-2 pl-4 text-sm leading-relaxed text-foreground">
+            <ol className="mt-3 list-decimal space-y-3 pl-4 text-sm leading-relaxed text-foreground">
               {sentences?.map((line, i) => (
-                <li key={`${i}-${line.slice(0, 24)}`}>{line}</li>
+                <li key={`${i}-${line.slice(0, 24)}`} className="pl-1">
+                  {highlightReportScanText(line)}
+                </li>
               ))}
             </ol>
           )}
