@@ -61,6 +61,9 @@ import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import PlannerTips from "@/components/planner-tips";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import PlannerReportStep from "@/components/planner-report-step";
+import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-breakdown";
+import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
+import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
@@ -394,6 +397,33 @@ export default function PlannerPageClient({
       mediaSelectionExplicit,
     ],
   );
+
+  const regionalReport = useMemo(() => {
+    if (portfolio.length === 0) return null;
+    const regionalBreakdown = computePlanCartRegionalBreakdown(
+      portfolio,
+      months,
+      isKo,
+    );
+    if (regionalBreakdown.length === 0) return null;
+    const regionBudgetCharts: PlannerExportChartDatum[] = regionalBreakdown
+      .filter((r) => r.monthlyBudgetWon > 0)
+      .map((r) => ({
+        label: r.label,
+        value: r.monthlyBudgetWon,
+        colorKey: r.regionKey,
+        pct: r.budgetPct,
+      }));
+    const regionImpressionCharts: PlannerExportChartDatum[] = regionalBreakdown
+      .filter((r) => r.monthlyImpressions > 0)
+      .map((r) => ({
+        label: r.label,
+        value: r.monthlyImpressions,
+        colorKey: r.regionKey,
+        pct: r.impressionPct,
+      }));
+    return { regionalBreakdown, regionBudgetCharts, regionImpressionCharts };
+  }, [portfolio, months, isKo]);
 
   const metrics = useMemo(() => {
     const source = portfolio.length > 0 ? portfolio : filtered;
@@ -1166,7 +1196,12 @@ export default function PlannerPageClient({
         ) : null}
 
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
-          <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
+          <div
+            className={cn(
+              "mx-auto w-full min-w-0 space-y-8 overflow-x-clip",
+              wizardStep === 6 ? "max-w-7xl" : "max-w-3xl",
+            )}
+          >
             <PlannerTips
               wizardStep={wizardStep}
               campaignGoal={campaignGoal}
@@ -1503,7 +1538,14 @@ export default function PlannerPageClient({
             ) : null}
 
             {wizardStep === 6 ? (
-              <PlannerReportStep
+              <>
+                {regionalReport ? (
+                  <PlanCartRegionalBreakdown
+                    rows={regionalReport.regionalBreakdown}
+                    isKo={isKo}
+                  />
+                ) : null}
+                <PlannerReportStep
                 isKo={isKo}
                 campaignGoal={campaignGoal}
                 goalTitle={goalTitle}
@@ -1540,7 +1582,11 @@ export default function PlannerPageClient({
                 }}
                 appliedScenario={appliedScenario}
                 scenarioVariantLabels={scenarioVariantLabels}
+                regionBreakdown={regionalReport?.regionalBreakdown}
+                regionBudgetCharts={regionalReport?.regionBudgetCharts}
+                regionImpressionCharts={regionalReport?.regionImpressionCharts}
               />
+              </>
             ) : null}
 
             <div className="flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
