@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 
 /** 월간 추정 노출: `impressions` → `monthlyFootTraffic` → 일 유동×30 */
 export function estimatedMonthlyImpressions(m: MediaItem): number {
@@ -11,13 +12,13 @@ export function estimatedMonthlyImpressions(m: MediaItem): number {
 }
 
 /**
- * CPM (원/1,000회 노출). 카탈로그 `price`는 `ai-media-recommend`와 동일하게 만원 단위로 취급.
+ * CPM (원/1,000회 노출) = 월 광고비(원) ÷ (월 노출 ÷ 1,000).
+ * 카탈로그 `price`는 DB 원 단위 — `catalogPriceFieldToWon`과 동일 (보고서·견적 경로).
  */
 export function estimatedCpmWon(m: MediaItem): number | null {
   const imp = estimatedMonthlyImpressions(m);
   if (imp <= 0) return null;
-  const p = m.price;
-  if (typeof p !== "number" || !Number.isFinite(p) || p <= 0) return null;
-  const priceWon = p * 10000;
+  const priceWon = catalogPriceFieldToWon(m.price);
+  if (priceWon <= 0) return null;
   return priceWon / (imp / 1000);
 }
