@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { usePathname } from "next/navigation";
 import { LayoutList } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
@@ -30,18 +30,6 @@ const lightBtn =
 
 const lightPlanBtn =
   "inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-violet-300/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 px-2 text-[11px] font-semibold text-white shadow-sm shadow-violet-500/20 sm:flex-none sm:min-w-[72px] sm:px-3";
-
-function useIsMdUp() {
-  const [isMdUp, setIsMdUp] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(min-width: 768px)");
-    const update = () => setIsMdUp(mq.matches);
-    update();
-    mq.addEventListener("change", update);
-    return () => mq.removeEventListener("change", update);
-  }, []);
-  return isMdUp;
-}
 
 function PlanCartBarLink({
   count,
@@ -85,9 +73,8 @@ export default function CompareBar({
   const isLight = variant === "light";
   const hidePlanOnPage = pathname?.includes("/my/plan") ?? false;
   const showPlanLink = !hidePlanOnPage && planCount > 0;
-  const isMdUp = useIsMdUp();
-  /** 모바일은 퀵액션 바(/my/plan) — CompareBar 내 플랜은 md+ only */
-  const showPlanInBar = showPlanLink && isMdUp;
+  /** 퀵액션 바 제거 후 모바일도 하단 CompareBar에서 담은 매체 진입 */
+  const showPlanInBar = showPlanLink;
   /** 비우기 직후 exit 애니메이션에서도 직전 선택 목록 라벨을 유지 */
   const stashRef = useRef<MediaItem[]>([]);
   /* eslint-disable react-hooks/refs -- items=[]인 exit 프레임에서만 스냅샷 읽기 */
@@ -178,7 +165,7 @@ export default function CompareBar({
                       : `${tPlan("cart")} ${planCount} items`
                   }
                   cartLabel={tPlan("cart")}
-                  className={cn(lightPlanBtn, "hidden md:inline-flex")}
+                  className={lightPlanBtn}
                 />
               ) : null}
               {hasCompareSelection ? (
@@ -264,7 +251,7 @@ export default function CompareBar({
               href="/my/plan"
               variant="secondary"
               size="sm"
-              className={cn(blockClass, "hidden whitespace-nowrap md:inline-flex")}
+              className={cn(blockClass, "whitespace-nowrap")}
             >
               {tPlan("cart")} ({formatPlanCartBadgeCount(planCount)})
             </BtnBlock>

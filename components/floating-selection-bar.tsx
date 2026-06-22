@@ -15,13 +15,13 @@ type Props = {
   variant?: "default" | "neon";
   /** 지도 등 — 패딩·높이 축소 */
   compact?: boolean;
-  /** 모바일 하단 탭·퀵액션 바 위에 표시 (가림 방지) */
+  /** 모바일 하단 탭 위에 표시 (가림 방지) */
   aboveMobileChrome?: boolean;
 };
 
 /** 바가 열렸을 때 본문 하단에 넣는 여백(콘텐츠가 가려지지 않도록). */
 export const FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS =
-  "h-[7.25rem] bg-transparent sm:h-[6.75rem]";
+  "h-[4.25rem] bg-transparent sm:h-[6.75rem]";
 
 /** 컴팩트(지도 등) 하단 바용 여백 */
 export const FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS =
@@ -79,15 +79,12 @@ export function FloatingSelectionBar({
       const tab = document.querySelector(
         'nav[aria-label*="하단 탭"], nav[aria-label*="Bottom tab"]',
       ) as HTMLElement | null;
-      const quick = document.querySelector(
-        '[data-screenshot="quick-actions-mobile"]',
-      ) as HTMLElement | null;
-      if (tab && quick) {
-        setMobileChromeHeight(tab.offsetHeight + quick.offsetHeight);
+      if (tab) {
+        setMobileChromeHeight(tab.offsetHeight);
         return;
       }
-      // fallback: tab h-16 + quick action row
-      setMobileChromeHeight(120);
+      // fallback: bottom tab bar h-[4.25rem]
+      setMobileChromeHeight(68);
     };
 
     measure();
