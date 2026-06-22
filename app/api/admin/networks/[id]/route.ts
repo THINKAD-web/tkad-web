@@ -1,6 +1,10 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import {
+  enrichNetworkLocations,
+  resolveNetworkRegionsArray,
+} from "@/lib/network-location-enrich";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +23,9 @@ function optInt(v: unknown): number | undefined {
 
 function strArr(v: unknown): string[] {
   if (!Array.isArray(v)) return [];
-  return v.filter((x): x is string => typeof x === "string" && x.trim().length > 0).map((x) => x.trim());
+  return v
+    .filter((x): x is string => typeof x === "string" && x.trim().length > 0)
+    .map((x) => x.trim());
 }
 
 function coalescePackageOptions(
@@ -104,7 +110,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       o.totalLocations !== undefined
         ? Math.max(0, optInt(o.totalLocations) ?? 0)
         : undefined,
-    regions: o.regions !== undefined ? strArr(o.regions) : undefined,
     city: o.city !== undefined ? str(o.city) || null : undefined,
     district: o.district !== undefined ? str(o.district) || null : undefined,
     image: o.image !== undefined ? str(o.image) || null : undefined,
@@ -133,29 +138,51 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   const locationsRaw = o.locations;
   if (Array.isArray(locationsRaw)) {
-    const locCreate: Prisma.MediaNetworkLocationCreateManyInput[] = [];
-    for (const x of locationsRaw) {
-      if (!x || typeof x !== "object") continue;
-      const l = x as Record<string, unknown>;
-      const locName = str(l.name);
-      if (!locName) continue;
-      const lat = l.latitude != null ? Number(l.latitude) : null;
-      const lng = l.longitude != null ? Number(l.longitude) : null;
-      locCreate.push({
+    const enriched = enrichNetworkLocations(
+      locationsRaw
+        .filter((x) => x && typeof x === "object")
+        .map((x) => {
+          const l = x as Record<string, unknown>;
+          return {
+            name: str(l.name),
+            address: str(l.address) || null,
+            fullAddress: str(l.fullAddress) || null,
+            regionMain: str(l.regionMain) || null,
+            regionSub: str(l.regionSub) || null,
+            unitCount: optInt(l.unitCount) ?? 1,
+            latitude: l.latitude != null ? Number(l.latitude) : null,
+            longitude: l.longitude != null ? Number(l.longitude) : null,
+            priceNote: str(l.priceNote) || null,
+            dailyFootfall: optInt(l.dailyFootfall) ?? null,
+            note: str(l.note) || null,
+          };
+        }),
+    );
+
+    const manualRegions =
+      o.regions !== undefined ? strArr(o.regions) : strArr(existing.regions);
+    updateData.regions = resolveNetworkRegionsArray(
+      manualRegions.length > 0 ? manualRegions : undefined,
+      enriched,
+    );
+    updateData.totalLocations = enriched.length;
+
+    const locCreate: Prisma.MediaNetworkLocationCreateManyInput[] =
+      enriched.map((l) => ({
         networkId: id,
-        name: locName,
-        address: str(l.address) || null,
-        fullAddress: str(l.fullAddress) || null,
-        regionMain: str(l.regionMain) || null,
-        regionSub: str(l.regionSub) || null,
-        unitCount: Math.max(1, optInt(l.unitCount) ?? 1),
-        latitude: lat != null && Number.isFinite(lat) ? lat : null,
-        longitude: lng != null && Number.isFinite(lng) ? lng : null,
-        priceNote: str(l.priceNote) || null,
-        dailyFootfall: optInt(l.dailyFootfall) ?? null,
-        note: str(l.note) || null,
-      });
-    }
+        name: l.name,
+        address: l.address,
+        fullAddress: l.fullAddress,
+        regionMain: l.regionMain,
+        regionSub: l.regionSub,
+        unitCount: l.unitCount,
+        latitude: l.latitude,
+        longitude: l.longitude,
+        priceNote: l.priceNote,
+        dailyFootfall: l.dailyFootfall,
+        note: l.note,
+      }));
+
     await db.$transaction(async (tx) => {
       await tx.mediaNetworkLocation.deleteMany({ where: { networkId: id } });
       await tx.mediaNetwork.update({ where: { id }, data: updateData });
@@ -164,6 +191,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       }
     });
   } else {
+    if (o.regions !== undefined) {
+      const manual = strArr(o.regions);
+      updateData.regions =
+        manual.length > 0
+          ? manual
+          : resolveNetworkRegionsArray(undefined, []);
+    }
     await db.mediaNetwork.update({
       where: { id },
       data: updateData,

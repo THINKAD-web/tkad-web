@@ -5,9 +5,13 @@ import {
   NETWORK_TYPE_CODES,
   NETWORK_TYPE_LABELS,
   loosePackagePrices,
+  resolveNetworkCatalogType,
+  resolveNetworkVenueCode,
   type NetworkTypeCode,
   type NetworkPackageTier,
 } from "@/lib/media-network-types";
+import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
+import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
 
 export {
   NETWORK_TYPE_CODES,
@@ -214,6 +218,36 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     locations: n.locations,
   });
 
+  const catalogMainType = resolveNetworkCatalogType(n.type);
+  const venueCode = resolveNetworkVenueCode(n.type, n.tags);
+
+  const browseFromNetwork = inferBrowseRegionFromMedia({
+    region: n.regions[0],
+    city: n.city,
+    district: n.district,
+    location: locSummary,
+  });
+
+  let browseMain = browseFromNetwork.main;
+  let browseSub = browseFromNetwork.sub;
+  for (const loc of n.locations) {
+    const resolved = resolveBrowseRegionIds({
+      regionMain: loc.regionMain,
+      regionSub: loc.regionSub,
+      address: loc.fullAddress ?? loc.address,
+    });
+    if (resolved.regionMain) {
+      browseMain = browseMain ?? resolved.regionMain;
+      browseSub = browseSub ?? resolved.regionSub;
+      break;
+    }
+  }
+
+  const mediaCategory = [
+    catalogMainType,
+    ...(venueCode ? [venueCode] : []),
+  ];
+
   return {
     id,
     name: n.name,
@@ -221,9 +255,12 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     location: locSummary,
     locationEn: locSummary,
     region,
-    subCategory: n.type,
+    subCategory: venueCode ?? n.type,
     tags: ["network", n.type, ...(n.tags ?? [])],
     type: "network",
+    mediaMainCategory: catalogMainType,
+    mediaSubCategory: venueCode ?? undefined,
+    mediaCategory,
     price: displayPriceWon,
     pricePeriod: "month",
     lat: centerLat,
@@ -240,7 +277,8 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     priceNote: n.priceNote ?? undefined,
     city: n.city ?? undefined,
     district: n.district ?? undefined,
-    regionMain: n.regions[0] ?? n.city ?? undefined,
+    regionMain: browseMain ?? undefined,
+    regionSub: browseSub ?? undefined,
     installLocations: n.locations
       .filter((l) => l.latitude != null && l.longitude != null)
       .map((l) => ({
