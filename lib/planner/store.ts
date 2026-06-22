@@ -20,6 +20,7 @@ import {
   type PlannerPresetId,
   type PlannerWizardStep,
 } from "@/lib/planner/types";
+import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import {
@@ -107,6 +108,8 @@ export type PlannerStoreActions = {
   clearMediaPlacement: (mediaId: string) => void;
   resetAllMediaPlacements: () => void;
   applyPreset: (id: PlannerPresetId) => void;
+  /** 동적 시나리오 1안 → regions·categories·budget·months 일괄 세팅 */
+  applyScenario: (patch: PlannerScenarioApplyPatch) => void;
   reset: () => void;
   /** 저장된 공유 플랜 JSON으로 입력 상태 복원 */
   importFromSavedPlan: (plan: SavedPlannerPlanJson) => void;
@@ -360,6 +363,18 @@ export const usePlannerStore = create<PlannerStore>()(
             regions: ["seoul", "gyeonggi", "incheon", "busan", "national"],
             categories: [...PLANNER_DEFAULT_CATEGORIES],
           };
+        }),
+
+      applyScenario: (patch) =>
+        set({
+          regions:
+            patch.regions.length > 0 ? [...patch.regions] : ["seoul"],
+          categories:
+            patch.categories.length > 0
+              ? [...patch.categories]
+              : [...PLANNER_DEFAULT_CATEGORIES],
+          budget: String(patch.budgetMan),
+          months: Math.max(1, Math.min(36, patch.months)),
         }),
 
       reset: () => set({ ...INITIAL_STATE }),
