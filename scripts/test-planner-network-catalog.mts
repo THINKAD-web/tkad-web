@@ -96,6 +96,25 @@ assert.ok(
   "seoul + digital filter includes network",
 );
 
+const recs5 = recommendPlannerMedia(
+  catalog,
+  {
+    goal: "brand",
+    regions: ["seoul"],
+    categories: ["digital"],
+    ageKeys: [],
+    industryKey: null,
+    budgetMan: 500,
+    months: 1,
+  },
+  5,
+  0,
+);
+assert.ok(
+  recs5.some((r) => r.media.catalogSource === "network"),
+  "recommendPlannerMedia limit=5 includes network in seoul+digital",
+);
+
 const recs = recommendPlannerMedia(
   catalog,
   {

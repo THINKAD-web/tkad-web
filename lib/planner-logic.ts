@@ -4,6 +4,10 @@ import {
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
 import {
+  isNetworkCatalogItem,
+  plannerMediaMonthlyPriceMan,
+} from "@/lib/matching-network-helpers";
+import {
   filterPlannerMediaByRegions,
   countPlannerMediaByBrowseRegion,
 } from "@/lib/planner/planner-regions";
@@ -244,6 +248,9 @@ export const PLANNER_AUTO_PORTFOLIO_MAX_ITEMS = 12;
 /** matchMediaCatalog 후보 풀 상한 (다양성 pick 전) */
 export const PLANNER_AUTO_PORTFOLIO_POOL_SIZE = 20;
 
+/** 자동 포트폴리오 내 네트워크 상한 — 저가 다지점이 일반 매체를 전부 대체하지 않도록 */
+export const PLANNER_AUTO_PORTFOLIO_MAX_NETWORK_ITEMS = 2;
+
 export function computePlannerPortfolioMonthlyMan(
   portfolio: readonly MediaItem[],
 ): number {
@@ -336,6 +343,7 @@ function knapsackPortfolioWithinMonthlyCap(
   months: number,
   maxItems: number,
   fallbackPool: readonly MediaItem[],
+  maxNetworkItems = Number.POSITIVE_INFINITY,
 ): MediaItem[] {
   if (months <= 0 || budgetMan < 1) return [];
 
@@ -351,24 +359,91 @@ function knapsackPortfolioWithinMonthlyCap(
 
   const out: MediaItem[] = [];
   let allocated = 0;
+  let networkCount = 0;
   for (const m of ordered) {
     if (out.length >= maxItems) break;
-    const priceMan = catalogPriceFieldToPriceMan(m.price);
+    if (isNetworkCatalogItem(m) && networkCount >= maxNetworkItems) continue;
+    const priceMan = plannerMediaMonthlyPriceMan(m);
     if (allocated + priceMan <= cap) {
       out.push(m);
       allocated += priceMan;
+      if (isNetworkCatalogItem(m)) networkCount++;
     }
   }
 
   if (out.length === 0 && fallbackPool.length > 0) {
     const cheapest = [...fallbackPool].sort(
       (a, b) =>
-        catalogPriceFieldToPriceMan(a.price) -
-        catalogPriceFieldToPriceMan(b.price),
+        plannerMediaMonthlyPriceMan(a) -
+        plannerMediaMonthlyPriceMan(b),
     )[0];
     if (cheapest) out.push(cheapest);
   }
   return out;
+}
+
+function ensurePortfolioNetworkCandidate(
+  candidates: MediaItem[],
+  filtered: MediaItem[],
+  matched: readonly { media: MediaItem }[],
+): MediaItem[] {
+  if (candidates.some((m) => isNetworkCatalogItem(m))) return candidates;
+
+  const matchedNw = matched
+    .map((r) => r.media)
+    .filter((m) => isNetworkCatalogItem(m));
+  const poolNw = filtered.filter((m) => isNetworkCatalogItem(m));
+  const best =
+    matchedNw[0] ??
+    poolNw.sort(
+      (a, b) => plannerMediaMonthlyPriceMan(a) - plannerMediaMonthlyPriceMan(b),
+    )[0];
+  if (!best) return candidates;
+
+  const seen = new Set(candidates.map((m) => m.id));
+  if (seen.has(best.id)) return candidates;
+  return [best, ...candidates];
+}
+
+function injectAffordableNetworkIntoPortfolio(
+  portfolio: MediaItem[],
+  candidates: MediaItem[],
+  budgetMan: number,
+  months: number,
+  maxItems: number,
+): MediaItem[] {
+  if (portfolio.some((m) => isNetworkCatalogItem(m))) return portfolio;
+  const spendPerMonth = budgetMan / months;
+  const cap = spendPerMonth * 0.92;
+  const allocated = portfolio.reduce(
+    (s, m) => s + plannerMediaMonthlyPriceMan(m),
+    0,
+  );
+
+  const affordable = candidates
+    .filter((m) => isNetworkCatalogItem(m))
+    .filter((m) => {
+      const p = plannerMediaMonthlyPriceMan(m);
+      return p > 0 && allocated + p <= cap;
+    })
+    .sort((a, b) => plannerMediaMonthlyPriceMan(a) - plannerMediaMonthlyPriceMan(b));
+
+  const pick = affordable[0];
+  if (!pick) return portfolio;
+
+  if (portfolio.length < maxItems) {
+    return [...portfolio, pick];
+  }
+
+  const dropIdx = portfolio.findIndex((m) => !isNetworkCatalogItem(m));
+  if (dropIdx < 0) return portfolio;
+  const dropPrice = plannerMediaMonthlyPriceMan(portfolio[dropIdx]!);
+  const pickPrice = plannerMediaMonthlyPriceMan(pick);
+  if (allocated - dropPrice + pickPrice > cap) return portfolio;
+
+  const next = [...portfolio];
+  next[dropIdx] = pick;
+  return next;
 }
 
 /**
@@ -387,14 +462,23 @@ export function selectPlannerPortfolioFromMatching(
 
   const matchingInput = plannerContextToMatching(ctx, 0);
   const matched = matchMediaCatalog(filtered, matchingInput, poolSize);
-  const candidates = matched.map((row) => row.media);
+  let candidates = matched.map((row) => row.media);
+  candidates = ensurePortfolioNetworkCandidate(candidates, filtered, matched);
 
-  return knapsackPortfolioWithinMonthlyCap(
+  const portfolio = knapsackPortfolioWithinMonthlyCap(
     candidates,
     budgetMan,
     months,
     maxItems,
     filtered,
+    PLANNER_AUTO_PORTFOLIO_MAX_NETWORK_ITEMS,
+  );
+  return injectAffordableNetworkIntoPortfolio(
+    portfolio,
+    candidates,
+    budgetMan,
+    months,
+    maxItems,
   );
 }
 
