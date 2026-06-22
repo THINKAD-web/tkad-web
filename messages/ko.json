@@ -1899,6 +1899,8 @@
     "scenariosTitle": "추천 시나리오",
     "scenariosHint": "목표·업종·지역·연령에 맞춰 조립된 안입니다. 선택 후에도 지역·예산 등을 개별 조정할 수 있습니다.",
     "scenarioApply": "이 시나리오로 적용",
+    "scenarioAppliedWithMedia": "시나리오 적용 · 매체 {count}개 자동 선택",
+    "scenarioAppliedNoMedia": "시나리오 조건이 적용되었습니다. 조건에 맞는 매체를 찾지 못했습니다.",
     "scenarioEfficiency": "효율형",
     "scenarioBalanced": "균형형",
     "scenarioPremium": "프리미엄형",

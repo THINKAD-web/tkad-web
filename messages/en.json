@@ -1899,6 +1899,8 @@
     "scenariosTitle": "Recommended scenarios",
     "scenariosHint": "Assembled from your goal, industry, region, and age. You can still fine-tune region, budget, and more after applying.",
     "scenarioApply": "Use this scenario",
+    "scenarioAppliedWithMedia": "Scenario applied · {count} media auto-selected",
+    "scenarioAppliedNoMedia": "Scenario conditions applied. No media matched your filters.",
     "scenarioEfficiency": "Efficiency",
     "scenarioBalanced": "Balanced",
     "scenarioPremium": "Premium",

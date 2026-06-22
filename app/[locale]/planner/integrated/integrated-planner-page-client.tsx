@@ -73,6 +73,7 @@ import {
   scenarioInputKey,
 } from "@/lib/planner/generate-scenarios";
 import type { PlannerScenario } from "@/lib/planner/scenario-types";
+import { resolveScenarioPortfolioMediaIds } from "@/lib/planner/apply-scenario-portfolio";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import type { ReactNode } from "react";
 
@@ -434,19 +435,37 @@ export default function IntegratedPlannerPageClient({
 
   const applyScenario = useCallback(
     (scenario: PlannerScenario) => {
-      applyScenarioAction({
+      const patch = {
         regions: scenario.regions,
         categories: scenario.categories,
         budgetMan: scenario.budgetMan,
         months: scenario.months,
-      });
+        districtHints: scenario.districtHints,
+        campaignGoal,
+        industryKey,
+        ageKeys,
+      };
+      const mediaIds = resolveScenarioPortfolioMediaIds(catalog, patch);
+      applyScenarioAction({ ...patch, campaignMediaIds: mediaIds });
       setSelectedScenarioId(scenario.id);
+      setWizardStep(4);
       toast(
         "success",
-        isKo ? "시나리오가 적용되었습니다." : "Scenario applied.",
+        mediaIds.length > 0
+          ? t("scenarioAppliedWithMedia", { count: mediaIds.length })
+          : t("scenarioAppliedNoMedia"),
       );
     },
-    [applyScenarioAction, toast, isKo],
+    [
+      applyScenarioAction,
+      catalog,
+      campaignGoal,
+      industryKey,
+      ageKeys,
+      setWizardStep,
+      toast,
+      t,
+    ],
   );
 
   const mapLabel = useCallback(

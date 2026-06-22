@@ -45,7 +45,7 @@ export function hydratePlannerFromPlanCart(
   const patch: Partial<PlannerStoreState> = {
     campaignMediaIds: cart.items.map((i) => i.mediaId),
     campaignGoal: mapPlanCartGoalToPlanner(cart.campaignGoal),
-    mediaSelectionExplicit: true,
+    mediaSelectionExplicit: cart.items.length > 0,
   };
 
   if (monthlyManwon != null) {
