@@ -3,8 +3,23 @@ import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
-import { filterPlannerMediaByRegions, countPlannerMediaByBrowseRegion } from "@/lib/planner/planner-regions";
+import {
+  filterPlannerMediaByRegions,
+  countPlannerMediaByBrowseRegion,
+} from "@/lib/planner/planner-regions";
+import {
+  normalizeCampaignGoal,
+  type CampaignFunnel,
+} from "@/lib/planner/normalize-campaign-goal";
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import { matchMediaCatalog } from "@/lib/matching-engine";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { followUpKpiBoost } from "@/lib/planner/goal-follow-up";
 import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
+import type { PlannerIndustryKey } from "@/lib/planner/types";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -169,13 +184,18 @@ export function filterPlannerMedia(
   });
 }
 
-/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. */
+/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. 서울 하위 상권은 `seoulZones`로 추가 필터. */
 export function filterPlannerMediaMulti(
   items: readonly MediaItem[],
   regions: ReadonlySet<string>,
   categories: ReadonlySet<PlannerCategory>,
+  seoulZones: readonly PlannerSeoulZoneKey[] = [],
 ): MediaItem[] {
-  return filterPlannerMediaByRegions(items, regions, categories);
+  let filtered = filterPlannerMediaByRegions(items, regions, categories);
+  if (regions.has("seoul") && seoulZones.length > 0) {
+    filtered = filtered.filter((m) => mediaMatchesSeoulZones(m, seoulZones));
+  }
+  return filtered;
 }
 
 export function countPlannerMediaByRegion(
@@ -220,6 +240,9 @@ export function computePortfolioReportMetrics(
 
 /** AI 자동 조합 상한 (직접 선택 시에는 적용하지 않음) */
 export const PLANNER_AUTO_PORTFOLIO_MAX_ITEMS = 12;
+
+/** matchMediaCatalog 후보 풀 상한 (다양성 pick 전) */
+export const PLANNER_AUTO_PORTFOLIO_POOL_SIZE = 20;
 
 export function computePlannerPortfolioMonthlyMan(
   portfolio: readonly MediaItem[],
@@ -274,6 +297,7 @@ export function resolvePlannerPortfolio(args: {
   budgetMan: number;
   months: number;
   mediaSelectionExplicit: boolean;
+  recommendCtx: RecommendationContext;
 }): MediaItem[] {
   const {
     campaignMediaIds,
@@ -282,6 +306,7 @@ export function resolvePlannerPortfolio(args: {
     budgetMan,
     months,
     mediaSelectionExplicit,
+    recommendCtx,
   } = args;
   if (months <= 0 || budgetMan < PLANNER_BUDGET_MIN) {
     return [];
@@ -296,33 +321,37 @@ export function resolvePlannerPortfolio(args: {
   if (filtered.length === 0) {
     return [];
   }
-  return selectPlannerPortfolio(
+  return selectPlannerPortfolioFromMatching(
     [...filtered],
+    recommendCtx,
     budgetMan,
     months,
     PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
   );
 }
 
-export function selectPlannerPortfolio(
-  filtered: MediaItem[],
+function knapsackPortfolioWithinMonthlyCap(
+  candidates: readonly MediaItem[],
   budgetMan: number,
   months: number,
-  maxItems = 6,
+  maxItems: number,
+  fallbackPool: readonly MediaItem[],
 ): MediaItem[] {
-  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+  if (months <= 0 || budgetMan < 1) return [];
+
   const spendPerMonth = budgetMan / months;
   const cap = spendPerMonth * 0.92;
-  const scored = filtered.map((m) => ({
-    m,
-    score:
-      m.dailyFootTraffic /
-      Math.max(catalogPriceFieldToPriceMan(m.price), 0.01),
-  }));
-  scored.sort((a, b) => b.score - a.score);
+  const seen = new Set<string>();
+  const ordered: MediaItem[] = [];
+  for (const m of candidates) {
+    if (seen.has(m.id)) continue;
+    seen.add(m.id);
+    ordered.push(m);
+  }
+
   const out: MediaItem[] = [];
   let allocated = 0;
-  for (const { m } of scored) {
+  for (const m of ordered) {
     if (out.length >= maxItems) break;
     const priceMan = catalogPriceFieldToPriceMan(m.price);
     if (allocated + priceMan <= cap) {
@@ -330,11 +359,68 @@ export function selectPlannerPortfolio(
       allocated += priceMan;
     }
   }
-  if (out.length === 0) {
-    const cheapest = [...filtered].sort((a, b) => a.price - b.price)[0];
+
+  if (out.length === 0 && fallbackPool.length > 0) {
+    const cheapest = [...fallbackPool].sort(
+      (a, b) =>
+        catalogPriceFieldToPriceMan(a.price) -
+        catalogPriceFieldToPriceMan(b.price),
+    )[0];
     if (cheapest) out.push(cheapest);
   }
   return out;
+}
+
+/**
+ * 하이브리드 자동 조합 — matchMediaCatalog(목표·연령·업종) + 월예산 92% knapsack.
+ * `PLANNER_AUTO_PORTFOLIO_MAX_ITEMS`(12) 상한 유지.
+ */
+export function selectPlannerPortfolioFromMatching(
+  filtered: MediaItem[],
+  ctx: RecommendationContext,
+  budgetMan: number,
+  months: number,
+  maxItems = PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
+  poolSize = PLANNER_AUTO_PORTFOLIO_POOL_SIZE,
+): MediaItem[] {
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+
+  const matchingInput = plannerContextToMatching(ctx, 0);
+  const matched = matchMediaCatalog(filtered, matchingInput, poolSize);
+  const candidates = matched.map((row) => row.media);
+
+  return knapsackPortfolioWithinMonthlyCap(
+    candidates,
+    budgetMan,
+    months,
+    maxItems,
+    filtered,
+  );
+}
+
+/** 레거시 자동 조합 — 유동인구÷가격 효율 greedy (before/after 비교용). */
+export function selectPlannerPortfolio(
+  filtered: MediaItem[],
+  budgetMan: number,
+  months: number,
+  maxItems = 6,
+): MediaItem[] {
+  if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
+  const scored = filtered.map((m) => ({
+    m,
+    score:
+      m.dailyFootTraffic /
+      Math.max(catalogPriceFieldToPriceMan(m.price), 0.01),
+  }));
+  scored.sort((a, b) => b.score - a.score);
+  const ordered = scored.map((s) => s.m);
+  return knapsackPortfolioWithinMonthlyCap(
+    ordered,
+    budgetMan,
+    months,
+    maxItems,
+    filtered,
+  );
 }
 
 /** 사용자가 고른 순서를 유지하며 월 예산 상한 내에서 슬롯 구성 */
@@ -611,20 +697,36 @@ export function impressionShareByCategory(
     .sort((a, b) => b.value - a.value);
 }
 
-/** 목표별 “핵심 도달” 비중(데모, 0–100) */
+/** 목표별 “핵심 도달” 비중(데모, 0–100) — 퍼널 기준 + displayKey 세분 */
 export function reachSplitForGoal(goal: PlannerCampaignGoal | null): {
   corePct: number;
   extendedPct: number;
 } {
-  const table: Record<PlannerCampaignGoal, [number, number]> = {
-    brand: [62, 38],
-    launch: [55, 45],
-    event: [58, 42],
-    sales: [52, 48],
-    local: [68, 32],
+  const funnelTable: Record<CampaignFunnel, [number, number]> = {
+    awareness: [62, 38],
+    consideration: [58, 42],
+    conversion: [52, 48],
   };
-  const row: [number, number] =
-    goal != null && table[goal] != null ? table[goal] : table.brand;
+
+  const displayOverride: Partial<Record<PlannerCampaignGoal, [number, number]>> =
+    {
+      launch: [55, 45],
+      local: [68, 32],
+    };
+
+  if (!goal) {
+    return {
+      corePct: funnelTable.awareness[0],
+      extendedPct: funnelTable.awareness[1],
+    };
+  }
+
+  const normalized = normalizeCampaignGoal(goal);
+  const override = displayOverride[normalized.displayKey];
+  if (override) {
+    return { corePct: override[0], extendedPct: override[1] };
+  }
+  const row = funnelTable[normalized.funnel];
   return { corePct: row[0], extendedPct: row[1] };
 }
 
@@ -651,14 +753,24 @@ export function comparePlansByDuration(
 
 function goalRoiBoost(goal: PlannerCampaignGoal | null): number {
   if (!goal) return 0;
-  const t: Record<PlannerCampaignGoal, number> = {
-    brand: 0.08,
-    launch: 0.12,
-    event: 0.1,
-    sales: 0.15,
-    local: 0.06,
+
+  const funnelBoost: Record<CampaignFunnel, number> = {
+    awareness: 0.08,
+    consideration: 0.1,
+    conversion: 0.12,
   };
-  return t[goal] ?? 0;
+
+  const displayOverride: Partial<Record<PlannerCampaignGoal, number>> = {
+    launch: 0.12,
+    local: 0.06,
+    sales: 0.15,
+    event: 0.1,
+  };
+
+  const normalized = normalizeCampaignGoal(goal);
+  const override = displayOverride[normalized.displayKey];
+  if (override != null) return override;
+  return funnelBoost[normalized.funnel] ?? 0;
 }
 
 /**
@@ -834,22 +946,42 @@ export type PlannerMetrics = {
   }[];
 };
 
+function industryRoiBoost(industryKey: PlannerIndustryKey | null | undefined): number {
+  if (!industryKey || industryKey === "indOther") return 0;
+  const map: Partial<Record<PlannerIndustryKey, number>> = {
+    indRetail: 0.04,
+    indFb: 0.03,
+    indTech: 0.02,
+    indFinance: 0.03,
+    indEnt: 0.02,
+  };
+  return map[industryKey] ?? 0;
+}
+
 /**
  * Demo model: budget (만원), period (months), visibility factor for OOH frequency.
+ * `media`는 포트폴리오(선택 매체) 또는 필터 풀 — 노출은 foot-traffic 합 우선(도넛·CPM과 정합).
  */
 export function computePlannerMetrics(
-  filtered: MediaItem[],
+  media: MediaItem[],
   budgetMan: number,
   months: number,
-  options?: { campaignGoal?: PlannerCampaignGoal | null },
+  options?: {
+    campaignGoal?: PlannerCampaignGoal | null;
+    industryKey?: PlannerIndustryKey | null;
+    goalFollowUp?: PlannerGoalFollowUp;
+  },
 ): PlannerMetrics | null {
-  if (filtered.length === 0 || months <= 0 || budgetMan <= 0) return null;
+  if (media.length === 0 || months <= 0 || budgetMan <= 0) return null;
+
+  const portReport = computePortfolioReportMetrics(media, months);
+  const useFootTrafficSum = portReport.monthlyImpressions > 0;
 
   const avgMonthlyPriceMan =
-    filtered.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
-    filtered.length;
+    media.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
+    media.length;
   const blendDailyReach =
-    filtered.reduce((s, m) => s + m.dailyFootTraffic, 0) / filtered.length;
+    media.reduce((s, m) => s + (m.dailyFootTraffic ?? 0), 0) / media.length;
 
   const spendPerMonth = budgetMan / months;
   const intensity = Math.min(
@@ -858,28 +990,37 @@ export function computePlannerMetrics(
   );
   const visibility = 0.14 + intensity * 0.1;
 
-  const estimatedMonthlyImpressions = Math.round(
-    blendDailyReach * 30 * visibility * Math.min(1, intensity + 0.25),
-  );
-  const estimatedTotalImpressions = Math.round(
-    estimatedMonthlyImpressions * months,
-  );
+  const estimatedMonthlyImpressions = useFootTrafficSum
+    ? portReport.monthlyImpressions
+    : Math.round(
+        blendDailyReach * 30 * visibility * Math.min(1, intensity + 0.25),
+      );
+  const estimatedTotalImpressions = useFootTrafficSum
+    ? portReport.totalImpressions
+    : Math.round(estimatedMonthlyImpressions * months);
 
   const mixBonus =
-    (filtered.some((m) => m.type === "digital" || m.type === "network")
+    (media.some((m) => m.type === "digital" || m.type === "network")
       ? 0.25
       : 0) +
-    (filtered.some((m) => m.type === "static") ? 0.15 : 0) +
-    (filtered.some((m) => m.type === "mobile") ? 0.1 : 0);
+    (media.some((m) => m.type === "static") ? 0.15 : 0) +
+    (media.some((m) => m.type === "mobile") ? 0.1 : 0);
 
   const goalBoost = goalRoiBoost(options?.campaignGoal ?? null);
+  const indBoost = industryRoiBoost(options?.industryKey ?? null);
+  const followBoost = followUpKpiBoost(
+    options?.campaignGoal ?? null,
+    options?.goalFollowUp ?? {},
+  );
 
   const roiMonthsForScale = Math.max(months, 7 / 30);
   const baseRoi =
     2.1 +
     Math.min(2.2, (budgetMan / (450 * roiMonthsForScale)) * 0.45) +
     mixBonus * 0.4 +
-    goalBoost;
+    goalBoost +
+    indBoost +
+    followBoost;
 
   const roiExpected = Math.round(baseRoi * 10) / 10;
   const roiConservative = Math.round(baseRoi * 0.82 * 10) / 10;

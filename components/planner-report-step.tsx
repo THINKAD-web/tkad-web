@@ -13,6 +13,11 @@ import {
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
+import type {
+  PlannerAgeKey,
+  PlannerCategory,
+  PlannerIndustryKey,
+} from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
@@ -34,7 +39,8 @@ import {
 import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { cn } from "@/lib/utils";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type {
@@ -42,6 +48,8 @@ import type {
   PlannerExportRegionBreakdown,
 } from "@/lib/planner-report-export/types";
 import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -53,6 +61,9 @@ export type PlannerReportSharedProps = {
   categoriesText: string;
   ageText: string;
   industryText: string;
+  industryKey?: PlannerIndustryKey | null;
+  seoulZones?: readonly PlannerSeoulZoneKey[];
+  goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
   /** Step 7과 동일: 조건에 맞는 전체 후보(필터 결과) */
   matchedCount: number;
@@ -81,6 +92,13 @@ export type PlannerReportSharedProps = {
   unlockReportPreview?: boolean;
   /** 보고서 활동 로그 출처 (PDF/PPT 다운로드 추적) */
   activitySource?: PlanReportActivitySource;
+  /** 제안 논리(Claude) API 요청용 — 미전달 시 블록 숨김 */
+  narrativeContext?: {
+    regions: string[];
+    categories: PlannerCategory[];
+    ageKeys: PlannerAgeKey[];
+    industryKey: PlannerIndustryKey | null;
+  };
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -214,9 +232,13 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
-  const { isPro, loading: proLoading } = useIsPro();
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+    access: plannerResultAccess,
+  } = useFeatureAccess("planner_result");
   const previewUnlocked = props.unlockReportPreview === true;
-  const showProPreview = previewUnlocked || isPro;
+  const showProPreview = previewUnlocked || plannerResultAllowed;
   const derived = usePlannerReportDerived(props);
 
   const [error, setError] = useState<string | null>(null);
@@ -240,6 +262,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         categoriesText: props.categoriesText,
         ageText: props.ageText,
         industryText: props.industryText,
+        industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
+        campaignGoal: props.campaignGoal,
+        seoulZones: props.seoulZones,
+        goalFollowUp: props.goalFollowUp,
         portfolio: props.portfolio,
         metrics: props.metrics,
         reachCorePct: props.reachCorePct,
@@ -401,10 +427,30 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         unresolvedCount={props.unresolvedMediaCount ?? 0}
       />
 
+      {props.narrativeContext && props.portfolio.length > 0 ? (
+        <PlannerProposalNarrative
+          isKo={props.isKo}
+          goal={props.campaignGoal}
+          regions={props.narrativeContext.regions}
+          categories={props.narrativeContext.categories}
+          ageKey={props.narrativeContext.ageKeys[0] ?? "ageAll"}
+          industryKey={props.narrativeContext.industryKey}
+          budgetMan={props.budgetNum}
+          months={props.months}
+          portfolio={props.portfolio}
+        />
+      ) : null}
+
       {/* PRO 블러 — 미리보기·노출·시뮬·PDF 통합 */}
-      {!proLoading ? (
-        <section className="space-y-3" data-screenshot="planner-pro-blur">
-          <PlannerProGate isPro={showProPreview} isKo={props.isKo} minHeightClass="min-h-[24rem]">
+      <section className="space-y-3" data-screenshot="planner-pro-blur">
+        <PlannerProGate
+          isPro={showProPreview}
+          loading={plannerResultLoading && !previewUnlocked}
+          isKo={props.isKo}
+          access={plannerResultAccess}
+          feature="planner_result"
+          minHeightClass="min-h-[24rem]"
+        >
             <div className="space-y-6">
               {props.metrics && !previewUnlocked ? (
                 <PlannerProTeaserStats
@@ -577,7 +623,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             </div>
           </PlannerProGate>
         </section>
-      ) : null}
     </div>
   );
 }
@@ -587,7 +632,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
-  const { loading: proLoading } = useIsPro();
+  const { allowed: pdfAllowed, loading: pdfAccessLoading } =
+    useFeatureAccess("planner_pdf");
   const derived = usePlannerReportDerived(props);
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
@@ -609,6 +655,10 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           categoriesText: props.categoriesText,
           ageText: props.ageText,
           industryText: props.industryText,
+          industryKey: props.industryKey ?? props.narrativeContext?.industryKey ?? null,
+          campaignGoal: props.campaignGoal,
+          seoulZones: props.seoulZones,
+          goalFollowUp: props.goalFollowUp,
           portfolio: props.portfolio,
           metrics: props.metrics,
           reachCorePct: props.reachCorePct,
@@ -641,7 +691,16 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     [downloading, props, derived, snapshotAt, t, tCommon, toast],
   );
 
-  if (proLoading) return null;
+  if (pdfAccessLoading) {
+    return (
+      <div
+        className="min-h-[8rem] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80"
+        aria-busy="true"
+      />
+    );
+  }
+
+  if (!pdfAllowed && !props.unlockReportPreview) return null;
 
   return (
     <PlannerNeonCard>

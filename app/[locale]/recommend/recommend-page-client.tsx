@@ -11,7 +11,7 @@ import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
-import { DISCOVERY_TABS } from "@/lib/navigation/sub-page-tabs";
+import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
 import MediaAiRecommendForm, {
   type MediaAiRecommendFormSubmit,
 } from "@/components/media-ai-recommend-form";
@@ -514,7 +514,7 @@ export default function RecommendPageClient({
           highlight="맞춤 매체"
           description="목표·예산·업종 조건에 맞는 매체를 AI가 자동 추천"
         />
-        <SubTabs tabs={DISCOVERY_TABS} currentPath="/recommend" />
+        <SubTabs tabs={PLANNING_TABS} currentPath="/recommend" />
 
         <section className="tkad-media-browse-main border-t border-border/60 bg-card py-16 sm:py-20">
           <div className="ui-container">

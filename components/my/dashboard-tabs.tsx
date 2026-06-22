@@ -11,7 +11,7 @@ type Props = {
 };
 
 const tabs: { key: Tab; label: string; icon: typeof Star }[] = [
-  { key: "favorites", label: "관심 매체", icon: Star },
+  { key: "favorites", label: "관심매체", icon: Star },
   { key: "quotes", label: "지난 견적서", icon: Receipt },
   { key: "campaigns", label: "진행 캠페인", icon: Activity },
 ];

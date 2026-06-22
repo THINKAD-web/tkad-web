@@ -12,6 +12,7 @@ export {
   countPlannerMediaByRegion,
   computePlannerMetrics,
   selectPlannerPortfolio,
+  selectPlannerPortfolioFromMatching,
   computeBudgetBlurbParts,
   portfolioDailyByCategory,
   estimateCpmByCategory,
@@ -23,4 +24,5 @@ export {
   orderPlannerSelectedMedia,
   computePlannerPortfolioBudgetStatus,
   PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
+  PLANNER_AUTO_PORTFOLIO_POOL_SIZE,
 } from "@/lib/planner-logic";

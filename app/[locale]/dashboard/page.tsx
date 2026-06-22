@@ -6,6 +6,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import { Bell, FileText, Film, ListMusic, LogOut, Megaphone } from "lucide-react";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
 import { AdvertiserSummaryCards } from "@/components/advertiser-dashboard/summary-cards";
 import {
   AdvertiserCampaignCard,
@@ -171,7 +172,7 @@ export default function AdvertiserDashboardPage() {
             aria-hidden
             className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.55),rgba(0,0,0,0.92))]"
           />
-          <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <PageContainer className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
               <p className="font-display text-xs font-medium uppercase tracking-[0.24em] dark:text-white text-gray-500">
                 {isKo ? "// 광고주 포털" : "// Advertiser portal"}
@@ -192,11 +193,11 @@ export default function AdvertiserDashboardPage() {
               <LogOut className="h-4 w-4" />
               {isKo ? "로그아웃" : "Log out"}
             </button>
-          </div>
+          </PageContainer>
         </section>
 
         <section className="py-8 sm:py-12 lg:py-14">
-          <div className="mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
+          <PageContainer className="relative space-y-8 lg:space-y-10">
             {summary ? (
               <AdvertiserSummaryCards
                 activeCount={summary.activeCount}
@@ -353,7 +354,7 @@ export default function AdvertiserDashboardPage() {
                 )}
               </section>
             ) : null}
-          </div>
+          </PageContainer>
         </section>
       </div>
     </HomeLandingDayNight>

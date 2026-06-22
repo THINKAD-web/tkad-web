@@ -157,9 +157,9 @@
         "label": "Map search",
         "desc": "Browse by location"
       },
-      "ai-recommend": {
-        "label": "AI media picks",
-        "desc": "Goal and budget-based AI picks"
+      "media-network": {
+        "label": "Network media",
+        "desc": "Browse bus, subway, and network bundles"
       },
       "campaign-targets": {
         "label": "Campaign goals",
@@ -176,6 +176,10 @@
       "package-proposal": {
         "label": "Package proposals",
         "desc": "Curated bundles by goal"
+      },
+      "ai-recommend": {
+        "label": "AI media picks",
+        "desc": "AI matches to your goals and budget"
       },
       "creative-library": {
         "label": "Creative library",
@@ -230,9 +234,9 @@
     "endDate": "End date",
     "budgetManwon": "Total budget (×10k KRW)",
     "goal": "Primary goal",
-    "goalAwareness": "Awareness",
-    "goalConversion": "Conversion",
-    "goalEvent": "Event",
+    "goalAwareness": "Brand awareness",
+    "goalConversion": "Conversion & sales",
+    "goalEvent": "Event promotion",
     "regions": "Target regions",
     "regionsPlaceholder": "e.g. Gangnam, Hongdae (comma-separated)",
     "loadPlanner": "Load saved planner",
@@ -283,14 +287,23 @@
     "orEmail": "Or with email",
     "usageGuide": "How to use"
   },
+  "planNav": {
+    "cart": "Selected media",
+    "saved": "Saved plans",
+    "plannerResults": "Planner results",
+    "newPlan": "New plan"
+  },
+  "favoritesNav": {
+    "label": "Favorite media"
+  },
   "myHub": {
     "loading": "Loading your hub…",
     "greeting": "Hello, {name}",
     "logout": "Log out",
     "tabs": {
       "campaigns": "My campaigns",
-      "favorites": "Saved media",
-      "planner": "My planner",
+      "favorites": "Favorite media",
+      "planner": "Planner results",
       "recent": "Recently viewed",
       "points": "Points history",
       "team": "Team"
@@ -930,9 +943,9 @@
     "compareAvailabilityMaintenance": "🔴 Maintenance",
     "compareStartPlanner": "Start Planner",
     "favorites": {
-      "headerAria": "Saved media",
-      "headerAriaCount": "{count} saved media",
-      "menuLabel": "Saved media",
+      "headerAria": "Favorite media",
+      "headerAriaCount": "{count} favorite media",
+      "menuLabel": "Favorite media",
       "guestMax": "Guests can save up to {max} items.",
       "added": "Saved {name}.",
       "removed": "Removed from saved list.",
@@ -957,6 +970,11 @@
     "form": {
       "panelTitle": "AI media recommendation",
       "panelSubtitle": "Pick region, budget, audience, and media type—AI ranks placements that fit your brief.",
+      "goalLabel": "Campaign goal",
+      "goalAwareness": "Brand awareness",
+      "goalConsideration": "Consideration",
+      "goalConversion": "Conversion",
+      "goalLaunch": "Product launch",
       "regionLabel": "Region",
       "regionSeoul": "Seoul",
       "regionGyeonggi": "Gyeonggi",
@@ -1884,6 +1902,44 @@
     "pkgNationalDesc": "Seoul + Busan + Jeju · all types",
     "pkgValue": "Value mix",
     "pkgValueDesc": "Seoul + Busan + nationwide network · broad mix",
+    "seoulZonesTitle": "Seoul districts (optional)",
+    "seoulZonesDesc": "Suggested districts are highlighted. Leave empty for all Seoul.",
+    "seoulZoneSuggested": "suggested",
+    "seoulZonesApplySuggested": "Apply suggested districts",
+    "seoulZonesClear": "Clear districts (all Seoul)",
+    "seoulZonesAllSeoul": "Current: all Seoul",
+    "followUpTitle": "Goal follow-up (optional)",
+    "followUpDesc": "Defaults are prefilled. You can proceed without changing them.",
+    "followUpLaunchWeeks": "Focus period",
+    "followUpLaunchTiming": "Launch timing",
+    "followUpWeeks": "{n} weeks",
+    "followUpTiming_asap": "ASAP",
+    "followUpTiming_next_month": "Next month",
+    "followUpTiming_season": "Seasonal",
+    "followUpLocalRadius": "Store radius",
+    "followUpKm": "{n} km",
+    "followUpLocalTradeArea": "Trade area (optional)",
+    "followUpLocalTradeAreaPh": "e.g. Hongdae main street",
+    "followUpEventDays": "Event duration",
+    "followUpDays": "{n} days",
+    "followUpConversionChannel": "Conversion channel",
+    "followUpChannel_store": "In-store",
+    "followUpChannel_online": "Online",
+    "followUpChannel_both": "Store + online",
+    "followUpConversionKpi": "Target KPI (optional)",
+    "followUpConversionKpiPh": "e.g. visits +20%",
+    "scenarioPresetsTitle": "Scenario presets",
+    "scenarioPresetsDesc": "Apply goal, industry, and districts at once — then tweak manually.",
+    "scenarioLaunchBeauty": "Launch × beauty retail",
+    "scenarioLaunchBeautyDesc": "Gangnam · Seongsu · digital+static · 4-week burst",
+    "scenarioLocalFb": "Local reach × F&B",
+    "scenarioLocalFbDesc": "Hongdae · Myeongdong · boards · 3 km",
+    "scenarioEventEnt": "Event × entertainment",
+    "scenarioEventEntDesc": "Hongdae · Gangnam · 7-day burst",
+    "scenarioSalesRetail": "Sales × retail",
+    "scenarioSalesRetailDesc": "Gangnam · Myeongdong · store+online",
+    "scenarioBrandTech": "Brand × tech",
+    "scenarioBrandTechDesc": "Gangnam · Yeouido · digital-first",
     "comboTitle": "Suggested media mix",
     "comboHint": "Illustrative picks for your budget. These items are pre-selected on the quote form.",
     "comboHintManual": "Media added in step 4 are included in the plan, report, and quote. You’ll see a notice if monthly rates exceed the budget.",
@@ -1927,6 +1983,9 @@
     "recommendAdd": "Add",
     "recommendAdded": "Added",
     "recommendAddAll": "Add all",
+    "proposalNarrativeEyebrow": "[ Proposal logic ]",
+    "proposalNarrativeTitle": "Why this mix",
+    "proposalNarrativeLoading": "Drafting proposal logic from your campaign inputs...",
     "recommendBrowseTitle": "Browse more",
     "recommendBrowseDesc": "Search the full catalog and add media to your selection.",
     "recommendReason": {
@@ -1934,6 +1993,7 @@
       "ageMatch": "Age match",
       "budgetEfficient": "Budget efficient",
       "goalFit": "Goal fit",
+      "industryFit": "Industry fit",
       "highVisibility": "High visibility",
       "landmarkHotspot": "Landmark / premium spot",
       "transitHotspot": "Transit flow (station / transfer)",
@@ -2059,6 +2119,7 @@
     "coreNavLabel": "Quick links",
     "coreAbout": "About us",
     "corePointsShop": "Points shop",
+    "corePricingCta": "Pricing",
     "coreDeveloperApi": "Developer API",
     "coreMediaSearch": "Media search",
     "corePlanner": "AI Planner",
@@ -2195,6 +2256,7 @@
     "launchMonitor": "Launch monitor",
     "linkHealth": "Link health",
     "operatorManual": "Operator manual",
+    "memberEntitlements": "Membership entitlements",
     "inquiries": "Inquiries",
     "biddings": "Open biddings",
     "chatMonitor": "Anonymous chat",

@@ -43,6 +43,7 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   budgetEfficient: "border-border bg-muted text-foreground",
   /** was bg-foreground + text-primary → 라이트에서 잉크 배경에 잉크 글자, 플래너 토큰에서도 대비 붕괴 */
   goalFit: "border-primary/55 bg-primary/12 text-primary",
+  industryFit: "border-violet-500/55 bg-violet-500/12 text-violet-700 dark:text-violet-300",
   highVisibility: "border-primary bg-card text-primary",
   landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
   transitHotspot: "border-accent bg-accent/10 text-accent",
@@ -88,6 +89,8 @@ export function PlannerRecommendationPanel({
   const plannerCategories = usePlannerStore((s) => s.categories);
   const plannerAgeKeys = usePlannerStore((s) => s.ageKeys);
   const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
+  const plannerSeoulZones = usePlannerStore((s) => s.seoulZones);
+  const plannerGoalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
   const plannerSelectedIds = usePlannerStore((s) => s.campaignMediaIds);
@@ -98,6 +101,8 @@ export function PlannerRecommendationPanel({
   const categories = store?.categories ?? plannerCategories;
   const ageKeys = store?.ageKeys ?? plannerAgeKeys;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
+  const seoulZones = plannerSeoulZones;
+  const goalFollowUp = plannerGoalFollowUp;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
   const selectedIds = store?.campaignMediaIds ?? plannerSelectedIds;
@@ -109,19 +114,42 @@ export function PlannerRecommendationPanel({
   const [recommendations, setRecommendations] = useState<ScoredMedia[]>([]);
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
   const [oneLines, setOneLines] = useState<Record<string, string>>({});
+  const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const fetchRef = useRef(0);
+
+  function reasonKeysFromBreakdown(
+    breakdown: {
+      budget: number;
+      region: number;
+      industry: number;
+      target: number;
+      category?: number;
+      popularity: number;
+    },
+  ): RecommendReasonKey[] {
+    const keys: RecommendReasonKey[] = [];
+    if (breakdown.budget >= 20) keys.push("budgetEfficient");
+    if (breakdown.region >= 15) keys.push("matchRegion");
+    if (breakdown.industry >= 10) keys.push("industryFit");
+    if (breakdown.target >= 12) keys.push("ageMatch");
+    if ((breakdown.category ?? 0) >= 12) keys.push("goalFit");
+    if (breakdown.popularity >= 5) keys.push("highVisibility");
+    return keys.length > 0 ? keys : ["goalFit"];
+  }
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
     [
       goal,
       regions,
+      seoulZones,
       categories,
       ageKeys,
       industryKey,
       budgetMan,
       months,
+      goalFollowUp,
       refreshTick,
     ],
   );
@@ -138,11 +166,13 @@ export function PlannerRecommendationPanel({
             body: JSON.stringify({
               goal,
               regions,
+              seoulZones,
               categories,
               ageKeys,
               industryKey,
               budgetMan,
               months,
+              goalFollowUp,
               seed: refreshTick,
               limit,
               locale,
@@ -150,10 +180,20 @@ export function PlannerRecommendationPanel({
           });
           const data = (await res.json()) as {
             ok?: boolean;
+            claudeUsed?: boolean;
             items?: Array<{
               mediaId: string;
               score: number;
               oneLine?: string;
+              reasoning?: string;
+              expectedImpact?: string;
+              breakdown?: {
+                budget: number;
+                region: number;
+                industry: number;
+                target: number;
+                popularity: number;
+              };
             }>;
           };
           if (id !== fetchRef.current) return;
@@ -161,36 +201,44 @@ export function PlannerRecommendationPanel({
             const byId = new Map(catalog.map((m) => [m.id, m]));
             const scores: Record<string, number> = {};
             const lines: Record<string, string> = {};
+            const narrative: Record<string, string> = {};
             const recs: ScoredMedia[] = [];
             for (const item of data.items) {
               const media = byId.get(item.mediaId);
               if (!media) continue;
               scores[media.id] = item.score;
-              if (item.oneLine) lines[media.id] = item.oneLine;
+              if (item.reasoning) narrative[media.id] = item.reasoning;
+              const summary = item.expectedImpact ?? item.oneLine;
+              if (summary && summary !== item.reasoning) {
+                lines[media.id] = summary;
+              }
+              const reasonKeys =
+                item.breakdown ?
+                  reasonKeysFromBreakdown(item.breakdown)
+                : item.score >= 70 ? (["goalFit"] as RecommendReasonKey[]) : [];
               recs.push({
                 media,
                 score: item.score / 100,
-                reasons: [
-                  ...(item.score >= 70 ?
-                    [{ key: "goalFit" as RecommendReasonKey, weight: 0.7 }]
-                  : []),
-                ],
+                reasons: reasonKeys.map((key) => ({ key, weight: 0.5 })),
               });
             }
             setRecommendations(recs);
             setMatchScores(scores);
             setOneLines(lines);
+            setReasonings(narrative);
           } else {
             const fallback = recommendPlannerMedia(
               catalog,
               {
                 goal,
                 regions,
+                seoulZones,
                 categories,
                 ageKeys,
                 industryKey,
                 budgetMan,
                 months,
+                goalFollowUp,
               },
               limit,
               refreshTick,
@@ -202,6 +250,7 @@ export function PlannerRecommendationPanel({
               ),
             );
             setOneLines({});
+            setReasonings({});
           }
         } catch {
           if (id !== fetchRef.current) return;
@@ -210,11 +259,13 @@ export function PlannerRecommendationPanel({
             {
               goal,
               regions,
+              seoulZones,
               categories,
               ageKeys,
               industryKey,
               budgetMan,
               months,
+              goalFollowUp,
             },
             limit,
             refreshTick,
@@ -341,6 +392,7 @@ export function PlannerRecommendationPanel({
               const selected = isSelected(media.id);
               const matchScore = matchScores[media.id];
               const oneLine = oneLines[media.id];
+              const reasoning = reasonings[media.id];
               return (
                 <li
                   key={media.id}
@@ -360,6 +412,11 @@ export function PlannerRecommendationPanel({
                         {isKo ?
                           `매칭도 ${matchScore}점`
                         : `Match ${matchScore}/100`}
+                      </p>
+                    ) : null}
+                    {reasoning ? (
+                      <p className="mt-2 text-xs leading-relaxed text-foreground/90">
+                        {reasoning}
                       </p>
                     ) : null}
                     {oneLine ? (

@@ -1,9 +1,12 @@
 "use client";
 
 import { ListPlus } from "lucide-react";
+import { useLocale } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { useIsPro } from "@/hooks/use-is-pro";
+import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
@@ -14,8 +17,11 @@ type Props = {
 };
 
 export function PlanCartBulkAddButton({ items, label, className }: Props) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const toast = useAppToast();
   const { addMany } = usePlanCart();
+  const { isPro } = useIsPro();
 
   function handleClick() {
     if (items.length === 0) {
@@ -28,7 +34,11 @@ export function PlanCartBulkAddButton({ items, label, className }: Props) {
     } else if (result.skippedDuplicate === items.length) {
       toast.warning("선택한 매체가 이미 모두 플랜에 있습니다");
     } else {
-      toast.error("플랜에 더 담을 수 없습니다");
+      toast.show({
+        variant: "warning",
+        title: isKo ? "플랜 카트 한도" : "Plan cart limit",
+        description: buildPlanCartLimitMessage(isKo, isPro),
+      });
     }
   }
 

@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Crown, CreditCard, Loader2, Sparkles, Zap, Rocket } from "lucide-react";
 import { POINT_COSTS, type RedeemType } from "@/lib/points-constants";
-import { PRO_MONTHLY_KRW } from "@/lib/report-pricing-constants";
+import { formatProCardPriceLabel } from "@/lib/entitlements/pricing";
 import { ProSubscriptionCheckout } from "@/components/pricing/pro-subscription-checkout";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -214,7 +214,7 @@ export function ProUpgradePanel({
           )}
         >
           <CreditCard className="h-3.5 w-3.5" aria-hidden />
-          {isKo ? `카드 ₩${PRO_MONTHLY_KRW.toLocaleString()}/월` : `Card ₩${PRO_MONTHLY_KRW.toLocaleString()}/mo`}
+          {formatProCardPriceLabel(isKo)}
         </button>
       </div>
 

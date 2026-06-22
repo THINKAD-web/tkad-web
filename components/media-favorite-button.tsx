@@ -2,9 +2,10 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Heart } from "lucide-react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { useAppToast } from "@/lib/use-toast";
-import { FAVORITES_CHANGE_EVENT, FAVORITES_GUEST_MAX } from "@/lib/favorites-constants";
+import { buildFavoritesGuestLimitMessage } from "@/lib/entitlements/gate-messages";
+import { FAVORITES_CHANGE_EVENT } from "@/lib/favorites-constants";
 import {
   isGuestFavorite,
   toggleGuestFavorite,
@@ -28,6 +29,7 @@ export function MediaFavoriteButton({
   compact = false,
   className,
 }: Props) {
+  const locale = useLocale();
   const t = useTranslations("media.favorites");
   const [favorited, setFavorited] = useState<boolean | null>(null);
   const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
@@ -90,7 +92,11 @@ export function MediaFavoriteButton({
           nameEn: mediaNameEn ?? mediaName ?? mediaId,
         });
         if (!result.ok) {
-          toast.error(t("guestMax", { max: FAVORITES_GUEST_MAX }));
+          toast.show({
+            variant: "warning",
+            title: locale === "ko" ? "찜 저장 한도" : "Favorites limit",
+            description: buildFavoritesGuestLimitMessage(locale === "ko"),
+          });
           return;
         }
         setFavorited(result.favorited);

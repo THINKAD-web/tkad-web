@@ -1,4 +1,17 @@
-/** Client-safe pricing constants (no server/DB imports). */
-export const PRO_MONTHLY_KRW = 99_000;
-export const PRO_TRIAL_DAYS = 14;
-export const FREE_PLANNER_PDF_LIMIT = 1;
+/** Client-safe pricing constants (no server/DB imports). @deprecated import from `@/lib/entitlements` */
+export {
+  PRO_MONTHLY_KRW,
+  PRO_TRIAL_DAYS,
+  FREE_PLANNER_PDF_LIMIT,
+} from "@/lib/entitlements/constants";
+export {
+  PRO_DISCOUNT_PERCENT,
+  getProDiscountPercent,
+  discountedProPriceKrw,
+  getProPriceDisplay,
+  formatProMonthlyPriceKo,
+  formatProMonthlyPriceEn,
+  formatProCardPriceLabel,
+  proPriceFaqAnswerKo,
+  proPriceFaqAnswerEn,
+} from "@/lib/entitlements/pricing";

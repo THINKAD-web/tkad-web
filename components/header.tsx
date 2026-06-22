@@ -198,7 +198,7 @@ export default function Header() {
           : "bg-background/70 backdrop-blur-md supports-[backdrop-filter]:bg-background/55"
       }`}
     >
-      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
+      <div className="mx-auto flex h-18 max-w-7xl items-center justify-between px-4 md:px-6 lg:px-8">
         <Link href="/" className="group flex items-center gap-3">
           <span className="text-2xl font-extrabold tracking-tight text-primary transition-colors duration-300">
             THINK

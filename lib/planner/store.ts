@@ -21,10 +21,21 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
-import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import {
+  defaultFollowUpForGoal,
+  normalizeFollowUpForGoal,
+} from "@/lib/planner/goal-follow-up";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import { isPlannerSeoulZoneKey, suggestSeoulZones } from "@/lib/planner/seoul-zones";
+import {
+  getScenarioPreset,
+  type PlannerScenarioPresetId,
+} from "@/lib/planner/scenario-presets";
 import { hydratePlannerFromSavedPlan } from "@/lib/planner/hydrate-from-saved-plan";
 import { hydratePlannerFromPlanCart } from "@/lib/plan-cart-planner-bridge";
 import type { PlanCart } from "@/lib/plan-cart";
+import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록
@@ -55,6 +66,12 @@ export type PlannerStoreState = {
    * Step 4 에서 사용자가 매체 선택을 건드렸으면 true.
    * true 이고 campaignMediaIds 가 비어 있으면 portfolio 자동조합을 하지 않음.
    */
+  /** 서울 선택 시 하위 상권. 빈 배열 = 서울 전체 */
+  seoulZones: PlannerSeoulZoneKey[];
+  /** true면 상권 추천 자동 적용 안 함 (회귀·수동 클리어) */
+  seoulZonesTouched: boolean;
+  /** Step 2 목표별 후속 (전부 optional) */
+  goalFollowUp: PlannerGoalFollowUp;
   mediaSelectionExplicit: boolean;
 };
 
@@ -72,6 +89,12 @@ export type PlannerStoreActions = {
   setAgeKeys: (keys: PlannerAgeKey[]) => void;
   toggleAgeKey: (key: PlannerAgeKey) => void;
   setIndustryKey: (key: PlannerIndustryKey) => void;
+  toggleSeoulZone: (zone: PlannerSeoulZoneKey) => void;
+  setSeoulZones: (zones: PlannerSeoulZoneKey[]) => void;
+  clearSeoulZones: () => void;
+  applySuggestedSeoulZones: () => void;
+  setGoalFollowUp: (patch: Partial<PlannerGoalFollowUp>) => void;
+  applyScenarioPreset: (id: PlannerScenarioPresetId) => void;
   /** React `Dispatch<SetStateAction<string[]>>` 호환 — 기존 하위 컴포넌트 시그니처 유지용 */
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
   /** React `Dispatch<SetStateAction<string | null>>` 호환 */
@@ -102,6 +125,9 @@ const INITIAL_STATE: PlannerStoreState = {
   months: 3,
   ageKeys: [] as PlannerAgeKey[],
   industryKey: "indOther",
+  seoulZones: [],
+  seoulZonesTouched: true,
+  goalFollowUp: {},
   campaignMediaIds: [],
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
@@ -140,7 +166,21 @@ export const usePlannerStore = create<PlannerStore>()(
           wizardStep: clampWizardStep(s.wizardStep - 1),
         })),
 
-      setCampaignGoal: (goal) => set({ campaignGoal: goal }),
+      setCampaignGoal: (goal) =>
+        set((s) => ({
+          campaignGoal: goal,
+          goalFollowUp: normalizeFollowUpForGoal(
+            goal,
+            defaultFollowUpForGoal(goal, s.industryKey),
+          ),
+          ...(!s.seoulZonesTouched &&
+          s.regions.includes("seoul") &&
+          goal != null
+            ? {
+                seoulZones: suggestSeoulZones(goal, s.industryKey),
+              }
+            : {}),
+        })),
 
       toggleRegion: (region) =>
         set((s) => {
@@ -148,10 +188,23 @@ export const usePlannerStore = create<PlannerStore>()(
           if (next.has(region)) {
             if (next.size <= 1) return {};
             next.delete(region);
-          } else {
-            next.add(region);
+            const patch: Partial<PlannerStoreState> = { regions: [...next] };
+            if (region === "seoul") {
+              patch.seoulZones = [];
+              patch.seoulZonesTouched = true;
+            }
+            return patch;
           }
-          return { regions: [...next] };
+          next.add(region);
+          const patch: Partial<PlannerStoreState> = { regions: [...next] };
+          if (
+            region === "seoul" &&
+            !s.seoulZonesTouched &&
+            s.campaignGoal != null
+          ) {
+            patch.seoulZones = suggestSeoulZones(s.campaignGoal, s.industryKey);
+          }
+          return patch;
         }),
 
       setRegions: (regions) =>
@@ -193,7 +246,60 @@ export const usePlannerStore = create<PlannerStore>()(
           return { ageKeys: [...next] };
         }),
 
-      setIndustryKey: (key) => set({ industryKey: key }),
+      setIndustryKey: (key) =>
+        set((s) => ({
+          industryKey: key,
+          ...(!s.seoulZonesTouched &&
+          s.regions.includes("seoul") &&
+          s.campaignGoal != null
+            ? { seoulZones: suggestSeoulZones(s.campaignGoal, key) }
+            : {}),
+        })),
+
+      toggleSeoulZone: (zone) =>
+        set((s) => {
+          const next = new Set(s.seoulZones);
+          if (next.has(zone)) next.delete(zone);
+          else next.add(zone);
+          return { seoulZones: [...next] as PlannerSeoulZoneKey[], seoulZonesTouched: true };
+        }),
+
+      setSeoulZones: (zones) =>
+        set({ seoulZones: [...zones], seoulZonesTouched: true }),
+
+      clearSeoulZones: () => set({ seoulZones: [], seoulZonesTouched: true }),
+
+      applySuggestedSeoulZones: () =>
+        set((s) => ({
+          seoulZones: suggestSeoulZones(s.campaignGoal, s.industryKey),
+          seoulZonesTouched: false,
+        })),
+
+      setGoalFollowUp: (patch) =>
+        set((s) => ({
+          goalFollowUp: normalizeFollowUpForGoal(s.campaignGoal, {
+            ...s.goalFollowUp,
+            ...patch,
+          }),
+        })),
+
+      applyScenarioPreset: (id) =>
+        set(() => {
+          const preset = getScenarioPreset(id);
+          if (!preset) return {};
+          return {
+            campaignGoal: preset.goal,
+            industryKey: preset.industryKey,
+            regions: [...preset.regions],
+            seoulZones: [...preset.seoulZones],
+            seoulZonesTouched: true,
+            categories: [...preset.categories],
+            goalFollowUp: normalizeFollowUpForGoal(
+              preset.goal,
+              preset.followUp,
+            ),
+          };
+        }),
 
       setCampaignMediaIds: (action) =>
         set((s) => ({
@@ -302,6 +408,9 @@ export const usePlannerStore = create<PlannerStore>()(
         months: state.months,
         ageKeys: state.ageKeys,
         industryKey: state.industryKey,
+        seoulZones: state.seoulZones,
+        seoulZonesTouched: state.seoulZonesTouched,
+        goalFollowUp: state.goalFollowUp,
         campaignMediaIds: state.campaignMediaIds,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
@@ -357,6 +466,26 @@ export const usePlannerStore = create<PlannerStore>()(
         );
         if (isPlannerIndustryKey(raw.industryKey))
           merged.industryKey = raw.industryKey;
+
+        if (Array.isArray(raw.seoulZones)) {
+          merged.seoulZones = raw.seoulZones.filter(isPlannerSeoulZoneKey);
+        }
+        if (fromVersion < 4) {
+          merged.seoulZonesTouched = true;
+        } else if (typeof raw.seoulZonesTouched === "boolean") {
+          merged.seoulZonesTouched = raw.seoulZonesTouched;
+        }
+
+        if (
+          raw.goalFollowUp &&
+          typeof raw.goalFollowUp === "object" &&
+          !Array.isArray(raw.goalFollowUp)
+        ) {
+          merged.goalFollowUp = normalizeFollowUpForGoal(
+            merged.campaignGoal,
+            raw.goalFollowUp as PlannerGoalFollowUp,
+          );
+        }
 
         // wizardStep 은 persist 대상이 아님 (항상 Step 1 부터 재개).
         // 레거시 저장본의 wizardStep 는 무시.

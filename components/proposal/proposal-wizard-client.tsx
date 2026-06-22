@@ -29,7 +29,6 @@ import type {
   ProposalGoal,
   ProposalInput,
 } from "@/lib/proposal/types";
-import type { PlannerCampaignGoal } from "@/lib/planner/types";
 import { isSavedPlannerPlanId } from "@/lib/planner/contact-prefill";
 import { usePlannerStore } from "@/lib/planner/store";
 import {
@@ -37,6 +36,7 @@ import {
   plannerGoalTitleKey,
   plannerGoalToProposalGoal,
   plannerPeriodDates,
+  proposalGoalToPlanner,
 } from "@/lib/proposal/prefill-from-planner";
 import { cn } from "@/lib/utils";
 
@@ -48,12 +48,6 @@ const inputClass =
 
 const labelClass =
   "block font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/70";
-
-function goalToPlanner(goal: ProposalGoal): PlannerCampaignGoal {
-  if (goal === "awareness") return "brand";
-  if (goal === "conversion") return "sales";
-  return "event";
-}
 
 function ProposalNeonPageBody({
   appearance,
@@ -173,7 +167,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
 
   const recommendCtx: RecommendationContext = useMemo(
     () => ({
-      goal: goalToPlanner(goal),
+      goal: proposalGoalToPlanner(goal),
       regions,
       categories: [],
       ageKeys: [] as PlannerAgeKey[],

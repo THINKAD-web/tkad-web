@@ -1,5 +1,4 @@
-import type { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
-import type { ReportAccessLevel } from "@prisma/client";
+import type { SubscriptionPlan, SubscriptionStatus, ReportAccessLevel } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseConfigured } from "@/lib/prisma";
 import {
@@ -11,6 +10,7 @@ import {
   type AccessCheckResult,
   type ReportFeature,
 } from "@/lib/report-access-shared";
+import { FEATURE_MIN_LEVEL } from "@/lib/entitlements/features";
 import {
   grantProTrialOnSignup,
   isPro,
@@ -25,18 +25,6 @@ export {
   rankLevel,
   featureLabel,
 } from "@/lib/report-access-shared";
-
-const FEATURE_MIN_LEVEL: Record<ReportFeature, ReportAccessLevel> = {
-  media_spec: "MEMBER",
-  planner_result: "MEMBER",
-  detail_data: "PRO",
-  planner_pdf: "PRO",
-  competitor: "PRO",
-  simulation_full: "PRO",
-  market_dashboard: "PRO",
-  api: "ENTERPRISE",
-  whitelabel: "ENTERPRISE",
-};
 
 export function resolveLevelFromPlan(
   plan: SubscriptionPlan,

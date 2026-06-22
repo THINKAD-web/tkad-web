@@ -7,6 +7,7 @@ import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kaka
 import { RoadviewCard } from "@/components/media-detail/roadview-card";
 import { NearbyPoiSection } from "@/components/media/nearby-poi-section";
 import type { MapMarker } from "@/components/public-map/map-types";
+import type { MapViewCommand } from "@/components/media-map/kakao-map-view";
 import type { MediaItem } from "@/lib/media-data";
 import {
   mapCenterForMediaDetail,
@@ -71,10 +72,44 @@ export function MediaDetailLocationPanel({
   const [focusActive, setFocusActive] = useState(false);
   const listRef = useRef<HTMLUListElement>(null);
 
-  const selectMarker = useCallback((id: string) => {
-    setFocusActive(true);
-    setSelectedId(id);
-  }, []);
+  // 단일 명령형 뷰 채널 — 지도 이동(fit/focus)을 한 곳에서만 결정.
+  const cmdNonceRef = useRef(0);
+  const didInitFitRef = useRef(false);
+  const [mapCommand, setMapCommand] = useState<MapViewCommand>(null);
+  const emitMapCommand = useCallback(
+    (cmd: { type: "fitMarkers"; auto?: boolean }
+      | { type: "focusMarker"; lat: number; lng: number; level: number }) => {
+      cmdNonceRef.current += 1;
+      setMapCommand({ ...cmd, nonce: cmdNonceRef.current } as MapViewCommand);
+    },
+    [],
+  );
+
+  const selectMarker = useCallback(
+    (id: string) => {
+      setFocusActive(true);
+      setSelectedId(id);
+      const mk = mapMarkers.find((m) => m.id === id);
+      if (mk) {
+        emitMapCommand({
+          type: "focusMarker",
+          lat: mk.lat,
+          lng: mk.lng,
+          level: LOCATION_FOCUS_ZOOM,
+        });
+      }
+    },
+    [mapMarkers, emitMapCommand],
+  );
+
+  // 최초 1회만 전체 핀 자동 맞춤(네트워크 다지점). 사용자가 지도를 조작하면
+  // 채널 게이트(userInteractedRef)가 이후 auto 명령을 무시하므로 리셋되지 않는다.
+  useEffect(() => {
+    if (didInitFitRef.current) return;
+    if (!(isNetwork && mapMarkers.length > 1)) return;
+    didInitFitRef.current = true;
+    emitMapCommand({ type: "fitMarkers", auto: true });
+  }, [isNetwork, mapMarkers, emitMapCommand]);
 
   /** 지점 목록 행 클릭 → 해당 마커 선택 + 지도 클로즈업 */
   const focusLocationOnMap = (loc: { lat?: number; lng?: number }) => {
@@ -128,10 +163,13 @@ export function MediaDetailLocationPanel({
     ];
   }, [netLocations, media, isKo, regionDisplay]);
 
+  // media 변경(다른 매체 보기)에만 반응 — mapMarkers 객체 identity 의존 제거(상위 리렌더 취약성 차단).
   useEffect(() => {
     setSelectedId(mapMarkers[0]?.id ?? media.id);
     setFocusActive(false);
-  }, [media.id, mapMarkers]);
+    didInitFitRef.current = false; // 새 매체엔 초기 fit 재허용
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [media.id]);
 
   /** 지도 마커 선택 시 목록에서 해당 행으로 스크롤 */
   useEffect(() => {
@@ -189,8 +227,7 @@ export function MediaDetailLocationPanel({
             center={mapCenter}
             zoom={mapZoom}
             disableCluster={mapMarkers.length <= 8}
-            fitMarkersBounds={isNetwork && mapMarkers.length > 1 && !focusActive}
-            zoomOnSelect={focusActive ? LOCATION_FOCUS_ZOOM : undefined}
+            command={mapCommand}
           />
         </div>
       </div>

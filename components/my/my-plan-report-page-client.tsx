@@ -1,11 +1,13 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { buildPlanCartReportBundle } from "@/lib/plan-cart-report/build-report";
 import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-breakdown";
@@ -13,8 +15,10 @@ import { SavePlanButton } from "@/components/my/save-plan-button";
 import PlannerReportStep from "@/components/planner-report-step";
 import { BtnBlock } from "@/components/brutalist";
 import { trackPlanReportActivity } from "@/lib/plan-report-activity/client";
+import { cn } from "@/lib/utils";
 
 export function MyPlanReportPageClient() {
+  const tPlan = useTranslations("planNav");
   const locale = useLocale();
   const isKo = locale === "ko";
   const { cart } = usePlanCart();
@@ -63,15 +67,20 @@ export function MyPlanReportPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
-        <div className="mx-auto max-w-5xl">
+      <div
+        className={cn(
+          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
+          MOBILE_CHROME_BOTTOM_PAD,
+        )}
+      >
+        <PageContainer>
           <div className="mb-8">
             <Link
               href="/my/plan"
               className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
             >
               <ArrowLeft className="h-4 w-4" />
-              {isKo ? "내 플랜" : "My plan"}
+              {tPlan("cart")}
             </Link>
             <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
               [ MY PLAN REPORT ]
@@ -141,7 +150,7 @@ export function MyPlanReportPageClient() {
                   }}
                 />
                 <BtnBlock href="/my/plan/saved" variant="secondary">
-                  {isKo ? "저장된 플랜" : "Saved plans"}
+                  {tPlan("saved")}
                 </BtnBlock>
               </div>
               <PlanCartRegionalBreakdown
@@ -158,7 +167,7 @@ export function MyPlanReportPageClient() {
               />
             </div>
           ) : null}
-        </div>
+        </PageContainer>
       </div>
     </HomeLandingDayNight>
   );

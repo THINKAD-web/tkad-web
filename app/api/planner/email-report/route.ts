@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { CONTACT_EMAIL, CONTACT_MAILTO } from "@/lib/constants";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
+import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 
 type MediaItem = {
   name: string;
@@ -34,6 +35,16 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       { error: "Email not configured" },
       { status: 503 },
+    );
+  }
+
+  const pdfAccess = await requirePlannerPdfAccess();
+  if (!pdfAccess.allowed) {
+    return NextResponse.json(
+      {
+        error: pdfAccess.status === 401 ? "Login required" : "PRO required",
+      },
+      { status: pdfAccess.status },
     );
   }
 

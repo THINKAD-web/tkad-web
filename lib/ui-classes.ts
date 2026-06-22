@@ -1,3 +1,9 @@
+import {
+  MOBILE_CHROME_BOTTOM_PAD,
+  PAGE_CONTAINER_PADDING,
+  pageContainerClass,
+} from "@/lib/layout/container-classes";
+
 /**
  * TKAD 공개 UI 디자인 토큰 — 타이포·간격·버튼·카드·뱃지 통일.
  * Tailwind 유틸 조합; 컴포넌트에서 `cn(ui.pageHeadline, className)` 형태로 사용.
@@ -29,9 +35,13 @@ export const ui = {
   /** 섹션 세로 패딩 */
   sectionY: "py-16 md:py-24",
 
-  /** 레이아웃 컨테이너 */
-  container: "mx-auto w-full max-w-7xl px-4 md:px-6 lg:px-8",
-  containerNarrow: "mx-auto w-full max-w-4xl px-4 md:px-6 lg:px-8",
+  /** 레이아웃 컨테이너 — prefer PageContainer; wide = `.ui-container` */
+  container: pageContainerClass.wide,
+  containerProse: pageContainerClass.prose,
+  containerFluid: pageContainerClass.fluid,
+  containerPadding: PAGE_CONTAINER_PADDING,
+  mobileChromeBottomPad: MOBILE_CHROME_BOTTOM_PAD,
+  containerNarrow: "ui-container-narrow",
 
   /** 그리드 / 목록 gap */
   gridGap: "gap-4 md:gap-6",

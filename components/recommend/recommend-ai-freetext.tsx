@@ -1,11 +1,13 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
+import { useTranslations } from "next-intl";
 import { useIsPro } from "@/hooks/use-is-pro";
 import { Sparkles, Loader2, Lock, Wand2, Pencil } from "lucide-react";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RecommendBriefFields } from "@/lib/recommend-freetext-parse";
+import { RECOMMEND_FREETEXT_GOAL_OPTS } from "@/lib/recommend/campaign-goal-options";
 import { cn } from "@/lib/utils";
 
 /**
@@ -31,11 +33,6 @@ type IndustryKey =
   | "beauty"
   | "other";
 
-const GOAL_OPTS: { value: GoalKey; ko: string; en: string }[] = [
-  { value: "awareness", ko: "브랜드 인지", en: "Awareness" },
-  { value: "consideration", ko: "관심·고려", en: "Consideration" },
-  { value: "launch", ko: "신규 런칭", en: "Launch" },
-];
 const TARGET_OPTS: { value: TargetKey; ko: string; en: string }[] = [
   { value: "genz", ko: "Z세대(10~20대 초)", en: "Gen Z" },
   { value: "millennial", ko: "20~30대", en: "Millennial" },
@@ -80,8 +77,18 @@ function fieldsToDraft(f: RecommendBriefFields): Draft {
 
 export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
   const isKo = locale === "ko";
+  const tr = useTranslations("recommend");
   const router = useRouter();
   const { isPro, loading: proLoading } = useIsPro();
+
+  const goalOpts = useMemo(
+    () =>
+      RECOMMEND_FREETEXT_GOAL_OPTS.map((o) => ({
+        value: o.value,
+        label: tr(o.titleKey),
+      })),
+    [tr],
+  );
 
   const [phase, setPhase] = useState<Phase>("input");
   const [text, setText] = useState("");
@@ -170,8 +177,18 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
     onConfirm(input);
   }, [draft, isKo, onConfirm]);
 
+  // ── PRO 판정 로딩: 업그레이드 CTA 플래시 방지 ──
+  if (proLoading) {
+    return (
+      <div
+        className="min-h-[10rem] animate-pulse rounded-2xl border border-gray-100 bg-gray-100/80 dark:border-white/8 dark:bg-white/5"
+        aria-busy="true"
+      />
+    );
+  }
+
   // ── 비PRO: 업그레이드 CTA ──
-  if (!proLoading && !isPro) {
+  if (!isPro) {
     return (
       <div className="rounded-2xl border border-violet-200 bg-violet-50/60 p-6 text-center dark:border-violet-500/30 dark:bg-violet-500/10">
         <div className="mx-auto mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-violet-500/15">
@@ -228,9 +245,9 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
               className={cn(selCls, draft.goal ? filledRing : emptyRing)}
             >
               <option value="">{isKo ? "선택" : "Select"}</option>
-              {GOAL_OPTS.map((o) => (
+              {goalOpts.map((o) => (
                 <option key={o.value} value={o.value}>
-                  {isKo ? o.ko : o.en}
+                  {o.label}
                 </option>
               ))}
             </select>

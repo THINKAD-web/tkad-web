@@ -23,6 +23,7 @@ import { PointsCheckInCard } from "@/components/my/points-check-in-card";
 import { PointsHistoryTab } from "@/components/my/points-history-tab";
 import { TeamManagementSection } from "@/components/my/team-management-section";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
 import { MyHubTabs, type MyHubTab } from "@/components/my/my-hub-tabs";
 import {
   MyHubMediaGridCard,
@@ -132,6 +133,8 @@ export function MyHubPageClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("myHub");
+  const tPlan = useTranslations("planNav");
+  const tFav = useTranslations("favoritesNav");
   const toast = useAppToast();
 
   const [me, setMe] = useState<Me | null>(null);
@@ -399,7 +402,7 @@ export function MyHubPageClient() {
     <>
       <div className="tkad-neon-surface relative mb-6 overflow-hidden rounded-[28px] px-5 py-6 sm:mb-8 sm:px-8 sm:py-10">
         <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
-          {isKo ? "// 찜한 매체" : "// Saved media"}
+          {isKo ? `// ${tFav("label")}` : `// ${tFav("label")}`}
         </p>
         <h2 className="mt-3 text-balance text-xl font-[950] leading-tight tracking-[-0.05em] text-foreground sm:text-3xl">
           {isKo ? (
@@ -477,7 +480,7 @@ export function MyHubPageClient() {
         />
       ) : (
         <div className="md:hidden">
-          <div className="border-b border-gray-200 bg-white px-4 py-3 dark:border-white/10 dark:bg-gray-950">
+          <PageContainer className="border-b border-gray-200 bg-white py-3 dark:border-white/10 dark:bg-gray-950">
             <Link
               href="/my?tab=campaigns"
               className="inline-flex items-center gap-1 text-xs font-semibold text-gray-600 dark:text-white/70"
@@ -488,9 +491,9 @@ export function MyHubPageClient() {
             <h1 className="mt-2 text-lg font-bold text-gray-900 dark:text-white">
               {tabDefs.find((d) => d.key === tab)?.label ?? t("tabs.favorites")}
             </h1>
-          </div>
+          </PageContainer>
           {tab === "favorites" ? (
-            <div className="px-4 py-6">{favoritesPanel}</div>
+            <PageContainer className="py-6">{favoritesPanel}</PageContainer>
           ) : null}
         </div>
       )}
@@ -504,7 +507,7 @@ export function MyHubPageClient() {
             aria-hidden
             className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.55),rgba(0,0,0,0.92))]"
           />
-          <div className="relative mx-auto flex max-w-7xl flex-col gap-6 px-4 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:px-8">
+          <PageContainer className="relative flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
             <div className="min-w-0">
               <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/60">
                 {isKo ? "// 마이 허브" : "// My hub"}
@@ -536,11 +539,11 @@ export function MyHubPageClient() {
                 {t("logout")}
               </button>
             </div>
-          </div>
+          </PageContainer>
         </section>
 
         <section className="py-8 sm:py-12 lg:py-14">
-          <div className="relative mx-auto max-w-7xl space-y-8 px-4 sm:px-6 lg:space-y-10 lg:px-8">
+          <PageContainer className="relative space-y-8 lg:space-y-10">
           {me.needsEmailVerification && (
             <EmailVerificationBanner onVerified={() => void reloadMe()} />
           )}
@@ -659,7 +662,7 @@ export function MyHubPageClient() {
                   </p>
                   <div className="mt-4 flex flex-wrap gap-2">
                     <Link href="/my/plan" className={myHubOutlineBtn}>
-                      {isKo ? "내 플랜 보기" : "View my plan"}
+                      {isKo ? `${tPlan("cart")} 보기` : `View ${tPlan("cart")}`}
                     </Link>
                     <Link href="/my/plan/report" className={myHubPrimaryBtn}>
                       <Sparkles className="mr-2 h-4 w-4" />
@@ -825,7 +828,7 @@ export function MyHubPageClient() {
               )}
             </section>
           )}
-          </div>
+          </PageContainer>
         </section>
       </div>
     </HomeLandingDayNight>

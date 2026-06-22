@@ -2,6 +2,7 @@ import {
   type ContactBudgetV2,
   type ContactCampaignGoal,
 } from "@/lib/contact-lead-schema";
+import { normalizeCampaignGoal } from "@/lib/planner/normalize-campaign-goal";
 import { PLANNER_BUDGET_MAX, PLANNER_BUDGET_MIN } from "@/lib/planner/types";
 import type { MediaItem } from "@/lib/media-data";
 
@@ -32,6 +33,22 @@ const PLANNER_GOAL_TO_CONTACT: Partial<
   local: "store_traffic",
 };
 
+export function plannerGoalToContactGoals(
+  campaignGoal: string | null | undefined,
+): ContactCampaignGoal[] {
+  if (!campaignGoal) return [];
+  const normalized = normalizeCampaignGoal(campaignGoal);
+  const legacyMapped = PLANNER_GOAL_TO_CONTACT[normalized.displayKey];
+  if (legacyMapped) return [legacyMapped];
+  if (normalized.tags.includes("launch")) return ["product_launch"];
+  if (normalized.funnel === "consideration" || normalized.tags.includes("event")) {
+    return ["event_promo"];
+  }
+  if (normalized.funnel === "conversion") return ["store_traffic"];
+  if (normalized.funnel === "awareness") return ["brand_awareness"];
+  return ["other"];
+}
+
 export function isSavedPlannerPlanId(id: string): boolean {
   return PLAN_ID_RE.test(id.trim());
 }
@@ -55,14 +72,6 @@ export function plannerBudgetToContactBudgetV2(
   if (monthly < 1000) return "5m_10m";
   if (monthly < 3000) return "10m_30m";
   return "over_30m";
-}
-
-export function plannerGoalToContactGoals(
-  campaignGoal: string | null | undefined,
-): ContactCampaignGoal[] {
-  if (!campaignGoal) return [];
-  const mapped = PLANNER_GOAL_TO_CONTACT[campaignGoal];
-  return mapped ? [mapped] : ["other"];
 }
 
 function formatManwon(amount: number, isKo: boolean): string {

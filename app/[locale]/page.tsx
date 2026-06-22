@@ -20,11 +20,11 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   const title = isKo
-    ? "THINKAD 싱커드 — 전국 OOH 광고 플랫폼"
-    : "THINKAD — Nationwide OOH advertising platform";
+    ? "전광판·지하철·버스 옥외광고 단가 비교 | 전국 500+ 매체"
+    : "Billboard, subway & bus OOH pricing | 500+ verified media";
   const description = isKo
-    ? "전국 500+ 검증 OOH 매체, AI 플래너, 전자계약까지 — 데이터 기반 옥외광고 원스톱."
-    : "500+ verified OOH media, AI planner, and e-contract — data-driven outdoor advertising.";
+    ? "실시간 월 단가·예상 노출로 전광판·지하철·버스·DOOH를 비교하고 즉시 견적. THINKAD 싱커드."
+    : "Compare monthly rates and estimated reach for billboards, subway, bus, and DOOH — instant quotes on THINKAD.";
   return {
     title: { absolute: title },
     description,
@@ -45,6 +45,7 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
+  const isKo = locale === "ko" || locale.startsWith("ko");
 
   // 추천 → 인기(추천 제외) → 신규(추천+인기 제외) 순으로 중복 없이 구성.
   const recommendedMedia = await fetchPublicMediaCatalog({
@@ -75,6 +76,11 @@ export default async function HomePage({
       id="main-content"
       className="min-h-screen bg-gray-50 dark:bg-[#020202]"
     >
+      <h1 className="sr-only">
+        {isKo
+          ? "전광판·지하철·버스 옥외광고 단가 비교 — 전국 500+ 매체"
+          : "Billboard, subway & bus OOH pricing — compare 500+ verified media nationwide"}
+      </h1>
       {/* 섹션 1: 히어로 배너 */}
       <HomeHeroBanner />
 

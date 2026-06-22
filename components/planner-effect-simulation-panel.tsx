@@ -21,7 +21,7 @@ import {
   formatMediaPriceCompactWon,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import {
   PLANNER_CHART_COLORS,
   PlannerNeonCard,
@@ -60,7 +60,8 @@ export function PlannerEffectSimulationPanel({
   skipProGate = false,
   variant = "full",
 }: Props) {
-  const { isPro, loading: proLoading } = useIsPro();
+  const { allowed: simAllowed, loading: simLoading, access: simAccess } =
+    useFeatureAccess("simulation_full");
 
   const advanced = useMemo(
     () =>
@@ -356,15 +357,19 @@ export function PlannerEffectSimulationPanel({
         </div>
 
         {/* 상세 시뮬레이션 — PRO / PRO_TRIAL */}
-        {!proLoading ? (
-          skipProGate ? (
-            proDetail
-          ) : (
-          <PlannerProGate isPro={isPro} isKo={isKo}>
+        {skipProGate ? (
+          proDetail
+        ) : (
+          <PlannerProGate
+            isPro={simAllowed}
+            loading={simLoading}
+            isKo={isKo}
+            access={simAccess}
+            feature="simulation_full"
+          >
             {proDetail}
           </PlannerProGate>
-          )
-        ) : null}
+        )}
       </div>
     </PlannerNeonCard>
   );

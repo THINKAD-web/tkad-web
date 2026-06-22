@@ -1,7 +1,7 @@
 "use client";
 
 import { PlannerProGate } from "@/components/planner/planner-neon-ui";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { TrafficChartsLazy } from "@/components/media-detail/traffic-charts-lazy";
 import { MediaAnalyticsReportSection } from "@/components/media-detail/media-analytics-report";
@@ -46,7 +46,8 @@ export function MediaDetailTrafficPanel({
   competitorAccess,
   recentBrands,
 }: Props) {
-  const { isPro } = useIsPro();
+  const { allowed: detailPro, loading: detailProLoading, access: detailAccessGate } =
+    useFeatureAccess("detail_data");
 
   return (
     <div className="space-y-6">
@@ -59,10 +60,16 @@ export function MediaDetailTrafficPanel({
         attributions={attributions}
         isKo={isKo}
         chartHeightClass="h-80 sm:h-96"
-        hourlyOnly={!isPro}
+        hourlyOnly={!detailProLoading && !detailPro}
       />
 
-      <PlannerProGate isPro={isPro} isKo={isKo}>
+      <PlannerProGate
+        isPro={detailPro}
+        loading={detailProLoading}
+        isKo={isKo}
+        access={detailAccessGate}
+        feature="detail_data"
+      >
         <div className="space-y-6">
           <MediaDetailPerformance metrics={performanceMetrics} />
           <MediaAnalyticsReportSection

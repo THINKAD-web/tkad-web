@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import {
   ArrowLeft,
@@ -12,6 +12,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { PageContainer } from "@/components/layout/page-container";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
 import { replacePlanCart } from "@/lib/plan-cart";
 import { pushPlanCartToServer } from "@/lib/plan-cart-server-sync";
@@ -35,6 +37,7 @@ const INTENT_LABELS = {
 } as const;
 
 export function MySavedPlansPageClient() {
+  const tPlan = useTranslations("planNav");
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
@@ -131,20 +134,25 @@ export function MySavedPlansPageClient() {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] px-4 py-8 pb-28">
-        <div className="mx-auto max-w-3xl">
+      <div
+        className={cn(
+          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
+          MOBILE_CHROME_BOTTOM_PAD,
+        )}
+      >
+        <PageContainer>
           <Link
             href="/my/plan"
             className="inline-flex items-center gap-1 text-xs font-semibold text-gray-500 hover:text-gray-800 dark:text-white/55 dark:hover:text-white"
           >
             <ArrowLeft className="h-4 w-4" />
-            {isKo ? "내 플랜" : "My plan"}
+            {tPlan("cart")}
           </Link>
           <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
             [ SAVED PLANS ]
           </p>
           <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
-            {isKo ? "저장된 플랜" : "Saved plans"}
+            {tPlan("saved")}
           </h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
             {isKo
@@ -162,7 +170,7 @@ export function MySavedPlansPageClient() {
                 {isKo ? "저장된 플랜이 없습니다" : "No saved plans yet"}
               </p>
               <BtnBlock href="/my/plan" variant="accent" className="mt-6">
-                {isKo ? "내 플랜으로" : "Go to My plan"}
+                {isKo ? `${tPlan("cart")}로` : `Go to ${tPlan("cart")}`}
               </BtnBlock>
             </div>
           ) : (
@@ -279,7 +287,7 @@ export function MySavedPlansPageClient() {
               })}
             </ul>
           )}
-        </div>
+        </PageContainer>
       </div>
     </HomeLandingDayNight>
   );

@@ -1,8 +1,11 @@
 "use client";
 
 import { Plus } from "lucide-react";
+import { useLocale } from "next-intl";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { useIsPro } from "@/hooks/use-is-pro";
+import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
@@ -22,8 +25,11 @@ export function PlanCartAddButton({
   gridInline = false,
   className,
 }: Props) {
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const toast = useAppToast();
   const { has, add, remove } = usePlanCart();
+  const { isPro } = useIsPro();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 
@@ -46,7 +52,11 @@ export function PlanCartAddButton({
       toast.warning("이미 플랜에 있습니다");
       return;
     }
-    toast.error("플랜에 더 담을 수 없습니다");
+    toast.show({
+      variant: "warning",
+      title: isKo ? "플랜 카트 한도" : "Plan cart limit",
+      description: buildPlanCartLimitMessage(isKo, isPro),
+    });
   }
 
   return (

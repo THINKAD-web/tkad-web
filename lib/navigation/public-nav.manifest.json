@@ -9,7 +9,7 @@
       "items": [
         { "id": "media-search", "href": "/media" },
         { "id": "map-search", "href": "/media/map" },
-        { "id": "ai-recommend", "href": "/recommend", "beta": true },
+        { "id": "media-network", "href": "/media/network" },
         { "id": "campaign-targets", "href": "/media/targets" }
       ]
     },
@@ -17,33 +17,29 @@
       "id": "planning",
       "icon": "clipboard-list",
       "items": [
-        { "id": "media-planner", "href": "/planner", "beta": true },
-        { "id": "package-proposal", "href": "/media/packages", "beta": true }
-      ]
-    },
-    {
-      "id": "creative",
-      "icon": "palette",
-      "items": [
-        { "id": "creative-library", "href": "/creatives", "beta": true },
-        { "id": "dooh-playlists", "href": "/creatives/playlists", "beta": true },
-        { "id": "creative-studio", "href": "/creatives/upload", "beta": true }
+        { "id": "media-planner", "href": "/planner" },
+        { "id": "integrated-planner", "href": "/planner/integrated" },
+        { "id": "package-proposal", "href": "/media/packages" },
+        { "id": "ai-recommend", "href": "/recommend" }
       ]
     },
     {
       "id": "insights",
       "icon": "line-chart",
       "items": [
-        { "id": "trend-report", "href": "/report" },
-        { "id": "success-cases", "href": "/cases" }
+        { "id": "trend-report", "href": "/report", "beta": true },
+        { "id": "success-cases", "href": "/cases", "beta": true },
+        { "id": "academy-content", "href": "/academy", "beta": true },
+        { "id": "advertiser-guide", "href": "/guides" }
       ]
     },
     {
-      "id": "academy",
-      "icon": "graduation-cap",
+      "id": "studio",
+      "icon": "palette",
       "items": [
-        { "id": "academy-content", "href": "/academy", "beta": true },
-        { "id": "advertiser-guide", "href": "/guides", "beta": true }
+        { "id": "creative-library", "href": "/creatives", "beta": true },
+        { "id": "creative-studio", "href": "/creatives/upload", "beta": true },
+        { "id": "dooh-playlists", "href": "/creatives/playlists", "beta": true }
       ]
     }
   ]

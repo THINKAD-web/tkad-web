@@ -6,12 +6,15 @@ import {
   Eye,
   FileText,
   LayoutDashboard,
+  LayoutList,
   LineChart,
   Package,
+  Plus,
   Scale,
   Search,
   Sparkles,
 } from "lucide-react";
+import { PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
 
 export type ContextSidebarItem = {
   id: string;
@@ -41,8 +44,52 @@ function exactOrPrefix(href: string) {
   return (path: string) => path === href || path.startsWith(`${href}/`);
 }
 
+const planWorkItems: ContextSidebarItem[] = [
+  {
+    id: "plan-cart",
+    labelKo: PLAN_NAV_LABELS.cart.ko,
+    labelEn: PLAN_NAV_LABELS.cart.en,
+    href: "/my/plan",
+    icon: LayoutList,
+    activeMatch: (p) => p === "/my/plan" || p.startsWith("/my/plan/report"),
+  },
+  {
+    id: "plan-saved",
+    labelKo: PLAN_NAV_LABELS.saved.ko,
+    labelEn: PLAN_NAV_LABELS.saved.en,
+    href: "/my/plan/saved",
+    icon: FileText,
+    activeMatch: exactOrPrefix("/my/plan/saved"),
+  },
+  {
+    id: "planner-results",
+    labelKo: PLAN_NAV_LABELS.plannerResults.ko,
+    labelEn: PLAN_NAV_LABELS.plannerResults.en,
+    href: "/my?tab=planner",
+    icon: Sparkles,
+    activeMatch: () => false,
+  },
+  {
+    id: "new-plan",
+    labelKo: PLAN_NAV_LABELS.newPlan.ko,
+    labelEn: PLAN_NAV_LABELS.newPlan.en,
+    href: "/planner",
+    icon: Plus,
+    activeMatch: exactOrPrefix("/planner"),
+  },
+];
+
 export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
   const path = pathname.replace(/^\/(ko|en)/, "") || "/";
+
+  if (path.startsWith("/planner") || path.startsWith("/my/plan")) {
+    return {
+      contextId: "planner",
+      titleKo: "플랜 작업",
+      titleEn: "Plan workspace",
+      sections: [{ id: "main", items: planWorkItems }],
+    };
+  }
 
   if (path.startsWith("/media") || path.startsWith("/recommend") || path.startsWith("/compare")) {
     return {
@@ -65,31 +112,8 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
               id: "recent",
               labelKo: "최근 본 매체",
               labelEn: "Recently viewed",
-              href: "/media",
+              href: "/my?tab=recent",
               icon: Eye,
-              activeMatch: () => false,
-            },
-          ],
-        },
-      ],
-    };
-  }
-
-  if (path.startsWith("/planner")) {
-    return {
-      contextId: "planner",
-      titleKo: "플래너",
-      titleEn: "Planner",
-      sections: [
-        {
-          id: "main",
-          items: [
-            {
-              id: "saved",
-              labelKo: "저장한 플랜",
-              labelEn: "Saved plans",
-              href: "/my",
-              icon: FileText,
               activeMatch: () => false,
             },
           ],
@@ -203,8 +227,8 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
           },
           {
             id: "planner",
-            labelKo: "플래너 시작",
-            labelEn: "Start planner",
+            labelKo: PLAN_NAV_LABELS.newPlan.ko,
+            labelEn: PLAN_NAV_LABELS.newPlan.en,
             href: "/planner",
             icon: BarChart3,
           },
@@ -217,8 +241,8 @@ export function resolveContextSidebar(pathname: string): ContextSidebarConfig {
           },
           {
             id: "contact",
-            labelKo: "무료 견적",
-            labelEn: "Free quote",
+            labelKo: "문의하기",
+            labelEn: "Contact us",
             href: "/contact",
             icon: FileText,
           },

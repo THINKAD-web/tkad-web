@@ -1,3 +1,5 @@
+import { PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
+
 export type SubpageChipDef = {
   id: string;
   labelKo: string;
@@ -253,8 +255,8 @@ export const SUBPAGE_CHIP_GROUPS: SubpageChipGroup[] = [
       },
       {
         id: "plan-cart",
-        labelKo: "내 플랜",
-        labelEn: "My plan",
+        labelKo: PLAN_NAV_LABELS.cart.ko,
+        labelEn: PLAN_NAV_LABELS.cart.en,
         href: "/my/plan",
         match: (p) =>
           p === "/my/plan" ||
@@ -262,15 +264,15 @@ export const SUBPAGE_CHIP_GROUPS: SubpageChipGroup[] = [
       },
       {
         id: "plan-saved",
-        labelKo: "저장된 플랜",
-        labelEn: "Saved plans",
+        labelKo: PLAN_NAV_LABELS.saved.ko,
+        labelEn: PLAN_NAV_LABELS.saved.en,
         href: "/my/plan/saved",
         match: (p) => p.startsWith("/my/plan/saved"),
       },
       {
         id: "planner",
-        labelKo: "저장 플래너",
-        labelEn: "Planner saves",
+        labelKo: PLAN_NAV_LABELS.plannerResults.ko,
+        labelEn: PLAN_NAV_LABELS.plannerResults.en,
         href: "/my?tab=planner",
         match: (_, sp) => sp.get("tab") === "planner",
       },

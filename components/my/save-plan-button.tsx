@@ -178,7 +178,7 @@ export function SavePlanButton({
                 </div>
                 <p className="text-xs text-gray-500 dark:text-white/50">
                   {isKo
-                    ? `매체 ${cart.items.length}개 · 저장 후 「저장된 플랜」에서 불러오거나 삭제할 수 있습니다.`
+                    ? `매체 ${cart.items.length}개 · 저장 후 「저장한 플랜」에서 불러오거나 삭제할 수 있습니다.`
                     : `${cart.items.length} media · Restore or delete from Saved plans.`}
                 </p>
               </div>

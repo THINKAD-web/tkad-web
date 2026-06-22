@@ -37,6 +37,7 @@ import {
   computePlannerMetrics,
   computeBudgetBlurbParts,
   estimateCpmByCategory,
+  portfolioCpmByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
   resolvePlannerPortfolio,
@@ -63,8 +64,13 @@ import PlannerReportStep from "@/components/planner-report-step";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
-import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
+import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
+import { PlannerScenarioPresets } from "@/components/planner/planner-scenario-presets";
+import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
+import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
+import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -98,6 +104,7 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -177,7 +184,12 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
   const landingAppearance = useTkadAppearance();
-  const { showTrialBanner, isPro, loading: proLoading } = useIsPro();
+  const { showTrialBanner } = useIsPro();
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+    access: plannerResultAccess,
+  } = useFeatureAccess("planner_result");
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -204,6 +216,8 @@ export default function PlannerPageClient({
   const months = usePlannerStore((s) => s.months);
   const ageKeys = usePlannerStore((s) => s.ageKeys);
   const industryKey = usePlannerStore((s) => s.industryKey);
+  const seoulZones = usePlannerStore((s) => s.seoulZones);
+  const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
   const mediaSelectionExplicit = usePlannerStore(
     (s) => s.mediaSelectionExplicit,
@@ -222,6 +236,13 @@ export default function PlannerPageClient({
   const setMonths = usePlannerStore((s) => s.setMonths);
   const toggleAgeKey = usePlannerStore((s) => s.toggleAgeKey);
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
+  const toggleSeoulZone = usePlannerStore((s) => s.toggleSeoulZone);
+  const clearSeoulZones = usePlannerStore((s) => s.clearSeoulZones);
+  const applySuggestedSeoulZones = usePlannerStore(
+    (s) => s.applySuggestedSeoulZones,
+  );
+  const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
+  const applyScenarioPreset = usePlannerStore((s) => s.applyScenarioPreset);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
   const importFromPlanCart = usePlannerStore((s) => s.importFromPlanCart);
 
@@ -264,7 +285,6 @@ export default function PlannerPageClient({
   const setCreativeUploadedUrl = usePlannerStore(
     (s) => s.setCreativeUploadedUrl,
   );
-  const applyPresetAction = usePlannerStore((s) => s.applyPreset);
   const importFromSavedPlan = usePlannerStore((s) => s.importFromSavedPlan);
 
   const selectedRegions = useMemo(() => new Set(regions), [regions]);
@@ -299,8 +319,19 @@ export default function PlannerPageClient({
   }, [ageKeys, t]);
 
   const filtered = useMemo(
-    () => filterPlannerMediaMulti(catalog, selectedRegions, categories),
-    [catalog, selectedRegions, categories],
+    () =>
+      filterPlannerMediaMulti(
+        catalog,
+        selectedRegions,
+        categories,
+        seoulZones,
+      ),
+    [catalog, selectedRegions, categories, seoulZones],
+  );
+
+  const suggestedSeoulZones = useMemo(
+    () => suggestSeoulZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
   );
 
   /** Step4 AI 추천: 엄격 필터 결과가 비어도 등록 매체가 보이도록 완화 풀 (직접 탐색은 기존 `catalog`) */
@@ -325,13 +356,6 @@ export default function PlannerPageClient({
     [campaignMediaIds, catalog, mediaCacheById],
   );
 
-  const metrics = useMemo(() => {
-    if (filtered.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
-    return computePlannerMetrics(filtered, budgetNum, months, {
-      campaignGoal,
-    });
-  }, [filtered, budgetNum, months, campaignGoal]);
-
   const portfolio = useMemo(
     () =>
       resolvePlannerPortfolio({
@@ -341,16 +365,64 @@ export default function PlannerPageClient({
         budgetMan: budgetNum,
         months,
         mediaSelectionExplicit,
+        recommendCtx: {
+          goal: campaignGoal,
+          regions,
+          seoulZones,
+          categories: categoriesArr,
+          ageKeys,
+          industryKey,
+          budgetMan: budgetNum,
+          months,
+          goalFollowUp,
+        },
       }),
     [
       filtered,
       budgetNum,
       months,
+      campaignGoal,
+      regions,
+      seoulZones,
+      categoriesArr,
+      ageKeys,
+      industryKey,
+      goalFollowUp,
       campaignMediaIds,
       selectedMediaForSimulation,
       mediaSelectionExplicit,
     ],
   );
+
+  const metrics = useMemo(() => {
+    const source = portfolio.length > 0 ? portfolio : filtered;
+    if (source.length === 0 || budgetNum < PLANNER_BUDGET_MIN) return null;
+    return computePlannerMetrics(source, budgetNum, months, {
+      campaignGoal,
+      industryKey,
+      goalFollowUp,
+    });
+  }, [
+    portfolio,
+    filtered,
+    budgetNum,
+    months,
+    campaignGoal,
+    industryKey,
+    goalFollowUp,
+  ]);
+
+  const cpmBars = useMemo(() => {
+    const pts =
+      portfolio.length > 0
+        ? portfolioCpmByCategory(portfolio)
+        : estimateCpmByCategory(filtered);
+    return pts.map((p) => ({
+      key: p.key,
+      label: isKo ? p.labelKo : p.labelEn,
+      value: p.cpm,
+    }));
+  }, [portfolio, filtered, isKo]);
 
   const portfolioBudgetStatus = useMemo(
     () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
@@ -373,15 +445,6 @@ export default function PlannerPageClient({
     [filtered, budgetNum],
   );
 
-  const cpmBars = useMemo(() => {
-    const pts = estimateCpmByCategory(filtered);
-    return pts.map((p) => ({
-      key: p.key,
-      label: isKo ? p.labelKo : p.labelEn,
-      value: p.cpm,
-    }));
-  }, [filtered, isKo]);
-
   const reachSplit = reachSplitForGoal(campaignGoal);
 
   const goalTitle = useMemo(() => {
@@ -394,14 +457,6 @@ export default function PlannerPageClient({
     const q = ids.join(",");
     return q ? `/compare?ids=${q}` : "/compare";
   }, [campaignMediaIds]);
-
-  const applyPreset = useCallback(
-    (id: "premium" | "national" | "value") => {
-      applyPresetAction(id);
-      toast("success", isKo ? "프리셋이 적용되었습니다." : "Preset applied.");
-    },
-    [applyPresetAction, toast, isKo],
-  );
 
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -747,13 +802,13 @@ export default function PlannerPageClient({
     [locale, t],
   );
 
-  const regionsSummary = useMemo(
-    () =>
-      [...selectedRegions]
-        .map((r) => mapLabel(r))
-        .join(", "),
-    [selectedRegions, mapLabel],
-  );
+  const regionsSummary = useMemo(() => {
+    const parts = [...selectedRegions].map((r) => mapLabel(r));
+    if (selectedRegions.has("seoul") && seoulZones.length > 0) {
+      parts.push(formatSeoulZonesText(seoulZones, isKo));
+    }
+    return parts.join(", ");
+  }, [selectedRegions, mapLabel, seoulZones, isKo]);
 
   const categoriesSummary = useMemo(
     () =>
@@ -1124,6 +1179,17 @@ export default function PlannerPageClient({
                   countLabel={(n) => t("mapCount", { count: n })}
                 />
 
+                {selectedRegions.has("seoul") ? (
+                  <PlannerSeoulZoneChips
+                    selected={seoulZones}
+                    suggested={suggestedSeoulZones}
+                    isKo={isKo}
+                    onToggle={toggleSeoulZone}
+                    onClear={clearSeoulZones}
+                    onApplySuggested={applySuggestedSeoulZones}
+                  />
+                ) : null}
+
                 <div>
                   <PlannerNeonLabel className="mb-3 block">
                     {t("ageLabel")}
@@ -1162,39 +1228,23 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                <PlannerNeonCard>
-                  <div className={plannerNeon.cardHeader}>
-                    <PlannerNeonLabel>{t("packagesTitle")}</PlannerNeonLabel>
-                  </div>
-                  <div className="grid grid-cols-1 gap-3 p-5 sm:grid-cols-3 sm:p-6">
-                    {(
-                      [
-                        ["premium", "pkgPremium", "pkgPremiumDesc"],
-                        ["national", "pkgNational", "pkgNationalDesc"],
-                        ["value", "pkgValue", "pkgValueDesc"],
-                      ] as const
-                    ).map(([id, titleKey, descKey]) => (
-                      <button
-                        key={id}
-                        type="button"
-                        onClick={() => applyPreset(id)}
-                        className={cn(
-                          plannerNeon.selectChip,
-                          "p-4 text-left touch-manipulation",
-                          plannerNeon.selectChipIdle,
-                          "hover:border-violet-300/40",
-                        )}
-                      >
-                        <p className={cn("font-bold", plannerNeon.headline)}>
-                          {t(titleKey)}
-                        </p>
-                        <p className={cn("mt-2 text-xs leading-relaxed", plannerNeon.subtext)}>
-                          {t(descKey)}
-                        </p>
-                      </button>
-                    ))}
-                  </div>
-                </PlannerNeonCard>
+                <PlannerGoalFollowUpPanel
+                  goal={campaignGoal}
+                  followUp={goalFollowUp}
+                  onChange={setGoalFollowUp}
+                />
+
+                <PlannerScenarioPresets
+                  onApply={(id) => {
+                    applyScenarioPreset(id);
+                    toast(
+                      "success",
+                      isKo
+                        ? "시나리오 추천 세팅을 적용했습니다."
+                        : "Scenario preset applied.",
+                    );
+                  }}
+                />
               </div>
             ) : null}
 
@@ -1376,6 +1426,9 @@ export default function PlannerPageClient({
                 categoriesText={categoriesSummary}
                 ageText={ageSummary}
                 industryText={t(industryKey)}
+                industryKey={industryKey}
+                seoulZones={seoulZones}
+                goalFollowUp={goalFollowUp}
                 portfolio={portfolio}
                 matchedCount={filtered.length}
                 monthCompare={monthCompare}
@@ -1392,6 +1445,12 @@ export default function PlannerPageClient({
                 isAutoPortfolio={isAutoPortfolio}
                 unresolvedMediaCount={unresolvedMediaCount}
                 activitySource="planner"
+                narrativeContext={{
+                  regions,
+                  categories: categoriesArr,
+                  ageKeys,
+                  industryKey,
+                }}
               />
             ) : null}
 
@@ -1566,6 +1625,18 @@ export default function PlannerPageClient({
                   unresolvedCount={unresolvedMediaCount}
                 />
 
+                <PlannerProposalNarrative
+                  isKo={isKo}
+                  goal={campaignGoal}
+                  regions={regions}
+                  categories={categoriesArr}
+                  ageKey={ageKeys[0] ?? "ageAll"}
+                  industryKey={industryKey}
+                  budgetMan={budgetNum}
+                  months={months}
+                  portfolio={portfolio}
+                />
+
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
@@ -1616,14 +1687,16 @@ export default function PlannerPageClient({
                   </div>
                 </div>
 
-                {!proLoading ? (
-                  <div data-screenshot="planner-pro-blur">
-                    <PlannerProGate
-                      isPro={isPro}
-                      isKo={isKo}
-                      minHeightClass="min-h-[20rem]"
-                      className="space-y-4"
-                    >
+                <div data-screenshot="planner-pro-blur">
+                  <PlannerProGate
+                    isPro={plannerResultAllowed}
+                    loading={plannerResultLoading}
+                    isKo={isKo}
+                    access={plannerResultAccess}
+                    feature="planner_result"
+                    minHeightClass="min-h-[20rem]"
+                    className="space-y-4"
+                  >
                       <PlannerProTeaserStats
                         isKo={isKo}
                         totalImpressions={metrics.estimatedTotalImpressions}
@@ -1651,7 +1724,6 @@ export default function PlannerPageClient({
                       />
                     </PlannerProGate>
                   </div>
-                ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
                   <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />

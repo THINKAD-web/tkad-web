@@ -32,9 +32,8 @@ export const DISCOVERY_TABS: SubTab[] = [
         !p.startsWith("/media/network") &&
         !p.startsWith("/media/targets")),
   },
-  { label: "네트워크 매체", href: "/media/network", icon: Network },
   { label: "지도에서 찾기", href: "/media/map", icon: Map },
-  { label: "AI 매체 추천", href: "/recommend", icon: Sparkles },
+  { label: "네트워크 매체", href: "/media/network", icon: Network },
   {
     label: "캠페인 목적",
     href: "/media/targets",
@@ -55,6 +54,7 @@ export const PLANNING_TABS: SubTab[] = [
   },
   { label: "통합 미디어 플래너", href: "/planner/integrated", icon: Link2 },
   { label: "패키지 제안", href: "/media/packages", icon: Package },
+  { label: "AI 매체 추천", href: "/recommend", icon: Sparkles },
 ];
 
 export const CONTENT_TABS: SubTab[] = [

@@ -65,7 +65,7 @@ type InternalLink = { phrase: string; href: string };
 const LINK_RULES: { pattern: RegExp; href: string }[] = [
   { pattern: /플래너|AI 플래너|캠페인 플래너/g, href: "/planner" },
   { pattern: /매체 탐색|매체 검색|매체 목록/g, href: "/media" },
-  { pattern: /패키지|번들/g, href: "/packages" },
+  { pattern: /패키지|번들/g, href: "/media/packages" },
   { pattern: /견적|상담/g, href: "/contact" },
   { pattern: /가이드|초보/g, href: "/guides" },
 ];

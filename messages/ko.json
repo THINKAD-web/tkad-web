@@ -157,9 +157,9 @@
         "label": "지도에서 찾기",
         "desc": "위치·반경 기반 탐색"
       },
-      "ai-recommend": {
-        "label": "AI 매체 추천",
-        "desc": "목표·예산에 맞는 AI 추천"
+      "media-network": {
+        "label": "네트워크 매체",
+        "desc": "버스·지하철 등 네트워크 단위 탐색"
       },
       "campaign-targets": {
         "label": "캠페인 목적",
@@ -176,6 +176,10 @@
       "package-proposal": {
         "label": "패키지 제안",
         "desc": "목적·지역별 검증 패키지"
+      },
+      "ai-recommend": {
+        "label": "AI 매체 추천",
+        "desc": "목표·예산에 맞는 AI 추천"
       },
       "creative-library": {
         "label": "소재 라이브러리",
@@ -230,9 +234,9 @@
     "endDate": "집행 종료일",
     "budgetManwon": "총 예산 (만원)",
     "goal": "주요 목적",
-    "goalAwareness": "인지도",
-    "goalConversion": "전환",
-    "goalEvent": "이벤트",
+    "goalAwareness": "브랜드 인지",
+    "goalConversion": "실적·전환",
+    "goalEvent": "이벤트 홍보",
     "regions": "희망 지역",
     "regionsPlaceholder": "예: 강남, 홍대, 잠실 (쉼표 구분)",
     "loadPlanner": "플래너 저장본 불러오기",
@@ -283,14 +287,23 @@
     "orEmail": "또는 이메일로",
     "usageGuide": "사용법"
   },
+  "planNav": {
+    "cart": "담은 매체",
+    "saved": "저장한 플랜",
+    "plannerResults": "플래너 결과",
+    "newPlan": "새 플랜"
+  },
+  "favoritesNav": {
+    "label": "관심매체"
+  },
   "myHub": {
     "loading": "마이페이지 불러오는 중…",
     "greeting": "안녕하세요, {name}님",
     "logout": "로그아웃",
     "tabs": {
       "campaigns": "내 캠페인",
-      "favorites": "저장한 매체",
-      "planner": "내 플래너",
+      "favorites": "관심매체",
+      "planner": "플래너 결과",
       "recent": "최근 본 매체",
       "points": "포인트 내역",
       "team": "팀 관리"
@@ -931,9 +944,9 @@
     "compareAvailabilityMaintenance": "🔴 점검중",
     "compareStartPlanner": "Planner 시작",
     "favorites": {
-      "headerAria": "찜한 매체",
-      "headerAriaCount": "찜한 매체 {count}개",
-      "menuLabel": "찜한 매체",
+      "headerAria": "관심매체",
+      "headerAriaCount": "관심매체 {count}개",
+      "menuLabel": "관심매체",
       "guestMax": "비회원은 최대 {max}개까지 찜할 수 있습니다.",
       "added": "{name}을(를) 찜했습니다.",
       "removed": "찜 목록에서 제거했습니다.",
@@ -958,6 +971,11 @@
     "form": {
       "panelTitle": "AI 매체 추천",
       "panelSubtitle": "지역·예산·타깃·매체 유형을 고르면 AI가 브리프에 맞는 매체를 순위로 추천합니다.",
+      "goalLabel": "캠페인 목표",
+      "goalAwareness": "브랜드 인지",
+      "goalConsideration": "관심·고려",
+      "goalConversion": "실적·전환",
+      "goalLaunch": "신제품 런칭",
       "regionLabel": "지역 선택",
       "regionSeoul": "서울",
       "regionGyeonggi": "경기",
@@ -1884,6 +1902,44 @@
     "pkgNationalDesc": "서울·부산·제주 · 유형 전체",
     "pkgValue": "가성비 패키지",
     "pkgValueDesc": "수도권+광역+전국망 · 믹스 넓게",
+    "seoulZonesTitle": "서울 상권 (선택)",
+    "seoulZonesDesc": "추천 상권이 미리 제안됩니다. 비우면 서울 전체로 진행합니다.",
+    "seoulZoneSuggested": "추천",
+    "seoulZonesApplySuggested": "추천 상권 적용",
+    "seoulZonesClear": "상권 선택 해제 (서울 전체)",
+    "seoulZonesAllSeoul": "현재: 서울 전체",
+    "followUpTitle": "목표 맞춤 질문 (선택)",
+    "followUpDesc": "추천값이 채워져 있습니다. 바꾸지 않아도 다음 단계로 진행할 수 있습니다.",
+    "followUpLaunchWeeks": "집중 기간",
+    "followUpLaunchTiming": "런칭 시점",
+    "followUpWeeks": "{n}주",
+    "followUpTiming_asap": "즉시",
+    "followUpTiming_next_month": "다음 달",
+    "followUpTiming_season": "시즌 맞춤",
+    "followUpLocalRadius": "매장 반경",
+    "followUpKm": "{n}km",
+    "followUpLocalTradeArea": "주요 상권 (선택)",
+    "followUpLocalTradeAreaPh": "예: 홍대 메인 거리",
+    "followUpEventDays": "행사 기간",
+    "followUpDays": "{n}일",
+    "followUpConversionChannel": "전환 채널",
+    "followUpChannel_store": "매장",
+    "followUpChannel_online": "온라인",
+    "followUpChannel_both": "매장+온라인",
+    "followUpConversionKpi": "목표 KPI (선택)",
+    "followUpConversionKpiPh": "예: 방문 +20%",
+    "scenarioPresetsTitle": "시나리오 프리셋",
+    "scenarioPresetsDesc": "목표·업종·상권을 한 번에 세팅합니다. 이후 개별 조정 가능합니다.",
+    "scenarioLaunchBeauty": "신제품 런칭 × 뷰티",
+    "scenarioLaunchBeautyDesc": "강남·성수 · 디지털+고정 · 4주 집중",
+    "scenarioLocalFb": "로컬 도달 × F&B",
+    "scenarioLocalFbDesc": "홍대·명동 · 상권 보드 · 3km",
+    "scenarioEventEnt": "이벤트 × 엔터",
+    "scenarioEventEntDesc": "홍대·강남 · 7일 집중",
+    "scenarioSalesRetail": "실적·전환 × 리테일",
+    "scenarioSalesRetailDesc": "강남·명동 · 매장+온라인",
+    "scenarioBrandTech": "브랜드 × 테크",
+    "scenarioBrandTechDesc": "강남·여의도 · 디지털 중심",
     "comboTitle": "추천 매체 조합",
     "comboHint": "예산·기간에 맞춘 참고 믹스입니다. 견적 시 아래 매체가 자동 선택됩니다.",
     "comboHintManual": "4단계에서 담은 매체가 설계·보고서·견적에 그대로 반영됩니다. 월 단가 합이 예산을 넘으면 안내가 표시됩니다.",
@@ -1927,6 +1983,9 @@
     "recommendAdd": "담기",
     "recommendAdded": "담김",
     "recommendAddAll": "전체 담기",
+    "proposalNarrativeEyebrow": "[ 제안 논리 ]",
+    "proposalNarrativeTitle": "왜 이 조합인가",
+    "proposalNarrativeLoading": "캠페인 조건을 바탕으로 제안 논리를 작성 중입니다...",
     "recommendBrowseTitle": "더 찾아보기",
     "recommendBrowseDesc": "추천 외에도 직접 검색해서 매체를 선택할 수 있습니다.",
     "recommendReason": {
@@ -1934,6 +1993,7 @@
       "ageMatch": "타깃 연령 매칭",
       "budgetEfficient": "예산 효율 우수",
       "goalFit": "목표 적합",
+      "industryFit": "업종 적합",
       "highVisibility": "고가시성",
       "landmarkHotspot": "랜드마크·대형 스팟",
       "transitHotspot": "역·환승 동선",
@@ -2059,6 +2119,7 @@
     "coreNavLabel": "주요 메뉴",
     "coreAbout": "회사소개",
     "corePointsShop": "포인트샵",
+    "corePricingCta": "요금제",
     "coreDeveloperApi": "개발자API",
     "coreMediaSearch": "매체 검색",
     "corePlanner": "AI 플래너",
@@ -2195,6 +2256,7 @@
     "launchMonitor": "오픈 모니터",
     "linkHealth": "링크 헬스",
     "operatorManual": "운영 매뉴얼",
+    "memberEntitlements": "회원 등급 권한",
     "inquiries": "문의 관리",
     "biddings": "오픈 비딩",
     "chatMonitor": "익명 채팅",

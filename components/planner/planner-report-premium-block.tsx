@@ -40,13 +40,23 @@ export function PlannerReportPremiumBlock(props: Props) {
     ],
   );
 
-  if (loading || !insights) return null;
+  if (loading) {
+    return (
+      <div
+        className="min-h-[12rem] animate-pulse rounded-2xl border dark:border-white/8 border-gray-100 dark:bg-white/5 bg-gray-100/80"
+        aria-busy="true"
+      />
+    );
+  }
+
+  if (!insights) return null;
 
   return (
     <PlannerPremiumInsightsPanel
       insights={insights}
       isKo={props.isKo}
       access={access}
+      loading={loading}
     />
   );
 }

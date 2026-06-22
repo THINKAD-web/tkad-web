@@ -14,7 +14,7 @@ import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildIntegratedReportPayload } from "@/lib/planner-report-export/payload-integrated";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { PlannerReportDocument } from "@/components/planner/report-document";
 import { IntegratedReportInfoCard } from "@/components/planner/integrated/integrated-report-info-card";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -51,7 +51,13 @@ export function IntegratedReportStep(props: Props) {
   const t = useTranslations("plannerIntegrated");
   const tPlanner = useTranslations("planner");
   const { toast } = useToast();
-  const { isPro, loading: proLoading } = useIsPro();
+  const {
+    allowed: plannerResultAllowed,
+    loading: plannerResultLoading,
+    access: plannerResultAccess,
+  } = useFeatureAccess("planner_result");
+  const { allowed: pdfAllowed, loading: pdfAccessLoading } =
+    useFeatureAccess("planner_pdf");
   const [downloading, setDownloading] = useState<PlannerReportExportFormat | null>(
     null,
   );
@@ -79,15 +85,15 @@ export function IntegratedReportStep(props: Props) {
         digitalResult: props.digitalResult,
         metrics: props.metrics,
         generatedAt,
-        includeProSections: isPro,
+        includeProSections: plannerResultAllowed,
         months: props.months,
       }),
-    [props, generatedAt, isPro],
+    [props, generatedAt, plannerResultAllowed],
   );
 
   const handleDownload = useCallback(
     async (format: PlannerReportExportFormat) => {
-      if (!isPro || downloading) return;
+      if (!pdfAllowed || downloading || pdfAccessLoading) return;
       setDownloading(format);
       try {
         await downloadPlannerReport(format, payload, {
@@ -102,7 +108,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [isPro, downloading, payload, toast, t],
+    [pdfAllowed, pdfAccessLoading, downloading, payload, toast, t],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
@@ -134,9 +140,15 @@ export function IntegratedReportStep(props: Props) {
         portfolio={props.portfolio}
       />
 
-      {!proLoading ? (
-        <section className="space-y-6">
-          <PlannerProGate isPro={isPro} isKo={props.isKo} minHeightClass="min-h-[24rem]">
+      <section className="space-y-6">
+        <PlannerProGate
+          isPro={plannerResultAllowed}
+          loading={plannerResultLoading}
+          isKo={props.isKo}
+          access={plannerResultAccess}
+          feature="planner_result"
+          minHeightClass="min-h-[24rem]"
+        >
             <div className="space-y-6">
               <PlannerProTeaserStats
                 isKo={props.isKo}
@@ -182,13 +194,15 @@ export function IntegratedReportStep(props: Props) {
                 </p>
               </div>
               <div className="flex flex-wrap gap-2">
-                {isPro ? (
+                {pdfAccessLoading ? (
+                  <div className="h-10 w-32 animate-pulse rounded-xl bg-gray-200 dark:bg-white/10" />
+                ) : pdfAllowed ? (
                   <>
                     <BtnBlock
                       variant="accent"
                       size="md"
                       onClick={() => void handleDownload("pdf")}
-                      disabled={downloading !== null || proLoading}
+                      disabled={downloading !== null}
                     >
                       {downloading === "pdf" ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -201,7 +215,7 @@ export function IntegratedReportStep(props: Props) {
                       variant="secondary"
                       size="md"
                       onClick={() => void handleDownload("pptx")}
-                      disabled={downloading !== null || proLoading}
+                      disabled={downloading !== null}
                     >
                       {downloading === "pptx" ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -229,7 +243,6 @@ export function IntegratedReportStep(props: Props) {
             </div>
           </PlannerNeonCard>
         </section>
-      ) : null}
     </div>
   );
 }

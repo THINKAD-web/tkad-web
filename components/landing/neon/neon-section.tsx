@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
+import { PageContainer } from "@/components/layout/page-container";
 
 type Props = {
   children: ReactNode;
@@ -23,14 +24,9 @@ export function NeonSection({ children, className, innerClassName, id }: Props) 
         aria-hidden
         className="absolute inset-0 hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
       />
-      <div
-        className={cn(
-          "ui-container relative",
-          innerClassName,
-        )}
-      >
+      <PageContainer className={cn("relative", innerClassName)}>
         {children}
-      </div>
+      </PageContainer>
     </section>
   );
 }

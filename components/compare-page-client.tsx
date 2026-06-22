@@ -32,13 +32,14 @@ import {
 } from "@/components/media-catalog-shared";
 import { MediaCatalogCompactLinkRow } from "@/components/media-catalog-compact-link";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { PlannerProGate } from "@/components/planner/planner-neon-ui";
 
 export default function ComparePageClient({ items }: { items: MediaItem[] }) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const { isPro } = useIsPro();
+  const { allowed: comparePro, loading: compareProLoading, access: compareAccess } =
+    useFeatureAccess("detail_data");
   const tMedia = useTranslations("media");
   const t = useTranslations();
   const tCommon = useTranslations("common");
@@ -256,8 +257,11 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
               <CompareRadarChart items={visibleItems} isKo={isKo} className="mb-6" />
 
               <PlannerProGate
-                isPro={isPro}
+                isPro={comparePro}
+                loading={compareProLoading}
                 isKo={isKo}
+                access={compareAccess}
+                feature="detail_data"
                 minHeightClass="min-h-[20rem]"
                 className="space-y-6"
               >

@@ -22,9 +22,11 @@ import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
   type AiRecommendInput,
+  type CampaignGoal,
   type Industry,
   type TargetAudience,
 } from "@/lib/ai-media-recommend";
+import { RECOMMEND_FUNNEL_GOAL_OPTS } from "@/lib/recommend/campaign-goal-options";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -102,6 +104,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     return new Set(shuffled.slice(0, count));
   });
   const [budgetMan, setBudgetMan] = useState(3000);
+  const [campaignGoal, setCampaignGoal] = useState<CampaignGoal>("awareness");
   const [industry, setIndustry] = useState<Industry>(() => {
     const allIndustries: Industry[] = [
       "beauty",
@@ -219,6 +222,15 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     [tr],
   );
 
+  const goalOptions = useMemo(
+    () =>
+      RECOMMEND_FUNNEL_GOAL_OPTS.map((opt) => ({
+        value: opt.value,
+        label: tr(opt.titleKey),
+      })),
+    [tr],
+  );
+
   const mediaTypeOptions: { value: MediaTypeFilter; label: string }[] = useMemo(
     () => [
       { value: "all", label: tr("form.mediaTypeAll") },
@@ -243,7 +255,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       placementHints.size > 0 ? [...placementHints] : undefined;
 
     const input: AiRecommendInput = {
-      goal: "awareness",
+      goal: campaignGoal,
       target,
       budgetMaxMan: Math.round(budgetMan),
       region: regionCode,
@@ -268,6 +280,9 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     const industryLabel =
       industryOptions.find((o) => o.value === industry)?.label ??
       (isKo ? "전체 업종" : "All industries");
+    const goalLabel =
+      goalOptions.find((o) => o.value === campaignGoal)?.label ??
+      (isKo ? "브랜드 인지" : "Awareness");
     const periodLabel =
       periodDef.find((p) => p.w === periodWeeks)?.label ??
       (isKo ? "기간 미정" : "Flexible period");
@@ -286,9 +301,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             : "All ages"
           : ageLabels.join(", "),
       industry: industryLabel,
+      goal: goalLabel,
       period: periodLabel,
     };
-  }, [ageBands, ageDef, industry, industryOptions, isKo, periodDef, periodWeeks, regionDef, regions]);
+  }, [ageBands, ageDef, campaignGoal, goalOptions, industry, industryOptions, isKo, periodDef, periodWeeks, regionDef, regions]);
 
   const maddyMessage = useMemo(() => {
     if (!isKo) {
@@ -385,6 +401,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     const randomIndustry = pickRandom(industryOptions).value;
     const randomPeriod = pickRandom(periodDef).w;
     const randomMediaType = pickRandom(mediaTypeOptions).value;
+    const randomGoal = pickRandom(goalOptions).value;
 
     const randomHints = (() => {
       const count = Math.floor(Math.random() * 3);
@@ -400,6 +417,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setIndustry(randomIndustry);
     setPeriodWeeks(randomPeriod);
     setMediaType(randomMediaType);
+    setCampaignGoal(randomGoal);
     setPlacementHints(new Set(randomHints));
 
     const target = mapAgeBands(randomAgeBands);
@@ -412,7 +430,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       randomHints.size > 0 ? [...randomHints] : undefined;
 
     const input: AiRecommendInput = {
-      goal: "awareness",
+      goal: campaignGoal,
       target,
       budgetMaxMan: Math.round(budgetMan),
       region: regionCode,
@@ -484,6 +502,30 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         <div className="space-y-7 p-6">
           <section className="space-y-3">
             <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+              <Target className="h-4 w-4 shrink-0 text-accent" aria-hidden />
+              [ {tr("form.goalLabel")} ]
+            </div>
+            <div className="flex flex-wrap gap-0">
+              {goalOptions.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  onClick={() => setCampaignGoal(value)}
+                  className={cn(
+                    "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
+                    campaignGoal === value
+                      ? "border-accent bg-accent text-accent-foreground"
+                      : "border-border bg-card text-foreground hover:bg-muted",
+                  )}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
               <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden />
               [ {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")} ]
             </div>
@@ -527,6 +569,12 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                   {isKo ? "연령" : "AGES"}:
                 </span>
                 <span>{summary.age}</span>
+              </div>
+              <div className="mt-1 flex flex-wrap gap-y-1">
+                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
+                  {isKo ? "목표" : "GOAL"}:
+                </span>
+                <span>{summary.goal}</span>
               </div>
               <div className="mt-1 flex flex-wrap gap-y-1">
                 <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">

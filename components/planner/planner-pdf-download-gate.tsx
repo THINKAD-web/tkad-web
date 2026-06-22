@@ -1,8 +1,10 @@
 "use client";
 
-import { useCallback, useState, type ReactNode } from "react";
+import { useCallback, type ReactNode } from "react";
 import { useRouter } from "@/i18n/navigation";
-import { useIsPro } from "@/hooks/use-is-pro";
+import { useFeatureAccess } from "@/hooks/use-feature-access";
+import { useAppToast } from "@/lib/use-toast";
+import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
 
 type Props = {
   isKo: boolean;
@@ -14,29 +16,45 @@ type Props = {
   }) => ReactNode;
 };
 
-/** PDF 다운로드 PRO 전용 — FREE는 /pricing 이동 */
+/** PDF 다운로드 PRO 전용 — entitlements `planner_pdf` 와 서버 게이트 동기 */
 export function PlannerPdfDownloadGate({
   isKo,
   onAllowedDownload,
   children,
 }: Props) {
   const router = useRouter();
-  const { isPro, loading } = useIsPro();
+  const toast = useAppToast();
+  const {
+    allowed: pdfAllowed,
+    loading: checking,
+    access,
+  } = useFeatureAccess("planner_pdf");
 
   const onDownloadClick = useCallback(() => {
-    if (isPro) {
+    if (checking) return;
+    if (pdfAllowed) {
       onAllowedDownload();
       return;
     }
-    router.push("/pricing");
-  }, [isPro, onAllowedDownload, router]);
+    const msg = buildFeatureGateMessage({
+      feature: "planner_pdf",
+      access,
+      isKo,
+    });
+    toast.show({
+      variant: "warning",
+      title: msg.title,
+      description: msg.description,
+    });
+    router.push(msg.primaryCta.href);
+  }, [checking, pdfAllowed, onAllowedDownload, router, access, isKo, toast]);
 
   return (
     <>
       {children({
         onDownloadClick,
-        pdfAllowed: isPro,
-        checking: loading,
+        pdfAllowed: checking ? false : pdfAllowed,
+        checking,
       })}
     </>
   );

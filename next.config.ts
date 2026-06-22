@@ -112,6 +112,13 @@ const nextConfig: NextConfig = {
      * (vercel-build heap 3584MB × 1 worker + webpack ≈ 8GB 한도 내)
      */
     cpus: process.env.VERCEL === "1" ? 1 : undefined,
+    /** postinstall 한글 TTF — 서버리스 함수 번들에 포함 (CDN 폴백 전 로컬 우선) */
+    outputFileTracingIncludes: {
+      "/api/planner/report/export": [
+        "./public/fonts/NotoSansKR-Regular.ttf",
+        "./public/fonts/Pretendard-Regular.ttf",
+      ],
+    },
   },
   webpack(config, { dev, isServer }) {
     config.resolve ??= {};
