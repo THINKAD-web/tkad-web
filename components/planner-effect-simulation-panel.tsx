@@ -21,6 +21,7 @@ import {
   formatMediaPriceCompactWon,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
+import { useTranslations } from "next-intl";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import {
   PLANNER_CHART_COLORS,
@@ -60,6 +61,7 @@ export function PlannerEffectSimulationPanel({
   skipProGate = false,
   variant = "full",
 }: Props) {
+  const t = useTranslations("planner");
   const { allowed: simAllowed, loading: simLoading, access: simAccess } =
     useFeatureAccess("simulation_full");
 
@@ -105,9 +107,9 @@ export function PlannerEffectSimulationPanel({
           hint: isKo ? "1인당 평균 노출" : "Exposures per person",
         },
         {
-          label: "CPM",
+          label: t("effectCpmBudgetBasedLabel"),
           value: formatCpmKrw(advanced.cpmKrw ?? 0, localeTag),
-          hint: isKo ? "천회당 비용 (원)" : "Cost per 1,000 imp.",
+          hint: t("effectCpmBudgetBasedHint"),
         },
         {
           label: "OTS",
@@ -225,6 +227,9 @@ export function PlannerEffectSimulationPanel({
         <PlannerNeonLabel>
           {isKo ? "매체별 노출·OTS·CPM" : "Per-Media Metrics"}
         </PlannerNeonLabel>
+        <p className={cn("mt-1", plannerNeon.subtext)}>
+          {t("effectCpmPerMediaHint")}
+        </p>
       </div>
       <div className="overflow-x-auto p-4 sm:p-5">
         <table className="w-full min-w-[36rem] text-left text-sm">
@@ -243,7 +248,7 @@ export function PlannerEffectSimulationPanel({
                 OTS
               </th>
               <th className="px-2 py-2 text-right text-xs uppercase tracking-wider">
-                CPM
+                {isKo ? "월 CPM" : "Mo. CPM"}
               </th>
             </tr>
           </thead>
@@ -274,12 +279,23 @@ export function PlannerEffectSimulationPanel({
           <tfoot>
             <tr className="font-semibold dark:text-white text-gray-900">
               <td className="px-2 py-2" colSpan={4}>
-                {isKo ? "포트폴리오 CPM" : "Portfolio CPM"}
+                {t("effectCpmBudgetBasedLabel")}
               </td>
               <td className="px-2 py-2 text-right tabular-nums">
                 {advanced.cpmKrw != null
                   ? formatCpmKrw(advanced.cpmKrw, localeTag)
                   : "—"}
+              </td>
+            </tr>
+            <tr>
+              <td
+                className={cn(
+                  "px-2 pb-2 text-xs font-normal",
+                  plannerNeon.subtext,
+                )}
+                colSpan={5}
+              >
+                {t("effectCpmBudgetBasedHint")}
               </td>
             </tr>
           </tfoot>

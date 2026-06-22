@@ -64,11 +64,11 @@ function followUpLine(input: ReportStrategyInput): string | null {
       ? `집중 기간 · 런칭 후 ${f.launchFocusWeeks}주 구간에 노출 밀도를 높였습니다.`
       : `Focus window · Higher density for ${f.launchFocusWeeks} weeks post-launch.`;
   }
-  if (g === "local" && f.localTradeArea?.trim()) {
-    const area = f.localTradeArea.trim();
+  if (g === "local" && input.seoulZones.length > 0) {
+    const zoneText = formatSeoulZonesText(input.seoulZones, input.isKo);
     return input.isKo
-      ? `집중 상권 · ${area} 인근 동선 매체를 우선했습니다. (지역·상권 선택과 함께 참고)`
-      : `Trade area · Prioritized media near ${area} (with your region picks).`;
+      ? `집중 상권 · ${zoneText} 동선을 우선했습니다.`
+      : `Focus districts · Prioritized along ${zoneText}.`;
   }
   if (g === "event" && f.eventDurationDays != null) {
     return input.isKo

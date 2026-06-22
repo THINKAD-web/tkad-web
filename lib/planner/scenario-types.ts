@@ -45,6 +45,17 @@ export type PlannerScenario = {
   focusPeriodEn: string;
 };
 
+/** 시나리오 적용 시 store·보고서에 남기는 맥락 (수동 진행 시 null) */
+export type AppliedPlannerScenario = Pick<
+  PlannerScenario,
+  | "id"
+  | "variant"
+  | "labelKo"
+  | "labelEn"
+  | "descriptionKo"
+  | "descriptionEn"
+>;
+
 /** 시나리오 적용 시 store·자동조합에 필요한 입력 전체 */
 export type PlannerScenarioApplyPatch = {
   regions: string[];
@@ -59,4 +70,6 @@ export type PlannerScenarioApplyPatch = {
   goalFollowUp?: PlannerGoalFollowUp;
   /** 자동조합 결과. UI에서 resolve 후 주입 */
   campaignMediaIds?: string[];
+  /** 시나리오 카드 적용 시 보고서 맥락용 */
+  appliedScenario?: AppliedPlannerScenario | null;
 };

@@ -325,6 +325,9 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                 <p className={cn("mt-2 text-lg font-bold tabular-nums", plannerNeon.kpiValue)}>
                   {formatCpmKrw(blendedCpmKrw, isKo ? "ko" : "en")}
                 </p>
+                <p className={cn("mt-1 text-xs", plannerNeon.subtext)}>
+                  {t("reportLabelCpmHint")}
+                </p>
               </div>
             ) : null}
             <div

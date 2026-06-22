@@ -21,6 +21,7 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
+import type { AppliedPlannerScenario } from "@/lib/planner/scenario-types";
 import { districtHintsToSeoulZones } from "@/lib/planner/apply-scenario-portfolio";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
@@ -75,6 +76,8 @@ export type PlannerStoreState = {
   /** Step 2 목표별 후속 (전부 optional) */
   goalFollowUp: PlannerGoalFollowUp;
   mediaSelectionExplicit: boolean;
+  /** 시나리오 카드 적용 시 보고서 맥락. 수동 진행 시 null */
+  appliedScenario: AppliedPlannerScenario | null;
 };
 
 export type PlannerStoreActions = {
@@ -137,6 +140,7 @@ const INITIAL_STATE: PlannerStoreState = {
   creativeUploadedUrl: null,
   mediaPlacements: {},
   mediaSelectionExplicit: false,
+  appliedScenario: null,
 };
 
 function clampWizardStep(n: number): PlannerWizardStep {
@@ -414,6 +418,9 @@ export const usePlannerStore = create<PlannerStore>()(
             seoulZonesTouched: seoulZones.length > 0,
             campaignMediaIds,
             mediaSelectionExplicit: campaignMediaIds.length > 0,
+            ...(patch.appliedScenario !== undefined
+              ? { appliedScenario: patch.appliedScenario }
+              : {}),
           };
         }),
 
@@ -441,6 +448,7 @@ export const usePlannerStore = create<PlannerStore>()(
             campaignMediaIds: ids,
             mediaPlacements: placements,
             mediaSelectionExplicit: ids.length > 0,
+            appliedScenario: null,
             wizardStep: 4,
             creativeObjectUrl: null,
           };
@@ -470,6 +478,7 @@ export const usePlannerStore = create<PlannerStore>()(
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
         mediaSelectionExplicit: state.mediaSelectionExplicit,
+        appliedScenario: state.appliedScenario,
       }),
       /**
        * 레거시 포맷:
@@ -566,6 +575,31 @@ export const usePlannerStore = create<PlannerStore>()(
             string,
             CompositeLogoPlacement
           >;
+        }
+
+        if (
+          raw.appliedScenario &&
+          typeof raw.appliedScenario === "object" &&
+          !Array.isArray(raw.appliedScenario)
+        ) {
+          const s = raw.appliedScenario as Record<string, unknown>;
+          if (
+            typeof s.id === "string" &&
+            typeof s.variant === "string" &&
+            typeof s.labelKo === "string" &&
+            typeof s.labelEn === "string"
+          ) {
+            merged.appliedScenario = {
+              id: s.id,
+              variant: s.variant as AppliedPlannerScenario["variant"],
+              labelKo: s.labelKo,
+              labelEn: s.labelEn,
+              descriptionKo:
+                typeof s.descriptionKo === "string" ? s.descriptionKo : "",
+              descriptionEn:
+                typeof s.descriptionEn === "string" ? s.descriptionEn : "",
+            };
+          }
         }
 
         return merged as unknown as PlannerStore;

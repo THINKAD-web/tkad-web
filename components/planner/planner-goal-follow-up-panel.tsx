@@ -8,10 +8,8 @@ import type {
 } from "@/lib/planner/goal-follow-up";
 import {
   CONVERSION_KPI_PRESETS,
-  LOCAL_TRADE_AREA_CHIPS,
   isConversionKpiPreset,
 } from "@/lib/planner/goal-follow-up";
-import { PLANNER_SEOUL_ZONE_LABELS } from "@/lib/planner/seoul-zones";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -38,11 +36,11 @@ export function PlannerGoalFollowUpPanel({
   goal,
   followUp,
   onChange,
-  isKo,
 }: Props) {
   const t = useTranslations("planner");
 
-  if (!goal || goal === "brand") return null;
+  /** 로컬·인지: 상권은 서울 상권 칩 / 지역 맵으로 처리 */
+  if (!goal || goal === "brand" || goal === "local") return null;
 
   const chip = (active: boolean) =>
     cn(
@@ -81,48 +79,6 @@ export function PlannerGoalFollowUpPanel({
                 </button>
               ))}
             </div>
-          </div>
-        ) : null}
-
-        {goal === "local" ? (
-          <div className="space-y-3">
-            <div>
-              <PlannerNeonLabel className="mb-2 block">
-                {t("followUpLocalTradeArea")}
-              </PlannerNeonLabel>
-              <p className={cn("mb-2 text-xs", plannerNeon.subtext)}>
-                {t("followUpLocalTradeAreaHint")}
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {LOCAL_TRADE_AREA_CHIPS.map((key) => {
-                  const label = isKo
-                    ? PLANNER_SEOUL_ZONE_LABELS[key].labelKo
-                    : PLANNER_SEOUL_ZONE_LABELS[key].labelEn;
-                  const active = followUp.localTradeArea === label;
-                  return (
-                    <button
-                      key={key}
-                      type="button"
-                      onClick={() => onChange({ localTradeArea: label })}
-                      className={chip(active)}
-                    >
-                      {label}
-                    </button>
-                  );
-                })}
-              </div>
-            </div>
-            <input
-              type="text"
-              value={followUp.localTradeArea ?? ""}
-              onChange={(e) =>
-                onChange({
-                  localTradeArea: e.target.value || null,
-                })
-              }
-              placeholder={t("followUpLocalTradeAreaPh")}
-              className="w-full rounded-xl border dark:border-white/10 border-gray-200 bg-transparent px-3 py-2.5 text-sm touch-manipulation"
-            />
           </div>
         ) : null}
 
