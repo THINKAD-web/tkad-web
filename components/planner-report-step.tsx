@@ -42,6 +42,7 @@ import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-n
 import { PlannerProposalNarrative } from "@/components/planner/planner-proposal-narrative";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { cn } from "@/lib/utils";
+import { countMediaMatchingPlannerAgeKeys } from "@/lib/planner/parse-target-age";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type {
   PlannerExportChartDatum,
@@ -245,6 +246,12 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   } = useFeatureAccess("planner_result");
   const derived = usePlannerReportDerived(props);
 
+  const ageTargetMatchCount = useMemo(() => {
+    const keys = props.narrativeContext?.ageKeys ?? [];
+    if (keys.filter((k) => k !== "ageAll").length === 0) return null;
+    return countMediaMatchingPlannerAgeKeys(props.portfolio, keys);
+  }, [props.narrativeContext?.ageKeys, props.portfolio]);
+
   const [error, setError] = useState<string | null>(null);
   const [downloading, setDownloading] =
     useState<PlannerReportExportFormat | null>(null);
@@ -445,6 +452,14 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         industryText={props.industryText}
         portfolio={props.portfolio}
       />
+
+      {ageTargetMatchCount != null && props.ageText ? (
+        <p className="text-sm text-muted-foreground">
+          {props.isKo
+            ? `타깃 연령 ${props.ageText} → 매체 targetAge 기준 매칭 ${ageTargetMatchCount}/${props.portfolio.length}개`
+            : `Target ages ${props.ageText} → ${ageTargetMatchCount}/${props.portfolio.length} media match by targetAge`}
+        </p>
+      ) : null}
 
       <PlannerPortfolioNotice
         isKo={props.isKo}

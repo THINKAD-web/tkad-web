@@ -5,6 +5,8 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
+import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
+import type { PlannerAgeKey } from "@/lib/planner/types";
 
 /** 월 예산·지역·업종·타겟·기간·목표 기반 매체 매칭 (0–100점, 결정론적) */
 export type MatchingGoal =
@@ -30,6 +32,8 @@ export type MatchingInput = {
   /** 보조 태그 — launch / event / local (퍼널과 독립) */
   goalTags?: string[];
   categories?: string[];
+  /** 플래너 Step 2 연령 — Media.targetAge 파싱 매칭 (설정 시 location 휴리스틱 대신 사용) */
+  plannerAgeKeys?: PlannerAgeKey[];
   /** 새로고침 시 후보 풀 슬라이드 (랜덤 아님) */
   seed?: number;
 };
@@ -301,7 +305,14 @@ function scoreIndustry(m: MediaItem, industryRaw: string): number {
   return pts;
 }
 
-function scoreTarget(m: MediaItem, targets: string[]): number {
+function scoreTarget(
+  m: MediaItem,
+  targets: string[],
+  plannerAgeKeys?: PlannerAgeKey[],
+): number {
+  if (plannerAgeKeys && plannerAgeKeys.length > 0) {
+    return scoreTargetAgeForPlanner(m.targetAge, plannerAgeKeys).points;
+  }
   if (targets.length === 0) return 10;
   const hay = mediaHaystack(m);
   let best = 5;
@@ -437,7 +448,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
     budget: budgetPts,
     region: scoreRegion(m, input.regions),
     industry: scoreIndustry(m, input.industry),
-    target: scoreTarget(m, input.targets),
+    target: scoreTarget(m, input.targets, input.plannerAgeKeys),
     category: scoreCategory(
       m,
       input.categories,

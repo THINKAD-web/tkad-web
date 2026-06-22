@@ -20,14 +20,6 @@ const TARGET_MAP: Record<string, string> = {
   tourist: "tourist",
 };
 
-const PLANNER_AGE_TO_TARGET: Record<string, string> = {
-  age20s: "mz",
-  age30s: "millennial",
-  age40s: "worker",
-  age50plus: "family",
-  ageAll: "mass",
-};
-
 import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
 import { followUpGoalTags } from "@/lib/planner/goal-follow-up";
 import { seoulZonesToMatchingRegions } from "@/lib/planner/seoul-zones";
@@ -89,14 +81,8 @@ export function plannerContextToMatching(
       (PLANNER_INDUSTRY_TO_MATCHING[ctx.industryKey as PlannerIndustryKey] ??
         "other")
     : "other",
-    targets:
-      ctx.ageKeys.length > 0
-        ? [
-            ...new Set(
-              ctx.ageKeys.map((k) => PLANNER_AGE_TO_TARGET[k] ?? "mass"),
-            ),
-          ]
-        : ["mass"],
+    targets: ctx.ageKeys.length > 0 ? [] : ["mass"],
+    plannerAgeKeys: ctx.ageKeys.length > 0 ? [...ctx.ageKeys] : undefined,
     durationMonths: Math.max(1, ctx.months),
     goal: toMatchingGoal(goalRaw),
     goalTags: goalTags.length > 0 ? goalTags : undefined,
