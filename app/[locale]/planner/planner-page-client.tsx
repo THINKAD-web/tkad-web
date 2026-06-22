@@ -122,6 +122,7 @@ import {
   scenarioInputKey,
 } from "@/lib/planner/generate-scenarios";
 import type { PlannerScenario } from "@/lib/planner/scenario-types";
+import { resolveScenarioPortfolioMediaIds } from "@/lib/planner/apply-scenario-portfolio";
 import { useTeamPermissions } from "@/lib/use-team-permissions";
 
 /** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
@@ -224,9 +225,7 @@ export default function PlannerPageClient({
   const seoulZones = usePlannerStore((s) => s.seoulZones);
   const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
-  const mediaSelectionExplicit = usePlannerStore(
-    (s) => s.mediaSelectionExplicit,
-  );
+  const mediaSelectionExplicit = campaignMediaIds.length > 0;
   const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
   const mediaPlacements = usePlannerStore((s) => s.mediaPlacements);
@@ -503,19 +502,39 @@ export default function PlannerPageClient({
 
   const applyScenario = useCallback(
     (scenario: PlannerScenario) => {
-      applyScenarioAction({
+      const patch = {
         regions: scenario.regions,
         categories: scenario.categories,
         budgetMan: scenario.budgetMan,
         months: scenario.months,
-      });
+        districtHints: scenario.districtHints,
+        campaignGoal,
+        industryKey,
+        ageKeys,
+        goalFollowUp,
+      };
+      const mediaIds = resolveScenarioPortfolioMediaIds(catalog, patch);
+      applyScenarioAction({ ...patch, campaignMediaIds: mediaIds });
       setSelectedScenarioId(scenario.id);
+      setWizardStep(4);
       toast(
         "success",
-        isKo ? "시나리오가 적용되었습니다." : "Scenario applied.",
+        mediaIds.length > 0
+          ? t("scenarioAppliedWithMedia", { count: mediaIds.length })
+          : t("scenarioAppliedNoMedia"),
       );
     },
-    [applyScenarioAction, toast, isKo],
+    [
+      applyScenarioAction,
+      catalog,
+      campaignGoal,
+      industryKey,
+      ageKeys,
+      goalFollowUp,
+      setWizardStep,
+      toast,
+      t,
+    ],
   );
 
   const [saving, setSaving] = useState(false);

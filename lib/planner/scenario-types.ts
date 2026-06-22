@@ -1,3 +1,5 @@
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -32,7 +34,7 @@ export type PlannerScenario = {
   descriptionKo: string;
   descriptionEn: string;
   regions: string[];
-  /** 상권 힌트 (매칭·라벨용, store에는 미저장) */
+  /** 상권 힌트 (매칭·라벨용) */
   districtHints: string[];
   categories: PlannerCategory[];
   /** UI 미리보기용 유형 비중 (합 100) */
@@ -43,7 +45,18 @@ export type PlannerScenario = {
   focusPeriodEn: string;
 };
 
-export type PlannerScenarioApplyPatch = Pick<
-  PlannerScenario,
-  "regions" | "categories" | "budgetMan" | "months"
->;
+/** 시나리오 적용 시 store·자동조합에 필요한 입력 전체 */
+export type PlannerScenarioApplyPatch = {
+  regions: string[];
+  categories: PlannerCategory[];
+  budgetMan: number;
+  months: number;
+  districtHints?: string[];
+  seoulZones?: PlannerSeoulZoneKey[];
+  campaignGoal?: PlannerCampaignGoal | null;
+  industryKey?: PlannerIndustryKey;
+  ageKeys?: PlannerAgeKey[];
+  goalFollowUp?: PlannerGoalFollowUp;
+  /** 자동조합 결과. UI에서 resolve 후 주입 */
+  campaignMediaIds?: string[];
+};

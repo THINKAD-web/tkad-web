@@ -21,6 +21,7 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
+import { districtHintsToSeoulZones } from "@/lib/planner/apply-scenario-portfolio";
 import type { CompositeLogoPlacement } from "@/components/planner/composite-preview";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import {
@@ -64,8 +65,8 @@ export type PlannerStoreState = {
   /** 매체별 로고 배치 좌표 (Canvas 편집 결과). key = media id. persist 포함. */
   mediaPlacements: Record<string, CompositeLogoPlacement>;
   /**
-   * Step 4 에서 사용자가 매체 선택을 건드렸으면 true.
-   * true 이고 campaignMediaIds 가 비어 있으면 portfolio 자동조합을 하지 않음.
+   * campaignMediaIds 가 비어 있지 않으면 true (직접·시나리오 자동선택 포함).
+   * 비어 있으면 false → resolvePlannerPortfolio 자동조합 허용.
    */
   /** 서울 선택 시 하위 상권. 빈 배열 = 서울 전체 */
   seoulZones: PlannerSeoulZoneKey[];
@@ -108,7 +109,7 @@ export type PlannerStoreActions = {
   clearMediaPlacement: (mediaId: string) => void;
   resetAllMediaPlacements: () => void;
   applyPreset: (id: PlannerPresetId) => void;
-  /** 동적 시나리오 1안 → regions·categories·budget·months 일괄 세팅 */
+  /** 동적 시나리오 1안 → 조건·매체 자동선택 일괄 세팅 */
   applyScenario: (patch: PlannerScenarioApplyPatch) => void;
   reset: () => void;
   /** 저장된 공유 플랜 JSON으로 입력 상태 복원 */
@@ -305,13 +306,16 @@ export const usePlannerStore = create<PlannerStore>()(
         }),
 
       setCampaignMediaIds: (action) =>
-        set((s) => ({
-          campaignMediaIds:
+        set((s) => {
+          const nextIds =
             typeof action === "function"
               ? action(s.campaignMediaIds)
-              : [...action],
-          mediaSelectionExplicit: true,
-        })),
+              : [...action];
+          return {
+            campaignMediaIds: nextIds,
+            mediaSelectionExplicit: nextIds.length > 0,
+          };
+        }),
 
       setCreativeObjectUrl: (action) =>
         set((s) => ({
@@ -366,15 +370,51 @@ export const usePlannerStore = create<PlannerStore>()(
         }),
 
       applyScenario: (patch) =>
-        set({
-          regions:
-            patch.regions.length > 0 ? [...patch.regions] : ["seoul"],
-          categories:
+        set((s) => {
+          const regions =
+            patch.regions.length > 0 ? [...patch.regions] : ["seoul"];
+          const categories =
             patch.categories.length > 0
               ? [...patch.categories]
-              : [...PLANNER_DEFAULT_CATEGORIES],
-          budget: String(patch.budgetMan),
-          months: Math.max(1, Math.min(36, patch.months)),
+              : [...PLANNER_DEFAULT_CATEGORIES];
+          const months = Math.max(1, Math.min(36, patch.months));
+          const seoulZones =
+            patch.seoulZones ??
+            districtHintsToSeoulZones(patch.districtHints ?? []);
+          const campaignMediaIds = [...(patch.campaignMediaIds ?? [])];
+
+          return {
+            regions,
+            categories,
+            budget: String(patch.budgetMan),
+            months,
+            ...(patch.campaignGoal !== undefined
+              ? {
+                  campaignGoal: patch.campaignGoal,
+                  goalFollowUp: normalizeFollowUpForGoal(
+                    patch.campaignGoal,
+                    patch.goalFollowUp ?? s.goalFollowUp,
+                  ),
+                }
+              : patch.goalFollowUp !== undefined
+                ? {
+                    goalFollowUp: normalizeFollowUpForGoal(
+                      s.campaignGoal,
+                      patch.goalFollowUp,
+                    ),
+                  }
+                : {}),
+            ...(patch.industryKey !== undefined
+              ? { industryKey: patch.industryKey }
+              : {}),
+            ...(patch.ageKeys !== undefined
+              ? { ageKeys: normalizePlannerAgeKeys(patch.ageKeys) }
+              : {}),
+            seoulZones,
+            seoulZonesTouched: seoulZones.length > 0,
+            campaignMediaIds,
+            mediaSelectionExplicit: campaignMediaIds.length > 0,
+          };
         }),
 
       reset: () => set({ ...INITIAL_STATE }),
@@ -400,7 +440,7 @@ export const usePlannerStore = create<PlannerStore>()(
             ...patch,
             campaignMediaIds: ids,
             mediaPlacements: placements,
-            mediaSelectionExplicit: true,
+            mediaSelectionExplicit: ids.length > 0,
             wizardStep: 4,
             creativeObjectUrl: null,
           };
@@ -511,7 +551,7 @@ export const usePlannerStore = create<PlannerStore>()(
           );
         }
 
-        merged.mediaSelectionExplicit = raw.mediaSelectionExplicit === true;
+        merged.mediaSelectionExplicit = merged.campaignMediaIds.length > 0;
 
         if (typeof raw.creativeUploadedUrl === "string") {
           merged.creativeUploadedUrl = raw.creativeUploadedUrl;

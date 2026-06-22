@@ -217,15 +217,32 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         }
       },
       applyScenario: (patch) =>
-        set({
-          regions:
-            patch.regions.length > 0 ? [...patch.regions] : ["seoul"],
-          categories:
+        set(() => {
+          const regions =
+            patch.regions.length > 0 ? [...patch.regions] : ["seoul"];
+          const categories =
             patch.categories.length > 0
               ? [...patch.categories]
-              : [...PLANNER_DEFAULT_CATEGORIES],
-          budget: String(patch.budgetMan),
-          months: Math.max(1, Math.min(36, patch.months)),
+              : [...PLANNER_DEFAULT_CATEGORIES];
+          const months = Math.max(1, Math.min(36, patch.months));
+          const campaignMediaIds = [...(patch.campaignMediaIds ?? [])];
+
+          return {
+            regions,
+            categories,
+            budget: String(patch.budgetMan),
+            months,
+            ...(patch.campaignGoal !== undefined
+              ? { campaignGoal: patch.campaignGoal }
+              : {}),
+            ...(patch.industryKey !== undefined
+              ? { industryKey: patch.industryKey }
+              : {}),
+            ...(patch.ageKeys !== undefined
+              ? { ageKeys: normalizePlannerAgeKeys(patch.ageKeys) }
+              : {}),
+            campaignMediaIds,
+          };
         }),
       reset: () => set({ ...INITIAL }),
     }),
