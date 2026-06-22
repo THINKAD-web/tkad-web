@@ -17,7 +17,11 @@ import {
   buildBreadcrumbJsonLd,
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
-import { buildShareMetadata, pageAlternates } from "@/lib/seo";
+import { buildShareMetadata, pageAlternates, pageAlternatesForCanonical } from "@/lib/seo";
+import {
+  categoryLandingCanonicalPath,
+  categoryLandingUsesExternalCanonical,
+} from "@/lib/seo-canonical-landings";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
 import { MediaKeywordLandingEmpty } from "@/components/media-keyword-landing-empty";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -63,6 +67,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const title = categoryLandingTitle(decoded, locale, count);
   const description = categoryLandingDescription(decoded, locale, count);
   const keywords = node.seoKeywordsKo ?? [];
+  const canonicalPath = categoryLandingCanonicalPath(decoded);
+  const alternates = categoryLandingUsesExternalCanonical(decoded)
+    ? pageAlternatesForCanonical(locale, canonicalPath)
+    : pageAlternates(locale, `/media/category/${slug}`);
 
   return {
     title,
@@ -70,7 +78,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     keywords: locale.startsWith("ko")
       ? [...keywords, "옥외광고", "THINKAD", "싱커드"]
       : ["OOH", "outdoor advertising", "THINKAD", decoded],
-    alternates: pageAlternates(locale, `/media/category/${slug}`),
+    alternates,
     ...buildShareMetadata({
       locale,
       title,

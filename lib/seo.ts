@@ -193,6 +193,17 @@ export function pageAlternates(
   };
 }
 
+/**
+ * Landing duplicate consolidation: `canonicalPath` is the preferred URL;
+ * hreflang alternates follow the canonical target (not the duplicate path).
+ */
+export function pageAlternatesForCanonical(
+  locale: string,
+  canonicalPath: string,
+): NonNullable<Metadata["alternates"]> {
+  return pageAlternates(locale, canonicalPath);
+}
+
 /** Route-specific OG image at `/[locale]/[segment]/opengraph-image` (1200×630). */
 export function segmentOpenGraphImages(
   locale: string,
