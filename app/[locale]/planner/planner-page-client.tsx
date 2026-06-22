@@ -66,7 +66,6 @@ import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-notice";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
-import { PlannerScenarioPresets } from "@/components/planner/planner-scenario-presets";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
@@ -117,6 +116,12 @@ import { PlannerReportInfoCard } from "@/components/planner/planner-report-info-
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
 import type { HomeAppearance } from "@/lib/home-appearance";
 import { useTkadAppearance } from "@/lib/use-tkad-appearance";
+import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
+import {
+  generateScenarios,
+  scenarioInputKey,
+} from "@/lib/planner/generate-scenarios";
+import type { PlannerScenario } from "@/lib/planner/scenario-types";
 import { useTeamPermissions } from "@/lib/use-team-permissions";
 
 /** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
@@ -242,7 +247,6 @@ export default function PlannerPageClient({
     (s) => s.applySuggestedSeoulZones,
   );
   const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
-  const applyScenarioPreset = usePlannerStore((s) => s.applyScenarioPreset);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
   const importFromPlanCart = usePlannerStore((s) => s.importFromPlanCart);
 
@@ -285,6 +289,7 @@ export default function PlannerPageClient({
   const setCreativeUploadedUrl = usePlannerStore(
     (s) => s.setCreativeUploadedUrl,
   );
+  const applyScenarioAction = usePlannerStore((s) => s.applyScenario);
   const importFromSavedPlan = usePlannerStore((s) => s.importFromSavedPlan);
 
   const selectedRegions = useMemo(() => new Set(regions), [regions]);
@@ -457,6 +462,61 @@ export default function PlannerPageClient({
     const q = ids.join(",");
     return q ? `/compare?ids=${q}` : "/compare";
   }, [campaignMediaIds]);
+
+  const scenarioInput = useMemo(
+    () => ({
+      goal: campaignGoal,
+      industryKey,
+      regions,
+      ageKeys,
+      locale,
+    }),
+    [campaignGoal, industryKey, regions, ageKeys, locale],
+  );
+
+  const scenarioInputMemoKey = useMemo(
+    () => scenarioInputKey(scenarioInput),
+    [scenarioInput],
+  );
+
+  const recommendedScenarios = useMemo(
+    () => generateScenarios(scenarioInput),
+    [scenarioInput],
+  );
+
+  const [selectedScenarioId, setSelectedScenarioId] = useState<string | null>(
+    null,
+  );
+
+  useEffect(() => {
+    setSelectedScenarioId(null);
+  }, [scenarioInputMemoKey]);
+
+  const scenarioVariantLabels = useMemo(
+    () => ({
+      efficiency: t("scenarioEfficiency"),
+      balanced: t("scenarioBalanced"),
+      premium: t("scenarioPremium"),
+    }),
+    [t],
+  );
+
+  const applyScenario = useCallback(
+    (scenario: PlannerScenario) => {
+      applyScenarioAction({
+        regions: scenario.regions,
+        categories: scenario.categories,
+        budgetMan: scenario.budgetMan,
+        months: scenario.months,
+      });
+      setSelectedScenarioId(scenario.id);
+      toast(
+        "success",
+        isKo ? "시나리오가 적용되었습니다." : "Scenario applied.",
+      );
+    },
+    [applyScenarioAction, toast, isKo],
+  );
 
   const [saving, setSaving] = useState(false);
   const [shareUrl, setShareUrl] = useState<string | null>(null);
@@ -1234,16 +1294,15 @@ export default function PlannerPageClient({
                   onChange={setGoalFollowUp}
                 />
 
-                <PlannerScenarioPresets
-                  onApply={(id) => {
-                    applyScenarioPreset(id);
-                    toast(
-                      "success",
-                      isKo
-                        ? "시나리오 추천 세팅을 적용했습니다."
-                        : "Scenario preset applied.",
-                    );
-                  }}
+                <PlannerScenarioCards
+                  scenarios={recommendedScenarios}
+                  selectedId={selectedScenarioId}
+                  onSelect={applyScenario}
+                  isKo={isKo}
+                  title={t("scenariosTitle")}
+                  hint={t("scenariosHint")}
+                  applyLabel={t("scenarioApply")}
+                  variantLabels={scenarioVariantLabels}
                 />
               </div>
             ) : null}
