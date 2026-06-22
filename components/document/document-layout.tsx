@@ -9,7 +9,7 @@ export const documentPreviewFrameClass =
 
 /** 플래너·견적 문서 카드 (흰색 A4/보고서 본문) */
 export const documentCardClass =
-  "tkad-document-light-surface mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm";
+  "tkad-document-light-surface mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-gray-200 dark:bg-white dark:text-gray-900";
 
 export function DocumentPreviewFrame({
   children,

@@ -1343,6 +1343,25 @@ html.dark .tkad-media-detail-hero,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface,
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface {
   color: rgb(17 24 39) !important;
+  background-color: #ffffff !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+/* 사이트 다크 + 플래너 night: text-foreground·dark:text-* 가 흰 문서 위에서 사라지지 않게 */
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-foreground,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-foreground {
+  color: rgb(17 24 39) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-white"],
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-gray-"] {
+  color: rgb(55 65 81) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
+  color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
