@@ -1,9 +1,11 @@
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
-import AdminNetworksListClient, {
+import {
+  toAdminNetworkListRow,
   type AdminNetworkListRow,
-} from "./admin-networks-list-client";
+} from "@/lib/admin-network-list";
+import AdminNetworksListClient from "./admin-networks-list-client";
 
 export const dynamic = "force-dynamic";
 
@@ -22,19 +24,24 @@ export default async function AdminNetworksPage({ params }: Props) {
   } else {
     try {
       const db = getPrisma();
-      initialRows = await db.mediaNetwork.findMany({
+      const rows = await db.mediaNetwork.findMany({
         orderBy: { updatedAt: "desc" },
         select: {
           id: true,
           name: true,
+          nameEn: true,
           type: true,
+          tags: true,
           totalLocations: true,
           regions: true,
           pricePackage: true,
           isActive: true,
+          updatedAt: true,
           _count: { select: { locations: true } },
+          locations: { select: { name: true } },
         },
       });
+      initialRows = rows.map(toAdminNetworkListRow);
     } catch {
       initialError = "load";
     }

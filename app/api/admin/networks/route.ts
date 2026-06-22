@@ -75,7 +75,10 @@ export async function GET(request: NextRequest) {
   const db = getPrisma();
   const rows = await db.mediaNetwork.findMany({
     orderBy: { updatedAt: "desc" },
-    include: { _count: { select: { locations: true } } },
+    include: {
+      _count: { select: { locations: true } },
+      locations: { select: { name: true } },
+    },
   });
   return json({ networks: rows });
 }
