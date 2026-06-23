@@ -28,6 +28,7 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type {
   AppliedPlannerScenario,
   ScenarioVariant,
@@ -45,6 +46,7 @@ type Props = {
   categoriesText: string;
   ageText: string;
   industryText: string;
+  goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
   digitalResult: DigitalRecommendResult;
   metrics: IntegratedCampaignMetrics;
@@ -146,6 +148,8 @@ export function IntegratedReportStep(props: Props) {
       <PlannerReportFreeSummary
         isKo={props.isKo}
         goalTitle={props.goalTitle}
+        campaignGoal={props.campaignGoal}
+        goalFollowUp={props.goalFollowUp}
         budgetNum={props.budgetNum}
         periodDisplay={props.periodDisplay}
         regionsText={props.regionsText}

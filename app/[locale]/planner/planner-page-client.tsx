@@ -527,6 +527,10 @@ export default function PlannerPageClient({
     [t],
   );
 
+  const selectScenario = useCallback((scenario: PlannerScenario) => {
+    setSelectedScenarioId(scenario.id);
+  }, []);
+
   const applyScenario = useCallback(
     (scenario: PlannerScenario) => {
       const patch = {
@@ -1360,7 +1364,8 @@ export default function PlannerPageClient({
                 <PlannerScenarioCards
                   scenarios={recommendedScenarios}
                   selectedId={selectedScenarioId}
-                  onSelect={applyScenario}
+                  onSelect={selectScenario}
+                  onApply={applyScenario}
                   isKo={isKo}
                   title={t("scenariosTitle")}
                   hint={t("scenariosHint")}

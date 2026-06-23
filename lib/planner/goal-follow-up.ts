@@ -34,6 +34,8 @@ export type PlannerGoalFollowUp = {
   conversionChannel?: PlannerConversionChannel | null;
   /** preset 키(visits|awareness|inquiries) 또는 참고용 자유 입력 */
   conversionKpi?: string | null;
+  /** brand·local 등 — 보고서 참고용 자유 목표 설명 */
+  goalReferenceNote?: string | null;
 };
 
 export const EMPTY_GOAL_FOLLOW_UP: PlannerGoalFollowUp = {};
@@ -56,6 +58,14 @@ export function defaultFollowUpForGoal(
   }
 }
 
+function withGoalReferenceNote(
+  base: PlannerGoalFollowUp,
+  raw: PlannerGoalFollowUp,
+): PlannerGoalFollowUp {
+  const note = raw.goalReferenceNote?.trim() || null;
+  return note ? { ...base, goalReferenceNote: note } : base;
+}
+
 /** 목표별 유효 필드만 남김 */
 export function normalizeFollowUpForGoal(
   goal: PlannerCampaignGoal | null,
@@ -64,23 +74,32 @@ export function normalizeFollowUpForGoal(
   const d = defaultFollowUpForGoal(goal);
   switch (goal) {
     case "launch":
-      return {
-        launchFocusWeeks: raw.launchFocusWeeks ?? d.launchFocusWeeks ?? null,
-      };
+      return withGoalReferenceNote(
+        {
+          launchFocusWeeks: raw.launchFocusWeeks ?? d.launchFocusWeeks ?? null,
+        },
+        raw,
+      );
     case "local":
-      return {};
+      return withGoalReferenceNote({}, raw);
     case "event":
-      return {
-        eventDurationDays: raw.eventDurationDays ?? d.eventDurationDays ?? null,
-      };
+      return withGoalReferenceNote(
+        {
+          eventDurationDays: raw.eventDurationDays ?? d.eventDurationDays ?? null,
+        },
+        raw,
+      );
     case "sales":
-      return {
-        conversionChannel:
-          raw.conversionChannel ?? d.conversionChannel ?? null,
-        conversionKpi: raw.conversionKpi?.trim() || null,
-      };
+      return withGoalReferenceNote(
+        {
+          conversionChannel:
+            raw.conversionChannel ?? d.conversionChannel ?? null,
+          conversionKpi: raw.conversionKpi?.trim() || null,
+        },
+        raw,
+      );
     default:
-      return {};
+      return withGoalReferenceNote({}, raw);
   }
 }
 
@@ -118,6 +137,62 @@ export function followUpKpiBoost(
   if (goal === "sales" && followUp.conversionChannel === "both") return 0.04;
   if (goal === "event" && (followUp.eventDurationDays ?? 0) >= 14) return 0.03;
   return 0;
+}
+
+/** 보고서·PDF·요약 카드용 목표 맞춤 입력 라인 */
+export function buildGoalFollowUpReportLines(
+  goal: PlannerCampaignGoal | null,
+  followUp: PlannerGoalFollowUp,
+  isKo: boolean,
+): string[] {
+  const lines: string[] = [];
+  const f = followUp;
+
+  if (goal === "launch" && f.launchFocusWeeks != null) {
+    lines.push(
+      isKo
+        ? `집중 기간 · 런칭 후 ${f.launchFocusWeeks}주`
+        : `Focus · ${f.launchFocusWeeks} weeks post-launch`,
+    );
+  }
+  if (goal === "event" && f.eventDurationDays != null) {
+    lines.push(
+      isKo
+        ? `행사 기간 · ${f.eventDurationDays}일`
+        : `Event span · ${f.eventDurationDays} days`,
+    );
+  }
+  if (goal === "sales" && f.conversionChannel) {
+    const ch =
+      f.conversionChannel === "store"
+        ? isKo
+          ? "매장 방문"
+          : "in-store"
+        : f.conversionChannel === "online"
+          ? isKo
+            ? "온라인 전환"
+            : "online"
+          : isKo
+            ? "매장+온라인"
+            : "store + online";
+    lines.push(
+      isKo ? `유도 방향 · ${ch}` : `Conversion focus · ${ch}`,
+    );
+  }
+
+  const kpi = formatConversionKpiForReport(f.conversionKpi, isKo);
+  if (goal === "sales" && kpi) {
+    lines.push(isKo ? `목표 (참고) · ${kpi}` : `Goal (reference) · ${kpi}`);
+  }
+
+  const note = f.goalReferenceNote?.trim();
+  if (note && goal !== "sales") {
+    lines.push(isKo ? `목표 (참고) · ${note}` : `Goal (reference) · ${note}`);
+  } else if (note && goal === "sales" && !kpi) {
+    lines.push(isKo ? `목표 (참고) · ${note}` : `Goal (reference) · ${note}`);
+  }
+
+  return lines;
 }
 
 /** 보고서·PDF용 KPI 라벨 (참고용) */

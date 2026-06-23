@@ -4,7 +4,7 @@ import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { formatSeoulZonesText } from "@/lib/planner/seoul-zones";
 import { industryStrategyLine } from "@/lib/planner/industry-match";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
-import { formatConversionKpiForReport } from "@/lib/planner/goal-follow-up";
+import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 
 export type ReportStrategyInput = {
   isKo: boolean;
@@ -56,44 +56,12 @@ function goalIndustryLine(input: ReportStrategyInput): string | null {
   return tableEn[key] ?? null;
 }
 
-function followUpLine(input: ReportStrategyInput): string | null {
-  const f = input.followUp;
-  const g = input.campaignGoal;
-  if (g === "launch" && f.launchFocusWeeks != null) {
-    return input.isKo
-      ? `집중 기간 · 런칭 후 ${f.launchFocusWeeks}주 구간에 노출 밀도를 높였습니다.`
-      : `Focus window · Higher density for ${f.launchFocusWeeks} weeks post-launch.`;
-  }
-  if (g === "local" && input.seoulZones.length > 0) {
-    const zoneText = formatSeoulZonesText(input.seoulZones, input.isKo);
-    return input.isKo
-      ? `집중 상권 · ${zoneText} 동선을 우선했습니다.`
-      : `Focus districts · Prioritized along ${zoneText}.`;
-  }
-  if (g === "event" && f.eventDurationDays != null) {
-    return input.isKo
-      ? `행사 기간 · ${f.eventDurationDays}일 캠페인에 맞춰 기간 집중형 매체를 배치했습니다.`
-      : `Event span · ${f.eventDurationDays}-day burst-friendly lineup.`;
-  }
-  if (g === "sales" && f.conversionChannel) {
-    const ch =
-      f.conversionChannel === "store"
-        ? input.isKo
-          ? "매장 방문"
-          : "in-store"
-        : f.conversionChannel === "online"
-          ? input.isKo
-            ? "온라인 전환"
-            : "online"
-          : input.isKo
-            ? "매장+온라인"
-            : "store + online";
-    const kpi = formatConversionKpiForReport(f.conversionKpi, input.isKo);
-    return input.isKo
-      ? `유도 방향 · ${ch} 중심 OOH 배치${kpi ? ` (참고 KPI: ${kpi})` : ""}.`
-      : `OOH focus · ${ch}${kpi ? ` (reference KPI: ${kpi})` : ""}.`;
-  }
-  return null;
+function followUpLines(input: ReportStrategyInput): string[] {
+  return buildGoalFollowUpReportLines(
+    input.campaignGoal,
+    input.followUp,
+    input.isKo,
+  );
 }
 
 /** goal×industry×region×후속답 → 전략 문구 (규칙 테이블) */
@@ -115,8 +83,9 @@ export function buildReportStrategyLines(
   const zone = zoneLine(input);
   if (zone) lines.push(zone);
 
-  const follow = followUpLine(input);
-  if (follow) lines.push(follow);
+  for (const follow of followUpLines(input)) {
+    lines.push(follow);
+  }
 
   return lines;
 }

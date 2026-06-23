@@ -29,6 +29,7 @@ import {
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 
 export type BuildOohPayloadArgs = {
@@ -174,6 +175,19 @@ export function buildOohReportPayload(
 
   // ── 전략 요약 (왜 / 효과 / 다음 액션) ──
   const sections: PlannerExportSection[] = [];
+
+  const goalContextLines = buildGoalFollowUpReportLines(
+    a.campaignGoal ?? null,
+    a.goalFollowUp ?? {},
+    isKo,
+  );
+  if (goalContextLines.length > 0) {
+    sections.push({
+      title: isKo ? "캠페인 목표 맥락" : "Campaign goal context",
+      lines: goalContextLines,
+    });
+  }
+
   if (a.portfolio.length && a.metrics) {
     const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
     const strategyCtx = {
