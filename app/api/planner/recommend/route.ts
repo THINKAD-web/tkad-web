@@ -133,6 +133,7 @@ export async function POST(request: NextRequest) {
       isKo,
       userId,
       sessionId: d.sessionId ?? null,
+      plannerRegionIds: d.regions.length > 0 ? d.regions : undefined,
     });
 
     const industry =

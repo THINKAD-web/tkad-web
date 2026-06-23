@@ -21,6 +21,7 @@ import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import {
   buildPlannerRegionOptions,
+  filterCatalogByPlannerRegions,
   plannerRegionLabel,
 } from "@/lib/planner/planner-regions";
 import {
@@ -195,9 +196,14 @@ export default function IntegratedPlannerPageClient({
     (s) => s.setCampaignMediaIds,
   );
 
+  const plannerBrowseCatalog = useMemo(() => {
+    if (regions.length === 0) return catalog;
+    return filterCatalogByPlannerRegions(catalog, regions);
+  }, [catalog, regions]);
+
   const plannerCatalogItems = useMemo(
-    () => catalog.map((m) => mapMediaItemToHomeCatalog(m)),
-    [catalog],
+    () => plannerBrowseCatalog.map((m) => mapMediaItemToHomeCatalog(m)),
+    [plannerBrowseCatalog],
   );
 
   const [mediaCacheById, setMediaCacheById] = useState<Record<string, MediaItem>>(
@@ -830,8 +836,8 @@ export default function IntegratedPlannerPageClient({
                     embedded
                     plannerMode
                     initialMedia={plannerCatalogItems}
-                    initialCatalogItems={catalog}
-                    initialTotal={catalog.length}
+                    initialCatalogItems={plannerBrowseCatalog}
+                    initialTotal={plannerBrowseCatalog.length}
                     plannerSelectedIds={campaignMediaIds}
                     onPlannerToggleMedia={togglePlannerMedia}
                     onPlannerClearMedia={clearPlannerMedia}

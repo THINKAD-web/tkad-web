@@ -45,7 +45,7 @@ export function legacyRegionConflictsWithRegionMain(
 ): boolean {
   const main = regionMain?.trim();
   if (!main || legacy === main) return false;
-  if (legacy === "national") return false;
+  if (legacy === "national" && main !== "national") return true;
   if (
     (legacy === "seoul" || legacy === "busan" || legacy === "jeju") &&
     main !== legacy
@@ -53,6 +53,23 @@ export function legacyRegionConflictsWithRegionMain(
     return true;
   }
   return false;
+}
+
+export function isNationwideBrowseMedia(media: MediaItem): boolean {
+  const main = media.regionMain?.trim();
+  if (main) return main === "national";
+  return media.region?.trim() === "national";
+}
+
+/** 플래너·API 추천 — browse 광역 ID 기준 하드 프리필터 (미선택 시 전체) */
+export function filterCatalogByPlannerRegions(
+  items: readonly MediaItem[],
+  regionIds: readonly string[],
+): MediaItem[] {
+  if (regionIds.length === 0) return [...items];
+  return items.filter((m) =>
+    regionIds.some((r) => matchesPlannerRegion(m, r)),
+  );
 }
 
 export function listPlannerBrowseRegionMains(): BrowseRegionMain[] {
@@ -71,11 +88,11 @@ export function matchesPlannerRegion(
 
   if (regionMain) {
     if (regionMain === id) return true;
-    if (id === "national" && regionMain === "national") return true;
-    // regionMain이 다른 광역이면 haystack 별칭(중구 등) 오매칭·레거시 seoul 통과 차단
-  } else if (matchesBrowseRegion(media, id, "", "")) {
-    return true;
+    // regionMain이 다른 광역이면 haystack 별칭(중구 등) 오매칭·레거시 통과 차단
+    return false;
   }
+
+  if (matchesBrowseRegion(media, id, "", "")) return true;
 
   const legacy = media.region?.trim();
   if (
@@ -86,9 +103,6 @@ export function matchesPlannerRegion(
   ) {
     return true;
   }
-
-  /** 레거시 `national` 버킷 + `regionMain` 세분 — 경기·인천 등 */
-  if (legacy === "national" && regionMain === id) return true;
 
   if (id === "national" && legacy === "national" && !regionMain) {
     return true;
@@ -210,6 +224,7 @@ export function mediaPlannerRegionDisplayLabel(
   const main = media.regionMain?.trim();
   const sub = media.regionSub?.trim();
   if (main) {
+    if (main === "national" && nationalShort) return nationalShort;
     const mainLabel = browseRegionLabel(main, locale, "main");
     if (sub) {
       const subLabel = browseRegionLabel(sub, locale, "sub", main);
@@ -220,6 +235,7 @@ export function mediaPlannerRegionDisplayLabel(
     return mainLabel;
   }
   const legacy = media.region?.trim();
+  if (legacy === "national" && nationalShort) return nationalShort;
   if (legacy) {
     return plannerRegionLabel(legacy, locale, nationalShort);
   }

@@ -1,6 +1,7 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import type { MatchingInput, MatchedMedia } from "@/lib/matching-engine";
+import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import {
   getCachedRecommendations,
   recommendationCacheKey,
@@ -28,6 +29,8 @@ export type RunRecommendationOpts = {
   userId?: string | null;
   sessionId?: string | null;
   skipCache?: boolean;
+  /** 플래너 browse 광역 ID — 설정 시 `matchesPlannerRegion` 하드 프리필터 */
+  plannerRegionIds?: string[];
 };
 
 export type RunRecommendationResult = {
@@ -58,11 +61,14 @@ export async function runRecommendation(
   const fullCatalog = await fetchPublicMediaCatalog();
   // v1: AI 자유입력 모드는 네트워크 매체를 후보 풀에서 명시적으로 제외한다.
   // (MediaNetwork 에 캠페인 목적 분류(targetCategory) 필드가 없어 의도적으로 스코프에서 뺀 결정)
-  const catalog = opts.excludeNetwork
+  let catalog = opts.excludeNetwork
     ? fullCatalog.filter(
         (m) => m.catalogSource !== "network" && m.type !== "network",
       )
     : fullCatalog;
+  if (opts.plannerRegionIds && opts.plannerRegionIds.length > 0) {
+    catalog = filterCatalogByPlannerRegions(catalog, opts.plannerRegionIds);
+  }
   let recommendations = matchMediaCatalog(catalog, opts.input, limit);
 
   if (useClaude) {

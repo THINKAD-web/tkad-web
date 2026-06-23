@@ -3,6 +3,7 @@ import { matchesPlannerCategory } from "@/lib/planner-logic";
 import type { PlannerCategory } from "@/lib/planner/types";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
@@ -71,15 +72,18 @@ export function recommendPlannerMedia(
   limit = 5,
   seed = 0,
 ): ScoredMedia[] {
-  const filteredByCategory = catalog.filter((m) => {
+  let pool = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
     return (ctx.categories as readonly PlannerCategory[]).some((c) =>
       matchesPlannerCategory(m, c),
     );
   });
+  if (ctx.regions.length > 0) {
+    pool = filterCatalogByPlannerRegions(pool, ctx.regions);
+  }
 
   const matchingInput = plannerContextToMatching(ctx, seed);
-  const matched = matchMediaCatalog(filteredByCategory, matchingInput, limit);
+  const matched = matchMediaCatalog(pool, matchingInput, limit);
 
   return matched.map((m) => ({
     media: m.media,
