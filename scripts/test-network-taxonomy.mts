@@ -87,37 +87,80 @@ assert.equal(
   "campus_kiosk",
 );
 
-// Haystack target inference
+// Haystack target inference (brand 기본값 없음, venue 컨텍스트 반영)
 assert.deepEqual(
-  inferTargetSlugsFromHaystack({ tags: ["2030 타겟", "직장인"] }),
+  inferTargetSlugsFromHaystack({
+    tags: ["직장인", "고소득", "B2B/B2C"],
+    venueCode: "office",
+  }),
   ["brand"],
 );
 assert.deepEqual(
-  inferTargetSlugsFromHaystack({ tags: ["학생 타겟", "대학생"] }),
+  inferTargetSlugsFromHaystack({ tags: ["2030 타겟", "자기관리"] }),
+  [],
+);
+assert.deepEqual(
+  inferTargetSlugsFromHaystack({
+    tags: ["학생 타겟", "대학생"],
+    venueCode: "campus_kiosk",
+  }),
   ["university"],
 );
 assert.deepEqual(
-  inferTargetSlugsFromHaystack({ tags: ["환자 보호자"] }),
-  ["brand"],
+  inferTargetSlugsFromHaystack({
+    tags: ["환자 보호자 타겟"],
+    venueCode: "hospital",
+  }),
+  ["regional"],
 );
+assert.deepEqual(
+  inferTargetSlugsFromHaystack({
+    tags: ["5060 타겟", "건강 타겟", "의약품 광고"],
+    venueCode: "pharmacy",
+  }),
+  ["regional", "small_business"],
+);
+
+assert.deepEqual(suggestBrowseFromVenue("pharmacy"), {
+  main: "building",
+  sub: "hospital",
+});
+assert.deepEqual(suggestBrowseFromVenue("bookstore"), {
+  main: "education",
+  sub: "library",
+});
 
 // Full row: venue browse not ooh/digital_signage when venue inferred
 const hospitalForm = networkTaxonomyFromRow({
   type: "digital",
   name: "헬로미디어 병원",
-  tags: ["병원 DOOH"],
+  tags: ["병원 DOOH", "환자 보호자 타겟"],
   targetCategory: [],
 });
 assert.equal(hospitalForm.venueCode, "hospital");
 assert.equal(hospitalForm.browseMain, "network");
 assert.equal(hospitalForm.browseSub, "hospital_network");
-assert.ok(hospitalForm.targetSlugs.includes("brand") || hospitalForm.targetSlugs.length === 0);
+assert.deepEqual(hospitalForm.targetSlugs, ["regional"]);
+
+const pharmacyForm = networkTaxonomyFromRow({
+  type: "digital",
+  name: "약국 와이드",
+  tags: ["5060 타겟", "건강 타겟", "의약품 광고"],
+  targetCategory: [],
+});
+assert.equal(pharmacyForm.venueCode, "pharmacy");
+assert.equal(pharmacyForm.browseMain, "building");
+assert.equal(pharmacyForm.browseSub, "hospital");
+assert.ok(pharmacyForm.targetSlugs.includes("regional"));
+assert.ok(!pharmacyForm.targetSlugs.includes("brand"));
 
 const targetsFromHaystack = resolveNetworkTargetForPublic({
   targetCategory: [],
-  tags: ["5060", "건강 타겟"],
+  tags: ["5060", "건강 타겟", "의약품"],
   name: "약국",
+  type: "digital",
 });
-assert.ok(targetsFromHaystack?.includes("brand"));
+assert.ok(targetsFromHaystack?.includes("regional"));
+assert.ok(!targetsFromHaystack?.includes("brand"));
 
 console.log("network-taxonomy: ok");

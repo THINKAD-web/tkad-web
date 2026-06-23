@@ -74,10 +74,10 @@ const VENUE_TO_BROWSE: Partial<
   campus_kiosk: { main: "network", sub: "campus_network" },
   elevator: { main: "network", sub: "elevator_network" },
   shopping_mall: { main: "shopping", sub: "mall" },
-  bookstore: { main: "network", sub: "franchise_network" },
+  bookstore: { main: "education", sub: "library" },
   office: { main: "building", sub: "office" },
   hospital: { main: "network", sub: "hospital_network" },
-  pharmacy: { main: "shopping", sub: "convenience" },
+  pharmacy: { main: "building", sub: "hospital" },
   gym: { main: "lifestyle", sub: "gym" },
 };
 
@@ -101,19 +101,63 @@ const VENUE_HAYSTACK_RULES: Array<[RegExp, NetworkTypeCode]> = [
   [/엘리베이터|elevator/i, "elevator"],
 ];
 
-/** target:* 이후 — tags·name 키워드 (과채움 방지, 명백한 단서만) */
+/** target:* 이후 — tags·name 키워드 (과채움 방지, 명백한 단서만; brand 기본값 없음) */
 const TARGET_HAYSTACK_RULES: Array<[RegExp, string]> = [
-  [/팬덤|아이돌|엔터|fandom/i, "fandom"],
+  [/팬덤|아이돌|팬클럽|fandom/i, "fandom"],
   [/학생\s*타겟|대학생|student/i, "university"],
   [/지자체|공공\s*캠페인|public\s*sector/i, "public"],
+  [/글로벌|해외\s*브랜드|외국인|global|international|관광|k-콘텐츠/i, "global"],
+  [/5060(?:\s*타겟)?|(?<![0-9])50대|(?<![0-9])60대|시니어|senior/i, "regional"],
+  [/환자|보호자|의료\s*환경|진료과/i, "regional"],
+  [/지역\s*축제|지역\s*홍보|동네|로컬\s*매장|마을/i, "regional"],
+  [/소상공인|동네\s*매장|small\s*business/i, "small_business"],
+  [/의약품|pharma|otc/i, "small_business"],
+  [/팝업|이벤트|pop[\s-]?up|event/i, "event"],
   [
-    /2030|20대|30대|직장인|고소득|b2b|b2c|브랜드|brand|자기관리|고관여|5060|50대|60대|시니어/i,
+    /브랜드\s*캠페인|기업\s*브랜드|신제품|론칭|b2b|b2c|직장인|고소득|프리미엄\s*미디어|고관여/i,
     "brand",
   ],
-  [/환자|보호자|건강\s*타겟|헬스케어|의약품|pharma/i, "brand"],
-  [/소상공인|동네\s*매장|small\s*business/i, "small_business"],
-  [/팝업|이벤트|pop[\s-]?up|event/i, "event"],
 ];
+
+/** venue 성격 + tags 조합으로 타깃 보강·brand 억제 */
+function inferTargetsFromVenueContext(
+  venueCode: string | null | undefined,
+  hay: string,
+): string[] {
+  const venue = venueCode?.trim().toLowerCase() ?? "";
+  const found = new Set<string>();
+
+  if (venue === "pharmacy") {
+    if (/5060(?:\s*타겟)?|(?<![0-9])50대|(?<![0-9])60대|시니어/i.test(hay)) found.add("regional");
+    if (/건강|의약품|pharma|약국/i.test(hay)) found.add("small_business");
+  }
+  if (venue === "hospital") {
+    if (/환자|보호자|의료|진료|헬스케어/i.test(hay)) found.add("regional");
+  }
+  if (venue === "office") {
+    if (/직장인|고소득|b2b|b2c|오피스|프리미엄/i.test(hay)) found.add("brand");
+  }
+
+  return [...found];
+}
+
+/** 의료·로컬 venue에서는 약한 brand 신호 제거 */
+function filterBrandForVenueContext(
+  slugs: string[],
+  venueCode: string | null | undefined,
+  hay: string,
+): string[] {
+  const venue = venueCode?.trim().toLowerCase() ?? "";
+  if (!slugs.includes("brand")) return slugs;
+  const strongBrand = /브랜드\s*캠페인|기업\s*브랜드|b2b|b2c|직장인|고소득|프리미엄\s*미디어/i.test(
+    hay,
+  );
+  if (strongBrand) return slugs;
+  if (venue === "pharmacy" || venue === "hospital" || venue === "gym") {
+    return slugs.filter((s) => s !== "brand");
+  }
+  return slugs;
+}
 
 const TARGET_TAG_RE = /^target:(.+)$/i;
 
@@ -171,6 +215,22 @@ function buildTaxonomyHaystack(input: {
     .join(" ");
 }
 
+/** target 추론용 — description 제외 (마케팅 문구·수치 오매칭 방지) */
+function buildTargetHaystack(input: {
+  name?: string | null;
+  tags?: string[] | null;
+}): string {
+  const tagText = (input.tags ?? [])
+    .filter((t) => {
+      const s = t.trim();
+      return s && !s.startsWith("venue:") && !TARGET_TAG_RE.test(s);
+    })
+    .join(" ");
+  return [input.name, tagText]
+    .filter((x) => typeof x === "string" && x.trim())
+    .join(" ");
+}
+
 /** 이름·tags·description에서 venue 추론 (명시 venue:* / DB 컬럼은 호출 전 처리) */
 export function inferNetworkVenueFromHaystack(input: {
   name?: string | null;
@@ -190,18 +250,23 @@ export function inferTargetSlugsFromHaystack(input: {
   name?: string | null;
   description?: string | null;
   tags?: string[] | null;
+  venueCode?: string | null;
 }): string[] {
   const explicit = parseTargetSlugsFromTags(input.tags);
   if (explicit.length > 0) return explicit;
 
-  const hay = buildTaxonomyHaystack(input).toLowerCase();
+  const hay = buildTargetHaystack(input);
   if (!hay.trim()) return [];
 
   const found = new Set<string>();
   for (const [re, slug] of TARGET_HAYSTACK_RULES) {
     if (re.test(hay) && TARGET_SLUG_SET.has(slug)) found.add(slug);
   }
-  return [...found];
+  for (const slug of inferTargetsFromVenueContext(input.venueCode, hay)) {
+    if (TARGET_SLUG_SET.has(slug)) found.add(slug);
+  }
+
+  return filterBrandForVenueContext([...found], input.venueCode, hay);
 }
 
 export function suggestBrowseFromVenue(
@@ -339,6 +404,7 @@ export function networkTaxonomyFromRow(
           name: row.name,
           description: row.description,
           tags: row.tags,
+          venueCode: venueCode || null,
         });
 
   return {
@@ -440,14 +506,19 @@ export function resolveNetworkBrowseForPublic(
 }
 
 export function resolveNetworkTargetForPublic(
-  row: Pick<NetworkTaxonomyRow, "targetCategory" | "tags" | "name" | "description">,
+  row: Pick<
+    NetworkTaxonomyRow,
+    "targetCategory" | "tags" | "name" | "description" | "type" | "venueType"
+  >,
 ): string[] | undefined {
   const fromCol = row.targetCategory ?? [];
   if (fromCol.length > 0) return [...fromCol];
+  const venueCode = resolveNetworkVenueCodeFromRow(row);
   const inferred = inferTargetSlugsFromHaystack({
     name: row.name,
     description: row.description,
     tags: row.tags,
+    venueCode,
   });
   return inferred.length > 0 ? inferred : undefined;
 }
