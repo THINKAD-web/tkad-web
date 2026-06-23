@@ -62,8 +62,9 @@ function withGoalReferenceNote(
   base: PlannerGoalFollowUp,
   raw: PlannerGoalFollowUp,
 ): PlannerGoalFollowUp {
-  const note = raw.goalReferenceNote?.trim() || null;
-  return note ? { ...base, goalReferenceNote: note } : base;
+  const note = raw.goalReferenceNote;
+  if (note == null || note === "") return base;
+  return { ...base, goalReferenceNote: note };
 }
 
 /** 목표별 유효 필드만 남김 */
@@ -94,7 +95,10 @@ export function normalizeFollowUpForGoal(
         {
           conversionChannel:
             raw.conversionChannel ?? d.conversionChannel ?? null,
-          conversionKpi: raw.conversionKpi?.trim() || null,
+          conversionKpi:
+            raw.conversionKpi == null || raw.conversionKpi === ""
+              ? null
+              : raw.conversionKpi,
         },
         raw,
       );

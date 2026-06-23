@@ -666,6 +666,13 @@ export default function IntegratedPlannerPageClient({
                   </div>
                 </PlannerNeonCard>
 
+                <PlannerGoalFollowUpPanel
+                  goal={campaignGoal}
+                  followUp={goalFollowUp}
+                  onChange={setGoalFollowUp}
+                  isKo={isKo}
+                />
+
                 <PlannerRegionMap
                   selected={selectedRegions}
                   regionOptions={regionOptions}
@@ -723,13 +730,6 @@ export default function IntegratedPlannerPageClient({
                     })}
                   </div>
                 </div>
-
-                <PlannerGoalFollowUpPanel
-                  goal={campaignGoal}
-                  followUp={goalFollowUp}
-                  onChange={setGoalFollowUp}
-                  isKo={isKo}
-                />
 
                 <PlannerScenarioCards
                   scenarios={recommendedScenarios}
