@@ -4,7 +4,7 @@ import {
   isValidBrowseSub,
 } from "@/lib/media-browse-categories";
 import { browseRegionLabel } from "@/lib/media-browse-regions";
-import { targetLabel } from "@/lib/media-categories";
+import { targetLabel, TARGET_CATEGORIES } from "@/lib/media-categories";
 import {
   NETWORK_TYPE_CODES,
   NETWORK_TYPE_LABELS,
@@ -77,7 +77,43 @@ const VENUE_TO_BROWSE: Partial<
   bookstore: { main: "network", sub: "franchise_network" },
   office: { main: "building", sub: "office" },
   hospital: { main: "network", sub: "hospital_network" },
+  pharmacy: { main: "shopping", sub: "convenience" },
+  gym: { main: "lifestyle", sub: "gym" },
 };
+
+const TARGET_SLUG_SET = new Set(TARGET_CATEGORIES.map((t) => t.slug));
+
+/** venue:* / DB 컬럼 / type 레거시 이후 — 이름·tags 키워드 추론 (명백한 단서만) */
+const VENUE_HAYSTACK_RULES: Array<[RegExp, NetworkTypeCode]> = [
+  [/교보문고|서점|bookstore/i, "bookstore"],
+  [/약국|pharmacy/i, "pharmacy"],
+  [/병원|의료|헬스케어|healthcare|hospital|진료|환자|의약/i, "hospital"],
+  [
+    /헬스장|피트니스|스포애니|fitness|gym|웰니스|wellness|어시스트핏|assistfit/i,
+    "gym",
+  ],
+  [/대학\s*키오스크|캠퍼스\s*내|campus[\s_-]?kiosk/i, "campus_kiosk"],
+  [/대학교|대학\s*광고|캠퍼스|campus/i, "campus_kiosk"],
+  [/프라임오피스|오피스|office|빌딩|직장인\s*타겟/i, "office"],
+  [/버스\s*쉘터|버스쉘터|정류장|bus[\s_-]?shelter/i, "bus_shelter"],
+  [/편의점|convenience/i, "convenience_store"],
+  [/쇼핑몰|백화점|shopping[\s_-]?mall/i, "shopping_mall"],
+  [/엘리베이터|elevator/i, "elevator"],
+];
+
+/** target:* 이후 — tags·name 키워드 (과채움 방지, 명백한 단서만) */
+const TARGET_HAYSTACK_RULES: Array<[RegExp, string]> = [
+  [/팬덤|아이돌|엔터|fandom/i, "fandom"],
+  [/학생\s*타겟|대학생|student/i, "university"],
+  [/지자체|공공\s*캠페인|public\s*sector/i, "public"],
+  [
+    /2030|20대|30대|직장인|고소득|b2b|b2c|브랜드|brand|자기관리|고관여|5060|50대|60대|시니어/i,
+    "brand",
+  ],
+  [/환자|보호자|건강\s*타겟|헬스케어|의약품|pharma/i, "brand"],
+  [/소상공인|동네\s*매장|small\s*business/i, "small_business"],
+  [/팝업|이벤트|pop[\s-]?up|event/i, "event"],
+];
 
 const TARGET_TAG_RE = /^target:(.+)$/i;
 
@@ -119,6 +155,55 @@ export function parseTargetSlugsFromTags(
   return [...new Set(out)];
 }
 
+function buildTaxonomyHaystack(input: {
+  name?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
+}): string {
+  const tagText = (input.tags ?? [])
+    .filter((t) => {
+      const s = t.trim();
+      return s && !s.startsWith("venue:") && !TARGET_TAG_RE.test(s);
+    })
+    .join(" ");
+  return [input.name, input.description, tagText]
+    .filter((x) => typeof x === "string" && x.trim())
+    .join(" ");
+}
+
+/** 이름·tags·description에서 venue 추론 (명시 venue:* / DB 컬럼은 호출 전 처리) */
+export function inferNetworkVenueFromHaystack(input: {
+  name?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
+}): NetworkTypeCode | null {
+  const hay = buildTaxonomyHaystack(input);
+  if (!hay.trim()) return null;
+  for (const [re, code] of VENUE_HAYSTACK_RULES) {
+    if (re.test(hay)) return code;
+  }
+  return null;
+}
+
+/** target:* 이후 tags·name에서 타깃 slug 추론 */
+export function inferTargetSlugsFromHaystack(input: {
+  name?: string | null;
+  description?: string | null;
+  tags?: string[] | null;
+}): string[] {
+  const explicit = parseTargetSlugsFromTags(input.tags);
+  if (explicit.length > 0) return explicit;
+
+  const hay = buildTaxonomyHaystack(input).toLowerCase();
+  if (!hay.trim()) return [];
+
+  const found = new Set<string>();
+  for (const [re, slug] of TARGET_HAYSTACK_RULES) {
+    if (re.test(hay) && TARGET_SLUG_SET.has(slug)) found.add(slug);
+  }
+  return [...found];
+}
+
 export function suggestBrowseFromVenue(
   venueCode: string,
 ): { main: string; sub: string } | null {
@@ -128,11 +213,20 @@ export function suggestBrowseFromVenue(
 }
 
 export function resolveNetworkVenueCodeFromRow(
-  row: Pick<NetworkTaxonomyRow, "type" | "tags" | "venueType">,
+  row: Pick<
+    NetworkTaxonomyRow,
+    "type" | "tags" | "venueType" | "name" | "description"
+  >,
 ): string | null {
   const fromCol = row.venueType?.trim();
   if (fromCol && isNetworkVenueCode(fromCol)) return fromCol;
-  return resolveNetworkVenueCode(row.type, row.tags);
+  const fromTags = resolveNetworkVenueCode(row.type, row.tags);
+  if (fromTags) return fromTags;
+  return inferNetworkVenueFromHaystack({
+    name: row.name,
+    description: row.description,
+    tags: row.tags,
+  });
 }
 
 export function resolveNetworkCatalogTypeFromRow(
@@ -190,7 +284,13 @@ export function inferNetworkBrowseDefaults(input: {
   description?: string | null;
   tags?: string[] | null;
 }): { main: string; sub: string } {
-  const venue = input.venueCode?.trim() || null;
+  const venue =
+    input.venueCode?.trim() ||
+    inferNetworkVenueFromHaystack({
+      name: input.name,
+      description: input.description,
+      tags: input.tags,
+    });
   if (venue) {
     const suggested = suggestBrowseFromVenue(venue);
     if (suggested) return suggested;
@@ -233,7 +333,13 @@ export function networkTaxonomyFromRow(
   const region = resolveBrowseRegionFromRow(row);
   const fromCol = row.targetCategory ?? [];
   const targetSlugs =
-    fromCol.length > 0 ? [...fromCol] : parseTargetSlugsFromTags(row.tags);
+    fromCol.length > 0
+      ? [...fromCol]
+      : inferTargetSlugsFromHaystack({
+          name: row.name,
+          description: row.description,
+          tags: row.tags,
+        });
 
   return {
     catalogType,
@@ -334,12 +440,16 @@ export function resolveNetworkBrowseForPublic(
 }
 
 export function resolveNetworkTargetForPublic(
-  row: Pick<NetworkTaxonomyRow, "targetCategory" | "tags">,
+  row: Pick<NetworkTaxonomyRow, "targetCategory" | "tags" | "name" | "description">,
 ): string[] | undefined {
   const fromCol = row.targetCategory ?? [];
   if (fromCol.length > 0) return [...fromCol];
-  const fromTags = parseTargetSlugsFromTags(row.tags);
-  return fromTags.length > 0 ? fromTags : undefined;
+  const inferred = inferTargetSlugsFromHaystack({
+    name: row.name,
+    description: row.description,
+    tags: row.tags,
+  });
+  return inferred.length > 0 ? inferred : undefined;
 }
 
 export function resolveNetworkTaxonomyLabels(

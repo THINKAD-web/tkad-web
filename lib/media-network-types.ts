@@ -50,6 +50,8 @@ export const NETWORK_TYPE_CODES = [
   "bookstore",
   "office",
   "hospital",
+  "pharmacy",
+  "gym",
 ] as const;
 
 export type NetworkTypeCode = (typeof NETWORK_TYPE_CODES)[number];
@@ -68,6 +70,8 @@ const NETWORK_VENUE_CATALOG_MAP: Record<NetworkTypeCode, NetworkCatalogType> = {
   bookstore: "digital",
   office: "digital",
   hospital: "digital",
+  pharmacy: "digital",
+  gym: "digital",
 };
 
 const VENUE_CODE_SET = new Set<string>(NETWORK_TYPE_CODES as unknown as string[]);
@@ -140,6 +144,8 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   bookstore: { ko: "교보문고·서점", en: "Bookstore" },
   office: { ko: "오피스·빌딩", en: "Office building" },
   hospital: { ko: "병원·의료", en: "Hospital" },
+  pharmacy: { ko: "약국", en: "Pharmacy" },
+  gym: { ko: "헬스장·피트니스", en: "Gym / fitness" },
 };
 
 /** `/media/network` 목록 필터 — 일반 `/media` 와 동일 3분류 */

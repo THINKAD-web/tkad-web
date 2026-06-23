@@ -19,12 +19,9 @@ import { Pool } from "pg";
 import { normalizePgDatabaseUrl } from "../lib/normalize-pg-database-url.ts";
 import { resolveNetworkCatalogType } from "../lib/media-network-types.ts";
 import {
-  inferNetworkBrowseDefaults,
   networkTaxonomyToPatch,
   networkTaxonomyFromRow,
-  parseTargetSlugsFromTags,
   resolveNetworkTaxonomyLabels,
-  resolveNetworkVenueCodeFromRow,
 } from "../lib/network-taxonomy.ts";
 import { resolveBrowseRegionIds } from "../lib/network-location-enrich.ts";
 
@@ -84,23 +81,6 @@ async function main() {
     );
 
     for (const row of rows) {
-      const venueCode = resolveNetworkVenueCodeFromRow(row);
-      const catalogType = resolveNetworkCatalogType(venueCode ?? row.type);
-      const normalizedType =
-        row.type === "digital" ||
-        row.type === "static" ||
-        row.type === "mobile"
-          ? row.type
-          : catalogType;
-
-      const browseDefaults = inferNetworkBrowseDefaults({
-        catalogType: normalizedType,
-        venueCode,
-        name: row.name,
-        description: row.description,
-        tags: row.tags,
-      });
-
       let regionMain = row.regionMain?.trim() ?? "";
       let regionSub = row.regionSub?.trim() ?? "";
       if (!regionMain) {
@@ -123,17 +103,24 @@ async function main() {
         regionSub = resolved.regionSub ?? "";
       }
 
-      const targetFromTags = parseTargetSlugsFromTags(row.tags);
+      const venueForCatalog = networkTaxonomyFromRow({
+        ...row,
+        regionMain: regionMain || null,
+        regionSub: regionSub || null,
+      }).venueCode;
+      const catalogType = resolveNetworkCatalogType(venueForCatalog || row.type);
+      const normalizedType =
+        row.type === "digital" ||
+        row.type === "static" ||
+        row.type === "mobile"
+          ? row.type
+          : catalogType;
+
       const form = networkTaxonomyFromRow({
         ...row,
         type: normalizedType,
-        venueType: venueCode,
-        mediaMainCategory: row.mediaMainCategory ?? browseDefaults.main,
-        mediaSubCategory: row.mediaSubCategory ?? browseDefaults.sub,
         regionMain: regionMain || null,
         regionSub: regionSub || null,
-        targetCategory:
-          row.targetCategory.length > 0 ? row.targetCategory : targetFromTags,
       });
 
       const patch = networkTaxonomyToPatch(form, row.tags);

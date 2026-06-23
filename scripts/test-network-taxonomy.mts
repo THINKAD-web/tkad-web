@@ -1,5 +1,7 @@
 import assert from "node:assert/strict";
 import {
+  inferNetworkVenueFromHaystack,
+  inferTargetSlugsFromHaystack,
   networkTaxonomyFromRow,
   networkTaxonomyToPatch,
   parseTargetSlugsFromTags,
@@ -56,5 +58,66 @@ const targets = resolveNetworkTargetForPublic({
 assert.deepEqual(targets, ["fandom"]);
 
 assert.deepEqual(parseTargetSlugsFromTags(["target:brand", "foo"]), ["brand"]);
+
+// Haystack venue inference (명시 venue:* 없을 때)
+assert.equal(
+  inferNetworkVenueFromHaystack({
+    name: "헬로미디어 병원",
+    tags: ["병원 DOOH"],
+  }),
+  "hospital",
+);
+assert.equal(
+  inferNetworkVenueFromHaystack({ name: "약국 와이드", tags: ["약국"] }),
+  "pharmacy",
+);
+assert.equal(
+  inferNetworkVenueFromHaystack({ name: "교보문고", tags: ["서점"] }),
+  "bookstore",
+);
+assert.equal(
+  inferNetworkVenueFromHaystack({ name: "어시스트핏 헬스장", tags: ["헬스"] }),
+  "gym",
+);
+assert.equal(
+  inferNetworkVenueFromHaystack({
+    name: "대학교 캠퍼스 키오스크",
+    tags: ["대학 키오스크"],
+  }),
+  "campus_kiosk",
+);
+
+// Haystack target inference
+assert.deepEqual(
+  inferTargetSlugsFromHaystack({ tags: ["2030 타겟", "직장인"] }),
+  ["brand"],
+);
+assert.deepEqual(
+  inferTargetSlugsFromHaystack({ tags: ["학생 타겟", "대학생"] }),
+  ["university"],
+);
+assert.deepEqual(
+  inferTargetSlugsFromHaystack({ tags: ["환자 보호자"] }),
+  ["brand"],
+);
+
+// Full row: venue browse not ooh/digital_signage when venue inferred
+const hospitalForm = networkTaxonomyFromRow({
+  type: "digital",
+  name: "헬로미디어 병원",
+  tags: ["병원 DOOH"],
+  targetCategory: [],
+});
+assert.equal(hospitalForm.venueCode, "hospital");
+assert.equal(hospitalForm.browseMain, "network");
+assert.equal(hospitalForm.browseSub, "hospital_network");
+assert.ok(hospitalForm.targetSlugs.includes("brand") || hospitalForm.targetSlugs.length === 0);
+
+const targetsFromHaystack = resolveNetworkTargetForPublic({
+  targetCategory: [],
+  tags: ["5060", "건강 타겟"],
+  name: "약국",
+});
+assert.ok(targetsFromHaystack?.includes("brand"));
 
 console.log("network-taxonomy: ok");
