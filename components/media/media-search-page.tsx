@@ -36,7 +36,6 @@ import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import { MediaPinPopup } from "@/components/media-pin-popup";
-import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import {
   mediaItemHasMapCoordinates,
   resolveMediaIdFromMapPinId,
@@ -598,8 +597,8 @@ function MediaSearchPageInner({
 
   const scrollToPlannerSelection = useCallback(() => {
     document
-      .getElementById("planner-browse-selected-media")
-      ?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      .getElementById("planner-selected-media-bar")
+      ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
   const edgePad = embedded || plannerMode ? "px-0" : "px-4";
@@ -653,21 +652,6 @@ function MediaSearchPageInner({
               : undefined
           }
         />
-
-        {plannerMode &&
-        plannerSelectedIds.length > 0 &&
-        onPlannerClearMedia &&
-        onPlannerToggleMedia ? (
-          <PlannerSelectedMediaBar
-            id="planner-browse-selected-media"
-            catalog={initialCatalogItems}
-            campaignMediaIds={plannerSelectedIds}
-            onRemove={onPlannerToggleMedia}
-            onClearAll={onPlannerClearMedia}
-            isKo={isKo}
-            className="mt-3"
-          />
-        ) : null}
       </div>
 
       {/* ── 매체 목록 / 지도 ── */}
