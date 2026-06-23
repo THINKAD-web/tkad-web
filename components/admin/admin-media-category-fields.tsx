@@ -31,6 +31,8 @@ type Props = {
   onParentChange: (slug: string) => void;
   onToggleSub: (slug: string) => void;
   onToggleTarget: (slug: string) => void;
+  /** 네트워크 등 — SEO legacy 블록 숨김 */
+  hideLegacySeo?: boolean;
 };
 
 export function AdminMediaCategoryFields({
@@ -49,6 +51,7 @@ export function AdminMediaCategoryFields({
   onParentChange,
   onToggleSub,
   onToggleTarget,
+  hideLegacySeo = false,
 }: Props) {
   const [legacyOpen, setLegacyOpen] = useState(false);
   const tops = getTopMediaCategories();
@@ -149,6 +152,7 @@ export function AdminMediaCategoryFields({
         </div>
       </div>
 
+      {!hideLegacySeo ? (
       <details
         open={legacyOpen}
         onToggle={(e) => setLegacyOpen(e.currentTarget.open)}
@@ -194,6 +198,7 @@ export function AdminMediaCategoryFields({
           ) : null}
         </div>
       </details>
+      ) : null}
 
       <div>
         <p className="mb-2 text-xs font-semibold text-foreground">

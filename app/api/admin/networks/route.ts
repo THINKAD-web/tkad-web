@@ -47,6 +47,12 @@ function toPrismaCreateData(
     effectMemo: d.effectMemo,
     operatingHours: d.operatingHours,
     tags: d.tags,
+    venueType: d.venueType ?? null,
+    mediaMainCategory: d.mediaMainCategory ?? null,
+    mediaSubCategory: d.mediaSubCategory ?? null,
+    regionMain: d.regionMain ?? null,
+    regionSub: d.regionSub ?? null,
+    targetCategory: d.targetCategory ?? [],
     isActive: d.isActive,
     locations:
       d.locations.length > 0

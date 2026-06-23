@@ -28,6 +28,12 @@ function strArr(v: unknown): string[] {
     .map((x) => x.trim());
 }
 
+function optStrNull(v: unknown): string | null | undefined {
+  if (v === undefined) return undefined;
+  if (v === null) return null;
+  return typeof v === "string" ? v.trim() || null : undefined;
+}
+
 function coalescePackageOptions(
   v: unknown,
 ): { ok: true; value: Prisma.InputJsonValue | null | undefined } | { ok: false; error: string } {
@@ -134,6 +140,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         ? str(o.operatingHours) || null
         : undefined,
     tags: o.tags !== undefined ? strArr(o.tags) : undefined,
+    venueType: optStrNull(o.venueType),
+    mediaMainCategory: optStrNull(o.mediaMainCategory),
+    mediaSubCategory: optStrNull(o.mediaSubCategory),
+    regionMain: optStrNull(o.regionMain),
+    regionSub: optStrNull(o.regionSub),
+    targetCategory:
+      o.targetCategory !== undefined ? strArr(o.targetCategory) : undefined,
   };
 
   const locationsRaw = o.locations;

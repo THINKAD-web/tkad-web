@@ -61,6 +61,12 @@ export default async function AdminNetworkEditPage({ params }: Props) {
     effectMemo: row.effectMemo,
     operatingHours: row.operatingHours,
     tags: row.tags,
+    venueType: row.venueType,
+    mediaMainCategory: row.mediaMainCategory,
+    mediaSubCategory: row.mediaSubCategory,
+    regionMain: row.regionMain,
+    regionSub: row.regionSub,
+    targetCategory: row.targetCategory,
     isActive: row.isActive,
     locations: row.locations.map((l) => ({
       name: l.name,

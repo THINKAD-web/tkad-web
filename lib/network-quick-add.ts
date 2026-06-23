@@ -10,6 +10,7 @@ import {
   resolveNetworkCatalogType,
 } from "@/lib/media-network-types";
 import { enrichNetworkLocation, resolveNetworkRegionsArray } from "@/lib/network-location-enrich";
+import { networkTaxonomyDefaultsForCreate } from "@/lib/network-taxonomy";
 
 export type NetworkQuickAddLocationInput = {
   name: string;
@@ -63,6 +64,12 @@ export type NetworkQuickAddParsed = {
   effectMemo: string | null;
   operatingHours: string | null;
   tags: string[];
+  venueType: string | null;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+  regionMain: string | null;
+  regionSub: string | null;
+  targetCategory: string[];
   locations: NetworkQuickAddLocationParsed[];
 };
 
@@ -548,13 +555,24 @@ function parseNetworkQuickAddObject(
     priceNoteBase,
   );
 
+  const taxonomy = networkTaxonomyDefaultsForCreate({
+    catalogType: type,
+    venueCode: resolvedType.venueCode,
+    name,
+    description: str(normalized.description) || null,
+    tags,
+    locations: locPayload,
+    regions,
+    targetCategory: strArr(normalized.targetCategory),
+  });
+
   return {
     ok: true,
     data: {
       name,
       nameEn: str(normalized.nameEn) || null,
       description: str(normalized.description) || null,
-      type,
+      type: taxonomy.type,
       pricePerUnit: normalizePriceWon(optNum(normalized.pricePerUnit)),
       pricePackage: pkg.pricePackage,
       priceNote: pkg.priceNote,
@@ -576,7 +594,13 @@ function parseNetworkQuickAddObject(
       targetAge: str(normalized.targetAge) || null,
       effectMemo: str(normalized.effectMemo) || null,
       operatingHours: str(normalized.operatingHours) || null,
-      tags,
+      tags: taxonomy.tags,
+      venueType: taxonomy.venueType,
+      mediaMainCategory: taxonomy.mediaMainCategory,
+      mediaSubCategory: taxonomy.mediaSubCategory,
+      regionMain: taxonomy.regionMain,
+      regionSub: taxonomy.regionSub,
+      targetCategory: taxonomy.targetCategory,
       locations: locPayload,
     },
   };

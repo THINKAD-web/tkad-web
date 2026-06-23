@@ -4,6 +4,10 @@ import {
   type NetworkCatalogType,
 } from "@/lib/media-network-types";
 import { browseRegionLabel } from "@/lib/media-browse-regions";
+import {
+  resolveNetworkTaxonomyLabels,
+  type NetworkTaxonomyRow,
+} from "@/lib/network-taxonomy";
 
 export type AdminNetworkListRow = {
   id: string;
@@ -11,6 +15,12 @@ export type AdminNetworkListRow = {
   nameEn: string | null;
   type: string;
   tags: string[];
+  venueType: string | null;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+  regionMain: string | null;
+  regionSub: string | null;
+  targetCategory: string[];
   totalLocations: number;
   regions: string[];
   pricePackage: number | null;
@@ -21,6 +31,25 @@ export type AdminNetworkListRow = {
   locationNames: string[];
 };
 
+export { resolveNetworkTaxonomyLabels };
+
+export function adminNetworkListRowToTaxonomyRow(
+  row: AdminNetworkListRow,
+): NetworkTaxonomyRow {
+  return {
+    type: row.type,
+    tags: row.tags,
+    venueType: row.venueType,
+    mediaMainCategory: row.mediaMainCategory,
+    mediaSubCategory: row.mediaSubCategory,
+    regionMain: row.regionMain,
+    regionSub: row.regionSub,
+    targetCategory: row.targetCategory,
+    name: row.name,
+    regions: row.regions,
+  };
+}
+
 export type NetworkTypeFilter = "all" | NetworkCatalogType;
 export type NetworkPublicFilter = "all" | "public" | "hidden";
 
@@ -30,6 +59,12 @@ type RawNetworkRow = {
   nameEn?: string | null;
   type: string;
   tags?: string[] | null;
+  venueType?: string | null;
+  mediaMainCategory?: string | null;
+  mediaSubCategory?: string | null;
+  regionMain?: string | null;
+  regionSub?: string | null;
+  targetCategory?: string[] | null;
   totalLocations: number;
   regions?: string[] | null;
   pricePackage?: number | null;
@@ -51,6 +86,12 @@ export function toAdminNetworkListRow(raw: RawNetworkRow): AdminNetworkListRow {
     nameEn: raw.nameEn ?? null,
     type: raw.type,
     tags: raw.tags ?? [],
+    venueType: raw.venueType ?? null,
+    mediaMainCategory: raw.mediaMainCategory ?? null,
+    mediaSubCategory: raw.mediaSubCategory ?? null,
+    regionMain: raw.regionMain ?? null,
+    regionSub: raw.regionSub ?? null,
+    targetCategory: raw.targetCategory ?? [],
     totalLocations: raw.totalLocations,
     regions: raw.regions ?? [],
     pricePackage: raw.pricePackage ?? null,
