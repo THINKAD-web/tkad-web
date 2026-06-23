@@ -35,6 +35,7 @@ import {
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
 import { formatMediaCategoryBadges } from "@/lib/media-category-badges";
+import { mediaPlannerRegionDisplayLabel } from "@/lib/planner/planner-regions";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -481,7 +482,13 @@ export function PlannerRecommendationPanel({
                       </p>
                     ) : null}
                     <p className="mt-1 break-words font-display text-[11px] font-medium uppercase tracking-tight text-muted-foreground">
-                      {`// `}{regionLabel(media.region)} ·{" "}
+                      {`// `}
+                      {mediaPlannerRegionDisplayLabel(
+                        media,
+                        locale,
+                        t("regionNationalShort"),
+                      ) || regionLabel(media.region ?? "")}
+                      {" · "}
                       {(isKo
                         ? media.location
                         : media.locationEn || media.location

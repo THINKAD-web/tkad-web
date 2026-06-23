@@ -36,11 +36,30 @@ export function isPlannerMapAnchorId(id: string): id is PlannerMapAnchorId {
   return (PLANNER_MAP_ANCHOR_IDS as readonly string[]).includes(id);
 }
 
+const LEGACY_MACRO_REGIONS = new Set(["seoul", "busan", "jeju", "national"]);
+
+/** 레거시 `region`이 browse `regionMain`과 충돌하면 매칭·표시에서 레거시 무시 */
+export function legacyRegionConflictsWithRegionMain(
+  legacy: string,
+  regionMain: string | undefined,
+): boolean {
+  const main = regionMain?.trim();
+  if (!main || legacy === main) return false;
+  if (legacy === "national") return false;
+  if (
+    (legacy === "seoul" || legacy === "busan" || legacy === "jeju") &&
+    main !== legacy
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function listPlannerBrowseRegionMains(): BrowseRegionMain[] {
   return listBrowseRegionMains();
 }
 
-/** 매체 1건이 플래너 지역(광역) 선택과 일치하는지 — `regionMain` 우선, 레거시 `region` 폴백 */
+/** 매체 1건이 플래너 지역(광역) 선택과 일치하는지 — `regionMain` 우선, 레거시 `region` 보조 */
 export function matchesPlannerRegion(
   media: MediaItem,
   regionId: string,
@@ -48,15 +67,30 @@ export function matchesPlannerRegion(
   const id = regionId.trim();
   if (!id) return true;
 
-  if (matchesBrowseRegion(media, id, "", "")) return true;
+  const regionMain = media.regionMain?.trim();
+
+  if (regionMain) {
+    if (regionMain === id) return true;
+    if (id === "national" && regionMain === "national") return true;
+    // regionMain이 다른 광역이면 haystack 별칭(중구 등) 오매칭·레거시 seoul 통과 차단
+  } else if (matchesBrowseRegion(media, id, "", "")) {
+    return true;
+  }
 
   const legacy = media.region?.trim();
-  if (legacy && legacy === id) return true;
+  if (
+    legacy &&
+    legacy === id &&
+    LEGACY_MACRO_REGIONS.has(legacy) &&
+    !legacyRegionConflictsWithRegionMain(legacy, regionMain)
+  ) {
+    return true;
+  }
 
   /** 레거시 `national` 버킷 + `regionMain` 세분 — 경기·인천 등 */
-  if (legacy === "national" && media.regionMain?.trim() === id) return true;
+  if (legacy === "national" && regionMain === id) return true;
 
-  if (id === "national" && legacy === "national" && !media.regionMain?.trim()) {
+  if (id === "national" && legacy === "national" && !regionMain) {
     return true;
   }
 
@@ -165,4 +199,29 @@ export function plannerRegionLabel(
 ): string {
   if (regionId === "national" && nationalShort) return nationalShort;
   return browseRegionLabel(regionId, locale, "main");
+}
+
+/** 추천 카드·플래너 — browse `regionMain`/`regionSub` 우선, 레거시 `region` 폴백 */
+export function mediaPlannerRegionDisplayLabel(
+  media: MediaItem,
+  locale = "ko",
+  nationalShort?: string,
+): string {
+  const main = media.regionMain?.trim();
+  const sub = media.regionSub?.trim();
+  if (main) {
+    const mainLabel = browseRegionLabel(main, locale, "main");
+    if (sub) {
+      const subLabel = browseRegionLabel(sub, locale, "sub", main);
+      if (subLabel && subLabel !== mainLabel) {
+        return `${mainLabel} · ${subLabel}`;
+      }
+    }
+    return mainLabel;
+  }
+  const legacy = media.region?.trim();
+  if (legacy) {
+    return plannerRegionLabel(legacy, locale, nationalShort);
+  }
+  return "";
 }

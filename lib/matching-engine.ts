@@ -14,6 +14,7 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
+import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
 
@@ -245,12 +246,16 @@ function scoreRegion(m: MediaItem, regions: string[]): number {
   let best = 0;
   for (const raw of regions) {
     const key = normalizeRegionKey(raw);
-    const def = REGION_DEFS[key];
-    if (!def) {
-      if (hay.includes(raw.toLowerCase()) || m.region === raw) best = Math.max(best, 25);
+    if (matchesPlannerRegion(m, raw) || matchesPlannerRegion(m, key)) {
+      best = Math.max(best, 25);
       continue;
     }
-    if (def.exact.test(hay) || m.region === key) best = Math.max(best, 25);
+    const def = REGION_DEFS[key];
+    if (!def) {
+      if (hay.includes(raw.toLowerCase())) best = Math.max(best, 25);
+      continue;
+    }
+    if (def.exact.test(hay)) best = Math.max(best, 25);
     else if (def.adjacent.test(hay)) best = Math.max(best, 15);
   }
   if (regions.some((r) => normalizeRegionKey(r) === "national")) {
