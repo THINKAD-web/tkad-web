@@ -155,18 +155,48 @@ function normBlob(parts: (string | null | undefined)[]): string {
     .toLowerCase();
 }
 
+/** 서울·수도권이 아닌 광역시·도 — 구명(중구 등) 오매칭 방지 */
+function metroZoneFromBlob(blob: string): MediaRegionZoneId | null {
+  if (/대구/.test(blob)) return "daegu";
+  if (/부산/.test(blob)) return "busan";
+  if (/광주/.test(blob)) return "gwangju";
+  if (/대전|세종/.test(blob)) return "daejeon";
+  if (/인천/.test(blob)) return "incheon";
+  if (/경기|수원|성남|분당|판교|용인|고양|일산|부천|안양|하남/.test(blob)) {
+    return "gyeonggi";
+  }
+  if (/울산|창원|청주|전주|춘천|강원/.test(blob)) return "other";
+  return null;
+}
+
+function isSeoulDistrictContext(blob: string, city?: string): boolean {
+  const c = (city ?? "").trim();
+  if (c) {
+    if (/서울/.test(c)) return true;
+    if (/대구|부산|광주|대전|울산|제주|인천|경기|세종/.test(c)) return false;
+  }
+  if (/대구|부산|광주|대전|울산|제주|인천|경기|세종/.test(blob)) return false;
+  return /서울/.test(blob) || !c;
+}
+
 /** 구 이름(또는 약칭) → 권역 코드 */
 export function mapDistrictToRegionZone(
   district: string | null | undefined,
   opts?: { location?: string; city?: string },
 ): MediaRegionZoneId | null {
   const d = (district ?? "").trim();
-  if (d) {
+  const blob = normBlob([opts?.city, opts?.location, district]);
+
+  const metro = metroZoneFromBlob(blob);
+  if (metro && !/서울/.test(blob)) {
+    return metro;
+  }
+
+  if (d && isSeoulDistrictContext(blob, opts?.city)) {
     const direct = DISTRICT_TO_ZONE.get(d) ?? DISTRICT_TO_ZONE.get(`${d}구`);
     if (direct) return direct;
   }
 
-  const blob = normBlob([opts?.city, opts?.location, district]);
   if (!blob) return null;
 
   for (const zone of MEDIA_REGION_ZONES) {
@@ -271,7 +301,11 @@ export function normalizeMediaLocationFields(input: {
     region = regionMacroFromZone(regionZone);
   } else if (/제주|서귀포/.test(normBlob([city, district, location]))) {
     region = "jeju";
-  } else if (/서울/.test(normBlob([city, location])) || mapDistrictToRegionZone(district, { location })) {
+  } else if (
+    /서울/.test(normBlob([city, location])) ||
+    (isSeoulDistrictContext(normBlob([city, location, district]), city) &&
+      mapDistrictToRegionZone(district, { location, city }))
+  ) {
     region = "seoul";
   } else if (/부산/.test(normBlob([city, district, location]))) {
     region = "busan";
