@@ -464,6 +464,10 @@ export default function IntegratedPlannerPageClient({
     [t],
   );
 
+  const selectScenario = useCallback((scenario: PlannerScenario) => {
+    setSelectedScenarioId(scenario.id);
+  }, []);
+
   const applyScenario = useCallback(
     (scenario: PlannerScenario) => {
       const patch = {
@@ -730,7 +734,8 @@ export default function IntegratedPlannerPageClient({
                 <PlannerScenarioCards
                   scenarios={recommendedScenarios}
                   selectedId={selectedScenarioId}
-                  onSelect={applyScenario}
+                  onSelect={selectScenario}
+                  onApply={applyScenario}
                   isKo={isKo}
                   title={t("scenariosTitle")}
                   hint={t("scenariosHint")}
@@ -878,6 +883,7 @@ export default function IntegratedPlannerPageClient({
                 categoriesText={categoriesSummary}
                 ageText={ageSummary}
                 industryText={t(industryKey)}
+                goalFollowUp={goalFollowUp}
                 portfolio={portfolio}
                 digitalResult={digitalResult}
                 metrics={integratedMetrics}

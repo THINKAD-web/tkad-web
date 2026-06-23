@@ -39,8 +39,7 @@ export function PlannerGoalFollowUpPanel({
 }: Props) {
   const t = useTranslations("planner");
 
-  /** 로컬·인지: 상권은 서울 상권 칩 / 지역 맵으로 처리 */
-  if (!goal || goal === "brand" || goal === "local") return null;
+  if (!goal) return null;
 
   const chip = (active: boolean) =>
     cn(
@@ -52,6 +51,39 @@ export function PlannerGoalFollowUpPanel({
   const kpiValue = followUp.conversionKpi ?? "";
   const kpiIsPreset = isConversionKpiPreset(kpiValue);
   const kpiCustom = kpiIsPreset ? "" : kpiValue;
+  const referenceNote = followUp.goalReferenceNote ?? "";
+
+  if (goal === "brand" || goal === "local") {
+    return (
+      <PlannerNeonCard>
+        <div className={plannerNeon.cardHeader}>
+          <PlannerNeonLabel>{t("followUpTitle")}</PlannerNeonLabel>
+          <p className={cn("mt-2 text-sm", plannerNeon.subtext)}>
+            {t("followUpDesc")}
+          </p>
+        </div>
+        <div className="space-y-5 p-5 sm:p-6">
+          <div>
+            <PlannerNeonLabel className="mb-2 block">
+              {t("followUpConversionKpi")}
+            </PlannerNeonLabel>
+            <p className={cn("mb-2 text-xs", plannerNeon.subtext)}>
+              {t("followUpConversionKpiHint")}
+            </p>
+            <input
+              type="text"
+              value={referenceNote}
+              onChange={(e) =>
+                onChange({ goalReferenceNote: e.target.value || null })
+              }
+              placeholder={t("followUpConversionKpiPh")}
+              className="w-full rounded-xl border dark:border-white/10 border-gray-200 bg-transparent px-3 py-2.5 text-sm touch-manipulation"
+            />
+          </div>
+        </div>
+      </PlannerNeonCard>
+    );
+  }
 
   return (
     <PlannerNeonCard>

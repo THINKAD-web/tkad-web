@@ -12,7 +12,10 @@ import {
 type Props = {
   scenarios: PlannerScenario[];
   selectedId: string | null;
+  /** 카드 클릭 — 선택(하이라이트)만 */
   onSelect: (scenario: PlannerScenario) => void;
+  /** 명시적 적용 버튼 — 시나리오 반영 + 단계 이동 */
+  onApply: (scenario: PlannerScenario) => void;
   isKo: boolean;
   title: string;
   hint: string;
@@ -24,6 +27,7 @@ export function PlannerScenarioCards({
   scenarios,
   selectedId,
   onSelect,
+  onApply,
   isKo,
   title,
   hint,
@@ -49,13 +53,20 @@ export function PlannerScenarioCards({
             ? scenario.descriptionKo
             : scenario.descriptionEn;
           return (
-            <button
+            <div
               key={scenario.id}
-              type="button"
+              role="button"
+              tabIndex={0}
               onClick={() => onSelect(scenario)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" || e.key === " ") {
+                  e.preventDefault();
+                  onSelect(scenario);
+                }
+              }}
               className={cn(
                 plannerNeon.selectChip,
-                "touch-manipulation p-4 text-left transition-colors",
+                "touch-manipulation cursor-pointer p-4 text-left transition-colors",
                 selected
                   ? plannerNeon.selectChipActive
                   : plannerNeon.selectChipIdle,
@@ -93,14 +104,22 @@ export function PlannerScenarioCards({
               >
                 {description}
               </p>
-              <p
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onApply(scenario);
+                }}
                 className={cn(
-                  "mt-3 text-[11px] font-medium text-violet-300/90",
+                  "mt-3 w-full rounded-lg border px-3 py-2 text-[11px] font-semibold transition-colors",
+                  selected
+                    ? "border-violet-400/50 bg-violet-500/20 text-violet-100 hover:bg-violet-500/30"
+                    : "border-violet-300/30 text-violet-300/90 hover:border-violet-300/50 hover:bg-violet-500/10",
                 )}
               >
                 {applyLabel}
-              </p>
-            </button>
+              </button>
+            </div>
           );
         })}
       </div>

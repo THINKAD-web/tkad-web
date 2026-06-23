@@ -1,12 +1,17 @@
 "use client";
 
 import type { MediaItem } from "@/lib/media-data";
+import type { PlannerCampaignGoal } from "@/lib/planner-logic";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 import { PlannerNeonLabel, plannerNeon } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 
 type Props = {
   isKo: boolean;
   goalTitle: string;
+  campaignGoal?: PlannerCampaignGoal | null;
+  goalFollowUp?: PlannerGoalFollowUp;
   budgetNum: number;
   periodDisplay: string;
   regionsText: string;
@@ -19,6 +24,8 @@ type Props = {
 export function PlannerReportFreeSummary({
   isKo,
   goalTitle,
+  campaignGoal = null,
+  goalFollowUp = {},
   budgetNum,
   periodDisplay,
   regionsText,
@@ -27,6 +34,12 @@ export function PlannerReportFreeSummary({
   industryText,
   portfolio,
 }: Props) {
+  const goalContextLines = buildGoalFollowUpReportLines(
+    campaignGoal,
+    goalFollowUp,
+    isKo,
+  );
+
   return (
     <div className="space-y-4">
       <div className={cn(plannerNeon.card, "rounded-[22px] px-4 py-3 text-sm")}>
@@ -34,6 +47,13 @@ export function PlannerReportFreeSummary({
           {isKo ? "캠페인 정보" : "Campaign info"}
         </PlannerNeonLabel>
         <p className="text-base font-bold text-gray-900 dark:text-white">{goalTitle}</p>
+        {goalContextLines.length > 0 ? (
+          <ul className="mt-2 space-y-1 text-sm text-gray-700 dark:text-white/85">
+            {goalContextLines.map((line) => (
+              <li key={line}>{line}</li>
+            ))}
+          </ul>
+        ) : null}
         <p className="mt-2 text-sm text-gray-700 dark:text-white/85">
           {isKo ? "예산" : "Budget"}: ₩{budgetNum.toLocaleString()}
           {isKo ? "만" : "M"} · {periodDisplay}

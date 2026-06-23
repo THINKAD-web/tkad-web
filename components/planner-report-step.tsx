@@ -444,6 +444,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       <PlannerReportFreeSummary
         isKo={props.isKo}
         goalTitle={props.goalTitle}
+        campaignGoal={props.campaignGoal}
+        goalFollowUp={props.goalFollowUp}
         budgetNum={props.budgetNum}
         periodDisplay={derived.periodDisplay}
         regionsText={props.regionsText}
