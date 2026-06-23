@@ -1042,8 +1042,21 @@ model MediaNetwork {
   name        String
   nameEn      String? @map("name_en")
   description String? @db.Text
-  /// bus_shelter | apartment | subway_pillar | convenience_store | golf_course | highway_rest | subway_digital_square_pillar
+  /// Catalog OOH type: digital | static | mobile (venue는 venueType / tags)
   type        String
+
+  /// 공개 /media browse 대분류 (`lib/media-browse-categories.ts`)
+  mediaMainCategory String?  @map("media_main_category")
+  /// 공개 /media browse 소분류
+  mediaSubCategory  String?  @map("media_sub_category")
+  /// 공개 browse 시도 (`lib/media-browse-regions.ts`)
+  regionMain        String?  @map("region_main")
+  /// 공개 browse 세부 지역
+  regionSub         String?  @map("region_sub")
+  /// 적합 캠페인 타겟 slug 배열
+  targetCategory    String[] @default([]) @map("target_category")
+  /// 세부 장소 유형 (bus_shelter, bookstore, …) — tags venue:* 와 동기화
+  venueType         String?  @map("venue_type")
 
   pricePerUnit Int?    @map("price_per_unit")
   pricePackage Int?    @map("price_package")
@@ -1075,6 +1088,8 @@ model MediaNetwork {
   locations MediaNetworkLocation[]
 
   @@index([isActive, type])
+  @@index([mediaMainCategory, mediaSubCategory])
+  @@index([regionMain, regionSub])
   @@map("media_networks")
 }
 

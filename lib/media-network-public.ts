@@ -6,12 +6,16 @@ import {
   NETWORK_TYPE_LABELS,
   loosePackagePrices,
   resolveNetworkCatalogType,
-  resolveNetworkVenueCode,
   type NetworkTypeCode,
   type NetworkPackageTier,
 } from "@/lib/media-network-types";
 import { inferBrowseRegionFromMedia } from "@/lib/media-browse-regions";
 import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
+import {
+  resolveNetworkBrowseForPublic,
+  resolveNetworkTargetForPublic,
+  resolveNetworkVenueCodeFromRow,
+} from "@/lib/network-taxonomy";
 
 export {
   NETWORK_TYPE_CODES,
@@ -219,7 +223,10 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
   });
 
   const catalogMainType = resolveNetworkCatalogType(n.type);
-  const venueCode = resolveNetworkVenueCode(n.type, n.tags);
+  const venueCode = resolveNetworkVenueCodeFromRow(n);
+
+  const browseTaxonomy = resolveNetworkBrowseForPublic(n);
+  const targetCategory = resolveNetworkTargetForPublic(n);
 
   const browseFromNetwork = inferBrowseRegionFromMedia({
     region: n.regions[0],
@@ -228,8 +235,8 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     location: locSummary,
   });
 
-  let browseMain = browseFromNetwork.main;
-  let browseSub = browseFromNetwork.sub;
+  let browseMain = n.regionMain?.trim() || browseFromNetwork.main;
+  let browseSub = n.regionSub?.trim() || browseFromNetwork.sub;
   for (const loc of n.locations) {
     const resolved = resolveBrowseRegionIds({
       regionMain: loc.regionMain,
@@ -244,6 +251,10 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
   }
 
   const mediaCategory = [
+    browseTaxonomy.mediaMainCategory,
+    ...(browseTaxonomy.mediaSubCategory
+      ? [browseTaxonomy.mediaSubCategory]
+      : []),
     catalogMainType,
     ...(venueCode ? [venueCode] : []),
   ];
@@ -258,8 +269,9 @@ export function prismaNetworkToMediaItem(n: MediaNetworkWithLocs): MediaItem {
     subCategory: venueCode ?? n.type,
     tags: ["network", n.type, ...(n.tags ?? [])],
     type: "network",
-    mediaMainCategory: catalogMainType,
-    mediaSubCategory: venueCode ?? undefined,
+    mediaMainCategory: browseTaxonomy.mediaMainCategory,
+    mediaSubCategory: browseTaxonomy.mediaSubCategory,
+    targetCategory,
     mediaCategory,
     price: displayPriceWon,
     pricePeriod: "month",

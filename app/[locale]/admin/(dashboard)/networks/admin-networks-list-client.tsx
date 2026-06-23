@@ -26,6 +26,8 @@ import {
   formatNetworkUpdatedAt,
   resolveRowCatalogType,
   toAdminNetworkListRow,
+  adminNetworkListRowToTaxonomyRow,
+  resolveNetworkTaxonomyLabels,
   type AdminNetworkListRow,
   type NetworkPublicFilter,
   type NetworkTypeFilter,
@@ -230,6 +232,35 @@ export default function AdminNetworksListClient({
     </div>
   );
 
+  const renderTaxonomyWarnings = (row: AdminNetworkListRow) => {
+    const labels = resolveNetworkTaxonomyLabels(
+      adminNetworkListRowToTaxonomyRow(row),
+      locale,
+    );
+    if (labels.warnings.length === 0) return null;
+    return (
+      <Badge
+        variant="outline"
+        className="border-amber-500/50 bg-amber-50 text-[10px] text-amber-900"
+        title={
+          isKo
+            ? `미설정: ${labels.warnings.join(", ")}`
+            : `Missing: ${labels.warnings.join(", ")}`
+        }
+      >
+        {isKo ? "카테고리 미설정" : "Taxonomy"}
+      </Badge>
+    );
+  };
+
+  const renderRowTaxonomy = (row: AdminNetworkListRow) => {
+    const tx = resolveNetworkTaxonomyLabels(
+      adminNetworkListRowToTaxonomyRow(row),
+      locale,
+    );
+    return tx;
+  };
+
   const emptyMessage =
     rows.length === 0
       ? isKo
@@ -363,7 +394,9 @@ export default function AdminNetworksListClient({
             </div>
           ) : (
             <ul className="divide-y divide-border">
-              {paginated.map((row) => (
+              {paginated.map((row) => {
+                const tx = renderRowTaxonomy(row);
+                return (
                 <li
                   key={row.id}
                   className={`border-l-[3px] px-3 py-3 ${
@@ -374,17 +407,33 @@ export default function AdminNetworksListClient({
                 >
                   <div className="flex items-start justify-between gap-3">
                     <div className="min-w-0 flex-1 space-y-1.5">
-                      <p className="text-sm font-semibold leading-snug">{row.name}</p>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <p className="text-sm font-semibold leading-snug">{row.name}</p>
+                        {renderTaxonomyWarnings(row)}
+                      </div>
                       <div className="flex flex-wrap gap-1.5">
                         <Badge variant="outline" className="text-[10px]">
                           {catalogLabel(row)}
                         </Badge>
+                        {tx.venueLabel ? (
+                          <Badge variant="outline" className="text-[10px]">
+                            {tx.venueLabel}
+                          </Badge>
+                        ) : null}
                         <Badge variant="secondary" className="text-[10px]">
                           {t("registeredPins", { count: row._count.locations })}
                         </Badge>
                       </div>
+                      {tx.browseLabel ? (
+                        <p className="text-xs text-muted-foreground">{tx.browseLabel}</p>
+                      ) : null}
+                      {tx.targetLabels.length > 0 ? (
+                        <p className="text-xs text-muted-foreground">
+                          {tx.targetLabels.join(" · ")}
+                        </p>
+                      ) : null}
                       <p className="text-xs text-muted-foreground">
-                        {formatNetworkRegionsSummary(row.regions, locale)}
+                        {tx.regionLabel ?? formatNetworkRegionsSummary(row.regions, locale)}
                       </p>
                       {row.pricePackage != null && (
                         <p className="text-xs text-muted-foreground">
@@ -397,35 +446,40 @@ export default function AdminNetworksListClient({
                   </div>
                   <div className="mt-3">{renderRowActions(row, true)}</div>
                 </li>
-              ))}
+              );
+              })}
             </ul>
           )}
         </div>
 
         {/* Desktop table */}
         <div className="hidden overflow-x-auto md:block">
-          <table className="w-full min-w-[48rem] table-fixed text-sm">
+          <table className="w-full min-w-[72rem] table-fixed text-sm">
             <thead>
               <tr className="border-b bg-muted/40 text-left text-xs font-medium text-foreground/80 dark:bg-muted/20">
-                <th className="w-[28%] min-w-[10rem] px-3 py-2.5">{isKo ? "이름" : "Name"}</th>
-                <th className="w-[5.5rem] px-2 py-2.5">{isKo ? "유형" : "Type"}</th>
-                <th className="w-20 px-2 py-2.5 text-center">{isKo ? "공개" : "Public"}</th>
-                <th className="w-16 px-2 py-2.5 text-center">{isKo ? "지점" : "Sites"}</th>
-                <th className="w-24 px-2 py-2.5">{isKo ? "패키지가" : "Package"}</th>
-                <th className="w-[18%] min-w-[7rem] px-2 py-2.5">{isKo ? "지역" : "Regions"}</th>
-                <th className="w-24 px-2 py-2.5">{isKo ? "수정일" : "Updated"}</th>
-                <th className="w-[11rem] px-2 py-2.5 text-center">{isKo ? "관리" : "Actions"}</th>
+                <th className="w-[16%] min-w-[8rem] px-3 py-2.5">{isKo ? "이름" : "Name"}</th>
+                <th className="w-14 px-1.5 py-2.5">{isKo ? "유형" : "Type"}</th>
+                <th className="w-20 px-1.5 py-2.5">{isKo ? "Venue" : "Venue"}</th>
+                <th className="w-[14%] min-w-[6rem] px-1.5 py-2.5">Browse</th>
+                <th className="w-[10%] min-w-[5rem] px-1.5 py-2.5">{isKo ? "타깃" : "Target"}</th>
+                <th className="w-16 px-1.5 py-2.5 text-center">{isKo ? "공개" : "Public"}</th>
+                <th className="w-12 px-1.5 py-2.5 text-center">{isKo ? "지점" : "Sites"}</th>
+                <th className="w-[10%] min-w-[5rem] px-1.5 py-2.5">{isKo ? "지역" : "Regions"}</th>
+                <th className="w-20 px-1.5 py-2.5">{isKo ? "수정일" : "Updated"}</th>
+                <th className="w-[9rem] px-1.5 py-2.5 text-center">{isKo ? "관리" : "Actions"}</th>
               </tr>
             </thead>
             <tbody>
               {paginated.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-3 py-8 text-center text-muted-foreground">
+                  <td colSpan={10} className="px-3 py-8 text-center text-muted-foreground">
                     {emptyMessage}
                   </td>
                 </tr>
               ) : (
-                paginated.map((row) => (
+                paginated.map((row) => {
+                  const tx = renderRowTaxonomy(row);
+                  return (
                   <tr
                     key={row.id}
                     className={`border-b last:border-0 border-l-[3px] transition-colors ${
@@ -435,8 +489,11 @@ export default function AdminNetworksListClient({
                     }`}
                   >
                     <td className="min-w-0 px-3 py-2.5 align-middle">
-                      <div className="truncate font-medium" title={row.name}>
-                        {row.name}
+                      <div className="flex flex-wrap items-center gap-1">
+                        <span className="truncate font-medium" title={row.name}>
+                          {row.name}
+                        </span>
+                        {renderTaxonomyWarnings(row)}
                       </div>
                       {row.nameEn ? (
                         <div className="truncate text-xs text-muted-foreground" title={row.nameEn}>
@@ -444,42 +501,56 @@ export default function AdminNetworksListClient({
                         </div>
                       ) : null}
                     </td>
-                    <td className="px-2 py-2.5 align-middle">
+                    <td className="px-1.5 py-2.5 align-middle">
                       <Badge
                         variant="secondary"
-                        className="max-w-full truncate text-[11px]"
+                        className="max-w-full truncate text-[10px]"
                         title={catalogLabel(row)}
                       >
                         {catalogLabel(row)}
                       </Badge>
                     </td>
-                    <td className="px-2 py-2.5 text-center align-middle">
-                      {renderActiveToggle(row)}
+                    <td className="px-1.5 py-2.5 align-middle text-xs text-muted-foreground">
+                      {tx.venueLabel ?? "—"}
                     </td>
-                    <td className="px-2 py-2.5 text-center align-middle tabular-nums text-muted-foreground">
-                      {row._count.locations}
-                    </td>
-                    <td className="px-2 py-2.5 align-middle text-xs tabular-nums">
-                      {row.pricePackage != null
-                        ? `${row.pricePackage.toLocaleString()}${isKo ? "만" : "K"}`
-                        : "—"}
-                    </td>
-                    <td className="px-2 py-2.5 align-middle">
+                    <td className="px-1.5 py-2.5 align-middle">
                       <span
                         className="line-clamp-2 text-xs text-muted-foreground"
-                        title={formatNetworkRegionsSummary(row.regions, locale)}
+                        title={tx.browseLabel ?? undefined}
                       >
-                        {formatNetworkRegionsSummary(row.regions, locale)}
+                        {tx.browseLabel ?? "—"}
                       </span>
                     </td>
-                    <td className="px-2 py-2.5 align-middle text-xs text-muted-foreground tabular-nums">
+                    <td className="px-1.5 py-2.5 align-middle">
+                      <span className="line-clamp-2 text-[10px] text-muted-foreground">
+                        {tx.targetLabels.length > 0
+                          ? tx.targetLabels.join(", ")
+                          : "—"}
+                      </span>
+                    </td>
+                    <td className="px-1.5 py-2.5 text-center align-middle">
+                      {renderActiveToggle(row)}
+                    </td>
+                    <td className="px-1.5 py-2.5 text-center align-middle tabular-nums text-muted-foreground">
+                      {row._count.locations}
+                    </td>
+                    <td className="px-1.5 py-2.5 align-middle">
+                      <span
+                        className="line-clamp-2 text-xs text-muted-foreground"
+                        title={tx.regionLabel ?? formatNetworkRegionsSummary(row.regions, locale)}
+                      >
+                        {tx.regionLabel ?? formatNetworkRegionsSummary(row.regions, locale)}
+                      </span>
+                    </td>
+                    <td className="px-1.5 py-2.5 align-middle text-xs text-muted-foreground tabular-nums">
                       {formatNetworkUpdatedAt(row.updatedAt, locale)}
                     </td>
-                    <td className="px-2 py-2.5 align-middle">
+                    <td className="px-1.5 py-2.5 align-middle">
                       {renderRowActions(row)}
                     </td>
                   </tr>
-                ))
+                );
+                })
               )}
             </tbody>
           </table>

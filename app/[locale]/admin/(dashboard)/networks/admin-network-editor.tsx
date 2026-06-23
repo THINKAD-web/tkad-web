@@ -13,7 +13,8 @@ import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
 import {
   NETWORK_CATALOG_TYPES,
   NETWORK_CATALOG_TYPE_LABELS,
-  resolveNetworkCatalogType,
+  NETWORK_TYPE_LABELS,
+  type NetworkCatalogType,
 } from "@/lib/media-network-types";
 import { parseNetworkLocationsCsv } from "@/lib/network-locations-csv";
 import {
@@ -21,6 +22,14 @@ import {
   parseAndBuildNetworkCreateBodyFromObject,
 } from "@/lib/network-quick-add";
 import { resolveBrowseRegionIds } from "@/lib/network-location-enrich";
+import { AdminMediaCategoryFields } from "@/components/admin/admin-media-category-fields";
+import {
+  NETWORK_VENUE_OPTIONS,
+  networkTaxonomyFromRow,
+  networkTaxonomyToPatch,
+  suggestBrowseFromVenue,
+  type NetworkTaxonomyFormState,
+} from "@/lib/network-taxonomy";
 
 export type SerializedNetwork = {
   id: string;
@@ -46,6 +55,12 @@ export type SerializedNetwork = {
   effectMemo: string | null;
   operatingHours: string | null;
   tags: string[];
+  venueType: string | null;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+  regionMain: string | null;
+  regionSub: string | null;
+  targetCategory: string[];
   isActive: boolean;
   locations: Array<{
     name: string;
@@ -101,6 +116,34 @@ function serializePackageOptions(raw: unknown): string {
   }
 }
 
+function initialTaxonomy(init: SerializedNetwork | null): NetworkTaxonomyFormState {
+  if (!init) {
+    return {
+      catalogType: "digital",
+      venueCode: "",
+      browseMain: "",
+      browseSub: "",
+      regionMain: "",
+      regionSub: "",
+      targetSlugs: [],
+    };
+  }
+  return networkTaxonomyFromRow({
+    type: init.type,
+    tags: init.tags,
+    venueType: init.venueType,
+    mediaMainCategory: init.mediaMainCategory,
+    mediaSubCategory: init.mediaSubCategory,
+    regionMain: init.regionMain,
+    regionSub: init.regionSub,
+    targetCategory: init.targetCategory,
+    name: init.name,
+    description: init.description,
+    regions: init.regions,
+    locations: init.locations,
+  });
+}
+
 type Props =
   | { mode: "create"; initial?: undefined }
   | { mode: "edit"; initial: SerializedNetwork };
@@ -113,12 +156,25 @@ export default function AdminNetworkEditor(props: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
 
   const init = props.mode === "edit" ? props.initial : null;
+  const taxonomyInit = initialTaxonomy(init);
 
   const [name, setName] = useState(init?.name ?? "");
   const [nameEn, setNameEn] = useState(init?.nameEn ?? "");
   const [description, setDescription] = useState(init?.description ?? "");
-  const [type, setType] = useState(
-    () => resolveNetworkCatalogType(init?.type ?? "digital"),
+  const [catalogType, setCatalogType] = useState<NetworkCatalogType>(
+    taxonomyInit.catalogType,
+  );
+  const [venueCode, setVenueCode] = useState(taxonomyInit.venueCode);
+  const [browseMain, setBrowseMain] = useState(taxonomyInit.browseMain);
+  const [browseSub, setBrowseSub] = useState(taxonomyInit.browseSub);
+  const [browseRegionMain, setBrowseRegionMain] = useState(
+    taxonomyInit.regionMain,
+  );
+  const [browseRegionSub, setBrowseRegionSub] = useState(
+    taxonomyInit.regionSub,
+  );
+  const [targetSlugs, setTargetSlugs] = useState<string[]>(
+    taxonomyInit.targetSlugs,
   );
   const [regionsText, setRegionsText] = useState(
     (init?.regions ?? []).join(", "),
@@ -288,11 +344,30 @@ export default function AdminNetworkEditor(props: Props) {
         ? null
         : Math.round(Number(dailyFootfall) || 0);
 
+    const taxonomy = networkTaxonomyToPatch(
+      {
+        catalogType,
+        venueCode,
+        browseMain,
+        browseSub,
+        regionMain: browseRegionMain,
+        regionSub: browseRegionSub,
+        targetSlugs,
+      },
+      tagsArray(),
+    );
+
     return {
       name: name.trim(),
       nameEn: nameEn.trim() || null,
       description: description.trim() || null,
-      type,
+      type: taxonomy.type,
+      venueType: taxonomy.venueType,
+      mediaMainCategory: taxonomy.mediaMainCategory,
+      mediaSubCategory: taxonomy.mediaSubCategory,
+      regionMain: taxonomy.regionMain,
+      regionSub: taxonomy.regionSub,
+      targetCategory: taxonomy.targetCategory,
       totalLocations: tl,
       regions: regionsArr(),
       pricePerUnit: ppu,
@@ -312,7 +387,7 @@ export default function AdminNetworkEditor(props: Props) {
       targetAge: targetAge.trim() || null,
       effectMemo: effectMemo.trim() || null,
       operatingHours: operatingHours.trim() || null,
-      tags: tagsArray(),
+      tags: taxonomy.tags,
       isActive,
       locations,
     };
@@ -320,7 +395,13 @@ export default function AdminNetworkEditor(props: Props) {
     name,
     nameEn,
     description,
-    type,
+    catalogType,
+    venueCode,
+    browseMain,
+    browseSub,
+    browseRegionMain,
+    browseRegionSub,
+    targetSlugs,
     regionsArr,
     pricePerUnit,
     pricePackage,
@@ -511,7 +592,6 @@ export default function AdminNetworkEditor(props: Props) {
     } else {
       if (packageOptionsText.trim()) {
         try {
-          // 검증만 수행 (실제 변환은 buildFormBody에서 처리)
           void parsePackageOptionsField();
         } catch {
           setError(
@@ -521,6 +601,23 @@ export default function AdminNetworkEditor(props: Props) {
           );
           return;
         }
+      }
+      try {
+        networkTaxonomyToPatch(
+          {
+            catalogType,
+            venueCode,
+            browseMain,
+            browseSub,
+            regionMain: browseRegionMain,
+            regionSub: browseRegionSub,
+            targetSlugs,
+          },
+          tagsArray(),
+        );
+      } catch (e) {
+        setError(e instanceof Error ? e.message : "카테고리 입력을 확인하세요.");
+        return;
       }
     }
 
@@ -585,6 +682,14 @@ export default function AdminNetworkEditor(props: Props) {
     router,
     t,
     locale,
+    catalogType,
+    venueCode,
+    browseMain,
+    browseSub,
+    browseRegionMain,
+    browseRegionSub,
+    targetSlugs,
+    tagsArray,
   ]);
 
   return (
@@ -676,23 +781,53 @@ export default function AdminNetworkEditor(props: Props) {
             </label>
             <Input value={nameEn} onChange={(e) => setNameEn(e.target.value)} />
           </div>
-          <div className="grid gap-2">
-            <label className="text-sm font-medium text-slate-700">
-              {t("type")}
-            </label>
-            <select
-              className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
-              value={type}
-              onChange={(e) => setType(e.target.value)}
-            >
-              {NETWORK_CATALOG_TYPES.map((code) => (
-                <option key={code} value={code}>
-                  {NETWORK_CATALOG_TYPE_LABELS[code]?.[
-                    locale === "en" ? "en" : "ko"
-                  ] ?? code}
-                </option>
-              ))}
-            </select>
+          <div className="grid gap-2 sm:grid-cols-2">
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {isKo ? "네트워크 장소 유형 (venue)" : "Venue type"}
+              </label>
+              <select
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                value={venueCode}
+                onChange={(e) => {
+                  const v = e.target.value;
+                  setVenueCode(v);
+                  if (v && !browseMain) {
+                    const suggested = suggestBrowseFromVenue(v);
+                    if (suggested) {
+                      setBrowseMain(suggested.main);
+                      setBrowseSub(suggested.sub);
+                    }
+                  }
+                }}
+              >
+                <option value="">{isKo ? "선택…" : "Select…"}</option>
+                {NETWORK_VENUE_OPTIONS.map((code) => (
+                  <option key={code} value={code}>
+                    {NETWORK_TYPE_LABELS[code]?.[isKo ? "ko" : "en"] ?? code}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div className="grid gap-2">
+              <label className="text-sm font-medium text-slate-700">
+                {isKo ? "카탈로그 유형 (digital/static/mobile)" : "Catalog type"}
+              </label>
+              <select
+                className="flex h-10 w-full rounded-md border border-slate-200 bg-white px-3 text-sm"
+                value={catalogType}
+                onChange={(e) =>
+                  setCatalogType(e.target.value as NetworkCatalogType)
+                }
+              >
+                {NETWORK_CATALOG_TYPES.map((code) => (
+                  <option key={code} value={code}>
+                    {NETWORK_CATALOG_TYPE_LABELS[code]?.[isKo ? "ko" : "en"] ??
+                      code}
+                  </option>
+                ))}
+              </select>
+            </div>
           </div>
           <div className="grid gap-2">
             <label className="text-sm font-medium text-slate-700">
@@ -754,6 +889,37 @@ export default function AdminNetworkEditor(props: Props) {
           </label>
         </CardContent>
           </Card>
+
+          <AdminMediaCategoryFields
+            locale={locale}
+            browseMain={browseMain}
+            browseSub={browseSub}
+            regionMain={browseRegionMain}
+            regionSub={browseRegionSub}
+            onBrowseMainChange={(slug) => {
+              setBrowseMain(slug);
+              setBrowseSub("");
+            }}
+            onBrowseSubChange={setBrowseSub}
+            onRegionMainChange={(slug) => {
+              setBrowseRegionMain(slug);
+              setBrowseRegionSub("");
+            }}
+            onRegionSubChange={setBrowseRegionSub}
+            parentSlug=""
+            subSlugs={[]}
+            targetSlugs={targetSlugs}
+            onParentChange={() => {}}
+            onToggleSub={() => {}}
+            onToggleTarget={(slug) =>
+              setTargetSlugs((prev) =>
+                prev.includes(slug)
+                  ? prev.filter((s) => s !== slug)
+                  : [...prev, slug],
+              )
+            }
+            hideLegacySeo
+          />
 
           <Card>
         <CardHeader>
