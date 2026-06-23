@@ -1363,11 +1363,33 @@ html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-gra
 html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
   color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
+  background-color: rgb(255 255 255) !important;
+}
+
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface *,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface * {
+  -webkit-text-fill-color: currentColor !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"],
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
   -webkit-text-fill-color: currentColor !important;
+}
+
+/* 밤 네온에서 text-foreground 등이 흰색으로 재매핑되면 흰 문서 위에서 사라짐 */
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-foreground,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-muted-foreground,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface [class*="text-foreground/"] {
+  color: inherit !important;
+}
+
+/* 사이트 다크 + 보고서 라이트 고정: dark:text-white* 유틸 무력화 */
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-white"] {
+  color: rgb(55 65 81) !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-violet"] {
+  color: rgb(124 58 237) !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta,

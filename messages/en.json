@@ -289,6 +289,8 @@
   },
   "planNav": {
     "cart": "Selected media",
+    "cartClear": "Clear",
+    "cartClearAria": "Clear all selected media",
     "saved": "Saved plans",
     "plannerResults": "Planner results",
     "newPlan": "New plan"

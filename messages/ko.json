@@ -289,6 +289,8 @@
   },
   "planNav": {
     "cart": "담은 매체",
+    "cartClear": "비우기",
+    "cartClearAria": "담은 매체 모두 비우기",
     "saved": "저장한 플랜",
     "plannerResults": "플래너 결과",
     "newPlan": "새 플랜"

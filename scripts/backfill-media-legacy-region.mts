@@ -55,12 +55,26 @@ async function main() {
     return legacy !== expected;
   });
 
+  const nationalMacroRegional = rows.filter((r) => {
+    const legacy = (r.region ?? "").trim().toLowerCase();
+    const main = r.regionMain?.trim();
+    return legacy === "national" && !!main && main !== "national";
+  });
+
   console.log(
     JSON.stringify(
       {
         mode: apply ? "apply" : "dry-run",
         activeWithRegionMain: rows.length,
         correctionTargets: targets.length,
+        nationalMacroWithRegionalMain: nationalMacroRegional.length,
+        nationalMacroSample: nationalMacroRegional.slice(0, 10).map((r) => ({
+          id: r.id,
+          name: r.name,
+          region: r.region,
+          regionMain: r.regionMain,
+          note: "매칭·표시는 regionMain 우선 정책으로 처리 (legacy region=national 유지)",
+        })),
         sample: targets.slice(0, 15).map((r) => ({
           id: r.id,
           name: r.name,
