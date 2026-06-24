@@ -37,7 +37,15 @@ export type MapBounds = {
  */
 export type MapViewCommand =
   | { type: "fitMarkers"; auto?: boolean; nonce: number }
-  | { type: "focusMarker"; lat: number; lng: number; level: number; nonce: number }
+  | {
+      type: "focusMarker";
+      lat: number;
+      lng: number;
+      level: number;
+      nonce: number;
+      /** false면 pan/setCenter 만 — 줌아웃 후 재실행 시 레벨 덮어쓰기 방지 */
+      adjustLevel?: boolean;
+    }
   | null;
 
 type Props = {
@@ -49,6 +57,8 @@ type Props = {
   onBoundsChange: (b: MapBounds) => void;
   /** 지도 idle 시점에 현재 중심·줌을 알림. URL state 동기화용. */
   onViewChange?: (view: { lat: number; lng: number; zoom: number }) => void;
+  /** 사용자가 직접 드래그/줌한 뒤 1회 알림 — 선택 재포커스 억제용 */
+  onUserViewportAdjusted?: () => void;
   onMarkerDetail?: (id: string) => void;
   center?: { lat: number; lng: number };
   zoom?: number;
@@ -89,6 +99,32 @@ const TKAD_CLUSTER_CALCULATOR = [5, 14, 35, 90] as const;
 /** MarkerClusterer `minLevel` 과 동기화 — 이보다 확대(숫자↓)되면 개별 마커 노출 */
 const TKAD_CLUSTER_MIN_LEVEL = 5;
 const TKAD_CLUSTER_UNCLUSTER_LEVEL = TKAD_CLUSTER_MIN_LEVEL - 1;
+/** 프로그램적 줌인 하한 — 카카오 레벨 1~2 과확대 방지 (숫자가 작을수록 확대) */
+const TKAD_PROGRAMMATIC_MIN_LEVEL = 3;
+
+function clampProgrammaticZoomLevel(level: number): number {
+  return Math.max(
+    TKAD_PROGRAMMATIC_MIN_LEVEL,
+    Math.min(14, Math.round(level)),
+  );
+}
+
+/** 현재보다 확대(레벨 숫자 감소)할 때만 setLevel — 줌아웃은 사용자에게 맡김 */
+function programmaticZoomInLevel(
+  currentLevel: number,
+  targetLevel: number,
+): number | null {
+  const target = clampProgrammaticZoomLevel(targetLevel);
+  if (target >= currentLevel) return null;
+  return target;
+}
+
+function clampMapZoomInIfNeeded(map: KakaoMapFocusApi) {
+  const cur = map.getLevel?.();
+  if (cur != null && cur < TKAD_PROGRAMMATIC_MIN_LEVEL) {
+    map.setLevel?.(TKAD_PROGRAMMATIC_MIN_LEVEL);
+  }
+}
 
 const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
   const mk = (px: number, fs: string, accent: string, glow: string) => {
@@ -487,7 +523,8 @@ function runAfterMapIdle(
 function forceUnclusterLevel(map: KakaoMapFocusApi) {
   const level = map.getLevel?.() ?? TKAD_CLUSTER_MIN_LEVEL + 1;
   if (level > TKAD_CLUSTER_UNCLUSTER_LEVEL) {
-    map.setLevel?.(TKAD_CLUSTER_UNCLUSTER_LEVEL);
+    const zoomIn = programmaticZoomInLevel(level, TKAD_CLUSTER_UNCLUSTER_LEVEL);
+    if (zoomIn != null) map.setLevel?.(zoomIn);
   }
 }
 function latLngDist2(
@@ -585,10 +622,12 @@ function focusMapOnPosition(
   visiblePositions: unknown[],
   opts?: { ensureVisible?: boolean },
 ) {
-  const level = Math.max(1, Math.min(14, targetLevel));
+  const level = clampProgrammaticZoomLevel(targetLevel);
   if (typeof map.setCenter === "function") map.setCenter(focusPos);
   else map.panTo?.(focusPos);
-  map.setLevel?.(level);
+  const current = map.getLevel?.() ?? level;
+  const zoomIn = programmaticZoomInLevel(current, level);
+  if (zoomIn != null) map.setLevel?.(zoomIn);
 
   if (opts?.ensureVisible === false) return;
 
@@ -626,8 +665,13 @@ function zoomClusterIn(
     const pos = markerPositions[0];
     map.setCenter?.(pos);
     const current = map.getLevel?.() ?? 8;
-    map.setLevel?.(Math.max(1, Math.min(current - 2, TKAD_CLUSTER_UNCLUSTER_LEVEL)));
-    runAfterMapIdle(map, kakao, finish);
+    const target = Math.min(current - 2, TKAD_CLUSTER_UNCLUSTER_LEVEL);
+    const zoomIn = programmaticZoomInLevel(current, target);
+    if (zoomIn != null) map.setLevel?.(zoomIn);
+    runAfterMapIdle(map, kakao, () => {
+      clampMapZoomInIfNeeded(map);
+      finish();
+    });
     return;
   }
 
@@ -657,6 +701,7 @@ function zoomClusterIn(
   if (compact && map.setBounds) {
     map.setBounds(bounds, 56, 56, 56, 56);
     runAfterMapIdle(map, kakao, () => {
+      clampMapZoomInIfNeeded(map);
       ensureAtLeastOneMarkerVisible(map, kakao, markerPositions, center);
       finish();
     });
@@ -669,8 +714,10 @@ function zoomClusterIn(
   const next = Math.max(TKAD_CLUSTER_UNCLUSTER_LEVEL, current - steps);
   const focus = center ?? markerPositions[0];
   if (focus) map.setCenter?.(focus);
-  map.setLevel?.(next);
+  const zoomIn = programmaticZoomInLevel(current, next);
+  if (zoomIn != null) map.setLevel?.(zoomIn);
   runAfterMapIdle(map, kakao, () => {
+    clampMapZoomInIfNeeded(map);
     ensureAtLeastOneMarkerVisible(map, kakao, markerPositions, focus);
     finish();
   });
@@ -683,6 +730,7 @@ export default function KakaoMapView({
   onSelect,
   onBoundsChange,
   onViewChange,
+  onUserViewportAdjusted,
   onMarkerDetail,
   center = { lat: 37.5665, lng: 126.978 },
   zoom = 8,
@@ -709,8 +757,10 @@ export default function KakaoMapView({
   const onMarkerDetailRef = useRef(onMarkerDetail);
   const onSelectRef = useRef(onSelect);
   const onViewChangeRef = useRef(onViewChange);
+  const onUserViewportAdjustedRef = useRef(onUserViewportAdjusted);
   const markersRef = useRef<MapMarker[]>(markers);
   const lastProgrammaticNonceRef = useRef<number | null>(null);
+  const lastExecutedCommandNonceRef = useRef<number | null>(null);
   const lastAutoFocusKeyRef = useRef<string | null>(null);
   const userViewportAdjustedRef = useRef(false);
   const programmaticApplyRef = useRef(false);
@@ -737,17 +787,23 @@ export default function KakaoMapView({
   }, [onViewChange]);
 
   useEffect(() => {
+    onUserViewportAdjustedRef.current = onUserViewportAdjusted;
+  }, [onUserViewportAdjusted]);
+
+  useEffect(() => {
     markersRef.current = markers;
   }, [markers]);
 
   useEffect(() => {
     lastAutoFocusKeyRef.current = null;
-    userViewportAdjustedRef.current = false;
   }, [selectedId]);
 
   const markUserViewportAdjusted = useCallback(() => {
     if (programmaticApplyRef.current) return;
-    userViewportAdjustedRef.current = true;
+    if (!userViewportAdjustedRef.current) {
+      userViewportAdjustedRef.current = true;
+      onUserViewportAdjustedRef.current?.();
+    }
   }, []);
 
   const isMarkerMapImage = useCallback((img: HTMLImageElement) => {
@@ -1275,6 +1331,7 @@ export default function KakaoMapView({
       const bounds = new kakao.maps.LatLngBounds();
       for (const m of valid) bounds.extend(new kakao.maps.LatLng(m.lat, m.lng));
       map.setBounds(bounds, 56, 56, 56, 56);
+      window.setTimeout(() => clampMapZoomInIfNeeded(map), 0);
     } catch {
       /* ignore */
     }
@@ -1328,6 +1385,8 @@ export default function KakaoMapView({
   // 이후 사용자 조정 상태로 표시 → effect 경쟁/리셋 구조 제거. main 의 제스처 신호 재사용.
   useEffect(() => {
     if (!usesCommandChannel || !command || !mapReady) return;
+    if (lastExecutedCommandNonceRef.current === command.nonce) return;
+    lastExecutedCommandNonceRef.current = command.nonce;
     const map = mapRef.current as KakaoMapFocusApi | null;
     const kakao = getKakaoSdk();
     if (!map || !kakao?.maps) return;
@@ -1353,13 +1412,18 @@ export default function KakaoMapView({
         map.setBounds?.(bounds, 56, 56, 56, 56);
         window.setTimeout(() => {
           programmaticApplyRef.current = false;
+          clampMapZoomInIfNeeded(map);
         }, 0);
       } else if (command.type === "focusMarker") {
         const pos = new kakao.maps.LatLng(command.lat, command.lng);
         programmaticApplyRef.current = true;
         map.setCenter?.(pos);
-        map.setLevel?.(Math.max(1, Math.min(14, command.level)));
-        // 명시적 사용자 의도 → 이후 auto fit 차단
+        const adjustLevel = command.adjustLevel !== false;
+        if (adjustLevel) {
+          const current = map.getLevel?.() ?? command.level;
+          const zoomIn = programmaticZoomInLevel(current, command.level);
+          if (zoomIn != null) map.setLevel?.(zoomIn);
+        }
         userViewportAdjustedRef.current = true;
         window.setTimeout(() => {
           programmaticApplyRef.current = false;
