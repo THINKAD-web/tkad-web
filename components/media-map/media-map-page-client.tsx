@@ -186,13 +186,24 @@ export default function MediaMapPageClient() {
     return null;
   });
   const emitMapCommand = useCallback(
-    (cmd: { lat: number; lng: number; level: number }) => {
+    (cmd: {
+      lat: number;
+      lng: number;
+      level: number;
+      adjustLevel?: boolean;
+      /** true면 사용자 조작 플래그를 리셋(명시적 지역/위치 이동) */
+      resetUserViewport?: boolean;
+    }) => {
+      if (cmd.resetUserViewport) {
+        userViewportAdjustedRef.current = false;
+      }
       cmdNonceRef.current += 1;
       setMapCommand({
         type: "focusMarker",
         lat: cmd.lat,
         lng: cmd.lng,
         level: cmd.level,
+        adjustLevel: cmd.adjustLevel !== false,
         nonce: cmdNonceRef.current,
       });
     },
@@ -205,6 +216,8 @@ export default function MediaMapPageClient() {
   );
   const listItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const regionPanSkipRef = useRef(true);
+  const userViewportAdjustedRef = useRef(false);
+  const lastFocusedSelectionRef = useRef<string | null>(null);
 
   useEffect(() => {
     itemsRef.current = items;
@@ -216,7 +229,12 @@ export default function MediaMapPageClient() {
     const bf = initMapBrowseFiltersFromUrl(init);
     const mapView = resolveBrowseRegionMapView(bf.regionMain, bf.regionSub);
     if (!mapView) return;
-    emitMapCommand({ lat: mapView.lat, lng: mapView.lng, level: mapView.zoom });
+    emitMapCommand({
+      lat: mapView.lat,
+      lng: mapView.lng,
+      level: mapView.zoom,
+      resetUserViewport: true,
+    });
   }, [emitMapCommand]);
 
   useEffect(() => {
@@ -337,7 +355,12 @@ export default function MediaMapPageClient() {
       browseFilters.regionSub,
     );
     if (!mapView) return;
-    emitMapCommand({ lat: mapView.lat, lng: mapView.lng, level: mapView.zoom });
+    emitMapCommand({
+      lat: mapView.lat,
+      lng: mapView.lng,
+      level: mapView.zoom,
+      resetUserViewport: true,
+    });
   }, [browseFilters.regionMain, browseFilters.regionSub, emitMapCommand]);
 
   const markers: MapMarker[] = useMemo(() => {
@@ -375,18 +398,20 @@ export default function MediaMapPageClient() {
     el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
   }, [selectedId, items]);
 
+  const handleUserViewportAdjusted = useCallback(() => {
+    userViewportAdjustedRef.current = true;
+  }, []);
+
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
   // itemsRef/markersRef 를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
   const handleSelect = useCallback(
     (id: string) => {
+      userViewportAdjustedRef.current = false;
+      lastFocusedSelectionRef.current = id;
       setSelectedId(id);
       const mediaId = resolveMediaIdFromMapPinId(id);
       const item = itemsRef.current.find((i) => i.id === mediaId);
       if (item) setSelectedItem(item);
-      // 선택한 핀으로 클로즈업(pan + zoom-in). 명령 채널의 focusMarker 가 단일 실행.
-      // 현재보다 확대만 — 이미 가까우면 줌아웃하지 않는다.
-      // 지도 마커 클릭은 핀 id 가 정확히 일치하고, 목록 카드 클릭(매체 id)은 복수 설치
-      // 매체의 첫 핀으로 폴백한다.
       const mk =
         markersRef.current.find((m) => m.id === id) ??
         markersRef.current.find(
@@ -396,7 +421,7 @@ export default function MediaMapPageClient() {
         const cur = viewRef.current?.zoom;
         const level =
           cur != null ? Math.min(cur, MARKER_FOCUS_ZOOM) : MARKER_FOCUS_ZOOM;
-        emitMapCommand({ lat: mk.lat, lng: mk.lng, level });
+        emitMapCommand({ lat: mk.lat, lng: mk.lng, level, adjustLevel: true });
       }
     },
     [emitMapCommand],
@@ -508,7 +533,7 @@ export default function MediaMapPageClient() {
           return;
         }
         setUserLocation({ lat, lng });
-        emitMapCommand({ lat, lng, level: 5 });
+        emitMapCommand({ lat, lng, level: 5, resetUserViewport: true });
         toast.success("현위치를 지도에 표시했습니다.");
         setLocating(false);
       },
@@ -566,6 +591,7 @@ export default function MediaMapPageClient() {
               onSelect={handleSelect}
               onBoundsChange={setBounds}
               onViewChange={handleViewChange}
+              onUserViewportAdjusted={handleUserViewportAdjusted}
               command={mapCommand}
               userLocation={userLocation}
               monochromeTiles
@@ -579,6 +605,7 @@ export default function MediaMapPageClient() {
               onClose={() => {
                 setSelectedId(null);
                 setSelectedItem(null);
+                lastFocusedSelectionRef.current = null;
               }}
               isKo={isKo}
               inCompare={isInCompare(selected.id)}
@@ -597,7 +624,12 @@ export default function MediaMapPageClient() {
               onClose={() => setSurveyMode(false)}
               onLocationTick={setUserLocation}
               onCenterMap={(loc) =>
-                emitMapCommand({ lat: loc.lat, lng: loc.lng, level: 4 })
+                emitMapCommand({
+                  lat: loc.lat,
+                  lng: loc.lng,
+                  level: 4,
+                  resetUserViewport: true,
+                })
               }
               checkedIds={surveyCheckedIds}
               onCheckedChange={setSurveyCheckedIds}
