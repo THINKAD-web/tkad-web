@@ -59,7 +59,7 @@ export function SectionHead({
         </span>
       </div>
 
-      <h2 className="mt-6 text-4xl font-black leading-[1.02] tracking-[-0.05em] text-foreground sm:text-5xl lg:text-6xl">
+      <h2 className="mt-6 text-4xl font-semibold leading-[1.02] tracking-normal text-foreground sm:text-5xl lg:text-6xl">
         {title}
       </h2>
       {meta ? (

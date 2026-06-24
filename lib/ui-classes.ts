@@ -11,11 +11,11 @@ import {
 export const ui = {
   /** 페이지 히어로 h1 */
   pageHeadline:
-    "text-4xl font-bold leading-tight tracking-tight text-gray-900 dark:text-white md:text-5xl lg:text-6xl",
+    "text-4xl font-bold leading-tight tracking-normal text-gray-900 dark:text-white md:text-5xl lg:text-6xl",
 
   /** 섹션 h2 */
   sectionHeadline:
-    "text-xl font-semibold leading-tight tracking-tight text-gray-900 dark:text-white md:text-2xl lg:text-3xl",
+    "text-xl font-semibold leading-tight tracking-normal text-gray-900 dark:text-white md:text-2xl lg:text-3xl",
 
   /** 카드 제목 */
   cardTitle:

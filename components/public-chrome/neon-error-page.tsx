@@ -169,7 +169,7 @@ function NeonErrorShell({
               {code}
             </p>
 
-            <h1 className="mt-4 text-xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-2xl">
+            <h1 className="mt-4 text-xl font-bold tracking-normal dark:text-white text-gray-900 sm:text-2xl">
               {title}
             </h1>
             <p className="mt-3 text-sm leading-relaxed dark:text-white text-gray-500">

@@ -32,7 +32,7 @@ export default {
           "var(--font-pretendard)",
           "system-ui",
           "sans-serif",
-        ],
+        ], // English accent labels only — see lib/fonts.ts
         mono: ["var(--font-jetbrains)", "ui-monospace", "monospace"],
       },
     },

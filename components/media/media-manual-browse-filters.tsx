@@ -658,7 +658,7 @@ export function MediaManualBrowseFilters({
         <div className="space-y-2 border-b border-gray-100 pb-4 dark:border-white/10">
           <PlannerNeonLabel>{sectionEyebrow}</PlannerNeonLabel>
           {sectionTitle ? (
-            <h3 className="text-base font-bold tracking-tight text-gray-900 dark:text-white">
+            <h3 className="text-base font-bold tracking-normal text-gray-900 dark:text-white">
               {sectionTitle}
             </h3>
           ) : null}

@@ -533,10 +533,8 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans);
   font-feature-settings: "ss06", "tnum", "cv11";
-  letter-spacing: -0.012em;
+  letter-spacing: 0;
   line-height: 1.65;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 /* 모바일 가로 스크롤(레이아웃 넘침) 전역 가드 — clip 은 sticky 를 깨지 않음 */

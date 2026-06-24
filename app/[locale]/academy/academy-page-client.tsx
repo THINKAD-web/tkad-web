@@ -306,10 +306,10 @@ export default function AcademyPageClient({
                   <Icon className="h-5 w-5" />
                 </div>
                 <div className="min-w-0 text-left">
-                  <p className="text-sm font-bold tracking-tight text-foreground">
+                  <p className="text-sm font-bold tracking-normal text-foreground">
                     {t(titleKey as "valueStripBasics")}
                   </p>
-                  <p className="mt-1 text-[11px] tracking-tight opacity-75">
+                  <p className="mt-1 text-[11px] tracking-normal opacity-75">
                     {`// `}
                     {t(descKey as "valueStripBasicsDesc")}
                   </p>
@@ -325,10 +325,10 @@ export default function AcademyPageClient({
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ BASICS ]
               </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
                 {t("sectionBasics")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-normal text-muted-foreground">
                 {`// `}
                 {t("sectionBasicsDesc")}
               </p>
@@ -341,7 +341,7 @@ export default function AcademyPageClient({
                 <p className="mt-3 text-base font-bold text-foreground">
                   {t("preparingLessons")}
                 </p>
-                <p className="mx-auto mt-2 max-w-md text-[12px] tracking-tight text-muted-foreground">
+                <p className="mx-auto mt-2 max-w-md text-[12px] tracking-normal text-muted-foreground">
                   {t("preparingLessonsDesc")}
                 </p>
                 <div className="mx-auto mt-8 max-w-lg text-left">
@@ -359,10 +359,10 @@ export default function AcademyPageClient({
                       <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground">
                         [ {t("minutes", { n: lesson.durationMin })} ]
                       </span>
-                      <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
+                      <h3 className="mt-3 text-lg font-bold tracking-normal text-foreground">
                         {isKo ? lesson.titleKo : lesson.titleEn}
                       </h3>
-                      <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                      <p className="mt-2 text-[12px] leading-relaxed tracking-normal text-muted-foreground">
                         {`// `}
                         {isKo ? lesson.descKo : lesson.descEn}
                       </p>
@@ -403,10 +403,10 @@ export default function AcademyPageClient({
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ WEBINARS ]
               </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
                 {t("sectionWebinars")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-normal text-muted-foreground">
                 {`// `}
                 {t("sectionWebinarsDesc")}
               </p>
@@ -421,10 +421,10 @@ export default function AcademyPageClient({
                     <span className="inline-flex w-fit border-2 border-primary bg-primary px-2 py-0.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-primary-foreground">
                       [ {t("badgeLive")} ]
                     </span>
-                    <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
+                    <h3 className="mt-3 text-lg font-bold tracking-normal text-foreground">
                       {isKo ? w.titleKo : w.titleEn}
                     </h3>
-                    <p className="mt-2 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 text-[12px] leading-relaxed tracking-normal text-muted-foreground">
                       {`// `}
                       {isKo ? w.descKo : w.descEn}
                     </p>
@@ -471,10 +471,10 @@ export default function AcademyPageClient({
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ DOWNLOADS ]
               </p>
-              <h2 className="mt-2 text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2 className="mt-2 text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
                 {t("sectionDownloads")}
               </h2>
-              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-tight text-muted-foreground">
+              <p className="mx-auto mt-2 max-w-2xl text-[12px] tracking-normal text-muted-foreground">
                 {`// `}
                 {t("sectionDownloadsDesc")}
               </p>
@@ -490,10 +490,10 @@ export default function AcademyPageClient({
                     <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                       [ ASSET / PDF ]
                     </p>
-                    <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
+                    <h3 className="mt-1 text-base font-bold tracking-normal text-foreground">
                       {isKo ? asset.titleKo : asset.titleEn}
                     </h3>
-                    <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                    <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                       {`// `}
                       {isKo ? asset.descKo : asset.descEn}
                     </p>
@@ -520,10 +520,10 @@ export default function AcademyPageClient({
                   <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ PPT ]
                   </p>
-                  <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
+                  <h3 className="mt-1 text-base font-bold tracking-normal text-foreground">
                     {t("pptTitle")}
                   </h3>
-                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                     {`// `}
                     {t("pptDesc")}
                   </p>
@@ -544,10 +544,10 @@ export default function AcademyPageClient({
                   <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ VIDEO ]
                   </p>
-                  <h3 className="mt-1 text-base font-bold tracking-tight text-foreground">
+                  <h3 className="mt-1 text-base font-bold tracking-normal text-foreground">
                     {t("videoAssetTitle")}
                   </h3>
-                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-2 flex-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                     {`// `}
                     {t("videoAssetDesc")}
                   </p>
@@ -579,10 +579,10 @@ export default function AcademyPageClient({
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                   [ REGISTER ]
                 </p>
-                <h3 className="mt-2 text-xl font-bold tracking-tight text-foreground">
+                <h3 className="mt-2 text-xl font-bold tracking-normal text-foreground">
                   {t("sectionRegister")}
                 </h3>
-                <p className="mt-2 text-[12px] tracking-tight text-muted-foreground">
+                <p className="mt-2 text-[12px] tracking-normal text-muted-foreground">
                   {`// `}
                   {t("sectionRegisterDesc")}
                 </p>
@@ -672,10 +672,10 @@ export default function AcademyPageClient({
             <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
               [ {t("consultSectionTitle")} ]
             </p>
-            <h2 className="mt-3 text-xl font-bold tracking-tight text-hero-fg sm:text-2xl">
+            <h2 className="mt-3 text-xl font-bold tracking-normal text-hero-fg sm:text-2xl">
               {t("ctaTitle")}
             </h2>
-            <p className="mx-auto mt-3 max-w-xl text-[12px] tracking-tight text-hero-fg/75">
+            <p className="mx-auto mt-3 max-w-xl text-[12px] tracking-normal text-hero-fg/75">
               {`// `}
               {t("consultSectionDesc")}
             </p>
@@ -753,7 +753,7 @@ export default function AcademyPageClient({
             <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
               [ VIDEO ]
             </p>
-            <h3 className="mt-2 pr-10 text-lg font-bold tracking-tight text-foreground">
+            <h3 className="mt-2 pr-10 text-lg font-bold tracking-normal text-foreground">
               {videoTitle}
             </h3>
             <div className="mt-4 aspect-video w-full overflow-hidden border-2 border-border bg-hero-void">

@@ -118,7 +118,7 @@ export function NetworkPackages({ isKo }: Props) {
                 </li>
               ))}
             </ul>
-            <p className="mt-6 font-display text-3xl font-black tabular-nums tracking-tight text-gray-900 dark:text-white">
+            <p className="mt-6 font-sans text-3xl font-bold tabular-nums tracking-normal text-gray-900 dark:text-white">
               {formatNetworkPriceWon(pkg.priceMan, isKo)}
               {"priceSuffix" in pkg && pkg.priceSuffix ? "+" : ""}
             </p>

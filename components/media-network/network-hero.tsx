@@ -150,7 +150,7 @@ export function NetworkHero({ isKo, stats }: Props) {
           </div>
 
           <div>
-            <h1 className="font-display text-3xl font-black leading-tight text-gray-900 dark:text-white sm:text-4xl">
+            <h1 className="text-3xl font-semibold leading-tight tracking-normal text-gray-900 dark:text-white sm:text-4xl">
               {isKo ? "네트워크 매체, 전국 어디든" : "Network media, nationwide reach"}
             </h1>
             <p className="mt-3 text-sm leading-relaxed text-gray-600 dark:text-white/60 sm:text-base">

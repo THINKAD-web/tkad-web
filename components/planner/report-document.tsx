@@ -332,7 +332,7 @@ export const PlannerReportDocument = forwardRef<
                 className="rounded-xl border border-gray-200 bg-gray-50 p-3.5"
               >
                 <p className="text-[11px] font-medium text-gray-500">{k.label}</p>
-                <p className="mt-1 break-words font-display text-lg font-black tabular-nums text-violet-700">
+                <p className="mt-1 break-words font-sans text-lg font-bold tabular-nums text-violet-700">
                   {k.value}
                 </p>
               </div>

@@ -31,7 +31,7 @@ export function DocumentSectionHeading({
   return (
     <h3
       className={cn(
-        "flex items-center gap-2 text-base font-bold tracking-tight text-gray-900",
+        "flex items-center gap-2 text-base font-semibold tracking-normal text-gray-900",
         className,
       )}
     >
