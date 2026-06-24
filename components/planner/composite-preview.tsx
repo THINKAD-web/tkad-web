@@ -178,7 +178,7 @@ export function CompositePreview({
 
       {!compact ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 border-t-2 border-border bg-hero-void px-3 py-2">
-          <p className="line-clamp-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-hero-fg sm:text-xs">
+          <p className="line-clamp-2 font-sans text-xs font-medium uppercase tracking-[0.18em] text-hero-fg sm:text-xs">
             {mediaName}
           </p>
         </div>

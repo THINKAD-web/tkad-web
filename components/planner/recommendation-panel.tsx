@@ -461,7 +461,7 @@ export function PlannerRecommendationPanel({
                   )}
                 >
                   <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-bold leading-snug tracking-tight text-foreground">
+                    <p className="line-clamp-2 text-sm font-semibold leading-snug tracking-normal text-foreground">
                       {isKo ? media.name : media.nameEn || media.name}
                     </p>
                     {typeof matchScore === "number" ? (

@@ -212,10 +212,10 @@ export default function InsightsPageClient({
                 <CalendarRange className="h-6 w-6" />
               </div>
               <div className="text-left">
-                <p className="font-bold tracking-tight text-foreground">
+                <p className="font-bold tracking-normal text-foreground">
                   {t("valueStripTrends")}
                 </p>
-                <p className="mt-1 text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-normal opacity-75">
                   {`// `}
                   {t("valueStripTrendsDesc")}
                 </p>
@@ -229,10 +229,10 @@ export default function InsightsPageClient({
                 <Download className="h-6 w-6" />
               </div>
               <div className="text-left">
-                <p className="font-bold tracking-tight text-foreground">
+                <p className="font-bold tracking-normal text-foreground">
                   {t("valueStripPdf")}
                 </p>
-                <p className="mt-1 text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-normal opacity-75">
                   {`// `}
                   {t("valueStripPdfDesc")}
                 </p>
@@ -246,10 +246,10 @@ export default function InsightsPageClient({
                 <Send className="h-6 w-6" />
               </div>
               <div className="text-left">
-                <p className="font-bold tracking-tight text-foreground">
+                <p className="font-bold tracking-normal text-foreground">
                   {t("valueStripCustom")}
                 </p>
-                <p className="mt-1 text-[11px] tracking-tight opacity-75">
+                <p className="mt-1 text-[11px] tracking-normal opacity-75">
                   {`// `}
                   {t("valueStripCustomDesc")}
                 </p>
@@ -264,10 +264,10 @@ export default function InsightsPageClient({
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                 [ REPORTS ]
               </p>
-              <h2 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+              <h2 className="text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
                 {t("reportsSectionTitle")}
               </h2>
-              <p className="max-w-2xl text-[12px] leading-relaxed tracking-tight text-muted-foreground">
+              <p className="max-w-2xl text-[12px] leading-relaxed tracking-normal text-muted-foreground">
                 {`// `}
                 {t("reportsSectionDesc")}
               </p>
@@ -281,7 +281,7 @@ export default function InsightsPageClient({
                 <p className="mt-3 text-base font-bold text-foreground">
                   {t("preparingContent")}
                 </p>
-                <p className="mx-auto mt-3 max-w-md text-[12px] tracking-tight text-muted-foreground">
+                <p className="mx-auto mt-3 max-w-md text-[12px] tracking-normal text-muted-foreground">
                   {t("preparingContentDesc")}
                 </p>
               </div>
@@ -349,7 +349,7 @@ export default function InsightsPageClient({
                 </div>
 
                 {filtered.length === 0 ? (
-                  <p className="py-8 text-center text-[12px] tracking-tight text-muted-foreground">
+                  <p className="py-8 text-center text-[12px] tracking-normal text-muted-foreground">
                     {`// `}
                     {t("empty")}
                   </p>
@@ -370,10 +370,10 @@ export default function InsightsPageClient({
                     <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                       [ {t("customSectionEyebrow")} ]
                     </p>
-                    <h3 className="mt-2 text-lg font-bold tracking-tight text-foreground">
+                    <h3 className="mt-2 text-lg font-bold tracking-normal text-foreground">
                       {t("formTitle")}
                     </h3>
-                    <p className="mt-1 text-[12px] tracking-tight text-muted-foreground">
+                    <p className="mt-1 text-[12px] tracking-normal text-muted-foreground">
                       {`// `}
                       {t("formDesc")}
                     </p>
@@ -497,11 +497,11 @@ export default function InsightsPageClient({
             </p>
             <h2
               id="insights-viewer-title"
-              className="mt-2 pr-8 text-lg font-bold tracking-tight text-foreground"
+              className="mt-2 pr-8 text-lg font-bold tracking-normal text-foreground"
             >
               {viewerTitle}
             </h2>
-            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
+            <p className="mt-1 text-[11px] tracking-normal text-muted-foreground">
               {`// `}
               {t("viewerHint")}
             </p>
@@ -570,7 +570,7 @@ function ReportCard({
             </span>
           ))}
         </div>
-        <h3 className="mt-3 text-lg font-bold tracking-tight text-foreground">
+        <h3 className="mt-3 text-lg font-bold tracking-normal text-foreground">
           {isKo ? report.titleKo : report.titleEn}
         </h3>
         <p className="mt-2 flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">

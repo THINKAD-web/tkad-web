@@ -46,7 +46,7 @@ export function PlannerCampaignGoalGrid({
           >
             <p
               className={cn(
-                "font-bold tracking-tight",
+                "font-semibold tracking-normal",
                 compact ? "text-sm" : undefined,
               )}
             >

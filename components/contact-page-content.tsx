@@ -75,7 +75,7 @@ export default function ContactPageContent() {
                   <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ {mainTab === "inquiry" ? "INQUIRY" : "FEEDBACK"} ]
                   </p>
-                  <h2 className="text-xl font-bold tracking-tight text-foreground">
+                  <h2 className="text-xl font-bold tracking-normal text-foreground">
                     {mainTab === "inquiry"
                       ? t("formTitle")
                       : t("formTitleFeedback")}
@@ -99,7 +99,7 @@ export default function ContactPageContent() {
                   <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ INFO ]
                   </p>
-                  <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
+                  <h2 className="mt-2 text-xl font-bold tracking-normal text-foreground">
                     {t("infoTitle")}
                   </h2>
                 </div>
@@ -168,7 +168,7 @@ export default function ContactPageContent() {
           <p className="text-center font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
             [ DIRECTIONS ]
           </p>
-          <h2 className="mt-3 mb-10 text-center text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
+          <h2 className="mt-3 mb-10 text-center text-2xl font-bold tracking-normal text-foreground sm:text-3xl">
             {t("directionsTitle")}
           </h2>
 
@@ -193,7 +193,7 @@ export default function ContactPageContent() {
                   <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ {t("subway")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                     {t("subwayDesc")}
                   </p>
                 </div>
@@ -207,7 +207,7 @@ export default function ContactPageContent() {
                   <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ {t("busTitle")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                     {t("busDesc")}
                   </p>
                 </div>
@@ -221,7 +221,7 @@ export default function ContactPageContent() {
                   <div className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ {t("parkingTitle")} ]
                   </div>
-                  <p className="mt-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
+                  <p className="mt-1 text-[11px] leading-relaxed tracking-normal text-muted-foreground">
                     {t("parkingDesc")}
                   </p>
                 </div>

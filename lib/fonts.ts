@@ -4,9 +4,10 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
 /**
  * THINKAD font system — 3 families only.
  *
- * - sans (Pretendard): body, titles, UI — Korean + English
- * - display (Space Grotesk): English accent headlines & labels only
- * - mono (JetBrains Mono): code blocks, API samples, select numeric data
+ * - sans (Pretendard): body, Korean/English titles, UI, numeric data (`tabular-nums`)
+ * - display (Space Grotesk): **English-only** accent labels — `font-display` + uppercase
+ *   (e.g. `[ 01 ]`, `// DISCOVERY`). Do not use on Korean headings or prices.
+ * - mono (JetBrains Mono): code blocks, API samples
  */
 export const pretendard = localFont({
   src: "../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",

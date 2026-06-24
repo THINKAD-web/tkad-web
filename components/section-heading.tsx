@@ -33,14 +33,14 @@ export function SectionHeading({
       ) : null}
       <h2
         className={cn(
-          "text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-[2.25rem] lg:leading-snug",
+          "text-2xl font-bold tracking-normal text-foreground sm:text-3xl lg:text-[2.25rem] lg:leading-snug",
           titleClassName,
         )}
       >
         {title}
       </h2>
       {subtitle ? (
-        <p className="mt-4 text-sm leading-relaxed tracking-tight text-muted-foreground sm:text-base">
+        <p className="mt-4 text-sm leading-relaxed tracking-normal text-muted-foreground sm:text-base">
           {`// `}{subtitle}
         </p>
       ) : null}

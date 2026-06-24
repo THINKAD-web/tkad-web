@@ -67,12 +67,12 @@ export function HomeBudgetWidget() {
             <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300/90">
               [ INSTANT QUOTE ]
             </p>
-            <h2 className="mt-2 text-xl font-black tracking-tight dark:text-white text-gray-900 sm:text-2xl">
+            <h2 className="mt-2 text-xl font-semibold tracking-normal dark:text-white text-gray-900 sm:text-2xl">
               {t("title")}
             </h2>
             <p className="mt-1 max-w-xl text-sm dark:text-white text-gray-600">{t("subtitle")}</p>
           </div>
-          <p className="font-display text-2xl font-black tabular-nums text-cyan-300">
+          <p className="font-sans text-2xl font-bold tabular-nums text-cyan-300">
             {budgetMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
             <span className="ml-1 text-sm font-bold dark:text-white text-gray-500">
               {isKo ? "만원" : "M KRW"}

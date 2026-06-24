@@ -73,7 +73,7 @@ export function PriceCalculator({
               >
                 {isKo ? "지점 수" : "Number of sites"}
               </label>
-              <span className="font-display text-2xl font-black tabular-nums text-violet-600 dark:text-violet-400">
+              <span className="font-sans text-2xl font-bold tabular-nums text-violet-600 dark:text-violet-400">
                 {points}
               </span>
             </div>
@@ -150,7 +150,7 @@ export function PriceCalculator({
             <Sparkles className="h-3.5 w-3.5 text-violet-500" />
             {isKo ? "총 예상 비용" : "Estimated total"}
           </p>
-          <p className="mt-3 font-display text-4xl font-black tabular-nums tracking-tight text-gray-900 dark:text-white sm:text-5xl">
+          <p className="mt-3 font-sans text-4xl font-bold tabular-nums tracking-normal text-gray-900 dark:text-white sm:text-5xl">
             {formatNetworkPriceWon(totalMan, isKo)}
           </p>
           <p className="mt-2 text-sm text-gray-600 dark:text-white/55">

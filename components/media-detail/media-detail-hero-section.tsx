@@ -100,11 +100,11 @@ export function MediaDetailHeroSection({
 
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
-      <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
+      <span className="font-sans text-3xl font-bold tabular-nums dark:text-white text-gray-900">
         {formatCatalogPriceFieldWon(primaryPriceOption.price)}
       </span>
     ) : (
-      <span className="font-display text-2xl font-black tabular-nums dark:text-white text-gray-900 sm:text-3xl">
+      <span className="font-sans text-2xl font-bold tabular-nums dark:text-white text-gray-900 sm:text-3xl">
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}
         <span className="dark:text-white/40 text-gray-400">~</span>{" "}
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}

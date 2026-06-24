@@ -194,7 +194,7 @@ export function HomeHeroNeo({ marqueeImageUrls, mapPins }: Props) {
               {t("heroEyebrow")}
             </p>
 
-            <h1 className="text-balance text-5xl font-black leading-tight tracking-tight lg:text-6xl">
+            <h1 className="text-balance text-5xl font-semibold leading-tight tracking-normal lg:text-6xl">
               {t.rich("heroTitleLine1", { accent: accentTag })}
               <br />
               {t("heroTitleLine2")}

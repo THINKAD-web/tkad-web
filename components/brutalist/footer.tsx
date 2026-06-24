@@ -125,13 +125,13 @@ function ColumnCell({
 }) {
   return (
     <div className="rounded-[28px] bg-white p-8 shadow-lg ring-1 ring-gray-200/80 dark:bg-white/5 dark:shadow-[0_30px_120px_rgba(0,0,0,0.78)] dark:ring-white/10 tkad-neon-border">
-      <h3 className="mb-4 font-display text-[11px] font-black uppercase tracking-[0.22em] text-gray-900 dark:text-white">
+      <h3 className="mb-4 text-[11px] font-semibold uppercase tracking-[0.22em] text-gray-900 dark:text-white">
         {col.title}
       </h3>
       <ul className="space-y-2.5">
         {col.items.map((it, i) => {
           const cls =
-            "text-sm font-medium tracking-tight text-gray-600 transition-colors hover:text-gray-900 dark:text-white/70 dark:hover:text-white";
+            "text-sm font-medium tracking-normal text-gray-600 transition-colors hover:text-gray-900 dark:text-white/70 dark:hover:text-white";
           if (!it.href) {
             return (
               <li key={i} className={cls}>

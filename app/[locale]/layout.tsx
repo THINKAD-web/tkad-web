@@ -159,7 +159,7 @@ export default async function LocaleLayout({ children, params }: Props) {
   return (
     <html lang={locale} suppressHydrationWarning>
       <body
-        className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans antialiased`}
+        className={`${fontClassNames} flex min-h-full min-h-[100dvh] flex-col font-sans`}
       >
         <ThemeInitScript />
         {structuredData ? <JsonLd data={structuredData} /> : null}

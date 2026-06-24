@@ -108,7 +108,7 @@ export default function MediaDetailPerformance({
                       {t(DONUT_LABEL_KEYS[seg.key])}
                     </span>
                   </span>
-                  <span className="font-display text-sm font-bold tabular-nums text-foreground">
+                  <span className="font-sans text-sm font-bold tabular-nums text-foreground">
                     {seg.percent}%
                   </span>
                 </li>
@@ -128,7 +128,7 @@ export default function MediaDetailPerformance({
                   <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
                     {t(BAR_LABEL_KEYS[row.key])}
                   </span>
-                  <span className="font-display text-lg font-bold tabular-nums text-foreground">
+                  <span className="font-sans text-lg font-bold tabular-nums text-foreground">
                     {row.value}
                   </span>
                 </div>

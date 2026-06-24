@@ -104,7 +104,7 @@ function FeedKpiChip({
       <p className="text-[9px] font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
         {label}
       </p>
-      <p className="mt-0.5 font-display text-xs font-bold tabular-nums text-gray-900 dark:text-white">
+      <p className="mt-0.5 font-sans text-xs font-bold tabular-nums text-gray-900 dark:text-white">
         {value}
       </p>
     </div>
@@ -235,7 +235,7 @@ export function MediaFeedCard({
               </p>
             ) : null}
             <Link href={href} className="group mt-1 block">
-              <h3 className="text-lg font-black leading-snug tracking-tight text-gray-900 group-hover:text-violet-600 dark:text-white dark:group-hover:text-violet-300 sm:text-xl">
+              <h3 className="text-lg font-semibold leading-snug tracking-normal text-gray-900 group-hover:text-violet-600 dark:text-white dark:group-hover:text-violet-300 sm:text-xl">
                 {item.name}
               </h3>
             </Link>
@@ -284,7 +284,7 @@ export function MediaFeedCard({
             <p className="text-[10px] font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
               {isKo ? "가격" : "Price"}
             </p>
-            <p className="mt-0.5 break-all font-display text-xl font-black tabular-nums text-gray-900 sm:text-2xl dark:text-white">
+            <p className="mt-0.5 break-all font-sans text-xl font-bold tabular-nums text-gray-900 sm:text-2xl dark:text-white">
               {item.price && item.price > 0
                 ? formatCatalogPriceFieldWon(item.price, isKo ? "ko-KR" : "en-US")
                 : isKo
