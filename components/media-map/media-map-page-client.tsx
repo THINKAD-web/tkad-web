@@ -41,6 +41,7 @@ import {
   mapBrowseFiltersToUrlState,
   type MapBrowseFilters,
 } from "@/lib/media-map/browse-filters";
+import { mapBrowseFiltersToMediaBrowseQueryString } from "@/lib/media-browse-query-string";
 import {
   boundsFromMapCoordItems,
   mapBoundsIntersect,
@@ -93,8 +94,6 @@ const DarkMapView = dynamic(
 type Item = MapMapItem;
 
 type Facets = { regions: string[]; types: string[] };
-
-const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const CART_KEY = "tkad-media-cart-v1";
 
@@ -669,14 +668,10 @@ export default function MediaMapPageClient() {
   const handleBrowseViewModeChange = useCallback(
     (mode: MediaManualBrowseViewMode) => {
       if (mode === "map") return;
-      try {
-        localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
-      } catch {
-        /* ignore */
-      }
-      router.push("/media");
+      const qs = mapBrowseFiltersToMediaBrowseQueryString(browseFilters);
+      router.push(qs ? `/media?${qs}` : "/media");
     },
-    [router],
+    [router, browseFilters],
   );
 
   const toggleCompare = useCallback(
@@ -874,11 +869,12 @@ export default function MediaMapPageClient() {
 
         {/* 매체 리스트 — 모바일: 지도 아래 */}
         <aside className="order-3 w-full border-t border-gray-200/80 bg-gray-50 md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto dark:border-white/10 dark:bg-[#020202]">
-          <div className="sticky top-0 z-10 border-b border-gray-200/80 bg-gray-50/95 backdrop-blur-md dark:border-white/10 dark:bg-[#020202]/95">
-            <div className="min-w-0 overflow-x-clip p-3 md:p-4">
+          <div className="sticky top-0 z-20 isolate border-b border-gray-200/80 bg-gray-50 dark:border-white/10 dark:bg-[#020202]">
+            <div className="min-w-0 overflow-x-clip px-3 pt-2 pb-1 md:px-4 md:pt-2 md:pb-1">
               <MediaManualBrowseFilters
                 isKo={isKo}
                 mapCompactFilters
+                mapPageViewModes
                 query={browseFilters.q}
                 onQueryChange={(q) => patchBrowseFilters({ q })}
                 mainCategory={browseFilters.mainCategory}
@@ -920,7 +916,7 @@ export default function MediaMapPageClient() {
             </div>
           </div>
 
-        <ul className="grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
+        <ul className="relative z-0 grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
           {((!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading) ? (
             <MapListSkeleton count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6} />
           ) : (

@@ -6,6 +6,7 @@ import {
   X,
   List,
   LayoutGrid,
+  LayoutList,
   AlignJustify,
   Map as MapIcon,
   ChevronDown,
@@ -94,6 +95,16 @@ const VIEW_MODES: {
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
+const MAP_PAGE_VIEW_MODES: {
+  id: MediaManualBrowseViewMode;
+  labelKo: string;
+  labelEn: string;
+  icon: typeof List;
+}[] = [
+  { id: "feed", labelKo: "목록", labelEn: "List", icon: LayoutList },
+  { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
+];
+
 /** `/media/map` — 현재 화면(뷰포트) vs 전국 필터 매칭 수 라벨 */
 function formatMapViewCountLabel(
   resultCount: number,
@@ -150,6 +161,8 @@ type Props = {
   showViewModes?: boolean;
   /** `/media/map` — 유형·고급 필터 접기 + 활성 칩 스트립 */
   mapCompactFilters?: boolean;
+  /** `/media/map` — [목록]/[지도] 2-way 토글 */
+  mapPageViewModes?: boolean;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -196,6 +209,7 @@ export function MediaManualBrowseFilters({
   className,
   showViewModes = true,
   mapCompactFilters = false,
+  mapPageViewModes = false,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
@@ -271,6 +285,15 @@ export function MediaManualBrowseFilters({
 
   const showMapInlineFilterAccordion =
     mapCompactFilters && mapFiltersExpanded;
+
+  const showResultCountLabel = !mapPageViewModes;
+  const showResultSummaryRow =
+    showResultCountLabel ||
+    selectedCount > 0 ||
+    cartCount > 0 ||
+    compareCount > 0;
+
+  const mapToolbarCompact = mapPageViewModes;
 
   const total = totalCount;
 
@@ -731,7 +754,10 @@ export function MediaManualBrowseFilters({
               : "매체명·지역·유형 검색"
             : "Search name, region, type"
         }
-        className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30 sm:py-2.5"
+        className={cn(
+          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30",
+          mapToolbarCompact ? "py-2" : "py-3 sm:py-2.5",
+        )}
       />
       {query ? (
         <button
@@ -751,7 +777,10 @@ export function MediaManualBrowseFilters({
       value={sort}
       onChange={(e) => onSortChange(e.target.value)}
       aria-label={isKo ? "정렬" : "Sort"}
-      className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
+      className={cn(
+        "min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70",
+        mapToolbarCompact ? "py-1" : "py-1.5",
+      )}
     >
       {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -764,10 +793,15 @@ export function MediaManualBrowseFilters({
   const viewModeToggle = showViewModes ? (
     <div
       className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
-      data-screenshot="media-view-mode"
+      data-screenshot={
+        mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
+      }
     >
-      {VIEW_MODES.map((mode) => {
+      {(mapPageViewModes ? MAP_PAGE_VIEW_MODES : VIEW_MODES).map((mode) => {
         const Icon = mode.icon;
+        const active = mapPageViewModes
+          ? mode.id === "map"
+          : viewMode === mode.id;
         return (
           <button
             key={mode.id}
@@ -776,7 +810,7 @@ export function MediaManualBrowseFilters({
             title={isKo ? mode.labelKo : mode.labelEn}
             className={cn(
               "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
-              viewMode === mode.id ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+              active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
             )}
           >
             <Icon className="h-3.5 w-3.5" aria-hidden />
@@ -791,7 +825,11 @@ export function MediaManualBrowseFilters({
 
   return (
     <div
-      className={cn("min-w-0 space-y-3", className)}
+      className={cn(
+        "min-w-0",
+        mapPageViewModes ? "space-y-1.5" : "space-y-3",
+        className,
+      )}
       data-screenshot="media-browse-filters"
     >
       {showSectionHeader ? (
@@ -826,7 +864,10 @@ export function MediaManualBrowseFilters({
               }
               setDesktopPanelOpen((o) => !o);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+              mapToolbarCompact ? "px-3 py-1.5" : "px-3 py-2",
+            )}
             aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
             aria-haspopup={mapCompactFilters ? undefined : "dialog"}
             aria-label={isKo ? "필터 열기" : "Open filters"}
@@ -934,7 +975,10 @@ export function MediaManualBrowseFilters({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+            mapToolbarCompact ? "px-3 py-1" : "px-3 py-1.5",
+          )}
           aria-label={isKo ? "필터 열기" : "Open filters"}
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden />
@@ -950,8 +994,11 @@ export function MediaManualBrowseFilters({
         {toolbarEnd}
       </div>
 
+      {showResultSummaryRow ? (
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
+        {showResultCountLabel ? (
+          <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {selectedCount > 0 ? (
             onSelectedSummaryClick ? (
@@ -992,6 +1039,7 @@ export function MediaManualBrowseFilters({
           ) : null}
         </div>
       </div>
+      ) : null}
 
       {/* 모바일 필터 바텀시트 (PR #207 — 변경 없음) */}
       {sheetOpen ? (
