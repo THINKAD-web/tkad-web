@@ -7,7 +7,8 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
-import { formatMediaPriceWithPeriodSuffix, formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
+import { buildMapItemMetrics } from "@/lib/media-map/map-item-metrics";
 import { MediaCard } from "@/components/media/media-card";
 import { mapMapItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
@@ -42,35 +43,6 @@ function MapDetailMetric({
       </dd>
     </div>
   );
-}
-
-function formatMapImpressions(item: MapMapItem, isKo: boolean): string | null {
-  const n =
-    item.impressions ??
-    (item.dailyFootTraffic && item.dailyFootTraffic > 0
-      ? item.dailyFootTraffic * 30
-      : 0);
-  if (!n || n <= 0) return null;
-  if (n >= 1_000_000) return `${(n / 1_000_000).toFixed(1)}M`;
-  if (isKo && n >= 10_000) return `${Math.round(n / 10_000)}만`;
-  if (n >= 1_000) return `${(n / 1_000).toFixed(1)}K`;
-  return n.toLocaleString(isKo ? "ko-KR" : "en-US");
-}
-
-function formatMapCpm(item: MapMapItem, locale: string): string | null {
-  if (item.cpm && item.cpm > 0) {
-    return formatMediaPriceCompactWon(Math.round(item.cpm), locale);
-  }
-  const imp =
-    item.impressions ??
-    (item.dailyFootTraffic && item.dailyFootTraffic > 0
-      ? item.dailyFootTraffic * 30
-      : 0);
-  if (imp > 0 && item.price > 0) {
-    const cpm = (item.price / imp) * 1000;
-    return formatMediaPriceCompactWon(Math.round(cpm), locale);
-  }
-  return null;
 }
 
 function availabilityTone(status: AvailabilitySummary["status"]): string {
@@ -131,13 +103,14 @@ function CloseButton({
   );
 }
 
-function MapDetailQuickActions({
+export function MapDetailQuickActions({
   item,
   inCompare,
   inCart,
   onToggleCompare,
   onToggleCart,
   size = "compact",
+  className,
 }: {
   item: MapMapItem;
   inCompare?: boolean;
@@ -145,6 +118,7 @@ function MapDetailQuickActions({
   onToggleCompare?: () => void;
   onToggleCart?: () => void;
   size?: "compact" | "comfortable";
+  className?: string;
 }) {
   const btnClass =
     size === "comfortable"
@@ -152,7 +126,13 @@ function MapDetailQuickActions({
       : "min-w-0 flex-1 !h-8 !px-1 !text-[10px]";
 
   return (
-    <div className={cn("flex items-stretch gap-1.5", size === "comfortable" ? "mt-3" : "mt-2")}>
+    <div
+      className={cn(
+        "flex items-stretch gap-1.5",
+        size === "comfortable" ? "mt-3" : "mt-2",
+        className,
+      )}
+    >
       <PlanCartAddButton
         item={planCartItemFromCatalog(
           {
@@ -394,19 +374,7 @@ function MediaMapDetailBody({
   if (variant === "sheet") {
     const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
     const locale = isKo ? "ko" : "en";
-    const impressions = formatMapImpressions(item, isKo);
-    const cpm = formatMapCpm(item, locale);
-    const visibility =
-      item.visibilityScore > 0 ? String(item.visibilityScore) : null;
-    const metrics = [
-      impressions
-        ? { label: isKo ? "월 노출" : "Monthly reach", value: impressions }
-        : null,
-      cpm ? { label: "CPM", value: cpm } : null,
-      visibility
-        ? { label: isKo ? "가시성" : "Visibility", value: visibility }
-        : null,
-    ].filter((m): m is { label: string; value: string } => m != null);
+    const metrics = buildMapItemMetrics(item, isKo, locale);
 
     return (
       <>
