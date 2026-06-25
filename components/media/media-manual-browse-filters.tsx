@@ -34,8 +34,15 @@ import {
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { NETWORK_BROWSE_TYPE_CHIPS } from "@/lib/media-network-types";
+import { MediaMapActiveFiltersBar } from "@/components/media-map/media-map-active-filters-bar";
 import { PlannerNeonLabel } from "@/components/planner/planner-neon-ui";
+import {
+  buildMapBrowseActiveFilterChips,
+  type MediaMapActiveFilterKey,
+} from "@/lib/media-map/active-filter-chips";
 import { cn } from "@/lib/utils";
+
+const MAP_TYPE_FILTERS_EXPANDED_KEY = "tkad-media-map-type-filters-expanded";
 
 export type MediaManualBrowseViewMode = "feed" | "card" | "compact" | "map";
 
@@ -141,6 +148,8 @@ type Props = {
   className?: string;
   /** false면 보기 모드(피드/카드/지도) 토글 숨김 — `/media/map` 등 */
   showViewModes?: boolean;
+  /** `/media/map` — 유형·고급 필터 접기 + 활성 칩 스트립 */
+  mapCompactFilters?: boolean;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -186,6 +195,7 @@ export function MediaManualBrowseFilters({
   toolbarEnd,
   className,
   showViewModes = true,
+  mapCompactFilters = false,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
@@ -195,6 +205,10 @@ export function MediaManualBrowseFilters({
   const [sheetOpen, setSheetOpen] = useState(false);
   /** 데스크탑(sm+) 접이형 필터 패널 */
   const [desktopPanelOpen, setDesktopPanelOpen] = useState(false);
+  /** `/media/map` — 유형·고급 필터 인라인 아코디언 */
+  const [mapFiltersExpanded, setMapFiltersExpanded] = useState(false);
+  const [mapFiltersExpandedHydrated, setMapFiltersExpandedHydrated] =
+    useState(false);
   const desktopPanelRef = useRef<HTMLDivElement>(null);
 
   const activeMain = MEDIA_CATEGORIES.find((m) => m.id === mainCategory);
@@ -224,6 +238,39 @@ export function MediaManualBrowseFilters({
     priceMax,
     variant === "media" ? features : "",
   ].filter(Boolean).length;
+
+  const mapBrowseFilterChips = mapCompactFilters
+    ? buildMapBrowseActiveFilterChips(
+        {
+          mainCategory,
+          subCategory,
+          target,
+          regionMain,
+          regionSub,
+          priceMin,
+          priceMax,
+          features,
+        },
+        isKo,
+      )
+    : [];
+
+  /** 지도 compact — 접힌 상태 배지 (유형·고급 필터 전체) */
+  const mapCompactFilterCount = mapBrowseFilterChips.length;
+
+  const desktopFilterBadgeCount = mapCompactFilters
+    ? mapCompactFilterCount
+    : collapsedFilterCount;
+
+  const showMapActiveFilterStrip =
+    mapCompactFilters &&
+    !mapFiltersExpanded &&
+    mapBrowseFilterChips.length > 0;
+
+  const showDesktopTypeChipRow = !mapCompactFilters;
+
+  const showMapInlineFilterAccordion =
+    mapCompactFilters && mapFiltersExpanded;
 
   const total = totalCount;
 
@@ -309,6 +356,71 @@ export function MediaManualBrowseFilters({
     onPriceMaxChange("");
     onFeaturesChange("");
   };
+
+  const persistMapFiltersExpanded = (next: boolean) => {
+    setMapFiltersExpanded(next);
+    if (typeof window !== "undefined") {
+      if (next) {
+        window.localStorage.setItem(MAP_TYPE_FILTERS_EXPANDED_KEY, "1");
+      } else {
+        window.localStorage.removeItem(MAP_TYPE_FILTERS_EXPANDED_KEY);
+      }
+    }
+  };
+
+  const toggleMapFiltersExpanded = () => {
+    persistMapFiltersExpanded(!mapFiltersExpanded);
+  };
+
+  const removeMapBrowseFilterChip = (key: MediaMapActiveFilterKey) => {
+    if (key === "mainCategory") {
+      onMainCategoryChange("");
+      onSubCategoryChange("");
+      return;
+    }
+    if (key === "subCategory") {
+      onSubCategoryChange("");
+      return;
+    }
+    if (key === "target") {
+      onTargetChange("");
+      return;
+    }
+    if (key === "regionMain") {
+      onRegionMainChange("");
+      onRegionSubChange("");
+      return;
+    }
+    if (key === "regionSub") {
+      onRegionSubChange("");
+      return;
+    }
+    if (key === "price") {
+      onPriceMinChange("");
+      onPriceMaxChange("");
+      return;
+    }
+    if (key.startsWith("feature:")) {
+      const featureId = key.slice("feature:".length);
+      const parts = new Set(
+        features
+          .split(/[,，]/)
+          .map((s) => s.trim())
+          .filter(Boolean),
+      );
+      parts.delete(featureId);
+      onFeaturesChange([...parts].join(","));
+    }
+  };
+
+  // `/media/map` — 펼침 상태 localStorage 복원 (기본 접힘)
+  useEffect(() => {
+    if (!mapCompactFilters || mapFiltersExpandedHydrated) return;
+    if (typeof window === "undefined") return;
+    const stored = window.localStorage.getItem(MAP_TYPE_FILTERS_EXPANDED_KEY);
+    setMapFiltersExpanded(stored === "1");
+    setMapFiltersExpandedHydrated(true);
+  }, [mapCompactFilters, mapFiltersExpandedHydrated]);
 
   // 바텀시트 열림 동안 배경 스크롤 잠금
   useEffect(() => {
@@ -707,10 +819,16 @@ export function MediaManualBrowseFilters({
         <div className="relative shrink-0" ref={desktopPanelRef}>
           <button
             type="button"
-            onClick={() => setDesktopPanelOpen((o) => !o)}
+            onClick={() => {
+              if (mapCompactFilters) {
+                toggleMapFiltersExpanded();
+                return;
+              }
+              setDesktopPanelOpen((o) => !o);
+            }}
             className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
-            aria-expanded={desktopPanelOpen}
-            aria-haspopup="dialog"
+            aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
+            aria-haspopup={mapCompactFilters ? undefined : "dialog"}
             aria-label={isKo ? "필터 열기" : "Open filters"}
           >
             <SlidersHorizontal className="h-4 w-4" aria-hidden />
@@ -718,18 +836,19 @@ export function MediaManualBrowseFilters({
             <ChevronDown
               className={cn(
                 "h-3.5 w-3.5 opacity-60 transition-transform",
-                desktopPanelOpen && "rotate-180",
+                (mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen) &&
+                  "rotate-180",
               )}
               aria-hidden
             />
-            {collapsedFilterCount > 0 ? (
+            {desktopFilterBadgeCount > 0 ? (
               <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
-                {collapsedFilterCount}
+                {desktopFilterBadgeCount}
               </span>
             ) : null}
           </button>
 
-          {desktopPanelOpen ? (
+          {!mapCompactFilters && desktopPanelOpen ? (
             <div
               role="dialog"
               aria-modal="false"
@@ -773,8 +892,42 @@ export function MediaManualBrowseFilters({
         {toolbarEnd}
       </div>
 
-      {/* 데스크탑: 매체 유형 칩 한 줄 노출 */}
-      <div className="hidden min-w-0 sm:block">{renderTypeAxis(false)}</div>
+      {showMapActiveFilterStrip ? (
+        <MediaMapActiveFiltersBar
+          chips={mapBrowseFilterChips}
+          onRemove={removeMapBrowseFilterChip}
+          onClearAll={clearAllFilters}
+          isKo={isKo}
+        />
+      ) : null}
+
+      {showDesktopTypeChipRow ? (
+        <div className="hidden min-w-0 sm:block">{renderTypeAxis(false)}</div>
+      ) : null}
+
+      {showMapInlineFilterAccordion ? (
+        <div className="hidden min-w-0 space-y-4 rounded-2xl border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-white/5 sm:block">
+          {renderTypeAxis(true)}
+          {renderCollapsedAxes(true)}
+          <div className="flex items-center gap-2 border-t border-gray-100 pt-3 dark:border-white/10">
+            <button
+              type="button"
+              onClick={clearAllFilters}
+              disabled={mapCompactFilterCount === 0}
+              className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
+            >
+              {isKo ? "초기화" : "Reset"}
+            </button>
+            <button
+              type="button"
+              onClick={() => persistMapFiltersExpanded(false)}
+              className="tkad-neon-cta-clean flex-1 rounded-xl px-4 py-2 text-sm font-bold text-white"
+            >
+              {desktopPanelCtaLabel}
+            </button>
+          </div>
+        </div>
+      ) : null}
 
       {/* 모바일 툴바: [필터] · [정렬] · [보기] (PR #207) */}
       <div className="flex min-w-0 flex-wrap items-center gap-2 sm:hidden">

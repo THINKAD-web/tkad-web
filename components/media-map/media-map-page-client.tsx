@@ -878,6 +878,7 @@ export default function MediaMapPageClient() {
             <div className="min-w-0 overflow-x-clip p-3 md:p-4">
               <MediaManualBrowseFilters
                 isKo={isKo}
+                mapCompactFilters
                 query={browseFilters.q}
                 onQueryChange={(q) => patchBrowseFilters({ q })}
                 mainCategory={browseFilters.mainCategory}
