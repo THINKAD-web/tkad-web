@@ -37,6 +37,10 @@ export type DarkMapProgrammaticView = {
   zoomInOnly?: boolean;
   /** Leaflet zoom 상한 — 단일/소영역 과확대 방지 */
   maxZoom?: number;
+  /** 설정 시 setView 대신 fitBounds (검색 결과 영역 맞춤) */
+  fitBounds?: MapBounds;
+  /** fitBounds 시 Leaflet maxZoom (기본 12) */
+  fitBoundsMaxZoom?: number;
 };
 
 type Props = {
@@ -180,15 +184,31 @@ function ProgrammaticView({
   useEffect(() => {
     if (!view || view.nonce === lastNonce.current) return;
     lastNonce.current = view.nonce;
-    const targetLeaflet = kakaoLevelToLeafletZoom(view.zoom, map.getZoom());
-    let leafletZoom = view.zoomInOnly
-      ? Math.max(map.getZoom(), targetLeaflet)
-      : targetLeaflet;
-    if (view.maxZoom != null) {
-      leafletZoom = Math.min(leafletZoom, view.maxZoom);
-    }
     programmaticApplyRef.current = true;
-    map.setView([view.lat, view.lng], leafletZoom, { animate: true });
+
+    if (view.fitBounds) {
+      const b = L.latLngBounds(
+        [view.fitBounds.swLat, view.fitBounds.swLng],
+        [view.fitBounds.neLat, view.fitBounds.neLng],
+      );
+      if (b.isValid()) {
+        map.fitBounds(b, {
+          padding: [32, 32],
+          maxZoom: view.fitBoundsMaxZoom ?? 12,
+          animate: true,
+        });
+      }
+    } else {
+      const targetLeaflet = kakaoLevelToLeafletZoom(view.zoom, map.getZoom());
+      let leafletZoom = view.zoomInOnly
+        ? Math.max(map.getZoom(), targetLeaflet)
+        : targetLeaflet;
+      if (view.maxZoom != null) {
+        leafletZoom = Math.min(leafletZoom, view.maxZoom);
+      }
+      map.setView([view.lat, view.lng], leafletZoom, { animate: true });
+    }
+
     const t = window.setTimeout(() => {
       programmaticApplyRef.current = false;
     }, 0);

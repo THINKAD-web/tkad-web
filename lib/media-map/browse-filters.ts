@@ -1,4 +1,6 @@
 import type { MediaMapUrlState } from "@/lib/media-map/url-state";
+import { LEGACY_REGION_TO_BROWSE } from "@/lib/media-map/legacy-region-browse";
+import { resolveTextQueryToRegionFilter } from "@/lib/media-map/text-query-region";
 
 export type MapBrowseFilters = {
   q: string;
@@ -11,15 +13,6 @@ export type MapBrowseFilters = {
   priceMax: string;
   features: string;
   sort: "popular" | "newest" | "price_asc" | "price_desc";
-};
-
-const LEGACY_REGION_TO_BROWSE: Record<string, { regionMain: string; regionSub: string }> = {
-  강남: { regionMain: "seoul", regionSub: "seoul_gangnam" },
-  홍대: { regionMain: "seoul", regionSub: "seoul_hongdae" },
-  성수: { regionMain: "seoul", regionSub: "seoul_seongsu" },
-  도심: { regionMain: "seoul", regionSub: "seoul_cbd" },
-  부산: { regionMain: "busan", regionSub: "" },
-  대구: { regionMain: "daegu", regionSub: "" },
 };
 
 function parseSort(raw?: string): MapBrowseFilters["sort"] {
@@ -92,6 +85,51 @@ export function mapBrowseFiltersToApiParams(
   if (filters.features.trim()) qs.set("features", filters.features.trim());
   if (filters.sort) qs.set("sort", filters.sort);
   return qs;
+}
+
+export type MapBrowseApiParams = {
+  params: URLSearchParams;
+  /** true면 bounds 필터 생략 — 전국 텍스트 검색 */
+  nationalScope: boolean;
+  /** 지역어로 승격된 region (지도 이동용) */
+  queryRegion: { regionMain: string; regionSub: string } | null;
+};
+
+/** /api/media/map 전용 — 텍스트 검색 시 bounds 분리 + 지역어 region 승격 */
+export function mapBrowseFiltersToMapApiParams(
+  filters: MapBrowseFilters,
+): MapBrowseApiParams {
+  const qTrim = filters.q.trim();
+  const nationalScope = qTrim.length > 0;
+  const qs = mapBrowseFiltersToApiParams(filters);
+
+  let queryRegion: MapBrowseApiParams["queryRegion"] = null;
+
+  if (nationalScope) {
+    qs.set("nationalScope", "1");
+    const fromQ = resolveTextQueryToRegionFilter(qTrim);
+    if (fromQ) {
+      queryRegion = {
+        regionMain: fromQ.regionMain,
+        regionSub: fromQ.regionSub,
+      };
+      if (!filters.regionMain) {
+        qs.set("regionMain", fromQ.regionMain);
+        if (fromQ.regionSub) qs.set("regionSub", fromQ.regionSub);
+      } else if (!filters.regionSub && fromQ.regionSub) {
+        qs.set("regionSub", fromQ.regionSub);
+      }
+      if (fromQ.consumeQuery) {
+        qs.delete("q");
+      }
+    }
+  }
+
+  return { params: qs, nationalScope, queryRegion };
+}
+
+export function isMapTextSearchActive(filters: MapBrowseFilters): boolean {
+  return filters.q.trim().length > 0;
 }
 
 export function clearMapBrowseFilters(
