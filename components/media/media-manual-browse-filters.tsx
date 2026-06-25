@@ -87,6 +87,20 @@ const VIEW_MODES: {
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
+/** `/media/map` — 현재 화면(뷰포트) vs 전국 필터 매칭 수 라벨 */
+function formatMapViewCountLabel(
+  resultCount: number,
+  total: number | undefined,
+  isKo: boolean,
+): string {
+  if (total != null && total > resultCount) {
+    return isKo
+      ? `현재 화면 ${resultCount} / 전국 ${total}개`
+      : `${resultCount} in current view / ${total} nationwide`;
+  }
+  return isKo ? `전국 ${resultCount}개` : `${resultCount} nationwide`;
+}
+
 type Props = {
   isKo?: boolean;
   query: string;
@@ -213,34 +227,48 @@ export function MediaManualBrowseFilters({
 
   const total = totalCount;
 
+  const mapCountLabel =
+    viewMode === "map" && variant !== "network"
+      ? formatMapViewCountLabel(resultCount, total, isKo)
+      : null;
+
   const resultLabel = loading
     ? isKo
       ? "검색 중…"
       : "Searching…"
-    : isKo
-      ? variant === "network"
-        ? `네트워크 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
-        : `매체 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
-      : variant === "network"
-        ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} networks`
-        : `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} media`;
+    : mapCountLabel ??
+      (isKo
+        ? variant === "network"
+          ? `네트워크 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
+          : `매체 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
+        : variant === "network"
+          ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} networks`
+          : `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} media`);
 
   // 바텀시트 "결과 보기" 버튼 라벨
   const sheetCtaLabel = loading
     ? isKo
       ? "검색 중…"
       : "Searching…"
-    : isKo
-      ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개 결과 보기`
-      : `Show ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}`;
+    : mapCountLabel
+      ? isKo
+        ? `${mapCountLabel} 결과 보기`
+        : `Show ${mapCountLabel}`
+      : isKo
+        ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개 결과 보기`
+        : `Show ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}`;
 
   const desktopPanelCtaLabel = loading
     ? isKo
       ? "검색 중…"
       : "Searching…"
-    : isKo
-      ? `적용 (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`
-      : `Apply (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`;
+    : mapCountLabel
+      ? isKo
+        ? `적용 (${mapCountLabel})`
+        : `Apply (${mapCountLabel})`
+      : isKo
+        ? `적용 (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`
+        : `Apply (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`;
 
   const toggleFeature = (value: string) => {
     const parts = new Set(
