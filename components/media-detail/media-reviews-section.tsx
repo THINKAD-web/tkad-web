@@ -20,6 +20,10 @@ const EMPTY_STATS: MediaReviewStats = {
   distribution: { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0 },
 };
 
+type LoadState = "loading" | "ready" | "error";
+
+const FETCH_TIMEOUT_MS = 15_000;
+
 export function MediaReviewsSection({ mediaId, mediaName }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -27,15 +31,19 @@ export function MediaReviewsSection({ mediaId, mediaName }: Props) {
 
   const [stats, setStats] = useState<MediaReviewStats>(EMPTY_STATS);
   const [items, setItems] = useState<PublicMediaReview[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
   const [canReview, setCanReview] = useState(false);
 
   const load = useCallback(async () => {
-    setLoading(true);
+    setLoadState("loading");
     try {
       const [pubRes, eligRes] = await Promise.all([
-        fetch(`/api/public/media/${mediaId}/reviews?locale=${locale}&limit=10`),
-        fetch(`/api/media/${mediaId}/reviews`),
+        fetch(`/api/public/media/${mediaId}/reviews?locale=${locale}&limit=10`, {
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        }),
+        fetch(`/api/media/${mediaId}/reviews`, {
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+        }),
       ]);
       if (pubRes.ok) {
         const data = (await pubRes.json()) as {
@@ -44,13 +52,20 @@ export function MediaReviewsSection({ mediaId, mediaName }: Props) {
         };
         setStats(data.stats ?? EMPTY_STATS);
         setItems(data.items ?? []);
+        setLoadState("ready");
+      } else {
+        setStats(EMPTY_STATS);
+        setItems([]);
+        setLoadState("error");
       }
       if (eligRes.ok) {
         const elig = (await eligRes.json()) as { canReview?: boolean };
         setCanReview(Boolean(elig.canReview));
       }
-    } finally {
-      setLoading(false);
+    } catch {
+      setStats(EMPTY_STATS);
+      setItems([]);
+      setLoadState("error");
     }
   }, [mediaId, locale]);
 
@@ -92,6 +107,8 @@ export function MediaReviewsSection({ mediaId, mediaName }: Props) {
   };
 
   const distMax = Math.max(...Object.values(stats.distribution), 1);
+  const showEmpty =
+    loadState === "error" || (loadState === "ready" && stats.reviewCount === 0 && items.length === 0);
 
   return (
     <section className="mt-12" aria-labelledby="media-reviews-heading">
@@ -115,15 +132,19 @@ export function MediaReviewsSection({ mediaId, mediaName }: Props) {
         ) : null}
       </div>
 
-      {loading ? (
+      {loadState === "loading" ? (
         <p className="mt-6 text-sm text-muted-foreground">
           {isKo ? "불러오는 중…" : "Loading…"}
         </p>
-      ) : stats.reviewCount === 0 && items.length === 0 ? (
+      ) : showEmpty ? (
         <p className="mt-6 rounded-2xl border border-dashed border-border/80 bg-muted/30 px-4 py-8 text-center text-sm text-muted-foreground">
-          {isKo
-            ? `아직 ${mediaName}에 대한 리뷰가 없습니다. 집행 경험이 있으시면 첫 리뷰를 남겨 주세요.`
-            : `No reviews for ${mediaName} yet. Be the first to share your experience.`}
+          {loadState === "error"
+            ? isKo
+              ? "리뷰를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요."
+              : "Could not load reviews. Please try again later."
+            : isKo
+              ? `아직 ${mediaName}에 대한 리뷰가 없습니다. 집행 경험이 있으시면 첫 리뷰를 남겨 주세요.`
+              : `No reviews for ${mediaName} yet. Be the first to share your experience.`}
         </p>
       ) : (
         <div className="mt-6 grid gap-8 lg:grid-cols-[minmax(0,240px)_1fr]">
