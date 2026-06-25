@@ -56,3 +56,15 @@ public/worker-*.js.map
 /lib/generated/prisma
 .env*.local
 public/fallback-*.js
+.neon
+tmp/
+tkad-web/
+scripts/debug-*.ts
+scripts/diagnose-*.ts
+scripts/trace-*.mts
+scripts/trace-*.ts
+scripts/test-*.ts
+scripts/verify-*.ts
+scripts/screenshot-*
+scripts/simulate-*.ts
+scripts/print-admin-*.ts
