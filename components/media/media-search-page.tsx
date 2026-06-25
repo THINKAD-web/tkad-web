@@ -35,6 +35,10 @@ import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
+import {
+  buildMediaBrowseQueryString,
+  type MediaBrowseFilterQueryState,
+} from "@/lib/media-browse-query-string";
 import { MediaPinPopup } from "@/components/media-pin-popup";
 import {
   mediaItemHasMapCoordinates,
@@ -50,38 +54,7 @@ const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const PAGE_SIZE = 30;
 
-type BrowseFilterUrlState = {
-  query: string;
-  mainCategory: string;
-  subCategory: string;
-  target: string;
-  regionMain: string;
-  regionSub: string;
-  priceMin: string;
-  priceMax: string;
-  features: string;
-  sort: string;
-  catalogVariant: "media" | "network";
-  networkType: string;
-};
-
-function buildMediaBrowseQueryString(state: BrowseFilterUrlState): string {
-  const params = new URLSearchParams();
-  if (state.query.trim()) params.set("q", state.query.trim());
-  if (state.mainCategory) params.set("mainCategory", state.mainCategory);
-  if (state.subCategory) params.set("subCategory", state.subCategory);
-  if (state.target) params.set("target", state.target);
-  if (state.regionMain) params.set("regionMain", state.regionMain);
-  if (state.regionSub) params.set("regionSub", state.regionSub);
-  if (state.priceMin.trim()) params.set("priceMin", state.priceMin.trim());
-  if (state.priceMax.trim()) params.set("priceMax", state.priceMax.trim());
-  if (state.features.trim()) params.set("features", state.features.trim());
-  if (state.catalogVariant === "network" && state.networkType) {
-    params.set("networkType", state.networkType);
-  }
-  if (state.sort && state.sort !== "popular") params.set("sort", state.sort);
-  return params.toString();
-}
+type BrowseFilterUrlState = MediaBrowseFilterQueryState;
 
 function readBrowseFilterStateFromSearchParams(
   searchParams: Pick<URLSearchParams, "get">,

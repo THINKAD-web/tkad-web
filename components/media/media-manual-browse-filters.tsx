@@ -6,6 +6,7 @@ import {
   X,
   List,
   LayoutGrid,
+  LayoutList,
   AlignJustify,
   Map as MapIcon,
   ChevronDown,
@@ -94,6 +95,16 @@ const VIEW_MODES: {
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
+const MAP_PAGE_VIEW_MODES: {
+  id: MediaManualBrowseViewMode;
+  labelKo: string;
+  labelEn: string;
+  icon: typeof List;
+}[] = [
+  { id: "feed", labelKo: "목록", labelEn: "List", icon: LayoutList },
+  { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
+];
+
 /** `/media/map` — 현재 화면(뷰포트) vs 전국 필터 매칭 수 라벨 */
 function formatMapViewCountLabel(
   resultCount: number,
@@ -150,6 +161,8 @@ type Props = {
   showViewModes?: boolean;
   /** `/media/map` — 유형·고급 필터 접기 + 활성 칩 스트립 */
   mapCompactFilters?: boolean;
+  /** `/media/map` — [목록]/[지도] 2-way 토글 */
+  mapPageViewModes?: boolean;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -196,6 +209,7 @@ export function MediaManualBrowseFilters({
   className,
   showViewModes = true,
   mapCompactFilters = false,
+  mapPageViewModes = false,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
@@ -764,10 +778,15 @@ export function MediaManualBrowseFilters({
   const viewModeToggle = showViewModes ? (
     <div
       className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
-      data-screenshot="media-view-mode"
+      data-screenshot={
+        mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
+      }
     >
-      {VIEW_MODES.map((mode) => {
+      {(mapPageViewModes ? MAP_PAGE_VIEW_MODES : VIEW_MODES).map((mode) => {
         const Icon = mode.icon;
+        const active = mapPageViewModes
+          ? mode.id === "map"
+          : viewMode === mode.id;
         return (
           <button
             key={mode.id}
@@ -776,7 +795,7 @@ export function MediaManualBrowseFilters({
             title={isKo ? mode.labelKo : mode.labelEn}
             className={cn(
               "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
-              viewMode === mode.id ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+              active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
             )}
           >
             <Icon className="h-3.5 w-3.5" aria-hidden />

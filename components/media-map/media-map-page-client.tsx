@@ -41,6 +41,7 @@ import {
   mapBrowseFiltersToUrlState,
   type MapBrowseFilters,
 } from "@/lib/media-map/browse-filters";
+import { mapBrowseFiltersToMediaBrowseQueryString } from "@/lib/media-browse-query-string";
 import {
   boundsFromMapCoordItems,
   mapBoundsIntersect,
@@ -93,8 +94,6 @@ const DarkMapView = dynamic(
 type Item = MapMapItem;
 
 type Facets = { regions: string[]; types: string[] };
-
-const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const CART_KEY = "tkad-media-cart-v1";
 
@@ -669,14 +668,10 @@ export default function MediaMapPageClient() {
   const handleBrowseViewModeChange = useCallback(
     (mode: MediaManualBrowseViewMode) => {
       if (mode === "map") return;
-      try {
-        localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
-      } catch {
-        /* ignore */
-      }
-      router.push("/media");
+      const qs = mapBrowseFiltersToMediaBrowseQueryString(browseFilters);
+      router.push(qs ? `/media?${qs}` : "/media");
     },
-    [router],
+    [router, browseFilters],
   );
 
   const toggleCompare = useCallback(
@@ -879,6 +874,7 @@ export default function MediaMapPageClient() {
               <MediaManualBrowseFilters
                 isKo={isKo}
                 mapCompactFilters
+                mapPageViewModes
                 query={browseFilters.q}
                 onQueryChange={(q) => patchBrowseFilters({ q })}
                 mainCategory={browseFilters.mainCategory}
