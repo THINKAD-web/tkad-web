@@ -5,6 +5,7 @@ import dynamic from "next/dynamic";
 import Image from "next/image";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
+import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
 import {
   formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
@@ -835,6 +836,11 @@ export default function MediaMapPageClient() {
               onCheckedChange={setSurveyCheckedIds}
             />
           ) : null}
+
+          <MediaMapVisibilityLegend
+            isKo={isKo}
+            className="pointer-events-none absolute bottom-3 left-3 z-[10] max-w-[148px] sm:bottom-4 sm:left-4"
+          />
 
           <div className="pointer-events-none absolute right-3 top-3 z-[10] flex flex-col gap-2 sm:right-4 sm:top-4">
             <button

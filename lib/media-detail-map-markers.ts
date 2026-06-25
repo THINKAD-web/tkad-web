@@ -123,9 +123,10 @@ function buildMapMarker(
   pointCount: number,
   price: number,
   type: string,
+  visibilityScore?: number,
 ): MapMarker {
   const label = point.label.trim();
-  return {
+  const marker: MapMarker = {
     id: pointCount > 1 ? `${mediaId}-install-${index}` : mediaId,
     name: label ? `${baseName} · ${label}` : baseName,
     lat: point.lat,
@@ -133,6 +134,10 @@ function buildMapMarker(
     price,
     type,
   };
+  if (visibilityScore !== undefined) {
+    marker.visibilityScore = visibilityScore;
+  }
+  return marker;
 }
 
 /** 공개 매체 상세·지도 — `installLocations` 또는 대표 좌표 → 카카오 핀 */
@@ -156,6 +161,7 @@ export function mapMarkersForMapCatalogItem(item: {
   lng: number;
   price: number;
   type: string;
+  visibilityScore?: number;
   installLocations?: Array<{ label: string; lat: number; lng: number }>;
 }): MapMarker[] {
   const points = mapPointsForMediaItem({
@@ -169,7 +175,16 @@ export function mapMarkersForMapCatalogItem(item: {
     })),
   });
   return points.map((p, i) =>
-    buildMapMarker(item.id, item.name, p, i, points.length, item.price, item.type),
+    buildMapMarker(
+      item.id,
+      item.name,
+      p,
+      i,
+      points.length,
+      item.price,
+      item.type,
+      item.visibilityScore,
+    ),
   );
 }
 
