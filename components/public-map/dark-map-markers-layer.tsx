@@ -36,17 +36,18 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
 function applyMarkerPinIcon(
   marker: L.Marker,
   pinId: string,
-  type: string,
+  meta: { type: string; visibilityScore?: number },
   selectedId: string | null,
   hoveredId: string | null,
   lightTiles: boolean,
 ) {
   marker.setIcon(
     leafletPinIcon(
-      type,
+      meta.type,
       mapPinMatchesActiveId(pinId, selectedId),
       mapPinMatchesActiveId(pinId, hoveredId),
       lightTiles,
+      meta.visibilityScore,
     ),
   );
 }
@@ -69,7 +70,9 @@ export function DarkMapMarkersLayer({
   const map = useMap();
   const layerRef = useRef<L.LayerGroup | L.MarkerClusterGroup | null>(null);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
-  const markerMetaRef = useRef<Map<string, { type: string }>>(new Map());
+  const markerMetaRef = useRef<Map<string, { type: string; visibilityScore?: number }>>(
+    new Map(),
+  );
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
   const lightTilesRef = useRef(lightTiles);
@@ -129,13 +132,23 @@ export function DarkMapMarkersLayer({
 
     for (const mk of markers) {
       if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
-      markerMetaRef.current.set(mk.id, { type: mk.type });
+      markerMetaRef.current.set(mk.id, {
+        type: mk.type,
+        visibilityScore: mk.visibilityScore,
+      });
       const existing = markerRefs.current.get(mk.id);
       if (existing) {
         existing.setLatLng([mk.lat, mk.lng]);
         const el = existing.getElement();
         if (el) el.title = mk.name;
-        applyMarkerPinIcon(existing, mk.id, mk.type, selected, hovered, tiles);
+        applyMarkerPinIcon(
+          existing,
+          mk.id,
+          { type: mk.type, visibilityScore: mk.visibilityScore },
+          selected,
+          hovered,
+          tiles,
+        );
         continue;
       }
       const marker = L.marker([mk.lat, mk.lng], {
@@ -144,6 +157,7 @@ export function DarkMapMarkersLayer({
           mapPinMatchesActiveId(mk.id, selected),
           mapPinMatchesActiveId(mk.id, hovered),
           tiles,
+          mk.visibilityScore,
         ),
         title: mk.name,
       });
@@ -173,14 +187,7 @@ export function DarkMapMarkersLayer({
       const marker = markerRefs.current.get(id);
       const meta = markerMetaRef.current.get(id);
       if (!marker || !meta) continue;
-      applyMarkerPinIcon(
-        marker,
-        id,
-        meta.type,
-        selectedId,
-        hoveredId,
-        tiles,
-      );
+      applyMarkerPinIcon(marker, id, meta, selectedId, hoveredId, tiles);
     }
     prevActivePinsRef.current = next;
   }, [selectedId, hoveredId]);
