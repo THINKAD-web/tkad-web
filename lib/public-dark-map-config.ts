@@ -1,8 +1,34 @@
-/** 공개(사용자) 지도 — Carto 다크 타일 (홈 히어로·/media/map·매체 상세 공통) */
-export const PUBLIC_DARK_MAP_TILE_URL =
-  "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png";
+/** 공개(사용자) 지도 — Carto 타일 (홈 히어로·/media/map·매체 상세 공통) */
 
-export const PUBLIC_DARK_MAP_TILE_SUBDOMAINS = "abcd";
+export const PUBLIC_MAP_TILE_SUBDOMAINS = "abcd";
+
+/** Carto 타일 URL — 한 줄만 바꿔 dark / light / voyager 비교 */
+export const PUBLIC_MAP_TILE_URLS = {
+  voyager:
+    "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
+  light:
+    "https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png",
+  dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+} as const;
+
+export type PublicMapTilePreset = keyof typeof PUBLIC_MAP_TILE_URLS;
+
+/** ← 여기만 수정: voyager | light | dark */
+export const PUBLIC_MAP_TILE_PRESET: PublicMapTilePreset = "voyager";
+
+/** @deprecated 이름 유지 — 실제 URL은 PRESET 에 따름 */
+export const PUBLIC_DARK_MAP_TILE_URL =
+  PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET];
+
+/** @deprecated PUBLIC_MAP_TILE_SUBDOMAINS 와 동일 */
+export const PUBLIC_DARK_MAP_TILE_SUBDOMAINS = PUBLIC_MAP_TILE_SUBDOMAINS;
+
+export function isPublicMapLightTile(): boolean {
+  return (
+    PUBLIC_MAP_TILE_PRESET === "voyager" ||
+    PUBLIC_MAP_TILE_PRESET === "light"
+  );
+}
 
 export const PUBLIC_DARK_MAP_DEFAULT_CENTER = {
   lat: 37.5665,
