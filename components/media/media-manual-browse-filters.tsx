@@ -827,7 +827,7 @@ export function MediaManualBrowseFilters({
     <div
       className={cn(
         "min-w-0",
-        mapPageViewModes ? "space-y-2" : "space-y-3",
+        mapPageViewModes ? "space-y-1.5" : "space-y-3",
         className,
       )}
       data-screenshot="media-browse-filters"

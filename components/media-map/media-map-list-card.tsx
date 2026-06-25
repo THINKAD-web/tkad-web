@@ -72,7 +72,7 @@ export const MediaMapListCard = forwardRef<HTMLLIElement, Props>(
         className={cn(
           "relative cursor-pointer overflow-hidden rounded-2xl border bg-white transition-all hover:shadow-md active:scale-[0.99] dark:bg-white/5",
           selected
-            ? "border-2 border-violet-500/90 shadow-md shadow-violet-500/20 ring-2 ring-violet-400/40 dark:border-violet-400 dark:shadow-violet-500/25"
+            ? "z-0 border-2 border-violet-500/90 shadow-md shadow-violet-500/15 ring-2 ring-inset ring-violet-400/35 dark:border-violet-400 dark:shadow-violet-500/20"
             : hovered
               ? "border border-cyan-400/50 dark:border-cyan-400/40"
               : "border border-gray-100 dark:border-white/10",
@@ -89,12 +89,6 @@ export const MediaMapListCard = forwardRef<HTMLLIElement, Props>(
         onFocus={onFocus}
         onBlur={onBlur}
       >
-        {selected ? (
-          <span
-            className="pointer-events-none absolute inset-y-0 left-0 z-10 w-1 bg-violet-500/75"
-            aria-hidden
-          />
-        ) : null}
         <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
           {thumb ? (
             <Image
