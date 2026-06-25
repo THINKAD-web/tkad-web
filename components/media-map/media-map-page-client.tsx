@@ -149,6 +149,7 @@ export default function MediaMapPageClient() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
+  const toast = useAppToast();
   const [bounds, setBounds] = useState<MapBounds | null>(null);
   /** 마지막 API 검색에 사용한 bounds — "이 지역 검색" 버튼 노출 판단용 */
   const [searchedBounds, setSearchedBounds] = useState<MapBounds | null>(null);
@@ -241,6 +242,14 @@ export default function MediaMapPageClient() {
   const lastFocusedSelectionRef = useRef<string | null>(null);
   const browseFiltersRef = useRef(browseFilters);
   const lastTextSearchQRef = useRef("");
+  const mapFetchAbortRef = useRef<AbortController | null>(null);
+  const fetchGenerationRef = useRef(0);
+
+  useEffect(() => {
+    return () => {
+      mapFetchAbortRef.current?.abort();
+    };
+  }, []);
 
   useEffect(() => {
     browseFiltersRef.current = browseFilters;
@@ -355,7 +364,19 @@ export default function MediaMapPageClient() {
 
   const fetchItems = useCallback(
     async (b: MapBounds | null, f: MapBrowseFilters) => {
+      mapFetchAbortRef.current?.abort();
+      const controller = new AbortController();
+      mapFetchAbortRef.current = controller;
+      const generation = ++fetchGenerationRef.current;
+
       setLoading(true);
+      const failToast = () => {
+        toast.error(
+          isKo
+            ? "지도 검색에 실패했습니다. 잠시 후 다시 시도해주세요."
+            : "Map search failed. Please try again.",
+        );
+      };
       try {
         const { params, nationalScope, queryRegion } =
           mapBrowseFiltersToMapApiParams(f);
@@ -368,9 +389,13 @@ export default function MediaMapPageClient() {
 
         const res = await fetch(`/api/media/map?${params.toString()}`, {
           cache: "no-store",
+          signal: controller.signal,
         });
+        if (generation !== fetchGenerationRef.current) return;
+
         const ct = res.headers.get("content-type") ?? "";
         if (!res.ok || !ct.includes("application/json")) {
+          failToast();
           return;
         }
         let data: {
@@ -380,8 +405,11 @@ export default function MediaMapPageClient() {
         try {
           data = (await res.json()) as typeof data;
         } catch {
+          if (generation !== fetchGenerationRef.current) return;
+          failToast();
           return;
         }
+        if (generation !== fetchGenerationRef.current) return;
         if (data?.ok && data.data) {
           const next = Array.isArray(data.data.items) ? data.data.items : [];
           setItems(next);
@@ -410,11 +438,17 @@ export default function MediaMapPageClient() {
             lastTextSearchQRef.current = "";
           }
         }
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return;
+        if (generation !== fetchGenerationRef.current) return;
+        failToast();
       } finally {
-        setLoading(false);
+        if (generation === fetchGenerationRef.current) {
+          setLoading(false);
+        }
       }
     },
-    [applyTextSearchMapView],
+    [applyTextSearchMapView, isKo, toast],
   );
 
   const runSearch = useCallback(
@@ -583,7 +617,6 @@ export default function MediaMapPageClient() {
     (id: string) => compareEntries.some((e) => e.id === id),
     [compareEntries],
   );
-  const toast = useAppToast();
   const { count: planCount } = usePlanCart();
   const floatingBarOffset = planCount > 0 || compareEntries.length > 0;
 
