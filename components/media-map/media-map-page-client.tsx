@@ -40,10 +40,15 @@ import {
 import { resolveBrowseRegionMapView } from "@/lib/media-map/region-view";
 import {
   initMapBrowseFiltersFromUrl,
-  mapBrowseFiltersToApiParams,
+  isMapTextSearchActive,
+  mapBrowseFiltersToMapApiParams,
   mapBrowseFiltersToUrlState,
   type MapBrowseFilters,
 } from "@/lib/media-map/browse-filters";
+import {
+  boundsFromMapCoordItems,
+  mapBoundsIntersect,
+} from "@/lib/media-map/map-item-bounds";
 import {
   MediaManualBrowseFilters,
   type MediaManualBrowseViewMode,
@@ -97,6 +102,9 @@ const CART_KEY = "tkad-media-cart-v1";
 
 /** 마커/카드 선택 시 클로즈업 줌(Kakao level, 작을수록 확대). zoomInOnly 로 확대만 적용. */
 const MARKER_FOCUS_ZOOM = 4;
+
+/** 텍스트 검색 결과 fitBounds 시 Leaflet maxZoom */
+const TEXT_SEARCH_FIT_MAX_ZOOM = 12;
 
 function boundsEqual(a: MapBounds, b: MapBounds, eps = 1e-5): boolean {
   return (
@@ -200,6 +208,8 @@ export default function MediaMapPageClient() {
       zoom: number;
       zoomInOnly?: boolean;
       maxZoom?: number;
+      fitBounds?: MapBounds;
+      fitBoundsMaxZoom?: number;
       /** true면 다음 bounds 갱신 시 즉시 검색 + dirty 리셋 */
       resetUserViewport?: boolean;
     }) => {
@@ -215,6 +225,8 @@ export default function MediaMapPageClient() {
         nonce: pvNonceRef.current,
         zoomInOnly: cmd.zoomInOnly,
         maxZoom: cmd.maxZoom,
+        fitBounds: cmd.fitBounds,
+        fitBoundsMaxZoom: cmd.fitBoundsMaxZoom,
       });
     },
     [],
@@ -227,6 +239,52 @@ export default function MediaMapPageClient() {
   const initialFetchDoneRef = useRef(false);
   const searchedBoundsRef = useRef<MapBounds | null>(null);
   const lastFocusedSelectionRef = useRef<string | null>(null);
+  const browseFiltersRef = useRef(browseFilters);
+  const lastTextSearchQRef = useRef("");
+
+  useEffect(() => {
+    browseFiltersRef.current = browseFilters;
+  }, [browseFilters]);
+
+  const applyTextSearchMapView = useCallback(
+    (
+      nextItems: Item[],
+      f: MapBrowseFilters,
+      queryRegion: { regionMain: string; regionSub: string } | null,
+      viewport: MapBounds | null,
+    ) => {
+      if (!isMapTextSearchActive(f)) return;
+
+      const regionMain = queryRegion?.regionMain ?? f.regionMain;
+      const regionSub = queryRegion?.regionSub ?? f.regionSub;
+      const regionView = resolveBrowseRegionMapView(regionMain, regionSub);
+      if (regionView) {
+        emitProgrammaticView({
+          lat: regionView.lat,
+          lng: regionView.lng,
+          zoom: regionView.zoom,
+          resetUserViewport: true,
+        });
+        return;
+      }
+
+      const resultBounds = boundsFromMapCoordItems(nextItems);
+      if (!resultBounds) return;
+      if (viewport && mapBoundsIntersect(resultBounds, viewport)) return;
+
+      const centerLat = (resultBounds.swLat + resultBounds.neLat) / 2;
+      const centerLng = (resultBounds.swLng + resultBounds.neLng) / 2;
+      emitProgrammaticView({
+        lat: centerLat,
+        lng: centerLng,
+        zoom: 8,
+        fitBounds: resultBounds,
+        fitBoundsMaxZoom: TEXT_SEARCH_FIT_MAX_ZOOM,
+        resetUserViewport: true,
+      });
+    },
+    [emitProgrammaticView],
+  );
 
   useEffect(() => {
     itemsRef.current = items;
@@ -299,15 +357,18 @@ export default function MediaMapPageClient() {
     async (b: MapBounds | null, f: MapBrowseFilters) => {
       setLoading(true);
       try {
-        const qs = mapBrowseFiltersToApiParams(f);
-        if (b) {
-          qs.set("swLat", String(b.swLat));
-          qs.set("swLng", String(b.swLng));
-          qs.set("neLat", String(b.neLat));
-          qs.set("neLng", String(b.neLng));
+        const { params, nationalScope, queryRegion } =
+          mapBrowseFiltersToMapApiParams(f);
+        if (!nationalScope && b) {
+          params.set("swLat", String(b.swLat));
+          params.set("swLng", String(b.swLng));
+          params.set("neLat", String(b.neLat));
+          params.set("neLng", String(b.neLng));
         }
 
-        const res = await fetch(`/api/media/map?${qs.toString()}`, { cache: "no-store" });
+        const res = await fetch(`/api/media/map?${params.toString()}`, {
+          cache: "no-store",
+        });
         const ct = res.headers.get("content-type") ?? "";
         if (!res.ok || !ct.includes("application/json")) {
           return;
@@ -335,12 +396,56 @@ export default function MediaMapPageClient() {
               types: [],
             },
           );
+
+          const qTrim = f.q.trim();
+          if (nationalScope && qTrim && qTrim !== lastTextSearchQRef.current) {
+            lastTextSearchQRef.current = qTrim;
+            applyTextSearchMapView(
+              next,
+              f,
+              queryRegion,
+              searchedBoundsRef.current ?? b,
+            );
+          } else if (!nationalScope) {
+            lastTextSearchQRef.current = "";
+          }
         }
       } finally {
         setLoading(false);
       }
     },
-    [],
+    [applyTextSearchMapView],
+  );
+
+  const runSearch = useCallback(
+    async (b: MapBounds) => {
+      const f = browseFiltersRef.current;
+      if (isMapTextSearchActive(f)) {
+        await fetchItems(null, f);
+      } else {
+        await fetchItems(b, f);
+      }
+      setSearchedBounds(b);
+      searchedBoundsRef.current = b;
+      setViewportDirty(false);
+    },
+    [fetchItems],
+  );
+
+  const handleBoundsChange = useCallback(
+    (b: MapBounds) => {
+      setBounds(b);
+      if (forceSearchRef.current) {
+        forceSearchRef.current = false;
+        void runSearch(b);
+        return;
+      }
+      if (!initialFetchDoneRef.current) {
+        initialFetchDoneRef.current = true;
+        void runSearch(b);
+      }
+    },
+    [runSearch],
   );
 
   const runSearch = useCallback(
@@ -373,11 +478,12 @@ export default function MediaMapPageClient() {
     searchedBoundsRef.current = searchedBounds;
   }, [searchedBounds]);
 
-  // 필터 변경(지역 제외) — 현재 검색 영역 기준으로 즉시 재조회
+  // 필터 변경(지역 제외) — 텍스트 검색은 전국, 그 외는 현재 검색 영역
   useEffect(() => {
     const b = searchedBoundsRef.current;
-    if (!b) return;
-    void fetchItems(b, browseFilters);
+    const f = browseFilters;
+    if (!b && !isMapTextSearchActive(f)) return;
+    void fetchItems(isMapTextSearchActive(f) ? null : b, f);
   }, [
     browseFilters.q,
     browseFilters.mainCategory,
@@ -465,6 +571,7 @@ export default function MediaMapPageClient() {
   }, [bounds, runSearch]);
 
   const showSearchAreaButton =
+    !isMapTextSearchActive(browseFilters) &&
     viewportDirty &&
     bounds != null &&
     searchedBounds != null &&
@@ -798,7 +905,7 @@ export default function MediaMapPageClient() {
                 onViewModeChange={handleBrowseViewModeChange}
                 resultCount={items.length}
                 totalCount={matchTotal}
-                loading={loading || !searchedBounds}
+                loading={loading || (!searchedBounds && !isMapTextSearchActive(browseFilters))}
                 compareCount={compareEntries.length}
                 cartCount={cartIds.length}
               />
@@ -806,8 +913,8 @@ export default function MediaMapPageClient() {
           </div>
 
         <ul className="grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-          {!searchedBounds || loading ? (
-            <MapListSkeleton count={!searchedBounds ? 4 : 6} />
+          {((!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading) ? (
+            <MapListSkeleton count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6} />
           ) : (
             items.map((it) => {
             const thumb = catalogThumbnailImageProps(it.image);
@@ -873,7 +980,7 @@ export default function MediaMapPageClient() {
             );
           })
           )}
-          {searchedBounds && items.length === 0 && !loading && (
+          {((searchedBounds || isMapTextSearchActive(browseFilters)) && items.length === 0 && !loading) && (
             <li className="col-span-2 p-8 text-center">
               <div className="text-3xl mb-2">🔍</div>
               <p className="text-sm font-medium text-foreground mb-1">검색 결과가 없습니다</p>

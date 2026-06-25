@@ -91,6 +91,8 @@ export async function GET(req: Request) {
       parseFloatOrNull(sp.get("maxPrice")) ??
       parseFloatOrNull(sp.get("priceMax"));
 
+    const nationalScope = sp.get("nationalScope") === "1";
+
     const filterParams: MapCatalogFilterParams = {
       category: sp.get("category")?.trim() || sp.get("type")?.trim() || null,
       target: sp.get("target")?.trim() || null,
@@ -137,7 +139,13 @@ export async function GET(req: Request) {
           Math.abs(p.lng) <= 180,
       );
       if (!hasValidCoord && !hasInstallCoords) return false;
-      if (swLat != null && neLat != null && swLng != null && neLng != null) {
+      if (
+        !nationalScope &&
+        swLat != null &&
+        neLat != null &&
+        swLng != null &&
+        neLng != null
+      ) {
         if (
           !mediaItemIntersectsMapBounds(m, {
             swLat,
