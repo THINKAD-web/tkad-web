@@ -64,12 +64,12 @@ export function pinDataUrl(
       : forLightBackground
         ? "#ffffff"
         : "rgba(8,8,12,0.94)";
-  const bodyStroke = useScore
-    ? forLightBackground
-      ? "rgba(15,23,42,0.45)"
-      : "rgba(255,255,255,0.14)"
-    : selected
-      ? stroke
+  const bodyStroke = selected
+    ? MAP_PIN_SELECTION_RING
+    : useScore
+      ? forLightBackground
+        ? "rgba(15,23,42,0.45)"
+        : "rgba(255,255,255,0.14)"
       : forLightBackground
         ? "rgba(15,23,42,0.55)"
         : "rgba(255,255,255,0.14)";
@@ -81,10 +81,6 @@ export function pinDataUrl(
         ? "#f8fafc"
         : "rgba(12,12,18,0.98)";
   const labelFill = useScore ? text : selected ? text : forLightBackground ? fill : stroke;
-
-  const selectionRing = selected
-    ? `<line x1="9" y1="11" x2="9" y2="41" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2" stroke-linecap="round" opacity="0.55"/>`
-    : "";
 
   const shadowFilter = forLightBackground
     ? `<filter id="pinShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="rgba(15,23,42,0.35)"/></filter>`
@@ -101,8 +97,7 @@ export function pinDataUrl(
       </linearGradient>
     </defs>
     <g${shadowGroup}>
-      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.5 : forLightBackground ? 2 : 1.75}"/>
-      ${selectionRing}
+      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.25 : forLightBackground ? 2 : 1.75}"${selected ? ` stroke-opacity="0.88"` : ""}/>
       <circle cx="22" cy="22" r="11.8" fill="${coreFill}" stroke="url(#ring)" stroke-width="${ring}"/>
       <text x="22" y="26.8" text-anchor="middle" font-family="ui-monospace, monospace" font-size="${font}" font-weight="800" fill="${labelFill}">${label}</text>
     </g>

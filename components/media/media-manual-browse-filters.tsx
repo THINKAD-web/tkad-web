@@ -293,9 +293,7 @@ export function MediaManualBrowseFilters({
     cartCount > 0 ||
     compareCount > 0;
 
-  const mapToolbarBorder = mapPageViewModes
-    ? "border-[0.5px] border-gray-200/25 dark:border-white/[0.04]"
-    : "border border-gray-200 dark:border-white/10";
+  const mapToolbarCompact = mapPageViewModes;
 
   const total = totalCount;
 
@@ -757,9 +755,8 @@ export function MediaManualBrowseFilters({
             : "Search name, region, type"
         }
         className={cn(
-          "w-full rounded-2xl border bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:bg-white/8 dark:text-white dark:placeholder-white/30 sm:py-2.5",
-          mapToolbarBorder,
-          mapPageViewModes && "bg-gray-50/90 py-2.5 dark:bg-white/[0.04] sm:py-2",
+          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30",
+          mapToolbarCompact ? "py-2" : "py-3 sm:py-2.5",
         )}
       />
       {query ? (
@@ -781,9 +778,8 @@ export function MediaManualBrowseFilters({
       onChange={(e) => onSortChange(e.target.value)}
       aria-label={isKo ? "정렬" : "Sort"}
       className={cn(
-        "min-w-0 flex-1 rounded-xl border bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:bg-white/8 dark:text-white/70",
-        mapToolbarBorder,
-        mapPageViewModes && "bg-transparent py-1 dark:bg-transparent",
+        "min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70",
+        mapToolbarCompact ? "py-1" : "py-1.5",
       )}
     >
       {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
@@ -796,10 +792,7 @@ export function MediaManualBrowseFilters({
 
   const viewModeToggle = showViewModes ? (
     <div
-      className={cn(
-        "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border",
-        mapToolbarBorder,
-      )}
+      className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
       data-screenshot={
         mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
       }
@@ -872,11 +865,8 @@ export function MediaManualBrowseFilters({
               setDesktopPanelOpen((o) => !o);
             }}
             className={cn(
-              "inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium text-gray-700 dark:text-white/80",
-              mapToolbarBorder,
-              mapPageViewModes
-                ? "bg-gray-50/90 py-1.5 dark:bg-white/[0.04]"
-                : "bg-white dark:bg-white/5",
+              "inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+              mapToolbarCompact ? "px-3 py-1.5" : "px-3 py-2",
             )}
             aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
             aria-haspopup={mapCompactFilters ? undefined : "dialog"}
@@ -986,11 +976,8 @@ export function MediaManualBrowseFilters({
           type="button"
           onClick={() => setSheetOpen(true)}
           className={cn(
-            "inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-white/80",
-            mapToolbarBorder,
-            mapPageViewModes
-              ? "bg-gray-50/90 dark:bg-white/[0.04]"
-              : "bg-white dark:bg-white/5",
+            "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+            mapToolbarCompact ? "px-3 py-1" : "px-3 py-1.5",
           )}
           aria-label={isKo ? "필터 열기" : "Open filters"}
         >
