@@ -448,32 +448,6 @@ export default function MediaMapPageClient() {
     [runSearch],
   );
 
-  const runSearch = useCallback(
-    async (b: MapBounds) => {
-      await fetchItems(b, browseFilters);
-      setSearchedBounds(b);
-      searchedBoundsRef.current = b;
-      setViewportDirty(false);
-    },
-    [fetchItems, browseFilters],
-  );
-
-  const handleBoundsChange = useCallback(
-    (b: MapBounds) => {
-      setBounds(b);
-      if (forceSearchRef.current) {
-        forceSearchRef.current = false;
-        void runSearch(b);
-        return;
-      }
-      if (!initialFetchDoneRef.current) {
-        initialFetchDoneRef.current = true;
-        void runSearch(b);
-      }
-    },
-    [runSearch],
-  );
-
   useEffect(() => {
     searchedBoundsRef.current = searchedBounds;
   }, [searchedBounds]);
