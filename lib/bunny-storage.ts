@@ -37,6 +37,15 @@ export function isBunnyStorageConfigured(): boolean {
   return getBunnyStorageConfigStatus().configured;
 }
 
+/** Pull Zone CDN URL for a storage-zone object path */
+export function buildBunnyCdnUrl(objectPath: string): string | null {
+  const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim();
+  if (!cdnBase) return null;
+  const normalized = objectPath.replace(/^\/+/, "");
+  if (!normalized) return null;
+  return joinUrl(cdnBase, normalized);
+}
+
 export type BunnyUploadResult = {
   publicUrl: string;
   path: string;
