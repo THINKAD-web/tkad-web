@@ -50,6 +50,100 @@ const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const PAGE_SIZE = 30;
 
+type BrowseFilterUrlState = {
+  query: string;
+  mainCategory: string;
+  subCategory: string;
+  target: string;
+  regionMain: string;
+  regionSub: string;
+  priceMin: string;
+  priceMax: string;
+  features: string;
+  sort: string;
+  catalogVariant: "media" | "network";
+  networkType: string;
+};
+
+function buildMediaBrowseQueryString(state: BrowseFilterUrlState): string {
+  const params = new URLSearchParams();
+  if (state.query.trim()) params.set("q", state.query.trim());
+  if (state.mainCategory) params.set("mainCategory", state.mainCategory);
+  if (state.subCategory) params.set("subCategory", state.subCategory);
+  if (state.target) params.set("target", state.target);
+  if (state.regionMain) params.set("regionMain", state.regionMain);
+  if (state.regionSub) params.set("regionSub", state.regionSub);
+  if (state.priceMin.trim()) params.set("priceMin", state.priceMin.trim());
+  if (state.priceMax.trim()) params.set("priceMax", state.priceMax.trim());
+  if (state.features.trim()) params.set("features", state.features.trim());
+  if (state.catalogVariant === "network" && state.networkType) {
+    params.set("networkType", state.networkType);
+  }
+  if (state.sort && state.sort !== "popular") params.set("sort", state.sort);
+  return params.toString();
+}
+
+function readBrowseFilterStateFromSearchParams(
+  searchParams: Pick<URLSearchParams, "get">,
+  opts: {
+    catalogVariant?: "media" | "network";
+    initialCategory?: string;
+    initialTarget?: string;
+    initialNetworkType?: string;
+  },
+): BrowseFilterUrlState {
+  const legacyCat = searchParams.get("category") ?? opts.initialCategory ?? "";
+  const resolved = resolveBrowseCategoryParams({
+    mainCategory: searchParams.get("mainCategory"),
+    subCategory: searchParams.get("subCategory"),
+    category: legacyCat,
+  });
+  const sortParam = searchParams.get("sort");
+  return {
+    query: searchParams.get("q") ?? "",
+    mainCategory: resolved.mainCategory ?? "",
+    subCategory: resolved.subCategory ?? "",
+    target: searchParams.get("target") ?? opts.initialTarget ?? "",
+    regionMain: searchParams.get("regionMain") ?? "",
+    regionSub: searchParams.get("regionSub") ?? "",
+    priceMin: searchParams.get("priceMin") ?? "",
+    priceMax: searchParams.get("priceMax") ?? "",
+    features: searchParams.get("features") ?? "",
+    sort: sortParam ?? "popular",
+    catalogVariant: opts.catalogVariant ?? "media",
+    networkType: searchParams.get("networkType") ?? opts.initialNetworkType ?? "",
+  };
+}
+
+function applyBrowseFilterUrlState(
+  state: BrowseFilterUrlState,
+  setters: {
+    setQuery: (v: string) => void;
+    setMainCategory: (v: string) => void;
+    setSubCategory: (v: string) => void;
+    setTarget: (v: string) => void;
+    setRegionMain: (v: string) => void;
+    setRegionSub: (v: string) => void;
+    setPriceMin: (v: string) => void;
+    setPriceMax: (v: string) => void;
+    setFeatures: (v: string) => void;
+    setSort: (v: string) => void;
+    setNetworkType: (v: string) => void;
+  },
+) {
+  setters.setQuery(state.query);
+  setters.setMainCategory(state.mainCategory);
+  setters.setSubCategory(state.subCategory);
+  setters.setTarget(state.target);
+  setters.setRegionMain(state.regionMain);
+  setters.setRegionSub(state.regionSub);
+  setters.setPriceMin(state.priceMin);
+  setters.setPriceMax(state.priceMax);
+  setters.setFeatures(state.features);
+  setters.setSort(state.sort);
+  setters.setNetworkType(state.networkType);
+}
+
 function formatPriceLabel(
   price?: number,
   period?: string,
@@ -120,31 +214,25 @@ function MediaSearchPageInner({
   const toast = useAppToast();
   const { ids: cartIds, toggle: toggleCartId } = useCart();
 
-  const initialFromUrl = useMemo(() => {
-    const legacyCat =
-      searchParams.get("category") ?? initialCategory ?? "";
-    const resolved = resolveBrowseCategoryParams({
-      mainCategory: searchParams.get("mainCategory"),
-      subCategory: searchParams.get("subCategory"),
-      category: legacyCat,
-    });
-    return {
-      mainCategory: resolved.mainCategory ?? "",
-      subCategory: resolved.subCategory ?? "",
-      target: searchParams.get("target") ?? initialTarget ?? "",
-      regionMain: searchParams.get("regionMain") ?? "",
-      regionSub: searchParams.get("regionSub") ?? "",
-      regionLegacy: searchParams.get("region") ?? initialRegion ?? "",
-      priceMin: searchParams.get("priceMin") ?? "",
-      priceMax: searchParams.get("priceMax") ?? "",
-      features: searchParams.get("features") ?? "",
-    };
-  }, [searchParams, initialCategory, initialTarget, initialRegion]);
-
-  const [query, setQuery] = useState(searchParams.get("q") ?? "");
-  const [mainCategory, setMainCategory] = useState(
-    initialFromUrl.mainCategory,
+  const initialFromUrl = useMemo(
+    () =>
+      readBrowseFilterStateFromSearchParams(searchParams, {
+        catalogVariant,
+        initialCategory,
+        initialTarget,
+        initialNetworkType,
+      }),
+    [
+      searchParams,
+      catalogVariant,
+      initialCategory,
+      initialTarget,
+      initialNetworkType,
+    ],
   );
+
+  const [query, setQuery] = useState(initialFromUrl.query);
+  const [mainCategory, setMainCategory] = useState(initialFromUrl.mainCategory);
   const [subCategory, setSubCategory] = useState(initialFromUrl.subCategory);
   const [target, setTarget] = useState(initialFromUrl.target);
   const [regionMain, setRegionMain] = useState(initialFromUrl.regionMain);
@@ -152,10 +240,8 @@ function MediaSearchPageInner({
   const [priceMin, setPriceMin] = useState(initialFromUrl.priceMin);
   const [priceMax, setPriceMax] = useState(initialFromUrl.priceMax);
   const [features, setFeatures] = useState(initialFromUrl.features);
-  const [networkType, setNetworkType] = useState(
-    searchParams.get("networkType") ?? initialNetworkType ?? "",
-  );
-  const [sort, setSort] = useState(searchParams.get("sort") ?? "popular");
+  const [networkType, setNetworkType] = useState(initialFromUrl.networkType);
+  const [sort, setSort] = useState(initialFromUrl.sort);
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
   const [catalogItems, setCatalogItems] =
@@ -168,6 +254,8 @@ function MediaSearchPageInner({
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const catalogFetchGeneration = useRef(0);
+  /** router.replace 로 쓴 쿼리 — 내부 동기화 시 searchParams effect 가 state 를 덮어쓰지 않게 */
+  const lastPushedBrowseQueryRef = useRef<string | null>(null);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
   );
@@ -180,43 +268,52 @@ function MediaSearchPageInner({
   }, []);
 
   useEffect(() => {
-    const legacyCat = searchParams.get("category") ?? "";
-    const resolved = resolveBrowseCategoryParams({
-      mainCategory: searchParams.get("mainCategory"),
-      subCategory: searchParams.get("subCategory"),
-      category: legacyCat,
+    const incoming = searchParams.toString();
+    if (incoming === (lastPushedBrowseQueryRef.current ?? "")) return;
+    const next = readBrowseFilterStateFromSearchParams(searchParams, {
+      catalogVariant,
+      initialCategory,
+      initialTarget,
+      initialNetworkType,
     });
-    setMainCategory(resolved.mainCategory ?? "");
-    setSubCategory(resolved.subCategory ?? "");
-    setTarget(searchParams.get("target") ?? "");
-    setRegionMain(searchParams.get("regionMain") ?? "");
-    setRegionSub(searchParams.get("regionSub") ?? "");
-    setQuery(searchParams.get("q") ?? "");
-    setPriceMin(searchParams.get("priceMin") ?? "");
-    setPriceMax(searchParams.get("priceMax") ?? "");
-    setFeatures(searchParams.get("features") ?? "");
-    setNetworkType(searchParams.get("networkType") ?? "");
-    const sortParam = searchParams.get("sort");
-    if (sortParam) setSort(sortParam);
-  }, [searchParams]);
+    applyBrowseFilterUrlState(next, {
+      setQuery,
+      setMainCategory,
+      setSubCategory,
+      setTarget,
+      setRegionMain,
+      setRegionSub,
+      setPriceMin,
+      setPriceMax,
+      setFeatures,
+      setSort,
+      setNetworkType,
+    });
+  }, [
+    searchParams,
+    catalogVariant,
+    initialCategory,
+    initialTarget,
+    initialNetworkType,
+  ]);
 
   useEffect(() => {
     if (plannerMode || embedded) return;
-    const params = new URLSearchParams();
-    if (query.trim()) params.set("q", query.trim());
-    if (mainCategory) params.set("mainCategory", mainCategory);
-    if (subCategory) params.set("subCategory", subCategory);
-    if (target) params.set("target", target);
-    if (regionMain) params.set("regionMain", regionMain);
-    if (regionSub) params.set("regionSub", regionSub);
-    if (priceMin.trim()) params.set("priceMin", priceMin.trim());
-    if (priceMax.trim()) params.set("priceMax", priceMax.trim());
-    if (features.trim()) params.set("features", features.trim());
-    if (catalogVariant === "network" && networkType) {
-      params.set("networkType", networkType);
-    }
-    if (sort && sort !== "popular") params.set("sort", sort);
-    const qs = params.toString();
+    const qs = buildMediaBrowseQueryString({
+      query,
+      mainCategory,
+      subCategory,
+      target,
+      regionMain,
+      regionSub,
+      priceMin,
+      priceMax,
+      features,
+      sort,
+      catalogVariant,
+      networkType,
+    });
+    lastPushedBrowseQueryRef.current = qs;
     router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
   }, [
     query,
