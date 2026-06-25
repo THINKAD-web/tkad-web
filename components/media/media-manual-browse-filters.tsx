@@ -286,6 +286,13 @@ export function MediaManualBrowseFilters({
   const showMapInlineFilterAccordion =
     mapCompactFilters && mapFiltersExpanded;
 
+  const showResultCountLabel = !mapPageViewModes;
+  const showResultSummaryRow =
+    showResultCountLabel ||
+    selectedCount > 0 ||
+    cartCount > 0 ||
+    compareCount > 0;
+
   const total = totalCount;
 
   const mapCountLabel =
@@ -969,8 +976,11 @@ export function MediaManualBrowseFilters({
         {toolbarEnd}
       </div>
 
+      {showResultSummaryRow ? (
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
+        {showResultCountLabel ? (
+          <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
+        ) : null}
         <div className="flex flex-wrap items-center gap-2 text-xs">
           {selectedCount > 0 ? (
             onSelectedSummaryClick ? (
@@ -1011,6 +1021,7 @@ export function MediaManualBrowseFilters({
           ) : null}
         </div>
       </div>
+      ) : null}
 
       {/* 모바일 필터 바텀시트 (PR #207 — 변경 없음) */}
       {sheetOpen ? (
