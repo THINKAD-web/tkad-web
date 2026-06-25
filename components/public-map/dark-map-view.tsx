@@ -18,6 +18,7 @@ import {
   PUBLIC_DARK_MAP_DEFAULT_CENTER,
   PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
   PUBLIC_DARK_MAP_TILE_URL,
+  isPublicMapLightTile,
   kakaoLevelToLeafletZoom,
   leafletZoomToKakaoLevel,
 } from "@/lib/public-dark-map-config";
@@ -332,6 +333,7 @@ export default function DarkMapView({
           hoveredId={hoveredId}
           onSelect={onSelectStable}
           disableCluster={!useCluster}
+          lightTiles={isPublicMapLightTile()}
         />
         {userLocation ? (
           <CircleMarker
