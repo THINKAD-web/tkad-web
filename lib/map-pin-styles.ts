@@ -36,28 +36,41 @@ export function pinLetterForType(type: string): string {
   return "•";
 }
 
-export function pinDataUrl(type: string, selected: boolean): string {
+export function pinDataUrl(
+  type: string,
+  selected: boolean,
+  forLightBackground = false,
+): string {
   const { fill, stroke, text } = pinColorForType(type);
   const w = selected ? 44 : 40;
   const h = selected ? 52 : 48;
   const label = pinLetterForType(type);
   const ring = selected ? 3 : 2;
   const font = selected ? 14 : 13;
-  const bodyFill = selected ? fill : "rgba(8,8,12,0.94)";
-  const bodyStroke = selected ? stroke : "rgba(255,255,255,0.14)";
-  const coreFill = selected ? fill : "rgba(12,12,18,0.98)";
-  const labelFill = selected ? text : stroke;
+  const bodyFill = selected ? fill : forLightBackground ? "#ffffff" : "rgba(8,8,12,0.94)";
+  const bodyStroke = selected
+    ? stroke
+    : forLightBackground
+      ? "rgba(15,23,42,0.55)"
+      : "rgba(255,255,255,0.14)";
+  const coreFill = selected ? fill : forLightBackground ? "#f8fafc" : "rgba(12,12,18,0.98)";
+  const labelFill = selected ? text : forLightBackground ? fill : stroke;
+  const shadowFilter = forLightBackground
+    ? `<filter id="pinShadow" x="-30%" y="-30%" width="160%" height="160%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.8" flood-color="rgba(15,23,42,0.35)"/></filter>`
+    : "";
+  const shadowGroup = forLightBackground ? ` filter="url(#pinShadow)"` : "";
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="${w}" height="${h}" viewBox="0 0 44 52">
     <defs>
+      ${shadowFilter}
       <linearGradient id="ring" x1="8" y1="8" x2="36" y2="36" gradientUnits="userSpaceOnUse">
         <stop offset="0" stop-color="${stroke}" stop-opacity="1"/>
         <stop offset="0.45" stop-color="#ffffff" stop-opacity="0.5"/>
         <stop offset="1" stop-color="${stroke}" stop-opacity="1"/>
       </linearGradient>
     </defs>
-    <g>
-      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.5 : 1.75}"/>
+    <g${shadowGroup}>
+      <path d="M22 51C31 39 36 30.5 36 22.5C36 12.85 29.15 5 22 5C14.85 5 8 12.85 8 22.5C8 30.5 13 39 22 51Z" fill="${bodyFill}" stroke="${bodyStroke}" stroke-width="${selected ? 2.5 : forLightBackground ? 2 : 1.75}"/>
       ${selected ? `<ellipse cx="22" cy="21" rx="17" ry="18" fill="none" stroke="${stroke}" stroke-width="2" opacity="0.85"/>` : ""}
       <circle cx="22" cy="22" r="11.8" fill="${coreFill}" stroke="url(#ring)" stroke-width="${ring}"/>
       <text x="22" y="26.8" text-anchor="middle" font-family="ui-monospace, monospace" font-size="${font}" font-weight="800" fill="${labelFill}">${label}</text>
@@ -66,12 +79,17 @@ export function pinDataUrl(type: string, selected: boolean): string {
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
 }
 
-export function leafletPinIcon(type: string, selected: boolean, hovered: boolean) {
+export function leafletPinIcon(
+  type: string,
+  selected: boolean,
+  hovered: boolean,
+  forLightBackground = false,
+) {
   const highlighted = selected || hovered;
   const w = highlighted ? 44 : 40;
   const h = highlighted ? 52 : 48;
   return L.icon({
-    iconUrl: pinDataUrl(type, highlighted),
+    iconUrl: pinDataUrl(type, highlighted, forLightBackground),
     iconSize: [w, h],
     iconAnchor: [w / 2, h],
     popupAnchor: [0, -h + 8],
