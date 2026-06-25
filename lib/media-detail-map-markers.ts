@@ -7,6 +7,18 @@ export function resolveMediaIdFromMapPinId(pinId: string): string {
   return m?.[1] ?? pinId;
 }
 
+/** 목록(mediaId) vs 지도 핀(mediaId-install-N) 선택·호버 매칭 */
+export function mapPinMatchesActiveId(
+  pinId: string,
+  activeId: string | null,
+): boolean {
+  if (!activeId) return false;
+  if (pinId === activeId) return true;
+  const pinMediaId = resolveMediaIdFromMapPinId(pinId);
+  const activeMediaId = resolveMediaIdFromMapPinId(activeId);
+  return activeId === activeMediaId && pinMediaId === activeMediaId;
+}
+
 type MapPoint = { label: string; lat: number; lng: number };
 
 function mapPointsForMediaItem(

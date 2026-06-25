@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
 import { leafletPinIcon } from "@/lib/map-pin-styles";
+import { mapPinMatchesActiveId } from "@/lib/media-detail-map-markers";
 import type { MapMarker } from "@/components/public-map/map-types";
 
 function clusterSizeClass(count: number): string {
@@ -78,8 +79,8 @@ export function DarkMapMarkersLayer({
 
     for (const mk of markers) {
       if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
-      const isSelected = mk.id === selectedId;
-      const isHovered = mk.id === hoveredId;
+      const isSelected = mapPinMatchesActiveId(mk.id, selectedId);
+      const isHovered = mapPinMatchesActiveId(mk.id, hoveredId);
       const marker = L.marker([mk.lat, mk.lng], {
         icon: leafletPinIcon(mk.type, isSelected, isHovered, lightTiles),
         title: mk.name,
@@ -97,8 +98,8 @@ export function DarkMapMarkersLayer({
       marker.setIcon(
         leafletPinIcon(
           mk.type,
-          id === selectedId,
-          id === hoveredId,
+          mapPinMatchesActiveId(id, selectedId),
+          mapPinMatchesActiveId(id, hoveredId),
           lightTiles,
         ),
       );
