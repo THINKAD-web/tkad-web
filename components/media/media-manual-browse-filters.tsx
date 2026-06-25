@@ -294,8 +294,8 @@ export function MediaManualBrowseFilters({
     compareCount > 0;
 
   const mapToolbarBorder = mapPageViewModes
-    ? "border-gray-200/40 dark:border-white/[0.07]"
-    : "border-gray-200 dark:border-white/10";
+    ? "border-[0.5px] border-gray-200/25 dark:border-white/[0.04]"
+    : "border border-gray-200 dark:border-white/10";
 
   const total = totalCount;
 

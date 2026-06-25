@@ -868,8 +868,8 @@ export default function MediaMapPageClient() {
         </div>
 
         {/* 매체 리스트 — 모바일: 지도 아래 */}
-        <aside className="order-3 w-full border-t border-gray-200/80 bg-gray-50 md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto dark:border-white/10 dark:bg-[#020202]">
-          <div className="sticky top-0 z-10 border-b border-gray-200/40 bg-gray-50/95 backdrop-blur-md dark:border-white/[0.06] dark:bg-[#020202]/95">
+        <aside className="order-3 w-full border-t border-gray-200/50 bg-gray-50 md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:border-gray-200/50 md:overflow-y-auto dark:border-white/[0.06] dark:bg-[#020202]">
+          <div className="sticky top-0 z-10 border-b border-[0.5px] border-gray-200/25 bg-gray-50/95 backdrop-blur-md dark:border-white/[0.04] dark:bg-[#020202]/95">
             <div className="min-w-0 overflow-x-clip p-2.5 md:p-3">
               <MediaManualBrowseFilters
                 isKo={isKo}
