@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { X, ExternalLink, MessageCircle } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
@@ -658,6 +659,12 @@ export function MediaMapDetailSheet({
   /** 하단 CompareBar·내 플랜 바가 열려 있을 때 겹침 방지 */
   floatingBarOffset?: boolean;
 }) {
+  const [portalMounted, setPortalMounted] = useState(false);
+
+  useEffect(() => {
+    queueMicrotask(() => setPortalMounted(true));
+  }, []);
+
   const bodyProps = {
     item,
     onClose,
@@ -715,7 +722,7 @@ export function MediaMapDetailSheet({
     );
   }
 
-  return (
+  const sheetEl = (
     <div
       role="dialog"
       aria-modal
@@ -734,4 +741,7 @@ export function MediaMapDetailSheet({
       <MediaMapDetailBody {...bodyProps} variant="sheet" />
     </div>
   );
+
+  if (!portalMounted) return null;
+  return createPortal(sheetEl, document.body);
 }
