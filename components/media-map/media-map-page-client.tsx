@@ -758,7 +758,8 @@ export default function MediaMapPageClient() {
 
   return (
     <>
-    <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
+    {/* md: viewport − site header (h-14) − discovery SubTabs sticky bar */}
+    <div className="flex flex-col md:h-[calc(100dvh-6.75rem)] md:flex-row md:min-h-0">
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">
