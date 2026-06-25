@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, type MutableRefObject } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
@@ -26,6 +26,19 @@ import { DarkMapMarkersLayer } from "@/components/public-map/dark-map-markers-la
 
 export type { MapBounds, MapMarker };
 
+/** Kakao level 호환 programmatic 이동 — nonce 로 중복 setView 방지 */
+export type DarkMapProgrammaticView = {
+  lat: number;
+  lng: number;
+  /** Kakao level (작을수록 확대) */
+  zoom: number;
+  nonce: number;
+  /** true면 현재 Leaflet zoom 보다 확대할 때만 적용 (줌아웃 금지) */
+  zoomInOnly?: boolean;
+  /** Leaflet zoom 상한 — 단일/소영역 과확대 방지 */
+  maxZoom?: number;
+};
+
 type Props = {
   markers: MapMarker[];
   selectedId: string | null;
@@ -33,18 +46,17 @@ type Props = {
   onSelect: (id: string) => void;
   onBoundsChange: (b: MapBounds) => void;
   onViewChange?: (view: { lat: number; lng: number; zoom: number }) => void;
+  /** 사용자 드래그/줌 시작 시 1회 — 프로그램matic setView 직후에는 호출 안 함 */
+  onUserViewportAdjusted?: () => void;
   center?: { lat: number; lng: number };
   /** Kakao level 호환 — 내부에서 Leaflet zoom 으로 변환 */
   zoom?: number;
-  programmaticView?: {
-    lat: number;
-    lng: number;
-    zoom: number;
-    nonce: number;
-  } | null;
+  programmaticView?: DarkMapProgrammaticView | null;
   userLocation?: { lat: number; lng: number } | null;
   coverageGeoJson?: unknown | null;
   fitCoverageBounds?: boolean;
+  /** fitCoverageBounds 시 Leaflet maxZoom (기본 15) */
+  fitBoundsMaxZoom?: number;
   monochromeTiles?: boolean;
   className?: string;
   disableCluster?: boolean;
@@ -128,10 +140,39 @@ function BoundsReporter({
   return null;
 }
 
+function UserViewportListener({
+  onUserViewportAdjusted,
+  programmaticApplyRef,
+}: {
+  onUserViewportAdjusted?: () => void;
+  programmaticApplyRef: MutableRefObject<boolean>;
+}) {
+  const map = useMap();
+  const onAdjustRef = useRef(onUserViewportAdjusted);
+  onAdjustRef.current = onUserViewportAdjusted;
+
+  useEffect(() => {
+    const fire = () => {
+      if (programmaticApplyRef.current) return;
+      onAdjustRef.current?.();
+    };
+    map.on("dragstart", fire);
+    map.on("zoomstart", fire);
+    return () => {
+      map.off("dragstart", fire);
+      map.off("zoomstart", fire);
+    };
+  }, [map, programmaticApplyRef]);
+
+  return null;
+}
+
 function ProgrammaticView({
   view,
+  programmaticApplyRef,
 }: {
   view: Props["programmaticView"];
+  programmaticApplyRef: MutableRefObject<boolean>;
 }) {
   const map = useMap();
   const lastNonce = useRef<number | null>(null);
@@ -139,12 +180,20 @@ function ProgrammaticView({
   useEffect(() => {
     if (!view || view.nonce === lastNonce.current) return;
     lastNonce.current = view.nonce;
-    map.setView(
-      [view.lat, view.lng],
-      kakaoLevelToLeafletZoom(view.zoom, map.getZoom()),
-      { animate: true },
-    );
-  }, [map, view]);
+    const targetLeaflet = kakaoLevelToLeafletZoom(view.zoom, map.getZoom());
+    let leafletZoom = view.zoomInOnly
+      ? Math.max(map.getZoom(), targetLeaflet)
+      : targetLeaflet;
+    if (view.maxZoom != null) {
+      leafletZoom = Math.min(leafletZoom, view.maxZoom);
+    }
+    programmaticApplyRef.current = true;
+    map.setView([view.lat, view.lng], leafletZoom, { animate: true });
+    const t = window.setTimeout(() => {
+      programmaticApplyRef.current = false;
+    }, 0);
+    return () => window.clearTimeout(t);
+  }, [map, view, programmaticApplyRef]);
 
   return null;
 }
@@ -152,9 +201,11 @@ function ProgrammaticView({
 function CoverageLayer({
   geoJson,
   fitBounds,
+  fitBoundsMaxZoom = 15,
 }: {
   geoJson: unknown;
   fitBounds?: boolean;
+  fitBoundsMaxZoom?: number;
 }) {
   const map = useMap();
 
@@ -163,11 +214,13 @@ function CoverageLayer({
     try {
       const layer = L.geoJSON(geoJson as GeoJSON.GeoJsonObject);
       const b = layer.getBounds();
-      if (b.isValid()) map.fitBounds(b, { padding: [24, 24] });
+      if (b.isValid()) {
+        map.fitBounds(b, { padding: [24, 24], maxZoom: fitBoundsMaxZoom });
+      }
     } catch {
       /* ignore */
     }
-  }, [geoJson, fitBounds, map]);
+  }, [geoJson, fitBounds, fitBoundsMaxZoom, map]);
 
   if (!geoJson) return null;
 
@@ -198,12 +251,15 @@ export default function DarkMapView({
   userLocation = null,
   coverageGeoJson = null,
   fitCoverageBounds = false,
+  fitBoundsMaxZoom = 15,
   className,
   disableCluster = false,
+  onUserViewportAdjusted,
 }: Props) {
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
   const onSelectStable = useCallback((id: string) => onSelect(id), [onSelect]);
   const useCluster = !disableCluster && markers.length > 1;
+  const programmaticApplyRef = useRef(false);
 
   return (
     <div
@@ -237,8 +293,19 @@ export default function DarkMapView({
           onBoundsChange={onBoundsChange}
           onViewChange={onViewChange}
         />
-        <ProgrammaticView view={programmaticView} />
-        <CoverageLayer geoJson={coverageGeoJson} fitBounds={fitCoverageBounds} />
+        <UserViewportListener
+          onUserViewportAdjusted={onUserViewportAdjusted}
+          programmaticApplyRef={programmaticApplyRef}
+        />
+        <ProgrammaticView
+          view={programmaticView}
+          programmaticApplyRef={programmaticApplyRef}
+        />
+        <CoverageLayer
+          geoJson={coverageGeoJson}
+          fitBounds={fitCoverageBounds}
+          fitBoundsMaxZoom={fitBoundsMaxZoom}
+        />
         <DarkMapMarkersLayer
           markers={markers}
           selectedId={selectedId}

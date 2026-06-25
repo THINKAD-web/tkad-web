@@ -3,21 +3,19 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
 import Image from "next/image";
-import { ClipboardCheck, Crosshair, LayoutList } from "lucide-react";
+import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import {
   formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
-import type { MapViewCommand } from "@/components/media-map/kakao-map-view";
+import type { DarkMapProgrammaticView } from "@/components/public-map/dark-map-view";
 import {
   mapMarkersForMapCatalogItem,
   resolveMediaIdFromMapPinId,
 } from "@/lib/media-detail-map-markers";
 import { useAppToast } from "@/lib/use-toast";
-import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
-import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import CompareBar from "@/components/compare-bar";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
@@ -81,8 +79,8 @@ function MapListSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-const KakaoMapView = dynamic(
-  () => import("@/components/media-map/kakao-map-view"),
+const DarkMapView = dynamic(
+  () => import("@/components/public-map/dark-map-view"),
   {
     ssr: false,
     loading: () => <MapViewLoadingPlaceholder />,
@@ -97,8 +95,17 @@ const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const CART_KEY = "tkad-media-cart-v1";
 
-/** 마커/카드 선택 시 클로즈업 줌(카카오 레벨, 작을수록 확대). 현재보다 확대만 적용. */
+/** 마커/카드 선택 시 클로즈업 줌(Kakao level, 작을수록 확대). zoomInOnly 로 확대만 적용. */
 const MARKER_FOCUS_ZOOM = 4;
+
+function boundsEqual(a: MapBounds, b: MapBounds, eps = 1e-5): boolean {
+  return (
+    Math.abs(a.swLat - b.swLat) < eps &&
+    Math.abs(a.swLng - b.swLng) < eps &&
+    Math.abs(a.neLat - b.neLat) < eps &&
+    Math.abs(a.neLng - b.neLng) < eps
+  );
+}
 
 function readCart(): string[] {
   if (typeof window === "undefined") return [];
@@ -135,6 +142,10 @@ export default function MediaMapPageClient() {
   const isKo = locale === "ko";
   const router = useRouter();
   const [bounds, setBounds] = useState<MapBounds | null>(null);
+  /** 마지막 API 검색에 사용한 bounds — "이 지역 검색" 버튼 노출 판단용 */
+  const [searchedBounds, setSearchedBounds] = useState<MapBounds | null>(null);
+  /** 사용자가 직접 지도를 이동/줌한 뒤 true — 프로그램matic 이동은 제외 */
+  const [viewportDirty, setViewportDirty] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [matchTotal, setMatchTotal] = useState<number | undefined>(undefined);
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
@@ -167,56 +178,54 @@ export default function MediaMapPageClient() {
   const [surveyCheckedIds, setSurveyCheckedIds] = useState<Set<string>>(
     () => new Set(),
   );
-  // 단일 명령형 뷰 채널(KakaoMapView.command) — 모든 지도 이동(focus)을 한 곳에서 nonce 로
-  // 보낸다. 기존 programmaticView/panOnSelect 의 effect 경쟁(드래그·줌 리셋, 마커 클릭 줌인
-  // 누락)을 제거. "내 주변"·지역 이동·답사·URL 하이드레이션·마커 선택이 모두 이 채널을 경유.
-  const cmdNonceRef = useRef(0);
-  const [mapCommand, setMapCommand] = useState<MapViewCommand>(() => {
-    const init = initialUrl.current;
-    if (init && init.lat != null && init.lng != null) {
-      cmdNonceRef.current = 1;
-      return {
-        type: "focusMarker",
-        lat: init.lat,
-        lng: init.lng,
-        level: init.zoom ?? 8,
-        nonce: 1,
-      };
-    }
-    return null;
-  });
-  const emitMapCommand = useCallback(
+  const pvNonceRef = useRef(0);
+  const [programmaticView, setProgrammaticView] =
+    useState<DarkMapProgrammaticView | null>(() => {
+      const init = initialUrl.current;
+      if (init && init.lat != null && init.lng != null) {
+        pvNonceRef.current = 1;
+        return {
+          lat: init.lat,
+          lng: init.lng,
+          zoom: init.zoom ?? 8,
+          nonce: 1,
+        };
+      }
+      return null;
+    });
+  const emitProgrammaticView = useCallback(
     (cmd: {
       lat: number;
       lng: number;
-      level: number;
-      adjustLevel?: boolean;
-      /** true면 사용자 조작 플래그를 리셋(명시적 지역/위치 이동) */
+      zoom: number;
+      zoomInOnly?: boolean;
+      maxZoom?: number;
+      /** true면 다음 bounds 갱신 시 즉시 검색 + dirty 리셋 */
       resetUserViewport?: boolean;
     }) => {
       if (cmd.resetUserViewport) {
-        userViewportAdjustedRef.current = false;
+        setViewportDirty(false);
+        forceSearchRef.current = true;
       }
-      cmdNonceRef.current += 1;
-      setMapCommand({
-        type: "focusMarker",
+      pvNonceRef.current += 1;
+      setProgrammaticView({
         lat: cmd.lat,
         lng: cmd.lng,
-        level: cmd.level,
-        adjustLevel: cmd.adjustLevel !== false,
-        nonce: cmdNonceRef.current,
+        zoom: cmd.zoom,
+        nonce: pvNonceRef.current,
+        zoomInOnly: cmd.zoomInOnly,
+        maxZoom: cmd.maxZoom,
       });
     },
     [],
   );
   const itemsRef = useRef<Item[]>([]);
   const markersRef = useRef<MapMarker[]>([]);
-  const viewRef = useRef<{ lat: number; lng: number; zoom: number } | null>(
-    null,
-  );
   const listItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const regionPanSkipRef = useRef(true);
-  const userViewportAdjustedRef = useRef(false);
+  const forceSearchRef = useRef(false);
+  const initialFetchDoneRef = useRef(false);
+  const searchedBoundsRef = useRef<MapBounds | null>(null);
   const lastFocusedSelectionRef = useRef<string | null>(null);
 
   useEffect(() => {
@@ -229,13 +238,13 @@ export default function MediaMapPageClient() {
     const bf = initMapBrowseFiltersFromUrl(init);
     const mapView = resolveBrowseRegionMapView(bf.regionMain, bf.regionSub);
     if (!mapView) return;
-    emitMapCommand({
+    emitProgrammaticView({
       lat: mapView.lat,
       lng: mapView.lng,
-      level: mapView.zoom,
+      zoom: mapView.zoom,
       resetUserViewport: true,
     });
-  }, [emitMapCommand]);
+  }, [emitProgrammaticView]);
 
   useEffect(() => {
     setCartIds(readCart());
@@ -286,8 +295,6 @@ export default function MediaMapPageClient() {
     browseFilters.sort,
   ]);
 
-  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   const fetchItems = useCallback(
     async (b: MapBounds | null, f: MapBrowseFilters) => {
       setLoading(true);
@@ -336,14 +343,64 @@ export default function MediaMapPageClient() {
     [],
   );
 
+  const runSearch = useCallback(
+    async (b: MapBounds) => {
+      await fetchItems(b, browseFilters);
+      setSearchedBounds(b);
+      searchedBoundsRef.current = b;
+      setViewportDirty(false);
+    },
+    [fetchItems, browseFilters],
+  );
+
+  const handleBoundsChange = useCallback(
+    (b: MapBounds) => {
+      setBounds(b);
+      if (forceSearchRef.current) {
+        forceSearchRef.current = false;
+        void runSearch(b);
+        return;
+      }
+      if (!initialFetchDoneRef.current) {
+        initialFetchDoneRef.current = true;
+        void runSearch(b);
+      }
+    },
+    [runSearch],
+  );
+
   useEffect(() => {
-    if (!bounds) return;
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => fetchItems(bounds, browseFilters), 400);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [bounds, browseFilters, fetchItems]);
+    searchedBoundsRef.current = searchedBounds;
+  }, [searchedBounds]);
+
+  // 필터 변경(지역 제외) — 현재 검색 영역 기준으로 즉시 재조회
+  useEffect(() => {
+    const b = searchedBoundsRef.current;
+    if (!b) return;
+    void fetchItems(b, browseFilters);
+  }, [
+    browseFilters.q,
+    browseFilters.mainCategory,
+    browseFilters.subCategory,
+    browseFilters.target,
+    browseFilters.priceMin,
+    browseFilters.priceMax,
+    browseFilters.features,
+    browseFilters.sort,
+    fetchItems,
+  ]);
+
+  // 지역 필터만 변경 + 지도 이동 없는 경우(전국 등) — bounds 유지 재조회
+  useEffect(() => {
+    const b = searchedBoundsRef.current;
+    if (!b) return;
+    const mapView = resolveBrowseRegionMapView(
+      browseFilters.regionMain,
+      browseFilters.regionSub,
+    );
+    if (mapView) return;
+    void fetchItems(b, browseFilters);
+  }, [browseFilters.regionMain, browseFilters.regionSub, fetchItems, browseFilters]);
 
   useEffect(() => {
     if (regionPanSkipRef.current) {
@@ -355,13 +412,13 @@ export default function MediaMapPageClient() {
       browseFilters.regionSub,
     );
     if (!mapView) return;
-    emitMapCommand({
+    emitProgrammaticView({
       lat: mapView.lat,
       lng: mapView.lng,
-      level: mapView.zoom,
+      zoom: mapView.zoom,
       resetUserViewport: true,
     });
-  }, [browseFilters.regionMain, browseFilters.regionSub, emitMapCommand]);
+  }, [browseFilters.regionMain, browseFilters.regionSub, emitProgrammaticView]);
 
   const markers: MapMarker[] = useMemo(() => {
     const fromItems = items.flatMap((i) => mapMarkersForMapCatalogItem(i));
@@ -399,14 +456,23 @@ export default function MediaMapPageClient() {
   }, [selectedId, items]);
 
   const handleUserViewportAdjusted = useCallback(() => {
-    userViewportAdjustedRef.current = true;
+    setViewportDirty(true);
   }, []);
 
+  const handleSearchThisArea = useCallback(() => {
+    if (!bounds) return;
+    void runSearch(bounds);
+  }, [bounds, runSearch]);
+
+  const showSearchAreaButton =
+    viewportDirty &&
+    bounds != null &&
+    searchedBounds != null &&
+    !boundsEqual(bounds, searchedBounds);
+
   // 마커 클릭 시 즉시 selectedId + selectedItem을 한 번에 set (지연 없이 카드 표시)
-  // itemsRef/markersRef 를 사용해 stale closure 를 회피한다 (items가 자주 바뀌어도 안전)
   const handleSelect = useCallback(
     (id: string) => {
-      userViewportAdjustedRef.current = false;
       lastFocusedSelectionRef.current = id;
       setSelectedId(id);
       const mediaId = resolveMediaIdFromMapPinId(id);
@@ -418,13 +484,15 @@ export default function MediaMapPageClient() {
           (m) => resolveMediaIdFromMapPinId(m.id) === mediaId,
         );
       if (mk) {
-        const cur = viewRef.current?.zoom;
-        const level =
-          cur != null ? Math.min(cur, MARKER_FOCUS_ZOOM) : MARKER_FOCUS_ZOOM;
-        emitMapCommand({ lat: mk.lat, lng: mk.lng, level, adjustLevel: true });
+        emitProgrammaticView({
+          lat: mk.lat,
+          lng: mk.lng,
+          zoom: MARKER_FOCUS_ZOOM,
+          zoomInOnly: true,
+        });
       }
     },
-    [emitMapCommand],
+    [emitProgrammaticView],
   );
 
   const selected = selectedItem;
@@ -533,7 +601,7 @@ export default function MediaMapPageClient() {
           return;
         }
         setUserLocation({ lat, lng });
-        emitMapCommand({ lat, lng, level: 5, resetUserViewport: true });
+        emitProgrammaticView({ lat, lng, zoom: 5, resetUserViewport: true });
         toast.success("현위치를 지도에 표시했습니다.");
         setLocating(false);
       },
@@ -548,7 +616,7 @@ export default function MediaMapPageClient() {
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 60_000 },
     );
-  }, [toast, emitMapCommand]);
+  }, [toast, emitProgrammaticView]);
 
   const startSurveyMode = useCallback(() => {
     setSurveyMode(true);
@@ -573,30 +641,48 @@ export default function MediaMapPageClient() {
     [],
   );
 
-  // 마커 선택 시 클로즈업 줌을 "현재보다 확대만"으로 계산하기 위해 최신 view 를 ref 로 보관
-  useEffect(() => {
-    viewRef.current = view;
-  }, [view]);
-
   return (
     <>
     <div className="flex flex-col md:h-[calc(100vh-72px)] md:flex-row md:min-h-0">
         {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
         <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
           <div className="absolute inset-0 min-h-[280px]">
-            <KakaoMapView
+            <DarkMapView
               markers={markers}
               selectedId={selectedId}
               hoveredId={hoveredId}
               onSelect={handleSelect}
-              onBoundsChange={setBounds}
+              onBoundsChange={handleBoundsChange}
               onViewChange={handleViewChange}
               onUserViewportAdjusted={handleUserViewportAdjusted}
-              command={mapCommand}
+              programmaticView={programmaticView}
               userLocation={userLocation}
-              monochromeTiles
             />
           </div>
+
+          {showSearchAreaButton ? (
+            <div className="pointer-events-none absolute left-1/2 top-3 z-[11] -translate-x-1/2 sm:top-4">
+              <button
+                type="button"
+                disabled={loading}
+                onClick={handleSearchThisArea}
+                className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-full border border-violet-400/40 bg-white/95 px-4 text-xs font-semibold text-gray-900 shadow-md backdrop-blur transition-colors hover:bg-white disabled:opacity-70 dark:border-violet-400/30 dark:bg-[#0a0a12]/95 dark:text-white dark:hover:bg-[#12121c]"
+              >
+                {loading ? (
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                ) : (
+                  <Search className="h-3.5 w-3.5" aria-hidden />
+                )}
+                {loading
+                  ? isKo
+                    ? "검색 중…"
+                    : "Searching…"
+                  : isKo
+                    ? "이 지역에서 검색"
+                    : "Search this area"}
+              </button>
+            </div>
+          ) : null}
 
           {selected ? (
             <MediaMapDetailSheet
@@ -624,10 +710,10 @@ export default function MediaMapPageClient() {
               onClose={() => setSurveyMode(false)}
               onLocationTick={setUserLocation}
               onCenterMap={(loc) =>
-                emitMapCommand({
+                emitProgrammaticView({
                   lat: loc.lat,
                   lng: loc.lng,
-                  level: 4,
+                  zoom: 4,
                   resetUserViewport: true,
                 })
               }
@@ -712,7 +798,7 @@ export default function MediaMapPageClient() {
                 onViewModeChange={handleBrowseViewModeChange}
                 resultCount={items.length}
                 totalCount={matchTotal}
-                loading={loading || !bounds}
+                loading={loading || !searchedBounds}
                 compareCount={compareEntries.length}
                 cartCount={cartIds.length}
               />
@@ -720,8 +806,8 @@ export default function MediaMapPageClient() {
           </div>
 
         <ul className="grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-          {!bounds || loading ? (
-            <MapListSkeleton count={!bounds ? 4 : 6} />
+          {!searchedBounds || loading ? (
+            <MapListSkeleton count={!searchedBounds ? 4 : 6} />
           ) : (
             items.map((it) => {
             const thumb = catalogThumbnailImageProps(it.image);
@@ -770,14 +856,6 @@ export default function MediaMapPageClient() {
                     {isKo ? "준비중" : "No image"}
                   </div>
                 )}
-                <MediaThumbnailTrustOverlay
-                  item={{
-                    isVerified: it.isVerified,
-                    isInstantBooking: it.isInstantBooking,
-                  }}
-                  isKo={isKo}
-                  variant="card"
-                />
               </div>
               <div className="p-3">
                 <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
@@ -795,7 +873,7 @@ export default function MediaMapPageClient() {
             );
           })
           )}
-          {bounds && items.length === 0 && !loading && (
+          {searchedBounds && items.length === 0 && !loading && (
             <li className="col-span-2 p-8 text-center">
               <div className="text-3xl mb-2">🔍</div>
               <p className="text-sm font-medium text-foreground mb-1">검색 결과가 없습니다</p>
