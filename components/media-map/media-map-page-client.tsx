@@ -2,13 +2,10 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import Image from "next/image";
+import { MediaMapListCard } from "@/components/media-map/media-map-list-card";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
-import {
-  formatMediaPriceWithPeriodSuffix,
-} from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import type { DarkMapProgrammaticView } from "@/components/public-map/dark-map-view";
@@ -19,7 +16,6 @@ import {
 import { useAppToast } from "@/lib/use-toast";
 import CompareBar from "@/components/compare-bar";
 import { usePlanCart } from "@/hooks/use-plan-cart";
-import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import type { MediaItem } from "@/lib/media-data";
 import {
   entriesToCompareMediaItems,
@@ -30,7 +26,6 @@ import {
 } from "@/lib/compare-cart-client";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { MediaMapDetailSheet } from "@/components/media-map/media-map-detail-sheet";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import {
@@ -75,9 +70,11 @@ function MapListSkeleton({ count = 6 }: { count?: number }) {
           className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-white/10 dark:bg-white/5"
         >
           <div className="aspect-[4/3] animate-pulse bg-gray-100 dark:bg-white/10" />
-          <div className="space-y-2 p-3">
+          <div className="space-y-2 p-2.5">
             <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
             <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
+            <div className="h-3 w-2/3 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
+            <div className="h-8 animate-pulse rounded-lg bg-gray-100 dark:bg-white/10" />
           </div>
         </li>
       ))}
@@ -130,10 +127,6 @@ function readCart(): string[] {
 function writeCart(ids: string[]) {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(CART_KEY, JSON.stringify(ids));
-}
-
-function formatPrice(v: number, period: string, locale: string): string {
-  return formatMediaPriceWithPeriodSuffix(v, period, locale);
 }
 
 /** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */
@@ -930,69 +923,33 @@ export default function MediaMapPageClient() {
           {((!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading) ? (
             <MapListSkeleton count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6} />
           ) : (
-            items.map((it) => {
-            const thumb = catalogThumbnailImageProps(it.image);
-            const locationLine = [it.district, it.region].filter(Boolean).join(" · ") || it.location;
-            return (
-            <li
-              key={it.id}
-              ref={(el) => {
-                if (el) listItemRefs.current.set(it.id, el);
-                else listItemRefs.current.delete(it.id);
-              }}
-              role="button"
-              tabIndex={0}
-              className={cn(
-                "cursor-pointer overflow-hidden rounded-2xl border border-gray-100 bg-white transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5",
-                resolveMediaIdFromMapPinId(selectedId ?? "") === it.id
-                  ? "border-violet-400/60 ring-2 ring-violet-400/20"
-                  : resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id
-                    ? "border-cyan-400/40"
-                    : "",
-              )}
-              onClick={() => handleSelect(it.id)}
-              onKeyDown={(e) => {
-                if (e.key === "Enter" || e.key === " ") {
-                  e.preventDefault();
-                  handleSelect(it.id);
+            items.map((it) => (
+              <MediaMapListCard
+                key={it.id}
+                ref={(el) => {
+                  if (el) listItemRefs.current.set(it.id, el);
+                  else listItemRefs.current.delete(it.id);
+                }}
+                item={it}
+                isKo={isKo}
+                locale={locale}
+                selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
+                hovered={resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id}
+                inCompare={isInCompare(it.id)}
+                inCart={inCart(it.id)}
+                onSelect={handleSelect}
+                onToggleCompare={() => toggleCompare(it)}
+                onToggleCart={() => toggleCart(it.id)}
+                onMouseEnter={() => setHoveredId(it.id)}
+                onMouseLeave={() =>
+                  setHoveredId((cur) => (cur === it.id ? null : cur))
                 }
-              }}
-              onMouseEnter={() => setHoveredId(it.id)}
-              onMouseLeave={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
-              onFocus={() => setHoveredId(it.id)}
-              onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
-            >
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-                {thumb ? (
-                  <Image
-                    src={thumb.src}
-                    alt={it.name}
-                    fill
-                    className="object-cover"
-                    sizes="(max-width: 768px) 50vw, 280px"
-                    unoptimized={thumb.unoptimized}
-                  />
-                ) : (
-                  <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">
-                    {isKo ? "준비중" : "No image"}
-                  </div>
-                )}
-              </div>
-              <div className="p-3">
-                <p className="line-clamp-2 text-sm font-semibold text-gray-900 dark:text-white">
-                  {it.name}
-                </p>
-                <p className="mt-1 line-clamp-1 text-xs text-gray-500 dark:text-white/45">
-                  {locationLine}
-                </p>
-                <p className="mt-2 text-sm font-bold tabular-nums text-gray-900 dark:text-white">
-                  {formatPrice(it.price, it.pricePeriod, locale)}
-                </p>
-                <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
-              </div>
-            </li>
-            );
-          })
+                onFocus={() => setHoveredId(it.id)}
+                onBlur={() =>
+                  setHoveredId((cur) => (cur === it.id ? null : cur))
+                }
+              />
+            ))
           )}
           {((searchedBounds || isMapTextSearchActive(browseFilters)) && items.length === 0 && !loading) && (
             <li className="col-span-2 p-8 text-center">
