@@ -65,11 +65,9 @@ export function pinDataUrl(
         ? "#ffffff"
         : "rgba(8,8,12,0.94)";
   const bodyStroke = useScore
-    ? selected
-      ? MAP_PIN_SELECTION_RING
-      : forLightBackground
-        ? "rgba(15,23,42,0.45)"
-        : "rgba(255,255,255,0.14)"
+    ? forLightBackground
+      ? "rgba(15,23,42,0.45)"
+      : "rgba(255,255,255,0.14)"
     : selected
       ? stroke
       : forLightBackground
@@ -85,11 +83,7 @@ export function pinDataUrl(
   const labelFill = useScore ? text : selected ? text : forLightBackground ? fill : stroke;
 
   const selectionRing = selected
-    ? useScore
-      ? `<ellipse cx="22" cy="21" rx="17" ry="18" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2.5" opacity="0.95"/>
-      <line x1="9" y1="11" x2="9" y2="41" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2" stroke-linecap="round" opacity="0.55"/>`
-      : `<ellipse cx="22" cy="21" rx="17" ry="18" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2" opacity="0.85"/>
-      <line x1="9" y1="11" x2="9" y2="41" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2" stroke-linecap="round" opacity="0.5"/>`
+    ? `<line x1="9" y1="11" x2="9" y2="41" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="2" stroke-linecap="round" opacity="0.55"/>`
     : "";
 
   const shadowFilter = forLightBackground
