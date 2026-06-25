@@ -293,6 +293,10 @@ export function MediaManualBrowseFilters({
     cartCount > 0 ||
     compareCount > 0;
 
+  const mapToolbarBorder = mapPageViewModes
+    ? "border-gray-200/40 dark:border-white/[0.07]"
+    : "border-gray-200 dark:border-white/10";
+
   const total = totalCount;
 
   const mapCountLabel =
@@ -752,7 +756,11 @@ export function MediaManualBrowseFilters({
               : "매체명·지역·유형 검색"
             : "Search name, region, type"
         }
-        className="w-full rounded-2xl border border-gray-200 bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30 sm:py-2.5"
+        className={cn(
+          "w-full rounded-2xl border bg-white py-3 pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:bg-white/8 dark:text-white dark:placeholder-white/30 sm:py-2.5",
+          mapToolbarBorder,
+          mapPageViewModes && "bg-gray-50/90 py-2.5 dark:bg-white/[0.04] sm:py-2",
+        )}
       />
       {query ? (
         <button
@@ -772,7 +780,11 @@ export function MediaManualBrowseFilters({
       value={sort}
       onChange={(e) => onSortChange(e.target.value)}
       aria-label={isKo ? "정렬" : "Sort"}
-      className="min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70"
+      className={cn(
+        "min-w-0 flex-1 rounded-xl border bg-gray-100 px-3 py-1.5 text-sm text-gray-600 focus:outline-none sm:w-auto sm:shrink-0 sm:flex-none dark:bg-white/8 dark:text-white/70",
+        mapToolbarBorder,
+        mapPageViewModes && "bg-transparent py-1 dark:bg-transparent",
+      )}
     >
       {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => (
         <option key={opt.value} value={opt.value}>
@@ -784,7 +796,10 @@ export function MediaManualBrowseFilters({
 
   const viewModeToggle = showViewModes ? (
     <div
-      className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
+      className={cn(
+        "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border",
+        mapToolbarBorder,
+      )}
       data-screenshot={
         mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
       }
@@ -817,7 +832,11 @@ export function MediaManualBrowseFilters({
 
   return (
     <div
-      className={cn("min-w-0 space-y-3", className)}
+      className={cn(
+        "min-w-0",
+        mapPageViewModes ? "space-y-2" : "space-y-3",
+        className,
+      )}
       data-screenshot="media-browse-filters"
     >
       {showSectionHeader ? (
@@ -852,7 +871,13 @@ export function MediaManualBrowseFilters({
               }
               setDesktopPanelOpen((o) => !o);
             }}
-            className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+            className={cn(
+              "inline-flex items-center gap-1.5 rounded-xl border px-3 py-2 text-sm font-medium text-gray-700 dark:text-white/80",
+              mapToolbarBorder,
+              mapPageViewModes
+                ? "bg-gray-50/90 py-1.5 dark:bg-white/[0.04]"
+                : "bg-white dark:bg-white/5",
+            )}
             aria-expanded={mapCompactFilters ? mapFiltersExpanded : desktopPanelOpen}
             aria-haspopup={mapCompactFilters ? undefined : "dialog"}
             aria-label={isKo ? "필터 열기" : "Open filters"}
@@ -960,7 +985,13 @@ export function MediaManualBrowseFilters({
         <button
           type="button"
           onClick={() => setSheetOpen(true)}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-1.5 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1.5 rounded-xl border px-3 py-1.5 text-sm font-medium text-gray-700 dark:text-white/80",
+            mapToolbarBorder,
+            mapPageViewModes
+              ? "bg-gray-50/90 dark:bg-white/[0.04]"
+              : "bg-white dark:bg-white/5",
+          )}
           aria-label={isKo ? "필터 열기" : "Open filters"}
         >
           <SlidersHorizontal className="h-4 w-4" aria-hidden />
