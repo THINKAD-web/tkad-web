@@ -68,3 +68,5 @@ scripts/verify-*.ts
 scripts/screenshot-*
 scripts/simulate-*.ts
 scripts/print-admin-*.ts
+*.png
+scripts/fix-*.ts
