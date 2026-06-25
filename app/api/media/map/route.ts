@@ -1,4 +1,4 @@
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { getPublicMediaMapCatalogCached } from "@/lib/public-media-map-catalog-cache";
 import { mediaItemIntersectsMapBounds } from "@/lib/media-detail-map-markers";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
@@ -121,7 +121,7 @@ export async function GET(req: Request) {
       query: filterParams.q ?? undefined,
     };
 
-    const all = await fetchPublicMediaCatalog();
+    const { catalog: all, facets } = await getPublicMediaMapCatalogCached();
 
     const filterMatched = filterMediaByDiscoveryChips(all, chipFilterOpts);
 
@@ -162,18 +162,11 @@ export async function GET(req: Request) {
 
     const items = sortMapCatalogItems(filtered, filterParams.sort).map(toMapItem);
 
-    const distinctRegions = Array.from(
-      new Set(all.map((m) => m.region).filter((v): v is string => !!v)),
-    ).sort();
-    const distinctTypes = Array.from(
-      new Set(all.map((m) => m.type).filter((v): v is string => !!v)),
-    ).sort();
-
     return apiOk({
       items,
       total: items.length,
       matchTotal: filterMatched.length,
-      facets: { regions: distinctRegions, types: distinctTypes },
+      facets,
     });
   } catch (e) {
     return apiServerError(e, "media/map");
