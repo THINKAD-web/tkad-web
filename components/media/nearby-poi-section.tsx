@@ -11,14 +11,18 @@ type Props = {
   className?: string;
 };
 
+type LoadState = "loading" | "ready" | "empty" | "error";
+
+const FETCH_TIMEOUT_MS = 15_000;
+
 export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) {
   const [items, setItems] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loadState, setLoadState] = useState<LoadState>("loading");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
-      setLoading(true);
+      setLoadState("loading");
       try {
         const q = new URLSearchParams({
           lat: String(lat),
@@ -28,15 +32,23 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
         });
         const res = await fetch(`/api/public/nearby-pois?${q}`, {
           cache: "no-store",
+          signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
         });
-        if (!res.ok || cancelled) return;
+        if (cancelled) return;
+        if (!res.ok) {
+          setItems([]);
+          setLoadState("error");
+          return;
+        }
         const data = (await res.json()) as { items?: string[] };
         const next = Array.isArray(data.items) ? data.items : [];
-        if (!cancelled) setItems(next.slice(0, 6));
+        setItems(next.slice(0, 6));
+        setLoadState(next.length > 0 ? "ready" : "empty");
       } catch {
-        if (!cancelled) setItems([]);
-      } finally {
-        if (!cancelled) setLoading(false);
+        if (!cancelled) {
+          setItems([]);
+          setLoadState("error");
+        }
       }
     })();
     return () => {
@@ -44,14 +56,14 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
     };
   }, [lat, lng, address, isKo]);
 
-  if (loading) {
+  const cardClass = cn(
+    "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4",
+    className,
+  );
+
+  if (loadState === "loading") {
     return (
-      <div
-        className={cn(
-          "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4",
-          className,
-        )}
-      >
+      <div className={cardClass}>
         <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
           {isKo ? "주변 POI" : "Nearby POI"}
         </p>
@@ -62,16 +74,27 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
     );
   }
 
-  if (items.length === 0) return null;
+  if (loadState === "empty" || loadState === "error") {
+    return (
+      <div className={cardClass} data-screenshot="media-nearby-poi-empty">
+        <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+          {isKo ? "주변 POI" : "Nearby POI"}
+        </p>
+        <p className="text-sm dark:text-white/50 text-gray-500">
+          {loadState === "error"
+            ? isKo
+              ? "주변 시설 정보를 불러오지 못했습니다."
+              : "Could not load nearby places."
+            : isKo
+              ? "표시할 주변 시설 정보가 없습니다."
+              : "No nearby places to show."}
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div
-      className={cn(
-        "rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4",
-        className,
-      )}
-      data-screenshot="media-nearby-poi"
-    >
+    <div className={cardClass} data-screenshot="media-nearby-poi">
       <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
         {isKo ? "주변 POI" : "Nearby POI"}
       </p>
