@@ -4,11 +4,11 @@ import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale } from "next-intl";
-import { Heart, MessageCircle, Plus, Search } from "lucide-react";
+import { MessageCircle, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
-import { FAVORITES_NAV_LABEL, PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
+import { PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -23,80 +23,6 @@ function isHiddenPath(pathname: string | null): boolean {
   );
 }
 
-function isMediaDetailPath(pathname: string): boolean {
-  return (
-    /^\/media\/[^/]+$/.test(pathname) &&
-    !pathname.startsWith("/media/map") &&
-    !pathname.startsWith("/media/category") &&
-    !pathname.startsWith("/media/type") &&
-    !pathname.startsWith("/media/region") &&
-    !pathname.startsWith("/media/area") &&
-    !pathname.startsWith("/media/network") &&
-    !pathname.startsWith("/media/packages") &&
-    !pathname.startsWith("/media/favorites") &&
-    !pathname.startsWith("/media/compare") &&
-    !pathname.startsWith("/media/submit") &&
-    !pathname.startsWith("/media/keyword-filter")
-  );
-}
-
-type QuickActionItem = {
-  id: string;
-  href: string;
-  labelKo: string;
-  labelEn: string;
-  match: (pathname: string, tab: string | null) => boolean;
-};
-
-const MOBILE_ACTIONS: QuickActionItem[] = [
-  {
-    id: "recommend",
-    href: "/recommend",
-    labelKo: "AI매체추천",
-    labelEn: "AI pick",
-    match: (p) => p.startsWith("/recommend"),
-  },
-  {
-    id: "plan",
-    href: "/my/plan",
-    labelKo: PLAN_NAV_LABELS.cart.ko,
-    labelEn: PLAN_NAV_LABELS.cart.en,
-    match: (p) => p.startsWith("/my/plan"),
-  },
-  {
-    id: "packages",
-    href: "/media/packages",
-    labelKo: "패키지제안",
-    labelEn: "Packages",
-    match: (p) =>
-      p.startsWith("/packages") || p.startsWith("/media/packages"),
-  },
-];
-
-const DETAIL_ACTIONS: QuickActionItem[] = [
-  {
-    id: "compare",
-    href: "/compare",
-    labelKo: "매체비교",
-    labelEn: "Compare",
-    match: (p) => p.startsWith("/compare"),
-  },
-  {
-    id: "favorites",
-    href: "/my?tab=favorites",
-    labelKo: FAVORITES_NAV_LABEL.ko,
-    labelEn: FAVORITES_NAV_LABEL.en,
-    match: (p) => p.startsWith("/media/favorites"),
-  },
-  {
-    id: "recommend",
-    href: "/recommend",
-    labelKo: "AI매체추천",
-    labelEn: "AI pick",
-    match: (p) => p.startsWith("/recommend"),
-  },
-];
-
 type DesktopQuickAction = {
   id: string;
   href: string;
@@ -107,48 +33,6 @@ type DesktopQuickAction = {
   variant?: "neon" | "outline";
   badge?: number;
 };
-
-function QuickActionBarMobileInner() {
-  const pathname = usePathname() ?? "/";
-  const searchParams = useSearchParams();
-  const locale = useLocale();
-  const isKo = locale === "ko";
-  const tab = searchParams.get("tab");
-
-  if (isHiddenPath(pathname)) return null;
-
-  const onDetail = isMediaDetailPath(pathname);
-  const actions = onDetail ? DETAIL_ACTIONS : MOBILE_ACTIONS;
-
-  return (
-    <div
-      className="fixed bottom-16 left-0 right-0 z-30 border-t border-gray-200 bg-white/95 px-3 py-2 backdrop-blur-md dark:border-white/10 dark:bg-gray-950/95 md:hidden"
-      data-screenshot="quick-actions-mobile"
-    >
-      <div className="mx-auto grid max-w-lg grid-cols-3 gap-2">
-        {actions.map((action) => {
-          const active = action.match(pathname, tab);
-          const label = isKo ? action.labelKo : action.labelEn;
-          return (
-            <Link
-              key={action.id}
-              href={action.href}
-              className={cn(
-                "rounded-xl py-2.5 text-center text-xs font-semibold transition-colors",
-                active
-                  ? "tkad-neon-cta-clean text-white"
-                  : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/80",
-              )}
-              aria-current={active ? "page" : undefined}
-            >
-              {label}
-            </Link>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
 
 function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
@@ -236,8 +120,4 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
   );
 }
 
-/** Icons exported for potential reuse */
-export { Search, MessageCircle };
-
-export const QuickActionBarMobile = withSearchParamsSuspense(QuickActionBarMobileInner);
 export const QuickActionBarDesktop = withSearchParamsSuspense(QuickActionBarDesktopInner);
