@@ -28,6 +28,7 @@ import {
   readRecentSearches,
 } from "@/lib/search-storage";
 import { cn } from "@/lib/utils";
+import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 
 type Props = {
   open: boolean;
@@ -82,6 +83,7 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
   const timerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   const [query, setQuery] = useState("");
+  const queryInput = useCompositionControlledInput(query, setQuery);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<UnifiedSearchResults | null>(null);
   const [suggestions, setSuggestions] = useState<UnifiedSearchHit[]>([]);
@@ -176,8 +178,10 @@ export function UnifiedSearchModal({ open, onClose }: Props) {
           <input
             ref={inputRef}
             type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={queryInput.value}
+            onChange={queryInput.onChange}
+            onCompositionStart={queryInput.onCompositionStart}
+            onCompositionEnd={queryInput.onCompositionEnd}
             placeholder={t("modalPlaceholder")}
             autoComplete="off"
             className="min-w-0 flex-1 bg-transparent text-base text-foreground outline-none placeholder:text-muted-foreground dark:text-white text-gray-900 dark:placeholder:dark:text-white text-gray-400"

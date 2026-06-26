@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Search, Sparkles } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Input } from "@/components/ui/input";
+import { CompositionInput } from "@/components/ui/composition-input";
 import { cn } from "@/lib/utils";
 import { KEYWORD_FILTER_SEARCH_PLACEHOLDERS } from "@/lib/media-keyword-filter-logic";
 
@@ -100,10 +100,10 @@ export function MediaKeywordSearchHero({
           )}
           aria-hidden
         />
-        <Input
+        <CompositionInput
           type="search"
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onValueChange={onChange}
           placeholder={
             isFeaturedEmbed ? t("inputPlaceholder") : placeholders[placeholderIdx]
           }

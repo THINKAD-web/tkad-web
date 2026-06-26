@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { RotateCcw } from "lucide-react";
+import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
 import {
@@ -194,9 +195,9 @@ export function CasesFilterHub({
       />
 
       <div className="flex flex-col gap-3 border-t dark:border-white/10 border-gray-200 pt-4 sm:flex-row sm:items-center sm:justify-between">
-        <input
+        <CompositionSearchInput
           value={query}
-          onChange={(e) => onQueryChange(e.target.value)}
+          onValueChange={onQueryChange}
           placeholder={t("searchPlaceholder")}
           className="h-11 w-full rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[#22d3ee]/40 focus:outline-none sm:max-w-md"
           aria-label={t("searchPlaceholder")}

@@ -6,6 +6,7 @@ import { ArrowRight, Clock, Loader2, Search, Zap } from "lucide-react";
 import Modal from "@/components/ui/modal";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
+import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 import {
   COMMAND_QUICK_LINKS,
   type TopNavLink,
@@ -31,6 +32,7 @@ export function CommandPalette({ open, onClose }: Props) {
   const router = useRouter();
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+  const queryInput = useCompositionControlledInput(query, setQuery);
   const [activeIdx, setActiveIdx] = useState(0);
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<UnifiedSearchResults | null>(null);
@@ -165,8 +167,10 @@ export function CommandPalette({ open, onClose }: Props) {
         <Search className="h-5 w-5 shrink-0 text-gray-400" aria-hidden />{" "}
         <input
           ref={inputRef}
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={queryInput.value}
+          onChange={queryInput.onChange}
+          onCompositionStart={queryInput.onCompositionStart}
+          onCompositionEnd={queryInput.onCompositionEnd}
           placeholder={
             isKo
               ? "매체 검색 · 페이지 이동 · 명령..."

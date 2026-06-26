@@ -11,6 +11,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { CompositionInput } from "@/components/ui/composition-input";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
 import {
@@ -1952,11 +1953,11 @@ export default function AdminMediasClient({
           <div className="flex w-full min-w-0 flex-col gap-1.5 sm:w-auto sm:max-w-none sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
             <div className="relative w-full min-w-0 sm:w-52 sm:flex-none">
               <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-              <Input
+              <CompositionInput
                 placeholder="매체명 검색..."
                 value={search}
-                onChange={(e) => {
-                  setSearch(e.target.value);
+                onValueChange={(value) => {
+                  setSearch(value);
                   setPage(1);
                 }}
                 className="h-9 w-full pl-8 text-sm"

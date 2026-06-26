@@ -5,6 +5,7 @@ import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { ArrowLeft, Clock, Search, TrendingUp, X } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 import { useMobileSearch } from "@/components/mobile/mobile-search-context";
 
 const RECENT_KEY = "tkad-mobile-recent-searches";
@@ -55,6 +56,7 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
   const isKo = locale === "ko";
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
+  const queryInput = useCompositionControlledInput(query, setQuery);
   const [recent, setRecent] = useState<string[]>([]);
 
   useEffect(() => {
@@ -129,16 +131,18 @@ export function MobileSearchModal({ suggestions = [] }: Props) {
           <input
             ref={inputRef}
             type="search"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            value={queryInput.value}
+            onChange={queryInput.onChange}
+            onCompositionStart={queryInput.onCompositionStart}
+            onCompositionEnd={queryInput.onCompositionEnd}
             onKeyDown={(e) => {
-              if (e.key === "Enter") submit(query);
+              if (e.key === "Enter") submit(queryInput.value);
             }}
             placeholder={isKo ? "매체, 지역, 유형 검색" : "Search media, area, type"}
             className="h-10 w-full rounded-full border border-gray-200 bg-gray-50 pl-9 pr-9 text-sm text-gray-900 outline-none focus:border-violet-500 dark:border-white/10 dark:bg-white/5 dark:text-white"
             autoComplete="off"
           />
-          {query ? (
+          {queryInput.value ? (
             <button
               type="button"
               onClick={() => setQuery("")}

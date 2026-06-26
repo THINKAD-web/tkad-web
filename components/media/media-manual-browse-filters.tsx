@@ -41,6 +41,7 @@ import {
   buildMapBrowseActiveFilterChips,
   type MediaMapActiveFilterKey,
 } from "@/lib/media-map/active-filter-chips";
+import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { cn } from "@/lib/utils";
 
 const MAP_TYPE_FILTERS_EXPANDED_KEY = "tkad-media-map-type-filters-expanded";
@@ -743,10 +744,9 @@ export function MediaManualBrowseFilters({
         className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-white/30"
         aria-hidden
       />
-      <input
-        type="search"
+      <CompositionSearchInput
         value={query}
-        onChange={(e) => onQueryChange(e.target.value)}
+        onValueChange={onQueryChange}
         placeholder={
           isKo
             ? variant === "network"

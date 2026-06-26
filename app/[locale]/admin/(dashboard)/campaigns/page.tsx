@@ -4,6 +4,7 @@ import { useCallback, useEffect, useRef, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { CompositionInput } from "@/components/ui/composition-input";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -797,10 +798,10 @@ export default function AdminCampaignsPage() {
               </Button>
             </div>
             <div className="space-y-2">
-              <Input
+              <CompositionInput
                 placeholder="캠페인명, 고객사, 담당자, 이메일로 검색…"
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onValueChange={setSearchQuery}
                 className="text-xs"
                 aria-label="캠페인 검색"
               />
