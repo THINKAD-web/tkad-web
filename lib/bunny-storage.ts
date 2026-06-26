@@ -37,12 +37,46 @@ export function isBunnyStorageConfigured(): boolean {
   return getBunnyStorageConfigStatus().configured;
 }
 
+/** Pathname prefix inside BUNNY_CDN_BASE_URL (e.g. `tkad`), excluding leading/trailing slashes. */
+function cdnBasePathPrefix(cdnBase: string): string {
+  try {
+    return new URL(cdnBase).pathname.replace(/^\/+|\/+$/g, "");
+  } catch {
+    const schemeEnd = cdnBase.indexOf("//");
+    if (schemeEnd < 0) return "";
+    const pathStart = cdnBase.indexOf("/", schemeEnd + 2);
+    if (pathStart < 0) return "";
+    return cdnBase.slice(pathStart).replace(/^\/+|\/+$/g, "");
+  }
+}
+
+function objectPathStartsWithBasePrefix(
+  basePathPrefix: string,
+  objectPath: string,
+): boolean {
+  if (!basePathPrefix) return false;
+  return (
+    objectPath === basePathPrefix ||
+    objectPath.startsWith(`${basePathPrefix}/`)
+  );
+}
+
 /** Pull Zone CDN URL for a storage-zone object path */
 export function buildBunnyCdnUrl(objectPath: string): string | null {
   const cdnBase = process.env.BUNNY_CDN_BASE_URL?.trim();
   if (!cdnBase) return null;
   const normalized = objectPath.replace(/^\/+/, "");
   if (!normalized) return null;
+
+  const basePathPrefix = cdnBasePathPrefix(cdnBase);
+  if (objectPathStartsWithBasePrefix(basePathPrefix, normalized)) {
+    try {
+      return `${new URL(cdnBase).origin}/${normalized}`;
+    } catch {
+      // Non-URL cdnBase — fall through to joinUrl.
+    }
+  }
+
   return joinUrl(cdnBase, normalized);
 }
 
