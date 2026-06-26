@@ -29,6 +29,7 @@ import { Link, useRouter } from "@/i18n/navigation";
 import {
   CategoryExploreHero,
 } from "@/components/category-explore-hero";
+import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { cn } from "@/lib/utils";
 import {
   useState,
@@ -825,10 +826,9 @@ export default function MediaBrowseClient({
                 className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 dark:text-white sm:left-4"
                 aria-hidden
               />
-              <input
-                type="search"
+              <CompositionSearchInput
                 value={catalogSearchQuery}
-                onChange={(e) => setCatalogSearchQuery(e.target.value)}
+                onValueChange={setCatalogSearchQuery}
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }

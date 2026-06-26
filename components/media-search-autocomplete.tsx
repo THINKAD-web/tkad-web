@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
+import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 import {
   matchesMediaTextQuery,
   typeLabels,
@@ -79,15 +80,20 @@ export default function MediaSearchAutocomplete({
     [catalog]
   );
 
-  const handleChange = (value: string) => {
-    setQuery(value);
-    onQueryChange?.(value);
-    if (timerRef.current) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => search(value), 300);
-  };
+  const commitQuery = useCallback(
+    (value: string) => {
+      setQuery(value);
+      onQueryChange?.(value);
+      if (timerRef.current) clearTimeout(timerRef.current);
+      timerRef.current = setTimeout(() => search(value), 300);
+    },
+    [setQuery, onQueryChange, search],
+  );
+
+  const queryInput = useCompositionControlledInput(query, commitQuery);
 
   const submitTextSearch = () => {
-    const q = query.trim();
+    const q = queryInput.value.trim();
     onSearchSubmit?.(q);
     setIsOpen(false);
   };
@@ -156,22 +162,25 @@ export default function MediaSearchAutocomplete({
           <input
             ref={inputRef}
             type="text"
-            value={query}
-            onChange={(e) => handleChange(e.target.value)}
+            value={queryInput.value}
+            onChange={queryInput.onChange}
+            onCompositionStart={queryInput.onCompositionStart}
+            onCompositionEnd={queryInput.onCompositionEnd}
             onKeyDown={handleKeyDown}
-            onFocus={() => query.trim() && results.length > 0 && setIsOpen(true)}
+            onFocus={() =>
+              queryInput.value.trim() && results.length > 0 && setIsOpen(true)
+            }
             placeholder={
               placeholder ??
               (isKo ? "매체명, 지역, 유형 검색..." : "Search name, location, type...")
             }
             className="w-full rounded-lg border bg-white py-2.5 pl-10 pr-9 text-base outline-none transition-colors focus:border-gold focus:ring-1 focus:ring-gold/30"
           />
-          {query && (
+          {queryInput.value ? (
             <button
               type="button"
               onClick={() => {
-                setQuery("");
-                onQueryChange?.("");
+                commitQuery("");
                 setResults([]);
                 setIsOpen(false);
                 inputRef.current?.focus();
@@ -180,7 +189,7 @@ export default function MediaSearchAutocomplete({
             >
               <X className="h-4 w-4" />
             </button>
-          )}
+          ) : null}
         </div>
         {onSearchSubmit && (
           <button

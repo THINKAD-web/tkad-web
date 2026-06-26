@@ -6,7 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
+import { CompositionInput } from "@/components/ui/composition-input";
 import {
   Plus,
   Pencil,
@@ -339,11 +339,11 @@ export default function AdminNetworksListClient({
         </div>
         <div className="relative w-full min-w-0 sm:w-52">
           <Search className="absolute left-2.5 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
+          <CompositionInput
             placeholder={isKo ? "네트워크·지점명 검색…" : "Search name or site…"}
             value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
+            onValueChange={(value) => {
+              setSearch(value);
               setPage(1);
             }}
             className="h-9 w-full pl-8 text-sm"
