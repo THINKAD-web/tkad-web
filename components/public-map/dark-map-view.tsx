@@ -1,29 +1,32 @@
 "use client";
 
-import { useCallback, useEffect, useRef, type MutableRefObject } from "react";
+import { useCallback, useEffect, useRef, useState, type MutableRefObject } from "react";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
+import { useTheme } from "next-themes";
 import {
   MapContainer,
-  TileLayer,
   useMap,
   GeoJSON,
   CircleMarker,
+  ZoomControl,
 } from "react-leaflet";
 import { cn } from "@/lib/utils";
 import {
   PUBLIC_DARK_MAP_DEFAULT_CENTER,
-  PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
-  PUBLIC_DARK_MAP_TILE_URL,
   isPublicMapLightTile,
   kakaoLevelToLeafletZoom,
   leafletZoomToKakaoLevel,
 } from "@/lib/public-dark-map-config";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import { DarkMapMarkersLayer } from "@/components/public-map/dark-map-markers-layer";
+import {
+  DarkMapTileLayer,
+  resolveDarkMapLightTiles,
+} from "@/components/public-map/dark-map-tile-layer";
 
 export type { MapBounds, MapMarker };
 
@@ -67,6 +70,8 @@ type Props = {
   disableCluster?: boolean;
   /** 값이 바뀔 때마다 map.invalidateSize() 1회 호출 — 레이아웃 전환/바텀시트 스냅 변경 후 타일 재계산 */
   invalidateNonce?: number;
+  /** next-themes light/dark 에 맞춰 Carto light_nolabels / dark_nolabels 전환 */
+  themeAwareTiles?: boolean;
 };
 
 /** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
@@ -87,6 +92,41 @@ function InvalidateOnNonce({ nonce }: { nonce?: number }) {
     });
     return () => window.cancelAnimationFrame(raf);
   }, [map, nonce]);
+  return null;
+}
+
+function prefersReducedMapMotion(): boolean {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function mapMotionDurationSec(): number {
+  return prefersReducedMapMotion() ? 0 : 0.72;
+}
+
+/** 타일 로딩 상태 — 루트 오버레이와 연동 */
+function MapTileLoadingTracker({
+  onLoadingChange,
+}: {
+  onLoadingChange: (loading: boolean) => void;
+}) {
+  const map = useMap();
+
+  useEffect(() => {
+    const onLoadStart = () => onLoadingChange(true);
+    const onLoadEnd = () => onLoadingChange(false);
+    map.on("loading", onLoadStart);
+    map.on("load", onLoadEnd);
+    map.on("tileload", onLoadEnd);
+    const t = window.setTimeout(() => onLoadingChange(false), 2400);
+    return () => {
+      map.off("loading", onLoadStart);
+      map.off("load", onLoadEnd);
+      map.off("tileload", onLoadEnd);
+      window.clearTimeout(t);
+    };
+  }, [map, onLoadingChange]);
+
   return null;
 }
 
@@ -210,17 +250,28 @@ function ProgrammaticView({
     lastNonce.current = view.nonce;
     programmaticApplyRef.current = true;
 
+    const duration = mapMotionDurationSec();
+
     if (view.fitBounds) {
       const b = L.latLngBounds(
         [view.fitBounds.swLat, view.fitBounds.swLng],
         [view.fitBounds.neLat, view.fitBounds.neLng],
       );
       if (b.isValid()) {
-        map.fitBounds(b, {
-          padding: [32, 32],
-          maxZoom: view.fitBoundsMaxZoom ?? 12,
-          animate: true,
-        });
+        if (duration <= 0) {
+          map.fitBounds(b, {
+            padding: [32, 32],
+            maxZoom: view.fitBoundsMaxZoom ?? 12,
+            animate: false,
+          });
+        } else {
+          map.flyToBounds(b, {
+            padding: [32, 32],
+            maxZoom: view.fitBoundsMaxZoom ?? 12,
+            duration,
+            easeLinearity: 0.22,
+          });
+        }
       }
     } else {
       const targetLeaflet = kakaoLevelToLeafletZoom(view.zoom, map.getZoom());
@@ -230,12 +281,19 @@ function ProgrammaticView({
       if (view.maxZoom != null) {
         leafletZoom = Math.min(leafletZoom, view.maxZoom);
       }
-      map.setView([view.lat, view.lng], leafletZoom, { animate: true });
+      if (duration <= 0) {
+        map.setView([view.lat, view.lng], leafletZoom, { animate: false });
+      } else {
+        map.flyTo([view.lat, view.lng], leafletZoom, {
+          duration,
+          easeLinearity: 0.22,
+        });
+      }
     }
 
     const t = window.setTimeout(() => {
       programmaticApplyRef.current = false;
-    }, 0);
+    }, Math.max(0, duration * 1000));
     return () => window.clearTimeout(t);
   }, [map, view, programmaticApplyRef]);
 
@@ -300,11 +358,21 @@ export default function DarkMapView({
   disableCluster = false,
   onUserViewportAdjusted,
   invalidateNonce,
+  themeAwareTiles = false,
 }: Props) {
+  const { resolvedTheme } = useTheme();
+  const [tilesLoading, setTilesLoading] = useState(true);
+  const onTilesLoadingChange = useCallback((loading: boolean) => {
+    setTilesLoading(loading);
+  }, []);
+
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
   const onSelectStable = useCallback((id: string) => onSelect(id), [onSelect]);
   const useCluster = !disableCluster && markers.length > 1;
   const programmaticApplyRef = useRef(false);
+  const lightTiles = themeAwareTiles
+    ? resolveDarkMapLightTiles(true, resolvedTheme)
+    : isPublicMapLightTile();
 
   return (
     <div
@@ -313,6 +381,12 @@ export default function DarkMapView({
         className,
       )}
     >
+      {tilesLoading ? (
+        <div
+          className="pointer-events-none absolute inset-0 z-[5] skeleton-shimmer bg-muted/50"
+          aria-hidden
+        />
+      ) : null}
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={leafletZoom}
@@ -324,17 +398,14 @@ export default function DarkMapView({
         touchZoom
         doubleClickZoom
         dragging
-        zoomControl
+        zoomControl={false}
         zoomAnimation
       >
-        <TileLayer
-          url={PUBLIC_DARK_MAP_TILE_URL}
-          subdomains={PUBLIC_DARK_MAP_TILE_SUBDOMAINS}
-          maxZoom={20}
-          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-        />
+        <DarkMapTileLayer themeAware={themeAwareTiles} />
+        <ZoomControl position="bottomright" />
         <MapResizeFix />
         <InvalidateOnNonce nonce={invalidateNonce} />
+        <MapTileLoadingTracker onLoadingChange={onTilesLoadingChange} />
         <BoundsReporter
           onBoundsChange={onBoundsChange}
           onViewChange={onViewChange}
@@ -358,7 +429,7 @@ export default function DarkMapView({
           hoveredId={hoveredId}
           onSelect={onSelectStable}
           disableCluster={!useCluster}
-          lightTiles={isPublicMapLightTile()}
+          lightTiles={lightTiles}
         />
         {userLocation ? (
           <CircleMarker
