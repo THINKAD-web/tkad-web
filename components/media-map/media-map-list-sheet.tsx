@@ -123,6 +123,17 @@ export function MediaMapListSheet({
     setDragPx(null);
     if (current == null || st == null) return;
 
+    // 탭(이동 거의 없음) — 포인터 캡처가 버튼 click 을 가로채므로 여기서 한 단계 순환 처리
+    if (Math.abs(st.lastY - st.startY) < 6) {
+      const idx = SNAP_ORDER.indexOf(snap);
+      const tapped =
+        snap === "full"
+          ? "peek"
+          : SNAP_ORDER[Math.min(SNAP_ORDER.length - 1, idx + 1)];
+      if (tapped && tapped !== snap) onSnapChange(tapped);
+      return;
+    }
+
     // 관성: 빠르게 내리면(+) 한 단계 접고, 빠르게 올리면(−) 한 단계 펼침
     let best: MediaMapSheetSnap = "peek";
     let bestDist = Infinity;
@@ -142,7 +153,7 @@ export function MediaMapListSheet({
     if (best !== snap) onSnapChange(best);
   };
 
-  const dragging = dragState.current != null;
+  const dragging = dragPx != null;
 
   return (
     <div
