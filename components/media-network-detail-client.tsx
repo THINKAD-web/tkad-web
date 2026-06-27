@@ -33,6 +33,7 @@ import {
   resolveNetworkCatalogType,
   resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
+import { computeNetworkDailyFootfall } from "@/lib/media-network-public";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import { Badge } from "@/components/ui/badge";
@@ -153,16 +154,21 @@ export default function MediaNetworkDetailClient({
 
   const quoteHref = `/quote?media=${encodeURIComponent(data.catalogId)}`;
 
-  const avgLocFootfall =
-    data.dailyFootfall ??
-    (data.locations.length > 0
-      ? Math.round(
-          data.locations.reduce(
-            (sum, l) => sum + (l.dailyFootfall ?? 0),
-            0,
-          ) / data.locations.length,
-        )
-      : null);
+  const networkDailyFootfall = useMemo(
+    () =>
+      computeNetworkDailyFootfall({
+        dailyFootfall: data.dailyFootfall,
+        totalLocations: data.totalLocations,
+        locations: data.locations.map((l) => ({
+          dailyFootfall: l.dailyFootfall,
+          unitCount: l.unitCount ?? null,
+        })),
+      }),
+    [data.dailyFootfall, data.totalLocations, data.locations],
+  );
+
+  const displayNetworkDailyFootfall =
+    networkDailyFootfall > 0 ? networkDailyFootfall : null;
 
   const selectedLocation =
     (mapSelectedId &&
@@ -189,7 +195,7 @@ export default function MediaNetworkDetailClient({
     pricePeriod: "month",
     lat: mapItems[0]?.lat ?? 37.5665,
     lng: mapItems[0]?.lng ?? 126.978,
-    dailyFootTraffic: data.dailyFootfall ?? avgLocFootfall ?? 0,
+    dailyFootTraffic: networkDailyFootfall,
     monthlyFootTraffic: undefined,
     impressions: undefined,
     reach: undefined,
@@ -336,8 +342,8 @@ export default function MediaNetworkDetailClient({
                   label={t("dailyFootfallLabel")}
                   value={
                     <span className="block text-base font-semibold tabular-nums dark:text-white text-gray-900">
-                      {avgLocFootfall != null
-                        ? `${avgLocFootfall.toLocaleString()}명/일`
+                      {displayNetworkDailyFootfall != null
+                        ? `${displayNetworkDailyFootfall.toLocaleString()}명/일`
                         : t("valueEmpty")}
                     </span>
                   }
@@ -668,8 +674,8 @@ export default function MediaNetworkDetailClient({
                 label={t("dailyFootfallLabel")}
                 value={
                   <span className="block text-base font-semibold text-navy">
-                    {avgLocFootfall != null
-                      ? `${avgLocFootfall.toLocaleString()}명/일`
+                    {displayNetworkDailyFootfall != null
+                      ? `${displayNetworkDailyFootfall.toLocaleString()}명/일`
                       : t("valueEmpty")}
                   </span>
                 }
