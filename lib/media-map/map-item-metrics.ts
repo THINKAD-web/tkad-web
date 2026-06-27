@@ -1,4 +1,4 @@
-import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { formatCpmKrw } from "@/lib/media-price-format";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
 export function formatMapImpressions(
@@ -19,7 +19,7 @@ export function formatMapImpressions(
 
 export function formatMapCpm(item: MapMapItem, locale: string): string | null {
   if (item.cpm && item.cpm > 0) {
-    return formatMediaPriceCompactWon(Math.round(item.cpm), locale);
+    return formatCpmKrw(Math.round(item.cpm), locale);
   }
   const imp =
     item.impressions ??
@@ -28,7 +28,7 @@ export function formatMapCpm(item: MapMapItem, locale: string): string | null {
       : 0);
   if (imp > 0 && item.price > 0) {
     const cpm = (item.price / imp) * 1000;
-    return formatMediaPriceCompactWon(Math.round(cpm), locale);
+    return formatCpmKrw(Math.round(cpm), locale);
   }
   return null;
 }
