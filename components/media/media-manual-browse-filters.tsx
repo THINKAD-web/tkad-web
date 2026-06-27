@@ -164,6 +164,8 @@ type Props = {
   mapCompactFilters?: boolean;
   /** `/media/map` — [목록]/[지도] 2-way 토글 */
   mapPageViewModes?: boolean;
+  /** `/media` 앱 셸 — 검색+필터+정렬+뷰모드를 단일 반응형 바로 통합(데스크톱/모바일 이중 마크업 제거) */
+  unifiedToolbar?: boolean;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -211,6 +213,7 @@ export function MediaManualBrowseFilters({
   showViewModes = true,
   mapCompactFilters = false,
   mapPageViewModes = false,
+  unifiedToolbar = false,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
@@ -282,7 +285,7 @@ export function MediaManualBrowseFilters({
     !mapFiltersExpanded &&
     mapBrowseFilterChips.length > 0;
 
-  const showDesktopTypeChipRow = !mapCompactFilters;
+  const showDesktopTypeChipRow = !mapCompactFilters && !unifiedToolbar;
 
   const showMapInlineFilterAccordion =
     mapCompactFilters && mapFiltersExpanded;
@@ -848,10 +851,40 @@ export function MediaManualBrowseFilters({
         </div>
       ) : null}
 
+      {/* `/media` 앱 셸 — 단일 반응형 컨트롤 바 (검색 + 필터 + 정렬 + 뷰모드) */}
+      {unifiedToolbar ? (
+        <>
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
+            {searchInput}
+            <button
+              type="button"
+              onClick={() => setSheetOpen(true)}
+              className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+              aria-haspopup="dialog"
+              aria-expanded={sheetOpen}
+              aria-label={isKo ? "필터 열기" : "Open filters"}
+            >
+              <SlidersHorizontal className="h-4 w-4" aria-hidden />
+              {isKo ? "필터" : "Filters"}
+              {activeFilterCount > 0 ? (
+                <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
+                  {activeFilterCount}
+                </span>
+              ) : null}
+            </button>
+            {sortSelect}
+            {viewModeToggle}
+            {toolbarEnd}
+          </div>
+          <div className="min-w-0">{renderTypeAxis(false)}</div>
+        </>
+      ) : null}
+
       {/* 모바일: 검색 전체 너비 (PR #207 레이아웃 유지) */}
-      <div className="sm:hidden">{searchInput}</div>
+      {!unifiedToolbar ? <div className="sm:hidden">{searchInput}</div> : null}
 
       {/* 데스크탑: 검색 + [필터] + 정렬 + 보기 (한 줄) */}
+      {!unifiedToolbar ? (
       <div className="hidden min-w-0 flex-wrap items-center gap-2 sm:flex">
         {searchInput}
         <div className="relative shrink-0" ref={desktopPanelRef}>
@@ -932,6 +965,7 @@ export function MediaManualBrowseFilters({
         {viewModeToggle}
         {toolbarEnd}
       </div>
+      ) : null}
 
       {showMapActiveFilterStrip ? (
         <MediaMapActiveFiltersBar
@@ -971,6 +1005,7 @@ export function MediaManualBrowseFilters({
       ) : null}
 
       {/* 모바일 툴바: [필터] · [정렬] · [보기] (PR #207) */}
+      {!unifiedToolbar ? (
       <div className="flex min-w-0 flex-wrap items-center gap-2 sm:hidden">
         <button
           type="button"
@@ -993,6 +1028,7 @@ export function MediaManualBrowseFilters({
         {viewModeToggle}
         {toolbarEnd}
       </div>
+      ) : null}
 
       {showResultSummaryRow ? (
       <div className="flex flex-wrap items-center justify-between gap-2">
@@ -1041,9 +1077,13 @@ export function MediaManualBrowseFilters({
       </div>
       ) : null}
 
-      {/* 모바일 필터 바텀시트 (PR #207 — 변경 없음) */}
+      {/* 필터 바텀시트 — unifiedToolbar 일 때는 전 브레이크포인트에서 사용 */}
       {sheetOpen ? (
-        <div className="fixed inset-0 z-50 sm:hidden" role="dialog" aria-modal="true">
+        <div
+          className={cn("fixed inset-0 z-50", !unifiedToolbar && "sm:hidden")}
+          role="dialog"
+          aria-modal="true"
+        >
           <button
             type="button"
             aria-label={isKo ? "필터 닫기" : "Close filters"}
