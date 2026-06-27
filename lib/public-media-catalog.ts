@@ -247,8 +247,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
         lng: p.longitude,
       }));
     })(),
-    dailyExposure:
-      m.impressions != null ? String(m.impressions) : undefined,
+    dailyExposure: daily > 0 ? String(daily) : undefined,
     sampleImages: imgs.length > 0 ? imgs : [],
     operatingHours: m.operatingHours ?? undefined,
     operatingHoursEn: m.operatingHours ?? undefined,
