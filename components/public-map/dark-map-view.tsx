@@ -65,7 +65,30 @@ type Props = {
   monochromeTiles?: boolean;
   className?: string;
   disableCluster?: boolean;
+  /** 값이 바뀔 때마다 map.invalidateSize() 1회 호출 — 레이아웃 전환/바텀시트 스냅 변경 후 타일 재계산 */
+  invalidateNonce?: number;
 };
+
+/** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
+function InvalidateOnNonce({ nonce }: { nonce?: number }) {
+  const map = useMap();
+  const first = useRef(true);
+  useEffect(() => {
+    if (first.current) {
+      first.current = false;
+      return;
+    }
+    const raf = window.requestAnimationFrame(() => {
+      try {
+        map.invalidateSize({ animate: false });
+      } catch {
+        /* noop */
+      }
+    });
+    return () => window.cancelAnimationFrame(raf);
+  }, [map, nonce]);
+  return null;
+}
 
 function MapResizeFix() {
   const map = useMap();
@@ -276,6 +299,7 @@ export default function DarkMapView({
   className,
   disableCluster = false,
   onUserViewportAdjusted,
+  invalidateNonce,
 }: Props) {
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
   const onSelectStable = useCallback((id: string) => onSelect(id), [onSelect]);
@@ -310,6 +334,7 @@ export default function DarkMapView({
           attribution='&copy; <a href="https://carto.com/">CARTO</a>'
         />
         <MapResizeFix />
+        <InvalidateOnNonce nonce={invalidateNonce} />
         <BoundsReporter
           onBoundsChange={onBoundsChange}
           onViewChange={onViewChange}
