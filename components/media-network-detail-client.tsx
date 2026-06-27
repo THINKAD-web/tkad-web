@@ -33,7 +33,7 @@ import {
   resolveNetworkCatalogType,
   resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
-import { computeNetworkDailyFootfall } from "@/lib/media-network-public";
+import { computeNetworkDailyFootfall } from "@/lib/media-network-footfall";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import { Badge } from "@/components/ui/badge";
