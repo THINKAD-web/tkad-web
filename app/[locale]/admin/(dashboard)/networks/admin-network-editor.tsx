@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useTranslations, useLocale } from "next-intl";
@@ -30,6 +30,10 @@ import {
   suggestBrowseFromVenue,
   type NetworkTaxonomyFormState,
 } from "@/lib/network-taxonomy";
+import {
+  computeNetworkDailyFootfall,
+  NETWORK_DAILY_FOOTFALL_CAP,
+} from "@/lib/media-network-footfall";
 
 export type SerializedNetwork = {
   id: string;
@@ -309,6 +313,29 @@ export default function AdminNetworkEditor(props: Props) {
     ).length;
     return { siteCount, unitTotal, blankWithData };
   })();
+
+  const publicDailyFootfallPreview = useMemo(() => {
+    const dbDaily =
+      dailyFootfall.trim() === ""
+        ? null
+        : Math.round(Number(dailyFootfall) || 0);
+    const locations = buildLocationsPayload();
+    const computed = computeNetworkDailyFootfall({
+      dailyFootfall: dbDaily,
+      totalLocations: locations.length,
+      locations: locations.map((l) => ({
+        dailyFootfall: l.dailyFootfall,
+        unitCount: l.unitCount,
+      })),
+    });
+    const rawDb = dbDaily ?? 0;
+    return {
+      computed,
+      exceedsCap: rawDb > NETWORK_DAILY_FOOTFALL_CAP,
+      differsFromDb:
+        dbDaily != null && dbDaily > 0 && dbDaily !== computed,
+    };
+  }, [dailyFootfall, buildLocationsPayload]);
 
   const parsePackageOptionsField = useCallback((): unknown => {
     const s = packageOptionsText.trim();
@@ -998,6 +1025,25 @@ export default function AdminNetworkEditor(props: Props) {
                 value={dailyFootfall}
                 onChange={(e) => setDailyFootfall(e.target.value)}
               />
+              <p className="text-xs text-slate-500">
+                공개 노출 예상:{" "}
+                {publicDailyFootfallPreview.computed.toLocaleString()}명/일
+                {publicDailyFootfallPreview.exceedsCap ? (
+                  <span className="text-amber-700">
+                    {" "}
+                    — DB 일 유동이 상한(
+                    {NETWORK_DAILY_FOOTFALL_CAP.toLocaleString()})을 초과해
+                    보정됩니다
+                  </span>
+                ) : null}
+                {publicDailyFootfallPreview.differsFromDb &&
+                !publicDailyFootfallPreview.exceedsCap ? (
+                  <span className="text-amber-700">
+                    {" "}
+                    — 지점 합산·스케일 기준으로 DB 단일값과 다릅니다
+                  </span>
+                ) : null}
+              </p>
             </div>
             <div className="grid gap-2">
               <label className="text-sm font-medium text-slate-700">
