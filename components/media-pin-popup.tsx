@@ -1,7 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { MediaCard } from "@/components/media/media-card";
+import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/types/media";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
@@ -46,8 +46,9 @@ export function MediaPinPopup({
           onToggleSelect ? "pb-2" : "",
         )}
       >
-        <MediaCard
-          mode="compact"
+        <DiscoveryMediaCard
+          variant="compact"
+          compactLayout="row"
           item={catalogItem}
           href={href}
           metaLine={metaLine}

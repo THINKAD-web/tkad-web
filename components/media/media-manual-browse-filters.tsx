@@ -36,7 +36,12 @@ import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { NETWORK_BROWSE_TYPE_CHIPS } from "@/lib/media-network-types";
 import { MediaMapActiveFiltersBar } from "@/components/media-map/media-map-active-filters-bar";
-import { PlannerNeonLabel } from "@/components/planner/planner-neon-ui";
+import { DiscoveryPageHeader } from "@/components/discovery/page-header";
+import {
+  DiscoveryFilterSheetHeader,
+  DiscoveryResultSummary,
+  formatMapViewCountLabel,
+} from "@/components/discovery/filter-bar-parts";
 import {
   buildMapBrowseActiveFilterChips,
   type MediaMapActiveFilterKey,
@@ -106,21 +111,7 @@ const MAP_PAGE_VIEW_MODES: {
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
-/** `/media/map` — 현재 화면(뷰포트) vs 전국 필터 매칭 수 라벨 */
-function formatMapViewCountLabel(
-  resultCount: number,
-  total: number | undefined,
-  isKo: boolean,
-): string {
-  if (total != null && total > resultCount) {
-    return isKo
-      ? `현재 화면 ${resultCount} / 전국 ${total}개`
-      : `${resultCount} in current view / ${total} nationwide`;
-  }
-  return isKo ? `전국 ${resultCount}개` : `${resultCount} nationwide`;
-}
-
-type Props = {
+export type MediaManualBrowseFiltersProps = {
   isKo?: boolean;
   query: string;
   onQueryChange: (q: string) => void;
@@ -217,7 +208,7 @@ export function MediaManualBrowseFilters({
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
-}: Props) {
+}: MediaManualBrowseFiltersProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
   /** 모바일 필터 바텀시트 */
   const [sheetOpen, setSheetOpen] = useState(false);
@@ -678,7 +669,7 @@ export function MediaManualBrowseFilters({
             <div className="mt-2 space-y-3 rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/5">
               <div className="grid grid-cols-2 gap-2">
                 <label className="space-y-1">
-                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/45">
+                  <span className="tkad-type-note font-medium text-tkad-muted">
                     {isKo ? "최소 가격(원)" : "Min price (KRW)"}
                   </span>
                   <input
@@ -690,7 +681,7 @@ export function MediaManualBrowseFilters({
                   />
                 </label>
                 <label className="space-y-1">
-                  <span className="text-[10px] font-medium text-gray-500 dark:text-white/45">
+                  <span className="tkad-type-note font-medium text-tkad-muted">
                     {isKo ? "최대 가격(원)" : "Max price (KRW)"}
                   </span>
                   <input
@@ -704,7 +695,7 @@ export function MediaManualBrowseFilters({
               </div>
               {variant === "media" ? (
                 <div>
-                  <p className="mb-1.5 text-[10px] font-medium text-gray-500 dark:text-white/45">
+                  <p className="tkad-type-note mb-1.5 font-medium text-tkad-muted">
                     {isKo ? "매체 특성" : "Features"}
                   </p>
                   <div className="flex flex-wrap gap-2">
@@ -835,21 +826,13 @@ export function MediaManualBrowseFilters({
       )}
       data-screenshot="media-browse-filters"
     >
-      {showSectionHeader ? (
-        <div className="space-y-2 border-b border-gray-100 pb-4 dark:border-white/10">
-          <PlannerNeonLabel>{sectionEyebrow}</PlannerNeonLabel>
-          {sectionTitle ? (
-            <h3 className="text-base font-bold tracking-normal text-gray-900 dark:text-white">
-              {sectionTitle}
-            </h3>
-          ) : null}
-          {sectionDesc ? (
-            <p className="text-sm text-gray-600 dark:text-white/65">
-              {sectionDesc}
-            </p>
-          ) : null}
-        </div>
-      ) : null}
+      <DiscoveryPageHeader
+        showHeader={showSectionHeader}
+        eyebrow={sectionEyebrow}
+        title={sectionTitle}
+        description={sectionDesc}
+        titleAs="h3"
+      />
 
       {/* `/media` 앱 셸 — 단일 반응형 컨트롤 바 (검색 + 필터 + 정렬 + 뷰모드) */}
       {unifiedToolbar ? (
@@ -867,7 +850,7 @@ export function MediaManualBrowseFilters({
               <SlidersHorizontal className="h-4 w-4" aria-hidden />
               {isKo ? "필터" : "Filters"}
               {activeFilterCount > 0 ? (
-                <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
+                <span className="tkad-type-note ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 font-bold leading-none text-white">
                   {activeFilterCount}
                 </span>
               ) : null}
@@ -1031,50 +1014,16 @@ export function MediaManualBrowseFilters({
       ) : null}
 
       {showResultSummaryRow ? (
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        {showResultCountLabel ? (
-          <p className="text-sm text-gray-500 dark:text-white/50">{resultLabel}</p>
-        ) : null}
-        <div className="flex flex-wrap items-center gap-2 text-xs">
-          {selectedCount > 0 ? (
-            onSelectedSummaryClick ? (
-              <button
-                type="button"
-                onClick={onSelectedSummaryClick}
-                className="font-medium text-violet-600 underline decoration-violet-400/50 underline-offset-2 hover:text-violet-500 dark:text-violet-300 dark:hover:text-violet-200"
-              >
-                {selectionVariant === "plan"
-                  ? isKo
-                    ? `선택됨 ${selectedCount}개 · 보기`
-                    : `${selectedCount} selected · view`
-                  : isKo
-                    ? `선택 ${selectedCount} · 보기`
-                    : `${selectedCount} selected · view`}
-              </button>
-            ) : (
-              <span className="font-medium text-violet-600 dark:text-violet-300">
-                {selectionVariant === "plan"
-                  ? isKo
-                    ? `선택됨 ${selectedCount}개`
-                    : `${selectedCount} selected`
-                  : isKo
-                    ? `선택 ${selectedCount}`
-                    : `${selectedCount} selected`}
-              </span>
-            )
-          ) : null}
-          {cartCount > 0 ? (
-            <span className="tkad-home-accent-text font-medium">
-              {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
-            </span>
-          ) : null}
-          {compareCount > 0 ? (
-            <span className="font-medium text-gray-700 dark:text-white">
-              {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
-            </span>
-          ) : null}
-        </div>
-      </div>
+        <DiscoveryResultSummary
+          resultLabel={resultLabel}
+          showResultCount={showResultCountLabel}
+          isKo={isKo}
+          selectedCount={selectedCount}
+          selectionVariant={selectionVariant}
+          onSelectedSummaryClick={onSelectedSummaryClick}
+          cartCount={cartCount}
+          compareCount={compareCount}
+        />
       ) : null}
 
       {/* 필터 바텀시트 — unifiedToolbar 일 때는 전 브레이크포인트에서 사용 */}
@@ -1091,23 +1040,11 @@ export function MediaManualBrowseFilters({
             className="absolute inset-0 bg-black/50"
           />
           <div className="absolute inset-x-0 bottom-0 flex max-h-[88vh] flex-col rounded-t-3xl border-t border-gray-200 bg-white dark:border-white/10 dark:bg-[#0a0a0a]">
-            <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-white/10">
-              <p className="text-base font-bold text-gray-900 dark:text-white">
-                {isKo ? "필터" : "Filters"}
-                {activeFilterCount > 0 ? (
-                  <span className="ml-1.5 text-sm font-semibold text-violet-500">
-                    {activeFilterCount}
-                  </span>
-                ) : null}
-              </p>
-              <button
-                type="button"
-                onClick={() => setSheetOpen(false)}
-                aria-label={isKo ? "닫기" : "Close"}
-              >
-                <X className="h-5 w-5 text-gray-500 dark:text-white/50" />
-              </button>
-            </div>
+            <DiscoveryFilterSheetHeader
+              isKo={isKo}
+              activeFilterCount={activeFilterCount}
+              onClose={() => setSheetOpen(false)}
+            />
 
             <div className="min-h-0 flex-1 space-y-4 overflow-y-auto px-4 py-4">
               {renderFilterAxes(true)}

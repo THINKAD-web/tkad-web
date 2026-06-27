@@ -117,6 +117,33 @@
   --shadow-md: 0 4px 16px rgba(13, 27, 46, 0.08);
   --shadow-lg: 0 12px 32px rgba(13, 27, 46, 0.12);
   --shadow-xl: 0 24px 56px rgba(13, 27, 46, 0.16);
+
+  /*
+   * PR A — 역할 기반 타이포 스케일 (발견하기·기획하기 공통)
+   * 유틸: text-tkad-display | text-tkad-title | text-tkad-price | text-tkad-body |
+   *       text-tkad-meta | text-tkad-label | text-tkad-note
+   * 복합(색 포함): .tkad-type-* — 아래 @layer components
+   */
+  --text-tkad-display: 1.5rem;
+  --text-tkad-display--line-height: 1.25;
+  --text-tkad-title: 0.875rem;
+  --text-tkad-title--line-height: 1.375;
+  --text-tkad-price: 1rem;
+  --text-tkad-price--line-height: 1.25;
+  --text-tkad-body: 0.875rem;
+  --text-tkad-body--line-height: 1.5;
+  --text-tkad-meta: 0.75rem;
+  --text-tkad-meta--line-height: 1.375;
+  --text-tkad-label: 0.6875rem;
+  --text-tkad-label--line-height: 1.25;
+  --text-tkad-note: 0.625rem;
+  --text-tkad-note--line-height: 1.35;
+
+  /* PR A — 의미 기반 텍스트 색 (shadcn foreground 체계 별칭) */
+  --color-tkad-primary: var(--tkad-fg-primary);
+  --color-tkad-secondary: var(--tkad-fg-secondary);
+  --color-tkad-muted: var(--tkad-fg-muted);
+  --color-tkad-accent: var(--tkad-fg-accent);
 }
 
 :root {
@@ -133,9 +160,19 @@
   --bg-primary: #ffffff;
   --bg-secondary: #f9fafb;
   --bg-tertiary: #f3f4f6;
-  --text-primary: #111827;
-  --text-secondary: #6b7280;
+  /* 레거시 별칭 — SSOT는 --foreground / --muted-foreground (아래 --tkad-fg-*) */
+  --text-primary: var(--foreground);
+  --text-secondary: var(--tkad-fg-secondary);
   --border-subtle: #e5e7eb;
+
+  /* PR A — 의미 기반 텍스트 색 (사이트 표준: shadcn foreground 체계) */
+  --tkad-fg-primary: var(--foreground);
+  --tkad-fg-secondary: #4b5563;
+  --tkad-fg-muted: var(--muted-foreground);
+  --tkad-neon-violet: #7c3aed;
+  --tkad-neon-violet-hover: #6d28d9;
+  --tkad-neon-violet-muted: #8b5cf6;
+  --tkad-fg-accent: var(--tkad-neon-violet);
 
   --background: #f4f3f0;
   --foreground: #08080a;
@@ -193,6 +230,7 @@
   --ring: #7c3aed;
   --cta: #7c3aed;
   --cta-hover: #6d28d9;
+  --tkad-fg-accent: var(--accent);
 }
 .dark .tkad-landing-neo {
   --accent: #7c3aed;
@@ -461,9 +499,17 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --bg-primary: #020202;
   --bg-secondary: #0f0f0f;
   --bg-tertiary: #1a1a1a;
-  --text-primary: #ffffff;
-  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-primary: var(--foreground);
+  --text-secondary: var(--tkad-fg-secondary);
   --border-subtle: rgba(255, 255, 255, 0.1);
+
+  --tkad-fg-primary: var(--foreground);
+  --tkad-fg-secondary: rgb(255 255 255 / 0.65);
+  --tkad-fg-muted: var(--muted-foreground);
+  --tkad-neon-violet: #8b5cf6;
+  --tkad-neon-violet-hover: #a78bfa;
+  --tkad-neon-violet-muted: #c4b5fd;
+  --tkad-fg-accent: var(--tkad-neon-violet);
 
   /* OLED black base */
   --background: #070707;
@@ -1006,6 +1052,89 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
   .tkad-home-accent-text {
     background-image: none;
     color: var(--home-ink, #0b1f4a);
+  }
+}
+
+/* ── PR A — 역할 기반 타이포 유틸 (발견하기·기획하기 공통) ──
+ * STEP 3~4에서 text-gray-* / text-[Npx] 를 이 클래스로 교체.
+ * Tailwind 단독: text-tkad-title 등 (@theme --text-tkad-*)
+ */
+@layer components {
+  .tkad-type-display {
+    font-size: var(--text-tkad-display);
+    line-height: var(--text-tkad-display--line-height);
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--tkad-fg-primary);
+  }
+  @media (min-width: 640px) {
+    .tkad-type-display {
+      font-size: 1.875rem;
+      line-height: 1.2;
+    }
+  }
+
+  .tkad-type-title {
+    font-size: var(--text-tkad-title);
+    line-height: var(--text-tkad-title--line-height);
+    font-weight: 600;
+    color: var(--tkad-fg-primary);
+  }
+
+  .tkad-type-price {
+    font-size: var(--text-tkad-price);
+    line-height: var(--text-tkad-price--line-height);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--tkad-fg-primary);
+  }
+  @media (min-width: 640px) {
+    .tkad-type-price {
+      font-size: 1.125rem;
+    }
+  }
+
+  /* 가격 — 네온 그라데이션 (카드·피드·지도 통일 표현) */
+  .tkad-type-price-accent {
+    font-size: var(--text-tkad-price);
+    line-height: var(--text-tkad-price--line-height);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  @media (min-width: 640px) {
+    .tkad-type-price-accent {
+      font-size: 1.125rem;
+    }
+  }
+
+  .tkad-type-body {
+    font-size: var(--text-tkad-body);
+    line-height: var(--text-tkad-body--line-height);
+    font-weight: 400;
+    color: var(--tkad-fg-secondary);
+  }
+
+  .tkad-type-meta {
+    font-size: var(--text-tkad-meta);
+    line-height: var(--text-tkad-meta--line-height);
+    font-weight: 400;
+    color: var(--tkad-fg-muted);
+  }
+
+  .tkad-type-label {
+    font-size: var(--text-tkad-label);
+    line-height: var(--text-tkad-label--line-height);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--tkad-fg-muted);
+  }
+
+  .tkad-type-note {
+    font-size: var(--text-tkad-note);
+    line-height: var(--text-tkad-note--line-height);
+    font-weight: 400;
+    color: var(--tkad-fg-muted);
   }
 }
 
