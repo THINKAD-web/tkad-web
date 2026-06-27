@@ -33,7 +33,7 @@ import {
 import {
   computeNetworkDailyFootfall,
   NETWORK_DAILY_FOOTFALL_CAP,
-} from "@/lib/media-network-public";
+} from "@/lib/media-network-footfall";
 
 export type SerializedNetwork = {
   id: string;
