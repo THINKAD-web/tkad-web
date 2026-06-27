@@ -3,6 +3,11 @@ import type { Config } from "tailwindcss";
 /**
  * THINKAD 2026 rebrand — Deep Ink #0D1B2E · Rich Amber #C8913C.
  * Runtime utilities: `app/globals.css` (`@theme inline`).
+ *
+ * PR A typography & text-color roles: `app/globals.css`
+ *   - @theme: --text-tkad-* , --color-tkad-*
+ *   - :root: --tkad-fg-* (SSOT: shadcn --foreground / --muted-foreground)
+ *   - @layer: .tkad-type-* composite utilities
  */
 export const brandColors = {
   primary: "#0D1B2E",

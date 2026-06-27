@@ -4,11 +4,12 @@ import dynamic from "next/dynamic";
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { MediaCard } from "@/components/media/media-card";
+import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import {
-  MediaManualBrowseFilters,
-  type MediaManualBrowseViewMode,
-} from "@/components/media/media-manual-browse-filters";
+  DiscoveryFilterBar,
+  DiscoveryEmptyState,
+  type DiscoveryFilterBarViewMode,
+} from "@/components/discovery/filter-bar";
 import CompareBar from "@/components/compare-bar";
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
@@ -49,7 +50,7 @@ const MediaBrowseMap = dynamic(() => import("@/components/media-browse-map"), {
   ssr: false,
 });
 
-type ViewMode = MediaManualBrowseViewMode;
+type ViewMode = DiscoveryFilterBarViewMode;
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const PAGE_SIZE = 30;
@@ -598,9 +599,10 @@ function MediaSearchPageInner({
         .filter(Boolean)
         .join(" · ");
       return (
-        <MediaCard
+        <DiscoveryMediaCard
           key={item.id}
-          mode="compact"
+          variant="compact"
+          compactLayout="row"
           item={item}
           href={href}
           metaLine={metaLine}
@@ -619,8 +621,9 @@ function MediaSearchPageInner({
     if (viewMode === "card") {
       return (
         <div key={item.id} className="h-full min-h-0">
-          <MediaCard
-            mode="card"
+          <DiscoveryMediaCard
+            variant="compact"
+            compactLayout="grid"
             item={item}
             href={href}
             priceLabel={priceLabel}
@@ -648,9 +651,9 @@ function MediaSearchPageInner({
         : null;
 
     return (
-      <MediaCard
+      <DiscoveryMediaCard
         key={item.id}
-        mode="feed"
+        variant="feed"
         item={item}
         href={href}
         highlights={highlights}
@@ -679,7 +682,7 @@ function MediaSearchPageInner({
   const appShell = appShellEnabled && !embedded && !plannerMode;
 
   const filtersBar = (
-    <MediaManualBrowseFilters
+    <DiscoveryFilterBar
       isKo={isKo}
       variant={catalogVariant}
       networkType={networkType}
@@ -727,7 +730,7 @@ function MediaSearchPageInner({
       type="button"
       onClick={handleLoadMore}
       disabled={loadingMore}
-      className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
+      className="tkad-type-body w-full rounded-2xl border border-gray-200 py-3 text-tkad-muted transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 hover:dark:bg-white/5"
     >
       {loadingMore
         ? isKo
@@ -750,18 +753,19 @@ function MediaSearchPageInner({
               style={{ height: mapHeightPx, minHeight: 360 }}
             />
           ) : mapDisplayItems.length === 0 ? (
-            <div className="flex min-h-[24rem] flex-col items-center justify-center gap-4 rounded-2xl border border-gray-100 bg-white px-6 py-16 text-center dark:border-white/10 dark:bg-white/5">
-              <p className="text-lg font-semibold text-gray-900 dark:text-white">
-                {isKo
+            <DiscoveryEmptyState
+              variant="panel"
+              title={
+                isKo
                   ? "지도에 표시할 매체가 없습니다"
-                  : "No media with map coordinates"}
-              </p>
-              <p className="text-sm text-gray-500 dark:text-white/60">
-                {isKo
+                  : "No media with map coordinates"
+              }
+              description={
+                isKo
                   ? "필터를 조정하거나 목록 보기로 전환해 보세요"
-                  : "Adjust filters or switch to list view"}
-              </p>
-            </div>
+                  : "Adjust filters or switch to list view"
+              }
+            />
           ) : (
             <div className="relative">
               <MediaBrowseMap
@@ -867,32 +871,29 @@ function MediaSearchPageInner({
             </div>
           ))
         ) : media.length === 0 ? (
-          <div className="col-span-full py-16 text-center">
-            <p className="mb-3 text-4xl">🔍</p>
-            <p className="mb-1 font-medium text-gray-500 dark:text-white/50">
-              조건에 맞는 매체가 없어요
-            </p>
-            <p className="mb-4 text-sm text-gray-400 dark:text-white/30">
-              필터를 조정해보세요
-            </p>
-            <button
-              type="button"
-              onClick={() => {
-                setQuery("");
-                setMainCategory("");
-                setSubCategory("");
-                setTarget("");
-                setRegionMain("");
-                setRegionSub("");
-                setPriceMin("");
-                setPriceMax("");
-                setFeatures("");
-              }}
-              className="tkad-home-accent-text text-sm underline"
-            >
-              필터 초기화
-            </button>
-          </div>
+          <DiscoveryEmptyState
+            title={isKo ? "조건에 맞는 매체가 없어요" : "No media match your filters"}
+            description={isKo ? "필터를 조정해보세요" : "Try adjusting your filters"}
+            action={
+              <button
+                type="button"
+                onClick={() => {
+                  setQuery("");
+                  setMainCategory("");
+                  setSubCategory("");
+                  setTarget("");
+                  setRegionMain("");
+                  setRegionSub("");
+                  setPriceMin("");
+                  setPriceMax("");
+                  setFeatures("");
+                }}
+                className="tkad-type-body tkad-home-accent-text underline"
+              >
+                {isKo ? "필터 초기화" : "Reset filters"}
+              </button>
+            }
+          />
         ) : (
           media.map((item) => renderMediaCard(item))
         )}

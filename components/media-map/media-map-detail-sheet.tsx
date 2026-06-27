@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
 import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
 import { buildMapItemMetrics } from "@/lib/media-map/map-item-metrics";
-import { MediaCard } from "@/components/media/media-card";
+import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { mapMapItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
@@ -37,8 +37,8 @@ function MapDetailMetric({
 }) {
   return (
     <div className="min-w-0 rounded-md border border-gray-100 bg-gray-50/80 px-2 py-1.5 text-center dark:border-white/8 dark:bg-white/[0.04]">
-      <dt className="truncate text-[10px] text-gray-500 dark:text-white/45">{label}</dt>
-      <dd className="mt-0.5 truncate text-xs font-bold tabular-nums text-gray-900 dark:text-white">
+      <dt className="tkad-type-label truncate text-tkad-muted">{label}</dt>
+      <dd className="tkad-type-meta mt-0.5 truncate font-bold tabular-nums text-foreground">
         {value}
       </dd>
     </div>
@@ -297,14 +297,14 @@ function MediaMapDetailBody({
             )}
           </div>
           <div className="min-w-0 flex-1">
-            <p className="line-clamp-2 text-[13px] font-semibold leading-snug text-gray-900 dark:text-white">
+            <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
               {item.name}
             </p>
-            <p className="mt-0.5 truncate text-[11px] text-gray-500 dark:text-white/50">
+            <p className="tkad-type-meta mt-0.5 truncate text-tkad-secondary">
               {regionLine}
             </p>
             <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
-              <p className="text-xs font-bold tabular-nums text-gray-900 dark:text-white">
+              <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
                 {priceLabel}
               </p>
               <MediaPriceExclNote isKo={isKo} className="text-[10px]" />
@@ -345,13 +345,14 @@ function MediaMapDetailBody({
     return (
       <div className="px-4 py-3">
         <div className="mb-2 flex items-center justify-between gap-2">
-          <p className="text-xs font-semibold uppercase tracking-wider text-gray-500 dark:text-white/50">
+          <p className="tkad-type-label text-tkad-muted">
             {isKo ? "선택한 매체" : "Selected"}
           </p>
           <CloseButton onClose={onClose} isKo={isKo} className="h-8 w-8" />
         </div>
-        <MediaCard
-          mode="compact"
+        <DiscoveryMediaCard
+          variant="compact"
+          compactLayout="row"
           item={catalogItem}
           href={href}
           metaLine={metaLine}
@@ -379,7 +380,7 @@ function MediaMapDetailBody({
     return (
       <>
         <div className="flex items-start gap-2 border-b border-gray-200 px-3 py-2.5 dark:border-white/10">
-          <p className="min-w-0 flex-1 line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-white">
+          <p className="tkad-type-title min-w-0 flex-1 line-clamp-2 leading-snug text-foreground">
             {item.name}
           </p>
           <CloseButton onClose={onClose} isKo={isKo} className="h-8 w-8 shrink-0" />
@@ -420,14 +421,14 @@ function MediaMapDetailBody({
                   ) : null}
                 </div>
               )}
-              <p className="truncate text-xs text-gray-500 dark:text-white/50">
+              <p className="tkad-type-meta truncate text-tkad-secondary">
                 {[catalogItem.type, regionLine].filter(Boolean).join(" · ")}
               </p>
               <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
-                <p className="text-sm font-bold tabular-nums text-gray-900 dark:text-white">
+                <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
                   {priceLabel}
                 </p>
-                <MediaPriceExclNote isKo={isKo} className="text-[10px]" />
+                <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
               </div>
             </div>
           </Link>
@@ -451,7 +452,7 @@ function MediaMapDetailBody({
               availabilityTone(availability.status),
             )}
           >
-            <span className="font-medium text-gray-500 dark:text-white/45">
+            <span className="tkad-type-meta font-medium text-tkad-muted">
               {isKo ? "가용" : "Avail."}
             </span>{" "}
             {availability.label}
@@ -472,7 +473,7 @@ function MediaMapDetailBody({
               href={href}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
+              className="tkad-type-meta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white font-semibold text-foreground transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:hover:bg-white/12"
             >
               {isKo ? "상세 보기" : "Details"}
               <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
@@ -497,8 +498,9 @@ function MediaMapDetailBody({
         isKo={isKo}
         className="absolute right-2 top-2 z-10 h-7 w-7"
       />
-      <MediaCard
-        mode="compact"
+      <DiscoveryMediaCard
+        variant="compact"
+        compactLayout="row"
         item={catalogItem}
         href={href}
         metaLine={metaLine}

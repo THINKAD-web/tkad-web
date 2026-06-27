@@ -2,7 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { MediaMapListCard } from "@/components/media-map/media-map-list-card";
+import { DiscoveryMediaCard } from "@/components/discovery/media-card";
+import {
+  DiscoveryFilterBar,
+  DiscoveryEmptyState,
+  formatMapViewCountLabel,
+  type DiscoveryFilterBarViewMode,
+} from "@/components/discovery/filter-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -47,10 +53,6 @@ import {
   mapBoundsIntersect,
 } from "@/lib/media-map/map-item-bounds";
 import {
-  MediaManualBrowseFilters,
-  type MediaManualBrowseViewMode,
-} from "@/components/media/media-manual-browse-filters";
-import {
   MediaMapListSheet,
   type MediaMapSheetSnap,
 } from "@/components/media-map/media-map-list-sheet";
@@ -60,7 +62,7 @@ function MapViewLoadingPlaceholder() {
     <div className="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-[#0a0a12]">
       <div className="flex flex-col items-center gap-3">
         <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-violet-500 dark:border-white/20 dark:border-t-violet-400" />
-        <p className="text-sm text-gray-500 dark:text-white/50">지도 불러오는 중…</p>
+        <p className="tkad-type-body text-tkad-muted">지도 불러오는 중…</p>
       </div>
     </div>
   );
@@ -690,7 +692,7 @@ export default function MediaMapPageClient() {
   }, []);
 
   const handleBrowseViewModeChange = useCallback(
-    (mode: MediaManualBrowseViewMode) => {
+    (mode: DiscoveryFilterBarViewMode) => {
       if (mode === "map") return;
       const qs = mapBrowseFiltersToMediaBrowseQueryString(browseFilters);
       router.push(qs ? `/media?${qs}` : "/media");
@@ -774,7 +776,7 @@ export default function MediaMapPageClient() {
 
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
   const controlBar = (
-    <MediaManualBrowseFilters
+    <DiscoveryFilterBar
       isKo={isKo}
       unifiedToolbar
       mapPageViewModes
@@ -823,12 +825,14 @@ export default function MediaMapPageClient() {
         />
       ) : (
         items.map((it) => (
-          <MediaMapListCard
+          <DiscoveryMediaCard
             key={it.id}
             ref={(el) => {
               if (el) listItemRefs.current.set(it.id, el);
               else listItemRefs.current.delete(it.id);
             }}
+            variant="compact"
+            compactLayout="map-tile"
             item={it}
             isKo={isKo}
             locale={locale}
@@ -851,39 +855,44 @@ export default function MediaMapPageClient() {
       {(searchedBounds || isMapTextSearchActive(browseFilters)) &&
       items.length === 0 &&
       !loading ? (
-        <li className="col-span-2 p-8 text-center">
-          <div className="text-3xl mb-2">🔍</div>
-          <p className="text-sm font-medium text-foreground mb-1">
-            검색 결과가 없습니다
-          </p>
-          <p className="text-xs text-muted-foreground">
-            필터를 조정하거나 지도를 이동해보세요.
-          </p>
+        <li className="col-span-2 list-none">
+          <DiscoveryEmptyState
+            title={isKo ? "검색 결과가 없습니다" : "No results"}
+            description={
+              isKo
+                ? "필터를 조정하거나 지도를 이동해보세요."
+                : "Adjust filters or pan the map."
+            }
+          />
         </li>
       ) : null}
     </ul>
   );
 
+  const mapResultLabel = formatMapViewCountLabel(
+    items.length,
+    matchTotal,
+    isKo,
+  );
+
   // 모바일 시트 상단 고정 — [목록]/[지도] 토글 + 결과 수
   const mobileSheetHeader = (
     <div className="flex items-center justify-between gap-2">
-      <p className="min-w-0 truncate text-xs font-medium text-gray-500 dark:text-white/50">
-        {isKo
-          ? `매체 ${items.length}${matchTotal != null && matchTotal > items.length ? ` / ${matchTotal}` : ""}개`
-          : `${items.length}${matchTotal != null && matchTotal > items.length ? ` / ${matchTotal}` : ""} media`}
+      <p className="tkad-type-meta min-w-0 truncate font-medium text-tkad-muted">
+        {mapResultLabel}
       </p>
       <div className="flex shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
         <button
           type="button"
           onClick={() => handleBrowseViewModeChange("feed")}
-          className="px-3 py-1 text-xs font-medium text-gray-600 dark:text-white/70"
+          className="tkad-type-meta px-3 py-1 font-medium text-tkad-secondary"
         >
           {isKo ? "목록" : "List"}
         </button>
         <button
           type="button"
           aria-current="page"
-          className="bg-violet-500 px-3 py-1 text-xs font-medium text-white"
+          className="tkad-type-meta bg-violet-500 px-3 py-1 font-medium text-white"
         >
           {isKo ? "지도" : "Map"}
         </button>
