@@ -50,6 +50,10 @@ import {
   MediaManualBrowseFilters,
   type MediaManualBrowseViewMode,
 } from "@/components/media/media-manual-browse-filters";
+import {
+  MediaMapListSheet,
+  type MediaMapSheetSnap,
+} from "@/components/media-map/media-map-list-sheet";
 
 function MapViewLoadingPlaceholder() {
   return (
@@ -180,6 +184,12 @@ export default function MediaMapPageClient() {
   const [surveyCheckedIds, setSurveyCheckedIds] = useState<Set<string>>(
     () => new Set(),
   );
+  /** 모바일(<md) 여부 — 리스트를 사이드 패널/바텀시트 중 한 곳에만 마운트(단일 인스턴스) */
+  const [isMobile, setIsMobile] = useState(false);
+  /** 모바일 리스트 바텀시트 스냅 단계 */
+  const [sheetSnap, setSheetSnap] = useState<MediaMapSheetSnap>("half");
+  /** 레이아웃 전환/스냅 변경 후 map.invalidateSize() 트리거용 nonce */
+  const [invalidateNonce, setInvalidateNonce] = useState(0);
   const pvNonceRef = useRef(0);
   const [programmaticView, setProgrammaticView] =
     useState<DarkMapProgrammaticView | null>(() => {
@@ -322,6 +332,20 @@ export default function MediaMapPageClient() {
       setCompareEntriesState(getCompareCartEntries());
     });
   }, []);
+
+  // 모바일 여부 추적 (md 브레이크포인트)
+  useEffect(() => {
+    const mq = window.matchMedia("(max-width: 767px)");
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
+
+  // 레이아웃 전환(데스크톱↔모바일)·바텀시트 스냅 변경 후 지도 타일 재계산
+  useEffect(() => {
+    setInvalidateNonce((n) => n + 1);
+  }, [isMobile, sheetSnap]);
 
   // URL 상태 동기화 — view + filter 변경 시 history.replaceState
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -744,13 +768,147 @@ export default function MediaMapPageClient() {
     [],
   );
 
+  const handleSheetSnapChange = useCallback((next: MediaMapSheetSnap) => {
+    setSheetSnap(next);
+  }, []);
+
+  // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
+  const controlBar = (
+    <MediaManualBrowseFilters
+      isKo={isKo}
+      unifiedToolbar
+      mapPageViewModes
+      query={browseFilters.q}
+      onQueryChange={(q) => patchBrowseFilters({ q })}
+      mainCategory={browseFilters.mainCategory}
+      onMainCategoryChange={(mainCategory) =>
+        patchBrowseFilters({ mainCategory, subCategory: "" })
+      }
+      subCategory={browseFilters.subCategory}
+      onSubCategoryChange={(subCategory) => patchBrowseFilters({ subCategory })}
+      target={browseFilters.target}
+      onTargetChange={(target) => patchBrowseFilters({ target })}
+      regionMain={browseFilters.regionMain}
+      onRegionMainChange={(regionMain) =>
+        patchBrowseFilters({ regionMain, regionSub: "" })
+      }
+      regionSub={browseFilters.regionSub}
+      onRegionSubChange={(regionSub) => patchBrowseFilters({ regionSub })}
+      priceMin={browseFilters.priceMin}
+      onPriceMinChange={(priceMin) => patchBrowseFilters({ priceMin })}
+      priceMax={browseFilters.priceMax}
+      onPriceMaxChange={(priceMax) => patchBrowseFilters({ priceMax })}
+      features={browseFilters.features}
+      onFeaturesChange={(features) => patchBrowseFilters({ features })}
+      sort={browseFilters.sort}
+      onSortChange={(sort) =>
+        patchBrowseFilters({ sort: sort as MapBrowseFilters["sort"] })
+      }
+      viewMode="map"
+      onViewModeChange={handleBrowseViewModeChange}
+      resultCount={items.length}
+      totalCount={matchTotal}
+      loading={loading || (!searchedBounds && !isMapTextSearchActive(browseFilters))}
+      compareCount={compareEntries.length}
+      cartCount={cartIds.length}
+    />
+  );
+
+  // 리스트 — 데스크톱 사이드/모바일 시트 중 한 곳에만 마운트(단일 인스턴스, ref 싱크 보존)
+  const listEl = (
+    <ul className="relative z-0 grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
+      {(!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading ? (
+        <MapListSkeleton
+          count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6}
+        />
+      ) : (
+        items.map((it) => (
+          <MediaMapListCard
+            key={it.id}
+            ref={(el) => {
+              if (el) listItemRefs.current.set(it.id, el);
+              else listItemRefs.current.delete(it.id);
+            }}
+            item={it}
+            isKo={isKo}
+            locale={locale}
+            selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
+            hovered={resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id}
+            inCompare={isInCompare(it.id)}
+            inCart={inCart(it.id)}
+            onSelect={handleSelect}
+            onToggleCompare={() => toggleCompare(it)}
+            onToggleCart={() => toggleCart(it.id)}
+            onMouseEnter={() => setHoveredId(it.id)}
+            onMouseLeave={() =>
+              setHoveredId((cur) => (cur === it.id ? null : cur))
+            }
+            onFocus={() => setHoveredId(it.id)}
+            onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
+          />
+        ))
+      )}
+      {(searchedBounds || isMapTextSearchActive(browseFilters)) &&
+      items.length === 0 &&
+      !loading ? (
+        <li className="col-span-2 p-8 text-center">
+          <div className="text-3xl mb-2">🔍</div>
+          <p className="text-sm font-medium text-foreground mb-1">
+            검색 결과가 없습니다
+          </p>
+          <p className="text-xs text-muted-foreground">
+            필터를 조정하거나 지도를 이동해보세요.
+          </p>
+        </li>
+      ) : null}
+    </ul>
+  );
+
+  // 모바일 시트 상단 고정 — [목록]/[지도] 토글 + 결과 수
+  const mobileSheetHeader = (
+    <div className="flex items-center justify-between gap-2">
+      <p className="min-w-0 truncate text-xs font-medium text-gray-500 dark:text-white/50">
+        {isKo
+          ? `매체 ${items.length}${matchTotal != null && matchTotal > items.length ? ` / ${matchTotal}` : ""}개`
+          : `${items.length}${matchTotal != null && matchTotal > items.length ? ` / ${matchTotal}` : ""} media`}
+      </p>
+      <div className="flex shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
+        <button
+          type="button"
+          onClick={() => handleBrowseViewModeChange("feed")}
+          className="px-3 py-1 text-xs font-medium text-gray-600 dark:text-white/70"
+        >
+          {isKo ? "목록" : "List"}
+        </button>
+        <button
+          type="button"
+          aria-current="page"
+          className="bg-violet-500 px-3 py-1 text-xs font-medium text-white"
+        >
+          {isKo ? "지도" : "Map"}
+        </button>
+      </div>
+    </div>
+  );
+
   return (
-    <>
-    {/* md: viewport − site header (h-14) − discovery SubTabs sticky bar */}
-    <div className="flex flex-col md:h-[calc(100dvh-6.75rem)] md:flex-row md:min-h-0">
-        {/* 지도 — 모바일: 상단 / 데스크톱: 우측 */}
-        <div className="relative order-1 h-[min(50dvh,400px)] min-h-[280px] w-full shrink-0 md:order-2 md:h-auto md:min-h-0 md:flex-1">
-          <div className="absolute inset-0 min-h-[280px]">
+    <div className="tkad-media-app-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+      {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
+      <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-2 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
+        {controlBar}
+      </div>
+
+      {/* 본문(flex-1, min-h-0): 데스크톱 = 리스트 + 지도 / 모바일 = 지도 풀 + 바텀시트 */}
+      <div className="relative flex min-h-0 flex-1">
+        {!isMobile ? (
+          <aside className="flex w-[440px] shrink-0 flex-col overflow-y-auto border-r border-gray-200/80 bg-gray-50 lg:w-[520px] dark:border-white/10 dark:bg-[#020202]">
+            {listEl}
+          </aside>
+        ) : null}
+
+        {/* 지도 (flex-1) — 인스턴스 1개, 나머지 영역 전부 차지 */}
+        <div className="relative min-h-0 flex-1">
+          <div className="absolute inset-0">
             <DarkMapView
               markers={markers}
               selectedId={selectedId}
@@ -761,6 +919,7 @@ export default function MediaMapPageClient() {
               onUserViewportAdjusted={handleUserViewportAdjusted}
               programmaticView={programmaticView}
               userLocation={userLocation}
+              invalidateNonce={invalidateNonce}
             />
           </div>
 
@@ -867,97 +1026,17 @@ export default function MediaMapPageClient() {
           </div>
         </div>
 
-        {/* 매체 리스트 — 모바일: 지도 아래 */}
-        <aside className="order-3 w-full border-t border-gray-200/80 bg-gray-50 md:order-1 md:w-[560px] lg:w-[640px] md:flex-shrink-0 md:border-r md:overflow-y-auto dark:border-white/10 dark:bg-[#020202]">
-          <div className="sticky top-0 z-20 isolate border-b border-gray-200/80 bg-gray-50 dark:border-white/10 dark:bg-[#020202]">
-            <div className="min-w-0 overflow-x-clip px-3 pt-2 pb-1 md:px-4 md:pt-2 md:pb-1">
-              <MediaManualBrowseFilters
-                isKo={isKo}
-                mapCompactFilters
-                mapPageViewModes
-                query={browseFilters.q}
-                onQueryChange={(q) => patchBrowseFilters({ q })}
-                mainCategory={browseFilters.mainCategory}
-                onMainCategoryChange={(mainCategory) =>
-                  patchBrowseFilters({ mainCategory, subCategory: "" })
-                }
-                subCategory={browseFilters.subCategory}
-                onSubCategoryChange={(subCategory) =>
-                  patchBrowseFilters({ subCategory })
-                }
-                target={browseFilters.target}
-                onTargetChange={(target) => patchBrowseFilters({ target })}
-                regionMain={browseFilters.regionMain}
-                onRegionMainChange={(regionMain) =>
-                  patchBrowseFilters({ regionMain, regionSub: "" })
-                }
-                regionSub={browseFilters.regionSub}
-                onRegionSubChange={(regionSub) => patchBrowseFilters({ regionSub })}
-                priceMin={browseFilters.priceMin}
-                onPriceMinChange={(priceMin) => patchBrowseFilters({ priceMin })}
-                priceMax={browseFilters.priceMax}
-                onPriceMaxChange={(priceMax) => patchBrowseFilters({ priceMax })}
-                features={browseFilters.features}
-                onFeaturesChange={(features) => patchBrowseFilters({ features })}
-                sort={browseFilters.sort}
-                onSortChange={(sort) =>
-                  patchBrowseFilters({
-                    sort: sort as MapBrowseFilters["sort"],
-                  })
-                }
-                viewMode="map"
-                onViewModeChange={handleBrowseViewModeChange}
-                resultCount={items.length}
-                totalCount={matchTotal}
-                loading={loading || (!searchedBounds && !isMapTextSearchActive(browseFilters))}
-                compareCount={compareEntries.length}
-                cartCount={cartIds.length}
-              />
-            </div>
-          </div>
-
-        <ul className="relative z-0 grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-          {((!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading) ? (
-            <MapListSkeleton count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6} />
-          ) : (
-            items.map((it) => (
-              <MediaMapListCard
-                key={it.id}
-                ref={(el) => {
-                  if (el) listItemRefs.current.set(it.id, el);
-                  else listItemRefs.current.delete(it.id);
-                }}
-                item={it}
-                isKo={isKo}
-                locale={locale}
-                selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
-                hovered={resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id}
-                inCompare={isInCompare(it.id)}
-                inCart={inCart(it.id)}
-                onSelect={handleSelect}
-                onToggleCompare={() => toggleCompare(it)}
-                onToggleCart={() => toggleCart(it.id)}
-                onMouseEnter={() => setHoveredId(it.id)}
-                onMouseLeave={() =>
-                  setHoveredId((cur) => (cur === it.id ? null : cur))
-                }
-                onFocus={() => setHoveredId(it.id)}
-                onBlur={() =>
-                  setHoveredId((cur) => (cur === it.id ? null : cur))
-                }
-              />
-            ))
-          )}
-          {((searchedBounds || isMapTextSearchActive(browseFilters)) && items.length === 0 && !loading) && (
-            <li className="col-span-2 p-8 text-center">
-              <div className="text-3xl mb-2">🔍</div>
-              <p className="text-sm font-medium text-foreground mb-1">검색 결과가 없습니다</p>
-              <p className="text-xs text-muted-foreground">필터를 조정하거나 지도를 이동해보세요.</p>
-            </li>
-          )}
-          </ul>
-        </aside>
-
+        {/* 모바일 리스트 바텀시트 (3단 스냅: peek/half/full) */}
+        {isMobile ? (
+          <MediaMapListSheet
+            snap={sheetSnap}
+            onSnapChange={handleSheetSnapChange}
+            isKo={isKo}
+            header={mobileSheetHeader}
+          >
+            {listEl}
+          </MediaMapListSheet>
+        ) : null}
       </div>
 
       {selected ? (
@@ -984,6 +1063,6 @@ export default function MediaMapPageClient() {
           setCompareCartEntries([]);
         }}
       />
-    </>
+    </div>
   );
 }

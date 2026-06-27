@@ -156,6 +156,8 @@ interface Props {
   /** `/media/network` — 네트워크 매체 전용 카탈로그 */
   catalogVariant?: "media" | "network";
   initialNetworkType?: string;
+  /** `/media` 전용 — 고정 앱 셸(히어로/푸터 제거, 내부 스크롤). 이 라우트에서만 true */
+  appShell?: boolean;
   /** 플래너 Step 4 임베드 — 동일 카드 + 플랜 담기 */
   plannerMode?: boolean;
   embedded?: boolean;
@@ -173,6 +175,7 @@ function MediaSearchPageInner({
   initialRegion,
   catalogVariant = "media",
   initialNetworkType,
+  appShell: appShellEnabled = false,
   plannerMode = false,
   embedded = false,
   plannerSelectedIds = [],
@@ -672,65 +675,76 @@ function MediaSearchPageInner({
   }, []);
 
   const edgePad = embedded || plannerMode ? "px-0" : "px-4";
+  /** `/media` 라우트에서 명시적으로 opt-in 했을 때만 고정 앱 셸로 렌더 (임베드/플래너 제외) */
+  const appShell = appShellEnabled && !embedded && !plannerMode;
 
-  return (
-    <>
-    <div
-      className={cn(
-        "min-w-0 w-full max-w-full",
-        !embedded && "bg-gray-50 dark:bg-[#020202]",
-      )}
+  const filtersBar = (
+    <MediaManualBrowseFilters
+      isKo={isKo}
+      variant={catalogVariant}
+      networkType={networkType}
+      onNetworkTypeChange={setNetworkType}
+      query={query}
+      onQueryChange={setQuery}
+      mainCategory={mainCategory}
+      onMainCategoryChange={setMainCategory}
+      subCategory={subCategory}
+      onSubCategoryChange={setSubCategory}
+      target={target}
+      onTargetChange={setTarget}
+      regionMain={regionMain}
+      onRegionMainChange={setRegionMain}
+      regionSub={regionSub}
+      onRegionSubChange={setRegionSub}
+      priceMin={priceMin}
+      onPriceMinChange={setPriceMin}
+      priceMax={priceMax}
+      onPriceMaxChange={setPriceMax}
+      features={features}
+      onFeaturesChange={setFeatures}
+      sort={sort}
+      onSortChange={setSort}
+      viewMode={viewMode}
+      onViewModeChange={handleViewModeChange}
+      resultCount={media.length}
+      totalCount={total}
+      loading={loading}
+      unifiedToolbar={appShell}
+      compareCount={plannerMode ? 0 : compareEntries.length}
+      cartCount={plannerMode ? 0 : cartIds.length}
+      selectedCount={plannerMode ? plannerSelectedIds.length : 0}
+      selectionVariant={plannerMode ? "plan" : "default"}
+      onSelectedSummaryClick={
+        plannerMode && plannerSelectedIds.length > 0
+          ? scrollToPlannerSelection
+          : undefined
+      }
+    />
+  );
+
+  const loadMoreButton = (
+    <button
+      type="button"
+      onClick={handleLoadMore}
+      disabled={loadingMore}
+      className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
     >
-      <div className={cn("min-w-0 overflow-x-clip pt-4", edgePad)}>
-        <MediaManualBrowseFilters
-          isKo={isKo}
-          variant={catalogVariant}
-          networkType={networkType}
-          onNetworkTypeChange={setNetworkType}
-          query={query}
-          onQueryChange={setQuery}
-          mainCategory={mainCategory}
-          onMainCategoryChange={setMainCategory}
-          subCategory={subCategory}
-          onSubCategoryChange={setSubCategory}
-          target={target}
-          onTargetChange={setTarget}
-          regionMain={regionMain}
-          onRegionMainChange={setRegionMain}
-          regionSub={regionSub}
-          onRegionSubChange={setRegionSub}
-          priceMin={priceMin}
-          onPriceMinChange={setPriceMin}
-          priceMax={priceMax}
-          onPriceMaxChange={setPriceMax}
-          features={features}
-          onFeaturesChange={setFeatures}
-          sort={sort}
-          onSortChange={setSort}
-          viewMode={viewMode}
-          onViewModeChange={handleViewModeChange}
-          resultCount={media.length}
-          totalCount={total}
-          loading={loading}
-          compareCount={plannerMode ? 0 : compareEntries.length}
-          cartCount={plannerMode ? 0 : cartIds.length}
-          selectedCount={plannerMode ? plannerSelectedIds.length : 0}
-          selectionVariant={plannerMode ? "plan" : "default"}
-          onSelectedSummaryClick={
-            plannerMode && plannerSelectedIds.length > 0
-              ? scrollToPlannerSelection
-              : undefined
-          }
-        />
-      </div>
+      {loadingMore
+        ? isKo
+          ? "불러오는 중…"
+          : "Loading…"
+        : tMedia("loadMoreBrowse")}
+    </button>
+  );
 
-      {/* ── 매체 목록 / 지도 ── */}
-      {viewMode === "map" ? (
-        <div
-          className={cn("relative mt-3 min-w-0 overflow-x-clip", edgePad)}
-          data-screenshot="media-view-map"
-        >
-          {loading ? (
+  /** 본문(매체 목록/지도) — 외부 여백 없이 순수 콘텐츠만. 셸/문서 흐름 양쪽에서 재사용 */
+  const bodyContent =
+    viewMode === "map" ? (
+      <div
+        className="relative min-w-0 overflow-x-clip"
+        data-screenshot="media-view-map"
+      >
+        {loading ? (
             <div
               className="animate-pulse rounded-2xl border border-gray-100 bg-gray-200 dark:border-white/10 dark:bg-white/10"
               style={{ height: mapHeightPx, minHeight: 360 }}
@@ -772,28 +786,14 @@ function MediaSearchPageInner({
             </div>
           )}
           {hasMore && !loading ? (
-            <div className="mt-4">
-              <button
-                type="button"
-                onClick={handleLoadMore}
-                disabled={loadingMore}
-                className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
-              >
-                {loadingMore
-                  ? isKo
-                    ? "불러오는 중…"
-                    : "Loading…"
-                  : tMedia("loadMoreBrowse")}
-              </button>
-            </div>
+            <div className="mt-4">{loadMoreButton}</div>
           ) : null}
         </div>
       ) : (
       <>
       <div
         className={cn(
-          "mt-3 min-w-0 overflow-x-clip",
-          edgePad,
+          "min-w-0 overflow-x-clip",
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             cn(
@@ -899,33 +899,54 @@ function MediaSearchPageInner({
       </div>
 
       {hasMore && !loading ? (
-        <div className={cn("mt-4", edgePad)}>
-          <button
-            type="button"
-            onClick={handleLoadMore}
-            disabled={loadingMore}
-            className="w-full rounded-2xl border border-gray-200 py-3 text-sm text-gray-500 transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 dark:text-white/60 hover:dark:bg-white/5"
-          >
-            {loadingMore
-              ? isKo
-                ? "불러오는 중…"
-                : "Loading…"
-              : tMedia("loadMoreBrowse")}
-          </button>
-        </div>
+        <div className="mt-4">{loadMoreButton}</div>
       ) : null}
       </>
-      )}
-    </div>
+    );
 
-    {!plannerMode ? (
+  const compareBar = !plannerMode ? (
     <CompareBar
       variant="light"
       items={compareItems}
       locale={locale}
       onClear={() => setCompareCartEntries([])}
     />
-    ) : null}
+  ) : null;
+
+  // ── 고정 앱 셸: 상단 sticky 컨트롤 바(flex-none) + 본문 내부 스크롤(flex-1) ──
+  if (appShell) {
+    return (
+      <>
+        <div className="tkad-media-app-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+          {/* 상단(flex-none): 항상 고정되는 단일 컨트롤 바 */}
+          <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-4 pt-3 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95">
+            {filtersBar}
+          </div>
+          {/* 본문(flex-1, min-h-0): 이 영역 안에서만 스크롤 */}
+          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-6">
+            {bodyContent}
+          </div>
+        </div>
+        {compareBar}
+      </>
+    );
+  }
+
+  // ── 문서 흐름(플래너 임베드 등): 기존 레이아웃 유지 ──
+  return (
+    <>
+      <div
+        className={cn(
+          "min-w-0 w-full max-w-full",
+          !embedded && "bg-gray-50 dark:bg-[#020202]",
+        )}
+      >
+        <div className={cn("min-w-0 overflow-x-clip pt-4", edgePad)}>
+          {filtersBar}
+        </div>
+        <div className={cn("mt-3", edgePad)}>{bodyContent}</div>
+      </div>
+      {compareBar}
     </>
   );
 }
