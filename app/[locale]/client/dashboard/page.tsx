@@ -437,6 +437,9 @@ export default function ClientDashboardPage() {
                 </Button>
               </SheetTrigger>
               <SheetContent side="right" className="flex w-full flex-col sm:max-w-md">
+                <SheetTitle className="sr-only">
+                  {isKo ? "1:1 채팅" : "1:1 chat"}
+                </SheetTitle>
                 {chatPanel}
               </SheetContent>
             </Sheet>

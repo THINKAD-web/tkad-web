@@ -45,11 +45,18 @@ function matchesBrowseCategory(
   subCategory: string,
   legacyCategory: string,
 ): boolean {
+  const mainTrim = mainCategory.trim();
+  const subTrim = subCategory.trim();
+  const legacyTrim = legacyCategory.trim();
+  /** URL `mainCategory` / `subCategory` — browse 칩 직접 선택 */
+  const browseParamsRequested = Boolean(mainTrim || subTrim);
+
   const resolved = resolveBrowseCategoryParams({
-    mainCategory,
-    subCategory,
-    category: legacyCategory,
+    mainCategory: mainTrim || undefined,
+    subCategory: subTrim || undefined,
+    category: legacyTrim || undefined,
   });
+
   if (resolved.subCategory) {
     if (m.mediaSubCategory === resolved.subCategory) return true;
     if (m.mediaCategory?.includes(resolved.subCategory)) return true;
@@ -64,7 +71,18 @@ function matchesBrowseCategory(
       return true;
     }
   }
-  return matchesCategoryChip(m, legacyCategory);
+
+  // browse taxonomy로 필터가 걸렸는데 매칭 실패
+  if (resolved.subCategory || resolved.mainCategory) {
+    // browse 칩(main/sub) 직접 요청 → 전량 통과 금지
+    if (browseParamsRequested) return false;
+    // legacy 칩만 요청 → slug·type 텍스트 매칭 폴백
+    if (legacyTrim) return matchesCategoryChip(m, legacyTrim);
+    return false;
+  }
+
+  if (legacyTrim) return matchesCategoryChip(m, legacyTrim);
+  return true;
 }
 
 function matchesCategoryChip(m: MediaItem, category: string): boolean {

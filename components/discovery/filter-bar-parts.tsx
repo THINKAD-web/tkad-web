@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { X } from "lucide-react";
+import { Drawer } from "vaul";
 import { cn } from "@/lib/utils";
 
 /** `/media`·`/media/map` 등 — 결과 수 + 선택/담기/비교 요약 행 */
@@ -99,6 +100,8 @@ export type DiscoveryFilterSheetHeaderProps = {
   activeFilterCount?: number;
   onClose: () => void;
   title?: string;
+  /** vaul `Drawer.Content` 안 — Radix DialogTitle 요구사항 */
+  useDrawerTitle?: boolean;
 };
 
 export function DiscoveryFilterSheetHeader({
@@ -106,19 +109,30 @@ export function DiscoveryFilterSheetHeader({
   activeFilterCount = 0,
   onClose,
   title,
+  useDrawerTitle = false,
 }: DiscoveryFilterSheetHeaderProps) {
   const label = title ?? (isKo ? "필터" : "Filters");
 
+  const titleContent = (
+    <>
+      {label}
+      {activeFilterCount > 0 ? (
+        <span className="tkad-type-meta ml-1.5 font-semibold text-tkad-accent">
+          {activeFilterCount}
+        </span>
+      ) : null}
+    </>
+  );
+
   return (
     <div className="flex items-center justify-between border-b border-gray-100 px-4 py-3 dark:border-white/10">
-      <p className="tkad-type-title text-foreground">
-        {label}
-        {activeFilterCount > 0 ? (
-          <span className="tkad-type-meta ml-1.5 font-semibold text-tkad-accent">
-            {activeFilterCount}
-          </span>
-        ) : null}
-      </p>
+      {useDrawerTitle ? (
+        <Drawer.Title className="tkad-type-title text-foreground">
+          {titleContent}
+        </Drawer.Title>
+      ) : (
+        <p className="tkad-type-title text-foreground">{titleContent}</p>
+      )}
       <button
         type="button"
         onClick={onClose}

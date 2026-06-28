@@ -33,9 +33,9 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
           <Drawer.Handle className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/25" />
           <div className="flex items-center justify-between gap-3 border-b border-border/70 px-4 py-3 dark:border-white/10">
             <div className="min-w-0">
-              <p className="text-sm font-bold text-foreground">
+              <Drawer.Title className="text-sm font-bold text-foreground">
                 {isKo ? "담은 매체" : "Selected media"}
-              </p>
+              </Drawer.Title>
               <p className="tkad-type-meta mt-0.5 text-tkad-muted">
                 {isKo
                   ? `${items.length}개 매체`
