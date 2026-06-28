@@ -9,7 +9,9 @@ import {
   DiscoveryFilterBar,
   DiscoveryEmptyState,
   type DiscoveryFilterBarViewMode,
+  type MediaMobileViewSegment,
 } from "@/components/discovery/filter-bar";
+import { MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID } from "@/components/discovery/media-mobile-bottom-bar";
 import CompareBar from "@/components/compare-bar";
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
@@ -677,6 +679,52 @@ function MediaSearchPageInner({
       ?.scrollIntoView({ behavior: "smooth", block: "start" });
   }, []);
 
+  const mobileViewSegment: MediaMobileViewSegment =
+    viewMode === "map" ? "map" : "list";
+
+  const handleMobileViewSegmentChange = useCallback(
+    (segment: MediaMobileViewSegment) => {
+      if (segment === "map") {
+        const qs = buildMediaBrowseQueryString({
+          query,
+          mainCategory,
+          subCategory,
+          target,
+          regionMain,
+          regionSub,
+          priceMin,
+          priceMax,
+          features,
+          sort,
+          catalogVariant,
+          networkType,
+        });
+        router.push(qs ? `/media/map?${qs}` : "/media/map");
+        return;
+      }
+      if (viewMode === "map") {
+        handleViewModeChange("feed");
+      }
+    },
+    [
+      catalogVariant,
+      features,
+      handleViewModeChange,
+      mainCategory,
+      networkType,
+      priceMax,
+      priceMin,
+      query,
+      regionMain,
+      regionSub,
+      router,
+      sort,
+      subCategory,
+      target,
+      viewMode,
+    ],
+  );
+
   const edgePad = embedded || plannerMode ? "px-0" : "px-4";
   /** `/media` 라우트에서 명시적으로 opt-in 했을 때만 고정 앱 셸로 렌더 (임베드/플래너 제외) */
   const appShell = appShellEnabled && !embedded && !plannerMode;
@@ -713,6 +761,9 @@ function MediaSearchPageInner({
       totalCount={total}
       loading={loading}
       unifiedToolbar={appShell}
+      mobileBottomBar={appShell}
+      mobileViewSegment={mobileViewSegment}
+      onMobileViewSegmentChange={handleMobileViewSegmentChange}
       compareCount={plannerMode ? 0 : compareEntries.length}
       cartCount={plannerMode ? 0 : cartIds.length}
       selectedCount={plannerMode ? plannerSelectedIds.length : 0}
@@ -918,7 +969,7 @@ function MediaSearchPageInner({
   if (appShell) {
     return (
       <>
-        <div className="tkad-media-app-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+        <div className="tkad-media-app-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
           {/* 상단(flex-none): 항상 고정되는 단일 컨트롤 바 */}
           <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-4 pt-3 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95">
             {filtersBar}
@@ -927,6 +978,11 @@ function MediaSearchPageInner({
           <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-6">
             {bodyContent}
           </div>
+          <div
+            id={MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID}
+            className="flex-none shrink-0 md:hidden"
+            aria-hidden={false}
+          />
         </div>
         {compareBar}
       </>

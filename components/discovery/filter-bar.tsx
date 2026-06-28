@@ -11,6 +11,9 @@ export {
   type MediaManualBrowseFiltersProps as DiscoveryFilterBarProps,
 } from "@/components/media/media-manual-browse-filters";
 
+export type { MediaMobileViewSegment } from "@/components/discovery/media-mobile-bottom-bar";
+export { MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID } from "@/components/discovery/media-mobile-bottom-bar";
+
 export {
   DiscoveryResultSummary,
   DiscoveryFilterSheetHeader,
