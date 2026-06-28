@@ -4001,3 +4001,66 @@ img {
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/* ── PR F-1 — /media/map Leaflet 지도 비주얼 ── */
+.tkad-dark-map-root .leaflet-control-zoom {
+  margin: 0 12px 12px 0 !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+.tkad-dark-map-root .leaflet-control-zoom a {
+  width: 2.5rem !important;
+  height: 2.5rem !important;
+  line-height: 2.5rem !important;
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent) !important;
+  background: color-mix(in srgb, var(--card) 92%, transparent) !important;
+  color: var(--foreground) !important;
+  backdrop-filter: blur(12px);
+  box-shadow:
+    0 4px 14px color-mix(in srgb, var(--foreground) 12%, transparent),
+    0 1px 2px color-mix(in srgb, var(--foreground) 8%, transparent);
+  transition: background-color 0.2s ease, transform 0.15s ease;
+}
+.tkad-dark-map-root .leaflet-control-zoom a:hover {
+  background: var(--card) !important;
+}
+.tkad-dark-map-root .leaflet-control-zoom-in {
+  border-radius: 1rem 1rem 0.35rem 0.35rem !important;
+}
+.tkad-dark-map-root .leaflet-control-zoom-out {
+  border-radius: 0.35rem 0.35rem 1rem 1rem !important;
+  margin-top: 4px !important;
+}
+
+.tkad-map-pin-icon {
+  transition:
+    transform 0.18s ease,
+    filter 0.18s ease;
+  will-change: transform;
+}
+.tkad-map-pin-icon--hovered {
+  transform: scale(1.05);
+  filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.28));
+}
+.tkad-map-pin-icon--selected {
+  transform: scale(1.1);
+  filter: drop-shadow(0 4px 10px rgba(124, 58, 237, 0.35));
+}
+
+.tkad-map-cluster {
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+.tkad-map-cluster:hover {
+  transform: scale(1.06);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tkad-map-pin-icon,
+  .tkad-map-cluster {
+    transition: none;
+  }
+  .tkad-map-pin-icon--hovered,
+  .tkad-map-pin-icon--selected {
+    transform: none;
+  }
+}

@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
-import { leafletPinIcon } from "@/lib/map-pin-styles";
+import { leafletPinIcon, pinZIndexOffset } from "@/lib/map-pin-styles";
 import {
   affectedPinIdsForActiveStateChange,
   mapPinMatchesActiveId,
@@ -20,14 +20,19 @@ function clusterSizeClass(count: number): string {
 
 function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
   const sizeClass = clusterSizeClass(count);
-  const px = sizeClass === "large" ? 46 : sizeClass === "medium" ? 42 : 38;
-  const border = lightTiles ? "2px solid rgba(15,23,42,0.45)" : "2px solid rgba(255,255,255,0.35)";
+  const px = sizeClass === "large" ? 44 : sizeClass === "medium" ? 40 : 36;
+  const bg = lightTiles
+    ? "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(241,245,249,0.92))"
+    : "linear-gradient(145deg, rgba(39,39,42,0.96), rgba(24,24,27,0.94))";
+  const border = lightTiles
+    ? "2px solid rgba(15,23,42,0.18)"
+    : "2px solid rgba(255,255,255,0.14)";
   const shadow = lightTiles
-    ? "0 2px 8px rgba(15,23,42,0.28)"
-    : "0 0 14px rgba(0,0,0,0.45)";
-  const textColor = lightTiles ? "#0f172a" : "#f8fafc";
+    ? `0 4px 14px rgba(15,23,42,0.18), inset 0 0 0 2px rgba(255,102,0,0.32)`
+    : `0 4px 16px rgba(0,0,0,0.45), inset 0 0 0 2px rgba(255,102,0,0.28)`;
+  const textColor = lightTiles ? "#0f172a" : "#f4f4f5";
   return L.divIcon({
-    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};box-shadow:${shadow};background:linear-gradient(145deg,#fbbf24,#f97316);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${textColor};font-family:ui-monospace,monospace">${count}</div>`,
+    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};box-shadow:${shadow};background:${bg};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${textColor};font-family:ui-monospace,monospace">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,
     iconSize: L.point(px, px),
   });
@@ -41,15 +46,18 @@ function applyMarkerPinIcon(
   hoveredId: string | null,
   lightTiles: boolean,
 ) {
+  const selected = mapPinMatchesActiveId(pinId, selectedId);
+  const hovered = mapPinMatchesActiveId(pinId, hoveredId);
   marker.setIcon(
     leafletPinIcon(
       meta.type,
-      mapPinMatchesActiveId(pinId, selectedId),
-      mapPinMatchesActiveId(pinId, hoveredId),
+      selected,
+      hovered,
       lightTiles,
       meta.visibilityScore,
     ),
   );
+  marker.setZIndexOffset(pinZIndexOffset(selected, hovered));
 }
 
 export function DarkMapMarkersLayer({
@@ -94,6 +102,8 @@ export function DarkMapMarkersLayer({
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,
           zoomToBoundsOnClick: true,
+          animate: true,
+          animateAddingMarkers: true,
           iconCreateFunction: (cluster) =>
             buildClusterIcon(cluster.getChildCount(), lightTilesRef.current),
         });
@@ -160,6 +170,10 @@ export function DarkMapMarkersLayer({
           mk.visibilityScore,
         ),
         title: mk.name,
+        zIndexOffset: pinZIndexOffset(
+          mapPinMatchesActiveId(mk.id, selected),
+          mapPinMatchesActiveId(mk.id, hovered),
+        ),
       });
       marker.on("click", () => onSelectRef.current(mk.id));
       layer.addLayer(marker);

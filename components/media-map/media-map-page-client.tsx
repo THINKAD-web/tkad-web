@@ -12,6 +12,8 @@ import {
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
+import { MediaMapFloatingEmptyState } from "@/components/media-map/media-map-floating-empty";
+import { MapFloatingButton, mapFloatingPanelClass } from "@/components/media-map/map-floating-ui";
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import type { DarkMapProgrammaticView } from "@/components/public-map/dark-map-view";
@@ -900,6 +902,11 @@ export default function MediaMapPageClient() {
     </div>
   );
 
+  const showMapEmptyOverlay =
+    (searchedBounds || isMapTextSearchActive(browseFilters)) &&
+    items.length === 0 &&
+    !loading;
+
   return (
     <div className="tkad-media-app-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
@@ -929,8 +936,16 @@ export default function MediaMapPageClient() {
               programmaticView={programmaticView}
               userLocation={userLocation}
               invalidateNonce={invalidateNonce}
+              themeAwareTiles
             />
           </div>
+
+          {showMapEmptyOverlay ? (
+            <MediaMapFloatingEmptyState
+              isKo={isKo}
+              className="pointer-events-none absolute inset-x-4 top-[38%] z-[12] -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2"
+            />
+          ) : null}
 
           {showSearchAreaButton ? (
             <div className="pointer-events-none absolute left-1/2 top-3 z-[11] -translate-x-1/2 sm:top-4">
@@ -938,7 +953,7 @@ export default function MediaMapPageClient() {
                 type="button"
                 disabled={loading}
                 onClick={handleSearchThisArea}
-                className="pointer-events-auto inline-flex h-9 items-center gap-2 rounded-full border border-violet-400/40 bg-white/95 px-4 text-xs font-semibold text-gray-900 shadow-md backdrop-blur transition-colors hover:bg-white disabled:opacity-70 dark:border-violet-400/30 dark:bg-[#0a0a12]/95 dark:text-white dark:hover:bg-[#12121c]"
+                className="pointer-events-auto tkad-type-meta inline-flex h-10 items-center gap-2 rounded-full border border-border/80 bg-card/90 px-4 font-semibold text-foreground shadow-lg shadow-black/10 backdrop-blur-md transition-colors hover:bg-card disabled:opacity-70 dark:border-white/12 dark:bg-[#0a0a12]/88 dark:shadow-black/40"
               >
                 {loading ? (
                   <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
@@ -996,40 +1011,65 @@ export default function MediaMapPageClient() {
 
           <MediaMapVisibilityLegend
             isKo={isKo}
-            className="pointer-events-none absolute bottom-3 left-3 z-[10] max-w-[148px] sm:bottom-4 sm:left-4"
+            className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
           />
 
           <div className="pointer-events-none absolute right-3 top-3 z-[10] flex flex-col gap-2 sm:right-4 sm:top-4">
-            <button
-              type="button"
+            <MapFloatingButton
+              icon={ClipboardCheck}
               onClick={startSurveyMode}
               className={cn(
-                "pointer-events-auto inline-flex h-9 items-center gap-1.5 rounded-lg border bg-white/95 px-2.5 text-xs font-medium text-gray-800 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-white/12 dark:bg-[#0a0a12]/90 dark:text-white dark:hover:bg-[#0a0a12]",
+                "hidden md:inline-flex",
                 surveyMode && "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
               )}
               aria-label={isKo ? "답사 모드" : "Field survey"}
             >
-              <ClipboardCheck className="h-3.5 w-3.5" />
-              <span className="hidden md:inline">{isKo ? "답사" : "Survey"}</span>
-            </button>
-            <button
-              type="button"
+              {isKo ? "답사" : "Survey"}
+            </MapFloatingButton>
+            <MapFloatingButton
+              icon={ClipboardCheck}
+              compact
+              onClick={startSurveyMode}
+              className={cn(
+                "md:hidden",
+                surveyMode && "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
+              )}
+              aria-label={isKo ? "답사 모드" : "Field survey"}
+            />
+            <MapFloatingButton
+              icon={Crosshair}
+              compact
               onClick={handleLocateMe}
               disabled={locating}
-              className="pointer-events-auto inline-flex h-9 w-9 items-center justify-center rounded-lg border border-gray-200 bg-white/95 text-gray-800 shadow-sm backdrop-blur transition-colors hover:bg-white disabled:opacity-60 dark:border-white/12 dark:bg-[#0a0a12]/90 dark:text-white md:w-auto md:gap-1.5 md:px-2.5"
+              iconClassName={locating ? "animate-pulse" : undefined}
+              className="md:hidden"
+              aria-label={isKo ? "내 주변" : "Near me"}
+            />
+            <MapFloatingButton
+              icon={Crosshair}
+              onClick={handleLocateMe}
+              disabled={locating}
+              className="hidden md:inline-flex"
               aria-label={isKo ? "내 주변" : "Near me"}
             >
-              <Crosshair className={cn("h-3.5 w-3.5", locating && "animate-pulse")} />
-              <span className="hidden text-xs font-medium md:inline">
-                {locating ? (isKo ? "확인 중…" : "Locating…") : isKo ? "내 주변" : "Near me"}
-              </span>
-            </button>
+              {locating
+                ? isKo
+                  ? "확인 중…"
+                  : "Locating…"
+                : isKo
+                  ? "내 주변"
+                  : "Near me"}
+            </MapFloatingButton>
             <Link
               href="/media"
-              className="pointer-events-auto hidden h-9 items-center gap-1.5 rounded-lg border border-gray-200 bg-white/95 px-2.5 text-xs font-medium text-gray-800 shadow-sm backdrop-blur transition-colors hover:bg-white dark:border-white/12 dark:bg-[#0a0a12]/90 dark:text-white md:inline-flex"
+              className={cn(
+                mapFloatingPanelClass(
+                  "pointer-events-auto tkad-type-meta hidden h-10 items-center gap-1.5 px-3.5 font-medium text-foreground transition-colors hover:bg-card md:inline-flex",
+                ),
+              )}
               aria-label={isKo ? "목록으로" : "List view"}
             >
-              <LayoutList className="h-3.5 w-3.5" />
+              <LayoutList className="h-4 w-4 shrink-0" aria-hidden />
               {isKo ? "목록" : "List"}
             </Link>
           </div>

@@ -8,17 +8,36 @@ export const PUBLIC_MAP_TILE_URLS = {
     "https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png",
   light:
     "https://{s}.basemaps.cartocdn.com/rastertiles/light_all/{z}/{x}/{y}{r}.png",
+  light_nolabels:
+    "https://{s}.basemaps.cartocdn.com/rastertiles/light_nolabels/{z}/{x}/{y}{r}.png",
   dark: "https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png",
+  dark_nolabels:
+    "https://{s}.basemaps.cartocdn.com/dark_nolabels/{z}/{x}/{y}{r}.png",
 } as const;
 
 export type PublicMapTilePreset = keyof typeof PUBLIC_MAP_TILE_URLS;
 
-/** ← 여기만 수정: voyager | light | dark */
+/** ← 여기만 수정: voyager | light | dark (themeAware 미사용 경로) */
 export const PUBLIC_MAP_TILE_PRESET: PublicMapTilePreset = "voyager";
 
 /** @deprecated 이름 유지 — 실제 URL은 PRESET 에 따름 */
 export const PUBLIC_DARK_MAP_TILE_URL =
   PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET];
+
+/** next-themes `resolvedTheme` 기준 — /media/map themeAware 타일 */
+export function publicMapTileUrlForTheme(
+  resolvedTheme: string | undefined,
+): string {
+  return resolvedTheme === "dark"
+    ? PUBLIC_MAP_TILE_URLS.dark_nolabels
+    : PUBLIC_MAP_TILE_URLS.light_nolabels;
+}
+
+export function isPublicMapLightTileFromTheme(
+  resolvedTheme: string | undefined,
+): boolean {
+  return resolvedTheme !== "dark";
+}
 
 /** @deprecated PUBLIC_MAP_TILE_SUBDOMAINS 와 동일 */
 export const PUBLIC_DARK_MAP_TILE_SUBDOMAINS = PUBLIC_MAP_TILE_SUBDOMAINS;
@@ -26,7 +45,8 @@ export const PUBLIC_DARK_MAP_TILE_SUBDOMAINS = PUBLIC_MAP_TILE_SUBDOMAINS;
 export function isPublicMapLightTile(): boolean {
   return (
     PUBLIC_MAP_TILE_PRESET === "voyager" ||
-    PUBLIC_MAP_TILE_PRESET === "light"
+    PUBLIC_MAP_TILE_PRESET === "light" ||
+    PUBLIC_MAP_TILE_PRESET === "light_nolabels"
   );
 }
 
