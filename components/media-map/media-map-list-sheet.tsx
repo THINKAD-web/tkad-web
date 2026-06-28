@@ -20,8 +20,6 @@ const PEEK_VISIBLE_FRACTION = 0.135;
 /** 스냅 결정 시 관성 보정 — 이 속도(px/ms) 이상이면 진행 방향으로 peek↔full */
 const FLING_VELOCITY = 0.45;
 
-const SNAP_ORDER: MediaMapSheetSnap[] = ["peek", "full"];
-
 function peekVisiblePx(containerHeight: number): number {
   if (containerHeight <= 0) return PEEK_VISIBLE_MIN_PX;
   return Math.round(
@@ -34,7 +32,7 @@ function peekVisiblePx(containerHeight: number): number {
 
 /**
  * 모바일 매체 리스트 바텀시트 — 지도 모드 peek / 목록 모드 full.
- * transform 기반 직접 구현. 시트 내부 리스트는 자체 스크롤.
+ * peek 은 고정 크롬(핸들+헤더)만, full 에서만 카드 그리드 노출.
  */
 export function MediaMapListSheet({
   snap,
@@ -85,10 +83,21 @@ export function MediaMapListSheet({
     return Math.max(0, h * (1 - FULL_VISIBLE_FRACTION));
   }, []);
 
+  const ready = height > 0;
+  const peekPx = peekVisiblePx(height);
   const minTranslate = translateForSnap("full", height);
   const maxTranslate = translateForSnap("peek", height);
   const baseTranslate = translateForSnap(snap, height);
-  const translate = dragPx ?? baseTranslate;
+  const effectiveTranslate = dragPx ?? baseTranslate;
+  const dragging = dragPx != null;
+  const peekSettled = snap === "peek" && !dragging;
+  const midTranslate = ready ? (minTranslate + maxTranslate) / 2 : 0;
+  const showListBody =
+    ready &&
+    (snap === "full" || (dragging && effectiveTranslate < midTranslate));
+
+  const sheetHeight = !ready ? peekPx : peekSettled ? peekPx : height;
+  const translateY = !ready ? 0 : peekSettled ? 0 : effectiveTranslate;
 
   const handlePointerDown = (e: React.PointerEvent) => {
     if (height <= 0) return;
@@ -96,12 +105,12 @@ export function MediaMapListSheet({
     const now = performance.now();
     dragState.current = {
       startY: e.clientY,
-      baseTranslate,
+      baseTranslate: peekSettled ? maxTranslate : baseTranslate,
       lastY: e.clientY,
       lastT: now,
       velocity: 0,
     };
-    setDragPx(baseTranslate);
+    setDragPx(peekSettled ? maxTranslate : baseTranslate);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
@@ -143,8 +152,6 @@ export function MediaMapListSheet({
     if (best !== snap) onSnapChange(best);
   };
 
-  const dragging = dragPx != null;
-
   return (
     <div
       ref={sheetRef}
@@ -152,20 +159,21 @@ export function MediaMapListSheet({
       aria-label={isKo ? "매체 목록" : "Media list"}
       aria-expanded={snap === "full"}
       className={cn(
-        "absolute inset-x-0 bottom-0 z-[40] flex flex-col",
+        "absolute inset-x-0 bottom-0 z-[40] flex flex-col overflow-hidden",
         "rounded-t-[1.25rem] border-t border-gray-200/90 bg-white",
         "shadow-[0_-12px_40px_rgba(15,23,42,0.16)] ring-1 ring-black/[0.04]",
         "dark:border-white/12 dark:bg-[#0a0a12] dark:shadow-[0_-18px_52px_rgba(0,0,0,0.55)] dark:ring-white/[0.06]",
-        !dragging && "transition-transform duration-300 ease-out",
+        !dragging && ready && "transition-[transform,height] duration-300 ease-out",
         className,
       )}
       style={{
-        height: height > 0 ? height : undefined,
-        transform: `translateY(${translate}px)`,
+        height: sheetHeight,
+        transform: peekSettled ? undefined : `translateY(${translateY}px)`,
+        visibility: ready ? "visible" : "hidden",
       }}
     >
       <div
-        className="sticky top-0 z-[1] flex shrink-0 cursor-grab touch-none select-none flex-col items-stretch bg-white active:cursor-grabbing dark:bg-[#0a0a12]"
+        className="flex shrink-0 cursor-grab touch-none select-none flex-col items-stretch bg-white active:cursor-grabbing dark:bg-[#0a0a12]"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
         onPointerUp={settleToNearest}
@@ -191,13 +199,24 @@ export function MediaMapListSheet({
           />
         </button>
         {header ? (
-          <div className="border-b border-gray-100 px-3 pb-2.5 pt-0.5 dark:border-white/8">
+          <div
+            className={cn(
+              "px-3 pb-2.5 pt-0.5",
+              showListBody && "border-b border-gray-100 dark:border-white/8",
+            )}
+          >
             {header}
           </div>
         ) : null}
       </div>
 
-      <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]">
+      <div
+        className={cn(
+          "min-h-0 flex-1 overflow-y-auto overscroll-contain px-0 pb-[max(0.75rem,env(safe-area-inset-bottom))]",
+          !showListBody && "hidden",
+        )}
+        aria-hidden={!showListBody}
+      >
         {children}
       </div>
     </div>
