@@ -888,7 +888,7 @@ export default function MediaMapPageClient() {
   );
 
   return (
-    <div className="tkad-media-app-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
+    <div className="tkad-media-app-shell tkad-media-map-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
       <MapChunkPrefetch />
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
       <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-2 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">

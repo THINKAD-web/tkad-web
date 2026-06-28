@@ -1035,6 +1035,11 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
   min-height: 0;
 }
 
+/* `/media/map` — 앱 셸 내부에 지도 전용 하단 바가 있어 in-flow spacer 를 줄임 */
+body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
+  min-height: 0;
+}
+
 /* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
 .tkad-home-accent-text {
   display: inline-block;

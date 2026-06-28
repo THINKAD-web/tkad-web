@@ -76,6 +76,7 @@ export default function CompareBar({
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const isKo = locale === "ko";
   const isLight = variant === "light";
+  const isMapPage = pathname?.includes("/media/map") ?? false;
   const hidePlanOnPage = pathname?.includes("/my/plan") ?? false;
   const showPlanLink = !hidePlanOnPage && planCount > 0;
   /** 퀵액션 바 제거 후 모바일도 하단 CompareBar에서 담은 매체 진입 */
@@ -106,7 +107,9 @@ export default function CompareBar({
     "w-full min-h-12 min-w-0 justify-center px-2 text-[11px] sm:min-h-10 sm:px-4 sm:text-[12px]";
 
   const spacerClass = isLight
-    ? FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS
+    ? isMapPage
+      ? "h-0 min-h-0"
+      : FLOATING_SELECTION_BAR_COMPACT_SPACER_CLASS
     : FLOATING_SELECTION_BAR_BOTTOM_SPACER_CLASS;
 
   if (isLight) {
