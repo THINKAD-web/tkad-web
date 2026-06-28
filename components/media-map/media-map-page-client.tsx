@@ -60,6 +60,7 @@ import {
   MediaMapListSheet,
   type MediaMapSheetSnap,
 } from "@/components/media-map/media-map-list-sheet";
+import { MapChunkPrefetch } from "@/components/media-map/map-chunk-prefetch";
 
 function MapViewLoadingPlaceholder() {
   return (
@@ -174,7 +175,7 @@ export default function MediaMapPageClient() {
   /** 모바일(<md) 여부 — 리스트를 사이드 패널/바텀시트 중 한 곳에만 마운트(단일 인스턴스) */
   const [isMobile, setIsMobile] = useState(false);
   /** 모바일 리스트 바텀시트 스냅 단계 */
-  const [sheetSnap, setSheetSnap] = useState<MediaMapSheetSnap>("half");
+  const [sheetSnap, setSheetSnap] = useState<MediaMapSheetSnap>("peek");
   /** 레이아웃 전환/스냅 변경 후 map.invalidateSize() 트리거용 nonce */
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   const pvNonceRef = useRef(0);
@@ -564,13 +565,14 @@ export default function MediaMapPageClient() {
 
   useEffect(() => {
     if (!selectedId) return;
-    if (typeof window !== "undefined" && window.matchMedia("(max-width: 767px)").matches) {
-      return;
-    }
     const mediaId = resolveMediaIdFromMapPinId(selectedId);
     const el = listItemRefs.current.get(mediaId);
-    el?.scrollIntoView({ block: "nearest", behavior: "smooth" });
-  }, [selectedId, items]);
+    if (!el) return;
+    el.scrollIntoView({
+      block: isMobile ? "center" : "nearest",
+      behavior: "smooth",
+    });
+  }, [selectedId, items, isMobile]);
 
   const handleUserViewportAdjusted = useCallback(() => {
     setViewportDirty(true);
@@ -596,6 +598,9 @@ export default function MediaMapPageClient() {
       const mediaId = resolveMediaIdFromMapPinId(id);
       const item = itemsRef.current.find((i) => i.id === mediaId);
       if (item) setSelectedItem(item);
+      if (isMobile) {
+        setSheetSnap("full");
+      }
       const mk =
         markersRef.current.find((m) => m.id === id) ??
         markersRef.current.find(
@@ -610,7 +615,7 @@ export default function MediaMapPageClient() {
         });
       }
     },
-    [emitProgrammaticView],
+    [emitProgrammaticView, isMobile],
   );
 
   const selected = selectedItem;
@@ -738,18 +743,20 @@ export default function MediaMapPageClient() {
   }, []);
 
   const mobileViewSegment: MediaMobileViewSegment =
-    isMobile && sheetSnap !== "peek" ? "list" : "map";
+    isMobile && sheetSnap === "full" ? "list" : "map";
 
   const handleMobileViewSegmentChange = useCallback(
     (segment: MediaMobileViewSegment) => {
       if (segment === "list") {
-        setSheetSnap((cur) => (cur === "peek" ? "half" : cur));
+        setSheetSnap("full");
         return;
       }
       setSheetSnap("peek");
     },
     [],
   );
+
+  const mapChromeVisible = !isMobile || sheetSnap === "peek";
 
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
   const controlBar = (
@@ -832,7 +839,8 @@ export default function MediaMapPageClient() {
       )}
       {(searchedBounds || isMapTextSearchActive(browseFilters)) &&
       items.length === 0 &&
-      !loading ? (
+      !loading &&
+      !isMobile ? (
         <li className="col-span-2 list-none">
           <DiscoveryEmptyState
             title={isKo ? "검색 결과가 없습니다" : "No results"}
@@ -853,29 +861,39 @@ export default function MediaMapPageClient() {
     isKo,
   );
 
-  // 모바일 시트 상단 — 결과 수만 (목록/지도 토글은 하단 바)
-  const mobileSheetHeader = (
-    <div className="flex items-center justify-between gap-2">
-      <p className="tkad-type-meta min-w-0 truncate font-medium text-tkad-muted">
-        {mapResultLabel}
-      </p>
-    </div>
-  );
-
   const showMapEmptyOverlay =
     (searchedBounds || isMapTextSearchActive(browseFilters)) &&
     items.length === 0 &&
     !loading;
 
+  // 모바일 시트 상단 — 결과 수만 (목록/지도 토글은 하단 바)
+  const mobileSheetHeader = (
+    <div className="flex items-center justify-between gap-2">
+      <p className="tkad-type-meta min-w-0 truncate font-semibold text-foreground">
+        {showMapEmptyOverlay
+          ? isKo
+            ? "이 영역 0개"
+            : "0 in this area"
+          : mapResultLabel}
+      </p>
+      {showMapEmptyOverlay ? (
+        <p className="tkad-type-note shrink-0 text-tkad-muted">
+          {isKo ? "지도 이동·필터 조정" : "Pan or filter"}
+        </p>
+      ) : null}
+    </div>
+  );
+
   return (
     <div className="tkad-media-app-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
+      <MapChunkPrefetch />
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
       <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-2 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
         {controlBar}
       </div>
 
       {/* 본문(flex-1, min-h-0): 데스크톱 = 리스트 + 지도 / 모바일 = 지도 풀 + 바텀시트 */}
-      <div className="relative flex min-h-0 flex-1">
+      <div className="relative flex min-h-0 flex-1 overflow-hidden">
         {!isMobile ? (
           <aside className="flex w-[440px] shrink-0 flex-col overflow-y-auto border-r border-gray-200/80 bg-gray-50 lg:w-[520px] dark:border-white/10 dark:bg-[#020202]">
             {listEl}
@@ -900,14 +918,14 @@ export default function MediaMapPageClient() {
             />
           </div>
 
-          {showMapEmptyOverlay ? (
+          {showMapEmptyOverlay && mapChromeVisible ? (
             <MediaMapFloatingEmptyState
               isKo={isKo}
               className="pointer-events-none absolute inset-x-4 top-[38%] z-[12] -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2"
             />
           ) : null}
 
-          {showSearchAreaButton ? (
+          {showSearchAreaButton && mapChromeVisible ? (
             <div className="pointer-events-none absolute left-1/2 top-3 z-[11] -translate-x-1/2 sm:top-4">
               <button
                 type="button"
@@ -931,7 +949,7 @@ export default function MediaMapPageClient() {
             </div>
           ) : null}
 
-          {selected ? (
+          {selected && !isMobile ? (
             <MediaMapDetailSheet
               variant="sheet"
               item={selected}
@@ -967,6 +985,8 @@ export default function MediaMapPageClient() {
             />
           ) : null}
 
+          {mapChromeVisible ? (
+            <>
           <MediaMapVisibilityLegend
             isKo={isKo}
             className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
@@ -1031,9 +1051,20 @@ export default function MediaMapPageClient() {
               {isKo ? "목록" : "List"}
             </Link>
           </div>
+            </>
+          ) : null}
         </div>
 
-        {/* 모바일 리스트 바텀시트 (3단 스냅: peek/half/full) */}
+        {isMobile && sheetSnap === "full" ? (
+          <button
+            type="button"
+            className="absolute inset-0 z-[35] bg-black/20 md:hidden"
+            aria-label={isKo ? "지도로 돌아가기" : "Back to map"}
+            onClick={() => setSheetSnap("peek")}
+          />
+        ) : null}
+
+        {/* 모바일 리스트 바텀시트 (peek / full) */}
         {isMobile ? (
           <MediaMapListSheet
             snap={sheetSnap}
@@ -1050,20 +1081,6 @@ export default function MediaMapPageClient() {
         id={MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID}
         className="flex-none shrink-0 md:hidden"
       />
-
-      {selected ? (
-        <MediaMapDetailSheet
-          variant="bottom-sheet"
-          item={selected}
-          onClose={() => {
-            setSelectedId(null);
-            setSelectedItem(null);
-          }}
-          isKo={isKo}
-          inCompare={isInCompare(selected.id)}
-          onToggleCompare={() => toggleCompare(selected)}
-        />
-      ) : null}
 
       <CompareBar
         variant="light"
