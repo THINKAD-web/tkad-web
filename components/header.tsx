@@ -3,7 +3,7 @@
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetTitle, SheetTrigger } from "@/components/ui/sheet";
 import {
   ChevronDown,
   Globe,
@@ -255,6 +255,9 @@ export default function Header() {
               side="right"
               className="mobile-sheet border-l-0 bg-white backdrop-blur-xl p-0 w-[88vw] sm:max-w-sm"
             >
+              <SheetTitle className="sr-only">
+                {locale === "ko" ? "메뉴" : "Menu"}
+              </SheetTitle>
               <div className="flex h-full flex-col overflow-y-auto">
                 <div className="sticky top-0 z-10 border-b border-border/60 bg-white/95 backdrop-blur-sm px-5 py-4">
                   <span className="text-lg font-extrabold tracking-tight text-primary">

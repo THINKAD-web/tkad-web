@@ -5,7 +5,6 @@ import { Drawer } from "vaul";
 import { cn } from "@/lib/utils";
 import { DiscoveryFilterSheetHeader } from "@/components/discovery/filter-bar-parts";
 import { MEDIA_SEARCH_SORT_OPTIONS } from "@/lib/media-discovery-filter-chips";
-
 type FilterSheetProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -47,6 +46,7 @@ export function MediaFilterVaulSheet({
             isKo={isKo}
             activeFilterCount={activeFilterCount}
             onClose={() => onOpenChange(false)}
+            useDrawerTitle
           />
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4">
             {children}
@@ -101,9 +101,9 @@ export function MediaSortVaulSheet({
           )}
         >
           <Drawer.Handle className="mx-auto mt-3 h-1.5 w-12 shrink-0 rounded-full bg-muted-foreground/25" />
-          <p className="tkad-type-title border-b border-border/70 px-4 py-3 text-foreground dark:border-white/10">
+          <Drawer.Title className="tkad-type-title border-b border-border/70 px-4 py-3 text-foreground dark:border-white/10">
             {isKo ? "정렬" : "Sort"}
-          </p>
+          </Drawer.Title>
           <ul className="px-2 py-2 pb-[calc(0.5rem+env(safe-area-inset-bottom,0px))]">
             {MEDIA_SEARCH_SORT_OPTIONS.map((opt) => {
               const selected = sort === opt.value;
