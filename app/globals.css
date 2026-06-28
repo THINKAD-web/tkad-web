@@ -1006,19 +1006,19 @@ main#main-content:has(.tkad-portal-appearance[data-appearance="day"]) {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   `/media` 고정 앱 셸 (route-scoped — root layout 미변경)
+   `/media` · `/media/map` 앱 셸 (route-scoped — root layout 미변경)
    페이지가 `.tkad-media-app-shell` 마커를 렌더할 때만 적용된다.
    - 전역 푸터를 이 라우트에서만 숨김 (root layout 의 FooterBrutal 은 그대로 둠)
-   - body 문서 스크롤 차단 → 스크롤은 셸 본문 영역 안에서만
-   - 셸 높이: 100dvh(주소창 변화 안정) − 사이트 헤더(h-14) − (모바일) 하단 탭바
+   - `.tkad-media-list-shell` — `/media` 목록: 문서 스크롤(세로로 긴 리스트)
+   - 그 외 셸 — body 스크롤 차단, 고정 뷰포트 높이(지도 등)
    ───────────────────────────────────────────────────────────── */
-body:has(.tkad-media-app-shell) {
+body:has(.tkad-media-app-shell:not(.tkad-media-list-shell)) {
   overflow: hidden;
 }
 body:has(.tkad-media-app-shell) .tkad-site-footer {
   display: none;
 }
-.tkad-media-app-shell {
+.tkad-media-app-shell:not(.tkad-media-list-shell) {
   display: flex;
   flex-direction: column;
   /* 모바일: 헤더(3.5rem) + 하단 탭바(4.25rem) 차감 */
@@ -1026,9 +1026,13 @@ body:has(.tkad-media-app-shell) .tkad-site-footer {
 }
 @media (min-width: 768px) {
   /* 데스크톱: 하단 탭바 없음 → 헤더만 차감 */
-  .tkad-media-app-shell {
+  .tkad-media-app-shell:not(.tkad-media-list-shell) {
     height: calc(100dvh - 3.5rem);
   }
+}
+.tkad-media-list-shell {
+  display: block;
+  min-height: 0;
 }
 
 /* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */

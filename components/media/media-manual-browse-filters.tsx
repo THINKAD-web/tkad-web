@@ -111,6 +111,9 @@ const VIEW_MODES: {
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
+/** `/media` 목록 — 피드·카드·컴팩트만 (지도는 별도 네비 버튼) */
+const LIST_VIEW_MODES = VIEW_MODES.filter((m) => m.id !== "map");
+
 const MAP_PAGE_VIEW_MODES: {
   id: MediaManualBrowseViewMode;
   labelKo: string;
@@ -167,8 +170,13 @@ export type MediaManualBrowseFiltersProps = {
   mapPageViewModes?: boolean;
   /** `/media` 앱 셸 — 검색+필터+정렬+뷰모드를 단일 반응형 바로 통합(데스크톱/모바일 이중 마크업 제거) */
   unifiedToolbar?: boolean;
-  /** PR B — 모바일 하단 바 + vaul 필터/정렬 시트 (`/media`, `/media/map` 앱 셸) */
+  /** PR B — 모바일 하단 바 + vaul 필터/정렬 시트 (`/media/map` 앱 셸) */
   mobileBottomBar?: boolean;
+  /** `/media` 목록 — 모바일 상단 sticky [필터·정렬·뷰모드] (하단 바 대신) */
+  mobileStickyToolbar?: boolean;
+  /** `/media` 목록 — 피드/카드/컴팩트 + 지도 별도 버튼 */
+  listPageLayout?: boolean;
+  onNavigateToMap?: () => void;
   /** 모바일 하단 바 목록/지도 세그먼트 (페이지에서 제어) */
   mobileViewSegment?: MediaMobileViewSegment;
   onMobileViewSegmentChange?: (segment: MediaMobileViewSegment) => void;
@@ -221,6 +229,9 @@ export function MediaManualBrowseFilters({
   mapPageViewModes = false,
   unifiedToolbar = false,
   mobileBottomBar = false,
+  mobileStickyToolbar = false,
+  listPageLayout = false,
+  onNavigateToMap,
   mobileViewSegment = "list",
   onMobileViewSegmentChange,
   variant = "media",
@@ -285,7 +296,7 @@ export function MediaManualBrowseFilters({
     : [];
 
   const mediaBrowseActiveChips =
-    mobileBottomBar && variant === "media"
+    mobileVaulSheets && variant === "media"
       ? buildMapBrowseActiveFilterChips(
           {
             mainCategory,
@@ -319,7 +330,7 @@ export function MediaManualBrowseFilters({
     !(mobileBottomBar && unifiedToolbar);
 
   const showMobileActiveSummary =
-    mobileBottomBar &&
+    mobileStickyToolbar &&
     unifiedToolbar &&
     mediaBrowseActiveChips.length > 0;
 
@@ -336,6 +347,8 @@ export function MediaManualBrowseFilters({
     compareCount > 0;
 
   const mapToolbarCompact = mapPageViewModes;
+
+  const mobileVaulSheets = mobileBottomBar || mobileStickyToolbar;
 
   const total = totalCount;
 
@@ -489,13 +502,13 @@ export function MediaManualBrowseFilters({
 
   // 바텀시트 열림 동안 배경 스크롤 잠금 (레거시 오버레이만 — vaul 은 자체 처리)
   useEffect(() => {
-    if (!sheetOpen || mobileBottomBar) return;
+    if (!sheetOpen || mobileVaulSheets) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [sheetOpen, mobileBottomBar]);
+  }, [sheetOpen, mobileVaulSheets]);
 
   useEffect(() => {
     if (!mobileBottomBar || typeof document === "undefined") return;
@@ -836,14 +849,23 @@ export function MediaManualBrowseFilters({
     </select>
   );
 
+  const viewModeOptions = listPageLayout
+    ? LIST_VIEW_MODES
+    : mapPageViewModes
+      ? MAP_PAGE_VIEW_MODES
+      : VIEW_MODES;
+
   const viewModeToggle = showViewModes ? (
     <div
-      className="scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10"
+      className={cn(
+        "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10",
+        listPageLayout && "rounded-lg",
+      )}
       data-screenshot={
         mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
       }
     >
-      {(mapPageViewModes ? MAP_PAGE_VIEW_MODES : VIEW_MODES).map((mode) => {
+      {viewModeOptions.map((mode) => {
         const Icon = mode.icon;
         const active = mapPageViewModes
           ? mode.id === "map"
@@ -854,13 +876,16 @@ export function MediaManualBrowseFilters({
             type="button"
             onClick={() => onViewModeChange(mode.id)}
             title={isKo ? mode.labelKo : mode.labelEn}
+            aria-label={isKo ? mode.labelKo : mode.labelEn}
+            aria-pressed={active}
             className={cn(
-              "flex items-center gap-1 px-2.5 py-1.5 text-xs font-medium transition-all",
+              "flex items-center gap-1 font-medium transition-all",
+              listPageLayout ? "px-2 py-1 text-xs" : "px-2.5 py-1.5 text-xs",
               active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
             )}
           >
-            <Icon className="h-3.5 w-3.5" aria-hidden />
-            <span className="hidden sm:inline">
+            <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            <span className={listPageLayout ? "sr-only sm:not-sr-only" : "hidden sm:inline"}>
               {isKo ? mode.labelKo : mode.labelEn}
             </span>
           </button>
@@ -868,6 +893,77 @@ export function MediaManualBrowseFilters({
       })}
     </div>
   ) : null;
+
+  const mapNavButton =
+    listPageLayout && onNavigateToMap ? (
+      <button
+        type="button"
+        onClick={onNavigateToMap}
+        className={cn(
+          "inline-flex shrink-0 items-center gap-1 rounded-xl border border-gray-200 bg-white font-medium text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10",
+          listPageLayout ? "px-2.5 py-1 text-xs" : "px-3 py-1.5 text-sm",
+        )}
+        aria-label={isKo ? "지도에서 보기" : "Open map"}
+      >
+        <MapIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+        <span>{isKo ? "지도" : "Map"}</span>
+      </button>
+    ) : null;
+
+  const mobileSortButton = (
+    <button
+      type="button"
+      onClick={() => {
+        if (mobileVaulSheets) {
+          setSortSheetOpen(true);
+          return;
+        }
+      }}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+        mapToolbarCompact ? "px-3 py-1 text-xs" : "px-3 py-1.5 text-sm",
+      )}
+      aria-label={isKo ? "정렬" : "Sort"}
+    >
+      <Filter className="h-4 w-4 rotate-90" aria-hidden />
+      <span className="max-w-[5.5rem] truncate">{sortLabel}</span>
+    </button>
+  );
+
+  const mobileFilterButton = (
+    <button
+      type="button"
+      onClick={() => setSheetOpen(true)}
+      className={cn(
+        "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80",
+        mapToolbarCompact ? "px-3 py-1 text-xs" : "px-3 py-1.5 text-sm",
+      )}
+      aria-haspopup="dialog"
+      aria-expanded={sheetOpen}
+      aria-label={isKo ? "필터 열기" : "Open filters"}
+    >
+      <SlidersHorizontal className="h-4 w-4" aria-hidden />
+      {isKo ? "필터" : "Filter"}
+      {activeFilterCount > 0 ? (
+        <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
+          {activeFilterCount}
+        </span>
+      ) : null}
+    </button>
+  );
+
+  const mobileStickyControlRow =
+    mobileStickyToolbar && unifiedToolbar ? (
+      <div
+        className="sticky top-14 z-30 -mx-4 flex min-w-0 items-center gap-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
+        data-screenshot="media-mobile-sticky-controls"
+      >
+        {mobileFilterButton}
+        {mobileSortButton}
+        <div className="min-w-0 flex-1">{viewModeToggle}</div>
+        {mapNavButton}
+      </div>
+    ) : null;
 
   return (
     <div
@@ -886,11 +982,12 @@ export function MediaManualBrowseFilters({
         titleAs="h3"
       />
 
-      {/* `/media` 앱 셸 — PR B: 모바일 상단(검색+요약) / 데스크톱 인라인 필터 */}
-      {unifiedToolbar && mobileBottomBar ? (
+      {/* `/media` 앱 셸 — 목록: 상단 검색 + sticky 컨트롤 / 지도: PR B 하단 바 */}
+      {unifiedToolbar && (mobileBottomBar || mobileStickyToolbar) ? (
         <>
           <div className="space-y-2 md:hidden">
             {searchInput}
+            {mobileStickyControlRow}
             {showMobileActiveSummary ? (
               <MediaMapActiveFiltersBar
                 chips={mediaBrowseActiveChips}
@@ -898,7 +995,7 @@ export function MediaManualBrowseFilters({
                 onClearAll={clearAllFilters}
                 isKo={isKo}
               />
-            ) : activeFilterCount > 0 ? (
+            ) : activeFilterCount > 0 && !mobileStickyToolbar ? (
               <p className="tkad-type-meta text-tkad-muted">
                 <span className="inline-flex items-center rounded-full bg-violet-500/15 px-2.5 py-0.5 font-semibold text-tkad-accent">
                   {isKo ? `필터 ${activeFilterCount}` : `${activeFilterCount} filters`}
@@ -968,6 +1065,7 @@ export function MediaManualBrowseFilters({
             </div>
             {sortSelect}
             {viewModeToggle}
+            {mapNavButton}
             {toolbarEnd}
           </div>
           <div className="hidden min-w-0 md:block">{renderTypeAxis(false)}</div>
@@ -1163,8 +1261,8 @@ export function MediaManualBrowseFilters({
         />
       ) : null}
 
-      {/* PR B — vaul 필터/정렬 + 하단 바 포털 */}
-      {mobileBottomBar && unifiedToolbar ? (
+      {/* PR B — vaul 필터/정렬 + (지도 전용) 하단 바 포털 */}
+      {mobileVaulSheets && unifiedToolbar ? (
         <>
           <MediaFilterVaulSheet
             open={sheetOpen}
@@ -1183,7 +1281,7 @@ export function MediaManualBrowseFilters({
             sort={sort}
             onSortChange={onSortChange}
           />
-          {bottomBarSlot
+          {mobileBottomBar && bottomBarSlot
             ? createPortal(
                 <MediaMobileBottomBar
                   isKo={isKo}

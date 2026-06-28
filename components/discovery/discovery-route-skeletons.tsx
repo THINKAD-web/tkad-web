@@ -123,18 +123,18 @@ export function DiscoveryMapTileSkeletonGrid({
   );
 }
 
-/** `/media` 고정 앱 셸 — loading.tsx 용 */
+/** `/media` 목록 앱 셸 — loading.tsx 용 (문서 스크롤) */
 export function MediaBrowseRouteSkeleton() {
   return (
     <div
-      className="tkad-media-app-shell relative w-full min-w-0 bg-background"
+      className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-background"
       aria-busy
       aria-label="Loading media browse"
     >
-      <div className="flex-none border-b border-border bg-background/95 px-4 pt-3 pb-2 backdrop-blur">
+      <div className="px-4 pt-3">
         <DiscoveryFilterBarSkeleton />
       </div>
-      <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-6">
+      <div className="px-4 pt-3 pb-6">
         <DiscoveryMediaFeedSkeletonList count={4} />
       </div>
     </div>
