@@ -3,8 +3,7 @@
 import { forwardRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import { Check, Plus, MessageCircle } from "lucide-react";
-import { Link as I18nLink } from "@/i18n/navigation";
+import { Check, Plus } from "lucide-react";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
@@ -147,8 +146,8 @@ export function DiscoveryMediaCardCompactRow({
               className="!h-[1.125rem] !px-1.5 !text-[8px]"
             />
             <MediaCartAddButton
-              inCart={inCart}
-              onToggle={onToggleCart ?? (() => {})}
+              item={planCartItemFromCatalog(item, "search")}
+              addedFrom="search"
               className="!h-[1.125rem] !px-1.5 !text-[8px]"
             />
           </>
@@ -280,14 +279,12 @@ export function DiscoveryMediaCardCompactGrid({
                   className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
                 />
               ) : null}
-              {onToggleCart ? (
-                <MediaCartAddButton
-                  inCart={inCart}
-                  onToggle={onToggleCart}
-                  gridInline
-                  className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
-                />
-              ) : null}
+              <MediaCartAddButton
+                item={planCartItemFromCatalog(item, "search")}
+                addedFrom="search"
+                gridInline
+                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+              />
             </div>
           ) : null}
         </div>
@@ -459,20 +456,10 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           <MapDetailQuickActions
             item={item}
             inCompare={inCompare}
-            inCart={inCart}
             onToggleCompare={onToggleCompare}
-            onToggleCart={onToggleCart}
             size="compact"
             className="mt-0 min-w-0 flex-1"
           />
-          <I18nLink
-            href={`/contact?media=${encodeURIComponent(item.id)}`}
-            onClick={(e) => e.stopPropagation()}
-            className="tkad-media-map-sheet-cta inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-violet-700/30 bg-violet-700 text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800"
-            aria-label={isKo ? "문의하기" : "Contact"}
-          >
-            <MessageCircle className="h-3.5 w-3.5" aria-hidden />
-          </I18nLink>
         </div>
       </div>
     </li>

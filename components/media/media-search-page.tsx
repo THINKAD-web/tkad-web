@@ -24,7 +24,7 @@ import {
   subscribeCompareCart,
   type CompareCartEntry,
 } from "@/lib/compare-cart-client";
-import { useCart } from "@/lib/cart";
+import { usePlanCart } from "@/hooks/use-plan-cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
@@ -192,7 +192,7 @@ function MediaSearchPageInner({
   const router = useRouter();
   const pathname = usePathname();
   const toast = useAppToast();
-  const { ids: cartIds, toggle: toggleCartId } = useCart();
+  const { count: planCount } = usePlanCart();
 
   const initialFromUrl = useMemo(
     () =>
@@ -332,32 +332,6 @@ function MediaSearchPageInner({
       : [...prev, { id: item.id, name: item.name, nameEn: item.name }];
     setCompareCartEntries(next);
   }, []);
-
-  const toggleCart = useCallback(
-    (item: HomeCatalogMediaItem) => {
-      const inCart = cartIds.includes(item.id);
-      toggleCartId(item.id);
-      if (inCart) {
-        toast.warning(
-          item.name
-            ? `${item.name}이(가) 장바구니에서 제거되었습니다.`
-            : "장바구니에서 제거되었습니다.",
-        );
-      } else {
-        toast.success(
-          item.name
-            ? `${item.name}이(가) 장바구니에 담겼습니다.`
-            : "매체가 장바구니에 담겼습니다.",
-        );
-      }
-    },
-    [cartIds, toggleCartId, toast],
-  );
-
-  const isInCart = useCallback(
-    (id: string) => cartIds.includes(id),
-    [cartIds],
-  );
 
   const mapDisplayItems = useMemo(
     () => catalogItems.filter(mediaItemHasMapCoordinates),
@@ -628,9 +602,7 @@ function MediaSearchPageInner({
           metaLine={metaLine}
           isKo={isKo}
           inCompare={isInCompare(item.id)}
-          inCart={isInCart(item.id)}
           onToggleCompare={() => toggleCompare(item)}
-          onToggleCart={() => toggleCart(item)}
           plannerMode={plannerMode}
           isInPlan={inPlan}
           onTogglePlan={plannerMode ? togglePlan : undefined}
@@ -650,9 +622,7 @@ function MediaSearchPageInner({
             isKo={isKo}
             className="h-full"
             inCompare={isInCompare(item.id)}
-            inCart={isInCart(item.id)}
             onToggleCompare={() => toggleCompare(item)}
-            onToggleCart={() => toggleCart(item)}
             plannerMode={plannerMode}
             isInPlan={inPlan}
             onTogglePlan={plannerMode ? togglePlan : undefined}
@@ -680,9 +650,7 @@ function MediaSearchPageInner({
         locationLine={locationLine}
         isKo={isKo}
         inCompare={isInCompare(item.id)}
-        inCart={isInCart(item.id)}
         onToggleCompare={() => toggleCompare(item)}
-        onToggleCart={() => toggleCart(item)}
         plannerMode={plannerMode}
         isInPlan={inPlan}
         onTogglePlan={plannerMode ? togglePlan : undefined}
@@ -756,7 +724,7 @@ function MediaSearchPageInner({
       mobileViewSegment={mobileViewSegment}
       onMobileViewSegmentChange={handleMobileViewSegmentChange}
       compareCount={plannerMode ? 0 : compareEntries.length}
-      cartCount={plannerMode ? 0 : cartIds.length}
+      cartCount={plannerMode ? 0 : planCount}
       selectedCount={plannerMode ? plannerSelectedIds.length : 0}
       selectionVariant={plannerMode ? "plan" : "default"}
       onSelectedSummaryClick={

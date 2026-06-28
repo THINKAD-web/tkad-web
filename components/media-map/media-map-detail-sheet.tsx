@@ -106,17 +106,13 @@ function CloseButton({
 export function MapDetailQuickActions({
   item,
   inCompare,
-  inCart,
   onToggleCompare,
-  onToggleCart,
   size = "compact",
   className,
 }: {
   item: MapMapItem;
   inCompare?: boolean;
-  inCart?: boolean;
   onToggleCompare?: () => void;
-  onToggleCart?: () => void;
   size?: "compact" | "comfortable";
   className?: string;
 }) {
@@ -158,14 +154,22 @@ export function MapDetailQuickActions({
           className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
         />
       ) : null}
-      {onToggleCart ? (
-        <MediaCartAddButton
-          inCart={inCart ?? false}
-          onToggle={onToggleCart}
-          gridInline
-          className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
-        />
-      ) : null}
+      <MediaCartAddButton
+        item={planCartItemFromCatalog(
+          {
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            region: item.region,
+            price: item.price,
+            thumbnailUrl: item.image ?? undefined,
+          },
+          "map",
+        )}
+        addedFrom="map"
+        gridInline
+        className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
+      />
     </div>
   );
 }
@@ -314,9 +318,7 @@ function MediaMapDetailBody({
         <MapDetailQuickActions
           item={item}
           inCompare={inCompare}
-          inCart={inCart}
           onToggleCompare={onToggleCompare}
-          onToggleCart={onToggleCart}
           size="compact"
         />
         <div className="mt-2 grid grid-cols-2 gap-1.5">
@@ -363,9 +365,7 @@ function MediaMapDetailBody({
         <MapDetailQuickActions
           item={item}
           inCompare={inCompare}
-          inCart={inCart}
           onToggleCompare={onToggleCompare}
-          onToggleCart={onToggleCart}
         />
         {linkRow()}
       </div>
@@ -461,9 +461,7 @@ function MediaMapDetailBody({
           <MapDetailQuickActions
             item={item}
             inCompare={inCompare}
-            inCart={inCart}
             onToggleCompare={onToggleCompare}
-            onToggleCart={onToggleCart}
             size="compact"
           />
         </div>
@@ -511,9 +509,7 @@ function MediaMapDetailBody({
       <MapDetailQuickActions
         item={item}
         inCompare={inCompare}
-        inCart={inCart}
         onToggleCompare={onToggleCompare}
-        onToggleCart={onToggleCart}
       />
       {linkRow()}
     </div>

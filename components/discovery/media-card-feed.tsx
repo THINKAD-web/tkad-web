@@ -353,8 +353,8 @@ export function DiscoveryMediaCardFeed({
                     feedLabeled
                   />
                   <MediaCartAddButton
-                    inCart={inCart}
-                    onToggle={onToggleCart ?? (() => {})}
+                    item={planCartItemFromCatalog(item, "search")}
+                    addedFrom="search"
                     feedLabeled
                   />
                   <MediaFavoriteButton

@@ -102,8 +102,8 @@ export function MediaDiscoveryGridCard({
               className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
             />
             <MediaCartAddButton
-              inCart={inCart}
-              onToggle={onToggleCart}
+              item={planItem}
+              addedFrom="search"
               gridInline
               className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
             />
