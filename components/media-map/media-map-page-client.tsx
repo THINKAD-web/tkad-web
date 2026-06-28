@@ -8,7 +8,9 @@ import {
   DiscoveryEmptyState,
   formatMapViewCountLabel,
   type DiscoveryFilterBarViewMode,
+  type MediaMobileViewSegment,
 } from "@/components/discovery/filter-bar";
+import { MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID } from "@/components/discovery/media-mobile-bottom-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -776,11 +778,28 @@ export default function MediaMapPageClient() {
     setSheetSnap(next);
   }, []);
 
+  const mobileViewSegment: MediaMobileViewSegment =
+    isMobile && sheetSnap !== "peek" ? "list" : "map";
+
+  const handleMobileViewSegmentChange = useCallback(
+    (segment: MediaMobileViewSegment) => {
+      if (segment === "list") {
+        setSheetSnap((cur) => (cur === "peek" ? "half" : cur));
+        return;
+      }
+      setSheetSnap("peek");
+    },
+    [],
+  );
+
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
   const controlBar = (
     <DiscoveryFilterBar
       isKo={isKo}
       unifiedToolbar
+      mobileBottomBar
+      mobileViewSegment={mobileViewSegment}
+      onMobileViewSegmentChange={handleMobileViewSegmentChange}
       mapPageViewModes
       query={browseFilters.q}
       onQueryChange={(q) => patchBrowseFilters({ q })}
@@ -877,28 +896,12 @@ export default function MediaMapPageClient() {
     isKo,
   );
 
-  // 모바일 시트 상단 고정 — [목록]/[지도] 토글 + 결과 수
+  // 모바일 시트 상단 — 결과 수만 (목록/지도 토글은 하단 바)
   const mobileSheetHeader = (
     <div className="flex items-center justify-between gap-2">
       <p className="tkad-type-meta min-w-0 truncate font-medium text-tkad-muted">
         {mapResultLabel}
       </p>
-      <div className="flex shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10">
-        <button
-          type="button"
-          onClick={() => handleBrowseViewModeChange("feed")}
-          className="tkad-type-meta px-3 py-1 font-medium text-tkad-secondary"
-        >
-          {isKo ? "목록" : "List"}
-        </button>
-        <button
-          type="button"
-          aria-current="page"
-          className="tkad-type-meta bg-violet-500 px-3 py-1 font-medium text-white"
-        >
-          {isKo ? "지도" : "Map"}
-        </button>
-      </div>
     </div>
   );
 
@@ -908,7 +911,7 @@ export default function MediaMapPageClient() {
     !loading;
 
   return (
-    <div className="tkad-media-app-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+    <div className="tkad-media-app-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
       <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-2 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
         {controlBar}
@@ -1087,6 +1090,11 @@ export default function MediaMapPageClient() {
           </MediaMapListSheet>
         ) : null}
       </div>
+
+      <div
+        id={MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID}
+        className="flex-none shrink-0 md:hidden"
+      />
 
       {selected ? (
         <MediaMapDetailSheet

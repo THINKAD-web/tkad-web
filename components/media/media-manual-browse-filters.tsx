@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import {
   Search,
   X,
@@ -36,6 +37,15 @@ import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
 import { NETWORK_BROWSE_TYPE_CHIPS } from "@/lib/media-network-types";
 import { MediaMapActiveFiltersBar } from "@/components/media-map/media-map-active-filters-bar";
+import {
+  MediaFilterVaulSheet,
+  MediaSortVaulSheet,
+} from "@/components/discovery/media-vaul-sheets";
+import {
+  MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID,
+  MediaMobileBottomBar,
+  type MediaMobileViewSegment,
+} from "@/components/discovery/media-mobile-bottom-bar";
 import { DiscoveryPageHeader } from "@/components/discovery/page-header";
 import {
   DiscoveryFilterSheetHeader,
@@ -157,6 +167,11 @@ export type MediaManualBrowseFiltersProps = {
   mapPageViewModes?: boolean;
   /** `/media` 앱 셸 — 검색+필터+정렬+뷰모드를 단일 반응형 바로 통합(데스크톱/모바일 이중 마크업 제거) */
   unifiedToolbar?: boolean;
+  /** PR B — 모바일 하단 바 + vaul 필터/정렬 시트 (`/media`, `/media/map` 앱 셸) */
+  mobileBottomBar?: boolean;
+  /** 모바일 하단 바 목록/지도 세그먼트 (페이지에서 제어) */
+  mobileViewSegment?: MediaMobileViewSegment;
+  onMobileViewSegmentChange?: (segment: MediaMobileViewSegment) => void;
   /** network: `/media/network` 전용 유형 칩 */
   variant?: "media" | "network";
   networkType?: string;
@@ -205,13 +220,18 @@ export function MediaManualBrowseFilters({
   mapCompactFilters = false,
   mapPageViewModes = false,
   unifiedToolbar = false,
+  mobileBottomBar = false,
+  mobileViewSegment = "list",
+  onMobileViewSegmentChange,
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
 }: MediaManualBrowseFiltersProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
-  /** 모바일 필터 바텀시트 */
+  /** 모바일 필터 바텀시트 (vaul) */
   const [sheetOpen, setSheetOpen] = useState(false);
+  const [sortSheetOpen, setSortSheetOpen] = useState(false);
+  const [bottomBarSlot, setBottomBarSlot] = useState<HTMLElement | null>(null);
   /** 데스크탑(sm+) 접이형 필터 패널 */
   const [desktopPanelOpen, setDesktopPanelOpen] = useState(false);
   /** `/media/map` — 유형·고급 필터 인라인 아코디언 */
@@ -264,6 +284,27 @@ export function MediaManualBrowseFilters({
       )
     : [];
 
+  const mediaBrowseActiveChips =
+    mobileBottomBar && variant === "media"
+      ? buildMapBrowseActiveFilterChips(
+          {
+            mainCategory,
+            subCategory,
+            target,
+            regionMain,
+            regionSub,
+            priceMin,
+            priceMax,
+            features,
+          },
+          isKo,
+        )
+      : mapBrowseFilterChips;
+
+  const sortLabel =
+    MEDIA_SEARCH_SORT_OPTIONS.find((o) => o.value === sort)?.label ??
+    (isKo ? "정렬" : "Sort");
+
   /** 지도 compact — 접힌 상태 배지 (유형·고급 필터 전체) */
   const mapCompactFilterCount = mapBrowseFilterChips.length;
 
@@ -274,7 +315,13 @@ export function MediaManualBrowseFilters({
   const showMapActiveFilterStrip =
     mapCompactFilters &&
     !mapFiltersExpanded &&
-    mapBrowseFilterChips.length > 0;
+    mapBrowseFilterChips.length > 0 &&
+    !(mobileBottomBar && unifiedToolbar);
+
+  const showMobileActiveSummary =
+    mobileBottomBar &&
+    unifiedToolbar &&
+    mediaBrowseActiveChips.length > 0;
 
   const showDesktopTypeChipRow = !mapCompactFilters && !unifiedToolbar;
 
@@ -440,15 +487,20 @@ export function MediaManualBrowseFilters({
     setMapFiltersExpandedHydrated(true);
   }, [mapCompactFilters, mapFiltersExpandedHydrated]);
 
-  // 바텀시트 열림 동안 배경 스크롤 잠금
+  // 바텀시트 열림 동안 배경 스크롤 잠금 (레거시 오버레이만 — vaul 은 자체 처리)
   useEffect(() => {
-    if (!sheetOpen) return;
+    if (!sheetOpen || mobileBottomBar) return;
     const prev = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prev;
     };
-  }, [sheetOpen]);
+  }, [sheetOpen, mobileBottomBar]);
+
+  useEffect(() => {
+    if (!mobileBottomBar || typeof document === "undefined") return;
+    setBottomBarSlot(document.getElementById(MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID));
+  }, [mobileBottomBar]);
 
   // 데스크탑 패널: 바깥 클릭 닫기
   useEffect(() => {
@@ -834,8 +886,93 @@ export function MediaManualBrowseFilters({
         titleAs="h3"
       />
 
-      {/* `/media` 앱 셸 — 단일 반응형 컨트롤 바 (검색 + 필터 + 정렬 + 뷰모드) */}
-      {unifiedToolbar ? (
+      {/* `/media` 앱 셸 — PR B: 모바일 상단(검색+요약) / 데스크톱 인라인 필터 */}
+      {unifiedToolbar && mobileBottomBar ? (
+        <>
+          <div className="space-y-2 md:hidden">
+            {searchInput}
+            {showMobileActiveSummary ? (
+              <MediaMapActiveFiltersBar
+                chips={mediaBrowseActiveChips}
+                onRemove={removeMapBrowseFilterChip}
+                onClearAll={clearAllFilters}
+                isKo={isKo}
+              />
+            ) : activeFilterCount > 0 ? (
+              <p className="tkad-type-meta text-tkad-muted">
+                <span className="inline-flex items-center rounded-full bg-violet-500/15 px-2.5 py-0.5 font-semibold text-tkad-accent">
+                  {isKo ? `필터 ${activeFilterCount}` : `${activeFilterCount} filters`}
+                </span>
+              </p>
+            ) : null}
+          </div>
+          <div className="hidden min-w-0 flex-wrap items-center gap-2 md:flex">
+            {searchInput}
+            <div className="relative shrink-0" ref={desktopPanelRef}>
+              <button
+                type="button"
+                onClick={() => setDesktopPanelOpen((o) => !o)}
+                className="inline-flex items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+                aria-expanded={desktopPanelOpen}
+                aria-haspopup="dialog"
+                aria-label={isKo ? "필터 열기" : "Open filters"}
+              >
+                <SlidersHorizontal className="h-4 w-4" aria-hidden />
+                {isKo ? "필터" : "Filters"}
+                <ChevronDown
+                  className={cn(
+                    "h-3.5 w-3.5 opacity-60 transition-transform",
+                    desktopPanelOpen && "rotate-180",
+                  )}
+                  aria-hidden
+                />
+                {activeFilterCount > 0 ? (
+                  <span className="ml-0.5 inline-flex h-5 min-w-[1.25rem] items-center justify-center rounded-full bg-violet-500 px-1.5 text-[11px] font-bold leading-none text-white">
+                    {activeFilterCount}
+                  </span>
+                ) : null}
+              </button>
+              {desktopPanelOpen ? (
+                <div
+                  role="dialog"
+                  aria-modal="false"
+                  className="absolute right-0 top-[calc(100%+0.35rem)] z-50 flex w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]"
+                >
+                  <div className="border-b border-gray-100 px-4 py-3 dark:border-white/10">
+                    <p className="text-sm font-bold text-gray-900 dark:text-white">
+                      {isKo ? "필터" : "Filters"}
+                    </p>
+                  </div>
+                  <div className="max-h-[min(70vh,28rem)] space-y-4 overflow-y-auto px-4 py-4">
+                    {renderFilterAxes(true)}
+                  </div>
+                  <div className="flex items-center gap-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
+                    <button
+                      type="button"
+                      onClick={clearAllFilters}
+                      disabled={activeFilterCount === 0}
+                      className="rounded-xl border border-gray-200 px-4 py-2 text-sm font-medium text-gray-600 disabled:opacity-40 dark:border-white/10 dark:text-white/70"
+                    >
+                      {isKo ? "초기화" : "Reset"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setDesktopPanelOpen(false)}
+                      className="tkad-neon-cta-clean flex-1 rounded-xl px-4 py-2 text-sm font-bold text-white"
+                    >
+                      {desktopPanelCtaLabel}
+                    </button>
+                  </div>
+                </div>
+              ) : null}
+            </div>
+            {sortSelect}
+            {viewModeToggle}
+            {toolbarEnd}
+          </div>
+          <div className="hidden min-w-0 md:block">{renderTypeAxis(false)}</div>
+        </>
+      ) : unifiedToolbar ? (
         <>
           <div className="flex min-w-0 flex-wrap items-center gap-2">
             {searchInput}
@@ -987,7 +1124,7 @@ export function MediaManualBrowseFilters({
         </div>
       ) : null}
 
-      {/* 모바일 툴바: [필터] · [정렬] · [보기] (PR #207) */}
+      {/* 모바일 툴바: [필터] · [정렬] · [보기] (PR #207) — PR B 하단 바 사용 시 숨김 */}
       {!unifiedToolbar ? (
       <div className="flex min-w-0 flex-wrap items-center gap-2 sm:hidden">
         <button
@@ -1026,8 +1163,42 @@ export function MediaManualBrowseFilters({
         />
       ) : null}
 
-      {/* 필터 바텀시트 — unifiedToolbar 일 때는 전 브레이크포인트에서 사용 */}
-      {sheetOpen ? (
+      {/* PR B — vaul 필터/정렬 + 하단 바 포털 */}
+      {mobileBottomBar && unifiedToolbar ? (
+        <>
+          <MediaFilterVaulSheet
+            open={sheetOpen}
+            onOpenChange={setSheetOpen}
+            isKo={isKo}
+            activeFilterCount={activeFilterCount}
+            onReset={clearAllFilters}
+            applyLabel={sheetCtaLabel}
+          >
+            {renderFilterAxes(true)}
+          </MediaFilterVaulSheet>
+          <MediaSortVaulSheet
+            open={sortSheetOpen}
+            onOpenChange={setSortSheetOpen}
+            isKo={isKo}
+            sort={sort}
+            onSortChange={onSortChange}
+          />
+          {bottomBarSlot
+            ? createPortal(
+                <MediaMobileBottomBar
+                  isKo={isKo}
+                  activeFilterCount={activeFilterCount}
+                  sortLabel={sortLabel}
+                  viewSegment={mobileViewSegment}
+                  onViewSegmentChange={onMobileViewSegmentChange}
+                  onOpenFilters={() => setSheetOpen(true)}
+                  onOpenSort={() => setSortSheetOpen(true)}
+                />,
+                bottomBarSlot,
+              )
+            : null}
+        </>
+      ) : sheetOpen ? (
         <div
           className={cn("fixed inset-0 z-50", !unifiedToolbar && "sm:hidden")}
           role="dialog"
