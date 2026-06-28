@@ -24,6 +24,7 @@ import {
   Network,
   MoreHorizontal,
   SlidersHorizontal,
+  Filter,
   type LucideIcon,
 } from "lucide-react";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
@@ -269,6 +270,8 @@ export function MediaManualBrowseFilters({
     variant === "media" ? features : "",
   ].filter(Boolean).length;
 
+  const mobileVaulSheets = mobileBottomBar || mobileStickyToolbar;
+
   /** 데스크탑 [필터] 뱃지 — 노출된 유형 칩 제외, 접힌 축만 */
   const collapsedFilterCount = [
     variant === "media" ? target : "",
@@ -347,8 +350,6 @@ export function MediaManualBrowseFilters({
     compareCount > 0;
 
   const mapToolbarCompact = mapPageViewModes;
-
-  const mobileVaulSheets = mobileBottomBar || mobileStickyToolbar;
 
   const total = totalCount;
 
