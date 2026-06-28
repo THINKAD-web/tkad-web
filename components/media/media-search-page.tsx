@@ -11,7 +11,6 @@ import {
   type DiscoveryFilterBarViewMode,
   type MediaMobileViewSegment,
 } from "@/components/discovery/filter-bar";
-import { MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID } from "@/components/discovery/media-mobile-bottom-bar";
 import CompareBar from "@/components/compare-bar";
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
@@ -485,26 +484,65 @@ function MediaSearchPageInner({
 
   const hasMore = media.length < total;
 
+  const navigateToMap = useCallback(() => {
+    const qs = buildMediaBrowseQueryString({
+      query,
+      mainCategory,
+      subCategory,
+      target,
+      regionMain,
+      regionSub,
+      priceMin,
+      priceMax,
+      features,
+      sort,
+      catalogVariant,
+      networkType,
+    });
+    router.push(qs ? `/media/map?${qs}` : "/media/map");
+  }, [
+    catalogVariant,
+    features,
+    mainCategory,
+    networkType,
+    priceMax,
+    priceMin,
+    query,
+    regionMain,
+    regionSub,
+    router,
+    sort,
+    subCategory,
+    target,
+  ]);
+
   useEffect(() => {
     try {
       const stored = localStorage.getItem(VIEW_MODE_STORAGE_KEY);
       if (
         stored === "feed" ||
         stored === "card" ||
-        stored === "compact" ||
-        stored === "map"
+        stored === "compact"
       ) {
         setViewMode(stored);
         return;
       }
+      if (stored === "map") {
+        if (appShellEnabled && !embedded && !plannerMode) {
+          setViewMode("feed");
+        } else {
+          setViewMode("map");
+        }
+        return;
+      }
       const legacyBrowse = localStorage.getItem("mediaBrowseMode");
-      if (legacyBrowse === "map") {
+      if (legacyBrowse === "map" && !appShellEnabled) {
         setViewMode("map");
       }
     } catch {
       /* ignore */
     }
-  }, []);
+  }, [appShellEnabled, embedded, plannerMode]);
 
   useEffect(() => {
     const updateMapHeight = () => {
@@ -526,6 +564,12 @@ function MediaSearchPageInner({
   }, [viewMode, mapSelectedId]);
 
   const handleViewModeChange = (mode: ViewMode) => {
+    if (mode === "map") {
+      if (appShell) {
+        navigateToMap();
+        return;
+      }
+    }
     setViewMode(mode);
     try {
       localStorage.setItem(VIEW_MODE_STORAGE_KEY, mode);
@@ -659,44 +703,14 @@ function MediaSearchPageInner({
   const handleMobileViewSegmentChange = useCallback(
     (segment: MediaMobileViewSegment) => {
       if (segment === "map") {
-        const qs = buildMediaBrowseQueryString({
-          query,
-          mainCategory,
-          subCategory,
-          target,
-          regionMain,
-          regionSub,
-          priceMin,
-          priceMax,
-          features,
-          sort,
-          catalogVariant,
-          networkType,
-        });
-        router.push(qs ? `/media/map?${qs}` : "/media/map");
+        navigateToMap();
         return;
       }
       if (viewMode === "map") {
         handleViewModeChange("feed");
       }
     },
-    [
-      catalogVariant,
-      features,
-      handleViewModeChange,
-      mainCategory,
-      networkType,
-      priceMax,
-      priceMin,
-      query,
-      regionMain,
-      regionSub,
-      router,
-      sort,
-      subCategory,
-      target,
-      viewMode,
-    ],
+    [handleViewModeChange, navigateToMap, viewMode],
   );
 
   const edgePad = embedded || plannerMode ? "px-0" : "px-4";
@@ -735,7 +749,10 @@ function MediaSearchPageInner({
       totalCount={total}
       loading={loading}
       unifiedToolbar={appShell}
-      mobileBottomBar={appShell}
+      mobileBottomBar={false}
+      mobileStickyToolbar={appShell}
+      listPageLayout={appShell}
+      onNavigateToMap={navigateToMap}
       mobileViewSegment={mobileViewSegment}
       onMobileViewSegmentChange={handleMobileViewSegmentChange}
       compareCount={plannerMode ? 0 : compareEntries.length}
@@ -767,7 +784,7 @@ function MediaSearchPageInner({
 
   /** 본문(매체 목록/지도) — 외부 여백 없이 순수 콘텐츠만. 셸/문서 흐름 양쪽에서 재사용 */
   const bodyContent =
-    viewMode === "map" ? (
+    viewMode === "map" && !appShell ? (
       <div
         className="relative min-w-0 overflow-x-clip"
         data-screenshot="media-view-map"
@@ -943,20 +960,9 @@ function MediaSearchPageInner({
   if (appShell) {
     return (
       <>
-        <div className="tkad-media-app-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
-          {/* 상단(flex-none): 항상 고정되는 단일 컨트롤 바 */}
-          <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-4 pt-3 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95">
-            {filtersBar}
-          </div>
-          {/* 본문(flex-1, min-h-0): 이 영역 안에서만 스크롤 */}
-          <div className="min-h-0 flex-1 overflow-y-auto px-4 pt-3 pb-6">
-            {bodyContent}
-          </div>
-          <div
-            id={MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID}
-            className="flex-none shrink-0 md:hidden"
-            aria-hidden={false}
-          />
+        <div className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
+          <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
+          <div className="min-w-0 px-4 pt-3 pb-6">{bodyContent}</div>
         </div>
         {compareBar}
       </>
