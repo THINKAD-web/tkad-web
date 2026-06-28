@@ -4,6 +4,7 @@ import {
   countPublicMediaCatalog,
   fetchFilteredMediaCatalogItems,
 } from "@/lib/media-catalog";
+import type { MediaCatalogSort } from "@/lib/media-catalog-types";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
@@ -13,6 +14,25 @@ type Props = {
   params: Promise<{ locale: string }>;
   searchParams: Promise<{ [key: string]: string | undefined }>;
 };
+
+function parseOptionalPrice(raw: string | undefined): number | undefined {
+  if (!raw?.trim()) return undefined;
+  const n = Number(raw);
+  return Number.isFinite(n) ? n : undefined;
+}
+
+function parseSort(raw: string | undefined): MediaCatalogSort {
+  if (
+    raw === "price_asc" ||
+    raw === "price_desc" ||
+    raw === "newest" ||
+    raw === "recommended" ||
+    raw === "popular"
+  ) {
+    return raw;
+  }
+  return "popular";
+}
 
 /**
  * `/media` — 고정 앱 셸(fixed app shell).
@@ -24,20 +44,25 @@ export default async function MediaPage({ params, searchParams }: Props) {
   const sp = await searchParams;
 
   const catalogOpts = {
-    sort: "popular" as const,
+    sort: parseSort(sp.sort),
     limit: 30,
     category: sp.category,
+    mainCategory: sp.mainCategory,
+    subCategory: sp.subCategory,
     target: sp.target,
     region: sp.region,
+    regionMain: sp.regionMain,
+    regionSub: sp.regionSub,
+    q: sp.q,
+    features: sp.features,
+    networkType: sp.networkType,
+    priceMin: parseOptionalPrice(sp.priceMin),
+    priceMax: parseOptionalPrice(sp.priceMax),
   };
 
   const [initialCatalogItems, initialTotal] = await Promise.all([
     fetchFilteredMediaCatalogItems(catalogOpts).catch(() => []),
-    countPublicMediaCatalog({
-      category: sp.category,
-      target: sp.target,
-      region: sp.region,
-    }).catch(() => 0),
+    countPublicMediaCatalog(catalogOpts).catch(() => 0),
   ]);
   const initialMedia = initialCatalogItems.map(mapMediaItemToHomeCatalog);
 

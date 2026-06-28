@@ -33,7 +33,10 @@ export const DISCOVERY_TABS: SubTab[] = [
         !p.startsWith("/media/targets")),
   },
   { label: "지도에서 찾기", href: "/media/map", icon: Map },
-  { label: "네트워크 매체", href: "/media/network", icon: Network },
+  { label: "네트워크 매체", href: "/media?features=network", icon: Network,
+    match: (p) =>
+      p === "/media/network" || p.startsWith("/media/network/"),
+  },
   {
     label: "캠페인 목적",
     href: "/media/targets",

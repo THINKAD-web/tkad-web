@@ -14,7 +14,7 @@
 
 - **`app/[locale]/layout.tsx`** 가 `BrutalNav` (헤더) + `BrutalFooter` (푸터) 를 모든 locale 페이지에 래핑.
 - 헤더 IA (b930b10 기준):
-  - 매체 검색 그룹: `/media`, `/media/map`, `/media/network`, `/media/keyword-filter`
+  - 매체 검색 그룹: `/media`, `/media/map`, `/media?features=network` (구 `/media/network` 리다이렉트), `/media/keyword-filter`
   - 트렌드 & 학습 그룹: `/cases`, `/insights`, `/academy`
   - 솔루션 그룹: `/recommend`, `/planner`, `/compare`, `/quote`
   - 회사: `/services`, `/contact`
@@ -745,7 +745,7 @@
 
 ### 라우트
 - `/[locale]` (홈)
-- `/[locale]/media`, `/[locale]/media/[id]`, `/[locale]/media/map`, `/[locale]/media/network`, `/[locale]/media/keyword-filter`
+- `/[locale]/media`, `/[locale]/media/[id]`, `/[locale]/media/map`, `/[locale]/media?features=network`, `/[locale]/media/network/[id]` (상세), `/[locale]/media/keyword-filter`
 - `/[locale]/recommend`
 - `/[locale]/planner`, `/[locale]/planner/shared/[id]`
 - `/[locale]/compare`

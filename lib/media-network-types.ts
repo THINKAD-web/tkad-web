@@ -104,6 +104,27 @@ export function networkDbTypesForCatalogFilter(filter: string): string[] {
   return [f];
 }
 
+/** 병합 카탈로그 — `networkType` 칩(digital/static/mobile) 일치 */
+export function mediaItemMatchesNetworkTypeChip(
+  m: MediaItem,
+  networkType: string | null | undefined,
+): boolean {
+  const f = networkType?.trim().toLowerCase();
+  if (!f) return true;
+  if (m.catalogSource !== "network" && m.mediaMainCategory !== "network") {
+    return false;
+  }
+  const dbType = (m.networkSubtype ?? m.subCategory ?? "")
+    .trim()
+    .toLowerCase();
+  const allowed = networkDbTypesForCatalogFilter(f);
+  if (allowed.some((t) => dbType === t)) return true;
+  if (isValidCatalogMediaType(f)) {
+    return resolveNetworkCatalogType(m.networkSubtype ?? m.subCategory) === f;
+  }
+  return false;
+}
+
 export function networkVenueTag(venueCode: string): string {
   return `venue:${venueCode}`;
 }
@@ -148,7 +169,7 @@ export const NETWORK_TYPE_LABELS: Record<string, { ko: string; en: string }> = {
   gym: { ko: "헬스장·피트니스", en: "Gym / fitness" },
 };
 
-/** `/media/network` 목록 필터 — 일반 `/media` 와 동일 3분류 */
+/** `/media?features=network` 목록 필터 — 일반 `/media` 와 동일 3분류 */
 export const NETWORK_BROWSE_TYPE_CHIPS = [
   { value: "", labelKo: "전체", labelEn: "All", icon: "Network" },
   { value: "digital", labelKo: "디지털", labelEn: "Digital", icon: "Monitor" },
