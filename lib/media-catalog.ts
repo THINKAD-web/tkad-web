@@ -49,6 +49,7 @@ type BrowseListOpts = {
   regionSub?: string;
   q?: string;
   features?: string;
+  networkType?: string;
   priceMin?: number;
   priceMax?: number;
 };
@@ -71,6 +72,7 @@ function toMergedQuery(opts: BrowseListOpts): MergedBrowseQuery {
     regionSub: opts.regionSub,
     q: opts.q,
     features: opts.features,
+    networkType: opts.networkType,
     priceMin: opts.priceMin,
     priceMax: opts.priceMax,
   };
@@ -102,6 +104,7 @@ export async function fetchFilteredMediaCatalogItems(opts: {
   regionSub?: string;
   q?: string;
   features?: string;
+  networkType?: string;
   priceMin?: number;
   priceMax?: number;
 }): Promise<MediaItem[]> {
@@ -166,6 +169,7 @@ export async function countPublicMediaCatalog(opts: {
   regionSub?: string;
   q?: string;
   features?: string;
+  networkType?: string;
   priceMin?: number;
   priceMax?: number;
 }): Promise<number> {

@@ -1,6 +1,7 @@
 import type { MapBrowseFilters } from "@/lib/media-map/browse-filters";
+import { discoveryFeaturesIncludeNetwork } from "@/lib/media-discovery-client-filter";
 
-/** `/media` · `/media/network` browse 필터 URL 쿼리 상태 */
+/** `/media` browse 필터 URL 쿼리 상태 */
 export type MediaBrowseFilterQueryState = {
   query: string;
   mainCategory: string;
@@ -29,7 +30,10 @@ export function buildMediaBrowseQueryString(
   if (state.priceMin.trim()) params.set("priceMin", state.priceMin.trim());
   if (state.priceMax.trim()) params.set("priceMax", state.priceMax.trim());
   if (state.features.trim()) params.set("features", state.features.trim());
-  if (state.catalogVariant === "network" && state.networkType) {
+  if (
+    discoveryFeaturesIncludeNetwork(state.features) &&
+    state.networkType
+  ) {
     params.set("networkType", state.networkType);
   }
   if (state.sort && state.sort !== "popular") params.set("sort", state.sort);

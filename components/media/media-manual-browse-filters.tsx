@@ -172,7 +172,7 @@ export type MediaManualBrowseFiltersProps = {
   /** 모바일 하단 바 목록/지도 세그먼트 (페이지에서 제어) */
   mobileViewSegment?: MediaMobileViewSegment;
   onMobileViewSegmentChange?: (segment: MediaMobileViewSegment) => void;
-  /** network: `/media/network` 전용 유형 칩 */
+  /** `features=network` 일 때 네트워크 유형 칩(전체/디지털/고정형/이동형) */
   variant?: "media" | "network";
   networkType?: string;
   onNetworkTypeChange?: (v: string) => void;
@@ -243,7 +243,7 @@ export function MediaManualBrowseFilters({
   const activeMain = MEDIA_CATEGORIES.find((m) => m.id === mainCategory);
   const activeRegion = MEDIA_BROWSE_REGIONS.find((r) => r.id === regionMain);
 
-  // "네트워크 매체" 분류 칩은 전용 /media/network 탭과 중복되어 혼동 → 매체유형 목록에서 제외
+  // 네트워크 매체는 `features=network` 로 전용 유형 칩 표시 — 일반 유형 목록의 network id 는 제외
   const mediaTypeCategories = MEDIA_CATEGORIES.filter((m) => m.id !== "network");
 
   /** 모바일 바텀시트 — 전체 축 카운트 (PR #207) */

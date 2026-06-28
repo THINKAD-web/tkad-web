@@ -26,6 +26,7 @@ export type PublicMediaQueryParams = {
   priceMin?: number | null;
   priceMax?: number | null;
   features?: string | null;
+  networkType?: string | null;
   available?: boolean | null;
   operatingHours?: string | null;
   sort?: PublicMediaSort | null;
@@ -218,6 +219,7 @@ export function parsePublicMediaQuery(
     priceMin: parseNum(sp.get("priceMin")),
     priceMax: parseNum(sp.get("priceMax")),
     features: sp.get("features"),
+    networkType: sp.get("networkType"),
     operatingHours: sp.get("operatingHours"),
     available:
       sp.get("available") === "true"

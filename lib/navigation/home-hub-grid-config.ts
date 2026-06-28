@@ -74,7 +74,7 @@ export const HOME_HUB_SECTIONS: HomeHubSection[] = [
       },
       {
         id: "media-network",
-        href: "/media/network",
+        href: "/media?features=network",
         labelKo: "네트워크 매체",
         labelEn: "Network media",
         icon: Network,

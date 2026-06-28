@@ -1,5 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
-import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
+import {
+  filterMediaByDiscoveryChips,
+  discoveryFeaturesIncludeNetwork,
+} from "@/lib/media-discovery-client-filter";
+import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type {
   PublicMediaQueryParams,
@@ -21,6 +25,7 @@ export type MergedBrowseQuery = Pick<
   | "priceMin"
   | "priceMax"
   | "features"
+  | "networkType"
   | "available"
   | "operatingHours"
   | "sort"
@@ -65,6 +70,10 @@ export function applyMergedBrowseExtraFilters(
     out = out.filter((m) =>
       m.operatingHours?.toLowerCase().includes(needle),
     );
+  }
+  const networkType = params.networkType?.trim();
+  if (networkType && discoveryFeaturesIncludeNetwork(params.features)) {
+    out = out.filter((m) => mediaItemMatchesNetworkTypeChip(m, networkType));
   }
   return out;
 }

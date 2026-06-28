@@ -68,7 +68,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     items: [
       { id: "media-search", href: "/media", icon: Search },
       { id: "map-search", href: "/media/map", icon: MapPin },
-      { id: "media-network", href: "/media/network", icon: Network },
+      { id: "media-network", href: "/media?features=network", icon: Network },
       { id: "campaign-targets", href: "/media/targets", icon: Target },
     ],
   },

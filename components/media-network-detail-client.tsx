@@ -237,7 +237,7 @@ export default function MediaNetworkDetailClient({
       <section className="bg-navy pb-8 pt-6 sm:pb-10 sm:pt-8">
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-6 px-4 sm:px-6 lg:px-12">
           <div className="flex items-start justify-between gap-3">
-            <Link href="/media">
+            <Link href="/media?features=network">
               <Button
                 variant="ghost"
                 size="sm"

@@ -84,6 +84,16 @@ function matchesTargetChip(m: MediaItem, target: string): boolean {
 }
 
 /** 클라이언트 카탈로그 — 매체 검색·견적 위저드 칩 필터 */
+export function discoveryFeaturesIncludeNetwork(
+  features: string | null | undefined,
+): boolean {
+  if (!features?.trim()) return false;
+  return features
+    .split(/[,，]/)
+    .map((s) => s.trim().toLowerCase())
+    .includes("network");
+}
+
 function parsePriceWon(raw: string | undefined): number | null {
   if (!raw?.trim()) return null;
   const n = Number(raw);

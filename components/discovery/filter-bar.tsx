@@ -2,7 +2,7 @@
 
 /**
  * 발견하기 필터 바 — `MediaManualBrowseFilters` 공용 래퍼.
- * `/media`, `/media/map`, `/media/network`, `/media/targets`, `/media/packages` 가
+ * `/media`, `/media/map`, `/media?features=network`, `/media/targets`, `/media/packages` 가
  * 동일 props·마크업 계약을 공유한다.
  */
 export {

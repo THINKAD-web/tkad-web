@@ -34,8 +34,10 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
-import { MEDIA_BROWSE_REGIONS } from "@/lib/media-browse-regions";
-import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
+import {
+  filterMediaByDiscoveryChips,
+  discoveryFeaturesIncludeNetwork,
+} from "@/lib/media-discovery-client-filter";
 import { mediaItemDetailPath } from "@/lib/media-slug";
 import { useRouter, usePathname } from "@/i18n/navigation";
 import {
@@ -156,7 +158,7 @@ interface Props {
   initialCategory?: string;
   initialTarget?: string;
   initialRegion?: string;
-  /** `/media/network` — 네트워크 매체 전용 카탈로그 */
+  /** @deprecated 네트워크 목록은 `/media?features=network` — 리다이렉트 호환만 */
   catalogVariant?: "media" | "network";
   initialNetworkType?: string;
   /** `/media` 전용 — 고정 앱 셸(히어로/푸터 제거, 내부 스크롤). 이 라우트에서만 true */
@@ -222,6 +224,11 @@ function MediaSearchPageInner({
   const [networkType, setNetworkType] = useState(initialFromUrl.networkType);
   const [sort, setSort] = useState(initialFromUrl.sort);
   const [viewMode, setViewMode] = useState<ViewMode>("feed");
+  const networkBrowse = useMemo(
+    () =>
+      discoveryFeaturesIncludeNetwork(features) || catalogVariant === "network",
+    [features, catalogVariant],
+  );
   const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
   const [catalogItems, setCatalogItems] =
     useState<MediaItem[]>(initialCatalogItems);
@@ -378,20 +385,6 @@ function MediaSearchPageInner({
     [compareEntries, catalogItems],
   );
 
-  const resolveRegionMainLabel = useCallback((id: string) => {
-    if (!id) return "";
-    return MEDIA_BROWSE_REGIONS.find((r) => r.id === id)?.label ?? id;
-  }, []);
-
-  const resolveRegionSubLabel = useCallback(
-    (mainId: string, subId: string) => {
-      if (!subId) return "";
-      const main = MEDIA_BROWSE_REGIONS.find((r) => r.id === mainId);
-      return main?.sub.find((s) => s.id === subId)?.label ?? subId;
-    },
-    [],
-  );
-
   const fetchMedia = useCallback(
     async (opts: { page: number; append: boolean }) => {
       if (opts.append) setLoadingMore(true);
@@ -428,7 +421,8 @@ function MediaSearchPageInner({
 
         const params = new URLSearchParams();
         if (query) params.set("q", query);
-        if (catalogVariant === "network") {
+        if (networkBrowse) {
+          params.set("features", features.trim() || "network");
           if (networkType) params.set("networkType", networkType);
         } else {
           if (mainCategory) params.set("mainCategory", mainCategory);
@@ -436,22 +430,8 @@ function MediaSearchPageInner({
           if (target) params.set("target", target);
           if (features.trim()) params.set("features", features.trim());
         }
-        if (regionMain) {
-          params.set(
-            "regionMain",
-            catalogVariant === "network"
-              ? resolveRegionMainLabel(regionMain)
-              : regionMain,
-          );
-        }
-        if (regionSub) {
-          params.set(
-            "regionSub",
-            catalogVariant === "network"
-              ? resolveRegionSubLabel(regionMain, regionSub)
-              : regionSub,
-          );
-        }
+        if (regionMain) params.set("regionMain", regionMain);
+        if (regionSub) params.set("regionSub", regionSub);
         if (priceMin.trim()) params.set("priceMin", priceMin.trim());
         if (priceMax.trim()) params.set("priceMax", priceMax.trim());
         params.set("sort", sort);
@@ -459,11 +439,7 @@ function MediaSearchPageInner({
         params.set("limit", String(PAGE_SIZE));
         if (plannerMode) params.set("plannerMode", "true");
 
-        const apiPath =
-          catalogVariant === "network"
-            ? "/api/public/media-network"
-            : "/api/public/media";
-        const res = await fetch(`${apiPath}?${params}`, {
+        const res = await fetch(`/api/public/media?${params}`, {
           cache: "no-store",
         });
         if (res.ok) {
@@ -491,7 +467,7 @@ function MediaSearchPageInner({
     },
     [
       query,
-      catalogVariant,
+      networkBrowse,
       networkType,
       mainCategory,
       subCategory,
@@ -504,8 +480,6 @@ function MediaSearchPageInner({
       sort,
       plannerMode,
       initialCatalogItems,
-      resolveRegionMainLabel,
-      resolveRegionSubLabel,
     ],
   );
 
@@ -732,7 +706,7 @@ function MediaSearchPageInner({
   const filtersBar = (
     <DiscoveryFilterBar
       isKo={isKo}
-      variant={catalogVariant}
+      variant={networkBrowse ? "network" : "media"}
       networkType={networkType}
       onNetworkTypeChange={setNetworkType}
       query={query}
