@@ -38,7 +38,7 @@ import {
   discoveryFeaturesIncludeNetwork,
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemDetailPath } from "@/lib/media-slug";
-import { useRouter, usePathname } from "@/i18n/navigation";
+import { useRouter } from "@/i18n/navigation";
 import {
   buildMediaBrowseQueryString,
   type MediaBrowseFilterQueryState,
@@ -190,7 +190,6 @@ function MediaSearchPageInner({
   const tMedia = useTranslations("media");
   const searchParams = useSearchParams();
   const router = useRouter();
-  const pathname = usePathname();
   const toast = useAppToast();
   const { count: planCount } = usePlanCart();
 
@@ -239,8 +238,34 @@ function MediaSearchPageInner({
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const catalogFetchGeneration = useRef(0);
-  /** router.replace 로 쓴 쿼리 — 내부 동기화 시 searchParams effect 가 state 를 덮어쓰지 않게 */
+  /** replaceState 로 쓴 쿼리 — popstate 외 URL→state 역동기화 방지 */
   const lastPushedBrowseQueryRef = useRef<string | null>(null);
+  const browseFilterSettersRef = useRef({
+    setQuery,
+    setMainCategory,
+    setSubCategory,
+    setTarget,
+    setRegionMain,
+    setRegionSub,
+    setPriceMin,
+    setPriceMax,
+    setFeatures,
+    setSort,
+    setNetworkType,
+  });
+  browseFilterSettersRef.current = {
+    setQuery,
+    setMainCategory,
+    setSubCategory,
+    setTarget,
+    setRegionMain,
+    setRegionSub,
+    setPriceMin,
+    setPriceMax,
+    setFeatures,
+    setSort,
+    setNetworkType,
+  };
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
   );
@@ -253,34 +278,54 @@ function MediaSearchPageInner({
   }, []);
 
   useEffect(() => {
-    const incoming = searchParams.toString();
-    if (incoming === (lastPushedBrowseQueryRef.current ?? "")) return;
-    const next = readBrowseFilterStateFromSearchParams(searchParams, {
+    if (plannerMode || embedded) return;
+    const applyFromWindowUrl = () => {
+      if (typeof window === "undefined") return;
+      const incoming = window.location.search.replace(/^\?/, "");
+      if (incoming === (lastPushedBrowseQueryRef.current ?? "")) return;
+      const sp = new URLSearchParams(window.location.search);
+      const next = readBrowseFilterStateFromSearchParams(sp, {
+        catalogVariant,
+        initialCategory,
+        initialTarget,
+        initialNetworkType,
+      });
+      applyBrowseFilterUrlState(next, browseFilterSettersRef.current);
+      lastPushedBrowseQueryRef.current = buildMediaBrowseQueryString({
+        query: next.query,
+        mainCategory: next.mainCategory,
+        subCategory: next.subCategory,
+        target: next.target,
+        regionMain: next.regionMain,
+        regionSub: next.regionSub,
+        priceMin: next.priceMin,
+        priceMax: next.priceMax,
+        features: next.features,
+        sort: next.sort,
+        catalogVariant: next.catalogVariant,
+        networkType: next.networkType,
+      });
+    };
+
+    lastPushedBrowseQueryRef.current = buildMediaBrowseQueryString({
+      query,
+      mainCategory,
+      subCategory,
+      target,
+      regionMain,
+      regionSub,
+      priceMin,
+      priceMax,
+      features,
+      sort,
       catalogVariant,
-      initialCategory,
-      initialTarget,
-      initialNetworkType,
+      networkType,
     });
-    applyBrowseFilterUrlState(next, {
-      setQuery,
-      setMainCategory,
-      setSubCategory,
-      setTarget,
-      setRegionMain,
-      setRegionSub,
-      setPriceMin,
-      setPriceMax,
-      setFeatures,
-      setSort,
-      setNetworkType,
-    });
-  }, [
-    searchParams,
-    catalogVariant,
-    initialCategory,
-    initialTarget,
-    initialNetworkType,
-  ]);
+
+    window.addEventListener("popstate", applyFromWindowUrl);
+    return () => window.removeEventListener("popstate", applyFromWindowUrl);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount + back/forward only
+  }, []);
 
   useEffect(() => {
     if (plannerMode || embedded) return;
@@ -299,7 +344,16 @@ function MediaSearchPageInner({
       networkType,
     });
     lastPushedBrowseQueryRef.current = qs;
-    router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    if (typeof window === "undefined") return;
+    const path = window.location.pathname;
+    const cur = window.location.search.replace(/^\?/, "");
+    if (cur === qs) return;
+    const url = qs ? `${path}?${qs}` : path;
+    try {
+      window.history.replaceState(window.history.state, "", url);
+    } catch {
+      /* noop */
+    }
   }, [
     query,
     mainCategory,
@@ -315,8 +369,6 @@ function MediaSearchPageInner({
     networkType,
     plannerMode,
     embedded,
-    pathname,
-    router,
   ]);
 
   const isInCompare = useCallback(

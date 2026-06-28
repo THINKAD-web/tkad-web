@@ -4,6 +4,7 @@ import {
   discoveryFeaturesIncludeNetwork,
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
+import { compareMediaPopularRank } from "@/lib/media-popularity";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type {
   PublicMediaQueryParams,
@@ -78,10 +79,7 @@ export function applyMergedBrowseExtraFilters(
   return out;
 }
 
-/**
- * Discovery browse 인기순 — 플래너 Step 4·지도와 동일하게 `dailyFootTraffic` 우선.
- * (일반 매체 `popularityScore` / 네트워크 `totalLocations` 혼용 방지)
- */
+/** Discovery browse·지도 인기순 — 홈 주간 인기와 동일한 popularity 폴백 우선 */
 export function sortMergedBrowseCatalog(
   items: MediaItem[],
   sort: PublicMediaSort | null | undefined,
@@ -113,14 +111,7 @@ export function sortMergedBrowseCatalog(
     case "popular":
     case "default":
     default:
-      return arr.sort(
-        (a, b) =>
-          (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0) ||
-          (b.popularityScore ?? 0) - (a.popularityScore ?? 0) ||
-          (b.createdAt && a.createdAt
-            ? Date.parse(b.createdAt) - Date.parse(a.createdAt)
-            : 0),
-      );
+      return arr.sort(compareMediaPopularRank);
   }
 }
 

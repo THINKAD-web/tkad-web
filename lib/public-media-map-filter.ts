@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { compareMediaPopularRank } from "@/lib/media-popularity";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
@@ -111,13 +112,6 @@ export function sortMapCatalogItems(
     case "popular":
     case "default":
     default:
-      return arr.sort(
-        (a, b) =>
-          (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0) ||
-          (b.popularityScore ?? 0) - (a.popularityScore ?? 0) ||
-          (b.createdAt && a.createdAt
-            ? Date.parse(b.createdAt) - Date.parse(a.createdAt)
-            : 0),
-      );
+      return arr.sort(compareMediaPopularRank);
   }
 }

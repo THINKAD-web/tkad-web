@@ -17,6 +17,49 @@ export const POPULARITY_BLEND = { days7: 0.6, days30: 0.4 } as const;
  * 누적 조회수 + 매체 본연의 노출/가시성 신호로 의미 있는 차등 정렬을 만든다.
  * (popularityScore 가 쌓이면 그 값이 우선)
  */
+/** browse·지도 인기순 — 홈 주간 인기와 동일 폴백 점수, 유동인구는 tie-break */
+export function compareMediaPopularRank(
+  a: {
+    popularityScore?: number | null;
+    viewCount?: number | null;
+    visibilityScore?: number | null;
+    dailyFootfall?: number | null;
+    dailyFootTraffic?: number | null;
+    impressions?: number | null;
+    instantBookingEnabled?: boolean | null;
+    createdAt?: string | null;
+  },
+  b: {
+    popularityScore?: number | null;
+    viewCount?: number | null;
+    visibilityScore?: number | null;
+    dailyFootfall?: number | null;
+    dailyFootTraffic?: number | null;
+    impressions?: number | null;
+    instantBookingEnabled?: boolean | null;
+    createdAt?: string | null;
+  },
+): number {
+  const toScore = (m: typeof a) =>
+    mediaPopularityFallbackScore({
+      popularityScore: m.popularityScore,
+      viewCount: m.viewCount,
+      visibilityScore: m.visibilityScore,
+      dailyFootfall: m.dailyFootfall ?? m.dailyFootTraffic,
+      impressions: m.impressions,
+      instantBookingEnabled: m.instantBookingEnabled,
+    });
+  const byPopularity = toScore(b) - toScore(a);
+  if (byPopularity !== 0) return byPopularity;
+  const byFoot =
+    (b.dailyFootTraffic ?? b.dailyFootfall ?? 0) -
+    (a.dailyFootTraffic ?? a.dailyFootfall ?? 0);
+  if (byFoot !== 0) return byFoot;
+  const at = a.createdAt ? Date.parse(a.createdAt) : 0;
+  const bt = b.createdAt ? Date.parse(b.createdAt) : 0;
+  return bt - at;
+}
+
 export function mediaPopularityFallbackScore(m: {
   popularityScore?: number | null;
   viewCount?: number | null;
