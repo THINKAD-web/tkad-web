@@ -105,8 +105,6 @@ type Item = MapMapItem;
 
 type Facets = { regions: string[]; types: string[] };
 
-const CART_KEY = "tkad-media-cart-v1";
-
 /** 마커/카드 선택 시 클로즈업 줌(Kakao level, 작을수록 확대). zoomInOnly 로 확대만 적용. */
 const MARKER_FOCUS_ZOOM = 4;
 
@@ -120,22 +118,6 @@ function boundsEqual(a: MapBounds, b: MapBounds, eps = 1e-5): boolean {
     Math.abs(a.neLat - b.neLat) < eps &&
     Math.abs(a.neLng - b.neLng) < eps
   );
-}
-
-function readCart(): string[] {
-  if (typeof window === "undefined") return [];
-  try {
-    const raw = window.localStorage.getItem(CART_KEY);
-    if (!raw) return [];
-    const arr = JSON.parse(raw);
-    return Array.isArray(arr) ? arr.filter((x): x is string => typeof x === "string") : [];
-  } catch {
-    return [];
-  }
-}
-function writeCart(ids: string[]) {
-  if (typeof window === "undefined") return;
-  window.localStorage.setItem(CART_KEY, JSON.stringify(ids));
 }
 
 /** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */
@@ -169,7 +151,6 @@ export default function MediaMapPageClient() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
-  const [cartIds, setCartIds] = useState<string[]>([]);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
   /** 마지막으로 idle 한 지도 중심/줌 — URL 동기화용 */
   const [view, setView] = useState<{ lat: number; lng: number; zoom: number } | null>(
@@ -323,7 +304,6 @@ export default function MediaMapPageClient() {
   }, [emitProgrammaticView]);
 
   useEffect(() => {
-    setCartIds(readCart());
     if (typeof window !== "undefined") {
       const sp = new URLSearchParams(window.location.search);
       if (sp.get("survey") === "1") {
@@ -635,33 +615,12 @@ export default function MediaMapPageClient() {
 
   const selected = selectedItem;
 
-  const inCart = useCallback((id: string) => cartIds.includes(id), [cartIds]);
   const isInCompare = useCallback(
     (id: string) => compareEntries.some((e) => e.id === id),
     [compareEntries],
   );
   const { count: planCount } = usePlanCart();
   const floatingBarOffset = planCount > 0 || compareEntries.length > 0;
-
-  const toggleCart = useCallback(
-    (id: string) => {
-      const item = items.find((x) => x.id === id);
-      const name = item?.name;
-      const prev = readCart();
-      const exists = prev.includes(id);
-      const next = exists ? prev.filter((x) => x !== id) : [...prev, id];
-      writeCart(next);
-      setCartIds(next);
-      if (exists) {
-        toast.warning(
-          name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.",
-        );
-      } else {
-        toast.success(name ? `${name}이(가) 장바구니에 담겼습니다.` : "매체가 장바구니에 담겼습니다.");
-      }
-    },
-    [items, toast],
-  );
 
   const mapCatalog = useMemo<MediaItem[]>(() => {
     const fromItem = (it: Item): MediaItem => ({
@@ -833,7 +792,7 @@ export default function MediaMapPageClient() {
       totalCount={matchTotal}
       loading={loading || (!searchedBounds && !isMapTextSearchActive(browseFilters))}
       compareCount={compareEntries.length}
-      cartCount={cartIds.length}
+      cartCount={planCount}
     />
   );
 
@@ -860,10 +819,8 @@ export default function MediaMapPageClient() {
             selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
             hovered={resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id}
             inCompare={isInCompare(it.id)}
-            inCart={inCart(it.id)}
             onSelect={handleSelect}
             onToggleCompare={() => toggleCompare(it)}
-            onToggleCart={() => toggleCart(it.id)}
             onMouseEnter={() => setHoveredId(it.id)}
             onMouseLeave={() =>
               setHoveredId((cur) => (cur === it.id ? null : cur))
@@ -985,9 +942,7 @@ export default function MediaMapPageClient() {
               }}
               isKo={isKo}
               inCompare={isInCompare(selected.id)}
-              inCart={inCart(selected.id)}
               onToggleCompare={() => toggleCompare(selected)}
-              onToggleCart={() => toggleCart(selected.id)}
               floatingBarOffset={floatingBarOffset}
             />
           ) : null}
@@ -1106,9 +1061,7 @@ export default function MediaMapPageClient() {
           }}
           isKo={isKo}
           inCompare={isInCompare(selected.id)}
-          inCart={inCart(selected.id)}
           onToggleCompare={() => toggleCompare(selected)}
-          onToggleCart={() => toggleCart(selected.id)}
         />
       ) : null}
 

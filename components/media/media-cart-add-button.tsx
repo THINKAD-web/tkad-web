@@ -3,11 +3,16 @@
 import { ShoppingBag } from "lucide-react";
 import { useLocale } from "next-intl";
 import { mediaActionPillClass } from "@/components/media/media-action-pill";
+import { usePlanCart } from "@/hooks/use-plan-cart";
+import { useIsPro } from "@/hooks/use-is-pro";
+import { useAppToast } from "@/lib/use-toast";
+import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
+import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  inCart: boolean;
-  onToggle: () => void;
+  item: Omit<PlanCartItem, "addedAt">;
+  addedFrom?: PlanCartAddedFrom;
   /** 그리드 카드 — 짧은 라벨 (담기+ / 담김) */
   gridInline?: boolean;
   /** 피드 카드 — 아이콘 + 긴 라벨 */
@@ -15,25 +20,62 @@ type Props = {
   className?: string;
 };
 
-/** 매체 목록·지도 공통 — 견적 장바구니 담기 토글 */
+/** 매체 목록·지도 공통 — 담은 매체(plan cart) 담기 토글 */
 export function MediaCartAddButton({
-  inCart,
-  onToggle,
+  item,
+  addedFrom,
   gridInline = false,
   feedLabeled = false,
   className,
 }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const toast = useAppToast();
+  const { has, add, remove } = usePlanCart();
+  const { isPro } = useIsPro();
+  const inCart = has(item.mediaId);
+  const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
+
+  function handleClick(e: React.MouseEvent) {
+    e.stopPropagation();
+    e.preventDefault();
+    if (inCart) {
+      remove(item.mediaId);
+      toast.success(
+        isKo
+          ? `${item.mediaName}을(를) 담은 매체에서 뺐어요`
+          : `Removed ${item.mediaName} from your plan`,
+      );
+      return;
+    }
+    const result = add(payload);
+    if (result.ok && result.added) {
+      toast.success(
+        isKo
+          ? `${item.mediaName}을(를) 담은 매체에 담았어요`
+          : `Added ${item.mediaName} to your plan`,
+      );
+      return;
+    }
+    if (result.ok && !result.added) {
+      toast.warning(isKo ? "이미 담은 매체에 있습니다" : "Already in your plan");
+      return;
+    }
+    toast.show({
+      variant: "warning",
+      title: isKo ? "담은 매체 한도" : "Plan cart limit",
+      description: buildPlanCartLimitMessage(isKo, isPro),
+    });
+  }
 
   const label = feedLabeled
     ? inCart
       ? isKo
-        ? "장바구니 담김"
-        : "In cart"
+        ? "담김"
+        : "Added"
       : isKo
-        ? "견적 장바구니"
-        : "Quote cart"
+        ? "매체 담기"
+        : "Add media"
     : gridInline
       ? inCart
         ? isKo
@@ -52,20 +94,16 @@ export function MediaCartAddButton({
 
   const ariaLabel = inCart
     ? isKo
-      ? "견적 장바구니에서 제거"
-      : "Remove from quote cart"
+      ? "담은 매체에서 제거"
+      : "Remove from plan"
     : isKo
-      ? "견적 장바구니에 담기"
-      : "Add to quote cart";
+      ? "담은 매체에 담기"
+      : "Add to plan";
 
   return (
     <button
       type="button"
-      onClick={(e) => {
-        e.stopPropagation();
-        e.preventDefault();
-        onToggle();
-      }}
+      onClick={handleClick}
       className={cn(
         feedLabeled
           ? "inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold transition-colors"

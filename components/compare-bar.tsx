@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import { LayoutList } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
@@ -10,6 +10,7 @@ import {
   FloatingSelectionBar,
 } from "@/components/floating-selection-bar";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
 import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatPlanCartBadgeCount } from "@/lib/plan-cart-limits";
 import { Link } from "@/i18n/navigation";
@@ -31,27 +32,30 @@ const lightBtn =
 const lightPlanBtn =
   "inline-flex h-8 min-w-0 flex-1 items-center justify-center gap-1 rounded-full border border-violet-300/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 px-2 text-[11px] font-semibold text-white shadow-sm shadow-violet-500/20 sm:flex-none sm:min-w-[72px] sm:px-3";
 
-function PlanCartBarLink({
+function PlanCartBarButton({
   count,
   label,
   cartLabel,
   className,
+  onOpen,
 }: {
   count: number;
   label: string;
   cartLabel: string;
   className?: string;
+  onOpen: () => void;
 }) {
   return (
-    <Link
-      href="/my/plan"
+    <button
+      type="button"
+      onClick={onOpen}
       className={className}
       aria-label={label}
     >
       <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
       {cartLabel}
       <span className="tabular-nums">{formatPlanCartBadgeCount(count)}</span>
-    </Link>
+    </button>
   );
 }
 
@@ -69,6 +73,7 @@ export default function CompareBar({
   const tPlan = useTranslations("planNav");
   const pathname = usePathname();
   const { count: planCount } = usePlanCart();
+  const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const isKo = locale === "ko";
   const isLight = variant === "light";
   const hidePlanOnPage = pathname?.includes("/my/plan") ?? false;
@@ -107,6 +112,11 @@ export default function CompareBar({
   if (isLight) {
     return (
       <>
+        <PlanCartSheet
+          open={planSheetOpen}
+          onOpenChange={setPlanSheetOpen}
+          isKo={isKo}
+        />
         {open ? <div className={spacerClass} aria-hidden /> : null}
         <FloatingSelectionBar
           open={open}
@@ -157,7 +167,7 @@ export default function CompareBar({
               )}
             >
               {showPlanInBar ? (
-                <PlanCartBarLink
+                <PlanCartBarButton
                   count={planCount}
                   label={
                     isKo
@@ -166,6 +176,7 @@ export default function CompareBar({
                   }
                   cartLabel={tPlan("cart")}
                   className={lightPlanBtn}
+                  onOpen={() => setPlanSheetOpen(true)}
                 />
               ) : null}
               {hasCompareSelection ? (
@@ -208,6 +219,11 @@ export default function CompareBar({
 
   return (
     <>
+      <PlanCartSheet
+        open={planSheetOpen}
+        onOpenChange={setPlanSheetOpen}
+        isKo={isKo}
+      />
       {open ? <div className={spacerClass} aria-hidden /> : null}
     <FloatingSelectionBar
       open={open}
@@ -248,7 +264,8 @@ export default function CompareBar({
         <div className="grid w-full grid-cols-3 gap-1.5 sm:flex sm:w-auto sm:shrink-0 sm:items-center sm:justify-end sm:gap-2">
           {showPlanInBar ? (
             <BtnBlock
-              href="/my/plan"
+              type="button"
+              onClick={() => setPlanSheetOpen(true)}
               variant="secondary"
               size="sm"
               className={cn(blockClass, "whitespace-nowrap")}
