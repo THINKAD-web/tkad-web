@@ -598,9 +598,6 @@ export default function MediaMapPageClient() {
       const mediaId = resolveMediaIdFromMapPinId(id);
       const item = itemsRef.current.find((i) => i.id === mediaId);
       if (item) setSelectedItem(item);
-      if (isMobile) {
-        setSheetSnap("full");
-      }
       const mk =
         markersRef.current.find((m) => m.id === id) ??
         markersRef.current.find(
@@ -615,8 +612,14 @@ export default function MediaMapPageClient() {
         });
       }
     },
-    [emitProgrammaticView, isMobile],
+    [emitProgrammaticView],
   );
+
+  const handleClosePinPopup = useCallback(() => {
+    setSelectedId(null);
+    setSelectedItem(null);
+    lastFocusedSelectionRef.current = null;
+  }, []);
 
   const selected = selectedItem;
 
@@ -953,11 +956,7 @@ export default function MediaMapPageClient() {
             <MediaMapDetailSheet
               variant="sheet"
               item={selected}
-              onClose={() => {
-                setSelectedId(null);
-                setSelectedItem(null);
-                lastFocusedSelectionRef.current = null;
-              }}
+              onClose={handleClosePinPopup}
               isKo={isKo}
               inCompare={isInCompare(selected.id)}
               onToggleCompare={() => toggleCompare(selected)}
@@ -982,6 +981,18 @@ export default function MediaMapPageClient() {
               }
               checkedIds={surveyCheckedIds}
               onCheckedChange={setSurveyCheckedIds}
+            />
+          ) : null}
+
+          {selected && isMobile && sheetSnap !== "full" ? (
+            <MediaMapDetailSheet
+              variant="dock"
+              item={selected}
+              onClose={handleClosePinPopup}
+              isKo={isKo}
+              inCompare={isInCompare(selected.id)}
+              onToggleCompare={() => toggleCompare(selected)}
+              className="bottom-[5.75rem] z-[45] max-h-[min(32dvh,200px)]"
             />
           ) : null}
 
