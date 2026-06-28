@@ -133,6 +133,10 @@ function MapTileLoadingTracker({
 function MapResizeFix() {
   const map = useMap();
   useEffect(() => {
+    let rafId = 0;
+    let debounceTimer: ReturnType<typeof window.setTimeout> | undefined;
+    let stabilityTimer: ReturnType<typeof window.setTimeout> | undefined;
+
     const invalidate = () => {
       try {
         map.invalidateSize({ animate: false });
@@ -141,29 +145,33 @@ function MapResizeFix() {
       }
     };
 
-    const raf = window.requestAnimationFrame(invalidate);
-    const t1 = window.setTimeout(invalidate, 150);
-    const t2 = window.setTimeout(invalidate, 450);
+    const scheduleInvalidate = (delayMs = 100) => {
+      if (debounceTimer !== undefined) window.clearTimeout(debounceTimer);
+      debounceTimer = window.setTimeout(() => {
+        debounceTimer = undefined;
+        window.cancelAnimationFrame(rafId);
+        rafId = window.requestAnimationFrame(invalidate);
+      }, delayMs);
+    };
+
+    rafId = window.requestAnimationFrame(invalidate);
+    stabilityTimer = window.setTimeout(invalidate, 400);
 
     const container = map.getContainer();
     const resizeObserver =
       typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => {
-            window.requestAnimationFrame(invalidate);
-          })
+        ? new ResizeObserver(() => scheduleInvalidate(120))
         : null;
     resizeObserver?.observe(container);
-    if (container.parentElement) {
-      resizeObserver?.observe(container.parentElement);
-    }
 
-    window.addEventListener("resize", invalidate);
+    const onWindowResize = () => scheduleInvalidate(80);
+    window.addEventListener("resize", onWindowResize);
     return () => {
-      window.cancelAnimationFrame(raf);
-      window.clearTimeout(t1);
-      window.clearTimeout(t2);
+      window.cancelAnimationFrame(rafId);
+      if (debounceTimer !== undefined) window.clearTimeout(debounceTimer);
+      if (stabilityTimer !== undefined) window.clearTimeout(stabilityTimer);
       resizeObserver?.disconnect();
-      window.removeEventListener("resize", invalidate);
+      window.removeEventListener("resize", onWindowResize);
     };
   }, [map]);
   return null;

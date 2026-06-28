@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
-import { leafletPinIcon, pinZIndexOffset } from "@/lib/map-pin-styles";
+import { leafletPinIcon } from "@/lib/map-pin-styles";
 import {
   affectedPinIdsForActiveStateChange,
   mapPinMatchesActiveId,
@@ -12,30 +12,35 @@ import {
 } from "@/lib/media-detail-map-markers";
 import type { MapMarker } from "@/components/public-map/map-types";
 
+const LAYER_GROUP_ADD_CHUNK = 80;
+
 function clusterSizeClass(count: number): string {
   if (count >= 90) return "large";
   if (count >= 35) return "medium";
   return "small";
 }
 
+const clusterIconCache = new Map<string, L.DivIcon>();
+
 function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
+  const cacheKey = `${count}|${lightTiles ? 1 : 0}`;
+  const cached = clusterIconCache.get(cacheKey);
+  if (cached) return cached;
+
   const sizeClass = clusterSizeClass(count);
-  const px = sizeClass === "large" ? 44 : sizeClass === "medium" ? 40 : 36;
-  const bg = lightTiles
-    ? "linear-gradient(145deg, rgba(255,255,255,0.96), rgba(241,245,249,0.92))"
-    : "linear-gradient(145deg, rgba(39,39,42,0.96), rgba(24,24,27,0.94))";
-  const border = lightTiles
-    ? "2px solid rgba(15,23,42,0.18)"
-    : "2px solid rgba(255,255,255,0.14)";
+  const px = sizeClass === "large" ? 46 : sizeClass === "medium" ? 42 : 38;
+  const border = lightTiles ? "2px solid rgba(15,23,42,0.45)" : "2px solid rgba(255,255,255,0.35)";
   const shadow = lightTiles
-    ? `0 4px 14px rgba(15,23,42,0.18), inset 0 0 0 2px rgba(255,102,0,0.32)`
-    : `0 4px 16px rgba(0,0,0,0.45), inset 0 0 0 2px rgba(255,102,0,0.28)`;
-  const textColor = lightTiles ? "#0f172a" : "#f4f4f5";
-  return L.divIcon({
-    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};box-shadow:${shadow};background:${bg};display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${textColor};font-family:ui-monospace,monospace">${count}</div>`,
+    ? "0 2px 8px rgba(15,23,42,0.28)"
+    : "0 0 14px rgba(0,0,0,0.45)";
+  const textColor = lightTiles ? "#0f172a" : "#f8fafc";
+  const icon = L.divIcon({
+    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};box-shadow:${shadow};background:linear-gradient(145deg,#fbbf24,#f97316);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${textColor};font-family:ui-monospace,monospace">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,
     iconSize: L.point(px, px),
   });
+  clusterIconCache.set(cacheKey, icon);
+  return icon;
 }
 
 function applyMarkerPinIcon(
@@ -46,18 +51,52 @@ function applyMarkerPinIcon(
   hoveredId: string | null,
   lightTiles: boolean,
 ) {
-  const selected = mapPinMatchesActiveId(pinId, selectedId);
-  const hovered = mapPinMatchesActiveId(pinId, hoveredId);
   marker.setIcon(
     leafletPinIcon(
       meta.type,
-      selected,
-      hovered,
+      mapPinMatchesActiveId(pinId, selectedId),
+      mapPinMatchesActiveId(pinId, hoveredId),
       lightTiles,
       meta.visibilityScore,
     ),
   );
-  marker.setZIndexOffset(pinZIndexOffset(selected, hovered));
+}
+
+function isMarkerClusterGroup(
+  layer: L.LayerGroup | L.MarkerClusterGroup,
+): layer is L.MarkerClusterGroup {
+  return typeof (layer as L.MarkerClusterGroup).addLayers === "function";
+}
+
+function addMarkersInChunks(
+  layer: L.LayerGroup,
+  markersToAdd: L.Marker[],
+  onDone: () => void,
+  isCancelled: () => boolean,
+) {
+  if (markersToAdd.length === 0) {
+    onDone();
+    return;
+  }
+
+  let index = 0;
+  const step = () => {
+    if (isCancelled()) return;
+    const end = Math.min(index + LAYER_GROUP_ADD_CHUNK, markersToAdd.length);
+    for (; index < end; index += 1) {
+      layer.addLayer(markersToAdd[index]!);
+    }
+    if (index < markersToAdd.length) {
+      if (typeof window.requestIdleCallback === "function") {
+        window.requestIdleCallback(step, { timeout: 120 });
+      } else {
+        window.requestAnimationFrame(step);
+      }
+      return;
+    }
+    onDone();
+  };
+  step();
 }
 
 export function DarkMapMarkersLayer({
@@ -81,6 +120,7 @@ export function DarkMapMarkersLayer({
   const markerMetaRef = useRef<Map<string, { type: string; visibilityScore?: number }>>(
     new Map(),
   );
+  const syncGenerationRef = useRef(0);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
   const lightTilesRef = useRef(lightTiles);
@@ -102,8 +142,9 @@ export function DarkMapMarkersLayer({
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,
           zoomToBoundsOnClick: true,
-          animate: true,
-          animateAddingMarkers: true,
+          chunkedLoading: true,
+          chunkInterval: 200,
+          chunkDelay: 50,
           iconCreateFunction: (cluster) =>
             buildClusterIcon(cluster.getChildCount(), lightTilesRef.current),
         });
@@ -123,6 +164,9 @@ export function DarkMapMarkersLayer({
     const layer = layerRef.current;
     if (!layer) return;
 
+    const generation = ++syncGenerationRef.current;
+    const isCancelled = () => generation !== syncGenerationRef.current;
+
     const nextIds = new Set<string>();
     for (const mk of markers) {
       if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
@@ -139,6 +183,7 @@ export function DarkMapMarkersLayer({
     const selected = selectedIdRef.current;
     const hovered = hoveredIdRef.current;
     const tiles = lightTilesRef.current;
+    const markersToAdd: L.Marker[] = [];
 
     for (const mk of markers) {
       if (!Number.isFinite(mk.lat) || !Number.isFinite(mk.lng)) continue;
@@ -170,20 +215,37 @@ export function DarkMapMarkersLayer({
           mk.visibilityScore,
         ),
         title: mk.name,
-        zIndexOffset: pinZIndexOffset(
-          mapPinMatchesActiveId(mk.id, selected),
-          mapPinMatchesActiveId(mk.id, hovered),
-        ),
       });
       marker.on("click", () => onSelectRef.current(mk.id));
-      layer.addLayer(marker);
       markerRefs.current.set(mk.id, marker);
+      markersToAdd.push(marker);
     }
 
-    const pinIds = [...markerRefs.current.keys()];
-    prevActivePinsRef.current = {
-      selected: pinsMatchingActiveId(pinIds, selected),
-      hovered: pinsMatchingActiveId(pinIds, hovered),
+    const finalizeActivePins = () => {
+      if (isCancelled()) return;
+      const pinIds = [...markerRefs.current.keys()];
+      prevActivePinsRef.current = {
+        selected: pinsMatchingActiveId(pinIds, selected),
+        hovered: pinsMatchingActiveId(pinIds, hovered),
+      };
+    };
+
+    if (markersToAdd.length === 0) {
+      finalizeActivePins();
+      return;
+    }
+
+    if (isMarkerClusterGroup(layer)) {
+      layer.addLayers(markersToAdd);
+      finalizeActivePins();
+      return () => {
+        syncGenerationRef.current += 1;
+      };
+    }
+
+    addMarkersInChunks(layer, markersToAdd, finalizeActivePins, isCancelled);
+    return () => {
+      syncGenerationRef.current += 1;
     };
   }, [markers, lightTiles]);
 
