@@ -333,8 +333,8 @@ export function MediaManualBrowseFilters({
     !(mobileBottomBar && unifiedToolbar);
 
   const showMobileActiveSummary =
-    mobileStickyToolbar &&
     unifiedToolbar &&
+    (mobileStickyToolbar || mobileBottomBar) &&
     mediaBrowseActiveChips.length > 0;
 
   const showDesktopTypeChipRow = !mapCompactFilters && !unifiedToolbar;
@@ -996,7 +996,9 @@ export function MediaManualBrowseFilters({
                 onClearAll={clearAllFilters}
                 isKo={isKo}
               />
-            ) : activeFilterCount > 0 && !mobileStickyToolbar ? (
+            ) : activeFilterCount > 0 &&
+              !mobileStickyToolbar &&
+              !mobileBottomBar ? (
               <p className="tkad-type-meta text-tkad-muted">
                 <span className="inline-flex items-center rounded-full bg-violet-500/15 px-2.5 py-0.5 font-semibold text-tkad-accent">
                   {isKo ? `필터 ${activeFilterCount}` : `${activeFilterCount} filters`}
