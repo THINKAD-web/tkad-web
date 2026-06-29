@@ -7,6 +7,7 @@ import type { MediaItem } from "../lib/media-data.ts";
 import {
   estimatedCpmWon,
   estimatedMonthlyImpressions,
+  resolveDisplayCpmWon,
 } from "../lib/ai-recommend-metrics.ts";
 import {
   computeNetworkDailyFootfall,
@@ -43,6 +44,44 @@ assert.equal(Math.round(cpm!), blended, "AI card CPM aligns with planner blend")
 
 const oldBugCpm = (10_000_000 * 10_000) / (4_500_000 / 1000);
 assert.ok(cpm! < oldBugCpm / 100, "fixed CPM far below old ×10000 bug");
+
+// --- C. Stored CPM outlier → resolveDisplayCpmWon ---
+const badStored: MediaItem = {
+  id: "bad-stored",
+  name: "노량진형",
+  location: "서울",
+  type: "billboard",
+  price: 9_700_000,
+  impressions: 2_990_000,
+  cpm: 2.7,
+} as MediaItem;
+
+const fixed = resolveDisplayCpmWon(badStored);
+assert.ok(fixed != null && fixed > 1000, `outlier stored should recalc, got ${fixed}`);
+assert.equal(Math.round(fixed!), 3244, "stored 2.7 → ~3244");
+
+const goodStored: MediaItem = {
+  id: "good-stored",
+  name: "광화문 KT형",
+  location: "서울",
+  type: "digital",
+  price: 72_000_000,
+  impressions: 3_000_000,
+  cpm: 24_000,
+} as MediaItem;
+
+const kept = resolveDisplayCpmWon(goodStored);
+assert.equal(kept, 24_000, "in-range stored CPM preserved");
+
+const noImp: MediaItem = {
+  id: "no-imp",
+  name: "Empty",
+  location: "서울",
+  type: "digital",
+  price: 1_000_000,
+  cpm: 12,
+} as MediaItem;
+assert.equal(resolveDisplayCpmWon(noImp), null, "no impressions → dash, not stored");
 
 // --- B. Network footfall: sum not average ---
 const campusPartial = computeNetworkDailyFootfall({
