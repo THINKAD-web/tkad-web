@@ -13,6 +13,7 @@ import {
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { formatDocumentManWon } from "@/lib/document-text";
 import { cn } from "@/lib/utils";
+import { formatQuoteValidUntilLabel } from "@/lib/admin-quote-calc";
 import { useTrustMetrics } from "@/lib/use-trust-metrics";
 import {
   computeQuotePremiumMetrics,
@@ -42,6 +43,8 @@ export type QuotePremiumProps = {
   vatWon?: number;
   grandTotalWon?: number;
   issuedAt?: Date;
+  /** 유효기간 — 없으면 14일 기본 문구 */
+  validUntil?: Date | string;
 };
 
 type ThemeTokens = {
@@ -205,6 +208,7 @@ type OfficialPageProps = Pick<
   | "vatWon"
   | "grandTotalWon"
   | "issuedAt"
+  | "validUntil"
 >;
 
 function QuotePremiumOfficialPage({
@@ -223,6 +227,7 @@ function QuotePremiumOfficialPage({
   vatWon: vatWonProp,
   grandTotalWon: grandTotalWonProp,
   issuedAt,
+  validUntil,
 }: OfficialPageProps) {
   const locale = useLocale();
   const isKo = locale.startsWith("ko");
@@ -237,6 +242,11 @@ function QuotePremiumOfficialPage({
     periodMonths,
     isKo,
   );
+  const validityLabel = validUntil
+    ? formatQuoteValidUntilLabel(validUntil, isKo)
+    : isKo
+      ? "발행일로부터 14일"
+      : "14 days from issue";
 
   const copy = isKo
     ? {
@@ -250,7 +260,7 @@ function QuotePremiumOfficialPage({
         barDuration: "광고 기간",
         barMedia: "매체 수",
         barValidity: "유효기간",
-        validityDays: "14일",
+        validityDays: validityLabel,
         colNo: "#",
         colMedia: "매체명",
         colLocation: "위치",
@@ -267,7 +277,7 @@ function QuotePremiumOfficialPage({
         signDate: "날짜",
         issuer: "발행사 ㈜ 싱커드",
         issuerName: "회사명: ㈜ 싱커드 · THINKAD",
-        footer: "// 본 견적서는 발행일로부터 14일간 유효합니다",
+        footer: `// ${validityLabel}`,
       }
     : {
         docTitle: "QUOTE",
@@ -280,7 +290,7 @@ function QuotePremiumOfficialPage({
         barDuration: "Duration",
         barMedia: "Media",
         barValidity: "Valid for",
-        validityDays: "14 days",
+        validityDays: validityLabel,
         colNo: "#",
         colMedia: "Media",
         colLocation: "Location",
@@ -297,7 +307,7 @@ function QuotePremiumOfficialPage({
         signDate: "Date",
         issuer: "Issuer THINKAD Inc.",
         issuerName: "㈜ 싱커드 · THINKAD",
-        footer: "// Valid for 14 days from issue date",
+        footer: `// ${validityLabel}`,
       };
 
   const heroSubtitle = `${displayDuration} · ${isKo ? "견적번호" : "Quote"} #${quoteNo} · ${isKo ? "발행" : "Issued"} ${issuedDots}`;
@@ -528,6 +538,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
       vatWon,
       grandTotalWon,
       issuedAt,
+      validUntil,
     },
     ref,
   ) {
@@ -1022,6 +1033,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
           vatWon={vatWon}
           grandTotalWon={grandTotalWon}
           issuedAt={issuedAt}
+          validUntil={validUntil}
         />
       </div>
     );

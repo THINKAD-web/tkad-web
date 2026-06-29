@@ -15,6 +15,7 @@ import {
   ADMIN_QUOTE_VALIDITY_DAYS,
   catalogPriceFieldToWon,
   computeAdminQuoteTotals,
+  formatAdminQuoteDiscountSummary,
   inclusiveCampaignDays,
   monthFactorFromDays,
 } from "@/lib/pricing";
@@ -120,6 +121,7 @@ export default function AdminQuoteNewClient() {
   const [pdfError, setPdfError] = useState<string | null>(null);
   const [saveLoading, setSaveLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
+  const [pdfStyle, setPdfStyle] = useState<"basic" | "formal">("basic");
 
   useEffect(() => {
     let cancelled = false;
@@ -238,6 +240,16 @@ export default function AdminQuoteNewClient() {
         vatIncluded,
       }),
     [lineWons, dpct, dwon, vatIncluded],
+  );
+
+  const discountSummary = useMemo(
+    () =>
+      formatAdminQuoteDiscountSummary({
+        isKo,
+        discountPercent: dpct,
+        discountWon: dwon,
+      }),
+    [isKo, dpct, dwon],
   );
 
   const toggle = useCallback((id: string) => {
@@ -452,7 +464,7 @@ export default function AdminQuoteNewClient() {
     toast,
   ]);
 
-  const downloadPdf = useCallback(async () => {
+  const downloadPdf = useCallback(async (style: "basic" | "formal" = pdfStyle) => {
     setPdfError(null);
     if (selected.size === 0 && customLines.length === 0) {
       setPdfError(t("pdfNeedMedia"));
@@ -485,6 +497,14 @@ export default function AdminQuoteNewClient() {
           supplyWon: totals.supplyWon,
           vatWon: totals.vatWon,
           totalWon: totals.totalWon,
+          linesSubtotalWon: totals.linesSubtotalWon,
+          discountTotalWon:
+            totals.discountTotalWon > 0 ? totals.discountTotalWon : undefined,
+          discountSummary: discountSummary,
+          vatIncluded,
+          discountPercent: dpct,
+          discountWon: dwon,
+          pdfStyle: style,
           rows: lineItems.map((it) => {
             const m = medias.find((x) => x.id === it.mediaId);
             return {
@@ -494,6 +514,8 @@ export default function AdminQuoteNewClient() {
               unitPriceWon: it.unitPrice,
               lineTotalWon: it.amount,
               location: m?.location,
+              spec: it.spec,
+              quantity: it.quantity,
             };
           }),
         }),
@@ -513,7 +535,10 @@ export default function AdminQuoteNewClient() {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `thinkad-quote-${displayQuoteNumber}.pdf`;
+      a.download =
+        style === "formal"
+          ? `thinkad-formal-quote-${displayQuoteNumber}.pdf`
+          : `thinkad-quote-${displayQuoteNumber}.pdf`;
       a.click();
       URL.revokeObjectURL(url);
       toast("success", isKo ? "견적서 PDF가 다운로드되었습니다" : "Quote PDF downloaded");
@@ -537,6 +562,11 @@ export default function AdminQuoteNewClient() {
     validUntilPdf,
     campaignPeriodLabel,
     totals,
+    discountSummary,
+    vatIncluded,
+    dpct,
+    dwon,
+    pdfStyle,
     lineItems,
     medias,
     isKo,
@@ -1023,6 +1053,31 @@ export default function AdminQuoteNewClient() {
           {pdfError ? (
             <p className="text-sm text-red-600">{pdfError}</p>
           ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-xs font-medium text-muted-foreground">PDF 형식</span>
+            <button
+              type="button"
+              onClick={() => setPdfStyle("basic")}
+              className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
+                pdfStyle === "basic"
+                  ? "border-accent bg-accent/15 text-foreground"
+                  : "border-slate-200 bg-white text-muted-foreground"
+              }`}
+            >
+              카드형
+            </button>
+            <button
+              type="button"
+              onClick={() => setPdfStyle("formal")}
+              className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
+                pdfStyle === "formal"
+                  ? "border-accent bg-accent/15 text-foreground"
+                  : "border-slate-200 bg-white text-muted-foreground"
+              }`}
+            >
+              공식 견적서 (6열·계좌)
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button
               type="button"
@@ -1234,6 +1289,14 @@ export default function AdminQuoteNewClient() {
                     vatWon={totals.vatWon}
                     grandTotalWon={totals.totalWon}
                     issuedAt={new Date(issueDatePdf)}
+                    quoteNumber={displayQuoteNumber}
+                    validUntil={validUntilPdf}
+                    linesSubtotalWon={totals.linesSubtotalWon}
+                    discountTotalWon={
+                      totals.discountTotalWon > 0 ? totals.discountTotalWon : undefined
+                    }
+                    discountSummary={discountSummary}
+                    vatIncluded={vatIncluded}
                   />
                 </div>
               </div>

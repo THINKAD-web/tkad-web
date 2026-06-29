@@ -219,6 +219,15 @@ export async function buildQuoteExportPayloadFromAdminQuote(
     supplyWon,
     vatWon: quote.tax,
     totalWon: quote.total,
+    linesSubtotalWon: quote.subtotal,
+    discountTotalWon: quote.discount > 0 ? quote.discount : undefined,
+    discountSummary:
+      quote.discount > 0
+        ? isKo
+          ? "할인"
+          : "Discount"
+        : undefined,
+    vatIncluded: false,
     totalImpressions,
     blendedCpmWon:
       totalImpressions > 0
@@ -236,6 +245,8 @@ export type AdminQuoteDraftExportRow = {
   unitPriceWon: number;
   lineTotalWon: number;
   location?: string;
+  spec?: string;
+  quantity?: number;
 };
 
 /** Admin 견적 초안(저장 전) POST — 동일 디자인 PDF */
@@ -254,6 +265,10 @@ export async function buildQuoteExportPayloadFromAdminDraft(
     supplyWon: number;
     vatWon: number;
     totalWon: number;
+    linesSubtotalWon?: number;
+    discountTotalWon?: number;
+    discountSummary?: string;
+    vatIncluded?: boolean;
     rows: AdminQuoteDraftExportRow[];
   },
   template: QuoteExportTemplate = "basic",
@@ -299,6 +314,10 @@ export async function buildQuoteExportPayloadFromAdminDraft(
     supplyWon: input.supplyWon,
     vatWon: input.vatWon,
     totalWon: input.totalWon,
+    linesSubtotalWon: input.linesSubtotalWon,
+    discountTotalWon: input.discountTotalWon,
+    discountSummary: input.discountSummary,
+    vatIncluded: input.vatIncluded,
     totalImpressions,
     blendedCpmWon:
       totalImpressions > 0

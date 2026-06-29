@@ -23,5 +23,7 @@ export {
   monthFactorFromDays,
   lineSupplyWon,
   computeAdminQuoteTotals,
+  formatAdminQuoteDiscountSummary,
+  formatQuoteValidUntilLabel,
 } from "@/lib/admin-quote-calc";
 export type { AdminQuoteTotals } from "@/lib/admin-quote-calc";

@@ -82,7 +82,7 @@ import {
 } from "@/lib/quote-wizard-pricing";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
-import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
+import { QUOTE_VALIDITY_DAYS } from "@/lib/quote-calculator";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { QuotePdfPreview } from "@/components/quote/quote-preview";
 import { QuotePremium } from "@/components/quote/quote-premium";
@@ -283,6 +283,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [downloading, setDownloading] = useState<QuoteExportFormat | null>(null);
   const [emailPdfLoading, setEmailPdfLoading] = useState(false);
   const [quoteIssuedAt] = useState(() => new Date());
+  const quoteValidUntil = useMemo(() => {
+    const d = new Date(quoteIssuedAt);
+    d.setDate(d.getDate() + QUOTE_VALIDITY_DAYS);
+    return d;
+  }, [quoteIssuedAt]);
 
   const selectedMedia = useMemo(
     () => catalog.filter((m) => selectedIds.has(m.id)),
@@ -495,6 +500,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       vatWon: pdfVatWon,
       grandTotalWon: pdfGrandTotalWon,
       issuedAt: quoteIssuedAt,
+      validUntil: quoteValidUntil,
     }),
     [
       template,
@@ -510,6 +516,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       pdfVatWon,
       pdfGrandTotalWon,
       quoteIssuedAt,
+      quoteValidUntil,
     ],
   );
 
@@ -567,6 +574,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       grandTotalWon: pdfGrandTotalWon,
       contactPhone: form.phone,
       contactEmail: form.email,
+      issuedAt: quoteIssuedAt,
+      validUntil: quoteValidUntil,
     }),
     [
       form.name,
@@ -583,6 +592,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       pdfSubtotalWon,
       pdfVatWon,
       pdfGrandTotalWon,
+      quoteIssuedAt,
+      quoteValidUntil,
     ],
   );
 

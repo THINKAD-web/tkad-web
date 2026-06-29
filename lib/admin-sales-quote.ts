@@ -4,6 +4,10 @@ import type {
   AdminFormalQuotePdfRow,
 } from "@/lib/build-admin-formal-quote-pdf";
 import { ADMIN_QUOTE_VALIDITY_DAYS } from "@/lib/pricing/constants";
+import {
+  formatAdminQuoteDiscountSummary,
+  type AdminQuoteTotals,
+} from "@/lib/admin-quote-calc";
 
 export const ADMIN_QUOTE_STATUSES = [
   "draft",
@@ -183,6 +187,52 @@ export function quoteToPdfParams(
     supplyWon,
     vatWon: quote.tax,
     totalWon: quote.total,
+  };
+}
+
+export type AdminQuoteDraftFormalInput = {
+  isKo: boolean;
+  quoteNumber: string;
+  issueDate: string;
+  validUntil: string;
+  clientCompany: string;
+  clientName: string;
+  clientPhone: string;
+  clientEmail?: string;
+  periodLabel: string;
+  discountPercent: number;
+  discountWon: number;
+  vatIncluded: boolean;
+  totals: AdminQuoteTotals;
+  rows: AdminFormalQuotePdfRow[];
+};
+
+/** Admin 견적 초안 → 공식 견적서 PDF 파라미터 (할인·합계는 `computeAdminQuoteTotals` 결과 그대로) */
+export function buildAdminFormalQuoteParamsFromDraft(
+  input: AdminQuoteDraftFormalInput,
+): AdminFormalQuotePdfParams {
+  return {
+    isKo: input.isKo,
+    quoteNumber: input.quoteNumber,
+    issueDate: input.issueDate.slice(0, 10),
+    validUntil: input.validUntil.slice(0, 10),
+    clientCompany: input.clientCompany,
+    clientName: input.clientName,
+    clientPhone: input.clientPhone,
+    clientEmail: input.clientEmail,
+    periodLabel: input.periodLabel,
+    vatIncluded: input.vatIncluded,
+    discountTotalWon: input.totals.discountTotalWon,
+    discountSummary: formatAdminQuoteDiscountSummary({
+      isKo: input.isKo,
+      discountPercent: input.discountPercent,
+      discountWon: input.discountWon,
+    }),
+    rows: input.rows,
+    linesSubtotalWon: input.totals.linesSubtotalWon,
+    supplyWon: input.totals.supplyWon,
+    vatWon: input.totals.vatWon,
+    totalWon: input.totals.totalWon,
   };
 }
 

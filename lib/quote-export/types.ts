@@ -39,6 +39,12 @@ export type QuoteExportPayload = {
   supplyWon: number;
   vatWon: number;
   totalWon: number;
+  /** 할인 전 라인 합계 (admin) */
+  linesSubtotalWon?: number;
+  /** 할인 총액 (admin) */
+  discountTotalWon?: number;
+  discountSummary?: string;
+  vatIncluded?: boolean;
   /** 프리미엄 표지/대시보드용 통계 */
   totalImpressions: number;
   blendedCpmWon: number | null;

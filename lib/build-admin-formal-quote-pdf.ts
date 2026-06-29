@@ -4,6 +4,8 @@ import {
   registerNotoSansKrIfAvailable,
 } from "@/lib/jspdf-register-noto-kr";
 import { CONTACT_EMAIL } from "@/lib/constants";
+import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { getQuoteStampUrl } from "@/lib/quote-stamp";
 
 /** THINKAD brand — globals.css navy / gold */
 const NAVY: [number, number, number] = [26, 42, 108];
@@ -71,6 +73,24 @@ function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
 
 function fmtWon(n: number, isKo: boolean) {
   return `₩${Math.round(n).toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+}
+
+async function resolveFormalStampDataUrl(): Promise<string | null> {
+  const local = loadQuoteStampDataUrl();
+  if (local) return local;
+  const url = getQuoteStampUrl();
+  if (!url || url.startsWith("/")) return null;
+  try {
+    const res = await fetch(url, { cache: "force-cache" });
+    if (!res.ok) return null;
+    const ct = res.headers.get("content-type") || "image/png";
+    if (!ct.startsWith("image/")) return null;
+    const ab = await res.arrayBuffer();
+    const b64 = Buffer.from(ab).toString("base64");
+    return `data:${ct};base64,${b64}`;
+  } catch {
+    return null;
+  }
 }
 
 function setFont(doc: jsPDF, fam: string, style: "normal" | "bold") {
@@ -410,6 +430,25 @@ export async function createAdminFormalQuotePdfDoc(
   y += 4;
   doc.text(DEFAULT_ISSUER.email, margin, y);
   y += 6;
+
+  const stampData = await resolveFormalStampDataUrl();
+  if (stampData) {
+    try {
+      doc.addImage(
+        stampData,
+        "PNG",
+        pageW - margin - 30,
+        y - 2,
+        26,
+        26,
+        undefined,
+        "FAST",
+        -3,
+      );
+    } catch {
+      /* stamp optional */
+    }
+  }
 
   doc.setFontSize(6.5);
   doc.setTextColor(...MUTED);
