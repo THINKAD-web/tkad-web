@@ -210,7 +210,24 @@ function drawTotals(
 
   const boxX = x + w * 0.38;
   const boxW = w - w * 0.38;
-  const rows: Array<[string, string, boolean]> = [
+  const rows: Array<[string, string, boolean]> = [];
+  const linesSubtotal = p.linesSubtotalWon ?? 0;
+  const discountTotal = p.discountTotalWon ?? 0;
+  if (linesSubtotal > 0 && (discountTotal > 0 || linesSubtotal !== p.supplyWon)) {
+    rows.push([
+      isKo ? "소계" : "Subtotal",
+      formatDocumentManWon(linesSubtotal, isKo),
+      false,
+    ]);
+  }
+  if (discountTotal > 0) {
+    rows.push([
+      p.discountSummary ?? (isKo ? "할인" : "Discount"),
+      `−${formatDocumentManWon(discountTotal, isKo)}`,
+      false,
+    ]);
+  }
+  rows.push(
     [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), false],
     [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), false],
     [
@@ -218,7 +235,7 @@ function drawTotals(
       formatDocumentManWon(p.totalWon, isKo),
       true,
     ],
-  ];
+  );
   let ry = y;
   doc.setFont(font, "normal");
   rows.forEach(([label, val, accent]) => {

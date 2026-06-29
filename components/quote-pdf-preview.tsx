@@ -14,6 +14,7 @@ import {
 } from "@/components/document/document-layout";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
+import { formatQuoteValidUntilLabel } from "@/lib/admin-quote-calc";
 
 export type QuotePdfPreviewRow = {
   id: string;
@@ -57,6 +58,15 @@ type Props = {
   vatWon: number;
   grandTotalWon: number;
   issuedAt: Date;
+  /** 견적번호 (admin·저장 견적) */
+  quoteNumber?: string;
+  /** 유효기간 — 없으면 기본 14일 문구 */
+  validUntil?: Date | string;
+  /** 할인 전 소계 (admin) */
+  linesSubtotalWon?: number;
+  discountTotalWon?: number;
+  discountSummary?: string;
+  vatIncluded?: boolean;
 };
 
 export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
@@ -75,13 +85,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       vatWon,
       grandTotalWon,
       issuedAt,
+      quoteNumber,
+      validUntil,
+      linesSubtotalWon,
+      discountTotalWon,
+      discountSummary,
     },
     ref,
   ) {
     const t = useTranslations("quote");
     const locale = useLocale();
     const isKo = locale === "ko";
-    const isPremium = template === "premium";
     const dateStr = new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
       year: "numeric",
       month: "long",
@@ -89,7 +103,25 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
     }).format(issuedAt);
 
     const heading = documentHeading?.trim() || t("pdfDocHeading");
-    const subtitle = `${periodLabel} · ${isKo ? "발행" : "Issued"} ${dateStr}`;
+    const quoteNo = quoteNumber?.trim();
+    const subtitleParts = [
+      quoteNo,
+      periodLabel,
+      `${isKo ? "발행" : "Issued"} ${dateStr}`,
+    ].filter(Boolean);
+    const subtitle = subtitleParts.join(" · ");
+
+    const showDiscountBreakdown =
+      (discountTotalWon ?? 0) > 0 ||
+      (linesSubtotalWon != null &&
+        linesSubtotalWon > 0 &&
+        linesSubtotalWon !== subtotalWon);
+
+    const validityText = validUntil
+      ? formatQuoteValidUntilLabel(validUntil, isKo)
+      : t("pdfValidity");
+
+    const isPremium = template === "premium";
 
     return (
       <div
@@ -206,37 +238,81 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
 
           <section className="space-y-4">
             <DocumentSectionHeading>{t("pdfTotal")}</DocumentSectionHeading>
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
-                <p className="text-[11px] font-medium text-gray-500">{t("pdfSupply")}</p>
-                <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
-                  {formatDocumentManWon(subtotalWon, isKo)}
-                </p>
+            {showDiscountBreakdown ? (
+              <div className="mx-auto max-w-md space-y-1.5 rounded-xl border border-gray-200 bg-gray-50 p-4 text-sm">
+                {linesSubtotalWon != null && linesSubtotalWon > 0 ? (
+                  <div className="flex justify-between">
+                    <span className="text-gray-500">{isKo ? "소계" : "Subtotal"}</span>
+                    <span className="font-semibold tabular-nums text-violet-700">
+                      {formatDocumentManWon(linesSubtotalWon, isKo)}
+                    </span>
+                  </div>
+                ) : null}
+                {(discountTotalWon ?? 0) > 0 ? (
+                  <div className="flex justify-between text-red-700">
+                    <span>{discountSummary ?? (isKo ? "할인" : "Discount")}</span>
+                    <span className="font-semibold tabular-nums">
+                      −{formatDocumentManWon(discountTotalWon!, isKo)}
+                    </span>
+                  </div>
+                ) : null}
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t("pdfSupply")}</span>
+                  <span className="font-semibold tabular-nums text-violet-700">
+                    {formatDocumentManWon(subtotalWon, isKo)}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span className="text-gray-500">{t("pdfVat")}</span>
+                  <span className="font-semibold tabular-nums text-violet-700">
+                    {formatDocumentManWon(vatWon, isKo)}
+                  </span>
+                </div>
+                <div className="flex justify-between border-t border-gray-200 pt-2 text-base font-bold text-violet-800">
+                  <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
+                  <span className="tabular-nums">
+                    {formatDocumentManWon(grandTotalWon, isKo)}
+                  </span>
+                </div>
               </div>
-              <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
-                <p className="text-[11px] font-medium text-gray-500">{t("pdfVat")}</p>
-                <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
-                  {formatDocumentManWon(vatWon, isKo)}
-                </p>
+            ) : (
+              <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+                  <p className="text-[11px] font-medium text-gray-500">{t("pdfSupply")}</p>
+                  <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
+                    {formatDocumentManWon(subtotalWon, isKo)}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
+                  <p className="text-[11px] font-medium text-gray-500">{t("pdfVat")}</p>
+                  <p className="quote-pdf-amount mt-1 text-lg font-bold tabular-nums text-violet-700">
+                    {formatDocumentManWon(vatWon, isKo)}
+                  </p>
+                </div>
+                <div
+                  className="col-span-2 rounded-xl border border-violet-200 p-3.5 sm:col-span-1"
+                  style={{
+                    background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+                  }}
+                >
+                  <p className="text-[11px] font-medium text-violet-100">
+                    {isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}
+                  </p>
+                  <p className="quote-pdf-amount mt-1 text-xl font-bold tabular-nums text-white">
+                    {formatDocumentManWon(grandTotalWon, isKo)}
+                  </p>
+                </div>
               </div>
-              <div
-                className="col-span-2 rounded-xl border border-violet-200 p-3.5 sm:col-span-1"
-                style={{
-                  background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
-                }}
-              >
-                <p className="text-[11px] font-medium text-violet-100">
-                  {isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}
-                </p>
-                <p className="quote-pdf-amount mt-1 text-xl font-bold tabular-nums text-white">
-                  {formatDocumentManWon(grandTotalWon, isKo)}
-                </p>
-              </div>
-            </div>
+            )}
           </section>
 
           <footer className="border-t border-gray-100 pt-6 text-[10px] text-gray-500">
-            <p>{t("pdfValidity")}</p>
+            <p>{validityText}</p>
+            {quoteNo ? (
+              <p className="mt-1">
+                {isKo ? "견적번호" : "Quote No."} {quoteNo}
+              </p>
+            ) : null}
             <div className="mt-6 grid gap-6 sm:grid-cols-2">
               <div>
                 <p className="text-xs font-semibold text-violet-700">{t("pdfSignature")}</p>

@@ -93,3 +93,39 @@ export function computeAdminQuoteTotals(opts: {
     totalWon,
   };
 }
+
+/** Admin 견적 할인 행 설명 (preview·PDF 공용) */
+export function formatAdminQuoteDiscountSummary(opts: {
+  isKo: boolean;
+  discountPercent: number;
+  discountWon: number;
+}): string | undefined {
+  const parts: string[] = [];
+  const pct = Math.min(100, Math.max(0, opts.discountPercent));
+  const won = Math.max(0, opts.discountWon);
+  if (pct > 0) {
+    parts.push(opts.isKo ? `할인율 ${pct}%` : `${pct}% off`);
+  }
+  if (won > 0) {
+    const label = won.toLocaleString(opts.isKo ? "ko-KR" : "en-US");
+    parts.push(opts.isKo ? `할인액 ₩${label}` : `₩${label} off`);
+  }
+  return parts.length > 0 ? parts.join(" · ") : undefined;
+}
+
+/** 견적서 푸터·메타용 유효기간 라벨 */
+export function formatQuoteValidUntilLabel(
+  validUntil: Date | string,
+  isKo: boolean,
+): string {
+  const d =
+    typeof validUntil === "string"
+      ? new Date(`${validUntil.slice(0, 10)}T12:00:00`)
+      : validUntil;
+  const fmt = new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  }).format(d);
+  return isKo ? `${fmt}까지 유효` : `Valid until ${fmt}`;
+}

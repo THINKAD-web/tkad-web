@@ -1,5 +1,7 @@
 import { NextRequest } from "next/server";
 import { assertAdmin } from "@/lib/admin-guard";
+import { buildAdminFormalQuoteParamsFromDraft } from "@/lib/admin-sales-quote";
+import { adminFormalQuotePdfBuffer } from "@/lib/build-admin-formal-quote-pdf";
 import { getPrisma } from "@/lib/prisma";
 import {
   buildQuoteExportPayloadFromAdminDraft,
@@ -33,7 +35,21 @@ function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
     typeof o.mediaId === "string" && o.mediaId.trim() ? o.mediaId.trim() : null;
   const location =
     typeof o.location === "string" && o.location.trim() ? o.location.trim() : undefined;
-  return { mediaId, name, period, unitPriceWon, lineTotalWon, location };
+  const spec =
+    typeof o.spec === "string" && o.spec.trim() ? o.spec.trim() : undefined;
+  const quantityRaw = Math.round(Number(o.quantity));
+  const quantity =
+    Number.isFinite(quantityRaw) && quantityRaw > 0 ? quantityRaw : undefined;
+  return {
+    mediaId,
+    name,
+    period,
+    unitPriceWon,
+    lineTotalWon,
+    location,
+    spec,
+    quantity,
+  };
 }
 
 export async function POST(request: NextRequest) {
@@ -80,8 +96,73 @@ export async function POST(request: NextRequest) {
     return jsonErr("Invalid totals", 400);
   }
 
-  const db = getPrisma();
+  const linesSubtotalWon = Math.round(Number(body.linesSubtotalWon));
+  const discountTotalWon = Math.round(Number(body.discountTotalWon));
+  const discountSummary =
+    typeof body.discountSummary === "string" ? body.discountSummary.trim() : undefined;
+  const vatIncluded = body.vatIncluded === true;
+  const discountPercent = Math.min(
+    100,
+    Math.max(0, Number(body.discountPercent) || 0),
+  );
+  const discountWon = Math.max(0, Math.round(Number(body.discountWon) || 0));
+  const isKo = body.isKo !== false;
+  const pdfStyle = String(body.pdfStyle ?? "basic").trim().toLowerCase();
+
+  const safeNum = quoteNumber.replace(/[^\w.-]+/g, "_");
+  const filename =
+    pdfStyle === "formal"
+      ? `thinkad-formal-quote-${safeNum}.pdf`
+      : `thinkad-quote-${safeNum}.pdf`;
+
   try {
+    if (pdfStyle === "formal") {
+      const formalBuf = await adminFormalQuotePdfBuffer(
+        buildAdminFormalQuoteParamsFromDraft({
+          isKo,
+          quoteNumber,
+          issueDate,
+          validUntil,
+          clientCompany,
+          clientName,
+          clientPhone,
+          clientEmail:
+            typeof body.clientEmail === "string" ? body.clientEmail.trim() : undefined,
+          periodLabel,
+          discountPercent,
+          discountWon,
+          vatIncluded,
+          totals: {
+            linesSubtotalWon: Number.isFinite(linesSubtotalWon)
+              ? linesSubtotalWon
+              : supplyWon + (Number.isFinite(discountTotalWon) ? discountTotalWon : 0),
+            discountTotalWon: Number.isFinite(discountTotalWon) ? discountTotalWon : 0,
+            afterDiscountWon: supplyWon,
+            supplyWon,
+            vatWon,
+            totalWon,
+          },
+          rows: rows.map((r) => ({
+            name: r.name,
+            spec: r.spec ?? "—",
+            period: r.period,
+            unitPriceWon: r.unitPriceWon,
+            quantity: r.quantity ?? 1,
+            lineTotalWon: r.lineTotalWon,
+          })),
+        }),
+      );
+      return new Response(new Uint8Array(formalBuf), {
+        status: 200,
+        headers: {
+          "Content-Type": "application/pdf",
+          "Content-Disposition": attachmentContentDisposition(filename),
+          "Cache-Control": "no-store, private",
+        },
+      });
+    }
+
+    const db = getPrisma();
     const payload = await buildQuoteExportPayloadFromAdminDraft(
       db,
       {
@@ -94,17 +175,24 @@ export async function POST(request: NextRequest) {
         clientEmail:
           typeof body.clientEmail === "string" ? body.clientEmail.trim() : undefined,
         periodLabel,
-        isKo: body.isKo !== false,
+        isKo,
         supplyWon,
         vatWon,
         totalWon,
+        linesSubtotalWon: Number.isFinite(linesSubtotalWon)
+          ? linesSubtotalWon
+          : undefined,
+        discountTotalWon:
+          Number.isFinite(discountTotalWon) && discountTotalWon > 0
+            ? discountTotalWon
+            : undefined,
+        discountSummary,
+        vatIncluded: vatIncluded || undefined,
         rows,
       },
       "basic",
     );
     const buf = await buildQuotePdf(payload);
-    const safeNum = quoteNumber.replace(/[^\w.-]+/g, "_");
-    const filename = `thinkad-quote-${safeNum}.pdf`;
     return new Response(new Uint8Array(buf), {
       status: 200,
       headers: {
