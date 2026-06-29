@@ -6,6 +6,7 @@ import {
 import {
   estimatedCpmWon,
   estimatedMonthlyImpressions,
+  resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
@@ -34,8 +35,7 @@ export function pricePeriodDays(period: MediaPricePeriodKey): number {
 }
 
 export function resolveMediaCpmWon(m: MediaItem): number | null {
-  if (typeof m.cpm === "number" && m.cpm > 0) return m.cpm;
-  return estimatedCpmWon(m);
+  return resolveDisplayCpmWon(m);
 }
 
 export type MediaQuoteLine = {

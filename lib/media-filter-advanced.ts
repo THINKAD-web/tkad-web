@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { estimatedCpmWon } from "@/lib/ai-recommend-metrics";
+import { resolveDisplayCpmWon } from "@/lib/ai-recommend-metrics";
 
 export {
   MEDIA_ADVANCED_HIGH_PRIORITY_FILTERS,
@@ -226,8 +226,7 @@ export function effectiveEngagement(m: MediaItem): number | null {
 }
 
 export function effectiveCpm(m: MediaItem): number | null {
-  if (m.cpm != null && Number.isFinite(m.cpm) && m.cpm > 0) return m.cpm;
-  return estimatedCpmWon(m);
+  return resolveDisplayCpmWon(m);
 }
 
 function parseWidthHeightMFromSize(

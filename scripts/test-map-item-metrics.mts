@@ -7,6 +7,7 @@ import {
   formatMapCpm,
   formatMapImpressions,
 } from "../lib/media-map/map-item-metrics.ts";
+import { resolveDisplayCpmWon } from "../lib/ai-recommend-metrics.ts";
 import type { MapMapItem } from "../components/media-map/media-map-types.ts";
 
 const base: MapMapItem = {
@@ -48,5 +49,19 @@ assert.match(midCpm!, /₩100/, `expected ~₩100 CPM, got ${midCpm}`);
 
 const monthly = formatMapImpressions(base, true);
 assert.equal(monthly, "4.5M", `monthly reach label, got ${monthly}`);
+
+const outlierItem: MapMapItem = {
+  ...base,
+  impressions: 2_990_000,
+  price: 9_700_000,
+  cpm: 2.7,
+};
+const outlierCpm = formatMapCpm(outlierItem, "ko-KR");
+assert.match(outlierCpm!, /₩3,24[34]/, `outlier stored → recalc CPM, got ${outlierCpm}`);
+assert.equal(
+  Math.round(resolveDisplayCpmWon(outlierItem)!),
+  3244,
+  "resolveDisplayCpmWon matches",
+);
 
 console.log("test-map-item-metrics.mts: all passed");

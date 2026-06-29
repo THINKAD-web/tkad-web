@@ -7,8 +7,8 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import {
-  estimatedCpmWon,
   estimatedMonthlyImpressions,
+  resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
 import {
   effectiveHeightM,
@@ -44,13 +44,9 @@ function formatSizeDisplay(m: MediaItem): string {
 }
 
 function formatCpmDisplay(m: MediaItem, locale: string): string {
-  const fromDb = m.cpm;
-  if (typeof fromDb === "number" && Number.isFinite(fromDb) && fromDb > 0) {
-    return `₩${Math.round(fromDb).toLocaleString(locale)}`;
-  }
-  const est = estimatedCpmWon(m);
-  if (est != null && Number.isFinite(est) && est > 0) {
-    return `₩${Math.round(est).toLocaleString(locale)}`;
+  const cpm = resolveDisplayCpmWon(m);
+  if (cpm != null && Number.isFinite(cpm) && cpm > 0) {
+    return `₩${Math.round(cpm).toLocaleString(locale)}`;
   }
   return "—";
 }
@@ -116,11 +112,7 @@ export function CompareSpecTable({
         key: "cpm",
         label: t("compareRowCpm"),
         cell: (m) => formatCpmDisplay(m, locale),
-        numVal: (m) => {
-          const fromDb = m.cpm;
-          if (typeof fromDb === "number" && fromDb > 0) return fromDb;
-          return estimatedCpmWon(m) ?? null;
-        },
+        numVal: (m) => resolveDisplayCpmWon(m),
         better: "lower",
       },
       {
