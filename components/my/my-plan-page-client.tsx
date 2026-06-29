@@ -61,7 +61,11 @@ export function MyPlanPageClient() {
   }
 
   async function handleQuoteRequest() {
-    if (cart.items.length === 0) return;
+    const mediaIds = cart.items.map((item) => item.mediaId).filter(Boolean);
+    if (mediaIds.length === 0) {
+      toast.warning(isKo ? "담은 매체가 없습니다." : "No media in your plan.");
+      return;
+    }
     try {
       const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
       const sessionData = await sessionRes.json();
@@ -81,7 +85,7 @@ export function MyPlanPageClient() {
     } catch {
       /* localStorage still holds plan */
     }
-    router.push("/contact?from=plan");
+    router.push(`/quote?media=${mediaIds.join(",")}`);
   }
 
   function handleClear() {
