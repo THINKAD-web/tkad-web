@@ -39,6 +39,7 @@ import {
   Trash2,
   Sparkles,
 } from "lucide-react";
+import { useToast } from "@/components/toast-provider";
 import {
   inferVatIncludedFromQuote,
   parseCampaignPeriodLabel,
