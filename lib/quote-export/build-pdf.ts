@@ -25,6 +25,10 @@ const WHITE = [255, 255, 255] as const;
 
 const M = 15;
 const HERO_H = 44;
+const BASIC_HERO_H = 48;
+const BASIC_COMPACT_MEDIA_MIN = 5;
+const VIOLET_50 = [237, 233, 254] as const;
+const VIOLET_700 = [109, 40, 217] as const;
 
 /** 직인: 로컬 public/brand → 원격 URL 순. 없으면 생략 (가짜 도장 미표시). */
 async function resolveStampDataUrl(url?: string): Promise<string | null> {
@@ -316,6 +320,410 @@ function drawClientCampaign(
   return y + 28;
 }
 
+function basicSectionTitle(doc: jsPDF, font: string, label: string, y: number): number {
+  doc.setFont(font, "normal");
+  doc.setFontSize(12);
+  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.rect(M, y, 1.8, 5.8, "F");
+  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.rect(M, y + 5.8, 1.8, 0.8, "F");
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.text(label, M + 5, y + 4.8);
+  return y + 11;
+}
+
+function basicDrawQuoteHero(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  pageW: number,
+): number {
+  doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+  doc.rect(0, 0, pageW, BASIC_HERO_H, "F");
+  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.rect(0, BASIC_HERO_H, pageW, 1.4, "F");
+
+  drawWordmark(doc, font, M, 15, 15, true);
+  doc.setFontSize(7);
+  doc.setTextColor(214, 199, 255);
+  doc.text("ADVERTISING QUOTE", pageW - M, 15, { align: "right" });
+
+  doc.setTextColor(255, 255, 255);
+  doc.setFontSize(22);
+  doc.text(p.isKo ? "광고 견적서" : "Advertising Quote", M, 30);
+  doc.setFontSize(9);
+  doc.setTextColor(225, 220, 245);
+  const sub = `${p.periodLabel} · ${p.issuedAt}`;
+  doc.text(sub, M, 38);
+  doc.setFontSize(8);
+  doc.text(`No. ${p.quoteNo}`, pageW - M, 38, { align: "right" });
+  doc.text(`${p.isKo ? "유효" : "Valid"} ${p.validUntil}`, pageW - M, 43, { align: "right" });
+
+  return BASIC_HERO_H + 4;
+}
+
+function basicDrawSummaryStrip(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  pageW: number,
+  y: number,
+): number {
+  const isKo = p.isKo;
+  const contentW = pageW - M * 2;
+  const gap = 3;
+  const colW = (contentW - gap * 2) / 3;
+  const boxH = 22;
+  const labels = isKo
+    ? ["총액 (VAT 포함)", "유효기간", "담당"]
+    : ["Total (incl. VAT)", "Valid until", "Contact"];
+  const totalVal = formatDocumentManWon(p.totalWon, isKo);
+  const validityVal = `${p.isKo ? "유효" : "Valid"} ${p.validUntil}`;
+  const contactVal =
+    p.clientName?.trim() ||
+    p.clientPhone?.trim() ||
+    (isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772");
+
+  doc.setFillColor(VIOLET_50[0], VIOLET_50[1], VIOLET_50[2]);
+  doc.rect(0, y, pageW, boxH + 6, "F");
+  y += 3;
+
+  for (let i = 0; i < 3; i++) {
+    const x = M + i * (colW + gap);
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, colW, boxH, 2, 2, "FD");
+
+    doc.setFont(font, "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+    doc.text(labels[i]!.toUpperCase(), x + 3, y + 6);
+
+    if (i === 0) {
+      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setFontSize(14);
+      doc.text(
+        (doc.splitTextToSize(totalVal, colW - 6) as string[]).slice(0, 1),
+        x + 3,
+        y + 15,
+      );
+    } else if (i === 1) {
+      doc.setTextColor(INK[0], INK[1], INK[2]);
+      doc.setFontSize(9);
+      const vLines = doc.splitTextToSize(validityVal, colW - 6) as string[];
+      doc.text(vLines.slice(0, 2), x + 3, y + 13);
+      doc.setFontSize(7);
+      doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+      doc.text(`No. ${p.quoteNo}`, x + 3, y + 19);
+    } else {
+      doc.setTextColor(INK[0], INK[1], INK[2]);
+      doc.setFontSize(9);
+      const cLines = doc.splitTextToSize(contactVal, colW - 6) as string[];
+      doc.text(cLines.slice(0, 2), x + 3, y + 13);
+      if (p.clientName?.trim()) {
+        doc.setFontSize(7);
+        doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+        doc.text(isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772", x + 3, y + 19);
+      }
+    }
+  }
+
+  return y + boxH + 8;
+}
+
+function basicFieldLabel(
+  doc: jsPDF,
+  font: string,
+  text: string,
+  x: number,
+  y: number,
+) {
+  doc.setFont(font, "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(text.toUpperCase(), x, y);
+}
+
+function basicDrawClientSection(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  y: number,
+  pageW: number,
+): number {
+  const isKo = p.isKo;
+  const contentW = pageW - M * 2;
+  const boxH = 20;
+
+  y = basicSectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
+  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(M, y, contentW, boxH, 2, 2, "FD");
+
+  const colW = contentW / 2;
+  basicFieldLabel(doc, font, isKo ? "회사" : "Company", M + 4, y + 6);
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFontSize(11);
+  doc.text(
+    (doc.splitTextToSize(p.clientCompany || "—", colW - 8) as string[]).slice(0, 1),
+    M + 4,
+    y + 12,
+  );
+
+  basicFieldLabel(doc, font, isKo ? "담당" : "Contact", M + 4 + colW, y + 6);
+  doc.setFontSize(9);
+  const contact = [
+    p.clientName && `${p.clientName}`,
+    p.clientPhone,
+    p.clientEmail,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+  doc.text(
+    (doc.splitTextToSize(contact || "—", colW - 8) as string[]).slice(0, 2),
+    M + 4 + colW,
+    y + 12,
+  );
+
+  return y + boxH + 8;
+}
+
+function basicDrawCampaignSection(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  y: number,
+  pageW: number,
+): number {
+  const isKo = p.isKo;
+  const contentW = pageW - M * 2;
+  const boxH = 16;
+
+  y = basicSectionTitle(doc, font, isKo ? "캠페인 요약" : "Campaign", y);
+  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(M, y, contentW, boxH, 2, 2, "FD");
+
+  const colW = contentW / 2;
+  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M + 4, y + 6);
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFontSize(11);
+  doc.text(p.periodLabel, M + 4, y + 12);
+
+  basicFieldLabel(doc, font, isKo ? "금액 단위" : "Amount unit", M + 4 + colW, y + 6);
+  doc.setFontSize(8);
+  doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
+  doc.text(isKo ? "만원 (₩10,000)" : "10K KRW", M + 4 + colW, y + 12);
+
+  return y + boxH + 8;
+}
+
+function basicDrawMediaTable(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  x: number,
+  yStart: number,
+  w: number,
+  pageH: number,
+): number {
+  const isKo = p.isKo;
+  let y = yStart;
+  const colX = [x + 2, x + 10, x + w * 0.42, x + w - 2];
+  const headH = 7;
+
+  const drawHeader = (yy: number) => {
+    doc.setFillColor(VIOLET_50[0], VIOLET_50[1], VIOLET_50[2]);
+    doc.rect(x, yy, w, headH, "F");
+    doc.setFont(font, "normal");
+    doc.setFontSize(6.5);
+    doc.setTextColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+    const heads = isKo ? ["#", "매체명", "위치", "소계"] : ["#", "Media", "Location", "Amt"];
+    doc.text(heads[0]!, colX[0]!, yy + 4.8);
+    doc.text(heads[1]!, colX[1]!, yy + 4.8);
+    doc.text(heads[2]!, colX[2]!, yy + 4.8);
+    doc.text(heads[3]!, colX[3]!, yy + 4.8, { align: "right" });
+    return yy + headH;
+  };
+
+  y = drawHeader(y);
+  doc.setFontSize(8.5);
+
+  p.lines.forEach((line, idx) => {
+    const nameLines = doc.splitTextToSize(line.name, w * 0.38 - 4) as string[];
+    const locLines = doc.splitTextToSize(line.location || "—", w * 0.28) as string[];
+    const rowH = Math.max(7, Math.max(nameLines.length, locLines.length) * 3.8 + 2);
+
+    if (y + rowH > pageH - 32) {
+      doc.addPage();
+      y = M;
+      y = drawHeader(y);
+      doc.setFontSize(8.5);
+    }
+
+    if (idx % 2 === 1) {
+      doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+      doc.rect(x, y, w, rowH, "F");
+    }
+
+    doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+    doc.setFontSize(7.5);
+    doc.text(String(idx + 1), colX[0]!, y + 4.5);
+    doc.setTextColor(INK[0], INK[1], INK[2]);
+    doc.setFontSize(9);
+    doc.text(nameLines.slice(0, 2), colX[1]!, y + 4.5);
+    doc.setFontSize(8);
+    doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
+    doc.text(locLines.slice(0, 2), colX[2]!, y + 4.5);
+    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.setFontSize(9);
+    doc.text(
+      formatDocumentManWon(line.lineSupplyWon, isKo),
+      colX[3]!,
+      y + 4.5,
+      { align: "right" },
+    );
+
+    doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+    doc.line(x, y + rowH, x + w, y + rowH);
+    y += rowH;
+  });
+
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.rect(x, yStart, w, y - yStart);
+  return y + 4;
+}
+
+function basicDrawMediaList(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  x: number,
+  yStart: number,
+  w: number,
+  pageH: number,
+  thumbs: Map<string, string>,
+): number {
+  if (p.lines.length >= BASIC_COMPACT_MEDIA_MIN) {
+    return basicDrawMediaTable(doc, font, p, x, yStart, w, pageH);
+  }
+  return drawMediaCards(doc, font, p, x, yStart, w, pageH, thumbs);
+}
+
+function basicDrawTotals(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  x: number,
+  y: number,
+  w: number,
+  pageH: number,
+): number {
+  const isKo = p.isKo;
+  if (y + 40 > pageH - 36) {
+    doc.addPage();
+    y = M;
+  }
+
+  const boxX = x + w * 0.32;
+  const boxW = w - w * 0.32;
+  const rows: Array<[string, string, boolean]> = [];
+  const linesSubtotal = p.linesSubtotalWon ?? 0;
+  const discountTotal = p.discountTotalWon ?? 0;
+  if (linesSubtotal > 0 && (discountTotal > 0 || linesSubtotal !== p.supplyWon)) {
+    rows.push([isKo ? "소계" : "Subtotal", formatDocumentManWon(linesSubtotal, isKo), false]);
+  }
+  if (discountTotal > 0) {
+    rows.push([
+      p.discountSummary ?? (isKo ? "할인" : "Discount"),
+      `−${formatDocumentManWon(discountTotal, isKo)}`,
+      false,
+    ]);
+  }
+  rows.push(
+    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), false],
+    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), false],
+    [
+      isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)",
+      formatDocumentManWon(p.totalWon, isKo),
+      true,
+    ],
+  );
+
+  let ry = y;
+  doc.setFont(font, "normal");
+  rows.forEach(([label, val, accent]) => {
+    if (accent) {
+      doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+      doc.roundedRect(boxX, ry, boxW, 14, 2, 2, "F");
+      doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+      doc.roundedRect(boxX + boxW - 14, ry, 14, 14, 2, 2, "F");
+      doc.setTextColor(235, 230, 255);
+      doc.setFontSize(8);
+      doc.text(label, boxX + 4, ry + 8.5);
+      doc.setTextColor(255, 255, 255);
+      doc.setFontSize(13);
+      doc.text(val, boxX + boxW - 18, ry + 9, { align: "right" });
+      ry += 16;
+    } else {
+      doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+      doc.setFontSize(7.5);
+      doc.text(label.toUpperCase(), boxX + 4, ry + 5.5);
+      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setFontSize(10.5);
+      doc.text(val, boxX + boxW - 4, ry + 5.5, { align: "right" });
+      ry += 9;
+    }
+  });
+  return ry;
+}
+
+function basicDrawFooter(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  pageW: number,
+  pageH: number,
+  y: number,
+) {
+  const isKo = p.isKo;
+  const contentW = pageW - M * 2;
+  const footerTop = Math.max(y + 8, pageH - 42);
+
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.setLineWidth(0.3);
+  doc.line(M, footerTop, M + contentW, footerTop);
+
+  doc.setFontSize(7);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(
+    isKo
+      ? "※ 본 견적은 참고용이며, 실제 계약 시 재확인됩니다."
+      : "For reference; confirm at contract.",
+    M,
+    footerTop + 5,
+  );
+
+  doc.setFontSize(7.5);
+  doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.text(isKo ? "담당자 확인" : "Authorized by", M, footerTop + 12);
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.line(M, footerTop + 22, M + contentW * 0.42, footerTop + 22);
+
+  const rx = M + contentW * 0.52;
+  doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.text(p.issuer.company, rx, footerTop + 12);
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  doc.setFontSize(8);
+  doc.text(`${p.issuer.phone}  ·  ${p.issuer.email}`, rx, footerTop + 17);
+  doc.setFontSize(7);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(p.issuer.address, rx, footerTop + 22);
+}
+
 /** ── 기본 견적서 (라이트 · 플래너 보고서 톤) ── */
 async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload, thumbs: Map<string, string>) {
   const pageW = doc.internal.pageSize.getWidth();
@@ -323,34 +731,19 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload, thumb
   const contentW = pageW - M * 2;
   const isKo = p.isKo;
 
-  let y = drawQuoteHero(
-    doc,
-    font,
-    p,
-    pageW,
-    "ADVERTISING QUOTE",
-    isKo ? "광고 견적서" : "Advertising Quote",
-  );
+  let y = basicDrawQuoteHero(doc, font, p, pageW);
+  y = basicDrawSummaryStrip(doc, font, p, pageW, y);
+  y = basicDrawClientSection(doc, font, p, y, pageW);
+  y = basicDrawCampaignSection(doc, font, p, y, pageW);
+  y = basicSectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
+  y = basicDrawMediaList(doc, font, p, M, y, contentW, pageH, thumbs);
+  y += 4;
+  y = basicSectionTitle(doc, font, isKo ? "합계" : "Total", y);
+  y = basicDrawTotals(doc, font, p, M, y, contentW, pageH);
 
-  y = drawClientCampaign(doc, font, p, y, pageW);
-  y = sectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
-  y = drawMediaCards(doc, font, p, M, y, contentW, pageH, thumbs);
-  y += 6;
-  y = sectionTitle(doc, font, isKo ? "합계" : "Total", y);
-  drawTotals(doc, font, p, M, y, contentW, pageH);
+  await drawStamp(doc, font, p, pageW - M - 14, pageH - 28);
 
-  await drawStamp(doc, font, p, pageW - M - 16, pageH - 34);
-
-  doc.setFontSize(7);
-  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-  doc.text(p.issuer.address, M, pageH - 10);
-  doc.text(
-    isKo
-      ? "※ 본 견적은 발행일 기준이며 매체 재고에 따라 변동될 수 있습니다."
-      : "Estimate as of issue date; subject to inventory.",
-    M,
-    pageH - 6,
-  );
+  basicDrawFooter(doc, font, p, pageW, pageH, y);
 }
 
 /** ── 프리미엄: P1 다크 제안 · P2 공식 견적(라이트) ── */
