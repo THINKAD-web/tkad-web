@@ -291,6 +291,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         regionBreakdown: props.regionBreakdown,
         regionBudgetCharts: props.regionBudgetCharts,
         regionImpressionCharts: props.regionImpressionCharts,
+        isAutoPortfolio: props.isAutoPortfolio,
       }),
     [props, derived, snapshotAt],
   );
@@ -748,6 +749,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           regionBreakdown: props.regionBreakdown,
           regionBudgetCharts: props.regionBudgetCharts,
           regionImpressionCharts: props.regionImpressionCharts,
+          isAutoPortfolio: props.isAutoPortfolio,
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,

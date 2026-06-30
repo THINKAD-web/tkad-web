@@ -441,6 +441,33 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
+        {p.recommendRationale ? (
+          <section className="space-y-4">
+            <DocumentSectionHeading>
+              {isKo ? "추천 근거" : "Recommendation rationale"}
+            </DocumentSectionHeading>
+            <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/40 p-4 sm:p-5">
+              {p.recommendRationale.summaryLines.map((line) => (
+                <p key={line} className="text-sm leading-relaxed text-gray-700">
+                  {line}
+                </p>
+              ))}
+              {p.recommendRationale.mediaReasons.length > 0 ? (
+                <ul className="space-y-2 border-t border-violet-100 pt-3">
+                  {p.recommendRationale.mediaReasons.map((item) => (
+                    <li key={`${item.name}-${item.reason}`} className="text-sm">
+                      <span className="font-semibold text-gray-900">
+                        {item.name}
+                      </span>
+                      <span className="text-gray-600"> — {item.reason}</span>
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          </section>
+        ) : null}
+
         <ReportMediaLineupSection payload={p} />
 
         {/* 디지털 예산 배분 */}

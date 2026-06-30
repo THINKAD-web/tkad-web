@@ -19,6 +19,7 @@ import type {
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
+import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
 import {
   flattenPlanCartReportGroups,
@@ -66,6 +67,7 @@ export type BuildOohPayloadArgs = {
   regionBreakdown?: PlannerExportRegionBreakdown[];
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
+  isAutoPortfolio?: boolean;
 };
 
 export function buildOohReportPayload(
@@ -263,6 +265,48 @@ export function buildOohReportPayload(
     });
   }
 
+  const months = Math.max(1, a.months ?? 1);
+  const groups = a.regionBreakdown?.length
+    ? groupPlanCartReportPortfolio(a.portfolio, isKo)
+    : null;
+  const orderedPortfolio = groups
+    ? flattenPlanCartReportGroups(groups)
+    : a.portfolio;
+  const contributions = computePortfolioContributions(orderedPortfolio, months);
+  const portfolioRows = orderedPortfolio.map((m) =>
+    mediaItemToExportRow(m, isKo, {
+      months,
+      contributions,
+      lineTotalWon:
+        m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
+    }),
+  );
+
+  const recommendRationale = buildPlannerRecommendRationale({
+    portfolio: orderedPortfolio,
+    portfolioRows,
+    budgetMan: a.budgetMan,
+    months,
+    isKo,
+    isAutoPortfolio: a.isAutoPortfolio,
+  });
+
+  const portfolioGroups = (() => {
+    if (!a.regionBreakdown?.length) return undefined;
+    const rowByKey = new Map<string, (typeof portfolioRows)[number]>();
+    orderedPortfolio.forEach((m, i) => {
+      rowByKey.set(m.id, portfolioRows[i]!);
+    });
+    const grouped = groupPlanCartReportPortfolio(a.portfolio, isKo);
+    return grouped.map((group) => ({
+      regionLabel: group.regionLabel,
+      categories: group.categories.map((cat) => ({
+        categoryLabel: cat.categoryLabel,
+        items: cat.items.map((m) => rowByKey.get(m.id)!).filter(Boolean),
+      })),
+    }));
+  })();
+
   return {
     kind: "ooh",
     isKo,
@@ -286,57 +330,9 @@ export function buildOohReportPayload(
     kpis,
     charts,
     regionBreakdown: a.regionBreakdown,
-    portfolio: (() => {
-      const months = Math.max(1, a.months ?? 1);
-      const groups = a.regionBreakdown?.length
-        ? groupPlanCartReportPortfolio(a.portfolio, isKo)
-        : null;
-      const orderedPortfolio = groups
-        ? flattenPlanCartReportGroups(groups)
-        : a.portfolio;
-      const contributions = computePortfolioContributions(
-        orderedPortfolio,
-        months,
-      );
-      const rows = orderedPortfolio.map((m) =>
-        mediaItemToExportRow(m, isKo, {
-          months,
-          contributions,
-          lineTotalWon:
-            m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
-        }),
-      );
-      return rows;
-    })(),
-    portfolioGroups: (() => {
-      if (!a.regionBreakdown?.length) return undefined;
-      const months = Math.max(1, a.months ?? 1);
-      const groups = groupPlanCartReportPortfolio(a.portfolio, isKo);
-      const orderedPortfolio = flattenPlanCartReportGroups(groups);
-      const contributions = computePortfolioContributions(
-        orderedPortfolio,
-        months,
-      );
-      const rowByKey = new Map<string, ReturnType<typeof mediaItemToExportRow>>();
-      for (const m of orderedPortfolio) {
-        rowByKey.set(
-          m.id,
-          mediaItemToExportRow(m, isKo, {
-            months,
-            contributions,
-            lineTotalWon:
-              m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
-          }),
-        );
-      }
-      return groups.map((group) => ({
-        regionLabel: group.regionLabel,
-        categories: group.categories.map((cat) => ({
-          categoryLabel: cat.categoryLabel,
-          items: cat.items.map((m) => rowByKey.get(m.id)!).filter(Boolean),
-        })),
-      }));
-    })(),
+    portfolio: portfolioRows,
+    portfolioGroups,
+    recommendRationale,
     sections,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
