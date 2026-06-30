@@ -438,6 +438,90 @@ export async function buildPlannerReportPptx(
     }
   }
 
+  if (p.regionSubdivision && p.regionSubdivision.breakdown.length >= 2) {
+    const subSlide = pptx.addSlide();
+    header(subSlide, isKo ? "상권 · 권역 세분화" : "District & zone detail");
+    subSlide.addText(
+      `${isKo ? "기준" : "Source"}: ${p.regionSubdivision.sourceFieldLabel} (${p.regionSubdivision.classifiedCount}/${p.regionSubdivision.totalCount})`,
+      {
+        x: 0.6,
+        y: 1.1,
+        w: 12.1,
+        h: 0.35,
+        fontFace: face,
+        fontSize: 11,
+        color: GRAY,
+      },
+    );
+    let sy = 1.45;
+    if (p.regionSubdivision.coverageNote) {
+      subSlide.addText(p.regionSubdivision.coverageNote, {
+        x: 0.6,
+        y: sy,
+        w: 12.1,
+        h: 0.4,
+        fontFace: face,
+        fontSize: 10,
+        color: "B45309",
+      });
+      sy += 0.45;
+    }
+    const tableHead = isKo
+      ? ["상권·권역", "매체", "월 예산", "월 노출"]
+      : ["Sub-area", "Media", "Monthly", "Imp/mo"];
+    const tableBody = [
+      tableHead.map((h) => ({
+        text: h,
+        options: {
+          fill: { color: LIGHT },
+          color: GRAY,
+          bold: true,
+          fontSize: 10,
+          fontFace: face,
+        },
+      })),
+      ...p.regionSubdivision.breakdown.slice(0, 10).map((row) => [
+        {
+          text: row.label,
+          options: { color: INK, bold: true, fontSize: 10, fontFace: face },
+        },
+        {
+          text: String(row.mediaCount),
+          options: { color: INK, fontSize: 10, fontFace: face },
+        },
+        {
+          text: `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")} (${row.budgetPct}%)`,
+          options: { color: INK, fontSize: 10, fontFace: face },
+        },
+        {
+          text: row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
+          options: { color: INK, fontSize: 10, fontFace: face },
+        },
+      ]),
+    ];
+    subSlide.addTable(tableBody, {
+      x: 0.6,
+      y: sy,
+      w: 12.1,
+      colW: [3.2, 1.2, 4.2, 3.5],
+      border: { type: "solid", color: "E4E6EC", pt: 0.5 },
+      rowH: 0.36,
+      valign: "middle",
+    });
+    if (ch?.regionSubdivisionBudgetSplit && ch.regionSubdivisionBudgetSplit.length > 1) {
+      addBudgetSplitShapes(
+        subSlide,
+        pptx,
+        0.6,
+        sy + 0.36 * (tableBody.length + 0.5) + 0.2,
+        5.5,
+        ch.regionSubdivisionBudgetSplit,
+        face,
+        isKo,
+      );
+    }
+  }
+
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;

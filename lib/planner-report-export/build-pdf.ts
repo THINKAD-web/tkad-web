@@ -560,6 +560,82 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
+  if (p.regionSubdivision && p.regionSubdivision.breakdown.length >= 2) {
+    sectionTitle(isKo ? "상권 · 권역 세분화" : "District & zone detail");
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8);
+    setText(GRAY_500);
+    const meta = `${isKo ? "기준" : "Source"}: ${p.regionSubdivision.sourceFieldLabel} (${p.regionSubdivision.classifiedCount}/${p.regionSubdivision.totalCount})`;
+    ensure(6);
+    doc.text(meta, M, y + 2);
+    y += 5;
+    if (p.regionSubdivision.coverageNote) {
+      const note = doc.splitTextToSize(p.regionSubdivision.coverageNote, contentW) as string[];
+      ensure(note.length * 4 + 2);
+      setText(GRAY_600);
+      doc.text(note, M, y + 2);
+      y += note.length * 4 + 2;
+    }
+    if (
+      ch?.regionSubdivisionBudgetSplit &&
+      ch.regionSubdivisionBudgetSplit.length > 1
+    ) {
+      ensure(46);
+      doc.setFontSize(8);
+      setText(GRAY_500);
+      doc.text(isKo ? "세분화 예산 비중" : "Budget by sub-area", M, y + 2);
+      drawDonut(M + 22, y + 26, 18, 10, ch.regionSubdivisionBudgetSplit);
+      y += 50;
+    }
+    if (
+      ch?.regionSubdivisionImpressionSplit &&
+      ch.regionSubdivisionImpressionSplit.length > 1
+    ) {
+      ensure(6 + ch.regionSubdivisionImpressionSplit.length * 7);
+      doc.setFontSize(8);
+      setText(GRAY_500);
+      doc.text(isKo ? "세분화 노출 비중" : "Impressions by sub-area", M, y + 2);
+      y += 5;
+      drawShareBars(M, contentW, ch.regionSubdivisionImpressionSplit);
+      y += 3;
+    }
+    const subCols = isKo
+      ? ["상권·권역", "매체", "월 예산", "월 노출", "도달"]
+      : ["Sub-area", "Media", "Monthly", "Imp/mo", "Reach"];
+    const subCw = [32, 14, 36, 30, 28];
+    ensure(8 + p.regionSubdivision.breakdown.length * 7);
+    doc.setFontSize(8);
+    setText(GRAY_500);
+    let sdx = M;
+    subCols.forEach((h, i) => {
+      doc.text(h, sdx, y + 2);
+      sdx += subCw[i] ?? 24;
+    });
+    y += 6;
+    doc.setFont(FONT, "normal");
+    for (const row of p.regionSubdivision.breakdown) {
+      ensure(7);
+      sdx = M;
+      const cells = [
+        row.label,
+        String(row.mediaCount),
+        `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
+        row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
+        row.uniqueReach > 0
+          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
+          : "—",
+      ];
+      cells.forEach((cell, i) => {
+        setText(i === 0 ? INK : GRAY_600);
+        const line = (doc.splitTextToSize(cell, (subCw[i] ?? 24) - 2) as string[])[0] ?? cell;
+        doc.text(line, sdx, y + 2);
+        sdx += subCw[i] ?? 24;
+      });
+      y += 7;
+    }
+    y += 4;
+  }
+
   // ── 매체 구성 (디테일 카드) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;

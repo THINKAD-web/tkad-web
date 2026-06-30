@@ -441,6 +441,87 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
+        {p.regionSubdivision &&
+        p.regionSubdivision.breakdown.length >= 2 ? (
+          <section className="space-y-4">
+            <DocumentSectionHeading>
+              {isKo ? "상권 · 권역 세분화" : "District & zone detail"}
+            </DocumentSectionHeading>
+            <p className="text-xs text-gray-500">
+              {isKo ? "기준" : "Source"}: {p.regionSubdivision.sourceFieldLabel}
+              <span className="ml-2 tabular-nums text-gray-400">
+                ({p.regionSubdivision.classifiedCount}/{p.regionSubdivision.totalCount})
+              </span>
+            </p>
+            {p.regionSubdivision.coverageNote ? (
+              <p className="text-[11px] leading-snug text-amber-700">
+                {p.regionSubdivision.coverageNote}
+              </p>
+            ) : null}
+            <div className="grid gap-6 sm:grid-cols-2">
+              {p.charts?.regionSubdivisionBudgetSplit &&
+              p.charts.regionSubdivisionBudgetSplit.length > 1 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "세분화 예산 비중" : "Budget by sub-area"}
+                  </p>
+                  <DonutChart data={p.charts.regionSubdivisionBudgetSplit} />
+                </div>
+              ) : null}
+              {p.charts?.regionSubdivisionImpressionSplit &&
+              p.charts.regionSubdivisionImpressionSplit.length > 1 ? (
+                <div className="rounded-xl border border-gray-200 p-4">
+                  <p className="mb-3 text-xs font-semibold text-gray-500">
+                    {isKo ? "세분화 노출 비중" : "Impressions by sub-area"}
+                  </p>
+                  <ShareBarChart data={p.charts.regionSubdivisionImpressionSplit} />
+                </div>
+              ) : null}
+            </div>
+            <div className="overflow-x-auto rounded-xl border border-gray-200">
+              <table className="w-full min-w-[32rem] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
+                    <th className="px-3 py-2.5">
+                      {isKo ? "상권·권역" : "Sub-area"}
+                    </th>
+                    <th className="px-3 py-2.5">{isKo ? "매체" : "Media"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "월 예산" : "Monthly"}</th>
+                    <th className="px-3 py-2.5">{isKo ? "월 노출" : "Monthly imp."}</th>
+                    <th className="px-3 py-2.5">{isKo ? "추정 도달" : "Reach"}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {p.regionSubdivision.breakdown.map((row) => (
+                    <tr key={row.regionKey} className="border-b border-gray-100">
+                      <td className="px-3 py-2.5 font-medium text-gray-900">
+                        {row.label}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
+                        {row.mediaCount}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-900">
+                        ₩{row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                        <span className="ml-1 text-xs text-gray-500">
+                          ({formatPlannerSharePct(row.budgetPct)})
+                        </span>
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-900">
+                        {row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                      </td>
+                      <td className="px-3 py-2.5 tabular-nums text-gray-700">
+                        {row.uniqueReach > 0
+                          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
+                          : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </section>
+        ) : null}
+
         {p.recommendRationale ? (
           <section className="space-y-4">
             <DocumentSectionHeading>

@@ -74,6 +74,10 @@ export type PlannerExportCharts = {
   regionBudgetSplit?: PlannerExportChartDatum[];
   /** 지역별 월 노출 비중 (내 플랜 보고서) */
   regionImpressionSplit?: PlannerExportChartDatum[];
+  /** 상권·권역 세분화 예산 비중 */
+  regionSubdivisionBudgetSplit?: PlannerExportChartDatum[];
+  /** 상권·권역 세분화 노출 비중 */
+  regionSubdivisionImpressionSplit?: PlannerExportChartDatum[];
   /** 예산·노출·CPM 차이 설명 (웹·PDF·PPT 공용) */
   performanceGuide?: PlannerPerformanceGuide;
 };
@@ -91,6 +95,16 @@ export type PlannerExportRegionBreakdown = {
   impressionPct: number;
   uniqueReach: number;
   cpmKrw: number | null;
+};
+
+/** 시·도 아래 상권/권역/구 세분화 (P-4) */
+export type PlannerExportRegionSubdivision = {
+  sourceField: "regionSub" | "regionZone" | "district";
+  sourceFieldLabel: string;
+  classifiedCount: number;
+  totalCount: number;
+  coverageNote?: string;
+  breakdown: PlannerExportRegionBreakdown[];
 };
 
 export type PlannerExportPortfolioGroup = {
@@ -126,6 +140,8 @@ export type PlannerReportExportPayload = {
   portfolioGroups?: PlannerExportPortfolioGroup[];
   /** 지역별 예산·효과 표 (내 플랜 보고서) */
   regionBreakdown?: PlannerExportRegionBreakdown[];
+  /** 상권·권역·구 세분화 (2개 이상일 때) */
+  regionSubdivision?: PlannerExportRegionSubdivision;
   /** 통합 플래너 전용 — 디지털 채널 배분 */
   digital?: PlannerExportDigitalRow[];
   digitalSummary?: string;

@@ -21,6 +21,7 @@ import type {
 import { buildPerformanceChartGuide } from "@/lib/planner-report-performance-guide";
 import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 import { regionalBreakdownSectionLines } from "@/lib/plan-cart-report/regional-breakdown";
+import { computeRegionSubdivisionReport } from "@/lib/plan-cart-report/region-subdivision";
 import {
   flattenPlanCartReportGroups,
   groupPlanCartReportPortfolio,
@@ -291,6 +292,22 @@ export function buildOohReportPayload(
     isAutoPortfolio: a.isAutoPortfolio,
   });
 
+  const subdivisionReport = computeRegionSubdivisionReport(
+    orderedPortfolio,
+    months,
+    isKo,
+  );
+  if (subdivisionReport) {
+    charts.regionSubdivisionBudgetSplit =
+      subdivisionReport.budgetCharts.length > 1
+        ? subdivisionReport.budgetCharts
+        : undefined;
+    charts.regionSubdivisionImpressionSplit =
+      subdivisionReport.impressionCharts.length > 1
+        ? subdivisionReport.impressionCharts
+        : undefined;
+  }
+
   const portfolioGroups = (() => {
     if (!a.regionBreakdown?.length) return undefined;
     const rowByKey = new Map<string, (typeof portfolioRows)[number]>();
@@ -330,6 +347,16 @@ export function buildOohReportPayload(
     kpis,
     charts,
     regionBreakdown: a.regionBreakdown,
+    regionSubdivision: subdivisionReport
+      ? {
+          sourceField: subdivisionReport.sourceField,
+          sourceFieldLabel: subdivisionReport.sourceFieldLabel,
+          classifiedCount: subdivisionReport.classifiedCount,
+          totalCount: subdivisionReport.totalCount,
+          coverageNote: subdivisionReport.coverageNote,
+          breakdown: subdivisionReport.breakdown,
+        }
+      : undefined,
     portfolio: portfolioRows,
     portfolioGroups,
     recommendRationale,
