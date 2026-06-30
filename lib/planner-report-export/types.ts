@@ -40,6 +40,12 @@ export type PlannerExportDigitalRow = {
 
 export type PlannerExportSection = { title: string; lines: string[] };
 
+/** 추천 근거 — 포트폴리오 요약 + 매체별 recommendReason (있을 때만) */
+export type PlannerExportRecommendRationale = {
+  summaryLines: string[];
+  mediaReasons: { name: string; reason: string }[];
+};
+
 /** 차트 1개 항목 (라벨 + 수치 + 유형별 색상 키) */
 export type PlannerExportChartDatum = {
   label: string;
@@ -125,6 +131,8 @@ export type PlannerReportExportPayload = {
   digitalSummary?: string;
   /** PRO 인사이트 등 추가 섹션 (제목 + 불릿) */
   sections?: PlannerExportSection[];
+  /** 데이터 기반 추천 근거 (AI narrative 와 별도) */
+  recommendRationale?: PlannerExportRecommendRationale;
   disclaimer: string;
 };
 

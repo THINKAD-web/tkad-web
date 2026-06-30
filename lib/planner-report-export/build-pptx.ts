@@ -393,6 +393,51 @@ export async function buildPlannerReportPptx(
     );
   }
 
+  if (p.recommendRationale) {
+    const rSlide = pptx.addSlide();
+    header(rSlide, isKo ? "추천 근거" : "Recommendation rationale");
+    let ry = 1.2;
+    for (const line of p.recommendRationale.summaryLines) {
+      rSlide.addText(line, {
+        x: 0.6,
+        y: ry,
+        w: 12.1,
+        h: 0.55,
+        fontFace: face,
+        fontSize: 12,
+        color: INK,
+        valign: "top",
+      });
+      ry += 0.62;
+    }
+    if (p.recommendRationale.mediaReasons.length > 0) {
+      ry += 0.15;
+      for (const item of p.recommendRationale.mediaReasons.slice(0, 8)) {
+        rSlide.addText(
+          [
+            {
+              text: `${item.name}\n`,
+              options: { bold: true, color: INK, fontSize: 11 },
+            },
+            {
+              text: item.reason,
+              options: { color: GRAY, fontSize: 10 },
+            },
+          ],
+          {
+            x: 0.6,
+            y: ry,
+            w: 12.1,
+            h: 0.5,
+            fontFace: face,
+            valign: "top",
+          },
+        );
+        ry += 0.55;
+      }
+    }
+  }
+
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
@@ -426,6 +471,12 @@ export async function buildPlannerReportPptx(
       parts.push({
         text: `${isKo ? "집행 소계" : "Subtotal"} ${row.lineTotalLabel}\n`,
         options: { color: VIOLET, bold: true, fontSize: 10 },
+      });
+    }
+    if (row.recommendReason?.trim()) {
+      parts.push({
+        text: `${isKo ? "추천" : "Why"} ${row.recommendReason.trim()}\n`,
+        options: { color: GRAY, fontSize: 10 },
       });
     }
     if (p.portfolio.length > 1) {

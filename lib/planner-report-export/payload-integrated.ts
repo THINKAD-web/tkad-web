@@ -12,6 +12,7 @@ import type {
   PlannerExportSection,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
+import { buildPlannerRecommendRationale } from "@/lib/planner/report-recommend-rationale";
 
 export type BuildIntegratedPayloadArgs = {
   isKo: boolean;
@@ -138,6 +139,25 @@ export function buildIntegratedReportPayload(
     });
   }
 
+  const months = Math.max(1, a.months ?? 1);
+  const contributions = computePortfolioContributions(a.portfolio, months);
+  const portfolioRows = a.portfolio.map((mm) =>
+    mediaItemToExportRow(mm, isKo, {
+      months,
+      contributions,
+      lineTotalWon:
+        mm.price > 0 ? catalogPriceFieldToWon(mm.price) * months : undefined,
+    }),
+  );
+  const recommendRationale = buildPlannerRecommendRationale({
+    portfolio: a.portfolio,
+    portfolioRows,
+    budgetMan: a.budgetMan,
+    months,
+    isKo,
+    isAutoPortfolio: false,
+  });
+
   return {
     kind: "integrated",
     isKo,
@@ -153,18 +173,8 @@ export function buildIntegratedReportPayload(
     industryText: a.industryText,
     kpis,
     charts,
-    portfolio: (() => {
-      const months = Math.max(1, a.months ?? 1);
-      const contributions = computePortfolioContributions(a.portfolio, months);
-      return a.portfolio.map((mm) =>
-        mediaItemToExportRow(mm, isKo, {
-          months,
-          contributions,
-          lineTotalWon:
-            mm.price > 0 ? catalogPriceFieldToWon(mm.price) * months : undefined,
-        }),
-      );
-    })(),
+    portfolio: portfolioRows,
+    recommendRationale,
     digital: a.digitalResult.channels.map((c) => ({
       platform: isKo ? c.channel.nameKo : c.channel.nameEn,
       sharePct: c.budgetPct,

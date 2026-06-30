@@ -604,6 +604,12 @@ export async function buildPlannerReportPdf(
         bold: true,
       });
     }
+    if (row.recommendReason?.trim()) {
+      lines.push({
+        text: `${isKo ? "추천" : "Why"} ${row.recommendReason.trim()}`,
+        color: GRAY_600,
+      });
+    }
     if (p.portfolio.length > 1) {
       const contrib = [
         row.exposureContributionPct != null
@@ -672,6 +678,37 @@ export async function buildPlannerReportPdf(
       });
     }
     y += rh + 4;
+  }
+
+  if (p.recommendRationale) {
+    sectionTitle(isKo ? "추천 근거" : "Recommendation rationale");
+    for (const line of p.recommendRationale.summaryLines) {
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(9);
+      setText(GRAY_600);
+      const wrapped = doc.splitTextToSize(line, contentW) as string[];
+      ensure(wrapped.length * 4.2 + 2);
+      doc.text(wrapped, M, y + 3);
+      y += wrapped.length * 4.2 + 2;
+    }
+    if (p.recommendRationale.mediaReasons.length > 0) {
+      ensure(p.recommendRationale.mediaReasons.length * 8 + 4);
+      y += 2;
+      for (const item of p.recommendRationale.mediaReasons) {
+        doc.setFont(FONT, "bold");
+        doc.setFontSize(8.5);
+        setText(INK);
+        doc.text(item.name, M + 2, y + 3);
+        y += 4.5;
+        doc.setFont(FONT, "normal");
+        setText(GRAY_600);
+        const wrapped = doc.splitTextToSize(item.reason, contentW - 6) as string[];
+        ensure(wrapped.length * 4);
+        doc.text(wrapped, M + 4, y + 2);
+        y += wrapped.length * 4 + 2;
+      }
+    }
+    y += 4;
   }
 
   sectionTitle(isKo ? "매체 구성" : "Media lineup");
