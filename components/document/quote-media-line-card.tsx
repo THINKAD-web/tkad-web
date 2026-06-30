@@ -39,9 +39,9 @@ export function QuoteAddonLineRow({ detail, isKo = true, className }: CardProps)
               <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                 {isKo ? "단가" : "Unit"}
               </p>
-              <p className="text-[12px] font-bold tabular-nums text-violet-700">
-                {detail.monthlyPriceLabel}
-              </p>
+            <p className="text-[12px] font-bold tabular-nums text-gray-900">
+              {detail.monthlyPriceLabel}
+            </p>
             </div>
           ) : null}
           {detail.lineTotalLabel ? (
@@ -180,9 +180,9 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
               <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                 {isKo ? "단가" : "Unit"}
               </p>
-              <p className="text-[12px] font-bold tabular-nums text-violet-700">
-                {detail.monthlyPriceLabel}
-              </p>
+            <p className="text-[12px] font-bold tabular-nums text-gray-900">
+              {detail.monthlyPriceLabel}
+            </p>
             </div>
           ) : null}
           {detail.lineTotalLabel ? (

@@ -9,6 +9,7 @@ import {
 } from "@/lib/export-media-images";
 import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
+import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
 const VIOLET = [124, 58, 237] as const;
@@ -27,10 +28,12 @@ const WHITE = [255, 255, 255] as const;
 const M = 15;
 const HERO_H = 44;
 const BASIC_HERO_H = 44;
+const BASIC_SECTION_TITLE_W = 26;
 const BASIC_COMPACT_MEDIA_MIN = 5;
 const QUOTE_BASIC_THUMB_MM = { w: 28, h: 21 } as const;
 const VIOLET_50 = [237, 233, 254] as const;
 const VIOLET_700 = [109, 40, 217] as const;
+const RED_700 = [185, 28, 28] as const;
 
 /** 직인: 로컬 public/brand → 원격 URL 순. 없으면 생략 (가짜 도장 미표시). */
 async function resolveStampDataUrl(url?: string): Promise<string | null> {
@@ -216,7 +219,7 @@ function basicDrawQuoteMediaCards(
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
       doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
       doc.setFontSize(8.5);
-      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setTextColor(INK[0], INK[1], INK[2]);
       doc.text(unitVal, priceX, y + 11, { align: "right" });
       doc.setFontSize(6);
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
@@ -293,7 +296,7 @@ function basicDrawQuoteMediaCards(
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
     doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
     doc.setFontSize(8.5);
-    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.setTextColor(INK[0], INK[1], INK[2]);
     doc.text(unitVal, priceX, y + 11, { align: "right" });
     doc.setFontSize(6);
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
@@ -503,15 +506,25 @@ function drawClientCampaign(
   return y + 28;
 }
 
-function basicSectionTitle(doc: jsPDF, font: string, label: string, y: number): number {
+function basicDrawSectionTitleAt(
+  doc: jsPDF,
+  font: string,
+  label: string,
+  x: number,
+  y: number,
+): void {
   doc.setFont(font, "normal");
-  doc.setFontSize(12);
+  doc.setFontSize(11);
   doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-  doc.rect(M, y, 1.8, 5.8, "F");
+  doc.rect(x, y, 1.8, 5.8, "F");
   doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
-  doc.rect(M, y + 5.8, 1.8, 0.8, "F");
+  doc.rect(x, y + 5.8, 1.8, 0.8, "F");
   doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.text(label, M + 5, y + 4.8);
+  doc.text(label, x + 5, y + 4.8);
+}
+
+function basicSectionTitle(doc: jsPDF, font: string, label: string, y: number): number {
+  basicDrawSectionTitleAt(doc, font, label, M, y);
   return y + 9;
 }
 
@@ -558,14 +571,11 @@ function basicDrawSummaryStrip(
   const colW = (contentW - gap * 2) / 3;
   const boxH = 16;
   const labels = isKo
-    ? ["총액 (VAT 포함)", "유효기간", "담당"]
-    : ["Total (incl. VAT)", "Valid until", "Contact"];
+    ? ["총액 (VAT 포함)", "유효기간", "싱커드 담당"]
+    : ["Total (incl. VAT)", "Valid until", "THINKAD"];
   const totalVal = formatDocumentManWon(p.totalWon, isKo);
   const validityVal = `${p.isKo ? "유효" : "Valid"} ${p.validUntil}`;
-  const contactVal =
-    p.clientName?.trim() ||
-    p.clientPhone?.trim() ||
-    (isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772");
+  const contactVal = isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772";
 
   y += 5;
   doc.setFillColor(255, 255, 255);
@@ -602,11 +612,6 @@ function basicDrawSummaryStrip(
       doc.setFontSize(9);
       const cLines = doc.splitTextToSize(contactVal, colW - 6) as string[];
       doc.text(cLines.slice(0, 2), x + 3, y + 13);
-      if (p.clientName?.trim()) {
-        doc.setFontSize(7);
-        doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-        doc.text(isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772", x + 3, y + 18);
-      }
     }
   }
 
@@ -634,41 +639,28 @@ function basicDrawClientSection(
   pageW: number,
 ): number {
   const isKo = p.isKo;
-  const contentW = pageW - M * 2;
-  const boxH = 15;
+  const contentX = M + BASIC_SECTION_TITLE_W;
+  const contentW = pageW - M - contentX;
+  const sectionY = y + 1;
 
-  y = basicSectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
-  doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
-  doc.setLineWidth(0.2);
-  doc.roundedRect(M, y, contentW, boxH, 2, 2, "D");
+  basicDrawSectionTitleAt(doc, font, isKo ? "고객 정보" : "Client", M, sectionY);
 
-  const colW = contentW / 2;
-  basicFieldLabel(doc, font, isKo ? "회사" : "Company", M + 4, y + 6);
-  doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(11);
-  doc.text(
-    (doc.splitTextToSize(p.clientCompany || "—", colW - 8) as string[]).slice(0, 1),
-    M + 4,
-    y + 12,
-  );
+  const parts = [
+    `${isKo ? "회사" : "Company"} ${p.clientCompany || "—"}`,
+    `${isKo ? "담당자" : "Contact"} ${p.clientName || "—"}`,
+    `${isKo ? "연락처" : "Phone"} ${p.clientPhone || "—"}`,
+  ];
+  if (p.clientEmail?.trim()) {
+    parts.push(`${isKo ? "이메일" : "Email"} ${p.clientEmail.trim()}`);
+  }
 
-  basicFieldLabel(doc, font, isKo ? "담당" : "Contact", M + 4 + colW, y + 6);
+  doc.setFont(font, "normal");
   doc.setFontSize(9);
-  const contact = [
-    p.clientName && `${p.clientName}`,
-    p.clientPhone,
-    p.clientEmail,
-  ]
-    .filter(Boolean)
-    .join(" · ");
-  doc.text(
-    (doc.splitTextToSize(contact || "—", colW - 8) as string[]).slice(0, 2),
-    M + 4 + colW,
-    y + 12,
-  );
+  doc.setTextColor(INK[0], INK[1], INK[2]);
+  const lines = doc.splitTextToSize(parts.join(" · "), contentW) as string[];
+  doc.text(lines.slice(0, 2), contentX, sectionY + 4.5);
 
-  return y + boxH + 5;
+  return sectionY + (lines.length > 1 ? 12 : 9);
 }
 
 function basicDrawCampaignSection(
@@ -676,16 +668,31 @@ function basicDrawCampaignSection(
   font: string,
   p: QuoteExportPayload,
   y: number,
+  pageW: number,
 ): number {
   const isKo = p.isKo;
+  const contentX = M + BASIC_SECTION_TITLE_W;
+  const contentW = pageW - M - contentX;
+  const sectionY = y + 1;
 
-  y = basicSectionTitle(doc, font, isKo ? "캠페인 요약" : "Campaign", y);
-  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M, y + 4);
+  basicDrawSectionTitleAt(doc, font, isKo ? "캠페인 요약" : "Campaign", M, sectionY);
+
+  const durationMeta = formatCampaignDurationMeta(p.periodLabel, isKo);
+  const lineY = sectionY + 4.5;
+
   doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(11);
-  doc.text(p.periodLabel, M + 22, y + 4);
+  doc.setFontSize(10.5);
+  doc.text(p.periodLabel, contentX, lineY);
 
-  return y + 9;
+  if (durationMeta) {
+    const periodW = doc.getTextWidth(p.periodLabel);
+    doc.setFontSize(9.5);
+    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    const metaLines = doc.splitTextToSize(` · ${durationMeta}`, contentW - periodW) as string[];
+    doc.text(metaLines[0] ?? "", contentX + periodW, lineY);
+  }
+
+  return sectionY + 10;
 }
 
 function basicDrawMediaTable(
@@ -799,33 +806,33 @@ function basicDrawTotals(
   const boxW = w;
   const labelX = boxX + 4;
   const valX = boxX + boxW - 4;
-  const rows: Array<[string, string, boolean]> = [];
+  const rows: Array<[string, string, "normal" | "discount" | "total"]> = [];
   const linesSubtotal = p.linesSubtotalWon ?? 0;
   const discountTotal = p.discountTotalWon ?? 0;
   if (linesSubtotal > 0 && (discountTotal > 0 || linesSubtotal !== p.supplyWon)) {
-    rows.push([isKo ? "소계" : "Subtotal", formatDocumentManWon(linesSubtotal, isKo), false]);
+    rows.push([isKo ? "소계" : "Subtotal", formatDocumentManWon(linesSubtotal, isKo), "normal"]);
   }
   if (discountTotal > 0) {
     rows.push([
       p.discountSummary ?? (isKo ? "할인" : "Discount"),
       `−${formatDocumentManWon(discountTotal, isKo)}`,
-      false,
+      "discount",
     ]);
   }
   rows.push(
-    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), false],
-    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), false],
+    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), "normal"],
+    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), "normal"],
     [
       isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)",
       formatDocumentManWon(p.totalWon, isKo),
-      true,
+      "total",
     ],
   );
 
   let ry = y;
   doc.setFont(font, "normal");
-  rows.forEach(([label, val, accent]) => {
-    if (accent) {
+  rows.forEach(([label, val, tone]) => {
+    if (tone === "total") {
       doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
       doc.roundedRect(boxX, ry, boxW, 12, 2, 2, "F");
       doc.setTextColor(235, 230, 255);
@@ -839,7 +846,11 @@ function basicDrawTotals(
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
       doc.setFontSize(7.5);
       doc.text(label.toUpperCase(), labelX, ry + 5.5);
-      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      if (tone === "discount") {
+        doc.setTextColor(RED_700[0], RED_700[1], RED_700[2]);
+      } else {
+        doc.setTextColor(INK[0], INK[1], INK[2]);
+      }
       doc.setFontSize(10.5);
       doc.text(val, valX, ry + 5, { align: "right" });
       ry += 8;
@@ -900,7 +911,7 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload, thumb
   let y = basicDrawQuoteHero(doc, font, p, pageW);
   y = basicDrawSummaryStrip(doc, font, p, pageW, y);
   y = basicDrawClientSection(doc, font, p, y, pageW);
-  y = basicDrawCampaignSection(doc, font, p, y);
+  y = basicDrawCampaignSection(doc, font, p, y, pageW);
   y = basicSectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
   y = basicDrawMediaList(doc, font, p, M, y, contentW, pageH, thumbs);
   y += 2;

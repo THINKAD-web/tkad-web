@@ -16,6 +16,7 @@ import {
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 import { formatQuoteValidUntilLabel } from "@/lib/admin-quote-calc";
+import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 
 /** 카드 대신 컴팩트 표로 전환하는 매체 건수 */
 const COMPACT_MEDIA_MIN = 5;
@@ -46,33 +47,54 @@ function QuoteDocSectionHeading({
   );
 }
 
-function QuoteFieldLabel({ children }: { children: React.ReactNode }) {
-  return (
-    <dt className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-      {children}
-    </dt>
-  );
-}
-
-function QuoteFieldValue({
+/** 기본 견적서: 섹션 제목(좌) + 내용(우) 가로 배치 */
+function QuoteDocSectionRow({
+  title,
   children,
   className,
-  emphasis,
 }: {
+  title: React.ReactNode;
   children: React.ReactNode;
   className?: string;
-  emphasis?: boolean;
 }) {
   return (
-    <dd
+    <section
       className={cn(
-        "mt-1 break-words text-[15px] text-gray-900",
-        emphasis ? "font-bold" : "font-semibold",
+        "flex items-start gap-5 border-b border-gray-100 pb-4 mb-4 sm:gap-7",
         className,
       )}
     >
-      {children}
-    </dd>
+      <div className="w-[5.5rem] shrink-0 pt-0.5 sm:w-24">{title}</div>
+      <div className="min-w-0 flex-1">{children}</div>
+    </section>
+  );
+}
+
+function QuoteInlineField({
+  label,
+  children,
+  emphasis,
+  className,
+}: {
+  label: string;
+  children: React.ReactNode;
+  emphasis?: boolean;
+  className?: string;
+}) {
+  return (
+    <span className={cn("inline-flex min-w-0 items-baseline gap-1.5", className)}>
+      <span className="shrink-0 text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+        {label}
+      </span>
+      <span
+        className={cn(
+          "break-words text-[15px] text-gray-900",
+          emphasis ? "font-bold" : "font-semibold",
+        )}
+      >
+        {children}
+      </span>
+    </span>
   );
 }
 
@@ -80,20 +102,12 @@ function QuoteSummaryStrip({
   isKo,
   grandTotalWon,
   validityText,
-  contactName,
-  contactPhone,
 }: {
   isKo: boolean;
   grandTotalWon: number;
   validityText: string;
-  contactName: string;
-  contactPhone: string;
 }) {
   const thinkadContact = isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772";
-  const clientContact =
-    contactName.trim() ||
-    contactPhone.trim() ||
-    (isKo ? thinkadContact : thinkadContact);
 
   return (
     <div
@@ -117,12 +131,9 @@ function QuoteSummaryStrip({
         </div>
         <div className="rounded-xl border border-gray-200/80 bg-white/80 px-4 py-3.5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-            {isKo ? "담당" : "Contact"}
+            {isKo ? "싱커드 담당" : "THINKAD"}
           </p>
-          <p className="mt-1 text-sm font-bold text-gray-900">{clientContact}</p>
-          {contactName.trim() ? (
-            <p className="mt-1 text-[11px] text-gray-500">{thinkadContact}</p>
-          ) : null}
+          <p className="mt-1 text-sm font-bold leading-snug text-gray-900">{thinkadContact}</p>
         </div>
       </div>
     </div>
@@ -159,7 +170,7 @@ function QuoteDefaultTotalsPanel({
           <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
             {isKo ? "소계" : "Subtotal"}
           </span>
-          <span className="font-bold tabular-nums text-violet-700">
+          <span className="font-bold tabular-nums text-gray-900">
             {formatDocumentManWon(linesSubtotalWon, isKo)}
           </span>
         </div>
@@ -178,7 +189,7 @@ function QuoteDefaultTotalsPanel({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
           {supplyLabel}
         </span>
-        <span className="font-bold tabular-nums text-violet-700">
+        <span className="font-bold tabular-nums text-gray-900">
           {formatDocumentManWon(subtotalWon, isKo)}
         </span>
       </div>
@@ -186,7 +197,7 @@ function QuoteDefaultTotalsPanel({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
           {vatLabel}
         </span>
-        <span className="font-bold tabular-nums text-violet-700">
+        <span className="font-bold tabular-nums text-gray-900">
           {formatDocumentManWon(vatWon, isKo)}
         </span>
       </div>
@@ -364,6 +375,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       ? formatQuoteValidUntilLabel(validUntil, isKo)
       : t("pdfValidity");
 
+    const campaignDurationMeta = formatCampaignDurationMeta(periodLabel, isKo);
+
     const isPremium = template === "premium";
     const isDefaultDoc = !isPremium;
     const useCompactMedia = isDefaultDoc && rows.length >= COMPACT_MEDIA_MIN;
@@ -397,8 +410,6 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             isKo={isKo}
             grandTotalWon={grandTotalWon}
             validityText={validityText}
-            contactName={contactName}
-            contactPhone={contactPhone}
           />
         ) : null}
 
@@ -418,101 +429,79 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             </div>
           ) : null}
 
-          <section
-            className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
-          >
-            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
-              <SectionHeading>{t("pdfClientSection")}</SectionHeading>
-            </div>
-            <dl
-              className={cn(
-                "grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border p-3 sm:grid-cols-4",
-                isDefaultDoc
-                  ? "border-gray-200/50 bg-white"
-                  : "border-gray-200 bg-[#F8F9FC] p-4",
-              )}
+          {isDefaultDoc ? (
+            <QuoteDocSectionRow
+              title={<SectionHeading>{t("pdfClientSection")}</SectionHeading>}
+              className="items-center"
             >
-              <div className="min-w-0 sm:col-span-2">
-                {isDefaultDoc ? (
-                  <>
-                    <QuoteFieldLabel>{t("company")}</QuoteFieldLabel>
-                    <QuoteFieldValue emphasis>{company.trim() || "—"}</QuoteFieldValue>
-                  </>
-                ) : (
-                  <>
-                    <dt className="text-xs font-medium text-gray-500">{t("company")}</dt>
-                    <dd className="mt-0.5 break-words text-sm font-semibold text-gray-900">
-                      {company.trim() || "—"}
-                    </dd>
-                  </>
-                )}
-              </div>
-              <div className="min-w-0">
-                {isDefaultDoc ? (
-                  <>
-                    <QuoteFieldLabel>{t("name")}</QuoteFieldLabel>
-                    <QuoteFieldValue>{contactName.trim() || "—"}</QuoteFieldValue>
-                  </>
-                ) : (
-                  <>
-                    <dt className="text-xs font-medium text-gray-500">{t("name")}</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-gray-900">
-                      {contactName.trim() || "—"}
-                    </dd>
-                  </>
-                )}
-              </div>
-              <div className="min-w-0">
-                {isDefaultDoc ? (
-                  <>
-                    <QuoteFieldLabel>{t("phone")}</QuoteFieldLabel>
-                    <QuoteFieldValue>{contactPhone.trim() || "—"}</QuoteFieldValue>
-                  </>
-                ) : (
-                  <>
-                    <dt className="text-xs font-medium text-gray-500">{t("phone")}</dt>
-                    <dd className="mt-0.5 text-sm text-gray-900">{contactPhone.trim() || "—"}</dd>
-                  </>
-                )}
-              </div>
-              {contactEmail.trim() ? (
+              <p className="flex flex-wrap items-baseline gap-x-4 gap-y-1 sm:gap-x-5">
+                <QuoteInlineField label={t("company")} emphasis>
+                  {company.trim() || "—"}
+                </QuoteInlineField>
+                <QuoteInlineField label={t("name")}>
+                  {contactName.trim() || "—"}
+                </QuoteInlineField>
+                <QuoteInlineField label={t("phone")}>
+                  {contactPhone.trim() || "—"}
+                </QuoteInlineField>
+                {contactEmail.trim() ? (
+                  <QuoteInlineField label={t("email")} className="break-all">
+                    {contactEmail.trim()}
+                  </QuoteInlineField>
+                ) : null}
+              </p>
+            </QuoteDocSectionRow>
+          ) : (
+            <section className="space-y-4 mb-0">
+              <SectionHeading>{t("pdfClientSection")}</SectionHeading>
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border border-gray-200 bg-[#F8F9FC] p-4 sm:grid-cols-4">
                 <div className="min-w-0 sm:col-span-2">
-                  {isDefaultDoc ? (
-                    <>
-                      <QuoteFieldLabel>{t("email")}</QuoteFieldLabel>
-                      <QuoteFieldValue className="break-all">
-                        {contactEmail.trim()}
-                      </QuoteFieldValue>
-                    </>
-                  ) : (
-                    <>
-                      <dt className="text-xs font-medium text-gray-500">{t("email")}</dt>
-                      <dd className="mt-0.5 break-all text-sm text-gray-900">
-                        {contactEmail.trim()}
-                      </dd>
-                    </>
-                  )}
+                  <dt className="text-xs font-medium text-gray-500">{t("company")}</dt>
+                  <dd className="mt-0.5 break-words text-sm font-semibold text-gray-900">
+                    {company.trim() || "—"}
+                  </dd>
                 </div>
-              ) : null}
-            </dl>
-          </section>
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-gray-500">{t("name")}</dt>
+                  <dd className="mt-0.5 text-sm font-semibold text-gray-900">
+                    {contactName.trim() || "—"}
+                  </dd>
+                </div>
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-gray-500">{t("phone")}</dt>
+                  <dd className="mt-0.5 text-sm text-gray-900">{contactPhone.trim() || "—"}</dd>
+                </div>
+                {contactEmail.trim() ? (
+                  <div className="min-w-0 sm:col-span-2">
+                    <dt className="text-xs font-medium text-gray-500">{t("email")}</dt>
+                    <dd className="mt-0.5 break-all text-sm text-gray-900">
+                      {contactEmail.trim()}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            </section>
+          )}
 
-          <section
-            className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
-          >
-            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
-              <SectionHeading>{t("pdfCampaignSection")}</SectionHeading>
-            </div>
-            {isDefaultDoc ? (
-              <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
-                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
-                  {t("period")}
-                </span>
+          {isDefaultDoc ? (
+            <QuoteDocSectionRow
+              title={<SectionHeading>{t("pdfCampaignSection")}</SectionHeading>}
+              className="items-center"
+            >
+              <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                 <span className="text-[15px] font-bold tracking-tight text-gray-900">
                   {periodLabel}
                 </span>
-              </p>
-            ) : (
+                {campaignDurationMeta ? (
+                  <span className="text-sm font-semibold tabular-nums text-violet-700">
+                    · {campaignDurationMeta}
+                  </span>
+                ) : null}
+              </div>
+            </QuoteDocSectionRow>
+          ) : (
+            <section className="space-y-4 mb-0">
+              <SectionHeading>{t("pdfCampaignSection")}</SectionHeading>
               <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-gray-200 bg-[#F8F9FC] p-4">
                 <div className="min-w-0">
                   <dt className="text-xs font-medium text-gray-500">{t("period")}</dt>
@@ -525,8 +514,8 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <dd className="mt-0.5 text-sm text-gray-600">{t("pdfAmountUnitNote")}</dd>
                 </div>
               </dl>
-            )}
-          </section>
+            </section>
+          )}
 
           <section
             className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
