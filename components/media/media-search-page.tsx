@@ -221,7 +221,9 @@ function MediaSearchPageInner({
   const [features, setFeatures] = useState(initialFromUrl.features);
   const [networkType, setNetworkType] = useState(initialFromUrl.networkType);
   const [sort, setSort] = useState(initialFromUrl.sort);
-  const [viewMode, setViewMode] = useState<ViewMode>("feed");
+  const [viewMode, setViewMode] = useState<ViewMode>(
+    plannerMode ? "card" : "feed",
+  );
   const networkBrowse = useMemo(
     () =>
       discoveryFeaturesIncludeNetwork(features) || catalogVariant === "network",
@@ -863,13 +865,18 @@ function MediaSearchPageInner({
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             cn(
-              "grid auto-rows-fr items-stretch gap-3",
+              "grid auto-rows-fr items-stretch [&>*]:min-w-0",
               plannerMode
-                ? "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3"
-                : "grid-cols-2 md:grid-cols-3 lg:grid-cols-4",
+                ? "grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
+                : "grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
             ),
           viewMode === "compact" &&
-            "grid grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
+            cn(
+              "grid [&>*]:min-w-0",
+              plannerMode
+                ? "grid-cols-2 gap-0.5 sm:gap-x-3 lg:grid-cols-4"
+                : "grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
+            ),
         )}
         data-screenshot={`media-view-${viewMode}`}
       >
