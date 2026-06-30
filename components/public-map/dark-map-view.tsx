@@ -70,7 +70,7 @@ type Props = {
   disableCluster?: boolean;
   /** 값이 바뀔 때마다 map.invalidateSize() 1회 호출 — 레이아웃 전환/바텀시트 스냅 변경 후 타일 재계산 */
   invalidateNonce?: number;
-  /** next-themes light/dark 에 맞춰 Carto light_nolabels / dark_nolabels 전환 */
+  /** next-themes light/dark 에 맞춰 Carto Voyager / Dark Matter(라벨 포함) 전환 */
   themeAwareTiles?: boolean;
 };
 

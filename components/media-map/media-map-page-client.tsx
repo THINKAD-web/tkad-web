@@ -119,6 +119,14 @@ function boundsEqual(a: MapBounds, b: MapBounds, eps = 1e-5): boolean {
   );
 }
 
+/** 진입 시 전국 개요 검색 — 초기 뷰포트 대기 없이 핀 노출 */
+const KOREA_MAP_OVERVIEW_BOUNDS: MapBounds = {
+  swLat: 33.0,
+  swLng: 124.5,
+  neLat: 38.8,
+  neLng: 132.0,
+};
+
 /** SSR-safe 초기 URL 파싱 (hydration warning 방지를 위해 lazy init 으로 사용) */
 function readInitialUrlState() {
   if (typeof window === "undefined") return null;
@@ -468,16 +476,27 @@ export default function MediaMapPageClient() {
     [fetchItems],
   );
 
+  /** /media/map 진입 즉시 전국 개요 영역 검색 — 빈 지도 방지 */
+  useEffect(() => {
+    if (initialFetchDoneRef.current) return;
+    initialFetchDoneRef.current = true;
+    const f = browseFiltersRef.current;
+    void (async () => {
+      if (isMapTextSearchActive(f)) {
+        await fetchItems(null, f);
+        return;
+      }
+      await fetchItems(KOREA_MAP_OVERVIEW_BOUNDS, f);
+      setSearchedBounds(KOREA_MAP_OVERVIEW_BOUNDS);
+      searchedBoundsRef.current = KOREA_MAP_OVERVIEW_BOUNDS;
+    })();
+  }, [fetchItems]);
+
   const handleBoundsChange = useCallback(
     (b: MapBounds) => {
       setBounds(b);
       if (forceSearchRef.current) {
         forceSearchRef.current = false;
-        void runSearch(b);
-        return;
-      }
-      if (!initialFetchDoneRef.current) {
-        initialFetchDoneRef.current = true;
         void runSearch(b);
       }
     },
@@ -798,10 +817,8 @@ export default function MediaMapPageClient() {
   // 리스트 — 데스크톱 사이드/모바일 시트 중 한 곳에만 마운트(단일 인스턴스, ref 싱크 보존)
   const listEl = (
     <ul className="relative z-0 grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-      {(!searchedBounds && !isMapTextSearchActive(browseFilters)) || loading ? (
-        <MapListSkeleton
-          count={!searchedBounds && !isMapTextSearchActive(browseFilters) ? 4 : 6}
-        />
+      {loading && items.length === 0 ? (
+        <MapListSkeleton count={6} />
       ) : (
         items.map((it) => (
           <DiscoveryMediaCard
@@ -860,7 +877,7 @@ export default function MediaMapPageClient() {
 
   // 모바일 시트 상단 — 결과 수만 (목록/지도 토글은 하단 바)
   const mobileSheetHeader = (
-    <div className="flex items-center justify-between gap-2">
+    <div className="flex min-h-0 items-center justify-between gap-2 leading-tight">
       <p className="tkad-type-meta min-w-0 truncate font-semibold text-foreground">
         {showMapEmptyOverlay
           ? isKo
@@ -880,7 +897,7 @@ export default function MediaMapPageClient() {
     <div className="tkad-media-app-shell tkad-media-map-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
       <MapChunkPrefetch />
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
-      <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-2 pb-2 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
+      <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-1.5 pb-1.5 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
         {controlBar}
       </div>
 

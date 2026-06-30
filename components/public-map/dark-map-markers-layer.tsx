@@ -28,14 +28,12 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
   if (cached) return cached;
 
   const sizeClass = clusterSizeClass(count);
-  const px = sizeClass === "large" ? 46 : sizeClass === "medium" ? 42 : 38;
-  const border = lightTiles ? "2px solid rgba(15,23,42,0.45)" : "2px solid rgba(255,255,255,0.35)";
-  const shadow = lightTiles
-    ? "0 2px 8px rgba(15,23,42,0.28)"
-    : "0 0 14px rgba(0,0,0,0.45)";
-  const textColor = lightTiles ? "#0f172a" : "#f8fafc";
+  const px = sizeClass === "large" ? 42 : sizeClass === "medium" ? 38 : 34;
+  const border = lightTiles ? "2px solid rgba(15,23,42,0.5)" : "2px solid rgba(255,255,255,0.85)";
+  const fill = lightTiles ? "#f97316" : "#fb923c";
+  const textColor = lightTiles ? "#ffffff" : "#0f172a";
   const icon = L.divIcon({
-    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};box-shadow:${shadow};background:linear-gradient(145deg,#fbbf24,#f97316);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:${textColor};font-family:ui-monospace,monospace">${count}</div>`,
+    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};background:${fill};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${textColor};font-family:ui-sans-serif,system-ui,sans-serif">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,
     iconSize: L.point(px, px),
   });

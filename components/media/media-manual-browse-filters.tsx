@@ -920,6 +920,18 @@ export function MediaManualBrowseFilters({
       </button>
     ) : null;
 
+  const cartSummaryButton =
+    cartCount > 0 ? (
+      <button
+        type="button"
+        onClick={() => setPlanSheetOpen(true)}
+        className="tkad-type-meta tkad-home-accent-text inline-flex shrink-0 items-center rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 font-semibold underline decoration-violet-400/50 underline-offset-2 hover:opacity-90"
+        aria-label={isKo ? `담은 매체 ${cartCount}개 보기` : `View ${cartCount} items in cart`}
+      >
+        {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+      </button>
+    ) : null;
+
   const mobileSortButton = (
     <button
       type="button"
@@ -965,6 +977,7 @@ export function MediaManualBrowseFilters({
         {mobileFilterButton}
         {mobileSortButton}
         <div className="min-w-0 flex-1">{viewModeToggle}</div>
+        {mapPageViewModes ? cartSummaryButton : null}
         {mapNavButton}
       </div>
     ) : null;
@@ -1071,6 +1084,7 @@ export function MediaManualBrowseFilters({
             </div>
             {sortSelect}
             {viewModeToggle}
+            {mapPageViewModes ? cartSummaryButton : null}
             {mapNavButton}
             {toolbarEnd}
           </div>
@@ -1260,9 +1274,11 @@ export function MediaManualBrowseFilters({
           selectedCount={selectedCount}
           selectionVariant={selectionVariant}
           onSelectedSummaryClick={onSelectedSummaryClick}
-          cartCount={cartCount}
+          cartCount={mapPageViewModes ? 0 : cartCount}
           onCartSummaryClick={
-            cartCount > 0 ? () => setPlanSheetOpen(true) : undefined
+            !mapPageViewModes && cartCount > 0
+              ? () => setPlanSheetOpen(true)
+              : undefined
           }
           compareCount={compareCount}
         />

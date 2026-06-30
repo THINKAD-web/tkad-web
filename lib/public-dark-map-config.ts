@@ -24,13 +24,13 @@ export const PUBLIC_MAP_TILE_PRESET: PublicMapTilePreset = "voyager";
 export const PUBLIC_DARK_MAP_TILE_URL =
   PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET];
 
-/** next-themes `resolvedTheme` 기준 — /media/map themeAware 타일 */
+/** next-themes `resolvedTheme` 기준 — /media/map themeAware 타일 (라벨 포함) */
 export function publicMapTileUrlForTheme(
   resolvedTheme: string | undefined,
 ): string {
   return resolvedTheme === "dark"
-    ? PUBLIC_MAP_TILE_URLS.dark_nolabels
-    : PUBLIC_MAP_TILE_URLS.light_nolabels;
+    ? PUBLIC_MAP_TILE_URLS.dark
+    : PUBLIC_MAP_TILE_URLS.voyager;
 }
 
 export function isPublicMapLightTileFromTheme(
