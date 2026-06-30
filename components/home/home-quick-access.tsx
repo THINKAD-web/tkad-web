@@ -1,88 +1,94 @@
-import Link from "next/link";
+"use client";
+
+import { Link } from "@/i18n/navigation";
+import { useLocale } from "next-intl";
 import {
   Search,
   Map,
   Sparkles,
-  Package,
   BarChart3,
-  Link2,
   MessageSquare,
-  Zap,
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 const NEON_ICON_GLOW: Record<string, string> = {
   "text-violet-500": "drop-shadow-[0_0_8px_rgba(139,92,246,0.55)]",
   "text-cyan-500": "drop-shadow-[0_0_8px_rgba(34,211,238,0.55)]",
 };
 
-const items = [
+type QuickItem = {
+  id: string;
+  icon: LucideIcon;
+  href: string;
+  color: string;
+  labelKo: string;
+  labelEn: string;
+};
+
+/** G-1: 8 → 5. 즉시예약→매체검색, 통합플래너→플래너, 패키지·견적문의 정리 */
+const ITEMS: QuickItem[] = [
   {
-    label: "매체검색",
+    id: "media",
+    labelKo: "매체검색",
+    labelEn: "Media",
     icon: Search,
-    href: "/ko/media",
+    href: "/media",
     color: "text-violet-500",
   },
   {
-    label: "지도탐색",
+    id: "map",
+    labelKo: "지도탐색",
+    labelEn: "Map",
     icon: Map,
-    href: "/ko/media/map",
+    href: "/media/map",
     color: "text-cyan-500",
   },
   {
-    label: "AI추천",
-    icon: Sparkles,
-    href: "/ko/recommend",
-    color: "text-pink-500",
-  },
-  {
-    label: "패키지",
-    icon: Package,
-    href: "/ko/media/packages",
-    color: "text-amber-500",
-  },
-  {
-    label: "플래너",
+    id: "planner",
+    labelKo: "플래너",
+    labelEn: "Planner",
     icon: BarChart3,
-    href: "/ko/planner",
+    href: "/planner",
     color: "text-emerald-500",
   },
   {
-    label: "통합플래너",
-    icon: Link2,
-    href: "/ko/planner/integrated",
-    color: "text-blue-500",
+    id: "recommend",
+    labelKo: "AI추천",
+    labelEn: "AI picks",
+    icon: Sparkles,
+    href: "/recommend",
+    color: "text-pink-500",
   },
   {
-    label: "견적문의",
+    id: "contact",
+    labelKo: "문의",
+    labelEn: "Contact",
     icon: MessageSquare,
-    href: "/ko/contact",
+    href: "/contact",
     color: "text-rose-500",
-  },
-  {
-    label: "즉시예약",
-    icon: Zap,
-    href: "/ko/media?instant=1",
-    color: "text-orange-500",
   },
 ];
 
 export function HomeQuickAccess() {
+  const locale = useLocale();
+  const isKo = locale === "ko";
+
   return (
-    <div className="px-4 py-4">
-      <div className="grid grid-cols-4 gap-2 md:grid-cols-8">
-        {items.map((item) => (
+    <div className="px-4 py-3 md:py-4">
+      <div className="grid grid-cols-5 gap-2 md:max-w-2xl md:mx-auto">
+        {ITEMS.map((item) => (
           <Link
-            key={item.href}
+            key={item.id}
             href={item.href}
             className="group flex flex-col items-center gap-1.5"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8 md:h-14 md:w-14">
               <item.icon
-                className={`h-6 w-6 ${item.color} ${NEON_ICON_GLOW[item.color] ?? ""}`}
+                className={`h-5 w-5 md:h-6 md:w-6 ${item.color} ${NEON_ICON_GLOW[item.color] ?? ""}`}
               />
             </div>
-            <span className="text-center text-xs leading-tight font-medium text-gray-600 dark:text-white/70">
-              {item.label}
+            <span className="text-center text-[11px] leading-tight font-medium text-gray-600 dark:text-white/70 md:text-xs">
+              {isKo ? item.labelKo : item.labelEn}
             </span>
           </Link>
         ))}
