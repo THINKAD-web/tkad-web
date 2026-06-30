@@ -27,7 +27,7 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
         : "※ Amounts: supply value (VAT extra)";
 
     const tableHeads = isKo
-      ? ["매체명", "규격", "기간", "월 단가(원)", "수량", "금액(원)"]
+      ? ["매체명", "규격", "기간", "월단가(원)", "수량", "금액(원)"]
       : ["Media", "Specs", "Period", "Unit/mo", "Qty", "Amount"];
 
     const sumRows: Array<{ label: string; value: string; accent?: boolean }> = [
@@ -121,7 +121,7 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
           {/* Quote info + Bill to */}
           <div className="grid grid-cols-2 gap-3">
             <div
-              className="rounded-md border p-3"
+              className="min-w-0 overflow-hidden rounded-md border p-3"
               style={{ borderColor: c.goldDark }}
             >
               <p className="text-[8px] font-bold" style={{ color: c.navy }}>
@@ -133,11 +133,14 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
                   [isKo ? "발행일" : "Issue date", p.issueDate],
                   [isKo ? "유효기간" : "Valid until", p.validUntil],
                 ].map(([k, v]) => (
-                  <div key={k} className="flex gap-2">
-                    <dt style={{ color: c.muted }} className="shrink-0">
+                  <div key={k} className="flex min-w-0 gap-2">
+                    <dt style={{ color: c.muted }} className="w-12 shrink-0">
                       {k}:
                     </dt>
-                    <dd className="font-medium" style={{ color: c.navyDark }}>
+                    <dd
+                      className="min-w-0 break-words font-medium"
+                      style={{ color: c.navyDark }}
+                    >
                       {v}
                     </dd>
                   </div>
@@ -145,33 +148,33 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
               </dl>
             </div>
             <div
-              className="rounded-md border p-3"
+              className="min-w-0 overflow-hidden rounded-md border p-3"
               style={{ borderColor: c.goldDark }}
             >
               <p className="text-[8px] font-bold" style={{ color: c.navy }}>
                 {isKo ? "수신 (고객사)" : "Bill to"}
               </p>
-              <dl className="mt-2 space-y-1 text-[7.5px]">
-                <div>
+              <dl className="mt-2 min-w-0 space-y-1 text-[7.5px]">
+                <div className="min-w-0 break-words">
                   <span style={{ color: c.muted }}>
                     {isKo ? "회사" : "Company"}:{" "}
                   </span>
                   <span>{p.clientCompany || "—"}</span>
                 </div>
-                <div>
+                <div className="min-w-0 break-words">
                   <span style={{ color: c.muted }}>
                     {isKo ? "담당자" : "Contact"}:{" "}
                   </span>
                   <span>{p.clientName || "—"}</span>
                 </div>
-                <div>
+                <div className="min-w-0 break-words">
                   <span style={{ color: c.muted }}>
                     {isKo ? "연락처" : "Phone"}:{" "}
                   </span>
                   <span>{p.clientPhone || "—"}</span>
                 </div>
                 {p.clientEmail?.trim() ? (
-                  <div>
+                  <div className="min-w-0 break-all">
                     <span style={{ color: c.muted }}>E-mail: </span>
                     <span>{p.clientEmail.trim()}</span>
                   </div>
@@ -192,16 +195,25 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
 
           {/* 6-column table */}
           <div className="overflow-hidden rounded-sm border" style={{ borderColor: c.border }}>
-            <table className="w-full border-collapse text-left text-[7px]">
+            <table className="w-full table-fixed border-collapse text-left text-[7px]">
+              <colgroup>
+                <col className="w-[26%]" />
+                <col className="w-[10%]" />
+                <col className="w-[15%]" />
+                <col className="w-[18%]" />
+                <col className="w-[7%]" />
+                <col className="w-[24%]" />
+              </colgroup>
               <thead>
                 <tr style={{ background: c.navy, color: c.gold }}>
                   {tableHeads.map((h, i) => (
                     <th
                       key={h}
                       className={cn(
-                        "px-1.5 py-2 font-bold",
+                        "px-1.5 py-2 font-bold leading-tight",
                         i >= 3 && "text-right",
                         i === 4 && "text-center",
+                        i === 5 && "pr-2.5",
                       )}
                     >
                       {h}
@@ -216,16 +228,22 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
                     className="border-t"
                     style={{ borderColor: c.border, color: c.navyDark }}
                   >
-                    <td className="px-1.5 py-2 align-top font-medium">{row.name}</td>
-                    <td className="px-1.5 py-2 align-top">{row.spec || "—"}</td>
-                    <td className="px-1.5 py-2 align-top">{row.period}</td>
-                    <td className="px-1.5 py-2 text-right tabular-nums">
+                    <td className="break-words px-1.5 py-2 align-top font-medium leading-snug">
+                      {row.name}
+                    </td>
+                    <td className="break-words px-1.5 py-2 align-top leading-snug">
+                      {row.spec || "—"}
+                    </td>
+                    <td className="break-words px-1.5 py-2 align-top leading-snug">
+                      {row.period}
+                    </td>
+                    <td className="px-1.5 py-2 text-right tabular-nums leading-snug">
                       {formatFormalWon(row.unitPriceWon, isKo)}
                     </td>
                     <td className="px-1.5 py-2 text-center tabular-nums">
                       {row.quantity}
                     </td>
-                    <td className="px-1.5 py-2 text-right font-semibold tabular-nums">
+                    <td className="px-2.5 py-2 text-right font-semibold tabular-nums leading-snug">
                       {formatFormalWon(row.lineTotalWon, isKo)}
                     </td>
                   </tr>
@@ -236,21 +254,28 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
 
           {/* Totals — right aligned */}
           <div className="flex justify-end">
-            <div className="w-[58%] min-w-[200px] space-y-1.5 text-[8px]">
+            <div className="w-[58%] min-w-0 max-w-full space-y-1.5 text-[8px]">
               {sumRows.map((row) =>
                 row.accent ? (
                   <div
                     key={row.label}
-                    className="flex items-center justify-between rounded-md px-2.5 py-2.5 font-bold"
+                    className="flex items-center justify-between gap-3 rounded-md px-3 py-2.5 font-bold"
                     style={{ background: c.goldTint, color: c.navy }}
                   >
-                    <span className="text-[10px]">{row.label}</span>
-                    <span className="text-[10px] tabular-nums">{row.value}</span>
+                    <span className="shrink-0 text-[10px]">{row.label}</span>
+                    <span className="min-w-0 truncate text-right text-[10px] tabular-nums">
+                      {row.value}
+                    </span>
                   </div>
                 ) : (
-                  <div key={row.label} className="flex justify-between gap-4">
-                    <span style={{ color: c.muted }}>{row.label}</span>
-                    <span className="font-bold tabular-nums" style={{ color: c.navyDark }}>
+                  <div key={row.label} className="flex justify-between gap-4 px-0.5">
+                    <span className="shrink-0" style={{ color: c.muted }}>
+                      {row.label}
+                    </span>
+                    <span
+                      className="min-w-0 text-right font-bold tabular-nums"
+                      style={{ color: c.navyDark }}
+                    >
                       {row.value}
                     </span>
                   </div>
