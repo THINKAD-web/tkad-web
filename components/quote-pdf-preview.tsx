@@ -6,6 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
 import { formatDocumentManWon } from "@/lib/document-text";
+import { QuoteMediaLineCard } from "@/components/document/quote-media-line-card";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import {
   documentCardClass,
@@ -98,7 +99,7 @@ function QuoteSummaryStrip({
 
   return (
     <div
-      className="border-b border-violet-100/80 bg-gradient-to-r from-violet-50 via-white to-cyan-50/60 px-6 py-5 sm:px-9"
+      className="border-b border-violet-100/80 bg-gradient-to-r from-violet-50 via-white to-cyan-50/60 px-5 py-4 sm:px-7"
       data-quote-summary-strip
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -337,7 +338,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
 
         <div
           className={cn(
-            isDefaultDoc ? "space-y-0 px-6 py-7 sm:px-9" : "space-y-8 px-6 py-8 sm:px-9",
+            isDefaultDoc ? "space-y-0 px-5 py-5 sm:px-7" : "space-y-8 px-6 py-8 sm:px-9",
           )}
         >
           {customerLogoSrc ? (
@@ -352,17 +353,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           ) : null}
 
           <section
-            className={cn(isDefaultDoc && "border-b border-gray-100 pb-7 mb-7")}
+            className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
           >
-            <div className={isDefaultDoc ? "mb-4" : "space-y-4 mb-0"}>
+            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
               <SectionHeading>{t("pdfClientSection")}</SectionHeading>
             </div>
             <dl
               className={cn(
-                "grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border p-4 sm:grid-cols-4",
+                "grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border p-3 sm:grid-cols-4",
                 isDefaultDoc
                   ? "border-gray-200/90 bg-[#F8F9FC] shadow-sm"
-                  : "border-gray-200 bg-[#F8F9FC]",
+                  : "border-gray-200 bg-[#F8F9FC] p-4",
               )}
             >
               <div className="min-w-0 sm:col-span-2">
@@ -431,17 +432,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
           </section>
 
           <section
-            className={cn(isDefaultDoc && "border-b border-gray-100 pb-7 mb-7")}
+            className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
           >
-            <div className={isDefaultDoc ? "mb-4" : "space-y-4 mb-0"}>
+            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
               <SectionHeading>{t("pdfCampaignSection")}</SectionHeading>
             </div>
             <dl
               className={cn(
-                "grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border p-4",
+                "rounded-xl border p-3",
                 isDefaultDoc
                   ? "border-gray-200/90 bg-[#F8F9FC] shadow-sm"
-                  : "border-gray-200 bg-[#F8F9FC]",
+                  : "grid grid-cols-2 gap-x-6 gap-y-4 border-gray-200 bg-[#F8F9FC] p-4",
               )}
             >
               <div className="min-w-0">
@@ -457,30 +458,21 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   </>
                 )}
               </div>
-              <div className="min-w-0">
-                {isDefaultDoc ? (
-                  <>
-                    <QuoteFieldLabel>{isKo ? "금액 단위" : "Amount unit"}</QuoteFieldLabel>
-                    <QuoteFieldValue className="text-sm font-medium text-gray-600">
-                      {t("pdfAmountUnitNote")}
-                    </QuoteFieldValue>
-                  </>
-                ) : (
-                  <>
-                    <dt className="text-xs font-medium text-gray-500">
-                      {isKo ? "금액 단위" : "Amount unit"}
-                    </dt>
-                    <dd className="mt-0.5 text-sm text-gray-600">{t("pdfAmountUnitNote")}</dd>
-                  </>
-                )}
-              </div>
+              {!isDefaultDoc ? (
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-gray-500">
+                    {isKo ? "금액 단위" : "Amount unit"}
+                  </dt>
+                  <dd className="mt-0.5 text-sm text-gray-600">{t("pdfAmountUnitNote")}</dd>
+                </div>
+              ) : null}
             </dl>
           </section>
 
           <section
-            className={cn(isDefaultDoc && "border-b border-gray-100 pb-7 mb-7")}
+            className={cn(isDefaultDoc && "border-b border-gray-100 pb-4 mb-4")}
           >
-            <div className={isDefaultDoc ? "mb-4" : "space-y-4 mb-0"}>
+            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
               <SectionHeading>{t("pdfMediaSection")}</SectionHeading>
             </div>
             {rows.length === 0 ? (
@@ -490,7 +482,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             ) : useCompactMedia ? (
               <QuoteMediaCompactTable rows={rows} isKo={isKo} />
             ) : (
-              <ul className={cn(isDefaultDoc ? "space-y-3" : "space-y-4")}>
+              <ul className={cn(isDefaultDoc ? "space-y-2" : "space-y-4")}>
                 {rows.map((row) => {
                   const unitLabel = row.unitPeriodLabel
                     ? `${formatDocumentManWon(row.unitPriceWon, isKo)} / ${row.unitPeriodLabel}`
@@ -510,7 +502,11 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   };
                   return (
                     <li key={row.id}>
-                      <MediaDetailCard detail={detail} isKo={isKo} compact />
+                      {isDefaultDoc ? (
+                        <QuoteMediaLineCard detail={detail} isKo={isKo} />
+                      ) : (
+                        <MediaDetailCard detail={detail} isKo={isKo} compact />
+                      )}
                     </li>
                   );
                 })}

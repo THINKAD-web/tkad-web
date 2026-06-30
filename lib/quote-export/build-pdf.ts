@@ -25,8 +25,9 @@ const WHITE = [255, 255, 255] as const;
 
 const M = 15;
 const HERO_H = 44;
-const BASIC_HERO_H = 48;
+const BASIC_HERO_H = 44;
 const BASIC_COMPACT_MEDIA_MIN = 5;
+const QUOTE_BASIC_THUMB_MM = { w: 28, h: 21 } as const;
 const VIOLET_50 = [237, 233, 254] as const;
 const VIOLET_700 = [109, 40, 217] as const;
 
@@ -122,6 +123,150 @@ function drawQuoteHero(
   doc.text(`${p.isKo ? "유효" : "Valid"} ${p.validUntil}`, pageW - M, 41, { align: "right" });
 
   return HERO_H + 6;
+}
+
+function drawPdfThumbOrPlaceholder(
+  doc: jsPDF,
+  thumb: string | undefined,
+  boxX: number,
+  boxY: number,
+  boxW: number,
+  boxH: number,
+  isKo: boolean,
+) {
+  doc.setFillColor(248, 249, 252);
+  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+  doc.setLineWidth(0.15);
+  doc.roundedRect(boxX, boxY, boxW, boxH, 1.5, 1.5, "FD");
+  if (thumb) {
+    addPdfThumbImage(doc, thumb, boxX, boxY, boxW, boxH);
+    return;
+  }
+  doc.setFontSize(5.5);
+  doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+  doc.text(
+    isKo ? "이미지 없음" : "No image",
+    boxX + boxW / 2,
+    boxY + boxH / 2 + 1,
+    { align: "center" },
+  );
+}
+
+/** 기본 견적서 매체 카드 — 플래너 톤·압축 레이아웃 (premium 은 drawMediaCards 유지) */
+function basicDrawQuoteMediaCards(
+  doc: jsPDF,
+  font: string,
+  p: QuoteExportPayload,
+  x: number,
+  yStart: number,
+  w: number,
+  pageH: number,
+  thumbs: Map<string, string>,
+): number {
+  const isKo = p.isKo;
+  let y = yStart;
+  const thumbW = QUOTE_BASIC_THUMB_MM.w;
+  const thumbH = QUOTE_BASIC_THUMB_MM.h;
+  const cardH = 20;
+  const gap = 1.5;
+
+  if (p.lines.length === 0) {
+    doc.setFontSize(9);
+    doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+    doc.text(isKo ? "선택된 매체가 없습니다." : "No media selected.", x + 2, y + 5);
+    return y + 10;
+  }
+
+  for (const line of p.lines) {
+    if (y + cardH > pageH - 30) {
+      doc.addPage();
+      y = M;
+    }
+
+    doc.setFillColor(255, 255, 255);
+    doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
+    doc.setLineWidth(0.2);
+    doc.roundedRect(x, y, w, cardH, 2, 2, "FD");
+
+    const thumb = line.thumbUrl ? thumbs.get(line.thumbUrl) : undefined;
+    drawPdfThumbOrPlaceholder(doc, thumb, x + 2, y + 1.5, thumbW, thumbH, isKo);
+
+    const textX = x + 2 + thumbW + 3;
+    const priceX = x + w - 3;
+    const textW = w - thumbW - 38;
+
+    doc.setFont(font, "normal");
+    doc.setFontSize(10);
+    doc.setTextColor(INK[0], INK[1], INK[2]);
+    doc.text(
+      (doc.splitTextToSize(line.name, textW) as string[]).slice(0, 1),
+      textX,
+      y + 5.5,
+    );
+
+    if (line.location?.trim()) {
+      doc.setFontSize(7);
+      doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
+      doc.text(
+        (doc.splitTextToSize(line.location, textW) as string[]).slice(0, 1),
+        textX,
+        y + 9.5,
+      );
+    }
+
+    const specParts: string[] = [];
+    if (line.categoryLabel) specParts.push(line.categoryLabel);
+    if (line.size) specParts.push(`${isKo ? "규격" : "Size"} ${line.size}`);
+    if (line.operatingHours) {
+      specParts.push(`${isKo ? "운영" : "Hours"} ${truncateDocText(line.operatingHours, 24)}`);
+    }
+    if (specParts.length > 0) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+      doc.text(
+        (doc.splitTextToSize(specParts.join(" · "), textW) as string[]).slice(0, 1),
+        textX,
+        y + 13,
+      );
+    }
+
+    if (line.dailyTraffic && line.dailyTraffic > 0) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(CYAN[0], CYAN[1], CYAN[2]);
+      const traffic = `${isKo ? "일일 노출" : "Daily"} ${line.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`;
+      doc.text(
+        (doc.splitTextToSize(traffic, textW) as string[]).slice(0, 1),
+        textX,
+        y + 16.5,
+      );
+    } else if (line.broadcastLabel) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+      doc.text(
+        (doc.splitTextToSize(truncateDocText(line.broadcastLabel, 48), textW) as string[]).slice(0, 1),
+        textX,
+        y + 16.5,
+      );
+    }
+
+    const unitVal = formatDocumentManWon(line.unitPriceWon, isKo);
+    const subVal = formatDocumentManWon(line.lineSupplyWon, isKo);
+    doc.setFontSize(6);
+    doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+    doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
+    doc.setFontSize(8.5);
+    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.text(unitVal, priceX, y + 11, { align: "right" });
+    doc.setFontSize(6);
+    doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+    doc.text(isKo ? "소계" : "Sub", priceX, y + 14.5, { align: "right" });
+    doc.setFontSize(9.5);
+    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.text(subVal, priceX, y + 18.5, { align: "right" });
+
+    y += cardH + gap;
+  }
+  return y;
 }
 
 /** 매체 카드 목록 (미리보기 MediaDetailCard 와 동일 정보 밀도) */
@@ -329,7 +474,7 @@ function basicSectionTitle(doc: jsPDF, font: string, label: string, y: number): 
   doc.rect(M, y + 5.8, 1.8, 0.8, "F");
   doc.setTextColor(INK[0], INK[1], INK[2]);
   doc.text(label, M + 5, y + 4.8);
-  return y + 11;
+  return y + 9;
 }
 
 function basicDrawQuoteHero(
@@ -373,7 +518,7 @@ function basicDrawSummaryStrip(
   const contentW = pageW - M * 2;
   const gap = 3;
   const colW = (contentW - gap * 2) / 3;
-  const boxH = 22;
+  const boxH = 16;
   const labels = isKo
     ? ["총액 (VAT 포함)", "유효기간", "담당"]
     : ["Total (incl. VAT)", "Valid until", "Contact"];
@@ -429,7 +574,7 @@ function basicDrawSummaryStrip(
     }
   }
 
-  return y + boxH + 8;
+  return y + boxH + 5;
 }
 
 function basicFieldLabel(
@@ -454,7 +599,7 @@ function basicDrawClientSection(
 ): number {
   const isKo = p.isKo;
   const contentW = pageW - M * 2;
-  const boxH = 20;
+  const boxH = 15;
 
   y = basicSectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
   doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
@@ -487,7 +632,7 @@ function basicDrawClientSection(
     y + 12,
   );
 
-  return y + boxH + 8;
+  return y + boxH + 5;
 }
 
 function basicDrawCampaignSection(
@@ -499,7 +644,7 @@ function basicDrawCampaignSection(
 ): number {
   const isKo = p.isKo;
   const contentW = pageW - M * 2;
-  const boxH = 16;
+  const boxH = 11;
 
   y = basicSectionTitle(doc, font, isKo ? "캠페인 요약" : "Campaign", y);
   doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
@@ -507,18 +652,12 @@ function basicDrawCampaignSection(
   doc.setLineWidth(0.2);
   doc.roundedRect(M, y, contentW, boxH, 2, 2, "FD");
 
-  const colW = contentW / 2;
-  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M + 4, y + 6);
+  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M + 4, y + 5);
   doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(11);
-  doc.text(p.periodLabel, M + 4, y + 12);
+  doc.setFontSize(10);
+  doc.text(p.periodLabel, M + 4, y + 9.5);
 
-  basicFieldLabel(doc, font, isKo ? "금액 단위" : "Amount unit", M + 4 + colW, y + 6);
-  doc.setFontSize(8);
-  doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
-  doc.text(isKo ? "만원 (₩10,000)" : "10K KRW", M + 4 + colW, y + 12);
-
-  return y + boxH + 8;
+  return y + boxH + 5;
 }
 
 function basicDrawMediaTable(
@@ -610,7 +749,7 @@ function basicDrawMediaList(
   if (p.lines.length >= BASIC_COMPACT_MEDIA_MIN) {
     return basicDrawMediaTable(doc, font, p, x, yStart, w, pageH);
   }
-  return drawMediaCards(doc, font, p, x, yStart, w, pageH, thumbs);
+  return basicDrawQuoteMediaCards(doc, font, p, x, yStart, w, pageH, thumbs);
 }
 
 function basicDrawTotals(
@@ -623,7 +762,7 @@ function basicDrawTotals(
   pageH: number,
 ): number {
   const isKo = p.isKo;
-  if (y + 40 > pageH - 36) {
+  if (y + 34 > pageH - 34) {
     doc.addPage();
     y = M;
   }
@@ -658,24 +797,24 @@ function basicDrawTotals(
   rows.forEach(([label, val, accent]) => {
     if (accent) {
       doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-      doc.roundedRect(boxX, ry, boxW, 14, 2, 2, "F");
+      doc.roundedRect(boxX, ry, boxW, 12, 2, 2, "F");
       doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
-      doc.roundedRect(boxX + boxW - 14, ry, 14, 14, 2, 2, "F");
+      doc.roundedRect(boxX + boxW - 12, ry, 12, 12, 2, 2, "F");
       doc.setTextColor(235, 230, 255);
-      doc.setFontSize(8);
-      doc.text(label, boxX + 4, ry + 8.5);
+      doc.setFontSize(7.5);
+      doc.text(label, boxX + 4, ry + 7.5);
       doc.setTextColor(255, 255, 255);
-      doc.setFontSize(13);
-      doc.text(val, boxX + boxW - 18, ry + 9, { align: "right" });
-      ry += 16;
+      doc.setFontSize(12);
+      doc.text(val, boxX + boxW - 16, ry + 8, { align: "right" });
+      ry += 14;
     } else {
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
       doc.setFontSize(7.5);
       doc.text(label.toUpperCase(), boxX + 4, ry + 5.5);
       doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
       doc.setFontSize(10.5);
-      doc.text(val, boxX + boxW - 4, ry + 5.5, { align: "right" });
-      ry += 9;
+      doc.text(val, boxX + boxW - 4, ry + 5, { align: "right" });
+      ry += 8;
     }
   });
   return ry;
