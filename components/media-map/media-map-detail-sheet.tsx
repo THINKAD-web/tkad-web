@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
 import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
-import { buildMapItemMetrics } from "@/lib/media-map/map-item-metrics";
+import { buildMapItemMetrics, formatMapCpm } from "@/lib/media-map/map-item-metrics";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { mapMapItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
@@ -96,7 +96,7 @@ function CloseButton({
       )}
       aria-label={isKo ? "닫기" : "Close"}
     >
-      <X className="h-3.5 w-3.5" />
+      <X className="h-4 w-4" />
     </button>
   );
 }
@@ -144,6 +144,96 @@ export function MapDetailQuickActions({
       className={className}
       stopPropagation
     />
+  );
+}
+
+/** 지도 마커 미리보기(dock·bottom-sheet) — 좌 썸네일 + 우 정보·축약 버튼 */
+function MapMarkerPreviewBody({
+  item,
+  catalogItem,
+  href,
+  isKo,
+  onClose,
+  showClose = true,
+}: {
+  item: MapMapItem;
+  catalogItem: ReturnType<typeof mapMapItemToHomeCatalog>;
+  href: string;
+  isKo: boolean;
+  onClose: () => void;
+  showClose?: boolean;
+}) {
+  const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
+  const priceLabel = formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en");
+  const regionLine =
+    [item.region, item.district].filter(Boolean).join(" · ") || item.location;
+  const locale = isKo ? "ko-KR" : "en-US";
+  const cpmLabel = formatMapCpm(item, locale);
+
+  return (
+    <div className={cn("relative p-3", showClose && "pr-11")}>
+      {showClose ? (
+        <CloseButton
+          onClose={onClose}
+          isKo={isKo}
+          className="absolute right-2 top-2 z-10 h-9 w-9"
+        />
+      ) : null}
+      <div className="flex min-w-0 gap-3">
+        <Link
+          href={href}
+          className="relative h-[4.75rem] w-[5.75rem] shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800"
+        >
+          {thumb ? (
+            <Image
+              src={thumb.src}
+              alt={item.name}
+              fill
+              className="object-cover"
+              sizes="92px"
+              unoptimized={thumb.unoptimized}
+            />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center text-[10px] text-tkad-muted">
+              —
+            </div>
+          )}
+        </Link>
+        <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+          <Link
+            href={href}
+            className="min-w-0 rounded-md transition-colors active:bg-gray-50 dark:active:bg-white/5"
+          >
+            <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
+              {item.name}
+            </p>
+            <p className="tkad-type-meta mt-0.5 truncate text-tkad-secondary">
+              {regionLine}
+            </p>
+            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5 gap-y-0">
+              <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
+                {priceLabel}
+              </p>
+              {cpmLabel ? (
+                <span className="tkad-type-note tabular-nums text-tkad-muted">
+                  CPM {cpmLabel}
+                </span>
+              ) : null}
+              <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+            </div>
+          </Link>
+          <DiscoveryMediaCardActions
+            mediaId={item.id}
+            planItem={mapItemPlanCart(item)}
+            detailHref={href}
+            isKo={isKo}
+            addedFrom="map"
+            layout="preview"
+            stopPropagation
+          />
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -222,62 +312,45 @@ function MediaMapDetailBody({
     };
   }, [item.id, isKo, showAvailability]);
 
-  const mapActions = (
-    <DiscoveryMediaCardActions
-      mediaId={item.id}
-      planItem={mapItemPlanCart(item)}
-      detailHref={href}
-      isKo={isKo}
-      inCompare={inCompare}
-      onToggleCompare={onToggleCompare}
-      addedFrom="map"
-      size={variant === "sheet" ? "comfortable" : "compact"}
-      className={variant === "dock" || variant === "bottom-sheet" ? "mt-2" : undefined}
-      stopPropagation={variant === "dock" || variant === "bottom-sheet"}
-    />
-  );
+  const mapActions =
+    variant === "sheet" || variant === "inline" ? (
+      <DiscoveryMediaCardActions
+        mediaId={item.id}
+        planItem={mapItemPlanCart(item)}
+        detailHref={href}
+        isKo={isKo}
+        inCompare={inCompare}
+        onToggleCompare={onToggleCompare}
+        addedFrom="map"
+        size={variant === "sheet" ? "comfortable" : "compact"}
+        layout="full"
+        className={variant === "inline" ? "mt-2" : undefined}
+        stopPropagation={variant === "inline"}
+      />
+    ) : null;
 
   if (variant === "bottom-sheet") {
-    const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
     return (
-      <div className="px-3 pb-3 pt-0">
-        <Link
-          href={href}
-          className="flex items-center gap-2.5 rounded-lg transition-colors active:bg-gray-50 dark:active:bg-white/5"
-        >
-          <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-md bg-gray-100 dark:bg-gray-800">
-            {thumb ? (
-              <Image
-                src={thumb.src}
-                alt=""
-                fill
-                className="object-cover"
-                sizes="56px"
-                unoptimized={thumb.unoptimized}
-              />
-            ) : (
-              <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
-                —
-              </div>
-            )}
-          </div>
-          <div className="min-w-0 flex-1">
-            <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
-              {item.name}
-            </p>
-            <p className="tkad-type-meta mt-0.5 truncate text-tkad-secondary">
-              {regionLine}
-            </p>
-            <div className="mt-0.5 flex flex-wrap items-baseline gap-x-1.5">
-              <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
-                {priceLabel}
-              </p>
-              <MediaPriceExclNote isKo={isKo} className="text-[10px]" />
-            </div>
-          </div>
-        </Link>
-        {mapActions}
-      </div>
+      <MapMarkerPreviewBody
+        item={item}
+        catalogItem={catalogItem}
+        href={href}
+        isKo={isKo}
+        onClose={onClose}
+        showClose={false}
+      />
+    );
+  }
+
+  if (variant === "dock") {
+    return (
+      <MapMarkerPreviewBody
+        item={item}
+        catalogItem={catalogItem}
+        href={href}
+        isKo={isKo}
+        onClose={onClose}
+      />
     );
   }
 
@@ -397,26 +470,7 @@ function MediaMapDetailBody({
     );
   }
 
-  return (
-    <div className="relative px-3 py-2">
-      <CloseButton
-        onClose={onClose}
-        isKo={isKo}
-        className="absolute right-2 top-2 z-10 h-7 w-7"
-      />
-      <DiscoveryMediaCard
-        variant="compact"
-        compactLayout="row"
-        item={catalogItem}
-        href={href}
-        metaLine={metaLine}
-        isKo={isKo}
-        showPlanButton={false}
-        {...mediaCardStaticHandlers}
-      />
-      {mapActions}
-    </div>
-  );
+  return null;
 }
 
 const BOTTOM_SHEET_DISMISS_DRAG_PX = 72;
@@ -495,7 +549,7 @@ function MediaMapBottomSheetShell({
           <CloseButton
             onClose={onClose}
             isKo={isKo}
-            className="absolute right-2 top-1 h-7 w-7"
+            className="absolute right-2 top-1 h-9 w-9"
           />
         </div>
         {children}
