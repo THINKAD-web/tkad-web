@@ -21,6 +21,8 @@ import {
 } from "@/lib/pricing";
 import { formatPricePeriodShortLabel, normalizeMediaPricePeriod } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
+import { QuoteFormalPreview } from "@/components/quote/quote-formal-preview";
+import { buildAdminFormalQuoteParamsFromDraft } from "@/lib/admin-sales-quote";
 import {
   Calculator,
   Camera,
@@ -359,6 +361,49 @@ export default function AdminQuoteNewClient() {
     factorForPeriod,
     selectedPrice,
   ]);
+
+  const formalPreviewParams = useMemo(
+    () =>
+      buildAdminFormalQuoteParamsFromDraft({
+        isKo,
+        quoteNumber: displayQuoteNumber,
+        issueDate: issueDatePdf,
+        validUntil: validUntilPdf,
+        clientCompany: clientCompany.trim(),
+        clientName: clientName.trim(),
+        clientPhone: clientPhone.trim(),
+        clientEmail: clientEmail.trim() || undefined,
+        periodLabel: campaignPeriodLabel,
+        discountPercent: dpct,
+        discountWon: dwon,
+        vatIncluded,
+        totals,
+        rows: lineItems.map((it) => ({
+          name: it.mediaName,
+          spec: it.spec,
+          period: it.period,
+          unitPriceWon: it.unitPrice,
+          quantity: it.quantity,
+          lineTotalWon: it.amount,
+        })),
+      }),
+    [
+      isKo,
+      displayQuoteNumber,
+      issueDatePdf,
+      validUntilPdf,
+      clientCompany,
+      clientName,
+      clientPhone,
+      clientEmail,
+      campaignPeriodLabel,
+      dpct,
+      dwon,
+      vatIncluded,
+      totals,
+      lineItems,
+    ],
+  );
 
   const pdfPeriodUnit = useMemo(() => {
     const periods = new Set<PeriodKey>();
@@ -1208,7 +1253,12 @@ export default function AdminQuoteNewClient() {
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
-              <CardTitle className="text-lg text-foreground dark:text-hero-fg">견적서 미리보기</CardTitle>
+              <CardTitle className="text-lg text-foreground dark:text-hero-fg">
+                견적서 미리보기
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({pdfStyle === "formal" ? "공식 견적서" : "카드형"})
+                </span>
+              </CardTitle>
               <div className="flex flex-wrap items-center gap-2">
                 <button
                   type="button"
@@ -1223,7 +1273,9 @@ export default function AdminQuoteNewClient() {
                         "@/lib/quote-html-pdf"
                       );
                       await runWithQuotePdfExport(el, async () => {
-                        await captureElementAsPng(el, `quote-${displayQuoteNumber}.png`);
+                        const prefix =
+                          pdfStyle === "formal" ? "formal-quote" : "quote";
+                        await captureElementAsPng(el, `${prefix}-${displayQuoteNumber}.png`);
                       });
                     } catch (e) {
                       console.error("[admin-quote-new] PNG capture failed", e);
@@ -1252,52 +1304,56 @@ export default function AdminQuoteNewClient() {
             <div className="overflow-x-auto rounded-xl border border-border/10 bg-slate-100/90 p-4 dark:border-hero-fg/15 dark:bg-card/5 md:p-6">
               <div className="mx-auto w-fit max-w-full" data-quote-pdf-scale-wrap>
                 <div id="quote-preview">
-                  <QuotePdfPreview
-                    template="default"
-                    customerLogoSrc={null}
-                    company={clientCompany}
-                    contactName={clientName}
-                    contactPhone={clientPhone}
-                    contactEmail={clientEmail}
-                    periodLabel={campaignPeriodLabel}
-                    periodMonths={pdfPeriodMultiplier}
-                    periodUnitLabel={pdfPeriodUnit}
-                    rows={lineItems.map((it) => {
-                      const m = medias.find((x) => x.id === it.mediaId);
-                      const size =
-                        m?.width && m?.height
-                          ? `${m.width}×${m.height}`
-                          : m?.resolution ?? null;
-                      const thumb =
-                        (m?.extractedImages ?? []).find((u) => !!u?.trim()) ||
-                        m?.image ||
-                        null;
-                      return {
-                        id: it.mediaId,
-                        thumbUrl: thumb,
-                        name: it.mediaName,
-                        location: m?.location ?? "—",
-                        unitPriceWon: it.unitPrice,
-                        lineTotalWon: it.amount,
-                        size,
-                        dailyFootTraffic: m?.dailyFootfall ?? null,
-                        visibilityScore: m?.visibilityScore ?? null,
-                        operatingHours: m?.operatingHours ?? null,
-                      };
-                    })}
-                    subtotalWon={totals.supplyWon}
-                    vatWon={totals.vatWon}
-                    grandTotalWon={totals.totalWon}
-                    issuedAt={new Date(issueDatePdf)}
-                    quoteNumber={displayQuoteNumber}
-                    validUntil={validUntilPdf}
-                    linesSubtotalWon={totals.linesSubtotalWon}
-                    discountTotalWon={
-                      totals.discountTotalWon > 0 ? totals.discountTotalWon : undefined
-                    }
-                    discountSummary={discountSummary}
-                    vatIncluded={vatIncluded}
-                  />
+                  {pdfStyle === "formal" ? (
+                    <QuoteFormalPreview {...formalPreviewParams} />
+                  ) : (
+                    <QuotePdfPreview
+                      template="default"
+                      customerLogoSrc={null}
+                      company={clientCompany}
+                      contactName={clientName}
+                      contactPhone={clientPhone}
+                      contactEmail={clientEmail}
+                      periodLabel={campaignPeriodLabel}
+                      periodMonths={pdfPeriodMultiplier}
+                      periodUnitLabel={pdfPeriodUnit}
+                      rows={lineItems.map((it) => {
+                        const m = medias.find((x) => x.id === it.mediaId);
+                        const size =
+                          m?.width && m?.height
+                            ? `${m.width}×${m.height}`
+                            : m?.resolution ?? null;
+                        const thumb =
+                          (m?.extractedImages ?? []).find((u) => !!u?.trim()) ||
+                          m?.image ||
+                          null;
+                        return {
+                          id: it.mediaId,
+                          thumbUrl: thumb,
+                          name: it.mediaName,
+                          location: m?.location ?? "—",
+                          unitPriceWon: it.unitPrice,
+                          lineTotalWon: it.amount,
+                          size,
+                          dailyFootTraffic: m?.dailyFootfall ?? null,
+                          visibilityScore: m?.visibilityScore ?? null,
+                          operatingHours: m?.operatingHours ?? null,
+                        };
+                      })}
+                      subtotalWon={totals.supplyWon}
+                      vatWon={totals.vatWon}
+                      grandTotalWon={totals.totalWon}
+                      issuedAt={new Date(issueDatePdf)}
+                      quoteNumber={displayQuoteNumber}
+                      validUntil={validUntilPdf}
+                      linesSubtotalWon={totals.linesSubtotalWon}
+                      discountTotalWon={
+                        totals.discountTotalWon > 0 ? totals.discountTotalWon : undefined
+                      }
+                      discountSummary={discountSummary}
+                      vatIncluded={vatIncluded}
+                    />
+                  )}
                 </div>
               </div>
             </div>

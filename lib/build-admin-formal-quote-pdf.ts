@@ -3,7 +3,10 @@ import {
   krFontFamily,
   registerNotoSansKrIfAvailable,
 } from "@/lib/jspdf-register-noto-kr";
-import { CONTACT_EMAIL } from "@/lib/constants";
+import {
+  formatFormalWon,
+  getFormalQuoteIssuer,
+} from "@/lib/formal-quote-issuer";
 import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import { getQuoteStampUrl } from "@/lib/quote-stamp";
 
@@ -47,32 +50,10 @@ export type AdminFormalQuotePdfParams = {
   totalWon: number;
 };
 
-const DEFAULT_ISSUER = {
-  companyKo: "(주)싱커드",
-  companyEn: "THINKAD Inc.",
-  taglineKo: "OOH 광고 · 미디어 플래닝",
-  taglineEn: "OOH advertising & media planning",
-  address:
-    process.env.QUOTE_ISSUER_ADDRESS?.trim() ||
-    "서울특별시 (주소는 환경변수 QUOTE_ISSUER_ADDRESS로 설정)",
-  regNo:
-    process.env.QUOTE_ISSUER_REG_NO?.trim() || "사업자등록번호: (등록 후 입력)",
-  tel: process.env.QUOTE_ISSUER_TEL?.trim() || "02-515-2772",
-  email: process.env.QUOTE_ISSUER_EMAIL?.trim() || CONTACT_EMAIL,
-  bank: process.env.QUOTE_BANK_NAME?.trim() || "국민은행",
-  account: process.env.QUOTE_BANK_ACCOUNT?.trim() || "000000-00-000000",
-  holder: process.env.QUOTE_BANK_HOLDER?.trim() || "(주)싱커드",
-  salesTitle: process.env.QUOTE_SALES_TITLE?.trim() || "견적·제안",
-};
-
 function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
   if (dataUrl.startsWith("data:image/png")) return "PNG";
   if (dataUrl.startsWith("data:image/webp")) return "WEBP";
   return "JPEG";
-}
-
-function fmtWon(n: number, isKo: boolean) {
-  return `₩${Math.round(n).toLocaleString(isKo ? "ko-KR" : "en-US")}`;
 }
 
 async function resolveFormalStampDataUrl(): Promise<string | null> {
@@ -113,6 +94,7 @@ export async function createAdminFormalQuotePdfDoc(
   const pageW = doc.internal.pageSize.getWidth();
   const pageH = doc.internal.pageSize.getHeight();
   const innerW = pageW - margin * 2;
+  const issuer = getFormalQuoteIssuer();
   let y = 0;
 
   const headerH = 22;
@@ -140,7 +122,7 @@ export async function createAdminFormalQuotePdfDoc(
   doc.setFontSize(8.5);
   setFont(doc, fam, "normal");
   doc.text(
-    p.isKo ? DEFAULT_ISSUER.taglineKo : DEFAULT_ISSUER.taglineEn,
+    p.isKo ? issuer.taglineKo : issuer.taglineEn,
     margin + (p.logoDataUrl ? 26 : 0),
     16,
   );
@@ -165,10 +147,10 @@ export async function createAdminFormalQuotePdfDoc(
   setFont(doc, fam, "normal");
   doc.setFontSize(8);
   const issuerLines = [
-    `${p.isKo ? DEFAULT_ISSUER.companyKo : DEFAULT_ISSUER.companyEn} · THINKAD`,
-    DEFAULT_ISSUER.address,
-    DEFAULT_ISSUER.regNo,
-    `${p.isKo ? "대표전화" : "Tel"}. ${DEFAULT_ISSUER.tel}  |  E-mail ${DEFAULT_ISSUER.email}`,
+    `${p.isKo ? issuer.companyKo : issuer.companyEn} · THINKAD`,
+    issuer.address,
+    issuer.regNo,
+    `${p.isKo ? "대표전화" : "Tel"}. ${issuer.tel}  |  E-mail ${issuer.email}`,
   ];
   for (const line of issuerLines) {
     for (const w of doc.splitTextToSize(line, innerW)) {
@@ -332,13 +314,13 @@ export async function createAdminFormalQuotePdfDoc(
     for (let i = 0; i < periodLines.length; i++) {
       doc.text(periodLines[i]!, colX[2] + 1, ly + i * 3.2);
     }
-    doc.text(fmtWon(row.unitPriceWon, p.isKo), colX[3] + colW[3] - 1, y + 3.5, {
+    doc.text(formatFormalWon(row.unitPriceWon, p.isKo), colX[3] + colW[3] - 1, y + 3.5, {
       align: "right",
     });
     doc.text(String(row.quantity), colX[4] + colW[4] / 2, y + 3.5, {
       align: "center",
     });
-    doc.text(fmtWon(row.lineTotalWon, p.isKo), colX[5] + colW[5] - 1, y + 3.5, {
+    doc.text(formatFormalWon(row.lineTotalWon, p.isKo), colX[5] + colW[5] - 1, y + 3.5, {
       align: "right",
     });
     y += h;
@@ -356,18 +338,18 @@ export async function createAdminFormalQuotePdfDoc(
 
   doc.setFontSize(8);
   const sumRows: [string, string][] = [
-    [p.isKo ? "소계" : "Subtotal", fmtWon(p.linesSubtotalWon, p.isKo)],
+    [p.isKo ? "소계" : "Subtotal", formatFormalWon(p.linesSubtotalWon, p.isKo)],
   ];
   if (p.discountTotalWon > 0) {
     sumRows.push([
       p.discountSummary ??
         (p.isKo ? "할인" : "Discount"),
-      `− ${fmtWon(p.discountTotalWon, p.isKo)}`,
+      `− ${formatFormalWon(p.discountTotalWon, p.isKo)}`,
     ]);
   }
   sumRows.push(
-    [p.isKo ? "공급가액" : "Supply", fmtWon(p.supplyWon, p.isKo)],
-    [p.isKo ? "부가세 (10%)" : "VAT (10%)", fmtWon(p.vatWon, p.isKo)],
+    [p.isKo ? "공급가액" : "Supply", formatFormalWon(p.supplyWon, p.isKo)],
+    [p.isKo ? "부가세 (10%)" : "VAT (10%)", formatFormalWon(p.vatWon, p.isKo)],
   );
 
   for (const [lab, val] of sumRows) {
@@ -388,7 +370,7 @@ export async function createAdminFormalQuotePdfDoc(
   setFont(doc, fam, "bold");
   doc.setFontSize(10);
   doc.text(p.isKo ? "합계" : "Total", sumX + 2, y + 3);
-  doc.text(fmtWon(p.totalWon, p.isKo), valX, y + 3, { align: "right" });
+  doc.text(formatFormalWon(p.totalWon, p.isKo), valX, y + 3, { align: "right" });
   y += 14;
 
   if (y > pageH - 48) {
@@ -410,8 +392,8 @@ export async function createAdminFormalQuotePdfDoc(
   doc.setFontSize(7.5);
   doc.setTextColor(...NAVY_DARK);
   const bankLines = [
-    `${DEFAULT_ISSUER.bank} ${DEFAULT_ISSUER.account}`,
-    `${p.isKo ? "예금주" : "Account holder"}: ${DEFAULT_ISSUER.holder}`,
+    `${issuer.bank} ${issuer.account}`,
+    `${p.isKo ? "예금주" : "Account holder"}: ${issuer.holder}`,
   ];
   for (const line of bankLines) {
     doc.text(line, margin, y);
@@ -426,9 +408,9 @@ export async function createAdminFormalQuotePdfDoc(
   setFont(doc, fam, "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...NAVY_DARK);
-  doc.text(`${DEFAULT_ISSUER.salesTitle} · ${DEFAULT_ISSUER.tel}`, margin, y);
+  doc.text(`${issuer.salesTitle} · ${issuer.tel}`, margin, y);
   y += 4;
-  doc.text(DEFAULT_ISSUER.email, margin, y);
+  doc.text(issuer.email, margin, y);
   y += 6;
 
   const stampData = await resolveFormalStampDataUrl();
