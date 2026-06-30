@@ -8,7 +8,7 @@ export const MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID = "tkad-media-mobile-bottom-bar-slo
 export type MediaMobileViewSegment = "list" | "map";
 
 const MOBILE_TOOLBAR_BTN =
-  "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10";
+  "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 transition-colors hover:bg-gray-50 active:bg-gray-100 dark:border-white/10 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10";
 
 type Props = {
   isKo?: boolean;
@@ -77,7 +77,7 @@ export function MediaMobileBottomBar({
         <button
           type="button"
           onClick={onOpenFilters}
-          className={cn(MOBILE_TOOLBAR_BTN, "relative px-3 py-2 text-xs")}
+          className={cn(MOBILE_TOOLBAR_BTN, "relative px-3 py-2")}
           aria-label={isKo ? "필터" : "Filters"}
         >
           <SlidersHorizontal className="h-4 w-4 shrink-0" aria-hidden />
@@ -92,7 +92,7 @@ export function MediaMobileBottomBar({
         <button
           type="button"
           onClick={onOpenSort}
-          className={cn(MOBILE_TOOLBAR_BTN, "max-w-[7.5rem] px-3 py-2 text-xs")}
+          className={cn(MOBILE_TOOLBAR_BTN, "max-w-[7.5rem] px-3 py-2")}
           aria-label={isKo ? "정렬" : "Sort"}
         >
           <Filter className="h-4 w-4 shrink-0 rotate-90" aria-hidden />

@@ -14,6 +14,7 @@ export type DiscoveryResultSummaryProps = {
   selectionVariant?: "default" | "plan";
   onSelectedSummaryClick?: () => void;
   cartCount?: number;
+  onCartSummaryClick?: () => void;
   compareCount?: number;
   className?: string;
   trailing?: ReactNode;
@@ -27,6 +28,7 @@ export function DiscoveryResultSummary({
   selectionVariant = "default",
   onSelectedSummaryClick,
   cartCount = 0,
+  onCartSummaryClick,
   compareCount = 0,
   className,
   trailing,
@@ -79,9 +81,19 @@ export function DiscoveryResultSummary({
           )
         ) : null}
         {cartCount > 0 ? (
-          <span className="tkad-type-meta tkad-home-accent-text font-medium">
-            {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
-          </span>
+          onCartSummaryClick ? (
+            <button
+              type="button"
+              onClick={onCartSummaryClick}
+              className="tkad-type-meta tkad-home-accent-text font-medium underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+            >
+              {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+            </button>
+          ) : (
+            <span className="tkad-type-meta tkad-home-accent-text font-medium">
+              {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
+            </span>
+          )
         ) : null}
         {compareCount > 0 ? (
           <span className="tkad-type-meta font-medium text-foreground">

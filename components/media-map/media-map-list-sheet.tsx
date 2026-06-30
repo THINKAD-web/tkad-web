@@ -191,7 +191,7 @@ export function MediaMapListSheet({
                 : "Expand list"
           }
           onClick={() => onSnapChange(snap === "full" ? "peek" : "full")}
-          className="flex items-center justify-center pt-2.5 pb-1"
+          className="flex items-center justify-center pt-1.5 pb-0.5"
         >
           <span
             aria-hidden
@@ -201,7 +201,7 @@ export function MediaMapListSheet({
         {header ? (
           <div
             className={cn(
-              "px-3 pb-2.5 pt-0.5",
+              "px-3 py-1",
               showListBody && "border-b border-gray-100 dark:border-white/8",
             )}
           >

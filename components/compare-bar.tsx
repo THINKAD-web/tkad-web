@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { isMediaBrowsePath } from "@/lib/navigation/discovery-path";
 import { LayoutList } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import {
@@ -78,9 +79,11 @@ export default function CompareBar({
   const isLight = variant === "light";
   const isMapPage = pathname?.includes("/media/map") ?? false;
   const hidePlanOnPage = pathname?.includes("/my/plan") ?? false;
+  const hidePlanOnMediaBrowse =
+    pathname != null && isMediaBrowsePath(pathname);
   const showPlanLink = !hidePlanOnPage && planCount > 0;
-  /** 퀵액션 바 제거 후 모바일도 하단 CompareBar에서 담은 매체 진입 */
-  const showPlanInBar = showPlanLink;
+  /** `/media`·`/media/map` — 담은 매체 팝업 진입점 제거 (비교 선택 바만 유지) */
+  const showPlanInBar = showPlanLink && !hidePlanOnMediaBrowse;
   /** 비우기 직후 exit 애니메이션에서도 직전 선택 목록 라벨을 유지 */
   const stashRef = useRef<MediaItem[]>([]);
   /* eslint-disable react-hooks/refs -- items=[]인 exit 프레임에서만 스냅샷 읽기 */

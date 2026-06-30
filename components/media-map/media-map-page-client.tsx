@@ -8,9 +8,7 @@ import {
   DiscoveryEmptyState,
   formatMapViewCountLabel,
   type DiscoveryFilterBarViewMode,
-  type MediaMobileViewSegment,
 } from "@/components/discovery/filter-bar";
-import { MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID } from "@/components/discovery/media-mobile-bottom-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -664,11 +662,18 @@ export default function MediaMapPageClient() {
 
   const handleBrowseViewModeChange = useCallback(
     (mode: DiscoveryFilterBarViewMode) => {
-      if (mode === "map") return;
+      if (mode === "map") {
+        setSheetSnap("peek");
+        return;
+      }
+      if (mode === "feed" && isMobile) {
+        setSheetSnap("full");
+        return;
+      }
       const qs = mapBrowseFiltersToMediaBrowseQueryString(browseFilters);
       router.push(qs ? `/media?${qs}` : "/media");
     },
-    [router, browseFilters],
+    [router, browseFilters, isMobile],
   );
 
   const toggleCompare = useCallback(
@@ -745,20 +750,6 @@ export default function MediaMapPageClient() {
     setSheetSnap(next);
   }, []);
 
-  const mobileViewSegment: MediaMobileViewSegment =
-    isMobile && sheetSnap === "full" ? "list" : "map";
-
-  const handleMobileViewSegmentChange = useCallback(
-    (segment: MediaMobileViewSegment) => {
-      if (segment === "list") {
-        setSheetSnap("full");
-        return;
-      }
-      setSheetSnap("peek");
-    },
-    [],
-  );
-
   const mapChromeVisible = !isMobile || sheetSnap === "peek";
 
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
@@ -766,9 +757,7 @@ export default function MediaMapPageClient() {
     <DiscoveryFilterBar
       isKo={isKo}
       unifiedToolbar
-      mobileBottomBar
-      mobileViewSegment={mobileViewSegment}
-      onMobileViewSegmentChange={handleMobileViewSegmentChange}
+      mobileStickyToolbar
       mapPageViewModes
       query={browseFilters.q}
       onQueryChange={(q) => patchBrowseFilters({ q })}
@@ -796,7 +785,7 @@ export default function MediaMapPageClient() {
       onSortChange={(sort) =>
         patchBrowseFilters({ sort: sort as MapBrowseFilters["sort"] })
       }
-      viewMode="map"
+      viewMode={isMobile ? (sheetSnap === "full" ? "feed" : "map") : "map"}
       onViewModeChange={handleBrowseViewModeChange}
       resultCount={items.length}
       totalCount={matchTotal}
@@ -1087,11 +1076,6 @@ export default function MediaMapPageClient() {
           </MediaMapListSheet>
         ) : null}
       </div>
-
-      <div
-        id={MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID}
-        className="flex-none shrink-0 md:hidden"
-      />
 
       <CompareBar
         variant="light"
