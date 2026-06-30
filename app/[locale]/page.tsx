@@ -5,7 +5,6 @@ import { HomeHeroBanner } from "@/components/home/home-hero-banner";
 import { HomeQuickAccess } from "@/components/home/home-quick-access";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
-import { HomeMoreLinks } from "@/components/home/home-more-links";
 import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
 import { fetchPublishedReports } from "@/lib/report-queries";
 import { fetchPublishedCases } from "@/lib/case-queries";
@@ -49,8 +48,8 @@ export default async function HomePage({
 
   const [popularMedia, reportItems, caseItems] = await Promise.all([
     fetchPublicMediaCatalog({ sort: "popular", limit: 8 }).catch(() => []),
-    fetchPublishedReports({ limit: 6 }).catch(() => []),
-    fetchPublishedCases({ limit: 6, locale }).catch(() => []),
+    fetchPublishedReports({ limit: 3 }).catch(() => []),
+    fetchPublishedCases({ limit: 3, locale }).catch(() => []),
   ]);
 
   return (
@@ -73,9 +72,11 @@ export default async function HomePage({
         locale={locale}
       />
 
-      <HomeContentFeed reports={reportItems} cases={caseItems} />
-
-      <HomeMoreLinks />
+      <HomeContentFeed
+        reports={reportItems}
+        cases={caseItems}
+        locale={locale}
+      />
     </main>
   );
 }

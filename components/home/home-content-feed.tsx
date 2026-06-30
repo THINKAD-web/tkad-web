@@ -1,139 +1,128 @@
-import Link from "next/link";
 import { ChevronRight } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { ContentCardGradientThumb } from "@/components/content/content-card-gradient-thumb";
-import {
-  cleanSummary,
-  estimateReadMinutes,
-} from "@/lib/content-card-visuals";
 import type { HomeReportItem } from "@/lib/report-queries";
 import type { HomeCaseItem } from "@/lib/case-queries";
 
-interface Props {
+type Props = {
   reports: HomeReportItem[];
   cases: HomeCaseItem[];
+  locale?: string;
+};
+
+type InsightItem =
+  | {
+      kind: "report";
+      id: string;
+      href: string;
+      title: string;
+      thumbnailUrl?: string;
+      category?: string;
+    }
+  | {
+      kind: "case";
+      id: string;
+      href: string;
+      title: string;
+      thumbnailUrl?: string;
+      industry?: string;
+    };
+
+function buildInsightItems(
+  reports: HomeReportItem[],
+  cases: HomeCaseItem[],
+): InsightItem[] {
+  const reportItems: InsightItem[] = reports.slice(0, 3).map((item) => ({
+    kind: "report",
+    id: item.id,
+    href: item.slug ? `/report/${item.slug}` : `/report/${item.id}`,
+    title: item.title,
+    thumbnailUrl: item.thumbnailUrl,
+    category: item.category,
+  }));
+
+  const caseItems: InsightItem[] = cases.slice(0, 3).map((item) => ({
+    kind: "case",
+    id: item.id,
+    href: item.slug ? `/cases/${item.slug}` : `/cases/${item.id}`,
+    title: item.title || item.brandName || "",
+    thumbnailUrl: item.thumbnailUrl,
+    industry: item.industry,
+  }));
+
+  return [...reportItems, ...caseItems];
 }
 
-export function HomeContentFeed({ reports, cases }: Props) {
+/** G-4: 리포트·사례를 인사이트 한 줄(3+3)로 통합 */
+export function HomeContentFeed({
+  reports,
+  cases,
+  locale = "ko",
+}: Props) {
+  const isKo = locale.startsWith("ko");
+  const items = buildInsightItems(reports, cases);
+
+  if (items.length === 0) return null;
+
   return (
-    <div className="border-t border-gray-100 dark:border-white/5">
-      {reports.length > 0 ? (
-        <div className="py-4">
-          <div className="mb-3 flex items-center justify-between px-4">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">
-              트렌드 리포트
-            </h3>
+    <section className="border-t border-gray-100 py-4 dark:border-white/5">
+      <div className="mb-3 flex items-center justify-between gap-3 px-4">
+        <h3 className="text-base font-bold text-gray-900 dark:text-white">
+          {isKo ? "인사이트" : "Insights"}
+        </h3>
+        <div className="flex shrink-0 items-center gap-2 text-xs font-medium tkad-home-accent-text">
+          <Link href="/report" className="inline-flex items-center gap-0.5">
+            {isKo ? "리포트" : "Reports"}
+            <ChevronRight className="h-3 w-3" aria-hidden />
+          </Link>
+          <span className="text-gray-300 dark:text-white/20" aria-hidden>
+            ·
+          </span>
+          <Link href="/cases" className="inline-flex items-center gap-0.5">
+            {isKo ? "사례" : "Cases"}
+            <ChevronRight className="h-3 w-3" aria-hidden />
+          </Link>
+        </div>
+      </div>
+
+      <div className="scrollbar-hide flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2">
+        {items.map((item) => {
+          const typeLabel =
+            item.kind === "report"
+              ? isKo
+                ? "리포트"
+                : "Report"
+              : isKo
+                ? "사례"
+                : "Case";
+
+          return (
             <Link
-              href="/ko/report"
-              className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
+              key={`${item.kind}-${item.id}`}
+              href={item.href}
+              className="w-44 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5 sm:w-48"
             >
-              전체보기 <ChevronRight className="h-3 w-3" />
-            </Link>
-          </div>
-          <div className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pb-2">
-            {reports.map((item) => (
-              <Link
-                key={item.id}
-                href={
-                  item.slug
-                    ? `/ko/report/${item.slug}`
-                    : `/ko/report/${item.id}`
+              <ContentCardGradientThumb
+                thumbnailUrl={item.thumbnailUrl}
+                alt={item.title}
+                category={item.kind === "report" ? item.category : undefined}
+                industry={item.kind === "case" ? item.industry : undefined}
+                heightClass="h-24"
+                badge={
+                  <span className="tkad-type-note absolute left-1.5 top-1.5 rounded-md bg-black/55 px-1.5 py-0.5 font-semibold text-white backdrop-blur-sm">
+                    {typeLabel}
+                  </span>
                 }
-                className="w-52 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5"
-              >
-                <ContentCardGradientThumb
-                  thumbnailUrl={item.thumbnailUrl}
-                  alt={item.title}
-                  category={item.category}
-                  heightClass="h-32"
-                  badge={
-                    item.category ? (
-                      <span className="absolute top-2 left-2 rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] text-white shadow-[0_0_10px_rgba(139,92,246,0.35)]">
-                        {item.category}
-                      </span>
-                    ) : null
-                  }
-                />
-                <div className="p-3">
-                  <p className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-white">
-                    {item.title}
-                  </p>
-                  <div className="mt-1.5 flex items-center justify-between gap-2">
-                    {item.publishedAt ? (
-                      <p className="text-xs text-gray-400 dark:text-white/40">
-                        {new Date(item.publishedAt).toLocaleDateString("ko-KR")}
-                      </p>
-                    ) : (
-                      <span />
-                    )}
-                    <p className="shrink-0 text-xs text-violet-400">
-                      {estimateReadMinutes(item.title)}분 읽기
-                    </p>
-                  </div>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      ) : null}
-
-      {cases.length > 0 ? (
-        <div className="border-t border-gray-100 py-4 dark:border-white/5">
-          <div className="mb-3 flex items-center justify-between px-4">
-            <h3 className="text-base font-bold text-gray-900 dark:text-white">
-              성공 사례
-            </h3>
-            <Link
-              href="/ko/cases"
-              className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
-            >
-              전체보기 <ChevronRight className="h-3 w-3" />
+              />
+              <div className="p-3">
+                <p className="tkad-type-title line-clamp-1 text-foreground">
+                  {item.title}
+                </p>
+              </div>
             </Link>
-          </div>
-          <div className="scrollbar-hide flex gap-3 overflow-x-auto px-4 pb-2">
-            {cases.map((item) => {
-              const cleanedSummary = item.summary
-                ? cleanSummary(item.summary)
-                : "";
-
-              return (
-                <Link
-                  key={item.id}
-                  href={
-                    item.slug
-                      ? `/ko/cases/${item.slug}`
-                      : `/ko/cases/${item.id}`
-                  }
-                  className="w-44 shrink-0 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5"
-                >
-                  <ContentCardGradientThumb
-                    thumbnailUrl={item.thumbnailUrl}
-                    alt={item.title || item.brandName || ""}
-                    industry={item.industry}
-                    heightClass="h-28"
-                    badge={
-                      item.industry ? (
-                        <span className="absolute top-2 left-2 rounded-full bg-gradient-to-r from-cyan-500 to-cyan-300 px-2 py-0.5 text-[10px] text-white shadow-[0_0_10px_rgba(34,211,238,0.35)]">
-                          {item.industry}
-                        </span>
-                      ) : null
-                    }
-                  />
-                  <div className="p-3">
-                    <p className="line-clamp-2 text-sm font-semibold leading-snug text-gray-900 dark:text-white">
-                      {item.title || item.brandName}
-                    </p>
-                    {cleanedSummary ? (
-                      <p className="mt-1 line-clamp-1 text-xs text-cyan-500 dark:text-cyan-400">
-                        {cleanedSummary}
-                      </p>
-                    ) : null}
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
-        </div>
-      ) : null}
-    </div>
+          );
+        })}
+      </div>
+    </section>
   );
 }
