@@ -32,6 +32,8 @@ type Props = {
   /** 포트폴리오 매체 수 — 1개면 기여도 막대 숨김 */
   portfolioSize?: number;
   compact?: boolean;
+  /** 플래너 보고서 등 — 썸네일 확대 (compact 보다 우선하지 않음) */
+  largeThumb?: boolean;
   /** 설정 시 카드 전체가 매체 상세 페이지로 연결됨 */
   mediaPageHref?: string;
 };
@@ -88,6 +90,7 @@ export function MediaDetailCard({
   showContribution = false,
   portfolioSize,
   compact = false,
+  largeThumb = false,
   mediaPageHref,
 }: Props) {
   const showContributionBars =
@@ -106,7 +109,7 @@ export function MediaDetailCard({
         className={cn(
           // 고정 4:3 비율 박스 — 폭만 반응형, 세로 늘어남 불가
           "relative aspect-[4/3] shrink-0 self-start overflow-hidden rounded-xl shadow-sm",
-          compact ? "w-24 sm:w-28" : "w-28 sm:w-40",
+          compact ? "w-24 sm:w-28" : largeThumb ? "w-40 sm:w-52" : "w-28 sm:w-40",
         )}
         style={{ background: LIGHT.bgAlt }}
       >

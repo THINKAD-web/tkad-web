@@ -2,7 +2,7 @@ import { ensureKrFontForServerPdf, krFontFamily } from "@/lib/jspdf-register-not
 import { CONTACT_EMAIL } from "@/lib/constants";
 import {
   addPdfThumbImage,
-  EXPORT_THUMB_BOX_MM,
+  PLANNER_EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
 import type {
@@ -528,9 +528,11 @@ export async function buildPlannerReportPdf(
 
   // ── 매체 구성 (디테일 카드) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
+  const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
 
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
-    const thumbW = thumb ? EXPORT_THUMB_BOX_MM.w + 2 : 0;
+    const thumbSlot = Boolean(row.thumbUrl?.trim());
+    const thumbW = thumbSlot ? thumbBox.w + 2 : 0;
     const textX = M + 3 + thumbW;
     const textW = contentW - 6 - thumbW;
     const lines: Array<{ text: string; color: readonly number[]; bold?: boolean }> =
@@ -586,7 +588,7 @@ export async function buildPlannerReportPdf(
     const linkBlockH = mediaUrl ? 11 : 0;
 
     const rh = Math.max(
-      thumb ? EXPORT_THUMB_BOX_MM.h + 4 : 16,
+      thumbSlot ? thumbBox.h + 4 : 16,
       lines.length * 4.4 + 8 + linkBlockH,
     );
     ensure(rh + 4);
@@ -594,8 +596,22 @@ export async function buildPlannerReportPdf(
     setDraw(GRAY_200);
     doc.setLineWidth(0.2);
     doc.roundedRect(M, y, contentW, rh, 2, 2, "FD");
-    if (thumb) {
-      addPdfThumbImage(doc, thumb, M + 2, y + 2);
+    if (thumbSlot) {
+      if (thumb) {
+        addPdfThumbImage(doc, thumb, M + 2, y + 2, thumbBox.w, thumbBox.h);
+      } else {
+        setFill(GRAY_50);
+        doc.roundedRect(M + 2, y + 2, thumbBox.w, thumbBox.h, 1.5, 1.5, "F");
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(7);
+        setText(GRAY_500);
+        doc.text(
+          isKo ? "이미지 없음" : "No image",
+          M + 2 + thumbBox.w / 2,
+          y + 2 + thumbBox.h / 2 + 1,
+          { align: "center" },
+        );
+      }
     }
     let ty = y + 5.5;
     for (const line of lines) {

@@ -67,6 +67,7 @@ function MediaLineupCard({
       detail={detail}
       isKo={isKo}
       showContribution
+      largeThumb
       portfolioSize={portfolioSize}
       mediaPageHref={hasMediaLink ? `/media/${mediaId}` : undefined}
     />

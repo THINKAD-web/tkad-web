@@ -1,4 +1,4 @@
-import { EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
+import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
   PlannerReportExportPayload,
@@ -360,8 +360,12 @@ export async function buildPlannerReportPptx(
 
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
-  const THUMB_W_IN = 2.35;
-  const THUMB_H_IN = (THUMB_W_IN * EXPORT_THUMB_BOX_MM.h) / EXPORT_THUMB_BOX_MM.w;
+  const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
+  /** 20mm 기준 2.35in — 플래너 확대 썸네일에 비례 스케일 */
+  const THUMB_W_IN = 2.35 * (thumbBox.w / EXPORT_THUMB_BOX_MM.w);
+  const THUMB_H_IN = (THUMB_W_IN * thumbBox.h) / thumbBox.w;
+  const PPT_CARD_H = 2.95;
+  const PPT_CARD_STEP = 3.2;
 
   function mediaRichLines(row: PlannerExportMediaRow) {
     type Part = { text: string; options: Record<string, unknown> };
@@ -433,17 +437,18 @@ export async function buildPlannerReportPptx(
             : "Media lineup (cont.)",
       );
       chunk.forEach((row, idx) => {
-        const cardY = 1.2 + idx * 2.95;
+        const cardY = 1.2 + idx * PPT_CARD_STEP;
         slide.addShape(pptx.ShapeType.roundRect, {
           x: 0.55,
           y: cardY,
           w: 12.2,
-          h: 2.75,
+          h: PPT_CARD_H,
           fill: { color: LIGHT },
           rectRadius: 0.08,
           line: { color: "E4E6EC", width: 0.75 },
         });
         const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+        const textX = 0.75 + THUMB_W_IN + 0.25;
         if (thumb) {
           try {
             slide.addImage({
@@ -467,14 +472,21 @@ export async function buildPlannerReportPptx(
             line: { color: "E4E6EC", width: 0.5 },
           });
           slide.addText(isKo ? "이미지 없음" : "No image", {
-            x: 0.75, y: cardY + 1.1, w: 2.35, h: 0.4, fontFace: face, fontSize: 9, color: GRAY, align: "center",
+            x: 0.75,
+            y: cardY + 0.2 + THUMB_H_IN / 2 - 0.2,
+            w: THUMB_W_IN,
+            h: 0.4,
+            fontFace: face,
+            fontSize: 9,
+            color: GRAY,
+            align: "center",
           });
         }
         slide.addText(mediaRichLines(row), {
-          x: 3.35,
+          x: textX,
           y: cardY + 0.25,
-          w: 9.1,
-          h: 2.05,
+          w: 0.55 + 12.2 - (textX - 0.55) - 0.2,
+          h: PPT_CARD_H - 0.5,
           valign: "top",
         });
         const mediaUrl = plannerMediaPageUrl(row.id, isKo);
@@ -483,7 +495,7 @@ export async function buildPlannerReportPptx(
           const btnW = 2.55;
           const btnH = 0.32;
           const btnX = 0.55 + 12.2 - btnW - 0.22;
-          const btnY = cardY + 2.75 - btnH - 0.42;
+          const btnY = cardY + PPT_CARD_H - btnH - 0.22;
           slide.addShape(pptx.ShapeType.roundRect, {
             x: btnX,
             y: btnY,

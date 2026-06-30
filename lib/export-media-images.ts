@@ -28,8 +28,11 @@ export function dataUrlImageFormat(d: string): "PNG" | "WEBP" | "JPEG" {
   return "JPEG";
 }
 
-/** PDF/PPTX 매체 카드 썸네일 박스 (4:3, mm) */
+/** PDF/PPTX 매체 카드 썸네일 박스 (4:3, mm) — 견적·일반 export */
 export const EXPORT_THUMB_BOX_MM = { w: 20, h: 15 } as const;
+
+/** 플래너 보고서 매체 카드 썸네일 (4:3, mm) — 화면 w-40/sm:w-52 와 동일 비율 */
+export const PLANNER_EXPORT_THUMB_BOX_MM = { w: 28, h: 21 } as const;
 
 /** 서버 임베드용 4:3 cover 크롭 (픽셀) — jsPDF·Keynote 등에서 비율 깨짐 방지 */
 const EXPORT_THUMB_PIXELS = { w: 400, h: 300 } as const;
