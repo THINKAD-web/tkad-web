@@ -75,7 +75,7 @@ async function main() {
     }
     await page.waitForSelector(
       shot.name.startsWith("home") || shot.name.startsWith("theme-auto")
-        ? '[data-screenshot="home-hub-grid"]'
+        ? ".grid-cols-5"
         : '[data-screenshot="subpage-chips"]',
       { timeout: 45000 },
     ).catch(() => null);
