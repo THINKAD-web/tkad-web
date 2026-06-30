@@ -16,6 +16,7 @@ import {
   RefreshCw,
   FileDown,
   Search,
+  Pencil,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 
@@ -345,7 +346,12 @@ export default function AdminQuotesListClient() {
                   {quotes.map((row) => (
                     <tr key={row.id} className="border-b border-border/10 dark:border-hero-fg/10">
                       <td className="px-3 py-2 text-xs font-medium text-foreground dark:text-hero-fg">
-                        {row.quoteNumber}
+                        <Link
+                          href={`/admin/quotes/${row.id}/edit`}
+                          className="font-semibold text-violet-700 hover:underline"
+                        >
+                          {row.quoteNumber}
+                        </Link>
                       </td>
                       <td className="px-3 py-2">
                         {row.clientName.includes(" · ") ? (
@@ -387,6 +393,19 @@ export default function AdminQuotesListClient() {
                       </td>
                       <td className="px-3 py-2">
                         <div className="flex flex-wrap gap-1">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            disabled={busyId === row.id}
+                            asChild
+                          >
+                            <Link href={`/admin/quotes/${row.id}/edit`}>
+                              <Pencil className="mr-1 h-3.5 w-3.5" />
+                              {t("edit")}
+                            </Link>
+                          </Button>
                           <Button
                             type="button"
                             variant="outline"

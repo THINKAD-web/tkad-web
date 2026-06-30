@@ -39,7 +39,13 @@ import {
   Trash2,
   Sparkles,
 } from "lucide-react";
-import { useToast } from "@/components/toast-provider";
+import {
+  inferVatIncludedFromQuote,
+  parseCampaignPeriodLabel,
+  parseStoredClientName,
+  splitQuoteItemsForForm,
+} from "@/lib/admin-quote-hydrate";
+import type { QuoteApi } from "@/lib/admin-sales-quote";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -78,7 +84,7 @@ function mediaSpecLine(m: AdminMediaDto): string {
   return bits.length > 0 ? bits.join(" · ") : "—";
 }
 
-export default function AdminQuoteNewClient() {
+export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const t = useTranslations("adminQuoteNew");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
@@ -124,6 +130,10 @@ export default function AdminQuoteNewClient() {
   const [saveLoading, setSaveLoading] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
   const [pdfStyle, setPdfStyle] = useState<"basic" | "formal">("basic");
+  const isEditMode = Boolean(quoteId);
+  const [editLoading, setEditLoading] = useState(isEditMode);
+  const [editError, setEditError] = useState<string | null>(null);
+  const [editHydrated, setEditHydrated] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -164,6 +174,79 @@ export default function AdminQuoteNewClient() {
       cancelled = true;
     };
   }, [t]);
+
+  useEffect(() => {
+    if (!quoteId || editHydrated || listLoading) return;
+    let cancelled = false;
+    (async () => {
+      setEditLoading(true);
+      setEditError(null);
+      try {
+        const res = await fetch(`/api/admin/quotes/${quoteId}`, {
+          credentials: "include",
+          cache: "no-store",
+        });
+        const raw: unknown = await res.json();
+        if (!res.ok) {
+          const err =
+            typeof raw === "object" &&
+            raw !== null &&
+            "error" in raw &&
+            typeof (raw as { error?: unknown }).error === "string"
+              ? (raw as { error: string }).error
+              : t("editLoadError");
+          if (!cancelled) setEditError(err);
+          return;
+        }
+        const quote =
+          typeof raw === "object" &&
+          raw !== null &&
+          "quote" in raw &&
+          typeof (raw as { quote?: unknown }).quote === "object"
+            ? (raw as { quote: QuoteApi }).quote
+            : null;
+        if (!quote) {
+          if (!cancelled) setEditError(t("editLoadError"));
+          return;
+        }
+
+        const { company, contact } = parseStoredClientName(quote.clientName);
+        const period = quote.items[0]?.period ?? "";
+        const parsedPeriod = parseCampaignPeriodLabel(period);
+
+        const knownMediaIds = new Set(medias.map((m) => m.id));
+        const split = splitQuoteItemsForForm(quote, knownMediaIds);
+
+        if (!cancelled) {
+          setQuoteNumber(quote.quoteNumber);
+          setClientCompany(company);
+          setClientName(contact);
+          setClientPhone(quote.clientPhone ?? "");
+          setClientEmail(quote.clientEmail ?? "");
+          setValidUntilPdf(quote.validUntil.slice(0, 10));
+          setIssueDatePdf(quote.createdAt.slice(0, 10));
+          if (parsedPeriod) {
+            setStartDate(parsedPeriod.startDate);
+            setEndDate(parsedPeriod.endDate);
+          }
+          setDiscountPercent("0");
+          setDiscountWon(String(quote.discount));
+          setVatIncluded(inferVatIncludedFromQuote(quote));
+          setSelected(new Set(split.selectedIds));
+          setQuantities(split.quantities);
+          setCustomLines(split.customLines);
+          setEditHydrated(true);
+        }
+      } catch {
+        if (!cancelled) setEditError(t("networkError"));
+      } finally {
+        if (!cancelled) setEditLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [quoteId, editHydrated, listLoading, medias, t]);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -446,33 +529,45 @@ export default function AdminQuoteNewClient() {
       const clientNameStored = [clientCompany.trim(), clientName.trim()]
         .filter(Boolean)
         .join(" · ");
-      const res = await fetch("/api/admin/quotes", {
-        method: "POST",
-        credentials: "include",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          ...(quoteNumber.trim() ? { quoteNumber: quoteNumber.trim() } : {}),
-          clientName: clientNameStored,
-          clientPhone: clientPhone.trim(),
-          clientEmail: clientEmail.trim() || undefined,
-          validUntil: validUntilPdf,
-          subtotal: totals.linesSubtotalWon,
-          discount: totals.discountTotalWon,
-          tax: totals.vatWon,
-          total: totals.totalWon,
-          isKo,
-          status: "draft",
-          items: lineItems.map((it) => ({
-            mediaId: it.mediaId,
-            mediaName: it.mediaName,
-            spec: it.spec === "—" ? null : it.spec,
-            period: it.period,
-            unitPrice: it.unitPrice,
-            quantity: it.quantity,
-            amount: it.amount,
-          })),
-        }),
-      });
+      const payload = {
+        clientName: clientNameStored,
+        clientPhone: clientPhone.trim(),
+        clientEmail: clientEmail.trim() || undefined,
+        validUntil: validUntilPdf,
+        subtotal: totals.linesSubtotalWon,
+        discount: totals.discountTotalWon,
+        tax: totals.vatWon,
+        total: totals.totalWon,
+        isKo,
+        items: lineItems.map((it) => ({
+          mediaId: it.mediaId,
+          mediaName: it.mediaName,
+          spec: it.spec === "—" ? null : it.spec,
+          period: it.period,
+          unitPrice: it.unitPrice,
+          quantity: it.quantity,
+          amount: it.amount,
+        })),
+      };
+      const res = await fetch(
+        isEditMode && quoteId
+          ? `/api/admin/quotes/${quoteId}`
+          : "/api/admin/quotes",
+        {
+          method: isEditMode && quoteId ? "PATCH" : "POST",
+          credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(
+            isEditMode
+              ? payload
+              : {
+                  ...payload,
+                  ...(quoteNumber.trim() ? { quoteNumber: quoteNumber.trim() } : {}),
+                  status: "draft",
+                },
+          ),
+        },
+      );
       const raw: unknown = await res.json();
       if (!res.ok) {
         const msg =
@@ -486,7 +581,7 @@ export default function AdminQuoteNewClient() {
       }
       const saved = raw as { quote?: { quoteNumber?: string } };
       if (saved.quote?.quoteNumber) setQuoteNumber(saved.quote.quoteNumber);
-      toast("success", t("saveOk"));
+      toast("success", isEditMode ? t("updateOk") : t("saveOk"));
     } catch (e) {
       toast("error", e instanceof Error ? e.message : t("saveFailed"));
     } finally {
@@ -505,6 +600,8 @@ export default function AdminQuoteNewClient() {
     totals,
     lineItems,
     isKo,
+    isEditMode,
+    quoteId,
     t,
     toast,
   ]);
@@ -622,13 +719,34 @@ export default function AdminQuoteNewClient() {
 
   return (
     <div className="mx-auto max-w-6xl space-y-6">
+      {editLoading ? (
+        <div className="flex items-center justify-center gap-2 py-24 text-muted-foreground">
+          <Loader2 className="h-6 w-6 animate-spin" />
+          {t("editLoading")}
+        </div>
+      ) : editError ? (
+        <div className="rounded-lg border border-red-200 bg-red-50 p-6 text-sm text-red-700">
+          <p>{editError}</p>
+          <Link
+            href="/admin/quotes"
+            className="mt-3 inline-block text-xs font-semibold text-accent hover:underline"
+          >
+            {t("goToQuotesList")}
+          </Link>
+        </div>
+      ) : (
+        <>
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
           <div className="mb-1 flex items-center gap-2 text-foreground dark:text-hero-fg">
             <Calculator className="h-7 w-7 text-accent" />
-            <h1 className="text-2xl font-bold tracking-tight">{t("title")}</h1>
+            <h1 className="text-2xl font-bold tracking-tight">
+              {isEditMode ? t("editTitle") : t("title")}
+            </h1>
           </div>
-          <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
+          <p className="text-sm text-muted-foreground">
+            {isEditMode ? t("editSubtitle") : t("subtitle")}
+          </p>
           <Link
             href="/admin/quotes"
             className="mt-2 inline-block text-xs font-semibold text-accent hover:opacity-90 hover:underline"
@@ -1146,7 +1264,7 @@ export default function AdminQuoteNewClient() {
               ) : (
                 <Save className="mr-2 h-4 w-4" />
               )}
-              {t("saveQuote")}
+              {isEditMode ? t("updateQuote") : t("saveQuote")}
             </Button>
             <Button
               type="button"
@@ -1396,6 +1514,8 @@ export default function AdminQuoteNewClient() {
             </div>
           </CardContent>
         </Card>
+      )}
+        </>
       )}
     </div>
   );

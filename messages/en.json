@@ -2494,7 +2494,13 @@
     "saveQuote": "Save quote",
     "saveOk": "Quote saved. Open Quotes to manage it.",
     "saveFailed": "Could not save quote.",
-    "goToQuotesList": "← Back to quote list"
+    "goToQuotesList": "← Back to quote list",
+    "editTitle": "Edit quote",
+    "editSubtitle": "Update media, dates, discounts, and client details for a saved quote.",
+    "editLoading": "Loading quote…",
+    "editLoadError": "Could not load quote.",
+    "updateQuote": "Save changes",
+    "updateOk": "Quote updated."
   },
   "adminQuotesList": {
     "title": "Quote management",
@@ -2524,6 +2530,7 @@
     "view": "View",
     "email": "Email",
     "copy": "Copy",
+    "edit": "Edit",
     "emailTitle": "Send quote by email",
     "emailTo": "Recipient",
     "emailSend": "Send",
