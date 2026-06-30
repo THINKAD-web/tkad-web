@@ -54,12 +54,16 @@ export type PlannerExportChartDatum = {
 export type PlannerExportCharts = {
   /** 예산 배분 — 도넛 (OOH vs 디지털 / 유형별) */
   budgetSplit?: PlannerExportChartDatum[];
+  /** 예산 배분 — 발견하기 메인 카테고리별 도넛 */
+  browseBudgetSplit?: PlannerExportChartDatum[];
   /** CPM 비교 — 가로 막대 (원 단위) */
   cpmBars?: PlannerExportChartDatum[];
   /** 노출·도달 요약 — 가로 막대 */
   reachSummary?: PlannerExportChartDatum[];
   /** 유형별 월 노출 비중 — 예산 배분과 대비 */
   impressionSplit?: PlannerExportChartDatum[];
+  /** 발견하기 카테고리별 월 노출 비중 */
+  browseImpressionSplit?: PlannerExportChartDatum[];
   /** 지역별 월 예산 비중 (내 플랜 보고서) */
   regionBudgetSplit?: PlannerExportChartDatum[];
   /** 지역별 월 노출 비중 (내 플랜 보고서) */

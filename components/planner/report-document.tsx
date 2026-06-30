@@ -294,24 +294,44 @@ export const PlannerReportDocument = forwardRef<
         {/* 성과 요약 차트 */}
         {p.charts &&
         ((p.charts.budgetSplit?.length ?? 0) > 0 ||
+          (p.charts.browseBudgetSplit?.length ?? 0) > 0 ||
           (p.charts.cpmBars?.length ?? 0) > 0 ||
           (p.charts.reachSummary?.length ?? 0) > 0) ? (
           <section className="space-y-4">
             <DocumentSectionHeading>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
+            {(p.charts.budgetSplit?.length ?? 0) > 0 ||
+            (p.charts.browseBudgetSplit?.length ?? 0) > 0 ? (
+              <div className="grid gap-4 sm:grid-cols-2">
+                {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="mb-1 text-xs font-semibold text-gray-500">
+                      {isKo ? "예산 배분 (유형별)" : "Budget by type"}
+                    </p>
+                    <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                      {isKo
+                        ? "디지털·고정형·이동형 — 선택 매체 월 단가 합"
+                        : "Digital · static · mobile — monthly rate share"}
+                    </p>
+                    <DonutChart data={p.charts.budgetSplit} />
+                  </div>
+                ) : null}
+                {p.charts.browseBudgetSplit &&
+                p.charts.browseBudgetSplit.length > 0 ? (
+                  <div className="rounded-xl border border-gray-200 p-4">
+                    <p className="mb-1 text-xs font-semibold text-gray-500">
+                      {isKo ? "예산 배분 (카테고리별)" : "Budget by category"}
+                    </p>
+                    <p className="mb-3 text-[10px] leading-snug text-gray-400">
+                      {isKo
+                        ? "OOH·교통·쉘터 등 발견하기 카테고리 기준"
+                        : "OOH · transit · shelter — browse category share"}
+                    </p>
+                    <DonutChart data={p.charts.browseBudgetSplit} />
+                  </div>
+                ) : null}
+              </div>
+            ) : null}
             <div className="grid gap-6 sm:grid-cols-2">
-              {p.charts.budgetSplit && p.charts.budgetSplit.length > 0 ? (
-                <div className="rounded-xl border border-gray-200 p-4">
-                  <p className="mb-1 text-xs font-semibold text-gray-500">
-                    {isKo ? "예산 배분" : "Budget allocation"}
-                  </p>
-                  <p className="mb-3 text-[10px] leading-snug text-gray-400">
-                    {isKo
-                      ? "선택 매체 월 단가 합 — 돈이 어디로 쓰이는지"
-                      : "Share of selected media monthly rates (where spend goes)"}
-                  </p>
-                  <DonutChart data={p.charts.budgetSplit} />
-                </div>
-              ) : null}
               {p.charts.reachSummary && p.charts.reachSummary.length > 0 ? (
                 <div className="rounded-xl border border-gray-200 p-4">
                   <p className="mb-3 text-xs font-semibold text-gray-500">
