@@ -5,10 +5,8 @@ import { cn } from "@/lib/utils";
 import type {
   PlannerReportExportPayload,
   PlannerExportChartDatum,
-  PlannerExportMediaRow,
 } from "@/lib/planner-report-export/types";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
-import { MediaDetailCard } from "@/components/document/media-detail-card";
 import { plannerChartColor } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import {
@@ -16,63 +14,15 @@ import {
   DocumentGradientHero,
   DocumentSectionHeading,
 } from "@/components/document/document-layout";
-import type { DocumentMediaDetail } from "@/lib/document-media-detail";
 import { ReportScanLine } from "@/components/planner/report-scan-text";
+import { ReportMediaLineupSection } from "@/components/planner/report-media-lineup-section";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
  * "화면에서 보는 것 = 내려받는 것" 을 보장하기 위한 단일 표현 컴포넌트.
  * 라이트 테마 고정(제안서 문서), 표는 가로 스크롤 래퍼로 모바일 넘침 방지.
+ * 매체 구성 섹션 뷰모드(피드/카드/컴팩트)는 화면 전용 — PDF/PPT는 상세 카드 고정.
  */
-
-function exportRowToDetail(
-  row: PlannerExportMediaRow,
-  index: number,
-): DocumentMediaDetail {
-  const mediaId = row.id;
-  return {
-    id: mediaId ?? `row-${index}`,
-    name: row.name,
-    location: row.location,
-    thumbUrl: row.thumbUrl,
-    categoryLabel: row.categoryLabel,
-    size: row.size,
-    operatingHours: row.operatingHours,
-    dailyTraffic: row.dailyTraffic,
-    broadcastLabel: row.broadcastLabel,
-    monthlyPriceLabel: row.monthlyPriceLabel ?? row.priceLabel,
-    lineTotalLabel: row.lineTotalLabel,
-    recommendReason: row.recommendReason,
-    exposureContributionPct: row.exposureContributionPct,
-    budgetContributionPct: row.budgetContributionPct,
-  };
-}
-
-function MediaLineupCard({
-  row,
-  index,
-  isKo,
-  portfolioSize,
-}: {
-  row: PlannerExportMediaRow;
-  index: number;
-  isKo: boolean;
-  portfolioSize: number;
-}) {
-  const mediaId = row.id;
-  const hasMediaLink = Boolean(mediaId && !String(mediaId).startsWith("row-"));
-  const detail = exportRowToDetail(row, index);
-  return (
-    <MediaDetailCard
-      detail={detail}
-      isKo={isKo}
-      showContribution
-      largeThumb
-      portfolioSize={portfolioSize}
-      mediaPageHref={hasMediaLink ? `/media/${mediaId}` : undefined}
-    />
-  );
-}
 
 function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
@@ -471,57 +421,7 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
-        {/* 선택 매체 구성 */}
-        <section className="space-y-4 py-2">
-          <DocumentSectionHeading>{isKo ? "매체 구성" : "Media lineup"}</DocumentSectionHeading>
-          {p.portfolio.length === 0 ? (
-            <p className="rounded-xl border border-gray-200 bg-[#F8F9FC] px-4 py-8 text-center text-sm text-gray-500">
-              {isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected."}
-            </p>
-          ) : p.portfolioGroups?.length ? (
-            <div className="space-y-8">
-              {p.portfolioGroups.map((group) => (
-                <div key={group.regionLabel} className="space-y-4">
-                  <h4 className="border-b border-violet-100 pb-2 text-base font-bold text-gray-900">
-                    {group.regionLabel}
-                  </h4>
-                  {group.categories.map((cat) => (
-                    <div key={`${group.regionLabel}-${cat.categoryLabel}`} className="space-y-3">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600">
-                        {cat.categoryLabel}
-                      </p>
-                      <ul className="space-y-4">
-                        {cat.items.map((row, i) => (
-                          <li key={row.id ?? `${group.regionLabel}-${cat.categoryLabel}-${i}`}>
-                            <MediaLineupCard
-                              row={row}
-                              index={i}
-                              isKo={isKo}
-                              portfolioSize={p.portfolio.length}
-                            />
-                          </li>
-                        ))}
-                      </ul>
-                    </div>
-                  ))}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <ul className="space-y-4">
-              {p.portfolio.map((m, i) => (
-                <li key={m.id ?? `row-${i}`}>
-                  <MediaLineupCard
-                    row={m}
-                    index={i}
-                    isKo={isKo}
-                    portfolioSize={p.portfolio.length}
-                  />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
+        <ReportMediaLineupSection payload={p} />
 
         {/* 디지털 예산 배분 */}
         {p.digital && p.digital.length ? (

@@ -109,7 +109,7 @@ export function MediaDetailCard({
         className={cn(
           // 고정 4:3 비율 박스 — 폭만 반응형, 세로 늘어남 불가
           "relative aspect-[4/3] shrink-0 self-start overflow-hidden rounded-xl shadow-sm",
-          compact ? "w-24 sm:w-28" : largeThumb ? "w-40 sm:w-52" : "w-28 sm:w-40",
+          compact ? "w-24 sm:w-28" : largeThumb ? "w-48 sm:w-64" : "w-28 sm:w-40",
         )}
         style={{ background: LIGHT.bgAlt }}
       >
