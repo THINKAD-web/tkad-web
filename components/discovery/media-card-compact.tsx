@@ -10,7 +10,7 @@ import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { MapDetailQuickActions } from "@/components/media-map/media-map-detail-sheet";
+import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
@@ -452,15 +452,28 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
         </div>
 
-        <div className="mt-2 flex items-stretch gap-1.5">
-          <MapDetailQuickActions
-            item={item}
-            inCompare={inCompare}
-            onToggleCompare={onToggleCompare}
-            size="compact"
-            className="mt-0 min-w-0 flex-1"
-          />
-        </div>
+        <DiscoveryMediaCardActions
+          mediaId={item.id}
+          planItem={planCartItemFromCatalog(
+            {
+              id: item.id,
+              name: item.name,
+              type: item.type,
+              region: item.region,
+              price: item.price,
+              thumbnailUrl: item.image ?? undefined,
+            },
+            "map",
+          )}
+          detailHref={`/media/${item.id}`}
+          isKo={isKo}
+          inCompare={inCompare}
+          onToggleCompare={onToggleCompare}
+          addedFrom="map"
+          size="compact"
+          className="mt-2"
+          stopPropagation
+        />
       </div>
     </li>
   );

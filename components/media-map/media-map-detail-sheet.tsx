@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
-import { X, ExternalLink, MessageCircle } from "lucide-react";
+import { X } from "lucide-react";
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
@@ -12,9 +12,7 @@ import { buildMapItemMetrics } from "@/lib/media-map/map-item-metrics";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import { mapMapItemToHomeCatalog, catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { mediaCardStaticHandlers } from "@/lib/media-card-static-handlers";
-import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS } from "@/components/floating-selection-bar";
@@ -103,74 +101,49 @@ function CloseButton({
   );
 }
 
+function mapItemPlanCart(item: MapMapItem) {
+  return planCartItemFromCatalog(
+    {
+      id: item.id,
+      name: item.name,
+      type: item.type,
+      region: item.region,
+      price: item.price,
+      thumbnailUrl: item.image ?? undefined,
+    },
+    "map",
+  );
+}
+
+/** @deprecated Use `DiscoveryMediaCardActions` */
 export function MapDetailQuickActions({
   item,
   inCompare,
   onToggleCompare,
   size = "compact",
   className,
+  isKo = true,
 }: {
   item: MapMapItem;
   inCompare?: boolean;
   onToggleCompare?: () => void;
   size?: "compact" | "comfortable";
   className?: string;
+  isKo?: boolean;
 }) {
-  const btnClass =
-    size === "comfortable"
-      ? "min-w-0 flex-1 !h-9 !rounded-lg !px-2 !text-xs"
-      : "min-w-0 flex-1 !h-8 !px-1 !text-[10px]";
-
   return (
-    <div
-      className={cn(
-        "flex items-stretch gap-1.5",
-        size === "comfortable" ? "mt-3" : "mt-2",
-        className,
-      )}
-    >
-      <PlanCartAddButton
-        item={planCartItemFromCatalog(
-          {
-            id: item.id,
-            name: item.name,
-            type: item.type,
-            region: item.region,
-            price: item.price,
-            thumbnailUrl: item.image ?? undefined,
-          },
-          "search",
-        )}
-        addedFrom="search"
-        compact
-        gridInline
-        className={btnClass}
-      />
-      {onToggleCompare ? (
-        <MediaCompareSelectButton
-          selected={inCompare ?? false}
-          onToggle={onToggleCompare}
-          gridInline
-          className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
-        />
-      ) : null}
-      <MediaCartAddButton
-        item={planCartItemFromCatalog(
-          {
-            id: item.id,
-            name: item.name,
-            type: item.type,
-            region: item.region,
-            price: item.price,
-            thumbnailUrl: item.image ?? undefined,
-          },
-          "map",
-        )}
-        addedFrom="map"
-        gridInline
-        className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
-      />
-    </div>
+    <DiscoveryMediaCardActions
+      mediaId={item.id}
+      planItem={mapItemPlanCart(item)}
+      detailHref={`/media/${item.id}`}
+      isKo={isKo}
+      inCompare={inCompare}
+      onToggleCompare={onToggleCompare}
+      addedFrom="map"
+      size={size}
+      className={className}
+      stopPropagation
+    />
   );
 }
 
@@ -249,31 +222,19 @@ function MediaMapDetailBody({
     };
   }, [item.id, isKo, showAvailability]);
 
-  const linkRow = (comfortable = false) => (
-    <div className={cn("grid grid-cols-2 gap-2", comfortable ? "mt-4" : "mt-3")}>
-      <Link
-        href={href}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cn(
-          "inline-flex items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white text-sm font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12",
-          comfortable ? "min-h-10 px-3 py-2" : "px-3 py-2.5",
-        )}
-      >
-        {isKo ? "상세 보기" : "Details"}
-        <ExternalLink className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      </Link>
-      <Link
-        href={`/contact?media=${encodeURIComponent(item.id)}`}
-        className={cn(
-          "tkad-media-map-sheet-cta inline-flex items-center justify-center gap-1.5 rounded-xl border border-violet-700/30 bg-violet-700 text-sm font-semibold text-white shadow-sm shadow-violet-900/25 transition-colors hover:bg-violet-800",
-          comfortable ? "min-h-10 px-3 py-2" : "min-h-11 px-3 py-2.5 font-bold",
-        )}
-      >
-        <MessageCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-        {isKo ? "문의하기" : "Contact"}
-      </Link>
-    </div>
+  const mapActions = (
+    <DiscoveryMediaCardActions
+      mediaId={item.id}
+      planItem={mapItemPlanCart(item)}
+      detailHref={href}
+      isKo={isKo}
+      inCompare={inCompare}
+      onToggleCompare={onToggleCompare}
+      addedFrom="map"
+      size={variant === "sheet" ? "comfortable" : "compact"}
+      className={variant === "dock" || variant === "bottom-sheet" ? "mt-2" : undefined}
+      stopPropagation={variant === "dock" || variant === "bottom-sheet"}
+    />
   );
 
   if (variant === "bottom-sheet") {
@@ -315,30 +276,7 @@ function MediaMapDetailBody({
             </div>
           </div>
         </Link>
-        <MapDetailQuickActions
-          item={item}
-          inCompare={inCompare}
-          onToggleCompare={onToggleCompare}
-          size="compact"
-        />
-        <div className="mt-2 grid grid-cols-2 gap-1.5">
-          <Link
-            href={href}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white text-xs font-semibold text-gray-800 transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:text-white dark:hover:bg-white/12"
-          >
-            {isKo ? "상세 보기" : "Details"}
-            <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
-          </Link>
-          <Link
-            href={`/contact?media=${encodeURIComponent(item.id)}`}
-            className="tkad-media-map-sheet-cta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 text-xs font-semibold text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800"
-          >
-            <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-            {isKo ? "문의하기" : "Contact"}
-          </Link>
-        </div>
+        {mapActions}
       </div>
     );
   }
@@ -362,12 +300,7 @@ function MediaMapDetailBody({
           showPlanButton={false}
           {...mediaCardStaticHandlers}
         />
-        <MapDetailQuickActions
-          item={item}
-          inCompare={inCompare}
-          onToggleCompare={onToggleCompare}
-        />
-        {linkRow()}
+        {mapActions}
       </div>
     );
   }
@@ -458,32 +391,7 @@ function MediaMapDetailBody({
             {availability.label}
           </p>
 
-          <MapDetailQuickActions
-            item={item}
-            inCompare={inCompare}
-            onToggleCompare={onToggleCompare}
-            size="compact"
-          />
-        </div>
-        <div className="shrink-0 border-t border-gray-200 px-3 py-2.5 dark:border-white/10">
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href={href}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="tkad-type-meta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-white font-semibold text-foreground transition-colors hover:bg-gray-50 dark:border-white/14 dark:bg-white/8 dark:hover:bg-white/12"
-            >
-              {isKo ? "상세 보기" : "Details"}
-              <ExternalLink className="h-3 w-3 shrink-0" aria-hidden />
-            </Link>
-            <Link
-              href={`/contact?media=${encodeURIComponent(item.id)}`}
-              className="tkad-media-map-sheet-cta inline-flex h-9 items-center justify-center gap-1 rounded-lg border border-violet-700/30 bg-violet-700 text-xs font-semibold text-white shadow-sm shadow-violet-900/20 transition-colors hover:bg-violet-800"
-            >
-              <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-              {isKo ? "문의하기" : "Contact"}
-            </Link>
-          </div>
+          {mapActions}
         </div>
       </>
     );
@@ -506,12 +414,7 @@ function MediaMapDetailBody({
         showPlanButton={false}
         {...mediaCardStaticHandlers}
       />
-      <MapDetailQuickActions
-        item={item}
-        inCompare={inCompare}
-        onToggleCompare={onToggleCompare}
-      />
-      {linkRow()}
+      {mapActions}
     </div>
   );
 }
