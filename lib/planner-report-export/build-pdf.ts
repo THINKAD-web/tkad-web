@@ -398,36 +398,70 @@ export async function buildPlannerReportPdf(
   if (
     ch &&
     ((ch.budgetSplit?.length ?? 0) > 0 ||
+      (ch.browseBudgetSplit?.length ?? 0) > 0 ||
       (ch.cpmBars?.length ?? 0) > 0 ||
       (ch.reachSummary?.length ?? 0) > 0)
   ) {
     sectionTitle(isKo ? "성과 요약" : "Performance summary");
 
-    if (ch.budgetSplit && ch.budgetSplit.length) {
+    const hasTypeBudget = (ch.budgetSplit?.length ?? 0) > 0;
+    const hasBrowseBudget = (ch.browseBudgetSplit?.length ?? 0) > 0;
+    if (hasTypeBudget || hasBrowseBudget) {
       ensure(46);
-      doc.setFontSize(8);
-      setText(GRAY_500);
-      doc.text(isKo ? "예산 배분" : "Budget allocation", M, y + 2);
-      const cx = M + 22;
-      const cy = y + 26;
-      drawDonut(cx, cy, 18, 10, ch.budgetSplit);
-      const total = ch.budgetSplit.reduce((s, d) => s + d.value, 0) || 1;
-      let ly = y + 12;
-      ch.budgetSplit.forEach((d, i) => {
-        const c = plannerChartColorRgb(d.colorKey, i);
-        doc.setFillColor(c[0]!, c[1]!, c[2]!);
-        doc.rect(M + 50, ly - 2.6, 3, 3, "F");
-        setText(GRAY_600);
-        doc.setFontSize(8.5);
-        const label = (doc.splitTextToSize(d.label, contentW - 75) as string[])[0] ?? d.label;
-        doc.text(
-          `${label}   ${formatPlannerSharePct(d.pct ?? (d.value / total) * 100)}`,
-          M + 55,
-          ly,
+      const halfW = contentW / 2 - 4;
+      const drawBudgetDonut = (
+        slices: NonNullable<typeof ch.budgetSplit>,
+        title: string,
+        colX: number,
+      ) => {
+        doc.setFontSize(8);
+        setText(GRAY_500);
+        doc.text(title, colX, y + 2);
+        const cx = colX + 18;
+        const cy = y + 24;
+        drawDonut(cx, cy, 15, 8, slices);
+        const total = slices.reduce((s, d) => s + d.value, 0) || 1;
+        let ly = y + 10;
+        slices.forEach((d, i) => {
+          const c = plannerChartColorRgb(d.colorKey, i);
+          doc.setFillColor(c[0]!, c[1]!, c[2]!);
+          doc.rect(colX + halfW * 0.42, ly - 2.6, 2.5, 2.5, "F");
+          setText(GRAY_600);
+          doc.setFontSize(7.5);
+          const label = (doc.splitTextToSize(d.label, halfW * 0.52) as string[])[0] ?? d.label;
+          doc.text(
+            `${label} ${formatPlannerSharePct(d.pct ?? (d.value / total) * 100)}`,
+            colX + halfW * 0.42 + 4,
+            ly,
+          );
+          ly += 5.5;
+        });
+      };
+      if (hasTypeBudget && hasBrowseBudget) {
+        drawBudgetDonut(
+          ch.budgetSplit!,
+          isKo ? "예산 배분 (유형별)" : "Budget by type",
+          M,
         );
-        ly += 6.5;
-      });
-      y += 50;
+        drawBudgetDonut(
+          ch.browseBudgetSplit!,
+          isKo ? "예산 배분 (카테고리별)" : "Budget by category",
+          M + contentW / 2,
+        );
+      } else if (hasTypeBudget) {
+        drawBudgetDonut(
+          ch.budgetSplit!,
+          isKo ? "예산 배분 (유형별)" : "Budget by type",
+          M,
+        );
+      } else if (hasBrowseBudget) {
+        drawBudgetDonut(
+          ch.browseBudgetSplit!,
+          isKo ? "예산 배분 (카테고리별)" : "Budget by category",
+          M,
+        );
+      }
+      y += 48;
     }
 
     if (ch.reachSummary && ch.reachSummary.length) {

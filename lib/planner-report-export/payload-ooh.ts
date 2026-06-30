@@ -3,6 +3,8 @@ import type { PlannerMetrics } from "@/lib/planner-logic";
 import {
   computePortfolioReportMetrics,
   impressionShareByCategory,
+  budgetSplitByBrowseCategory,
+  impressionShareByBrowseCategory,
 } from "@/lib/planner-logic";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
@@ -109,12 +111,21 @@ export function buildOohReportPayload(
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
+  const browseBudgetSlices = budgetSplitByBrowseCategory(a.portfolio);
   const charts: PlannerExportCharts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
       .map((s) => ({
         label: s.label,
         value: s.valueWon,
+        colorKey: s.key,
+        pct: s.pct,
+      })),
+    browseBudgetSplit: browseBudgetSlices
+      .filter((s) => s.value > 0)
+      .map((s) => ({
+        label: isKo ? s.labelKo : s.labelEn,
+        value: s.value,
         colorKey: s.key,
         pct: s.pct,
       })),
@@ -150,6 +161,14 @@ export function buildOohReportPayload(
         : [],
     impressionSplit: usePortfolioReach
       ? impressionShareByCategory(a.portfolio).map((s) => ({
+          label: isKo ? s.labelKo : s.labelEn,
+          value: s.value,
+          colorKey: s.key,
+          pct: s.pct,
+        }))
+      : [],
+    browseImpressionSplit: usePortfolioReach
+      ? impressionShareByBrowseCategory(a.portfolio).map((s) => ({
           label: isKo ? s.labelKo : s.labelEn,
           value: s.value,
           colorKey: s.key,

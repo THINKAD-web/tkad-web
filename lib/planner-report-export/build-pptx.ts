@@ -256,14 +256,18 @@ export async function buildPlannerReportPptx(
   if (
     ch &&
     ((ch.budgetSplit?.length ?? 0) > 0 ||
+      (ch.browseBudgetSplit?.length ?? 0) > 0 ||
       (ch.cpmBars?.length ?? 0) > 0 ||
       (ch.reachSummary?.length ?? 0) > 0)
   ) {
     const sc = pptx.addSlide();
     header(sc, isKo ? "성과 요약" : "Performance summary");
 
-    if (ch.budgetSplit && ch.budgetSplit.length) {
-      sc.addText(isKo ? "예산 배분" : "Budget allocation", {
+    const hasTypeBudget = (ch.budgetSplit?.length ?? 0) > 0;
+    const hasBrowseBudget = (ch.browseBudgetSplit?.length ?? 0) > 0;
+    let budgetBlockBottom = 1.15;
+    if (hasTypeBudget) {
+      sc.addText(isKo ? "예산 배분 (유형별)" : "Budget by type", {
         x: 0.6,
         y: 1.15,
         w: 6,
@@ -273,16 +277,47 @@ export async function buildPlannerReportPptx(
         color: GRAY,
         bold: true,
       });
-      addBudgetSplitShapes(sc, pptx, 0.6, 1.15, 5.8, ch.budgetSplit, face, isKo);
+      budgetBlockBottom = Math.max(
+        budgetBlockBottom,
+        addBudgetSplitShapes(sc, pptx, 0.6, 1.15, 5.8, ch.budgetSplit!, face, isKo),
+      );
+    }
+    if (hasBrowseBudget) {
+      sc.addText(isKo ? "예산 배분 (카테고리별)" : "Budget by category", {
+        x: hasTypeBudget ? 6.9 : 0.6,
+        y: 1.15,
+        w: 6,
+        h: 0.3,
+        fontFace: face,
+        fontSize: 12,
+        color: GRAY,
+        bold: true,
+      });
+      budgetBlockBottom = Math.max(
+        budgetBlockBottom,
+        addBudgetSplitShapes(
+          sc,
+          pptx,
+          hasTypeBudget ? 6.9 : 0.6,
+          1.15,
+          5.8,
+          ch.browseBudgetSplit!,
+          face,
+          isKo,
+        ),
+      );
     }
 
-    let rightY = 1.15;
+    const dualBudget = hasTypeBudget && hasBrowseBudget;
+    const barX = dualBudget ? 0.6 : 7.0;
+    const barW = dualBudget ? 12.1 : 5.9;
+    let rightY = dualBudget ? budgetBlockBottom + 0.15 : 1.15;
     if (ch.reachSummary?.length) {
       rightY = addShapeBarChart(sc, pptx, {
         title: isKo ? "노출 요약" : "Impressions",
-        x: 7.0,
+        x: barX,
         y: rightY,
-        w: 5.9,
+        w: barW,
         rows: ch.reachSummary,
         color: CYAN,
         face,
@@ -292,9 +327,9 @@ export async function buildPlannerReportPptx(
     if (ch.cpmBars?.length) {
       addShapeBarChart(sc, pptx, {
         title: isKo ? "CPM 비교 (원)" : "CPM (KRW)",
-        x: 7.0,
+        x: barX,
         y: ch.reachSummary?.length ? rightY + 0.15 : rightY,
-        w: 5.9,
+        w: barW,
         rows: ch.cpmBars,
         color: VIOLET,
         face,

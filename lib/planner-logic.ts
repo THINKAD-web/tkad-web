@@ -1,3 +1,4 @@
+import { getMainCategory } from "@/lib/media-browse-categories";
 import type { MediaItem } from "@/lib/media-data";
 import {
   catalogPriceFieldToPriceMan,
@@ -777,6 +778,132 @@ export function impressionShareByCategory(
       actualWon: imp,
       pct: sharePctOf(imp, total),
     }))
+    .filter((s) => s.value > 0)
+    .sort((a, b) => b.value - a.value);
+}
+
+const BROWSE_OTHER_KEY = "other";
+
+const BROWSE_CATEGORY_META: Record<
+  string,
+  { labelKo: string; labelEn: string }
+> = {
+  other: { labelKo: "기타", labelEn: "Other" },
+};
+
+function browseCategoryLabels(key: string): { labelKo: string; labelEn: string } {
+  if (BROWSE_CATEGORY_META[key]) return BROWSE_CATEGORY_META[key]!;
+  const main = getMainCategory(key);
+  if (!main) return { labelKo: key, labelEn: key };
+  return { labelKo: main.label, labelEn: main.labelEn ?? main.label };
+}
+
+/** 발견하기 메인 카테고리(mediaMainCategory) — 미입력·미등록은 기타 */
+export function plannerBrowseCategoryKey(m: MediaItem): string {
+  const raw = m.mediaMainCategory?.trim();
+  if (!raw || !getMainCategory(raw)) return BROWSE_OTHER_KEY;
+  return raw;
+}
+
+function groupPortfolioByBrowseCategory(
+  portfolio: readonly MediaItem[],
+): Map<string, MediaItem[]> {
+  const groups = new Map<string, MediaItem[]>();
+  for (const m of portfolio) {
+    const key = plannerBrowseCategoryKey(m);
+    const list = groups.get(key) ?? [];
+    list.push(m);
+    groups.set(key, list);
+  }
+  return groups;
+}
+
+function budgetSplitByGroupedKeys(
+  portfolio: MediaItem[],
+  keyOf: (m: MediaItem) => string,
+  labelsOf: (key: string) => { labelKo: string; labelEn: string },
+): BudgetPieSlice[] {
+  if (portfolio.length === 0) return [];
+
+  const positivePrices = portfolio
+    .map((m) => catalogPriceFieldToWon(m.price))
+    .filter((won) => won > 0);
+  const fallbackWon =
+    positivePrices.length > 0
+      ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
+      : 1;
+  const weightOf = (m: MediaItem): number => {
+    const won = catalogPriceFieldToWon(m.price);
+    return won > 0 ? won : fallbackWon;
+  };
+
+  const weightSums = new Map<string, number>();
+  const wonSums = new Map<string, number>();
+  for (const m of portfolio) {
+    const key = keyOf(m);
+    weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
+    wonSums.set(
+      key,
+      (wonSums.get(key) ?? 0) + catalogPriceFieldToWon(m.price),
+    );
+  }
+  const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
+  const totalActual = [...wonSums.values()].reduce((a, b) => a + b, 0);
+  const useActual = totalActual > 0;
+  const totalSegment = useActual ? totalActual : totalWeight;
+
+  return [...weightSums.entries()]
+    .map(([key, weight]) => {
+      const actualWon = wonSums.get(key) ?? 0;
+      const segmentValue = useActual ? actualWon : weight;
+      const labels = labelsOf(key);
+      return {
+        key,
+        labelKo: labels.labelKo,
+        labelEn: labels.labelEn,
+        value: segmentValue,
+        actualWon,
+        pct: sharePctOf(segmentValue, totalSegment),
+      };
+    })
+    .filter((s) => s.value > 0)
+    .sort((a, b) => b.value - a.value);
+}
+
+/** 발견하기 카테고리별 예산 배분 — catalog 유형 축과 별도 */
+export function budgetSplitByBrowseCategory(
+  portfolio: MediaItem[],
+): BudgetPieSlice[] {
+  return budgetSplitByGroupedKeys(
+    portfolio,
+    plannerBrowseCategoryKey,
+    browseCategoryLabels,
+  );
+}
+
+/** 발견하기 카테고리별 월 노출 비중 */
+export function impressionShareByBrowseCategory(
+  portfolio: MediaItem[],
+): BudgetPieSlice[] {
+  if (portfolio.length === 0) return [];
+  const impSums = new Map<string, number>();
+  for (const [key, list] of groupPortfolioByBrowseCategory(portfolio)) {
+    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m), 0);
+    impSums.set(key, imp);
+  }
+  const total = [...impSums.values()].reduce((a, b) => a + b, 0) || 1;
+  return [...impSums.entries()]
+    .map(([key, imp]) => {
+      const labels = browseCategoryLabels(key);
+      return {
+        key,
+        labelKo: labels.labelKo,
+        labelEn: labels.labelEn,
+        value: imp,
+        actualWon: imp,
+        pct: sharePctOf(imp, total),
+      };
+    })
     .filter((s) => s.value > 0)
     .sort((a, b) => b.value - a.value);
 }
