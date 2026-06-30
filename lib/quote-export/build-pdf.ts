@@ -9,6 +9,7 @@ import {
 } from "@/lib/export-media-images";
 import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
 const VIOLET = [124, 58, 237] as const;
 const VIOLET_DK = [76, 29, 149] as const;
@@ -167,7 +168,6 @@ function basicDrawQuoteMediaCards(
   let y = yStart;
   const thumbW = QUOTE_BASIC_THUMB_MM.w;
   const thumbH = QUOTE_BASIC_THUMB_MM.h;
-  const cardH = 20;
   const gap = 1.5;
 
   if (p.lines.length === 0) {
@@ -178,6 +178,9 @@ function basicDrawQuoteMediaCards(
   }
 
   for (const line of p.lines) {
+    const isAddon = isQuoteAddonLineId(line.mediaId);
+    const cardH = 20;
+
     if (y + cardH > pageH - 30) {
       doc.addPage();
       y = M;
@@ -186,14 +189,51 @@ function basicDrawQuoteMediaCards(
     doc.setFillColor(255, 255, 255);
     doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
     doc.setLineWidth(0.2);
-    doc.roundedRect(x, y, w, cardH, 2, 2, "FD");
+    if (isAddon) {
+      doc.setLineDashPattern([1.2, 1.2], 0);
+    }
+    doc.roundedRect(x, y, w, cardH, 2, 2, isAddon ? "D" : "FD");
+    if (isAddon) {
+      doc.setLineDashPattern([], 0);
+    }
+
+    const priceX = x + w - 3;
+    const textX = x + 2 + thumbW + 3;
+    const textW = w - thumbW - 38;
+    const unitVal = formatDocumentManWon(line.unitPriceWon, isKo);
+    const subVal = formatDocumentManWon(line.lineSupplyWon, isKo);
+
+    if (isAddon) {
+      doc.setFont(font, "normal");
+      doc.setFontSize(10);
+      doc.setTextColor(INK[0], INK[1], INK[2]);
+      doc.text(
+        (doc.splitTextToSize(line.name, textW) as string[]).slice(0, 1),
+        textX,
+        y + 10,
+      );
+      doc.setFontSize(6);
+      doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+      doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
+      doc.setFontSize(8.5);
+      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.text(unitVal, priceX, y + 11, { align: "right" });
+      doc.setFontSize(6);
+      doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
+      doc.text(isKo ? "소계" : "Sub", priceX, y + 14.5, { align: "right" });
+      doc.setFontSize(9.5);
+      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.text(subVal, priceX, y + 18.5, { align: "right" });
+      y += cardH + gap;
+      continue;
+    }
 
     const thumb = line.thumbUrl ? thumbs.get(line.thumbUrl) : undefined;
-    drawPdfThumbOrPlaceholder(doc, thumb, x + 2, y + 1.5, thumbW, thumbH, isKo);
-
-    const textX = x + 2 + thumbW + 3;
-    const priceX = x + w - 3;
-    const textW = w - thumbW - 38;
+    if (thumb) {
+      drawPdfThumbOrPlaceholder(doc, thumb, x + 2, y + 1.5, thumbW, thumbH, isKo);
+    } else {
+      drawPdfThumbOrPlaceholder(doc, undefined, x + 2, y + 1.5, thumbW, thumbH, isKo);
+    }
 
     doc.setFont(font, "normal");
     doc.setFontSize(10);
@@ -204,7 +244,7 @@ function basicDrawQuoteMediaCards(
       y + 5.5,
     );
 
-    if (line.location?.trim()) {
+    if (line.location?.trim() && line.location !== "—") {
       doc.setFontSize(7);
       doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
       doc.text(
@@ -249,8 +289,6 @@ function basicDrawQuoteMediaCards(
       );
     }
 
-    const unitVal = formatDocumentManWon(line.unitPriceWon, isKo);
-    const subVal = formatDocumentManWon(line.lineSupplyWon, isKo);
     doc.setFontSize(6);
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
     doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
@@ -504,7 +542,7 @@ function basicDrawQuoteHero(
   doc.text(`No. ${p.quoteNo}`, pageW - M, 38, { align: "right" });
   doc.text(`${p.isKo ? "유효" : "Valid"} ${p.validUntil}`, pageW - M, 43, { align: "right" });
 
-  return BASIC_HERO_H + 4;
+  return BASIC_HERO_H + 2;
 }
 
 function basicDrawSummaryStrip(
@@ -529,9 +567,10 @@ function basicDrawSummaryStrip(
     p.clientPhone?.trim() ||
     (isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772");
 
-  doc.setFillColor(VIOLET_50[0], VIOLET_50[1], VIOLET_50[2]);
-  doc.rect(0, y, pageW, boxH + 6, "F");
-  y += 3;
+  y += 5;
+  doc.setFillColor(255, 255, 255);
+  doc.rect(0, y, pageW, boxH + 10, "F");
+  y += 4;
 
   for (let i = 0; i < 3; i++) {
     const x = M + i * (colW + gap);
@@ -551,16 +590,13 @@ function basicDrawSummaryStrip(
       doc.text(
         (doc.splitTextToSize(totalVal, colW - 6) as string[]).slice(0, 1),
         x + 3,
-        y + 15,
+        y + 14,
       );
     } else if (i === 1) {
       doc.setTextColor(INK[0], INK[1], INK[2]);
       doc.setFontSize(9);
       const vLines = doc.splitTextToSize(validityVal, colW - 6) as string[];
       doc.text(vLines.slice(0, 2), x + 3, y + 13);
-      doc.setFontSize(7);
-      doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-      doc.text(`No. ${p.quoteNo}`, x + 3, y + 19);
     } else {
       doc.setTextColor(INK[0], INK[1], INK[2]);
       doc.setFontSize(9);
@@ -569,12 +605,12 @@ function basicDrawSummaryStrip(
       if (p.clientName?.trim()) {
         doc.setFontSize(7);
         doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
-        doc.text(isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772", x + 3, y + 19);
+        doc.text(isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772", x + 3, y + 18);
       }
     }
   }
 
-  return y + boxH + 5;
+  return y + boxH + 4;
 }
 
 function basicFieldLabel(
@@ -602,10 +638,10 @@ function basicDrawClientSection(
   const boxH = 15;
 
   y = basicSectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
-  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
+  doc.setFillColor(255, 255, 255);
   doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
   doc.setLineWidth(0.2);
-  doc.roundedRect(M, y, contentW, boxH, 2, 2, "FD");
+  doc.roundedRect(M, y, contentW, boxH, 2, 2, "D");
 
   const colW = contentW / 2;
   basicFieldLabel(doc, font, isKo ? "회사" : "Company", M + 4, y + 6);
@@ -640,24 +676,16 @@ function basicDrawCampaignSection(
   font: string,
   p: QuoteExportPayload,
   y: number,
-  pageW: number,
 ): number {
   const isKo = p.isKo;
-  const contentW = pageW - M * 2;
-  const boxH = 11;
 
   y = basicSectionTitle(doc, font, isKo ? "캠페인 요약" : "Campaign", y);
-  doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
-  doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
-  doc.setLineWidth(0.2);
-  doc.roundedRect(M, y, contentW, boxH, 2, 2, "FD");
-
-  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M + 4, y + 5);
+  basicFieldLabel(doc, font, isKo ? "집행 기간" : "Period", M, y + 4);
   doc.setTextColor(INK[0], INK[1], INK[2]);
-  doc.setFontSize(10);
-  doc.text(p.periodLabel, M + 4, y + 9.5);
+  doc.setFontSize(11);
+  doc.text(p.periodLabel, M + 22, y + 4);
 
-  return y + boxH + 5;
+  return y + 9;
 }
 
 function basicDrawMediaTable(
@@ -767,8 +795,10 @@ function basicDrawTotals(
     y = M;
   }
 
-  const boxX = x + w * 0.32;
-  const boxW = w - w * 0.32;
+  const boxX = x;
+  const boxW = w;
+  const labelX = boxX + 4;
+  const valX = boxX + boxW - 4;
   const rows: Array<[string, string, boolean]> = [];
   const linesSubtotal = p.linesSubtotalWon ?? 0;
   const discountTotal = p.discountTotalWon ?? 0;
@@ -798,22 +828,20 @@ function basicDrawTotals(
     if (accent) {
       doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
       doc.roundedRect(boxX, ry, boxW, 12, 2, 2, "F");
-      doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
-      doc.roundedRect(boxX + boxW - 12, ry, 12, 12, 2, 2, "F");
       doc.setTextColor(235, 230, 255);
       doc.setFontSize(7.5);
-      doc.text(label, boxX + 4, ry + 7.5);
+      doc.text(label, labelX, ry + 7.5);
       doc.setTextColor(255, 255, 255);
       doc.setFontSize(12);
-      doc.text(val, boxX + boxW - 16, ry + 8, { align: "right" });
+      doc.text(val, valX, ry + 8, { align: "right" });
       ry += 14;
     } else {
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
       doc.setFontSize(7.5);
-      doc.text(label.toUpperCase(), boxX + 4, ry + 5.5);
+      doc.text(label.toUpperCase(), labelX, ry + 5.5);
       doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
       doc.setFontSize(10.5);
-      doc.text(val, boxX + boxW - 4, ry + 5, { align: "right" });
+      doc.text(val, valX, ry + 5, { align: "right" });
       ry += 8;
     }
   });
@@ -825,12 +853,11 @@ function basicDrawFooter(
   font: string,
   p: QuoteExportPayload,
   pageW: number,
-  pageH: number,
   y: number,
 ) {
   const isKo = p.isKo;
   const contentW = pageW - M * 2;
-  const footerTop = Math.max(y + 8, pageH - 42);
+  const footerTop = y + 4;
 
   doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
   doc.setLineWidth(0.3);
@@ -873,16 +900,17 @@ async function buildBasic(doc: jsPDF, font: string, p: QuoteExportPayload, thumb
   let y = basicDrawQuoteHero(doc, font, p, pageW);
   y = basicDrawSummaryStrip(doc, font, p, pageW, y);
   y = basicDrawClientSection(doc, font, p, y, pageW);
-  y = basicDrawCampaignSection(doc, font, p, y, pageW);
+  y = basicDrawCampaignSection(doc, font, p, y);
   y = basicSectionTitle(doc, font, isKo ? "매체 내역" : "Media lineup", y);
   y = basicDrawMediaList(doc, font, p, M, y, contentW, pageH, thumbs);
-  y += 4;
+  y += 2;
   y = basicSectionTitle(doc, font, isKo ? "합계" : "Total", y);
   y = basicDrawTotals(doc, font, p, M, y, contentW, pageH);
 
-  await drawStamp(doc, font, p, pageW - M - 14, pageH - 28);
+  const footerY = y + 4;
+  await drawStamp(doc, font, p, pageW - M - 14, footerY + 18);
 
-  basicDrawFooter(doc, font, p, pageW, pageH, y);
+  basicDrawFooter(doc, font, p, pageW, y);
 }
 
 /** ── 프리미엄: P1 다크 제안 · P2 공식 견적(라이트) ── */

@@ -3,6 +3,7 @@
 import { Clock, MapPin, Radio, Ruler, Users } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { DocumentMediaDetail } from "@/lib/document-media-detail";
+import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
 type SpecItem = {
   key: string;
@@ -12,14 +13,60 @@ type SpecItem = {
   tone?: "cyan" | "default";
 };
 
-type Props = {
+type CardProps = {
   detail: DocumentMediaDetail;
   isKo?: boolean;
   className?: string;
 };
 
+/** 부가비용·제작비 — 매체 카드와 좌우·가격 컬럼 정렬 일치 */
+export function QuoteAddonLineRow({ detail, isKo = true, className }: CardProps) {
+  return (
+    <article
+      className={cn(
+        "flex gap-3 overflow-hidden rounded-xl border border-dashed border-gray-200 bg-white p-3 shadow-sm",
+        className,
+      )}
+    >
+      <div className="w-[7.5rem] shrink-0 sm:w-32" aria-hidden />
+      <h4 className="min-w-0 flex-1 self-center text-[13px] font-semibold leading-snug text-gray-900">
+        {detail.name}
+      </h4>
+      {(detail.monthlyPriceLabel || detail.lineTotalLabel) && (
+        <div className="flex shrink-0 flex-col justify-center gap-1.5 border-l border-gray-100 pl-3 text-right">
+          {detail.monthlyPriceLabel ? (
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                {isKo ? "단가" : "Unit"}
+              </p>
+              <p className="text-[12px] font-bold tabular-nums text-violet-700">
+                {detail.monthlyPriceLabel}
+              </p>
+            </div>
+          ) : null}
+          {detail.lineTotalLabel ? (
+            <div>
+              <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
+                {isKo ? "소계" : "Subtotal"}
+              </p>
+              <p className="text-[13px] font-extrabold tabular-nums text-violet-700">
+                {detail.lineTotalLabel}
+              </p>
+            </div>
+          ) : null}
+        </div>
+      )}
+    </article>
+  );
+}
+
+/** admin 커스텀 라인(제작비 등) — 매체 카드와 구분 */
+export function isQuoteAddonRow(row: { id: string }): boolean {
+  return isQuoteAddonLineId(row.id);
+}
+
 /** 견적서(default) 매체 라인 — 플래너 카드 톤, 분석 지표 없이 단가·소계 중심 */
-export function QuoteMediaLineCard({ detail, isKo = true, className }: Props) {
+export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps) {
   const specs: SpecItem[] = [];
   if (detail.categoryLabel) {
     specs.push({
@@ -63,6 +110,8 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: Props) {
     });
   }
 
+  const showThumb = Boolean(detail.thumbUrl?.trim());
+
   return (
     <article
       className={cn(
@@ -70,11 +119,11 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: Props) {
         className,
       )}
     >
-      <div
-        className="relative aspect-[4/3] w-[7.5rem] shrink-0 self-start overflow-hidden rounded-lg shadow-sm sm:w-32"
-        style={{ background: "#F8F9FC" }}
-      >
-        {detail.thumbUrl ? (
+      {showThumb ? (
+        <div
+          className="relative aspect-[4/3] w-[7.5rem] shrink-0 self-start overflow-hidden rounded-lg shadow-sm sm:w-32"
+          style={{ background: "#F8F9FC" }}
+        >
           <div
             aria-hidden
             className="absolute inset-0"
@@ -85,12 +134,8 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: Props) {
               backgroundRepeat: "no-repeat",
             }}
           />
-        ) : (
-          <div className="flex h-full w-full items-center justify-center px-1 text-center text-[9px] font-medium uppercase tracking-wide text-gray-400">
-            {isKo ? "이미지 없음" : "No image"}
-          </div>
-        )}
-      </div>
+        </div>
+      ) : null}
 
       <div className="min-w-0 flex-1 py-0.5">
         <h4 className="text-[13px] font-bold leading-snug tracking-tight text-gray-900">
@@ -114,7 +159,12 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: Props) {
               >
                 <s.icon className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
                 <span className="text-gray-400">{s.label}</span>
-                <span className={cn("font-medium", s.tone === "cyan" ? "text-cyan-700" : "text-gray-700")}>
+                <span
+                  className={cn(
+                    "font-medium",
+                    s.tone === "cyan" ? "text-cyan-700" : "text-gray-700",
+                  )}
+                >
                   {s.value}
                 </span>
               </li>

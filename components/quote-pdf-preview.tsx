@@ -6,7 +6,7 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
 import { formatDocumentManWon } from "@/lib/document-text";
-import { QuoteMediaLineCard } from "@/components/document/quote-media-line-card";
+import { QuoteMediaLineCard, QuoteAddonLineRow, isQuoteAddonRow } from "@/components/document/quote-media-line-card";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import {
   documentCardClass,
@@ -80,14 +80,12 @@ function QuoteSummaryStrip({
   isKo,
   grandTotalWon,
   validityText,
-  quoteNo,
   contactName,
   contactPhone,
 }: {
   isKo: boolean;
   grandTotalWon: number;
   validityText: string;
-  quoteNo?: string;
   contactName: string;
   contactPhone: string;
 }) {
@@ -99,7 +97,7 @@ function QuoteSummaryStrip({
 
   return (
     <div
-      className="border-b border-violet-100/80 bg-gradient-to-r from-violet-50 via-white to-cyan-50/60 px-5 py-4 sm:px-7"
+      className="border-b border-gray-100 bg-white px-5 pt-6 pb-4 sm:px-7"
       data-quote-summary-strip
     >
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
@@ -116,11 +114,6 @@ function QuoteSummaryStrip({
             {isKo ? "유효기간" : "Valid until"}
           </p>
           <p className="mt-1 text-sm font-bold leading-snug text-gray-900">{validityText}</p>
-          {quoteNo ? (
-            <p className="mt-1.5 text-[11px] font-medium tabular-nums text-violet-600">
-              {isKo ? "견적번호" : "Quote No."} {quoteNo}
-            </p>
-          ) : null}
         </div>
         <div className="rounded-xl border border-gray-200/80 bg-white/80 px-4 py-3.5">
           <p className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
@@ -131,6 +124,80 @@ function QuoteSummaryStrip({
             <p className="mt-1 text-[11px] text-gray-500">{thinkadContact}</p>
           ) : null}
         </div>
+      </div>
+    </div>
+  );
+}
+
+function QuoteDefaultTotalsPanel({
+  isKo,
+  subtotalWon,
+  vatWon,
+  grandTotalWon,
+  linesSubtotalWon,
+  discountTotalWon,
+  discountSummary,
+  showDiscountBreakdown,
+  supplyLabel,
+  vatLabel,
+}: {
+  isKo: boolean;
+  subtotalWon: number;
+  vatWon: number;
+  grandTotalWon: number;
+  linesSubtotalWon?: number;
+  discountTotalWon?: number;
+  discountSummary?: string;
+  showDiscountBreakdown: boolean;
+  supplyLabel: string;
+  vatLabel: string;
+}) {
+  return (
+    <div className="w-full space-y-1.5 rounded-xl border border-gray-200/50 bg-white p-4 text-[15px]">
+      {showDiscountBreakdown && linesSubtotalWon != null && linesSubtotalWon > 0 ? (
+        <div className="flex justify-between gap-6">
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+            {isKo ? "소계" : "Subtotal"}
+          </span>
+          <span className="font-bold tabular-nums text-violet-700">
+            {formatDocumentManWon(linesSubtotalWon, isKo)}
+          </span>
+        </div>
+      ) : null}
+      {showDiscountBreakdown && (discountTotalWon ?? 0) > 0 ? (
+        <div className="flex justify-between gap-6 text-red-700">
+          <span className="text-[11px] font-semibold uppercase tracking-wide">
+            {discountSummary ?? (isKo ? "할인" : "Discount")}
+          </span>
+          <span className="font-bold tabular-nums">
+            −{formatDocumentManWon(discountTotalWon!, isKo)}
+          </span>
+        </div>
+      ) : null}
+      <div className="flex justify-between gap-6">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          {supplyLabel}
+        </span>
+        <span className="font-bold tabular-nums text-violet-700">
+          {formatDocumentManWon(subtotalWon, isKo)}
+        </span>
+      </div>
+      <div className="flex justify-between gap-6">
+        <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
+          {vatLabel}
+        </span>
+        <span className="font-bold tabular-nums text-violet-700">
+          {formatDocumentManWon(vatWon, isKo)}
+        </span>
+      </div>
+      <div
+        className="flex items-center justify-between gap-6 rounded-lg px-4 py-3 text-base font-black text-white"
+        style={{
+          background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
+        }}
+      >
+        <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
+        <span className="tabular-nums">{formatDocumentManWon(grandTotalWon, isKo)}</span>
       </div>
     </div>
   );
@@ -308,7 +375,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         className={cn(
           documentCardClass,
           "quote-pdf-preview-doc box-border w-full min-w-0 antialiased",
-          "md:w-[210mm] md:max-w-[210mm] md:min-h-[297mm]",
+          "md:w-[210mm] md:max-w-[210mm]",
         )}
         data-quote-pdf-background="#ffffff"
         style={{
@@ -330,7 +397,6 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             isKo={isKo}
             grandTotalWon={grandTotalWon}
             validityText={validityText}
-            quoteNo={quoteNo}
             contactName={contactName}
             contactPhone={contactPhone}
           />
@@ -362,7 +428,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               className={cn(
                 "grid grid-cols-2 gap-x-6 gap-y-3 rounded-xl border p-3 sm:grid-cols-4",
                 isDefaultDoc
-                  ? "border-gray-200/90 bg-[#F8F9FC] shadow-sm"
+                  ? "border-gray-200/50 bg-white"
                   : "border-gray-200 bg-[#F8F9FC] p-4",
               )}
             >
@@ -437,36 +503,29 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
               <SectionHeading>{t("pdfCampaignSection")}</SectionHeading>
             </div>
-            <dl
-              className={cn(
-                "rounded-xl border p-3",
-                isDefaultDoc
-                  ? "border-gray-200/90 bg-[#F8F9FC] shadow-sm"
-                  : "grid grid-cols-2 gap-x-6 gap-y-4 border-gray-200 bg-[#F8F9FC] p-4",
-              )}
-            >
-              <div className="min-w-0">
-                {isDefaultDoc ? (
-                  <>
-                    <QuoteFieldLabel>{t("period")}</QuoteFieldLabel>
-                    <QuoteFieldValue emphasis>{periodLabel}</QuoteFieldValue>
-                  </>
-                ) : (
-                  <>
-                    <dt className="text-xs font-medium text-gray-500">{t("period")}</dt>
-                    <dd className="mt-0.5 text-sm font-semibold text-gray-900">{periodLabel}</dd>
-                  </>
-                )}
-              </div>
-              {!isDefaultDoc ? (
+            {isDefaultDoc ? (
+              <p className="flex flex-wrap items-baseline gap-x-2.5 gap-y-0.5">
+                <span className="text-[10px] font-semibold uppercase tracking-[0.14em] text-gray-400">
+                  {t("period")}
+                </span>
+                <span className="text-[15px] font-bold tracking-tight text-gray-900">
+                  {periodLabel}
+                </span>
+              </p>
+            ) : (
+              <dl className="grid grid-cols-2 gap-x-6 gap-y-4 rounded-xl border border-gray-200 bg-[#F8F9FC] p-4">
+                <div className="min-w-0">
+                  <dt className="text-xs font-medium text-gray-500">{t("period")}</dt>
+                  <dd className="mt-0.5 text-sm font-semibold text-gray-900">{periodLabel}</dd>
+                </div>
                 <div className="min-w-0">
                   <dt className="text-xs font-medium text-gray-500">
                     {isKo ? "금액 단위" : "Amount unit"}
                   </dt>
                   <dd className="mt-0.5 text-sm text-gray-600">{t("pdfAmountUnitNote")}</dd>
                 </div>
-              ) : null}
-            </dl>
+              </dl>
+            )}
           </section>
 
           <section
@@ -487,11 +546,15 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   const unitLabel = row.unitPeriodLabel
                     ? `${formatDocumentManWon(row.unitPriceWon, isKo)} / ${row.unitPeriodLabel}`
                     : formatDocumentManWon(row.unitPriceWon, isKo);
+                  const isAddon = isQuoteAddonRow(row);
                   const detail: DocumentMediaDetail = {
                     id: row.id,
                     name: row.name,
-                    location: row.location,
-                    thumbUrl: row.thumbUrl,
+                    location:
+                      isAddon || !row.location?.trim() || row.location === "—"
+                        ? undefined
+                        : row.location,
+                    thumbUrl: isAddon ? null : row.thumbUrl,
                     categoryLabel: row.categoryLabel ?? undefined,
                     size: row.size ?? undefined,
                     operatingHours: row.operatingHours ?? undefined,
@@ -503,7 +566,11 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   return (
                     <li key={row.id}>
                       {isDefaultDoc ? (
-                        <QuoteMediaLineCard detail={detail} isKo={isKo} />
+                        isAddon ? (
+                          <QuoteAddonLineRow detail={detail} isKo={isKo} />
+                        ) : (
+                          <QuoteMediaLineCard detail={detail} isKo={isKo} />
+                        )
                       ) : (
                         <MediaDetailCard detail={detail} isKo={isKo} compact />
                       )}
@@ -514,11 +581,24 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             )}
           </section>
 
-          <section className={cn(isDefaultDoc && "pb-2")}>
-            <div className={isDefaultDoc ? "mb-4" : "space-y-4 mb-0"}>
+          <section className={cn(isDefaultDoc && "pb-1")}>
+            <div className={isDefaultDoc ? "mb-2.5" : "space-y-4 mb-0"}>
               <SectionHeading>{t("pdfTotal")}</SectionHeading>
             </div>
-            {showDiscountBreakdown ? (
+            {isDefaultDoc ? (
+              <QuoteDefaultTotalsPanel
+                isKo={isKo}
+                subtotalWon={subtotalWon}
+                vatWon={vatWon}
+                grandTotalWon={grandTotalWon}
+                linesSubtotalWon={linesSubtotalWon}
+                discountTotalWon={discountTotalWon}
+                discountSummary={discountSummary}
+                showDiscountBreakdown={showDiscountBreakdown}
+                supplyLabel={t("pdfSupply")}
+                vatLabel={t("pdfVat")}
+              />
+            ) : showDiscountBreakdown ? (
               <div
                 className={cn(
                   "mx-auto max-w-md space-y-2 rounded-xl border p-4",
@@ -647,10 +727,10 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
 
           <footer
             className={cn(
-              "border-t pt-6",
+              "border-t pt-3",
               isDefaultDoc
-                ? "mt-7 border-gray-200 text-[11px] text-gray-500"
-                : "border-gray-100 text-[10px] text-gray-500",
+                ? "mt-3 border-gray-200 text-[11px] text-gray-500"
+                : "mt-7 border-gray-100 pt-6 text-[10px] text-gray-500",
             )}
           >
             {!isDefaultDoc ? <p>{validityText}</p> : null}
@@ -662,7 +742,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             {isDefaultDoc ? (
               <p className="text-xs leading-relaxed text-gray-500">{t("pdfFooterNote")}</p>
             ) : null}
-            <div className={cn("grid gap-6 sm:grid-cols-2", isDefaultDoc ? "mt-5" : "mt-6")}>
+            <div className={cn("grid gap-4 sm:grid-cols-2", isDefaultDoc ? "mt-3" : "mt-6")}>
               <div>
                 <p
                   className={cn(
@@ -672,9 +752,9 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 >
                   {t("pdfSignature")}
                 </p>
-                <div className={cn("border-b border-gray-300", isDefaultDoc ? "mt-10" : "mt-8")} />
+                <div className={cn("border-b border-gray-300", isDefaultDoc ? "mt-6" : "mt-8")} />
               </div>
-              <div className="relative min-h-[88px] pr-20">
+              <div className="relative min-h-[64px] pr-16">
                 <p
                   className={cn(
                     "font-bold text-violet-700",
