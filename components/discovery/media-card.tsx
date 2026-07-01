@@ -90,6 +90,7 @@ export const DiscoveryMediaCard = forwardRef<
         href={props.href}
         highlights={props.highlights ?? []}
         locationLine={props.locationLine ?? null}
+        priceLabel={props.priceLabel}
         isKo={isKo}
         inCompare={inCompare}
         inCart={inCart}

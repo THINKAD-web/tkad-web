@@ -1532,6 +1532,42 @@ html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-vio
   -webkit-text-fill-color: currentColor !important;
 }
 
+/* 보고서 흰 문서 — 발견하기 피드·카드·컴팩트의 tkad 토큰을 라이트 잉크로 (html.dark 포함) */
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted {
+  color: rgb(75 85 99) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent {
+  color: rgb(124 58 237) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
+html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-label,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-type-label {
+  color: rgb(17 24 39) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text {
+  background-image: none !important;
+  color: rgb(124 58 237) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+
+html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed,
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed {
+  background-color: #ffffff !important;
+  border-color: rgb(229 231 235) !important;
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta *,
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta,

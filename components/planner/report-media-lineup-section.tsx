@@ -69,7 +69,7 @@ function exportRowToCatalogItem(row: PlannerExportMediaRow, index: number): Home
     name: row.name,
     type: row.type ?? row.categoryLabel,
     region: row.region,
-    location: row.location,
+    location: row.location ?? row.region,
     size: row.size,
     dailyFootTraffic: row.dailyTraffic,
     thumbnailUrl: row.thumbUrl ?? undefined,
@@ -165,7 +165,8 @@ function DiscoveryLineupCard({
       item={item}
       href={href}
       highlights={highlights}
-      locationLine={row.location ?? null}
+      locationLine={row.location ?? row.region ?? null}
+      priceLabel={priceLabel}
       isKo={isKo}
       showPlanButton={false}
     />
