@@ -19,6 +19,7 @@ import {
   collectMediaCardSpecs,
   showMediaCardContributions,
 } from "@/lib/planner-report-export/media-card-layout";
+import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup-segments";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -305,6 +306,46 @@ export async function buildPlannerReportPptx(
       x: W - 5.1, y: 0.3, w: 4.5, h: 0.35, fontFace: face, fontSize: 11,
       color: "E1DCF5", align: "right",
     });
+  }
+
+  function lineupSlideTitle(slideIndex: number): string {
+    if (slideIndex === 0) return isKo ? "매체 구성" : "Media lineup";
+    return isKo ? "매체 구성 (계속)" : "Media lineup (cont.)";
+  }
+
+  function addPptRegionHeader(slide: PptxSlide, label: string, topY: number): number {
+    slide.addText(label, {
+      x: 0.6,
+      y: topY,
+      w: 12.1,
+      h: 0.35,
+      fontFace: face,
+      fontSize: 15,
+      bold: true,
+      color: INK,
+    });
+    slide.addShape(pptx.ShapeType.line, {
+      x: 0.6,
+      y: topY + 0.38,
+      w: 12.1,
+      h: 0,
+      line: { color: GRAY, width: 0.75 },
+    });
+    return topY + 0.52;
+  }
+
+  function addPptCategoryHeader(slide: PptxSlide, label: string, topY: number): number {
+    slide.addText(label.toUpperCase(), {
+      x: 0.6,
+      y: topY,
+      w: 12.1,
+      h: 0.22,
+      fontFace: face,
+      fontSize: 10,
+      bold: true,
+      color: VIOLET,
+    });
+    return topY + 0.28;
   }
 
   // ── 2. 캠페인 요약 + KPI ──
@@ -1035,10 +1076,10 @@ export async function buildPlannerReportPptx(
     }
   }
 
-  const portfolioAll = p.portfolio;
-  const portfolio =
-    lineupViewMode === "detail" ? portfolioAll.slice(0, 12) : portfolioAll;
-  if (portfolio.length === 0) {
+  const { grouped, segments } = buildPortfolioLineupSegments(p);
+  let lineupSlideIdx = 0;
+
+  if (p.portfolio.length === 0) {
     const s3 = pptx.addSlide();
     header(s3, isKo ? "매체 구성" : "Media lineup");
     s3.addText(isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.", {
@@ -1046,92 +1087,120 @@ export async function buildPlannerReportPptx(
     });
   } else if (lineupViewMode === "card") {
     const COLS = 3;
-    const ROWS = 2;
-    const PER_SLIDE = COLS * ROWS;
     const MARGIN_X = 0.6;
     const GRID_W = W - MARGIN_X * 2;
     const GAP = 0.22;
     const cellW = (GRID_W - GAP * (COLS - 1)) / COLS;
     const cellH = 2.5;
-    const startY = 1.15;
+    const bottomY = 7.15;
+    const rowSpan = cellH + GAP;
 
-    for (let i = 0; i < portfolio.length; i += PER_SLIDE) {
-      const slide = pptx.addSlide();
-      header(
-        slide,
-        i === 0
-          ? isKo
-            ? "매체 구성"
-            : "Media lineup"
-          : isKo
-            ? "매체 구성 (계속)"
-            : "Media lineup (cont.)",
-      );
-      const chunk = portfolio.slice(i, i + PER_SLIDE);
-      chunk.forEach((row, j) => {
-        const col = j % COLS;
-        const rowIdx = Math.floor(j / COLS);
-        const tx = MARGIN_X + col * (cellW + GAP);
-        const ty = startY + rowIdx * (cellH + GAP);
-        drawPptMediaTile(slide, row, tx, ty, cellW, cellH);
-      });
+    for (const seg of segments) {
+      let idx = 0;
+      while (idx < seg.items.length) {
+        const slide = pptx.addSlide();
+        header(slide, lineupSlideTitle(lineupSlideIdx));
+        let startY = 1.15;
+        if (grouped) {
+          startY = addPptRegionHeader(slide, seg.regionLabel, startY);
+          startY = addPptCategoryHeader(slide, seg.categoryLabel, startY);
+        }
+        const rowsFit = Math.max(1, Math.floor((bottomY - startY + GAP) / rowSpan));
+        const perSlide = rowsFit * COLS;
+        const chunk = seg.items.slice(idx, idx + perSlide);
+        chunk.forEach((row, j) => {
+          const col = j % COLS;
+          const rowIdx = Math.floor(j / COLS);
+          const tx = MARGIN_X + col * (cellW + GAP);
+          const ty = startY + rowIdx * rowSpan;
+          drawPptMediaTile(slide, row, tx, ty, cellW, cellH);
+        });
+        idx += chunk.length;
+        lineupSlideIdx += 1;
+      }
     }
   } else if (lineupViewMode === "compact") {
     const COLS = 4;
-    const ROWS = 2;
-    const PER_SLIDE = COLS * ROWS;
     const MARGIN_X = 0.55;
     const GRID_W = W - MARGIN_X * 2;
     const GAP = 0.18;
     const cellW = (GRID_W - GAP * (COLS - 1)) / COLS;
     const cellH = 0.95;
-    const startY = 1.15;
+    const bottomY = 7.1;
+    const rowSpan = cellH + GAP;
 
-    for (let i = 0; i < portfolio.length; i += PER_SLIDE) {
-      const slide = pptx.addSlide();
-      header(
-        slide,
-        i === 0
-          ? isKo
-            ? "매체 구성"
-            : "Media lineup"
-          : isKo
-            ? "매체 구성 (계속)"
-            : "Media lineup (cont.)",
-      );
-      const chunk = portfolio.slice(i, i + PER_SLIDE);
-      chunk.forEach((row, j) => {
-        const col = j % COLS;
-        const rowIdx = Math.floor(j / COLS);
-        const tx = MARGIN_X + col * (cellW + GAP);
-        const ty = startY + rowIdx * (cellH + GAP);
-        drawPptMediaCompactTile(slide, row, tx, ty, cellW, cellH);
-      });
+    for (const seg of segments) {
+      let idx = 0;
+      while (idx < seg.items.length) {
+        const slide = pptx.addSlide();
+        header(slide, lineupSlideTitle(lineupSlideIdx));
+        let startY = 1.15;
+        if (grouped) {
+          startY = addPptRegionHeader(slide, seg.regionLabel, startY);
+          startY = addPptCategoryHeader(slide, seg.categoryLabel, startY);
+        }
+        const rowsFit = Math.max(1, Math.floor((bottomY - startY + GAP) / rowSpan));
+        const perSlide = rowsFit * COLS;
+        const chunk = seg.items.slice(idx, idx + perSlide);
+        chunk.forEach((row, j) => {
+          const col = j % COLS;
+          const rowIdx = Math.floor(j / COLS);
+          const tx = MARGIN_X + col * (cellW + GAP);
+          const ty = startY + rowIdx * rowSpan;
+          drawPptMediaCompactTile(slide, row, tx, ty, cellW, cellH);
+        });
+        idx += chunk.length;
+        lineupSlideIdx += 1;
+      }
     }
   } else {
     let slide: PptxSlide | null = null;
     let cardY = 1.2;
     const maxY = 6.85;
+    let rendered = 0;
+    let prevRegion = "";
+    let prevCategory = "";
 
-    for (let i = 0; i < portfolio.length; i++) {
-      const row = portfolio[i]!;
-      const cardH = estimatePptCardHeight(row, p.portfolio.length, isKo, THUMB_H_IN);
-      if (!slide || cardY + cardH > maxY) {
-        slide = pptx.addSlide();
-        header(
-          slide,
-          i === 0
-            ? isKo
-              ? "매체 구성"
-              : "Media lineup"
-            : isKo
-              ? "매체 구성 (계속)"
-              : "Media lineup (cont.)",
-        );
-        cardY = 1.2;
+    const beginLineupSlide = () => {
+      slide = pptx.addSlide();
+      header(slide, lineupSlideTitle(lineupSlideIdx));
+      cardY = 1.2;
+      prevRegion = "";
+      prevCategory = "";
+      lineupSlideIdx += 1;
+    };
+
+    const paintSegmentHeaders = (seg: (typeof segments)[number]) => {
+      if (!grouped || !slide) return;
+      if (seg.regionLabel !== prevRegion) {
+        cardY = addPptRegionHeader(slide, seg.regionLabel, cardY);
+        prevRegion = seg.regionLabel;
+        prevCategory = "";
       }
-      drawPptMediaCard(slide, row, cardY, cardH);
-      cardY += cardH + CARD_GAP;
+      if (seg.categoryLabel !== prevCategory) {
+        cardY = addPptCategoryHeader(slide, seg.categoryLabel, cardY);
+        prevCategory = seg.categoryLabel;
+      }
+    };
+
+    for (const seg of segments) {
+      for (const row of seg.items) {
+        if (rendered >= 12) break;
+        const cardH = estimatePptCardHeight(row, p.portfolio.length, isKo, THUMB_H_IN);
+        const headerReserve = grouped ? 0.8 : 0;
+        if (!slide || cardY + headerReserve + cardH > maxY) {
+          beginLineupSlide();
+        }
+        paintSegmentHeaders(seg);
+        if (cardY + cardH > maxY) {
+          beginLineupSlide();
+          paintSegmentHeaders(seg);
+        }
+        drawPptMediaCard(slide!, row, cardY, cardH);
+        cardY += cardH + CARD_GAP;
+        rendered += 1;
+      }
+      if (rendered >= 12) break;
     }
   }
 

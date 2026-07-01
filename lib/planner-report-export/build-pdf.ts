@@ -28,6 +28,7 @@ import {
   showMediaCardContributions,
   type MediaCardSpec,
 } from "@/lib/planner-report-export/media-card-layout";
+import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup-segments";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -903,18 +904,193 @@ export async function buildPlannerReportPdf(
     y += rh + 4;
   }
 
-  function drawMediaCardGrid(
-    rows: PlannerExportMediaRow[],
-    thumbMap: Map<string, string>,
-  ) {
+  type PdfGridState = { col: number; rowY: number };
+
+  const PDF_REGION_HEADER_MM = 8.5;
+  const PDF_CATEGORY_HEADER_MM = 6.5;
+
+  function cardGridMetrics() {
     const gap = 3;
     const cols = 2;
     const cellW = (contentW - gap * (cols - 1)) / cols;
     const pad = 2;
     const thumbSize = Math.min(cellW - pad * 2, 20);
     const cellH = pad + thumbSize + 16 + pad;
-    let col = 0;
-    let rowY = y;
+    return { gap, cols, cellW, pad, thumbSize, cellH };
+  }
+
+  function compactGridMetrics() {
+    const gap = 2.5;
+    const cols = 2;
+    const cellW = (contentW - gap * (cols - 1)) / cols;
+    const rowH = 10;
+    const thumbSize = 7;
+    return { gap, cols, cellW, rowH, thumbSize };
+  }
+
+  function flushPdfCardGrid(state: PdfGridState): PdfGridState {
+    const { cellH, gap } = cardGridMetrics();
+    if (state.col > 0) {
+      const newY = state.rowY + cellH + gap;
+      y = newY;
+      return { col: 0, rowY: newY };
+    }
+    y = state.rowY;
+    return { col: 0, rowY: state.rowY };
+  }
+
+  function flushPdfCompactGrid(state: PdfGridState): PdfGridState {
+    const { rowH, gap } = compactGridMetrics();
+    if (state.col > 0) {
+      const newY = state.rowY + rowH + gap;
+      y = newY;
+      return { col: 0, rowY: newY };
+    }
+    y = state.rowY;
+    return { col: 0, rowY: state.rowY };
+  }
+
+  function drawPortfolioRegionHeader(label: string, followingBlockMm: number) {
+    ensure(PDF_REGION_HEADER_MM + followingBlockMm);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(10.5);
+    setText(INK);
+    doc.text(label, M, y + 4.2);
+    setDraw(GRAY_200);
+    doc.setLineWidth(0.25);
+    doc.line(M, y + 6.2, M + contentW, y + 6.2);
+    y += PDF_REGION_HEADER_MM;
+  }
+
+  function drawPortfolioCategoryHeader(label: string, followingBlockMm: number) {
+    ensure(PDF_CATEGORY_HEADER_MM + followingBlockMm);
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(7.5);
+    setText(VIOLET);
+    doc.text(label.toUpperCase(), M, y + 4);
+    y += PDF_CATEGORY_HEADER_MM;
+  }
+
+  function renderPortfolioLineup() {
+    const { grouped, segments } = buildPortfolioLineupSegments(p);
+    const cardBlockMm = cardGridMetrics().cellH + cardGridMetrics().gap;
+    const compactBlockMm = compactGridMetrics().rowH + compactGridMetrics().gap;
+    const detailBlockMm = 26;
+    const firstBlockMm =
+      lineupViewMode === "card"
+        ? cardBlockMm
+        : lineupViewMode === "compact"
+          ? compactBlockMm
+          : detailBlockMm;
+
+    const lineupFollowingMm = grouped
+      ? PDF_REGION_HEADER_MM + PDF_CATEGORY_HEADER_MM + firstBlockMm
+      : lineupViewMode === "card"
+        ? 43
+        : lineupViewMode === "compact"
+          ? 13
+          : 0;
+
+    sectionTitle(isKo ? "매체 구성" : "Media lineup", lineupFollowingMm);
+
+    if (p.portfolio.length === 0) {
+      ensure(10);
+      setText(GRAY_500);
+      doc.setFontSize(9);
+      doc.text(
+        isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.",
+        M + 2,
+        y + 5,
+      );
+      y += 12;
+      return;
+    }
+
+    if (lineupViewMode === "card") {
+      let grid: PdfGridState = { col: 0, rowY: y };
+      let prevRegion = "";
+      for (const seg of segments) {
+        if (!seg.items.length) continue;
+        if (grouped) {
+          if (seg.regionLabel !== prevRegion) {
+            grid = flushPdfCardGrid(grid);
+            drawPortfolioRegionHeader(
+              seg.regionLabel,
+              PDF_CATEGORY_HEADER_MM + firstBlockMm,
+            );
+            prevRegion = seg.regionLabel;
+          } else {
+            grid = flushPdfCardGrid(grid);
+          }
+          drawPortfolioCategoryHeader(seg.categoryLabel, firstBlockMm);
+        }
+        grid = drawMediaCardGrid(seg.items, thumbs, grid);
+        if (grouped) {
+          y = grid.rowY + 2;
+          grid = { col: grid.col, rowY: y };
+        }
+      }
+      const { cellH, gap } = cardGridMetrics();
+      y = grid.col > 0 ? grid.rowY + cellH + gap : grid.rowY;
+    } else if (lineupViewMode === "compact") {
+      let grid: PdfGridState = { col: 0, rowY: y };
+      let prevRegion = "";
+      for (const seg of segments) {
+        if (!seg.items.length) continue;
+        if (grouped) {
+          if (seg.regionLabel !== prevRegion) {
+            grid = flushPdfCompactGrid(grid);
+            drawPortfolioRegionHeader(
+              seg.regionLabel,
+              PDF_CATEGORY_HEADER_MM + firstBlockMm,
+            );
+            prevRegion = seg.regionLabel;
+          } else {
+            grid = flushPdfCompactGrid(grid);
+          }
+          drawPortfolioCategoryHeader(seg.categoryLabel, firstBlockMm);
+        }
+        grid = drawMediaCompactGrid(seg.items, thumbs, grid);
+        if (grouped) {
+          y = grid.rowY + 2;
+          grid = { col: grid.col, rowY: y };
+        }
+      }
+      const { rowH, gap } = compactGridMetrics();
+      y = grid.col > 0 ? grid.rowY + rowH + gap : grid.rowY;
+    } else {
+      let prevRegion = "";
+      for (const seg of segments) {
+        if (!seg.items.length) continue;
+        if (grouped) {
+          if (seg.regionLabel !== prevRegion) {
+            if (prevRegion) y += 2;
+            drawPortfolioRegionHeader(
+              seg.regionLabel,
+              PDF_CATEGORY_HEADER_MM + detailBlockMm,
+            );
+            prevRegion = seg.regionLabel;
+          }
+          drawPortfolioCategoryHeader(seg.categoryLabel, detailBlockMm);
+        }
+        for (const row of seg.items) {
+          const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+          drawMediaCard(row, thumb);
+        }
+      }
+    }
+    y += 4;
+  }
+
+  function drawMediaCardGrid(
+    rows: PlannerExportMediaRow[],
+    thumbMap: Map<string, string>,
+    grid?: PdfGridState,
+  ): PdfGridState {
+    const { gap, cols, cellW, pad, thumbSize, cellH } = cardGridMetrics();
+    let col = grid?.col ?? 0;
+    let rowY = grid?.rowY ?? y;
+    y = rowY;
 
     for (const row of rows) {
       if (col === 0) {
@@ -992,19 +1168,18 @@ export async function buildPlannerReportPdf(
     }
     if (col > 0) y = rowY + cellH + gap;
     else y = rowY;
+    return { col, rowY: y };
   }
 
   function drawMediaCompactGrid(
     rows: PlannerExportMediaRow[],
     thumbMap: Map<string, string>,
-  ) {
-    const gap = 2.5;
-    const cols = 2;
-    const cellW = (contentW - gap * (cols - 1)) / cols;
-    const rowH = 10;
-    const thumbSize = 7;
-    let col = 0;
-    let rowY = y;
+    grid?: PdfGridState,
+  ): PdfGridState {
+    const { gap, cols, cellW, rowH, thumbSize } = compactGridMetrics();
+    let col = grid?.col ?? 0;
+    let rowY = grid?.rowY ?? y;
+    y = rowY;
 
     for (const row of rows) {
       if (col === 0) {
@@ -1060,6 +1235,7 @@ export async function buildPlannerReportPdf(
     }
     if (col > 0) y = rowY + rowH + gap;
     else y = rowY;
+    return { col, rowY: y };
   }
 
   if (sectionVisible(vis, "recommend") && p.recommendRationale) {
@@ -1093,33 +1269,7 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
-  const lineupFollowingMm =
-    lineupViewMode === "card" ? 43 : lineupViewMode === "compact" ? 13 : 0;
-  sectionTitle(isKo ? "매체 구성" : "Media lineup", lineupFollowingMm);
-  {
-    doc.setFont(FONT, "normal");
-    if (p.portfolio.length === 0) {
-      ensure(10);
-      setText(GRAY_500);
-      doc.setFontSize(9);
-      doc.text(
-        isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.",
-        M + 2,
-        y + 5,
-      );
-      y += 12;
-    } else if (lineupViewMode === "card") {
-      drawMediaCardGrid(p.portfolio, thumbs);
-    } else if (lineupViewMode === "compact") {
-      drawMediaCompactGrid(p.portfolio, thumbs);
-    } else {
-      for (const row of p.portfolio) {
-        const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
-        drawMediaCard(row, thumb);
-      }
-    }
-    y += 4;
-  }
+  renderPortfolioLineup();
 
   // ── 디지털 배분 (통합) ──
   if (p.digital && p.digital.length) {
