@@ -63,6 +63,8 @@ import PlannerTips from "@/components/planner-tips";
 import PlannerSimulationStep3 from "@/components/planner-simulation-step3";
 import PlannerReportStep from "@/components/planner-report-step";
 import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-breakdown";
+import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -196,6 +198,9 @@ export default function PlannerPageClient({
     loading: plannerResultLoading,
     access: plannerResultAccess,
   } = useFeatureAccess("planner_result");
+
+  const [reportSectionVisibility, setReportSectionVisibility] =
+    usePlannerReportSectionVisibility();
 
   const priceOptionBadge = useCallback(
     (m: MediaItem): string | null => {
@@ -1551,7 +1556,7 @@ export default function PlannerPageClient({
 
             {wizardStep === 6 ? (
               <>
-                {regionalReport ? (
+                {regionalReport && sectionVisible(reportSectionVisibility, "region") ? (
                   <PlanCartRegionalBreakdown
                     rows={regionalReport.regionalBreakdown}
                     isKo={isKo}
@@ -1597,6 +1602,8 @@ export default function PlannerPageClient({
                 regionBreakdown={regionalReport?.regionalBreakdown}
                 regionBudgetCharts={regionalReport?.regionBudgetCharts}
                 regionImpressionCharts={regionalReport?.regionImpressionCharts}
+                sectionVisibility={reportSectionVisibility}
+                onSectionVisibilityChange={setReportSectionVisibility}
               />
               </>
             ) : null}

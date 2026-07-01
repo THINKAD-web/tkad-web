@@ -34,7 +34,9 @@ import type {
   AppliedPlannerScenario,
   ScenarioVariant,
 } from "@/lib/planner/scenario-types";
-import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
+import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
+import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 
 type Props = {
   isKo: boolean;
@@ -106,6 +108,9 @@ export function IntegratedReportStep(props: Props) {
     [props.portfolio, props.isKo],
   );
 
+  const [sectionVisibility, setSectionVisibility] =
+    usePlannerReportSectionVisibility();
+
   const handleDownload = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (!pdfAllowed || downloading || pdfAccessLoading) return;
@@ -113,7 +118,10 @@ export function IntegratedReportStep(props: Props) {
       try {
         await downloadPlannerReport(format, payload, {
           activitySource: "integrated_planner",
-          exportMapPins,
+          exportMapPins: sectionVisible(sectionVisibility, "map")
+            ? exportMapPins
+            : undefined,
+          sectionVisibility,
         });
         toast("success", t("pdfDownloaded"));
       } catch (e) {
@@ -124,7 +132,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [pdfAllowed, pdfAccessLoading, downloading, payload, exportMapPins, toast, t],
+    [pdfAllowed, pdfAccessLoading, downloading, payload, exportMapPins, sectionVisibility, toast, t],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);
@@ -184,7 +192,11 @@ export function IntegratedReportStep(props: Props) {
               />
 
               <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
-                <PlannerReportDocument payload={payload} mapPortfolio={props.portfolio} />
+                <PlannerReportDocument
+                  payload={payload}
+                  mapPortfolio={props.portfolio}
+                  sectionVisibility={sectionVisibility}
+                />
               </div>
 
               <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
@@ -209,6 +221,15 @@ export function IntegratedReportStep(props: Props) {
           </PlannerProGate>
 
           <PlannerNeonCard>
+            <div className="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-white/10 sm:p-6">
+              <ReportSectionVisibilityPanel
+                isKo={props.isKo}
+                payload={payload}
+                mapPortfolio={props.portfolio}
+                visibility={sectionVisibility}
+                onChange={setSectionVisibility}
+              />
+            </div>
             <div className="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-white/10 sm:flex-row sm:items-start sm:justify-between sm:p-6">
               <div>
                 <PlannerNeonLabel>{t("reportEyebrow")}</PlannerNeonLabel>

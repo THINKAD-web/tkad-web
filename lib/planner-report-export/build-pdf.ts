@@ -20,6 +20,10 @@ import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
+import {
+  filterExportSections,
+  sectionVisible,
+} from "@/lib/planner-report-export/section-visibility";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -49,6 +53,8 @@ export async function buildPlannerReportPdf(
 ): Promise<Uint8Array> {
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
+  const vis = assets?.sectionVisibility;
+  const exportSections = filterExportSections(p.sections, vis);
   const hasKr = await ensureKrFontForServerPdf(doc);
   const FONT = krFontFamily(hasKr);
 
@@ -399,11 +405,13 @@ export async function buildPlannerReportPdf(
   // ── 성과 요약 차트 ──
   const ch = p.charts;
   if (
+    sectionVisible(vis, "performance") &&
     ch &&
     ((ch.budgetSplit?.length ?? 0) > 0 ||
       (ch.browseBudgetSplit?.length ?? 0) > 0 ||
       (ch.cpmBars?.length ?? 0) > 0 ||
-      (ch.reachSummary?.length ?? 0) > 0)
+      (ch.reachSummary?.length ?? 0) > 0 ||
+      Boolean(ch.performanceGuide))
   ) {
     sectionTitle(isKo ? "성과 요약" : "Performance summary");
 
@@ -505,7 +513,11 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
-  if (p.regionBreakdown && p.regionBreakdown.length > 0) {
+  if (
+    sectionVisible(vis, "region") &&
+    p.regionBreakdown &&
+    p.regionBreakdown.length > 0
+  ) {
     sectionTitle(isKo ? "지역별 예산 · 효과" : "Budget & impact by region");
     if (ch?.regionBudgetSplit && ch.regionBudgetSplit.length > 1) {
       ensure(46);
@@ -563,7 +575,11 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
-  if (p.regionSubdivision && p.regionSubdivision.breakdown.length >= 2) {
+  if (
+    sectionVisible(vis, "subdivision") &&
+    p.regionSubdivision &&
+    p.regionSubdivision.breakdown.length >= 2
+  ) {
     sectionTitle(isKo ? "상권 · 권역 세분화" : "District & zone detail");
     doc.setFont(FONT, "normal");
     doc.setFontSize(8);
@@ -759,7 +775,7 @@ export async function buildPlannerReportPdf(
     y += rh + 4;
   }
 
-  if (p.recommendRationale) {
+  if (sectionVisible(vis, "recommend") && p.recommendRationale) {
     sectionTitle(isKo ? "추천 근거" : "Recommendation rationale");
     for (const line of p.recommendRationale.summaryLines) {
       doc.setFont(FONT, "normal");
@@ -791,7 +807,7 @@ export async function buildPlannerReportPdf(
   }
 
   const dist = assets?.distributionMap;
-  if (dist?.dataUrl) {
+  if (sectionVisible(vis, "map") && dist?.dataUrl) {
     const MAP_H = 54;
     ensure(MAP_H + 20);
     sectionTitle(isKo ? "매체 위치" : "Media locations");
@@ -900,7 +916,7 @@ export async function buildPlannerReportPdf(
   }
 
   // ── 추가 섹션 (PRO 인사이트 등) ──
-  for (const sec of p.sections ?? []) {
+  for (const sec of exportSections ?? []) {
     if (!sec.lines.length) continue;
     sectionTitle(sec.title);
     doc.setFont(FONT, "normal");

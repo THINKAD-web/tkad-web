@@ -17,6 +17,8 @@ import {
 import { ReportScanLine } from "@/components/planner/report-scan-text";
 import { ReportMediaLineupSection } from "@/components/planner/report-media-lineup-section";
 import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio-map-section";
+import { sectionVisible, filterExportSections } from "@/lib/planner-report-export/section-visibility";
+import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 import type { MediaItem } from "@/lib/media-data";
 
 /**
@@ -218,15 +220,18 @@ export const PlannerReportDocument = forwardRef<
     payload: PlannerReportExportPayload;
     /** 화면 미니맵용 — export payload 에 좌표를 넣지 않음 */
     mapPortfolio?: readonly MediaItem[];
+    sectionVisibility?: PlannerReportSectionVisibility;
     className?: string;
     editableTitle?: boolean;
     onDocumentTitleChange?: (title: string) => void;
   }
 >(function PlannerReportDocument(
-  { payload: p, mapPortfolio, className, editableTitle, onDocumentTitleChange },
+  { payload: p, mapPortfolio, sectionVisibility, className, editableTitle, onDocumentTitleChange },
   ref,
 ) {
   const isKo = p.isKo;
+  const vis = sectionVisibility;
+  const visibleSections = filterExportSections(p.sections, vis);
   const summary: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
     [isKo ? "총 예산" : "Total budget", fmtBudget(p.budgetMan, isKo)],
@@ -296,11 +301,13 @@ export const PlannerReportDocument = forwardRef<
         ) : null}
 
         {/* 성과 요약 차트 */}
-        {p.charts &&
+        {sectionVisible(vis, "performance") &&
+        p.charts &&
         ((p.charts.budgetSplit?.length ?? 0) > 0 ||
           (p.charts.browseBudgetSplit?.length ?? 0) > 0 ||
           (p.charts.cpmBars?.length ?? 0) > 0 ||
-          (p.charts.reachSummary?.length ?? 0) > 0) ? (
+          (p.charts.reachSummary?.length ?? 0) > 0 ||
+          Boolean(p.charts.performanceGuide)) ? (
           <section className="space-y-4">
             <DocumentSectionHeading>{isKo ? "성과 요약" : "Performance summary"}</DocumentSectionHeading>
             {(p.charts.budgetSplit?.length ?? 0) > 0 ||
@@ -378,7 +385,9 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
-        {p.regionBreakdown && p.regionBreakdown.length > 0 ? (
+        {sectionVisible(vis, "region") &&
+        p.regionBreakdown &&
+        p.regionBreakdown.length > 0 ? (
           <section className="space-y-4">
             <DocumentSectionHeading>
               {isKo ? "지역별 예산 · 효과" : "Budget & impact by region"}
@@ -445,7 +454,8 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
-        {p.regionSubdivision &&
+        {sectionVisible(vis, "subdivision") &&
+        p.regionSubdivision &&
         p.regionSubdivision.breakdown.length >= 2 ? (
           <section className="space-y-4">
             <DocumentSectionHeading>
@@ -526,7 +536,7 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
-        {p.recommendRationale ? (
+        {sectionVisible(vis, "recommend") && p.recommendRationale ? (
           <section className="space-y-4">
             <DocumentSectionHeading>
               {isKo ? "추천 근거" : "Recommendation rationale"}
@@ -553,7 +563,9 @@ export const PlannerReportDocument = forwardRef<
           </section>
         ) : null}
 
-        {mapPortfolio && mapPortfolio.length > 0 ? (
+        {sectionVisible(vis, "map") &&
+        mapPortfolio &&
+        mapPortfolio.length > 0 ? (
           <ReportPortfolioMapSection portfolio={mapPortfolio} isKo={isKo} />
         ) : null}
 
@@ -599,7 +611,7 @@ export const PlannerReportDocument = forwardRef<
         ) : null}
 
         {/* 추가 섹션 (PRO 인사이트) */}
-        {(p.sections ?? []).map((sec) =>
+        {(visibleSections ?? []).map((sec) =>
           sec.lines.length ? (
             <section key={sec.title} className="space-y-3">
               <DocumentSectionHeading>{sec.title}</DocumentSectionHeading>

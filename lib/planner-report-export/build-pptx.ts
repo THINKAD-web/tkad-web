@@ -12,6 +12,10 @@ import {
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
 import { shortMediaUrl } from "@/lib/planner-report-export/draw-media-link";
+import {
+  filterExportSections,
+  sectionVisible,
+} from "@/lib/planner-report-export/section-visibility";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -175,6 +179,8 @@ export async function buildPlannerReportPptx(
   const isKo = p.isKo;
   const face = isKo ? "Malgun Gothic" : "Arial";
   const W = 13.33;
+  const vis = assets?.sectionVisibility;
+  const exportSections = filterExportSections(p.sections, vis);
 
   const CYAN_LT = "7CDCEB";
   const wordmark = (size: number) => [
@@ -256,6 +262,7 @@ export async function buildPlannerReportPptx(
   // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──
   const ch = p.charts;
   if (
+    sectionVisible(vis, "performance") &&
     ch &&
     ((ch.budgetSplit?.length ?? 0) > 0 ||
       (ch.browseBudgetSplit?.length ?? 0) > 0 ||
@@ -341,7 +348,7 @@ export async function buildPlannerReportPptx(
     }
   }
 
-  if (ch?.performanceGuide) {
+  if (sectionVisible(vis, "performance") && ch?.performanceGuide) {
     const g = ch.performanceGuide;
     const gSlide = pptx.addSlide();
     header(gSlide, g.title);
@@ -395,7 +402,7 @@ export async function buildPlannerReportPptx(
     );
   }
 
-  if (p.recommendRationale) {
+  if (sectionVisible(vis, "recommend") && p.recommendRationale) {
     const rSlide = pptx.addSlide();
     header(rSlide, isKo ? "추천 근거" : "Recommendation rationale");
     let ry = 1.2;
@@ -440,7 +447,11 @@ export async function buildPlannerReportPptx(
     }
   }
 
-  if (p.regionSubdivision && p.regionSubdivision.breakdown.length >= 2) {
+  if (
+    sectionVisible(vis, "subdivision") &&
+    p.regionSubdivision &&
+    p.regionSubdivision.breakdown.length >= 2
+  ) {
     const subSlide = pptx.addSlide();
     header(subSlide, isKo ? "상권 · 권역 세분화" : "District & zone detail");
     subSlide.addText(
@@ -525,7 +536,7 @@ export async function buildPlannerReportPptx(
   }
 
   const dist = assets?.distributionMap;
-  if (dist?.dataUrl) {
+  if (sectionVisible(vis, "map") && dist?.dataUrl) {
     const mSlide = pptx.addSlide();
     header(mSlide, isKo ? "매체 위치" : "Media locations");
     try {
@@ -774,7 +785,7 @@ export async function buildPlannerReportPptx(
   }
 
   // ── 5+. 추가 섹션 (PRO 인사이트) ──
-  for (const sec of p.sections ?? []) {
+  for (const sec of exportSections ?? []) {
     if (!sec.lines.length) continue;
     const s = pptx.addSlide();
     header(s, sec.title);

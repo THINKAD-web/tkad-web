@@ -171,7 +171,13 @@ export type PlannerReportDistributionMap = {
 
 export type PlannerReportExportAssets = {
   distributionMap?: PlannerReportDistributionMap | null;
+  sectionVisibility?: import("@/lib/planner-report-export/section-visibility").PlannerReportSectionVisibility;
 };
+
+export type {
+  PlannerReportSectionKey,
+  PlannerReportSectionVisibility,
+} from "@/lib/planner-report-export/section-visibility";
 
 /**
  * 파일명 규칙: `THINKAD_{캠페인명}_제안서_{YYYY-MM-DD}` (+확장자).

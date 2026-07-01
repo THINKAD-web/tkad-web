@@ -7,6 +7,7 @@ import {
   type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types";
+import type { PlannerReportSectionVisibility } from "@/lib/planner-report-export/section-visibility";
 
 /**
  * 서버에 보고서 payload 를 보내 PDF/PPTX 바이너리를 받아 다운로드한다.
@@ -18,6 +19,7 @@ export async function downloadPlannerReport(
   options?: {
     activitySource?: PlanReportActivitySource;
     exportMapPins?: PlannerExportMapPin[];
+    sectionVisibility?: PlannerReportSectionVisibility;
   },
 ): Promise<void> {
   const res = await fetch("/api/planner/report/export", {
@@ -29,6 +31,7 @@ export async function downloadPlannerReport(
       payload,
       activitySource: options?.activitySource,
       exportMapPins: options?.exportMapPins,
+      sectionVisibility: options?.sectionVisibility,
     }),
   });
   if (!res.ok) {

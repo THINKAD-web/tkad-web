@@ -11,6 +11,8 @@ import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { buildPlanCartReportBundle } from "@/lib/plan-cart-report/build-report";
 import { PlanCartRegionalBreakdown } from "@/components/my/plan-cart-regional-breakdown";
+import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { SavePlanButton } from "@/components/my/save-plan-button";
 import PlannerReportStep from "@/components/planner-report-step";
 import { BtnBlock } from "@/components/brutalist";
@@ -50,6 +52,9 @@ export function MyPlanReportPageClient() {
     if (catalogLoading || cart.items.length === 0) return null;
     return buildPlanCartReportBundle({ cart, catalog, isKo });
   }, [cart, catalog, catalogLoading, isKo]);
+
+  const [sectionVisibility, setSectionVisibility] =
+    usePlannerReportSectionVisibility();
 
   const viewLoggedRef = useRef(false);
   useEffect(() => {
@@ -153,16 +158,20 @@ export function MyPlanReportPageClient() {
                   {tPlan("saved")}
                 </BtnBlock>
               </div>
-              <PlanCartRegionalBreakdown
-                rows={bundle.regionalBreakdown}
-                isKo={isKo}
-              />
+              {sectionVisible(sectionVisibility, "region") ? (
+                <PlanCartRegionalBreakdown
+                  rows={bundle.regionalBreakdown}
+                  isKo={isKo}
+                />
+              ) : null}
               <PlannerReportStep
                 {...bundle.reportProps}
                 regionBreakdown={bundle.regionalBreakdown}
                 regionBudgetCharts={bundle.regionBudgetCharts}
                 regionImpressionCharts={bundle.regionImpressionCharts}
                 activitySource="plan_cart_report"
+                sectionVisibility={sectionVisibility}
+                onSectionVisibilityChange={setSectionVisibility}
               />
             </div>
           ) : null}
