@@ -68,6 +68,30 @@ export function isPlannerIndustryKey(v: unknown): v is PlannerIndustryKey {
   );
 }
 
+/** planner 메시지 파일 업종 라벨과 동기화 (보고서·서버 경로용) */
+export const PLANNER_INDUSTRY_LABELS: Record<
+  PlannerIndustryKey,
+  { ko: string; en: string }
+> = {
+  indFb: { ko: "F&B", en: "F&B" },
+  indRetail: { ko: "유통·리테일", en: "Retail" },
+  indTech: { ko: "IT·테크", en: "Tech" },
+  indFinance: { ko: "금융", en: "Finance" },
+  indEnt: { ko: "엔터·미디어", en: "Entertainment" },
+  indOther: { ko: "기타", en: "Other" },
+};
+
+export function plannerIndustryLabel(
+  key: PlannerIndustryKey | string | null | undefined,
+  isKo: boolean,
+): string {
+  if (!isPlannerIndustryKey(key)) {
+    return isKo ? "미지정" : "Not specified";
+  }
+  const row = PLANNER_INDUSTRY_LABELS[key];
+  return isKo ? row.ko : row.en;
+}
+
 export function isPlannerCategory(v: unknown): v is PlannerCategory {
   return v === "digital" || v === "static" || v === "mobile";
 }

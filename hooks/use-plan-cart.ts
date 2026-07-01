@@ -76,7 +76,10 @@ export function usePlanCart() {
   const updateMeta = useCallback(
     (
       patch: Partial<
-        Pick<PlanCart, "campaignGoal" | "totalBudget" | "duration">
+        Pick<
+          PlanCart,
+          "campaignGoal" | "totalBudget" | "duration" | "industryKey"
+        >
       >,
     ) => {
       savePlanCartMeta(patch);
