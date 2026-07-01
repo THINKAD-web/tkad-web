@@ -24,6 +24,7 @@ export const HEALTH_PAGE_ROUTES: string[] = [
   "/ko/pricing",
   "/ko/my",
   "/ko/special/fandom",
+  /** popup/campus/local → /media?target=* 영구 리다이렉트 (3xx = 정상, classifyPage) */
   "/ko/special/popup",
   "/ko/special/campus",
   "/ko/special/local",

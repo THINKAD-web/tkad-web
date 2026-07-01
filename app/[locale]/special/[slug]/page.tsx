@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
@@ -22,6 +22,7 @@ import {
   SpecialMapSection,
   SpecialMediaGridSection,
 } from "@/components/special/special-landing-sections";
+import { specialSlugRedirectPath } from "@/lib/special-slug-redirects";
 import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 
 type Props = {
@@ -43,7 +44,15 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale: rawLocale, slug } = await params;
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
-  const config = getSpecialLandingConfig(decodeURIComponent(slug));
+  const decoded = decodeURIComponent(slug);
+  const redirectPath = specialSlugRedirectPath(locale, decoded);
+  if (redirectPath) {
+    return {
+      alternates: pageAlternates(locale, "/media"),
+      robots: { index: false, follow: true },
+    };
+  }
+  const config = getSpecialLandingConfig(decoded);
   if (!config) return { title: "Not found" };
   return {
     ...specialLandingMetadata(config, locale),
@@ -56,6 +65,9 @@ export default async function SpecialLandingPage({ params }: Props) {
   const locale = await resolveLocaleParam(Promise.resolve({ locale: rawLocale }));
   setRequestLocale(locale);
   const decoded = decodeURIComponent(slug);
+  const redirectPath = specialSlugRedirectPath(locale, decoded);
+  if (redirectPath) permanentRedirect(redirectPath);
+
   const config = getSpecialLandingConfig(decoded);
   if (!config) notFound();
 
