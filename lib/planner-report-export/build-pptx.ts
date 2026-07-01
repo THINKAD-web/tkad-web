@@ -1,6 +1,7 @@
 import { EXPORT_THUMB_BOX_MM, PLANNER_EXPORT_THUMB_BOX_MM, loadExportThumbMap } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
+  PlannerReportExportAssets,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import { plannerChartColorPptx } from "@/lib/planner-chart-colors";
@@ -162,6 +163,7 @@ function addBudgetSplitShapes(
 
 export async function buildPlannerReportPptx(
   p: PlannerReportExportPayload,
+  assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
   const PptxGenJS = (await import("pptxgenjs")).default;
   const pptx = new PptxGenJS();
@@ -520,6 +522,49 @@ export async function buildPlannerReportPptx(
         isKo,
       );
     }
+  }
+
+  const dist = assets?.distributionMap;
+  if (dist?.dataUrl) {
+    const mSlide = pptx.addSlide();
+    header(mSlide, isKo ? "매체 위치" : "Media locations");
+    try {
+      mSlide.addImage({
+        data: dist.dataUrl,
+        x: 0.7,
+        y: 1.15,
+        w: 11.9,
+        h: 4.85,
+      });
+    } catch {
+      /* broken map image */
+    }
+    const caption = isKo
+      ? `${dist.mappableMediaCount}개 매체 · ${dist.locationCount}개 위치 — 도로·지명 없는 위치 분포도`
+      : `${dist.mappableMediaCount} media · ${dist.locationCount} locations — scatter map (no roads or labels)`;
+    mSlide.addText(caption, {
+      x: 0.7,
+      y: 6.2,
+      w: 12,
+      h: 0.45,
+      fontFace: face,
+      fontSize: 11,
+      color: GRAY,
+    });
+    mSlide.addText(
+      isKo
+        ? "화면: 인터랙티브 미니맵 · PDF·PPT: 분포도"
+        : "On-screen: interactive mini-map · PDF/PPT: distribution map",
+      {
+        x: 0.7,
+        y: 6.65,
+        w: 12,
+        h: 0.35,
+        fontFace: face,
+        fontSize: 9,
+        color: GRAY,
+      },
+    );
   }
 
   // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──

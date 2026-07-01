@@ -4,6 +4,10 @@ import {
   plannerReportFileBase,
   type PlannerReportExportFormat,
 } from "@/lib/planner-report-export/types";
+import {
+  parseExportMapPins,
+  renderPlannerDistributionMap,
+} from "@/lib/planner-report-export/render-distribution-map";
 import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
 import {
@@ -46,10 +50,11 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { format, payload, activitySource } = (body ?? {}) as {
+  const { format, payload, activitySource, exportMapPins: rawPins } = (body ?? {}) as {
     format?: PlannerReportExportFormat;
     payload?: unknown;
     activitySource?: PlanReportActivitySource;
+    exportMapPins?: unknown;
   };
 
   if (format !== "pdf" && format !== "pptx") {
@@ -63,6 +68,12 @@ export async function POST(request: NextRequest) {
   }
 
   const base = plannerReportFileBase(payload);
+
+  const pins = parseExportMapPins(rawPins);
+  const distributionMap = pins
+    ? await renderPlannerDistributionMap(pins, payload.isKo)
+    : null;
+  const exportAssets = { distributionMap };
 
   const logExport = () => {
     const userId = pdfAccess.userId;
@@ -91,7 +102,7 @@ export async function POST(request: NextRequest) {
       const { buildPlannerReportPdf } = await import(
         "@/lib/planner-report-export/build-pdf"
       );
-      const bytes = await buildPlannerReportPdf(payload);
+      const bytes = await buildPlannerReportPdf(payload, exportAssets);
       logExport();
       return new NextResponse(new Blob([bytes as BlobPart]), {
         status: 200,
@@ -106,7 +117,7 @@ export async function POST(request: NextRequest) {
     const { buildPlannerReportPptx } = await import(
       "@/lib/planner-report-export/build-pptx"
     );
-    const bytes = await buildPlannerReportPptx(payload);
+    const bytes = await buildPlannerReportPptx(payload, exportAssets);
     logExport();
     return new NextResponse(new Blob([bytes as BlobPart]), {
       status: 200,
