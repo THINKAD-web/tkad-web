@@ -11,11 +11,14 @@ import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
-import { shortMediaUrl } from "@/lib/planner-report-export/draw-media-link";
 import {
   filterExportSections,
   sectionVisible,
 } from "@/lib/planner-report-export/section-visibility";
+import {
+  collectMediaCardSpecs,
+  showMediaCardContributions,
+} from "@/lib/planner-report-export/media-card-layout";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -163,6 +166,78 @@ function addBudgetSplitShapes(
     );
   });
   return barY + barH + 0.22 + rows.length * 0.4 + 0.1;
+}
+
+const CYAN_BAR = "06B6D4";
+const BAR_TRACK = "F3F4F6";
+
+function addPptContributionBar(
+  slide: PptxSlide,
+  pptx: InstanceType<typeof import("pptxgenjs")["default"]>,
+  x: number,
+  y: number,
+  w: number,
+  label: string,
+  pct: number,
+  color: string,
+  face: string,
+) {
+  slide.addText(label, {
+    x,
+    y,
+    w: w * 0.62,
+    h: 0.16,
+    fontSize: 8,
+    color: GRAY,
+    fontFace: face,
+  });
+  slide.addText(`${pct}%`, {
+    x: x + w * 0.62,
+    y,
+    w: w * 0.38,
+    h: 0.16,
+    fontSize: 8,
+    color: INK,
+    fontFace: face,
+    align: "right",
+  });
+  const barY = y + 0.18;
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x,
+    y: barY,
+    w,
+    h: 0.09,
+    fill: { color: BAR_TRACK },
+    rectRadius: 0.045,
+    line: { color: BAR_TRACK, width: 0 },
+  });
+  const fillW = Math.max(0.04, (w * Math.min(100, Math.max(0, pct))) / 100);
+  slide.addShape(pptx.ShapeType.roundRect, {
+    x,
+    y: barY,
+    w: fillW,
+    h: 0.09,
+    fill: { color },
+    rectRadius: 0.045,
+    line: { color, width: 0 },
+  });
+}
+
+function estimatePptCardHeight(
+  row: PlannerExportMediaRow,
+  portfolioLen: number,
+  isKo: boolean,
+  thumbHIn: number,
+): number {
+  const specs = collectMediaCardSpecs(row, isKo);
+  let h = 0.55;
+  if (row.location) h += 0.22;
+  if (row.categoryLabel) h += 0.2;
+  if (specs.length > 0) h += 0.12 + Math.ceil(specs.length / 2) * 0.24;
+  if (row.monthlyPriceLabel || row.lineTotalLabel) h += 0.48;
+  if (row.recommendReason?.trim()) h += 0.38;
+  if (showMediaCardContributions(portfolioLen, row)) h += 0.42;
+  return Math.max(h + 0.35, thumbHIn + 0.4);
 }
 
 export async function buildPlannerReportPptx(
@@ -578,66 +653,264 @@ export async function buildPlannerReportPptx(
     );
   }
 
-  // ── 3. 매체 구성 (썸네일 카드 — 화면 미리보기와 동일) ──
+  // ── 3. 매체 구성 (썸네일 카드 — 화면 MediaDetailCard 근접) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
-  /** 20mm 기준 2.35in — 플래너 확대 썸네일에 비례 스케일 */
   const THUMB_W_IN = 2.35 * (thumbBox.w / EXPORT_THUMB_BOX_MM.w);
   const THUMB_H_IN = (THUMB_W_IN * thumbBox.h) / thumbBox.w;
-  const PPT_CARD_H = 2.95;
-  const PPT_CARD_STEP = 3.2;
+  const CARD_X = 0.55;
+  const CARD_W = 12.2;
+  const CARD_GAP = 0.28;
 
-  function mediaRichLines(row: PlannerExportMediaRow) {
-    type Part = { text: string; options: Record<string, unknown> };
-    const parts: Part[] = [
-      { text: `${row.name}\n`, options: { bold: true, color: INK, fontSize: 12 } },
-    ];
-    for (const line of [row.location, row.categoryLabel].filter(Boolean) as string[]) {
-      parts.push({ text: `${line}\n`, options: { color: GRAY, fontSize: 10 } });
-    }
-    if (row.dailyTraffic) {
-      parts.push({
-        text: `${isKo ? "일일 노출" : "Daily"} ${row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}\n`,
-        options: { color: CYAN, bold: true, fontSize: 10 },
+  function drawPptMediaCard(
+    slide: PptxSlide,
+    row: PlannerExportMediaRow,
+    cardY: number,
+    cardH: number,
+  ) {
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: CARD_X,
+      y: cardY,
+      w: CARD_W,
+      h: cardH,
+      fill: { color: WHITE },
+      rectRadius: 0.08,
+      line: { color: "E5E7EB", width: 0.75 },
+    });
+    const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+    const textX = 0.75 + THUMB_W_IN + 0.25;
+    const textW = CARD_X + CARD_W - textX - 0.25;
+    const colW = (textW - 0.15) / 2;
+
+    if (thumb) {
+      try {
+        slide.addImage({
+          data: thumb,
+          x: 0.75,
+          y: cardY + 0.2,
+          w: THUMB_W_IN,
+          h: THUMB_H_IN,
+        });
+      } catch {
+        /* broken thumb */
+      }
+    } else if (row.thumbUrl?.trim()) {
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: 0.75,
+        y: cardY + 0.2,
+        w: THUMB_W_IN,
+        h: THUMB_H_IN,
+        fill: { color: "F8F9FC" },
+        rectRadius: 0.06,
+        line: { color: "E5E7EB", width: 0.5 },
+      });
+      slide.addText(isKo ? "이미지 없음" : "No image", {
+        x: 0.75,
+        y: cardY + 0.2 + THUMB_H_IN / 2 - 0.2,
+        w: THUMB_W_IN,
+        h: 0.4,
+        fontFace: face,
+        fontSize: 9,
+        color: GRAY,
+        align: "center",
       });
     }
-    if (row.monthlyPriceLabel) {
-      parts.push({
-        text: `${isKo ? "월 단가" : "Monthly"} ${row.monthlyPriceLabel}\n`,
-        options: { color: VIOLET, bold: true, fontSize: 10 },
+
+    let ty = cardY + 0.28;
+    slide.addText(row.name, {
+      x: textX,
+      y: ty,
+      w: textW,
+      h: 0.35,
+      fontFace: face,
+      fontSize: 12,
+      color: INK,
+      bold: true,
+    });
+    ty += 0.32;
+    if (row.location) {
+      slide.addText(row.location, {
+        x: textX,
+        y: ty,
+        w: textW,
+        h: 0.22,
+        fontFace: face,
+        fontSize: 10,
+        color: GRAY,
       });
+      ty += 0.22;
     }
-    if (row.lineTotalLabel) {
-      parts.push({
-        text: `${isKo ? "집행 소계" : "Subtotal"} ${row.lineTotalLabel}\n`,
-        options: { color: VIOLET, bold: true, fontSize: 10 },
+    if (row.categoryLabel) {
+      slide.addText(row.categoryLabel, {
+        x: textX,
+        y: ty,
+        w: textW,
+        h: 0.2,
+        fontFace: face,
+        fontSize: 10,
+        color: GRAY,
       });
+      ty += 0.22;
     }
-    if (row.recommendReason?.trim()) {
-      parts.push({
-        text: `${isKo ? "추천" : "Why"} ${row.recommendReason.trim()}\n`,
-        options: { color: GRAY, fontSize: 10 },
-      });
-    }
-    if (p.portfolio.length > 1) {
-      const contrib = [
-        row.exposureContributionPct != null
-          ? `${isKo ? "노출 기여" : "Exposure"} ${row.exposureContributionPct}%`
-          : null,
-        row.budgetContributionPct != null
-          ? `${isKo ? "예산 비중" : "Budget"} ${row.budgetContributionPct}%`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      if (contrib) {
-        parts.push({ text: contrib, options: { color: CYAN, bold: true, fontSize: 10 } });
+
+    const specs = collectMediaCardSpecs(row, isKo);
+    if (specs.length > 0) {
+      ty += 0.08;
+      for (let i = 0; i < specs.length; i += 2) {
+        const drawSpec = (spec: { label: string; value: string }, sx: number) => {
+          slide.addText(
+            [
+              { text: `${spec.label} `, options: { color: GRAY, fontSize: 9 } },
+              { text: spec.value, options: { color: INK, fontSize: 9, bold: true } },
+            ].map((p) => ({ ...p, options: { ...p.options, fontFace: face } })),
+            { x: sx, y: ty, w: colW, h: 0.22 },
+          );
+        };
+        drawSpec(specs[i]!, textX);
+        if (specs[i + 1]) drawSpec(specs[i + 1]!, textX + colW + 0.15);
+        ty += 0.24;
       }
     }
-    return parts.map((p) => ({
-      ...p,
-      options: { ...p.options, fontFace: face },
-    }));
+
+    if (row.monthlyPriceLabel || row.lineTotalLabel) {
+      ty += 0.06;
+      if (row.monthlyPriceLabel) {
+        slide.addText(isKo ? "월 단가" : "Monthly", {
+          x: textX,
+          y: ty,
+          w: colW,
+          h: 0.16,
+          fontFace: face,
+          fontSize: 8,
+          color: GRAY,
+        });
+        slide.addText(row.monthlyPriceLabel, {
+          x: textX,
+          y: ty + 0.16,
+          w: colW,
+          h: 0.2,
+          fontFace: face,
+          fontSize: 10,
+          color: VIOLET,
+          bold: true,
+        });
+      }
+      if (row.lineTotalLabel) {
+        slide.addText(isKo ? "집행 소계" : "Subtotal", {
+          x: textX + colW + 0.15,
+          y: ty,
+          w: colW,
+          h: 0.16,
+          fontFace: face,
+          fontSize: 8,
+          color: GRAY,
+        });
+        slide.addText(row.lineTotalLabel, {
+          x: textX + colW + 0.15,
+          y: ty + 0.16,
+          w: colW,
+          h: 0.2,
+          fontFace: face,
+          fontSize: 10,
+          color: VIOLET,
+          bold: true,
+        });
+      }
+      ty += 0.42;
+    }
+
+    if (row.recommendReason?.trim()) {
+      slide.addText(
+        [
+          { text: isKo ? "추천 " : "Why ", options: { color: VIOLET, bold: true, fontSize: 10 } },
+          { text: row.recommendReason.trim(), options: { color: GRAY, fontSize: 10 } },
+        ].map((p) => ({ ...p, options: { ...p.options, fontFace: face } })),
+        { x: textX, y: ty, w: textW, h: 0.35, valign: "top" },
+      );
+      ty += 0.36;
+    }
+
+    if (showMediaCardContributions(p.portfolio.length, row)) {
+      const barY = ty + 0.04;
+      if (row.exposureContributionPct != null && row.budgetContributionPct != null) {
+        addPptContributionBar(
+          slide,
+          pptx,
+          textX,
+          barY,
+          colW,
+          isKo ? "노출 기여" : "Exposure share",
+          row.exposureContributionPct,
+          CYAN_BAR,
+          face,
+        );
+        addPptContributionBar(
+          slide,
+          pptx,
+          textX + colW + 0.15,
+          barY,
+          colW,
+          isKo ? "예산 비중" : "Budget share",
+          row.budgetContributionPct,
+          VIOLET,
+          face,
+        );
+      } else if (row.exposureContributionPct != null) {
+        addPptContributionBar(
+          slide,
+          pptx,
+          textX,
+          barY,
+          textW,
+          isKo ? "노출 기여" : "Exposure share",
+          row.exposureContributionPct,
+          CYAN_BAR,
+          face,
+        );
+      } else if (row.budgetContributionPct != null) {
+        addPptContributionBar(
+          slide,
+          pptx,
+          textX,
+          barY,
+          textW,
+          isKo ? "예산 비중" : "Budget share",
+          row.budgetContributionPct,
+          VIOLET,
+          face,
+        );
+      }
+    }
+
+    const mediaUrl = plannerMediaPageUrl(row.id, isKo);
+    if (mediaUrl) {
+      const btnW = 2.55;
+      const btnH = 0.32;
+      const btnX = CARD_X + CARD_W - btnW - 0.22;
+      const btnY = cardY + cardH - btnH - 0.22;
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: btnX,
+        y: btnY,
+        w: btnW,
+        h: btnH,
+        fill: { color: WHITE },
+        line: { color: VIOLET, width: 1.25 },
+        rectRadius: 0.06,
+      });
+      slide.addText(plannerMediaPageButtonLabel(isKo), {
+        x: btnX,
+        y: btnY,
+        w: btnW,
+        h: btnH,
+        fontFace: face,
+        fontSize: 9,
+        color: VIOLET,
+        bold: true,
+        align: "center",
+        valign: "middle",
+        hyperlink: { url: mediaUrl },
+      });
+    }
   }
 
   const portfolio = p.portfolio.slice(0, 12);
@@ -648,115 +921,29 @@ export async function buildPlannerReportPptx(
       x: 0.7, y: 2.2, w: 12, h: 0.5, fontFace: face, fontSize: 14, color: GRAY, align: "center",
     });
   } else {
-    const perSlide = 2;
-    for (let i = 0; i < portfolio.length; i += perSlide) {
-      const chunk = portfolio.slice(i, i + perSlide);
-      const slide = pptx.addSlide();
-      header(
-        slide,
-        i === 0
-          ? isKo
-            ? "매체 구성"
-            : "Media lineup"
-          : isKo
-            ? "매체 구성 (계속)"
-            : "Media lineup (cont.)",
-      );
-      chunk.forEach((row, idx) => {
-        const cardY = 1.2 + idx * PPT_CARD_STEP;
-        slide.addShape(pptx.ShapeType.roundRect, {
-          x: 0.55,
-          y: cardY,
-          w: 12.2,
-          h: PPT_CARD_H,
-          fill: { color: LIGHT },
-          rectRadius: 0.08,
-          line: { color: "E4E6EC", width: 0.75 },
-        });
-        const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
-        const textX = 0.75 + THUMB_W_IN + 0.25;
-        if (thumb) {
-          try {
-            slide.addImage({
-              data: thumb,
-              x: 0.75,
-              y: cardY + 0.2,
-              w: THUMB_W_IN,
-              h: THUMB_H_IN,
-            });
-          } catch {
-            /* broken thumb — skip */
-          }
-        } else {
-          slide.addShape(pptx.ShapeType.roundRect, {
-            x: 0.75,
-            y: cardY + 0.2,
-            w: THUMB_W_IN,
-            h: THUMB_H_IN,
-            fill: { color: WHITE },
-            rectRadius: 0.06,
-            line: { color: "E4E6EC", width: 0.5 },
-          });
-          slide.addText(isKo ? "이미지 없음" : "No image", {
-            x: 0.75,
-            y: cardY + 0.2 + THUMB_H_IN / 2 - 0.2,
-            w: THUMB_W_IN,
-            h: 0.4,
-            fontFace: face,
-            fontSize: 9,
-            color: GRAY,
-            align: "center",
-          });
-        }
-        slide.addText(mediaRichLines(row), {
-          x: textX,
-          y: cardY + 0.25,
-          w: 0.55 + 12.2 - (textX - 0.55) - 0.2,
-          h: PPT_CARD_H - 0.5,
-          valign: "top",
-        });
-        const mediaUrl = plannerMediaPageUrl(row.id, isKo);
-        if (mediaUrl) {
-          const btnLabel = plannerMediaPageButtonLabel(isKo);
-          const btnW = 2.55;
-          const btnH = 0.32;
-          const btnX = 0.55 + 12.2 - btnW - 0.22;
-          const btnY = cardY + PPT_CARD_H - btnH - 0.22;
-          slide.addShape(pptx.ShapeType.roundRect, {
-            x: btnX,
-            y: btnY,
-            w: btnW,
-            h: btnH,
-            fill: { color: WHITE },
-            line: { color: VIOLET, width: 1.25 },
-            rectRadius: 0.06,
-          });
-          slide.addText(btnLabel, {
-            x: btnX,
-            y: btnY,
-            w: btnW,
-            h: btnH,
-            fontFace: face,
-            fontSize: 9,
-            color: VIOLET,
-            bold: true,
-            align: "center",
-            valign: "middle",
-            hyperlink: { url: mediaUrl },
-          });
-          slide.addText(shortMediaUrl(mediaUrl), {
-            x: btnX - 0.15,
-            y: btnY + btnH + 0.04,
-            w: btnW + 0.3,
-            h: 0.22,
-            fontFace: face,
-            fontSize: 7,
-            color: CYAN,
-            align: "right",
-            hyperlink: { url: mediaUrl },
-          });
-        }
-      });
+    let slide: PptxSlide | null = null;
+    let cardY = 1.2;
+    const maxY = 6.85;
+
+    for (let i = 0; i < portfolio.length; i++) {
+      const row = portfolio[i]!;
+      const cardH = estimatePptCardHeight(row, p.portfolio.length, isKo, THUMB_H_IN);
+      if (!slide || cardY + cardH > maxY) {
+        slide = pptx.addSlide();
+        header(
+          slide,
+          i === 0
+            ? isKo
+              ? "매체 구성"
+              : "Media lineup"
+            : isKo
+              ? "매체 구성 (계속)"
+              : "Media lineup (cont.)",
+        );
+        cardY = 1.2;
+      }
+      drawPptMediaCard(slide, row, cardY, cardH);
+      cardY += cardH + CARD_GAP;
     }
   }
 
