@@ -103,6 +103,7 @@ function resolveNameEn(koreanName: string, dbNameEn: string | null | undefined):
 export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaItem {
   const lat = m.latitude ?? 37.5665;
   const lng = m.longitude ?? 126.978;
+  const coordinatesAreFallback = m.latitude == null || m.longitude == null;
   const daily = m.dailyFootfall ?? 0;
   const imgs = filterDisplayableMediaImageUrls(
     dedupeImageUrls(
@@ -204,6 +205,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     price: m.price,
     lat,
     lng,
+    coordinatesAreFallback,
     dailyFootTraffic: daily,
     impressions: m.impressions ?? undefined,
     monthlyFootTraffic: m.impressions ?? undefined,

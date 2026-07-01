@@ -177,7 +177,7 @@ export function IntegratedReportStep(props: Props) {
               />
 
               <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
-                <PlannerReportDocument payload={payload} />
+                <PlannerReportDocument payload={payload} mapPortfolio={props.portfolio} />
               </div>
 
               <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>

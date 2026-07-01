@@ -72,6 +72,8 @@ type Props = {
   invalidateNonce?: number;
   /** next-themes light/dark 에 맞춰 Carto Voyager / Dark Matter(라벨 포함) 전환 */
   themeAwareTiles?: boolean;
+  /** 보고서 등 라이트 문서 — Carto light 타일 고정 (다크 타일 금지) */
+  preferLightTiles?: boolean;
 };
 
 /** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
@@ -367,6 +369,7 @@ export default function DarkMapView({
   onUserViewportAdjusted,
   invalidateNonce,
   themeAwareTiles = false,
+  preferLightTiles = false,
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
@@ -378,9 +381,11 @@ export default function DarkMapView({
   const onSelectStable = useCallback((id: string) => onSelect(id), [onSelect]);
   const useCluster = !disableCluster && markers.length > 1;
   const programmaticApplyRef = useRef(false);
-  const lightTiles = themeAwareTiles
-    ? resolveDarkMapLightTiles(true, resolvedTheme)
-    : isPublicMapLightTile();
+  const lightTiles = preferLightTiles
+    ? true
+    : themeAwareTiles
+      ? resolveDarkMapLightTiles(true, resolvedTheme)
+      : isPublicMapLightTile();
 
   return (
     <div
@@ -409,7 +414,7 @@ export default function DarkMapView({
         zoomControl={false}
         zoomAnimation
       >
-        <DarkMapTileLayer themeAware={themeAwareTiles} />
+        <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
         <ZoomControl position="bottomright" />
         <MapResizeFix />
         <InvalidateOnNonce nonce={invalidateNonce} />
