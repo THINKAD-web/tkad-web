@@ -256,6 +256,7 @@ export async function buildPlannerReportPptx(
   const W = 13.33;
   const vis = assets?.sectionVisibility;
   const exportSections = filterExportSections(p.sections, vis);
+  const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
   const CYAN_LT = "7CDCEB";
   const wordmark = (size: number) => [
@@ -913,13 +914,226 @@ export async function buildPlannerReportPptx(
     }
   }
 
-  const portfolio = p.portfolio.slice(0, 12);
+  function drawPptMediaTile(
+    slide: PptxSlide,
+    row: PlannerExportMediaRow,
+    tx: number,
+    ty: number,
+    tw: number,
+    th: number,
+  ) {
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: tx,
+      y: ty,
+      w: tw,
+      h: th,
+      fill: { color: WHITE },
+      rectRadius: 0.06,
+      line: { color: "E5E7EB", width: 0.5 },
+    });
+    const pad = 0.12;
+    const thumbSize = Math.min(tw - pad * 2, th * 0.42);
+    const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+    if (thumb) {
+      try {
+        slide.addImage({
+          data: thumb,
+          x: tx + (tw - thumbSize) / 2,
+          y: ty + pad,
+          w: thumbSize,
+          h: thumbSize,
+        });
+      } catch {
+        /* broken thumb */
+      }
+    } else if (row.thumbUrl?.trim()) {
+      slide.addShape(pptx.ShapeType.roundRect, {
+        x: tx + (tw - thumbSize) / 2,
+        y: ty + pad,
+        w: thumbSize,
+        h: thumbSize,
+        fill: { color: "F8F9FC" },
+        rectRadius: 0.04,
+        line: { color: "E5E7EB", width: 0.5 },
+      });
+    }
+    let textY = ty + pad + thumbSize + 0.12;
+    slide.addText(row.name, {
+      x: tx + pad,
+      y: textY,
+      w: tw - pad * 2,
+      h: 0.38,
+      fontFace: face,
+      fontSize: 9,
+      color: INK,
+      bold: true,
+    });
+    textY += 0.34;
+    const meta = [row.region, row.type ?? row.categoryLabel].filter(Boolean).join(" · ");
+    if (meta) {
+      slide.addText(meta, {
+        x: tx + pad,
+        y: textY,
+        w: tw - pad * 2,
+        h: 0.2,
+        fontFace: face,
+        fontSize: 8,
+        color: GRAY,
+      });
+      textY += 0.2;
+    }
+    const price = row.monthlyPriceLabel ?? row.priceLabel;
+    if (price) {
+      slide.addText(price, {
+        x: tx + pad,
+        y: textY,
+        w: tw - pad * 2,
+        h: 0.22,
+        fontFace: face,
+        fontSize: 9,
+        color: VIOLET,
+        bold: true,
+      });
+    }
+  }
+
+  function drawPptMediaCompactTile(
+    slide: PptxSlide,
+    row: PlannerExportMediaRow,
+    tx: number,
+    ty: number,
+    tw: number,
+    th: number,
+  ) {
+    slide.addShape(pptx.ShapeType.roundRect, {
+      x: tx,
+      y: ty,
+      w: tw,
+      h: th,
+      fill: { color: WHITE },
+      rectRadius: 0.05,
+      line: { color: "E5E7EB", width: 0.5 },
+    });
+    const thumbSize = 0.55;
+    const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
+    if (thumb) {
+      try {
+        slide.addImage({
+          data: thumb,
+          x: tx + 0.1,
+          y: ty + (th - thumbSize) / 2,
+          w: thumbSize,
+          h: thumbSize,
+        });
+      } catch {
+        /* broken thumb */
+      }
+    }
+    const textX = tx + thumbSize + 0.22;
+    const textW = tw - thumbSize - 0.32;
+    slide.addText(row.name, {
+      x: textX,
+      y: ty + 0.14,
+      w: textW,
+      h: 0.28,
+      fontFace: face,
+      fontSize: 8.5,
+      color: INK,
+      bold: true,
+    });
+    const meta = [
+      row.region,
+      row.type ?? row.categoryLabel,
+      row.monthlyPriceLabel ?? row.priceLabel,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    if (meta) {
+      slide.addText(meta, {
+        x: textX,
+        y: ty + 0.44,
+        w: textW,
+        h: 0.24,
+        fontFace: face,
+        fontSize: 8,
+        color: GRAY,
+      });
+    }
+  }
+
+  const portfolioAll = p.portfolio;
+  const portfolio =
+    lineupViewMode === "detail" ? portfolioAll.slice(0, 12) : portfolioAll;
   if (portfolio.length === 0) {
     const s3 = pptx.addSlide();
     header(s3, isKo ? "매체 구성" : "Media lineup");
     s3.addText(isKo ? "포트폴리오에 담긴 매체가 없습니다." : "No media selected.", {
       x: 0.7, y: 2.2, w: 12, h: 0.5, fontFace: face, fontSize: 14, color: GRAY, align: "center",
     });
+  } else if (lineupViewMode === "card") {
+    const COLS = 3;
+    const ROWS = 2;
+    const PER_SLIDE = COLS * ROWS;
+    const MARGIN_X = 0.6;
+    const GRID_W = W - MARGIN_X * 2;
+    const GAP = 0.22;
+    const cellW = (GRID_W - GAP * (COLS - 1)) / COLS;
+    const cellH = 2.5;
+    const startY = 1.15;
+
+    for (let i = 0; i < portfolio.length; i += PER_SLIDE) {
+      const slide = pptx.addSlide();
+      header(
+        slide,
+        i === 0
+          ? isKo
+            ? "매체 구성"
+            : "Media lineup"
+          : isKo
+            ? "매체 구성 (계속)"
+            : "Media lineup (cont.)",
+      );
+      const chunk = portfolio.slice(i, i + PER_SLIDE);
+      chunk.forEach((row, j) => {
+        const col = j % COLS;
+        const rowIdx = Math.floor(j / COLS);
+        const tx = MARGIN_X + col * (cellW + GAP);
+        const ty = startY + rowIdx * (cellH + GAP);
+        drawPptMediaTile(slide, row, tx, ty, cellW, cellH);
+      });
+    }
+  } else if (lineupViewMode === "compact") {
+    const COLS = 4;
+    const ROWS = 2;
+    const PER_SLIDE = COLS * ROWS;
+    const MARGIN_X = 0.55;
+    const GRID_W = W - MARGIN_X * 2;
+    const GAP = 0.18;
+    const cellW = (GRID_W - GAP * (COLS - 1)) / COLS;
+    const cellH = 0.95;
+    const startY = 1.15;
+
+    for (let i = 0; i < portfolio.length; i += PER_SLIDE) {
+      const slide = pptx.addSlide();
+      header(
+        slide,
+        i === 0
+          ? isKo
+            ? "매체 구성"
+            : "Media lineup"
+          : isKo
+            ? "매체 구성 (계속)"
+            : "Media lineup (cont.)",
+      );
+      const chunk = portfolio.slice(i, i + PER_SLIDE);
+      chunk.forEach((row, j) => {
+        const col = j % COLS;
+        const rowIdx = Math.floor(j / COLS);
+        const tx = MARGIN_X + col * (cellW + GAP);
+        const ty = startY + rowIdx * (cellH + GAP);
+        drawPptMediaCompactTile(slide, row, tx, ty, cellW, cellH);
+      });
+    }
   } else {
     let slide: PptxSlide | null = null;
     let cardY = 1.2;

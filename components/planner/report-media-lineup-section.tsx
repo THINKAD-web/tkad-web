@@ -328,11 +328,20 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
         </ul>
       )}
 
-      {viewMode !== "detail" ? (
+      {p.portfolio.length > 0 ? (
         <p className="text-[11px] leading-snug text-gray-400">
-          {isKo
-            ? "피드·카드·컴팩트 보기는 화면 전용입니다. PDF·PPT는 상세 카드 형식으로 내려받습니다."
-            : "Feed, card, and compact views are on-screen only. PDF and PPT exports use the detail card layout."}
+          {viewMode === "feed"
+            ? isKo
+              ? "피드 보기는 화면 전용입니다. PDF·PPT는 상세 카드 형식으로 내려받습니다."
+              : "Feed view is on-screen only. PDF and PPT exports use the detail card layout."
+            : isKo
+              ? `PDF·PPT 다운로드는 위에서 선택한 보기(${viewMode === "card" ? "카드" : viewMode === "compact" ? "컴팩트" : "상세"})와 동일한 레이아웃으로 내려받습니다.`
+              : `PDF and PPT exports match the selected view (${viewMode === "card" ? "card" : viewMode === "compact" ? "compact" : "detail"}) above.`}
+          {p.portfolio.length >= 8 && viewMode === "detail"
+            ? isKo
+              ? " 매체가 많을 때는 카드형 보기로 페이지 수를 줄일 수 있습니다."
+              : " For many media, card view reduces export page count."
+            : null}
         </p>
       ) : null}
     </section>

@@ -63,6 +63,7 @@ export async function buildPlannerReportPdf(
   const doc = new JsPDF({ unit: "mm", format: "a4" });
   const vis = assets?.sectionVisibility;
   const exportSections = filterExportSections(p.sections, vis);
+  const lineupViewMode = assets?.lineupViewMode ?? "detail";
   const hasKr = await ensureKrFontForServerPdf(doc);
   const FONT = krFontFamily(hasKr);
 
@@ -903,6 +904,142 @@ export async function buildPlannerReportPdf(
     y += rh + 4;
   }
 
+  function drawMediaCardGrid(
+    rows: PlannerExportMediaRow[],
+    thumbMap: Map<string, string>,
+  ) {
+    const gap = 3;
+    const cols = 2;
+    const cellW = (contentW - gap * (cols - 1)) / cols;
+    const pad = 2;
+    const thumbSize = Math.min(cellW - pad * 2, 20);
+    const cellH = pad + thumbSize + 16 + pad;
+    let col = 0;
+    let rowY = y;
+
+    for (const row of rows) {
+      if (col === 0) ensure(cellH + gap);
+      const cx = M + col * (cellW + gap);
+
+      setFill(WHITE);
+      setDraw(GRAY_200);
+      doc.setLineWidth(0.25);
+      doc.roundedRect(cx, rowY, cellW, cellH, 2, 2, "FD");
+
+      const thumb = row.thumbUrl ? thumbMap.get(row.thumbUrl) : undefined;
+      if (thumb) {
+        addPdfThumbImage(doc, thumb, cx + pad, rowY + pad, thumbSize, thumbSize);
+      } else if (row.thumbUrl?.trim()) {
+        setFill(GRAY_50);
+        doc.roundedRect(cx + pad, rowY + pad, thumbSize, thumbSize, 1.5, 1.5, "F");
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(6);
+        setText(GRAY_500);
+        doc.text(
+          isKo ? "이미지 없음" : "No image",
+          cx + pad + thumbSize / 2,
+          rowY + pad + thumbSize / 2 + 0.5,
+          { align: "center" },
+        );
+      }
+
+      const textW = cellW - pad * 2;
+      let ty = rowY + pad + thumbSize + 3.5;
+      doc.setFont(FONT, "bold");
+      doc.setFontSize(8);
+      setText(INK);
+      const nameLines = doc.splitTextToSize(row.name, textW) as string[];
+      doc.text(nameLines.slice(0, 2), cx + pad, ty);
+      ty += nameLines.slice(0, 2).length * 3.4 + 0.8;
+
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(7);
+      setText(GRAY_600);
+      const meta = [row.region, row.type ?? row.categoryLabel]
+        .filter(Boolean)
+        .join(" · ");
+      if (meta) {
+        const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
+        doc.text(metaLine, cx + pad, ty);
+        ty += 3.2;
+      }
+      const price = row.monthlyPriceLabel ?? row.priceLabel;
+      if (price) {
+        doc.setFont(FONT, "bold");
+        doc.setFontSize(7.5);
+        setText(VIOLET);
+        doc.text(price, cx + pad, ty);
+      }
+
+      col += 1;
+      if (col >= cols) {
+        col = 0;
+        rowY += cellH + gap;
+      }
+    }
+    if (col > 0) rowY += cellH + gap;
+    y = rowY;
+  }
+
+  function drawMediaCompactGrid(
+    rows: PlannerExportMediaRow[],
+    thumbMap: Map<string, string>,
+  ) {
+    const gap = 2.5;
+    const cols = 2;
+    const cellW = (contentW - gap * (cols - 1)) / cols;
+    const rowH = 10;
+    const thumbSize = 7;
+    let col = 0;
+    let rowY = y;
+
+    for (const row of rows) {
+      if (col === 0) ensure(rowH + gap);
+      const cx = M + col * (cellW + gap);
+
+      setFill(WHITE);
+      setDraw(GRAY_200);
+      doc.setLineWidth(0.2);
+      doc.roundedRect(cx, rowY, cellW, rowH, 1.5, 1.5, "FD");
+
+      const thumb = row.thumbUrl ? thumbMap.get(row.thumbUrl) : undefined;
+      if (thumb) {
+        addPdfThumbImage(doc, thumb, cx + 1.5, rowY + 1.5, thumbSize, thumbSize);
+      }
+
+      const textX = cx + thumbSize + 3;
+      const textW = cellW - thumbSize - 5;
+      doc.setFont(FONT, "bold");
+      doc.setFontSize(7.5);
+      setText(INK);
+      const nameLine = (doc.splitTextToSize(row.name, textW) as string[])[0] ?? row.name;
+      doc.text(nameLine, textX, rowY + 4);
+
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(6.5);
+      setText(GRAY_600);
+      const meta = [
+        row.region,
+        row.type ?? row.categoryLabel,
+        row.monthlyPriceLabel ?? row.priceLabel,
+      ]
+        .filter(Boolean)
+        .join(" · ");
+      if (meta) {
+        const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
+        doc.text(metaLine, textX, rowY + 7.5);
+      }
+
+      col += 1;
+      if (col >= cols) {
+        col = 0;
+        rowY += rowH + gap;
+      }
+    }
+    if (col > 0) rowY += rowH + gap;
+    y = rowY;
+  }
+
   if (sectionVisible(vis, "recommend") && p.recommendRationale) {
     sectionTitle(isKo ? "추천 근거" : "Recommendation rationale");
     for (const line of p.recommendRationale.summaryLines) {
@@ -982,6 +1119,10 @@ export async function buildPlannerReportPdf(
         y + 5,
       );
       y += 12;
+    } else if (lineupViewMode === "card") {
+      drawMediaCardGrid(p.portfolio, thumbs);
+    } else if (lineupViewMode === "compact") {
+      drawMediaCompactGrid(p.portfolio, thumbs);
     } else {
       for (const row of p.portfolio) {
         const thumb = row.thumbUrl ? thumbs.get(row.thumbUrl) : undefined;
