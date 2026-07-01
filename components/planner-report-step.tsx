@@ -57,6 +57,9 @@ import type {
   ScenarioVariant,
 } from "@/lib/planner/scenario-types";
 import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
+import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
+import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -107,6 +110,17 @@ export type PlannerReportSharedProps = {
   /** 시나리오 카드 적용 시 보고서 상단 맥락. 수동 진행 시 null */
   appliedScenario?: AppliedPlannerScenario | null;
   scenarioVariantLabels?: Record<ScenarioVariant, string>;
+  /** 문서 밖 지역 블록과 미리보기 동기화용 (미전달 시 Step 내부 state) */
+  sectionVisibility?: Record<
+    import("@/lib/planner-report-export/section-visibility").PlannerReportSectionKey,
+    boolean
+  >;
+  onSectionVisibilityChange?: (
+    next: Record<
+      import("@/lib/planner-report-export/section-visibility").PlannerReportSectionKey,
+      boolean
+    >,
+  ) => void;
 };
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -316,6 +330,13 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [props.portfolio, props.isKo],
   );
 
+  const [internalSectionVisibility, setInternalSectionVisibility] =
+    usePlannerReportSectionVisibility();
+  const sectionVisibility =
+    props.sectionVisibility ?? internalSectionVisibility;
+  const setSectionVisibility =
+    props.onSectionVisibilityChange ?? setInternalSectionVisibility;
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
@@ -324,7 +345,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: props.activitySource,
-          exportMapPins,
+          exportMapPins: sectionVisible(sectionVisibility, "map")
+            ? exportMapPins
+            : undefined,
+          sectionVisibility,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
@@ -338,7 +362,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, exportPayload, exportMapPins, props.activitySource, t, tCommon, toast],
+    [downloading, exportPayload, exportMapPins, sectionVisibility, props.activitySource, t, tCommon, toast],
   );
 
   const sendEmailReport = useCallback(async () => {
@@ -520,6 +544,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                 <PlannerReportDocument
                   payload={exportPayload}
                   mapPortfolio={props.portfolio}
+                  sectionVisibility={sectionVisibility}
                   editableTitle
                   onDocumentTitleChange={setDocumentTitle}
                 />
@@ -557,6 +582,15 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               />
 
               <PlannerNeonCard>
+                <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:p-6">
+                  <ReportSectionVisibilityPanel
+                    isKo={props.isKo}
+                    payload={exportPayload}
+                    mapPortfolio={props.portfolio}
+                    visibility={sectionVisibility}
+                    onChange={setSectionVisibility}
+                  />
+                </div>
                 <div className="flex flex-col gap-4 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
                   <div>
                     <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
@@ -731,6 +765,11 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     [props.portfolio, props.isKo],
   );
 
+  const [internalSectionVisibility, setInternalSectionVisibility] =
+    usePlannerReportSectionVisibility();
+  const sectionVisibility =
+    props.sectionVisibility ?? internalSectionVisibility;
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
@@ -766,7 +805,10 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,
-          exportMapPins,
+          exportMapPins: sectionVisible(sectionVisibility, "map")
+            ? exportMapPins
+            : undefined,
+          sectionVisibility,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", {
@@ -780,7 +822,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, props, derived, snapshotAt, exportMapPins, t, tCommon, toast],
+    [downloading, props, derived, snapshotAt, exportMapPins, sectionVisibility, t, tCommon, toast],
   );
 
   if (pdfAccessLoading) {
