@@ -2,6 +2,7 @@
 
 import {
   plannerReportFileBase,
+  type PlannerExportMapPin,
   type PlannerReportExportFormat,
   type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
@@ -14,7 +15,10 @@ import type { PlanReportActivitySource } from "@/lib/plan-report-activity/types"
 export async function downloadPlannerReport(
   format: PlannerReportExportFormat,
   payload: PlannerReportExportPayload,
-  options?: { activitySource?: PlanReportActivitySource },
+  options?: {
+    activitySource?: PlanReportActivitySource;
+    exportMapPins?: PlannerExportMapPin[];
+  },
 ): Promise<void> {
   const res = await fetch("/api/planner/report/export", {
     method: "POST",
@@ -24,6 +28,7 @@ export async function downloadPlannerReport(
       format,
       payload,
       activitySource: options?.activitySource,
+      exportMapPins: options?.exportMapPins,
     }),
   });
   if (!res.ok) {

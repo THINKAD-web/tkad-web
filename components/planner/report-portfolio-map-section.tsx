@@ -28,7 +28,7 @@ type Props = {
   isKo: boolean;
 };
 
-/** 플래너 보고서 화면 전용 — 담긴 매체 위치 미니맵 (PDF/PPT 제외) */
+/** 플래너 보고서 화면 전용 — 담긴 매체 위치 미니맵 (PDF/PPT 는 분포도) */
 export function ReportPortfolioMapSection({ portfolio, isKo }: Props) {
   const mapData = useMemo(
     () => buildPlannerReportPortfolioMap(portfolio, isKo),
@@ -96,8 +96,8 @@ export function ReportPortfolioMapSection({ portfolio, isKo }: Props) {
         ) : null}
         <p className="text-[11px] text-gray-400">
           {isKo
-            ? "매체 위치 지도는 화면에서만 제공됩니다. PDF·PPT에는 포함되지 않습니다."
-            : "Location map is on-screen only. Not included in PDF or PPT exports."}
+            ? "화면: 인터랙티브 미니맵 · PDF·PPT: 도로·지명 없는 위치 분포도"
+            : "On-screen: interactive mini-map · PDF/PPT: location scatter (no roads or labels)"}
         </p>
       </div>
     </section>

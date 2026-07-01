@@ -2,11 +2,13 @@ import { ensureKrFontForServerPdf, krFontFamily } from "@/lib/jspdf-register-not
 import { CONTACT_EMAIL } from "@/lib/constants";
 import {
   addPdfThumbImage,
+  dataUrlImageFormat,
   PLANNER_EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
 import type {
   PlannerExportMediaRow,
+  PlannerReportExportAssets,
   PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
 import {
@@ -43,6 +45,7 @@ function fmtImp(n: number, isKo: boolean): string {
 
 export async function buildPlannerReportPdf(
   p: PlannerReportExportPayload,
+  assets?: PlannerReportExportAssets,
 ): Promise<Uint8Array> {
   const { default: JsPDF } = await import("jspdf");
   const doc = new JsPDF({ unit: "mm", format: "a4" });
@@ -785,6 +788,41 @@ export async function buildPlannerReportPdf(
       }
     }
     y += 4;
+  }
+
+  const dist = assets?.distributionMap;
+  if (dist?.dataUrl) {
+    const MAP_H = 54;
+    ensure(MAP_H + 20);
+    sectionTitle(isKo ? "매체 위치" : "Media locations");
+    try {
+      doc.addImage(
+        dist.dataUrl,
+        dataUrlImageFormat(dist.dataUrl),
+        M,
+        y + 2,
+        contentW,
+        MAP_H,
+      );
+    } catch {
+      /* broken map image — skip section body */
+    }
+    y += MAP_H + 5;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8);
+    setText(GRAY_500);
+    const caption = isKo
+      ? `${dist.mappableMediaCount}개 매체 · ${dist.locationCount}개 위치 — 도로·지명 없는 위치 분포도`
+      : `${dist.mappableMediaCount} media · ${dist.locationCount} locations — scatter map (no roads or labels)`;
+    const wrappedCaption = doc.splitTextToSize(caption, contentW) as string[];
+    ensure(wrappedCaption.length * 3.5 + 2);
+    doc.text(wrappedCaption, M, y + 2);
+    y += wrappedCaption.length * 3.5 + 2;
+    const note = isKo
+      ? "화면: 인터랙티브 미니맵 · PDF·PPT: 분포도"
+      : "On-screen: interactive mini-map · PDF/PPT: distribution map";
+    doc.text(note, M, y + 2);
+    y += 8;
   }
 
   sectionTitle(isKo ? "매체 구성" : "Media lineup");

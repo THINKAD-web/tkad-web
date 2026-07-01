@@ -154,6 +154,25 @@ export type PlannerReportExportPayload = {
 
 export type PlannerReportExportFormat = "pdf" | "pptx";
 
+/** PDF/PPT 분포도용 최소 핀 — payload 좌표 대량 삽입 대신 export body 에만 전달 */
+export type PlannerExportMapPin = {
+  id: string;
+  lat: number;
+  lng: number;
+  type: string;
+  name: string;
+};
+
+export type PlannerReportDistributionMap = {
+  dataUrl: string;
+  mappableMediaCount: number;
+  locationCount: number;
+};
+
+export type PlannerReportExportAssets = {
+  distributionMap?: PlannerReportDistributionMap | null;
+};
+
 /**
  * 파일명 규칙: `THINKAD_{캠페인명}_제안서_{YYYY-MM-DD}` (+확장자).
  * OS 금지문자·공백 정리. 클라이언트(blob download)·서버(Content-Disposition) 공용.

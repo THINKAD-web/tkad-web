@@ -20,6 +20,7 @@ import type {
 } from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
+import { buildExportMapPinsFromPortfolio } from "@/lib/planner-report-export/build-export-map-pins";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
@@ -310,6 +311,11 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [payload, documentTitle],
   );
 
+  const exportMapPins = useMemo(
+    () => buildExportMapPinsFromPortfolio(props.portfolio, props.isKo),
+    [props.portfolio, props.isKo],
+  );
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
@@ -318,6 +324,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: props.activitySource,
+          exportMapPins,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
@@ -331,7 +338,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, exportPayload, props.activitySource, t, tCommon, toast],
+    [downloading, exportPayload, exportMapPins, props.activitySource, t, tCommon, toast],
   );
 
   const sendEmailReport = useCallback(async () => {
@@ -719,6 +726,11 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
 
+  const exportMapPins = useMemo(
+    () => buildExportMapPinsFromPortfolio(props.portfolio, props.isKo),
+    [props.portfolio, props.isKo],
+  );
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
@@ -754,6 +766,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,
+          exportMapPins,
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", {
@@ -767,7 +780,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, props, derived, snapshotAt, t, tCommon, toast],
+    [downloading, props, derived, snapshotAt, exportMapPins, t, tCommon, toast],
   );
 
   if (pdfAccessLoading) {
