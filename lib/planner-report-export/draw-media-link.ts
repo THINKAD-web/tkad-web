@@ -56,3 +56,16 @@ export function addPdfMediaDetailLink(
 
   return btnH + 5.5;
 }
+
+/** 카드형·컴팩트 타일 전체 클릭 영역 */
+export function addPdfRectLink(
+  doc: PdfDoc,
+  opts: { x: number; y: number; w: number; h: number; url: string },
+): void {
+  try {
+    const linkFn = (doc as PdfDoc & { link?: PdfDoc["link"] }).link;
+    linkFn?.call(doc, opts.x, opts.y, opts.w, opts.h, { url: opts.url });
+  } catch {
+    /* 링크 실패해도 문서 생성은 계속 */
+  }
+}

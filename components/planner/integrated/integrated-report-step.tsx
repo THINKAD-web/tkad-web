@@ -11,7 +11,6 @@ import { reachSplitForGoal } from "@/lib/planner-logic";
 import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
 import type { DigitalRecommendResult } from "@/lib/planner/recommend-digital";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { buildExportMapPinsFromPortfolio } from "@/lib/planner-report-export/build-export-map-pins";
 import { buildIntegratedReportPayload } from "@/lib/planner-report-export/payload-integrated";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { useToast } from "@/components/toast-provider";
@@ -36,7 +35,6 @@ import type {
 } from "@/lib/planner/scenario-types";
 import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
-import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
@@ -107,11 +105,6 @@ export function IntegratedReportStep(props: Props) {
     [props, generatedAt, plannerResultAllowed],
   );
 
-  const exportMapPins = useMemo(
-    () => buildExportMapPinsFromPortfolio(props.portfolio, props.isKo),
-    [props.portfolio, props.isKo],
-  );
-
   const [sectionVisibility, setSectionVisibility] =
     usePlannerReportSectionVisibility();
 
@@ -122,9 +115,6 @@ export function IntegratedReportStep(props: Props) {
       try {
         await downloadPlannerReport(format, payload, {
           activitySource: "integrated_planner",
-          exportMapPins: sectionVisible(sectionVisibility, "map")
-            ? exportMapPins
-            : undefined,
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
@@ -137,7 +127,7 @@ export function IntegratedReportStep(props: Props) {
         setDownloading(null);
       }
     },
-    [pdfAllowed, pdfAccessLoading, downloading, payload, exportMapPins, sectionVisibility, toast, t],
+    [pdfAllowed, pdfAccessLoading, downloading, payload, sectionVisibility, toast, t],
   );
 
   const reachSplit = reachSplitForGoal(props.campaignGoal);

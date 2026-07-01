@@ -20,7 +20,6 @@ import type {
 } from "@/lib/planner/types";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
-import { buildExportMapPinsFromPortfolio } from "@/lib/planner-report-export/build-export-map-pins";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
@@ -63,7 +62,6 @@ import {
   lineupViewModeForExport,
   readPlannerReportViewMode,
 } from "@/lib/planner-report-view-mode";
-import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 
 export type PlannerReportSharedProps = {
   isKo: boolean;
@@ -329,11 +327,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
     [payload, documentTitle],
   );
 
-  const exportMapPins = useMemo(
-    () => buildExportMapPinsFromPortfolio(props.portfolio, props.isKo),
-    [props.portfolio, props.isKo],
-  );
-
   const [internalSectionVisibility, setInternalSectionVisibility] =
     usePlannerReportSectionVisibility();
   const sectionVisibility =
@@ -349,9 +342,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
       try {
         await downloadPlannerReport(format, exportPayload, {
           activitySource: props.activitySource,
-          exportMapPins: sectionVisible(sectionVisibility, "map")
-            ? exportMapPins
-            : undefined,
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
@@ -367,7 +357,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, exportPayload, exportMapPins, sectionVisibility, props.activitySource, t, tCommon, toast],
+    [downloading, exportPayload, sectionVisibility, props.activitySource, t, tCommon, toast],
   );
 
   const sendEmailReport = useCallback(async () => {
@@ -765,11 +755,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
     new Date().toLocaleString(props.isKo ? "ko-KR" : "en-US"),
   );
 
-  const exportMapPins = useMemo(
-    () => buildExportMapPinsFromPortfolio(props.portfolio, props.isKo),
-    [props.portfolio, props.isKo],
-  );
-
   const [internalSectionVisibility, setInternalSectionVisibility] =
     usePlannerReportSectionVisibility();
   const sectionVisibility =
@@ -810,9 +795,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,
-          exportMapPins: sectionVisible(sectionVisibility, "map")
-            ? exportMapPins
-            : undefined,
           sectionVisibility,
           lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
@@ -828,7 +810,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, props, derived, snapshotAt, exportMapPins, sectionVisibility, t, tCommon, toast],
+    [downloading, props, derived, snapshotAt, sectionVisibility, t, tCommon, toast],
   );
 
   if (pdfAccessLoading) {

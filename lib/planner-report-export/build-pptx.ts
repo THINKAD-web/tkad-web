@@ -611,49 +611,6 @@ export async function buildPlannerReportPptx(
     }
   }
 
-  const dist = assets?.distributionMap;
-  if (sectionVisible(vis, "map") && dist?.dataUrl) {
-    const mSlide = pptx.addSlide();
-    header(mSlide, isKo ? "매체 위치" : "Media locations");
-    try {
-      mSlide.addImage({
-        data: dist.dataUrl,
-        x: 0.7,
-        y: 1.15,
-        w: 11.9,
-        h: 4.85,
-      });
-    } catch {
-      /* broken map image */
-    }
-    const caption = isKo
-      ? `${dist.mappableMediaCount}개 매체 · ${dist.locationCount}개 위치 — 도로·지명 없는 위치 분포도`
-      : `${dist.mappableMediaCount} media · ${dist.locationCount} locations — scatter map (no roads or labels)`;
-    mSlide.addText(caption, {
-      x: 0.7,
-      y: 6.2,
-      w: 12,
-      h: 0.45,
-      fontFace: face,
-      fontSize: 11,
-      color: GRAY,
-    });
-    mSlide.addText(
-      isKo
-        ? "화면: 인터랙티브 미니맵 · PDF·PPT: 분포도"
-        : "On-screen: interactive mini-map · PDF/PPT: distribution map",
-      {
-        x: 0.7,
-        y: 6.65,
-        w: 12,
-        h: 0.35,
-        fontFace: face,
-        fontSize: 9,
-        color: GRAY,
-      },
-    );
-  }
-
   // ── 3. 매체 구성 (썸네일 카드 — 화면 MediaDetailCard 근접) ──
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
@@ -958,6 +915,7 @@ export async function buildPlannerReportPptx(
       });
     }
     let textY = ty + pad + thumbSize + 0.12;
+    const mediaUrl = plannerMediaPageUrl(row.id, isKo);
     slide.addText(row.name, {
       x: tx + pad,
       y: textY,
@@ -967,6 +925,7 @@ export async function buildPlannerReportPptx(
       fontSize: 9,
       color: INK,
       bold: true,
+      ...(mediaUrl ? { hyperlink: { url: mediaUrl } } : {}),
     });
     textY += 0.34;
     const meta = [row.region, row.type ?? row.categoryLabel].filter(Boolean).join(" · ");
@@ -993,6 +952,19 @@ export async function buildPlannerReportPptx(
         fontSize: 9,
         color: VIOLET,
         bold: true,
+      });
+    }
+    if (mediaUrl) {
+      slide.addText(isKo ? "상세 →" : "Details →", {
+        x: tx + tw - pad - 0.55,
+        y: ty + th - 0.28,
+        w: 0.55,
+        h: 0.2,
+        fontFace: face,
+        fontSize: 7.5,
+        color: VIOLET,
+        align: "right",
+        hyperlink: { url: mediaUrl },
       });
     }
   }
@@ -1031,6 +1003,7 @@ export async function buildPlannerReportPptx(
     }
     const textX = tx + thumbSize + 0.22;
     const textW = tw - thumbSize - 0.32;
+    const mediaUrl = plannerMediaPageUrl(row.id, isKo);
     slide.addText(row.name, {
       x: textX,
       y: ty + 0.14,
@@ -1040,6 +1013,7 @@ export async function buildPlannerReportPptx(
       fontSize: 8.5,
       color: INK,
       bold: true,
+      ...(mediaUrl ? { hyperlink: { url: mediaUrl } } : {}),
     });
     const meta = [
       row.region,
