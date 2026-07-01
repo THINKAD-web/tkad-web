@@ -93,6 +93,8 @@ export interface MediaItem {
   pricePeriod?: MediaPricePeriodKey;
   lat: number;
   lng: number;
+  /** DB `latitude`/`longitude` null 시 catalog 폴백(서울 시청) 좌표 여부 — 지도 핀 제외 판단용 */
+  coordinatesAreFallback?: boolean;
   /** 복수 설치 지점 (휴게소 상·하행 등, DB `install_locations`) */
   installLocations?: Array<{
     label: string;

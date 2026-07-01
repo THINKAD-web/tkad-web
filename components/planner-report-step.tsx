@@ -512,6 +512,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
               <DocumentPreviewFrame>
                 <PlannerReportDocument
                   payload={exportPayload}
+                  mapPortfolio={props.portfolio}
                   editableTitle
                   onDocumentTitleChange={setDocumentTitle}
                 />

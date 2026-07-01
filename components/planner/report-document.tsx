@@ -16,6 +16,8 @@ import {
 } from "@/components/document/document-layout";
 import { ReportScanLine } from "@/components/planner/report-scan-text";
 import { ReportMediaLineupSection } from "@/components/planner/report-media-lineup-section";
+import { ReportPortfolioMapSection } from "@/components/planner/report-portfolio-map-section";
+import type { MediaItem } from "@/lib/media-data";
 
 /**
  * 플래너 보고서 화면 문서 — 서버 PDF/PPTX 와 동일한 payload·레이아웃으로 렌더한다.
@@ -214,12 +216,14 @@ export const PlannerReportDocument = forwardRef<
   HTMLDivElement,
   {
     payload: PlannerReportExportPayload;
+    /** 화면 미니맵용 — export payload 에 좌표를 넣지 않음 */
+    mapPortfolio?: readonly MediaItem[];
     className?: string;
     editableTitle?: boolean;
     onDocumentTitleChange?: (title: string) => void;
   }
 >(function PlannerReportDocument(
-  { payload: p, className, editableTitle, onDocumentTitleChange },
+  { payload: p, mapPortfolio, className, editableTitle, onDocumentTitleChange },
   ref,
 ) {
   const isKo = p.isKo;
@@ -547,6 +551,10 @@ export const PlannerReportDocument = forwardRef<
               ) : null}
             </div>
           </section>
+        ) : null}
+
+        {mapPortfolio && mapPortfolio.length > 0 ? (
+          <ReportPortfolioMapSection portfolio={mapPortfolio} isKo={isKo} />
         ) : null}
 
         <ReportMediaLineupSection payload={p} />
