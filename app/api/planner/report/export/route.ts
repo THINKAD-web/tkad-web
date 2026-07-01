@@ -12,6 +12,7 @@ import {
   parseSectionVisibility,
   sectionVisible,
 } from "@/lib/planner-report-export/section-visibility";
+import { parseExportLineupViewMode } from "@/lib/planner-report-view-mode";
 import { requirePlannerPdfAccess } from "@/lib/require-planner-pdf-access";
 import { logPlanReportActivityFireAndForget } from "@/lib/plan-report-activity/log";
 import {
@@ -54,12 +55,13 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "Invalid JSON body." }, { status: 400 });
   }
 
-  const { format, payload, activitySource, exportMapPins: rawPins, sectionVisibility: rawVisibility } = (body ?? {}) as {
+  const { format, payload, activitySource, exportMapPins: rawPins, sectionVisibility: rawVisibility, lineupViewMode: rawLineupViewMode } = (body ?? {}) as {
     format?: PlannerReportExportFormat;
     payload?: unknown;
     activitySource?: PlanReportActivitySource;
     exportMapPins?: unknown;
     sectionVisibility?: unknown;
+    lineupViewMode?: unknown;
   };
 
   if (format !== "pdf" && format !== "pptx") {
@@ -75,13 +77,14 @@ export async function POST(request: NextRequest) {
   const base = plannerReportFileBase(payload);
 
   const sectionVisibility = parseSectionVisibility(rawVisibility);
+  const lineupViewMode = parseExportLineupViewMode(rawLineupViewMode);
 
   const pins =
     sectionVisible(sectionVisibility, "map") ? parseExportMapPins(rawPins) : undefined;
   const distributionMap = pins
     ? await renderPlannerDistributionMap(pins, payload.isKo)
     : null;
-  const exportAssets = { distributionMap, sectionVisibility };
+  const exportAssets = { distributionMap, sectionVisibility, lineupViewMode };
 
   const logExport = () => {
     const userId = pdfAccess.userId;

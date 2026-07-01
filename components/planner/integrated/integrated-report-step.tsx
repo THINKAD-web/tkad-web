@@ -37,6 +37,10 @@ import type {
 import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
 import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
+import {
+  lineupViewModeForExport,
+  readPlannerReportViewMode,
+} from "@/lib/planner-report-view-mode";
 
 type Props = {
   isKo: boolean;
@@ -122,6 +126,7 @@ export function IntegratedReportStep(props: Props) {
             ? exportMapPins
             : undefined,
           sectionVisibility,
+          lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
         toast("success", t("pdfDownloaded"));
       } catch (e) {

@@ -172,7 +172,12 @@ export type PlannerReportDistributionMap = {
 export type PlannerReportExportAssets = {
   distributionMap?: PlannerReportDistributionMap | null;
   sectionVisibility?: import("@/lib/planner-report-export/section-visibility").PlannerReportSectionVisibility;
+  lineupViewMode?: import("@/lib/planner-report-view-mode").PlannerExportLineupViewMode;
 };
+
+export type {
+  PlannerExportLineupViewMode,
+} from "@/lib/planner-report-view-mode";
 
 export type {
   PlannerReportSectionKey,

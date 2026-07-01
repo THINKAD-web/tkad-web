@@ -59,6 +59,10 @@ import type {
 import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
+import {
+  lineupViewModeForExport,
+  readPlannerReportViewMode,
+} from "@/lib/planner-report-view-mode";
 import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 
 export type PlannerReportSharedProps = {
@@ -349,6 +353,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
             ? exportMapPins
             : undefined,
           sectionVisibility,
+          lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", { source: `planner_report_${format}` });
@@ -809,6 +814,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
             ? exportMapPins
             : undefined,
           sectionVisibility,
+          lineupViewMode: lineupViewModeForExport(readPlannerReportViewMode()),
         });
         const { trackGaEvent } = await import("@/lib/ga-events");
         trackGaEvent("pdf_download", {
