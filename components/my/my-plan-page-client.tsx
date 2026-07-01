@@ -3,6 +3,11 @@
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import {
+  isPlannerIndustryKey,
+  PLANNER_INDUSTRY_KEYS,
+  type PlannerIndustryKey,
+} from "@/lib/planner/types";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowRight, ChevronDown, ChevronUp, GripVertical, Sparkles, Trash2, X } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -28,6 +33,7 @@ import { cn } from "@/lib/utils";
 
 export function MyPlanPageClient() {
   const tPlan = useTranslations("planNav");
+  const tPlanner = useTranslations("planner");
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
@@ -54,6 +60,11 @@ export function MyPlanPageClient() {
   );
   const reportHref = "/my/plan/report";
   const selectedGoal = mapPlanCartGoalToPlanner(cart.campaignGoal);
+  const selectedIndustry: PlannerIndustryKey | null = isPlannerIndustryKey(
+    cart.industryKey,
+  )
+    ? cart.industryKey
+    : null;
 
   function formatWon(amount: number) {
     if (amount <= 0) return isKo ? "문의" : "Inquire";
@@ -202,6 +213,28 @@ export function MyPlanPageClient() {
                       className="h-11 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900"
                       placeholder={isKo ? "예: 4800" : "e.g. 4800"}
                     />
+                  </div>
+                  <div>
+                    <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">
+                      {tPlanner("industryLabel")}
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      {PLANNER_INDUSTRY_KEYS.map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => updateMeta({ industryKey: k })}
+                          className={cn(
+                            "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
+                            selectedIndustry === k
+                              ? "tkad-plan-cart-chip-active bg-cyan-600 shadow-sm ring-1 ring-cyan-400/40"
+                              : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
+                          )}
+                        >
+                          {tPlanner(k)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                   <div>
                     <label className="mb-2 block text-xs font-semibold text-gray-600 dark:text-white/60">

@@ -12,7 +12,12 @@ import {
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
-import { PLANNER_BUDGET_MIN } from "@/lib/planner/types";
+import {
+  isPlannerIndustryKey,
+  PLANNER_BUDGET_MIN,
+  plannerIndustryLabel,
+  type PlannerIndustryKey,
+} from "@/lib/planner/types";
 import type { PlannerReportSharedProps } from "@/components/planner-report-step";
 import {
   computePlanCartRegionalBreakdown,
@@ -202,6 +207,13 @@ export function buildPlanCartReportBundle(args: {
 
   const monthlyTotalMan = computePlannerPortfolioMonthlyMan(portfolioSorted);
 
+  const industryKey: PlannerIndustryKey | null = isPlannerIndustryKey(
+    cart.industryKey,
+  )
+    ? cart.industryKey
+    : null;
+  const industryText = plannerIndustryLabel(industryKey, isKo);
+
   return {
     regionalBreakdown,
     regionBudgetCharts,
@@ -216,8 +228,8 @@ export function buildPlanCartReportBundle(args: {
       regionsText: inferRegionsText(portfolioSorted, isKo),
       categoriesText: inferCategoriesText(portfolioSorted, isKo),
       ageText: isKo ? "전 연령" : "All ages",
-      industryText: isKo ? "미지정" : "Not specified",
-      industryKey: null,
+      industryText,
+      industryKey,
       portfolio: portfolioSorted,
       matchedCount: portfolio.length,
       monthCompare: comparePlansByDuration(portfolioSorted, budgetMan, [1, 3, 6]),

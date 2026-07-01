@@ -39,6 +39,7 @@ export interface PlanCart {
   campaignGoal?: string;
   totalBudget?: number;
   duration?: number;
+  industryKey?: string;
   updatedAt: string;
 }
 
@@ -130,6 +131,8 @@ export function getPlanCart(): PlanCart {
         typeof parsed.totalBudget === "number" ? parsed.totalBudget : undefined,
       duration:
         typeof parsed.duration === "number" ? parsed.duration : undefined,
+      industryKey:
+        typeof parsed.industryKey === "string" ? parsed.industryKey : undefined,
       updatedAt:
         typeof parsed.updatedAt === "string"
           ? parsed.updatedAt
@@ -141,7 +144,9 @@ export function getPlanCart(): PlanCart {
 }
 
 export function savePlanCartMeta(
-  patch: Partial<Pick<PlanCart, "campaignGoal" | "totalBudget" | "duration">>,
+  patch: Partial<
+    Pick<PlanCart, "campaignGoal" | "totalBudget" | "duration" | "industryKey">
+  >,
 ): PlanCart {
   const cart = getPlanCart();
   const next: PlanCart = {
