@@ -24,6 +24,11 @@ import {
   filterExportSections,
   sectionVisible,
 } from "@/lib/planner-report-export/section-visibility";
+import {
+  collectMediaCardSpecs,
+  showMediaCardContributions,
+  type MediaCardSpec,
+} from "@/lib/planner-report-export/media-card-layout";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -39,6 +44,9 @@ const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
 const GRAY_100 = [238, 240, 244] as const;
 const CYAN_LIGHT = [120, 220, 235] as const;
+const WHITE = [255, 255, 255] as const;
+const CYAN_BAR = [6, 182, 212] as const; // #06B6D4 — 화면 ContributionBar
+const BAR_TRACK = [243, 244, 246] as const;
 
 const M = 15;
 
@@ -659,107 +667,227 @@ export async function buildPlannerReportPdf(
   const thumbs = await loadExportThumbMap(p.portfolio);
   const thumbBox = PLANNER_EXPORT_THUMB_BOX_MM;
 
+  function drawPdfContributionBar(
+    x: number,
+    y: number,
+    w: number,
+    label: string,
+    pct: number,
+    fill: readonly number[],
+  ): number {
+    const trackH = 1.6;
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(7);
+    setText(GRAY_500);
+    doc.text(label, x, y);
+    doc.text(`${pct}%`, x + w, y, { align: "right" });
+    const trackY = y + 2.4;
+    setFill(BAR_TRACK);
+    doc.roundedRect(x, trackY, w, trackH, 0.8, 0.8, "F");
+    const fillW = (w * Math.min(100, Math.max(0, pct))) / 100;
+    if (fillW > 0.3) {
+      setFill(fill);
+      doc.roundedRect(x, trackY, fillW, trackH, 0.8, 0.8, "F");
+    }
+    return 7;
+  }
+
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
+    const pad = 3;
     const thumbSlot = Boolean(row.thumbUrl?.trim());
-    const thumbW = thumbSlot ? thumbBox.w + 2 : 0;
-    const textX = M + 3 + thumbW;
-    const textW = contentW - 6 - thumbW;
-    const lines: Array<{ text: string; color: readonly number[]; bold?: boolean }> =
-      [{ text: row.name, color: INK, bold: true }];
-
-    for (const part of [
-      row.location,
-      row.categoryLabel,
-      row.size ? `${isKo ? "규격" : "Size"} ${row.size}` : null,
-      row.operatingHours
-        ? `${isKo ? "운영" : "Hours"} ${row.operatingHours}`
-        : null,
-    ].filter(Boolean) as string[]) {
-      lines.push({ text: part, color: GRAY_600 });
-    }
-    if (row.dailyTraffic) {
-      lines.push({
-        text: `${isKo ? "일일 노출" : "Daily"} ${row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
-        color: CYAN,
-        bold: true,
-      });
-    }
-    if (row.broadcastLabel) lines.push({ text: row.broadcastLabel, color: GRAY_600 });
-    if (row.monthlyPriceLabel) {
-      lines.push({
-        text: `${isKo ? "월 단가" : "Monthly"} ${row.monthlyPriceLabel}`,
-        color: VIOLET,
-        bold: true,
-      });
-    }
-    if (row.lineTotalLabel) {
-      lines.push({
-        text: `${isKo ? "집행 소계" : "Subtotal"} ${row.lineTotalLabel}`,
-        color: VIOLET,
-        bold: true,
-      });
-    }
-    if (row.recommendReason?.trim()) {
-      lines.push({
-        text: `${isKo ? "추천" : "Why"} ${row.recommendReason.trim()}`,
-        color: GRAY_600,
-      });
-    }
-    if (p.portfolio.length > 1) {
-      const contrib = [
-        row.exposureContributionPct != null
-          ? `${isKo ? "노출 기여" : "Exposure"} ${row.exposureContributionPct}%`
-          : null,
-        row.budgetContributionPct != null
-          ? `${isKo ? "예산 비중" : "Budget"} ${row.budgetContributionPct}%`
-          : null,
-      ]
-        .filter(Boolean)
-        .join(" · ");
-      if (contrib) lines.push({ text: contrib, color: CYAN, bold: true });
-    }
-
+    const thumbW = thumbSlot ? thumbBox.w : 0;
+    const textX = M + pad + (thumbSlot ? thumbW + 3 : 0);
+    const textW = contentW - pad * 2 - (thumbSlot ? thumbW + 3 : 0);
+    const colW = (textW - 3) / 2;
+    const specs = collectMediaCardSpecs(row, isKo);
+    const showContrib = showMediaCardContributions(p.portfolio.length, row);
     const mediaUrl = plannerMediaPageUrl(row.id, isKo);
     const linkBlockH = mediaUrl ? 11 : 0;
 
-    const rh = Math.max(
-      thumbSlot ? thumbBox.h + 4 : 16,
-      lines.length * 4.4 + 8 + linkBlockH,
-    );
+    let contentH = 5;
+    if (row.location) contentH += 4.2;
+    if (row.categoryLabel) contentH += 4.2;
+    if (specs.length > 0) contentH += 3 + Math.ceil(specs.length / 2) * 5.2;
+    if (row.monthlyPriceLabel || row.lineTotalLabel) contentH += 11;
+    if (row.recommendReason?.trim()) {
+      const reasonLines = doc.splitTextToSize(
+        row.recommendReason.trim(),
+        textW - 2,
+      ) as string[];
+      contentH += 4 + Math.min(reasonLines.length, 3) * 3.8;
+    }
+    if (showContrib) contentH += 16;
+    contentH += linkBlockH + pad;
+
+    const thumbColH = thumbSlot ? thumbBox.h + pad * 2 : 0;
+    const rh = Math.max(thumbColH, contentH, 22);
+
     ensure(rh + 4);
-    setFill(GRAY_50);
+    setFill(WHITE);
     setDraw(GRAY_200);
-    doc.setLineWidth(0.2);
-    doc.roundedRect(M, y, contentW, rh, 2, 2, "FD");
+    doc.setLineWidth(0.25);
+    doc.roundedRect(M, y, contentW, rh, 2.5, 2.5, "FD");
+
     if (thumbSlot) {
       if (thumb) {
-        addPdfThumbImage(doc, thumb, M + 2, y + 2, thumbBox.w, thumbBox.h);
+        addPdfThumbImage(doc, thumb, M + pad, y + pad, thumbBox.w, thumbBox.h);
       } else {
         setFill(GRAY_50);
-        doc.roundedRect(M + 2, y + 2, thumbBox.w, thumbBox.h, 1.5, 1.5, "F");
+        doc.roundedRect(M + pad, y + pad, thumbBox.w, thumbBox.h, 1.5, 1.5, "F");
         doc.setFont(FONT, "normal");
         doc.setFontSize(7);
         setText(GRAY_500);
         doc.text(
           isKo ? "이미지 없음" : "No image",
-          M + 2 + thumbBox.w / 2,
-          y + 2 + thumbBox.h / 2 + 1,
+          M + pad + thumbBox.w / 2,
+          y + pad + thumbBox.h / 2 + 1,
           { align: "center" },
         );
       }
     }
-    let ty = y + 5.5;
-    for (const line of lines) {
-      doc.setFont(FONT, "normal");
-      doc.setFontSize(line.bold ? 9.5 : 8.5);
-      setText(line.color);
-      const wrapped = doc.splitTextToSize(line.text, textW) as string[];
-      doc.text(wrapped.slice(0, 2), textX, ty);
-      ty += wrapped.length * 4.2 + 0.8;
+
+    let ty = y + pad + 4;
+    doc.setFont(FONT, "bold");
+    doc.setFontSize(9.5);
+    setText(INK);
+    const nameLines = doc.splitTextToSize(row.name, textW) as string[];
+    doc.text(nameLines.slice(0, 2), textX, ty);
+    ty += nameLines.slice(0, 2).length * 4.2 + 1;
+
+    doc.setFont(FONT, "normal");
+    doc.setFontSize(8.5);
+    if (row.location) {
+      setText(GRAY_600);
+      const locLines = doc.splitTextToSize(row.location, textW) as string[];
+      doc.text(locLines.slice(0, 2), textX, ty);
+      ty += locLines.slice(0, 2).length * 3.8 + 0.6;
     }
+    if (row.categoryLabel) {
+      setText(GRAY_600);
+      doc.text(row.categoryLabel, textX, ty);
+      ty += 4.2;
+    }
+
+    if (specs.length > 0) {
+      setDraw(GRAY_100);
+      doc.setLineWidth(0.15);
+      doc.line(textX, ty, textX + textW, ty);
+      ty += 3;
+      doc.setFontSize(8);
+      for (let i = 0; i < specs.length; i += 2) {
+        const drawSpec = (spec: MediaCardSpec, sx: number) => {
+          setText(GRAY_500);
+          doc.text(`${spec.label}`, sx, ty);
+          setText(INK);
+          doc.setFont(FONT, "normal");
+          const val = (doc.splitTextToSize(spec.value, colW - 14) as string[])[0] ?? spec.value;
+          doc.text(val, sx + 14, ty);
+        };
+        drawSpec(specs[i]!, textX);
+        if (specs[i + 1]) drawSpec(specs[i + 1]!, textX + colW + 3);
+        ty += 5;
+      }
+    }
+
+    if (row.monthlyPriceLabel || row.lineTotalLabel) {
+      setDraw(GRAY_100);
+      doc.line(textX, ty, textX + textW, ty);
+      ty += 4;
+      doc.setFontSize(7);
+      if (row.monthlyPriceLabel) {
+        setText(GRAY_500);
+        doc.text(isKo ? "월 단가" : "Monthly", textX, ty);
+        doc.setFont(FONT, "bold");
+        doc.setFontSize(8.5);
+        setText(VIOLET);
+        doc.text(row.monthlyPriceLabel, textX, ty + 3.5);
+      }
+      if (row.lineTotalLabel) {
+        setText(GRAY_500);
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(7);
+        doc.text(isKo ? "집행 소계" : "Subtotal", textX + colW + 3, ty);
+        doc.setFont(FONT, "bold");
+        doc.setFontSize(8.5);
+        setText(VIOLET);
+        doc.text(row.lineTotalLabel, textX + colW + 3, ty + 3.5);
+      }
+      ty += 9;
+    }
+
+    if (row.recommendReason?.trim()) {
+      doc.setFont(FONT, "bold");
+      doc.setFontSize(8.5);
+      setText(VIOLET);
+      const label = isKo ? "추천 " : "Why ";
+      doc.text(label, textX, ty);
+      const labelW = doc.getTextWidth(label);
+      doc.setFont(FONT, "normal");
+      setText(GRAY_600);
+      const reasonLines = doc.splitTextToSize(
+        row.recommendReason.trim(),
+        textW - labelW,
+      ) as string[];
+      if (reasonLines.length > 0) {
+        doc.text(reasonLines[0]!, textX + labelW, ty);
+        for (let ri = 1; ri < Math.min(reasonLines.length, 3); ri++) {
+          ty += 3.8;
+          doc.text(reasonLines[ri]!, textX, ty);
+        }
+      }
+      ty += 4.5;
+    }
+
+    if (showContrib) {
+      setDraw(GRAY_100);
+      doc.line(textX, ty, textX + textW, ty);
+      ty += 3.5;
+      const barW = colW;
+      const barY = ty;
+      const hasExposure = row.exposureContributionPct != null;
+      const hasBudget = row.budgetContributionPct != null;
+      if (hasExposure && hasBudget) {
+        drawPdfContributionBar(
+          textX,
+          barY,
+          barW,
+          isKo ? "노출 기여" : "Exposure share",
+          row.exposureContributionPct!,
+          CYAN_BAR,
+        );
+        drawPdfContributionBar(
+          textX + colW + 3,
+          barY,
+          barW,
+          isKo ? "예산 비중" : "Budget share",
+          row.budgetContributionPct!,
+          VIOLET,
+        );
+        ty = barY + 7;
+      } else if (hasExposure) {
+        ty = barY + drawPdfContributionBar(
+          textX,
+          barY,
+          barW,
+          isKo ? "노출 기여" : "Exposure share",
+          row.exposureContributionPct!,
+          CYAN_BAR,
+        );
+      } else if (hasBudget) {
+        ty = barY + drawPdfContributionBar(
+          textX,
+          barY,
+          barW,
+          isKo ? "예산 비중" : "Budget share",
+          row.budgetContributionPct!,
+          VIOLET,
+        );
+      }
+    }
+
     if (mediaUrl) {
       const btnW = 48;
-      const btnX = M + contentW - btnW - 3;
+      const btnX = M + contentW - btnW - pad;
       const btnY = y + rh - linkBlockH + 1;
       addPdfMediaDetailLink(doc, {
         x: btnX,
