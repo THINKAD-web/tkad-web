@@ -9,7 +9,7 @@ import {
   formatMapViewCountLabel,
   type DiscoveryFilterBarViewMode,
 } from "@/components/discovery/filter-bar";
-import { ClipboardCheck, Crosshair, LayoutList, Loader2, Search } from "lucide-react";
+import { ClipboardCheck, Crosshair, LayoutList, Loader2, Map as MapIcon, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
 import { MediaMapFloatingEmptyState } from "@/components/media-map/media-map-floating-empty";
@@ -182,6 +182,8 @@ export default function MediaMapPageClient() {
   const [isMobile, setIsMobile] = useState(false);
   /** 모바일 리스트 바텀시트 스냅 단계 */
   const [sheetSnap, setSheetSnap] = useState<MediaMapSheetSnap>("peek");
+  /** peek 시트 크롬 높이 — 핀 dock 오버레이 오프셋 */
+  const [peekChromeHeight, setPeekChromeHeight] = useState(56);
   /** 레이아웃 전환/스냅 변경 후 map.invalidateSize() 트리거용 nonce */
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   const pvNonceRef = useRef(0);
@@ -335,10 +337,10 @@ export default function MediaMapPageClient() {
     return () => mq.removeEventListener("change", update);
   }, []);
 
-  // 레이아웃 전환(데스크톱↔모바일)·바텀시트 스냅 변경 후 지도 타일 재계산
+  // 레이아웃 전환(데스크톱↔모바일)·바텀시트 스냅·peek 크롬 높이 변경 후 지도 타일 재계산
   useEffect(() => {
     setInvalidateNonce((n) => n + 1);
-  }, [isMobile, sheetSnap]);
+  }, [isMobile, sheetSnap, peekChromeHeight]);
 
   // URL 상태 동기화 — view + filter 변경 시 history.replaceState
   const urlSyncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -778,6 +780,7 @@ export default function MediaMapPageClient() {
       unifiedToolbar
       mobileStickyToolbar
       mapPageViewModes
+      mapMobileImmersive={isMobile}
       query={browseFilters.q}
       onQueryChange={(q) => patchBrowseFilters({ q })}
       mainCategory={browseFilters.mainCategory}
@@ -875,21 +878,59 @@ export default function MediaMapPageClient() {
     items.length === 0 &&
     !loading;
 
-  // 모바일 시트 상단 — 결과 수만 (목록/지도 토글은 하단 바)
+  // 모바일 시트 상단 — 결과 수 + 목록↔지도 토글 (immersive 시 상단에서 이동)
   const mobileSheetHeader = (
     <div className="flex min-h-0 items-center justify-between gap-2 leading-tight">
-      <p className="tkad-type-meta min-w-0 truncate font-semibold text-foreground">
-        {showMapEmptyOverlay
-          ? isKo
-            ? "이 영역 0개"
-            : "0 in this area"
-          : mapResultLabel}
-      </p>
-      {showMapEmptyOverlay ? (
-        <p className="tkad-type-note shrink-0 text-tkad-muted">
-          {isKo ? "지도 이동·필터 조정" : "Pan or filter"}
+      <div className="flex min-w-0 flex-1 items-center gap-2">
+        <p className="tkad-type-meta min-w-0 truncate font-semibold text-foreground">
+          {showMapEmptyOverlay
+            ? isKo
+              ? "이 영역 0개"
+              : "0 in this area"
+            : mapResultLabel}
         </p>
-      ) : null}
+        {showMapEmptyOverlay ? (
+          <p className="tkad-type-note shrink-0 text-tkad-muted">
+            {isKo ? "지도 이동·필터 조정" : "Pan or filter"}
+          </p>
+        ) : null}
+      </div>
+      <div
+        className="flex shrink-0 overflow-hidden rounded-lg border border-gray-200 dark:border-white/10"
+        onPointerDown={(e) => e.stopPropagation()}
+        data-screenshot="media-map-sheet-view-toggle"
+      >
+        <button
+          type="button"
+          onClick={() => handleBrowseViewModeChange("feed")}
+          aria-label={isKo ? "목록 보기" : "List view"}
+          aria-pressed={sheetSnap === "full"}
+          className={cn(
+            "flex items-center gap-1 px-2 py-1 tkad-type-meta font-medium transition-colors",
+            sheetSnap === "full"
+              ? "bg-violet-500 text-white"
+              : "text-gray-600 dark:text-white/70",
+          )}
+        >
+          <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>{isKo ? "목록" : "List"}</span>
+        </button>
+        <button
+          type="button"
+          onClick={() => handleBrowseViewModeChange("map")}
+          aria-label={isKo ? "지도 보기" : "Map view"}
+          aria-pressed={sheetSnap === "peek"}
+          className={cn(
+            "flex items-center gap-1 px-2 py-1 tkad-type-meta font-medium transition-colors",
+            sheetSnap === "peek"
+              ? "bg-violet-500 text-white"
+              : "text-gray-600 dark:text-white/70",
+          )}
+        >
+          <MapIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          <span>{isKo ? "지도" : "Map"}</span>
+        </button>
+      </div>
     </div>
   );
 
@@ -897,7 +938,12 @@ export default function MediaMapPageClient() {
     <div className="tkad-media-app-shell tkad-media-map-shell relative flex w-full min-w-0 flex-col bg-gray-50 dark:bg-[#020202]">
       <MapChunkPrefetch />
       {/* 상단(flex-none): 단일 반응형 컨트롤 바 (항상 고정) */}
-      <div className="flex-none border-b border-gray-200/80 bg-gray-50/95 px-3 pt-1.5 pb-1.5 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95 md:px-4">
+      <div
+        className={cn(
+          "flex-none border-b border-gray-200/80 bg-gray-50/95 backdrop-blur dark:border-white/10 dark:bg-[#020202]/95",
+          isMobile ? "px-3 py-1" : "px-3 pt-1.5 pb-1.5 md:px-4",
+        )}
+      >
         {controlBar}
       </div>
 
@@ -998,7 +1044,8 @@ export default function MediaMapPageClient() {
               isKo={isKo}
               inCompare={isInCompare(selected.id)}
               onToggleCompare={() => toggleCompare(selected)}
-              className="bottom-[5.75rem] z-[45] max-h-[min(32dvh,200px)]"
+              className="z-[45] max-h-[min(32dvh,200px)]"
+              style={{ bottom: peekChromeHeight + 8 }}
             />
           ) : null}
 
@@ -1088,6 +1135,7 @@ export default function MediaMapPageClient() {
             onSnapChange={handleSheetSnapChange}
             isKo={isKo}
             header={mobileSheetHeader}
+            onPeekChromeHeightChange={setPeekChromeHeight}
           >
             {listEl}
           </MediaMapListSheet>
