@@ -2,7 +2,6 @@
 
 import {
   plannerReportFileBase,
-  type PlannerExportMapPin,
   type PlannerReportExportFormat,
   type PlannerReportExportPayload,
 } from "@/lib/planner-report-export/types";
@@ -19,7 +18,6 @@ export async function downloadPlannerReport(
   payload: PlannerReportExportPayload,
   options?: {
     activitySource?: PlanReportActivitySource;
-    exportMapPins?: PlannerExportMapPin[];
     sectionVisibility?: PlannerReportSectionVisibility;
     lineupViewMode?: PlannerExportLineupViewMode;
   },
@@ -32,7 +30,6 @@ export async function downloadPlannerReport(
       format,
       payload,
       activitySource: options?.activitySource,
-      exportMapPins: options?.exportMapPins,
       sectionVisibility: options?.sectionVisibility,
       lineupViewMode: options?.lineupViewMode,
     }),

@@ -1,5 +1,5 @@
 /**
- * B-2 분포도 PDF/PPT 검증 (DB 없이 샘플 핀)
+ * 분포도 렌더 단위 검증 (export 파이프라인에서는 PDF/PPT 미사용)
  * Usage: npx tsx scripts/verify-b2-distribution-map.mts
  */
 import { writeFile, mkdir } from "node:fs/promises";
@@ -61,13 +61,12 @@ const payload = {
   disclaimer: "테스트",
 };
 
-const assets = { distributionMap: dist };
 const { buildPlannerReportPdf } = await import("../lib/planner-report-export/build-pdf");
 const { buildPlannerReportPptx } = await import("../lib/planner-report-export/build-pptx");
 
 const t0 = Date.now();
-const pdfBytes = await buildPlannerReportPdf(payload, assets);
-const pptxBytes = await buildPlannerReportPptx(payload, assets);
+const pdfBytes = await buildPlannerReportPdf(payload, {});
+const pptxBytes = await buildPlannerReportPptx(payload, {});
 console.log(`export elapsed: ${Date.now() - t0}ms`);
 
 const pdfPath = join(outDir, "test-b2-planner.pdf");
@@ -76,14 +75,12 @@ await writeFile(pdfPath, pdfBytes);
 await writeFile(pptxPath, pptxBytes);
 
 const pdfRaw = Buffer.from(pdfBytes).toString("latin1");
-const imageCount = (pdfRaw.match(/\/Subtype\s*\/Image/g) ?? []).length;
-console.log(`PDF images: ${imageCount} (expect >=1 for distribution map)`);
+const hasMapSection = pdfRaw.includes("Media locations") || pdfRaw.includes("\uae30c \uc704uce58");
+console.log(`PDF has map section text: ${hasMapSection} (expect false)`);
 console.log(`PDF bytes: ${pdfBytes.length}, PPTX bytes: ${pptxBytes.length}`);
 
 const emptyDist = await renderPlannerDistributionMap([], true);
-const pdfNoMap = await buildPlannerReportPdf(payload, { distributionMap: emptyDist });
-const noMapImages = (Buffer.from(pdfNoMap).toString("latin1").match(/\/Subtype\s*\/Image/g) ?? []).length;
-console.log(`0-pin skip: emptyDist=${emptyDist === null ? "null" : "bad"}, pdf images without map=${noMapImages}`);
+console.log(`0-pin render: ${emptyDist === null ? "null (ok)" : "unexpected"}`);
 
 // 서울시청 폴백 제외
 const fallbackOnly = await renderPlannerDistributionMap(

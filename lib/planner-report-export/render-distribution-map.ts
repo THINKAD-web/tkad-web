@@ -1,9 +1,20 @@
 import { plannerChartColor } from "@/lib/planner-chart-colors";
 import { boundsFromMapMarkers, isCatalogFallbackCoordinate } from "@/lib/planner-report-portfolio-map";
-import type {
-  PlannerExportMapPin,
-  PlannerReportDistributionMap,
-} from "@/lib/planner-report-export/types";
+
+/** 분포도 렌더 전용 — export 파이프라인에서는 미사용 (화면 미니맵만 유지) */
+export type PlannerExportMapPin = {
+  id: string;
+  lat: number;
+  lng: number;
+  type: string;
+  name: string;
+};
+
+export type PlannerReportDistributionMap = {
+  dataUrl: string;
+  mappableMediaCount: number;
+  locationCount: number;
+};
 
 const WIDTH = 800;
 const HEIGHT = 450;

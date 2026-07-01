@@ -2,7 +2,6 @@ import { ensureKrFontForServerPdf, krFontFamily } from "@/lib/jspdf-register-not
 import { CONTACT_EMAIL } from "@/lib/constants";
 import {
   addPdfThumbImage,
-  dataUrlImageFormat,
   PLANNER_EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
@@ -15,7 +14,7 @@ import {
   plannerMediaPageButtonLabel,
   plannerMediaPageUrl,
 } from "@/lib/planner-report-export/media-page-url";
-import { addPdfMediaDetailLink } from "@/lib/planner-report-export/draw-media-link";
+import { addPdfMediaDetailLink, addPdfRectLink } from "@/lib/planner-report-export/draw-media-link";
 import { plannerChartColorRgb } from "@/lib/planner-chart-colors";
 import { formatPlannerSharePct } from "@/lib/planner-logic";
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
@@ -101,8 +100,8 @@ export async function buildPlannerReportPdf(
     }
   }
 
-  function sectionTitle(label: string) {
-    ensure(14);
+  function sectionTitle(label: string, followingBlockMm = 0) {
+    ensure(14 + followingBlockMm);
     doc.setFont(FONT, "normal");
     doc.setFontSize(11);
     setFill(VIOLET);
@@ -918,8 +917,12 @@ export async function buildPlannerReportPdf(
     let rowY = y;
 
     for (const row of rows) {
-      if (col === 0) ensure(cellH + gap);
+      if (col === 0) {
+        ensure(cellH + gap);
+        rowY = y;
+      }
       const cx = M + col * (cellW + gap);
+      const mediaUrl = plannerMediaPageUrl(row.id, isKo);
 
       setFill(WHITE);
       setDraw(GRAY_200);
@@ -971,14 +974,24 @@ export async function buildPlannerReportPdf(
         doc.text(price, cx + pad, ty);
       }
 
+      if (mediaUrl) {
+        doc.setFont(FONT, "normal");
+        doc.setFontSize(6.5);
+        setText(CYAN);
+        const linkLabel = isKo ? "상세 →" : "Details →";
+        doc.text(linkLabel, cx + cellW - pad, rowY + cellH - 2.2, { align: "right" });
+        addPdfRectLink(doc, { x: cx, y: rowY, w: cellW, h: cellH, url: mediaUrl });
+      }
+
       col += 1;
       if (col >= cols) {
         col = 0;
-        rowY += cellH + gap;
+        y = rowY + cellH + gap;
+        rowY = y;
       }
     }
-    if (col > 0) rowY += cellH + gap;
-    y = rowY;
+    if (col > 0) y = rowY + cellH + gap;
+    else y = rowY;
   }
 
   function drawMediaCompactGrid(
@@ -994,8 +1007,12 @@ export async function buildPlannerReportPdf(
     let rowY = y;
 
     for (const row of rows) {
-      if (col === 0) ensure(rowH + gap);
+      if (col === 0) {
+        ensure(rowH + gap);
+        rowY = y;
+      }
       const cx = M + col * (cellW + gap);
+      const mediaUrl = plannerMediaPageUrl(row.id, isKo);
 
       setFill(WHITE);
       setDraw(GRAY_200);
@@ -1030,14 +1047,19 @@ export async function buildPlannerReportPdf(
         doc.text(metaLine, textX, rowY + 7.5);
       }
 
+      if (mediaUrl) {
+        addPdfRectLink(doc, { x: cx, y: rowY, w: cellW, h: rowH, url: mediaUrl });
+      }
+
       col += 1;
       if (col >= cols) {
         col = 0;
-        rowY += rowH + gap;
+        y = rowY + rowH + gap;
+        rowY = y;
       }
     }
-    if (col > 0) rowY += rowH + gap;
-    y = rowY;
+    if (col > 0) y = rowY + rowH + gap;
+    else y = rowY;
   }
 
   if (sectionVisible(vis, "recommend") && p.recommendRationale) {
@@ -1071,42 +1093,9 @@ export async function buildPlannerReportPdf(
     y += 4;
   }
 
-  const dist = assets?.distributionMap;
-  if (sectionVisible(vis, "map") && dist?.dataUrl) {
-    const MAP_H = 54;
-    ensure(MAP_H + 20);
-    sectionTitle(isKo ? "매체 위치" : "Media locations");
-    try {
-      doc.addImage(
-        dist.dataUrl,
-        dataUrlImageFormat(dist.dataUrl),
-        M,
-        y + 2,
-        contentW,
-        MAP_H,
-      );
-    } catch {
-      /* broken map image — skip section body */
-    }
-    y += MAP_H + 5;
-    doc.setFont(FONT, "normal");
-    doc.setFontSize(8);
-    setText(GRAY_500);
-    const caption = isKo
-      ? `${dist.mappableMediaCount}개 매체 · ${dist.locationCount}개 위치 — 도로·지명 없는 위치 분포도`
-      : `${dist.mappableMediaCount} media · ${dist.locationCount} locations — scatter map (no roads or labels)`;
-    const wrappedCaption = doc.splitTextToSize(caption, contentW) as string[];
-    ensure(wrappedCaption.length * 3.5 + 2);
-    doc.text(wrappedCaption, M, y + 2);
-    y += wrappedCaption.length * 3.5 + 2;
-    const note = isKo
-      ? "화면: 인터랙티브 미니맵 · PDF·PPT: 분포도"
-      : "On-screen: interactive mini-map · PDF/PPT: distribution map";
-    doc.text(note, M, y + 2);
-    y += 8;
-  }
-
-  sectionTitle(isKo ? "매체 구성" : "Media lineup");
+  const lineupFollowingMm =
+    lineupViewMode === "card" ? 43 : lineupViewMode === "compact" ? 13 : 0;
+  sectionTitle(isKo ? "매체 구성" : "Media lineup", lineupFollowingMm);
   {
     doc.setFont(FONT, "normal");
     if (p.portfolio.length === 0) {
