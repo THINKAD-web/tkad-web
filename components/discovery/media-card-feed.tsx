@@ -30,6 +30,7 @@ type FeedProps = Pick<
   | "href"
   | "highlights"
   | "locationLine"
+  | "priceLabel"
   | "isKo"
   | "inCompare"
   | "inCart"
@@ -80,6 +81,7 @@ export function DiscoveryMediaCardFeed({
   href,
   highlights = [],
   locationLine = null,
+  priceLabel = null,
   isKo = true,
   inCompare = false,
   onToggleCompare,
@@ -101,6 +103,13 @@ export function DiscoveryMediaCardFeed({
     item.pricePeriod,
     isKo ? "ko" : "en",
   );
+
+  const formattedNumericPrice =
+    item.price && item.price > 0
+      ? formatCatalogPriceFieldWon(item.price, isKo ? "ko-KR" : "en-US")
+      : null;
+  const displayPrice =
+    priceLabel?.trim() || formattedNumericPrice || null;
 
   const locationDisplay =
     locationLine ?? item.region ?? (isKo ? "위치 정보 없음" : "No location");
@@ -141,7 +150,10 @@ export function DiscoveryMediaCardFeed({
   );
 
   return (
-    <article className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]">
+    <article
+      className="discovery-media-card-feed min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
+      data-discovery-media-card="feed"
+    >
       <div className="flex min-w-0 gap-3 p-3 sm:gap-4 sm:p-4">
         <div className="w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 sm:min-w-[8rem] sm:max-w-[12rem]">
           {plannerMode && onTogglePlan ? (
@@ -196,16 +208,11 @@ export function DiscoveryMediaCardFeed({
 
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
             <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
-              {item.price && item.price > 0
-                ? formatCatalogPriceFieldWon(
-                    item.price,
-                    isKo ? "ko-KR" : "en-US",
-                  )
-                : isKo
-                  ? "문의"
-                  : "Inquire"}
+              {displayPrice ?? (isKo ? "문의" : "Inquire")}
             </p>
-            <span className="tkad-type-note text-tkad-muted">{periodLabel}</span>
+            {displayPrice && !priceLabel?.trim() && periodLabel ? (
+              <span className="tkad-type-note text-tkad-muted">{periodLabel}</span>
+            ) : null}
             {cpm != null ? (
               <span className="tkad-type-note tabular-nums text-tkad-muted">
                 CPM {formatCpmKrw(cpm, isKo ? "ko-KR" : "en-US")}
@@ -213,6 +220,14 @@ export function DiscoveryMediaCardFeed({
             ) : null}
             <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
           </div>
+
+          {item.dailyFootTraffic != null && item.dailyFootTraffic > 0 ? (
+            <p className="tkad-type-note text-tkad-muted">
+              {isKo
+                ? `일 ${item.dailyFootTraffic.toLocaleString("ko-KR")}명+`
+                : `${item.dailyFootTraffic.toLocaleString("en-US")}+ daily`}
+            </p>
+          ) : null}
 
           {highlights.length > 0 ? (
             <p className="tkad-type-note line-clamp-1 text-tkad-muted">
