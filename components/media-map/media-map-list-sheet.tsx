@@ -13,26 +13,14 @@ import { cn } from "@/lib/utils";
 export type MediaMapSheetSnap = "peek" | "full";
 
 const FULL_VISIBLE_FRACTION = 0.96;
-/** peek — 화면 하단 ~12–15% (핸들 + 헤더) */
-const PEEK_VISIBLE_MIN_PX = 88;
-const PEEK_VISIBLE_MAX_PX = 132;
-const PEEK_VISIBLE_FRACTION = 0.135;
+/** peek 크롬 측정 전 폴백 (핸들+헤더 대략 높이) */
+const PEEK_CHROME_FALLBACK_PX = 56;
 /** 스냅 결정 시 관성 보정 — 이 속도(px/ms) 이상이면 진행 방향으로 peek↔full */
 const FLING_VELOCITY = 0.45;
 
-function peekVisiblePx(containerHeight: number): number {
-  if (containerHeight <= 0) return PEEK_VISIBLE_MIN_PX;
-  return Math.round(
-    Math.min(
-      PEEK_VISIBLE_MAX_PX,
-      Math.max(PEEK_VISIBLE_MIN_PX, containerHeight * PEEK_VISIBLE_FRACTION),
-    ),
-  );
-}
-
 /**
  * 모바일 매체 리스트 바텀시트 — 지도 모드 peek / 목록 모드 full.
- * peek 은 고정 크롬(핸들+헤더)만, full 에서만 카드 그리드 노출.
+ * peek 은 핸들+헤더 intrinsic 높이만, full 에서만 카드 그리드 노출.
  */
 export function MediaMapListSheet({
   snap,
@@ -41,6 +29,7 @@ export function MediaMapListSheet({
   children,
   isKo = true,
   className,
+  onPeekChromeHeightChange,
 }: {
   snap: MediaMapSheetSnap;
   onSnapChange: (next: MediaMapSheetSnap) => void;
@@ -48,9 +37,13 @@ export function MediaMapListSheet({
   children: ReactNode;
   isKo?: boolean;
   className?: string;
+  /** peek 크롬(핸들+헤더) 높이 — 핀 dock 등 오버레이 오프셋용 */
+  onPeekChromeHeightChange?: (px: number) => void;
 }) {
   const sheetRef = useRef<HTMLDivElement>(null);
+  const chromeRef = useRef<HTMLDivElement>(null);
   const [height, setHeight] = useState(0);
+  const [peekChromePx, setPeekChromePx] = useState(PEEK_CHROME_FALLBACK_PX);
   const [dragPx, setDragPx] = useState<number | null>(null);
   const dragState = useRef<{
     startY: number;
@@ -77,14 +70,37 @@ export function MediaMapListSheet({
     };
   }, []);
 
-  const translateForSnap = useCallback((s: MediaMapSheetSnap, h: number) => {
-    if (h <= 0) return 0;
-    if (s === "peek") return Math.max(0, h - peekVisiblePx(h));
-    return Math.max(0, h * (1 - FULL_VISIBLE_FRACTION));
-  }, []);
+  useEffect(() => {
+    const el = chromeRef.current;
+    if (!el) return;
+    const update = () => {
+      const next = el.offsetHeight;
+      if (next > 0) {
+        setPeekChromePx(next);
+        onPeekChromeHeightChange?.(next);
+      }
+    };
+    update();
+    const ro =
+      typeof ResizeObserver !== "undefined"
+        ? new ResizeObserver(update)
+        : null;
+    ro?.observe(el);
+    return () => ro?.disconnect();
+  }, [header, snap, onPeekChromeHeightChange]);
+
+  const peekPx = peekChromePx;
+
+  const translateForSnap = useCallback(
+    (s: MediaMapSheetSnap, h: number) => {
+      if (h <= 0) return 0;
+      if (s === "peek") return Math.max(0, h - peekPx);
+      return Math.max(0, h * (1 - FULL_VISIBLE_FRACTION));
+    },
+    [peekPx],
+  );
 
   const ready = height > 0;
-  const peekPx = peekVisiblePx(height);
   const minTranslate = translateForSnap("full", height);
   const maxTranslate = translateForSnap("peek", height);
   const baseTranslate = translateForSnap(snap, height);
@@ -173,6 +189,7 @@ export function MediaMapListSheet({
       }}
     >
       <div
+        ref={chromeRef}
         className="flex shrink-0 cursor-grab touch-none select-none flex-col items-stretch bg-white active:cursor-grabbing dark:bg-[#0a0a12]"
         onPointerDown={handlePointerDown}
         onPointerMove={handlePointerMove}
@@ -201,7 +218,7 @@ export function MediaMapListSheet({
         {header ? (
           <div
             className={cn(
-              "px-3 py-0.5",
+              "px-3 pb-1 pt-0",
               showListBody && "border-b border-gray-100 dark:border-white/8",
             )}
           >

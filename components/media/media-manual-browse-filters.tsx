@@ -175,6 +175,8 @@ export type MediaManualBrowseFiltersProps = {
   mapCompactFilters?: boolean;
   /** `/media/map` — [목록]/[지도] 2-way 토글 */
   mapPageViewModes?: boolean;
+  /** `/media/map` 모바일 — 상단 툴바 축소(검색+필터/정렬 아이콘), 뷰모드는 시트 헤더로 이동 */
+  mapMobileImmersive?: boolean;
   /** `/media` 앱 셸 — 검색+필터+정렬+뷰모드를 단일 반응형 바로 통합(데스크톱/모바일 이중 마크업 제거) */
   unifiedToolbar?: boolean;
   /** PR B — 모바일 하단 바 + vaul 필터/정렬 시트 (`/media/map` 앱 셸) */
@@ -234,6 +236,7 @@ export function MediaManualBrowseFilters({
   showViewModes = true,
   mapCompactFilters = false,
   mapPageViewModes = false,
+  mapMobileImmersive = false,
   unifiedToolbar = false,
   mobileBottomBar = false,
   mobileStickyToolbar = false,
@@ -356,8 +359,15 @@ export function MediaManualBrowseFilters({
     cartCount > 0 ||
     compareCount > 0;
 
+  const mapMobileImmersiveMode =
+    mapMobileImmersive &&
+    mapPageViewModes &&
+    unifiedToolbar &&
+    mobileStickyToolbar;
+
   const mapToolbarCompact =
-    mapPageViewModes && !(unifiedToolbar && mobileStickyToolbar);
+    (mapPageViewModes && !(unifiedToolbar && mobileStickyToolbar)) ||
+    mapMobileImmersiveMode;
 
   const total = totalCount;
 
@@ -968,8 +978,58 @@ export function MediaManualBrowseFilters({
     </button>
   );
 
+  const TOOLBAR_ICON_BTN = cn(
+    TOOLBAR_CTRL_BTN,
+    "relative h-9 w-9 justify-center gap-0 p-0",
+  );
+
+  const mobileFilterButtonIcon = (
+    <button
+      type="button"
+      onClick={() => setSheetOpen(true)}
+      className={TOOLBAR_ICON_BTN}
+      aria-haspopup="dialog"
+      aria-expanded={sheetOpen}
+      aria-label={isKo ? "필터 열기" : "Open filters"}
+    >
+      <SlidersHorizontal className="h-4 w-4" aria-hidden />
+      {activeFilterCount > 0 ? (
+        <span className="absolute -right-1 -top-1 inline-flex h-4 min-w-[1rem] items-center justify-center rounded-full bg-violet-500 px-1 text-[10px] font-bold leading-none text-white">
+          {activeFilterCount}
+        </span>
+      ) : null}
+    </button>
+  );
+
+  const mobileSortButtonIcon = (
+    <button
+      type="button"
+      onClick={() => {
+        if (mobileVaulSheets) {
+          setSortSheetOpen(true);
+        }
+      }}
+      className={TOOLBAR_ICON_BTN}
+      aria-label={isKo ? "정렬" : "Sort"}
+    >
+      <Filter className="h-4 w-4 rotate-90" aria-hidden />
+    </button>
+  );
+
+  const mobileImmersiveControlRow = mapMobileImmersiveMode ? (
+    <div
+      className="flex min-w-0 items-center gap-1.5 md:hidden"
+      data-screenshot="media-map-mobile-immersive-toolbar"
+    >
+      {searchInput}
+      {mobileFilterButtonIcon}
+      {mobileSortButtonIcon}
+      {mapPageViewModes ? cartSummaryButton : null}
+    </div>
+  ) : null;
+
   const mobileStickyControlRow =
-    mobileStickyToolbar && unifiedToolbar ? (
+    mobileStickyToolbar && unifiedToolbar && !mapMobileImmersiveMode ? (
       <div
         className="sticky top-14 z-30 -mx-4 flex min-w-0 items-center gap-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
         data-screenshot="media-mobile-sticky-controls"
@@ -1002,9 +1062,14 @@ export function MediaManualBrowseFilters({
       {/* `/media` 앱 셸 — 목록: 상단 검색 + sticky 컨트롤 / 지도: PR B 하단 바 */}
       {unifiedToolbar && (mobileBottomBar || mobileStickyToolbar) ? (
         <>
-          <div className="space-y-2 md:hidden">
-            {searchInput}
-            {mobileStickyControlRow}
+          <div
+            className={cn(
+              "md:hidden",
+              mapMobileImmersiveMode ? "space-y-1.5" : "space-y-2",
+            )}
+          >
+            {mapMobileImmersiveMode ? mobileImmersiveControlRow : searchInput}
+            {!mapMobileImmersiveMode ? mobileStickyControlRow : null}
             {showMobileActiveSummary ? (
               <MediaMapActiveFiltersBar
                 chips={mediaBrowseActiveChips}
