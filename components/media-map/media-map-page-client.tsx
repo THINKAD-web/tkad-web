@@ -59,6 +59,12 @@ import {
   type MediaMapSheetSnap,
 } from "@/components/media-map/media-map-list-sheet";
 import { MapChunkPrefetch } from "@/components/media-map/map-chunk-prefetch";
+import { MapOnboardingCoachmark } from "@/components/media-map/map-onboarding-coachmark";
+import {
+  hasSeenMapOnboarding,
+  markMapOnboardingSeen,
+  MAP_ONBOARDING_KEYS,
+} from "@/lib/media-map/onboarding-storage";
 
 function MapViewLoadingPlaceholder() {
   return (
@@ -186,6 +192,8 @@ export default function MediaMapPageClient() {
   const [peekChromeHeight, setPeekChromeHeight] = useState(56);
   /** 레이아웃 전환/스냅 변경 후 map.invalidateSize() 트리거용 nonce */
   const [invalidateNonce, setInvalidateNonce] = useState(0);
+  /** "이 지역에서 검색" 1회성 코치마크 */
+  const [showSearchCoachmark, setShowSearchCoachmark] = useState(false);
   const pvNonceRef = useRef(0);
   const [programmaticView, setProgrammaticView] =
     useState<DarkMapProgrammaticView | null>(() => {
@@ -597,10 +605,17 @@ export default function MediaMapPageClient() {
     setViewportDirty(true);
   }, []);
 
+  const dismissSearchCoachmark = useCallback(() => {
+    markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchCoachmark);
+    setShowSearchCoachmark(false);
+  }, []);
+
   const handleSearchThisArea = useCallback(() => {
+    dismissSearchCoachmark();
+    markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchNudge);
     if (!bounds) return;
     void runSearch(bounds);
-  }, [bounds, runSearch]);
+  }, [bounds, runSearch, dismissSearchCoachmark]);
 
   const showSearchAreaButton =
     !isMapTextSearchActive(browseFilters) &&
@@ -772,6 +787,72 @@ export default function MediaMapPageClient() {
   }, []);
 
   const mapChromeVisible = !isMobile || sheetSnap === "peek";
+
+  useEffect(() => {
+    if (!showSearchAreaButton || !mapChromeVisible) {
+      setShowSearchCoachmark(false);
+      return;
+    }
+    if (!hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchCoachmark)) {
+      setShowSearchCoachmark(true);
+    }
+  }, [showSearchAreaButton, mapChromeVisible]);
+
+  useEffect(() => {
+    if (!showSearchAreaButton || !mapChromeVisible) return;
+    if (hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchNudge)) return;
+    const timer = window.setTimeout(() => {
+      if (hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.searchNudge)) return;
+      markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchNudge);
+      toast.info(
+        isKo
+          ? "「이 지역에서 검색」을 눌러 이 영역의 매체를 불러오세요."
+          : "Tap “Search this area” to load media here.",
+      );
+    }, 5000);
+    return () => window.clearTimeout(timer);
+  }, [showSearchAreaButton, mapChromeVisible, isKo, toast]);
+
+  const locateFloatingButtons = (mobileCompact = false) => (
+    <>
+      <MapFloatingButton
+        icon={Crosshair}
+        onClick={handleLocateMe}
+        disabled={locating}
+        compact={mobileCompact}
+        iconClassName={locating ? "animate-pulse" : undefined}
+        className={cn("md:hidden", !mobileCompact && "gap-1 px-2.5")}
+        aria-label={isKo ? "내 주변" : "Near me"}
+        title={isKo ? "내 주변 매체 보기" : "Show media near me"}
+      >
+        {mobileCompact
+          ? null
+          : locating
+            ? isKo
+              ? "확인…"
+              : "…"
+            : isKo
+              ? "내 주변"
+              : "Near me"}
+      </MapFloatingButton>
+      <MapFloatingButton
+        icon={Crosshair}
+        onClick={handleLocateMe}
+        disabled={locating}
+        className="hidden md:inline-flex"
+        aria-label={isKo ? "내 주변" : "Near me"}
+        title={isKo ? "내 주변 매체 보기" : "Show media near me"}
+      >
+        {locating
+          ? isKo
+            ? "확인 중…"
+            : "Locating…"
+          : isKo
+            ? "내 주변"
+            : "Near me"}
+      </MapFloatingButton>
+    </>
+  );
 
   // 컨트롤 바 — PR1 의 단일 반응형 컴포넌트 재사용(unifiedToolbar). 지도용으로 복제하지 않음.
   const controlBar = (
@@ -982,25 +1063,44 @@ export default function MediaMapPageClient() {
 
           {showSearchAreaButton && mapChromeVisible ? (
             <div className="pointer-events-none absolute left-1/2 top-3 z-[11] -translate-x-1/2 sm:top-4">
-              <button
-                type="button"
-                disabled={loading}
-                onClick={handleSearchThisArea}
-                className="pointer-events-auto tkad-type-meta inline-flex h-10 items-center gap-2 rounded-full border border-border/80 bg-card/90 px-4 font-semibold text-foreground shadow-lg shadow-black/10 backdrop-blur-md transition-colors hover:bg-card disabled:opacity-70 dark:border-white/12 dark:bg-[#0a0a12]/88 dark:shadow-black/40"
-              >
-                {loading ? (
-                  <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
-                ) : (
-                  <Search className="h-3.5 w-3.5" aria-hidden />
-                )}
-                {loading
-                  ? isKo
-                    ? "검색 중…"
-                    : "Searching…"
-                  : isKo
-                    ? "이 지역에서 검색"
-                    : "Search this area"}
-              </button>
+              <div className="relative" data-map-onboarding="search-area">
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute -inset-1 rounded-full bg-violet-500/30 motion-safe:animate-ping"
+                />
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={handleSearchThisArea}
+                  className="pointer-events-auto relative tkad-type-meta inline-flex h-10 items-center gap-2 rounded-full border border-violet-500/80 bg-violet-600 px-4 font-semibold text-white shadow-lg shadow-violet-600/35 backdrop-blur-md transition-colors hover:bg-violet-500 disabled:opacity-70 motion-safe:animate-pulse dark:border-violet-400/70 dark:bg-violet-600 dark:shadow-violet-900/40 dark:hover:bg-violet-500"
+                >
+                  {loading ? (
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+                  ) : (
+                    <Search className="h-3.5 w-3.5" aria-hidden />
+                  )}
+                  {loading
+                    ? isKo
+                      ? "검색 중…"
+                      : "Searching…"
+                    : isKo
+                      ? "이 지역에서 검색"
+                      : "Search this area"}
+                </button>
+                <MapOnboardingCoachmark
+                  open={showSearchCoachmark}
+                  title={
+                    isKo ? "지도를 움직였나요?" : "Moved the map?"
+                  }
+                  description={
+                    isKo
+                      ? "버튼을 눌러 이 영역의 매체를 불러오세요."
+                      : "Tap the button to load media in this area."
+                  }
+                  dismissLabel={isKo ? "알겠어요" : "Got it"}
+                  onDismiss={dismissSearchCoachmark}
+                />
+              </div>
             </div>
           ) : null}
 
@@ -1050,72 +1150,71 @@ export default function MediaMapPageClient() {
           ) : null}
 
           {mapChromeVisible ? (
-            <>
-          <MediaMapVisibilityLegend
-            isKo={isKo}
-            className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
-          />
+            <MediaMapVisibilityLegend
+              isKo={isKo}
+              className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
+            />
+          ) : null}
 
-          <div className="pointer-events-none absolute right-3 top-3 z-[10] flex flex-col gap-2 sm:right-4 sm:top-4">
-            <MapFloatingButton
-              icon={ClipboardCheck}
-              onClick={startSurveyMode}
-              className={cn(
-                "hidden md:inline-flex",
-                surveyMode && "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
-              )}
-              aria-label={isKo ? "답사 모드" : "Field survey"}
-            >
-              {isKo ? "답사" : "Survey"}
-            </MapFloatingButton>
-            <MapFloatingButton
-              icon={ClipboardCheck}
-              compact
-              onClick={startSurveyMode}
-              className={cn(
-                "md:hidden",
-                surveyMode && "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
-              )}
-              aria-label={isKo ? "답사 모드" : "Field survey"}
-            />
-            <MapFloatingButton
-              icon={Crosshair}
-              compact
-              onClick={handleLocateMe}
-              disabled={locating}
-              iconClassName={locating ? "animate-pulse" : undefined}
-              className="md:hidden"
-              aria-label={isKo ? "내 주변" : "Near me"}
-            />
-            <MapFloatingButton
-              icon={Crosshair}
-              onClick={handleLocateMe}
-              disabled={locating}
-              className="hidden md:inline-flex"
-              aria-label={isKo ? "내 주변" : "Near me"}
-            >
-              {locating
-                ? isKo
-                  ? "확인 중…"
-                  : "Locating…"
-                : isKo
-                  ? "내 주변"
-                  : "Near me"}
-            </MapFloatingButton>
-            <Link
-              href="/media"
-              className={cn(
-                mapFloatingPanelClass(
-                  "pointer-events-auto tkad-type-meta hidden h-10 items-center gap-1.5 px-3.5 font-medium text-foreground transition-colors hover:bg-card md:inline-flex",
-                ),
-              )}
-              aria-label={isKo ? "목록으로" : "List view"}
-            >
-              <LayoutList className="h-4 w-4 shrink-0" aria-hidden />
-              {isKo ? "목록" : "List"}
-            </Link>
+          <div className="pointer-events-none absolute right-3 top-3 z-[46] hidden flex-col gap-2 sm:right-4 sm:top-4 md:flex">
+            {mapChromeVisible ? (
+              <>
+                <MapFloatingButton
+                  icon={ClipboardCheck}
+                  onClick={startSurveyMode}
+                  className={cn(
+                    surveyMode &&
+                      "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
+                  )}
+                  aria-label={isKo ? "답사 모드" : "Field survey"}
+                >
+                  {isKo ? "답사" : "Survey"}
+                </MapFloatingButton>
+                <Link
+                  href="/media"
+                  className={cn(
+                    mapFloatingPanelClass(
+                      "pointer-events-auto tkad-type-meta h-10 items-center gap-1.5 px-3.5 font-medium text-foreground transition-colors hover:bg-card inline-flex",
+                    ),
+                  )}
+                  aria-label={isKo ? "목록으로" : "List view"}
+                >
+                  <LayoutList className="h-4 w-4 shrink-0" aria-hidden />
+                  {isKo ? "목록" : "List"}
+                </Link>
+              </>
+            ) : null}
+            {locateFloatingButtons()}
           </div>
-            </>
+
+          {isMobile ? (
+            <div
+              className={cn(
+                "pointer-events-none absolute z-[46] md:hidden",
+                sheetSnap === "full" ? "left-3" : "right-3",
+              )}
+              style={
+                sheetSnap === "full"
+                  ? { top: 12 }
+                  : { bottom: peekChromeHeight + 12 }
+              }
+            >
+              {locateFloatingButtons(sheetSnap === "full")}
+            </div>
+          ) : null}
+
+          {mapChromeVisible ? (
+            <MapFloatingButton
+              icon={ClipboardCheck}
+              compact
+              onClick={startSurveyMode}
+              className={cn(
+                "pointer-events-auto absolute left-3 top-3 z-[46] md:hidden",
+                surveyMode &&
+                  "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
+              )}
+              aria-label={isKo ? "답사 모드" : "Field survey"}
+            />
           ) : null}
         </div>
 

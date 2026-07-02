@@ -162,7 +162,7 @@ function MapResizeFix() {
     const container = map.getContainer();
     const resizeObserver =
       typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => scheduleInvalidate(120))
+        ? new ResizeObserver(() => scheduleInvalidate(180))
         : null;
     resizeObserver?.observe(container);
 

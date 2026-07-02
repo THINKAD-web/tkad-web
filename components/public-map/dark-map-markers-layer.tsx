@@ -136,7 +136,8 @@ export function DarkMapMarkersLayer({
     const layer = disableCluster
       ? L.layerGroup()
       : L.markerClusterGroup({
-          maxClusterRadius: 56,
+          maxClusterRadius: 72,
+          disableClusteringAtZoom: 16,
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,
           zoomToBoundsOnClick: true,
