@@ -13,7 +13,17 @@ export type SeoulMetroLineId =
   | "bundang"
   | "shinbundang"
   | "gyeongui-jungang"
-  | "arex";
+  | "arex"
+  | "gtx-a"
+  | "gyeonggang"
+  | "gimpo-gold"
+  | "incheon1"
+  | "incheon2"
+  | "everline"
+  | "uijeongbu"
+  | "gyeongchun"
+  | "seohae"
+  | "silim";
 
 export type SeoulMetroLineDef = {
   id: SeoulMetroLineId;
@@ -46,6 +56,31 @@ export const SEOUL_METRO_LINES: readonly SeoulMetroLineDef[] = [
     color: "#77C4A3",
   },
   { id: "arex", nameKo: "공항철도", nameEn: "AREX", color: "#0090D2" },
+  { id: "gtx-a", nameKo: "GTX-A", nameEn: "GTX-A", color: "#9A6292" },
+  { id: "gyeonggang", nameKo: "경강선", nameEn: "Gyeonggang Line", color: "#0054A6" },
+  {
+    id: "gimpo-gold",
+    nameKo: "김포골드라인",
+    nameEn: "Gimpo Gold Line",
+    color: "#A17800",
+  },
+  { id: "incheon1", nameKo: "인천1호선", nameEn: "Incheon Line 1", color: "#759BBE" },
+  { id: "incheon2", nameKo: "인천2호선", nameEn: "Incheon Line 2", color: "#F5A200" },
+  {
+    id: "everline",
+    nameKo: "용인경전철",
+    nameEn: "Everline",
+    color: "#56AB2D",
+  },
+  {
+    id: "uijeongbu",
+    nameKo: "의정부경전철",
+    nameEn: "Uijeongbu LRT",
+    color: "#FDA600",
+  },
+  { id: "gyeongchun", nameKo: "경춘선", nameEn: "Gyeongchun Line", color: "#0C8E72" },
+  { id: "seohae", nameKo: "서해선", nameEn: "Seohae Line", color: "#81A1D2" },
+  { id: "silim", nameKo: "신림선", nameEn: "Sillim Line", color: "#4EA346" },
 ] as const;
 
 export const SEOUL_METRO_LINE_BY_ID: Record<
@@ -55,5 +90,6 @@ export const SEOUL_METRO_LINE_BY_ID: Record<
   SEOUL_METRO_LINES.map((line) => [line.id, line]),
 ) as Record<SeoulMetroLineId, SeoulMetroLineDef>;
 
+/** 수도권 오버레이에 포함할 lineId (빌드·렌더 공용) */
 export const SEOUL_METRO_MVP_LINE_IDS: readonly SeoulMetroLineId[] =
   SEOUL_METRO_LINES.map((l) => l.id);
