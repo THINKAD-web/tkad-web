@@ -8,6 +8,11 @@ import {
   type ReactNode,
 } from "react";
 import { cn } from "@/lib/utils";
+import {
+  hasSeenMapOnboarding,
+  markMapOnboardingSeen,
+  MAP_ONBOARDING_KEYS,
+} from "@/lib/media-map/onboarding-storage";
 
 /** 모바일 지도 목록 시트 — peek(지도 풀) / full(목록 풀) 2단만 */
 export type MediaMapSheetSnap = "peek" | "full";
@@ -45,6 +50,7 @@ export function MediaMapListSheet({
   const [height, setHeight] = useState(0);
   const [peekChromePx, setPeekChromePx] = useState(PEEK_CHROME_FALLBACK_PX);
   const [dragPx, setDragPx] = useState<number | null>(null);
+  const [showPeekHint, setShowPeekHint] = useState(false);
   const dragState = useRef<{
     startY: number;
     baseTranslate: number;
@@ -88,6 +94,24 @@ export function MediaMapListSheet({
     ro?.observe(el);
     return () => ro?.disconnect();
   }, [header, snap, onPeekChromeHeightChange]);
+
+  useEffect(() => {
+    if (!hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.sheetPeekHint)) {
+      setShowPeekHint(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (snap === "full" && showPeekHint) {
+      markMapOnboardingSeen(MAP_ONBOARDING_KEYS.sheetPeekHint);
+      setShowPeekHint(false);
+    }
+  }, [snap, showPeekHint]);
+
+  const dismissPeekHint = useCallback(() => {
+    markMapOnboardingSeen(MAP_ONBOARDING_KEYS.sheetPeekHint);
+    setShowPeekHint(false);
+  }, []);
 
   const peekPx = peekChromePx;
 
@@ -196,25 +220,42 @@ export function MediaMapListSheet({
         onPointerUp={settleToNearest}
         onPointerCancel={settleToNearest}
       >
-        <button
-          type="button"
-          aria-label={
-            snap === "full"
-              ? isKo
-                ? "지도로 돌아가기"
-                : "Back to map"
-              : isKo
-                ? "목록 펼치기"
-                : "Expand list"
-          }
-          onClick={() => onSnapChange(snap === "full" ? "peek" : "full")}
-          className="flex items-center justify-center pt-1 pb-0"
-        >
-          <span
-            aria-hidden
-            className="h-1 w-10 rounded-full bg-gray-300 dark:bg-white/25"
-          />
-        </button>
+        <div className="flex flex-col items-center justify-center pt-1 pb-0">
+          <button
+            type="button"
+            aria-label={
+              snap === "full"
+                ? isKo
+                  ? "지도로 돌아가기"
+                  : "Back to map"
+                : isKo
+                  ? "목록 펼치기"
+                  : "Expand list"
+            }
+            onClick={() => onSnapChange(snap === "full" ? "peek" : "full")}
+            className="flex w-full items-center justify-center"
+          >
+            <span
+              aria-hidden
+              className="h-1 w-10 rounded-full bg-gray-300 dark:bg-white/25"
+            />
+          </button>
+          {showPeekHint && snap === "peek" ? (
+            <p
+              className="tkad-type-note mt-1 px-3 text-center font-medium text-violet-600 dark:text-violet-300"
+              data-map-onboarding="sheet-peek-hint"
+            >
+              {isKo ? "위로 올려 목록 보기" : "Swipe up for the list"}
+              <button
+                type="button"
+                onClick={dismissPeekHint}
+                className="ml-1.5 text-tkad-muted underline-offset-2 hover:underline"
+              >
+                {isKo ? "닫기" : "Dismiss"}
+              </button>
+            </p>
+          ) : null}
+        </div>
         {header ? (
           <div
             className={cn(
