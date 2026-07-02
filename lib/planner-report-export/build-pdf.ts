@@ -48,7 +48,55 @@ const WHITE = [255, 255, 255] as const;
 const CYAN_BAR = [6, 182, 212] as const; // #06B6D4 — 화면 ContributionBar
 const BAR_TRACK = [243, 244, 246] as const;
 
-const M = 15;
+/** PR3 균형안 — 여백·타이포·카드 레이아웃 (미세조정은 이 객체만 수정) */
+export const PDF_LAYOUT = {
+  marginMm: 13,
+  pageBottomReserveMm: 16,
+  footerYm: 8,
+
+  summaryLabelPt: 8.5,
+  summaryValuePt: 11,
+  summaryRowHmm: 13,
+
+  kpiLabelPt: 8,
+  kpiValuePt: 12,
+  kpiCardHmm: 16,
+
+  detailPadMm: 3,
+  detailCardGapMm: 4,
+  detailNamePt: 10.5,
+  detailBodyPt: 8.5,
+  detailSpecPt: 8,
+  detailPriceLabelPt: 7,
+  detailPriceValuePt: 8.5,
+  detailReasonPt: 8.5,
+  detailBlockMm: 30,
+
+  cardCols: 2,
+  cardGapMm: 3,
+  cardPadMm: 2,
+  cardThumbMaxMm: 28,
+  cardTextBlockMm: 18,
+  cardNamePt: 9,
+  cardMetaPt: 8,
+  cardPricePt: 8.5,
+  cardLinkPt: 6.5,
+  cardNameLineHmm: 3.6,
+
+  compactGapMm: 2.5,
+  compactRowHmm: 11,
+  compactThumbMm: 7,
+  compactNamePt: 8.5,
+  compactMetaPt: 7.5,
+
+  regionHeaderMm: 8.5,
+  regionHeaderPt: 11,
+  categoryHeaderMm: 6.5,
+  categoryHeaderPt: 7.5,
+  groupSegmentTrailingMm: 2,
+} as const;
+
+const M = PDF_LAYOUT.marginMm;
 
 function fmtImp(n: number, isKo: boolean): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
@@ -80,7 +128,7 @@ export async function buildPlannerReportPdf(
 
   /** 페이지 하단을 넘기면 새 페이지로 — need: 다음 블록 높이(mm) */
   function ensure(need: number) {
-    if (y + need > pageH - 16) {
+    if (y + need > pageH - PDF_LAYOUT.pageBottomReserveMm) {
       doc.addPage();
       y = M;
     }
@@ -94,8 +142,8 @@ export async function buildPlannerReportPdf(
       doc.setFont(FONT, "normal");
       doc.setFontSize(7);
       setText(GRAY_500);
-      doc.text("THINKAD CAMPAIGN PLANNER", M, pageH - 8);
-      doc.text(`${i - 1} / ${pages - 1}`, pageW - M, pageH - 8, {
+      doc.text("THINKAD CAMPAIGN PLANNER", M, pageH - PDF_LAYOUT.footerYm);
+      doc.text(`${i - 1} / ${pages - 1}`, pageW - M, pageH - PDF_LAYOUT.footerYm, {
         align: "right",
       });
     }
@@ -368,17 +416,17 @@ export async function buildPlannerReportPdf(
     [isKo ? "업종" : "Industry", p.industryText || "—"],
   ];
   const colW = contentW / 2;
-  const rowH = 12;
+  const rowH = PDF_LAYOUT.summaryRowHmm;
   summary.forEach(([label, value], i) => {
     const col = i % 2;
     const x = M + col * colW;
     if (col === 0) ensure(rowH);
     doc.setFont(FONT, "normal");
-    doc.setFontSize(7.5);
+    doc.setFontSize(PDF_LAYOUT.summaryLabelPt);
     setText(GRAY_500);
     doc.text(label, x, y + 4);
     setText(INK);
-    doc.setFontSize(10);
+    doc.setFontSize(PDF_LAYOUT.summaryValuePt);
     const lines = doc.splitTextToSize(value, colW - 4) as string[];
     doc.text(lines.slice(0, 2), x, y + 9);
     if (col === 1 || i === summary.length - 1) y += rowH;
@@ -398,13 +446,13 @@ export async function buildPlannerReportPdf(
     kpis.forEach((k, i) => {
       const x = M + kW * i;
       setFill(GRAY_50);
-      doc.roundedRect(x + 1, y, kW - 2, 16, 1.5, 1.5, "F");
+      doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, 1.5, 1.5, "F");
       doc.setFont(FONT, "normal");
-      doc.setFontSize(7);
+      doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
       setText(GRAY_500);
       doc.text(k.label, x + 4, y + 5.5);
       setText(VIOLET);
-      doc.setFontSize(12);
+      doc.setFontSize(PDF_LAYOUT.kpiValuePt);
       const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
       doc.text(vLines.slice(0, 1), x + 4, y + 12);
     });
@@ -694,7 +742,7 @@ export async function buildPlannerReportPdf(
   }
 
   function drawMediaCard(row: PlannerExportMediaRow, thumb?: string) {
-    const pad = 3;
+    const pad = PDF_LAYOUT.detailPadMm;
     const thumbSlot = Boolean(row.thumbUrl?.trim());
     const thumbW = thumbSlot ? thumbBox.w : 0;
     const textX = M + pad + (thumbSlot ? thumbW + 3 : 0);
@@ -749,14 +797,14 @@ export async function buildPlannerReportPdf(
 
     let ty = y + pad + 4;
     doc.setFont(FONT, "bold");
-    doc.setFontSize(9.5);
+    doc.setFontSize(PDF_LAYOUT.detailNamePt);
     setText(INK);
     const nameLines = doc.splitTextToSize(row.name, textW) as string[];
     doc.text(nameLines.slice(0, 2), textX, ty);
     ty += nameLines.slice(0, 2).length * 4.2 + 1;
 
     doc.setFont(FONT, "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(PDF_LAYOUT.detailBodyPt);
     if (row.location) {
       setText(GRAY_600);
       const locLines = doc.splitTextToSize(row.location, textW) as string[];
@@ -774,7 +822,7 @@ export async function buildPlannerReportPdf(
       doc.setLineWidth(0.15);
       doc.line(textX, ty, textX + textW, ty);
       ty += 3;
-      doc.setFontSize(8);
+      doc.setFontSize(PDF_LAYOUT.detailSpecPt);
       for (let i = 0; i < specs.length; i += 2) {
         const drawSpec = (spec: MediaCardSpec, sx: number) => {
           setText(GRAY_500);
@@ -794,22 +842,22 @@ export async function buildPlannerReportPdf(
       setDraw(GRAY_100);
       doc.line(textX, ty, textX + textW, ty);
       ty += 4;
-      doc.setFontSize(7);
+      doc.setFontSize(PDF_LAYOUT.detailPriceLabelPt);
       if (row.monthlyPriceLabel) {
         setText(GRAY_500);
         doc.text(isKo ? "월 단가" : "Monthly", textX, ty);
         doc.setFont(FONT, "bold");
-        doc.setFontSize(8.5);
+        doc.setFontSize(PDF_LAYOUT.detailPriceValuePt);
         setText(VIOLET);
         doc.text(row.monthlyPriceLabel, textX, ty + 3.5);
       }
       if (row.lineTotalLabel) {
         setText(GRAY_500);
         doc.setFont(FONT, "normal");
-        doc.setFontSize(7);
+        doc.setFontSize(PDF_LAYOUT.detailPriceLabelPt);
         doc.text(isKo ? "집행 소계" : "Subtotal", textX + colW + 3, ty);
         doc.setFont(FONT, "bold");
-        doc.setFontSize(8.5);
+        doc.setFontSize(PDF_LAYOUT.detailPriceValuePt);
         setText(VIOLET);
         doc.text(row.lineTotalLabel, textX + colW + 3, ty + 3.5);
       }
@@ -818,7 +866,7 @@ export async function buildPlannerReportPdf(
 
     if (row.recommendReason?.trim()) {
       doc.setFont(FONT, "bold");
-      doc.setFontSize(8.5);
+      doc.setFontSize(PDF_LAYOUT.detailReasonPt);
       setText(VIOLET);
       const label = isKo ? "추천 " : "Why ";
       doc.text(label, textX, ty);
@@ -901,30 +949,27 @@ export async function buildPlannerReportPdf(
         cyan: CYAN,
       });
     }
-    y += rh + 4;
+    y += rh + PDF_LAYOUT.detailCardGapMm;
   }
 
   type PdfGridState = { col: number; rowY: number };
 
-  const PDF_REGION_HEADER_MM = 8.5;
-  const PDF_CATEGORY_HEADER_MM = 6.5;
-
   function cardGridMetrics() {
-    const gap = 3;
-    const cols = 2;
+    const gap = PDF_LAYOUT.cardGapMm;
+    const cols = PDF_LAYOUT.cardCols;
     const cellW = (contentW - gap * (cols - 1)) / cols;
-    const pad = 2;
-    const thumbSize = Math.min(cellW - pad * 2, 20);
-    const cellH = pad + thumbSize + 16 + pad;
+    const pad = PDF_LAYOUT.cardPadMm;
+    const thumbSize = Math.min(cellW - pad * 2, PDF_LAYOUT.cardThumbMaxMm);
+    const cellH = pad + thumbSize + PDF_LAYOUT.cardTextBlockMm + pad;
     return { gap, cols, cellW, pad, thumbSize, cellH };
   }
 
   function compactGridMetrics() {
-    const gap = 2.5;
-    const cols = 2;
+    const gap = PDF_LAYOUT.compactGapMm;
+    const cols = PDF_LAYOUT.cardCols;
     const cellW = (contentW - gap * (cols - 1)) / cols;
-    const rowH = 10;
-    const thumbSize = 7;
+    const rowH = PDF_LAYOUT.compactRowHmm;
+    const thumbSize = PDF_LAYOUT.compactThumbMm;
     return { gap, cols, cellW, rowH, thumbSize };
   }
 
@@ -951,31 +996,31 @@ export async function buildPlannerReportPdf(
   }
 
   function drawPortfolioRegionHeader(label: string, followingBlockMm: number) {
-    ensure(PDF_REGION_HEADER_MM + followingBlockMm);
+    ensure(PDF_LAYOUT.regionHeaderMm + followingBlockMm);
     doc.setFont(FONT, "bold");
-    doc.setFontSize(10.5);
+    doc.setFontSize(PDF_LAYOUT.regionHeaderPt);
     setText(INK);
     doc.text(label, M, y + 4.2);
     setDraw(GRAY_200);
     doc.setLineWidth(0.25);
     doc.line(M, y + 6.2, M + contentW, y + 6.2);
-    y += PDF_REGION_HEADER_MM;
+    y += PDF_LAYOUT.regionHeaderMm;
   }
 
   function drawPortfolioCategoryHeader(label: string, followingBlockMm: number) {
-    ensure(PDF_CATEGORY_HEADER_MM + followingBlockMm);
+    ensure(PDF_LAYOUT.categoryHeaderMm + followingBlockMm);
     doc.setFont(FONT, "bold");
-    doc.setFontSize(7.5);
+    doc.setFontSize(PDF_LAYOUT.categoryHeaderPt);
     setText(VIOLET);
     doc.text(label.toUpperCase(), M, y + 4);
-    y += PDF_CATEGORY_HEADER_MM;
+    y += PDF_LAYOUT.categoryHeaderMm;
   }
 
   function renderPortfolioLineup() {
     const { grouped, segments } = buildPortfolioLineupSegments(p);
     const cardBlockMm = cardGridMetrics().cellH + cardGridMetrics().gap;
     const compactBlockMm = compactGridMetrics().rowH + compactGridMetrics().gap;
-    const detailBlockMm = 26;
+    const detailBlockMm = PDF_LAYOUT.detailBlockMm;
     const firstBlockMm =
       lineupViewMode === "card"
         ? cardBlockMm
@@ -984,12 +1029,8 @@ export async function buildPlannerReportPdf(
           : detailBlockMm;
 
     const lineupFollowingMm = grouped
-      ? PDF_REGION_HEADER_MM + PDF_CATEGORY_HEADER_MM + firstBlockMm
-      : lineupViewMode === "card"
-        ? 43
-        : lineupViewMode === "compact"
-          ? 13
-          : 0;
+      ? PDF_LAYOUT.regionHeaderMm + PDF_LAYOUT.categoryHeaderMm + firstBlockMm
+      : firstBlockMm;
 
     sectionTitle(isKo ? "매체 구성" : "Media lineup", lineupFollowingMm);
 
@@ -1016,7 +1057,7 @@ export async function buildPlannerReportPdf(
             grid = flushPdfCardGrid(grid);
             drawPortfolioRegionHeader(
               seg.regionLabel,
-              PDF_CATEGORY_HEADER_MM + firstBlockMm,
+              PDF_LAYOUT.categoryHeaderMm + firstBlockMm,
             );
             prevRegion = seg.regionLabel;
           } else {
@@ -1026,7 +1067,7 @@ export async function buildPlannerReportPdf(
         }
         grid = drawMediaCardGrid(seg.items, thumbs, grid);
         if (grouped) {
-          y = grid.rowY + 2;
+          y = grid.rowY + PDF_LAYOUT.groupSegmentTrailingMm;
           grid = { col: grid.col, rowY: y };
         }
       }
@@ -1042,7 +1083,7 @@ export async function buildPlannerReportPdf(
             grid = flushPdfCompactGrid(grid);
             drawPortfolioRegionHeader(
               seg.regionLabel,
-              PDF_CATEGORY_HEADER_MM + firstBlockMm,
+              PDF_LAYOUT.categoryHeaderMm + firstBlockMm,
             );
             prevRegion = seg.regionLabel;
           } else {
@@ -1052,7 +1093,7 @@ export async function buildPlannerReportPdf(
         }
         grid = drawMediaCompactGrid(seg.items, thumbs, grid);
         if (grouped) {
-          y = grid.rowY + 2;
+          y = grid.rowY + PDF_LAYOUT.groupSegmentTrailingMm;
           grid = { col: grid.col, rowY: y };
         }
       }
@@ -1064,10 +1105,10 @@ export async function buildPlannerReportPdf(
         if (!seg.items.length) continue;
         if (grouped) {
           if (seg.regionLabel !== prevRegion) {
-            if (prevRegion) y += 2;
+            if (prevRegion) y += PDF_LAYOUT.groupSegmentTrailingMm;
             drawPortfolioRegionHeader(
               seg.regionLabel,
-              PDF_CATEGORY_HEADER_MM + detailBlockMm,
+              PDF_LAYOUT.categoryHeaderMm + detailBlockMm,
             );
             prevRegion = seg.regionLabel;
           }
@@ -1125,14 +1166,15 @@ export async function buildPlannerReportPdf(
       const textW = cellW - pad * 2;
       let ty = rowY + pad + thumbSize + 3.5;
       doc.setFont(FONT, "bold");
-      doc.setFontSize(8);
+      doc.setFontSize(PDF_LAYOUT.cardNamePt);
       setText(INK);
       const nameLines = doc.splitTextToSize(row.name, textW) as string[];
       doc.text(nameLines.slice(0, 2), cx + pad, ty);
-      ty += nameLines.slice(0, 2).length * 3.4 + 0.8;
+      ty +=
+        nameLines.slice(0, 2).length * PDF_LAYOUT.cardNameLineHmm + 0.8;
 
       doc.setFont(FONT, "normal");
-      doc.setFontSize(7);
+      doc.setFontSize(PDF_LAYOUT.cardMetaPt);
       setText(GRAY_600);
       const meta = [row.region, row.type ?? row.categoryLabel]
         .filter(Boolean)
@@ -1140,19 +1182,19 @@ export async function buildPlannerReportPdf(
       if (meta) {
         const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
         doc.text(metaLine, cx + pad, ty);
-        ty += 3.2;
+        ty += 3.4;
       }
       const price = row.monthlyPriceLabel ?? row.priceLabel;
       if (price) {
         doc.setFont(FONT, "bold");
-        doc.setFontSize(7.5);
+        doc.setFontSize(PDF_LAYOUT.cardPricePt);
         setText(VIOLET);
         doc.text(price, cx + pad, ty);
       }
 
       if (mediaUrl) {
         doc.setFont(FONT, "normal");
-        doc.setFontSize(6.5);
+        doc.setFontSize(PDF_LAYOUT.cardLinkPt);
         setText(CYAN);
         const linkLabel = isKo ? "상세 →" : "Details →";
         doc.text(linkLabel, cx + cellW - pad, rowY + cellH - 2.2, { align: "right" });
@@ -1202,13 +1244,13 @@ export async function buildPlannerReportPdf(
       const textX = cx + thumbSize + 3;
       const textW = cellW - thumbSize - 5;
       doc.setFont(FONT, "bold");
-      doc.setFontSize(7.5);
+      doc.setFontSize(PDF_LAYOUT.compactNamePt);
       setText(INK);
       const nameLine = (doc.splitTextToSize(row.name, textW) as string[])[0] ?? row.name;
-      doc.text(nameLine, textX, rowY + 4);
+      doc.text(nameLine, textX, rowY + 4.2);
 
       doc.setFont(FONT, "normal");
-      doc.setFontSize(6.5);
+      doc.setFontSize(PDF_LAYOUT.compactMetaPt);
       setText(GRAY_600);
       const meta = [
         row.region,
@@ -1219,7 +1261,7 @@ export async function buildPlannerReportPdf(
         .join(" · ");
       if (meta) {
         const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
-        doc.text(metaLine, textX, rowY + 7.5);
+        doc.text(metaLine, textX, rowY + 8);
       }
 
       if (mediaUrl) {
