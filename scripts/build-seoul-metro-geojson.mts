@@ -1,8 +1,9 @@
 /**
  * Overpass → public/geo/seoul-metro-v1.json (build-time only, no runtime Overpass).
- * Usage: npx tsx scripts/build-seoul-metro-geojson.mts
+ * Capital region: subway + light_rail + selective train (whitelist-first matching).
+ * Usage: npm run build:metro-geo
  */
-import { mkdir, writeFile } from "node:fs/promises";
+import { readFile, mkdir, writeFile } from "node:fs/promises";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -17,8 +18,47 @@ import type {
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT_PATH = join(__dirname, "../public/geo/seoul-metro-v1.json");
+const REPORT_PATH = join(__dirname, "../public/geo/metro-relation-report.json");
+const WHITELIST_PATH = join(
+  __dirname,
+  "../lib/public-map/metro-relation-whitelist.json",
+);
 
-const BBOX = { south: 36.95, west: 126.55, north: 37.85, east: 127.25 };
+/** 수도권 bbox — 인천·경기 외곽 포함 */
+const BBOX = { south: 36.9, west: 126.4, north: 37.85, east: 127.45 };
+
+/** Overpass 부하 분산용 영역 분할 */
+const QUERY_REGIONS: Array<{ name: string; bbox: string }> = [
+  { name: "seoul-core", bbox: "37.4,126.8,37.65,127.2" },
+  { name: "west-gyeonggi", bbox: "36.9,126.4,37.5,126.95" },
+  { name: "east-gyeonggi", bbox: "37.2,127.0,37.85,127.45" },
+  { name: "south-gyeonggi", bbox: "37.0,126.7,37.4,127.3" },
+];
+
+const OVERPASS_ENDPOINTS = [
+  "https://overpass.kumi.systems/api/interpreter",
+  "https://overpass-api.de/api/interpreter",
+];
+
+const SIMPLIFY_TOLERANCE = 0.00015;
+const MAX_RETRIES = 3;
+const RETRY_BASE_MS = 3000;
+
+/** train route 는 화이트리스트만 허용 (KTX·장거리 열차 제외) */
+const TRAIN_LINE_IDS = new Set<SeoulMetroLineId>([
+  "bundang",
+  "gyeongui-jungang",
+  "arex",
+  "gtx-a",
+  "gyeongchun",
+  "seohae",
+]);
+
+const EXCLUDE_RELATION_NAME =
+  /KTX|ITX|무궁화|새마을|누리로|강릉|직통열차|공항철도 직통|셔틀트레인|급행|특급|화물|freight|cargo/i;
+
+type WhitelistEntry = { lineId: SeoulMetroLineId; lineNameKo: string };
+type WhitelistMap = Record<string, WhitelistEntry>;
 
 type OsmTags = Record<string, string>;
 
@@ -39,7 +79,21 @@ type OsmElement = {
   geometry?: Array<{ lat: number; lon: number }>;
 };
 
+type UnmatchedRelation = {
+  id: number;
+  name: string | null;
+  ref: string | null;
+  route: string | null;
+};
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 function resolveLineId(tags: OsmTags): SeoulMetroLineId | null {
+  const name = tags.name ?? tags["name:ko"] ?? tags["name:en"] ?? "";
+  if (EXCLUDE_RELATION_NAME.test(name)) return null;
+
   const hay = [
     tags.ref,
     tags.name,
@@ -51,14 +105,27 @@ function resolveLineId(tags: OsmTags): SeoulMetroLineId | null {
     .join(" ")
     .toLowerCase();
 
-  if (/공항|arex|airport railroad|인천국제공항철도|airport railway/.test(hay)) return "arex";
-  if (/신분당|shinbundang|daxin/.test(hay)) return "shinbundang";
-  if (/수인분당|suin.bundang|분당선|분당|bundang line|bundang/.test(hay))
+  if (/인천.*1호선|incheon.*line 1/i.test(hay)) return "incheon1";
+  if (/인천.*2호선|incheon.*line 2/i.test(hay)) return "incheon2";
+  if (/gtx|great train express/i.test(hay)) return "gtx-a";
+  if (/경강선|gyeonggang/i.test(hay)) return "gyeonggang";
+  if (/김포|gimpo gold/i.test(hay)) return "gimpo-gold";
+  if (/용인|에버라인|everline/i.test(hay)) return "everline";
+  if (/의정부|uijeongbu/i.test(hay)) return "uijeongbu";
+  if (/경춘|gyeongchun/i.test(hay) && !/ktx/i.test(hay)) return "gyeongchun";
+  if (/서해선|seohae/i.test(hay)) return "seohae";
+  if (/신림선|sillim/i.test(hay)) return "silim";
+  if (/공항|arex|airport railroad|인천국제공항철도/i.test(hay) && !/직통|express/i.test(hay))
+    return "arex";
+  if (/신분당|shinbundang|daxin/i.test(hay)) return "shinbundang";
+  if (/수인.?분당|suin.?bundang|분당선|분당|bundang line|bundang/.test(hay))
     return "bundang";
-  if (/경의중앙|경의·중앙|경의-중앙|gyeongui|jungang|gyeongwon/.test(hay))
+  if (/경의중앙|경의·중앙|경의-중앙|gyeongui|jungang|gyeongwon/i.test(hay))
     return "gyeongui-jungang";
 
-  const numMatch = hay.match(/(?:서울\s*)?([1-9])\s*호선|line\s*([1-9])\b|^[1-9]$/);
+  const numMatch = hay.match(
+    /(?:서울\s*|수도권\s*)?([1-9])\s*호선|line\s*([1-9])\b|^[1-9]$/,
+  );
   if (numMatch) {
     const n = (numMatch[1] ?? numMatch[2]) as SeoulMetroLineId;
     if (SEOUL_METRO_MVP_LINE_IDS.includes(n)) return n;
@@ -72,9 +139,31 @@ function resolveLineId(tags: OsmTags): SeoulMetroLineId | null {
   return null;
 }
 
+function resolveRelationLine(
+  rel: OsmElement,
+  whitelist: WhitelistMap,
+): { lineId: SeoulMetroLineId; lineNameKo: string } | null {
+  if (!rel.tags) return null;
+
+  const wl = whitelist[String(rel.id)];
+  if (wl && SEOUL_METRO_MVP_LINE_IDS.includes(wl.lineId)) {
+    const def = SEOUL_METRO_LINE_BY_ID[wl.lineId];
+    return { lineId: wl.lineId, lineNameKo: def.nameKo };
+  }
+
+  const route = rel.tags.route ?? "";
+  const lineId = resolveLineId(rel.tags);
+  if (!lineId || !SEOUL_METRO_MVP_LINE_IDS.includes(lineId)) return null;
+
+  if (route === "train" && !TRAIN_LINE_IDS.has(lineId)) return null;
+
+  const def = SEOUL_METRO_LINE_BY_ID[lineId];
+  return { lineId, lineNameKo: def.nameKo };
+}
+
 function simplifyRing(
   coords: Array<[number, number]>,
-  tolerance = 0.00012,
+  tolerance = SIMPLIFY_TOLERANCE,
 ): Array<[number, number]> {
   if (coords.length <= 2) return coords;
 
@@ -162,15 +251,31 @@ function relationToLineStrings(rel: OsmElement): Array<Array<[number, number]>> 
   return lines;
 }
 
-async function fetchOverpass(query: string): Promise<OsmElement[]> {
-  const endpoints = [
-    "https://overpass-api.de/api/interpreter",
-    "https://overpass.kumi.systems/api/interpreter",
-  ];
+function buildRegionQuery(bbox: string): string {
+  return `
+[out:json][timeout:90];
+(
+  relation["route"="subway"](${bbox});
+  relation["route"="light_rail"](${bbox});
+  relation["route"="train"](${bbox});
+);
+out geom;
+>;
+out body qt;
+`;
+}
+
+async function fetchOverpassRegion(
+  regionName: string,
+  bbox: string,
+): Promise<OsmElement[]> {
+  const query = buildRegionQuery(bbox);
   let lastErr = "";
-  for (const url of endpoints) {
+
+  for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+    const endpoint = OVERPASS_ENDPOINTS[attempt % OVERPASS_ENDPOINTS.length]!;
     try {
-      const res = await fetch(url, {
+      const res = await fetch(endpoint, {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8",
@@ -178,48 +283,79 @@ async function fetchOverpass(query: string): Promise<OsmElement[]> {
           "User-Agent": "tkad-web-metro-build/1.0 (contact@tkad.co.kr)",
         },
         body: `data=${encodeURIComponent(query.trim())}`,
+        signal: AbortSignal.timeout(95_000),
       });
       if (!res.ok) {
-        lastErr = `${url} HTTP ${res.status}`;
+        lastErr = `${regionName}@${endpoint} HTTP ${res.status}`;
+        await sleep(RETRY_BASE_MS * (attempt + 1));
         continue;
       }
       const json = (await res.json()) as { elements?: OsmElement[] };
       return json.elements ?? [];
     } catch (e) {
-      lastErr = e instanceof Error ? e.message : String(e);
+      lastErr = `${regionName}@${endpoint}: ${e instanceof Error ? e.message : String(e)}`;
+      await sleep(RETRY_BASE_MS * (attempt + 1));
     }
   }
-  throw new Error(`Overpass failed: ${lastErr}`);
+
+  console.warn(`Overpass region ${regionName} failed after retries: ${lastErr}`);
+  return [];
+}
+
+async function fetchAllRegions(): Promise<OsmElement[]> {
+  const byKey = new Map<string, OsmElement>();
+
+  for (const region of QUERY_REGIONS) {
+    console.log(`Fetching ${region.name} (${region.bbox})…`);
+    const elements = await fetchOverpassRegion(region.name, region.bbox);
+    for (const el of elements) {
+      byKey.set(`${el.type}/${el.id}`, el);
+    }
+    await sleep(1500);
+  }
+
+  return [...byKey.values()];
 }
 
 async function main() {
-  const bbox = `${BBOX.south},${BBOX.west},${BBOX.north},${BBOX.east}`;
+  const whitelistRaw = await readFile(WHITELIST_PATH, "utf8");
+  const whitelist = JSON.parse(whitelistRaw) as WhitelistMap;
 
-  const relationQuery = `
-[out:json][timeout:180];
-(
-  relation["route"="subway"](${bbox});
-  relation["route"="light_rail"](${bbox});
-);
-out geom;
->;
-out body qt;
-`;
-
-  console.log("Fetching subway relations + stop nodes from Overpass…");
-  const elements = await fetchOverpass(relationQuery);
+  console.log(
+    `Capital bbox ${BBOX.south},${BBOX.west},${BBOX.north},${BBOX.east} — ${QUERY_REGIONS.length} region queries`,
+  );
+  const elements = await fetchAllRegions();
   const relations = elements.filter((e) => e.type === "relation");
   const stationNodes = elements.filter((e) => e.type === "node");
   console.log(`Relations: ${relations.length}, nodes: ${stationNodes.length}`);
 
   const features: SeoulMetroGeoJson["features"] = [];
   const stationLineCounts = new Map<number, Set<SeoulMetroLineId>>();
+  const unmatched: UnmatchedRelation[] = [];
+  const matchedLineIds = new Set<SeoulMetroLineId>();
+  const processedRelationIds = new Set<number>();
 
   for (const rel of relations) {
     if (rel.type !== "relation" || !rel.tags) continue;
-    const lineId = resolveLineId(rel.tags);
-    if (!lineId || !SEOUL_METRO_MVP_LINE_IDS.includes(lineId)) continue;
+    if (processedRelationIds.has(rel.id)) continue;
+    processedRelationIds.add(rel.id);
 
+    const resolved = resolveRelationLine(rel, whitelist);
+    if (!resolved) {
+      const name = rel.tags.name ?? rel.tags["name:ko"] ?? null;
+      if (name && !EXCLUDE_RELATION_NAME.test(name)) {
+        unmatched.push({
+          id: rel.id,
+          name,
+          ref: rel.tags.ref ?? null,
+          route: rel.tags.route ?? null,
+        });
+      }
+      continue;
+    }
+
+    const { lineId, lineNameKo } = resolved;
+    matchedLineIds.add(lineId);
     const def = SEOUL_METRO_LINE_BY_ID[lineId];
     const lineStrings = relationToLineStrings(rel);
     if (lineStrings.length === 0) continue;
@@ -227,7 +363,7 @@ out body qt;
     const props: SeoulMetroFeatureProperties = {
       kind: "line",
       lineId,
-      lineNameKo: def.nameKo,
+      lineNameKo,
       color: def.color,
     };
 
@@ -258,7 +394,10 @@ out body qt;
     if (n.type === "node") nodeById.set(n.id, n);
   }
 
-  const stationFeaturesById = new Map<number, SeoulMetroGeoJson["features"][number]>();
+  const stationFeaturesById = new Map<
+    number,
+    SeoulMetroGeoJson["features"][number]
+  >();
 
   for (const [nodeId, lineSet] of stationLineCounts) {
     const node = nodeById.get(nodeId);
@@ -292,10 +431,14 @@ out body qt;
   features.push(...stationFeaturesById.values());
 
   const lineCount = features.filter((f) => f.properties.kind === "line").length;
-  const stationCount = features.filter((f) => f.properties.kind === "station").length;
+  const stationCount = features.filter(
+    (f) => f.properties.kind === "station",
+  ).length;
 
   if (lineCount === 0) {
-    throw new Error("No line features extracted — Overpass may have failed or returned empty data");
+    throw new Error(
+      "No line features extracted — Overpass may have failed or returned empty data",
+    );
   }
 
   const collection: SeoulMetroGeoJson = {
@@ -303,11 +446,28 @@ out body qt;
     features,
   };
 
-  await mkdir(dirname(OUT_PATH), { recursive: true });
-  await writeFile(OUT_PATH, `${JSON.stringify(collection)}\n`, "utf8");
+  const report = {
+    generatedAt: new Date().toISOString(),
+    bbox: BBOX,
+    matchedLineIds: [...matchedLineIds].sort(),
+    unmatchedCount: unmatched.length,
+    unmatched: unmatched.sort((a, b) => a.id - b.id),
+  };
 
+  await mkdir(dirname(OUT_PATH), { recursive: true });
+  const json = JSON.stringify(collection);
+  await writeFile(OUT_PATH, `${json}\n`, "utf8");
+  await writeFile(REPORT_PATH, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+
+  const sizeKb = Math.round(json.length / 1024);
   console.log(
-    `Wrote ${OUT_PATH} — ${lineCount} line features, ${stationCount} stations`,
+    `Wrote ${OUT_PATH} — ${lineCount} line features, ${stationCount} stations, ${sizeKb}KB`,
+  );
+  console.log(
+    `Matched lineIds (${matchedLineIds.size}): ${[...matchedLineIds].sort().join(", ")}`,
+  );
+  console.log(
+    `Unmatched relations: ${unmatched.length} → ${REPORT_PATH}`,
   );
 }
 

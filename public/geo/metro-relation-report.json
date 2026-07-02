@@ -1,0 +1,79 @@
+{
+  "generatedAt": "2026-07-02T13:38:41.616Z",
+  "bbox": {
+    "south": 36.9,
+    "west": 126.4,
+    "north": 37.85,
+    "east": 127.45
+  },
+  "matchedLineIds": [
+    "1",
+    "2",
+    "3",
+    "4",
+    "5",
+    "6",
+    "7",
+    "8",
+    "9",
+    "arex",
+    "bundang",
+    "everline",
+    "gimpo-gold",
+    "gtx-a",
+    "gyeongchun",
+    "gyeonggang",
+    "gyeongui-jungang",
+    "incheon1",
+    "incheon2",
+    "seohae",
+    "shinbundang",
+    "silim",
+    "uijeongbu"
+  ],
+  "unmatchedCount": 7,
+  "unmatched": [
+    {
+      "id": 6094786,
+      "name": "경부선 (부산역 행)",
+      "ref": "201",
+      "route": "train"
+    },
+    {
+      "id": 7533582,
+      "name": "서울 경전철 우이신설선: 북한산우이 → 신설동",
+      "ref": "W",
+      "route": "light_rail"
+    },
+    {
+      "id": 7533583,
+      "name": "서울 경전철 우이신설선: 신설동 → 북한산우이",
+      "ref": "W",
+      "route": "light_rail"
+    },
+    {
+      "id": 8266158,
+      "name": "경부선 (서울역 행)",
+      "ref": "201",
+      "route": "train"
+    },
+    {
+      "id": 11214688,
+      "name": "SRT 수서평택고속선·경부고속선: 수서 → 부산",
+      "ref": null,
+      "route": "train"
+    },
+    {
+      "id": 11214689,
+      "name": "SRT 수서평택고속선·경부고속선·호남고속선: 수서 → 광주송정",
+      "ref": null,
+      "route": "train"
+    },
+    {
+      "id": 11214690,
+      "name": "SRT 수서평택고속선·경부고속선·호남고속선·호남선: 수서 → 목포",
+      "ref": null,
+      "route": "train"
+    }
+  ]
+}
