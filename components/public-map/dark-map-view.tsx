@@ -27,6 +27,7 @@ import {
   DarkMapTileLayer,
   resolveDarkMapLightTiles,
 } from "@/components/public-map/dark-map-tile-layer";
+import { SeoulMetroOverlayLayer } from "@/components/public-map/seoul-metro-overlay-layer";
 
 export type { MapBounds, MapMarker };
 
@@ -74,6 +75,8 @@ type Props = {
   themeAwareTiles?: boolean;
   /** 보고서 등 라이트 문서 — Carto light 타일 고정 (다크 타일 금지) */
   preferLightTiles?: boolean;
+  /** 수도권 지하철 GeoJSON 오버레이 — `/media/map` 전용 */
+  subwayOverlayEnabled?: boolean;
 };
 
 /** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
@@ -370,6 +373,7 @@ export default function DarkMapView({
   invalidateNonce,
   themeAwareTiles = false,
   preferLightTiles = false,
+  subwayOverlayEnabled = false,
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
@@ -415,6 +419,9 @@ export default function DarkMapView({
         zoomAnimation
       >
         <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
+        {subwayOverlayEnabled ? (
+          <SeoulMetroOverlayLayer lightTiles={lightTiles} />
+        ) : null}
         <ZoomControl position="bottomright" />
         <MapResizeFix />
         <InvalidateOnNonce nonce={invalidateNonce} />

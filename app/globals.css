@@ -4077,6 +4077,11 @@ img {
   margin-top: 4px !important;
 }
 
+.tkad-dark-map-root .tkad-metro-label {
+  background: transparent !important;
+  border: none !important;
+}
+
 .tkad-map-pin-icon {
   transition:
     transform 0.18s ease,
