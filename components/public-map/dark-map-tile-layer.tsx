@@ -33,7 +33,7 @@ export function DarkMapTileLayer({ themeAware = false, preferLight = false }: Pr
       url={url}
       subdomains={PUBLIC_DARK_MAP_TILE_SUBDOMAINS}
       maxZoom={20}
-      attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+      attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
     />
   );
 }

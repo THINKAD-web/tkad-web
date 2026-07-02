@@ -65,6 +65,10 @@ import {
   markMapOnboardingSeen,
   MAP_ONBOARDING_KEYS,
 } from "@/lib/media-map/onboarding-storage";
+import {
+  readSubwayOverlayEnabled,
+  writeSubwayOverlayEnabled,
+} from "@/lib/public-map/seoul-metro-overlay-storage";
 
 function MapViewLoadingPlaceholder() {
   return (
@@ -194,6 +198,7 @@ export default function MediaMapPageClient() {
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   /** "이 지역에서 검색" 1회성 코치마크 */
   const [showSearchCoachmark, setShowSearchCoachmark] = useState(false);
+  const [subwayOverlayEnabled, setSubwayOverlayEnabled] = useState(true);
   const pvNonceRef = useRef(0);
   const [programmaticView, setProgrammaticView] =
     useState<DarkMapProgrammaticView | null>(() => {
@@ -343,6 +348,15 @@ export default function MediaMapPageClient() {
     update();
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
+  }, []);
+
+  useEffect(() => {
+    setSubwayOverlayEnabled(readSubwayOverlayEnabled());
+  }, []);
+
+  const handleSubwayOverlayChange = useCallback((enabled: boolean) => {
+    setSubwayOverlayEnabled(enabled);
+    writeSubwayOverlayEnabled(enabled);
   }, []);
 
   // 레이아웃 전환(데스크톱↔모바일)·바텀시트 스냅·peek 크롬 높이 변경 후 지도 타일 재계산
@@ -1051,6 +1065,7 @@ export default function MediaMapPageClient() {
               userLocation={userLocation}
               invalidateNonce={invalidateNonce}
               themeAwareTiles
+              subwayOverlayEnabled={subwayOverlayEnabled}
             />
           </div>
 
@@ -1153,6 +1168,9 @@ export default function MediaMapPageClient() {
             <MediaMapVisibilityLegend
               isKo={isKo}
               className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
+              showSubwayToggle
+              subwayEnabled={subwayOverlayEnabled}
+              onSubwayEnabledChange={handleSubwayOverlayChange}
             />
           ) : null}
 

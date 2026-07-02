@@ -9,9 +9,18 @@ import { cn } from "@/lib/utils";
 type Props = {
   isKo?: boolean;
   className?: string;
+  subwayEnabled?: boolean;
+  onSubwayEnabledChange?: (enabled: boolean) => void;
+  showSubwayToggle?: boolean;
 };
 
-export function MediaMapVisibilityLegend({ isKo = true, className }: Props) {
+export function MediaMapVisibilityLegend({
+  isKo = true,
+  className,
+  subwayEnabled = true,
+  onSubwayEnabledChange,
+  showSubwayToggle = false,
+}: Props) {
   const [expanded, setExpanded] = useState(false);
   const entries = visibilityPinLegendEntries();
 
@@ -21,7 +30,7 @@ export function MediaMapVisibilityLegend({ isKo = true, className }: Props) {
         mapFloatingPanelClass("pointer-events-auto overflow-hidden"),
         className,
       )}
-      aria-label={isKo ? "가시성 점수 범례" : "Visibility score legend"}
+      aria-label={isKo ? "지도 범례" : "Map legend"}
     >
       <button
         type="button"
@@ -49,6 +58,26 @@ export function MediaMapVisibilityLegend({ isKo = true, className }: Props) {
           />
         )}
       </button>
+
+      {showSubwayToggle && onSubwayEnabledChange ? (
+        <div className="border-t border-border/70 px-3 py-2 dark:border-white/10">
+          <label className="tkad-type-meta flex cursor-pointer items-center justify-between gap-2 font-medium text-foreground">
+            <span className="inline-flex items-center gap-2">
+              <span
+                className="h-0.5 w-4 shrink-0 rounded-full bg-[#00A84D]"
+                aria-hidden
+              />
+              {isKo ? "지하철" : "Subway"}
+            </span>
+            <input
+              type="checkbox"
+              checked={subwayEnabled}
+              onChange={(e) => onSubwayEnabledChange(e.target.checked)}
+              className="h-4 w-4 rounded border-border accent-violet-600"
+            />
+          </label>
+        </div>
+      ) : null}
 
       {expanded ? (
         <div className="border-t border-border/70 px-3 pb-2.5 pt-2 dark:border-white/10">
@@ -83,6 +112,37 @@ export function MediaMapVisibilityLegend({ isKo = true, className }: Props) {
           <p className="tkad-type-note mt-1.5 text-tkad-muted">
             {isKo ? "진할수록 높은 점수" : "Darker = higher score"}
           </p>
+          {showSubwayToggle ? (
+            <p className="tkad-type-note mt-2 text-tkad-muted">
+              {isKo ? (
+                <>
+                  지하철 노선·역 ©{" "}
+                  <a
+                    href="https://www.openstreetmap.org/copyright"
+                    className="underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    OpenStreetMap
+                  </a>{" "}
+                  (ODbL)
+                </>
+              ) : (
+                <>
+                  Subway ©{" "}
+                  <a
+                    href="https://www.openstreetmap.org/copyright"
+                    className="underline underline-offset-2"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    OpenStreetMap
+                  </a>{" "}
+                  (ODbL)
+                </>
+              )}
+            </p>
+          ) : null}
         </div>
       ) : null}
     </div>
