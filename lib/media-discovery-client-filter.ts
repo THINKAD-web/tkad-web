@@ -57,11 +57,8 @@ function matchesBrowseCategory(
     category: legacyTrim || undefined,
   });
 
-  if (resolved.subCategory) {
-    if (m.mediaSubCategory === resolved.subCategory) return true;
-    if (m.mediaCategory?.includes(resolved.subCategory)) return true;
-  }
-  if (resolved.mainCategory) {
+  const matchesMain = (): boolean => {
+    if (!resolved.mainCategory) return true;
     if (m.mediaMainCategory === resolved.mainCategory) return true;
     if (m.mediaCategory?.includes(resolved.mainCategory)) return true;
     if (
@@ -70,6 +67,19 @@ function matchesBrowseCategory(
     ) {
       return true;
     }
+    return false;
+  };
+
+  if (resolved.subCategory) {
+    const subMatch =
+      m.mediaSubCategory === resolved.subCategory ||
+      Boolean(m.mediaCategory?.includes(resolved.subCategory));
+    if (!subMatch) return false;
+    // Prisma buildPublicMediaWhere 와 동일 — sub 요청 시 main 폴백 통과 금지, 둘 다 있으면 AND
+    return matchesMain();
+  }
+  if (resolved.mainCategory) {
+    if (matchesMain()) return true;
   }
 
   // browse taxonomy로 필터가 걸렸는데 매칭 실패
