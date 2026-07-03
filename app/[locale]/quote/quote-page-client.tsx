@@ -549,6 +549,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const detail = mediaToDocumentDetail(m, {
         isKo,
         lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+        priceOptionIndex: poIdx,
       });
       return {
         id: m.id,
@@ -925,6 +926,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           ? catalogPriceFieldToWon(priceOpt.price)
           : catalogPriceFieldToWon(m.price),
         lineTotalWon: Math.round((line?.lineTotalMan ?? 0) * 10_000),
+        optionDescription: priceOpt?.description?.trim() ?? null,
       };
     });
   }, [selectedMedia, mediaPriceOptionIndex, quoteLineContexts]);
