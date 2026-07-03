@@ -551,6 +551,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     broadcastLabel: row.broadcastLabel ?? undefined,
                     monthlyPriceLabel: unitLabel,
                     lineTotalLabel: formatDocumentManWon(row.lineTotalWon, isKo),
+                    executionPeriodLabel: row.executionPeriodLabel ?? undefined,
                   };
                   return (
                     <li key={row.id}>

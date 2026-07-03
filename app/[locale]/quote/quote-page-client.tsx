@@ -414,6 +414,27 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [quoteLineContexts],
   );
 
+  const estimateLineBreakdowns = useMemo(
+    () =>
+      selectedMedia.flatMap((m, idx) => {
+        const line = quoteLineContexts[idx];
+        if (!line?.prorationLabel) return [];
+        const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
+        const priceOpt = m.priceOptions?.[poIdx];
+        const name = (isKo ? m.name : m.nameEn || m.name) || m.name;
+        const optionPart = priceOpt?.label?.trim()
+          ? ` · ${priceOpt.label}`
+          : "";
+        return [
+          {
+            key: m.id,
+            label: `${name}${optionPart} ${line.prorationLabel}`,
+          },
+        ];
+      }),
+    [selectedMedia, quoteLineContexts, mediaPriceOptionIndex, isKo],
+  );
+
   const budgetMinN = useMemo(() => {
     const n = parseInt(form.budgetMin, 10);
     return Number.isFinite(n) && n >= 0 ? n : null;
@@ -2219,6 +2240,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     </p>
                   </div>
                   <div className="space-y-5 p-6 sm:p-7">
+                    {estimateLineBreakdowns.length > 0 ? (
+                      <ul className="space-y-2 border-b dark:border-white/10 border-gray-200 pb-4">
+                        {estimateLineBreakdowns.map((row) => (
+                          <li
+                            key={row.key}
+                            className="text-xs leading-relaxed text-muted-foreground sm:text-sm"
+                          >
+                            {row.label}
+                          </li>
+                        ))}
+                      </ul>
+                    ) : null}
                     <div>
                       <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
                         [ {t("quote.unitPriceSum")} ]

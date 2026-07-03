@@ -26,6 +26,8 @@ export type DocumentMediaDetail = {
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
+  /** 견적 집행 기간 (예: 1개월 · 4.3주) */
+  executionPeriodLabel?: string;
   recommendReason?: string;
   exposureContributionPct?: number;
   budgetContributionPct?: number;
