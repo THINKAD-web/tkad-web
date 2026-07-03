@@ -801,6 +801,8 @@ export default function MediaMapPageClient() {
   }, []);
 
   const mapChromeVisible = !isMobile || sheetSnap === "peek";
+  // 핀 미리보기(dock) 카드가 우하단 대부분을 덮는 동안엔 내 주변 버튼도 우하단에 겹침
+  const pinPreviewOpen = !!selected && isMobile && sheetSnap !== "full";
 
   useEffect(() => {
     if (!showSearchAreaButton || !mapChromeVisible) {
@@ -1151,7 +1153,7 @@ export default function MediaMapPageClient() {
             />
           ) : null}
 
-          {selected && isMobile && sheetSnap !== "full" ? (
+          {pinPreviewOpen ? (
             <MediaMapDetailSheet
               variant="dock"
               item={selected}
@@ -1212,7 +1214,7 @@ export default function MediaMapPageClient() {
                 sheetSnap === "full" ? "left-3" : "right-3",
               )}
               style={
-                sheetSnap === "full"
+                sheetSnap === "full" || pinPreviewOpen
                   ? { top: 12 }
                   : { bottom: peekChromeHeight + 12 }
               }
