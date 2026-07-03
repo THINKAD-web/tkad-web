@@ -1279,6 +1279,7 @@
     "estimatedCostDesc": "선택한 매체와 기간 기준",
     "perMonth": "/ 월",
     "unitPriceSum": "단가 합계",
+    "packagePriceSum": "패키지 정가 합계",
     "total": "총 예상 비용",
     "company": "회사명",
     "companyPlaceholder": "회사명을 입력하세요",
