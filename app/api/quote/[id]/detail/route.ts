@@ -2,6 +2,10 @@ import { OoHQuoteStatus, OohContractStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import {
+  parseQuoteMediaSelections,
+  selectionsByMediaId,
+} from "@/lib/quote-media-selections";
 import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -24,21 +28,31 @@ export async function GET(
     }
 
     const catalog = await fetchPublicMediaCatalog();
+    const selectionMap = selectionsByMediaId(
+      parseQuoteMediaSelections(quote.mediaSelections),
+    );
     const medias = catalog
       .filter((m) => quote.mediaIds.includes(m.id))
-      .map((m) => ({
-        id: m.id,
-        name: m.name,
-        location: m.location,
-        region: m.region,
-        type: m.type,
-        price: catalogPriceFieldToWon(m.price ?? 0),
-        pricePeriod: m.pricePeriod ?? "month",
-        image: m.sampleImages?.[0] ?? null,
-        visibilityScore: m.visibilityScore ?? 0,
-        dailyFootTraffic: m.dailyFootTraffic ?? null,
-        impressions: m.impressions ?? null,
-      }));
+      .map((m) => {
+        const snap = selectionMap.get(m.id);
+        const basePrice = catalogPriceFieldToWon(m.price ?? 0);
+        return {
+          id: m.id,
+          name: snap?.optionLabel ? `${m.name} (${snap.optionLabel})` : m.name,
+          location: m.location,
+          region: m.region,
+          type: m.type,
+          price: snap?.optionPriceWon ?? basePrice,
+          lineTotalWon: snap?.lineTotalWon ?? null,
+          priceOptionIndex: snap?.priceOptionIndex ?? null,
+          optionLabel: snap?.optionLabel ?? null,
+          pricePeriod: m.pricePeriod ?? "month",
+          image: m.sampleImages?.[0] ?? null,
+          visibilityScore: m.visibilityScore ?? 0,
+          dailyFootTraffic: m.dailyFootTraffic ?? null,
+          impressions: m.impressions ?? null,
+        };
+      });
 
     const contract = quote.oohContract;
     const contractSigned =
@@ -64,6 +78,7 @@ export async function GET(
       budgetMin: quote.budgetMin,
       budgetMax: quote.budgetMax,
       createdAt: quote.createdAt,
+      mediaSelections: parseQuoteMediaSelections(quote.mediaSelections) ?? null,
       medias,
     });
   } catch (e) {

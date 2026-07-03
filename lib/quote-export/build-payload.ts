@@ -7,6 +7,12 @@ import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import { getQuoteStampUrl } from "@/lib/quote-stamp";
 import type { QuoteExportPayload, QuoteExportTemplate } from "@/lib/quote-export/types";
 import type { QuoteExportLine } from "@/lib/quote-export/types";
+import {
+  mediaPriceOptionIndexFromSelections,
+  parseQuoteMediaSelections,
+  selectionsByMediaId,
+  type QuoteMediaSelectionSnapshot,
+} from "@/lib/quote-media-selections";
 
 /** OoHQuote 에서 필요한 필드만 */
 export type QuoteExportSourceRow = {
@@ -23,6 +29,8 @@ export type QuoteExportSourceRow = {
   locale: string | null;
   pdfTemplate?: string | null;
   mediaPriceOptionIndex?: Record<string, number>;
+  /** DB `media_selections` JSON — 제출 시점 옵션 스냅샷 */
+  mediaSelections?: QuoteMediaSelectionSnapshot[] | unknown;
 };
 
 const DAY = 86_400_000;
@@ -37,13 +45,19 @@ export async function buildQuoteExportPayload(
   const start = row.startDate ?? now;
   const end = row.endDate ?? new Date(start.getTime() + 30 * DAY);
 
+  const mediaSelections = parseQuoteMediaSelections(row.mediaSelections);
+  const selectionMap = selectionsByMediaId(mediaSelections);
+  const resolvedOptionIndex =
+    mediaPriceOptionIndexFromSelections(mediaSelections) ??
+    row.mediaPriceOptionIndex;
+
   const breakdown = await calculateQuoteFromMediaIds(db, {
     mediaIds: row.mediaIds,
     startDate: start,
     endDate: end,
     issuedAt: now,
     periodKey: row.periodKey ?? undefined,
-    mediaPriceOptionIndex: row.mediaPriceOptionIndex,
+    mediaPriceOptionIndex: resolvedOptionIndex,
   });
 
   const mediaIds = breakdown.lines.map((l) => l.mediaId);
@@ -96,9 +110,19 @@ export async function buildQuoteExportPayload(
     clientEmail: row.clientEmail || undefined,
     clientPhone: row.clientPhone || undefined,
     periodLabel: row.period || `${breakdown.periodDays}${isKo ? "일" : " days"}`,
-    lines: breakdown.lines.map((l) =>
-      mapQuoteExportLine(l, mediaById.get(l.mediaId), isKo),
-    ),
+    lines: breakdown.lines.map((l) => {
+      const base = mapQuoteExportLine(l, mediaById.get(l.mediaId), isKo);
+      const snap = selectionMap.get(l.mediaId);
+      if (!snap) return base;
+      const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
+      const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
+      return {
+        ...base,
+        name: snap.optionLabel ? `${mediaName}${optSuffix}` : base.name,
+        unitPriceWon: snap.optionPriceWon,
+        lineSupplyWon: snap.lineTotalWon,
+      };
+    }),
     supplyWon: breakdown.supplyWon,
     vatWon: breakdown.vatWon,
     totalWon: breakdown.totalWon,

@@ -70,10 +70,12 @@ import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   catalogPriceFieldToPriceMan,
+  catalogPriceFieldToWon,
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
 import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
+import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import {
   buildQuoteWizardLineContext,
   inferQuoteCampaignPeriodFromMedia,
@@ -787,6 +789,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           budgetMin: form.budgetMin,
           budgetMax: form.budgetMax,
           estimatedCost: totalCost,
+          mediaSelections: submitMediaSelections,
           message: form.message,
           website: form.website,
           pdfTemplate: template,
@@ -851,6 +854,23 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       ),
     [selectedMedia, mediaPriceOptionIndex],
   );
+
+  const submitMediaSelections = useMemo((): QuoteMediaSelectionSnapshot[] => {
+    return selectedMedia.map((m, idx) => {
+      const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
+      const priceOpt = m.priceOptions?.[poIdx];
+      const line = quoteLineContexts[idx];
+      return {
+        mediaId: m.id,
+        priceOptionIndex: poIdx,
+        optionLabel: priceOpt?.label?.trim() ?? null,
+        optionPriceWon: priceOpt
+          ? catalogPriceFieldToWon(priceOpt.price)
+          : catalogPriceFieldToWon(m.price),
+        lineTotalWon: Math.round((line?.lineTotalMan ?? 0) * 10_000),
+      };
+    });
+  }, [selectedMedia, mediaPriceOptionIndex, quoteLineContexts]);
 
   const exportQuoteDraft = useCallback(
     async (format: QuoteExportFormat) => {
