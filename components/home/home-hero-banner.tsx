@@ -5,41 +5,29 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
-import {
-  optimizeHeroMarqueeUrl,
-  shouldUseUnoptimizedImage,
-} from "@/lib/optimized-image-url";
 
 type HeroSlide = {
   id: string;
   image: string;
   titleKo: string;
   titleEn: string;
-  ctaKo: string;
-  ctaEn: string;
   href: "/media" | "/planner";
 };
 
-/** G-1: 브랜드(투명화) + 플래너 2장. PRO·팬덤 슬라이드 제거 */
+/** 828px WebP — see public/images/hero/ and scripts/upload-hero-banners.mjs for CDN mirror */
 const SLIDES: HeroSlide[] = [
   {
-    id: "brand",
-    image:
-      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0d44e972-2876-4145-b552-6c8641c53867.jpg",
+    id: "media",
+    image: "/images/hero/main1-828.webp",
     titleKo: "OOH 단가, 한눈에 비교",
     titleEn: "Compare OOH rates at a glance",
-    ctaKo: "매체 탐색하기",
-    ctaEn: "Explore media",
     href: "/media",
   },
   {
     id: "planner",
-    image:
-      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/0fa1cb83-dc2e-45ee-9210-4c2f433cbaa1.jpg",
+    image: "/images/hero/main2-828.webp",
     titleKo: "AI로 캠페인 설계",
     titleEn: "Plan campaigns with AI",
-    ctaKo: "플래너 시작",
-    ctaEn: "Start planner",
     href: "/planner",
   },
 ];
@@ -68,18 +56,18 @@ export function HomeHeroBanner() {
 
   const slide = SLIDES[current];
   const title = isKo ? slide.titleKo : slide.titleEn;
-  const cta = isKo ? slide.ctaKo : slide.ctaEn;
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
       <div
-        className="relative h-40 overflow-hidden rounded-2xl md:h-56 md:rounded-3xl lg:h-64"
+        className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-black/5 md:rounded-3xl dark:bg-white/5 dark:ring-white/10"
         role="region"
         aria-roledescription="carousel"
         aria-label={isKo ? "프로모션" : "Promotions"}
       >
         {SLIDES.map((s, i) => {
-          const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
+          const alt = isKo ? s.titleKo : s.titleEn;
+          const isFirst = i === 0;
           return (
             <div
               key={s.id}
@@ -90,57 +78,42 @@ export function HomeHeroBanner() {
               aria-hidden={i !== current}
             >
               <Image
-                src={src}
-                alt=""
+                src={s.image}
+                alt={alt}
                 fill
-                className="object-cover"
-                priority={i === 0}
-                sizes="(max-width: 768px) 100vw, 1280px"
-                unoptimized={shouldUseUnoptimizedImage(src)}
+                className="object-cover object-center"
+                priority={isFirst}
+                loading={isFirst ? "eager" : "lazy"}
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
               />
             </div>
           );
         })}
 
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-r from-black/75 via-black/45 to-black/15"
-        />
-        <div
-          aria-hidden
-          className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent"
+        <Link
+          href={slide.href}
+          className="absolute inset-0 z-10 rounded-2xl md:rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
+          aria-label={title}
         />
 
-        <div className="absolute inset-0 flex flex-col justify-end p-4 md:p-6 lg:p-8">
-          <div className="max-w-2xl">
-            <h2 className="mb-3 text-xl font-bold leading-snug text-white md:mb-4 md:text-3xl lg:text-4xl">
-              {title}
-            </h2>
-            <Link
-              href={slide.href}
-              className="inline-flex items-center gap-1.5 rounded-xl bg-white px-4 py-2 text-sm font-semibold text-gray-900 transition-all hover:bg-gray-100 active:scale-95 md:px-5 md:py-2.5"
-            >
-              {cta} →
-            </Link>
-          </div>
-        </div>
-
-        <div className="absolute bottom-3 left-1/2 flex -translate-x-1/2 gap-2 md:bottom-4">
+        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
           {SLIDES.map((s, i) => (
             <button
               key={s.id}
               type="button"
-              onClick={() => goTo(i)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                goTo(i);
+              }}
               className={cn(
                 "rounded-full transition-all duration-300",
                 i === current
-                  ? "h-1.5 w-6 bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"
-                  : "h-1.5 w-1.5 bg-white/45 hover:bg-white/70",
+                  ? "h-1.5 w-6 bg-violet-600 shadow-sm dark:bg-violet-400"
+                  : "h-1.5 w-1.5 bg-gray-400/80 hover:bg-gray-500 dark:bg-white/50 dark:hover:bg-white/70",
               )}
               aria-label={
-                isKo
-                  ? `${i + 1}번째 배너`
-                  : `Banner ${i + 1}`
+                isKo ? `${i + 1}번째 배너` : `Banner ${i + 1}`
               }
               aria-current={i === current ? "true" : undefined}
             />
