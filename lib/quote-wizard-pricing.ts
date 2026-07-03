@@ -1,7 +1,9 @@
 import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
+import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
   catalogPriceFieldToPriceMan,
+  catalogPriceFieldToWon,
   formatPricePeriodShortLabel,
   inferMediaPricePeriodFromPriceOption,
   normalizeMediaPricePeriod,
@@ -30,6 +32,15 @@ export function isQuoteCampaignPeriodKey(
   value: string,
 ): value is QuoteCampaignPeriodKey {
   return value in QUOTE_CAMPAIGN_PERIOD_CONFIG;
+}
+
+/** 견적 위저드 캠페인 기간 → 일수 */
+export function quoteCampaignDaysFromPeriodKey(
+  campaignPeriod: QuoteCampaignPeriodKey,
+): number {
+  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[campaignPeriod];
+  if (cfg.months != null) return cfg.months * 30;
+  return cfg.days;
 }
 
 /** 매체 단가 주기 → 견적 위저드 기본 캠페인 기간 */
@@ -183,8 +194,24 @@ export function buildQuoteWizardLineContext(
       : catalogPriceFieldToPriceMan(media.price);
 
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
-  const campaignUnits = quoteCampaignUnits(opts.campaignPeriod, pricePeriod);
-  const lineTotalMan = quoteLineTotalMan(unitPriceMan, campaignUnits);
+  const explicitBundleDays =
+    priceOpt != null ? tryResolveExplicitPriceOptionBundleDays(priceOpt) : null;
+
+  let campaignUnits: number;
+  let lineTotalMan: number;
+  if (!isNw && priceOpt && explicitBundleDays != null) {
+    const campaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
+    campaignUnits = campaignDays / explicitBundleDays;
+    const lineTotalWon = quoteBundleProrationWon(
+      catalogPriceFieldToWon(priceOpt.price),
+      campaignDays,
+      explicitBundleDays,
+    );
+    lineTotalMan = lineTotalWon / 10_000;
+  } else {
+    campaignUnits = quoteCampaignUnits(opts.campaignPeriod, pricePeriod);
+    lineTotalMan = quoteLineTotalMan(unitPriceMan, campaignUnits);
+  }
 
   const locale = opts.isKo ? "ko" : "en";
   const unitPeriodLabel = formatPricePeriodShortLabel(pricePeriod, locale);

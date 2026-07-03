@@ -10,8 +10,8 @@ import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
 import {
   buildQuoteWizardLineContext,
-  QUOTE_CAMPAIGN_PERIOD_CONFIG,
   isQuoteCampaignPeriodKey,
+  quoteCampaignDaysFromPeriodKey,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
 
@@ -87,9 +87,7 @@ function parsePriceOptions(raw: unknown): MediaPriceOption[] {
 }
 
 function campaignDaysFromPeriodKey(key: QuoteCampaignPeriodKey): number {
-  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[key];
-  if (cfg.months != null) return cfg.months * 30;
-  return cfg.days;
+  return quoteCampaignDaysFromPeriodKey(key);
 }
 
 function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
