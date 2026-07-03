@@ -73,10 +73,12 @@ import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
 } from "@/lib/media-price-format";
+import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
 import {
   buildQuoteWizardLineContext,
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
+  quoteCampaignDaysFromPeriodKey,
   resolveQuoteMediaPricePeriod,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
@@ -407,6 +409,21 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const unitPriceSumMan = useMemo(
     () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
     [quoteLineContexts],
+  );
+
+  const hasProrationLine = useMemo(
+    () =>
+      selectedMedia.some((m) => {
+        if (m.catalogSource === "network") return false;
+        const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
+        const priceOpt = m.priceOptions?.[poIdx];
+        if (!priceOpt) return false;
+        const bundleDays = tryResolveExplicitPriceOptionBundleDays(priceOpt);
+        if (bundleDays == null) return false;
+        const campaignDays = quoteCampaignDaysFromPeriodKey(period);
+        return campaignDays !== bundleDays;
+      }),
+    [selectedMedia, mediaPriceOptionIndex, period],
   );
 
   const totalCost = useMemo(
@@ -2221,7 +2238,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   <div className="space-y-5 p-6 sm:p-7">
                     <div>
                       <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
-                        [ {t("quote.unitPriceSum")} ]
+                        [ {t(hasProrationLine ? "quote.packagePriceSum" : "quote.unitPriceSum")} ]
                       </p>
                       <p className="mt-2 font-display text-2xl font-bold tabular-nums text-foreground sm:text-3xl">
                         {isKo

@@ -1278,6 +1278,7 @@
     "estimatedCostDesc": "Based on selected media and period",
     "perMonth": "/ month",
     "unitPriceSum": "Unit price total",
+    "packagePriceSum": "Package list price total",
     "total": "Total Estimated Cost",
     "company": "Company",
     "companyPlaceholder": "Enter company name",
