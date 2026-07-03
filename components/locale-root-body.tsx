@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
 import ToastProvider from "@/components/toast-provider";
 import { PointToastListener } from "@/components/points/point-toast-listener";
+import { ContactChannelProvider } from "@/components/contact/contact-channel-provider";
 import ConditionalPublicChrome from "@/components/conditional-public-chrome";
 import TopLoader from "@/components/top-loader";
 import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
@@ -42,38 +43,40 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
 
   return (
     <ToastProvider>
-      <CommandPaletteProvider>
-        <PointToastListener />
-        <RecentPageTracker />
-        <a href="#main-content" className="skip-link">
-          {skipLinkLabel}
-        </a>
-        <div className="flex min-h-0 flex-1 flex-col">
-          <ConditionalPublicChrome>
-            <TopLoader />
-            {header}
-          </ConditionalPublicChrome>
-
-          <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+      <ContactChannelProvider>
+        <CommandPaletteProvider>
+          <PointToastListener />
+          <RecentPageTracker />
+          <a href="#main-content" className="skip-link">
+            {skipLinkLabel}
+          </a>
+          <div className="flex min-h-0 flex-1 flex-col">
             <ConditionalPublicChrome>
-              <ContextNavAsideShell />
+              <TopLoader />
+              {header}
             </ConditionalPublicChrome>
 
-            <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-              <main
-                id="main-content"
-                className="tkad-app-ui flex flex-col md:min-h-0 md:flex-1"
-              >
-                <MobileAppChrome>{children}</MobileAppChrome>
-              </main>
+            <div className="flex min-h-0 flex-1 flex-col md:flex-row">
               <ConditionalPublicChrome>
-                <FooterBrutal />
-                <DeferredPublicWidgetsGate />
+                <ContextNavAsideShell />
               </ConditionalPublicChrome>
+
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <main
+                  id="main-content"
+                  className="tkad-app-ui flex flex-col md:min-h-0 md:flex-1"
+                >
+                  <MobileAppChrome>{children}</MobileAppChrome>
+                </main>
+                <ConditionalPublicChrome>
+                  <FooterBrutal />
+                  <DeferredPublicWidgetsGate />
+                </ConditionalPublicChrome>
+              </div>
             </div>
           </div>
-        </div>
-      </CommandPaletteProvider>
+        </CommandPaletteProvider>
+      </ContactChannelProvider>
     </ToastProvider>
   );
 }
