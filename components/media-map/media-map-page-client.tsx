@@ -2,13 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { DiscoveryMediaCard } from "@/components/discovery/media-card";
-import {
-  DiscoveryFilterBar,
-  DiscoveryEmptyState,
-  formatMapViewCountLabel,
-  type DiscoveryFilterBarViewMode,
-} from "@/components/discovery/filter-bar";
+import { DiscoveryFilterBar, formatMapViewCountLabel, type DiscoveryFilterBarViewMode } from "@/components/discovery/filter-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Map as MapIcon, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -65,6 +59,12 @@ import {
   markMapOnboardingSeen,
   MAP_ONBOARDING_KEYS,
 } from "@/lib/media-map/onboarding-storage";
+import { MediaMapItemList } from "@/components/media-map/media-map-item-list";
+import {
+  markMapPageInit,
+  markMapPageUsable,
+} from "@/lib/media-map/map-performance";
+import { setMapHoveredMediaId } from "@/lib/media-map/map-hover-bridge";
 import {
   readSubwayOverlayEnabled,
   writeSubwayOverlayEnabled,
@@ -78,27 +78,6 @@ function MapViewLoadingPlaceholder() {
         <p className="tkad-type-body text-tkad-muted">지도 불러오는 중…</p>
       </div>
     </div>
-  );
-}
-
-function MapListSkeleton({ count = 6 }: { count?: number }) {
-  return (
-    <>
-      {Array.from({ length: count }, (_, i) => (
-        <li
-          key={i}
-          className="overflow-hidden rounded-2xl border border-gray-100 bg-white dark:border-white/10 dark:bg-white/5"
-        >
-          <div className="aspect-[4/3] animate-pulse bg-gray-100 dark:bg-white/10" />
-          <div className="space-y-2 p-2.5">
-            <div className="h-4 w-3/4 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
-            <div className="h-3 w-1/2 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
-            <div className="h-3 w-2/3 animate-pulse rounded bg-gray-100 dark:bg-white/10" />
-            <div className="h-8 animate-pulse rounded-lg bg-gray-100 dark:bg-white/10" />
-          </div>
-        </li>
-      ))}
-    </>
   );
 }
 
@@ -167,7 +146,6 @@ export default function MediaMapPageClient() {
   );
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [selectedItem, setSelectedItem] = useState<Item | null>(null);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>([]);
   /** 마지막으로 idle 한 지도 중심/줌 — URL 동기화용 */
   const [view, setView] = useState<{ lat: number; lng: number; zoom: number } | null>(
@@ -198,7 +176,7 @@ export default function MediaMapPageClient() {
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   /** "이 지역에서 검색" 1회성 코치마크 */
   const [showSearchCoachmark, setShowSearchCoachmark] = useState(false);
-  const [subwayOverlayEnabled, setSubwayOverlayEnabled] = useState(true);
+  const [subwayOverlayEnabled, setSubwayOverlayEnabled] = useState(false);
   const pvNonceRef = useRef(0);
   const [programmaticView, setProgrammaticView] =
     useState<DarkMapProgrammaticView | null>(() => {
@@ -349,6 +327,16 @@ export default function MediaMapPageClient() {
     mq.addEventListener("change", update);
     return () => mq.removeEventListener("change", update);
   }, []);
+
+  useEffect(() => {
+    markMapPageInit();
+  }, []);
+
+  useEffect(() => {
+    if (!loading && items.length > 0) {
+      markMapPageUsable();
+    }
+  }, [loading, items.length]);
 
   useEffect(() => {
     setSubwayOverlayEnabled(readSubwayOverlayEnabled());
@@ -667,6 +655,7 @@ export default function MediaMapPageClient() {
     setSelectedId(null);
     setSelectedItem(null);
     lastFocusedSelectionRef.current = null;
+    setMapHoveredMediaId(null);
   }, []);
 
   const selected = selectedItem;
@@ -705,6 +694,12 @@ export default function MediaMapPageClient() {
     () => entriesToCompareMediaItems(compareEntries, mapCatalog),
     [compareEntries, mapCatalog],
   );
+
+  const openCompareSummary = useCallback(() => {
+    const ids = compareEntries.map((e) => e.id).join(",");
+    if (!ids) return;
+    router.push(`/compare?ids=${ids}`);
+  }, [compareEntries, router]);
 
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
     setBrowseFilters((f) => ({ ...f, ...patch }));
@@ -801,7 +796,6 @@ export default function MediaMapPageClient() {
   }, []);
 
   const mapChromeVisible = !isMobile || sheetSnap === "peek";
-  // 핀 미리보기(dock) 카드가 우하단 대부분을 덮는 동안엔 내 주변 버튼도 우하단에 겹침
   const pinPreviewOpen = !!selected && isMobile && sheetSnap !== "full";
 
   useEffect(() => {
@@ -910,58 +904,27 @@ export default function MediaMapPageClient() {
       totalCount={matchTotal}
       loading={loading || (!searchedBounds && !isMapTextSearchActive(browseFilters))}
       compareCount={compareEntries.length}
+      onCompareSummaryClick={openCompareSummary}
       cartCount={planCount}
     />
   );
 
-  // 리스트 — 데스크톱 사이드/모바일 시트 중 한 곳에만 마운트(단일 인스턴스, ref 싱크 보존)
   const listEl = (
-    <ul className="relative z-0 grid grid-cols-2 gap-3 p-3 pb-8 md:gap-4 md:p-4">
-      {loading && items.length === 0 ? (
-        <MapListSkeleton count={6} />
-      ) : (
-        items.map((it) => (
-          <DiscoveryMediaCard
-            key={it.id}
-            ref={(el) => {
-              if (el) listItemRefs.current.set(it.id, el);
-              else listItemRefs.current.delete(it.id);
-            }}
-            variant="compact"
-            compactLayout="map-tile"
-            item={it}
-            isKo={isKo}
-            locale={locale}
-            selected={resolveMediaIdFromMapPinId(selectedId ?? "") === it.id}
-            hovered={resolveMediaIdFromMapPinId(hoveredId ?? "") === it.id}
-            inCompare={isInCompare(it.id)}
-            onSelect={handleSelect}
-            onToggleCompare={() => toggleCompare(it)}
-            onMouseEnter={() => setHoveredId(it.id)}
-            onMouseLeave={() =>
-              setHoveredId((cur) => (cur === it.id ? null : cur))
-            }
-            onFocus={() => setHoveredId(it.id)}
-            onBlur={() => setHoveredId((cur) => (cur === it.id ? null : cur))}
-          />
-        ))
-      )}
-      {(searchedBounds || isMapTextSearchActive(browseFilters)) &&
-      items.length === 0 &&
-      !loading &&
-      !isMobile ? (
-        <li className="col-span-2 list-none">
-          <DiscoveryEmptyState
-            title={isKo ? "검색 결과가 없습니다" : "No results"}
-            description={
-              isKo
-                ? "필터를 조정하거나 지도를 이동해보세요."
-                : "Adjust filters or pan the map."
-            }
-          />
-        </li>
-      ) : null}
-    </ul>
+    <MediaMapItemList
+      items={items}
+      loading={loading}
+      isKo={isKo}
+      locale={locale}
+      isMobile={isMobile}
+      selectedId={selectedId}
+      searchedBounds={searchedBounds}
+      isTextSearchActive={isMapTextSearchActive(browseFilters)}
+      compareEntries={compareEntries}
+      listItemRefs={listItemRefs}
+      onSelect={handleSelect}
+      onToggleCompare={toggleCompare}
+      isInCompare={isInCompare}
+    />
   );
 
   const mapResultLabel = formatMapViewCountLabel(
@@ -1058,7 +1021,6 @@ export default function MediaMapPageClient() {
             <DarkMapView
               markers={markers}
               selectedId={selectedId}
-              hoveredId={hoveredId}
               onSelect={handleSelect}
               onBoundsChange={handleBoundsChange}
               onViewChange={handleViewChange}
@@ -1208,17 +1170,7 @@ export default function MediaMapPageClient() {
           </div>
 
           {isMobile ? (
-            <div
-              className={cn(
-                "pointer-events-none absolute z-[46] md:hidden",
-                sheetSnap === "full" ? "left-3" : "right-3",
-              )}
-              style={
-                sheetSnap === "full" || pinPreviewOpen
-                  ? { top: 12 }
-                  : { bottom: peekChromeHeight + 12 }
-              }
-            >
+            <div className="pointer-events-none absolute right-3 top-3 z-[46] sm:right-4 sm:top-4 md:hidden">
               {locateFloatingButtons(sheetSnap === "full")}
             </div>
           ) : null}
