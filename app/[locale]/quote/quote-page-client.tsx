@@ -78,6 +78,7 @@ import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import {
   buildQuoteWizardLineContext,
+  formatQuoteCampaignPeriodWithDays,
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
   quoteCampaignDaysFromPeriodKey,
@@ -474,6 +475,41 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       }),
     [selectedMedia, quoteLineContexts, mediaPriceOptionIndex, isKo],
   );
+
+  const periodMismatchLines = useMemo(() => {
+    return selectedMedia.flatMap((m, idx) => {
+      const line = quoteLineContexts[idx];
+      if (
+        line?.bundleDays == null ||
+        line.bundleDays === line.campaignDays
+      ) {
+        return [];
+      }
+      const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
+      const priceOpt = m.priceOptions?.[poIdx];
+      const optionLabel =
+        priceOpt?.label?.trim() ??
+        ((isKo ? m.name : m.nameEn || m.name) || m.name);
+      return [
+        {
+          mediaId: m.id,
+          optionLabel,
+          bundleDays: line.bundleDays,
+          campaignDays: line.campaignDays,
+          inferredPeriod: inferQuoteCampaignPeriodFromMedia(m, poIdx),
+        },
+      ];
+    });
+  }, [selectedMedia, quoteLineContexts, mediaPriceOptionIndex, isKo]);
+
+  const periodSnapTarget = useMemo((): QuoteCampaignPeriodKey | null => {
+    if (periodMismatchLines.length === 0) return null;
+    const periods = new Set(
+      periodMismatchLines.map((row) => row.inferredPeriod),
+    );
+    if (periods.size !== 1) return null;
+    return periodMismatchLines[0]!.inferredPeriod;
+  }, [periodMismatchLines]);
 
   const budgetMinN = useMemo(() => {
     const n = parseInt(form.budgetMin, 10);
@@ -2292,6 +2328,39 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     </p>
                   </div>
                   <div className="space-y-5 p-6 sm:p-7">
+                    {periodMismatchLines.length > 0 ? (
+                      <div className="space-y-2.5 rounded-xl border border-amber-500/35 bg-amber-500/10 p-3.5">
+                        {periodMismatchLines.map((row) => (
+                          <p
+                            key={row.mediaId}
+                            className="text-xs leading-relaxed text-amber-950 dark:text-amber-100 sm:text-sm"
+                          >
+                            {t("quote.periodBundleMismatch", {
+                              optionLabel: row.optionLabel,
+                              bundleDays: row.bundleDays,
+                              campaignDays: row.campaignDays,
+                            })}
+                          </p>
+                        ))}
+                        {periodSnapTarget ? (
+                          <button
+                            type="button"
+                            className="w-full rounded-lg border border-amber-600/50 bg-amber-500/15 px-3 py-2 text-left text-xs font-semibold text-amber-950 transition hover:bg-amber-500/25 dark:text-amber-50 sm:text-sm"
+                            onClick={() => setPeriod(periodSnapTarget)}
+                          >
+                            {t("quote.alignCampaignPeriod", {
+                              periodWithDays: formatQuoteCampaignPeriodWithDays(
+                                periodSnapTarget,
+                                t(
+                                  `quote.periods.${periodSnapTarget}` as `quote.periods.${QuoteCampaignPeriodKey}`,
+                                ),
+                                isKo,
+                              ),
+                            })}
+                          </button>
+                        ) : null}
+                      </div>
+                    ) : null}
                     {estimateLineBreakdowns.length > 0 ? (
                       <ul className="space-y-2 border-b dark:border-white/10 border-gray-200 pb-4">
                         {estimateLineBreakdowns.map((row) => (

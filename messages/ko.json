@@ -1280,6 +1280,8 @@
     "perMonth": "/ 월",
     "unitPriceSum": "단가 합계",
     "packagePriceSum": "패키지 정가 합계",
+    "periodBundleMismatch": "선택한 '{optionLabel}' 패키지({bundleDays}일)와 캠페인 기간({campaignDays}일)이 달라 기간 비례로 계산됩니다.",
+    "alignCampaignPeriod": "캠페인 기간을 {periodWithDays}로 맞추기",
     "total": "총 예상 비용",
     "company": "회사명",
     "companyPlaceholder": "회사명을 입력하세요",
