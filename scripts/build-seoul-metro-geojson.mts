@@ -251,6 +251,142 @@ function relationToLineStrings(rel: OsmElement): Array<Array<[number, number]>> 
   return lines;
 }
 
+/**
+ * 같은 이름의 역이 이 거리(m) 이내면 환승역 중복으로 보고 1개로 병합.
+ * 실제 대형 환승역(공덕·김포공항·서울역 등)은 노드 간 최대 500m 안팎까지 벌어져 있어
+ * 150m 로는 완전히 합쳐지지 않음 — 신촌(실제로 다른 두 역, 약 624m)·양평(수도권/타 지역
+ * 동명역, 수십km) 등 진짜 별개인 동명역과는 충분한 여유를 두고 구분되는 값으로 조정.
+ */
+const TRANSFER_MERGE_DISTANCE_M = 450;
+
+function haversineMeters(a: [number, number], b: [number, number]): number {
+  const R = 6371000;
+  const toRad = (deg: number) => (deg * Math.PI) / 180;
+  const [lon1, lat1] = a;
+  const [lon2, lat2] = b;
+  const dLat = toRad(lat2 - lat1);
+  const dLon = toRad(lon2 - lon1);
+  const s =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) * Math.sin(dLon / 2) ** 2;
+  return 2 * R * Math.asin(Math.sqrt(s));
+}
+
+/** Union-Find 기반 single-linkage 클러스터링 — 순서에 의존하지 않고 근접한 노드를 전이적으로 병합 */
+function clusterByProximity(
+  features: SeoulMetroGeoJson["features"],
+  thresholdM: number,
+): Array<SeoulMetroGeoJson["features"]> {
+  const n = features.length;
+  const parent = Array.from({ length: n }, (_, i) => i);
+  function find(x: number): number {
+    while (parent[x] !== x) {
+      parent[x] = parent[parent[x]!]!;
+      x = parent[x]!;
+    }
+    return x;
+  }
+  function union(a: number, b: number) {
+    const ra = find(a);
+    const rb = find(b);
+    if (ra !== rb) parent[ra] = rb;
+  }
+
+  for (let i = 0; i < n; i++) {
+    const a = (features[i]!.geometry as GeoJSON.Point).coordinates as [
+      number,
+      number,
+    ];
+    for (let j = i + 1; j < n; j++) {
+      const b = (features[j]!.geometry as GeoJSON.Point).coordinates as [
+        number,
+        number,
+      ];
+      if (haversineMeters(a, b) <= thresholdM) union(i, j);
+    }
+  }
+
+  const groups = new Map<number, SeoulMetroGeoJson["features"]>();
+  for (let i = 0; i < n; i++) {
+    const root = find(i);
+    if (!groups.has(root)) groups.set(root, []);
+    groups.get(root)!.push(features[i]!);
+  }
+  return [...groups.values()];
+}
+
+/**
+ * 환승역이 노선 relation 마다 별도 station 노드로 들어와 라벨이 중복 렌더되는 문제 보정.
+ * 같은 이름 + 근접 좌표인 station 만 병합 — 동명이역(다른 도시·실제로 다른 역)은 거리 조건으로 보호.
+ */
+function dedupeStationFeatures(
+  stationFeaturesById: Map<number, SeoulMetroGeoJson["features"][number]>,
+): SeoulMetroGeoJson["features"] {
+  const byName = new Map<string, SeoulMetroGeoJson["features"]>();
+  for (const feature of stationFeaturesById.values()) {
+    const name = feature.properties.nameKo ?? "";
+    if (!byName.has(name)) byName.set(name, []);
+    byName.get(name)!.push(feature);
+  }
+
+  const merged: SeoulMetroGeoJson["features"] = [];
+
+  for (const candidates of byName.values()) {
+    const clusters = clusterByProximity(candidates, TRANSFER_MERGE_DISTANCE_M);
+
+    for (const cluster of clusters) {
+      if (cluster.length === 1) {
+        const only = cluster[0]!;
+        merged.push({
+          ...only,
+          properties: { ...only.properties, lineIds: [only.properties.lineId] },
+        });
+        continue;
+      }
+
+      const lineIdSet = new Set<SeoulMetroLineId>();
+      let sumLon = 0;
+      let sumLat = 0;
+      let anyTransferTag = false;
+      for (const feature of cluster) {
+        lineIdSet.add(feature.properties.lineId);
+        const [lon, lat] = (feature.geometry as GeoJSON.Point).coordinates;
+        sumLon += lon;
+        sumLat += lat;
+        if (feature.properties.isTransfer) anyTransferTag = true;
+      }
+
+      const lineIds = [...lineIdSet].sort(
+        (a, b) =>
+          SEOUL_METRO_MVP_LINE_IDS.indexOf(a) - SEOUL_METRO_MVP_LINE_IDS.indexOf(b),
+      );
+      const primaryLine = lineIds[0]!;
+      const def = SEOUL_METRO_LINE_BY_ID[primaryLine];
+      const first = cluster[0]!;
+
+      merged.push({
+        type: "Feature",
+        properties: {
+          kind: "station",
+          lineId: primaryLine,
+          lineNameKo: def.nameKo,
+          color: def.color,
+          stationId: first.properties.stationId,
+          nameKo: first.properties.nameKo,
+          isTransfer: anyTransferTag || lineIds.length > 1,
+          lineIds,
+        },
+        geometry: {
+          type: "Point",
+          coordinates: [sumLon / cluster.length, sumLat / cluster.length],
+        },
+      });
+    }
+  }
+
+  return merged;
+}
+
 function buildRegionQuery(bbox: string): string {
   return `
 [out:json][timeout:90];
@@ -428,7 +564,7 @@ async function main() {
     });
   }
 
-  features.push(...stationFeaturesById.values());
+  features.push(...dedupeStationFeatures(stationFeaturesById));
 
   const lineCount = features.filter((f) => f.properties.kind === "line").length;
   const stationCount = features.filter(
