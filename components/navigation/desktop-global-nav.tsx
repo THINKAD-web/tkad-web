@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, ChevronDown, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -153,6 +154,7 @@ function discoveryLinksFromGroup(group: ResolvedPublicNavGroup) {
 
 export function DesktopGlobalNav() {
   const pathname = usePathname() ?? "/";
+  const searchParams = useSearchParams();
   const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -161,7 +163,7 @@ export function DesktopGlobalNav() {
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
-  const activeGroupId = findActiveNavGroupId(pathname, navGroups);
+  const activeGroupId = findActiveNavGroupId(pathname, navGroups, searchParams);
   const showMobileBack = isMobileDetailPath(pathname);
 
   useEffect(() => {

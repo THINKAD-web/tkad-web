@@ -17,10 +17,12 @@ const SupportAiChatModal = dynamic(
 );
 
 const OPEN_EVENT = "tkad-open-contact-sheet";
+const OPEN_AI_EVENT = "tkad-open-ai-chat";
 
 type ContactChannelContextValue = {
   open: () => void;
   close: () => void;
+  openAi: () => void;
 };
 
 const ContactChannelContext = createContext<ContactChannelContextValue | null>(
@@ -37,6 +39,11 @@ export function useContactChannelSheet() {
         }
       },
       close: () => {},
+      openAi: () => {
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent(OPEN_AI_EVENT));
+        }
+      },
     };
   }
   return ctx;
@@ -187,6 +194,7 @@ export function ContactChannelProvider({ children }: { children: ReactNode }) {
 
   const open = useCallback(() => setSheetOpen(true), []);
   const close = useCallback(() => setSheetOpen(false), []);
+  const openAi = useCallback(() => setAiOpen(true), []);
 
   useEffect(() => {
     const handler = () => open();
@@ -194,8 +202,14 @@ export function ContactChannelProvider({ children }: { children: ReactNode }) {
     return () => window.removeEventListener(OPEN_EVENT, handler);
   }, [open]);
 
+  useEffect(() => {
+    const handler = () => openAi();
+    window.addEventListener(OPEN_AI_EVENT, handler);
+    return () => window.removeEventListener(OPEN_AI_EVENT, handler);
+  }, [openAi]);
+
   return (
-    <ContactChannelContext.Provider value={{ open, close }}>
+    <ContactChannelContext.Provider value={{ open, close, openAi }}>
       {children}
       <ContactChannelSheetUI
         open={sheetOpen}

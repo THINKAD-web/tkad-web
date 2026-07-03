@@ -44,7 +44,7 @@ export function MediaDetailMobileBar({
       compact
       aboveMobileChrome
       ariaLabel={isKo ? "빠른 문의" : "Quick inquiry"}
-      className={cn("lg:hidden", className)}
+      className={cn("z-30 lg:hidden", className)}
     >
       <div className="mx-auto flex max-w-lg items-center gap-2">
         {/* 가격: ₩금액 1줄 + 기간 인라인, 보조문구는 아래 캡션 */}
@@ -84,7 +84,8 @@ export function MediaDetailMobileBar({
           mediaId={media.id}
           mediaName={displayName}
           triggerLabel={isKo ? "문의하기" : "Inquire"}
-          className="shrink-0 border-0 bg-gradient-to-r from-violet-500 to-cyan-400 px-5 font-semibold text-gray-900 dark:text-white"
+          compact
+          className="shrink-0 border-0 bg-gradient-to-r from-violet-500 to-cyan-400 font-semibold text-gray-900 shadow-sm shadow-violet-500/25 dark:text-white"
         />
       </div>
     </FloatingSelectionBar>

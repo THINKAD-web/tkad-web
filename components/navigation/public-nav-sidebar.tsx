@@ -2,10 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
+import { useSearchParams } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
+import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
+import type { PublicNavItemId } from "@/lib/navigation/public-nav-data";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 
 type Props = {
@@ -25,16 +28,6 @@ const MOBILE_DESC_ITEM_IDS = new Set([
   "competitive-intel",
 ]);
 
-function navPath(href: string): string {
-  return href.split("#")[0]?.split("?")[0] ?? href;
-}
-
-function isItemActive(pathname: string, href: string): boolean {
-  const path = pathname.split("?")[0] ?? pathname;
-  const base = navPath(href);
-  return path === base || (base !== "/" && path.startsWith(`${base}/`));
-}
-
 export function PublicNavSidebar({
   groups,
   onNavigate,
@@ -42,9 +35,10 @@ export function PublicNavSidebar({
   className,
 }: Props) {
   const pathname = usePathname() ?? "";
+  const searchParams = useSearchParams();
   const activeGroupId = useMemo(
-    () => findActiveNavGroupId(pathname, groups),
-    [pathname, groups],
+    () => findActiveNavGroupId(pathname, groups, searchParams),
+    [pathname, groups, searchParams],
   );
 
   const [openId, setOpenId] = useState<string | null>(
@@ -77,7 +71,9 @@ export function PublicNavSidebar({
           const expanded = openId === group.id;
           const groupActive =
             activeGroupId === group.id ||
-            group.items.some((item) => isItemActive(pathname, item.href));
+            group.items.some((item) =>
+              isPublicNavItemActive(pathname, item.id as PublicNavItemId, searchParams),
+            );
 
           return (
             <li key={group.id}>
@@ -131,7 +127,11 @@ export function PublicNavSidebar({
                 <ul className="overflow-hidden">
                   <div className="space-y-0 pb-2 pl-8 pr-4 pt-0.5">
                     {group.items.map((item) => {
-                      const active = isItemActive(pathname, item.href);
+                      const active = isPublicNavItemActive(
+                        pathname,
+                        item.id as PublicNavItemId,
+                        searchParams,
+                      );
                       const showDesc =
                         item.desc && MOBILE_DESC_ITEM_IDS.has(item.id);
                       return (
