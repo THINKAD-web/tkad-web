@@ -82,7 +82,6 @@ import {
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
   quoteCampaignDaysFromPeriodKey,
-  resolveQuoteCampaignPeriodSummaryLabel,
   resolveQuoteMediaPricePeriod,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
@@ -479,14 +478,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const pdfPeriodLabel = useMemo(() => {
     const globalDays = quoteCampaignDaysFromPeriodKey(period);
     const lineDays = quoteLineContexts.map((line) => line.campaignDays);
-    return resolveQuoteCampaignPeriodSummaryLabel({
-      campaignPeriodLabel: periodLabel,
-      globalCampaignDays: globalDays,
-      lineCampaignDays: lineDays,
-      isKo,
-      mixedLabel: t("quote.periodMixedSummary"),
-    });
-  }, [quoteLineContexts, period, periodLabel, isKo, t]);
+    const allSame =
+      lineDays.length === 0 || lineDays.every((d) => d === globalDays);
+    if (allSame) return periodLabel;
+    return t("quote.periodMixedSummary", { period: periodLabel });
+  }, [quoteLineContexts, period, periodLabel, t]);
 
   const unitPriceSumMan = useMemo(
     () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
@@ -2539,12 +2535,16 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                     </div>
                     {step >= 3 ? (
                       <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                        {`// `}{template === "premium"
-                          ? t("quote.templatePremium")
-                          : t("quote.templateDefault")}
-                        {logoDataUrl
-                          ? ` · ${t("quote.reviewLogoYes")}`
-                          : ""}
+                        {`// `}
+                        {t("quote.sidebarDocSummary", {
+                          template:
+                            template === "premium"
+                              ? t("quote.sidebarTemplatePremium")
+                              : t("quote.sidebarTemplateDefault"),
+                          logoSuffix: logoDataUrl
+                            ? t("quote.sidebarDocSummaryLogoSuffix")
+                            : "",
+                        })}
                       </p>
                     ) : null}
                   </div>
