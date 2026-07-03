@@ -161,7 +161,6 @@ export default async function LocaleLayout({ children, params }: Props) {
       >
         <ThemeInitScript />
         {structuredData ? <JsonLd data={structuredData} /> : null}
-        {!isAdminRoute ? <DeferredAnalytics /> : null}
         {!isAdminRoute ? <SpeedInsightsLoader /> : null}
         <PwaAutoUpdate />
         <PublicAnalyticsLoader />
@@ -177,6 +176,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             messages={messages}
             timeZone="Asia/Seoul"
           >
+            {!isAdminRoute ? <DeferredAnalytics /> : null}
             <LocaleRootBody
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"

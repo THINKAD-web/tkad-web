@@ -18,18 +18,18 @@ type HeroSlide = {
   href: "/media" | "/planner";
 };
 
-/** 828px WebP — see public/images/hero/ and scripts/upload-hero-banners.mjs for CDN mirror */
+/** 828px WebP from user JPEG CDN (Jul 2026) — public/images/hero + Bunny mirror */
 const SLIDES: HeroSlide[] = [
   {
     id: "media",
-    image: "/images/hero/main1-828.webp",
+    image: "/images/hero/hero-slide1-828.webp",
     titleKo: "OOH 단가, 한눈에 비교",
     titleEn: "Compare OOH rates at a glance",
     href: "/media",
   },
   {
     id: "planner",
-    image: "/images/hero/main2-828.webp",
+    image: "/images/hero/hero-slide2-828.webp",
     titleKo: "AI로 캠페인 설계",
     titleEn: "Plan campaigns with AI",
     href: "/planner",
@@ -72,6 +72,7 @@ export function HomeHeroBanner() {
         {SLIDES.map((s, i) => {
           const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
           const alt = isKo ? s.titleKo : s.titleEn;
+          const isFirst = i === 0;
           return (
             <div
               key={s.id}
@@ -86,7 +87,8 @@ export function HomeHeroBanner() {
                 alt={alt}
                 fill
                 className="object-cover object-center"
-                priority={i === 0}
+                priority={isFirst}
+                loading={isFirst ? "eager" : "lazy"}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
                 unoptimized={shouldUseUnoptimizedImage(src)}
               />

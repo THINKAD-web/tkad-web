@@ -49,6 +49,6 @@ async function upload(fileName) {
   console.log(`OK ${fileName} → ${publicUrl}`);
 }
 
-for (const name of ["main1-828.webp", "main2-828.webp"]) {
+for (const name of ["hero-slide1-828.webp", "hero-slide2-828.webp"]) {
   await upload(name);
 }
