@@ -55,6 +55,18 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
       item.dailyFootTraffic && item.dailyFootTraffic > 0
         ? item.dailyFootTraffic
         : undefined,
+    impressions:
+      item.impressions != null && item.impressions > 0
+        ? item.impressions
+        : undefined,
+    monthlyFootTraffic:
+      item.monthlyFootTraffic != null && item.monthlyFootTraffic > 0
+        ? item.monthlyFootTraffic
+        : undefined,
+    cpm:
+      item.cpm != null && Number.isFinite(item.cpm) && item.cpm > 0
+        ? item.cpm
+        : undefined,
     visibilityScore:
       item.visibilityScore != null && item.visibilityScore > 0
         ? item.visibilityScore
@@ -114,8 +126,38 @@ export function mapMapItemToHomeCatalog(
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,
     dailyFootTraffic: item.dailyFootTraffic ?? undefined,
+    impressions: item.impressions ?? undefined,
+    cpm: item.cpm ?? undefined,
     isVerified: item.isVerified,
     isInstantBooking: item.isInstantBooking,
+  };
+}
+
+/**
+ * `HomeCatalogMediaItem` → CPM·성능 지표용 최소 `MediaItem`.
+ * `price`는 `mapMediaItemToHomeCatalog` 가 이미 `resolveMediaDisplayPrice` 로 넣은 표시가.
+ */
+export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
+  return {
+    id: item.id,
+    slug: item.slug,
+    name: item.name,
+    nameEn: item.name,
+    location: item.location ?? item.region ?? "",
+    locationEn: item.location ?? item.region ?? "",
+    region: "seoul",
+    type: "digital",
+    price: item.price ?? 0,
+    pricePeriod: item.pricePeriod,
+    lat: 0,
+    lng: 0,
+    dailyFootTraffic: item.dailyFootTraffic ?? 0,
+    impressions: item.impressions,
+    monthlyFootTraffic: item.monthlyFootTraffic,
+    cpm: item.cpm,
+    visibilityScore: item.visibilityScore,
+    sampleImages:
+      item.galleryImages ?? (item.thumbnailUrl ? [item.thumbnailUrl] : []),
   };
 }
 
