@@ -14,6 +14,13 @@ import {
   type QuoteMediaSelectionSnapshot,
 } from "@/lib/quote-media-selections";
 import type { DocumentBroadcastResolveOpts } from "@/lib/document-media-detail";
+import {
+  buildQuoteWizardLineContext,
+  isQuoteCampaignPeriodKey,
+  quoteCampaignDaysFromPeriodKey,
+  resolveQuoteCampaignPeriodSummaryLabel,
+} from "@/lib/quote-wizard-pricing";
+import type { MediaItem } from "@/lib/media-data";
 
 /** OoHQuote 에서 필요한 필드만 */
 export type QuoteExportSourceRow = {
@@ -35,6 +42,78 @@ export type QuoteExportSourceRow = {
 };
 
 const DAY = 86_400_000;
+
+function mixedPeriodSummaryLabel(isKo: boolean): string {
+  return isKo ? "{period} (매체별 상이)" : "{period} (varies by media)";
+}
+
+function resolveExportPeriodLabel(opts: {
+  row: QuoteExportSourceRow;
+  isKo: boolean;
+  mediaSelections: QuoteMediaSelectionSnapshot[] | undefined;
+  selectionMap: Map<string, QuoteMediaSelectionSnapshot>;
+  breakdownLineDays: number[];
+}): string {
+  const base =
+    opts.row.period ||
+    (opts.row.periodKey
+      ? periodLabelFromKey(opts.row.periodKey, opts.isKo ? "ko" : "en")
+      : "");
+  if (!opts.row.periodKey || !isQuoteCampaignPeriodKey(opts.row.periodKey)) {
+    return base;
+  }
+  const globalDays = quoteCampaignDaysFromPeriodKey(opts.row.periodKey);
+  const lineDays =
+    opts.breakdownLineDays.length > 0
+      ? opts.breakdownLineDays
+      : opts.row.mediaIds.map((id) => {
+          const snap = opts.selectionMap.get(id);
+          if (snap?.usePackagePeriod && snap.lineCampaignDays != null) {
+            return snap.lineCampaignDays;
+          }
+          return globalDays;
+        });
+  return resolveQuoteCampaignPeriodSummaryLabel({
+    campaignPeriodLabel: base,
+    globalCampaignDays: globalDays,
+    lineCampaignDays: lineDays,
+    isKo: opts.isKo,
+    mixedLabel: mixedPeriodSummaryLabel(opts.isKo),
+  });
+}
+
+function mediaItemForExportLine(row: {
+  id: string;
+  name: string;
+  location: string;
+  type: string;
+  image: string | null;
+  extractedImages: string[];
+  dailyFootfall: number | null;
+  impressions: number | null;
+  priceOptions: unknown;
+  mediaMainCategory: string | null;
+  mediaSubCategory: string | null;
+}): MediaItem {
+  return {
+    id: row.id,
+    name: row.name,
+    nameEn: row.name,
+    location: row.location,
+    locationEn: row.location,
+    region: "",
+    type: row.type as MediaItem["type"],
+    price: 0,
+    sampleImages: [...(row.image ? [row.image] : []), ...row.extractedImages],
+    lat: 0,
+    lng: 0,
+    dailyFootTraffic: row.dailyFootfall ?? 0,
+    impressions: row.impressions ?? undefined,
+    priceOptions: row.priceOptions as MediaItem["priceOptions"],
+    mediaMainCategory: row.mediaMainCategory,
+    mediaSubCategory: row.mediaSubCategory,
+  };
+}
 
 export async function buildQuoteExportPayload(
   db: Pick<PrismaClient, "media">,
@@ -59,6 +138,7 @@ export async function buildQuoteExportPayload(
     issuedAt: now,
     periodKey: row.periodKey ?? undefined,
     mediaPriceOptionIndex: resolvedOptionIndex,
+    mediaSelections,
   });
 
   const mediaIds = breakdown.lines.map((l) => l.mediaId);
@@ -95,9 +175,80 @@ export async function buildQuoteExportPayload(
     (s, l) => s + (l.impressions || 0),
     0,
   );
+
+  const periodLabel = resolveExportPeriodLabel({
+    row,
+    isKo,
+    mediaSelections,
+    selectionMap,
+    breakdownLineDays: breakdown.lines.map((l) => l.periodDays),
+  });
+
+  const mappedLines = breakdown.lines.map((l) => {
+    const snap = selectionMap.get(l.mediaId);
+    const poIdx =
+      snap?.priceOptionIndex ??
+      resolvedOptionIndex?.[l.mediaId] ??
+      0;
+    const mediaRow = mediaById.get(l.mediaId);
+    let executionPeriodLabel: string | undefined;
+    if (
+      mediaRow &&
+      row.periodKey &&
+      isQuoteCampaignPeriodKey(row.periodKey)
+    ) {
+      const wizardLine = buildQuoteWizardLineContext(
+        mediaItemForExportLine(mediaRow),
+        {
+          isKo,
+          campaignPeriod: row.periodKey,
+          campaignPeriodLabel: row.period,
+          priceOptionIndex: poIdx,
+          usePackagePeriod: snap?.usePackagePeriod === true,
+        },
+      );
+      executionPeriodLabel = wizardLine.executionPeriodLabel;
+    }
+    const base = mapQuoteExportLine(
+      l,
+      mediaRow,
+      isKo,
+      snap
+        ? {
+            priceOptionIndex: poIdx,
+            optionDescription: snap.optionDescription,
+            optionLabel: snap.optionLabel,
+            optionPriceWon: snap.optionPriceWon,
+          }
+        : { priceOptionIndex: poIdx },
+    );
+    const withPeriod = executionPeriodLabel
+      ? { ...base, executionPeriodLabel }
+      : base;
+    if (!snap) return withPeriod;
+    const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
+    const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
+    return {
+      ...withPeriod,
+      name: snap.optionLabel ? `${mediaName}${optSuffix}` : base.name,
+      unitPriceWon: snap.optionPriceWon,
+      lineSupplyWon: snap.lineTotalWon,
+    };
+  });
+
+  const linesSubtotalWon = mappedLines.reduce(
+    (s, line) => s + line.lineSupplyWon,
+    0,
+  );
+  const supplyWon =
+    mediaSelections?.length && linesSubtotalWon > 0
+      ? linesSubtotalWon
+      : breakdown.supplyWon;
+  const vatWon = Math.round(supplyWon * 0.1);
+  const totalWon = supplyWon + vatWon;
   const blendedCpmWon =
     totalImpressions > 0
-      ? Math.round((breakdown.supplyWon / totalImpressions) * 1000)
+      ? Math.round((supplyWon / totalImpressions) * 1000)
       : null;
 
   return {
@@ -110,39 +261,11 @@ export async function buildQuoteExportPayload(
     clientName: row.clientName || (isKo ? "담당자" : "Contact"),
     clientEmail: row.clientEmail || undefined,
     clientPhone: row.clientPhone || undefined,
-    periodLabel: row.period || `${breakdown.periodDays}${isKo ? "일" : " days"}`,
-    lines: breakdown.lines.map((l) => {
-      const snap = selectionMap.get(l.mediaId);
-      const poIdx =
-        snap?.priceOptionIndex ??
-        resolvedOptionIndex?.[l.mediaId] ??
-        0;
-      const base = mapQuoteExportLine(
-        l,
-        mediaById.get(l.mediaId),
-        isKo,
-        snap
-          ? {
-              priceOptionIndex: poIdx,
-              optionDescription: snap.optionDescription,
-              optionLabel: snap.optionLabel,
-              optionPriceWon: snap.optionPriceWon,
-            }
-          : { priceOptionIndex: poIdx },
-      );
-      if (!snap) return base;
-      const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
-      const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
-      return {
-        ...base,
-        name: snap.optionLabel ? `${mediaName}${optSuffix}` : base.name,
-        unitPriceWon: snap.optionPriceWon,
-        lineSupplyWon: snap.lineTotalWon,
-      };
-    }),
-    supplyWon: breakdown.supplyWon,
-    vatWon: breakdown.vatWon,
-    totalWon: breakdown.totalWon,
+    periodLabel,
+    lines: mappedLines,
+    supplyWon,
+    vatWon,
+    totalWon,
     totalImpressions,
     blendedCpmWon,
     issuer: {
@@ -476,6 +599,8 @@ export type QuoteWizardExportInput = {
   clientPhone?: string | null;
   clientCompany?: string | null;
   mediaPriceOptionIndex?: Record<string, number>;
+  /** 마법사 초안 — 제출 전 옵션·패키지 기간 스냅샷 */
+  mediaSelections?: QuoteMediaSelectionSnapshot[];
 };
 
 export async function buildQuoteExportPayloadFromWizard(
@@ -499,6 +624,7 @@ export async function buildQuoteExportPayloadFromWizard(
     locale: input.locale,
     pdfTemplate: input.template === "premium" ? "premium" : "default",
     mediaPriceOptionIndex: input.mediaPriceOptionIndex,
+    mediaSelections: input.mediaSelections,
   };
   return buildQuoteExportPayload(db, row, input.template);
 }

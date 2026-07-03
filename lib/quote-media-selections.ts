@@ -7,6 +7,10 @@ export type QuoteMediaSelectionSnapshot = {
   lineTotalWon: number;
   /** 제출 시점 priceOptions[].description — catalog 변경 후에도 송출 문구 보존 */
   optionDescription?: string | null;
+  /** 패키지 기간만 집행 토글 (9d-min) */
+  usePackagePeriod?: boolean;
+  /** 토글 on 시 라인 집행 일수 (bundleDays) */
+  lineCampaignDays?: number;
 };
 
 export function parseQuoteMediaSelections(
@@ -39,6 +43,13 @@ export function parseQuoteMediaSelections(
       typeof o.optionDescription === "string" && o.optionDescription.trim()
         ? o.optionDescription.trim()
         : null;
+    const usePackagePeriod = o.usePackagePeriod === true;
+    const lineCampaignDays =
+      typeof o.lineCampaignDays === "number" &&
+      Number.isFinite(o.lineCampaignDays) &&
+      o.lineCampaignDays > 0
+        ? Math.round(o.lineCampaignDays)
+        : undefined;
     out.push({
       mediaId,
       priceOptionIndex,
@@ -46,6 +57,8 @@ export function parseQuoteMediaSelections(
       optionPriceWon,
       lineTotalWon,
       ...(optionDescription ? { optionDescription } : {}),
+      ...(usePackagePeriod ? { usePackagePeriod: true } : {}),
+      ...(lineCampaignDays != null ? { lineCampaignDays } : {}),
     });
   }
   return out.length > 0 ? out : undefined;

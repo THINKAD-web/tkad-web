@@ -1261,6 +1261,8 @@
     "networkRegion": "Target regions",
     "networkRegionAll": "All regions in this network",
     "priceOptionLabel": "Price option",
+    "usePackagePeriodOnly": "Package period only ({period})",
+    "periodMixedSummary": "{period} (varies by media)",
     "period": "Campaign Period",
     "periodPlaceholder": "Select period",
     "periods": {

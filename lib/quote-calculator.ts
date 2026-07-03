@@ -14,6 +14,10 @@ import {
   quoteCampaignDaysFromPeriodKey,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
+import {
+  selectionsByMediaId,
+  type QuoteMediaSelectionSnapshot,
+} from "@/lib/quote-media-selections";
 
 export const QUOTE_VALIDITY_DAYS = 14;
 
@@ -63,6 +67,7 @@ export type CalculateQuoteInput = {
   /** 견적 마법사 — 있으면 선택 옵션·캠페인 기간 기준 (UI와 동일) */
   periodKey?: string;
   mediaPriceOptionIndex?: Record<string, number>;
+  mediaSelections?: QuoteMediaSelectionSnapshot[];
 };
 
 /** DB 조회 기반 API — `calculateQuote({ mediaIds, startDate, endDate, discountRate })` */
@@ -74,6 +79,7 @@ export type CalculateQuoteByMediaIdsInput = {
   issuedAt?: Date;
   periodKey?: string;
   mediaPriceOptionIndex?: Record<string, number>;
+  mediaSelections?: QuoteMediaSelectionSnapshot[];
 };
 
 function parsePriceOptions(raw: unknown): MediaPriceOption[] {
@@ -203,6 +209,7 @@ export async function calculateQuoteFromMediaIds(
     issuedAt: input.issuedAt,
     periodKey: input.periodKey,
     mediaPriceOptionIndex: input.mediaPriceOptionIndex,
+    mediaSelections: input.mediaSelections,
   });
 }
 
@@ -220,6 +227,7 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
     isQuoteCampaignPeriodKey(input.periodKey);
   const campaignPeriod = useOptionPricing ? input.periodKey : null;
   const poMap = input.mediaPriceOptionIndex ?? {};
+  const selectionMap = selectionsByMediaId(input.mediaSelections);
   const campaignDays =
     campaignPeriod != null
       ? campaignDaysFromPeriodKey(campaignPeriod)
@@ -236,22 +244,29 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
           ? Math.min(Math.max(0, rawIdx), priceOptions.length - 1)
           : 0;
       const option = priceOptions[poIdx];
+      const snap = selectionMap.get(m.id);
+      const usePackagePeriod = snap?.usePackagePeriod === true;
 
       const wizardLine = buildQuoteWizardLineContext(mediaItem, {
         isKo: true,
         campaignPeriod,
         campaignPeriodLabel: campaignPeriod,
         priceOptionIndex: poIdx,
+        usePackagePeriod,
       });
+
+      const lineCampaignDays = usePackagePeriod
+        ? (snap?.lineCampaignDays ?? wizardLine.campaignDays)
+        : campaignDays;
 
       return {
         mediaId: m.id,
         mediaName: formatQuoteLineMediaName(m.name, option),
         location: m.location,
-        periodDays: campaignDays,
+        periodDays: lineCampaignDays,
         unitPriceWon: Math.round(wizardLine.unitPriceMan * 10_000),
         lineSupplyWon: Math.round(wizardLine.lineTotalMan * 10_000),
-        impressions: lineImpressions(m, campaignDays),
+        impressions: lineImpressions(m, lineCampaignDays),
         lat: m.latitude ?? undefined,
         lng: m.longitude ?? undefined,
       };
