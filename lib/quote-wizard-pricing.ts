@@ -4,6 +4,7 @@ import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from
 import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
+  formatMediaPriceCompactWon,
   formatPricePeriodShortLabel,
   inferMediaPricePeriodFromPriceOption,
   normalizeMediaPricePeriod,
@@ -74,6 +75,9 @@ export type QuoteWizardLineContext = {
   lineTotalMan: number;
   unitPeriodLabel: string;
   executionPeriodLabel: string;
+  bundleDays: number | null;
+  campaignDays: number;
+  prorationLabel: string | null;
 };
 
 export function resolveQuoteMediaPricePeriod(
@@ -172,6 +176,23 @@ function buildExecutionPeriodLabel(opts: {
     : `${campaignPeriodLabel} · ${unitsDisplay}× ${unitPeriodLabel}`;
 }
 
+function buildProrationLabel(opts: {
+  isKo: boolean;
+  unitPriceWon: number;
+  unitPeriodLabel: string;
+  campaignDays: number;
+  bundleDays: number;
+  lineTotalWon: number;
+}): string | null {
+  if (opts.campaignDays === opts.bundleDays) return null;
+  const locale = opts.isKo ? "ko-KR" : "en-US";
+  const fmt = (won: number) => formatMediaPriceCompactWon(won, locale);
+  if (opts.isKo) {
+    return `${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${opts.campaignDays}일÷${opts.bundleDays}일 ≈ ${fmt(opts.lineTotalWon)}`;
+  }
+  return `${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${opts.campaignDays}d÷${opts.bundleDays}d ≈ ${fmt(opts.lineTotalWon)}`;
+}
+
 export function buildQuoteWizardLineContext(
   media: MediaItem,
   opts: {
@@ -196,11 +217,11 @@ export function buildQuoteWizardLineContext(
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
   const explicitBundleDays =
     priceOpt != null ? tryResolveExplicitPriceOptionBundleDays(priceOpt) : null;
+  const campaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
 
   let campaignUnits: number;
   let lineTotalMan: number;
   if (!isNw && priceOpt && explicitBundleDays != null) {
-    const campaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
     campaignUnits = campaignDays / explicitBundleDays;
     const lineTotalWon = quoteBundleProrationWon(
       catalogPriceFieldToWon(priceOpt.price),
@@ -215,6 +236,25 @@ export function buildQuoteWizardLineContext(
 
   const locale = opts.isKo ? "ko" : "en";
   const unitPeriodLabel = formatPricePeriodShortLabel(pricePeriod, locale);
+  const lineTotalWon = Math.round(lineTotalMan * 10_000);
+  const unitPriceWon = isNw
+    ? lineTotalWon
+    : priceOpt
+      ? catalogPriceFieldToWon(priceOpt.price)
+      : catalogPriceFieldToWon(media.price);
+  const bundleDays =
+    !isNw && priceOpt && explicitBundleDays != null ? explicitBundleDays : null;
+  const prorationLabel =
+    bundleDays != null
+      ? buildProrationLabel({
+          isKo: opts.isKo,
+          unitPriceWon,
+          unitPeriodLabel,
+          campaignDays,
+          bundleDays,
+          lineTotalWon,
+        })
+      : null;
   const executionPeriodLabel = buildExecutionPeriodLabel({
     isKo: opts.isKo,
     campaignPeriod: opts.campaignPeriod,
@@ -231,5 +271,8 @@ export function buildQuoteWizardLineContext(
     lineTotalMan,
     unitPeriodLabel,
     executionPeriodLabel,
+    bundleDays,
+    campaignDays,
+    prorationLabel,
   };
 }

@@ -54,6 +54,11 @@ export function QuoteAddonLineRow({ detail, isKo = true, className }: CardProps)
               </p>
             </div>
           ) : null}
+          {detail.executionPeriodLabel ? (
+            <p className="max-w-[9rem] text-[10px] leading-snug text-gray-500">
+              {detail.executionPeriodLabel}
+            </p>
+          ) : null}
         </div>
       )}
     </article>
@@ -194,6 +199,11 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
                 {detail.lineTotalLabel}
               </p>
             </div>
+          ) : null}
+          {detail.executionPeriodLabel ? (
+            <p className="max-w-[9rem] text-[10px] leading-snug text-gray-500">
+              {detail.executionPeriodLabel}
+            </p>
           ) : null}
         </div>
       )}
