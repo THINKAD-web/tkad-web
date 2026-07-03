@@ -30,6 +30,24 @@ function parseFormat(raw: unknown): QuoteExportFormat | null {
   return null;
 }
 
+function parseMediaPriceOptionIndex(
+  raw: unknown,
+): Record<string, number> | undefined {
+  if (raw === undefined || raw === null) return undefined;
+  if (typeof raw !== "object" || Array.isArray(raw)) return undefined;
+  const out: Record<string, number> = {};
+  for (const [mediaId, value] of Object.entries(
+    raw as Record<string, unknown>,
+  )) {
+    if (!CUID_RE.test(mediaId)) continue;
+    const n =
+      typeof value === "number" ? value : parseInt(String(value ?? ""), 10);
+    if (!Number.isFinite(n) || n < 0) continue;
+    out[mediaId] = Math.floor(n);
+  }
+  return out;
+}
+
 /** 견적 마법사 Step 4 — 저장 전 초안도 서버 jsPDF/pptxgenjs 출력 (#173과 동일 빌더) */
 export async function POST(request: NextRequest) {
   const ip =
@@ -79,6 +97,9 @@ export async function POST(request: NextRequest) {
   const periodKeyRaw = String(body.periodKey ?? "1month").trim();
   const periodKey =
     periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "1month";
+  const mediaPriceOptionIndex = parseMediaPriceOptionIndex(
+    body.mediaPriceOptionIndex,
+  );
 
   try {
     const db = getPrisma();
@@ -91,6 +112,7 @@ export async function POST(request: NextRequest) {
       clientEmail: String(body.clientEmail ?? "").trim(),
       clientPhone: body.clientPhone != null ? String(body.clientPhone).trim() : null,
       clientCompany: String(body.clientCompany ?? "").trim() || null,
+      mediaPriceOptionIndex,
     });
 
     const base = quoteExportFileBase(payload);
