@@ -71,7 +71,7 @@ import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 export const dynamicParams = true;
 export const maxDuration = 60;
 
