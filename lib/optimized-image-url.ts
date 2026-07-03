@@ -86,11 +86,9 @@ export function buildBunnyMediaProxyUrl(
   return `/api/bunny-media/${encoded}`;
 }
 
-/** Bunny·프록시 URL은 next/image optimizer 우회 */
-export function shouldUseUnoptimizedImage(url: string | null | undefined): boolean {
-  const raw = url?.trim();
-  if (!raw) return false;
-  return isBunnyMediaUrl(raw) || raw.startsWith("/api/bunny-media/");
+/** @deprecated Prefer resolveCatalogImageSrc — catalog images use next/image optimizer */
+export function shouldUseUnoptimizedImage(_url: string | null | undefined): boolean {
+  return false;
 }
 
 /** 공개 표시용 — Bunny는 프록시 우선, Cloudinary 제외 */
@@ -110,20 +108,28 @@ export type ResolvedCatalogImage = {
   unoptimized: boolean;
 };
 
-/** 카탈로그/카드용 src — Bunny는 Storage 프록시 우선 */
+const CATALOG_CARD_WIDTH = 400;
+
+/** 카탈로그/카드용 src — Bunny는 same-origin 프록시 우선, next/image로 리사이즈 */
 export function resolveCatalogImageSrc(
   url: string | null | undefined,
+  opts?: { width?: number },
 ): ResolvedCatalogImage | null {
+  const cardWidth = opts?.width ?? CATALOG_CARD_WIDTH;
   const raw = url?.trim();
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
   if (raw.startsWith("/api/bunny-media/")) {
-    return { src: raw, unoptimized: true };
+    return { src: raw, unoptimized: false };
   }
   if (isBunnyMediaUrl(raw)) {
     const src = buildBunnyMediaProxyUrl(raw) ?? raw;
-    return { src, unoptimized: true };
+    return { src, unoptimized: false };
   }
-  const optimized = optimizeImageUrl(raw, { width: 800, quality: 80, forceWebp: true });
+  const optimized = optimizeImageUrl(raw, {
+    width: cardWidth,
+    quality: 80,
+    forceWebp: true,
+  });
   return optimized ? { src: optimized, unoptimized: false } : null;
 }
 
