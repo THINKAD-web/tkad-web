@@ -12,8 +12,10 @@ import {
 } from "@/components/media/media-trust-score";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
-import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
-import type { MediaItem } from "@/lib/media-data";
+import {
+  catalogThumbnailImageProps,
+  catalogToMediaItem,
+} from "@/lib/media-catalog-map";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
 import {
@@ -42,27 +44,6 @@ type FeedProps = Pick<
   | "rank"
   | "showPlanButton"
 >;
-
-function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
-  return {
-    id: item.id,
-    slug: item.slug,
-    name: item.name,
-    nameEn: item.name,
-    location: item.location ?? item.region ?? "",
-    locationEn: item.location ?? item.region ?? "",
-    region: "seoul",
-    type: "digital",
-    price: item.price ?? 0,
-    pricePeriod: item.pricePeriod,
-    lat: 0,
-    lng: 0,
-    dailyFootTraffic: item.dailyFootTraffic ?? 0,
-    visibilityScore: item.visibilityScore,
-    sampleImages:
-      item.galleryImages ?? (item.thumbnailUrl ? [item.thumbnailUrl] : []),
-  };
-}
 
 function collectGalleryImages(item: HomeCatalogMediaItem): string[] {
   const seen = new Set<string>();

@@ -9,6 +9,12 @@ export type HomeCatalogMediaItem = {
   location?: string;
   size?: string;
   dailyFootTraffic?: number;
+  /** 월 노출 (DB `impressions`) — 카드 CPM 계산용 */
+  impressions?: number;
+  /** 월 유동 (`monthlyFootTraffic` 또는 `impressions` 폴백) */
+  monthlyFootTraffic?: number;
+  /** DB 저장 CPM — `resolveDisplayCpmWon` 이 재계산과 대조 */
+  cpm?: number;
   visibilityScore?: number;
   features?: string;
   advertiserHistory?: string;

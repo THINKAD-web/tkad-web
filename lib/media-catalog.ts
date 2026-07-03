@@ -20,6 +20,7 @@ export type { HomeCatalogMediaItem, MediaCatalogSort } from "@/lib/media-catalog
 export {
   mapMediaItemToHomeCatalog,
   catalogThumbnailImageProps,
+  catalogToMediaItem,
 } from "@/lib/media-catalog-map";
 
 function usesFilteredQuery(opts: {

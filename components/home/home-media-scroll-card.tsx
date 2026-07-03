@@ -4,8 +4,10 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { ShieldCheck } from "lucide-react";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
-import type { MediaItem } from "@/lib/media-data";
-import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import {
+  catalogThumbnailImageProps,
+  catalogToMediaItem,
+} from "@/lib/media-catalog-map";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
 import {
   formatCpmKrw,
@@ -19,27 +21,6 @@ type Props = {
   isKo: boolean;
   priority?: boolean;
 };
-
-function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
-  return {
-    id: item.id,
-    slug: item.slug,
-    name: item.name,
-    nameEn: item.name,
-    location: item.location ?? item.region ?? "",
-    locationEn: item.location ?? item.region ?? "",
-    region: "seoul",
-    type: "digital",
-    price: item.price ?? 0,
-    pricePeriod: item.pricePeriod,
-    lat: 0,
-    lng: 0,
-    dailyFootTraffic: item.dailyFootTraffic ?? 0,
-    visibilityScore: item.visibilityScore,
-    sampleImages:
-      item.galleryImages ?? (item.thumbnailUrl ? [item.thumbnailUrl] : []),
-  };
-}
 
 function VerifiedBadge({ isKo }: { isKo: boolean }) {
   return (
