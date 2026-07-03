@@ -48,16 +48,62 @@ export type MediaQuoteLine = {
   cpm: number | null;
 };
 
+/** 패키지 총액 × (캠페인 일수 ÷ 번들 일수) — 스티키 패널·마법사 공용 */
+export function quoteBundleProrationWon(
+  bundlePriceWon: number,
+  campaignDays: number,
+  bundleDays: number,
+): number {
+  const days = Math.max(1, Math.round(campaignDays));
+  const bundle = Math.max(1, Math.round(bundleDays));
+  return Math.round(bundlePriceWon * (days / bundle));
+}
+
+function parseExplicitBundleDaysFromText(text: string): number | null {
+  const dayKo = text.match(/(\d+)\s*일/);
+  if (dayKo) return Math.max(1, parseInt(dayKo[1], 10));
+  const weekKo = text.match(/(\d+)\s*주/);
+  if (weekKo) return Math.max(1, parseInt(weekKo[1], 10)) * 7;
+  const monthKo = text.match(/(\d+)\s*개월/);
+  if (monthKo) return Math.max(1, parseInt(monthKo[1], 10)) * 30;
+  const dayEn = text.match(/(\d+)\s*days?/i);
+  if (dayEn) return Math.max(1, parseInt(dayEn[1], 10));
+  const weekEn = text.match(/(\d+)\s*weeks?/i);
+  if (weekEn) return Math.max(1, parseInt(weekEn[1], 10)) * 7;
+  const monthEn = text.match(/(\d+)\s*months?/i);
+  if (monthEn) return Math.max(1, parseInt(monthEn[1], 10)) * 30;
+  return null;
+}
+
+/** 라벨·period 텍스트에 명시된 번들 일수만 추출 — 없으면 null (period 추론 폴백 없음) */
+export function tryResolveExplicitPriceOptionBundleDays(
+  option: Pick<MediaPriceOption, "label" | "period">,
+): number | null {
+  const label = option.label?.trim() ?? "";
+  if (label) {
+    const fromLabel = parseExplicitBundleDaysFromText(label);
+    if (fromLabel != null) return fromLabel;
+  }
+  const periodText = String(option.period ?? "").trim();
+  if (periodText) {
+    return parseExplicitBundleDaysFromText(periodText);
+  }
+  return null;
+}
+
 function quoteLineFromUnitPrice(
   media: MediaItem,
   unitPriceWon: number,
   durationDays: number,
   bundleDays: number,
 ): MediaQuoteLine {
-  const days = Math.max(1, Math.round(durationDays));
-  const periodDays = Math.max(1, Math.round(bundleDays));
-  const costWon = Math.round(unitPriceWon * (days / periodDays));
+  const costWon = quoteBundleProrationWon(
+    unitPriceWon,
+    durationDays,
+    bundleDays,
+  );
 
+  const days = Math.max(1, Math.round(durationDays));
   const monthlyImp = estimatedMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
   const cpm =
@@ -87,22 +133,8 @@ export function resolvePriceOptionBundleDays(
   option: Pick<MediaPriceOption, "label" | "period">,
   fallbackPeriod: MediaPricePeriodKey | string | null | undefined,
 ): number {
-  const sources = [option.label?.trim() ?? "", String(option.period ?? "").trim()];
-  for (const text of sources) {
-    if (!text) continue;
-    const dayKo = text.match(/(\d+)\s*일/);
-    if (dayKo) return Math.max(1, parseInt(dayKo[1], 10));
-    const weekKo = text.match(/(\d+)\s*주/);
-    if (weekKo) return Math.max(1, parseInt(weekKo[1], 10)) * 7;
-    const monthKo = text.match(/(\d+)\s*개월/);
-    if (monthKo) return Math.max(1, parseInt(monthKo[1], 10)) * 30;
-    const dayEn = text.match(/(\d+)\s*days?/i);
-    if (dayEn) return Math.max(1, parseInt(dayEn[1], 10));
-    const weekEn = text.match(/(\d+)\s*weeks?/i);
-    if (weekEn) return Math.max(1, parseInt(weekEn[1], 10)) * 7;
-    const monthEn = text.match(/(\d+)\s*months?/i);
-    if (monthEn) return Math.max(1, parseInt(monthEn[1], 10)) * 30;
-  }
+  const explicit = tryResolveExplicitPriceOptionBundleDays(option);
+  if (explicit != null) return explicit;
   const periodKey = inferMediaPricePeriodFromPriceOption(option, fallbackPeriod);
   return pricePeriodDays(periodKey);
 }
