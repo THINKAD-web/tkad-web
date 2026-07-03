@@ -5,6 +5,10 @@ import Image from "next/image";
 import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import {
+  optimizeHeroMarqueeUrl,
+  shouldUseUnoptimizedImage,
+} from "@/lib/optimized-image-url";
 
 type HeroSlide = {
   id: string;
@@ -66,8 +70,8 @@ export function HomeHeroBanner() {
         aria-label={isKo ? "프로모션" : "Promotions"}
       >
         {SLIDES.map((s, i) => {
+          const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
           const alt = isKo ? s.titleKo : s.titleEn;
-          const isFirst = i === 0;
           return (
             <div
               key={s.id}
@@ -78,13 +82,13 @@ export function HomeHeroBanner() {
               aria-hidden={i !== current}
             >
               <Image
-                src={s.image}
+                src={src}
                 alt={alt}
                 fill
                 className="object-cover object-center"
-                priority={isFirst}
-                loading={isFirst ? "eager" : "lazy"}
+                priority={i === 0}
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
+                unoptimized={shouldUseUnoptimizedImage(src)}
               />
             </div>
           );
