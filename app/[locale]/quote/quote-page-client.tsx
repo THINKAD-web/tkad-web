@@ -171,6 +171,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     Record<string, number>
   >({});
   const mediaQueryApplied = useRef(false);
+  /** Step 2·URL에서 사용자가 명시한 캠페인 기간 — true면 옵션 변경 시 자동 추종 안 함 */
+  const periodDirtyRef = useRef(false);
   const [template, setTemplate] = useState<QuoteTemplateId>("default");
   const [discoverySort, setDiscoverySort] = useState("popular");
   const [logoDataUrl, setLogoDataUrl] = useState<string | null>(null);
@@ -219,6 +221,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     const periodParam = params.get("period");
     if (periodParam && isQuoteCampaignPeriodKey(periodParam)) {
       setPeriod(periodParam);
+      periodDirtyRef.current = true;
     } else if (matchedIds.length === 1) {
       const m = catalog.find((x) => x.id === matchedIds[0]);
       if (m) {
@@ -296,6 +299,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const selectedMedia = useMemo(
     () => catalog.filter((m) => selectedIds.has(m.id)),
     [catalog, selectedIds],
+  );
+
+  const handleMediaPriceOptionChange = useCallback(
+    (media: MediaItem, rawIdx: number) => {
+      const idx = Number.isFinite(rawIdx) && rawIdx >= 0 ? rawIdx : 0;
+      setMediaPriceOptionIndex((p) => ({
+        ...p,
+        [media.id]: idx,
+      }));
+      if (
+        selectedMedia.length === 1 &&
+        selectedMedia[0]?.id === media.id &&
+        !periodDirtyRef.current
+      ) {
+        setPeriod(inferQuoteCampaignPeriodFromMedia(media, idx));
+      }
+    },
+    [selectedMedia],
   );
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
@@ -1405,12 +1426,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     value={poIdx}
                                     onChange={(e) => {
                                       const v = parseInt(e.target.value, 10);
-                                      setMediaPriceOptionIndex((p) => ({
-                                        ...p,
-                                        [media.id]: Number.isFinite(v)
-                                          ? v
-                                          : 0,
-                                      }));
+                                      handleMediaPriceOptionChange(
+                                        media,
+                                        v,
+                                      );
                                     }}
                                   >
                                     {(media.priceOptions ?? []).map((o, i) => (
@@ -1599,12 +1618,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                       value={poIdxC}
                                       onChange={(e) => {
                                         const v = parseInt(e.target.value, 10);
-                                        setMediaPriceOptionIndex((p) => ({
-                                          ...p,
-                                          [media.id]: Number.isFinite(v)
-                                            ? v
-                                            : 0,
-                                        }));
+                                        handleMediaPriceOptionChange(media, v);
                                       }}
                                     >
                                       {(media.priceOptions ?? []).map((o, i) => (
@@ -1652,9 +1666,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </label>
                         <select
                           value={period}
-                          onChange={(e) =>
-                            setPeriod(e.target.value as PeriodKey)
-                          }
+                          onChange={(e) => {
+                            periodDirtyRef.current = true;
+                            setPeriod(e.target.value as PeriodKey);
+                          }}
                           className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
                           aria-label={t("quote.period")}
                         >
