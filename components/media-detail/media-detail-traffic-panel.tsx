@@ -12,7 +12,6 @@ import {
 } from "@/components/media-detail/media-recent-brands-panel";
 import type { MediaRecentBrandsData } from "@/lib/insights/media-recent-brands";
 import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
-import type { AccessCheckResult } from "@/lib/report-access-shared";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import type { StoredTrafficPattern } from "@/lib/media-traffic-estimate";
 import type { DataSourceAttribution } from "@/lib/data-source-types";
@@ -27,8 +26,6 @@ type Props = {
   isKo: boolean;
   performanceMetrics: MediaPerformanceMetrics;
   analyticsReport: MediaAnalyticsReport;
-  detailAccess: AccessCheckResult;
-  competitorAccess: AccessCheckResult;
   recentBrands: MediaRecentBrandsData;
 };
 
@@ -42,12 +39,12 @@ export function MediaDetailTrafficPanel({
   isKo,
   performanceMetrics,
   analyticsReport,
-  detailAccess,
-  competitorAccess,
   recentBrands,
 }: Props) {
   const { allowed: detailPro, loading: detailProLoading, access: detailAccessGate } =
     useFeatureAccess("detail_data");
+  const { access: competitorAccess, allowed: competitorAllowed } =
+    useFeatureAccess("competitor");
 
   return (
     <div className="space-y-6">
@@ -75,7 +72,7 @@ export function MediaDetailTrafficPanel({
           <MediaAnalyticsReportSection
             report={analyticsReport}
             isKo={isKo}
-            access={detailAccess}
+            access={detailAccessGate}
           />
           <CompetitorOohSection
             report={analyticsReport}
@@ -87,7 +84,7 @@ export function MediaDetailTrafficPanel({
             isKo={isKo}
             access={competitorAccess}
           />
-          {!competitorAccess.allowed ? (
+          {!competitorAllowed ? (
             <MediaRecentBrandsTeaser data={recentBrands} isKo={isKo} />
           ) : null}
         </div>

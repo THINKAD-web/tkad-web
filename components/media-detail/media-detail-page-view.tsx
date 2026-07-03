@@ -1,6 +1,5 @@
 import type { ReactNode } from "react";
 import type { MediaAnalyticsReport } from "@/lib/media-report-analytics";
-import type { AccessCheckResult } from "@/lib/report-access-shared";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaRecentBrandsData } from "@/lib/insights/media-recent-brands";
@@ -32,8 +31,6 @@ type Props = {
   imageAlt: string;
   performanceMetrics: MediaPerformanceMetrics;
   analyticsReport: MediaAnalyticsReport;
-  detailAccess: AccessCheckResult;
-  competitorAccess: AccessCheckResult;
   recentBrands: MediaRecentBrandsData;
   similar: SimilarItem[];
   hasPriceOptions: boolean;
@@ -95,8 +92,6 @@ export function MediaDetailPageView({
   imageAlt,
   performanceMetrics,
   analyticsReport,
-  detailAccess,
-  competitorAccess,
   recentBrands,
   similar,
   hasPriceOptions,
@@ -168,8 +163,6 @@ export function MediaDetailPageView({
                 isKo={isKo}
                 performanceMetrics={performanceMetrics}
                 analyticsReport={analyticsReport}
-                detailAccess={detailAccess}
-                competitorAccess={competitorAccess}
                 recentBrands={recentBrands}
               />
             ),
