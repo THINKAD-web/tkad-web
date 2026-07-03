@@ -16,6 +16,7 @@ import {
   pricePeriodDays,
   resolvePriceOptionBundleDays,
 } from "@/lib/compare-quote";
+import { rememberQuoteEntryPriceOption } from "@/lib/quote-wizard-entry";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-proposal-card";
 import {
@@ -62,6 +63,13 @@ export function MediaDetailStickyQuotePanel({
   const safeOptIdx = hasPriceOptions
     ? Math.min(Math.max(0, optIdx), priceOptions.length - 1)
     : 0;
+
+  useEffect(() => {
+    if (hasPriceOptions) {
+      rememberQuoteEntryPriceOption(media.id, safeOptIdx);
+    }
+  }, [media.id, hasPriceOptions, safeOptIdx]);
+
   const selectedOption = hasPriceOptions
     ? priceOptions[safeOptIdx]
     : undefined;
@@ -136,7 +144,9 @@ export function MediaDetailStickyQuotePanel({
             value={safeOptIdx}
             onChange={(e) => {
               const v = parseInt(e.target.value, 10);
-              setOptIdx(Number.isFinite(v) ? v : 0);
+              const idx = Number.isFinite(v) ? v : 0;
+              setOptIdx(idx);
+              rememberQuoteEntryPriceOption(media.id, idx);
             }}
             className={inputCls}
           >

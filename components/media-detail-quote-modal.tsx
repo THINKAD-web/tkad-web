@@ -14,6 +14,7 @@ import {
 import {
   inferQuoteCampaignPeriodFromMedia,
 } from "@/lib/quote-wizard-pricing";
+import { resolveQuoteEntryPriceOptionIndex } from "@/lib/quote-wizard-entry";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -30,7 +31,9 @@ function MediaDetailQuoteModalBody({
 
   const opts = media.priceOptions ?? [];
   const hasOpts = opts.length > 0;
-  const [optIdx, setOptIdx] = useState(0);
+  const [optIdx, setOptIdx] = useState(() =>
+    resolveQuoteEntryPriceOptionIndex(media),
+  );
 
   const safeIdx = hasOpts
     ? Math.min(Math.max(0, optIdx), opts.length - 1)
