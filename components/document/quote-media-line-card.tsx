@@ -120,7 +120,7 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
   return (
     <article
       className={cn(
-        "flex gap-3 overflow-hidden rounded-xl border border-gray-200 bg-white p-3 shadow-sm",
+        "flex min-w-[17rem] gap-3 rounded-xl border border-gray-200 bg-white p-3 shadow-sm sm:min-w-0",
         className,
       )}
     >

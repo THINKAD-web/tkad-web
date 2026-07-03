@@ -189,7 +189,7 @@ function QuoteDefaultTotalsPanel({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
           {supplyLabel}
         </span>
-        <span className="font-bold tabular-nums text-gray-900">
+        <span className="font-bold tabular-nums text-gray-900 quote-pdf-amount">
           {formatDocumentManWon(subtotalWon, isKo)}
         </span>
       </div>
@@ -197,18 +197,20 @@ function QuoteDefaultTotalsPanel({
         <span className="text-[11px] font-semibold uppercase tracking-wide text-gray-400">
           {vatLabel}
         </span>
-        <span className="font-bold tabular-nums text-gray-900">
+        <span className="font-bold tabular-nums text-gray-900 quote-pdf-amount">
           {formatDocumentManWon(vatWon, isKo)}
         </span>
       </div>
       <div
-        className="flex items-center justify-between gap-6 rounded-lg px-4 py-3 text-base font-black text-white"
+        className="quote-pdf-totals-gradient flex items-center justify-between gap-6 rounded-lg px-4 py-3 text-base font-black text-white"
         style={{
           background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
         }}
       >
         <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
-        <span className="tabular-nums">{formatDocumentManWon(grandTotalWon, isKo)}</span>
+        <span className="quote-pdf-amount tabular-nums">
+          {formatDocumentManWon(grandTotalWon, isKo)}
+        </span>
       </div>
     </div>
   );
@@ -388,6 +390,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
         className={cn(
           documentCardClass,
           "quote-pdf-preview-doc box-border w-full min-w-0 antialiased",
+          "overflow-x-auto overflow-y-visible",
           "md:w-[210mm] md:max-w-[210mm]",
         )}
         data-quote-pdf-background="#ffffff"

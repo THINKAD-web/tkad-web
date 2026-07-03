@@ -1568,6 +1568,18 @@ html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-
   border-color: rgb(229 231 235) !important;
 }
 
+/* 견적 PDF 미리보기 — planner-neon day의 text-white 재매핑 예외 (그라데이션 합계 바) */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+/* 견적 PDF 미리보기 — 금액 셀 (-webkit-text-fill 상속 깨짐 방지) */
+.tkad-planner-neon .tkad-document-light-surface .quote-pdf-amount {
+  -webkit-text-fill-color: currentColor !important;
+}
+
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta *,
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta,
