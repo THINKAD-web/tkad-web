@@ -34,6 +34,14 @@
     "chatPreviewTitle": "상담 채팅",
     "chatPreviewHint": "카카오·AI·전화"
   },
+  "mobileTabs": {
+    "home": "홈",
+    "explore": "탐색",
+    "planner": "플래너",
+    "contact": "문의",
+    "my": "MY",
+    "navAria": "하단 탭 메뉴"
+  },
   "supportChat": {
     "openMenu": "상담 메뉴 열기",
     "close": "닫기",

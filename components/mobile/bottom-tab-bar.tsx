@@ -1,32 +1,37 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
+import { useTranslations } from "next-intl";
 import {
   Home,
   LayoutGrid,
   MessageCircle,
   Search,
   User,
+  type LucideIcon,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/haptic";
 import { useMobileTabBadges } from "@/hooks/use-mobile-tab-badges";
 import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
 
-type TabDef = {
-  id: "home" | "explore" | "planner" | "contact" | "my";
-  href: string;
+export type MobileBottomTabDef = {
+  id: string;
+  /** i18n key under `mobileTabs` */
   labelKey: string;
-  icon: typeof Home;
+  icon: LucideIcon;
   match: (path: string) => boolean;
+  href?: string;
   emphasized?: boolean;
   badgeKey?: "contact" | "my";
+  /** Opens contact channel sheet instead of navigating */
+  action?: "contact-sheet";
 };
 
-const TABS: TabDef[] = [
+/** 모바일 하단 탭 정의 — 항목 추가 시 이 배열만 수정 */
+export const MOBILE_BOTTOM_TABS: MobileBottomTabDef[] = [
   {
     id: "home",
     href: "/",
@@ -53,11 +58,11 @@ const TABS: TabDef[] = [
   },
   {
     id: "contact",
-    href: "/contact",
     labelKey: "contact",
     icon: MessageCircle,
     match: (p) => p.startsWith("/contact"),
     badgeKey: "contact",
+    action: "contact-sheet",
   },
   {
     id: "my",
@@ -68,14 +73,6 @@ const TABS: TabDef[] = [
     badgeKey: "my",
   },
 ];
-
-const LABELS: Record<string, { ko: string; en: string }> = {
-  home: { ko: "홈", en: "Home" },
-  explore: { ko: "탐색", en: "Explore" },
-  planner: { ko: "플래너", en: "Planner" },
-  contact: { ko: "문의", en: "Contact" },
-  my: { ko: "MY", en: "MY" },
-};
 
 const TAB_LABEL_ACTIVE = "tkad-home-accent-text font-semibold";
 
@@ -109,7 +106,7 @@ function TabNeonIcon({
   badgeCount,
   variant = "chip",
 }: {
-  Icon: typeof Home;
+  Icon: LucideIcon;
   active: boolean;
   badgeCount: number;
   variant?: "chip" | "fab";
@@ -151,10 +148,22 @@ function TabNeonIcon({
   );
 }
 
+function TabLabel({ active, children }: { active: boolean; children: ReactNode }) {
+  return (
+    <span
+      className={cn(
+        "mt-1 w-full truncate text-center text-[10px] transition-colors duration-200",
+        active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
+      )}
+    >
+      {children}
+    </span>
+  );
+}
+
 export function BottomTabBar() {
   const pathname = usePathname();
-  const locale = useLocale();
-  const isKo = locale === "ko";
+  const t = useTranslations("mobileTabs");
   const badges = useMobileTabBadges();
   const [mounted, setMounted] = useState(false);
 
@@ -174,26 +183,26 @@ export function BottomTabBar() {
         "dark:shadow-[0_-8px_48px_rgba(0,0,0,0.55),0_0_28px_rgba(124,58,237,0.1)]",
       )}
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
-      aria-label={isKo ? "하단 탭 메뉴" : "Bottom tab navigation"}
+      aria-label={t("navAria")}
     >
       <div
         aria-hidden
         className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent dark:via-cyan-400/40"
       />
-      <ul className="mx-auto flex h-full max-w-lg items-end justify-around px-1">
-        {TABS.map((tab) => {
+      <ul className="flex h-full w-full items-end">
+        {MOBILE_BOTTOM_TABS.map((tab) => {
           const active = tab.match(pathname ?? "");
           const Icon = tab.icon;
-          const label = LABELS[tab.labelKey]?.[isKo ? "ko" : "en"] ?? tab.labelKey;
+          const label = t(tab.labelKey);
           const badgeCount = tab.badgeKey ? badges[tab.badgeKey] : 0;
 
-          if (tab.emphasized) {
+          if (tab.emphasized && tab.href) {
             return (
-              <li key={tab.href} className="flex min-w-0 flex-1 justify-center">
+              <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
                 <Link
                   href={tab.href}
                   onClick={() => hapticLight()}
-                  className="tkad-mobile-tab-fab relative -translate-y-2 flex w-full max-w-[4.5rem] flex-col items-center transition-all duration-200 active:scale-95"
+                  className="tkad-mobile-tab-fab relative -translate-y-2 flex w-full min-w-0 flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                 >
                   <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab relative flex h-14 w-14 items-center justify-center rounded-full">
@@ -204,29 +213,22 @@ export function BottomTabBar() {
                       variant="fab"
                     />
                   </span>
-                  <span
-                    className={cn(
-                      "mt-1 text-[10px]",
-                      active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
-                    )}
-                  >
-                    {label}
-                  </span>
+                  <TabLabel active={active}>{label}</TabLabel>
                 </Link>
               </li>
             );
           }
 
-          if (tab.id === "contact") {
+          if (tab.action === "contact-sheet") {
             return (
-              <li key={tab.id} className="flex min-w-0 flex-1 justify-center">
+              <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
                 <button
                   type="button"
                   onClick={() => {
                     hapticLight();
                     openContactChannelSheet();
                   }}
-                  className="flex w-full max-w-[4.5rem] flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                  className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                 >
                   <TabNeonIcon
@@ -234,24 +236,19 @@ export function BottomTabBar() {
                     active={active}
                     badgeCount={badgeCount}
                   />
-                  <span
-                    className={cn(
-                      "mt-1 text-[10px] transition-colors duration-200",
-                      active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
-                    )}
-                  >
-                    {label}
-                  </span>
+                  <TabLabel active={active}>{label}</TabLabel>
                 </button>
               </li>
             );
           }
 
+          if (!tab.href) return null;
+
           return (
-            <li key={tab.href} className="flex min-w-0 flex-1 justify-center">
+            <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
               <Link
                 href={tab.href}
-                className="flex w-full max-w-[4.5rem] flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
+                className="flex w-full min-w-0 flex-col items-center pb-2 pt-1 transition-all duration-200 active:scale-95"
                 aria-current={active ? "page" : undefined}
                 onClick={() => hapticLight()}
               >
@@ -260,14 +257,7 @@ export function BottomTabBar() {
                   active={active}
                   badgeCount={badgeCount}
                 />
-                <span
-                  className={cn(
-                    "mt-1 text-[10px] transition-colors duration-200",
-                    active ? TAB_LABEL_ACTIVE : TAB_LABEL_INACTIVE,
-                  )}
-                >
-                  {label}
-                </span>
+                <TabLabel active={active}>{label}</TabLabel>
               </Link>
             </li>
           );
