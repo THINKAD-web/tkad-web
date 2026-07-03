@@ -9,9 +9,7 @@ import {
   catalogThumbnailImageProps,
 } from "@/lib/media-catalog-map";
 import type { MediaItem } from "@/lib/media-data";
-import {
-  formatMediaPriceWonWithSymbol,
-} from "@/lib/media-price-format";
+import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
 import { typeLabels } from "@/lib/media-data";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { cn } from "@/lib/utils";
@@ -39,12 +37,14 @@ export function QuoteMediaSelectCard({
   const typeLabel =
     typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
   const metaLine = [catalog.region, typeLabel].filter(Boolean).join(" · ");
+  const locale = isKo ? "ko-KR" : "en-US";
   const priceLabel =
     priceMan > 0
-      ? `${formatMediaPriceWonWithSymbol(
+      ? formatMediaPriceWithPeriodSuffix(
           priceMan * 10_000,
-          isKo ? "ko" : "en",
-        )}${isKo ? "/" : "/"}${isKo ? "월" : "mo"}`
+          pricePeriod ?? "month",
+          locale,
+        )
       : null;
   const instant = isInstantBookingEligible({
     instantBookingEnabled: media.instantBookingEnabled ?? false,
@@ -109,11 +109,6 @@ export function QuoteMediaSelectCard({
           <div className="mt-2">
             <p className="text-sm font-bold tabular-nums tkad-home-accent-text">
               {priceLabel}
-              {pricePeriod && pricePeriod !== "month" ? (
-                <span className="ml-1 text-[10px] font-medium text-gray-500 dark:text-white/45">
-                  ({isKo ? "옵션" : "opt"})
-                </span>
-              ) : null}
             </p>
             <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
           </div>
