@@ -15,6 +15,7 @@ import {
   OOH_PERIOD_MONTHS,
   periodLabelFromKey,
 } from "@/lib/ooh-quote";
+import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import { quotePdfBase64FromRow } from "@/lib/quote-export/build-payload";
 import {
   adminOohQuoteUrl,
@@ -78,6 +79,7 @@ export async function POST(request: NextRequest) {
     pdfTemplate,
     locale: localeBody,
     networkSelections: networkSelectionsRaw,
+    mediaSelections: mediaSelectionsRaw,
   } = body as Record<string, unknown>;
 
   const ids = Array.isArray(mediaIds)
@@ -144,6 +146,7 @@ export async function POST(request: NextRequest) {
       .filter((x) => x.catalogId.length > 0);
     if (cleaned.length > 0) networkSelectionsJson = cleaned;
   }
+  const mediaSelectionsJson = parseQuoteMediaSelections(mediaSelectionsRaw);
   const tplRaw = String(pdfTemplate ?? "").trim();
   const pdfTpl = tplRaw === "premium" ? "premium" : "default";
   const startDate = new Date();
@@ -193,6 +196,7 @@ export async function POST(request: NextRequest) {
           locale: localeStr,
           quoteRequestId: created.id,
           networkSelections: networkSelectionsJson ?? undefined,
+          mediaSelections: mediaSelectionsJson ?? undefined,
         },
       });
 

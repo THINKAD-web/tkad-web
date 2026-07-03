@@ -1025,6 +1025,12 @@ model OoHQuote {
    */
   networkSelections Json? @map("network_selections")
 
+  /**
+   * 견적 마법사 제출 시 매체·옵션 스냅샷
+   * [{ mediaId, priceOptionIndex, optionLabel, optionPriceWon, lineTotalWon }]
+   */
+  mediaSelections Json? @map("media_selections")
+
   oohContract OohContract?
 
   createdAt DateTime @default(now()) @map("created_at")
