@@ -8,13 +8,35 @@ import { JetBrains_Mono, Space_Grotesk } from "next/font/google";
  * - display (Space Grotesk): **English-only** accent labels — `font-display` + uppercase
  *   (e.g. `[ 01 ]`, `// DISCOVERY`). Do not use on Korean headings or prices.
  * - mono (JetBrains Mono): code blocks, API samples
+ *
+ * Pretendard: Korean subset static woff2 (~267KB/weight vs ~2MB variable).
  */
 export const pretendard = localFont({
-  src: "../node_modules/pretendard/dist/web/variable/woff2/PretendardVariable.woff2",
+  src: [
+    {
+      path: "../node_modules/pretendard/dist/web/static/woff2-subset/Pretendard-Regular.subset.woff2",
+      weight: "400",
+      style: "normal",
+    },
+    {
+      path: "../node_modules/pretendard/dist/web/static/woff2-subset/Pretendard-Medium.subset.woff2",
+      weight: "500",
+      style: "normal",
+    },
+    {
+      path: "../node_modules/pretendard/dist/web/static/woff2-subset/Pretendard-SemiBold.subset.woff2",
+      weight: "600",
+      style: "normal",
+    },
+    {
+      path: "../node_modules/pretendard/dist/web/static/woff2-subset/Pretendard-Bold.subset.woff2",
+      weight: "700",
+      style: "normal",
+    },
+  ],
   variable: "--font-pretendard",
   display: "swap",
   preload: true,
-  weight: "100 900",
 });
 
 export const spaceGrotesk = Space_Grotesk({

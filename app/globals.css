@@ -4148,3 +4148,28 @@ img {
     transform: none;
   }
 }
+
+/* Locale template — mobile page enter (replaces framer-motion in layout path) */
+@keyframes tkad-locale-page-enter-keyframes {
+  from {
+    opacity: 0.94;
+    transform: translateX(var(--tkad-locale-enter-x, 0));
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+.tkad-locale-page-enter {
+  animation: tkad-locale-page-enter-keyframes 0.2s cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    both;
+}
+
+.tkad-locale-page-enter--forward {
+  --tkad-locale-enter-x: 20px;
+}
+
+.tkad-locale-page-enter--back {
+  --tkad-locale-enter-x: -20px;
+}

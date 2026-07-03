@@ -46,8 +46,6 @@ import {
 } from "@/lib/public-media-catalog";
 import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
 import { attachReviewStatsToMediaItems } from "@/lib/media-reviews";
-import { getCurrentUser } from "@/lib/user-session";
-import { checkReportAccess } from "@/lib/report-access";
 import {
   buildMediaAnalyticsReport,
   buildMediaAnalyticsReportFused,
@@ -160,14 +158,6 @@ export default async function MediaDetailPage({ params }: Props) {
     console.error("[media-detail] catalog fetch failed", media.id, e);
   }
 
-  let user: Awaited<ReturnType<typeof getCurrentUser>> = null;
-  try {
-    user = await getCurrentUser();
-  } catch (e) {
-    console.error("[media-detail] session lookup failed", e);
-  }
-  const detailAccess = await checkReportAccess(user?.id ?? null, "detail_data");
-  const competitorAccess = await checkReportAccess(user?.id ?? null, "competitor");
   let analyticsReport: MediaAnalyticsReport;
   try {
     analyticsReport = await buildMediaAnalyticsReportFused(
@@ -314,8 +304,6 @@ export default async function MediaDetailPage({ params }: Props) {
         imageAlt={imageAlt}
         performanceMetrics={performanceMetrics}
         analyticsReport={analyticsReport}
-        detailAccess={detailAccess}
-        competitorAccess={competitorAccess}
         recentBrands={recentBrands}
         similar={similar}
         hasPriceOptions={hasPriceOptions}

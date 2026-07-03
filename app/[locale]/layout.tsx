@@ -24,9 +24,8 @@ import { GaTracker } from "@/components/analytics/ga-tracker";
 import { PwaAutoUpdate } from "@/components/pwa-auto-update";
 import { Suspense } from "react";
 import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
-import { WebVitalsReporter } from "@/components/web-vitals-reporter";
+import { DeferredAnalytics } from "@/components/deferred-analytics";
 import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
-import { OpsAnalyticsTracker } from "@/components/tracking/ops-analytics-tracker";
 import { fontClassNames } from "@/lib/fonts";
 import "../globals.css";
 
@@ -162,7 +161,7 @@ export default async function LocaleLayout({ children, params }: Props) {
       >
         <ThemeInitScript />
         {structuredData ? <JsonLd data={structuredData} /> : null}
-        {!isAdminRoute ? <WebVitalsReporter /> : null}
+        {!isAdminRoute ? <DeferredAnalytics /> : null}
         {!isAdminRoute ? <SpeedInsightsLoader /> : null}
         <PwaAutoUpdate />
         <PublicAnalyticsLoader />
@@ -178,7 +177,6 @@ export default async function LocaleLayout({ children, params }: Props) {
             messages={messages}
             timeZone="Asia/Seoul"
           >
-            {!isAdminRoute ? <OpsAnalyticsTracker /> : null}
             <LocaleRootBody
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
