@@ -11,10 +11,12 @@ import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import { MediaDetailMobileChromeSync } from "@/components/mobile/media-detail-mobile-chrome-sync";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
+import { formatMonthlyImpressionsLabel } from "@/lib/ai-recommend-metrics";
 import {
   formatCatalogPriceFieldWon,
+  formatCpmKrw,
   formatMediaPriceWonWithSymbol,
-  mediaDetailPricePeriodTranslationKey,
+  resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaExecutionSummary, MediaTrustScoreBadge } from "@/components/media/media-trust-score";
@@ -92,8 +94,15 @@ export function MediaDetailHeroSection({
   className,
 }: Props) {
   const displayName = isKo ? media.name : media.nameEn || media.name;
-  const cpm = resolveMediaCpmWon(media);
-  const impressions = performanceMetrics.monthlyImpressions;
+  const locale = isKo ? "ko-KR" : "en-US";
+  const displayPrice = resolveMediaDisplayPrice(media);
+  const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
+  const cpm = resolveMediaCpmWon({
+    ...media,
+    price: displayPrice.priceWon,
+    pricePeriod: displayPrice.period,
+  });
+  const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
   const shareDescription = isKo
     ? `${displayName} — THINKAD 매체 상세`
     : `${displayName} — THINKAD media detail`;
@@ -111,10 +120,15 @@ export function MediaDetailHeroSection({
       </span>
     )
   ) : (
-    // 일반·네트워크 매체: 스티키 바와 동일한 기준 월 단가(media.price)를 헤드라인으로 통일.
-    // 패키지 옵션은 실행 탭 "가격 옵션" 영역에 별도 표시되어 기본가와 혼동되지 않는다.
+    // 카드와 동일 — priceOptions 포함 최저가(resolveMediaDisplayPrice). 옵션 2개 이상이면 ~/from.
     <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
-      {formatCatalogPriceFieldWon(media.price)}
+      {!isKo && multiPriceOptions ? (
+        <span className="text-lg font-bold dark:text-white/55 text-gray-500">
+          from{" "}
+        </span>
+      ) : null}
+      {formatCatalogPriceFieldWon(displayPrice.priceWon, locale)}
+      {multiPriceOptions && isKo ? "~" : null}
     </span>
   );
 
@@ -220,18 +234,12 @@ export function MediaDetailHeroSection({
           <div className="grid grid-cols-3 gap-2">
             <KpiChip
               label={labels.kpiExposure}
-              value={
-                impressions > 0
-                  ? `${Math.round(impressions / 10000) / 100}${isKo ? "만" : "M"}`
-                  : "—"
-              }
+              value={impressionsLabel ?? "—"}
             />
             <KpiChip
               label={labels.kpiCpm}
               value={
-                cpm != null
-                  ? `₩${Math.round(cpm).toLocaleString(isKo ? "ko-KR" : "en-US")}`
-                  : "—"
+                cpm != null ? formatCpmKrw(Math.round(cpm), locale) : "—"
               }
             />
             <KpiChip
