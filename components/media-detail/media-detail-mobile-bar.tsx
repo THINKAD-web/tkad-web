@@ -6,7 +6,11 @@ import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import type { MediaItem } from "@/lib/media-data";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  formatPricePeriodShortLabel,
+  resolveMediaDisplayPrice,
+} from "@/lib/media-price-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { cn } from "@/lib/utils";
 
@@ -26,6 +30,12 @@ export function MediaDetailMobileBar({
   className,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
+  const displayPrice = resolveMediaDisplayPrice(media);
+  const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
+  const displayPeriodLabel = formatPricePeriodShortLabel(
+    displayPrice.period,
+    isKo ? "ko" : "en",
+  );
 
   return (
     <FloatingSelectionBar
@@ -41,10 +51,11 @@ export function MediaDetailMobileBar({
         <div className="min-w-0 flex-1">
           <p className="font-display text-base font-bold leading-tight tabular-nums text-gray-900 dark:text-white">
             <span className="whitespace-nowrap">
-              {formatCatalogPriceFieldWon(media.price, locale)}
+              {formatCatalogPriceFieldWon(displayPrice.priceWon, locale)}
+              {multiPriceOptions && isKo ? "~" : null}
             </span>
             <span className="ml-1 text-[11px] font-medium text-gray-500 dark:text-white/45">
-              / {periodLabel}
+              / {displayPeriodLabel}
             </span>
           </p>
           <MediaPriceExclNote

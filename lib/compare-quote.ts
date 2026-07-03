@@ -1,6 +1,8 @@
-import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   catalogPriceFieldToWon,
+  getCheapestMediaPriceOption,
+  inferMediaPricePeriodFromPriceOption,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import {
@@ -46,14 +48,14 @@ export type MediaQuoteLine = {
   cpm: number | null;
 };
 
-export function calculateMediaQuoteByDays(
+function quoteLineFromUnitPrice(
   media: MediaItem,
+  unitPriceWon: number,
   durationDays: number,
+  bundleDays: number,
 ): MediaQuoteLine {
   const days = Math.max(1, Math.round(durationDays));
-  const period = normalizeMediaPricePeriod(media.pricePeriod);
-  const periodDays = pricePeriodDays(period);
-  const unitPriceWon = catalogPriceFieldToWon(media.price);
+  const periodDays = Math.max(1, Math.round(bundleDays));
   const costWon = Math.round(unitPriceWon * (days / periodDays));
 
   const monthlyImp = estimatedMonthlyImpressions(media);
@@ -68,6 +70,84 @@ export function calculateMediaQuoteByDays(
     impressions,
     cpm,
   };
+}
+
+export function calculateMediaQuoteByDays(
+  media: MediaItem,
+  durationDays: number,
+): MediaQuoteLine {
+  const period = normalizeMediaPricePeriod(media.pricePeriod);
+  const periodDays = pricePeriodDays(period);
+  const unitPriceWon = catalogPriceFieldToWon(media.price);
+  return quoteLineFromUnitPrice(media, unitPriceWon, durationDays, periodDays);
+}
+
+/** 옵션 라벨·period에서 패키지 길이(일) 추출 — 예: "20초 3일" → 3, "1개월" → 30 */
+export function resolvePriceOptionBundleDays(
+  option: Pick<MediaPriceOption, "label" | "period">,
+  fallbackPeriod: MediaPricePeriodKey | string | null | undefined,
+): number {
+  const sources = [option.label?.trim() ?? "", String(option.period ?? "").trim()];
+  for (const text of sources) {
+    if (!text) continue;
+    const dayKo = text.match(/(\d+)\s*일/);
+    if (dayKo) return Math.max(1, parseInt(dayKo[1], 10));
+    const weekKo = text.match(/(\d+)\s*주/);
+    if (weekKo) return Math.max(1, parseInt(weekKo[1], 10)) * 7;
+    const monthKo = text.match(/(\d+)\s*개월/);
+    if (monthKo) return Math.max(1, parseInt(monthKo[1], 10)) * 30;
+    const dayEn = text.match(/(\d+)\s*days?/i);
+    if (dayEn) return Math.max(1, parseInt(dayEn[1], 10));
+    const weekEn = text.match(/(\d+)\s*weeks?/i);
+    if (weekEn) return Math.max(1, parseInt(weekEn[1], 10)) * 7;
+    const monthEn = text.match(/(\d+)\s*months?/i);
+    if (monthEn) return Math.max(1, parseInt(monthEn[1], 10)) * 30;
+  }
+  const periodKey = inferMediaPricePeriodFromPriceOption(option, fallbackPeriod);
+  return pricePeriodDays(periodKey);
+}
+
+/** priceOptions 중 최저가 인덱스 — getCheapestMediaPriceOption과 동일 기준 */
+export function findCheapestPriceOptionIndex(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+): number {
+  const opts = media.priceOptions ?? [];
+  if (opts.length === 0) return 0;
+
+  const cheapest = getCheapestMediaPriceOption(media);
+  if (cheapest) {
+    const matchIdx = opts.findIndex(
+      (o) => catalogPriceFieldToWon(o.price) === cheapest.priceWon,
+    );
+    if (matchIdx >= 0) return matchIdx;
+  }
+
+  let bestIdx = 0;
+  let bestWon = catalogPriceFieldToWon(opts[0].price);
+  for (let i = 1; i < opts.length; i++) {
+    const won = catalogPriceFieldToWon(opts[i].price);
+    if (won < bestWon) {
+      bestWon = won;
+      bestIdx = i;
+    }
+  }
+  return bestIdx;
+}
+
+/** 선택 priceOption 단가·패키지 기간 기준 일할 견적 (기존 calculateMediaQuoteByDays 동작 불변) */
+export function calculateMediaQuoteFromOption(
+  media: MediaItem,
+  option: MediaPriceOption,
+  durationDays: number,
+): MediaQuoteLine {
+  const bundleDays = resolvePriceOptionBundleDays(option, media.pricePeriod);
+  const unitPriceWon = catalogPriceFieldToWon(option.price);
+  return quoteLineFromUnitPrice(
+    media,
+    unitPriceWon,
+    durationDays,
+    bundleDays,
+  );
 }
 
 export function calculateMediaQuote(
