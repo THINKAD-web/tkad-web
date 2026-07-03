@@ -5,6 +5,7 @@ import { rateLimit } from "@/lib/rate-limit";
 import { buildQuoteExportPayloadFromWizard } from "@/lib/quote-export/build-payload";
 import { buildQuotePdf } from "@/lib/quote-export/build-pdf";
 import { buildQuotePptx } from "@/lib/quote-export/build-pptx";
+import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import {
   quoteExportFileBase,
   type QuoteExportFormat,
@@ -100,6 +101,7 @@ export async function POST(request: NextRequest) {
   const mediaPriceOptionIndex = parseMediaPriceOptionIndex(
     body.mediaPriceOptionIndex,
   );
+  const mediaSelections = parseQuoteMediaSelections(body.mediaSelections);
 
   try {
     const db = getPrisma();
@@ -113,6 +115,7 @@ export async function POST(request: NextRequest) {
       clientPhone: body.clientPhone != null ? String(body.clientPhone).trim() : null,
       clientCompany: String(body.clientCompany ?? "").trim() || null,
       mediaPriceOptionIndex,
+      mediaSelections,
     });
 
     const base = quoteExportFileBase(payload);

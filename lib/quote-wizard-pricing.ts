@@ -1,4 +1,4 @@
-import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
@@ -203,6 +203,34 @@ function buildProrationLabel(opts: {
   return `${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${opts.campaignDays}d÷${opts.bundleDays}d ≈ ${fmt(opts.lineTotalWon)}`;
 }
 
+/** 패키지 기간 토글 on 시 행 집행 기간 라벨 (예: "1주", "3일") */
+export function formatPackageExecutionPeriodLabel(
+  priceOpt: MediaPriceOption | undefined,
+  bundleDays: number,
+  isKo: boolean,
+): string {
+  const period =
+    typeof priceOpt?.period === "string" ? priceOpt.period.trim() : "";
+  if (period) return period;
+  return isKo ? `${bundleDays}일` : `${bundleDays}d`;
+}
+
+/** 캠페인 요약 — 라인별 집행 일수가 다르면 혼합 접미사 */
+export function resolveQuoteCampaignPeriodSummaryLabel(opts: {
+  campaignPeriodLabel: string;
+  globalCampaignDays: number;
+  lineCampaignDays: number[];
+  isKo: boolean;
+  mixedLabel: string;
+}): string {
+  const { campaignPeriodLabel, globalCampaignDays, lineCampaignDays, mixedLabel } =
+    opts;
+  if (lineCampaignDays.length === 0) return campaignPeriodLabel;
+  const allGlobal = lineCampaignDays.every((d) => d === globalCampaignDays);
+  if (allGlobal) return campaignPeriodLabel;
+  return mixedLabel.replace("{period}", campaignPeriodLabel);
+}
+
 export function buildQuoteWizardLineContext(
   media: MediaItem,
   opts: {
@@ -211,6 +239,8 @@ export function buildQuoteWizardLineContext(
     campaignPeriodLabel: string;
     priceOptionIndex: number;
     networkUnits?: number;
+    /** true면 패키지 번들 기간만 집행 — proration 없음 */
+    usePackagePeriod?: boolean;
   },
 ): QuoteWizardLineContext {
   const isNw = media.catalogSource === "network";
@@ -227,18 +257,29 @@ export function buildQuoteWizardLineContext(
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
   const explicitBundleDays =
     priceOpt != null ? tryResolveExplicitPriceOptionBundleDays(priceOpt) : null;
-  const campaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
+  const globalCampaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
+  const usePackagePeriod =
+    opts.usePackagePeriod === true &&
+    !isNw &&
+    priceOpt != null &&
+    explicitBundleDays != null;
+  const campaignDays = usePackagePeriod ? explicitBundleDays! : globalCampaignDays;
 
   let campaignUnits: number;
   let lineTotalMan: number;
   if (!isNw && priceOpt && explicitBundleDays != null) {
-    campaignUnits = campaignDays / explicitBundleDays;
-    const lineTotalWon = quoteBundleProrationWon(
-      catalogPriceFieldToWon(priceOpt.price),
-      campaignDays,
-      explicitBundleDays,
-    );
-    lineTotalMan = lineTotalWon / 10_000;
+    if (usePackagePeriod) {
+      campaignUnits = 1;
+      lineTotalMan = unitPriceMan;
+    } else {
+      campaignUnits = campaignDays / explicitBundleDays;
+      const lineTotalWon = quoteBundleProrationWon(
+        catalogPriceFieldToWon(priceOpt.price),
+        campaignDays,
+        explicitBundleDays,
+      );
+      lineTotalMan = lineTotalWon / 10_000;
+    }
   } else {
     campaignUnits = quoteCampaignUnits(opts.campaignPeriod, pricePeriod);
     lineTotalMan = quoteLineTotalMan(unitPriceMan, campaignUnits);
@@ -255,24 +296,27 @@ export function buildQuoteWizardLineContext(
   const bundleDays =
     !isNw && priceOpt && explicitBundleDays != null ? explicitBundleDays : null;
   const prorationLabel =
-    bundleDays != null
-      ? buildProrationLabel({
+    usePackagePeriod || bundleDays == null
+      ? null
+      : buildProrationLabel({
           isKo: opts.isKo,
           unitPriceWon,
           unitPeriodLabel,
           campaignDays,
           bundleDays,
           lineTotalWon,
-        })
-      : null;
-  const executionPeriodLabel = buildExecutionPeriodLabel({
-    isKo: opts.isKo,
-    campaignPeriod: opts.campaignPeriod,
-    campaignPeriodLabel: opts.campaignPeriodLabel,
-    pricePeriod,
-    campaignUnits,
-    unitPeriodLabel,
-  });
+        });
+  const executionPeriodLabel =
+    usePackagePeriod && bundleDays != null
+      ? formatPackageExecutionPeriodLabel(priceOpt, bundleDays, opts.isKo)
+      : buildExecutionPeriodLabel({
+          isKo: opts.isKo,
+          campaignPeriod: opts.campaignPeriod,
+          campaignPeriodLabel: opts.campaignPeriodLabel,
+          pricePeriod,
+          campaignUnits,
+          unitPeriodLabel,
+        });
 
   return {
     unitPriceMan,

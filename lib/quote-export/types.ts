@@ -22,6 +22,7 @@ export type QuoteExportLine = {
   categoryLabel?: string;
   mediaTypeLabel?: string;
   recommendReason?: string;
+  executionPeriodLabel?: string;
 };
 
 export type QuoteExportPayload = {

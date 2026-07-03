@@ -82,6 +82,7 @@ import {
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
   quoteCampaignDaysFromPeriodKey,
+  resolveQuoteCampaignPeriodSummaryLabel,
   resolveQuoteMediaPricePeriod,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
@@ -98,6 +99,21 @@ import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-downloa
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOGO_MAX_BYTES = 600 * 1024;
+
+function packagePeriodToggleMeta(
+  media: MediaItem,
+  poIdx: number,
+): { bundleDays: number; periodText: string } | null {
+  const priceOpt = media.priceOptions?.[poIdx];
+  if (!priceOpt) return null;
+  const bundleDays = tryResolveExplicitPriceOptionBundleDays(priceOpt);
+  if (bundleDays == null) return null;
+  const periodText =
+    typeof priceOpt.period === "string" && priceOpt.period.trim()
+      ? priceOpt.period.trim()
+      : String(bundleDays);
+  return { bundleDays, periodText };
+}
 
 async function runWithQuotePdfExport(
   el: HTMLElement | null,
@@ -170,6 +186,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   /** 매체별 `priceOptions` 선택 인덱스 (견적 월 단가 반영) */
   const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<
     Record<string, number>
+  >({});
+  /** 매체별 패키지 기간만 집행 토글 (bundleDays 있는 옵션만) */
+  const [usePackagePeriodByMediaId, setUsePackagePeriodByMediaId] = useState<
+    Record<string, boolean>
   >({});
   const mediaQueryApplied = useRef(false);
   /** Step 2·URL에서 사용자가 명시한 캠페인 기간 — true면 옵션 변경 시 자동 추종 안 함 */
@@ -270,6 +290,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     });
   }, [selectedIds, catalog]);
 
+  useEffect(() => {
+    setUsePackagePeriodByMediaId((prev) => {
+      const next = { ...prev };
+      for (const id of selectedIds) {
+        if (!next[id]) continue;
+        const m = catalog.find((x) => x.id === id);
+        const poIdx = mediaPriceOptionIndex[id] ?? 0;
+        if (!m || !packagePeriodToggleMeta(m, poIdx)) {
+          delete next[id];
+        }
+      }
+      for (const k of Object.keys(next)) {
+        if (!selectedIds.has(k)) delete next[k];
+      }
+      return next;
+    });
+  }, [selectedIds, catalog, mediaPriceOptionIndex]);
+
   const [form, setForm] = useState<FormState>({
     company: "",
     name: "",
@@ -309,6 +347,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         ...p,
         [media.id]: idx,
       }));
+      setUsePackagePeriodByMediaId((p) => {
+        if (!p[media.id]) return p;
+        const next = { ...p };
+        delete next[media.id];
+        return next;
+      });
       if (
         selectedMedia.length === 1 &&
         selectedMedia[0]?.id === media.id &&
@@ -418,17 +462,31 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           campaignPeriodLabel: periodLabel,
           priceOptionIndex: mediaPriceOptionIndex[m.id] ?? 0,
           networkUnits: isNw ? opt?.units ?? m.networkMinUnits ?? 1 : undefined,
+          usePackagePeriod: usePackagePeriodByMediaId[m.id] === true,
         });
       }),
     [
       selectedMedia,
       networkQuoteOptions,
       mediaPriceOptionIndex,
+      usePackagePeriodByMediaId,
       isKo,
       period,
       periodLabel,
     ],
   );
+
+  const pdfPeriodLabel = useMemo(() => {
+    const globalDays = quoteCampaignDaysFromPeriodKey(period);
+    const lineDays = quoteLineContexts.map((line) => line.campaignDays);
+    return resolveQuoteCampaignPeriodSummaryLabel({
+      campaignPeriodLabel: periodLabel,
+      globalCampaignDays: globalDays,
+      lineCampaignDays: lineDays,
+      isKo,
+      mixedLabel: t("quote.periodMixedSummary"),
+    });
+  }, [quoteLineContexts, period, periodLabel, isKo, t]);
 
   const unitPriceSumMan = useMemo(
     () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
@@ -438,6 +496,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const hasProrationLine = useMemo(
     () =>
       selectedMedia.some((m) => {
+        if (usePackagePeriodByMediaId[m.id]) return false;
         if (m.catalogSource === "network") return false;
         const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
         const priceOpt = m.priceOptions?.[poIdx];
@@ -447,7 +506,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         const campaignDays = quoteCampaignDaysFromPeriodKey(period);
         return campaignDays !== bundleDays;
       }),
-    [selectedMedia, mediaPriceOptionIndex, period],
+    [selectedMedia, mediaPriceOptionIndex, usePackagePeriodByMediaId, period],
   );
 
   const totalCost = useMemo(
@@ -458,6 +517,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const estimateLineBreakdowns = useMemo(
     () =>
       selectedMedia.flatMap((m, idx) => {
+        if (usePackagePeriodByMediaId[m.id]) return [];
         const line = quoteLineContexts[idx];
         if (!line?.prorationLabel) return [];
         const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
@@ -591,7 +651,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       contactName: form.name,
       contactPhone: form.phone,
       contactEmail: form.email,
-      periodLabel,
+      periodLabel: pdfPeriodLabel,
       periodMonths,
       rows: pdfPreviewRows,
       subtotalWon: pdfSubtotalWon,
@@ -608,6 +668,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       form.phone,
       form.email,
       periodLabel,
+      pdfPeriodLabel,
       periodMonths,
       pdfPreviewRows,
       pdfSubtotalWon,
@@ -646,7 +707,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       brandName: form.company.trim() || form.name.trim(),
       version: "v1.0",
       dateLabel: quotePremiumDateLabel,
-      durationLabel: periodLabel,
+      durationLabel: pdfPeriodLabel,
       periodKey: period,
       periodMonths,
       region: quotePremiumRegion,
@@ -683,7 +744,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       quotePremiumRegion,
       isKo,
       quotePremiumDateLabel,
-      periodLabel,
+      pdfPeriodLabel,
       period,
       periodMonths,
       pdfPreviewRows,
@@ -927,9 +988,20 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           : catalogPriceFieldToWon(m.price),
         lineTotalWon: Math.round((line?.lineTotalMan ?? 0) * 10_000),
         optionDescription: priceOpt?.description?.trim() ?? null,
+        ...(usePackagePeriodByMediaId[m.id]
+          ? {
+              usePackagePeriod: true as const,
+              lineCampaignDays: line?.campaignDays,
+            }
+          : {}),
       };
     });
-  }, [selectedMedia, mediaPriceOptionIndex, quoteLineContexts]);
+  }, [
+    selectedMedia,
+    mediaPriceOptionIndex,
+    quoteLineContexts,
+    usePackagePeriodByMediaId,
+  ]);
 
   const exportQuoteDraft = useCallback(
     async (format: QuoteExportFormat) => {
@@ -943,6 +1015,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           mediaIds: selectedMedia.map((m) => m.id),
           periodKey: period,
           mediaPriceOptionIndex: exportMediaPriceOptionIndex,
+          mediaSelections: submitMediaSelections,
           clientName: form.name.trim(),
           clientEmail: form.email.trim(),
           clientPhone: form.phone.trim() || null,
@@ -976,6 +1049,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     [
       exportTemplate,
       exportMediaPriceOptionIndex,
+      submitMediaSelections,
       form.company,
       form.email,
       form.name,
@@ -1477,6 +1551,39 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                       </option>
                                     ))}
                                   </select>
+                                  {(() => {
+                                    const pkgMeta = packagePeriodToggleMeta(
+                                      media,
+                                      poIdx,
+                                    );
+                                    if (!pkgMeta) return null;
+                                    return (
+                                      <label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-foreground">
+                                        <input
+                                          type="checkbox"
+                                          className="mt-0.5"
+                                          checked={
+                                            usePackagePeriodByMediaId[
+                                              media.id
+                                            ] === true
+                                          }
+                                          onChange={(e) =>
+                                            setUsePackagePeriodByMediaId(
+                                              (p) => ({
+                                                ...p,
+                                                [media.id]: e.target.checked,
+                                              }),
+                                            )
+                                          }
+                                        />
+                                        <span>
+                                          {t("quote.usePackagePeriodOnly", {
+                                            period: pkgMeta.periodText,
+                                          })}
+                                        </span>
+                                      </label>
+                                    );
+                                  })()}
                                 </div>
                               ) : null}
                             </div>
@@ -1669,6 +1776,39 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         </option>
                                       ))}
                                     </select>
+                                    {(() => {
+                                      const pkgMeta = packagePeriodToggleMeta(
+                                        media,
+                                        poIdxC,
+                                      );
+                                      if (!pkgMeta) return null;
+                                      return (
+                                        <label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-foreground">
+                                          <input
+                                            type="checkbox"
+                                            className="mt-0.5"
+                                            checked={
+                                              usePackagePeriodByMediaId[
+                                                media.id
+                                              ] === true
+                                            }
+                                            onChange={(e) =>
+                                              setUsePackagePeriodByMediaId(
+                                                (p) => ({
+                                                  ...p,
+                                                  [media.id]: e.target.checked,
+                                                }),
+                                              )
+                                            }
+                                          />
+                                          <span>
+                                            {t("quote.usePackagePeriodOnly", {
+                                              period: pkgMeta.periodText,
+                                            })}
+                                          </span>
+                                        </label>
+                                      );
+                                    })()}
                                   </div>
                                 ) : null}
                               </div>
@@ -1902,7 +2042,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
                               {t("quote.period")}
                             </span>
-                            <span className="font-bold text-foreground">{periodLabel}</span>
+                            <span className="font-bold text-foreground">{pdfPeriodLabel}</span>
                           </li>
                           <li className="flex flex-wrap items-baseline justify-between gap-2 py-3.5">
                             <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">

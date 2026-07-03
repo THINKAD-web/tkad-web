@@ -1262,6 +1262,8 @@
     "networkRegion": "집행 지역",
     "networkRegionAll": "전체 (네트워크 전 지역)",
     "priceOptionLabel": "가격 옵션",
+    "usePackagePeriodOnly": "패키지 기간({period})만 집행",
+    "periodMixedSummary": "{period} (매체별 상이)",
     "period": "광고 기간",
     "periodPlaceholder": "기간을 선택하세요",
     "periods": {

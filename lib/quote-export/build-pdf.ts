@@ -349,6 +349,9 @@ function drawMediaCards(
       line.broadcastLabel
         ? truncateDocText(line.broadcastLabel, 60)
         : null,
+      line.executionPeriodLabel
+        ? `${isKo ? "집행 기간" : "Period"} ${line.executionPeriodLabel}`
+        : null,
     ].filter(Boolean) as string[];
 
     const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
