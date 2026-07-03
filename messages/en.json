@@ -1279,6 +1279,8 @@
     "perMonth": "/ month",
     "unitPriceSum": "Unit price total",
     "packagePriceSum": "Package list price total",
+    "periodBundleMismatch": "Package '{optionLabel}' ({bundleDays} days) differs from the campaign period ({campaignDays} days); cost is prorated by duration.",
+    "alignCampaignPeriod": "Align campaign to {periodWithDays}",
     "total": "Total Estimated Cost",
     "company": "Company",
     "companyPlaceholder": "Enter company name",

@@ -44,6 +44,16 @@ export function quoteCampaignDaysFromPeriodKey(
   return cfg.days;
 }
 
+/** UI 라벨용 — 예: ko "2주(14일)" */
+export function formatQuoteCampaignPeriodWithDays(
+  campaignPeriod: QuoteCampaignPeriodKey,
+  periodLabel: string,
+  isKo: boolean,
+): string {
+  const days = quoteCampaignDaysFromPeriodKey(campaignPeriod);
+  return isKo ? `${periodLabel}(${days}일)` : `${periodLabel} (${days}d)`;
+}
+
 /** 매체 단가 주기 → 견적 위저드 기본 캠페인 기간 */
 export function pricePeriodToQuoteCampaignPeriod(
   pricePeriod: MediaPricePeriodKey,
