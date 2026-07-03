@@ -1,4 +1,4 @@
-import type { MediaItem } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import {
   catalogPriceFieldToWon,
@@ -107,21 +107,74 @@ function cleanSpecText(s: string): string {
     .trim();
 }
 
-function resolveBroadcastLabel(m: DocumentMediaDetailSource, isKo: boolean): string | undefined {
+export type DocumentBroadcastResolveOpts = {
+  priceOptionIndex?: number;
+  /** 제출 스냅샷 — catalog 변경 후에도 발행 당시 문구 */
+  optionDescription?: string | null;
+  optionLabel?: string | null;
+  optionPriceWon?: number;
+};
+
+function buildDynamicBroadcastDescription(
+  option: MediaPriceOption,
+  overrides: Pick<DocumentBroadcastResolveOpts, "optionLabel" | "optionPriceWon">,
+  isKo: boolean,
+): string {
+  const locale = isKo ? "ko" : "en";
+  const label = overrides.optionLabel?.trim() || option.label.trim();
+  const priceWon =
+    overrides.optionPriceWon != null && overrides.optionPriceWon > 0
+      ? overrides.optionPriceWon
+      : catalogPriceFieldToWon(option.price);
+  const priceStr = formatCatalogPriceFieldWon(priceWon, locale);
+  const vatSuffix = isKo ? "(VAT 별도)" : "(excl. VAT)";
+  const period =
+    typeof option.period === "string" ? option.period.trim() : "";
+  if (period && !label.includes(period)) {
+    const spotLabel =
+      /\d+초/.test(label) && !label.includes("영상")
+        ? label.replace(/(\d+초)/, "$1 영상")
+        : label;
+    return `${spotLabel}, ${period}, ${priceStr} ${vatSuffix}`;
+  }
+  return `${label}, ${priceStr} ${vatSuffix}`;
+}
+
+function resolveBroadcastLabel(
+  m: DocumentMediaDetailSource,
+  opts: { isKo: boolean } & DocumentBroadcastResolveOpts,
+): string | undefined {
+  const { isKo } = opts;
+  const priceOptions =
+    "priceOptions" in m && m.priceOptions?.length ? m.priceOptions : undefined;
+
+  if (priceOptions) {
+    const idx = Math.min(
+      Math.max(0, opts.priceOptionIndex ?? 0),
+      priceOptions.length - 1,
+    );
+    const option = priceOptions[idx];
+    if (option) {
+      const snapDesc = opts.optionDescription?.trim();
+      const catalogDesc = option.description?.trim();
+      const text =
+        snapDesc ||
+        catalogDesc ||
+        buildDynamicBroadcastDescription(option, opts, isKo);
+      if (text) {
+        return truncateDocText(cleanSpecText(text), 72);
+      }
+    }
+  }
+
   const kf = "keywordFilter" in m ? m.keywordFilter : undefined;
   const durations = kf?.duration?.filter(Boolean) ?? [];
   const exposure = kf?.exposureTime?.filter(Boolean) ?? [];
   const rawParts: string[] = [];
   if (durations.length) rawParts.push(durations.join(" · "));
-  const optDesc =
-    "priceOptions" in m && m.priceOptions?.[0]?.description?.trim()
-      ? m.priceOptions[0].description.trim()
-      : undefined;
-  if (optDesc) rawParts.push(optDesc);
   if ("dailyExposure" in m && (m as MediaItem).dailyExposure?.trim()) {
     rawParts.push((m as MediaItem).dailyExposure!.trim());
   }
-  // raw 숫자 정리 + 순수 숫자 파트 제거
   const parts = rawParts
     .map(cleanSpecText)
     .filter((p) => p.length > 0 && !/^[\d,]+$/.test(p));
@@ -136,8 +189,7 @@ function resolveBroadcastLabel(m: DocumentMediaDetailSource, isKo: boolean): str
   if (!isDooh && !durations.length) {
     return truncateDocText(parts.join(" · "), 72);
   }
-  const raw = isKo ? `송출: ${parts.join(" · ")}` : `Spot: ${parts.join(" · ")}`;
-  return truncateDocText(raw, 72);
+  return truncateDocText(parts.join(" · "), 72);
 }
 
 function resolveThumb(m: DocumentMediaDetailSource): string | null {
@@ -157,7 +209,7 @@ export function mediaToDocumentDetail(
     months?: number;
     exposureContributionPct?: number;
     budgetContributionPct?: number;
-  },
+  } & DocumentBroadcastResolveOpts,
 ): DocumentMediaDetail {
   const isKo = opts.isKo;
   const name = m.name;
@@ -206,7 +258,7 @@ export function mediaToDocumentDetail(
     size: formatSizeFromItem(m),
     operatingHours: operatingHours?.trim() || undefined,
     dailyTraffic: resolveDailyTraffic(m),
-    broadcastLabel: resolveBroadcastLabel(m, isKo),
+    broadcastLabel: resolveBroadcastLabel(m, opts),
     monthlyPriceLabel,
     lineTotalLabel,
     recommendReason:

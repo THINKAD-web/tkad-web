@@ -5,6 +5,8 @@ export type QuoteMediaSelectionSnapshot = {
   optionLabel: string | null;
   optionPriceWon: number;
   lineTotalWon: number;
+  /** 제출 시점 priceOptions[].description — catalog 변경 후에도 송출 문구 보존 */
+  optionDescription?: string | null;
 };
 
 export function parseQuoteMediaSelections(
@@ -33,12 +35,17 @@ export function parseQuoteMediaSelections(
       typeof o.lineTotalWon === "number" && Number.isFinite(o.lineTotalWon)
         ? Math.round(o.lineTotalWon)
         : 0;
+    const optionDescription =
+      typeof o.optionDescription === "string" && o.optionDescription.trim()
+        ? o.optionDescription.trim()
+        : null;
     out.push({
       mediaId,
       priceOptionIndex,
       optionLabel,
       optionPriceWon,
       lineTotalWon,
+      ...(optionDescription ? { optionDescription } : {}),
     });
   }
   return out.length > 0 ? out : undefined;

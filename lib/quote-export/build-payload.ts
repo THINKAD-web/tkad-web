@@ -13,6 +13,7 @@ import {
   selectionsByMediaId,
   type QuoteMediaSelectionSnapshot,
 } from "@/lib/quote-media-selections";
+import type { DocumentBroadcastResolveOpts } from "@/lib/document-media-detail";
 
 /** OoHQuote 에서 필요한 필드만 */
 export type QuoteExportSourceRow = {
@@ -111,8 +112,24 @@ export async function buildQuoteExportPayload(
     clientPhone: row.clientPhone || undefined,
     periodLabel: row.period || `${breakdown.periodDays}${isKo ? "일" : " days"}`,
     lines: breakdown.lines.map((l) => {
-      const base = mapQuoteExportLine(l, mediaById.get(l.mediaId), isKo);
       const snap = selectionMap.get(l.mediaId);
+      const poIdx =
+        snap?.priceOptionIndex ??
+        resolvedOptionIndex?.[l.mediaId] ??
+        0;
+      const base = mapQuoteExportLine(
+        l,
+        mediaById.get(l.mediaId),
+        isKo,
+        snap
+          ? {
+              priceOptionIndex: poIdx,
+              optionDescription: snap.optionDescription,
+              optionLabel: snap.optionLabel,
+              optionPriceWon: snap.optionPriceWon,
+            }
+          : { priceOptionIndex: poIdx },
+      );
       if (!snap) return base;
       const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
       const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
@@ -396,6 +413,7 @@ function mapQuoteExportLine(
       }
     | undefined,
   isKo: boolean,
+  broadcastOpts?: DocumentBroadcastResolveOpts,
 ): QuoteExportLine {
   const base: QuoteExportLine = {
     mediaId: line.mediaId,
@@ -424,7 +442,7 @@ function mapQuoteExportLine(
       type: row.type,
       priceOptions: row.priceOptions as never,
     },
-    { isKo, lineTotalWon: line.lineSupplyWon },
+    { isKo, lineTotalWon: line.lineSupplyWon, ...broadcastOpts },
   );
 
   return {
