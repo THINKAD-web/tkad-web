@@ -16,6 +16,7 @@ import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatPlanCartBadgeCount } from "@/lib/plan-cart-limits";
 import { Link } from "@/i18n/navigation";
 import type { MediaItem } from "@/lib/media-data";
+import { buildQuoteWizardEntryHref } from "@/lib/quote-wizard-entry";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -94,14 +95,8 @@ export default function CompareBar({
 
   const hasCompareSelection = displayItems.length > 0;
 
-  const ids = displayItems.map((m) => m.id).join(",");
   const compareHref = `/compare?ids=${displayItems.map((m) => m.id).join(",")}`;
-  const one = displayItems[0];
-  const onlyPo =
-    displayItems.length === 1 && (one?.priceOptions?.length ?? 0) > 0
-      ? "&po=0"
-      : "";
-  const quoteHref = `/quote?media=${ids}${onlyPo}`;
+  const quoteHref = buildQuoteWizardEntryHref(displayItems);
 
   const count = displayItems.length;
   const canCompare = count >= 2;
