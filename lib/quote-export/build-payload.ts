@@ -22,6 +22,7 @@ export type QuoteExportSourceRow = {
   endDate: Date | null;
   locale: string | null;
   pdfTemplate?: string | null;
+  mediaPriceOptionIndex?: Record<string, number>;
 };
 
 const DAY = 86_400_000;
@@ -41,6 +42,8 @@ export async function buildQuoteExportPayload(
     startDate: start,
     endDate: end,
     issuedAt: now,
+    periodKey: row.periodKey ?? undefined,
+    mediaPriceOptionIndex: row.mediaPriceOptionIndex,
   });
 
   const mediaIds = breakdown.lines.map((l) => l.mediaId);
@@ -430,6 +433,7 @@ export type QuoteWizardExportInput = {
   clientEmail: string;
   clientPhone?: string | null;
   clientCompany?: string | null;
+  mediaPriceOptionIndex?: Record<string, number>;
 };
 
 export async function buildQuoteExportPayloadFromWizard(
@@ -452,6 +456,7 @@ export async function buildQuoteExportPayloadFromWizard(
     endDate,
     locale: input.locale,
     pdfTemplate: input.template === "premium" ? "premium" : "default",
+    mediaPriceOptionIndex: input.mediaPriceOptionIndex,
   };
   return buildQuoteExportPayload(db, row, input.template);
 }

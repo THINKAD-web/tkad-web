@@ -1,5 +1,5 @@
 import type { PrismaClient } from "@prisma/client";
-import type { MediaPricePeriodKey } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   computeAdminQuoteTotals,
   inclusiveCampaignDays,
@@ -8,6 +8,12 @@ import {
 } from "@/lib/admin-quote-calc";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
+import {
+  buildQuoteWizardLineContext,
+  QUOTE_CAMPAIGN_PERIOD_CONFIG,
+  isQuoteCampaignPeriodKey,
+  type QuoteCampaignPeriodKey,
+} from "@/lib/quote-wizard-pricing";
 
 export const QUOTE_VALIDITY_DAYS = 14;
 
@@ -17,6 +23,7 @@ export type QuoteCalculatorMedia = {
   location: string;
   price: number;
   pricePeriod?: MediaPricePeriodKey | string | null;
+  priceOptions?: MediaPriceOption[] | null;
   dailyFootfall?: number | null;
   impressions?: number | null;
   latitude?: number | null;
@@ -53,6 +60,9 @@ export type CalculateQuoteInput = {
   endDate: Date;
   discountRate?: number;
   issuedAt?: Date;
+  /** 견적 마법사 — 있으면 선택 옵션·캠페인 기간 기준 (UI와 동일) */
+  periodKey?: string;
+  mediaPriceOptionIndex?: Record<string, number>;
 };
 
 /** DB 조회 기반 API — `calculateQuote({ mediaIds, startDate, endDate, discountRate })` */
@@ -62,7 +72,53 @@ export type CalculateQuoteByMediaIdsInput = {
   endDate: Date | string;
   discountRate?: number;
   issuedAt?: Date;
+  periodKey?: string;
+  mediaPriceOptionIndex?: Record<string, number>;
 };
+
+function parsePriceOptions(raw: unknown): MediaPriceOption[] {
+  if (!Array.isArray(raw)) return [];
+  return raw.filter(
+    (o): o is MediaPriceOption =>
+      o != null &&
+      typeof o === "object" &&
+      typeof (o as MediaPriceOption).price === "number",
+  );
+}
+
+function campaignDaysFromPeriodKey(key: QuoteCampaignPeriodKey): number {
+  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[key];
+  if (cfg.months != null) return cfg.months * 30;
+  return cfg.days;
+}
+
+function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
+  return {
+    id: m.id,
+    name: m.name,
+    nameEn: m.name,
+    location: m.location,
+    locationEn: m.location,
+    region: "",
+    type: "digital",
+    price: m.price,
+    pricePeriod: m.pricePeriod,
+    priceOptions: m.priceOptions ?? undefined,
+    lat: m.latitude ?? 0,
+    lng: m.longitude ?? 0,
+    dailyFootTraffic: m.dailyFootfall ?? 0,
+    impressions: m.impressions ?? undefined,
+    sampleImages: [],
+  };
+}
+
+function formatQuoteLineMediaName(
+  name: string,
+  option: MediaPriceOption | undefined,
+): string {
+  const label = option?.label?.trim();
+  return label ? `${name} (${label})` : name;
+}
 
 function coerceDate(v: Date | string): Date {
   return v instanceof Date ? v : new Date(v);
@@ -112,6 +168,18 @@ export async function calculateQuoteFromMediaIds(
   }
   const rows = await db.media.findMany({
     where: { id: { in: ids.slice(0, 24) }, isActive: true },
+    select: {
+      id: true,
+      name: true,
+      location: true,
+      price: true,
+      pricePeriod: true,
+      priceOptions: true,
+      dailyFootfall: true,
+      impressions: true,
+      latitude: true,
+      longitude: true,
+    },
   });
   const order = new Map(ids.map((id, i) => [id, i]));
   const media = rows
@@ -122,6 +190,7 @@ export async function calculateQuoteFromMediaIds(
       location: m.location,
       price: m.price,
       pricePeriod: m.pricePeriod,
+      priceOptions: parsePriceOptions(m.priceOptions),
       dailyFootfall: m.dailyFootfall,
       impressions: m.impressions,
       latitude: m.latitude,
@@ -134,6 +203,8 @@ export async function calculateQuoteFromMediaIds(
     endDate: coerceDate(input.endDate),
     discountRate: input.discountRate,
     issuedAt: input.issuedAt,
+    periodKey: input.periodKey,
+    mediaPriceOptionIndex: input.mediaPriceOptionIndex,
   });
 }
 
@@ -145,7 +216,49 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
   const monthFactor = monthFactorFromDays(periodDays);
   const discountRate = Math.min(100, Math.max(0, input.discountRate ?? 0));
 
+  const useOptionPricing =
+    input.mediaPriceOptionIndex !== undefined &&
+    input.periodKey != null &&
+    isQuoteCampaignPeriodKey(input.periodKey);
+  const campaignPeriod = useOptionPricing ? input.periodKey : null;
+  const poMap = input.mediaPriceOptionIndex ?? {};
+  const campaignDays =
+    campaignPeriod != null
+      ? campaignDaysFromPeriodKey(campaignPeriod)
+      : periodDays;
+
   const lines: QuoteLineItem[] = input.media.map((m) => {
+    const priceOptions = m.priceOptions ?? [];
+    const mediaItem = toMediaItemForQuote(m);
+
+    if (useOptionPricing && campaignPeriod != null) {
+      const rawIdx = poMap[m.id] ?? 0;
+      const poIdx =
+        priceOptions.length > 0
+          ? Math.min(Math.max(0, rawIdx), priceOptions.length - 1)
+          : 0;
+      const option = priceOptions[poIdx];
+
+      const wizardLine = buildQuoteWizardLineContext(mediaItem, {
+        isKo: true,
+        campaignPeriod,
+        campaignPeriodLabel: campaignPeriod,
+        priceOptionIndex: poIdx,
+      });
+
+      return {
+        mediaId: m.id,
+        mediaName: formatQuoteLineMediaName(m.name, option),
+        location: m.location,
+        periodDays: campaignDays,
+        unitPriceWon: Math.round(wizardLine.unitPriceMan * 10_000),
+        lineSupplyWon: Math.round(wizardLine.lineTotalMan * 10_000),
+        impressions: lineImpressions(m, campaignDays),
+        lat: m.latitude ?? undefined,
+        lng: m.longitude ?? undefined,
+      };
+    }
+
     const unitPriceWon = catalogPriceFieldToWon(m.price);
     const supply = lineSupplyWon(m.price, monthFactor, 1);
     return {

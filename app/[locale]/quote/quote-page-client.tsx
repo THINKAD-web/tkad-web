@@ -806,6 +806,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const exportTemplate = template === "premium" ? "premium" : "basic";
 
+  const exportMediaPriceOptionIndex = useMemo(
+    () =>
+      Object.fromEntries(
+        selectedMedia.map((m) => [m.id, mediaPriceOptionIndex[m.id] ?? 0]),
+      ),
+    [selectedMedia, mediaPriceOptionIndex],
+  );
+
   const exportQuoteDraft = useCallback(
     async (format: QuoteExportFormat) => {
       const res = await fetch("/api/quote/export", {
@@ -817,6 +825,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           locale: isKo ? "ko" : "en",
           mediaIds: selectedMedia.map((m) => m.id),
           periodKey: period,
+          mediaPriceOptionIndex: exportMediaPriceOptionIndex,
           clientName: form.name.trim(),
           clientEmail: form.email.trim(),
           clientPhone: form.phone.trim() || null,
@@ -849,6 +858,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     },
     [
       exportTemplate,
+      exportMediaPriceOptionIndex,
       form.company,
       form.email,
       form.name,
@@ -949,6 +959,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           locale: isKo ? "ko" : "en",
           mediaIds: selectedMedia.map((m) => m.id),
           periodKey: period,
+          mediaPriceOptionIndex: exportMediaPriceOptionIndex,
           clientName: form.name.trim(),
           clientEmail: form.email.trim(),
           clientPhone: form.phone.trim() || null,
