@@ -1,7 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
-import { buildMediaPageTitle } from "@/lib/media-seo";
+import {
+  buildMediaPageTitle,
+  formatMediaSeoMonthlyPriceLabel,
+} from "@/lib/media-seo";
 import { isBunnyMediaUrl } from "@/lib/optimized-image-url";
 import { ogImageUrl, siteUrl } from "@/lib/seo";
 
@@ -53,15 +55,9 @@ export function buildMediaOgDescription(media: MediaItem, locale: string): strin
   const address = isKo
     ? media.location
     : media.locationEn || media.location || "";
-  const won = catalogPriceFieldToWon(media.price);
   const pricePart =
-    won > 0
-      ? isKo
-        ? `월 ${Math.round(won / 10_000).toLocaleString("ko-KR")}만원`
-        : `from ₩${Math.round(won / 10_000).toLocaleString("en-US")}0K/mo`
-      : isKo
-        ? "문의"
-        : "Inquire";
+    formatMediaSeoMonthlyPriceLabel(media, locale) ||
+    (isKo ? "문의" : "Inquire");
 
   const parts = [region, typeStr, isKo ? "광고 매체" : "OOH media", address, pricePart]
     .map((p) => p.trim())
