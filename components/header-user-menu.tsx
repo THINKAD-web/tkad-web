@@ -12,9 +12,7 @@ import {
 } from "@/components/public-chrome/header-chrome-buttons";
 import { HeaderAccountActions } from "@/components/header-account-actions";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
-import { HeaderFavoritesLink } from "@/components/header-favorites-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
-import { HeaderCartLink } from "@/components/header-cart-link";
 
 type Session = {
   id: string;
@@ -66,17 +64,11 @@ export function HeaderUserMenu({
     return (
       <div className="divide-y divide-zinc-200 dark:divide-white/10">
         <FavoritesSessionSync />
-        <HeaderFavoritesLink
-          onNavigate={onNavigate}
-          variant="menu"
-          className={menuRowClass}
-        />
         <HeaderNotificationsBell
           onNavigate={onNavigate}
           variant="menu"
           className={menuRowClass}
         />
-        <HeaderCartLink onNavigate={onNavigate} variant="menu" className={menuRowClass} />
         {session ? (
           <>
             <Link href="/my" onClick={onNavigate} className={menuRowClass}>

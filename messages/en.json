@@ -34,6 +34,14 @@
     "chatPreviewTitle": "Chat support",
     "chatPreviewHint": "Kakao · AI · phone"
   },
+  "mobileTabs": {
+    "home": "Home",
+    "explore": "Explore",
+    "planner": "Planner",
+    "contact": "Contact",
+    "my": "MY",
+    "navAria": "Bottom tab navigation"
+  },
   "supportChat": {
     "openMenu": "Open support menu",
     "close": "Close",
