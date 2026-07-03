@@ -1,7 +1,11 @@
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import { categoryLabel } from "@/lib/media-categories";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import {
+  catalogPriceFieldToWon,
+  formatMediaPriceCompactWon,
+  resolveMediaDisplayPrice,
+} from "@/lib/media-price-format";
 
 const META_DESC_MAX = 158;
 const TITLE_MAX = 72;
@@ -104,6 +108,28 @@ function resolveMediaSeoDistrict(media: MediaItem, locale: string): string {
   return isKo ? media.location : media.locationEn || media.location;
 }
 
+/** 메타·OG용 월 단가 — 카드/상세와 동일 `resolveMediaDisplayPrice` + 공용 컴팩트 포맷 */
+export function formatMediaSeoMonthlyPriceLabel(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+  locale: string,
+): string {
+  const isKo = locale === "ko" || locale.startsWith("ko");
+  const { priceWon } = resolveMediaDisplayPrice(media);
+  if (priceWon <= 0) return "";
+
+  const multi = (media.priceOptions?.length ?? 0) >= 2;
+  const compact = formatMediaPriceCompactWon(priceWon, isKo ? "ko-KR" : "en-US");
+  const amount = compact.replace(/^₩/, "");
+
+  if (isKo) {
+    const suffix = multi ? "~" : "";
+    return `월 ${amount}원${suffix}`;
+  }
+
+  const prefix = multi ? "from " : "";
+  return `${prefix}${compact}/mo`;
+}
+
 /** generateMetadata / OG용 제목 (유형·지역·단가 키워드 중심) */
 export function buildMediaPageTitle(
   media: MediaItem,
@@ -114,13 +140,9 @@ export function buildMediaPageTitle(
   const name = isKo ? media.name : media.nameEn || media.name;
   const district = resolveMediaSeoDistrict(media, locale);
   const typeStr = resolveMediaSeoTypeLabel(media, locale);
-  const won = catalogPriceFieldToWon(media.price);
+  const pricePart = formatMediaSeoMonthlyPriceLabel(media, locale);
 
   if (isKo) {
-    const pricePart =
-      won > 0
-        ? `월 ${Math.round(won / 10_000).toLocaleString("ko-KR")}만원`
-        : "";
     const core = pricePart
       ? `${name} ${typeStr} — ${district} ${pricePart} | ${brand}`
       : `${name} ${typeStr} — ${district} | ${brand}`;
@@ -131,10 +153,6 @@ export function buildMediaPageTitle(
     return fallback.slice(0, TITLE_MAX);
   }
 
-  const pricePart =
-    won > 0
-      ? `from ₩${Math.round(won / 10_000).toLocaleString("en-US")}0K/mo`
-      : "";
   const core = pricePart
     ? `${name} ${typeStr} — ${district} ${pricePart} | ${brand}`
     : `${name} ${typeStr} — ${district} | ${brand}`;
