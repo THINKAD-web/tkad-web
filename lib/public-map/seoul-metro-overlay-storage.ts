@@ -1,13 +1,13 @@
 const STORAGE_KEY = "tkad_map_subway_overlay";
 
 export function readSubwayOverlayEnabled(): boolean {
-  if (typeof window === "undefined") return true;
+  if (typeof window === "undefined") return false;
   try {
     const v = window.localStorage.getItem(STORAGE_KEY);
-    if (v === "0") return false;
-    return true;
+    if (v === "1") return true;
+    return false;
   } catch {
-    return true;
+    return false;
   }
 }
 

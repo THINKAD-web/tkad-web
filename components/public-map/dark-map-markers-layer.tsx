@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useSyncExternalStore } from "react";
 import L from "leaflet";
 import { useMap } from "react-leaflet";
 import { leafletPinIcon } from "@/lib/map-pin-styles";
@@ -10,9 +10,25 @@ import {
   pinsMatchingActiveId,
   type MapPinActiveSets,
 } from "@/lib/media-detail-map-markers";
+import {
+  getMapHoveredMediaId,
+  subscribeMapHoveredMediaId,
+} from "@/lib/media-map/map-hover-bridge";
 import type { MapMarker } from "@/components/public-map/map-types";
 
 const LAYER_GROUP_ADD_CHUNK = 80;
+const PIN_NAME_LABEL_CLASS = "tkad-pin-name-label";
+
+function useMapHoveredPinId(markers: MapMarker[]): string | null {
+  const hoveredMediaId = useSyncExternalStore(
+    subscribeMapHoveredMediaId,
+    getMapHoveredMediaId,
+    () => null,
+  );
+  if (!hoveredMediaId) return null;
+  const pin = markers.find((m) => mapPinMatchesActiveId(m.id, hoveredMediaId));
+  return pin?.id ?? null;
+}
 
 function clusterSizeClass(count: number): string {
   if (count >= 90) return "large";
@@ -60,6 +76,22 @@ function applyMarkerPinIcon(
   );
 }
 
+function syncPinNameLabel(marker: L.Marker, name: string, show: boolean) {
+  if (show && name) {
+    marker.unbindTooltip();
+    marker.bindTooltip(name, {
+      permanent: true,
+      direction: "bottom",
+      offset: L.point(0, 8),
+      className: PIN_NAME_LABEL_CLASS,
+      opacity: 1,
+    });
+    marker.openTooltip();
+    return;
+  }
+  marker.unbindTooltip();
+}
+
 function isMarkerClusterGroup(
   layer: L.LayerGroup | L.MarkerClusterGroup,
 ): layer is L.MarkerClusterGroup {
@@ -100,24 +132,23 @@ function addMarkersInChunks(
 export function DarkMapMarkersLayer({
   markers,
   selectedId,
-  hoveredId,
   onSelect,
   disableCluster,
   lightTiles = false,
 }: {
   markers: MapMarker[];
   selectedId: string | null;
-  hoveredId: string | null;
   onSelect: (id: string) => void;
   disableCluster?: boolean;
   lightTiles?: boolean;
 }) {
   const map = useMap();
+  const hoveredId = useMapHoveredPinId(markers);
   const layerRef = useRef<L.LayerGroup | L.MarkerClusterGroup | null>(null);
   const markerRefs = useRef<Map<string, L.Marker>>(new Map());
-  const markerMetaRef = useRef<Map<string, { type: string; visibilityScore?: number }>>(
-    new Map(),
-  );
+  const markerMetaRef = useRef<
+    Map<string, { type: string; visibilityScore?: number; name: string }>
+  >(new Map());
   const syncGenerationRef = useRef(0);
   const onSelectRef = useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -131,6 +162,7 @@ export function DarkMapMarkersLayer({
     selected: new Set(),
     hovered: new Set(),
   });
+  const labeledPinIdRef = useRef<string | null>(null);
 
   useEffect(() => {
     const layer = disableCluster
@@ -155,6 +187,7 @@ export function DarkMapMarkersLayer({
       markerRefs.current.clear();
       markerMetaRef.current.clear();
       prevActivePinsRef.current = { selected: new Set(), hovered: new Set() };
+      labeledPinIdRef.current = null;
     };
   }, [map, disableCluster]);
 
@@ -174,6 +207,8 @@ export function DarkMapMarkersLayer({
 
     for (const [id, marker] of markerRefs.current.entries()) {
       if (nextIds.has(id)) continue;
+      if (labeledPinIdRef.current === id) labeledPinIdRef.current = null;
+      syncPinNameLabel(marker, "", false);
       layer.removeLayer(marker);
       markerRefs.current.delete(id);
       markerMetaRef.current.delete(id);
@@ -189,6 +224,7 @@ export function DarkMapMarkersLayer({
       markerMetaRef.current.set(mk.id, {
         type: mk.type,
         visibilityScore: mk.visibilityScore,
+        name: mk.name,
       });
       const existing = markerRefs.current.get(mk.id);
       if (existing) {
@@ -203,6 +239,9 @@ export function DarkMapMarkersLayer({
           hovered,
           tiles,
         );
+        if (labeledPinIdRef.current === mk.id) {
+          syncPinNameLabel(existing, mk.name, true);
+        }
         continue;
       }
       const marker = L.marker([mk.lat, mk.lng], {
@@ -266,6 +305,36 @@ export function DarkMapMarkersLayer({
     }
     prevActivePinsRef.current = next;
   }, [selectedId, hoveredId]);
+
+  // 선택된 핀 1개만 매체명 라벨 (네이버지도 스타일 하단 말풍선)
+  useEffect(() => {
+    const resolvePinId = (activeId: string | null): string | null => {
+      if (!activeId) return null;
+      if (markerRefs.current.has(activeId)) return activeId;
+      for (const id of markerRefs.current.keys()) {
+        if (mapPinMatchesActiveId(id, activeId)) return id;
+      }
+      return null;
+    };
+
+    const nextPinId = resolvePinId(selectedId);
+    const prevLabeled = labeledPinIdRef.current;
+
+    if (prevLabeled && prevLabeled !== nextPinId) {
+      const prevMarker = markerRefs.current.get(prevLabeled);
+      if (prevMarker) syncPinNameLabel(prevMarker, "", false);
+      labeledPinIdRef.current = null;
+    }
+
+    if (!nextPinId) return;
+
+    const marker = markerRefs.current.get(nextPinId);
+    const meta = markerMetaRef.current.get(nextPinId);
+    if (!marker || !meta?.name) return;
+
+    syncPinNameLabel(marker, meta.name, true);
+    labeledPinIdRef.current = nextPinId;
+  }, [selectedId]);
 
   return null;
 }

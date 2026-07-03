@@ -27,7 +27,7 @@ import {
   DarkMapTileLayer,
   resolveDarkMapLightTiles,
 } from "@/components/public-map/dark-map-tile-layer";
-import { SeoulMetroOverlayLayer } from "@/components/public-map/seoul-metro-overlay-layer";
+import { LazySeoulMetroOverlayLayer } from "@/components/public-map/lazy-seoul-metro-overlay-layer";
 
 export type { MapBounds, MapMarker };
 
@@ -140,7 +140,6 @@ function MapResizeFix() {
   useEffect(() => {
     let rafId = 0;
     let debounceTimer: ReturnType<typeof window.setTimeout> | undefined;
-    let stabilityTimer: ReturnType<typeof window.setTimeout> | undefined;
 
     const invalidate = () => {
       try {
@@ -150,33 +149,30 @@ function MapResizeFix() {
       }
     };
 
-    const scheduleInvalidate = (delayMs = 100) => {
+    const scheduleInvalidate = () => {
       if (debounceTimer !== undefined) window.clearTimeout(debounceTimer);
       debounceTimer = window.setTimeout(() => {
         debounceTimer = undefined;
         window.cancelAnimationFrame(rafId);
         rafId = window.requestAnimationFrame(invalidate);
-      }, delayMs);
+      }, 200);
     };
 
     rafId = window.requestAnimationFrame(invalidate);
-    stabilityTimer = window.setTimeout(invalidate, 400);
 
     const container = map.getContainer();
     const resizeObserver =
       typeof ResizeObserver !== "undefined"
-        ? new ResizeObserver(() => scheduleInvalidate(180))
+        ? new ResizeObserver(scheduleInvalidate)
         : null;
     resizeObserver?.observe(container);
 
-    const onWindowResize = () => scheduleInvalidate(80);
-    window.addEventListener("resize", onWindowResize);
+    window.addEventListener("resize", scheduleInvalidate);
     return () => {
       window.cancelAnimationFrame(rafId);
       if (debounceTimer !== undefined) window.clearTimeout(debounceTimer);
-      if (stabilityTimer !== undefined) window.clearTimeout(stabilityTimer);
       resizeObserver?.disconnect();
-      window.removeEventListener("resize", onWindowResize);
+      window.removeEventListener("resize", scheduleInvalidate);
     };
   }, [map]);
   return null;
@@ -420,7 +416,7 @@ export default function DarkMapView({
       >
         <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
         {subwayOverlayEnabled ? (
-          <SeoulMetroOverlayLayer lightTiles={lightTiles} />
+          <LazySeoulMetroOverlayLayer lightTiles={lightTiles} />
         ) : null}
         <ZoomControl position="bottomright" />
         <MapResizeFix />
@@ -446,7 +442,6 @@ export default function DarkMapView({
         <DarkMapMarkersLayer
           markers={markers}
           selectedId={selectedId}
-          hoveredId={hoveredId}
           onSelect={onSelectStable}
           disableCluster={!useCluster}
           lightTiles={lightTiles}
