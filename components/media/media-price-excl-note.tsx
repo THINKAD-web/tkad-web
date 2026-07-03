@@ -28,13 +28,13 @@ export function MediaPriceExclNote({
     );
   }
   return (
-    <p
+    <span
       className={cn(
-        "text-[10px] leading-tight text-gray-400 dark:text-white/45",
+        "block text-[10px] leading-tight text-gray-400 dark:text-white/45",
         className,
       )}
     >
       {text}
-    </p>
+    </span>
   );
 }

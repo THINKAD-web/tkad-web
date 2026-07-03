@@ -13,7 +13,6 @@ import { CONTACT_EMAIL } from "@/lib/constants";
 import { buildPublicNavGroups } from "@/lib/navigation/build-public-nav";
 import { buildSitemapSections } from "@/lib/navigation/sitemap-sections";
 import { SitemapModal } from "@/components/public-chrome/sitemap-modal";
-import { TrustMetricsInline } from "@/components/trust-metrics-inline";
 import { useMediaMinWidth } from "@/lib/use-media-min-width";
 const INSTAGRAM_URL = "https://www.instagram.com/thinkad_korea" as const;
 
@@ -258,7 +257,6 @@ export function FooterBrutal() {
 
       <div className="relative border-t border-gray-200 bg-white/80 px-4 py-2.5 backdrop-blur dark:border-gray-800 dark:bg-black/40 sm:px-6">
         <div className="mx-auto flex max-w-7xl flex-col items-center gap-2">
-          <TrustMetricsInline className="text-center text-[11px] text-gray-500 dark:text-white/45" />
           <div className="flex flex-col items-center gap-2 sm:flex-row sm:flex-wrap sm:justify-center">
             <span className="text-[11px] text-gray-500 dark:text-white/50">
               {t("footer.copyrightShort", { year })}

@@ -162,6 +162,7 @@ export type MediaManualBrowseFiltersProps = {
   selectionVariant?: "default" | "plan";
   onSelectedSummaryClick?: () => void;
   compareCount?: number;
+  onCompareSummaryClick?: () => void;
   cartCount?: number;
   showSectionHeader?: boolean;
   sectionEyebrow?: string;
@@ -226,6 +227,7 @@ export function MediaManualBrowseFilters({
   selectionVariant = "default",
   onSelectedSummaryClick,
   compareCount = 0,
+  onCompareSummaryClick,
   cartCount = 0,
   showSectionHeader = false,
   sectionEyebrow = "Manual Browse",
@@ -356,8 +358,8 @@ export function MediaManualBrowseFilters({
   const showResultSummaryRow =
     showResultCountLabel ||
     selectedCount > 0 ||
-    cartCount > 0 ||
-    compareCount > 0;
+    (!mapPageViewModes && cartCount > 0) ||
+    (!mapPageViewModes && compareCount > 0);
 
   const mapMobileImmersiveMode =
     mapMobileImmersive &&
@@ -817,7 +819,14 @@ export function MediaManualBrowseFilters({
   );
 
   const searchInput = (
-    <div className="relative min-w-0 flex-1 sm:min-w-[12rem] sm:max-w-md">
+    <div
+      className={cn(
+        "relative min-w-0",
+        mapPageViewModes
+          ? "w-auto max-w-[9.5rem] flex-1 sm:max-w-44"
+          : "flex-1 sm:min-w-[12rem] sm:max-w-md",
+      )}
+    >
       <Search
         className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400 dark:text-white/30"
         aria-hidden
@@ -930,16 +939,39 @@ export function MediaManualBrowseFilters({
       </button>
     ) : null;
 
+  const summaryChipClass =
+    "tkad-type-meta tkad-home-accent-text inline-flex shrink-0 items-center rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 font-semibold underline decoration-violet-400/50 underline-offset-2 hover:opacity-90";
+
   const cartSummaryButton =
     cartCount > 0 ? (
       <button
         type="button"
         onClick={() => setPlanSheetOpen(true)}
-        className="tkad-type-meta tkad-home-accent-text inline-flex shrink-0 items-center rounded-full border border-violet-300/45 bg-violet-500/10 px-2.5 py-1 font-semibold underline decoration-violet-400/50 underline-offset-2 hover:opacity-90"
+        className={summaryChipClass}
         aria-label={isKo ? `담은 매체 ${cartCount}개 보기` : `View ${cartCount} items in cart`}
       >
         {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
       </button>
+    ) : null;
+
+  const compareSummaryButton =
+    mapPageViewModes && compareCount > 0 && onCompareSummaryClick ? (
+      <button
+        type="button"
+        onClick={onCompareSummaryClick}
+        className={summaryChipClass}
+        aria-label={isKo ? `비교함 ${compareCount}개 보기` : `View ${compareCount} items to compare`}
+      >
+        {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+      </button>
+    ) : null;
+
+  const mapToolbarSummaryChips =
+    mapPageViewModes && (cartSummaryButton || compareSummaryButton) ? (
+      <div className="flex shrink-0 items-center gap-1.5">
+        {cartSummaryButton}
+        {compareSummaryButton}
+      </div>
     ) : null;
 
   const mobileSortButton = (
@@ -1024,7 +1056,7 @@ export function MediaManualBrowseFilters({
       {searchInput}
       {mobileFilterButtonIcon}
       {mobileSortButtonIcon}
-      {mapPageViewModes ? cartSummaryButton : null}
+      {mapPageViewModes ? mapToolbarSummaryChips : null}
     </div>
   ) : null;
 
@@ -1037,7 +1069,7 @@ export function MediaManualBrowseFilters({
         {mobileFilterButton}
         {mobileSortButton}
         <div className="min-w-0 flex-1">{viewModeToggle}</div>
-        {mapPageViewModes ? cartSummaryButton : null}
+        {mapPageViewModes ? mapToolbarSummaryChips : null}
         {mapNavButton}
       </div>
     ) : null;
@@ -1149,7 +1181,7 @@ export function MediaManualBrowseFilters({
             </div>
             {sortSelect}
             {viewModeToggle}
-            {mapPageViewModes ? cartSummaryButton : null}
+            {mapPageViewModes ? mapToolbarSummaryChips : null}
             {mapNavButton}
             {toolbarEnd}
           </div>
@@ -1345,7 +1377,10 @@ export function MediaManualBrowseFilters({
               ? () => setPlanSheetOpen(true)
               : undefined
           }
-          compareCount={compareCount}
+          compareCount={mapPageViewModes ? 0 : compareCount}
+          onCompareSummaryClick={
+            mapPageViewModes || compareCount === 0 ? undefined : onCompareSummaryClick
+          }
         />
       ) : null}
 

@@ -87,7 +87,7 @@ export function PlannerSelectedMediaBar({
                   /{isKo ? "월" : "mo"}
                 </span>
               </span>
-              <MediaPriceExclNote isKo={isKo} className="ml-1 inline" />
+              <MediaPriceExclNote isKo={isKo} inline className="ml-1" />
             </p>
           ) : null}
         </div>

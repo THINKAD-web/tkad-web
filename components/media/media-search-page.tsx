@@ -412,6 +412,12 @@ function MediaSearchPageInner({
     [compareEntries, catalogItems],
   );
 
+  const openCompareSummary = useCallback(() => {
+    const ids = compareEntries.map((e) => e.id).join(",");
+    if (!ids) return;
+    router.push(`/compare?ids=${ids}`);
+  }, [compareEntries, router]);
+
   const fetchMedia = useCallback(
     async (opts: { page: number; append: boolean }) => {
       if (opts.append) setLoadingMore(true);
@@ -778,6 +784,7 @@ function MediaSearchPageInner({
       mobileViewSegment={mobileViewSegment}
       onMobileViewSegmentChange={handleMobileViewSegmentChange}
       compareCount={plannerMode ? 0 : compareEntries.length}
+      onCompareSummaryClick={plannerMode ? undefined : openCompareSummary}
       cartCount={plannerMode ? 0 : planCount}
       selectedCount={plannerMode ? plannerSelectedIds.length : 0}
       selectionVariant={plannerMode ? "plan" : "default"}

@@ -16,6 +16,7 @@ export type DiscoveryResultSummaryProps = {
   cartCount?: number;
   onCartSummaryClick?: () => void;
   compareCount?: number;
+  onCompareSummaryClick?: () => void;
   className?: string;
   trailing?: ReactNode;
 };
@@ -30,6 +31,7 @@ export function DiscoveryResultSummary({
   cartCount = 0,
   onCartSummaryClick,
   compareCount = 0,
+  onCompareSummaryClick,
   className,
   trailing,
 }: DiscoveryResultSummaryProps) {
@@ -96,9 +98,19 @@ export function DiscoveryResultSummary({
           )
         ) : null}
         {compareCount > 0 ? (
-          <span className="tkad-type-meta font-medium text-foreground">
-            {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
-          </span>
+          onCompareSummaryClick ? (
+            <button
+              type="button"
+              onClick={onCompareSummaryClick}
+              className="tkad-type-meta tkad-home-accent-text font-medium underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+            >
+              {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+            </button>
+          ) : (
+            <span className="tkad-type-meta tkad-home-accent-text font-medium">
+              {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
+            </span>
+          )
         ) : null}
         {trailing}
       </div>

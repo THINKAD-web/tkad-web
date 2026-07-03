@@ -4,7 +4,9 @@ import {
   type PublicNavGroupDef,
   type PublicNavGroupId,
   type PublicNavItemDef,
+  type PublicNavItemId,
 } from "@/lib/navigation/public-nav-data";
+import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
 
 export type ResolvedPublicNavItem = {
   id: string;
@@ -81,12 +83,11 @@ export function buildBrutalNavEntries(t: NavTranslator): BrutalNavEntry[] {
 export function findActiveNavGroupId(
   pathname: string,
   groups: ResolvedPublicNavGroup[],
+  searchParams?: Pick<URLSearchParams, "get"> | null,
 ): PublicNavGroupId | null {
-  const path = pathname.split("?")[0] ?? pathname;
   for (const group of groups) {
     for (const item of group.items) {
-      const base = item.href.split("#")[0]?.split("?")[0] ?? item.href;
-      if (path === base || (base !== "/" && path.startsWith(`${base}/`))) {
+      if (isPublicNavItemActive(pathname, item.id as PublicNavItemId, searchParams)) {
         return group.id;
       }
     }

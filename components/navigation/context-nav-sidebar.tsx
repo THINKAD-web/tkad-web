@@ -11,6 +11,7 @@ import {
   type ContextSidebarItem,
 } from "@/lib/navigation/context-sidebar-config";
 import { QuickActionBarDesktop } from "@/components/navigation/quick-action-bar";
+import { SidebarSupportDock } from "@/components/navigation/sidebar-support-dock";
 import {
   readSidebarCollapsed,
   writeSidebarCollapsed,
@@ -206,11 +207,14 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
     >
       <ContextNavSidebar collapsed={collapsed} hoverExpanded={hoverExpanded} />
 
-      <Suspense fallback={null}>
-        <QuickActionBarDesktop compact={compact} />
-      </Suspense>
+      <div className="mt-auto flex min-h-0 shrink-0 flex-col">
+        <SidebarSupportDock compact={compact} />
 
-      <div className="mt-auto shrink-0 border-t border-gray-200 p-2 dark:border-white/10">
+        <Suspense fallback={null}>
+          <QuickActionBarDesktop compact={compact} />
+        </Suspense>
+
+        <div className="shrink-0 border-t border-gray-200 p-2 dark:border-white/10">
         <button
           type="button"
           onClick={toggle}
@@ -226,6 +230,7 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
             </>
           )}
         </button>
+        </div>
       </div>
     </aside>
   );

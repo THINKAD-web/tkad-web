@@ -3,12 +3,27 @@
 import { usePathname } from "@/i18n/navigation";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { useLocale } from "next-intl";
-import { MessageCircle, Plus } from "lucide-react";
+import { useLocale, useTranslations } from "next-intl";
+import { Bot, MessageCircle, Plus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
 import { cn } from "@/lib/utils";
+import { useContactChannelSheet } from "@/components/contact/contact-channel-provider";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 import { PLAN_NAV_LABELS } from "@/lib/navigation/logged-in-nav-labels";
+
+function KakaoTalkIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      className={className}
+      aria-hidden
+      fill="currentColor"
+    >
+      <path d="M12 3C6.477 3 2 6.477 2 10.8c0 2.742 1.815 5.146 4.545 6.52-.198.72-.717 2.606-.82 3.01-.13.52.19.512.398.372.165-.11 2.615-1.755 3.676-2.47.387.053.784.08 1.201.08 5.523 0 10-3.477 10-7.8S17.523 3 12 3z" />
+    </svg>
+  );
+}
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -34,14 +49,25 @@ type DesktopQuickAction = {
   badge?: number;
 };
 
+function actionRowClass(compact: boolean) {
+  return cn(
+    "relative flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors",
+    compact ? "px-2 py-2.5" : "px-3 py-2.5",
+  );
+}
+
 function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const tChat = useTranslations("supportChat");
+  const { openAi } = useContactChannelSheet();
   const tab = searchParams.get("tab");
 
   if (isHiddenPath(pathname)) return null;
+
+  const aiLabel = isKo ? "AI 챗봇 상담" : "AI chatbot";
 
   const actions: DesktopQuickAction[] = [
     {
@@ -69,6 +95,34 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
       className="hidden shrink-0 flex-col gap-1.5 border-t border-gray-200 p-2 dark:border-white/10 md:flex"
       data-screenshot="quick-actions-desktop"
     >
+      <button
+        type="button"
+        onClick={openAi}
+        title={aiLabel}
+        aria-label={aiLabel}
+        className={cn(actionRowClass(compact), "tkad-neon-cta-clean text-white [&_svg]:text-white")}
+      >
+        <Bot className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
+        {!compact ? <span className="min-w-0 flex-1 truncate text-left">{aiLabel}</span> : null}
+      </button>
+
+      <a
+        href={KAKAO_CHANNEL_PUBLIC_URL}
+        target="_blank"
+        rel="noopener noreferrer"
+        title={tChat("kakaoCta")}
+        aria-label={tChat("kakaoCta")}
+        className={cn(
+          actionRowClass(compact),
+          "bg-[#FEE500] font-medium text-[#191600] hover:brightness-95",
+        )}
+      >
+        <KakaoTalkIcon className="h-4 w-4 shrink-0" />
+        {!compact ? (
+          <span className="min-w-0 flex-1 truncate text-left">{tChat("kakaoCta")}</span>
+        ) : null}
+      </a>
+
       {actions.map((action) => {
         const active = action.match(pathname, tab);
         const label = isKo ? action.labelKo : action.labelEn;
@@ -82,8 +136,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
             title={compact ? label : undefined}
             aria-label={compact ? label : undefined}
             className={cn(
-              "relative flex items-center justify-center gap-2 rounded-lg text-sm font-semibold transition-colors",
-              compact ? "px-2 py-2.5" : "px-3 py-2.5",
+              actionRowClass(compact),
               isNeon
                 ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
                 : action.variant === "outline"
