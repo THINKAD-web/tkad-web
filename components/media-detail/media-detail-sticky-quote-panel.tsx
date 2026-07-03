@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Share2 } from "lucide-react";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
@@ -10,11 +10,19 @@ import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import type { MediaItem } from "@/lib/media-data";
 import {
   calculateMediaQuoteByDays,
+  calculateMediaQuoteFromOption,
+  findCheapestPriceOptionIndex,
   formatWonShort,
+  pricePeriodDays,
+  resolvePriceOptionBundleDays,
 } from "@/lib/compare-quote";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-proposal-card";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import {
+  formatCatalogPriceFieldWon,
+  normalizeMediaPricePeriod,
+  resolveMediaPriceOptionPeriodLabel,
+} from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -35,21 +43,64 @@ export function MediaDetailStickyQuotePanel({
   className,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
+  const localeTag = isKo ? "ko" : "en";
+  const priceOptions = media.priceOptions ?? [];
+  const hasPriceOptions = priceOptions.length > 0;
+
+  const defaultOptIdx = useMemo(
+    () => findCheapestPriceOptionIndex(media),
+    [media],
+  );
+  const [optIdx, setOptIdx] = useState(defaultOptIdx);
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
-  const days = useMemo(() => {
-    if (!startDate || !endDate) return 30;
-    const s = new Date(startDate);
-    const e = new Date(endDate);
-    const diff = Math.ceil((e.getTime() - s.getTime()) / 86400000) + 1;
-    return Number.isFinite(diff) && diff > 0 ? diff : 30;
-  }, [startDate, endDate]);
+  useEffect(() => {
+    setOptIdx(findCheapestPriceOptionIndex(media));
+  }, [media.id, media]);
 
-  const quote = useMemo(
-    () => calculateMediaQuoteByDays(media, days),
-    [media, days],
-  );
+  const safeOptIdx = hasPriceOptions
+    ? Math.min(Math.max(0, optIdx), priceOptions.length - 1)
+    : 0;
+  const selectedOption = hasPriceOptions
+    ? priceOptions[safeOptIdx]
+    : undefined;
+
+  const optionBundleDays = useMemo(() => {
+    if (!selectedOption) {
+      return pricePeriodDays(normalizeMediaPricePeriod(media.pricePeriod));
+    }
+    return resolvePriceOptionBundleDays(selectedOption, media.pricePeriod);
+  }, [selectedOption, media.pricePeriod]);
+
+  const days = useMemo(() => {
+    if (startDate && endDate) {
+      const s = new Date(startDate);
+      const e = new Date(endDate);
+      const diff = Math.ceil((e.getTime() - s.getTime()) / 86400000) + 1;
+      if (Number.isFinite(diff) && diff > 0) return diff;
+    }
+    return hasPriceOptions ? optionBundleDays : 30;
+  }, [startDate, endDate, hasPriceOptions, optionBundleDays]);
+
+  const quote = useMemo(() => {
+    if (hasPriceOptions && selectedOption) {
+      return calculateMediaQuoteFromOption(media, selectedOption, days);
+    }
+    return calculateMediaQuoteByDays(media, days);
+  }, [media, days, hasPriceOptions, selectedOption]);
+
+  const headlinePrice = hasPriceOptions && selectedOption
+    ? formatCatalogPriceFieldWon(selectedOption.price, locale)
+    : formatCatalogPriceFieldWon(media.price, locale);
+
+  const headlinePeriod = hasPriceOptions && selectedOption
+    ? resolveMediaPriceOptionPeriodLabel(
+        selectedOption,
+        media.pricePeriod,
+        localeTag,
+      ) ?? periodLabel
+    : periodLabel;
 
   const inputCls =
     "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/50 focus:ring-2 focus:ring-violet-400/20";
@@ -65,12 +116,38 @@ export function MediaDetailStickyQuotePanel({
         {displayName}
       </p>
       <p className="mt-1 text-2xl font-black tabular-nums dark:text-white text-gray-900">
-        {formatCatalogPriceFieldWon(media.price, locale)}
+        {headlinePrice}
       </p>
       <p className="text-[11px] dark:text-white/45 text-gray-500">
-        {periodLabel}
+        {headlinePeriod}
       </p>
       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
+
+      {hasPriceOptions ? (
+        <div className="mt-4 space-y-1.5">
+          <label
+            htmlFor="sticky-quote-price-option"
+            className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400"
+          >
+            {isKo ? "가격 옵션" : "Price option"}
+          </label>
+          <select
+            id="sticky-quote-price-option"
+            value={safeOptIdx}
+            onChange={(e) => {
+              const v = parseInt(e.target.value, 10);
+              setOptIdx(Number.isFinite(v) ? v : 0);
+            }}
+            className={inputCls}
+          >
+            {priceOptions.map((o, i) => (
+              <option key={`${o.label}-${i}`} value={i}>
+                {o.label} — {formatCatalogPriceFieldWon(o.price, locale)}
+              </option>
+            ))}
+          </select>
+        </div>
+      ) : null}
 
       <div className="mt-5 space-y-3 border-t dark:border-white/10 border-gray-100 pt-5">
         <p className="text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
