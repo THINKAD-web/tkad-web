@@ -44,6 +44,7 @@ import {
   type MediaBrowseFilterQueryState,
 } from "@/lib/media-browse-query-string";
 import { MediaPinPopup } from "@/components/media-pin-popup";
+import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
 import {
   mediaItemHasMapCoordinates,
   resolveMediaIdFromMapPinId,
@@ -221,9 +222,12 @@ function MediaSearchPageInner({
   const [features, setFeatures] = useState(initialFromUrl.features);
   const [networkType, setNetworkType] = useState(initialFromUrl.networkType);
   const [sort, setSort] = useState(initialFromUrl.sort);
-  const [viewMode, setViewMode] = useState<ViewMode>(
-    plannerMode ? "card" : "feed",
-  );
+  const [viewMode, setViewMode] = useState<ViewMode>(() => {
+    if (plannerMode) return "card";
+    const urlView = searchParams.get("view");
+    if (urlView === "reels") return "reels";
+    return "feed";
+  });
   const networkBrowse = useMemo(
     () =>
       discoveryFeaturesIncludeNetwork(features) || catalogVariant === "network",
@@ -556,7 +560,8 @@ function MediaSearchPageInner({
       if (
         stored === "feed" ||
         stored === "card" ||
-        stored === "compact"
+        stored === "compact" ||
+        stored === "reels"
       ) {
         setViewMode(stored);
         return;
@@ -610,6 +615,11 @@ function MediaSearchPageInner({
     } catch {
       /* ignore */
     }
+    const params = new URLSearchParams(searchParams.toString());
+    if (mode === "reels") params.set("view", "reels");
+    else params.delete("view");
+    const qs = params.toString();
+    router.replace(qs ? `/media?${qs}` : "/media", { scroll: false });
   };
 
   useEffect(() => {
@@ -862,6 +872,28 @@ function MediaSearchPageInner({
             <div className="mt-4">{loadMoreButton}</div>
           ) : null}
         </div>
+      ) : viewMode === "reels" ? (
+        <MediaReelsBrowse
+          items={media}
+          isKo={isKo}
+          locale={locale}
+          getHref={getMediaHref}
+          hasMore={hasMore}
+          loadingMore={loadingMore}
+          onLoadMore={handleLoadMore}
+          inCompare={isInCompare}
+          onToggleCompare={toggleCompare}
+          plannerMode={plannerMode}
+          plannerSelectedIds={plannerSelectedIds}
+          onPlannerToggleMedia={
+            onPlannerToggleMedia
+              ? (id) => {
+                  const raw = catalogItems.find((m) => m.id === id);
+                  onPlannerToggleMedia(id, raw);
+                }
+              : undefined
+          }
+        />
       ) : (
       <>
       <div

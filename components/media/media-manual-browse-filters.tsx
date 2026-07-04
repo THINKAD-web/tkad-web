@@ -10,6 +10,7 @@ import {
   LayoutList,
   AlignJustify,
   Map as MapIcon,
+  RectangleVertical,
   ChevronDown,
   Monitor,
   Train,
@@ -68,7 +69,7 @@ const TOOLBAR_CTRL_BTN =
   "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80";
 const TOOLBAR_CTRL_PAD = "px-3 py-1.5";
 
-export type MediaManualBrowseViewMode = "feed" | "card" | "compact" | "map";
+export type MediaManualBrowseViewMode = "feed" | "card" | "compact" | "reels" | "map";
 
 const MAIN_ICONS: Record<string, LucideIcon> = {
   Monitor,
@@ -114,6 +115,7 @@ const VIEW_MODES: {
 }[] = [
   { id: "feed", labelKo: "피드", labelEn: "Feed", icon: List },
   { id: "card", labelKo: "카드", labelEn: "Card", icon: LayoutGrid },
+  { id: "reels", labelKo: "몰입 보기", labelEn: "Immersive", icon: RectangleVertical },
   { id: "compact", labelKo: "컴팩트", labelEn: "Compact", icon: AlignJustify },
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
