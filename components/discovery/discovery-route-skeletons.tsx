@@ -39,23 +39,23 @@ export function DiscoveryMediaFeedCardSkeleton({ className }: { className?: stri
       )}
       aria-hidden
     >
-      <div className="flex flex-col gap-4 p-4 sm:gap-5 md:flex-row md:items-stretch">
-        <DiscoveryBone className="aspect-[4/3] w-full shrink-0 rounded-xl md:aspect-auto md:min-h-[12rem] md:w-[48%] lg:w-[50%]" />
-        <div className="flex min-w-0 flex-1 flex-col gap-2.5 sm:gap-3">
-          <DiscoveryBone className="h-3 w-14" />
-          <DiscoveryBone className="h-6 w-4/5" />
-          <div className="flex gap-1.5">
-            <DiscoveryBone className="h-5 w-14 rounded-full" />
-            <DiscoveryBone className="h-5 w-16 rounded-full" />
+      <div className="flex min-w-0 items-stretch gap-3 p-3 sm:gap-4 sm:p-3.5">
+        <DiscoveryBone className="aspect-[4/3] h-full min-h-[6.5rem] w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 rounded-xl sm:min-w-[8rem] sm:max-w-[12rem]" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2 py-0.5">
+          <DiscoveryBone className="h-3 w-24" />
+          <DiscoveryBone className="h-5 w-4/5" />
+          <DiscoveryBone className="h-4 w-2/5" />
+          <div className="mt-auto space-y-1.5 pt-1">
+            <div className="grid grid-cols-2 gap-1.5">
+              <DiscoveryBone className="h-8 rounded-lg" />
+              <DiscoveryBone className="h-8 rounded-lg" />
+            </div>
+            <div className="flex gap-1">
+              <DiscoveryBone className="h-7 flex-1 rounded-lg" />
+              <DiscoveryBone className="h-7 flex-1 rounded-lg" />
+              <DiscoveryBone className="h-7 flex-1 rounded-lg" />
+            </div>
           </div>
-          <DiscoveryBone className="h-4 w-3/5" />
-          <DiscoveryBone className="h-20 w-full rounded-xl" />
-          <div className="grid grid-cols-3 gap-1.5">
-            <DiscoveryBone className="h-12 rounded-xl" />
-            <DiscoveryBone className="h-12 rounded-xl" />
-            <DiscoveryBone className="h-12 rounded-xl" />
-          </div>
-          <DiscoveryBone className="h-9 w-full rounded-xl" />
         </div>
       </div>
     </div>

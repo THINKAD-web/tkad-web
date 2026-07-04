@@ -13,6 +13,8 @@ type Props = {
   item: OverlayItem;
   isKo: boolean;
   variant?: "card" | "feed";
+  /** 피드 카드 — 검증 뱃지만 (즉시예약은 상세로) */
+  verifiedOnly?: boolean;
   className?: string;
 };
 
@@ -33,10 +35,11 @@ export function MediaThumbnailTrustOverlay({
   item,
   isKo,
   variant = "card",
+  verifiedOnly = false,
   className,
 }: Props) {
   const showVerified = Boolean(item.isVerified);
-  const showInstant = Boolean(item.isInstantBooking);
+  const showInstant = !verifiedOnly && Boolean(item.isInstantBooking);
 
   if (!showVerified && !showInstant) return null;
 

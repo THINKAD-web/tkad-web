@@ -19,7 +19,7 @@ export type DiscoveryMediaCardActionsProps = {
   addedFrom?: PlanCartAddedFrom;
   size?: "compact" | "comfortable";
   /** `preview` — 지도 마커 미리보기(dock): 상세·담기·문의만 */
-  layout?: "full" | "preview";
+  layout?: "full" | "preview" | "dense";
   className?: string;
   /** 클릭 가능한 카드/타일 안에서 버블링 방지 */
   stopPropagation?: boolean;
@@ -92,6 +92,54 @@ export function DiscoveryMediaCardActions({
           <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
           <span className="truncate">{isKo ? "문의하기" : "Contact"}</span>
         </Link>
+      </div>
+    );
+  }
+
+  if (layout === "dense") {
+    return (
+      <div className={cn("space-y-1.5", className)}>
+        <div className="grid grid-cols-2 gap-1.5">
+          <Link
+            href={detailHref}
+            onClick={guardCardClick(stopPropagation)}
+            className={cn(primaryLinkClass, "!h-8 !min-h-8 !text-[11px]")}
+          >
+            <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="truncate">{isKo ? "상세" : "Details"}</span>
+          </Link>
+          <Link
+            href={contactHref}
+            onClick={guardCardClick(stopPropagation)}
+            className={cn(contactLinkClass, "!h-8 !min-h-8 !text-[11px]")}
+          >
+            <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
+            <span className="truncate">{isKo ? "문의하기" : "Contact"}</span>
+          </Link>
+        </div>
+        <div className="flex items-stretch justify-end gap-1">
+          <PlanCartAddButton
+            item={planItem}
+            addedFrom={addedFrom}
+            compact
+            gridInline
+            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+          />
+          {onToggleCompare ? (
+            <MediaCompareSelectButton
+              selected={inCompare}
+              onToggle={onToggleCompare}
+              gridInline
+              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+            />
+          ) : null}
+          <MediaCartAddButton
+            item={planItem}
+            addedFrom={addedFrom}
+            gridInline
+            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+          />
+        </div>
       </div>
     );
   }
