@@ -1,9 +1,15 @@
-import { formatCpmKrw } from "@/lib/media-price-format";
 import {
   formatMonthlyImpressionsLabel,
   resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
+import { formatCpmKrw } from "@/lib/media-price-format";
+import {
+  buildMapItemMetricLine,
+  buildCatalogItemMetricLine,
+} from "@/lib/media-card-metrics";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
+
+export { buildMapItemMetricLine, buildCatalogItemMetricLine };
 
 export function formatMapImpressions(
   item: MapMapItem,
@@ -16,23 +22,6 @@ export function formatMapCpm(item: MapMapItem, locale: string): string | null {
   const cpm = resolveDisplayCpmWon(item);
   if (cpm == null) return null;
   return formatCpmKrw(Math.round(cpm), locale);
-}
-
-/** 목록 카드 썸네일 하단 1줄 — CPM · 월 노출 */
-export function buildMapItemMetricLine(
-  item: MapMapItem,
-  isKo: boolean,
-  locale: string,
-): string | null {
-  const cpm = formatMapCpm(item, locale);
-  const impressions = formatMapImpressions(item, isKo);
-  if (!cpm && !impressions) return null;
-  const parts: string[] = [];
-  if (cpm) parts.push(`CPM ${cpm}`);
-  if (impressions) {
-    parts.push(isKo ? `노출 ${impressions}` : `Reach ${impressions}`);
-  }
-  return parts.join(" · ");
 }
 
 export function buildMapItemMetrics(

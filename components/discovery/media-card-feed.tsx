@@ -2,25 +2,16 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { Check, MapPin, Plus } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
-import {
-  MediaExecutionSummary,
-  MediaTrustScoreBadge,
-} from "@/components/media/media-trust-score";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
-import {
-  catalogThumbnailImageProps,
-  catalogToMediaItem,
-} from "@/lib/media-catalog-map";
-import { resolveMediaCpmWon } from "@/lib/compare-quote";
-import { resolvePerformanceMetrics } from "@/lib/media-performance";
+import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
+import { buildCatalogItemMetricLine } from "@/lib/media-card-metrics";
 import {
   formatCatalogPriceFieldWon,
-  formatCpmKrw,
   formatPricePeriodShortLabel,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
@@ -31,7 +22,6 @@ type FeedProps = Pick<
   | "item"
   | "href"
   | "highlights"
-  | "locationLine"
   | "priceLabel"
   | "isKo"
   | "inCompare"
@@ -57,11 +47,32 @@ function collectGalleryImages(item: HomeCatalogMediaItem): string[] {
   return urls.slice(0, 6);
 }
 
+function CategoryTrustLine({
+  type,
+  trustScore,
+  isKo,
+}: {
+  type?: string;
+  trustScore?: number;
+  isKo: boolean;
+}) {
+  if (!type && trustScore == null) return null;
+  const parts: string[] = [];
+  if (type?.trim()) parts.push(type.trim());
+  if (trustScore != null) {
+    parts.push(isKo ? `신뢰도 ${trustScore}` : `Trust ${trustScore}`);
+  }
+  return (
+    <p className="tkad-type-label text-tkad-muted">
+      {parts.join(" · ")}
+    </p>
+  );
+}
+
 export function DiscoveryMediaCardFeed({
   item,
   href,
   highlights = [],
-  locationLine = null,
   priceLabel = null,
   isKo = true,
   inCompare = false,
@@ -72,14 +83,12 @@ export function DiscoveryMediaCardFeed({
   rank,
   showPlanButton = true,
 }: FeedProps) {
-  const media = catalogToMediaItem(item);
+  const locale = isKo ? "ko-KR" : "en-US";
   const images = collectGalleryImages(item);
   const heroSrc = images[0];
   const heroImage = heroSrc ? catalogThumbnailImageProps(heroSrc) : null;
   const extraImages = images.length - 1;
-
-  const metrics = resolvePerformanceMetrics(media);
-  const cpm = resolveMediaCpmWon(media);
+  const metricLine = buildCatalogItemMetricLine(item, isKo, locale);
   const periodLabel = formatPricePeriodShortLabel(
     item.pricePeriod,
     isKo ? "ko" : "en",
@@ -87,23 +96,17 @@ export function DiscoveryMediaCardFeed({
 
   const formattedNumericPrice =
     item.price && item.price > 0
-      ? formatCatalogPriceFieldWon(item.price, isKo ? "ko-KR" : "en-US")
+      ? formatCatalogPriceFieldWon(item.price, locale)
       : null;
   const displayPrice =
     priceLabel?.trim() || formattedNumericPrice || null;
 
-  const locationDisplay =
-    locationLine ?? item.region ?? (isKo ? "위치 정보 없음" : "No location");
-
-  const showTrust =
-    item.trustScore != null || item.executionCount != null;
-
   const planItem = planCartItemFromCatalog(item, "search");
 
   const thumbBlock = (
-    <div className="relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800">
+    <div className="relative aspect-[4/3] h-full min-h-[6.5rem] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800">
       {rank != null ? (
-        <span className="absolute left-1.5 top-1.5 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-[10px] font-black text-white shadow-md">
+        <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-[10px] font-black text-white shadow-md">
           {rank}
         </span>
       ) : null}
@@ -121,9 +124,21 @@ export function DiscoveryMediaCardFeed({
           {isKo ? "이미지 준비중" : "No image"}
         </div>
       )}
-      <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="feed" />
+      <MediaThumbnailTrustOverlay
+        item={item}
+        isKo={isKo}
+        variant="feed"
+        verifiedOnly
+      />
+      {metricLine ? (
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-2 pb-1.5 pt-6">
+          <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
+            {metricLine}
+          </p>
+        </div>
+      ) : null}
       {extraImages > 0 ? (
-        <span className="tkad-type-note absolute bottom-1.5 right-1.5 rounded-md bg-black/60 px-1.5 py-0.5 font-semibold text-white backdrop-blur-sm">
+        <span className="tkad-type-note absolute bottom-1.5 right-1.5 z-20 rounded-md bg-black/60 px-1.5 py-0.5 font-semibold text-white backdrop-blur-sm">
           +{extraImages}
         </span>
       ) : null}
@@ -135,56 +150,35 @@ export function DiscoveryMediaCardFeed({
       className="discovery-media-card-feed min-w-0 max-w-full overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/[0.04]"
       data-discovery-media-card="feed"
     >
-      <div className="flex min-w-0 gap-3 p-3 sm:gap-4 sm:p-4">
-        <div className="w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 sm:min-w-[8rem] sm:max-w-[12rem]">
+      <div className="flex min-w-0 items-stretch gap-3 p-3 sm:gap-4 sm:p-3.5">
+        <div className="w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 self-stretch sm:min-w-[8rem] sm:max-w-[12rem]">
           {plannerMode && onTogglePlan ? (
             <button
               type="button"
               onClick={onTogglePlan}
-              className="block w-full text-left"
+              className="block h-full w-full text-left"
             >
               {thumbBlock}
             </button>
           ) : (
-            <Link href={href} className="block w-full">
+            <Link href={href} className="block h-full w-full">
               {thumbBlock}
             </Link>
           )}
         </div>
 
-        <div className="flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
-          <div className="min-w-0">
-            {item.type ? (
-              <p className="tkad-type-label text-tkad-accent">{item.type}</p>
-            ) : null}
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
+          <div className="min-w-0 space-y-1">
+            <CategoryTrustLine
+              type={item.type}
+              trustScore={item.trustScore}
+              isKo={isKo}
+            />
             <Link href={href} className="group block">
               <h3 className="tkad-type-title line-clamp-2 text-foreground group-hover:text-tkad-accent">
                 {item.name}
               </h3>
             </Link>
-            {showTrust ? (
-              <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5">
-                {item.trustScore != null ? (
-                  <MediaTrustScoreBadge
-                    score={item.trustScore}
-                    isKo={isKo}
-                    compact
-                  />
-                ) : null}
-                {item.executionCount != null ? (
-                  <MediaExecutionSummary
-                    count={item.executionCount}
-                    monthsAgo={item.lastExecutionMonthsAgo ?? null}
-                    isKo={isKo}
-                    className="tkad-type-note text-tkad-muted"
-                  />
-                ) : null}
-              </div>
-            ) : null}
-            <p className="tkad-type-meta mt-1 flex items-center gap-1 text-tkad-secondary">
-              <MapPin className="h-3 w-3 shrink-0" aria-hidden />
-              <span className="truncate">{locationDisplay}</span>
-            </p>
           </div>
 
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
@@ -194,21 +188,8 @@ export function DiscoveryMediaCardFeed({
             {displayPrice && !priceLabel?.trim() && periodLabel ? (
               <span className="tkad-type-note text-tkad-muted">{periodLabel}</span>
             ) : null}
-            {cpm != null ? (
-              <span className="tkad-type-note tabular-nums text-tkad-muted">
-                CPM {formatCpmKrw(cpm, isKo ? "ko-KR" : "en-US")}
-              </span>
-            ) : null}
             <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
           </div>
-
-          {item.dailyFootTraffic != null && item.dailyFootTraffic > 0 ? (
-            <p className="tkad-type-note text-tkad-muted">
-              {isKo
-                ? `일 ${item.dailyFootTraffic.toLocaleString("ko-KR")}명+`
-                : `${item.dailyFootTraffic.toLocaleString("en-US")}+ daily`}
-            </p>
-          ) : null}
 
           {highlights.length > 0 ? (
             <p className="tkad-type-note line-clamp-1 text-tkad-muted">
@@ -216,7 +197,7 @@ export function DiscoveryMediaCardFeed({
             </p>
           ) : null}
 
-          <div className="mt-auto border-t border-gray-100 pt-2 dark:border-white/8">
+          <div className="mt-auto pt-1">
             {plannerMode && onTogglePlan ? (
               <button
                 type="button"
@@ -249,7 +230,7 @@ export function DiscoveryMediaCardFeed({
                 inCompare={inCompare}
                 onToggleCompare={onToggleCompare}
                 addedFrom="search"
-                size="comfortable"
+                layout="dense"
               />
             ) : null}
           </div>
