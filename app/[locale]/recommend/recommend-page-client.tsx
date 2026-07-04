@@ -5,7 +5,6 @@ import { useTranslations, useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useToast } from "@/components/toast-provider";
-import { motion } from "framer-motion";
 import { useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -814,11 +813,9 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
               aria-hidden
               className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(120%_90%_at_15%_10%,rgba(168,85,247,0.28),transparent_55%),radial-gradient(110%_85%_at_90%_25%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(95%_75%_at_45%_95%,rgba(236,72,153,0.12),transparent_60%)]"
             />
-            <motion.div
+            <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[32px] border dark:border-white/10 border-gray-200"
-              animate={{ opacity: [0.35, 0.65, 0.35] }}
-              transition={{ duration: 1.8, repeat: Infinity, ease: "easeInOut" }}
+              className="pointer-events-none absolute inset-0 rounded-[32px] border dark:border-white/10 border-gray-200 motion-safe:animate-pulse"
             />
             <span className="relative z-10 text-[44px]" aria-hidden>
               🤖
@@ -842,14 +839,8 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
       </div>
       <div className="space-y-3 rounded-[28px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
         <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30">
-          <motion.div
-            className="h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
-            animate={{ x: ["-30%", "220%"] }}
-            transition={{
-              duration: 1.35,
-              repeat: Infinity,
-              ease: "easeInOut",
-            }}
+          <div
+            className="loading-slide h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
           />
         </div>
         <div className="space-y-2">

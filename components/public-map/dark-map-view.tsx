@@ -135,6 +135,21 @@ function MapTileLoadingTracker({
   return null;
 }
 
+/** Explicit map.remove() on unmount — dev HMR / Strict Mode container reuse 방지 */
+function MapLifecycleCleanup() {
+  const map = useMap();
+  useEffect(() => {
+    return () => {
+      try {
+        map.remove();
+      } catch {
+        /* noop — interrupted HMR */
+      }
+    };
+  }, [map]);
+  return null;
+}
+
 function MapResizeFix() {
   const map = useMap();
   useEffect(() => {
@@ -373,8 +388,14 @@ export default function DarkMapView({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
+  const [mapReady, setMapReady] = useState(false);
   const onTilesLoadingChange = useCallback((loading: boolean) => {
     setTilesLoading(loading);
+  }, []);
+
+  useEffect(() => {
+    setMapReady(true);
+    return () => setMapReady(false);
   }, []);
 
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
@@ -400,6 +421,7 @@ export default function DarkMapView({
           aria-hidden
         />
       ) : null}
+      {mapReady ? (
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={leafletZoom}
@@ -414,6 +436,7 @@ export default function DarkMapView({
         zoomControl={false}
         zoomAnimation
       >
+        <MapLifecycleCleanup />
         <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
         {subwayOverlayEnabled ? (
           <LazySeoulMetroOverlayLayer lightTiles={lightTiles} />
@@ -459,6 +482,12 @@ export default function DarkMapView({
           />
         ) : null}
       </MapContainer>
+      ) : (
+        <div
+          className="skeleton-shimmer h-full w-full min-h-[200px] bg-muted/40"
+          aria-hidden
+        />
+      )}
     </div>
   );
 }

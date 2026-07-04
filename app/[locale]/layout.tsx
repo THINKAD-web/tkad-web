@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, setRequestLocale } from "next-intl/server";
-import { headers } from "next/headers";
+import { PublicOnlyMount } from "@/components/public-only-mount";
 import { notFound } from "next/navigation";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { routing } from "@/i18n/routing";
@@ -150,9 +150,7 @@ export default async function LocaleLayout({ children, params }: Props) {
 
   setRequestLocale(locale);
   const messages = await getMessages();
-  const headerStore = await headers();
-  const isAdminRoute = headerStore.get("x-tkad-admin-route") === "1";
-  const structuredData = isAdminRoute ? null : buildStructuredDataGraph(locale);
+  const structuredData = buildStructuredDataGraph(locale);
 
   return (
     <html lang={locale} suppressHydrationWarning>
@@ -161,31 +159,44 @@ export default async function LocaleLayout({ children, params }: Props) {
       >
         <ThemeInitScript />
         {structuredData ? <JsonLd data={structuredData} /> : null}
-        {!isAdminRoute ? <SpeedInsightsLoader /> : null}
+        <PublicOnlyMount>
+          <SpeedInsightsLoader />
+        </PublicOnlyMount>
         <PwaAutoUpdate />
         <PublicAnalyticsLoader />
-        {!isAdminRoute ? (
+        <PublicOnlyMount>
           <Suspense fallback={null}>
             <GaTracker />
           </Suspense>
-        ) : null}
-        {!isAdminRoute ? <AbGaVariantSync /> : null}
+        </PublicOnlyMount>
+        <PublicOnlyMount>
+          <AbGaVariantSync />
+        </PublicOnlyMount>
         <ThemeProvider>
           <NextIntlClientProvider
             locale={locale}
             messages={messages}
             timeZone="Asia/Seoul"
           >
-            {!isAdminRoute ? <DeferredAnalytics /> : null}
+            <PublicOnlyMount>
+              <DeferredAnalytics />
+            </PublicOnlyMount>
             <LocaleRootBody
               skipLinkLabel={
                 locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
               }
               header={
-                <>
+                <Suspense
+                  fallback={
+                    <div
+                      className="h-14 shrink-0 md:h-16"
+                      aria-hidden
+                    />
+                  }
+                >
                   <SiteHeader />
                   <OnboardingProgressBar />
-                </>
+                </Suspense>
               }
             >
               {children}
