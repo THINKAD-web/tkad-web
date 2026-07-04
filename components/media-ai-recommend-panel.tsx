@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
-import { motion } from "framer-motion";
 import { Link } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
 import {
@@ -177,14 +176,8 @@ export default function MediaAiRecommendPanel({
           </p>
           <div className="space-y-3 rounded-2xl border border-gold/20 bg-navy/80 p-6 shadow-xl">
             <div className="h-3 overflow-hidden rounded-full dark:bg-white/10 bg-gray-100">
-              <motion.div
-                className="h-full w-2/5 rounded-full bg-gradient-to-r from-gold/70 to-gold"
-                animate={{ x: ["-30%", "220%"] }}
-                transition={{
-                  duration: 1.35,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
+              <div
+                className="loading-slide h-full w-2/5 rounded-full bg-gradient-to-r from-gold/70 to-gold"
               />
             </div>
             <div className="space-y-2">

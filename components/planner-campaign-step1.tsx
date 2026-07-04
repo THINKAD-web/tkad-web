@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { useTranslations } from "next-intl";
 import { MonitorPlay, Sparkles } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -15,11 +14,6 @@ import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-g
 type Props = {
   campaignGoal: PlannerCampaignGoal | null;
   onSelectGoal: (key: PlannerCampaignGoal) => void;
-};
-
-const list = {
-  visible: { transition: { staggerChildren: 0.05 } },
-  hidden: {},
 };
 
 export default function PlannerCampaignStep1({
@@ -45,27 +39,18 @@ export default function PlannerCampaignStep1({
           <p className={cn("mt-2", plannerNeon.subtext)}>{t("step1Desc")}</p>
         </div>
         <div className="p-5 sm:p-6">
-          <motion.div
-            initial="hidden"
-            animate="visible"
-            variants={list}
-          >
-            <PlannerCampaignGoalGrid
-              selected={campaignGoal}
-              onSelect={onSelectGoal}
-            />
-          </motion.div>
+          <PlannerCampaignGoalGrid
+            selected={campaignGoal}
+            onSelect={onSelectGoal}
+          />
         </div>
       </PlannerNeonCard>
 
-      <motion.aside
+      <aside
         className={cn(
           plannerNeon.card,
-          "tkad-planner-step1-aside overflow-hidden",
+          "tkad-planner-step1-aside animate-fade-in-up overflow-hidden",
         )}
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}
       >
         <div className="space-y-4 p-5">
           <p
@@ -77,18 +62,13 @@ export default function PlannerCampaignStep1({
             <MonitorPlay className="h-3.5 w-3.5" aria-hidden />
             {t("step1VisualTitle")}
           </p>
-          <motion.div
+          <div
             className={cn(
-              "relative overflow-hidden rounded-xl border",
+              "relative overflow-hidden rounded-xl border transition-transform motion-safe:duration-300",
               campaignGoal
-                ? "border-violet-400/50"
+                ? "border-violet-400/50 motion-safe:scale-[1.01]"
                 : "dark:border-white/10 border-gray-200",
             )}
-            animate={
-              campaignGoal
-                ? { scale: [1, 1.01, 1], transition: { duration: 0.6 } }
-                : {}
-            }
           >
             <div className="tkad-planner-step1-preview-frame aspect-[2.35/1] w-full bg-gray-100 dark:bg-[#020202]/80">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
@@ -103,12 +83,12 @@ export default function PlannerCampaignStep1({
                 </p>
               </div>
             </div>
-          </motion.div>
+          </div>
           <p className="text-xs leading-relaxed text-muted-foreground">
             {t("step1VisualDesc")}
           </p>
         </div>
-      </motion.aside>
+      </aside>
     </div>
   );
 }

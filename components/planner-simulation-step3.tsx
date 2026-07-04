@@ -10,6 +10,7 @@ import {
   type SetStateAction,
 } from "react";
 import { useTranslations } from "next-intl";
+import dynamic from "next/dynamic";
 import {
   Check,
   ChevronLeft,
@@ -18,7 +19,6 @@ import {
   Loader2,
   Trash2,
 } from "lucide-react";
-import { AnimatePresence, motion, type PanInfo } from "framer-motion";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -40,6 +40,19 @@ import {
 } from "@/components/planner/composite-preview";
 import { usePlannerStore } from "@/lib/planner/store";
 import { Move, RotateCcw } from "lucide-react";
+
+const PlannerSimulationSlideDeck = dynamic(
+  () =>
+    import("@/components/planner/planner-simulation-slide-deck").then((m) => ({
+      default: m.PlannerSimulationSlideDeck,
+    })),
+  {
+    ssr: false,
+    loading: () => (
+      <div className="skeleton-shimmer aspect-[4/3] w-full rounded-none bg-muted/40" />
+    ),
+  },
+);
 
 type Props = {
   selectedMedia: MediaItem[];
@@ -128,7 +141,7 @@ export default function PlannerSimulationStep3({
   }, [maxIdx]);
 
   const onSlideDragEnd = useCallback(
-    (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
+    (_e: MouseEvent | TouchEvent | PointerEvent, info: { offset: { x: number } }) => {
       const { offset, velocity } = info;
       if (
         (offset.x < -SWIPE_DRAG_THRESHOLD || velocity.x < -420) &&
@@ -458,60 +471,19 @@ export default function PlannerSimulationStep3({
                 </button>
 
                 <div className="overflow-hidden rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-100">
-                  <AnimatePresence
-                    initial={false}
-                    custom={slideDir === 0 ? 1 : slideDir}
-                    mode="wait"
-                  >
-                    {current ? (
-                      <motion.div
-                        key={current.id}
-                        custom={slideDir === 0 ? 1 : slideDir}
-                        variants={{
-                          enter: (dir: number) => ({
-                            x: dir > 0 ? 56 : -56,
-                            opacity: 0,
-                          }),
-                          center: { x: 0, opacity: 1 },
-                          exit: (dir: number) => ({
-                            x: dir < 0 ? 56 : -56,
-                            opacity: 0,
-                          }),
-                        }}
-                        initial="enter"
-                        animate="center"
-                        exit="exit"
-                        transition={{
-                          duration: 0.28,
-                          ease: [0.22, 1, 0.36, 1],
-                        }}
-                        drag="x"
-                        dragConstraints={{ left: 0, right: 0 }}
-                        dragElastic={0.85}
-                        onDragEnd={onSlideDragEnd}
-                        className="touch-pan-y"
-                      >
-                        <CompositePreview
-                          mediaImageUrl={current.url}
-                          mediaName={current.name}
-                          logoUrl={
-                            creativeUploadedUrl || creativeObjectUrl
-                          }
-                          placement={
-                            mediaPlacements[current.id] ??
-                            DEFAULT_LOGO_PLACEMENT
-                          }
-                          editable={editing}
-                          onPlacementChange={(next) =>
-                            setMediaPlacement(current.id, next)
-                          }
-                          missingLabel={t("mediaPhotoMissing")}
-                          badgeLabel={t("simBadge")}
-                          className="rounded-none"
-                        />
-                      </motion.div>
-                    ) : null}
-                  </AnimatePresence>
+                  <PlannerSimulationSlideDeck
+                    current={current}
+                    slideDir={slideDir}
+                    editing={editing}
+                    creativeUploadedUrl={creativeUploadedUrl}
+                    creativeObjectUrl={creativeObjectUrl}
+                    mediaPlacements={mediaPlacements}
+                    defaultPlacement={DEFAULT_LOGO_PLACEMENT}
+                    onSlideDragEnd={onSlideDragEnd}
+                    onPlacementChange={setMediaPlacement}
+                    missingLabel={t("mediaPhotoMissing")}
+                    badgeLabel={t("simBadge")}
+                  />
                 </div>
               </div>
 
