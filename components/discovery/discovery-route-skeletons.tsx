@@ -78,7 +78,7 @@ export function DiscoveryMediaFeedSkeletonList({
   );
 }
 
-/** `DiscoveryMediaCard` map-tile variant */
+/** `DiscoveryMediaCard` map-tile variant — horizontal list tile */
 export function DiscoveryMapTileSkeleton({ className }: { className?: string }) {
   return (
     <div
@@ -88,12 +88,14 @@ export function DiscoveryMapTileSkeleton({ className }: { className?: string }) 
       )}
       aria-hidden
     >
-      <DiscoveryBone className="aspect-[4/3] w-full rounded-none" />
-      <div className="space-y-2 p-2.5">
-        <DiscoveryBone className="h-4 w-4/5" />
-        <DiscoveryBone className="h-3 w-2/3" />
-        <DiscoveryBone className="h-4 w-1/2" />
-        <DiscoveryBone className="h-8 w-full rounded-lg" />
+      <div className="flex min-w-0 items-stretch gap-3 p-3">
+        <DiscoveryBone className="aspect-[4/3] h-full min-h-[6.5rem] w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 rounded-xl" />
+        <div className="flex min-w-0 flex-1 flex-col gap-2 py-0.5">
+          <DiscoveryBone className="h-3 w-24" />
+          <DiscoveryBone className="h-4 w-4/5" />
+          <DiscoveryBone className="h-4 w-1/2" />
+          <DiscoveryBone className="mt-auto h-16 w-full rounded-xl" />
+        </div>
       </div>
     </div>
   );

@@ -4,19 +4,16 @@ import { forwardRef } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Check, Plus } from "lucide-react";
+import { DiscoveryMediaCardHorizontal } from "@/components/discovery/media-card-horizontal";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
+import { mapItemToDisplayModel } from "@/lib/media-card-display";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
-import type { MapMapItem } from "@/components/media-map/media-map-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
-import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
-import { buildMapItemMetricLine } from "@/lib/media-map/map-item-metrics";
-import { visibilityPinTierDefForScore } from "@/lib/map-pin-visibility-colors";
 import { cn } from "@/lib/utils";
 import type {
   DiscoveryMediaCardCatalogProps,
@@ -335,10 +332,8 @@ export const DiscoveryMediaCardMapTile = forwardRef<
     selected = false,
     hovered = false,
     inCompare,
-    inCart,
     onSelect,
     onToggleCompare,
-    onToggleCart,
     onMouseEnter,
     onMouseLeave,
     onFocus,
@@ -346,19 +341,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
   },
   ref,
 ) {
-  const thumb = catalogThumbnailImageProps(item.image);
-  const locationLine =
-    [item.district, item.region].filter(Boolean).join(" · ") || item.location;
-  const priceLabel = formatMediaPriceWithPeriodSuffix(
-    item.price,
-    item.pricePeriod,
-    locale,
-  );
-  const metricLine = buildMapItemMetricLine(item, isKo, locale);
-  const visTier =
-    item.visibilityScore > 0
-      ? visibilityPinTierDefForScore(item.visibilityScore)
-      : null;
+  const model = mapItemToDisplayModel(item, locale, isKo);
 
   return (
     <li
@@ -366,12 +349,8 @@ export const DiscoveryMediaCardMapTile = forwardRef<
       role="button"
       tabIndex={0}
       className={cn(
-        "relative cursor-pointer overflow-hidden rounded-2xl border bg-white transition-all hover:shadow-md active:scale-[0.99] dark:bg-white/5",
-        selected
-          ? "z-0 border-2 border-violet-500/90 shadow-md shadow-violet-500/15 ring-2 ring-inset ring-violet-400/35 dark:border-violet-400 dark:shadow-violet-500/20"
-          : hovered
-            ? "border border-cyan-400/50 dark:border-cyan-400/40"
-            : "border border-gray-100 dark:border-white/10",
+        "relative list-none cursor-pointer transition-all",
+        selected ? "z-0" : "z-0",
       )}
       onClick={() => onSelect(item.id)}
       onKeyDown={(e) => {
@@ -385,96 +364,27 @@ export const DiscoveryMediaCardMapTile = forwardRef<
       onFocus={onFocus}
       onBlur={onBlur}
     >
-      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
-        {thumb ? (
-          <Image
-            src={thumb.src}
-            alt={item.name}
-            fill
-            className="object-cover"
-            sizes="(max-width: 768px) 50vw, 280px"
-            unoptimized={thumb.unoptimized}
-          />
-        ) : (
-          <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
-            {isKo ? "준비중" : "No image"}
-          </div>
+      <DiscoveryMediaCardHorizontal
+        model={model}
+        isKo={isKo}
+        selected={selected}
+        hovered={hovered}
+        inCompare={inCompare}
+        onToggleCompare={onToggleCompare}
+        planItem={planCartItemFromCatalog(
+          {
+            id: item.id,
+            name: item.name,
+            type: item.type,
+            region: item.region,
+            price: item.price,
+            thumbnailUrl: item.image ?? undefined,
+          },
+          "map",
         )}
-
-        {visTier ? (
-          <span
-            className="tkad-type-label absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 font-bold tabular-nums shadow-sm"
-            style={{
-              backgroundColor: visTier.fill,
-              color: visTier.text,
-              border: `1px solid ${visTier.stroke}`,
-            }}
-          >
-            {item.visibilityScore}
-          </span>
-        ) : null}
-
-        {(item.isInstantBooking || item.isVerified) && (
-          <div className="absolute right-1.5 top-1.5 flex max-w-[calc(100%-3rem)] flex-col items-end gap-0.5">
-            {item.isInstantBooking ? (
-              <span className="tkad-type-note rounded bg-violet-600/90 px-1.5 py-0.5 font-semibold text-white shadow-sm">
-                {isKo ? "즉시예약" : "Instant"}
-              </span>
-            ) : null}
-            {item.isVerified ? (
-              <span className="tkad-type-note rounded bg-emerald-600/90 px-1.5 py-0.5 font-semibold text-white shadow-sm">
-                {isKo ? "검증" : "Verified"}
-              </span>
-            ) : null}
-          </div>
-        )}
-
-        {metricLine ? (
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">
-            <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
-              {metricLine}
-            </p>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="p-2.5">
-        <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
-          {item.name}
-        </p>
-        <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
-          {locationLine}
-        </p>
-        <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
-          <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
-            {priceLabel}
-          </p>
-          <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
-        </div>
-
-        <DiscoveryMediaCardActions
-          mediaId={item.id}
-          planItem={planCartItemFromCatalog(
-            {
-              id: item.id,
-              name: item.name,
-              type: item.type,
-              region: item.region,
-              price: item.price,
-              thumbnailUrl: item.image ?? undefined,
-            },
-            "map",
-          )}
-          detailHref={`/media/${item.id}`}
-          isKo={isKo}
-          inCompare={inCompare}
-          onToggleCompare={onToggleCompare}
-          addedFrom="map"
-          size="compact"
-          className="mt-2"
-          stopPropagation
-        />
-      </div>
+        addedFrom="map"
+        stopPropagation
+      />
     </li>
   );
 });
