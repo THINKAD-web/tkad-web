@@ -966,10 +966,10 @@ export default function MediaMapPageClient() {
           aria-label={isKo ? "목록 보기" : "List view"}
           aria-pressed={sheetSnap === "full"}
           className={cn(
-            "flex items-center gap-1 px-2 py-1 tkad-type-meta font-medium transition-colors",
+            "flex items-center gap-1 px-2 py-1 text-xs leading-[1.375] font-medium transition-colors",
             sheetSnap === "full"
-              ? "bg-violet-500 text-white"
-              : "text-gray-600 dark:text-white/70",
+              ? "bg-violet-500 !text-white"
+              : "tkad-type-meta text-gray-600 dark:text-white/70",
           )}
         >
           <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -981,10 +981,10 @@ export default function MediaMapPageClient() {
           aria-label={isKo ? "지도 보기" : "Map view"}
           aria-pressed={sheetSnap === "peek"}
           className={cn(
-            "flex items-center gap-1 px-2 py-1 tkad-type-meta font-medium transition-colors",
+            "flex items-center gap-1 px-2 py-1 text-xs leading-[1.375] font-medium transition-colors",
             sheetSnap === "peek"
-              ? "bg-violet-500 text-white"
-              : "text-gray-600 dark:text-white/70",
+              ? "bg-violet-500 !text-white"
+              : "tkad-type-meta text-gray-600 dark:text-white/70",
           )}
         >
           <MapIcon className="h-3.5 w-3.5 shrink-0" aria-hidden />
@@ -1051,7 +1051,7 @@ export default function MediaMapPageClient() {
                   type="button"
                   disabled={loading}
                   onClick={handleSearchThisArea}
-                  className="pointer-events-auto relative tkad-type-meta inline-flex h-10 items-center gap-2 rounded-full border border-violet-500/80 bg-violet-600 px-4 font-semibold text-white shadow-lg shadow-violet-600/35 backdrop-blur-md transition-colors hover:bg-violet-500 disabled:opacity-70 motion-safe:animate-pulse dark:border-violet-400/70 dark:bg-violet-600 dark:shadow-violet-900/40 dark:hover:bg-violet-500"
+                  className="pointer-events-auto relative inline-flex h-10 items-center gap-2 rounded-full border border-violet-500/80 bg-violet-600 px-4 text-xs leading-[1.375] font-semibold !text-white shadow-lg shadow-violet-600/35 backdrop-blur-md transition-colors hover:bg-violet-500 disabled:opacity-70 motion-safe:animate-pulse dark:border-violet-400/70 dark:bg-violet-600 dark:shadow-violet-900/40 dark:hover:bg-violet-500"
                 >
                   {loading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
