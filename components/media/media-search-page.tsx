@@ -671,24 +671,22 @@ function MediaSearchPageInner({
     }
 
     if (viewMode === "card") {
+      const highlights = feedHighlightChips(item);
       return (
-        <div key={item.id} className="h-full min-h-0">
-          <DiscoveryMediaCard
-            variant="compact"
-            compactLayout="grid"
-            item={item}
-            href={href}
-            priceLabel={priceLabel}
-            isKo={isKo}
-            className="h-full"
-            inCompare={isInCompare(item.id)}
-            onToggleCompare={() => toggleCompare(item)}
-            plannerMode={plannerMode}
-            isInPlan={inPlan}
-            onTogglePlan={plannerMode ? togglePlan : undefined}
-            showPlanButton={!plannerMode}
-          />
-        </div>
+        <DiscoveryMediaCard
+          key={item.id}
+          variant="feed"
+          item={item}
+          href={href}
+          highlights={highlights}
+          isKo={isKo}
+          inCompare={isInCompare(item.id)}
+          onToggleCompare={() => toggleCompare(item)}
+          plannerMode={plannerMode}
+          isInPlan={inPlan}
+          onTogglePlan={plannerMode ? togglePlan : undefined}
+          showPlanButton={!plannerMode}
+        />
       );
     }
 
@@ -872,10 +870,8 @@ function MediaSearchPageInner({
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             cn(
-              "grid auto-rows-fr items-stretch [&>*]:min-w-0",
-              plannerMode
-                ? "grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
-                : "grid-cols-2 gap-3 md:grid-cols-3 lg:grid-cols-4",
+              "grid grid-cols-2 gap-3 md:gap-4",
+              plannerMode && "gap-2 sm:gap-3",
             ),
           viewMode === "compact" &&
             cn(
@@ -895,16 +891,14 @@ function MediaSearchPageInner({
               key={i}
               className={cn(
                 "animate-pulse",
-                viewMode === "card"
+                viewMode === "card" || viewMode === "feed"
                   ? "overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10"
-                  : viewMode === "feed"
-                    ? "space-y-3 py-4"
-                    : viewMode === "compact"
-                      ? "flex min-h-[3rem] items-center gap-2.5"
-                      : "flex gap-3",
+                  : viewMode === "compact"
+                    ? "flex min-h-[3rem] items-center gap-2.5"
+                    : "flex gap-3",
               )}
             >
-              {viewMode === "feed" ? (
+              {viewMode === "feed" || viewMode === "card" ? (
                 <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/10 md:flex-row md:items-stretch">
                   <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 dark:bg-white/10 md:w-[48%] md:aspect-auto md:min-h-[12rem]" />
                   <div className="space-y-2">
