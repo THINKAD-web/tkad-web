@@ -9,6 +9,40 @@ import { isBunnyStorageConfigured } from "@/lib/bunny-storage";
 const CLOUDINARY_HOST = /(^|\.)res\.cloudinary\.com$/i;
 const BUNNY_CDN = /\.b-cdn\.net$/i;
 
+/**
+ * Fix common bad DB/import prefixes (`hthttps://`, duplicated schemes).
+ * Returns null when the string cannot be used as a URL.
+ */
+export function sanitizeMediaImageUrl(
+  url: string | null | undefined,
+): string | null {
+  let raw = url?.trim();
+  if (!raw) return null;
+
+  // hthttps:// → https://
+  raw = raw.replace(/^ht+(?=https?:\/\/)/i, "");
+  // httpshttps:// → https://
+  raw = raw.replace(/^(https?:\/\/)(?:https?:\/\/)+/i, "$1");
+
+  if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
+    if (/b-cdn\.net/i.test(raw)) {
+      raw = `https://${raw.replace(/^\/+/, "")}`;
+    } else {
+      return null;
+    }
+  }
+
+  try {
+    const parsed = new URL(raw);
+    if (parsed.protocol !== "http:" && parsed.protocol !== "https:") {
+      return null;
+    }
+    return parsed.href;
+  } catch {
+    return null;
+  }
+}
+
 export type OptimizeImageOptions = {
   width?: number;
   quality?: number;
@@ -16,7 +50,7 @@ export type OptimizeImageOptions = {
 };
 
 export function isCloudinaryMediaUrl(url: string | null | undefined): boolean {
-  const raw = url?.trim();
+  const raw = sanitizeMediaImageUrl(url);
   if (!raw) return false;
   try {
     const host = new URL(raw).hostname.toLowerCase();
@@ -27,7 +61,7 @@ export function isCloudinaryMediaUrl(url: string | null | undefined): boolean {
 }
 
 export function isBunnyMediaUrl(url: string | null | undefined): boolean {
-  const raw = url?.trim();
+  const raw = sanitizeMediaImageUrl(url);
   if (!raw) return false;
   try {
     return BUNNY_CDN.test(new URL(raw).hostname.toLowerCase());
@@ -61,7 +95,7 @@ export function getPreferredMediaImageUrl(
 export function bunnyObjectPathFromPublicUrl(
   url: string | null | undefined,
 ): string | null {
-  const raw = url?.trim();
+  const raw = sanitizeMediaImageUrl(url);
   if (!raw || !isBunnyMediaUrl(raw)) return null;
   try {
     const path = new URL(raw).pathname.replace(/^\/+/, "");
@@ -95,7 +129,7 @@ export function shouldUseUnoptimizedImage(_url: string | null | undefined): bool
 export function resolvePublicMediaImageUrl(
   url: string | null | undefined,
 ): string | null {
-  const raw = url?.trim();
+  const raw = sanitizeMediaImageUrl(url);
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
   if (isBunnyMediaUrl(raw)) {
     return buildBunnyMediaProxyUrl(raw) ?? raw;
@@ -116,7 +150,7 @@ export function resolveCatalogImageSrc(
   opts?: { width?: number },
 ): ResolvedCatalogImage | null {
   const cardWidth = opts?.width ?? CATALOG_CARD_WIDTH;
-  const raw = url?.trim();
+  const raw = sanitizeMediaImageUrl(url);
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
   if (raw.startsWith("/api/bunny-media/")) {
     return { src: raw, unoptimized: false };
