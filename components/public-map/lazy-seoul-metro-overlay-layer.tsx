@@ -12,9 +12,9 @@ export function LazySeoulMetroOverlayLayer({ lightTiles }: MetroLayerProps) {
 
   useEffect(() => {
     let cancelled = false;
-    void import("@/components/public-map/seoul-metro-overlay-layer").then(
+    void import("@/components/public-map/metro-overlay-layer").then(
       (mod) => {
-        if (!cancelled) setLayer(() => mod.SeoulMetroOverlayLayer);
+        if (!cancelled) setLayer(() => mod.MetroOverlayLayer);
       },
     );
     return () => {

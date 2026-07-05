@@ -1,0 +1,76 @@
+{
+  "version": 1,
+  "generatedAt": "2026-07-05T14:58:27.596Z",
+  "chunks": [
+    {
+      "id": "capital",
+      "nameKo": "수도권",
+      "url": "/geo/metro/capital.json",
+      "bbox": {
+        "south": 36.9,
+        "west": 126.4,
+        "north": 37.85,
+        "east": 127.45
+      },
+      "byteSize": 662839,
+      "lineCount": 197,
+      "stationCount": 664
+    },
+    {
+      "id": "busan",
+      "nameKo": "부산",
+      "url": "/geo/metro/busan.json",
+      "bbox": {
+        "south": 35,
+        "west": 128.75,
+        "north": 35.4,
+        "east": 129.25
+      },
+      "byteSize": 39261,
+      "lineCount": 6,
+      "stationCount": 97
+    },
+    {
+      "id": "daegu",
+      "nameKo": "대구",
+      "url": "/geo/metro/daegu.json",
+      "bbox": {
+        "south": 35.72,
+        "west": 128.45,
+        "north": 36.02,
+        "east": 128.78
+      },
+      "byteSize": 24088,
+      "lineCount": 4,
+      "stationCount": 63
+    },
+    {
+      "id": "gwangju",
+      "nameKo": "광주",
+      "url": "/geo/metro/gwangju.json",
+      "bbox": {
+        "south": 35.05,
+        "west": 126.72,
+        "north": 35.24,
+        "east": 126.95
+      },
+      "byteSize": 22387,
+      "lineCount": 4,
+      "stationCount": 55
+    },
+    {
+      "id": "daejeon",
+      "nameKo": "대전",
+      "url": "/geo/metro/daejeon.json",
+      "bbox": {
+        "south": 36.22,
+        "west": 127.32,
+        "north": 36.48,
+        "east": 127.55
+      },
+      "byteSize": 8832,
+      "lineCount": 2,
+      "stationCount": 22
+    }
+  ]
+}
