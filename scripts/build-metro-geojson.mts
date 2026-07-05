@@ -87,6 +87,7 @@ function resolveCapitalLineId(tags: OsmTags): string | null {
   if (/경춘|gyeongchun/i.test(hay) && !/ktx/i.test(hay)) return "gyeongchun";
   if (/서해선|seohae/i.test(hay)) return "seohae";
   if (/신림선|sillim/i.test(hay)) return "silim";
+  if (/우이신설|ui.?sinseol|ui-sinseol/i.test(hay)) return "ui-sinseol";
   if (/공항|arex|airport railroad/i.test(hay) && !/직통|express/i.test(hay))
     return "arex";
   if (/신분당|shinbundang/i.test(hay)) return "shinbundang";
@@ -560,16 +561,27 @@ async function writeIndex(
     stationCount: number;
   }>,
 ) {
+  let existingManifest: MetroIndexManifest | null = null;
+  try {
+    existingManifest = JSON.parse(
+      await readFile(INDEX_PATH, "utf8"),
+    ) as MetroIndexManifest;
+  } catch {
+    /* fresh write */
+  }
+
   const manifest: MetroIndexManifest = {
     version: 1,
     generatedAt: new Date().toISOString(),
     chunks: stats.map(({ cityId, byteSize, lineCount, stationCount }) => {
       const meta = METRO_CITY_META[cityId];
+      const prev = existingManifest?.chunks.find((c) => c.id === cityId);
       return {
         id: cityId,
         nameKo: meta.nameKo,
         url: `/geo/metro/${cityId}.json`,
         bbox: meta.bbox,
+        ...(prev?.alwaysLoad ? { alwaysLoad: true } : {}),
         byteSize,
         lineCount,
         stationCount,
@@ -638,6 +650,12 @@ async function main() {
       const s = await buildProvincial(cityId);
       stats.push({ cityId, ...s });
     }
+  }
+
+  // ktx-srt 등 Overpass 빌드 대상 외 청크 — 기존 파일 유지
+  if (!stats.some((s) => s.cityId === "ktx-srt")) {
+    const ktx = await readExistingStats("ktx-srt");
+    if (ktx) stats.push({ cityId: "ktx-srt", ...ktx });
   }
 
   await writeIndex(stats);

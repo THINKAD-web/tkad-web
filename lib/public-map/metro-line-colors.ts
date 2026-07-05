@@ -38,7 +38,8 @@ export type SeoulMetroLineId =
   | "uijeongbu"
   | "gyeongchun"
   | "seohae"
-  | "silim";
+  | "silim"
+  | "ui-sinseol";
 
 export type SeoulMetroLineDef = MetroLineDef & { id: SeoulMetroLineId };
 
@@ -66,6 +67,7 @@ export const SEOUL_METRO_LINES: readonly SeoulMetroLineDef[] = [
   { id: "gyeongchun", nameKo: "경춘선", nameEn: "Gyeongchun Line", color: "#0C8E72" },
   { id: "seohae", nameKo: "서해선", nameEn: "Seohae Line", color: "#81A1D2" },
   { id: "silim", nameKo: "신림선", nameEn: "Sillim Line", color: "#4EA346" },
+  { id: "ui-sinseol", nameKo: "우이신설선", nameEn: "Ui–Sinseol Line", color: "#B0CE18" },
 ] as const;
 
 export const SEOUL_METRO_MVP_LINE_IDS: SeoulMetroLineId[] = SEOUL_METRO_LINES.map(

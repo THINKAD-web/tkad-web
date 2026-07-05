@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-07-02T13:38:41.616Z",
+  "generatedAt": "2026-07-05T16:00:37.967Z",
   "bbox": {
     "south": 36.9,
     "west": 126.4,
@@ -29,27 +29,16 @@
     "seohae",
     "shinbundang",
     "silim",
+    "ui-sinseol",
     "uijeongbu"
   ],
-  "unmatchedCount": 7,
+  "unmatchedCount": 5,
   "unmatched": [
     {
       "id": 6094786,
       "name": "경부선 (부산역 행)",
       "ref": "201",
       "route": "train"
-    },
-    {
-      "id": 7533582,
-      "name": "서울 경전철 우이신설선: 북한산우이 → 신설동",
-      "ref": "W",
-      "route": "light_rail"
-    },
-    {
-      "id": 7533583,
-      "name": "서울 경전철 우이신설선: 신설동 → 북한산우이",
-      "ref": "W",
-      "route": "light_rail"
     },
     {
       "id": 8266158,

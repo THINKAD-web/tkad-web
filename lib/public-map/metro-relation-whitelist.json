@@ -63,5 +63,7 @@
   "16244687": { "lineId": "seohae", "lineNameKo": "서해선" },
   "16244688": { "lineId": "seohae", "lineNameKo": "서해선" },
   "14191876": { "lineId": "silim", "lineNameKo": "신림선" },
-  "14191877": { "lineId": "silim", "lineNameKo": "신림선" }
+  "14191877": { "lineId": "silim", "lineNameKo": "신림선" },
+  "7533582": { "lineId": "ui-sinseol", "lineNameKo": "우이신설선" },
+  "7533583": { "lineId": "ui-sinseol", "lineNameKo": "우이신설선" }
 }
