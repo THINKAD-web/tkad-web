@@ -11,8 +11,13 @@ import type {
 } from "@/lib/public-map/metro-types";
 import { METRO_INDEX_URL } from "@/lib/public-map/metro-types";
 import type { MetroCityId } from "@/lib/public-map/metro-line-colors";
+import type { RailOperator } from "@/lib/public-map/ktx-srt-stations";
 import {
   featureInBounds,
+  ktxSrtLabelHtml,
+  ktxSrtLabelVisible,
+  ktxSrtMarkerHtml,
+  ktxSrtStationVisible,
   lineStyleForBand,
   resolveMetroZoomBand,
   stationLabelHtml,
@@ -26,14 +31,19 @@ const SUBWAY_PANE_Z = 350;
 
 type ChunkRuntime = {
   cityId: MetroCityId;
-  linesLayer: L.GeoJSON;
+  linesLayer: L.GeoJSON | null;
   stationsLayer: L.LayerGroup;
   labelsLayer: L.LayerGroup;
+  isKtxSrt: boolean;
 };
 
 type Props = {
   lightTiles: boolean;
 };
+
+function isKtxSrtCity(cityId: MetroCityId): boolean {
+  return cityId === "ktx-srt";
+}
 
 function normalizeGeo(
   data: MetroGeoJson,
@@ -51,7 +61,7 @@ function normalizeGeo(
   };
 }
 
-function buildChunkLayers(
+function buildCityChunkLayers(
   data: MetroGeoJson,
   cityId: MetroCityId,
   map: L.Map,
@@ -110,7 +120,78 @@ function buildChunkLayers(
   stationsLayer.addTo(map);
   labelsLayer.addTo(map);
 
-  return { cityId, linesLayer, stationsLayer, labelsLayer };
+  return { cityId, linesLayer, stationsLayer, labelsLayer, isKtxSrt: false };
+}
+
+function buildKtxSrtChunkLayers(
+  data: MetroGeoJson,
+  map: L.Map,
+  lightTiles: boolean,
+): ChunkRuntime {
+  const geo = normalizeGeo(data, "ktx-srt");
+  const stationsLayer = L.layerGroup([], { pane: SUBWAY_PANE });
+  const labelsLayer = L.layerGroup([], { pane: SUBWAY_PANE });
+
+  for (const feature of geo.features) {
+    if (feature.properties.kind !== "station") continue;
+    if (feature.geometry.type !== "Point") continue;
+    const [lng, lat] = feature.geometry.coordinates;
+    const props = feature.properties;
+    const operator = (props.railOperator ?? props.lineId) as RailOperator;
+
+    const markerIcon = L.divIcon({
+      className: "tkad-ktx-srt-marker",
+      html: ktxSrtMarkerHtml(props.color, lightTiles),
+      iconSize: [14, 14],
+      iconAnchor: [7, 7],
+    });
+    const marker = L.marker([lat, lng], {
+      icon: markerIcon,
+      pane: SUBWAY_PANE,
+      interactive: false,
+      opacity: 0,
+    });
+    marker.feature = feature as GeoJSON.Feature<GeoJSON.Point, MetroFeatureProperties>;
+    stationsLayer.addLayer(marker);
+
+    const labelIcon = L.divIcon({
+      className: "tkad-ktx-srt-label",
+      html: ktxSrtLabelHtml(props.nameKo ?? "", operator, lightTiles),
+      iconSize: [0, 0],
+      iconAnchor: [0, 12],
+    });
+    const label = L.marker([lat, lng], {
+      icon: labelIcon,
+      pane: SUBWAY_PANE,
+      interactive: false,
+      opacity: 0,
+    });
+    label.feature = feature as GeoJSON.Feature<GeoJSON.Point, MetroFeatureProperties>;
+    labelsLayer.addLayer(label);
+  }
+
+  stationsLayer.addTo(map);
+  labelsLayer.addTo(map);
+
+  return {
+    cityId: "ktx-srt",
+    linesLayer: null,
+    stationsLayer,
+    labelsLayer,
+    isKtxSrt: true,
+  };
+}
+
+function buildChunkLayers(
+  data: MetroGeoJson,
+  cityId: MetroCityId,
+  map: L.Map,
+  lightTiles: boolean,
+): ChunkRuntime {
+  if (isKtxSrtCity(cityId)) {
+    return buildKtxSrtChunkLayers(data, map, lightTiles);
+  }
+  return buildCityChunkLayers(data, cityId, map, lightTiles);
 }
 
 /** Nationwide metro overlay — manifest index + bounds-based chunk fetch */
@@ -141,26 +222,52 @@ export function MetroOverlayLayer({ lightTiles }: Props) {
       const zoom = m.getZoom();
       const band = resolveMetroZoomBand(zoom);
       const light = lightTilesRef.current;
-      const showStations = stationVisible(band);
+      const showCityStations = stationVisible(band);
+      const showKtx = ktxSrtStationVisible(zoom);
+      const showKtxLabels = ktxSrtLabelVisible(zoom);
 
       for (const chunk of chunksRef.current.values()) {
-        chunk.linesLayer.eachLayer((layer) => {
-          if (!(layer instanceof L.Path)) return;
-          const feature = (layer as L.Path & { feature?: GeoJSON.Feature })
-            .feature as GeoJSON.Feature<
-            GeoJSON.LineString,
-            MetroFeatureProperties
-          >;
-          if (!feature?.properties) return;
-          const inView = featureInBounds(feature, boundsAdapter);
-          if (!inView || band === "hidden") {
-            layer.setStyle({ opacity: 0, weight: 0 });
-            return;
-          }
-          layer.setStyle(
-            lineStyleForBand(feature.properties.color, light, band),
-          );
-        });
+        if (chunk.linesLayer) {
+          chunk.linesLayer.eachLayer((layer) => {
+            if (!(layer instanceof L.Path)) return;
+            const feature = (layer as L.Path & { feature?: GeoJSON.Feature })
+              .feature as GeoJSON.Feature<
+              GeoJSON.LineString,
+              MetroFeatureProperties
+            >;
+            if (!feature?.properties) return;
+            const inView = featureInBounds(feature, boundsAdapter);
+            if (!inView || band === "hidden") {
+              layer.setStyle({ opacity: 0, weight: 0 });
+              return;
+            }
+            layer.setStyle(
+              lineStyleForBand(feature.properties.color, light, band),
+            );
+          });
+        }
+
+        if (chunk.isKtxSrt) {
+          chunk.stationsLayer.eachLayer((layer) => {
+            if (!(layer instanceof L.Marker)) return;
+            const feature = (layer as L.Marker & { feature?: GeoJSON.Feature })
+              .feature as GeoJSON.Feature<GeoJSON.Point, MetroFeatureProperties>;
+            if (!feature?.properties) return;
+            const inView = featureInBounds(feature, boundsAdapter);
+            layer.setOpacity(showKtx && inView && band !== "hidden" ? 1 : 0);
+          });
+          chunk.labelsLayer.eachLayer((layer) => {
+            if (!(layer instanceof L.Marker)) return;
+            const feature = (layer as L.Marker & { feature?: GeoJSON.Feature })
+              .feature as
+              | GeoJSON.Feature<GeoJSON.Point, MetroFeatureProperties>
+              | undefined;
+            if (!feature?.properties) return;
+            const inView = featureInBounds(feature, boundsAdapter);
+            layer.setOpacity(showKtxLabels && inView && band !== "hidden" ? 1 : 0);
+          });
+          continue;
+        }
 
         chunk.stationsLayer.eachLayer((layer) => {
           if (!(layer instanceof L.CircleMarker)) return;
@@ -168,7 +275,7 @@ export function MetroOverlayLayer({ lightTiles }: Props) {
             .feature as GeoJSON.Feature<GeoJSON.Point, MetroFeatureProperties>;
           if (!feature?.properties) return;
           const inView = featureInBounds(feature, boundsAdapter);
-          if (!showStations || !inView || band === "hidden") {
+          if (!showCityStations || !inView || band === "hidden") {
             layer.setStyle({ opacity: 0, fillOpacity: 0 });
             return;
           }
@@ -190,11 +297,33 @@ export function MetroOverlayLayer({ lightTiles }: Props) {
           if (!feature?.properties) return;
           const inView = featureInBounds(feature, boundsAdapter);
           const show =
-            showStations &&
+            showCityStations &&
             inView &&
             stationLabelVisible(band, !!feature.properties.isTransfer);
           layer.setOpacity(show ? 1 : 0);
         });
+      }
+    }
+
+    async function loadChunk(chunk: MetroIndexManifest["chunks"][number]) {
+      const id = chunk.id;
+      if (chunksRef.current.has(id) || loadingRef.current.has(id)) return;
+      loadingRef.current.add(id);
+      try {
+        const res = await fetch(chunk.url);
+        if (!res.ok) throw new Error(`geo ${id} ${res.status}`);
+        const data = (await res.json()) as MetroGeoJson;
+        if (cancelled) return;
+        if (chunksRef.current.has(id)) return;
+        chunksRef.current.set(
+          id,
+          buildChunkLayers(data, id, map, lightTilesRef.current),
+        );
+        applyMetroStyles(map);
+      } catch (e) {
+        console.error(`[MetroOverlayLayer] chunk ${id} failed`, e);
+      } finally {
+        loadingRef.current.delete(id);
       }
     }
 
@@ -203,33 +332,11 @@ export function MetroOverlayLayer({ lightTiles }: Props) {
       if (!manifest || cancelled) return;
 
       const viewport = mapBoundsToMetroBbox(map.getBounds());
-      const needed = manifest.chunks.filter((c) =>
-        chunkIntersectsViewport(c.bbox, viewport),
+      const needed = manifest.chunks.filter(
+        (c) => c.alwaysLoad || chunkIntersectsViewport(c.bbox, viewport),
       );
 
-      await Promise.all(
-        needed.map(async (chunk) => {
-          const id = chunk.id;
-          if (chunksRef.current.has(id) || loadingRef.current.has(id)) return;
-          loadingRef.current.add(id);
-          try {
-            const res = await fetch(chunk.url);
-            if (!res.ok) throw new Error(`geo ${id} ${res.status}`);
-            const data = (await res.json()) as MetroGeoJson;
-            if (cancelled) return;
-            if (chunksRef.current.has(id)) return;
-            chunksRef.current.set(
-              id,
-              buildChunkLayers(data, id, map, lightTilesRef.current),
-            );
-            applyMetroStyles(map);
-          } catch (e) {
-            console.error(`[MetroOverlayLayer] chunk ${id} failed`, e);
-          } finally {
-            loadingRef.current.delete(id);
-          }
-        }),
-      );
+      await Promise.all(needed.map((chunk) => loadChunk(chunk)));
     }
 
     const scheduleUpdate = () => {
@@ -265,7 +372,7 @@ export function MetroOverlayLayer({ lightTiles }: Props) {
         window.clearTimeout(debounceRef.current);
       }
       for (const chunk of chunksRef.current.values()) {
-        chunk.linesLayer.remove();
+        chunk.linesLayer?.remove();
         chunk.stationsLayer.remove();
         chunk.labelsLayer.remove();
       }

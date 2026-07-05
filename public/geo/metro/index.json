@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-05T14:58:27.596Z",
+  "generatedAt": "2026-07-05T15:09:49.586Z",
   "chunks": [
     {
       "id": "capital",
@@ -71,6 +71,21 @@
       "byteSize": 8832,
       "lineCount": 2,
       "stationCount": 22
+    },
+    {
+      "id": "ktx-srt",
+      "nameKo": "KTX·SRT",
+      "url": "/geo/metro/ktx-srt.json",
+      "bbox": {
+        "south": 34.5,
+        "west": 126,
+        "north": 38.1,
+        "east": 129.5
+      },
+      "alwaysLoad": true,
+      "byteSize": 8704,
+      "lineCount": 0,
+      "stationCount": 34
     }
   ]
 }

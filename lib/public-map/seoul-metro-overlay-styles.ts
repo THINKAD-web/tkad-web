@@ -1,5 +1,7 @@
 import type { PathOptions } from "leaflet";
 import type { SeoulMetroFeatureProperties } from "@/lib/public-map/seoul-metro-types";
+import type { RailOperator } from "@/lib/public-map/ktx-srt-stations";
+import { railOperatorLabel } from "@/lib/public-map/ktx-srt-stations";
 
 /** Leaflet zoom → 지하철 노출 단계 */
 export type MetroZoomBand =
@@ -56,6 +58,41 @@ export function stationLabelVisible(
   if (band === "allLabels") return true;
   if (band === "transferLabels") return isTransfer;
   return false;
+}
+
+/** KTX·SRT 역 — 도시철도 역보다 한 단계 일찍 (zoom≥10), 전국 뷰(<9)는 숨김 */
+export function ktxSrtStationVisible(zoom: number): boolean {
+  return zoom >= 10;
+}
+
+export function ktxSrtLabelVisible(zoom: number): boolean {
+  return zoom >= 10;
+}
+
+export function ktxSrtMarkerHtml(
+  color: string,
+  lightTiles: boolean,
+): string {
+  const border = lightTiles ? "#1e293b" : "#f8fafc";
+  const shadow = lightTiles
+    ? "0 0 2px #fff"
+    : "0 0 3px #0a0a12";
+  return `<span style="display:block;width:10px;height:10px;background:${color};border:2px solid ${border};box-shadow:${shadow};transform:rotate(45deg);pointer-events:none"></span>`;
+}
+
+export function ktxSrtLabelHtml(
+  nameKo: string,
+  operator: RailOperator,
+  lightTiles: boolean,
+): string {
+  const tag = railOperatorLabel(operator);
+  const shadow = lightTiles
+    ? "0 0 2px #fff,0 0 4px #fff"
+    : "0 0 3px #0a0a12,0 0 6px #0a0a12";
+  const color = lightTiles ? "#1e293b" : "#f1f5f9";
+  const accent = lightTiles ? "#475569" : "#cbd5e1";
+  const base = nameKo.replace(/역$/, "");
+  return `<span style="font:600 11px/1.2 system-ui,sans-serif;color:${color};text-shadow:${shadow};white-space:nowrap;pointer-events:none">${escapeHtml(base)}역<span style="font-weight:500;color:${accent}">(${escapeHtml(tag)})</span></span>`;
 }
 
 export function stationMarkerStyle(
