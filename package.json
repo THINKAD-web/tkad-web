@@ -29,7 +29,8 @@
     "cursor:agent": "CURSOR_AGENT_MODE=agent tsx scripts/cursor-agent.mts",
     "screenshots:hub": "node scripts/capture-hub-screenshots.mjs",
     "smoke": "tsx scripts/smoke-test.ts",
-    "build:metro-geo": "tsx scripts/build-seoul-metro-geojson.mts"
+    "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
+    "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"
