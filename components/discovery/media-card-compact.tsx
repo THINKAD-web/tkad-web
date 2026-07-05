@@ -7,7 +7,10 @@ import { Check, Plus } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
-import { mapItemToDisplayModel } from "@/lib/media-card-display";
+import {
+  catalogItemToDisplayModel,
+  mapItemToDisplayModel,
+} from "@/lib/media-card-display";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
@@ -303,6 +306,168 @@ export function DiscoveryMediaCardCompactGrid({
         "transition-shadow hover:shadow-md active:scale-[0.99]",
       )}
     >
+      {body}
+    </Link>
+  );
+}
+
+type CatalogTileProps = Pick<
+  DiscoveryMediaCardCatalogProps,
+  | "item"
+  | "href"
+  | "isKo"
+  | "priceLabel"
+  | "inCompare"
+  | "onToggleCompare"
+  | "plannerMode"
+  | "isInPlan"
+  | "onTogglePlan"
+  | "className"
+>;
+
+/** `/media` 카드형·지도 목록과 동일한 세로 스택 타일 (4:3 이미지 + 담기+·비교+) */
+export function DiscoveryMediaCardCatalogTile({
+  item,
+  href,
+  isKo = true,
+  priceLabel,
+  inCompare = false,
+  onToggleCompare,
+  plannerMode = false,
+  isInPlan = false,
+  onTogglePlan,
+  className,
+}: CatalogTileProps) {
+  const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
+  const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
+  const locationLine = item.region || item.location || "";
+  const visScore = item.visibilityScore ?? 0;
+  const visTier =
+    visScore > 0 ? visibilityPinTierDefForScore(visScore) : null;
+  const planItem = planCartItemFromCatalog(item, "search");
+
+  const body = (
+    <>
+      <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
+        {thumb ? (
+          <Image
+            src={thumb.src}
+            alt={item.name}
+            fill
+            className="object-cover"
+            sizes="(max-width: 768px) 50vw, 280px"
+            unoptimized={thumb.unoptimized}
+          />
+        ) : (
+          <div className="tkad-type-note flex h-full w-full items-center justify-center text-tkad-muted">
+            {isKo ? "준비중" : "No image"}
+          </div>
+        )}
+
+        {visTier ? (
+          <span
+            className="tkad-type-note absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 font-bold tabular-nums shadow-sm"
+            style={{
+              backgroundColor: visTier.fill,
+              color: visTier.text,
+              border: `1px solid ${visTier.stroke}`,
+            }}
+          >
+            {visScore}
+          </span>
+        ) : null}
+
+        <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="card" />
+
+        {model.metricLine ? (
+          <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">
+            <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
+              {model.metricLine}
+            </p>
+          </div>
+        ) : null}
+      </div>
+
+      <div className="flex min-h-0 flex-1 flex-col p-2.5">
+        {item.type ? (
+          <span className="tkad-type-note mb-1 inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10">
+            {item.type}
+          </span>
+        ) : null}
+        <p className="tkad-type-title line-clamp-2 leading-snug text-foreground">
+          {item.name}
+        </p>
+        {locationLine ? (
+          <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
+            {locationLine}
+          </p>
+        ) : null}
+        <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
+          <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
+            {model.priceLabel}
+          </p>
+          <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+        </div>
+
+        {plannerMode && onTogglePlan ? (
+          <div
+            className={cn(
+              "tkad-type-meta mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg font-semibold",
+              isInPlan
+                ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
+                : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+            )}
+          >
+            {isInPlan ? (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                {isKo ? "담김 ✓" : "Added ✓"}
+              </>
+            ) : (
+              <>
+                <Plus className="h-3.5 w-3.5" />
+                {isKo ? "+ 플랜 담기" : "+ Add to plan"}
+              </>
+            )}
+          </div>
+        ) : (
+          <DiscoveryMediaCardActions
+            mediaId={item.id}
+            planItem={planItem}
+            detailHref={href}
+            isKo={isKo}
+            inCompare={inCompare}
+            onToggleCompare={onToggleCompare}
+            addedFrom="search"
+            layout="map-tile"
+            stopPropagation
+          />
+        )}
+      </div>
+    </>
+  );
+
+  const shellClass = cn(
+    "flex h-full min-h-0 flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5",
+    className,
+  );
+
+  if (plannerMode && onTogglePlan) {
+    return (
+      <div className={shellClass}>
+        <button
+          type="button"
+          onClick={onTogglePlan}
+          className="flex h-full w-full flex-col text-left"
+        >
+          {body}
+        </button>
+      </div>
+    );
+  }
+
+  return (
+    <Link href={href} className={shellClass}>
       {body}
     </Link>
   );

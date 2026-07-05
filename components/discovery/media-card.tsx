@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 import { DiscoveryMediaCardFeed } from "@/components/discovery/media-card-feed";
 import {
   DiscoveryMediaCardCompactRow,
+  DiscoveryMediaCardCatalogTile,
   DiscoveryMediaCardCompactGrid,
   DiscoveryMediaCardMapTile,
 } from "@/components/discovery/media-card-compact";
@@ -30,8 +31,8 @@ export type {
  * - `variant="feed"` — 큰 썸네일 쇼핑몰형 (`/media` 기본)
  * - `variant="compact"` — `compactLayout` 으로 분기:
  *   - `row` — 고밀도 리스트 행 (`/media` 컴팩트 뷰)
- *   - `grid` — 2~4열 정사각 그리드 (`/media` 카드 뷰, 홈·추천)
- *   - `map-tile` — 지도 사이드 패널 (`/media/map`, 세로 스택 타일)
+ *   - `grid` — 2~4열 정사각 그리드 (홈·추천)
+ *   - `map-tile` — 세로 스택 타일 (`/media/map` 목록, `/media` 카드형)
  */
 export const DiscoveryMediaCard = forwardRef<
   HTMLLIElement,
@@ -103,6 +104,20 @@ export const DiscoveryMediaCard = forwardRef<
         showPlanButton={showPlanButton}
       />
     );
+  } else if (compactLayout === "map-tile") {
+    card = (
+      <DiscoveryMediaCardCatalogTile
+        item={props.item}
+        href={props.href}
+        isKo={isKo}
+        priceLabel={props.priceLabel}
+        inCompare={inCompare}
+        onToggleCompare={onToggleCompare}
+        plannerMode={plannerMode}
+        isInPlan={isInPlan}
+        onTogglePlan={onTogglePlan}
+      />
+    );
   } else if (compactLayout === "grid") {
     card = (
       <DiscoveryMediaCardCompactGrid
@@ -140,12 +155,13 @@ export const DiscoveryMediaCard = forwardRef<
     );
   }
 
-  const isGridTile =
-    props.variant === "compact" && props.compactLayout === "grid";
+  const isStackedTile =
+    props.variant === "compact" &&
+    (props.compactLayout === "grid" || props.compactLayout === "map-tile");
 
   if (!recommendReason?.trim()) {
     return (
-      <div className={cn(isGridTile && "h-full min-h-0", className)}>{card}</div>
+      <div className={cn(isStackedTile && "h-full min-h-0", className)}>{card}</div>
     );
   }
 
