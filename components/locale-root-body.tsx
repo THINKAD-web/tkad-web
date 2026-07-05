@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
 import ToastProvider from "@/components/toast-provider";
 import { PointToastListener } from "@/components/points/point-toast-listener";
 import { ContactChannelProvider } from "@/components/contact/contact-channel-provider";
@@ -34,14 +35,17 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
 
   if (isAdmin) {
     return (
-      <ToastProvider>
-        <PointToastListener />
-        {children}
-      </ToastProvider>
+      <AuthSessionProvider>
+        <ToastProvider>
+          <PointToastListener />
+          {children}
+        </ToastProvider>
+      </AuthSessionProvider>
     );
   }
 
   return (
+    <AuthSessionProvider>
     <ToastProvider>
       <ContactChannelProvider>
         <CommandPaletteProvider>
@@ -78,5 +82,6 @@ export default function LocaleRootBody({ skipLinkLabel, header, children }: Prop
         </CommandPaletteProvider>
       </ContactChannelProvider>
     </ToastProvider>
+    </AuthSessionProvider>
   );
 }

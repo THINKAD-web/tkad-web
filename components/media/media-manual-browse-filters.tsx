@@ -265,6 +265,15 @@ export function MediaManualBrowseFilters({
     useState(false);
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const desktopPanelRef = useRef<HTMLDivElement>(null);
+  const advancedSectionRef = useRef<HTMLDivElement>(null);
+
+  /** `/media` 목록 — 유형 칩은 툴바 밖 노출, 필터 패널·시트에도 전체 축(어떤 매체 포함) */
+  const showListTypeChipRow =
+    listPageLayout &&
+    unifiedToolbar &&
+    (mobileBottomBar || mobileStickyToolbar) &&
+    !mapCompactFilters &&
+    !mapPageViewModes;
 
   const activeMain = MEDIA_CATEGORIES.find((m) => m.id === mainCategory);
   const activeRegion = MEDIA_BROWSE_REGIONS.find((r) => r.id === regionMain);
@@ -550,6 +559,14 @@ export function MediaManualBrowseFilters({
     return () => document.removeEventListener("mousedown", onDoc);
   }, [desktopPanelOpen]);
 
+  useEffect(() => {
+    if (!advancedOpen || !desktopPanelOpen) return;
+    const frame = requestAnimationFrame(() => {
+      advancedSectionRef.current?.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    });
+    return () => cancelAnimationFrame(frame);
+  }, [advancedOpen, desktopPanelOpen]);
+
   const chipRowScroll = "scrollbar-hide flex gap-2 overflow-x-auto pb-0.5";
   const chipRowWrap = "flex flex-wrap gap-2 pb-1";
 
@@ -738,7 +755,7 @@ export function MediaManualBrowseFilters({
           ) : null}
         </div>
 
-        <div>
+        <div ref={advancedSectionRef}>
           <button
             type="button"
             onClick={() => setAdvancedOpen((o) => !o)}
@@ -1104,6 +1121,11 @@ export function MediaManualBrowseFilters({
           >
             {mapMobileImmersiveMode ? mobileImmersiveControlRow : searchInput}
             {!mapMobileImmersiveMode ? mobileStickyControlRow : null}
+            {showListTypeChipRow && !mapMobileImmersiveMode ? (
+              <div className="min-w-0 md:hidden" data-screenshot="media-main-category-mobile">
+                {renderTypeAxis(false)}
+              </div>
+            ) : null}
             {showMobileActiveSummary ? (
               <MediaMapActiveFiltersBar
                 chips={mediaBrowseActiveChips}
@@ -1151,17 +1173,17 @@ export function MediaManualBrowseFilters({
                 <div
                   role="dialog"
                   aria-modal="false"
-                  className="absolute right-0 top-[calc(100%+0.35rem)] z-50 flex w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]"
+                  className="absolute right-0 top-[calc(100%+0.35rem)] z-50 flex max-h-[min(80vh,36rem)] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]"
                 >
-                  <div className="border-b border-gray-100 px-4 py-3 dark:border-white/10">
+                  <div className="shrink-0 border-b border-gray-100 px-4 py-3 dark:border-white/10">
                     <p className="text-sm font-bold text-gray-900 dark:text-white">
                       {isKo ? "필터" : "Filters"}
                     </p>
                   </div>
-                  <div className="max-h-[min(70vh,28rem)] space-y-4 overflow-y-auto px-4 py-4">
-                    {renderFilterAxes(true)}
+                  <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
+                    <div className="space-y-4 pb-2">{renderFilterAxes(true)}</div>
                   </div>
-                  <div className="flex items-center gap-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
+                  <div className="flex shrink-0 items-center gap-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
                     <button
                       type="button"
                       onClick={clearAllFilters}
@@ -1187,7 +1209,11 @@ export function MediaManualBrowseFilters({
             {mapNavButton}
             {toolbarEnd}
           </div>
-          <div className="hidden min-w-0 md:block">{renderTypeAxis(false)}</div>
+          {showListTypeChipRow ? (
+            <div className="hidden min-w-0 md:block" data-screenshot="media-main-category">
+              {renderTypeAxis(false)}
+            </div>
+          ) : null}
         </>
       ) : unifiedToolbar ? (
         <>
@@ -1264,9 +1290,9 @@ export function MediaManualBrowseFilters({
             <div
               role="dialog"
               aria-modal="false"
-              className="absolute right-0 top-[calc(100%+0.35rem)] z-50 flex w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]"
+              className="absolute right-0 top-[calc(100%+0.35rem)] z-50 flex max-h-[min(80vh,36rem)] w-[min(28rem,calc(100vw-2rem))] flex-col overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-xl dark:border-white/10 dark:bg-[#0a0a0a]"
             >
-              <div className="border-b border-gray-100 px-4 py-3 dark:border-white/10">
+              <div className="shrink-0 border-b border-gray-100 px-4 py-3 dark:border-white/10">
                 <p className="text-sm font-bold text-gray-900 dark:text-white">
                   {isKo ? "필터" : "Filters"}
                   {collapsedFilterCount > 0 ? (
@@ -1276,10 +1302,10 @@ export function MediaManualBrowseFilters({
                   ) : null}
                 </p>
               </div>
-              <div className="max-h-[min(70vh,28rem)] space-y-4 overflow-y-auto px-4 py-4">
-                {renderCollapsedAxes(true)}
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4">
+                <div className="space-y-4 pb-2">{renderCollapsedAxes(true)}</div>
               </div>
-              <div className="flex items-center gap-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
+              <div className="flex shrink-0 items-center gap-2 border-t border-gray-100 px-4 py-3 dark:border-white/10">
                 <button
                   type="button"
                   onClick={clearCollapsedFilters}

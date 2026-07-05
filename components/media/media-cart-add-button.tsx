@@ -4,7 +4,6 @@ import { ShoppingBag } from "lucide-react";
 import { useLocale } from "next-intl";
 import { mediaActionPillClass } from "@/components/media/media-action-pill";
 import { usePlanCart } from "@/hooks/use-plan-cart";
-import { useIsPro } from "@/hooks/use-is-pro";
 import { useAppToast } from "@/lib/use-toast";
 import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
@@ -31,8 +30,7 @@ export function MediaCartAddButton({
   const locale = useLocale();
   const isKo = locale === "ko";
   const toast = useAppToast();
-  const { has, add, remove } = usePlanCart();
-  const { isPro } = useIsPro();
+  const { has, add, remove, isPro } = usePlanCart();
   const inCart = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
 

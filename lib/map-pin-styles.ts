@@ -40,7 +40,7 @@ export function pinLetterForType(type: string): string {
   return "";
 }
 
-const MAP_PIN_SELECTION_RING = "#7c3aed";
+const MAP_PIN_SELECTION_RING = "#00E5FF";
 
 const pinDataUrlCache = new Map<string, string>();
 const leafletIconCache = new Map<string, L.Icon>();

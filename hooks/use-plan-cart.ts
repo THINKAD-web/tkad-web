@@ -96,6 +96,7 @@ export function usePlanCart() {
     cart,
     count: cart.items.length,
     maxItems,
+    isPro,
     add,
     addMany,
     remove,

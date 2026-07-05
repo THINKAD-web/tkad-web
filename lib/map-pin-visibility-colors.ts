@@ -1,6 +1,6 @@
-/** `/media/map` 가시성 점수 핀 — 브랜드 보라(#7C3AED) 단일 계열 명도 그라데이션 */
+/** `/media/map` 가시성 점수 핀 — 네온 시안(플래너 accent) 단일 계열 명도 그라데이션. 5호선 보라(#996CAC)와 구분 */
 
-export const VISIBILITY_PIN_BRAND_VIOLET = "#7C3AED";
+export const VISIBILITY_PIN_BRAND_NEON = "#00E5FF";
 
 export type VisibilityPinTier = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -17,7 +17,7 @@ export type VisibilityPinTierDef = {
   rangeLabelEn: string;
 };
 
-/** 연함(낮은 점수) → 진함(높은 점수). 다크 타일 대비용 stroke 포함. */
+/** 연함(낮은 점수) → 진함(높은 점수). 다크 타일·지하철 노선 대비용 밝은 네온 stroke */
 export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
   {
     tier: 0,
@@ -35,9 +35,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 1,
     min: 1,
     max: 84,
-    fill: "#DDD6FE",
-    stroke: "#C4B5FD",
-    text: "#5B21B6",
+    fill: "#CFFAFE",
+    stroke: "#A5F3FC",
+    text: "#0E7490",
     labelKo: "기본",
     labelEn: "Basic",
     rangeLabelKo: "1–84",
@@ -47,9 +47,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 2,
     min: 85,
     max: 88,
-    fill: "#C4B5FD",
-    stroke: "#A78BFA",
-    text: "#5B21B6",
+    fill: "#A5F3FC",
+    stroke: "#67E8F9",
+    text: "#0E7490",
     labelKo: "표준",
     labelEn: "Standard",
     rangeLabelKo: "85–88",
@@ -59,9 +59,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 3,
     min: 89,
     max: 91,
-    fill: "#A78BFA",
-    stroke: "#8B5CF6",
-    text: "#ffffff",
+    fill: "#67E8F9",
+    stroke: "#22D3EE",
+    text: "#0C4A6E",
     labelKo: "양호",
     labelEn: "Good",
     rangeLabelKo: "89–91",
@@ -71,9 +71,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 4,
     min: 92,
     max: 94,
-    fill: "#8B5CF6",
-    stroke: "#7C3AED",
-    text: "#ffffff",
+    fill: "#22D3EE",
+    stroke: "#06B6D4",
+    text: "#0f172a",
     labelKo: "높음",
     labelEn: "High",
     rangeLabelKo: "92–94",
@@ -83,9 +83,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 5,
     min: 95,
     max: 100,
-    fill: "#7C3AED",
-    stroke: "#6D28D9",
-    text: "#ffffff",
+    fill: "#00E5FF",
+    stroke: "#06B6D4",
+    text: "#0f172a",
     labelKo: "최상",
     labelEn: "Top",
     rangeLabelKo: "95+",
@@ -124,5 +124,8 @@ export function visibilityPinLegendEntries(): VisibilityPinTierDef[] {
   return [...VISIBILITY_PIN_TIERS];
 }
 
-/** @deprecated Use VISIBILITY_PIN_BRAND_VIOLET */
-export const VISIBILITY_PIN_BRAND_ORANGE = VISIBILITY_PIN_BRAND_VIOLET;
+/** @deprecated Use VISIBILITY_PIN_BRAND_NEON */
+export const VISIBILITY_PIN_BRAND_VIOLET = VISIBILITY_PIN_BRAND_NEON;
+
+/** @deprecated Use VISIBILITY_PIN_BRAND_NEON */
+export const VISIBILITY_PIN_BRAND_ORANGE = VISIBILITY_PIN_BRAND_NEON;

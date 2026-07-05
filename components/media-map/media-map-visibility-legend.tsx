@@ -42,8 +42,8 @@ export function MediaMapVisibilityLegend({
           <span
             className="h-3 w-3 shrink-0 rounded-full border"
             style={{
-              backgroundColor: entries[4]?.fill ?? "#8B5CF6",
-              borderColor: entries[4]?.stroke ?? "#7C3AED",
+              backgroundColor: entries[4]?.fill ?? "#22D3EE",
+              borderColor: entries[4]?.stroke ?? "#06B6D4",
             }}
             aria-hidden
           />

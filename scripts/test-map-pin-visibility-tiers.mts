@@ -35,6 +35,6 @@ const gray = pinColorForVisibilityScore(0);
 assert.equal(gray.fill, "#94a3b8", "unknown fill");
 
 const top = pinColorForVisibilityScore(98);
-assert.equal(top.fill, "#7C3AED", "top fill");
+assert.equal(top.fill, "#00E5FF", "top fill");
 
 console.log("test-map-pin-visibility-tiers: ok");
