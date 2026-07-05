@@ -139,11 +139,19 @@ function MapTileLoadingTracker({
 function MapLifecycleCleanup() {
   const map = useMap();
   useEffect(() => {
+    const container = map.getContainer();
     return () => {
       try {
         map.remove();
       } catch {
         /* noop — interrupted HMR */
+      }
+      try {
+        // Leaflet leaves _leaflet_id on the node; remount on same element throws.
+        delete (container as unknown as { _leaflet_id?: number })._leaflet_id;
+        container.replaceChildren();
+      } catch {
+        /* noop */
       }
     };
   }, [map]);
@@ -388,14 +396,14 @@ export default function DarkMapView({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
-  const [mapReady, setMapReady] = useState(false);
+  /** Strict Mode / route re-entry마다 fresh DOM — Leaflet container reuse 방지 */
+  const [mapSessionId, setMapSessionId] = useState(0);
   const onTilesLoadingChange = useCallback((loading: boolean) => {
     setTilesLoading(loading);
   }, []);
 
   useEffect(() => {
-    setMapReady(true);
-    return () => setMapReady(false);
+    setMapSessionId((id) => id + 1);
   }, []);
 
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
@@ -421,7 +429,8 @@ export default function DarkMapView({
           aria-hidden
         />
       ) : null}
-      {mapReady ? (
+      {mapSessionId > 0 ? (
+      <div key={`leaflet-session-${mapSessionId}`} className="h-full w-full">
       <MapContainer
         center={[center.lat, center.lng]}
         zoom={leafletZoom}
@@ -482,6 +491,7 @@ export default function DarkMapView({
           />
         ) : null}
       </MapContainer>
+      </div>
       ) : (
         <div
           className="skeleton-shimmer h-full w-full min-h-[200px] bg-muted/40"

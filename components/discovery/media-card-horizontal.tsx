@@ -75,8 +75,10 @@ export function DiscoveryMediaCardHorizontal({
     ? catalogThumbnailImageProps(model.thumbnailUrl)
     : null;
 
-  const thumbBlock = (
-    <div className="relative aspect-[4/3] h-full min-h-[6.5rem] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800">
+  const narrowMetric = model.metricLineCompact ?? model.metricLine;
+
+  const thumbInner = (
+    <>
       {rank != null ? (
         <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-[10px] font-black text-white shadow-md">
           {rank}
@@ -88,7 +90,7 @@ export function DiscoveryMediaCardHorizontal({
           alt={model.name}
           fill
           className="object-cover"
-          sizes="(max-width: 768px) 38vw, 200px"
+          sizes="(max-width: 768px) 50vw, 200px"
           unoptimized={heroImage.unoptimized}
         />
       ) : (
@@ -103,8 +105,8 @@ export function DiscoveryMediaCardHorizontal({
         verifiedOnly
       />
       {model.metricLine ? (
-        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-2 pb-1.5 pt-6">
-          <p className="tkad-type-meta line-clamp-1 font-medium tabular-nums text-white/95">
+        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 hidden bg-gradient-to-t from-black/80 via-black/50 to-transparent px-2 pb-1.5 pt-6 @[300px]:block">
+          <p className="tkad-type-meta truncate font-medium tabular-nums text-white/95">
             {model.metricLine}
           </p>
         </div>
@@ -114,8 +116,31 @@ export function DiscoveryMediaCardHorizontal({
           +{model.galleryExtraCount}
         </span>
       ) : null}
-    </div>
+    </>
   );
+
+  const thumbShellClass =
+    "relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800";
+
+  const thumbBlock =
+    plannerMode && onTogglePlan ? (
+      <button
+        type="button"
+        onClick={(e) => {
+          if (stopPropagation) e.stopPropagation();
+          onTogglePlan();
+        }}
+        className={cn(thumbShellClass, "block text-left")}
+      >
+        {thumbInner}
+      </button>
+    ) : interactive ? (
+      <div className={thumbShellClass}>{thumbInner}</div>
+    ) : (
+      <Link href={model.detailHref} className={cn(thumbShellClass, "block")}>
+        {thumbInner}
+      </Link>
+    );
 
   const titleBlock = (
     <Link
@@ -134,6 +159,17 @@ export function DiscoveryMediaCardHorizontal({
       </h3>
     </Link>
   );
+
+  const actionsProps = {
+    mediaId: model.id,
+    planItem: planItem!,
+    detailHref: model.detailHref,
+    isKo,
+    inCompare,
+    onToggleCompare,
+    addedFrom,
+    stopPropagation,
+  };
 
   const actionsBlock =
     plannerMode && onTogglePlan ? (
@@ -163,91 +199,27 @@ export function DiscoveryMediaCardHorizontal({
         )}
       </button>
     ) : showPlanButton && planItem ? (
-      <DiscoveryMediaCardActions
-        mediaId={model.id}
-        planItem={planItem}
-        detailHref={model.detailHref}
-        isKo={isKo}
-        inCompare={inCompare}
-        onToggleCompare={onToggleCompare}
-        addedFrom={addedFrom}
-        layout="dense"
-        stopPropagation={stopPropagation}
-      />
+      <>
+        <div className="@[300px]:hidden">
+          <DiscoveryMediaCardActions {...actionsProps} layout="grid-cell" />
+        </div>
+        <div className="hidden @[300px]:block">
+          <DiscoveryMediaCardActions {...actionsProps} layout="dense" />
+        </div>
+      </>
     ) : null;
-
-  const body = (
-    <div className="flex min-w-0 items-stretch gap-3 p-3 sm:gap-4 sm:p-3.5">
-      <div className="w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 self-stretch sm:min-w-[8rem] sm:max-w-[12rem]">
-        {plannerMode && onTogglePlan ? (
-          <button
-            type="button"
-            onClick={(e) => {
-              if (stopPropagation) e.stopPropagation();
-              onTogglePlan();
-            }}
-            className="block h-full w-full text-left"
-          >
-            {thumbBlock}
-          </button>
-        ) : interactive ? (
-          <div className="block h-full w-full">{thumbBlock}</div>
-        ) : (
-          <Link href={model.detailHref} className="block h-full w-full">
-            {thumbBlock}
-          </Link>
-        )}
-      </div>
-
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
-        <div className="min-w-0 space-y-1">
-          <CategoryTrustLine
-            type={model.type}
-            trustScore={model.trustScore}
-            isKo={isKo}
-          />
-          {interactive ? (
-            <h3 className="tkad-type-title line-clamp-2 text-foreground">
-              {model.name}
-            </h3>
-          ) : (
-            titleBlock
-          )}
-        </div>
-
-        <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
-          <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
-            {model.priceLabel}
-          </p>
-          {model.showPeriodSuffix && model.periodLabel ? (
-            <span className="tkad-type-note text-tkad-muted">
-              {model.periodLabel}
-            </span>
-          ) : null}
-          <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
-        </div>
-
-        {model.highlights.length > 0 ? (
-          <p className="tkad-type-note line-clamp-1 text-tkad-muted">
-            {model.highlights.slice(0, 2).join(" · ")}
-          </p>
-        ) : null}
-
-        <div className="mt-auto pt-1">{actionsBlock}</div>
-      </div>
-    </div>
-  );
 
   return (
     <article
       className={cn(
-        "discovery-media-card-horizontal min-w-0 max-w-full overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-white/[0.04]",
+        "@container discovery-media-card-horizontal min-w-0 max-w-full overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-white/[0.04]",
         selected
           ? "border-2 border-violet-500/90 shadow-md shadow-violet-500/15 ring-2 ring-inset ring-violet-400/35 dark:border-violet-400"
           : hovered
             ? "border-cyan-400/50 dark:border-cyan-400/40"
             : "border-gray-100 dark:border-white/10",
-        interactive && "cursor-pointer transition-all hover:shadow-md active:scale-[0.99]",
+        interactive &&
+          "cursor-pointer transition-all hover:shadow-md active:scale-[0.99]",
         className,
       )}
       data-discovery-media-card="horizontal"
@@ -265,7 +237,66 @@ export function DiscoveryMediaCardHorizontal({
       role={interactive ? "button" : undefined}
       tabIndex={interactive ? 0 : undefined}
     >
-      {body}
+      <div className="flex min-w-0 flex-col items-stretch gap-2.5 p-2.5 @[300px]:flex-row @[300px]:gap-3 @[300px]:p-3 sm:@[300px]:gap-4 sm:@[300px]:p-3.5">
+        <div className="w-full shrink-0 @[300px]:w-[38%] @[300px]:min-w-[8rem] @[300px]:max-w-[12rem] @[300px]:self-stretch">
+          {thumbBlock}
+        </div>
+
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5 py-0.5">
+          <div className="min-w-0 space-y-1">
+            {model.type ? (
+              <span className="tkad-type-note inline-block max-w-full truncate rounded-md bg-gray-100 px-1.5 py-0.5 font-medium capitalize text-tkad-muted dark:bg-white/10 @[300px]:hidden">
+                {model.type}
+              </span>
+            ) : null}
+            <div className="hidden @[300px]:block">
+              <CategoryTrustLine
+                type={model.type}
+                trustScore={model.trustScore}
+                isKo={isKo}
+              />
+            </div>
+            {interactive ? (
+              <h3 className="tkad-type-title line-clamp-2 text-foreground">
+                {model.name}
+              </h3>
+            ) : (
+              titleBlock
+            )}
+          </div>
+
+          {narrowMetric ? (
+            <p className="tkad-type-meta tabular-nums text-tkad-muted @[300px]:hidden">
+              {narrowMetric}
+            </p>
+          ) : null}
+
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5">
+            <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
+              {model.priceLabel}
+            </p>
+            {model.showPeriodSuffix && model.periodLabel ? (
+              <span className="tkad-type-note text-tkad-muted">
+                {model.periodLabel}
+              </span>
+            ) : null}
+            <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
+          </div>
+
+          {model.highlights.length > 0 ? (
+            <>
+              <p className="tkad-type-note line-clamp-1 text-tkad-muted @[300px]:hidden">
+                {model.highlights[0]}
+              </p>
+              <p className="tkad-type-note hidden line-clamp-1 text-tkad-muted @[300px]:block">
+                {model.highlights.slice(0, 2).join(" · ")}
+              </p>
+            </>
+          ) : null}
+
+          <div className="mt-auto pt-1">{actionsBlock}</div>
+        </div>
+      </div>
     </article>
   );
 }

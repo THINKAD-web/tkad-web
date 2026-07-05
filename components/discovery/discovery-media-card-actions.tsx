@@ -5,7 +5,6 @@ import { ArrowUpRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
 
@@ -19,7 +18,9 @@ export type DiscoveryMediaCardActionsProps = {
   addedFrom?: PlanCartAddedFrom;
   size?: "compact" | "comfortable";
   /** `preview` — 지도 마커 미리보기(dock): 상세·담기·문의만 */
-  layout?: "full" | "preview" | "dense";
+  /** `map-tile` — 지도 사이드 패널 타일: 담기+·비교+만 */
+  /** `grid-cell` — /media 2열 카드: 상세·문의 짧은 라벨 + 담기·비교 */
+  layout?: "full" | "preview" | "dense" | "map-tile" | "grid-cell";
   className?: string;
   /** 클릭 가능한 카드/타일 안에서 버블링 방지 */
   stopPropagation?: boolean;
@@ -40,7 +41,7 @@ function guardCardClick(
 
 /**
  * `/media`·`/media/map` 결과 카드 공용 액션 — 구성·라벨·순서 동일.
- * 1행: 상세 보기 · 문의하기 / 2행: 플랜+ · 비교+ · 담기+
+ * 1행: 상세 보기 · 문의하기 / 2행: 비교+ · 담기+ (플랜 카트 = 담기+ 단일)
  */
 export function DiscoveryMediaCardActions({
   mediaId,
@@ -96,6 +97,70 @@ export function DiscoveryMediaCardActions({
     );
   }
 
+  if (layout === "grid-cell") {
+    const shortBtn =
+      "inline-flex h-8 min-h-8 min-w-0 flex-1 items-center justify-center gap-0.5 rounded-lg px-1 text-[10px] font-semibold leading-none whitespace-nowrap";
+    return (
+      <div className={cn("space-y-1.5", className)}>
+        <div className="grid grid-cols-2 gap-1">
+          <Link
+            href={detailHref}
+            onClick={guardCardClick(stopPropagation)}
+            className={cn(shortBtn, primaryLinkClass, "!h-8")}
+          >
+            <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
+            {isKo ? "상세" : "Details"}
+          </Link>
+          <Link
+            href={contactHref}
+            onClick={guardCardClick(stopPropagation)}
+            className={cn(shortBtn, contactLinkClass, "!h-8")}
+          >
+            <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
+            {isKo ? "문의" : "Contact"}
+          </Link>
+        </div>
+        <div className="flex items-stretch gap-1">
+          {onToggleCompare ? (
+            <MediaCompareSelectButton
+              selected={inCompare}
+              onToggle={onToggleCompare}
+              gridInline
+              className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+            />
+          ) : null}
+          <MediaCartAddButton
+            item={planItem}
+            addedFrom={addedFrom}
+            gridInline
+            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
+          />
+        </div>
+      </div>
+    );
+  }
+
+  if (layout === "map-tile") {
+    return (
+      <div className={cn("mt-2 flex items-stretch gap-1.5", className)}>
+        <MediaCartAddButton
+          item={planItem}
+          addedFrom={addedFrom}
+          gridInline
+          className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !text-[11px]"
+        />
+        {onToggleCompare ? (
+          <MediaCompareSelectButton
+            selected={inCompare}
+            onToggle={onToggleCompare}
+            gridInline
+            className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !text-[11px]"
+          />
+        ) : null}
+      </div>
+    );
+  }
+
   if (layout === "dense") {
     return (
       <div className={cn("space-y-1.5", className)}>
@@ -106,7 +171,7 @@ export function DiscoveryMediaCardActions({
             className={cn(primaryLinkClass, "!h-8 !min-h-8 !text-[11px]")}
           >
             <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
-            <span className="truncate">{isKo ? "상세" : "Details"}</span>
+            <span className="whitespace-nowrap">{isKo ? "상세" : "Details"}</span>
           </Link>
           <Link
             href={contactHref}
@@ -114,17 +179,10 @@ export function DiscoveryMediaCardActions({
             className={cn(contactLinkClass, "!h-8 !min-h-8 !text-[11px]")}
           >
             <MessageCircle className="h-3 w-3 shrink-0" aria-hidden />
-            <span className="truncate">{isKo ? "문의하기" : "Contact"}</span>
+            <span className="whitespace-nowrap">{isKo ? "문의" : "Contact"}</span>
           </Link>
         </div>
         <div className="flex items-stretch justify-end gap-1">
-          <PlanCartAddButton
-            item={planItem}
-            addedFrom={addedFrom}
-            compact
-            gridInline
-            className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
-          />
           {onToggleCompare ? (
             <MediaCompareSelectButton
               selected={inCompare}
@@ -165,13 +223,6 @@ export function DiscoveryMediaCardActions({
         </Link>
       </div>
       <div className="flex items-stretch gap-1.5">
-        <PlanCartAddButton
-          item={planItem}
-          addedFrom={addedFrom}
-          compact
-          gridInline
-          className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
-        />
         {onToggleCompare ? (
           <MediaCompareSelectButton
             selected={inCompare}

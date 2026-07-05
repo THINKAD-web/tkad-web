@@ -120,9 +120,7 @@ export function mapMapItemToHomeCatalog(
     location: item.location,
     price: item.price > 0 ? item.price : undefined,
     pricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
-    thumbnailUrl: item.image
-      ? (resolveCatalogImageSrc(item.image)?.src ?? item.image)
-      : undefined,
+    thumbnailUrl: resolveCatalogImageSrc(item.image)?.src,
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,
     dailyFootTraffic: item.dailyFootTraffic ?? undefined,
@@ -161,11 +159,9 @@ export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
   };
 }
 
-/** 목록 카드 `next/image` — Bunny·프록시 URL은 optimizer 우회 */
+/** 목록 카드 `next/image` — Bunny는 same-origin 프록시, 잘못된 URL은 정규화 */
 export function catalogThumbnailImageProps(
   thumbnailUrl: string | null | undefined,
 ): { src: string; unoptimized: boolean } | null {
-  const src = thumbnailUrl?.trim();
-  if (!src) return null;
-  return { src, unoptimized: shouldUseUnoptimizedImage(src) };
+  return resolveCatalogImageSrc(thumbnailUrl);
 }

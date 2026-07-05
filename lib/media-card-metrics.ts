@@ -1,4 +1,4 @@
-import { formatCpmKrw } from "@/lib/media-price-format";
+import { formatCpmKrw, formatMediaPriceCompactWon } from "@/lib/media-price-format";
 import {
   formatMonthlyImpressionsLabel,
   resolveDisplayCpmWon,
@@ -25,19 +25,38 @@ function formatImpressionsLine(
   return isKo ? `노출 ${label}` : `Reach ${label}`;
 }
 
+function resolveCpmWon(item: MetricInput): number | null {
+  if (item.cpm != null && item.cpm > 0 && Number.isFinite(item.cpm)) {
+    return Math.round(item.cpm);
+  }
+  const resolved = resolveDisplayCpmWon(item);
+  if (resolved != null && resolved > 0 && Number.isFinite(resolved)) {
+    return Math.round(resolved);
+  }
+  return null;
+}
+
 /** 카탈로그·피드 카드 썸네일 하단 1줄 — CPM · 월 노출 */
 export function buildCatalogItemMetricLine(
   item: MetricInput,
   isKo: boolean,
   locale: string,
 ): string | null {
-  const cpm =
-    item.cpm != null && item.cpm > 0
-      ? formatCpmLine(item.cpm, locale)
-      : formatCpmLine(resolveDisplayCpmWon(item), locale);
+  const cpmWon = resolveCpmWon(item);
+  const cpm = cpmWon != null ? formatCpmLine(cpmWon, locale) : null;
   const impressions = formatImpressionsLine(item, isKo);
   if (!cpm && !impressions) return null;
   return [cpm, impressions].filter(Boolean).join(" · ");
+}
+
+/** 좁은 그리드 셀 — CPM만 축약 표기(숫자 중간 잘림 방지) */
+export function buildCatalogItemMetricLineCompact(
+  item: MetricInput,
+  locale: string,
+): string | null {
+  const cpmWon = resolveCpmWon(item);
+  if (cpmWon == null) return null;
+  return `CPM ${formatMediaPriceCompactWon(cpmWon, locale)}`;
 }
 
 export function buildMapItemMetricLine(
