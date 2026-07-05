@@ -31,7 +31,7 @@ export type {
  * - `variant="compact"` — `compactLayout` 으로 분기:
  *   - `row` — 고밀도 리스트 행 (`/media` 컴팩트 뷰)
  *   - `grid` — 2~4열 정사각 그리드 (`/media` 카드 뷰, 홈·추천)
- *   - `map-tile` — 지도 사이드 패널 (`/media/map`, `DiscoveryMediaCardHorizontal`)
+ *   - `map-tile` — 지도 사이드 패널 (`/media/map`, 세로 스택 타일)
  */
 export const DiscoveryMediaCard = forwardRef<
   HTMLLIElement,
