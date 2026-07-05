@@ -40,7 +40,7 @@ export function DiscoveryMediaFeedCardSkeleton({ className }: { className?: stri
       aria-hidden
     >
       <div className="flex min-w-0 items-stretch gap-3 p-3 sm:gap-4 sm:p-3.5">
-        <DiscoveryBone className="aspect-[4/3] h-full min-h-[6.5rem] w-[38%] min-w-[7.25rem] max-w-[11rem] shrink-0 rounded-xl sm:min-w-[8rem] sm:max-w-[12rem]" />
+        <DiscoveryBone className="aspect-[4/3] h-full min-h-[7rem] w-[45%] min-w-[8rem] max-w-[14rem] shrink-0 rounded-xl sm:min-w-[9rem]" />
         <div className="flex min-w-0 flex-1 flex-col gap-2 py-0.5">
           <DiscoveryBone className="h-3 w-24" />
           <DiscoveryBone className="h-5 w-4/5" />

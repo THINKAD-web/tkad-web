@@ -120,7 +120,7 @@ export function DiscoveryMediaCardHorizontal({
   );
 
   const thumbShellClass =
-    "relative aspect-[4/3] w-full overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800";
+    "relative aspect-[4/3] w-full min-h-[10.5rem] overflow-hidden rounded-xl border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800 sm:min-h-[11rem]";
 
   const thumbBlock =
     plannerMode && onTogglePlan ? (
@@ -238,7 +238,7 @@ export function DiscoveryMediaCardHorizontal({
       tabIndex={interactive ? 0 : undefined}
     >
       <div className="flex min-w-0 flex-col items-stretch gap-2.5 p-2.5 @[300px]:flex-row @[300px]:gap-3 @[300px]:p-3 sm:@[300px]:gap-4 sm:@[300px]:p-3.5">
-        <div className="w-full shrink-0 @[300px]:w-[38%] @[300px]:min-w-[8rem] @[300px]:max-w-[12rem] @[300px]:self-stretch">
+        <div className="w-full shrink-0 @[300px]:w-[45%] @[300px]:min-w-[9rem] @[300px]:max-w-[14rem] @[300px]:self-stretch">
           {thumbBlock}
         </div>
 
