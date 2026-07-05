@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "generatedAt": "2026-07-05T15:09:49.586Z",
+  "generatedAt": "2026-07-05T16:01:08.807Z",
   "chunks": [
     {
       "id": "capital",
@@ -12,9 +12,9 @@
         "north": 37.85,
         "east": 127.45
       },
-      "byteSize": 662839,
-      "lineCount": 197,
-      "stationCount": 664
+      "byteSize": 668039,
+      "lineCount": 199,
+      "stationCount": 675
     },
     {
       "id": "busan",

@@ -115,6 +115,7 @@ function resolveLineId(tags: OsmTags): SeoulMetroLineId | null {
   if (/경춘|gyeongchun/i.test(hay) && !/ktx/i.test(hay)) return "gyeongchun";
   if (/서해선|seohae/i.test(hay)) return "seohae";
   if (/신림선|sillim/i.test(hay)) return "silim";
+  if (/우이신설|ui.?sinseol|ui-sinseol/i.test(hay)) return "ui-sinseol";
   if (/공항|arex|airport railroad|인천국제공항철도/i.test(hay) && !/직통|express/i.test(hay))
     return "arex";
   if (/신분당|shinbundang|daxin/i.test(hay)) return "shinbundang";
