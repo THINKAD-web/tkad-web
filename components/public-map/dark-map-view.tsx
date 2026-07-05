@@ -142,14 +142,16 @@ function MapLifecycleCleanup() {
     const container = map.getContainer();
     return () => {
       try {
+        map.off();
         map.remove();
       } catch {
         /* noop — interrupted HMR */
       }
       try {
-        // Leaflet leaves _leaflet_id on the node; remount on same element throws.
-        delete (container as unknown as { _leaflet_id?: number })._leaflet_id;
-        container.replaceChildren();
+        if (container?.isConnected) {
+          delete (container as unknown as { _leaflet_id?: number })._leaflet_id;
+          container.replaceChildren();
+        }
       } catch {
         /* noop */
       }
@@ -396,14 +398,29 @@ export default function DarkMapView({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
-  /** Strict Mode / route re-entry마다 fresh DOM — Leaflet container reuse 방지 */
-  const [mapSessionId, setMapSessionId] = useState(0);
+  /** Strict Mode: unmount(null) → next frame mount — Leaflet container reuse 방지 */
+  const [mountKey, setMountKey] = useState<string | null>(null);
   const onTilesLoadingChange = useCallback((loading: boolean) => {
     setTilesLoading(loading);
   }, []);
 
   useEffect(() => {
-    setMapSessionId((id) => id + 1);
+    let cancelled = false;
+    let rafOuter = 0;
+    let rafInner = 0;
+    rafOuter = requestAnimationFrame(() => {
+      rafInner = requestAnimationFrame(() => {
+        if (!cancelled) {
+          setMountKey(`leaflet-${Date.now()}`);
+        }
+      });
+    });
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafOuter);
+      cancelAnimationFrame(rafInner);
+      setMountKey(null);
+    };
   }, []);
 
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
@@ -429,9 +446,10 @@ export default function DarkMapView({
           aria-hidden
         />
       ) : null}
-      {mapSessionId > 0 ? (
-      <div key={`leaflet-session-${mapSessionId}`} className="h-full w-full">
+      {mountKey ? (
+      <div key={mountKey} className="h-full w-full">
       <MapContainer
+        key={mountKey}
         center={[center.lat, center.lng]}
         zoom={leafletZoom}
         minZoom={5}
