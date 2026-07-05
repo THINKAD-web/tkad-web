@@ -1,4 +1,5 @@
 import type { MetroCityId } from "@/lib/public-map/metro-line-colors";
+import type { RailOperator } from "@/lib/public-map/ktx-srt-stations";
 
 export type MetroFeatureKind = "line" | "station";
 
@@ -12,6 +13,8 @@ export type MetroFeatureProperties = {
   nameKo?: string;
   isTransfer?: boolean;
   lineIds?: string[];
+  /** KTX·SRT 역 청크 전용 */
+  railOperator?: RailOperator;
 };
 
 export type MetroGeoJson = GeoJSON.FeatureCollection<
@@ -31,6 +34,8 @@ export type MetroChunkManifest = {
   nameKo: string;
   url: string;
   bbox: MetroBbox;
+  /** 작은 전국 청크 — 뷰포트 무관 항상 fetch */
+  alwaysLoad?: boolean;
   byteSize?: number;
   lineCount?: number;
   stationCount?: number;

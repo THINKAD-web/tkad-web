@@ -5,7 +5,8 @@ export type MetroCityId =
   | "busan"
   | "daegu"
   | "gwangju"
-  | "daejeon";
+  | "daejeon"
+  | "ktx-srt";
 
 export type MetroLineDef = {
   id: string;
@@ -76,7 +77,7 @@ export const SEOUL_METRO_LINE_BY_ID = Object.fromEntries(
 ) as Record<SeoulMetroLineId, SeoulMetroLineDef>;
 
 const PROVINCIAL_LINES: Record<
-  Exclude<MetroCityId, "capital">,
+  Exclude<MetroCityId, "capital" | "ktx-srt">,
   readonly MetroLineDef[]
 > = {
   busan: [
@@ -95,13 +96,16 @@ const PROVINCIAL_LINES: Record<
   daejeon: [{ id: "1", nameKo: "1호선", nameEn: "Line 1", color: "#007448" }],
 };
 
-export const METRO_CITY_LINES: Record<MetroCityId, readonly MetroLineDef[]> = {
+export const METRO_CITY_LINES: Record<
+  Exclude<MetroCityId, "ktx-srt">,
+  readonly MetroLineDef[]
+> = {
   capital: SEOUL_METRO_LINES,
   ...PROVINCIAL_LINES,
 };
 
 export function metroLineDef(
-  cityId: MetroCityId,
+  cityId: Exclude<MetroCityId, "ktx-srt">,
   lineId: string,
 ): MetroLineDef | undefined {
   return METRO_CITY_LINES[cityId]?.find((l) => l.id === lineId);
@@ -130,5 +134,9 @@ export const METRO_CITY_META: Record<
   daejeon: {
     nameKo: "대전",
     bbox: { south: 36.22, west: 127.32, north: 36.48, east: 127.55 },
+  },
+  "ktx-srt": {
+    nameKo: "KTX·SRT",
+    bbox: { south: 34.5, west: 126.0, north: 38.1, east: 129.5 },
   },
 };
