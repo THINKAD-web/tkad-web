@@ -1,6 +1,9 @@
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
-import { buildCatalogItemMetricLine } from "@/lib/media-card-metrics";
+import {
+  buildCatalogItemMetricLine,
+  buildCatalogItemMetricLineCompact,
+} from "@/lib/media-card-metrics";
 import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWithPeriodSuffix,
@@ -19,6 +22,8 @@ export type MediaCardDisplayModel = {
   showPeriodSuffix: boolean;
   periodLabel?: string | null;
   metricLine?: string | null;
+  /** 2열 그리드 등 좁은 셀 — CPM 축약 1줄 */
+  metricLineCompact?: string | null;
   highlights: string[];
   detailHref: string;
 };
@@ -71,6 +76,7 @@ export function catalogItemToDisplayModel(
     showPeriodSuffix: Boolean(displayPrice && !opts.priceLabel?.trim()),
     periodLabel,
     metricLine: buildCatalogItemMetricLine(item, opts.isKo, locale),
+    metricLineCompact: buildCatalogItemMetricLineCompact(item, locale),
     highlights: opts.highlights ?? [],
     detailHref: opts.href,
   };
@@ -99,6 +105,7 @@ export function mapItemToDisplayModel(
     showPeriodSuffix: false,
     periodLabel: null,
     metricLine: buildCatalogItemMetricLine(item, isKo, locale),
+    metricLineCompact: buildCatalogItemMetricLineCompact(item, locale),
     highlights: [],
     detailHref: `/media/${item.id}`,
   };
