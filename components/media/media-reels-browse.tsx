@@ -11,7 +11,6 @@ import {
 } from "lucide-react";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { catalogItemToDisplayModel } from "@/lib/media-card-display";
@@ -148,20 +147,14 @@ function ReelsSlide({
             </button>
           ) : (
             <>
-              <PlanCartAddButton
+              <MediaCartAddButton
                 item={planItem}
                 addedFrom="search"
-                compact
                 className="!h-10 !w-10 !min-w-10 !rounded-xl !px-0"
               />
               <MediaCompareSelectButton
                 selected={inCompare}
                 onToggle={onToggleCompare}
-                className="!h-10 !w-10 !min-w-10 !rounded-xl !px-0"
-              />
-              <MediaCartAddButton
-                item={planItem}
-                addedFrom="search"
                 className="!h-10 !w-10 !min-w-10 !rounded-xl !px-0"
               />
             </>
