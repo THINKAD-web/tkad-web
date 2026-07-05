@@ -46,8 +46,8 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
   const sizeClass = clusterSizeClass(count);
   const px = sizeClass === "large" ? 42 : sizeClass === "medium" ? 38 : 34;
   const border = lightTiles ? "2px solid rgba(15,23,42,0.5)" : "2px solid rgba(255,255,255,0.85)";
-  const fill = lightTiles ? "#f97316" : "#fb923c";
-  const textColor = lightTiles ? "#ffffff" : "#0f172a";
+  const fill = lightTiles ? "#7C3AED" : "#8B5CF6";
+  const textColor = "#ffffff";
   const icon = L.divIcon({
     html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};background:${fill};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${textColor};font-family:ui-sans-serif,system-ui,sans-serif">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,

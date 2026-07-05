@@ -1,7 +1,7 @@
 "use client";
 
 import { forwardRef } from "react";
-import Link from "next/link";
+import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { Check, Plus } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";

@@ -645,10 +645,7 @@ function MediaSearchPageInner({
   const renderPrice = (item: HomeCatalogMediaItem) =>
     formatPriceLabel(item.price, item.pricePeriod, priceLocale);
 
-  const getMediaHref = (item: HomeCatalogMediaItem) => {
-    const path = mediaItemDetailPath(item.id);
-    return `/${locale}${path}`;
-  };
+  const getMediaHref = (item: HomeCatalogMediaItem) => mediaItemDetailPath(item);
 
   const isKo = locale === "ko";
 

@@ -128,7 +128,7 @@ function buildMapMarker(
   const label = point.label.trim();
   const marker: MapMarker = {
     id: pointCount > 1 ? `${mediaId}-install-${index}` : mediaId,
-    name: label ? `${baseName} · ${label}` : baseName,
+    name: pointCount > 1 && label ? `${baseName} · ${label}` : baseName,
     lat: point.lat,
     lng: point.lng,
     price,

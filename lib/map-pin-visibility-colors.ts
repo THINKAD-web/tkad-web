@@ -1,6 +1,6 @@
-/** `/media/map` 가시성 점수 핀 — 브랜드 주황(#FF6600) 단일 계열 명도 그라데이션 */
+/** `/media/map` 가시성 점수 핀 — 브랜드 보라(#7C3AED) 단일 계열 명도 그라데이션 */
 
-export const VISIBILITY_PIN_BRAND_ORANGE = "#FF6600";
+export const VISIBILITY_PIN_BRAND_VIOLET = "#7C3AED";
 
 export type VisibilityPinTier = 0 | 1 | 2 | 3 | 4 | 5;
 
@@ -17,7 +17,7 @@ export type VisibilityPinTierDef = {
   rangeLabelEn: string;
 };
 
-/** 연함(낮은 점수) → 진함(높은 점수). voyager 밝은 타일 대비용 stroke 포함. */
+/** 연함(낮은 점수) → 진함(높은 점수). 다크 타일 대비용 stroke 포함. */
 export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
   {
     tier: 0,
@@ -35,9 +35,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 1,
     min: 1,
     max: 84,
-    fill: "#FFD4B8",
-    stroke: "#FFAA66",
-    text: "#9a3412",
+    fill: "#DDD6FE",
+    stroke: "#C4B5FD",
+    text: "#5B21B6",
     labelKo: "기본",
     labelEn: "Basic",
     rangeLabelKo: "1–84",
@@ -47,9 +47,9 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 2,
     min: 85,
     max: 88,
-    fill: "#FFB380",
-    stroke: "#FF8833",
-    text: "#9a3412",
+    fill: "#C4B5FD",
+    stroke: "#A78BFA",
+    text: "#5B21B6",
     labelKo: "표준",
     labelEn: "Standard",
     rangeLabelKo: "85–88",
@@ -59,8 +59,8 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 3,
     min: 89,
     max: 91,
-    fill: "#FF9933",
-    stroke: "#FF7711",
+    fill: "#A78BFA",
+    stroke: "#8B5CF6",
     text: "#ffffff",
     labelKo: "양호",
     labelEn: "Good",
@@ -71,8 +71,8 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 4,
     min: 92,
     max: 94,
-    fill: "#FF6600",
-    stroke: "#E55A00",
+    fill: "#8B5CF6",
+    stroke: "#7C3AED",
     text: "#ffffff",
     labelKo: "높음",
     labelEn: "High",
@@ -83,8 +83,8 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
     tier: 5,
     min: 95,
     max: 100,
-    fill: "#CC5200",
-    stroke: "#993D00",
+    fill: "#7C3AED",
+    stroke: "#6D28D9",
     text: "#ffffff",
     labelKo: "최상",
     labelEn: "Top",
@@ -123,3 +123,6 @@ export function pinColorForVisibilityScore(score: number | null | undefined): {
 export function visibilityPinLegendEntries(): VisibilityPinTierDef[] {
   return [...VISIBILITY_PIN_TIERS];
 }
+
+/** @deprecated Use VISIBILITY_PIN_BRAND_VIOLET */
+export const VISIBILITY_PIN_BRAND_ORANGE = VISIBILITY_PIN_BRAND_VIOLET;

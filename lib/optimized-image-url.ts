@@ -19,6 +19,11 @@ export function sanitizeMediaImageUrl(
   let raw = url?.trim();
   if (!raw) return null;
 
+  // same-origin Bunny proxy (already resolved for cards)
+  if (raw.startsWith("/api/bunny-media/")) {
+    return raw;
+  }
+
   // hthttps:// → https://
   raw = raw.replace(/^ht+(?=https?:\/\/)/i, "");
   // httpshttps:// → https://
