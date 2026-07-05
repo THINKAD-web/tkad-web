@@ -155,6 +155,8 @@ function MapMarkerPreviewBody({
   isKo,
   onClose,
   showClose = true,
+  inCompare,
+  onToggleCompare,
 }: {
   item: MapMapItem;
   catalogItem: ReturnType<typeof mapMapItemToHomeCatalog>;
@@ -162,6 +164,8 @@ function MapMarkerPreviewBody({
   isKo: boolean;
   onClose: () => void;
   showClose?: boolean;
+  inCompare?: boolean;
+  onToggleCompare?: () => void;
 }) {
   const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
   const priceLabel = formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en");
@@ -227,8 +231,11 @@ function MapMarkerPreviewBody({
             planItem={mapItemPlanCart(item)}
             detailHref={href}
             isKo={isKo}
+            inCompare={inCompare}
+            onToggleCompare={onToggleCompare}
             addedFrom="map"
-            layout="preview"
+            layout="map-tile"
+            className="!mt-0"
             stopPropagation
           />
         </div>
@@ -338,6 +345,8 @@ function MediaMapDetailBody({
         isKo={isKo}
         onClose={onClose}
         showClose={false}
+        inCompare={inCompare}
+        onToggleCompare={onToggleCompare}
       />
     );
   }
@@ -350,6 +359,8 @@ function MediaMapDetailBody({
         href={href}
         isKo={isKo}
         onClose={onClose}
+        inCompare={inCompare}
+        onToggleCompare={onToggleCompare}
       />
     );
   }

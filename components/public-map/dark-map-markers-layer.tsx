@@ -182,6 +182,7 @@ export function DarkMapMarkersLayer({
     layerRef.current = layer;
     map.addLayer(layer);
     return () => {
+      syncGenerationRef.current += 1;
       map.removeLayer(layer);
       layerRef.current = null;
       markerRefs.current.clear();

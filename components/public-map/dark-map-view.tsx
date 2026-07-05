@@ -7,13 +7,8 @@ import "leaflet.markercluster/dist/MarkerCluster.css";
 import "leaflet.markercluster/dist/MarkerCluster.Default.css";
 import "leaflet.markercluster";
 import { useTheme } from "next-themes";
-import {
-  MapContainer,
-  useMap,
-  GeoJSON,
-  CircleMarker,
-  ZoomControl,
-} from "react-leaflet";
+import { useMap, GeoJSON, CircleMarker, ZoomControl } from "react-leaflet";
+import { LeafletMapHost } from "@/components/public-map/leaflet-map-host";
 import { cn } from "@/lib/utils";
 import {
   PUBLIC_DARK_MAP_DEFAULT_CENTER,
@@ -132,31 +127,6 @@ function MapTileLoadingTracker({
     };
   }, [map, onLoadingChange]);
 
-  return null;
-}
-
-/** Explicit map.remove() on unmount — dev HMR / Strict Mode container reuse 방지 */
-function MapLifecycleCleanup() {
-  const map = useMap();
-  useEffect(() => {
-    const container = map.getContainer();
-    return () => {
-      try {
-        map.off();
-        map.remove();
-      } catch {
-        /* noop — interrupted HMR */
-      }
-      try {
-        if (container?.isConnected) {
-          delete (container as unknown as { _leaflet_id?: number })._leaflet_id;
-          container.replaceChildren();
-        }
-      } catch {
-        /* noop */
-      }
-    };
-  }, [map]);
   return null;
 }
 
@@ -398,29 +368,8 @@ export default function DarkMapView({
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
-  /** Strict Mode: unmount(null) → next frame mount — Leaflet container reuse 방지 */
-  const [mountKey, setMountKey] = useState<string | null>(null);
   const onTilesLoadingChange = useCallback((loading: boolean) => {
     setTilesLoading(loading);
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    let rafOuter = 0;
-    let rafInner = 0;
-    rafOuter = requestAnimationFrame(() => {
-      rafInner = requestAnimationFrame(() => {
-        if (!cancelled) {
-          setMountKey(`leaflet-${Date.now()}`);
-        }
-      });
-    });
-    return () => {
-      cancelled = true;
-      cancelAnimationFrame(rafOuter);
-      cancelAnimationFrame(rafInner);
-      setMountKey(null);
-    };
   }, []);
 
   const leafletZoom = kakaoLevelToLeafletZoom(zoom, 10);
@@ -446,24 +395,22 @@ export default function DarkMapView({
           aria-hidden
         />
       ) : null}
-      {mountKey ? (
-      <div key={mountKey} className="h-full w-full">
-      <MapContainer
-        key={mountKey}
+      <LeafletMapHost
         center={[center.lat, center.lng]}
         zoom={leafletZoom}
-        minZoom={5}
-        maxZoom={18}
         style={{ height: "100%", width: "100%" }}
         className="z-0 h-full w-full touch-none"
-        scrollWheelZoom
-        touchZoom
-        doubleClickZoom
-        dragging
-        zoomControl={false}
-        zoomAnimation
+        mapOptions={{
+          minZoom: 5,
+          maxZoom: 18,
+          scrollWheelZoom: true,
+          touchZoom: true,
+          doubleClickZoom: true,
+          dragging: true,
+          zoomControl: false,
+          zoomAnimation: true,
+        }}
       >
-        <MapLifecycleCleanup />
         <DarkMapTileLayer themeAware={themeAwareTiles} preferLight={preferLightTiles} />
         {subwayOverlayEnabled ? (
           <LazySeoulMetroOverlayLayer lightTiles={lightTiles} />
@@ -508,14 +455,7 @@ export default function DarkMapView({
             }}
           />
         ) : null}
-      </MapContainer>
-      </div>
-      ) : (
-        <div
-          className="skeleton-shimmer h-full w-full min-h-[200px] bg-muted/40"
-          aria-hidden
-        />
-      )}
+      </LeafletMapHost>
     </div>
   );
 }

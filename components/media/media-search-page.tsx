@@ -43,7 +43,10 @@ import {
   buildMediaBrowseQueryString,
   type MediaBrowseFilterQueryState,
 } from "@/lib/media-browse-query-string";
-import { MediaPinPopup } from "@/components/media-pin-popup";
+import {
+  DiscoveryMapTileSkeleton,
+  DiscoveryMediaFeedCardSkeleton,
+} from "@/components/discovery/discovery-route-skeletons";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
 import {
   mediaItemHasMapCoordinates,
@@ -681,21 +684,20 @@ function MediaSearchPageInner({
     }
 
     if (viewMode === "card") {
-      const highlights = feedHighlightChips(item);
       return (
         <DiscoveryMediaCard
           key={item.id}
-          variant="feed"
+          variant="compact"
+          compactLayout="map-tile"
           item={item}
           href={href}
-          highlights={highlights}
+          priceLabel={priceLabel}
           isKo={isKo}
           inCompare={isInCompare(item.id)}
           onToggleCompare={() => toggleCompare(item)}
           plannerMode={plannerMode}
           isInPlan={inPlan}
           onTogglePlan={plannerMode ? togglePlan : undefined}
-          showPlanButton={!plannerMode}
         />
       );
     }
@@ -902,7 +904,7 @@ function MediaSearchPageInner({
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             cn(
-              "grid grid-cols-2 gap-3 md:gap-4",
+              "grid grid-cols-2 gap-3 sm:gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4",
               plannerMode && "gap-2 sm:gap-3",
             ),
           viewMode === "compact" &&
@@ -930,20 +932,10 @@ function MediaSearchPageInner({
                     : "flex gap-3",
               )}
             >
-              {viewMode === "feed" || viewMode === "card" ? (
-                <div className="flex flex-col gap-4 rounded-2xl border border-gray-100 p-4 dark:border-white/10 md:flex-row md:items-stretch">
-                  <div className="aspect-[4/3] w-full rounded-xl bg-gray-200 dark:bg-white/10 md:w-[48%] md:aspect-auto md:min-h-[12rem]" />
-                  <div className="space-y-2">
-                    <div className="h-3 w-12 rounded bg-gray-200 dark:bg-white/10" />
-                    <div className="h-5 w-4/5 rounded bg-gray-200 dark:bg-white/10" />
-                    <div className="h-16 w-full rounded-xl bg-gray-200 dark:bg-white/10" />
-                    <div className="grid grid-cols-3 gap-1.5">
-                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
-                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
-                      <div className="h-12 rounded-xl bg-gray-200 dark:bg-white/10" />
-                    </div>
-                  </div>
-                </div>
+              {viewMode === "feed" ? (
+                <DiscoveryMediaFeedCardSkeleton />
+              ) : viewMode === "card" ? (
+                <DiscoveryMapTileSkeleton />
               ) : viewMode === "compact" ? (
                 <>
                   <div className="h-11 w-14 shrink-0 rounded-lg bg-gray-200 dark:bg-white/10" />
