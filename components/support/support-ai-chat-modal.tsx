@@ -2,19 +2,39 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
-import { Bot, MessageCircle, Send, X } from "lucide-react";
+import { Bot, MessageCircle, Send, X, ArrowRight } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { KAKAO_CHANNEL_PUBLIC_URL } from "@/lib/kakao-public";
-import type { SupportChatTurn } from "@/lib/support-chat-complete";
+import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import {
-  getOrCreateSupportSessionId,
-  loadSupportChatFromSession,
-  saveSupportChatToSession,
-} from "@/lib/support-chat-storage";
+  type AiChatTurn,
+  getOrCreateAiChatSessionId,
+  loadAiChatFromSession,
+  saveAiChatToSession,
+} from "@/lib/ai-chatbot-storage";
+import { buildPlannerBriefPath } from "@/lib/planner/freetext-brief-url";
+import { ChatbotMediaCardBlock } from "@/components/support/chatbot-media-card-block";
 import { cn } from "@/lib/utils";
 
 type Props = {
   open: boolean;
   onClose: () => void;
+};
+
+type ChatApiResponse = {
+  reply?: string;
+  media?: AiChatbotMediaCard[];
+  remaining?: number;
+  limit?: number;
+  rateLimited?: boolean;
+  maintenance?: boolean;
+  message?: string;
+  error?: string;
+};
+
+type QuotaState = {
+  remaining: number;
+  limit: number;
 };
 
 function Bubble({
@@ -39,20 +59,29 @@ function Bubble({
   );
 }
 
+function lastUserTextBefore(messages: AiChatTurn[], assistantIndex: number): string | null {
+  for (let i = assistantIndex - 1; i >= 0; i--) {
+    const m = messages[i];
+    if (m?.role === "user") return m.content.trim() || null;
+  }
+  return null;
+}
+
 export function SupportAiChatModal({ open, onClose }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const t = useTranslations("supportChat");
-  const [messages, setMessages] = useState<SupportChatTurn[]>([]);
+  const t = useTranslations("aiChatbot");
+  const [messages, setMessages] = useState<AiChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [quota, setQuota] = useState<QuotaState | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
     if (open) {
-      setMessages(loadSupportChatFromSession());
+      setMessages(loadAiChatFromSession());
       setError(null);
     }
   }, [open]);
@@ -84,42 +113,68 @@ export function SupportAiChatModal({ open, onClose }: Props) {
       if (!text || loading) return;
       setInput("");
       setError(null);
-      const userMsg: SupportChatTurn = { role: "user", content: text };
+      const userMsg: AiChatTurn = { role: "user", content: text };
       const nextMessages = [...messages, userMsg];
       setMessages(nextMessages);
-      saveSupportChatToSession(nextMessages);
+      saveAiChatToSession(nextMessages);
       setLoading(true);
       try {
         const history = messages.map(({ role, content }) => ({ role, content }));
-        const res = await fetch("/api/support-chat", {
+        const res = await fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             message: text,
             history,
             locale: isKo ? "ko" : "en",
-            sessionId: getOrCreateSupportSessionId(),
+            sessionId: getOrCreateAiChatSessionId(),
+            pageUrl:
+              typeof window !== "undefined" ? window.location.href : undefined,
           }),
         });
-        const data = (await res.json()) as { reply?: string; error?: string };
-        if (!res.ok) throw new Error(data.error || t("errorGeneric"));
+        const data = (await res.json()) as ChatApiResponse;
+
+        if (data.maintenance) {
+          throw new Error(data.reply?.trim() || t("maintenance"));
+        }
+
+        if (res.status === 429 || data.rateLimited) {
+          throw new Error(data.message?.trim() || t("rateLimited"));
+        }
+
+        if (!res.ok) {
+          throw new Error(data.error || t("errorGeneric"));
+        }
+
         const reply = data.reply?.trim() || "…";
-        const withReply: SupportChatTurn[] = [
+        const media =
+          Array.isArray(data.media) && data.media.length > 0
+            ? data.media
+            : undefined;
+
+        if (
+          typeof data.remaining === "number" &&
+          typeof data.limit === "number"
+        ) {
+          setQuota({ remaining: data.remaining, limit: data.limit });
+        }
+
+        const withReply: AiChatTurn[] = [
           ...nextMessages,
-          { role: "assistant", content: reply },
+          { role: "assistant", content: reply, media },
         ];
         setMessages(withReply);
-        saveSupportChatToSession(withReply);
+        saveAiChatToSession(withReply);
       } catch (e) {
         setError(e instanceof Error ? e.message : t("errorGeneric"));
         setMessages(messages);
-        saveSupportChatToSession(messages);
+        saveAiChatToSession(messages);
         setInput(text);
       } finally {
         setLoading(false);
       }
     },
-    [input, loading, locale, messages, t, isKo],
+    [input, loading, messages, t, isKo],
   );
 
   if (!open) return null;
@@ -135,7 +190,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
       <div
         className="pointer-events-auto fixed inset-x-3 bottom-3 top-auto z-[56] mx-auto flex max-h-[min(560px,78vh)] min-h-[360px] flex-col overflow-hidden rounded-[24px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white dark:bg-white/5 bg-gray-500 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.7)] backdrop-blur sm:inset-x-auto sm:bottom-6 sm:right-6 sm:left-auto sm:mx-0 sm:w-[min(400px,calc(100vw-2rem))]"
         role="dialog"
-        aria-label={t("aiDialogLabel")}
+        aria-label={t("dialogLabel")}
         onClick={(e) => e.stopPropagation()}
       >
         <div
@@ -148,15 +203,23 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           </div>
           <div className="min-w-0 flex-1">
             <p className="font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-500">
-              {t("aiEyebrow")}
+              {t("eyebrow")}
             </p>
-            <p className="truncate text-sm font-black">{t("aiTitle")}</p>
+            <p className="truncate text-sm font-black">{t("title")}</p>
+            <p className="truncate text-[11px] text-muted-foreground">
+              {quota != null
+                ? t("remaining", {
+                    remaining: quota.remaining,
+                    limit: quota.limit,
+                  })
+                : t("subtitle")}
+            </p>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="flex h-9 w-9 items-center justify-center rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 hover:dark:bg-white/10 bg-gray-100"
-            aria-label={t("close")}
+            aria-label={t("closeAria")}
           >
             <X className="h-4 w-4" />
           </button>
@@ -168,37 +231,77 @@ export function SupportAiChatModal({ open, onClose }: Props) {
         >
           {messages.length === 0 && !loading ? (
             <p className="px-2 text-center text-xs dark:text-white text-gray-500">
-              {t("aiEmpty")}
+              {t("emptyState")}
             </p>
           ) : null}
-          {messages.map((msg, i) => (
-            <Bubble key={`${i}-${msg.role}`} role={msg.role} content={msg.content} />
-          ))}
+          {messages.map((msg, i) => {
+            const showMedia =
+              msg.role === "assistant" &&
+              Array.isArray(msg.media) &&
+              msg.media.length > 0;
+            const briefSource = showMedia
+              ? lastUserTextBefore(messages, i)
+              : null;
+            const plannerHref = briefSource
+              ? buildPlannerBriefPath(briefSource)
+              : null;
+
+            return (
+              <div key={`${i}-${msg.role}`} className="space-y-2">
+                <Bubble role={msg.role} content={msg.content} />
+                {showMedia ? (
+                  <div className="mr-auto max-w-[92%] space-y-2">
+                    {msg.media!.map((card) => (
+                      <ChatbotMediaCardBlock
+                        key={card.id}
+                        card={card}
+                        isKo={isKo}
+                      />
+                    ))}
+                    {plannerHref ? (
+                      <Link
+                        href={plannerHref}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/35 bg-violet-500/10 px-3 py-2.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/15 dark:text-violet-200"
+                      >
+                        {t("plannerCta")}
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                      </Link>
+                    ) : null}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
           {loading ? (
             <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-400">
               {t("thinking")}
             </p>
           ) : null}
           {error ? (
-            <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-100">
+            <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-100">
               {error}
             </p>
           ) : null}
         </div>
 
         <div className="relative shrink-0 border-t dark:border-white/10 border-gray-200 dark:bg-black bg-white/30 p-3">
+          <p className="mb-1.5 text-[10px] font-medium text-muted-foreground">
+            {t("suggestionsLabel")}
+          </p>
           <div className="mb-2 flex flex-wrap gap-1.5">
-            {(["suggestion1", "suggestion2", "suggestion3"] as const).map((key) => (
-              <button
-                key={key}
-                type="button"
-                disabled={loading}
-                onClick={() => void send(t(key))}
-                className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 text-[10px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
-              >
-                {t(key)}
-              </button>
-            ))}
+            {(["suggestion1", "suggestion2", "suggestion3"] as const).map(
+              (key) => (
+                <button
+                  key={key}
+                  type="button"
+                  disabled={loading}
+                  onClick={() => void send(t(key))}
+                  className="rounded-lg border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-2 py-1 text-[10px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100 disabled:opacity-40"
+                >
+                  {t(key)}
+                </button>
+              ),
+            )}
           </div>
           <div className="flex gap-2">
             <textarea
@@ -211,7 +314,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                   void send();
                 }
               }}
-              placeholder={t("aiPlaceholder")}
+              placeholder={t("placeholder")}
               rows={2}
               disabled={loading}
               className="min-h-[2.75rem] min-w-0 flex-1 resize-none rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 px-3 py-2 text-sm dark:text-white text-gray-900 outline-none placeholder:dark:text-white focus:border-white/22"
@@ -236,7 +339,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             {t("kakaoHandoff")}
           </a>
           <p className="mt-2 text-center font-display text-[9px] uppercase tracking-[0.14em] dark:text-white text-gray-400">
-            {t("aiDisclaimer")}
+            {t("disclaimer")}
           </p>
         </div>
       </div>

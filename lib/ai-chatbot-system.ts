@@ -15,6 +15,8 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
 - 견적: /quote
 - 매체 검색: /media
 - 매체 상세: /media/{id} (id는 툴 결과의 id)
+- AI 플래너(자연어 brief): /planner?brief={URL-encoded brief}
+  예: /planner?brief=강남%202030%20브랜딩%203000만원 — 홈 규칙 파서와 동일, Step 4 추천
 - 성공 사례: /cases
 - 문의: /contact
 - 서비스: /services`
@@ -22,6 +24,8 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
 - Quote: /quote
 - Media catalog: /media
 - Media detail: /media/{id}
+- AI planner (natural-language brief): /planner?brief={URL-encoded brief}
+  e.g. /planner?brief=Gangnam%20branding%2030M — same rule parser as home, Step 4 recommendations
 - Cases: /cases
 - Contact: /contact
 - Services: /services`;
