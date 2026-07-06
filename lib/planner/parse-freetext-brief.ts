@@ -16,6 +16,7 @@ import {
   PLANNER_BUDGET_MIN,
   type PlannerAgeKey,
   type PlannerCampaignGoal,
+  type PlannerCategory,
   type PlannerIndustryKey,
 } from "@/lib/planner/types";
 
@@ -38,6 +39,7 @@ export type PlannerFreetextParseResult = {
     industryKey: ParsedField<PlannerIndustryKey>;
     budgetMan: ParsedField<number>;
     months: ParsedField<number>;
+    categories: ParsedField<PlannerCategory[]>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
   unmatchedTokens: string[];
@@ -575,6 +577,97 @@ function parseIndustryKey(text: string): ParsedField<PlannerIndustryKey> {
   return field(best.key, best.len >= 3 ? "high" : "low", best.hint);
 }
 
+const CATEGORY_ORDER: PlannerCategory[] = ["digital", "static", "mobile"];
+
+/** 매체 유형 키워드 → 플래너 categories (추측 금지·「만」 명시 우선) */
+export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
+  const exclusiveSubway = text.match(
+    /지하철(?:\s*광고)?\s*만|만\s*(?:지하철|지하철\s*광고)/i,
+  );
+  if (exclusiveSubway) {
+    return field(
+      ["digital", "mobile"],
+      "high",
+      exclusiveSubway[0].trim(),
+    );
+  }
+
+  const exclusiveMobile = text.match(
+    /(?:버스|택시|래핑|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑)/i,
+  );
+  if (exclusiveMobile) {
+    return field(["mobile"], "high", exclusiveMobile[0].trim());
+  }
+
+  const exclusiveStatic = text.match(
+    /(?:옥외|빌보드|고정형)(?:\s*광고)?\s*만|만\s*(?:옥외|빌보드)/i,
+  );
+  if (exclusiveStatic) {
+    return field(["static"], "high", exclusiveStatic[0].trim());
+  }
+
+  const exclusiveDigital = text.match(
+    /(?:전광판|led|디지털|사이니지)(?:\s*광고)?\s*만|만\s*(?:전광판|디지털)/i,
+  );
+  if (exclusiveDigital) {
+    return field(["digital"], "high", exclusiveDigital[0].trim());
+  }
+
+  type Hit = { cat: PlannerCategory; source: string };
+  const hits: Hit[] = [];
+
+  const rules: { cat: PlannerCategory; re: RegExp }[] = [
+    { cat: "mobile", re: /버스|택시|래핑|이동형|bus\b|taxi|vehicle\s*wrap/i },
+    {
+      cat: "static",
+      re: /옥외|빌보드|고정형|billboard|outdoor(?!\s*digital)/i,
+    },
+    {
+      cat: "digital",
+      re: /전광판|led|디지털(?:\s*사이니지)?|사이니지|dooh|signage/i,
+    },
+    {
+      cat: "mobile",
+      re: /지하철\s*(?:차내|랩핑|열차)|subway\s*train/i,
+    },
+    {
+      cat: "digital",
+      re: /지하철\s*(?:역|역사|승강장|플랫폼|스크린도어)|subway\s*station/i,
+    },
+    { cat: "digital", re: /2호선\s*(?:역|역사|승강장)/i },
+    { cat: "mobile", re: /2호선\s*(?:차내|열차|랩핑)/i },
+  ];
+
+  for (const { cat, re } of rules) {
+    const m = text.match(re);
+    if (m?.[0]) hits.push({ cat, source: m[0].trim() });
+  }
+
+  const subwayAmbiguous = text.match(/지하철|subway/i);
+  const subwaySpecific = /지하철\s*(?:역|역사|차내|랩핑|열차)|2호선/i.test(
+    text,
+  );
+
+  if (hits.length === 0 && subwayAmbiguous && !subwaySpecific) {
+    return field(
+      ["digital", "mobile"],
+      "low",
+      subwayAmbiguous[0].trim(),
+    );
+  }
+
+  if (hits.length === 0) return emptyField();
+
+  const cats = CATEGORY_ORDER.filter((c) => hits.some((h) => h.cat === c));
+  const sources = [...new Set(hits.map((h) => h.source))];
+  const confidence: ParseConfidence =
+    subwayAmbiguous && !subwaySpecific && cats.includes("digital") && cats.includes("mobile")
+      ? "low"
+      : "high";
+
+  return field(cats, confidence, sources.join(", "));
+}
+
 function collectUnmatchedTokens(
   text: string,
   fields: PlannerFreetextParseResult["fields"],
@@ -588,6 +681,7 @@ function collectUnmatchedTokens(
     fields.industryKey.source,
     fields.budgetMan.source,
     fields.months.source,
+    fields.categories.source,
   ].filter(Boolean) as string[];
 
   for (const src of sources) {
@@ -633,6 +727,7 @@ export function parsePlannerFreetextBrief(
         industryKey: empty,
         budgetMan: empty,
         months: empty,
+        categories: empty,
       },
       unmatchedTokens: [],
     };
@@ -647,6 +742,7 @@ export function parsePlannerFreetextBrief(
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
     months: parseMonths(text),
+    categories: parseCategories(text),
   };
 
   return {
@@ -669,7 +765,10 @@ export function buildScenarioPatchFromFreetextParse(
 
   return {
     regions: regions.length > 0 ? regions : ["seoul"],
-    categories: [...PLANNER_DEFAULT_CATEGORIES],
+    categories:
+      fields.categories.value != null && fields.categories.value.length > 0
+        ? [...fields.categories.value]
+        : [...PLANNER_DEFAULT_CATEGORIES],
     budgetMan: fields.budgetMan.value ?? PLANNER_BUDGET_MIN,
     months: fields.months.value ?? 1,
     ...(fields.campaignGoal.value != null

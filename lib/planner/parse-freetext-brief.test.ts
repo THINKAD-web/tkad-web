@@ -280,4 +280,89 @@ test("variant: 애매한 문장은 여전히 null (추측 금지)", () => {
   assert.equal(r.fields.regions.value, null);
   assert.equal(r.fields.ageKeys.value, null);
   assert.equal(r.fields.industryKey.value, null);
+  assert.equal(r.fields.categories.value, null);
+});
+
+// ─── 매체 유형 categories ─────────────────────────────────────────
+
+test("categories: 버스 래핑 → mobile", () => {
+  const r = parsePlannerFreetextBrief("버스 래핑 브랜딩 1000만");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 버스만 → mobile exclusive", () => {
+  const r = parsePlannerFreetextBrief("강남 버스만 1000만");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 옥외 빌보드 → static", () => {
+  const r = parsePlannerFreetextBrief("옥외 빌보드 브랜딩 2000만");
+  assert.deepEqual(r.fields.categories.value, ["static"]);
+});
+
+test("categories: 옥외만 → static exclusive", () => {
+  const r = parsePlannerFreetextBrief("전국 옥외만 3000만");
+  assert.deepEqual(r.fields.categories.value, ["static"]);
+});
+
+test("categories: 전광판 LED → digital", () => {
+  const r = parsePlannerFreetextBrief("전광판 LED 브랜딩 1500만");
+  assert.deepEqual(r.fields.categories.value, ["digital"]);
+});
+
+test("categories: 디지털 사이니지만 → digital exclusive", () => {
+  const r = parsePlannerFreetextBrief("강남 디지털만 800만");
+  assert.deepEqual(r.fields.categories.value, ["digital"]);
+});
+
+test("categories: 지하철 단독 → digital+mobile low", () => {
+  const r = parsePlannerFreetextBrief("지하철 IT 런칭 500만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "low");
+});
+
+test("categories: 지하철 광고만 → digital+mobile high", () => {
+  const r = parsePlannerFreetextBrief("지하철 광고만 1000만");
+  assert.deepEqual(r.fields.categories.value, ["digital", "mobile"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 지하철 역사 → digital", () => {
+  const r = parsePlannerFreetextBrief("지하철 역사 브랜딩 500만");
+  assert.deepEqual(r.fields.categories.value, ["digital"]);
+  assert.equal(r.fields.categories.confidence, "high");
+});
+
+test("categories: 지하철 차내 → mobile", () => {
+  const r = parsePlannerFreetextBrief("지하철 차내 광고 700만");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+});
+
+test("categories: 택시 래핑 → mobile", () => {
+  const r = parsePlannerFreetextBrief("택시 래핑 500만");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+});
+
+test("categories: 이동형 → mobile", () => {
+  const r = parsePlannerFreetextBrief("이동형 매체 1000만");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+});
+
+test("categories: 미언급 → null", () => {
+  const r = parsePlannerFreetextBrief("강남 브랜딩 3000만원");
+  assert.equal(r.fields.categories.value, null);
+});
+
+test("buildScenarioPatchFromFreetextParse: categories 파싱 시 덮어씀", () => {
+  const r = parsePlannerFreetextBrief("버스만 강남 브랜딩 1000만");
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.categories, ["mobile"]);
+});
+
+test("buildScenarioPatchFromFreetextParse: categories 없으면 전체", () => {
+  const r = parsePlannerFreetextBrief("강남 브랜딩");
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.deepEqual(patch.categories, ["digital", "static", "mobile"]);
 });

@@ -11,6 +11,7 @@ import {
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
+  PlannerCategory,
   PlannerIndustryKey,
 } from "@/lib/planner/types";
 
@@ -47,6 +48,18 @@ const AGE_LABELS: Record<PlannerAgeKey, { ko: string; en: string }> = {
   age40s: { ko: "40대", en: "40s" },
   age50plus: { ko: "50대+", en: "50s+" },
 };
+
+const CATEGORY_LABELS: Record<PlannerCategory, { ko: string; en: string }> = {
+  digital: { ko: "디지털·전광판", en: "Digital signage" },
+  static: { ko: "옥외·고정형", en: "Static OOH" },
+  mobile: { ko: "이동형·버스", en: "Mobile transit" },
+};
+
+function formatCategoriesValue(cats: PlannerCategory[], isKo: boolean): string {
+  return cats
+    .map((c) => (isKo ? CATEGORY_LABELS[c].ko : CATEGORY_LABELS[c].en))
+    .join(isKo ? " · " : ", ");
+}
 
 export type FreetextEvidenceRow = {
   key: string;
@@ -165,6 +178,16 @@ export function buildFreetextEvidenceRows(
     });
   }
 
+  if (fields.categories.value?.length) {
+    rows.push({
+      key: "categories",
+      label: isKo ? "매체" : "Media type",
+      valueText: formatCategoriesValue(fields.categories.value, isKo),
+      source: fields.categories.source,
+      confidence: fields.categories.confidence,
+    });
+  }
+
   if (fields.budgetMan.value != null) {
     rows.push({
       key: "budget",
@@ -274,6 +297,11 @@ export function buildFreetextBriefSummarySentence(
         ? INDUSTRY_LABELS[fields.industryKey.value].ko
         : INDUSTRY_LABELS[fields.industryKey.value].en,
     );
+  }
+
+  if (fields.categories.value?.length) {
+    const mediaLabel = formatCategoriesValue(fields.categories.value, isKo);
+    parts.push(isKo ? `${mediaLabel} 매체` : `${mediaLabel} media`);
   }
 
   if (fields.campaignGoal.value != null) {

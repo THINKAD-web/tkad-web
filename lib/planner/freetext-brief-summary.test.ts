@@ -34,6 +34,12 @@ test("buildFreetextEvidenceRows: source on recognized fields", () => {
   assert.ok(rows.every((row) => row.valueText.length > 0));
 });
 
+test("buildFreetextEvidenceRows: categories row", () => {
+  const r = parsePlannerFreetextBrief("지하철 광고만 1000만");
+  const rows = buildFreetextEvidenceRows(r, true);
+  assert.ok(rows.some((row) => row.key === "categories" && row.source?.includes("지하철")));
+});
+
 test("buildFreetextBriefSummarySentence: empty parse fallback", () => {
   const r = parsePlannerFreetextBrief("   ");
   assert.match(buildFreetextBriefSummarySentence(r, true), /인식된 조건이 없습니다/);
