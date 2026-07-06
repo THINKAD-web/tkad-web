@@ -2,9 +2,9 @@
 
 import { useCallback, useMemo, useState } from "react";
 import {
+  AlertTriangle,
   Check,
   ChevronRight,
-  HelpCircle,
   Loader2,
   Sparkles,
   Wand2,
@@ -13,19 +13,14 @@ import { cn } from "@/lib/utils";
 import {
   buildScenarioPatchFromFreetextParse,
   parsePlannerFreetextBrief,
-  type ParsedField,
   type PlannerFreetextParseResult,
 } from "@/lib/planner/parse-freetext-brief";
-import type {
-  PlannerAgeKey,
-  PlannerCampaignGoal,
-  PlannerIndustryKey,
-} from "@/lib/planner/types";
 import {
-  PLANNER_SEOUL_ZONE_LABELS,
-  type PlannerSeoulZoneKey,
-} from "@/lib/planner/seoul-zones";
-import { plannerRegionLabel } from "@/lib/planner/planner-regions";
+  buildFreetextBriefSummarySentence,
+  buildFreetextBriefSummaryShort,
+  buildFreetextEvidenceRows,
+  type FreetextEvidenceRow,
+} from "@/lib/planner/freetext-brief-summary";
 import { usePlannerStore } from "@/lib/planner/store";
 import {
   PlannerNeonCard,
@@ -33,196 +28,60 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 
-const GOAL_LABELS: Record<PlannerCampaignGoal, { ko: string; en: string }> = {
-  brand: { ko: "브랜딩·인지", en: "Brand awareness" },
-  launch: { ko: "런칭·출시", en: "Launch" },
-  event: { ko: "프로모션·이벤트", en: "Promotion / event" },
-  sales: { ko: "전환·매출", en: "Conversion" },
-  local: { ko: "로컬·상권", en: "Local" },
-};
-
-const INDUSTRY_LABELS: Record<PlannerIndustryKey, { ko: string; en: string }> =
-  {
-    indFb: { ko: "F&B", en: "F&B" },
-    indRetail: { ko: "리테일·뷰티", en: "Retail / beauty" },
-    indTech: { ko: "IT·테크", en: "Tech" },
-    indFinance: { ko: "금융", en: "Finance" },
-    indEnt: { ko: "엔터", en: "Entertainment" },
-    indOther: { ko: "기타", en: "Other" },
-};
-
-const AGE_LABELS: Record<PlannerAgeKey, { ko: string; en: string }> = {
-  ageAll: { ko: "전 연령", en: "All ages" },
-  age20s: { ko: "20대", en: "20s" },
-  age30s: { ko: "30대", en: "30s" },
-  age40s: { ko: "40대", en: "40s" },
-  age50plus: { ko: "50대+", en: "50s+" },
-};
-
 const PLACEHOLDER_KO =
   '예) "강남 2030 브랜딩 3000만원" — 지역·타깃·목표·예산을 자연어로 입력';
 const PLACEHOLDER_EN =
   'e.g. "Gangnam Gen Z branding 30M KRW monthly" — natural-language brief';
 
-type Props = {
-  isKo: boolean;
-  onApplied?: () => void;
+export type FreetextApplySummary = {
+  sentence: string;
+  short: string | null;
 };
 
-function FieldChip({
-  label,
-  recognized,
-  valueText,
-  isKo,
-}: {
-  label: string;
-  recognized: boolean;
-  valueText: string | null;
+type Props = {
   isKo: boolean;
-}) {
+  onApplied?: (summary: FreetextApplySummary) => void;
+};
+
+function SourceQuote({ source }: { source: string | null }) {
+  if (!source?.trim()) return null;
   return (
-    <div
-      className={cn(
-        "inline-flex max-w-full items-center gap-1.5 rounded-xl border px-3 py-2 text-sm",
-        recognized
-          ? "border-emerald-400/40 bg-emerald-500/10 text-emerald-900 dark:text-emerald-100"
-          : "border-amber-400/40 bg-amber-500/10 text-amber-900 dark:text-amber-100",
-      )}
-    >
-      {recognized ? (
-        <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      ) : (
-        <HelpCircle className="h-3.5 w-3.5 shrink-0" aria-hidden />
-      )}
-      <span className="font-medium">{label}</span>
-      <span className="text-muted-foreground">·</span>
-      <span className="truncate">
-        {recognized && valueText
-          ? valueText
-          : isKo
-            ? "인식 못함 — 직접 선택"
-            : "Not detected — pick manually"}
-      </span>
-    </div>
+    <span className="text-muted-foreground">
+      {" "}
+      「{source.trim()}」
+    </span>
   );
 }
 
-function formatRegions(
-  regions: string[] | null,
-  zones: PlannerSeoulZoneKey[] | null,
-  isKo: boolean,
-): string | null {
-  if (!regions?.length && !zones?.length) return null;
-  const parts: string[] = [];
-  if (regions?.length) {
-    for (const r of regions) {
-      parts.push(plannerRegionLabel(r, isKo ? "ko" : "en"));
-    }
-  }
-  if (zones?.length) {
-    for (const z of zones) {
-      const row = PLANNER_SEOUL_ZONE_LABELS[z];
-      parts.push(isKo ? row.labelKo : row.labelEn);
-    }
-  }
-  return [...new Set(parts)].join(", ");
-}
-
-function formatFieldSummary(
-  result: PlannerFreetextParseResult,
-  isKo: boolean,
-): {
-  key: string;
-  label: string;
-  recognized: boolean;
-  valueText: string | null;
-}[] {
-  const { fields } = result;
-  const fmt = <T,>(f: ParsedField<T>, text: string | null) => ({
-    recognized: f.value != null,
-    valueText: text,
-  });
-
-  return [
-    {
-      key: "goal",
-      label: isKo ? "목표" : "Goal",
-      ...fmt(
-        fields.campaignGoal,
-        fields.campaignGoal.value
-          ? (isKo
-              ? GOAL_LABELS[fields.campaignGoal.value].ko
-              : GOAL_LABELS[fields.campaignGoal.value].en)
-          : null,
-      ),
-    },
-    {
-      key: "region",
-      label: isKo ? "지역" : "Region",
-      recognized: !!(
-        fields.regions.value?.length || fields.seoulZones.value?.length
-      ),
-      valueText: formatRegions(
-        fields.regions.value,
-        fields.seoulZones.value,
-        isKo,
-      ),
-    },
-    {
-      key: "age",
-      label: isKo ? "타깃" : "Target",
-      ...fmt(
-        fields.ageKeys,
-        fields.ageKeys.value
-          ? fields.ageKeys.value
-              .map((k) => (isKo ? AGE_LABELS[k].ko : AGE_LABELS[k].en))
-              .join(", ")
-          : null,
-      ),
-    },
-    {
-      key: "industry",
-      label: isKo ? "업종" : "Industry",
-      ...fmt(
-        fields.industryKey,
-        fields.industryKey.value
-          ? (isKo
-              ? INDUSTRY_LABELS[fields.industryKey.value].ko
-              : INDUSTRY_LABELS[fields.industryKey.value].en)
-          : null,
-      ),
-    },
-    {
-      key: "budget",
-      label: isKo ? "예산" : "Budget",
-      ...fmt(
-        fields.budgetMan,
-        fields.budgetMan.value != null
-          ? isKo
-            ? `월 ${fields.budgetMan.value.toLocaleString("ko-KR")}만원`
-            : `${fields.budgetMan.value.toLocaleString()}M KRW/mo`
-          : null,
-      ),
-    },
-    {
-      key: "months",
-      label: isKo ? "기간" : "Duration",
-      ...fmt(
-        fields.months,
-        fields.months.value != null
-          ? isKo
-            ? `${fields.months.value}개월`
-            : `${fields.months.value} mo`
-          : null,
-      ),
-    },
-  ];
-}
-
-export function PlannerFreetextBetaPanel({
+function EvidenceRow({
+  row,
   isKo,
-  onApplied,
-}: Props) {
+}: {
+  row: FreetextEvidenceRow;
+  isKo: boolean;
+}) {
+  return (
+    <li className="flex gap-2 text-sm leading-relaxed">
+      <Check
+        className="mt-0.5 h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400"
+        aria-hidden
+      />
+      <span>
+        <span className="font-medium">{row.label}</span>
+        <span className="text-muted-foreground">: </span>
+        <span>{row.valueText}</span>
+        <SourceQuote source={row.source} />
+        {row.confidence === "low" ? (
+          <span className="text-xs text-amber-700 dark:text-amber-300">
+            {isKo ? " · 약하게 인식" : " · low confidence"}
+          </span>
+        ) : null}
+      </span>
+    </li>
+  );
+}
+
+export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
   const [text, setText] = useState("");
   const [parseResult, setParseResult] =
     useState<PlannerFreetextParseResult | null>(null);
@@ -231,8 +90,14 @@ export function PlannerFreetextBetaPanel({
   const applyScenario = usePlannerStore((s) => s.applyScenario);
   const setWizardStep = usePlannerStore((s) => s.setWizardStep);
 
-  const chips = useMemo(
-    () => (parseResult ? formatFieldSummary(parseResult, isKo) : []),
+  const summarySentence = useMemo(
+    () =>
+      parseResult ? buildFreetextBriefSummarySentence(parseResult, isKo) : null,
+    [parseResult, isKo],
+  );
+
+  const evidenceRows = useMemo(
+    () => (parseResult ? buildFreetextEvidenceRows(parseResult, isKo) : []),
     [parseResult, isKo],
   );
 
@@ -252,8 +117,11 @@ export function PlannerFreetextBetaPanel({
     const patch = buildScenarioPatchFromFreetextParse(parseResult);
     applyScenario(patch);
     setWizardStep(4);
-    onApplied?.();
-  }, [applyScenario, onApplied, parseResult, setWizardStep]);
+    onApplied?.({
+      sentence: buildFreetextBriefSummarySentence(parseResult, isKo),
+      short: buildFreetextBriefSummaryShort(parseResult, isKo),
+    });
+  }, [applyScenario, isKo, onApplied, parseResult, setWizardStep]);
 
   return (
     <PlannerNeonCard className="overflow-hidden">
@@ -314,28 +182,56 @@ export function PlannerFreetextBetaPanel({
           </button>
         </div>
 
-        {parseResult ? (
-          <div className="space-y-3 border-t dark:border-white/10 border-gray-100 pt-4">
+        {parseResult && summarySentence ? (
+          <div className="space-y-4 border-t dark:border-white/10 border-gray-100 pt-4">
             <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-              {isKo ? "분석 결과" : "Parse result"}
+              {isKo ? "AI 분석 결과" : "Analysis result"}
             </p>
-            <div className="flex flex-wrap gap-2">
-              {chips.map((c) => (
-                <FieldChip
-                  key={c.key}
-                  label={c.label}
-                  recognized={c.recognized}
-                  valueText={c.valueText}
-                  isKo={isKo}
-                />
-              ))}
-            </div>
-            {parseResult.unmatchedTokens.length > 0 ? (
-              <p className="text-xs text-muted-foreground">
-                {isKo ? "미매칭:" : "Unmatched:"}{" "}
-                {parseResult.unmatchedTokens.join(", ")}
+
+            <div
+              className={cn(
+                "space-y-4 rounded-xl border p-4 sm:p-5",
+                "border-violet-400/25 bg-gradient-to-br from-violet-500/[0.07] to-cyan-500/[0.05]",
+                "dark:border-violet-400/20 dark:from-violet-500/10 dark:to-cyan-500/5",
+              )}
+            >
+              <p className="text-sm font-semibold leading-relaxed text-foreground sm:text-base">
+                {summarySentence}
               </p>
-            ) : null}
+
+              {evidenceRows.length > 0 ? (
+                <ul className="space-y-2 border-t border-violet-400/15 pt-3 dark:border-white/10">
+                  {evidenceRows.map((row) => (
+                    <EvidenceRow key={row.key} row={row} isKo={isKo} />
+                  ))}
+                </ul>
+              ) : null}
+
+              {parseResult.unmatchedTokens.length > 0 ? (
+                <div className="flex gap-2 border-t border-amber-400/20 pt-3 text-sm leading-relaxed text-amber-900 dark:text-amber-100">
+                  <AlertTriangle
+                    className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400"
+                    aria-hidden
+                  />
+                  <p>
+                    {isKo ? "미해석: " : "Unparsed: "}
+                    <span className="font-medium">
+                      {parseResult.unmatchedTokens.join(", ")}
+                    </span>
+                    {isKo
+                      ? " — Step 2~3에서 직접 선택해 주세요."
+                      : " — set manually in Steps 2–3."}
+                  </p>
+                </div>
+              ) : null}
+
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                {isKo
+                  ? "→ 이 조건으로 Step 4 맞춤 추천을 불러옵니다."
+                  : "→ Step 4 will load tailored recommendations from this brief."}
+              </p>
+            </div>
+
             <button
               type="button"
               onClick={handleApply}

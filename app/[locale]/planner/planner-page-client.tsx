@@ -75,6 +75,7 @@ import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regiona
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerFreetextBetaPanel } from "@/components/planner/planner-freetext-beta-panel";
+import type { FreetextApplySummary } from "@/components/planner/planner-freetext-beta-panel";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
@@ -654,6 +655,8 @@ export default function PlannerPageClient({
   const handledCreateQuoteRef = useRef(false);
   const [plannerStoreReady, setPlannerStoreReady] = useState(false);
   const [freetextApplied, setFreetextApplied] = useState(false);
+  const [freetextBriefSummary, setFreetextBriefSummary] =
+    useState<FreetextApplySummary | null>(null);
 
   useEffect(() => {
     const persist = usePlannerStore.persist;
@@ -1285,7 +1288,10 @@ export default function PlannerPageClient({
                 {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
                 <PlannerFreetextBetaPanel
                   isKo={isKo}
-                  onApplied={() => setFreetextApplied(true)}
+                  onApplied={(summary) => {
+                    setFreetextApplied(true);
+                    setFreetextBriefSummary(summary);
+                  }}
                 />
                 <PlannerCampaignStep1
                   campaignGoal={campaignGoal}
@@ -1556,11 +1562,22 @@ export default function PlannerPageClient({
             {wizardStep === 4 ? (
               <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-clip">
                 {freetextApplied ? (
-                  <p className="rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground">
-                    {isKo
-                      ? "자연어 입력으로 조건이 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요."
-                      : "Brief applied from natural-language input. Use Back to edit goal, region, or budget."}
-                  </p>
+                  <div className="space-y-1 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground">
+                    <p>
+                      {freetextBriefSummary?.short
+                        ? isKo
+                          ? `자연어 입력(${freetextBriefSummary.short} 조건)으로 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요.`
+                          : `Brief applied from natural language (${freetextBriefSummary.short}). Use Back to edit goal, region, or budget.`
+                        : isKo
+                          ? "자연어 입력으로 조건이 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요."
+                          : "Brief applied from natural-language input. Use Back to edit goal, region, or budget."}
+                    </p>
+                    {freetextBriefSummary?.sentence ? (
+                      <p className="text-xs leading-relaxed text-foreground/80">
+                        {freetextBriefSummary.sentence}
+                      </p>
+                    ) : null}
+                  </div>
                 ) : null}
                 <div className="space-y-2 text-center sm:text-left">
                   <PlannerNeonLabel>Step 4 / Media Selection</PlannerNeonLabel>
