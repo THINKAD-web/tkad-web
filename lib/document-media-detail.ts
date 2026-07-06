@@ -7,6 +7,14 @@ import {
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import {
+  formatPlannerQuantityLabel,
+  plannerMonthlyImpressionsForMedia,
+  plannerMonthlyPriceWonForMedia,
+  plannerUnitsForMedia,
+  shouldShowPlannerQuantityControl,
+  type PlannerPortfolioPricing,
+} from "@/lib/planner/planner-media-quantity";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import { normalizeMediaTypeForPlanner } from "@/lib/planner-logic";
 import { truncateDocText } from "@/lib/document-text";
@@ -273,13 +281,22 @@ export function mediaToDocumentDetail(
 export function computePortfolioContributions(
   items: MediaItem[],
   months: number,
+  pricing?: PlannerPortfolioPricing,
 ): Map<string, { exposurePct: number; budgetPct: number }> {
-  const exposureWeights = items.map((m) => {
-    const daily = m.dailyFootTraffic ?? (m.impressions ? m.impressions / 30 : 0);
-    return Math.max(0, daily) * Math.max(1, months) * 30;
-  });
+  const exposureWeights = items.map(
+    (m) =>
+      plannerMonthlyImpressionsForMedia(
+        m,
+        pricing?.quantities,
+        pricing?.priceOptionIndex,
+      ) * Math.max(1, months),
+  );
   const budgetWeights = items.map((m) =>
-    Math.max(0, catalogPriceFieldToWon(m.price)),
+    plannerMonthlyPriceWonForMedia(
+      m,
+      pricing?.quantities,
+      pricing?.priceOptionIndex,
+    ),
   );
   const expTotal = exposureWeights.reduce((a, b) => a + b, 0) || 1;
   const budTotal = budgetWeights.reduce((a, b) => a + b, 0) || 1;
@@ -300,20 +317,60 @@ export function mediaItemToExportRow(
     lineTotalWon?: number;
     months?: number;
     contributions?: Map<string, { exposurePct: number; budgetPct: number }>;
+    pricing?: PlannerPortfolioPricing;
+    quantities?: CampaignMediaQuantities;
   },
 ): import("@/lib/planner-report-export/types").PlannerExportMediaRow {
   const c = opts?.contributions?.get(m.id);
+  const pricing = opts?.pricing ?? { quantities: opts?.quantities };
+  const units = plannerUnitsForMedia(m, pricing.quantities);
+  const monthlyWon = plannerMonthlyPriceWonForMedia(
+    m,
+    pricing.quantities,
+    pricing.priceOptionIndex,
+  );
+  const lineTotalWon =
+    opts?.lineTotalWon ??
+    (monthlyWon > 0 && opts?.months
+      ? monthlyWon * Math.max(1, opts.months)
+      : undefined);
   const detail = mediaToDocumentDetail(m, {
     isKo,
-    lineTotalWon: opts?.lineTotalWon,
+    lineTotalWon,
     months: opts?.months,
     exposureContributionPct: c?.exposurePct,
     budgetContributionPct: c?.budgetPct,
   });
+  const monthlyPriceLabel =
+    monthlyWon > 0
+      ? `${formatCatalogPriceFieldWon(monthlyWon, isKo ? "ko" : "en")}/${formatPricePeriodShortLabel(
+          m.pricePeriod ?? "month",
+          isKo ? "ko" : "en",
+        )}`
+      : detail.monthlyPriceLabel;
+  const quantityLabel = shouldShowPlannerQuantityControl(m)
+    ? formatPlannerQuantityLabel(
+        m,
+        units,
+        isKo,
+        pricing.priceOptionIndex,
+      )
+    : undefined;
   return {
     ...detail,
     region: m.region ?? undefined,
     type: m.type ?? undefined,
-    priceLabel: detail.monthlyPriceLabel,
+    priceLabel: monthlyPriceLabel ?? detail.monthlyPriceLabel,
+    monthlyPriceLabel,
+    lineTotalLabel:
+      lineTotalWon != null && lineTotalWon > 0
+        ? formatMediaPrice(lineTotalWon, isKo ? "ko" : "en") +
+          (opts?.months && opts.months > 1
+            ? isKo
+              ? ` (${opts.months}개월)`
+              : ` (${opts.months} mo)`
+            : "")
+        : detail.lineTotalLabel,
+    quantityLabel,
   };
 }

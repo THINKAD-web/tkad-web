@@ -1,6 +1,11 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToPriceMan, catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
+  plannerMonthlyImpressionsForMedia,
+  plannerMonthlyPriceWonForMedia,
+  type PlannerPortfolioPricing,
+} from "@/lib/planner/planner-media-quantity";
+import {
   computeAdvancedPlannerMetrics,
   formatPlannerSharePct,
 } from "@/lib/planner-logic";
@@ -184,8 +189,15 @@ function regionSortOrder(key: string): number {
   return planReportRegionSortOrder(key);
 }
 
-function monthlyImpressionsOf(m: MediaItem): number {
-  return Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
+function monthlyImpressionsOf(
+  m: MediaItem,
+  pricing?: PlannerPortfolioPricing,
+): number {
+  return plannerMonthlyImpressionsForMedia(
+    m,
+    pricing?.quantities,
+    pricing?.priceOptionIndex,
+  );
 }
 
 /** 담은 매체를 지역별로 묶어 예산·노출·도달 지표 산출 */
@@ -193,6 +205,7 @@ export function computePlanCartRegionalBreakdown(
   portfolio: readonly MediaItem[],
   months: number,
   isKo: boolean,
+  pricing?: PlannerPortfolioPricing,
 ): PlannerExportRegionBreakdown[] {
   if (portfolio.length === 0) return [];
 
@@ -206,11 +219,17 @@ export function computePlanCartRegionalBreakdown(
   }
 
   const totalMonthlyWon = portfolio.reduce(
-    (s, item) => s + catalogPriceFieldToWon(item.price),
+    (s, item) =>
+      s +
+      plannerMonthlyPriceWonForMedia(
+        item,
+        pricing?.quantities,
+        pricing?.priceOptionIndex,
+      ),
     0,
   );
   const totalMonthlyImp = portfolio.reduce(
-    (s, item) => s + monthlyImpressionsOf(item),
+    (s, item) => s + monthlyImpressionsOf(item, pricing),
     0,
   );
 
@@ -218,11 +237,17 @@ export function computePlanCartRegionalBreakdown(
 
   for (const [regionKey, media] of groups.entries()) {
     const monthlyBudgetWon = media.reduce(
-      (s, item) => s + catalogPriceFieldToWon(item.price),
+      (s, item) =>
+        s +
+        plannerMonthlyPriceWonForMedia(
+          item,
+          pricing?.quantities,
+          pricing?.priceOptionIndex,
+        ),
       0,
     );
     const monthlyImpressions = media.reduce(
-      (s, item) => s + monthlyImpressionsOf(item),
+      (s, item) => s + monthlyImpressionsOf(item, pricing),
       0,
     );
     const totalImpressions = monthlyImpressions * m;

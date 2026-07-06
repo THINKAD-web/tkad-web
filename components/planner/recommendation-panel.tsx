@@ -34,6 +34,18 @@ import {
 } from "@/lib/ai-recommend-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
+import {
+  resolveImpressionsForUnits,
+  resolveMonthlyPriceForUnits,
+} from "@/lib/media-quantity";
+import {
+  plannerMonthlyPriceWonForMedia,
+  plannerUnitsForMedia,
+  type CampaignMediaPriceOptionIndex,
+  type CampaignMediaQuantities,
+} from "@/lib/planner/planner-media-quantity";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import { getQuantityUnitMode } from "@/lib/media-quantity";
 import { formatMediaCategoryBadges } from "@/lib/media-category-badges";
 import { mediaPlannerRegionDisplayLabel } from "@/lib/planner/planner-regions";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
@@ -65,6 +77,10 @@ export type PlannerRecommendationStoreBinding = {
   seoulZones?: PlannerSeoulZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   campaignMediaIds: string[];
+  campaignMediaQuantities?: CampaignMediaQuantities;
+  campaignMediaPriceOptionIndex?: CampaignMediaPriceOptionIndex;
+  setCampaignMediaQuantity?: (mediaId: string, units: number) => void;
+  setCampaignMediaPriceOptionIndex?: (mediaId: string, index: number) => void;
   setCampaignMediaIds: (updater: (prev: string[]) => string[]) => void;
 };
 
@@ -115,7 +131,17 @@ export function PlannerRecommendationPanel({
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
   const plannerSelectedIds = usePlannerStore((s) => s.campaignMediaIds);
+  const plannerQuantities = usePlannerStore((s) => s.campaignMediaQuantities);
+  const plannerPriceOptionIndex = usePlannerStore(
+    (s) => s.campaignMediaPriceOptionIndex,
+  );
   const plannerSetCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const plannerSetCampaignMediaQuantity = usePlannerStore(
+    (s) => s.setCampaignMediaQuantity,
+  );
+  const plannerSetCampaignMediaPriceOptionIndex = usePlannerStore(
+    (s) => s.setCampaignMediaPriceOptionIndex,
+  );
 
   const goal = store?.goal ?? plannerGoal;
   const regions = store?.regions ?? plannerRegions;
@@ -127,8 +153,17 @@ export function PlannerRecommendationPanel({
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
   const selectedIds = store?.campaignMediaIds ?? plannerSelectedIds;
+  const campaignMediaQuantities =
+    store?.campaignMediaQuantities ?? plannerQuantities;
+  const campaignMediaPriceOptionIndex =
+    store?.campaignMediaPriceOptionIndex ?? plannerPriceOptionIndex;
   const setCampaignMediaIds =
     store?.setCampaignMediaIds ?? plannerSetCampaignMediaIds;
+  const setCampaignMediaQuantity =
+    store?.setCampaignMediaQuantity ?? plannerSetCampaignMediaQuantity;
+  const setCampaignMediaPriceOptionIndex =
+    store?.setCampaignMediaPriceOptionIndex ??
+    plannerSetCampaignMediaPriceOptionIndex;
 
   const [loading, setLoading] = useState(true);
   const [refreshTick, setRefreshTick] = useState(0);
@@ -497,11 +532,31 @@ export function PlannerRecommendationPanel({
                   </div>
                   {/* [PATCH-P3-01] AI 추천의 수치 근거 — 노출/가시성/CPM 한 줄 */}
                   {(() => {
-                    const monthlyImp = estimatedMonthlyImpressions(media);
+                    const units = selected
+                      ? plannerUnitsForMedia(media, campaignMediaQuantities)
+                      : undefined;
+                    const monthlyImp =
+                      units != null
+                        ? resolveImpressionsForUnits(media, units)
+                        : estimatedMonthlyImpressions(media);
                     const visPct = Math.round(
                       normalizeVisibilityScore(media.visibilityScore) * 100,
                     );
-                    const cpm = estimatedCpmWon(media);
+                    const priceWon = selected
+                      ? plannerMonthlyPriceWonForMedia(
+                          media,
+                          campaignMediaQuantities,
+                          campaignMediaPriceOptionIndex,
+                        )
+                      : getQuantityUnitMode(media) === "package"
+                        ? null
+                        : null;
+                    const cpm =
+                      priceWon != null && priceWon > 0 && monthlyImp > 0
+                        ? Math.round(priceWon / (monthlyImp / 1000))
+                        : selected
+                          ? estimatedCpmWon(media)
+                          : estimatedCpmWon(media);
                     const items: string[] = [];
                     if (monthlyImp > 0) {
                       items.push(
@@ -593,6 +648,22 @@ export function PlannerRecommendationPanel({
                       </>
                     )}
                   </button>
+                  {selected &&
+                  setCampaignMediaQuantity &&
+                  setCampaignMediaPriceOptionIndex ? (
+                    <PlannerMediaQuantityControl
+                      media={media}
+                      isKo={isKo}
+                      quantities={campaignMediaQuantities}
+                      priceOptionIndex={campaignMediaPriceOptionIndex}
+                      onQuantityChange={(units) =>
+                        setCampaignMediaQuantity(media.id, units)
+                      }
+                      onPriceOptionChange={(index) =>
+                        setCampaignMediaPriceOptionIndex(media.id, index)
+                      }
+                    />
+                  ) : null}
                   <PlanCartAddButton
                     item={planCartItemFromMediaItem(media, planCartAddedFrom)}
                     addedFrom="planner"

@@ -8,6 +8,7 @@ import {
 } from "@/lib/build-quote-pdf";
 import {
   NETWORK_CATALOG_ID_PREFIX,
+  computeNetworkMonthlyPrice,
   parseNetworkRawId,
 } from "@/lib/media-network-public";
 import { periodLabelFromKey } from "@/lib/ooh-quote";
@@ -170,8 +171,15 @@ export async function buildOoHQuotePdfParams(
       const line =
         sel?.lineTotal != null && Number.isFinite(sel.lineTotal)
           ? Math.round(sel.lineTotal)
-          : n.pricePackage ??
-            (n.pricePerUnit != null ? n.pricePerUnit * units : 0);
+          : computeNetworkMonthlyPrice(
+              {
+                pricePackage: n.pricePackage,
+                pricePerUnit: n.pricePerUnit,
+                minUnits: n.minUnits,
+                packageOptions: n.packageOptions,
+              },
+              units,
+            );
       rows.push({
         name: `${isKo ? n.name : n.nameEn ?? n.name} (${units}${isKo ? "개소" : " sites"})`,
         location: region,

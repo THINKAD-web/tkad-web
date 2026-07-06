@@ -14,6 +14,10 @@ export type QuoteExportLine = {
   unitPriceWon: number;
   lineSupplyWon: number;
   impressions?: number;
+  /** 수량 숫자 (admin formal 등) */
+  quantity?: number;
+  /** PDF·표시용 — "87구좌", "스팟광고", "3대" */
+  quantityLabel?: string;
   thumbUrl?: string | null;
   size?: string;
   operatingHours?: string;

@@ -33,6 +33,12 @@ import {
   resolveNetworkCatalogType,
   resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
+import {
+  getQuantityBounds,
+  getQuantityUnitMode,
+  getValidNetworkPackageTiers,
+} from "@/lib/media-quantity";
+import { networkDetailToMediaItem } from "@/lib/media-detail-quantity";
 import { computeNetworkDailyFootfall } from "@/lib/media-network-footfall";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -832,9 +838,16 @@ function NetworkPriceCalculator({
   isKo: boolean;
   router: ReturnType<typeof useRouter>;
 }) {
-  const minUnits = Math.max(1, data.minUnits || 1);
-  const sliderMax = Math.max(minUnits * 10, data.totalLocations || 0, 1000);
-  const [units, setUnits] = useState<number>(minUnits);
+  const mediaItem = useMemo(() => networkDetailToMediaItem(data), [data]);
+  const unitMode = getQuantityUnitMode(mediaItem);
+  const packageTiers = getValidNetworkPackageTiers(mediaItem);
+  const bounds = getQuantityBounds(mediaItem);
+  const minUnits = bounds.min;
+  const sliderMax =
+    bounds.max != null
+      ? bounds.max
+      : Math.max(minUnits * 10, data.totalLocations || 0, 1000);
+  const [units, setUnits] = useState<number>(bounds.default);
   const [months, setMonths] = useState<number>(1);
   const [busy, setBusy] = useState(false);
 
@@ -853,8 +866,10 @@ function NetworkPriceCalculator({
   );
   const total = monthly * months;
 
-  const clampUnits = (n: number) =>
-    Math.max(minUnits, Math.min(sliderMax, Math.round(n) || minUnits));
+  const clampUnits = (n: number) => {
+    const hi = bounds.max ?? sliderMax;
+    return Math.max(minUnits, Math.min(hi, Math.round(n) || minUnits));
+  };
 
   const createQuote = useCallback(async () => {
     if (busy) return;
@@ -937,49 +952,85 @@ function NetworkPriceCalculator({
       <div className="mt-5">
         <div className="flex items-end justify-between gap-3">
           <label className="text-sm font-semibold text-navy">
-            {isKo ? "설치 수량" : "Units"}
+            {unitMode === "package"
+              ? isKo
+                ? "패키지 구좌"
+                : "Package slot"
+              : isKo
+                ? "설치 수량"
+                : "Units"}
           </label>
-          <div className="flex items-center gap-1.5">
+          {unitMode === "unit" ? (
+            <div className="flex items-center gap-1.5">
+              <input
+                type="number"
+                min={minUnits}
+                max={sliderMax}
+                value={units}
+                onChange={(e) => setUnits(clampUnits(Number(e.target.value)))}
+                className="w-28 rounded-lg border border-navy/15 bg-white px-3 py-1.5 text-right text-sm font-bold tabular-nums text-navy outline-none focus:border-gold"
+              />
+              <span className="text-sm text-muted-foreground">
+                {isKo ? "대" : "units"}
+              </span>
+            </div>
+          ) : (
+            <span className="text-sm font-bold tabular-nums text-navy">
+              {units.toLocaleString()}
+              {isKo ? "구좌" : " pkg"}
+            </span>
+          )}
+        </div>
+        {unitMode === "package" && packageTiers.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {packageTiers.map((t) => (
+              <button
+                key={t.units}
+                type="button"
+                onClick={() => setUnits(t.units)}
+                className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  units === t.units
+                    ? "border-gold bg-gold/15 text-gold-dark"
+                    : "border-navy/15 bg-white text-navy hover:border-gold"
+                }`}
+              >
+                {isKo
+                  ? `${t.units.toLocaleString("ko-KR")}구좌 · ₩${t.price.toLocaleString("ko-KR")}`
+                  : `${t.units.toLocaleString("en-US")} pkg · ₩${t.price.toLocaleString("en-US")}`}
+              </button>
+            ))}
+          </div>
+        ) : (
+          <>
             <input
-              type="number"
+              type="range"
               min={minUnits}
               max={sliderMax}
+              step={Math.max(1, Math.round(minUnits))}
               value={units}
               onChange={(e) => setUnits(clampUnits(Number(e.target.value)))}
-              className="w-28 rounded-lg border border-navy/15 bg-white px-3 py-1.5 text-right text-sm font-bold tabular-nums text-navy outline-none focus:border-gold"
+              className="mt-3 w-full cursor-pointer accent-gold"
+              aria-label={isKo ? "설치 수량" : "Units"}
             />
-            <span className="text-sm text-muted-foreground">
-              {isKo ? "대" : "units"}
-            </span>
-          </div>
-        </div>
-        <input
-          type="range"
-          min={minUnits}
-          max={sliderMax}
-          step={Math.max(1, Math.round(minUnits))}
-          value={units}
-          onChange={(e) => setUnits(clampUnits(Number(e.target.value)))}
-          className="mt-3 w-full cursor-pointer accent-gold"
-          aria-label={isKo ? "설치 수량" : "Units"}
-        />
-        <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
-          <span>{minUnits.toLocaleString()}</span>
-          <span>{sliderMax.toLocaleString()}+</span>
-        </div>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {[10, 100, 1000, 10000].map((q) => (
-            <button
-              key={q}
-              type="button"
-              onClick={() => setUnits(clampUnits(q))}
-              className="rounded-full border border-navy/15 bg-white px-3 py-1 text-xs font-semibold text-navy hover:border-gold"
-            >
-              {q.toLocaleString()}
-              {isKo ? "대" : ""}
-            </button>
-          ))}
-        </div>
+            <div className="mt-1 flex justify-between text-[11px] text-muted-foreground">
+              <span>{minUnits.toLocaleString()}</span>
+              <span>{sliderMax.toLocaleString()}+</span>
+            </div>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {[10, 100, 1000, 10000].map((q) => (
+                <button
+                  key={q}
+                  type="button"
+                  onClick={() => setUnits(clampUnits(q))}
+                  className="rounded-full border border-navy/15 bg-white px-3 py-1 text-xs font-semibold text-navy hover:border-gold"
+                >
+                  {q.toLocaleString()}
+                  {isKo ? "대" : ""}
+                </button>
+              ))}
+            </div>
+          </>
+        )}
       </div>
 
       {/* 기간 */}

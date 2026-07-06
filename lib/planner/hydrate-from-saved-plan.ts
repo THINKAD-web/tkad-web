@@ -9,6 +9,12 @@ import {
   type PlannerCampaignGoal,
 } from "@/lib/planner/types";
 import type { PlannerStoreState } from "@/lib/planner/store";
+import {
+  pruneCampaignMediaQuantities,
+  pruneCampaignMediaPriceOptionIndex,
+  type CampaignMediaQuantities,
+  type CampaignMediaPriceOptionIndex,
+} from "@/lib/planner/planner-media-quantity";
 
 /** DB `planJson` → 플래너 스토어 입력 필드 */
 export function hydratePlannerFromSavedPlan(
@@ -32,6 +38,36 @@ export function hydratePlannerFromSavedPlan(
     campaignMediaIds: Array.isArray(plan.campaignMediaIds)
       ? plan.campaignMediaIds.filter((id): id is string => typeof id === "string")
       : [],
+    campaignMediaQuantities: (() => {
+      const ids = Array.isArray(plan.campaignMediaIds)
+        ? plan.campaignMediaIds.filter((id): id is string => typeof id === "string")
+        : [];
+      const raw = plan.campaignMediaQuantities;
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        return {};
+      }
+      const qty: CampaignMediaQuantities = {};
+      for (const [id, v] of Object.entries(raw)) {
+        const n = typeof v === "number" ? v : Number(v);
+        if (Number.isFinite(n) && n > 0) qty[id] = Math.round(n);
+      }
+      return pruneCampaignMediaQuantities(ids, qty);
+    })(),
+    campaignMediaPriceOptionIndex: (() => {
+      const ids = Array.isArray(plan.campaignMediaIds)
+        ? plan.campaignMediaIds.filter((id): id is string => typeof id === "string")
+        : [];
+      const raw = plan.campaignMediaPriceOptionIndex;
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) {
+        return {};
+      }
+      const idx: CampaignMediaPriceOptionIndex = {};
+      for (const [id, v] of Object.entries(raw)) {
+        const n = typeof v === "number" ? v : Number(v);
+        if (Number.isFinite(n) && n >= 0) idx[id] = Math.round(n);
+      }
+      return pruneCampaignMediaPriceOptionIndex(ids, idx);
+    })(),
     creativeUploadedUrl: plan.creativeUploadedUrl ?? null,
     mediaPlacements:
       plan.mediaPlacements &&

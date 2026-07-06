@@ -9,6 +9,13 @@ import {
   formatCatalogPriceFieldWon,
   formatCatalogPricesSumWon,
 } from "@/lib/media-price-format";
+import {
+  formatPlannerQuantityLabel,
+  plannerMonthlyPriceWonForMedia,
+  type CampaignMediaPriceOptionIndex,
+  type CampaignMediaQuantities,
+} from "@/lib/planner/planner-media-quantity";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { plannerNeon } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
@@ -16,7 +23,10 @@ import { cn } from "@/lib/utils";
 type Props = {
   catalog: MediaItem[];
   campaignMediaIds: string[];
-  /** 검색 API에서만 로드된 매체 (서버 catalog 보강) */
+  campaignMediaQuantities?: CampaignMediaQuantities;
+  campaignMediaPriceOptionIndex?: CampaignMediaPriceOptionIndex;
+  onQuantityChange?: (mediaId: string, units: number) => void;
+  onPriceOptionChange?: (mediaId: string, index: number) => void;
   supplementalById?: Record<string, MediaItem>;
   onRemove: (mediaId: string) => void;
   onClearAll: () => void;
@@ -28,6 +38,10 @@ type Props = {
 export function PlannerSelectedMediaBar({
   catalog,
   campaignMediaIds,
+  campaignMediaQuantities = {},
+  campaignMediaPriceOptionIndex = {},
+  onQuantityChange,
+  onPriceOptionChange,
   supplementalById = {},
   onRemove,
   onClearAll,
@@ -52,8 +66,19 @@ export function PlannerSelectedMediaBar({
 
   const monthlyTotal = useMemo(
     () =>
-      entries.reduce((sum, { media }) => sum + (media?.price ?? 0), 0),
-    [entries],
+      entries.reduce(
+        (sum, { media }) =>
+          sum +
+          (media
+            ? plannerMonthlyPriceWonForMedia(
+                media,
+                campaignMediaQuantities,
+                campaignMediaPriceOptionIndex,
+              )
+            : 0),
+        0,
+      ),
+    [entries, campaignMediaQuantities, campaignMediaPriceOptionIndex],
   );
 
   if (entries.length === 0) return null;
@@ -80,7 +105,15 @@ export function PlannerSelectedMediaBar({
               {t("campaignMonthlyTotalLabel")}{" "}
               <span className="font-semibold text-foreground">
                 {formatCatalogPricesSumWon(
-                  entries.map(({ media }) => media?.price ?? 0),
+                  entries.map(({ media }) =>
+                    media
+                      ? plannerMonthlyPriceWonForMedia(
+                          media,
+                          campaignMediaQuantities,
+                          campaignMediaPriceOptionIndex,
+                        )
+                      : 0,
+                  ),
                   isKo ? "ko-KR" : "en-US",
                 )}
                 <span className="font-normal text-muted-foreground">
@@ -111,33 +144,67 @@ export function PlannerSelectedMediaBar({
               ? media.name
               : media.nameEn || media.name
             : t("selectedMediaUnknown");
-          const priceLabel =
+          const priceWon =
             media && media.price > 0
-              ? formatCatalogPriceFieldWon(
-                  media.price,
-                  isKo ? "ko-KR" : "en-US",
+              ? plannerMonthlyPriceWonForMedia(
+                  media,
+                  campaignMediaQuantities,
+                  campaignMediaPriceOptionIndex,
+                )
+              : 0;
+          const priceLabel =
+            priceWon > 0
+              ? formatCatalogPriceFieldWon(priceWon, isKo ? "ko-KR" : "en-US")
+              : null;
+          const qtyLabel =
+            media != null
+              ? formatPlannerQuantityLabel(
+                  media,
+                  campaignMediaQuantities[media.id] ?? 1,
+                  isKo,
+                  campaignMediaPriceOptionIndex,
                 )
               : null;
 
           return (
             <li key={id}>
-              <span className="inline-flex max-w-full items-center gap-1 rounded-full border border-violet-400/35 bg-white py-1 pl-3 pr-1 text-xs font-medium text-violet-800 dark:border-violet-400/25 dark:bg-white/10 dark:text-violet-100">
-                <span className="max-w-[12rem] truncate sm:max-w-[16rem]">
-                  {label}
-                  {priceLabel ? (
-                    <span className="ml-1 font-normal text-muted-foreground">
-                      · {priceLabel}
-                    </span>
-                  ) : null}
+              <span className="inline-flex max-w-full flex-col gap-1.5 rounded-2xl border border-violet-400/35 bg-white py-2 pl-3 pr-2 text-xs font-medium text-violet-800 dark:border-violet-400/25 dark:bg-white/10 dark:text-violet-100 sm:flex-row sm:items-center">
+                <span className="inline-flex min-w-0 max-w-full items-center gap-1">
+                  <span className="max-w-[12rem] truncate sm:max-w-[16rem]">
+                    {label}
+                    {qtyLabel ? (
+                      <span className="ml-1 font-normal text-muted-foreground">
+                        · {qtyLabel}
+                      </span>
+                    ) : null}
+                    {priceLabel ? (
+                      <span className="ml-1 font-normal text-muted-foreground">
+                        · {priceLabel}
+                      </span>
+                    ) : null}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => onRemove(id)}
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-violet-600 transition-colors hover:bg-violet-500/15 hover:text-rose-600 dark:text-violet-300 dark:hover:text-rose-300"
+                    aria-label={t("selectedMediaRemove", { name: label })}
+                  >
+                    <X className="h-3.5 w-3.5" aria-hidden />
+                  </button>
                 </span>
-                <button
-                  type="button"
-                  onClick={() => onRemove(id)}
-                  className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-violet-600 transition-colors hover:bg-violet-500/15 hover:text-rose-600 dark:text-violet-300 dark:hover:text-rose-300"
-                  aria-label={t("selectedMediaRemove", { name: label })}
-                >
-                  <X className="h-3.5 w-3.5" aria-hidden />
-                </button>
+                {media && onQuantityChange && onPriceOptionChange ? (
+                  <PlannerMediaQuantityControl
+                    media={media}
+                    isKo={isKo}
+                    quantities={campaignMediaQuantities}
+                    priceOptionIndex={campaignMediaPriceOptionIndex}
+                    onQuantityChange={(units) => onQuantityChange(id, units)}
+                    onPriceOptionChange={(index) =>
+                      onPriceOptionChange(id, index)
+                    }
+                    compact
+                  />
+                ) : null}
               </span>
             </li>
           );

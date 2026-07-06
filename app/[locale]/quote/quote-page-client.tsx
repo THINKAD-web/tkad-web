@@ -76,6 +76,7 @@ import {
 } from "@/lib/media-price-format";
 import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
+import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
 import {
   buildQuoteWizardLineContext,
   formatQuoteCampaignPeriodWithDays,
@@ -186,6 +187,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<
     Record<string, number>
   >({});
+  /** 이동형 단일 등 unit 모드 수량 */
+  const [mediaQuantities, setMediaQuantities] = useState<Record<string, number>>(
+    {},
+  );
   /** 매체별 패키지 기간만 집행 토글 (bundleDays 있는 옵션만) */
   const [usePackagePeriodByMediaId, setUsePackagePeriodByMediaId] = useState<
     Record<string, boolean>
@@ -227,6 +232,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     if (matchedIds.length === 0) return;
     mediaQueryApplied.current = true;
     setSelectedIds(new Set(matchedIds));
+    const unitsRaw = params.get("units");
+    if (matchedIds.length === 1 && unitsRaw) {
+      const u = parseInt(unitsRaw, 10);
+      if (Number.isFinite(u) && u > 0) {
+        setMediaQuantities({ [matchedIds[0]!]: u });
+      }
+    }
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
     let poIdx = 0;
@@ -461,6 +473,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           campaignPeriodLabel: periodLabel,
           priceOptionIndex: mediaPriceOptionIndex[m.id] ?? 0,
           networkUnits: isNw ? opt?.units ?? m.networkMinUnits ?? 1 : undefined,
+          mobileUnits: !isNw ? mediaQuantities[m.id] : undefined,
           usePackagePeriod: usePackagePeriodByMediaId[m.id] === true,
         });
       }),
@@ -468,6 +481,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       selectedMedia,
       networkQuoteOptions,
       mediaPriceOptionIndex,
+      mediaQuantities,
       usePackagePeriodByMediaId,
       isKo,
       period,
@@ -973,30 +987,33 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const submitMediaSelections = useMemo((): QuoteMediaSelectionSnapshot[] => {
     return selectedMedia.map((m, idx) => {
       const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
-      const priceOpt = m.priceOptions?.[poIdx];
       const line = quoteLineContexts[idx];
-      return {
-        mediaId: m.id,
+      const isNw = m.catalogSource === "network";
+      const units = isNw
+        ? (networkQuoteOptions[m.id]?.units ?? m.networkMinUnits ?? 1)
+        : mediaQuantities[m.id];
+      return buildQuoteMediaSelectionSnapshot({
+        media: m,
+        isKo,
         priceOptionIndex: poIdx,
-        optionLabel: priceOpt?.label?.trim() ?? null,
-        optionPriceWon: priceOpt
-          ? catalogPriceFieldToWon(priceOpt.price)
-          : catalogPriceFieldToWon(m.price),
+        units,
         lineTotalWon: Math.round((line?.lineTotalMan ?? 0) * 10_000),
-        optionDescription: priceOpt?.description?.trim() ?? null,
         ...(usePackagePeriodByMediaId[m.id]
           ? {
               usePackagePeriod: true as const,
               lineCampaignDays: line?.campaignDays,
             }
           : {}),
-      };
+      });
     });
   }, [
     selectedMedia,
     mediaPriceOptionIndex,
     quoteLineContexts,
     usePackagePeriodByMediaId,
+    networkQuoteOptions,
+    mediaQuantities,
+    isKo,
   ]);
 
   const exportQuoteDraft = useCallback(

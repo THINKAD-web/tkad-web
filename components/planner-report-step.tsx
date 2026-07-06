@@ -77,6 +77,9 @@ export type PlannerReportSharedProps = {
   seoulZones?: readonly PlannerSeoulZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
+  /** Step 4 선택 매체 수량 — 예산·노출·보고서 반영 */
+  campaignMediaQuantities?: Record<string, number>;
+  campaignMediaPriceOptionIndex?: Record<string, number>;
   /** Step 7과 동일: 조건에 맞는 전체 후보(필터 결과) */
   matchedCount: number;
   /** Step 7과 동일: 1/3/6개월 총 노출 비교 */
@@ -125,6 +128,13 @@ export type PlannerReportSharedProps = {
   ) => void;
 };
 
+function reportPortfolioPricing(props: PlannerReportSharedProps) {
+  return {
+    quantities: props.campaignMediaQuantities,
+    priceOptionIndex: props.campaignMediaPriceOptionIndex,
+  };
+}
+
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
   const t = useTranslations("planner");
 
@@ -141,7 +151,10 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
   );
 
   const budgetAllocation = useMemo(() => {
-    const slices = budgetSplitByCategory(props.portfolio);
+    const slices = budgetSplitByCategory(
+      props.portfolio,
+      reportPortfolioPricing(props),
+    );
     return slices.map((s) => ({
       key: s.key,
       label: props.isKo ? s.labelKo : s.labelEn,
@@ -149,20 +162,28 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       valueWon: s.value,
       actualWon: s.actualWon,
     }));
-  }, [props.portfolio, props.isKo]);
+  }, [props.portfolio, props.isKo, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex]);
 
   const cpmBars = useMemo(() => {
-    const pts = portfolioCpmByCategory(props.portfolio);
+    const pts = portfolioCpmByCategory(
+      props.portfolio,
+      reportPortfolioPricing(props),
+    );
     return pts.map((p) => ({
       key: p.key,
       label: props.isKo ? p.labelKo : p.labelEn,
       value: p.cpm,
     }));
-  }, [props.portfolio, props.isKo]);
+  }, [props.portfolio, props.isKo, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex]);
 
   const portfolioReport = useMemo(
-    () => computePortfolioReportMetrics(props.portfolio, props.months),
-    [props.portfolio, props.months],
+    () =>
+      computePortfolioReportMetrics(
+        props.portfolio,
+        props.months,
+        reportPortfolioPricing(props),
+      ),
+    [props.portfolio, props.months, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex],
   );
   const usePortfolioReach =
     props.portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;
@@ -309,6 +330,8 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         regionBudgetCharts: props.regionBudgetCharts,
         regionImpressionCharts: props.regionImpressionCharts,
         isAutoPortfolio: props.isAutoPortfolio,
+        campaignMediaQuantities: props.campaignMediaQuantities,
+        campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
       }),
     [props, derived, snapshotAt],
   );
@@ -792,6 +815,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           regionBudgetCharts: props.regionBudgetCharts,
           regionImpressionCharts: props.regionImpressionCharts,
           isAutoPortfolio: props.isAutoPortfolio,
+          campaignMediaQuantities: props.campaignMediaQuantities,
+        campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,

@@ -231,6 +231,17 @@ export default function PlannerPageClient({
   const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const appliedScenario = usePlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
+  const campaignMediaQuantities = usePlannerStore((s) => s.campaignMediaQuantities);
+  const campaignMediaPriceOptionIndex = usePlannerStore(
+    (s) => s.campaignMediaPriceOptionIndex,
+  );
+  const portfolioPricing = useMemo(
+    () => ({
+      quantities: campaignMediaQuantities,
+      priceOptionIndex: campaignMediaPriceOptionIndex,
+    }),
+    [campaignMediaQuantities, campaignMediaPriceOptionIndex],
+  );
   const mediaSelectionExplicit = campaignMediaIds.length > 0;
   const creativeObjectUrl = usePlannerStore((s) => s.creativeObjectUrl);
   const creativeUploadedUrl = usePlannerStore((s) => s.creativeUploadedUrl);
@@ -253,6 +264,10 @@ export default function PlannerPageClient({
   );
   const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
+  const setCampaignMediaQuantity = usePlannerStore((s) => s.setCampaignMediaQuantity);
+  const setCampaignMediaPriceOptionIndex = usePlannerStore(
+    (s) => s.setCampaignMediaPriceOptionIndex,
+  );
   const importFromPlanCart = usePlannerStore((s) => s.importFromPlanCart);
 
   const plannerBrowseCatalog = useMemo(() => {
@@ -415,6 +430,7 @@ export default function PlannerPageClient({
       portfolio,
       months,
       isKo,
+      portfolioPricing,
     );
     if (regionalBreakdown.length === 0) return null;
     const regionBudgetCharts: PlannerExportChartDatum[] = regionalBreakdown
@@ -434,7 +450,7 @@ export default function PlannerPageClient({
         pct: r.impressionPct,
       }));
     return { regionalBreakdown, regionBudgetCharts, regionImpressionCharts };
-  }, [portfolio, months, isKo]);
+  }, [portfolio, months, isKo, portfolioPricing]);
 
   const metrics = useMemo(() => {
     const source = portfolio.length > 0 ? portfolio : filtered;
@@ -443,6 +459,7 @@ export default function PlannerPageClient({
       campaignGoal,
       industryKey,
       goalFollowUp,
+      pricing: portfolioPricing,
     });
   }, [
     portfolio,
@@ -452,23 +469,30 @@ export default function PlannerPageClient({
     campaignGoal,
     industryKey,
     goalFollowUp,
+    portfolioPricing,
   ]);
 
   const cpmBars = useMemo(() => {
     const pts =
       portfolio.length > 0
-        ? portfolioCpmByCategory(portfolio)
+        ? portfolioCpmByCategory(portfolio, portfolioPricing)
         : estimateCpmByCategory(filtered);
     return pts.map((p) => ({
       key: p.key,
       label: isKo ? p.labelKo : p.labelEn,
       value: p.cpm,
     }));
-  }, [portfolio, filtered, isKo]);
+  }, [portfolio, filtered, isKo, portfolioPricing]);
 
   const portfolioBudgetStatus = useMemo(
-    () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
-    [portfolio, budgetNum, months],
+    () =>
+      computePlannerPortfolioBudgetStatus(
+        portfolio,
+        budgetNum,
+        months,
+        portfolioPricing,
+      ),
+    [portfolio, budgetNum, months, portfolioPricing],
   );
 
   const isAutoPortfolio = campaignMediaIds.length === 0;
@@ -604,6 +628,7 @@ export default function PlannerPageClient({
   const searchParams = useSearchParams();
   const addMediaId = searchParams.get("addMedia");
   const mediaIdsParam = searchParams.get("mediaIds");
+  const unitsParam = searchParams.get("units");
   const fromPlanParam = searchParams.get("from");
   const loadPlanParam = searchParams.get("loadPlan");
   const createQuoteParam = searchParams.get("createQuote");
@@ -709,6 +734,10 @@ export default function PlannerPageClient({
         return;
       }
       setCampaignMediaIds(valid);
+      const u = unitsParam ? parseInt(unitsParam, 10) : NaN;
+      if (valid.length === 1 && Number.isFinite(u) && u > 0) {
+        setCampaignMediaQuantity(valid[0]!, u);
+      }
       setWizardStep(4);
       toast(
         "success",
@@ -716,7 +745,7 @@ export default function PlannerPageClient({
           ? `찜한 매체 ${valid.length}개로 플래너를 시작합니다.`
           : `Starting planner with ${valid.length} saved media.`,
       );
-      stripPlannerQueryKeys(["mediaIds", "addMedia"]);
+      stripPlannerQueryKeys(["mediaIds", "addMedia", "units"]);
       return;
     }
 
@@ -735,6 +764,10 @@ export default function PlannerPageClient({
     setCampaignMediaIds((prev) =>
       prev.includes(addMediaId) ? prev : [...prev, addMediaId],
     );
+    const u = unitsParam ? parseInt(unitsParam, 10) : NaN;
+    if (Number.isFinite(u) && u > 0) {
+      setCampaignMediaQuantity(addMediaId, u);
+    }
     setWizardStep(4);
     toast(
       "success",
@@ -742,14 +775,16 @@ export default function PlannerPageClient({
         ? "매체가 캠페인에 추가되었습니다."
         : "Media added to your campaign.",
     );
-    stripPlannerQueryKeys(["addMedia"]);
+    stripPlannerQueryKeys(["addMedia", "units"]);
   }, [
     plannerStoreReady,
     fromPlanParam,
     addMediaId,
     mediaIdsParam,
+    unitsParam,
     catalog,
     setCampaignMediaIds,
+    setCampaignMediaQuantity,
     setWizardStep,
     toast,
     isKo,
@@ -831,6 +866,8 @@ export default function PlannerPageClient({
         ageKeys: state.ageKeys,
         industryKey: state.industryKey,
         campaignMediaIds: Array.from(state.campaignMediaIds),
+        campaignMediaQuantities: state.campaignMediaQuantities,
+        campaignMediaPriceOptionIndex: state.campaignMediaPriceOptionIndex,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
       };
@@ -1509,6 +1546,10 @@ export default function PlannerPageClient({
                   catalog={catalog}
                   supplementalById={mediaCacheById}
                   campaignMediaIds={campaignMediaIds}
+                  campaignMediaQuantities={campaignMediaQuantities}
+                  campaignMediaPriceOptionIndex={campaignMediaPriceOptionIndex}
+                  onQuantityChange={setCampaignMediaQuantity}
+                  onPriceOptionChange={setCampaignMediaPriceOptionIndex}
                   onRemove={removePlannerMedia}
                   onClearAll={clearPlannerMedia}
                   isKo={isKo}
@@ -1576,6 +1617,8 @@ export default function PlannerPageClient({
                 seoulZones={seoulZones}
                 goalFollowUp={goalFollowUp}
                 portfolio={portfolio}
+                campaignMediaQuantities={campaignMediaQuantities}
+                campaignMediaPriceOptionIndex={campaignMediaPriceOptionIndex}
                 matchedCount={filtered.length}
                 monthCompare={monthCompare}
                 cpmBars={cpmBars}

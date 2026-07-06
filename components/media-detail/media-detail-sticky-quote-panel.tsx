@@ -1,22 +1,25 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Share2 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
+import { Share2, Sparkles } from "lucide-react";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
 import type { MediaItem } from "@/lib/media-data";
 import {
-  calculateMediaQuoteByDays,
-  calculateMediaQuoteFromOption,
   findCheapestPriceOptionIndex,
   formatWonShort,
   pricePeriodDays,
   resolvePriceOptionBundleDays,
 } from "@/lib/compare-quote";
 import { rememberQuoteEntryPriceOption } from "@/lib/quote-wizard-entry";
+import {
+  inferQuoteCampaignPeriodFromMedia,
+} from "@/lib/quote-wizard-pricing";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-proposal-card";
 import {
@@ -24,6 +27,17 @@ import {
   normalizeMediaPricePeriod,
   resolveMediaPriceOptionPeriodLabel,
 } from "@/lib/media-price-format";
+import {
+  buildMediaDetailPlannerHref,
+  buildMediaDetailQuoteHref,
+  calculateMediaDetailQuote,
+  shouldShowMediaDetailQuantityControl,
+} from "@/lib/media-detail-quantity";
+import {
+  getQuantityUnitMode,
+  resolveImpressionsForUnits,
+  resolveMediaQuantity,
+} from "@/lib/media-quantity";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -47,17 +61,25 @@ export function MediaDetailStickyQuotePanel({
   const localeTag = isKo ? "ko" : "en";
   const priceOptions = media.priceOptions ?? [];
   const hasPriceOptions = priceOptions.length > 0;
+  const showQuantity = shouldShowMediaDetailQuantityControl(media);
+  const packageMode = getQuantityUnitMode(media) === "package";
 
   const defaultOptIdx = useMemo(
     () => findCheapestPriceOptionIndex(media),
     [media],
   );
   const [optIdx, setOptIdx] = useState(defaultOptIdx);
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [priceOptionIndex, setPriceOptionIndex] = useState<Record<string, number>>(
+    {},
+  );
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
 
   useEffect(() => {
     setOptIdx(findCheapestPriceOptionIndex(media));
+    setQuantities({});
+    setPriceOptionIndex({});
   }, [media.id, media]);
 
   const safeOptIdx = hasPriceOptions
@@ -65,14 +87,29 @@ export function MediaDetailStickyQuotePanel({
     : 0;
 
   useEffect(() => {
-    if (hasPriceOptions) {
+    if (hasPriceOptions && !packageMode) {
       rememberQuoteEntryPriceOption(media.id, safeOptIdx);
     }
-  }, [media.id, hasPriceOptions, safeOptIdx]);
+  }, [media.id, hasPriceOptions, packageMode, safeOptIdx]);
+
+  useEffect(() => {
+    if (packageMode && hasPriceOptions) {
+      setPriceOptionIndex((prev) => ({
+        ...prev,
+        [media.id]: safeOptIdx,
+      }));
+    }
+  }, [media.id, packageMode, hasPriceOptions, safeOptIdx]);
+
+  const effectivePoIdx = packageMode
+    ? (priceOptionIndex[media.id] ?? safeOptIdx)
+    : safeOptIdx;
 
   const selectedOption = hasPriceOptions
-    ? priceOptions[safeOptIdx]
+    ? priceOptions[effectivePoIdx]
     : undefined;
+
+  const units = resolveMediaQuantity(media, quantities[media.id]);
 
   const optionBundleDays = useMemo(() => {
     if (!selectedOption) {
@@ -91,12 +128,21 @@ export function MediaDetailStickyQuotePanel({
     return hasPriceOptions ? optionBundleDays : 30;
   }, [startDate, endDate, hasPriceOptions, optionBundleDays]);
 
-  const quote = useMemo(() => {
-    if (hasPriceOptions && selectedOption) {
-      return calculateMediaQuoteFromOption(media, selectedOption, days);
+  const quote = useMemo(
+    () =>
+      calculateMediaDetailQuote(media, days, {
+        units,
+        priceOptionIndex: effectivePoIdx,
+      }),
+    [media, days, units, effectivePoIdx],
+  );
+
+  const monthlyImpressions = useMemo(() => {
+    if (packageMode && hasPriceOptions) {
+      return resolveImpressionsForUnits(media, 1);
     }
-    return calculateMediaQuoteByDays(media, days);
-  }, [media, days, hasPriceOptions, selectedOption]);
+    return resolveImpressionsForUnits(media, units);
+  }, [media, units, packageMode, hasPriceOptions]);
 
   const headlinePrice = hasPriceOptions && selectedOption
     ? formatCatalogPriceFieldWon(selectedOption.price, locale)
@@ -109,6 +155,21 @@ export function MediaDetailStickyQuotePanel({
         localeTag,
       ) ?? periodLabel
     : periodLabel;
+
+  const quoteHref = useMemo(
+    () =>
+      buildMediaDetailQuoteHref(media, {
+        priceOptionIndex: effectivePoIdx,
+        units,
+        period: inferQuoteCampaignPeriodFromMedia(media, effectivePoIdx),
+      }),
+    [media, effectivePoIdx, units],
+  );
+
+  const plannerHref = useMemo(
+    () => buildMediaDetailPlannerHref(media.id, units),
+    [media.id, units],
+  );
 
   const inputCls =
     "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/50 focus:ring-2 focus:ring-violet-400/20";
@@ -131,7 +192,24 @@ export function MediaDetailStickyQuotePanel({
       </p>
       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
 
-      {hasPriceOptions ? (
+      {showQuantity ? (
+        <div className="mt-4">
+          <PlannerMediaQuantityControl
+            media={media}
+            isKo={isKo}
+            quantities={quantities}
+            priceOptionIndex={priceOptionIndex}
+            onQuantityChange={(n) =>
+              setQuantities((prev) => ({ ...prev, [media.id]: n }))
+            }
+            onPriceOptionChange={(i) => {
+              setOptIdx(i);
+              setPriceOptionIndex((prev) => ({ ...prev, [media.id]: i }));
+              rememberQuoteEntryPriceOption(media.id, i);
+            }}
+          />
+        </div>
+      ) : hasPriceOptions && !packageMode ? (
         <div className="mt-4 space-y-1.5">
           <label
             htmlFor="sticky-quote-price-option"
@@ -195,7 +273,15 @@ export function MediaDetailStickyQuotePanel({
               {formatWonShort(quote.costWon, isKo ? "ko" : "en")}
             </span>
           </p>
-          {quote.impressions > 0 ? (
+          {monthlyImpressions > 0 ? (
+            <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
+              <span>{isKo ? "월 예상 노출" : "Est. monthly reach"}</span>
+              <span className="tabular-nums">
+                {monthlyImpressions.toLocaleString(locale)}
+                {isKo ? "회" : ""}
+              </span>
+            </p>
+          ) : quote.impressions > 0 ? (
             <p className="mt-1 flex justify-between gap-2 dark:text-white/60 text-gray-500">
               <span>{isKo ? "예상 노출" : "Est. impressions"}</span>
               <span className="tabular-nums">
@@ -204,6 +290,22 @@ export function MediaDetailStickyQuotePanel({
               </span>
             </p>
           ) : null}
+        </div>
+
+        <div className="grid grid-cols-2 gap-2">
+          <Link
+            href={quoteHref}
+            className="inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-xs font-bold text-gray-900 dark:text-white"
+          >
+            {isKo ? "견적 받기" : "Get quote"}
+          </Link>
+          <Link
+            href={plannerHref}
+            className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 text-center text-xs font-bold text-violet-800 dark:text-violet-100"
+          >
+            <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            {isKo ? "플래너" : "Planner"}
+          </Link>
         </div>
 
         <MediaDetailProposalCard

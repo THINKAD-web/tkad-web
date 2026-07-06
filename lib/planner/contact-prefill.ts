@@ -17,6 +17,8 @@ export type SavedPlannerPlanJson = {
   ageKey?: string;
   industryKey?: string;
   campaignMediaIds?: string[];
+  campaignMediaQuantities?: Record<string, number>;
+  campaignMediaPriceOptionIndex?: Record<string, number>;
   creativeUploadedUrl?: string | null;
   mediaPlacements?: Record<string, unknown>;
 };

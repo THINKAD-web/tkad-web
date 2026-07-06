@@ -4,10 +4,49 @@ import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
 } from "@/lib/media-price-format";
+import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import {
-  isNetworkCatalogItem,
-  plannerMediaMonthlyPriceMan,
-} from "@/lib/matching-network-helpers";
+  type CampaignMediaQuantities,
+  type CampaignMediaPriceOptionIndex,
+  type PlannerPortfolioPricing,
+  plannerMonthlyImpressionsForMedia,
+  plannerMonthlyPriceManForMedia,
+  plannerMonthlyPriceWonForMedia,
+} from "@/lib/planner/planner-media-quantity";
+
+function portfolioPriceMan(
+  m: MediaItem,
+  pricing?: PlannerPortfolioPricing,
+): number {
+  return plannerMonthlyPriceManForMedia(
+    m,
+    pricing?.quantities,
+    pricing?.priceOptionIndex,
+  );
+}
+
+function portfolioPriceWon(
+  m: MediaItem,
+  pricing?: PlannerPortfolioPricing,
+): number {
+  return plannerMonthlyPriceWonForMedia(
+    m,
+    pricing?.quantities,
+    pricing?.priceOptionIndex,
+  );
+}
+
+function portfolioImpressions(
+  m: MediaItem,
+  pricing?: PlannerPortfolioPricing,
+): number {
+  return plannerMonthlyImpressionsForMedia(
+    m,
+    pricing?.quantities,
+    pricing?.priceOptionIndex,
+  );
+}
+
 import {
   filterPlannerMediaByRegions,
   countPlannerMediaByBrowseRegion,
@@ -214,10 +253,11 @@ export function countPlannerMediaByRegion(
 export function plannerBlendCpmKrw(
   portfolio: readonly MediaItem[],
   estimatedMonthlyImpressions: number,
+  pricing?: PlannerPortfolioPricing,
 ): number | null {
   if (portfolio.length === 0 || estimatedMonthlyImpressions <= 0) return null;
   const wonPerMonth = portfolio.reduce(
-    (s, m) => s + catalogPriceFieldToWon(m.price),
+    (s, m) => s + portfolioPriceWon(m, pricing),
     0,
   );
   if (wonPerMonth <= 0) return null;
@@ -228,18 +268,23 @@ export function plannerBlendCpmKrw(
 export function computePortfolioReportMetrics(
   portfolio: readonly MediaItem[],
   months: number,
+  pricing?: PlannerPortfolioPricing,
 ): {
   monthlyImpressions: number;
   totalImpressions: number;
   blendedCpmKrw: number | null;
 } {
   const monthlyImpressions = portfolio.reduce(
-    (s, m) => s + Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30)),
+    (s, m) => s + portfolioImpressions(m, pricing),
     0,
   );
   const m = Math.max(1, months);
   const totalImpressions = monthlyImpressions * m;
-  const blendedCpmKrw = plannerBlendCpmKrw(portfolio, monthlyImpressions);
+  const blendedCpmKrw = plannerBlendCpmKrw(
+    portfolio,
+    monthlyImpressions,
+    pricing,
+  );
   return { monthlyImpressions, totalImpressions, blendedCpmKrw };
 }
 
@@ -254,9 +299,10 @@ export const PLANNER_AUTO_PORTFOLIO_MAX_NETWORK_ITEMS = 2;
 
 export function computePlannerPortfolioMonthlyMan(
   portfolio: readonly MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): number {
   return portfolio.reduce(
-    (s, m) => s + catalogPriceFieldToPriceMan(m.price),
+    (s, m) => s + portfolioPriceMan(m, pricing),
     0,
   );
 }
@@ -265,13 +311,17 @@ export function computePlannerPortfolioBudgetStatus(
   portfolio: readonly MediaItem[],
   budgetMan: number,
   months: number,
+  pricing?: PlannerPortfolioPricing,
 ): {
   monthlyTotalMan: number;
   monthlyBudgetMan: number;
   overBudget: boolean;
 } {
   const monthlyBudgetMan = months > 0 ? budgetMan / months : budgetMan;
-  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(portfolio);
+  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(
+    portfolio,
+    pricing,
+  );
   return {
     monthlyTotalMan,
     monthlyBudgetMan,
@@ -345,6 +395,7 @@ function knapsackPortfolioWithinMonthlyCap(
   maxItems: number,
   fallbackPool: readonly MediaItem[],
   maxNetworkItems = Number.POSITIVE_INFINITY,
+  pricing?: PlannerPortfolioPricing,
 ): MediaItem[] {
   if (months <= 0 || budgetMan < 1) return [];
 
@@ -364,7 +415,7 @@ function knapsackPortfolioWithinMonthlyCap(
   for (const m of ordered) {
     if (out.length >= maxItems) break;
     if (isNetworkCatalogItem(m) && networkCount >= maxNetworkItems) continue;
-    const priceMan = plannerMediaMonthlyPriceMan(m);
+    const priceMan = portfolioPriceMan(m, pricing);
     if (allocated + priceMan <= cap) {
       out.push(m);
       allocated += priceMan;
@@ -375,8 +426,8 @@ function knapsackPortfolioWithinMonthlyCap(
   if (out.length === 0 && fallbackPool.length > 0) {
     const cheapest = [...fallbackPool].sort(
       (a, b) =>
-        plannerMediaMonthlyPriceMan(a) -
-        plannerMediaMonthlyPriceMan(b),
+        portfolioPriceMan(a, pricing) -
+        portfolioPriceMan(b, pricing),
     )[0];
     if (cheapest) out.push(cheapest);
   }
@@ -397,7 +448,8 @@ function ensurePortfolioNetworkCandidate(
   const best =
     matchedNw[0] ??
     poolNw.sort(
-      (a, b) => plannerMediaMonthlyPriceMan(a) - plannerMediaMonthlyPriceMan(b),
+      (a, b) =>
+        portfolioPriceMan(a) - portfolioPriceMan(b),
     )[0];
   if (!best) return candidates;
 
@@ -412,22 +464,27 @@ function injectAffordableNetworkIntoPortfolio(
   budgetMan: number,
   months: number,
   maxItems: number,
+  pricing?: PlannerPortfolioPricing,
 ): MediaItem[] {
   if (portfolio.some((m) => isNetworkCatalogItem(m))) return portfolio;
   const spendPerMonth = budgetMan / months;
   const cap = spendPerMonth * 0.92;
   const allocated = portfolio.reduce(
-    (s, m) => s + plannerMediaMonthlyPriceMan(m),
+    (s, m) => s + portfolioPriceMan(m, pricing),
     0,
   );
 
   const affordable = candidates
     .filter((m) => isNetworkCatalogItem(m))
     .filter((m) => {
-      const p = plannerMediaMonthlyPriceMan(m);
+      const p = portfolioPriceMan(m, pricing);
       return p > 0 && allocated + p <= cap;
     })
-    .sort((a, b) => plannerMediaMonthlyPriceMan(a) - plannerMediaMonthlyPriceMan(b));
+    .sort(
+      (a, b) =>
+        portfolioPriceMan(a, pricing) -
+        portfolioPriceMan(b, pricing),
+    );
 
   const pick = affordable[0];
   if (!pick) return portfolio;
@@ -438,8 +495,8 @@ function injectAffordableNetworkIntoPortfolio(
 
   const dropIdx = portfolio.findIndex((m) => !isNetworkCatalogItem(m));
   if (dropIdx < 0) return portfolio;
-  const dropPrice = plannerMediaMonthlyPriceMan(portfolio[dropIdx]!);
-  const pickPrice = plannerMediaMonthlyPriceMan(pick);
+  const dropPrice = portfolioPriceMan(portfolio[dropIdx]!, pricing);
+  const pickPrice = portfolioPriceMan(pick, pricing);
   if (allocated - dropPrice + pickPrice > cap) return portfolio;
 
   const next = [...portfolio];
@@ -458,6 +515,7 @@ export function selectPlannerPortfolioFromMatching(
   months: number,
   maxItems = PLANNER_AUTO_PORTFOLIO_MAX_ITEMS,
   poolSize = PLANNER_AUTO_PORTFOLIO_POOL_SIZE,
+  pricing?: PlannerPortfolioPricing,
 ): MediaItem[] {
   if (filtered.length === 0 || months <= 0 || budgetMan < 1) return [];
 
@@ -473,6 +531,7 @@ export function selectPlannerPortfolioFromMatching(
     maxItems,
     filtered,
     PLANNER_AUTO_PORTFOLIO_MAX_NETWORK_ITEMS,
+    pricing,
   );
   return injectAffordableNetworkIntoPortfolio(
     portfolio,
@@ -480,6 +539,7 @@ export function selectPlannerPortfolioFromMatching(
     budgetMan,
     months,
     maxItems,
+    pricing,
   );
 }
 
@@ -601,8 +661,11 @@ function groupPortfolioByReportCategory(
   return groups;
 }
 
-function monthlyImpressionsOf(m: MediaItem): number {
-  return Math.max(0, Math.round((m.dailyFootTraffic ?? 0) * 30));
+function monthlyImpressionsOf(
+  m: MediaItem,
+  pricing?: PlannerPortfolioPricing,
+): number {
+  return portfolioImpressions(m, pricing);
 }
 
 /** 비중 % — 도넛·범례·시뮬레이션 공통 (소수 1자리) */
@@ -668,14 +731,17 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
 }
 
 /** 선택 포트폴리오 기준 유형별 CPM — 예산·노출 가중 (단순 평균 아님) */
-export function portfolioCpmByCategory(portfolio: MediaItem[]): CpmBarPoint[] {
+export function portfolioCpmByCategory(
+  portfolio: MediaItem[],
+  pricing?: PlannerPortfolioPricing,
+): CpmBarPoint[] {
   const out: CpmBarPoint[] = [];
   for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
     let priceWon = 0;
     let monthlyImp = 0;
     for (const m of list) {
-      priceWon += catalogPriceFieldToWon(m.price);
-      monthlyImp += monthlyImpressionsOf(m);
+      priceWon += portfolioPriceWon(m, pricing);
+      monthlyImp += monthlyImpressionsOf(m, pricing);
     }
     let cpm = 0;
     if (priceWon > 0 && monthlyImp > 0) {
@@ -708,64 +774,28 @@ export type BudgetPieSlice = {
 
 export function budgetSplitByCategory(
   portfolio: MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): BudgetPieSlice[] {
-  if (portfolio.length === 0) return [];
-
-  // 가격 0/미입력("문의") 매체는 합산 0 → payload valueWon>0 필터에서 유형 전체가 빠져
-  // 도넛이 한 유형(보통 디지털) 100%로 쏠림. 평균 단가를 폴백 가중치로 pct만 보정.
-  const positivePrices = portfolio
-    .map((m) => catalogPriceFieldToWon(m.price))
-    .filter((won) => won > 0);
-  const fallbackWon =
-    positivePrices.length > 0
-      ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
-      : 1;
-  const weightOf = (m: MediaItem): number => {
-    const won = catalogPriceFieldToWon(m.price);
-    return won > 0 ? won : fallbackWon;
-  };
-
-  const weightSums = new Map<string, number>();
-  const wonSums = new Map<string, number>();
-  for (const m of portfolio) {
-    const key = plannerReportCategoryKey(m);
-    weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
-    wonSums.set(
-      key,
-      (wonSums.get(key) ?? 0) + catalogPriceFieldToWon(m.price),
-    );
-  }
-  const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
-  const totalActual = [...wonSums.values()].reduce((a, b) => a + b, 0);
-  /** 실제 단가 합이 있으면 도넛·%는 실제 월 예산 기준 (0원 유형은 제외) */
-  const useActual = totalActual > 0;
-  const totalSegment = useActual ? totalActual : totalWeight;
-
-  return [...weightSums.entries()]
-    .map(([key, weight]) => {
-      const actualWon = wonSums.get(key) ?? 0;
-      const segmentValue = useActual ? actualWon : weight;
-      return {
-        key,
-        labelKo: TYPE_META[key]?.labelKo ?? key,
-        labelEn: TYPE_META[key]?.labelEn ?? key,
-        value: segmentValue,
-        actualWon,
-        pct: sharePctOf(segmentValue, totalSegment),
-      };
-    })
-    .filter((s) => s.value > 0)
-    .sort((a, b) => b.value - a.value);
+  return budgetSplitByGroupedKeys(
+    portfolio,
+    plannerReportCategoryKey,
+    (key) => ({
+      labelKo: TYPE_META[key]?.labelKo ?? key,
+      labelEn: TYPE_META[key]?.labelEn ?? key,
+    }),
+    pricing,
+  );
 }
 
 /** 유형별 월 노출 비중 — 예산 배분과 대비해 효율 차이를 설명 */
 export function impressionShareByCategory(
   portfolio: MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
   const impSums = new Map<string, number>();
   for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
-    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m), 0);
+    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m, pricing), 0);
     impSums.set(key, imp);
   }
   const total = [...impSums.values()].reduce((a, b) => a + b, 0) || 1;
@@ -822,18 +852,19 @@ function budgetSplitByGroupedKeys(
   portfolio: MediaItem[],
   keyOf: (m: MediaItem) => string,
   labelsOf: (key: string) => { labelKo: string; labelEn: string },
+  pricing?: PlannerPortfolioPricing,
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
 
   const positivePrices = portfolio
-    .map((m) => catalogPriceFieldToWon(m.price))
+    .map((m) => portfolioPriceWon(m, pricing))
     .filter((won) => won > 0);
   const fallbackWon =
     positivePrices.length > 0
       ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
       : 1;
   const weightOf = (m: MediaItem): number => {
-    const won = catalogPriceFieldToWon(m.price);
+    const won = portfolioPriceWon(m, pricing);
     return won > 0 ? won : fallbackWon;
   };
 
@@ -844,7 +875,7 @@ function budgetSplitByGroupedKeys(
     weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
     wonSums.set(
       key,
-      (wonSums.get(key) ?? 0) + catalogPriceFieldToWon(m.price),
+      (wonSums.get(key) ?? 0) + portfolioPriceWon(m, pricing),
     );
   }
   const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
@@ -873,22 +904,25 @@ function budgetSplitByGroupedKeys(
 /** 발견하기 카테고리별 예산 배분 — catalog 유형 축과 별도 */
 export function budgetSplitByBrowseCategory(
   portfolio: MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): BudgetPieSlice[] {
   return budgetSplitByGroupedKeys(
     portfolio,
     plannerBrowseCategoryKey,
     browseCategoryLabels,
+    pricing,
   );
 }
 
 /** 발견하기 카테고리별 월 노출 비중 */
 export function impressionShareByBrowseCategory(
   portfolio: MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
   const impSums = new Map<string, number>();
   for (const [key, list] of groupPortfolioByBrowseCategory(portfolio)) {
-    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m), 0);
+    const imp = list.reduce((s, m) => s + monthlyImpressionsOf(m, pricing), 0);
     impSums.set(key, imp);
   }
   const total = [...impSums.values()].reduce((a, b) => a + b, 0) || 1;
@@ -1181,16 +1215,20 @@ export function computePlannerMetrics(
     campaignGoal?: PlannerCampaignGoal | null;
     industryKey?: PlannerIndustryKey | null;
     goalFollowUp?: PlannerGoalFollowUp;
+    pricing?: PlannerPortfolioPricing;
   },
 ): PlannerMetrics | null {
   if (media.length === 0 || months <= 0 || budgetMan <= 0) return null;
 
-  const portReport = computePortfolioReportMetrics(media, months);
+  const pricing = options?.pricing;
+  const portReport = computePortfolioReportMetrics(media, months, pricing);
   const useFootTrafficSum = portReport.monthlyImpressions > 0;
 
   const avgMonthlyPriceMan =
-    media.reduce((s, m) => s + catalogPriceFieldToPriceMan(m.price), 0) /
-    media.length;
+    media.reduce(
+      (s, m) => s + portfolioPriceMan(m, pricing),
+      0,
+    ) / media.length;
   const blendDailyReach =
     media.reduce((s, m) => s + (m.dailyFootTraffic ?? 0), 0) / media.length;
 

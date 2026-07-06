@@ -6,7 +6,6 @@ import {
   budgetSplitByBrowseCategory,
   impressionShareByBrowseCategory,
 } from "@/lib/planner-logic";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   computePortfolioContributions,
   mediaItemToExportRow,
@@ -31,6 +30,7 @@ import {
   buildReportWhyLine,
 } from "@/lib/planner/report-strategy";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
@@ -69,6 +69,8 @@ export type BuildOohPayloadArgs = {
   regionBudgetCharts?: PlannerExportChartDatum[];
   regionImpressionCharts?: PlannerExportChartDatum[];
   isAutoPortfolio?: boolean;
+  campaignMediaQuantities?: Record<string, number>;
+  campaignMediaPriceOptionIndex?: Record<string, number>;
 };
 
 export function buildOohReportPayload(
@@ -76,9 +78,14 @@ export function buildOohReportPayload(
 ): PlannerReportExportPayload {
   const isKo = a.isKo;
   const fmt = (n: number) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const pricing: PlannerPortfolioPricing = {
+    quantities: a.campaignMediaQuantities,
+    priceOptionIndex: a.campaignMediaPriceOptionIndex,
+  };
   const portfolioMetrics = computePortfolioReportMetrics(
     a.portfolio,
     a.months ?? 1,
+    pricing,
   );
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
@@ -114,7 +121,7 @@ export function buildOohReportPayload(
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
-  const browseBudgetSlices = budgetSplitByBrowseCategory(a.portfolio);
+  const browseBudgetSlices = budgetSplitByBrowseCategory(a.portfolio, pricing);
   const charts: PlannerExportCharts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
@@ -163,7 +170,7 @@ export function buildOohReportPayload(
           ].filter((d) => d.value > 0)
         : [],
     impressionSplit: usePortfolioReach
-      ? impressionShareByCategory(a.portfolio).map((s) => ({
+      ? impressionShareByCategory(a.portfolio, pricing).map((s) => ({
           label: isKo ? s.labelKo : s.labelEn,
           value: s.value,
           colorKey: s.key,
@@ -171,7 +178,7 @@ export function buildOohReportPayload(
         }))
       : [],
     browseImpressionSplit: usePortfolioReach
-      ? impressionShareByBrowseCategory(a.portfolio).map((s) => ({
+      ? impressionShareByBrowseCategory(a.portfolio, pricing).map((s) => ({
           label: isKo ? s.labelKo : s.labelEn,
           value: s.value,
           colorKey: s.key,
@@ -273,13 +280,16 @@ export function buildOohReportPayload(
   const orderedPortfolio = groups
     ? flattenPlanCartReportGroups(groups)
     : a.portfolio;
-  const contributions = computePortfolioContributions(orderedPortfolio, months);
+  const contributions = computePortfolioContributions(
+    orderedPortfolio,
+    months,
+    pricing,
+  );
   const portfolioRows = orderedPortfolio.map((m) =>
     mediaItemToExportRow(m, isKo, {
       months,
       contributions,
-      lineTotalWon:
-        m.price > 0 ? catalogPriceFieldToWon(m.price) * months : undefined,
+      pricing,
     }),
   );
 

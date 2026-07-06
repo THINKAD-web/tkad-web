@@ -30,6 +30,8 @@ export type PlannerExportMediaRow = {
   recommendReason?: string;
   exposureContributionPct?: number;
   budgetContributionPct?: number;
+  /** 선택 수량 (네트워크·이동형) */
+  quantityLabel?: string;
 };
 
 export type PlannerExportDigitalRow = {

@@ -2,6 +2,10 @@
 export type QuoteMediaSelectionSnapshot = {
   mediaId: string;
   priceOptionIndex: number;
+  /** 네트워크 구좌·이동형 대수 등 — 미지정 시 1 (레거시 호환) */
+  quantity?: number;
+  /** PDF·라인 표기용 — 예: "87구좌", "스팟광고", "3대" */
+  quantityLabel?: string | null;
   optionLabel: string | null;
   optionPriceWon: number;
   lineTotalWon: number;
@@ -27,6 +31,16 @@ export function parseQuoteMediaSelections(
       typeof o.priceOptionIndex === "number"
         ? Math.max(0, Math.floor(o.priceOptionIndex))
         : 0;
+    const quantity =
+      typeof o.quantity === "number" &&
+      Number.isFinite(o.quantity) &&
+      o.quantity > 0
+        ? Math.round(o.quantity)
+        : undefined;
+    const quantityLabel =
+      typeof o.quantityLabel === "string" && o.quantityLabel.trim()
+        ? o.quantityLabel.trim()
+        : null;
     const optionLabel =
       typeof o.optionLabel === "string" && o.optionLabel.trim()
         ? o.optionLabel.trim()
@@ -53,6 +67,8 @@ export function parseQuoteMediaSelections(
     out.push({
       mediaId,
       priceOptionIndex,
+      ...(quantity != null ? { quantity } : {}),
+      ...(quantityLabel ? { quantityLabel } : {}),
       optionLabel,
       optionPriceWon,
       lineTotalWon,
@@ -71,6 +87,17 @@ export function mediaPriceOptionIndexFromSelections(
   return Object.fromEntries(
     selections.map((s) => [s.mediaId, s.priceOptionIndex]),
   );
+}
+
+export function mediaQuantitiesFromSelections(
+  selections: QuoteMediaSelectionSnapshot[] | null | undefined,
+): Record<string, number> | undefined {
+  if (!selections?.length) return undefined;
+  const out: Record<string, number> = {};
+  for (const s of selections) {
+    if (s.quantity != null && s.quantity > 0) out[s.mediaId] = s.quantity;
+  }
+  return Object.keys(out).length > 0 ? out : undefined;
 }
 
 export function selectionsByMediaId(

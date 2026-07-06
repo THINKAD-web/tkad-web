@@ -258,6 +258,11 @@ function basicDrawQuoteMediaCards(
     }
 
     const specParts: string[] = [];
+    if (line.quantityLabel) {
+      specParts.push(`${isKo ? "수량" : "Qty"} ${line.quantityLabel}`);
+    } else if (line.quantity != null && line.quantity > 1) {
+      specParts.push(`${isKo ? "수량" : "Qty"} ${line.quantity}`);
+    }
     if (line.categoryLabel) specParts.push(line.categoryLabel);
     if (line.size) specParts.push(`${isKo ? "규격" : "Size"} ${line.size}`);
     if (line.operatingHours) {
@@ -338,6 +343,11 @@ function drawMediaCards(
     const textW = w - 8 - tW;
     const specLines = [
       line.location,
+      line.quantityLabel
+        ? `${isKo ? "수량" : "Qty"} ${line.quantityLabel}`
+        : line.quantity != null && line.quantity > 1
+          ? `${isKo ? "수량" : "Qty"} ${line.quantity}`
+          : null,
       line.categoryLabel,
       line.size ? `${isKo ? "규격" : "Size"} ${line.size}` : null,
       line.operatingHours

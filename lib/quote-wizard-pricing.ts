@@ -1,5 +1,11 @@
 import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
+import {
+  getQuantityUnitMode,
+  isMobileSingleMedia,
+  resolveMediaQuantity,
+  resolveMonthlyPriceForUnits,
+} from "@/lib/media-quantity";
 import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
   catalogPriceFieldToPriceMan,
@@ -239,6 +245,8 @@ export function buildQuoteWizardLineContext(
     campaignPeriodLabel: string;
     priceOptionIndex: number;
     networkUnits?: number;
+    /** 이동형 단일 매체 대수 */
+    mobileUnits?: number;
     /** true면 패키지 번들 기간만 집행 — proration 없음 */
     usePackagePeriod?: boolean;
   },
@@ -252,7 +260,14 @@ export function buildQuoteWizardLineContext(
     ? catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(media, units))
     : priceOpt
       ? catalogPriceFieldToPriceMan(priceOpt.price)
-      : catalogPriceFieldToPriceMan(media.price);
+      : isMobileSingleMedia(media) && getQuantityUnitMode(media) === "unit"
+        ? catalogPriceFieldToPriceMan(
+            resolveMonthlyPriceForUnits(
+              media,
+              resolveMediaQuantity(media, opts.mobileUnits),
+            ),
+          )
+        : catalogPriceFieldToPriceMan(media.price);
 
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
   const explicitBundleDays =

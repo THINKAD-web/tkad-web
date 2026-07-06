@@ -9,6 +9,12 @@ import {
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
 import {
+  getQuantityUnitMode,
+  isMobileSingleMedia,
+  resolveMediaQuantity,
+  resolveMonthlyPriceForUnits,
+} from "@/lib/media-quantity";
+import {
   buildQuoteWizardLineContext,
   isQuoteCampaignPeriodKey,
   quoteCampaignDaysFromPeriodKey,
@@ -25,6 +31,7 @@ export type QuoteCalculatorMedia = {
   id: string;
   name: string;
   location: string;
+  type?: string | null;
   price: number;
   pricePeriod?: MediaPricePeriodKey | string | null;
   priceOptions?: MediaPriceOption[] | null;
@@ -42,6 +49,8 @@ export type QuoteLineItem = {
   unitPriceWon: number;
   lineSupplyWon: number;
   impressions: number;
+  quantity?: number;
+  quantityLabel?: string;
   lat?: number;
   lng?: number;
 };
@@ -104,7 +113,7 @@ function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
     location: m.location,
     locationEn: m.location,
     region: "",
-    type: "digital",
+    type: (m.type?.trim() || "digital") as MediaItem["type"],
     price: m.price,
     pricePeriod: m.pricePeriod,
     priceOptions: m.priceOptions ?? undefined,
@@ -176,6 +185,7 @@ export async function calculateQuoteFromMediaIds(
       id: true,
       name: true,
       location: true,
+      type: true,
       price: true,
       pricePeriod: true,
       priceOptions: true,
@@ -192,6 +202,7 @@ export async function calculateQuoteFromMediaIds(
       id: m.id,
       name: m.name,
       location: m.location,
+      type: m.type,
       price: m.price,
       pricePeriod: m.pricePeriod,
       priceOptions: parsePriceOptions(m.priceOptions),
@@ -267,6 +278,64 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
         unitPriceWon: Math.round(wizardLine.unitPriceMan * 10_000),
         lineSupplyWon: Math.round(wizardLine.lineTotalMan * 10_000),
         impressions: lineImpressions(m, lineCampaignDays),
+        quantity: snap?.quantity,
+        quantityLabel: snap?.quantityLabel ?? undefined,
+        lat: m.latitude ?? undefined,
+        lng: m.longitude ?? undefined,
+      };
+    }
+
+    const snap = selectionMap.get(m.id);
+    const mode = getQuantityUnitMode(mediaItem);
+    const qty =
+      snap?.quantity != null
+        ? resolveMediaQuantity(mediaItem, snap.quantity)
+        : 1;
+
+    if (
+      snap &&
+      mode === "package" &&
+      (m.priceOptions?.length ?? 0) > 0
+    ) {
+      const poIdx = snap?.priceOptionIndex ?? poMap[m.id] ?? 0;
+      const opt = m.priceOptions?.[poIdx] ?? m.priceOptions?.[0];
+      const unitPriceWon = opt
+        ? catalogPriceFieldToWon(opt.price)
+        : catalogPriceFieldToWon(m.price);
+      const supply = Math.round(unitPriceWon * monthFactor);
+      return {
+        mediaId: m.id,
+        mediaName: formatQuoteLineMediaName(m.name, opt),
+        location: m.location,
+        periodDays,
+        unitPriceWon,
+        lineSupplyWon: supply,
+        impressions: lineImpressions(m, periodDays),
+        quantity: 1,
+        quantityLabel: snap?.quantityLabel ?? opt?.label ?? undefined,
+        lat: m.latitude ?? undefined,
+        lng: m.longitude ?? undefined,
+      };
+    }
+
+    if (
+      isMobileSingleMedia(mediaItem) &&
+      snap?.quantity != null &&
+      qty > 1
+    ) {
+      const monthlyWon = resolveMonthlyPriceForUnits(mediaItem, qty);
+      const unitPriceWon = Math.round(monthlyWon / qty);
+      const supply = Math.round(monthlyWon * monthFactor);
+      return {
+        mediaId: m.id,
+        mediaName: m.name,
+        location: m.location,
+        periodDays,
+        unitPriceWon,
+        lineSupplyWon: supply,
+        impressions: lineImpressions(m, periodDays),
+        quantity: qty,
+        quantityLabel: snap?.quantityLabel ?? `${qty}대`,
         lat: m.latitude ?? undefined,
         lng: m.longitude ?? undefined,
       };
@@ -282,6 +351,8 @@ export function calculateQuote(input: CalculateQuoteInput): CalculateQuoteResult
       unitPriceWon,
       lineSupplyWon: supply,
       impressions: lineImpressions(m, periodDays),
+      ...(snap?.quantity != null ? { quantity: qty } : {}),
+      ...(snap?.quantityLabel ? { quantityLabel: snap.quantityLabel } : {}),
       lat: m.latitude ?? undefined,
       lng: m.longitude ?? undefined,
     };

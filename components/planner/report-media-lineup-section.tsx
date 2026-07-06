@@ -128,7 +128,7 @@ function DiscoveryLineupCard({
   const highlights = row.recommendReason ? [row.recommendReason] : [];
 
   if (viewMode === "compact") {
-    const metaLine = [row.region, row.type ?? row.categoryLabel, priceLabel]
+    const metaLine = [row.quantityLabel, row.region, row.type ?? row.categoryLabel, priceLabel]
       .filter(Boolean)
       .join(" · ");
     return (

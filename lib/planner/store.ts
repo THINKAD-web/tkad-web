@@ -39,13 +39,19 @@ import { hydratePlannerFromSavedPlan } from "@/lib/planner/hydrate-from-saved-pl
 import { hydratePlannerFromPlanCart } from "@/lib/plan-cart-planner-bridge";
 import type { PlanCart } from "@/lib/plan-cart";
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
+import {
+  pruneCampaignMediaQuantities,
+  pruneCampaignMediaPriceOptionIndex,
+  type CampaignMediaQuantities,
+  type CampaignMediaPriceOptionIndex,
+} from "@/lib/planner/planner-media-quantity";
 
 /**
  * localStorage key. 과거 `tkad-planner-plan-v2` 포맷(v2/v3)과 호환되도록
  * `migrate()` 훅에서 흡수한다. persist 자체 version은 별도 관리.
  */
 export const PLANNER_STORAGE_KEY = "tkad-planner-plan-v2";
-const PLANNER_PERSIST_VERSION = 4;
+const PLANNER_PERSIST_VERSION = 6;
 
 export type PlannerStoreState = {
   wizardStep: PlannerWizardStep;
@@ -59,6 +65,10 @@ export type PlannerStoreState = {
   ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   campaignMediaIds: string[];
+  /** 선택 매체별 수량 — 미지정 ID는 `getQuantityBounds().default` */
+  campaignMediaQuantities: CampaignMediaQuantities;
+  /** `priceOptions` 패키지 매체 선택 인덱스 */
+  campaignMediaPriceOptionIndex: CampaignMediaPriceOptionIndex;
   /** 로컬 Object URL. 메모리 전용이라 persist 대상에서 제외. */
   creativeObjectUrl: string | null;
   /** Cloudinary 업로드된 크리에이티브 secure_url. persist 포함. */
@@ -102,6 +112,8 @@ export type PlannerStoreActions = {
   applyScenarioPreset: (id: PlannerScenarioPresetId) => void;
   /** React `Dispatch<SetStateAction<string[]>>` 호환 — 기존 하위 컴포넌트 시그니처 유지용 */
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
+  setCampaignMediaQuantity: (mediaId: string, units: number) => void;
+  setCampaignMediaPriceOptionIndex: (mediaId: string, index: number) => void;
   /** React `Dispatch<SetStateAction<string | null>>` 호환 */
   setCreativeObjectUrl: (action: SetStateAction<string | null>) => void;
   setCreativeUploadedUrl: (url: string | null) => void;
@@ -136,6 +148,8 @@ const INITIAL_STATE: PlannerStoreState = {
   seoulZonesTouched: true,
   goalFollowUp: {},
   campaignMediaIds: [],
+  campaignMediaQuantities: {},
+  campaignMediaPriceOptionIndex: {},
   creativeObjectUrl: null,
   creativeUploadedUrl: null,
   mediaPlacements: {},
@@ -317,7 +331,41 @@ export const usePlannerStore = create<PlannerStore>()(
               : [...action];
           return {
             campaignMediaIds: nextIds,
+            campaignMediaQuantities: pruneCampaignMediaQuantities(
+              nextIds,
+              s.campaignMediaQuantities,
+            ),
+            campaignMediaPriceOptionIndex: pruneCampaignMediaPriceOptionIndex(
+              nextIds,
+              s.campaignMediaPriceOptionIndex,
+            ),
             mediaSelectionExplicit: nextIds.length > 0,
+          };
+        }),
+
+      setCampaignMediaQuantity: (mediaId, units) =>
+        set((s) => {
+          if (!s.campaignMediaIds.includes(mediaId)) return {};
+          const q = Math.round(units);
+          if (!Number.isFinite(q) || q <= 0) return {};
+          return {
+            campaignMediaQuantities: {
+              ...s.campaignMediaQuantities,
+              [mediaId]: q,
+            },
+          };
+        }),
+
+      setCampaignMediaPriceOptionIndex: (mediaId, index) =>
+        set((s) => {
+          if (!s.campaignMediaIds.includes(mediaId)) return {};
+          const i = Math.round(index);
+          if (!Number.isFinite(i) || i < 0) return {};
+          return {
+            campaignMediaPriceOptionIndex: {
+              ...s.campaignMediaPriceOptionIndex,
+              [mediaId]: i,
+            },
           };
         }),
 
@@ -417,6 +465,8 @@ export const usePlannerStore = create<PlannerStore>()(
             seoulZones,
             seoulZonesTouched: seoulZones.length > 0,
             campaignMediaIds,
+            campaignMediaQuantities: {},
+            campaignMediaPriceOptionIndex: {},
             mediaSelectionExplicit: campaignMediaIds.length > 0,
             ...(patch.appliedScenario !== undefined
               ? { appliedScenario: patch.appliedScenario }
@@ -446,6 +496,8 @@ export const usePlannerStore = create<PlannerStore>()(
           return {
             ...patch,
             campaignMediaIds: ids,
+            campaignMediaQuantities: {},
+            campaignMediaPriceOptionIndex: {},
             mediaPlacements: placements,
             mediaSelectionExplicit: ids.length > 0,
             appliedScenario: null,
@@ -475,6 +527,8 @@ export const usePlannerStore = create<PlannerStore>()(
         seoulZonesTouched: state.seoulZonesTouched,
         goalFollowUp: state.goalFollowUp,
         campaignMediaIds: state.campaignMediaIds,
+        campaignMediaQuantities: state.campaignMediaQuantities,
+        campaignMediaPriceOptionIndex: state.campaignMediaPriceOptionIndex,
         creativeUploadedUrl: state.creativeUploadedUrl,
         mediaPlacements: state.mediaPlacements,
         mediaSelectionExplicit: state.mediaSelectionExplicit,
@@ -558,6 +612,46 @@ export const usePlannerStore = create<PlannerStore>()(
           merged.campaignMediaIds = raw.campaignMediaIds.filter(
             (id): id is string => typeof id === "string",
           );
+        }
+
+        if (
+          raw.campaignMediaQuantities &&
+          typeof raw.campaignMediaQuantities === "object" &&
+          !Array.isArray(raw.campaignMediaQuantities)
+        ) {
+          const qty: CampaignMediaQuantities = {};
+          for (const [id, v] of Object.entries(
+            raw.campaignMediaQuantities as Record<string, unknown>,
+          )) {
+            const n = typeof v === "number" ? v : Number(v);
+            if (Number.isFinite(n) && n > 0) qty[id] = Math.round(n);
+          }
+          merged.campaignMediaQuantities = pruneCampaignMediaQuantities(
+            merged.campaignMediaIds,
+            qty,
+          );
+        } else {
+          merged.campaignMediaQuantities = {};
+        }
+
+        if (
+          raw.campaignMediaPriceOptionIndex &&
+          typeof raw.campaignMediaPriceOptionIndex === "object" &&
+          !Array.isArray(raw.campaignMediaPriceOptionIndex)
+        ) {
+          const idx: CampaignMediaPriceOptionIndex = {};
+          for (const [id, v] of Object.entries(
+            raw.campaignMediaPriceOptionIndex as Record<string, unknown>,
+          )) {
+            const n = typeof v === "number" ? v : Number(v);
+            if (Number.isFinite(n) && n >= 0) idx[id] = Math.round(n);
+          }
+          merged.campaignMediaPriceOptionIndex = pruneCampaignMediaPriceOptionIndex(
+            merged.campaignMediaIds,
+            idx,
+          );
+        } else {
+          merged.campaignMediaPriceOptionIndex = {};
         }
 
         merged.mediaSelectionExplicit = merged.campaignMediaIds.length > 0;

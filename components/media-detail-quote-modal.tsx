@@ -15,6 +15,13 @@ import {
   inferQuoteCampaignPeriodFromMedia,
 } from "@/lib/quote-wizard-pricing";
 import { resolveQuoteEntryPriceOptionIndex } from "@/lib/quote-wizard-entry";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import {
+  buildMediaDetailPlannerHref,
+  buildMediaDetailQuoteHref,
+  shouldShowMediaDetailQuantityControl,
+} from "@/lib/media-detail-quantity";
+import { resolveMediaQuantity } from "@/lib/media-quantity";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -31,28 +38,41 @@ function MediaDetailQuoteModalBody({
 
   const opts = media.priceOptions ?? [];
   const hasOpts = opts.length > 0;
+  const showQuantity = shouldShowMediaDetailQuantityControl(media);
   const [optIdx, setOptIdx] = useState(() =>
     resolveQuoteEntryPriceOptionIndex(media),
   );
+  const [quantities, setQuantities] = useState<Record<string, number>>({});
+  const [priceOptionIndex, setPriceOptionIndex] = useState<
+    Record<string, number>
+  >({});
 
   const safeIdx = hasOpts
     ? Math.min(Math.max(0, optIdx), opts.length - 1)
     : 0;
-  const selected = hasOpts ? opts[safeIdx] : undefined;
+  const effectivePoIdx = priceOptionIndex[media.id] ?? safeIdx;
+  const units = resolveMediaQuantity(media, quantities[media.id]);
 
   const quoteHref = useMemo(() => {
-    const q = new URLSearchParams();
-    q.set("media", media.id);
-    if (hasOpts) q.set("po", String(safeIdx));
-    q.set("period", inferQuoteCampaignPeriodFromMedia(media, safeIdx));
-    return `/quote?${q.toString()}`;
-  }, [media, hasOpts, safeIdx, selected]);
+    return buildMediaDetailQuoteHref(media, {
+      priceOptionIndex: effectivePoIdx,
+      units,
+      period: inferQuoteCampaignPeriodFromMedia(media, effectivePoIdx),
+    });
+  }, [media, effectivePoIdx, units]);
+
+  const plannerHref = useMemo(
+    () => buildMediaDetailPlannerHref(media.id, units),
+    [media.id, units],
+  );
 
   const contactHref = useMemo(() => {
     const q = `/contact?media=${encodeURIComponent(media.id)}`;
     if (!hasOpts) return q;
-    return `${q}&po=${safeIdx}`;
-  }, [media.id, hasOpts, safeIdx]);
+    return `${q}&po=${effectivePoIdx}`;
+  }, [media.id, hasOpts, effectivePoIdx]);
+
+  const selected = hasOpts ? opts[effectivePoIdx] : undefined;
 
   const btnBlockBase =
     "inline-flex w-full items-center justify-center gap-2 border-2 font-display font-bold uppercase tracking-[0.18em] transition-colors duration-150";
@@ -98,7 +118,25 @@ function MediaDetailQuoteModalBody({
           {t("quoteModalDescription")}
         </p>
 
-        {hasOpts ? (
+        {showQuantity ? (
+          <div className="mb-4">
+            <PlannerMediaQuantityControl
+              media={media}
+              isKo={isKo}
+              quantities={quantities}
+              priceOptionIndex={priceOptionIndex}
+              onQuantityChange={(n) =>
+                setQuantities((prev) => ({ ...prev, [media.id]: n }))
+              }
+              onPriceOptionChange={(i) => {
+                setOptIdx(i);
+                setPriceOptionIndex((prev) => ({ ...prev, [media.id]: i }));
+              }}
+            />
+          </div>
+        ) : null}
+
+        {hasOpts && !showQuantity ? (
           <div
             className="mb-2 rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 p-3 shadow-[0_18px_60px_rgba(0,0,0,0.35)] backdrop-blur sm:p-4"
             role="radiogroup"
@@ -214,6 +252,14 @@ function MediaDetailQuoteModalBody({
           >
             <Calculator className="h-5 w-5 shrink-0" aria-hidden />
             {t("quoteModalPrimary")}
+          </Link>
+          <Link
+            href={plannerHref}
+            onClick={onClose}
+            className={secondaryLinkClass}
+          >
+            <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+            {isKo ? "AI 플래너로" : "Open in planner"}
           </Link>
           <Link
             href={contactHref}

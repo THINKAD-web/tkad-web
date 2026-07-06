@@ -225,7 +225,15 @@ export async function buildQuoteExportPayload(
     const withPeriod = executionPeriodLabel
       ? { ...base, executionPeriodLabel }
       : base;
-    if (!snap) return withPeriod;
+    const fromLine = {
+      ...(l.quantity != null ? { quantity: l.quantity } : {}),
+      ...(l.quantityLabel ? { quantityLabel: l.quantityLabel } : {}),
+    };
+    if (!snap) {
+      return Object.keys(fromLine).length > 0
+        ? { ...withPeriod, ...fromLine }
+        : withPeriod;
+    }
     const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
     const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
     return {
@@ -233,6 +241,8 @@ export async function buildQuoteExportPayload(
       name: snap.optionLabel ? `${mediaName}${optSuffix}` : base.name,
       unitPriceWon: snap.optionPriceWon,
       lineSupplyWon: snap.lineTotalWon,
+      ...(snap.quantity != null ? { quantity: snap.quantity } : {}),
+      ...(snap.quantityLabel ? { quantityLabel: snap.quantityLabel } : {}),
     };
   });
 
@@ -448,7 +458,7 @@ export async function buildQuoteExportPayloadFromAdminDraft(
   const lines: QuoteExportLine[] = input.rows.map((r) => {
     const media = r.mediaId ? mediaById.get(r.mediaId) : undefined;
     const location = r.location?.trim() || media?.location || "—";
-    return mapQuoteExportLine(
+    const base = mapQuoteExportLine(
       {
         mediaId: r.mediaId ?? r.name,
         mediaName: r.name,
@@ -460,6 +470,9 @@ export async function buildQuoteExportPayloadFromAdminDraft(
       media,
       input.isKo,
     );
+    return r.quantity != null && r.quantity > 0
+      ? { ...base, quantity: r.quantity }
+      : base;
   });
 
   const totalImpressions = lines.reduce((s, l) => s + (l.impressions || 0), 0);
