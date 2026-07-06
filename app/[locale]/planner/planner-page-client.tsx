@@ -76,6 +76,8 @@ import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types"
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { PlannerFreetextBetaPanel } from "@/components/planner/planner-freetext-beta-panel";
 import type { FreetextApplySummary } from "@/components/planner/planner-freetext-beta-panel";
+import { buildFreetextBriefApply } from "@/lib/planner/freetext-brief-apply";
+import { decodeBriefFromPlannerQuery } from "@/lib/planner/freetext-brief-url";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
@@ -649,7 +651,9 @@ export default function PlannerPageClient({
   const fromPlanParam = searchParams.get("from");
   const loadPlanParam = searchParams.get("loadPlan");
   const createQuoteParam = searchParams.get("createQuote");
+  const briefParam = searchParams.get("brief");
   const handledQueryRef = useRef<string | null>(null);
+  const handledBriefRef = useRef(false);
   const handledFromPlanRef = useRef(false);
   const handledLoadPlanRef = useRef<string | null>(null);
   const handledCreateQuoteRef = useRef(false);
@@ -680,9 +684,57 @@ export default function PlannerPageClient({
     window.history.replaceState({}, "", url.toString());
   }, []);
 
+  /** 홈·딥링크 ?brief= — 1회 소비 후 URL 정리, persist 위에 시나리오 덮어씀 */
+  useEffect(() => {
+    if (!plannerStoreReady) return;
+    if (!briefParam) return;
+    if (handledBriefRef.current) return;
+    handledBriefRef.current = true;
+
+    const raw = decodeBriefFromPlannerQuery(briefParam);
+    if (!raw) {
+      toast(
+        "error",
+        isKo
+          ? "캠페인 조건을 읽을 수 없습니다."
+          : "Could not read campaign brief.",
+      );
+      stripPlannerQueryKeys(["brief"]);
+      return;
+    }
+
+    const payload = buildFreetextBriefApply(raw, isKo);
+    if (!payload) {
+      stripPlannerQueryKeys(["brief"]);
+      return;
+    }
+
+    applyScenarioAction(payload.patch);
+    setWizardStep(4);
+    setFreetextApplied(true);
+    setFreetextBriefSummary(payload.summary);
+    handledQueryRef.current = `brief:${briefParam}`;
+    stripPlannerQueryKeys(["brief"]);
+    toast(
+      "success",
+      isKo
+        ? "입력한 조건으로 맞춤 추천을 준비했습니다."
+        : "Tailored recommendations ready from your brief.",
+    );
+  }, [
+    plannerStoreReady,
+    briefParam,
+    isKo,
+    applyScenarioAction,
+    setWizardStep,
+    stripPlannerQueryKeys,
+    toast,
+  ]);
+
   /** 내 플랜 → 플래너: persist 재수화 후 카트로 교체 (옛 세션 merge 금지) */
   useEffect(() => {
     if (!plannerStoreReady) return;
+    if (briefParam) return;
     if (fromPlanParam !== "plan") return;
     if (handledFromPlanRef.current) return;
     handledFromPlanRef.current = true;
@@ -717,6 +769,7 @@ export default function PlannerPageClient({
     stripPlannerQueryKeys(["from", "mediaIds", "addMedia"]);
   }, [
     plannerStoreReady,
+    briefParam,
     fromPlanParam,
     importFromPlanCart,
     setWizardStep,
@@ -727,6 +780,7 @@ export default function PlannerPageClient({
 
   useEffect(() => {
     if (!plannerStoreReady) return;
+    if (handledBriefRef.current) return;
     if (fromPlanParam === "plan") return;
     const batchKey = mediaIdsParam
       ? `mediaIds:${mediaIdsParam}`

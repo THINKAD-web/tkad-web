@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
+import { HomeFreetextEntry } from "@/components/home/home-freetext-entry";
 import { HomeQuickAccess } from "@/components/home/home-quick-access";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
@@ -63,6 +64,8 @@ export default async function HomePage({
           : "Billboard, subway & bus OOH pricing — compare 500+ verified media nationwide"}
       </h1>
       <HomeHeroBanner />
+
+      <HomeFreetextEntry />
 
       <HomeQuickAccess />
 

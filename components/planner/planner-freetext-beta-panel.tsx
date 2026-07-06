@@ -11,22 +11,17 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
-  buildScenarioPatchFromFreetextParse,
   parsePlannerFreetextBrief,
   type PlannerFreetextParseResult,
 } from "@/lib/planner/parse-freetext-brief";
 import {
   buildFreetextBriefSummarySentence,
-  buildFreetextBriefSummaryShort,
   buildFreetextEvidenceRows,
   type FreetextEvidenceRow,
 } from "@/lib/planner/freetext-brief-summary";
-import {
-  FREETEXT_EXAMPLE_CHIP_COUNT,
-  FREETEXT_EXAMPLE_PROMPTS_EN,
-  FREETEXT_EXAMPLE_PROMPTS_KO,
-  pickFreetextExamplePrompts,
-} from "@/lib/planner/freetext-example-prompts";
+import { buildFreetextBriefApply } from "@/lib/planner/freetext-brief-apply";
+import type { FreetextBriefApplySummary } from "@/lib/planner/freetext-brief-apply";
+import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import { usePlannerStore } from "@/lib/planner/store";
 import {
   PlannerNeonCard,
@@ -39,10 +34,7 @@ const PLACEHOLDER_KO =
 const PLACEHOLDER_EN =
   'e.g. "Gangnam Gen Z branding 30M KRW monthly" — natural-language brief';
 
-export type FreetextApplySummary = {
-  sentence: string;
-  short: string | null;
-};
+export type FreetextApplySummary = FreetextBriefApplySummary;
 
 type Props = {
   isKo: boolean;
@@ -92,24 +84,9 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
   const [parseResult, setParseResult] =
     useState<PlannerFreetextParseResult | null>(null);
   const [analyzing, setAnalyzing] = useState(false);
-  const [exampleSeed, setExampleSeed] = useState(1);
 
   const applyScenario = usePlannerStore((s) => s.applyScenario);
   const setWizardStep = usePlannerStore((s) => s.setWizardStep);
-
-  const examplePool = isKo
-    ? FREETEXT_EXAMPLE_PROMPTS_KO
-    : FREETEXT_EXAMPLE_PROMPTS_EN;
-
-  const visibleExamples = useMemo(
-    () =>
-      pickFreetextExamplePrompts(
-        examplePool,
-        FREETEXT_EXAMPLE_CHIP_COUNT,
-        exampleSeed,
-      ),
-    [examplePool, exampleSeed],
-  );
 
   const summarySentence = useMemo(
     () =>
@@ -136,13 +113,11 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
 
   const handleApply = useCallback(() => {
     if (!parseResult) return;
-    const patch = buildScenarioPatchFromFreetextParse(parseResult);
-    applyScenario(patch);
+    const payload = buildFreetextBriefApply(parseResult.raw, isKo);
+    if (!payload) return;
+    applyScenario(payload.patch);
     setWizardStep(4);
-    onApplied?.({
-      sentence: buildFreetextBriefSummarySentence(parseResult, isKo),
-      short: buildFreetextBriefSummaryShort(parseResult, isKo),
-    });
+    onApplied?.(payload.summary);
   }, [applyScenario, isKo, onApplied, parseResult, setWizardStep]);
 
   return (
@@ -188,37 +163,12 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
           )}
         />
 
-        <div className="space-y-2">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <p className="text-xs font-medium text-muted-foreground">
-              {isKo ? "이렇게 입력해보세요" : "Try an example"}
-            </p>
-            <button
-              type="button"
-              onClick={() => setExampleSeed((n) => n + 1)}
-              className="text-xs font-semibold text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
-            >
-              {isKo ? "새 예시" : "More examples"}
-            </button>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {visibleExamples.map((example) => (
-              <button
-                key={`${exampleSeed}-${example}`}
-                type="button"
-                onClick={() => runAnalyze(example)}
-                disabled={analyzing}
-                className={cn(
-                  plannerNeon.selectChip,
-                  plannerNeon.selectChipIdle,
-                  "max-w-full truncate px-3 py-1.5 text-left text-xs leading-snug",
-                )}
-              >
-                {example}
-              </button>
-            ))}
-          </div>
-        </div>
+        <FreetextExampleChips
+          isKo={isKo}
+          onSelect={(example) => runAnalyze(example)}
+          disabled={analyzing}
+          chipClassName={cn(plannerNeon.selectChip, plannerNeon.selectChipIdle)}
+        />
 
         <div className="flex flex-wrap gap-2">
           <button
