@@ -29,7 +29,6 @@ import {
   ChevronRight,
   Download,
   GitCompare,
-  Layers,
   Send,
   Wallet,
   CalendarRange,
@@ -58,6 +57,7 @@ import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 import { PlannerRegionMap } from "@/components/planner-region-map";
+import { PlannerStepCollapsible } from "@/components/planner/planner-step-collapsible";
 import {
   buildPlannerRegionOptions,
   filterCatalogByPlannerRegions,
@@ -1388,9 +1388,9 @@ export default function PlannerPageClient({
 
             {/* Step 2 — 타깃 · 지역 */}
             {wizardStep === 2 ? (
-              <div className="space-y-6">
+              <div className="space-y-5">
                 <div className="space-y-2 text-center sm:text-left">
-                  <PlannerNeonLabel>Step 2 / Target + Region</PlannerNeonLabel>
+                  <PlannerNeonLabel>{t("step2Eyebrow")}</PlannerNeonLabel>
                   <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                     {t("stepRegionTitle")}
                   </h2>
@@ -1399,37 +1399,71 @@ export default function PlannerPageClient({
 
                 <PlannerNeonCard>
                   <div className={plannerNeon.cardHeader}>
-                    <PlannerNeonLabel>Category</PlannerNeonLabel>
-                    <h3
-                      className={cn(
-                        "mt-2 flex items-center gap-2 text-lg",
-                        plannerNeon.headline,
-                      )}
-                    >
-                      <Layers className="h-5 w-5 text-violet-400" />
-                      {t("category")}
-                    </h3>
-                    <p className={cn("mt-1", plannerNeon.subtext)}>
-                      {t("mediaMixHint")}
-                    </p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <PlannerNeonLabel>{t("mapTitle")}</PlannerNeonLabel>
+                      <span className="rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-200">
+                        {t("requiredMark")}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2 p-5 sm:p-6">
-                    {CATEGORIES.map(({ key, labelKey }) => (
-                      <button
-                        key={key}
-                        type="button"
-                        onClick={() => toggleCategory(key)}
-                        className={cn(
-                          plannerNeon.selectChip,
-                          "touch-manipulation",
-                          categories.has(key)
-                            ? plannerNeon.selectChipActive
-                            : plannerNeon.selectChipIdle,
-                        )}
-                      >
-                        {t(labelKey)}
-                      </button>
-                    ))}
+                  <div className="space-y-1 p-5 sm:p-6">
+                    <PlannerRegionMap
+                      selected={selectedRegions}
+                      regionOptions={regionOptions}
+                      onToggle={toggleRegion}
+                      title=""
+                      hint={t("mapHint")}
+                      countLabel={(n) => t("mapCount", { count: n })}
+                    />
+                    {selectedRegions.has("seoul") ? (
+                      <PlannerSeoulZoneChips
+                        embedded
+                        selected={seoulZones}
+                        suggested={suggestedSeoulZones}
+                        isKo={isKo}
+                        onToggle={toggleSeoulZone}
+                        onClear={clearSeoulZones}
+                        onApplySuggested={applySuggestedSeoulZones}
+                      />
+                    ) : null}
+                  </div>
+                </PlannerNeonCard>
+
+                <PlannerNeonCard>
+                  <div className="p-5 sm:p-6">
+                    <PlannerNeonLabel className="mb-2 block">
+                      {t("ageLabel")}
+                    </PlannerNeonLabel>
+                    {ageKeys.length === 0 ? (
+                      <p className={cn("text-sm font-medium", plannerNeon.headline)}>
+                        {t("ageDefaultLabel")}
+                      </p>
+                    ) : (
+                      <p className={cn("text-sm", plannerNeon.subtext)}>
+                        {ageSummary}
+                      </p>
+                    )}
+                    <p className={cn("mt-2 mb-3 text-xs", plannerNeon.subtext)}>
+                      {t("ageSpecifyHint")}
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {PLANNER_AGE_KEYS.filter((k) => k !== "ageAll").map((k) => (
+                        <button
+                          key={k}
+                          type="button"
+                          onClick={() => toggleAgeKey(k)}
+                          aria-pressed={ageKeys.includes(k)}
+                          className={cn(
+                            "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
+                            ageKeys.includes(k)
+                              ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
+                              : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
+                          )}
+                        >
+                          {t(k)}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </PlannerNeonCard>
 
@@ -1457,82 +1491,46 @@ export default function PlannerPageClient({
                   </div>
                 </PlannerNeonCard>
 
-                <PlannerGoalFollowUpPanel
-                  goal={campaignGoal}
-                  followUp={goalFollowUp}
-                  onChange={setGoalFollowUp}
-                  isKo={isKo}
-                />
-
-                <PlannerRegionMap
-                  selected={selectedRegions}
-                  regionOptions={regionOptions}
-                  onToggle={toggleRegion}
-                  title={t("mapTitle")}
-                  hint={t("mapHint")}
-                  countLabel={(n) => t("mapCount", { count: n })}
-                />
-
-                {selectedRegions.has("seoul") ? (
-                  <PlannerSeoulZoneChips
-                    selected={seoulZones}
-                    suggested={suggestedSeoulZones}
-                    isKo={isKo}
-                    onToggle={toggleSeoulZone}
-                    onClear={clearSeoulZones}
-                    onApplySuggested={applySuggestedSeoulZones}
-                  />
-                ) : null}
-
-                <div>
-                  <PlannerNeonLabel className="mb-3 block">
-                    {t("ageLabel")}
-                  </PlannerNeonLabel>
-                  <p className={cn("mb-3 text-xs", plannerNeon.subtext)}>
-                    {isKo
-                      ? "복수 선택 가능 · 미선택 시 전 연령"
-                      : "Multi-select · empty means all ages"}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {PLANNER_AGE_KEYS.map((k) => {
-                      const selected =
-                        k === "ageAll"
-                          ? ageKeys.length === 0
-                          : ageKeys.includes(k);
-                      return (
-                        <button
-                          key={k}
-                          type="button"
-                          onClick={() => {
-                            if (k === "ageAll") toggleAgeKey("ageAll");
-                            else toggleAgeKey(k);
-                          }}
-                          className={cn(
-                            plannerNeon.selectChip,
-                            "touch-manipulation",
-                            selected
-                              ? plannerNeon.selectChipActive
-                              : plannerNeon.selectChipIdle,
-                          )}
-                        >
-                          {t(k)}
-                        </button>
-                      );
-                    })}
+                <PlannerStepCollapsible
+                  title={t("category")}
+                  summary={t("step2CategorySummary")}
+                  defaultOpen={false}
+                >
+                  <div className="flex flex-wrap gap-2 p-4 sm:p-5">
+                    {CATEGORIES.map(({ key, labelKey }) => (
+                      <button
+                        key={key}
+                        type="button"
+                        onClick={() => toggleCategory(key)}
+                        className={cn(
+                          plannerNeon.selectChip,
+                          "touch-manipulation",
+                          categories.has(key)
+                            ? plannerNeon.selectChipActive
+                            : plannerNeon.selectChipIdle,
+                        )}
+                      >
+                        {t(labelKey)}
+                      </button>
+                    ))}
                   </div>
-                </div>
+                </PlannerStepCollapsible>
 
-                <PlannerScenarioCards
-                  scenarios={recommendedScenarios}
-                  selectedId={selectedScenarioId}
-                  onSelect={selectScenario}
-                  onApply={applyScenario}
-                  isKo={isKo}
-                  title={t("scenariosTitle")}
-                  hint={t("scenariosHint")}
-                  applyLabel={t("scenarioApply")}
-                  variantLabels={scenarioVariantLabels}
-                />
+                {campaignGoal ? (
+                  <PlannerStepCollapsible
+                    title={t("followUpTitle")}
+                    summary={t("followUpDesc")}
+                    defaultOpen={false}
+                  >
+                    <PlannerGoalFollowUpPanel
+                      embedded
+                      goal={campaignGoal}
+                      followUp={goalFollowUp}
+                      onChange={setGoalFollowUp}
+                      isKo={isKo}
+                    />
+                  </PlannerStepCollapsible>
+                ) : null}
               </div>
             ) : null}
 
@@ -1540,7 +1538,7 @@ export default function PlannerPageClient({
             {wizardStep === 3 ? (
               <PlannerNeonCard>
                 <div className={plannerNeon.cardHeader}>
-                  <PlannerNeonLabel>Step 3 / Budget + Period</PlannerNeonLabel>
+                  <PlannerNeonLabel>{t("step3Eyebrow")}</PlannerNeonLabel>
                   <h3
                     className={cn(
                       "mt-2 flex items-center gap-2 text-lg",
@@ -1657,12 +1655,36 @@ export default function PlannerPageClient({
                   </div>
                 ) : null}
                 <div className="space-y-2 text-center sm:text-left">
-                  <PlannerNeonLabel>Step 4 / Media Selection</PlannerNeonLabel>
+                  <PlannerNeonLabel>{t("step4Eyebrow")}</PlannerNeonLabel>
                   <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                     {t("stepMediaTitle")}
                   </h2>
                   <p className={plannerNeon.subtext}>{t("stepMediaDesc")}</p>
                 </div>
+
+                <PlannerNeonCard>
+                  <div className={plannerNeon.cardHeader}>
+                    <PlannerNeonLabel className="flex items-center gap-2">
+                      <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+                      {t("quickScenarioTitle")}
+                    </PlannerNeonLabel>
+                    <p className={cn("mt-2 text-xs leading-relaxed", plannerNeon.subtext)}>
+                      {t("quickScenarioHint")}
+                    </p>
+                  </div>
+                  <PlannerScenarioCards
+                    embedded
+                    scenarios={recommendedScenarios}
+                    selectedId={selectedScenarioId}
+                    onSelect={selectScenario}
+                    onApply={applyScenario}
+                    isKo={isKo}
+                    title=""
+                    hint=""
+                    applyLabel={t("scenarioApply")}
+                    variantLabels={scenarioVariantLabels}
+                  />
+                </PlannerNeonCard>
 
                 <PlannerSelectedMediaBar
                   catalog={catalog}
@@ -1685,7 +1707,7 @@ export default function PlannerPageClient({
                 />
 
                 <div className="space-y-2 border-t dark:border-white/10 border-gray-100 pt-6">
-                  <PlannerNeonLabel>Manual Browse</PlannerNeonLabel>
+                  <PlannerNeonLabel>{t("recommendBrowseEyebrow")}</PlannerNeonLabel>
                   <h3 className={cn("text-base", plannerNeon.headline)}>
                     {t("recommendBrowseTitle")}
                   </h3>
@@ -1783,7 +1805,7 @@ export default function PlannerPageClient({
               budgetNum={budgetNum}
             />
             <div className="space-y-2 text-center sm:text-left">
-              <PlannerNeonLabel>Step 7 / Effect</PlannerNeonLabel>
+              <PlannerNeonLabel>{t("step7Eyebrow")}</PlannerNeonLabel>
               <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
                 {t("effectDashboardTitle")}
               </h2>
