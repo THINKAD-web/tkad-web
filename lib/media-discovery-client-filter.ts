@@ -8,7 +8,19 @@ import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
+import { resolveBrowseRegionSubId } from "@/lib/plan-cart-report/region-subdivision";
 import type { MediaItem } from "@/lib/media-data";
+
+function mediaMatchesBrowseRegionSub(
+  m: MediaItem,
+  canonicalSub: string,
+): boolean {
+  if (m.regionSub?.trim() === canonicalSub) return true;
+  for (const loc of m.networkLocations ?? []) {
+    if (loc.regionSub?.trim() === canonicalSub) return true;
+  }
+  return false;
+}
 
 function mediaSearchHaystack(m: MediaItem): string {
   return mediaRegionHaystack(m);
@@ -21,8 +33,13 @@ export function matchesBrowseRegion(
   legacyRegion: string,
 ): boolean {
   if (regionSub.trim()) {
-    if (m.regionSub === regionSub.trim()) return true;
-    const aliases = expandBrowseRegionSub(regionSub);
+    const trimmed = regionSub.trim();
+    const canonicalSub = resolveBrowseRegionSubId(trimmed);
+    if (canonicalSub) {
+      return mediaMatchesBrowseRegionSub(m, canonicalSub);
+    }
+    if (m.regionSub === trimmed) return true;
+    const aliases = expandBrowseRegionSub(trimmed);
     const hay = mediaSearchHaystack(m);
     return aliases.some((alias) => hay.includes(alias.toLowerCase()));
   }

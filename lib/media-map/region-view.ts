@@ -1,3 +1,5 @@
+import { resolveRegionSubMapView, type HotspotRegionMapView } from "@/lib/media-hotspot-regions";
+
 /** 지역 칩 선택 시 지도 `programmaticView` 로 이동할 대표 좌표 (카카오 level — 작을수록 확대) */
 export const MEDIA_REGION_MAP_VIEW: Record<
   string,
@@ -35,10 +37,14 @@ export const BROWSE_REGION_MAP_VIEW: Record<
 export function resolveBrowseRegionMapView(
   regionMain: string,
   regionSub: string,
-): { lat: number; lng: number; zoom: number } | null {
+): HotspotRegionMapView | null {
   const sub = regionSub.trim();
-  if (sub && BROWSE_REGION_MAP_VIEW[sub]) return BROWSE_REGION_MAP_VIEW[sub];
+  if (sub) {
+    const fromHotspot = resolveRegionSubMapView(regionMain, sub);
+    if (fromHotspot) return fromHotspot;
+    if (BROWSE_REGION_MAP_VIEW[sub]) return BROWSE_REGION_MAP_VIEW[sub];
+  }
   const main = regionMain.trim();
   if (main && BROWSE_REGION_MAP_VIEW[main]) return BROWSE_REGION_MAP_VIEW[main];
-  return null;
+  return resolveRegionSubMapView(main, "");
 }

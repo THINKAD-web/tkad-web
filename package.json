@@ -31,7 +31,8 @@
     "smoke": "tsx scripts/smoke-test.ts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
     "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts",
-    "build:ktx-srt-geo": "tsx scripts/build-ktx-srt-geojson.mts"
+    "build:ktx-srt-geo": "tsx scripts/build-ktx-srt-geojson.mts",
+    "build:hotspot-regions": "tsx scripts/build-hotspot-regions.mts"
   },
   "prisma": {
     "seed": "npx tsx prisma/seed.ts"

@@ -226,6 +226,7 @@ export default function MediaMapPageClient() {
   const markersRef = useRef<MapMarker[]>([]);
   const listItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
   const regionPanSkipRef = useRef(true);
+  const hotspotPanOnlyRef = useRef(false);
   const forceSearchRef = useRef(false);
   const initialFetchDoneRef = useRef(false);
   const searchedBoundsRef = useRef<MapBounds | null>(null);
@@ -554,6 +555,10 @@ export default function MediaMapPageClient() {
       regionPanSkipRef.current = false;
       return;
     }
+    if (hotspotPanOnlyRef.current) {
+      hotspotPanOnlyRef.current = false;
+      return;
+    }
     const mapView = resolveBrowseRegionMapView(
       browseFilters.regionMain,
       browseFilters.regionSub,
@@ -704,6 +709,33 @@ export default function MediaMapPageClient() {
   const patchBrowseFilters = useCallback((patch: Partial<MapBrowseFilters>) => {
     setBrowseFilters((f) => ({ ...f, ...patch }));
   }, []);
+
+  const handleHotspotRegionSelect = useCallback(
+    (regionMain: string, regionSub: string) => {
+      hotspotPanOnlyRef.current = true;
+      patchBrowseFilters({ regionMain, regionSub });
+      const mapView = resolveBrowseRegionMapView(regionMain, regionSub);
+      if (mapView) {
+        if (mapView.fitBounds) {
+          emitProgrammaticView({
+            lat: mapView.lat,
+            lng: mapView.lng,
+            zoom: mapView.zoom,
+            fitBounds: mapView.fitBounds,
+            fitBoundsMaxZoom: mapView.fitBoundsMaxZoom ?? 16,
+          });
+        } else {
+          emitProgrammaticView({
+            lat: mapView.lat,
+            lng: mapView.lng,
+            zoom: mapView.zoom,
+          });
+        }
+        setViewportDirty(true);
+      }
+    },
+    [patchBrowseFilters, emitProgrammaticView],
+  );
 
   const handleBrowseViewModeChange = useCallback(
     (mode: DiscoveryFilterBarViewMode) => {
@@ -906,6 +938,8 @@ export default function MediaMapPageClient() {
       compareCount={compareEntries.length}
       onCompareSummaryClick={openCompareSummary}
       cartCount={planCount}
+      showHotspotRegions
+      onHotspotRegionSelect={handleHotspotRegionSelect}
     />
   );
 

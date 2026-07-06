@@ -60,6 +60,7 @@ import {
 } from "@/lib/media-map/active-filter-chips";
 import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
+import { HotspotRegionChips } from "@/components/media/hotspot-region-chips";
 import { cn } from "@/lib/utils";
 
 const MAP_TYPE_FILTERS_EXPANDED_KEY = "tkad-media-map-type-filters-expanded";
@@ -196,6 +197,10 @@ export type MediaManualBrowseFiltersProps = {
   variant?: "media" | "network";
   networkType?: string;
   onNetworkTypeChange?: (v: string) => void;
+  /** 상단 인기 지역 칩 — 패널 내 전체 지역 목록은 접힘 */
+  showHotspotRegions?: boolean;
+  /** 지도: flyTo 전용(자동 bounds 검색 생략). 미지정 시 목록과 동일하게 region 필터만 적용 */
+  onHotspotRegionSelect?: (regionMain: string, regionSub: string) => void;
 };
 
 export function MediaManualBrowseFilters({
@@ -251,8 +256,11 @@ export function MediaManualBrowseFilters({
   variant = "media",
   networkType = "",
   onNetworkTypeChange,
+  showHotspotRegions = false,
+  onHotspotRegionSelect,
 }: MediaManualBrowseFiltersProps) {
   const [advancedOpen, setAdvancedOpen] = useState(false);
+  const [regionPanelOpen, setRegionPanelOpen] = useState(false);
   /** 모바일 필터 바텀시트 (vaul) */
   const [sheetOpen, setSheetOpen] = useState(false);
   const [sortSheetOpen, setSortSheetOpen] = useState(false);
@@ -305,23 +313,32 @@ export function MediaManualBrowseFilters({
     variant === "media" ? features : "",
   ].filter(Boolean).length;
 
-  const mapBrowseFilterChips = mapCompactFilters
-    ? buildMapBrowseActiveFilterChips(
-        {
-          mainCategory,
-          subCategory,
-          target,
-          regionMain,
-          regionSub,
-          priceMin,
-          priceMax,
-          features,
-        },
-        isKo,
-      )
-    : [];
+  const filterOutRegionChips = (chips: ReturnType<typeof buildMapBrowseActiveFilterChips>) =>
+    showHotspotRegions
+      ? chips.filter(
+          (c) => c.key !== "regionMain" && c.key !== "regionSub",
+        )
+      : chips;
 
-  const mediaBrowseActiveChips =
+  const mapBrowseFilterChips = filterOutRegionChips(
+    mapCompactFilters
+      ? buildMapBrowseActiveFilterChips(
+          {
+            mainCategory,
+            subCategory,
+            target,
+            regionMain,
+            regionSub,
+            priceMin,
+            priceMax,
+            features,
+          },
+          isKo,
+        )
+      : [],
+  );
+
+  const mediaBrowseActiveChips = filterOutRegionChips(
     mobileVaulSheets && variant === "media"
       ? buildMapBrowseActiveFilterChips(
           {
@@ -336,7 +353,8 @@ export function MediaManualBrowseFilters({
           },
           isKo,
         )
-      : mapBrowseFilterChips;
+      : mapBrowseFilterChips,
+  );
 
   const sortLabel =
     MEDIA_SEARCH_SORT_OPTIONS.find((o) => o.value === sort)?.label ??
@@ -667,6 +685,92 @@ export function MediaManualBrowseFilters({
     );
   };
 
+  const renderRegionAxis = (wrap: boolean) => {
+    const chipRow = wrap ? chipRowWrap : chipRowScroll;
+    return (
+      <div data-screenshot="media-region-filter">
+        <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+          {isKo ? "어디서?" : "Where"}
+        </p>
+        <div className={chipRow}>
+          {MEDIA_BROWSE_REGIONS.map((main) => {
+            const selected = regionMain === main.id;
+            return (
+              <button
+                key={main.id}
+                type="button"
+                onClick={() => {
+                  if (selected) {
+                    onRegionMainChange("");
+                    onRegionSubChange("");
+                  } else {
+                    onRegionMainChange(main.id);
+                    onRegionSubChange("");
+                  }
+                }}
+                className={cn(
+                  "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                  selected
+                    ? "bg-cyan-500 text-white"
+                    : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+                )}
+              >
+                {isKo ? main.label : main.labelEn ?? main.label}
+              </button>
+            );
+          })}
+        </div>
+
+        {activeRegion ? (
+          <div className="mt-2 flex flex-wrap gap-2 rounded-xl border border-cyan-100 bg-cyan-50/50 p-2 dark:border-cyan-500/20 dark:bg-cyan-500/5">
+            {activeRegion.sub.map((sub) => {
+              const selected = regionSub === sub.id;
+              return (
+                <button
+                  key={sub.id}
+                  type="button"
+                  onClick={() => onRegionSubChange(selected ? "" : sub.id)}
+                  className={cn(
+                    "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    selected
+                      ? "bg-cyan-500 text-white"
+                      : "bg-white text-gray-600 dark:bg-white/10 dark:text-white/70",
+                  )}
+                >
+                  {sub.label}
+                </button>
+              );
+            })}
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
+  const handleHotspotSelect = (main: string, sub: string) => {
+    if (onHotspotRegionSelect) {
+      onHotspotRegionSelect(main, sub);
+      return;
+    }
+    onRegionMainChange(main);
+    onRegionSubChange(sub);
+  };
+
+  const handleHotspotClear = () => {
+    onRegionMainChange("");
+    onRegionSubChange("");
+  };
+
+  const renderHotspotRow = () => (
+    <HotspotRegionChips
+      isKo={isKo}
+      regionSub={regionSub}
+      compact={mapMobileImmersiveMode}
+      onSelect={handleHotspotSelect}
+      onClear={handleHotspotClear}
+    />
+  );
+
   const renderCollapsedAxes = (wrap: boolean) => {
     const chipRow = wrap ? chipRowWrap : chipRowScroll;
     return (
@@ -698,62 +802,29 @@ export function MediaManualBrowseFilters({
           </div>
         ) : null}
 
-        <div data-screenshot="media-region-filter">
-          <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
-            {isKo ? "어디서?" : "Where"}
-          </p>
-          <div className={chipRow}>
-            {MEDIA_BROWSE_REGIONS.map((main) => {
-              const selected = regionMain === main.id;
-              return (
-                <button
-                  key={main.id}
-                  type="button"
-                  onClick={() => {
-                    if (selected) {
-                      onRegionMainChange("");
-                      onRegionSubChange("");
-                    } else {
-                      onRegionMainChange(main.id);
-                      onRegionSubChange("");
-                    }
-                  }}
-                  className={cn(
-                    "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
-                    selected
-                      ? "bg-cyan-500 text-white"
-                      : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
-                  )}
-                >
-                  {isKo ? main.label : main.labelEn ?? main.label}
-                </button>
-              );
-            })}
+        {showHotspotRegions ? (
+          <div>
+            <button
+              type="button"
+              onClick={() => setRegionPanelOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-xl border border-cyan-100 bg-cyan-50/40 px-3 py-2 text-sm font-medium text-cyan-800 dark:border-cyan-500/20 dark:bg-cyan-500/5 dark:text-cyan-200"
+            >
+              <span>{isKo ? "전체 지역" : "All regions"}</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  regionPanelOpen && "rotate-180",
+                )}
+                aria-hidden
+              />
+            </button>
+            {regionPanelOpen ? (
+              <div className="mt-2">{renderRegionAxis(wrap)}</div>
+            ) : null}
           </div>
-
-          {activeRegion ? (
-            <div className="mt-2 flex flex-wrap gap-2 rounded-xl border border-cyan-100 bg-cyan-50/50 p-2 dark:border-cyan-500/20 dark:bg-cyan-500/5">
-              {activeRegion.sub.map((sub) => {
-                const selected = regionSub === sub.id;
-                return (
-                  <button
-                    key={sub.id}
-                    type="button"
-                    onClick={() => onRegionSubChange(selected ? "" : sub.id)}
-                    className={cn(
-                      "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
-                      selected
-                        ? "bg-cyan-500 text-white"
-                        : "bg-white text-gray-600 dark:bg-white/10 dark:text-white/70",
-                    )}
-                  >
-                    {sub.label}
-                  </button>
-                );
-              })}
-            </div>
-          ) : null}
-        </div>
+        ) : (
+          renderRegionAxis(wrap)
+        )}
 
         <div ref={advancedSectionRef}>
           <button
@@ -1119,8 +1190,20 @@ export function MediaManualBrowseFilters({
               mapMobileImmersiveMode ? "space-y-1.5" : "space-y-2",
             )}
           >
-            {mapMobileImmersiveMode ? mobileImmersiveControlRow : searchInput}
+            {mapMobileImmersiveMode ? (
+              <>
+                {mobileImmersiveControlRow}
+                {showHotspotRegions && variant === "media"
+                  ? renderHotspotRow()
+                  : null}
+              </>
+            ) : (
+              searchInput
+            )}
             {!mapMobileImmersiveMode ? mobileStickyControlRow : null}
+            {showHotspotRegions && variant === "media" && !mapMobileImmersiveMode ? (
+              <div className="md:hidden">{renderHotspotRow()}</div>
+            ) : null}
             {showListTypeChipRow && !mapMobileImmersiveMode ? (
               <div className="min-w-0 md:hidden" data-screenshot="media-main-category-mobile">
                 {renderTypeAxis(false)}
@@ -1209,6 +1292,9 @@ export function MediaManualBrowseFilters({
             {mapNavButton}
             {toolbarEnd}
           </div>
+          {showHotspotRegions && variant === "media" ? (
+            <div className="hidden min-w-0 md:block">{renderHotspotRow()}</div>
+          ) : null}
           {showListTypeChipRow ? (
             <div className="hidden min-w-0 md:block" data-screenshot="media-main-category">
               {renderTypeAxis(false)}

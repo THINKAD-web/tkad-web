@@ -525,6 +525,14 @@ function MediaSearchPageInner({
 
   const hasMore = media.length < total;
 
+  const handleHotspotRegionSelect = useCallback(
+    (main: string, sub: string) => {
+      setRegionMain(main);
+      setRegionSub(sub);
+    },
+    [],
+  );
+
   const navigateToMap = useCallback(() => {
     const qs = buildMediaBrowseQueryString({
       query,
@@ -790,6 +798,8 @@ function MediaSearchPageInner({
       onNavigateToMap={navigateToMap}
       mobileViewSegment={mobileViewSegment}
       onMobileViewSegmentChange={handleMobileViewSegmentChange}
+      showHotspotRegions={appShell && !networkBrowse}
+      onHotspotRegionSelect={handleHotspotRegionSelect}
       compareCount={plannerMode ? 0 : compareEntries.length}
       onCompareSummaryClick={plannerMode ? undefined : openCompareSummary}
       cartCount={plannerMode ? 0 : planCount}

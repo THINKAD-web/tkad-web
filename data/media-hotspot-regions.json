@@ -1,0 +1,177 @@
+{
+  "generatedAt": "2026-07-06T00:34:47.139Z",
+  "total": 10,
+  "seoulCap": 6,
+  "hotspots": [
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_gangnam",
+      "labelKo": "강남",
+      "labelEn": "Gangnam",
+      "mediaCount": 144,
+      "lat": 37.50694,
+      "lng": 127.02733,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.49994,
+        "swLng": 127.01658,
+        "neLat": 37.51582,
+        "neLng": 127.04073
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_cbd",
+      "labelKo": "광화문",
+      "labelEn": "Downtown",
+      "mediaCount": 62,
+      "lat": 37.56522,
+      "lng": 126.9815,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.55964,
+        "swLng": 126.97179,
+        "neLat": 37.57376,
+        "neLng": 126.98962
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_itaewon",
+      "labelKo": "이태원",
+      "labelEn": "Itaewon",
+      "mediaCount": 45,
+      "lat": 37.54071,
+      "lng": 126.97173,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.53032,
+        "swLng": 126.9657,
+        "neLat": 37.5587,
+        "neLng": 126.99874
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_hongdae",
+      "labelKo": "홍대",
+      "labelEn": "Hongdae",
+      "mediaCount": 44,
+      "lat": 37.55653,
+      "lng": 126.92385,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.55085,
+        "swLng": 126.91759,
+        "neLat": 37.56148,
+        "neLng": 126.93121
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "labelKo": "부산",
+      "labelEn": "Busan",
+      "mediaCount": 29,
+      "lat": 35.16597,
+      "lng": 129.0756,
+      "zoom": 4,
+      "bounds": {
+        "swLat": 35.09109,
+        "swLng": 129.01692,
+        "neLat": 35.19397,
+        "neLng": 129.0924
+      },
+      "fitBoundsMaxZoom": 14
+    },
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_seongsu",
+      "labelKo": "성수",
+      "labelEn": "Seongsu",
+      "mediaCount": 26,
+      "lat": 37.54308,
+      "lng": 127.05659,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.53759,
+        "swLng": 127.05039,
+        "neLat": 37.5485,
+        "neLng": 127.07623
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "incheon",
+      "regionSub": "incheon_airport",
+      "labelKo": "인천공항",
+      "labelEn": "Incheon Airport",
+      "mediaCount": 26,
+      "lat": 37.46,
+      "lng": 126.44,
+      "zoom": 5,
+      "bounds": {
+        "swLat": 37.43961,
+        "swLng": 126.42321,
+        "neLat": 37.47725,
+        "neLng": 126.46235
+      },
+      "fitBoundsMaxZoom": 13
+    },
+    {
+      "regionMain": "seoul",
+      "regionSub": "seoul_yeongdeungpo",
+      "labelKo": "여의도",
+      "labelEn": "Yeouido",
+      "mediaCount": 23,
+      "lat": 37.52423,
+      "lng": 126.92427,
+      "zoom": 3,
+      "bounds": {
+        "swLat": 37.51784,
+        "swLng": 126.90107,
+        "neLat": 37.52907,
+        "neLng": 126.93028
+      },
+      "fitBoundsMaxZoom": 16
+    },
+    {
+      "regionMain": "gwangju",
+      "regionSub": "gwangju_downtown",
+      "labelKo": "광주",
+      "labelEn": "Gwangju",
+      "mediaCount": 16,
+      "lat": 35.16004,
+      "lng": 126.86988,
+      "zoom": 5,
+      "bounds": {
+        "swLat": 35.1387,
+        "swLng": 126.84252,
+        "neLat": 35.17079,
+        "neLng": 126.91516
+      },
+      "fitBoundsMaxZoom": 14
+    },
+    {
+      "regionMain": "daegu",
+      "regionSub": "daegu_downtown",
+      "labelKo": "대구",
+      "labelEn": "Daegu",
+      "mediaCount": 14,
+      "lat": 35.86442,
+      "lng": 128.60115,
+      "zoom": 4,
+      "bounds": {
+        "swLat": 35.84039,
+        "swLng": 128.57111,
+        "neLat": 35.8842,
+        "neLng": 128.63756
+      },
+      "fitBoundsMaxZoom": 14
+    }
+  ]
+}
