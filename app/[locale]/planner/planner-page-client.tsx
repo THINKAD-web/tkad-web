@@ -68,6 +68,7 @@ import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
+import { PlannerFreetextBetaPanel } from "@/components/planner/planner-freetext-beta-panel";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
@@ -637,6 +638,7 @@ export default function PlannerPageClient({
   const handledLoadPlanRef = useRef<string | null>(null);
   const handledCreateQuoteRef = useRef(false);
   const [plannerStoreReady, setPlannerStoreReady] = useState(false);
+  const [freetextApplied, setFreetextApplied] = useState(false);
 
   useEffect(() => {
     const persist = usePlannerStore.persist;
@@ -1266,6 +1268,10 @@ export default function PlannerPageClient({
             {wizardStep === 1 ? (
               <>
                 {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
+                <PlannerFreetextBetaPanel
+                  isKo={isKo}
+                  onApplied={() => setFreetextApplied(true)}
+                />
                 <PlannerCampaignStep1
                   campaignGoal={campaignGoal}
                   onSelectGoal={setCampaignGoal}
@@ -1534,6 +1540,13 @@ export default function PlannerPageClient({
             {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
               <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-clip">
+                {freetextApplied ? (
+                  <p className="rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground">
+                    {isKo
+                      ? "자연어 입력으로 조건이 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요."
+                      : "Brief applied from natural-language input. Use Back to edit goal, region, or budget."}
+                  </p>
+                ) : null}
                 <div className="space-y-2 text-center sm:text-left">
                   <PlannerNeonLabel>Step 4 / Media Selection</PlannerNeonLabel>
                   <h2 className={cn("text-xl sm:text-2xl", plannerNeon.headline)}>
