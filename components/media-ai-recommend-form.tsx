@@ -1,21 +1,14 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
-  Building2,
   Bus,
-  CalendarDays,
-  Layers,
-  MapPin,
+  ChevronDown,
   Monitor,
   PanelTop,
-  Search,
   Sparkles,
-  Store,
-  Target,
   TrainFront,
-  Wallet,
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { cn } from "@/lib/utils";
@@ -38,15 +31,7 @@ export type RegionCheckboxCode =
 type AgeBand = "teens" | "twenties" | "thirties" | "forties";
 type PeriodWeeks = 1 | 2 | 4 | 12;
 
-/** Fisher-Yates shuffle: 새로고침마다 버튼 순서 랜덤화용 */
-function shuffleArray<T>(arr: readonly T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
-  }
-  return result;
-}
+type MediaTypeFilter = "all" | "digital" | "static" | "mobile" | "network";
 
 function mapAgeBands(bands: ReadonlySet<AgeBand>): TargetAudience {
   if (bands.size === 0) return "mass";
@@ -67,9 +52,7 @@ function mapAgeBands(bands: ReadonlySet<AgeBand>): TargetAudience {
 
 export type MediaAiRecommendFormSubmit = {
   input: AiRecommendInput;
-  /** 선택 지역(빈 배열이면 전국·필터 없음) */
   regionCodes: RegionCheckboxCode[];
-  /** 매체명·지역 등 텍스트 검색(비어 있으면 무시) */
   searchQuery: string;
 };
 
@@ -78,75 +61,83 @@ type Props = {
   onSubmit: (payload: MediaAiRecommendFormSubmit) => void;
 };
 
-type MediaTypeFilter = "all" | "digital" | "static" | "mobile" | "network";
+function FormField({
+  label,
+  required,
+  hint,
+  requiredLabel,
+  optionalLabel,
+  children,
+}: {
+  label: string;
+  required?: boolean;
+  hint?: string;
+  requiredLabel: string;
+  optionalLabel: string;
+  children: ReactNode;
+}) {
+  return (
+    <section className="space-y-2.5">
+      <div>
+        <div className="flex flex-wrap items-center gap-2">
+          <h3 className="text-sm font-semibold text-foreground">{label}</h3>
+          <span
+            className={cn(
+              "rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
+              required
+                ? "bg-violet-500/15 text-violet-700 dark:text-violet-200"
+                : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-white/50",
+            )}
+          >
+            {required ? requiredLabel : optionalLabel}
+          </span>
+        </div>
+        {hint ? (
+          <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+            {hint}
+          </p>
+        ) : null}
+      </div>
+      {children}
+    </section>
+  );
+}
+
+function chipClass(selected: boolean) {
+  return cn(
+    "rounded-xl border px-3 py-2 text-sm font-medium transition-colors touch-manipulation",
+    selected
+      ? "border-violet-500/50 bg-gradient-to-r from-violet-500/15 to-cyan-400/15 text-foreground shadow-sm"
+      : "border-gray-200 bg-white text-foreground hover:border-violet-300/50 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-400/30",
+  );
+}
 
 export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const tr = useTranslations("recommend");
   const tPlacement = useTranslations("recommend.form.placementHints");
   const isKo = locale === "ko";
 
-  const [regions, setRegions] = useState<Set<RegionCheckboxCode>>(() => {
-    const allRegions: RegionCheckboxCode[] = [
-      "seoul",
-      "capital",
-      "busan",
-      "jeju",
-      "national",
-    ];
-    const shuffled = shuffleArray(allRegions);
-    const count = Math.max(1, Math.min(3, Math.floor(Math.random() * 4)));
-    return new Set(shuffled.slice(0, count));
-  });
-  const [ageBands, setAgeBands] = useState<Set<AgeBand>>(() => {
-    const allAges: AgeBand[] = ["teens", "twenties", "thirties", "forties"];
-    const shuffled = shuffleArray(allAges);
-    const count = Math.max(1, Math.min(3, Math.floor(Math.random() * 4)));
-    return new Set(shuffled.slice(0, count));
-  });
-  const [budgetMan, setBudgetMan] = useState(3000);
-  const [campaignGoal, setCampaignGoal] = useState<CampaignGoal>("awareness");
-  const [industry, setIndustry] = useState<Industry>(() => {
-    const allIndustries: Industry[] = [
-      "beauty",
-      "retail",
-      "fmcg",
-      "fintech",
-      "auto",
-      "entertainment",
-      "other",
-    ];
-    return allIndustries[Math.floor(Math.random() * allIndustries.length)];
-  });
-  const [periodWeeks, setPeriodWeeks] = useState<PeriodWeeks>(() => {
-    const allPeriods: PeriodWeeks[] = [1, 2, 4, 12];
-    return allPeriods[Math.floor(Math.random() * allPeriods.length)];
-  });
+  const [regions, setRegions] = useState<Set<RegionCheckboxCode>>(
+    () => new Set(),
+  );
+  const [ageBands, setAgeBands] = useState<Set<AgeBand>>(() => new Set());
+  const [budgetMan, setBudgetMan] = useState(1000);
+  const [campaignGoal, setCampaignGoal] = useState<CampaignGoal | null>(null);
+  const [industry, setIndustry] = useState<Industry | null>(null);
+  const [periodWeeks, setPeriodWeeks] = useState<PeriodWeeks | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [mediaType, setMediaType] = useState<MediaTypeFilter>(() => {
-    const allTypes: MediaTypeFilter[] = [
-      "all",
-      "digital",
-      "static",
-      "mobile",
-      "network",
-    ];
-    return allTypes[Math.floor(Math.random() * allTypes.length)];
-  });
-  const [placementHints, setPlacementHints] = useState<Set<string>>(() => {
-    const count = Math.floor(Math.random() * 3);
-    const picked = new Set<string>();
-    for (let i = 0; i < count; i++) {
-      picked.add(
-        PLACEMENT_HINT_KEYS[
-          Math.floor(Math.random() * PLACEMENT_HINT_KEYS.length)
-        ],
-      );
-    }
-    return picked;
-  });
+  const [mediaType, setMediaType] = useState<MediaTypeFilter>("all");
+  const [placementHints, setPlacementHints] = useState<Set<string>>(
+    () => new Set(),
+  );
+  const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const budgetMin = 100;
   const budgetMax = 10000;
+
+  const requiredMark = tr("form.requiredMark");
+  const optionalMark = tr("form.optionalMark");
+  const fieldBadge = { requiredLabel: requiredMark, optionalLabel: optionalMark };
 
   const toggleRegion = useCallback((code: RegionCheckboxCode) => {
     setRegions((prev) => {
@@ -242,155 +233,76 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     [tr],
   );
 
+  const buildPayload = useCallback(
+    (
+      goal: CampaignGoal,
+      regionSet: Set<RegionCheckboxCode>,
+      ageSet: Set<AgeBand>,
+      industryVal: Industry | null,
+      period: PeriodWeeks | null,
+      media: MediaTypeFilter,
+      hints: Set<string>,
+      budget: number,
+      search: string,
+    ): MediaAiRecommendFormSubmit => {
+      const regionCodes = [...regionSet];
+      let regionCode: AiRecommendInput["region"] = "all";
+      if (regionCodes.length === 1) {
+        regionCode = regionCodes[0];
+      }
+
+      const input: AiRecommendInput = {
+        goal,
+        target: mapAgeBands(ageSet),
+        budgetMaxMan: Math.round(budget),
+        region: regionCode,
+        industry: industryVal ?? "other",
+        preferredPeriodWeeks: period ?? 4,
+        type: media === "all" ? "all" : media,
+        placementHints: hints.size > 0 ? [...hints] : undefined,
+      };
+
+      return { input, regionCodes, searchQuery: search };
+    },
+    [],
+  );
+
   const handleSubmit = () => {
-    if (ageBands.size === 0) return;
-    const target = mapAgeBands(ageBands);
-    const regionCodes = [...regions];
-    let regionCode: AiRecommendInput["region"] = "all";
-    if (regionCodes.length === 1) {
-      regionCode = regionCodes[0];
-    }
-
-    const hints =
-      placementHints.size > 0 ? [...placementHints] : undefined;
-
-    const input: AiRecommendInput = {
-      goal: campaignGoal,
-      target,
-      budgetMaxMan: Math.round(budgetMan),
-      region: regionCode,
-      industry,
-      preferredPeriodWeeks: periodWeeks,
-      type: mediaType === "all" ? "all" : mediaType,
-      placementHints: hints,
-    };
-
-    onSubmit({ input, regionCodes, searchQuery });
+    if (!campaignGoal) return;
+    onSubmit(
+      buildPayload(
+        campaignGoal,
+        regions,
+        ageBands,
+        industry,
+        periodWeeks,
+        mediaType,
+        placementHints,
+        budgetMan,
+        searchQuery,
+      ),
+    );
   };
 
-  const canSubmit = ageBands.size > 0;
+  const canSubmit = campaignGoal != null;
 
-  const summary = useMemo(() => {
-    const regionLabels = regionDef
-      .filter((r) => regions.has(r.code))
-      .map((r) => r.label);
-    const ageLabels = ageDef
-      .filter((a) => ageBands.has(a.code))
-      .map((a) => a.label);
-    const industryLabel =
-      industryOptions.find((o) => o.value === industry)?.label ??
-      (isKo ? "전체 업종" : "All industries");
-    const goalLabel =
-      goalOptions.find((o) => o.value === campaignGoal)?.label ??
-      (isKo ? "브랜드 인지" : "Awareness");
-    const periodLabel =
-      periodDef.find((p) => p.w === periodWeeks)?.label ??
-      (isKo ? "기간 미정" : "Flexible period");
-
-    return {
-      region:
-        regionLabels.length === 0
-          ? isKo
-            ? "전체 지역"
-            : "All regions"
-          : regionLabels.join(", "),
-      age:
-        ageLabels.length === 0
-          ? isKo
-            ? "전 연령"
-            : "All ages"
-          : ageLabels.join(", "),
-      industry: industryLabel,
-      goal: goalLabel,
-      period: periodLabel,
-    };
-  }, [ageBands, ageDef, campaignGoal, goalOptions, industry, industryOptions, isKo, periodDef, periodWeeks, regionDef, regions]);
-
-  const maddyMessage = useMemo(() => {
-    if (!isKo) {
-      const hasYoung = ageBands.has("teens") || ageBands.has("twenties");
-      const hasFamily =
-        ageBands.has("forties") && !hasYoung;
-      const hasNight =
-        Array.from(placementHints).some((code) =>
-          code.toLowerCase().includes("night"),
-        );
-
-      if (hasYoung && (industry === "entertainment" || industry === "beauty")) {
-        return "TKAD bot: Oho, big fandom energy detected. I'll sweep Hongdae and Gangnam for hype-ready hero screens that feel tailor-made for your crowd.";
-      }
-      if (hasYoung && hasNight) {
-        return "TKAD bot: Night-owl crew spotted. I'll light up neon city routes that really wake up after dark and catch late-night selfies.";
-      }
-      if (hasYoung) {
-        return "TKAD bot: Fresh, active audience locked in. I'll lean toward vivid hangout spots where foot traffic and buzz both spike.";
-      }
-      if (hasFamily) {
-        return "TKAD bot: Family routes it is. I'll trace everyday paths-malls, grocery hubs, family stops-where trust and repetition work together.";
-      }
-      if (industry === "fintech" || industry === "auto") {
-        return "TKAD bot: High-trust category detected. I'll prioritize premium, credible business corridors where the placements feel 'safe but strong.'";
-      }
-      if (budgetMan >= 7000) {
-        return "TKAD bot: Bold budget detected. Instead of a tiny test, let's sketch a city-spanning hero route that really feels like a launch.";
-      }
-      if (budgetMan <= 1000) {
-        return "TKAD bot: Compact budget mode, got it. I'll snipe a few sharp, high-efficiency placements where every slot has to pull its weight.";
-      }
-      return "TKAD bot: Got it. I'll balance reach, vibe, and efficiency to build a clean first route that still feels a bit like a hidden-gem tour.";
-    }
-
-    const hasYoung =
-      ageBands.has("teens") || ageBands.has("twenties");
-    const hasFamily =
-      ageBands.has("forties") && !hasYoung;
-
-    const hasNight =
-      Array.from(placementHints).some((code) =>
-        code.toLowerCase().includes("night"),
-      );
-
-    if (hasYoung && (industry === "entertainment" || industry === "beauty")) {
-      return "오호~ 딱 젊은 팬덤 타겟이네요! 🔥 TKAD bot이 홍대·강남 일대에서 팬덤이 좋아할 만한 찰떡 매체만 골라볼게요.";
-    }
-    if (hasYoung && hasNight) {
-      return "야간형 젊은 타겟이라… 딱 제 취향이에요. ✨ 네온 간판 맛집, 심야 핫플 위주로 보석 같은 스팟만 좁혀볼게요.";
-    }
-    if (hasYoung) {
-      return "에너지 터지는 타겟이군요! 유동 인구가 빵 터지는 구간을 위주로, 궁합 좋아 보이는 스팟만 골라볼게요.";
-    }
-    if (hasFamily) {
-      return "가족 단위 비중이 크네요. 마트·쇼핑몰·생활 동선 중심으로, 매일 스쳐 지나가는 신뢰형 매체부터 차근차근 탐험해볼게요.";
-    }
-    if (industry === "fintech" || industry === "auto") {
-      return "신뢰와 전문성이 핵심인 업종이네요. TKAD bot이 프리미엄 입지·비즈니스 동선 위주로 차분하게 스캔해볼게요.";
-    }
-    if (budgetMan >= 7000) {
-      return "오호~ 제법 든든한 예산이네요. 도시 한 바퀴를 두르는 '존재감 폭발' 루트를 한번 상상해볼게요. 💡";
-    }
-    if (budgetMan <= 1000) {
-      return "예산은 슬림하지만 괜찮아요. TKAD bot이 숨겨진 보석 느낌의 알짜 매체 몇 곳만 정확히 찔러볼게요.";
-    }
-    return "좋아요! TKAD bot이 지금 조건에 맞는 매체들을 하나씩 꿰어서, 궁합 좋은 조합으로 세트업하는 중이에요.";
-  }, [ageBands, budgetMan, industry, isKo, placementHints]);
-
-  const handleSurprise = () => {
+  const handleRandomFill = () => {
     const pickRandom = <T,>(arr: readonly T[]): T =>
       arr[Math.floor(Math.random() * arr.length)];
 
     const randomRegionCodes = (() => {
       const codes = regionDef.map((r) => r.code);
-      const count = Math.max(1, Math.min(3, Math.floor(Math.random() * 4)));
+      const count = Math.max(1, Math.min(2, Math.floor(Math.random() * 3)));
       const picked = new Set<RegionCheckboxCode>();
       while (picked.size < count) {
         picked.add(pickRandom(codes));
       }
-      return [...picked];
+      return picked;
     })();
 
     const randomAgeBands = (() => {
       const codes = ageDef.map((a) => a.code);
-      const count = Math.max(1, Math.min(3, Math.floor(Math.random() * 4)));
+      const count = Math.max(1, Math.min(2, Math.floor(Math.random() * 3)));
       const picked = new Set<AgeBand>();
       while (picked.size < count) {
         picked.add(pickRandom(codes));
@@ -398,13 +310,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       return picked;
     })();
 
-    const randomIndustry = pickRandom(industryOptions).value;
-    const randomPeriod = pickRandom(periodDef).w;
-    const randomMediaType = pickRandom(mediaTypeOptions).value;
-    const randomGoal = pickRandom(goalOptions).value;
-
     const randomHints = (() => {
-      const count = Math.floor(Math.random() * 3);
+      const count = Math.floor(Math.random() * 2);
       const picked = new Set<string>();
       while (picked.size < count) {
         picked.add(pickRandom(PLACEMENT_HINT_KEYS));
@@ -412,134 +319,62 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       return picked;
     })();
 
-    setRegions(new Set(randomRegionCodes));
-    setAgeBands(new Set(randomAgeBands));
-    setIndustry(randomIndustry);
-    setPeriodWeeks(randomPeriod);
-    setMediaType(randomMediaType);
-    setCampaignGoal(randomGoal);
-    setPlacementHints(new Set(randomHints));
-
-    const target = mapAgeBands(randomAgeBands);
-    let regionCode: AiRecommendInput["region"] = "all";
-    if (randomRegionCodes.length === 1) {
-      regionCode = randomRegionCodes[0];
-    }
-
-    const hints =
-      randomHints.size > 0 ? [...randomHints] : undefined;
-
-    const input: AiRecommendInput = {
-      goal: campaignGoal,
-      target,
-      budgetMaxMan: Math.round(budgetMan),
-      region: regionCode,
-      industry: randomIndustry,
-      preferredPeriodWeeks: randomPeriod,
-      type: randomMediaType === "all" ? "all" : randomMediaType,
-      placementHints: hints,
-    };
-
-    onSubmit({
-      input,
-      regionCodes: randomRegionCodes,
-      searchQuery,
-    });
+    setCampaignGoal(pickRandom(goalOptions).value);
+    setRegions(randomRegionCodes);
+    setAgeBands(randomAgeBands);
+    setIndustry(pickRandom(industryOptions).value);
+    setPeriodWeeks(pickRandom(periodDef).w);
+    setMediaType(pickRandom(mediaTypeOptions).value);
+    setPlacementHints(randomHints);
+    setBudgetMan(
+      Math.round(
+        (budgetMin + Math.random() * (budgetMax - budgetMin)) / 100,
+      ) * 100,
+    );
   };
 
   return (
-    <div className="w-full max-w-none overflow-x-clip">
-      <div className="border-2 border-border bg-card text-foreground">
-        <div className="border-b-2 border-border p-6">
-          <div className="flex items-start justify-between gap-3">
-            <div className="min-w-0 space-y-2">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                <Sparkles className="mr-1 inline h-3 w-3" aria-hidden />
-                {isKo ? "[ AI MEDIA EXPLORER · TKAD BOT ]" : "[ AI MEDIA EXPLORER · TKAD BOT ]"}
-              </p>
-              <h2 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
-                {isKo
-                  ? "TKAD bot과 함께 매체 탐험 시작!"
-                  : tr("form.panelTitle")}
-              </h2>
-              <p className="text-[11px] tracking-tight text-muted-foreground">
-                {isKo
-                  ? "원하는 분위기와 조건을 알려주세요. TKAD bot이 딱 맞는 매체를 찾아줄게요!"
-                  : tr("form.panelSubtitle")}
-              </p>
-            </div>
-            <div className="relative grid h-16 w-16 shrink-0 place-items-center overflow-hidden rounded-[22px] border border-border/80 bg-card/80 text-foreground shadow-[0_24px_80px_rgba(0,0,0,0.18)] backdrop-blur">
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.16),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.12),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
-              />
-              <span className="relative z-10 text-[28px] leading-none" aria-hidden>
-                🤖
-              </span>
-              <span className="pointer-events-none absolute -bottom-3 left-1/2 z-10 -translate-x-1/2 rounded-full border border-border/80 bg-card/80 px-2.5 py-1 font-display text-[9px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-xs backdrop-blur">
-                TKAD bot
-              </span>
-            </div>
-          </div>
-          <div className="mt-6 flex flex-wrap items-center justify-between gap-3 border-t-2 border-border pt-4">
-            <p className="min-w-0 flex-1 text-[11px] leading-relaxed tracking-tight text-muted-foreground sm:text-[12px]">
-              {`// `}{maddyMessage}
-            </p>
-            <BtnBlock
-              variant="accent"
-              size="sm"
-              onClick={handleSurprise}
-            >
-              <Sparkles className="h-3 w-3" />
-              {isKo ? "랜덤 탐험" : "Surprise me"}
-            </BtnBlock>
-          </div>
+    <div className="mx-auto w-full max-w-xl overflow-x-clip">
+      <div className="rounded-2xl border border-gray-200 bg-card text-foreground shadow-sm dark:border-white/10">
+        <div className="border-b border-gray-100 p-5 sm:p-6 dark:border-white/10">
+          <h2 className="text-lg font-bold tracking-tight sm:text-xl">
+            {tr("form.panelTitle")}
+          </h2>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {tr("form.panelSubtitle")}
+          </p>
         </div>
-        <div className="space-y-7 p-6">
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Target className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {tr("form.goalLabel")} ]
-            </div>
-            <div className="flex flex-wrap gap-0">
+
+        <div className="space-y-6 p-5 sm:p-6">
+          <FormField
+            label={tr("form.goalLabel")}
+            required
+            hint={tr("form.goalHint")}
+            {...fieldBadge}
+          >
+            <div className="flex flex-wrap gap-2">
               {goalOptions.map(({ value, label }) => (
                 <button
                   key={value}
                   type="button"
                   onClick={() => setCampaignGoal(value)}
-                  className={cn(
-                    "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-                    campaignGoal === value
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
-                  )}
+                  aria-pressed={campaignGoal === value}
+                  className={chipClass(campaignGoal === value)}
                 >
                   {label}
                 </button>
               ))}
             </div>
-          </section>
+          </FormField>
 
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <MapPin className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo ? "TKAD Bot 추천 지역" : tr("form.regionLabel")} ]
-            </div>
-            <div className="flex flex-wrap gap-0">
+          <FormField
+            label={tr("form.regionLabel")}
+            hint={tr("form.regionHint")}
+            {...fieldBadge}
+          >
+            <div className="flex flex-wrap gap-2">
               {regionDef.map(({ code, label }) => (
-                <label
-                  key={code}
-                  className={cn(
-                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-                    regions.has(code)
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
-                  )}
-                >
+                <label key={code} className={chipClass(regions.has(code))}>
                   <input
                     type="checkbox"
                     className="sr-only"
@@ -550,316 +385,220 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 </label>
               ))}
             </div>
-          </section>
+          </FormField>
 
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Store className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo ? "이번 탐험 준비 현황" : "EXPLORATION SETUP"} ]
-            </div>
-            <div className="border-2 border-border bg-muted p-4 text-[11px] tracking-tight text-foreground sm:text-xs">
-              <div className="flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
-                  {isKo ? "지역" : "REGION"}:
-                </span>
-                <span>{summary.region}</span>
-              </div>
-              <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
-                  {isKo ? "연령" : "AGES"}:
-                </span>
-                <span>{summary.age}</span>
-              </div>
-              <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
-                  {isKo ? "목표" : "GOAL"}:
-                </span>
-                <span>{summary.goal}</span>
-              </div>
-              <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
-                  {isKo ? "업종" : "INDUSTRY"}:
-                </span>
-                <span>{summary.industry}</span>
-              </div>
-              <div className="mt-1 flex flex-wrap gap-y-1">
-                <span className="mr-2 font-bold uppercase tracking-[0.18em] text-accent">
-                  {isKo ? "기간" : "PERIOD"}:
-                </span>
-                <span>{summary.period}</span>
-              </div>
-              <div className="mt-3 border-t-2 border-border pt-3 text-[11px] leading-relaxed text-muted-foreground sm:text-xs">
-                {`// `}{isKo
-                  ? "이 정도면 출발 준비는 끝났어요. 마음에 안 들면 언제든 Remix로 다른 코스를 타볼 수 있어요."
-                  : "Looks like we're ready to launch. You can always hit Remix later if you want a different route."}
-              </div>
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Search className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {tr("form.searchLabel")} ]
-            </div>
-            <input
-              type="search"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder={
-                isKo
-                  ? "예: 강남 지하철, 홍대 거리 가구, 코엑스 빌보드…"
-                  : tr("form.searchPlaceholder")
-              }
-              className="h-12 w-full border-2 border-border bg-card px-3 text-sm text-foreground placeholder:text-muted-foreground focus:border-accent focus:outline-none"
-            />
-          </section>
-
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Monitor className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo ? "탐험할 매체 유형" : tr("form.mediaTypeLabel")} ]
-            </div>
-            <div className="grid grid-cols-2 gap-0 sm:grid-cols-3">
-              {mediaTypeOptions.map((o) => {
-                const selected = mediaType === o.value;
-                const icon =
-                  o.value === "all"
-                    ? Sparkles
-                    : o.value === "digital"
-                      ? Monitor
-                      : o.value === "static"
-                        ? PanelTop
-                        : o.value === "mobile"
-                          ? Bus
-                          : TrainFront;
-                const Icon = icon;
-                return (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => setMediaType(o.value)}
-                    className={cn(
-                      "-mt-[2px] -ml-[2px] flex flex-col items-start gap-1.5 border-2 px-4 py-3 text-left transition-colors",
-                      selected
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card text-foreground hover:bg-muted",
-                    )}
-                  >
-                    <Icon className="h-4 w-4" aria-hidden />
-                    <span className="font-display text-xs font-medium uppercase tracking-[0.18em]">
-                      {o.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Layers className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo
-                ? "TKAD Bot이 탐험할 노출 환경"
-                : tr("form.placementHintsLabel")} ]
-            </div>
-            <div className="flex flex-wrap gap-0">
-              {PLACEMENT_HINT_KEYS.map((code) => (
-                <label
-                  key={code}
-                  className={cn(
-                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-                    placementHints.has(code)
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
-                  )}
-                >
-                  <input
-                    type="checkbox"
-                    className="sr-only"
-                    checked={placementHints.has(code)}
-                    onChange={() => togglePlacementHint(code)}
-                  />
-                  <span className="text-base">
-                    {code.includes("subway")
-                      ? "🚇"
-                      : code.includes("bus")
-                        ? "🚌"
-                        : code.includes("mall")
-                          ? "🛍️"
-                          : "🌆"}
-                  </span>
-                  {tPlacement(code)}
-                </label>
-              ))}
-            </div>
-          </section>
-
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Target className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo ? "TKAD Bot이 타겟할 연령대" : tr("form.ageLabel")} ]
-            </div>
-            <div className="flex flex-wrap gap-0">
+          <FormField label={tr("form.ageLabel")} hint={tr("form.ageHint")} {...fieldBadge}>
+            <div className="flex flex-wrap gap-2">
               {ageDef.map(({ code, label }) => (
-                <label
-                  key={code}
-                  className={cn(
-                    "-mt-[2px] -ml-[2px] flex cursor-pointer items-center gap-2 border-2 px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-                    ageBands.has(code)
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
-                  )}
-                >
+                <label key={code} className={chipClass(ageBands.has(code))}>
                   <input
                     type="checkbox"
                     className="sr-only"
                     checked={ageBands.has(code)}
                     onChange={() => toggleAge(code)}
                   />
-                  <span className="text-base">
-                    {code === "teens"
-                      ? "🔰"
-                      : code === "twenties"
-                        ? "✨"
-                        : code === "thirties"
-                          ? "💼"
-                          : "👨‍👩‍👧"}
-                  </span>
                   {label}
                 </label>
               ))}
             </div>
-          </section>
+          </FormField>
 
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Wallet className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo ? "예산 게이지" : tr("form.budgetLabel")} ]
-            </div>
-            <div className="border-2 border-border bg-muted p-4">
-              <div className="flex items-center justify-between text-[11px] tabular-nums text-muted-foreground">
+          <FormField
+            label={tr("form.budgetLabel")}
+            required
+            hint={tr("form.budgetHint")}
+            {...fieldBadge}
+          >
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-4 dark:border-white/10 dark:bg-white/5">
+              <div className="flex items-center justify-between text-xs tabular-nums text-muted-foreground">
                 <span>
                   {isKo
                     ? `${budgetMin.toLocaleString()}만원`
-                    : `${budgetMin.toLocaleString()} (10K)`}
+                    : `${budgetMin.toLocaleString()}`}
                 </span>
-                <span className="inline-flex items-center gap-1 border-2 border-accent bg-accent px-2 py-0.5 font-bold text-accent-foreground">
-                  <Sparkles className="h-3 w-3" />
+                <span className="text-sm font-bold text-violet-600 dark:text-violet-300">
                   {isKo
                     ? `${budgetMan.toLocaleString()}만원`
-                    : `${budgetMan.toLocaleString()} (10K)`}
+                    : `${budgetMan.toLocaleString()}`}
                 </span>
                 <span>
                   {isKo
                     ? `${budgetMax.toLocaleString()}만원`
-                    : `${budgetMax.toLocaleString()} (10K)`}
+                    : `${budgetMax.toLocaleString()}`}
                 </span>
               </div>
-              <div className="mt-4 flex items-center gap-3">
-                <div className="relative flex-1">
-                  <input
-                    type="range"
-                    min={budgetMin}
-                    max={budgetMax}
-                    step={100}
-                    value={budgetMan}
-                    onChange={(e) => setBudgetMan(Number(e.target.value))}
-                    className="h-3 w-full cursor-pointer appearance-none border-2 border-border bg-card accent-cta"
-                    aria-valuemin={budgetMin}
-                    aria-valuemax={budgetMax}
-                    aria-valuenow={budgetMan}
-                  />
-                </div>
-              </div>
-              <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-                {`// `}{isKo
-                  ? "게이지를 움직여서 캠페인 스케일을 정해봐요."
-                  : "Slide to set how bold your campaign should be."}
-              </p>
+              <input
+                type="range"
+                min={budgetMin}
+                max={budgetMax}
+                step={100}
+                value={budgetMan}
+                onChange={(e) => setBudgetMan(Number(e.target.value))}
+                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-violet-500 dark:bg-white/10"
+                aria-valuemin={budgetMin}
+                aria-valuemax={budgetMax}
+                aria-valuenow={budgetMan}
+              />
             </div>
-          </section>
+          </FormField>
 
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <Building2 className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {isKo
-                ? "어떤 업종의 모험을 떠날까요?"
-                : tr("form.industryLabel")} ]
+          <FormField
+            label={tr("form.industryLabel")}
+            hint={tr("form.industryHint")}
+            {...fieldBadge}
+          >
+            <div className="flex flex-wrap gap-2">
+              {industryOptions.map((o) => (
+                <button
+                  key={o.value}
+                  type="button"
+                  onClick={() =>
+                    setIndustry((prev) => (prev === o.value ? null : o.value))
+                  }
+                  aria-pressed={industry === o.value}
+                  className={chipClass(industry === o.value)}
+                >
+                  {o.label}
+                </button>
+              ))}
             </div>
-            <div className="grid grid-cols-2 gap-0 sm:grid-cols-3">
-              {industryOptions.map((o) => {
-                const selected = industry === o.value;
-                return (
-                  <button
-                    key={o.value}
-                    type="button"
-                    onClick={() => setIndustry(o.value)}
-                    className={cn(
-                      "-mt-[2px] -ml-[2px] flex items-center gap-2 border-2 px-4 py-3 text-left transition-colors",
-                      selected
-                        ? "border-accent bg-accent text-accent-foreground"
-                        : "border-border bg-card text-foreground hover:bg-muted",
-                    )}
-                  >
-                    <span className="text-base">
-                      {o.value === "beauty"
-                        ? "💄"
-                        : o.value === "retail"
-                          ? "🛍️"
-                          : o.value === "fmcg"
-                            ? "🥤"
-                            : o.value === "fintech"
-                              ? "💳"
-                              : o.value === "auto"
-                                ? "🚗"
-                                : o.value === "entertainment"
-                                  ? "🎬"
-                                  : "✨"}
-                    </span>
-                    <span className="font-display text-xs font-medium uppercase tracking-[0.18em]">
-                      {o.label}
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
-          </section>
+          </FormField>
 
-          <section className="space-y-3">
-            <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-              <CalendarDays className="h-4 w-4 shrink-0 text-accent" aria-hidden />
-              [ {tr("form.periodLabel")} ]
-            </div>
-            <div className="flex flex-wrap gap-0">
+          <FormField
+            label={tr("form.periodLabel")}
+            hint={tr("form.periodHint")}
+            {...fieldBadge}
+          >
+            <div className="flex flex-wrap gap-2">
               {periodDef.map(({ w, label }) => (
                 <button
                   key={w}
                   type="button"
-                  onClick={() => setPeriodWeeks(w)}
-                  className={cn(
-                    "-mt-[2px] -ml-[2px] border-2 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors",
-                    periodWeeks === w
-                      ? "border-accent bg-accent text-accent-foreground"
-                      : "border-border bg-card text-foreground hover:bg-muted",
-                  )}
+                  onClick={() =>
+                    setPeriodWeeks((prev) => (prev === w ? null : w))
+                  }
+                  aria-pressed={periodWeeks === w}
+                  className={chipClass(periodWeeks === w)}
                 >
                   {label}
                 </button>
               ))}
             </div>
-          </section>
+          </FormField>
 
-          <div className="pt-2">
+          <div className="rounded-xl border border-gray-200 dark:border-white/10">
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((o) => !o)}
+              className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left"
+              aria-expanded={advancedOpen}
+            >
+              <div>
+                <p className="text-sm font-semibold">{tr("form.advancedTitle")}</p>
+                <p className="mt-0.5 text-xs text-muted-foreground">
+                  {tr("form.advancedHint")}
+                </p>
+              </div>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 shrink-0 text-muted-foreground transition-transform",
+                  advancedOpen && "rotate-180",
+                )}
+              />
+            </button>
+            {advancedOpen ? (
+              <div className="space-y-5 border-t border-gray-100 px-4 py-4 dark:border-white/10">
+                <FormField label={tr("form.searchLabel")} {...fieldBadge}>
+                  <input
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder={tr("form.searchPlaceholder")}
+                    className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm focus:border-violet-400/60 focus:outline-none dark:border-white/10 dark:bg-black/20"
+                  />
+                </FormField>
+
+                <FormField label={tr("form.mediaTypeLabel")} {...fieldBadge}>
+                  <div className="flex flex-wrap gap-2">
+                    {mediaTypeOptions.map((o) => {
+                      const selected = mediaType === o.value;
+                      const Icon =
+                        o.value === "all"
+                          ? Sparkles
+                          : o.value === "digital"
+                            ? Monitor
+                            : o.value === "static"
+                              ? PanelTop
+                              : o.value === "mobile"
+                                ? Bus
+                                : TrainFront;
+                      return (
+                        <button
+                          key={o.value}
+                          type="button"
+                          onClick={() => setMediaType(o.value)}
+                          className={cn(chipClass(selected), "inline-flex items-center gap-1.5")}
+                        >
+                          <Icon className="h-3.5 w-3.5" aria-hidden />
+                          {o.label}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </FormField>
+
+                <FormField label={tr("form.placementHintsLabel")} {...fieldBadge}>
+                  <div className="flex flex-wrap gap-2">
+                    {PLACEMENT_HINT_KEYS.map((code) => (
+                      <label
+                        key={code}
+                        className={chipClass(placementHints.has(code))}
+                      >
+                        <input
+                          type="checkbox"
+                          className="sr-only"
+                          checked={placementHints.has(code)}
+                          onChange={() => togglePlacementHint(code)}
+                        />
+                        {tPlacement(code)}
+                      </label>
+                    ))}
+                  </div>
+                </FormField>
+              </div>
+            ) : null}
+          </div>
+
+          <div className="space-y-3 border-t border-gray-100 pt-4 dark:border-white/10">
             <BtnBlock
               variant="accent"
               size="md"
               disabled={!canSubmit}
               onClick={handleSubmit}
-              className="w-full py-3 text-[15px]"
+              className="w-full py-3"
             >
-              <Sparkles className="h-4.5 w-4.5" aria-hidden />
-              {isKo ? "TKAD bot과 함께 탐험 시작!" : tr("form.submit")}
+              <Sparkles className="h-4 w-4" aria-hidden />
+              {tr("form.submit")}
             </BtnBlock>
+            {!canSubmit ? (
+              <p className="text-center text-xs text-amber-700 dark:text-amber-200/90">
+                {tr("form.goalHint")}
+              </p>
+            ) : null}
+
+            <div className="rounded-xl border border-dashed border-gray-200 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+              <p className="text-xs text-muted-foreground">
+                {tr("form.randomFillHint")}
+              </p>
+              <BtnBlock
+                variant="secondary"
+                size="sm"
+                onClick={handleRandomFill}
+                className="mt-2 w-full"
+              >
+                {tr("form.randomFill")}
+              </BtnBlock>
+            </div>
           </div>
         </div>
       </div>
