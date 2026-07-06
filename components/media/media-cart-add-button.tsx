@@ -1,8 +1,11 @@
 "use client";
 
-import { ShoppingBag } from "lucide-react";
+import { Check, Plus, ShoppingBag } from "lucide-react";
 import { useLocale } from "next-intl";
-import { mediaActionPillClass } from "@/components/media/media-action-pill";
+import {
+  mediaActionBlockClass,
+  mediaActionPillClass,
+} from "@/components/media/media-action-pill";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { useAppToast } from "@/lib/use-toast";
 import { buildPlanCartLimitMessage } from "@/lib/entitlements/gate-messages";
@@ -12,10 +15,12 @@ import { cn } from "@/lib/utils";
 type Props = {
   item: Omit<PlanCartItem, "addedAt">;
   addedFrom?: PlanCartAddedFrom;
-  /** 그리드 카드 — 짧은 라벨 (담기+ / 담김) */
+  /** 그리드 카드 — 짧은 라벨 (담기+ / 담김 ✓) */
   gridInline?: boolean;
   /** 피드 카드 — 아이콘 + 긴 라벨 */
   feedLabeled?: boolean;
+  /** 아이콘만 (릴스 등 정사각 버튼) */
+  iconOnly?: boolean;
   className?: string;
 };
 
@@ -25,6 +30,7 @@ export function MediaCartAddButton({
   addedFrom,
   gridInline = false,
   feedLabeled = false,
+  iconOnly = false,
   className,
 }: Props) {
   const locale = useLocale();
@@ -69,26 +75,26 @@ export function MediaCartAddButton({
   const label = feedLabeled
     ? inCart
       ? isKo
-        ? "담김"
-        : "Added"
+        ? "담김 ✓"
+        : "Added ✓"
       : isKo
         ? "매체 담기"
         : "Add media"
     : gridInline
       ? inCart
         ? isKo
-          ? "담김"
-          : "On"
+          ? "담김 ✓"
+          : "On ✓"
         : isKo
           ? "담기+"
-          : "Add"
+          : "Add+"
       : inCart
         ? isKo
-          ? "담김"
-          : "On"
+          ? "담김 ✓"
+          : "On ✓"
         : isKo
-          ? "담기"
-          : "Add";
+          ? "담기+"
+          : "Add+";
 
   const ariaLabel = inCart
     ? isKo
@@ -98,27 +104,47 @@ export function MediaCartAddButton({
       ? "담은 매체에 담기"
       : "Add to plan";
 
+  const showCheck = inCart && (gridInline || feedLabeled || iconOnly);
+
   return (
     <button
       type="button"
       onClick={handleClick}
       className={cn(
-        feedLabeled
-          ? "inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold transition-colors"
-          : mediaActionPillClass(inCart),
-        feedLabeled &&
-          (inCart
-            ? "border-emerald-400/45 bg-emerald-500/12 text-emerald-800 dark:text-emerald-200"
-            : "border-gray-200/90 bg-white/90 text-gray-700 hover:bg-gray-50 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12"),
+        iconOnly
+          ? cn(
+              "inline-flex h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition-colors",
+              inCart
+                ? "border-emerald-400/55 bg-emerald-500/20 text-emerald-100"
+                : "border-white/20 bg-white/10 text-white hover:bg-white/20",
+            )
+          : feedLabeled
+            ? mediaActionBlockClass(inCart, "cart", "h-8 flex-1 px-2 text-[11px]")
+            : mediaActionPillClass(inCart, "cart"),
         className,
       )}
       aria-pressed={inCart}
       aria-label={ariaLabel}
     >
-      {feedLabeled ? (
+      {iconOnly ? (
+        inCart ? (
+          <Check className="h-4 w-4 shrink-0" aria-hidden />
+        ) : (
+          <ShoppingBag className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+        )
+      ) : feedLabeled ? (
         <ShoppingBag className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
       ) : null}
-      {label}
+      {!iconOnly ? (
+        <>
+          {showCheck ? (
+            <Check className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
+          ) : !feedLabeled && !inCart ? (
+            <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
+          ) : null}
+          {label}
+        </>
+      ) : null}
     </button>
   );
 }

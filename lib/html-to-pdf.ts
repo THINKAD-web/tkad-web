@@ -145,6 +145,43 @@ function stripStylesheetsInClone(clonedDoc: Document) {
   });
 }
 
+function isUnsupportedCssColorValue(val: string): boolean {
+  return /(^|\s|,)(lab|oklch|lch|oklab|color-mix|color)\(/i.test(val);
+}
+
+function coerceCssColorToRgb(val: string): string {
+  if (!isUnsupportedCssColorValue(val)) return val;
+  try {
+    if (typeof document !== "undefined") {
+      const probe = document.createElement("canvas").getContext("2d");
+      if (probe) {
+        probe.fillStyle = val;
+        const computed = probe.fillStyle;
+        if (computed && /^(#[0-9a-f]{3,8}|rgba?\()/i.test(computed)) {
+          return computed;
+        }
+      }
+    }
+  } catch {
+    /* ignore */
+  }
+  return "rgb(0,0,0)";
+}
+
+const INLINE_COLOR_PROPS = new Set([
+  "color",
+  "background-color",
+  "border-top-color",
+  "border-right-color",
+  "border-bottom-color",
+  "border-left-color",
+  "outline-color",
+  "fill",
+  "stroke",
+  "text-decoration-color",
+  "-webkit-text-fill-color",
+]);
+
 function inlineComputedStylesForCapture(clonedDoc: Document, root: HTMLElement) {
   const win = clonedDoc.defaultView;
   if (!win) return;
@@ -253,9 +290,16 @@ function inlineComputedStylesForCapture(clonedDoc: Document, root: HTMLElement) 
     }
     for (const prop of PROPS) {
       try {
-        const val = cs.getPropertyValue(prop);
+        let val = cs.getPropertyValue(prop);
         if (!val) continue;
         if (prop === "background-image" && val === "none") continue;
+        if (prop === "background-image" && isUnsupportedCssColorValue(val)) {
+          el.style.setProperty(prop, "none");
+          continue;
+        }
+        if (INLINE_COLOR_PROPS.has(prop) && isUnsupportedCssColorValue(val)) {
+          val = coerceCssColorToRgb(val);
+        }
         el.style.setProperty(prop, val);
       } catch {
         /* ignore */
@@ -274,6 +318,7 @@ function replaceUntrustedImagesInClone(
     if (opts?.forceLight) forceCloneLightMode(clonedDoc);
     flattenModernColorsToInline(clonedDoc, cloned);
     inlineComputedStylesForCapture(clonedDoc, cloned);
+    flattenModernColorsToInline(clonedDoc, cloned);
     fixBackgroundClipTextForCapture(cloned);
     fixQuotePdfAmountFonts(cloned);
     // inline style에 남은 잔존 color 함수 치환
@@ -756,29 +801,31 @@ export async function downloadPdfFromHtmlElements(
 export async function captureElementAsPng(
   element: HTMLElement,
   filename = "THINKAD-capture.png",
+  options?: HtmlElementToPdfOptions,
 ): Promise<void> {
-  await preloadImagesAsProxyDataUrls(element);
-  await waitForImagesInElement(element);
-  await waitForFontsAndPaint();
-  const html2canvas = (await import("html2canvas")).default;
-  const canvas = await html2canvas(element, {
-    scale: 2,
-    useCORS: true,
-    allowTaint: false,
-    logging: false,
-    backgroundColor: "#ffffff",
-    scrollX: 0,
-    scrollY: -window.scrollY,
-    imageTimeout: 20_000,
-    onclone: (doc, el) =>
-      replaceUntrustedImagesInClone(doc, el, { forceLight: true }),
-  });
-  const blob = await new Promise<Blob | null>((resolve) => {
-    canvas.toBlob((b) => resolve(b), "image/png");
-  });
-  if (!blob) {
-    throw new Error("captureElementAsPng: empty blob");
+  const timeoutMs =
+    options?.timeoutMs !== undefined
+      ? options.timeoutMs
+      : HTML_TO_PDF_DEFAULT_TIMEOUT_MS;
+  const work = (async () => {
+    const canvas = await elementToCanvas(element);
+    const blob = await new Promise<Blob | null>((resolve) => {
+      canvas.toBlob((b) => resolve(b), "image/png");
+    });
+    if (!blob) {
+      throw new Error("captureElementAsPng: empty blob");
+    }
+    triggerBlobDownload(blob, filename);
+  })();
+  if (timeoutMs > 0) {
+    await withTimeout(work, timeoutMs, "captureElementAsPng");
+    return;
   }
+  await work;
+}
+
+/** Blob 파일 다운로드 (서버 PDF 등) */
+export function downloadBlobFile(blob: Blob, filename: string): void {
   triggerBlobDownload(blob, filename);
 }
 

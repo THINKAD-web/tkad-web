@@ -12,6 +12,12 @@ import { useSearchParams } from "next/navigation";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import {
+  STICKY_ACTION_BAR_BTN,
+  STICKY_ACTION_BAR_BTN_IDLE,
+  STICKY_ACTION_BAR_BTN_PRIMARY,
+  StickyActionBar,
+} from "@/components/sticky-action-bar";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { ExitSurveyBanner } from "@/components/exit-survey-banner";
 import { PageHero } from "@/components/layout/page-hero";
@@ -129,6 +135,15 @@ import { resolveScenarioPortfolioMediaIds } from "@/lib/planner/apply-scenario-p
 import { useTeamPermissions } from "@/lib/use-team-permissions";
 
 /** 밤: 메인 NeonSection 과 동일한 #05050a + 네온 뎁스(히어로 아래 본문만 밝은 페이지 배경이 비지 않도록) */
+const PLANNER_PAGE_SHELL_CLASS =
+  "mx-auto w-full min-w-0 max-w-7xl px-4 sm:px-6 lg:px-8";
+
+const plannerWizardColumnClass = (step: number) =>
+  cn(
+    "mx-auto w-full min-w-0",
+    step === 6 ? "max-w-7xl" : "max-w-3xl",
+  );
+
 function PlannerNeonPageBody({
   appearance,
   className,
@@ -1236,7 +1251,7 @@ export default function PlannerPageClient({
 
         <PlannerNeonPageBody
           appearance={landingAppearance}
-          className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
+          className={cn(PLANNER_PAGE_SHELL_CLASS, "py-10 lg:py-12")}
         >
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <PlannerStepper
@@ -1252,8 +1267,8 @@ export default function PlannerPageClient({
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <div
             className={cn(
-              "mx-auto w-full min-w-0 space-y-8 overflow-x-clip",
-              wizardStep === 6 ? "max-w-7xl" : "max-w-3xl",
+              "space-y-8 overflow-x-clip pb-28",
+              plannerWizardColumnClass(wizardStep),
             )}
           >
             <PlannerTips
@@ -1663,43 +1678,6 @@ export default function PlannerPageClient({
               />
               </>
             ) : null}
-
-            <div
-              className={cn(
-                "flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between",
-                wizardStep === 4 &&
-                  "sticky bottom-3 z-30 mt-4 rounded-2xl border border-violet-400/20 bg-background/95 p-3 shadow-lg backdrop-blur-md dark:bg-[#0a0a0f]/95",
-              )}
-            >
-              <BtnBlock
-                variant="secondary"
-                size="md"
-                className="w-full min-w-0 sm:w-auto"
-                onClick={goBack}
-                disabled={wizardStep <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                {t("back")}
-              </BtnBlock>
-              <BtnBlock
-                variant="accent"
-                size="md"
-                className="tkad-planner-wizard-btn-accent w-full min-w-0 sm:w-auto"
-                onClick={goNext}
-              >
-                {wizardStep === 6 ? (
-                  <>
-                    {t("viewEffectDashboard")}
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    {t("next")}
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </BtnBlock>
-            </div>
           </div>
         ) : (
           <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
@@ -2047,6 +2025,55 @@ export default function PlannerPageClient({
             </p>
           </div>
         )}
+
+        {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
+          <StickyActionBar
+            open
+            layout="dock"
+            variant="neon"
+                compact
+                aboveMobileChrome
+                className="px-0 sm:px-0"
+                innerClassName={cn(
+                  PLANNER_PAGE_SHELL_CLASS,
+                  "pt-2 pb-2 sm:py-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
+                )}
+            ariaLabel={t("stepOf", {
+              current: wizardStep,
+              total: PLANNER_LAST_INPUT_STEP,
+            })}
+          >
+            <div className={plannerWizardColumnClass(wizardStep)}>
+              <div className="flex w-full items-center justify-between gap-2">
+              <button
+                type="button"
+                onClick={goBack}
+                disabled={wizardStep <= 1}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  "disabled:opacity-40",
+                )}
+              >
+                <ChevronLeft className="h-3 w-3" aria-hidden />
+                {t("back")}
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_PRIMARY,
+                  "shrink-0",
+                )}
+              >
+                {wizardStep === 6 ? t("viewEffectDashboard") : t("next")}
+                <ChevronRight className="h-3 w-3" aria-hidden />
+              </button>
+              </div>
+            </div>
+          </StickyActionBar>
+        ) : null}
         </PlannerNeonPageBody>
       </div>
       <ExitSurveyBanner surface="planner" />

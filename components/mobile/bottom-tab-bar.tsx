@@ -176,7 +176,7 @@ export function BottomTabBar() {
   return (
     <nav
       className={cn(
-        "fixed bottom-0 left-0 right-0 z-40 block h-[4.25rem] md:hidden",
+        "fixed bottom-0 left-0 right-0 z-[80] block h-[4.25rem] md:hidden",
         "border-t border-gray-200/70 bg-white/90 backdrop-blur-xl",
         "shadow-[0_-6px_40px_rgba(15,23,42,0.08),0_0_24px_rgba(168,85,247,0.06)]",
         "dark:border-white/10 dark:bg-[#05050a]/92",
@@ -198,14 +198,14 @@ export function BottomTabBar() {
 
           if (tab.emphasized && tab.href) {
             return (
-              <li key={tab.id} className="flex min-w-0 flex-1 basis-0">
+              <li key={tab.id} className="relative z-10 flex min-w-0 flex-1 basis-0">
                 <Link
                   href={tab.href}
                   onClick={() => hapticLight()}
-                  className="tkad-mobile-tab-fab relative -translate-y-2 flex w-full min-w-0 flex-col items-center transition-all duration-200 active:scale-95"
+                  className="tkad-mobile-tab-fab relative z-10 -translate-y-2 flex w-full min-w-0 flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                 >
-                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab relative flex h-14 w-14 items-center justify-center rounded-full">
+                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab relative z-10 flex h-14 w-14 items-center justify-center rounded-full">
                     <TabNeonIcon
                       Icon={Icon}
                       active={active}

@@ -150,12 +150,16 @@ function ReelsSlide({
               <MediaCartAddButton
                 item={planItem}
                 addedFrom="search"
-                className="!h-10 !w-10 !min-w-10 !rounded-xl !px-0"
+                iconOnly
               />
               <MediaCompareSelectButton
-                selected={inCompare}
-                onToggle={onToggleCompare}
-                className="!h-10 !w-10 !min-w-10 !rounded-xl !px-0"
+                mediaId={item.id}
+                compareEntry={{
+                  id: item.id,
+                  name: item.name,
+                  nameEn: item.name,
+                }}
+                iconOnly
               />
             </>
           )}

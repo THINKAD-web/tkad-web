@@ -52,6 +52,11 @@ export default function PlannerError({
                 ? "잠시 후 다시 시도하거나 매체 목록에서 다시 시작해 주세요."
                 : "Please try again or browse media to start over."}
             </p>
+            {process.env.NODE_ENV !== "production" && error.message ? (
+              <p className="mt-4 rounded-lg border border-red-300/40 bg-red-500/10 px-3 py-2 text-left font-mono text-xs text-red-700 dark:border-red-400/30 dark:text-red-300">
+                {error.message}
+              </p>
+            ) : null}
             <div className="mt-8 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-center">
               <button
                 type="button"

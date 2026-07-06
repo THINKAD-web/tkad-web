@@ -642,13 +642,19 @@ export function MediaManualBrowseFilters({
                       }
                     }}
                     className={cn(
-                      "flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
+                      "flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-medium transition-all",
+                      wrap
+                        ? "px-3 py-1.5 text-sm"
+                        : "px-2.5 py-1 text-xs",
                       selected
                         ? MAIN_COLOR_ACTIVE[main.color] ?? MEDIA_CHIP_ACTIVE
                         : MEDIA_CHIP_INACTIVE,
                     )}
                   >
-                    <Icon className="h-3.5 w-3.5" aria-hidden />
+                    <Icon
+                      className={cn("shrink-0", wrap ? "h-3.5 w-3.5" : "h-3 w-3")}
+                      aria-hidden
+                    />
                     {isKo ? main.label : main.labelEn ?? main.label}
                   </button>
                 );

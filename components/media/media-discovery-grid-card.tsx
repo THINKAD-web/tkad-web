@@ -5,7 +5,6 @@ import { Link } from "@/i18n/navigation";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
@@ -27,7 +26,7 @@ type Props = {
   imagePriority?: boolean;
 };
 
-/** `/media` 카드 뷰와 동일 — 썸네일·검증/즉시·플랜+/선택+/담기+ */
+/** `/media` 카드 뷰와 동일 — 썸네일·검증/즉시·비교+/담기+ */
 export function MediaDiscoveryGridCard({
   href,
   name,
@@ -88,16 +87,13 @@ export function MediaDiscoveryGridCard({
             </div>
           ) : null}
           <div className="flex items-stretch gap-1">
-            <PlanCartAddButton
-              item={planItem}
-              addedFrom="search"
-              compact
-              gridInline
-              className="min-w-0 flex-1 !h-8 !px-1 !text-[10px]"
-            />
             <MediaCompareSelectButton
-              selected={inCompare}
-              onToggle={onToggleCompare}
+              mediaId={planItem.mediaId}
+              compareEntry={{
+                id: planItem.mediaId,
+                name: planItem.mediaName,
+                nameEn: planItem.mediaName,
+              }}
               gridInline
               className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
             />

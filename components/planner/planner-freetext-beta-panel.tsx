@@ -116,7 +116,7 @@ function formatRegions(
   const parts: string[] = [];
   if (regions?.length) {
     for (const r of regions) {
-      parts.push(plannerRegionLabel(r, isKo));
+      parts.push(plannerRegionLabel(r, isKo ? "ko" : "en"));
     }
   }
   if (zones?.length) {

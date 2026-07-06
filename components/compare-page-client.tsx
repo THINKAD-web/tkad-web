@@ -14,6 +14,7 @@ import {
 import { cn } from "@/lib/utils";
 import {
   downloadPdfFromHtmlElement,
+  downloadBlobFile,
   HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
   captureElementAsPng,
 } from "@/lib/html-to-pdf";
@@ -88,9 +89,22 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
       return;
     }
     setComparePdfLoading(true);
+    const stamp = new Date().toISOString().slice(0, 10);
+    const filename = `thinkad-media-compare-${stamp}.pdf`;
+    const ids = visibleItems.map((m) => m.id).join(",");
     try {
-      const stamp = new Date().toISOString().slice(0, 10);
-      const filename = `thinkad-media-compare-${stamp}.pdf`;
+      const res = await fetch(
+        `/api/compare/pdf?ids=${encodeURIComponent(ids)}`,
+      );
+      if (res.ok) {
+        const blob = await res.blob();
+        downloadBlobFile(blob, filename);
+        return;
+      }
+    } catch (e) {
+      console.warn("[compare-pdf] server route failed, falling back to client", e);
+    }
+    try {
       await downloadPdfFromHtmlElement(el, filename, {
         timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
       });
@@ -100,7 +114,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     } finally {
       setComparePdfLoading(false);
     }
-  }, [toast, tCommon]);
+  }, [toast, tCommon, visibleItems]);
 
   // [PATCH-P2-03] 견적서 PDF — 로고/발행일/스펙표/총 예상 비용 포함, 파일명 THINKAD_견적비교_YYYYMMDD.pdf
   const handleQuotePdfDownload = useCallback(async () => {
@@ -133,7 +147,9 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
     setCaptureLoading(true);
     try {
       const stamp = new Date().toISOString().slice(0, 10).replace(/-/g, "");
-      await captureElementAsPng(el, `싱커드_매체비교_${stamp}.png`);
+      await captureElementAsPng(el, `싱커드_매체비교_${stamp}.png`, {
+        timeoutMs: HTML_TO_PDF_DEFAULT_TIMEOUT_MS,
+      });
     } catch (e) {
       console.error("[compare-capture]", e);
       toast("error", tCommon("pdfGenerationFailed"));
@@ -267,8 +283,9 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
               >
                 <div
                   ref={comparePdfRef}
+                  data-quote-pdf-background="#ffffff"
                   className={cn(
-                    "tkad-glass-surface p-1 sm:p-2",
+                    "tkad-glass-surface tkad-pdf-capture-root p-1 sm:p-2",
                     "bg-card/80 text-foreground",
                   )}
                 >

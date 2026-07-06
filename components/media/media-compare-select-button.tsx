@@ -1,54 +1,85 @@
 "use client";
 
-import { GitCompare } from "lucide-react";
+import { Check, GitCompare, Plus } from "lucide-react";
 import { useLocale } from "next-intl";
-import { mediaActionPillClass } from "@/components/media/media-action-pill";
+import {
+  mediaActionBlockClass,
+  mediaActionPillClass,
+} from "@/components/media/media-action-pill";
+import { useCompareCart } from "@/hooks/use-compare-cart";
+import type { CompareCartEntry } from "@/lib/compare-cart-client";
 import { cn } from "@/lib/utils";
 
 type Props = {
-  selected: boolean;
-  onToggle: () => void;
-  /** 그리드 카드 — 짧은 라벨 (비교+ / 비교✓) */
+  /** 지정 시 compare cart를 직접 구독 — 카드·하단바와 즉시 동기화 */
+  mediaId?: string;
+  compareEntry?: CompareCartEntry;
+  /** 레거시: mediaId 없을 때만 사용 */
+  selected?: boolean;
+  onToggle?: () => void;
+  /** 그리드 카드 — 짧은 라벨 (비교+ / 비교중 ✓) */
   gridInline?: boolean;
   /** 피드 카드 — 아이콘 + 긴 라벨 */
   feedLabeled?: boolean;
+  /** 아이콘만 (릴스 등 정사각 버튼) */
+  iconOnly?: boolean;
   className?: string;
 };
 
 /** 매체 목록·지도 공통 — 비교함(비교 카트) 선택 토글 */
 export function MediaCompareSelectButton({
-  selected,
+  mediaId,
+  compareEntry,
+  selected: selectedProp = false,
   onToggle,
   gridInline = false,
   feedLabeled = false,
+  iconOnly = false,
   className,
 }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const compareCart = useCompareCart();
+
+  const usesStore = mediaId != null;
+  const selected = usesStore ? compareCart.has(mediaId) : selectedProp;
+
+  function handleToggle() {
+    if (usesStore) {
+      const entry: CompareCartEntry = compareEntry ?? {
+        id: mediaId!,
+        name: mediaId!,
+        nameEn: mediaId!,
+      };
+      compareCart.toggle(entry);
+      return;
+    }
+    onToggle?.();
+  }
 
   const label = feedLabeled
     ? selected
       ? isKo
-        ? "비교 해제"
-        : "Remove"
+        ? "비교중 ✓"
+        : "Comparing ✓"
       : isKo
         ? "비교 담기"
         : "Compare"
     : gridInline
       ? selected
         ? isKo
-          ? "비교✓"
-          : "On"
+          ? "비교중 ✓"
+          : "On ✓"
         : isKo
           ? "비교+"
-          : "Add"
+          : "Add+"
       : selected
         ? isKo
-          ? "비교됨"
-          : "On"
+          ? "비교중 ✓"
+          : "On ✓"
         : isKo
-          ? "비교"
-          : "Add";
+          ? "비교+"
+          : "Add+";
 
   const ariaLabel = selected
     ? isKo
@@ -58,31 +89,55 @@ export function MediaCompareSelectButton({
       ? "비교함에 담기"
       : "Add to compare";
 
+  const showCheck = selected && (gridInline || feedLabeled || iconOnly);
+
   return (
     <button
       type="button"
       onClick={(e) => {
         e.stopPropagation();
         e.preventDefault();
-        onToggle();
+        handleToggle();
       }}
       className={cn(
-        feedLabeled
-          ? "inline-flex h-8 flex-1 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold transition-colors"
-          : mediaActionPillClass(selected),
-        feedLabeled &&
-          (selected
-            ? "border-violet-400/50 bg-violet-500/15 text-violet-700 dark:text-violet-200"
-            : "border-gray-200/90 bg-white/90 text-gray-700 hover:bg-gray-50 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12"),
+        iconOnly
+          ? cn(
+              "inline-flex h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition-colors",
+              selected
+                ? "border-violet-400/55 bg-violet-500/25 text-white"
+                : "border-white/20 bg-white/10 text-white hover:bg-white/20",
+            )
+          : feedLabeled
+            ? mediaActionBlockClass(
+                selected,
+                "compare",
+                "h-8 flex-1 px-2 text-[11px]",
+              )
+            : mediaActionPillClass(selected, "compare"),
         className,
       )}
       aria-pressed={selected}
       aria-label={ariaLabel}
     >
-      {feedLabeled ? (
+      {iconOnly ? (
+        selected ? (
+          <Check className="h-4 w-4 shrink-0" aria-hidden />
+        ) : (
+          <GitCompare className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
+        )
+      ) : feedLabeled ? (
         <GitCompare className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
       ) : null}
-      {label}
+      {!iconOnly ? (
+        <>
+          {showCheck ? (
+            <Check className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
+          ) : !feedLabeled && !selected ? (
+            <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
+          ) : null}
+          {label}
+        </>
+      ) : null}
     </button>
   );
 }

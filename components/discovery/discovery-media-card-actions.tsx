@@ -123,8 +123,12 @@ export function DiscoveryMediaCardActions({
         <div className="flex items-stretch gap-1">
           {onToggleCompare ? (
             <MediaCompareSelectButton
-              selected={inCompare}
-              onToggle={onToggleCompare}
+              mediaId={mediaId}
+              compareEntry={{
+                id: planItem.mediaId,
+                name: planItem.mediaName,
+                nameEn: planItem.mediaName,
+              }}
               gridInline
               className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
             />
@@ -151,8 +155,12 @@ export function DiscoveryMediaCardActions({
         />
         {onToggleCompare ? (
           <MediaCompareSelectButton
-            selected={inCompare}
-            onToggle={onToggleCompare}
+            mediaId={mediaId}
+            compareEntry={{
+              id: planItem.mediaId,
+              name: planItem.mediaName,
+              nameEn: planItem.mediaName,
+            }}
             gridInline
             className="!h-8 !min-w-0 !flex-1 !rounded-lg !px-2 !text-[11px]"
           />
@@ -185,8 +193,12 @@ export function DiscoveryMediaCardActions({
         <div className="flex items-stretch justify-end gap-1">
           {onToggleCompare ? (
             <MediaCompareSelectButton
-              selected={inCompare}
-              onToggle={onToggleCompare}
+              mediaId={mediaId}
+              compareEntry={{
+                id: planItem.mediaId,
+                name: planItem.mediaName,
+                nameEn: planItem.mediaName,
+              }}
               gridInline
               className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
             />
@@ -225,8 +237,12 @@ export function DiscoveryMediaCardActions({
       <div className="flex items-stretch gap-1.5">
         {onToggleCompare ? (
           <MediaCompareSelectButton
-            selected={inCompare}
-            onToggle={onToggleCompare}
+            mediaId={mediaId}
+            compareEntry={{
+              id: planItem.mediaId,
+              name: planItem.mediaName,
+              nameEn: planItem.mediaName,
+            }}
             gridInline
             className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
           />

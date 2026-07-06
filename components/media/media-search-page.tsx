@@ -1,7 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { useState, useEffect, useCallback, useMemo, useRef } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore } from "react";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
@@ -12,6 +12,7 @@ import {
   type MediaMobileViewSegment,
 } from "@/components/discovery/filter-bar";
 import CompareBar from "@/components/compare-bar";
+import { MediaBrowseStickyBar } from "@/components/media/media-browse-sticky-bar";
 import type { HomeCatalogMediaItem, PublicMediaListResponse } from "@/types/media";
 import type { MediaItem } from "@/lib/media-data";
 import {
@@ -28,6 +29,20 @@ import { usePlanCart } from "@/hooks/use-plan-cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+
+function subscribeLg(cb: () => void) {
+  const mq = window.matchMedia("(min-width: 1024px)");
+  mq.addEventListener("change", cb);
+  return () => mq.removeEventListener("change", cb);
+}
+
+function useLgUp() {
+  return useSyncExternalStore(
+    subscribeLg,
+    () => window.matchMedia("(min-width: 1024px)").matches,
+    () => false,
+  );
+}
 import {
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
@@ -208,6 +223,7 @@ function MediaSearchPageInner({
 }: Props) {
   const locale = useLocale();
   const tMedia = useTranslations("media");
+  const lgUp = useLgUp();
   const searchParams = useSearchParams();
   const router = useRouter();
   const toast = useAppToast();
@@ -1056,12 +1072,23 @@ function MediaSearchPageInner({
     );
 
   const compareBar = !plannerMode ? (
-    <CompareBar
-      variant="light"
-      items={compareItems}
-      locale={locale}
-      onClear={() => setCompareCartEntries([])}
-    />
+    <>
+      {appShell && !lgUp ? (
+        <MediaBrowseStickyBar
+          items={compareItems}
+          locale={locale}
+          onClearCompare={() => setCompareCartEntries([])}
+        />
+      ) : null}
+      {lgUp || !appShell ? (
+        <CompareBar
+          variant="light"
+          items={compareItems}
+          locale={locale}
+          onClear={() => setCompareCartEntries([])}
+        />
+      ) : null}
+    </>
   ) : null;
 
   // ── 고정 앱 셸: 상단 sticky 컨트롤 바(flex-none) + 본문 내부 스크롤(flex-1) ──
@@ -1070,7 +1097,9 @@ function MediaSearchPageInner({
       <>
         <div className="tkad-media-app-shell tkad-media-list-shell relative w-full min-w-0 bg-gray-50 dark:bg-[#020202]">
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
-          <div className="min-w-0 px-4 pt-3 pb-6">{bodyContent}</div>
+          <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">
+            {bodyContent}
+          </div>
         </div>
         {compareBar}
       </>

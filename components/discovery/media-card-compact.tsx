@@ -135,13 +135,19 @@ export function DiscoveryMediaCardCompactRow({
         ) : (
           <>
             <MediaCompareSelectButton
-              selected={inCompare}
-              onToggle={onToggleCompare ?? (() => {})}
+              mediaId={item.id}
+              compareEntry={{
+                id: item.id,
+                name: item.name,
+                nameEn: item.name,
+              }}
+              gridInline
               className="!h-[1.125rem] !px-1.5 !text-[8px]"
             />
             <MediaCartAddButton
               item={planCartItemFromCatalog(item, "search")}
               addedFrom="search"
+              gridInline
               className="!h-[1.125rem] !px-1.5 !text-[8px]"
             />
           </>
@@ -259,12 +265,16 @@ export function DiscoveryMediaCardCompactGrid({
           ) : showPlanButton ? (
             <div className="flex h-8 items-stretch gap-1">
               {onToggleCompare ? (
-                <MediaCompareSelectButton
-                  selected={inCompare}
-                  onToggle={onToggleCompare}
-                  gridInline
-                  className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
-                />
+            <MediaCompareSelectButton
+              mediaId={item.id}
+              compareEntry={{
+                id: item.id,
+                name: item.name,
+                nameEn: item.name,
+              }}
+              gridInline
+              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+            />
               ) : null}
               <MediaCartAddButton
                 item={planCartItemFromCatalog(item, "search")}
