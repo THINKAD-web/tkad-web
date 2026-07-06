@@ -86,8 +86,8 @@ export function getMediaPackageOptions(
   isKo: boolean,
 ): MediaPackageOption[] {
   if (isNetworkCatalogItem(m)) {
-    return getValidNetworkPackageTiers(m).map((t) => ({
-      key: String(t.units),
+    return getValidNetworkPackageTiers(m).map((t, i) => ({
+      key: `tier:${i}:${t.units}`,
       units: t.units,
       price: t.price,
       label: formatNetworkTierPackageLabel(m, t.units, t.price, isKo),

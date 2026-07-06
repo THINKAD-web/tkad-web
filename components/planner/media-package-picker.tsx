@@ -22,6 +22,16 @@ type Props = {
   className?: string;
 };
 
+function optionPrimaryLabel(
+  label: string,
+  isNetwork: boolean,
+  compact: boolean,
+): string {
+  if (!compact) return label;
+  if (isNetwork) return label.split(" · ")[0]?.trim() || label;
+  return label;
+}
+
 export function PlannerMediaPackagePicker({
   media,
   isKo,
@@ -38,15 +48,17 @@ export function PlannerMediaPackagePicker({
   const isNetwork = isNetworkCatalogItem(media);
   const selectedUnits = quantities[media.id];
   const selectedOptIdx = priceOptionIndex[media.id] ?? 0;
+  const showInlinePrice =
+    getQuantityUnitMode(media) === "package" && isNetwork ? false : !compact;
 
   return (
     <div
-      className={cn("space-y-1.5", className)}
+      className={cn(compact ? "min-w-0 space-y-1" : "space-y-1.5", className)}
       onClick={(e) => e.stopPropagation()}
       onKeyDown={(e) => e.stopPropagation()}
     >
       {!compact ? (
-        <p className="text-[11px] font-medium text-muted-foreground">
+        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
           {isKo
             ? isNetwork
               ? "패키지 구좌"
@@ -57,7 +69,12 @@ export function PlannerMediaPackagePicker({
         </p>
       ) : null}
       <div
-        className="flex flex-wrap gap-1.5"
+        className={cn(
+          "flex min-w-0 gap-1",
+          compact
+            ? "max-w-full overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+            : "flex-wrap gap-1.5",
+        )}
         role="listbox"
         aria-label={isKo ? "패키지 선택" : "Package selection"}
       >
@@ -65,6 +82,7 @@ export function PlannerMediaPackagePicker({
           const selected = isNetwork
             ? selectedUnits === opt.units
             : selectedOptIdx === i;
+          const primary = optionPrimaryLabel(opt.label, isNetwork, compact);
           return (
             <button
               key={opt.key}
@@ -79,26 +97,44 @@ export function PlannerMediaPackagePicker({
                 }
               }}
               className={cn(
-                "max-w-full rounded-lg border px-2.5 py-1.5 text-left text-[11px] leading-snug transition-colors",
+                "shrink-0 rounded-md border text-left transition-colors",
+                compact
+                  ? "max-w-[9.5rem] px-2 py-1 text-[10px] leading-tight"
+                  : "max-w-full rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
                 selected
                   ? "border-violet-500 bg-violet-500/15 font-semibold text-violet-800 dark:text-violet-100"
-                  : "border-violet-400/25 bg-white/80 text-foreground hover:border-violet-400/50 dark:bg-white/5",
+                  : compact
+                    ? "border-violet-400/20 bg-white/70 font-medium text-foreground/85 hover:border-violet-400/40 dark:bg-white/5"
+                    : "border-violet-400/25 bg-white/80 text-foreground hover:border-violet-400/50 dark:bg-white/5",
               )}
             >
-              <span className="block font-medium">{opt.label}</span>
-              {!isNetwork && opt.description ? (
-                <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground line-clamp-2">
+              <span className="block truncate font-medium">{primary}</span>
+              {!compact && !isNetwork && opt.description && selected ? (
+                <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground line-clamp-1">
                   {opt.description}
                 </span>
               ) : null}
-              {getQuantityUnitMode(media) === "package" && isNetwork ? null : (
-                <span className="mt-0.5 block tabular-nums text-muted-foreground">
+              {showInlinePrice ? (
+                <span
+                  className={cn(
+                    "block tabular-nums text-muted-foreground",
+                    compact ? "text-[9px]" : "mt-0.5 text-[10px]",
+                  )}
+                >
                   {formatCatalogPriceFieldWon(
                     opt.price,
                     isKo ? "ko-KR" : "en-US",
                   )}
                 </span>
-              )}
+              ) : null}
+              {compact && !isNetwork ? (
+                <span className="block truncate text-[9px] tabular-nums text-muted-foreground">
+                  {formatCatalogPriceFieldWon(
+                    opt.price,
+                    isKo ? "ko-KR" : "en-US",
+                  )}
+                </span>
+              ) : null}
             </button>
           );
         })}

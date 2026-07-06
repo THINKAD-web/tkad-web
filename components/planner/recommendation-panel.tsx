@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState, useRef } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Sparkles, Plus, Check, RefreshCw, Eye, Users } from "lucide-react";
+import { Sparkles, Plus, Check, RefreshCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { trackEvent } from "@/lib/ga-events";
 import {
@@ -34,23 +34,17 @@ import {
 } from "@/lib/ai-recommend-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
-import {
-  resolveImpressionsForUnits,
-  resolveMonthlyPriceForUnits,
-} from "@/lib/media-quantity";
+import { resolveImpressionsForUnits } from "@/lib/media-quantity";
 import {
   plannerMonthlyPriceWonForMedia,
   plannerUnitsForMedia,
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
-import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
-import { getQuantityUnitMode } from "@/lib/media-quantity";
-import { formatMediaCategoryBadges } from "@/lib/media-category-badges";
 import { mediaPlannerRegionDisplayLabel } from "@/lib/planner/planner-regions";
-import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
-import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
-import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import { PlannerRecommendationAxisTabs } from "@/components/planner/recommendation-axis-tabs";
+import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
 const REASON_COLORS: Record<RecommendReasonKey, string> = {
   matchRegion: "border-border bg-card text-foreground",
@@ -405,12 +399,29 @@ export function PlannerRecommendationPanel({
     });
   };
 
-  const planBulkItems = useMemo(
-    () =>
-      recommendations.map(({ media }) =>
-        planCartItemFromMediaItem(media, planCartAddedFrom),
-      ),
-    [recommendations, planCartAddedFrom],
+  const recommendCtx = useMemo<RecommendationContext>(
+    () => ({
+      goal,
+      regions,
+      seoulZones,
+      categories,
+      ageKeys,
+      industryKey,
+      budgetMan,
+      months,
+      goalFollowUp,
+    }),
+    [
+      goal,
+      regions,
+      seoulZones,
+      categories,
+      ageKeys,
+      industryKey,
+      budgetMan,
+      months,
+      goalFollowUp,
+    ],
   );
 
   return (
@@ -454,11 +465,6 @@ export function PlannerRecommendationPanel({
           >
             {t("recommendAddAll")}
           </button>
-          <PlanCartBulkAddButton
-            items={planBulkItems}
-            label={isKo ? "추천 전체 플랜에 추가" : "Add all to plan"}
-            className="!h-auto w-full justify-center !px-4 !py-2 !text-xs sm:w-auto"
-          />
         </div>
       </div>
       <div className="min-w-0 overflow-x-clip p-5 sm:p-6">
@@ -485,196 +491,165 @@ export function PlannerRecommendationPanel({
               const matchScore = matchScores[media.id];
               const oneLine = oneLines[media.id];
               const reasoning = reasonings[media.id];
+              const displayName = isKo ? media.name : media.nameEn || media.name;
+              const regionLine =
+                mediaPlannerRegionDisplayLabel(
+                  media,
+                  locale,
+                  t("regionNationalShort"),
+                ) || regionLabel(media.region ?? "");
+              const locationLine = (isKo
+                ? media.location
+                : media.locationEn || media.location
+              ).slice(0, 28);
+
+              const units = selected
+                ? plannerUnitsForMedia(media, campaignMediaQuantities)
+                : undefined;
+              const monthlyImp =
+                units != null
+                  ? resolveImpressionsForUnits(media, units)
+                  : estimatedMonthlyImpressions(media);
+              const visPct = Math.round(
+                normalizeVisibilityScore(media.visibilityScore) * 100,
+              );
+              const priceWon = selected
+                ? plannerMonthlyPriceWonForMedia(
+                    media,
+                    campaignMediaQuantities,
+                    campaignMediaPriceOptionIndex,
+                  )
+                : null;
+              const cpm =
+                priceWon != null && priceWon > 0 && monthlyImp > 0
+                  ? Math.round(priceWon / (monthlyImp / 1000))
+                  : estimatedCpmWon(media);
+              const metricItems: string[] = [];
+              if (monthlyImp > 0) {
+                metricItems.push(
+                  isKo
+                    ? `월 ${Math.round(monthlyImp / 1000).toLocaleString()}K 노출`
+                    : `${Math.round(monthlyImp / 1000).toLocaleString()}K imp/mo`,
+                );
+              }
+              if (visPct > 0) {
+                metricItems.push(
+                  isKo ? `가시성 ${visPct}/100` : `Vis ${visPct}/100`,
+                );
+              }
+              if (cpm != null && cpm > 0) {
+                metricItems.push(
+                  `CPM ${formatCpmKrw(Math.round(cpm), isKo ? "ko" : "en")}`,
+                );
+              }
+
               return (
                 <li
                   key={media.id}
                   className={cn(
-                    "flex min-w-0 flex-col gap-2 rounded-xl border p-4 transition-colors",
+                    "flex min-w-0 gap-2.5 rounded-xl border p-2.5 transition-colors sm:gap-3",
                     selected
                       ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
                       : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white hover:border-violet-300/40",
                   )}
                 >
-                  <div className="min-w-0">
-                    <p className="line-clamp-2 text-sm font-semibold leading-snug tracking-normal text-foreground">
-                      {isKo ? media.name : media.nameEn || media.name}
-                    </p>
-                    {typeof matchScore === "number" ? (
-                      <p className="mt-1 text-xs font-semibold text-violet-600 dark:text-violet-300">
-                        {isKo ?
-                          `매칭도 ${matchScore}점`
-                        : `Match ${matchScore}/100`}
+                  <PlannerMediaThumb media={media} alt={displayName} size="card" />
+                  <div className="flex min-w-0 flex-1 flex-col gap-1">
+                    <div className="min-w-0">
+                      <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
+                        {displayName}
                       </p>
-                    ) : null}
+                      {typeof matchScore === "number" ? (
+                        <p className="mt-0.5 text-[11px] font-semibold text-violet-600 dark:text-violet-300">
+                          {isKo
+                            ? `매칭도 ${matchScore}점`
+                            : `Match ${matchScore}/100`}
+                        </p>
+                      ) : null}
+                      <p className="mt-0.5 line-clamp-1 text-[10px] text-muted-foreground">
+                        {regionLine}
+                        {locationLine ? ` · ${locationLine}` : ""}
+                      </p>
+                    </div>
                     {reasoning ? (
-                      <p className="mt-2 text-xs leading-relaxed text-foreground/90">
+                      <p className="line-clamp-2 text-[11px] leading-relaxed text-foreground/90">
                         {reasoning}
                       </p>
-                    ) : null}
-                    {oneLine ? (
-                      <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                    ) : oneLine ? (
+                      <p className="line-clamp-1 text-[11px] text-muted-foreground">
                         {oneLine}
                       </p>
                     ) : null}
-                    <p className="mt-1 break-words font-display text-[11px] font-medium uppercase tracking-tight text-muted-foreground">
-                      {`// `}
-                      {mediaPlannerRegionDisplayLabel(
-                        media,
-                        locale,
-                        t("regionNationalShort"),
-                      ) || regionLabel(media.region ?? "")}
-                      {" · "}
-                      {(isKo
-                        ? media.location
-                        : media.locationEn || media.location
-                      ).slice(0, 28)}
-                    </p>
-                  </div>
-                  {/* [PATCH-P3-01] AI 추천의 수치 근거 — 노출/가시성/CPM 한 줄 */}
-                  {(() => {
-                    const units = selected
-                      ? plannerUnitsForMedia(media, campaignMediaQuantities)
-                      : undefined;
-                    const monthlyImp =
-                      units != null
-                        ? resolveImpressionsForUnits(media, units)
-                        : estimatedMonthlyImpressions(media);
-                    const visPct = Math.round(
-                      normalizeVisibilityScore(media.visibilityScore) * 100,
-                    );
-                    const priceWon = selected
-                      ? plannerMonthlyPriceWonForMedia(
-                          media,
-                          campaignMediaQuantities,
-                          campaignMediaPriceOptionIndex,
-                        )
-                      : getQuantityUnitMode(media) === "package"
-                        ? null
-                        : null;
-                    const cpm =
-                      priceWon != null && priceWon > 0 && monthlyImp > 0
-                        ? Math.round(priceWon / (monthlyImp / 1000))
-                        : selected
-                          ? estimatedCpmWon(media)
-                          : estimatedCpmWon(media);
-                    const items: string[] = [];
-                    if (monthlyImp > 0) {
-                      items.push(
-                        isKo
-                          ? `월 ${Math.round(monthlyImp / 1000).toLocaleString()}K 노출`
-                          : `${Math.round(monthlyImp / 1000).toLocaleString()}K imp/mo`,
-                      );
-                    }
-                    if (visPct > 0) {
-                      items.push(
-                        isKo ? `가시성 ${visPct}/100` : `Vis ${visPct}/100`,
-                      );
-                    }
-                    if (cpm != null && cpm > 0) {
-                      items.push(
-                        `CPM ${formatCpmKrw(Math.round(cpm), isKo ? "ko" : "en")}`,
-                      );
-                    }
-                    if (items.length === 0) return null;
-                    // 모바일: 세로 스택 / sm+: 한 줄 wrap. (uppercase·letter-spacing 제거로 폭 초과 방지)
-                    return (
-                      <div className="flex w-full min-w-0 flex-col gap-0.5 text-[11px] font-medium tabular-nums text-muted-foreground sm:flex-row sm:flex-wrap sm:items-center sm:gap-x-3">
-                        {items.map((it, i) => (
-                          <span
-                            key={it}
-                            className="inline-flex min-w-0 items-center gap-1 break-words"
-                          >
-                            {i === 0 ? (
-                              <Users className="h-3 w-3 shrink-0 text-primary" aria-hidden />
-                            ) : i === 1 ? (
-                              <Eye className="h-3 w-3 shrink-0 text-primary" aria-hidden />
-                            ) : null}
+                    {metricItems.length > 0 ? (
+                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
+                        {metricItems.map((it) => (
+                          <span key={it} className="whitespace-nowrap">
                             {it}
                           </span>
                         ))}
                       </div>
-                    );
-                  })()}
-                  {reasons.length > 0 ? (
-                    <div className="flex flex-wrap gap-1">
-                      {reasons.map((r) => (
-                        <span
-                          key={r.key}
-                          className={cn(
-                            "max-w-full break-words border-2 px-2 py-0.5 font-display text-[11px] font-medium normal-case tracking-normal sm:text-xs sm:uppercase sm:tracking-[0.12em]",
-                            REASON_COLORS[r.key],
-                          )}
-                        >
-                          {t(`recommendReason.${r.key}`)}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                  {(() => {
-                    const badges = formatMediaCategoryBadges(media, locale, 2);
-                    if (badges.length === 0) return null;
-                    return (
+                    ) : null}
+                    {reasons.length > 0 ? (
                       <div className="flex flex-wrap gap-1">
-                        {badges.map((b) => (
+                        {reasons.slice(0, 2).map((r) => (
                           <span
-                            key={`${media.id}-${b.label}`}
-                            className="rounded-full border border-violet-500/30 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-200"
+                            key={r.key}
+                            className={cn(
+                              "max-w-full truncate border px-1.5 py-0.5 text-[10px] font-medium",
+                              REASON_COLORS[r.key],
+                            )}
                           >
-                            {b.icon} {b.label}
+                            {t(`recommendReason.${r.key}`)}
                           </span>
                         ))}
                       </div>
-                    );
-                  })()}
-                  <button
-                    type="button"
-                    onClick={() => handleToggle(media.id)}
-                    className={cn(
-                      "mt-auto w-full",
-                      selected
-                        ? cn(plannerNeon.selectChip, plannerNeon.selectChipActive, "py-2")
-                        : plannerNeon.ctaSm,
-                    )}
-                  >
-                    {selected ? (
-                      <>
-                        <Check className="h-3.5 w-3.5" aria-hidden />
-                        {t("recommendAdded")}
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="h-3.5 w-3.5" aria-hidden />
-                        {t("recommendAdd")}
-                      </>
-                    )}
-                  </button>
-                  {selected &&
-                  setCampaignMediaQuantity &&
-                  setCampaignMediaPriceOptionIndex ? (
-                    <PlannerMediaQuantityControl
-                      media={media}
-                      isKo={isKo}
-                      quantities={campaignMediaQuantities}
-                      priceOptionIndex={campaignMediaPriceOptionIndex}
-                      onQuantityChange={(units) =>
-                        setCampaignMediaQuantity(media.id, units)
-                      }
-                      onPriceOptionChange={(index) =>
-                        setCampaignMediaPriceOptionIndex(media.id, index)
-                      }
-                    />
-                  ) : null}
-                  <PlanCartAddButton
-                    item={planCartItemFromMediaItem(media, planCartAddedFrom)}
-                    addedFrom="planner"
-                    compact
-                    className="w-full"
-                  />
+                    ) : null}
+                    <div className="mt-auto flex items-center gap-2 pt-0.5">
+                      <button
+                        type="button"
+                        onClick={() => handleToggle(media.id)}
+                        title={t("recommendAddCampaignHint")}
+                        className={cn(
+                          "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-xs font-semibold",
+                          selected
+                            ? cn(plannerNeon.selectChip, plannerNeon.selectChipActive)
+                            : plannerNeon.ctaSm,
+                        )}
+                      >
+                        {selected ? (
+                          <>
+                            <Check className="h-3.5 w-3.5" aria-hidden />
+                            {t("recommendAdded")}
+                          </>
+                        ) : (
+                          <>
+                            <Plus className="h-3.5 w-3.5" aria-hidden />
+                            {t("recommendAdd")}
+                          </>
+                        )}
+                      </button>
+                      {selected ? (
+                        <span className="text-[10px] text-muted-foreground">
+                          {t("recommendTabQtyHint")}
+                        </span>
+                      ) : null}
+                    </div>
+                  </div>
                 </li>
               );
             })}
           </ul>
         )}
+        {!loading && catalog.length > 0 ? (
+          <PlannerRecommendationAxisTabs
+            catalog={catalog}
+            ctx={recommendCtx}
+            isKo={isKo}
+            seed={refreshTick}
+            selectedIds={selectedIds}
+            setCampaignMediaIds={setCampaignMediaIds}
+          />
+        ) : null}
       </div>
     </PlannerNeonCard>
   );

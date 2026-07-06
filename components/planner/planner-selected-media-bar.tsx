@@ -134,7 +134,7 @@ export function PlannerSelectedMediaBar({
       </div>
 
       <ul
-        className="mt-3 flex flex-wrap gap-2"
+        className="mt-3 flex flex-col gap-2"
         role="list"
         aria-label={t("selectedMediaBarLabel")}
       >
@@ -167,22 +167,22 @@ export function PlannerSelectedMediaBar({
               : null;
 
           return (
-            <li key={id}>
-              <span className="inline-flex max-w-full flex-col gap-1.5 rounded-2xl border border-violet-400/35 bg-white py-2 pl-3 pr-2 text-xs font-medium text-violet-800 dark:border-violet-400/25 dark:bg-white/10 dark:text-violet-100 sm:flex-row sm:items-center">
-                <span className="inline-flex min-w-0 max-w-full items-center gap-1">
-                  <span className="max-w-[12rem] truncate sm:max-w-[16rem]">
-                    {label}
+            <li key={id} className="min-w-0">
+              <div className="rounded-xl border border-violet-400/30 bg-white px-2.5 py-2 text-xs dark:border-violet-400/25 dark:bg-white/10">
+                <div className="flex min-w-0 items-start justify-between gap-2">
+                  <p className="min-w-0 flex-1 leading-snug font-medium text-violet-800 dark:text-violet-100">
+                    <span className="line-clamp-2">{label}</span>
                     {qtyLabel ? (
                       <span className="ml-1 font-normal text-muted-foreground">
                         · {qtyLabel}
                       </span>
                     ) : null}
                     {priceLabel ? (
-                      <span className="ml-1 font-normal text-muted-foreground">
+                      <span className="ml-1 font-normal tabular-nums text-muted-foreground">
                         · {priceLabel}
                       </span>
                     ) : null}
-                  </span>
+                  </p>
                   <button
                     type="button"
                     onClick={() => onRemove(id)}
@@ -191,21 +191,23 @@ export function PlannerSelectedMediaBar({
                   >
                     <X className="h-3.5 w-3.5" aria-hidden />
                   </button>
-                </span>
+                </div>
                 {media && onQuantityChange && onPriceOptionChange ? (
-                  <PlannerMediaQuantityControl
-                    media={media}
-                    isKo={isKo}
-                    quantities={campaignMediaQuantities}
-                    priceOptionIndex={campaignMediaPriceOptionIndex}
-                    onQuantityChange={(units) => onQuantityChange(id, units)}
-                    onPriceOptionChange={(index) =>
-                      onPriceOptionChange(id, index)
-                    }
-                    compact
-                  />
+                  <div className="mt-1.5 min-w-0 border-t border-violet-400/15 pt-1.5 dark:border-violet-400/10">
+                    <PlannerMediaQuantityControl
+                      media={media}
+                      isKo={isKo}
+                      quantities={campaignMediaQuantities}
+                      priceOptionIndex={campaignMediaPriceOptionIndex}
+                      onQuantityChange={(units) => onQuantityChange(id, units)}
+                      onPriceOptionChange={(index) =>
+                        onPriceOptionChange(id, index)
+                      }
+                      compact
+                    />
+                  </div>
                 ) : null}
-              </span>
+              </div>
             </li>
           );
         })}

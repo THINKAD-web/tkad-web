@@ -125,6 +125,7 @@ function MediaDetailQuoteModalBody({
               isKo={isKo}
               quantities={quantities}
               priceOptionIndex={priceOptionIndex}
+              compact
               onQuantityChange={(n) =>
                 setQuantities((prev) => ({ ...prev, [media.id]: n }))
               }

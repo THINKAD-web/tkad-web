@@ -2026,6 +2026,25 @@
     "recommendAdd": "담기",
     "recommendAdded": "담김",
     "recommendAddAll": "전체 담기",
+    "recommendTabsEyebrow": "[ 축별 탐색 ]",
+    "recommendTabsHeading": "축별 순위 Top 10",
+    "recommendTabsDesc": "예산·타깃·목표·업종 기준으로 매체를 탐색해 담을 수 있습니다. 상단 맞춤 조합과 병행합니다.",
+    "recommendTabsEmpty": "이 축에서 표시할 매체가 없습니다.",
+    "recommendTab": {
+      "budgetEfficiency": "예산효율",
+      "targetMatch": "타깃매칭",
+      "goalFit": "목표적합",
+      "industryFit": "업종적합"
+    },
+    "recommendTabIndustryNote": "업종 키워드·매체 유형 규칙 기반 추정 순위입니다. 신호가 약하면 목록을 숨깁니다.",
+    "recommendTabIndustryWeak": "선택 업종과 연결된 매체 신호가 부족합니다. 다른 축을 참고하거나 업종을 변경해 주세요.",
+    "recommendTabQtyHint": "수량·패키지는 상단 선택 바에서 조정",
+    "recommendAddCampaignHint": "이번 캠페인 매체 목록에 추가 (내 플랜 저장과 별도)",
+    "recommendTabScore": {
+      "targetMatch": "타깃 적합 {score}",
+      "goalFit": "목표 적합 {score}",
+      "industryFit": "업종 적합 {score}"
+    },
     "proposalNarrativeEyebrow": "[ 제안 논리 ]",
     "proposalNarrativeTitle": "왜 이 조합인가",
     "proposalNarrativeLoading": "캠페인 조건을 바탕으로 제안 논리를 작성 중입니다...",

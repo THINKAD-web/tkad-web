@@ -1651,7 +1651,13 @@ export default function PlannerPageClient({
               </>
             ) : null}
 
-            <div className="flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
+            <div
+              className={cn(
+                "flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between",
+                wizardStep === 4 &&
+                  "sticky bottom-3 z-30 mt-4 rounded-2xl border border-violet-400/20 bg-background/95 p-3 shadow-lg backdrop-blur-md dark:bg-[#0a0a0f]/95",
+              )}
+            >
               <BtnBlock
                 variant="secondary"
                 size="md"

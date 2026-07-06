@@ -193,12 +193,13 @@ export function MediaDetailStickyQuotePanel({
       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
 
       {showQuantity ? (
-        <div className="mt-4">
+        <div className="mt-3">
           <PlannerMediaQuantityControl
             media={media}
             isKo={isKo}
             quantities={quantities}
             priceOptionIndex={priceOptionIndex}
+            compact
             onQuantityChange={(n) =>
               setQuantities((prev) => ({ ...prev, [media.id]: n }))
             }

@@ -2026,6 +2026,25 @@
     "recommendAdd": "Add",
     "recommendAdded": "Added",
     "recommendAddAll": "Add all",
+    "recommendTabsEyebrow": "[ Explore by axis ]",
+    "recommendTabsHeading": "Top 10 by axis",
+    "recommendTabsDesc": "Browse and add media ranked by budget efficiency, target, goal, or industry. Works alongside the curated mix above.",
+    "recommendTabsEmpty": "No media to show for this axis.",
+    "recommendTab": {
+      "budgetEfficiency": "Budget efficiency",
+      "targetMatch": "Target match",
+      "goalFit": "Goal fit",
+      "industryFit": "Industry fit"
+    },
+    "recommendTabIndustryNote": "Industry ranking uses keyword and media-type rules. The list is hidden when signals are too weak.",
+    "recommendTabIndustryWeak": "Not enough industry signals for your selection. Try another axis or change industry.",
+    "recommendTabQtyHint": "Adjust quantity or package in the selection bar above",
+    "recommendAddCampaignHint": "Add to this campaign (separate from saved My Plan cart)",
+    "recommendTabScore": {
+      "targetMatch": "Target fit {score}",
+      "goalFit": "Goal fit {score}",
+      "industryFit": "Industry fit {score}"
+    },
     "proposalNarrativeEyebrow": "[ Proposal logic ]",
     "proposalNarrativeTitle": "Why this mix",
     "proposalNarrativeLoading": "Drafting proposal logic from your campaign inputs...",

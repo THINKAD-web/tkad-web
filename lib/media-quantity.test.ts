@@ -179,6 +179,22 @@ test("pharmacy network: package mode bounds from tiers", () => {
   });
 });
 
+test("network package options: duplicate tier units get unique keys", () => {
+  const dup = baseItem({
+    id: "nw_dup_units",
+    catalogSource: "network",
+    type: "network",
+    networkPackageTiers: [
+      { units: 200, price: 5_000_000 },
+      { units: 200, price: 9_000_000 },
+    ],
+  });
+  const opts = getMediaPackageOptions(dup, true);
+  assert.equal(opts.length, 2);
+  const keys = opts.map((o) => o.key);
+  assert.equal(new Set(keys).size, keys.length);
+});
+
 test("G-bus style priceOptions → package mode", () => {
   const gbus = baseItem({
     id: "gbus",

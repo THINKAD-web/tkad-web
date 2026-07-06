@@ -520,6 +520,59 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
   };
 }
 
+/**
+ * 축별 탭 순위용 — `scoreMedia`와 동일 breakdown, 예산 초과 매체도 포함(budget 0).
+ * 기존 `scoreMedia`·`matchMediaCatalog` 동작은 변경하지 않음.
+ */
+export function scoreMediaForRanking(
+  m: MediaItem,
+  input: MatchingInput,
+): MatchedMedia {
+  const rawBudget = scoreBudget(
+    m,
+    input.monthlyBudgetWon,
+    input.mediaQuantities,
+  );
+  const budgetPts = rawBudget < 0 ? 0 : rawBudget;
+
+  const breakdown: ScoreBreakdown = {
+    budget: budgetPts,
+    region: scoreRegion(m, input.regions),
+    industry: scoreIndustry(m, input.industry),
+    target: scoreTarget(m, input.targets, input.plannerAgeKeys),
+    category: scoreCategory(
+      m,
+      input.categories,
+      String(input.goal ?? ""),
+      input.goalTags,
+    ),
+    popularity: Math.min(
+      10,
+      scorePopularityTrust(m) + networkReachBonus(m),
+    ),
+    total: 0,
+  };
+  breakdown.total = Math.min(
+    100,
+    breakdown.budget +
+      breakdown.region +
+      breakdown.industry +
+      breakdown.target +
+      breakdown.category +
+      breakdown.popularity,
+  );
+
+  return {
+    media: m,
+    score: breakdown.total,
+    breakdown,
+    reasons: buildReasons(m, breakdown),
+    budgetAllocation: 0,
+    role: "sub",
+    priority: 0,
+  };
+}
+
 function mediaTypeBucket(m: MediaItem): string {
   const t = (m.type ?? "other").toLowerCase();
   if (/subway|bus|mobile|transport/.test(t)) return "transit";

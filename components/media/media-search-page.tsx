@@ -61,6 +61,22 @@ type ViewMode = DiscoveryFilterBarViewMode;
 const VIEW_MODE_STORAGE_KEY = "tkad_media_view_mode";
 
 const PAGE_SIZE = 30;
+/** 플래너 Step 4 임베드 — 초기·더보기 단위 (짧은 목록) */
+const PLANNER_EMBEDDED_PAGE_SIZE = 12;
+/** 플래너 임베드에서 한 번에 보여줄 최대 매체 수 */
+const PLANNER_EMBEDDED_MAX_ITEMS = 36;
+
+function slicePlannerEmbeddedCatalog<T>(items: T[], page: number): T[] {
+  const end = Math.min(page * PLANNER_EMBEDDED_PAGE_SIZE, PLANNER_EMBEDDED_MAX_ITEMS);
+  return items.slice(0, end);
+}
+
+function plannerEmbeddedHasMore(
+  shown: number,
+  total: number,
+): boolean {
+  return shown < total && shown < PLANNER_EMBEDDED_MAX_ITEMS;
+}
 
 type BrowseFilterUrlState = MediaBrowseFilterQueryState;
 
@@ -236,9 +252,23 @@ function MediaSearchPageInner({
       discoveryFeaturesIncludeNetwork(features) || catalogVariant === "network",
     [features, catalogVariant],
   );
-  const [media, setMedia] = useState<HomeCatalogMediaItem[]>(initialMedia);
+  const [media, setMedia] = useState<HomeCatalogMediaItem[]>(() => {
+    if (plannerMode && embedded && initialMedia.length > PLANNER_EMBEDDED_PAGE_SIZE) {
+      return initialMedia.slice(0, PLANNER_EMBEDDED_PAGE_SIZE);
+    }
+    return initialMedia;
+  });
   const [catalogItems, setCatalogItems] =
-    useState<MediaItem[]>(initialCatalogItems);
+    useState<MediaItem[]>(() => {
+      if (
+        plannerMode &&
+        embedded &&
+        initialCatalogItems.length > PLANNER_EMBEDDED_PAGE_SIZE
+      ) {
+        return initialCatalogItems.slice(0, PLANNER_EMBEDDED_PAGE_SIZE);
+      }
+      return initialCatalogItems;
+    });
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
   const [mapPopupOpen, setMapPopupOpen] = useState(false);
   const [mapHeightPx, setMapHeightPx] = useState(520);
@@ -448,9 +478,11 @@ function MediaSearchPageInner({
             if (sort === "price_desc") return (b.price ?? 0) - (a.price ?? 0);
             return (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0);
           });
-          const pageSize = PAGE_SIZE;
-          const end = opts.page * pageSize;
-          const slice = sorted.slice(0, end);
+          const pageSize =
+            embedded ? PLANNER_EMBEDDED_PAGE_SIZE : PAGE_SIZE;
+          const slice = embedded
+            ? slicePlannerEmbeddedCatalog(sorted, opts.page)
+            : sorted.slice(0, opts.page * pageSize);
           const mapped = slice.map((row) => mapMediaItemToHomeCatalog(row));
           setTotal(sorted.length);
           setMedia(mapped);
@@ -520,10 +552,14 @@ function MediaSearchPageInner({
       sort,
       plannerMode,
       initialCatalogItems,
+      embedded,
     ],
   );
 
-  const hasMore = media.length < total;
+  const hasMore =
+    plannerMode && embedded
+      ? plannerEmbeddedHasMore(media.length, total)
+      : media.length < total;
 
   const handleHotspotRegionSelect = useCallback(
     (main: string, sub: string) => {
@@ -814,18 +850,31 @@ function MediaSearchPageInner({
   );
 
   const loadMoreButton = (
-    <button
-      type="button"
-      onClick={handleLoadMore}
-      disabled={loadingMore}
-      className="tkad-type-body w-full rounded-2xl border border-gray-200 py-3 text-tkad-muted transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 hover:dark:bg-white/5"
-    >
-      {loadingMore
-        ? isKo
-          ? "불러오는 중…"
-          : "Loading…"
-        : tMedia("loadMoreBrowse")}
-    </button>
+    <div className="space-y-1.5">
+      {plannerMode && embedded ? (
+        <p className="text-center text-[11px] text-muted-foreground">
+          {isKo
+            ? `${media.length.toLocaleString("ko-KR")} / ${total.toLocaleString("ko-KR")}개 표시${media.length >= PLANNER_EMBEDDED_MAX_ITEMS ? " · 필터로 범위를 좁혀 보세요" : ""}`
+            : `Showing ${media.length} of ${total}${media.length >= PLANNER_EMBEDDED_MAX_ITEMS ? " · narrow filters to refine" : ""}`}
+        </p>
+      ) : null}
+      <button
+        type="button"
+        onClick={handleLoadMore}
+        disabled={loadingMore}
+        className="tkad-type-body w-full rounded-xl border border-gray-200 py-2.5 text-sm text-tkad-muted transition hover:bg-gray-50 disabled:opacity-60 dark:border-white/10 hover:dark:bg-white/5"
+      >
+        {loadingMore
+          ? isKo
+            ? "불러오는 중…"
+            : "Loading…"
+          : plannerMode && embedded
+            ? isKo
+              ? `더 보기 (+${Math.min(PLANNER_EMBEDDED_PAGE_SIZE, PLANNER_EMBEDDED_MAX_ITEMS - media.length)})`
+              : `Load more (+${Math.min(PLANNER_EMBEDDED_PAGE_SIZE, PLANNER_EMBEDDED_MAX_ITEMS - media.length)})`
+            : tMedia("loadMoreBrowse")}
+      </button>
+    </div>
   );
 
   /** 본문(매체 목록/지도) — 외부 여백 없이 순수 콘텐츠만. 셸/문서 흐름 양쪽에서 재사용 */
