@@ -39,7 +39,7 @@ export function MediaDetailPageLayout({
   return (
     <div className={cn("pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:items-start lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
             {mobileProposal ? (
               <div className="mb-6">{mobileProposal}</div>
@@ -85,7 +85,11 @@ export function MediaDetailPageLayout({
             ) : null}
           </div>
 
-          {sidebar ? <div className="hidden lg:block">{sidebar}</div> : null}
+          {sidebar ? (
+            <div className="hidden lg:block">
+              <div className="sticky top-[72px] z-10">{sidebar}</div>
+            </div>
+          ) : null}
         </div>
       </div>
     </div>

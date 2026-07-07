@@ -67,7 +67,7 @@ export function MediaDetailProposalCard({
             type="button"
             onClick={onDownloadClick}
             disabled={checking}
-            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-500 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-violet-600 disabled:opacity-60"
+            className="tkad-neon-cta mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold shadow-sm transition hover:bg-violet-700 disabled:opacity-60"
           >
             {checking ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

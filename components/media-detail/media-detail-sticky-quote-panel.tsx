@@ -177,7 +177,7 @@ export function MediaDetailStickyQuotePanel({
   return (
     <aside
       className={cn(
-        "sticky top-20 hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5 shadow-lg lg:block",
+        "w-full max-h-[calc(100dvh-5.5rem)] overflow-y-auto overscroll-contain rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5 shadow-lg",
         className,
       )}
     >

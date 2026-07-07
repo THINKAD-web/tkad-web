@@ -29,7 +29,7 @@ export function MobileAppChrome({ children }: Props) {
           <Suspense fallback={null}>
             <SubpageRelatedChips />
           </Suspense>
-          <div className="flex min-w-0 flex-col overflow-x-clip tkad-mobile-scroll md:pb-0">
+          <div className="flex min-w-0 flex-col max-md:overflow-x-clip max-md:tkad-mobile-scroll md:overflow-visible md:pb-0">
             {children}
           </div>
           <BottomTabBar />
