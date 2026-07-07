@@ -5,12 +5,15 @@ import type { MediaItem } from "@/lib/media-data";
 import { trackEvent } from "@/lib/ga-events";
 import { mediaProposalDownloadFilename } from "@/lib/media-proposal-filename";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
+import { cn } from "@/lib/utils";
 
 type Props = {
   media: MediaItem;
   isKo: boolean;
   locale: string;
   className?: string;
+  /** 사이드바 — 단일 버튼 행 */
+  variant?: "card" | "inline";
 };
 
 /**
@@ -22,6 +25,7 @@ export function MediaDetailProposalCard({
   isKo,
   locale,
   className,
+  variant = "card",
 }: Props) {
   const downloadName = mediaProposalDownloadFilename(media, isKo);
   const proposalHref = `/api/media/${encodeURIComponent(media.id)}/proposal?locale=${encodeURIComponent(locale)}`;
@@ -36,6 +40,44 @@ export function MediaDetailProposalCard({
     a.click();
     a.remove();
   };
+
+  if (variant === "inline") {
+    return (
+      <PlannerPdfDownloadGate isKo={isKo} onAllowedDownload={triggerDownload}>
+        {({ onDownloadClick, pdfAllowed, checking }) => (
+          <button
+            type="button"
+            onClick={onDownloadClick}
+            disabled={checking}
+            className={cn(
+              "inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12",
+              className,
+            )}
+          >
+            {checking ? (
+              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+            ) : pdfAllowed ? (
+              <Download className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            ) : (
+              <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+            )}
+            <span>
+              {pdfAllowed
+                ? isKo
+                  ? "제안서 다운로드"
+                  : "Download proposal"
+                : isKo
+                  ? "PRO 제안서"
+                  : "PRO proposal"}
+            </span>
+            <span className="rounded bg-violet-500/15 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+              PRO
+            </span>
+          </button>
+        )}
+      </PlannerPdfDownloadGate>
+    );
+  }
 
   return (
     <div

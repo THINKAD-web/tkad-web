@@ -293,71 +293,76 @@ export function MediaDetailStickyQuotePanel({
           ) : null}
         </div>
 
-        <div className="grid grid-cols-2 gap-2">
-          <Link
-            href={quoteHref}
-            className="inline-flex h-10 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-xs font-bold text-gray-900 dark:text-white"
-          >
-            {isKo ? "견적 받기" : "Get quote"}
-          </Link>
-          <Link
-            href={plannerHref}
-            className="inline-flex h-10 items-center justify-center gap-1 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 text-center text-xs font-bold text-violet-800 dark:text-violet-100"
-          >
-            <Sparkles className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            {isKo ? "플래너" : "Planner"}
-          </Link>
-        </div>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <Link
+              href={quoteHref}
+              className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-sm font-bold text-gray-900 dark:text-white"
+            >
+              {isKo ? "견적 받기" : "Get quote"}
+            </Link>
+            <Link
+              href={plannerHref}
+              className="inline-flex h-11 items-center justify-center gap-1 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 text-center text-sm font-bold text-violet-800 dark:text-violet-100"
+            >
+              <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+              {isKo ? "플래너" : "Planner"}
+            </Link>
+          </div>
 
-        <MediaDetailProposalCard
-          media={media}
-          isKo={isKo}
-          locale={pageLocale}
-        />
+          <div className="grid grid-cols-2 gap-2">
+            <MediaInquiryDialog
+              mediaId={media.id}
+              mediaName={displayName}
+              triggerLabel={isKo ? "전문가 문의" : "Ask expert"}
+              compact
+              className="w-full border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90"
+            />
+            <MediaDetailAddToCart
+              mediaId={media.id}
+              mediaName={displayName}
+              compact
+            />
+            <PlanCartAddButton
+              item={planCartItemFromMediaItem(media, "search")}
+              addedFrom="search"
+              compact
+              className="col-span-2 w-full"
+            />
+          </div>
 
-        <MediaInquiryDialog
-          mediaId={media.id}
-          mediaName={displayName}
-          triggerLabel={isKo ? "이 매체로 문의하기 →" : "Inquire about this media →"}
-          className="w-full justify-center bg-gradient-to-r from-violet-500 to-cyan-400 border-0 dark:text-white text-gray-900"
-        />
-
-        <MediaDetailAddToCart
-          mediaId={media.id}
-          mediaName={displayName}
-          className="w-full"
-        />
-
-        <PlanCartAddButton
-          item={planCartItemFromMediaItem(media, "search")}
-          addedFrom="search"
-          className="w-full"
-        />
-
-        <div className="flex items-center justify-between gap-2 pt-1">
-          <MediaFavoriteButton
-            mediaId={media.id}
-            mediaName={media.name}
-            mediaNameEn={media.nameEn}
-            compact
+          <MediaDetailProposalCard
+            media={media}
+            isKo={isKo}
+            locale={pageLocale}
+            variant="inline"
           />
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof navigator !== "undefined" && navigator.share) {
-                void navigator.share({
-                  title: displayName,
-                  url: window.location.href,
-                });
-              } else {
-                void navigator.clipboard?.writeText(window.location.href);
-              }
-            }}
-            className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/12 dark:bg-white/8 dark:text-white/85 dark:hover:bg-white/12"
-          >
-            <Share2 className="h-3.5 w-3.5" aria-hidden />
-            {isKo ? "공유" : "Share"}
-          </button>
+
+          <div className="flex items-center justify-between gap-2 border-t dark:border-white/10 border-gray-100 pt-3">
+            <MediaFavoriteButton
+              mediaId={media.id}
+              mediaName={media.name}
+              mediaNameEn={media.nameEn}
+              compact
+            />
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof navigator !== "undefined" && navigator.share) {
+                  void navigator.share({
+                    title: displayName,
+                    url: window.location.href,
+                  });
+                } else {
+                  void navigator.clipboard?.writeText(window.location.href);
+                }
+              }}
+              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/12 dark:bg-white/8 dark:text-white/85 dark:hover:bg-white/12"
+            >
+              <Share2 className="h-3.5 w-3.5" aria-hidden />
+              {isKo ? "공유" : "Share"}
+            </button>
+          </div>
         </div>
       </div>
     </aside>

@@ -9,9 +9,16 @@ type Props = {
   mediaId: string;
   mediaName?: string;
   className?: string;
+  /** 사이드바 등 좁은 영역 — 단일 컴팩트 버튼 */
+  compact?: boolean;
 };
 
-export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Props) {
+export function MediaDetailAddToCart({
+  mediaId,
+  mediaName,
+  className = "",
+  compact = false,
+}: Props) {
   const { has, toggle, ids } = useCart();
   const toast = useAppToast();
   const inCart = has(mediaId);
@@ -31,6 +38,33 @@ export function MediaDetailAddToCart({ mediaId, mediaName, className = "" }: Pro
           : "매체가 장바구니에 담겼습니다.",
       );
     }
+  }
+
+  if (compact) {
+    return (
+      <button
+        type="button"
+        onClick={handleClick}
+        className={`inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border px-2.5 text-xs font-semibold transition active:scale-95 ${
+          inCart
+            ? "border-accent/50 bg-accent/15 text-accent dark:text-accent"
+            : "border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90"
+        } ${className}`}
+        aria-pressed={inCart}
+      >
+        {inCart ? (
+          <>
+            <Check className="h-3.5 w-3.5 shrink-0" />
+            담김
+          </>
+        ) : (
+          <>
+            <Plus className="h-3.5 w-3.5 shrink-0" />
+            견적서 담기
+          </>
+        )}
+      </button>
+    );
   }
 
   return (
