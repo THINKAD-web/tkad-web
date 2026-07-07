@@ -4,6 +4,11 @@ import {
   estimatedMonthlyImpressions,
 } from "@/lib/ai-recommend-metrics";
 import {
+  filterCatalogByRegionCodes,
+  pickRecommendPool,
+  type AiRecommendInput,
+} from "@/lib/ai-media-recommend";
+import {
   scoreMediaForRanking,
   type MatchedMedia,
   type ScoreBreakdown,
@@ -13,7 +18,10 @@ import { matchesPlannerCategory } from "@/lib/planner-logic";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 import type { PlannerCategory } from "@/lib/planner/types";
-import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import {
+  aiInputToMatching,
+  plannerContextToMatching,
+} from "@/lib/recommendation-adapters";
 
 export type RecommendTabAxis =
   | "budgetEfficiency"
@@ -49,6 +57,28 @@ export type AxisRankedItem = {
 
 export function isIndustryTabAvailable(ctx: RecommendationContext): boolean {
   return !!ctx.industryKey && ctx.industryKey !== "indOther";
+}
+
+export function isRecommendIndustryTabAvailable(
+  input: AiRecommendInput,
+): boolean {
+  return !!input.industry && input.industry !== "other";
+}
+
+export function visiblePlannerAxes(
+  ctx: RecommendationContext,
+): RecommendTabAxis[] {
+  return RECOMMEND_TAB_AXES.filter(
+    (axis) => axis !== "industryFit" || isIndustryTabAvailable(ctx),
+  );
+}
+
+export function visibleRecommendAxes(
+  input: AiRecommendInput,
+): RecommendTabAxis[] {
+  return RECOMMEND_TAB_AXES.filter(
+    (axis) => axis !== "industryFit" || isRecommendIndustryTabAvailable(input),
+  );
 }
 
 /** 업종 탭 — 키워드·유형 신호가 있는 매체가 충분한지 */
@@ -174,6 +204,24 @@ function sortByAxis(
  * 축별 top-N — knapsack·다양성 선택과 무관한 단순 정렬.
  * `scoreMediaForRanking` breakdown 재사용.
  */
+function toAxisRankedItems(
+  sorted: MatchedMedia[],
+  axis: RecommendTabAxis,
+  limit: number,
+): AxisRankedItem[] {
+  return sorted.slice(0, limit).map((s, i) => {
+    const { axisScore, metricKo, metricEn } = metricLabelsForAxis(s, axis);
+    return {
+      rank: i + 1,
+      media: s.media,
+      breakdown: s.breakdown,
+      axisScore,
+      metricKo,
+      metricEn,
+    };
+  });
+}
+
 export function rankPlannerMediaByAxis(
   catalog: readonly MediaItem[],
   ctx: RecommendationContext,
@@ -186,18 +234,29 @@ export function rankPlannerMediaByAxis(
 
   const scored = scoreRecommendPool(pool, ctx, seed);
   const sorted = sortByAxis(scored, axis);
+  return toAxisRankedItems(sorted, axis, limit);
+}
 
-  return sorted.slice(0, limit).map((s, i) => {
-    const { axisScore, metricKo, metricEn } = metricLabelsForAxis(s, axis);
-    return {
-      rank: i + 1,
-      media: s.media,
-      breakdown: s.breakdown,
-      axisScore,
-      metricKo,
-      metricEn,
-    };
-  });
+/**
+ * AI 추천 결과 축별 Top-N — `pickRecommendPool` + `aiInputToMatching` (엔진 동일).
+ */
+export function rankRecommendMediaByAxis(
+  catalog: readonly MediaItem[],
+  input: AiRecommendInput,
+  regionCodes: readonly string[],
+  axis: RecommendTabAxis,
+  limit = 10,
+  seed = 0,
+): AxisRankedItem[] {
+  const regionFiltered = filterCatalogByRegionCodes(catalog, regionCodes);
+  const base = regionFiltered.length > 0 ? regionFiltered : [...catalog];
+  const pool = pickRecommendPool(base, input);
+  if (pool.length === 0) return [];
+
+  const matchingInput = aiInputToMatching(input, seed);
+  const scored = pool.map((m) => scoreMediaForRanking(m, matchingInput));
+  const sorted = sortByAxis(scored, axis);
+  return toAxisRankedItems(sorted, axis, limit);
 }
 
 /** 659매체 풀 스코어링 벤치 — 개발·회귀 확인용 */

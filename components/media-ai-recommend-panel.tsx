@@ -94,11 +94,14 @@ export default function MediaAiRecommendPanel({
   const [view, setView] = useState<"list" | "map">("list");
   const [rowLayout, setRowLayout] = useState<"card" | "compact">("card");
   const [results, setResults] = useState<ScoredMedia[] | null>(null);
+  const [lastPayload, setLastPayload] =
+    useState<MediaAiRecommendFormSubmit | null>(null);
 
   const runRecommend = useCallback(
     (payload: MediaAiRecommendFormSubmit) => {
       setPhase("loading");
       setResults(null);
+      setLastPayload(payload);
       window.setTimeout(() => {
         const poolRegion = filterCatalogByRegionCodes(
           catalog,
@@ -194,20 +197,24 @@ export default function MediaAiRecommendPanel({
     );
   }
 
-  if (phase === "dashboard" && results !== null && results.length > 0) {
+  if (phase === "dashboard" && results !== null && results.length > 0 && lastPayload) {
     return (
       <MediaAiRecommendDashboard
         locale={locale}
         scored={results}
         top3={top3Dash}
-        quoteHref={quoteHref}
+        catalog={catalog}
+        recommendInput={lastPayload.input}
+        regionCodes={lastPayload.regionCodes}
         onBackToForm={() => {
           setResults(null);
+          setLastPayload(null);
           setPhase("form");
         }}
         onViewFullList={() => setPhase("list")}
         onRemix={() => {
           setResults(null);
+          setLastPayload(null);
           setPhase("form");
         }}
       />

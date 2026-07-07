@@ -5,7 +5,10 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   benchmarkAxisRankingMs,
   rankPlannerMediaByAxis,
+  rankRecommendMediaByAxis,
+  isRecommendIndustryTabAvailable,
 } from "@/lib/planner/recommend-tabs";
+import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
 function mockMedia(
@@ -83,4 +86,36 @@ test("rankPlannerMediaByAxis: 659-media benchmark under 500ms", () => {
   const top = rankPlannerMediaByAxis(big, baseCtx, "goalFit", 10);
   assert.equal(top.length, 10);
   assert.equal(top[0]!.rank, 1);
+});
+
+test("isRecommendIndustryTabAvailable: hides other industry", () => {
+  assert.equal(
+    isRecommendIndustryTabAvailable({ industry: "retail" } as AiRecommendInput),
+    true,
+  );
+  assert.equal(
+    isRecommendIndustryTabAvailable({ industry: "other" } as AiRecommendInput),
+    false,
+  );
+});
+
+test("rankRecommendMediaByAxis: uses pickRecommendPool region filter", () => {
+  const seoul = mockMedia("seoul-1", { region: "seoul" });
+  const busan = mockMedia("busan-1", { region: "busan" });
+  const input = {
+    goal: "awareness",
+    target: "mass",
+    budgetMaxMan: 0,
+    region: "all",
+    industry: "retail",
+  } as AiRecommendInput;
+  const ranked = rankRecommendMediaByAxis(
+    [seoul, busan],
+    input,
+    ["seoul"],
+    "goalFit",
+    10,
+  );
+  assert.ok(ranked.every((r) => r.media.region === "seoul"));
+  assert.ok(ranked.length >= 1);
 });

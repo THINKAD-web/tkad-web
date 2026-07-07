@@ -1,10 +1,10 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import {
   Calculator,
+  ChevronDown,
   FileText,
   LayoutList,
   MapPin,
@@ -13,7 +13,8 @@ import {
   Trophy,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
-import type { ScoredMedia } from "@/lib/ai-media-recommend";
+import type { AiRecommendInput, ScoredMedia } from "@/lib/ai-media-recommend";
+import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
@@ -21,6 +22,7 @@ import {
   RECOMMEND_MEDIA_GRID_CLASS,
   RecommendScoredMediaCard,
 } from "@/components/media-ai-recommend-scored-card";
+import { RecommendationAxisTabs } from "@/components/recommendation/recommendation-axis-tabs";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
@@ -38,6 +40,10 @@ type Props = {
   renderQuantityControl?: (media: MediaItem) => React.ReactNode;
   /** 견적·플랜 추가 대상 — 미지정 시 전체 scored */
   planAddItems?: readonly MediaItem[];
+  catalog: readonly MediaItem[];
+  recommendInput: AiRecommendInput;
+  regionCodes: readonly RegionCheckboxCode[];
+  analysisSeed?: number;
 };
 
 export default function MediaAiRecommendDashboard({
@@ -53,10 +59,14 @@ export default function MediaAiRecommendDashboard({
   quoteBusy = false,
   renderQuantityControl,
   planAddItems,
+  catalog,
+  recommendInput,
+  regionCodes,
+  analysisSeed = 0,
 }: Props) {
-  const tr = useTranslations("recommend");
   const isKo = locale === "ko";
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
+  const [chartOpen, setChartOpen] = useState(false);
 
   const mapItems = useMemo(
     () => scored.map((s) => s.item),
@@ -204,36 +214,16 @@ export default function MediaAiRecommendDashboard({
           </div>
         </section>
 
-        {/* 나머지 추천 매체 */}
-        {scored.length > 3 && (
-          <section className="border-2 border-border bg-card p-5">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-              [ MORE PICKS ]
-            </p>
-            <h3 className="mt-2 text-base font-bold tracking-tight text-foreground sm:text-lg">
-              {isKo
-                ? "TKAD bot이 추가로 발견한 매체들"
-                : "Other media TKAD bot discovered"}
-            </h3>
-            <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">
-              {`// `}{isKo
-                ? "TOP 3 외에도 탐험 중 눈에 띈 매체들이에요."
-                : "Beyond the TOP 3, these also stood out during exploration."}
-            </p>
-            <ul className={cn("mt-5", RECOMMEND_MEDIA_GRID_CLASS)}>
-              {scored.slice(3, 8).map((s, idx) => (
-                <RecommendScoredMediaCard
-                  key={s.item.id}
-                  scored={s}
-                  rank={idx + 4}
-                  isKo={isKo}
-                  locale={locale}
-                  quantityControl={renderQuantityControl?.(s.item)}
-                />
-              ))}
-            </ul>
-          </section>
-        )}
+        <RecommendationAxisTabs
+          variant="recommend"
+          catalog={[...catalog]}
+          input={recommendInput}
+          regionCodes={regionCodes}
+          isKo={isKo}
+          locale={locale}
+          seed={analysisSeed}
+          renderQuantityControl={renderQuantityControl}
+        />
 
         {/* 간단 Achievement 영역 */}
         <section className="border-2 border-accent bg-card p-5">
@@ -259,66 +249,92 @@ export default function MediaAiRecommendDashboard({
           </div>
         </section>
 
-        {/* 차트 영역 */}
-        <section className="border-2 border-border bg-card p-5">
-          <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
-            <Star className="h-4 w-4 text-accent" />
-            [ {tr("resultChartTitle")} ]
-          </h3>
-          <div className="mt-3 grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
-            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted p-4">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                [ {isKo ? "읽는 법" : "How to read"} ]
-              </p>
-              <ul className="mt-2 space-y-1 text-sm leading-relaxed text-foreground">
-                <li>
-                  - {isKo ? "오른쪽일수록 추천 점수가 높아요." : "Further right = higher fit score."}
-                </li>
-                <li>
-                  - {isKo ? "위로 갈수록 월간 노출(추정)이 커요." : "Higher up = more estimated monthly reach."}
-                </li>
-                <li>
-                  - {isKo ? "오른쪽 위에 몰릴수록 유리해요." : "Top-right cluster is generally better."}
-                </li>
-              </ul>
-            </div>
-            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                [ {isKo ? "어려운 용어" : "Terms"} ]
-              </p>
-              <dl className="mt-2 space-y-2 text-sm text-foreground">
-                <div>
-                  <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
-                    {isKo ? "추천 점수" : "Fit score"}
-                  </dt>
-                  <dd className="text-muted-foreground">
-                    {isKo ? "조건(목표·지역·예산·타깃)과의 매칭 정도(0–100)" : "How well it matches your inputs (0–100)."}
-                  </dd>
-                </div>
-                <div>
-                  <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
-                    {isKo ? "월간 노출(추정)" : "Est. monthly reach"}
-                  </dt>
-                  <dd className="text-muted-foreground">
-                    {isKo ? "서로 간 상대 비교용(정확한 실측이 아닐 수 있음)" : "For relative comparison (may not be measured)."}
-                  </dd>
-                </div>
-              </dl>
-            </div>
-            <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2 lg:col-span-1">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-                [ {isKo ? "빠른 팁" : "Quick tip"} ]
-              </p>
-              <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+        {/* 산점도 — 접이식(기본 접힘) */}
+        <section className="border-2 border-border bg-card">
+          <button
+            type="button"
+            onClick={() => setChartOpen((o) => !o)}
+            aria-expanded={chartOpen}
+            className="flex w-full items-center justify-between gap-3 p-5 text-left"
+          >
+            <span className="flex min-w-0 flex-col gap-1">
+              <span className="font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
+                <Star className="mr-2 inline h-4 w-4 text-accent" aria-hidden />
+                [ {isKo ? "전체 분포 보기" : "Full distribution"} ]
+              </span>
+              <span className="text-[11px] text-muted-foreground sm:text-xs">
                 {isKo
-                  ? "차트는 ‘완벽한 답’이 아니라 후보를 빠르게 좁히기 위한 지도예요. TOP 3부터 보고, 마음에 드는 매체를 비교/견적으로 이어가세요."
-                  : "This chart helps you narrow options quickly. Start with TOP 3, then compare and request a quote."}
-              </p>
+                  ? "추천 점수·월간 노출 산점도 — 필요할 때만 펼쳐 보세요."
+                  : "Fit score vs. estimated reach — expand when you need the big picture."}
+              </span>
+            </span>
+            <ChevronDown
+              className={cn(
+                "h-5 w-5 shrink-0 text-muted-foreground transition-transform",
+                chartOpen && "rotate-180",
+              )}
+              aria-hidden
+            />
+          </button>
+
+          {chartOpen ? (
+            <div className="border-t-2 border-border px-5 pb-5 pt-4">
+              <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-3">
+                <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-muted p-4">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    [ {isKo ? "읽는 법" : "How to read"} ]
+                  </p>
+                  <ul className="mt-2 space-y-1 text-sm leading-relaxed text-foreground">
+                    <li>
+                      - {isKo ? "오른쪽일수록 추천 점수가 높아요." : "Further right = higher fit score."}
+                    </li>
+                    <li>
+                      - {isKo ? "위로 갈수록 월간 노출(추정)이 커요." : "Higher up = more estimated monthly reach."}
+                    </li>
+                    <li>
+                      - {isKo ? "오른쪽 위에 몰릴수록 유리해요." : "Top-right cluster is generally better."}
+                    </li>
+                  </ul>
+                </div>
+                <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    [ {isKo ? "어려운 용어" : "Terms"} ]
+                  </p>
+                  <dl className="mt-2 space-y-2 text-sm text-foreground">
+                    <div>
+                      <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                        {isKo ? "추천 점수" : "Fit score"}
+                      </dt>
+                      <dd className="text-muted-foreground">
+                        {isKo ? "조건(목표·지역·예산·타깃)과의 매칭 정도(0–100)" : "How well it matches your inputs (0–100)."}
+                      </dd>
+                    </div>
+                    <div>
+                      <dt className="font-display text-xs font-medium uppercase tracking-[0.18em] text-foreground">
+                        {isKo ? "월간 노출(추정)" : "Est. monthly reach"}
+                      </dt>
+                      <dd className="text-muted-foreground">
+                        {isKo ? "서로 간 상대 비교용(정확한 실측이 아닐 수 있음)" : "For relative comparison (may not be measured)."}
+                      </dd>
+                    </div>
+                  </dl>
+                </div>
+                <div className="-mt-[2px] -ml-[2px] border-2 border-border bg-card p-4 sm:col-span-2 lg:col-span-1">
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    [ {isKo ? "빠른 팁" : "Quick tip"} ]
+                  </p>
+                  <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+                    {isKo
+                      ? "차트는 ‘완벽한 답’이 아니라 후보를 빠르게 좁히기 위한 지도예요. 축별 탭과 TOP 3를 먼저 보세요."
+                      : "Use this chart to narrow options — start with axis tabs and TOP 3."}
+                  </p>
+                </div>
+              </div>
+              <div className="mt-4">
+                <MediaAiRecommendChart locale={locale} scored={scored} />
+              </div>
             </div>
-          </div>
-          <div className="mt-4">
-            <MediaAiRecommendChart locale={locale} scored={scored} />
-          </div>
+          ) : null}
         </section>
 
         {/* 하단 액션 */}

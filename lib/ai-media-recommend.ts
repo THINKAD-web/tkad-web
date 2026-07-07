@@ -566,7 +566,7 @@ function buildRecommendPool(
   return pool;
 }
 
-function pickRecommendPool(
+export function pickRecommendPool(
   valid: readonly MediaItem[],
   input: AiRecommendInput,
 ): MediaItem[] {

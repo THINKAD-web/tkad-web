@@ -685,11 +685,15 @@ export default function RecommendPageClient({
             </div>
           )}
 
-          {phase === "dashboard" && fullList && fullList.length > 0 && (
+          {phase === "dashboard" && fullList && fullList.length > 0 && lastPayload && (
             <MediaAiRecommendDashboard
               locale={locale}
               scored={fullList}
               top3={top3}
+              catalog={catalog}
+              recommendInput={lastPayload.input}
+              regionCodes={lastPayload.regionCodes}
+              analysisSeed={analysisSeed}
               onRequestQuote={goToContactQuote}
               onCreateQuote={() => void createQuoteFromRecommend()}
               creatingQuote={creatingQuote}
