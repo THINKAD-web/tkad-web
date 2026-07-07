@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import type { HomeCatalogMediaItem } from "@/types/media";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
@@ -11,6 +12,10 @@ export type DiscoveryMediaCardSharedProps = {
   isKo?: boolean;
   className?: string;
   recommendReason?: string;
+  /** true: 추천 이유를 카드 셸 안에 렌더 (그리드 카드 높이 정렬용) */
+  recommendReasonInside?: boolean;
+  /** 그리드 카드 하단 슬롯 (수량 컨트롤 등) */
+  cardFooter?: ReactNode;
   rank?: number;
   plannerMode?: boolean;
   isInPlan?: boolean;

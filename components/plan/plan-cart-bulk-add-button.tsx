@@ -2,6 +2,7 @@
 
 import { ListPlus } from "lucide-react";
 import { useLocale } from "next-intl";
+import type { BtnBlockSize } from "@/components/brutalist/btn-block";
 import { BtnBlock } from "@/components/brutalist";
 import { useAppToast } from "@/lib/use-toast";
 import { usePlanCart } from "@/hooks/use-plan-cart";
@@ -13,10 +14,11 @@ import { cn } from "@/lib/utils";
 type Props = {
   items: Omit<PlanCartItem, "addedAt">[];
   label?: string;
+  size?: BtnBlockSize;
   className?: string;
 };
 
-export function PlanCartBulkAddButton({ items, label, className }: Props) {
+export function PlanCartBulkAddButton({ items, label, size = "md", className }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const toast = useAppToast();
@@ -46,7 +48,7 @@ export function PlanCartBulkAddButton({ items, label, className }: Props) {
     <BtnBlock
       type="button"
       variant="secondary"
-      size="md"
+      size={size}
       onClick={handleClick}
       className={cn(
         "inline-flex max-w-full items-center gap-2 whitespace-normal !normal-case !tracking-normal rounded-2xl border text-center dark:border-white/12 border-gray-200",

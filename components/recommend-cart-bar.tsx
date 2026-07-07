@@ -10,7 +10,6 @@ type Props = {
   items: MediaItem[];
   locale: string;
   maxItems: number;
-  quoteHref: string;
   onRemove: (id: string) => void;
   onClear: () => void;
 };
@@ -19,7 +18,6 @@ export default function RecommendCartBar({
   items,
   locale,
   maxItems,
-  quoteHref,
   onRemove,
   onClear,
 }: Props) {
@@ -63,9 +61,6 @@ export default function RecommendCartBar({
         <div className="flex shrink-0 items-center gap-2 sm:ml-auto">
           <BtnBlock variant="secondary" size="sm" onClick={onClear}>
             {t("cartClear")}
-          </BtnBlock>
-          <BtnBlock href={quoteHref} variant="accent" size="sm">
-            {t("cartQuote")}
           </BtnBlock>
         </div>
       </div>

@@ -29,6 +29,8 @@ export type MediaCardProps = {
   plannerMode?: boolean;
   rank?: number;
   recommendReason?: string;
+  recommendReasonInside?: boolean;
+  cardFooter?: ReactNode;
   planAddedFrom?: "search" | "planner" | "ai_recommend" | "map";
   className?: string;
 };

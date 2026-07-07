@@ -172,6 +172,8 @@ type CompactGridProps = Pick<
   | "isInPlan"
   | "onTogglePlan"
   | "rank"
+  | "recommendReason"
+  | "cardFooter"
   | "className"
 >;
 
@@ -189,6 +191,8 @@ export function DiscoveryMediaCardCompactGrid({
   isInPlan = false,
   onTogglePlan,
   rank,
+  recommendReason,
+  cardFooter,
   className,
 }: CompactGridProps) {
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
@@ -286,6 +290,16 @@ export function DiscoveryMediaCardCompactGrid({
           ) : null}
         </div>
       </div>
+      {recommendReason?.trim() ? (
+        <p className="line-clamp-2 px-3 pb-1 text-[11px] leading-snug text-tkad-accent">
+          {recommendReason}
+        </p>
+      ) : null}
+      {cardFooter != null ? (
+        <div className="mt-auto min-h-[4.25rem] border-t border-border/60 px-3 py-2">
+          <div className="min-w-0 overflow-hidden">{cardFooter}</div>
+        </div>
+      ) : null}
     </>
   );
 

@@ -11,7 +11,6 @@ import {
   Sparkles,
   Star,
   Trophy,
-  Share2,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
@@ -29,7 +28,6 @@ type Props = {
   locale: string;
   scored: readonly ScoredMedia[];
   top3: readonly ScoredMedia[];
-  quoteHref: string;
   onBackToForm: () => void;
   onViewFullList: () => void;
   onRemix: () => void;
@@ -38,13 +36,14 @@ type Props = {
   creatingQuote?: boolean;
   quoteBusy?: boolean;
   renderQuantityControl?: (media: MediaItem) => React.ReactNode;
+  /** 견적·플랜 추가 대상 — 미지정 시 전체 scored */
+  planAddItems?: readonly MediaItem[];
 };
 
 export default function MediaAiRecommendDashboard({
   locale,
   scored,
   top3,
-  quoteHref,
   onBackToForm,
   onViewFullList,
   onRemix,
@@ -53,6 +52,7 @@ export default function MediaAiRecommendDashboard({
   creatingQuote = false,
   quoteBusy = false,
   renderQuantityControl,
+  planAddItems,
 }: Props) {
   const tr = useTranslations("recommend");
   const isKo = locale === "ko";
@@ -65,8 +65,10 @@ export default function MediaAiRecommendDashboard({
 
   const planBulkItems = useMemo(
     () =>
-      scored.map((s) => planCartItemFromMediaItem(s.item, "ai_recommend")),
-    [scored],
+      (planAddItems ?? scored.map((s) => s.item)).map((item) =>
+        planCartItemFromMediaItem(item, "ai_recommend"),
+      ),
+    [planAddItems, scored],
   );
 
   const pinMetaById = useMemo(() => {
@@ -321,82 +323,74 @@ export default function MediaAiRecommendDashboard({
 
         {/* 하단 액션 */}
         <div className="flex flex-col gap-4 border-t-2 border-border pt-6">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-1 flex-col gap-2 sm:flex-row sm:flex-wrap">
-              <BtnBlock
-                variant="accent"
-                size="md"
-                onClick={onBackToForm}
-                className="w-full sm:w-auto"
-              >
-                {isKo ? "새로운 탐험 시작" : "New exploration"}
-              </BtnBlock>
-              <BtnBlock
-                variant="primary"
-                size="md"
-                onClick={onRemix}
-                className="w-full sm:w-auto"
-              >
-                {isKo ? "다시 탐험" : "Remix"}
-              </BtnBlock>
-              <BtnBlock
-                variant="secondary"
-                size="md"
-                onClick={onViewFullList}
-                className="w-full sm:w-auto"
-              >
-                <LayoutList className="h-4 w-4" />
-                {isKo ? "전체 추천 리스트" : "Full list"}
-              </BtnBlock>
-              <BtnBlock
-                variant="secondary"
-                size="md"
-                className="w-full sm:w-auto"
-              >
-                <Share2 className="h-4 w-4" />
-                {isKo ? "공유" : "Share"}
-              </BtnBlock>
-              <PlanCartBulkAddButton
-                items={planBulkItems}
-                label={isKo ? "추천 매체 전체 플랜에 추가" : "Add all to plan"}
-                className="w-full sm:w-auto"
-              />
-            </div>
-            <div className="flex flex-col gap-2 sm:flex-row">
-              <BtnBlock
-                variant="accent"
-                size="md"
-                className="w-full sm:w-auto"
-                onClick={onCreateQuote}
-                disabled={!onCreateQuote || creatingQuote}
-              >
-                <FileText className="h-5 w-5" />
-                {creatingQuote
-                  ? isKo
-                    ? "견적서 생성 중…"
-                    : "Creating quote…"
-                  : isKo
-                    ? "이 플랜으로 견적서 만들기 →"
-                    : "Create a quote with this plan →"}
-              </BtnBlock>
-              <BtnBlock
-                variant="secondary"
-                size="md"
-                className="w-full sm:w-auto"
-                onClick={onRequestQuote}
-                disabled={!onRequestQuote || quoteBusy}
-              >
-                <Calculator className="h-5 w-5" />
-                {quoteBusy
-                  ? isKo
-                    ? "이동 중…"
-                    : "Opening…"
-                  : isKo
-                    ? "전문가 상담 받기"
-                    : "Talk to an expert"}
-              </BtnBlock>
-            </div>
+          <div className="flex flex-col gap-2 sm:flex-row">
+            <BtnBlock
+              variant="accent"
+              size="lg"
+              className="w-full flex-1 sm:w-auto"
+              onClick={onCreateQuote}
+              disabled={!onCreateQuote || creatingQuote}
+            >
+              <FileText className="h-5 w-5" />
+              {creatingQuote
+                ? isKo
+                  ? "견적서 생성 중…"
+                  : "Creating quote…"
+                : isKo
+                  ? "이 플랜으로 견적서 만들기"
+                  : "Create a quote with this plan"}
+            </BtnBlock>
+            <PlanCartBulkAddButton
+              items={planBulkItems}
+              label={isKo ? "선택 매체 플랜에 추가" : "Add selected to plan"}
+              size="lg"
+              className="w-full flex-1 sm:w-auto"
+            />
           </div>
+
+          <div className="flex flex-wrap gap-2">
+            <BtnBlock
+              variant="secondary"
+              size="sm"
+              onClick={onViewFullList}
+              className="w-full sm:w-auto"
+            >
+              <LayoutList className="h-4 w-4" />
+              {isKo ? "전체 추천 리스트" : "Full list"}
+            </BtnBlock>
+            <BtnBlock
+              variant="secondary"
+              size="sm"
+              className="w-full sm:w-auto"
+              onClick={onRequestQuote}
+              disabled={!onRequestQuote || quoteBusy}
+            >
+              <Calculator className="h-4 w-4" />
+              {quoteBusy
+                ? isKo
+                  ? "이동 중…"
+                  : "Opening…"
+                : isKo
+                  ? "전문가 상담 받기"
+                  : "Talk to an expert"}
+            </BtnBlock>
+            <BtnBlock
+              variant="secondary"
+              size="sm"
+              onClick={onRemix}
+              className="w-full sm:w-auto"
+            >
+              {isKo ? "다른 후보 보기" : "See other picks"}
+            </BtnBlock>
+          </div>
+
+          <button
+            type="button"
+            onClick={onBackToForm}
+            className="self-start text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+          >
+            {isKo ? "조건 수정" : "Edit criteria"}
+          </button>
         </div>
       </div>
     </div>

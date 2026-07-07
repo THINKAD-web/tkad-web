@@ -41,6 +41,8 @@ export const DiscoveryMediaCard = forwardRef<
   const {
     className,
     recommendReason,
+    recommendReasonInside = false,
+    cardFooter,
     isKo = true,
     plannerMode = false,
     onTogglePlan,
@@ -134,6 +136,10 @@ export const DiscoveryMediaCard = forwardRef<
         isInPlan={isInPlan}
         onTogglePlan={onTogglePlan}
         rank={rank}
+        recommendReason={
+          recommendReasonInside ? recommendReason : undefined
+        }
+        cardFooter={cardFooter}
       />
     );
   } else {
@@ -159,7 +165,7 @@ export const DiscoveryMediaCard = forwardRef<
     props.variant === "compact" &&
     (props.compactLayout === "grid" || props.compactLayout === "map-tile");
 
-  if (!recommendReason?.trim()) {
+  if (!recommendReason?.trim() || recommendReasonInside) {
     return (
       <div className={cn(isStackedTile && "h-full min-h-0", className)}>{card}</div>
     );
@@ -168,7 +174,7 @@ export const DiscoveryMediaCard = forwardRef<
   return (
     <div className={cn("space-y-0", className)}>
       {card}
-      <p className="tkad-type-meta px-3 pb-2 text-tkad-accent">
+      <p className="tkad-type-meta line-clamp-2 px-3 pb-2 text-tkad-accent">
         {recommendReason}
       </p>
     </div>

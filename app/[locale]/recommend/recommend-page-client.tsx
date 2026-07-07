@@ -46,7 +46,6 @@ import {
   RecommendTop3PickRow,
 } from "@/components/media-ai-recommend-scored-card";
 import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
-import { buildQuoteDeeplinkPath } from "@/lib/quote-deeplink";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
 import {
   shouldShowPlannerQuantityControl,
@@ -113,15 +112,6 @@ export default function RecommendPageClient({
     () =>
       cartItems.length > 0 ? cartItems : top3.map((s) => s.item),
     [cartItems, top3],
-  );
-
-  const quoteHref = useMemo(
-    () =>
-      buildQuoteDeeplinkPath(pickedForQuote, {
-        quantities: recommendQuantities,
-        priceOptionIndex: recommendPriceOptionIndex,
-      }),
-    [pickedForQuote, recommendQuantities, recommendPriceOptionIndex],
   );
 
   const renderRecommendQuantityControl = useCallback(
@@ -700,7 +690,6 @@ export default function RecommendPageClient({
               locale={locale}
               scored={fullList}
               top3={top3}
-              quoteHref={quoteHref}
               onRequestQuote={goToContactQuote}
               onCreateQuote={() => void createQuoteFromRecommend()}
               creatingQuote={creatingQuote}
@@ -712,6 +701,7 @@ export default function RecommendPageClient({
               onViewFullList={() => setPhase("list")}
               onRemix={handleRemix}
               renderQuantityControl={renderRecommendQuantityControl}
+              planAddItems={pickedForQuote}
             />
           )}
 
@@ -815,10 +805,6 @@ export default function RecommendPageClient({
         items={cartItems}
         locale={locale}
         maxItems={cartMax}
-        quoteHref={buildQuoteDeeplinkPath(cartItems, {
-          quantities: recommendQuantities,
-          priceOptionIndex: recommendPriceOptionIndex,
-        })}
         onRemove={(id) =>
           setCartItems((prev) => prev.filter((m) => m.id !== id))
         }

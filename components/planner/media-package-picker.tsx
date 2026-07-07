@@ -76,9 +76,7 @@ export function PlannerMediaPackagePicker({
       <div
         className={cn(
           "flex min-w-0 gap-1",
-          compact
-            ? "max-w-full overflow-x-auto pb-0.5 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-            : "flex-wrap gap-1.5",
+          compact ? "flex-wrap gap-1" : "flex-wrap gap-1.5",
         )}
         role="listbox"
         aria-label={isKo ? "패키지 선택" : "Package selection"}
@@ -102,10 +100,10 @@ export function PlannerMediaPackagePicker({
                 }
               }}
               className={cn(
-                "shrink-0 rounded-md border text-left transition-colors",
+                "rounded-md border text-left transition-colors",
                 compact
-                  ? "max-w-[9.5rem] px-2 py-1 text-[10px] leading-tight"
-                  : "max-w-full rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
+                  ? "min-w-0 max-w-full shrink px-2 py-1 text-[10px] leading-tight"
+                  : "max-w-full shrink-0 rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
                 selected
                   ? "border-violet-500 bg-violet-500/15 font-semibold text-violet-800 dark:text-violet-100"
                   : compact

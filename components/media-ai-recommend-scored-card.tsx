@@ -13,9 +13,18 @@ import {
 import { MediaCard } from "@/components/media/media-card";
 import { cn } from "@/lib/utils";
 
+const RECOMMEND_CARD_FOOTER_PLACEHOLDER = (
+  <div
+    className="flex min-h-[2.75rem] items-center justify-center"
+    aria-hidden
+  >
+    <span className="select-none text-[10px] text-transparent">—</span>
+  </div>
+);
+
 /** AI 추천 결과 — 카드 그리드 (썸네일 상단, feed 가로 레이아웃 사용 금지) */
 export const RECOMMEND_MEDIA_GRID_CLASS =
-  "grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3";
+  "grid auto-rows-min grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3";
 
 export function RecommendScoredMediaCard({
   scored,
@@ -53,6 +62,8 @@ export function RecommendScoredMediaCard({
         rank={rank}
         showPlanButton
         recommendReason={reason}
+        recommendReasonInside
+        cardFooter={quantityControl ?? RECOMMEND_CARD_FOOTER_PLACEHOLDER}
         planAddedFrom="ai_recommend"
         inCompare={false}
         inCart={false}
@@ -60,9 +71,6 @@ export function RecommendScoredMediaCard({
         onToggleCart={() => {}}
         className="h-full"
       />
-      {quantityControl ? (
-        <div className="mt-2 border-t border-border pt-2">{quantityControl}</div>
-      ) : null}
     </li>
   );
 }
