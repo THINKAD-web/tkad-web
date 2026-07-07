@@ -5,6 +5,7 @@ import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Sparkles } from "lucide-react";
+import { PointsCheckInCard } from "@/components/my/points-check-in-card";
 import { MyHubEmptyQuickActions } from "@/components/my/my-hub-empty-quick-actions";
 import {
   MyHubMediaGridCard,

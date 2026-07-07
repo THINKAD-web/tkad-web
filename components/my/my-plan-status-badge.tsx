@@ -42,9 +42,9 @@ export function MyPlanStatusBadge({
         className={cn(
           "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide",
           tone === "pro" &&
-            "bg-violet-600 text-white shadow-sm dark:bg-violet-500",
+            "tkad-neon-cta bg-violet-600 text-white shadow-sm dark:bg-violet-500",
           tone === "trial" &&
-            "bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-sm",
+            "tkad-neon-cta bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-sm",
           tone === "free" &&
             "border border-gray-300 bg-gray-100 text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80",
         )}

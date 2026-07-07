@@ -68,7 +68,7 @@ function PrimaryNavCard({
         className={cn(
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors",
           active
-            ? "bg-violet-600 text-white shadow-md dark:bg-violet-500"
+            ? "tkad-neon-cta bg-violet-600 text-white shadow-md dark:bg-violet-500"
             : "bg-violet-500/10 text-violet-600 group-hover:bg-violet-500/15 dark:text-violet-300",
         )}
       >

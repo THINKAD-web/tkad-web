@@ -1606,6 +1606,35 @@ html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
+/* 사이트 다크(html.dark) — planner-neon accent CTA 라벨 대비 */
+html.dark .tkad-planner-neon .tkad-planner-wizard-btn-accent,
+html.dark .tkad-planner-neon .tkad-planner-wizard-btn-accent *,
+html.dark .tkad-planner-neon .tkad-neon-cta,
+html.dark .tkad-planner-neon .tkad-neon-cta *,
+html.dark .tkad-planner-neon .tkad-ai-recommend-submit,
+html.dark .tkad-planner-neon .tkad-ai-recommend-submit * {
+  color: rgb(255 255 255) !important;
+  -webkit-text-fill-color: rgb(255 255 255) !important;
+}
+
+html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgb(124 58 237) 0%,
+    rgb(34 211 238) 100%
+  ) !important;
+  border-color: rgb(124 58 237 / 0.55) !important;
+}
+
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
+  background: linear-gradient(
+    135deg,
+    rgb(124 58 237) 0%,
+    rgb(34 211 238) 100%
+  ) !important;
+  border-color: rgb(124 58 237 / 0.55) !important;
+}
+
 /* 견적 마법사 — 단계 숫자 버튼 (라이트 모드 가독성) */
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn {
   border-color: rgb(226 232 240);

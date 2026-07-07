@@ -198,7 +198,7 @@ export function MyPlanPageClient() {
                 </Link>
                 <Link
                   href="/recommend"
-                  className="inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-3 text-sm font-bold text-white"
+                  className="tkad-neon-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-3 text-sm font-bold text-white"
                 >
                   <Sparkles className="h-4 w-4" />
                   {isKo ? "AI 추천 받기" : "AI recommend"}

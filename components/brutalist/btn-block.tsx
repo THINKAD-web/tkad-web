@@ -27,7 +27,7 @@ const variantClass: Record<BtnBlockVariant, string> = {
   dark: "bg-hero-void text-hero-fg border-border hover:bg-muted hover:border-border",
   /* accent: 주황/보라 배경 — 라이트·다크 모두 흰색 텍스트. planner-neon day 에서 text-white 뒤집힘 방지. */
   accent:
-    "tkad-planner-wizard-btn-accent bg-accent text-white border-accent hover:bg-foreground hover:border-border hover:text-background hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98]",
+    "tkad-neon-cta tkad-planner-wizard-btn-accent bg-accent text-white border-accent hover:bg-foreground hover:border-border hover:text-white hover:shadow-[0_0_32px_rgba(255,98,0,0.4)] active:scale-[0.98] disabled:!opacity-100 disabled:!bg-accent/30 disabled:!text-white disabled:!border-accent/25 disabled:!shadow-none",
 };
 
 const sizeClass: Record<BtnBlockSize, string> = {
