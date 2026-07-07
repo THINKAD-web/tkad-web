@@ -16,6 +16,7 @@ import {
   STICKY_ACTION_BAR_BTN,
   STICKY_ACTION_BAR_BTN_IDLE,
   STICKY_ACTION_BAR_BTN_PRIMARY,
+  STICKY_ACTION_BAR_ROW,
   StickyActionBar,
 } from "@/components/sticky-action-bar";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
@@ -2102,20 +2103,29 @@ export default function PlannerPageClient({
             open
             layout="dock"
             variant="neon"
-                compact
-                aboveMobileChrome
-                className="px-0 sm:px-0"
-                innerClassName={cn(
-                  PLANNER_PAGE_SHELL_CLASS,
-                  "pt-2 pb-2 sm:py-2 sm:pb-[max(0.5rem,env(safe-area-inset-bottom,0px))]",
-                )}
+            compact
+            aboveMobileChrome
             ariaLabel={t("stepOf", {
               current: wizardStep,
               total: PLANNER_LAST_INPUT_STEP,
             })}
           >
-            <div className={plannerWizardColumnClass(wizardStep)}>
-              <div className="flex w-full items-center justify-between gap-2">
+            <div
+              className={cn(
+                STICKY_ACTION_BAR_ROW,
+                "max-w-full",
+                plannerWizardColumnClass(wizardStep),
+              )}
+            >
+              <span
+                className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+                aria-live="polite"
+              >
+                {t("stepOf", {
+                  current: wizardStep,
+                  total: PLANNER_LAST_INPUT_STEP,
+                })}
+              </span>
               <button
                 type="button"
                 onClick={goBack}
@@ -2126,7 +2136,7 @@ export default function PlannerPageClient({
                   "disabled:opacity-40",
                 )}
               >
-                <ChevronLeft className="h-3 w-3" aria-hidden />
+                <ChevronLeft className="h-3 w-3 shrink-0" aria-hidden />
                 {t("back")}
               </button>
               <button
@@ -2135,13 +2145,11 @@ export default function PlannerPageClient({
                 className={cn(
                   STICKY_ACTION_BAR_BTN,
                   STICKY_ACTION_BAR_BTN_PRIMARY,
-                  "shrink-0",
                 )}
               >
                 {wizardStep === 6 ? t("viewEffectDashboard") : t("next")}
-                <ChevronRight className="h-3 w-3" aria-hidden />
+                <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />
               </button>
-              </div>
             </div>
           </StickyActionBar>
         ) : null}

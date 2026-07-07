@@ -496,8 +496,6 @@ export const usePlannerStore = create<PlannerStore>()(
           return {
             ...patch,
             campaignMediaIds: ids,
-            campaignMediaQuantities: {},
-            campaignMediaPriceOptionIndex: {},
             mediaPlacements: placements,
             mediaSelectionExplicit: ids.length > 0,
             appliedScenario: null,

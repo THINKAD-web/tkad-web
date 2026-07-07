@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { PlannerMediaPackagePicker } from "@/components/planner/media-package-picker";
 import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
-import { PlannerMediaQuantityStepper } from "@/components/planner/media-quantity-stepper";
 import type { AdminMediaDto } from "@/lib/admin-media-dto";
 import {
   adminLineMediaItemForControl,
@@ -255,17 +254,25 @@ export function AdminQuoteLinesEditor({
                     </td>
                     <td className="px-2 py-2 align-top">
                       {isGrade ? (
-                        <PlannerMediaQuantityStepper
-                          media={controlMedia}
-                          units={line.quantity}
-                          onChange={(units) =>
-                            updateLine(line.lineId, {
-                              quantity: Math.max(1, units),
-                            })
-                          }
-                          isKo={isKo}
-                          compact
-                        />
+                        <div className="space-y-1.5">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={String(line.quantity)}
+                            onChange={(e) => {
+                              const n = Math.max(
+                                1,
+                                parseInt(e.target.value, 10) || 1,
+                              );
+                              updateLine(line.lineId, { quantity: n });
+                            }}
+                            className="h-9 w-24 text-right text-sm tabular-nums"
+                            aria-label={isKo ? "대수" : "Fleet count"}
+                          />
+                          <p className="text-[10px] text-muted-foreground">
+                            {isKo ? "대" : "units"}
+                          </p>
+                        </div>
                       ) : (
                         <PlannerMediaQuantityControl
                           media={controlMedia}

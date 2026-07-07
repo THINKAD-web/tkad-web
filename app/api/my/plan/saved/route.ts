@@ -56,6 +56,28 @@ const PlanCartItemSchema = z.object({
   mediaType: z.string(),
   region: z.string(),
   price: z.number(),
+  quantity: z.number().int().positive().optional(),
+  priceOptionIndex: z.number().int().nonnegative().optional(),
+  gradeSelections: z
+    .array(
+      z.object({
+        priceOptionIndex: z.number().int().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(12)
+    .optional(),
+  addonLines: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        name: z.string(),
+        unitPriceWon: z.number().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(10)
+    .optional(),
   thumbnailUrl: z.string().optional(),
   addedFrom: z.enum(["ai_recommend", "planner", "search", "map", "package"]),
   addedAt: z.string(),
@@ -66,6 +88,17 @@ const SaveBodySchema = z.object({
   description: z.string().trim().max(2000).optional(),
   source: z.enum(["plan_cart", "plan_report"]).optional(),
   items: z.array(PlanCartItemSchema).min(1),
+  addonLines: z
+    .array(
+      z.object({
+        id: z.string().min(1),
+        name: z.string(),
+        unitPriceWon: z.number().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(20)
+    .optional(),
   campaignGoal: z.string().optional(),
   totalBudget: z.number().int().nonnegative().optional(),
   duration: z.number().int().positive().optional(),

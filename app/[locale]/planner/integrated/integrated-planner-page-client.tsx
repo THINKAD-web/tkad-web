@@ -10,6 +10,13 @@ import {
   Send,
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import {
+  STICKY_ACTION_BAR_BTN,
+  STICKY_ACTION_BAR_BTN_IDLE,
+  STICKY_ACTION_BAR_BTN_PRIMARY,
+  STICKY_ACTION_BAR_ROW,
+  StickyActionBar,
+} from "@/components/sticky-action-bar";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
@@ -603,7 +610,7 @@ export default function IntegratedPlannerPageClient({
         ) : null}
 
         {wizardStep <= LAST_STEP ? (
-          <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
+          <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip pb-28">
             <PlannerTips
               variant="integrated"
               wizardStep={wizardStep}
@@ -899,37 +906,6 @@ export default function IntegratedPlannerPageClient({
                 scenarioVariantLabels={scenarioVariantLabels}
               />
             ) : null}
-
-            <div className="flex w-full min-w-0 max-w-full flex-col-reverse gap-3 border-t dark:border-white/10 border-gray-100 pt-6 sm:flex-row sm:justify-between">
-              <BtnBlock
-                variant="secondary"
-                size="md"
-                className="w-full min-w-0 sm:w-auto"
-                onClick={goPrevStep}
-                disabled={wizardStep <= 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-                {t("back")}
-              </BtnBlock>
-              <BtnBlock
-                variant="accent"
-                size="md"
-                className="tkad-planner-wizard-btn-accent w-full min-w-0 sm:w-auto"
-                onClick={goNext}
-              >
-                {wizardStep === LAST_STEP ? (
-                  <>
-                    {ti("viewDashboard")}
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                ) : (
-                  <>
-                    {t("next")}
-                    <ChevronRight className="h-4 w-4" />
-                  </>
-                )}
-              </BtnBlock>
-            </div>
           </div>
         ) : integratedMetrics ? (
           <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
@@ -977,6 +953,65 @@ export default function IntegratedPlannerPageClient({
             {t("title")}
           </Link>
         </p>
+
+        {wizardStep <= LAST_STEP ? (
+          <StickyActionBar
+            open
+            layout="dock"
+            variant="neon"
+            compact
+            aboveMobileChrome
+            ariaLabel={ti("stepOf", {
+              current: wizardStep,
+              total: LAST_STEP,
+            })}
+          >
+            <div className={cn(STICKY_ACTION_BAR_ROW, "mx-auto w-full max-w-3xl")}>
+              <span
+                className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+                aria-live="polite"
+              >
+                {ti("stepOf", {
+                  current: wizardStep,
+                  total: LAST_STEP,
+                })}
+              </span>
+              <button
+                type="button"
+                onClick={goPrevStep}
+                disabled={wizardStep <= 1}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  "disabled:opacity-40",
+                )}
+              >
+                <ChevronLeft className="h-3 w-3 shrink-0" aria-hidden />
+                {t("back")}
+              </button>
+              <button
+                type="button"
+                onClick={goNext}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_PRIMARY,
+                )}
+              >
+                {wizardStep === LAST_STEP ? (
+                  <>
+                    {ti("viewDashboard")}
+                    <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />
+                  </>
+                ) : (
+                  <>
+                    {t("next")}
+                    <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />
+                  </>
+                )}
+              </button>
+            </div>
+          </StickyActionBar>
+        ) : null}
       </IntegratedPlannerPageBody>
     </div>
     </HomeLandingDayNight>

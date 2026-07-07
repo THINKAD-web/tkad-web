@@ -20,6 +20,7 @@ type Props = {
   onQuantityChange: (units: number) => void;
   onPriceOptionChange: (index: number) => void;
   compact?: boolean;
+  quantityEditable?: boolean;
   className?: string;
 };
 
@@ -31,6 +32,7 @@ export function PlannerMediaQuantityControl({
   onQuantityChange,
   onPriceOptionChange,
   compact = false,
+  quantityEditable = false,
   className,
 }: Props) {
   if (!shouldShowPlannerQuantityControl(media)) return null;
@@ -53,6 +55,7 @@ export function PlannerMediaQuantityControl({
           onChange={onQuantityChange}
           isKo={isKo}
           compact={compact}
+          editable={quantityEditable}
         />
       </div>
     );
@@ -80,6 +83,7 @@ export function PlannerMediaQuantityControl({
       onChange={onQuantityChange}
       isKo={isKo}
       compact={compact}
+      editable={quantityEditable}
       className={cn(className)}
     />
   );

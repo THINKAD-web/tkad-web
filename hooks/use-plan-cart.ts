@@ -14,6 +14,11 @@ import {
   removeFromPlanCart,
   reorderPlanCartItems,
   savePlanCartMeta,
+  updatePlanCartItem,
+  addPlanCartAddonLine,
+  updatePlanCartAddonLine,
+  removePlanCartAddonLine,
+  type PlanCartAddonLine,
   type AddToPlanCartResult,
   type BulkAddToPlanCartResult,
   type PlanCart,
@@ -87,6 +92,36 @@ export function usePlanCart() {
     [],
   );
 
+  const updateItem = useCallback(
+    (
+      mediaId: string,
+      patch: Partial<
+        Pick<PlanCartItem, "quantity" | "priceOptionIndex" | "gradeSelections" | "addonLines">
+      >,
+    ) => {
+      updatePlanCartItem(mediaId, patch);
+    },
+    [],
+  );
+
+  const addAddon = useCallback((line: PlanCartAddonLine) => {
+    addPlanCartAddonLine(line);
+  }, []);
+
+  const updateAddon = useCallback(
+    (
+      id: string,
+      patch: Partial<Pick<PlanCartAddonLine, "name" | "unitPriceWon" | "quantity">>,
+    ) => {
+      updatePlanCartAddonLine(id, patch);
+    },
+    [],
+  );
+
+  const removeAddon = useCallback((id: string) => {
+    removePlanCartAddonLine(id);
+  }, []);
+
   const has = useCallback(
     (mediaId: string) => cart.items.some((i) => i.mediaId === mediaId),
     [cart.items],
@@ -103,6 +138,10 @@ export function usePlanCart() {
     reorder,
     clear,
     updateMeta,
+    updateItem,
+    addAddon,
+    updateAddon,
+    removeAddon,
     has,
     isInPlanCart,
     getPlanCartCount,

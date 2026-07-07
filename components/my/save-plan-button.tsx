@@ -78,6 +78,7 @@ export function SavePlanButton({
             campaignGoal: cart.campaignGoal,
             totalBudget: cart.totalBudget,
             duration: cart.duration,
+            addonLines: cart.addonLines,
             updatedAt: cart.updatedAt,
             reportSummary,
           }),

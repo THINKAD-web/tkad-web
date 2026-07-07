@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -9,24 +9,27 @@ import {
   type PlannerIndustryKey,
 } from "@/lib/planner/types";
 import { Link, useRouter } from "@/i18n/navigation";
-import { ArrowRight, ChevronDown, ChevronUp, GripVertical, Sparkles, Trash2, X } from "lucide-react";
+import { ArrowRight, Sparkles, Trash2 } from "lucide-react";
+import type { MediaItem } from "@/lib/media-data";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
 import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
+import { PlanCartLineCard } from "@/components/plan/plan-cart-line-card";
 import { usePlanCart } from "@/hooks/use-plan-cart";
+import { PLAN_CART_DURATION_OPTIONS } from "@/lib/plan-cart";
 import {
-  PLAN_CART_DURATION_OPTIONS,
-  planCartAddedFromLabel,
-  planCartMonthlyTotal,
-} from "@/lib/plan-cart";
+  planCartAddonTotalWon,
+  planCartCatalogById,
+  planCartMonthlyTotalWon,
+  planCartPeriodTotalWon,
+} from "@/lib/plan-cart-pricing";
 import {
   buildMyPlanPlannerHref,
   mapPlanCartGoalToPlanner,
 } from "@/lib/plan-cart-planner-bridge";
 import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
 import { SavePlanButton } from "@/components/my/save-plan-button";
-import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -38,11 +41,34 @@ export function MyPlanPageClient() {
   const isKo = locale === "ko";
   const router = useRouter();
   const toast = useAppToast();
-  const { cart, remove, clear, updateMeta, reorder } = usePlanCart();
+  const {
+    cart,
+    remove,
+    clear,
+    updateMeta,
+    reorder,
+    updateItem,
+  } = usePlanCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
+  const [catalog, setCatalog] = useState<MediaItem[]>([]);
+
+  const loadCatalog = useCallback(async () => {
+    try {
+      const res = await fetch("/api/public/media-catalog", { cache: "no-store" });
+      if (!res.ok) return;
+      const data = await res.json();
+      setCatalog(Array.isArray(data) ? (data as MediaItem[]) : []);
+    } catch {
+      setCatalog([]);
+    }
+  }, []);
+
+  useEffect(() => {
+    void loadCatalog();
+  }, [loadCatalog]);
 
   useEffect(() => {
     setBudgetInput(
@@ -52,9 +78,17 @@ export function MyPlanPageClient() {
     );
   }, [cart.totalBudget]);
 
-  const monthlyTotal = useMemo(() => planCartMonthlyTotal(cart), [cart]);
+  const catalogById = useMemo(() => planCartCatalogById(catalog), [catalog]);
+  const monthlyTotal = useMemo(
+    () => planCartMonthlyTotalWon(cart, catalogById),
+    [cart, catalogById],
+  );
+  const addonTotal = useMemo(() => planCartAddonTotalWon(cart), [cart]);
   const duration = cart.duration ?? 1;
-  const periodTotal = monthlyTotal * duration;
+  const periodTotal = useMemo(
+    () => planCartPeriodTotalWon(cart, catalogById),
+    [cart, catalogById],
+  );
   const plannerHref = buildMyPlanPlannerHref(
     cart.items.map((item) => item.mediaId),
   );
@@ -86,6 +120,7 @@ export function MyPlanPageClient() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             items: cart.items,
+            addonLines: cart.addonLines,
             campaignGoal: cart.campaignGoal,
             totalBudget: cart.totalBudget,
             duration: cart.duration,
@@ -273,20 +308,30 @@ export function MyPlanPageClient() {
                 </div>
                 <div className="flex justify-between py-1">
                   <span className="text-gray-500 dark:text-white/55">
-                    {isKo ? "월 총 예산" : "Monthly total"}
+                    {isKo ? "월 매체 합계" : "Monthly media"}
                   </span>
                   <span className="font-bold dark:text-white text-gray-900">
                     {formatWon(monthlyTotal)}
                   </span>
                 </div>
+                {addonTotal > 0 ? (
+                  <div className="flex justify-between py-1">
+                    <span className="text-gray-500 dark:text-white/55">
+                      {isKo ? "부가 비용" : "Add-on costs"}
+                    </span>
+                    <span className="font-bold dark:text-white text-gray-900">
+                      {formatWon(addonTotal)}
+                    </span>
+                  </div>
+                ) : null}
                 <div className="flex justify-between border-t dark:border-white/10 border-gray-200 py-2 pt-3">
                   <span className="text-gray-500 dark:text-white/55">
-                    {isKo ? "기간 총 예산" : "Period total"}
+                    {isKo ? `기간 총 예산 (${duration}개월)` : `Period total (${duration} mo)`}
                   </span>
                   <span className="font-black tkad-home-accent-text">
                     {formatWon(periodTotal)}
                     <span className="ml-1 text-xs font-normal text-gray-400">
-                      {isKo ? "(제작비·부가세 별도)" : "(Production & VAT extra)"}
+                      {isKo ? "(부가세 별도)" : "(VAT extra)"}
                     </span>
                   </span>
                 </div>
@@ -306,102 +351,44 @@ export function MyPlanPageClient() {
                   </p>
                 </div>
                 {cart.items.map((item, index) => (
-                  <article
+                  <PlanCartLineCard
                     key={item.mediaId}
-                    draggable
-                    onDragStart={() => setDraggingId(item.mediaId)}
-                    onDragEnd={() => {
+                    item={item}
+                    media={catalogById.get(item.mediaId)}
+                    index={index}
+                    total={cart.items.length}
+                    isKo={isKo}
+                    draggingId={draggingId}
+                    dragOverId={dragOverId}
+                    onRemove={remove}
+                    onMove={moveItem}
+                    onQuantityChange={(mediaId, units) =>
+                      updateItem(mediaId, { quantity: units })
+                    }
+                    onPriceOptionChange={(mediaId, poIdx) =>
+                      updateItem(mediaId, { priceOptionIndex: poIdx })
+                    }
+                    onGradeSelectionsChange={(mediaId, selections) =>
+                      updateItem(mediaId, {
+                        gradeSelections: selections,
+                        quantity: undefined,
+                        priceOptionIndex: undefined,
+                      })
+                    }
+                    onAddonLinesChange={(mediaId, lines) =>
+                      updateItem(mediaId, { addonLines: lines })
+                    }
+                    onGripDragStart={setDraggingId}
+                    onGripDragEnd={() => {
                       setDraggingId(null);
                       setDragOverId(null);
                     }}
-                    onDragOver={(e) => {
-                      e.preventDefault();
-                      if (draggingId && draggingId !== item.mediaId) {
-                        setDragOverId(item.mediaId);
-                      }
+                    onDropOnItem={handleDropOnItem}
+                    onDragOverItem={setDragOverId}
+                    onDragLeaveItem={(id) => {
+                      if (dragOverId === id) setDragOverId(null);
                     }}
-                    onDragLeave={() => {
-                      if (dragOverId === item.mediaId) setDragOverId(null);
-                    }}
-                    onDrop={(e) => {
-                      e.preventDefault();
-                      handleDropOnItem(item.mediaId);
-                    }}
-                    className={cn(
-                      "flex gap-2 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-3 transition",
-                      draggingId === item.mediaId && "opacity-60",
-                      dragOverId === item.mediaId &&
-                        draggingId !== item.mediaId &&
-                        "ring-2 ring-violet-400/70",
-                    )}
-                  >
-                    <div className="flex shrink-0 flex-col items-center gap-0.5">
-                      <button
-                        type="button"
-                        className="flex h-7 w-7 cursor-grab items-center justify-center rounded-lg dark:bg-white/10 bg-gray-200 text-gray-500 active:cursor-grabbing dark:text-white/55"
-                        aria-label={isKo ? "순서 변경" : "Reorder"}
-                        onMouseDown={(e) => e.stopPropagation()}
-                      >
-                        <GripVertical className="h-4 w-4" aria-hidden />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={() => moveItem(item.mediaId, "up")}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        className="flex h-6 w-7 items-center justify-center rounded-md dark:bg-white/10 bg-gray-200 text-gray-600 disabled:opacity-30 dark:text-white/70"
-                        aria-label={isKo ? "위로" : "Move up"}
-                      >
-                        <ChevronUp className="h-3.5 w-3.5" aria-hidden />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === cart.items.length - 1}
-                        onClick={() => moveItem(item.mediaId, "down")}
-                        onMouseDown={(e) => e.stopPropagation()}
-                        className="flex h-6 w-7 items-center justify-center rounded-md dark:bg-white/10 bg-gray-200 text-gray-600 disabled:opacity-30 dark:text-white/70"
-                        aria-label={isKo ? "아래로" : "Move down"}
-                      >
-                        <ChevronDown className="h-3.5 w-3.5" aria-hidden />
-                      </button>
-                    </div>
-                    <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-xl bg-gray-200 dark:bg-gray-800">
-                      {item.thumbnailUrl ? (
-                        <Image
-                          src={item.thumbnailUrl}
-                          alt=""
-                          fill
-                          className="object-cover"
-                          unoptimized
-                        />
-                      ) : null}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p className="text-sm font-bold leading-snug break-words dark:text-white text-gray-900">
-                        {item.mediaName}
-                      </p>
-                      <p className="text-xs text-gray-500 dark:text-white/50">
-                        {[item.region, item.mediaType].filter(Boolean).join(" · ")}
-                      </p>
-                      <p className="mt-1 text-sm font-semibold tkad-home-accent-text">
-                        {formatWon(item.price)}
-                        {isKo ? "/월" : "/mo"}
-                      </p>
-                      <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
-                      <span className="mt-1 inline-block rounded-full dark:bg-white/10 bg-gray-200 px-2 py-0.5 text-[10px] font-semibold dark:text-white/70 text-gray-600">
-                        {planCartAddedFromLabel(item.addedFrom, isKo)}
-                      </span>
-                    </div>
-                    <button
-                      type="button"
-                      onClick={() => remove(item.mediaId)}
-                      onMouseDown={(e) => e.stopPropagation()}
-                      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl dark:bg-white/10 bg-gray-200 dark:text-white/70 text-gray-600"
-                      aria-label={isKo ? "삭제" : "Remove"}
-                    >
-                      <X className="h-4 w-4" />
-                    </button>
-                  </article>
+                  />
                 ))}
               </section>
 

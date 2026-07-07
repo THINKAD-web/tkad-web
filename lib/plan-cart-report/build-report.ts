@@ -12,6 +12,7 @@ import {
   type PlannerCampaignGoal,
   type PlannerMetrics,
 } from "@/lib/planner-logic";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import {
   isPlannerIndustryKey,
   PLANNER_BUDGET_MIN,
@@ -26,6 +27,7 @@ import {
   planReportRegionSortOrder,
   resolvePlanCartItemRegionKey,
 } from "@/lib/plan-cart-report/regional-breakdown";
+import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
 import {
   flattenPlanCartReportGroups,
   groupPlanCartReportPortfolio,
@@ -120,11 +122,12 @@ export function resolvePlanCartPortfolio(
 function resolvePlanCartBudgetMan(
   cart: PlanCart,
   portfolio: readonly MediaItem[],
+  pricing?: PlannerPortfolioPricing,
 ): number {
   if (cart.totalBudget != null && cart.totalBudget > 0) {
     return Math.max(1, Math.round(cart.totalBudget / 10_000));
   }
-  const sum = computePlannerPortfolioMonthlyMan(portfolio);
+  const sum = computePlannerPortfolioMonthlyMan(portfolio, pricing);
   return sum > 0 ? sum : PLANNER_BUDGET_MIN;
 }
 
@@ -166,9 +169,10 @@ export function buildPlanCartReportBundle(args: {
 
   const portfolioGroups = groupPlanCartReportPortfolio(portfolio, isKo);
   const portfolioSorted = flattenPlanCartReportGroups(portfolioGroups);
+  const pricing = planCartPortfolioPricing(cart);
 
   const months = Math.max(1, cart.duration ?? 1);
-  const budgetMan = resolvePlanCartBudgetMan(cart, portfolioSorted);
+  const budgetMan = resolvePlanCartBudgetMan(cart, portfolioSorted, pricing);
   const campaignGoal = mapPlanCartGoalToPlanner(cart.campaignGoal) ?? "brand";
   const goalTitle = isKo
     ? GOAL_TITLES_KO[campaignGoal]
@@ -178,13 +182,14 @@ export function buildPlanCartReportBundle(args: {
     portfolioSorted,
     budgetMan,
     months,
-    { campaignGoal },
+    { campaignGoal, pricing },
   );
   const reachSplit = reachSplitForGoal(campaignGoal);
   const regionalBreakdown = computePlanCartRegionalBreakdown(
     portfolioSorted,
     months,
     isKo,
+    pricing,
   );
 
   const regionBudgetCharts: PlannerExportChartDatum[] = regionalBreakdown
@@ -205,7 +210,10 @@ export function buildPlanCartReportBundle(args: {
       pct: r.impressionPct,
     }));
 
-  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(portfolioSorted);
+  const monthlyTotalMan = computePlannerPortfolioMonthlyMan(
+    portfolioSorted,
+    pricing,
+  );
 
   const industryKey: PlannerIndustryKey | null = isPlannerIndustryKey(
     cart.industryKey,

@@ -2595,6 +2595,10 @@
     "pdfFailed": "Could not download PDF.",
     "copyOk": "A draft copy was created.",
     "copyFailed": "Copy failed.",
+    "delete": "Delete",
+    "deleteConfirm": "Delete quote {number} ({name})? This cannot be undone.",
+    "deleteOk": "Quote deleted.",
+    "deleteFailed": "Failed to delete quote.",
     "statusFailed": "Could not update status."
   },
   "adminQuotesHub": {

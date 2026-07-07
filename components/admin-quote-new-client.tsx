@@ -6,7 +6,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   parseAdminMediaListFromApiJson,
   type AdminMediaDto,
@@ -46,6 +46,7 @@ import {
   Download,
   Plus,
   ListOrdered,
+  Trash2,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import {
@@ -88,8 +89,10 @@ function addDaysISODate(iso: string, days: number): string {
 
 export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const t = useTranslations("adminQuoteNew");
+  const tList = useTranslations("adminQuotesList");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
+  const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
   const [medias, setMedias] = useState<AdminMediaDto[]>([]);
@@ -488,6 +491,45 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     toast,
   ]);
 
+  const deleteQuote = useCallback(async () => {
+    if (!quoteId) return;
+    if (
+      !window.confirm(
+        tList("deleteConfirm", {
+          number: quoteNumber || quoteId,
+          name: clientCompany.trim() || clientName.trim() || "—",
+        }),
+      )
+    ) {
+      return;
+    }
+    setSaveLoading(true);
+    try {
+      const res = await fetch(`/api/admin/quotes/${quoteId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) {
+        toast("error", tList("deleteFailed"));
+        return;
+      }
+      toast("success", tList("deleteOk"));
+      router.push("/admin/quotes");
+    } catch {
+      toast("error", tList("deleteFailed"));
+    } finally {
+      setSaveLoading(false);
+    }
+  }, [
+    quoteId,
+    quoteNumber,
+    clientCompany,
+    clientName,
+    tList,
+    toast,
+    router,
+  ]);
+
   const downloadPdf = useCallback(async (style: "basic" | "formal" = pdfStyle) => {
     setPdfError(null);
     if (!hasLines) {
@@ -636,6 +678,19 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
             {t("goToQuotesList")}
           </Link>
         </div>
+        {isEditMode ? (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            className="text-red-600 hover:bg-red-50 hover:text-red-700"
+            disabled={saveLoading}
+            onClick={() => void deleteQuote()}
+          >
+            <Trash2 className="mr-2 h-4 w-4" />
+            {tList("delete")}
+          </Button>
+        ) : null}
       </div>
 
       <Card>
@@ -1153,6 +1208,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                           m?.image ||
                           null;
                         return {
+                          rowKey: it.lineId,
                           id: it.mediaId,
                           thumbUrl: thumb,
                           name: it.mediaName,

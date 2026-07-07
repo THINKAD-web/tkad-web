@@ -51,7 +51,7 @@ export const STICKY_ACTION_BAR_BTN =
   "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold leading-none transition active:scale-95";
 
 export const STICKY_ACTION_BAR_BTN_IDLE =
-  "border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
+  "border-gray-200 bg-white text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
 
 export const STICKY_ACTION_BAR_BTN_PRIMARY =
   "border-0 bg-gradient-to-r from-violet-500 to-cyan-400 font-semibold text-white shadow-sm shadow-violet-500/20";
@@ -60,7 +60,7 @@ export const STICKY_ACTION_BAR_BTN_VIOLET =
   "border-violet-500/40 bg-violet-500 text-white shadow-sm shadow-violet-500/25";
 
 export const STICKY_ACTION_BAR_BTN_DISABLED =
-  "border-gray-200 bg-gray-100 text-gray-800 opacity-45 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
+  "border-gray-200 bg-white text-gray-800 opacity-45 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
 
 const TRANSITION = {
   type: "tween" as const,

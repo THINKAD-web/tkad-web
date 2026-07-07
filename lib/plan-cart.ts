@@ -1,5 +1,6 @@
 /** 플랜 장바구니 — localStorage `tkad_plan_cart` */
 
+import { planCartMonthlyTotalWon } from "@/lib/plan-cart-pricing";
 import {
   PLAN_CART_MAX_ITEMS,
   PLAN_CART_MAX_ITEMS_FREE,
@@ -29,13 +30,36 @@ export interface PlanCartItem {
   mediaType: string;
   region: string;
   price: number;
+  /** 수량(대·기·구좌 등) — 미지정 시 카탈로그 기본값 */
+  quantity?: number;
+  /** `priceOptions` 패키지·등급 매체 — 선택 옵션 인덱스 */
+  priceOptionIndex?: number;
+  /** 버스 등급형 — 복수 등급·대수 (있으면 단일 priceOptionIndex/quantity 보다 우선) */
+  gradeSelections?: PlanCartGradeSelection[];
+  /** 매체별 제작비·설치비 등 (기간 총액에 1회 합산) */
+  addonLines?: PlanCartAddonLine[];
   thumbnailUrl?: string;
   addedFrom: PlanCartAddedFrom;
   addedAt: string;
 }
 
+/** 등급형 버스 — 등급별 대수 */
+export interface PlanCartGradeSelection {
+  priceOptionIndex: number;
+  quantity: number;
+}
+
+/** 제작비·설치비 등 부가 비용 라인 (견적서 커스텀 라인과 동일 개념) */
+export interface PlanCartAddonLine {
+  id: string;
+  name: string;
+  unitPriceWon: number;
+  quantity: number;
+}
+
 export interface PlanCart {
   items: PlanCartItem[];
+  addonLines?: PlanCartAddonLine[];
   campaignGoal?: string;
   totalBudget?: number;
   duration?: number;
@@ -91,6 +115,20 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
     mediaType: typeof o.mediaType === "string" ? o.mediaType : "",
     region: typeof o.region === "string" ? o.region : "",
     price: typeof o.price === "number" && Number.isFinite(o.price) ? o.price : 0,
+    quantity:
+      typeof o.quantity === "number" &&
+      Number.isFinite(o.quantity) &&
+      o.quantity > 0
+        ? Math.round(o.quantity)
+        : undefined,
+    priceOptionIndex:
+      typeof o.priceOptionIndex === "number" &&
+      Number.isFinite(o.priceOptionIndex) &&
+      o.priceOptionIndex >= 0
+        ? Math.round(o.priceOptionIndex)
+        : undefined,
+    gradeSelections: normalizeGradeSelections(o.gradeSelections),
+    addonLines: normalizeItemAddonLines(o.addonLines),
     thumbnailUrl:
       typeof o.thumbnailUrl === "string" ? o.thumbnailUrl : undefined,
     addedFrom:
@@ -108,6 +146,78 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
   };
 }
 
+function normalizeItemAddonLines(raw: unknown): PlanCartAddonLine[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out = raw
+    .map(normalizeAddonLine)
+    .filter((x): x is PlanCartAddonLine => x !== null);
+  return out.length > 0 ? out : undefined;
+}
+
+function normalizeGradeSelection(raw: unknown): PlanCartGradeSelection | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const priceOptionIndex =
+    typeof o.priceOptionIndex === "number" &&
+    Number.isFinite(o.priceOptionIndex) &&
+    o.priceOptionIndex >= 0
+      ? Math.round(o.priceOptionIndex)
+      : null;
+  const quantity =
+    typeof o.quantity === "number" &&
+    Number.isFinite(o.quantity) &&
+    o.quantity > 0
+      ? Math.round(o.quantity)
+      : null;
+  if (priceOptionIndex == null || quantity == null) return null;
+  return { priceOptionIndex, quantity };
+}
+
+function normalizeGradeSelections(raw: unknown): PlanCartGradeSelection[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out = raw
+    .map(normalizeGradeSelection)
+    .filter((x): x is PlanCartGradeSelection => x !== null);
+  return out.length > 0 ? out : undefined;
+}
+
+function normalizeAddonLine(raw: unknown): PlanCartAddonLine | null {
+  if (!raw || typeof raw !== "object") return null;
+  const o = raw as Record<string, unknown>;
+  const id = typeof o.id === "string" && o.id.trim() ? o.id.trim() : "";
+  if (!id) return null;
+  const name = typeof o.name === "string" ? o.name : "";
+  return {
+    id,
+    name,
+    unitPriceWon:
+      typeof o.unitPriceWon === "number" && Number.isFinite(o.unitPriceWon)
+        ? Math.max(0, Math.round(o.unitPriceWon))
+        : 0,
+    quantity:
+      typeof o.quantity === "number" &&
+      Number.isFinite(o.quantity) &&
+      o.quantity > 0
+        ? Math.round(o.quantity)
+        : 1,
+  };
+}
+
+export function newPlanCartAddonLineId(): string {
+  return `addon-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+}
+
+export function createPlanCartAddonLine(
+  partial?: Partial<Pick<PlanCartAddonLine, "name" | "unitPriceWon" | "quantity">>,
+): PlanCartAddonLine {
+  return {
+    id: newPlanCartAddonLineId(),
+    name: partial?.name ?? "",
+    unitPriceWon: Math.max(0, partial?.unitPriceWon ?? 0),
+    quantity: Math.max(1, partial?.quantity ?? 1),
+  };
+}
+
 export function getPlanCart(): PlanCart {
   if (!isBrowser()) return EMPTY_CART();
   try {
@@ -121,8 +231,14 @@ export function getPlanCart(): PlanCart {
           .map(normalizeItem)
           .filter((x): x is PlanCartItem => x !== null)
       : [];
+    const addonLines = Array.isArray(parsed.addonLines)
+      ? parsed.addonLines
+          .map(normalizeAddonLine)
+          .filter((x): x is PlanCartAddonLine => x !== null)
+      : [];
     return {
       items,
+      addonLines: addonLines.length > 0 ? addonLines : undefined,
       campaignGoal:
         typeof parsed.campaignGoal === "string"
           ? parsed.campaignGoal
@@ -164,6 +280,9 @@ export function replacePlanCart(cart: PlanCart): void {
     items: cart.items
       .map((i) => normalizeItem(i))
       .filter((x): x is PlanCartItem => x !== null),
+    addonLines: (cart.addonLines ?? [])
+      .map((l) => normalizeAddonLine(l))
+      .filter((x): x is PlanCartAddonLine => x !== null),
     updatedAt: cart.updatedAt || new Date().toISOString(),
   });
 }
@@ -176,6 +295,9 @@ export function applySyncedPlanCart(cart: PlanCart): void {
     items: cart.items
       .map((i) => normalizeItem(i))
       .filter((x): x is PlanCartItem => x !== null),
+    addonLines: (cart.addonLines ?? [])
+      .map((l) => normalizeAddonLine(l))
+      .filter((x): x is PlanCartAddonLine => x !== null),
     updatedAt: cart.updatedAt || new Date().toISOString(),
   };
   window.localStorage.setItem(PLAN_CART_KEY, JSON.stringify(next));
@@ -227,6 +349,98 @@ export function removeFromPlanCart(mediaId: string): void {
   });
 }
 
+export function updatePlanCartItem(
+  mediaId: string,
+  patch: Partial<
+    Pick<
+      PlanCartItem,
+      "quantity" | "priceOptionIndex" | "gradeSelections" | "addonLines"
+    >
+  >,
+): void {
+  const cart = getPlanCart();
+  const items = cart.items.map((item) => {
+    if (item.mediaId !== mediaId) return item;
+    const next = { ...item };
+    if ("quantity" in patch) {
+      const q = patch.quantity;
+      if (q == null || !Number.isFinite(q) || q <= 0) {
+        delete next.quantity;
+      } else {
+        next.quantity = Math.round(q);
+      }
+    }
+    if ("priceOptionIndex" in patch) {
+      const idx = patch.priceOptionIndex;
+      if (idx == null || !Number.isFinite(idx) || idx < 0) {
+        delete next.priceOptionIndex;
+      } else {
+        next.priceOptionIndex = Math.round(idx);
+      }
+    }
+    if ("gradeSelections" in patch) {
+      const gs = patch.gradeSelections;
+      if (!gs?.length) {
+        delete next.gradeSelections;
+      } else {
+        next.gradeSelections = gs
+          .map(normalizeGradeSelection)
+          .filter((x): x is PlanCartGradeSelection => x !== null);
+        if (next.gradeSelections.length === 0) delete next.gradeSelections;
+      }
+    }
+    if ("addonLines" in patch) {
+      const al = patch.addonLines;
+      if (!al?.length) {
+        delete next.addonLines;
+      } else {
+        next.addonLines = al
+          .map(normalizeAddonLine)
+          .filter((x): x is PlanCartAddonLine => x !== null);
+        if (next.addonLines.length === 0) delete next.addonLines;
+      }
+    }
+    return next;
+  });
+  writeCart({ ...cart, items });
+}
+
+export function addPlanCartAddonLine(line: PlanCartAddonLine): void {
+  const cart = getPlanCart();
+  writeCart({
+    ...cart,
+    addonLines: [...(cart.addonLines ?? []), line],
+  });
+}
+
+export function updatePlanCartAddonLine(
+  id: string,
+  patch: Partial<Pick<PlanCartAddonLine, "name" | "unitPriceWon" | "quantity">>,
+): void {
+  const cart = getPlanCart();
+  const addonLines = (cart.addonLines ?? []).map((line) => {
+    if (line.id !== id) return line;
+    const next = { ...line, ...patch };
+    if (patch.unitPriceWon != null) {
+      next.unitPriceWon = Math.max(0, Math.round(patch.unitPriceWon));
+    }
+    if (patch.quantity != null) {
+      next.quantity = Math.max(1, Math.round(patch.quantity));
+    }
+    return next;
+  });
+  writeCart({ ...cart, addonLines });
+}
+
+export function removePlanCartAddonLine(id: string): void {
+  const cart = getPlanCart();
+  const addonLines = (cart.addonLines ?? []).filter((line) => line.id !== id);
+  writeCart({
+    ...cart,
+    addonLines: addonLines.length > 0 ? addonLines : undefined,
+  });
+}
+
 export function reorderPlanCartItems(fromIndex: number, toIndex: number): void {
   const cart = getPlanCart();
   if (
@@ -246,7 +460,7 @@ export function reorderPlanCartItems(fromIndex: number, toIndex: number): void {
 }
 
 export function clearPlanCart(): void {
-  writeCart(EMPTY_CART());
+  writeCart({ ...EMPTY_CART(), addonLines: undefined });
 }
 
 export function getPlanCartCount(): number {
@@ -258,7 +472,7 @@ export function isInPlanCart(mediaId: string): boolean {
 }
 
 export function planCartMonthlyTotal(cart: PlanCart = getPlanCart()): number {
-  return cart.items.reduce((sum, i) => sum + (i.price > 0 ? i.price : 0), 0);
+  return planCartMonthlyTotalWon(cart);
 }
 
 export const PLAN_CART_GOAL_OPTIONS = [

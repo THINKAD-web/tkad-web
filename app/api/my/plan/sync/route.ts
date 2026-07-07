@@ -18,12 +18,31 @@ import {
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 
+const PlanCartAddonLineSchema = z.object({
+  id: z.string().min(1),
+  name: z.string(),
+  unitPriceWon: z.number().nonnegative(),
+  quantity: z.number().int().positive(),
+});
+
 const PlanCartItemSchema = z.object({
   mediaId: z.string().min(1),
   mediaName: z.string(),
   mediaType: z.string(),
   region: z.string(),
   price: z.number(),
+  quantity: z.number().int().positive().optional(),
+  priceOptionIndex: z.number().int().nonnegative().optional(),
+  gradeSelections: z
+    .array(
+      z.object({
+        priceOptionIndex: z.number().int().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(12)
+    .optional(),
+  addonLines: z.array(PlanCartAddonLineSchema).max(10).optional(),
   thumbnailUrl: z.string().optional(),
   addedFrom: z.enum(["ai_recommend", "planner", "search", "map", "package"]),
   addedAt: z.string(),
@@ -32,6 +51,7 @@ const PlanCartItemSchema = z.object({
 function syncBodySchema(maxItems: number) {
   return z.object({
     items: z.array(PlanCartItemSchema).max(maxItems),
+    addonLines: z.array(PlanCartAddonLineSchema).max(20).optional(),
     campaignGoal: z.string().optional(),
     totalBudget: z.number().optional(),
     duration: z.number().int().positive().optional(),

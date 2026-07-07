@@ -99,9 +99,6 @@ export function PlannerMediaPackagePicker({
                   onQuantityChange(opt.units);
                 } else {
                   onPriceOptionChange(i);
-                  if (isGrade && opt.units != null && opt.units > 0) {
-                    onQuantityChange(opt.units);
-                  }
                 }
               }}
               className={cn(

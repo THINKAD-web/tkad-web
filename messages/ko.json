@@ -2554,7 +2554,8 @@
     "editLoading": "견적 불러오는 중…",
     "editLoadError": "견적을 불러오지 못했습니다.",
     "updateQuote": "변경 저장",
-    "updateOk": "견적이 수정되었습니다."
+    "updateOk": "견적이 수정되었습니다.",
+    "deleteQuote": "견적 삭제"
   },
   "adminQuotesList": {
     "title": "견적 관리",
@@ -2595,6 +2596,10 @@
     "pdfFailed": "PDF를 받지 못했습니다.",
     "copyOk": "복사본이 작성중 상태로 저장되었습니다.",
     "copyFailed": "복사에 실패했습니다.",
+    "delete": "삭제",
+    "deleteConfirm": "견적 {number} ({name})을(를) 삭제할까요? 되돌릴 수 없습니다.",
+    "deleteOk": "견적을 삭제했습니다.",
+    "deleteFailed": "삭제에 실패했습니다.",
     "statusFailed": "상태 변경에 실패했습니다."
   },
   "adminQuotesHub": {

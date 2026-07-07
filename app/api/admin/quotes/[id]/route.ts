@@ -133,3 +133,19 @@ export async function PATCH(request: NextRequest, ctx: Ctx) {
     return json({ error: "Update failed" }, 500);
   }
 }
+
+export async function DELETE(request: NextRequest, ctx: Ctx) {
+  const deny = assertAdminDb(request);
+  if (deny) return deny;
+  const { id } = await ctx.params;
+  const db = getPrisma();
+  const existing = await db.quote.findUnique({ where: { id } });
+  if (!existing) return json({ error: "Not found" }, 404);
+  try {
+    await db.quote.delete({ where: { id } });
+    return json({ ok: true });
+  } catch (e) {
+    console.error("[admin-quotes DELETE]", e);
+    return json({ error: "Delete failed" }, 500);
+  }
+}

@@ -30,6 +30,7 @@ type Props = {
   networkRegionLabel: string;
   networkRegionAllLabel: string;
   packagePeriodOnlyLabel: string;
+  quantityEditable?: boolean;
 };
 
 export function QuoteMediaQuantityFields({
@@ -48,6 +49,7 @@ export function QuoteMediaQuantityFields({
   networkRegionLabel,
   networkRegionAllLabel,
   packagePeriodOnlyLabel,
+  quantityEditable = false,
 }: Props) {
   if (!checked) return null;
 
@@ -80,6 +82,7 @@ export function QuoteMediaQuantityFields({
             }
           }}
           onPriceOptionChange={(index) => onPriceOptionChange(media, index)}
+          quantityEditable={quantityEditable}
         />
       ) : null}
 

@@ -1,13 +1,17 @@
 "use client";
 
 import { Minus, Plus } from "lucide-react";
+import { useEffect, useState } from "react";
 import type { MediaItem } from "@/lib/media-data";
-import { getQuantityBounds } from "@/lib/media-quantity";
+import {
+  getQuantityBounds,
+  getQuantityUnitMode,
+  isPerUnitGradePriceOptions,
+} from "@/lib/media-quantity";
 import {
   formatPlannerQuantityLabel,
   shouldShowPlannerQuantityStepper,
 } from "@/lib/planner/planner-media-quantity";
-import { getQuantityUnitMode } from "@/lib/media-quantity";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -16,6 +20,8 @@ type Props = {
   onChange: (units: number) => void;
   isKo: boolean;
   compact?: boolean;
+  /** 직접 숫자 입력 (내 플랜·어드민) */
+  editable?: boolean;
   className?: string;
 };
 
@@ -25,9 +31,11 @@ export function PlannerMediaQuantityStepper({
   onChange,
   isKo,
   compact = false,
+  editable = false,
   className,
 }: Props) {
-  if (getQuantityUnitMode(media) !== "unit") return null;
+  const gradePerUnit = isPerUnitGradePriceOptions(media);
+  if (getQuantityUnitMode(media) !== "unit" && !gradePerUnit) return null;
   if (!shouldShowPlannerQuantityStepper(media)) return null;
 
   const bounds = getQuantityBounds(media);
@@ -38,6 +46,20 @@ export function PlannerMediaQuantityStepper({
   const label = formatPlannerQuantityLabel(media, units, isKo);
   const atMin = units <= bounds.min;
   const atMax = bounds.max != null && units >= bounds.max;
+  const [draft, setDraft] = useState(String(units));
+
+  useEffect(() => {
+    setDraft(String(units));
+  }, [units]);
+
+  const commitDraft = () => {
+    const parsed = Number(draft.replace(/,/g, ""));
+    if (!Number.isFinite(parsed)) {
+      setDraft(String(units));
+      return;
+    }
+    onChange(clamp(parsed));
+  };
 
   return (
     <div
@@ -64,9 +86,28 @@ export function PlannerMediaQuantityStepper({
         >
           <Minus className="h-3.5 w-3.5" aria-hidden />
         </button>
-        <span className="min-w-[3.5rem] px-1 text-center text-xs font-semibold tabular-nums text-foreground">
-          {label}
-        </span>
+        {editable ? (
+          <input
+            type="text"
+            inputMode="numeric"
+            value={draft}
+            onChange={(e) => setDraft(e.target.value)}
+            onBlur={commitDraft}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") {
+                e.preventDefault();
+                commitDraft();
+                (e.target as HTMLInputElement).blur();
+              }
+            }}
+            className="h-7 w-14 border-x border-violet-400/35 bg-white px-1 text-center text-xs font-semibold tabular-nums text-foreground outline-none focus:ring-1 focus:ring-violet-400/50 dark:border-violet-400/25 dark:bg-white/5"
+            aria-label={isKo ? "수량 직접 입력" : "Quantity input"}
+          />
+        ) : (
+          <span className="min-w-[3.5rem] px-1 text-center text-xs font-semibold tabular-nums text-foreground">
+            {label}
+          </span>
+        )}
         <button
           type="button"
           onClick={() => onChange(clamp(units + 1))}

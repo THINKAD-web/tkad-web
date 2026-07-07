@@ -249,7 +249,7 @@ function QuoteMediaCompactTable({
         <tbody>
           {rows.map((row, idx) => (
             <tr
-              key={row.id}
+              key={row.rowKey ?? `${row.id}-${idx}`}
               className="border-b border-gray-100 last:border-0 even:bg-gray-50/60"
             >
               <td className="px-3 py-2.5 text-xs font-medium tabular-nums text-gray-400">
@@ -273,6 +273,8 @@ function QuoteMediaCompactTable({
 }
 
 export type QuotePdfPreviewRow = {
+  /** React list key — 동일 mediaId 다중 라인 시 `lineId` 등 유일값 */
+  rowKey?: string;
   id: string;
   thumbUrl: string | null;
   name: string;
@@ -534,7 +536,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
               <QuoteMediaCompactTable rows={rows} isKo={isKo} />
             ) : (
               <ul className={cn(isDefaultDoc ? "space-y-2" : "space-y-4")}>
-                {rows.map((row) => {
+                {rows.map((row, idx) => {
                   const unitLabel = row.unitPeriodLabel
                     ? `${formatDocumentManWon(row.unitPriceWon, isKo)} / ${row.unitPeriodLabel}`
                     : formatDocumentManWon(row.unitPriceWon, isKo);
@@ -557,7 +559,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     executionPeriodLabel: row.executionPeriodLabel ?? undefined,
                   };
                   return (
-                    <li key={row.id}>
+                    <li key={row.rowKey ?? `${row.id}-${idx}`}>
                       {isDefaultDoc ? (
                         isAddon ? (
                           <QuoteAddonLineRow detail={detail} isKo={isKo} />

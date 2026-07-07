@@ -1,4 +1,8 @@
 import type { PlanCart } from "@/lib/plan-cart";
+import {
+  planCartToCampaignPriceOptionIndex,
+  planCartToCampaignQuantities,
+} from "@/lib/plan-cart-pricing";
 import type { PlannerStoreState } from "@/lib/planner/store";
 import {
   PLANNER_BUDGET_MAX,
@@ -44,6 +48,8 @@ export function hydratePlannerFromPlanCart(
 
   const patch: Partial<PlannerStoreState> = {
     campaignMediaIds: cart.items.map((i) => i.mediaId),
+    campaignMediaQuantities: planCartToCampaignQuantities(cart),
+    campaignMediaPriceOptionIndex: planCartToCampaignPriceOptionIndex(cart),
     campaignGoal: mapPlanCartGoalToPlanner(cart.campaignGoal),
     mediaSelectionExplicit: cart.items.length > 0,
   };
