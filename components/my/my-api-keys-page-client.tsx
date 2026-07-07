@@ -11,7 +11,6 @@ import {
   Plus,
   Trash2,
 } from "lucide-react";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -125,16 +124,11 @@ export function MyApiKeysPageClient() {
   }
 
   if (loading) {
-    return (
-      <HomeLandingDayNight>
-        <FullPageSpinner />
-      </HomeLandingDayNight>
-    );
+    return <FullPageSpinner />;
   }
 
   return (
-    <HomeLandingDayNight>
-      <div className="mx-auto max-w-2xl px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-2xl">
         <Link
           href="/my"
           className="mb-6 inline-flex items-center gap-2 font-display text-xs uppercase tracking-widest dark:text-white text-gray-500 hover:dark:text-white text-gray-900"
@@ -266,6 +260,5 @@ export function MyApiKeysPageClient() {
           )}
         </div>
       </div>
-    </HomeLandingDayNight>
   );
 }

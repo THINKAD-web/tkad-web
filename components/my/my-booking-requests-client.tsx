@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, CalendarDays, Loader2 } from "lucide-react";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -111,9 +110,7 @@ export function MyBookingRequestsClient() {
   }
 
   return (
-    <HomeLandingDayNight portal>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)] px-4 py-8 sm:px-6 sm:py-10">
-        <div className="relative mx-auto max-w-5xl">
+      <div className="relative mx-auto max-w-5xl">
           <Link
             href="/my"
             className="mb-6 inline-flex items-center gap-2 text-[12px] dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
@@ -273,7 +270,5 @@ export function MyBookingRequestsClient() {
             </ul>
           )}
         </div>
-      </div>
-    </HomeLandingDayNight>
   );
 }

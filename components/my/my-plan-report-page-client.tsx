@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
 import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { usePlanCart } from "@/hooks/use-plan-cart";
@@ -71,13 +70,8 @@ export function MyPlanReportPageClient() {
   }, [bundle, isKo]);
 
   return (
-    <HomeLandingDayNight>
-      <div
-        className={cn(
-          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
-          MOBILE_CHROME_BOTTOM_PAD,
-        )}
-      >
+    <>
+      <div className={cn(MOBILE_CHROME_BOTTOM_PAD)}>
         <PageContainer>
           <div className="mb-8">
             <Link
@@ -177,6 +171,6 @@ export function MyPlanReportPageClient() {
           ) : null}
         </PageContainer>
       </div>
-    </HomeLandingDayNight>
+    </>
   );
 }

@@ -303,8 +303,8 @@
   },
   "planNav": {
     "cart": "Selected media",
-    "saved": "Saved plans",
-    "plannerResults": "Planner results",
+    "saved": "Plan snapshots",
+    "plannerResults": "Planner & proposals",
     "newPlan": "New plan"
   },
   "favoritesNav": {
@@ -317,7 +317,7 @@
     "tabs": {
       "campaigns": "My campaigns",
       "favorites": "Favorite media",
-      "planner": "Planner results",
+      "planner": "Planner & proposals",
       "recent": "Recently viewed",
       "points": "Points history",
       "team": "Team"
@@ -343,7 +343,7 @@
       "emptyCta": "Open planner",
       "emptyProposalCta": "Create AI proposal",
       "proposalsSection": "AI campaign proposals",
-      "plansSection": "Saved planner plans",
+      "plansSection": "Planner saves",
       "viewProposal": "View proposal",
       "continueEdit": "Continue editing",
       "requestQuote": "Request quote"

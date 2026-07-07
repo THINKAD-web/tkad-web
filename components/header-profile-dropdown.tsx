@@ -24,6 +24,7 @@ import {
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
 import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
+import { isPro } from "@/lib/plan-check-shared";
 import { HeaderUsageGuideMenuPanel } from "@/components/header-usage-guide-menu";
 
 type SessionUser = {
@@ -67,11 +68,7 @@ export function HeaderProfileDropdown({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const days = session.trialDaysLeft ?? 0;
-  const showPro =
-    session.plan === "PRO" ||
-    session.plan === "PRO_TRIAL" ||
-    session.plan === "ENTERPRISE" ||
-    days > 0;
+  const pro = isPro(session);
 
   useEffect(() => {
     setMounted(true);
@@ -151,7 +148,7 @@ export function HeaderProfileDropdown({
             {session.name}
           </p>
 
-          {showPro ? (
+          {pro ? (
             <Link
               href="/pricing"
               role="menuitem"
@@ -162,13 +159,30 @@ export function HeaderProfileDropdown({
               className="mx-2 mb-1 flex items-center gap-2 rounded-lg tkad-neon-cta-clean px-3 py-2 text-xs font-bold text-white"
             >
               <Sparkles className="h-3.5 w-3.5 text-white" />
-              {days > 0
+              {session.plan === "PRO_TRIAL" && days > 0
                 ? isKo
                   ? `PRO 체험 D-${days}`
                   : `PRO trial D-${days}`
-                : "PRO"}
+                : session.plan === "ENTERPRISE"
+                  ? "ENTERPRISE"
+                  : "PRO"}
             </Link>
-          ) : null}
+          ) : (
+            <Link
+              href="/pricing"
+              role="menuitem"
+              onClick={() => {
+                close();
+                onNavigate?.();
+              }}
+              className="mx-2 mb-1 flex items-center justify-between gap-2 rounded-lg border border-violet-400/30 bg-violet-500/10 px-3 py-2 text-xs font-bold text-violet-800 dark:text-violet-200"
+            >
+              <span className="rounded-full border border-gray-300 bg-gray-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80">
+                FREE
+              </span>
+              <span>{isKo ? "PRO 업그레이드 →" : "Upgrade to PRO →"}</span>
+            </Link>
+          )}
 
           {typeof session.pointBalance === "number" ? (
             <Link

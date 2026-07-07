@@ -11,7 +11,6 @@ import {
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowRight, Sparkles, Trash2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
 import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
@@ -159,13 +158,8 @@ export function MyPlanPageClient() {
   }
 
   return (
-    <HomeLandingDayNight>
-      <div
-        className={cn(
-          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
-          MOBILE_CHROME_BOTTOM_PAD,
-        )}
-      >
+    <>
+      <div className={cn(MOBILE_CHROME_BOTTOM_PAD)}>
         <PageContainer>
           <div className="mb-8">
             <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
@@ -176,8 +170,8 @@ export function MyPlanPageClient() {
             </h1>
             <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
               {isKo
-                ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장한 플랜」에서 확인할 수 있습니다."
-                : "Generate a report or request a quote. After saving, open Saved plans."}
+                ? "담은 매체로 보고서를 만들거나 견적을 요청하세요. 저장 후에는 「저장 스냅샷」에서 확인할 수 있습니다."
+                : "Generate a report or request a quote. After saving, find it under Plan snapshots."}
             </p>
             <div className="mt-3">
               <Link
@@ -453,8 +447,8 @@ export function MyPlanPageClient() {
             </p>
             <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
               {isKo
-                ? "담긴 매체와 설정만 삭제됩니다. 이미 저장한 플랜은 「저장된 플랜」에 그대로 남습니다."
-                : "Only clears the current cart. Saved snapshots remain under Saved plans."}
+                ? "담긴 매체와 설정만 삭제됩니다. 이미 저장한 스냅샷은 「저장 스냅샷」에 그대로 남습니다."
+                : "Only clears the current cart. Saved snapshots remain under Plan snapshots."}
             </p>
             <div className="mt-6 flex gap-3">
               <BtnBlock
@@ -477,6 +471,6 @@ export function MyPlanPageClient() {
           </div>
         </div>
       ) : null}
-    </HomeLandingDayNight>
+    </>
   );
 }

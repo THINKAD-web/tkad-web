@@ -17,6 +17,7 @@ function isHiddenPath(pathname: string | null): boolean {
   const normalized = pathname.replace(/\/$/, "") || "/";
   return (
     normalized === "/media" ||
+    pathname.startsWith("/my") ||
     pathname.startsWith("/planner") ||
     pathname.includes("/admin") ||
     pathname.includes("/login") ||

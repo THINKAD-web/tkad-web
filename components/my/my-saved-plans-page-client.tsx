@@ -11,7 +11,6 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
 import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { BtnBlock } from "@/components/brutalist";
@@ -133,13 +132,7 @@ export function MySavedPlansPageClient() {
   }
 
   return (
-    <HomeLandingDayNight>
-      <div
-        className={cn(
-          "tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] py-8",
-          MOBILE_CHROME_BOTTOM_PAD,
-        )}
-      >
+      <div className={cn(MOBILE_CHROME_BOTTOM_PAD)}>
         <PageContainer>
           <Link
             href="/my/plan"
@@ -156,8 +149,8 @@ export function MySavedPlansPageClient() {
           </h1>
           <p className="mt-2 text-sm text-gray-500 dark:text-white/55">
             {isKo
-              ? "저장한 플랜을 불러오거나 삭제할 수 있습니다. 사례·커뮤니티 활용 후보로 표시하면 운영팀이 검토합니다."
-              : "Restore or delete saved plans. Mark as case/community candidate for admin review."}
+              ? "저장 스냅샷을 불러오거나 삭제할 수 있습니다. 사례·커뮤니티 활용 후보로 표시하면 운영팀이 검토합니다."
+              : "Restore or delete plan snapshots. Mark as case/community candidate for admin review."}
           </p>
 
           {loading ? (
@@ -167,7 +160,7 @@ export function MySavedPlansPageClient() {
           ) : items.length === 0 ? (
             <div className="mt-10 rounded-[28px] border border-gray-200 bg-gray-50 p-10 text-center dark:border-white/12 dark:bg-white/5">
               <p className="text-sm font-semibold text-gray-700 dark:text-white/80">
-                {isKo ? "저장된 플랜이 없습니다" : "No saved plans yet"}
+                {isKo ? "저장된 스냅샷이 없습니다" : "No plan snapshots yet"}
               </p>
               <BtnBlock href="/my/plan" variant="accent" className="mt-6">
                 {isKo ? `${tPlan("cart")}로` : `Go to ${tPlan("cart")}`}
@@ -289,6 +282,5 @@ export function MySavedPlansPageClient() {
           )}
         </PageContainer>
       </div>
-    </HomeLandingDayNight>
   );
 }

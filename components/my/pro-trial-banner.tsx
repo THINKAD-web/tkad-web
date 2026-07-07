@@ -16,9 +16,10 @@ export type ProTrialStatus = {
 type Props = {
   trial: ProTrialStatus;
   isKo: boolean;
+  className?: string;
 };
 
-export function ProTrialBanner({ trial, isKo }: Props) {
+export function ProTrialBanner({ trial, isKo, className }: Props) {
   if (trial.plan !== "PRO_TRIAL" || trial.daysLeft <= 0) return null;
 
   return (
@@ -26,6 +27,7 @@ export function ProTrialBanner({ trial, isKo }: Props) {
       className={cn(
         myHubGlassCard,
         "relative overflow-hidden border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-transparent to-fuchsia-500/5 p-5 sm:p-6",
+        className,
       )}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">

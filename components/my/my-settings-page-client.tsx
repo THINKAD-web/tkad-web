@@ -4,7 +4,6 @@ import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { ArrowLeft, CheckCircle2, Loader2, Mail, RefreshCw, Trash2 } from "lucide-react";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { BtnBlock } from "@/components/brutalist";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { useAppToast } from "@/lib/use-toast";
@@ -218,9 +217,7 @@ export function MySettingsPageClient() {
   const verified = !!data.emailVerifiedAt;
 
   return (
-    <HomeLandingDayNight portal>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)] px-4 py-8 sm:px-6 sm:py-10">
-        <div className="relative mx-auto max-w-2xl">
+      <div className="relative mx-auto max-w-2xl">
           <Link
             href="/my"
             className="mb-6 inline-flex items-center gap-2 text-[12px] dark:text-white text-gray-500 transition-colors hover:dark:text-white text-gray-900"
@@ -428,7 +425,5 @@ export function MySettingsPageClient() {
             </button>
           </section>
         </div>
-      </div>
-    </HomeLandingDayNight>
   );
 }

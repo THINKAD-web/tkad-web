@@ -303,8 +303,8 @@
   },
   "planNav": {
     "cart": "담은 매체",
-    "saved": "저장한 플랜",
-    "plannerResults": "플래너 결과",
+    "saved": "저장 스냅샷",
+    "plannerResults": "플래너·제안서",
     "newPlan": "새 플랜"
   },
   "favoritesNav": {
@@ -317,7 +317,7 @@
     "tabs": {
       "campaigns": "내 캠페인",
       "favorites": "관심매체",
-      "planner": "플래너 결과",
+      "planner": "플래너·제안서",
       "recent": "최근 본 매체",
       "points": "포인트 내역",
       "team": "팀 관리"
@@ -343,7 +343,7 @@
       "emptyCta": "플래너 시작하기",
       "emptyProposalCta": "AI 제안서 만들기",
       "proposalsSection": "AI 캠페인 제안서",
-      "plansSection": "저장한 플래너",
+      "plansSection": "플래너 저장",
       "viewProposal": "제안서 보기",
       "continueEdit": "이어서 편집",
       "requestQuote": "견적 요청"

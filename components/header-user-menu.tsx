@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Megaphone, User as UserIcon } from "lucide-react";
 import {
@@ -13,6 +13,7 @@ import {
 import { HeaderAccountActions } from "@/components/header-account-actions";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
+import { MyPlanStatusBadge } from "@/components/my/my-plan-status-badge";
 
 type Session = {
   id: string;
@@ -20,6 +21,8 @@ type Session = {
   name: string;
   role: string;
   pointBalance?: number;
+  plan?: string;
+  trialDaysLeft?: number;
 } | null;
 
 function useSession() {
@@ -57,6 +60,8 @@ export function HeaderUserMenu({
 }) {
   const t = useTranslations("auth");
   const { session, loaded } = useSession();
+  const locale = useLocale();
+  const isKo = locale === "ko";
 
   if (!loaded) return null;
 
@@ -71,6 +76,16 @@ export function HeaderUserMenu({
         />
         {session ? (
           <>
+            <div className="space-y-3 px-5 py-4">
+              <p className="truncate text-sm font-semibold text-gray-900 dark:text-white">
+                {session.name}
+              </p>
+              <MyPlanStatusBadge
+                user={session}
+                isKo={isKo}
+                showPoints={session.pointBalance}
+              />
+            </div>
             <Link href="/my" onClick={onNavigate} className={menuRowClass}>
               <UserIcon className="h-4 w-4 shrink-0" strokeWidth={2} />
               <span>{t("myPage")}</span>

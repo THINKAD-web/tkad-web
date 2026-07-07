@@ -12,6 +12,7 @@ import {
 } from "@/lib/navigation/context-sidebar-config";
 import { QuickActionBarDesktop } from "@/components/navigation/quick-action-bar";
 import { SidebarSupportDock } from "@/components/navigation/sidebar-support-dock";
+import { isMyHubPath } from "@/lib/my-hub-nav-config";
 import {
   readSidebarCollapsed,
   writeSidebarCollapsed,
@@ -169,6 +170,7 @@ export function ContextNavSidebar({ collapsed, hoverExpanded }: Props) {
 }
 
 export function ContextNavAsideShell({ className }: { className?: string }) {
+  const pathname = usePathname();
   const locale = useLocale();
   const isKo = locale === "ko";
   const [collapsed, setCollapsed] = useState(false);
@@ -189,6 +191,8 @@ export function ContextNavAsideShell({ className }: { className?: string }) {
   };
 
   if (!mounted) return null;
+
+  if (isMyHubPath(pathname)) return null;
 
   const compact = collapsed && !hoverExpanded;
 
