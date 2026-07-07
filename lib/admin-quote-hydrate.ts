@@ -1,4 +1,9 @@
+import type { AdminMediaDto } from "@/lib/admin-media-dto";
 import type { QuoteApi } from "@/lib/admin-sales-quote";
+import {
+  hydrateAdminQuoteLinesFromItems,
+  type AdminQuoteLine,
+} from "@/lib/admin-quote-lines";
 
 export function parseStoredClientName(stored: string): {
   company: string;
@@ -19,48 +24,12 @@ export function parseCampaignPeriodLabel(
   return { startDate: m[1]!, endDate: m[2]! };
 }
 
-export type HydratedCustomLine = {
-  id: string;
-  name: string;
-  quantity: number;
-  unitPriceWon: number;
-};
-
+/** 저장된 QuoteItem → 편집 폼 lines[] (멀티 라인·옵션 인덱스 보존) */
 export function splitQuoteItemsForForm(
   quote: QuoteApi,
-  knownMediaIds: Set<string>,
-): {
-  selectedIds: string[];
-  quantities: Record<string, number>;
-  customLines: HydratedCustomLine[];
-} {
-  const selectedIds: string[] = [];
-  const quantities: Record<string, number> = {};
-  const customLines: HydratedCustomLine[] = [];
-
-  for (const item of quote.items) {
-    const mediaId = item.mediaId?.trim() ?? "";
-    const isCustom = !mediaId || mediaId.startsWith("custom-");
-
-    if (!isCustom && knownMediaIds.has(mediaId)) {
-      selectedIds.push(mediaId);
-      quantities[mediaId] = Math.max(1, item.quantity);
-      continue;
-    }
-
-    const customId = isCustom
-      ? mediaId.replace(/^custom-/, "") || `item-${item.id}`
-      : `orphan-${item.id}`;
-
-    customLines.push({
-      id: customId,
-      name: item.mediaName,
-      quantity: Math.max(1, item.quantity),
-      unitPriceWon: item.unitPrice,
-    });
-  }
-
-  return { selectedIds, quantities, customLines };
+  medias: AdminMediaDto[],
+): { lines: AdminQuoteLine[] } {
+  return { lines: hydrateAdminQuoteLinesFromItems(quote.items, medias) };
 }
 
 /** 저장된 합계 필드로 부가세 포함 여부 추정 */

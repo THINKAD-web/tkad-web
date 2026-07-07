@@ -424,6 +424,7 @@ export type AdminQuoteDraftExportRow = {
   location?: string;
   spec?: string;
   quantity?: number;
+  quantityLabel?: string;
 };
 
 /** Admin 견적 초안(저장 전) POST — 동일 디자인 PDF */
@@ -471,7 +472,11 @@ export async function buildQuoteExportPayloadFromAdminDraft(
       input.isKo,
     );
     return r.quantity != null && r.quantity > 0
-      ? { ...base, quantity: r.quantity }
+      ? {
+          ...base,
+          quantity: r.quantity,
+          ...(r.quantityLabel ? { quantityLabel: r.quantityLabel } : {}),
+        }
       : base;
   });
 

@@ -40,6 +40,10 @@ function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
   const quantityRaw = Math.round(Number(o.quantity));
   const quantity =
     Number.isFinite(quantityRaw) && quantityRaw > 0 ? quantityRaw : undefined;
+  const quantityLabel =
+    typeof o.quantityLabel === "string" && o.quantityLabel.trim()
+      ? o.quantityLabel.trim()
+      : undefined;
   return {
     mediaId,
     name,
@@ -49,6 +53,7 @@ function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
     location,
     spec,
     quantity,
+    quantityLabel,
   };
 }
 

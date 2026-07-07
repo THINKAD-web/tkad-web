@@ -19,10 +19,19 @@ import {
   inclusiveCampaignDays,
   monthFactorFromDays,
 } from "@/lib/pricing";
-import { formatPricePeriodShortLabel, normalizeMediaPricePeriod } from "@/lib/media-price-format";
+import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import { QuoteFormalPreview } from "@/components/quote/quote-formal-preview";
 import { buildAdminFormalQuoteParamsFromDraft } from "@/lib/admin-sales-quote";
+import { AdminQuoteLinesEditor } from "@/components/admin/admin-quote-lines-editor";
+import {
+  buildAdminQuoteLineItems,
+  createCatalogQuoteLine,
+  adminQuoteLineAmounts,
+  type AdminQuoteLine,
+  type AdminQuotePeriodKey,
+} from "@/lib/admin-quote-lines";
+import { decodeAdminQuoteItemSpec } from "@/lib/admin-quote-line-spec";
 import {
   Calculator,
   Camera,
@@ -36,8 +45,7 @@ import {
   Eye,
   Download,
   Plus,
-  Trash2,
-  Sparkles,
+  ListOrdered,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import {
@@ -78,13 +86,6 @@ function addDaysISODate(iso: string, days: number): string {
   return `${yy}-${mm}-${dd}`;
 }
 
-function mediaSpecLine(m: AdminMediaDto): string {
-  const wh =
-    m.width && m.height ? `${m.width}×${m.height}` : m.width || m.height || "";
-  const bits = [m.resolution, wh].filter(Boolean);
-  return bits.length > 0 ? bits.join(" · ") : "—";
-}
-
 export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const t = useTranslations("adminQuoteNew");
   const tCommon = useTranslations("common");
@@ -96,12 +97,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const [listError, setListError] = useState<string | null>(null);
   const [search, setSearch] = useState("");
 
-  const [selected, setSelected] = useState<Set<string>>(() => new Set());
-  const [quantities, setQuantities] = useState<Record<string, number>>({});
-
-  /** 커스텀 라인(제작비·디자인비·운영비 등 수기 입력) */
-  type CustomLine = { id: string; name: string; quantity: number; unitPriceWon: number };
-  const [customLines, setCustomLines] = useState<CustomLine[]>([]);
+  const [lines, setLines] = useState<AdminQuoteLine[]>([]);
 
   const [startDate, setStartDate] = useState(todayISODate);
   // NOTE: 일수(포함) 기반으로 월 환산(days/30)을 쓰기 때문에,
@@ -215,8 +211,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         const period = quote.items[0]?.period ?? "";
         const parsedPeriod = parseCampaignPeriodLabel(period);
 
-        const knownMediaIds = new Set(medias.map((m) => m.id));
-        const split = splitQuoteItemsForForm(quote, knownMediaIds);
+        const split = splitQuoteItemsForForm(quote, medias);
 
         if (!cancelled) {
           setQuoteNumber(quote.quoteNumber);
@@ -233,9 +228,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           setDiscountPercent("0");
           setDiscountWon(String(quote.discount));
           setVatIncluded(inferVatIncludedFromQuote(quote));
-          setSelected(new Set(split.selectedIds));
-          setQuantities(split.quantities);
-          setCustomLines(split.customLines);
+          setLines(split.lines);
           setEditHydrated(true);
         }
       } catch {
@@ -267,7 +260,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const days = useMemo(() => inclusiveCampaignDays(start, end), [start, end]);
   const monthFactor = useMemo(() => monthFactorFromDays(days), [days]);
 
-  type PeriodKey = "month" | "biweekly" | "week" | "day";
+  type PeriodKey = AdminQuotePeriodKey;
   const factorForPeriod = useCallback((p: PeriodKey, d: number): number => {
     const dd = Math.max(0, d);
     switch (p) {
@@ -282,37 +275,30 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     }
   }, []);
 
-  /** 매체별 priceOptions 선택 인덱스 (없으면 0) */
-  const [mediaPriceOptionIndex, setMediaPriceOptionIndex] = useState<Record<string, number>>({});
-
-  const selectedPrice = useCallback(
-    (m: AdminMediaDto) => {
-      const idx = mediaPriceOptionIndex[m.id] ?? 0;
-      const opt = m.priceOptions?.[idx];
-      const rawPrice = opt?.price ?? m.price;
-      const period = normalizeMediaPricePeriod(opt?.period);
-      return { rawPrice, period: period as PeriodKey, label: opt?.label ?? null };
-    },
-    [mediaPriceOptionIndex],
+  const campaignPeriodLabel = useMemo(
+    () => `${startDate} ~ ${endDate}`,
+    [startDate, endDate],
   );
 
-  const lineWons = useMemo(() => {
-    const out: number[] = [];
-    for (const id of selected) {
-      const m = medias.find((x) => x.id === id);
-      if (!m) continue;
-      const qty = quantities[id] ?? 1;
-      const { rawPrice, period } = selectedPrice(m);
-      const unitWon = catalogPriceFieldToWon(rawPrice);
-      const factor = factorForPeriod(period, days);
-      out.push(Math.round(unitWon * factor * Math.max(0, qty)));
-    }
-    for (const c of customLines) {
-      const amount = Math.max(0, Math.round(c.unitPriceWon * Math.max(1, c.quantity)));
-      if (amount > 0) out.push(amount);
-    }
-    return out;
-  }, [selected, medias, quantities, days, factorForPeriod, selectedPrice, customLines]);
+  const lineItems = useMemo(
+    () =>
+      buildAdminQuoteLineItems({
+        lines,
+        medias,
+        isKo,
+        campaignPeriodLabel,
+        days,
+        factorForPeriod,
+      }),
+    [lines, medias, isKo, campaignPeriodLabel, days, factorForPeriod],
+  );
+
+  const lineWons = useMemo(
+    () => adminQuoteLineAmounts(lineItems),
+    [lineItems],
+  );
+
+  const hasLines = lines.length > 0;
 
   const dpct = Math.min(100, Math.max(0, parseFloat(discountPercent) || 0));
   const dwon = Math.max(0, parseFloat(discountWon.replace(/,/g, "")) || 0);
@@ -338,113 +324,9 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     [isKo, dpct, dwon],
   );
 
-  const toggle = useCallback((id: string) => {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-        setQuantities((q) => {
-          return Object.fromEntries(
-            Object.entries(q).filter(([key]) => key !== id),
-          );
-        });
-      } else {
-        next.add(id);
-        setQuantities((q) => ({ ...q, [id]: q[id] ?? 1 }));
-      }
-      return next;
-    });
+  const addCatalogLine = useCallback((mediaId: string) => {
+    setLines((prev) => [...prev, createCatalogQuoteLine(mediaId)]);
   }, []);
-
-  const setQty = useCallback((id: string, value: string) => {
-    const n = Math.max(0, parseInt(value.replace(/\D/g, ""), 10) || 0);
-    setQuantities((q) => ({ ...q, [id]: Math.max(1, n || 1) }));
-  }, []);
-
-  const selectAllVisible = useCallback(() => {
-    setQuantities((q) => {
-      const next = { ...q };
-      for (const m of filtered) {
-        next[m.id] = next[m.id] ?? 1;
-      }
-      return next;
-    });
-    setSelected((prev) => {
-      const next = new Set(prev);
-      for (const m of filtered) next.add(m.id);
-      return next;
-    });
-  }, [filtered]);
-
-  const clearSelection = useCallback(() => {
-    setSelected(new Set());
-    setQuantities({});
-  }, []);
-
-  const campaignPeriodLabel = useMemo(
-    () => `${startDate} ~ ${endDate}`,
-    [startDate, endDate],
-  );
-
-  const lineItems = useMemo(() => {
-    const list: {
-      mediaId: string;
-      mediaName: string;
-      spec: string;
-      period: string;
-      unitPrice: number;
-      unitPeriod: PeriodKey;
-      quantity: number;
-      amount: number;
-    }[] = [];
-    for (const id of selected) {
-      const m = medias.find((x) => x.id === id);
-      if (!m) continue;
-      const qty = quantities[id] ?? 1;
-      const { rawPrice, period, label } = selectedPrice(m);
-      const unitWon = catalogPriceFieldToWon(rawPrice);
-      const factor = factorForPeriod(period, days);
-      const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
-      const name = label ? `${nameBase} (${label})` : nameBase;
-      list.push({
-        mediaId: m.id,
-        mediaName: name,
-        spec: mediaSpecLine(m),
-        period: campaignPeriodLabel,
-        unitPrice: unitWon,
-        unitPeriod: period,
-        quantity: qty,
-        amount: Math.round(unitWon * factor * Math.max(0, qty)),
-      });
-    }
-    for (const c of customLines) {
-      const qty = Math.max(1, c.quantity);
-      const unit = Math.max(0, Math.round(c.unitPriceWon));
-      const amount = Math.round(unit * qty);
-      if (amount <= 0 && !c.name.trim()) continue;
-      list.push({
-        mediaId: `custom-${c.id}`,
-        mediaName: c.name.trim() || (isKo ? "기타 비용" : "Other cost"),
-        spec: "—",
-        period: campaignPeriodLabel,
-        unitPrice: unit,
-        unitPeriod: "month",
-        quantity: qty,
-        amount,
-      });
-    }
-    return list;
-  }, [
-    selected,
-    medias,
-    quantities,
-    campaignPeriodLabel,
-    isKo,
-    customLines,
-    days,
-    factorForPeriod,
-    selectedPrice,
-  ]);
 
   const formalPreviewParams = useMemo(
     () =>
@@ -464,7 +346,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         totals,
         rows: lineItems.map((it) => ({
           name: it.mediaName,
-          spec: it.spec,
+          spec: decodeAdminQuoteItemSpec(it.spec).displaySpec,
           period: it.period,
           unitPriceWon: it.unitPrice,
           quantity: it.quantity,
@@ -513,7 +395,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
 
   const saveQuote = useCallback(async () => {
     setPdfError(null);
-    if (selected.size === 0 && customLines.length === 0) {
+    if (!hasLines) {
       setPdfError(t("pdfNeedMedia"));
       return;
     }
@@ -589,8 +471,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       setSaveLoading(false);
     }
   }, [
-    selected.size,
-    customLines.length,
+    hasLines,
     days,
     clientCompany,
     clientName,
@@ -609,7 +490,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
 
   const downloadPdf = useCallback(async (style: "basic" | "formal" = pdfStyle) => {
     setPdfError(null);
-    if (selected.size === 0 && customLines.length === 0) {
+    if (!hasLines) {
       setPdfError(t("pdfNeedMedia"));
       return;
     }
@@ -657,8 +538,9 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               unitPriceWon: it.unitPrice,
               lineTotalWon: it.amount,
               location: m?.location,
-              spec: it.spec,
+              spec: decodeAdminQuoteItemSpec(it.spec).displaySpec,
               quantity: it.quantity,
+              quantityLabel: it.quantityLabel,
             };
           }),
         }),
@@ -693,8 +575,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       setPdfLoading(false);
     }
   }, [
-    selected.size,
-    customLines.length,
+    hasLines,
     days,
     clientCompany,
     clientName,
@@ -757,10 +638,35 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         </div>
       </div>
 
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center gap-2 text-lg text-foreground dark:text-hero-fg">
+            <ListOrdered className="h-5 w-5 text-accent" />
+            견적 라인
+          </CardTitle>
+          <p className="text-xs text-muted-foreground">
+            같은 매체를 등급·수량별로 여러 라인에 넣을 수 있습니다.
+          </p>
+        </CardHeader>
+        <CardContent>
+          <AdminQuoteLinesEditor
+            lines={lines}
+            onChange={setLines}
+            medias={medias}
+            isKo={isKo}
+            locale={locale}
+            days={days}
+            factorForPeriod={factorForPeriod}
+          />
+        </CardContent>
+      </Card>
+
       <div className="grid gap-6 lg:grid-cols-5">
         <Card className="lg:col-span-3">
           <CardHeader className="pb-3">
-            <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("mediaTitle")}</CardTitle>
+            <CardTitle className="text-lg text-foreground dark:text-hero-fg">
+              매체에서 라인 추가
+            </CardTitle>
             <div className="relative mt-2">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
               <Input
@@ -770,16 +676,8 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                 onChange={(e) => setSearch(e.target.value)}
               />
             </div>
-            <div className="mt-2 flex flex-wrap gap-2">
-              <Button type="button" variant="outline" size="sm" onClick={selectAllVisible}>
-                {t("selectAllVisible")}
-              </Button>
-              <Button type="button" variant="ghost" size="sm" onClick={clearSelection}>
-                {t("clearSelection")}
-              </Button>
-            </div>
           </CardHeader>
-          <CardContent className="max-h-[min(520px,55vh)] overflow-auto rounded-lg border bg-slate-50/50 p-0">
+          <CardContent className="max-h-[min(420px,45vh)] overflow-auto rounded-lg border bg-slate-50/50 p-0">
             {listLoading ? (
               <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -793,89 +691,52 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               <table className="w-full text-sm">
                 <thead className="sticky top-0 z-10 bg-white shadow-sm">
                   <tr className="border-b text-left text-xs text-muted-foreground">
-                    <th className="w-10 px-3 py-2" />
-                    <th className="px-2 py-2">{t("colMedia")}</th>
-                    <th className="w-24 px-2 py-2">{t("colPrice")}</th>
-                    <th className="w-28 px-2 py-2">{t("colQty")}</th>
+                    <th className="px-3 py-2">{t("colMedia")}</th>
+                    <th className="w-28 px-2 py-2">{t("colPrice")}</th>
+                    <th className="w-28 px-2 py-2" />
                   </tr>
                 </thead>
                 <tbody>
                   {filtered.map((m) => {
-                    const on = selected.has(m.id);
-                    const qty = quantities[m.id] ?? 1;
-                    const { rawPrice, period } = selectedPrice(m);
+                    const rawPrice = m.priceOptions?.[0]?.price ?? m.price;
+                    const period = m.priceOptions?.[0]?.period ?? "month";
                     return (
                       <tr
                         key={m.id}
-                        className={`border-b border-slate-100 ${on ? "bg-accent/10 dark:bg-accent/20" : "bg-white dark:bg-hero-void"}`}
+                        className="border-b border-slate-100 bg-white dark:bg-hero-void"
                       >
                         <td className="px-3 py-2 align-middle">
-                          <input
-                            type="checkbox"
-                            checked={on}
-                            onChange={() => toggle(m.id)}
-                            className="h-4 w-4 rounded border-slate-300"
-                          />
-                        </td>
-                        <td className="px-2 py-2 align-middle">
-                          <div className="font-medium text-foreground dark:text-hero-fg">{m.name}</div>
+                          <div className="font-medium text-foreground dark:text-hero-fg">
+                            {m.name}
+                          </div>
                           <div className="text-xs text-muted-foreground">
                             {m.location} · {m.type}
                           </div>
                         </td>
-                        <td className="px-2 py-2 align-middle tabular-nums">
-                          {on && (m.priceOptions?.length ?? 0) > 0 ? (
-                            <div className="space-y-1">
-                              <select
-                                className="w-full rounded border border-slate-200 bg-white px-2 py-1 text-xs"
-                                value={mediaPriceOptionIndex[m.id] ?? 0}
-                                onChange={(e) => {
-                                  const n = Math.max(0, parseInt(e.target.value, 10) || 0);
-                                  setMediaPriceOptionIndex((prev) => ({
-                                    ...prev,
-                                    [m.id]: n,
-                                  }));
-                                }}
-                              >
-                                {(m.priceOptions ?? []).map((o, i) => (
-                                  <option key={`${o.label}-${i}`} value={i}>
-                                    {o.label} ·{" "}
-                                    {new Intl.NumberFormat("ko-KR").format(
-                                      catalogPriceFieldToWon(o.price),
-                                    )}
-                                    {formatPricePeriodShortLabel(o.period ?? "month", locale)}
-                                  </option>
-                                ))}
-                              </select>
-                              <div className="text-[11px] font-semibold text-foreground dark:text-hero-fg">
-                                {new Intl.NumberFormat("ko-KR").format(
-                                  catalogPriceFieldToWon(rawPrice),
-                                )}
-                                <span className="ml-1 text-[10px] text-muted-foreground">
-                                  {formatPricePeriodShortLabel(period, locale)}
-                                </span>
-                              </div>
-                            </div>
-                          ) : (
-                            <>
-                              {new Intl.NumberFormat("ko-KR").format(
-                                catalogPriceFieldToWon(rawPrice),
-                              )}
-                              <span className="text-xs text-muted-foreground">
-                                {" "}
-                                {formatPricePeriodShortLabel(period, locale)}
-                              </span>
-                            </>
+                        <td className="px-2 py-2 align-middle tabular-nums text-xs">
+                          {new Intl.NumberFormat("ko-KR").format(
+                            catalogPriceFieldToWon(rawPrice),
                           )}
+                          <span className="ml-1 text-[10px] text-muted-foreground">
+                            {formatPricePeriodShortLabel(period, locale)}
+                          </span>
+                          {(m.priceOptions?.length ?? 0) > 1 ? (
+                            <div className="text-[10px] text-muted-foreground">
+                              +{(m.priceOptions?.length ?? 1) - 1} 등급
+                            </div>
+                          ) : null}
                         </td>
-                        <td className="px-2 py-2 align-middle">
-                          <Input
-                            className="h-8 w-20 text-right text-xs"
-                            disabled={!on}
-                            value={on ? String(qty) : ""}
-                            onChange={(e) => setQty(m.id, e.target.value)}
-                            inputMode="numeric"
-                          />
+                        <td className="px-2 py-2 align-middle text-right">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 text-xs"
+                            onClick={() => addCatalogLine(m.id)}
+                          >
+                            <Plus className="mr-1 h-3.5 w-3.5" />
+                            라인 추가
+                          </Button>
                         </td>
                       </tr>
                     );
@@ -978,161 +839,6 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           </CardContent>
         </Card>
       </div>
-
-      <Card>
-        <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-lg text-foreground dark:text-hero-fg">
-            <Sparkles className="h-5 w-5 text-accent" />
-            추가 비용 항목 (제작비·디자인비·운영비 등)
-          </CardTitle>
-          <p className="text-xs text-muted-foreground">
-            매체 광고비 외에 견적서에 포함할 비용을 자유롭게 추가하세요.
-          </p>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {customLines.length === 0 ? (
-            <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-muted-foreground">
-              아직 추가된 항목이 없습니다. 아래 ‘항목 추가’를 눌러 입력하세요.
-            </p>
-          ) : (
-            <div className="space-y-2">
-              {customLines.map((line) => (
-                <div
-                  key={line.id}
-                  className="grid items-center gap-2 rounded-2xl border border-slate-200 bg-white p-2 sm:grid-cols-[1fr_120px_140px_auto] sm:p-3"
-                >
-                  <Input
-                    value={line.name}
-                    onChange={(e) =>
-                      setCustomLines((arr) =>
-                        arr.map((c) =>
-                          c.id === line.id ? { ...c, name: e.target.value } : c,
-                        ),
-                      )
-                    }
-                    placeholder="예) 제작비, 디자인 시안비, 운영 관리비"
-                    className="text-sm"
-                  />
-                  <div>
-                    <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
-                      수량
-                    </label>
-                    <Input
-                      type="number"
-                      min={1}
-                      value={String(line.quantity)}
-                      onChange={(e) => {
-                        const n = Math.max(1, parseInt(e.target.value, 10) || 1);
-                        setCustomLines((arr) =>
-                          arr.map((c) =>
-                            c.id === line.id ? { ...c, quantity: n } : c,
-                          ),
-                        );
-                      }}
-                      className="h-9 text-right text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
-                      단가 (원)
-                    </label>
-                    <Input
-                      type="number"
-                      min={0}
-                      value={String(line.unitPriceWon)}
-                      onChange={(e) => {
-                        const n = Math.max(0, parseInt(e.target.value, 10) || 0);
-                        setCustomLines((arr) =>
-                          arr.map((c) =>
-                            c.id === line.id ? { ...c, unitPriceWon: n } : c,
-                          ),
-                        );
-                      }}
-                      placeholder="0"
-                      className="h-9 text-right text-sm tabular-nums"
-                    />
-                  </div>
-                  <div className="flex items-center justify-between gap-2 sm:flex-col sm:items-end">
-                    <span className="text-sm font-bold tabular-nums text-foreground dark:text-hero-fg">
-                      {formatWon(
-                        Math.round(
-                          Math.max(0, line.unitPriceWon) *
-                            Math.max(1, line.quantity),
-                        ),
-                      )}
-                    </span>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600"
-                      onClick={() =>
-                        setCustomLines((arr) =>
-                          arr.filter((c) => c.id !== line.id),
-                        )
-                      }
-                      aria-label="항목 삭제"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-          <div className="flex flex-wrap gap-2 pt-1">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              className="border-dashed border-border/30 text-foreground hover:bg-muted dark:border-hero-fg/30 dark:text-hero-fg dark:hover:bg-card/10"
-              onClick={() =>
-                setCustomLines((arr) => [
-                  ...arr,
-                  {
-                    id: `c-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-                    name: "",
-                    quantity: 1,
-                    unitPriceWon: 0,
-                  },
-                ])
-              }
-            >
-              <Plus className="mr-1 h-3.5 w-3.5" />
-              항목 추가
-            </Button>
-            {[
-              { name: "제작비", price: 500000 },
-              { name: "디자인 시안비", price: 300000 },
-              { name: "운영·관리비", price: 200000 },
-              { name: "출력·시공비", price: 800000 },
-            ].map((preset) => (
-              <Button
-                key={preset.name}
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-xs text-muted-foreground hover:text-foreground dark:text-hero-fg"
-                onClick={() =>
-                  setCustomLines((arr) => [
-                    ...arr,
-                    {
-                      id: `c-${Date.now()}-${Math.random()
-                        .toString(36)
-                        .slice(2, 6)}`,
-                      name: preset.name,
-                      quantity: 1,
-                      unitPriceWon: preset.price,
-                    },
-                  ])
-                }
-              >
-                + {preset.name}
-              </Button>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
 
       <Card>
         <CardHeader className="pb-3">
@@ -1250,7 +956,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               disabled={
                 saveLoading ||
                 pdfLoading ||
-                (selected.size === 0 && customLines.length === 0) ||
+                !hasLines ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
@@ -1272,7 +978,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               variant="outline"
               className="border-border/20 text-foreground hover:bg-muted dark:border-hero-fg/25 dark:text-hero-fg dark:hover:bg-card/10"
               disabled={
-                (selected.size === 0 && customLines.length === 0) ||
+                !hasLines ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
@@ -1289,7 +995,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               disabled={
                 pdfLoading ||
                 saveLoading ||
-                (selected.size === 0 && customLines.length === 0) ||
+                !hasLines ||
                 days <= 0 ||
                 !clientCompany.trim() ||
                 !clientName.trim() ||
@@ -1319,7 +1025,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("summaryTitle")}</CardTitle>
         </CardHeader>
         <CardContent>
-          {selected.size === 0 && customLines.length === 0 ? (
+          {!hasLines ? (
             <p className="text-sm text-muted-foreground">{t("pickMedia")}</p>
           ) : days <= 0 ? (
             <p className="text-sm text-amber-700">{t("invalidPeriod")}</p>
@@ -1368,7 +1074,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         </CardContent>
       </Card>
 
-      {showPreview && (selected.size > 0 || customLines.length > 0) && days > 0 && (
+      {showPreview && hasLines && days > 0 && (
         <Card>
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
