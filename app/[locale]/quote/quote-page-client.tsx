@@ -69,10 +69,7 @@ import {
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
-  catalogPriceFieldToPriceMan,
-  catalogPriceFieldToWon,
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
+  formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
 import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
@@ -83,6 +80,7 @@ import {
   inferQuoteCampaignPeriodFromMedia,
   isQuoteCampaignPeriodKey,
   quoteCampaignDaysFromPeriodKey,
+  quoteCatalogDisplayPriceMan,
   resolveQuoteMediaPricePeriod,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
@@ -92,7 +90,7 @@ import {
   parseQuotePoMap,
   parseQuoteUnitsMap,
 } from "@/lib/quote-deeplink";
-import { resolveMediaQuantity, resolveMonthlyPriceForUnits } from "@/lib/media-quantity";
+import { isPerUnitGradePriceOptions, resolveMediaQuantity } from "@/lib/media-quantity";
 import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
@@ -438,6 +436,14 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         delete next[media.id];
         return next;
       });
+      const opt = media.priceOptions?.[idx];
+      if (
+        isPerUnitGradePriceOptions(media) &&
+        opt?.units != null &&
+        opt.units > 0
+      ) {
+        setMediaQuantities((p) => ({ ...p, [media.id]: opt.units! }));
+      }
       if (
         selectedMedia.length === 1 &&
         selectedMedia[0]?.id === media.id &&
@@ -1595,25 +1601,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           const nwOpt = networkQuoteOptions[media.id];
                           const isNw = media.catalogSource === "network";
                           const poIdx = mediaPriceOptionIndex[media.id] ?? 0;
-                          const displayPrice = isNw
-                            ? catalogPriceFieldToPriceMan(
-                                computeNetworkMonthlyFromMediaItem(
-                                  media,
-                                  nwOpt?.units ??
-                                    media.networkMinUnits ??
-                                    1,
-                                ),
-                              )
-                            : media.priceOptions?.length
-                              ? catalogPriceFieldToPriceMan(
-                                  media.priceOptions[poIdx].price,
-                                )
-                              : catalogPriceFieldToPriceMan(
-                                  resolveMonthlyPriceForUnits(
-                                    media,
-                                    mediaQuantities[media.id],
-                                  ),
-                                );
+                          const displayPrice = quoteCatalogDisplayPriceMan(media, {
+                            priceOptionIndex: poIdx,
+                            mobileUnits: mediaQuantities[media.id],
+                            networkUnits: nwOpt?.units,
+                          });
                           return (
                             <div key={media.id} className="space-y-2">
                               <QuoteMediaSelectCard
@@ -1644,23 +1636,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             const nwOpt = networkQuoteOptions[media.id];
                             const isNw = media.catalogSource === "network";
                             const poIdxC = mediaPriceOptionIndex[media.id] ?? 0;
-                            const displayPrice = isNw
-                              ? catalogPriceFieldToPriceMan(
-                                  computeNetworkMonthlyFromMediaItem(
-                                    media,
-                                    nwOpt?.units ?? media.networkMinUnits ?? 1,
-                                  ),
-                                )
-                              : media.priceOptions?.length
-                                ? catalogPriceFieldToPriceMan(
-                                    media.priceOptions[poIdxC].price,
+                            const displayPrice = quoteCatalogDisplayPriceMan(media, {
+                              priceOptionIndex: poIdxC,
+                              mobileUnits: mediaQuantities[media.id],
+                              networkUnits: nwOpt?.units,
+                            });
+                            const pricePeriod = resolveQuoteMediaPricePeriod(
+                              media,
+                              poIdxC,
+                              isNw,
+                            );
+                            const priceLabel =
+                              displayPrice > 0
+                                ? formatMediaPriceWithPeriodSuffix(
+                                    displayPrice * 10_000,
+                                    pricePeriod,
+                                    isKo ? "ko-KR" : "en-US",
                                   )
-                                : catalogPriceFieldToPriceMan(
-                                    resolveMonthlyPriceForUnits(
-                                      media,
-                                      mediaQuantities[media.id],
-                                    ),
-                                  );
+                                : null;
                             return (
                               <div key={media.id} className="space-y-2">
                                 <label className="block cursor-pointer">
@@ -1720,19 +1713,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                         </span>
                                       </p>
                                       <p className="min-w-0 break-words font-display text-[13px] font-bold tabular-nums leading-tight text-accent sm:text-sm sm:leading-none">
-                                        {formatCatalogPriceFieldWon(displayPrice)}
-                                        <span className="ml-1 font-normal text-[9px] uppercase tracking-[0.18em] text-muted-foreground sm:text-[10px]">
-                                          ·{" "}
-                                          {tMedia(
-                                            mediaPricePeriodTranslationKey(
-                                              resolveQuoteMediaPricePeriod(
-                                                media,
-                                                poIdxC,
-                                                isNw,
-                                              ),
-                                            ),
-                                          )}
-                                        </span>
+                                        {priceLabel}
                                       </p>
                                       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                                     </div>

@@ -1,7 +1,11 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
-import { getQuantityUnitMode, resolveMediaQuantity } from "@/lib/media-quantity";
+import {
+  getQuantityUnitMode,
+  isPerUnitGradePriceOptions,
+  resolveMediaQuantity,
+} from "@/lib/media-quantity";
 import { formatPlannerQuantityLabel } from "@/lib/planner/planner-media-quantity";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 
@@ -25,10 +29,12 @@ export function buildQuoteMediaSelectionSnapshot(
   const isNw = isNetworkCatalogItem(m);
   const quantity = resolveMediaQuantity(
     m,
-    input.units ??
-      (isNw ? m.networkMinUnits ?? 1 : getQuantityUnitMode(m) === "unit" ? 1 : undefined),
+    input.units ?? (isNw ? (m.networkMinUnits ?? 1) : undefined),
   );
-  const priceOptionIndex = getQuantityUnitMode(m) === "package" ? poIdx : 0;
+  const priceOptionIndex =
+    isPerUnitGradePriceOptions(m) || getQuantityUnitMode(m) === "package"
+      ? poIdx
+      : 0;
 
   return {
     mediaId: m.id,

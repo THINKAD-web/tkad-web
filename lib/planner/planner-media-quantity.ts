@@ -6,10 +6,11 @@ import {
   getMediaPackageOptions,
   getQuantityUnitMode,
   isMobileSingleMedia,
+  isPerUnitGradePriceOptions,
   isQuantitySelectableMedia,
+  resolveCatalogLineMonthlyPriceWon,
   resolveImpressionsForUnits,
   resolveMediaQuantity,
-  resolveMonthlyPriceForUnits,
   type MediaPackageOption,
   type MediaQuantityUnitMode,
 } from "@/lib/media-quantity";
@@ -50,12 +51,11 @@ export function plannerMonthlyPriceWonForMedia(
   quantities?: CampaignMediaQuantities,
   priceOptionIndex?: CampaignMediaPriceOptionIndex,
 ): number {
-  if (getQuantityUnitMode(m) === "package" && !isNetworkCatalogItem(m)) {
-    const idx = priceOptionIndex?.[m.id] ?? 0;
-    const opt = m.priceOptions?.[idx] ?? m.priceOptions?.[0];
-    if (opt) return catalogPriceFieldToWon(opt.price);
-  }
-  return resolveMonthlyPriceForUnits(m, quantities?.[m.id]);
+  const poIdx = priceOptionIndex?.[m.id] ?? 0;
+  return resolveCatalogLineMonthlyPriceWon(m, {
+    priceOptionIndex: poIdx,
+    units: quantities?.[m.id],
+  });
 }
 
 export function plannerMonthlyPriceManForMedia(
@@ -73,9 +73,7 @@ export function plannerMonthlyImpressionsForMedia(
   quantities?: CampaignMediaQuantities,
   priceOptionIndex?: CampaignMediaPriceOptionIndex,
 ): number {
-  if (getQuantityUnitMode(m) === "package" && !isNetworkCatalogItem(m)) {
-    return resolveImpressionsForUnits(m, 1);
-  }
+  void priceOptionIndex;
   return resolveImpressionsForUnits(m, quantities?.[m.id]);
 }
 
@@ -108,6 +106,9 @@ export function formatPlannerQuantityLabel(
   isKo: boolean,
   priceOptionIndex?: CampaignMediaPriceOptionIndex,
 ): string {
+  if (isPerUnitGradePriceOptions(m)) {
+    return isKo ? `${units.toLocaleString("ko-KR")}대` : `${units} units`;
+  }
   if (getQuantityUnitMode(m) === "package") {
     if (isNetworkCatalogItem(m)) {
       const opt = getMediaPackageOptions(m, isKo).find((o) => o.units === units);
@@ -145,9 +146,16 @@ export function shouldShowPlannerQuantityControl(m: MediaItem): boolean {
   return true;
 }
 
+/** 등급형 버스 — 대수 스텝퍼 노출 */
+export function shouldShowGradeQuantityStepper(m: MediaItem): boolean {
+  return isPerUnitGradePriceOptions(m);
+}
+
 /** @deprecated use shouldShowPlannerQuantityControl */
 export function shouldShowPlannerQuantityStepper(m: MediaItem): boolean {
-  return shouldShowPlannerQuantityControl(m) && getQuantityUnitMode(m) === "unit";
+  if (!shouldShowPlannerQuantityControl(m)) return false;
+  if (shouldShowGradeQuantityStepper(m)) return true;
+  return getQuantityUnitMode(m) === "unit";
 }
 
 export function defaultPackageUnitsForMedia(m: MediaItem): number {

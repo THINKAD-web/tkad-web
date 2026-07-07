@@ -1,7 +1,7 @@
 "use client";
 
 import type { MediaItem } from "@/lib/media-data";
-import { getQuantityUnitMode } from "@/lib/media-quantity";
+import { getQuantityUnitMode, isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { PlannerMediaPackagePicker } from "@/components/planner/media-package-picker";
 import { PlannerMediaQuantityStepper } from "@/components/planner/media-quantity-stepper";
 import {
@@ -34,6 +34,29 @@ export function PlannerMediaQuantityControl({
   className,
 }: Props) {
   if (!shouldShowPlannerQuantityControl(media)) return null;
+
+  if (isPerUnitGradePriceOptions(media)) {
+    return (
+      <div className={cn(compact ? "min-w-0 space-y-1.5" : "space-y-2", className)}>
+        <PlannerMediaPackagePicker
+          media={media}
+          isKo={isKo}
+          quantities={quantities}
+          priceOptionIndex={priceOptionIndex}
+          onQuantityChange={onQuantityChange}
+          onPriceOptionChange={onPriceOptionChange}
+          compact={compact}
+        />
+        <PlannerMediaQuantityStepper
+          media={media}
+          units={plannerUnitsForMedia(media, quantities)}
+          onChange={onQuantityChange}
+          isKo={isKo}
+          compact={compact}
+        />
+      </div>
+    );
+  }
 
   if (getQuantityUnitMode(media) === "package") {
     return (

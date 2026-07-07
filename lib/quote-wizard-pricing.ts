@@ -1,10 +1,9 @@
 import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
 import {
-  getQuantityUnitMode,
-  isMobileSingleMedia,
+  isPerUnitGradePriceOptions,
+  resolveCatalogLineMonthlyPriceWon,
   resolveMediaQuantity,
-  resolveMonthlyPriceForUnits,
 } from "@/lib/media-quantity";
 import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
@@ -258,16 +257,12 @@ export function buildQuoteWizardLineContext(
 
   const unitPriceMan = isNw
     ? catalogPriceFieldToPriceMan(computeNetworkMonthlyFromMediaItem(media, units))
-    : priceOpt
-      ? catalogPriceFieldToPriceMan(priceOpt.price)
-      : isMobileSingleMedia(media) && getQuantityUnitMode(media) === "unit"
-        ? catalogPriceFieldToPriceMan(
-            resolveMonthlyPriceForUnits(
-              media,
-              resolveMediaQuantity(media, opts.mobileUnits),
-            ),
-          )
-        : catalogPriceFieldToPriceMan(media.price);
+    : catalogPriceFieldToPriceMan(
+        resolveCatalogLineMonthlyPriceWon(media, {
+          priceOptionIndex: poIdx,
+          units: opts.mobileUnits,
+        }),
+      );
 
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
   const explicitBundleDays =
@@ -277,12 +272,18 @@ export function buildQuoteWizardLineContext(
     opts.usePackagePeriod === true &&
     !isNw &&
     priceOpt != null &&
-    explicitBundleDays != null;
+    explicitBundleDays != null &&
+    !isPerUnitGradePriceOptions(media);
   const campaignDays = usePackagePeriod ? explicitBundleDays! : globalCampaignDays;
 
   let campaignUnits: number;
   let lineTotalMan: number;
-  if (!isNw && priceOpt && explicitBundleDays != null) {
+  const gradePerUnitWon =
+    isPerUnitGradePriceOptions(media) && priceOpt
+      ? catalogPriceFieldToWon(priceOpt.price) *
+        resolveMediaQuantity(media, opts.mobileUnits)
+      : null;
+  if (!isNw && priceOpt && explicitBundleDays != null && !isPerUnitGradePriceOptions(media)) {
     if (usePackagePeriod) {
       campaignUnits = 1;
       lineTotalMan = unitPriceMan;
@@ -305,9 +306,11 @@ export function buildQuoteWizardLineContext(
   const lineTotalWon = Math.round(lineTotalMan * 10_000);
   const unitPriceWon = isNw
     ? lineTotalWon
-    : priceOpt
-      ? catalogPriceFieldToWon(priceOpt.price)
-      : catalogPriceFieldToWon(media.price);
+    : gradePerUnitWon != null
+      ? gradePerUnitWon
+      : priceOpt
+        ? catalogPriceFieldToWon(priceOpt.price)
+        : catalogPriceFieldToWon(media.price);
   const bundleDays =
     !isNw && priceOpt && explicitBundleDays != null ? explicitBundleDays : null;
   const prorationLabel =
@@ -344,4 +347,28 @@ export function buildQuoteWizardLineContext(
     campaignDays,
     prorationLabel,
   };
+}
+
+/** 견적 카드 표시용 월액(만원) — `quoteLineContexts` 와 동일 입력 */
+export function quoteCatalogDisplayPriceMan(
+  media: MediaItem,
+  opts: {
+    priceOptionIndex: number;
+    mobileUnits?: number;
+    networkUnits?: number;
+  },
+): number {
+  const isNw = media.catalogSource === "network";
+  if (isNw) {
+    const units = opts.networkUnits ?? media.networkMinUnits ?? 1;
+    return catalogPriceFieldToPriceMan(
+      computeNetworkMonthlyFromMediaItem(media, units),
+    );
+  }
+  return catalogPriceFieldToPriceMan(
+    resolveCatalogLineMonthlyPriceWon(media, {
+      priceOptionIndex: opts.priceOptionIndex,
+      units: opts.mobileUnits,
+    }),
+  );
 }

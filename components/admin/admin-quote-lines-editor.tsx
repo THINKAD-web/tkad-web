@@ -2,19 +2,23 @@
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { PlannerMediaPackagePicker } from "@/components/planner/media-package-picker";
 import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import { PlannerMediaQuantityStepper } from "@/components/planner/media-quantity-stepper";
 import type { AdminMediaDto } from "@/lib/admin-media-dto";
 import {
   adminLineMediaItemForControl,
+  adminMediaDtoToMediaItem,
   catalogLinePrice,
   computeAdminCatalogLineAmount,
   createCustomQuoteLine,
+  type AdminQuoteCatalogLine,
   type AdminQuoteLine,
   type AdminQuotePeriodKey,
 } from "@/lib/admin-quote-lines";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
-import { getQuantityUnitMode } from "@/lib/media-quantity";
+import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { Plus, Trash2 } from "lucide-react";
 
 function formatWon(n: number) {
@@ -180,8 +184,9 @@ export function AdminQuoteLinesEditor({
                 }
 
                 const controlMedia = adminLineMediaItemForControl(m, line.lineId);
-                const isPackage =
-                  getQuantityUnitMode(controlMedia) === "package";
+                const isGrade = isPerUnitGradePriceOptions(
+                  adminMediaDtoToMediaItem(m),
+                );
                 const { rawPrice, period, label } = catalogLinePrice(
                   m,
                   line.priceOptionIndex,
@@ -205,7 +210,28 @@ export function AdminQuoteLinesEditor({
                       </div>
                     </td>
                     <td className="px-2 py-2 align-top">
-                      {!isPackage && (m.priceOptions?.length ?? 0) > 0 ? (
+                      {isGrade ? (
+                        <PlannerMediaPackagePicker
+                          media={controlMedia}
+                          isKo={isKo}
+                          quantities={{ [line.lineId]: line.quantity }}
+                          priceOptionIndex={{
+                            [line.lineId]: line.priceOptionIndex,
+                          }}
+                          onQuantityChange={() => {}}
+                          onPriceOptionChange={(idx) => {
+                            const opt = m.priceOptions?.[idx];
+                            const patch: Partial<AdminQuoteCatalogLine> = {
+                              priceOptionIndex: Math.max(0, idx),
+                            };
+                            if (opt?.units != null && opt.units > 0) {
+                              patch.quantity = opt.units;
+                            }
+                            updateLine(line.lineId, patch);
+                          }}
+                          compact
+                        />
+                      ) : (m.priceOptions?.length ?? 0) > 0 ? (
                         <select
                           className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs"
                           value={line.priceOptionIndex}
@@ -228,25 +254,39 @@ export function AdminQuoteLinesEditor({
                       )}
                     </td>
                     <td className="px-2 py-2 align-top">
-                      <PlannerMediaQuantityControl
-                        media={controlMedia}
-                        isKo={isKo}
-                        quantities={{ [line.lineId]: line.quantity }}
-                        priceOptionIndex={{
-                          [line.lineId]: line.priceOptionIndex,
-                        }}
-                        onQuantityChange={(units) =>
-                          updateLine(line.lineId, {
-                            quantity: Math.max(1, units),
-                          })
-                        }
-                        onPriceOptionChange={(idx) =>
-                          updateLine(line.lineId, {
-                            priceOptionIndex: Math.max(0, idx),
-                          })
-                        }
-                        compact
-                      />
+                      {isGrade ? (
+                        <PlannerMediaQuantityStepper
+                          media={controlMedia}
+                          units={line.quantity}
+                          onChange={(units) =>
+                            updateLine(line.lineId, {
+                              quantity: Math.max(1, units),
+                            })
+                          }
+                          isKo={isKo}
+                          compact
+                        />
+                      ) : (
+                        <PlannerMediaQuantityControl
+                          media={controlMedia}
+                          isKo={isKo}
+                          quantities={{ [line.lineId]: line.quantity }}
+                          priceOptionIndex={{
+                            [line.lineId]: line.priceOptionIndex,
+                          }}
+                          onQuantityChange={(units) =>
+                            updateLine(line.lineId, {
+                              quantity: Math.max(1, units),
+                            })
+                          }
+                          onPriceOptionChange={(idx) =>
+                            updateLine(line.lineId, {
+                              priceOptionIndex: Math.max(0, idx),
+                            })
+                          }
+                          compact
+                        />
+                      )}
                     </td>
                     <td className="px-2 py-2 align-middle text-right tabular-nums text-xs">
                       {new Intl.NumberFormat("ko-KR").format(unitWon)}

@@ -7,7 +7,7 @@ import {
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
-import { getQuantityUnitMode } from "@/lib/media-quantity";
+import { getQuantityUnitMode, isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { cn } from "@/lib/utils";
 
@@ -46,6 +46,7 @@ export function PlannerMediaPackagePicker({
   if (options.length === 0) return null;
 
   const isNetwork = isNetworkCatalogItem(media);
+  const isGrade = isPerUnitGradePriceOptions(media);
   const selectedUnits = quantities[media.id];
   const selectedOptIdx = priceOptionIndex[media.id] ?? 0;
   const showInlinePrice =
@@ -62,10 +63,14 @@ export function PlannerMediaPackagePicker({
           {isKo
             ? isNetwork
               ? "패키지 구좌"
-              : "패키지 옵션"
+              : isGrade
+                ? "등급"
+                : "패키지 옵션"
             : isNetwork
               ? "Package slot"
-              : "Package option"}
+              : isGrade
+                ? "Grade"
+                : "Package option"}
         </p>
       ) : null}
       <div
@@ -94,6 +99,9 @@ export function PlannerMediaPackagePicker({
                   onQuantityChange(opt.units);
                 } else {
                   onPriceOptionChange(i);
+                  if (isGrade && opt.units != null && opt.units > 0) {
+                    onQuantityChange(opt.units);
+                  }
                 }
               }}
               className={cn(

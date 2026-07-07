@@ -29,6 +29,42 @@ export function isMobileSingleMedia(m: MediaItem): boolean {
   return m.type?.trim().toLowerCase() === "mobile" && !isNetworkCatalogItem(m);
 }
 
+const BROADCAST_PACKAGE_LABEL_RE =
+  /회|초|분|시간|slot|sec|min|hour|times?\//i;
+
+function isBusLikeMediaType(m: MediaItem): boolean {
+  const type = (m.type ?? "").trim().toLowerCase();
+  return type === "mobile" || type === "버스" || type.includes("bus");
+}
+
+/**
+ * 버스 래핑 등급(SSA/A/B) — `priceOptions[].price` 는 **대당 월 단가**.
+ * 수량(대수)은 별도 입력·`×` 곱셈. (어드민 견적·운영 DB와 동일)
+ *
+ * G버스 등 방송 슬롯 패키지(3회/시간)는 제외 — 옵션가가 월 총액.
+ */
+export function isPerUnitGradePriceOptions(m: MediaItem): boolean {
+  if (isNetworkCatalogItem(m)) return false;
+  const opts = m.priceOptions ?? [];
+  if (opts.length === 0) return false;
+  if (!isBusLikeMediaType(m)) return false;
+  const broadcastPackage = opts.every((o) =>
+    BROADCAST_PACKAGE_LABEL_RE.test(
+      `${o.label} ${o.description ?? ""} ${String(o.period ?? "")}`,
+    ),
+  );
+  return !broadcastPackage;
+}
+
+/** 등급형이 아닌 `priceOptions` — 옵션가가 월 패키지 총액 */
+export function isPackageTotalPriceOptions(m: MediaItem): boolean {
+  if (isNetworkCatalogItem(m)) return false;
+  const opts = m.priceOptions ?? [];
+  if (opts.length === 0) return false;
+  if (isPerUnitGradePriceOptions(m)) return false;
+  return getQuantityUnitMode(m) === "package";
+}
+
 /**
  * 수량 선택 대상: 네트워크 패키지 + 이동형 단일.
  * 단일 고정(빌보드·전광판 1면 등)은 false.
@@ -141,6 +177,17 @@ export function getQuantityBounds(m: MediaItem): MediaQuantityBounds {
   if (isMobileSingleMedia(m)) {
     return { min: 1, max: null, default: 1 };
   }
+  if (isPerUnitGradePriceOptions(m)) {
+    const poIdx = 0;
+    const suggested =
+      m.priceOptions?.find((o) => (o.units ?? 0) > 0)?.units ??
+      m.priceOptions?.[poIdx]?.units;
+    return {
+      min: 1,
+      max: null,
+      default: suggested != null && suggested > 0 ? suggested : 1,
+    };
+  }
   return { min: 1, max: 1, default: 1 };
 }
 
@@ -155,6 +202,49 @@ export function resolveMediaQuantity(m: MediaItem, units?: number): number {
   const qty = raw > 0 ? raw : bounds.default;
   const hi = bounds.max ?? Number.MAX_SAFE_INTEGER;
   return Math.min(hi, Math.max(bounds.min, qty));
+}
+
+/** 등급 옵션 월액(원) = 대당 단가 × 대수 */
+export function resolveGradeOptionMonthlyPriceWon(
+  m: MediaItem,
+  priceOptionIndex: number,
+  units?: number,
+): number {
+  const idx = Math.max(0, priceOptionIndex);
+  const opt = m.priceOptions?.[idx] ?? m.priceOptions?.[0];
+  const unitWon = catalogPriceFieldToWon(opt?.price ?? m.price);
+  const qty = resolveMediaQuantity(m, units);
+  return Math.round(unitWon * qty);
+}
+
+export type CatalogLinePriceOpts = {
+  priceOptionIndex?: number;
+  units?: number;
+};
+
+/**
+ * 카탈로그 매체 월액(원) — 견적·플래너·어드민 공통.
+ * - 네트워크: tier/단가×구좌
+ * - 등급형 버스: 등급 단가×대수
+ * - 패키지 총액 옵션: 선택 옵션가
+ * - 이동형 단일: `price × units`
+ */
+export function resolveCatalogLineMonthlyPriceWon(
+  m: MediaItem,
+  opts?: CatalogLinePriceOpts,
+): number {
+  if (isNetworkCatalogItem(m)) {
+    return resolveMonthlyPriceForUnits(m, opts?.units);
+  }
+  const poIdx = opts?.priceOptionIndex ?? 0;
+  if (isPerUnitGradePriceOptions(m)) {
+    return resolveGradeOptionMonthlyPriceWon(m, poIdx, opts?.units);
+  }
+  if (isPackageTotalPriceOptions(m)) {
+    const opt = m.priceOptions?.[poIdx] ?? m.priceOptions?.[0];
+    return catalogPriceFieldToWon(opt?.price ?? m.price);
+  }
+  return resolveMonthlyPriceForUnits(m, opts?.units);
 }
 
 /**
@@ -201,6 +291,9 @@ export function resolveImpressionsForUnits(
 ): number {
   const base = baseMonthlyImpressions(m);
   if (!isQuantitySelectableMedia(m)) return base;
+  if (isPerUnitGradePriceOptions(m) || isPackageTotalPriceOptions(m)) {
+    return base;
+  }
   const u = resolveMediaQuantity(m, units);
   return Math.round(base * u);
 }

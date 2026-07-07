@@ -10,8 +10,10 @@ import {
   getMediaPackageOptions,
   getQuantityBounds,
   getQuantityUnitMode,
+  isPerUnitGradePriceOptions,
   isQuantitySelectableMedia,
   MEDIA_QUANTITY_NETWORK_SOFT_MAX,
+  resolveGradeOptionMonthlyPriceWon,
   resolveImpressionsForUnits,
   resolveMediaQuantity,
   resolveMonthlyPriceForUnits,
@@ -208,4 +210,48 @@ test("G-bus style priceOptions → package mode", () => {
   assert.equal(getQuantityUnitMode(gbus), "package");
   assert.equal(getMediaPackageOptions(gbus, true).length, 2);
   assert.equal(isQuantitySelectableMedia(gbus), true);
+});
+
+test("isPerUnitGradePriceOptions — bus grades yes, G-bus broadcast no", () => {
+  const seoulBus = baseItem({
+    id: "bus-seoul",
+    type: "버스",
+    priceOptions: [
+      { label: "SSA", price: 1_500_000, period: "month" },
+      { label: "A", price: 1_200_000, period: "month" },
+    ],
+  });
+  const gbus = baseItem({
+    id: "gbus",
+    type: "mobile",
+    priceOptions: [
+      { label: "3회/시간", price: 64_000_000 },
+      { label: "1회/시간", price: 21_000_000 },
+    ],
+  });
+  assert.equal(isPerUnitGradePriceOptions(seoulBus), true);
+  assert.equal(isPerUnitGradePriceOptions(gbus), false);
+});
+
+test("resolveGradeOptionMonthlyPriceWon multiplies unit rate by fleet", () => {
+  const bus = baseItem({
+    type: "버스",
+    priceOptions: [{ label: "A", price: 800_000, period: "month" }],
+  });
+  assert.equal(resolveGradeOptionMonthlyPriceWon(bus, 0, 1), 800_000);
+  assert.equal(resolveGradeOptionMonthlyPriceWon(bus, 0, 50), 40_000_000);
+});
+
+test("per-unit grade bounds allow fleet > 1", () => {
+  const bus = baseItem({
+    type: "버스",
+    priceOptions: [
+      { label: "SSA", price: 1_500_000, units: 40 },
+      { label: "A", price: 1_200_000, units: 20 },
+    ],
+  });
+  const bounds = getQuantityBounds(bus);
+  assert.equal(bounds.default, 40);
+  assert.equal(bounds.max, null);
+  assert.equal(resolveMediaQuantity(bus, 100), 100);
 });

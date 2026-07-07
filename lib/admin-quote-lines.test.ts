@@ -54,6 +54,29 @@ test("computeAdminCatalogLineAmount matches legacy single-line formula", () => {
   assert.equal(next, legacy);
 });
 
+test("buildAdminQuoteLineItems SSA 40대 amount = 150만×40", () => {
+  const days = 30;
+  const line: AdminQuoteCatalogLine = {
+    kind: "catalog",
+    lineId: "l1",
+    mediaId: "bus-seoul",
+    priceOptionIndex: 0,
+    quantity: 40,
+  };
+  const items = buildAdminQuoteLineItems({
+    lines: [line],
+    medias: [busMedia],
+    isKo: true,
+    campaignPeriodLabel: "2026-07-01 ~ 2026-07-30",
+    days,
+    factorForPeriod,
+  });
+  assert.equal(items.length, 1);
+  const expected = Math.round(catalogPriceFieldToWon(1_500_000) * 40);
+  assert.equal(items[0]?.amount, expected);
+  assert.equal(items[0]?.quantity, 40);
+});
+
 test("buildAdminQuoteLineItems single catalog line amount regression", () => {
   const days = 30;
   const line: AdminQuoteCatalogLine = {
