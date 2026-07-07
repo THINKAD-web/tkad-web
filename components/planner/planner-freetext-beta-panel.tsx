@@ -128,7 +128,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
             {isKo ? "AI 자연어 입력" : "AI natural language"}
           </PlannerNeonLabel>
           <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
-            {isKo ? "베타 · 무료" : "Beta · Free"}
+            {isKo ? "무료 · 규칙" : "Free · Rules"}
           </span>
         </div>
         <h3

@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import type { ReactNode } from "react";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
@@ -22,12 +23,14 @@ export function RecommendScoredMediaCard({
   isKo,
   locale,
   className,
+  quantityControl,
 }: {
   scored: ScoredMedia;
   rank?: number;
   isKo: boolean;
   locale: string;
   className?: string;
+  quantityControl?: ReactNode;
 }) {
   const catalogItem = mapMediaItemToHomeCatalog(scored.item);
   const priceLabel =
@@ -57,6 +60,9 @@ export function RecommendScoredMediaCard({
         onToggleCart={() => {}}
         className="h-full"
       />
+      {quantityControl ? (
+        <div className="mt-2 border-t border-border pt-2">{quantityControl}</div>
+      ) : null}
     </li>
   );
 }

@@ -345,6 +345,30 @@ test("categories: 택시 래핑 → mobile", () => {
   assert.deepEqual(r.fields.categories.value, ["mobile"]);
 });
 
+test("categories: 강남 택시 브랜딩 → mobile + brand + gangnam", () => {
+  const r = parsePlannerFreetextBrief("강남 택시 브랜딩");
+  assert.deepEqual(r.fields.categories.value, ["mobile"]);
+  assert.equal(r.fields.campaignGoal.value, "brand");
+  assert.ok(r.fields.seoulZones.value?.includes("gangnam"));
+});
+
+test("categories: 택시래핑·택시광고·차량·트럭·모빌리티 → mobile", () => {
+  for (const phrase of [
+    "택시래핑 500만",
+    "택시광고 브랜딩",
+    "차량 래핑 강남",
+    "트럭 광고 1000만",
+    "모빌리티 브랜딩",
+  ]) {
+    const r = parsePlannerFreetextBrief(phrase);
+    assert.deepEqual(
+      r.fields.categories.value,
+      ["mobile"],
+      `expected mobile for: ${phrase}`,
+    );
+  }
+});
+
 test("categories: 이동형 → mobile", () => {
   const r = parsePlannerFreetextBrief("이동형 매체 1000만");
   assert.deepEqual(r.fields.categories.value, ["mobile"]);

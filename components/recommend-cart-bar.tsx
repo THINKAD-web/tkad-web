@@ -10,6 +10,7 @@ type Props = {
   items: MediaItem[];
   locale: string;
   maxItems: number;
+  quoteHref: string;
   onRemove: (id: string) => void;
   onClear: () => void;
 };
@@ -18,6 +19,7 @@ export default function RecommendCartBar({
   items,
   locale,
   maxItems,
+  quoteHref,
   onRemove,
   onClear,
 }: Props) {
@@ -25,8 +27,6 @@ export default function RecommendCartBar({
   const isKo = locale === "ko";
 
   if (items.length === 0) return null;
-
-  const ids = items.map((m) => m.id).join(",");
 
   return (
     <div className="fixed bottom-0 left-0 right-0 z-50 border-t-2 border-border bg-card">
@@ -64,7 +64,7 @@ export default function RecommendCartBar({
           <BtnBlock variant="secondary" size="sm" onClick={onClear}>
             {t("cartClear")}
           </BtnBlock>
-          <BtnBlock href={`/quote?media=${ids}`} variant="accent" size="sm">
+          <BtnBlock href={quoteHref} variant="accent" size="sm">
             {t("cartQuote")}
           </BtnBlock>
         </div>

@@ -13,6 +13,7 @@ import {
   Trophy,
   Share2,
 } from "lucide-react";
+import type { MediaItem } from "@/lib/media-data";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
@@ -36,6 +37,7 @@ type Props = {
   onCreateQuote?: () => void;
   creatingQuote?: boolean;
   quoteBusy?: boolean;
+  renderQuantityControl?: (media: MediaItem) => React.ReactNode;
 };
 
 export default function MediaAiRecommendDashboard({
@@ -50,6 +52,7 @@ export default function MediaAiRecommendDashboard({
   onCreateQuote,
   creatingQuote = false,
   quoteBusy = false,
+  renderQuantityControl,
 }: Props) {
   const tr = useTranslations("recommend");
   const isKo = locale === "ko";
@@ -192,6 +195,7 @@ export default function MediaAiRecommendDashboard({
                   rank={i + 1}
                   isKo={isKo}
                   locale={locale}
+                  quantityControl={renderQuantityControl?.(s.item)}
                 />
               ))}
             </ul>
@@ -222,6 +226,7 @@ export default function MediaAiRecommendDashboard({
                   rank={idx + 4}
                   isKo={isKo}
                   locale={locale}
+                  quantityControl={renderQuantityControl?.(s.item)}
                 />
               ))}
             </ul>

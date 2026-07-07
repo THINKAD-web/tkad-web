@@ -8,6 +8,7 @@ export const FREETEXT_EXAMPLE_PROMPTS_KO = [
   "전국 30대 테크 브랜드 인지",
   "지하철 IT 런칭 500만",
   "버스 래핑 브랜딩 1000만",
+  "강남 택시 브랜딩",
 ] as const;
 
 export const FREETEXT_EXAMPLE_PROMPTS_EN = [

@@ -579,6 +579,13 @@ function parseIndustryKey(text: string): ParsedField<PlannerIndustryKey> {
 
 const CATEGORY_ORDER: PlannerCategory[] = ["digital", "static", "mobile"];
 
+/** 이동형 매체 키워드 — 버스·택시·래핑·차량·트럭·모빌리티 등 */
+const MOBILE_CATEGORY_RE =
+  /버스|택시(?:\s*(?:래핑|광고|광고차))?|택시래핑|택시광고|래핑|차량|트럭|모빌리티|이동형|bus\b|taxi|vehicle\s*wrap|truck|mobility/i;
+
+const MOBILE_EXCLUSIVE_RE =
+  /(?:버스|택시(?:래핑|광고)?|래핑|차량|트럭|모빌리티|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑|차량|트럭)/i;
+
 /** 매체 유형 키워드 → 플래너 categories (추측 금지·「만」 명시 우선) */
 export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   const exclusiveSubway = text.match(
@@ -592,9 +599,7 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
     );
   }
 
-  const exclusiveMobile = text.match(
-    /(?:버스|택시|래핑|이동형)(?:\s*광고)?\s*만|만\s*(?:버스|택시|래핑)/i,
-  );
+  const exclusiveMobile = text.match(MOBILE_EXCLUSIVE_RE);
   if (exclusiveMobile) {
     return field(["mobile"], "high", exclusiveMobile[0].trim());
   }
@@ -617,7 +622,7 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   const hits: Hit[] = [];
 
   const rules: { cat: PlannerCategory; re: RegExp }[] = [
-    { cat: "mobile", re: /버스|택시|래핑|이동형|bus\b|taxi|vehicle\s*wrap/i },
+    { cat: "mobile", re: MOBILE_CATEGORY_RE },
     {
       cat: "static",
       re: /옥외|빌보드|고정형|billboard|outdoor(?!\s*digital)/i,

@@ -8,11 +8,9 @@ import {
 import { parseFreetextToBrief } from "@/lib/recommend-freetext-parse";
 
 /**
- * AI 플래너 자유텍스트 파싱 — PRO 전용.
- *
- * - PRO 하드 게이트: 비PRO 는 파서(Haiku) 호출 자체를 막고 403 반환.
- * - PRO 는 기존 AI 일일 쿼터(PRO 30회) + 어뷰징 방지(enforceAiRateLimit) 그대로 적용.
- * - 구조화 검색(/api/recommend)의 guest 1회 허용 정책과는 별개 — 이 엔드포인트만 PRO 강제.
+ * @deprecated 클라이언트 미사용 — /recommend·홈·플래너 자유입력은
+ * `parsePlannerFreetextBrief`(규칙·0토큰)로 통일됨. Haiku 파서는 데드코드.
+ * 제거는 별도 작업. (PRO 게이트·일일 쿼터는 이 라우트에만 남아 있음)
  */
 export const dynamic = "force-dynamic";
 

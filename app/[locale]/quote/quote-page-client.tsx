@@ -86,6 +86,14 @@ import {
   resolveQuoteMediaPricePeriod,
   type QuoteCampaignPeriodKey,
 } from "@/lib/quote-wizard-pricing";
+import { QuoteMediaQuantityFields } from "@/components/quote/quote-media-quantity-fields";
+import {
+  buildQuoteDeeplinkPath,
+  parseQuotePoMap,
+  parseQuoteUnitsMap,
+} from "@/lib/quote-deeplink";
+import { resolveMediaQuantity, resolveMonthlyPriceForUnits } from "@/lib/media-quantity";
+import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import { QUOTE_VALIDITY_DAYS } from "@/lib/quote-calculator";
@@ -233,12 +241,45 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     mediaQueryApplied.current = true;
     setSelectedIds(new Set(matchedIds));
     const unitsRaw = params.get("units");
+    const unitsMapRaw = params.get("unitsMap");
+    const unitsFromMap = parseQuoteUnitsMap(unitsMapRaw);
+    const poMapRaw = params.get("poMap");
+    const poFromMap = parseQuotePoMap(poMapRaw);
+
+    const mobileQtyInit: Record<string, number> = {};
+    const networkQtyInit: Record<string, { units: number; regionScope: string }> =
+      {};
+
     if (matchedIds.length === 1 && unitsRaw) {
       const u = parseInt(unitsRaw, 10);
       if (Number.isFinite(u) && u > 0) {
-        setMediaQuantities({ [matchedIds[0]!]: u });
+        const soleId = matchedIds[0]!;
+        const m = catalog.find((x) => x.id === soleId);
+        if (m?.catalogSource === "network") {
+          networkQtyInit[soleId] = { units: u, regionScope: "all" };
+        } else {
+          mobileQtyInit[soleId] = u;
+        }
+      }
+    } else if (Object.keys(unitsFromMap).length > 0) {
+      for (const id of matchedIds) {
+        const u = unitsFromMap[id];
+        if (u == null) continue;
+        const m = catalog.find((x) => x.id === id);
+        if (m?.catalogSource === "network") {
+          networkQtyInit[id] = { units: u, regionScope: "all" };
+        } else {
+          mobileQtyInit[id] = u;
+        }
       }
     }
+    if (Object.keys(mobileQtyInit).length > 0) {
+      setMediaQuantities(mobileQtyInit);
+    }
+    if (Object.keys(networkQtyInit).length > 0) {
+      setNetworkQuoteOptions((prev) => ({ ...prev, ...networkQtyInit }));
+    }
+
     const poRaw = params.get("po");
     const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
     let poIdx = 0;
@@ -247,8 +288,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       const n = m?.priceOptions?.length ?? 0;
       if (n > 0) {
         poIdx = Math.min(po, n - 1);
-        setMediaPriceOptionIndex({ [matchedIds[0]]: poIdx });
+        setMediaPriceOptionIndex({ [matchedIds[0]!]: poIdx });
       }
+    } else if (Object.keys(poFromMap).length > 0) {
+      const nextPo: Record<string, number> = {};
+      for (const id of matchedIds) {
+        const p = poFromMap[id];
+        if (p == null) continue;
+        const m = catalog.find((x) => x.id === id);
+        const n = m?.priceOptions?.length ?? 0;
+        if (n > 0) nextPo[id] = Math.min(Math.max(0, p), n - 1);
+      }
+      if (Object.keys(nextPo).length > 0) setMediaPriceOptionIndex(nextPo);
     }
     const periodParam = params.get("period");
     if (periodParam && isQuoteCampaignPeriodKey(periodParam)) {
@@ -298,6 +349,29 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         if (!selectedIds.has(k)) delete next[k];
       }
       return next;
+    });
+  }, [selectedIds, catalog]);
+
+  useEffect(() => {
+    setMediaQuantities((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const id of selectedIds) {
+        const m = catalog.find((x) => x.id === id);
+        if (!m || m.catalogSource === "network") continue;
+        if (!shouldShowPlannerQuantityControl(m)) continue;
+        if (next[id] == null) {
+          next[id] = resolveMediaQuantity(m);
+          changed = true;
+        }
+      }
+      for (const k of Object.keys(next)) {
+        if (!selectedIds.has(k)) {
+          delete next[k];
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
     });
   }, [selectedIds, catalog]);
 
@@ -373,6 +447,79 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       }
     },
     [selectedMedia],
+  );
+
+  const handleMediaQuantityChange = useCallback((mediaId: string, units: number) => {
+    setMediaQuantities((p) => ({ ...p, [mediaId]: units }));
+  }, []);
+
+  const handleNetworkQuoteOptionsChange = useCallback(
+    (mediaId: string, patch: Partial<{ units: number; regionScope: string }>) => {
+      setNetworkQuoteOptions((p) => {
+        const m = catalog.find((x) => x.id === mediaId);
+        const prev = p[mediaId];
+        return {
+          ...p,
+          [mediaId]: {
+            units:
+              patch.units ??
+              prev?.units ??
+              Math.max(m?.networkMinUnits ?? 1, 1),
+            regionScope: patch.regionScope ?? prev?.regionScope ?? "all",
+          },
+        };
+      });
+    },
+    [catalog],
+  );
+
+  const handlePackagePeriodToggle = useCallback(
+    (mediaId: string, checked: boolean) => {
+      setUsePackagePeriodByMediaId((p) => ({ ...p, [mediaId]: checked }));
+    },
+    [],
+  );
+
+  const quotePackagePeriodTemplate = t("quote.usePackagePeriodOnly", {
+    period: "{period}",
+  });
+
+  const renderQuoteMediaQuantityFields = useCallback(
+    (media: MediaItem, checked: boolean) => (
+      <QuoteMediaQuantityFields
+        media={media}
+        isKo={isKo}
+        checked={checked}
+        mediaQuantities={mediaQuantities}
+        mediaPriceOptionIndex={mediaPriceOptionIndex}
+        networkQuoteOptions={networkQuoteOptions}
+        usePackagePeriodByMediaId={usePackagePeriodByMediaId}
+        onMediaQuantityChange={handleMediaQuantityChange}
+        onPriceOptionChange={handleMediaPriceOptionChange}
+        onNetworkQuoteOptionsChange={handleNetworkQuoteOptionsChange}
+        onPackagePeriodToggle={handlePackagePeriodToggle}
+        packagePeriodMeta={packagePeriodToggleMeta(
+          media,
+          mediaPriceOptionIndex[media.id] ?? 0,
+        )}
+        networkRegionLabel={t("quote.networkRegion")}
+        networkRegionAllLabel={t("quote.networkRegionAll")}
+        packagePeriodOnlyLabel={quotePackagePeriodTemplate}
+      />
+    ),
+    [
+      isKo,
+      mediaQuantities,
+      mediaPriceOptionIndex,
+      networkQuoteOptions,
+      usePackagePeriodByMediaId,
+      handleMediaQuantityChange,
+      handleMediaPriceOptionChange,
+      handleNetworkQuoteOptionsChange,
+      handlePackagePeriodToggle,
+      quotePackagePeriodTemplate,
+      t,
+    ],
   );
 
   const bounds = useMemo(() => computeCatalogBounds(catalog), [catalog]);
@@ -1449,17 +1596,24 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           const isNw = media.catalogSource === "network";
                           const poIdx = mediaPriceOptionIndex[media.id] ?? 0;
                           const displayPrice = isNw
-                            ? computeNetworkMonthlyFromMediaItem(
-                                media,
-                                nwOpt?.units ??
-                                  media.networkMinUnits ??
-                                  1,
+                            ? catalogPriceFieldToPriceMan(
+                                computeNetworkMonthlyFromMediaItem(
+                                  media,
+                                  nwOpt?.units ??
+                                    media.networkMinUnits ??
+                                    1,
+                                ),
                               )
                             : media.priceOptions?.length
                               ? catalogPriceFieldToPriceMan(
                                   media.priceOptions[poIdx].price,
                                 )
-                              : media.price;
+                              : catalogPriceFieldToPriceMan(
+                                  resolveMonthlyPriceForUnits(
+                                    media,
+                                    mediaQuantities[media.id],
+                                  ),
+                                );
                           return (
                             <div key={media.id} className="space-y-2">
                               <QuoteMediaSelectCard
@@ -1474,131 +1628,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                 )}
                                 onToggle={() => toggleMedia(media.id)}
                               />
-                              {checked && isNw ? (
-                                <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">
-                                  <div>
-                                    <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                      [ {t("quote.networkUnits")} ]
-                                    </label>
-                                    <input
-                                      type="number"
-                                      min={media.networkMinUnits ?? 1}
-                                      max={media.networkTotalLocations ?? 99999}
-                                      value={nwOpt?.units ?? media.networkMinUnits ?? 1}
-                                      onChange={(e) => {
-                                        const v = parseInt(e.target.value, 10);
-                                        const lo = media.networkMinUnits ?? 1;
-                                        const hi =
-                                          media.networkTotalLocations ?? 99999;
-                                        const u = Number.isFinite(v)
-                                          ? Math.min(hi, Math.max(lo, v))
-                                          : lo;
-                                        setNetworkQuoteOptions((p) => ({
-                                          ...p,
-                                          [media.id]: {
-                                            units: u,
-                                            regionScope:
-                                              p[media.id]?.regionScope ?? "all",
-                                          },
-                                        }));
-                                      }}
-                                      className="h-9 w-full border-2 border-border bg-card px-3 text-sm text-foreground focus:border-accent focus:outline-none"
-                                    />
-                                  </div>
-                                  <div>
-                                    <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                      [ {t("quote.networkRegion")} ]
-                                    </label>
-                                    <select
-                                      className="w-full border-2 border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
-                                      value={nwOpt?.regionScope ?? "all"}
-                                      onChange={(e) =>
-                                        setNetworkQuoteOptions((p) => ({
-                                          ...p,
-                                          [media.id]: {
-                                            units:
-                                              p[media.id]?.units ??
-                                              media.networkMinUnits ??
-                                              1,
-                                            regionScope: e.target.value,
-                                          },
-                                        }))
-                                      }
-                                    >
-                                      <option value="all">
-                                        {t("quote.networkRegionAll")}
-                                      </option>
-                                      {(media.networkRegionLabels ?? []).map(
-                                        (r) => (
-                                          <option key={r} value={r}>
-                                            {r}
-                                          </option>
-                                        ),
-                                      )}
-                                    </select>
-                                  </div>
-                                </div>
-                              ) : null}
-                              {checked &&
-                              !isNw &&
-                              (media.priceOptions?.length ?? 0) > 0 ? (
-                                <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">
-                                  <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                    [ {t("quote.priceOptionLabel")} ]
-                                  </label>
-                                  <select
-                                    className="w-full border-2 border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
-                                    value={poIdx}
-                                    onChange={(e) => {
-                                      const v = parseInt(e.target.value, 10);
-                                      handleMediaPriceOptionChange(
-                                        media,
-                                        v,
-                                      );
-                                    }}
-                                  >
-                                    {(media.priceOptions ?? []).map((o, i) => (
-                                      <option key={`${o.label}-${i}`} value={i}>
-                                        {o.label} —{" "}
-                                        {formatCatalogPriceFieldWon(o.price)}
-                                      </option>
-                                    ))}
-                                  </select>
-                                  {(() => {
-                                    const pkgMeta = packagePeriodToggleMeta(
-                                      media,
-                                      poIdx,
-                                    );
-                                    if (!pkgMeta) return null;
-                                    return (
-                                      <label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-foreground">
-                                        <input
-                                          type="checkbox"
-                                          className="mt-0.5"
-                                          checked={
-                                            usePackagePeriodByMediaId[
-                                              media.id
-                                            ] === true
-                                          }
-                                          onChange={(e) =>
-                                            setUsePackagePeriodByMediaId(
-                                              (p) => ({
-                                                ...p,
-                                                [media.id]: e.target.checked,
-                                              }),
-                                            )
-                                          }
-                                        />
-                                        <span>
-                                          {t("quote.usePackagePeriodOnly", {
-                                            period: pkgMeta.periodText,
-                                          })}
-                                        </span>
-                                      </label>
-                                    );
-                                  })()}
-                                </div>
-                              ) : null}
+                              {renderQuoteMediaQuantityFields(media, checked)}
                             </div>
                           );
                         })}
@@ -1615,15 +1645,22 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             const isNw = media.catalogSource === "network";
                             const poIdxC = mediaPriceOptionIndex[media.id] ?? 0;
                             const displayPrice = isNw
-                              ? computeNetworkMonthlyFromMediaItem(
-                                  media,
-                                  nwOpt?.units ?? media.networkMinUnits ?? 1,
+                              ? catalogPriceFieldToPriceMan(
+                                  computeNetworkMonthlyFromMediaItem(
+                                    media,
+                                    nwOpt?.units ?? media.networkMinUnits ?? 1,
+                                  ),
                                 )
                               : media.priceOptions?.length
                                 ? catalogPriceFieldToPriceMan(
                                     media.priceOptions[poIdxC].price,
                                   )
-                                : media.price;
+                                : catalogPriceFieldToPriceMan(
+                                    resolveMonthlyPriceForUnits(
+                                      media,
+                                      mediaQuantities[media.id],
+                                    ),
+                                  );
                             return (
                               <div key={media.id} className="space-y-2">
                                 <label className="block cursor-pointer">
@@ -1701,129 +1738,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                                     </div>
                                   </div>
                                 </label>
-                                {checked && isNw ? (
-                                  <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">
-                                    <div>
-                                      <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                        [ {t("quote.networkUnits")} ]
-                                      </label>
-                                      <input
-                                        type="number"
-                                        min={media.networkMinUnits ?? 1}
-                                        max={media.networkTotalLocations ?? 99999}
-                                        value={nwOpt?.units ?? media.networkMinUnits ?? 1}
-                                        onChange={(e) => {
-                                          const v = parseInt(e.target.value, 10);
-                                          const lo = media.networkMinUnits ?? 1;
-                                          const hi =
-                                            media.networkTotalLocations ?? 99999;
-                                          const u = Number.isFinite(v)
-                                            ? Math.min(hi, Math.max(lo, v))
-                                            : lo;
-                                          setNetworkQuoteOptions((p) => ({
-                                            ...p,
-                                            [media.id]: {
-                                              units: u,
-                                              regionScope:
-                                                p[media.id]?.regionScope ?? "all",
-                                            },
-                                          }));
-                                        }}
-                                        className="h-9"
-                                      />
-                                    </div>
-                                    <div>
-                                      <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                        {t("quote.networkRegion")}
-                                      </label>
-                                      <select
-                                        className="w-full border-2 border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
-                                        value={nwOpt?.regionScope ?? "all"}
-                                        onChange={(e) =>
-                                          setNetworkQuoteOptions((p) => ({
-                                            ...p,
-                                            [media.id]: {
-                                              units:
-                                                p[media.id]?.units ??
-                                                media.networkMinUnits ??
-                                                1,
-                                              regionScope: e.target.value,
-                                            },
-                                          }))
-                                        }
-                                      >
-                                        <option value="all">
-                                          {isKo ? "전체" : "All"}
-                                        </option>
-                                        {(media.networkRegionLabels ?? []).map((label) => (
-                                          <option key={label} value={label}>
-                                            {label}
-                                          </option>
-                                        ))}
-                                    </select>
-                                  </div>
-                                </div>
-                              ) : null}
-                                {checked &&
-                                !isNw &&
-                                (media.priceOptions?.length ?? 0) > 0 ? (
-                                  <div className="space-y-3 border-2 border-border bg-muted p-3 text-sm">
-                                    <label className="mb-2 block font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                                      [ {t("quote.priceOptionLabel")} ]
-                                    </label>
-                                    <select
-                                      className="w-full border-2 border-border bg-card px-2 py-1.5 text-sm text-foreground focus:border-accent focus:outline-none"
-                                      value={poIdxC}
-                                      onChange={(e) => {
-                                        const v = parseInt(e.target.value, 10);
-                                        handleMediaPriceOptionChange(media, v);
-                                      }}
-                                    >
-                                      {(media.priceOptions ?? []).map((o, i) => (
-                                        <option
-                                          key={`${o.label}-${i}`}
-                                          value={i}
-                                        >
-                                          {o.label} —{" "}
-                                          {formatCatalogPriceFieldWon(o.price)}
-                                        </option>
-                                      ))}
-                                    </select>
-                                    {(() => {
-                                      const pkgMeta = packagePeriodToggleMeta(
-                                        media,
-                                        poIdxC,
-                                      );
-                                      if (!pkgMeta) return null;
-                                      return (
-                                        <label className="mt-2 flex cursor-pointer items-start gap-2 text-xs text-foreground">
-                                          <input
-                                            type="checkbox"
-                                            className="mt-0.5"
-                                            checked={
-                                              usePackagePeriodByMediaId[
-                                                media.id
-                                              ] === true
-                                            }
-                                            onChange={(e) =>
-                                              setUsePackagePeriodByMediaId(
-                                                (p) => ({
-                                                  ...p,
-                                                  [media.id]: e.target.checked,
-                                                }),
-                                              )
-                                            }
-                                          />
-                                          <span>
-                                            {t("quote.usePackagePeriodOnly", {
-                                              period: pkgMeta.periodText,
-                                            })}
-                                          </span>
-                                        </label>
-                                      );
-                                    })()}
-                                  </div>
-                                ) : null}
+                                {renderQuoteMediaQuantityFields(media, checked)}
                               </div>
                             );
                           })}

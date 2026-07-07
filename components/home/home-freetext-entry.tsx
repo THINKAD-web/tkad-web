@@ -42,7 +42,7 @@ export function HomeFreetextEntry() {
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
               <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
-                {isKo ? "베타 · 무료" : "Beta · Free"}
+                {isKo ? "무료 · 규칙" : "Free · Rules"}
               </span>
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 {isKo ? "규칙 분석 · 0토큰" : "Rule-based · 0 tokens"}
@@ -56,7 +56,7 @@ export function HomeFreetextEntry() {
                 className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400"
                 aria-hidden
               />
-              {isKo ? "캠페인 조건을 입력하세요" : "Describe your campaign"}
+              {isKo ? "AI 자연어 입력" : "AI natural language"}
             </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-white/65">
               {isKo

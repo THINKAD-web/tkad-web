@@ -131,6 +131,9 @@ export function formatPlannerQuantityLabel(
   if (isMobileSingleMedia(m)) {
     return isKo ? `${units}대` : `${units} units`;
   }
+  if (m.type?.trim().toLowerCase() === "digital") {
+    return isKo ? `${units}기` : `${units} units`;
+  }
   return String(units);
 }
 

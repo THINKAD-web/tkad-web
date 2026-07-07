@@ -45,6 +45,14 @@ import {
   RecommendScoredMediaCard,
   RecommendTop3PickRow,
 } from "@/components/media-ai-recommend-scored-card";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import { buildQuoteDeeplinkPath } from "@/lib/quote-deeplink";
+import { resolveMediaQuantity } from "@/lib/media-quantity";
+import {
+  shouldShowPlannerQuantityControl,
+  type CampaignMediaPriceOptionIndex,
+  type CampaignMediaQuantities,
+} from "@/lib/planner/planner-media-quantity";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -78,7 +86,7 @@ export default function RecommendPageClient({
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("form");
-  /** 입력 방식: 기존 구조화 폼 / AI 자유입력(PRO) */
+  /** 입력 방식: 기존 구조화 폼 / AI 자연어 입력(규칙·0토큰) */
   const [inputMode, setInputMode] = useState<"structured" | "ai">("structured");
   const [fullList, setFullList] = useState<ScoredMedia[] | null>(null);
   const [lastPayload, setLastPayload] =
@@ -86,6 +94,10 @@ export default function RecommendPageClient({
   const [analysisSeed, setAnalysisSeed] = useState(0);
   const [recommendLogId, setRecommendLogId] = useState<string | null>(null);
   const [captchaToken, setCaptchaToken] = useState("");
+  const [recommendQuantities, setRecommendQuantities] =
+    useState<CampaignMediaQuantities>({});
+  const [recommendPriceOptionIndex, setRecommendPriceOptionIndex] =
+    useState<CampaignMediaPriceOptionIndex>({});
 
   const router = useRouter();
   const [navigatingQuote, setNavigatingQuote] = useState(false);
@@ -97,12 +109,62 @@ export default function RecommendPageClient({
     return fullList.slice(0, 3);
   }, [fullList]);
 
-  const quoteQueryPicked =
-    cartItems.length > 0
-      ? cartItems.map((m) => m.id).join(",")
-      : top3.map((s) => s.item.id).join(",");
+  const pickedForQuote = useMemo(
+    () =>
+      cartItems.length > 0 ? cartItems : top3.map((s) => s.item),
+    [cartItems, top3],
+  );
 
-  const quoteHref = `/quote?media=${encodeURIComponent(quoteQueryPicked)}`;
+  const quoteHref = useMemo(
+    () =>
+      buildQuoteDeeplinkPath(pickedForQuote, {
+        quantities: recommendQuantities,
+        priceOptionIndex: recommendPriceOptionIndex,
+      }),
+    [pickedForQuote, recommendQuantities, recommendPriceOptionIndex],
+  );
+
+  const renderRecommendQuantityControl = useCallback(
+    (media: MediaItem) => {
+      if (!shouldShowPlannerQuantityControl(media)) return null;
+      return (
+        <PlannerMediaQuantityControl
+          media={media}
+          isKo={isKo}
+          quantities={recommendQuantities}
+          priceOptionIndex={recommendPriceOptionIndex}
+          onQuantityChange={(units) =>
+            setRecommendQuantities((p) => ({ ...p, [media.id]: units }))
+          }
+          onPriceOptionChange={(index) =>
+            setRecommendPriceOptionIndex((p) => ({
+              ...p,
+              [media.id]: index,
+            }))
+          }
+          compact
+        />
+      );
+    },
+    [isKo, recommendQuantities, recommendPriceOptionIndex],
+  );
+
+  useEffect(() => {
+    if (!fullList?.length) return;
+    setRecommendQuantities((prev) => {
+      const next = { ...prev };
+      let changed = false;
+      for (const s of fullList) {
+        const m = s.item;
+        if (!shouldShowPlannerQuantityControl(m)) continue;
+        if (next[m.id] == null) {
+          next[m.id] = resolveMediaQuantity(m);
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+  }, [fullList]);
 
   const goToContactQuote = useCallback(() => {
     const picked =
@@ -567,7 +629,7 @@ export default function RecommendPageClient({
           ) : null}
           {phase === "form" && autoFromUrl !== "1" && (
             <>
-              {/* 입력 방식 토글: 구조화 입력 / AI 자유입력 */}
+              {/* 입력 방식 토글: 구조화 입력 / AI 자연어 입력 */}
               <div className="mx-auto mb-4 flex max-w-xl gap-1 rounded-2xl border border-gray-200 bg-gray-50 p-1 text-sm font-medium dark:border-white/10 dark:bg-white/5">
                 <button
                   type="button"
@@ -593,9 +655,9 @@ export default function RecommendPageClient({
                   )}
                 >
                   <Sparkles className="h-4 w-4 text-violet-500" />
-                  {isKo ? "AI 자유입력" : "AI free-text"}
-                  <span className="rounded bg-violet-500/15 px-1 text-[9px] font-bold uppercase text-violet-600 dark:text-violet-300">
-                    PRO
+                  {isKo ? "AI 자연어 입력" : "AI natural language"}
+                  <span className="rounded border border-cyan-400/40 bg-cyan-500/15 px-1 text-[9px] font-bold uppercase text-cyan-700 dark:text-cyan-200">
+                    {isKo ? "무료" : "Free"}
                   </span>
                 </button>
               </div>
@@ -649,6 +711,7 @@ export default function RecommendPageClient({
               }}
               onViewFullList={() => setPhase("list")}
               onRemix={handleRemix}
+              renderQuantityControl={renderRecommendQuantityControl}
             />
           )}
 
@@ -739,6 +802,7 @@ export default function RecommendPageClient({
                     rank={index < 3 ? index + 1 : undefined}
                     isKo={isKo}
                     locale={locale}
+                    quantityControl={renderRecommendQuantityControl(s.item)}
                   />
                 ))}
               </ul>
@@ -751,6 +815,10 @@ export default function RecommendPageClient({
         items={cartItems}
         locale={locale}
         maxItems={cartMax}
+        quoteHref={buildQuoteDeeplinkPath(cartItems, {
+          quantities: recommendQuantities,
+          priceOptionIndex: recommendPriceOptionIndex,
+        })}
         onRemove={(id) =>
           setCartItems((prev) => prev.filter((m) => m.id !== id))
         }
