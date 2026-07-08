@@ -66,6 +66,7 @@ import {
   STICKY_ACTION_BAR_BTN_IDLE,
   STICKY_ACTION_BAR_BTN_PRIMARY,
   STICKY_ACTION_BAR_DOCK_SPACER_CLASS,
+  STICKY_ACTION_BAR_ROW,
   StickyActionBar,
 } from "@/components/sticky-action-bar";
 import { cn } from "@/lib/utils";
