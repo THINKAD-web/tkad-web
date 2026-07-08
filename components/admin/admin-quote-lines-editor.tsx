@@ -19,6 +19,12 @@ import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { Plus, Trash2 } from "lucide-react";
+import {
+  adminQuoteSelectClass,
+  adminQuoteSurfaceMutedClass,
+  adminQuoteTableRowClass,
+  adminQuoteTableTheadClass,
+} from "@/components/admin/admin-quote-page-shell";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -73,13 +79,13 @@ export function AdminQuoteLinesEditor({
   return (
     <div className="space-y-3">
       {lines.length === 0 ? (
-        <p className="rounded-lg border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center text-sm text-muted-foreground">
+        <p className={`${adminQuoteSurfaceMutedClass} border-dashed px-4 py-8 text-center text-sm text-muted-foreground`}>
           아래 매체 목록에서 「라인 추가」로 견적 항목을 넣거나, 커스텀 비용을 추가하세요.
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
           <table className="w-full min-w-[720px] text-sm">
-            <thead className="bg-slate-50 text-left text-xs text-muted-foreground">
+            <thead className={adminQuoteTableTheadClass}>
               <tr className="border-b">
                 <th className="px-3 py-2">항목</th>
                 <th className="w-36 px-2 py-2">등급</th>
@@ -96,7 +102,7 @@ export function AdminQuoteLinesEditor({
                     Math.max(0, line.unitPriceWon) * Math.max(1, line.quantity),
                   );
                   return (
-                    <tr key={line.lineId} className="border-b bg-white dark:bg-hero-void">
+                    <tr key={line.lineId} className={adminQuoteTableRowClass}>
                       <td className="px-3 py-2 align-top">
                         <Input
                           value={line.name}
@@ -198,7 +204,7 @@ export function AdminQuoteLinesEditor({
                 return (
                   <tr
                     key={line.lineId}
-                    className="border-b bg-white dark:bg-hero-void"
+                    className={adminQuoteTableRowClass}
                   >
                     <td className="px-3 py-2 align-top">
                       <div className="font-medium text-foreground dark:text-hero-fg">
@@ -232,7 +238,7 @@ export function AdminQuoteLinesEditor({
                         />
                       ) : (m.priceOptions?.length ?? 0) > 0 ? (
                         <select
-                          className="w-full rounded border border-slate-200 bg-white px-2 py-1.5 text-xs"
+                          className={`w-full ${adminQuoteSelectClass} py-1.5 text-xs`}
                           value={line.priceOptionIndex}
                           onChange={(e) => {
                             const n = Math.max(

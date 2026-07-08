@@ -23,7 +23,12 @@ import { formatOohQuoteManwonShort } from "@/lib/ooh-quote-amount";
 import { mapOohQuoteRecalcApiError } from "@/lib/ooh-quote-recalc-error";
 import {
   AdminQuotePageShell,
+  adminQuoteEmphasisTextClass,
+  adminQuoteLinkVioletClass,
   adminQuoteSectionCard,
+  adminQuoteSelectClass,
+  adminQuoteTableExpandedRowClass,
+  adminQuoteTableTheadClass,
 } from "@/components/admin/admin-quote-page-shell";
 import {
   AdminOohContractDetailPanel,
@@ -250,7 +255,7 @@ export default function AdminOohQuotesClient() {
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
           <select
-            className="h-9 min-w-[200px] rounded-md border border-input bg-white px-2 text-sm"
+            className={`h-9 min-w-[200px] ${adminQuoteSelectClass}`}
             value={status}
             onChange={(e) => setStatus(e.target.value)}
           >
@@ -352,7 +357,7 @@ export default function AdminOohQuotesClient() {
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="border-b bg-slate-50 text-left text-xs text-muted-foreground">
+                <thead className={adminQuoteTableTheadClass}>
                   <tr>
                     <th className="px-3 py-2 font-medium">{t("colClient")}</th>
                     <th className="px-3 py-2 font-medium">{t("colEmail")}</th>
@@ -374,9 +379,9 @@ export default function AdminOohQuotesClient() {
                       ref={(el) => {
                         rowRefs.current[row.id] = el;
                       }}
-                      className="border-b border-slate-100 transition-colors"
+                      className="border-b border-border/10 transition-colors dark:border-hero-fg/10"
                     >
-                      <td className="px-3 py-2 font-medium text-navy">
+                      <td className={`px-3 py-2 ${adminQuoteEmphasisTextClass}`}>
                         <button
                           type="button"
                           className="inline-flex items-center gap-1 text-left hover:underline"
@@ -396,7 +401,7 @@ export default function AdminOohQuotesClient() {
                             })}{" "}
                             <Link
                               href={`/admin/quotes/${row.sourceAdminQuoteId}/edit`}
-                              className="font-medium text-violet-700 hover:underline"
+                              className={adminQuoteLinkVioletClass}
                             >
                               {t("sourceFromAdminQuoteLink")}
                             </Link>
@@ -525,7 +530,7 @@ export default function AdminOohQuotesClient() {
                           {canShowContractConfirm(row) ? (
                             <Button
                               size="sm"
-                              className="bg-gold text-navy"
+                              className="bg-gold text-foreground dark:text-hero-fg"
                               disabled={busyId === row.id}
                               onClick={() =>
                                 void run(row.id, () =>
@@ -553,7 +558,7 @@ export default function AdminOohQuotesClient() {
                       </td>
                     </tr>
                     {expanded ? (
-                      <tr key={`${row.id}-detail`} className="bg-slate-50/80">
+                      <tr key={`${row.id}-detail`} className={adminQuoteTableExpandedRowClass}>
                         <td colSpan={7} className="px-4 py-3">
                           <AdminOohContractDetailPanel
                             quoteId={row.id}

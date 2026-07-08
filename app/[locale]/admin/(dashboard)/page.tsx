@@ -305,9 +305,15 @@ export default async function AdminOverviewPage({ params }: Props) {
         />
       </section>
 
-      <section className="grid grid-cols-2 gap-2 md:grid-cols-4">
+      <section className="grid grid-cols-2 gap-2 md:grid-cols-3">
         {[
           { href: `${prefix}/admin/medias`, label: "매체 관리", icon: Monitor },
+          { href: `${prefix}/admin/quotes`, label: "견적서", icon: Calculator },
+          {
+            href: `${prefix}/admin/contracts`,
+            label: "계약 관리",
+            icon: FileSignature,
+          },
           {
             href: `${prefix}/admin/campaigns`,
             label: "캠페인",
@@ -318,7 +324,6 @@ export default async function AdminOverviewPage({ params }: Props) {
             label: "문의",
             icon: MessageSquareText,
           },
-          { href: `${prefix}/admin/quotes`, label: "견적서", icon: Calculator },
           {
             href: `${prefix}/admin/quotes?tab=booking`,
             label: "계약·부킹",

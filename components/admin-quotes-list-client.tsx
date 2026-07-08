@@ -23,7 +23,9 @@ import {
 import { useToast } from "@/components/toast-provider";
 import {
   AdminQuotePageShell,
+  adminQuoteLinkVioletClass,
   adminQuoteSectionCard,
+  adminQuoteSelectClass,
 } from "@/components/admin/admin-quote-page-shell";
 
 function formatWon(n: number) {
@@ -277,7 +279,7 @@ export default function AdminQuotesListClient() {
               {t("status")}
             </label>
             <select
-              className="h-9 w-full min-w-[140px] rounded-md border border-input bg-white px-2 text-sm"
+              className={`h-9 w-full min-w-[140px] ${adminQuoteSelectClass}`}
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
@@ -381,7 +383,7 @@ export default function AdminQuotesListClient() {
                       <td className="px-3 py-2 text-xs font-medium text-foreground dark:text-hero-fg">
                         <Link
                           href={`/admin/quotes/${row.id}/edit`}
-                          className="font-semibold text-violet-700 hover:underline"
+                          className={adminQuoteLinkVioletClass}
                         >
                           {row.quoteNumber}
                         </Link>
@@ -408,7 +410,7 @@ export default function AdminQuotesListClient() {
                       </td>
                       <td className="px-3 py-2">
                         <select
-                          className="h-8 max-w-[9rem] rounded border border-slate-200 bg-white px-1.5 text-xs"
+                          className={`h-8 max-w-[9rem] ${adminQuoteSelectClass} text-xs`}
                           value={row.status}
                           disabled={busyId === row.id}
                           onChange={(e) => void patchStatus(row.id, e.target.value)}
@@ -443,7 +445,7 @@ export default function AdminQuotesListClient() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-8 border-navy/30 bg-navy/5 text-xs text-navy hover:bg-navy/10 dark:text-hero-fg"
+                            className="h-8 border-navy/30 bg-navy/5 text-xs text-foreground hover:bg-navy/10 dark:text-hero-fg"
                             disabled={busyId === row.id}
                             asChild
                           >

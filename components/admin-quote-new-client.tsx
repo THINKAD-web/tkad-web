@@ -59,7 +59,13 @@ import {
 } from "@/lib/admin-quote-hydrate";
 import type { QuoteApi } from "@/lib/admin-sales-quote";
 import { AdminQuoteContractActions } from "@/components/admin/admin-quote-contract-actions";
-import { AdminQuotePageShell } from "@/components/admin/admin-quote-page-shell";
+import {
+  AdminQuotePageShell,
+  adminQuoteSectionCard,
+  adminQuoteSurfaceMutedClass,
+  adminQuoteTableRowClass,
+  adminQuoteTableTheadClass,
+} from "@/components/admin/admin-quote-page-shell";
 import { AdminQuoteTopSticky } from "@/components/admin/admin-quote-top-sticky";
 import {
   STICKY_ACTION_BAR_BTN,
@@ -903,7 +909,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               />
             </div>
           </CardHeader>
-          <CardContent className="max-h-[min(420px,45vh)] overflow-auto rounded-lg border bg-slate-50/50 p-0">
+          <CardContent className={`max-h-[min(420px,45vh)] overflow-auto p-0 ${adminQuoteSurfaceMutedClass}`}>
             {listLoading ? (
               <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -915,7 +921,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               <p className="p-6 text-sm text-muted-foreground">{t("empty")}</p>
             ) : (
               <table className="w-full text-sm">
-                <thead className="sticky top-0 z-10 bg-white shadow-sm">
+                <thead className={`sticky top-0 z-10 shadow-sm ${adminQuoteTableTheadClass}`}>
                   <tr className="border-b text-left text-xs text-muted-foreground">
                     <th className="px-3 py-2">{t("colMedia")}</th>
                     <th className="w-28 px-2 py-2">{t("colPrice")}</th>
@@ -929,7 +935,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                     return (
                       <tr
                         key={m.id}
-                        className="border-b border-slate-100 bg-white dark:bg-hero-void"
+                        className={adminQuoteTableRowClass}
                       >
                         <td className="px-3 py-2 align-middle">
                           <div className="font-medium text-foreground dark:text-hero-fg">
@@ -1003,7 +1009,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                 />
               </div>
             </div>
-            <div className="rounded-2xl border bg-slate-50 px-3 py-2 text-xs text-muted-foreground">
+            <div className={`${adminQuoteSurfaceMutedClass} px-3 py-2 text-xs text-muted-foreground`}>
               <span className="font-medium text-foreground dark:text-hero-fg">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
               <Badge variant="secondary" className="ml-1 text-[10px]">
@@ -1079,7 +1085,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               <Input
                 value={displayQuoteNumber}
                 readOnly
-                className="bg-slate-50 text-xs"
+                className="bg-muted/40 text-xs dark:bg-card/10"
               />
             </div>
             <div>
@@ -1164,7 +1170,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
                 pdfStyle === "basic"
                   ? "border-accent bg-accent/15 text-foreground"
-                  : "border-slate-200 bg-white text-muted-foreground"
+                  : "border-slate-200 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5"
               }`}
             >
               카드형
@@ -1175,7 +1181,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               className={`rounded-md border px-2.5 py-1.5 text-xs font-semibold ${
                 pdfStyle === "formal"
                   ? "border-accent bg-accent/15 text-foreground"
-                  : "border-slate-200 bg-white text-muted-foreground"
+                  : "border-slate-200 bg-white text-muted-foreground dark:border-white/10 dark:bg-white/5"
               }`}
             >
               공식 견적서 (6열·계좌)
@@ -1349,7 +1355,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                       );
                     }
                   }}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground dark:text-hero-fg hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
                 >
                   <Camera className="h-4 w-4" />
                   이미지 캡처
@@ -1357,7 +1363,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                 <button
                   type="button"
                   onClick={() => void downloadPdf()}
-                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground dark:text-hero-fg hover:bg-slate-50"
+                  className="inline-flex items-center gap-2 rounded-md border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-foreground hover:bg-muted/50 dark:border-white/10 dark:bg-white/5 dark:text-hero-fg dark:hover:bg-card/10"
                 >
                   <Download className="h-4 w-4" />
                   PDF 저장
@@ -1425,7 +1431,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
             </div>
 
             {/* 관리자용 세부 합계 (할인 포함) */}
-            <div className="mx-auto mt-4 max-w-md space-y-1 rounded-2xl border bg-white p-4 text-sm">
+            <div className="mx-auto mt-4 max-w-md space-y-1 rounded-2xl border bg-card p-4 text-sm dark:bg-white/5">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">소계</span>
                 <span className="font-semibold tabular-nums">

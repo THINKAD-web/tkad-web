@@ -15,6 +15,8 @@ import {
 import {
   AdminQuotePageShell,
   adminQuoteSectionCard,
+  adminQuoteSurfaceMutedClass,
+  adminQuoteTableRowClass,
 } from "@/components/admin/admin-quote-page-shell";
 import {
   STICKY_ACTION_BAR_BTN,
@@ -510,7 +512,7 @@ export default function AdminStandaloneContractClient() {
                 value={specialTerms}
                 onChange={(e) => setSpecialTerms(e.target.value)}
                 placeholder={t("specialTermsPh")}
-                className="w-full rounded-xl border border-input bg-white px-3 py-2 text-sm leading-relaxed dark:bg-white/5"
+                className="w-full rounded-xl border border-input bg-white px-3 py-2 text-sm leading-relaxed text-foreground dark:bg-white/5 dark:text-hero-fg"
               />
             </label>
           </CardContent>
@@ -554,7 +556,7 @@ export default function AdminStandaloneContractClient() {
               />
             </div>
           </CardHeader>
-          <CardContent className="max-h-[min(360px,40vh)] overflow-auto rounded-lg border bg-slate-50/50 p-0">
+          <CardContent className={`max-h-[min(360px,40vh)] overflow-auto p-0 ${adminQuoteSurfaceMutedClass}`}>
             {listLoading ? (
               <div className="flex items-center justify-center gap-2 py-12 text-muted-foreground">
                 <Loader2 className="h-5 w-5 animate-spin" />
@@ -570,7 +572,7 @@ export default function AdminStandaloneContractClient() {
                     const rawPrice = m.priceOptions?.[0]?.price ?? m.price;
                     const period = m.priceOptions?.[0]?.period ?? "month";
                     return (
-                      <tr key={m.id} className="border-b border-slate-100 bg-white">
+                      <tr key={m.id} className={adminQuoteTableRowClass}>
                         <td className="px-3 py-2">
                           <div className="font-medium">{m.name}</div>
                           <div className="text-xs text-muted-foreground">
@@ -624,7 +626,7 @@ export default function AdminStandaloneContractClient() {
             <iframe
               title={t("previewTitle")}
               src={previewUrl}
-              className="h-[min(640px,70vh)] w-full rounded-xl border border-gray-200 bg-white"
+              className="h-[min(640px,70vh)] w-full rounded-xl border border-gray-200 bg-white dark:border-white/10 dark:bg-white/5"
             />
           </CardContent>
         </Card>
