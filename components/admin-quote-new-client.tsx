@@ -47,6 +47,7 @@ import {
   Plus,
   ListOrdered,
   Trash2,
+  FileSignature,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 import {
@@ -134,6 +135,11 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const [editLoading, setEditLoading] = useState(isEditMode);
   const [editError, setEditError] = useState<string | null>(null);
   const [editHydrated, setEditHydrated] = useState(false);
+  const [bridgeModalOpen, setBridgeModalOpen] = useState(false);
+  const [bridgeLoading, setBridgeLoading] = useState(false);
+  const [existingOohQuoteId, setExistingOohQuoteId] = useState<string | null>(
+    null,
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -490,6 +496,72 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     t,
     toast,
   ]);
+
+  const canCreateContract =
+    Boolean(quoteId) &&
+    hasLines &&
+    days > 0 &&
+    clientCompany.trim() &&
+    clientName.trim() &&
+    clientPhone.trim() &&
+    clientEmail.trim();
+
+  const openBridgeModal = useCallback(async () => {
+    if (!quoteId) return;
+    setBridgeModalOpen(true);
+    setExistingOohQuoteId(null);
+    try {
+      const res = await fetch(
+        `/api/admin/quotes/${quoteId}/create-ooh-quote`,
+        { credentials: "include", cache: "no-store" },
+      );
+      const raw = (await res.json()) as { existingOohQuoteId?: string | null };
+      if (res.ok) {
+        setExistingOohQuoteId(raw.existingOohQuoteId ?? null);
+      }
+    } catch {
+      /* preview optional */
+    }
+  }, [quoteId]);
+
+  const confirmCreateContract = useCallback(async () => {
+    if (!quoteId) return;
+    setBridgeLoading(true);
+    try {
+      const res = await fetch(
+        `/api/admin/quotes/${quoteId}/create-ooh-quote`,
+        {
+          method: "POST",
+          credentials: "include",
+          cache: "no-store",
+        },
+      );
+      const raw = (await res.json()) as {
+        oohQuoteId?: string;
+        error?: string;
+        created?: boolean;
+      };
+      if (!res.ok) {
+        throw new Error(raw.error ?? t("createContractFailed"));
+      }
+      if (!raw.oohQuoteId) throw new Error(t("createContractFailed"));
+      toast(
+        "success",
+        raw.created ? t("createContractOk") : t("createContractExists"),
+      );
+      setBridgeModalOpen(false);
+      router.push(
+        `/admin/quotes?tab=booking&highlight=${encodeURIComponent(raw.oohQuoteId)}`,
+      );
+    } catch (e) {
+      toast(
+        "error",
+        e instanceof Error ? e.message : t("createContractFailed"),
+      );
+    } finally {
+      setBridgeLoading(false);
+    }
+  }, [quoteId, router, t, toast]);
 
   const deleteQuote = useCallback(async () => {
     if (!quoteId) return;
@@ -1030,6 +1102,24 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
             </Button>
             <Button
               type="button"
+              variant="secondary"
+              disabled={
+                !canCreateContract || bridgeLoading || saveLoading || pdfLoading
+              }
+              title={
+                !quoteId
+                  ? t("createContractNeedSave")
+                  : !clientEmail.trim()
+                    ? t("createContractNeedEmail")
+                    : undefined
+              }
+              onClick={() => void openBridgeModal()}
+            >
+              <FileSignature className="mr-2 h-4 w-4" />
+              {t("createContract")}
+            </Button>
+            <Button
+              type="button"
               variant="outline"
               className="border-border/20 text-foreground hover:bg-muted dark:border-hero-fg/25 dark:text-hero-fg dark:hover:bg-card/10"
               disabled={
@@ -1280,6 +1370,83 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       )}
         </>
       )}
+
+      {bridgeModalOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="bridge-modal-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border bg-white p-5 shadow-xl dark:bg-hero-void">
+            <h2
+              id="bridge-modal-title"
+              className="text-lg font-semibold text-foreground dark:text-hero-fg"
+            >
+              {t("createContractModalTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-muted-foreground">
+              {t("createContractModalBody")}
+            </p>
+            <dl className="mt-4 space-y-2 rounded-xl border bg-muted/30 p-3 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t("clientCompany")}</dt>
+                <dd className="text-right font-medium">
+                  {[clientCompany.trim(), clientName.trim()]
+                    .filter(Boolean)
+                    .join(" · ")}
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t("periodSummary")}</dt>
+                <dd className="text-right font-medium">{campaignPeriodLabel}</dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t("sumTotal")}</dt>
+                <dd className="text-right font-semibold tabular-nums">
+                  {formatWon(totals.totalWon)}
+                  <span className="ml-2 text-xs font-normal text-muted-foreground">
+                    ({Math.round(totals.totalWon / 10_000).toLocaleString("ko-KR")}
+                    만원)
+                  </span>
+                </dd>
+              </div>
+              <div className="flex justify-between gap-3">
+                <dt className="text-muted-foreground">{t("quoteNumberLabel")}</dt>
+                <dd className="font-mono text-xs">{displayQuoteNumber}</dd>
+              </div>
+            </dl>
+            {existingOohQuoteId ? (
+              <p className="mt-3 text-sm text-amber-800">{t("createContractAlready")}</p>
+            ) : null}
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                disabled={bridgeLoading}
+                onClick={() => setBridgeModalOpen(false)}
+              >
+                {t("createContractCancel")}
+              </Button>
+              <Button
+                type="button"
+                className="bg-navy dark:text-white"
+                disabled={bridgeLoading}
+                onClick={() => void confirmCreateContract()}
+              >
+                {bridgeLoading ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <FileSignature className="mr-2 h-4 w-4" />
+                )}
+                {existingOohQuoteId
+                  ? t("createContractGoExisting")
+                  : t("createContractConfirm")}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }

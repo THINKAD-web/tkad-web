@@ -1009,6 +1009,10 @@ model OoHQuote {
   priceNegotiationId String?                 @unique @map("price_negotiation_id")
   priceNegotiation   PriceNegotiationRequest? @relation(fields: [priceNegotiationId], references: [id], onDelete: SetNull)
 
+  /** Admin formal Quote → contract pipeline bridge (P1) */
+  sourceAdminQuoteId String? @unique @map("source_admin_quote_id")
+  sourceAdminQuote   Quote?  @relation(fields: [sourceAdminQuoteId], references: [id], onDelete: SetNull)
+
   chatRoom ChatRoom?
 
   pipelineCard     PipelineCard?
@@ -1212,6 +1216,8 @@ model Quote {
   isKo        Boolean     @default(true) @map("is_ko")
   createdAt   DateTime    @default(now()) @map("created_at")
   updatedAt   DateTime    @updatedAt @map("updated_at")
+
+  oohQuoteBridge OoHQuote?
 
   @@index([status])
   @@index([createdAt])

@@ -2572,7 +2572,19 @@
     "editLoadError": "견적을 불러오지 못했습니다.",
     "updateQuote": "변경 저장",
     "updateOk": "견적이 수정되었습니다.",
-    "deleteQuote": "견적 삭제"
+    "deleteQuote": "견적 삭제",
+    "createContract": "계약서 만들기",
+    "createContractNeedSave": "견적을 먼저 저장한 뒤 이용할 수 있습니다.",
+    "createContractNeedEmail": "계약 파이프라인에 고객 이메일이 필요합니다.",
+    "createContractModalTitle": "계약 파이프라인으로 전환",
+    "createContractModalBody": "이 견적을 OoH 계약·부킹 파이프라인(draft)으로 복사합니다. 원본 견적서와 PDF는 변경되지 않습니다.",
+    "createContractConfirm": "계약서 생성",
+    "createContractGoExisting": "기존 계약으로 이동",
+    "createContractAlready": "이 견적에서 만든 계약이 이미 있습니다. 다시 누르면 동일 계약으로 이동합니다.",
+    "createContractOk": "계약 파이프라인에 견적이 생성되었습니다.",
+    "createContractExists": "기존 계약으로 이동합니다.",
+    "createContractFailed": "계약서 생성에 실패했습니다.",
+    "createContractCancel": "취소"
   },
   "adminQuotesList": {
     "title": "견적 관리",

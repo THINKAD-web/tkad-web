@@ -2571,7 +2571,20 @@
     "editLoading": "Loading quote…",
     "editLoadError": "Could not load quote.",
     "updateQuote": "Save changes",
-    "updateOk": "Quote updated."
+    "updateOk": "Quote updated.",
+    "deleteQuote": "Delete quote",
+    "createContract": "Create contract",
+    "createContractNeedSave": "Save the quote first.",
+    "createContractNeedEmail": "Client email is required for the contract pipeline.",
+    "createContractModalTitle": "Send to contract pipeline",
+    "createContractModalBody": "Copy this quote into the OoH contract & booking pipeline (draft). The original quote and PDF are unchanged.",
+    "createContractConfirm": "Create contract",
+    "createContractGoExisting": "Go to existing contract",
+    "createContractAlready": "A contract already exists for this quote. You will be taken to the same record.",
+    "createContractOk": "Contract pipeline quote created.",
+    "createContractExists": "Opening existing contract.",
+    "createContractFailed": "Could not create contract.",
+    "createContractCancel": "Cancel"
   },
   "adminQuotesList": {
     "title": "Quote management",
