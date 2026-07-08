@@ -29,7 +29,7 @@ import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
-import { formatOohQuoteTotalKrw } from "@/lib/ooh-quote-amount";
+import { formatOohQuoteTotalKrw, coerceOohQuoteTotalAmountManwon } from "@/lib/ooh-quote-amount";
 
 type Media = {
   id: string;
@@ -277,8 +277,22 @@ export default function QuotePreviewView({
   const canProceed = showProceedCta && quote.status === "sent";
   const showContractCta =
     quote.contractSigned === true || quote.status === "booking_confirmed";
+
+  const referenceMediaTotalWon = quote.medias.reduce((sum, m) => sum + (m.price ?? 0), 0);
+  const { manwon: displayTotalManwon, corrected: totalAmountCorrected } =
+    coerceOohQuoteTotalAmountManwon(quote.totalAmount, referenceMediaTotalWon);
+
+  if (totalAmountCorrected) {
+    console.warn("[quote-preview] OoHQuote.totalAmount unit mismatch — displaying corrected value", {
+      quoteId: quote.id,
+      storedTotalAmount: quote.totalAmount,
+      referenceMediaTotalWon,
+      displayTotalManwon,
+    });
+  }
+
   const totalDisplayKrw = formatOohQuoteTotalKrw(
-    quote.totalAmount,
+    displayTotalManwon,
     isKo ? "ko-KR" : "en-US",
   );
 

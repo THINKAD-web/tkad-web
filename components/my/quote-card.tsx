@@ -1,5 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ChevronRight, Download } from "lucide-react";
+import { formatOohQuoteTotalKrw } from "@/lib/ooh-quote-amount";
 import { QuoteStatusBadge } from "./quote-status-badge";
 
 export type QuoteCardItem = {
@@ -15,9 +16,6 @@ export type QuoteCardItem = {
   createdAt: string;
 };
 
-function formatKRW(v: number): string {
-  return `₩${new Intl.NumberFormat("ko-KR").format(v)}`;
-}
 function formatDate(s: string | null): string {
   if (!s) return "-";
   return new Date(s).toLocaleDateString("ko-KR");
@@ -55,7 +53,7 @@ export function QuoteCard({
       </div>
       <div className="flex items-center justify-between border-t-2 border-border pt-3">
         <span className="font-display text-base font-bold tabular-nums text-accent">
-          {formatKRW(item.totalAmount)}
+          {formatOohQuoteTotalKrw(item.totalAmount)}
         </span>
         <div className="flex items-center gap-0">
           <Link

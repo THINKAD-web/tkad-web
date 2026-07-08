@@ -3,6 +3,7 @@ import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
+import { wonToManwon } from "@/lib/ooh-quote-amount";
 import {
   apiError,
   apiOk,
@@ -60,8 +61,8 @@ export async function POST(req: Request) {
       });
     }
 
-    // 네트워크 매체는 선택 수량(units)으로 월 단가를 환산, 일반 매체는 표시 단가 사용.
-    const totalAmount = picked.reduce((sum, m) => {
+    // 네트워크 매체는 선택 수량(units)으로 월 단가를 환산, 일반 매체는 표시 단가(원) 사용.
+    const totalWon = picked.reduce((sum, m) => {
       if (m.catalogSource === "network") {
         const units = networkUnits?.[m.id];
         if (units && units > 0) {
@@ -70,6 +71,7 @@ export async function POST(req: Request) {
       }
       return sum + catalogPriceFieldToWon(m.price ?? 0);
     }, 0);
+    const totalAmount = Math.max(1, wonToManwon(totalWon));
 
     const quote = await prisma.ooHQuote.create({
       data: {

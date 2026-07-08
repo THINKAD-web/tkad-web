@@ -1,0 +1,127 @@
+{
+  "generatedAt": "2026-07-08T10:09:24.550Z",
+  "mode": "apply",
+  "candidateCount": 10,
+  "candidates": [
+    {
+      "id": "cmo9gtvyx000004jowbfohgzj",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-04-22T03:00:50.073Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 50000000,
+      "referenceTotalWon": 50000000,
+      "correctedManwon": 5000,
+      "displayBeforeWon": 500000000000,
+      "displayAfterWon": 50000000
+    },
+    {
+      "id": "cmo9ile3n000004l56tsj7oc9",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-04-22T03:50:12.899Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 50000000,
+      "referenceTotalWon": 50000000,
+      "correctedManwon": 5000,
+      "displayBeforeWon": 500000000000,
+      "displayAfterWon": 50000000
+    },
+    {
+      "id": "cmocvb13t000004l5sup4xodv",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-04-24T12:09:23.033Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 14000000,
+      "referenceTotalWon": 14000000,
+      "correctedManwon": 1400,
+      "displayBeforeWon": 140000000000,
+      "displayAfterWon": 14000000
+    },
+    {
+      "id": "cmpm8zzd901ya08jkanz2bpsp",
+      "clientName": "포인트데모",
+      "status": "draft",
+      "createdAt": "2026-05-26T06:22:20.109Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 30000000,
+      "referenceTotalWon": 30000000,
+      "correctedManwon": 3000,
+      "displayBeforeWon": 300000000000,
+      "displayAfterWon": 30000000
+    },
+    {
+      "id": "cmppcoxax0048amjkvdgvg387",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-05-28T10:29:01.209Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 40000000,
+      "referenceTotalWon": 40000000,
+      "correctedManwon": 4000,
+      "displayBeforeWon": 400000000000,
+      "displayAfterWon": 40000000
+    },
+    {
+      "id": "cmppdq6qn0096amjkleqi6ydy",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-05-28T10:57:59.711Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 30000000,
+      "referenceTotalWon": 30000000,
+      "correctedManwon": 3000,
+      "displayBeforeWon": 300000000000,
+      "displayAfterWon": 30000000
+    },
+    {
+      "id": "cmppmnrow000904l3tfviww7z",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-05-28T15:08:03.440Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 30000000,
+      "referenceTotalWon": 30000000,
+      "correctedManwon": 3000,
+      "displayBeforeWon": 300000000000,
+      "displayAfterWon": 30000000
+    },
+    {
+      "id": "cmppmwncu002004l220soy94v",
+      "clientName": "이재한",
+      "status": "draft",
+      "createdAt": "2026-05-28T15:14:57.726Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 53000000,
+      "referenceTotalWon": 53000000,
+      "correctedManwon": 5300,
+      "displayBeforeWon": 530000000000,
+      "displayAfterWon": 53000000
+    },
+    {
+      "id": "cmqcxwjyv000104lejwzv5wnf",
+      "clientName": "최예연",
+      "status": "draft",
+      "createdAt": "2026-06-13T22:41:31.159Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 96550000,
+      "referenceTotalWon": 96550000,
+      "correctedManwon": 9655,
+      "displayBeforeWon": 965500000000,
+      "displayAfterWon": 96550000
+    },
+    {
+      "id": "cmqo3nwot000104lawp8yo7s0",
+      "clientName": "카카오 사용자",
+      "status": "draft",
+      "createdAt": "2026-06-21T18:08:13.373Z",
+      "sourceAdminQuoteId": null,
+      "totalAmount": 29000000,
+      "referenceTotalWon": 29000000,
+      "correctedManwon": 2900,
+      "displayBeforeWon": 290000000000,
+      "displayAfterWon": 29000000
+    }
+  ]
+}
