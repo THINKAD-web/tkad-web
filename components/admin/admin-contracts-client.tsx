@@ -34,6 +34,7 @@ import {
   SheetTitle,
 } from "@/components/ui/sheet";
 import { useToast } from "@/components/toast-provider";
+import { mapOohQuoteRecalcApiError } from "@/lib/ooh-quote-recalc-error";
 import {
   formatOohQuoteManwonShort,
   formatOohQuoteTotalKrw,
@@ -486,7 +487,22 @@ export default function AdminContractsClient() {
                         body: JSON.stringify({ recalculate: true }),
                       });
                       if (!res.ok) {
-                        toast("error", tOoh("fail"));
+                        const raw: unknown = await res.json().catch(() => ({}));
+                        const errCode =
+                          typeof raw === "object" &&
+                          raw !== null &&
+                          "error" in raw &&
+                          typeof (raw as { error?: unknown }).error === "string"
+                            ? (raw as { error: string }).error
+                            : undefined;
+                        toast(
+                          "error",
+                          mapOohQuoteRecalcApiError(errCode, {
+                            recalcCustomOnly: tOoh("recalcCustomOnly"),
+                            recalcNoMedia: tOoh("recalcNoMedia"),
+                            fallback: tOoh("fail"),
+                          }),
+                        );
                         return;
                       }
                       await loadDetail(sheetQuoteId);

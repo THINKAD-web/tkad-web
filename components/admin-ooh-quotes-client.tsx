@@ -20,6 +20,7 @@ import {
 } from "@/lib/ooh-quote-admin-ui";
 import { useToast } from "@/components/toast-provider";
 import { formatOohQuoteManwonShort } from "@/lib/ooh-quote-amount";
+import { mapOohQuoteRecalcApiError } from "@/lib/ooh-quote-recalc-error";
 import {
   AdminQuotePageShell,
   adminQuoteSectionCard,
@@ -206,14 +207,20 @@ export default function AdminOohQuotesClient() {
     });
     const raw: unknown = await res.json().catch(() => ({}));
     if (!res.ok) {
-      const msg =
+      const errCode =
         typeof raw === "object" &&
         raw !== null &&
         "error" in raw &&
         typeof (raw as { error?: unknown }).error === "string"
           ? (raw as { error: string }).error
-          : t("fail");
-      throw new Error(msg);
+          : undefined;
+      throw new Error(
+        mapOohQuoteRecalcApiError(errCode, {
+          recalcCustomOnly: t("recalcCustomOnly"),
+          recalcNoMedia: t("recalcNoMedia"),
+          fallback: t("fail"),
+        }),
+      );
     }
   };
 

@@ -2697,6 +2697,8 @@
     "status_completed": "완료",
     "status_cancelled": "취소",
     "recalc": "재계산",
+    "recalcCustomOnly": "이 견적은 커스텀 항목만 있어 재계산할 수 없습니다. 금액은 견적서 기준으로 유지됩니다.",
+    "recalcNoMedia": "재계산할 매체가 없습니다.",
     "breakdownTitle": "견적 상세 (자동 계산)",
     "breakdownImpressions": "노출",
     "breakdownSubtotal": "소계",

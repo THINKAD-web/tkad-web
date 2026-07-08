@@ -4,6 +4,7 @@ import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
 import { serializeOoHQuotePublic } from "@/lib/ooh-quote";
 import { syncOoHQuoteBreakdown } from "@/lib/ooh-quote-sync-breakdown";
+import { isOohQuoteRecalcError } from "@/lib/ooh-quote-recalc-error";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import {
   loadOoHQuoteForContract,
@@ -133,7 +134,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   const row = await db.ooHQuote.findUnique({ where: { id } });
   if (!row) return json({ error: "not_found" }, 404);
 
-  const updated = recalc ? await syncOoHQuoteBreakdown(db, row) : row;
+  let updated = row;
+  if (recalc) {
+    try {
+      updated = await syncOoHQuoteBreakdown(db, row);
+    } catch (e) {
+      if (isOohQuoteRecalcError(e)) {
+        return json({ error: e.code, message: e.message }, 400);
+      }
+      throw e;
+    }
+  }
 
   return json({
     ok: true,

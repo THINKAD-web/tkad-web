@@ -78,11 +78,36 @@ function inferPeriodKey(periodDays: number): string {
   return "1month";
 }
 
+export function isCustomBridgeMediaId(mediaId: string): boolean {
+  return mediaId.startsWith("custom-");
+}
+
+/** Admin 견적 라인 → DB 매체 ID vs 커스텀 라인 ID */
+export function partitionQuoteItemMediaIds(items: QuoteItem[]): {
+  dbMediaIds: string[];
+  customLineIds: string[];
+} {
+  const dbSet = new Set<string>();
+  const customSet = new Set<string>();
+  for (const it of items) {
+    const id = it.mediaId?.trim() ?? "";
+    if (!id || isCustomBridgeMediaId(id)) {
+      customSet.add(id || `custom-${it.id}`);
+      continue;
+    }
+    dbSet.add(id);
+  }
+  return {
+    dbMediaIds: [...dbSet],
+    customLineIds: [...customSet],
+  };
+}
+
 function buildMediaSelections(items: QuoteItem[]): QuoteMediaSelectionSnapshot[] {
   const out: QuoteMediaSelectionSnapshot[] = [];
   for (const it of items) {
     const mediaId = it.mediaId?.trim() ?? "";
-    if (!mediaId || mediaId.startsWith("custom-")) continue;
+    if (!mediaId || isCustomBridgeMediaId(mediaId)) continue;
     const { meta } = decodeAdminQuoteItemSpec(it.spec);
     out.push({
       mediaId,
@@ -197,13 +222,7 @@ export function buildOoHQuoteFromAdminQuote(
     parsePeriodFromItems(quote.items);
   const locale = quote.isKo ? "ko" : "en";
   const mediaSelections = buildMediaSelections(quote.items);
-  const mediaIds = [
-    ...new Set(
-      quote.items
-        .map((it) => it.mediaId?.trim() ?? "")
-        .filter((id) => id && !id.startsWith("custom-")),
-    ),
-  ];
+  const { dbMediaIds, customLineIds } = partitionQuoteItemMediaIds(quote.items);
 
   const totalAmountManwon = Math.max(1, wonToManwon(quote.total));
   assertAmountBridgeConsistent(quote.total, totalAmountManwon);
@@ -213,7 +232,10 @@ export function buildOoHQuoteFromAdminQuote(
       ? periodLabelForDays(periodDays, locale)
       : periodLabel;
 
-  const quoteBreakdown = buildQuoteBreakdown(quote, periodDays);
+  const quoteBreakdown = {
+    ...buildQuoteBreakdown(quote, periodDays),
+    ...(customLineIds.length > 0 ? { customLineIds } : {}),
+  };
 
   const data: Prisma.OoHQuoteCreateInput = {
     status: OoHQuoteStatus.draft,
@@ -221,7 +243,7 @@ export function buildOoHQuoteFromAdminQuote(
     clientEmail: email,
     clientPhone: quote.clientPhone?.trim() || null,
     clientCompany: company.trim() || null,
-    mediaIds,
+    mediaIds: dbMediaIds,
     totalAmount: totalAmountManwon,
     period,
     periodKey: inferPeriodKey(periodDays),

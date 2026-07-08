@@ -2697,6 +2697,8 @@
     "status_completed": "Completed",
     "status_cancelled": "Cancelled",
     "recalc": "Recalculate",
+    "recalcCustomOnly": "This quote has custom line items only; recalculation is not available. Amounts stay as on the quote.",
+    "recalcNoMedia": "No media items available to recalculate.",
     "breakdownTitle": "Quote breakdown (auto)",
     "breakdownImpressions": "Impressions",
     "breakdownSubtotal": "Subtotal",
