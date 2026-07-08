@@ -80,7 +80,7 @@
   },
   "aiChatbot": {
     "title": "AI chat",
-    "subtitle": "Tailored picks · rule-based (0 tokens)",
+    "subtitle": "Tailored picks · free (0 tokens)",
     "eyebrow": "[ AI CHAT ]",
     "placeholder": "Ask about campaign briefs or media picks",
     "send": "Send",
@@ -98,6 +98,7 @@
     "errorGeneric": "Could not get a response. Please try again.",
     "maintenance": "The chatbot is under maintenance. Please try again later.",
     "rateLimited": "You've used today's AI chat quota. Please try again tomorrow.",
+    "rateLimitedAbuse": "Please try again in a moment. Too many requests in a short time — take a short break.",
     "remaining": "{remaining} left today (max {limit})",
     "plannerCta": "Design in step-by-step planner",
     "recommendCta": "Get quick recommendations",

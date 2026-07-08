@@ -27,8 +27,11 @@ export const PLAN_CART_MAX_ITEMS_PRO = PLAN_CART_UNLIMITED;
 /** 일일 AI 사용 한도 (guest / 로그인 FREE / PRO) */
 export const AI_DAILY_LIMITS = { guest: 1, user: 5, pro: 30 } as const;
 
-/** 시간당 동일 IP AI 어뷰징 한도 */
+/** 시간당 동일 IP AI 어뷰징 한도 (토큰 AI: recommend·planner 등) */
 export const AI_HOURLY_ABUSE_LIMIT = 20;
+
+/** 시간당 동일 IP — 규칙 챗봇(0토큰) abuse 방지 (일일 한도 없음) */
+export const AI_CHATBOT_HOURLY_ABUSE_LIMIT = 80;
 
 /** 매체 비교함 최대 개수 (URL·PDF·UI 공통) */
 export const COMPARE_MAX_ITEMS = Number.MAX_SAFE_INTEGER;

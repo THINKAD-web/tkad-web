@@ -3,6 +3,7 @@ import { Redis } from "@upstash/redis";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { isPro } from "@/lib/plan-check-shared";
 import {
+  AI_CHATBOT_HOURLY_ABUSE_LIMIT,
   AI_DAILY_LIMITS,
   AI_HOURLY_ABUSE_LIMIT,
 } from "@/lib/entitlements/constants";
@@ -161,6 +162,45 @@ export async function enforceAiRateLimit(
   });
 }
 
+/** 규칙 챗봇(0토큰) — 일일 한도 없음, 시간당 IP abuse·봇 UA만 검사. */
+export async function checkChatbotRuleAbuseLimit(opts: {
+  ipOnlyHash: string;
+  ua: string;
+}): Promise<AiRateResult> {
+  if (!opts.ua || BOT_RE.test(opts.ua)) {
+    return { allowed: false, remaining: 0, limit: 0, reason: "abuse" };
+  }
+
+  const hour = new Date().toISOString().slice(0, 13);
+  const hourCount = await incr(
+    `tkad:ai:chatbot:hourly:${opts.ipOnlyHash}:${hour}`,
+    3600,
+  );
+  if (hourCount > AI_CHATBOT_HOURLY_ABUSE_LIMIT) {
+    return { allowed: false, remaining: 0, limit: 0, reason: "abuse" };
+  }
+
+  return { allowed: true, remaining: 0, limit: 0 };
+}
+
+/** 규칙 챗봇 라우트용 — enforceAiRateLimit 과 분리 (Claude 유료 경로는 기존 일일 한도). */
+export async function enforceChatbotRuleAbuseLimit(
+  req: Request,
+): Promise<AiRateResult> {
+  const id = aiRateIdentity(req, null);
+  return checkChatbotRuleAbuseLimit({
+    ipOnlyHash: id.ipOnlyHash,
+    ua: id.ua,
+  });
+}
+
 export function aiRateMessage(reason: AiRateReason | undefined, isKo: boolean): string {
   return aiRateMessageFromEntitlements(reason, isKo);
+}
+
+/** 규칙 챗봇 abuse 차단 시 UI·API 한 줄 메시지 */
+export function chatbotAbuseMessage(isKo: boolean): string {
+  return isKo
+    ? "잠시 후 다시 시도해 주세요. 짧은 시간에 요청이 많으면 잠깐 쉬어갈 수 있어요."
+    : "Please try again in a moment. Too many requests in a short time — take a short break.";
 }

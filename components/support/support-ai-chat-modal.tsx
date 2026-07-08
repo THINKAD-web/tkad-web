@@ -37,6 +37,7 @@ type ChatApiResponse = {
   error?: string;
   engine?: "rule" | "claude";
   tokensUsed?: number;
+  free?: boolean;
 };
 
 const ANALYZE_MIN_MS = 480;
@@ -119,7 +120,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [quota, setQuota] = useState<QuotaState | null>(null);
+  const [claudeQuota, setClaudeQuota] = useState<QuotaState | null>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
@@ -184,7 +185,11 @@ export function SupportAiChatModal({ open, onClose }: Props) {
         }
 
         if (res.status === 429 || data.rateLimited) {
-          throw new Error(data.message?.trim() || t("rateLimited"));
+          const fallback =
+            data.reason === "abuse" || data.engine === "rule"
+              ? t("rateLimitedAbuse")
+              : t("rateLimited");
+          throw new Error(data.message?.trim() || fallback);
         }
 
         if (!res.ok) {
@@ -213,10 +218,11 @@ export function SupportAiChatModal({ open, onClose }: Props) {
         }
 
         if (
+          data.engine === "claude" &&
           typeof data.remaining === "number" &&
           typeof data.limit === "number"
         ) {
-          setQuota({ remaining: data.remaining, limit: data.limit });
+          setClaudeQuota({ remaining: data.remaining, limit: data.limit });
         }
 
         const withReply: AiChatTurn[] = [
@@ -273,10 +279,10 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             </p>
             <p className="truncate text-sm font-black">{t("title")}</p>
             <p className="truncate text-[11px] text-muted-foreground">
-              {quota != null
+              {claudeQuota != null
                 ? t("remaining", {
-                    remaining: quota.remaining,
-                    limit: quota.limit,
+                    remaining: claudeQuota.remaining,
+                    limit: claudeQuota.limit,
                   })
                 : t("subtitle")}
             </p>

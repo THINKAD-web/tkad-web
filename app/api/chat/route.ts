@@ -8,7 +8,12 @@ import { getCurrentUser } from "@/lib/user-session";
 import { getClientIp } from "@/lib/api-response";
 import { logChatbotTurn } from "@/lib/chatbot-log";
 import { getChatbotStatus } from "@/lib/chatbot-status";
-import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
+import {
+  enforceAiRateLimit,
+  enforceChatbotRuleAbuseLimit,
+  aiRateMessage,
+  chatbotAbuseMessage,
+} from "@/lib/ai-rate-limit";
 
 export const maxDuration = 60;
 
@@ -106,15 +111,23 @@ export async function POST(req: Request) {
   }
 
   const user = await getCurrentUser();
-  const rl = await enforceAiRateLimit(req, user?.id ?? null);
+  const useClaude = isChatbotClaudeEnabled();
+  const isKo = locale === "ko";
+
+  const rl = useClaude
+    ? await enforceAiRateLimit(req, user?.id ?? null)
+    : await enforceChatbotRuleAbuseLimit(req);
+
   if (!rl.allowed) {
     return NextResponse.json(
       {
         rateLimited: true,
         reason: rl.reason,
-        message: aiRateMessage(rl.reason, locale === "ko"),
-        remaining: 0,
-        limit: rl.limit,
+        message: useClaude
+          ? aiRateMessage(rl.reason, isKo)
+          : chatbotAbuseMessage(isKo),
+        remaining: useClaude ? 0 : undefined,
+        limit: useClaude ? rl.limit : undefined,
       },
       { status: 429 },
     );
@@ -126,8 +139,6 @@ export async function POST(req: Request) {
   } catch {
     catalog = [];
   }
-
-  const useClaude = isChatbotClaudeEnabled();
 
   try {
     if (useClaude) {
@@ -220,12 +231,11 @@ export async function POST(req: Request) {
       media,
       recommendDeeplink,
       plannerDeeplink,
-      remaining: rl.remaining,
-      limit: rl.limit,
       engine: "rule",
       tokensUsed,
       inputTokens,
       outputTokens,
+      free: true,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);

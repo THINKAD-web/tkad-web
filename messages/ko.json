@@ -80,7 +80,7 @@
   },
   "aiChatbot": {
     "title": "AI 상담",
-    "subtitle": "맞춤 매체 추천 · 규칙 분석(0토큰)",
+    "subtitle": "맞춤 매체 추천 · 무료 (0토큰)",
     "eyebrow": "[ AI 상담 ]",
     "placeholder": "캠페인 조건·매체 추천을 물어보세요",
     "send": "보내기",
@@ -98,6 +98,7 @@
     "errorGeneric": "응답을 가져오지 못했습니다. 잠시 후 다시 시도해 주세요.",
     "maintenance": "챗봇이 점검 중입니다. 잠시 후 다시 시도해 주세요.",
     "rateLimited": "오늘 AI 상담 한도를 모두 사용했습니다. 내일 다시 이용해 주세요.",
+    "rateLimitedAbuse": "잠시 후 다시 시도해 주세요. 짧은 시간에 요청이 많으면 잠깐 쉬어갈 수 있어요.",
     "remaining": "오늘 {remaining}회 남음 (최대 {limit})",
     "plannerCta": "플래너에서 상세 설계",
     "recommendCta": "빠른 추천 받기",
