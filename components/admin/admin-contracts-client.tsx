@@ -195,15 +195,23 @@ export default function AdminContractsClient() {
           {t("title")}
         </h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
-        <p className="text-xs text-muted-foreground">
-          {t("roleHint")}{" "}
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          <p className="text-xs text-muted-foreground">
+            {t("roleHint")}{" "}
+            <Link
+              href="/admin/quotes?tab=booking"
+              className="font-semibold text-violet-700 underline-offset-2 hover:underline dark:text-violet-300"
+            >
+              {t("bookingPipelineLink")}
+            </Link>
+          </p>
           <Link
-            href="/admin/quotes?tab=booking"
-            className="font-semibold text-violet-700 underline-offset-2 hover:underline dark:text-violet-300"
+            href="/admin/contracts/new"
+            className="inline-flex items-center rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-950/40 dark:text-violet-100"
           >
-            {t("bookingPipelineLink")}
+            {t("newContract")}
           </Link>
-        </p>
+        </div>
       </div>
 
       {kpi ? (

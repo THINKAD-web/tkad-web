@@ -77,6 +77,7 @@ type NavKey =
   | "crm"
   | "quotesList"
   | "contractsDashboard"
+  | "contractsNew"
   | "quotesBooking"
   | "quotesNew"
   | "quoteTemplates"
@@ -132,6 +133,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/crm", key: "crm", icon: UsersRound },
   { href: "/admin/quotes", key: "quotesList", icon: ClipboardList },
   { href: "/admin/contracts", key: "contractsDashboard", icon: FileSignature },
+  { href: "/admin/contracts/new", key: "contractsNew", icon: FileText },
   { href: "/admin/quotes?tab=booking", key: "quotesBooking", icon: CalendarCheck },
   { href: "/admin/quotes/new", key: "quotesNew", icon: Calculator },
   { href: "/admin/quote-templates", key: "quoteTemplates", icon: FileText },
@@ -218,6 +220,7 @@ const navGroupDefs: {
     itemKeys: [
       "quotesList",
       "contractsDashboard",
+      "contractsNew",
       "quotesBooking",
       "quotesNew",
       "quoteTemplates",
@@ -298,8 +301,14 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathWithoutLocale === "/admin";
+    if (href === "/admin/contracts/new") {
+      return pathWithoutLocale.startsWith("/admin/contracts/new");
+    }
     if (href === "/admin/contracts") {
-      return pathWithoutLocale.startsWith("/admin/contracts");
+      return (
+        pathWithoutLocale.startsWith("/admin/contracts") &&
+        !pathWithoutLocale.startsWith("/admin/contracts/new")
+      );
     }
     if (href === "/admin/quotes?tab=booking") {
       return pathWithoutLocale === "/admin/quotes" && quotesTab === "booking";
