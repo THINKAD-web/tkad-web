@@ -18,6 +18,7 @@ import {
   Search,
   Pencil,
   Trash2,
+  FileSignature,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
 
@@ -432,6 +433,25 @@ export default function AdminQuotesListClient() {
                             <Link href={`/admin/quotes/${row.id}/edit`}>
                               <Pencil className="mr-1 h-3.5 w-3.5" />
                               {t("edit")}
+                            </Link>
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            size="sm"
+                            className="h-8 border-navy/30 bg-navy/5 text-xs text-navy hover:bg-navy/10 dark:text-hero-fg"
+                            disabled={busyId === row.id}
+                            asChild
+                          >
+                            <Link
+                              href={
+                                row.clientEmail?.trim()
+                                  ? `/admin/quotes/${row.id}/edit?contract=1`
+                                  : `/admin/quotes/${row.id}/edit`
+                              }
+                            >
+                              <FileSignature className="mr-1 h-3.5 w-3.5" />
+                              {t("createContract")}
                             </Link>
                           </Button>
                           <Button

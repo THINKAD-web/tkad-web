@@ -26,7 +26,10 @@ export async function GET(request: NextRequest) {
     where,
     orderBy: { updatedAt: "desc" },
     take,
-    include: { oohContract: { select: { status: true } } },
+    include: {
+      oohContract: { select: { status: true } },
+      sourceAdminQuote: { select: { id: true, quoteNumber: true } },
+    },
   });
 
   return json({
@@ -40,6 +43,8 @@ export async function GET(request: NextRequest) {
       cancelReason: r.cancelReason,
       campaignId: r.campaignId,
       updatedAt: r.updatedAt.toISOString(),
+      sourceAdminQuoteId: r.sourceAdminQuoteId,
+      sourceAdminQuoteNumber: r.sourceAdminQuote?.quoteNumber ?? null,
     })),
   });
 }

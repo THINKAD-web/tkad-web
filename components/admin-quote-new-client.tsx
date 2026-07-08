@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale, useTranslations } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -57,6 +58,7 @@ import {
   splitQuoteItemsForForm,
 } from "@/lib/admin-quote-hydrate";
 import type { QuoteApi } from "@/lib/admin-sales-quote";
+import { AdminQuoteContractActions } from "@/components/admin/admin-quote-contract-actions";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -94,6 +96,8 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const tCommon = useTranslations("common");
   const { toast } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const contractPrompt = searchParams.get("contract") === "1";
   const locale = useLocale();
   const isKo = locale === "ko";
   const [medias, setMedias] = useState<AdminMediaDto[]>([]);
@@ -471,8 +475,13 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
             : t("saveFailed");
         throw new Error(msg);
       }
-      const saved = raw as { quote?: { quoteNumber?: string } };
+      const saved = raw as { quote?: QuoteApi };
       if (saved.quote?.quoteNumber) setQuoteNumber(saved.quote.quoteNumber);
+      if (!isEditMode && saved.quote?.id) {
+        toast("success", t("saveOk"));
+        router.push(`/admin/quotes/${saved.quote.id}/edit`);
+        return;
+      }
       toast("success", isEditMode ? t("updateOk") : t("saveOk"));
     } catch (e) {
       toast("error", e instanceof Error ? e.message : t("saveFailed"));
@@ -493,6 +502,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     isKo,
     isEditMode,
     quoteId,
+    router,
     t,
     toast,
   ]);
@@ -505,6 +515,27 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     clientName.trim() &&
     clientPhone.trim() &&
     clientEmail.trim();
+
+  const contractBlockReason = useMemo(() => {
+    if (!quoteId) return t("createContractNeedSave");
+    if (!clientEmail.trim()) return t("createContractEmailInline");
+    if (!hasLines || days <= 0) return t("createContractNeedLines");
+    if (!clientCompany.trim() || !clientName.trim() || !clientPhone.trim()) {
+      return t("createContractNeedClientInline");
+    }
+    return null;
+  }, [
+    quoteId,
+    clientEmail,
+    hasLines,
+    days,
+    clientCompany,
+    clientName,
+    clientPhone,
+    t,
+  ]);
+
+  const contractBusy = bridgeLoading || saveLoading || pdfLoading;
 
   const openBridgeModal = useCallback(async () => {
     if (!quoteId) return;
@@ -523,6 +554,18 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       /* preview optional */
     }
   }, [quoteId]);
+
+  useEffect(() => {
+    if (!contractPrompt || !quoteId || editLoading || !editHydrated) return;
+    if (canCreateContract) void openBridgeModal();
+  }, [
+    contractPrompt,
+    quoteId,
+    editLoading,
+    editHydrated,
+    canCreateContract,
+    openBridgeModal,
+  ]);
 
   const confirmCreateContract = useCallback(async () => {
     if (!quoteId) return;
@@ -764,6 +807,38 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           </Button>
         ) : null}
       </div>
+
+      {quoteId ? (
+        <div className="sticky top-0 z-20 -mx-1 rounded-xl border border-navy/20 bg-background/95 px-4 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <div className="min-w-0">
+              <p className="text-xs font-semibold uppercase tracking-wide text-navy dark:text-hero-fg">
+                {t("createContractStickyTitle")}
+              </p>
+              <p className="mt-0.5 text-sm text-muted-foreground">
+                {displayQuoteNumber} · {formatWon(totals.totalWon)}
+              </p>
+            </div>
+            <AdminQuoteContractActions
+              label={t("createContract")}
+              blockReason={canCreateContract ? null : contractBlockReason}
+              canCreate={canCreateContract}
+              busy={contractBusy}
+              onClick={() => void openBridgeModal()}
+              className="shrink-0 sm:min-w-[200px]"
+            />
+          </div>
+        </div>
+      ) : null}
+
+      {contractPrompt && contractBlockReason ? (
+        <div
+          className="rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100"
+          role="status"
+        >
+          {contractBlockReason}
+        </div>
+      ) : null}
 
       <Card>
         <CardHeader className="pb-3">
@@ -1045,6 +1120,9 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                 onChange={(e) => setClientEmail(e.target.value)}
                 placeholder={t("clientEmailPh")}
               />
+              <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                {t("clientEmailHint")}
+              </p>
             </div>
           </div>
           {pdfError ? (
@@ -1100,24 +1178,13 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               )}
               {isEditMode ? t("updateQuote") : t("saveQuote")}
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              disabled={
-                !canCreateContract || bridgeLoading || saveLoading || pdfLoading
-              }
-              title={
-                !quoteId
-                  ? t("createContractNeedSave")
-                  : !clientEmail.trim()
-                    ? t("createContractNeedEmail")
-                    : undefined
-              }
+            <AdminQuoteContractActions
+              label={t("createContract")}
+              blockReason={canCreateContract ? null : contractBlockReason}
+              canCreate={canCreateContract}
+              busy={contractBusy}
               onClick={() => void openBridgeModal()}
-            >
-              <FileSignature className="mr-2 h-4 w-4" />
-              {t("createContract")}
-            </Button>
+            />
             <Button
               type="button"
               variant="outline"

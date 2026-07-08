@@ -47,6 +47,8 @@ type OohRow = {
   period: string;
   updatedAt: string;
   contractSigned: boolean;
+  sourceAdminQuoteId: string | null;
+  sourceAdminQuoteNumber: string | null;
 };
 
 export default function AdminOohQuotesClient() {
@@ -369,6 +371,19 @@ export default function AdminOohQuotesClient() {
                           )}
                           {row.clientName}
                         </button>
+                        {row.sourceAdminQuoteId && row.sourceAdminQuoteNumber ? (
+                          <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
+                            {t("sourceFromAdminQuote", {
+                              number: row.sourceAdminQuoteNumber,
+                            })}{" "}
+                            <Link
+                              href={`/admin/quotes/${row.sourceAdminQuoteId}/edit`}
+                              className="font-medium text-violet-700 hover:underline"
+                            >
+                              {t("sourceFromAdminQuoteLink")}
+                            </Link>
+                          </p>
+                        ) : null}
                       </td>
                       <td className="max-w-[140px] truncate px-3 py-2 text-xs">
                         {row.clientEmail || "—"}
@@ -442,33 +457,40 @@ export default function AdminOohQuotesClient() {
                               {t("bookingConfirm")}
                             </Button>
                           ) : null}
-                          {canShowAwaitingSignature(row) ? (
-                            <Button size="sm" variant="secondary" asChild>
-                              <Link
-                                href={`/quote/${row.id}/contract`}
-                                target="_blank"
-                                rel="noreferrer"
-                              >
-                                {t("awaitingSignature")}
-                              </Link>
-                            </Button>
-                          ) : null}
                           {canShowSendInvoice(row) ? (
-                            <Button
-                              size="sm"
-                              variant="secondary"
-                              disabled={busyId === row.id}
-                              onClick={() =>
-                                void run(row.id, () =>
-                                  act(
-                                    `/api/admin/ooh-quotes/${row.id}/send-invoice`,
-                                    "POST",
-                                  ),
-                                )
-                              }
-                            >
-                              {t("sendInvoice")}
-                            </Button>
+                            <div className="flex flex-col gap-1">
+                              <Button
+                                size="sm"
+                                variant="secondary"
+                                disabled={busyId === row.id}
+                                onClick={() =>
+                                  void run(row.id, () =>
+                                    act(
+                                      `/api/admin/ooh-quotes/${row.id}/send-invoice`,
+                                      "POST",
+                                    ),
+                                  )
+                                }
+                              >
+                                {t("sendInvoice")}
+                              </Button>
+                            </div>
+                          ) : null}
+                          {canShowAwaitingSignature(row) ? (
+                            <div className="flex flex-col gap-1">
+                              <Button size="sm" variant="secondary" asChild>
+                                <Link
+                                  href={`/quote/${row.id}/contract`}
+                                  target="_blank"
+                                  rel="noreferrer"
+                                >
+                                  {t("awaitingSignature")}
+                                </Link>
+                              </Button>
+                              <p className="max-w-[12rem] text-[10px] leading-snug text-amber-800 dark:text-amber-200">
+                                {t("awaitingSignatureHint")}
+                              </p>
+                            </div>
                           ) : null}
                           {canShowPaymentConfirm(row) ? (
                             <Button
