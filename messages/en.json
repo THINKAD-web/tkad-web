@@ -2778,6 +2778,9 @@
     "clientCompanyPh": "Example Co., Ltd.",
     "clientName": "Contact name",
     "clientNamePh": "Jane Doe",
+    "clientEmail": "Customer email (optional)",
+    "clientEmailPh": "name@company.com",
+    "clientEmailHint": "Required to email the PDF or connect to the booking pipeline. You can leave blank to generate PDF only.",
     "startDate": "Start",
     "endDate": "End",
     "periodPreview": "Campaign period",
@@ -2800,7 +2803,8 @@
     "pdfFailed": "PDF generation failed.",
     "stickyLabel": "Contract PDF",
     "errClientName": "Contact name is required.",
-    "errAmount": "Enter contract amount (10K KRW units)."
+    "errAmount": "Enter contract amount (10K KRW units).",
+    "errClientEmailFormat": "Customer email format is invalid."
   },
   "quoteCustomer": {
     "detailTitle": "Your quote",

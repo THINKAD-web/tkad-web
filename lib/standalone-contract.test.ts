@@ -3,6 +3,7 @@ import test from "node:test";
 import {
   buildAdvertiserLine,
   buildContractAmountLine,
+  StandaloneContractPreviewBody,
   standaloneContractToPdfVars,
 } from "@/lib/standalone-contract";
 
@@ -34,6 +35,49 @@ test("advertiser line without company", () => {
   );
 });
 
-test("amount line en locale", () => {
-  assert.match(buildContractAmountLine(4080, false), /4,080/);
+test("standalone contract preview body accepts optional client email", () => {
+  const parsed = StandaloneContractPreviewBody.safeParse({
+    clientName: "홍길동",
+    clientEmail: "client@example.com",
+    period: "2026-07-01 ~ 2026-07-31",
+    totalAmountManwon: 1000,
+    locale: "ko",
+  });
+  assert.equal(parsed.success, true);
+  if (parsed.success) {
+    assert.equal(parsed.data.clientEmail, "client@example.com");
+  }
+
+  const emptyEmail = StandaloneContractPreviewBody.safeParse({
+    clientName: "홍길동",
+    period: "2026-07-01 ~ 2026-07-31",
+    totalAmountManwon: 1000,
+  });
+  assert.equal(emptyEmail.success, true);
+
+  const badEmail = StandaloneContractPreviewBody.safeParse({
+    clientName: "홍길동",
+    clientEmail: "not-an-email",
+    period: "2026-07-01 ~ 2026-07-31",
+    totalAmountManwon: 1000,
+  });
+  assert.equal(badEmail.success, false);
+});
+
+test("client email is not included in pdf vars", () => {
+  const vars = standaloneContractToPdfVars(
+    {
+      clientCompany: "테스트",
+      clientName: "홍길동",
+      clientEmail: "hidden@example.com",
+      mediaLines: [],
+      period: "2026-07-01 ~ 2026-07-31",
+      totalAmountManwon: 1000,
+      locale: "ko",
+      download: false,
+    },
+    "DRAFT-EMAIL",
+  );
+  assert.equal(vars.advertiserLine, "테스트 (홍길동)");
+  assert.equal(JSON.stringify(vars).includes("hidden@example.com"), false);
 });

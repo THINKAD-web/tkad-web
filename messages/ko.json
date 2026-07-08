@@ -2778,6 +2778,9 @@
     "clientCompanyPh": "주식회사 예시",
     "clientName": "담당자명",
     "clientNamePh": "홍길동",
+    "clientEmail": "고객 이메일 (선택)",
+    "clientEmailPh": "name@company.com",
+    "clientEmailHint": "고객에게 PDF를 보내거나 파이프라인으로 연결하려면 입력하세요. 비워도 PDF 생성은 가능합니다.",
     "startDate": "시작일",
     "endDate": "종료일",
     "periodPreview": "집행 기간",
@@ -2800,7 +2803,8 @@
     "pdfFailed": "PDF 생성에 실패했습니다.",
     "stickyLabel": "계약서 PDF",
     "errClientName": "담당자명을 입력해 주세요.",
-    "errAmount": "계약 금액(만원)을 입력해 주세요."
+    "errAmount": "계약 금액(만원)을 입력해 주세요.",
+    "errClientEmailFormat": "고객 이메일 형식이 올바르지 않습니다."
   },
   "quoteCustomer": {
     "detailTitle": "견적 확인",

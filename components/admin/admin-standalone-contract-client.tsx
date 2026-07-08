@@ -45,6 +45,18 @@ import { cn } from "@/lib/utils";
 
 const DRAFT_STORAGE_KEY = "tkad-admin-standalone-contract-draft-v1";
 
+function isValidOptionalEmail(value: string): boolean {
+  const v = value.trim();
+  if (!v) return true;
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v);
+}
+
+function fieldErrorClass(show: boolean) {
+  return show
+    ? "border-2 border-red-500 focus-visible:ring-red-500/40 dark:border-red-400"
+    : undefined;
+}
+
 function todayISODate() {
   const d = new Date();
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
@@ -71,6 +83,7 @@ export default function AdminStandaloneContractClient() {
   const [draftId] = useState(() => newStandaloneContractDraftId());
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
   const [startDate, setStartDate] = useState(todayISODate);
   const [endDate, setEndDate] = useState(() =>
     addDaysISODate(addMonthsISODate(todayISODate(), 1), -1),
@@ -89,6 +102,7 @@ export default function AdminStandaloneContractClient() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
+  const [submitAttempted, setSubmitAttempted] = useState(false);
   const previewUrlRef = useRef<string | null>(null);
 
   const periodLabel = useMemo(
@@ -160,6 +174,7 @@ export default function AdminStandaloneContractClient() {
       if (parsed.version !== STANDALONE_CONTRACT_DRAFT_VERSION) return;
       setClientCompany(parsed.clientCompany ?? "");
       setClientName(parsed.clientName ?? "");
+      setClientEmail(parsed.clientEmail ?? "");
       if (parsed.period?.includes("~")) {
         const [a, b] = parsed.period.split("~").map((s) => s.trim());
         if (a) setStartDate(a);
@@ -187,6 +202,7 @@ export default function AdminStandaloneContractClient() {
       draftId,
       clientCompany,
       clientName,
+      clientEmail: clientEmail.trim() || "",
       mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
@@ -200,6 +216,7 @@ export default function AdminStandaloneContractClient() {
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
   }, [
     clientCompany,
+    clientEmail,
     clientName,
     draftId,
     isKo,
@@ -215,6 +232,7 @@ export default function AdminStandaloneContractClient() {
       draftId,
       clientCompany: clientCompany.trim(),
       clientName: clientName.trim(),
+      clientEmail: clientEmail.trim() || "",
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
       totalAmountManwon: manwon,
@@ -223,6 +241,7 @@ export default function AdminStandaloneContractClient() {
     };
   }, [
     clientCompany,
+    clientEmail,
     clientName,
     draftId,
     isKo,
@@ -232,13 +251,32 @@ export default function AdminStandaloneContractClient() {
     totalAmountManwon,
   ]);
 
-  const validationError = useMemo(() => {
-    if (!clientName.trim()) return t("errClientName");
-    if (!totalAmountManwon.trim() || parseInt(totalAmountManwon, 10) <= 0) {
-      return t("errAmount");
+  const fieldErrors = useMemo(() => {
+    const errors: {
+      clientName?: string;
+      clientEmail?: string;
+      totalAmountManwon?: string;
+    } = {};
+    if (!clientName.trim()) {
+      errors.clientName = t("errClientName");
     }
-    return null;
-  }, [clientName, totalAmountManwon, t]);
+    if (clientEmail.trim() && !isValidOptionalEmail(clientEmail)) {
+      errors.clientEmail = t("errClientEmailFormat");
+    }
+    if (!totalAmountManwon.trim() || parseInt(totalAmountManwon, 10) <= 0) {
+      errors.totalAmountManwon = t("errAmount");
+    }
+    return errors;
+  }, [clientEmail, clientName, totalAmountManwon, t]);
+
+  const validationError = useMemo(() => {
+    const first = Object.values(fieldErrors)[0];
+    return first ?? null;
+  }, [fieldErrors]);
+
+  const showClientNameError = submitAttempted && Boolean(fieldErrors.clientName);
+  const showClientEmailError = submitAttempted && Boolean(fieldErrors.clientEmail);
+  const showAmountError = submitAttempted && Boolean(fieldErrors.totalAmountManwon);
 
   const revokePreviewUrl = useCallback(() => {
     if (previewUrlRef.current) {
@@ -252,6 +290,7 @@ export default function AdminStandaloneContractClient() {
 
   const fetchPdf = useCallback(
     async (download: boolean) => {
+      setSubmitAttempted(true);
       if (validationError) {
         toast("error", validationError);
         return null;
@@ -369,7 +408,35 @@ export default function AdminStandaloneContractClient() {
                 value={clientName}
                 onChange={(e) => setClientName(e.target.value)}
                 placeholder={t("clientNamePh")}
+                aria-invalid={showClientNameError || undefined}
+                className={cn(fieldErrorClass(showClientNameError))}
               />
+              {showClientNameError ? (
+                <p className="text-xs font-medium text-red-600" role="alert">
+                  {fieldErrors.clientName}
+                </p>
+              ) : null}
+            </label>
+            <label className="space-y-1 text-sm sm:col-span-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("clientEmail")}
+              </span>
+              <Input
+                type="email"
+                value={clientEmail}
+                onChange={(e) => setClientEmail(e.target.value)}
+                placeholder={t("clientEmailPh")}
+                aria-invalid={showClientEmailError || undefined}
+                className={cn(fieldErrorClass(showClientEmailError))}
+              />
+              <p className="text-[11px] leading-snug text-muted-foreground">
+                {t("clientEmailHint")}
+              </p>
+              {showClientEmailError ? (
+                <p className="text-xs font-medium text-red-600" role="alert">
+                  {fieldErrors.clientEmail}
+                </p>
+              ) : null}
             </label>
           </CardContent>
         </Card>
@@ -414,7 +481,14 @@ export default function AdminStandaloneContractClient() {
                 value={totalAmountManwon}
                 onChange={(e) => setTotalAmountManwon(e.target.value)}
                 placeholder="5000"
+                aria-invalid={showAmountError || undefined}
+                className={cn(fieldErrorClass(showAmountError))}
               />
+              {showAmountError ? (
+                <p className="text-xs font-medium text-red-600" role="alert">
+                  {fieldErrors.totalAmountManwon}
+                </p>
+              ) : null}
               {mediaSumManwon > 0 ? (
                 <Button
                   type="button"

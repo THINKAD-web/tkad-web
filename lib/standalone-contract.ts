@@ -4,9 +4,21 @@ import type { OohContractPdfVars } from "@/lib/ooh-contract-pdf";
 /** localStorage / 향후 파이프라인 bridge용 초안 스키마 버전 */
 export const STANDALONE_CONTRACT_DRAFT_VERSION = 1;
 
+const optionalClientEmail = z
+  .string()
+  .max(254)
+  .optional()
+  .default("")
+  .refine(
+    (v) => !v.trim() || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v.trim()),
+    { message: "invalid_client_email" },
+  );
+
 export const StandaloneContractPreviewBody = z.object({
   clientCompany: z.string().max(120).optional().default(""),
   clientName: z.string().min(1).max(80),
+  /** 발송·파이프라인 bridge 메타 — PDF 본문에는 미포함 */
+  clientEmail: optionalClientEmail,
   mediaLines: z.array(z.string().min(1).max(200)).max(50).default([]),
   period: z.string().min(1).max(120),
   /** OoHQuote.totalAmount 와 동일 — 만원 단위 */
