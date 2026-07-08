@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme-toggle";
@@ -40,6 +40,7 @@ import {
   Gift,
   ChevronDown,
   Shield,
+  FileSignature,
   type LucideIcon,
 } from "lucide-react";
 
@@ -75,6 +76,7 @@ type NavKey =
   | "emailTemplates"
   | "crm"
   | "quotesList"
+  | "quotesBooking"
   | "quotesNew"
   | "quoteTemplates"
   | "campaigns"
@@ -128,6 +130,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/email-templates", key: "emailTemplates", icon: Mail },
   { href: "/admin/crm", key: "crm", icon: UsersRound },
   { href: "/admin/quotes", key: "quotesList", icon: ClipboardList },
+  { href: "/admin/quotes?tab=booking", key: "quotesBooking", icon: FileSignature },
   { href: "/admin/quotes/new", key: "quotesNew", icon: Calculator },
   { href: "/admin/quote-templates", key: "quoteTemplates", icon: FileText },
   { href: "/admin/campaigns", key: "campaigns", icon: Megaphone },
@@ -212,6 +215,7 @@ const navGroupDefs: {
     labelKey: "groupQuotes",
     itemKeys: [
       "quotesList",
+      "quotesBooking",
       "quotesNew",
       "quoteTemplates",
       "biddings",
@@ -268,6 +272,8 @@ const navByKey = new Map(navDefs.map((n) => [n.key, n]));
 
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const quotesTab = searchParams.get("tab");
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [collapsedGroups, setCollapsedGroups] = useState<
     Partial<Record<NavGroupId, boolean>>
@@ -289,9 +295,12 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   const isActive = (href: string) => {
     if (href === "/admin") return pathWithoutLocale === "/admin";
+    if (href === "/admin/quotes?tab=booking") {
+      return pathWithoutLocale === "/admin/quotes" && quotesTab === "booking";
+    }
     if (href === "/admin/quotes") {
       return (
-        pathWithoutLocale === "/admin/quotes" ||
+        (pathWithoutLocale === "/admin/quotes" && quotesTab !== "booking") ||
         (pathWithoutLocale.startsWith("/admin/quotes/") &&
           !pathWithoutLocale.startsWith("/admin/quotes/new"))
       );

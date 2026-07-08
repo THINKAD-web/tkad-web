@@ -287,7 +287,7 @@ export function AdminMonitoringClient({ locale }: Props) {
               <AlertBlock
                 title="만료 예정 견적 (D-3)"
                 count={data.alerts.expiringQuotes.length}
-                href={`/${locale}/admin/quotes`}
+                href={`/${locale}/admin/quotes?tab=booking`}
                 items={data.alerts.expiringQuotes.map((q) => ({
                   id: q.id,
                   primary: q.company,

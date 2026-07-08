@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import AdminShell from "../admin-shell";
@@ -20,5 +21,9 @@ export default async function AdminDashboardLayout({ children, params }: Props) 
   if (!verifyAdminSessionToken(token)) {
     redirect(`/${locale}/admin/login`);
   }
-  return <AdminShell>{children}</AdminShell>;
+  return (
+    <Suspense fallback={null}>
+      <AdminShell>{children}</AdminShell>
+    </Suspense>
+  );
 }

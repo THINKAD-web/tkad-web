@@ -9,6 +9,15 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, RefreshCw, ExternalLink, ChevronDown, ChevronUp } from "lucide-react";
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
+import {
+  canShowAwaitingSignature,
+  canShowBookingConfirm,
+  canShowContractConfirm,
+  canShowCancel,
+  canShowPaymentConfirm,
+  canShowSendInvoice,
+  canShowSendQuote,
+} from "@/lib/ooh-quote-admin-ui";
 import { useToast } from "@/components/toast-provider";
 
 const OOH_STATUSES = [
@@ -37,6 +46,7 @@ type OohRow = {
   totalAmount: number;
   period: string;
   updatedAt: string;
+  contractSigned: boolean;
 };
 
 export default function AdminOohQuotesClient() {
@@ -379,7 +389,7 @@ export default function AdminOohQuotesClient() {
                               {t("openDetail")}
                             </Link>
                           </Button>
-                          {(row.status === "draft" || row.status === "sent") && (
+                          {canShowSendQuote(row) ? (
                             <>
                               <Button
                                 size="sm"
@@ -414,9 +424,8 @@ export default function AdminOohQuotesClient() {
                                   : t("resendQuote")}
                               </Button>
                             </>
-                          )}
-                          {(row.status === "booking_requested" ||
-                            row.status === "booking_pending") && (
+                          ) : null}
+                          {canShowBookingConfirm(row) ? (
                             <Button
                               size="sm"
                               className="bg-navy dark:text-white text-gray-900"
@@ -432,8 +441,19 @@ export default function AdminOohQuotesClient() {
                             >
                               {t("bookingConfirm")}
                             </Button>
-                          )}
-                          {row.status === "booking_confirmed" && (
+                          ) : null}
+                          {canShowAwaitingSignature(row) ? (
+                            <Button size="sm" variant="secondary" asChild>
+                              <Link
+                                href={`/quote/${row.id}/contract`}
+                                target="_blank"
+                                rel="noreferrer"
+                              >
+                                {t("awaitingSignature")}
+                              </Link>
+                            </Button>
+                          ) : null}
+                          {canShowSendInvoice(row) ? (
                             <Button
                               size="sm"
                               variant="secondary"
@@ -449,9 +469,8 @@ export default function AdminOohQuotesClient() {
                             >
                               {t("sendInvoice")}
                             </Button>
-                          )}
-                          {(row.status === "invoice_sent" ||
-                            row.status === "payment_pending") && (
+                          ) : null}
+                          {canShowPaymentConfirm(row) ? (
                             <Button
                               size="sm"
                               variant="outline"
@@ -462,8 +481,8 @@ export default function AdminOohQuotesClient() {
                             >
                               {t("paymentConfirm")}
                             </Button>
-                          )}
-                          {row.status === "payment_confirmed" && (
+                          ) : null}
+                          {canShowContractConfirm(row) ? (
                             <Button
                               size="sm"
                               className="bg-gold text-navy"
@@ -479,13 +498,8 @@ export default function AdminOohQuotesClient() {
                             >
                               {t("contractConfirm")}
                             </Button>
-                          )}
-                          {![
-                            "cancelled",
-                            "completed",
-                            "contract_confirmed",
-                            "in_progress",
-                          ].includes(row.status) && (
+                          ) : null}
+                          {canShowCancel(row) ? (
                             <Button
                               size="sm"
                               variant="ghost"
@@ -494,7 +508,7 @@ export default function AdminOohQuotesClient() {
                             >
                               {t("cancel")}
                             </Button>
-                          )}
+                          ) : null}
                         </div>
                       </td>
                     </tr>

@@ -26,11 +26,12 @@ export async function GET(request: NextRequest) {
     where,
     orderBy: { updatedAt: "desc" },
     take,
+    include: { oohContract: { select: { status: true } } },
   });
 
   return json({
     quotes: rows.map((r: (typeof rows)[number]) => ({
-      ...serializeOoHQuotePublic(r),
+      ...serializeOoHQuotePublic(r, r.oohContract),
       clientEmail: r.clientEmail,
       clientPhone: r.clientPhone,
       adminNote: r.adminNote,

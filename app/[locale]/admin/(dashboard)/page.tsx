@@ -10,6 +10,7 @@ import {
   Monitor,
   Plus,
   Users,
+  FileSignature,
 } from "lucide-react";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { loadAdminDashboardData } from "@/lib/admin-dashboard-data";
@@ -129,6 +130,11 @@ export default async function AdminOverviewPage({ params }: Props) {
       href: `${prefix}/admin/quotes/new`,
       label: "견적서 작성",
       icon: Calculator,
+    },
+    {
+      href: `${prefix}/admin/quotes?tab=booking`,
+      label: "계약 · 부킹",
+      icon: FileSignature,
     },
     {
       href: `${prefix}/admin/reports/new`,
@@ -313,6 +319,11 @@ export default async function AdminOverviewPage({ params }: Props) {
             icon: MessageSquareText,
           },
           { href: `${prefix}/admin/quotes`, label: "견적서", icon: Calculator },
+          {
+            href: `${prefix}/admin/quotes?tab=booking`,
+            label: "계약·부킹",
+            icon: FileSignature,
+          },
         ].map(({ href, label, icon: Icon }) => (
           <Link key={href} href={href}>
             <div className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/40 px-3 py-3 transition hover:bg-muted/30">
