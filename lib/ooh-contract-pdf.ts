@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
 import {
+  ensureKrFontForServerPdf,
+  krFontFamily,
+} from "@/lib/jspdf-register-noto-kr";
+import {
   OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_EN,
   OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_KO,
   OOH_CONTRACT_GENERAL_TERMS_EN,
@@ -41,6 +45,20 @@ function wrapLines(
   return doc.splitTextToSize(text, maxW) as string[];
 }
 
+function setContractFont(
+  doc: import("jspdf").default,
+  fam: string,
+  style: "normal" | "bold" | "italic",
+) {
+  const resolved =
+    style === "italic" && fam !== "helvetica" ? "normal" : style;
+  try {
+    doc.setFont(fam, resolved);
+  } catch {
+    doc.setFont(fam, "normal");
+  }
+}
+
 export async function buildOohContractPdf(
   vars: OohContractPdfVars,
   options?: {
@@ -56,8 +74,10 @@ export async function buildOohContractPdf(
   let y = 18;
 
   const isKo = vars.isKo;
+  const hasKr = isKo ? await ensureKrFontForServerPdf(doc) : false;
+  const fam = krFontFamily(hasKr);
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.setFontSize(16);
   doc.setTextColor(15, 23, 42);
   doc.text(
@@ -68,17 +88,17 @@ export async function buildOohContractPdf(
   y += 10;
 
   doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   doc.setTextColor(100, 100, 100);
   doc.text(`ID: ${vars.contractId}`, margin, y);
   y += 8;
 
   doc.setFontSize(10);
   doc.setTextColor(0, 0, 0);
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제1조 (당사자)" : "Article 1 (Parties)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   for (const line of wrapLines(
     doc,
     isKo
@@ -95,10 +115,10 @@ export async function buildOohContractPdf(
   }
   y += 4;
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제2조 (광고 매체)" : "Article 2 (Media)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   if (vars.mediaLines.length === 0) {
     const t = isKo ? "(매체명 별첨)" : "(See attachment)";
     doc.text(t, margin, y);
@@ -117,10 +137,10 @@ export async function buildOohContractPdf(
   }
   y += 4;
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제3조 (집행 기간)" : "Article 3 (Period)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   for (const line of wrapLines(doc, vars.period, maxW)) {
     if (y > 275) {
       doc.addPage();
@@ -131,10 +151,10 @@ export async function buildOohContractPdf(
   }
   y += 4;
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제4조 (계약 금액)" : "Article 4 (Amount)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   for (const line of wrapLines(doc, vars.amountLine, maxW)) {
     if (y > 275) {
       doc.addPage();
@@ -145,10 +165,10 @@ export async function buildOohContractPdf(
   }
   y += 4;
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제5조 (특약)" : "Article 5 (Special terms)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   const terms =
     vars.specialTerms?.trim() ||
     (isKo ? OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_KO : OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_EN);
@@ -162,10 +182,10 @@ export async function buildOohContractPdf(
   }
   y += 6;
 
-  doc.setFont("helvetica", "bold");
+  setContractFont(doc, fam, "bold");
   doc.text(isKo ? "제6조 (일반)" : "Article 6 (General)", margin, y);
   y += 6;
-  doc.setFont("helvetica", "normal");
+  setContractFont(doc, fam, "normal");
   const general = isKo ? OOH_CONTRACT_GENERAL_TERMS_KO : OOH_CONTRACT_GENERAL_TERMS_EN;
   for (const line of wrapLines(doc, general, maxW)) {
     if (y > 275) {
@@ -189,7 +209,7 @@ export async function buildOohContractPdf(
         doc.addPage();
         y = 18;
       }
-      doc.setFont("helvetica", "bold");
+      setContractFont(doc, fam, "bold");
       doc.text(isKo ? "광고주 서명" : "Advertiser signature", margin, y);
       y += 6;
       doc.addImage(raw, "PNG", sigX, y - 4, sigW, sigH);
@@ -201,7 +221,7 @@ export async function buildOohContractPdf(
   } else {
     doc.setDrawColor(180, 180, 180);
     doc.rect(pageW - margin - 60, y, 60, 22);
-    doc.setFont("helvetica", "italic");
+    setContractFont(doc, fam, "italic");
     doc.setFontSize(8);
     doc.text(isKo ? "서명" : "Sign here", pageW - margin - 55, y + 13);
     doc.setFontSize(10);
@@ -213,7 +233,7 @@ export async function buildOohContractPdf(
       doc.addPage();
       y = 18;
     }
-    doc.setFont("helvetica", "bold");
+    setContractFont(doc, fam, "bold");
     doc.setFontSize(9);
     doc.setTextColor(15, 23, 42);
     doc.text(
@@ -223,7 +243,7 @@ export async function buildOohContractPdf(
     );
     y += 7;
 
-    doc.setFont("helvetica", "normal");
+    setContractFont(doc, fam, "normal");
     doc.setFontSize(7);
     doc.setTextColor(50, 50, 50);
     const a = options.audit;
