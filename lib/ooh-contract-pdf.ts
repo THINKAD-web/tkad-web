@@ -1,4 +1,10 @@
 import { createHash } from "node:crypto";
+import {
+  OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_EN,
+  OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_KO,
+  OOH_CONTRACT_GENERAL_TERMS_EN,
+  OOH_CONTRACT_GENERAL_TERMS_KO,
+} from "@/lib/ooh-contract-display";
 
 export type OohContractPdfVars = {
   isKo: boolean;
@@ -145,9 +151,7 @@ export async function buildOohContractPdf(
   doc.setFont("helvetica", "normal");
   const terms =
     vars.specialTerms?.trim() ||
-    (isKo
-      ? "별도 합의가 없는 한, 송출 일정·소재 규격은 매체사 정책 및 싱커드 운영 기준을 따릅니다."
-      : "Unless otherwise agreed, scheduling and specs follow media owner policies and THINKAD operations.");
+    (isKo ? OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_KO : OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_EN);
   for (const line of wrapLines(doc, terms, maxW)) {
     if (y > 275) {
       doc.addPage();
@@ -162,9 +166,7 @@ export async function buildOohContractPdf(
   doc.text(isKo ? "제6조 (일반)" : "Article 6 (General)", margin, y);
   y += 6;
   doc.setFont("helvetica", "normal");
-  const general = isKo
-    ? "본 계약은 전자서명 및 기록된 메타데이터(서명 시각, 접속 IP 등)와 함께 보관됩니다. 분쟁 시 대한민국 법을 준거법으로 합니다."
-    : "This agreement is stored with e-signature metadata (timestamp, IP). Governing law: Republic of Korea.";
+  const general = isKo ? OOH_CONTRACT_GENERAL_TERMS_KO : OOH_CONTRACT_GENERAL_TERMS_EN;
   for (const line of wrapLines(doc, general, maxW)) {
     if (y > 275) {
       doc.addPage();

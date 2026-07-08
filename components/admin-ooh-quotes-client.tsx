@@ -24,6 +24,10 @@ import {
   AdminQuotePageShell,
   adminQuoteSectionCard,
 } from "@/components/admin/admin-quote-page-shell";
+import {
+  AdminOohContractDetailPanel,
+  type OohQuoteContractDetail,
+} from "@/components/admin/admin-ooh-contract-detail";
 
 const OOH_STATUSES = [
   "all",
@@ -72,9 +76,7 @@ export default function AdminOohQuotesClient() {
   const [cancelOpenId, setCancelOpenId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [detailById, setDetailById] = useState<
-    Record<string, { quoteBreakdown?: QuoteBreakdown | null; loading?: boolean }>
-  >({});
+  const [detailById, setDetailById] = useState<Record<string, OohQuoteContractDetail>>({});
   const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
 
   const loadDetail = useCallback(async (id: string) => {
@@ -85,14 +87,21 @@ export default function AdminOohQuotesClient() {
         cache: "no-store",
       });
       const raw = (await res.json()) as {
-        quote?: { quoteBreakdown?: QuoteBreakdown };
+        quote?: {
+          quoteBreakdown?: QuoteBreakdown | null;
+          contract?: OohQuoteContractDetail["contract"];
+          contractDisplay?: OohQuoteContractDetail["contractDisplay"];
+        };
       };
       if (!res.ok) throw new Error("load_failed");
+      const q = raw.quote;
       setDetailById((prev) => ({
         ...prev,
         [id]: {
           loading: false,
-          quoteBreakdown: raw.quote?.quoteBreakdown ?? null,
+          quoteBreakdown: q?.quoteBreakdown ?? null,
+          contract: q?.contract ?? null,
+          contractDisplay: q?.contractDisplay ?? null,
         },
       }));
     } catch {
@@ -106,9 +115,7 @@ export default function AdminOohQuotesClient() {
       return;
     }
     setExpandedId(id);
-    if (!detailById[id]?.quoteBreakdown && !detailById[id]?.loading) {
-      void loadDetail(id);
-    }
+    void loadDetail(id);
   };
 
   const load = useCallback(async () => {
@@ -268,7 +275,7 @@ export default function AdminOohQuotesClient() {
               />
             </div>
             <Button
-              className="bg-navy dark:text-white text-gray-900"
+              className="bg-navy text-white hover:bg-navy/90"
               disabled={busyId === payOpenId}
               onClick={() =>
                 void run(payOpenId, async () => {
@@ -353,7 +360,6 @@ export default function AdminOohQuotesClient() {
                   {quotes.map((row) => {
                     const expanded = expandedId === row.id;
                     const detail = detailById[row.id];
-                    const breakdown = detail?.quoteBreakdown;
                     return (
                     <Fragment key={row.id}>
                     <tr
@@ -424,11 +430,11 @@ export default function AdminOohQuotesClient() {
                                   })
                                 }
                               >
-                                재계산
+                                {t("recalc")}
                               </Button>
                               <Button
                                 size="sm"
-                                className="bg-hermes dark:text-white text-gray-900 hover:bg-hermes/90"
+                                className="bg-hermes text-white hover:bg-hermes/90"
                                 disabled={busyId === row.id}
                                 onClick={() =>
                                   void run(row.id, () =>
@@ -448,7 +454,7 @@ export default function AdminOohQuotesClient() {
                           {canShowBookingConfirm(row) ? (
                             <Button
                               size="sm"
-                              className="bg-navy dark:text-white text-gray-900"
+                              className="bg-navy text-white hover:bg-navy/90"
                               disabled={busyId === row.id}
                               onClick={() =>
                                 void run(row.id, () =>
@@ -542,39 +548,20 @@ export default function AdminOohQuotesClient() {
                     {expanded ? (
                       <tr key={`${row.id}-detail`} className="bg-slate-50/80">
                         <td colSpan={7} className="px-4 py-3">
-                          {detail?.loading ? (
-                            <p className="text-xs text-muted-foreground">불러오는 중…</p>
-                          ) : breakdown ? (
-                            <div className="space-y-2 text-xs">
-                              <p className="font-semibold text-navy">견적 상세 (자동 계산)</p>
-                              <ul className="divide-y rounded border bg-white">
-                                {breakdown.lines.map((line) => (
-                                  <li
-                                    key={line.mediaId}
-                                    className="flex flex-wrap justify-between gap-2 px-3 py-2"
-                                  >
-                                    <span>
-                                      {line.mediaName} · {line.location}
-                                    </span>
-                                    <span className="tabular-nums text-muted-foreground">
-                                      ₩{line.lineSupplyWon.toLocaleString("ko-KR")} · 노출{" "}
-                                      {line.impressions.toLocaleString("ko-KR")}
-                                    </span>
-                                  </li>
-                                ))}
-                              </ul>
-                              <p className="tabular-nums text-muted-foreground">
-                                소계 ₩{breakdown.subtotalWon.toLocaleString("ko-KR")} · VAT(10%) ₩
-                                {breakdown.vatWon.toLocaleString("ko-KR")} · 합계 ₩
-                                {breakdown.totalWon.toLocaleString("ko-KR")} · 유효{" "}
-                                {breakdown.validUntil.slice(0, 10)}
-                              </p>
-                            </div>
-                          ) : (
-                            <p className="text-xs text-muted-foreground">
-                              상세 없음 · 재계산을 눌러 주세요.
-                            </p>
-                          )}
+                          <AdminOohContractDetailPanel
+                            quoteId={row.id}
+                            detail={detail}
+                            recalcBusy={busyId === row.id}
+                            onRecalc={() =>
+                              void run(row.id, async () => {
+                                await act(`/api/admin/ooh-quotes/${row.id}`, "PATCH", {
+                                  recalculate: true,
+                                });
+                                await loadDetail(row.id);
+                              })
+                            }
+                            onSaved={() => void loadDetail(row.id)}
+                          />
                         </td>
                       </tr>
                     ) : null}
