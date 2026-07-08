@@ -32,6 +32,10 @@ export type OohContractTemplateVars = {
   clientCompany: string;
   /** 갑 대표이사 (서명란) — 예: 최 진 영 */
   clientRepName: string;
+  /** 갑 주소 (서명란) */
+  clientAddress: string;
+  /** 갑 전화번호 (서명란) */
+  clientPhone: string;
   /** 광고명칭 — 예: 교보문고에 사이니지 광고 */
   campaignName: string;
   /** 광고기간 시작 — 예: 2026년 07월 06일 */
@@ -46,6 +50,8 @@ export type OohContractTemplateVars = {
   mediaCount: string;
   /** 최종합계 — 예: ₩ 2,156,000원 (VAT포함) */
   totalAmount: string;
+  /** 제3조 한글 금액 — 예: 이백일십오만육천원정 */
+  amountKorean: string;
   /** 결제방법 — 예: 계산서 발행 후 선결제 */
   paymentMethod: string;
   /** 계약 체결일 — 예: 2026년 6월 29일 */
@@ -55,6 +61,8 @@ export type OohContractTemplateVars = {
 export const OOH_CONTRACT_TEMPLATE_VAR_KEYS = [
   "clientCompany",
   "clientRepName",
+  "clientAddress",
+  "clientPhone",
   "campaignName",
   "periodStart",
   "periodEnd",
@@ -62,6 +70,7 @@ export const OOH_CONTRACT_TEMPLATE_VAR_KEYS = [
   "productionCost",
   "mediaCount",
   "totalAmount",
+  "amountKorean",
   "paymentMethod",
   "contractDate",
 ] as const satisfies readonly (keyof OohContractTemplateVars)[];
@@ -99,9 +108,23 @@ export const OOH_CONTRACT_TEMPLATE_VARIABLE_MAPPING: OohContractTemplateVariable
       key: "clientRepName",
       labelKo: "갑 대표이사 (서명란)",
       source: "new_input",
-      pipelineHint: "없음 — clientName 은 담당자",
-      standaloneHint: "없음 — clientName 은 담당자",
+      pipelineHint: "contractMeta.clientRepName (adminNote JSON)",
+      standaloneHint: "clientRepName 입력",
       notes: "원문 서명란 대표이사명; 을(이 재 한)은 OOH_CONTRACT_PARTY_B_KO 고정",
+    },
+    {
+      key: "clientAddress",
+      labelKo: "갑 주소 (서명란)",
+      source: "new_input",
+      pipelineHint: "contractMeta.clientAddress",
+      standaloneHint: "clientAddress 입력",
+    },
+    {
+      key: "clientPhone",
+      labelKo: "갑 전화번호 (서명란)",
+      source: "existing",
+      pipelineHint: "OoHQuote.clientPhone 또는 contractMeta",
+      standaloneHint: "clientPhone 입력",
     },
     {
       key: "campaignName",
@@ -153,8 +176,16 @@ export const OOH_CONTRACT_TEMPLATE_VARIABLE_MAPPING: OohContractTemplateVariable
       labelKo: "최종합계 (VAT 포함 표기)",
       source: "derivable",
       pipelineHint: "quoteBreakdown.totalWon → ₩ 표기",
-      standaloneHint: "totalAmountManwon → ₩ 변환",
+      standaloneHint: "totalAmountManwon → VAT 포함 ₩ 변환",
       notes: '원문 형식: "₩ 2,156,000원 (VAT포함)"',
+    },
+    {
+      key: "amountKorean",
+      labelKo: "제3조 한글 금액",
+      source: "derivable",
+      pipelineHint: "quoteBreakdown.totalWon → wonToKoreanLegalAmount",
+      standaloneHint: "VAT 포함 원 → wonToKoreanLegalAmount",
+      notes: '원문 예: "이백일십오만육천원정"',
     },
     {
       key: "paymentMethod",
@@ -239,7 +270,7 @@ export const OOH_CONTRACT_TEMPLATE_KO_ARTICLES: readonly OohContractTemplateSect
       kind: "article",
       heading: "제3조 (광고료지급)",
       paragraphs: [
-        '제3조 (광고료지급) 1) 본 계약의 지급 방법은 제 1조의 결제 방법을 따른다. 2) "갑"은" 을"의 청구에 의해 광고료를 "을"에게 현금 이백일십오만육천원정   {{totalAmount}} 광고료를 지급한다.',
+        '제3조 (광고료지급) 1) 본 계약의 지급 방법은 제 1조의 결제 방법을 따른다. 2) "갑"은" 을"의 청구에 의해 광고료를 "을"에게 현금 {{amountKorean}}   {{totalAmount}} 광고료를 지급한다.',
       ],
     },
     {
@@ -296,7 +327,7 @@ export const OOH_CONTRACT_TEMPLATE_KO_ARTICLES: readonly OohContractTemplateSect
       heading: "서명란",
       paragraphs: [
         "{{contractDate}}",
-        '"갑" 상호 : {{clientCompany}} 주소 : 서울특별시 송파구 오금로 185, 4층 전화번호 : 010-3589-2330 대표이사 : {{clientRepName}} (인)',
+        '"갑" 상호 : {{clientCompany}} 주소 : {{clientAddress}} 전화번호 : {{clientPhone}} 대표이사 : {{clientRepName}} (인)',
         '"을" 상호 : (주)싱커드 주소 : 서울 성동구 뚝섬로17가길 48 전화번호 : 02-515-2772 대표이사 : 이 재 한 (인)',
       ],
     },
@@ -366,6 +397,8 @@ export function isOohContractTemplateKoSourceComplete(): boolean {
 export const OOH_CONTRACT_TEMPLATE_SAMPLE_VARS: OohContractTemplateVars = {
   clientCompany: "(주)스펙토리",
   clientRepName: "최 진 영",
+  clientAddress: "서울특별시 송파구 오금로 185, 4층",
+  clientPhone: "010-3589-2330",
   campaignName: "교보문고에 사이니지 광고",
   periodStart: "2026년 07월 06일",
   periodEnd: "2026년 08월 05일",
@@ -373,6 +406,7 @@ export const OOH_CONTRACT_TEMPLATE_SAMPLE_VARS: OohContractTemplateVars = {
   productionCost: "자체제작",
   mediaCount: "1기",
   totalAmount: "₩ 2,156,000원 (VAT포함)",
+  amountKorean: "이백일십오만육천원정",
   paymentMethod: "계산서 발행 후 선결제",
   contractDate: "2026년 6월 29일",
 };

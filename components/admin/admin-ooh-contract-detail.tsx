@@ -3,12 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { ExternalLink, FileText, Loader2, Save } from "lucide-react";
+import type { OohContractMeta } from "@/lib/ooh-contract-meta";
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import {
   effectiveSpecialTerms,
   generalContractTerms,
 } from "@/lib/ooh-contract-display";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
 
@@ -33,7 +35,17 @@ export type OohQuoteContractDetail = {
     period: string;
     amountLine: string;
     canPreview: boolean;
+    campaignName?: string;
+    clientRepName?: string;
+    clientAddress?: string;
+    clientPhone?: string;
+    productionCost?: string;
+    mediaCount?: string;
+    paymentMethod?: string;
+    totalAmount?: string;
+    amountKorean?: string;
   } | null;
+  contractMeta?: OohContractMeta | null;
   loading?: boolean;
 };
 
@@ -55,7 +67,9 @@ export function AdminOohContractDetailPanel({
   const t = useTranslations("adminOohQuotes");
   const { toast } = useToast();
   const [termsDraft, setTermsDraft] = useState("");
+  const [metaDraft, setMetaDraft] = useState<OohContractMeta>({});
   const [saving, setSaving] = useState(false);
+  const [metaSaving, setMetaSaving] = useState(false);
   const [previewKey, setPreviewKey] = useState(0);
 
   const contract = detail?.contract;
@@ -79,6 +93,10 @@ export function AdminOohContractDetailPanel({
   useEffect(() => {
     setTermsDraft(contract?.specialTerms ?? "");
   }, [contract?.specialTerms, quoteId]);
+
+  useEffect(() => {
+    setMetaDraft(detail?.contractMeta ?? {});
+  }, [detail?.contractMeta, quoteId]);
 
   const saveTerms = useCallback(async () => {
     if (!contract?.canEditTerms) return;
@@ -117,6 +135,37 @@ export function AdminOohContractDetailPanel({
       setSaving(false);
     }
   }, [contract?.canEditTerms, onSaved, quoteId, t, termsDraft, toast]);
+
+  const saveMeta = useCallback(async () => {
+    setMetaSaving(true);
+    try {
+      const res = await fetch(`/api/admin/ooh-quotes/${quoteId}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ contractMeta: metaDraft }),
+      });
+      const raw: unknown = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        const err =
+          typeof raw === "object" &&
+          raw !== null &&
+          "error" in raw &&
+          typeof (raw as { error?: unknown }).error === "string"
+            ? (raw as { error: string }).error
+            : t("contractMetaSaveFail");
+        toast("error", err);
+        return;
+      }
+      toast("success", t("contractMetaSaveOk"));
+      setPreviewKey((k) => k + 1);
+      onSaved();
+    } catch {
+      toast("error", t("contractMetaSaveFail"));
+    } finally {
+      setMetaSaving(false);
+    }
+  }, [metaDraft, onSaved, quoteId, t, toast]);
 
   if (detail?.loading) {
     return <p className="text-xs text-muted-foreground">{t("loading")}</p>;
@@ -198,6 +247,14 @@ export function AdminOohContractDetailPanel({
             </div>
             <div>
               <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+                {t("contractCampaignName")}
+              </dt>
+              <dd className="mt-0.5 font-medium text-foreground">
+                {display.campaignName ?? "—"}
+              </dd>
+            </div>
+            <div>
+              <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractPeriod")}
               </dt>
               <dd className="mt-0.5 font-medium text-foreground">{display.period}</dd>
@@ -206,7 +263,14 @@ export function AdminOohContractDetailPanel({
               <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
                 {t("contractAmount")}
               </dt>
-              <dd className="mt-0.5 font-medium text-foreground">{display.amountLine}</dd>
+              <dd className="mt-0.5 font-medium text-foreground">
+                {display.totalAmount ?? display.amountLine}
+                {display.amountKorean ? (
+                  <span className="ml-2 text-muted-foreground">
+                    ({display.amountKorean})
+                  </span>
+                ) : null}
+              </dd>
             </div>
             <div className="sm:col-span-2">
               <dt className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -225,6 +289,91 @@ export function AdminOohContractDetailPanel({
               </dd>
             </div>
           </dl>
+
+          <div className="grid gap-2 rounded-xl border border-gray-100 bg-muted/10 p-3 sm:grid-cols-2 dark:border-white/10">
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractClientRep")}
+              </span>
+              <Input
+                value={metaDraft.clientRepName ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, clientRepName: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractCampaignName")}
+              </span>
+              <Input
+                value={metaDraft.campaignName ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, campaignName: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs sm:col-span-2">
+              <span className="font-medium text-muted-foreground">
+                {t("contractClientAddress")}
+              </span>
+              <Input
+                value={metaDraft.clientAddress ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, clientAddress: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractProductionCost")}
+              </span>
+              <Input
+                value={metaDraft.productionCost ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, productionCost: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs">
+              <span className="font-medium text-muted-foreground">
+                {t("contractMediaCount")}
+              </span>
+              <Input
+                value={metaDraft.mediaCount ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, mediaCount: e.target.value }))
+                }
+              />
+            </label>
+            <label className="space-y-1 text-xs sm:col-span-2">
+              <span className="font-medium text-muted-foreground">
+                {t("contractPaymentMethod")}
+              </span>
+              <Input
+                value={metaDraft.paymentMethod ?? ""}
+                onChange={(e) =>
+                  setMetaDraft((m) => ({ ...m, paymentMethod: e.target.value }))
+                }
+              />
+            </label>
+            <div className="sm:col-span-2">
+              <Button
+                type="button"
+                size="sm"
+                variant="outline"
+                disabled={metaSaving}
+                onClick={() => void saveMeta()}
+              >
+                {metaSaving ? (
+                  <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                ) : (
+                  <Save className="mr-1 h-3 w-3" />
+                )}
+                {t("contractMetaSave")}
+              </Button>
+            </div>
+          </div>
 
           <div className="space-y-1.5 rounded-xl border border-gray-100 bg-muted/20 p-3 dark:border-white/10">
             <p className="text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">

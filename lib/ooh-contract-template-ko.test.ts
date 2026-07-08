@@ -53,8 +53,10 @@ test("sample vars round-trip to original spectory case", () => {
   assert.match(all, /\(주\)스펙토리 \(이하"갑"이라한다\)과 \(주\)싱커드/);
   assert.match(all, /교보문고에 사이니지 광고/);
   assert.match(all, /2026년 07월 06일 - 2026년 08월 05일 \(1개월\)/);
+  assert.match(all, /이백일십오만육천원정/);
+  assert.match(all, /서울특별시 송파구 오금로 185, 4층/);
   assert.match(all, /₩ 2,156,000원 \(VAT포함\)/);
-  assert.match(all, /2026년 6월 29일/);
+  assert.match(all, /010-3589-2330/);
   assert.match(all, /대표이사 : 최 진 영 \(인\)/);
   assert.match(all, /대표이사 : 이 재 한 \(인\)/);
 });

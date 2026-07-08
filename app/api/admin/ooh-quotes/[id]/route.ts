@@ -12,6 +12,11 @@ import {
   resolveMediaNamesForQuote,
 } from "@/lib/ooh-contract-context";
 import { canPreviewOohContract } from "@/lib/ooh-contract-display";
+import {
+  mergeOohContractMetaIntoAdminNote,
+  parseOohContractMeta,
+  type OohContractMeta,
+} from "@/lib/ooh-contract-meta";
 
 export const dynamic = "force-dynamic";
 
@@ -66,13 +71,23 @@ export async function GET(request: NextRequest, { params }: Params) {
             canEditTerms: contract.status === OohContractStatus.pending,
           }
         : null,
+      contractMeta: parseOohContractMeta(row.adminNote),
       contractDisplay: {
         isKo,
-        advertiserLine: pdfVars.advertiserLine,
-        mediaLines: pdfVars.mediaLines,
-        period: pdfVars.period,
-        amountLine: pdfVars.amountLine,
+        advertiserLine: pdfVars.advertiserLine ?? pdfVars.clientCompany,
+        mediaLines: pdfVars.mediaLines ?? [],
+        period: pdfVars.period ?? `${pdfVars.periodStart} - ${pdfVars.periodEnd}`,
+        amountLine: pdfVars.amountLine ?? pdfVars.totalAmount,
         canPreview: canPreviewOohContract(row.status),
+        campaignName: pdfVars.campaignName,
+        clientRepName: pdfVars.clientRepName,
+        clientAddress: pdfVars.clientAddress,
+        clientPhone: pdfVars.clientPhone,
+        productionCost: pdfVars.productionCost,
+        mediaCount: pdfVars.mediaCount,
+        paymentMethod: pdfVars.paymentMethod,
+        totalAmount: pdfVars.totalAmount,
+        amountKorean: pdfVars.amountKorean,
       },
     },
   });
@@ -128,6 +143,32 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     await db.oohContract.update({
       where: { id: contract.id },
       data: { specialTerms: nextTerms },
+    });
+  }
+
+  if ("contractMeta" in body) {
+    const rawMeta = body.contractMeta;
+    if (rawMeta !== null && (typeof rawMeta !== "object" || Array.isArray(rawMeta))) {
+      return json({ error: "invalid_contract_meta" }, 400);
+    }
+    const meta = (rawMeta ?? {}) as OohContractMeta;
+    const nextNote = mergeOohContractMetaIntoAdminNote(existing.adminNote, {
+      clientRepName:
+        typeof meta.clientRepName === "string" ? meta.clientRepName : undefined,
+      clientAddress:
+        typeof meta.clientAddress === "string" ? meta.clientAddress : undefined,
+      campaignName:
+        typeof meta.campaignName === "string" ? meta.campaignName : undefined,
+      productionCost:
+        typeof meta.productionCost === "string" ? meta.productionCost : undefined,
+      mediaCount:
+        typeof meta.mediaCount === "string" ? meta.mediaCount : undefined,
+      paymentMethod:
+        typeof meta.paymentMethod === "string" ? meta.paymentMethod : undefined,
+    });
+    await db.ooHQuote.update({
+      where: { id },
+      data: { adminNote: nextNote },
     });
   }
 

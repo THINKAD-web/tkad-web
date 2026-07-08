@@ -83,6 +83,13 @@ export default function AdminStandaloneContractClient() {
   const [draftId] = useState(() => newStandaloneContractDraftId());
   const [clientCompany, setClientCompany] = useState("");
   const [clientName, setClientName] = useState("");
+  const [clientRepName, setClientRepName] = useState("");
+  const [clientAddress, setClientAddress] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [campaignName, setCampaignName] = useState("");
+  const [productionCost, setProductionCost] = useState("자체제작");
+  const [mediaCount, setMediaCount] = useState("");
+  const [paymentMethod, setPaymentMethod] = useState("계산서 발행 후 선결제");
   const [clientEmail, setClientEmail] = useState("");
   const [startDate, setStartDate] = useState(todayISODate);
   const [endDate, setEndDate] = useState(() =>
@@ -171,9 +178,21 @@ export default function AdminStandaloneContractClient() {
       const raw = localStorage.getItem(DRAFT_STORAGE_KEY);
       if (!raw) return;
       const parsed = JSON.parse(raw) as StandaloneContractDraft;
-      if (parsed.version !== STANDALONE_CONTRACT_DRAFT_VERSION) return;
+      if (
+        parsed.version !== STANDALONE_CONTRACT_DRAFT_VERSION &&
+        parsed.version !== 1
+      ) {
+        return;
+      }
       setClientCompany(parsed.clientCompany ?? "");
       setClientName(parsed.clientName ?? "");
+      setClientRepName(parsed.clientRepName ?? "");
+      setClientAddress(parsed.clientAddress ?? "");
+      setClientPhone(parsed.clientPhone ?? "");
+      setCampaignName(parsed.campaignName ?? "");
+      setProductionCost(parsed.productionCost ?? "자체제작");
+      setMediaCount(parsed.mediaCount ?? "");
+      setPaymentMethod(parsed.paymentMethod ?? "계산서 발행 후 선결제");
       setClientEmail(parsed.clientEmail ?? "");
       if (parsed.period?.includes("~")) {
         const [a, b] = parsed.period.split("~").map((s) => s.trim());
@@ -202,10 +221,19 @@ export default function AdminStandaloneContractClient() {
       draftId,
       clientCompany,
       clientName,
+      clientRepName,
+      clientAddress,
+      clientPhone,
+      campaignName,
+      productionCost,
+      mediaCount,
+      paymentMethod,
       clientEmail: clientEmail.trim() || "",
       mediaIds: selectedMedia.map((m) => m.id),
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
+      startDate,
+      endDate,
       totalAmountManwon: manwon,
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
@@ -215,14 +243,23 @@ export default function AdminStandaloneContractClient() {
     };
     localStorage.setItem(DRAFT_STORAGE_KEY, JSON.stringify(draft));
   }, [
+    campaignName,
+    clientAddress,
     clientCompany,
     clientEmail,
     clientName,
+    clientPhone,
+    clientRepName,
     draftId,
+    endDate,
     isKo,
+    mediaCount,
+    paymentMethod,
     periodLabel,
+    productionCost,
     selectedMedia,
     specialTerms,
+    startDate,
     totalAmountManwon,
   ]);
 
@@ -232,22 +269,42 @@ export default function AdminStandaloneContractClient() {
       draftId,
       clientCompany: clientCompany.trim(),
       clientName: clientName.trim(),
+      clientRepName: clientRepName.trim(),
+      clientAddress: clientAddress.trim(),
+      clientPhone: clientPhone.trim(),
+      campaignName: campaignName.trim(),
+      productionCost: productionCost.trim(),
+      mediaCount:
+        mediaCount.trim() ||
+        (selectedMedia.length > 0 ? `${selectedMedia.length}기` : ""),
+      paymentMethod: paymentMethod.trim(),
       clientEmail: clientEmail.trim() || "",
       mediaLines: selectedMedia.map((m) => m.label),
       period: periodLabel,
+      startDate,
+      endDate,
       totalAmountManwon: manwon,
       specialTerms: specialTerms.trim() || null,
       locale: isKo ? "ko" : "en",
     };
   }, [
+    campaignName,
+    clientAddress,
     clientCompany,
     clientEmail,
     clientName,
+    clientPhone,
+    clientRepName,
     draftId,
+    endDate,
     isKo,
+    mediaCount,
+    paymentMethod,
     periodLabel,
+    productionCost,
     selectedMedia,
     specialTerms,
+    startDate,
     totalAmountManwon,
   ]);
 
@@ -351,7 +408,13 @@ export default function AdminStandaloneContractClient() {
   const addMedia = (m: AdminMediaDto) => {
     if (selectedMedia.some((s) => s.id === m.id)) return;
     const label = (isKo ? m.name : m.nameEn) || m.name;
-    setSelectedMedia((prev) => [...prev, { id: m.id, label }]);
+    setSelectedMedia((prev) => {
+      const next = [...prev, { id: m.id, label }];
+      if (!mediaCount.trim()) {
+        setMediaCount(`${next.length}기`);
+      }
+      return next;
+    });
     if (!totalAmountManwon.trim() && mediaSumManwon === 0) {
       const raw = m.priceOptions?.[0]?.price ?? m.price;
       setTotalAmountManwon(String(wonToManwon(catalogPriceFieldToWon(raw))));
@@ -417,6 +480,36 @@ export default function AdminStandaloneContractClient() {
                 </p>
               ) : null}
             </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("clientRepName")}
+              </span>
+              <Input
+                value={clientRepName}
+                onChange={(e) => setClientRepName(e.target.value)}
+                placeholder={t("clientRepNamePh")}
+              />
+            </label>
+            <label className="space-y-1 text-sm sm:col-span-2">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("clientAddress")}
+              </span>
+              <Input
+                value={clientAddress}
+                onChange={(e) => setClientAddress(e.target.value)}
+                placeholder={t("clientAddressPh")}
+              />
+            </label>
+            <label className="space-y-1 text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("clientPhone")}
+              </span>
+              <Input
+                value={clientPhone}
+                onChange={(e) => setClientPhone(e.target.value)}
+                placeholder={t("clientPhonePh")}
+              />
+            </label>
             <label className="space-y-1 text-sm sm:col-span-2">
               <span className="text-xs font-medium text-muted-foreground">
                 {t("clientEmail")}
@@ -446,6 +539,16 @@ export default function AdminStandaloneContractClient() {
             <CardTitle className="text-base">{t("sectionPeriodAmount")}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <label className="block space-y-1 text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("campaignName")}
+              </span>
+              <Input
+                value={campaignName}
+                onChange={(e) => setCampaignName(e.target.value)}
+                placeholder={t("campaignNamePh")}
+              />
+            </label>
             <div className="grid gap-3 sm:grid-cols-2">
               <label className="space-y-1 text-sm">
                 <span className="text-xs font-medium text-muted-foreground">
@@ -500,6 +603,38 @@ export default function AdminStandaloneContractClient() {
                   {t("useMediaSum", { amount: mediaSumManwon.toLocaleString("ko-KR") })}
                 </Button>
               ) : null}
+            </label>
+            <div className="grid gap-3 sm:grid-cols-2">
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("productionCost")}
+                </span>
+                <Input
+                  value={productionCost}
+                  onChange={(e) => setProductionCost(e.target.value)}
+                  placeholder={t("productionCostPh")}
+                />
+              </label>
+              <label className="space-y-1 text-sm">
+                <span className="text-xs font-medium text-muted-foreground">
+                  {t("mediaCount")}
+                </span>
+                <Input
+                  value={mediaCount}
+                  onChange={(e) => setMediaCount(e.target.value)}
+                  placeholder={t("mediaCountPh")}
+                />
+              </label>
+            </div>
+            <label className="block space-y-1 text-sm">
+              <span className="text-xs font-medium text-muted-foreground">
+                {t("paymentMethod")}
+              </span>
+              <Input
+                value={paymentMethod}
+                onChange={(e) => setPaymentMethod(e.target.value)}
+                placeholder={t("paymentMethodPh")}
+              />
             </label>
             <label className="block space-y-1 text-sm">
               <span className="text-xs font-medium text-muted-foreground">

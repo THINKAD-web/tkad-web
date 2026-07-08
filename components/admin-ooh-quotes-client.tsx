@@ -92,6 +92,7 @@ export default function AdminOohQuotesClient() {
           quoteBreakdown?: QuoteBreakdown | null;
           contract?: OohQuoteContractDetail["contract"];
           contractDisplay?: OohQuoteContractDetail["contractDisplay"];
+          contractMeta?: OohQuoteContractDetail["contractMeta"];
         };
       };
       if (!res.ok) throw new Error("load_failed");
@@ -103,6 +104,7 @@ export default function AdminOohQuotesClient() {
           quoteBreakdown: q?.quoteBreakdown ?? null,
           contract: q?.contract ?? null,
           contractDisplay: q?.contractDisplay ?? null,
+          contractMeta: q?.contractMeta ?? null,
         },
       }));
     } catch {

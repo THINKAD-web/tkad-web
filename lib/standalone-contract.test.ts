@@ -12,8 +12,17 @@ test("standalone contract pdf vars without pipeline", () => {
     {
       clientCompany: "테스트 주식회사",
       clientName: "홍길동",
+      clientRepName: "김대표",
+      clientAddress: "서울시 강남구",
+      clientPhone: "010-1111-2222",
+      campaignName: "강남역 LED 광고",
+      productionCost: "자체제작",
+      mediaCount: "2기",
+      paymentMethod: "계산서 발행 후 선결제",
       mediaLines: ["강남역 LED", "홍대입구 버스쉘터"],
       period: "2026-07-01 ~ 2026-07-31",
+      startDate: "2026-07-01",
+      endDate: "2026-07-31",
       totalAmountManwon: 5000,
       specialTerms: "소재 규격은 1920x1080 기준.",
       locale: "ko",
@@ -21,11 +30,13 @@ test("standalone contract pdf vars without pipeline", () => {
     },
     "DRAFT-ABC123",
   );
-  assert.equal(vars.advertiserLine, "테스트 주식회사 (홍길동)");
-  assert.equal(vars.mediaLines.length, 2);
-  assert.match(vars.amountLine, /5,000/);
+  assert.equal(vars.clientCompany, "테스트 주식회사");
+  assert.equal(vars.clientRepName, "김대표");
+  assert.equal(vars.campaignName, "강남역 LED 광고");
+  assert.equal(vars.mediaCount, "2기");
+  assert.match(vars.totalAmount, /VAT포함/);
+  assert.equal(vars.amountKorean, "오천오백만원정");
   assert.equal(vars.contractId, "DRAFT-ABC123");
-  assert.equal(vars.specialTerms, "소재 규격은 1920x1080 기준.");
 });
 
 test("advertiser line without company", () => {
@@ -78,6 +89,6 @@ test("client email is not included in pdf vars", () => {
     },
     "DRAFT-EMAIL",
   );
-  assert.equal(vars.advertiserLine, "테스트 (홍길동)");
+  assert.equal(vars.clientRepName, "홍길동");
   assert.equal(JSON.stringify(vars).includes("hidden@example.com"), false);
 });
