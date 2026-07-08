@@ -1,7 +1,7 @@
 "use client";
 
 import { FileSignature, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 type Props = {
   label: string;
@@ -13,7 +13,7 @@ type Props = {
   className?: string;
 };
 
-/** 견적 → 계약 브릿지 버튼 + disabled 이유 인라인 (Phase 1 discoverability). */
+/** 견적 → 계약 브릿지 버튼 + disabled 이유 인라인 */
 export function AdminQuoteContractActions({
   label,
   blockReason,
@@ -23,29 +23,31 @@ export function AdminQuoteContractActions({
   size = "default",
   className,
 }: Props) {
+  const h = size === "sm" ? "h-9 text-xs" : "h-11 text-sm";
+
   return (
     <div className={className ?? "space-y-1.5"}>
-      <Button
+      <button
         type="button"
-        variant="secondary"
-        size={size}
-        className={
-          size === "sm"
-            ? "h-8 bg-navy text-xs text-white hover:bg-navy/90 dark:text-white"
-            : "bg-navy text-white hover:bg-navy/90 dark:text-white"
-        }
         disabled={!canCreate || busy}
         onClick={onClick}
+        className={cn(
+          "inline-flex w-full items-center justify-center gap-2 rounded-xl border-2 px-4 font-bold transition-colors disabled:opacity-100",
+          h,
+          canCreate && !busy
+            ? "border-violet-500 bg-gradient-to-r from-violet-500 to-cyan-400 text-white shadow-sm hover:opacity-95"
+            : "cursor-not-allowed border-violet-400/80 bg-white text-foreground dark:border-violet-400/50 dark:bg-white/10 dark:text-white",
+        )}
       >
         {busy ? (
-          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
         ) : (
-          <FileSignature className="mr-2 h-4 w-4" />
+          <FileSignature className="h-4 w-4 shrink-0" aria-hidden />
         )}
         {label}
-      </Button>
+      </button>
       {blockReason ? (
-        <p className="text-xs leading-snug text-amber-800 dark:text-amber-200">
+        <p className="text-sm font-semibold leading-snug text-amber-900 dark:text-amber-200">
           {blockReason}
         </p>
       ) : null}

@@ -20,6 +20,10 @@ import {
 } from "@/lib/ooh-quote-admin-ui";
 import { useToast } from "@/components/toast-provider";
 import { formatOohQuoteManwonShort } from "@/lib/ooh-quote-amount";
+import {
+  AdminQuotePageShell,
+  adminQuoteSectionCard,
+} from "@/components/admin/admin-quote-page-shell";
 
 const OOH_STATUSES = [
   "all",
@@ -220,15 +224,15 @@ export default function AdminOohQuotesClient() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <AdminQuotePageShell>
       <div>
-        <h1 className="text-2xl font-bold text-foreground dark:text-hero-fg">{t("title")}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <Card>
+      <Card className={adminQuoteSectionCard}>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base text-navy">{t("filterStatus")}</CardTitle>
+          <CardTitle className="text-base text-foreground">{t("filterStatus")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-wrap items-end gap-3">
           <select
@@ -320,7 +324,7 @@ export default function AdminOohQuotesClient() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className={adminQuoteSectionCard}>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
@@ -583,6 +587,6 @@ export default function AdminOohQuotesClient() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AdminQuotePageShell>
   );
 }

@@ -59,6 +59,16 @@ import {
 } from "@/lib/admin-quote-hydrate";
 import type { QuoteApi } from "@/lib/admin-sales-quote";
 import { AdminQuoteContractActions } from "@/components/admin/admin-quote-contract-actions";
+import { AdminQuotePageShell } from "@/components/admin/admin-quote-page-shell";
+import { AdminQuoteTopSticky } from "@/components/admin/admin-quote-top-sticky";
+import {
+  STICKY_ACTION_BAR_BTN,
+  STICKY_ACTION_BAR_BTN_IDLE,
+  STICKY_ACTION_BAR_BTN_PRIMARY,
+  STICKY_ACTION_BAR_DOCK_SPACER_CLASS,
+  StickyActionBar,
+} from "@/components/sticky-action-bar";
+import { cn } from "@/lib/utils";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -409,15 +419,33 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   const saveQuote = useCallback(async () => {
     setPdfError(null);
     if (!hasLines) {
-      setPdfError(t("pdfNeedMedia"));
+      const msg = t("saveFailNeedLines");
+      setPdfError(msg);
+      toast("error", msg);
       return;
     }
     if (days <= 0) {
-      setPdfError(t("invalidPeriod"));
+      const msg = t("invalidPeriod");
+      setPdfError(msg);
+      toast("error", msg);
       return;
     }
-    if (!clientCompany.trim() || !clientName.trim() || !clientPhone.trim()) {
-      setPdfError(t("pdfNeedClient"));
+    if (!clientCompany.trim()) {
+      const msg = t("saveFailNeedCompany");
+      setPdfError(msg);
+      toast("error", msg);
+      return;
+    }
+    if (!clientName.trim()) {
+      const msg = t("saveFailNeedName");
+      setPdfError(msg);
+      toast("error", msg);
+      return;
+    }
+    if (!clientPhone.trim()) {
+      const msg = t("saveFailNeedPhone");
+      setPdfError(msg);
+      toast("error", msg);
       return;
     }
     setSaveLoading(true);
@@ -478,7 +506,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       const saved = raw as { quote?: QuoteApi };
       if (saved.quote?.quoteNumber) setQuoteNumber(saved.quote.quoteNumber);
       if (!isEditMode && saved.quote?.id) {
-        toast("success", t("saveOk"));
+        toast("success", t("saveOkWithContract"));
         router.push(`/admin/quotes/${saved.quote.id}/edit`);
         return;
       }
@@ -517,7 +545,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
     clientEmail.trim();
 
   const contractBlockReason = useMemo(() => {
-    if (!quoteId) return t("createContractNeedSave");
+    if (!quoteId) return t("createContractNeedSaveFirst");
     if (!clientEmail.trim()) return t("createContractEmailInline");
     if (!hasLines || days <= 0) return t("createContractNeedLines");
     if (!clientCompany.trim() || !clientName.trim() || !clientPhone.trim()) {
@@ -536,6 +564,13 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   ]);
 
   const contractBusy = bridgeLoading || saveLoading || pdfLoading;
+  const showEmailFieldError = Boolean(quoteId) && !clientEmail.trim();
+  const emailBannerText = showEmailFieldError ? t("createContractEmailBanner") : null;
+  const stickySummary = quoteId
+    ? `${displayQuoteNumber} · ${formatWon(totals.totalWon)}`
+    : isEditMode
+      ? t("editSubtitle")
+      : t("subtitle");
 
   const openBridgeModal = useCallback(async () => {
     if (!quoteId) return;
@@ -757,7 +792,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
   ]);
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <AdminQuotePageShell>
       {editLoading ? (
         <div className="flex items-center justify-center gap-2 py-24 text-muted-foreground">
           <Loader2 className="h-6 w-6 animate-spin" />
@@ -808,28 +843,16 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         ) : null}
       </div>
 
-      {quoteId ? (
-        <div className="sticky top-0 z-20 -mx-1 rounded-xl border border-navy/20 bg-background/95 px-4 py-3 shadow-sm backdrop-blur supports-[backdrop-filter]:bg-background/80">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-wide text-navy dark:text-hero-fg">
-                {t("createContractStickyTitle")}
-              </p>
-              <p className="mt-0.5 text-sm text-muted-foreground">
-                {displayQuoteNumber} · {formatWon(totals.totalWon)}
-              </p>
-            </div>
-            <AdminQuoteContractActions
-              label={t("createContract")}
-              blockReason={canCreateContract ? null : contractBlockReason}
-              canCreate={canCreateContract}
-              busy={contractBusy}
-              onClick={() => void openBridgeModal()}
-              className="shrink-0 sm:min-w-[200px]"
-            />
-          </div>
-        </div>
-      ) : null}
+      <AdminQuoteTopSticky
+        title={t("createContractStickyTitle")}
+        summary={stickySummary}
+        contractLabel={t("createContract")}
+        blockReason={canCreateContract ? null : contractBlockReason}
+        canCreate={canCreateContract}
+        busy={contractBusy}
+        onContractClick={() => void openBridgeModal()}
+        emailBanner={emailBannerText}
+      />
 
       {contractPrompt && contractBlockReason ? (
         <div
@@ -840,7 +863,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         </div>
       ) : null}
 
-      <Card>
+      <Card className="rounded-2xl border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-lg text-foreground dark:text-hero-fg">
             <ListOrdered className="h-5 w-5 text-accent" />
@@ -1042,7 +1065,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
         </Card>
       </div>
 
-      <Card>
+      <Card className="rounded-2xl border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
         <CardHeader className="pb-3">
           <CardTitle className="text-lg text-foreground dark:text-hero-fg">{t("pdfSectionTitle")}</CardTitle>
         </CardHeader>
@@ -1119,6 +1142,10 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
                 value={clientEmail}
                 onChange={(e) => setClientEmail(e.target.value)}
                 placeholder={t("clientEmailPh")}
+                className={cn(
+                  showEmailFieldError &&
+                    "border-2 border-red-500 focus-visible:ring-red-500/40 dark:border-red-400",
+                )}
               />
               <p className="mt-1 text-[11px] leading-snug text-muted-foreground">
                 {t("clientEmailHint")}
@@ -1287,7 +1314,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
       </Card>
 
       {showPreview && hasLines && days > 0 && (
-        <Card>
+        <Card className="rounded-2xl border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5">
           <CardHeader>
             <div className="flex flex-wrap items-center justify-between gap-2">
               <CardTitle className="text-lg text-foreground dark:text-hero-fg">
@@ -1435,6 +1462,62 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           </CardContent>
         </Card>
       )}
+
+      <div className={STICKY_ACTION_BAR_DOCK_SPACER_CLASS} aria-hidden />
+      <StickyActionBar
+        open
+        layout="dock"
+        variant="neon"
+        compact
+        aboveMobileChrome
+        portal
+        ariaLabel={isEditMode ? t("updateQuote") : t("saveQuote")}
+      >
+        <div className={cn(STICKY_ACTION_BAR_ROW, "max-w-4xl sm:max-w-full")}>
+          <span
+            className="min-w-0 flex-1 truncate text-[10px] font-medium tabular-nums text-gray-600 dark:text-white/55"
+            aria-live="polite"
+          >
+            {hasLines ? formatWon(totals.totalWon) : t("subtitle")}
+          </span>
+          <button
+            type="button"
+            disabled={!canCreateContract || contractBusy}
+            onClick={() => void openBridgeModal()}
+            className={cn(
+              STICKY_ACTION_BAR_BTN,
+              canCreateContract && !contractBusy
+                ? "border-violet-500/50 bg-white font-bold text-violet-800 dark:border-violet-400/50 dark:bg-white/10 dark:text-violet-200"
+                : STICKY_ACTION_BAR_BTN_IDLE,
+              "font-bold",
+            )}
+          >
+            <FileSignature className="h-3 w-3 shrink-0" aria-hidden />
+            {t("createContract")}
+          </button>
+          <button
+            type="button"
+            disabled={
+              saveLoading ||
+              pdfLoading ||
+              !hasLines ||
+              days <= 0 ||
+              !clientCompany.trim() ||
+              !clientName.trim() ||
+              !clientPhone.trim()
+            }
+            onClick={() => void saveQuote()}
+            className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_PRIMARY, "min-w-[5.5rem]")}
+          >
+            {saveLoading ? (
+              <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
+            ) : (
+              <Save className="h-3 w-3 shrink-0" aria-hidden />
+            )}
+            {isEditMode ? t("updateQuote") : t("saveQuote")}
+          </button>
+        </div>
+      </StickyActionBar>
         </>
       )}
 
@@ -1514,6 +1597,6 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
           </div>
         </div>
       ) : null}
-    </div>
+    </AdminQuotePageShell>
   );
 }

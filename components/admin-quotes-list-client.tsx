@@ -21,6 +21,10 @@ import {
   FileSignature,
 } from "lucide-react";
 import { useToast } from "@/components/toast-provider";
+import {
+  AdminQuotePageShell,
+  adminQuoteSectionCard,
+} from "@/components/admin/admin-quote-page-shell";
 
 function formatWon(n: number) {
   return new Intl.NumberFormat("ko-KR").format(Math.round(n));
@@ -240,10 +244,10 @@ export default function AdminQuotesListClient() {
   };
 
   return (
-    <div className="mx-auto max-w-6xl space-y-6">
+    <AdminQuotePageShell>
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-foreground dark:text-hero-fg">{t("title")}</h1>
+          <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
         </div>
         <Link href="/admin/quotes/new">
@@ -254,9 +258,9 @@ export default function AdminQuotesListClient() {
         </Link>
       </div>
 
-      <Card>
+      <Card className={adminQuoteSectionCard}>
         <CardHeader className="pb-3">
-          <CardTitle className="text-base text-foreground dark:text-hero-fg">{t("filters")}</CardTitle>
+          <CardTitle className="text-base text-foreground">{t("filters")}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-end">
           <div className="relative min-w-[200px] flex-1">
@@ -347,7 +351,7 @@ export default function AdminQuotesListClient() {
         </Card>
       ) : null}
 
-      <Card>
+      <Card className={adminQuoteSectionCard}>
         <CardContent className="p-0">
           {loading ? (
             <div className="flex items-center justify-center gap-2 py-16 text-muted-foreground">
@@ -508,6 +512,6 @@ export default function AdminQuotesListClient() {
           )}
         </CardContent>
       </Card>
-    </div>
+    </AdminQuotePageShell>
   );
 }
