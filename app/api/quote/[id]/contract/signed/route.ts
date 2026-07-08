@@ -3,6 +3,7 @@ import { OohContractStatus } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { rateLimit } from "@/lib/rate-limit";
 import { loadOoHQuoteForContract } from "@/lib/ooh-contract-context";
+import { isAdminRequestAuthorized } from "@/lib/require-admin-request";
 
 export const dynamic = "force-dynamic";
 
@@ -13,12 +14,15 @@ export async function GET(
   request: NextRequest,
   ctx: { params: Promise<{ id: string }> },
 ) {
-  const ip =
-    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    request.headers.get("x-real-ip") ??
-    "unknown";
-  if (!limiter.check(ip)) {
-    return new NextResponse("Too many requests", { status: 429 });
+  const isAdmin = isAdminRequestAuthorized(request);
+  if (!isAdmin) {
+    const ip =
+      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
+      request.headers.get("x-real-ip") ??
+      "unknown";
+    if (!limiter.check(ip)) {
+      return new NextResponse("Too many requests", { status: 429 });
+    }
   }
 
   const { id } = await ctx.params;
