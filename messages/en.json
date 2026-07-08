@@ -2649,6 +2649,7 @@
     "deleteConfirm": "Delete quote {number} ({name})? This cannot be undone.",
     "deleteOk": "Quote deleted.",
     "deleteFailed": "Failed to delete quote.",
+    "moreActions": "More",
     "statusFailed": "Could not update status."
   },
   "adminQuotesHub": {
@@ -2661,6 +2662,9 @@
     "filterStatus": "Status",
     "all": "All",
     "refresh": "Refresh",
+    "moreActions": "More",
+    "expandDetail": "Expand contract detail",
+    "collapseDetail": "Collapse contract detail",
     "loading": "Loading…",
     "empty": "No records.",
     "loadError": "Could not load list.",

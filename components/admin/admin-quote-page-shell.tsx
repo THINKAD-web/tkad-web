@@ -55,3 +55,12 @@ export const adminQuoteEmphasisTextClass =
 
 export const adminQuoteSurfaceMutedClass =
   "rounded-lg border bg-muted/30 dark:bg-card/5";
+
+/** 모바일 카드 목록 — 매체관리 md:hidden 패턴과 동일 */
+export const adminMobileListClass = "md:hidden divide-y divide-border";
+
+export const adminMobileCardClass = "px-3 py-3";
+
+export const adminMobileTouchBtnClass = "h-11 min-h-11 text-sm";
+
+export const adminDesktopTableWrapClass = "hidden overflow-x-auto md:block";

@@ -1,6 +1,6 @@
 "use client";
 
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
@@ -23,6 +23,8 @@ import { formatOohQuoteManwonShort } from "@/lib/ooh-quote-amount";
 import { mapOohQuoteRecalcApiError } from "@/lib/ooh-quote-recalc-error";
 import {
   AdminQuotePageShell,
+  adminDesktopTableWrapClass,
+  adminMobileTouchBtnClass,
   adminQuoteEmphasisTextClass,
   adminQuoteLinkVioletClass,
   adminQuoteSectionCard,
@@ -34,6 +36,10 @@ import {
   AdminOohContractDetailPanel,
   type OohQuoteContractDetail,
 } from "@/components/admin/admin-ooh-contract-detail";
+import {
+  AdminMobileCard,
+  AdminMobileList,
+} from "@/components/admin/admin-mobile-list-primitives";
 
 const OOH_STATUSES = [
   "all",
@@ -82,8 +88,9 @@ export default function AdminOohQuotesClient() {
   const [cancelOpenId, setCancelOpenId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [mobileMoreId, setMobileMoreId] = useState<string | null>(null);
   const [detailById, setDetailById] = useState<Record<string, OohQuoteContractDetail>>({});
-  const rowRefs = useRef<Record<string, HTMLTableRowElement | null>>({});
+  const rowRefs = useRef<Record<string, HTMLElement | null>>({});
 
   const loadDetail = useCallback(async (id: string) => {
     setDetailById((prev) => ({ ...prev, [id]: { ...prev[id], loading: true } }));
@@ -172,8 +179,11 @@ export default function AdminOohQuotesClient() {
     const el = rowRefs.current[highlightId];
     if (el) {
       el.scrollIntoView({ behavior: "smooth", block: "center" });
-      el.classList.add("bg-amber-50");
-      const tmr = setTimeout(() => el.classList.remove("bg-amber-50"), 2500);
+      el.classList.add("bg-amber-50", "dark:bg-amber-950/30");
+      const tmr = setTimeout(
+        () => el.classList.remove("bg-amber-50", "dark:bg-amber-950/30"),
+        2500,
+      );
       return () => clearTimeout(tmr);
     }
   }, [highlightId, quotes]);
@@ -241,6 +251,139 @@ export default function AdminOohQuotesClient() {
       setBusyId(null);
     }
   };
+
+  const touchBtn = adminMobileTouchBtnClass;
+
+  const renderMobilePrimaryActions = (row: OohRow) => {
+    const actions: ReactNode[] = [];
+    if (canShowSendQuote(row)) {
+      actions.push(
+        <Button
+          key="send"
+          className={`w-full bg-hermes text-white hover:bg-hermes/90 ${touchBtn}`}
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, () =>
+              act(`/api/admin/ooh-quotes/${row.id}/send-quote`, "POST"),
+            )
+          }
+        >
+          {row.status === "draft" ? t("sendQuote") : t("resendQuote")}
+        </Button>,
+      );
+    }
+    if (canShowBookingConfirm(row)) {
+      actions.push(
+        <Button
+          key="booking"
+          className={`w-full bg-navy text-white hover:bg-navy/90 ${touchBtn}`}
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, () =>
+              act(`/api/admin/ooh-quotes/${row.id}/booking-confirm`, "PATCH"),
+            )
+          }
+        >
+          {t("bookingConfirm")}
+        </Button>,
+      );
+    }
+    if (canShowContractConfirm(row)) {
+      actions.push(
+        <Button
+          key="contract"
+          className={`w-full bg-gold text-foreground dark:text-hero-fg ${touchBtn}`}
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, () =>
+              act(`/api/admin/ooh-quotes/${row.id}/contract-confirm`, "PATCH"),
+            )
+          }
+        >
+          {t("contractConfirm")}
+        </Button>,
+      );
+    }
+    if (canShowSendInvoice(row)) {
+      actions.push(
+        <Button
+          key="invoice"
+          variant="secondary"
+          className={`w-full ${touchBtn}`}
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, () =>
+              act(`/api/admin/ooh-quotes/${row.id}/send-invoice`, "POST"),
+            )
+          }
+        >
+          {t("sendInvoice")}
+        </Button>,
+      );
+    }
+    if (canShowPaymentConfirm(row)) {
+      actions.push(
+        <Button
+          key="pay"
+          variant="outline"
+          className={`w-full ${touchBtn}`}
+          onClick={() => {
+            setPayOpenId(row.id);
+            setPayAmount(String(row.totalAmount));
+          }}
+        >
+          {t("paymentConfirm")}
+        </Button>,
+      );
+    }
+    if (canShowAwaitingSignature(row)) {
+      actions.push(
+        <Button key="sign" variant="secondary" className={`w-full ${touchBtn}`} asChild>
+          <Link href={`/quote/${row.id}/contract`} target="_blank" rel="noreferrer">
+            {t("awaitingSignature")}
+          </Link>
+        </Button>,
+      );
+    }
+    return actions.slice(0, 3);
+  };
+
+  const renderMobileSecondaryActions = (row: OohRow) => (
+    <>
+      <Button variant="outline" className={`w-full ${touchBtn}`} asChild>
+        <Link href={`/quote/${row.id}/preview`} target="_blank" rel="noreferrer">
+          <ExternalLink className="mr-1.5 h-4 w-4" />
+          {t("openDetail")}
+        </Link>
+      </Button>
+      {canShowSendQuote(row) ? (
+        <Button
+          variant="outline"
+          className={`w-full ${touchBtn}`}
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, async () => {
+              await act(`/api/admin/ooh-quotes/${row.id}`, "PATCH", {
+                recalculate: true,
+              });
+              await loadDetail(row.id);
+            })
+          }
+        >
+          {t("recalc")}
+        </Button>
+      ) : null}
+      {canShowCancel(row) ? (
+        <Button
+          variant="ghost"
+          className={`w-full text-red-600 ${touchBtn}`}
+          onClick={() => setCancelOpenId(row.id)}
+        >
+          {t("cancel")}
+        </Button>
+      ) : null}
+    </>
+  );
 
   return (
     <AdminQuotePageShell>
@@ -355,7 +498,121 @@ export default function AdminOohQuotesClient() {
           ) : quotes.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <AdminMobileList>
+                {quotes.map((row) => {
+                  const expanded = expandedId === row.id;
+                  const detail = detailById[row.id];
+                  const showMore = mobileMoreId === row.id;
+                  const primaryActions = renderMobilePrimaryActions(row);
+                  return (
+                    <AdminMobileCard
+                      key={row.id}
+                      cardRef={(el) => {
+                        rowRefs.current[row.id] = el;
+                      }}
+                    >
+                      <div className="space-y-2">
+                        <button
+                          type="button"
+                          className={`w-full text-left ${adminQuoteEmphasisTextClass}`}
+                          onClick={() => toggleExpand(row.id)}
+                        >
+                          <span className="inline-flex items-center gap-1 text-sm font-semibold">
+                            {expanded ? (
+                              <ChevronUp className="h-4 w-4 shrink-0" />
+                            ) : (
+                              <ChevronDown className="h-4 w-4 shrink-0" />
+                            )}
+                            {row.clientName}
+                          </span>
+                        </button>
+                        {row.sourceAdminQuoteId && row.sourceAdminQuoteNumber ? (
+                          <p className="text-[11px] leading-snug text-muted-foreground">
+                            {t("sourceFromAdminQuote", {
+                              number: row.sourceAdminQuoteNumber,
+                            })}{" "}
+                            <Link
+                              href={`/admin/quotes/${row.sourceAdminQuoteId}/edit`}
+                              className={adminQuoteLinkVioletClass}
+                            >
+                              {t("sourceFromAdminQuoteLink")}
+                            </Link>
+                          </p>
+                        ) : null}
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                          <span className="font-semibold tabular-nums text-foreground">
+                            {formatOohQuoteManwonShort(row.totalAmount)}
+                          </span>
+                          <span className="text-muted-foreground">{row.period}</span>
+                        </div>
+                        <div className="flex flex-wrap items-center justify-between gap-2">
+                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground">
+                            {statusLabel(row.status)}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground">
+                            {row.updatedAt.slice(0, 10)}
+                          </span>
+                        </div>
+                        {row.clientEmail ? (
+                          <p className="truncate text-xs text-muted-foreground">
+                            {row.clientEmail}
+                          </p>
+                        ) : null}
+                      </div>
+                      {primaryActions.length > 0 ? (
+                        <div className="mt-3 flex flex-col gap-2">
+                          {primaryActions}
+                        </div>
+                      ) : null}
+                      <div className="mt-2 flex flex-col gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={touchBtn}
+                          onClick={() => toggleExpand(row.id)}
+                        >
+                          {expanded ? t("collapseDetail") : t("expandDetail")}
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className={touchBtn}
+                          onClick={() =>
+                            setMobileMoreId(showMore ? null : row.id)
+                          }
+                        >
+                          {t("moreActions")}
+                        </Button>
+                      </div>
+                      {showMore ? (
+                        <div className="mt-2 flex flex-col gap-2 border-t border-border/60 pt-2">
+                          {renderMobileSecondaryActions(row)}
+                        </div>
+                      ) : null}
+                      {expanded ? (
+                        <div className="mt-3 rounded-lg border border-border/60 bg-muted/20 p-3 dark:bg-card/10">
+                          <AdminOohContractDetailPanel
+                            quoteId={row.id}
+                            detail={detail}
+                            recalcBusy={busyId === row.id}
+                            onRecalc={() =>
+                              void run(row.id, async () => {
+                                await act(`/api/admin/ooh-quotes/${row.id}`, "PATCH", {
+                                  recalculate: true,
+                                });
+                                await loadDetail(row.id);
+                              })
+                            }
+                            onSaved={() => void loadDetail(row.id)}
+                          />
+                        </div>
+                      ) : null}
+                    </AdminMobileCard>
+                  );
+                })}
+              </AdminMobileList>
+              <div className={adminDesktopTableWrapClass}>
               <table className="w-full text-sm">
                 <thead className={adminQuoteTableTheadClass}>
                   <tr>
@@ -582,7 +839,8 @@ export default function AdminOohQuotesClient() {
                   })}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
