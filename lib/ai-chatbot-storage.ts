@@ -12,6 +12,7 @@ export type AiChatTurn = {
   role: "user" | "assistant";
   content: string;
   media?: AiChatbotMediaCard[];
+  plannerDeeplink?: string | null;
 };
 
 export function getOrCreateAiChatSessionId(): string {
@@ -52,6 +53,10 @@ function parseTurns(raw: unknown): AiChatTurn[] {
               (c): c is AiChatbotMediaCard =>
                 !!c && typeof c === "object" && typeof c.id === "string",
             )
+          : undefined,
+      plannerDeeplink:
+        m.role === "assistant" && typeof m.plannerDeeplink === "string"
+          ? m.plannerDeeplink
           : undefined,
     }))
     .slice(-24);

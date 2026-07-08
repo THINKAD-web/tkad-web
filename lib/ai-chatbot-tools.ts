@@ -1,3 +1,4 @@
+import { executePlanFromBrief } from "@/lib/ai-chatbot-plan-from-brief";
 import type { MediaItem, MediaPricePeriodKey } from "@/lib/media-data";
 import {
   getPrimaryMediaImageUrl,
@@ -89,6 +90,26 @@ function matchesSearchQuery(m: MediaItem, query: string): boolean {
 export function getAiChatbotTools(): AiChatbotToolSpec[] {
   return [
     {
+      name: "planFromBrief",
+      description:
+        "Parse a natural-language campaign brief with the rule-based planner parser (0 tokens), then rank media with the same scoreMedia engine as /planner Step 4. Prefer for mixed briefs: region + goal + budget + age + format (택시, 버스, 이동형, 경기, 30대, 강남 브랜딩, etc.). Returns parseSummary, parsed fields, reasonLabels per item, and /planner?brief= deeplink. Do not invent fields missing from parse.",
+      input_schema: {
+        type: "object",
+        properties: {
+          brief: {
+            type: "string",
+            description:
+              "User campaign utterance in Korean or English (pass the user's words, trimmed)",
+          },
+          limit: {
+            type: "number",
+            description: "Max ranked items (default 6, max 10)",
+          },
+        },
+        required: ["brief"],
+      },
+    },
+    {
       name: "searchMedia",
       description:
         "Search THINKAD public OOH media by free text: station names (e.g. 논현역), district, address keywords, format, tags. Monthly price is in 만원 (10,000 KRW units). Use before answering location/format questions.",
@@ -133,7 +154,7 @@ export function getAiChatbotTools(): AiChatbotToolSpec[] {
     {
       name: "recommendMedia",
       description:
-        "Recommend media using optional region (seoul|busan|jeju|national), type (digital|static|mobile; aliases billboard→static, bus|subway→mobile), max monthly price in 만원, and optional keywords/goals for text matching. Combines filters and sorts by relevance.",
+        "Legacy fallback only when planFromBrief is unsuitable. Simple filter by region (seoul|busan|jeju|national), type (digital|static|mobile), max monthly price in 만원, and keywords. Prefer planFromBrief for campaign-style briefs.",
       input_schema: {
         type: "object",
         properties: {
@@ -172,8 +193,21 @@ export function executeChatbotTool(
   name: string,
   rawInput: unknown,
   catalog: MediaItem[],
+  locale: "ko" | "en" = "ko",
 ): { result: unknown; cards: AiChatbotMediaCard[] } {
   const input = rawInput && typeof rawInput === "object" ? (rawInput as Record<string, unknown>) : {};
+
+  if (name === "planFromBrief") {
+    const brief = String(input.brief ?? "").trim();
+    const out = executePlanFromBrief(brief, catalog, locale, input.limit);
+    if ("error" in out) {
+      return { result: { error: out.error }, cards: [] };
+    }
+    const cards = out.items.slice(0, 6).map(
+      ({ score: _s, reasonKeys: _k, reasonLabels: _l, ...card }) => card,
+    );
+    return { result: out, cards };
+  }
 
   if (name === "searchMedia") {
     const query = String(input.query ?? "").trim();

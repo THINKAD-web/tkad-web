@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { Bot, MessageCircle, Send, X, ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
@@ -24,13 +24,49 @@ type Props = {
 type ChatApiResponse = {
   reply?: string;
   media?: AiChatbotMediaCard[];
+  plannerDeeplink?: string | null;
   remaining?: number;
   limit?: number;
   rateLimited?: boolean;
   maintenance?: boolean;
   message?: string;
   error?: string;
+  engine?: "rule" | "claude";
+  tokensUsed?: number;
 };
+
+const ANALYZE_MIN_MS = 480;
+const LINK_INLINE_RE = /\[([^\]]+)\]\(([^)]+)\)/g;
+
+function ChatReplyText({ content }: { content: string }) {
+  const nodes: ReactNode[] = [];
+  let last = 0;
+  let key = 0;
+  for (const match of content.matchAll(LINK_INLINE_RE)) {
+    const index = match.index ?? 0;
+    if (index > last) {
+      nodes.push(content.slice(last, index));
+    }
+    const label = match[1] ?? "";
+    const href = match[2] ?? "";
+    if (href.startsWith("/")) {
+      nodes.push(
+        <Link
+          key={`lnk-${key++}`}
+          href={href}
+          className="font-semibold text-violet-600 underline underline-offset-2 dark:text-violet-300"
+        >
+          {label}
+        </Link>,
+      );
+    } else {
+      nodes.push(match[0]);
+    }
+    last = index + match[0].length;
+  }
+  if (last < content.length) nodes.push(content.slice(last));
+  return <p className="whitespace-pre-wrap break-words">{nodes}</p>;
+}
 
 type QuotaState = {
   remaining: number;
@@ -54,7 +90,11 @@ function Bubble({
           : "mr-auto dark:border-white/12 border-gray-200 dark:bg-black bg-white/35 dark:text-white text-gray-800",
       )}
     >
-      <p className="whitespace-pre-wrap break-words">{content}</p>
+      {isUser ? (
+        <p className="whitespace-pre-wrap break-words">{content}</p>
+      ) : (
+        <ChatReplyText content={content} />
+      )}
     </div>
   );
 }
@@ -118,6 +158,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
       setMessages(nextMessages);
       saveAiChatToSession(nextMessages);
       setLoading(true);
+      const startedAt = Date.now();
       try {
         const history = messages.map(({ role, content }) => ({ role, content }));
         const res = await fetch("/api/chat", {
@@ -151,6 +192,17 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           Array.isArray(data.media) && data.media.length > 0
             ? data.media
             : undefined;
+        const plannerDeeplink =
+          typeof data.plannerDeeplink === "string"
+            ? data.plannerDeeplink
+            : buildPlannerBriefPath(text);
+
+        const elapsed = Date.now() - startedAt;
+        if (elapsed < ANALYZE_MIN_MS) {
+          await new Promise((r) =>
+            setTimeout(r, ANALYZE_MIN_MS - elapsed),
+          );
+        }
 
         if (
           typeof data.remaining === "number" &&
@@ -161,7 +213,12 @@ export function SupportAiChatModal({ open, onClose }: Props) {
 
         const withReply: AiChatTurn[] = [
           ...nextMessages,
-          { role: "assistant", content: reply, media },
+          {
+            role: "assistant",
+            content: reply,
+            media,
+            plannerDeeplink: plannerDeeplink ?? undefined,
+          },
         ];
         setMessages(withReply);
         saveAiChatToSession(withReply);
@@ -242,9 +299,9 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             const briefSource = showMedia
               ? lastUserTextBefore(messages, i)
               : null;
-            const plannerHref = briefSource
-              ? buildPlannerBriefPath(briefSource)
-              : null;
+            const plannerHref =
+              msg.plannerDeeplink ??
+              (briefSource ? buildPlannerBriefPath(briefSource) : null);
 
             return (
               <div key={`${i}-${msg.role}`} className="space-y-2">
@@ -269,13 +326,29 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                     ) : null}
                   </div>
                 ) : null}
+                {msg.role === "assistant" ? (
+                  <Link
+                    href="/contact"
+                    className="mr-auto flex max-w-[92%] items-center justify-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-[11px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"
+                  >
+                    {t("contactCta")}
+                    <ArrowRight className="h-3 w-3" aria-hidden />
+                  </Link>
+                ) : null}
               </div>
             );
           })}
           {loading ? (
-            <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-400">
-              {t("thinking")}
-            </p>
+            <div className="mr-auto max-w-[92%] space-y-2 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black/40 bg-white/60 px-3 py-2.5">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-violet-200 text-violet-700">
+                {t("analyzing")}
+              </p>
+              <div className="flex gap-1 pt-1" aria-hidden>
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:0ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:120ms]" />
+                <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-violet-400 [animation-delay:240ms]" />
+              </div>
+            </div>
           ) : null}
           {error ? (
             <p className="rounded-xl border border-red-400/30 bg-red-500/10 px-3 py-2 text-xs text-red-700 dark:text-red-100">

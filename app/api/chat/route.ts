@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
-import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
 import { completeClaudeChatbot } from "@/lib/ai-chatbot-claude";
+import { completeRuleChatbot, isChatbotClaudeEnabled } from "@/lib/ai-chatbot-rule";
+import { buildAiChatbotSystemPromptWithTools } from "@/lib/ai-chatbot-system";
 import { recordAiUsage } from "@/lib/ai-usage-log";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { getCurrentUser } from "@/lib/user-session";
@@ -18,7 +19,6 @@ type HistoryItem = { role: ChatRole; content: string };
 type ChatTurn = { role: "user" | "assistant"; content: string };
 
 const MAX_MESSAGE_CHARS = 2_500;
-// 비용 절감: 최근 10개 메시지만 모델에 전송
 const MAX_HISTORY = 10;
 const MAX_CONTENT_STRIP = 12_000;
 
@@ -88,8 +88,8 @@ export async function POST(req: Request) {
   const sessionId =
     typeof sessionIdRaw === "string" ? sessionIdRaw.slice(0, 64) : "";
   const pageUrl = typeof pageUrlRaw === "string" ? pageUrlRaw : null;
+  const userMessage = String(message ?? "").trim();
 
-  // 점검 모드면 즉시 안내 (모델 호출 안 함 → 비용 0)
   if ((await getChatbotStatus()) === "maintenance") {
     return NextResponse.json({
       maintenance: true,
@@ -100,12 +100,11 @@ export async function POST(req: Request) {
     });
   }
 
-  const normalized = normalizeMessages(String(message ?? ""), history);
+  const normalized = normalizeMessages(userMessage, history);
   if (!normalized.ok) {
     return NextResponse.json({ error: normalized.error }, { status: 400 });
   }
 
-  // AI 토큰 어뷰징 방지 — 일일 한도(비로그인 1 / 로그인 5 / PRO 30) + 시간당 어뷰징
   const user = await getCurrentUser();
   const rl = await enforceAiRateLimit(req, user?.id ?? null);
   if (!rl.allowed) {
@@ -128,27 +127,72 @@ export async function POST(req: Request) {
     catalog = [];
   }
 
-  const system = buildAiChatbotSystemPromptWithTools(locale);
+  const useClaude = isChatbotClaudeEnabled();
 
   try {
-    const { reply, media, tokensUsed, inputTokens, outputTokens, model } =
-      await completeClaudeChatbot({
-        systemPrompt: system,
-        messages: normalized.messages,
-        catalog,
-        locale,
+    if (useClaude) {
+      const system = buildAiChatbotSystemPromptWithTools(locale);
+      const { reply, media, tokensUsed, inputTokens, outputTokens, model } =
+        await completeClaudeChatbot({
+          systemPrompt: system,
+          messages: normalized.messages,
+          catalog,
+          locale,
+        });
+
+      void recordAiUsage({
+        feature: "chatbot",
+        model,
+        inputTokens,
+        outputTokens,
+        userId: user?.id ?? null,
       });
 
-    // 통합 사용량 로그 (비차단)
-    void recordAiUsage({
-      feature: "chatbot",
-      model,
+      if (sessionId) {
+        try {
+          await logChatbotTurn({
+            sessionId,
+            userId: user?.id ?? null,
+            userName: user?.name ?? null,
+            userEmail: user?.email ?? null,
+            ip: getClientIp(req),
+            userAgent: req.headers.get("user-agent"),
+            pageUrl,
+            locale,
+            model,
+            userMessage,
+            assistantMessage: reply,
+            tokensUsed,
+          });
+        } catch (logErr) {
+          console.error("[api/chat] log failed", logErr);
+        }
+      }
+
+      return NextResponse.json({
+        reply,
+        media,
+        remaining: rl.remaining,
+        limit: rl.limit,
+        engine: "claude",
+        tokensUsed,
+      });
+    }
+
+    const {
+      reply,
+      media,
+      tokensUsed,
       inputTokens,
       outputTokens,
-      userId: user?.id ?? null,
+      model,
+      plannerDeeplink,
+    } = completeRuleChatbot({
+      message: userMessage,
+      catalog,
+      locale,
     });
 
-    // 대화 로그 저장 (관리자 대시보드용) — 실패해도 응답엔 영향 없음
     if (sessionId) {
       try {
         await logChatbotTurn({
@@ -161,7 +205,7 @@ export async function POST(req: Request) {
           pageUrl,
           locale,
           model,
-          userMessage: String(message ?? ""),
+          userMessage,
           assistantMessage: reply,
           tokensUsed,
         });
@@ -170,7 +214,17 @@ export async function POST(req: Request) {
       }
     }
 
-    return NextResponse.json({ reply, media, remaining: rl.remaining, limit: rl.limit });
+    return NextResponse.json({
+      reply,
+      media,
+      plannerDeeplink,
+      remaining: rl.remaining,
+      limit: rl.limit,
+      engine: "rule",
+      tokensUsed,
+      inputTokens,
+      outputTokens,
+    });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
     if (msg.includes("ANTHROPIC_API_KEY")) {

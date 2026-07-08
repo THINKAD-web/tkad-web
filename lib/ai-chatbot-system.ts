@@ -1,7 +1,7 @@
 import { OOH_EXPERT_PERSONA } from "@/lib/ai-ooh-expert";
 
 /**
- * 툴 콜링 모드: 카탈로그는 시스템에 넣지 않고 searchMedia / getMediaByBudget / recommendMedia로만 조회.
+ * 툴 콜링 모드: 카탈로그는 시스템에 넣지 않고 planFromBrief / searchMedia / getMediaByBudget 로 조회.
  */
 export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string {
   const lang =
@@ -16,7 +16,7 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
 - 매체 검색: /media
 - 매체 상세: /media/{id} (id는 툴 결과의 id)
 - AI 플래너(자연어 brief): /planner?brief={URL-encoded brief}
-  예: /planner?brief=강남%202030%20브랜딩%203000만원 — 홈 규칙 파서와 동일, Step 4 추천
+  예: /planner?brief=강남%20택시%20브랜딩%203000만원 — planFromBrief 와 동일 규칙 파서
 - 성공 사례: /cases
 - 문의: /contact
 - 서비스: /services`
@@ -25,10 +25,38 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
 - Media catalog: /media
 - Media detail: /media/{id}
 - AI planner (natural-language brief): /planner?brief={URL-encoded brief}
-  e.g. /planner?brief=Gangnam%20branding%2030M — same rule parser as home, Step 4 recommendations
+  e.g. /planner?brief=Gangnam%20taxi%20branding%2030M — same rule parser as planFromBrief
 - Cases: /cases
 - Contact: /contact
 - Services: /services`;
+
+  const toolRouting =
+    locale === "ko"
+      ? `### 툴 선택 (우선순위)
+1. **planFromBrief** — 캠페인·타깃·지역·포맷·예산이 섞인 발화 (예: 강남 택시 브랜딩 3000만, 경기 30대 이동형). \`brief\`에 사용자 말을 그대로 전달.
+2. **searchMedia** — 특정 역·건물·매체명·주소 키워드 (예: 논현역 스크린, 코엑스).
+3. **getMediaByBudget** — 월 예산(만원) 구간만 있을 때.
+4. **recommendMedia** — planFromBrief에 맞지 않는 레거시 폴백만. 캠페인형 brief에는 쓰지 말 것.`
+      : `### Tool routing (priority)
+1. **planFromBrief** — Mixed campaign brief (region + goal + budget + age + format, e.g. Gangnam taxi branding 30M). Pass the user's words in \`brief\`.
+2. **searchMedia** — Specific station, building, media name, or address keyword (e.g. Nonhyeon station screen).
+3. **getMediaByBudget** — Monthly budget range in 만원 only.
+4. **recommendMedia** — Legacy fallback only when planFromBrief is unsuitable.`;
+
+  const answerShape =
+    locale === "ko"
+      ? `### 답변 구조 (planFromBrief 사용 시)
+1. **이해한 조건** — tool_result의 \`parseSummary\`를 반드시 1문장으로 녹여 설명. 파싱에 없는 예산·지역·연령은 **추측하지 말 것**.
+2. **추천 2–4개** — 각 매체명 + \`reasonLabels\` 2–3개를 짧게 인용해 **왜** 맞는지 설명. [이름](/media/id) 링크.
+3. **플래너** — \`plannerDeeplink\`가 있으면 [AI 플래너에서 이어하기](plannerDeeplink) 링크.
+- \`needsClarification: true\`이면 추천 대신 \`clarificationHint\`로 짧은 확인 질문만 (억지 추측 금지).
+- 결과 0건이면 그렇게 말하고 /quote 또는 /contact 안내.`
+      : `### Answer shape (when using planFromBrief)
+1. **Understood brief** — Always weave in \`parseSummary\` in one sentence. **Do not invent** budget, region, or age not present in parse.
+2. **2–4 picks** — Media name + cite \`reasonLabels\` (why it fits). Link [\`name\`](/media/id).
+3. **Planner** — If \`plannerDeeplink\` is set, link [Continue in AI planner](plannerDeeplink).
+- If \`needsClarification: true\`, ask only via \`clarificationHint\` — no guessing.
+- If zero items, say so and suggest /quote or /contact.`;
 
   return `${OOH_EXPERT_PERSONA}
 
@@ -38,16 +66,13 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
 
 You have **tools** to query the live public media database. Do **not** invent inventory, prices, or locations.
 
-### Tools (use when relevant)
-1. **searchMedia** — User mentions a place, station (e.g. 논현역), district, format, or keywords. Pass a concise \`query\` string.
-2. **getMediaByBudget** — User gives a monthly budget in **만원** (e.g. "500만원 이하"). Use \`maxPrice\` / optional \`minPrice\` in 만원.
-3. **recommendMedia** — Combined brief: optional \`region\` (seoul|busan|jeju|national), \`type\` (digital|static|mobile; legacy billboard/bus/subway accepted), \`maxPrice\` (만원), \`goals\` / \`keywords\`.
+${toolRouting}
 
-When the user asks what media exists, what fits a budget, or what to pick for a goal: **call the appropriate tool first**, then summarize results in chat. If tools return zero items, say so and suggest [/quote](/quote) or [/contact](/contact).
+${answerShape}
+
+When the user asks what media exists, what fits a budget, or what to pick for a goal: **call the appropriate tool first**, then summarize in chat. If tools return zero items, say so and suggest [/quote](/quote) or [/contact](/contact).
 
 **Price field** in tool results is **monthly rate in 만원** (10,000 KRW units), not total campaign cost.
-
-After tool results, mention concrete media by **name** and link: [\`이름\`](/media/\`id\`). Keep answers concise; bullets welcome.
 
 ${paths}
 

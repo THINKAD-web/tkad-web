@@ -10,7 +10,7 @@ import { AI_MODELS } from "@/lib/ai-models";
 
 /** 공개 챗봇 모델 — 비용 최소화를 위해 Haiku 기본 (CHATBOT_MODEL 로 override) */
 export const CHATBOT_MODEL = AI_MODELS.chatbot;
-const CHATBOT_MAX_TOKENS = Number(process.env.CHATBOT_MAX_TOKENS ?? "1024") || 1024;
+const CHATBOT_MAX_TOKENS = Number(process.env.CHATBOT_MAX_TOKENS ?? "1280") || 1280;
 
 function dedupeMediaCards(cards: AiChatbotMediaCard[]): AiChatbotMediaCard[] {
   const seen = new Set<string>();
@@ -81,6 +81,7 @@ export async function completeClaudeChatbot(params: {
           block.name,
           block.input,
           params.catalog,
+          params.locale,
         );
         collectedCards.push(...cards);
         toolResults.push({
