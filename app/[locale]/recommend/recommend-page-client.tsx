@@ -34,6 +34,8 @@ import {
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { planCartMaxItems } from "@/lib/plan-cart-limits";
 import { useIsPro } from "@/hooks/use-is-pro";
+import { buildRecommendInputFromBriefRaw } from "@/lib/recommend/brief-to-recommend-input";
+import { decodeBriefFromPlannerQuery } from "@/lib/planner/freetext-brief-url";
 import {
   buildHomeBudgetRecommendInput,
   type HomeBudgetIndustry,
@@ -76,10 +78,12 @@ export default function RecommendPageClient({
   const similarCampaignId = searchParams.get("similar")?.trim() ?? "";
   const similarPrefillDone = useRef<string | null>(null);
   const homeBudgetAutoDone = useRef(false);
+  const briefAutoDone = useRef(false);
   const budgetFromUrl = searchParams.get("budget");
   const regionFromUrl = searchParams.get("region") as HomeBudgetRegion | null;
   const industryFromUrl = searchParams.get("industry") as HomeBudgetIndustry | null;
   const autoFromUrl = searchParams.get("auto");
+  const briefFromUrl = searchParams.get("brief");
 
   const [cartItems, setCartItems] = useState<MediaItem[]>([]);
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
@@ -428,6 +432,31 @@ export default function RecommendPageClient({
   );
 
   useEffect(() => {
+    if (!briefFromUrl || briefAutoDone.current || catalog.length === 0) return;
+    briefAutoDone.current = true;
+
+    const raw = decodeBriefFromPlannerQuery(briefFromUrl);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("brief");
+      window.history.replaceState({}, "", url.toString());
+    }
+    if (!raw) return;
+
+    const input = buildRecommendInputFromBriefRaw(raw, isKo);
+    if (!input) return;
+
+    setInputMode("ai");
+    const payload: MediaAiRecommendFormSubmit = {
+      input,
+      regionCodes: [],
+      searchQuery: "",
+    };
+    setLastPayload(payload);
+    runAnalysis(payload, 0, { excludeNetwork: true });
+  }, [briefFromUrl, catalog, isKo, runAnalysis]);
+
+  useEffect(() => {
     if (
       autoFromUrl !== "1" ||
       homeBudgetAutoDone.current ||
@@ -560,10 +589,14 @@ export default function RecommendPageClient({
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon tkad-media-page overflow-x-clip">
         <PageHero
-          eyebrow="// 03 · DISCOVERY"
-          title="AI가 추천하는 "
-          highlight="맞춤 매체"
-          description="목표·예산·업종 조건에 맞는 매체를 AI가 자동 추천"
+          eyebrow={isKo ? "// 빠른 추천" : "// Quick recommend"}
+          title={isKo ? "빠른 AI " : "Quick AI "}
+          highlight={isKo ? "매체 추천" : "media picks"}
+          description={
+            isKo
+              ? "조건을 넣으면 즉시 TOP·지도·견적까지. 단계별 설계는 「단계별 플래너」 탭."
+              : "Enter criteria for instant TOP picks, map, and quote. Step-by-step design lives under Step-by-step planner."
+          }
         />
         <SubTabs tabs={PLANNING_TABS} currentPath="/recommend" />
 
@@ -603,8 +636,8 @@ export default function RecommendPageClient({
                       ? "견적서 생성 중..."
                       : "Creating quote..."
                     : isKo
-                      ? "이 플랜으로 견적서 만들기 →"
-                      : "Create a quote with this plan →"}
+                      ? "견적서 만들기 →"
+                      : "Create quote →"}
                 </BtnBlock>
                 <BtnBlock
                   variant="secondary"

@@ -2,6 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { BtnBlock } from "@/components/brutalist";
+import { Link } from "@/i18n/navigation";
 import {
   Calculator,
   ChevronDown,
@@ -108,8 +109,8 @@ export default function MediaAiRecommendDashboard({
             </h2>
             <p className="max-w-xl text-[12px] leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
               {`// `}{isKo
-                ? "TKAD bot이 당신을 위해 특별히 골라온 매체들입니다! 아래 추천들을 살펴보고 캠페인에 딱 맞는 조합을 골라보세요."
-                : "These are the placements TKAD bot carefully picked for your campaign. Explore them and choose the combo that feels right."}
+                ? "TKAD bot이 골라온 매체입니다. 여기서 견적·상담까지 완료할 수 있어요."
+                : "Placements TKAD bot picked for you. Finish with a quote or expert consult here."}
             </p>
           </div>
           <div className="flex shrink-0 items-center justify-center">
@@ -353,8 +354,8 @@ export default function MediaAiRecommendDashboard({
                   ? "견적서 생성 중…"
                   : "Creating quote…"
                 : isKo
-                  ? "이 플랜으로 견적서 만들기"
-                  : "Create a quote with this plan"}
+                  ? "견적서 만들기"
+                  : "Create quote"}
             </BtnBlock>
             <PlanCartBulkAddButton
               items={planBulkItems}
@@ -362,6 +363,15 @@ export default function MediaAiRecommendDashboard({
               size="lg"
               className="w-full flex-1 sm:w-auto"
             />
+          </div>
+
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+            <Link
+              href="/planner"
+              className="inline-flex w-full flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted sm:w-auto"
+            >
+              {isKo ? "플래너에서 상세 설계" : "Design in step-by-step planner"}
+            </Link>
           </div>
 
           <div className="flex flex-wrap gap-2">

@@ -48,7 +48,7 @@ export const DISCOVERY_TABS: SubTab[] = [
 
 export const PLANNING_TABS: SubTab[] = [
   {
-    label: "OOH 캠페인 플래너",
+    label: "단계별 플래너",
     href: "/planner",
     icon: BarChart3,
     match: (p) =>
@@ -57,7 +57,7 @@ export const PLANNING_TABS: SubTab[] = [
   },
   { label: "통합 미디어 플래너", href: "/planner/integrated", icon: Link2 },
   { label: "패키지 제안", href: "/media/packages", icon: Package },
-  { label: "AI 매체 추천", href: "/recommend", icon: Sparkles },
+  { label: "빠른 AI 추천", href: "/recommend", icon: Sparkles },
 ];
 
 export const CONTENT_TABS: SubTab[] = [

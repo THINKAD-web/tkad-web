@@ -613,12 +613,16 @@ export default function PlannerPageClient({
         },
       });
       setSelectedScenarioId(scenario.id);
-      setWizardStep(4);
+      setScenarioPrefillApplied(true);
       toast(
         "success",
         mediaIds.length > 0
-          ? t("scenarioAppliedWithMedia", { count: mediaIds.length })
-          : t("scenarioAppliedNoMedia"),
+          ? isKo
+            ? `시나리오 조건이 채워졌습니다. 확인 후 다음 단계로 진행해 주세요. (매체 ${mediaIds.length}개)`
+            : `Scenario applied — review and tap Next. (${mediaIds.length} media)`
+          : isKo
+            ? "시나리오 조건이 채워졌습니다. 확인 후 다음 단계로 진행해 주세요."
+            : "Scenario applied — review and tap Next.",
       );
     },
     [
@@ -628,9 +632,8 @@ export default function PlannerPageClient({
       industryKey,
       ageKeys,
       goalFollowUp,
-      setWizardStep,
       toast,
-      t,
+      isKo,
     ],
   );
 
@@ -662,6 +665,8 @@ export default function PlannerPageClient({
   const [freetextApplied, setFreetextApplied] = useState(false);
   const [freetextBriefSummary, setFreetextBriefSummary] =
     useState<FreetextApplySummary | null>(null);
+  const [scenarioPrefillApplied, setScenarioPrefillApplied] = useState(false);
+  const [addMediaHandoff, setAddMediaHandoff] = useState(false);
 
   useEffect(() => {
     const persist = usePlannerStore.persist;
@@ -711,7 +716,7 @@ export default function PlannerPageClient({
     }
 
     applyScenarioAction(payload.patch);
-    setWizardStep(4);
+    setWizardStep(1);
     setFreetextApplied(true);
     setFreetextBriefSummary(payload.summary);
     handledQueryRef.current = `brief:${briefParam}`;
@@ -719,8 +724,8 @@ export default function PlannerPageClient({
     toast(
       "success",
       isKo
-        ? "입력한 조건으로 맞춤 추천을 준비했습니다."
-        : "Tailored recommendations ready from your brief.",
+        ? "입력한 조건으로 채워졌습니다. 확인 후 다음 단계로 진행해 주세요."
+        : "Brief applied — review each step, then continue with Next.",
     );
   }, [
     plannerStoreReady,
@@ -814,11 +819,12 @@ export default function PlannerPageClient({
         setCampaignMediaQuantity(valid[0]!, u);
       }
       setWizardStep(4);
+      setAddMediaHandoff(true);
       toast(
         "success",
         isKo
-          ? `찜한 매체 ${valid.length}개로 플래너를 시작합니다.`
-          : `Starting planner with ${valid.length} saved media.`,
+          ? `찜한 매체 ${valid.length}개가 추가되었습니다. 수량을 확인한 뒤 다음 단계로 진행해 주세요.`
+          : `Added ${valid.length} saved media. Check quantities, then continue.`,
       );
       stripPlannerQueryKeys(["mediaIds", "addMedia", "units"]);
       return;
@@ -844,11 +850,12 @@ export default function PlannerPageClient({
       setCampaignMediaQuantity(addMediaId, u);
     }
     setWizardStep(4);
+    setAddMediaHandoff(true);
     toast(
       "success",
       isKo
-        ? "매체가 캠페인에 추가되었습니다."
-        : "Media added to your campaign.",
+        ? "매체가 캠페인에 추가되었습니다. 수량을 확인한 뒤 다음 단계로 진행해 주세요."
+        : "Media added to your campaign. Check quantities, then continue.",
     );
     stripPlannerQueryKeys(["addMedia", "units"]);
   }, [
@@ -1300,10 +1307,14 @@ export default function PlannerPageClient({
     <HomeLandingDayNight>
       <div className="tkad-landing-neon w-full min-w-0 overflow-x-clip pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
         <PageHero
-          eyebrow="// 01 · PLANNING"
-          title="예산에 맞는 "
-          highlight="미디어 플랜"
-          description="AI가 최적 매체 조합과 예상 성과를 3분 안에 제안"
+          eyebrow={isKo ? "// 캠페인 설계" : "// Campaign design"}
+          title={isKo ? "단계별 " : "Step-by-step "}
+          highlight={isKo ? "미디어 플랜" : "media plan"}
+          description={
+            isKo
+              ? "목표→지역→예산→매체→보고서·합성까지 위저드로 설계합니다. 빠른 추천은 「빠른 AI 추천」 탭."
+              : "Wizard from goal to report and composite preview. For instant picks, use Quick AI recommend."
+          }
         />
         <SubTabs tabs={PLANNING_TABS} currentPath="/planner" />
 
@@ -1320,6 +1331,26 @@ export default function PlannerPageClient({
             })}
             onStepClick={(s) => setWizardStep(s)}
           />
+        ) : null}
+
+        {wizardStep <= 3 && (freetextApplied || scenarioPrefillApplied) ? (
+          <div
+            className={cn(
+              "mb-6 space-y-1 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground",
+              plannerWizardColumnClass(wizardStep),
+            )}
+          >
+            <p className="font-medium text-foreground">
+              {isKo
+                ? "조건이 채워졌어요. 각 단계를 확인한 뒤 다음으로 진행해 주세요."
+                : "Your inputs are prefilled. Review each step, then tap Next."}
+            </p>
+            {freetextBriefSummary?.sentence ? (
+              <p className="text-xs leading-relaxed text-foreground/80">
+                {freetextBriefSummary.sentence}
+              </p>
+            ) : null}
+          </div>
         ) : null}
 
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
@@ -1616,22 +1647,13 @@ export default function PlannerPageClient({
             {/* Step 4 — 매체 선택 (AI 추천 + 직접 탐색) */}
             {wizardStep === 4 ? (
               <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-clip">
-                {freetextApplied ? (
-                  <div className="space-y-1 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground">
+                {addMediaHandoff ? (
+                  <div className="space-y-1 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm text-muted-foreground">
                     <p>
-                      {freetextBriefSummary?.short
-                        ? isKo
-                          ? `자연어 입력(${freetextBriefSummary.short} 조건)으로 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요.`
-                          : `Brief applied from natural language (${freetextBriefSummary.short}). Use Back to edit goal, region, or budget.`
-                        : isKo
-                          ? "자연어 입력으로 조건이 채워졌습니다. 수정하려면 이전 단계(목표·지역·예산)로 돌아가 주세요."
-                          : "Brief applied from natural-language input. Use Back to edit goal, region, or budget."}
+                      {isKo
+                        ? "선택한 매체가 캠페인에 추가되었습니다. 수량·조합을 확인한 뒤 다음 단계로 진행해 주세요."
+                        : "Selected media was added. Adjust quantities, then continue."}
                     </p>
-                    {freetextBriefSummary?.sentence ? (
-                      <p className="text-xs leading-relaxed text-foreground/80">
-                        {freetextBriefSummary.sentence}
-                      </p>
-                    ) : null}
                   </div>
                 ) : null}
                 <div className="space-y-2 text-center sm:text-left">

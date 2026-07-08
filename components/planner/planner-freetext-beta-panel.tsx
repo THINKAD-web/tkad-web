@@ -86,7 +86,6 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
   const [analyzing, setAnalyzing] = useState(false);
 
   const applyScenario = usePlannerStore((s) => s.applyScenario);
-  const setWizardStep = usePlannerStore((s) => s.setWizardStep);
 
   const summarySentence = useMemo(
     () =>
@@ -116,9 +115,8 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
     const payload = buildFreetextBriefApply(parseResult.raw, isKo);
     if (!payload) return;
     applyScenario(payload.patch);
-    setWizardStep(4);
     onApplied?.(payload.summary);
-  }, [applyScenario, isKo, onApplied, parseResult, setWizardStep]);
+  }, [applyScenario, isKo, onApplied, parseResult]);
 
   return (
     <PlannerNeonCard className="overflow-hidden">
@@ -231,8 +229,8 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
 
               <p className="text-xs leading-relaxed text-muted-foreground">
                 {isKo
-                  ? "→ 이 조건으로 Step 4 맞춤 추천을 불러옵니다."
-                  : "→ Step 4 will load tailored recommendations from this brief."}
+                  ? "→ 조건이 Step 1~3에 채워집니다. 확인 후 다음 단계로 진행해 주세요."
+                  : "→ Fills Steps 1–3. Review, then continue with Next."}
               </p>
             </div>
 
@@ -241,7 +239,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
               onClick={handleApply}
               className={cn(plannerNeon.cta, "w-full sm:w-auto")}
             >
-              {isKo ? "이대로 추천 받기" : "Recommend with this brief"}
+              {isKo ? "조건 적용하기" : "Apply to wizard"}
               <ChevronRight className="h-4 w-4" />
             </button>
           </div>

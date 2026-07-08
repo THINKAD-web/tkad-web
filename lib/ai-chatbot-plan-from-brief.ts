@@ -2,7 +2,10 @@ import type { MediaItem } from "@/lib/media-data";
 import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 import { buildFreetextBriefApply } from "@/lib/planner/freetext-brief-apply";
-import { buildPlannerBriefPath } from "@/lib/planner/freetext-brief-url";
+import {
+  buildPlannerBriefPath,
+  buildRecommendBriefPath,
+} from "@/lib/planner/freetext-brief-url";
 import type { PlannerFreetextParseResult } from "@/lib/planner/parse-freetext-brief";
 import {
   recommendPlannerMedia,
@@ -53,6 +56,7 @@ export type PlanFromBriefResult = {
   needsClarification: boolean;
   clarificationHint: string | null;
   items: PlanFromBriefItem[];
+  recommendDeeplink: string | null;
   plannerDeeplink: string | null;
   totalCandidates: number;
 };
@@ -185,6 +189,7 @@ export function executePlanFromBrief(
     needsClarification,
     clarificationHint: clarificationHint(locale, parsedFieldCount),
     items,
+    recommendDeeplink: buildRecommendBriefPath(apply.raw),
     plannerDeeplink: buildPlannerBriefPath(apply.raw),
     totalCandidates: scored.length,
   };

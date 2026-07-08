@@ -37,3 +37,10 @@ export function buildPlannerBriefPath(text: string): string | null {
   if (!encoded) return null;
   return `/planner?${PLANNER_BRIEF_QUERY_KEY}=${encoded}`;
 }
+
+/** 빠른 AI 추천 — 홈·챗봇 handoff (recommend 즉시 결과). */
+export function buildRecommendBriefPath(text: string): string | null {
+  const encoded = encodeBriefForPlannerQuery(text);
+  if (!encoded) return null;
+  return `/recommend?${PLANNER_BRIEF_QUERY_KEY}=${encoded}`;
+}

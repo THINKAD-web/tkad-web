@@ -16,6 +16,7 @@ export const RULE_CHATBOT_MODEL = "rule-based-v1" as const;
 export type RuleChatbotResult = {
   reply: string;
   media: AiChatbotMediaCard[];
+  recommendDeeplink: string | null;
   plannerDeeplink: string | null;
   engine: "rule";
   tokensUsed: 0;
@@ -86,11 +87,19 @@ function buildPlanReply(plan: PlanFromBriefResult, locale: "ko" | "en"): string 
     );
   });
 
+  if (plan.recommendDeeplink) {
+    lines.push(
+      isKo
+        ? `\n\n빠른 추천 보기: [추천 받기](${plan.recommendDeeplink})`
+        : `\n\nQuick picks: [Get recommendations](${plan.recommendDeeplink})`,
+    );
+  }
+
   if (plan.plannerDeeplink) {
     lines.push(
       isKo
-        ? `\n\n플래너에서 전체 설계: [이어하기](${plan.plannerDeeplink})`
-        : `\n\nContinue in planner: [Open](${plan.plannerDeeplink})`,
+        ? `\n단계별 설계: [플래너에서 상세 설계](${plan.plannerDeeplink})`
+        : `\nStep-by-step: [Open planner](${plan.plannerDeeplink})`,
     );
   }
 
@@ -176,6 +185,7 @@ function tryBudgetPath(
     reply: buildBudgetReply(maxPrice, budget, locale),
     media: cards,
     plannerDeeplink: null,
+    recommendDeeplink: null,
     engine: "rule",
     tokensUsed: 0,
     inputTokens: 0,
@@ -227,6 +237,7 @@ export function completeRuleChatbot(params: {
       return {
         reply: buildPlanReply(plan, locale),
         media: cards,
+        recommendDeeplink: plan.recommendDeeplink,
         plannerDeeplink: plan.plannerDeeplink,
         engine: "rule",
         tokensUsed: 0,
@@ -249,6 +260,7 @@ export function completeRuleChatbot(params: {
           reply: buildSearchReply(trimmed, searchResult, locale),
           media: search.cards,
           plannerDeeplink: null,
+          recommendDeeplink: null,
           engine: "rule",
           tokensUsed: 0,
           inputTokens: 0,
@@ -264,6 +276,7 @@ export function completeRuleChatbot(params: {
         reply: buildClarificationReply(plan.clarificationHint, locale),
         media: [],
         plannerDeeplink: null,
+        recommendDeeplink: null,
         engine: "rule",
         tokensUsed: 0,
         inputTokens: 0,
@@ -286,6 +299,7 @@ export function completeRuleChatbot(params: {
         reply: buildSearchReply(trimmed, searchResult, locale),
         media: search.cards,
         plannerDeeplink: null,
+        recommendDeeplink: null,
         engine: "rule",
         tokensUsed: 0,
         inputTokens: 0,
@@ -309,6 +323,7 @@ export function completeRuleChatbot(params: {
     reply: buildClarificationReply(fallbackHint, locale),
     media: [],
     plannerDeeplink: null,
+    recommendDeeplink: null,
     engine: "rule",
     tokensUsed: 0,
     inputTokens: 0,

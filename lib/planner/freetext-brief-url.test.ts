@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildPlannerBriefPath,
+  buildRecommendBriefPath,
   decodeBriefFromPlannerQuery,
   encodeBriefForPlannerQuery,
   isValidFreetextBrief,
@@ -17,6 +18,11 @@ test("encode/decode brief round-trip", () => {
 test("buildPlannerBriefPath", () => {
   const path = buildPlannerBriefPath("강남 브랜딩");
   assert.ok(path?.startsWith("/planner?brief="));
+});
+
+test("buildRecommendBriefPath", () => {
+  const path = buildRecommendBriefPath("강남 브랜딩");
+  assert.ok(path?.startsWith("/recommend?brief="));
 });
 
 test("rejects too short brief", () => {

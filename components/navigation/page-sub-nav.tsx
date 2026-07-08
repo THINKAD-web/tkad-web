@@ -115,8 +115,8 @@ export const PLANNER_SUB_NAV_ITEMS: PageSubNavItem[] = [
   {
     id: "media-planner",
     href: "/planner",
-    labelKo: "미디어플래너",
-    labelEn: "Media planner",
+    labelKo: "단계별 플래너",
+    labelEn: "Step-by-step planner",
     icon: BarChart3,
     match: (p) => p === "/planner" || (p.startsWith("/planner") && !p.startsWith("/planner/integrated")),
   },
@@ -130,8 +130,8 @@ export const PLANNER_SUB_NAV_ITEMS: PageSubNavItem[] = [
   {
     id: "recommend",
     href: "/recommend",
-    labelKo: "AI추천",
-    labelEn: "AI recommend",
+    labelKo: "빠른 AI추천",
+    labelEn: "Quick AI recommend",
     icon: Sparkles,
   },
   {

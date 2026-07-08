@@ -12,6 +12,7 @@ export type AiChatTurn = {
   role: "user" | "assistant";
   content: string;
   media?: AiChatbotMediaCard[];
+  recommendDeeplink?: string | null;
   plannerDeeplink?: string | null;
 };
 
@@ -53,6 +54,10 @@ function parseTurns(raw: unknown): AiChatTurn[] {
               (c): c is AiChatbotMediaCard =>
                 !!c && typeof c === "object" && typeof c.id === "string",
             )
+          : undefined,
+      recommendDeeplink:
+        m.role === "assistant" && typeof m.recommendDeeplink === "string"
+          ? m.recommendDeeplink
           : undefined,
       plannerDeeplink:
         m.role === "assistant" && typeof m.plannerDeeplink === "string"

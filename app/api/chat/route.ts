@@ -186,6 +186,7 @@ export async function POST(req: Request) {
       inputTokens,
       outputTokens,
       model,
+      recommendDeeplink,
       plannerDeeplink,
     } = completeRuleChatbot({
       message: userMessage,
@@ -217,6 +218,7 @@ export async function POST(req: Request) {
     return NextResponse.json({
       reply,
       media,
+      recommendDeeplink,
       plannerDeeplink,
       remaining: rl.remaining,
       limit: rl.limit,

@@ -12,7 +12,10 @@ import {
   loadAiChatFromSession,
   saveAiChatToSession,
 } from "@/lib/ai-chatbot-storage";
-import { buildPlannerBriefPath } from "@/lib/planner/freetext-brief-url";
+import {
+  buildPlannerBriefPath,
+  buildRecommendBriefPath,
+} from "@/lib/planner/freetext-brief-url";
 import { ChatbotMediaCardBlock } from "@/components/support/chatbot-media-card-block";
 import { cn } from "@/lib/utils";
 
@@ -24,6 +27,7 @@ type Props = {
 type ChatApiResponse = {
   reply?: string;
   media?: AiChatbotMediaCard[];
+  recommendDeeplink?: string | null;
   plannerDeeplink?: string | null;
   remaining?: number;
   limit?: number;
@@ -192,6 +196,10 @@ export function SupportAiChatModal({ open, onClose }: Props) {
           Array.isArray(data.media) && data.media.length > 0
             ? data.media
             : undefined;
+        const recommendDeeplink =
+          typeof data.recommendDeeplink === "string"
+            ? data.recommendDeeplink
+            : buildRecommendBriefPath(text);
         const plannerDeeplink =
           typeof data.plannerDeeplink === "string"
             ? data.plannerDeeplink
@@ -218,6 +226,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             content: reply,
             media,
             plannerDeeplink: plannerDeeplink ?? undefined,
+            recommendDeeplink: recommendDeeplink ?? undefined,
           },
         ];
         setMessages(withReply);
@@ -299,6 +308,9 @@ export function SupportAiChatModal({ open, onClose }: Props) {
             const briefSource = showMedia
               ? lastUserTextBefore(messages, i)
               : null;
+            const recommendHref =
+              msg.recommendDeeplink ??
+              (briefSource ? buildRecommendBriefPath(briefSource) : null);
             const plannerHref =
               msg.plannerDeeplink ??
               (briefSource ? buildPlannerBriefPath(briefSource) : null);
@@ -315,10 +327,26 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                         isKo={isKo}
                       />
                     ))}
+                    <Link
+                      href="/contact"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl border border-[#22d3ee]/35 bg-[#22d3ee]/15 px-3 py-2.5 text-xs font-bold text-[#0e7490] transition-colors hover:bg-[#22d3ee]/20 dark:text-[#22d3ee]"
+                    >
+                      {t("contactCta")}
+                      <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                    </Link>
+                    {recommendHref ? (
+                      <Link
+                        href={recommendHref}
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/35 bg-gradient-to-r from-violet-600/90 to-cyan-500/90 px-3 py-2.5 text-xs font-bold text-white transition-opacity hover:opacity-95"
+                      >
+                        {t("recommendCta")}
+                        <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+                      </Link>
+                    ) : null}
                     {plannerHref ? (
                       <Link
                         href={plannerHref}
-                        className="flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/35 bg-violet-500/10 px-3 py-2.5 text-xs font-bold text-violet-700 transition-colors hover:bg-violet-500/15 dark:text-violet-200"
+                        className="flex w-full items-center justify-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2.5 text-xs font-bold dark:text-white/85 text-gray-700 transition-colors hover:dark:bg-white/10 bg-gray-100"
                       >
                         {t("plannerCta")}
                         <ArrowRight className="h-3.5 w-3.5" aria-hidden />
@@ -326,7 +354,7 @@ export function SupportAiChatModal({ open, onClose }: Props) {
                     ) : null}
                   </div>
                 ) : null}
-                {msg.role === "assistant" ? (
+                {msg.role === "assistant" && !showMedia ? (
                   <Link
                     href="/contact"
                     className="mr-auto flex max-w-[92%] items-center justify-center gap-2 rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-[11px] font-bold dark:text-white text-gray-700 hover:dark:bg-white/10 bg-gray-100"

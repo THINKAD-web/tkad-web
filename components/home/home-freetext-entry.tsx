@@ -8,7 +8,7 @@ import { Link } from "@/i18n/navigation";
 import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import {
   FREETEXT_BRIEF_MAX_CHARS,
-  buildPlannerBriefPath,
+  buildRecommendBriefPath,
   isValidFreetextBrief,
 } from "@/lib/planner/freetext-brief-url";
 import { cn } from "@/lib/utils";
@@ -26,8 +26,8 @@ export function HomeFreetextEntry() {
 
   const canSubmit = isValidFreetextBrief(text);
 
-  const goPlanner = useCallback(() => {
-    const path = buildPlannerBriefPath(text);
+  const goRecommend = useCallback(() => {
+    const path = buildRecommendBriefPath(text);
     if (!path) return;
     router.push(path);
   }, [router, text]);
@@ -45,7 +45,7 @@ export function HomeFreetextEntry() {
                 {isKo ? "무료 · 규칙" : "Free · Rules"}
               </span>
               <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {isKo ? "규칙 분석 · 0토큰" : "Rule-based · 0 tokens"}
+                {isKo ? "빠른 추천 · 0토큰" : "Quick picks · 0 tokens"}
               </span>
             </div>
             <h2
@@ -56,12 +56,12 @@ export function HomeFreetextEntry() {
                 className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400"
                 aria-hidden
               />
-              {isKo ? "AI 자연어 입력" : "AI natural language"}
+              {isKo ? "빠른 AI 추천" : "Quick AI recommend"}
             </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-white/65">
               {isKo
-                ? "지역·타깃·목표·예산을 자연어로 입력하면 AI 플래너가 맞춤 매체를 추천합니다. 매체명 검색이 아닙니다."
-                : "Enter region, audience, goal, and budget in plain language — not a media name search."}
+                ? "지역·타깃·목표·예산을 자연어로 입력하면 즉시 TOP·지도·견적까지 이어집니다. 매체명 검색이 아닙니다."
+                : "Enter region, audience, goal, and budget — get ranked picks, map, and quote in one flow. Not a media name search."}
             </p>
           </div>
           <Link
@@ -92,7 +92,7 @@ export function HomeFreetextEntry() {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey && canSubmit) {
                 e.preventDefault();
-                goPlanner();
+                goRecommend();
               }
             }}
           />
@@ -102,19 +102,27 @@ export function HomeFreetextEntry() {
             onSelect={(example) => setText(example)}
           />
 
-          <button
-            type="button"
-            onClick={goPlanner}
-            disabled={!canSubmit}
-            className={cn(
-              "inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity sm:w-auto",
-              "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
-              "disabled:cursor-not-allowed disabled:opacity-40",
-            )}
-          >
-            {isKo ? "플래닝 시작" : "Start planning"}
-            <ArrowRight className="h-4 w-4" aria-hidden />
-          </button>
+          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
+            <button
+              type="button"
+              onClick={goRecommend}
+              disabled={!canSubmit}
+              className={cn(
+                "inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity sm:w-auto",
+                "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
+                "disabled:cursor-not-allowed disabled:opacity-40",
+              )}
+            >
+              {isKo ? "추천 받기" : "Get recommendations"}
+              <ArrowRight className="h-4 w-4" aria-hidden />
+            </button>
+            <Link
+              href="/planner"
+              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-3 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/12 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 sm:w-auto"
+            >
+              {isKo ? "단계별 설계는 플래너 →" : "Step-by-step? Open planner →"}
+            </Link>
+          </div>
         </div>
       </div>
     </section>

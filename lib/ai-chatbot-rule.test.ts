@@ -70,6 +70,7 @@ test("completeRuleChatbot: 강남 택시 브랜딩 — 0 token plan path", () =>
   assert.ok(out.media.length >= 1);
   assert.ok(out.reply.includes("/contact"));
   assert.ok(out.plannerDeeplink?.startsWith("/planner?brief="));
+  assert.ok(out.recommendDeeplink?.startsWith("/recommend?brief="));
 });
 
 test("completeRuleChatbot: 논현역 스크린 — search fallback", () => {

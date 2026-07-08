@@ -96,6 +96,7 @@ test("planFromBrief: 강남 택시 브랜딩 3000만 → mobile·gangnam·brand"
   assert.ok(out.items.every((i) => i.type === "mobile" || i.type === "network"));
   assert.ok(out.items[0]!.reasonLabels.length >= 1);
   assert.ok(out.plannerDeeplink?.startsWith("/planner?brief="));
+  assert.ok(out.recommendDeeplink?.startsWith("/recommend?brief="));
   const names = out.items.map((i) => i.name).join(" ");
   assert.match(names, /택시|버스|G버스/i);
 });
