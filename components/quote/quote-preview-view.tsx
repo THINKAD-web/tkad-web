@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import {
   Calendar,
@@ -28,6 +29,7 @@ import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
+import { formatOohQuoteTotalKrw } from "@/lib/ooh-quote-amount";
 
 type Media = {
   id: string;
@@ -125,12 +127,16 @@ export default function QuotePreviewView({
   quoteId,
   showProceedCta = true,
 }: QuotePreviewViewProps) {
+  const t = useTranslations("quoteCustomer");
+  const locale = useLocale();
+  const isKo = locale === "ko";
   const [quote, setQuote] = useState<Quote | null>(null);
   const [loading, setLoading] = useState(true);
   const [err, setErr] = useState<string | null>(null);
   const [template, setTemplate] = useState<"basic" | "premium">("basic");
   const [downloading, setDownloading] = useState<"pdf" | "pptx" | null>(null);
   const [proceeding, setProceeding] = useState(false);
+  const [proceedConfirmOpen, setProceedConfirmOpen] = useState(false);
   const captureRef = useRef<HTMLDivElement | null>(null);
   const toast = useAppToast();
 
@@ -181,13 +187,14 @@ export default function QuotePreviewView({
         body: JSON.stringify({}),
       });
       if (!res.ok) {
-        toast.error("진행 요청에 실패했습니다.");
+        toast.error(isKo ? "진행 요청에 실패했습니다." : "Could not send request.");
         return;
       }
-      toast.success("진행 요청을 보냈습니다. 담당자가 곧 연락드립니다.");
+      toast.success(t("proceedOk"));
+      setProceedConfirmOpen(false);
       window.location.href = `/quote/${quote.id}/status`;
     } catch {
-      toast.error("네트워크 오류가 발생했습니다.");
+      toast.error(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");
     } finally {
       setProceeding(false);
     }
@@ -270,6 +277,10 @@ export default function QuotePreviewView({
   const canProceed = showProceedCta && quote.status === "sent";
   const showContractCta =
     quote.contractSigned === true || quote.status === "booking_confirmed";
+  const totalDisplayKrw = formatOohQuoteTotalKrw(
+    quote.totalAmount,
+    isKo ? "ko-KR" : "en-US",
+  );
 
   return (
     <HomeLandingDayNight>
@@ -378,21 +389,29 @@ export default function QuotePreviewView({
                   )}
                 </PlannerPdfDownloadGate>
               {canProceed ? (
-                <button
-                  type="button"
-                  onClick={() => void onProceed()}
-                  disabled={proceeding}
-                  className={cn(plannerNeon.cta, "h-11 disabled:opacity-60")}
-                >
-                  {proceeding ? (
-                    <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
-                  ) : (
-                    <>
-                      진행 요청
-                      <ArrowRight className="h-4 w-4" aria-hidden />
-                    </>
-                  )}
-                </button>
+                <div className="flex flex-col items-stretch gap-1.5 sm:items-end">
+                  <button
+                    type="button"
+                    onClick={() => setProceedConfirmOpen(true)}
+                    disabled={proceeding}
+                    className={cn(plannerNeon.cta, "h-11 disabled:opacity-60")}
+                  >
+                    {proceeding ? (
+                      <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                    ) : (
+                      <>
+                        {t("proceed")}
+                        <ArrowRight className="h-4 w-4" aria-hidden />
+                      </>
+                    )}
+                  </button>
+                  <p className="max-w-xs text-right text-[11px] leading-snug text-gray-500 dark:text-white/55">
+                    {t("proceedNote")}
+                    <span className="mt-0.5 block text-violet-700 dark:text-violet-300">
+                      {t("proceedContractHint")}
+                    </span>
+                  </p>
+                </div>
               ) : null}
               </div>
             </div>
@@ -493,7 +512,7 @@ export default function QuotePreviewView({
                     총 견적
                   </p>
                   <div className="mt-2 font-display text-3xl font-black tabular-nums sm:text-4xl">
-                    {formatKRW(quote.totalAmount)}
+                    {totalDisplayKrw}
                   </div>
                 </div>
                 <Wallet className="h-10 w-10 shrink-0 text-cyan-300/50" aria-hidden />
@@ -505,6 +524,49 @@ export default function QuotePreviewView({
           </div>
         </div>
       </div>
+
+      {proceedConfirmOpen ? (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/45 p-4"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="proceed-confirm-title"
+        >
+          <div className="w-full max-w-md rounded-2xl border border-gray-200 bg-white p-5 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]">
+            <h2
+              id="proceed-confirm-title"
+              className="text-lg font-bold text-gray-900 dark:text-white"
+            >
+              {t("proceedConfirmTitle")}
+            </h2>
+            <p className="mt-2 text-sm text-gray-600 dark:text-white/70">
+              {t("proceedConfirmBody")}
+            </p>
+            <div className="mt-5 flex flex-wrap justify-end gap-2">
+              <button
+                type="button"
+                disabled={proceeding}
+                onClick={() => setProceedConfirmOpen(false)}
+                className="inline-flex h-10 items-center rounded-xl border border-gray-200 px-4 text-sm font-semibold text-gray-700 hover:bg-gray-50 dark:border-white/12 dark:text-white/80 dark:hover:bg-white/5"
+              >
+                {t("proceedConfirmCancel")}
+              </button>
+              <button
+                type="button"
+                disabled={proceeding}
+                onClick={() => void onProceed()}
+                className={cn(plannerNeon.cta, "h-10 disabled:opacity-60")}
+              >
+                {proceeding ? (
+                  <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+                ) : (
+                  t("proceedConfirmOk")
+                )}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </HomeLandingDayNight>
   );
 }

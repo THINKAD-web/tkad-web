@@ -138,7 +138,7 @@ function coerceDate(v: Date | string): Date {
 }
 
 export type CalculateQuoteResult = QuoteBreakdown & {
-  /** OoHQuote.totalAmount (만원 단위) */
+  /** OoHQuote.totalAmount (만원 단위) — 고객 UI는 {@link formatOohQuoteTotalKrw} 로 원 표시 */
   totalAmountManwon: number;
   startDate: Date;
   endDate: Date;

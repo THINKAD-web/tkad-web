@@ -19,6 +19,7 @@ import {
   canShowSendQuote,
 } from "@/lib/ooh-quote-admin-ui";
 import { useToast } from "@/components/toast-provider";
+import { formatOohQuoteManwonShort } from "@/lib/ooh-quote-amount";
 
 const OOH_STATUSES = [
   "all",
@@ -389,7 +390,7 @@ export default function AdminOohQuotesClient() {
                         {row.clientEmail || "—"}
                       </td>
                       <td className="px-3 py-2 tabular-nums">
-                        ₩{row.totalAmount.toLocaleString("ko-KR")}
+                        {formatOohQuoteManwonShort(row.totalAmount)}
                       </td>
                       <td className="px-3 py-2">{row.period}</td>
                       <td className="px-3 py-2 text-xs">{statusLabel(row.status)}</td>
