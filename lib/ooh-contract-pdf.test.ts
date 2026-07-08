@@ -40,6 +40,16 @@ const EN_VARS = {
 const TINY_PNG_B64 =
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==";
 
+function countPdfPages(pdfBase64: string): number {
+  const latin = Buffer.from(pdfBase64, "base64").toString("latin1");
+  return (latin.match(/\/Type\s*\/Page\b/g) ?? []).length;
+}
+
+test("Korean spectory sample contract fits exactly 2 pages", async () => {
+  const { pdfBase64 } = await buildOohContractPdf(KO_VARS);
+  assert.equal(countPdfPages(pdfBase64), 2);
+});
+
 test("Korean contract PDF embeds NotoSansKR", async () => {
   const { pdfBase64 } = await buildOohContractPdf(KO_VARS);
   const latin = Buffer.from(pdfBase64, "base64").toString("latin1");
