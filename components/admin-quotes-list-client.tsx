@@ -23,7 +23,13 @@ import {
 import { useToast } from "@/components/toast-provider";
 import {
   AdminQuotePageShell,
+  adminDesktopTableWrapClass,
+  adminMobileCardClass,
+  adminMobileListClass,
+  adminMobileTouchBtnClass,
+  adminQuoteLinkVioletClass,
   adminQuoteSectionCard,
+  adminQuoteSelectClass,
 } from "@/components/admin/admin-quote-page-shell";
 
 function formatWon(n: number) {
@@ -32,6 +38,23 @@ function formatWon(n: number) {
 
 function formatDate(iso: string) {
   return iso.slice(0, 10);
+}
+
+function clientDisplay(row: QuoteApi): { primary: string; secondary: string } {
+  if (row.clientName.includes(" · ")) {
+    const parts = row.clientName.split(" · ");
+    const secondary = [
+      parts.slice(1).join(" · "),
+      row.clientPhone ?? "",
+    ]
+      .filter(Boolean)
+      .join(" · ");
+    return { primary: parts[0]!, secondary: secondary || "—" };
+  }
+  return {
+    primary: row.clientName,
+    secondary: row.clientPhone ?? "—",
+  };
 }
 
 export default function AdminQuotesListClient() {
@@ -49,6 +72,7 @@ export default function AdminQuotesListClient() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [emailOpenId, setEmailOpenId] = useState<string | null>(null);
   const [emailTo, setEmailTo] = useState("");
+  const [moreActionsId, setMoreActionsId] = useState<string | null>(null);
 
   useEffect(() => {
     if (debounceRef.current) clearTimeout(debounceRef.current);
@@ -277,7 +301,7 @@ export default function AdminQuotesListClient() {
               {t("status")}
             </label>
             <select
-              className="h-9 w-full min-w-[140px] rounded-md border border-input bg-white px-2 text-sm"
+              className={`h-9 w-full min-w-[140px] ${adminQuoteSelectClass}`}
               value={status}
               onChange={(e) => setStatus(e.target.value)}
             >
@@ -363,7 +387,140 @@ export default function AdminQuotesListClient() {
           ) : quotes.length === 0 ? (
             <p className="p-6 text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <ul className={adminMobileListClass}>
+                {quotes.map((row) => {
+                  const client = clientDisplay(row);
+                  const showMore = moreActionsId === row.id;
+                  return (
+                    <li key={row.id} className={adminMobileCardClass}>
+                      <div className="space-y-2">
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="min-w-0 flex-1">
+                            <Link
+                              href={`/admin/quotes/${row.id}/edit`}
+                              className={`text-sm ${adminQuoteLinkVioletClass}`}
+                            >
+                              {row.quoteNumber}
+                            </Link>
+                            <p className="mt-0.5 text-sm font-semibold text-foreground">
+                              {client.primary}
+                            </p>
+                            <p className="text-xs text-muted-foreground">{client.secondary}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <p className="text-sm font-bold tabular-nums text-foreground">
+                              ₩{formatWon(row.total)}
+                            </p>
+                            <p className="text-[10px] text-muted-foreground">
+                              {formatDate(row.createdAt)}
+                            </p>
+                          </div>
+                        </div>
+                        <select
+                          className={`w-full ${adminQuoteSelectClass} ${adminMobileTouchBtnClass}`}
+                          value={row.status}
+                          disabled={busyId === row.id}
+                          onChange={(e) => void patchStatus(row.id, e.target.value)}
+                        >
+                          {ADMIN_QUOTE_STATUSES.map((s) => (
+                            <option key={s} value={s}>
+                              {t(`status_${s}`)}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`col-span-1 ${adminMobileTouchBtnClass}`}
+                          disabled={busyId === row.id}
+                          asChild
+                        >
+                          <Link href={`/admin/quotes/${row.id}/edit`}>
+                            <Pencil className="mr-1.5 h-4 w-4" />
+                            {t("edit")}
+                          </Link>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`col-span-1 ${adminMobileTouchBtnClass}`}
+                          disabled={busyId === row.id}
+                          asChild
+                        >
+                          <Link
+                            href={
+                              row.clientEmail?.trim()
+                                ? `/admin/quotes/${row.id}/edit?contract=1`
+                                : `/admin/quotes/${row.id}/edit`
+                            }
+                          >
+                            <FileSignature className="mr-1.5 h-4 w-4" />
+                            {t("createContract")}
+                          </Link>
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          className={`col-span-2 ${adminMobileTouchBtnClass}`}
+                          disabled={busyId === row.id}
+                          onClick={() => void downloadPdf(row.id, row.quoteNumber)}
+                        >
+                          <FileDown className="mr-1.5 h-4 w-4" />
+                          PDF
+                        </Button>
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          className={`col-span-2 ${adminMobileTouchBtnClass}`}
+                          onClick={() =>
+                            setMoreActionsId(showMore ? null : row.id)
+                          }
+                        >
+                          {t("moreActions")}
+                        </Button>
+                      </div>
+                      {showMore ? (
+                        <div className="mt-2 flex flex-col gap-2 border-t border-border/60 pt-2">
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={adminMobileTouchBtnClass}
+                            disabled={busyId === row.id}
+                            onClick={() => openEmail(row)}
+                          >
+                            <Mail className="mr-1.5 h-4 w-4" />
+                            {t("email")}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={adminMobileTouchBtnClass}
+                            disabled={busyId === row.id}
+                            onClick={() => void copyQuote(row.id)}
+                          >
+                            <Copy className="mr-1.5 h-4 w-4" />
+                            {t("copy")}
+                          </Button>
+                          <Button
+                            type="button"
+                            variant="outline"
+                            className={`${adminMobileTouchBtnClass} text-red-600 hover:bg-red-50 hover:text-red-700 dark:hover:bg-red-950/30`}
+                            disabled={busyId === row.id}
+                            onClick={() => void deleteQuote(row)}
+                          >
+                            <Trash2 className="mr-1.5 h-4 w-4" />
+                            {t("delete")}
+                          </Button>
+                        </div>
+                      ) : null}
+                    </li>
+                  );
+                })}
+              </ul>
+              <div className={adminDesktopTableWrapClass}>
               <table className="w-full text-sm">
                 <thead className="border-b bg-muted text-left text-xs text-muted-foreground dark:bg-card/5">
                   <tr>
@@ -381,7 +538,7 @@ export default function AdminQuotesListClient() {
                       <td className="px-3 py-2 text-xs font-medium text-foreground dark:text-hero-fg">
                         <Link
                           href={`/admin/quotes/${row.id}/edit`}
-                          className="font-semibold text-violet-700 hover:underline"
+                          className={adminQuoteLinkVioletClass}
                         >
                           {row.quoteNumber}
                         </Link>
@@ -408,7 +565,7 @@ export default function AdminQuotesListClient() {
                       </td>
                       <td className="px-3 py-2">
                         <select
-                          className="h-8 max-w-[9rem] rounded border border-slate-200 bg-white px-1.5 text-xs"
+                          className={`h-8 max-w-[9rem] ${adminQuoteSelectClass} text-xs`}
                           value={row.status}
                           disabled={busyId === row.id}
                           onChange={(e) => void patchStatus(row.id, e.target.value)}
@@ -443,7 +600,7 @@ export default function AdminQuotesListClient() {
                             type="button"
                             variant="outline"
                             size="sm"
-                            className="h-8 border-navy/30 bg-navy/5 text-xs text-navy hover:bg-navy/10 dark:text-hero-fg"
+                            className="h-8 border-navy/30 bg-navy/5 text-xs text-foreground hover:bg-navy/10 dark:text-hero-fg"
                             disabled={busyId === row.id}
                             asChild
                           >
@@ -508,7 +665,8 @@ export default function AdminQuotesListClient() {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

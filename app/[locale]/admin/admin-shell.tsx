@@ -5,6 +5,8 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AdminShellNav } from "@/components/admin/admin-shell-nav";
+import type { AdminNavKey } from "@/lib/admin-nav-config";
 import {
   Activity,
   LayoutDashboard,
@@ -38,7 +40,6 @@ import {
   TrendingUp,
   Mail,
   Gift,
-  ChevronDown,
   Shield,
   FileSignature,
   type LucideIcon,
@@ -60,55 +61,7 @@ function SignOutButton({ locale, label }: { locale: string; label: string }) {
   );
 }
 
-type NavKey =
-  | "dashboard"
-  | "monitoring"
-  | "launchMonitor"
-  | "linkHealth"
-  | "operatorManual"
-  | "inquiries"
-  | "biddings"
-  | "chatMonitor"
-  | "chatbotLogs"
-  | "pipeline"
-  | "crmRecords"
-  | "forecast"
-  | "emailTemplates"
-  | "crm"
-  | "quotesList"
-  | "contractsDashboard"
-  | "contractsNew"
-  | "quotesBooking"
-  | "quotesNew"
-  | "quoteTemplates"
-  | "campaigns"
-  | "campaignCalendar"
-  | "community"
-  | "mediaApplications"
-  | "mediaLeads"
-  | "mediaOwnerOps"
-  | "mediaReviews"
-  | "medias"
-  | "verification"
-  | "networks"
-  | "mediaHub"
-  | "users"
-  | "points"
-  | "analytics"
-  | "funnel"
-  | "searchStats"
-  | "recommendations"
-  | "apiUsage"
-  | "aiUsage"
-  | "trustMetrics"
-  | "abTest"
-  | "trendReports"
-  | "academyNew"
-  | "content"
-  | "contentSeed"
-  | "aiContent"
-  | "planSnapshots"
-  | "memberEntitlements";
+type NavKey = AdminNavKey;
 
 type NavDef = {
   href: string;
@@ -167,136 +120,48 @@ const navDefs: NavDef[] = [
   { href: "/admin/entitlements", key: "memberEntitlements", icon: Shield },
 ];
 
-type NavGroupId =
-  | "dashboard"
-  | "media"
-  | "quotes"
-  | "customers"
-  | "content"
-  | "marketing"
-  | "settings";
-
-const navGroupDefs: {
-  id: NavGroupId;
-  labelKey:
-    | "groupDashboard"
-    | "groupMedia"
-    | "groupQuotes"
-    | "groupCustomers"
-    | "groupContent"
-    | "groupMarketing"
-    | "groupSettings";
-  itemKeys: NavKey[];
-}[] = [
-  {
-    id: "dashboard",
-    labelKey: "groupDashboard",
-    itemKeys: [
-      "dashboard",
-      "monitoring",
-      "launchMonitor",
-      "linkHealth",
-      "analytics",
-      "funnel",
-    ],
-  },
-  {
-    id: "media",
-    labelKey: "groupMedia",
-    itemKeys: [
-      "medias",
-      "mediaApplications",
-      "mediaLeads",
-      "mediaOwnerOps",
-      "mediaReviews",
-      "verification",
-      "networks",
-      "mediaHub",
-    ],
-  },
-  {
-    id: "quotes",
-    labelKey: "groupQuotes",
-    itemKeys: [
-      "quotesList",
-      "contractsDashboard",
-      "contractsNew",
-      "quotesBooking",
-      "quotesNew",
-      "quoteTemplates",
-      "biddings",
-      "campaigns",
-      "campaignCalendar",
-      "forecast",
-    ],
-  },
-  {
-    id: "customers",
-    labelKey: "groupCustomers",
-    itemKeys: [
-      "inquiries",
-      "chatMonitor",
-      "chatbotLogs",
-      "users",
-      "pipeline",
-      "crmRecords",
-      "crm",
-      "planSnapshots",
-    ],
-  },
-  {
-    id: "content",
-    labelKey: "groupContent",
-    itemKeys: [
-      "trendReports",
-      "academyNew",
-      "content",
-      "contentSeed",
-      "aiContent",
-      "community",
-    ],
-  },
-  {
-    id: "marketing",
-    labelKey: "groupMarketing",
-    itemKeys: [
-      "points",
-      "emailTemplates",
-      "recommendations",
-      "abTest",
-      "searchStats",
-    ],
-  },
-  {
-    id: "settings",
-    labelKey: "groupSettings",
-    itemKeys: ["operatorManual", "memberEntitlements", "apiUsage", "aiUsage", "trustMetrics"],
-  },
-];
-
-const navByKey = new Map(navDefs.map((n) => [n.key, n]));
-
 export default function AdminShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const quotesTab = searchParams.get("tab");
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [collapsedGroups, setCollapsedGroups] = useState<
-    Partial<Record<NavGroupId, boolean>>
-  >({});
   const tNav = useTranslations("adminNav");
 
   const locale = pathname.split("/")[1] || "ko";
   const pathWithoutLocale = pathname.replace(`/${locale}`, "") || "/";
 
+  const navItemByKey = useMemo(() => {
+    const map = new Map<
+      AdminNavKey,
+      {
+        href: string;
+        key: AdminNavKey;
+        label: string;
+        icon: LucideIcon;
+        description?: string;
+      }
+    >();
+    const quickDescKeys: Partial<Record<AdminNavKey, string>> = {
+      medias: "mediasQuickDesc",
+      quotesList: "quotesListQuickDesc",
+      contractsDashboard: "contractsDashboardQuickDesc",
+    };
+    for (const n of navDefs) {
+      const descKey = quickDescKeys[n.key];
+      map.set(n.key, {
+        href: n.href,
+        key: n.key,
+        icon: n.icon,
+        label: tNav(n.key),
+        description: descKey ? tNav(descKey) : undefined,
+      });
+    }
+    return map;
+  }, [tNav]);
+
   const navItems = useMemo(
     () => navDefs.map((n) => ({ ...n, label: tNav(n.key) })),
     [tNav],
-  );
-
-  const navItemByHref = useMemo(
-    () => new Map(navItems.map((n) => [n.href, n])),
-    [navItems],
   );
 
   const isActive = (href: string) => {
@@ -320,11 +185,15 @@ export default function AdminShell({ children }: { children: ReactNode }) {
           !pathWithoutLocale.startsWith("/admin/quotes/new"))
       );
     }
+    if (href === "/admin/medias/quick-add") {
+      return pathWithoutLocale.startsWith("/admin/medias/quick-add");
+    }
     if (href === "/admin/medias") {
       return (
-        pathWithoutLocale === "/admin/medias" ||
-        pathWithoutLocale.startsWith("/admin/medias/") ||
-        pathWithoutLocale === "/admin/media/new"
+        (pathWithoutLocale === "/admin/medias" ||
+          (pathWithoutLocale.startsWith("/admin/medias/") &&
+            !pathWithoutLocale.startsWith("/admin/medias/quick-add")) ||
+          pathWithoutLocale === "/admin/media/new")
       );
     }
     if (href === "/admin/health") {
@@ -338,15 +207,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
     navItems
       .filter((n) => pathWithoutLocale.startsWith(n.href) && n.href !== "/admin")
       .sort((a, b) => b.href.length - a.href.length)[0];
-
-  const isGroupCollapsed = (id: NavGroupId) => collapsedGroups[id] === true;
-
-  const toggleGroup = (id: NavGroupId) => {
-    setCollapsedGroups((prev) => ({
-      ...prev,
-      [id]: !isGroupCollapsed(id),
-    }));
-  };
 
   const sidebar = (
     <div className="tkad-admin-shell relative flex h-full flex-col overflow-hidden border-r border-border/60 bg-card/70 text-card-foreground backdrop-blur">
@@ -365,76 +225,13 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         </span>
       </div>
 
-      <nav className="relative flex-1 overflow-y-auto px-2 py-3">
-        {navGroupDefs.map((group, groupIndex) => {
-          const items = group.itemKeys
-            .map((key) => navByKey.get(key))
-            .filter((n): n is NavDef => Boolean(n))
-            .map((n) => ({
-              ...n,
-              label: navItemByHref.get(n.href)?.label ?? tNav(n.key),
-            }));
-          const open = !isGroupCollapsed(group.id);
-          const groupHasActive = items.some((item) => isActive(item.href));
-
-          return (
-            <div
-              key={group.id}
-              className={groupIndex > 0 ? "mt-5" : undefined}
-            >
-              <button
-                type="button"
-                onClick={() => toggleGroup(group.id)}
-                className="flex w-full items-center justify-between rounded-md py-1.5 pl-3 pr-2 text-left"
-                aria-expanded={open}
-              >
-                <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400 dark:text-white/30">
-                  {tNav(group.labelKey)}
-                </span>
-                <ChevronDown
-                  className={[
-                    "h-3.5 w-3.5 shrink-0 text-gray-400 transition-transform dark:text-white/30",
-                    open ? "rotate-0" : "-rotate-90",
-                    groupHasActive ? "text-violet-500 dark:text-violet-400" : "",
-                  ].join(" ")}
-                />
-              </button>
-              {open && (
-                <ul className="mt-1.5 space-y-0.5">
-                  {items.map((item) => {
-                    const Icon = item.icon;
-                    const active = isActive(item.href);
-                    return (
-                      <li key={item.href}>
-                        <Link
-                          href={`/${locale}${item.href}`}
-                          onClick={() => setSidebarOpen(false)}
-                          className={[
-                            "flex items-center gap-2.5 rounded-r-md py-2 pl-3 pr-2 text-[13px] font-medium transition-colors",
-                            active
-                              ? "border-l-2 border-violet-500 bg-violet-50 text-violet-700 dark:bg-white/10 dark:text-white"
-                              : "border-l-2 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
-                          ].join(" ")}
-                        >
-                          <Icon
-                            className={[
-                              "h-4 w-4 shrink-0",
-                              active
-                                ? "text-violet-600 dark:text-white/90"
-                                : "text-muted-foreground",
-                            ].join(" ")}
-                          />
-                          <span className="truncate">{item.label}</span>
-                        </Link>
-                      </li>
-                    );
-                  })}
-                </ul>
-              )}
-            </div>
-          );
-        })}
-      </nav>
+      <AdminShellNav
+        locale={locale}
+        isActive={isActive}
+        navItemByKey={navItemByKey}
+        tNav={tNav}
+        onNavigate={() => setSidebarOpen(false)}
+      />
 
       <div className="relative border-t border-border/60 p-3">
         <Link
@@ -455,7 +252,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
       {sidebarOpen && (
         <div className="fixed inset-0 z-50 md:hidden">
           <div
-            className="absolute inset-0 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 backdrop-blur-md"
+            className="absolute inset-0 bg-gray-500/50 backdrop-blur-md dark:bg-black/60"
             onClick={() => setSidebarOpen(false)}
           />
           <div className="relative h-full w-72">{sidebar}</div>

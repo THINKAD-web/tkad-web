@@ -14,11 +14,18 @@ import {
 import type { QuoteBreakdown } from "@/lib/quote-calculator";
 import {
   AdminQuotePageShell,
+  adminDesktopTableWrapClass,
+  adminMobileTouchBtnClass,
   adminQuoteSectionCard,
   adminQuoteSectionHeader,
   adminQuoteSectionHint,
   adminQuoteSectionTitle,
+  adminQuoteSelectClass,
 } from "@/components/admin/admin-quote-page-shell";
+import {
+  AdminMobileCard,
+  AdminMobileList,
+} from "@/components/admin/admin-mobile-list-primitives";
 import {
   AdminOohContractDetailPanel,
   type OohQuoteContractDetail,
@@ -264,7 +271,7 @@ export default function AdminContractsClient() {
                 <select
                   value={contractStatus}
                   onChange={(e) => setContractStatus(e.target.value)}
-                  className="block h-9 min-w-[140px] rounded-md border border-input bg-background px-2 text-sm"
+                  className={`block h-9 min-w-[140px] ${adminQuoteSelectClass}`}
                 >
                   <option value="all">{t("statusAll")}</option>
                   <option value="pending">{t("statusPending")}</option>
@@ -342,7 +349,79 @@ export default function AdminContractsClient() {
           ) : rows.length === 0 ? (
             <p className="px-5 py-10 text-sm text-muted-foreground">{t("empty")}</p>
           ) : (
-            <div className="overflow-x-auto">
+            <>
+              <AdminMobileList>
+                {rows.map((row) => (
+                  <AdminMobileCard key={row.quoteId}>
+                    <button
+                      type="button"
+                      className="w-full text-left"
+                      onClick={() => openRow(row.quoteId)}
+                    >
+                      <p className="font-mono text-xs font-semibold text-violet-700 dark:text-violet-300">
+                        {row.contractId.slice(-8).toUpperCase()}
+                      </p>
+                      <p className="mt-1 text-sm font-semibold text-foreground">
+                        {row.clientName}
+                      </p>
+                      {row.clientCompany ? (
+                        <p className="text-xs text-muted-foreground">{row.clientCompany}</p>
+                      ) : null}
+                      <p className="mt-0.5 truncate text-xs text-muted-foreground">
+                        {row.clientEmail}
+                      </p>
+                      <div className="mt-2 flex flex-wrap items-center gap-2">
+                        <span className="text-sm font-bold tabular-nums text-foreground">
+                          {formatOohQuoteTotalKrw(row.totalAmount)}
+                        </span>
+                        <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide">
+                          {contractStatusLabel(row.contractStatus)}
+                        </span>
+                      </div>
+                      <p className="mt-1 text-[10px] text-muted-foreground">
+                        {t("colSignedAt")}: {formatDate(row.signedAt)}
+                      </p>
+                      <p className="text-[10px] text-muted-foreground">
+                        {formatPeriod(row)}
+                      </p>
+                    </button>
+                    <div
+                      className="mt-3 flex flex-col gap-2"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <a
+                        href={`/api/quote/${row.quoteId}/contract/preview`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className={`inline-flex items-center justify-center gap-1.5 rounded-md border border-border bg-card px-3 font-semibold hover:bg-muted ${adminMobileTouchBtnClass}`}
+                      >
+                        <FileText className="h-4 w-4" />
+                        {t("previewPdf")}
+                      </a>
+                      {row.contractSigned ? (
+                        <a
+                          href={`/api/quote/${row.quoteId}/contract/signed`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className={`inline-flex items-center justify-center gap-1.5 rounded-md border border-violet-300 bg-violet-50 px-3 font-semibold text-violet-800 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-950/40 dark:text-violet-100 ${adminMobileTouchBtnClass}`}
+                        >
+                          <Download className="h-4 w-4" />
+                          {t("signedPdf")}
+                        </a>
+                      ) : null}
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className={adminMobileTouchBtnClass}
+                        onClick={() => openRow(row.quoteId)}
+                      >
+                        {t("detailTitle")}
+                      </Button>
+                    </div>
+                  </AdminMobileCard>
+                ))}
+              </AdminMobileList>
+              <div className={adminDesktopTableWrapClass}>
               <table className="w-full min-w-[960px] text-left text-sm">
                 <thead className="border-b border-border/60 bg-muted/30 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                   <tr>
@@ -415,7 +494,8 @@ export default function AdminContractsClient() {
                   ))}
                 </tbody>
               </table>
-            </div>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>

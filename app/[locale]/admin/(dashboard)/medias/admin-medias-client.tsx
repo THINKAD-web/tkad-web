@@ -3033,7 +3033,7 @@ export default function AdminMediasClient({
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 dark:bg-zinc-900 bg-gray-50/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
+            className="absolute inset-0 bg-gray-500/50 backdrop-blur-sm dark:bg-black/60"
             onClick={() => setModalOpen(false)}
             aria-hidden
           />
@@ -4288,7 +4288,7 @@ export default function AdminMediasClient({
       {uploadModalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 dark:bg-zinc-900 bg-gray-50/30 dark:bg-black bg-white dark:bg-white/6 bg-gray-500 dark:backdrop-blur-sm"
+            className="absolute inset-0 bg-gray-500/50 backdrop-blur-sm dark:bg-black/60"
             onClick={() => setUploadModalOpen(false)}
             aria-hidden
           />
@@ -4482,7 +4482,7 @@ export default function AdminMediasClient({
       {deleteConfirm !== null && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">
           <div
-            className="absolute inset-0 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
+            className="absolute inset-0 bg-gray-500/40 backdrop-blur-sm dark:bg-black/55"
             onClick={() => setDeleteConfirm(null)}
             aria-hidden
           />

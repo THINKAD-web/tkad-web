@@ -2366,6 +2366,10 @@
     "forecast": "매출 예측",
     "emailTemplates": "이메일 템플릿",
     "medias": "매체 관리",
+    "mediasQuickDesc": "등록 · 검색 · 수정",
+    "quotesListQuickDesc": "목록 · 발송",
+    "contractsDashboardQuickDesc": "계약서 · 전자서명",
+    "mediasQuickAdd": "매체 빠른 등록",
     "verification": "검증 큐",
     "users": "사용자 관리",
     "points": "포인트 관리",
@@ -2645,6 +2649,7 @@
     "deleteConfirm": "견적 {number} ({name})을(를) 삭제할까요? 되돌릴 수 없습니다.",
     "deleteOk": "견적을 삭제했습니다.",
     "deleteFailed": "삭제에 실패했습니다.",
+    "moreActions": "더보기",
     "statusFailed": "상태 변경에 실패했습니다."
   },
   "adminQuotesHub": {
@@ -2657,6 +2662,9 @@
     "filterStatus": "상태",
     "all": "전체",
     "refresh": "새로고침",
+    "moreActions": "더보기",
+    "expandDetail": "계약 상세 펼치기",
+    "collapseDetail": "계약 상세 접기",
     "loading": "불러오는 중…",
     "empty": "건이 없습니다.",
     "loadError": "목록을 불러오지 못했습니다.",
