@@ -175,6 +175,12 @@ export default function IntegratedPlannerPageClient({
   const goalFollowUp = useIntegratedPlannerStore((s) => s.goalFollowUp);
   const appliedScenario = useIntegratedPlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
+  const campaignMediaQuantities = useIntegratedPlannerStore(
+    (s) => s.campaignMediaQuantities,
+  );
+  const campaignMediaPriceOptionIndex = useIntegratedPlannerStore(
+    (s) => s.campaignMediaPriceOptionIndex,
+  );
   const digitalChannelIds = useIntegratedPlannerStore((s) => s.digitalChannelIds);
   const digitalBudgetPct = useIntegratedPlannerStore((s) => s.digitalBudgetPct);
   const creativeObjectUrl = useIntegratedPlannerStore((s) => s.creativeObjectUrl);
@@ -201,6 +207,20 @@ export default function IntegratedPlannerPageClient({
   const setGoalFollowUp = useIntegratedPlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = useIntegratedPlannerStore(
     (s) => s.setCampaignMediaIds,
+  );
+  const setCampaignMediaQuantity = useIntegratedPlannerStore(
+    (s) => s.setCampaignMediaQuantity,
+  );
+  const setCampaignMediaPriceOptionIndex = useIntegratedPlannerStore(
+    (s) => s.setCampaignMediaPriceOptionIndex,
+  );
+
+  const portfolioPricing = useMemo(
+    () => ({
+      quantities: campaignMediaQuantities,
+      priceOptionIndex: campaignMediaPriceOptionIndex,
+    }),
+    [campaignMediaQuantities, campaignMediaPriceOptionIndex],
   );
 
   const plannerBrowseCatalog = useMemo(() => {
@@ -298,6 +318,10 @@ export default function IntegratedPlannerPageClient({
       goalFollowUp,
       seoulZones,
       campaignMediaIds,
+      campaignMediaQuantities,
+      campaignMediaPriceOptionIndex,
+      setCampaignMediaQuantity,
+      setCampaignMediaPriceOptionIndex,
       setCampaignMediaIds,
     }),
     [
@@ -311,6 +335,10 @@ export default function IntegratedPlannerPageClient({
       goalFollowUp,
       seoulZones,
       campaignMediaIds,
+      campaignMediaQuantities,
+      campaignMediaPriceOptionIndex,
+      setCampaignMediaQuantity,
+      setCampaignMediaPriceOptionIndex,
       setCampaignMediaIds,
     ],
   );
@@ -378,8 +406,14 @@ export default function IntegratedPlannerPageClient({
   );
 
   const portfolioBudgetStatus = useMemo(
-    () => computePlannerPortfolioBudgetStatus(portfolio, budgetNum, months),
-    [portfolio, budgetNum, months],
+    () =>
+      computePlannerPortfolioBudgetStatus(
+        portfolio,
+        budgetNum,
+        months,
+        portfolioPricing,
+      ),
+    [portfolio, budgetNum, months, portfolioPricing],
   );
 
   const digitalResult = useMemo(
@@ -412,6 +446,7 @@ export default function IntegratedPlannerPageClient({
         digitalChannelIds,
         regions,
         goal: campaignGoal,
+        pricing: portfolioPricing,
       }),
     [
       portfolio,
@@ -421,6 +456,7 @@ export default function IntegratedPlannerPageClient({
       digitalChannelIds,
       regions,
       campaignGoal,
+      portfolioPricing,
     ],
   );
 
@@ -818,7 +854,12 @@ export default function IntegratedPlannerPageClient({
 
                 <PlannerSelectedMediaBar
                   catalog={catalog}
+                  supplementalById={mediaCacheById}
                   campaignMediaIds={campaignMediaIds}
+                  campaignMediaQuantities={campaignMediaQuantities}
+                  campaignMediaPriceOptionIndex={campaignMediaPriceOptionIndex}
+                  onQuantityChange={setCampaignMediaQuantity}
+                  onPriceOptionChange={setCampaignMediaPriceOptionIndex}
                   onRemove={removePlannerMedia}
                   onClearAll={clearPlannerMedia}
                   isKo={isKo}
@@ -829,6 +870,7 @@ export default function IntegratedPlannerPageClient({
                   isKo={isKo}
                   regionLabel={mediaRegionLabel}
                   store={recommendationStore}
+                  supplementalById={mediaCacheById}
                 />
 
                 <div className="space-y-2 border-t dark:border-white/10 border-gray-100 pt-6">
@@ -898,6 +940,7 @@ export default function IntegratedPlannerPageClient({
                 industryText={t(industryKey)}
                 goalFollowUp={goalFollowUp}
                 portfolio={portfolio}
+                portfolioPricing={portfolioPricing}
                 digitalResult={digitalResult}
                 metrics={integratedMetrics}
                 logoUrl={creativeUploadedUrl || creativeObjectUrl}

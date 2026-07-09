@@ -29,6 +29,7 @@ import {
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import type {
   AppliedPlannerScenario,
   ScenarioVariant,
@@ -53,6 +54,7 @@ type Props = {
   industryText: string;
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
+  portfolioPricing?: PlannerPortfolioPricing;
   digitalResult: DigitalRecommendResult;
   metrics: IntegratedCampaignMetrics;
   logoUrl?: string | null;
@@ -96,6 +98,7 @@ export function IntegratedReportStep(props: Props) {
         ageText: props.ageText,
         industryText: props.industryText,
         portfolio: props.portfolio,
+        portfolioPricing: props.portfolioPricing,
         digitalResult: props.digitalResult,
         metrics: props.metrics,
         generatedAt,

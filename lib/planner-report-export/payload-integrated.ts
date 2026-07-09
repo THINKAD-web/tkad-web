@@ -3,11 +3,11 @@ import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics
 import type { DigitalRecommendResult } from "@/lib/planner/recommend-digital";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import { computeIntegratedProInsights } from "@/lib/planner/integrated-report-insights";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
   computePortfolioContributions,
   mediaItemToExportRow,
 } from "@/lib/document-media-detail";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import type {
   PlannerExportSection,
   PlannerReportExportPayload,
@@ -25,6 +25,7 @@ export type BuildIntegratedPayloadArgs = {
   ageText: string;
   industryText: string;
   portfolio: MediaItem[];
+  portfolioPricing?: PlannerPortfolioPricing;
   digitalResult: DigitalRecommendResult;
   metrics: IntegratedCampaignMetrics;
   generatedAt: string;
@@ -140,13 +141,17 @@ export function buildIntegratedReportPayload(
   }
 
   const months = Math.max(1, a.months ?? 1);
-  const contributions = computePortfolioContributions(a.portfolio, months);
+  const pricing = a.portfolioPricing;
+  const contributions = computePortfolioContributions(
+    a.portfolio,
+    months,
+    pricing,
+  );
   const portfolioRows = a.portfolio.map((mm) =>
     mediaItemToExportRow(mm, isKo, {
       months,
       contributions,
-      lineTotalWon:
-        mm.price > 0 ? catalogPriceFieldToWon(mm.price) * months : undefined,
+      pricing,
     }),
   );
   const recommendRationale = buildPlannerRecommendRationale({

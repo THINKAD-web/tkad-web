@@ -4,6 +4,7 @@ import {
   computePlannerMetrics,
   type PlannerCampaignGoal,
 } from "@/lib/planner-logic";
+import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import {
   getDigitalChannel,
   OOH_DIGITAL_SYNERGY_LIFT,
@@ -58,6 +59,7 @@ export function computeIntegratedCampaignMetrics(opts: {
   digitalChannelIds: DigitalChannelId[];
   regions: string[];
   goal: PlannerCampaignGoal | null;
+  pricing?: PlannerPortfolioPricing;
 }): IntegratedCampaignMetrics | null {
   const {
     portfolio,
@@ -67,6 +69,7 @@ export function computeIntegratedCampaignMetrics(opts: {
     digitalChannelIds,
     regions,
     goal,
+    pricing,
   } = opts;
   if (portfolio.length === 0 || budgetMan <= 0) return null;
 
@@ -75,6 +78,7 @@ export function computeIntegratedCampaignMetrics(opts: {
 
   const oohMetrics = computePlannerMetrics(portfolio, oohBudgetMan, months, {
     campaignGoal: goal,
+    pricing,
   });
   const advanced = computeAdvancedPlannerMetrics({
     portfolio,
