@@ -202,15 +202,25 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       );
       return;
     }
+    const zones = parseResult?.fields.seoulZones.value ?? [];
+    const parsedRegions = parseResult?.fields.regions.value ?? [];
+    const regionCodes =
+      parsedRegions.length > 0 ? parsedRegions
+      : zones.length > 0 ? (["seoul"] as const)
+      : undefined;
+
     const input: AiRecommendInput = {
       goal: draft.goal as GoalKey,
       target: draft.target as TargetKey,
       budgetMaxMan: budget,
-      region: draft.region.trim(),
+      region:
+        regionCodes?.length === 1 ? regionCodes[0] : draft.region.trim(),
       industry: draft.industry as IndustryKey,
+      ...(regionCodes?.length ? { regionCodes: [...regionCodes] } : {}),
+      ...(zones.length > 0 ? { seoulZones: zones } : {}),
     };
     onConfirm(input);
-  }, [draft, isKo, onConfirm]);
+  }, [draft, isKo, onConfirm, parseResult]);
 
   const freeRuleBadge = (
     <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">

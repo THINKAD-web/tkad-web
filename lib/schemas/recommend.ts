@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PLANNER_SEOUL_ZONE_KEYS } from "@/lib/planner/seoul-zones";
 
 export const recommendInputSchema = z.object({
   goal: z.enum(["awareness", "consideration", "launch", "conversion"]),
@@ -20,6 +21,8 @@ export const recommendInputSchema = z.object({
   locationKeywords: z.array(z.string()).optional(),
   preferredPeriodWeeks: z.number().optional(),
   placementHints: z.array(z.string()).optional(),
+  seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
+  regionCodes: z.array(z.string().max(32)).optional(),
 });
 
 export const recommendRequestSchema = z.object({

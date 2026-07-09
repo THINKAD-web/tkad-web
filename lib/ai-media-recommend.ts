@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import { aiInputToMatching } from "@/lib/recommendation-adapters";
@@ -42,6 +43,10 @@ export type AiRecommendInput = {
   minVisibility?: number;
   /** Minimum daily foot traffic. 0 disables filtering. */
   minDailyFootTraffic?: number;
+  /** 서울 선택 시 matching-engine 상권 코드 (gangnam 등) */
+  seoulZones?: readonly PlannerSeoulZoneKey[] | null;
+  /** 구조화 폼 다중 지역 선택 — `region` 단일값보다 우선 */
+  regionCodes?: readonly string[] | null;
   /** 서울 등 선택 시 `mediaHaystack`에 포함되는 키워드로 한 번 더 좁힘 (하나라도 매칭) */
   locationKeywords?: readonly string[] | null;
   /** 희망 집행 기간(주). UI·사유 문구용 — 스코어 가중은 선택적 */

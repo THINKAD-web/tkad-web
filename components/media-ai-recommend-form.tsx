@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState, type ReactNode } from "react";
+import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import {
   Bus,
@@ -11,6 +11,7 @@ import {
   TrainFront,
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
+import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
@@ -20,6 +21,14 @@ import {
   type TargetAudience,
 } from "@/lib/ai-media-recommend";
 import { RECOMMEND_FUNNEL_GOAL_OPTS } from "@/lib/recommend/campaign-goal-options";
+import {
+  suggestSeoulZones,
+  type PlannerSeoulZoneKey,
+} from "@/lib/planner/seoul-zones";
+import type {
+  PlannerCampaignGoal,
+  PlannerIndustryKey,
+} from "@/lib/planner/types";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -32,6 +41,35 @@ type AgeBand = "teens" | "twenties" | "thirties" | "forties";
 type PeriodWeeks = 1 | 2 | 4 | 12;
 
 type MediaTypeFilter = "all" | "digital" | "static" | "mobile" | "network";
+
+function recommendGoalToPlanner(goal: CampaignGoal): PlannerCampaignGoal {
+  switch (goal) {
+    case "launch":
+      return "launch";
+    case "awareness":
+      return "brand";
+    case "conversion":
+    case "consideration":
+    default:
+      return "sales";
+  }
+}
+
+function recommendIndustryToPlanner(industry: Industry): PlannerIndustryKey {
+  switch (industry) {
+    case "beauty":
+      return "indFb";
+    case "retail":
+    case "fmcg":
+      return "indRetail";
+    case "fintech":
+      return "indFinance";
+    case "entertainment":
+      return "indEnt";
+    default:
+      return "indOther";
+  }
+}
 
 function mapAgeBands(bands: ReadonlySet<AgeBand>): TargetAudience {
   if (bands.size === 0) return "mass";
@@ -130,6 +168,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const [placementHints, setPlacementHints] = useState<Set<string>>(
     () => new Set(),
   );
+  const [seoulZones, setSeoulZones] = useState<PlannerSeoulZoneKey[]>([]);
+  const [seoulZonesTouched, setSeoulZonesTouched] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const budgetMin = 100;
@@ -142,11 +182,48 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const toggleRegion = useCallback((code: RegionCheckboxCode) => {
     setRegions((prev) => {
       const next = new Set(prev);
-      if (next.has(code)) next.delete(code);
-      else next.add(code);
+      if (next.has(code)) {
+        next.delete(code);
+        if (code === "seoul") {
+          setSeoulZones([]);
+          setSeoulZonesTouched(false);
+        }
+      } else {
+        next.add(code);
+      }
       return next;
     });
   }, []);
+
+  const suggestedSeoulZones = useMemo(() => {
+    if (!campaignGoal) return [] as PlannerSeoulZoneKey[];
+    return suggestSeoulZones(
+      recommendGoalToPlanner(campaignGoal),
+      recommendIndustryToPlanner(industry ?? "other"),
+    );
+  }, [campaignGoal, industry]);
+
+  useEffect(() => {
+    if (!regions.has("seoul") || seoulZonesTouched || !campaignGoal) return;
+    setSeoulZones(suggestedSeoulZones);
+  }, [regions, seoulZonesTouched, campaignGoal, suggestedSeoulZones]);
+
+  const toggleSeoulZone = useCallback((zone: PlannerSeoulZoneKey) => {
+    setSeoulZonesTouched(true);
+    setSeoulZones((prev) =>
+      prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone],
+    );
+  }, []);
+
+  const clearSeoulZones = useCallback(() => {
+    setSeoulZonesTouched(true);
+    setSeoulZones([]);
+  }, []);
+
+  const applySuggestedSeoulZones = useCallback(() => {
+    setSeoulZonesTouched(false);
+    setSeoulZones([...suggestedSeoulZones]);
+  }, [suggestedSeoulZones]);
 
   const toggleAge = useCallback((b: AgeBand) => {
     setAgeBands((prev) => {
@@ -244,6 +321,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       hints: Set<string>,
       budget: number,
       search: string,
+      zoneList: readonly PlannerSeoulZoneKey[],
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -260,6 +338,9 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         preferredPeriodWeeks: period ?? 4,
         type: media === "all" ? "all" : media,
         placementHints: hints.size > 0 ? [...hints] : undefined,
+        regionCodes: regionCodes.length > 0 ? regionCodes : undefined,
+        seoulZones:
+          regionSet.has("seoul") && zoneList.length > 0 ? [...zoneList] : undefined,
       };
 
       return { input, regionCodes, searchQuery: search };
@@ -280,6 +361,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         placementHints,
         budgetMan,
         searchQuery,
+        seoulZones,
       ),
     );
   };
@@ -385,6 +467,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 </label>
               ))}
             </div>
+            {regions.has("seoul") ? (
+              <PlannerSeoulZoneChips
+                embedded
+                selected={seoulZones}
+                suggested={suggestedSeoulZones}
+                isKo={isKo}
+                onToggle={toggleSeoulZone}
+                onClear={clearSeoulZones}
+                onApplySuggested={applySuggestedSeoulZones}
+              />
+            ) : null}
           </FormField>
 
           <FormField label={tr("form.ageLabel")} hint={tr("form.ageHint")} {...fieldBadge}>

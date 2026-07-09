@@ -420,9 +420,28 @@ export default function RecommendPageClient({
   /** AI 자유입력 확인 완료 → 네트워크 제외(v1)로 추천 실행 */
   const handleAiConfirm = useCallback(
     (input: AiRecommendInput) => {
+      const validRegionCodes: RegionCheckboxCode[] = [
+        "seoul",
+        "capital",
+        "busan",
+        "jeju",
+        "national",
+      ];
+      const regionCodes: RegionCheckboxCode[] =
+        input.regionCodes?.length ?
+          input.regionCodes.filter((c): c is RegionCheckboxCode =>
+            (validRegionCodes as readonly string[]).includes(c),
+          )
+        : input.seoulZones?.length ?
+          ["seoul"]
+        : input.region &&
+            input.region !== "all" &&
+            (validRegionCodes as readonly string[]).includes(input.region) ?
+          [input.region as RegionCheckboxCode]
+        : [];
       const payload: MediaAiRecommendFormSubmit = {
         input,
-        regionCodes: [],
+        regionCodes,
         searchQuery: "",
       };
       setLastPayload(payload);

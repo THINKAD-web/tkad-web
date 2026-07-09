@@ -33,10 +33,23 @@ export function aiInputToMatching(
   input: AiRecommendInput,
   seed = 0,
 ): MatchingInput {
-  const regions: string[] = [];
-  if (input.region && input.region !== "all") regions.push(input.region);
+  const macroRegions =
+    input.regionCodes?.filter((c) => c.trim().length > 0).length ?
+      [...input.regionCodes!]
+    : input.region && input.region !== "all" ?
+      [input.region]
+    : [];
+
+  const seoulZones = input.seoulZones ?? [];
+  const regions = seoulZonesToMatchingRegions(macroRegions, seoulZones);
+
   if (input.locationKeywords?.length) {
-    for (const k of input.locationKeywords) regions.push(k);
+    for (const k of input.locationKeywords) {
+      const trimmed = k.trim();
+      if (trimmed.length > 0 && !regions.includes(trimmed)) {
+        regions.push(trimmed);
+      }
+    }
   }
 
   return {
