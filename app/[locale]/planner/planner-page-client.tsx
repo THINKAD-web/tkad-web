@@ -75,9 +75,11 @@ import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { PlannerFreetextBetaPanel } from "@/components/planner/planner-freetext-beta-panel";
-import type { FreetextApplySummary } from "@/components/planner/planner-freetext-beta-panel";
-import { buildFreetextBriefApply } from "@/lib/planner/freetext-brief-apply";
+import { PlannerRecommendHintCard } from "@/components/planner/planner-recommend-hint-card";
+import {
+  buildFreetextBriefApply,
+  type FreetextBriefApplySummary,
+} from "@/lib/planner/freetext-brief-apply";
 import { decodeBriefFromPlannerQuery } from "@/lib/planner/freetext-brief-url";
 import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
@@ -664,7 +666,7 @@ export default function PlannerPageClient({
   const [plannerStoreReady, setPlannerStoreReady] = useState(false);
   const [freetextApplied, setFreetextApplied] = useState(false);
   const [freetextBriefSummary, setFreetextBriefSummary] =
-    useState<FreetextApplySummary | null>(null);
+    useState<FreetextBriefApplySummary | null>(null);
   const [scenarioPrefillApplied, setScenarioPrefillApplied] = useState(false);
   const [addMediaHandoff, setAddMediaHandoff] = useState(false);
 
@@ -1372,13 +1374,7 @@ export default function PlannerPageClient({
             {wizardStep === 1 ? (
               <>
                 {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
-                <PlannerFreetextBetaPanel
-                  isKo={isKo}
-                  onApplied={(summary) => {
-                    setFreetextApplied(true);
-                    setFreetextBriefSummary(summary);
-                  }}
-                />
+                <PlannerRecommendHintCard />
                 <PlannerCampaignStep1
                   campaignGoal={campaignGoal}
                   onSelectGoal={setCampaignGoal}
