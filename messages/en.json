@@ -373,13 +373,13 @@
   },
   "hero": {
     "title": "Korea OOH media search & campaign execution",
-    "subtitle": "Browse 500+ verified out-of-home placements nationwide. Plan, buy, and run campaigns with field-verified data.",
+    "subtitle": "Browse {count} verified out-of-home placements nationwide. Plan, buy, and run campaigns with field-verified data.",
     "cta": "Search Media",
     "ctaSecondary": "Request Proposal"
   },
   "stats": {
     "media": "Registered Media",
-    "mediaValue": "500+",
+    "mediaValue": "{count}",
     "experience": "Industry Experience",
     "experienceValue": "15 Years",
     "coverage": "Coverage",

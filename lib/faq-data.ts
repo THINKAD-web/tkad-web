@@ -3,6 +3,8 @@
  * `app/[locale]/faq/page.tsx` (UI) + `app/[locale]/faq/layout.tsx` (FAQPage JSON-LD) 공유.
  */
 
+import { injectMediaCountPlaceholder } from "@/lib/media-count-copy";
+
 export type FaqCategory = "ad" | "process" | "cost" | "other";
 
 export type FaqItem = {
@@ -21,9 +23,9 @@ export const FAQ_ITEMS: FaqItem[] = [
     questionKo: "옥외광고는 어떤 종류가 있나요?",
     questionEn: "What types of outdoor advertising are available?",
     answerKo:
-      "빌보드, 디지털 사이니지, 지하철 광고, 버스 광고, 전광판 등 다양한 종류가 있습니다. 싱커드는 전국 500개 이상의 검증된 매체를 보유하고 있어 캠페인 목표에 맞는 최적의 매체를 추천해 드립니다.",
+      "빌보드, 디지털 사이니지, 지하철 광고, 버스 광고, 전광판 등 다양한 종류가 있습니다. 싱커드는 전국 {count} 검증된 매체를 보유하고 있어 캠페인 목표에 맞는 최적의 매체를 추천해 드립니다.",
     answerEn:
-      "We offer billboards, digital signage, subway ads, bus ads, LED displays, and more. THINKAD has 500+ verified media nationwide and recommends the best media for your campaign goals.",
+      "We offer billboards, digital signage, subway ads, bus ads, LED displays, and more. THINKAD has {count} verified media nationwide and recommends the best media for your campaign goals.",
   },
   {
     id: "2",
@@ -136,3 +138,14 @@ export const FAQ_ITEMS: FaqItem[] = [
       "Yes, you can view campaign results from various industries on our Case Studies page. More detailed examples can be provided during a free consultation.",
   },
 ];
+
+export function applyFaqMediaCount(
+  items: FaqItem[],
+  verifiedMediaLabel: string,
+): FaqItem[] {
+  return items.map((item) => ({
+    ...item,
+    answerKo: injectMediaCountPlaceholder(item.answerKo, verifiedMediaLabel),
+    answerEn: injectMediaCountPlaceholder(item.answerEn, verifiedMediaLabel),
+  }));
+}

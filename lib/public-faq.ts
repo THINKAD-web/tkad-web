@@ -4,6 +4,10 @@ import {
   FAQ_CATEGORY_ORDER,
   type FaqCategoryId,
 } from "@/lib/seo-content/faq-catalog";
+import {
+  getPublicMediaCountLabel,
+  injectMediaCountPlaceholder,
+} from "@/lib/trust-metrics";
 
 export type PublicFaqItem = {
   id: string;
@@ -24,7 +28,14 @@ function catalogFallback(): PublicFaqItem[] {
 }
 
 export async function getPublicFaqs(): Promise<PublicFaqItem[]> {
-  if (!isDatabaseConfigured()) return catalogFallback();
+  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
+  const withCount = (items: PublicFaqItem[]) =>
+    items.map((item) => ({
+      ...item,
+      answer: injectMediaCountPlaceholder(item.answer, verifiedMediaLabel),
+    }));
+
+  if (!isDatabaseConfigured()) return withCount(catalogFallback());
 
   try {
     const rows = await getPrisma().faq.findMany({
@@ -32,19 +43,21 @@ export async function getPublicFaqs(): Promise<PublicFaqItem[]> {
     });
 
     if (rows.length > 0) {
-      return rows.map((r) => ({
-        id: r.id,
-        question: r.question,
-        answer: r.answer,
-        category: r.category as FaqCategoryId,
-        order: r.order,
-      }));
+      return withCount(
+        rows.map((r) => ({
+          id: r.id,
+          question: r.question,
+          answer: r.answer,
+          category: r.category as FaqCategoryId,
+          order: r.order,
+        })),
+      );
     }
   } catch {
     /* DB / stale Prisma client — catalog fallback */
   }
 
-  return catalogFallback();
+  return withCount(catalogFallback());
 }
 
 export function groupFaqsByCategory(

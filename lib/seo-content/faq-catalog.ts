@@ -82,9 +82,9 @@ export const FAQ_CATALOG: FaqCatalogItem[] = [
     questionKo: "싱커드는 어떤 서비스인가요?",
     questionEn: "What is THINKAD?",
     answerKo:
-      "2014년부터 OOH 단가를 투명 공개해온 국내 미디어렙 플랫폼입니다. 매체 검색·AI 기획·견적·전자계약·집행 관리까지 광고주·대행사가 한곳에서 이용합니다.",
+      "2014년부터 OOH 단가를 투명 공개해온 국내 미디어렙 플랫폼입니다. 전국 검증 매체 {count}를 탐색하고 AI 기획·견적·전자계약·집행 관리까지 광고주·대행사가 한곳에서 이용합니다.",
     answerEn:
-      "THINKAD has published transparent OOH rates since 2014. Advertisers and agencies search media, plan with AI, quote, e-sign, and manage campaigns on one platform.",
+      "THINKAD has published transparent OOH rates since 2014. Browse {count} verified media nationwide and search, plan with AI, quote, e-sign, and manage campaigns on one platform.",
   },
   {
     category: "pricing",

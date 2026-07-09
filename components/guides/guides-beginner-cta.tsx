@@ -1,6 +1,6 @@
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, MessageCircle, Sparkles } from "lucide-react";
-import { BEGINNER_TRUST_METRICS } from "@/lib/guides-beginner-content";
+import type { BeginnerTrustMetric } from "@/lib/guides-beginner-content";
 
 type Props = {
   isKo: boolean;
@@ -8,6 +8,7 @@ type Props = {
   mediaCta: string;
   plannerCta: string;
   contactCta: string;
+  trustMetrics: BeginnerTrustMetric[];
 };
 
 export function GuidesBeginnerCta({
@@ -16,6 +17,7 @@ export function GuidesBeginnerCta({
   mediaCta,
   plannerCta,
   contactCta,
+  trustMetrics,
 }: Props) {
   return (
     <section className="relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 px-6 py-12 text-center backdrop-blur tkad-neon-border sm:px-10 sm:py-16">
@@ -30,7 +32,7 @@ export function GuidesBeginnerCta({
         <h2 className="mt-3 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">{title}</h2>
 
         <ul className="mx-auto mt-8 grid max-w-2xl grid-cols-1 gap-3 sm:grid-cols-3">
-          {BEGINNER_TRUST_METRICS.map((m) => (
+          {trustMetrics.map((m) => (
             <li
               key={m.labelKo}
               className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/25 px-4 py-4"

@@ -379,7 +379,7 @@
   },
   "stats": {
     "media": "등록 매체",
-    "mediaValue": "500+",
+    "mediaValue": "{count}",
     "experience": "업계 경력",
     "experienceValue": "15년",
     "coverage": "커버리지",

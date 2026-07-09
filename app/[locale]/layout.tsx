@@ -27,6 +27,10 @@ import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { DeferredAnalytics } from "@/components/deferred-analytics";
 import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
 import { fontClassNames } from "@/lib/fonts";
+import {
+  getPublicMediaCountLabel,
+  homePageMetadataTitle,
+} from "@/lib/trust-metrics";
 import "../globals.css";
 
 /** ISR: marketing subtree; admin/client opt out via their own layouts. */
@@ -53,11 +57,9 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   /** 앱 실제 origin (app.tkad.co.kr). tkad.co.kr 은 Cafe24 — OG 이미지 404 원인이었음 */
   const metadataBase = new URL(siteUrl);
+  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
 
-  const titleDefault =
-    locale === "ko"
-      ? "전광판·지하철·버스 옥외광고 단가 비교 | 전국 500+ 매체"
-      : "Billboard, subway & bus OOH pricing | 500+ verified media";
+  const titleDefault = homePageMetadataTitle(locale, verifiedMediaLabel);
   const description =
     locale === "ko"
       ? "실시간 월 단가·예상 노출로 전광판·지하철·버스·DOOH를 비교하고 즉시 견적. THINKAD 싱커드."

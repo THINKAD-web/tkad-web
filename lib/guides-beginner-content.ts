@@ -639,8 +639,8 @@ export const BEGINNER_TRUST_METRICS: BeginnerTrustMetric[] = [
     labelEn: "Average response within 24 hours",
   },
   {
-    valueKo: "500+",
-    valueEn: "500+",
+    valueKo: "{count}",
+    valueEn: "{count}",
     labelKo: "검증 매체 보유",
     labelEn: "Verified media inventory",
   },
@@ -651,3 +651,13 @@ export const BEGINNER_TRUST_METRICS: BeginnerTrustMetric[] = [
     labelEn: "Cumulative campaign spend",
   },
 ];
+
+export function buildBeginnerTrustMetrics(
+  verifiedMediaLabel: string,
+): BeginnerTrustMetric[] {
+  return BEGINNER_TRUST_METRICS.map((m) => ({
+    ...m,
+    valueKo: m.valueKo.replace("{count}", verifiedMediaLabel),
+    valueEn: m.valueEn.replace("{count}", verifiedMediaLabel),
+  }));
+}

@@ -11,6 +11,10 @@ import {
   buildMediaCatalogItemListJsonLd,
 } from "@/lib/structured-data";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import {
+  getPublicMediaCountLabel,
+  mediaListingMetadataDescription,
+} from "@/lib/trust-metrics";
 
 export async function generateMetadata({
   params,
@@ -19,12 +23,11 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
+  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
   const title = isKo
     ? "옥외광고 매체 검색 — 전광판·지하철·버스 단가 비교"
     : "OOH media search — billboard, subway & bus pricing";
-  const description = isKo
-    ? "전광판·지하철·버스·DOOH 등 전국 500+ 검증 매체를 월 단가·지역·유형별로 비교하고 즉시 견적하세요. THINKAD 싱커드."
-    : "Compare 500+ verified billboards, subway, bus, and DOOH media by monthly rate, region, and format — get instant quotes on THINKAD.";
+  const description = mediaListingMetadataDescription(locale, verifiedMediaLabel);
   const ogTitle = title;
   return {
     title: { absolute: title },
@@ -55,7 +58,7 @@ export async function generateMetadata({
       title: ogTitle,
       description,
       path: "/media",
-      alt: ogAltForRoute("media"),
+      alt: ogAltForRoute("media", verifiedMediaLabel),
       image: { kind: "segment", segment: "media" },
     }),
   };

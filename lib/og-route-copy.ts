@@ -1,16 +1,23 @@
+import {
+  MEDIA_COUNT_LABEL_FALLBACK,
+  injectMediaCountPlaceholder,
+} from "@/lib/media-count-copy";
+
 export type OgBlock = { badge: string; title: string; subtitle: string };
+
+const MEDIA_COUNT_OG_ROUTE_IDS = ["home", "media"] as const;
 
 const routes = {
   home: {
     ko: {
       badge: "Korea's #1 OOH Ad Agency",
       title: "생각하는 광고회사, 싱커드",
-      subtitle: "전국 500+ 검증된 옥외광고 매체 · 데이터 기반 캠페인 컨설팅",
+      subtitle: "전국 {count} 검증된 옥외광고 매체 · 데이터 기반 캠페인 컨설팅",
     },
     en: {
       badge: "Korea's #1 OOH Ad Agency",
       title: "The Thinking Ad Agency",
-      subtitle: "500+ verified OOH media nationwide · Data-driven campaign consulting",
+      subtitle: "{count} verified OOH media nationwide · Data-driven campaign consulting",
     },
   },
   about: {
@@ -41,12 +48,12 @@ const routes = {
     ko: {
       badge: "Verified Media",
       title: "옥외광고 매체 검색",
-      subtitle: "전국 500+ 검증된 빌보드·디지털·교통 매체를 한눈에 비교",
+      subtitle: "전국 {count} 검증된 빌보드·디지털·교통 매체를 한눈에 비교",
     },
     en: {
       badge: "Verified Media",
       title: "OOH media search",
-      subtitle: "Compare 500+ verified billboards, DOOH, and transit media",
+      subtitle: "Compare {count} verified billboards, DOOH, and transit media",
     },
   },
   recommend: {
@@ -281,16 +288,41 @@ const routes = {
 
 export type OgRouteId = keyof typeof routes;
 
-export function ogForRoute(route: OgRouteId, locale: string): OgBlock {
+function usesMediaCountInSubtitle(route: OgRouteId): boolean {
+  return (MEDIA_COUNT_OG_ROUTE_IDS as readonly string[]).includes(route);
+}
+
+function resolveOgBlock(
+  route: OgRouteId,
+  locale: string,
+  mediaCountLabel: string,
+): OgBlock {
   const b = routes[route];
-  return locale === "ko" ? b.ko : b.en;
+  const block = locale === "ko" ? b.ko : b.en;
+  if (!usesMediaCountInSubtitle(route)) return block;
+  return {
+    ...block,
+    subtitle: injectMediaCountPlaceholder(block.subtitle, mediaCountLabel),
+  };
+}
+
+export function ogForRoute(
+  route: OgRouteId,
+  locale: string,
+  mediaCountLabel: string = MEDIA_COUNT_LABEL_FALLBACK,
+): OgBlock {
+  return resolveOgBlock(route, locale, mediaCountLabel);
 }
 
 /** Short bilingual strings for metadata `openGraph.images[].alt`. */
-export function ogAltForRoute(route: OgRouteId): { ko: string; en: string } {
-  const r = routes[route];
+export function ogAltForRoute(
+  route: OgRouteId,
+  mediaCountLabel: string = MEDIA_COUNT_LABEL_FALLBACK,
+): { ko: string; en: string } {
+  const ko = resolveOgBlock(route, "ko", mediaCountLabel);
+  const en = resolveOgBlock(route, "en", mediaCountLabel);
   return {
-    ko: `${r.ko.title} — ${r.ko.subtitle}`,
-    en: `${r.en.title} — ${r.en.subtitle}`,
+    ko: `${ko.title} — ${ko.subtitle}`,
+    en: `${en.title} — ${en.subtitle}`,
   };
 }

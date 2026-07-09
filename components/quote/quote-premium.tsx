@@ -15,6 +15,7 @@ import { formatDocumentManWon } from "@/lib/document-text";
 import { cn } from "@/lib/utils";
 import { formatQuoteValidUntilLabel } from "@/lib/admin-quote-calc";
 import { useTrustMetrics } from "@/lib/use-trust-metrics";
+import { MEDIA_COUNT_LABEL_FALLBACK } from "@/lib/media-count-copy";
 import {
   computeQuotePremiumMetrics,
   formatCompactMetric,
@@ -546,7 +547,8 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
     const isKo = locale.startsWith("ko");
     const tokens = PROPOSAL_TOKENS;
     const trustMetrics = useTrustMetrics();
-    const verifiedMediaLabel = trustMetrics?.mediaCount ?? "500+";
+    const verifiedMediaLabel =
+      trustMetrics?.verifiedMediaCount ?? MEDIA_COUNT_LABEL_FALLBACK;
 
     const metrics = useMemo(
       () =>

@@ -1,4 +1,18 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import {
+  formatTrustCount,
+  MEDIA_COUNT_LABEL_FALLBACK,
+} from "@/lib/media-count-copy";
+
+export {
+  formatTrustCount,
+  MEDIA_COUNT_LABEL_FALLBACK,
+  MEDIA_COUNT_PLACEHOLDER,
+  homePageMetadataTitle,
+  homePageSrOnlyH1,
+  injectMediaCountPlaceholder,
+  mediaListingMetadataDescription,
+} from "@/lib/media-count-copy";
 
 export type TrustMetrics = {
   mediaCount: number;
@@ -88,9 +102,41 @@ export async function getTrustOverrideRaw(): Promise<Partial<TrustMetrics>> {
   return override();
 }
 
-/** 내림 10단위 + "+" (예: 527 → "520+", 8 → "8") */
-export function formatTrustCount(n: number): string {
-  if (!Number.isFinite(n) || n <= 0) return "0";
-  if (n < 10) return String(Math.floor(n));
-  return `${Math.floor(n / 10) * 10}+`;
+export type MediaCountVariant = "verified" | "active";
+
+async function countVerifiedActiveMedia(): Promise<number> {
+  if (!isDatabaseConfigured()) return 0;
+  try {
+    return await getPrisma().media.count({
+      where: { isActive: true, isVerified: true },
+    });
+  } catch (e) {
+    console.error(
+      "[trust-metrics] countVerifiedActiveMedia",
+      e instanceof Error ? e.message : e,
+    );
+    return 0;
+  }
+}
+
+/** 활성·검증 매체 raw count (override는 active에만 적용). */
+export async function getPublicMediaCounts(): Promise<{
+  active: number;
+  verified: number;
+}> {
+  const [trust, verified] = await Promise.all([
+    getTrustMetrics(),
+    countVerifiedActiveMedia(),
+  ]);
+  return { active: trust.mediaCount, verified };
+}
+
+/** 공개 카피용 포맷 라벨 — verified: isVerified&&isActive, active: isActive (+ override). */
+export async function getPublicMediaCountLabel(
+  variant: MediaCountVariant,
+): Promise<string> {
+  const counts = await getPublicMediaCounts();
+  const n = variant === "verified" ? counts.verified : counts.active;
+  if (n <= 0) return MEDIA_COUNT_LABEL_FALLBACK;
+  return formatTrustCount(n);
 }

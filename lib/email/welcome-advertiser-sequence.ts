@@ -4,11 +4,12 @@ export type WelcomeDay = 0 | 1 | 3 | 7 | 14;
 
 export function buildAdvertiserWelcomeEmail(
   day: WelcomeDay,
-  opts: { name: string; locale: "ko" | "en" },
+  opts: { name: string; locale: "ko" | "en"; verifiedMediaCount: string },
 ): { subject: string; html: string; text: string } | null {
   const isKo = opts.locale === "ko";
   const site = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "") ?? "https://tkad.co.kr";
   const name = opts.name.trim() || (isKo ? "고객" : "there");
+  const count = opts.verifiedMediaCount;
 
   const blocks: Record<
     WelcomeDay,
@@ -18,7 +19,7 @@ export function buildAdvertiserWelcomeEmail(
         0: {
           subject: "THINKAD 싱커드에 오신 것을 환영합니다",
           title: "환영합니다",
-          body: `${name}님, 가입을 환영합니다. 500+ 검증 매체 검색, AI 플래너, 데이터 기반 견적까지 한 곳에서 이용하실 수 있습니다.`,
+          body: `${name}님, 가입을 환영합니다. ${count} 검증 매체 검색, AI 플래너, 데이터 기반 견적까지 한 곳에서 이용하실 수 있습니다.`,
           cta: "플래너 시작하기",
           href: `${site}/ko/planner`,
         },
@@ -55,7 +56,7 @@ export function buildAdvertiserWelcomeEmail(
         0: {
           subject: "Welcome to THINKAD",
           title: "Welcome",
-          body: `Hi ${name}, explore 500+ verified OOH media, AI planner, and data-driven quotes.`,
+          body: `Hi ${name}, explore ${count} verified OOH media, AI planner, and data-driven quotes.`,
           cta: "Start planner",
           href: `${site}/en/planner`,
         },

@@ -4,6 +4,7 @@ import {
   buildAdvertiserWelcomeEmail,
   type WelcomeDay,
 } from "@/lib/email/welcome-advertiser-sequence";
+import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 
 const MS_DAY = 24 * 60 * 60 * 1000;
 
@@ -34,6 +35,7 @@ export async function runAdvertiserWelcomeDrip(): Promise<{
   }
 
   const db = getPrisma();
+  const verifiedMediaCount = await getPublicMediaCountLabel("verified");
   const users = await db.user.findMany({
     where: {
       deletedAt: null,
@@ -78,6 +80,7 @@ export async function runAdvertiserWelcomeDrip(): Promise<{
       const mail = buildAdvertiserWelcomeEmail(row.day, {
         name: u.name,
         locale,
+        verifiedMediaCount,
       });
       if (!mail) continue;
 

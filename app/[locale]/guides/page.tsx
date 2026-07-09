@@ -8,6 +8,7 @@ import {
   BEGINNER_FAQS,
   BEGINNER_GUIDE_META,
   BEGINNER_TIMELINE,
+  buildBeginnerTrustMetrics,
 } from "@/lib/guides-beginner-content";
 import { listGuideMeta } from "@/lib/guides-data";
 import { getPublishedGuideArticles } from "@/lib/public-auto-content";
@@ -33,6 +34,7 @@ import { GuidesBeginnerTimeline } from "@/components/guides/guides-beginner-time
 import { GuidesBeginnerFaq } from "@/components/guides/guides-beginner-faq";
 import { GuidesBeginnerCta } from "@/components/guides/guides-beginner-cta";
 import { ArrowRight } from "lucide-react";
+import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -132,6 +134,8 @@ export default async function GuidesIndexPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const isKo = locale === "ko";
+  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
+  const beginnerTrustMetrics = buildBeginnerTrustMetrics(verifiedMediaLabel);
 
   const otherGuides = listGuideMeta().filter((g) => !g.draft);
   const publishedDbGuides = await getPublishedGuideArticles();
@@ -304,6 +308,7 @@ export default async function GuidesIndexPage({ params }: Props) {
               mediaCta={sectionCopy.mediaCta}
               plannerCta={sectionCopy.plannerCta}
               contactCta={sectionCopy.contactCta}
+              trustMetrics={beginnerTrustMetrics}
             />
 
             {otherGuides.length > 0 ? (

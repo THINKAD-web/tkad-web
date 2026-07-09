@@ -1,9 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { MEDIA_COUNT_LABEL_FALLBACK } from "@/lib/media-count-copy";
 
 export type FormattedTrustMetrics = {
   mediaCount: string;
+  verifiedMediaCount: string;
   brandCount: string;
   campaignCount: string;
 };

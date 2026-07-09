@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { ogAltForRoute } from "@/lib/og-route-copy";
 import { pageAlternates, segmentOpenGraphImages } from "@/lib/seo";
+import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 
 export async function generateMetadata({
   params,
@@ -10,6 +11,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
+  const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
   const title = isKo
     ? "OOH 광고 패키지 | THINKAD 싱커드"
     : "OOH advertising packages | THINKAD";
@@ -26,7 +28,7 @@ export async function generateMetadata({
       images: segmentOpenGraphImages(
         locale,
         "media",
-        ogAltForRoute("media"),
+        ogAltForRoute("media", verifiedMediaLabel),
       ),
     },
     twitter: {
@@ -36,7 +38,7 @@ export async function generateMetadata({
       images: segmentOpenGraphImages(
         locale,
         "media",
-        ogAltForRoute("media"),
+        ogAltForRoute("media", verifiedMediaLabel),
       ),
     },
   };
