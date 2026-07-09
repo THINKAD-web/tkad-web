@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   item: Omit<PlanCartItem, "addedAt">;
   addedFrom?: PlanCartAddedFrom;
-  /** 그리드 카드 — 짧은 라벨 (담기+ / 담김 ✓) */
+  /** 그리드 카드 — 짧은 라벨 (담기 / 담김) */
   gridInline?: boolean;
   /** 피드 카드 — 아이콘 + 긴 라벨 */
   feedLabeled?: boolean;
@@ -75,26 +75,26 @@ export function MediaCartAddButton({
   const label = feedLabeled
     ? inCart
       ? isKo
-        ? "담김 ✓"
-        : "Added ✓"
+        ? "담김"
+        : "Added"
       : isKo
         ? "매체 담기"
         : "Add media"
     : gridInline
       ? inCart
         ? isKo
-          ? "담김 ✓"
-          : "On ✓"
+          ? "담김"
+          : "On"
         : isKo
-          ? "담기+"
-          : "Add+"
+          ? "담기"
+          : "Add"
       : inCart
         ? isKo
-          ? "담김 ✓"
-          : "On ✓"
+          ? "담김"
+          : "On"
         : isKo
-          ? "담기+"
-          : "Add+";
+          ? "담기"
+          : "Add";
 
   const ariaLabel = inCart
     ? isKo
