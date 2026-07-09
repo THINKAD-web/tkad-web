@@ -189,12 +189,12 @@ export function DiscoveryMediaCardHorizontal({
         {isInPlan ? (
           <>
             <Check className="h-4 w-4" />
-            {isKo ? "담김 ✓" : "Added ✓"}
+            {isKo ? "담김" : "Added"}
           </>
         ) : (
           <>
             <Plus className="h-4 w-4" />
-            {isKo ? "+ 플랜 담기" : "+ Add to plan"}
+            {isKo ? "플랜 담기" : "Add to plan"}
           </>
         )}
       </button>

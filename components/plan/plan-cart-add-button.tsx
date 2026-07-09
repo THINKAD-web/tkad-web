@@ -14,7 +14,7 @@ type Props = {
   item: Omit<PlanCartItem, "addedAt">;
   addedFrom?: PlanCartAddedFrom;
   compact?: boolean;
-  /** 그리드 카드 — 짧은 라벨 (담기+ / 담김 ✓) */
+  /** 그리드 카드 — 짧은 라벨 (담기 / 담김) */
   gridInline?: boolean;
   className?: string;
 };
@@ -78,12 +78,12 @@ export function PlanCartAddButton({
         {inPlan ? (
           <>
             <Check className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
-            {isKo ? "담김 ✓" : "On ✓"}
+            {isKo ? "담김" : "On"}
           </>
         ) : (
           <>
             <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
-            {isKo ? "담기+" : "Add+"}
+            {isKo ? "담기" : "Add"}
           </>
         )}
       </button>
@@ -108,12 +108,12 @@ export function PlanCartAddButton({
       {inPlan ? (
         <>
           <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "담김 ✓" : "Added ✓"}
+          {isKo ? "담김" : "Added"}
         </>
       ) : (
         <>
           <Plus className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "담기+" : "Add+"}
+          {isKo ? "담기" : "Add"}
         </>
       )}
     </button>

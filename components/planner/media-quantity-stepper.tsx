@@ -64,7 +64,10 @@ export function PlannerMediaQuantityStepper({
   return (
     <div
       className={cn("flex items-center gap-2", className)}
-      onClick={(e) => e.stopPropagation()}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
       onKeyDown={(e) => e.stopPropagation()}
     >
       {!compact ? (

@@ -240,15 +240,9 @@ export function DiscoveryMediaCardCompactGrid({
             <div className="min-h-[2.25rem]" aria-hidden />
           )}
           {plannerMode && onTogglePlan ? (
-            <button
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onTogglePlan();
-              }}
+            <div
               className={cn(
-                "tkad-type-meta flex h-9 w-full items-center justify-center gap-1.5 rounded-xl font-semibold transition-colors",
+                "tkad-type-meta flex h-9 w-full items-center justify-center gap-1.5 rounded-xl font-semibold",
                 isInPlan
                   ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
                   : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
@@ -257,15 +251,15 @@ export function DiscoveryMediaCardCompactGrid({
               {isInPlan ? (
                 <>
                   <Check className="h-3.5 w-3.5" />
-                  {isKo ? "담김 ✓" : "Added ✓"}
+                  {isKo ? "담김" : "Added"}
                 </>
               ) : (
                 <>
                   <Plus className="h-3.5 w-3.5" />
-                  {isKo ? "+ 플랜 담기" : "+ Add to plan"}
+                  {isKo ? "플랜 담기" : "Add to plan"}
                 </>
               )}
-            </button>
+            </div>
           ) : showPlanButton ? (
             <div className="flex h-8 items-stretch gap-1">
               {onToggleCompare ? (
@@ -295,13 +289,22 @@ export function DiscoveryMediaCardCompactGrid({
           {recommendReason}
         </p>
       ) : null}
-      {cardFooter != null ? (
-        <div className="mt-auto min-h-[4.25rem] border-t border-border/60 px-3 py-2">
-          <div className="min-w-0 overflow-hidden">{cardFooter}</div>
-        </div>
-      ) : null}
     </>
   );
+
+  const footerBlock =
+    cardFooter != null ? (
+      <div
+        className="mt-auto min-h-[4.25rem] border-t border-border/60 px-3 py-2"
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <div className="min-w-0 overflow-hidden">{cardFooter}</div>
+      </div>
+    ) : null;
 
   const shellClass = cn(
     "flex h-full flex-col overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm dark:border-white/10 dark:bg-white/5",
@@ -314,24 +317,27 @@ export function DiscoveryMediaCardCompactGrid({
         <button
           type="button"
           onClick={onTogglePlan}
-          className="flex h-full w-full flex-col text-left"
+          className="flex min-h-0 w-full flex-1 flex-col text-left"
         >
           {body}
         </button>
+        {footerBlock}
       </div>
     );
   }
 
   return (
-    <Link
-      href={href}
-      className={cn(
-        shellClass,
-        "transition-shadow hover:shadow-md active:scale-[0.99]",
-      )}
-    >
-      {body}
-    </Link>
+    <div className={shellClass}>
+      <Link
+        href={href}
+        className={cn(
+          "flex min-h-0 flex-1 flex-col transition-shadow hover:shadow-md active:scale-[0.99]",
+        )}
+      >
+        {body}
+      </Link>
+      {footerBlock}
+    </div>
   );
 }
 
@@ -445,12 +451,12 @@ export function DiscoveryMediaCardCatalogTile({
             {isInPlan ? (
               <>
                 <Check className="h-3.5 w-3.5" />
-                {isKo ? "담김 ✓" : "Added ✓"}
+                {isKo ? "담김" : "Added"}
               </>
             ) : (
               <>
                 <Plus className="h-3.5 w-3.5" />
-                {isKo ? "+ 플랜 담기" : "+ Add to plan"}
+                {isKo ? "플랜 담기" : "Add to plan"}
               </>
             )}
           </div>
