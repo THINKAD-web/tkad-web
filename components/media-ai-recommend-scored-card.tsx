@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import { Lightbulb } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { ReactNode } from "react";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
@@ -89,6 +90,7 @@ export function RecommendScoredMediaCard({
         }
         recommendRationaleExpandable={!rationaleTwoLine && bullets.length > 0}
         recommendReasonInside
+        recommendRationaleProminent={rationaleTwoLine}
         cardFooter={quantityControl ?? RECOMMEND_CARD_FOOTER_PLACEHOLDER}
         className="h-full"
       />
@@ -151,8 +153,14 @@ export function RecommendTop3PickRow({
             </span>
           </span>
           {summary ? (
-            <span className="line-clamp-2 pl-9 text-[11px] leading-snug text-muted-foreground">
-              {summary}
+            <span className="mt-1 line-clamp-2 space-y-0.5 pl-9">
+              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
+                {isKo ? "추천 이유" : "Why"}
+              </span>
+              <span className="block text-[12px] font-medium leading-snug text-foreground">
+                {summary}
+              </span>
             </span>
           ) : null}
         </span>

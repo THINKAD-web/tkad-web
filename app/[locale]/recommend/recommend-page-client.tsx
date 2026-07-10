@@ -474,7 +474,7 @@ export default function RecommendPageClient({
     }
 
     writeRecommendSessionSnapshot({
-      v: 1,
+      v: 2,
       phase,
       inputMode,
       lastPayload,

@@ -44,6 +44,7 @@ export const DiscoveryMediaCard = forwardRef<
     recommendRationaleBullets,
     recommendRationaleExpandable,
     recommendReasonInside = false,
+    recommendRationaleProminent = false,
     cardFooter,
     isKo = true,
     plannerMode = false,
@@ -147,6 +148,9 @@ export const DiscoveryMediaCard = forwardRef<
         }
         recommendRationaleExpandable={
           recommendReasonInside ? recommendRationaleExpandable : undefined
+        }
+        recommendRationaleProminent={
+          recommendReasonInside ? recommendRationaleProminent : undefined
         }
         cardFooter={cardFooter}
         planAddedFrom={planAddedFrom}

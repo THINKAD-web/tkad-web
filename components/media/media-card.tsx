@@ -32,6 +32,7 @@ export type MediaCardProps = {
   recommendRationaleBullets?: string[];
   recommendRationaleExpandable?: boolean;
   recommendReasonInside?: boolean;
+  recommendRationaleProminent?: boolean;
   cardFooter?: ReactNode;
   planAddedFrom?: "search" | "planner" | "ai_recommend" | "map";
   className?: string;

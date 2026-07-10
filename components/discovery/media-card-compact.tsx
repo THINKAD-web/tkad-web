@@ -3,7 +3,7 @@
 import { forwardRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { Check, ChevronDown, Plus } from "lucide-react";
+import { Check, ChevronDown, Lightbulb, Plus } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
@@ -175,6 +175,7 @@ type CompactGridProps = Pick<
   | "recommendReason"
   | "recommendRationaleBullets"
   | "recommendRationaleExpandable"
+  | "recommendRationaleProminent"
   | "cardFooter"
   | "className"
   | "planAddedFrom"
@@ -197,6 +198,7 @@ export function DiscoveryMediaCardCompactGrid({
   recommendReason,
   recommendRationaleBullets,
   recommendRationaleExpandable = false,
+  recommendRationaleProminent = false,
   cardFooter,
   className,
   planAddedFrom = "search",
@@ -297,12 +299,38 @@ export function DiscoveryMediaCardCompactGrid({
         </div>
       </div>
       {recommendReason?.trim() ? (
-        <div className="px-3 pb-1">
-          <p className="line-clamp-1 text-[11px] leading-snug text-tkad-accent">
+        <div
+          className={cn(
+            recommendRationaleProminent
+              ? "mx-1 mb-2 rounded-lg border border-violet-400/35 bg-violet-500/[0.07] px-2.5 py-2 dark:border-violet-400/25 dark:bg-violet-500/10"
+              : "px-3 pb-1",
+          )}
+        >
+          {recommendRationaleProminent ? (
+            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+              <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              {isKo ? "추천 이유" : "Why recommended"}
+            </p>
+          ) : null}
+          <p
+            className={cn(
+              "leading-snug",
+              recommendRationaleProminent
+                ? "line-clamp-2 text-[13px] font-medium text-foreground"
+                : "line-clamp-1 text-[11px] text-tkad-accent",
+            )}
+          >
             {recommendReason}
           </p>
           {inlineSecondLine ? (
-            <p className="mt-0.5 line-clamp-1 text-[10px] leading-snug text-muted-foreground">
+            <p
+              className={cn(
+                "mt-0.5 line-clamp-1 leading-snug",
+                recommendRationaleProminent
+                  ? "text-[12px] text-muted-foreground"
+                  : "text-[10px] text-muted-foreground",
+              )}
+            >
               {inlineSecondLine}
             </p>
           ) : null}

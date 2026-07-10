@@ -215,25 +215,59 @@ export function matchesPlannerCategory(
   return false;
 }
 
-/** network 타입이어도 택시·버스·래핑 haystack이면 mobile 의도로 취급 (recommend 매칭용) */
+/**
+ * 이동형 OOH 명시 키워드 — 이름·카테고리 필드만 (tags 제외: 터미널·역 인접 '버스' 오탐 방지).
+ * @deprecated `mediaMatchesPlannerMobileIntent` 내부에서 primary/exclusion 조합으로 대체.
+ */
 export const PLANNER_MOBILE_HAYSTACK_RE =
-  /버스|bus\b|택시|taxi|래핑|랩핑|vehicle[\s_-]?wrap|bus[\s_-]?wrap|truck|mobility|이동형/i;
+  /택시|taxi|(?<!캔)버스(?!터미널)[\s_-]?(래핑|랩핑|wrap|외부|광고)?|(?<!캔)버스(?!터미널)(?![\w가-힣])|\bbus\b(?!way)[\s_-]?(wrap)?|리무진|limousine|차량[\s_-]?(래핑|랩핑|wrap)|vehicle[\s_-]?wrap|트럭[\s_-]?(래핑|랩핑|wrap)|truck[\s_-]?wrap|이동형/i;
 
-export function mediaMatchesPlannerMobileIntent(item: MediaItem): boolean {
-  if (matchesPlannerCategory(item, "mobile")) return true;
-  const hay = [
+/** 고정형 디지털·역사 — mobile 의도 제외 (택시쉘터·버스래핑 등은 primary 매칭으로 포함) */
+export const PLANNER_MOBILE_EXCLUSION_RE =
+  /사이니지|signage|digital[\s_-]?signage|DOOH|전광판|미디어타워|미디어월|보이드|void|엘리베이터|elevator|지하철|subway|역사[\s_]|역[\s_(]|station[\s_(]|캔버스(?!.*(?:버스|bus|택시|taxi))|택배|delivery|고속터미널[\s_]*역|LED[\s_-]?보드|실내[\s_-]?디지털|버스터미널|bus[\s_-]?terminal/i;
+
+/** 택시쉘터 — 고정형이지만 택시 대기 동선 연관 → mobile 의도 포함 */
+export const PLANNER_TAXI_SHELTER_RE = /택시\s*쉘터|taxi\s*shelter/i;
+
+function plannerMobilePrimaryHaystack(item: MediaItem): string {
+  return [
     item.name,
     item.nameEn,
-    item.location,
-    item.locationEn,
     item.subCategory,
     item.mediaSubCategory,
     item.networkSubtype,
-    ...(item.tags ?? []),
   ]
     .filter(Boolean)
     .join(" ");
-  return PLANNER_MOBILE_HAYSTACK_RE.test(hay);
+}
+
+/** network·digital 타입이어도 택시·버스·래핑 등 실제 이동형만 mobile 의도 (recommend 매칭용) */
+export function mediaMatchesPlannerMobileIntent(item: MediaItem): boolean {
+  if (matchesPlannerCategory(item, "mobile")) return true;
+
+  const primary = plannerMobilePrimaryHaystack(item);
+  if (!primary.trim()) return false;
+
+  if (PLANNER_TAXI_SHELTER_RE.test(primary)) return true;
+
+  if (/쉘터|shelter/i.test(primary) && !/택시|taxi/i.test(primary)) {
+    return false;
+  }
+
+  const hasTransitSignal =
+    PLANNER_MOBILE_HAYSTACK_RE.test(primary) ||
+    (/(?<!캔)버스(?!터미널)|\bbus\b(?!way)/i.test(primary) &&
+      !PLANNER_MOBILE_EXCLUSION_RE.test(primary));
+
+  if (!hasTransitSignal) return false;
+
+  if (PLANNER_MOBILE_EXCLUSION_RE.test(primary)) {
+    return /(?:택시|taxi|(?<!캔)버스(?!터미널)|\bbus\b(?!way)|래핑|랩핑|wrap|리무진|limousine)/i.test(
+      primary,
+    );
+  }
+
+  return true;
 }
 
 export function filterPlannerMedia(

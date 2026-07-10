@@ -450,6 +450,14 @@ function scoreCategory(
     if (inputCats.includes(t)) best = Math.max(best, 14);
   }
 
+  if (inputCats.includes("mobile")) {
+    if (matchesPlannerCategory(m, "mobile")) {
+      best = Math.max(best, 15);
+    } else if (mediaMatchesPlannerMobileIntent(m)) {
+      best = Math.max(best, 13);
+    }
+  }
+
   return Math.min(15, best);
 }
 

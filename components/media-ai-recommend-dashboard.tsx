@@ -12,6 +12,7 @@ import {
   Sparkles,
   Star,
   Trophy,
+  Lightbulb,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { AiRecommendInput, ScoredMedia } from "@/lib/ai-media-recommend";
@@ -239,8 +240,14 @@ export default function MediaAiRecommendDashboard({
                                 {name}
                               </span>
                               {summary ? (
-                                <span className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-muted-foreground">
-                                  {summary}
+                                <span className="mt-1 block space-y-0.5">
+                                  <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                                    <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
+                                    {isKo ? "추천 이유" : "Why"}
+                                  </span>
+                                  <span className="line-clamp-2 text-[11px] font-medium leading-snug text-foreground">
+                                    {summary}
+                                  </span>
                                 </span>
                               ) : null}
                             </span>

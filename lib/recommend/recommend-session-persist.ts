@@ -6,7 +6,9 @@ import type {
 } from "@/lib/planner/planner-media-quantity";
 import type { MediaItem } from "@/lib/media-data";
 
-export const RECOMMEND_SESSION_STORAGE_KEY = "tkad_recommend_session_v1";
+/** v2: rationaleLines 포함 스키마 — v1 세션은 복원하지 않음 */
+export const RECOMMEND_SESSION_STORAGE_KEY = "tkad_recommend_session_v2";
+const LEGACY_RECOMMEND_SESSION_STORAGE_KEY = "tkad_recommend_session_v1";
 
 export type RecommendPersistPhase =
   | "dashboard"
@@ -21,7 +23,7 @@ type StoredScored = {
 };
 
 export type RecommendSessionSnapshot = {
-  v: 1;
+  v: 2;
   phase: RecommendPersistPhase;
   inputMode: "structured" | "ai";
   lastPayload: MediaAiRecommendFormSubmit;
@@ -66,13 +68,23 @@ export function hydrateScoredList(
   return out;
 }
 
+function clearLegacyRecommendSession(): void {
+  if (!isBrowser()) return;
+  try {
+    window.sessionStorage.removeItem(LEGACY_RECOMMEND_SESSION_STORAGE_KEY);
+  } catch {
+    /* ignore */
+  }
+}
+
 export function readRecommendSessionSnapshot(): RecommendSessionSnapshot | null {
   if (!isBrowser()) return null;
+  clearLegacyRecommendSession();
   try {
     const raw = window.sessionStorage.getItem(RECOMMEND_SESSION_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<RecommendSessionSnapshot>;
-    if (parsed.v !== 1 || !parsed.lastPayload || !Array.isArray(parsed.scored)) {
+    if (parsed.v !== 2 || !parsed.lastPayload || !Array.isArray(parsed.scored)) {
       return null;
     }
     if (
@@ -95,7 +107,7 @@ export function writeRecommendSessionSnapshot(
   try {
     window.sessionStorage.setItem(
       RECOMMEND_SESSION_STORAGE_KEY,
-      JSON.stringify(snapshot),
+      JSON.stringify({ ...snapshot, v: 2 as const }),
     );
   } catch {
     /* quota / private mode */
@@ -106,6 +118,7 @@ export function clearRecommendSessionSnapshot(): void {
   if (!isBrowser()) return;
   try {
     window.sessionStorage.removeItem(RECOMMEND_SESSION_STORAGE_KEY);
+    window.sessionStorage.removeItem(LEGACY_RECOMMEND_SESSION_STORAGE_KEY);
   } catch {
     /* ignore */
   }

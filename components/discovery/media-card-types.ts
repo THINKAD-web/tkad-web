@@ -18,6 +18,8 @@ export type DiscoveryMediaCardSharedProps = {
   recommendRationaleExpandable?: boolean;
   /** true: 추천 이유를 카드 셸 안에 렌더 (그리드 카드 높이 정렬용) */
   recommendReasonInside?: boolean;
+  /** true: TOP3 등 — 추천 이유 라벨·대비 강화 */
+  recommendRationaleProminent?: boolean;
   /** 그리드 카드 하단 슬롯 (수량 컨트롤 등) */
   cardFooter?: ReactNode;
   rank?: number;
