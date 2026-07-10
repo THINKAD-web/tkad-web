@@ -24,7 +24,12 @@ import {
   RecommendScoredMediaCard,
 } from "@/components/media-ai-recommend-scored-card";
 import { RecommendationAxisTabs } from "@/components/recommendation/recommendation-axis-tabs";
+import { RecommendReportSection } from "@/components/recommend/recommend-report-section";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
+import type {
+  CampaignMediaPriceOptionIndex,
+  CampaignMediaQuantities,
+} from "@/lib/planner/planner-media-quantity";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
 type Props = {
@@ -45,6 +50,12 @@ type Props = {
   recommendInput: AiRecommendInput;
   regionCodes: readonly RegionCheckboxCode[];
   analysisSeed?: number;
+  reportPortfolio?: readonly MediaItem[];
+  reportScoredPortfolio?: readonly ScoredMedia[];
+  matchedCount?: number;
+  matchedPool?: readonly MediaItem[];
+  recommendQuantities?: CampaignMediaQuantities;
+  recommendPriceOptionIndex?: CampaignMediaPriceOptionIndex;
 };
 
 export default function MediaAiRecommendDashboard({
@@ -64,6 +75,12 @@ export default function MediaAiRecommendDashboard({
   recommendInput,
   regionCodes,
   analysisSeed = 0,
+  reportPortfolio,
+  reportScoredPortfolio,
+  matchedCount = 0,
+  matchedPool,
+  recommendQuantities = {},
+  recommendPriceOptionIndex = {},
 }: Props) {
   const isKo = locale === "ko";
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
@@ -80,6 +97,24 @@ export default function MediaAiRecommendDashboard({
         planCartItemFromMediaItem(item, "ai_recommend"),
       ),
     [planAddItems, scored],
+  );
+
+  const portfolioForReport = useMemo(
+    () => [...(reportPortfolio ?? planAddItems ?? top3.map((s) => s.item))],
+    [reportPortfolio, planAddItems, top3],
+  );
+
+  const scoredForReport = useMemo(() => {
+    if (reportScoredPortfolio?.length) return [...reportScoredPortfolio];
+    const byId = new Map(scored.map((s) => [s.item.id, s]));
+    return portfolioForReport
+      .map((item) => byId.get(item.id))
+      .filter((s): s is ScoredMedia => s != null);
+  }, [reportScoredPortfolio, scored, portfolioForReport]);
+
+  const poolForReport = useMemo(
+    () => [...(matchedPool ?? scored.map((s) => s.item))],
+    [matchedPool, scored],
   );
 
   const pinMetaById = useMemo(() => {
@@ -337,6 +372,19 @@ export default function MediaAiRecommendDashboard({
             </div>
           ) : null}
         </section>
+
+        <RecommendReportSection
+          isKo={isKo}
+          locale={locale}
+          input={recommendInput}
+          regionCodes={regionCodes}
+          portfolio={portfolioForReport}
+          scoredPortfolio={scoredForReport}
+          matchedCount={matchedCount || scored.length}
+          quantities={recommendQuantities}
+          priceOptionIndex={recommendPriceOptionIndex}
+          matchedPool={poolForReport}
+        />
 
         {/* 하단 액션 */}
         <div className="flex flex-col gap-4 border-t-2 border-border pt-6">

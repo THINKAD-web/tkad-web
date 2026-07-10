@@ -10,6 +10,7 @@ export const PLAN_REPORT_ACTIVITY_SOURCES = [
   "plan_cart_report",
   "planner",
   "integrated_planner",
+  "ai_recommend",
 ] as const;
 export type PlanReportActivitySource =
   (typeof PLAN_REPORT_ACTIVITY_SOURCES)[number];
@@ -63,6 +64,8 @@ export function sourceLabelKo(source: PlanReportActivitySource): string {
       return "플래너";
     case "integrated_planner":
       return "통합 플래너";
+    case "ai_recommend":
+      return "AI 추천";
   }
 }
 

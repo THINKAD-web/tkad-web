@@ -118,6 +118,14 @@ export default function RecommendPageClient({
     [cartItems, top3],
   );
 
+  const scoredForReport = useMemo(() => {
+    if (!fullList?.length) return [];
+    const byId = new Map(fullList.map((s) => [s.item.id, s]));
+    return pickedForQuote
+      .map((item) => byId.get(item.id))
+      .filter((s): s is ScoredMedia => s != null);
+  }, [fullList, pickedForQuote]);
+
   const renderRecommendQuantityControl = useCallback(
     (media: MediaItem) => {
       if (!shouldShowPlannerQuantityControl(media)) return null;
@@ -758,6 +766,12 @@ export default function RecommendPageClient({
               onRemix={handleRemix}
               renderQuantityControl={renderRecommendQuantityControl}
               planAddItems={pickedForQuote}
+              reportPortfolio={pickedForQuote}
+              reportScoredPortfolio={scoredForReport}
+              matchedCount={fullList.length}
+              matchedPool={fullList.map((s) => s.item)}
+              recommendQuantities={recommendQuantities}
+              recommendPriceOptionIndex={recommendPriceOptionIndex}
             />
           )}
 
