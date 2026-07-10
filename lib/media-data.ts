@@ -63,6 +63,8 @@ export interface MediaItem {
   popularityScore?: number;
   /** 홈·카드 추천 이유 (한 줄) */
   recommendReason?: string;
+  /** 보고서·카드 확장용 추천 근거 (최대 3줄) */
+  rationaleLines?: string[];
   /** 공개 카탈로그에서의 운영 상태 (DB `availability`) */
   availability?: "available" | "reserved" | "maintenance";
   /** 세부 카테고리 (DB `sub_category`) */

@@ -1,9 +1,9 @@
 "use client";
 
-import { forwardRef } from "react";
+import { forwardRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { Check, Plus } from "lucide-react";
+import { Check, ChevronDown, Plus } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
@@ -173,6 +173,8 @@ type CompactGridProps = Pick<
   | "onTogglePlan"
   | "rank"
   | "recommendReason"
+  | "recommendRationaleBullets"
+  | "recommendRationaleExpandable"
   | "cardFooter"
   | "className"
   | "planAddedFrom"
@@ -193,11 +195,21 @@ export function DiscoveryMediaCardCompactGrid({
   onTogglePlan,
   rank,
   recommendReason,
+  recommendRationaleBullets,
+  recommendRationaleExpandable = false,
   cardFooter,
   className,
   planAddedFrom = "search",
 }: CompactGridProps) {
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
+  const [rationaleOpen, setRationaleOpen] = useState(false);
+  const extraBullets = recommendRationaleBullets?.filter(Boolean) ?? [];
+  const showExpand =
+    recommendRationaleExpandable && extraBullets.length > 0;
+  const visibleBullets =
+    showExpand && rationaleOpen ? extraBullets : extraBullets.slice(0, 0);
+  const inlineSecondLine =
+    !showExpand && extraBullets.length > 0 ? extraBullets[0] : null;
 
   const body = (
     <>
@@ -285,9 +297,56 @@ export function DiscoveryMediaCardCompactGrid({
         </div>
       </div>
       {recommendReason?.trim() ? (
-        <p className="line-clamp-2 px-3 pb-1 text-[11px] leading-snug text-tkad-accent">
-          {recommendReason}
-        </p>
+        <div className="px-3 pb-1">
+          <p className="line-clamp-1 text-[11px] leading-snug text-tkad-accent">
+            {recommendReason}
+          </p>
+          {inlineSecondLine ? (
+            <p className="mt-0.5 line-clamp-1 text-[10px] leading-snug text-muted-foreground">
+              {inlineSecondLine}
+            </p>
+          ) : null}
+          {showExpand ? (
+            <div className="mt-0.5">
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  setRationaleOpen((v) => !v);
+                }}
+                className="inline-flex items-center gap-0.5 text-[10px] font-medium text-muted-foreground hover:text-foreground"
+                aria-expanded={rationaleOpen}
+              >
+                <ChevronDown
+                  className={cn(
+                    "h-3 w-3 transition-transform",
+                    rationaleOpen && "rotate-180",
+                  )}
+                  aria-hidden
+                />
+                {isKo ? "추천 근거" : "Why"}
+              </button>
+              {rationaleOpen ? (
+                <ul className="mt-1 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
+                  {extraBullets.slice(0, 3).map((line) => (
+                    <li key={line} className="line-clamp-2">
+                      · {line}
+                    </li>
+                  ))}
+                </ul>
+              ) : null}
+            </div>
+          ) : visibleBullets.length > 0 ? (
+            <ul className="mt-0.5 space-y-0.5 text-[10px] leading-snug text-muted-foreground">
+              {visibleBullets.map((line) => (
+                <li key={line} className="line-clamp-2">
+                  · {line}
+                </li>
+              ))}
+            </ul>
+          ) : null}
+        </div>
       ) : null}
     </>
   );

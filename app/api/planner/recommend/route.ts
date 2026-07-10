@@ -5,6 +5,7 @@ import { runRecommendation } from "@/lib/recommendation-service";
 import {
   matchedToApiItems,
   plannerContextToMatching,
+  displayContextFromPlannerContext,
 } from "@/lib/recommendation-adapters";
 import { getCurrentUser } from "@/lib/user-session";
 import { enforceAiRateLimit, aiRateMessage } from "@/lib/ai-rate-limit";
@@ -148,6 +149,8 @@ export async function POST(request: NextRequest) {
       industry,
       [matchingInput.targets[0] ?? "mass"],
       isKo,
+      matchingInput,
+      displayContextFromPlannerContext(ctx),
     );
 
     return json({

@@ -12,6 +12,10 @@ export type DiscoveryMediaCardSharedProps = {
   isKo?: boolean;
   className?: string;
   recommendReason?: string;
+  /** 확장 시 표시할 추가 근거 bullet (최대 2줄) */
+  recommendRationaleBullets?: string[];
+  /** true: 카드에서 근거 bullet 펼치기 UI */
+  recommendRationaleExpandable?: boolean;
   /** true: 추천 이유를 카드 셸 안에 렌더 (그리드 카드 높이 정렬용) */
   recommendReasonInside?: boolean;
   /** 그리드 카드 하단 슬롯 (수량 컨트롤 등) */

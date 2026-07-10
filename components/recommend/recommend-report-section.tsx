@@ -22,6 +22,7 @@ import {
   computeRecommendReportMetrics,
   inferRecommendCategoriesText,
 } from "@/lib/recommend/recommend-report-adapter";
+import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import type {
   CampaignMediaPriceOptionIndex,
   CampaignMediaQuantities,
@@ -80,9 +81,12 @@ function RecommendMediaRationale({
           const name = isKo
             ? scored.item.name
             : scored.item.nameEn || scored.item.name;
-          const reasons = scored.reasons
-            .map((r) => (isKo ? r.ko : r.en))
-            .filter(Boolean);
+          const reasons =
+            scored.rationaleLines?.length ?
+              rationaleLinesForLocale(scored.rationaleLines, isKo ? "ko" : "en")
+            : scored.reasons
+                .map((r) => (isKo ? r.ko : r.en))
+                .filter(Boolean);
           return (
             <li key={scored.item.id} className="border-t border-border pt-4 first:border-t-0 first:pt-0">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
@@ -291,6 +295,25 @@ export function RecommendReportSection({
     tPlanner,
   ]);
 
+  const portfolioForExport = useMemo(() => {
+    const byId = new Map(scoredPortfolio.map((s) => [s.item.id, s]));
+    return portfolio.map((m) => {
+      const scored = byId.get(m.id);
+      if (!scored) return m;
+      const lines = rationaleLinesForLocale(
+        scored.rationaleLines ??
+          scored.reasons.map((r) => ({ ko: r.ko, en: r.en })),
+        isKo ? "ko" : "en",
+      );
+      if (lines.length === 0) return m;
+      return {
+        ...m,
+        recommendReason: lines.slice(0, 2).join(" · "),
+        rationaleLines: lines,
+      };
+    });
+  }, [portfolio, scoredPortfolio, isKo]);
+
   const payload = useMemo(
     () =>
       buildOohReportPayload({
@@ -306,7 +329,7 @@ export function RecommendReportSection({
         campaignGoal: reportContext.campaignGoal,
         seoulZones: input.seoulZones ?? undefined,
         goalFollowUp: {},
-        portfolio,
+        portfolio: portfolioForExport,
         metrics: metricsBundle.metrics,
         reachCorePct: metricsBundle.reachCorePct,
         reachExtendedPct: metricsBundle.reachExtendedPct,
@@ -328,7 +351,7 @@ export function RecommendReportSection({
       ageText,
       industryText,
       input.seoulZones,
-      portfolio,
+      portfolioForExport,
       metricsBundle,
       blendedCpmKrw,
       budgetAllocation,

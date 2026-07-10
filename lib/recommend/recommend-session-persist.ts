@@ -17,6 +17,7 @@ type StoredScored = {
   mediaId: string;
   score: number;
   reasons: ScoredMedia["reasons"];
+  rationaleLines?: ScoredMedia["rationaleLines"];
 };
 
 export type RecommendSessionSnapshot = {
@@ -42,6 +43,7 @@ export function serializeScoredList(
     mediaId: s.item.id,
     score: s.score,
     reasons: s.reasons,
+    rationaleLines: s.rationaleLines,
   }));
 }
 
@@ -58,6 +60,7 @@ export function hydrateScoredList(
       item,
       score: row.score,
       reasons: row.reasons,
+      rationaleLines: row.rationaleLines,
     });
   }
   return out;

@@ -23,7 +23,9 @@ import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
 import {
   RECOMMEND_MEDIA_GRID_CLASS,
   RecommendScoredMediaCard,
+  RecommendTop3PickRow,
 } from "@/components/media-ai-recommend-scored-card";
+import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { RecommendationAxisTabs } from "@/components/recommendation/recommendation-axis-tabs";
 import { RecommendReportSection } from "@/components/recommend/recommend-report-section";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
@@ -212,24 +214,44 @@ export default function MediaAiRecommendDashboard({
                   [ TOP 3 PICKS ]
                 </div>
                 <ol className="space-y-2">
-                  {top3.map((s, i) => (
-                    <li
-                      key={s.item.id}
-                      className="flex items-center justify-between gap-2 border-t-2 border-border pt-2 first:border-t-0 first:pt-0"
-                    >
-                      <span className="inline-flex min-w-0 items-center gap-2">
-                        <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent text-[10px] font-bold text-accent-foreground">
-                          {i + 1}
-                        </span>
-                        <span className="line-clamp-1 text-xs font-bold tracking-tight text-foreground">
-                          {isKo ? s.item.name : s.item.nameEn}
-                        </span>
-                      </span>
-                      <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
-                        {isKo ? `${s.score}점` : `M${s.score}`}
-                      </span>
-                    </li>
-                  ))}
+                  {top3.map((s, i) => {
+                    const summary =
+                      rationaleLinesForLocale(
+                        s.rationaleLines ?? s.reasons.map((r) => ({
+                          ko: r.ko,
+                          en: r.en,
+                        })),
+                        locale,
+                      )[0] ?? "";
+                    const name = isKo ? s.item.name : s.item.nameEn || s.item.name;
+                    return (
+                      <li
+                        key={s.item.id}
+                        className="border-t-2 border-border pt-2 first:border-t-0 first:pt-0"
+                      >
+                        <div className="flex items-start justify-between gap-2">
+                          <span className="inline-flex min-w-0 flex-1 items-start gap-2">
+                            <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent text-[10px] font-bold text-accent-foreground">
+                              {i + 1}
+                            </span>
+                            <span className="min-w-0">
+                              <span className="line-clamp-1 text-xs font-bold tracking-tight text-foreground">
+                                {name}
+                              </span>
+                              {summary ? (
+                                <span className="mt-0.5 line-clamp-2 text-[10px] leading-snug text-muted-foreground">
+                                  {summary}
+                                </span>
+                              ) : null}
+                            </span>
+                          </span>
+                          <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
+                            {isKo ? `${s.score}점` : `M${s.score}`}
+                          </span>
+                        </div>
+                      </li>
+                    );
+                  })}
                 </ol>
               </div>
             )}
@@ -256,6 +278,7 @@ export default function MediaAiRecommendDashboard({
                   rank={i + 1}
                   isKo={isKo}
                   locale={locale}
+                  rationaleTwoLine
                   quantityControl={renderQuantityControl?.(s.item)}
                 />
               ))}

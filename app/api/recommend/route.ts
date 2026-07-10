@@ -3,6 +3,7 @@ import { runRecommendation } from "@/lib/recommendation-service";
 import {
   aiInputToMatching,
   matchedToApiItems,
+  displayContextFromAiInput,
 } from "@/lib/recommendation-adapters";
 import { resolveAiRecommendPlannerRegionIds } from "@/lib/recommend/recommend-region-filter";
 import { getCurrentUser } from "@/lib/user-session";
@@ -124,6 +125,8 @@ export async function POST(request: NextRequest) {
       input.industry,
       [input.target],
       isKo,
+      matchingInput,
+      displayContextFromAiInput(aiInput),
     );
 
     return json({

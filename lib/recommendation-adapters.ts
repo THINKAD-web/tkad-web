@@ -8,6 +8,16 @@ import type { MatchingInput, MatchedMedia, MatchingGoal } from "@/lib/matching-e
 import type { ScoredMedia as AiScoredMedia } from "@/lib/ai-media-recommend";
 import type { ScoredMedia as PlannerScoredMedia } from "@/lib/planner/recommend";
 import { oneLineReason } from "@/lib/matching-engine";
+import {
+  displayContextFromAiInput,
+  displayContextFromPlannerContext,
+  formatRecommendRationale,
+  rationaleKeysFromBreakdown,
+  rationaleLinesForLocale,
+  rationaleSummaryLine,
+  type LocalizedRationaleLine,
+  type RecommendRationaleDisplayContext,
+} from "@/lib/recommend/recommend-rationale";
 
 const TARGET_MAP: Record<string, string> = {
   genz: "mz",
@@ -55,16 +65,18 @@ export function aiInputToMatching(
     }
   }
 
+  const weeks = input.preferredPeriodWeeks ?? 4;
+  const durationDays =
+    weeks > 0 && weeks < 4 ? Math.max(1, Math.round(weeks * 7)) : undefined;
+
   return {
     monthlyBudgetWon:
       input.budgetMaxMan > 0 ? input.budgetMaxMan * 10_000 : 0,
     regions,
     industry: input.industry,
     targets: [TARGET_MAP[input.target] ?? input.target],
-    durationMonths: Math.max(
-      1,
-      Math.round((input.preferredPeriodWeeks ?? 4) / 4),
-    ),
+    durationMonths: Math.max(1, Math.round(weeks / 4)),
+    durationDays,
     goal: toMatchingGoal(input.goal),
     goalTags: matchingGoalTagsFromRaw(input.goal),
     categories: (() => {
@@ -92,6 +104,9 @@ export function plannerContextToMatching(
   const followTags = followUpGoalTags(ctx.goal, ctx.goalFollowUp ?? {});
   const goalTags = [...new Set([...baseTags, ...followTags])];
 
+  const durationDays =
+    ctx.durationDays ?? ctx.goalFollowUp?.eventDurationDays ?? undefined;
+
   return {
     monthlyBudgetWon,
     regions: mergePlannerMacroMatchingRegions(
@@ -106,7 +121,7 @@ export function plannerContextToMatching(
     targets: ctx.ageKeys.length > 0 ? [] : ["mass"],
     plannerAgeKeys: ctx.ageKeys.length > 0 ? [...ctx.ageKeys] : undefined,
     durationMonths: Math.max(1, ctx.months),
-    durationDays: ctx.durationDays,
+    durationDays,
     goal: toMatchingGoal(goalRaw),
     goalTags: goalTags.length > 0 ? goalTags : undefined,
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,
@@ -114,46 +129,82 @@ export function plannerContextToMatching(
   };
 }
 
+function buildRationaleBundle(
+  input: MatchingInput,
+  m: MatchedMedia,
+  locale: string,
+  display?: RecommendRationaleDisplayContext,
+): { lines: LocalizedRationaleLine[]; reasons: MatchedMedia["reasons"] } {
+  const lines = formatRecommendRationale(
+    input,
+    m.media,
+    m.breakdown,
+    locale,
+    display,
+  );
+  return {
+    lines,
+    reasons: lines.map((l) => ({ ko: l.ko, en: l.en })),
+  };
+}
+
 export function matchedToAiScored(
   matched: MatchedMedia[],
   isKo: boolean,
+  input?: MatchingInput,
+  display?: RecommendRationaleDisplayContext,
 ): AiScoredMedia[] {
-  return matched.map((m) => ({
-    item: m.media,
-    score: m.score,
-    reasons: m.reasons.length > 0 ? m.reasons : [
-      {
-        ko: m.reasoning ?? oneLineReason(m, "", [], true),
-        en: m.reasoning ?? oneLineReason(m, "", [], false),
-      },
-    ],
-  }));
+  const locale = isKo ? "ko" : "en";
+  return matched.map((m) => {
+    const bundle =
+      input ?
+        buildRationaleBundle(input, m, locale, display)
+      : { lines: m.reasons.map((r) => ({ ko: r.ko, en: r.en })), reasons: m.reasons };
+    return {
+      item: m.media,
+      score: m.score,
+      reasons: bundle.reasons.length > 0 ? bundle.reasons : [
+        {
+          ko: m.reasoning ?? oneLineReason(m, "", [], true),
+          en: m.reasoning ?? oneLineReason(m, "", [], false),
+        },
+      ],
+      rationaleLines: bundle.lines,
+    };
+  });
 }
 
 export function matchedToPlannerScored(
   matched: MatchedMedia[],
+  input: MatchingInput,
+  ctx: RecommendationContext,
+  locale = "ko",
 ): PlannerScoredMedia[] {
-  return matched.map((m) => ({
-    media: m.media,
-    score: m.score / 100,
-    reasons: [
-      ...(m.breakdown.budget >= 20 ?
-        [{ key: "budgetEfficient" as const, weight: m.breakdown.budget / 100 }]
-      : []),
-      ...(m.breakdown.region >= 15 ?
-        [{ key: "matchRegion" as const, weight: m.breakdown.region / 100 }]
-      : []),
-      ...(m.breakdown.industry >= 10 ?
-        [{ key: "goalFit" as const, weight: m.breakdown.industry / 100 }]
-      : []),
-      ...(m.breakdown.target >= 12 ?
-        [{ key: "ageMatch" as const, weight: m.breakdown.target / 100 }]
-      : []),
-      ...(m.breakdown.popularity >= 5 ?
-        [{ key: "highVisibility" as const, weight: m.breakdown.popularity / 100 }]
-      : []),
-    ],
-  }));
+  const display = displayContextFromPlannerContext(ctx);
+  return matched.map((m) => {
+    const keys = rationaleKeysFromBreakdown(m.breakdown);
+    return {
+      media: m.media,
+      score: m.score / 100,
+      reasons: keys.map((key) => ({
+        key,
+        weight:
+          key === "budgetEfficient" ? m.breakdown.budget / 100
+          : key === "matchRegion" ? m.breakdown.region / 100
+          : key === "industryFit" ? m.breakdown.industry / 100
+          : key === "ageMatch" ? m.breakdown.target / 100
+          : key === "goalFit" ? m.breakdown.category / 100
+          : m.breakdown.popularity / 100,
+      })),
+      rationaleLines: formatRecommendRationale(
+        input,
+        m.media,
+        m.breakdown,
+        locale,
+        display,
+      ),
+    };
+  });
 }
 
 export type ApiRecommendationItem = {
@@ -161,6 +212,7 @@ export type ApiRecommendationItem = {
   score: number;
   breakdown: MatchedMedia["breakdown"];
   reasons: MatchedMedia["reasons"];
+  rationaleLines: LocalizedRationaleLine[];
   budgetAllocation: number;
   role: MatchedMedia["role"];
   reasoning?: string;
@@ -174,12 +226,22 @@ export function matchedToApiItems(
   industry: string,
   targets: string[],
   isKo: boolean,
+  input?: MatchingInput,
+  display?: RecommendRationaleDisplayContext,
 ): ApiRecommendationItem[] {
-  return matched.map((m) => ({
+  const locale = isKo ? "ko" : "en";
+  return matched.map((m) => {
+    const lines =
+      input ?
+        formatRecommendRationale(input, m.media, m.breakdown, locale, display)
+      : m.reasons.map((r) => ({ ko: r.ko, en: r.en }));
+    const reasons = lines.map((l) => ({ ko: l.ko, en: l.en }));
+  return {
     mediaId: m.media.id,
     score: m.score,
     breakdown: m.breakdown,
-    reasons: m.reasons,
+    reasons,
+    rationaleLines: lines,
     budgetAllocation: m.budgetAllocation,
     role: m.role,
     reasoning: m.reasoning,
@@ -187,6 +249,15 @@ export function matchedToApiItems(
     priority: m.priority,
     oneLine:
       m.reasoning ??
+      rationaleSummaryLine(lines, locale) ??
       oneLineReason(m, industry, targets, isKo),
-  }));
+  };
+  });
 }
+
+export {
+  displayContextFromAiInput,
+  displayContextFromPlannerContext,
+  rationaleLinesForLocale,
+  rationaleSummaryLine,
+};

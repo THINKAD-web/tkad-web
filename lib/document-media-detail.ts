@@ -273,6 +273,7 @@ export function mediaToDocumentDetail(
     lineTotalLabel,
     recommendReason:
       ("recommendReason" in m && m.recommendReason?.trim()) ||
+      ("rationaleLines" in m && m.rationaleLines?.[0]?.trim()) ||
       undefined,
     exposureContributionPct: opts.exposureContributionPct,
     budgetContributionPct: opts.budgetContributionPct,

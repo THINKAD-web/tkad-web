@@ -2,9 +2,17 @@ import type { MediaItem } from "@/lib/media-data";
 import { matchesPlannerCategory } from "@/lib/planner-logic";
 import type { PlannerCategory } from "@/lib/planner/types";
 import { matchMediaCatalog } from "@/lib/matching-engine";
-import { plannerContextToMatching } from "@/lib/recommendation-adapters";
+import {
+  plannerContextToMatching,
+  displayContextFromPlannerContext,
+} from "@/lib/recommendation-adapters";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
+import {
+  formatRecommendRationale,
+  rationaleKeysFromBreakdown,
+  type LocalizedRationaleLine,
+} from "@/lib/recommend/recommend-rationale";
 
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
@@ -27,11 +35,14 @@ export type RecommendReason = { key: RecommendReasonKey; weight: number };
 export type ScoredMedia = {
   media: MediaItem;
   score: number;
-  /** 점수 기여도 상위 2–3개. UI 노출용. */
+  /** 점수 기여도 상위 2–3개. UI 칩용. */
   reasons: RecommendReason[];
+  /** 조건 연결 문장 (최대 3줄) */
+  rationaleLines: LocalizedRationaleLine[];
 };
 
-function reasonsFromBreakdown(
+function reasonWeightForKey(
+  key: RecommendReasonKey,
   breakdown: {
     budget: number;
     region: number;
@@ -40,27 +51,23 @@ function reasonsFromBreakdown(
     category: number;
     popularity: number;
   },
-): RecommendReason[] {
-  const parts: RecommendReason[] = [];
-  if (breakdown.budget >= 20) {
-    parts.push({ key: "budgetEfficient", weight: breakdown.budget / 100 });
+): number {
+  switch (key) {
+    case "budgetEfficient":
+      return breakdown.budget / 100;
+    case "matchRegion":
+      return breakdown.region / 100;
+    case "industryFit":
+      return breakdown.industry / 100;
+    case "ageMatch":
+      return breakdown.target / 100;
+    case "goalFit":
+      return breakdown.category / 100;
+    case "highVisibility":
+      return breakdown.popularity / 100;
+    default:
+      return 0.5;
   }
-  if (breakdown.region >= 15) {
-    parts.push({ key: "matchRegion", weight: breakdown.region / 100 });
-  }
-  if (breakdown.industry >= 10) {
-    parts.push({ key: "industryFit", weight: breakdown.industry / 100 });
-  }
-  if (breakdown.target >= 12) {
-    parts.push({ key: "ageMatch", weight: breakdown.target / 100 });
-  }
-  if (breakdown.category >= 12) {
-    parts.push({ key: "goalFit", weight: breakdown.category / 100 });
-  }
-  if (breakdown.popularity >= 5) {
-    parts.push({ key: "highVisibility", weight: breakdown.popularity / 100 });
-  }
-  return parts.slice(0, 3);
 }
 
 /**
@@ -72,6 +79,7 @@ export function recommendPlannerMedia(
   ctx: RecommendationContext,
   limit = 5,
   seed = 0,
+  locale = "ko",
 ): ScoredMedia[] {
   let pool = catalog.filter((m) => {
     if (ctx.categories.length === 0) return true;
@@ -91,11 +99,25 @@ export function recommendPlannerMedia(
   }
 
   const matchingInput = plannerContextToMatching(ctx, seed);
+  const display = displayContextFromPlannerContext(ctx);
   const matched = matchMediaCatalog(pool, matchingInput, limit);
 
-  return matched.map((m) => ({
-    media: m.media,
-    score: m.score / 100,
-    reasons: reasonsFromBreakdown(m.breakdown),
-  }));
+  return matched.map((m) => {
+    const keys = rationaleKeysFromBreakdown(m.breakdown);
+    return {
+      media: m.media,
+      score: m.score / 100,
+      reasons: keys.map((key) => ({
+        key,
+        weight: reasonWeightForKey(key, m.breakdown),
+      })),
+      rationaleLines: formatRecommendRationale(
+        matchingInput,
+        m.media,
+        m.breakdown,
+        locale,
+        display,
+      ),
+    };
+  });
 }

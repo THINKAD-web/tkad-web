@@ -68,7 +68,11 @@ import {
   filterRecommendCandidateCatalog,
   type RecommendMatchMeta,
 } from "@/lib/recommend/recommend-region-filter";
-import { aiInputToMatching } from "@/lib/recommendation-adapters";
+import {
+  aiInputToMatching,
+  displayContextFromAiInput,
+  matchedToAiScored,
+} from "@/lib/recommendation-adapters";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import {
   clearRecommendSessionSnapshot,
@@ -540,6 +544,7 @@ export default function RecommendPageClient({
             mediaId: string;
             score: number;
             reasons: { ko: string; en: string }[];
+            rationaleLines?: { ko: string; en: string }[];
             oneLine?: string;
           }>;
           logId?: string;
@@ -563,6 +568,7 @@ export default function RecommendPageClient({
                     en: item.oneLine ?? "Rule-based match",
                   },
                 ],
+              rationaleLines: item.rationaleLines,
             });
           }
           setRecommendLogId(data.logId ?? null);
@@ -581,10 +587,16 @@ export default function RecommendPageClient({
           payload.input,
         );
         setRegionMeta(meta);
-        const scored = recommendations.map((m) => ({
-          item: m.media,
-          score: m.score,
-          reasons: m.reasons,
+        const scored = matchedToAiScored(
+          recommendations,
+          locale.startsWith("ko"),
+          matchingInput,
+          displayContextFromAiInput(payload.input),
+        ).map((s) => ({
+          item: s.item,
+          score: s.score,
+          reasons: s.reasons,
+          rationaleLines: s.rationaleLines,
         }));
         setFullList(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
@@ -1079,6 +1091,7 @@ export default function RecommendPageClient({
                         scored={s}
                         index={i}
                         isKo={isKo}
+                        locale={locale}
                       />
                     ))}
                   </ol>

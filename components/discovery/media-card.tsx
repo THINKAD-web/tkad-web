@@ -41,6 +41,8 @@ export const DiscoveryMediaCard = forwardRef<
   const {
     className,
     recommendReason,
+    recommendRationaleBullets,
+    recommendRationaleExpandable,
     recommendReasonInside = false,
     cardFooter,
     isKo = true,
@@ -139,6 +141,12 @@ export const DiscoveryMediaCard = forwardRef<
         rank={rank}
         recommendReason={
           recommendReasonInside ? recommendReason : undefined
+        }
+        recommendRationaleBullets={
+          recommendReasonInside ? recommendRationaleBullets : undefined
+        }
+        recommendRationaleExpandable={
+          recommendReasonInside ? recommendRationaleExpandable : undefined
         }
         cardFooter={cardFooter}
         planAddedFrom={planAddedFrom}

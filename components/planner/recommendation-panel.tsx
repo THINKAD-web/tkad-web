@@ -10,6 +10,9 @@ import {
   type RecommendReasonKey,
   type ScoredMedia,
 } from "@/lib/planner/recommend";
+import { rationaleKeysFromBreakdown } from "@/lib/recommend/recommend-rationale";
+import type { LocalizedRationaleLine } from "@/lib/recommend/recommend-rationale";
+import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -169,27 +172,10 @@ export function PlannerRecommendationPanel({
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
   const [oneLines, setOneLines] = useState<Record<string, string>>({});
   const [reasonings, setReasonings] = useState<Record<string, string>>({});
+  const [rationaleByMediaId, setRationaleByMediaId] = useState<
+    Record<string, LocalizedRationaleLine[]>
+  >({});
   const fetchRef = useRef(0);
-
-  function reasonKeysFromBreakdown(
-    breakdown: {
-      budget: number;
-      region: number;
-      industry: number;
-      target: number;
-      category?: number;
-      popularity: number;
-    },
-  ): RecommendReasonKey[] {
-    const keys: RecommendReasonKey[] = [];
-    if (breakdown.budget >= 20) keys.push("budgetEfficient");
-    if (breakdown.region >= 15) keys.push("matchRegion");
-    if (breakdown.industry >= 10) keys.push("industryFit");
-    if (breakdown.target >= 12) keys.push("ageMatch");
-    if ((breakdown.category ?? 0) >= 12) keys.push("goalFit");
-    if (breakdown.popularity >= 5) keys.push("highVisibility");
-    return keys.length > 0 ? keys : ["goalFit"];
-  }
 
   const depsKey = useMemo(
     () =>
@@ -248,6 +234,7 @@ export function PlannerRecommendationPanel({
               oneLine?: string;
               reasoning?: string;
               expectedImpact?: string;
+              rationaleLines?: LocalizedRationaleLine[];
               breakdown?: {
                 budget: number;
                 region: number;
@@ -262,6 +249,7 @@ export function PlannerRecommendationPanel({
             const scores: Record<string, number> = {};
             const lines: Record<string, string> = {};
             const narrative: Record<string, string> = {};
+            const rationaleMap: Record<string, LocalizedRationaleLine[]> = {};
             const recs: ScoredMedia[] = [];
             const unresolvedIds: string[] = [];
             for (const item of data.items) {
@@ -272,6 +260,9 @@ export function PlannerRecommendationPanel({
               }
               scores[media.id] = item.score;
               if (item.reasoning) narrative[media.id] = item.reasoning;
+              if (item.rationaleLines?.length) {
+                rationaleMap[media.id] = item.rationaleLines;
+              }
               const summary = item.expectedImpact ?? item.oneLine;
               if (summary && summary !== item.reasoning) {
                 lines[media.id] = summary;
@@ -284,6 +275,7 @@ export function PlannerRecommendationPanel({
                 media,
                 score: item.score / 100,
                 reasons: reasonKeys.map((key) => ({ key, weight: 0.5 })),
+                rationaleLines: item.rationaleLines ?? [],
               });
             }
             if (unresolvedIds.length > 0 && recs.length === 0) {
@@ -312,11 +304,17 @@ export function PlannerRecommendationPanel({
               );
               setOneLines({});
               setReasonings({});
+              setRationaleByMediaId(
+                Object.fromEntries(
+                  fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
+                ),
+              );
             } else {
               setRecommendations(recs);
               setMatchScores(scores);
               setOneLines(lines);
               setReasonings(narrative);
+              setRationaleByMediaId(rationaleMap);
             }
           } else {
             const fallback = recommendPlannerMedia(
@@ -344,6 +342,11 @@ export function PlannerRecommendationPanel({
             );
             setOneLines({});
             setReasonings({});
+            setRationaleByMediaId(
+              Object.fromEntries(
+                fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
+              ),
+            );
           }
         } catch {
           if (id !== fetchRef.current) return;
@@ -365,6 +368,18 @@ export function PlannerRecommendationPanel({
             refreshTick,
           );
           setRecommendations(fallback);
+          setMatchScores(
+            Object.fromEntries(
+              fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
+            ),
+          );
+          setOneLines({});
+          setReasonings({});
+          setRationaleByMediaId(
+            Object.fromEntries(
+              fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
+            ),
+          );
         } finally {
           if (id === fetchRef.current) setLoading(false);
         }
@@ -502,6 +517,10 @@ export function PlannerRecommendationPanel({
               const matchScore = matchScores[media.id];
               const oneLine = oneLines[media.id];
               const reasoning = reasonings[media.id];
+              const rationaleTexts = rationaleLinesForLocale(
+                rationaleByMediaId[media.id] ?? [],
+                locale,
+              );
               const displayName = isKo ? media.name : media.nameEn || media.name;
               const regionLine =
                 mediaPlannerRegionDisplayLabel(
@@ -582,13 +601,29 @@ export function PlannerRecommendationPanel({
                         {locationLine ? ` · ${locationLine}` : ""}
                       </p>
                     </div>
-                    {reasoning ? (
+                    {rationaleTexts.length > 0 ? (
+                      <div className="space-y-0.5">
+                        {rationaleTexts.slice(0, 2).map((line) => (
+                          <p
+                            key={line}
+                            className="line-clamp-2 text-[11px] leading-relaxed text-foreground/90"
+                          >
+                            {line}
+                          </p>
+                        ))}
+                      </div>
+                    ) : reasoning ? (
                       <p className="line-clamp-2 text-[11px] leading-relaxed text-foreground/90">
                         {reasoning}
                       </p>
                     ) : oneLine ? (
                       <p className="line-clamp-1 text-[11px] text-muted-foreground">
                         {oneLine}
+                      </p>
+                    ) : null}
+                    {reasoning && rationaleTexts.length > 0 ? (
+                      <p className="line-clamp-1 text-[10px] italic text-muted-foreground">
+                        {reasoning}
                       </p>
                     ) : null}
                     {metricItems.length > 0 ? (

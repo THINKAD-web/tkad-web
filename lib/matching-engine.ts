@@ -18,6 +18,7 @@ import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent } from "@/lib/p
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
+import { rationaleToMatchReasons } from "@/lib/recommend/recommend-rationale";
 
 /** 월 예산·지역·업종·타겟·기간·목표 기반 매체 매칭 (0–100점, 결정론적) */
 export type MatchingGoal =
@@ -494,46 +495,10 @@ function scoreDuration(m: MediaItem, input: MatchingInput): number {
 function buildReasons(
   m: MediaItem,
   b: ScoreBreakdown,
-  isKo = true,
+  input: MatchingInput,
+  locale = "ko",
 ): MatchReason[] {
-  const reasons: MatchReason[] = [];
-  if (b.budget >= 20) {
-    reasons.push({
-      ko: "예산 적합도 ✓",
-      en: "Budget fit ✓",
-    });
-  }
-  if (b.region >= 15) {
-    reasons.push({
-      ko: "지역 매칭 ✓",
-      en: "Region match ✓",
-    });
-  }
-  if (b.industry >= 10) {
-    reasons.push({
-      ko: "업종 적합 ✓",
-      en: "Industry fit ✓",
-    });
-  }
-  if (b.target >= 12) {
-    reasons.push({
-      ko: "타겟 동선 ✓",
-      en: "Target audience ✓",
-    });
-  }
-  if (b.category >= 12) {
-    reasons.push({
-      ko: "카테고리 일치 ✓",
-      en: "Category match ✓",
-    });
-  }
-  if (reasons.length === 0) {
-    reasons.push({
-      ko: isKo ? `${m.name.slice(0, 24)}… 조건 부분 일치` : "Partial condition match",
-      en: "Partial match with your criteria",
-    });
-  }
-  return reasons.slice(0, 4);
+  return rationaleToMatchReasons(input, m, b, locale).slice(0, 4);
 }
 
 function deterministicHash(id: string, seed: number): number {
@@ -580,7 +545,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
     media: m,
     score: breakdown.total,
     breakdown,
-    reasons: buildReasons(m, breakdown),
+    reasons: buildReasons(m, breakdown, input),
     budgetAllocation: 0,
     role: "sub",
     priority: 0,
@@ -633,7 +598,7 @@ export function scoreMediaForRanking(
     media: m,
     score: breakdown.total,
     breakdown,
-    reasons: buildReasons(m, breakdown),
+    reasons: buildReasons(m, breakdown, input),
     budgetAllocation: 0,
     role: "sub",
     priority: 0,

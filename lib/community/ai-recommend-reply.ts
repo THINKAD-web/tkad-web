@@ -83,7 +83,7 @@ export async function createAiRecommendReply(opts: {
     3,
   );
 
-  const picks = scored.length > 0 ? scored : pool.slice(0, 3).map((m) => ({ media: m, score: 0, reasons: [] }));
+  const picks = scored.length > 0 ? scored : pool.slice(0, 3).map((m) => ({ media: m, score: 0, reasons: [], rationaleLines: [] }));
 
   const intro = isKo
     ? "조건에 맞는 추천 매체 3개입니다."
