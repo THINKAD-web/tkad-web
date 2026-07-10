@@ -6,21 +6,19 @@ import type {
   CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
 
-/** recommend 결과 풀 ∩ plan cart 순서 — 견적·보고서 portfolio SSOT */
+/** plan cart 순서대로 portfolio — 추천 결과 밖 매체도 카탈로그에 있으면 포함 */
 export function resolveRecommendPortfolioFromPlanCart(
   planItems: readonly PlanCartItem[],
-  fullList: readonly ScoredMedia[] | null,
+  _fullList: readonly ScoredMedia[] | null,
   catalog: readonly MediaItem[],
 ): MediaItem[] {
-  if (!fullList?.length || planItems.length === 0) return [];
+  if (planItems.length === 0) return [];
 
-  const resultIds = new Set(fullList.map((s) => s.item.id));
   const byId = new Map(catalog.map((m) => [m.id, m]));
   const picked: MediaItem[] = [];
   const seen = new Set<string>();
 
   for (const pi of planItems) {
-    if (!resultIds.has(pi.mediaId)) continue;
     const media = byId.get(pi.mediaId);
     if (!media || seen.has(media.id)) continue;
     seen.add(media.id);
@@ -54,4 +52,20 @@ export function recommendPricingFromPlanCart(
   }
 
   return { quantities, priceOptionIndex };
+}
+
+export function buildManualAddedScoredMedia(
+  item: MediaItem,
+  isKo: boolean,
+): ScoredMedia {
+  return {
+    item,
+    score: 0,
+    reasons: [
+      {
+        ko: "직접 추가한 매체",
+        en: "Manually added media",
+      },
+    ],
+  };
 }

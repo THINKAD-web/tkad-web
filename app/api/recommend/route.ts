@@ -4,6 +4,7 @@ import {
   aiInputToMatching,
   matchedToApiItems,
 } from "@/lib/recommendation-adapters";
+import { resolveAiRecommendPlannerRegionIds } from "@/lib/recommend/recommend-region-filter";
 import { getCurrentUser } from "@/lib/user-session";
 import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import { enforceRateLimit } from "@/lib/rate-limit";
@@ -92,7 +93,9 @@ export async function POST(request: NextRequest) {
   const { input, seed = 0, limit = 10, sessionId, locale, useClaude, excludeNetwork } =
     parsed.data;
   const isKo = (locale ?? "ko").startsWith("ko");
-  const matchingInput = aiInputToMatching(input as AiRecommendInput, seed);
+  const aiInput = input as AiRecommendInput;
+  const matchingInput = aiInputToMatching(aiInput, seed);
+  const plannerRegionIds = resolveAiRecommendPlannerRegionIds(aiInput);
 
   let userId: string | null = null;
   try {
@@ -103,7 +106,7 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const { recommendations, cached, logId } = await runRecommendation({
+    const { recommendations, cached, logId, regionMeta } = await runRecommendation({
       input: matchingInput,
       source: "recommend",
       limit,
@@ -112,6 +115,8 @@ export async function POST(request: NextRequest) {
       isKo,
       userId,
       sessionId: sessionId ?? null,
+      plannerRegionIds,
+      aiRecommendInput: aiInput,
     });
 
     const items = matchedToApiItems(
@@ -127,6 +132,7 @@ export async function POST(request: NextRequest) {
       logId,
       items,
       recommendations: items,
+      regionMeta,
     });
   } catch (e) {
     console.error("[api/recommend]", e);

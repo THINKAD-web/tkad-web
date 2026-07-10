@@ -1,7 +1,14 @@
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import type { MatchingInput, MatchedMedia } from "@/lib/matching-engine";
+import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
+import {
+  filterRecommendCatalogByRegions,
+  matchRecommendWithRegionalPolicy,
+  resolveAiRecommendPlannerRegionIds,
+  type RecommendMatchMeta,
+} from "@/lib/recommend/recommend-region-filter";
 import {
   getCachedRecommendations,
   recommendationCacheKey,
@@ -31,6 +38,8 @@ export type RunRecommendationOpts = {
   skipCache?: boolean;
   /** 플래너 browse 광역 ID — 설정 시 `matchesPlannerRegion` 하드 프리필터 */
   plannerRegionIds?: string[];
+  /** `/recommend` AI 입력 — 광역·상권 필터·보완 정책 (source=recommend) */
+  aiRecommendInput?: AiRecommendInput;
 };
 
 export type RunRecommendationResult = {
@@ -38,6 +47,7 @@ export type RunRecommendationResult = {
   cached: boolean;
   logId?: string;
   claudeUsed: boolean;
+  regionMeta?: RecommendMatchMeta;
 };
 
 export async function runRecommendation(
@@ -66,10 +76,37 @@ export async function runRecommendation(
         (m) => m.catalogSource !== "network" && m.type !== "network",
       )
     : fullCatalog;
-  if (opts.plannerRegionIds && opts.plannerRegionIds.length > 0) {
-    catalog = filterCatalogByPlannerRegions(catalog, opts.plannerRegionIds);
+
+  let regionMeta: RecommendMatchMeta | undefined;
+  let recommendations: MatchedMedia[];
+
+  if (opts.source === "recommend" && opts.aiRecommendInput) {
+    const plannerRegionIds =
+      opts.plannerRegionIds ??
+      resolveAiRecommendPlannerRegionIds(opts.aiRecommendInput);
+    const regionalCatalog = filterRecommendCatalogByRegions(
+      catalog,
+      plannerRegionIds,
+      {
+        seoulZones: opts.aiRecommendInput.seoulZones ?? undefined,
+        busanZones: opts.aiRecommendInput.busanZones ?? undefined,
+      },
+    );
+    const matched = matchRecommendWithRegionalPolicy(
+      catalog,
+      regionalCatalog,
+      opts.input,
+      limit,
+      Boolean(plannerRegionIds?.length),
+    );
+    regionMeta = matched.meta;
+    recommendations = matched.recommendations;
+  } else {
+    if (opts.plannerRegionIds && opts.plannerRegionIds.length > 0) {
+      catalog = filterCatalogByPlannerRegions(catalog, opts.plannerRegionIds);
+    }
+    recommendations = matchMediaCatalog(catalog, opts.input, limit);
   }
-  let recommendations = matchMediaCatalog(catalog, opts.input, limit);
 
   if (useClaude) {
     recommendations = await enrichWithClaude(
@@ -114,7 +151,7 @@ export async function runRecommendation(
     }
   }
 
-  return { recommendations, cached: false, logId, claudeUsed: useClaude };
+  return { recommendations, cached: false, logId, claudeUsed: useClaude, regionMeta };
 }
 
 export async function markRecommendationSelection(

@@ -820,10 +820,16 @@ function mergeNetworkCandidatesIntoWindow(
   return [...windowed, ...extras].sort((a, b) => b.score - a.score);
 }
 
+export type MatchMediaCatalogOpts = {
+  /** true면 지역 점수 미달 후보로 풀을 전국(카탈로그 전체)으로 확장하지 않음 */
+  strictRegionalPool?: boolean;
+};
+
 export function matchMediaCatalog(
   catalog: readonly MediaItem[],
   input: MatchingInput,
   limit = 10,
+  opts?: MatchMediaCatalogOpts,
 ): MatchedMedia[] {
   const seed = input.seed ?? 0;
   const categories = input.categories?.filter(Boolean) ?? [];
@@ -855,6 +861,8 @@ export function matchMediaCatalog(
   if (wantsSpecificRegion) {
     const regional = scored.filter((s) => s.breakdown.region >= 15);
     if (regional.length >= Math.min(limit, 3)) {
+      pool = regional.map((s) => s.media);
+    } else if (opts?.strictRegionalPool) {
       pool = regional.map((s) => s.media);
     } else {
       pool = scored.map((s) => s.media);

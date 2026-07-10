@@ -16,6 +16,7 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import type { AiRecommendInput, ScoredMedia } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
+import type { RecommendMatchMeta } from "@/lib/recommend/recommend-region-filter";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
@@ -56,6 +57,8 @@ type Props = {
   matchedPool?: readonly MediaItem[];
   recommendQuantities?: CampaignMediaQuantities;
   recommendPriceOptionIndex?: CampaignMediaPriceOptionIndex;
+  regionMeta?: RecommendMatchMeta | null;
+  onOpenMediaBrowse?: () => void;
 };
 
 export default function MediaAiRecommendDashboard({
@@ -81,6 +84,8 @@ export default function MediaAiRecommendDashboard({
   matchedPool,
   recommendQuantities = {},
   recommendPriceOptionIndex = {},
+  regionMeta = null,
+  onOpenMediaBrowse,
 }: Props) {
   const isKo = locale === "ko";
   const [mapSelectedId, setMapSelectedId] = useState<string | null>(null);
@@ -131,6 +136,14 @@ export default function MediaAiRecommendDashboard({
   return (
     <div className="overflow-x-clip border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
       <div className="space-y-10">
+        {regionMeta?.regionSupplemented ? (
+          <p className="rounded-2xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 dark:text-amber-100">
+            {isKo
+              ? `선택 지역 매체가 ${regionMeta.regionalCatalogCount}건뿐이라, 조건에 맞는 전국 매체를 일부 보완했습니다.`
+              : `Only ${regionMeta.regionalCatalogCount} placements matched your region — we added some nationwide options.`}
+          </p>
+        ) : null}
+
         {/* 상단 헤더 — TKAD bot 테마 */}
         <header className="flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2 text-center sm:text-left">
@@ -423,6 +436,17 @@ export default function MediaAiRecommendDashboard({
           </div>
 
           <div className="flex flex-wrap gap-2">
+            {onOpenMediaBrowse ? (
+              <BtnBlock
+                variant="primary"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={onOpenMediaBrowse}
+              >
+                <MapPin className="h-4 w-4" />
+                {isKo ? "매체 더 찾기 · 추가" : "Find & add media"}
+              </BtnBlock>
+            ) : null}
             <BtnBlock
               variant="secondary"
               size="sm"

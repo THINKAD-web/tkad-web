@@ -19,11 +19,9 @@ import { Sparkles, SlidersHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendDashboard from "@/components/media-ai-recommend-dashboard";
 import type { MediaItem } from "@/lib/media-data";
-import { matchesMediaTextQuery } from "@/lib/media-data";
-import type { ScoredMedia } from "@/lib/ai-media-recommend";
+import type { AiRecommendInput, ScoredMedia } from "@/lib/ai-media-recommend";
 import {
   recommendMedia,
-  filterCatalogByRegionCodes,
   type AiRecommendInput,
 } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
@@ -63,7 +61,14 @@ import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import {
   recommendPricingFromPlanCart,
   resolveRecommendPortfolioFromPlanCart,
+  buildManualAddedScoredMedia,
 } from "@/lib/recommend/recommend-plan-cart";
+import {
+  runRecommendMatchFromCatalog,
+  type RecommendMatchMeta,
+} from "@/lib/recommend/recommend-region-filter";
+import { aiInputToMatching } from "@/lib/recommendation-adapters";
+import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import {
   clearRecommendSessionSnapshot,
   hydrateScoredList,
@@ -74,6 +79,14 @@ import {
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
+  { ssr: false },
+);
+
+const MediaSearchPage = dynamic(
+  () =>
+    import("@/components/media/media-search-page").then((m) => ({
+      default: m.MediaSearchPage,
+    })),
   { ssr: false },
 );
 
@@ -124,11 +137,18 @@ export default function RecommendPageClient({
     useState<CampaignMediaQuantities>({});
   const [recommendPriceOptionIndex, setRecommendPriceOptionIndex] =
     useState<CampaignMediaPriceOptionIndex>({});
+  const [regionMeta, setRegionMeta] = useState<RecommendMatchMeta | null>(null);
+  const [mediaBrowseOpen, setMediaBrowseOpen] = useState(false);
 
   const router = useRouter();
   const [navigatingQuote, setNavigatingQuote] = useState(false);
   const [creatingQuote, setCreatingQuote] = useState(false);
   const handledCreateQuoteRef = useRef(false);
+
+  const catalogHomeItems = useMemo(
+    () => catalog.map(mapMediaItemToHomeCatalog),
+    [catalog],
+  );
 
   const top3 = useMemo(() => {
     if (!fullList?.length) return [];
@@ -174,12 +194,12 @@ export default function RecommendPageClient({
   );
 
   const scoredForReport = useMemo(() => {
-    if (!fullList?.length) return [];
-    const byId = new Map(fullList.map((s) => [s.item.id, s]));
-    return pickedForQuote
-      .map((item) => byId.get(item.id))
-      .filter((s): s is ScoredMedia => s != null);
-  }, [fullList, pickedForQuote]);
+    if (!pickedForQuote.length) return [];
+    const byId = new Map(fullList?.map((s) => [s.item.id, s]) ?? []);
+    return pickedForQuote.map(
+      (item) => byId.get(item.id) ?? buildManualAddedScoredMedia(item, isKo),
+    );
+  }, [fullList, pickedForQuote, isKo]);
 
   const renderRecommendQuantityControl = useCallback(
     (media: MediaItem) => {
@@ -492,6 +512,7 @@ export default function RecommendPageClient({
     ) => {
       clearRecommendSessionSnapshot();
       setPhase("loading");
+      setRegionMeta(null);
       // v1 AI 자유입력: 네트워크 매체 제외(서버 후보 + 클라 폴백 모두 일관 적용)
       const effectiveCatalog = opts?.excludeNetwork
         ? catalog.filter(
@@ -521,6 +542,7 @@ export default function RecommendPageClient({
             oneLine?: string;
           }>;
           logId?: string;
+          regionMeta?: RecommendMatchMeta;
         };
 
         if (data.ok && data.items?.length) {
@@ -543,28 +565,26 @@ export default function RecommendPageClient({
             });
           }
           setRecommendLogId(data.logId ?? null);
+          setRegionMeta(data.regionMeta ?? null);
           setFullList(scored);
           setPhase(scored.length > 0 ? "dashboard" : "noResults");
           return;
         }
 
-        /** API 실패 시 클라이언트 폴백 (동일 카탈로그·결정론적) */
-        const poolRegion = filterCatalogByRegionCodes(
+        /** API 실패 시 클라이언트 폴백 — recommend 지역 필터·보완 정책 동일 적용 */
+        const matchingInput = aiInputToMatching(payload.input, seed);
+        const { recommendations, meta } = runRecommendMatchFromCatalog(
           effectiveCatalog,
-          payload.regionCodes,
+          matchingInput,
+          30,
+          payload.input,
         );
-        const q = payload.searchQuery.trim().toLowerCase();
-        const poolFiltered =
-          q.length > 0 ?
-            poolRegion.filter((m) => matchesMediaTextQuery(m, q))
-          : poolRegion;
-        const baseCatalog =
-          poolFiltered.length > 0 ? poolFiltered : effectiveCatalog;
-        const paddingSource = poolRegion.length > 0 ? poolRegion : effectiveCatalog;
-        let scored = recommendMedia(payload.input, baseCatalog, paddingSource);
-        if (scored.length === 0 && q.length > 0 && poolRegion.length > 0) {
-          scored = recommendMedia(payload.input, poolRegion, paddingSource);
-        }
+        setRegionMeta(meta);
+        const scored = recommendations.map((m) => ({
+          item: m.media,
+          score: m.score,
+          reasons: m.reasons,
+        }));
         setFullList(scored);
         setPhase(scored.length > 0 ? "dashboard" : "noResults");
       } catch (e) {
@@ -575,7 +595,7 @@ export default function RecommendPageClient({
         toast("error", tr("analysisFailed"));
       }
     },
-    [catalog, toast, tr, locale],
+    [catalog, toast, tr, locale, captchaToken],
   );
 
   const handleFormSubmit = useCallback(
@@ -938,8 +958,45 @@ export default function RecommendPageClient({
               matchedPool={fullList.map((s) => s.item)}
               recommendQuantities={effectiveQuantities}
               recommendPriceOptionIndex={effectivePriceOptionIndex}
+              regionMeta={regionMeta}
+              onOpenMediaBrowse={() => setMediaBrowseOpen(true)}
             />
           )}
+
+          {mediaBrowseOpen &&
+          (phase === "dashboard" || phase === "list") &&
+          catalog.length > 0 ? (
+            <div className="mt-10 space-y-4 rounded-[24px] border-2 border-border bg-muted/40 p-5 sm:p-6">
+              <div className="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+                    [ {isKo ? "매체 추가" : "ADD MEDIA"} ]
+                  </p>
+                  <h3 className="mt-1 text-lg font-bold text-foreground">
+                    {isKo ? "추천 외 매체 더 찾기" : "Find more media beyond picks"}
+                  </h3>
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {isKo
+                      ? "검색·필터로 원하는 매체를 담으면 견적·보고서에 함께 반영됩니다."
+                      : "Search and add placements — they are included in quote and report."}
+                  </p>
+                </div>
+                <BtnBlock
+                  variant="secondary"
+                  size="sm"
+                  onClick={() => setMediaBrowseOpen(false)}
+                >
+                  {isKo ? "닫기" : "Close"}
+                </BtnBlock>
+              </div>
+              <MediaSearchPage
+                embedded
+                initialMedia={catalogHomeItems}
+                initialCatalogItems={catalog}
+                initialTotal={catalog.length}
+              />
+            </div>
+          ) : null}
 
           {phase === "noResults" && (
             <div className="mx-auto max-w-lg border-2 border-border bg-muted p-8 text-center">
@@ -978,6 +1035,13 @@ export default function RecommendPageClient({
                   </h2>
                 </div>
                 <div className="flex flex-wrap gap-2">
+                  <BtnBlock
+                    variant="primary"
+                    size="sm"
+                    onClick={() => setMediaBrowseOpen(true)}
+                  >
+                    {isKo ? "매체 더 찾기" : "Find more media"}
+                  </BtnBlock>
                   <BtnBlock
                     variant="secondary"
                     size="sm"
