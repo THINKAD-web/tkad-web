@@ -7,6 +7,7 @@ import {
   normalizeQuoteBudgetInputToManwon,
   wonToManwon,
 } from "@/lib/ooh-quote-amount";
+import { parseQuoteMediaSelections } from "@/lib/quote-media-selections";
 import {
   apiError,
   apiOk,
@@ -30,6 +31,7 @@ const Body = z.object({
   budgetMax: z.number().int().nonnegative().optional(),
   /** 네트워크 매체 선택 수량 — { [catalogId]: units }. 가격은 구간/단가로 환산. */
   networkUnits: z.record(z.string(), z.number().int().positive()).optional(),
+  mediaSelections: z.array(z.unknown()).optional(),
   locale: z.enum(["ko", "en"]).default("ko"),
 });
 
@@ -53,8 +55,11 @@ export async function POST(req: Request) {
       budgetMin,
       budgetMax,
       networkUnits,
+      mediaSelections: mediaSelectionsRaw,
       locale,
     } = parsed.data;
+
+    const mediaSelectionsJson = parseQuoteMediaSelections(mediaSelectionsRaw);
 
     const catalog = await fetchPublicMediaCatalog();
     const picked = catalog.filter((m) => mediaIds.includes(m.id));
@@ -64,10 +69,18 @@ export async function POST(req: Request) {
       });
     }
 
+    const selectionMap = new Map(
+      (mediaSelectionsJson ?? []).map((s) => [s.mediaId, s]),
+    );
+
     // 네트워크 매체는 선택 수량(units)으로 월 단가를 환산, 일반 매체는 표시 단가(원) 사용.
     const totalWon = picked.reduce((sum, m) => {
+      const snap = selectionMap.get(m.id);
+      if (snap?.lineTotalWon != null && snap.lineTotalWon > 0) {
+        return sum + snap.lineTotalWon;
+      }
       if (m.catalogSource === "network") {
-        const units = networkUnits?.[m.id];
+        const units = networkUnits?.[m.id] ?? snap?.quantity;
         if (units && units > 0) {
           return sum + computeNetworkMonthlyFromMediaItem(m, units);
         }
@@ -94,6 +107,7 @@ export async function POST(req: Request) {
         budgetMax: budgetMaxMan,
         locale,
         pdfTemplate: "default",
+        mediaSelections: mediaSelectionsJson ?? undefined,
       },
       select: { id: true, createdAt: true, totalAmount: true },
     });

@@ -81,6 +81,15 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
       value: detail.categoryLabel,
     });
   }
+  if (detail.quantityLabel) {
+    specs.push({
+      key: "qty",
+      icon: Ruler,
+      label: isKo ? "수량" : "Qty",
+      value: detail.quantityLabel,
+      tone: "cyan",
+    });
+  }
   if (detail.size) {
     specs.push({
       key: "size",

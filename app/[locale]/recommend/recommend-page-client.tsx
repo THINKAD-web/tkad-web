@@ -55,6 +55,8 @@ import {
   type CampaignMediaQuantities,
   plannerMonthlyPriceWonForMedia,
 } from "@/lib/planner/planner-media-quantity";
+import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
+import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -354,6 +356,29 @@ export default function RecommendPageClient({
           0,
         );
 
+        const mediaSelections = picked.map((m) => {
+          const poIdx = effectivePriceOptionIndex[m.id] ?? 0;
+          const units = effectiveQuantities[m.id];
+          const lineTotalWon = plannerMonthlyPriceWonForMedia(
+            m,
+            effectiveQuantities,
+            effectivePriceOptionIndex,
+          );
+          return buildQuoteMediaSelectionSnapshot({
+            media: m,
+            isKo,
+            priceOptionIndex: poIdx,
+            units,
+            lineTotalWon,
+          });
+        });
+        const networkUnits: Record<string, number> = {};
+        for (const m of picked) {
+          if (!isNetworkCatalogItem(m)) continue;
+          const q = effectiveQuantities[m.id];
+          if (q != null && q > 0) networkUnits[m.id] = Math.round(q);
+        }
+
         const res = await fetch("/api/quote/create", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -365,6 +390,8 @@ export default function RecommendPageClient({
             period,
             budgetMax: monthlyWon > 0 ? wonToManwon(monthlyWon) : undefined,
             locale: isKo ? "ko" : "en",
+            mediaSelections,
+            ...(Object.keys(networkUnits).length > 0 ? { networkUnits } : {}),
           }),
         });
         const data = (await res.json()) as {
