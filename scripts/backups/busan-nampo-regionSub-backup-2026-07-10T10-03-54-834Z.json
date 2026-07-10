@@ -1,0 +1,61 @@
+{
+  "createdAt": "2026-07-10T10:03:54.834Z",
+  "purpose": "busan_nampo tagging pre-apply backup",
+  "targetRegionSub": "busan_nampo",
+  "items": [
+    {
+      "id": "cmqygbdkb000204lemkq78k0i",
+      "name": "부산 남포동 광복로 패션거리 전광판 광고",
+      "location": "부산 중구 광복로55번길 5",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "중구",
+      "updatedAt": "2026-07-09T15:00:39.194Z"
+    },
+    {
+      "id": "cmqy2gb32000004l2pf6j5vhg",
+      "name": "부산 남포역 한국투자증권 전광판 광고",
+      "location": "부산 중구 해관로 1",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "중구",
+      "updatedAt": "2026-07-09T15:00:39.577Z"
+    },
+    {
+      "id": "cmoxwu87g000004jo5e7oojhw",
+      "name": "부산 중앙역 금진빌딩 전광판 광고",
+      "location": "부산 중구 중앙대로 111",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "중구",
+      "updatedAt": "2026-07-09T15:00:40.289Z"
+    },
+    {
+      "id": "cmpdw86yy000604lbo1njx8en",
+      "name": "부산 자갈치시장 해안미디어보드 전광판 광고",
+      "location": "부산 중구 자갈치해안로 52",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "중구",
+      "updatedAt": "2026-07-09T15:00:40.322Z"
+    },
+    {
+      "id": "cmoxv0c10000004ibkhytl26r",
+      "name": "부산 남포동 HL타워 전광판 광고",
+      "location": "부산 중구 구덕로 40",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "중구",
+      "updatedAt": "2026-07-10T10:01:31.318Z"
+    },
+    {
+      "id": "cmpdw6b60000204lbzq9zn0go",
+      "name": "부산 자갈치역 JS메디컬 전광판 광고",
+      "location": "부산 서구 구덕로 95 JS메디컬",
+      "regionMain": "busan",
+      "regionSub": "busan_downtown",
+      "district": "서구",
+      "updatedAt": "2026-07-10T09:48:26.653Z"
+    }
+  ]
+}
