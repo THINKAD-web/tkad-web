@@ -1812,6 +1812,18 @@ export default function PlannerPageClient({
                   ageKeys,
                   industryKey,
                 }}
+                recommendationContext={{
+                  goal: campaignGoal,
+                  regions,
+                  seoulZones,
+                  busanZones,
+                  categories: categoriesArr,
+                  ageKeys,
+                  industryKey,
+                  budgetMan: budgetNum,
+                  months,
+                  goalFollowUp,
+                }}
                 appliedScenario={appliedScenario}
                 scenarioVariantLabels={scenarioVariantLabels}
                 regionBreakdown={regionalReport?.regionalBreakdown}

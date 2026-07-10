@@ -55,6 +55,10 @@ import type {
   AppliedPlannerScenario,
   ScenarioVariant,
 } from "@/lib/planner/scenario-types";
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+import type { ScoredMedia as PlannerScoredMedia } from "@/lib/planner/recommend";
+import { enrichPlannerPortfolioForExport, buildPlannerPortfolioScored } from "@/lib/planner/planner-portfolio-rationale";
+import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { PlannerScenarioContextBanner } from "@/components/planner/planner-scenario-context-banner";
 import { ReportSectionVisibilityPanel } from "@/components/planner/report-section-visibility-panel";
 import { usePlannerReportSectionVisibility } from "@/hooks/use-planner-report-section-visibility";
@@ -115,6 +119,10 @@ export type PlannerReportSharedProps = {
   /** 시나리오 카드 적용 시 보고서 상단 맥락. 수동 진행 시 null */
   appliedScenario?: AppliedPlannerScenario | null;
   scenarioVariantLabels?: Record<ScenarioVariant, string>;
+  /** Step 4 추천 컨텍스트 — 매체별 rationale formatter용 */
+  recommendationContext?: RecommendationContext | null;
+  /** formatter scored (화면 「왜 이 매체?」용, 미전달 시 recommendationContext로 계산) */
+  scoredPortfolio?: readonly PlannerScoredMedia[];
   /** 문서 밖 지역 블록과 미리보기 동기화용 (미전달 시 Step 내부 state) */
   sectionVisibility?: Record<
     import("@/lib/planner-report-export/section-visibility").PlannerReportSectionKey,
@@ -133,6 +141,63 @@ function reportPortfolioPricing(props: PlannerReportSharedProps) {
     quantities: props.campaignMediaQuantities,
     priceOptionIndex: props.campaignMediaPriceOptionIndex,
   };
+}
+
+function resolvePlannerExportPortfolio(props: PlannerReportSharedProps): MediaItem[] {
+  if (!props.recommendationContext || props.portfolio.length === 0) {
+    return props.portfolio;
+  }
+  return enrichPlannerPortfolioForExport(
+    props.portfolio,
+    props.recommendationContext,
+    props.isKo ? "ko" : "en",
+  );
+}
+
+export function PlannerMediaRationaleBlock({
+  isKo,
+  scored,
+}: {
+  isKo: boolean;
+  scored: readonly PlannerScoredMedia[];
+}) {
+  if (scored.length === 0) return null;
+  return (
+    <div className="rounded-2xl border-2 border-border bg-card p-5">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+        [ {isKo ? "왜 이 매체?" : "Why this media?"} ]
+      </p>
+      <ul className="mt-4 space-y-4">
+        {scored.map((row) => {
+          const name = isKo ? row.media.name : row.media.nameEn || row.media.name;
+          const lines = rationaleLinesForLocale(
+            row.rationaleLines,
+            isKo ? "ko" : "en",
+          );
+          return (
+            <li
+              key={row.media.id}
+              className="border-t border-border pt-4 first:border-t-0 first:pt-0"
+            >
+              <div className="flex flex-wrap items-baseline justify-between gap-2">
+                <p className="text-sm font-bold text-foreground">{name}</p>
+                <span className="font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
+                  {isKo ? "적합도" : "Fit"} {Math.round(row.score * 100)}
+                </span>
+              </div>
+              {lines.length > 0 ? (
+                <ul className="mt-2 space-y-1 text-sm leading-relaxed text-muted-foreground">
+                  {lines.slice(0, 3).map((line) => (
+                    <li key={line}>· {line}</li>
+                  ))}
+                </ul>
+              ) : null}
+            </li>
+          );
+        })}
+      </ul>
+    </div>
+  );
 }
 
 function usePlannerReportDerived(props: PlannerReportSharedProps) {
@@ -301,6 +366,26 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
   const [emailSent, setEmailSent] = useState(false);
   const [emailError, setEmailError] = useState<string | null>(null);
 
+  const portfolioForExport = useMemo(
+    () => resolvePlannerExportPortfolio(props),
+    [props.portfolio, props.recommendationContext, props.isKo],
+  );
+
+  const scoredForReport = useMemo(() => {
+    if (props.scoredPortfolio?.length) return props.scoredPortfolio;
+    if (!props.recommendationContext || props.portfolio.length === 0) return [];
+    return buildPlannerPortfolioScored(
+      props.portfolio,
+      props.recommendationContext,
+      props.isKo ? "ko" : "en",
+    );
+  }, [
+    props.scoredPortfolio,
+    props.portfolio,
+    props.recommendationContext,
+    props.isKo,
+  ]);
+
   const payload = useMemo(
     () =>
       buildOohReportPayload({
@@ -316,7 +401,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignGoal: props.campaignGoal,
         seoulZones: props.seoulZones,
         goalFollowUp: props.goalFollowUp,
-        portfolio: props.portfolio,
+        portfolio: portfolioForExport,
         metrics: props.metrics,
         reachCorePct: props.reachCorePct,
         reachExtendedPct: props.reachExtendedPct,
@@ -333,7 +418,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         campaignMediaQuantities: props.campaignMediaQuantities,
         campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
       }),
-    [props, derived, snapshotAt],
+    [props, derived, snapshotAt, portfolioForExport],
   );
 
   const [documentTitle, setDocumentTitle] = useState(payload.documentTitle);
@@ -524,6 +609,10 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         isAutoMix={props.isAutoPortfolio}
         unresolvedCount={props.unresolvedMediaCount ?? 0}
       />
+
+      {scoredForReport.length > 0 ? (
+        <PlannerMediaRationaleBlock isKo={props.isKo} scored={scoredForReport} />
+      ) : null}
 
       {props.narrativeContext && props.portfolio.length > 0 ? (
         <PlannerProposalNarrative
@@ -784,6 +873,11 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
   const sectionVisibility =
     props.sectionVisibility ?? internalSectionVisibility;
 
+  const portfolioForExport = useMemo(
+    () => resolvePlannerExportPortfolio(props),
+    [props.portfolio, props.recommendationContext, props.isKo],
+  );
+
   const handleExport = useCallback(
     async (format: PlannerReportExportFormat) => {
       if (downloading) return;
@@ -802,7 +896,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           campaignGoal: props.campaignGoal,
           seoulZones: props.seoulZones,
           goalFollowUp: props.goalFollowUp,
-          portfolio: props.portfolio,
+          portfolio: portfolioForExport,
           metrics: props.metrics,
           reachCorePct: props.reachCorePct,
           reachExtendedPct: props.reachExtendedPct,
@@ -836,7 +930,7 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
         setDownloading(null);
       }
     },
-    [downloading, props, derived, snapshotAt, sectionVisibility, t, tCommon, toast],
+    [downloading, props, derived, snapshotAt, sectionVisibility, portfolioForExport, t, tCommon, toast],
   );
 
   if (pdfAccessLoading) {

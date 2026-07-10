@@ -976,6 +976,18 @@ export default function IntegratedPlannerPageClient({
                 mediaPlacements={mediaPlacements}
                 appliedScenario={appliedScenario}
                 scenarioVariantLabels={scenarioVariantLabels}
+                recommendationContext={{
+                  goal: campaignGoal,
+                  regions,
+                  seoulZones,
+                  busanZones,
+                  categories: categoriesArr,
+                  ageKeys,
+                  industryKey,
+                  budgetMan: budgetNum,
+                  months,
+                  goalFollowUp,
+                }}
               />
             ) : null}
           </div>

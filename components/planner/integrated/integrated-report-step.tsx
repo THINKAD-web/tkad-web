@@ -28,8 +28,15 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
-import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
+import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
+import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+import type { ScoredMedia as PlannerScoredMedia } from "@/lib/planner/recommend";
+import {
+  buildPlannerPortfolioScored,
+  enrichPlannerPortfolioForExport,
+} from "@/lib/planner/planner-portfolio-rationale";
+import { PlannerMediaRationaleBlock } from "@/components/planner-report-step";
 import type {
   AppliedPlannerScenario,
   ScenarioVariant,
@@ -61,6 +68,8 @@ type Props = {
   mediaPlacements?: Record<string, CompositeLogoPlacement>;
   appliedScenario?: AppliedPlannerScenario | null;
   scenarioVariantLabels?: Record<ScenarioVariant, string>;
+  recommendationContext?: RecommendationContext | null;
+  scoredPortfolio?: readonly PlannerScoredMedia[];
 };
 
 export function IntegratedReportStep(props: Props) {
@@ -85,6 +94,32 @@ export function IntegratedReportStep(props: Props) {
     day: "numeric",
   }).format(new Date());
 
+  const portfolioForExport = useMemo(() => {
+    if (!props.recommendationContext || props.portfolio.length === 0) {
+      return props.portfolio;
+    }
+    return enrichPlannerPortfolioForExport(
+      props.portfolio,
+      props.recommendationContext,
+      props.isKo ? "ko" : "en",
+    );
+  }, [props.portfolio, props.recommendationContext, props.isKo]);
+
+  const scoredForReport = useMemo(() => {
+    if (props.scoredPortfolio?.length) return props.scoredPortfolio;
+    if (!props.recommendationContext || props.portfolio.length === 0) return [];
+    return buildPlannerPortfolioScored(
+      props.portfolio,
+      props.recommendationContext,
+      props.isKo ? "ko" : "en",
+    );
+  }, [
+    props.scoredPortfolio,
+    props.portfolio,
+    props.recommendationContext,
+    props.isKo,
+  ]);
+
   const payload = useMemo(
     () =>
       buildIntegratedReportPayload({
@@ -97,7 +132,7 @@ export function IntegratedReportStep(props: Props) {
         categoriesText: props.categoriesText,
         ageText: props.ageText,
         industryText: props.industryText,
-        portfolio: props.portfolio,
+        portfolio: portfolioForExport,
         portfolioPricing: props.portfolioPricing,
         digitalResult: props.digitalResult,
         metrics: props.metrics,
@@ -105,7 +140,7 @@ export function IntegratedReportStep(props: Props) {
         includeProSections: plannerResultAllowed,
         months: props.months,
       }),
-    [props, generatedAt, plannerResultAllowed],
+    [props, generatedAt, plannerResultAllowed, portfolioForExport],
   );
 
   const [sectionVisibility, setSectionVisibility] =
@@ -172,6 +207,10 @@ export function IntegratedReportStep(props: Props) {
         portfolio={props.portfolio}
         portfolioRows={payload.portfolio}
       />
+
+      {scoredForReport.length > 0 ? (
+        <PlannerMediaRationaleBlock isKo={props.isKo} scored={scoredForReport} />
+      ) : null}
 
       <section className="space-y-6">
         <PlannerProGate
