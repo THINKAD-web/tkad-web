@@ -65,6 +65,7 @@ import {
 } from "@/lib/recommend/recommend-plan-cart";
 import {
   runRecommendMatchFromCatalog,
+  filterRecommendCandidateCatalog,
   type RecommendMatchMeta,
 } from "@/lib/recommend/recommend-region-filter";
 import { aiInputToMatching } from "@/lib/recommendation-adapters";
@@ -514,11 +515,11 @@ export default function RecommendPageClient({
       setPhase("loading");
       setRegionMeta(null);
       // v1 AI 자유입력: 네트워크 매체 제외(서버 후보 + 클라 폴백 모두 일관 적용)
-      const effectiveCatalog = opts?.excludeNetwork
-        ? catalog.filter(
-            (m) => m.catalogSource !== "network" && m.type !== "network",
-          )
-        : catalog;
+      const effectiveCatalog = filterRecommendCandidateCatalog(
+        catalog,
+        payload.input,
+        Boolean(opts?.excludeNetwork),
+      );
       try {
         const res = await fetch("/api/recommend", {
           method: "POST",
@@ -623,10 +624,8 @@ export default function RecommendPageClient({
           )
         : input.seoulZones?.length ?
           ["seoul"]
-        : input.region &&
-            input.region !== "all" &&
-            (validRegionCodes as readonly string[]).includes(input.region) ?
-          [input.region as RegionCheckboxCode]
+        : input.busanZones?.length ?
+          ["busan"]
         : [];
       const payload: MediaAiRecommendFormSubmit = {
         input,

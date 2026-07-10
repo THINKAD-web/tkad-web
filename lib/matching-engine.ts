@@ -14,6 +14,7 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
+import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent } from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
@@ -368,9 +369,19 @@ function scoreTarget(
   return best;
 }
 
+function isPlannerCategorySlug(
+  c: string,
+): c is "digital" | "static" | "mobile" {
+  return c === "digital" || c === "static" || c === "mobile";
+}
+
 function matchesMatchingInputCategory(m: MediaItem, category: string): boolean {
   const c = category.trim().toLowerCase();
   if (!c) return true;
+  if (isPlannerCategorySlug(c)) {
+    if (c === "mobile") return mediaMatchesPlannerMobileIntent(m);
+    return matchesPlannerCategory(m, c);
+  }
   const t = (m.type ?? "").toLowerCase();
   if (t === c) return true;
   if (

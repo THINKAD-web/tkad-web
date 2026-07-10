@@ -215,6 +215,27 @@ export function matchesPlannerCategory(
   return false;
 }
 
+/** network 타입이어도 택시·버스·래핑 haystack이면 mobile 의도로 취급 (recommend 매칭용) */
+export const PLANNER_MOBILE_HAYSTACK_RE =
+  /버스|bus\b|택시|taxi|래핑|랩핑|vehicle[\s_-]?wrap|bus[\s_-]?wrap|truck|mobility|이동형/i;
+
+export function mediaMatchesPlannerMobileIntent(item: MediaItem): boolean {
+  if (matchesPlannerCategory(item, "mobile")) return true;
+  const hay = [
+    item.name,
+    item.nameEn,
+    item.location,
+    item.locationEn,
+    item.subCategory,
+    item.mediaSubCategory,
+    item.networkSubtype,
+    ...(item.tags ?? []),
+  ]
+    .filter(Boolean)
+    .join(" ");
+  return PLANNER_MOBILE_HAYSTACK_RE.test(hay);
+}
+
 export function filterPlannerMedia(
   items: readonly MediaItem[],
   region: "all" | string,

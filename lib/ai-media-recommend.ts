@@ -1,5 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
+import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { PlannerCategory } from "@/lib/planner/types";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import { aiInputToMatching } from "@/lib/recommendation-adapters";
@@ -49,6 +51,10 @@ export type AiRecommendInput = {
   busanZones?: readonly PlannerBusanZoneKey[] | null;
   /** 구조화 폼 다중 지역 선택 — `region` 단일값보다 우선 */
   regionCodes?: readonly string[] | null;
+  /** 규칙 파서·플래너에서 추출한 매체 유형 (digital/static/mobile) */
+  plannerCategories?: readonly PlannerCategory[] | null;
+  /** 자연어 원문 — mobile(택시·버스·래핑) 의도 판별용 */
+  freetextSource?: string | null;
   /** 서울 등 선택 시 `mediaHaystack`에 포함되는 키워드로 한 번 더 좁힘 (하나라도 매칭) */
   locationKeywords?: readonly string[] | null;
   /** 희망 집행 기간(주). UI·사유 문구용 — 스코어 가중은 선택적 */

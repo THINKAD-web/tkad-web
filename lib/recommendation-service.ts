@@ -5,6 +5,7 @@ import type { AiRecommendInput } from "@/lib/ai-media-recommend";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import {
   filterRecommendCatalogByRegions,
+  filterRecommendCandidateCatalog,
   matchRecommendWithRegionalPolicy,
   resolveAiRecommendPlannerRegionIds,
   type RecommendMatchMeta,
@@ -69,13 +70,11 @@ export async function runRecommendation(
   }
 
   const fullCatalog = await fetchPublicMediaCatalog();
-  // v1: AI 자유입력 모드는 네트워크 매체를 후보 풀에서 명시적으로 제외한다.
-  // (MediaNetwork 에 캠페인 목적 분류(targetCategory) 필드가 없어 의도적으로 스코프에서 뺀 결정)
-  let catalog = opts.excludeNetwork
-    ? fullCatalog.filter(
-        (m) => m.catalogSource !== "network" && m.type !== "network",
-      )
-    : fullCatalog;
+  let catalog = filterRecommendCandidateCatalog(
+    fullCatalog,
+    opts.aiRecommendInput,
+    Boolean(opts.excludeNetwork),
+  );
 
   let regionMeta: RecommendMatchMeta | undefined;
   let recommendations: MatchedMedia[];

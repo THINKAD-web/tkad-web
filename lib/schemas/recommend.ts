@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { PLANNER_BUSAN_ZONE_KEYS } from "@/lib/planner/busan-zones";
 import { PLANNER_SEOUL_ZONE_KEYS } from "@/lib/planner/seoul-zones";
 
 export const recommendInputSchema = z.object({
@@ -22,7 +23,12 @@ export const recommendInputSchema = z.object({
   preferredPeriodWeeks: z.number().optional(),
   placementHints: z.array(z.string()).optional(),
   seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
+  busanZones: z.array(z.enum(PLANNER_BUSAN_ZONE_KEYS)).optional(),
   regionCodes: z.array(z.string().max(32)).optional(),
+  plannerCategories: z
+    .array(z.enum(["digital", "static", "mobile"]))
+    .optional(),
+  freetextSource: z.string().max(2000).optional(),
 });
 
 export const recommendRequestSchema = z.object({

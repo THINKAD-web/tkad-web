@@ -24,6 +24,7 @@ import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
 import { followUpGoalTags } from "@/lib/planner/goal-follow-up";
 import { mergePlannerMacroMatchingRegions } from "@/lib/planner/busan-zones";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
+import { isNonSpecificRegionCode } from "@/lib/recommend/recommend-region-filter";
 
 function toMatchingGoal(raw: string | null | undefined): MatchingGoal {
   return matchingGoalFromRaw(raw) as MatchingGoal;
@@ -33,12 +34,9 @@ export function aiInputToMatching(
   input: AiRecommendInput,
   seed = 0,
 ): MatchingInput {
-  const macroRegions =
-    input.regionCodes?.filter((c) => c.trim().length > 0).length ?
-      [...input.regionCodes!]
-    : input.region && input.region !== "all" ?
-      [input.region]
-    : [];
+  const macroRegions = (input.regionCodes ?? []).filter(
+    (c) => c.trim().length > 0 && !isNonSpecificRegionCode(c),
+  );
 
   const seoulZones = input.seoulZones ?? [];
   const busanZones = input.busanZones ?? [];
@@ -69,8 +67,13 @@ export function aiInputToMatching(
     ),
     goal: toMatchingGoal(input.goal),
     goalTags: matchingGoalTagsFromRaw(input.goal),
-    categories:
-      input.type && input.type !== "all" ? [input.type] : undefined,
+    categories: (() => {
+      if (input.plannerCategories?.length) {
+        return [...input.plannerCategories];
+      }
+      if (input.type && input.type !== "all") return [input.type];
+      return undefined;
+    })(),
     seed,
   };
 }

@@ -16,6 +16,7 @@ import {
   type FreetextEvidenceRow,
 } from "@/lib/planner/freetext-brief-summary";
 import { plannerFreetextToRecommendBrief } from "@/lib/recommend/planner-freetext-to-recommend-brief";
+import { buildAiRecommendInputFromFreetext } from "@/lib/recommend/build-freetext-recommend-input";
 import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import { cn } from "@/lib/utils";
 
@@ -187,43 +188,27 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
   );
 
   const runRecommend = useCallback(() => {
-    const budget = Math.round(Number(draft.budgetMan) || 0);
-    if (
-      !draft.goal ||
-      !draft.target ||
-      !draft.industry ||
-      !draft.region.trim() ||
-      budget <= 0
-    ) {
+    if (!parseResult) return;
+    const input = buildAiRecommendInputFromFreetext(parseResult, draft, text);
+    if (!input) {
+      const zones = parseResult.fields.seoulZones.value ?? [];
+      const busanZones = parseResult.fields.busanZones.value ?? [];
+      const parsedRegions = parseResult.fields.regions.value ?? [];
+      const hasParsedRegion =
+        parsedRegions.length > 0 || zones.length > 0 || busanZones.length > 0;
       setError(
         isKo
-          ? "비어 있는 조건을 모두 선택/입력해주세요."
-          : "Please fill in all the highlighted fields.",
+          ? hasParsedRegion
+            ? "비어 있는 조건을 모두 선택/입력해주세요."
+            : "목적·타깃·업종·예산을 입력해주세요."
+          : hasParsedRegion
+            ? "Please fill in all the highlighted fields."
+            : "Please fill goal, target, industry, and budget.",
       );
       return;
     }
-    const zones = parseResult?.fields.seoulZones.value ?? [];
-    const busanZones = parseResult?.fields.busanZones.value ?? [];
-    const parsedRegions = parseResult?.fields.regions.value ?? [];
-    const regionCodes =
-      parsedRegions.length > 0 ? parsedRegions
-      : zones.length > 0 ? (["seoul"] as const)
-      : busanZones.length > 0 ? (["busan"] as const)
-      : undefined;
-
-    const input: AiRecommendInput = {
-      goal: draft.goal as GoalKey,
-      target: draft.target as TargetKey,
-      budgetMaxMan: budget,
-      region:
-        regionCodes?.length === 1 ? regionCodes[0] : draft.region.trim(),
-      industry: draft.industry as IndustryKey,
-      ...(regionCodes?.length ? { regionCodes: [...regionCodes] } : {}),
-      ...(zones.length > 0 ? { seoulZones: zones } : {}),
-      ...(busanZones.length > 0 ? { busanZones } : {}),
-    };
     onConfirm(input);
-  }, [draft, isKo, onConfirm, parseResult]);
+  }, [draft, isKo, onConfirm, parseResult, text]);
 
   const freeRuleBadge = (
     <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
@@ -236,6 +221,13 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       "h-11 w-full rounded-xl border bg-white px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400/35 dark:bg-white/8 dark:text-white";
     const emptyRing = "border-amber-300 dark:border-amber-400/50";
     const filledRing = "border-gray-200 dark:border-white/10";
+    const parsedRegions = parseResult?.fields.regions.value ?? [];
+    const parsedZones = parseResult?.fields.seoulZones.value ?? [];
+    const parsedBusanZones = parseResult?.fields.busanZones.value ?? [];
+    const hasParsedRegion =
+      parsedRegions.length > 0 ||
+      parsedZones.length > 0 ||
+      parsedBusanZones.length > 0;
     return (
       <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex flex-wrap items-center gap-2">
@@ -334,7 +326,13 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
 
           <label className="space-y-1">
             <span className="text-xs font-medium text-gray-600 dark:text-white/60">
-              {isKo ? "희망 지역" : "Region"}
+              {isKo
+                ? hasParsedRegion
+                  ? "희망 지역"
+                  : "희망 지역 (선택 · 미입력 시 전국)"
+                : hasParsedRegion
+                  ? "Region"
+                  : "Region (optional · nationwide if empty)"}
             </span>
             <input
               type="text"
@@ -342,8 +340,23 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
               onChange={(e) =>
                 setDraft((d) => ({ ...d, region: e.target.value }))
               }
-              placeholder={isKo ? "예: 서울 강남" : "e.g. Seoul Gangnam"}
-              className={cn(selCls, draft.region.trim() ? filledRing : emptyRing)}
+              placeholder={
+                isKo
+                  ? hasParsedRegion
+                    ? "예: 서울 강남"
+                    : "비우면 전국 검색"
+                  : hasParsedRegion
+                    ? "e.g. Seoul Gangnam"
+                    : "Leave empty for nationwide"
+              }
+              className={cn(
+                selCls,
+                hasParsedRegion
+                  ? draft.region.trim()
+                    ? filledRing
+                    : emptyRing
+                  : filledRing,
+              )}
             />
           </label>
 
