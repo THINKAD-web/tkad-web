@@ -272,7 +272,7 @@ function scoreBudget(
   if (ratio > 1) return -1;
   if (ratio >= 0.8) return 20;
   if (ratio >= 0.1) return 30;
-  // 네트워크 진입 단가(1구좌·최소 패키지)는 예산 내이면 과소평가하지 않음
+  // 네트워크 진입 단가(최소 패키지·per-unit)는 예산 내이면 과소평가하지 않음
   if (isNetworkCatalogItem(m) && ratio > 0) return 26;
   return 15;
 }

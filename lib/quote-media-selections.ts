@@ -2,9 +2,9 @@
 export type QuoteMediaSelectionSnapshot = {
   mediaId: string;
   priceOptionIndex: number;
-  /** 네트워크 구좌·이동형 대수 등 — 미지정 시 1 (레거시 호환) */
+  /** 네트워크·이동형 대수 등 — 미지정 시 1 (레거시 호환) */
   quantity?: number;
-  /** PDF·라인 표기용 — 예: "87구좌", "스팟광고", "3대" */
+  /** PDF·라인 표기용 — 예: "87대", "스팟광고", "3대" */
   quantityLabel?: string | null;
   optionLabel: string | null;
   optionPriceWon: number;

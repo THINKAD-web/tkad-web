@@ -95,14 +95,14 @@ test("parseQuoteMediaSelections preserves quantity fields", () => {
       mediaId: "nw_1",
       priceOptionIndex: 0,
       quantity: 87,
-      quantityLabel: "87구좌",
+      quantityLabel: "87대",
       optionLabel: null,
       optionPriceWon: 3_000_000,
       lineTotalWon: 3_000_000,
     },
   ]);
   assert.equal(parsed?.[0]?.quantity, 87);
-  assert.equal(parsed?.[0]?.quantityLabel, "87구좌");
+  assert.equal(parsed?.[0]?.quantityLabel, "87대");
 });
 
 test("network tier pricing uses package tier not pricePerUnit×qty", () => {

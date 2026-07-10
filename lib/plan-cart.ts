@@ -30,7 +30,7 @@ export interface PlanCartItem {
   mediaType: string;
   region: string;
   price: number;
-  /** 수량(대·기·구좌 등) — 미지정 시 카탈로그 기본값 */
+  /** 수량(대·기 등) — 미지정 시 카탈로그 기본값 */
   quantity?: number;
   /** `priceOptions` 패키지·등급 매체 — 선택 옵션 인덱스 */
   priceOptionIndex?: number;

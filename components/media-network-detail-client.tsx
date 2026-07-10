@@ -34,9 +34,11 @@ import {
   resolveNetworkVenueCode,
 } from "@/lib/media-network-types";
 import {
+  getMediaPackageOptions,
   getQuantityBounds,
   getQuantityUnitMode,
   getValidNetworkPackageTiers,
+  networkQuantitySuffixForItem,
 } from "@/lib/media-quantity";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
 import { computeNetworkDailyFootfall } from "@/lib/media-network-footfall";
@@ -841,6 +843,8 @@ function NetworkPriceCalculator({
   const mediaItem = useMemo(() => networkDetailToMediaItem(data), [data]);
   const unitMode = getQuantityUnitMode(mediaItem);
   const packageTiers = getValidNetworkPackageTiers(mediaItem);
+  const packageOptions = getMediaPackageOptions(mediaItem, isKo);
+  const quantitySuffix = networkQuantitySuffixForItem(mediaItem, isKo);
   const bounds = getQuantityBounds(mediaItem);
   const minUnits = bounds.min;
   const sliderMax =
@@ -954,8 +958,8 @@ function NetworkPriceCalculator({
           <label className="text-sm font-semibold text-navy">
             {unitMode === "package"
               ? isKo
-                ? "패키지 구좌"
-                : "Package slot"
+                ? `패키지 (${quantitySuffix})`
+                : "Package units"
               : isKo
                 ? "설치 수량"
                 : "Units"}
@@ -971,32 +975,30 @@ function NetworkPriceCalculator({
                 className="w-28 rounded-lg border border-navy/15 bg-white px-3 py-1.5 text-right text-sm font-bold tabular-nums text-navy outline-none focus:border-gold"
               />
               <span className="text-sm text-muted-foreground">
-                {isKo ? "대" : "units"}
+                {quantitySuffix}
               </span>
             </div>
           ) : (
             <span className="text-sm font-bold tabular-nums text-navy">
               {units.toLocaleString()}
-              {isKo ? "구좌" : " pkg"}
+              {isKo ? quantitySuffix : " units"}
             </span>
           )}
         </div>
         {unitMode === "package" && packageTiers.length > 0 ? (
           <div className="mt-3 flex flex-wrap gap-2">
-            {packageTiers.map((t) => (
+            {packageOptions.map((opt) => (
               <button
-                key={t.units}
+                key={opt.key}
                 type="button"
-                onClick={() => setUnits(t.units)}
+                onClick={() => opt.units != null && setUnits(opt.units)}
                 className={`rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
-                  units === t.units
+                  units === opt.units
                     ? "border-gold bg-gold/15 text-gold-dark"
                     : "border-navy/15 bg-white text-navy hover:border-gold"
                 }`}
               >
-                {isKo
-                  ? `${t.units.toLocaleString("ko-KR")}구좌 · ₩${t.price.toLocaleString("ko-KR")}`
-                  : `${t.units.toLocaleString("en-US")} pkg · ₩${t.price.toLocaleString("en-US")}`}
+                {opt.label}
               </button>
             ))}
           </div>

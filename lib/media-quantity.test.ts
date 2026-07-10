@@ -179,6 +179,26 @@ test("pharmacy network: package mode bounds from tiers", () => {
     max: 87,
     default: 1,
   });
+  const opts = getMediaPackageOptions(pharmacy, true);
+  assert.ok(opts[1]!.label.includes("87대"));
+  assert.equal(opts[1]!.label.includes("구좌"), false);
+});
+
+test("elevator network: package tier labels use 기", () => {
+  const elevator = baseItem({
+    id: "nw_el",
+    catalogSource: "network",
+    type: "elevator",
+    networkSubtype: "elevator",
+    networkPackageTiers: [
+      { units: 10, price: 5_000_000 },
+      { units: 50, price: 20_000_000 },
+    ],
+  });
+  assert.equal(getQuantityUnitMode(elevator), "package");
+  const opts = getMediaPackageOptions(elevator, true);
+  assert.ok(opts[0]!.label.includes("10기"));
+  assert.equal(opts[0]!.label.includes("구좌"), false);
 });
 
 test("network package options: duplicate tier units get unique keys", () => {

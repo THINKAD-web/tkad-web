@@ -291,7 +291,7 @@ export default function AdminNetworkEditor(props: Props) {
       }));
   }, [locRows]);
 
-  /** 개별 위치 행에서 자동 집계 — 지점 수(개소)·총 구좌 수·이름 누락 경고 */
+  /** 개별 위치 행에서 자동 집계 — 지점 수(개소)·총 설치 수·이름 누락 경고 */
   const locStats = (() => {
     const named = locRows.filter((r) => r.name.trim());
     const siteCount = named.length;

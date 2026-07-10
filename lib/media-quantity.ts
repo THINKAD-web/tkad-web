@@ -1,7 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { catalogPriceFieldToWon, formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
-import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
+import { computeNetworkMonthlyFromMediaItem, networkInventoryUnitSuffix } from "@/lib/media-network-types";
 
 /** 견적 위저드(`quote-page-client`)와 동일한 네트워크 수량 상한 폴백 */
 export const MEDIA_QUANTITY_NETWORK_SOFT_MAX = 99_999;
@@ -86,7 +86,7 @@ export function getValidNetworkPackageTiers(
 
 /**
  * 수량 UI 모드.
- * - `package`: tier·priceOptions 중심 (구좌/패키지 칩)
+ * - `package`: tier·priceOptions 중심 (패키지 칩)
  * - `unit`: pricePerUnit·이동형 대수 스텝퍼
  */
 export function getQuantityUnitMode(m: MediaItem): MediaQuantityUnitMode {
@@ -144,12 +144,23 @@ function formatNetworkTierPackageLabel(
   price: number,
   isKo: boolean,
 ): string {
-  const suffix = isKo ? "구좌" : " pkg";
+  const suffix = networkInventoryUnitSuffix(
+    m.networkSubtype ?? m.type,
+    isKo,
+    m.tags,
+  );
   const unitPart = isKo
-    ? `${units.toLocaleString("ko-KR")}${suffix}`
-    : `${units.toLocaleString("en-US")} pkg`;
+    ? `${units.toLocaleString("ko-KR")}${suffix || "대"}`
+    : `${units.toLocaleString("en-US")} units`;
   const pricePart = formatCatalogPriceFieldWon(price, isKo ? "ko-KR" : "en-US");
   return `${unitPart} · ${pricePart}`;
+}
+
+/** 네트워크 매체 수량 표기 접미사 — 플래너·상세 UI 공용 */
+export function networkQuantitySuffixForItem(m: MediaItem, isKo: boolean): string {
+  if (!isNetworkCatalogItem(m)) return isKo ? "대" : "units";
+  if (!isKo) return "units";
+  return networkInventoryUnitSuffix(m.networkSubtype ?? m.type, isKo, m.tags) || "대";
 }
 
 export function getQuantityBounds(m: MediaItem): MediaQuantityBounds {
@@ -224,7 +235,7 @@ export type CatalogLinePriceOpts = {
 
 /**
  * 카탈로그 매체 월액(원) — 견적·플래너·어드민 공통.
- * - 네트워크: tier/단가×구좌
+ * - 네트워크: tier/단가×수량(기·대)
  * - 등급형 버스: 등급 단가×대수
  * - 패키지 총액 옵션: 선택 옵션가
  * - 이동형 단일: `price × units`
