@@ -22,7 +22,7 @@ const TARGET_MAP: Record<string, string> = {
 
 import { PLANNER_INDUSTRY_TO_MATCHING } from "@/lib/planner/industry-match";
 import { followUpGoalTags } from "@/lib/planner/goal-follow-up";
-import { seoulZonesToMatchingRegions } from "@/lib/planner/seoul-zones";
+import { mergePlannerMacroMatchingRegions } from "@/lib/planner/busan-zones";
 import type { PlannerIndustryKey } from "@/lib/planner/types";
 
 function toMatchingGoal(raw: string | null | undefined): MatchingGoal {
@@ -41,7 +41,12 @@ export function aiInputToMatching(
     : [];
 
   const seoulZones = input.seoulZones ?? [];
-  const regions = seoulZonesToMatchingRegions(macroRegions, seoulZones);
+  const busanZones = input.busanZones ?? [];
+  const regions = mergePlannerMacroMatchingRegions(
+    macroRegions,
+    seoulZones,
+    busanZones,
+  );
 
   if (input.locationKeywords?.length) {
     for (const k of input.locationKeywords) {
@@ -86,9 +91,10 @@ export function plannerContextToMatching(
 
   return {
     monthlyBudgetWon,
-    regions: seoulZonesToMatchingRegions(
+    regions: mergePlannerMacroMatchingRegions(
       ctx.regions,
       ctx.seoulZones ?? [],
+      ctx.busanZones ?? [],
     ),
     industry: ctx.industryKey ?
       (PLANNER_INDUSTRY_TO_MATCHING[ctx.industryKey as PlannerIndustryKey] ??
@@ -97,6 +103,7 @@ export function plannerContextToMatching(
     targets: ctx.ageKeys.length > 0 ? [] : ["mass"],
     plannerAgeKeys: ctx.ageKeys.length > 0 ? [...ctx.ageKeys] : undefined,
     durationMonths: Math.max(1, ctx.months),
+    durationDays: ctx.durationDays,
     goal: toMatchingGoal(goalRaw),
     goalTags: goalTags.length > 0 ? goalTags : undefined,
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,

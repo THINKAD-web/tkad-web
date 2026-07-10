@@ -33,10 +33,12 @@ export type PlanFromBriefParsed = {
   campaignGoal: string | null;
   regions: string[] | null;
   seoulZones: string[] | null;
+  busanZones: string[] | null;
   ageKeys: string[] | null;
   industryKey: string | null;
   budgetMan: number | null;
   months: number | null;
+  durationDays: number | null;
   categories: string[] | null;
   unmatchedTokens: string[];
 };
@@ -95,10 +97,12 @@ function countParsedFields(result: PlannerFreetextParseResult): number {
   if (fields.campaignGoal.value != null) n++;
   if (fields.regions.value?.length) n++;
   if (fields.seoulZones.value?.length) n++;
+  if (fields.busanZones.value?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
   if (fields.budgetMan.value != null) n++;
   if (fields.months.value != null) n++;
+  if (fields.durationDays.value != null) n++;
   if (fields.categories.value?.length) n++;
   return n;
 }
@@ -111,10 +115,12 @@ function toParsedSnapshot(
     campaignGoal: fields.campaignGoal.value,
     regions: fields.regions.value,
     seoulZones: fields.seoulZones.value,
+    busanZones: fields.busanZones.value,
     ageKeys: fields.ageKeys.value,
     industryKey: fields.industryKey.value,
     budgetMan: fields.budgetMan.value,
     months: fields.months.value,
+    durationDays: fields.durationDays.value,
     categories: fields.categories.value,
     unmatchedTokens: result.unmatchedTokens,
   };
@@ -127,11 +133,14 @@ function patchToRecommendationContext(
     goal: patch.campaignGoal ?? null,
     regions: patch.regions ?? [],
     seoulZones: patch.seoulZones ?? [],
+    busanZones: patch.busanZones ?? [],
     categories: patch.categories ?? [],
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,
     budgetMan: patch.budgetMan ?? 0,
     months: patch.months ?? 1,
+    durationDays: patch.goalFollowUp?.eventDurationDays ?? undefined,
+    goalFollowUp: patch.goalFollowUp,
   };
 }
 

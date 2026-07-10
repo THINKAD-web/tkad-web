@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
 import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
@@ -25,6 +26,10 @@ import {
   suggestSeoulZones,
   type PlannerSeoulZoneKey,
 } from "@/lib/planner/seoul-zones";
+import {
+  suggestBusanZones,
+  type PlannerBusanZoneKey,
+} from "@/lib/planner/busan-zones";
 import type {
   PlannerCampaignGoal,
   PlannerIndustryKey,
@@ -170,6 +175,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   );
   const [seoulZones, setSeoulZones] = useState<PlannerSeoulZoneKey[]>([]);
   const [seoulZonesTouched, setSeoulZonesTouched] = useState(false);
+  const [busanZones, setBusanZones] = useState<PlannerBusanZoneKey[]>([]);
+  const [busanZonesTouched, setBusanZonesTouched] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const budgetMin = 100;
@@ -187,6 +194,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         if (code === "seoul") {
           setSeoulZones([]);
           setSeoulZonesTouched(false);
+        }
+        if (code === "busan") {
+          setBusanZones([]);
+          setBusanZonesTouched(false);
         }
       } else {
         next.add(code);
@@ -208,6 +219,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setSeoulZones(suggestedSeoulZones);
   }, [regions, seoulZonesTouched, campaignGoal, suggestedSeoulZones]);
 
+  const suggestedBusanZones = useMemo(() => {
+    if (!campaignGoal) return [] as PlannerBusanZoneKey[];
+    return suggestBusanZones(
+      recommendGoalToPlanner(campaignGoal),
+      recommendIndustryToPlanner(industry ?? "other"),
+    );
+  }, [campaignGoal, industry]);
+
+  useEffect(() => {
+    if (!regions.has("busan") || busanZonesTouched || !campaignGoal) return;
+    setBusanZones(suggestedBusanZones);
+  }, [regions, busanZonesTouched, campaignGoal, suggestedBusanZones]);
+
   const toggleSeoulZone = useCallback((zone: PlannerSeoulZoneKey) => {
     setSeoulZonesTouched(true);
     setSeoulZones((prev) =>
@@ -224,6 +248,23 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setSeoulZonesTouched(false);
     setSeoulZones([...suggestedSeoulZones]);
   }, [suggestedSeoulZones]);
+
+  const toggleBusanZone = useCallback((zone: PlannerBusanZoneKey) => {
+    setBusanZonesTouched(true);
+    setBusanZones((prev) =>
+      prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone],
+    );
+  }, []);
+
+  const clearBusanZones = useCallback(() => {
+    setBusanZonesTouched(true);
+    setBusanZones([]);
+  }, []);
+
+  const applySuggestedBusanZones = useCallback(() => {
+    setBusanZonesTouched(false);
+    setBusanZones([...suggestedBusanZones]);
+  }, [suggestedBusanZones]);
 
   const toggleAge = useCallback((b: AgeBand) => {
     setAgeBands((prev) => {
@@ -322,6 +363,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       budget: number,
       search: string,
       zoneList: readonly PlannerSeoulZoneKey[],
+      busanZoneList: readonly PlannerBusanZoneKey[],
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -341,6 +383,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         regionCodes: regionCodes.length > 0 ? regionCodes : undefined,
         seoulZones:
           regionSet.has("seoul") && zoneList.length > 0 ? [...zoneList] : undefined,
+        busanZones:
+          regionSet.has("busan") && busanZoneList.length > 0
+            ? [...busanZoneList]
+            : undefined,
       };
 
       return { input, regionCodes, searchQuery: search };
@@ -362,6 +408,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         budgetMan,
         searchQuery,
         seoulZones,
+        busanZones,
       ),
     );
   };
@@ -476,6 +523,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onToggle={toggleSeoulZone}
                 onClear={clearSeoulZones}
                 onApplySuggested={applySuggestedSeoulZones}
+              />
+            ) : null}
+            {regions.has("busan") ? (
+              <PlannerBusanZoneChips
+                embedded
+                selected={busanZones}
+                suggested={suggestedBusanZones}
+                isKo={isKo}
+                onToggle={toggleBusanZone}
+                onClear={clearBusanZones}
+                onApplySuggested={applySuggestedBusanZones}
               />
             ) : null}
           </FormField>

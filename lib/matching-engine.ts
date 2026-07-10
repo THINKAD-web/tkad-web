@@ -38,6 +38,8 @@ export type MatchingInput = {
   /** mz | worker | tourist | family | mass | genz | millennial | biz */
   targets: string[];
   durationMonths: number;
+  /** 단기·행사 집행 일수 — 스코어 보조 (선택) */
+  durationDays?: number;
   goal: MatchingGoal | string;
   /** 보조 태그 — launch / event / local (퍼널과 독립) */
   goalTags?: string[];
@@ -101,6 +103,26 @@ const REGION_DEFS: Record<string, RegionDef> = {
     exact: /부산|해운대|센텀|광안|서면|남포/i,
     adjacent: /김해|양산|기장/i,
   },
+  centum: {
+    exact: /센텀|벡스코|bexco|centum|마린시티|센텀시티/i,
+    adjacent: /해운대|우동|동천/i,
+  },
+  haeundae: {
+    exact: /해운대|동백|송정|마린|해수욕/i,
+    adjacent: /센텀|반송|재송/i,
+  },
+  seomyeon: {
+    exact: /서면|부전|전포|범천|양정/i,
+    adjacent: /부산진|연산|망미/i,
+  },
+  nampo: {
+    exact: /남포|광복|자갈치|보수동/i,
+    adjacent: /영도|동광|부산역/i,
+  },
+  downtown: {
+    exact: /부산\s*시내|부산역|초량|참전/i,
+    adjacent: /중구|영도|부암/i,
+  },
   jeju: {
     exact: /제주|중문|서귀|애월/i,
     adjacent: /제주/i,
@@ -126,6 +148,11 @@ const REGION_ALIASES: Record<string, string> = {
   명동: "myeongdong",
   여의도: "yeouido",
   부산: "busan",
+  센텀: "centum",
+  벡스코: "centum",
+  해운대: "haeundae",
+  서면: "seomyeon",
+  남포: "nampo",
   제주: "jeju",
   전국: "national",
   서울: "seoul",
@@ -424,6 +451,35 @@ function scorePopularityTrust(m: MediaItem): number {
   return Math.min(10, pts);
 }
 
+/** 보수적 기간 가중 — 최대 +3점, 기본 추천 순위 급변 방지 */
+function scoreDuration(m: MediaItem, input: MatchingInput): number {
+  const days = input.durationDays;
+  const months = input.durationMonths;
+  if ((!days || days <= 0) && months <= 1) return 0;
+
+  const type = (m.type ?? "").toLowerCase();
+  const hay = mediaHaystack(m);
+  const isTransit =
+    type === "mobile" ||
+    /지하철|버스|subway|bus|쉘터|brt|역\s|호선|transit/i.test(hay);
+  const isFixed =
+    type === "static" || type === "digital" || /전광|빌보|billboard|led/i.test(hay);
+
+  if (days != null && days > 0 && days <= 14) {
+    return isTransit ? 2 : 0;
+  }
+  if (days != null && days > 14 && days <= 31) {
+    return isTransit ? 1 : isFixed ? 1 : 0;
+  }
+  if (months >= 3 && isFixed) {
+    return 2;
+  }
+  if (months >= 2) {
+    return 1;
+  }
+  return 0;
+}
+
 function buildReasons(
   m: MediaItem,
   b: ScoreBreakdown,
@@ -495,7 +551,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
     ),
     popularity: Math.min(
       10,
-      scorePopularityTrust(m) + networkReachBonus(m),
+      scorePopularityTrust(m) + networkReachBonus(m) + scoreDuration(m, input),
     ),
     total: 0,
   };
@@ -548,7 +604,7 @@ export function scoreMediaForRanking(
     ),
     popularity: Math.min(
       10,
-      scorePopularityTrust(m) + networkReachBonus(m),
+      scorePopularityTrust(m) + networkReachBonus(m) + scoreDuration(m, input),
     ),
     total: 0,
   };

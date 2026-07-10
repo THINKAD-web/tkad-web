@@ -202,10 +202,12 @@ function countParsedFieldsForRoute(
   if (fields.campaignGoal.value != null) n++;
   if (fields.regions.value?.length) n++;
   if (fields.seoulZones.value?.length) n++;
+  if (fields.busanZones.value?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
   if (fields.budgetMan.value != null) n++;
   if (fields.months.value != null) n++;
+  if (fields.durationDays.value != null) n++;
   if (fields.categories.value?.length) n++;
   return n;
 }

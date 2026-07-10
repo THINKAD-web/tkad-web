@@ -390,3 +390,37 @@ test("buildScenarioPatchFromFreetextParse: categories 없으면 전체", () => {
   const patch = buildScenarioPatchFromFreetextParse(r);
   assert.deepEqual(patch.categories, ["digital", "static", "mobile"]);
 });
+
+test("parsePlannerFreetextBrief: 부산 센텀·해운대 → busanZones", () => {
+  const r = parsePlannerFreetextBrief("부산 센텀 해운대 옥외광고");
+  assert.ok(r.fields.regions.value?.includes("busan"));
+  assert.ok(r.fields.busanZones.value?.includes("centum"));
+  assert.ok(r.fields.busanZones.value?.includes("haeundae"));
+});
+
+test("parsePlannerFreetextBrief: 벡스코 → centum zone", () => {
+  const r = parsePlannerFreetextBrief("벡스코 행사 광고");
+  assert.ok(r.fields.busanZones.value?.includes("centum"));
+  assert.ok(r.fields.regions.value?.includes("busan"));
+});
+
+test("parsePlannerFreetextBrief: 7/19~29 기간 + eventDurationDays 패치", () => {
+  const r = parsePlannerFreetextBrief(
+    "부산 벡스코 7/19~29 프로모션 지하철 버스쉘터",
+  );
+  assert.equal(r.fields.durationDays.value, 11);
+  assert.equal(r.fields.months.value, 1);
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.equal(patch.goalFollowUp?.eventDurationDays, 11);
+  assert.ok(patch.busanZones?.includes("centum"));
+});
+
+test("parsePlannerFreetextBrief: 유네스코 문의 핵심 필드", () => {
+  const brief =
+    "부산 벡스코에서 7/19~29 옥외광고 2026년7월19일~7월29일 지하철 역사+버스쉘터 프로모션";
+  const r = parsePlannerFreetextBrief(brief);
+  assert.ok(r.fields.regions.value?.includes("busan"));
+  assert.ok(r.fields.busanZones.value?.includes("centum"));
+  assert.equal(r.fields.durationDays.value, 11);
+  assert.equal(r.fields.campaignGoal.value, "event");
+});

@@ -72,7 +72,7 @@ export const MEDIA_BROWSE_REGIONS: BrowseRegionMain[] = [
     label: "부산",
     labelEn: "Busan",
     sub: [
-      { id: "busan_haeundae", label: "해운대", aliases: ["해운대", "센텀"] },
+      { id: "busan_haeundae", label: "해운대", aliases: ["해운대", "센텀", "벡스코", "BEXCO", "센텀시티", "마린시티"] },
       { id: "busan_seomyeon", label: "서면", aliases: ["서면", "부전"] },
       { id: "busan_downtown", label: "부산 시내", aliases: ["부산", "남포", "중구"] },
       { id: "busan_nampo", label: "남포/광복", aliases: ["남포", "광복", "자갈치"] },

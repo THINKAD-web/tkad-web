@@ -4,6 +4,7 @@ import type { PlannerCategory } from "@/lib/planner/types";
 import { matchMediaCatalog } from "@/lib/matching-engine";
 import { plannerContextToMatching } from "@/lib/recommendation-adapters";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
+import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
 
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
@@ -80,6 +81,13 @@ export function recommendPlannerMedia(
   });
   if (ctx.regions.length > 0) {
     pool = filterCatalogByPlannerRegions(pool, ctx.regions);
+  }
+  if (
+    ctx.regions.includes("busan") &&
+    ctx.busanZones &&
+    ctx.busanZones.length > 0
+  ) {
+    pool = pool.filter((m) => mediaMatchesBusanZones(m, ctx.busanZones!));
   }
 
   const matchingInput = plannerContextToMatching(ctx, seed);

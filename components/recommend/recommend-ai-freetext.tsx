@@ -203,10 +203,12 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       return;
     }
     const zones = parseResult?.fields.seoulZones.value ?? [];
+    const busanZones = parseResult?.fields.busanZones.value ?? [];
     const parsedRegions = parseResult?.fields.regions.value ?? [];
     const regionCodes =
       parsedRegions.length > 0 ? parsedRegions
       : zones.length > 0 ? (["seoul"] as const)
+      : busanZones.length > 0 ? (["busan"] as const)
       : undefined;
 
     const input: AiRecommendInput = {
@@ -218,6 +220,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       industry: draft.industry as IndustryKey,
       ...(regionCodes?.length ? { regionCodes: [...regionCodes] } : {}),
       ...(zones.length > 0 ? { seoulZones: zones } : {}),
+      ...(busanZones.length > 0 ? { busanZones } : {}),
     };
     onConfirm(input);
   }, [draft, isKo, onConfirm, parseResult]);

@@ -1,6 +1,6 @@
 {
-  "generatedAt": "2026-07-06T00:34:47.139Z",
-  "total": 10,
+  "generatedAt": "2026-07-10T09:00:00.000Z",
+  "total": 12,
   "seoulCap": 6,
   "hotspots": [
     {
@@ -85,6 +85,40 @@
         "swLng": 129.01692,
         "neLat": 35.19397,
         "neLng": 129.0924
+      },
+      "fitBoundsMaxZoom": 14
+    },
+    {
+      "regionMain": "busan",
+      "regionSub": "busan_haeundae",
+      "labelKo": "해운대·센텀",
+      "labelEn": "Haeundae / Centum",
+      "mediaCount": 6,
+      "lat": 35.169,
+      "lng": 129.131,
+      "zoom": 4,
+      "bounds": {
+        "swLat": 35.155,
+        "swLng": 129.115,
+        "neLat": 35.182,
+        "neLng": 129.145
+      },
+      "fitBoundsMaxZoom": 14
+    },
+    {
+      "regionMain": "busan",
+      "regionSub": "busan_seomyeon",
+      "labelKo": "서면",
+      "labelEn": "Seomyeon",
+      "mediaCount": 13,
+      "lat": 35.158,
+      "lng": 129.059,
+      "zoom": 4,
+      "bounds": {
+        "swLat": 35.148,
+        "swLng": 129.045,
+        "neLat": 35.168,
+        "neLng": 129.072
       },
       "fitBoundsMaxZoom": 14
     },

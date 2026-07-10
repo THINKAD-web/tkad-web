@@ -7,6 +7,12 @@ import {
 } from "@/lib/planner/parse-target-age";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
 import {
+  BROWSE_SUB_TO_BUSAN_ZONE,
+  BUSAN_ZONE_REGEX,
+  type PlannerBusanZoneKey,
+} from "@/lib/planner/busan-zones";
+import { parseDurationFields } from "@/lib/planner/parse-duration";
+import {
   isPlannerSeoulZoneKey,
   PLANNER_SEOUL_ZONE_KEYS,
   type PlannerSeoulZoneKey,
@@ -39,6 +45,8 @@ export type PlannerFreetextParseResult = {
     industryKey: ParsedField<PlannerIndustryKey>;
     budgetMan: ParsedField<number>;
     months: ParsedField<number>;
+    durationDays: ParsedField<number>;
+    busanZones: ParsedField<PlannerBusanZoneKey[]>;
     categories: ParsedField<PlannerCategory[]>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
@@ -296,29 +304,11 @@ function parseBudgetMan(text: string): ParsedField<number> {
 }
 
 function parseMonths(text: string): ParsedField<number> {
-  const explicit = text.match(/(\d+)\s*(?:개월|달)(?:\s*간)?/i);
-  if (explicit?.[1]) {
-    const n = Number(explicit[1]);
-    if (n >= 1 && n <= 36) {
-      return field(n, "high", explicit[0]);
-    }
-  }
-  if (/한\s*달|1\s*달/i.test(text)) {
-    return field(1, "high", "한 달");
-  }
-  if (/석\s*달|세\s*달/i.test(text)) {
-    return field(3, "high", "석달");
-  }
-  if (/분기/i.test(text)) {
-    return field(3, "high", "분기");
-  }
-  if (/반년|반기/i.test(text)) {
-    return field(6, "high", text.match(/반년|반기/)![0]!);
-  }
-  if (/(?:1|일)\s*년/i.test(text)) {
-    return field(12, "high", "1년");
-  }
-  return emptyField();
+  return parseDurationFields(text).months;
+}
+
+function parseDurationDays(text: string): ParsedField<number> {
+  return parseDurationFields(text).durationDays;
 }
 
 function parsedAgeToPlannerAgeKeys(
@@ -467,9 +457,34 @@ function scanSeoulZones(text: string): {
   };
 }
 
+function scanBusanZones(text: string): {
+  zones: PlannerBusanZoneKey[];
+  source: string | null;
+  confidence: ParseConfidence;
+} {
+  const found = new Set<PlannerBusanZoneKey>();
+  let source: string | null = null;
+  for (const { zone, re } of BUSAN_ZONE_REGEX) {
+    const m = text.match(re);
+    if (m?.[0]) {
+      found.add(zone);
+      source = source ? `${source}, ${m[0]}` : m[0];
+    }
+  }
+  if (found.size === 0) {
+    return { zones: [], source: null, confidence: "low" };
+  }
+  return {
+    zones: [...found],
+    source,
+    confidence: "high",
+  };
+}
+
 function parseRegions(text: string): {
   regions: ParsedField<string[]>;
   seoulZones: ParsedField<PlannerSeoulZoneKey[]>;
+  busanZones: ParsedField<PlannerBusanZoneKey[]>;
 } {
   const allHits = [
     ...scanHotspots(text),
@@ -479,6 +494,7 @@ function parseRegions(text: string): {
 
   const macroSet = new Set<string>();
   const zoneSet = new Set<PlannerSeoulZoneKey>();
+  const busanZoneSet = new Set<PlannerBusanZoneKey>();
   const sources: string[] = [];
 
   for (const hit of allHits) {
@@ -492,18 +508,30 @@ function parseRegions(text: string): {
       const zone = BROWSE_SUB_TO_SEOUL_ZONE[hit.subId];
       if (zone) zoneSet.add(zone);
     }
+    if (hit.subId && hit.mainId === "busan") {
+      const zone = BROWSE_SUB_TO_BUSAN_ZONE[hit.subId];
+      if (zone) busanZoneSet.add(zone);
+    }
   }
 
   const zoneScan = scanSeoulZones(text);
   for (const z of zoneScan.zones) zoneSet.add(z);
   if (zoneScan.source) sources.push(zoneScan.source);
 
+  const busanZoneScan = scanBusanZones(text);
+  for (const z of busanZoneScan.zones) busanZoneSet.add(z);
+  if (busanZoneScan.source) sources.push(busanZoneScan.source);
+
   if (zoneSet.size > 0 && !macroSet.has("national")) {
     macroSet.add("seoul");
+  }
+  if (busanZoneSet.size > 0 && !macroSet.has("national")) {
+    macroSet.add("busan");
   }
 
   const regionsArr = [...macroSet];
   const zonesArr = [...zoneSet];
+  const busanZonesArr = [...busanZoneSet];
 
   return {
     regions:
@@ -516,6 +544,14 @@ function parseRegions(text: string): {
             zonesArr,
             zoneScan.confidence,
             zoneScan.source ?? sources.join(", "),
+          )
+        : emptyField(),
+    busanZones:
+      busanZonesArr.length > 0
+        ? field(
+            busanZonesArr,
+            busanZoneScan.confidence,
+            busanZoneScan.source ?? sources.join(", "),
           )
         : emptyField(),
   };
@@ -686,6 +722,8 @@ function collectUnmatchedTokens(
     fields.industryKey.source,
     fields.budgetMan.source,
     fields.months.source,
+    fields.durationDays.source,
+    fields.busanZones.source,
     fields.categories.source,
   ].filter(Boolean) as string[];
 
@@ -701,7 +739,8 @@ function collectUnmatchedTokens(
   remaining = remaining
     .replace(/\d+(?:\.\d+)?\s*(?:억|천\s*만|천|만)\s*(?:원)?/gi, " ")
     .replace(/[일이삼사오육칠팔구한두세네]+\s*(?:천|백)\s*만/gi, " ")
-    .replace(/\d+\s*(?:개월|달)/gi, " ")
+    .replace(/\d+\s*(?:개월|달|일|주)(?:\s*간)?/gi, " ")
+    .replace(/\d{1,2}\s*[/.]\s*\d{1,2}\s*[~\-–]\s*\d{1,2}/gi, " ")
     .replace(/[,.]/g, " ");
 
   const tokens = remaining
@@ -732,21 +771,26 @@ export function parsePlannerFreetextBrief(
         industryKey: empty,
         budgetMan: empty,
         months: empty,
+        durationDays: empty,
+        busanZones: empty,
         categories: empty,
       },
       unmatchedTokens: [],
     };
   }
 
-  const { regions, seoulZones } = parseRegions(text);
+  const { regions, seoulZones, busanZones } = parseRegions(text);
+  const duration = parseDurationFields(text);
   const fields = {
     campaignGoal: parseCampaignGoal(text),
     regions,
     seoulZones,
+    busanZones,
     ageKeys: parseAgeKeys(text),
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
-    months: parseMonths(text),
+    months: duration.months,
+    durationDays: duration.durationDays,
     categories: parseCategories(text),
   };
 
@@ -763,10 +807,18 @@ export function buildScenarioPatchFromFreetextParse(
 ): PlannerScenarioApplyPatch {
   const { fields } = result;
   const zones = fields.seoulZones.value ?? [];
+  const busanZones = fields.busanZones.value ?? [];
   let regions = fields.regions.value ?? [];
   if (regions.length === 0 && zones.length > 0) {
     regions = ["seoul"];
   }
+  if (regions.length === 0 && busanZones.length > 0) {
+    regions = ["busan"];
+  }
+
+  const durationDays = fields.durationDays.value;
+  const goalFollowUp =
+    durationDays != null ? { eventDurationDays: durationDays } : undefined;
 
   return {
     regions: regions.length > 0 ? regions : ["seoul"],
@@ -784,6 +836,8 @@ export function buildScenarioPatchFromFreetextParse(
       : {}),
     ...(fields.ageKeys.value != null ? { ageKeys: fields.ageKeys.value } : {}),
     ...(zones.length > 0 ? { seoulZones: zones } : {}),
+    ...(busanZones.length > 0 ? { busanZones } : {}),
+    ...(goalFollowUp ? { goalFollowUp } : {}),
     appliedScenario: null,
   };
 }
