@@ -38,7 +38,7 @@ import {
   getQuantityUnitMode,
   getValidNetworkPackageTiers,
 } from "@/lib/media-quantity";
-import { networkDetailToMediaItem } from "@/lib/media-detail-quantity";
+import { wonToManwon } from "@/lib/ooh-quote-amount";
 import { computeNetworkDailyFootfall } from "@/lib/media-network-footfall";
 import MediaDetailPerformance from "@/components/media-detail-performance";
 import { resolvePerformanceMetrics } from "@/lib/media-performance";
@@ -902,7 +902,7 @@ function NetworkPriceCalculator({
           clientEmail: user.email,
           clientCompany: user.company || undefined,
           period,
-          budgetMax: total > 0 ? total : undefined,
+          budgetMax: monthly > 0 ? wonToManwon(monthly) : undefined,
           locale: isKo ? "ko" : "en",
         }),
       });

@@ -29,7 +29,7 @@ import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
-import { formatOohQuoteTotalKrw, coerceOohQuoteTotalAmountManwon } from "@/lib/ooh-quote-amount";
+import { formatOohQuoteTotalKrw, coerceOohQuoteTotalAmountManwon, coerceOohQuoteBudgetManwonForDisplay, formatOohQuoteBudgetKrw } from "@/lib/ooh-quote-amount";
 
 type Media = {
   id: string;
@@ -65,6 +65,20 @@ type Quote = {
 
 function formatKRW(v: number): string {
   return `₩${new Intl.NumberFormat("ko-KR").format(v)}`;
+}
+
+function formatBudgetDisplay(
+  budgetMax: number | null,
+  referenceMonthlyWon: number,
+  locale: string,
+): string | null {
+  if (budgetMax == null) return null;
+  const { manwon } = coerceOohQuoteBudgetManwonForDisplay(
+    budgetMax,
+    referenceMonthlyWon,
+  );
+  if (manwon == null) return null;
+  return formatOohQuoteBudgetKrw(manwon, locale);
 }
 
 function formatDate(s: string | null): string {
@@ -295,6 +309,11 @@ export default function QuotePreviewView({
     displayTotalManwon,
     isKo ? "ko-KR" : "en-US",
   );
+  const budgetDisplayKrw = formatBudgetDisplay(
+    quote.budgetMax,
+    referenceMediaTotalWon,
+    isKo ? "ko-KR" : "en-US",
+  );
 
   return (
     <HomeLandingDayNight>
@@ -457,8 +476,8 @@ export default function QuotePreviewView({
                     value={`${formatDate(quote.startDate)} ~ ${formatDate(quote.endDate)}`}
                   />
                 ) : null}
-                {quote.budgetMax != null ? (
-                  <InfoRow icon={Wallet} label="예산" value={formatKRW(quote.budgetMax)} />
+                {budgetDisplayKrw != null ? (
+                  <InfoRow icon={Wallet} label="예산" value={budgetDisplayKrw} />
                 ) : null}
               </dl>
             </PlannerNeonCard>

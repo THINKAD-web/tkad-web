@@ -1195,7 +1195,6 @@ export default function PlannerPageClient({
       const period = isKo
         ? `${months}개월`
         : `${months} month${months > 1 ? "s" : ""}`;
-      const totalBudgetWon = budgetNum * months * 10_000;
 
       const res = await fetch("/api/quote/create", {
         method: "POST",
@@ -1206,7 +1205,7 @@ export default function PlannerPageClient({
           clientEmail: user.email,
           clientCompany: user.company || undefined,
           period,
-          budgetMax: totalBudgetWon > 0 ? totalBudgetWon : undefined,
+          budgetMax: budgetNum > 0 ? budgetNum : undefined,
           locale: isKo ? "ko" : "en",
         }),
       });

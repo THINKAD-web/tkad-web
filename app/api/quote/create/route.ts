@@ -3,7 +3,10 @@ import { prisma } from "@/lib/prisma";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
 import { computeNetworkMonthlyFromMediaItem } from "@/lib/media-network-types";
-import { wonToManwon } from "@/lib/ooh-quote-amount";
+import {
+  normalizeQuoteBudgetInputToManwon,
+  wonToManwon,
+} from "@/lib/ooh-quote-amount";
 import {
   apiError,
   apiOk,
@@ -72,6 +75,8 @@ export async function POST(req: Request) {
       return sum + catalogPriceFieldToWon(m.price ?? 0);
     }, 0);
     const totalAmount = Math.max(1, wonToManwon(totalWon));
+    const budgetMinMan = normalizeQuoteBudgetInputToManwon(budgetMin);
+    const budgetMaxMan = normalizeQuoteBudgetInputToManwon(budgetMax);
 
     const quote = await prisma.ooHQuote.create({
       data: {
@@ -85,8 +90,8 @@ export async function POST(req: Request) {
         period,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
-        budgetMin: budgetMin ?? null,
-        budgetMax: budgetMax ?? null,
+        budgetMin: budgetMinMan,
+        budgetMax: budgetMaxMan,
         locale,
         pdfTemplate: "default",
       },

@@ -53,7 +53,9 @@ import {
   shouldShowPlannerQuantityControl,
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
+  plannerMonthlyPriceWonForMedia,
 } from "@/lib/planner/planner-media-quantity";
+import { wonToManwon } from "@/lib/ooh-quote-amount";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -272,8 +274,16 @@ export default function RecommendPageClient({
         const period = isKo
           ? `${duration}개월`
           : `${duration} month${duration > 1 ? "s" : ""}`;
-        const totalBudgetWon =
-          picked.reduce((s, m) => s + (m.price || 0), 0) * duration;
+        const monthlyWon = picked.reduce(
+          (s, m) =>
+            s +
+            plannerMonthlyPriceWonForMedia(
+              m,
+              recommendQuantities,
+              recommendPriceOptionIndex,
+            ),
+          0,
+        );
 
         const res = await fetch("/api/quote/create", {
           method: "POST",
@@ -284,7 +294,7 @@ export default function RecommendPageClient({
             clientEmail: user.email,
             clientCompany: user.company || undefined,
             period,
-            budgetMax: totalBudgetWon > 0 ? totalBudgetWon : undefined,
+            budgetMax: monthlyWon > 0 ? wonToManwon(monthlyWon) : undefined,
             locale: isKo ? "ko" : "en",
           }),
         });
@@ -307,7 +317,7 @@ export default function RecommendPageClient({
         setCreatingQuote(false);
       }
     },
-    [cartItems, top3, catalog, lastPayload, creatingQuote, isKo, router, toast],
+    [cartItems, top3, catalog, lastPayload, creatingQuote, isKo, router, toast, recommendQuantities, recommendPriceOptionIndex],
   );
 
   // 로그인 후 `?createQuote=<ids>` 로 복귀하면 해당 매체로 견적 생성을 재개.
