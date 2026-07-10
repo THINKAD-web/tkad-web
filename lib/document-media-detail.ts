@@ -34,6 +34,8 @@ export type DocumentMediaDetail = {
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
+  /** 수량 선택 매체 — 예: 2기, 40대 */
+  quantityLabel?: string;
   /** 견적 집행 기간 (예: 1개월 · 4.3주) */
   executionPeriodLabel?: string;
   recommendReason?: string;

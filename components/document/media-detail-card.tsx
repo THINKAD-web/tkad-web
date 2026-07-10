@@ -139,6 +139,11 @@ export function MediaDetailCard({
             style={{ fontWeight: 700 }}
           >
             {detail.name}
+            {detail.quantityLabel ? (
+              <span className="ml-1.5 text-sm font-semibold tabular-nums text-[#7C3AED]">
+                · {detail.quantityLabel}
+              </span>
+            ) : null}
           </h4>
           {detail.location ? (
             <p className="mt-1 flex items-center gap-1.5 text-sm text-[#6B7280]">

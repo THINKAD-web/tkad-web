@@ -461,6 +461,7 @@ export function RecommendReportSection({
             ageText={ageText}
             industryText={industryText}
             portfolio={portfolio}
+            portfolioRows={payload.portfolio}
           />
 
           <RecommendMediaRationale

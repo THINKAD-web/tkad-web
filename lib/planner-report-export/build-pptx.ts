@@ -17,6 +17,7 @@ import {
 } from "@/lib/planner-report-export/section-visibility";
 import {
   collectMediaCardSpecs,
+  exportMediaLineMetaParts,
   showMediaCardContributions,
 } from "@/lib/planner-report-export/media-card-layout";
 import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup-segments";
@@ -969,7 +970,7 @@ export async function buildPlannerReportPptx(
       ...(mediaUrl ? { hyperlink: { url: mediaUrl } } : {}),
     });
     textY += 0.34;
-    const meta = [row.region, row.type ?? row.categoryLabel].filter(Boolean).join(" · ");
+    const meta = exportMediaLineMetaParts(row).join(" · ");
     if (meta) {
       slide.addText(meta, {
         x: tx + pad,
@@ -1056,13 +1057,7 @@ export async function buildPlannerReportPptx(
       bold: true,
       ...(mediaUrl ? { hyperlink: { url: mediaUrl } } : {}),
     });
-    const meta = [
-      row.region,
-      row.type ?? row.categoryLabel,
-      row.monthlyPriceLabel ?? row.priceLabel,
-    ]
-      .filter(Boolean)
-      .join(" · ");
+    const meta = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
     if (meta) {
       slide.addText(meta, {
         x: textX,

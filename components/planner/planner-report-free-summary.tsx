@@ -1,6 +1,7 @@
 "use client";
 
 import type { MediaItem } from "@/lib/media-data";
+import type { PlannerExportMediaRow } from "@/lib/planner-report-export/types";
 import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
@@ -19,6 +20,8 @@ type Props = {
   ageText: string;
   industryText: string;
   portfolio: MediaItem[];
+  /** payload.portfolio — quantityLabel 포함 시 선택 매체 목록에 수량 표시 */
+  portfolioRows?: PlannerExportMediaRow[];
 };
 
 export function PlannerReportFreeSummary({
@@ -33,12 +36,26 @@ export function PlannerReportFreeSummary({
   ageText,
   industryText,
   portfolio,
+  portfolioRows,
 }: Props) {
   const goalContextLines = buildGoalFollowUpReportLines(
     campaignGoal,
     goalFollowUp,
     isKo,
   );
+
+  const mediaLines =
+    portfolioRows && portfolioRows.length > 0
+      ? portfolioRows.map((row) => ({
+          key: row.id ?? row.name,
+          name: row.name,
+          quantityLabel: row.quantityLabel,
+        }))
+      : portfolio.map((m) => ({
+          key: m.id,
+          name: isKo ? m.name : m.nameEn || m.name,
+          quantityLabel: undefined as string | undefined,
+        }));
 
   return (
     <div className="space-y-4">
@@ -68,15 +85,20 @@ export function PlannerReportFreeSummary({
 
       <div className={cn(plannerNeon.card, "rounded-[22px] p-4")}>
         <PlannerNeonLabel className="mb-3 block">
-          {isKo ? "선택 매체" : "Selected media"} ({portfolio.length})
+          {isKo ? "선택 매체" : "Selected media"} ({mediaLines.length})
         </PlannerNeonLabel>
         <ul className="space-y-1.5">
-          {portfolio.map((m) => (
+          {mediaLines.map((line) => (
             <li
-              key={m.id}
+              key={line.key}
               className="text-sm font-semibold leading-snug text-gray-900 dark:text-white"
             >
-              · {isKo ? m.name : m.nameEn || m.name}
+              · {line.name}
+              {line.quantityLabel ? (
+                <span className="ml-1 font-medium tabular-nums text-violet-600 dark:text-violet-300">
+                  ({line.quantityLabel})
+                </span>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -503,6 +503,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         ageText={props.ageText}
         industryText={props.industryText}
         portfolio={props.portfolio}
+        portfolioRows={payload.portfolio}
       />
 
       {ageTargetMatchCount != null && props.ageText ? (

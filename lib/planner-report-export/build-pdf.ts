@@ -25,6 +25,7 @@ import {
 } from "@/lib/planner-report-export/section-visibility";
 import {
   collectMediaCardSpecs,
+  exportMediaLineMetaParts,
   showMediaCardContributions,
   type MediaCardSpec,
 } from "@/lib/planner-report-export/media-card-layout";
@@ -1176,9 +1177,7 @@ export async function buildPlannerReportPdf(
       doc.setFont(FONT, "normal");
       doc.setFontSize(PDF_LAYOUT.cardMetaPt);
       setText(GRAY_600);
-      const meta = [row.region, row.type ?? row.categoryLabel]
-        .filter(Boolean)
-        .join(" · ");
+      const meta = exportMediaLineMetaParts(row).join(" · ");
       if (meta) {
         const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
         doc.text(metaLine, cx + pad, ty);
@@ -1252,13 +1251,7 @@ export async function buildPlannerReportPdf(
       doc.setFont(FONT, "normal");
       doc.setFontSize(PDF_LAYOUT.compactMetaPt);
       setText(GRAY_600);
-      const meta = [
-        row.region,
-        row.type ?? row.categoryLabel,
-        row.monthlyPriceLabel ?? row.priceLabel,
-      ]
-        .filter(Boolean)
-        .join(" · ");
+      const meta = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
       if (meta) {
         const metaLine = (doc.splitTextToSize(meta, textW) as string[])[0] ?? meta;
         doc.text(metaLine, textX, rowY + 8);

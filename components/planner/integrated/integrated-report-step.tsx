@@ -170,6 +170,7 @@ export function IntegratedReportStep(props: Props) {
         ageText={props.ageText}
         industryText={props.industryText}
         portfolio={props.portfolio}
+        portfolioRows={payload.portfolio}
       />
 
       <section className="space-y-6">

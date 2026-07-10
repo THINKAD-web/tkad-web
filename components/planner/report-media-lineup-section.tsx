@@ -25,6 +25,7 @@ import {
   writePlannerReportViewMode,
   type PlannerReportViewMode,
 } from "@/lib/planner-report-view-mode";
+import { exportMediaLineMetaParts } from "@/lib/planner-report-export/media-card-layout";
 import { cn } from "@/lib/utils";
 
 const VIEW_MODES: {
@@ -56,6 +57,7 @@ function exportRowToDetail(
     broadcastLabel: row.broadcastLabel,
     monthlyPriceLabel: row.monthlyPriceLabel ?? row.priceLabel,
     lineTotalLabel: row.lineTotalLabel,
+    quantityLabel: row.quantityLabel,
     recommendReason: row.recommendReason,
     exposureContributionPct: row.exposureContributionPct,
     budgetContributionPct: row.budgetContributionPct,
@@ -128,9 +130,7 @@ function DiscoveryLineupCard({
   const highlights = row.recommendReason ? [row.recommendReason] : [];
 
   if (viewMode === "compact") {
-    const metaLine = [row.quantityLabel, row.region, row.type ?? row.categoryLabel, priceLabel]
-      .filter(Boolean)
-      .join(" · ");
+    const metaLine = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
     return (
       <DiscoveryMediaCard
         variant="compact"

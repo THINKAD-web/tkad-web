@@ -2,11 +2,30 @@ import type { PlannerExportMediaRow } from "@/lib/planner-report-export/types";
 
 export type MediaCardSpec = { label: string; value: string };
 
+export function exportMediaLineMetaParts(
+  row: PlannerExportMediaRow,
+  opts?: { includePrice?: boolean },
+): string[] {
+  const parts: string[] = [];
+  if (row.region) parts.push(row.region);
+  const typeLabel = row.type ?? row.categoryLabel;
+  if (typeLabel) parts.push(typeLabel);
+  if (row.quantityLabel) parts.push(row.quantityLabel);
+  if (opts?.includePrice) {
+    const price = row.monthlyPriceLabel ?? row.priceLabel;
+    if (price) parts.push(price);
+  }
+  return parts;
+}
+
 export function collectMediaCardSpecs(
   row: PlannerExportMediaRow,
   isKo: boolean,
 ): MediaCardSpec[] {
   const specs: MediaCardSpec[] = [];
+  if (row.quantityLabel) {
+    specs.push({ label: isKo ? "수량" : "Qty", value: row.quantityLabel });
+  }
   if (row.size) specs.push({ label: isKo ? "규격" : "Size", value: row.size });
   if (row.operatingHours) {
     specs.push({ label: isKo ? "운영시간" : "Hours", value: row.operatingHours });
