@@ -7,7 +7,7 @@ import {
   OOH_CONTRACT_DEFAULT_SPECIAL_TERMS_EN,
   OOH_CONTRACT_GENERAL_TERMS_EN,
 } from "@/lib/ooh-contract-display";
-import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import {
   buildOohContractKoTemplate,
   OOH_CONTRACT_PARTY_B_KO,
@@ -837,7 +837,7 @@ function renderKoSignatureBlock(
   margin: number,
   pageW: number,
   yStart: number,
-  options?: { signaturePngBase64?: string },
+  options?: { signaturePngBase64?: string; stampDataUrl?: string | null },
 ): number {
   const partyB = OOH_CONTRACT_PARTY_B_KO;
   const maxW = pageW - 2 * margin;
@@ -917,7 +917,7 @@ function renderKoSignatureBlock(
 
   const stampCx = rightX + colW - 14;
   const stampCy = boxTop + KO_LAYOUT.sigBoxH - 12;
-  drawPartyStamp(doc, fam, loadQuoteStampDataUrl(), stampCx, stampCy);
+  drawPartyStamp(doc, fam, options?.stampDataUrl ?? null, stampCx, stampCy);
 
   return boxTop + KO_LAYOUT.sigBoxH + 6;
 }
@@ -937,6 +937,7 @@ async function buildKoStandardContractPdf(
 
   const hasKr = await ensureKrFontForServerPdf(doc);
   const fam = krFontFamily(hasKr);
+  const stampDataUrl = await resolveQuoteStampDataUrl();
 
   const template = buildOohContractKoTemplate(pdfVarsToTemplateVars(vars));
   let y = KO_LAYOUT.pageTop;
@@ -957,6 +958,7 @@ async function buildKoStandardContractPdf(
     if (section.kind === "signature") {
       y = renderKoSignatureBlock(doc, fam, vars, margin, pageW, y, {
         signaturePngBase64: options?.signaturePngBase64,
+        stampDataUrl,
       });
       continue;
     }

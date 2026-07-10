@@ -7,7 +7,7 @@ import {
   EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
-import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
+import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
@@ -37,20 +37,7 @@ const RED_700 = [185, 28, 28] as const;
 
 /** 직인: 로컬 public/brand → 원격 URL 순. 없으면 생략 (가짜 도장 미표시). */
 async function resolveStampDataUrl(url?: string): Promise<string | null> {
-  const local = loadQuoteStampDataUrl();
-  if (local) return local;
-  if (!url || url.startsWith("/")) return null;
-  try {
-    const res = await fetch(url, { cache: "force-cache" });
-    if (!res.ok) return null;
-    const ct = res.headers.get("content-type") || "image/png";
-    if (!ct.startsWith("image/")) return null;
-    const ab = await res.arrayBuffer();
-    const b64 = Buffer.from(ab).toString("base64");
-    return `data:${ct};base64,${b64}`;
-  } catch {
-    return null;
-  }
+  return resolveQuoteStampDataUrl(url);
 }
 
 async function drawStamp(

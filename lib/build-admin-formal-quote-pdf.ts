@@ -7,8 +7,7 @@ import {
   formatFormalWon,
   getFormalQuoteIssuer,
 } from "@/lib/formal-quote-issuer";
-import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
-import { getQuoteStampUrl } from "@/lib/quote-stamp";
+import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 
 /** THINKAD brand — globals.css navy / gold */
 const NAVY: [number, number, number] = [26, 42, 108];
@@ -57,21 +56,7 @@ function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
 }
 
 async function resolveFormalStampDataUrl(): Promise<string | null> {
-  const local = loadQuoteStampDataUrl();
-  if (local) return local;
-  const url = getQuoteStampUrl();
-  if (!url || url.startsWith("/")) return null;
-  try {
-    const res = await fetch(url, { cache: "force-cache" });
-    if (!res.ok) return null;
-    const ct = res.headers.get("content-type") || "image/png";
-    if (!ct.startsWith("image/")) return null;
-    const ab = await res.arrayBuffer();
-    const b64 = Buffer.from(ab).toString("base64");
-    return `data:${ct};base64,${b64}`;
-  } catch {
-    return null;
-  }
+  return resolveQuoteStampDataUrl();
 }
 
 function setFont(doc: jsPDF, fam: string, style: "normal" | "bold") {

@@ -1,6 +1,5 @@
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
-import { loadQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
-import { getQuoteStampUrl } from "@/lib/quote-stamp";
+import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 
 const VIOLET = "7C3AED";
 const CYAN = "0891B2";
@@ -17,20 +16,7 @@ function won(n: number, isKo: boolean): string {
 }
 
 async function resolveStampDataUrl(url?: string): Promise<string | null> {
-  const local = loadQuoteStampDataUrl();
-  if (local) return local;
-  const remote = url && !url.startsWith("/") ? url : getQuoteStampUrl();
-  if (!remote || remote.startsWith("/")) return null;
-  try {
-    const res = await fetch(remote, { cache: "force-cache" });
-    if (!res.ok) return null;
-    const ct = res.headers.get("content-type") || "image/png";
-    if (!ct.startsWith("image/")) return null;
-    const b64 = Buffer.from(await res.arrayBuffer()).toString("base64");
-    return `data:${ct};base64,${b64}`;
-  } catch {
-    return null;
-  }
+  return resolveQuoteStampDataUrl(url);
 }
 
 export async function buildQuotePptx(p: QuoteExportPayload): Promise<Uint8Array> {
