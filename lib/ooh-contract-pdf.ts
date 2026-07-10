@@ -70,9 +70,12 @@ const KO_LAYOUT = {
   titleGapAfter: 12,
   tableLabelW: 30,
   tableRowH: 7,
+  tableValueLineH: 4.2,
   tablePad: 2,
+  tableBorderPt: 0.35,
   tableFontPt: 9,
   tableTotalPt: 10,
+  articleMidGap: 3,
   sigColGap: 6,
   sigBoxH: 46,
   sigFieldH: 6,
@@ -172,6 +175,38 @@ function splitArticleLead(paragraph: string): {
   );
   if (!m) return null;
   return { lead: m[1]!, rest: m[2]!.trim() };
+}
+
+/** 장문 조항 본문을 항(1) 2))·(1) (2) 경계로 분할 — 원문 문자열 변경 없음 */
+export function splitArticleBodyAtItemBoundaries(body: string): string[] {
+  const trimmed = body.trim();
+  if (!trimmed) return [];
+  const chunks = trimmed
+    .split(/(?= \d+\) )|(?= \(\d+\) )/)
+    .map((s) => s.trim())
+    .filter(Boolean);
+  return chunks.length > 1 ? chunks : [trimmed];
+}
+
+/** 제10·11 단일 단락을 PDF 렌더용 2조각으로 분리 — 템플릿 원문은 그대로 */
+export function splitArt10And11ForRender(paragraph: string): string[] {
+  const marker = "제11조 (효력발생)";
+  const idx = paragraph.indexOf(marker);
+  if (idx <= 0) return [paragraph];
+  return [paragraph.slice(0, idx).trimEnd(), paragraph.slice(idx).trim()];
+}
+
+function articleParagraphsForRender(
+  section: OohContractTemplateSection,
+): string[] {
+  const paras = section.paragraphs.filter((p) => p.trim());
+  if (
+    section.heading.includes("제10조") &&
+    section.heading.includes("제11조")
+  ) {
+    return paras.flatMap((p) => splitArt10And11ForRender(p));
+  }
+  return paras;
 }
 
 type TextRunOpts = {
@@ -304,7 +339,10 @@ function emphasisRulesForSection(
     return [{ pattern: /제\s*1조\s*계약\s*기간/, bold: true }];
   }
   if (heading.startsWith("제7조")) {
-    return [{ pattern: /50%|100%/g, bold: true }];
+    return [
+      { pattern: /50%|100%/g, bold: true },
+      { pattern: /위약금|일시불/g, bold: true },
+    ];
   }
   return [];
 }
@@ -319,6 +357,55 @@ function tableValueStyle(label: string): TextRunOpts {
   return { size: KO_LAYOUT.tableFontPt };
 }
 
+function drawWrappedParagraphLines(
+  doc: import("jspdf").default,
+  fam: string,
+  text: string,
+  margin: number,
+  maxW: number,
+  yStart: number,
+  emphasisRules: readonly EmphasisRule[] = [],
+): number {
+  let y = yStart;
+  for (const line of wrapLines(doc, text, maxW)) {
+    y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+    drawLineWithEmphasis(doc, fam, margin, y, line, emphasisRules);
+    y += KO_LAYOUT.bodyLineH;
+  }
+  return y;
+}
+
+/** 제1조: 조항 제목 단독 행 + 본문(계약일로부터…) 분리 */
+function drawArticleTitleSeparatedBody(
+  doc: import("jspdf").default,
+  fam: string,
+  lead: string,
+  body: string,
+  margin: number,
+  maxW: number,
+  yStart: number,
+  emphasisRules: readonly EmphasisRule[] = [],
+): number {
+  let y = ensurePageSpace(doc, yStart, KO_LAYOUT.bodyLineH * 2);
+  drawTextRun(doc, fam, margin, y, lead, {
+    bold: true,
+    size: KO_LAYOUT.articleTitlePt,
+  });
+  y += KO_LAYOUT.bodyLineH;
+  if (body.trim()) {
+    y = drawWrappedParagraphLines(
+      doc,
+      fam,
+      body,
+      margin,
+      maxW,
+      y,
+      emphasisRules,
+    );
+  }
+  return y;
+}
+
 function drawArticleLeadParagraph(
   doc: import("jspdf").default,
   fam: string,
@@ -327,16 +414,47 @@ function drawArticleLeadParagraph(
   maxW: number,
   yStart: number,
   emphasisRules: readonly EmphasisRule[] = [],
+  options?: { titleOnOwnLine?: boolean },
 ): number {
   const split = splitArticleLead(paragraph);
   let y = yStart;
   if (!split) {
-    for (const line of wrapLines(doc, paragraph, maxW)) {
-      y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
-      drawLineWithEmphasis(doc, fam, margin, y, line, emphasisRules);
-      y += KO_LAYOUT.bodyLineH;
-    }
-    return y;
+    return drawWrappedParagraphLines(
+      doc,
+      fam,
+      paragraph,
+      margin,
+      maxW,
+      y,
+      emphasisRules,
+    );
+  }
+
+  if (options?.titleOnOwnLine) {
+    return drawArticleTitleSeparatedBody(
+      doc,
+      fam,
+      split.lead,
+      split.rest,
+      margin,
+      maxW,
+      y,
+      emphasisRules,
+    );
+  }
+
+  const bodyChunks = splitArticleBodyAtItemBoundaries(split.rest);
+  if (bodyChunks.length > 1) {
+    return drawArticleBodyChunks(
+      doc,
+      fam,
+      split.lead,
+      bodyChunks,
+      margin,
+      maxW,
+      y,
+      emphasisRules,
+    );
   }
 
   y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
@@ -358,6 +476,85 @@ function drawArticleLeadParagraph(
   return y + KO_LAYOUT.bodyLineH;
 }
 
+/** 장문 조항: 항 경계 단위 페이지 넘김 + 이어짐 표시 */
+function drawArticleBodyChunks(
+  doc: import("jspdf").default,
+  fam: string,
+  lead: string,
+  chunks: readonly string[],
+  margin: number,
+  maxW: number,
+  yStart: number,
+  emphasisRules: readonly EmphasisRule[] = [],
+): number {
+  let y = yStart;
+
+  for (let i = 0; i < chunks.length; i++) {
+    const chunk = chunks[i]!;
+    const isFirst = i === 0;
+    const continuationLabel = `${lead} — 계속`;
+
+    if (isFirst) {
+      const firstText = `${lead} ${chunk}`;
+      const chunkH = measureWrappedHeight(doc, firstText, maxW, KO_LAYOUT.bodyLineH);
+      y = ensurePageSpace(doc, y, chunkH);
+      y = drawArticleLeadParagraph(
+        doc,
+        fam,
+        firstText,
+        margin,
+        maxW,
+        y,
+        emphasisRules,
+      );
+      continue;
+    }
+
+    const chunkH = measureWrappedHeight(doc, chunk, maxW, KO_LAYOUT.bodyLineH);
+    const needH = KO_LAYOUT.bodyLineH + chunkH;
+    const pageBefore = doc.getNumberOfPages();
+    y = ensurePageSpace(doc, y, needH);
+    const pageAfter = doc.getNumberOfPages();
+    if (pageAfter > pageBefore || y <= KO_LAYOUT.pageTop + 0.5) {
+      y = ensurePageSpace(doc, y, KO_LAYOUT.bodyLineH);
+      drawTextRun(doc, fam, margin, y, continuationLabel, {
+        bold: true,
+        size: KO_LAYOUT.articleTitlePt - 0.5,
+      });
+      y += KO_LAYOUT.bodyLineH;
+    }
+
+    y = drawWrappedParagraphLines(
+      doc,
+      fam,
+      chunk,
+      margin,
+      maxW,
+      y,
+      emphasisRules,
+    );
+  }
+
+  return y;
+}
+
+function measureTableRowHeight(
+  doc: import("jspdf").default,
+  label: string,
+  value: string,
+  maxW: number,
+): number {
+  const valueW = maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
+  const labelW = KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
+  const valueLines = wrapLines(doc, value, valueW).length;
+  const labelLines = wrapLines(doc, label, labelW).length;
+  const lines = Math.max(valueLines, labelLines, 1);
+  return Math.max(
+    KO_LAYOUT.tableRowH,
+    KO_LAYOUT.tablePad * 2 + lines * KO_LAYOUT.tableValueLineH,
+  );
+}
+
 function drawArticle1SummaryTable(
   doc: import("jspdf").default,
   fam: string,
@@ -371,44 +568,92 @@ function drawArticle1SummaryTable(
     .filter((r): r is { label: string; value: string } => r != null);
   if (parsed.length === 0) return yStart;
 
-  const tableH = parsed.length * KO_LAYOUT.tableRowH;
+  const valueW = maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
+  const labelW = KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2;
+  const rowHeights = parsed.map((row) =>
+    measureTableRowHeight(doc, row.label, row.value, maxW),
+  );
+  const tableH = rowHeights.reduce((sum, h) => sum + h, 0);
   let y = ensurePageSpace(doc, yStart, tableH + 2);
 
-  doc.setDrawColor(180, 180, 180);
-  doc.setLineWidth(0.25);
+  doc.setDrawColor(170, 170, 170);
+  doc.setLineWidth(KO_LAYOUT.tableBorderPt);
   doc.rect(margin, y, maxW, tableH);
 
   const valueX = margin + KO_LAYOUT.tableLabelW;
   doc.line(valueX, y, valueX, y + tableH);
 
+  let rowY = y;
   for (let i = 0; i < parsed.length; i++) {
-    const rowY = y + KO_LAYOUT.tableRowH * i;
+    const rowH = rowHeights[i]!;
     if (i > 0) {
       doc.line(margin, rowY, margin + maxW, rowY);
     }
     const row = parsed[i]!;
-    const midY = rowY + KO_LAYOUT.tableRowH * 0.68;
     const valueStyle = tableValueStyle(row.label);
-    drawTextRun(doc, fam, margin + KO_LAYOUT.tablePad, midY, row.label, {
-      bold: true,
-      size: KO_LAYOUT.tableFontPt,
+    const labelLines = wrapLines(doc, row.label, labelW);
+    const valueLines = wrapLines(doc, row.value, valueW);
+    const textTop = rowY + KO_LAYOUT.tablePad + KO_LAYOUT.tableValueLineH * 0.85;
+
+    labelLines.forEach((line, li) => {
+      drawTextRun(
+        doc,
+        fam,
+        margin + KO_LAYOUT.tablePad,
+        textTop + li * KO_LAYOUT.tableValueLineH,
+        line,
+        { bold: true, size: KO_LAYOUT.tableFontPt },
+      );
     });
-    const valueLines = wrapLines(
-      doc,
-      row.value,
-      maxW - KO_LAYOUT.tableLabelW - KO_LAYOUT.tablePad * 2,
-    );
-    drawTextRun(
-      doc,
-      fam,
-      valueX + KO_LAYOUT.tablePad,
-      midY,
-      valueLines[0] ?? "",
-      valueStyle,
-    );
+    valueLines.forEach((line, li) => {
+      drawTextRun(
+        doc,
+        fam,
+        valueX + KO_LAYOUT.tablePad,
+        textTop + li * KO_LAYOUT.tableValueLineH,
+        line,
+        valueStyle,
+      );
+    });
+    rowY += rowH;
   }
 
   return y + tableH + KO_LAYOUT.paragraphGap;
+}
+
+function estimateParagraphRenderHeight(
+  doc: import("jspdf").default,
+  paragraph: string,
+  maxW: number,
+  options?: { titleOnOwnLine?: boolean },
+): number {
+  const split = splitArticleLead(paragraph);
+  if (!split) {
+    return measureWrappedHeight(doc, paragraph, maxW, KO_LAYOUT.bodyLineH);
+  }
+
+  if (options?.titleOnOwnLine) {
+    let h = KO_LAYOUT.bodyLineH;
+    if (split.rest.trim()) {
+      h += measureWrappedHeight(doc, split.rest, maxW, KO_LAYOUT.bodyLineH);
+    }
+    return h;
+  }
+
+  const chunks = splitArticleBodyAtItemBoundaries(split.rest);
+  if (chunks.length > 1) {
+    let h = 0;
+    const firstText = `${split.lead} ${chunks[0]!}`;
+    h += measureWrappedHeight(doc, firstText, maxW, KO_LAYOUT.bodyLineH);
+    for (let i = 1; i < chunks.length; i++) {
+      h += KO_LAYOUT.bodyLineH + KO_LAYOUT.paragraphGap;
+      h += measureWrappedHeight(doc, chunks[i]!, maxW, KO_LAYOUT.bodyLineH);
+    }
+    return h;
+  }
+
+  const full = split.rest ? `${split.lead} ${split.rest}` : split.lead;
+  return measureWrappedHeight(doc, full, maxW, KO_LAYOUT.bodyLineH);
 }
 
 function estimateArticleHeight(
@@ -416,22 +661,39 @@ function estimateArticleHeight(
   section: OohContractTemplateSection,
   maxW: number,
 ): number {
-  const paras = section.paragraphs.filter((p) => p.trim());
+  const paras = articleParagraphsForRender(section).filter((p) => p.trim());
   if (paras.length === 0) return KO_LAYOUT.articleGapBefore;
 
-  let h = KO_LAYOUT.articleGapBefore + KO_LAYOUT.bodyLineH + KO_LAYOUT.paragraphGap;
+  let h = KO_LAYOUT.articleGapBefore + KO_LAYOUT.paragraphGap;
   const isArt1 = section.heading.startsWith("제1조");
 
-  if (isArt1 && paras.length > 1) {
-    h += measureWrappedHeight(doc, paras[0]!, maxW, KO_LAYOUT.bodyLineH);
-    h += paras.length * KO_LAYOUT.tableRowH + KO_LAYOUT.paragraphGap;
+  if (isArt1 && section.paragraphs.filter((p) => p.trim()).length > 1) {
+    const leadPara = section.paragraphs.filter((p) => p.trim())[0]!;
+    h += estimateParagraphRenderHeight(doc, leadPara, maxW, {
+      titleOnOwnLine: true,
+    });
+    const tableRows = section.paragraphs.filter((p) => p.trim()).slice(1);
+    for (const row of tableRows) {
+      const parsed = parseSummaryRow(row);
+      if (!parsed) continue;
+      h += measureTableRowHeight(doc, parsed.label, parsed.value, maxW);
+    }
+    h += KO_LAYOUT.paragraphGap;
     return h + KO_LAYOUT.articleGapAfter;
   }
 
-  for (const para of paras) {
+  for (let i = 0; i < paras.length; i++) {
     h +=
-      measureWrappedHeight(doc, para, maxW, KO_LAYOUT.bodyLineH) +
+      estimateParagraphRenderHeight(doc, paras[i]!, maxW) +
       KO_LAYOUT.paragraphGap;
+    if (
+      section.heading.includes("제10조") &&
+      section.heading.includes("제11조") &&
+      i === 0 &&
+      paras.length > 1
+    ) {
+      h += KO_LAYOUT.articleMidGap;
+    }
   }
   return h + KO_LAYOUT.articleGapAfter;
 }
@@ -445,15 +707,12 @@ function renderKoArticleSection(
   yStart: number,
   vars: OohContractPdfVars,
 ): number {
-  const paras = section.paragraphs.filter((p) => p.trim());
-  if (paras.length === 0) return yStart;
+  const rawParas = section.paragraphs.filter((p) => p.trim());
+  if (rawParas.length === 0) return yStart;
 
   const est = estimateArticleHeight(doc, section, maxW);
   let y = yStart;
-  if (
-    est <= KO_KEEP_TOGETHER_MAX_MM &&
-    y + est > KO_LAYOUT.pageBottom
-  ) {
+  if (est <= KO_KEEP_TOGETHER_MAX_MM && y + est > KO_LAYOUT.pageBottom) {
     doc.addPage();
     y = KO_LAYOUT.pageTop;
   }
@@ -462,16 +721,32 @@ function renderKoArticleSection(
   const emphasis = emphasisRulesForSection(section.heading, vars);
 
   const isArt1 = section.heading.startsWith("제1조");
-  if (isArt1 && paras.length > 1) {
-    y = drawArticleLeadParagraph(doc, fam, paras[0]!, margin, maxW, y, emphasis);
+  if (isArt1 && rawParas.length > 1) {
+    y = drawArticleLeadParagraph(
+      doc,
+      fam,
+      rawParas[0]!,
+      margin,
+      maxW,
+      y,
+      emphasis,
+      { titleOnOwnLine: true },
+    );
     y += KO_LAYOUT.paragraphGap;
-    y = drawArticle1SummaryTable(doc, fam, paras.slice(1), margin, maxW, y);
+    y = drawArticle1SummaryTable(doc, fam, rawParas.slice(1), margin, maxW, y);
     return y + KO_LAYOUT.articleGapAfter;
   }
 
-  for (const para of paras) {
-    y = drawArticleLeadParagraph(doc, fam, para, margin, maxW, y, emphasis);
+  const paras = articleParagraphsForRender(section);
+  const isArt10And11 =
+    section.heading.includes("제10조") && section.heading.includes("제11조");
+
+  for (let i = 0; i < paras.length; i++) {
+    y = drawArticleLeadParagraph(doc, fam, paras[i]!, margin, maxW, y, emphasis);
     y += KO_LAYOUT.paragraphGap;
+    if (isArt10And11 && i === 0 && paras.length > 1) {
+      y += KO_LAYOUT.articleMidGap;
+    }
   }
   return y + KO_LAYOUT.articleGapAfter;
 }
@@ -499,6 +774,24 @@ function drawSigFieldRow(
     drawTextRun(doc, fam, valX, y, lines[0] ?? "", { size: 9 });
   }
   return y + KO_LAYOUT.sigFieldH;
+}
+
+function drawSignaturePlaceholder(
+  doc: import("jspdf").default,
+  fam: string,
+  cx: number,
+  cy: number,
+) {
+  const sigW = 46;
+  const sigH = 18;
+  doc.setDrawColor(180, 180, 180);
+  doc.setLineWidth(0.35);
+  doc.rect(cx - sigW / 2, cy - sigH / 2, sigW, sigH);
+  drawTextRun(doc, fam, cx, cy + 1.5, "(서명)", {
+    size: 8,
+    color: [100, 100, 100],
+    align: "center",
+  });
 }
 
 function drawPartyStamp(
@@ -589,21 +882,17 @@ function renderKoSignatureBlock(
   );
 
   let ry = boxTop + 10;
-  drawTextRun(doc, fam, rightX + 3, ry, `상호 : ${partyB.companyName}`, {
-    size: 8.5,
-  });
-  ry += KO_LAYOUT.sigFieldH;
-  drawTextRun(doc, fam, rightX + 3, ry, `주소 : ${partyB.address}`, { size: 8.5 });
-  ry += KO_LAYOUT.sigFieldH;
-  drawTextRun(doc, fam, rightX + 3, ry, `전화번호 : ${partyB.tel}`, { size: 8.5 });
-  ry += KO_LAYOUT.sigFieldH;
-  drawTextRun(
+  ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "상호", partyB.companyName);
+  ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "주소", partyB.address);
+  ry = drawSigFieldRow(doc, fam, rightX + 3, ry, colW - 6, "전화번호", partyB.tel);
+  ry = drawSigFieldRow(
     doc,
     fam,
     rightX + 3,
     ry,
-    `대표이사 : ${partyB.representative}`,
-    { size: 8.5 },
+    colW - 6,
+    "대표이사",
+    partyB.representative,
   );
 
   const sigW = 46;
@@ -623,12 +912,7 @@ function renderKoSignatureBlock(
       });
     }
   } else {
-    doc.setDrawColor(180, 180, 180);
-    doc.rect(sigX, sigY, sigW, sigH);
-    drawTextRun(doc, fam, sigX + 14, sigY + 12, "(인)", {
-      size: 8,
-      color: [100, 100, 100],
-    });
+    drawSignaturePlaceholder(doc, fam, sigX + sigW / 2, sigY + sigH / 2);
   }
 
   const stampCx = rightX + colW - 14;
