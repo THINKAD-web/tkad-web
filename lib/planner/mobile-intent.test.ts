@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 import type { MediaItem } from "@/lib/media-data";
 import {
   mediaMatchesPlannerMobileIntent,
+  mediaMatchesPlannerSubwayIntent,
+  mediaMatchesPlannerBusWrapIntent,
   matchesPlannerCategory,
   resolvePlannerMediaKind,
 } from "@/lib/planner-logic";
@@ -84,4 +86,28 @@ test("mediaMatchesPlannerMobileIntent: generic shelter without taxi excluded", (
     type: "digital",
   });
   assert.equal(mediaMatchesPlannerMobileIntent(shelter), false);
+});
+
+test("mediaMatchesPlannerSubwayIntent: station CM board", () => {
+  const subway = mockMedia("sub1", "영등포구청역 지하철 5호선 CM보드 영상 광고", {
+    type: "digital",
+    mediaSubCategory: "subway",
+  });
+  assert.equal(mediaMatchesPlannerSubwayIntent(subway), true);
+
+  const mall = mockMedia("mall1", "스타필드 시티 운정점 E.V홀 스크린 광고", {
+    type: "digital",
+  });
+  assert.equal(mediaMatchesPlannerSubwayIntent(mall), false);
+
+  const busWrap = mockMedia("bw1", "서울 버스 외부 광고 (A권역/B권역)", {
+    type: "mobile",
+    mediaSubCategory: "bus_exterior",
+  });
+  assert.equal(mediaMatchesPlannerBusWrapIntent(busWrap), true);
+
+  const terminalLed = mockMedia("led1", "강변 동서울터미널 LED 전광판 광고", {
+    type: "digital",
+  });
+  assert.equal(mediaMatchesPlannerBusWrapIntent(terminalLed), false);
 });

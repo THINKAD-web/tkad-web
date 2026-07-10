@@ -11,6 +11,21 @@ export const FREETEXT_EXAMPLE_PROMPTS_KO = [
   "강남 택시 브랜딩",
 ] as const;
 
+/** 첫 화면 노출 4개 — 실측 적합 샘플만 */
+export const FREETEXT_CHIP_PROMPTS_KO = [
+  "부산 해운대 40대 금융 프로모션 5천만원 분기",
+  "성수 팝업스토어 20대 카페 1억 반년",
+  "강남 택시 브랜딩",
+  "강남 2030 브랜딩 3000만원",
+] as const;
+
+export const FREETEXT_CHIP_PROMPTS_EN = [
+  "Busan Haeundae finance promo 50M quarterly",
+  "Gangnam 2030 branding 30M KRW",
+  "Bus wrap branding 10M",
+  "Subway IT launch 5M",
+] as const;
+
 export const FREETEXT_EXAMPLE_PROMPTS_EN = [
   "Gangnam 2030 branding 30M KRW",
   "Hongdae beauty launch 5M monthly 3 months",

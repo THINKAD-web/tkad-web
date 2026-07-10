@@ -78,8 +78,20 @@ function formatRegions(
   zones: PlannerSeoulZoneKey[] | null,
   isKo: boolean,
   preferZones = false,
+  zoneSource: string | null = null,
 ): string | null {
   if (!regions?.length && !zones?.length) return null;
+
+  if (zoneSource && /을지로/.test(zoneSource) && !/명동/.test(zoneSource)) {
+    return isKo ? "을지로" : "Euljiro";
+  }
+  if (
+    zoneSource &&
+    /광화문|종로/.test(zoneSource) &&
+    !/명동|을지로/.test(zoneSource)
+  ) {
+    return isKo ? "종로·광화문" : "Jongno / Gwanghwamun";
+  }
 
   const zoneParts: string[] = [];
   if (zones?.length) {
@@ -143,6 +155,7 @@ export function buildFreetextEvidenceRows(
     fields.seoulZones.value,
     isKo,
     true,
+    fields.seoulZones.source,
   );
   if (regionText) {
     rows.push({
@@ -228,6 +241,7 @@ export function buildFreetextBriefSummaryShort(
     fields.seoulZones.value,
     isKo,
     true,
+    fields.seoulZones.source,
   );
   if (regionText) {
     parts.push(regionText.split(",")[0]!.trim());
@@ -281,6 +295,7 @@ export function buildFreetextBriefSummarySentence(
     fields.seoulZones.value,
     isKo,
     true,
+    fields.seoulZones.source,
   );
   if (regionText) parts.push(regionText);
 

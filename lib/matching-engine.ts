@@ -14,7 +14,7 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
-import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent } from "@/lib/planner-logic";
+import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent } from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
@@ -52,6 +52,8 @@ export type MatchingInput = {
   seed?: number;
   /** 선택 매체별 수량 — scoreMedia 예산 효율 반영 */
   mediaQuantities?: Record<string, number>;
+  /** 자연어 파싱 유형 의도 — scoreCategory 가점 전용 */
+  mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[];
 };
 
 export type ScoreBreakdown = {
@@ -297,6 +299,10 @@ function scoreRegion(m: MediaItem, regions: string[]): number {
   }
   if (regions.some((r) => normalizeRegionKey(r) === "national")) {
     best = Math.max(best, 20);
+    const macro = (m.regionMain ?? m.region ?? "").toLowerCase();
+    if (macro && macro !== "seoul") {
+      best = Math.max(best, 24);
+    }
   }
   if (isNetworkCatalogItem(m)) {
     best = Math.max(best, networkRegionScoreBoost(m, regions));
@@ -399,6 +405,7 @@ function scoreCategory(
   categories: string[] | undefined,
   goal: string,
   goalTags: string[] | undefined,
+  mediaIntents?: readonly ("subway" | "bus_wrap")[],
 ): number {
   const inputCats = (categories ?? []).map((c) => c.trim()).filter(Boolean);
   const mediaCats = m.mediaCategory ?? [];
@@ -458,7 +465,34 @@ function scoreCategory(
     }
   }
 
+  if (mediaIntents?.includes("subway")) {
+    if (mediaMatchesPlannerSubwayIntent(m)) {
+      best = Math.max(best, 15);
+    } else {
+      best = Math.min(best, 2);
+    }
+  }
+
+  if (mediaIntents?.includes("bus_wrap")) {
+    if (mediaMatchesPlannerBusWrapIntent(m)) {
+      best = Math.max(best, 15);
+    } else if (
+      /터미널|terminal|전광판|led|dooh|미디어타워/i.test(plannerCategoryHaystack(m)) &&
+      !/래핑|wrap|외부/i.test(plannerCategoryHaystack(m))
+    ) {
+      best = Math.min(best, 2);
+    } else if (!mediaMatchesPlannerBusWrapIntent(m)) {
+      best = Math.min(best, 4);
+    }
+  }
+
   return Math.min(15, best);
+}
+
+function plannerCategoryHaystack(m: MediaItem): string {
+  return [m.name, m.nameEn, m.subCategory, m.mediaSubCategory, m.networkSubtype]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function scorePopularityTrust(m: MediaItem): number {
@@ -532,6 +566,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
       input.categories,
       String(input.goal ?? ""),
       input.goalTags,
+      input.mediaIntents,
     ),
     popularity: Math.min(
       10,
@@ -585,6 +620,7 @@ export function scoreMediaForRanking(
       input.categories,
       String(input.goal ?? ""),
       input.goalTags,
+      input.mediaIntents,
     ),
     popularity: Math.min(
       10,

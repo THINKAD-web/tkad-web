@@ -8,6 +8,14 @@ import {
   parsePlannerFreetextBrief,
   type PlannerFreetextParseResult,
 } from "@/lib/planner/parse-freetext-brief";
+import {
+  applyFreetextRecommendDraftDefaults,
+  FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
+} from "@/lib/recommend/freetext-recommend-defaults";
+import {
+  extractFreetextLocationKeywords,
+  parseFreetextMediaIntents,
+} from "@/lib/recommend/freetext-media-intents";
 import { plannerFreetextToRecommendBrief } from "@/lib/recommend/planner-freetext-to-recommend-brief";
 
 type GoalKey = CampaignGoal;
@@ -27,9 +35,18 @@ export function buildAiRecommendInputFromFreetext(
   parseResult: PlannerFreetextParseResult,
   draft: FreetextRecommendDraft,
   freetextSource: string,
+  isKo = true,
 ): AiRecommendInput | null {
-  const budget = Math.round(Number(draft.budgetMan) || 0);
-  if (!draft.goal || !draft.target || !draft.industry || budget <= 0) {
+  const { draft: resolved } = applyFreetextRecommendDraftDefaults(
+    draft,
+    parseResult,
+    isKo,
+  );
+
+  const budget = Math.round(
+    Number(resolved.budgetMan) || FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
+  );
+  if (!resolved.goal) {
     return null;
   }
 
@@ -39,7 +56,7 @@ export function buildAiRecommendInputFromFreetext(
   const hasParsedRegion =
     parsedRegions.length > 0 || zones.length > 0 || busanZones.length > 0;
 
-  if (hasParsedRegion && !draft.region.trim()) {
+  if (hasParsedRegion && !resolved.region.trim()) {
     return null;
   }
 
@@ -50,20 +67,24 @@ export function buildAiRecommendInputFromFreetext(
     : undefined;
 
   const categories = parseResult.fields.categories.value ?? undefined;
+  const locationKeywords = extractFreetextLocationKeywords(freetextSource);
+  const mediaIntents = parseFreetextMediaIntents(freetextSource);
 
   return {
-    goal: draft.goal as GoalKey,
-    target: draft.target as TargetKey,
+    goal: resolved.goal as GoalKey,
+    target: resolved.target as TargetKey,
     budgetMaxMan: budget,
     region:
       regionCodes?.length === 1 ? regionCodes[0]!
-      : hasParsedRegion ? draft.region.trim()
+      : hasParsedRegion ? resolved.region.trim()
       : "all",
-    industry: draft.industry as IndustryKey,
+    industry: resolved.industry as IndustryKey,
     ...(regionCodes?.length ? { regionCodes: [...regionCodes] } : {}),
     ...(zones.length > 0 ? { seoulZones: zones } : {}),
     ...(busanZones.length > 0 ? { busanZones } : {}),
     ...(categories?.length ? { plannerCategories: [...categories] } : {}),
+    ...(locationKeywords.length > 0 ? { locationKeywords } : {}),
+    ...(mediaIntents.length > 0 ? { mediaIntents } : {}),
     freetextSource: freetextSource.trim(),
   };
 }
@@ -91,5 +112,5 @@ export function buildAiRecommendInputFromFreetextRaw(
     draft.budgetMan = "1000";
   }
 
-  return buildAiRecommendInputFromFreetext(parseResult, draft, trimmed);
+  return buildAiRecommendInputFromFreetext(parseResult, draft, trimmed, isKo);
 }

@@ -47,6 +47,13 @@ function formatRegionText(
   isKo: boolean,
 ): string | null {
   const loc = isKo ? "ko" : "en";
+  const zoneSource = result.fields.seoulZones.source ?? "";
+  if (/을지로/.test(zoneSource) && !/명동/.test(zoneSource)) {
+    return isKo ? "을지로" : "Euljiro";
+  }
+  if (/광화문|종로/.test(zoneSource) && !/명동|을지로/.test(zoneSource)) {
+    return isKo ? "종로·광화문" : "Jongno / Gwanghwamun";
+  }
   const zones = result.fields.seoulZones.value;
   if (zones?.length) {
     return zones

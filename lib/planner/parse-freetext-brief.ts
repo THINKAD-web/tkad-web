@@ -149,7 +149,15 @@ const SEOUL_ZONE_REGEX: { zone: PlannerSeoulZoneKey; re: RegExp }[] = [
   },
   {
     zone: "myeongdong",
-    re: /명동(?:역)?(?:\s*(?:근처|일대|주변))?|을지로|광화문|종로|동대문|시청/i,
+    re: /명동(?:역)?(?:\s*(?:근처|일대|주변))?/i,
+  },
+  {
+    zone: "myeongdong",
+    re: /을지로(?:\s*(?:근처|일대|주변))?/i,
+  },
+  {
+    zone: "myeongdong",
+    re: /광화문|종로(?:\s*(?:근처|일대|주변))?|동대문|시청/i,
   },
   {
     zone: "yeouido",

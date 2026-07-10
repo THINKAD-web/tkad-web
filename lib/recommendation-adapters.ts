@@ -48,6 +48,10 @@ export function aiInputToMatching(
     (c) => c.trim().length > 0 && !isNonSpecificRegionCode(c),
   );
 
+  const wantsNationalScoring =
+    input.regionCodes?.includes("national") ||
+    /전국|nationwide/i.test(input.freetextSource?.trim() ?? "");
+
   const seoulZones = input.seoulZones ?? [];
   const busanZones = input.busanZones ?? [];
   const regions = mergePlannerMacroMatchingRegions(
@@ -55,6 +59,10 @@ export function aiInputToMatching(
     seoulZones,
     busanZones,
   );
+
+  if (wantsNationalScoring && !regions.includes("national")) {
+    regions.push("national");
+  }
 
   if (input.locationKeywords?.length) {
     for (const k of input.locationKeywords) {
@@ -87,6 +95,7 @@ export function aiInputToMatching(
       return undefined;
     })(),
     seed,
+    ...(input.mediaIntents?.length ? { mediaIntents: [...input.mediaIntents] } : {}),
   };
 }
 

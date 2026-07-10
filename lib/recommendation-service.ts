@@ -91,12 +91,17 @@ export async function runRecommendation(
         busanZones: opts.aiRecommendInput.busanZones ?? undefined,
       },
     );
+    const hasExplicitSubZone = Boolean(
+      opts.aiRecommendInput.seoulZones?.length ||
+        opts.aiRecommendInput.busanZones?.length,
+    );
     const matched = matchRecommendWithRegionalPolicy(
       catalog,
       regionalCatalog,
       opts.input,
       limit,
       Boolean(plannerRegionIds?.length),
+      hasExplicitSubZone,
     );
     regionMeta = matched.meta;
     recommendations = matched.recommendations;

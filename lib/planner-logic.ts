@@ -270,6 +270,62 @@ export function mediaMatchesPlannerMobileIntent(item: MediaItem): boolean {
   return true;
 }
 
+const PLANNER_SUBWAY_PRIMARY_RE =
+  /지하철|subway|역사|플랫폼|스크린도어|CM보드|cm\s*board|승강장|호선.*역/i;
+
+const PLANNER_SUBWAY_EXCLUDE_RE =
+  /스타필드|shopping\s*mall|백화점|department|아울렛|outlet/i;
+
+/** 지하철 역·승강장·차내 등 — 몰 DOOH 제외 */
+export function mediaMatchesPlannerSubwayIntent(item: MediaItem): boolean {
+  const primary = plannerMobilePrimaryHaystack(item);
+  if (!primary.trim()) return false;
+
+  if (PLANNER_SUBWAY_EXCLUDE_RE.test(primary) && !PLANNER_SUBWAY_PRIMARY_RE.test(primary)) {
+    return false;
+  }
+
+  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`.toLowerCase();
+  if (/subway|지하철/.test(sub)) return true;
+
+  if (PLANNER_SUBWAY_PRIMARY_RE.test(primary)) {
+    if (PLANNER_MOBILE_EXCLUSION_RE.test(primary)) {
+      return /지하철|subway|역|platform|screendoor|cm보드/i.test(primary);
+    }
+    return true;
+  }
+
+  return false;
+}
+
+const PLANNER_BUS_WRAP_RE =
+  /(?:버스|bus)(?:\s*(?:래핑|랩핑|wrap|외부|exterior))|(?:래핑|랩핑|wrap).*(?:버스|bus)|vehicle\s*wrap|bus_wrap/i;
+
+/** 버스·차량 래핑 — 터미널 LED·전광판 제외 */
+export function mediaMatchesPlannerBusWrapIntent(item: MediaItem): boolean {
+  const primary = plannerMobilePrimaryHaystack(item);
+  if (!primary.trim()) return false;
+
+  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`.toLowerCase();
+  if (sub.includes("bus_wrap") || sub.includes("vehicle_wrap")) return true;
+
+  if (/터미널|terminal|전광판|led|dooh|미디어타워|미디어월/i.test(primary)) {
+    if (!PLANNER_BUS_WRAP_RE.test(primary)) return false;
+  }
+
+  if (PLANNER_BUS_WRAP_RE.test(primary)) return true;
+
+  if (
+    /(?<!캔)버스(?!터미널)/i.test(primary) &&
+    /외부|exterior|pkg|패키지/i.test(primary) &&
+    !PLANNER_MOBILE_EXCLUSION_RE.test(primary)
+  ) {
+    return true;
+  }
+
+  return false;
+}
+
 export function filterPlannerMedia(
   items: readonly MediaItem[],
   region: "all" | string,

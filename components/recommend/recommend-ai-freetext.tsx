@@ -17,6 +17,10 @@ import {
 } from "@/lib/planner/freetext-brief-summary";
 import { plannerFreetextToRecommendBrief } from "@/lib/recommend/planner-freetext-to-recommend-brief";
 import { buildAiRecommendInputFromFreetext } from "@/lib/recommend/build-freetext-recommend-input";
+import {
+  applyFreetextRecommendDraftDefaults,
+  FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN,
+} from "@/lib/recommend/freetext-recommend-defaults";
 import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import { cn } from "@/lib/utils";
 
@@ -48,7 +52,7 @@ const TARGET_OPTS: { value: TargetKey; ko: string; en: string }[] = [
   { value: "millennial", ko: "20~30대", en: "Millennial" },
   { value: "family", ko: "가족·40대+", en: "Family / 40s+" },
   { value: "biz", ko: "직장인·B2B", en: "Business" },
-  { value: "mass", ko: "불특정 다수", en: "Mass" },
+  { value: "mass", ko: "전체 (불특정 다수)", en: "All audiences" },
 ];
 const INDUSTRY_OPTS: { value: IndustryKey; ko: string; en: string }[] = [
   { value: "retail", ko: "리테일·유통", en: "Retail" },
@@ -57,7 +61,7 @@ const INDUSTRY_OPTS: { value: IndustryKey; ko: string; en: string }[] = [
   { value: "auto", ko: "자동차", en: "Auto" },
   { value: "entertainment", ko: "엔터·콘텐츠", en: "Entertainment" },
   { value: "beauty", ko: "뷰티", en: "Beauty" },
-  { value: "other", ko: "기타", en: "Other" },
+  { value: "other", ko: "전체", en: "All industries" },
 ];
 
 const PLACEHOLDER_KO =
@@ -149,6 +153,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
     region: "",
     industry: "",
   });
+  const [budgetDefaulted, setBudgetDefaulted] = useState(false);
 
   const summarySentence = useMemo(
     () =>
@@ -162,7 +167,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
   );
 
   const analyze = useCallback(
-    (input?: string) => {
+    (input?: string, opts?: { autoConfirm?: boolean }) => {
       const trimmed = (input ?? text).trim();
       if (input != null) setText(input);
       if (trimmed.length < 3) {
@@ -177,33 +182,56 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       setError(null);
       try {
         const result = parsePlannerFreetextBrief(trimmed);
+        const { draft: withDefaults, budgetDefaulted: defaulted } =
+          applyFreetextRecommendDraftDefaults(
+            fieldsToDraft(plannerFreetextToRecommendBrief(result, isKo)),
+            result,
+            isKo,
+          );
+
+        if (opts?.autoConfirm) {
+          const built = buildAiRecommendInputFromFreetext(
+            result,
+            withDefaults,
+            trimmed,
+            isKo,
+          );
+        if (built) {
+          setParsing(false);
+          onConfirm(built);
+          return;
+        }
+        }
+
         setParseResult(result);
-        setDraft(fieldsToDraft(plannerFreetextToRecommendBrief(result, isKo)));
+        setDraft(withDefaults);
+        setBudgetDefaulted(defaulted);
         setPhase("confirm");
       } finally {
         setParsing(false);
       }
     },
-    [text, isKo],
+    [text, isKo, onConfirm],
   );
 
   const runRecommend = useCallback(() => {
     if (!parseResult) return;
-    const input = buildAiRecommendInputFromFreetext(parseResult, draft, text);
+    const { draft: withDefaults } = applyFreetextRecommendDraftDefaults(
+      draft,
+      parseResult,
+      isKo,
+    );
+    const input = buildAiRecommendInputFromFreetext(
+      parseResult,
+      withDefaults,
+      text,
+      isKo,
+    );
     if (!input) {
-      const zones = parseResult.fields.seoulZones.value ?? [];
-      const busanZones = parseResult.fields.busanZones.value ?? [];
-      const parsedRegions = parseResult.fields.regions.value ?? [];
-      const hasParsedRegion =
-        parsedRegions.length > 0 || zones.length > 0 || busanZones.length > 0;
       setError(
         isKo
-          ? hasParsedRegion
-            ? "비어 있는 조건을 모두 선택/입력해주세요."
-            : "목적·타깃·업종·예산을 입력해주세요."
-          : hasParsedRegion
-            ? "Please fill in all the highlighted fields."
-            : "Please fill goal, target, industry, and budget.",
+          ? "광고 목적을 선택해주세요."
+          : "Please select a campaign goal.",
       );
       return;
     }
@@ -261,9 +289,16 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
 
         <p className="text-xs text-gray-500 dark:text-white/55">
           {isKo
-            ? "확인 후 비어 있는 항목을 채우거나 수정하세요. 확인을 눌러야 추천이 실행됩니다."
-            : "Review, fill any missing fields, then confirm to run the recommendation."}
+            ? "확인 후 필요 시 수정하세요. 업종·타깃·예산은 비워도 기본값으로 추천됩니다."
+            : "Review and edit if needed. Industry, target, and budget default when empty."}
         </p>
+        {budgetDefaulted ? (
+          <p className="rounded-lg border border-cyan-200/80 bg-cyan-50/80 px-3 py-2 text-[11px] leading-relaxed text-cyan-900 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-100">
+            {isKo
+              ? `예산 미입력 시 월 ${FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN.toLocaleString("ko-KR")}만원 기준으로 추천합니다.`
+              : `When budget is empty, recommendations use ${FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN}M KRW/month.`}
+          </p>
+        ) : null}
 
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="space-y-1">
@@ -392,7 +427,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
             className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-95"
           >
             <Sparkles className="h-4 w-4" />
-            {isKo ? "이 조건으로 추천 실행" : "Run recommendation"}
+            {isKo ? "추천 받기" : "Get recommendations"}
           </button>
           <button
             type="button"
@@ -435,7 +470,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
       />
       <FreetextExampleChips
         isKo={isKo}
-        onSelect={(example) => analyze(example)}
+        onSelect={(example) => analyze(example, { autoConfirm: true })}
         disabled={parsing}
       />
       {error ? <p className="text-xs font-medium text-rose-500">{error}</p> : null}

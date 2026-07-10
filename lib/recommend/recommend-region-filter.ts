@@ -135,6 +135,7 @@ export function matchRecommendWithRegionalPolicy(
   matchingInput: MatchingInput,
   limit: number,
   hasExplicitRegion: boolean,
+  hasExplicitSubZone = false,
 ): { recommendations: MatchedMedia[]; meta: RecommendMatchMeta } {
   const regionalCount = regionalCatalog.length;
 
@@ -176,7 +177,10 @@ export function matchRecommendWithRegionalPolicy(
 
   let regionSupplemented = false;
 
-  if (regionalCount < RECOMMEND_REGION_SUPPLEMENT_THRESHOLD) {
+  if (
+    regionalCount < RECOMMEND_REGION_SUPPLEMENT_THRESHOLD &&
+    !hasExplicitSubZone
+  ) {
     regionSupplemented = true;
     const pickedIds = new Set(recommendations.map((r) => r.media.id));
     const slotsLeft = Math.max(0, limit - recommendations.length);
@@ -211,11 +215,16 @@ export function runRecommendMatchFromCatalog(
     },
   );
 
+  const hasExplicitSubZone = Boolean(
+    aiInput.seoulZones?.length || aiInput.busanZones?.length,
+  );
+
   return matchRecommendWithRegionalPolicy(
     fullCatalog,
     regionalCatalog,
     matchingInput,
     limit,
     Boolean(plannerRegionIds?.length),
+    hasExplicitSubZone,
   );
 }

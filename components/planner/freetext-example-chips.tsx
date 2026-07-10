@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import {
+  FREETEXT_CHIP_PROMPTS_EN,
+  FREETEXT_CHIP_PROMPTS_KO,
   FREETEXT_EXAMPLE_CHIP_COUNT,
   FREETEXT_EXAMPLE_PROMPTS_EN,
   FREETEXT_EXAMPLE_PROMPTS_KO,
@@ -28,15 +30,18 @@ export function FreetextExampleChips({
   const examplePool = isKo
     ? FREETEXT_EXAMPLE_PROMPTS_KO
     : FREETEXT_EXAMPLE_PROMPTS_EN;
+  const chipPool = isKo ? FREETEXT_CHIP_PROMPTS_KO : FREETEXT_CHIP_PROMPTS_EN;
 
   const visibleExamples = useMemo(
     () =>
-      pickFreetextExamplePrompts(
-        examplePool,
-        FREETEXT_EXAMPLE_CHIP_COUNT,
-        exampleSeed,
-      ),
-    [examplePool, exampleSeed],
+      exampleSeed === 1
+        ? [...chipPool]
+        : pickFreetextExamplePrompts(
+            examplePool,
+            FREETEXT_EXAMPLE_CHIP_COUNT,
+            exampleSeed,
+          ),
+    [chipPool, examplePool, exampleSeed],
   );
 
   return (
