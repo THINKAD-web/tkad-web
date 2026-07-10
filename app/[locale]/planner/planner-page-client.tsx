@@ -85,8 +85,13 @@ import { PlannerStepper } from "@/components/planner/stepper";
 import { PlannerRecommendationPanel } from "@/components/planner/recommendation-panel";
 import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-media-bar";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
+import {
+  formatBusanZonesText,
+  suggestBusanZones,
+} from "@/lib/planner/busan-zones";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -250,6 +255,7 @@ export default function PlannerPageClient({
   const ageKeys = usePlannerStore((s) => s.ageKeys);
   const industryKey = usePlannerStore((s) => s.industryKey);
   const seoulZones = usePlannerStore((s) => s.seoulZones);
+  const busanZones = usePlannerStore((s) => s.busanZones);
   const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const appliedScenario = usePlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
@@ -283,6 +289,11 @@ export default function PlannerPageClient({
   const clearSeoulZones = usePlannerStore((s) => s.clearSeoulZones);
   const applySuggestedSeoulZones = usePlannerStore(
     (s) => s.applySuggestedSeoulZones,
+  );
+  const toggleBusanZone = usePlannerStore((s) => s.toggleBusanZone);
+  const clearBusanZones = usePlannerStore((s) => s.clearBusanZones);
+  const applySuggestedBusanZones = usePlannerStore(
+    (s) => s.applySuggestedBusanZones,
   );
   const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
@@ -377,12 +388,18 @@ export default function PlannerPageClient({
         selectedRegions,
         categories,
         seoulZones,
+        busanZones,
       ),
-    [catalog, selectedRegions, categories, seoulZones],
+    [catalog, selectedRegions, categories, seoulZones, busanZones],
   );
 
   const suggestedSeoulZones = useMemo(
     () => suggestSeoulZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
+  );
+
+  const suggestedBusanZones = useMemo(
+    () => suggestBusanZones(campaignGoal, industryKey),
     [campaignGoal, industryKey],
   );
 
@@ -421,6 +438,7 @@ export default function PlannerPageClient({
           goal: campaignGoal,
           regions,
           seoulZones,
+          busanZones,
           categories: categoriesArr,
           ageKeys,
           industryKey,
@@ -436,6 +454,7 @@ export default function PlannerPageClient({
       campaignGoal,
       regions,
       seoulZones,
+      busanZones,
       categoriesArr,
       ageKeys,
       industryKey,
@@ -1060,8 +1079,11 @@ export default function PlannerPageClient({
     if (selectedRegions.has("seoul") && seoulZones.length > 0) {
       parts.push(formatSeoulZonesText(seoulZones, isKo));
     }
+    if (selectedRegions.has("busan") && busanZones.length > 0) {
+      parts.push(formatBusanZonesText(busanZones, isKo));
+    }
     return parts.join(", ");
-  }, [selectedRegions, mapLabel, seoulZones, isKo]);
+  }, [selectedRegions, mapLabel, seoulZones, busanZones, isKo]);
 
   const categoriesSummary = useMemo(
     () =>
@@ -1419,6 +1441,17 @@ export default function PlannerPageClient({
                         onToggle={toggleSeoulZone}
                         onClear={clearSeoulZones}
                         onApplySuggested={applySuggestedSeoulZones}
+                      />
+                    ) : null}
+                    {selectedRegions.has("busan") ? (
+                      <PlannerBusanZoneChips
+                        embedded
+                        selected={busanZones}
+                        suggested={suggestedBusanZones}
+                        isKo={isKo}
+                        onToggle={toggleBusanZone}
+                        onClear={clearBusanZones}
+                        onApplySuggested={applySuggestedBusanZones}
                       />
                     ) : null}
                   </div>

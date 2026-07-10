@@ -78,7 +78,9 @@ import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
+import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
 import { suggestSeoulZones } from "@/lib/planner/seoul-zones";
+import { suggestBusanZones } from "@/lib/planner/busan-zones";
 import {
   generateScenarios,
   scenarioInputKey,
@@ -172,6 +174,7 @@ export default function IntegratedPlannerPageClient({
   const ageKeys = useIntegratedPlannerStore((s) => s.ageKeys);
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
   const seoulZones = useIntegratedPlannerStore((s) => s.seoulZones);
+  const busanZones = useIntegratedPlannerStore((s) => s.busanZones);
   const goalFollowUp = useIntegratedPlannerStore((s) => s.goalFollowUp);
   const appliedScenario = useIntegratedPlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
@@ -203,6 +206,11 @@ export default function IntegratedPlannerPageClient({
   const clearSeoulZones = useIntegratedPlannerStore((s) => s.clearSeoulZones);
   const applySuggestedSeoulZones = useIntegratedPlannerStore(
     (s) => s.applySuggestedSeoulZones,
+  );
+  const toggleBusanZone = useIntegratedPlannerStore((s) => s.toggleBusanZone);
+  const clearBusanZones = useIntegratedPlannerStore((s) => s.clearBusanZones);
+  const applySuggestedBusanZones = useIntegratedPlannerStore(
+    (s) => s.applySuggestedBusanZones,
   );
   const setGoalFollowUp = useIntegratedPlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = useIntegratedPlannerStore(
@@ -286,12 +294,18 @@ export default function IntegratedPlannerPageClient({
         selectedRegions,
         categories,
         seoulZones,
+        busanZones,
       ),
-    [catalog, selectedRegions, categories, seoulZones],
+    [catalog, selectedRegions, categories, seoulZones, busanZones],
   );
 
   const suggestedSeoulZones = useMemo(
     () => suggestSeoulZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
+  );
+
+  const suggestedBusanZones = useMemo(
+    () => suggestBusanZones(campaignGoal, industryKey),
     [campaignGoal, industryKey],
   );
 
@@ -317,6 +331,7 @@ export default function IntegratedPlannerPageClient({
       months,
       goalFollowUp,
       seoulZones,
+      busanZones,
       campaignMediaIds,
       campaignMediaQuantities,
       campaignMediaPriceOptionIndex,
@@ -334,6 +349,7 @@ export default function IntegratedPlannerPageClient({
       months,
       goalFollowUp,
       seoulZones,
+      busanZones,
       campaignMediaIds,
       campaignMediaQuantities,
       campaignMediaPriceOptionIndex,
@@ -381,6 +397,7 @@ export default function IntegratedPlannerPageClient({
           goal: campaignGoal,
           regions,
           seoulZones,
+          busanZones,
           categories: categoriesArr,
           ageKeys,
           industryKey,
@@ -398,6 +415,7 @@ export default function IntegratedPlannerPageClient({
       campaignGoal,
       regions,
       seoulZones,
+      busanZones,
       categoriesArr,
       ageKeys,
       industryKey,
@@ -739,6 +757,17 @@ export default function IntegratedPlannerPageClient({
                     onToggle={toggleSeoulZone}
                     onClear={clearSeoulZones}
                     onApplySuggested={applySuggestedSeoulZones}
+                  />
+                ) : null}
+
+                {selectedRegions.has("busan") ? (
+                  <PlannerBusanZoneChips
+                    selected={busanZones}
+                    suggested={suggestedBusanZones}
+                    isKo={isKo}
+                    onToggle={toggleBusanZone}
+                    onClear={clearBusanZones}
+                    onApplySuggested={applySuggestedBusanZones}
                   />
                 ) : null}
 

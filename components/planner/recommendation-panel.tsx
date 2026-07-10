@@ -18,6 +18,7 @@ import type {
 } from "@/lib/planner/types";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import {
   selectBudgetNum,
   usePlannerStore,
@@ -69,6 +70,7 @@ export type PlannerRecommendationStoreBinding = {
   budgetMan: number;
   months: number;
   seoulZones?: PlannerSeoulZoneKey[];
+  busanZones?: PlannerBusanZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   campaignMediaIds: string[];
   campaignMediaQuantities?: CampaignMediaQuantities;
@@ -121,6 +123,7 @@ export function PlannerRecommendationPanel({
   const plannerAgeKeys = usePlannerStore((s) => s.ageKeys);
   const plannerIndustryKey = usePlannerStore((s) => s.industryKey);
   const plannerSeoulZones = usePlannerStore((s) => s.seoulZones);
+  const plannerBusanZones = usePlannerStore((s) => s.busanZones);
   const plannerGoalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
@@ -143,6 +146,7 @@ export function PlannerRecommendationPanel({
   const ageKeys = store?.ageKeys ?? plannerAgeKeys;
   const industryKey = store?.industryKey ?? plannerIndustryKey;
   const seoulZones = store?.seoulZones ?? plannerSeoulZones;
+  const busanZones = store?.busanZones ?? plannerBusanZones;
   const goalFollowUp = store?.goalFollowUp ?? plannerGoalFollowUp;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
@@ -189,11 +193,12 @@ export function PlannerRecommendationPanel({
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${busanZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
     [
       goal,
       regions,
       seoulZones,
+      busanZones,
       categories,
       ageKeys,
       industryKey,
@@ -222,6 +227,7 @@ export function PlannerRecommendationPanel({
               goal,
               regions,
               seoulZones,
+              busanZones,
               categories,
               ageKeys,
               industryKey,
@@ -287,6 +293,7 @@ export function PlannerRecommendationPanel({
                   goal,
                   regions,
                   seoulZones,
+                  busanZones,
                   categories,
                   ageKeys,
                   industryKey,
@@ -318,6 +325,7 @@ export function PlannerRecommendationPanel({
                 goal,
                 regions,
                 seoulZones,
+                busanZones,
                 categories,
                 ageKeys,
                 industryKey,
@@ -345,6 +353,7 @@ export function PlannerRecommendationPanel({
               goal,
               regions,
               seoulZones,
+              busanZones,
               categories,
               ageKeys,
               industryKey,
@@ -404,6 +413,7 @@ export function PlannerRecommendationPanel({
       goal,
       regions,
       seoulZones,
+      busanZones,
       categories,
       ageKeys,
       industryKey,
@@ -415,6 +425,7 @@ export function PlannerRecommendationPanel({
       goal,
       regions,
       seoulZones,
+      busanZones,
       categories,
       ageKeys,
       industryKey,

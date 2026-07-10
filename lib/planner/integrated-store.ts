@@ -31,6 +31,11 @@ import {
   isPlannerSeoulZoneKey,
   suggestSeoulZones,
 } from "@/lib/planner/seoul-zones";
+import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
+import {
+  isPlannerBusanZoneKey,
+  suggestBusanZones,
+} from "@/lib/planner/busan-zones";
 import {
   INTEGRATED_LAST_INPUT_STEP,
   INTEGRATED_RESULT_STEP,
@@ -60,6 +65,7 @@ export type IntegratedPlannerStoreState = {
   ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey;
   seoulZones: PlannerSeoulZoneKey[];
+  busanZones: PlannerBusanZoneKey[];
   goalFollowUp: PlannerGoalFollowUp;
   campaignMediaIds: string[];
   /** 선택 OOH 매체별 수량 — 미지정 ID는 `getQuantityBounds().default` */
@@ -92,6 +98,9 @@ export type IntegratedPlannerStoreActions = {
   toggleSeoulZone: (zone: PlannerSeoulZoneKey) => void;
   clearSeoulZones: () => void;
   applySuggestedSeoulZones: () => void;
+  toggleBusanZone: (zone: PlannerBusanZoneKey) => void;
+  clearBusanZones: () => void;
+  applySuggestedBusanZones: () => void;
   setGoalFollowUp: (patch: Partial<PlannerGoalFollowUp>) => void;
   setCampaignMediaIds: (action: SetStateAction<string[]>) => void;
   setCampaignMediaQuantity: (mediaId: string, units: number) => void;
@@ -121,6 +130,7 @@ const INITIAL: IntegratedPlannerStoreState = {
   ageKeys: [] as PlannerAgeKey[],
   industryKey: "indOther",
   seoulZones: [],
+  busanZones: [],
   goalFollowUp: {},
   campaignMediaIds: [],
   campaignMediaQuantities: {},
@@ -177,13 +187,32 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           goal != null
             ? { seoulZones: suggestSeoulZones(goal, s.industryKey) }
             : {}),
+          ...(!s.busanZones.length &&
+          s.regions.includes("busan") &&
+          goal != null
+            ? { busanZones: suggestBusanZones(goal, s.industryKey) }
+            : {}),
         })),
       toggleRegion: (region) =>
-        set((s) => ({
-          regions: s.regions.includes(region)
-            ? s.regions.filter((r) => r !== region)
-            : [...s.regions, region],
-        })),
+        set((s) => {
+          if (s.regions.includes(region)) {
+            const next = s.regions.filter((r) => r !== region);
+            if (next.length === 0) return {};
+            const patch: Partial<IntegratedPlannerStoreState> = { regions: next };
+            if (region === "busan") patch.busanZones = [];
+            return patch;
+          }
+          const next = [...s.regions, region];
+          const patch: Partial<IntegratedPlannerStoreState> = { regions: next };
+          if (
+            region === "busan" &&
+            !s.busanZones.length &&
+            s.campaignGoal != null
+          ) {
+            patch.busanZones = suggestBusanZones(s.campaignGoal, s.industryKey);
+          }
+          return patch;
+        }),
       setRegions: (regions) => set({ regions }),
       toggleCategory: (cat) =>
         set((s) => ({
@@ -209,6 +238,9 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           ...(s.regions.includes("seoul") && s.campaignGoal != null
             ? { seoulZones: suggestSeoulZones(s.campaignGoal, key) }
             : {}),
+          ...(s.regions.includes("busan") && s.campaignGoal != null
+            ? { busanZones: suggestBusanZones(s.campaignGoal, key) }
+            : {}),
         })),
       toggleSeoulZone: (zone) =>
         set((s) => {
@@ -221,6 +253,18 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
       applySuggestedSeoulZones: () =>
         set((s) => ({
           seoulZones: suggestSeoulZones(s.campaignGoal, s.industryKey),
+        })),
+      toggleBusanZone: (zone) =>
+        set((s) => {
+          const next = new Set(s.busanZones);
+          if (next.has(zone)) next.delete(zone);
+          else next.add(zone);
+          return { busanZones: [...next] as PlannerBusanZoneKey[] };
+        }),
+      clearBusanZones: () => set({ busanZones: [] }),
+      applySuggestedBusanZones: () =>
+        set((s) => ({
+          busanZones: suggestBusanZones(s.campaignGoal, s.industryKey),
         })),
       setGoalFollowUp: (patch) =>
         set((s) => ({
@@ -340,6 +384,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           const seoulZones =
             patch.seoulZones ??
             districtHintsToSeoulZones(patch.districtHints ?? []);
+          const busanZones = patch.busanZones ?? [];
 
           return {
             regions,
@@ -369,6 +414,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
               ? { ageKeys: normalizePlannerAgeKeys(patch.ageKeys) }
               : {}),
             ...(seoulZones.length > 0 ? { seoulZones } : {}),
+            ...(busanZones.length > 0 ? { busanZones } : {}),
             campaignMediaIds,
             campaignMediaQuantities: {},
             campaignMediaPriceOptionIndex: {},
@@ -391,6 +437,7 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
         ageKeys: s.ageKeys,
         industryKey: s.industryKey,
         seoulZones: s.seoulZones,
+        busanZones: s.busanZones,
         goalFollowUp: s.goalFollowUp,
         campaignMediaIds: s.campaignMediaIds,
         campaignMediaQuantities: s.campaignMediaQuantities,
@@ -425,6 +472,9 @@ export const useIntegratedPlannerStore = create<IntegratedPlannerStore>()(
           seoulZones: Array.isArray(p.seoulZones)
             ? p.seoulZones.filter(isPlannerSeoulZoneKey)
             : current.seoulZones,
+          busanZones: Array.isArray(p.busanZones)
+            ? p.busanZones.filter(isPlannerBusanZoneKey)
+            : current.busanZones,
           goalFollowUp:
             p.goalFollowUp &&
             typeof p.goalFollowUp === "object" &&

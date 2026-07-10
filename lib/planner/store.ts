@@ -31,6 +31,11 @@ import {
 } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { isPlannerSeoulZoneKey, suggestSeoulZones } from "@/lib/planner/seoul-zones";
+import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
+import {
+  isPlannerBusanZoneKey,
+  suggestBusanZones,
+} from "@/lib/planner/busan-zones";
 import {
   getScenarioPreset,
   type PlannerScenarioPresetId,
@@ -83,6 +88,10 @@ export type PlannerStoreState = {
   seoulZones: PlannerSeoulZoneKey[];
   /** true면 상권 추천 자동 적용 안 함 (회귀·수동 클리어) */
   seoulZonesTouched: boolean;
+  /** 부산 선택 시 하위 상권. 빈 배열 = 부산 전체 */
+  busanZones: PlannerBusanZoneKey[];
+  /** true면 부산 상권 추천 자동 적용 안 함 */
+  busanZonesTouched: boolean;
   /** Step 2 목표별 후속 (전부 optional) */
   goalFollowUp: PlannerGoalFollowUp;
   mediaSelectionExplicit: boolean;
@@ -108,6 +117,10 @@ export type PlannerStoreActions = {
   setSeoulZones: (zones: PlannerSeoulZoneKey[]) => void;
   clearSeoulZones: () => void;
   applySuggestedSeoulZones: () => void;
+  toggleBusanZone: (zone: PlannerBusanZoneKey) => void;
+  setBusanZones: (zones: PlannerBusanZoneKey[]) => void;
+  clearBusanZones: () => void;
+  applySuggestedBusanZones: () => void;
   setGoalFollowUp: (patch: Partial<PlannerGoalFollowUp>) => void;
   applyScenarioPreset: (id: PlannerScenarioPresetId) => void;
   /** React `Dispatch<SetStateAction<string[]>>` 호환 — 기존 하위 컴포넌트 시그니처 유지용 */
@@ -146,6 +159,8 @@ const INITIAL_STATE: PlannerStoreState = {
   industryKey: "indOther",
   seoulZones: [],
   seoulZonesTouched: true,
+  busanZones: [],
+  busanZonesTouched: true,
   goalFollowUp: {},
   campaignMediaIds: [],
   campaignMediaQuantities: {},
@@ -202,6 +217,13 @@ export const usePlannerStore = create<PlannerStore>()(
                 seoulZones: suggestSeoulZones(goal, s.industryKey),
               }
             : {}),
+          ...(!s.busanZonesTouched &&
+          s.regions.includes("busan") &&
+          goal != null
+            ? {
+                busanZones: suggestBusanZones(goal, s.industryKey),
+              }
+            : {}),
         })),
 
       toggleRegion: (region) =>
@@ -215,6 +237,10 @@ export const usePlannerStore = create<PlannerStore>()(
               patch.seoulZones = [];
               patch.seoulZonesTouched = true;
             }
+            if (region === "busan") {
+              patch.busanZones = [];
+              patch.busanZonesTouched = true;
+            }
             return patch;
           }
           next.add(region);
@@ -225,6 +251,13 @@ export const usePlannerStore = create<PlannerStore>()(
             s.campaignGoal != null
           ) {
             patch.seoulZones = suggestSeoulZones(s.campaignGoal, s.industryKey);
+          }
+          if (
+            region === "busan" &&
+            !s.busanZonesTouched &&
+            s.campaignGoal != null
+          ) {
+            patch.busanZones = suggestBusanZones(s.campaignGoal, s.industryKey);
           }
           return patch;
         }),
@@ -276,6 +309,11 @@ export const usePlannerStore = create<PlannerStore>()(
           s.campaignGoal != null
             ? { seoulZones: suggestSeoulZones(s.campaignGoal, key) }
             : {}),
+          ...(!s.busanZonesTouched &&
+          s.regions.includes("busan") &&
+          s.campaignGoal != null
+            ? { busanZones: suggestBusanZones(s.campaignGoal, key) }
+            : {}),
         })),
 
       toggleSeoulZone: (zone) =>
@@ -295,6 +333,28 @@ export const usePlannerStore = create<PlannerStore>()(
         set((s) => ({
           seoulZones: suggestSeoulZones(s.campaignGoal, s.industryKey),
           seoulZonesTouched: false,
+        })),
+
+      toggleBusanZone: (zone) =>
+        set((s) => {
+          const next = new Set(s.busanZones);
+          if (next.has(zone)) next.delete(zone);
+          else next.add(zone);
+          return {
+            busanZones: [...next] as PlannerBusanZoneKey[],
+            busanZonesTouched: true,
+          };
+        }),
+
+      setBusanZones: (zones) =>
+        set({ busanZones: [...zones], busanZonesTouched: true }),
+
+      clearBusanZones: () => set({ busanZones: [], busanZonesTouched: true }),
+
+      applySuggestedBusanZones: () =>
+        set((s) => ({
+          busanZones: suggestBusanZones(s.campaignGoal, s.industryKey),
+          busanZonesTouched: false,
         })),
 
       setGoalFollowUp: (patch) =>
@@ -433,6 +493,7 @@ export const usePlannerStore = create<PlannerStore>()(
           const seoulZones =
             patch.seoulZones ??
             districtHintsToSeoulZones(patch.districtHints ?? []);
+          const busanZones = patch.busanZones ?? [];
           const campaignMediaIds = [...(patch.campaignMediaIds ?? [])];
 
           return {
@@ -464,6 +525,8 @@ export const usePlannerStore = create<PlannerStore>()(
               : {}),
             seoulZones,
             seoulZonesTouched: seoulZones.length > 0,
+            busanZones,
+            busanZonesTouched: busanZones.length > 0,
             campaignMediaIds,
             campaignMediaQuantities: {},
             campaignMediaPriceOptionIndex: {},
@@ -523,6 +586,8 @@ export const usePlannerStore = create<PlannerStore>()(
         industryKey: state.industryKey,
         seoulZones: state.seoulZones,
         seoulZonesTouched: state.seoulZonesTouched,
+        busanZones: state.busanZones,
+        busanZonesTouched: state.busanZonesTouched,
         goalFollowUp: state.goalFollowUp,
         campaignMediaIds: state.campaignMediaIds,
         campaignMediaQuantities: state.campaignMediaQuantities,
@@ -590,6 +655,13 @@ export const usePlannerStore = create<PlannerStore>()(
           merged.seoulZonesTouched = true;
         } else if (typeof raw.seoulZonesTouched === "boolean") {
           merged.seoulZonesTouched = raw.seoulZonesTouched;
+        }
+
+        if (Array.isArray(raw.busanZones)) {
+          merged.busanZones = raw.busanZones.filter(isPlannerBusanZoneKey);
+        }
+        if (typeof raw.busanZonesTouched === "boolean") {
+          merged.busanZonesTouched = raw.busanZonesTouched;
         }
 
         if (

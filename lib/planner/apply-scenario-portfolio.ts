@@ -39,12 +39,14 @@ export function resolveScenarioPortfolioMediaIds(
   const categorySet = new Set(categories);
   const seoulZones =
     patch.seoulZones ?? districtHintsToSeoulZones(patch.districtHints ?? []);
+  const busanZones = patch.busanZones ?? [];
 
   const filtered = filterPlannerMediaMulti(
     catalog,
     regionSet,
     categorySet,
     seoulZones,
+    busanZones,
   );
   if (filtered.length === 0) return [];
 
@@ -52,6 +54,7 @@ export function resolveScenarioPortfolioMediaIds(
     goal: patch.campaignGoal ?? null,
     regions,
     seoulZones,
+    busanZones,
     categories,
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,
