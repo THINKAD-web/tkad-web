@@ -175,6 +175,7 @@ type CompactGridProps = Pick<
   | "recommendReason"
   | "cardFooter"
   | "className"
+  | "planAddedFrom"
 >;
 
 export function DiscoveryMediaCardCompactGrid({
@@ -194,6 +195,7 @@ export function DiscoveryMediaCardCompactGrid({
   recommendReason,
   cardFooter,
   className,
+  planAddedFrom = "search",
 }: CompactGridProps) {
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
 
@@ -262,21 +264,19 @@ export function DiscoveryMediaCardCompactGrid({
             </div>
           ) : showPlanButton ? (
             <div className="flex h-8 items-stretch gap-1">
-              {onToggleCompare ? (
-            <MediaCompareSelectButton
-              mediaId={item.id}
-              compareEntry={{
-                id: item.id,
-                name: item.name,
-                nameEn: item.name,
-              }}
-              gridInline
-              className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
-            />
-              ) : null}
+              <MediaCompareSelectButton
+                mediaId={item.id}
+                compareEntry={{
+                  id: item.id,
+                  name: item.name,
+                  nameEn: item.name,
+                }}
+                gridInline
+                className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
+              />
               <MediaCartAddButton
-                item={planCartItemFromCatalog(item, "search")}
-                addedFrom="search"
+                item={planCartItemFromCatalog(item, planAddedFrom)}
+                addedFrom={planAddedFrom}
                 gridInline
                 className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
               />

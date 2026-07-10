@@ -56,6 +56,19 @@ import {
   plannerMonthlyPriceWonForMedia,
 } from "@/lib/planner/planner-media-quantity";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
+import { usePlanCart } from "@/hooks/use-plan-cart";
+import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import {
+  recommendPricingFromPlanCart,
+  resolveRecommendPortfolioFromPlanCart,
+} from "@/lib/recommend/recommend-plan-cart";
+import {
+  clearRecommendSessionSnapshot,
+  hydrateScoredList,
+  readRecommendSessionSnapshot,
+  serializeScoredList,
+  writeRecommendSessionSnapshot,
+} from "@/lib/recommend/recommend-session-persist";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -76,6 +89,12 @@ export default function RecommendPageClient({
   const isKo = locale === "ko";
   const { isPro } = useIsPro();
   const cartMax = planCartMaxItems(isPro);
+  const {
+    cart: planCart,
+    remove: removePlanItem,
+    updateItem: updatePlanCartItem,
+    addMany: addManyToPlanCart,
+  } = usePlanCart();
   const searchParams = useSearchParams();
   const similarCampaignId = searchParams.get("similar")?.trim() ?? "";
   const similarPrefillDone = useRef<string | null>(null);
@@ -86,8 +105,8 @@ export default function RecommendPageClient({
   const industryFromUrl = searchParams.get("industry") as HomeBudgetIndustry | null;
   const autoFromUrl = searchParams.get("auto");
   const briefFromUrl = searchParams.get("brief");
+  const sessionRestoredRef = useRef(false);
 
-  const [cartItems, setCartItems] = useState<MediaItem[]>([]);
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
   const [phase, setPhase] = useState<Phase>("form");
@@ -114,10 +133,42 @@ export default function RecommendPageClient({
     return fullList.slice(0, 3);
   }, [fullList]);
 
-  const pickedForQuote = useMemo(
+  const planPicked = useMemo(
     () =>
-      cartItems.length > 0 ? cartItems : top3.map((s) => s.item),
-    [cartItems, top3],
+      resolveRecommendPortfolioFromPlanCart(
+        planCart.items,
+        fullList,
+        catalog,
+      ),
+    [planCart.items, fullList, catalog],
+  );
+
+  const pickedForQuote = useMemo(
+    () => (planPicked.length > 0 ? planPicked : top3.map((s) => s.item)),
+    [planPicked, top3],
+  );
+
+  const pickedIdSet = useMemo(
+    () => new Set(pickedForQuote.map((m) => m.id)),
+    [pickedForQuote],
+  );
+
+  const planCartPricing = useMemo(
+    () => recommendPricingFromPlanCart(planCart.items, pickedIdSet),
+    [planCart.items, pickedIdSet],
+  );
+
+  const effectiveQuantities = useMemo(
+    () => ({ ...recommendQuantities, ...planCartPricing.quantities }),
+    [recommendQuantities, planCartPricing.quantities],
+  );
+
+  const effectivePriceOptionIndex = useMemo(
+    () => ({
+      ...recommendPriceOptionIndex,
+      ...planCartPricing.priceOptionIndex,
+    }),
+    [recommendPriceOptionIndex, planCartPricing.priceOptionIndex],
   );
 
   const scoredForReport = useMemo(() => {
@@ -135,22 +186,34 @@ export default function RecommendPageClient({
         <PlannerMediaQuantityControl
           media={media}
           isKo={isKo}
-          quantities={recommendQuantities}
-          priceOptionIndex={recommendPriceOptionIndex}
-          onQuantityChange={(units) =>
-            setRecommendQuantities((p) => ({ ...p, [media.id]: units }))
-          }
-          onPriceOptionChange={(index) =>
+          quantities={effectiveQuantities}
+          priceOptionIndex={effectivePriceOptionIndex}
+          onQuantityChange={(units) => {
+            setRecommendQuantities((p) => ({ ...p, [media.id]: units }));
+            if (planCart.items.some((i) => i.mediaId === media.id)) {
+              updatePlanCartItem(media.id, { quantity: units });
+            }
+          }}
+          onPriceOptionChange={(index) => {
             setRecommendPriceOptionIndex((p) => ({
               ...p,
               [media.id]: index,
-            }))
-          }
+            }));
+            if (planCart.items.some((i) => i.mediaId === media.id)) {
+              updatePlanCartItem(media.id, { priceOptionIndex: index });
+            }
+          }}
           compact
         />
       );
     },
-    [isKo, recommendQuantities, recommendPriceOptionIndex],
+    [
+      isKo,
+      effectiveQuantities,
+      effectivePriceOptionIndex,
+      planCart.items,
+      updatePlanCartItem,
+    ],
   );
 
   useEffect(() => {
@@ -171,8 +234,7 @@ export default function RecommendPageClient({
   }, [fullList]);
 
   const goToContactQuote = useCallback(() => {
-    const picked =
-      cartItems.length > 0 ? cartItems : top3.map((s) => s.item);
+    const picked = pickedForQuote;
     if (picked.length === 0) {
       toast(
         "error",
@@ -183,7 +245,16 @@ export default function RecommendPageClient({
     const duration = lastPayload?.input.preferredPeriodWeeks
       ? Math.max(1, Math.round(lastPayload.input.preferredPeriodWeeks / 4))
       : 1;
-    const monthlyWon = picked.reduce((s, m) => s + (m.price || 0), 0);
+    const monthlyWon = picked.reduce(
+      (s, m) =>
+        s +
+        plannerMonthlyPriceWonForMedia(
+          m,
+          effectiveQuantities,
+          effectivePriceOptionIndex,
+        ),
+      0,
+    );
     const estimatedReach =
       picked.reduce((s, m) => s + estimatedMonthlyImpressions(m), 0) *
       duration;
@@ -211,7 +282,7 @@ export default function RecommendPageClient({
     setNavigatingQuote(true);
     router.push("/contact?from=ai");
     setNavigatingQuote(false);
-  }, [cartItems, top3, lastPayload, isKo, router, toast]);
+  }, [pickedForQuote, lastPayload, isKo, router, toast, effectiveQuantities, effectivePriceOptionIndex]);
 
   /**
    * 추천 결과로 견적서를 직접 생성하고 미리보기로 이동.
@@ -223,9 +294,7 @@ export default function RecommendPageClient({
       const picked =
         idsOverride && idsOverride.length > 0
           ? catalog.filter((m) => idsOverride.includes(m.id))
-          : cartItems.length > 0
-            ? cartItems
-            : top3.map((s) => s.item);
+          : pickedForQuote;
       if (picked.length === 0) {
         toast(
           "error",
@@ -279,8 +348,8 @@ export default function RecommendPageClient({
             s +
             plannerMonthlyPriceWonForMedia(
               m,
-              recommendQuantities,
-              recommendPriceOptionIndex,
+              effectiveQuantities,
+              effectivePriceOptionIndex,
             ),
           0,
         );
@@ -317,8 +386,61 @@ export default function RecommendPageClient({
         setCreatingQuote(false);
       }
     },
-    [cartItems, top3, catalog, lastPayload, creatingQuote, isKo, router, toast, recommendQuantities, recommendPriceOptionIndex],
+    [pickedForQuote, catalog, lastPayload, creatingQuote, isKo, router, toast, effectiveQuantities, effectivePriceOptionIndex],
   );
+
+  const skipSessionRestore =
+    Boolean(briefFromUrl) ||
+    autoFromUrl === "1" ||
+    Boolean(similarCampaignId) ||
+    Boolean(searchParams.get("createQuote"));
+
+  useEffect(() => {
+    if (catalog.length === 0 || sessionRestoredRef.current) return;
+    sessionRestoredRef.current = true;
+    if (skipSessionRestore) return;
+
+    const snap = readRecommendSessionSnapshot();
+    if (!snap) return;
+
+    const scored = hydrateScoredList(snap.scored, catalog);
+    if (scored.length === 0 && snap.phase !== "noResults") return;
+
+    setInputMode(snap.inputMode);
+    setLastPayload(snap.lastPayload);
+    setFullList(scored.length > 0 ? scored : null);
+    setAnalysisSeed(snap.analysisSeed);
+    setRecommendQuantities(snap.recommendQuantities);
+    setRecommendPriceOptionIndex(snap.recommendPriceOptionIndex);
+    setPhase(snap.phase);
+  }, [catalog, skipSessionRestore]);
+
+  useEffect(() => {
+    if (!lastPayload) return;
+    if (phase !== "dashboard" && phase !== "list" && phase !== "noResults") {
+      return;
+    }
+
+    writeRecommendSessionSnapshot({
+      v: 1,
+      phase,
+      inputMode,
+      lastPayload,
+      scored: serializeScoredList(fullList ?? []),
+      analysisSeed,
+      recommendQuantities,
+      recommendPriceOptionIndex,
+      savedAt: Date.now(),
+    });
+  }, [
+    phase,
+    inputMode,
+    lastPayload,
+    fullList,
+    analysisSeed,
+    recommendQuantities,
+    recommendPriceOptionIndex,
+  ]);
 
   // 로그인 후 `?createQuote=<ids>` 로 복귀하면 해당 매체로 견적 생성을 재개.
   useEffect(() => {
@@ -341,6 +463,7 @@ export default function RecommendPageClient({
       seed = 0,
       opts?: { excludeNetwork?: boolean },
     ) => {
+      clearRecommendSessionSnapshot();
       setPhase("loading");
       // v1 AI 자유입력: 네트워크 매체 제외(서버 후보 + 클라 폴백 모두 일관 적용)
       const effectiveCatalog = opts?.excludeNetwork
@@ -420,6 +543,7 @@ export default function RecommendPageClient({
       } catch (e) {
         console.error("[recommend] runAnalysis", e);
         setFullList(null);
+        clearRecommendSessionSnapshot();
         setPhase("form");
         toast("error", tr("analysisFailed"));
       }
@@ -564,7 +688,11 @@ export default function RecommendPageClient({
         const idSet = new Set(mediaIds);
         const matched = catalog.filter((m) => idSet.has(m.id));
         if (matched.length > 0) {
-          setCartItems(matched.slice(0, cartMax));
+          addManyToPlanCart(
+            matched
+              .slice(0, cartMax)
+              .map((m) => planCartItemFromMediaItem(m, "ai_recommend")),
+          );
         }
 
         const period =
@@ -769,6 +897,7 @@ export default function RecommendPageClient({
               creatingQuote={creatingQuote}
               quoteBusy={navigatingQuote}
               onBackToForm={() => {
+                clearRecommendSessionSnapshot();
                 setPhase("form");
                 setFullList(null);
               }}
@@ -780,8 +909,8 @@ export default function RecommendPageClient({
               reportScoredPortfolio={scoredForReport}
               matchedCount={fullList.length}
               matchedPool={fullList.map((s) => s.item)}
-              recommendQuantities={recommendQuantities}
-              recommendPriceOptionIndex={recommendPriceOptionIndex}
+              recommendQuantities={effectiveQuantities}
+              recommendPriceOptionIndex={effectivePriceOptionIndex}
             />
           )}
 
@@ -798,6 +927,7 @@ export default function RecommendPageClient({
                   variant="primary"
                   size="md"
                   onClick={() => {
+                    clearRecommendSessionSnapshot();
                     setPhase("form");
                     setFullList(null);
                   }}
@@ -832,6 +962,7 @@ export default function RecommendPageClient({
                     variant="primary"
                     size="sm"
                     onClick={() => {
+                      clearRecommendSessionSnapshot();
                       setPhase("form");
                       setFullList(null);
                     }}
@@ -882,16 +1013,18 @@ export default function RecommendPageClient({
       </section>
 
       <RecommendCartBar
-        items={cartItems}
+        items={planPicked}
         locale={locale}
         maxItems={cartMax}
-        onRemove={(id) =>
-          setCartItems((prev) => prev.filter((m) => m.id !== id))
-        }
-        onClear={() => setCartItems([])}
+        onRemove={removePlanItem}
+        onClear={() => {
+          for (const m of planPicked) {
+            removePlanItem(m.id);
+          }
+        }}
       />
 
-      {cartItems.length > 0 && <div className="h-20" />}
+      {planPicked.length > 0 && <div className="h-20" />}
       </div>
     </HomeLandingDayNight>
   );

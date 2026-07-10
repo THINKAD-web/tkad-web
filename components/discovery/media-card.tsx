@@ -53,6 +53,7 @@ export const DiscoveryMediaCard = forwardRef<
     inCart = false,
     onToggleCompare,
     onToggleCart,
+    planAddedFrom = "search",
   } = props;
 
   if (isDiscoveryMapCardProps(props)) {
@@ -140,6 +141,7 @@ export const DiscoveryMediaCard = forwardRef<
           recommendReasonInside ? recommendReason : undefined
         }
         cardFooter={cardFooter}
+        planAddedFrom={planAddedFrom}
       />
     );
   } else {

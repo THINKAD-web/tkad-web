@@ -71,15 +71,15 @@ export function MediaCompareSelectButton({
           ? "비교중 ✓"
           : "On ✓"
         : isKo
-          ? "비교+"
-          : "Add+"
+          ? "비교"
+          : "Compare"
       : selected
         ? isKo
           ? "비교중 ✓"
           : "On ✓"
         : isKo
-          ? "비교+"
-          : "Add+";
+          ? "비교"
+          : "Compare";
 
   const ariaLabel = selected
     ? isKo

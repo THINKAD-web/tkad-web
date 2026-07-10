@@ -120,6 +120,7 @@ export function RecommendReportSection({
 }: Props) {
   const tPlanner = useTranslations("planner");
   const tr = useTranslations("recommend");
+  const tm = useTranslations("media.ai");
   const tCommon = useTranslations("common");
   const { toast } = useToast();
   const [open, setOpen] = useState(true);
@@ -137,14 +138,14 @@ export function RecommendReportSection({
 
   const ageText = useMemo(() => {
     const keyMap = {
-      genz: "form.targetGenz",
-      millennial: "form.targetMillennial",
-      family: "form.targetFamily",
-      biz: "form.targetBiz",
-      mass: "form.targetMass",
+      genz: "targetGenz",
+      millennial: "targetMillennial",
+      family: "targetFamily",
+      biz: "targetBiz",
+      mass: "targetMass",
     } as const;
-    return tr(keyMap[input.target] ?? "form.targetMass");
-  }, [input.target, tr]);
+    return tm(keyMap[input.target] ?? "targetMass");
+  }, [input.target, tm]);
 
   const typeCategoryText = useMemo(() => {
     if (!input.type || input.type === "all") {

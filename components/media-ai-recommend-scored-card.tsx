@@ -60,15 +60,11 @@ export function RecommendScoredMediaCard({
         priceLabel={priceLabel}
         isKo={isKo}
         rank={rank}
+        planAddedFrom="ai_recommend"
         showPlanButton
         recommendReason={reason}
         recommendReasonInside
         cardFooter={quantityControl ?? RECOMMEND_CARD_FOOTER_PLACEHOLDER}
-        planAddedFrom="ai_recommend"
-        inCompare={false}
-        inCart={false}
-        onToggleCompare={() => {}}
-        onToggleCart={() => {}}
         className="h-full"
       />
     </li>
