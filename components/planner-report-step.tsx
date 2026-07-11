@@ -32,6 +32,7 @@ import {
   PlannerNeonCard,
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProLockedPlaceholder,
   PlannerProTeaserStats,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
@@ -641,7 +642,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
           minHeightClass="min-h-[24rem]"
           lockedPlaceholder={
             props.metrics ? (
-              <>
+              <PlannerProLockedPlaceholder isKo={props.isKo}>
                 <PlannerProTeaserStats
                   isKo={props.isKo}
                   totalImpressions={props.metrics.estimatedTotalImpressions}
@@ -654,7 +655,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                     ? "로그인·PRO 구독 후 전체 보고서, PDF·시뮬레이션을 확인할 수 있습니다."
                     : "Sign in with PRO to unlock the full report, PDF export, and simulation."}
                 </p>
-              </>
+              </PlannerProLockedPlaceholder>
             ) : null
           }
         >

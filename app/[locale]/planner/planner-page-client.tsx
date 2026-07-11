@@ -130,6 +130,7 @@ import {
   PlannerNeonCard,
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProLockedPlaceholder,
   PlannerProTeaserStats,
   PlannerTrialBanner,
   plannerNeon,
@@ -2054,7 +2055,7 @@ export default function PlannerPageClient({
                     minHeightClass="min-h-[20rem]"
                     className="space-y-4"
                     lockedPlaceholder={
-                      <>
+                      <PlannerProLockedPlaceholder isKo={isKo}>
                         <PlannerProTeaserStats
                           isKo={isKo}
                           totalImpressions={metrics.estimatedTotalImpressions}
@@ -2067,7 +2068,7 @@ export default function PlannerPageClient({
                             ? "로그인·PRO 구독 후 프리미엄 인사이트와 효과 시뮬레이션을 확인할 수 있습니다."
                             : "Sign in with PRO to unlock premium insights and effect simulation."}
                         </p>
-                      </>
+                      </PlannerProLockedPlaceholder>
                     }
                   >
                     {plannerResultAllowed ? (

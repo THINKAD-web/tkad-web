@@ -24,6 +24,7 @@ import {
   PlannerNeonCard,
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProLockedPlaceholder,
   PlannerProTeaserStats,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
@@ -221,7 +222,7 @@ export function IntegratedReportStep(props: Props) {
           feature="planner_result"
           minHeightClass="min-h-[24rem]"
           lockedPlaceholder={
-            <>
+            <PlannerProLockedPlaceholder isKo={props.isKo}>
               <PlannerProTeaserStats
                 isKo={props.isKo}
                 totalImpressions={props.metrics.oohImpressions}
@@ -234,7 +235,7 @@ export function IntegratedReportStep(props: Props) {
                   ? "로그인·PRO 구독 후 통합 보고서 전체를 확인할 수 있습니다."
                   : "Sign in with PRO to unlock the full integrated report."}
               </p>
-            </>
+            </PlannerProLockedPlaceholder>
           }
         >
           {plannerResultAllowed ? (

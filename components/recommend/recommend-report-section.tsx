@@ -38,6 +38,7 @@ import { PlannerPortfolioNotice } from "@/components/planner/planner-portfolio-n
 import {
   PlannerNeonLabel,
   PlannerProGate,
+  PlannerProLockedPlaceholder,
   PlannerProTeaserStats,
 } from "@/components/planner/planner-neon-ui";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
@@ -511,7 +512,7 @@ export function RecommendReportSection({
               minHeightClass="min-h-[24rem]"
               lockedPlaceholder={
                 metrics ? (
-                  <>
+                  <PlannerProLockedPlaceholder isKo={isKo}>
                     <PlannerProTeaserStats
                       isKo={isKo}
                       totalImpressions={metrics.estimatedTotalImpressions}
@@ -524,7 +525,7 @@ export function RecommendReportSection({
                         ? "로그인·PRO 구독 후 전체 효과 보고서와 PDF를 확인할 수 있습니다."
                         : "Sign in with PRO to unlock the full effect report and PDF export."}
                     </p>
-                  </>
+                  </PlannerProLockedPlaceholder>
                 ) : null
               }
             >

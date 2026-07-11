@@ -60,6 +60,83 @@ export function PlannerNeonCard({
   return <div className={cn(plannerNeon.card, className)}>{children}</div>;
 }
 
+/** 비PRO 잠금 — 실데이터 없는 블러 스켈레톤 + 자물쇠 (무거운 children 미마운트) */
+export function PlannerProLockedSkeleton({
+  isKo,
+  className,
+  minHeightClass = "min-h-[11rem]",
+}: {
+  isKo: boolean;
+  className?: string;
+  minHeightClass?: string;
+}) {
+  return (
+    <div
+      className={cn(
+        "relative overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200",
+        "dark:bg-white/[0.03] bg-gray-50/80",
+        minHeightClass,
+        className,
+      )}
+      aria-hidden
+    >
+      <div className="pointer-events-none select-none p-5 opacity-55 blur-[2px] sm:p-6 dark:opacity-45">
+        <div className="space-y-3">
+          <div className="h-2.5 w-24 rounded-full bg-gray-300 dark:bg-white/25" />
+          <div className="h-6 w-3/5 max-w-xs rounded-lg bg-gray-300/90 dark:bg-white/20" />
+          <div className="h-3 w-2/5 max-w-[10rem] rounded-full bg-gray-200 dark:bg-white/15" />
+        </div>
+        <div className="mt-5 grid grid-cols-3 gap-2 sm:gap-3">
+          {[0, 1, 2].map((i) => (
+            <div
+              key={i}
+              className="h-14 rounded-xl border border-gray-200/80 bg-gray-200/90 dark:border-white/10 dark:bg-white/10 sm:h-16"
+            />
+          ))}
+        </div>
+        <div className="mt-4 h-28 rounded-xl border border-gray-200/70 bg-gray-100 dark:border-white/8 dark:bg-white/[0.06] sm:h-32" />
+        <div className="mt-4 space-y-2">
+          {[100, 88, 76, 64].map((w) => (
+            <div
+              key={w}
+              className="h-2.5 rounded-full bg-gray-200 dark:bg-white/12"
+              style={{ width: `${w}%` }}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-background/10 via-background/25 to-background/40">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-background/90 px-4 py-3 shadow-sm dark:border-white/15 dark:bg-[#0a0a0a]/90">
+          <Lock className="h-5 w-5 text-violet-500 dark:text-violet-300" aria-hidden />
+          <span className="text-xs font-medium text-muted-foreground">
+            {isKo ? "잠긴 프리미엄 콘텐츠" : "Locked premium content"}
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/** 잠금 스켈레톤 + 선택적 KPI·안내 문구 */
+export function PlannerProLockedPlaceholder({
+  isKo,
+  children,
+  className,
+  skeletonClassName,
+}: {
+  isKo: boolean;
+  children?: ReactNode;
+  className?: string;
+  skeletonClassName?: string;
+}) {
+  return (
+    <div className={cn("space-y-4", className)}>
+      <PlannerProLockedSkeleton isKo={isKo} className={skeletonClassName} />
+      {children}
+    </div>
+  );
+}
+
 export function PlannerProTeaserStats({
   isKo,
   totalImpressions,
@@ -165,7 +242,7 @@ export function PlannerProGate({
 
   return (
     <div className={cn("relative space-y-4", minHeightClass, className)}>
-      {lockedPlaceholder}
+      {lockedPlaceholder ?? <PlannerProLockedSkeleton isKo={isKo} />}
       <TierGatePanel message={message} className="mx-auto" />
     </div>
   );
