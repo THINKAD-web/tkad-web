@@ -3,9 +3,13 @@
 import { Plus, Trash2 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import type { PlanCartAddonLine, PlanCartGradeSelection, PlanCartItem } from "@/lib/plan-cart";
 import { createPlanCartAddonLine } from "@/lib/plan-cart";
-import { planCartEffectiveGradeSelections } from "@/lib/plan-cart-pricing";
+import {
+  planCartEffectiveOptionSelections,
+  resolveOptionSelectionMonthlyPriceWon,
+} from "@/lib/plan-cart-option-selections";
 import { PlannerMediaPackagePicker } from "@/components/planner/media-package-picker";
 import { PlannerMediaQuantityStepper } from "@/components/planner/media-quantity-stepper";
 import {
@@ -13,7 +17,6 @@ import {
   PlanCartItemAddonEditor,
 } from "@/components/plan/plan-cart-item-addon-editor";
 import { plannerPackageOptions } from "@/lib/planner/planner-media-quantity";
-import { resolveGradeOptionMonthlyPriceWon } from "@/lib/media-quantity";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -25,7 +28,7 @@ type Props = {
   className?: string;
 };
 
-function nextUnusedGradeIndex(
+function nextUnusedOptionIndex(
   media: MediaItem,
   selections: PlanCartGradeSelection[],
 ): number {
@@ -44,8 +47,8 @@ export function PlanCartGradeSelectionsEditor({
   className,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
-  const selections =
-    planCartEffectiveGradeSelections(item, media) ?? [];
+  const isGradeMode = isPerUnitGradePriceOptions(media);
+  const selections = planCartEffectiveOptionSelections(item, media) ?? [];
 
   const updateRow = (
     rowIndex: number,
@@ -63,7 +66,7 @@ export function PlanCartGradeSelectionsEditor({
   };
 
   const addRow = () => {
-    const idx = nextUnusedGradeIndex(media, selections);
+    const idx = nextUnusedOptionIndex(media, selections);
     onChange([...selections, { priceOptionIndex: idx, quantity: 1 }]);
   };
 
@@ -73,17 +76,19 @@ export function PlanCartGradeSelectionsEditor({
   return (
     <div className={cn("space-y-3", className)}>
       <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
-        {isKo ? "등급별 대수" : "Grade & fleet"}
+        {isGradeMode
+          ? isKo
+            ? "등급별 대수"
+            : "Grade & fleet"
+          : isKo
+            ? "옵션별 수량"
+            : "Options & quantity"}
       </p>
 
       {selections.map((sel, rowIndex) => {
         const quantities = { [media.id]: sel.quantity };
         const priceOptionIndex = { [media.id]: sel.priceOptionIndex };
-        const rowTotal = resolveGradeOptionMonthlyPriceWon(
-          media,
-          sel.priceOptionIndex,
-          sel.quantity,
-        );
+        const rowTotal = resolveOptionSelectionMonthlyPriceWon(media, sel);
 
         return (
           <div
@@ -92,7 +97,13 @@ export function PlanCartGradeSelectionsEditor({
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-200">
-                {isKo ? `등급 ${rowIndex + 1}` : `Grade ${rowIndex + 1}`}
+                {isGradeMode
+                  ? isKo
+                    ? `등급 ${rowIndex + 1}`
+                    : `Grade ${rowIndex + 1}`
+                  : isKo
+                    ? `옵션 ${rowIndex + 1}`
+                    : `Option ${rowIndex + 1}`}
               </span>
               <div className="flex items-center gap-2">
                 <span className="text-[11px] font-bold tabular-nums text-foreground">
@@ -104,7 +115,15 @@ export function PlanCartGradeSelectionsEditor({
                     type="button"
                     onClick={() => removeRow(rowIndex)}
                     className="flex h-7 w-7 items-center justify-center rounded-md border border-gray-200 text-gray-500 hover:border-rose-300 hover:text-rose-600 dark:border-white/12"
-                    aria-label={isKo ? "등급 행 삭제" : "Remove grade row"}
+                    aria-label={
+                      isGradeMode
+                        ? isKo
+                          ? "등급 행 삭제"
+                          : "Remove grade row"
+                        : isKo
+                          ? "옵션 행 삭제"
+                          : "Remove option row"
+                    }
                   >
                     <Trash2 className="h-3.5 w-3.5" />
                   </button>
@@ -146,7 +165,13 @@ export function PlanCartGradeSelectionsEditor({
             className="inline-flex items-center gap-1 rounded-lg border border-dashed border-violet-400/40 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-200"
           >
             <Plus className="h-3.5 w-3.5" />
-            {isKo ? "다른 등급 추가" : "Add another grade"}
+            {isGradeMode
+              ? isKo
+                ? "다른 등급 추가"
+                : "Add another grade"
+              : isKo
+                ? "옵션 행 추가"
+                : "Add option row"}
           </button>
         ) : null}
         <PlanCartAddonAddButton
@@ -169,3 +194,6 @@ export function PlanCartGradeSelectionsEditor({
     </div>
   );
 }
+
+/** package 매체 복수 옵션 편집 — 등급형과 동일 UI */
+export const PlanCartOptionSelectionsEditor = PlanCartGradeSelectionsEditor;

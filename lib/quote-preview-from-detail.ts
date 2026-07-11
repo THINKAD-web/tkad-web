@@ -57,6 +57,41 @@ function formatMediaDisplayName(
   return parts.join(" · ");
 }
 
+function previewMediaSelectionPairs(
+  medias: readonly QuoteDetailPreviewMedia[],
+  selections: readonly QuoteMediaSelectionSnapshot[] | null | undefined,
+): Array<{
+  media: QuoteDetailPreviewMedia;
+  snap?: QuoteMediaSelectionSnapshot;
+  rowKey: string;
+}> {
+  if (!selections?.length) {
+    return medias.map((media) => ({ media, rowKey: media.id }));
+  }
+  const mediaById = new Map(medias.map((m) => [m.id, m]));
+  const hasDuplicateMediaIds =
+    selections.length > new Set(selections.map((s) => s.mediaId)).size;
+  if (hasDuplicateMediaIds) {
+    return selections.flatMap((snap, index) => {
+      const media = mediaById.get(snap.mediaId);
+      if (!media) return [];
+      return [
+        {
+          media,
+          snap,
+          rowKey: `${snap.mediaId}-${snap.priceOptionIndex}-${index}`,
+        },
+      ];
+    });
+  }
+  const map = selectionsByMediaId([...selections]);
+  return medias.map((media) => ({
+    media,
+    snap: map.get(media.id),
+    rowKey: media.id,
+  }));
+}
+
 export function inferQuotePreviewPeriodMonths(period: string): number {
   const m = period.match(/(\d+)\s*(?:개월|month)/i);
   if (m) return Math.max(1, parseInt(m[1]!, 10));
@@ -69,25 +104,25 @@ export function buildQuotePreviewPdfRows(
   isKo: boolean,
   periodLabel: string,
 ): QuotePdfPreviewRow[] {
-  const map = selectionsByMediaId(selections ?? []);
-  return medias.map((m) => {
-    const snap = map.get(m.id);
-    const unitPriceWon = snap?.optionPriceWon ?? m.price;
-    const lineTotalWon =
-      snap?.lineTotalWon ?? m.lineTotalWon ?? unitPriceWon;
-    return {
-      id: m.id,
-      thumbUrl: m.image,
-      name: formatMediaDisplayName(m, snap, isKo),
-      location: m.location,
-      unitPriceWon,
-      lineTotalWon,
-      unitPeriodLabel: isKo ? "월" : "mo",
-      executionPeriodLabel: periodLabel,
-      categoryLabel: m.type,
-      dailyFootTraffic: m.dailyFootTraffic ?? null,
-    };
-  });
+  return previewMediaSelectionPairs(medias, selections).map(
+    ({ media: m, snap, rowKey }) => {
+      const unitPriceWon = snap?.optionPriceWon ?? m.price;
+      const lineTotalWon =
+        snap?.lineTotalWon ?? m.lineTotalWon ?? unitPriceWon;
+      return {
+        id: rowKey,
+        thumbUrl: m.image,
+        name: formatMediaDisplayName(m, snap, isKo),
+        location: m.location,
+        unitPriceWon,
+        lineTotalWon,
+        unitPeriodLabel: isKo ? "월" : "mo",
+        executionPeriodLabel: periodLabel,
+        categoryLabel: m.type,
+        dailyFootTraffic: m.dailyFootTraffic ?? null,
+      };
+    },
+  );
 }
 
 export function buildQuotePreviewLineDetails(
@@ -96,26 +131,26 @@ export function buildQuotePreviewLineDetails(
   isKo: boolean,
   periodLabel: string,
 ): DocumentMediaDetail[] {
-  const map = selectionsByMediaId(selections ?? []);
   const loc = localeTag(isKo);
-  return medias.map((m) => {
-    const snap = map.get(m.id);
-    const unitPriceWon = snap?.optionPriceWon ?? m.price;
-    const lineTotalWon =
-      snap?.lineTotalWon ?? m.lineTotalWon ?? unitPriceWon;
-    return {
-      id: m.id,
-      name: formatMediaDisplayName(m, snap, isKo),
-      location: m.location,
-      thumbUrl: m.image,
-      categoryLabel: m.type,
-      quantityLabel: snap?.quantityLabel ?? undefined,
-      dailyTraffic: m.dailyFootTraffic ?? undefined,
-      monthlyPriceLabel: formatMediaPrice(unitPriceWon, loc),
-      lineTotalLabel: formatMediaPrice(lineTotalWon, loc),
-      executionPeriodLabel: periodLabel,
-    };
-  });
+  return previewMediaSelectionPairs(medias, selections).map(
+    ({ media: m, snap, rowKey }) => {
+      const unitPriceWon = snap?.optionPriceWon ?? m.price;
+      const lineTotalWon =
+        snap?.lineTotalWon ?? m.lineTotalWon ?? unitPriceWon;
+      return {
+        id: rowKey,
+        name: formatMediaDisplayName(m, snap, isKo),
+        location: m.location,
+        thumbUrl: m.image,
+        categoryLabel: m.type,
+        quantityLabel: snap?.quantityLabel ?? undefined,
+        dailyTraffic: m.dailyFootTraffic ?? undefined,
+        monthlyPriceLabel: formatMediaPrice(unitPriceWon, loc),
+        lineTotalLabel: formatMediaPrice(lineTotalWon, loc),
+        executionPeriodLabel: periodLabel,
+      };
+    },
+  );
 }
 
 export function quotePreviewAmountsWon(displayTotalManwon: number): {

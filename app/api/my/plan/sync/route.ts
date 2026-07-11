@@ -42,6 +42,15 @@ const PlanCartItemSchema = z.object({
     )
     .max(12)
     .optional(),
+  optionSelections: z
+    .array(
+      z.object({
+        priceOptionIndex: z.number().int().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(12)
+    .optional(),
   addonLines: z.array(PlanCartAddonLineSchema).max(10).optional(),
   thumbnailUrl: z.string().optional(),
   addedFrom: z.enum(["ai_recommend", "planner", "search", "map", "package"]),

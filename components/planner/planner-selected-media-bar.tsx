@@ -15,6 +15,8 @@ import {
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
+import { formatPlanCartMultiOptionSummaryShort } from "@/lib/plan-cart-option-selections";
+import { usePlanCart } from "@/hooks/use-plan-cart";
 import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { plannerNeon } from "@/components/planner/planner-neon-ui";
@@ -50,6 +52,11 @@ export function PlannerSelectedMediaBar({
   id = "planner-selected-media-bar",
 }: Props) {
   const t = useTranslations("planner");
+  const { cart: planCart } = usePlanCart();
+  const planCartByMediaId = useMemo(
+    () => new Map(planCart.items.map((item) => [item.mediaId, item])),
+    [planCart.items],
+  );
 
   const entries = useMemo(() => {
     const ordered = orderPlannerSelectedMedia(
@@ -165,6 +172,11 @@ export function PlannerSelectedMediaBar({
                   campaignMediaPriceOptionIndex,
                 )
               : null;
+          const cartItem = planCartByMediaId.get(id);
+          const multiOptionSummary =
+            media != null && cartItem
+              ? formatPlanCartMultiOptionSummaryShort(media, cartItem, isKo)
+              : undefined;
 
           return (
             <li key={id} className="min-w-0">
@@ -172,7 +184,11 @@ export function PlannerSelectedMediaBar({
                 <div className="flex min-w-0 items-start justify-between gap-2">
                   <p className="min-w-0 flex-1 leading-snug font-medium text-violet-800 dark:text-violet-100">
                     <span className="line-clamp-2">{label}</span>
-                    {qtyLabel ? (
+                    {multiOptionSummary ? (
+                      <span className="ml-1 font-normal text-muted-foreground">
+                        · {multiOptionSummary}
+                      </span>
+                    ) : qtyLabel ? (
                       <span className="ml-1 font-normal text-muted-foreground">
                         · {qtyLabel}
                       </span>

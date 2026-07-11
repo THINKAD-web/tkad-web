@@ -53,7 +53,8 @@ import {
   type CampaignMediaQuantities,
   plannerMonthlyPriceWonForMedia,
 } from "@/lib/planner/planner-media-quantity";
-import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
+import { buildQuoteMediaSelectionSnapshot, buildQuoteMediaSelectionSnapshotsFromCartItem } from "@/lib/quote-snapshot-build";
+import { planCartLineMonthlyWon } from "@/lib/plan-cart-pricing";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
 import { usePlanCart } from "@/hooks/use-plan-cart";
@@ -181,8 +182,8 @@ export default function RecommendPageClient({
   );
 
   const planCartPricing = useMemo(
-    () => recommendPricingFromPlanCart(planCart.items, pickedIdSet),
-    [planCart.items, pickedIdSet],
+    () => recommendPricingFromPlanCart(planCart.items, pickedIdSet, catalog),
+    [planCart.items, pickedIdSet, catalog],
   );
 
   const effectiveQuantities = useMemo(
@@ -370,18 +371,31 @@ export default function RecommendPageClient({
         const period = isKo
           ? `${duration}개월`
           : `${duration} month${duration > 1 ? "s" : ""}`;
-        const monthlyWon = picked.reduce(
-          (s, m) =>
+        const cartById = new Map(planCart.items.map((item) => [item.mediaId, item]));
+        const monthlyWon = picked.reduce((s, m) => {
+          const cartItem = cartById.get(m.id);
+          if (cartItem) {
+            return s + planCartLineMonthlyWon(cartItem, m);
+          }
+          return (
             s +
             plannerMonthlyPriceWonForMedia(
               m,
               effectiveQuantities,
               effectivePriceOptionIndex,
-            ),
-          0,
-        );
+            )
+          );
+        }, 0);
 
-        const mediaSelections = picked.map((m) => {
+        const mediaSelections = picked.flatMap((m) => {
+          const cartItem = cartById.get(m.id);
+          if (cartItem) {
+            return buildQuoteMediaSelectionSnapshotsFromCartItem({
+              media: m,
+              item: cartItem,
+              isKo,
+            });
+          }
           const poIdx = effectivePriceOptionIndex[m.id] ?? 0;
           const units = effectiveQuantities[m.id];
           const lineTotalWon = plannerMonthlyPriceWonForMedia(
@@ -389,13 +403,15 @@ export default function RecommendPageClient({
             effectiveQuantities,
             effectivePriceOptionIndex,
           );
-          return buildQuoteMediaSelectionSnapshot({
-            media: m,
-            isKo,
-            priceOptionIndex: poIdx,
-            units,
-            lineTotalWon,
-          });
+          return [
+            buildQuoteMediaSelectionSnapshot({
+              media: m,
+              isKo,
+              priceOptionIndex: poIdx,
+              units,
+              lineTotalWon,
+            }),
+          ];
         });
         const networkUnits: Record<string, number> = {};
         for (const m of picked) {

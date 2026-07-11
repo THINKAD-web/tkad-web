@@ -1,6 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
 import type { PlanCartItem } from "@/lib/plan-cart";
+import { planCartPortfolioPricing } from "@/lib/plan-cart-pricing";
+import { planCartCatalogById } from "@/lib/plan-cart-pricing";
 import type {
   CampaignMediaPriceOptionIndex,
   CampaignMediaQuantities,
@@ -31,23 +33,43 @@ export function resolveRecommendPortfolioFromPlanCart(
 export function recommendPricingFromPlanCart(
   planItems: readonly PlanCartItem[],
   portfolioIds: ReadonlySet<string>,
+  catalog?: readonly MediaItem[],
 ): {
   quantities: CampaignMediaQuantities;
   priceOptionIndex: CampaignMediaPriceOptionIndex;
 } {
-  const quantities: CampaignMediaQuantities = {};
-  const priceOptionIndex: CampaignMediaPriceOptionIndex = {};
+  const filtered = planItems.filter((item) => portfolioIds.has(item.mediaId));
+  const syntheticCart = {
+    items: filtered,
+    updatedAt: new Date(0).toISOString(),
+  };
+  const pricing = planCartPortfolioPricing(syntheticCart);
 
-  for (const item of planItems) {
-    if (!portfolioIds.has(item.mediaId)) continue;
-    if (item.quantity != null && Number.isFinite(item.quantity)) {
-      quantities[item.mediaId] = Math.round(item.quantity);
+  if (!catalog?.length) {
+    return {
+      quantities: pricing.quantities ?? {},
+      priceOptionIndex: pricing.priceOptionIndex ?? {},
+    };
+  }
+
+  const byId = planCartCatalogById(catalog);
+  const quantities = { ...(pricing.quantities ?? {}) };
+  const priceOptionIndex = { ...(pricing.priceOptionIndex ?? {}) };
+
+  for (const item of filtered) {
+    const media = byId.get(item.mediaId);
+    if (!media) continue;
+    if (quantities[item.mediaId] == null) {
+      const q = item.quantity;
+      if (q != null && Number.isFinite(q)) {
+        quantities[item.mediaId] = Math.round(q);
+      }
     }
-    if (
-      item.priceOptionIndex != null &&
-      Number.isFinite(item.priceOptionIndex)
-    ) {
-      priceOptionIndex[item.mediaId] = Math.round(item.priceOptionIndex);
+    if (priceOptionIndex[item.mediaId] == null) {
+      const idx = item.priceOptionIndex;
+      if (idx != null && Number.isFinite(idx)) {
+        priceOptionIndex[item.mediaId] = Math.round(idx);
+      }
     }
   }
 

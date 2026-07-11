@@ -5,10 +5,14 @@ import { ChevronDown, ChevronUp, GripVertical, X } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { isPerUnitGradePriceOptions, resolveMediaQuantity } from "@/lib/media-quantity";
-import type { PlanCartAddonLine, PlanCartGradeSelection, PlanCartItem } from "@/lib/plan-cart";
+import type { PlanCartAddonLine, PlanCartGradeSelection, PlanCartItem, PlanCartOptionSelection } from "@/lib/plan-cart";
 import { createPlanCartAddonLine, planCartAddedFromLabel } from "@/lib/plan-cart";
 import {
-  planCartEffectiveGradeSelections,
+  formatPlanCartMultiOptionSummaryShort,
+  planCartEffectiveOptionSelections,
+  planCartItemUsesMultiOptionSelections,
+} from "@/lib/plan-cart-option-selections";
+import {
   planCartItemAddonTotalWon,
   planCartLineMonthlyWon,
   planCartLineUnitMonthlyWon,
@@ -39,6 +43,10 @@ type Props = {
     mediaId: string,
     selections: PlanCartGradeSelection[],
   ) => void;
+  onOptionSelectionsChange: (
+    mediaId: string,
+    selections: PlanCartOptionSelection[],
+  ) => void;
   onAddonLinesChange: (mediaId: string, lines: PlanCartAddonLine[]) => void;
   onGripDragStart: (mediaId: string) => void;
   onGripDragEnd: () => void;
@@ -60,6 +68,7 @@ export function PlanCartLineCard({
   onQuantityChange,
   onPriceOptionChange,
   onGradeSelectionsChange,
+  onOptionSelectionsChange,
   onAddonLinesChange,
   onGripDragStart,
   onGripDragEnd,
@@ -69,24 +78,30 @@ export function PlanCartLineCard({
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
   const lineMonthlyWon = planCartLineMonthlyWon(item, media);
-  const grades = media ? planCartEffectiveGradeSelections(item, media) : null;
+  const optionRows = media ? planCartEffectiveOptionSelections(item, media) : null;
+  const usesMultiOptionEditor = media
+    ? planCartItemUsesMultiOptionSelections(item, media)
+    : false;
   const isGradeBus = media ? isPerUnitGradePriceOptions(media) : false;
   const units = media
     ? planCartResolvedUnits(item, media)
     : item.quantity ?? 1;
   const unitMonthlyWon =
-    !isGradeBus || (grades?.length ?? 0) <= 1
+    !usesMultiOptionEditor || (optionRows?.length ?? 0) <= 1
       ? planCartLineUnitMonthlyWon(item, media)
       : 0;
   const showQtyBreakdown =
     media &&
     shouldShowPlannerQuantityControl(media) &&
-    !isGradeBus &&
+    !usesMultiOptionEditor &&
     units > 1 &&
     unitMonthlyWon > 0 &&
     unitMonthlyWon !== lineMonthlyWon;
-  const showGradeSummary =
-    isGradeBus && grades && grades.length > 0;
+  const multiOptionSummary =
+    media != null
+      ? formatPlanCartMultiOptionSummaryShort(media, item, isKo)
+      : undefined;
+  const showMultiOptionSummary = Boolean(multiOptionSummary);
   const itemAddonTotal = planCartItemAddonTotalWon(item);
   const addonLines = item.addonLines ?? [];
 
@@ -181,15 +196,14 @@ export function PlanCartLineCard({
 
           <div className="mt-2 flex flex-wrap items-end justify-between gap-2 border-t border-gray-100 pt-2 dark:border-white/10">
             <div className="min-w-0">
-              {showGradeSummary ? (
+              {showMultiOptionSummary ? (
                 <p className="text-[11px] text-gray-500 dark:text-white/50">
-                  {grades!.length > 1
+                  {multiOptionSummary}
+                  {units > 1
                     ? isKo
-                      ? `${grades!.length}개 등급 · 총 ${units.toLocaleString(locale)}대`
-                      : `${grades!.length} grades · ${units.toLocaleString(locale)} units`
-                    : isKo
-                      ? `${units.toLocaleString(locale)}대`
-                      : `${units.toLocaleString(locale)} units`}
+                      ? ` · 총 ${units.toLocaleString(locale)}`
+                      : ` · ${units.toLocaleString(locale)} total`
+                    : null}
                 </p>
               ) : null}
               {showQtyBreakdown ? (
@@ -227,14 +241,18 @@ export function PlanCartLineCard({
 
       {media ? (
         <div className="mt-3 border-2 border-gray-200 bg-gray-50 p-3 dark:border-white/12 dark:bg-black/30">
-          {isGradeBus ? (
+          {usesMultiOptionEditor ? (
             <PlanCartGradeSelectionsEditor
               media={media}
               item={item}
               isKo={isKo}
-              onChange={(selections) =>
-                onGradeSelectionsChange(item.mediaId, selections)
-              }
+              onChange={(selections) => {
+                if (isGradeBus) {
+                  onGradeSelectionsChange(item.mediaId, selections);
+                } else {
+                  onOptionSelectionsChange(item.mediaId, selections);
+                }
+              }}
               onAddonLinesChange={(lines) =>
                 onAddonLinesChange(item.mediaId, lines)
               }

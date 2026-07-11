@@ -34,8 +34,10 @@ export interface PlanCartItem {
   quantity?: number;
   /** `priceOptions` 패키지·등급 매체 — 선택 옵션 인덱스 */
   priceOptionIndex?: number;
-  /** 버스 등급형 — 복수 등급·대수 (있으면 단일 priceOptionIndex/quantity 보다 우선) */
+  /** 버스 등급형 — 복수 등급·대수 */
   gradeSelections?: PlanCartGradeSelection[];
+  /** package 매체 — 복수 옵션·수량 행 (형태는 gradeSelections 와 동일) */
+  optionSelections?: PlanCartOptionSelection[];
   /** 매체별 제작비·설치비 등 (기간 총액에 1회 합산) */
   addonLines?: PlanCartAddonLine[];
   thumbnailUrl?: string;
@@ -48,6 +50,8 @@ export interface PlanCartGradeSelection {
   priceOptionIndex: number;
   quantity: number;
 }
+
+export type PlanCartOptionSelection = PlanCartGradeSelection;
 
 /** 제작비·설치비 등 부가 비용 라인 (견적서 커스텀 라인과 동일 개념) */
 export interface PlanCartAddonLine {
@@ -77,6 +81,10 @@ export type BulkAddToPlanCartResult = {
   skippedDuplicate: number;
   skippedMax: number;
 };
+
+import {
+  normalizePlanCartOptionSelections,
+} from "@/lib/plan-cart-option-selections";
 
 const EMPTY_CART = (): PlanCart => ({
   items: [],
@@ -128,6 +136,7 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
         ? Math.round(o.priceOptionIndex)
         : undefined,
     gradeSelections: normalizeGradeSelections(o.gradeSelections),
+    optionSelections: normalizePlanCartOptionSelections(o.optionSelections),
     addonLines: normalizeItemAddonLines(o.addonLines),
     thumbnailUrl:
       typeof o.thumbnailUrl === "string" ? o.thumbnailUrl : undefined,
@@ -354,7 +363,7 @@ export function updatePlanCartItem(
   patch: Partial<
     Pick<
       PlanCartItem,
-      "quantity" | "priceOptionIndex" | "gradeSelections" | "addonLines"
+      "quantity" | "priceOptionIndex" | "gradeSelections" | "optionSelections" | "addonLines"
     >
   >,
 ): void {
@@ -387,6 +396,15 @@ export function updatePlanCartItem(
           .map(normalizeGradeSelection)
           .filter((x): x is PlanCartGradeSelection => x !== null);
         if (next.gradeSelections.length === 0) delete next.gradeSelections;
+      }
+    }
+    if ("optionSelections" in patch) {
+      const os = patch.optionSelections;
+      if (!os?.length) {
+        delete next.optionSelections;
+      } else {
+        next.optionSelections = normalizePlanCartOptionSelections(os);
+        if (!next.optionSelections?.length) delete next.optionSelections;
       }
     }
     if ("addonLines" in patch) {

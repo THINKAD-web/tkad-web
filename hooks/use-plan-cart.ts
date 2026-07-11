@@ -96,7 +96,7 @@ export function usePlanCart() {
     (
       mediaId: string,
       patch: Partial<
-        Pick<PlanCartItem, "quantity" | "priceOptionIndex" | "gradeSelections" | "addonLines">
+        Pick<PlanCartItem, "quantity" | "priceOptionIndex" | "gradeSelections" | "optionSelections" | "addonLines">
       >,
     ) => {
       updatePlanCartItem(mediaId, patch);

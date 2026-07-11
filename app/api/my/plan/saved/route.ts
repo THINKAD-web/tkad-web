@@ -67,6 +67,15 @@ const PlanCartItemSchema = z.object({
     )
     .max(12)
     .optional(),
+  optionSelections: z
+    .array(
+      z.object({
+        priceOptionIndex: z.number().int().nonnegative(),
+        quantity: z.number().int().positive(),
+      }),
+    )
+    .max(12)
+    .optional(),
   addonLines: z
     .array(
       z.object({

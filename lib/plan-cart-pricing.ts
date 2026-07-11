@@ -11,6 +11,10 @@ import type {
   PlanCartGradeSelection,
   PlanCartItem,
 } from "@/lib/plan-cart";
+import {
+  planCartEffectiveOptionSelections,
+  resolveOptionSelectionMonthlyPriceWon,
+} from "@/lib/plan-cart-option-selections";
 import type {
   CampaignMediaPriceOptionIndex,
   CampaignMediaQuantities,
@@ -39,31 +43,27 @@ export function planCartItemPriceOptionIndex(
   return Math.round(item.priceOptionIndex);
 }
 
-/** 등급형 버스 — 복수 등급 행 (레거시 단일 필드 → 1행으로 승격) */
+/** @deprecated — planCartEffectiveOptionSelections 사용 */
 export function planCartEffectiveGradeSelections(
   item: PlanCartItem,
   media?: MediaItem | null,
 ): PlanCartGradeSelection[] | null {
   if (!media || !isPerUnitGradePriceOptions(media)) return null;
-  if (item.gradeSelections?.length) return item.gradeSelections;
-  return [
-    {
-      priceOptionIndex: planCartItemPriceOptionIndex(item) ?? 0,
-      quantity: resolveMediaQuantity(media, planCartItemQuantity(item)),
-    },
-  ];
+  const rows = planCartEffectiveOptionSelections(item, media);
+  return rows?.length ? rows : null;
 }
 
 export function planCartPortfolioPricing(cart: PlanCart): PlannerPortfolioPricing {
   const quantities: CampaignMediaQuantities = {};
   const priceOptionIndex: CampaignMediaPriceOptionIndex = {};
   for (const item of cart.items) {
-    if (item.gradeSelections?.length) {
-      quantities[item.mediaId] = item.gradeSelections.reduce(
+    const rows = planCartEffectiveOptionSelections(item);
+    if (rows?.length) {
+      quantities[item.mediaId] = rows.reduce(
         (sum, sel) => sum + sel.quantity,
         0,
       );
-      priceOptionIndex[item.mediaId] = item.gradeSelections[0]!.priceOptionIndex;
+      priceOptionIndex[item.mediaId] = rows[0]!.priceOptionIndex;
       continue;
     }
     const po = planCartItemPriceOptionIndex(item);
@@ -90,23 +90,24 @@ export function planCartCatalogById(
   catalog: readonly MediaItem[] | ReadonlyMap<string, MediaItem>,
 ): ReadonlyMap<string, MediaItem> {
   if (catalog instanceof Map) return catalog;
-  return new Map(catalog.map((m) => [m.id, m]));
+  return new Map(
+    (catalog as readonly MediaItem[]).map((m) => [m.id, m] as const),
+  );
 }
 
 export function planCartLineMonthlyWon(
   item: PlanCartItem,
   media?: MediaItem | null,
 ): number {
-  const grades = planCartEffectiveGradeSelections(item, media);
-  if (grades?.length && media) {
-    return grades.reduce(
-      (sum, sel) =>
-        sum +
-        resolveGradeOptionMonthlyPriceWon(
-          media,
-          sel.priceOptionIndex,
-          sel.quantity,
-        ),
+  const rows = planCartEffectiveOptionSelections(item, media);
+  const usesExplicitRows =
+    (item.optionSelections?.length ?? 0) > 0 ||
+    (item.gradeSelections?.length ?? 0) > 0 ||
+    (rows?.length ?? 0) > 1;
+
+  if (rows?.length && media && usesExplicitRows) {
+    return rows.reduce(
+      (sum, sel) => sum + resolveOptionSelectionMonthlyPriceWon(media, sel),
       0,
     );
   }
@@ -168,9 +169,9 @@ export function planCartResolvedUnits(
   item: PlanCartItem,
   media?: MediaItem | null,
 ): number {
-  const grades = planCartEffectiveGradeSelections(item, media);
-  if (grades?.length) {
-    return grades.reduce((sum, sel) => sum + sel.quantity, 0);
+  const rows = planCartEffectiveOptionSelections(item, media);
+  if (rows?.length) {
+    return rows.reduce((sum, sel) => sum + sel.quantity, 0);
   }
   if (media) return resolveMediaQuantity(media, planCartItemQuantity(item));
   return planCartItemQuantity(item) ?? 1;

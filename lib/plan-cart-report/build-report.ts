@@ -249,6 +249,7 @@ export function buildPlanCartReportBundle(args: {
       portfolioMonthlyTotalMan: monthlyTotalMan,
       portfolioMonthlyBudgetMan: budgetMan,
       isAutoPortfolio: false,
+      planCartItems: cart.items,
       unresolvedMediaCount: Math.max(
         0,
         cart.items.length -

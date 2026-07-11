@@ -13,8 +13,12 @@ import {
   plannerMonthlyPriceWonForMedia,
   plannerUnitsForMedia,
   shouldShowPlannerQuantityControl,
+  type CampaignMediaQuantities,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
+import type { PlanCartItem } from "@/lib/plan-cart";
+import { formatPlanCartMultiOptionQuantityLabel } from "@/lib/plan-cart-option-selections";
+import { planCartLineMonthlyWon } from "@/lib/plan-cart-pricing";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import { normalizeMediaTypeForPlanner } from "@/lib/planner-logic";
 import { truncateDocText } from "@/lib/document-text";
@@ -322,16 +326,25 @@ export function mediaItemToExportRow(
     contributions?: Map<string, { exposurePct: number; budgetPct: number }>;
     pricing?: PlannerPortfolioPricing;
     quantities?: CampaignMediaQuantities;
+    planCartItem?: PlanCartItem;
   },
 ): import("@/lib/planner-report-export/types").PlannerExportMediaRow {
   const c = opts?.contributions?.get(m.id);
-  const pricing = opts?.pricing ?? { quantities: opts?.quantities };
+  const pricing: PlannerPortfolioPricing =
+    opts?.pricing ?? { quantities: opts?.quantities };
   const units = plannerUnitsForMedia(m, pricing.quantities);
-  const monthlyWon = plannerMonthlyPriceWonForMedia(
-    m,
-    pricing.quantities,
-    pricing.priceOptionIndex,
-  );
+  const monthlyWonFromCart =
+    opts?.planCartItem != null
+      ? planCartLineMonthlyWon(opts.planCartItem, m)
+      : null;
+  const monthlyWon =
+    monthlyWonFromCart != null && monthlyWonFromCart > 0
+      ? monthlyWonFromCart
+      : plannerMonthlyPriceWonForMedia(
+          m,
+          pricing.quantities,
+          pricing.priceOptionIndex,
+        );
   const lineTotalWon =
     opts?.lineTotalWon ??
     (monthlyWon > 0 && opts?.months
@@ -351,14 +364,23 @@ export function mediaItemToExportRow(
           isKo ? "ko" : "en",
         )}`
       : detail.monthlyPriceLabel;
-  const quantityLabel = shouldShowPlannerQuantityControl(m)
-    ? formatPlannerQuantityLabel(
+  const quantityLabel = (() => {
+    if (opts?.planCartItem) {
+      const multi = formatPlanCartMultiOptionQuantityLabel(
         m,
-        units,
+        opts.planCartItem,
         isKo,
-        pricing.priceOptionIndex,
-      )
-    : undefined;
+      );
+      if (multi) return multi;
+    }
+    if (!shouldShowPlannerQuantityControl(m)) return undefined;
+    return formatPlannerQuantityLabel(
+      m,
+      units,
+      isKo,
+      pricing.priceOptionIndex,
+    );
+  })();
   return {
     ...detail,
     region: m.region ?? undefined,

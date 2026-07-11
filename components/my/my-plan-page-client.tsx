@@ -369,6 +369,13 @@ export function MyPlanPageClient() {
                         priceOptionIndex: undefined,
                       })
                     }
+                    onOptionSelectionsChange={(mediaId, selections) =>
+                      updateItem(mediaId, {
+                        optionSelections: selections,
+                        quantity: undefined,
+                        priceOptionIndex: undefined,
+                      })
+                    }
                     onAddonLinesChange={(mediaId, lines) =>
                       updateItem(mediaId, { addonLines: lines })
                     }

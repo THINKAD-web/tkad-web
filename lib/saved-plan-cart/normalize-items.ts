@@ -95,6 +95,33 @@ export function normalizePlanCartItemsForSave(raw: unknown): PlanCartItem[] {
                 x !== null,
             )
         : undefined,
+      optionSelections: Array.isArray(o.optionSelections)
+        ? o.optionSelections
+            .map((row) => {
+              if (!row || typeof row !== "object") return null;
+              const r = row as Record<string, unknown>;
+              const priceOptionIndex =
+                typeof r.priceOptionIndex === "number" &&
+                Number.isFinite(r.priceOptionIndex) &&
+                r.priceOptionIndex >= 0
+                  ? Math.round(r.priceOptionIndex)
+                  : null;
+              const quantity =
+                typeof r.quantity === "number" &&
+                Number.isFinite(r.quantity) &&
+                r.quantity > 0
+                  ? Math.round(r.quantity)
+                  : null;
+              if (priceOptionIndex == null || quantity == null) return null;
+              return { priceOptionIndex, quantity };
+            })
+            .filter(
+              (
+                x,
+              ): x is { priceOptionIndex: number; quantity: number } =>
+                x !== null,
+            )
+        : undefined,
       addonLines: normalizeItemAddonLines(o.addonLines),
       thumbnailUrl:
         typeof o.thumbnailUrl === "string" && o.thumbnailUrl.trim()

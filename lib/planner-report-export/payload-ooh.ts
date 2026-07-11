@@ -71,6 +71,8 @@ export type BuildOohPayloadArgs = {
   isAutoPortfolio?: boolean;
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
+  /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
+  planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
 };
 
 export function buildOohReportPayload(
@@ -290,6 +292,7 @@ export function buildOohReportPayload(
       months,
       contributions,
       pricing,
+      planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
     }),
   );
 

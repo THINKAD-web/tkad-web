@@ -83,6 +83,8 @@ export type PlannerReportSharedProps = {
   /** Step 4 선택 매체 수량 — 예산·노출·보고서 반영 */
   campaignMediaQuantities?: Record<string, number>;
   campaignMediaPriceOptionIndex?: Record<string, number>;
+  /** 내 플랜 카트 — 복수 옵션 보고서 라벨 */
+  planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
   /** Step 7과 동일: 조건에 맞는 전체 후보(필터 결과) */
   matchedCount: number;
   /** Step 7과 동일: 1/3/6개월 총 노출 비교 */
@@ -416,6 +418,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         isAutoPortfolio: props.isAutoPortfolio,
         campaignMediaQuantities: props.campaignMediaQuantities,
         campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
+        planCartItems: props.planCartItems,
       }),
     [props, derived, snapshotAt, portfolioForExport],
   );
@@ -900,7 +903,8 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           regionImpressionCharts: props.regionImpressionCharts,
           isAutoPortfolio: props.isAutoPortfolio,
           campaignMediaQuantities: props.campaignMediaQuantities,
-        campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
+          campaignMediaPriceOptionIndex: props.campaignMediaPriceOptionIndex,
+          planCartItems: props.planCartItems,
         });
         await downloadPlannerReport(format, payload, {
           activitySource: props.activitySource,
