@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import {
   Calendar,
   Mail,
+  Phone,
   Building2,
   User as UserIcon,
   Wallet,
@@ -50,6 +51,7 @@ type Quote = {
   contractSigned?: boolean;
   canSignContract?: boolean;
   clientName: string;
+  clientPhone?: string | null;
   clientEmail: string;
   clientCompany: string | null;
   period: string;
@@ -546,7 +548,7 @@ export default function QuotePreviewView({
                       template={template}
                       company={quote.clientCompany ?? ""}
                       contactName={quote.clientName}
-                      contactPhone=""
+                      contactPhone={quote.clientPhone ?? ""}
                       contactEmail={quote.clientEmail}
                       periodLabel={quote.period}
                       periodMonths={periodMonths}
@@ -570,7 +572,8 @@ export default function QuotePreviewView({
                 <dl className="grid grid-cols-1 gap-x-6 gap-y-4 px-6 py-5 text-sm sm:grid-cols-2 sm:px-8 sm:py-6">
                   <InfoField icon={UserIcon} label={isKo ? "담당자" : "Contact"} value={quote.clientName} />
                   <InfoField icon={Building2} label={isKo ? "회사" : "Company"} value={quote.clientCompany ?? "-"} />
-                  <InfoField icon={Mail} label={isKo ? "이메일" : "Email"} value={quote.clientEmail} />
+                  <InfoField icon={Phone} label={isKo ? "연락처" : "Phone"} value={quote.clientPhone?.trim() || "—"} />
+                  <InfoField icon={Mail} label={isKo ? "이메일" : "Email"} value={quote.clientEmail || "—"} />
                   <InfoField icon={Calendar} label={isKo ? "기간" : "Period"} value={quote.period} />
                   {quote.startDate ? (
                     <InfoField

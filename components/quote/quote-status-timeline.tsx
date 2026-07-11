@@ -2,26 +2,16 @@
 
 import { useTranslations } from "next-intl";
 import { Check, Circle } from "lucide-react";
+import {
+  isQuoteTimelineStepDone,
+  quoteStatusLevel,
+  resolveQuoteTimelineCurrentStep,
+  type QuoteTimelineStepId,
+} from "@/lib/quote-status-timeline";
 import { cn } from "@/lib/utils";
 
-const STATUS_ORDER = [
-  "draft",
-  "sent",
-  "booking_requested",
-  "booking_pending",
-  "booking_confirmed",
-  "invoice_sent",
-  "payment_pending",
-  "payment_confirmed",
-  "contract_confirmed",
-  "in_progress",
-  "completed",
-] as const;
-
-type StepId = "quote" | "booking" | "esign" | "invoice" | "contract";
-
 type StepDef = {
-  id: StepId;
+  id: QuoteTimelineStepId;
   labelKey:
     | "milestone_quoteSent"
     | "milestone_bookingConfirmed"
@@ -38,45 +28,6 @@ const STEPS: StepDef[] = [
   { id: "contract", labelKey: "milestone_contract" },
 ];
 
-function statusLevel(status: string): number {
-  const i = (STATUS_ORDER as readonly string[]).indexOf(status);
-  return i >= 0 ? i : 0;
-}
-
-function isStepDone(
-  step: StepId,
-  level: number,
-  contractSigned: boolean,
-): boolean {
-  switch (step) {
-    case "quote":
-      return level >= 1;
-    case "booking":
-      return level >= 4;
-    case "esign":
-      return contractSigned;
-    case "invoice":
-      return level >= 5;
-    case "contract":
-      return level >= 8;
-    default:
-      return false;
-  }
-}
-
-function resolveCurrentStepId(
-  status: string,
-  level: number,
-  contractSigned: boolean,
-): StepId | null {
-  for (const step of STEPS) {
-    if (!isStepDone(step.id, level, contractSigned)) {
-      return step.id;
-    }
-  }
-  return null;
-}
-
 export function QuoteStatusTimeline({
   status,
   contractSigned,
@@ -85,13 +36,13 @@ export function QuoteStatusTimeline({
   contractSigned: boolean;
 }) {
   const t = useTranslations("quoteCustomer");
-  const level = statusLevel(status);
-  const currentId = resolveCurrentStepId(status, level, contractSigned);
+  const level = quoteStatusLevel(status);
+  const currentId = resolveQuoteTimelineCurrentStep(status, contractSigned);
 
   return (
     <div className="space-y-4">
       {STEPS.map((step) => {
-        const done = isStepDone(step.id, level, contractSigned);
+        const done = isQuoteTimelineStepDone(step.id, level, contractSigned);
         const isCurrent = currentId === step.id;
         const label = t(step.labelKey);
 

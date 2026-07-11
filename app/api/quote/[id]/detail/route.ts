@@ -69,6 +69,7 @@ export async function GET(
       contractSigned,
       canSignContract,
       clientName: quote.clientName,
+      clientPhone: quote.clientPhone?.trim() || null,
       clientEmail: quote.clientEmail,
       clientCompany: quote.clientCompany,
       period: quote.period,

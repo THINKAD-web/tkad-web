@@ -54,6 +54,7 @@ export type OoHQuotePublicJson = {
   id: string;
   status: OoHQuoteStatus;
   clientName: string;
+  clientPhone: string | null;
   clientCompany: string | null;
   mediaIds: string[];
   totalAmount: number;
@@ -91,6 +92,7 @@ export function serializeOoHQuotePublic(
     id: row.id,
     status: row.status,
     clientName: row.clientName,
+    clientPhone: row.clientPhone?.trim() || null,
     clientCompany: row.clientCompany,
     mediaIds: row.mediaIds,
     totalAmount: row.totalAmount,
