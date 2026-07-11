@@ -59,7 +59,6 @@ import {
   type MediaBrowseFilterQueryState,
 } from "@/lib/media-browse-query-string";
 import {
-  DiscoveryMapTileSkeleton,
   DiscoveryMediaFeedCardSkeleton,
 } from "@/components/discovery/discovery-route-skeletons";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
