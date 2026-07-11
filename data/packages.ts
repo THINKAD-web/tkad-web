@@ -1,10 +1,11 @@
 /**
+ * @deprecated 레거시 에디토리얼 패키지 정의.
+ * 공개 `/media/packages` SSOT 는 `lib/media-package-seed-data.ts` + DB `MediaPackage`.
+ * industry 링크는 `lib/industry-package-links.ts` 로 이관됨.
+ * 이 파일은 `lib/media-packages.ts` / `PackageCard` 호환용으로만 유지 — 신규 코드에서 import 금지.
+ *
  * 지역별 OOH 패키지 큐레이션 — 에디토리얼 메타 + 카탈로그 매체 ID.
  * 런타임 집계(노출·가격)는 `lib/media-packages.ts` 에서 public catalog 기준 계산.
- *
- * `mediaIds` 가 비어 있어도 카드는 정상 렌더 — 사람이 작성한
- * `expectedImpressionsLabel*` / `budgetRangeLabel*` 가 항상 우선 표시되고,
- * 카탈로그 기반 자동 계산값은 디버그/운영 화면에서만 보조로 사용됩니다.
  */
 
 export type PackageIndustryBadge =

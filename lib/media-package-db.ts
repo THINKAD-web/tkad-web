@@ -22,6 +22,11 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 
 function rowToPublicPackage(row: MediaPackage): PublicMediaPackage {
+  const seed = MEDIA_PACKAGE_SEED_DATA.find((s) => s.slug === row.slug);
+  const filterTarget =
+    (row.filterTarget ?? []).length > 0
+      ? (row.filterTarget ?? [])
+      : (seed?.filterTarget ?? []);
   return {
     id: row.id,
     slug: row.slug,
@@ -34,7 +39,7 @@ function rowToPublicPackage(row: MediaPackage): PublicMediaPackage {
     isActive: row.isActive,
     filterRegion: row.filterRegion ?? [],
     filterCategory: row.filterCategory ?? [],
-    filterTarget: row.filterTarget ?? [],
+    filterTarget,
     filterMaxPrice: row.filterMaxPrice,
     filterMinPrice: row.filterMinPrice,
     sortBy: row.sortBy,

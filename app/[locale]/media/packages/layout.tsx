@@ -16,8 +16,8 @@ export async function generateMetadata({
     ? "OOH 광고 패키지 | THINKAD 싱커드"
     : "OOH advertising packages | THINKAD";
   const description = isKo
-    ? "강남 프리미엄, 성수 감성, K-콘텐츠 팬덤 등 목적별 큐레이션 패키지로 간편하게 시작하세요."
-    : "Start fast with curated OOH packages—Gangnam premium, Seongsu lifestyle, K-content fandom, and more.";
+    ? `전국 ${verifiedMediaLabel} 검증 매체 기반 목적별 큐레이션 패키지 — 강남 프리미엄, 성수 감성, K-콘텐츠 팬덤 등으로 빠르게 시작하세요.`
+    : `Curated OOH packages from ${verifiedMediaLabel} verified placements — Gangnam premium, Seongsu lifestyle, K-content fandom, and more.`;
   return {
     title,
     description,
@@ -33,7 +33,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title: title,
+      title,
       description,
       images: segmentOpenGraphImages(
         locale,

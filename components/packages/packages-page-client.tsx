@@ -1,42 +1,73 @@
 "use client";
 
 import { Link } from "@/i18n/navigation";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Package, Target } from "lucide-react";
 import type { PublicMediaPackage } from "@/lib/media-package-types";
+import type { MediaLandingPreview } from "@/lib/media-landing-previews";
 import { PackageGridCard } from "@/components/packages/package-grid-card";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
 import { PLANNING_TABS } from "@/lib/navigation/sub-page-tabs";
+import { BtnBlock } from "@/components/brutalist";
 
 type Props = {
   packages: PublicMediaPackage[];
+  previews: Record<string, MediaLandingPreview>;
   isKo: boolean;
+  verifiedCountLabel: string;
 };
 
-export function PackagesPageClient({ packages, isKo }: Props) {
+export function PackagesPageClient({
+  packages,
+  previews,
+  isKo,
+  verifiedCountLabel,
+}: Props) {
   return (
-    <div className="min-h-screen bg-[#F4F4F2] text-foreground transition-colors dark:bg-[#0A0A0A]">
+    <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-w-0">
       <PageHero
         eyebrow="// 03 · PLANNING"
-        title="목적에 맞는 "
-        highlight="OOH 패키지"
-        description="검증된 매체 조합 패키지로 빠르게 시작하세요"
+        title={isKo ? "목적에 맞는 " : "Curated "}
+        highlight={isKo ? "OOH 패키지" : "OOH packages"}
+        description={
+          isKo
+            ? `전국 ${verifiedCountLabel} 검증 매체에서 목적·상권별로 묶은 큐레이션. 필터 매칭 건수를 보고 바로 상세로 들어가세요.`
+            : `Curated packs from ${verifiedCountLabel} verified placements — see live match counts, then open a pack.`
+        }
       />
       <SubTabs tabs={PLANNING_TABS} currentPath="/media/packages" />
 
-      <section className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-14 lg:px-8">
+      <section className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
+        <div className="flex flex-col gap-3 border-2 border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+          <div className="min-w-0 space-y-1">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+              [ {isKo ? "역할 구분" : "How this differs"} ]
+            </p>
+            <p className="text-sm text-muted-foreground">
+              {isKo
+                ? "패키지 = 미리 짜 둔 조합·견적 진입. 목적만 고르고 탐색하려면 캠페인 목적 허브를 쓰세요."
+                : "Packages = curated bundles for quoting. For goal-only browsing, use Campaign targets."}
+            </p>
+          </div>
+          <Link
+            href="/media/targets"
+            className="inline-flex shrink-0 items-center gap-2 border-2 border-border bg-muted px-3 py-2 text-xs font-bold text-foreground transition-colors hover:border-accent"
+          >
+            <Target className="h-3.5 w-3.5 text-accent" aria-hidden />
+            {isKo ? "캠페인 목적별 매체 →" : "Browse by campaign goal →"}
+          </Link>
+        </div>
+
         {packages.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-12 text-center">
-            <p className="text-lg font-bold">
+          <div className="border-2 border-dashed border-border bg-card p-12 text-center">
+            <Package className="mx-auto h-8 w-8 text-muted-foreground" aria-hidden />
+            <p className="mt-3 text-lg font-bold">
               {isKo ? "패키지를 준비 중입니다." : "Packages coming soon."}
             </p>
-            <Link
-              href="/planner"
-              className="mt-4 inline-flex items-center gap-2 text-sm font-bold text-violet-600"
-            >
+            <BtnBlock href="/planner" variant="accent" size="md" className="mt-4">
               {isKo ? "AI 플래너로 시작" : "Start with AI planner"}
               <ArrowRight className="h-4 w-4" />
-            </Link>
+            </BtnBlock>
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -44,11 +75,21 @@ export function PackagesPageClient({ packages, isKo }: Props) {
               <PackageGridCard
                 key={pkg.slug}
                 pkg={pkg}
+                preview={previews[pkg.slug]}
                 detailLabel={isKo ? "자세히 보기" : "View details"}
+                matchLabel={(n) =>
+                  isKo ? `매칭 ${n.toLocaleString("ko-KR")}건` : `${n.toLocaleString("en-US")} matches`
+                }
               />
             ))}
           </div>
         )}
+
+        <p className="text-center text-xs text-muted-foreground">
+          {isKo
+            ? "매칭 건수는 패키지 필터(지역·유형·타깃·예산)로 활성 카탈로그를 조회한 결과입니다."
+            : "Match counts use each pack’s region, type, target, and budget filters on the live catalog."}
+        </p>
       </section>
     </div>
   );

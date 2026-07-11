@@ -1,3 +1,8 @@
+/**
+ * @deprecated Prefer `fetchActiveMediaPackages` / package detail API.
+ * Resolves legacy `data/packages.ts` editorial packs against catalog `mediaIds`.
+ * Public listing SSOT is DB/seed (`lib/media-package-db.ts`).
+ */
 import {
   MEDIA_PACKAGES,
   type MediaPackageDefinition,

@@ -1,19 +1,19 @@
 import type { MediaPackageSeedInput } from "@/lib/media-package-types";
 
-/** DB 시드 + DB 미연결 시 폴백 표시용 */
+/** DB 시드 + DB 미연결 시 폴백 — /media/packages SSOT */
 export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
   {
     slug: "gangnam-premium",
     name: "강남 프리미엄 루트",
     subtitle: "강남·서초 핵심 상권 OOH",
     description:
-      "강남대로·테헤란로·신논현 일대 검증된 프리미엄 매체",
+      "강남대로·테헤란로·신논현 일대 검증 프리미엄 매체. 전국 660+ 카탈로그 중 고가시성 DOOH·빌보드를 묶어 럭셔리·테크 론칭에 맞춥니다.",
     heroColor: "from-violet-600 to-purple-800",
     icon: "🏢",
     order: 1,
     filterRegion: ["강남", "서초", "강남구", "서초구"],
     filterCategory: ["dooh", "billboard"],
-    filterTarget: [],
+    filterTarget: ["brand"],
     filterMaxPrice: null,
     filterMinPrice: null,
     sortBy: "popular",
@@ -29,7 +29,7 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     faqs: [
       {
         q: "최소 예산이 얼마인가요?",
-        a: "강남권 DOOH 기준 월 800만원부터 가능합니다.",
+        a: "강남권 DOOH 기준 월 800만원부터 가능합니다. 실제 단가는 카탈로그 매칭 매체에 따라 달라집니다.",
       },
       {
         q: "패키지 할인이 있나요?",
@@ -41,7 +41,8 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     slug: "fandom-hotspot",
     name: "K-콘텐츠 팬덤 패키지",
     subtitle: "아이돌·팬클럽 응원 광고 전문",
-    description: "강남역·홍대입구·코엑스 등 팬덤 광고 핫스팟 매체",
+    description:
+      "강남역·홍대·코엑스 등 팬덤 핫스팟. targetCategory=fandom 매체를 중심으로 660+ 카탈로그에서 자동 매칭합니다.",
     heroColor: "from-pink-600 to-rose-800",
     icon: "🎤",
     order: 2,
@@ -75,13 +76,14 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     slug: "seongsu-vibe",
     name: "성수·한남 감성 루트",
     subtitle: "MZ 타겟 핫플레이스 OOH",
-    description: "성수동·한남동·이태원 감성 매체 큐레이션",
+    description:
+      "성수·한남·이태원 감성 상권. 팝업·브랜드 목적(event·brand) 태그와 지역 키워드로 최신 매체를 골라 줍니다.",
     heroColor: "from-cyan-600 to-teal-800",
     icon: "✨",
     order: 3,
     filterRegion: ["성수", "한남", "이태원", "성동"],
     filterCategory: [],
-    filterTarget: [],
+    filterTarget: ["event", "brand"],
     filterMaxPrice: null,
     filterMinPrice: null,
     sortBy: "newest",
@@ -105,13 +107,14 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     slug: "local-starter",
     name: "소상공인 스타터",
     subtitle: "우리 동네 첫 광고, 부담 없이",
-    description: "월 50만원부터 시작하는 동네 OOH 광고",
+    description:
+      "월 50만원대부터. small_business 타깃 + 로컬·쉘터 유형으로 카탈로그에서 부담 없는 매체를 매칭합니다.",
     heroColor: "from-emerald-600 to-green-800",
     icon: "🏘",
     order: 4,
     filterRegion: [],
     filterCategory: ["bus_shelter", "local"],
-    filterTarget: [],
+    filterTarget: ["small_business"],
     filterMaxPrice: 3_000_000,
     filterMinPrice: null,
     sortBy: "price_asc",
@@ -127,7 +130,7 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     faqs: [
       {
         q: "정말 50만원으로 가능한가요?",
-        a: "아파트 엘리베이터·버스쉘터 등 저렴한 매체가 많습니다.",
+        a: "버스쉘터·로컬 빌보드 등 저가 매체가 카탈로그에 다수 있습니다. 매칭 건수를 카드에서 확인하세요.",
       },
       {
         q: "소재 제작도 도와주나요?",
@@ -139,7 +142,8 @@ export const MEDIA_PACKAGE_SEED_DATA: MediaPackageSeedInput[] = [
     slug: "campus-campaign",
     name: "대학가 캠페인",
     subtitle: "대학생 타겟 OOH 전략",
-    description: "서울 주요 대학가 매체로 20대를 공략하세요",
+    description:
+      "campus 유형 + university 타깃으로 주요 대학가 매체를 모읍니다. 개강·축제 시즌 캠페인에 적합합니다.",
     heroColor: "from-amber-500 to-orange-700",
     icon: "🎓",
     order: 5,

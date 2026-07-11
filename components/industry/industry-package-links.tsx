@@ -1,6 +1,5 @@
 import { Link } from "@/i18n/navigation";
-import { MEDIA_PACKAGES } from "@/data/packages";
-import { getPackageSlugsForIndustry } from "@/lib/industry-package-links";
+import { getSeedPackagesForIndustry } from "@/lib/industry-package-links";
 import type { IndustrySlug } from "@/lib/industry-landing";
 
 type Props = {
@@ -10,10 +9,8 @@ type Props = {
 
 export async function IndustryPackageLinks({ slug, locale }: Props) {
   const isKo = locale === "ko" || locale.startsWith("ko");
-  const slugs = getPackageSlugsForIndustry(slug);
-  if (slugs.length === 0) return null;
-
-  const packages = MEDIA_PACKAGES.filter((p) => slugs.includes(p.slug));
+  const packages = getSeedPackagesForIndustry(slug);
+  if (packages.length === 0) return null;
 
   return (
     <section className="border-t border-border/80 bg-muted/50 py-12 sm:py-16">
@@ -28,10 +25,10 @@ export async function IndustryPackageLinks({ slug, locale }: Props) {
           {packages.map((p) => (
             <li key={p.slug}>
               <Link
-                href="/media/packages"
+                href={`/media/packages/${encodeURIComponent(p.slug)}`}
                 className="inline-flex items-center gap-1.5 rounded-2xl border-2 border-border bg-card px-4 py-2.5 text-sm font-medium text-card-foreground shadow-xs transition-colors hover:border-accent hover:bg-muted"
               >
-                {isKo ? p.nameKo : p.nameEn}
+                {p.name}
               </Link>
             </li>
           ))}
