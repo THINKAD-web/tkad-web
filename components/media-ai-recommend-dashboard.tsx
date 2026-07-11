@@ -7,6 +7,7 @@ import {
   Calculator,
   ChevronDown,
   FileText,
+  GitCompare,
   LayoutList,
   MapPin,
   Sparkles,
@@ -446,13 +447,13 @@ export default function MediaAiRecommendDashboard({
           matchedPool={poolForReport}
         />
 
-        {/* 하단 액션 */}
+        {/* 하단 액션 — 견적·플랜·비교·탐색 */}
         <div className="flex flex-col gap-4 border-t-2 border-border pt-6">
-          <div className="flex flex-col gap-2 sm:flex-row">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <BtnBlock
               variant="accent"
               size="lg"
-              className="w-full flex-1 sm:w-auto"
+              className="w-full"
               onClick={onCreateQuote}
               disabled={!onCreateQuote || creatingQuote}
             >
@@ -469,44 +470,15 @@ export default function MediaAiRecommendDashboard({
               items={planBulkItems}
               label={isKo ? "선택 매체 플랜에 추가" : "Add selected to plan"}
               size="lg"
-              className="w-full flex-1 sm:w-auto"
+              className="w-full"
             />
           </div>
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-            <Link
-              href="/planner"
-              className="inline-flex w-full flex-1 items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-3 text-sm font-bold text-foreground transition-colors hover:bg-muted sm:w-auto"
-            >
-              {isKo ? "플래너에서 상세 설계" : "Design in step-by-step planner"}
-            </Link>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {onOpenMediaBrowse ? (
-              <BtnBlock
-                variant="primary"
-                size="sm"
-                className="w-full sm:w-auto"
-                onClick={onOpenMediaBrowse}
-              >
-                <MapPin className="h-4 w-4" />
-                {isKo ? "매체 더 찾기 · 추가" : "Find & add media"}
-              </BtnBlock>
-            ) : null}
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
             <BtnBlock
               variant="secondary"
-              size="sm"
-              onClick={onViewFullList}
-              className="w-full sm:w-auto"
-            >
-              <LayoutList className="h-4 w-4" />
-              {isKo ? "전체 추천 리스트" : "Full list"}
-            </BtnBlock>
-            <BtnBlock
-              variant="secondary"
-              size="sm"
-              className="w-full sm:w-auto"
+              size="md"
+              className="w-full"
               onClick={onRequestQuote}
               disabled={!onRequestQuote || quoteBusy}
             >
@@ -516,8 +488,44 @@ export default function MediaAiRecommendDashboard({
                   ? "이동 중…"
                   : "Opening…"
                 : isKo
-                  ? "전문가 상담 받기"
-                  : "Talk to an expert"}
+                  ? "전문가 상담"
+                  : "Expert consult"}
+            </BtnBlock>
+            <Link
+              href="/compare"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+            >
+              <GitCompare className="h-4 w-4" />
+              {isKo ? "비교함" : "Compare"}
+            </Link>
+            <Link
+              href="/planner"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
+            >
+              {isKo ? "플래너 설계" : "Planner"}
+            </Link>
+          </div>
+
+          <div className="flex flex-wrap gap-2">
+            {onOpenMediaBrowse ? (
+              <BtnBlock
+                variant="secondary"
+                size="sm"
+                className="w-full sm:w-auto"
+                onClick={onOpenMediaBrowse}
+              >
+                <MapPin className="h-4 w-4" />
+                {isKo ? "매체 더 찾기" : "Find media"}
+              </BtnBlock>
+            ) : null}
+            <BtnBlock
+              variant="secondary"
+              size="sm"
+              onClick={onViewFullList}
+              className="w-full sm:w-auto"
+            >
+              <LayoutList className="h-4 w-4" />
+              {isKo ? "전체 리스트" : "Full list"}
             </BtnBlock>
             <BtnBlock
               variant="secondary"
@@ -525,7 +533,7 @@ export default function MediaAiRecommendDashboard({
               onClick={onRemix}
               className="w-full sm:w-auto"
             >
-              {isKo ? "다른 후보 보기" : "See other picks"}
+              {isKo ? "다른 후보" : "Other picks"}
             </BtnBlock>
           </div>
 

@@ -5,7 +5,7 @@ import { Lock } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { AccessCheckResult, ReportFeature } from "@/lib/report-access-shared";
 import { buildFeatureGateMessage } from "@/lib/entitlements/gate-messages";
-import { TierGateOverlay } from "@/components/entitlements/tier-gate-panel";
+import { TierGatePanel } from "@/components/entitlements/tier-gate-panel";
 import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
 
@@ -65,16 +65,22 @@ export function PlannerProTeaserStats({
   totalImpressions,
   reachCorePct,
   roiExpected,
+  blurred = true,
 }: {
   isKo: boolean;
   totalImpressions: number;
   reachCorePct: number;
   roiExpected?: number;
+  /** 잠금 placeholder용 — 블러 없이 요약만 표시 */
+  blurred?: boolean;
 }) {
   return (
     <div
-      className="mb-4 grid grid-cols-3 gap-2 blur-xl sm:gap-3"
-      aria-hidden
+      className={cn(
+        "mb-4 grid grid-cols-3 gap-2 sm:gap-3",
+        blurred && "pointer-events-none select-none blur-xl",
+      )}
+      aria-hidden={blurred}
     >
       <div className="rounded-xl border border-gray-200 bg-white p-3 text-center dark:border-white/10 dark:bg-white/5 sm:p-4">
         <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
@@ -114,6 +120,7 @@ export function PlannerProGate({
   loading = false,
   access,
   feature = "planner_result",
+  lockedPlaceholder,
 }: {
   isPro: boolean;
   isKo: boolean;
@@ -125,6 +132,8 @@ export function PlannerProGate({
   /** entitlements access — 맥락 안내용 (useFeatureAccess.access) */
   access?: AccessCheckResult;
   feature?: ReportFeature;
+  /** 비PRO — 무거운 children 대신 경량 요약·잠금 안내만 표시 (children 미마운트) */
+  lockedPlaceholder?: ReactNode;
 }) {
   if (loading) {
     return (
@@ -155,14 +164,10 @@ export function PlannerProGate({
   const message = buildFeatureGateMessage({ feature, access: gateAccess, isKo });
 
   return (
-    <TierGateOverlay
-      message={message}
-      className={className}
-      minHeightClass={minHeightClass}
-      blurContent
-    >
-      {children}
-    </TierGateOverlay>
+    <div className={cn("relative space-y-4", minHeightClass, className)}>
+      {lockedPlaceholder}
+      <TierGatePanel message={message} className="mx-auto" />
+    </div>
   );
 }
 

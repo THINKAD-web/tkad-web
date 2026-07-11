@@ -88,6 +88,9 @@ function priceLabelForRow(row: PlannerExportMediaRow): string | undefined {
   return row.monthlyPriceLabel ?? row.priceLabel;
 }
 
+const DOCUMENT_LINEUP_CARD =
+  "overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-200 dark:bg-white";
+
 function DetailLineupCard({
   row,
   index,
@@ -102,14 +105,16 @@ function DetailLineupCard({
   const href = mediaHref(row);
   const detail = exportRowToDetail(row, index);
   return (
-    <MediaDetailCard
-      detail={detail}
-      isKo={isKo}
-      showContribution
-      largeThumb
-      portfolioSize={portfolioSize}
-      mediaPageHref={href ?? undefined}
-    />
+    <div className={DOCUMENT_LINEUP_CARD}>
+      <MediaDetailCard
+        detail={detail}
+        isKo={isKo}
+        showContribution
+        largeThumb
+        portfolioSize={portfolioSize}
+        mediaPageHref={href ?? undefined}
+      />
+    </div>
   );
 }
 
@@ -132,44 +137,50 @@ function DiscoveryLineupCard({
   if (viewMode === "compact") {
     const metaLine = exportMediaLineMetaParts(row, { includePrice: true }).join(" · ");
     return (
-      <DiscoveryMediaCard
-        variant="compact"
-        compactLayout="row"
-        item={item}
-        href={href}
-        metaLine={metaLine}
-        isKo={isKo}
-        showPlanButton={false}
-      />
+      <div className={DOCUMENT_LINEUP_CARD}>
+        <DiscoveryMediaCard
+          variant="compact"
+          compactLayout="row"
+          item={item}
+          href={href}
+          metaLine={metaLine}
+          isKo={isKo}
+          showPlanButton={false}
+        />
+      </div>
     );
   }
 
   if (viewMode === "card") {
     return (
-      <DiscoveryMediaCard
-        variant="compact"
-        compactLayout="grid"
-        item={item}
-        href={href}
-        priceLabel={priceLabel}
-        isKo={isKo}
-        className="h-full"
-        showPlanButton={false}
-      />
+      <div className={cn(DOCUMENT_LINEUP_CARD, "h-full")}>
+        <DiscoveryMediaCard
+          variant="compact"
+          compactLayout="grid"
+          item={item}
+          href={href}
+          priceLabel={priceLabel}
+          isKo={isKo}
+          className="h-full"
+          showPlanButton={false}
+        />
+      </div>
     );
   }
 
   return (
-    <DiscoveryMediaCard
-      variant="feed"
-      item={item}
-      href={href}
-      highlights={highlights}
-      locationLine={row.location ?? row.region ?? null}
-      priceLabel={priceLabel}
-      isKo={isKo}
-      showPlanButton={false}
-    />
+    <div className={DOCUMENT_LINEUP_CARD}>
+      <DiscoveryMediaCard
+        variant="feed"
+        item={item}
+        href={href}
+        highlights={highlights}
+        locationLine={row.location ?? row.region ?? null}
+        priceLabel={priceLabel}
+        isKo={isKo}
+        showPlanButton={false}
+      />
+    </div>
   );
 }
 

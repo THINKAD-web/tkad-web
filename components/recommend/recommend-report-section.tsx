@@ -31,7 +31,6 @@ import { PLANNER_INDUSTRY_LABELS } from "@/lib/planner/types";
 import { useToast } from "@/components/toast-provider";
 import { DocumentPreviewFrame } from "@/components/document/document-layout";
 import { PlannerReportDocument } from "@/components/planner/report-document";
-import { PlannerEffectSimulationPanel } from "@/components/planner-effect-simulation-panel";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { PlannerReportFreeSummary } from "@/components/planner/planner-report-free-summary";
@@ -40,7 +39,6 @@ import {
   PlannerNeonLabel,
   PlannerProGate,
   PlannerProTeaserStats,
-  plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { useFeatureAccess } from "@/hooks/use-feature-access";
 import { cn } from "@/lib/utils";
@@ -511,71 +509,48 @@ export function RecommendReportSection({
               access={plannerResultAccess}
               feature="planner_result"
               minHeightClass="min-h-[24rem]"
-            >
-              <div className="space-y-6">
-                {metrics && !plannerResultAllowed ? (
-                  <PlannerProTeaserStats
-                    isKo={isKo}
-                    totalImpressions={metrics.estimatedTotalImpressions}
-                    reachCorePct={metricsBundle.reachCorePct}
-                    roiExpected={metrics.roiExpected}
-                  />
-                ) : null}
-
-                <DocumentPreviewFrame>
-                  <PlannerReportDocument
-                    payload={exportPayload}
-                    mapPortfolio={portfolio}
-                    sectionVisibility={sectionVisibility}
-                    editableTitle
-                    onDocumentTitleChange={setDocumentTitle}
-                  />
-                </DocumentPreviewFrame>
-
-                {metrics ? (
-                  <div
-                    className={cn(
-                      plannerNeon.kpiCard,
-                      "mx-auto max-w-md text-center",
-                    )}
-                  >
-                    <p className={plannerNeon.kpiLabel}>
+              lockedPlaceholder={
+                metrics ? (
+                  <>
+                    <PlannerProTeaserStats
+                      isKo={isKo}
+                      totalImpressions={metrics.estimatedTotalImpressions}
+                      reachCorePct={metricsBundle.reachCorePct}
+                      roiExpected={metrics.roiExpected}
+                      blurred={false}
+                    />
+                    <p className="text-center text-sm text-muted-foreground">
                       {isKo
-                        ? "총 예상 노출수 (대략)"
-                        : "Est. total impressions (approx.)"}
+                        ? "로그인·PRO 구독 후 전체 효과 보고서와 PDF를 확인할 수 있습니다."
+                        : "Sign in with PRO to unlock the full effect report and PDF export."}
                     </p>
-                    <p
-                      className={cn(
-                        "mt-2 text-3xl font-bold tabular-nums text-cyan-400",
-                      )}
-                    >
-                      {metrics.estimatedTotalImpressions.toLocaleString()}
-                    </p>
-                  </div>
-                ) : null}
+                  </>
+                ) : null
+              }
+            >
+              {plannerResultAllowed ? (
+                <div className="space-y-6">
+                  <DocumentPreviewFrame>
+                    <PlannerReportDocument
+                      payload={exportPayload}
+                      mapPortfolio={portfolio}
+                      sectionVisibility={sectionVisibility}
+                      editableTitle
+                      onDocumentTitleChange={setDocumentTitle}
+                    />
+                  </DocumentPreviewFrame>
 
-                <PlannerReportPremiumBlock
-                  isKo={isKo}
-                  portfolio={portfolio}
-                  budgetMan={reportContext.budgetNum}
-                  months={reportContext.months}
-                  regionsText={reportContext.regionsText}
-                  goal={reportContext.campaignGoal}
-                  industryText={industryText}
-                />
+                  <PlannerReportPremiumBlock
+                    isKo={isKo}
+                    portfolio={portfolio}
+                    budgetMan={reportContext.budgetNum}
+                    months={reportContext.months}
+                    regionsText={reportContext.regionsText}
+                    goal={reportContext.campaignGoal}
+                    industryText={industryText}
+                  />
 
-                <PlannerEffectSimulationPanel
-                  isKo={isKo}
-                  portfolio={portfolio}
-                  budgetMan={reportContext.budgetNum}
-                  months={reportContext.months}
-                  totalImpressionsFromMetrics={
-                    metrics?.estimatedTotalImpressions ?? null
-                  }
-                  skipProGate
-                />
-
-                <div className="rounded-2xl border-2 border-border bg-card p-5">
+                  <div className="rounded-2xl border-2 border-border bg-card p-5">
                   <PlannerNeonLabel>PDF Document</PlannerNeonLabel>
                   <p className="mt-2 text-sm text-muted-foreground">
                     {tPlanner("reportPreviewDesc")}
@@ -627,7 +602,8 @@ export function RecommendReportSection({
                     </PlannerPdfDownloadGate>
                   </div>
                 </div>
-              </div>
+                </div>
+              ) : null}
             </PlannerProGate>
           </section>
 

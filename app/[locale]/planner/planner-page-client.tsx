@@ -1996,7 +1996,6 @@ export default function PlannerPageClient({
                 ) : null}
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px]">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
                   <div className="relative border-b dark:border-white/10 border-gray-100 p-5">
                     <PlannerNeonLabel>Portfolio</PlannerNeonLabel>
                     <h3 className={cn("mt-2 text-lg", plannerNeon.headline)}>
@@ -2019,7 +2018,7 @@ export default function PlannerPageClient({
                       <Link
                         key={m.id}
                         href={mediaItemDetailPath(m)}
-                        className="group tkad-glass-surface flex flex-col gap-2 rounded-[22px] p-3 transition-all hover:-translate-y-0.5 hover:dark:bg-white/10 bg-gray-100"
+                        className="group flex flex-col gap-2 rounded-[22px] border border-gray-200/80 bg-white/90 p-3 transition-all hover:-translate-y-0.5 hover:bg-white dark:border-white/12 dark:bg-white/8 dark:hover:bg-white/12"
                       >
                         <CompositePreview
                           mediaImageUrl={getPrimaryMediaImageUrl(m)}
@@ -2054,37 +2053,50 @@ export default function PlannerPageClient({
                     feature="planner_result"
                     minHeightClass="min-h-[20rem]"
                     className="space-y-4"
+                    lockedPlaceholder={
+                      <>
+                        <PlannerProTeaserStats
+                          isKo={isKo}
+                          totalImpressions={metrics.estimatedTotalImpressions}
+                          reachCorePct={reachSplit.corePct}
+                          roiExpected={metrics.roiExpected}
+                          blurred={false}
+                        />
+                        <p className="text-center text-sm text-muted-foreground">
+                          {isKo
+                            ? "로그인·PRO 구독 후 프리미엄 인사이트와 효과 시뮬레이션을 확인할 수 있습니다."
+                            : "Sign in with PRO to unlock premium insights and effect simulation."}
+                        </p>
+                      </>
+                    }
                   >
-                      <PlannerProTeaserStats
-                        isKo={isKo}
-                        totalImpressions={metrics.estimatedTotalImpressions}
-                        reachCorePct={reachSplit.corePct}
-                        roiExpected={metrics.roiExpected}
-                      />
-                      <PlannerReportPremiumBlock
-                        isKo={isKo}
-                        portfolio={portfolio}
-                        budgetMan={budgetNum}
-                        months={months}
-                        regionsText={regionsSummary}
-                        goal={campaignGoal}
-                        industryText={t(industryKey)}
-                      />
-                      <PlannerEffectSimulationPanel
-                        isKo={isKo}
-                        portfolio={portfolio}
-                        budgetMan={budgetNum}
-                        months={months}
-                        totalImpressionsFromMetrics={
-                          metrics.estimatedTotalImpressions
-                        }
-                        skipProGate
-                      />
-                    </PlannerProGate>
-                  </div>
+                    {plannerResultAllowed ? (
+                      <>
+                        <PlannerReportPremiumBlock
+                          isKo={isKo}
+                          portfolio={portfolio}
+                          budgetMan={budgetNum}
+                          months={months}
+                          regionsText={regionsSummary}
+                          goal={campaignGoal}
+                          industryText={t(industryKey)}
+                        />
+                        <PlannerEffectSimulationPanel
+                          isKo={isKo}
+                          portfolio={portfolio}
+                          budgetMan={budgetNum}
+                          months={months}
+                          totalImpressionsFromMetrics={
+                            metrics.estimatedTotalImpressions
+                          }
+                          skipProGate
+                        />
+                      </>
+                    ) : null}
+                  </PlannerProGate>
+                </div>
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.12] tkad-neon-grid" />
                   <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
                   <div className="relative space-y-5">
                     <div className="space-y-2">

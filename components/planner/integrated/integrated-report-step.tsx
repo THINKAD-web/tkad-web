@@ -220,31 +220,31 @@ export function IntegratedReportStep(props: Props) {
           access={plannerResultAccess}
           feature="planner_result"
           minHeightClass="min-h-[24rem]"
-        >
-            <div className="space-y-6">
+          lockedPlaceholder={
+            <>
               <PlannerProTeaserStats
                 isKo={props.isKo}
                 totalImpressions={props.metrics.oohImpressions}
                 reachCorePct={reachSplit.corePct}
                 roiExpected={props.metrics.integratedRoasExpected}
+                blurred={false}
               />
-
+              <p className="text-center text-sm text-muted-foreground">
+                {props.isKo
+                  ? "로그인·PRO 구독 후 통합 보고서 전체를 확인할 수 있습니다."
+                  : "Sign in with PRO to unlock the full integrated report."}
+              </p>
+            </>
+          }
+        >
+          {plannerResultAllowed ? (
+            <div className="space-y-6">
               <div className="rounded-2xl border border-gray-200 bg-gray-100 p-3 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7">
                 <PlannerReportDocument
                   payload={payload}
                   mapPortfolio={props.portfolio}
                   sectionVisibility={sectionVisibility}
                 />
-              </div>
-
-              <div className={cn(plannerNeon.kpiCard, "mx-auto max-w-md text-center")}>
-                <p className={plannerNeon.kpiLabel}>
-                  {props.isKo ? "통합 ROAS (기대)" : "Integrated ROAS (expected)"}
-                </p>
-                <p className="mt-2 text-3xl font-bold tabular-nums text-cyan-400">
-                  {props.metrics.integratedRoasExpected}
-                  {props.isKo ? "배" : "×"}
-                </p>
               </div>
 
               <PlannerEffectSimulationPanel
@@ -256,7 +256,8 @@ export function IntegratedReportStep(props: Props) {
                 skipProGate
               />
             </div>
-          </PlannerProGate>
+          ) : null}
+        </PlannerProGate>
 
           <PlannerNeonCard>
             <div className="flex flex-col gap-4 border-b border-gray-100 p-5 dark:border-white/10 sm:p-6">
