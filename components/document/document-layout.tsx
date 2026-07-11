@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 export const documentPreviewFrameClass =
   "w-full min-w-0 rounded-2xl border border-gray-200 bg-gray-100 p-2 dark:border-white/10 dark:bg-white/[0.03] sm:p-5 lg:p-7";
 
-/** 플래너·견적 문서 카드 (흰색 A4/보고서 본문) */
+/** 플래너·견적 문서 카드 (흰색 A4/보고서 본문) — min-w-0 + overflow-x-auto 로 내부 테이블 자체 스크롤 */
 export const documentCardClass =
-  "tkad-document-light-surface mx-auto w-full max-w-[880px] overflow-hidden rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-gray-200 dark:bg-white dark:text-gray-900";
+  "tkad-document-light-surface mx-auto w-full min-w-0 max-w-[880px] overflow-x-auto rounded-2xl border border-gray-200 bg-white text-gray-900 shadow-sm dark:border-gray-200 dark:bg-white dark:text-gray-900";
 
 export function DocumentPreviewFrame({
   children,

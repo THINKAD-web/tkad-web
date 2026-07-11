@@ -35,6 +35,7 @@ import type {
   CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
+import { formatRecommendQuestionLine } from "@/lib/recommend/format-recommend-question";
 
 type Props = {
   locale: string;
@@ -137,7 +138,7 @@ export default function MediaAiRecommendDashboard({
   }, [top3]);
 
   return (
-    <div className="overflow-x-clip border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
+    <div className="min-w-0 overflow-x-auto border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
       <div className="space-y-10">
         {regionMeta?.regionSupplemented ? (
           <p className="rounded-2xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 dark:text-amber-100">
@@ -158,6 +159,22 @@ export default function MediaAiRecommendDashboard({
                 ? "TKAD bot의 탐험 완료!"
                 : "TKAD bot's exploration complete!"}
             </h2>
+            {(() => {
+              const questionLine = formatRecommendQuestionLine({
+                input: recommendInput,
+                regionCodes,
+                isKo,
+              });
+              if (!questionLine) return null;
+              return (
+                <p className="mx-auto max-w-xl rounded-xl border border-border/80 bg-muted/60 px-3 py-2 text-left text-[12px] leading-relaxed text-foreground sm:mx-0 sm:text-sm">
+                  <span className="font-semibold text-accent">
+                    {isKo ? "질문: " : "Q: "}
+                  </span>
+                  <span className="text-foreground/90">{questionLine}</span>
+                </p>
+              );
+            })()}
             <p className="max-w-xl text-[12px] leading-relaxed tracking-tight text-muted-foreground sm:text-sm">
               {`// `}{isKo
                 ? "TKAD bot이 골라온 매체입니다. 여기서 견적·상담까지 완료할 수 있어요."

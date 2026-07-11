@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus, ShoppingBag } from "lucide-react";
+import { Check, Plus, ShoppingBag, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import {
   mediaActionBlockClass,
@@ -15,7 +15,7 @@ import { cn } from "@/lib/utils";
 type Props = {
   item: Omit<PlanCartItem, "addedAt">;
   addedFrom?: PlanCartAddedFrom;
-  /** 그리드 카드 — 짧은 라벨 (담기 / 담김) */
+  /** 그리드 카드 — 짧은 라벨 (담기 / 빼기) */
   gridInline?: boolean;
   /** 피드 카드 — 아이콘 + 긴 라벨 */
   feedLabeled?: boolean;
@@ -72,50 +72,51 @@ export function MediaCartAddButton({
     });
   }
 
+  const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
+
   const label = feedLabeled
     ? inCart
       ? isKo
-        ? "담김"
-        : "Added"
+        ? "빼기"
+        : "Remove"
       : isKo
         ? "매체 담기"
         : "Add media"
     : gridInline
       ? inCart
         ? isKo
-          ? "담김"
-          : "On"
+          ? "빼기"
+          : "Out"
         : isKo
           ? "담기"
           : "Add"
       : inCart
         ? isKo
-          ? "담김"
-          : "On"
+          ? "빼기"
+          : "Remove"
         : isKo
           ? "담기"
           : "Add";
 
   const ariaLabel = inCart
     ? isKo
-      ? "담은 매체에서 제거"
-      : "Remove from plan"
+      ? "담은 매체에서 제거 (다시 누르면 빼기)"
+      : "Remove from plan (tap again to remove)"
     : isKo
       ? "담은 매체에 담기"
       : "Add to plan";
-
-  const showCheck = inCart && (gridInline || feedLabeled || iconOnly);
 
   return (
     <button
       type="button"
       onClick={handleClick}
+      title={inCart ? removeHint : undefined}
       className={cn(
         iconOnly
           ? cn(
               "inline-flex h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition-colors",
               inCart
-                ? "border-emerald-400/55 bg-emerald-500/20 text-emerald-100"
+                ? "border-rose-400/55 bg-rose-500/20 text-rose-100"
                 : "border-white/20 bg-white/10 text-white hover:bg-white/20",
             )
           : feedLabeled
@@ -128,19 +129,25 @@ export function MediaCartAddButton({
     >
       {iconOnly ? (
         inCart ? (
-          <Check className="h-4 w-4 shrink-0" aria-hidden />
+          <X className="h-4 w-4 shrink-0" aria-hidden />
         ) : (
           <ShoppingBag className="h-4 w-4 shrink-0 opacity-90" aria-hidden />
         )
       ) : feedLabeled ? (
-        <ShoppingBag className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+        inCart ? (
+          <X className="h-3.5 w-3.5 shrink-0 opacity-90" aria-hidden />
+        ) : (
+          <ShoppingBag className="h-3.5 w-3.5 shrink-0 opacity-80" aria-hidden />
+        )
       ) : null}
       {!iconOnly ? (
         <>
-          {showCheck ? (
-            <Check className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
-          ) : !feedLabeled && !inCart ? (
-            <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
+          {!feedLabeled ? (
+            inCart ? (
+              <X className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
+            ) : (
+              <Plus className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
+            )
           ) : null}
           {label}
         </>

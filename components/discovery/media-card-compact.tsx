@@ -3,7 +3,7 @@
 import { forwardRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { Check, ChevronDown, Lightbulb, Plus } from "lucide-react";
+import { ChevronDown, Lightbulb, Plus, X } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
@@ -122,12 +122,13 @@ export function DiscoveryMediaCardCompactRow({
             className={cn(
               "tkad-type-note inline-flex h-6 items-center gap-0.5 rounded-md px-1.5 font-semibold",
               isInPlan
-                ? "bg-violet-500/20 text-violet-600 dark:text-violet-300"
+                ? "bg-rose-500/20 text-rose-700 dark:text-rose-200"
                 : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
             )}
+            title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
           >
             {isInPlan ? (
-              <Check className="h-3 w-3" />
+              <X className="h-3 w-3" />
             ) : (
               <Plus className="h-3 w-3" />
             )}
@@ -257,17 +258,18 @@ export function DiscoveryMediaCardCompactGrid({
           )}
           {plannerMode && onTogglePlan ? (
             <div
+              title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
               className={cn(
                 "tkad-type-meta flex h-9 w-full items-center justify-center gap-1.5 rounded-xl font-semibold",
                 isInPlan
-                  ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
+                  ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
                   : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
               )}
             >
               {isInPlan ? (
                 <>
-                  <Check className="h-3.5 w-3.5" />
-                  {isKo ? "담김" : "Added"}
+                  <X className="h-3.5 w-3.5" />
+                  {isKo ? "빼기" : "Remove"}
                 </>
               ) : (
                 <>
@@ -528,17 +530,18 @@ export function DiscoveryMediaCardCatalogTile({
 
         {plannerMode && onTogglePlan ? (
           <div
+            title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
             className={cn(
               "tkad-type-meta mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg font-semibold",
               isInPlan
-                ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
+                ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
                 : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
             )}
           >
             {isInPlan ? (
               <>
-                <Check className="h-3.5 w-3.5" />
-                {isKo ? "담김" : "Added"}
+                <X className="h-3.5 w-3.5" />
+                {isKo ? "빼기" : "Remove"}
               </>
             ) : (
               <>

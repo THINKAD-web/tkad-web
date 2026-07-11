@@ -451,7 +451,7 @@ export function PlannerRecommendationPanel({
   );
 
   return (
-    <PlannerNeonCard className="min-w-0 overflow-x-clip border-violet-400/20">
+    <PlannerNeonCard className="min-w-0 overflow-x-auto border-violet-400/20">
       <div className="flex min-w-0 flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
         <div className="min-w-0 space-y-1">
           <PlannerNeonLabel>{t("recommendEyebrow")}</PlannerNeonLabel>
@@ -493,7 +493,7 @@ export function PlannerRecommendationPanel({
           </button>
         </div>
       </div>
-      <div className="min-w-0 overflow-x-clip p-5 sm:p-6">
+      <div className="min-w-0 overflow-x-auto p-5 sm:p-6">
         {loading ? (
           <div
             className={cn(

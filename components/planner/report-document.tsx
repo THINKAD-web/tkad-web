@@ -412,7 +412,7 @@ export const PlannerReportDocument = forwardRef<
                 </div>
               ) : null}
             </div>
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[32rem] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
@@ -492,7 +492,7 @@ export const PlannerReportDocument = forwardRef<
                 </div>
               ) : null}
             </div>
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[32rem] border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-gray-200 bg-gray-50 text-left text-xs font-semibold text-gray-600">
@@ -580,7 +580,7 @@ export const PlannerReportDocument = forwardRef<
             {p.digitalSummary ? (
               <p className="text-sm text-gray-600">{p.digitalSummary}</p>
             ) : null}
-            <div className="overflow-x-auto rounded-xl border border-gray-200">
+            <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[30rem] border-collapse text-sm">
                 <thead>
                   <tr className="bg-cyan-600 text-left text-xs font-semibold uppercase tracking-wide text-white">

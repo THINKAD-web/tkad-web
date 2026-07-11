@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import Image from "next/image";
-import { Check, Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
@@ -179,17 +179,18 @@ export function DiscoveryMediaCardHorizontal({
           if (stopPropagation) e.stopPropagation();
           onTogglePlan();
         }}
+        title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
         className={cn(
           "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition-colors",
           isInPlan
-            ? "border border-violet-400/50 bg-violet-500/15 text-violet-600 dark:text-violet-300"
+            ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
             : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
         )}
       >
         {isInPlan ? (
           <>
-            <Check className="h-4 w-4" />
-            {isKo ? "담김" : "Added"}
+            <X className="h-4 w-4" />
+            {isKo ? "빼기" : "Remove"}
           </>
         ) : (
           <>

@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Plus } from "lucide-react";
+import { Plus, X } from "lucide-react";
 import { useLocale } from "next-intl";
 import { mediaActionPillClass } from "@/components/media/media-action-pill";
 import { useAppToast } from "@/lib/use-toast";
@@ -14,7 +14,7 @@ type Props = {
   item: Omit<PlanCartItem, "addedAt">;
   addedFrom?: PlanCartAddedFrom;
   compact?: boolean;
-  /** 그리드 카드 — 짧은 라벨 (담기 / 담김) */
+  /** 그리드 카드 — 짧은 라벨 (담기 / 빼기) */
   gridInline?: boolean;
   className?: string;
 };
@@ -33,6 +33,7 @@ export function PlanCartAddButton({
   const { isPro } = useIsPro();
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
+  const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation();
@@ -71,14 +72,23 @@ export function PlanCartAddButton({
       <button
         type="button"
         onClick={handleClick}
+        title={inPlan ? removeHint : undefined}
         className={cn(mediaActionPillClass(inPlan, "cart"), className)}
         aria-pressed={inPlan}
-        aria-label={inPlan ? (isKo ? "담은 매체에서 제거" : "Remove from plan") : (isKo ? "담은 매체에 담기" : "Add to plan")}
+        aria-label={
+          inPlan
+            ? isKo
+              ? "담은 매체에서 제거 (다시 누르면 빼기)"
+              : "Remove from plan (tap again to remove)"
+            : isKo
+              ? "담은 매체에 담기"
+              : "Add to plan"
+        }
       >
         {inPlan ? (
           <>
-            <Check className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
-            {isKo ? "담김" : "On"}
+            <X className="h-2.5 w-2.5 shrink-0 opacity-90" aria-hidden />
+            {isKo ? "빼기" : "Out"}
           </>
         ) : (
           <>
@@ -94,21 +104,30 @@ export function PlanCartAddButton({
     <button
       type="button"
       onClick={handleClick}
+      title={inPlan ? removeHint : undefined}
       className={cn(
         "inline-flex max-w-full items-center justify-center gap-1 whitespace-normal rounded-xl border font-semibold transition active:scale-95",
         compact ? "h-9 px-2.5 text-xs" : "h-10 px-3 text-xs",
         inPlan
-          ? "border-emerald-400/50 bg-emerald-500/15 text-emerald-800 dark:border-emerald-400/40 dark:bg-emerald-500/20 dark:text-emerald-100"
+          ? "border-rose-400/55 bg-rose-500/15 text-rose-800 dark:border-rose-400/45 dark:bg-rose-500/20 dark:text-rose-100"
           : "border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90",
         className,
       )}
       aria-pressed={inPlan}
-      aria-label={inPlan ? (isKo ? "담은 매체에서 제거" : "Remove from plan") : (isKo ? "담은 매체에 담기" : "Add to plan")}
+      aria-label={
+        inPlan
+          ? isKo
+            ? "담은 매체에서 제거 (다시 누르면 빼기)"
+            : "Remove from plan (tap again to remove)"
+          : isKo
+            ? "담은 매체에 담기"
+            : "Add to plan"
+      }
     >
       {inPlan ? (
         <>
-          <Check className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "담김" : "Added"}
+          <X className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {isKo ? "빼기" : "Remove"}
         </>
       ) : (
         <>

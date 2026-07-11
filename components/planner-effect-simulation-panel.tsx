@@ -231,7 +231,7 @@ export function PlannerEffectSimulationPanel({
           {t("effectCpmPerMediaHint")}
         </p>
       </div>
-      <div className="overflow-x-auto p-4 sm:p-5">
+      <div className="min-w-0 overflow-x-auto p-4 sm:p-5">
         <table className="w-full min-w-[36rem] text-left text-sm">
           <thead>
             <tr className="border-b dark:border-white/10 border-gray-100 dark:text-white/40 text-gray-400">
