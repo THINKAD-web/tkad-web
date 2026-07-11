@@ -114,6 +114,11 @@ export function canProceedBooking(status: OoHQuoteStatus): boolean {
   return status === OoHQuoteStatus.sent;
 }
 
+/** 고객 진행 요청 철회 — 관리자 부킹 확정 전에만 허용 */
+export function canWithdrawProceed(status: OoHQuoteStatus): boolean {
+  return status === OoHQuoteStatus.booking_requested;
+}
+
 export function canAdminBookingConfirm(status: OoHQuoteStatus): boolean {
   return (
     status === OoHQuoteStatus.booking_requested ||

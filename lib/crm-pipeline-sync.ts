@@ -1,4 +1,4 @@
-import type { OoHQuoteStatus, SalesPipelineStage } from "@prisma/client";
+import type { OoHQuoteStatus, PrismaClient, SalesPipelineStage } from "@prisma/client";
 import { getPrisma } from "@/lib/prisma";
 
 export function oohQuoteStatusToStage(status: OoHQuoteStatus): SalesPipelineStage {
@@ -26,6 +26,31 @@ export function oohQuoteStatusToStage(status: OoHQuoteStatus): SalesPipelineStag
     default:
       return "consulting";
   }
+}
+
+/** 단일 OoH 견적 상태 변경 후 연결된 PipelineCard stage 즉시 반영 */
+export async function syncPipelineStageForOoHQuote(
+  db: PrismaClient,
+  quoteId: string,
+): Promise<void> {
+  const q = await db.ooHQuote.findUnique({
+    where: { id: quoteId },
+    include: { pipelineCard: true },
+  });
+  if (!q?.pipelineCard) return;
+
+  const stage = oohQuoteStatusToStage(q.status);
+  if (q.pipelineCard.stage === stage) return;
+
+  await db.pipelineCard.update({
+    where: { id: q.pipelineCard.id },
+    data: {
+      stage,
+      expectedAmount: q.totalAmount,
+      quoteSentAt: q.quotePdfSentAt ?? q.pipelineCard.quoteSentAt,
+      lastContactAt: new Date(),
+    },
+  });
 }
 
 /** ContactInquiry + OoHQuote + CrmAccount → PipelineCard 동기화 */

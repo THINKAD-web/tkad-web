@@ -25,6 +25,7 @@ export default function QuoteStatusClient({
   const t = useTranslations("quoteCustomer");
   const [quote, setQuote] = useState<QuotePublic | null>(null);
   const [loading, setLoading] = useState(true);
+  const [withdrawing, setWithdrawing] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -53,6 +54,30 @@ export default function QuoteStatusClient({
   useEffect(() => {
     void load();
   }, [load]);
+
+  const onWithdrawProceed = async () => {
+    if (!quote || quote.status !== "booking_requested" || withdrawing) return;
+    if (!window.confirm(t("withdrawProceedConfirmBody"))) return;
+
+    setWithdrawing(true);
+    try {
+      const res = await fetch(`/api/quote/${quoteId}/withdraw-proceed`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
+      if (!res.ok) {
+        window.alert(t("withdrawProceedFail"));
+        await load();
+        return;
+      }
+      await load();
+    } catch {
+      window.alert(t("withdrawProceedFail"));
+    } finally {
+      setWithdrawing(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -92,6 +117,7 @@ export default function QuoteStatusClient({
 
   const showContractBlock =
     quote.contractSigned || quote.status === "booking_confirmed";
+  const showWithdrawProceed = quote.status === "booking_requested";
 
   return (
     <div className="mx-auto max-w-2xl space-y-6 px-4 py-10 sm:px-6">
@@ -123,6 +149,32 @@ export default function QuoteStatusClient({
           />
         </div>
       </div>
+
+      {showWithdrawProceed ? (
+        <div className="border-2 border-amber-400/40 bg-amber-50/80 p-5 dark:border-amber-400/25 dark:bg-amber-500/10">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-800 dark:text-amber-200">
+            [ {t("bookingRequestedBannerTitle")} ]
+          </p>
+          <p className="mt-2 text-sm text-foreground">{t("bookingRequestedBannerBody")}</p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <BtnBlock
+              variant="secondary"
+              size="md"
+              onClick={() => void onWithdrawProceed()}
+              disabled={withdrawing}
+            >
+              {withdrawing ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                t("withdrawProceedButton")
+              )}
+            </BtnBlock>
+            <BtnBlock href={`/quote/${quoteId}`} variant="secondary" size="md">
+              {t("backToDetail")}
+            </BtnBlock>
+          </div>
+        </div>
+      ) : null}
 
       {showContractBlock ? (
         <QuoteContractCta
