@@ -122,6 +122,11 @@ export const DiscoveryMediaCard = forwardRef<
         plannerMode={plannerMode}
         isInPlan={isInPlan}
         onTogglePlan={onTogglePlan}
+        rank={rank}
+        showPlanButton={showPlanButton}
+        planAddedFrom={planAddedFrom}
+        cardFooter={cardFooter}
+        className={className}
       />
     );
   } else if (compactLayout === "grid") {
@@ -180,6 +185,9 @@ export const DiscoveryMediaCard = forwardRef<
     (props.compactLayout === "grid" || props.compactLayout === "map-tile");
 
   if (!recommendReason?.trim() || recommendReasonInside) {
+    if (compactLayout === "map-tile") {
+      return card;
+    }
     return (
       <div className={cn(isStackedTile && "h-full min-h-0", className)}>{card}</div>
     );

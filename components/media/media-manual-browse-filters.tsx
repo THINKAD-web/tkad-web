@@ -114,14 +114,14 @@ const VIEW_MODES: {
   labelEn: string;
   icon: typeof List;
 }[] = [
-  { id: "feed", labelKo: "피드", labelEn: "Feed", icon: List },
   { id: "card", labelKo: "카드", labelEn: "Card", icon: LayoutGrid },
+  { id: "feed", labelKo: "피드", labelEn: "Feed", icon: List },
   { id: "reels", labelKo: "몰입 보기", labelEn: "Immersive", icon: RectangleVertical },
   { id: "compact", labelKo: "컴팩트", labelEn: "Compact", icon: AlignJustify },
   { id: "map", labelKo: "지도", labelEn: "Map", icon: MapIcon },
 ];
 
-/** `/media` 목록 — 피드·카드·컴팩트만 (지도는 별도 네비 버튼) */
+/** `/media` 목록 — 카드·피드·컴팩트만 (지도는 별도 네비 버튼) */
 const LIST_VIEW_MODES = VIEW_MODES.filter((m) => m.id !== "map");
 
 const MAP_PAGE_VIEW_MODES: {

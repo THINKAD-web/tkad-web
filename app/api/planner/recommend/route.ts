@@ -135,7 +135,7 @@ export async function POST(request: NextRequest) {
     const { recommendations, cached, logId, claudeUsed } = await runRecommendation({
       input: matchingInput,
       source: "planner",
-      limit: d.limit ?? 5,
+      limit: d.limit ?? 8,
       useClaude: d.useClaude ?? isPlannerClaudeEnabled(),
       isKo,
       userId,

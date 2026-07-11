@@ -12,21 +12,16 @@ import {
   mapMediaItemToHomeCatalog,
 } from "@/lib/media-catalog-map";
 import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
-import { MediaCard } from "@/components/media/media-card";
+import { DiscoveryMediaCard } from "@/components/discovery/media-card";
+import type { MediaCardCompactLayout } from "@/components/discovery/media-card-types";
+import type { PlanCartAddedFrom } from "@/lib/plan-cart";
+import {
+  RECOMMEND_MEDIA_GRID_CLASS,
+  RECOMMEND_TOP3_GRID_CLASS,
+} from "@/lib/media-browse-grid";
 import { cn } from "@/lib/utils";
 
-const RECOMMEND_CARD_FOOTER_PLACEHOLDER = (
-  <div
-    className="flex min-h-[2.75rem] items-center justify-center"
-    aria-hidden
-  >
-    <span className="select-none text-[10px] text-transparent">—</span>
-  </div>
-);
-
-/** AI 추천 결과 — 카드 그리드 (썸네일 상단, feed 가로 레이아웃 사용 금지) */
-export const RECOMMEND_MEDIA_GRID_CLASS =
-  "grid auto-rows-min grid-cols-1 items-start gap-4 sm:grid-cols-2 lg:grid-cols-3";
+export { RECOMMEND_MEDIA_GRID_CLASS, RECOMMEND_TOP3_GRID_CLASS };
 
 function resolveRationaleTexts(
   scored: ScoredMedia,
@@ -53,6 +48,12 @@ export function RecommendScoredMediaCard({
   className,
   quantityControl,
   rationaleTwoLine = false,
+  compactLayout = "map-tile",
+  plannerMode = false,
+  isInPlan = false,
+  onTogglePlan,
+  planAddedFrom = "ai_recommend",
+  showPlanButton = true,
 }: {
   scored: ScoredMedia;
   rank?: number;
@@ -62,6 +63,14 @@ export function RecommendScoredMediaCard({
   quantityControl?: ReactNode;
   /** TOP3 카드: 요약 + 첫 bullet 2줄 고정 */
   rationaleTwoLine?: boolean;
+  /** `map-tile` — `/media` 카드형과 동일; `grid` — 정사각 + 추천 이유 */
+  compactLayout?: Extract<MediaCardCompactLayout, "grid" | "map-tile">;
+  /** 플래너 Step 4 — 캠페인 담기 토글 (담기+ 대신 플랜 담기) */
+  plannerMode?: boolean;
+  isInPlan?: boolean;
+  onTogglePlan?: () => void;
+  planAddedFrom?: PlanCartAddedFrom;
+  showPlanButton?: boolean;
 }) {
   const catalogItem = mapMediaItemToHomeCatalog(scored.item);
   const priceLabel =
@@ -72,27 +81,38 @@ export function RecommendScoredMediaCard({
         )
       : null;
   const { summary, bullets } = resolveRationaleTexts(scored, locale);
+  const mapTile = compactLayout === "map-tile";
 
   return (
     <li className={cn("min-w-0 list-none", className)}>
-      <MediaCard
-        mode="card"
+      <DiscoveryMediaCard
+        variant="compact"
+        compactLayout={compactLayout}
         item={catalogItem}
         href={mediaItemDetailPath(scored.item)}
         priceLabel={priceLabel}
         isKo={isKo}
         rank={rank}
-        planAddedFrom="ai_recommend"
-        showPlanButton
-        recommendReason={summary}
+        planAddedFrom={planAddedFrom}
+        showPlanButton={showPlanButton && !plannerMode}
+        plannerMode={plannerMode}
+        isInPlan={isInPlan}
+        onTogglePlan={onTogglePlan}
+        recommendReason={mapTile ? undefined : summary}
         recommendRationaleBullets={
-          rationaleTwoLine ? bullets.slice(0, 1) : bullets
+          mapTile
+            ? undefined
+            : rationaleTwoLine
+              ? bullets.slice(0, 1)
+              : bullets
         }
-        recommendRationaleExpandable={!rationaleTwoLine && bullets.length > 0}
-        recommendReasonInside
-        recommendRationaleProminent={rationaleTwoLine}
-        cardFooter={quantityControl ?? RECOMMEND_CARD_FOOTER_PLACEHOLDER}
-        className="h-full"
+        recommendRationaleExpandable={
+          !mapTile && !rationaleTwoLine && bullets.length > 0
+        }
+        recommendReasonInside={!mapTile}
+        recommendRationaleProminent={!mapTile && rationaleTwoLine}
+        cardFooter={quantityControl}
+        className="h-full min-h-0"
       />
     </li>
   );

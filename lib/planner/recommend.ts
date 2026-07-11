@@ -78,7 +78,7 @@ function reasonWeightForKey(
 export function recommendPlannerMedia(
   catalog: readonly MediaItem[],
   ctx: RecommendationContext,
-  limit = 5,
+  limit = 8,
   seed = 0,
   locale = "ko",
 ): ScoredMedia[] {

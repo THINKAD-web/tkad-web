@@ -42,8 +42,11 @@ type PlannerVariantProps = SharedProps & {
   variant: "planner";
   catalog: MediaItem[];
   ctx: RecommendationContext;
+  locale: string;
   selectedIds: string[];
   setCampaignMediaIds: (updater: (prev: string[]) => string[]) => void;
+  renderQuantityControl?: (media: MediaItem) => ReactNode;
+  onCampaignToggleMedia?: (media: MediaItem, axisSource: string) => void;
 };
 
 type RecommendVariantProps = SharedProps & {
@@ -280,20 +283,24 @@ function PlannerAxisCardGrid({
   ranked,
   industryWeak,
   isKo,
+  locale,
   selectedIds,
   setCampaignMediaIds,
+  renderQuantityControl,
+  onCampaignToggleMedia,
   t,
 }: {
   effectiveAxis: RecommendTabAxis;
   ranked: AxisRankedItem[];
   industryWeak: boolean;
   isKo: boolean;
+  locale: string;
   selectedIds: string[];
   setCampaignMediaIds: (updater: (prev: string[]) => string[]) => void;
+  renderQuantityControl?: (media: MediaItem) => ReactNode;
+  onCampaignToggleMedia?: (media: MediaItem, axisSource: string) => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
-
   if (ranked.length === 0) {
     return (
       <p className={cn("py-6 text-center text-sm", plannerNeon.subtext)}>
@@ -314,72 +321,39 @@ function PlannerAxisCardGrid({
     <ul className={RECOMMEND_MEDIA_GRID_CLASS}>
       {ranked.map((item) => {
         const selected = selectedIds.includes(item.media.id);
-        const metric = isKo ? item.metricKo : item.metricEn;
         return (
-          <li
+          <RecommendScoredMediaCard
             key={item.media.id}
-            className={cn(
-              "flex min-w-0 flex-col gap-3 rounded-2xl border p-3",
-              selected
-                ? "border-violet-400/50 bg-violet-500/5"
-                : "border-border bg-card",
-            )}
-          >
-            <div className="flex items-start gap-3">
-              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-500/15 text-xs font-bold tabular-nums text-violet-700 dark:text-violet-200">
-                {item.rank}
-              </span>
-              <PlannerMediaThumb
-                media={item.media}
-                alt={isKo ? item.media.name : item.media.nameEn || item.media.name}
-                size="rank"
-              />
-              <div className="min-w-0 flex-1">
-                <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
-                  {isKo ? item.media.name : item.media.nameEn || item.media.name}
-                </p>
-                <p className="mt-1 line-clamp-2 text-xs text-muted-foreground">
-                  {metric}
-                </p>
-              </div>
-            </div>
-            <button
-              type="button"
-              title={selected ? removeHint : t("recommendAddCampaignHint")}
-              onClick={() => {
-                setCampaignMediaIds((prev) => {
-                  const adding = !prev.includes(item.media.id);
-                  if (adding) {
-                    trackEvent("add_to_plan", {
-                      media_id: item.media.id,
-                      source: `recommend_tab_${effectiveAxis}`,
-                    });
-                  }
-                  return adding
-                    ? [...prev, item.media.id]
-                    : prev.filter((x) => x !== item.media.id);
-                });
-              }}
-              className={cn(
-                "inline-flex w-full items-center justify-center gap-1 rounded-xl border px-3 py-2 text-xs font-semibold",
-                selected
-                  ? "border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
-                  : cn(plannerNeon.ctaSm),
-              )}
-            >
-              {selected ? (
-                <>
-                  <X className="h-3.5 w-3.5" aria-hidden />
-                  {t("recommendRemove")}
-                </>
-              ) : (
-                <>
-                  <Plus className="h-3.5 w-3.5" aria-hidden />
-                  {t("recommendAdd")}
-                </>
-              )}
-            </button>
-          </li>
+            scored={axisRankedToScored(item)}
+            rank={item.rank}
+            isKo={isKo}
+            locale={locale}
+            plannerMode
+            isInPlan={selected}
+            planAddedFrom="planner"
+            quantityControl={renderQuantityControl?.(item.media)}
+            onTogglePlan={() => {
+              if (onCampaignToggleMedia) {
+                onCampaignToggleMedia(
+                  item.media,
+                  `recommend_tab_${effectiveAxis}`,
+                );
+                return;
+              }
+              setCampaignMediaIds((prev) => {
+                const adding = !prev.includes(item.media.id);
+                if (adding) {
+                  trackEvent("add_to_plan", {
+                    media_id: item.media.id,
+                    source: `recommend_tab_${effectiveAxis}`,
+                  });
+                }
+                return adding
+                  ? [...prev, item.media.id]
+                  : prev.filter((x) => x !== item.media.id);
+              });
+            }}
+          />
         );
       })}
     </ul>
@@ -623,8 +597,11 @@ export function RecommendationAxisTabs(props: RecommendationAxisTabsProps) {
             ranked={ranked}
             industryWeak={industryWeak}
             isKo={isKo}
+            locale={props.locale}
             selectedIds={props.selectedIds}
             setCampaignMediaIds={props.setCampaignMediaIds}
+            renderQuantityControl={props.renderQuantityControl}
+            onCampaignToggleMedia={props.onCampaignToggleMedia}
             t={t}
           />
         )

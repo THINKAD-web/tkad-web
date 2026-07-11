@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect, useMemo, useState, useRef } from "react";
+import { useEffect, useMemo, useState, useRef, useCallback } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Sparkles, Plus, Check, RefreshCw } from "lucide-react";
+import { Sparkles, RefreshCw } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { trackEvent } from "@/lib/ga-events";
 import {
@@ -12,7 +12,7 @@ import {
 } from "@/lib/planner/recommend";
 import { rationaleKeysFromBreakdown } from "@/lib/recommend/recommend-rationale";
 import type { LocalizedRationaleLine } from "@/lib/recommend/recommend-rationale";
-import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
+import type { ScoredMedia as AiScoredMedia } from "@/lib/ai-media-recommend";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -33,37 +33,33 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
+import { resolveMediaQuantity } from "@/lib/media-quantity";
 import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-} from "@/lib/ai-recommend-metrics";
-import { normalizeVisibilityScore } from "@/lib/planner-logic";
-import { formatCpmKrw } from "@/lib/media-price-format";
-import { resolveImpressionsForUnits } from "@/lib/media-quantity";
-import {
-  plannerMonthlyPriceWonForMedia,
-  plannerUnitsForMedia,
+  shouldShowPlannerQuantityControl,
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
 } from "@/lib/planner/planner-media-quantity";
-import { mediaPlannerRegionDisplayLabel } from "@/lib/planner/planner-regions";
 import { PlannerRecommendationAxisTabs } from "@/components/planner/recommendation-axis-tabs";
-import { PlannerMediaThumb } from "@/components/planner/planner-media-thumb";
+import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
+import {
+  RECOMMEND_MEDIA_GRID_CLASS,
+  RecommendScoredMediaCard,
+} from "@/components/media-ai-recommend-scored-card";
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
 
-const REASON_COLORS: Record<RecommendReasonKey, string> = {
-  matchRegion: "border-border bg-card text-foreground",
-  ageMatch: "border-primary bg-primary text-primary-foreground",
-  budgetEfficient: "border-border bg-muted text-foreground",
-  /** was bg-foreground + text-primary → 라이트에서 잉크 배경에 잉크 글자, 플래너 토큰에서도 대비 붕괴 */
-  goalFit: "border-primary/55 bg-primary/12 text-primary",
-  industryFit: "border-violet-500/55 bg-violet-500/12 text-violet-700 dark:text-violet-300",
-  highVisibility: "border-primary bg-card text-primary",
-  landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
-  transitHotspot: "border-accent bg-accent/10 text-accent",
-  retailHotspot: "border-emerald-500 bg-emerald-500/10 text-emerald-700",
-  neighborhoodHotspot: "border-border bg-muted text-foreground",
-};
+function plannerScoredToAiScored(
+  rec: ScoredMedia,
+  matchScores: Record<string, number>,
+  rationaleByMediaId: Record<string, LocalizedRationaleLine[]>,
+): AiScoredMedia {
+  const id = rec.media.id;
+  return {
+    item: rec.media,
+    score: matchScores[id] ?? Math.round(rec.score * 100),
+    reasons: [],
+    rationaleLines: rationaleByMediaId[id] ?? rec.rationaleLines ?? [],
+  };
+}
 
 export type PlannerRecommendationStoreBinding = {
   goal: PlannerCampaignGoal | null;
@@ -89,7 +85,7 @@ type Props = {
   catalog: MediaItem[];
   isKo: boolean;
   regionLabel: (region: string) => string;
-  /** 추천 개수 상한 (기본 5) */
+  /** 추천 개수 상한 (기본 8) */
   limit?: number;
   /** 통합 플래너 등 외부 store — 미전달 시 OOH `usePlannerStore` */
   store?: PlannerRecommendationStoreBinding;
@@ -115,7 +111,7 @@ export function PlannerRecommendationPanel({
   catalog,
   isKo,
   regionLabel,
-  limit = 5,
+  limit = 8,
   store,
   planCartAddedFrom = "planner",
   supplementalById,
@@ -174,11 +170,13 @@ export function PlannerRecommendationPanel({
   const [refreshTick, setRefreshTick] = useState(0);
   const [recommendations, setRecommendations] = useState<ScoredMedia[]>([]);
   const [matchScores, setMatchScores] = useState<Record<string, number>>({});
-  const [oneLines, setOneLines] = useState<Record<string, string>>({});
-  const [reasonings, setReasonings] = useState<Record<string, string>>({});
   const [rationaleByMediaId, setRationaleByMediaId] = useState<
     Record<string, LocalizedRationaleLine[]>
   >({});
+  const [axisDraftQuantities, setAxisDraftQuantities] =
+    useState<CampaignMediaQuantities>({});
+  const [axisDraftPriceOptionIndex, setAxisDraftPriceOptionIndex] =
+    useState<CampaignMediaPriceOptionIndex>({});
   const fetchRef = useRef(0);
 
   const depsKey = useMemo(
@@ -253,8 +251,6 @@ export function PlannerRecommendationPanel({
           if (id !== fetchRef.current) return;
           if (data.ok && data.items?.length) {
             const scores: Record<string, number> = {};
-            const lines: Record<string, string> = {};
-            const narrative: Record<string, string> = {};
             const rationaleMap: Record<string, LocalizedRationaleLine[]> = {};
             const recs: ScoredMedia[] = [];
             const unresolvedIds: string[] = [];
@@ -265,13 +261,8 @@ export function PlannerRecommendationPanel({
                 continue;
               }
               scores[media.id] = item.score;
-              if (item.reasoning) narrative[media.id] = item.reasoning;
               if (item.rationaleLines?.length) {
                 rationaleMap[media.id] = item.rationaleLines;
-              }
-              const summary = item.expectedImpact ?? item.oneLine;
-              if (summary && summary !== item.reasoning) {
-                lines[media.id] = summary;
               }
               const reasonKeys =
                 item.breakdown ?
@@ -308,8 +299,6 @@ export function PlannerRecommendationPanel({
                   fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
                 ),
               );
-              setOneLines({});
-              setReasonings({});
               setRationaleByMediaId(
                 Object.fromEntries(
                   fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
@@ -318,8 +307,6 @@ export function PlannerRecommendationPanel({
             } else {
               setRecommendations(recs);
               setMatchScores(scores);
-              setOneLines(lines);
-              setReasonings(narrative);
               setRationaleByMediaId(rationaleMap);
             }
           } else {
@@ -346,8 +333,6 @@ export function PlannerRecommendationPanel({
                 fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
               ),
             );
-            setOneLines({});
-            setReasonings({});
             setRationaleByMediaId(
               Object.fromEntries(
                 fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
@@ -380,8 +365,6 @@ export function PlannerRecommendationPanel({
               fallback.map((r) => [r.media.id, Math.round(r.score * 100)]),
             ),
           );
-          setOneLines({});
-          setReasonings({});
           setRationaleByMediaId(
             Object.fromEntries(
               fallback.map((r) => [r.media.id, r.rationaleLines ?? []]),
@@ -413,14 +396,6 @@ export function PlannerRecommendationPanel({
 
   const isSelected = (id: string) => selectedIds.includes(id);
 
-  const handleToggle = (id: string) => {
-    setCampaignMediaIds((prev) => {
-      const adding = !prev.includes(id);
-      if (adding) trackEvent("add_to_plan", { media_id: id, source: "recommend" });
-      return adding ? [...prev, id] : prev.filter((x) => x !== id);
-    });
-  };
-
   const handleAddAll = () => {
     trackEvent("add_to_plan", { source: "recommend_all" });
     setCampaignMediaIds((prev) => {
@@ -429,6 +404,94 @@ export function PlannerRecommendationPanel({
       return [...merged];
     });
   };
+
+  const effectiveAxisQuantities = useMemo(
+    () => ({ ...axisDraftQuantities, ...campaignMediaQuantities }),
+    [axisDraftQuantities, campaignMediaQuantities],
+  );
+
+  const effectiveAxisPriceOptionIndex = useMemo(
+    () => ({
+      ...axisDraftPriceOptionIndex,
+      ...campaignMediaPriceOptionIndex,
+    }),
+    [axisDraftPriceOptionIndex, campaignMediaPriceOptionIndex],
+  );
+
+  const renderPlannerAxisQuantityControl = useCallback(
+    (media: MediaItem) => {
+      if (!shouldShowPlannerQuantityControl(media)) return null;
+      return (
+        <PlannerMediaQuantityControl
+          media={media}
+          isKo={isKo}
+          quantities={effectiveAxisQuantities}
+          priceOptionIndex={effectiveAxisPriceOptionIndex}
+          onQuantityChange={(units) => {
+            if (selectedIds.includes(media.id)) {
+              setCampaignMediaQuantity(media.id, units);
+              return;
+            }
+            setAxisDraftQuantities((prev) => ({ ...prev, [media.id]: units }));
+          }}
+          onPriceOptionChange={(index) => {
+            if (selectedIds.includes(media.id)) {
+              setCampaignMediaPriceOptionIndex(media.id, index);
+              return;
+            }
+            setAxisDraftPriceOptionIndex((prev) => ({
+              ...prev,
+              [media.id]: index,
+            }));
+          }}
+          compact
+        />
+      );
+    },
+    [
+      isKo,
+      effectiveAxisQuantities,
+      effectiveAxisPriceOptionIndex,
+      selectedIds,
+      setCampaignMediaQuantity,
+      setCampaignMediaPriceOptionIndex,
+    ],
+  );
+
+  const handleAxisCampaignToggle = useCallback(
+    (media: MediaItem, axisSource: string) => {
+      setCampaignMediaIds((prev) => {
+        const adding = !prev.includes(media.id);
+        if (adding) {
+          trackEvent("add_to_plan", {
+            media_id: media.id,
+            source: axisSource,
+          });
+          const units =
+            effectiveAxisQuantities[media.id] ??
+            resolveMediaQuantity(media, campaignMediaQuantities[media.id]);
+          const priceIdx = effectiveAxisPriceOptionIndex[media.id];
+          queueMicrotask(() => {
+            setCampaignMediaQuantity(media.id, units);
+            if (priceIdx != null) {
+              setCampaignMediaPriceOptionIndex(media.id, priceIdx);
+            }
+          });
+        }
+        return adding
+          ? [...prev, media.id]
+          : prev.filter((x) => x !== media.id);
+      });
+    },
+    [
+      setCampaignMediaIds,
+      effectiveAxisQuantities,
+      effectiveAxisPriceOptionIndex,
+      campaignMediaQuantities,
+      setCampaignMediaQuantity,
+      setCampaignMediaPriceOptionIndex,
+    ],
+  );
 
   const recommendCtx = useMemo<RecommendationContext>(
     () => ({
@@ -520,179 +583,27 @@ export function PlannerRecommendationPanel({
             {t("recommendEmpty")}
           </p>
         ) : (
-          <ul className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {recommendations.map(({ media, reasons }) => {
-              const selected = isSelected(media.id);
-              const matchScore = matchScores[media.id];
-              const oneLine = oneLines[media.id];
-              const reasoning = reasonings[media.id];
-              const rationaleTexts = rationaleLinesForLocale(
-                rationaleByMediaId[media.id] ?? [],
-                locale,
-              );
-              const displayName = isKo ? media.name : media.nameEn || media.name;
-              const regionLine =
-                mediaPlannerRegionDisplayLabel(
-                  media,
-                  locale,
-                  t("regionNationalShort"),
-                ) || regionLabel(media.region ?? "");
-              const locationLine = (isKo
-                ? media.location
-                : media.locationEn || media.location
-              ).slice(0, 28);
-
-              const units = selected
-                ? plannerUnitsForMedia(media, campaignMediaQuantities)
-                : undefined;
-              const monthlyImp =
-                units != null
-                  ? resolveImpressionsForUnits(media, units)
-                  : estimatedMonthlyImpressions(media);
-              const visPct = Math.round(
-                normalizeVisibilityScore(media.visibilityScore) * 100,
-              );
-              const priceWon = selected
-                ? plannerMonthlyPriceWonForMedia(
-                    media,
-                    campaignMediaQuantities,
-                    campaignMediaPriceOptionIndex,
-                  )
-                : null;
-              const cpm =
-                priceWon != null && priceWon > 0 && monthlyImp > 0
-                  ? Math.round(priceWon / (monthlyImp / 1000))
-                  : estimatedCpmWon(media);
-              const metricItems: string[] = [];
-              if (monthlyImp > 0) {
-                metricItems.push(
-                  isKo
-                    ? `월 ${Math.round(monthlyImp / 1000).toLocaleString()}K 노출`
-                    : `${Math.round(monthlyImp / 1000).toLocaleString()}K imp/mo`,
-                );
-              }
-              if (visPct > 0) {
-                metricItems.push(
-                  isKo ? `가시성 ${visPct}/100` : `Vis ${visPct}/100`,
-                );
-              }
-              if (cpm != null && cpm > 0) {
-                metricItems.push(
-                  `CPM ${formatCpmKrw(Math.round(cpm), isKo ? "ko" : "en")}`,
-                );
-              }
-
-              return (
-                <li
-                  key={media.id}
-                  className={cn(
-                    "flex min-w-0 gap-2.5 rounded-xl border p-2.5 transition-colors sm:gap-3",
-                    selected
-                      ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
-                      : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white hover:border-violet-300/40",
-                  )}
-                >
-                  <PlannerMediaThumb media={media} alt={displayName} size="card" />
-                  <div className="flex min-w-0 flex-1 flex-col gap-1">
-                    <div className="min-w-0">
-                      <p className="line-clamp-2 text-sm font-semibold leading-snug text-foreground">
-                        {displayName}
-                      </p>
-                      {typeof matchScore === "number" ? (
-                        <p className="mt-0.5 text-[11px] font-semibold text-violet-600 dark:text-violet-300">
-                          {isKo
-                            ? `매칭도 ${matchScore}점`
-                            : `Match ${matchScore}/100`}
-                        </p>
-                      ) : null}
-                      <p className="mt-0.5 line-clamp-1 text-[10px] text-muted-foreground">
-                        {regionLine}
-                        {locationLine ? ` · ${locationLine}` : ""}
-                      </p>
-                    </div>
-                    {rationaleTexts.length > 0 ? (
-                      <div className="space-y-0.5">
-                        {rationaleTexts.slice(0, 2).map((line) => (
-                          <p
-                            key={line}
-                            className="line-clamp-2 text-[11px] leading-relaxed text-foreground/90"
-                          >
-                            {line}
-                          </p>
-                        ))}
-                      </div>
-                    ) : reasoning ? (
-                      <p className="line-clamp-2 text-[11px] leading-relaxed text-foreground/90">
-                        {reasoning}
-                      </p>
-                    ) : oneLine ? (
-                      <p className="line-clamp-1 text-[11px] text-muted-foreground">
-                        {oneLine}
-                      </p>
-                    ) : null}
-                    {reasoning && rationaleTexts.length > 0 ? (
-                      <p className="line-clamp-1 text-[10px] italic text-muted-foreground">
-                        {reasoning}
-                      </p>
-                    ) : null}
-                    {metricItems.length > 0 ? (
-                      <div className="flex flex-wrap gap-x-2 gap-y-0.5 text-[10px] font-medium tabular-nums text-muted-foreground">
-                        {metricItems.map((it) => (
-                          <span key={it} className="whitespace-nowrap">
-                            {it}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    {reasons.length > 0 ? (
-                      <div className="flex flex-wrap gap-1">
-                        {reasons.slice(0, 2).map((r) => (
-                          <span
-                            key={r.key}
-                            className={cn(
-                              "max-w-full truncate border px-1.5 py-0.5 text-[10px] font-medium",
-                              REASON_COLORS[r.key],
-                            )}
-                          >
-                            {t(`recommendReason.${r.key}`)}
-                          </span>
-                        ))}
-                      </div>
-                    ) : null}
-                    <div className="mt-auto flex items-center gap-2 pt-0.5">
-                      <button
-                        type="button"
-                        onClick={() => handleToggle(media.id)}
-                        title={t("recommendAddCampaignHint")}
-                        className={cn(
-                          "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg px-3 text-xs font-semibold",
-                          selected
-                            ? cn(plannerNeon.selectChip, plannerNeon.selectChipActive)
-                            : plannerNeon.ctaSm,
-                        )}
-                      >
-                        {selected ? (
-                          <>
-                            <Check className="h-3.5 w-3.5" aria-hidden />
-                            {t("recommendAdded")}
-                          </>
-                        ) : (
-                          <>
-                            <Plus className="h-3.5 w-3.5" aria-hidden />
-                            {t("recommendAdd")}
-                          </>
-                        )}
-                      </button>
-                      {selected ? (
-                        <span className="text-[10px] text-muted-foreground">
-                          {t("recommendTabQtyHint")}
-                        </span>
-                      ) : null}
-                    </div>
-                  </div>
-                </li>
-              );
-            })}
+          <ul className={RECOMMEND_MEDIA_GRID_CLASS}>
+            {recommendations.map((rec, index) => (
+              <RecommendScoredMediaCard
+                key={rec.media.id}
+                scored={plannerScoredToAiScored(
+                  rec,
+                  matchScores,
+                  rationaleByMediaId,
+                )}
+                rank={index + 1}
+                isKo={isKo}
+                locale={locale}
+                plannerMode
+                isInPlan={isSelected(rec.media.id)}
+                planAddedFrom={planCartAddedFrom}
+                quantityControl={renderPlannerAxisQuantityControl(rec.media)}
+                onTogglePlan={() =>
+                  handleAxisCampaignToggle(rec.media, "recommend")
+                }
+              />
+            ))}
           </ul>
         )}
         {!loading && catalog.length > 0 ? (
@@ -700,9 +611,12 @@ export function PlannerRecommendationPanel({
             catalog={catalog}
             ctx={recommendCtx}
             isKo={isKo}
+            locale={locale}
             seed={refreshTick}
             selectedIds={selectedIds}
             setCampaignMediaIds={setCampaignMediaIds}
+            renderQuantityControl={renderPlannerAxisQuantityControl}
+            onCampaignToggleMedia={handleAxisCampaignToggle}
           />
         ) : null}
       </div>

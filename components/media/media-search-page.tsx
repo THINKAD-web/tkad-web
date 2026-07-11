@@ -59,9 +59,13 @@ import {
   type MediaBrowseFilterQueryState,
 } from "@/lib/media-browse-query-string";
 import {
+  MEDIA_BROWSE_CARD_GRID_CLASS,
+} from "@/lib/media-browse-grid";
+import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
+import {
+  DiscoveryMapTileSkeleton,
   DiscoveryMediaFeedCardSkeleton,
 } from "@/components/discovery/discovery-route-skeletons";
-import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
 import {
   mediaItemHasMapCoordinates,
   resolveMediaIdFromMapPinId,
@@ -740,16 +744,36 @@ function MediaSearchPageInner({
     }
 
     if (viewMode === "card") {
-      const highlights = feedHighlightChips(item);
-      const locationLine =
-        item.location &&
-        item.location !== item.region &&
-        !item.location.includes(item.region ?? "")
-          ? item.location
-          : null;
       return (
+        <div key={item.id} className="h-full min-h-0">
+          <DiscoveryMediaCard
+            variant="compact"
+            compactLayout="map-tile"
+            item={item}
+            href={href}
+            priceLabel={priceLabel}
+            isKo={isKo}
+            inCompare={isInCompare(item.id)}
+            onToggleCompare={() => toggleCompare(item)}
+            plannerMode={plannerMode}
+            isInPlan={inPlan}
+            onTogglePlan={plannerMode ? togglePlan : undefined}
+          />
+        </div>
+      );
+    }
+
+    const highlights = feedHighlightChips(item);
+    const locationLine =
+      item.location &&
+      item.location !== item.region &&
+      !item.location.includes(item.region ?? "")
+        ? item.location
+        : null;
+
+    return (
+      <div key={item.id} className="min-w-0">
         <DiscoveryMediaCard
-          key={item.id}
           variant="feed"
           item={item}
           href={href}
@@ -764,33 +788,7 @@ function MediaSearchPageInner({
           onTogglePlan={plannerMode ? togglePlan : undefined}
           showPlanButton={!plannerMode}
         />
-      );
-    }
-
-    const highlights = feedHighlightChips(item);
-    const locationLine =
-      item.location &&
-      item.location !== item.region &&
-      !item.location.includes(item.region ?? "")
-        ? item.location
-        : null;
-
-    return (
-      <DiscoveryMediaCard
-        key={item.id}
-        variant="feed"
-        item={item}
-        href={href}
-        highlights={highlights}
-        locationLine={locationLine}
-        isKo={isKo}
-        inCompare={isInCompare(item.id)}
-        onToggleCompare={() => toggleCompare(item)}
-        plannerMode={plannerMode}
-        isInPlan={inPlan}
-        onTogglePlan={plannerMode ? togglePlan : undefined}
-        showPlanButton={!plannerMode}
-      />
+      </div>
     );
   };
 
@@ -981,12 +979,15 @@ function MediaSearchPageInner({
       <div
         className={cn(
           "min-w-0 overflow-x-clip",
-          viewMode === "feed" && "space-y-3",
-          viewMode === "card" &&
+          viewMode === "feed" &&
             cn(
               "grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4",
               plannerMode && "gap-2 sm:gap-3",
             ),
+          viewMode === "card" &&
+            (plannerMode
+              ? "grid auto-rows-fr items-stretch [&>*]:min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
+              : MEDIA_BROWSE_CARD_GRID_CLASS),
           viewMode === "compact" &&
             cn(
               "grid [&>*]:min-w-0",
@@ -1012,8 +1013,10 @@ function MediaSearchPageInner({
                     : "flex gap-3",
               )}
             >
-              {viewMode === "feed" || viewMode === "card" ? (
+              {viewMode === "feed" ? (
                 <DiscoveryMediaFeedCardSkeleton />
+              ) : viewMode === "card" ? (
+                <DiscoveryMapTileSkeleton />
               ) : viewMode === "compact" ? (
                 <>
                   <div className="h-11 w-14 shrink-0 rounded-lg bg-gray-200 dark:bg-white/10" />

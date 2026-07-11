@@ -80,7 +80,7 @@ export function PlannerProLockedSkeleton({
       )}
       aria-hidden
     >
-      <div className="pointer-events-none select-none p-5 opacity-55 blur-[2px] sm:p-6 dark:opacity-45">
+      <div className="pointer-events-none select-none p-5 opacity-55 blur-[2px] sm:p-6 dark:opacity-60">
         <div className="space-y-3">
           <div className="h-2.5 w-24 rounded-full bg-gray-300 dark:bg-white/25" />
           <div className="h-6 w-3/5 max-w-xs rounded-lg bg-gray-300/90 dark:bg-white/20" />

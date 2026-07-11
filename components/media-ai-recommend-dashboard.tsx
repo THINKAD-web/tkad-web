@@ -14,6 +14,7 @@ import {
   Star,
   Trophy,
   Lightbulb,
+  type LucideIcon,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { AiRecommendInput, ScoredMedia } from "@/lib/ai-media-recommend";
@@ -24,8 +25,8 @@ import MediaAiRecommendMap from "@/components/media-ai-recommend-map";
 import MediaAiRecommendChart from "@/components/media-ai-recommend-chart";
 import {
   RECOMMEND_MEDIA_GRID_CLASS,
+  RECOMMEND_TOP3_GRID_CLASS,
   RecommendScoredMediaCard,
-  RecommendTop3PickRow,
 } from "@/components/media-ai-recommend-scored-card";
 import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { RecommendationAxisTabs } from "@/components/recommendation/recommendation-axis-tabs";
@@ -37,6 +38,54 @@ import type {
 } from "@/lib/planner/planner-media-quantity";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import { formatRecommendQuestionLine } from "@/lib/recommend/format-recommend-question";
+
+type DashboardPanelAction =
+  | {
+      kind: "button";
+      key: string;
+      label: string;
+      icon: LucideIcon;
+      onClick?: () => void;
+      disabled?: boolean;
+    }
+  | {
+      kind: "link";
+      key: string;
+      label: string;
+      icon: LucideIcon;
+      href: string;
+    };
+
+function RecommendDashboardActionCell({
+  action,
+}: {
+  action: DashboardPanelAction;
+}) {
+  const Icon = action.icon;
+  const className =
+    "flex h-full min-h-[2.75rem] w-full items-center justify-center gap-2 px-3 py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
+
+  if (action.kind === "link") {
+    return (
+      <Link href={action.href} className={className}>
+        <Icon className="h-4 w-4 shrink-0" aria-hidden />
+        <span className="line-clamp-2 leading-snug">{action.label}</span>
+      </Link>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={action.onClick}
+      disabled={action.disabled}
+      className={cn(className, action.disabled && "cursor-not-allowed opacity-50")}
+    >
+      <Icon className="h-4 w-4 shrink-0" aria-hidden />
+      <span className="line-clamp-2 leading-snug">{action.label}</span>
+    </button>
+  );
+}
 
 type Props = {
   locale: string;
@@ -137,6 +186,73 @@ export default function MediaAiRecommendDashboard({
     }
     return meta;
   }, [top3]);
+
+  const toolActions = useMemo((): DashboardPanelAction[] => {
+    const actions: DashboardPanelAction[] = [
+      {
+        kind: "button",
+        key: "consult",
+        label:
+          quoteBusy
+            ? isKo
+              ? "이동 중…"
+              : "Opening…"
+            : isKo
+              ? "전문가 상담"
+              : "Expert consult",
+        icon: Calculator,
+        onClick: onRequestQuote,
+        disabled: !onRequestQuote || quoteBusy,
+      },
+      {
+        kind: "link",
+        key: "compare",
+        label: isKo ? "비교함" : "Compare",
+        icon: GitCompare,
+        href: "/compare",
+      },
+      {
+        kind: "link",
+        key: "planner",
+        label: isKo ? "플래너 설계" : "Planner",
+        icon: Sparkles,
+        href: "/planner",
+      },
+    ];
+    if (onOpenMediaBrowse) {
+      actions.push({
+        kind: "button",
+        key: "browse",
+        label: isKo ? "매체 더 찾기" : "Find media",
+        icon: MapPin,
+        onClick: onOpenMediaBrowse,
+      });
+    }
+    actions.push(
+      {
+        kind: "button",
+        key: "full-list",
+        label: isKo ? "전체 리스트" : "Full list",
+        icon: LayoutList,
+        onClick: onViewFullList,
+      },
+      {
+        kind: "button",
+        key: "remix",
+        label: isKo ? "다른 후보" : "Other picks",
+        icon: Star,
+        onClick: onRemix,
+      },
+    );
+    return actions;
+  }, [
+    isKo,
+    onOpenMediaBrowse,
+    onRemix,
+    onRequestQuote,
+    onViewFullList,
+    quoteBusy,
+  ]);
 
   return (
     <div className="min-w-0 overflow-x-auto border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
@@ -295,7 +411,7 @@ export default function MediaAiRecommendDashboard({
                   : "Left to right: the three strongest matches from this run."}
               </p>
             </div>
-            <ul className={RECOMMEND_MEDIA_GRID_CLASS}>
+            <ul className={RECOMMEND_TOP3_GRID_CLASS}>
               {top3.map((s, i) => (
                 <RecommendScoredMediaCard
                   key={s.item.id}
@@ -303,7 +419,6 @@ export default function MediaAiRecommendDashboard({
                   rank={i + 1}
                   isKo={isKo}
                   locale={locale}
-                  rationaleTwoLine
                   quantityControl={renderQuantityControl?.(s.item)}
                 />
               ))}
@@ -447,104 +562,61 @@ export default function MediaAiRecommendDashboard({
           matchedPool={poolForReport}
         />
 
-        {/* 하단 액션 — 견적·플랜·비교·탐색 */}
-        <div className="flex flex-col gap-4 border-t-2 border-border pt-6">
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-            <BtnBlock
-              variant="accent"
-              size="lg"
-              className="w-full"
-              onClick={onCreateQuote}
-              disabled={!onCreateQuote || creatingQuote}
-            >
-              <FileText className="h-5 w-5" />
-              {creatingQuote
-                ? isKo
-                  ? "견적서 생성 중…"
-                  : "Creating quote…"
-                : isKo
-                  ? "견적서 만들기"
-                  : "Create quote"}
-            </BtnBlock>
-            <PlanCartBulkAddButton
-              items={planBulkItems}
-              label={isKo ? "선택 매체 플랜에 추가" : "Add selected to plan"}
-              size="lg"
-              className="w-full"
-            />
-          </div>
-
-          <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-            <BtnBlock
-              variant="secondary"
-              size="md"
-              className="w-full"
-              onClick={onRequestQuote}
-              disabled={!onRequestQuote || quoteBusy}
-            >
-              <Calculator className="h-4 w-4" />
-              {quoteBusy
-                ? isKo
-                  ? "이동 중…"
-                  : "Opening…"
-                : isKo
-                  ? "전문가 상담"
-                  : "Expert consult"}
-            </BtnBlock>
-            <Link
-              href="/compare"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
-            >
-              <GitCompare className="h-4 w-4" />
-              {isKo ? "비교함" : "Compare"}
-            </Link>
-            <Link
-              href="/planner"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-2xl border-2 border-border bg-card px-5 py-2.5 text-sm font-bold text-foreground transition-colors hover:bg-muted"
-            >
-              {isKo ? "플래너 설계" : "Planner"}
-            </Link>
-          </div>
-
-          <div className="flex flex-wrap gap-2">
-            {onOpenMediaBrowse ? (
+        {/* 하단 액션 — 견적·플랜·탐색 */}
+        <section
+          className="border-t-2 border-border pt-6"
+          aria-label={isKo ? "추천 결과 다음 단계" : "Recommended next steps"}
+        >
+          <div className="space-y-4">
+            <div className="grid gap-2 sm:grid-cols-2">
               <BtnBlock
-                variant="secondary"
-                size="sm"
-                className="w-full sm:w-auto"
-                onClick={onOpenMediaBrowse}
+                variant="accent"
+                size="lg"
+                className="w-full"
+                onClick={onCreateQuote}
+                disabled={!onCreateQuote || creatingQuote}
               >
-                <MapPin className="h-4 w-4" />
-                {isKo ? "매체 더 찾기" : "Find media"}
+                <FileText className="h-5 w-5" aria-hidden />
+                {creatingQuote
+                  ? isKo
+                    ? "견적서 생성 중…"
+                    : "Creating quote…"
+                  : isKo
+                    ? "견적서 만들기"
+                    : "Create quote"}
               </BtnBlock>
-            ) : null}
-            <BtnBlock
-              variant="secondary"
-              size="sm"
-              onClick={onViewFullList}
-              className="w-full sm:w-auto"
-            >
-              <LayoutList className="h-4 w-4" />
-              {isKo ? "전체 리스트" : "Full list"}
-            </BtnBlock>
-            <BtnBlock
-              variant="secondary"
-              size="sm"
-              onClick={onRemix}
-              className="w-full sm:w-auto"
-            >
-              {isKo ? "다른 후보" : "Other picks"}
-            </BtnBlock>
-          </div>
+              <PlanCartBulkAddButton
+                items={planBulkItems}
+                label={isKo ? "선택 매체 플랜에 추가" : "Add selected to plan"}
+                size="lg"
+                className="w-full"
+              />
+            </div>
 
-          <button
-            type="button"
-            onClick={onBackToForm}
-            className="self-start text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
-          >
-            {isKo ? "조건 수정" : "Edit criteria"}
-          </button>
-        </div>
+            <nav
+              aria-label={isKo ? "추천 도구" : "Recommendation tools"}
+              className="overflow-hidden rounded-2xl border border-border/80 bg-muted/30"
+            >
+              <ul className="grid grid-cols-2 divide-x divide-y divide-border/70 sm:grid-cols-3 [&>li]:min-w-0">
+                {toolActions.map((action) => (
+                  <li key={action.key}>
+                    <RecommendDashboardActionCell action={action} />
+                  </li>
+                ))}
+              </ul>
+            </nav>
+
+            <div className="flex justify-center border-t border-border/60 pt-4 sm:justify-start">
+              <button
+                type="button"
+                onClick={onBackToForm}
+                className="text-sm font-medium text-muted-foreground underline-offset-4 transition-colors hover:text-foreground hover:underline"
+              >
+                {isKo ? "조건 수정" : "Edit criteria"}
+              </button>
+            </div>
+          </div>
+        </section>
       </div>
     </div>
   );
