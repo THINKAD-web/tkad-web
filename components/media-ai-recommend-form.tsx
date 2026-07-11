@@ -35,10 +35,8 @@ import {
   suggestGyeonggiZones,
   type PlannerGyeonggiZoneKey,
 } from "@/lib/planner/gyeonggi-zones";
-import type {
-  PlannerCampaignGoal,
-  PlannerIndustryKey,
-} from "@/lib/planner/types";
+import type { PlannerCampaignGoal } from "@/lib/planner/types";
+import { recommendIndustryToPlannerIndustryKey as recommendIndustryToPlanner } from "@/lib/recommend/recommend-report-adapter";
 
 export type RegionCheckboxCode =
   | "seoul"
@@ -62,22 +60,6 @@ function recommendGoalToPlanner(goal: CampaignGoal): PlannerCampaignGoal {
     case "consideration":
     default:
       return "sales";
-  }
-}
-
-function recommendIndustryToPlanner(industry: Industry): PlannerIndustryKey {
-  switch (industry) {
-    case "beauty":
-      return "indFb";
-    case "retail":
-    case "fmcg":
-      return "indRetail";
-    case "fintech":
-      return "indFinance";
-    case "entertainment":
-      return "indEnt";
-    default:
-      return "indOther";
   }
 }
 

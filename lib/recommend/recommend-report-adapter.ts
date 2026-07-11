@@ -44,7 +44,7 @@ export function recommendIndustryToPlannerIndustryKey(
 ): PlannerIndustryKey {
   switch (industry) {
     case "beauty":
-      return "indFb";
+      return "indRetail";
     case "retail":
     case "fmcg":
       return "indRetail";
