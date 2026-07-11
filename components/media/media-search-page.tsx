@@ -261,7 +261,7 @@ function MediaSearchPageInner({
     if (plannerMode) return "card";
     const urlView = searchParams.get("view");
     if (urlView === "reels") return "reels";
-    return "feed";
+    return "card";
   });
   const networkBrowse = useMemo(
     () =>
@@ -741,13 +741,21 @@ function MediaSearchPageInner({
     }
 
     if (viewMode === "card") {
+      const highlights = feedHighlightChips(item);
+      const locationLine =
+        item.location &&
+        item.location !== item.region &&
+        !item.location.includes(item.region ?? "")
+          ? item.location
+          : null;
       return (
         <DiscoveryMediaCard
           key={item.id}
-          variant="compact"
-          compactLayout="map-tile"
+          variant="feed"
           item={item}
           href={href}
+          highlights={highlights}
+          locationLine={locationLine}
           priceLabel={priceLabel}
           isKo={isKo}
           inCompare={isInCompare(item.id)}
@@ -755,6 +763,7 @@ function MediaSearchPageInner({
           plannerMode={plannerMode}
           isInPlan={inPlan}
           onTogglePlan={plannerMode ? togglePlan : undefined}
+          showPlanButton={!plannerMode}
         />
       );
     }
@@ -976,7 +985,7 @@ function MediaSearchPageInner({
           viewMode === "feed" && "space-y-3",
           viewMode === "card" &&
             cn(
-              "grid grid-cols-2 gap-3 sm:gap-3 md:grid-cols-3 md:gap-4 lg:grid-cols-4",
+              "grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4",
               plannerMode && "gap-2 sm:gap-3",
             ),
           viewMode === "compact" &&
@@ -1004,10 +1013,8 @@ function MediaSearchPageInner({
                     : "flex gap-3",
               )}
             >
-              {viewMode === "feed" ? (
+              {viewMode === "feed" || viewMode === "card" ? (
                 <DiscoveryMediaFeedCardSkeleton />
-              ) : viewMode === "card" ? (
-                <DiscoveryMapTileSkeleton />
               ) : viewMode === "compact" ? (
                 <>
                   <div className="h-11 w-14 shrink-0 rounded-lg bg-gray-200 dark:bg-white/10" />
