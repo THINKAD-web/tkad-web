@@ -78,6 +78,8 @@ export async function GET(
       budgetMin: quote.budgetMin,
       budgetMax: quote.budgetMax,
       createdAt: quote.createdAt,
+      revisionMessage: quote.revisionMessage,
+      revisionRequestedAt: quote.revisionRequestedAt?.toISOString() ?? null,
       mediaSelections: parseQuoteMediaSelections(quote.mediaSelections) ?? null,
       medias,
     });

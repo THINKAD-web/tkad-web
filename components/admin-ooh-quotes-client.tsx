@@ -70,6 +70,8 @@ type OohRow = {
   contractSigned: boolean;
   sourceAdminQuoteId: string | null;
   sourceAdminQuoteNumber: string | null;
+  revisionMessage: string | null;
+  revisionRequestedAt: string | null;
 };
 
 export default function AdminOohQuotesClient() {
@@ -255,6 +257,26 @@ export default function AdminOohQuotesClient() {
   };
 
   const touchBtn = adminMobileTouchBtnClass;
+
+  const revisionBadge = (row: OohRow) =>
+    row.revisionMessage ? (
+      <span className="rounded-full bg-amber-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-amber-900 dark:bg-amber-500/20 dark:text-amber-100">
+        {t("revisionRequestBadge")}
+      </span>
+    ) : null;
+
+  const revisionMessageBlock = (row: OohRow) =>
+    row.revisionMessage ? (
+      <div className="mt-3 rounded-lg border border-amber-200/80 bg-amber-50/80 p-3 text-sm dark:border-amber-500/30 dark:bg-amber-500/10">
+        <p className="text-[10px] font-semibold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+          {t("revisionRequestMessageLabel")}
+          {row.revisionRequestedAt
+            ? ` · ${row.revisionRequestedAt.slice(0, 16).replace("T", " ")}`
+            : ""}
+        </p>
+        <p className="mt-1 whitespace-pre-wrap text-foreground">{row.revisionMessage}</p>
+      </div>
+    ) : null;
 
   const renderMobilePrimaryActions = (row: OohRow) => {
     const actions: ReactNode[] = [];
@@ -549,9 +571,12 @@ export default function AdminOohQuotesClient() {
                           <span className="text-muted-foreground">{row.period}</span>
                         </div>
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground">
-                            {statusLabel(row.status)}
-                          </span>
+                          <div className="flex flex-wrap items-center gap-2">
+                            <span className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium uppercase tracking-wide text-foreground">
+                              {statusLabel(row.status)}
+                            </span>
+                            {revisionBadge(row)}
+                          </div>
                           <span className="text-[10px] text-muted-foreground">
                             {row.updatedAt.slice(0, 10)}
                           </span>
@@ -594,6 +619,7 @@ export default function AdminOohQuotesClient() {
                       ) : null}
                       {expanded ? (
                         <div className="mt-3 rounded-lg border border-border/60 bg-muted/20 p-3 dark:bg-card/10">
+                          {revisionMessageBlock(row)}
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}
@@ -674,7 +700,12 @@ export default function AdminOohQuotesClient() {
                         {formatOohQuoteManwonShort(row.totalAmount)}
                       </td>
                       <td className="px-3 py-2">{row.period}</td>
-                      <td className="px-3 py-2 text-xs">{statusLabel(row.status)}</td>
+                      <td className="px-3 py-2 text-xs">
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <span>{statusLabel(row.status)}</span>
+                          {revisionBadge(row)}
+                        </div>
+                      </td>
                       <td className="px-3 py-2 text-xs text-muted-foreground">
                         {row.updatedAt.slice(0, 10)}
                       </td>
@@ -819,6 +850,7 @@ export default function AdminOohQuotesClient() {
                     {expanded ? (
                       <tr key={`${row.id}-detail`} className={adminQuoteTableExpandedRowClass}>
                         <td colSpan={7} className="px-4 py-3">
+                          {revisionMessageBlock(row)}
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
                             detail={detail}

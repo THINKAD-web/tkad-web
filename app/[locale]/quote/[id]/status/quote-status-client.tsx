@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import { BtnBlock } from "@/components/brutalist";
 import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
+import { QuoteRevisionRequestPanel } from "@/components/quote/quote-revision-request-panel";
 import { QuoteStatusTimeline } from "@/components/quote/quote-status-timeline";
 import { Loader2 } from "lucide-react";
 
@@ -15,6 +16,8 @@ type QuotePublic = {
   invoiceDocUrl: string | null;
   contractSigned: boolean;
   canSignContract: boolean;
+  revisionMessage: string | null;
+  revisionRequestedAt: string | null;
 };
 
 export default function QuoteStatusClient({
@@ -149,6 +152,16 @@ export default function QuoteStatusClient({
           />
         </div>
       </div>
+
+      {quote.status === "sent" ? (
+        <QuoteRevisionRequestPanel
+          quoteId={quote.id}
+          status={quote.status}
+          revisionMessage={quote.revisionMessage}
+          revisionRequestedAt={quote.revisionRequestedAt}
+          onSubmitted={() => void load()}
+        />
+      ) : null}
 
       {showWithdrawProceed ? (
         <div className="border-2 border-amber-400/40 bg-amber-50/80 p-5 dark:border-amber-400/25 dark:bg-amber-500/10">

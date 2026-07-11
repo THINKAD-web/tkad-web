@@ -25,6 +25,7 @@ import { QuoteMediaLineCard } from "@/components/document/quote-media-line-card"
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { QuoteStatusBadge } from "@/components/my/quote-status-badge";
 import { QuoteContractCta } from "@/components/quote/quote-contract-cta";
+import { QuoteRevisionRequestPanel } from "@/components/quote/quote-revision-request-panel";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
@@ -58,6 +59,8 @@ type Quote = {
   budgetMin: number | null;
   budgetMax: number | null;
   createdAt: string;
+  revisionMessage?: string | null;
+  revisionRequestedAt?: string | null;
   medias: QuoteDetailPreviewMedia[];
   mediaSelections?: QuoteMediaSelectionSnapshot[] | null;
 };
@@ -100,6 +103,8 @@ export default function QuotePreviewView({
   const [downloading, setDownloading] = useState<"pdf" | "pptx" | null>(null);
   const [proceeding, setProceeding] = useState(false);
   const [proceedConfirmOpen, setProceedConfirmOpen] = useState(false);
+  const [revisionRequestedAt, setRevisionRequestedAt] = useState<string | null>(null);
+  const [revisionMessage, setRevisionMessage] = useState<string | null>(null);
   const captureRef = useRef<HTMLDivElement | null>(null);
   const toast = useAppToast();
 
@@ -179,7 +184,10 @@ export default function QuotePreviewView({
           | { ok?: boolean; data?: Quote; error?: { code?: string; message?: string } }
           | null;
         if (res.ok && d?.ok) {
-          setQuote(d.data ?? null);
+          const data = d.data ?? null;
+          setQuote(data);
+          setRevisionMessage(data?.revisionMessage ?? null);
+          setRevisionRequestedAt(data?.revisionRequestedAt ?? null);
         } else {
           const code = d?.error?.code ?? `HTTP_${res.status}`;
           const message = d?.error?.message ?? res.statusText ?? "조회 실패";
@@ -355,6 +363,38 @@ export default function QuotePreviewView({
                 <p className="mt-1 text-sm font-medium text-violet-950 dark:text-violet-50/90">
                   {t("sentBannerBody")}
                 </p>
+              </div>
+            ) : null}
+
+            {showSentBanner ? (
+              <div className="mb-6">
+                <QuoteRevisionRequestPanel
+                  embedded
+                  quoteId={quote.id}
+                  status={quote.status}
+                  revisionMessage={revisionMessage}
+                  revisionRequestedAt={revisionRequestedAt}
+                  onSubmitted={async () => {
+                    try {
+                      const res = await fetch(`/api/quote/${quoteId}/detail`, {
+                        cache: "no-store",
+                      });
+                      const d = (await res.json()) as {
+                        ok?: boolean;
+                        data?: {
+                          revisionMessage?: string | null;
+                          revisionRequestedAt?: string | null;
+                        };
+                      };
+                      if (res.ok && d.ok && d.data) {
+                        setRevisionMessage(d.data.revisionMessage ?? null);
+                        setRevisionRequestedAt(d.data.revisionRequestedAt ?? null);
+                      }
+                    } catch {
+                      setRevisionRequestedAt(new Date().toISOString());
+                    }
+                  }}
+                />
               </div>
             ) : null}
 

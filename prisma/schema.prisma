@@ -991,6 +991,10 @@ model OoHQuote {
 
   adminNote      String?   @map("admin_note")
   cancelReason   String?   @map("cancel_reason")
+  /// 고객 수정 요청 본문 (sent 상태에서만 제출; P2 처리 시 null 클리어)
+  revisionMessage     String?   @map("revision_message") @db.Text
+  revisionRequestedAt DateTime? @map("revision_requested_at")
+
   pdfTemplate    String    @default("default") @map("pdf_template")
   locale         String    @default("ko")
   quotePdfSentAt DateTime? @map("quote_pdf_sent_at")

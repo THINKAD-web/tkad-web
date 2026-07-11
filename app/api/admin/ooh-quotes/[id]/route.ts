@@ -61,6 +61,8 @@ export async function GET(request: NextRequest, { params }: Params) {
       validUntil: row.validUntil?.toISOString() ?? null,
       startDate: row.startDate?.toISOString() ?? null,
       endDate: row.endDate?.toISOString() ?? null,
+      revisionMessage: row.revisionMessage,
+      revisionRequestedAt: row.revisionRequestedAt?.toISOString() ?? null,
       updatedAt: row.updatedAt.toISOString(),
       contract: contract
         ? {

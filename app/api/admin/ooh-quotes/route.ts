@@ -41,6 +41,8 @@ export async function GET(request: NextRequest) {
       quotePdfSentAt: r.quotePdfSentAt?.toISOString() ?? null,
       paymentAmount: r.paymentAmount,
       cancelReason: r.cancelReason,
+      revisionMessage: r.revisionMessage,
+      revisionRequestedAt: r.revisionRequestedAt?.toISOString() ?? null,
       campaignId: r.campaignId,
       updatedAt: r.updatedAt.toISOString(),
       sourceAdminQuoteId: r.sourceAdminQuoteId,

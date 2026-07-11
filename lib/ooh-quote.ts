@@ -72,6 +72,8 @@ export type OoHQuotePublicJson = {
   contractStatus: OohContractStatus | null;
   contractSigned: boolean;
   canSignContract: boolean;
+  revisionMessage: string | null;
+  revisionRequestedAt: string | null;
 };
 
 export function serializeOoHQuotePublic(
@@ -107,6 +109,8 @@ export function serializeOoHQuotePublic(
     contractStatus: contract?.status ?? null,
     contractSigned,
     canSignContract,
+    revisionMessage: row.revisionMessage,
+    revisionRequestedAt: row.revisionRequestedAt?.toISOString() ?? null,
   };
 }
 
@@ -117,6 +121,11 @@ export function canProceedBooking(status: OoHQuoteStatus): boolean {
 /** 고객 진행 요청 철회 — 관리자 부킹 확정 전에만 허용 */
 export function canWithdrawProceed(status: OoHQuoteStatus): boolean {
   return status === OoHQuoteStatus.booking_requested;
+}
+
+/** 고객 견적 수정 요청 — 발송(sent) 상태에서만 허용 */
+export function canRequestRevision(status: OoHQuoteStatus): boolean {
+  return status === OoHQuoteStatus.sent;
 }
 
 export function canAdminBookingConfirm(status: OoHQuoteStatus): boolean {

@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { test } from "node:test";
 import { OoHQuoteStatus } from "@prisma/client";
-import { canProceedBooking, canWithdrawProceed } from "@/lib/ooh-quote";
+import { canProceedBooking, canRequestRevision, canWithdrawProceed } from "@/lib/ooh-quote";
 import { oohQuoteStatusToStage } from "@/lib/crm-pipeline-sync";
 
 test("canWithdrawProceed: only booking_requested", () => {
@@ -9,6 +9,13 @@ test("canWithdrawProceed: only booking_requested", () => {
   assert.equal(canWithdrawProceed(OoHQuoteStatus.sent), false);
   assert.equal(canWithdrawProceed(OoHQuoteStatus.booking_confirmed), false);
   assert.equal(canWithdrawProceed(OoHQuoteStatus.booking_pending), false);
+});
+
+test("canRequestRevision: only sent", () => {
+  assert.equal(canRequestRevision(OoHQuoteStatus.sent), true);
+  assert.equal(canRequestRevision(OoHQuoteStatus.booking_requested), false);
+  assert.equal(canRequestRevision(OoHQuoteStatus.booking_confirmed), false);
+  assert.equal(canRequestRevision(OoHQuoteStatus.draft), false);
 });
 
 test("canProceedBooking and canWithdrawProceed are mutually exclusive", () => {
