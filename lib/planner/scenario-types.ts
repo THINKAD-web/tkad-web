@@ -1,6 +1,7 @@
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
+import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
 import type {
   PlannerAgeKey,
   PlannerCampaignGoal,
@@ -66,6 +67,7 @@ export type PlannerScenarioApplyPatch = {
   districtHints?: string[];
   seoulZones?: PlannerSeoulZoneKey[];
   busanZones?: PlannerBusanZoneKey[];
+  gyeonggiZones?: PlannerGyeonggiZoneKey[];
   campaignGoal?: PlannerCampaignGoal | null;
   industryKey?: PlannerIndustryKey;
   ageKeys?: PlannerAgeKey[];

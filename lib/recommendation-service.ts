@@ -89,11 +89,13 @@ export async function runRecommendation(
       {
         seoulZones: opts.aiRecommendInput.seoulZones ?? undefined,
         busanZones: opts.aiRecommendInput.busanZones ?? undefined,
+        gyeonggiZones: opts.aiRecommendInput.gyeonggiZones ?? undefined,
       },
     );
     const hasExplicitSubZone = Boolean(
       opts.aiRecommendInput.seoulZones?.length ||
-        opts.aiRecommendInput.busanZones?.length,
+        opts.aiRecommendInput.busanZones?.length ||
+        opts.aiRecommendInput.gyeonggiZones?.length,
     );
     const matched = matchRecommendWithRegionalPolicy(
       catalog,

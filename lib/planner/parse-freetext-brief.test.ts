@@ -424,3 +424,30 @@ test("parsePlannerFreetextBrief: 유네스코 문의 핵심 필드", () => {
   assert.equal(r.fields.durationDays.value, 11);
   assert.equal(r.fields.campaignGoal.value, "event");
 });
+
+test("parsePlannerFreetextBrief: 분당 브랜딩 → seongnam gyeonggi", () => {
+  const r = parsePlannerFreetextBrief("분당 브랜딩");
+  assert.ok(r.fields.regions.value?.includes("gyeonggi"));
+  assert.ok(r.fields.gyeonggiZones.value?.includes("seongnam"));
+  assert.equal(r.fields.campaignGoal.value, "brand");
+});
+
+test("parsePlannerFreetextBrief: 수원 카페 → suwon gyeonggi", () => {
+  const r = parsePlannerFreetextBrief("수원 카페");
+  assert.ok(r.fields.regions.value?.includes("gyeonggi"));
+  assert.ok(r.fields.gyeonggiZones.value?.includes("suwon"));
+});
+
+test("parsePlannerFreetextBrief: 김포 프로모션 → gimpo gyeonggi event", () => {
+  const r = parsePlannerFreetextBrief("김포 프로모션");
+  assert.ok(r.fields.regions.value?.includes("gyeonggi"));
+  assert.ok(r.fields.gyeonggiZones.value?.includes("gimpo"));
+  assert.equal(r.fields.campaignGoal.value, "event");
+});
+
+test("buildScenarioPatchFromFreetextParse: gyeonggi zone only → gyeonggi region", () => {
+  const r = parsePlannerFreetextBrief("일산 로컬");
+  const patch = buildScenarioPatchFromFreetextParse(r);
+  assert.ok(patch.regions.includes("gyeonggi"));
+  assert.ok(patch.gyeonggiZones?.includes("goyang"));
+});

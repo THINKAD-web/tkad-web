@@ -647,13 +647,17 @@ export default function RecommendPageClient({
       ];
       const regionCodes: RegionCheckboxCode[] =
         input.regionCodes?.length ?
-          input.regionCodes.filter((c): c is RegionCheckboxCode =>
-            (validRegionCodes as readonly string[]).includes(c),
-          )
+          input.regionCodes
+            .map((c) => (c === "gyeonggi" ? "capital" : c))
+            .filter((c): c is RegionCheckboxCode =>
+              (validRegionCodes as readonly string[]).includes(c),
+            )
         : input.seoulZones?.length ?
           ["seoul"]
         : input.busanZones?.length ?
           ["busan"]
+        : input.gyeonggiZones?.length ?
+          ["capital"]
         : [];
       const payload: MediaAiRecommendFormSubmit = {
         input,

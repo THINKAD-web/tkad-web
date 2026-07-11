@@ -2,6 +2,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import type { MatchReason, MatchingInput, ScoreBreakdown } from "@/lib/matching-engine";
 import { PLANNER_BUSAN_ZONE_LABELS } from "@/lib/planner/busan-zones";
+import { PLANNER_GYEONGGI_ZONE_LABELS } from "@/lib/planner/gyeonggi-zones";
 import { PLANNER_SEOUL_ZONE_LABELS } from "@/lib/planner/seoul-zones";
 import type { RecommendReasonKey } from "@/lib/planner/recommend";
 import { matchesPlannerCategory } from "@/lib/planner-logic";
@@ -13,6 +14,7 @@ export type LocalizedRationaleLine = { ko: string; en: string };
 export type RecommendRationaleDisplayContext = {
   seoulZones?: readonly string[];
   busanZones?: readonly string[];
+  gyeonggiZones?: readonly string[];
   locationKeywords?: readonly string[];
   plannerCategories?: readonly PlannerCategory[];
   /** 만원 단위 월 예산 상한 (recommend 폼) */
@@ -22,6 +24,7 @@ export type RecommendRationaleDisplayContext = {
 const REGION_CODE_LABELS: Record<string, { ko: string; en: string }> = {
   seoul: { ko: "서울", en: "Seoul" },
   busan: { ko: "부산", en: "Busan" },
+  gyeonggi: { ko: "경기", en: "Gyeonggi" },
   jeju: { ko: "제주", en: "Jeju" },
   national: { ko: "전국", en: "Nationwide" },
   capital: { ko: "수도권", en: "Capital area" },
@@ -112,6 +115,9 @@ function zoneLabel(code: string, isKo: boolean): string | null {
   if (seoul) return isKo ? seoul.labelKo : seoul.labelEn;
   const busan = PLANNER_BUSAN_ZONE_LABELS[key as keyof typeof PLANNER_BUSAN_ZONE_LABELS];
   if (busan) return isKo ? busan.labelKo : busan.labelEn;
+  const gyeonggi =
+    PLANNER_GYEONGGI_ZONE_LABELS[key as keyof typeof PLANNER_GYEONGGI_ZONE_LABELS];
+  if (gyeonggi) return isKo ? gyeonggi.labelKo : gyeonggi.labelEn;
   if (/[가-힣]/.test(code)) return code.trim();
   return null;
 }
@@ -133,6 +139,7 @@ export function formatRequestedRegionsText(
 
   for (const z of display?.seoulZones ?? []) push(zoneLabel(z, isKo));
   for (const z of display?.busanZones ?? []) push(zoneLabel(z, isKo));
+  for (const z of display?.gyeonggiZones ?? []) push(zoneLabel(z, isKo));
   for (const kw of display?.locationKeywords ?? []) push(kw);
   for (const r of input.regions) push(zoneLabel(r, isKo));
 
@@ -554,6 +561,7 @@ export function displayContextFromAiInput(
   return {
     seoulZones: input.seoulZones ?? undefined,
     busanZones: input.busanZones ?? undefined,
+    gyeonggiZones: input.gyeonggiZones ?? undefined,
     locationKeywords: input.locationKeywords ?? undefined,
     plannerCategories: input.plannerCategories ?? undefined,
     budgetMaxMan: input.budgetMaxMan > 0 ? input.budgetMaxMan : undefined,
@@ -566,6 +574,7 @@ export function displayContextFromPlannerContext(
   return {
     seoulZones: ctx.seoulZones,
     busanZones: ctx.busanZones,
+    gyeonggiZones: ctx.gyeonggiZones,
     plannerCategories: ctx.categories,
     budgetMaxMan: ctx.budgetMan > 0 ? ctx.budgetMan : undefined,
   };

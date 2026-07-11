@@ -16,6 +16,13 @@ import type { RecommendationContext } from "@/lib/planner/recommendation-context
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 
+function readGyeonggiZoneValues(
+  result: PlannerFreetextParseResult,
+): string[] | null {
+  const zones = result.fields.gyeonggiZones.value;
+  return zones?.length ? zones : null;
+}
+
 const REASON_LABELS: Record<RecommendReasonKey, { ko: string; en: string }> = {
   matchRegion: { ko: "타깃 지역 매칭", en: "Region match" },
   ageMatch: { ko: "타깃 연령 매칭", en: "Age match" },
@@ -34,6 +41,7 @@ export type PlanFromBriefParsed = {
   regions: string[] | null;
   seoulZones: string[] | null;
   busanZones: string[] | null;
+  gyeonggiZones: string[] | null;
   ageKeys: string[] | null;
   industryKey: string | null;
   budgetMan: number | null;
@@ -98,6 +106,7 @@ function countParsedFields(result: PlannerFreetextParseResult): number {
   if (fields.regions.value?.length) n++;
   if (fields.seoulZones.value?.length) n++;
   if (fields.busanZones.value?.length) n++;
+  if (readGyeonggiZoneValues(result)?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
   if (fields.budgetMan.value != null) n++;
@@ -116,6 +125,7 @@ function toParsedSnapshot(
     regions: fields.regions.value,
     seoulZones: fields.seoulZones.value,
     busanZones: fields.busanZones.value,
+    gyeonggiZones: readGyeonggiZoneValues(result),
     ageKeys: fields.ageKeys.value,
     industryKey: fields.industryKey.value,
     budgetMan: fields.budgetMan.value,
@@ -134,6 +144,7 @@ function patchToRecommendationContext(
     regions: patch.regions ?? [],
     seoulZones: patch.seoulZones ?? [],
     busanZones: patch.busanZones ?? [],
+    gyeonggiZones: patch.gyeonggiZones ?? [],
     categories: patch.categories ?? [],
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,

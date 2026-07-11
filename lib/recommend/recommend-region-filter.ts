@@ -6,6 +6,8 @@ import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent } from "@/lib/p
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
+import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
+import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
 
@@ -36,6 +38,7 @@ export function isNonSpecificRegionCode(code: string): boolean {
 export type RecommendRegionFilterOpts = {
   seoulZones?: readonly PlannerSeoulZoneKey[];
   busanZones?: readonly PlannerBusanZoneKey[];
+  gyeonggiZones?: readonly PlannerGyeonggiZoneKey[];
 };
 
 export type RecommendMatchMeta = {
@@ -45,7 +48,7 @@ export type RecommendMatchMeta = {
 
 /**
  * AI recommend → 플래너 browse 광역 ID (하드 프리필터).
- * regionCodes / seoulZones / busanZones 등 구조화·파싱 필드만 사용.
+ * regionCodes / seoulZones / busanZones / gyeonggiZones 등 구조화·파싱 필드만 사용.
  * `input.region` 한글 자유 텍스트는 browse ID로 변환하지 않음.
  */
 export function resolveAiRecommendPlannerRegionIds(
@@ -65,6 +68,7 @@ export function resolveAiRecommendPlannerRegionIds(
   }
 
   if (input.busanZones?.length) return ["busan"];
+  if (input.gyeonggiZones?.length) return ["gyeonggi"];
   if (input.seoulZones?.length) return ["seoul"];
 
   return undefined;
@@ -123,6 +127,11 @@ export function filterRecommendCatalogByRegions(
   if (zones?.busanZones?.length && macroSet.has("busan")) {
     filtered = filtered.filter((m) =>
       mediaMatchesBusanZones(m, zones.busanZones!),
+    );
+  }
+  if (zones?.gyeonggiZones?.length && macroSet.has("gyeonggi")) {
+    filtered = filtered.filter((m) =>
+      mediaMatchesGyeonggiZones(m, zones.gyeonggiZones!),
     );
   }
 
@@ -212,11 +221,14 @@ export function runRecommendMatchFromCatalog(
     {
       seoulZones: aiInput.seoulZones ?? undefined,
       busanZones: aiInput.busanZones ?? undefined,
+      gyeonggiZones: aiInput.gyeonggiZones ?? undefined,
     },
   );
 
   const hasExplicitSubZone = Boolean(
-    aiInput.seoulZones?.length || aiInput.busanZones?.length,
+    aiInput.seoulZones?.length ||
+      aiInput.busanZones?.length ||
+      aiInput.gyeonggiZones?.length,
   );
 
   return matchRecommendWithRegionalPolicy(

@@ -16,6 +16,7 @@ import {
 } from "@/lib/planner/types";
 import { PLANNER_SEOUL_ZONE_KEYS } from "@/lib/planner/seoul-zones";
 import { PLANNER_BUSAN_ZONE_KEYS } from "@/lib/planner/busan-zones";
+import { PLANNER_GYEONGGI_ZONE_KEYS } from "@/lib/planner/gyeonggi-zones";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { isPlannerClaudeEnabled } from "@/lib/planner/planner-claude-config";
 import type { PlannerCampaignGoal, PlannerCategory } from "@/lib/planner/types";
@@ -32,6 +33,7 @@ const Body = z.object({
   regions: z.array(z.string()).default([]),
   seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
   busanZones: z.array(z.enum(PLANNER_BUSAN_ZONE_KEYS)).optional(),
+  gyeonggiZones: z.array(z.enum(PLANNER_GYEONGGI_ZONE_KEYS)).optional(),
   categories: z.array(z.string()).default([]),
   ageKey: z.enum(PLANNER_AGE_KEYS).optional(),
   ageKeys: z.array(z.enum(PLANNER_AGE_KEYS)).optional(),
@@ -110,6 +112,7 @@ export async function POST(request: NextRequest) {
     regions: d.regions,
     seoulZones: d.seoulZones,
     busanZones: d.busanZones,
+    gyeonggiZones: d.gyeonggiZones,
     categories: d.categories as PlannerCategory[],
     ageKeys,
     industryKey: d.industryKey ?? null,

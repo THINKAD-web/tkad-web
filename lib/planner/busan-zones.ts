@@ -125,6 +125,8 @@ export function suggestBusanZones(
   return ["centum", "haeundae", "seomyeon"];
 }
 
+export { mergePlannerMacroMatchingRegions } from "@/lib/planner/gyeonggi-zones";
+
 /** 매칭 엔진 regions 배열 — macro + 부산 상권 코드 */
 export function busanZonesToMatchingRegions(
   macroRegions: string[],
@@ -138,34 +140,6 @@ export function busanZonesToMatchingRegions(
   if (hasBusan) {
     if (zones.length > 0) {
       for (const z of zones) out.push(z);
-    } else {
-      out.push("busan");
-    }
-  }
-  return out.length > 0 ? out : macroRegions;
-}
-
-/** 서울·부산 상권을 matching-engine regions로 병합 */
-export function mergePlannerMacroMatchingRegions(
-  macroRegions: string[],
-  seoulZones: readonly string[],
-  busanZones: readonly PlannerBusanZoneKey[],
-): string[] {
-  const out: string[] = [];
-  for (const r of macroRegions) {
-    if (r === "seoul" || r === "busan") continue;
-    out.push(r);
-  }
-  if (macroRegions.includes("seoul")) {
-    if (seoulZones.length > 0) {
-      out.push(...seoulZones);
-    } else {
-      out.push("seoul");
-    }
-  }
-  if (macroRegions.includes("busan")) {
-    if (busanZones.length > 0) {
-      out.push(...busanZones);
     } else {
       out.push("busan");
     }

@@ -54,10 +54,12 @@ export function aiInputToMatching(
 
   const seoulZones = input.seoulZones ?? [];
   const busanZones = input.busanZones ?? [];
+  const gyeonggiZones = input.gyeonggiZones ?? [];
   const regions = mergePlannerMacroMatchingRegions(
     macroRegions,
     seoulZones,
     busanZones,
+    gyeonggiZones,
   );
 
   if (wantsNationalScoring && !regions.includes("national")) {
@@ -122,6 +124,7 @@ export function plannerContextToMatching(
       ctx.regions,
       ctx.seoulZones ?? [],
       ctx.busanZones ?? [],
+      ctx.gyeonggiZones ?? [],
     ),
     industry: ctx.industryKey ?
       (PLANNER_INDUSTRY_TO_MATCHING[ctx.industryKey as PlannerIndustryKey] ??

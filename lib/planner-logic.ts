@@ -66,6 +66,8 @@ import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
+import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
+import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -341,13 +343,14 @@ export function filterPlannerMedia(
   });
 }
 
-/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. 서울·부산 하위 상권은 각 zones로 추가 필터. */
+/** 다중 지역(OR). `regions`가 비어 있으면 유형만으로 전체. 서울·부산·경기 하위 상권은 각 zones로 추가 필터. */
 export function filterPlannerMediaMulti(
   items: readonly MediaItem[],
   regions: ReadonlySet<string>,
   categories: ReadonlySet<PlannerCategory>,
   seoulZones: readonly PlannerSeoulZoneKey[] = [],
   busanZones: readonly PlannerBusanZoneKey[] = [],
+  gyeonggiZones: readonly PlannerGyeonggiZoneKey[] = [],
 ): MediaItem[] {
   let filtered = filterPlannerMediaByRegions(items, regions, categories);
   if (regions.has("seoul") && seoulZones.length > 0) {
@@ -355,6 +358,11 @@ export function filterPlannerMediaMulti(
   }
   if (regions.has("busan") && busanZones.length > 0) {
     filtered = filtered.filter((m) => mediaMatchesBusanZones(m, busanZones));
+  }
+  if (regions.has("gyeonggi") && gyeonggiZones.length > 0) {
+    filtered = filtered.filter((m) =>
+      mediaMatchesGyeonggiZones(m, gyeonggiZones),
+    );
   }
   return filtered;
 }

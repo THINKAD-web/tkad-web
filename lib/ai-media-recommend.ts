@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
+import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type { PlannerCategory } from "@/lib/planner/types";
 import { catalogPriceFieldToPriceMan } from "@/lib/media-price-format";
@@ -49,6 +50,8 @@ export type AiRecommendInput = {
   seoulZones?: readonly PlannerSeoulZoneKey[] | null;
   /** 부산 선택 시 matching-engine 상권 코드 (centum 등) */
   busanZones?: readonly PlannerBusanZoneKey[] | null;
+  /** 경기 선택 시 matching-engine 상권 코드 (seongnam 등) */
+  gyeonggiZones?: readonly PlannerGyeonggiZoneKey[] | null;
   /** 구조화 폼 다중 지역 선택 — `region` 단일값보다 우선 */
   regionCodes?: readonly string[] | null;
   /** 규칙 파서·플래너에서 추출한 매체 유형 (digital/static/mobile) */

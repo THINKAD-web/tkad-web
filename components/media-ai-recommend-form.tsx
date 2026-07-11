@@ -13,6 +13,7 @@ import {
 import { BtnBlock } from "@/components/brutalist";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
+import { PlannerGyeonggiZoneChips } from "@/components/planner/planner-gyeonggi-zone-chips";
 import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
@@ -30,6 +31,10 @@ import {
   suggestBusanZones,
   type PlannerBusanZoneKey,
 } from "@/lib/planner/busan-zones";
+import {
+  suggestGyeonggiZones,
+  type PlannerGyeonggiZoneKey,
+} from "@/lib/planner/gyeonggi-zones";
 import type {
   PlannerCampaignGoal,
   PlannerIndustryKey,
@@ -177,6 +182,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const [seoulZonesTouched, setSeoulZonesTouched] = useState(false);
   const [busanZones, setBusanZones] = useState<PlannerBusanZoneKey[]>([]);
   const [busanZonesTouched, setBusanZonesTouched] = useState(false);
+  const [gyeonggiZones, setGyeonggiZones] = useState<PlannerGyeonggiZoneKey[]>([]);
+  const [gyeonggiZonesTouched, setGyeonggiZonesTouched] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const budgetMin = 100;
@@ -198,6 +205,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         if (code === "busan") {
           setBusanZones([]);
           setBusanZonesTouched(false);
+        }
+        if (code === "capital") {
+          setGyeonggiZones([]);
+          setGyeonggiZonesTouched(false);
         }
       } else {
         next.add(code);
@@ -232,6 +243,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setBusanZones(suggestedBusanZones);
   }, [regions, busanZonesTouched, campaignGoal, suggestedBusanZones]);
 
+  const suggestedGyeonggiZones = useMemo(() => {
+    if (!campaignGoal) return [] as PlannerGyeonggiZoneKey[];
+    return suggestGyeonggiZones(
+      recommendGoalToPlanner(campaignGoal),
+      recommendIndustryToPlanner(industry ?? "other"),
+    );
+  }, [campaignGoal, industry]);
+
+  useEffect(() => {
+    if (!regions.has("capital") || gyeonggiZonesTouched || !campaignGoal) return;
+    setGyeonggiZones(suggestedGyeonggiZones);
+  }, [regions, gyeonggiZonesTouched, campaignGoal, suggestedGyeonggiZones]);
+
   const toggleSeoulZone = useCallback((zone: PlannerSeoulZoneKey) => {
     setSeoulZonesTouched(true);
     setSeoulZones((prev) =>
@@ -265,6 +289,23 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setBusanZonesTouched(false);
     setBusanZones([...suggestedBusanZones]);
   }, [suggestedBusanZones]);
+
+  const toggleGyeonggiZone = useCallback((zone: PlannerGyeonggiZoneKey) => {
+    setGyeonggiZonesTouched(true);
+    setGyeonggiZones((prev) =>
+      prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone],
+    );
+  }, []);
+
+  const clearGyeonggiZones = useCallback(() => {
+    setGyeonggiZonesTouched(true);
+    setGyeonggiZones([]);
+  }, []);
+
+  const applySuggestedGyeonggiZones = useCallback(() => {
+    setGyeonggiZonesTouched(false);
+    setGyeonggiZones([...suggestedGyeonggiZones]);
+  }, [suggestedGyeonggiZones]);
 
   const toggleAge = useCallback((b: AgeBand) => {
     setAgeBands((prev) => {
@@ -364,6 +405,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       search: string,
       zoneList: readonly PlannerSeoulZoneKey[],
       busanZoneList: readonly PlannerBusanZoneKey[],
+      gyeonggiZoneList: readonly PlannerGyeonggiZoneKey[],
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -387,6 +429,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           regionSet.has("busan") && busanZoneList.length > 0
             ? [...busanZoneList]
             : undefined,
+        gyeonggiZones:
+          regionSet.has("capital") && gyeonggiZoneList.length > 0
+            ? [...gyeonggiZoneList]
+            : undefined,
       };
 
       return { input, regionCodes, searchQuery: search };
@@ -409,6 +455,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         searchQuery,
         seoulZones,
         busanZones,
+        gyeonggiZones,
       ),
     );
   };
@@ -534,6 +581,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onToggle={toggleBusanZone}
                 onClear={clearBusanZones}
                 onApplySuggested={applySuggestedBusanZones}
+              />
+            ) : null}
+            {regions.has("capital") ? (
+              <PlannerGyeonggiZoneChips
+                embedded
+                selected={gyeonggiZones}
+                suggested={suggestedGyeonggiZones}
+                isKo={isKo}
+                onToggle={toggleGyeonggiZone}
+                onClear={clearGyeonggiZones}
+                onApplySuggested={applySuggestedGyeonggiZones}
               />
             ) : null}
           </FormField>

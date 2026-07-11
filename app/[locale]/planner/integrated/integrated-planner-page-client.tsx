@@ -79,8 +79,10 @@ import { PlannerScenarioCards } from "@/components/planner/planner-scenario-card
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
+import { PlannerGyeonggiZoneChips } from "@/components/planner/planner-gyeonggi-zone-chips";
 import { suggestSeoulZones } from "@/lib/planner/seoul-zones";
 import { suggestBusanZones } from "@/lib/planner/busan-zones";
+import { suggestGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
 import {
   generateScenarios,
   scenarioInputKey,
@@ -175,6 +177,7 @@ export default function IntegratedPlannerPageClient({
   const industryKey = useIntegratedPlannerStore((s) => s.industryKey);
   const seoulZones = useIntegratedPlannerStore((s) => s.seoulZones);
   const busanZones = useIntegratedPlannerStore((s) => s.busanZones);
+  const gyeonggiZones = useIntegratedPlannerStore((s) => s.gyeonggiZones);
   const goalFollowUp = useIntegratedPlannerStore((s) => s.goalFollowUp);
   const appliedScenario = useIntegratedPlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = useIntegratedPlannerStore((s) => s.campaignMediaIds);
@@ -211,6 +214,11 @@ export default function IntegratedPlannerPageClient({
   const clearBusanZones = useIntegratedPlannerStore((s) => s.clearBusanZones);
   const applySuggestedBusanZones = useIntegratedPlannerStore(
     (s) => s.applySuggestedBusanZones,
+  );
+  const toggleGyeonggiZone = useIntegratedPlannerStore((s) => s.toggleGyeonggiZone);
+  const clearGyeonggiZones = useIntegratedPlannerStore((s) => s.clearGyeonggiZones);
+  const applySuggestedGyeonggiZones = useIntegratedPlannerStore(
+    (s) => s.applySuggestedGyeonggiZones,
   );
   const setGoalFollowUp = useIntegratedPlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = useIntegratedPlannerStore(
@@ -295,8 +303,9 @@ export default function IntegratedPlannerPageClient({
         categories,
         seoulZones,
         busanZones,
+        gyeonggiZones,
       ),
-    [catalog, selectedRegions, categories, seoulZones, busanZones],
+    [catalog, selectedRegions, categories, seoulZones, busanZones, gyeonggiZones],
   );
 
   const suggestedSeoulZones = useMemo(
@@ -306,6 +315,11 @@ export default function IntegratedPlannerPageClient({
 
   const suggestedBusanZones = useMemo(
     () => suggestBusanZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
+  );
+
+  const suggestedGyeonggiZones = useMemo(
+    () => suggestGyeonggiZones(campaignGoal, industryKey),
     [campaignGoal, industryKey],
   );
 
@@ -332,6 +346,7 @@ export default function IntegratedPlannerPageClient({
       goalFollowUp,
       seoulZones,
       busanZones,
+      gyeonggiZones,
       campaignMediaIds,
       campaignMediaQuantities,
       campaignMediaPriceOptionIndex,
@@ -350,6 +365,7 @@ export default function IntegratedPlannerPageClient({
       goalFollowUp,
       seoulZones,
       busanZones,
+      gyeonggiZones,
       campaignMediaIds,
       campaignMediaQuantities,
       campaignMediaPriceOptionIndex,
@@ -398,6 +414,7 @@ export default function IntegratedPlannerPageClient({
           regions,
           seoulZones,
           busanZones,
+          gyeonggiZones,
           categories: categoriesArr,
           ageKeys,
           industryKey,
@@ -416,6 +433,7 @@ export default function IntegratedPlannerPageClient({
       regions,
       seoulZones,
       busanZones,
+      gyeonggiZones,
       categoriesArr,
       ageKeys,
       industryKey,
@@ -771,6 +789,17 @@ export default function IntegratedPlannerPageClient({
                   />
                 ) : null}
 
+                {selectedRegions.has("gyeonggi") ? (
+                  <PlannerGyeonggiZoneChips
+                    selected={gyeonggiZones}
+                    suggested={suggestedGyeonggiZones}
+                    isKo={isKo}
+                    onToggle={toggleGyeonggiZone}
+                    onClear={clearGyeonggiZones}
+                    onApplySuggested={applySuggestedGyeonggiZones}
+                  />
+                ) : null}
+
                 <div>
                   <PlannerNeonLabel className="mb-3 block">
                     {t("ageLabel")}
@@ -981,6 +1010,7 @@ export default function IntegratedPlannerPageClient({
                   regions,
                   seoulZones,
                   busanZones,
+                  gyeonggiZones,
                   categories: categoriesArr,
                   ageKeys,
                   industryKey,

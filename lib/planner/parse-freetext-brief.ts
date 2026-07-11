@@ -11,6 +11,11 @@ import {
   BUSAN_ZONE_REGEX,
   type PlannerBusanZoneKey,
 } from "@/lib/planner/busan-zones";
+import {
+  BROWSE_SUB_TO_GYEONGGI_ZONE,
+  GYEONGGI_ZONE_REGEX,
+  type PlannerGyeonggiZoneKey,
+} from "@/lib/planner/gyeonggi-zones";
 import { parseDurationFields } from "@/lib/planner/parse-duration";
 import {
   isPlannerSeoulZoneKey,
@@ -47,6 +52,7 @@ export type PlannerFreetextParseResult = {
     months: ParsedField<number>;
     durationDays: ParsedField<number>;
     busanZones: ParsedField<PlannerBusanZoneKey[]>;
+    gyeonggiZones: ParsedField<PlannerGyeonggiZoneKey[]>;
     categories: ParsedField<PlannerCategory[]>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
@@ -489,10 +495,35 @@ function scanBusanZones(text: string): {
   };
 }
 
+function scanGyeonggiZones(text: string): {
+  zones: PlannerGyeonggiZoneKey[];
+  source: string | null;
+  confidence: ParseConfidence;
+} {
+  const found = new Set<PlannerGyeonggiZoneKey>();
+  let source: string | null = null;
+  for (const { zone, re } of GYEONGGI_ZONE_REGEX) {
+    const m = text.match(re);
+    if (m?.[0]) {
+      found.add(zone);
+      source = source ? `${source}, ${m[0]}` : m[0];
+    }
+  }
+  if (found.size === 0) {
+    return { zones: [], source: null, confidence: "low" };
+  }
+  return {
+    zones: [...found],
+    source,
+    confidence: "high",
+  };
+}
+
 function parseRegions(text: string): {
   regions: ParsedField<string[]>;
   seoulZones: ParsedField<PlannerSeoulZoneKey[]>;
   busanZones: ParsedField<PlannerBusanZoneKey[]>;
+  gyeonggiZones: ParsedField<PlannerGyeonggiZoneKey[]>;
 } {
   const allHits = [
     ...scanHotspots(text),
@@ -503,6 +534,7 @@ function parseRegions(text: string): {
   const macroSet = new Set<string>();
   const zoneSet = new Set<PlannerSeoulZoneKey>();
   const busanZoneSet = new Set<PlannerBusanZoneKey>();
+  const gyeonggiZoneSet = new Set<PlannerGyeonggiZoneKey>();
   const sources: string[] = [];
 
   for (const hit of allHits) {
@@ -520,6 +552,10 @@ function parseRegions(text: string): {
       const zone = BROWSE_SUB_TO_BUSAN_ZONE[hit.subId];
       if (zone) busanZoneSet.add(zone);
     }
+    if (hit.subId && hit.mainId === "gyeonggi") {
+      const zone = BROWSE_SUB_TO_GYEONGGI_ZONE[hit.subId];
+      if (zone) gyeonggiZoneSet.add(zone);
+    }
   }
 
   const zoneScan = scanSeoulZones(text);
@@ -530,16 +566,24 @@ function parseRegions(text: string): {
   for (const z of busanZoneScan.zones) busanZoneSet.add(z);
   if (busanZoneScan.source) sources.push(busanZoneScan.source);
 
+  const gyeonggiZoneScan = scanGyeonggiZones(text);
+  for (const z of gyeonggiZoneScan.zones) gyeonggiZoneSet.add(z);
+  if (gyeonggiZoneScan.source) sources.push(gyeonggiZoneScan.source);
+
   if (zoneSet.size > 0 && !macroSet.has("national")) {
     macroSet.add("seoul");
   }
   if (busanZoneSet.size > 0 && !macroSet.has("national")) {
     macroSet.add("busan");
   }
+  if (gyeonggiZoneSet.size > 0 && !macroSet.has("national")) {
+    macroSet.add("gyeonggi");
+  }
 
   const regionsArr = [...macroSet];
   const zonesArr = [...zoneSet];
   const busanZonesArr = [...busanZoneSet];
+  const gyeonggiZonesArr = [...gyeonggiZoneSet];
 
   return {
     regions:
@@ -560,6 +604,14 @@ function parseRegions(text: string): {
             busanZonesArr,
             busanZoneScan.confidence,
             busanZoneScan.source ?? sources.join(", "),
+          )
+        : emptyField(),
+    gyeonggiZones:
+      gyeonggiZonesArr.length > 0
+        ? field(
+            gyeonggiZonesArr,
+            gyeonggiZoneScan.confidence,
+            gyeonggiZoneScan.source ?? sources.join(", "),
           )
         : emptyField(),
   };
@@ -732,6 +784,7 @@ function collectUnmatchedTokens(
     fields.months.source,
     fields.durationDays.source,
     fields.busanZones.source,
+    fields.gyeonggiZones.source,
     fields.categories.source,
   ].filter(Boolean) as string[];
 
@@ -781,19 +834,21 @@ export function parsePlannerFreetextBrief(
         months: empty,
         durationDays: empty,
         busanZones: empty,
+        gyeonggiZones: empty,
         categories: empty,
       },
       unmatchedTokens: [],
     };
   }
 
-  const { regions, seoulZones, busanZones } = parseRegions(text);
+  const { regions, seoulZones, busanZones, gyeonggiZones } = parseRegions(text);
   const duration = parseDurationFields(text);
   const fields = {
     campaignGoal: parseCampaignGoal(text),
     regions,
     seoulZones,
     busanZones,
+    gyeonggiZones,
     ageKeys: parseAgeKeys(text),
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
@@ -816,12 +871,16 @@ export function buildScenarioPatchFromFreetextParse(
   const { fields } = result;
   const zones = fields.seoulZones.value ?? [];
   const busanZones = fields.busanZones.value ?? [];
+  const gyeonggiZones = fields.gyeonggiZones.value ?? [];
   let regions = fields.regions.value ?? [];
   if (regions.length === 0 && zones.length > 0) {
     regions = ["seoul"];
   }
   if (regions.length === 0 && busanZones.length > 0) {
     regions = ["busan"];
+  }
+  if (regions.length === 0 && gyeonggiZones.length > 0) {
+    regions = ["gyeonggi"];
   }
 
   const durationDays = fields.durationDays.value;
@@ -845,6 +904,7 @@ export function buildScenarioPatchFromFreetextParse(
     ...(fields.ageKeys.value != null ? { ageKeys: fields.ageKeys.value } : {}),
     ...(zones.length > 0 ? { seoulZones: zones } : {}),
     ...(busanZones.length > 0 ? { busanZones } : {}),
+    ...(gyeonggiZones.length > 0 ? { gyeonggiZones } : {}),
     ...(goalFollowUp ? { goalFollowUp } : {}),
     appliedScenario: null,
   };
