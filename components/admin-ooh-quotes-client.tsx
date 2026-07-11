@@ -40,6 +40,8 @@ import {
   AdminMobileCard,
   AdminMobileList,
 } from "@/components/admin/admin-mobile-list-primitives";
+import { AdminOohPipelineStepper } from "@/components/admin/admin-ooh-pipeline-stepper";
+import type { OohQuotePipelineRow } from "@/lib/ooh-quote-pipeline";
 
 const OOH_STATUSES = [
   "all",
@@ -73,7 +75,35 @@ type OohRow = {
   sourceAdminQuoteNumber: string | null;
   revisionMessage: string | null;
   revisionRequestedAt: string | null;
+  quotePdfSentAt?: string | null;
+  bookingRequestedAt?: string | null;
+  bookingConfirmedAt?: string | null;
+  invoiceSentAt?: string | null;
+  paymentConfirmedAt?: string | null;
+  contractConfirmedAt?: string | null;
+  cancelReason?: string | null;
+  createdAt?: string | null;
 };
+
+function toPipelineRow(
+  row: OohRow,
+  detail?: OohQuoteContractDetail,
+): OohQuotePipelineRow {
+  return {
+    status: row.status,
+    contractSigned: row.contractSigned,
+    quotePdfSentAt: row.quotePdfSentAt ?? null,
+    bookingRequestedAt: row.bookingRequestedAt ?? null,
+    bookingConfirmedAt: row.bookingConfirmedAt ?? null,
+    contractSignedAt: detail?.contract?.signedAt ?? null,
+    invoiceSentAt: row.invoiceSentAt ?? null,
+    paymentConfirmedAt: row.paymentConfirmedAt ?? null,
+    contractConfirmedAt: row.contractConfirmedAt ?? null,
+    revisionMessage: row.revisionMessage,
+    cancelReason: row.cancelReason ?? null,
+    createdAt: row.createdAt ?? row.updatedAt,
+  };
+}
 
 export default function AdminOohQuotesClient() {
   const t = useTranslations("adminOohQuotes");
@@ -602,6 +632,10 @@ export default function AdminOohQuotesClient() {
                             {row.updatedAt.slice(0, 10)}
                           </span>
                         </div>
+                        <AdminOohPipelineStepper
+                          row={toPipelineRow(row, detail)}
+                          variant="mini"
+                        />
                         {row.clientEmail ? (
                           <p className="truncate text-xs text-muted-foreground">
                             {row.clientEmail}
@@ -640,6 +674,10 @@ export default function AdminOohQuotesClient() {
                       ) : null}
                       {expanded ? (
                         <div className="mt-3 rounded-lg border border-border/60 bg-muted/20 p-3 dark:bg-card/10">
+                          <AdminOohPipelineStepper
+                            row={toPipelineRow(row, detail)}
+                            variant="full"
+                          />
                           {revisionMessageBlock(row)}
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
@@ -726,6 +764,10 @@ export default function AdminOohQuotesClient() {
                           <span>{statusLabel(row.status)}</span>
                           {revisionBadge(row)}
                         </div>
+                        <AdminOohPipelineStepper
+                          row={toPipelineRow(row, detail)}
+                          variant="mini"
+                        />
                       </td>
                       <td className="px-3 py-2 text-xs text-muted-foreground">
                         {row.updatedAt.slice(0, 10)}
@@ -871,6 +913,10 @@ export default function AdminOohQuotesClient() {
                     {expanded ? (
                       <tr key={`${row.id}-detail`} className={adminQuoteTableExpandedRowClass}>
                         <td colSpan={7} className="px-4 py-3">
+                          <AdminOohPipelineStepper
+                            row={toPipelineRow(row, detail)}
+                            variant="full"
+                          />
                           {revisionMessageBlock(row)}
                           <AdminOohContractDetailPanel
                             quoteId={row.id}
