@@ -174,6 +174,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     });
   }
 
+  if (body.clearRevisionRequest === true) {
+    if (!existing.revisionMessage) {
+      return json({ error: "no_revision_request" }, 400);
+    }
+    await db.ooHQuote.update({
+      where: { id },
+      data: {
+        revisionMessage: null,
+        revisionRequestedAt: null,
+      },
+    });
+  }
+
   const row = await db.ooHQuote.findUnique({ where: { id } });
   if (!row) return json({ error: "not_found" }, 404);
 

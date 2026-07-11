@@ -7,6 +7,8 @@ import { serializeOoHQuotePublic } from "@/lib/ooh-quote";
 export const dynamic = "force-dynamic";
 
 const STATUSES = new Set(Object.values(OoHQuoteStatus));
+/** P2: pseudo-filter — not an OoHQuoteStatus enum value */
+const REVISION_REQUESTED_FILTER = "revision_requested";
 
 export async function GET(request: NextRequest) {
   const deny = assertAdminDb(request);
@@ -18,9 +20,11 @@ export async function GET(request: NextRequest) {
 
   const db = getPrisma();
   const where =
-    statusRaw && statusRaw !== "all" && STATUSES.has(statusRaw as OoHQuoteStatus)
-      ? { status: statusRaw as OoHQuoteStatus }
-      : {};
+    statusRaw === REVISION_REQUESTED_FILTER
+      ? { revisionMessage: { not: null } }
+      : statusRaw && statusRaw !== "all" && STATUSES.has(statusRaw as OoHQuoteStatus)
+        ? { status: statusRaw as OoHQuoteStatus }
+        : {};
 
   const rows = await db.ooHQuote.findMany({
     where,

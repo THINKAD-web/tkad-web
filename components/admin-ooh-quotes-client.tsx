@@ -43,6 +43,7 @@ import {
 
 const OOH_STATUSES = [
   "all",
+  "revision_requested",
   "draft",
   "sent",
   "expired",
@@ -275,6 +276,22 @@ export default function AdminOohQuotesClient() {
             : ""}
         </p>
         <p className="mt-1 whitespace-pre-wrap text-foreground">{row.revisionMessage}</p>
+        <Button
+          type="button"
+          size="sm"
+          variant="outline"
+          className="mt-3 border-amber-300 bg-white hover:bg-amber-50 dark:border-amber-500/40 dark:bg-transparent dark:hover:bg-amber-500/10"
+          disabled={busyId === row.id}
+          onClick={() =>
+            void run(row.id, () =>
+              act(`/api/admin/ooh-quotes/${row.id}`, "PATCH", {
+                clearRevisionRequest: true,
+              }),
+            )
+          }
+        >
+          {t("revisionRequestAcknowledge")}
+        </Button>
       </div>
     ) : null;
 
@@ -428,7 +445,11 @@ export default function AdminOohQuotesClient() {
           >
             {OOH_STATUSES.map((s) => (
               <option key={s} value={s}>
-                {s === "all" ? t("all") : statusLabel(s)}
+                {s === "all"
+                  ? t("all")
+                  : s === "revision_requested"
+                    ? t("filterRevisionRequested")
+                    : statusLabel(s)}
               </option>
             ))}
           </select>

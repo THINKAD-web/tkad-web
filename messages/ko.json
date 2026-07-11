@@ -2713,6 +2713,8 @@
     "resendQuote": "재발송",
     "revisionRequestBadge": "수정 요청",
     "revisionRequestMessageLabel": "고객 수정 요청",
+    "filterRevisionRequested": "수정 요청",
+    "revisionRequestAcknowledge": "처리 완료",
     "status_draft": "임시",
     "status_sent": "견적 발송",
     "status_expired": "만료",

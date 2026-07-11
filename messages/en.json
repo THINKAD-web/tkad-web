@@ -2713,6 +2713,8 @@
     "resendQuote": "Resend",
     "revisionRequestBadge": "Revision",
     "revisionRequestMessageLabel": "Customer revision request",
+    "filterRevisionRequested": "Revision requests",
+    "revisionRequestAcknowledge": "Mark resolved",
     "status_draft": "Draft",
     "status_sent": "Quote sent",
     "status_expired": "Expired",
