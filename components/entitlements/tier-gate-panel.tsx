@@ -17,7 +17,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
   return (
     <div
       className={cn(
-        "mx-auto max-w-sm rounded-2xl border border-violet-200/80 bg-gradient-to-b from-violet-50/95 to-white px-6 py-7 text-center shadow-lg dark:border-violet-500/25 dark:from-violet-950/90 dark:to-gray-950/95",
+        "mx-auto max-w-sm rounded-2xl border border-violet-200/80 bg-gradient-to-b from-violet-50/95 to-white px-6 py-7 text-center shadow-lg dark:border-violet-500/25 dark:from-violet-950/60 dark:to-gray-950/70",
         compact && "px-5 py-5",
         className,
       )}

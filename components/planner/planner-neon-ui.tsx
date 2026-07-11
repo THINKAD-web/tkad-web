@@ -105,8 +105,8 @@ export function PlannerProLockedSkeleton({
           ))}
         </div>
       </div>
-      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-background/10 via-background/25 to-background/40">
-        <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-background/90 px-4 py-3 shadow-sm dark:border-white/15 dark:bg-[#0a0a0a]/90">
+      <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-background/5 via-background/15 to-background/25">
+        <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-background/90 px-4 py-3 shadow-sm dark:border-white/15 dark:bg-[#1a1a1a]/80">
           <Lock className="h-5 w-5 text-violet-500 dark:text-violet-300" aria-hidden />
           <span className="text-xs font-medium text-muted-foreground">
             {isKo ? "잠긴 프리미엄 콘텐츠" : "Locked premium content"}
