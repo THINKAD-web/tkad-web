@@ -129,6 +129,9 @@ export function MediaDetailPageView({
             kpiExposure: labels.kpiExposure,
             kpiCpm: labels.kpiCpm,
             kpiVisibility: labels.kpiVisibility,
+            specSize: labels.execution.size,
+            specResolution: labels.execution.resolution,
+            specBrightness: labels.execution.brightness,
             gallery: labels.gallery,
           }}
           hasPriceOptions={hasPriceOptions}
@@ -137,10 +140,10 @@ export function MediaDetailPageView({
 
         <MediaDetailPageLayout
           tabs={[
+            { id: "execution", label: labels.tabs.execution },
             { id: "location", label: labels.tabs.location },
             { id: "traffic", label: labels.tabs.traffic },
             { id: "calendar", label: labels.tabs.calendar },
-            { id: "execution", label: labels.tabs.execution },
           ]}
           panels={{
             location: (

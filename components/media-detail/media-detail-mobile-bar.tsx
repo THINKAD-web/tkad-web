@@ -1,12 +1,14 @@
 "use client";
 
+import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import {
   STICKY_ACTION_BAR_BTN,
-  STICKY_ACTION_BAR_BTN_PRIMARY,
+  STICKY_ACTION_BAR_BTN_IDLE,
+  STICKY_ACTION_BAR_BTN_VIOLET,
   STICKY_ACTION_BAR_ROW,
   StickyActionBar,
 } from "@/components/sticky-action-bar";
@@ -75,18 +77,23 @@ export function MediaDetailMobileBar({
           item={planCartItemFromMediaItem(media, "search")}
           addedFrom="search"
           compact
-          className={cn(STICKY_ACTION_BAR_BTN, "!h-8 shrink-0")}
+          className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "!h-8 shrink-0")}
+        />
+        <MediaQuoteCtaButton
+          media={media}
+          variant="sticky"
+          className={cn(
+            STICKY_ACTION_BAR_BTN,
+            STICKY_ACTION_BAR_BTN_VIOLET,
+            "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !text-[11px] !font-semibold !shadow-sm !tracking-normal",
+          )}
         />
         <MediaInquiryDialog
           mediaId={media.id}
           mediaName={displayName}
           triggerLabel={isKo ? "문의" : "Ask"}
           compact
-          className={cn(
-            STICKY_ACTION_BAR_BTN,
-            STICKY_ACTION_BAR_BTN_PRIMARY,
-            "shrink-0",
-          )}
+          className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "shrink-0")}
         />
       </div>
     </StickyActionBar>

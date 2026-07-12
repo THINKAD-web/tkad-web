@@ -34,7 +34,7 @@ export function MediaDetailPageLayout({
   belowFold,
   className,
 }: Props) {
-  const [active, setActive] = useState<MediaDetailTabId>(tabs[0]?.id ?? "location");
+  const [active, setActive] = useState<MediaDetailTabId>(tabs[0]?.id ?? "execution");
 
   return (
     <div className={cn("pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-16", className)}>

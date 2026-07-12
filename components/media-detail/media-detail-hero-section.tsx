@@ -22,6 +22,7 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { MediaExecutionSummary, MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaTrustBadges } from "@/components/media/media-trust-badges";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
+import { buildMediaHeroSpecBadges } from "@/lib/media-detail-hero-specs";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -34,6 +35,9 @@ type Labels = {
   kpiExposure: string;
   kpiCpm: string;
   kpiVisibility: string;
+  specSize: string;
+  specResolution: string;
+  specBrightness: string;
   gallery: {
     close: string;
     prev: string;
@@ -103,6 +107,16 @@ export function MediaDetailHeroSection({
     pricePeriod: displayPrice.period,
   });
   const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
+  const specBadges = buildMediaHeroSpecBadges(media, {
+    isKo,
+    visibilityScore: performanceMetrics.visibilityScore,
+    labels: {
+      size: labels.specSize,
+      resolution: labels.specResolution,
+      visibility: labels.kpiVisibility,
+      brightness: labels.specBrightness,
+    },
+  });
   const shareDescription = isKo
     ? `${displayName} — THINKAD 매체 상세`
     : `${displayName} — THINKAD media detail`;
@@ -252,6 +266,23 @@ export function MediaDetailHeroSection({
               }
             />
           </div>
+
+          {specBadges.length > 0 ? (
+            <div className="flex flex-wrap gap-1.5">
+              {specBadges.map((badge) => (
+                <span
+                  key={badge.key}
+                  className="inline-flex max-w-full items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-2.5 py-1 text-[11px] dark:text-white/80 text-gray-700"
+                  title={`${badge.label}: ${badge.value}`}
+                >
+                  <span className="shrink-0 font-semibold uppercase tracking-wide dark:text-white/45 text-gray-400">
+                    {badge.label}
+                  </span>
+                  <span className="truncate font-medium">{badge.value}</span>
+                </span>
+              ))}
+            </div>
+          ) : null}
 
           <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
             <MediaInquiryDialog

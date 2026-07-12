@@ -57,6 +57,7 @@ import TrackMediaView from "@/components/track-media-view";
 import { EventOnMount } from "@/components/analytics/event-on-mount";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { MediaDetailPageView } from "@/components/media-detail/media-detail-page-view";
+import { MediaDetailOverviewSection } from "@/components/media-detail/media-detail-overview-section";
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
@@ -375,14 +376,11 @@ export default async function MediaDetailPage({ params }: Props) {
             ) : null}
 
             {overviewBody?.trim() ? (
-              <details className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
-                <summary className="cursor-pointer font-semibold dark:text-white text-gray-900">
-                  {t("overviewAccordion")}
-                </summary>
-                <div className="mt-3 text-sm leading-relaxed dark:text-white/75 text-gray-700">
-                  <ProseParagraphs text={overviewBody} />
-                </div>
-              </details>
+              <MediaDetailOverviewSection
+                title={t("overviewAccordion")}
+                body={overviewBody}
+                isKo={isKo}
+              />
             ) : null}
 
             {relatedCases.length > 0 ? (
@@ -423,22 +421,3 @@ export default async function MediaDetailPage({ params }: Props) {
     </>
   );
 }
-
-function ProseParagraphs({ text }: { text: string }) {
-  const normalized = text.trim();
-  if (!normalized) {
-    return null;
-  }
-  const blocks = normalized.split(/\n\s*\n/).filter(Boolean);
-  if (blocks.length <= 1) {
-    return <p>{normalized}</p>;
-  }
-  return (
-    <>
-      {blocks.map((block, i) => (
-        <p key={i}>{block.replace(/\s*\n\s*/g, " ").trim()}</p>
-      ))}
-    </>
-  );
-}
-
