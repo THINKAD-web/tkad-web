@@ -14,6 +14,22 @@ import {
   type MediaPackageOption,
   type MediaQuantityUnitMode,
 } from "@/lib/media-quantity";
+import { quotePeriodLookupKeyFromDays } from "@/lib/compare-quote";
+import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
+import {
+  buildQuoteWizardLineContext,
+  isQuoteCampaignPeriodKey,
+  type QuoteCampaignPeriodKey,
+} from "@/lib/quote-wizard-pricing";
+
+const PLANNER_PERIOD_MONTHS_TOL = 0.04;
+
+export type PlannerPeriodPricingContext = {
+  /** 플래너·plan cart — 월 단위 (2주 ≈ 14/30) */
+  months?: number;
+  /** AI recommend `preferredPeriodWeeks` */
+  weeks?: number;
+};
 
 /** 플래너 선택 매체별 수량 — 미지정 시 `getQuantityBounds().default` */
 export type CampaignMediaQuantities = Record<string, number>;
@@ -66,6 +82,116 @@ export function plannerMonthlyPriceManForMedia(
   return catalogPriceFieldToPriceMan(
     plannerMonthlyPriceWonForMedia(m, quantities, priceOptionIndex),
   );
+}
+
+/** 플래너 기간(월) → 견적 위저드 `periodKey` (2주·1·3·6·12개월 등) */
+export function resolveQuoteCampaignPeriodFromPlannerMonths(
+  months: number,
+): QuoteCampaignPeriodKey | null {
+  const preset = PLANNER_PERIOD_OPTIONS.find(
+    (o) => Math.abs(months - o.months) < PLANNER_PERIOD_MONTHS_TOL,
+  );
+  if (preset?.id === "2w") return "2weeks";
+  if (preset?.id === "1m") return "1month";
+  if (preset?.id === "3m") return "3months";
+  if (preset?.id === "6m") return "6months";
+  if (preset?.id === "1y") return "12months";
+  const rounded = Math.round(months);
+  if (Math.abs(months - rounded) < 0.01) {
+    if (rounded === 1) return "1month";
+    if (rounded === 3) return "3months";
+    if (rounded === 6) return "6months";
+    if (rounded === 12) return "12months";
+  }
+  return null;
+}
+
+/** recommend `preferredPeriodWeeks` → 견적 `periodKey` */
+export function resolveQuoteCampaignPeriodFromWeeks(
+  weeks: number,
+): QuoteCampaignPeriodKey | null {
+  const days = Math.max(1, Math.round(weeks * 7));
+  const key = quotePeriodLookupKeyFromDays(days);
+  if (key != null && isQuoteCampaignPeriodKey(key)) return key;
+  return null;
+}
+
+export function resolveQuoteCampaignPeriodForPricing(
+  ctx: PlannerPeriodPricingContext,
+): QuoteCampaignPeriodKey | null {
+  if (ctx.weeks != null && ctx.weeks > 0) {
+    const fromWeeks = resolveQuoteCampaignPeriodFromWeeks(ctx.weeks);
+    if (fromWeeks) return fromWeeks;
+  }
+  if (ctx.months != null && ctx.months > 0) {
+    return resolveQuoteCampaignPeriodFromPlannerMonths(ctx.months);
+  }
+  return null;
+}
+
+/** 단일 매체 — 캠페인 기간 반영 line total(원). P1 `buildQuoteWizardLineContext` 공유 */
+export function plannerMediaPeriodTotalWon(
+  media: MediaItem,
+  opts: {
+    campaignPeriod: QuoteCampaignPeriodKey;
+    quantities?: CampaignMediaQuantities;
+    priceOptionIndex?: CampaignMediaPriceOptionIndex;
+    isKo?: boolean;
+  },
+): number {
+  const poIdx = opts.priceOptionIndex?.[media.id] ?? 0;
+  const isNw = media.catalogSource === "network";
+  const line = buildQuoteWizardLineContext(media, {
+    isKo: opts.isKo ?? true,
+    campaignPeriod: opts.campaignPeriod,
+    campaignPeriodLabel: opts.campaignPeriod,
+    priceOptionIndex: poIdx,
+    mobileUnits: opts.quantities?.[media.id],
+    networkUnits: isNw
+      ? opts.quantities?.[media.id] ?? media.networkMinUnits ?? 1
+      : undefined,
+  });
+  return Math.round(line.lineTotalMan * 10_000);
+}
+
+/** 포트폴리오 기간 총액(원) — partial rate 우선, 없으면 월×개월 선형 */
+export function plannerPortfolioPeriodTotalWon(
+  portfolio: readonly MediaItem[],
+  ctx: PlannerPeriodPricingContext,
+  pricing?: PlannerPortfolioPricing,
+  isKo = true,
+): number {
+  const period = resolveQuoteCampaignPeriodForPricing(ctx);
+  if (period) {
+    return portfolio.reduce(
+      (sum, m) =>
+        sum +
+        plannerMediaPeriodTotalWon(m, {
+          campaignPeriod: period,
+          quantities: pricing?.quantities,
+          priceOptionIndex: pricing?.priceOptionIndex,
+          isKo,
+        }),
+      0,
+    );
+  }
+  const months =
+    ctx.months != null && ctx.months > 0
+      ? ctx.months
+      : ctx.weeks != null && ctx.weeks > 0
+        ? (ctx.weeks * 7) / 30
+        : 1;
+  const monthly = portfolio.reduce(
+    (s, m) =>
+      s +
+      plannerMonthlyPriceWonForMedia(
+        m,
+        pricing?.quantities,
+        pricing?.priceOptionIndex,
+      ),
+    0,
+  );
+  return Math.round(monthly * months);
 }
 
 export function plannerMonthlyImpressionsForMedia(

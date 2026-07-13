@@ -51,10 +51,12 @@ import {
   shouldShowPlannerQuantityControl,
   type CampaignMediaPriceOptionIndex,
   type CampaignMediaQuantities,
+  plannerMediaPeriodTotalWon,
   plannerMonthlyPriceWonForMedia,
+  resolveQuoteCampaignPeriodFromWeeks,
 } from "@/lib/planner/planner-media-quantity";
 import { buildQuoteMediaSelectionSnapshot, buildQuoteMediaSelectionSnapshotsFromCartItem } from "@/lib/quote-snapshot-build";
-import { planCartLineMonthlyWon } from "@/lib/plan-cart-pricing";
+import { planCartLineMonthlyWon, planCartLinePeriodTotalWon } from "@/lib/plan-cart-pricing";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { wonToManwon } from "@/lib/ooh-quote-amount";
 import { usePlanCart } from "@/hooks/use-plan-cart";
@@ -270,19 +272,36 @@ export default function RecommendPageClient({
       );
       return;
     }
-    const duration = lastPayload?.input.preferredPeriodWeeks
-      ? Math.max(1, Math.round(lastPayload.input.preferredPeriodWeeks / 4))
-      : 1;
-    const monthlyWon = picked.reduce(
-      (s, m) =>
+    const periodWeeks = lastPayload?.input.preferredPeriodWeeks ?? 4;
+    const periodCtx = { weeks: periodWeeks };
+    const duration = Math.max(1, Math.round(periodWeeks / 4));
+    const periodTotalWon = picked.reduce((s, m) => {
+      const cartItem = planCart.items.find((i) => i.mediaId === m.id);
+      if (cartItem) {
+        return s + planCartLinePeriodTotalWon(cartItem, m, periodCtx, isKo);
+      }
+      const campaignPeriod = resolveQuoteCampaignPeriodFromWeeks(periodWeeks);
+      if (campaignPeriod) {
+        return (
+          s +
+          plannerMediaPeriodTotalWon(m, {
+            campaignPeriod,
+            quantities: effectiveQuantities,
+            priceOptionIndex: effectivePriceOptionIndex,
+            isKo,
+          })
+        );
+      }
+      return (
         s +
         plannerMonthlyPriceWonForMedia(
           m,
           effectiveQuantities,
           effectivePriceOptionIndex,
-        ),
-      0,
-    );
+        ) *
+          duration
+      );
+    }, 0);
     const estimatedReach =
       picked.reduce((s, m) => s + estimatedMonthlyImpressions(m), 0) *
       duration;
@@ -299,7 +318,7 @@ export default function RecommendPageClient({
       mediaNames: picked.map((m) =>
         isKo ? m.name : m.nameEn || m.name,
       ),
-      totalBudget: monthlyWon * duration,
+      totalBudget: periodTotalWon,
       duration,
       region: lastPayload?.regionCodes.join(", ") || undefined,
       goal: lastPayload?.input.goal,
@@ -362,47 +381,65 @@ export default function RecommendPageClient({
           return;
         }
 
-        const duration = lastPayload?.input.preferredPeriodWeeks
-          ? Math.max(
-              1,
-              Math.round(lastPayload.input.preferredPeriodWeeks / 4),
-            )
-          : 1;
+        const periodWeeks = lastPayload?.input.preferredPeriodWeeks ?? 4;
+        const periodCtx = { weeks: periodWeeks };
+        const duration = Math.max(1, Math.round(periodWeeks / 4));
+        const campaignPeriod = resolveQuoteCampaignPeriodFromWeeks(periodWeeks);
         const period = isKo
           ? `${duration}개월`
           : `${duration} month${duration > 1 ? "s" : ""}`;
         const cartById = new Map(planCart.items.map((item) => [item.mediaId, item]));
-        const monthlyWon = picked.reduce((s, m) => {
-          const cartItem = cartById.get(m.id);
+
+        const resolveLineTotalWon = (m: MediaItem, cartItem?: PlanCartItem) => {
           if (cartItem) {
-            return s + planCartLineMonthlyWon(cartItem, m);
+            return planCartLinePeriodTotalWon(cartItem, m, periodCtx, isKo);
+          }
+          if (campaignPeriod) {
+            return plannerMediaPeriodTotalWon(m, {
+              campaignPeriod,
+              quantities: effectiveQuantities,
+              priceOptionIndex: effectivePriceOptionIndex,
+              isKo,
+            });
           }
           return (
-            s +
             plannerMonthlyPriceWonForMedia(
               m,
               effectiveQuantities,
               effectivePriceOptionIndex,
-            )
+            ) * duration
           );
-        }, 0);
+        };
+
+        const periodTotalWon = picked.reduce(
+          (s, m) => s + resolveLineTotalWon(m, cartById.get(m.id)),
+          0,
+        );
 
         const mediaSelections = picked.flatMap((m) => {
           const cartItem = cartById.get(m.id);
+          const lineTotalWon = resolveLineTotalWon(m, cartItem);
           if (cartItem) {
-            return buildQuoteMediaSelectionSnapshotsFromCartItem({
+            const snaps = buildQuoteMediaSelectionSnapshotsFromCartItem({
               media: m,
               item: cartItem,
               isKo,
             });
+            if (snaps.length === 1) {
+              return [{ ...snaps[0]!, lineTotalWon }];
+            }
+            return snaps.map((snap) => ({
+              ...snap,
+              lineTotalWon: plannerMediaPeriodTotalWon(m, {
+                campaignPeriod: campaignPeriod ?? "1month",
+                quantities: { [m.id]: snap.quantity },
+                priceOptionIndex: { [m.id]: snap.priceOptionIndex },
+                isKo,
+              }),
+            }));
           }
           const poIdx = effectivePriceOptionIndex[m.id] ?? 0;
           const units = effectiveQuantities[m.id];
-          const lineTotalWon = plannerMonthlyPriceWonForMedia(
-            m,
-            effectiveQuantities,
-            effectivePriceOptionIndex,
-          );
           return [
             buildQuoteMediaSelectionSnapshot({
               media: m,
@@ -429,7 +466,7 @@ export default function RecommendPageClient({
             clientEmail: user.email,
             clientCompany: user.company || undefined,
             period,
-            budgetMax: monthlyWon > 0 ? wonToManwon(monthlyWon) : undefined,
+            budgetMax: periodTotalWon > 0 ? wonToManwon(periodTotalWon) : undefined,
             locale: isKo ? "ko" : "en",
             mediaSelections,
             ...(Object.keys(networkUnits).length > 0 ? { networkUnits } : {}),

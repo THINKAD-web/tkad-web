@@ -18,8 +18,14 @@ import {
 import type {
   CampaignMediaPriceOptionIndex,
   CampaignMediaQuantities,
+  PlannerPeriodPricingContext,
   PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
+import {
+  plannerMediaPeriodTotalWon,
+  resolveQuoteCampaignPeriodForPricing,
+} from "@/lib/planner/planner-media-quantity";
+import type { QuoteCampaignPeriodKey } from "@/lib/quote-wizard-pricing";
 
 export function planCartItemQuantity(
   item: Pick<PlanCartItem, "quantity">,
@@ -155,14 +161,97 @@ export function planCartAddonTotalWon(cart: PlanCart): number {
   return fromItems + legacy;
 }
 
+function planCartItemPeriodTotalWon(
+  item: PlanCartItem,
+  media: MediaItem,
+  campaignPeriod: QuoteCampaignPeriodKey,
+  isKo: boolean,
+): number {
+  const rows = planCartEffectiveOptionSelections(item, media);
+  const usesMulti =
+    ((item.optionSelections?.length ?? 0) > 0 ||
+      (item.gradeSelections?.length ?? 0) > 0) &&
+    (rows?.length ?? 0) > 1;
+
+  if (rows?.length && usesMulti) {
+    return rows.reduce((sum, row) => {
+      return (
+        sum +
+        plannerMediaPeriodTotalWon(media, {
+          campaignPeriod,
+          quantities: { [media.id]: row.quantity },
+          priceOptionIndex: { [media.id]: row.priceOptionIndex },
+          isKo,
+        })
+      );
+    }, 0);
+  }
+
+  const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
+  const units = rows?.[0]?.quantity ?? item.quantity;
+  const quantities: CampaignMediaQuantities | undefined =
+    units != null && Number.isFinite(units)
+      ? { [media.id]: Math.round(units) }
+      : undefined;
+
+  return plannerMediaPeriodTotalWon(media, {
+    campaignPeriod,
+    quantities,
+    priceOptionIndex: { [media.id]: poIdx },
+    isKo,
+  });
+}
+
+/** plan cart / recommend — 기간 반영 라인 total(원) */
+export function planCartLinePeriodTotalWon(
+  item: PlanCartItem,
+  media: MediaItem,
+  periodCtx: PlannerPeriodPricingContext,
+  isKo = true,
+): number {
+  const campaignPeriod = resolveQuoteCampaignPeriodForPricing(periodCtx);
+  if (campaignPeriod) {
+    return planCartItemPeriodTotalWon(item, media, campaignPeriod, isKo);
+  }
+  const months =
+    periodCtx.months != null && periodCtx.months > 0
+      ? periodCtx.months
+      : periodCtx.weeks != null && periodCtx.weeks > 0
+        ? (periodCtx.weeks * 7) / 30
+        : 1;
+  return Math.round(planCartLineMonthlyWon(item, media) * months);
+}
+
 export function planCartPeriodTotalWon(
   cart: PlanCart,
   catalog?: readonly MediaItem[] | ReadonlyMap<string, MediaItem>,
+  opts?: PlannerPeriodPricingContext & { isKo?: boolean },
 ): number {
+  const byId = catalog ? planCartCatalogById(catalog) : null;
   const months = Math.max(1, cart.duration ?? 1);
-  return (
-    planCartMonthlyTotalWon(cart, catalog) * months + planCartAddonTotalWon(cart)
-  );
+  const periodCtx: PlannerPeriodPricingContext = {
+    weeks: opts?.weeks,
+    months: opts?.weeks != null ? undefined : (opts?.months ?? months),
+  };
+  const campaignPeriod = resolveQuoteCampaignPeriodForPricing(periodCtx);
+  const isKo = opts?.isKo ?? true;
+
+  let mediaTotal: number;
+  if (campaignPeriod && byId) {
+    mediaTotal = cart.items.reduce((sum, item) => {
+      const media = byId.get(item.mediaId);
+      if (!media) {
+        return sum + planCartLineMonthlyWon(item);
+      }
+      return (
+        sum + planCartItemPeriodTotalWon(item, media, campaignPeriod, isKo)
+      );
+    }, 0);
+  } else {
+    mediaTotal = planCartMonthlyTotalWon(cart, catalog) * months;
+  }
+
+  return mediaTotal + planCartAddonTotalWon(cart);
 }
 
 export function planCartResolvedUnits(

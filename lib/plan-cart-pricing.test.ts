@@ -4,9 +4,11 @@ import type { PlanCart } from "@/lib/plan-cart";
 import {
   planCartLineMonthlyWon,
   planCartMonthlyTotalWon,
+  planCartPeriodTotalWon,
   planCartPortfolioPricing,
 } from "@/lib/plan-cart-pricing";
 import type { MediaItem } from "@/lib/media-data";
+import { buildQuoteWizardLineContext } from "@/lib/quote-wizard-pricing";
 
 const busMedia: MediaItem = {
   id: "bus-a",
@@ -88,4 +90,88 @@ test("planCartPortfolioPricing builds planner pricing maps from cart items", () 
     quantities: { "bus-a": 10 },
     priceOptionIndex: { "bus-a": 1 },
   });
+});
+
+const monthlyMedia: MediaItem = {
+  id: "m-monthly",
+  name: "월단가 매체",
+  nameEn: "Monthly",
+  location: "서울",
+  locationEn: "Seoul",
+  region: "seoul",
+  type: "digital",
+  price: 10_000_000,
+  pricePeriod: "month",
+  lat: 0,
+  lng: 0,
+  dailyFootTraffic: 0,
+  sampleImages: [],
+  partialPeriodRates: { "2weeks": 0.6 },
+  priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
+};
+
+test("planCartPeriodTotalWon — 2week period matches quote wizard 60% override", () => {
+  const cart: PlanCart = {
+    items: [
+      {
+        mediaId: "m-monthly",
+        mediaName: "월단가",
+        mediaType: "digital",
+        region: "seoul",
+        price: 10_000_000,
+        addedFrom: "planner",
+        addedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    duration: 1,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  const wizardLine = buildQuoteWizardLineContext(monthlyMedia, {
+    isKo: true,
+    campaignPeriod: "2weeks",
+    campaignPeriodLabel: "2주",
+    priceOptionIndex: 0,
+  });
+
+  const cartTotal = planCartPeriodTotalWon(cart, [monthlyMedia], {
+    weeks: 2,
+  });
+
+  assert.equal(cartTotal, Math.round(wizardLine.lineTotalMan * 10_000));
+  assert.equal(cartTotal, 6_000_000);
+});
+
+test("planCartPeriodTotalWon — no override keeps monthly × months", () => {
+  const plain: MediaItem = {
+    ...monthlyMedia,
+    id: "m-plain",
+    partialPeriodRates: undefined,
+  };
+  const cart: PlanCart = {
+    items: [
+      {
+        mediaId: "m-plain",
+        mediaName: "Plain",
+        mediaType: "digital",
+        region: "seoul",
+        price: 10_000_000,
+        addedFrom: "planner",
+        addedAt: "2026-01-01T00:00:00.000Z",
+      },
+    ],
+    duration: 3,
+    updatedAt: "2026-01-01T00:00:00.000Z",
+  };
+
+  const wizardLine = buildQuoteWizardLineContext(plain, {
+    isKo: true,
+    campaignPeriod: "3months",
+    campaignPeriodLabel: "3개월",
+    priceOptionIndex: 0,
+  });
+
+  const cartTotal = planCartPeriodTotalWon(cart, [plain]);
+  assert.equal(cartTotal, Math.round(wizardLine.lineTotalMan * 10_000));
+  assert.equal(cartTotal, 30_000_000);
 });
