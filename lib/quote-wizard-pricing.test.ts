@@ -4,7 +4,11 @@ import type { MediaItem } from "@/lib/media-data";
 import {
   buildQuoteWizardLineContext,
   quoteCatalogDisplayPriceMan,
+  quoteCampaignUnits,
 } from "@/lib/quote-wizard-pricing";
+import {
+  calculateMediaQuoteFromOption,
+} from "@/lib/compare-quote";
 
 function busItem(overrides: Partial<MediaItem> = {}): MediaItem {
   return {
@@ -126,4 +130,65 @@ test("quoteCatalogDisplayPriceMan matches line unit for grade bus", () => {
   });
   assert.equal(display, line.unitPriceMan);
   assert.equal(display, 4000);
+});
+
+test("partial period rate override — 2weeks 60% on monthly media", () => {
+  const media = busItem({
+    price: 10_000_000,
+    pricePeriod: "month",
+    partialPeriodRates: { "2weeks": 0.6 },
+    priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
+  });
+
+  const line = buildQuoteWizardLineContext(media, {
+    isKo: true,
+    campaignPeriod: "2weeks",
+    campaignPeriodLabel: "2주",
+    priceOptionIndex: 0,
+  });
+
+  assert.equal(line.lineTotalMan, 600);
+  assert.equal(line.usesMediaPartialRate, true);
+  assert.match(line.prorationLabel ?? "", /매체 지정 요율/);
+});
+
+test("partial period rate — no override keeps 50% for 2weeks monthly", () => {
+  const media = busItem({
+    price: 10_000_000,
+    pricePeriod: "month",
+    priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
+  });
+
+  const line = buildQuoteWizardLineContext(media, {
+    isKo: true,
+    campaignPeriod: "2weeks",
+    campaignPeriodLabel: "2주",
+    priceOptionIndex: 0,
+  });
+
+  assert.equal(line.usesMediaPartialRate, false);
+  assert.equal(line.campaignUnits, quoteCampaignUnits("2weeks", "month"));
+  assert.equal(line.lineTotalMan, 500);
+});
+
+test("compare calculateMediaQuoteFromOption applies option partial rate", () => {
+  const media = busItem({
+    price: 10_000_000,
+    pricePeriod: "month",
+    priceOptions: [
+      {
+        label: "기본",
+        price: 10_000_000,
+        period: "month",
+        partialPeriodRates: { "2weeks": 0.6 },
+      },
+    ],
+  });
+
+  const line = calculateMediaQuoteFromOption(
+    media,
+    media.priceOptions![0]!,
+    14,
+  );
+  assert.equal(line.costWon, 6_000_000);
 });

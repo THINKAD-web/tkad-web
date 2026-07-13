@@ -96,7 +96,7 @@ export function partialPeriodRatesMapFromDraft(
 
 function lookupRateInMap(
   map: PartialPeriodRatesMap | null | undefined,
-  periodKey: QuoteCampaignPeriodKey,
+  periodKey: QuoteCampaignPeriodKey | PartialPeriodRateAdminKey,
 ): number | null {
   if (!map) return null;
   const rate = map[periodKey];
@@ -113,11 +113,19 @@ function lookupRateInMap(
 export function resolvePartialPeriodRate(
   media: Pick<MediaItem, "partialPeriodRates">,
   priceOption: Pick<MediaPriceOption, "partialPeriodRates"> | null | undefined,
-  periodKey: QuoteCampaignPeriodKey,
+  periodKey: QuoteCampaignPeriodKey | PartialPeriodRateAdminKey,
 ): number | null {
   const fromOption = lookupRateInMap(priceOption?.partialPeriodRates, periodKey);
   if (fromOption != null) return fromOption;
   return lookupRateInMap(media.partialPeriodRates, periodKey);
+}
+
+/** 매체 지정 요율(0–1) × 패키지/월 단가(원) */
+export function quoteLineTotalWonFromPartialRate(
+  unitPriceWon: number,
+  rate: number,
+): number {
+  return Math.round(unitPriceWon * rate);
 }
 
 export function parsePartialPeriodRatesFromPriceOptionRow(

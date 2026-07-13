@@ -10,7 +10,9 @@ import {
   aggregateQuoteLines,
   buildQuoteContactHref,
   calculateMediaQuoteByDays,
+  calculateMediaQuoteFromOption,
   durationToDays,
+  findCheapestPriceOptionIndex,
   formatWonShort,
   type QuoteDurationUnit,
 } from "@/lib/compare-quote";
@@ -80,9 +82,18 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
   );
 
   const totals = useMemo(() => {
-    const lines = selectedItems.map((m) =>
-      calculateMediaQuoteByDays(m, effectiveDuration.days),
-    );
+    const lines = selectedItems.map((m) => {
+      const opts = m.priceOptions ?? [];
+      if (opts.length > 0) {
+        const idx = findCheapestPriceOptionIndex(m);
+        return calculateMediaQuoteFromOption(
+          m,
+          opts[idx]!,
+          effectiveDuration.days,
+        );
+      }
+      return calculateMediaQuoteByDays(m, effectiveDuration.days);
+    });
     return aggregateQuoteLines(lines);
   }, [selectedItems, effectiveDuration.days]);
 

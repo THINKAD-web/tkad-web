@@ -7,6 +7,11 @@ import {
 } from "@/lib/media-quantity";
 import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
+  partialPeriodRateToPercentLabel,
+  quoteLineTotalWonFromPartialRate,
+  resolvePartialPeriodRate,
+} from "@/lib/media-partial-period-rates";
+import {
   catalogPriceFieldToPriceMan,
   catalogPriceFieldToWon,
   formatMediaPriceCompactWon,
@@ -93,6 +98,8 @@ export type QuoteWizardLineContext = {
   bundleDays: number | null;
   campaignDays: number;
   prorationLabel: string | null;
+  /** 매체·옵션에 설정된 부분기간 요율이 적용됨 */
+  usesMediaPartialRate: boolean;
 };
 
 export function resolveQuoteMediaPricePeriod(
@@ -208,6 +215,22 @@ function buildProrationLabel(opts: {
   return `${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${opts.campaignDays}d÷${opts.bundleDays}d ≈ ${fmt(opts.lineTotalWon)}`;
 }
 
+function buildPartialPeriodRateLabel(opts: {
+  isKo: boolean;
+  unitPriceWon: number;
+  unitPeriodLabel: string;
+  rate: number;
+  lineTotalWon: number;
+}): string {
+  const locale = opts.isKo ? "ko-KR" : "en-US";
+  const fmt = (won: number) => formatMediaPriceCompactWon(won, locale);
+  const pct = partialPeriodRateToPercentLabel(opts.rate);
+  if (opts.isKo) {
+    return `[매체 지정 요율] ${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${pct}% ≈ ${fmt(opts.lineTotalWon)}`;
+  }
+  return `[Media rate] ${fmt(opts.unitPriceWon)}/${opts.unitPeriodLabel} × ${pct}% ≈ ${fmt(opts.lineTotalWon)}`;
+}
+
 /** 패키지 기간 토글 on 시 행 집행 기간 라벨 (예: "1주", "3일") */
 export function formatPackageExecutionPeriodLabel(
   priceOpt: MediaPriceOption | undefined,
@@ -276,14 +299,40 @@ export function buildQuoteWizardLineContext(
     !isPerUnitGradePriceOptions(media);
   const campaignDays = usePackagePeriod ? explicitBundleDays! : globalCampaignDays;
 
-  let campaignUnits: number;
-  let lineTotalMan: number;
   const gradePerUnitWon =
     isPerUnitGradePriceOptions(media) && priceOpt
       ? catalogPriceFieldToWon(priceOpt.price) *
         resolveMediaQuantity(media, opts.mobileUnits)
       : null;
-  if (!isNw && priceOpt && explicitBundleDays != null && !isPerUnitGradePriceOptions(media)) {
+
+  const partialRate =
+    !isNw && !usePackagePeriod
+      ? resolvePartialPeriodRate(media, priceOpt ?? null, opts.campaignPeriod)
+      : null;
+
+  let usesMediaPartialRate = false;
+  let campaignUnits: number;
+  let lineTotalMan: number;
+
+  if (partialRate != null) {
+    const baseUnitWon =
+      gradePerUnitWon ??
+      (priceOpt
+        ? catalogPriceFieldToWon(priceOpt.price)
+        : catalogPriceFieldToWon(media.price));
+    const lineTotalWon = quoteLineTotalWonFromPartialRate(
+      baseUnitWon,
+      partialRate,
+    );
+    campaignUnits = partialRate;
+    lineTotalMan = lineTotalWon / 10_000;
+    usesMediaPartialRate = true;
+  } else if (
+    !isNw &&
+    priceOpt &&
+    explicitBundleDays != null &&
+    !isPerUnitGradePriceOptions(media)
+  ) {
     if (usePackagePeriod) {
       campaignUnits = 1;
       lineTotalMan = unitPriceMan;
@@ -313,17 +362,26 @@ export function buildQuoteWizardLineContext(
         : catalogPriceFieldToWon(media.price);
   const bundleDays =
     !isNw && priceOpt && explicitBundleDays != null ? explicitBundleDays : null;
-  const prorationLabel =
-    usePackagePeriod || bundleDays == null
-      ? null
-      : buildProrationLabel({
+  const prorationLabel = usePackagePeriod
+    ? null
+    : usesMediaPartialRate
+      ? buildPartialPeriodRateLabel({
           isKo: opts.isKo,
           unitPriceWon,
           unitPeriodLabel,
-          campaignDays,
-          bundleDays,
+          rate: partialRate!,
           lineTotalWon,
-        });
+        })
+      : bundleDays == null
+        ? null
+        : buildProrationLabel({
+            isKo: opts.isKo,
+            unitPriceWon,
+            unitPeriodLabel,
+            campaignDays,
+            bundleDays,
+            lineTotalWon,
+          });
   const executionPeriodLabel =
     usePackagePeriod && bundleDays != null
       ? formatPackageExecutionPeriodLabel(priceOpt, bundleDays, opts.isKo)
@@ -346,6 +404,7 @@ export function buildQuoteWizardLineContext(
     bundleDays,
     campaignDays,
     prorationLabel,
+    usesMediaPartialRate,
   };
 }
 

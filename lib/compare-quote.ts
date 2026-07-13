@@ -10,6 +10,12 @@ import {
   estimatedMonthlyImpressions,
   resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
+import {
+  quoteLineTotalWonFromPartialRate,
+  resolvePartialPeriodRate,
+  type PartialPeriodRateAdminKey,
+} from "@/lib/media-partial-period-rates";
+import type { QuoteCampaignPeriodKey } from "@/lib/quote-wizard-pricing";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
 
@@ -91,6 +97,26 @@ export function tryResolveExplicitPriceOptionBundleDays(
   return null;
 }
 
+function quoteLineFromCostWon(
+  media: MediaItem,
+  costWon: number,
+  durationDays: number,
+): MediaQuoteLine {
+  const days = Math.max(1, Math.round(durationDays));
+  const monthlyImp = estimatedMonthlyImpressions(media);
+  const impressions = Math.round(monthlyImp * (days / 30));
+  const cpm =
+    impressions > 0 ? Math.round(costWon / (impressions / 1000)) : null;
+
+  return {
+    mediaId: media.id,
+    name: media.name,
+    costWon,
+    impressions,
+    cpm,
+  };
+}
+
 function quoteLineFromUnitPrice(
   media: MediaItem,
   unitPriceWon: number,
@@ -118,13 +144,47 @@ function quoteLineFromUnitPrice(
   };
 }
 
+/** 비교·상세 instant quote — 일수 → 부분기간 lookup 키 */
+export function quotePeriodLookupKeyFromDays(
+  days: number,
+): QuoteCampaignPeriodKey | PartialPeriodRateAdminKey | null {
+  const d = Math.max(1, Math.round(days));
+  const adminByDays: Record<number, PartialPeriodRateAdminKey> = {
+    3: "3days",
+    7: "1week",
+    14: "2weeks",
+    21: "3weeks",
+  };
+  if (adminByDays[d]) return adminByDays[d];
+  const wizardByDays: Record<number, QuoteCampaignPeriodKey> = {
+    14: "2weeks",
+    30: "1month",
+    90: "3months",
+    180: "6months",
+    360: "12months",
+  };
+  return wizardByDays[d] ?? null;
+}
+
 export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
+  const days = Math.max(1, Math.round(durationDays));
+  const periodKey = quotePeriodLookupKeyFromDays(days);
+  const partialRate =
+    periodKey != null
+      ? resolvePartialPeriodRate(media, null, periodKey)
+      : null;
+  const unitPriceWon = catalogPriceFieldToWon(media.price);
+
+  if (partialRate != null) {
+    const costWon = quoteLineTotalWonFromPartialRate(unitPriceWon, partialRate);
+    return quoteLineFromCostWon(media, costWon, durationDays);
+  }
+
   const period = normalizeMediaPricePeriod(media.pricePeriod);
   const periodDays = pricePeriodDays(period);
-  const unitPriceWon = catalogPriceFieldToWon(media.price);
   return quoteLineFromUnitPrice(media, unitPriceWon, durationDays, periodDays);
 }
 
@@ -172,8 +232,20 @@ export function calculateMediaQuoteFromOption(
   option: MediaPriceOption,
   durationDays: number,
 ): MediaQuoteLine {
-  const bundleDays = resolvePriceOptionBundleDays(option, media.pricePeriod);
+  const days = Math.max(1, Math.round(durationDays));
+  const periodKey = quotePeriodLookupKeyFromDays(days);
+  const partialRate =
+    periodKey != null
+      ? resolvePartialPeriodRate(media, option, periodKey)
+      : null;
   const unitPriceWon = catalogPriceFieldToWon(option.price);
+
+  if (partialRate != null) {
+    const costWon = quoteLineTotalWonFromPartialRate(unitPriceWon, partialRate);
+    return quoteLineFromCostWon(media, costWon, durationDays);
+  }
+
+  const bundleDays = resolvePriceOptionBundleDays(option, media.pricePeriod);
   return quoteLineFromUnitPrice(
     media,
     unitPriceWon,

@@ -658,18 +658,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const hasProrationLine = useMemo(
     () =>
-      selectedMedia.some((m) => {
-        if (usePackagePeriodByMediaId[m.id]) return false;
-        if (m.catalogSource === "network") return false;
-        const poIdx = mediaPriceOptionIndex[m.id] ?? 0;
-        const priceOpt = m.priceOptions?.[poIdx];
-        if (!priceOpt) return false;
-        const bundleDays = tryResolveExplicitPriceOptionBundleDays(priceOpt);
-        if (bundleDays == null) return false;
-        const campaignDays = quoteCampaignDaysFromPeriodKey(period);
-        return campaignDays !== bundleDays;
-      }),
-    [selectedMedia, mediaPriceOptionIndex, usePackagePeriodByMediaId, period],
+      quoteLineContexts.some(
+        (line) => line.prorationLabel != null || line.usesMediaPartialRate,
+      ),
+    [quoteLineContexts],
   );
 
   const totalCost = useMemo(
@@ -693,6 +685,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           {
             key: m.id,
             label: `${name}${optionPart} ${line.prorationLabel}`,
+            usesMediaPartialRate: line.usesMediaPartialRate,
           },
         ];
       }),
@@ -2419,6 +2412,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             key={row.key}
                             className="text-xs leading-relaxed text-muted-foreground sm:text-sm"
                           >
+                            {row.usesMediaPartialRate ? (
+                              <span className="mr-1.5 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                                {isKo ? "매체 지정 요율" : "Media rate"}
+                              </span>
+                            ) : null}
                             {row.label}
                           </li>
                         ))}
