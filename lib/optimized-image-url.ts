@@ -4,7 +4,10 @@
  * Cloudinary: 계정 종료로 표시 제외.
  */
 
-import { isBunnyStorageConfigured } from "@/lib/bunny-storage";
+import {
+  buildBunnyCdnUrl,
+  isBunnyStorageConfigured,
+} from "@/lib/bunny-storage";
 
 const CLOUDINARY_HOST = /(^|\.)res\.cloudinary\.com$/i;
 const BUNNY_CDN = /\.b-cdn\.net$/i;
@@ -32,6 +35,10 @@ export function sanitizeMediaImageUrl(
   if (!/^[a-z][a-z0-9+.-]*:/i.test(raw)) {
     if (/b-cdn\.net/i.test(raw)) {
       raw = `https://${raw.replace(/^\/+/, "")}`;
+    } else if (/^tkad\//i.test(raw.replace(/^\/+/, ""))) {
+      const cdnUrl = buildBunnyCdnUrl(raw.replace(/^\/+/, ""));
+      if (!cdnUrl) return null;
+      raw = cdnUrl;
     } else {
       return null;
     }
@@ -125,9 +132,14 @@ export function buildBunnyMediaProxyUrl(
   return `/api/bunny-media/${encoded}`;
 }
 
+/** Same-origin Bunny proxy — must bypass `/_next/image` (Vercel App Router has no pages image handler). */
+export function isBunnyMediaProxyPath(url: string | null | undefined): boolean {
+  return typeof url === "string" && url.startsWith("/api/bunny-media/");
+}
+
 /** @deprecated Prefer resolveCatalogImageSrc — catalog images use next/image optimizer */
-export function shouldUseUnoptimizedImage(_url: string | null | undefined): boolean {
-  return false;
+export function shouldUseUnoptimizedImage(url: string | null | undefined): boolean {
+  return isBunnyMediaProxyPath(url?.trim() ?? "");
 }
 
 /** 공개 표시용 — Bunny는 프록시 우선, Cloudinary 제외 */
@@ -149,7 +161,7 @@ export type ResolvedCatalogImage = {
 
 const CATALOG_CARD_WIDTH = 400;
 
-/** 카탈로그/카드용 src — Bunny는 same-origin 프록시 우선, next/image로 리사이즈 */
+/** 카탈로그/카드용 src — Bunny CDN은 remotePatterns로 `/_next/image` 최적화, 프록시는 unoptimized */
 export function resolveCatalogImageSrc(
   url: string | null | undefined,
   opts?: { width?: number },
@@ -157,12 +169,11 @@ export function resolveCatalogImageSrc(
   const cardWidth = opts?.width ?? CATALOG_CARD_WIDTH;
   const raw = sanitizeMediaImageUrl(url);
   if (!raw || isCloudinaryMediaUrl(raw)) return null;
-  if (raw.startsWith("/api/bunny-media/")) {
-    return { src: raw, unoptimized: false };
+  if (isBunnyMediaProxyPath(raw)) {
+    return { src: raw, unoptimized: true };
   }
   if (isBunnyMediaUrl(raw)) {
-    const src = buildBunnyMediaProxyUrl(raw) ?? raw;
-    return { src, unoptimized: false };
+    return { src: raw, unoptimized: false };
   }
   const optimized = optimizeImageUrl(raw, {
     width: cardWidth,

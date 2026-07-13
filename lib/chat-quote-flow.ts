@@ -130,7 +130,7 @@ export async function createOoHQuoteFromChatRoom(
     data: { oohQuoteId: ooh.id },
   });
 
-  const previewPath = `/${locale}/quote/${ooh.id}/preview`;
+  const previewPath = `/quote/${ooh.id}/preview`;
   const isKo = locale === "ko";
 
   await db.chatMessage.create({

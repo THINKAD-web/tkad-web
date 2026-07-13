@@ -1,5 +1,6 @@
 import type { MediaAvailability, NotificationType } from "@prisma/client";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { stripLocalePath } from "@/lib/navigation/discovery-path";
 import {
   isWebPushConfigured,
   pushNotifyCampaignD1,
@@ -8,6 +9,41 @@ import {
   sendWebPushToUser,
 } from "@/lib/web-push";
 import { siteUrl } from "@/lib/seo";
+
+/** In-app navigation (`Link`, `router.push`) — locale prefix must be omitted. */
+export function normalizeNotificationLink(
+  link: string | null | undefined,
+): string | null {
+  if (!link?.trim()) return null;
+  let path = link.trim();
+  if (/^https?:\/\//i.test(path)) {
+    try {
+      path = new URL(path).pathname;
+    } catch {
+      return null;
+    }
+  }
+  if (!path.startsWith("/")) path = `/${path}`;
+  return stripLocalePath(path);
+}
+
+function localeFromRawNotificationLink(
+  link: string | null | undefined,
+): "ko" | "en" {
+  const raw = link?.trim() ?? "";
+  return /\/en(?:\/|$)/.test(raw) ? "en" : "ko";
+}
+
+function notificationLinkToPublicUrl(
+  link: string | null | undefined,
+  locale?: "ko" | "en",
+): string {
+  const base = siteUrl.replace(/\/$/, "");
+  const loc = locale ?? localeFromRawNotificationLink(link);
+  const path = normalizeNotificationLink(link);
+  if (!path) return `${base}/${loc}/my`;
+  return `${base}/${loc}${path}`;
+}
 
 export type NotificationDto = {
   id: string;
@@ -42,7 +78,7 @@ function rowToDto(row: {
     type: row.type,
     title: row.title,
     body: row.body,
-    link: row.link,
+    link: normalizeNotificationLink(row.link),
     isRead: row.isRead,
     createdAt: row.createdAt.toISOString(),
   };
@@ -53,6 +89,7 @@ export async function createNotification(
 ): Promise<NotificationDto | null> {
   if (!isDatabaseConfigured()) return null;
   const db = getPrisma();
+  const link = normalizeNotificationLink(input.link);
   try {
     if (input.dedupeKey) {
       const row = await db.notification.upsert({
@@ -67,17 +104,17 @@ export async function createNotification(
           type: input.type,
           title: input.title,
           body: input.body,
-          link: input.link ?? null,
+          link,
           dedupeKey: input.dedupeKey,
         },
         update: {
           title: input.title,
           body: input.body,
-          link: input.link ?? null,
+          link,
           isRead: false,
         },
       });
-      void mirrorNotificationToWebPush(input);
+      void mirrorNotificationToWebPush({ ...input, link });
       return rowToDto(row);
     }
     const row = await db.notification.create({
@@ -86,10 +123,10 @@ export async function createNotification(
         type: input.type,
         title: input.title,
         body: input.body,
-        link: input.link ?? null,
+        link,
       },
     });
-    void mirrorNotificationToWebPush(input);
+    void mirrorNotificationToWebPush({ ...input, link });
     return rowToDto(row);
   } catch (e) {
     console.error("[createNotification]", e);
@@ -102,7 +139,7 @@ function mirrorNotificationToWebPush(input: CreateNotificationInput): void {
 
   if (input.type === "QUOTE_RECEIVED" && input.dedupeKey?.startsWith("quote_sent:")) {
     const quoteId = input.dedupeKey.replace("quote_sent:", "");
-    const locale = input.link?.includes("/en/") ? "en" : "ko";
+    const locale = localeFromRawNotificationLink(input.link);
     void pushNotifyQuoteArrived(input.userId, { quoteId, locale });
     return;
   }
@@ -125,9 +162,7 @@ function mirrorNotificationToWebPush(input: CreateNotificationInput): void {
     return;
   }
 
-  const base = siteUrl.replace(/\/$/, "");
-  const path = input.link?.startsWith("/") ? input.link : input.link ? `/${input.link}` : "";
-  const url = path ? `${base}/ko${path}` : `${base}/ko/my`;
+  const url = notificationLinkToPublicUrl(input.link);
   void sendWebPushToUser(input.userId, {
     title: input.title,
     body: input.body,
