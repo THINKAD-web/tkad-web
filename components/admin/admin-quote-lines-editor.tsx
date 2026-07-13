@@ -9,7 +9,7 @@ import {
   adminLineMediaItemForControl,
   adminMediaDtoToMediaItem,
   catalogLinePrice,
-  computeAdminCatalogLineAmount,
+  computeAdminCatalogLineAmountForMedia,
   createCustomQuoteLine,
   type AdminQuoteCatalogLine,
   type AdminQuoteLine,
@@ -65,11 +65,10 @@ export function AdminQuoteLinesEditor({
 
   const catalogLineSubtotal = (line: Extract<AdminQuoteLine, { kind: "catalog" }>) => {
     const m = mediaById.get(line.mediaId);
-    if (!m) return 0;
-    const { rawPrice, period } = catalogLinePrice(m, line.priceOptionIndex);
-    return computeAdminCatalogLineAmount(
-      rawPrice,
-      period,
+    if (!m) return { amount: 0, usesMediaPartialRate: false };
+    return computeAdminCatalogLineAmountForMedia(
+      m,
+      line.priceOptionIndex,
       days,
       line.quantity,
       factorForPeriod,
@@ -197,7 +196,8 @@ export function AdminQuoteLinesEditor({
                   line.priceOptionIndex,
                 );
                 const unitWon = catalogPriceFieldToWon(rawPrice);
-                const subtotal = catalogLineSubtotal(line);
+                const { amount: subtotal, usesMediaPartialRate } =
+                  catalogLineSubtotal(line);
                 const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
                 const displayName = label ? `${nameBase} (${label})` : nameBase;
 
@@ -210,6 +210,11 @@ export function AdminQuoteLinesEditor({
                       <div className="font-medium text-foreground dark:text-hero-fg">
                         {displayName}
                       </div>
+                      {usesMediaPartialRate ? (
+                        <span className="mt-1 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
+                          {isKo ? "매체 지정 요율" : "Media rate"}
+                        </span>
+                      ) : null}
                       <div className="text-xs text-muted-foreground">
                         {m.location} · {m.type}
                       </div>

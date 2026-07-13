@@ -4,6 +4,11 @@ import {
   encodeAdminQuoteItemSpec,
 } from "@/lib/admin-quote-line-spec";
 import type { QuoteItemApi } from "@/lib/admin-sales-quote";
+import { quotePeriodLookupKeyFromDays } from "@/lib/compare-quote";
+import {
+  quoteLineTotalWonFromPartialRate,
+  resolvePartialPeriodRate,
+} from "@/lib/media-partial-period-rates";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { normalizeMediaPricePeriod } from "@/lib/media-price-format";
 import type { MediaItem } from "@/lib/media-data";
@@ -40,6 +45,8 @@ export type AdminQuoteBuiltLineItem = {
   quantity: number;
   quantityLabel?: string;
   amount: number;
+  /** 매체·옵션 부분기간 요율 적용 */
+  usesMediaPartialRate?: boolean;
 };
 
 export function newAdminQuoteLineId(prefix = "l"): string {
@@ -86,6 +93,7 @@ export function adminMediaDtoToMediaItem(m: AdminMediaDto): MediaItem {
     dailyFootTraffic: m.dailyFootfall ?? 0,
     sampleImages: m.image ? [m.image] : [],
     priceOptions: m.priceOptions ?? undefined,
+    partialPeriodRates: m.partialPeriodRates ?? undefined,
   };
 }
 
@@ -129,6 +137,46 @@ export function computeAdminCatalogLineAmount(
   const unitWon = catalogPriceFieldToWon(rawPrice);
   const factor = factorForPeriod(period, days);
   return Math.round(unitWon * factor * Math.max(0, quantity));
+}
+
+/** 카탈로그 라인 — partial rate 우선, 없으면 monthFactorFromDays 계열 */
+export function computeAdminCatalogLineAmountForMedia(
+  m: AdminMediaDto,
+  priceOptionIndex: number,
+  days: number,
+  quantity: number,
+  factorForPeriod: (p: AdminQuotePeriodKey, d: number) => number,
+): { amount: number; usesMediaPartialRate: boolean } {
+  const qty = Math.max(0, quantity);
+  const { rawPrice, period } = catalogLinePrice(m, priceOptionIndex);
+  const mediaItem = adminMediaDtoToMediaItem(m);
+  const priceOpt = m.priceOptions?.[Math.max(0, priceOptionIndex)] ?? null;
+  const periodKey = quotePeriodLookupKeyFromDays(days);
+  const partialRate =
+    periodKey != null
+      ? resolvePartialPeriodRate(mediaItem, priceOpt, periodKey)
+      : null;
+
+  if (partialRate != null) {
+    const unitWon = catalogPriceFieldToWon(rawPrice);
+    return {
+      amount: Math.round(
+        quoteLineTotalWonFromPartialRate(unitWon, partialRate) * qty,
+      ),
+      usesMediaPartialRate: true,
+    };
+  }
+
+  return {
+    amount: computeAdminCatalogLineAmount(
+      rawPrice,
+      period,
+      days,
+      qty,
+      factorForPeriod,
+    ),
+    usesMediaPartialRate: false,
+  };
 }
 
 export function inferPriceOptionIndexFromMediaName(
@@ -230,14 +278,14 @@ export function buildAdminQuoteLineItems(opts: {
       m,
       line.priceOptionIndex,
     );
-    const unitWon = catalogPriceFieldToWon(rawPrice);
-    const amount = computeAdminCatalogLineAmount(
-      rawPrice,
-      period,
+    const { amount, usesMediaPartialRate } = computeAdminCatalogLineAmountForMedia(
+      m,
+      line.priceOptionIndex,
       days,
       qty,
       factorForPeriod,
     );
+    const unitWon = catalogPriceFieldToWon(rawPrice);
     const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
     const mediaName = label ? `${nameBase} (${label})` : nameBase;
     const displaySpec = mediaSpecLine(m);
@@ -261,6 +309,7 @@ export function buildAdminQuoteLineItems(opts: {
       quantity: qty,
       quantityLabel,
       amount,
+      usesMediaPartialRate,
     });
   }
 
