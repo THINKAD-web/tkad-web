@@ -172,6 +172,8 @@ model Media {
   pricePeriod  MediaPricePeriod @default(month) @map("price_period")
   /// 가격 옵션 (JSON 배열). 예: [{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]
   priceOptions Json?            @map("price_options")
+  /// 부분기간 요율 lookup — 예: {"3days":0.35,"1week":0.45,"2weeks":0.6,"3weeks":0.8}
+  partialPeriodRates Json?      @map("partial_period_rates")
   image        String?
   width        String?
   height       String?

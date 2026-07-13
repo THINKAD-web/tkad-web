@@ -1,5 +1,9 @@
 import type { Media } from "@prisma/client";
 import {
+  parsePartialPeriodRatesRaw,
+  type PartialPeriodRatesMap,
+} from "@/lib/media-partial-period-rates";
+import {
   parseMediaInstallLocations,
   type MediaInstallLocation,
 } from "@/lib/media-install-locations";
@@ -73,7 +77,9 @@ export type AdminMediaDto = {
     price: number;
     period?: string;
     description?: string;
+    partialPeriodRates?: PartialPeriodRatesMap;
   }> | null;
+  partialPeriodRates: PartialPeriodRatesMap | null;
   /** 이동형 매체 서비스 구역 — 전국 시·군·구 5자리 행정구역 코드 */
   coverageDistrictCodes: string[];
   proposalUrl: string | null;
@@ -259,10 +265,15 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     isPopular: pickBool(r, "isPopular", "is_popular", false),
     popularOrder: pickInt(r, "popularOrder", "popular_order"),
     priceOptions: Array.isArray((r as Record<string, unknown>).priceOptions)
-      ? (r as Record<string, unknown>).priceOptions as Array<{ label: string; price: number; period?: string }>
+      ? ((r as Record<string, unknown>).priceOptions as AdminMediaDto["priceOptions"])
       : Array.isArray((r as Record<string, unknown>).price_options)
-        ? (r as Record<string, unknown>).price_options as Array<{ label: string; price: number; period?: string }>
+        ? ((r as Record<string, unknown>).price_options as AdminMediaDto["priceOptions"])
         : null,
+    partialPeriodRates:
+      parsePartialPeriodRatesRaw(
+        (r as Record<string, unknown>).partialPeriodRates ??
+          (r as Record<string, unknown>).partial_period_rates,
+      ) ?? null,
     coverageDistrictCodes: pickStrArr(
       r,
       "coverageDistrictCodes",
@@ -361,8 +372,9 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     isPopular: m.isPopular,
     popularOrder: m.popularOrder,
     priceOptions: Array.isArray(m.priceOptions)
-      ? m.priceOptions as Array<{ label: string; price: number; period?: string }>
+      ? (m.priceOptions as AdminMediaDto["priceOptions"])
       : null,
+    partialPeriodRates: parsePartialPeriodRatesRaw(m.partialPeriodRates) ?? null,
     coverageDistrictCodes: m.coverageDistrictCodes ?? [],
     proposalUrl: m.proposalUrl,
     proposalFileName: m.proposalFileName,

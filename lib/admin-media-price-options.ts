@@ -1,4 +1,8 @@
 import { Prisma } from "@prisma/client";
+import {
+  parsePartialPeriodRatesFromPriceOptionRow,
+  type PartialPeriodRatesMap,
+} from "@/lib/media-partial-period-rates";
 
 /** Admin·API 공통: DB `price_options` JSON 배열 한 행 */
 export type AdminMediaPriceOption = {
@@ -6,6 +10,7 @@ export type AdminMediaPriceOption = {
   price: number;
   period?: string;
   description?: string;
+  partialPeriodRates?: PartialPeriodRatesMap;
 };
 
 export type NormalizePriceOptionsResult =
@@ -60,6 +65,8 @@ export function normalizePriceOptionsForPrisma(
     const item: AdminMediaPriceOption = { label, price };
     if (period) item.period = period;
     if (description) item.description = description;
+    const partialPeriodRates = parsePartialPeriodRatesFromPriceOptionRow(o);
+    if (partialPeriodRates) item.partialPeriodRates = partialPeriodRates;
     out.push(item);
   }
   if (out.length === 0) {

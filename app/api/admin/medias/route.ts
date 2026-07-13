@@ -12,6 +12,7 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { normalizePartialPeriodRatesForPrisma } from "@/lib/admin-partial-period-rates";
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
 import {
@@ -214,6 +215,13 @@ export async function POST(request: NextRequest) {
   }
   if (po.kind === "ok") {
     data.priceOptions = po.data;
+  }
+  const ppr = normalizePartialPeriodRatesForPrisma(body);
+  if (ppr.kind === "error") {
+    return json({ error: ppr.message }, 400);
+  }
+  if (ppr.kind === "ok") {
+    data.partialPeriodRates = ppr.data;
   }
   const wm = optNum(body.widthM);
   if (wm !== undefined) data.widthM = wm;

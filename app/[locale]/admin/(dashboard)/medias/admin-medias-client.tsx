@@ -78,6 +78,13 @@ import {
   normalizeInstallLocationsFromInput,
   resolveMediaCoordsForSave,
 } from "@/lib/media-install-locations";
+import {
+  EMPTY_PARTIAL_PERIOD_RATES_DRAFT,
+  partialPeriodRatesDraftFromMap,
+  partialPeriodRatesMapFromDraft,
+  parsePartialPeriodRatesRaw,
+  type PartialPeriodRatesDraft,
+} from "@/lib/media-partial-period-rates";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -265,6 +272,8 @@ type AdminMediaForm = {
   tags: string;
   priceNote: string;
   priceOptionsJson: string;
+  /** 매체 공통 부분기간 요율 (옵션 override 없을 때) */
+  partialPeriodRates: PartialPeriodRatesDraft;
   image: string;
   extractedImagesText: string;
   targetAge: string;
@@ -336,6 +345,7 @@ const emptyForm: AdminMediaForm = {
   tags: "",
   priceNote: "",
   priceOptionsJson: "",
+  partialPeriodRates: { ...EMPTY_PARTIAL_PERIOD_RATES_DRAFT },
   image: "",
   extractedImagesText: "",
   targetAge: "",
@@ -360,7 +370,61 @@ type PriceOptDraft = {
   price: string;
   period: string;
   description: string;
+  partialPeriodRates: PartialPeriodRatesDraft;
 };
+
+const PARTIAL_PERIOD_RATE_UI: { key: keyof PartialPeriodRatesDraft; label: string }[] =
+  [
+    { key: "3days", label: "3일" },
+    { key: "1week", label: "1주" },
+    { key: "2weeks", label: "2주" },
+    { key: "3weeks", label: "3주" },
+  ];
+
+function PartialPeriodRatesFields({
+  draft,
+  onChange,
+  compact = false,
+}: {
+  draft: PartialPeriodRatesDraft;
+  onChange: (next: PartialPeriodRatesDraft) => void;
+  compact?: boolean;
+}) {
+  return (
+    <div className={compact ? "space-y-1.5" : "space-y-2"}>
+      <p className="text-[10px] font-medium text-muted-foreground">
+        부분기간 요율 (%)
+      </p>
+      <p className="text-[10px] leading-relaxed text-muted-foreground">
+        비워두면 기존 선형/고정 로직 사용. 패키지 단가 대비 집행 기간 비율(예: 2주
+        60% → 0.6).
+      </p>
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+        {PARTIAL_PERIOD_RATE_UI.map(({ key, label }) => (
+          <div key={key}>
+            <label className="mb-0.5 block text-[10px] text-muted-foreground">
+              {label}
+            </label>
+            <div className="relative">
+              <Input
+                className="h-8 pr-7 text-sm tabular-nums"
+                inputMode="decimal"
+                placeholder="—"
+                value={draft[key]}
+                onChange={(e) =>
+                  onChange({ ...draft, [key]: e.target.value })
+                }
+              />
+              <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[10px] text-muted-foreground">
+                %
+              </span>
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 const PRICE_PERIOD_KEYS = ["month", "biweekly", "week", "day"] as const;
 type PricePeriodKey = (typeof PRICE_PERIOD_KEYS)[number];
@@ -389,6 +453,7 @@ function newPriceOptDraft(): PriceOptDraft {
     price: "",
     period: "month",
     description: "",
+    partialPeriodRates: { ...EMPTY_PARTIAL_PERIOD_RATES_DRAFT },
   };
 }
 
@@ -415,6 +480,9 @@ function priceOptDraftsFromJson(jsonStr: string): PriceOptDraft[] {
         period: normalizePricePeriodForSelect(o.period),
         description:
           typeof o.description === "string" ? o.description : "",
+        partialPeriodRates: partialPeriodRatesDraftFromMap(
+          parsePartialPeriodRatesRaw(o.partialPeriodRates),
+        ),
       };
     });
   } catch {
@@ -433,6 +501,8 @@ function jsonStringFromPriceOptDrafts(rows: PriceOptDraft[]): string {
       };
       if (r.period.trim()) o.period = r.period.trim();
       if (r.description.trim()) o.description = r.description.trim();
+      const optionRates = partialPeriodRatesMapFromDraft(r.partialPeriodRates);
+      if (optionRates) o.partialPeriodRates = optionRates;
       return o;
     });
   return arr.length > 0 ? JSON.stringify(arr, null, 2) : "";
@@ -509,6 +579,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     priceNote: m.priceNote ?? "",
     priceOptionsJson:
       m.priceOptions != null ? JSON.stringify(m.priceOptions, null, 2) : "",
+    partialPeriodRates: partialPeriodRatesDraftFromMap(m.partialPeriodRates),
     image: m.image ?? "",
     extractedImagesText: (m.extractedImages ?? []).join("\n"),
     targetAge: m.targetAge ?? "",
@@ -617,6 +688,7 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     })(),
     priceNote: form.priceNote.trim() || null,
     priceOptions,
+    partialPeriodRates: partialPeriodRatesMapFromDraft(form.partialPeriodRates),
     widthM: parseOptFloat(form.widthM),
     heightM: parseOptFloat(form.heightM),
     resolution: form.resolution.trim() || null,
@@ -3923,6 +3995,14 @@ export default function AdminMediasClient({
                   }
                 />
               </div>
+              <div className="rounded-xl border border-border/80 bg-muted/40 p-4">
+                <PartialPeriodRatesFields
+                  draft={form.partialPeriodRates}
+                  onChange={(partialPeriodRates) =>
+                    setForm((f) => ({ ...f, partialPeriodRates }))
+                  }
+                />
+              </div>
               <div className="rounded-xl border-2 border-border bg-muted p-4 bg-muted/60">
                 <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                   <label className="text-xs font-semibold text-foreground">
@@ -4049,6 +4129,20 @@ export default function AdminMediasClient({
                               <option value="week">week (주)</option>
                               <option value="day">day (일)</option>
                             </select>
+                          </div>
+                          <div className="sm:col-span-2">
+                            <PartialPeriodRatesFields
+                              compact
+                              draft={row.partialPeriodRates}
+                              onChange={(partialPeriodRates) => {
+                                const next = priceOptDrafts.map((r) =>
+                                  r.key === row.key
+                                    ? { ...r, partialPeriodRates }
+                                    : r,
+                                );
+                                applyPriceOptDrafts(next);
+                              }}
+                            />
                           </div>
                           <div className="sm:col-span-2">
                             <label className="mb-0.5 block text-[10px] font-medium text-muted-foreground">

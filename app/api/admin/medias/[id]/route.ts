@@ -14,6 +14,7 @@ import {
   isValidCatalogMediaType,
 } from "@/lib/media-auto-categorize";
 import { normalizePriceOptionsForPrisma } from "@/lib/admin-media-price-options";
+import { normalizePartialPeriodRatesForPrisma } from "@/lib/admin-partial-period-rates";
 import { normalizeCoverageDistrictCodesInput } from "@/lib/geo/normalize-coverage-codes";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-district-codes";
@@ -206,6 +207,14 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   if (priceOpts.kind === "ok") {
     data.priceOptions = priceOpts.data;
+  }
+
+  const partialRates = normalizePartialPeriodRatesForPrisma(body);
+  if (partialRates.kind === "error") {
+    return json({ error: partialRates.message }, 400);
+  }
+  if (partialRates.kind === "ok") {
+    data.partialPeriodRates = partialRates.data;
   }
 
   if (body.widthM !== undefined) {

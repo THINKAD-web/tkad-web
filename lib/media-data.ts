@@ -1,3 +1,4 @@
+import type { PartialPeriodRatesMap } from "@/lib/media-partial-period-rates";
 import type { CampaignMapMediaType, CampaignMapPin } from "@/lib/campaign-monitoring-mock";
 import { getDataDrivenSimilarMedia } from "@/lib/media-similar";
 import {
@@ -30,6 +31,8 @@ export type MediaPriceOption = {
   units?: number;
   /** 포함 지점 목록 (콤마 구분) */
   stores?: string;
+  /** 옵션별 부분기간 요율 — Media.partialPeriodRates 보다 우선 */
+  partialPeriodRates?: PartialPeriodRatesMap;
 };
 
 /** `data/media-items-keyword-filter.json`에서 합성 상세에만 쓰는 메타 */
@@ -163,6 +166,8 @@ export interface MediaItem {
   caseStudyPhotos?: MediaCaseStudyPhoto[];
   /** 복수 가격 옵션 (예: 15초 1일 1회 / 1일 2회 등) */
   priceOptions?: MediaPriceOption[];
+  /** 매체 공통 부분기간 요율 (옵션 override 없을 때) */
+  partialPeriodRates?: PartialPeriodRatesMap;
   /** DB 단일 매체 | 합성 네트워크 패키지 */
   catalogSource?: "media" | "network";
   networkSubtype?: string;
