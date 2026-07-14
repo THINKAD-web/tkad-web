@@ -14,7 +14,6 @@ import { MediaDetailProposalCard } from "@/components/media-detail/media-detail-
 import { MediaDetailMobileBar } from "@/components/media-detail/media-detail-mobile-bar";
 import { MediaAvailabilityCalendar } from "@/components/media-detail/availability-calendar";
 import MediaSimilarCarousel from "@/components/media-similar-carousel";
-import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
 type SimilarItem = Parameters<typeof MediaSimilarCarousel>[0]["items"][number];
 
@@ -107,8 +106,7 @@ export function MediaDetailPageView({
   const displayName = isKo ? media.name : media.nameEn || media.name;
 
   return (
-    <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+    <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
         <MediaDetailHeroSection
           media={media}
           isKo={isKo}
@@ -231,7 +229,6 @@ export function MediaDetailPageView({
           displayName={displayName}
           periodLabel={periodLabel}
         />
-      </div>
-    </HomeLandingDayNight>
+    </div>
   );
 }

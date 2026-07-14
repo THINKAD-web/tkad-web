@@ -287,21 +287,6 @@ export default async function MediaDetailPage({ params }: Props) {
 
   return (
     <>
-      <TrackMediaView
-        record={mediaItemToRecentlyViewedRecord(media, { isKo })}
-        offlineCard={{
-          id: media.id,
-          name: isKo ? media.name : media.nameEn || media.name,
-          location: formatMediaLocationShort(media, isKo),
-          type: typeLabel,
-          price: media.price,
-          imageUrl: heroImage || undefined,
-        }}
-      />
-      <EventOnMount
-        event="view_media"
-        params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
-      />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
@@ -433,6 +418,21 @@ export default async function MediaDetailPage({ params }: Props) {
             ) : null}
           </>
         }
+      />
+      <TrackMediaView
+        record={mediaItemToRecentlyViewedRecord(media, { isKo })}
+        offlineCard={{
+          id: media.id,
+          name: isKo ? media.name : media.nameEn || media.name,
+          location: formatMediaLocationShort(media, isKo),
+          type: typeLabel,
+          price: media.price,
+          imageUrl: heroImage || undefined,
+        }}
+      />
+      <EventOnMount
+        event="view_media"
+        params={{ media_id: media.id, media_name: media.name, media_type: media.type }}
       />
       <ExitSurveyBanner surface="media_detail" />
     </>

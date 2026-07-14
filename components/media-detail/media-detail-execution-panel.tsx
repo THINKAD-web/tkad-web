@@ -140,9 +140,9 @@ export function MediaDetailExecutionPanel({
   return (
     <div className={cn("space-y-5", className)}>
       <div>
-        <h3 className="text-sm font-bold dark:text-white text-gray-900">
+        <h2 className="text-sm font-bold dark:text-white text-gray-900">
           {labels.specsTitle}
-        </h3>
+        </h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
           <IconSpec
             icon={Ruler}

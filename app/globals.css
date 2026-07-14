@@ -1760,6 +1760,22 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   max-width: 794px !important;
 }
 
+/* 공식 견적서 — VAT 안내와 테이블 헤더 겹침 방지 */
+.quote-formal-preview-doc .quote-formal-vat-note {
+  display: block;
+  margin-bottom: 0;
+}
+
+.quote-formal-preview-doc .quote-formal-table-block {
+  margin-top: 0 !important;
+  isolation: isolate;
+}
+
+[data-quote-pdf-scale-wrap][data-quote-pdf-exporting="true"] .quote-formal-preview-doc {
+  width: 210mm !important;
+  max-width: 210mm !important;
+}
+
 /* Step 1 미리보기 카드 — appearance 기준 배경·대비 (Tailwind dark: 와 분리) */
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-aside {
   background: linear-gradient(

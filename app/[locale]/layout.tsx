@@ -16,7 +16,7 @@ import { buildStructuredDataGraph } from "@/lib/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeInitScript } from "@/components/theme-init-script";
-import LocaleRootBody from "@/components/locale-root-body";
+import { AppProvidersRoot } from "@/components/app-providers-root";
 import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
@@ -183,26 +183,7 @@ export default async function LocaleLayout({ children, params }: Props) {
             <PublicOnlyMount>
               <DeferredAnalytics />
             </PublicOnlyMount>
-            <LocaleRootBody
-              skipLinkLabel={
-                locale === "ko" ? "본문으로 건너뛰기" : "Skip to main content"
-              }
-              header={
-                <Suspense
-                  fallback={
-                    <div
-                      className="h-14 shrink-0 md:h-16"
-                      aria-hidden
-                    />
-                  }
-                >
-                  <SiteHeader />
-                  <OnboardingProgressBar />
-                </Suspense>
-              }
-            >
-              {children}
-            </LocaleRootBody>
+            {children}
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
