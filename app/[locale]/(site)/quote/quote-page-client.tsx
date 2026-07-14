@@ -71,7 +71,7 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
-import { tryResolveExplicitPriceOptionBundleDays } from "@/lib/compare-quote";
+import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 import { buildQuoteMediaSelectionSnapshot } from "@/lib/quote-snapshot-build";
 import {
@@ -105,21 +105,6 @@ import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-downloa
 const PHONE_RE = /^[\d\-+() ]{8,}$/;
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const LOGO_MAX_BYTES = 600 * 1024;
-
-function packagePeriodToggleMeta(
-  media: MediaItem,
-  poIdx: number,
-): { bundleDays: number; periodText: string } | null {
-  const priceOpt = media.priceOptions?.[poIdx];
-  if (!priceOpt) return null;
-  const bundleDays = tryResolveExplicitPriceOptionBundleDays(priceOpt);
-  if (bundleDays == null) return null;
-  const periodText =
-    typeof priceOpt.period === "string" && priceOpt.period.trim()
-      ? priceOpt.period.trim()
-      : String(bundleDays);
-  return { bundleDays, periodText };
-}
 
 async function runWithQuotePdfExport(
   el: HTMLElement | null,

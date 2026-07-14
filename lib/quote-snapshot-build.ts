@@ -17,8 +17,9 @@ import {
   plannerMediaPeriodTotalWon,
   resolveQuoteCampaignPeriodForPricing,
 } from "@/lib/planner/planner-media-quantity";
-import { planCartLinePeriodTotalWon } from "@/lib/plan-cart-pricing";
+import { planCartLinePeriodTotalWon, planCartItemQuoteLineFromPeriod } from "@/lib/plan-cart-pricing";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
+import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 
 export type BuildQuoteMediaSelectionInput = {
   media: MediaItem;
@@ -109,27 +110,31 @@ export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
   item: PlanCartItem;
   isKo: boolean;
   periodCtx: PlannerPeriodPricingContext;
-  usePackagePeriod?: boolean;
-  lineCampaignDays?: number;
 }): QuoteMediaSelectionSnapshot[] {
   const { media: m, item, isKo, periodCtx } = input;
   const rows = planCartEffectiveOptionSelections(item, m);
   const usesMulti =
     planCartUsesExplicitOptionRows(item) && (rows?.length ?? 0) > 1;
+  const campaignPeriod = resolveQuoteCampaignPeriodForPricing(periodCtx);
 
   if (!rows?.length || !usesMulti) {
     const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
     const units = rows?.[0]?.quantity ?? item.quantity;
-    const lineTotalWon = planCartLinePeriodTotalWon(item, m, periodCtx, isKo);
+    const quoteLine =
+      campaignPeriod != null
+        ? planCartItemQuoteLineFromPeriod(item, m, campaignPeriod, isKo)
+        : item.usePackagePeriod === true && packagePeriodToggleMeta(m, poIdx)
+          ? planCartItemQuoteLineFromPeriod(item, m, "30days", isKo)
+          : { lineTotalWon: planCartLinePeriodTotalWon(item, m, periodCtx, isKo) };
     return [
       buildQuoteMediaSelectionSnapshot({
         media: m,
         isKo,
         priceOptionIndex: poIdx,
         units,
-        lineTotalWon,
-        usePackagePeriod: input.usePackagePeriod,
-        lineCampaignDays: input.lineCampaignDays,
+        lineTotalWon: quoteLine.lineTotalWon,
+        usePackagePeriod: quoteLine.usePackagePeriod,
+        lineCampaignDays: quoteLine.lineCampaignDays,
       }),
     ];
   }
@@ -141,8 +146,6 @@ export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
       priceOptionIndex: row.priceOptionIndex,
       units: row.quantity,
       lineTotalWon: quoteOptionSelectionPeriodTotalWon(m, row, periodCtx, isKo),
-      usePackagePeriod: input.usePackagePeriod,
-      lineCampaignDays: input.lineCampaignDays,
     }),
   );
 }

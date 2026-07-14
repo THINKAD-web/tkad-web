@@ -26,6 +26,8 @@ import {
   resolveQuoteCampaignPeriodForPricing,
 } from "@/lib/planner/planner-media-quantity";
 import type { QuoteCampaignPeriodKey } from "@/lib/quote-wizard-pricing";
+import { buildQuoteWizardLineContext } from "@/lib/quote-wizard-pricing";
+import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 
 export function planCartItemQuantity(
   item: Pick<PlanCartItem, "quantity">,
@@ -167,6 +169,21 @@ function planCartItemPeriodTotalWon(
   campaignPeriod: QuoteCampaignPeriodKey,
   isKo: boolean,
 ): number {
+  return planCartItemQuoteLineFromPeriod(item, media, campaignPeriod, isKo)
+    .lineTotalWon;
+}
+
+/** plan cart → 견적 라인 (패키지 기간 토글 반영) */
+export function planCartItemQuoteLineFromPeriod(
+  item: PlanCartItem,
+  media: MediaItem,
+  campaignPeriod: QuoteCampaignPeriodKey,
+  isKo = true,
+): {
+  lineTotalWon: number;
+  usePackagePeriod?: boolean;
+  lineCampaignDays?: number;
+} {
   const rows = planCartEffectiveOptionSelections(item, media);
   const usesMulti =
     ((item.optionSelections?.length ?? 0) > 0 ||
@@ -174,7 +191,7 @@ function planCartItemPeriodTotalWon(
     (rows?.length ?? 0) > 1;
 
   if (rows?.length && usesMulti) {
-    return rows.reduce((sum, row) => {
+    const lineTotalWon = rows.reduce((sum, row) => {
       return (
         sum +
         plannerMediaPeriodTotalWon(media, {
@@ -185,21 +202,41 @@ function planCartItemPeriodTotalWon(
         })
       );
     }, 0);
+    return { lineTotalWon };
   }
 
   const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
   const units = rows?.[0]?.quantity ?? item.quantity;
+
+  if (item.usePackagePeriod === true && packagePeriodToggleMeta(media, poIdx)) {
+    const line = buildQuoteWizardLineContext(media, {
+      isKo,
+      campaignPeriod,
+      campaignPeriodLabel: campaignPeriod,
+      priceOptionIndex: poIdx,
+      mobileUnits: units,
+      usePackagePeriod: true,
+    });
+    return {
+      lineTotalWon: Math.round(line.lineTotalMan * 10_000),
+      usePackagePeriod: true,
+      lineCampaignDays: line.campaignDays,
+    };
+  }
+
   const quantities: CampaignMediaQuantities | undefined =
     units != null && Number.isFinite(units)
       ? { [media.id]: Math.round(units) }
       : undefined;
 
-  return plannerMediaPeriodTotalWon(media, {
-    campaignPeriod,
-    quantities,
-    priceOptionIndex: { [media.id]: poIdx },
-    isKo,
-  });
+  return {
+    lineTotalWon: plannerMediaPeriodTotalWon(media, {
+      campaignPeriod,
+      quantities,
+      priceOptionIndex: { [media.id]: poIdx },
+      isKo,
+    }),
+  };
 }
 
 /** plan cart / recommend — 기간 반영 라인 total(원) */
@@ -219,6 +256,14 @@ export function planCartLinePeriodTotalWon(
       : periodCtx.weeks != null && periodCtx.weeks > 0
         ? (periodCtx.weeks * 7) / 30
         : 1;
+  if (item.usePackagePeriod === true) {
+    const rows = planCartEffectiveOptionSelections(item, media);
+    const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
+    if (packagePeriodToggleMeta(media, poIdx)) {
+      return planCartItemQuoteLineFromPeriod(item, media, "30days", isKo)
+        .lineTotalWon;
+    }
+  }
   return Math.round(planCartLineMonthlyWon(item, media) * months);
 }
 

@@ -96,7 +96,16 @@ export function usePlanCart() {
     (
       mediaId: string,
       patch: Partial<
-        Pick<PlanCartItem, "quantity" | "priceOptionIndex" | "gradeSelections" | "optionSelections" | "addonLines">
+        Pick<
+          PlanCartItem,
+          | "quantity"
+          | "priceOptionIndex"
+          | "gradeSelections"
+          | "optionSelections"
+          | "addonLines"
+          | "usePackagePeriod"
+          | "lineCampaignDays"
+        >
       >,
     ) => {
       updatePlanCartItem(mediaId, patch);
@@ -127,6 +136,23 @@ export function usePlanCart() {
     [cart.items],
   );
 
+  const togglePackagePeriod = useCallback(
+    (
+      mediaId: string,
+      checked: boolean,
+      bundleDays?: number,
+    ) => {
+      updatePlanCartItem(mediaId, {
+        usePackagePeriod: checked ? true : undefined,
+        lineCampaignDays:
+          checked && bundleDays != null && bundleDays > 0
+            ? Math.round(bundleDays)
+            : undefined,
+      });
+    },
+    [],
+  );
+
   return {
     cart,
     count: cart.items.length,
@@ -139,6 +165,7 @@ export function usePlanCart() {
     clear,
     updateMeta,
     updateItem,
+    togglePackagePeriod,
     addAddon,
     updateAddon,
     removeAddon,

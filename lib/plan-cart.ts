@@ -40,6 +40,10 @@ export interface PlanCartItem {
   optionSelections?: PlanCartOptionSelection[];
   /** 매체별 제작비·설치비 등 (기간 총액에 1회 합산) */
   addonLines?: PlanCartAddonLine[];
+  /** 패키지 옵션 — 번들 기간만 집행 (견적 생성 시 반영) */
+  usePackagePeriod?: boolean;
+  /** 패키지 번들 일수 — usePackagePeriod 시 스냅샷·견적용 */
+  lineCampaignDays?: number;
   thumbnailUrl?: string;
   addedFrom: PlanCartAddedFrom;
   addedAt: string;
@@ -138,6 +142,13 @@ function normalizeItem(raw: unknown): PlanCartItem | null {
     gradeSelections: normalizeGradeSelections(o.gradeSelections),
     optionSelections: normalizePlanCartOptionSelections(o.optionSelections),
     addonLines: normalizeItemAddonLines(o.addonLines),
+    usePackagePeriod: o.usePackagePeriod === true ? true : undefined,
+    lineCampaignDays:
+      typeof o.lineCampaignDays === "number" &&
+      Number.isFinite(o.lineCampaignDays) &&
+      o.lineCampaignDays > 0
+        ? Math.round(o.lineCampaignDays)
+        : undefined,
     thumbnailUrl:
       typeof o.thumbnailUrl === "string" ? o.thumbnailUrl : undefined,
     addedFrom:
@@ -363,7 +374,13 @@ export function updatePlanCartItem(
   patch: Partial<
     Pick<
       PlanCartItem,
-      "quantity" | "priceOptionIndex" | "gradeSelections" | "optionSelections" | "addonLines"
+      | "quantity"
+      | "priceOptionIndex"
+      | "gradeSelections"
+      | "optionSelections"
+      | "addonLines"
+      | "usePackagePeriod"
+      | "lineCampaignDays"
     >
   >,
 ): void {
@@ -416,6 +433,22 @@ export function updatePlanCartItem(
           .map(normalizeAddonLine)
           .filter((x): x is PlanCartAddonLine => x !== null);
         if (next.addonLines.length === 0) delete next.addonLines;
+      }
+    }
+    if ("usePackagePeriod" in patch) {
+      if (patch.usePackagePeriod === true) {
+        next.usePackagePeriod = true;
+      } else {
+        delete next.usePackagePeriod;
+        delete next.lineCampaignDays;
+      }
+    }
+    if ("lineCampaignDays" in patch) {
+      const days = patch.lineCampaignDays;
+      if (days != null && Number.isFinite(days) && days > 0) {
+        next.lineCampaignDays = Math.round(days);
+      } else {
+        delete next.lineCampaignDays;
       }
     }
     return next;

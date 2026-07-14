@@ -26,6 +26,7 @@ import {
 } from "@/components/plan/plan-cart-item-addon-editor";
 import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
 import { cn } from "@/lib/utils";
+import type { PackagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 
 type Props = {
   item: PlanCartItem;
@@ -53,6 +54,10 @@ type Props = {
   onDropOnItem: (targetMediaId: string) => void;
   onDragOverItem: (targetMediaId: string) => void;
   onDragLeaveItem: (targetMediaId: string) => void;
+  usePackagePeriod?: boolean;
+  onPackagePeriodToggle?: (mediaId: string, checked: boolean) => void;
+  packagePeriodMeta?: PackagePeriodToggleMeta | null;
+  packagePeriodOnlyLabel?: string;
 };
 
 export function PlanCartLineCard({
@@ -75,6 +80,10 @@ export function PlanCartLineCard({
   onDropOnItem,
   onDragOverItem,
   onDragLeaveItem,
+  usePackagePeriod = false,
+  onPackagePeriodToggle,
+  packagePeriodMeta = null,
+  packagePeriodOnlyLabel = "",
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
   const lineMonthlyWon = planCartLineMonthlyWon(item, media);
@@ -270,15 +279,19 @@ export function PlanCartLineCard({
                   [item.mediaId]: item.priceOptionIndex ?? 0,
                 }}
                 networkQuoteOptions={{}}
-                usePackagePeriodByMediaId={{}}
+                usePackagePeriodByMediaId={
+                  usePackagePeriod ? { [item.mediaId]: true } : {}
+                }
                 onMediaQuantityChange={onQuantityChange}
                 onPriceOptionChange={(m, idx) => onPriceOptionChange(m.id, idx)}
                 onNetworkQuoteOptionsChange={() => {}}
-                onPackagePeriodToggle={() => {}}
-                packagePeriodMeta={null}
+                onPackagePeriodToggle={(mediaId, checked) =>
+                  onPackagePeriodToggle?.(mediaId, checked)
+                }
+                packagePeriodMeta={packagePeriodMeta}
                 networkRegionLabel={isKo ? "권역" : "Region"}
                 networkRegionAllLabel={isKo ? "전체" : "All"}
-                packagePeriodOnlyLabel=""
+                packagePeriodOnlyLabel={packagePeriodOnlyLabel}
                 quantityEditable
               />
               <div className="flex flex-wrap gap-2">

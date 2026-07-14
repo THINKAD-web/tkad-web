@@ -30,12 +30,14 @@ import {
 import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
 import { SavePlanButton } from "@/components/my/save-plan-button";
 import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
 export function MyPlanPageClient() {
   const tPlan = useTranslations("planNav");
   const tPlanner = useTranslations("planner");
+  const tQuote = useTranslations("quote");
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
@@ -47,12 +49,26 @@ export function MyPlanPageClient() {
     updateMeta,
     reorder,
     updateItem,
+    togglePackagePeriod,
   } = usePlanCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<MediaItem[]>([]);
+
+  const packagePeriodOnlyLabel = tQuote("usePackagePeriodOnly", {
+    period: "{period}",
+  });
+
+  const resolveCartPackageMeta = useCallback(
+    (item: (typeof cart.items)[number], media?: MediaItem) => {
+      if (!media) return null;
+      const poIdx = item.priceOptionIndex ?? 0;
+      return packagePeriodToggleMeta(media, poIdx);
+    },
+    [],
+  );
 
   const loadCatalog = useCallback(async () => {
     try {
@@ -344,11 +360,14 @@ export function MyPlanPageClient() {
                       : "Drag or use ↑↓ to reorder · reflected in report"}
                   </p>
                 </div>
-                {cart.items.map((item, index) => (
+                {cart.items.map((item, index) => {
+                  const media = catalogById.get(item.mediaId);
+                  const packageMeta = resolveCartPackageMeta(item, media);
+                  return (
                   <PlanCartLineCard
                     key={item.mediaId}
                     item={item}
-                    media={catalogById.get(item.mediaId)}
+                    media={media}
                     index={index}
                     total={cart.items.length}
                     isKo={isKo}
@@ -359,14 +378,21 @@ export function MyPlanPageClient() {
                     onQuantityChange={(mediaId, units) =>
                       updateItem(mediaId, { quantity: units })
                     }
-                    onPriceOptionChange={(mediaId, poIdx) =>
-                      updateItem(mediaId, { priceOptionIndex: poIdx })
-                    }
+                    onPriceOptionChange={(mediaId, poIdx) => {
+                      const m = catalogById.get(mediaId);
+                      const meta = m ? packagePeriodToggleMeta(m, poIdx) : null;
+                      updateItem(mediaId, {
+                        priceOptionIndex: poIdx,
+                        ...(meta ? {} : { usePackagePeriod: undefined, lineCampaignDays: undefined }),
+                      });
+                    }}
                     onGradeSelectionsChange={(mediaId, selections) =>
                       updateItem(mediaId, {
                         gradeSelections: selections,
                         quantity: undefined,
                         priceOptionIndex: undefined,
+                        usePackagePeriod: undefined,
+                        lineCampaignDays: undefined,
                       })
                     }
                     onOptionSelectionsChange={(mediaId, selections) =>
@@ -374,11 +400,23 @@ export function MyPlanPageClient() {
                         optionSelections: selections,
                         quantity: undefined,
                         priceOptionIndex: undefined,
+                        usePackagePeriod: undefined,
+                        lineCampaignDays: undefined,
                       })
                     }
                     onAddonLinesChange={(mediaId, lines) =>
                       updateItem(mediaId, { addonLines: lines })
                     }
+                    usePackagePeriod={item.usePackagePeriod === true}
+                    onPackagePeriodToggle={(mediaId, checked) =>
+                      togglePackagePeriod(
+                        mediaId,
+                        checked,
+                        packageMeta?.bundleDays,
+                      )
+                    }
+                    packagePeriodMeta={packageMeta}
+                    packagePeriodOnlyLabel={packagePeriodOnlyLabel}
                     onGripDragStart={setDraggingId}
                     onGripDragEnd={() => {
                       setDraggingId(null);
@@ -390,7 +428,8 @@ export function MyPlanPageClient() {
                       if (dragOverId === id) setDragOverId(null);
                     }}
                   />
-                ))}
+                  );
+                })}
               </section>
 
               <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
