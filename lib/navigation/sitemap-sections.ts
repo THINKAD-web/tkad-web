@@ -104,17 +104,17 @@ export function buildSitemapSections(
       links: groupLinks(planning),
     },
     {
-      id: "studio",
-      title: studio.label,
-      links: groupLinks(studio),
-    },
-    {
       id: "insights",
       title: insights.label,
       links: [
         ...groupLinks(insights),
         { href: "/industry/beauty", label: industryGuideLabel },
       ],
+    },
+    {
+      id: "studio",
+      title: studio.label,
+      links: groupLinks(studio),
     },
     {
       id: "company",

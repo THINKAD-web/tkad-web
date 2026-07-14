@@ -10,7 +10,22 @@ import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
 import { isPublicNavItemActive } from "@/lib/navigation/public-nav-active";
 import type { PublicNavItemId } from "@/lib/navigation/public-nav-data";
+import {
+  MOBILE_DEMOTED_NAV_GROUP_IDS,
+  MOBILE_PRIMARY_NAV_GROUP_IDS,
+} from "@/lib/navigation/public-nav-data";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
+
+function defaultMobileOpenIds(activeGroupId: string | null): Set<string> {
+  const ids = new Set<string>(MOBILE_PRIMARY_NAV_GROUP_IDS);
+  if (
+    activeGroupId &&
+    (MOBILE_DEMOTED_NAV_GROUP_IDS as readonly string[]).includes(activeGroupId)
+  ) {
+    ids.add(activeGroupId);
+  }
+  return ids;
+}
 
 type Props = {
   groups: ResolvedPublicNavGroup[];
@@ -46,20 +61,33 @@ export function PublicNavSidebar({
     [pathname, groups, searchParams],
   );
 
-  const [openId, setOpenId] = useState<string | null>(
-    initialOpenId ?? activeGroupId ?? groups[0]?.id ?? null,
+  const [openIds, setOpenIds] = useState<Set<string>>(() =>
+    defaultMobileOpenIds(activeGroupId),
   );
 
   useEffect(() => {
-    if (initialOpenId) setOpenId(initialOpenId);
+    if (initialOpenId) {
+      setOpenIds((cur) => new Set([...cur, initialOpenId]));
+    }
   }, [initialOpenId]);
 
   useEffect(() => {
-    if (activeGroupId) setOpenId(activeGroupId);
+    if (!activeGroupId) return;
+    setOpenIds((cur) => {
+      const next = new Set(cur);
+      next.add(activeGroupId);
+      for (const id of MOBILE_PRIMARY_NAV_GROUP_IDS) next.add(id);
+      return next;
+    });
   }, [activeGroupId]);
 
   const toggle = (id: string) => {
-    setOpenId((cur) => (cur === id ? null : id));
+    setOpenIds((cur) => {
+      const next = new Set(cur);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
   };
 
   return (
@@ -99,7 +127,7 @@ export function PublicNavSidebar({
       <ul className="flex flex-col divide-y divide-gray-200/80 dark:divide-white/10">
         {groups.map((group) => {
           const Icon = group.icon;
-          const expanded = openId === group.id;
+          const expanded = openIds.has(group.id);
           const groupActive =
             activeGroupId === group.id ||
             group.items.some((item) =>

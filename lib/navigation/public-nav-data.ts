@@ -59,9 +59,22 @@ export type PublicNavGroupDef = {
   items: PublicNavItemDef[];
 };
 
+/** 모바일 사이드바 — funnel 핵심 그룹만 기본 펼침 */
+export const MOBILE_PRIMARY_NAV_GROUP_IDS = [
+  "discovery",
+  "planning",
+] as const satisfies readonly PublicNavGroupId[];
+
+/** 모바일 — 기본 접힘(스크롤·탭 후 노출) */
+export const MOBILE_DEMOTED_NAV_GROUP_IDS = [
+  "insights",
+  "studio",
+] as const satisfies readonly PublicNavGroupId[];
+
 /**
  * OOH 플랫폼 공개 네비게이션 — 라벨은 i18n(`nav.groups.*`, `nav.items.*`).
  * href·계층·BETA 위치의 단일 소스.
+ * 그룹 순서: funnel 핵심(발견→기획) → 보조(인사이트·스튜디오).
  */
 export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
   {
