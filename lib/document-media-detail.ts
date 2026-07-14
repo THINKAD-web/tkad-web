@@ -22,6 +22,7 @@ import { planCartLineMonthlyWon } from "@/lib/plan-cart-pricing";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import { normalizeMediaTypeForPlanner } from "@/lib/planner-logic";
 import { truncateDocText } from "@/lib/document-text";
+import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 /** 보고서·견적서·PDF/PPT 공용 매체 상세 (필드 없으면 undefined → UI에서 숨김) */
 export type DocumentMediaDetail = {
@@ -84,16 +85,6 @@ function browseCategoryLabel(
   const subLabel = sub ? (isKo ? sub.label : sub.labelEn ?? sub.label) : subId;
   if (mainLabel && subLabel) return `${mainLabel} · ${subLabel}`;
   return mainLabel ?? subLabel ?? undefined;
-}
-
-function formatSizeFromItem(m: DocumentMediaDetailSource): string | undefined {
-  if ("size" in m && m.size?.trim()) return m.size.trim();
-  if ("widthM" in m && "heightM" in m) {
-    const w = (m as MediaItem).widthM;
-    const h = (m as MediaItem).heightM;
-    if (w && h) return `${w}m × ${h}m`;
-  }
-  return undefined;
 }
 
 function resolveDailyTraffic(m: DocumentMediaDetailSource): number | undefined {
@@ -269,7 +260,7 @@ export function mediaToDocumentDetail(
     location: location?.trim() || undefined,
     thumbUrl: resolveThumb(m),
     categoryLabel,
-    size: formatSizeFromItem(m),
+    size: formatSizeDisplayOptional(m as MediaItem),
     operatingHours: operatingHours?.trim() || undefined,
     dailyTraffic: resolveDailyTraffic(m),
     broadcastLabel: resolveBroadcastLabel(m, opts),

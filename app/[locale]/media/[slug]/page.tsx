@@ -70,6 +70,7 @@ import {
 } from "@/lib/media-slug";
 import { deferCatalogLandingStaticGeneration } from "@/lib/vercel-static-build";
 import { ExitSurveyBanner } from "@/components/exit-survey-banner";
+import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
@@ -246,10 +247,11 @@ export default async function MediaDetailPage({ params }: Props) {
     }
   })();
 
+  const heroSizeTag = formatSizeDisplayOptional(media);
   const heroTags = media.keywordFilter
     ? heroTagCandidatesFromKeyword(media.keywordFilter, media.size)
     : [
-        media.size,
+        ...(heroSizeTag ? [heroSizeTag] : []),
         typeLabel,
         ...(media.targetAge
           ? media.targetAge

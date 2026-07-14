@@ -21,6 +21,7 @@ import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
 import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
 import { parseMediaInstallLocations } from "@/lib/media-install-locations";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
+import { formatSizeFromMeters } from "@/lib/format-media-size";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -114,10 +115,10 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   );
 
   const size =
-    m.width && m.height
-      ? `${m.width} × ${m.height}`
-      : m.widthM != null && m.heightM != null
-        ? `${m.widthM}m × ${m.heightM}m`
+    m.widthM != null && m.heightM != null
+      ? formatSizeFromMeters(m.widthM, m.heightM)
+      : m.width && m.height
+        ? `${m.width} × ${m.height}`
         : undefined;
 
   const locationEn =

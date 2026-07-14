@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 export type MediaHeroSpecBadge = {
   key: string;
@@ -24,7 +25,7 @@ export function buildMediaHeroSpecBadges(
 ): MediaHeroSpecBadge[] {
   const badges: MediaHeroSpecBadge[] = [];
 
-  const size = media.size?.trim();
+  const size = formatSizeDisplayOptional(media);
   if (size) {
     badges.push({ key: "size", label: labels.size, value: size });
   }

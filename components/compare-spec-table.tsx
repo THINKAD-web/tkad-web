@@ -10,10 +10,7 @@ import {
   estimatedMonthlyImpressions,
   resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
-import {
-  effectiveHeightM,
-  effectiveWidthM,
-} from "@/lib/media-filter-advanced";
+import { formatSizeDisplay } from "@/lib/format-media-size";
 import {
   formatCatalogPriceFieldWon,
   mediaPricePeriodTranslationKey,
@@ -27,21 +24,6 @@ const KNOWN_REGION_CODES = new Set([
   "jeju",
   "national",
 ]);
-
-function formatDimM(n: number): string {
-  const s = n % 1 === 0 ? n.toFixed(0) : n.toFixed(1);
-  return s.replace(/\.0$/, "");
-}
-
-function formatSizeDisplay(m: MediaItem): string {
-  const w = effectiveWidthM(m);
-  const h = effectiveHeightM(m);
-  if (w != null && h != null) {
-    return `${formatDimM(w)}×${formatDimM(h)} m`;
-  }
-  const raw = m.size?.trim();
-  return raw && raw.length > 0 ? raw : "—";
-}
 
 function formatCpmDisplay(m: MediaItem, locale: string): string {
   const cpm = resolveDisplayCpmWon(m);

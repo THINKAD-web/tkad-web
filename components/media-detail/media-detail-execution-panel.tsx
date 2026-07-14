@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import type { LucideIcon } from "lucide-react";
 import { Monitor, Ruler } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
+import { formatSizeDisplay } from "@/lib/format-media-size";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
@@ -143,7 +144,14 @@ export function MediaDetailExecutionPanel({
           {labels.specsTitle}
         </h3>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
-          <IconSpec icon={Ruler} label={labels.size} value={media.size || labels.empty} />
+          <IconSpec
+            icon={Ruler}
+            label={labels.size}
+            value={(() => {
+              const sized = formatSizeDisplay(media);
+              return sized !== "—" ? sized : labels.empty;
+            })()}
+          />
           <IconSpec
             icon={Monitor}
             label={labels.resolution}
