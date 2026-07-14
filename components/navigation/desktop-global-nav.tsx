@@ -103,21 +103,53 @@ function NavGroupPanel({
 }) {
   return (
     <ul className="min-w-[15rem] space-y-0.5 p-2">
-      {group.items.map((item: ResolvedPublicNavItem) => {
+      {group.items.map((item: ResolvedPublicNavItem, index) => {
         const Icon = item.icon;
+        const showPlanningDivider =
+          group.id === "planning" &&
+          item.id === "ai-recommend" &&
+          index > 0;
         return (
           <li key={item.id}>
+            {showPlanningDivider ? (
+              <div
+                className="mx-3 my-1.5 border-t border-gray-200/80 dark:border-white/10"
+                aria-hidden
+              />
+            ) : null}
             <Link
               href={item.href}
               onClick={onClose}
-              className="flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/5"
+              className={cn(
+                "flex items-start gap-3 rounded-xl px-3 py-2.5 transition-colors hover:bg-gray-50 dark:hover:bg-white/5",
+                item.id === "ai-recommend" && "py-2",
+              )}
             >
               {Icon ? (
-                <Icon className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-300" aria-hidden />
+                <Icon
+                  className={cn(
+                    "mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-300",
+                    item.id === "ai-recommend"
+                      ? "h-3.5 w-3.5 opacity-70"
+                      : item.secondary
+                        ? "h-3.5 w-3.5"
+                        : "h-4 w-4",
+                  )}
+                  aria-hidden
+                />
               ) : null}
               <span className="min-w-0">
                 <span className="flex items-center gap-2">
-                  <span className="block text-sm font-semibold text-gray-800 dark:text-white/90">
+                  <span
+                    className={cn(
+                      "block text-gray-800 dark:text-white/90",
+                      item.id === "ai-recommend"
+                        ? "text-[13px] font-medium text-gray-600 dark:text-white/65"
+                        : item.secondary
+                          ? "text-[13px] font-semibold"
+                          : "text-sm font-semibold",
+                    )}
+                  >
                     {item.label}
                   </span>
                   {item.badge ? (
@@ -126,7 +158,7 @@ function NavGroupPanel({
                     </span>
                   ) : null}
                 </span>
-                {item.desc ? (
+                {item.desc && item.id !== "ai-recommend" ? (
                   <span className="mt-0.5 block text-xs text-gray-500 dark:text-white/45">
                     {item.desc}
                   </span>

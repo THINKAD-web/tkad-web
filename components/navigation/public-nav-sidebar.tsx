@@ -26,6 +26,7 @@ const MOBILE_DESC_ITEM_IDS = new Set([
   "media-network",
   "campaign-targets",
   "integrated-planner",
+  "package-proposal",
   "competitive-intel",
 ]);
 
@@ -156,7 +157,7 @@ export function PublicNavSidebar({
               >
                 <ul className="overflow-hidden">
                   <div className="space-y-0 pb-2 pl-8 pr-4 pt-0.5">
-                    {group.items.map((item) => {
+                    {group.items.map((item, index) => {
                       const active = isPublicNavItemActive(
                         pathname,
                         item.id as PublicNavItemId,
@@ -164,8 +165,18 @@ export function PublicNavSidebar({
                       );
                       const showDesc =
                         item.desc && MOBILE_DESC_ITEM_IDS.has(item.id);
+                      const showPlanningDivider =
+                        group.id === "planning" &&
+                        item.id === "ai-recommend" &&
+                        index > 0;
                       return (
                         <li key={item.navKey}>
+                          {showPlanningDivider ? (
+                            <div
+                              className="my-1 border-t border-gray-200/80 dark:border-white/10"
+                              aria-hidden
+                            />
+                          ) : null}
                           <Link
                             href={item.href}
                             onClick={onNavigate}
@@ -174,11 +185,21 @@ export function PublicNavSidebar({
                               active
                                 ? "text-violet-600 dark:text-violet-400"
                                 : "text-gray-800 hover:text-gray-900 dark:text-white/85 dark:hover:text-white",
+                              item.secondary &&
+                                !active &&
+                                "text-gray-600 dark:text-white/60",
                             )}
                           >
                             <span className="min-w-0 flex-1">
                               <span className="flex flex-wrap items-center gap-2">
-                                <span className="text-xl font-semibold leading-snug tracking-tight">
+                                <span
+                                  className={cn(
+                                    "leading-snug tracking-tight",
+                                    item.secondary
+                                      ? "text-lg font-medium"
+                                      : "text-xl font-semibold",
+                                  )}
+                                >
                                   {item.label}
                                 </span>
                                 {item.badge ? <NavBetaBadge /> : null}

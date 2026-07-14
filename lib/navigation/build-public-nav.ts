@@ -16,6 +16,7 @@ export type ResolvedPublicNavItem = {
   badge?: string;
   icon: PublicNavItemDef["icon"];
   navKey: string;
+  secondary?: boolean;
 };
 
 export type ResolvedPublicNavGroup = {
@@ -38,6 +39,7 @@ function resolveItem(item: PublicNavItemDef, t: NavTranslator): ResolvedPublicNa
     badge: item.beta ? t("nav.beta") : undefined,
     icon: item.icon,
     navKey: item.id,
+    secondary: item.secondary,
   };
 }
 

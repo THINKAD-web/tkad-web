@@ -188,15 +188,15 @@
         "desc": "Budget, timeline, and media mix"
       },
       "integrated-planner": {
-        "label": "Integrated media planner",
+        "label": "Advanced · OOH + digital",
         "desc": "OOH + digital (SA/DA) linkage"
       },
       "package-proposal": {
-        "label": "Package proposals",
-        "desc": "Curated bundles by goal"
+        "label": "Verified packages",
+        "desc": "Curated bundles by goal and region"
       },
       "ai-recommend": {
-        "label": "AI media picks",
+        "label": "Quick AI picks",
         "desc": "AI matches to your goals and budget"
       },
       "creative-library": {

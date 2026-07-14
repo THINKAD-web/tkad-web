@@ -188,16 +188,16 @@
         "desc": "예산·기간·매체 조합 설계"
       },
       "integrated-planner": {
-        "label": "통합 미디어 플래너",
+        "label": "고급 · OOH+디지털",
         "desc": "OOH + 디지털(SA·DA) 연계 기획"
       },
       "package-proposal": {
-        "label": "패키지 제안",
-        "desc": "목적·지역별 검증 패키지"
+        "label": "검증 패키지",
+        "desc": "목적·지역별 패키지 제안"
       },
       "ai-recommend": {
-        "label": "AI 매체 추천",
-        "desc": "목표·예산에 맞는 AI 추천"
+        "label": "빠른 AI 추천",
+        "desc": "목표·예산에 맞는 AI 매체 추천"
       },
       "creative-library": {
         "label": "소재 라이브러리",

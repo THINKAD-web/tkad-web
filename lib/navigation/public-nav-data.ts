@@ -49,6 +49,8 @@ export type PublicNavItemDef = {
   icon: LucideIcon;
   /** BETA는 세부 메뉴에만 */
   beta?: boolean;
+  /** 기획하기 등 — 대표 진입점 아래 보조 링크 */
+  secondary?: boolean;
 };
 
 export type PublicNavGroupDef = {
@@ -81,9 +83,20 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
         id: "integrated-planner",
         href: "/planner/integrated",
         icon: Sparkles,
+        secondary: true,
       },
-      { id: "package-proposal", href: "/media/packages", icon: Package },
-      { id: "ai-recommend", href: "/recommend", icon: Sparkles },
+      {
+        id: "package-proposal",
+        href: "/media/packages",
+        icon: Package,
+        secondary: true,
+      },
+      {
+        id: "ai-recommend",
+        href: "/recommend",
+        icon: Wand2,
+        secondary: true,
+      },
     ],
   },
   {
