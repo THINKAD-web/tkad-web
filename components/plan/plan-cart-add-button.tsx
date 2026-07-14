@@ -16,6 +16,8 @@ type Props = {
   compact?: boolean;
   /** 그리드 카드 — 짧은 라벨 (담기 / 빼기) */
   gridInline?: boolean;
+  /** 매체 상세 — "플래너에 담기" 라벨 + 용도 힌트 */
+  mediaDetailLabel?: boolean;
   className?: string;
 };
 
@@ -24,6 +26,7 @@ export function PlanCartAddButton({
   addedFrom,
   compact = false,
   gridInline = false,
+  mediaDetailLabel = false,
   className,
 }: Props) {
   const locale = useLocale();
@@ -34,6 +37,18 @@ export function PlanCartAddButton({
   const inPlan = has(item.mediaId);
   const payload = { ...item, addedFrom: addedFrom ?? item.addedFrom };
   const removeHint = isKo ? "다시 누르면 빼기" : "Tap again to remove";
+  const addLabel = mediaDetailLabel
+    ? isKo
+      ? "플래너에 담기"
+      : "Add to planner"
+    : isKo
+      ? "담기"
+      : "Add";
+  const addHint = mediaDetailLabel
+    ? isKo
+      ? "플래너: 캠페인 플래너에 매체를 추가합니다"
+      : "Planner: add this media to your campaign planner"
+    : undefined;
 
   function handleClick(e: React.MouseEvent) {
     e.stopPropagation();
@@ -72,7 +87,7 @@ export function PlanCartAddButton({
       <button
         type="button"
         onClick={handleClick}
-        title={inPlan ? removeHint : undefined}
+        title={inPlan ? removeHint : addHint}
         className={cn(mediaActionPillClass(inPlan, "cart"), className)}
         aria-pressed={inPlan}
         aria-label={
@@ -104,7 +119,7 @@ export function PlanCartAddButton({
     <button
       type="button"
       onClick={handleClick}
-      title={inPlan ? removeHint : undefined}
+      title={inPlan ? removeHint : addHint}
       className={cn(
         "inline-flex max-w-full items-center justify-center gap-1 whitespace-normal rounded-xl border font-semibold transition active:scale-95",
         compact ? "h-9 px-2.5 text-xs" : "h-10 px-3 text-xs",
@@ -120,8 +135,12 @@ export function PlanCartAddButton({
             ? "담은 매체에서 제거 (다시 누르면 빼기)"
             : "Remove from plan (tap again to remove)"
           : isKo
-            ? "담은 매체에 담기"
-            : "Add to plan"
+            ? mediaDetailLabel
+              ? "플래너에 담기"
+              : "담은 매체에 담기"
+            : mediaDetailLabel
+              ? "Add to planner"
+              : "Add to plan"
       }
     >
       {inPlan ? (
@@ -132,7 +151,7 @@ export function PlanCartAddButton({
       ) : (
         <>
           <Plus className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "담기" : "Add"}
+          {addLabel}
         </>
       )}
     </button>

@@ -14,6 +14,8 @@ type Props = {
   className?: string;
   /** 사이드바 — 단일 버튼 행 */
   variant?: "card" | "inline";
+  /** 사이드바 2차 CTA — 아이콘+짧은 라벨 */
+  compactSecondary?: boolean;
 };
 
 /**
@@ -26,6 +28,7 @@ export function MediaDetailProposalCard({
   locale,
   className,
   variant = "card",
+  compactSecondary = false,
 }: Props) {
   const downloadName = mediaProposalDownloadFilename(media, isKo);
   const proposalHref = `/api/media/${encodeURIComponent(media.id)}/proposal?locale=${encodeURIComponent(locale)}`;
@@ -50,29 +53,37 @@ export function MediaDetailProposalCard({
             onClick={onDownloadClick}
             disabled={checking}
             className={cn(
-              "inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12",
+              compactSecondary
+                ? "inline-flex h-8 w-full min-w-0 items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
+                : "inline-flex h-9 w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-semibold text-gray-800 transition hover:bg-gray-100 disabled:opacity-60 dark:border-white/12 dark:bg-white/8 dark:text-white/90 dark:hover:bg-white/12",
               className,
             )}
           >
             {checking ? (
-              <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
+              <Loader2 className="h-3 w-3 animate-spin" aria-hidden />
             ) : pdfAllowed ? (
-              <Download className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <Download className="h-3 w-3 shrink-0" aria-hidden />
             ) : (
-              <Lock className="h-3.5 w-3.5 shrink-0" aria-hidden />
+              <Lock className="h-3 w-3 shrink-0" aria-hidden />
             )}
-            <span>
-              {pdfAllowed
+            <span className="truncate">
+              {compactSecondary
                 ? isKo
-                  ? "제안서 다운로드"
-                  : "Download proposal"
-                : isKo
-                  ? "PRO 제안서"
-                  : "PRO proposal"}
+                  ? "PRO"
+                  : "PRO"
+                : pdfAllowed
+                  ? isKo
+                    ? "제안서 다운로드"
+                    : "Download proposal"
+                  : isKo
+                    ? "PRO 제안서"
+                    : "PRO proposal"}
             </span>
-            <span className="rounded bg-violet-500/15 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
-              PRO
-            </span>
+            {!compactSecondary ? (
+              <span className="rounded bg-violet-500/15 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+                PRO
+              </span>
+            ) : null}
           </button>
         )}
       </PlannerPdfDownloadGate>

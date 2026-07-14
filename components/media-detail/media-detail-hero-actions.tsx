@@ -2,7 +2,6 @@
 
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
-import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import type { MediaItem } from "@/lib/media-data";
 
 type Props = {
@@ -22,11 +21,6 @@ export function MediaDetailHeroActions({
         mediaId={media.id}
         mediaName={displayName}
         triggerLabel={`${inquiryLabel} →`}
-        className="w-full justify-center sm:flex-1"
-      />
-      <MediaQuoteCtaButton
-        media={media}
-        variant="inline"
         className="w-full justify-center sm:flex-1"
       />
       <MediaFavoriteButton

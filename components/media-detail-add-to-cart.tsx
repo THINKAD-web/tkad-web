@@ -11,6 +11,8 @@ type Props = {
   className?: string;
   /** 사이드바 등 좁은 영역 — 단일 컴팩트 버튼 */
   compact?: boolean;
+  /** 매체 상세 — 견적함 용도 힌트(title) */
+  showUsageHint?: boolean;
 };
 
 export function MediaDetailAddToCart({
@@ -18,6 +20,7 @@ export function MediaDetailAddToCart({
   mediaName,
   className = "",
   compact = false,
+  showUsageHint = false,
 }: Props) {
   const { has, toggle, ids } = useCart();
   const toast = useAppToast();
@@ -51,6 +54,11 @@ export function MediaDetailAddToCart({
             : "border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90"
         } ${className}`}
         aria-pressed={inCart}
+        title={
+          showUsageHint
+            ? "견적함: 여러 매체를 모아 한 번에 견적을 요청합니다"
+            : undefined
+        }
       >
         {inCart ? (
           <>
@@ -60,7 +68,7 @@ export function MediaDetailAddToCart({
         ) : (
           <>
             <Plus className="h-3.5 w-3.5 shrink-0" />
-            견적서 담기
+            견적함에 담기
           </>
         )}
       </button>

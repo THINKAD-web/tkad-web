@@ -1,7 +1,7 @@
 "use client";
 
-import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
-import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
+import { useMemo } from "react";
+import { Link } from "@/i18n/navigation";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -13,11 +13,15 @@ import {
   StickyActionBar,
 } from "@/components/sticky-action-bar";
 import type { MediaItem } from "@/lib/media-data";
+import { findCheapestPriceOptionIndex } from "@/lib/compare-quote";
 import {
   formatCatalogPriceFieldWon,
   formatPricePeriodShortLabel,
   resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
+import { buildMediaDetailQuoteHref } from "@/lib/media-detail-quantity";
+import { inferQuoteCampaignPeriodFromMedia } from "@/lib/quote-wizard-pricing";
+import { rememberQuoteEntryPriceOption } from "@/lib/quote-wizard-entry";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -31,7 +35,6 @@ type Props = {
 export function MediaDetailMobileBar({
   media,
   isKo,
-  displayName,
   className,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
@@ -42,6 +45,20 @@ export function MediaDetailMobileBar({
     isKo ? "ko" : "en",
   );
 
+  const defaultOptIdx = useMemo(
+    () => findCheapestPriceOptionIndex(media),
+    [media],
+  );
+
+  const quoteHref = useMemo(
+    () =>
+      buildMediaDetailQuoteHref(media, {
+        priceOptionIndex: defaultOptIdx,
+        period: inferQuoteCampaignPeriodFromMedia(media, defaultOptIdx),
+      }),
+    [media, defaultOptIdx],
+  );
+
   return (
     <StickyActionBar
       open
@@ -50,7 +67,7 @@ export function MediaDetailMobileBar({
       compact
       aboveMobileChrome
       respectFooter
-      ariaLabel={isKo ? "빠른 문의" : "Quick inquiry"}
+      ariaLabel={isKo ? "빠른 견적" : "Quick quote"}
       className={cn("lg:hidden", className)}
     >
       <div className={STICKY_ACTION_BAR_ROW}>
@@ -77,24 +94,20 @@ export function MediaDetailMobileBar({
           item={planCartItemFromMediaItem(media, "search")}
           addedFrom="search"
           compact
+          mediaDetailLabel
           className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "!h-8 shrink-0")}
         />
-        <MediaQuoteCtaButton
-          media={media}
-          variant="sticky"
+        <Link
+          href={quoteHref}
+          onClick={() => rememberQuoteEntryPriceOption(media.id, defaultOptIdx)}
           className={cn(
             STICKY_ACTION_BAR_BTN,
             STICKY_ACTION_BAR_BTN_VIOLET,
             "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !text-[11px] !font-semibold !shadow-sm !tracking-normal",
           )}
-        />
-        <MediaInquiryDialog
-          mediaId={media.id}
-          mediaName={displayName}
-          triggerLabel={isKo ? "문의" : "Ask"}
-          compact
-          className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "shrink-0")}
-        />
+        >
+          {isKo ? "견적 받기" : "Get quote"}
+        </Link>
       </div>
     </StickyActionBar>
   );

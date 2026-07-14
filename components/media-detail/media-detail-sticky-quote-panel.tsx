@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Share2, Sparkles } from "lucide-react";
-import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
@@ -294,56 +293,51 @@ export function MediaDetailStickyQuotePanel({
         </div>
 
         <div className="space-y-3">
-          <div className="grid grid-cols-2 gap-2">
-            <Link
-              href={quoteHref}
-              className="inline-flex h-11 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-sm font-bold text-gray-900 dark:text-white"
-            >
-              {isKo ? "견적 받기" : "Get quote"}
-            </Link>
+          <Link
+            href={quoteHref}
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-sm font-bold text-gray-900 dark:text-white"
+          >
+            {isKo ? "견적 받기" : "Get quote"}
+          </Link>
+
+          <div className="space-y-1">
+            <div className="grid grid-cols-2 gap-2">
+              <MediaDetailAddToCart
+                mediaId={media.id}
+                mediaName={displayName}
+                compact
+                showUsageHint
+              />
+              <PlanCartAddButton
+                item={planCartItemFromMediaItem(media, "search")}
+                addedFrom="search"
+                compact
+                mediaDetailLabel
+                className="w-full"
+              />
+            </div>
+            <p className="text-center text-[10px] text-gray-400 dark:text-white/35">
+              {isKo
+                ? "견적함·플래너는 저장 위치가 다릅니다"
+                : "Quote cart and plan cart are separate"}
+            </p>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-1.5 border-t dark:border-white/10 border-gray-100 pt-2">
             <Link
               href={plannerHref}
-              className="inline-flex h-11 items-center justify-center gap-1 rounded-xl border border-violet-400/30 bg-violet-500/10 px-3 text-center text-sm font-bold text-violet-800 dark:text-violet-100"
+              className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-violet-400/25 bg-violet-500/8 px-2 text-[10px] font-semibold text-violet-800 dark:text-violet-100"
             >
-              <Sparkles className="h-4 w-4 shrink-0" aria-hidden />
+              <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
               {isKo ? "플래너" : "Planner"}
             </Link>
-          </div>
-
-          <div className="grid grid-cols-2 gap-2">
-            <MediaInquiryDialog
-              mediaId={media.id}
-              mediaName={displayName}
-              triggerLabel={isKo ? "전문가 문의" : "Ask expert"}
-              compact
-              className="w-full border-gray-200 bg-gray-100 text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90"
-            />
-            <MediaDetailAddToCart
-              mediaId={media.id}
-              mediaName={displayName}
-              compact
-            />
-            <PlanCartAddButton
-              item={planCartItemFromMediaItem(media, "search")}
-              addedFrom="search"
-              compact
-              className="col-span-2 w-full"
-            />
-          </div>
-
-          <MediaDetailProposalCard
-            media={media}
-            isKo={isKo}
-            locale={pageLocale}
-            variant="inline"
-          />
-
-          <div className="flex items-center justify-between gap-2 border-t dark:border-white/10 border-gray-100 pt-3">
-            <MediaFavoriteButton
-              mediaId={media.id}
-              mediaName={media.name}
-              mediaNameEn={media.nameEn}
-              compact
+            <MediaDetailProposalCard
+              media={media}
+              isKo={isKo}
+              locale={pageLocale}
+              variant="inline"
+              compactSecondary
+              className="min-w-0 flex-1"
             />
             <button
               type="button"
@@ -357,11 +351,18 @@ export function MediaDetailStickyQuotePanel({
                   void navigator.clipboard?.writeText(window.location.href);
                 }
               }}
-              className="inline-flex h-9 items-center gap-1.5 rounded-xl border border-gray-200 bg-gray-50 px-3 text-xs font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/12 dark:bg-white/8 dark:text-white/85 dark:hover:bg-white/12"
+              className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
             >
-              <Share2 className="h-3.5 w-3.5" aria-hidden />
+              <Share2 className="h-3 w-3 shrink-0" aria-hidden />
               {isKo ? "공유" : "Share"}
             </button>
+            <MediaFavoriteButton
+              mediaId={media.id}
+              mediaName={media.name}
+              mediaNameEn={media.nameEn}
+              compact
+              className="!h-8 shrink-0"
+            />
           </div>
         </div>
       </div>
