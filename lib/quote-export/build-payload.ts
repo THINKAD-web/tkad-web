@@ -229,6 +229,7 @@ export async function buildQuoteExportPayload(
       0;
     const mediaRow = mediaById.get(l.mediaId);
     let executionPeriodLabel: string | undefined;
+    let prorationLabel: string | undefined;
     if (
       mediaRow &&
       row.periodKey &&
@@ -245,6 +246,9 @@ export async function buildQuoteExportPayload(
         },
       );
       executionPeriodLabel = wizardLine.executionPeriodLabel;
+      if (wizardLine.usesMediaPartialRate && wizardLine.prorationLabel) {
+        prorationLabel = wizardLine.prorationLabel;
+      }
     }
     const base = mapQuoteExportLine(
       l,
@@ -262,19 +266,22 @@ export async function buildQuoteExportPayload(
     const withPeriod = executionPeriodLabel
       ? { ...base, executionPeriodLabel }
       : base;
+    const withProration = prorationLabel
+      ? { ...withPeriod, prorationLabel }
+      : withPeriod;
     const fromLine = {
       ...(l.quantity != null ? { quantity: l.quantity } : {}),
       ...(l.quantityLabel ? { quantityLabel: l.quantityLabel } : {}),
     };
     if (!snap) {
       return Object.keys(fromLine).length > 0
-        ? { ...withPeriod, ...fromLine }
-        : withPeriod;
+        ? { ...withProration, ...fromLine }
+        : withProration;
     }
     const mediaName = mediaById.get(l.mediaId)?.name ?? base.name;
     const optSuffix = snap.optionLabel ? ` (${snap.optionLabel})` : "";
     return {
-      ...withPeriod,
+      ...withProration,
       name: snap.optionLabel ? `${mediaName}${optSuffix}` : base.name,
       unitPriceWon: snap.optionPriceWon,
       lineSupplyWon: snap.lineTotalWon,

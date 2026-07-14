@@ -27,6 +27,8 @@ export type QuoteExportLine = {
   mediaTypeLabel?: string;
   recommendReason?: string;
   executionPeriodLabel?: string;
+  /** 매체 지정 부분기간 요율 적용 시에만 — UI prorationLabel 과 동일 */
+  prorationLabel?: string;
 };
 
 export type QuoteExportPayload = {

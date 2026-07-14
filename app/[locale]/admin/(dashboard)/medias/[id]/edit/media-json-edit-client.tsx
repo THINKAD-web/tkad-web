@@ -8,12 +8,22 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { PartialPeriodRatesFields } from "@/components/admin/partial-period-rates-fields";
+import {
+  EMPTY_PARTIAL_PERIOD_RATES_DRAFT,
+  partialPeriodRatesDraftFromMap,
+  partialPeriodRatesMapFromDraft,
+  parsePartialPeriodRatesRaw,
+  type PartialPeriodRatesDraft,
+} from "@/lib/media-partial-period-rates";
 
 type Props = { mediaId: string };
 
 export default function MediaJsonEditClient({ mediaId }: Props) {
   const router = useRouter();
   const [text, setText] = useState("");
+  const [partialPeriodRates, setPartialPeriodRates] =
+    useState<PartialPeriodRatesDraft>({ ...EMPTY_PARTIAL_PERIOD_RATES_DRAFT });
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -44,6 +54,24 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
           ? (raw as { json: Record<string, unknown> }).json
           : null;
       setText(j ? JSON.stringify(j, null, 2) : "{}");
+
+      const detail = await adminFetchJson(`/api/admin/medias/${mediaId}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (detail.ok) {
+        const media =
+          typeof detail.data === "object" &&
+          detail.data !== null &&
+          "media" in detail.data
+            ? (detail.data as { media: { partialPeriodRates?: unknown } }).media
+            : null;
+        setPartialPeriodRates(
+          partialPeriodRatesDraftFromMap(
+            parsePartialPeriodRatesRaw(media?.partialPeriodRates),
+          ),
+        );
+      }
     } catch (e) {
       setLoadError(
         e instanceof Error ? e.message : "불러오기 요청을 처리하지 못했습니다.",
@@ -118,6 +146,20 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
 
     setSaving(true);
     try {
+      const ratesMap = partialPeriodRatesMapFromDraft(partialPeriodRates);
+      const ratesResult = await adminFetchJson(`/api/admin/medias/${mediaId}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          partialPeriodRates: ratesMap ?? null,
+        }),
+      });
+      if (!ratesResult.ok) {
+        setError(ratesResult.message);
+        return;
+      }
+
       const result = await adminFetchJson(
         `/api/admin/medias/${mediaId}/json`,
         {
@@ -187,6 +229,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
           </h1>
           <p className="text-sm text-muted-foreground">
             ID: <code className="text-xs">{mediaId}</code> · quick-add와 동일 키
+            · 부분기간 요율은 아래 패널에서 편집 (매체 목록 폼과 동기화)
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>
@@ -202,6 +245,20 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
           {error}
         </p>
       ) : null}
+
+      <Card className="border-border/80 bg-muted/40">
+        <CardHeader className="pb-2">
+          <CardTitle className="text-base text-foreground">
+            부분기간 요율
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <PartialPeriodRatesFields
+            draft={partialPeriodRates}
+            onChange={setPartialPeriodRates}
+          />
+        </CardContent>
+      </Card>
 
       <div className="grid gap-4 lg:grid-cols-2">
         <Card className="min-h-0 lg:col-span-1">

@@ -143,6 +143,12 @@ function drawPdfThumbOrPlaceholder(
   );
 }
 
+function quoteExportProrationSpecLine(
+  line: QuoteExportPayload["lines"][number],
+): string | null {
+  return line.prorationLabel?.trim() ? line.prorationLabel.trim() : null;
+}
+
 /** 기본 견적서 매체 카드 — 플래너 톤·압축 레이아웃 (premium 은 drawMediaCards 유지) */
 function basicDrawQuoteMediaCards(
   doc: jsPDF,
@@ -169,7 +175,8 @@ function basicDrawQuoteMediaCards(
 
   for (const line of p.lines) {
     const isAddon = isQuoteAddonLineId(line.mediaId);
-    const cardH = 20;
+    const prorationSpec = quoteExportProrationSpecLine(line);
+    const cardH = prorationSpec ? 24 : 20;
 
     if (y + cardH > pageH - 30) {
       doc.addPage();
@@ -284,6 +291,16 @@ function basicDrawQuoteMediaCards(
       );
     }
 
+    if (prorationSpec) {
+      doc.setFontSize(6.5);
+      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.text(
+        (doc.splitTextToSize(prorationSpec, textW) as string[]).slice(0, 1),
+        textX,
+        y + (line.dailyTraffic && line.dailyTraffic > 0 ? 19.5 : 16.5),
+      );
+    }
+
     doc.setFontSize(6);
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
     doc.text(isKo ? "단가" : "Unit", priceX, y + 7, { align: "right" });
@@ -349,6 +366,7 @@ function drawMediaCards(
       line.executionPeriodLabel
         ? `${isKo ? "집행 기간" : "Period"} ${line.executionPeriodLabel}`
         : null,
+      quoteExportProrationSpecLine(line),
     ].filter(Boolean) as string[];
 
     const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
@@ -727,7 +745,11 @@ function basicDrawMediaTable(
   doc.setFontSize(8.5);
 
   p.lines.forEach((line, idx) => {
-    const nameLines = doc.splitTextToSize(line.name, w * 0.38 - 4) as string[];
+    const prorationSpec = quoteExportProrationSpecLine(line);
+    const nameLines = doc.splitTextToSize(
+      prorationSpec ? `${line.name}\n${prorationSpec}` : line.name,
+      w * 0.38 - 4,
+    ) as string[];
     const locLines = doc.splitTextToSize(line.location || "—", w * 0.28) as string[];
     const rowH = Math.max(7, Math.max(nameLines.length, locLines.length) * 3.8 + 2);
 
