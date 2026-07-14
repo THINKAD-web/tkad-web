@@ -1,11 +1,12 @@
 "use client";
 
+import { Link } from "@/i18n/navigation";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 import { HeaderAccountActions } from "@/components/header-account-actions";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { headerChromeIconGhostClass } from "@/components/public-chrome/header-chrome-buttons";
 import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
-import { Search } from "lucide-react";
+import { MessageSquare, Search } from "lucide-react";
 
 type Props = {
   isKo: boolean;
@@ -27,6 +28,14 @@ export function HeaderDesktopChrome({ isKo }: Props) {
         <Search className="h-[18px] w-[18px]" strokeWidth={2} />
       </button>
       <HeaderNotificationsBell compact />
+      <Link
+        href="/contact"
+        className={headerChromeIconGhostClass}
+        aria-label={isKo ? "문의하기" : "Contact"}
+        data-tour="contact"
+      >
+        <MessageSquare className="h-[18px] w-[18px]" strokeWidth={2} />
+      </Link>
       <HeaderAccountActions />
     </div>
   );

@@ -3,7 +3,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { useTranslations } from "next-intl";
+import { ChevronDown, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
@@ -34,8 +35,11 @@ export function PublicNavSidebar({
   initialOpenId = null,
   className,
 }: Props) {
+  const t = useTranslations("nav");
   const pathname = usePathname() ?? "";
   const searchParams = useSearchParams();
+  const contactActive =
+    pathname === "/contact" || pathname.startsWith("/contact/");
   const activeGroupId = useMemo(
     () => findActiveNavGroupId(pathname, groups, searchParams),
     [pathname, groups, searchParams],
@@ -65,6 +69,32 @@ export function PublicNavSidebar({
       )}
       aria-label="Main navigation"
     >
+      <div className="border-b border-gray-200/80 px-5 py-3 dark:border-white/10">
+        <Link
+          href="/contact"
+          onClick={onNavigate}
+          className={cn(
+            "flex min-h-12 items-center gap-3 transition-colors",
+            contactActive
+              ? "text-violet-600 dark:text-violet-400"
+              : "text-gray-900 hover:text-gray-950 dark:text-white dark:hover:text-white",
+          )}
+        >
+          <span
+            className={cn(
+              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+              contactActive
+                ? "bg-violet-600 text-white dark:bg-violet-500"
+                : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
+            )}
+          >
+            <MessageSquare className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="text-xl font-semibold leading-snug tracking-tight">
+            {t("contact")}
+          </span>
+        </Link>
+      </div>
       <ul className="flex flex-col divide-y divide-gray-200/80 dark:divide-white/10">
         {groups.map((group) => {
           const Icon = group.icon;
