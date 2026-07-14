@@ -2,17 +2,15 @@
 
 import Image from "next/image";
 import { Link } from "@/i18n/navigation";
-import { ShieldCheck } from "lucide-react";
+import { Info, ShieldCheck } from "lucide-react";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import {
-  catalogThumbnailImageProps,
-  catalogToMediaItem,
-} from "@/lib/media-catalog-map";
-import { resolveMediaCpmWon } from "@/lib/compare-quote";
-import {
-  formatCpmKrw,
-  formatMediaPriceWithPeriodSuffix,
-} from "@/lib/media-price-format";
+  buildHomePopularCardPriceDisplay,
+  formatHomePopularCardCpm,
+  homePopularCardCpmTooltip,
+  homePopularCardDoohTooltip,
+} from "@/lib/home-popular-card-display";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -21,6 +19,34 @@ type Props = {
   isKo: boolean;
   priority?: boolean;
 };
+
+function CardInfoButton({
+  label,
+  title,
+  className,
+}: {
+  label: string;
+  title: string;
+  className?: string;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={label}
+      title={title}
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+      }}
+      className={cn(
+        "inline-flex shrink-0 rounded-full p-0.5 text-tkad-muted transition-colors hover:bg-gray-100 hover:text-foreground dark:hover:bg-white/10",
+        className,
+      )}
+    >
+      <Info className="h-3 w-3" aria-hidden />
+    </button>
+  );
+}
 
 function VerifiedBadge({ isKo }: { isKo: boolean }) {
   return (
@@ -31,7 +57,7 @@ function VerifiedBadge({ isKo }: { isKo: boolean }) {
   );
 }
 
-/** 홈 인기 캐러셀 — /media discovery 톤의 링크-only 티저 카드 (담기·비교 없음) */
+/** 홈 인기 캐러셀 — 월 환산 primary + 원본 period secondary, CPM·용어 info */
 export function HomeMediaScrollCard({
   item,
   href,
@@ -40,12 +66,10 @@ export function HomeMediaScrollCard({
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
-  const regionLine = [item.region, item.type].filter(Boolean).join(" · ");
-  const priceLabel =
-    item.price && item.price > 0
-      ? formatMediaPriceWithPeriodSuffix(item.price, item.pricePeriod, locale)
-      : null;
-  const cpm = resolveMediaCpmWon(catalogToMediaItem(item));
+  const showDoohHint = item.type?.toUpperCase().includes("DOOH") ?? false;
+  const regionParts = [item.region, item.type].filter(Boolean);
+  const priceDisplay = buildHomePopularCardPriceDisplay(item, locale, isKo);
+  const cpmLabel = formatHomePopularCardCpm(item, locale);
 
   return (
     <Link
@@ -77,19 +101,45 @@ export function HomeMediaScrollCard({
         <p className="tkad-type-title line-clamp-2 leading-snug text-foreground group-hover:text-tkad-accent">
           {item.name}
         </p>
-        {regionLine ? (
-          <p className="tkad-type-meta line-clamp-1 text-tkad-muted">
-            {regionLine}
+        {regionParts.length > 0 ? (
+          <p className="tkad-type-meta flex items-center gap-0.5 line-clamp-1 text-tkad-muted">
+            <span className="min-w-0 truncate">{regionParts.join(" · ")}</span>
+            {showDoohHint ? (
+              <CardInfoButton
+                label={isKo ? "DOOH 설명" : "About DOOH"}
+                title={homePopularCardDoohTooltip(isKo)}
+              />
+            ) : null}
           </p>
         ) : null}
-        {priceLabel ? (
-          <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
-            {priceLabel}
-          </p>
+        {priceDisplay ? (
+          <div className="space-y-0.5">
+            <p className="tkad-type-price-accent flex items-center gap-0.5 tkad-home-accent-text tabular-nums">
+              <span>{priceDisplay.primary}</span>
+              <CardInfoButton
+                label={isKo ? "월 환산 단가 설명" : "Monthly rate note"}
+                title={
+                  priceDisplay.originalPeriodTooltip ??
+                  priceDisplay.monthlyEquivalentTooltip
+                }
+              />
+            </p>
+            {priceDisplay.secondary ? (
+              <p className="tkad-type-note line-clamp-1 tabular-nums text-tkad-muted">
+                {priceDisplay.secondary}
+              </p>
+            ) : null}
+          </div>
         ) : null}
-        {cpm != null ? (
-          <p className="tkad-type-note tabular-nums text-tkad-muted">
-            CPM {formatCpmKrw(cpm, locale)}
+        {cpmLabel ? (
+          <p className="tkad-type-note flex items-center gap-0.5 tabular-nums text-tkad-muted">
+            <span>
+              CPM {cpmLabel}
+            </span>
+            <CardInfoButton
+              label={isKo ? "CPM 설명" : "About CPM"}
+              title={homePopularCardCpmTooltip(isKo)}
+            />
           </p>
         ) : null}
       </div>

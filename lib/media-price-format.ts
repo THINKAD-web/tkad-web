@@ -351,6 +351,31 @@ export function formatMediaPriceWithPeriodSuffix(
   return `${priceLabel}/${periodLabel}`;
 }
 
+/** 카드·예산 비교용 — 단가 주기 → 월 환산(원). matching-engine 과 동일 계수. */
+export function priceToMonthlyEquivalentWon(
+  priceWon: number,
+  period: MediaPricePeriodKey | string | null | undefined,
+): number {
+  const won = catalogPriceFieldToWon(priceWon);
+  if (won <= 0) return 0;
+  switch (normalizeMediaPricePeriod(period)) {
+    case "day":
+      return won * 30;
+    case "week":
+      return won * 4;
+    case "biweekly":
+      return won * 2;
+    default:
+      return won;
+  }
+}
+
+export function isNonMonthlyPricePeriod(
+  period: MediaPricePeriodKey | string | null | undefined,
+): boolean {
+  return normalizeMediaPricePeriod(period) !== "month";
+}
+
 /** 목록·지도 공통 — priceOptions 포함 최저가 + 표시 기간 */
 export function resolveMediaDisplayPrice(
   media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
