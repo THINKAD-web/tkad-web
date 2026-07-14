@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getPrisma } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
 import {
+  getMediaReviewEligibility,
   userHasVerifiedExecution,
 } from "@/lib/media-reviews";
 import { postInternalAlert } from "@/lib/internal-webhook";
@@ -107,30 +108,7 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> },
 ) {
   const user = await getCurrentUser();
-  if (!user) {
-    return NextResponse.json({ canReview: false, reason: "login_required" });
-  }
-
   const { id: mediaId } = await params;
-  const db = getPrisma();
-
-  const existing = await db.mediaReview.findUnique({
-    where: { mediaId_userId: { mediaId, userId: user.id } },
-    select: { id: true, status: true },
-  });
-  if (existing) {
-    return NextResponse.json({
-      canReview: false,
-      reason: "already_reviewed",
-      reviewId: existing.id,
-      status: existing.status,
-    });
-  }
-
-  const { verified } = await userHasVerifiedExecution(user.id, mediaId);
-
-  return NextResponse.json({
-    canReview: true,
-    isVerifiedEligible: verified,
-  });
+  const eligibility = await getMediaReviewEligibility(user?.id ?? null, mediaId);
+  return NextResponse.json(eligibility);
 }

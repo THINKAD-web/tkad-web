@@ -45,7 +45,10 @@ import {
   resolveMediaForDetail,
 } from "@/lib/public-media-catalog";
 import { enrichMediaWithTrust } from "@/lib/media-trust-catalog";
-import { attachReviewStatsToMediaItems } from "@/lib/media-reviews";
+import {
+  attachReviewStatsToMediaItems,
+  fetchMediaReviewsInitialStats,
+} from "@/lib/media-reviews";
 import {
   buildMediaAnalyticsReport,
   buildMediaAnalyticsReportFused,
@@ -195,6 +198,17 @@ export default async function MediaDetailPage({ params }: Props) {
   const periodLabel = t(
     mediaDetailPricePeriodTranslationKey(media.pricePeriod),
   );
+
+  let reviewInitialStats: Awaited<
+    ReturnType<typeof fetchMediaReviewsInitialStats>
+  > | null = null;
+  if (!media.keywordFilter) {
+    try {
+      reviewInitialStats = await fetchMediaReviewsInitialStats(media.id);
+    } catch (e) {
+      console.error("[media-detail] review prefetch failed", media.id, e);
+    }
+  }
 
   const priceOptions = Array.isArray(media.priceOptions)
     ? media.priceOptions
@@ -405,6 +419,7 @@ export default async function MediaDetailPage({ params }: Props) {
               <MediaReviewsSection
                 mediaId={media.id}
                 mediaName={isKo ? media.name : media.nameEn || media.name}
+                initialStats={reviewInitialStats ?? undefined}
               />
             ) : null}
 

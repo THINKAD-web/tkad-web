@@ -188,6 +188,62 @@ export async function userHasVerifiedExecution(
   return { verified: true, campaignId: booking.campaignId };
 }
 
+export type MediaReviewEligibility = {
+  canReview: boolean;
+  reason?: "login_required" | "already_reviewed";
+  reviewId?: string;
+  status?: MediaReviewStatus;
+  isVerifiedEligible?: boolean;
+};
+
+/** GET /api/media/[id]/reviews 와 동일한 canReview 판정 */
+export async function getMediaReviewEligibility(
+  userId: string | null,
+  mediaId: string,
+): Promise<MediaReviewEligibility> {
+  if (!userId) {
+    return { canReview: false, reason: "login_required" };
+  }
+  if (!isDatabaseConfigured()) {
+    return { canReview: false, reason: "login_required" };
+  }
+
+  const db = getPrisma();
+  const existing = await db.mediaReview.findUnique({
+    where: { mediaId_userId: { mediaId, userId } },
+    select: { id: true, status: true },
+  });
+  if (existing) {
+    return {
+      canReview: false,
+      reason: "already_reviewed",
+      reviewId: existing.id,
+      status: existing.status,
+    };
+  }
+
+  const { verified } = await userHasVerifiedExecution(userId, mediaId);
+
+  return {
+    canReview: true,
+    isVerifiedEligible: verified,
+  };
+}
+
+export type MediaReviewsInitialStats = {
+  stats: MediaReviewStats;
+  /** SSR에서 생략 시 클라이언트 eligibility fetch로 보완 */
+  canReview?: boolean;
+};
+
+export async function fetchMediaReviewsInitialStats(
+  mediaId: string,
+): Promise<MediaReviewsInitialStats> {
+  return {
+    stats: await getMediaReviewStats(mediaId),
+  };
+}
+
 export async function attachReviewStatsToMediaItems<
   T extends { id: string },
 >(items: T[]): Promise<(T & { averageRating?: number; reviewCount?: number })[]> {
