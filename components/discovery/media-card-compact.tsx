@@ -13,6 +13,7 @@ import {
 } from "@/lib/media-card-display";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
+import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
@@ -533,6 +534,14 @@ export function DiscoveryMediaCardCatalogTile({
         <p className="tkad-type-meta mt-0.5 line-clamp-1 text-tkad-secondary">
           {locationLine}
         </p>
+      ) : null}
+      {model.trustScore != null ? (
+        <MediaTrustScoreBadge
+          score={model.trustScore}
+          isKo={isKo}
+          compact
+          className="mt-1 max-w-full"
+        />
       ) : null}
       <div className="mt-1 flex flex-wrap items-baseline gap-x-1.5">
         <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
