@@ -9,16 +9,21 @@ import {
 } from "@/lib/media-price-format";
 import {
   formatPlannerQuantityLabel,
+  plannerMediaPeriodLineWon,
   plannerMonthlyImpressionsForMedia,
   plannerMonthlyPriceWonForMedia,
   plannerUnitsForMedia,
   shouldShowPlannerQuantityControl,
   type CampaignMediaQuantities,
+  type PlannerPeriodPricingContext,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { formatPlanCartMultiOptionQuantityLabel } from "@/lib/plan-cart-option-selections";
-import { planCartLineMonthlyWon } from "@/lib/plan-cart-pricing";
+import {
+  planCartLineMonthlyWon,
+  planCartLinePeriodTotalWon,
+} from "@/lib/plan-cart-pricing";
 import { getPrimaryMediaImageUrl, resolveMediaGallery } from "@/lib/media-data";
 import { normalizeMediaTypeForPlanner } from "@/lib/planner-logic";
 import { truncateDocText } from "@/lib/document-text";
@@ -280,21 +285,27 @@ export function computePortfolioContributions(
   items: MediaItem[],
   months: number,
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): Map<string, { exposurePct: number; budgetPct: number }> {
+  const ctx =
+    periodCtx ?? (months > 0 ? { months } : undefined);
+  const effectiveMonths = months > 0 ? months : 1;
   const exposureWeights = items.map(
     (m) =>
       plannerMonthlyImpressionsForMedia(
         m,
         pricing?.quantities,
         pricing?.priceOptionIndex,
-      ) * Math.max(1, months),
+      ) * effectiveMonths,
   );
   const budgetWeights = items.map((m) =>
-    plannerMonthlyPriceWonForMedia(
-      m,
-      pricing?.quantities,
-      pricing?.priceOptionIndex,
-    ),
+    ctx
+      ? plannerMediaPeriodLineWon(m, ctx, pricing)
+      : plannerMonthlyPriceWonForMedia(
+          m,
+          pricing?.quantities,
+          pricing?.priceOptionIndex,
+        ),
   );
   const expTotal = exposureWeights.reduce((a, b) => a + b, 0) || 1;
   const budTotal = budgetWeights.reduce((a, b) => a + b, 0) || 1;
@@ -314,6 +325,7 @@ export function mediaItemToExportRow(
   opts?: {
     lineTotalWon?: number;
     months?: number;
+    periodCtx?: PlannerPeriodPricingContext;
     contributions?: Map<string, { exposurePct: number; budgetPct: number }>;
     pricing?: PlannerPortfolioPricing;
     quantities?: CampaignMediaQuantities;
@@ -323,6 +335,9 @@ export function mediaItemToExportRow(
   const c = opts?.contributions?.get(m.id);
   const pricing: PlannerPortfolioPricing =
     opts?.pricing ?? { quantities: opts?.quantities };
+  const periodCtx =
+    opts?.periodCtx ??
+    (opts?.months != null && opts.months > 0 ? { months: opts.months } : undefined);
   const units = plannerUnitsForMedia(m, pricing.quantities);
   const monthlyWonFromCart =
     opts?.planCartItem != null
@@ -338,9 +353,13 @@ export function mediaItemToExportRow(
         );
   const lineTotalWon =
     opts?.lineTotalWon ??
-    (monthlyWon > 0 && opts?.months
-      ? monthlyWon * Math.max(1, opts.months)
-      : undefined);
+    (periodCtx
+      ? opts?.planCartItem
+        ? planCartLinePeriodTotalWon(opts.planCartItem, m, periodCtx, isKo)
+        : plannerMediaPeriodLineWon(m, periodCtx, pricing, isKo)
+      : monthlyWon > 0
+        ? monthlyWon
+        : undefined);
   const detail = mediaToDocumentDetail(m, {
     isKo,
     lineTotalWon,

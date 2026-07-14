@@ -146,6 +146,37 @@ export function plannerMediaPeriodTotalWon(
   return Math.round(line.lineTotalMan * 10_000);
 }
 
+/** 단일 매체 — 캠페인 기간 반영 line total(원). partial rate 우선, 없으면 월×기간 선형 */
+export function plannerMediaPeriodLineWon(
+  media: MediaItem,
+  ctx: PlannerPeriodPricingContext,
+  pricing?: PlannerPortfolioPricing,
+  isKo = true,
+): number {
+  const period = resolveQuoteCampaignPeriodForPricing(ctx);
+  if (period) {
+    return plannerMediaPeriodTotalWon(media, {
+      campaignPeriod: period,
+      quantities: pricing?.quantities,
+      priceOptionIndex: pricing?.priceOptionIndex,
+      isKo,
+    });
+  }
+  const months =
+    ctx.months != null && ctx.months > 0
+      ? ctx.months
+      : ctx.weeks != null && ctx.weeks > 0
+        ? (ctx.weeks * 7) / 30
+        : 1;
+  return Math.round(
+    plannerMonthlyPriceWonForMedia(
+      media,
+      pricing?.quantities,
+      pricing?.priceOptionIndex,
+    ) * months,
+  );
+}
+
 /** 포트폴리오 기간 총액(원) — partial rate 우선, 없으면 월×개월 선형 */
 export function plannerPortfolioPeriodTotalWon(
   portfolio: readonly MediaItem[],

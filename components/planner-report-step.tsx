@@ -217,10 +217,16 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
     [props.months, t],
   );
 
+  const reportPeriodCtx = useMemo(
+    () => (props.months > 0 ? { months: props.months } : undefined),
+    [props.months],
+  );
+
   const budgetAllocation = useMemo(() => {
     const slices = budgetSplitByCategory(
       props.portfolio,
       reportPortfolioPricing(props),
+      reportPeriodCtx,
     );
     return slices.map((s) => ({
       key: s.key,
@@ -229,19 +235,32 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       valueWon: s.value,
       actualWon: s.actualWon,
     }));
-  }, [props.portfolio, props.isKo, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex]);
+  }, [
+    props.portfolio,
+    props.isKo,
+    props.campaignMediaQuantities,
+    props.campaignMediaPriceOptionIndex,
+    reportPeriodCtx,
+  ]);
 
   const cpmBars = useMemo(() => {
     const pts = portfolioCpmByCategory(
       props.portfolio,
       reportPortfolioPricing(props),
+      reportPeriodCtx,
     );
     return pts.map((p) => ({
       key: p.key,
       label: props.isKo ? p.labelKo : p.labelEn,
       value: p.cpm,
     }));
-  }, [props.portfolio, props.isKo, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex]);
+  }, [
+    props.portfolio,
+    props.isKo,
+    props.campaignMediaQuantities,
+    props.campaignMediaPriceOptionIndex,
+    reportPeriodCtx,
+  ]);
 
   const portfolioReport = useMemo(
     () =>
@@ -249,8 +268,15 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
         props.portfolio,
         props.months,
         reportPortfolioPricing(props),
+        reportPeriodCtx,
       ),
-    [props.portfolio, props.months, props.campaignMediaQuantities, props.campaignMediaPriceOptionIndex],
+    [
+      props.portfolio,
+      props.months,
+      props.campaignMediaQuantities,
+      props.campaignMediaPriceOptionIndex,
+      reportPeriodCtx,
+    ],
   );
   const usePortfolioReach =
     props.portfolio.length > 0 && portfolioReport.monthlyImpressions > 0;

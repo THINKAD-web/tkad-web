@@ -140,16 +140,21 @@ export function buildIntegratedReportPayload(
     });
   }
 
-  const months = Math.max(1, a.months ?? 1);
+  const campaignMonths = a.months ?? 1;
+  const periodCtx =
+    campaignMonths > 0 ? { months: campaignMonths } : undefined;
+  const months = campaignMonths;
   const pricing = a.portfolioPricing;
   const contributions = computePortfolioContributions(
     a.portfolio,
     months,
     pricing,
+    periodCtx,
   );
   const portfolioRows = a.portfolio.map((mm) =>
     mediaItemToExportRow(mm, isKo, {
       months,
+      periodCtx,
       contributions,
       pricing,
     }),

@@ -8,7 +8,9 @@ import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import {
   type CampaignMediaQuantities,
   type CampaignMediaPriceOptionIndex,
+  type PlannerPeriodPricingContext,
   type PlannerPortfolioPricing,
+  plannerMediaPeriodLineWon,
   plannerMonthlyImpressionsForMedia,
   plannerMonthlyPriceManForMedia,
   plannerMonthlyPriceWonForMedia,
@@ -34,6 +36,26 @@ function portfolioPriceWon(
     pricing?.quantities,
     pricing?.priceOptionIndex,
   );
+}
+
+function portfolioPeriodPriceWon(
+  m: MediaItem,
+  pricing: PlannerPortfolioPricing | undefined,
+  periodCtx: PlannerPeriodPricingContext | undefined,
+): number {
+  if (!periodCtx) return portfolioPriceWon(m, pricing);
+  return plannerMediaPeriodLineWon(m, periodCtx, pricing);
+}
+
+function effectiveMonthsFromPeriodCtx(
+  periodCtx?: PlannerPeriodPricingContext,
+  fallbackMonths = 1,
+): number {
+  if (periodCtx?.months != null && periodCtx.months > 0) return periodCtx.months;
+  if (periodCtx?.weeks != null && periodCtx.weeks > 0) {
+    return (periodCtx.weeks * 7) / 30;
+  }
+  return fallbackMonths > 0 ? fallbackMonths : 1;
 }
 
 function portfolioImpressions(
@@ -394,6 +416,7 @@ export function computePortfolioReportMetrics(
   portfolio: readonly MediaItem[],
   months: number,
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): {
   monthlyImpressions: number;
   totalImpressions: number;
@@ -403,13 +426,18 @@ export function computePortfolioReportMetrics(
     (s, m) => s + portfolioImpressions(m, pricing),
     0,
   );
-  const m = Math.max(1, months);
-  const totalImpressions = monthlyImpressions * m;
-  const blendedCpmKrw = plannerBlendCpmKrw(
-    portfolio,
-    monthlyImpressions,
-    pricing,
+  const ctx =
+    periodCtx ?? (months > 0 ? { months } : undefined);
+  const effectiveMonths = effectiveMonthsFromPeriodCtx(ctx, months);
+  const totalImpressions = Math.round(monthlyImpressions * effectiveMonths);
+  const periodTotalWon = portfolio.reduce(
+    (s, m) => s + portfolioPeriodPriceWon(m, pricing, ctx),
+    0,
   );
+  const blendedCpmKrw =
+    totalImpressions > 0 && periodTotalWon > 0
+      ? Math.round(periodTotalWon / (totalImpressions / 1000))
+      : null;
   return { monthlyImpressions, totalImpressions, blendedCpmKrw };
 }
 
@@ -859,18 +887,21 @@ export function estimateCpmByCategory(filtered: MediaItem[]): CpmBarPoint[] {
 export function portfolioCpmByCategory(
   portfolio: MediaItem[],
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): CpmBarPoint[] {
+  const effectiveMonths = effectiveMonthsFromPeriodCtx(periodCtx, 1);
   const out: CpmBarPoint[] = [];
   for (const [key, list] of groupPortfolioByReportCategory(portfolio)) {
     let priceWon = 0;
     let monthlyImp = 0;
     for (const m of list) {
-      priceWon += portfolioPriceWon(m, pricing);
+      priceWon += portfolioPeriodPriceWon(m, pricing, periodCtx);
       monthlyImp += monthlyImpressionsOf(m, pricing);
     }
+    const periodImp = monthlyImp * effectiveMonths;
     let cpm = 0;
-    if (priceWon > 0 && monthlyImp > 0) {
-      cpm = Math.round(priceWon / (monthlyImp / 1000));
+    if (priceWon > 0 && periodImp > 0) {
+      cpm = Math.round(priceWon / (periodImp / 1000));
     } else {
       cpm = estimateCpmByCategory(list)[0]?.cpm ?? 0;
     }
@@ -900,6 +931,7 @@ export type BudgetPieSlice = {
 export function budgetSplitByCategory(
   portfolio: MediaItem[],
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): BudgetPieSlice[] {
   return budgetSplitByGroupedKeys(
     portfolio,
@@ -909,6 +941,7 @@ export function budgetSplitByCategory(
       labelEn: TYPE_META[key]?.labelEn ?? key,
     }),
     pricing,
+    periodCtx,
   );
 }
 
@@ -978,18 +1011,22 @@ function budgetSplitByGroupedKeys(
   keyOf: (m: MediaItem) => string,
   labelsOf: (key: string) => { labelKo: string; labelEn: string },
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): BudgetPieSlice[] {
   if (portfolio.length === 0) return [];
 
+  const lineWonOf = (m: MediaItem) =>
+    portfolioPeriodPriceWon(m, pricing, periodCtx);
+
   const positivePrices = portfolio
-    .map((m) => portfolioPriceWon(m, pricing))
+    .map((m) => lineWonOf(m))
     .filter((won) => won > 0);
   const fallbackWon =
     positivePrices.length > 0
       ? Math.round(positivePrices.reduce((a, b) => a + b, 0) / positivePrices.length)
       : 1;
   const weightOf = (m: MediaItem): number => {
-    const won = portfolioPriceWon(m, pricing);
+    const won = lineWonOf(m);
     return won > 0 ? won : fallbackWon;
   };
 
@@ -998,10 +1035,7 @@ function budgetSplitByGroupedKeys(
   for (const m of portfolio) {
     const key = keyOf(m);
     weightSums.set(key, (weightSums.get(key) ?? 0) + weightOf(m));
-    wonSums.set(
-      key,
-      (wonSums.get(key) ?? 0) + portfolioPriceWon(m, pricing),
-    );
+    wonSums.set(key, (wonSums.get(key) ?? 0) + lineWonOf(m));
   }
   const totalWeight = [...weightSums.values()].reduce((a, b) => a + b, 0) || 1;
   const totalActual = [...wonSums.values()].reduce((a, b) => a + b, 0);
@@ -1030,12 +1064,14 @@ function budgetSplitByGroupedKeys(
 export function budgetSplitByBrowseCategory(
   portfolio: MediaItem[],
   pricing?: PlannerPortfolioPricing,
+  periodCtx?: PlannerPeriodPricingContext,
 ): BudgetPieSlice[] {
   return budgetSplitByGroupedKeys(
     portfolio,
     plannerBrowseCategoryKey,
     browseCategoryLabels,
     pricing,
+    periodCtx,
   );
 }
 

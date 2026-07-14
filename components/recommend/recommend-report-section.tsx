@@ -219,8 +219,18 @@ export function RecommendReportSection({
 
   const portfolioPricing = reportContext.pricing;
 
+  const reportPeriodCtx = useMemo(
+    () =>
+      reportContext.months > 0 ? { months: reportContext.months } : undefined,
+    [reportContext.months],
+  );
+
   const budgetAllocation = useMemo(() => {
-    const slices = budgetSplitByCategory(portfolio, portfolioPricing);
+    const slices = budgetSplitByCategory(
+      portfolio,
+      portfolioPricing,
+      reportPeriodCtx,
+    );
     return slices.map((s) => ({
       key: s.key,
       label: isKo ? s.labelKo : s.labelEn,
@@ -228,16 +238,20 @@ export function RecommendReportSection({
       valueWon: s.value,
       actualWon: s.actualWon,
     }));
-  }, [portfolio, portfolioPricing, isKo]);
+  }, [portfolio, portfolioPricing, isKo, reportPeriodCtx]);
 
   const cpmBars = useMemo(() => {
-    const pts = portfolioCpmByCategory(portfolio, portfolioPricing);
+    const pts = portfolioCpmByCategory(
+      portfolio,
+      portfolioPricing,
+      reportPeriodCtx,
+    );
     return pts.map((p) => ({
       key: p.key,
       label: isKo ? p.labelKo : p.labelEn,
       value: p.cpm,
     }));
-  }, [portfolio, portfolioPricing, isKo]);
+  }, [portfolio, portfolioPricing, isKo, reportPeriodCtx]);
 
   const portfolioReport = useMemo(
     () =>
@@ -245,8 +259,9 @@ export function RecommendReportSection({
         portfolio,
         reportContext.months,
         portfolioPricing,
+        reportPeriodCtx,
       ),
-    [portfolio, reportContext.months, portfolioPricing],
+    [portfolio, reportContext.months, portfolioPricing, reportPeriodCtx],
   );
 
   const blendedCpmKrw = portfolioReport.blendedCpmKrw;

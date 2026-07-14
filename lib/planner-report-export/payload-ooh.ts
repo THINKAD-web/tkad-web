@@ -84,10 +84,14 @@ export function buildOohReportPayload(
     quantities: a.campaignMediaQuantities,
     priceOptionIndex: a.campaignMediaPriceOptionIndex,
   };
+  const campaignMonths = a.months ?? 1;
+  const periodCtx =
+    campaignMonths > 0 ? { months: campaignMonths } : undefined;
   const portfolioMetrics = computePortfolioReportMetrics(
     a.portfolio,
-    a.months ?? 1,
+    campaignMonths,
     pricing,
+    periodCtx,
   );
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
@@ -123,7 +127,11 @@ export function buildOohReportPayload(
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
-  const browseBudgetSlices = budgetSplitByBrowseCategory(a.portfolio, pricing);
+  const browseBudgetSlices = budgetSplitByBrowseCategory(
+    a.portfolio,
+    pricing,
+    periodCtx,
+  );
   const charts: PlannerExportCharts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
@@ -275,7 +283,7 @@ export function buildOohReportPayload(
     });
   }
 
-  const months = Math.max(1, a.months ?? 1);
+  const months = campaignMonths;
   const groups = a.regionBreakdown?.length
     ? groupPlanCartReportPortfolio(a.portfolio, isKo)
     : null;
@@ -286,10 +294,12 @@ export function buildOohReportPayload(
     orderedPortfolio,
     months,
     pricing,
+    periodCtx,
   );
   const portfolioRows = orderedPortfolio.map((m) =>
     mediaItemToExportRow(m, isKo, {
       months,
+      periodCtx,
       contributions,
       pricing,
       planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
