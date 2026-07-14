@@ -72,7 +72,7 @@ test("wizard path with priceOptionIndex unchanged subtotal", () => {
     ],
     startDate: start,
     endDate: end,
-    periodKey: "1month",
+    periodKey: "30days",
     mediaPriceOptionIndex: { "g-bus": 1 },
     mediaSelections: [
       {

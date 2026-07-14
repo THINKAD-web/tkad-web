@@ -1296,11 +1296,12 @@
     "period": "Campaign Period",
     "periodPlaceholder": "Select period",
     "periods": {
-      "2weeks": "2 Weeks",
-      "1month": "1 Month",
-      "3months": "3 Months",
-      "6months": "6 Months",
-      "12months": "12 Months"
+      "1day": "1 Day",
+      "3days": "3 Days",
+      "5days": "5 Days",
+      "7days": "7 Days",
+      "15days": "15 Days",
+      "30days": "30 Days"
     },
     "budgetRange": "Budget Range",
     "budgetMin": "Min Budget (₩10K)",

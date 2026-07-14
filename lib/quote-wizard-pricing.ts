@@ -7,9 +7,14 @@ import {
 } from "@/lib/media-quantity";
 import { tryResolveExplicitPriceOptionBundleDays, quoteBundleProrationWon } from "@/lib/compare-quote";
 import {
+  isPartialPeriodRateAdminKey,
+  partialPeriodRateDaysFromKey,
   partialPeriodRateToPercentLabel,
+  PARTIAL_PERIOD_RATE_DAYS,
+  PARTIAL_PERIOD_RATE_KEYS,
   quoteLineTotalWonFromPartialRate,
   resolvePartialPeriodRate,
+  type PartialPeriodRateAdminKey,
 } from "@/lib/media-partial-period-rates";
 import {
   catalogPriceFieldToPriceMan,
@@ -20,41 +25,34 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 
-export type QuoteCampaignPeriodKey =
-  | "2weeks"
-  | "1month"
-  | "3months"
-  | "6months"
-  | "12months";
+/** 견적 캠페인 기간 = 운영 부분기간 요율 키 (1/3/5/7/15/30일) */
+export type QuoteCampaignPeriodKey = PartialPeriodRateAdminKey;
 
-/** 견적 위저드 캠페인 기간 — `months` 가 있으면 업계 관행(1개월=2×2주)으로 환산 */
+/** 견적 위저드 캠페인 기간 — 일수 기반 */
 export const QUOTE_CAMPAIGN_PERIOD_CONFIG: Record<
   QuoteCampaignPeriodKey,
-  { days: number; months: number | null }
-> = {
-  "2weeks": { days: 14, months: null },
-  "1month": { days: 30, months: 1 },
-  "3months": { days: 90, months: 3 },
-  "6months": { days: 180, months: 6 },
-  "12months": { days: 360, months: 12 },
-};
+  { days: number; months: null }
+> = Object.fromEntries(
+  PARTIAL_PERIOD_RATE_KEYS.map((key) => [
+    key,
+    { days: PARTIAL_PERIOD_RATE_DAYS[key], months: null as null },
+  ]),
+) as Record<QuoteCampaignPeriodKey, { days: number; months: null }>;
 
 export function isQuoteCampaignPeriodKey(
   value: string,
 ): value is QuoteCampaignPeriodKey {
-  return value in QUOTE_CAMPAIGN_PERIOD_CONFIG;
+  return isPartialPeriodRateAdminKey(value);
 }
 
 /** 견적 위저드 캠페인 기간 → 일수 */
 export function quoteCampaignDaysFromPeriodKey(
   campaignPeriod: QuoteCampaignPeriodKey,
 ): number {
-  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[campaignPeriod];
-  if (cfg.months != null) return cfg.months * 30;
-  return cfg.days;
+  return partialPeriodRateDaysFromKey(campaignPeriod);
 }
 
-/** UI 라벨용 — 예: ko "2주(14일)" */
+/** UI 라벨용 — 예: ko "15일(15일)" */
 export function formatQuoteCampaignPeriodWithDays(
   campaignPeriod: QuoteCampaignPeriodKey,
   periodLabel: string,
@@ -69,12 +67,14 @@ export function pricePeriodToQuoteCampaignPeriod(
   pricePeriod: MediaPricePeriodKey,
 ): QuoteCampaignPeriodKey {
   switch (pricePeriod) {
-    case "biweekly":
-    case "week":
     case "day":
-      return "2weeks";
+      return "1day";
+    case "week":
+      return "7days";
+    case "biweekly":
+      return "15days";
     default:
-      return "1month";
+      return "30days";
   }
 }
 
@@ -119,30 +119,16 @@ export function quoteCampaignUnits(
   campaignPeriod: QuoteCampaignPeriodKey,
   pricePeriod: MediaPricePeriodKey,
 ): number {
-  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[campaignPeriod];
-
-  if (cfg.months != null) {
-    switch (pricePeriod) {
-      case "biweekly":
-        return cfg.months * 2;
-      case "week":
-        return cfg.months * 4;
-      case "day":
-        return cfg.months * 30;
-      default:
-        return cfg.months;
-    }
-  }
-
+  const days = quoteCampaignDaysFromPeriodKey(campaignPeriod);
   switch (pricePeriod) {
     case "biweekly":
-      return 1;
+      return days / 14;
     case "week":
-      return 2;
+      return days / 7;
     case "day":
-      return cfg.days;
+      return days;
     default:
-      return 0.5;
+      return days / 30;
   }
 }
 
@@ -161,37 +147,19 @@ function formatCampaignUnitsDisplay(units: number): string {
 
 function buildExecutionPeriodLabel(opts: {
   isKo: boolean;
-  campaignPeriod: QuoteCampaignPeriodKey;
   campaignPeriodLabel: string;
   pricePeriod: MediaPricePeriodKey;
   campaignUnits: number;
   unitPeriodLabel: string;
 }): string {
-  const {
-    isKo,
-    campaignPeriod,
-    campaignPeriodLabel,
-    pricePeriod,
-    campaignUnits,
-    unitPeriodLabel,
-  } = opts;
+  const { isKo, campaignPeriodLabel, pricePeriod, campaignUnits, unitPeriodLabel } =
+    opts;
 
   if (pricePeriod === "month") {
-    if (campaignPeriod === "2weeks") {
-      return isKo ? "2주 (0.5개월)" : "2 weeks (0.5 mo)";
-    }
     return campaignPeriodLabel;
   }
 
   const unitsDisplay = formatCampaignUnitsDisplay(campaignUnits);
-
-  if (
-    pricePeriod === "biweekly" &&
-    campaignPeriod === "2weeks" &&
-    campaignUnits === 1
-  ) {
-    return isKo ? "2주 · 1회" : "2 weeks · 1×";
-  }
 
   return isKo
     ? `${campaignPeriodLabel} · ${unitsDisplay}${unitPeriodLabel}`
@@ -387,7 +355,6 @@ export function buildQuoteWizardLineContext(
       ? formatPackageExecutionPeriodLabel(priceOpt, bundleDays, opts.isKo)
       : buildExecutionPeriodLabel({
           isKo: opts.isKo,
-          campaignPeriod: opts.campaignPeriod,
           campaignPeriodLabel: opts.campaignPeriodLabel,
           pricePeriod,
           campaignUnits,

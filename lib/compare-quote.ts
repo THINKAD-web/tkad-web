@@ -11,11 +11,11 @@ import {
   resolveDisplayCpmWon,
 } from "@/lib/ai-recommend-metrics";
 import {
+  partialRateLookupKeyFromDays,
   quoteLineTotalWonFromPartialRate,
   resolvePartialPeriodRate,
   type PartialPeriodRateAdminKey,
 } from "@/lib/media-partial-period-rates";
-import type { QuoteCampaignPeriodKey } from "@/lib/quote-wizard-pricing";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
 
@@ -144,26 +144,11 @@ function quoteLineFromUnitPrice(
   };
 }
 
-/** 비교·상세 instant quote — 일수 → 부분기간 lookup 키 */
+/** 비교·상세 instant quote — 일수 → 부분기간 lookup 키 (운영 6단위, 정확 일치만) */
 export function quotePeriodLookupKeyFromDays(
   days: number,
-): QuoteCampaignPeriodKey | PartialPeriodRateAdminKey | null {
-  const d = Math.max(1, Math.round(days));
-  const adminByDays: Record<number, PartialPeriodRateAdminKey> = {
-    3: "3days",
-    7: "1week",
-    14: "2weeks",
-    21: "3weeks",
-  };
-  if (adminByDays[d]) return adminByDays[d];
-  const wizardByDays: Record<number, QuoteCampaignPeriodKey> = {
-    14: "2weeks",
-    30: "1month",
-    90: "3months",
-    180: "6months",
-    360: "12months",
-  };
-  return wizardByDays[d] ?? null;
+): PartialPeriodRateAdminKey | null {
+  return partialRateLookupKeyFromDays(days);
 }
 
 export function calculateMediaQuoteByDays(

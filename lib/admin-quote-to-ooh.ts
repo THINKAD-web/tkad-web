@@ -12,6 +12,7 @@ import { adminQuoteLineAmounts } from "@/lib/admin-quote-lines";
 import { serializeQuote } from "@/lib/admin-sales-quote";
 import type { QuoteBreakdown, QuoteLineItem } from "@/lib/quote-calculator";
 import { periodLabelForDays } from "@/lib/quote-calculator";
+import { inferOohPeriodKeyFromDays } from "@/lib/ooh-quote";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 
 export const WON_PER_MANWON = 10_000;
@@ -68,14 +69,6 @@ function parsePeriodFromItems(items: QuoteItem[]): {
     periodLabel: periodRaw || "—",
     periodDays: 30,
   };
-}
-
-function inferPeriodKey(periodDays: number): string {
-  if (periodDays >= 28 && periodDays <= 31) return "1month";
-  if (periodDays <= 7) return "1week";
-  if (periodDays <= 14) return "2weeks";
-  if (periodDays <= 21) return "3weeks";
-  return "1month";
 }
 
 export function isCustomBridgeMediaId(mediaId: string): boolean {
@@ -246,7 +239,7 @@ export function buildOoHQuoteFromAdminQuote(
     mediaIds: dbMediaIds,
     totalAmount: totalAmountManwon,
     period,
-    periodKey: inferPeriodKey(periodDays),
+    periodKey: inferOohPeriodKeyFromDays(periodDays),
     startDate: startDate ?? undefined,
     endDate: endDate ?? undefined,
     validUntil: quote.validUntil,

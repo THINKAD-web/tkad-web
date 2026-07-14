@@ -118,9 +118,9 @@ export async function POST(request: NextRequest) {
   const budgetMaxN = parseOptionalInt(budgetMax);
   const estimatedN = parseOptionalInt(estimatedCost);
 
-  const periodKeyRaw = period != null ? String(period).trim() : "1month";
+  const periodKeyRaw = period != null ? String(period).trim() : "30days";
   const periodKey =
-    periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "1month";
+    periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "30days";
   const localeStr =
     String(localeBody ?? "").toLowerCase() === "en" ? "en" : "ko";
   const periodHuman = periodLabelFromKey(periodKey, localeStr);

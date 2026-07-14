@@ -111,14 +111,14 @@ const monthlyMedia = {
   name: "월단가 디지털",
   price: 10_000_000,
   priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
-  partialPeriodRates: { "2weeks": 0.6 },
+  partialPeriodRates: { "15days": 0.6 },
 } as AdminMediaDto;
 
-test("computeAdminCatalogLineAmountForMedia applies 2weeks 60% override", () => {
+test("computeAdminCatalogLineAmountForMedia applies 15days 60% override", () => {
   const { amount, usesMediaPartialRate } = computeAdminCatalogLineAmountForMedia(
     monthlyMedia,
     0,
-    14,
+    15,
     1,
     factorForPeriod,
   );
@@ -126,7 +126,7 @@ test("computeAdminCatalogLineAmountForMedia applies 2weeks 60% override", () => 
   assert.equal(amount, 6_000_000);
 });
 
-test("buildAdminQuoteLineItems sets usesMediaPartialRate for 14-day campaign", () => {
+test("buildAdminQuoteLineItems sets usesMediaPartialRate for 15-day campaign", () => {
   const line: AdminQuoteCatalogLine = {
     kind: "catalog",
     lineId: "l-partial",
@@ -138,8 +138,8 @@ test("buildAdminQuoteLineItems sets usesMediaPartialRate for 14-day campaign", (
     lines: [line],
     medias: [monthlyMedia],
     isKo: true,
-    campaignPeriodLabel: "2026-07-01 ~ 2026-07-14",
-    days: 14,
+    campaignPeriodLabel: "2026-07-01 ~ 2026-07-15",
+    days: 15,
     factorForPeriod,
   });
   assert.equal(items[0]?.amount, 6_000_000);
@@ -157,8 +157,8 @@ test("buildAdminQuoteLineItems custom line unchanged (manual amount)", () => {
     ],
     medias: [],
     isKo: true,
-    campaignPeriodLabel: "2026-07-01 ~ 2026-07-14",
-    days: 14,
+    campaignPeriodLabel: "2026-07-01 ~ 2026-07-15",
+    days: 15,
     factorForPeriod,
   });
   assert.equal(items.length, 1);

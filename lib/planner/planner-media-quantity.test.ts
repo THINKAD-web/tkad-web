@@ -90,20 +90,20 @@ test("planner 2w period total matches quote wizard partial rate", () => {
     lng: 0,
     dailyFootTraffic: 1000,
     sampleImages: [],
-    partialPeriodRates: { "2weeks": 0.6 },
+    partialPeriodRates: { "15days": 0.6 },
     priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
   };
 
   const wizard = buildQuoteWizardLineContext(media, {
     isKo: true,
-    campaignPeriod: "2weeks",
-    campaignPeriodLabel: "2주",
+    campaignPeriod: "15days",
+    campaignPeriodLabel: "15일",
     priceOptionIndex: 0,
   });
 
   const plannerTotal = plannerPortfolioPeriodTotalWon(
     [media],
-    { months: 14 / 30 },
+    { months: 15 / 30 },
     undefined,
     true,
   );
@@ -111,7 +111,7 @@ test("planner 2w period total matches quote wizard partial rate", () => {
   assert.equal(plannerTotal, Math.round(wizard.lineTotalMan * 10_000));
   assert.equal(
     plannerMediaPeriodTotalWon(media, {
-      campaignPeriod: "2weeks",
+      campaignPeriod: "15days",
       isKo: true,
     }),
     6_000_000,

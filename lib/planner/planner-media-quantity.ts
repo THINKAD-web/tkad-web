@@ -84,26 +84,18 @@ export function plannerMonthlyPriceManForMedia(
   );
 }
 
-/** 플래너 기간(월) → 견적 위저드 `periodKey` (2주·1·3·6·12개월 등) */
+/** 플래너 기간(월) → 견적 캠페인 `periodKey` (운영 6일 단위, 정확 일치만) */
 export function resolveQuoteCampaignPeriodFromPlannerMonths(
   months: number,
 ): QuoteCampaignPeriodKey | null {
   const preset = PLANNER_PERIOD_OPTIONS.find(
     (o) => Math.abs(months - o.months) < PLANNER_PERIOD_MONTHS_TOL,
   );
-  if (preset?.id === "2w") return "2weeks";
-  if (preset?.id === "1m") return "1month";
-  if (preset?.id === "3m") return "3months";
-  if (preset?.id === "6m") return "6months";
-  if (preset?.id === "1y") return "12months";
-  const rounded = Math.round(months);
-  if (Math.abs(months - rounded) < 0.01) {
-    if (rounded === 1) return "1month";
-    if (rounded === 3) return "3months";
-    if (rounded === 6) return "6months";
-    if (rounded === 12) return "12months";
-  }
-  return null;
+  if (preset?.id === "1w") return "7days";
+  if (preset?.id === "1m") return "30days";
+  const days = Math.max(1, Math.round(months * 30));
+  const key = quotePeriodLookupKeyFromDays(days);
+  return key != null && isQuoteCampaignPeriodKey(key) ? key : null;
 }
 
 /** recommend `preferredPeriodWeeks` → 견적 `periodKey` */

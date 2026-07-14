@@ -120,7 +120,7 @@ export async function createOoHQuoteFromNegotiation(
       mediaIds: [row.media.id],
       totalAmount: Math.max(1, Math.round(totals.totalWon / 10_000)),
       period: periodLabelForDays(base.periodDays, locale),
-      periodKey: "1month",
+      periodKey: "30days",
       startDate: start,
       endDate: end,
       validUntil,

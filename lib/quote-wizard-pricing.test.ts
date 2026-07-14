@@ -6,9 +6,7 @@ import {
   quoteCatalogDisplayPriceMan,
   quoteCampaignUnits,
 } from "@/lib/quote-wizard-pricing";
-import {
-  calculateMediaQuoteFromOption,
-} from "@/lib/compare-quote";
+import { calculateMediaQuoteFromOption } from "@/lib/compare-quote";
 
 function busItem(overrides: Partial<MediaItem> = {}): MediaItem {
   return {
@@ -42,15 +40,15 @@ test("grade bus: line total = unit rate × fleet count (80만×1 + 80만×50 = 4
 
   const line1 = buildQuoteWizardLineContext(seoul, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 1,
   });
   const line2 = buildQuoteWizardLineContext(city, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 50,
   });
@@ -70,15 +68,15 @@ test("170만 regression: fixed total differs from summing option rates without f
   const legacyWrongTotal = 80 + 80;
   const line1 = buildQuoteWizardLineContext(seoul, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 1,
   });
   const line2 = buildQuoteWizardLineContext(city, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 50,
   });
@@ -98,15 +96,15 @@ test("SSA 40대 · A 20대 admin parity", () => {
 
   const ssa = buildQuoteWizardLineContext(bus, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 40,
   });
   const a = buildQuoteWizardLineContext(bus, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 1,
     mobileUnits: 20,
   });
@@ -123,8 +121,8 @@ test("quoteCatalogDisplayPriceMan matches line unit for grade bus", () => {
   });
   const line = buildQuoteWizardLineContext(bus, {
     isKo: true,
-    campaignPeriod: "1month",
-    campaignPeriodLabel: "1개월",
+    campaignPeriod: "30days",
+    campaignPeriodLabel: "30일",
     priceOptionIndex: 0,
     mobileUnits: 50,
   });
@@ -132,18 +130,18 @@ test("quoteCatalogDisplayPriceMan matches line unit for grade bus", () => {
   assert.equal(display, 4000);
 });
 
-test("partial period rate override — 2weeks 60% on monthly media", () => {
+test("partial period rate override — 15days 60% on monthly media", () => {
   const media = busItem({
     price: 10_000_000,
     pricePeriod: "month",
-    partialPeriodRates: { "2weeks": 0.6 },
+    partialPeriodRates: { "15days": 0.6 },
     priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
   });
 
   const line = buildQuoteWizardLineContext(media, {
     isKo: true,
-    campaignPeriod: "2weeks",
-    campaignPeriodLabel: "2주",
+    campaignPeriod: "15days",
+    campaignPeriodLabel: "15일",
     priceOptionIndex: 0,
   });
 
@@ -152,7 +150,7 @@ test("partial period rate override — 2weeks 60% on monthly media", () => {
   assert.match(line.prorationLabel ?? "", /매체 지정 요율/);
 });
 
-test("partial period rate — no override keeps 50% for 2weeks monthly", () => {
+test("partial period rate — no override keeps 50% for 15days monthly", () => {
   const media = busItem({
     price: 10_000_000,
     pricePeriod: "month",
@@ -161,17 +159,17 @@ test("partial period rate — no override keeps 50% for 2weeks monthly", () => {
 
   const line = buildQuoteWizardLineContext(media, {
     isKo: true,
-    campaignPeriod: "2weeks",
-    campaignPeriodLabel: "2주",
+    campaignPeriod: "15days",
+    campaignPeriodLabel: "15일",
     priceOptionIndex: 0,
   });
 
   assert.equal(line.usesMediaPartialRate, false);
-  assert.equal(line.campaignUnits, quoteCampaignUnits("2weeks", "month"));
+  assert.equal(line.campaignUnits, quoteCampaignUnits("15days", "month"));
   assert.equal(line.lineTotalMan, 500);
 });
 
-test("compare calculateMediaQuoteFromOption applies option partial rate", () => {
+test("compare calculateMediaQuoteFromOption applies option partial rate at 15 days", () => {
   const media = busItem({
     price: 10_000_000,
     pricePeriod: "month",
@@ -180,7 +178,7 @@ test("compare calculateMediaQuoteFromOption applies option partial rate", () => 
         label: "기본",
         price: 10_000_000,
         period: "month",
-        partialPeriodRates: { "2weeks": 0.6 },
+        partialPeriodRates: { "15days": 0.6 },
       },
     ],
   });
@@ -188,7 +186,23 @@ test("compare calculateMediaQuoteFromOption applies option partial rate", () => 
   const line = calculateMediaQuoteFromOption(
     media,
     media.priceOptions![0]!,
-    14,
+    15,
   );
   assert.equal(line.costWon, 6_000_000);
+});
+
+test("10-day campaign falls back to linear proration", () => {
+  const media = busItem({
+    price: 10_000_000,
+    pricePeriod: "month",
+    partialPeriodRates: { "15days": 0.6 },
+    priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
+  });
+
+  const line = calculateMediaQuoteFromOption(
+    media,
+    media.priceOptions![0]!,
+    10,
+  );
+  assert.equal(line.costWon, Math.round(10_000_000 * (10 / 30)));
 });

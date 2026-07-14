@@ -213,7 +213,7 @@ export async function buildOoHQuotePdfParams(
   }
 
   const monthlyCost = rows.reduce((s, r) => s + r.price, 0);
-  const periodLabelPdf = periodLabelFromKey(row.periodKey ?? "1month", "en");
+  const periodLabelPdf = periodLabelFromKey(row.periodKey ?? "30days", "en");
 
   const start =
     row.startDate instanceof Date

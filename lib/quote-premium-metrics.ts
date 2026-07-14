@@ -35,11 +35,15 @@ export type QuotePremiumMetrics = {
 const AVG_FREQ = 4.2;
 const FALLBACK_DAILY_FOOT = 35_000;
 
+import { isQuoteCampaignPeriodKey, quoteCampaignDaysFromPeriodKey } from "@/lib/quote-wizard-pricing";
+
 export function quoteCampaignDays(
   periodKey: string,
   periodMonths: number,
 ): number {
-  if (periodKey === "2weeks") return 14;
+  if (isQuoteCampaignPeriodKey(periodKey)) {
+    return quoteCampaignDaysFromPeriodKey(periodKey);
+  }
   if (periodMonths > 0) return periodMonths * 30;
   return 30;
 }

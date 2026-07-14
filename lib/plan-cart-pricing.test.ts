@@ -106,11 +106,11 @@ const monthlyMedia: MediaItem = {
   lng: 0,
   dailyFootTraffic: 0,
   sampleImages: [],
-  partialPeriodRates: { "2weeks": 0.6 },
+  partialPeriodRates: { "15days": 0.6 },
   priceOptions: [{ label: "기본", price: 10_000_000, period: "month" }],
 };
 
-test("planCartPeriodTotalWon — 2week period matches quote wizard 60% override", () => {
+test("planCartPeriodTotalWon — 15-day period matches quote wizard 60% override", () => {
   const cart: PlanCart = {
     items: [
       {
@@ -129,13 +129,13 @@ test("planCartPeriodTotalWon — 2week period matches quote wizard 60% override"
 
   const wizardLine = buildQuoteWizardLineContext(monthlyMedia, {
     isKo: true,
-    campaignPeriod: "2weeks",
-    campaignPeriodLabel: "2주",
+    campaignPeriod: "15days",
+    campaignPeriodLabel: "15일",
     priceOptionIndex: 0,
   });
 
   const cartTotal = planCartPeriodTotalWon(cart, [monthlyMedia], {
-    weeks: 2,
+    months: 15 / 30,
   });
 
   assert.equal(cartTotal, Math.round(wizardLine.lineTotalMan * 10_000));
@@ -164,14 +164,6 @@ test("planCartPeriodTotalWon — no override keeps monthly × months", () => {
     updatedAt: "2026-01-01T00:00:00.000Z",
   };
 
-  const wizardLine = buildQuoteWizardLineContext(plain, {
-    isKo: true,
-    campaignPeriod: "3months",
-    campaignPeriodLabel: "3개월",
-    priceOptionIndex: 0,
-  });
-
-  const cartTotal = planCartPeriodTotalWon(cart, [plain]);
-  assert.equal(cartTotal, Math.round(wizardLine.lineTotalMan * 10_000));
+  const cartTotal = planCartPeriodTotalWon(cart, [plain], { months: 3 });
   assert.equal(cartTotal, 30_000_000);
 });

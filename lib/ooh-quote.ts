@@ -1,10 +1,19 @@
 import { OoHQuoteStatus, OohContractStatus, type OoHQuote } from "@prisma/client";
 import {
-  QUOTE_CAMPAIGN_PERIOD_CONFIG,
-  type QuoteCampaignPeriodKey,
-} from "@/lib/quote-wizard-pricing";
+  partialPeriodRateDaysFromKey,
+  partialRateLookupKeyFromDays,
+  isPartialPeriodRateAdminKey,
+  type PartialPeriodRateAdminKey,
+} from "@/lib/media-partial-period-rates";
 
+/** OoH·API 견적 periodKey — 신 6키 + 레거시 월/주 키 */
 export const OOH_PERIOD_MONTHS: Record<string, number> = {
+  "1day": 0,
+  "3days": 0,
+  "5days": 0,
+  "7days": 0,
+  "15days": 0,
+  "30days": 1,
   "2weeks": 0,
   "1month": 1,
   "3months": 3,
@@ -12,13 +21,33 @@ export const OOH_PERIOD_MONTHS: Record<string, number> = {
   "12months": 12,
 };
 
+const OOH_PERIOD_DAYS: Record<string, number> = {
+  "1day": 1,
+  "3days": 3,
+  "5days": 5,
+  "7days": 7,
+  "15days": 15,
+  "30days": 30,
+  "2weeks": 14,
+  "1month": 30,
+  "3months": 90,
+  "6months": 180,
+  "12months": 360,
+};
+
 export function periodLabelFromKey(
   periodKey: string | null | undefined,
   locale: string,
 ): string {
   const isKo = locale !== "en";
-  const k = periodKey ?? "1month";
+  const k = periodKey ?? "30days";
   const labelsKo: Record<string, string> = {
+    "1day": "1일",
+    "3days": "3일",
+    "5days": "5일",
+    "7days": "7일",
+    "15days": "15일",
+    "30days": "30일",
     "2weeks": "2주",
     "1month": "1개월",
     "3months": "3개월",
@@ -26,6 +55,12 @@ export function periodLabelFromKey(
     "12months": "12개월",
   };
   const labelsEn: Record<string, string> = {
+    "1day": "1 day",
+    "3days": "3 days",
+    "5days": "5 days",
+    "7days": "7 days",
+    "15days": "15 days",
+    "30days": "30 days",
     "2weeks": "2 weeks",
     "1month": "1 month",
     "3months": "3 months",
@@ -35,18 +70,24 @@ export function periodLabelFromKey(
   return (isKo ? labelsKo : labelsEn)[k] ?? (isKo ? "기간 미지정" : "Period");
 }
 
+export function oohPeriodDaysFromKey(
+  periodKey: string | null | undefined,
+): number {
+  const k = periodKey ?? "30days";
+  if (k in OOH_PERIOD_DAYS) return OOH_PERIOD_DAYS[k]!;
+  if (isPartialPeriodRateAdminKey(k)) {
+    return partialPeriodRateDaysFromKey(k as PartialPeriodRateAdminKey);
+  }
+  return 30;
+}
+
 export function estimateEndDate(
   start: Date,
   periodKey: string | null | undefined,
 ): Date {
-  const key = (periodKey ?? "1month") as QuoteCampaignPeriodKey;
-  const cfg = QUOTE_CAMPAIGN_PERIOD_CONFIG[key];
+  const days = oohPeriodDaysFromKey(periodKey);
   const d = new Date(start.getTime());
-  if (cfg?.months == null) {
-    d.setDate(d.getDate() + (cfg?.days ?? 14));
-    return d;
-  }
-  d.setMonth(d.getMonth() + cfg.months);
+  d.setDate(d.getDate() + days);
   return d;
 }
 
@@ -150,4 +191,12 @@ export function canAdminPaymentConfirm(status: OoHQuoteStatus): boolean {
 
 export function canAdminContractConfirm(status: OoHQuoteStatus): boolean {
   return status === OoHQuoteStatus.payment_confirmed;
+}
+
+/** Admin→OoH 브릿지용 periodKey 추론 */
+export function inferOohPeriodKeyFromDays(periodDays: number): string {
+  const key = partialRateLookupKeyFromDays(periodDays);
+  if (key) return key;
+  if (periodDays >= 28 && periodDays <= 31) return "30days";
+  return "30days";
 }

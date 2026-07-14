@@ -141,12 +141,14 @@ async function runWithQuotePdfExport(
 
 type PeriodKey = QuoteCampaignPeriodKey;
 
-const PERIOD_MONTHS: Record<Exclude<PeriodKey, "2weeks">, number> = {
-  "1month": 1,
-  "3months": 3,
-  "6months": 6,
-  "12months": 12,
-};
+const QUOTE_WIZARD_PERIOD_KEYS: PeriodKey[] = [
+  "1day",
+  "3days",
+  "5days",
+  "7days",
+  "15days",
+  "30days",
+];
 
 type FormState = {
   company: string;
@@ -171,7 +173,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const isKo = locale === "ko";
 
   const [step, setStep] = useState<WizardStep>(1);
-  const [period, setPeriod] = useState<PeriodKey>("1month");
+  const [period, setPeriod] = useState<PeriodKey>("30days");
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [browseViewMode, setBrowseViewMode] =
     useState<MediaManualBrowseViewMode>("card");
@@ -611,8 +613,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const hasMoreMedia = mediaPage * mediaPageSize < sortedCatalog.length;
 
-  const periodMonths =
-    period === "2weeks" ? 0 : PERIOD_MONTHS[period];
+  const periodMonths = useMemo(
+    () => quoteCampaignDaysFromPeriodKey(period) / 30,
+    [period],
+  );
   const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
 
   const quoteLineContexts = useMemo(
@@ -1753,11 +1757,11 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
                           aria-label={t("quote.period")}
                         >
-                          <option value="2weeks">{t("quote.periods.2weeks")}</option>
-                          <option value="1month">{t("quote.periods.1month")}</option>
-                          <option value="3months">{t("quote.periods.3months")}</option>
-                          <option value="6months">{t("quote.periods.6months")}</option>
-                          <option value="12months">{t("quote.periods.12months")}</option>
+                          {QUOTE_WIZARD_PERIOD_KEYS.map((key) => (
+                            <option key={key} value={key}>
+                              {t(`quote.periods.${key}` as `quote.periods.${PeriodKey}`)}
+                            </option>
+                          ))}
                         </select>
                       </div>
                       {/* 예산 입력 제거 — 매체를 이미 선택했으므로 불필요 */}

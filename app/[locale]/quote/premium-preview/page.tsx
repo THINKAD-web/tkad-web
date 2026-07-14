@@ -9,7 +9,7 @@ const SAMPLE: QuotePremiumProps = {
   version: "v1.0",
   dateLabel: "2026.05.26",
   durationLabel: "2개월",
-  periodKey: "1month",
+  periodKey: "30days",
   periodMonths: 2,
   region: "서울 강남 · 명동 · 홍대",
   goal: "브랜드 인지도 · OOH 집행",

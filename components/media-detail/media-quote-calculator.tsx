@@ -15,7 +15,7 @@ type Props = {
   className?: string;
 };
 
-const DAY_PRESETS = [7, 14, 30, 60];
+const DAY_PRESETS = [1, 3, 5, 7, 15, 30];
 
 export function MediaQuoteCalculator({ media, isKo, className }: Props) {
   const locale = isKo ? "ko" : "en";

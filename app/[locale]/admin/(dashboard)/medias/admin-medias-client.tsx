@@ -375,10 +375,12 @@ type PriceOptDraft = {
 
 const PARTIAL_PERIOD_RATE_UI: { key: keyof PartialPeriodRatesDraft; label: string }[] =
   [
+    { key: "1day", label: "1일" },
     { key: "3days", label: "3일" },
-    { key: "1week", label: "1주" },
-    { key: "2weeks", label: "2주" },
-    { key: "3weeks", label: "3주" },
+    { key: "5days", label: "5일" },
+    { key: "7days", label: "7일" },
+    { key: "15days", label: "15일" },
+    { key: "30days", label: "30일" },
   ];
 
 function PartialPeriodRatesFields({
@@ -396,10 +398,10 @@ function PartialPeriodRatesFields({
         부분기간 요율 (%)
       </p>
       <p className="text-[10px] leading-relaxed text-muted-foreground">
-        비워두면 기존 선형/고정 로직 사용. 패키지 단가 대비 집행 기간 비율(예: 2주
-        60% → 0.6).
+        비워두면 기존 선형/고정 로직 사용. 패키지 단가 대비 집행 기간 비율(예: 15일
+        60% → 0.6). 운영 단위: 1·3·5·7·15·30일.
       </p>
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+      <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
         {PARTIAL_PERIOD_RATE_UI.map(({ key, label }) => (
           <div key={key}>
             <label className="mb-0.5 block text-[10px] text-muted-foreground">

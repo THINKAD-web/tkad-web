@@ -95,9 +95,9 @@ export async function POST(request: NextRequest) {
     return new NextResponse("No media selected", { status: 400 });
   }
 
-  const periodKeyRaw = String(body.periodKey ?? "1month").trim();
+  const periodKeyRaw = String(body.periodKey ?? "30days").trim();
   const periodKey =
-    periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "1month";
+    periodKeyRaw in OOH_PERIOD_MONTHS ? periodKeyRaw : "30days";
   const mediaPriceOptionIndex = parseMediaPriceOptionIndex(
     body.mediaPriceOptionIndex,
   );

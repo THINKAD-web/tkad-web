@@ -22,6 +22,10 @@ import {
   formatKrw,
   type QuotePremiumMediaInput,
 } from "@/lib/quote-premium-metrics";
+import {
+  isQuoteCampaignPeriodKey,
+  quoteCampaignDaysFromPeriodKey,
+} from "@/lib/quote-wizard-pricing";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 
 export type QuotePremiumProps = {
@@ -185,7 +189,10 @@ function resolveDisplayDuration(
 ): string {
   const trimmed = durationLabel.trim();
   if (trimmed) return trimmed;
-  if (periodKey === "2weeks") return isKo ? "2주" : "2 weeks";
+  if (isQuoteCampaignPeriodKey(periodKey)) {
+    const days = quoteCampaignDaysFromPeriodKey(periodKey);
+    return isKo ? `${days}일` : `${days} days`;
+  }
   if (periodMonths > 0) {
     return isKo ? `${periodMonths}개월` : `${periodMonths} mo`;
   }

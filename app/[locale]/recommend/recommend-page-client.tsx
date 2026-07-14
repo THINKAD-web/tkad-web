@@ -431,7 +431,7 @@ export default function RecommendPageClient({
             return snaps.map((snap) => ({
               ...snap,
               lineTotalWon: plannerMediaPeriodTotalWon(m, {
-                campaignPeriod: campaignPeriod ?? "1month",
+                campaignPeriod: campaignPeriod ?? "30days",
                 quantities: { [m.id]: snap.quantity },
                 priceOptionIndex: { [m.id]: snap.priceOptionIndex },
                 isKo,

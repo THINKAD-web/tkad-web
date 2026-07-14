@@ -1297,11 +1297,12 @@
     "period": "광고 기간",
     "periodPlaceholder": "기간을 선택하세요",
     "periods": {
-      "2weeks": "2주",
-      "1month": "1개월",
-      "3months": "3개월",
-      "6months": "6개월",
-      "12months": "12개월"
+      "1day": "1일",
+      "3days": "3일",
+      "5days": "5일",
+      "7days": "7일",
+      "15days": "15일",
+      "30days": "30일"
     },
     "budgetRange": "예산 범위",
     "budgetMin": "최소 예산 (만원)",
