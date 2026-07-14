@@ -1,11 +1,12 @@
 "use client";
 
 import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 /**
  * 트렌드 리포트 본문 마크다운 렌더 (PR-5).
- * react-markdown 10.x — 로컬 컴포넌트 매핑으로 한글 가독성 최적화
- * (line-height 1.75, 헤딩 spacing).
+ * react-markdown 10.x — remark-gfm 으로 GFM 테이블·취소선 등 지원.
+ * 로컬 컴포넌트 매핑으로 한글 가독성 최적화 (line-height 1.75, 헤딩 spacing).
  *
  * Client Component 로 분리한 이유: react-markdown 이 내부 React state 사용.
  * 부모 (page.tsx) 는 Server Component 로 SEO/JSON-LD 렌더 유지.
@@ -14,6 +15,7 @@ export function InsightMarkdownBody({ markdown }: { markdown: string }) {
   return (
     <div className="prose-insight max-w-none text-foreground">
       <ReactMarkdown
+        remarkPlugins={[remarkGfm]}
         components={{
           h1: ({ children }) => (
             <h1 className="mb-4 mt-8 text-2xl font-bold tracking-tight text-foreground">
