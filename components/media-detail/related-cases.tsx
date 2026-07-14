@@ -4,6 +4,7 @@ import { useTranslations } from "next-intl";
 import { ArrowRight, Briefcase } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import type { PublicSuccessCaseListItem } from "@/lib/success-case-public";
+import { stripMarkdown } from "@/lib/strip-markdown";
 
 type Props = {
   cases: PublicSuccessCaseListItem[];
@@ -55,7 +56,7 @@ export function RelatedCases({ cases, isKo }: Props) {
                     {title}
                   </p>
                   <p className="line-clamp-3 text-[11px] leading-relaxed tracking-tight text-muted-foreground">
-                    {c.summaryKo}
+                    {stripMarkdown(c.summaryKo)}
                   </p>
                   <p className="mt-auto font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
                     {`// `}

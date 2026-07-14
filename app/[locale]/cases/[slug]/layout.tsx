@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { getPublishedSuccessCaseById } from "@/lib/public-content-queries";
 import { caseStudyOpenGraphImages, pageAlternates } from "@/lib/seo";
+import { stripMarkdown } from "@/lib/strip-markdown";
 
 export async function generateMetadata({
   params,
@@ -17,7 +18,7 @@ export async function generateMetadata({
   const isKo = locale === "ko";
   const title = isKo ? row.titleKo : row.titleEn ?? row.titleKo;
   const description = isKo
-    ? row.summaryKo
+    ? stripMarkdown(row.summaryKo)
     : `${title} is a THINKAD case study covering campaign execution, media strategy, and measurable OOH outcomes.`;
   const ogTitle = `${title} | THINKAD`;
   return {

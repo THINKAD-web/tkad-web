@@ -13,6 +13,8 @@ import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import MediaLightbox from "@/components/media-lightbox";
 import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
 import { buildCaseHeadline } from "@/lib/success-case-hub";
+import { InsightMarkdownBody } from "@/components/insights/markdown-body";
+import { stripMarkdown } from "@/lib/strip-markdown";
 import type {
   PublicSuccessCaseDetail,
   PublicSuccessCaseListItem,
@@ -88,6 +90,13 @@ export default function CaseDetailClient({
     () => row.galleryUrls.filter(Boolean),
     [row.galleryUrls],
   );
+  const resultsMarkdown = useMemo(
+    () =>
+      row.resultsKo.length > 0
+        ? row.resultsKo.map((line) => `- ${line.trim()}`).join("\n")
+        : "",
+    [row.resultsKo],
+  );
 
   return (
     <HomeLandingDayNight>
@@ -139,7 +148,7 @@ export default function CaseDetailClient({
                 [ {t("backgroundLabel")} ]
               </p>
               <p className="mt-2 max-w-3xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
-                {row.summaryKo}
+                {stripMarkdown(row.summaryKo)}
               </p>
             </div>
 
@@ -197,18 +206,18 @@ export default function CaseDetailClient({
                   <Target className="h-4 w-4" aria-hidden />
                   {t("challengeLabel")}
                 </div>
-                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
-                  {row.challengeKo}
-                </p>
+                <div className="mt-4 text-base leading-relaxed dark:text-white text-gray-800">
+                  <InsightMarkdownBody markdown={row.challengeKo} />
+                </div>
               </div>
               <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
                 <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
                   <Eye className="h-4 w-4" aria-hidden />
                   {t("solutionLabel")}
                 </div>
-                <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
-                  {row.solutionKo}
-                </p>
+                <div className="mt-4 text-base leading-relaxed dark:text-white text-gray-800">
+                  <InsightMarkdownBody markdown={row.solutionKo} />
+                </div>
               </div>
             </div>
           </CaseDetailContainer>
@@ -248,14 +257,9 @@ export default function CaseDetailClient({
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
                   [ {t("resultsLabel")} ]
                 </p>
-                <ul className="mt-4 space-y-3">
-                  {row.resultsKo.map((line, i) => (
-                    <li key={i} className="flex items-start gap-3 dark:text-white text-gray-800">
-                      <span className="mt-1.5 inline-block h-2 w-2 shrink-0 rounded-full bg-[#22d3ee]" />
-                      <span className="leading-relaxed">{line}</span>
-                    </li>
-                  ))}
-                </ul>
+                <div className="mt-4 dark:text-white text-gray-800">
+                  <InsightMarkdownBody markdown={resultsMarkdown} />
+                </div>
               </div>
             ) : null}
           </CaseDetailContainer>

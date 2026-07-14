@@ -12,6 +12,7 @@ import {
   sectionByKeyword,
   splitMarkdownSections,
 } from "@/lib/content-auto/seed-content-parse";
+import { normalizeSummaryKo } from "@/lib/content-auto/success-case-summary";
 import {
   generateSeedText,
   resolveSeedModel,
@@ -51,10 +52,14 @@ function parseSuccessCaseFields(content: string, topic: CaseSeedTopic) {
     resultsKo = extractSummaryLines(content, 3);
   }
 
-  const summaryKo =
-    extractSummaryLines(performance || content, 1)[0] ||
-    firstParagraph(performance || content, 120) ||
-    `${topic.goal} — ${topic.region} ${topic.mediaType} 집행 성과`;
+  const summaryFallback = `${topic.goal} — ${topic.region} ${topic.mediaType} 집행 성과`;
+  const summaryCandidates = [
+    ...extractSummaryLines(performance || content, 4),
+    ...extractSummaryLines(background || content, 2),
+    firstParagraph(performance || content, 160),
+    firstParagraph(background || content, 160),
+  ].filter(Boolean);
+  const summaryKo = normalizeSummaryKo(summaryCandidates, summaryFallback);
 
   return {
     challengeKo: challengeKo || content.slice(0, 1200),
