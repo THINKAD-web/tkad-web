@@ -224,7 +224,7 @@ export async function createAdminFormalQuotePdfDoc(
     margin,
     y,
   );
-  y += 2;
+  y += 5;
   doc.setFontSize(7);
   setFont(doc, fam, "normal");
   doc.setTextColor(...MUTED);
@@ -237,9 +237,9 @@ export async function createAdminFormalQuotePdfDoc(
         ? "※ 금액 표기: 공급가액 기준 (부가세 별도)"
         : "※ Amounts: supply value (VAT extra)",
     margin,
-    y + 4,
+    y,
   );
-  y += 8;
+  y += 10;
 
   const tablePadR = 2;
   const colW = [40, 18, 24, 30, 10, innerW - 40 - 18 - 24 - 30 - 10 - tablePadR];
@@ -254,22 +254,24 @@ export async function createAdminFormalQuotePdfDoc(
   const amountAlignX = colX[5]! + colW[5]! - 2;
   const unitAlignX = colX[3]! + colW[3]! - 2;
 
-  const drawTableHeader = (yy: number) => {
+  const drawTableHeader = (topY: number) => {
+    const barH = 7;
     doc.setFillColor(...NAVY);
-    doc.rect(margin, yy - 4, innerW, 7, "F");
+    doc.rect(margin, topY, innerW, barH, "F");
     doc.setTextColor(...GOLD);
     setFont(doc, fam, "bold");
     doc.setFontSize(7);
+    const textY = topY + 5;
     const heads = p.isKo
       ? ["매체명", "규격", "기간", "월단가(원)", "수량", "금액(원)"]
       : ["Media", "Specs", "Period", "Unit/mo", "Qty", "Amount"];
-    doc.text(heads[0]!, colX[0]! + 1, yy);
-    doc.text(heads[1]!, colX[1]! + 1, yy);
-    doc.text(heads[2]!, colX[2]! + 1, yy);
-    doc.text(heads[3]!, unitAlignX, yy, { align: "right" });
-    doc.text(heads[4]!, colX[4]! + colW[4]! / 2, yy, { align: "center" });
-    doc.text(heads[5]!, amountAlignX, yy, { align: "right" });
-    return yy + 5;
+    doc.text(heads[0]!, colX[0]! + 1, textY);
+    doc.text(heads[1]!, colX[1]! + 1, textY);
+    doc.text(heads[2]!, colX[2]! + 1, textY);
+    doc.text(heads[3]!, unitAlignX, textY, { align: "right" });
+    doc.text(heads[4]!, colX[4]! + colW[4]! / 2, textY, { align: "center" });
+    doc.text(heads[5]!, amountAlignX, textY, { align: "right" });
+    return topY + barH + 2;
   };
 
   y = drawTableHeader(y);

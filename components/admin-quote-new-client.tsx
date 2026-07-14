@@ -76,6 +76,7 @@ import {
   StickyActionBar,
 } from "@/components/sticky-action-bar";
 import { cn } from "@/lib/utils";
+import type { FormalQuoteIssuer } from "@/lib/formal-quote-issuer";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -107,7 +108,13 @@ function addDaysISODate(iso: string, days: number): string {
   return `${yy}-${mm}-${dd}`;
 }
 
-export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
+export default function AdminQuoteNewClient({
+  quoteId,
+  formalQuoteIssuer,
+}: {
+  quoteId?: string;
+  formalQuoteIssuer: FormalQuoteIssuer;
+}) {
   const t = useTranslations("adminQuoteNew");
   const tList = useTranslations("adminQuotesList");
   const tCommon = useTranslations("common");
@@ -1376,7 +1383,10 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               <div className="mx-auto w-fit max-w-full" data-quote-pdf-scale-wrap>
                 <div id="quote-preview">
                   {pdfStyle === "formal" ? (
-                    <QuoteFormalPreview {...formalPreviewParams} />
+                    <QuoteFormalPreview
+                      {...formalPreviewParams}
+                      issuer={formalQuoteIssuer}
+                    />
                   ) : (
                     <QuotePdfPreview
                       template="default"
@@ -1587,7 +1597,7 @@ export default function AdminQuoteNewClient({ quoteId }: { quoteId?: string }) {
               </Button>
               <Button
                 type="button"
-                className="bg-navy dark:text-white"
+                className="bg-navy text-white hover:bg-navy/90"
                 disabled={bridgeLoading}
                 onClick={() => void confirmCreateContract()}
               >

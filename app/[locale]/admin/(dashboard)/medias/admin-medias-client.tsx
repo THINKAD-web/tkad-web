@@ -7,6 +7,7 @@ import {
   useCallback,
   useRef,
   useEffect,
+  Fragment,
 } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -32,7 +33,6 @@ import {
   Loader2,
   AlertCircle,
   Star,
-  Flame,
   ShieldCheck,
   Copy,
   FileSpreadsheet,
@@ -1484,34 +1484,6 @@ export default function AdminMediasClient({
     }
   }, []);
 
-  const changeAvailability = useCallback(
-    async (m: AdminMediaDto, next: MediaAvailability) => {
-      if (m.availability === next) return;
-      listFetchGenRef.current += 1;
-      try {
-        const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
-          method: "PATCH",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ availability: next }),
-        });
-        if (!result.ok) {
-          setListError(result.message);
-          return;
-        }
-        const data = result.data as { media?: unknown };
-        const row = data.media ? normalizeAdminMediaRow(data.media) : null;
-        if (row) {
-          setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
-          setListError(null);
-        }
-      } catch {
-        /* ignore */
-      }
-    },
-    [],
-  );
-
   const toggleCatalogVerified = useCallback(async (m: AdminMediaDto) => {
     listFetchGenRef.current += 1;
     const next = !m.isVerified;
@@ -1987,6 +1959,159 @@ export default function AdminMediasClient({
 
   const isRowActive = (m: AdminMediaDto) => m.isActive;
 
+  const mediaListMetaLine = (media: AdminMediaDto): string | null => {
+    const region = regionZoneLabel(media.regionZone, "ko");
+    const district = media.district?.trim() ?? "";
+    const nameEn = media.nameEn?.trim() ?? "";
+    if (!nameEn && !region && !district) return null;
+    const parts: string[] = [nameEn || "—"];
+    if (region) parts.push(region);
+    if (district) parts.push(district);
+    return parts.join(" · ");
+  };
+
+  const mediaListNameLine = (media: AdminMediaDto): string => {
+    const meta = mediaListMetaLine(media);
+    return meta ? `${media.name} · ${meta}` : media.name;
+  };
+
+  const renderMediaListActionBar = (media: AdminMediaDto) => (
+    <div className="flex flex-wrap items-center gap-x-3 gap-y-2">
+      <span className="text-[10px] font-semibold text-muted-foreground">노출</span>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] text-muted-foreground">공개</span>
+        <button
+          type="button"
+          title={
+            isRowActive(media)
+              ? "공개 목록·검색에서 숨기기"
+              : "공개 목록·검색에 표시"
+          }
+          aria-label={isRowActive(media) ? "공개 목록 끄기" : "공개 목록 켜기"}
+          onClick={() => toggleActive(media)}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+            isRowActive(media) ? "bg-emerald-500" : "bg-slate-300"
+          }`}
+        >
+          <span
+            className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+              isRowActive(media) ? "translate-x-[18px]" : "translate-x-0.5"
+            }`}
+          />
+        </button>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] text-muted-foreground">즉시예약</span>
+        <button
+          type="button"
+          title={
+            media.instantBookingEnabled ? "즉시 예약 끄기" : "즉시 예약 켜기"
+          }
+          aria-label={
+            media.instantBookingEnabled ? "즉시 예약 끄기" : "즉시 예약 켜기"
+          }
+          onClick={() => void toggleInstantBooking(media)}
+          className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
+            media.instantBookingEnabled ? "bg-violet-500" : "bg-slate-300"
+          }`}
+        >
+          <span
+            className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
+              media.instantBookingEnabled
+                ? "translate-x-[18px]"
+                : "translate-x-0.5"
+            }`}
+          />
+        </button>
+      </div>
+
+      <span className="hidden h-4 w-px shrink-0 bg-border sm:inline" aria-hidden />
+
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] font-semibold text-muted-foreground">검증</span>
+        <button
+          type="button"
+          title={
+            media.isVerified
+              ? "공개 Verified 해제"
+              : "공개 카탈로그에 Verified 표시"
+          }
+          onClick={() => void toggleCatalogVerified(media)}
+          className="inline-flex touch-manipulation rounded-full p-0.5 transition-colors hover:bg-orange-50"
+        >
+          <ShieldCheck
+            className={`h-[18px] w-[18px] ${
+              media.isVerified ? "text-[#ff6200]" : "text-slate-300"
+            }`}
+            aria-hidden
+          />
+        </button>
+      </div>
+      <div className="flex items-center gap-1.5">
+        <span className="text-[10px] font-semibold text-muted-foreground">추천</span>
+        <button
+          type="button"
+          title={
+            media.isFeatured ? "추천 해제" : "홈 추천 매체로 지정"
+          }
+          onClick={() =>
+            void patchFeaturedFields(media, {
+              isFeatured: !media.isFeatured,
+            })
+          }
+          className="inline-flex touch-manipulation rounded-full p-0.5 transition-colors hover:bg-amber-50"
+        >
+          <Star
+            className={`h-[18px] w-[18px] ${
+              media.isFeatured
+                ? "fill-amber-400 text-amber-500"
+                : "text-slate-300"
+            }`}
+            aria-hidden
+          />
+        </button>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-1 sm:ml-auto">
+        <Button variant="outline" size="xs" asChild className="h-7 px-2 text-xs">
+          <Link href={`/admin/medias/${media.id}/edit`} title="JSON 수정">
+            JSON 수정
+          </Link>
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          title="복제"
+          disabled={duplicateBusyId === media.id}
+          onClick={() => void duplicateMedia(media)}
+        >
+          {duplicateBusyId === media.id ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Copy className="h-3.5 w-3.5" />
+          )}
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          onClick={() => openEdit(media)}
+          title="수정"
+        >
+          <Pencil className="h-3.5 w-3.5" />
+        </Button>
+        <Button
+          variant="ghost"
+          size="icon-xs"
+          className="text-destructive hover:text-destructive"
+          onClick={() => setDeleteConfirm(media.id)}
+          title="삭제"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </div>
+    </div>
+  );
+
   return (
     <>
       <div className="space-y-4">
@@ -2370,7 +2495,7 @@ export default function AdminMediasClient({
                 </div>
               </div>
             )}
-            {/* #ADMIN-MEDIAS-1: 모바일 카드 — 매체명·유형·가격·노출(공개·가용·홈 추천/인기)·Verified·수정·삭제 (위치는 목록 비표시) */}
+            {/* #ADMIN-MEDIAS-1: 모바일 카드 — 상단 매체명·유형·품질·가격, 하단 노출·검증·추천·관리 */}
             <div className="md:hidden">
               {listLoading ? (
                 <div className="px-3 py-8 text-center text-muted-foreground">
@@ -2385,7 +2510,10 @@ export default function AdminMediasClient({
                 </div>
               ) : (
                 <ul className="divide-y divide-border">
-                  {paginated.map((media) => (
+                  {paginated.map((media) => {
+                    const metaLine = mediaListMetaLine(media);
+                    const nameLine = mediaListNameLine(media);
+                    return (
                     <li
                       key={media.id}
                       className={`border-l-[3px] px-3 py-3 ${
@@ -2403,266 +2531,49 @@ export default function AdminMediasClient({
                           aria-label={`${media.name} 선택`}
                         />
                         <div className="flex min-w-0 flex-1 flex-col gap-2.5">
-                          <div className="flex items-start justify-between gap-3">
-                            <div className="min-w-0 flex-1 space-y-1">
-                              <p
-                                className="break-words text-sm font-semibold leading-snug text-foreground"
-                                title={media.name}
-                              >
-                                <span className="inline-flex flex-wrap items-center gap-1.5">
-                                  {media.name}
-                                  <MediaQualityScoreBadge
-                                    score={mediaQualityScore(media)}
-                                  />
-                                </span>
-                              </p>
-                              {regionZoneLabel(media.regionZone, "ko") ? (
-                                <p className="text-[10px] text-muted-foreground">
-                                  // {regionZoneLabel(media.regionZone, "ko")}
-                                  {media.district ? ` · ${media.district}` : ""}
-                                </p>
-                              ) : null}
-                              {media.nameEn != null && media.nameEn.trim() !== "" ? (
-                                <p
-                                  className="break-words text-[11px] leading-snug text-muted-foreground"
-                                  title={media.nameEn}
-                                >
-                                  {media.nameEn}
-                                </p>
-                              ) : null}
-                              <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
-                                <Badge
-                                  variant="secondary"
-                                  className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
-                                >
-                                  {typeBadgeLabel(media.type)}
-                                </Badge>
-                                <span className="text-xs font-semibold tabular-nums text-foreground">
-                                  ₩{media.price.toLocaleString()}
-                                </span>
-                              </div>
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => toggleActive(media)}
-                              title={
-                                isRowActive(media)
-                                  ? "공개 목록·검색에서 숨기기"
-                                  : "공개 목록·검색에 표시"
-                              }
-                              aria-label={
-                                isRowActive(media)
-                                  ? "공개 목록 끄기"
-                                  : "공개 목록 켜기"
-                              }
-                              className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                                isRowActive(media)
-                                  ? "bg-emerald-500"
-                                  : "bg-slate-300"
-                              }`}
+                          <div className="min-w-0 space-y-1">
+                            <p
+                              className="truncate text-sm font-semibold leading-snug text-foreground"
+                              title={nameLine}
                             >
-                              <span
-                                className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                                  isRowActive(media)
-                                    ? "translate-x-[18px]"
-                                    : "translate-x-0.5"
-                                }`}
-                              />
-                            </button>
-                          </div>
-
-                          <div
-                            className="rounded-md border border-border/70 bg-muted/15 p-2.5"
-                            title="홈 추천·인기 순서는 PC 목록에서 설정"
-                          >
-                            <div className="flex flex-wrap items-end gap-2">
-                              <label className="min-w-0 flex-1">
-                                <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
-                                  가용
+                              <span>{media.name}</span>
+                              {metaLine ? (
+                                <span className="font-normal text-muted-foreground">
+                                  {" · "}
+                                  {metaLine}
                                 </span>
-                                <select
-                                  className="flex h-8 w-full rounded-md border border-input bg-background px-2 text-xs"
-                                  value={media.availability}
-                                  aria-label="가용 상태"
-                                  onChange={(e) => {
-                                    const v = e.target
-                                      .value as MediaAvailability;
-                                    void changeAvailability(media, v);
-                                  }}
-                                >
-                                  {(
-                                    [
-                                      "available",
-                                      "reserved",
-                                      "maintenance",
-                                    ] as const
-                                  ).map((key) => (
-                                    <option key={key} value={key}>
-                                      {ADMIN_MEDIA_AVAILABILITY_LABEL[key]}
-                                    </option>
-                                  ))}
-                                </select>
-                              </label>
-                              <div className="flex shrink-0 flex-col items-center gap-1">
-                                <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
-                                  즉시예약
-                                </span>
-                                <button
-                                  type="button"
-                                  title={
-                                    media.instantBookingEnabled
-                                      ? "즉시 예약 끄기"
-                                      : "즉시 예약 켜기"
-                                  }
-                                  onClick={() => void toggleInstantBooking(media)}
-                                  className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                                    media.instantBookingEnabled
-                                      ? "bg-violet-500"
-                                      : "bg-slate-300"
-                                  }`}
-                                >
-                                  <span
-                                    className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                                      media.instantBookingEnabled
-                                        ? "translate-x-[18px]"
-                                        : "translate-x-0.5"
-                                    }`}
-                                  />
-                                </button>
-                              </div>
-                              <div className="shrink-0">
-                                <span className="mb-0.5 block text-[10px] font-medium text-muted-foreground">
-                                  홈
-                                </span>
-                                <div className="flex gap-1">
-                                  <button
-                                    type="button"
-                                    title={
-                                      media.isFeatured
-                                        ? "추천 해제"
-                                        : "홈 추천 매체로 지정"
-                                    }
-                                    onClick={() =>
-                                      void patchFeaturedFields(media, {
-                                        isFeatured: !media.isFeatured,
-                                      })
-                                    }
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-amber-50"
-                                  >
-                                    <Star
-                                      className={`h-3.5 w-3.5 ${
-                                        media.isFeatured
-                                          ? "fill-amber-400 text-amber-500"
-                                          : "text-slate-300"
-                                      }`}
-                                      aria-hidden
-                                    />
-                                  </button>
-                                  <button
-                                    type="button"
-                                    title={
-                                      media.isPopular
-                                        ? "인기 해제"
-                                        : "홈 인기 매체로 지정"
-                                    }
-                                    onClick={() =>
-                                      void patchFeaturedFields(media, {
-                                        isPopular: !media.isPopular,
-                                      })
-                                    }
-                                    className="inline-flex h-8 w-8 items-center justify-center rounded-md border border-border bg-card transition-colors hover:bg-rose-50"
-                                  >
-                                    <Flame
-                                      className={`h-3.5 w-3.5 ${
-                                        media.isPopular
-                                          ? "fill-rose-400 text-rose-500"
-                                          : "text-slate-300"
-                                      }`}
-                                      aria-hidden
-                                    />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                          <div className="flex flex-wrap items-center justify-between gap-2 border-t border-border/40 pt-2">
-                            <div className="flex min-w-0 items-center gap-1.5">
-                              <button
-                                type="button"
-                                title={
-                                  media.isVerified
-                                    ? "공개 Verified 해제"
-                                    : "공개 카탈로그에 Verified 표시"
-                                }
-                                onClick={() =>
-                                  void toggleCatalogVerified(media)
-                                }
-                                className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border bg-card text-foreground transition-colors hover:bg-orange-50"
+                              ) : null}
+                            </p>
+                            <div className="flex flex-wrap items-center gap-1.5">
+                              <Badge
+                                variant="secondary"
+                                className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
                               >
-                                <ShieldCheck
-                                  className={`h-3.5 w-3.5 ${
-                                    media.isVerified
-                                      ? "text-[#ff6200]"
-                                      : "text-slate-300"
-                                  }`}
-                                  aria-hidden
-                                />
-                              </button>
-                              <span className="text-[11px] text-muted-foreground">
-                                Verified
+                                {typeBadgeLabel(media.type)}
+                              </Badge>
+                              <MediaQualityScoreBadge
+                                score={mediaQualityScore(media)}
+                              />
+                              <span className="text-xs font-semibold tabular-nums text-foreground">
+                                ₩{media.price.toLocaleString()}
                               </span>
                             </div>
-                            <div className="flex shrink-0 gap-1.5">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                asChild
-                                className="h-8 min-w-0 justify-center px-3"
-                              >
-                                <Link
-                                  href={`/admin/medias/${media.id}/edit`}
-                                  className="inline-flex min-w-0 items-center justify-center gap-1.5"
-                                >
-                                  <Pencil className="h-3.5 w-3.5 shrink-0" />
-                                  <span>수정</span>
-                                </Link>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 shrink-0 px-2"
-                                title="복제"
-                                disabled={duplicateBusyId === media.id}
-                                onClick={() => void duplicateMedia(media)}
-                              >
-                                {duplicateBusyId === media.id ? (
-                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                                ) : (
-                                  <Copy className="h-3.5 w-3.5" />
-                                )}
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="h-8 shrink-0 px-2 text-destructive hover:text-destructive"
-                                onClick={() => setDeleteConfirm(media.id)}
-                                aria-label="삭제"
-                              >
-                                <Trash2 className="h-3.5 w-3.5" />
-                              </Button>
-                            </div>
+                          </div>
+
+                          <div className="border-t border-border/40 pt-2.5">
+                            {renderMediaListActionBar(media)}
                           </div>
                         </div>
                       </div>
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               )}
             </div>
 
             <div className="hidden overflow-x-auto md:block">
-              <table className="w-full min-w-[52rem] table-fixed text-sm">
+              <table className="w-full min-w-[40rem] table-fixed text-sm">
                 <thead>
                   <tr className="border-b bg-muted/40 text-left text-xs font-medium text-foreground/80 dark:bg-muted/20 dark:text-muted-foreground">
                     <th className="w-10 px-2 py-2.5 text-center">
@@ -2675,28 +2586,17 @@ export default function AdminMediasClient({
                         aria-label="현재 페이지 전체 선택"
                       />
                     </th>
-                    <th className="w-[42%] min-w-[14rem] px-3 py-2.5 font-medium">
-                      매체명 · 품질
-                    </th>
+                    <th className="min-w-0 px-3 py-2.5 font-medium">매체명</th>
                     <th className="w-[5.5rem] px-2 py-2.5">유형</th>
+                    <th className="w-14 px-2 py-2.5 text-center">품질</th>
                     <th className="w-28 px-2 py-2.5">가격</th>
-                    <th className="w-12 px-1 py-2.5 text-center">조회</th>
-                    <th className="w-12 px-1 py-2.5 text-center">찜</th>
-                    <th className="w-12 px-1 py-2.5 text-center">문의</th>
-                    <th className="w-56 px-2 py-2.5 text-center">노출</th>
-                    <th className="w-11 px-1.5 py-2.5 text-center">검증</th>
-                    <th className="w-11 px-1.5 py-2.5 text-center">추천</th>
-                    <th className="w-14 px-1.5 py-2.5 text-center">순서</th>
-                    <th className="w-11 px-1.5 py-2.5 text-center">인기</th>
-                    <th className="w-14 px-1.5 py-2.5 text-center">순서</th>
-                    <th className="w-[7.5rem] px-2 py-2.5 text-center">관리</th>
                   </tr>
                 </thead>
                 <tbody>
                   {listLoading ? (
                     <tr>
                       <td
-                        colSpan={14}
+                        colSpan={5}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         <Loader2 className="mx-auto h-7 w-7 animate-spin text-muted-foreground" />
@@ -2706,7 +2606,7 @@ export default function AdminMediasClient({
                   ) : paginated.length === 0 ? (
                     <tr>
                       <td
-                        colSpan={14}
+                        colSpan={5}
                         className="px-3 py-8 text-center text-muted-foreground"
                       >
                         {medias.length === 0
@@ -2715,334 +2615,77 @@ export default function AdminMediasClient({
                       </td>
                     </tr>
                   ) : (
-                    paginated.map((media) => (
-                      <tr
-                        key={media.id}
-                        className={`border-b last:border-0 border-l-[3px] transition-colors ${
-                          isRowActive(media)
-                            ? "border-l-transparent hover:bg-muted/40"
-                            : "border-l-amber-500/75 bg-muted/25 hover:bg-muted/40 dark:border-l-amber-400/60"
-                        }`}
-                      >
-                        <td className="px-2 py-2.5 align-middle text-center">
-                          <input
-                            type="checkbox"
-                            className="h-4 w-4 rounded border-input text-primary accent-primary"
-                            checked={selectedIds.has(media.id)}
-                            onChange={() => toggleRowSelected(media.id)}
-                            aria-label={`${media.name} 선택`}
-                          />
-                        </td>
-                        <td className="min-w-0 px-3 py-2.5 align-middle">
-                          <div className="flex flex-wrap items-center gap-1.5 break-words text-sm font-medium leading-snug text-foreground">
-                            {media.name}
-                            <MediaQualityScoreBadge score={mediaQualityScore(media)} />
-                          </div>
-                          <div className="mt-1 break-words text-xs leading-snug text-muted-foreground">
-                            {media.nameEn != null && media.nameEn !== ""
-                              ? media.nameEn
-                              : "—"}
-                            {regionZoneLabel(media.regionZone, "ko")
-                              ? ` · ${regionZoneLabel(media.regionZone, "ko")}`
-                              : ""}
-                            {media.district ? ` · ${media.district}` : ""}
-                          </div>
-                        </td>
-                        <td className="px-2 py-2.5 align-middle">
-                          <Badge
-                            variant="secondary"
-                            className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-display font-bold uppercase tracking-[0.06em] text-foreground"
-                            title={typeBadgeLabel(media.type)}
-                          >
-                            {typeBadgeLabel(media.type)}
-                          </Badge>
-                        </td>
-                        <td className="px-2 py-2.5 align-middle font-semibold text-foreground">
-                          <div
-                            className="truncate text-sm tabular-nums"
-                            title={`₩${media.price.toLocaleString()}`}
-                          >
-                            ₩{media.price.toLocaleString()}
-                          </div>
-                        </td>
-                        {(["viewCount", "favoriteCount", "inquiryCount"] as const).map(
-                          (key) => (
+                    paginated.map((media) => {
+                      const metaLine = mediaListMetaLine(media);
+                      const nameLine = mediaListNameLine(media);
+                      const rowClass = `border-l-[3px] transition-colors ${
+                        isRowActive(media)
+                          ? "border-l-transparent hover:bg-muted/40"
+                          : "border-l-amber-500/75 bg-muted/25 hover:bg-muted/40 dark:border-l-amber-400/60"
+                      }`;
+
+                      return (
+                        <Fragment key={media.id}>
+                          <tr className={rowClass}>
                             <td
-                              key={key}
-                              className="px-1 py-2.5 text-center align-middle  tabular-nums text-muted-foreground"
+                              rowSpan={2}
+                              className="border-b px-2 py-2.5 align-top text-center"
                             >
-                              {engagement[media.id]?.[key] ?? 0}
+                              <input
+                                type="checkbox"
+                                className="mt-1 h-4 w-4 rounded border-input text-primary accent-primary"
+                                checked={selectedIds.has(media.id)}
+                                onChange={() => toggleRowSelected(media.id)}
+                                aria-label={`${media.name} 선택`}
+                              />
                             </td>
-                          ),
-                        )}
-                        <td className="px-2 py-2.5 align-middle">
-                          <div className="mx-auto flex min-w-0 items-center justify-center gap-3">
-                            <div className="flex shrink-0 flex-col items-center gap-1">
-                              <span className="text-[10px] font-medium text-muted-foreground">
-                                공개
-                              </span>
-                              <button
-                                type="button"
-                                title={
-                                  isRowActive(media)
-                                    ? "공개 목록·검색에서 숨기기"
-                                    : "공개 목록·검색에 표시"
-                                }
-                                onClick={() => toggleActive(media)}
-                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                                  isRowActive(media)
-                                    ? "bg-emerald-500"
-                                    : "bg-slate-300"
-                                }`}
+                            <td className="min-w-0 px-3 py-2 align-middle">
+                              <p
+                                className="truncate text-sm leading-snug"
+                                title={nameLine}
                               >
-                                <span
-                                  className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                                    isRowActive(media)
-                                      ? "translate-x-[18px]"
-                                      : "translate-x-0.5"
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                            <label className="min-w-0 flex-1">
-                              <span className="mb-1 block text-center text-[10px] font-medium text-muted-foreground">
-                                가용
-                              </span>
-                              <select
-                                className="flex h-8 w-full min-w-[5.5rem] rounded-md border border-input bg-background px-2 text-xs"
-                                value={media.availability}
-                                aria-label="가용 상태"
-                                onChange={(e) => {
-                                  const v = e.target
-                                    .value as MediaAvailability;
-                                  void changeAvailability(media, v);
-                                }}
+                                <span className="font-medium text-foreground">
+                                  {media.name}
+                                </span>
+                                {metaLine ? (
+                                  <span className="text-xs text-muted-foreground">
+                                    {" · "}
+                                    {metaLine}
+                                  </span>
+                                ) : null}
+                              </p>
+                            </td>
+                            <td className="px-2 py-2.5 align-middle">
+                              <Badge
+                                variant="secondary"
+                                className="max-w-full truncate border border-border bg-card px-2 py-0.5 text-[11px] font-display font-bold uppercase tracking-[0.06em] text-foreground"
+                                title={typeBadgeLabel(media.type)}
                               >
-                                {(
-                                  [
-                                    "available",
-                                    "reserved",
-                                    "maintenance",
-                                  ] as const
-                                ).map((key) => (
-                                  <option key={key} value={key}>
-                                    {ADMIN_MEDIA_AVAILABILITY_LABEL[key]}
-                                  </option>
-                                ))}
-                              </select>
-                            </label>
-                            <div className="flex shrink-0 flex-col items-center gap-1">
-                              <span className="text-[10px] font-medium text-muted-foreground">
-                                즉시예약
-                              </span>
-                              <button
-                                type="button"
-                                title={
-                                  media.instantBookingEnabled
-                                    ? "즉시 예약 끄기"
-                                    : "즉시 예약 켜기 (가용=예약가능 필요)"
-                                }
-                                aria-label={
-                                  media.instantBookingEnabled
-                                    ? "즉시 예약 끄기"
-                                    : "즉시 예약 켜기"
-                                }
-                                onClick={() => void toggleInstantBooking(media)}
-                                className={`relative inline-flex h-5 w-9 shrink-0 cursor-pointer rounded-full transition-colors ${
-                                  media.instantBookingEnabled
-                                    ? "bg-violet-500"
-                                    : "bg-slate-300"
-                                }`}
+                                {typeBadgeLabel(media.type)}
+                              </Badge>
+                            </td>
+                            <td className="px-2 py-2.5 text-center align-middle">
+                              <MediaQualityScoreBadge
+                                score={mediaQualityScore(media)}
+                              />
+                            </td>
+                            <td className="px-2 py-2.5 align-middle font-semibold text-foreground">
+                              <div
+                                className="truncate text-sm tabular-nums"
+                                title={`₩${media.price.toLocaleString()}`}
                               >
-                                <span
-                                  className={`mt-0.5 inline-block h-4 w-4 rounded-full bg-white shadow-sm transition-transform ${
-                                    media.instantBookingEnabled
-                                      ? "translate-x-[18px]"
-                                      : "translate-x-0.5"
-                                  }`}
-                                />
-                              </button>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-1.5 py-2.5 text-center align-middle">
-                          <button
-                            type="button"
-                            title={
-                              media.isVerified
-                                ? "공개 Verified 해제"
-                                : "공개 카탈로그에 Verified 표시"
-                            }
-                            onClick={() => void toggleCatalogVerified(media)}
-                            className="inline-flex touch-manipulation rounded-full p-1 transition-colors hover:bg-orange-50"
-                          >
-                            <ShieldCheck
-                              className={`h-[18px] w-[18px] ${
-                                media.isVerified
-                                  ? "text-[#ff6200]"
-                                  : "text-slate-300"
-                              }`}
-                              aria-hidden
-                            />
-                          </button>
-                        </td>
-                        <td className="px-1.5 py-2.5 text-center align-middle">
-                          <button
-                            type="button"
-                            title={
-                              media.isFeatured
-                                ? "추천 해제"
-                                : "홈 추천 매체로 지정"
-                            }
-                            onClick={() =>
-                              void patchFeaturedFields(media, {
-                                isFeatured: !media.isFeatured,
-                              })
-                            }
-                            className="inline-flex touch-manipulation rounded-full p-1 transition-colors hover:bg-amber-50"
-                          >
-                            <Star
-                              className={`h-[18px] w-[18px] ${
-                                media.isFeatured
-                                  ? "fill-amber-400 text-amber-500"
-                                  : "text-slate-300"
-                              }`}
-                            />
-                          </button>
-                        </td>
-                        <td className="px-1.5 py-2.5 text-center align-middle">
-                          <Input
-                            key={`fo-${media.id}-${media.featuredOrder ?? "n"}`}
-                            type="number"
-                            min={1}
-                            max={99}
-                            placeholder="—"
-                            disabled={!media.isFeatured}
-                            defaultValue={
-                              media.featuredOrder != null
-                                ? String(media.featuredOrder)
-                                : ""
-                            }
-                            className="mx-auto h-8 w-12 px-1 text-center text-xs disabled:opacity-40"
-                            onBlur={(e) => {
-                              if (!media.isFeatured) return;
-                              const raw = e.target.value.trim();
-                              if (!raw) {
-                                void patchFeaturedFields(media, {
-                                  featuredOrder: null,
-                                });
-                                return;
-                              }
-                              const n = parseInt(raw, 10);
-                              if (!Number.isFinite(n)) return;
-                              void patchFeaturedFields(media, {
-                                featuredOrder: n,
-                              });
-                            }}
-                          />
-                        </td>
-                        <td className="px-1.5 py-2.5 text-center align-middle">
-                          <button
-                            type="button"
-                            title={
-                              media.isPopular
-                                ? "인기 해제"
-                                : "홈 인기 매체로 지정"
-                            }
-                            onClick={() =>
-                              void patchFeaturedFields(media, {
-                                isPopular: !media.isPopular,
-                              })
-                            }
-                            className="inline-flex touch-manipulation rounded-full p-1 transition-colors hover:bg-rose-50"
-                          >
-                            <Flame
-                              className={`h-[18px] w-[18px] ${
-                                media.isPopular
-                                  ? "fill-rose-400 text-rose-500"
-                                  : "text-slate-300"
-                              }`}
-                            />
-                          </button>
-                        </td>
-                        <td className="px-1.5 py-2.5 text-center align-middle">
-                          <Input
-                            key={`po-${media.id}-${media.popularOrder ?? "n"}`}
-                            type="number"
-                            min={1}
-                            max={99}
-                            placeholder="—"
-                            disabled={!media.isPopular}
-                            defaultValue={
-                              media.popularOrder != null
-                                ? String(media.popularOrder)
-                                : ""
-                            }
-                            className="mx-auto h-8 w-12 px-1 text-center text-xs disabled:opacity-40"
-                            onBlur={(e) => {
-                              if (!media.isPopular) return;
-                              const raw = e.target.value.trim();
-                              if (!raw) {
-                                void patchFeaturedFields(media, {
-                                  popularOrder: null,
-                                });
-                                return;
-                              }
-                              const n = parseInt(raw, 10);
-                              if (!Number.isFinite(n)) return;
-                              void patchFeaturedFields(media, {
-                                popularOrder: n,
-                              });
-                            }}
-                          />
-                        </td>
-                        <td className="px-2 py-2.5 align-middle">
-                          <div className="flex flex-wrap items-center justify-center gap-1">
-                            <Button
-                              variant="outline"
-                              size="xs"
-                              asChild
-                              className="h-8 px-2 text-xs"
-                            >
-                              <Link
-                                href={`/admin/medias/${media.id}/edit`}
-                                title="JSON 수정"
-                              >
-                                JSON 수정
-                              </Link>
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              title="복제"
-                              disabled={duplicateBusyId === media.id}
-                              onClick={() => void duplicateMedia(media)}
-                            >
-                              {duplicateBusyId === media.id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Copy className="h-3.5 w-3.5" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              onClick={() => openEdit(media)}
-                            >
-                              <Pencil className="h-3.5 w-3.5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon-xs"
-                              className="text-destructive hover:text-destructive"
-                              onClick={() => setDeleteConfirm(media.id)}
-                            >
-                              <Trash2 className="h-3.5 w-3.5" />
-                            </Button>
-                          </div>
-                        </td>
-                      </tr>
-                    ))
+                                ₩{media.price.toLocaleString()}
+                              </div>
+                            </td>
+                          </tr>
+                          <tr className={`${rowClass} border-b last:border-0`}>
+                            <td colSpan={4} className="px-3 py-2 align-middle">
+                              {renderMediaListActionBar(media)}
+                            </td>
+                          </tr>
+                        </Fragment>
+                      );
+                    })
                   )}
                 </tbody>
               </table>

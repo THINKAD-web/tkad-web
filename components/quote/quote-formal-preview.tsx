@@ -6,15 +6,19 @@ import {
   FORMAL_QUOTE_COLORS,
   formatFormalWon,
   getFormalQuoteIssuer,
+  type FormalQuoteIssuer,
 } from "@/lib/formal-quote-issuer";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 import { cn } from "@/lib/utils";
 
-type Props = AdminFormalQuotePdfParams;
+type Props = AdminFormalQuotePdfParams & {
+  /** Server-provided issuer (avoids client build-time env + `\n` artifacts). */
+  issuer?: FormalQuoteIssuer;
+};
 
 export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
-  function QuoteFormalPreview(p, ref) {
-    const issuer = getFormalQuoteIssuer();
+  function QuoteFormalPreview({ issuer: issuerProp, ...p }, ref) {
+    const issuer = issuerProp ?? getFormalQuoteIssuer();
     const isKo = p.isKo;
     const c = FORMAL_QUOTE_COLORS;
 
@@ -183,19 +187,25 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
             </div>
           </div>
 
-          {/* Campaign period */}
-          <div>
-            <p className="text-[9px] font-bold" style={{ color: c.navy }}>
-              {isKo ? "집행 기간" : "Campaign period"}: {p.periodLabel}
-            </p>
-            <p className="mt-1 text-[7px]" style={{ color: c.muted }}>
-              {vatNote}
-            </p>
-          </div>
+          {/* Campaign period + line items (flex gap avoids margin collapse with thead) */}
+          <section className="flex flex-col gap-5">
+            <div>
+              <p className="text-[9px] font-bold" style={{ color: c.navy }}>
+                {isKo ? "집행 기간" : "Campaign period"}: {p.periodLabel}
+              </p>
+              <p
+                className="quote-formal-vat-note mt-1.5 text-[7px] leading-normal"
+                style={{ color: c.muted }}
+              >
+                {vatNote}
+              </p>
+            </div>
 
-          {/* 6-column table */}
-          <div className="overflow-hidden rounded-sm border" style={{ borderColor: c.border }}>
-            <table className="w-full table-fixed border-collapse text-left text-[7px]">
+            <div
+              className="quote-formal-table-block overflow-hidden rounded-sm border"
+              style={{ borderColor: c.border }}
+            >
+              <table className="w-full table-fixed border-collapse text-left text-[7px]">
               <colgroup>
                 <col className="w-[26%]" />
                 <col className="w-[10%]" />
@@ -250,7 +260,8 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
                 ))}
               </tbody>
             </table>
-          </div>
+            </div>
+          </section>
 
           {/* Totals — right aligned */}
           <div className="flex justify-end">
