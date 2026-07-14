@@ -408,3 +408,34 @@ export function getCheapestMediaPriceOption(
     period: cheapest.period,
   };
 }
+
+/** priceOptions 2개 이상이며 모든 옵션 price가 동일한지 */
+export function hasUniformPriceOptions(
+  priceOptions: MediaPriceOption[] | undefined | null,
+): boolean {
+  const opts = priceOptions ?? [];
+  if (opts.length < 2) return false;
+  const first = opts[0]?.price;
+  if (typeof first !== "number" || first <= 0) return false;
+  return opts.every((o) => o.price === first);
+}
+
+/** 동일 단가 옵션 — 라벨을 "20초/30초" 형태로 결합 */
+export function joinUniformPriceOptionLabels(
+  priceOptions: MediaPriceOption[],
+): string {
+  return priceOptions
+    .map((o) => o.label.trim())
+    .filter(Boolean)
+    .join("/");
+}
+
+export function uniformPriceOptionsSummary(
+  priceOptions: MediaPriceOption[],
+): { labelsJoined: string; priceWon: number } | null {
+  if (!hasUniformPriceOptions(priceOptions)) return null;
+  const labelsJoined = joinUniformPriceOptionLabels(priceOptions);
+  const priceWon = catalogPriceFieldToWon(priceOptions[0]?.price ?? 0);
+  if (!labelsJoined || priceWon <= 0) return null;
+  return { labelsJoined, priceWon };
+}

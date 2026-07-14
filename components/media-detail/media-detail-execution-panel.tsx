@@ -8,7 +8,9 @@ import { formatSizeDisplay } from "@/lib/format-media-size";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   formatCatalogPriceFieldWon,
+  hasUniformPriceOptions,
   resolveMediaPriceOptionPeriodLabel,
+  uniformPriceOptionsSummary,
 } from "@/lib/media-price-format";
 import { networkInventoryUnitSuffix } from "@/lib/media-network-types";
 import { cn } from "@/lib/utils";
@@ -137,6 +139,11 @@ export function MediaDetailExecutionPanel({
         "Confirm creatives at least 7 days before flight.",
       ];
 
+  const uniformPriceSummary =
+    hasPriceOptions && priceOptions?.length && hasUniformPriceOptions(priceOptions)
+      ? uniformPriceOptionsSummary(priceOptions)
+      : null;
+
   return (
     <div className={cn("space-y-5", className)}>
       <div>
@@ -179,6 +186,18 @@ export function MediaDetailExecutionPanel({
           <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
             {isKo ? "가격 옵션" : "Price options"}
           </p>
+          {uniformPriceSummary ? (
+            <div className="rounded-xl border dark:border-white/8 border-gray-100 dark:bg-black/15 bg-gray-50/80 px-3 py-2.5">
+              <p className="text-sm font-medium dark:text-white/85 text-gray-800">
+                {isKo
+                  ? `${uniformPriceSummary.labelsJoined} 동일 단가`
+                  : `${uniformPriceSummary.labelsJoined} — same rate`}
+              </p>
+              <p className="mt-1 font-display text-base font-bold tabular-nums dark:text-white text-gray-900">
+                {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon)}
+              </p>
+            </div>
+          ) : (
           <ul className="space-y-3">
             {priceOptions.map((opt, idx) => {
               const periodLabel = resolveMediaPriceOptionPeriodLabel(
@@ -242,6 +261,7 @@ export function MediaDetailExecutionPanel({
               );
             })}
           </ul>
+          )}
           <MediaPriceExclNote isKo={isKo} className="mt-2" />
         </div>
       ) : null}

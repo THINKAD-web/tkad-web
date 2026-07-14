@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
+import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { catalogItemToDisplayModel } from "@/lib/media-card-display";
@@ -94,14 +95,19 @@ function ReelsSlide({
       />
       <div className="absolute inset-x-0 bottom-0 z-10 space-y-3 p-4 pb-6 sm:p-5">
         <div className="space-y-1">
-          {model.type ? (
-            <p className="tkad-type-label text-white/75">
-              {model.type}
-              {model.trustScore != null
-                ? ` · ${isKo ? `신뢰도 ${model.trustScore}` : `Trust ${model.trustScore}`}`
-                : ""}
-            </p>
-          ) : null}
+          <div className="flex flex-wrap items-center gap-2">
+            {model.type ? (
+              <p className="tkad-type-label text-white/75">{model.type}</p>
+            ) : null}
+            {model.trustScore != null ? (
+              <MediaTrustScoreBadge
+                score={model.trustScore}
+                isKo={isKo}
+                compact
+                className="border-white/20 bg-white/10 text-white/90"
+              />
+            ) : null}
+          </div>
           <h3 className="tkad-type-title line-clamp-2 text-white">{item.name}</h3>
           {model.metricLine ? (
             <p className="tkad-type-meta tabular-nums text-white/85">

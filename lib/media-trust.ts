@@ -235,6 +235,60 @@ export function computeTrustScore(
   return Math.max(1, Math.min(100, Math.round(raw)));
 }
 
+export type MediaTrustScoreGrade = "excellent" | "good" | "average" | "new";
+
+/** 100점 만점 신뢰 점수 → 등급 (표시용 — 산식 변경 없음) */
+export function trustScoreToGrade(score: number): MediaTrustScoreGrade {
+  if (score >= 80) return "excellent";
+  if (score >= 60) return "good";
+  if (score >= 40) return "average";
+  return "new";
+}
+
+export function trustGradeLabel(grade: MediaTrustScoreGrade, isKo: boolean): string {
+  if (isKo) {
+    switch (grade) {
+      case "excellent":
+        return "우수";
+      case "good":
+        return "양호";
+      case "average":
+        return "보통";
+      case "new":
+        return "신규";
+    }
+  }
+  switch (grade) {
+    case "excellent":
+      return "Excellent";
+    case "good":
+      return "Good";
+    case "average":
+      return "Fair";
+    case "new":
+      return "New";
+  }
+}
+
+export function trustScoreExplanation(isKo: boolean): string {
+  return isKo
+    ? "집행 이력·리뷰·데이터 완성도 기반 산정"
+    : "Based on execution history, reviews, and data completeness";
+}
+
+export function trustGradeToneClass(grade: MediaTrustScoreGrade): string {
+  switch (grade) {
+    case "excellent":
+      return "text-emerald-700 dark:text-emerald-300 border-emerald-400/40 bg-emerald-400/10";
+    case "good":
+      return "text-violet-700 dark:text-violet-300 border-violet-400/40 bg-violet-500/10";
+    case "average":
+      return "text-amber-800 dark:text-amber-200 border-amber-400/40 bg-amber-400/10";
+    case "new":
+      return "text-muted-foreground border-border/60 bg-muted/40";
+  }
+}
+
 export function trustBadgeLabel(b: MediaTrustBadge, isKo: boolean): string {
   return `${b.emoji} ${isKo ? b.labelKo : b.labelEn}`;
 }

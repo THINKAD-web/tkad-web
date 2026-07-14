@@ -1,4 +1,10 @@
 import { ShieldCheck } from "lucide-react";
+import {
+  trustGradeLabel,
+  trustGradeToneClass,
+  trustScoreExplanation,
+  trustScoreToGrade,
+} from "@/lib/media-trust";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -14,15 +20,14 @@ export function MediaTrustScoreBadge({
   className,
   compact = false,
 }: Props) {
-  const tone =
-    score >= 80
-      ? "text-emerald-700 dark:text-emerald-300 border-emerald-400/40 bg-emerald-400/10"
-      : score >= 60
-        ? "text-violet-700 dark:text-violet-300 border-violet-400/40 bg-violet-400/10"
-        : "text-muted-foreground border-border/60 bg-muted/40";
+  const grade = trustScoreToGrade(score);
+  const tone = trustGradeToneClass(grade);
+  const gradeLabel = trustGradeLabel(grade, isKo);
+  const explanation = trustScoreExplanation(isKo);
 
   return (
     <span
+      title={explanation}
       className={cn(
         "inline-flex items-center gap-1 rounded-full border font-semibold tabular-nums",
         tone,
@@ -30,8 +35,11 @@ export function MediaTrustScoreBadge({
         className,
       )}
     >
-      <ShieldCheck className={cn(compact ? "h-3 w-3" : "h-3.5 w-3.5")} />
-      {isKo ? `신뢰도 ${score}점` : `Trust ${score}`}
+      <ShieldCheck className={cn(compact ? "h-3 w-3" : "h-3.5 w-3.5")} aria-hidden />
+      <span>
+        {isKo ? `${gradeLabel} · ${score}점` : `${gradeLabel} · ${score}`}
+      </span>
+      <span className="sr-only">{explanation}</span>
     </span>
   );
 }

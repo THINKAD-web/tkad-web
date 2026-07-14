@@ -6,6 +6,7 @@ import { Plus, X } from "lucide-react";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
+import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import type { MediaCardDisplayModel } from "@/lib/media-card-display";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
@@ -21,13 +22,15 @@ function CategoryTrustLine({
   isKo: boolean;
 }) {
   if (!type && trustScore == null) return null;
-  const parts: string[] = [];
-  if (type?.trim()) parts.push(type.trim());
-  if (trustScore != null) {
-    parts.push(isKo ? `신뢰도 ${trustScore}` : `Trust ${trustScore}`);
-  }
   return (
-    <p className="tkad-type-label text-tkad-muted">{parts.join(" · ")}</p>
+    <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+      {type?.trim() ? (
+        <p className="tkad-type-label text-tkad-muted">{type.trim()}</p>
+      ) : null}
+      {trustScore != null ? (
+        <MediaTrustScoreBadge score={trustScore} isKo={isKo} compact />
+      ) : null}
+    </div>
   );
 }
 
