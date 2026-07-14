@@ -20,7 +20,11 @@ import {
   quoteCampaignDaysFromPeriodKey,
   resolveQuoteCampaignPeriodSummaryLabel,
 } from "@/lib/quote-wizard-pricing";
-import type { MediaItem } from "@/lib/media-data";
+import type { MediaItem, MediaPriceOption, MediaPricePeriodKey } from "@/lib/media-data";
+import {
+  parsePartialPeriodRatesFromPriceOptionRow,
+  parsePartialPeriodRatesRaw,
+} from "@/lib/media-partial-period-rates";
 
 /** OoHQuote 에서 필요한 필드만 */
 export type QuoteExportSourceRow = {
@@ -42,6 +46,47 @@ export type QuoteExportSourceRow = {
 };
 
 const DAY = 86_400_000;
+
+function parseExportPriceOptions(raw: unknown): MediaItem["priceOptions"] {
+  if (!Array.isArray(raw)) return undefined;
+  const normalized: MediaPriceOption[] = [];
+  for (const row of raw) {
+    if (row == null || typeof row !== "object") continue;
+    const o = row as Record<string, unknown>;
+    if (typeof o.label !== "string" || typeof o.price !== "number") continue;
+    const optionPartialRates = parsePartialPeriodRatesFromPriceOptionRow(o);
+    normalized.push({
+      label: o.label,
+      price: o.price,
+      period:
+        typeof o.period === "string"
+          ? (o.period as MediaPricePeriodKey)
+          : undefined,
+      ...(optionPartialRates ? { partialPeriodRates: optionPartialRates } : {}),
+    });
+  }
+  return normalized.length ? normalized : undefined;
+}
+
+const quoteExportMediaSelect = {
+  id: true,
+  name: true,
+  location: true,
+  width: true,
+  height: true,
+  operatingHours: true,
+  dailyFootfall: true,
+  impressions: true,
+  image: true,
+  extractedImages: true,
+  mediaMainCategory: true,
+  mediaSubCategory: true,
+  type: true,
+  price: true,
+  pricePeriod: true,
+  priceOptions: true,
+  partialPeriodRates: true,
+} as const;
 
 function mixedPeriodSummaryLabel(isKo: boolean): string {
   return isKo ? "{period} (매체별 상이)" : "{period} (varies by media)";
@@ -87,14 +132,19 @@ function mediaItemForExportLine(row: {
   name: string;
   location: string;
   type: string;
+  price: number;
+  pricePeriod: string | null;
   image: string | null;
   extractedImages: string[];
   dailyFootfall: number | null;
   impressions: number | null;
   priceOptions: unknown;
+  partialPeriodRates: unknown;
   mediaMainCategory: string | null;
   mediaSubCategory: string | null;
 }): MediaItem {
+  const partialPeriodRates =
+    parsePartialPeriodRatesRaw(row.partialPeriodRates) ?? undefined;
   return {
     id: row.id,
     name: row.name,
@@ -103,13 +153,15 @@ function mediaItemForExportLine(row: {
     locationEn: row.location,
     region: "",
     type: row.type as MediaItem["type"],
-    price: 0,
+    price: row.price,
+    pricePeriod: (row.pricePeriod ?? "month") as MediaPricePeriodKey,
     sampleImages: [...(row.image ? [row.image] : []), ...row.extractedImages],
     lat: 0,
     lng: 0,
     dailyFootTraffic: row.dailyFootfall ?? 0,
     impressions: row.impressions ?? undefined,
-    priceOptions: row.priceOptions as MediaItem["priceOptions"],
+    priceOptions: parseExportPriceOptions(row.priceOptions),
+    ...(partialPeriodRates ? { partialPeriodRates } : {}),
     mediaMainCategory: row.mediaMainCategory,
     mediaSubCategory: row.mediaSubCategory,
   };
@@ -144,22 +196,7 @@ export async function buildQuoteExportPayload(
   const mediaIds = breakdown.lines.map((l) => l.mediaId);
   const mediaRows = await db.media.findMany({
     where: { id: { in: mediaIds }, isActive: true },
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      width: true,
-      height: true,
-      operatingHours: true,
-      dailyFootfall: true,
-      impressions: true,
-      image: true,
-      extractedImages: true,
-      mediaMainCategory: true,
-      mediaSubCategory: true,
-      type: true,
-      priceOptions: true,
-    },
+    select: quoteExportMediaSelect,
   });
   const mediaById = new Map(mediaRows.map((m) => [m.id, m]));
 
@@ -318,22 +355,7 @@ async function loadMediaMapForExport(
   if (ids.length === 0) return new Map<string, Awaited<ReturnType<typeof db.media.findMany>>[number]>();
   const mediaRows = await db.media.findMany({
     where: { id: { in: ids }, isActive: true },
-    select: {
-      id: true,
-      name: true,
-      location: true,
-      width: true,
-      height: true,
-      operatingHours: true,
-      dailyFootfall: true,
-      impressions: true,
-      image: true,
-      extractedImages: true,
-      mediaMainCategory: true,
-      mediaSubCategory: true,
-      type: true,
-      priceOptions: true,
-    },
+    select: quoteExportMediaSelect,
   });
   return new Map(mediaRows.map((m) => [m.id, m]));
 }

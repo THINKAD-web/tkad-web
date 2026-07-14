@@ -24,6 +24,11 @@ import {
   selectionsByMediaId,
   type QuoteMediaSelectionSnapshot,
 } from "@/lib/quote-media-selections";
+import {
+  parsePartialPeriodRatesFromPriceOptionRow,
+  parsePartialPeriodRatesRaw,
+  type PartialPeriodRatesMap,
+} from "@/lib/media-partial-period-rates";
 
 export const QUOTE_VALIDITY_DAYS = 14;
 
@@ -35,6 +40,7 @@ export type QuoteCalculatorMedia = {
   price: number;
   pricePeriod?: MediaPricePeriodKey | string | null;
   priceOptions?: MediaPriceOption[] | null;
+  partialPeriodRates?: PartialPeriodRatesMap | null;
   dailyFootfall?: number | null;
   impressions?: number | null;
   latitude?: number | null;
@@ -93,12 +99,20 @@ export type CalculateQuoteByMediaIdsInput = {
 
 function parsePriceOptions(raw: unknown): MediaPriceOption[] {
   if (!Array.isArray(raw)) return [];
-  return raw.filter(
-    (o): o is MediaPriceOption =>
-      o != null &&
-      typeof o === "object" &&
-      typeof (o as MediaPriceOption).price === "number",
-  );
+  const out: MediaPriceOption[] = [];
+  for (const row of raw) {
+    if (row == null || typeof row !== "object") continue;
+    const o = row as Record<string, unknown>;
+    if (typeof (o as MediaPriceOption).price !== "number") continue;
+    const item = row as MediaPriceOption;
+    const optionPartialRates = parsePartialPeriodRatesFromPriceOptionRow(o);
+    out.push(
+      optionPartialRates
+        ? { ...item, partialPeriodRates: optionPartialRates }
+        : item,
+    );
+  }
+  return out;
 }
 
 function campaignDaysFromPeriodKey(key: QuoteCampaignPeriodKey): number {
@@ -117,6 +131,7 @@ function toMediaItemForQuote(m: QuoteCalculatorMedia): MediaItem {
     price: m.price,
     pricePeriod: m.pricePeriod,
     priceOptions: m.priceOptions ?? undefined,
+    partialPeriodRates: m.partialPeriodRates ?? undefined,
     lat: m.latitude ?? 0,
     lng: m.longitude ?? 0,
     dailyFootTraffic: m.dailyFootfall ?? 0,
@@ -189,6 +204,7 @@ export async function calculateQuoteFromMediaIds(
       price: true,
       pricePeriod: true,
       priceOptions: true,
+      partialPeriodRates: true,
       dailyFootfall: true,
       impressions: true,
       latitude: true,
@@ -206,6 +222,7 @@ export async function calculateQuoteFromMediaIds(
       price: m.price,
       pricePeriod: m.pricePeriod,
       priceOptions: parsePriceOptions(m.priceOptions),
+      partialPeriodRates: parsePartialPeriodRatesRaw(m.partialPeriodRates),
       dailyFootfall: m.dailyFootfall,
       impressions: m.impressions,
       latitude: m.latitude,

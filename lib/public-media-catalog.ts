@@ -22,6 +22,10 @@ import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalo
 import { parseMediaInstallLocations } from "@/lib/media-install-locations";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { formatSizeFromMeters } from "@/lib/format-media-size";
+import {
+  parsePartialPeriodRatesFromPriceOptionRow,
+  parsePartialPeriodRatesRaw,
+} from "@/lib/media-partial-period-rates";
 
 /** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -156,6 +160,9 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
           typeof (item as { stores?: unknown }).stores === "string"
             ? (item as { stores: string }).stores.trim() || undefined
             : undefined;
+        const optionPartialRates = parsePartialPeriodRatesFromPriceOptionRow(
+          priceOption,
+        );
         normalized.push({
           label,
           price,
@@ -166,6 +173,9 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
               ? units
               : undefined,
           stores,
+          ...(optionPartialRates
+            ? { partialPeriodRates: optionPartialRates }
+            : {}),
         });
       }
       return normalized.length ? normalized : undefined;
@@ -173,6 +183,8 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
       return undefined;
     }
   })();
+
+  const partialPeriodRates = parsePartialPeriodRatesRaw(m.partialPeriodRates);
 
   return {
     id: m.id,
@@ -269,6 +281,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     caseStudyPhotos: undefined,
     pricePeriod: normalizePricePeriod(m.pricePeriod),
     priceOptions,
+    ...(partialPeriodRates ? { partialPeriodRates } : {}),
     createdAt: m.createdAt instanceof Date
       ? m.createdAt.toISOString()
       : (typeof m.createdAt === "string" ? m.createdAt : undefined),
