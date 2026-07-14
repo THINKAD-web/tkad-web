@@ -418,26 +418,15 @@ export default function RecommendPageClient({
 
         const mediaSelections = picked.flatMap((m) => {
           const cartItem = cartById.get(m.id);
-          const lineTotalWon = resolveLineTotalWon(m, cartItem);
           if (cartItem) {
-            const snaps = buildQuoteMediaSelectionSnapshotsFromCartItem({
+            return buildQuoteMediaSelectionSnapshotsFromCartItem({
               media: m,
               item: cartItem,
               isKo,
+              periodCtx,
             });
-            if (snaps.length === 1) {
-              return [{ ...snaps[0]!, lineTotalWon }];
-            }
-            return snaps.map((snap) => ({
-              ...snap,
-              lineTotalWon: plannerMediaPeriodTotalWon(m, {
-                campaignPeriod: campaignPeriod ?? "30days",
-                quantities: { [m.id]: snap.quantity },
-                priceOptionIndex: { [m.id]: snap.priceOptionIndex },
-                isKo,
-              }),
-            }));
           }
+          const lineTotalWon = resolveLineTotalWon(m);
           const poIdx = effectivePriceOptionIndex[m.id] ?? 0;
           const units = effectiveQuantities[m.id];
           return [

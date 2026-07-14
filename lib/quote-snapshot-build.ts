@@ -7,11 +7,17 @@ import {
   resolveMediaQuantity,
 } from "@/lib/media-quantity";
 import { formatPlannerQuantityLabel } from "@/lib/planner/planner-media-quantity";
-import type { PlanCartItem } from "@/lib/plan-cart";
+import type { PlanCartItem, PlanCartOptionSelection } from "@/lib/plan-cart";
 import {
   planCartEffectiveOptionSelections,
   resolveOptionSelectionMonthlyPriceWon,
 } from "@/lib/plan-cart-option-selections";
+import type { PlannerPeriodPricingContext } from "@/lib/planner/planner-media-quantity";
+import {
+  plannerMediaPeriodTotalWon,
+  resolveQuoteCampaignPeriodForPricing,
+} from "@/lib/planner/planner-media-quantity";
+import { planCartLinePeriodTotalWon } from "@/lib/plan-cart-pricing";
 import type { QuoteMediaSelectionSnapshot } from "@/lib/quote-media-selections";
 
 export type BuildQuoteMediaSelectionInput = {
@@ -70,15 +76,43 @@ function planCartUsesExplicitOptionRows(item: PlanCartItem): boolean {
   );
 }
 
+/** 옵션 행 단위 기간 총액 — planCartLinePeriodTotalWon과 동일 partial/선형 규칙 */
+export function quoteOptionSelectionPeriodTotalWon(
+  media: MediaItem,
+  selection: PlanCartOptionSelection,
+  periodCtx: PlannerPeriodPricingContext,
+  isKo = true,
+): number {
+  const campaignPeriod = resolveQuoteCampaignPeriodForPricing(periodCtx);
+  if (campaignPeriod) {
+    return plannerMediaPeriodTotalWon(media, {
+      campaignPeriod,
+      quantities: { [media.id]: selection.quantity },
+      priceOptionIndex: { [media.id]: selection.priceOptionIndex },
+      isKo,
+    });
+  }
+  const months =
+    periodCtx.months != null && periodCtx.months > 0
+      ? periodCtx.months
+      : periodCtx.weeks != null && periodCtx.weeks > 0
+        ? (periodCtx.weeks * 7) / 30
+        : 1;
+  return Math.round(
+    resolveOptionSelectionMonthlyPriceWon(media, selection) * months,
+  );
+}
+
 /** plan cart 아이템 → 견적 mediaSelections (복수 옵션 행이면 배열 확장) */
 export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
   media: MediaItem;
   item: PlanCartItem;
   isKo: boolean;
+  periodCtx: PlannerPeriodPricingContext;
   usePackagePeriod?: boolean;
   lineCampaignDays?: number;
 }): QuoteMediaSelectionSnapshot[] {
-  const { media: m, item, isKo } = input;
+  const { media: m, item, isKo, periodCtx } = input;
   const rows = planCartEffectiveOptionSelections(item, m);
   const usesMulti =
     planCartUsesExplicitOptionRows(item) && (rows?.length ?? 0) > 1;
@@ -86,13 +120,7 @@ export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
   if (!rows?.length || !usesMulti) {
     const poIdx = rows?.[0]?.priceOptionIndex ?? item.priceOptionIndex ?? 0;
     const units = rows?.[0]?.quantity ?? item.quantity;
-    const lineTotalWon = resolveOptionSelectionMonthlyPriceWon(m, {
-      priceOptionIndex: poIdx,
-      quantity:
-        units != null && Number.isFinite(units)
-          ? Math.round(units)
-          : resolveMediaQuantity(m, undefined),
-    });
+    const lineTotalWon = planCartLinePeriodTotalWon(item, m, periodCtx, isKo);
     return [
       buildQuoteMediaSelectionSnapshot({
         media: m,
@@ -112,7 +140,7 @@ export function buildQuoteMediaSelectionSnapshotsFromCartItem(input: {
       isKo,
       priceOptionIndex: row.priceOptionIndex,
       units: row.quantity,
-      lineTotalWon: resolveOptionSelectionMonthlyPriceWon(m, row),
+      lineTotalWon: quoteOptionSelectionPeriodTotalWon(m, row, periodCtx, isKo),
       usePackagePeriod: input.usePackagePeriod,
       lineCampaignDays: input.lineCampaignDays,
     }),
