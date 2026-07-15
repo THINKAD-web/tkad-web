@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { Heart } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { useAppToast } from "@/lib/use-toast";
 import { buildFavoritesGuestLimitMessage } from "@/lib/entitlements/gate-messages";
 import { FAVORITES_CHANGE_EVENT } from "@/lib/favorites-constants";
@@ -31,21 +32,19 @@ export function MediaFavoriteButton({
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("media.favorites");
+  const { user, loading: sessionLoading } = useAuthSession();
+  const loggedIn = user?.id ? true : sessionLoading ? null : false;
   const [favorited, setFavorited] = useState<boolean | null>(null);
-  const [loggedIn, setLoggedIn] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
   const toast = useAppToast();
 
   const refreshState = useCallback(async () => {
+    if (sessionLoading) return;
     try {
-      const s = await fetch("/api/auth/session", { cache: "no-store" });
-      const sd = await s.json();
-      if (!sd?.ok || !sd.data) {
-        setLoggedIn(false);
+      if (!user?.id) {
         setFavorited(isGuestFavorite(mediaId));
         return;
       }
-      setLoggedIn(true);
       const r = await fetch("/api/my/favorites", { cache: "no-store" });
       const rd = await r.json();
       if (rd?.ok && rd.data && Array.isArray(rd.data.ids)) {
@@ -54,10 +53,9 @@ export function MediaFavoriteButton({
         setFavorited(false);
       }
     } catch {
-      setLoggedIn(false);
       setFavorited(isGuestFavorite(mediaId));
     }
-  }, [mediaId]);
+  }, [mediaId, sessionLoading, user?.id]);
 
   useEffect(() => {
     let cancelled = false;

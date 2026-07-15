@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { usePathname } from "@/i18n/navigation";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import {
   getPlanCartCount,
   PLAN_CART_CHANGE_EVENT,
@@ -25,7 +25,8 @@ const BADGE_REFRESH_MS = 60_000;
  * - planner: plan cart item count (localStorage)
  */
 export function useMobileTabBadges(): TabBadges {
-  const pathname = usePathname();
+  const { user } = useAuthSession();
+  const loggedIn = Boolean(user?.id);
   const [badges, setBadges] = useState<TabBadges>(DEFAULT_BADGES);
 
   const refreshPlanCount = useCallback(() => {
@@ -34,14 +35,12 @@ export function useMobileTabBadges(): TabBadges {
 
   const refresh = useCallback(async () => {
     refreshPlanCount();
-    try {
-      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-      const sessionData = await sessionRes.json();
-      if (!sessionData?.ok || !sessionData.data) {
-        setBadges((prev) => ({ contact: 0, my: 0, planner: prev.planner }));
-        return;
-      }
+    if (!loggedIn) {
+      setBadges((prev) => ({ contact: 0, my: 0, planner: prev.planner }));
+      return;
+    }
 
+    try {
       const [notifRes, chatRes] = await Promise.all([
         fetch("/api/my/notifications?limit=1", { cache: "no-store" }),
         fetch("/api/chat/rooms?side=advertiser", { cache: "no-store" }),
@@ -70,7 +69,7 @@ export function useMobileTabBadges(): TabBadges {
     } catch {
       setBadges((prev) => ({ contact: 0, my: 0, planner: prev.planner }));
     }
-  }, [refreshPlanCount]);
+  }, [loggedIn, refreshPlanCount]);
 
   useEffect(() => {
     refreshPlanCount();
@@ -97,7 +96,7 @@ export function useMobileTabBadges(): TabBadges {
       window.clearInterval(interval);
       document.removeEventListener("visibilitychange", onVisibility);
     };
-  }, [pathname, refresh]);
+  }, [refresh]);
 
   return badges;
 }

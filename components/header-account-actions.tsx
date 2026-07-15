@@ -1,57 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { HeaderGuestMenu } from "@/components/header-guest-menu";
 import { HeaderProfileDropdown } from "@/components/header-profile-dropdown";
-
-type Session = {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  pointBalance?: number;
-  plan?: string;
-  trialDaysLeft?: number;
-} | null;
-
-function useSession() {
-  const pathname = usePathname();
-  const [session, setSession] = useState<Session>(null);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/auth/session", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) {
-          setSession(d?.ok ? d.data : null);
-          setLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]);
-  return { session, loaded };
-}
 
 /** 데스크톱 헤더 우측 — 로그인/회원가입 또는 마이페이지 프로필만 */
 export function HeaderAccountActions({ onNavigate }: { onNavigate?: () => void }) {
   const t = useTranslations("auth");
-  const { session, loaded } = useSession();
+  const { user, loading } = useAuthSession();
 
-  if (!loaded) return null;
+  if (loading) return null;
 
-  if (session) {
+  if (user?.id) {
     return (
       <HeaderProfileDropdown
-        session={session}
+        session={{
+          id: user.id,
+          email: user.email ?? "",
+          name: user.name ?? "",
+          role: user.role ?? "ADVERTISER",
+          pointBalance: user.pointBalance,
+          plan: user.plan,
+          trialDaysLeft: user.trialDaysLeft,
+        }}
         onNavigate={onNavigate}
         myPageLabel={t("myPage")}
         campaignsLabel={t("myCampaigns")}

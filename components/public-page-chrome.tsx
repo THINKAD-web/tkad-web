@@ -5,6 +5,7 @@ import { FooterBrutal } from "@/components/public-chrome/footer-brutal";
 import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate";
 import { ContextNavAsideShell } from "@/components/navigation/context-nav-sidebar";
 import { AppProvidersRoot } from "@/components/app-providers-root";
+import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
 
 type Props = {
   skipLinkLabel: string;
@@ -15,7 +16,7 @@ type Props = {
 /** 공개 site chrome — 서버 shell (main → footer 순서 고정) */
 export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
   return (
-    <>
+    <AuthSessionProvider>
       <a href="#main-content" className="skip-link">
         {skipLinkLabel}
       </a>
@@ -44,6 +45,6 @@ export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
           </div>
         </div>
       </div>
-    </>
+    </AuthSessionProvider>
   );
 }

@@ -15,7 +15,7 @@ type Props = {
   admin?: boolean;
 };
 
-/** 전역 클라이언트 providers — DOM shell 은 PublicPageChrome(서버) */
+/** @deprecated PublicPageChrome + AppProvidersRoot 사용. AuthSessionProvider 는 PublicPageChrome. */
 export function LocaleRootBodyProviders({ children, admin }: Props) {
   if (admin) {
     return (

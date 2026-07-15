@@ -1,7 +1,6 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
 import ToastProvider from "@/components/toast-provider";
 import { PointToastListener } from "@/components/points/point-toast-listener";
 import { ContactChannelProvider } from "@/components/contact/contact-channel-provider";
@@ -21,38 +20,35 @@ type Props = {
 
 /**
  * 전역 providers — DOM shell 없이 children 만 감쌈 (RSC main/footer 스트리밍 순서 보존).
+ * AuthSessionProvider 는 PublicPageChrome 에서 헤더·본문 공통으로 감쌈.
  */
 export function AppProvidersRoot({ children, admin }: Props) {
   if (admin) {
     return (
-      <AuthSessionProvider>
-        <ToastProvider>
-          <PointToastListener />
-          {children}
-        </ToastProvider>
-      </AuthSessionProvider>
+      <ToastProvider>
+        <PointToastListener />
+        {children}
+      </ToastProvider>
     );
   }
 
   return (
-    <AuthSessionProvider>
-      <ToastProvider>
-        <ContactChannelProvider>
-          <CommandPaletteProvider>
-            <PointToastListener />
-            <RecentPageTracker />
-            <MobileSearchProvider>
-              <MobileDetailChromeProvider>
-                <MobileKeyboardProvider />
-                <PushHapticListener />
-                <PwaSplashScreen />
-                {children}
-                <MobileAppOverlays />
-              </MobileDetailChromeProvider>
-            </MobileSearchProvider>
-          </CommandPaletteProvider>
-        </ContactChannelProvider>
-      </ToastProvider>
-    </AuthSessionProvider>
+    <ToastProvider>
+      <ContactChannelProvider>
+        <CommandPaletteProvider>
+          <PointToastListener />
+          <RecentPageTracker />
+          <MobileSearchProvider>
+            <MobileDetailChromeProvider>
+              <MobileKeyboardProvider />
+              <PushHapticListener />
+              <PwaSplashScreen />
+              {children}
+              <MobileAppOverlays />
+            </MobileDetailChromeProvider>
+          </MobileSearchProvider>
+        </CommandPaletteProvider>
+      </ContactChannelProvider>
+    </ToastProvider>
   );
 }

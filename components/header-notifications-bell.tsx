@@ -1,10 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useLocale } from "next-intl";
 import { Bell } from "lucide-react";
 import { Link } from "@/i18n/navigation";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { cn } from "@/lib/utils";
 import { headerChromeIconButtonClass, headerChromeIconGhostClass, headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 
@@ -35,8 +35,8 @@ export function HeaderNotificationsBell({
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const pathname = usePathname();
-  const [loggedIn, setLoggedIn] = useState(false);
+  const { user } = useAuthSession();
+  const loggedIn = Boolean(user?.id);
   const [unreadCount, setUnreadCount] = useState(0);
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [open, setOpen] = useState(false);
@@ -44,16 +44,12 @@ export function HeaderNotificationsBell({
   const rootRef = useRef<HTMLDivElement>(null);
 
   const refresh = useCallback(async () => {
+    if (!loggedIn) {
+      setUnreadCount(0);
+      setItems([]);
+      return;
+    }
     try {
-      const s = await fetch("/api/auth/session", { cache: "no-store" });
-      const sd = await s.json();
-      if (!sd?.ok || !sd.data) {
-        setLoggedIn(false);
-        setUnreadCount(0);
-        setItems([]);
-        return;
-      }
-      setLoggedIn(true);
       const r = await fetch("/api/my/notifications?limit=5", {
         cache: "no-store",
       });
@@ -63,13 +59,14 @@ export function HeaderNotificationsBell({
         setUnreadCount(rd.data.unreadCount ?? 0);
       }
     } catch {
-      setLoggedIn(false);
+      setUnreadCount(0);
+      setItems([]);
     }
-  }, []);
+  }, [loggedIn]);
 
   useEffect(() => {
     void refresh();
-  }, [pathname, refresh]);
+  }, [refresh]);
 
   useEffect(() => {
     if (!open || !loggedIn) return;
