@@ -9,9 +9,9 @@
  * 리스트(/ko/media)·상세 페이지·홈 캐러셀 등에서 재사용.
  */
 import { Link } from "@/i18n/navigation";
-import Image from "next/image";
 import type { ReactNode } from "react";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { cn } from "@/lib/utils";
 
 export type MediaCardProps = {
@@ -105,13 +105,12 @@ export function MediaCard({
         )}
       >
         {resolved ? (
-          <Image
-            src={resolved.src}
+          <BunnyFallbackImage
+            rawSrc={imageSrc!}
             alt={imageAlt ?? ""}
             fill
             sizes={imageSizes}
             priority={imagePriority}
-            unoptimized={resolved.unoptimized}
             className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.1] group-focus-within:scale-[1.1]"
           />
         ) : (

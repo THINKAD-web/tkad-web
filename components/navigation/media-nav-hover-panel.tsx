@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { TopNavLink } from "@/lib/navigation/desktop-top-nav";
@@ -23,13 +23,12 @@ type PreviewItem = {
 
 function mapPreviewItem(m: MediaItem): PreviewItem | null {
   const rawUrl = getPrimaryMediaImageUrl(m);
-  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
-  if (!resolved?.src) return null;
+  if (!rawUrl || !resolveCatalogImageSrc(rawUrl)?.src) return null;
   return {
     id: m.id,
     name: m.name,
     region: m.region ?? m.district ?? m.city ?? "",
-    imageUrl: resolved.src,
+    imageUrl: rawUrl,
   };
 }
 
@@ -105,13 +104,12 @@ export function MediaNavHoverPanel({ links, className }: Props) {
               className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
             >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-white/10">
-                <Image
-                  src={m.imageUrl!}
+                <BunnyFallbackImage
+                  rawSrc={m.imageUrl!}
                   alt=""
                   fill
                   className="object-cover"
                   sizes="48px"
-                  unoptimized={m.imageUrl!.includes("/api/bunny-media")}
                 />
               </div>
               <span className="min-w-0">

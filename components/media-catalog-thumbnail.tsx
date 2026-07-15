@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
-import Image from "next/image";
 import { cn } from "@/lib/utils";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import { buildMediaImageAlt } from "@/lib/media-image-seo";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
 
 type Props = {
@@ -55,11 +55,11 @@ export function MediaCatalogThumbnail({
       ? primaryImageUrl?.trim() || null
       : fromItem;
   const rawUrl = primary || fallbackUrl?.trim() || null;
-  const resolved = rawUrl ? resolveCatalogImageSrc(rawUrl) : null;
-  const imageUrl = resolved?.src ?? null;
-  const imageUnoptimized = resolved?.unoptimized ?? false;
+  const hasResolvableImage = rawUrl
+    ? Boolean(resolveCatalogImageSrc(rawUrl)?.src ?? rawUrl.trim())
+    : false;
   const [failed, setFailed] = useState(false);
-  const showPlaceholder = !imageUrl || failed;
+  const showPlaceholder = !hasResolvableImage || failed;
 
   /**
    * SEO / 이미지 검색 / 접근성:
@@ -85,18 +85,17 @@ export function MediaCatalogThumbnail({
         />
       ) : (
         <>
-          <Image
-            src={imageUrl}
+          <BunnyFallbackImage
+            rawSrc={rawUrl!}
             alt={finalAlt}
             fill
             sizes={sizes}
             priority={priority}
-            unoptimized={imageUnoptimized}
             className={cn(
               "object-cover",
               imgClassName,
             )}
-            onError={() => setFailed(true)}
+            onFallbackFailed={() => setFailed(true)}
           />
           {bottomGradientClassName ? (
             <div className={bottomGradientClassName} />

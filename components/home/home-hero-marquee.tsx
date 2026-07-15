@@ -1,5 +1,7 @@
-import Image from "next/image";
-import { optimizeHeroMarqueeUrl, shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
+"use client";
+
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
+import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 
 type Props = {
   imageUrls: string[];
@@ -29,15 +31,14 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
             key={`t-${i}-${src.slice(-24)}`}
             className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
           >
-            <Image
-              src={src}
+            <BunnyFallbackImage
+              rawSrc={src}
               alt=""
               fill
               sizes="192px"
               className="object-cover"
               loading={i < 4 ? "eager" : "lazy"}
               priority={i < 2}
-              unoptimized={shouldUseUnoptimizedImage(src)}
             />
           </div>
         ))}
@@ -48,14 +49,13 @@ export function HomeHeroMarquee({ imageUrls }: Props) {
             key={`b-${i}-${src.slice(-24)}`}
             className="relative h-28 w-48 shrink-0 overflow-hidden rounded-none border dark:border-white/10 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100"
           >
-            <Image
-              src={src}
+            <BunnyFallbackImage
+              rawSrc={src}
               alt=""
               fill
               sizes="192px"
               className="object-cover"
               loading="lazy"
-              unoptimized={shouldUseUnoptimizedImage(src)}
             />
           </div>
         ))}

@@ -1,13 +1,12 @@
 "use client";
 
-import Image from "next/image";
 import { Link } from "@/i18n/navigation";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { shouldUseUnoptimizedImage } from "@/lib/optimized-image-url";
 
 type Props = {
   href: string;
@@ -43,8 +42,6 @@ export function MediaDiscoveryGridCard({
   isInstantBooking,
   imagePriority = false,
 }: Props) {
-  const thumbUnoptimized = imageUrl ? shouldUseUnoptimizedImage(imageUrl) : false;
-
   return (
     <Link
       href={href}
@@ -52,14 +49,13 @@ export function MediaDiscoveryGridCard({
     >
       <div className="relative aspect-square w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
         {imageUrl ? (
-          <Image
-            src={imageUrl}
+          <BunnyFallbackImage
+            rawSrc={imageUrl}
             alt={name}
             fill
             className="object-cover"
             sizes="(max-width: 768px) 50vw, 33vw"
             priority={imagePriority}
-            unoptimized={thumbUnoptimized}
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center text-xs text-gray-300 dark:text-white/20">

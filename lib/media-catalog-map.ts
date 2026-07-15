@@ -159,7 +159,7 @@ export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
   };
 }
 
-/** 목록 카드 `next/image` — Bunny는 same-origin 프록시, 잘못된 URL은 정규화 */
+/** 목록 카드 `next/image` — Bunny CDN 직링크 + unoptimized (Strategy A) */
 export function catalogThumbnailImageProps(
   thumbnailUrl: string | null | undefined,
 ): { src: string; unoptimized: boolean } | null {

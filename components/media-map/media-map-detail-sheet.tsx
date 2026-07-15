@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
-import Image from "next/image";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import type { MapMapItem } from "./media-map-types";
@@ -188,14 +188,13 @@ function MapMarkerPreviewBody({
           href={href}
           className="relative h-[4.75rem] w-[5.75rem] shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-gray-100 dark:border-white/10 dark:bg-gray-800"
         >
-          {thumb ? (
-            <Image
-              src={thumb.src}
+          {thumb && catalogItem.thumbnailUrl ? (
+            <BunnyFallbackImage
+              rawSrc={catalogItem.thumbnailUrl}
               alt={item.name}
               fill
               className="object-cover"
               sizes="92px"
-              unoptimized={thumb.unoptimized}
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center text-[10px] text-tkad-muted">
@@ -408,14 +407,13 @@ function MediaMapDetailBody({
             className="flex gap-3 rounded-lg transition-colors hover:bg-gray-50 dark:hover:bg-white/[0.04]"
           >
             <div className="relative h-16 w-20 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
-              {thumb ? (
-                <Image
-                  src={thumb.src}
+              {thumb && catalogItem.thumbnailUrl ? (
+                <BunnyFallbackImage
+                  rawSrc={catalogItem.thumbnailUrl}
                   alt=""
                   fill
                   className="object-cover"
                   sizes="80px"
-                  unoptimized={thumb.unoptimized}
                 />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-[10px] text-gray-300 dark:text-white/20">
