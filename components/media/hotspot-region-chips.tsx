@@ -11,6 +11,9 @@ type Props = {
   className?: string;
   /** 지도 immersive 등 컴팩트 패딩 */
   compact?: boolean;
+  /** `/media` — 클릭 시 필터 패널을 지역 섹션으로 연다 */
+  shortcutToPanel?: boolean;
+  onOpenFilterPanel?: () => void;
 };
 
 export function HotspotRegionChips({
@@ -20,6 +23,8 @@ export function HotspotRegionChips({
   onClear,
   className,
   compact = false,
+  shortcutToPanel = false,
+  onOpenFilterPanel,
 }: Props) {
   const hotspots = listMediaHotspotRegions();
   if (hotspots.length === 0) return null;
@@ -45,8 +50,12 @@ export function HotspotRegionChips({
               key={h.regionSub}
               type="button"
               onClick={() => {
-                if (active) onClear();
-                else onSelect(h.regionMain, h.regionSub);
+                if (active) {
+                  onClear();
+                  return;
+                }
+                if (shortcutToPanel) onOpenFilterPanel?.();
+                onSelect(h.regionMain, h.regionSub);
               }}
               className={cn(
                 "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold transition-all",

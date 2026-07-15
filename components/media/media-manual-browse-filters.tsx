@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, useCallback, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import {
   Search,
@@ -52,6 +52,7 @@ import { DiscoveryPageHeader } from "@/components/discovery/page-header";
 import {
   DiscoveryFilterSheetHeader,
   DiscoveryResultSummary,
+  formatBrowseListResultLabel,
   formatMapViewCountLabel,
 } from "@/components/discovery/filter-bar-parts";
 import {
@@ -61,6 +62,16 @@ import {
 import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
 import { HotspotRegionChips } from "@/components/media/hotspot-region-chips";
+import { useBrowseFilterOptionCounts } from "@/hooks/use-browse-filter-option-counts";
+import {
+  browseRegionSubCount,
+  browseSubCategoryCount,
+} from "@/lib/media-browse-filter-option-counts";
+import {
+  matchMediaMapPricePreset,
+  MEDIA_MAP_PRICE_PRESETS,
+  mediaMapPricePresetToRange,
+} from "@/lib/media-map/price-presets";
 import { cn } from "@/lib/utils";
 
 const MAP_TYPE_FILTERS_EXPANDED_KEY = "tkad-media-map-type-filters-expanded";
@@ -274,6 +285,13 @@ export function MediaManualBrowseFilters({
   const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const desktopPanelRef = useRef<HTMLDivElement>(null);
   const advancedSectionRef = useRef<HTMLDivElement>(null);
+  const regionSectionRef = useRef<HTMLDivElement>(null);
+
+  /** `/media` 목록 — 패널 IA 정리(유형 표면만, 목적·지역·가격·features 패널) */
+  const filterIaListPage =
+    listPageLayout && unifiedToolbar && !mapPageViewModes;
+
+  const optionCounts = useBrowseFilterOptionCounts(variant === "media");
 
   /** `/media` 목록 — 유형 칩은 툴바 밖 노출, 필터 패널·시트에도 전체 축(어떤 매체 포함) */
   const showListTypeChipRow =
@@ -412,15 +430,24 @@ export function MediaManualBrowseFilters({
       ? "검색 중…"
       : "Searching…"
     : mapCountLabel ??
-      (isKo
-        ? variant === "network"
-          ? `네트워크 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
-          : `매체 ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개`
-        : variant === "network"
-          ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} networks`
-          : `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""} media`);
+      formatBrowseListResultLabel(
+        resultCount,
+        total,
+        isKo,
+        variant === "network" ? "network" : "media",
+      );
 
-  // 바텀시트 "결과 보기" 버튼 라벨
+  const browseResultCountPhrase = loading
+    ? isKo
+      ? "검색 중…"
+      : "Searching…"
+    : formatBrowseListResultLabel(
+        resultCount,
+        total,
+        isKo,
+        variant === "network" ? "network" : "media",
+      );
+
   const sheetCtaLabel = loading
     ? isKo
       ? "검색 중…"
@@ -430,8 +457,8 @@ export function MediaManualBrowseFilters({
         ? `${mapCountLabel} 결과 보기`
         : `Show ${mapCountLabel}`
       : isKo
-        ? `${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}개 결과 보기`
-        : `Show ${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""}`;
+        ? `${browseResultCountPhrase} 결과 보기`
+        : `Show ${browseResultCountPhrase}`;
 
   const desktopPanelCtaLabel = loading
     ? isKo
@@ -442,8 +469,8 @@ export function MediaManualBrowseFilters({
         ? `적용 (${mapCountLabel})`
         : `Apply (${mapCountLabel})`
       : isKo
-        ? `적용 (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`
-        : `Apply (${resultCount}${total != null && total > resultCount ? ` / ${total}` : ""})`;
+        ? `적용 (${browseResultCountPhrase})`
+        : `Apply (${browseResultCountPhrase})`;
 
   const toggleFeature = (value: string) => {
     const parts = new Set(
@@ -585,8 +612,34 @@ export function MediaManualBrowseFilters({
     return () => cancelAnimationFrame(frame);
   }, [advancedOpen, desktopPanelOpen]);
 
+  const openFilterPanelFocusedOnRegion = useCallback(() => {
+    setRegionPanelOpen(true);
+    if (mobileVaulSheets) {
+      setSheetOpen(true);
+    } else {
+      setDesktopPanelOpen(true);
+    }
+    requestAnimationFrame(() => {
+      regionSectionRef.current?.scrollIntoView({
+        block: "nearest",
+        behavior: "smooth",
+      });
+    });
+  }, [mobileVaulSheets]);
+
   const chipRowScroll = "scrollbar-hide flex gap-2 overflow-x-auto pb-0.5";
   const chipRowWrap = "flex flex-wrap gap-2 pb-1";
+
+  const countBadgeClass =
+    "ml-0.5 tabular-nums text-[10px] font-semibold opacity-70";
+
+  const renderCountBadge = (count: number | null) => {
+    if (count == null) return null;
+    return <span className={countBadgeClass}>{count}</span>;
+  };
+
+  const disabledZeroChipClass =
+    "cursor-not-allowed opacity-45 hover:opacity-45";
 
   const renderTypeAxis = (wrap: boolean) => {
     const chipRow = wrap ? chipRowWrap : chipRowScroll;
@@ -671,17 +724,29 @@ export function MediaManualBrowseFilters({
           >
             {activeMain.sub.map((sub) => {
               const selected = subCategory === sub.id;
+              const subCount = browseSubCategoryCount(
+                optionCounts,
+                activeMain.id,
+                sub.id,
+              );
+              const subDisabled = subCount === 0;
               return (
                 <button
                   key={sub.id}
                   type="button"
-                  onClick={() => onSubCategoryChange(selected ? "" : sub.id)}
+                  disabled={subDisabled}
+                  onClick={() => {
+                    if (subDisabled) return;
+                    onSubCategoryChange(selected ? "" : sub.id);
+                  }}
                   className={cn(
                     "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
                     selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+                    subDisabled && disabledZeroChipClass,
                   )}
                 >
                   {isKo ? sub.label : sub.labelEn ?? sub.label}
+                  {renderCountBadge(subCount)}
                 </button>
               );
             })}
@@ -691,13 +756,35 @@ export function MediaManualBrowseFilters({
     );
   };
 
-  const renderRegionAxis = (wrap: boolean) => {
+  const renderRegionAxis = (wrap: boolean, opts?: { includeHotspots?: boolean }) => {
     const chipRow = wrap ? chipRowWrap : chipRowScroll;
+    const includeHotspots = opts?.includeHotspots ?? false;
     return (
       <div data-screenshot="media-region-filter">
-        <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
-          {isKo ? "어디서?" : "Where"}
-        </p>
+        {!includeHotspots ? (
+          <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+            {isKo ? "어디서?" : "Where"}
+          </p>
+        ) : null}
+        {includeHotspots && showHotspotRegions ? (
+          <div className="mb-3">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-cyan-600 dark:text-cyan-400">
+              {isKo ? "인기" : "Popular"}
+            </p>
+            <HotspotRegionChips
+              isKo={isKo}
+              regionSub={regionSub}
+              compact={wrap}
+              onSelect={handleHotspotSelect}
+              onClear={handleHotspotClear}
+            />
+          </div>
+        ) : null}
+        {includeHotspots ? (
+          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-cyan-600/80 dark:text-cyan-400/80">
+            {isKo ? "전체 지역" : "All regions"}
+          </p>
+        ) : null}
         <div className={chipRow}>
           {MEDIA_BROWSE_REGIONS.map((main) => {
             const selected = regionMain === main.id;
@@ -731,19 +818,31 @@ export function MediaManualBrowseFilters({
           <div className="mt-2 flex flex-wrap gap-2 rounded-xl border border-cyan-100 bg-cyan-50/50 p-2 dark:border-cyan-500/20 dark:bg-cyan-500/5">
             {activeRegion.sub.map((sub) => {
               const selected = regionSub === sub.id;
+              const regionCount = browseRegionSubCount(
+                optionCounts,
+                activeRegion.id,
+                sub.id,
+              );
+              const regionDisabled = regionCount === 0;
               return (
                 <button
                   key={sub.id}
                   type="button"
-                  onClick={() => onRegionSubChange(selected ? "" : sub.id)}
+                  disabled={regionDisabled}
+                  onClick={() => {
+                    if (regionDisabled) return;
+                    onRegionSubChange(selected ? "" : sub.id);
+                  }}
                   className={cn(
                     "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
                     selected
                       ? "bg-cyan-500 text-white"
                       : "bg-white text-gray-600 dark:bg-white/10 dark:text-white/70",
+                    regionDisabled && disabledZeroChipClass,
                   )}
                 >
                   {sub.label}
+                  {renderCountBadge(regionCount)}
                 </button>
               );
             })}
@@ -752,6 +851,15 @@ export function MediaManualBrowseFilters({
       </div>
     );
   };
+
+  const renderUnifiedRegionSection = (wrap: boolean) => (
+    <div ref={regionSectionRef}>
+      <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+        {isKo ? "어디서?" : "Where"}
+      </p>
+      {renderRegionAxis(wrap, { includeHotspots: showHotspotRegions })}
+    </div>
+  );
 
   const handleHotspotSelect = (main: string, sub: string) => {
     if (onHotspotRegionSelect) {
@@ -767,18 +875,119 @@ export function MediaManualBrowseFilters({
     onRegionSubChange("");
   };
 
-  const renderHotspotRow = () => (
+  const renderHotspotRow = (shortcut = false) => (
     <HotspotRegionChips
       isKo={isKo}
       regionSub={regionSub}
       compact={mapMobileImmersiveMode}
+      shortcutToPanel={shortcut}
+      onOpenFilterPanel={shortcut ? openFilterPanelFocusedOnRegion : undefined}
       onSelect={handleHotspotSelect}
       onClear={handleHotspotClear}
     />
   );
 
-  const renderCollapsedAxes = (wrap: boolean) => {
+  const renderPriceAndFeatures = () => {
+    const minParsed = priceMin.trim() ? Number(priceMin) : null;
+    const maxParsed = priceMax.trim() ? Number(priceMax) : null;
+    const activePresetId = matchMediaMapPricePreset(
+      minParsed != null && !Number.isNaN(minParsed) ? minParsed : null,
+      maxParsed != null && !Number.isNaN(maxParsed) ? maxParsed : null,
+    );
+
+    return (
+      <div className="space-y-3">
+        <div>
+          <p className="tkad-type-note mb-2 font-medium text-tkad-muted">
+            {isKo ? "가격대" : "Budget"}
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {MEDIA_MAP_PRICE_PRESETS.map((preset) => {
+              const selected = activePresetId === preset.id;
+              return (
+                <button
+                  key={preset.id}
+                  type="button"
+                  onClick={() => {
+                    const range = mediaMapPricePresetToRange(preset.id);
+                    onPriceMinChange(
+                      range.minPrice != null ? String(range.minPrice) : "",
+                    );
+                    onPriceMaxChange(
+                      range.maxPrice != null ? String(range.maxPrice) : "",
+                    );
+                  }}
+                  className={cn(
+                    "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                    selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+                  )}
+                >
+                  {isKo ? preset.labelKo : preset.labelEn}
+                </button>
+              );
+            })}
+          </div>
+          <div className="mt-2 grid grid-cols-2 gap-2">
+            <label className="space-y-1">
+              <span className="tkad-type-note font-medium text-tkad-muted">
+                {isKo ? "최소 가격(원)" : "Min price (KRW)"}
+              </span>
+              <input
+                type="number"
+                value={priceMin}
+                onChange={(e) => onPriceMinChange(e.target.value)}
+                className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-sm dark:border-white/10 dark:bg-white/8 dark:text-white"
+                placeholder="0"
+              />
+            </label>
+            <label className="space-y-1">
+              <span className="tkad-type-note font-medium text-tkad-muted">
+                {isKo ? "최대 가격(원)" : "Max price (KRW)"}
+              </span>
+              <input
+                type="number"
+                value={priceMax}
+                onChange={(e) => onPriceMaxChange(e.target.value)}
+                className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-sm dark:border-white/10 dark:bg-white/8 dark:text-white"
+                placeholder="∞"
+              />
+            </label>
+          </div>
+        </div>
+        {variant === "media" ? (
+          <div>
+            <p className="tkad-type-note mb-1.5 font-medium text-tkad-muted">
+              {isKo ? "매체 특성" : "Features"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {FEATURE_CHIPS.map((chip) => {
+                const selected = featureSet.has(chip.value);
+                return (
+                  <button
+                    key={chip.value}
+                    type="button"
+                    onClick={() => toggleFeature(chip.value)}
+                    className={cn(
+                      "rounded-full px-3 py-1 text-xs font-medium transition-all",
+                      selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+                    )}
+                  >
+                    {isKo ? chip.labelKo : chip.labelEn}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        ) : null}
+      </div>
+    );
+  };
+
+  const renderCollapsedAxes = (wrap: boolean, flatAdvanced = false) => {
     const chipRow = wrap ? chipRowWrap : chipRowScroll;
+    const useUnifiedRegion =
+      showHotspotRegions || filterIaListPage;
+
     return (
       <>
         {variant === "media" ? (
@@ -808,111 +1017,54 @@ export function MediaManualBrowseFilters({
           </div>
         ) : null}
 
-        {showHotspotRegions ? (
-          <div>
-            <button
-              type="button"
-              onClick={() => setRegionPanelOpen((o) => !o)}
-              className="flex w-full items-center justify-between rounded-xl border border-cyan-100 bg-cyan-50/40 px-3 py-2 text-sm font-medium text-cyan-800 dark:border-cyan-500/20 dark:bg-cyan-500/5 dark:text-cyan-200"
-            >
-              <span>{isKo ? "전체 지역" : "All regions"}</span>
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform",
-                  regionPanelOpen && "rotate-180",
-                )}
-                aria-hidden
-              />
-            </button>
-            {regionPanelOpen ? (
-              <div className="mt-2">{renderRegionAxis(wrap)}</div>
-            ) : null}
-          </div>
+        {useUnifiedRegion ? (
+          renderUnifiedRegionSection(wrap)
         ) : (
           renderRegionAxis(wrap)
         )}
 
-        <div ref={advancedSectionRef}>
-          <button
-            type="button"
-            onClick={() => setAdvancedOpen((o) => !o)}
-            className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
-          >
-            <span>{isKo ? "추가 필터" : "More filters"}</span>
-            <ChevronDown
-              className={cn(
-                "h-4 w-4 transition-transform",
-                advancedOpen && "rotate-180",
-              )}
-            />
-          </button>
+        {flatAdvanced ? (
+          renderPriceAndFeatures()
+        ) : (
+          <div ref={advancedSectionRef}>
+            <button
+              type="button"
+              onClick={() => setAdvancedOpen((o) => !o)}
+              className="flex w-full items-center justify-between rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80"
+            >
+              <span>{isKo ? "추가 필터" : "More filters"}</span>
+              <ChevronDown
+                className={cn(
+                  "h-4 w-4 transition-transform",
+                  advancedOpen && "rotate-180",
+                )}
+              />
+            </button>
 
-          {advancedOpen ? (
-            <div className="mt-2 space-y-3 rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/5">
-              <div className="grid grid-cols-2 gap-2">
-                <label className="space-y-1">
-                  <span className="tkad-type-note font-medium text-tkad-muted">
-                    {isKo ? "최소 가격(원)" : "Min price (KRW)"}
-                  </span>
-                  <input
-                    type="number"
-                    value={priceMin}
-                    onChange={(e) => onPriceMinChange(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-sm dark:border-white/10 dark:bg-white/8 dark:text-white"
-                    placeholder="0"
-                  />
-                </label>
-                <label className="space-y-1">
-                  <span className="tkad-type-note font-medium text-tkad-muted">
-                    {isKo ? "최대 가격(원)" : "Max price (KRW)"}
-                  </span>
-                  <input
-                    type="number"
-                    value={priceMax}
-                    onChange={(e) => onPriceMaxChange(e.target.value)}
-                    className="h-9 w-full rounded-lg border border-gray-200 bg-white px-2 text-sm dark:border-white/10 dark:bg-white/8 dark:text-white"
-                    placeholder="∞"
-                  />
-                </label>
+            {advancedOpen ? (
+              <div className="mt-2 rounded-xl border border-gray-100 bg-gray-50/80 p-3 dark:border-white/10 dark:bg-white/5">
+                {renderPriceAndFeatures()}
               </div>
-              {variant === "media" ? (
-                <div>
-                  <p className="tkad-type-note mb-1.5 font-medium text-tkad-muted">
-                    {isKo ? "매체 특성" : "Features"}
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {FEATURE_CHIPS.map((chip) => {
-                      const selected = featureSet.has(chip.value);
-                      return (
-                        <button
-                          key={chip.value}
-                          type="button"
-                          onClick={() => toggleFeature(chip.value)}
-                          className={cn(
-                            "rounded-full px-3 py-1 text-xs font-medium transition-all",
-                            selected ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
-                          )}
-                        >
-                          {isKo ? chip.labelKo : chip.labelEn}
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
+            ) : null}
+          </div>
+        )}
       </>
     );
   };
 
-  const renderFilterAxes = (wrap: boolean) => (
-    <>
-      {renderTypeAxis(wrap)}
-      {renderCollapsedAxes(wrap)}
-    </>
-  );
+  /** 패널·시트 — 유형 제외(표면 노출), 목적·지역·가격·features */
+  const renderPanelAxes = (wrap: boolean) =>
+    renderCollapsedAxes(wrap, filterIaListPage);
+
+  const renderFilterAxes = (wrap: boolean) =>
+    filterIaListPage ? (
+      renderPanelAxes(wrap)
+    ) : (
+      <>
+        {renderTypeAxis(wrap)}
+        {renderCollapsedAxes(wrap, false)}
+      </>
+    );
 
   const searchInput = (
     <div
@@ -1200,7 +1352,7 @@ export function MediaManualBrowseFilters({
               <>
                 {mobileImmersiveControlRow}
                 {showHotspotRegions && variant === "media"
-                  ? renderHotspotRow()
+                  ? renderHotspotRow(filterIaListPage)
                   : null}
               </>
             ) : (
@@ -1208,7 +1360,7 @@ export function MediaManualBrowseFilters({
             )}
             {!mapMobileImmersiveMode ? mobileStickyControlRow : null}
             {showHotspotRegions && variant === "media" && !mapMobileImmersiveMode ? (
-              <div className="md:hidden">{renderHotspotRow()}</div>
+              <div className="md:hidden">{renderHotspotRow(filterIaListPage)}</div>
             ) : null}
             {showListTypeChipRow && !mapMobileImmersiveMode ? (
               <div className="min-w-0 md:hidden" data-screenshot="media-main-category-mobile">
@@ -1299,7 +1451,7 @@ export function MediaManualBrowseFilters({
             {toolbarEnd}
           </div>
           {showHotspotRegions && variant === "media" ? (
-            <div className="hidden min-w-0 md:block">{renderHotspotRow()}</div>
+            <div className="hidden min-w-0 md:block">{renderHotspotRow(filterIaListPage)}</div>
           ) : null}
           {showListTypeChipRow ? (
             <div className="hidden min-w-0 md:block" data-screenshot="media-main-category">

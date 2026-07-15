@@ -241,3 +241,28 @@ export function formatMapViewCountLabel(
   }
   return isKo ? `전국 ${resultCount}개` : `${resultCount} nationwide`;
 }
+
+const fmtCount = (n: number, isKo: boolean) =>
+  isKo ? n.toLocaleString("ko-KR") : n.toLocaleString();
+
+/** `/media` 목록 — 페이지 표시 건수 vs 전체 매칭 건수 */
+export function formatBrowseListResultLabel(
+  shown: number,
+  total: number | undefined,
+  isKo: boolean,
+  kind: "media" | "network" = "media",
+): string {
+  const nounKo = kind === "network" ? "네트워크" : "매체";
+  if (total != null && total > shown) {
+    return isKo
+      ? `전체 ${fmtCount(total, isKo)}건 중 ${fmtCount(shown, isKo)}건 표시`
+      : kind === "network"
+        ? `Showing ${fmtCount(shown, isKo)} of ${fmtCount(total, isKo)} networks`
+        : `Showing ${fmtCount(shown, isKo)} of ${fmtCount(total, isKo)} media`;
+  }
+  return isKo
+    ? `전체 ${fmtCount(shown, isKo)}건`
+    : kind === "network"
+      ? `${fmtCount(shown, isKo)} networks`
+      : `${fmtCount(shown, isKo)} media`;
+}
