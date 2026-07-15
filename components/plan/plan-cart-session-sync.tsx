@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import {
   applySyncedPlanCart,
   getPlanCart,
@@ -16,16 +17,19 @@ function parseUpdatedAt(iso: string | undefined): number {
 
 /** 로그인 시 localStorage 플랜 ↔ DB 동기화 (삭제·추가·순서 반영) */
 export function PlanCartSessionSync() {
-  const loggedInRef = useRef(false);
+  const { user, loading } = useAuthSession();
+  const loggedIn = Boolean(user?.id);
   const syncTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const syncGenerationRef = useRef(0);
   const applyingFromServerRef = useRef(false);
 
   useEffect(() => {
+    if (loading) return;
+
     let cancelled = false;
 
     async function syncCart(): Promise<void> {
-      if (!loggedInRef.current || cancelled) return;
+      if (!loggedIn || cancelled) return;
 
       const cartAtStart = getPlanCart();
       const sentUpdatedAt = cartAtStart.updatedAt;
@@ -50,26 +54,12 @@ export function PlanCartSessionSync() {
       });
     }
 
-    async function ensureSession() {
-      try {
-        const sessionRes = await fetch("/api/auth/session", {
-          cache: "no-store",
-        });
-        const sessionData = await sessionRes.json();
-        if (cancelled) return;
-        const loggedIn = Boolean(sessionData?.ok && sessionData.data);
-        loggedInRef.current = loggedIn;
-        if (!loggedIn) return;
-        await syncCart();
-      } catch {
-        /* ignore */
-      }
+    if (loggedIn) {
+      void syncCart();
     }
 
-    void ensureSession();
-
     const onCartChange = () => {
-      if (!loggedInRef.current || applyingFromServerRef.current) return;
+      if (!loggedIn || applyingFromServerRef.current) return;
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
       syncTimerRef.current = setTimeout(() => {
         void syncCart();
@@ -83,7 +73,7 @@ export function PlanCartSessionSync() {
       if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
       window.removeEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);
     };
-  }, []);
+  }, [loading, loggedIn]);
 
   return null;
 }
