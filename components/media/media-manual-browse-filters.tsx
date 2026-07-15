@@ -26,8 +26,10 @@ import {
   MoreHorizontal,
   SlidersHorizontal,
   Filter,
+  Target,
   type LucideIcon,
 } from "lucide-react";
+import { Link } from "@/i18n/navigation";
 import { MediaFilterChipLabel } from "@/components/media/media-filter-chip-label";
 import {
   MEDIA_CHIP_ACTIVE,
@@ -67,6 +69,7 @@ import {
   browseRegionSubCount,
   browseSubCategoryCount,
 } from "@/lib/media-browse-filter-option-counts";
+import { setFeaturesNetworkEnabled } from "@/lib/media-discovery-client-filter";
 import {
   matchMediaMapPricePreset,
   MEDIA_MAP_PRICE_PRESETS,
@@ -406,7 +409,8 @@ export function MediaManualBrowseFilters({
     showResultCountLabel ||
     selectedCount > 0 ||
     (!mapPageViewModes && cartCount > 0) ||
-    (!mapPageViewModes && compareCount > 0);
+    (!mapPageViewModes && compareCount > 0) ||
+    filterIaListPage;
 
   const mapMobileImmersiveMode =
     mapMobileImmersive &&
@@ -876,15 +880,41 @@ export function MediaManualBrowseFilters({
   };
 
   const renderHotspotRow = (shortcut = false) => (
-    <HotspotRegionChips
-      isKo={isKo}
-      regionSub={regionSub}
-      compact={mapMobileImmersiveMode}
-      shortcutToPanel={shortcut}
-      onOpenFilterPanel={shortcut ? openFilterPanelFocusedOnRegion : undefined}
-      onSelect={handleHotspotSelect}
-      onClear={handleHotspotClear}
-    />
+    <div className="flex min-w-0 items-end gap-2">
+      <div className="min-w-0 flex-1">
+        <HotspotRegionChips
+          isKo={isKo}
+          regionSub={regionSub}
+          compact={mapMobileImmersiveMode}
+          shortcutToPanel={shortcut}
+          onOpenFilterPanel={shortcut ? openFilterPanelFocusedOnRegion : undefined}
+          onSelect={handleHotspotSelect}
+          onClear={handleHotspotClear}
+        />
+      </div>
+      {filterIaListPage ? (
+        <button
+          type="button"
+          onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, true))}
+          className={cn(
+            "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:text-sm",
+            variant === "network"
+              ? "bg-indigo-500 text-white shadow-sm"
+              : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
+          )}
+          aria-pressed={variant === "network"}
+          data-screenshot="media-network-hotspot-chip"
+        >
+          <Network className="h-3.5 w-3.5 shrink-0" aria-hidden />
+          {isKo ? "네트워크" : "Network"}
+          {optionCounts?.networkFeature != null ? (
+            <span className="tabular-nums text-[10px] opacity-75">
+              {optionCounts.networkFeature}
+            </span>
+          ) : null}
+        </button>
+      ) : null}
+    </div>
   );
 
   const renderPriceAndFeatures = () => {
@@ -1170,6 +1200,47 @@ export function MediaManualBrowseFilters({
     </div>
   ) : null;
 
+  const catalogBrowseSegment = filterIaListPage ? (
+    <div
+      className="flex shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10"
+      data-screenshot="media-catalog-browse-segment"
+    >
+      <button
+        type="button"
+        aria-pressed={variant === "media"}
+        onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, false))}
+        className={cn(
+          "px-2.5 py-1 text-xs font-medium transition-all sm:px-3 sm:py-1.5 sm:text-sm",
+          variant === "media" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+        )}
+      >
+        {isKo ? "매체" : "Media"}
+      </button>
+      <button
+        type="button"
+        aria-pressed={variant === "network"}
+        onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, true))}
+        className={cn(
+          "px-2.5 py-1 text-xs font-medium transition-all sm:px-3 sm:py-1.5 sm:text-sm",
+          variant === "network" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
+        )}
+      >
+        {isKo ? "네트워크" : "Network"}
+      </button>
+    </div>
+  ) : null;
+
+  const targetsHubLink = filterIaListPage ? (
+    <Link
+      href="/media/targets"
+      className="tkad-type-meta inline-flex items-center gap-1 font-medium text-tkad-accent underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+      data-screenshot="media-targets-hub-link"
+    >
+      <Target className="h-3.5 w-3.5 shrink-0" aria-hidden />
+      {isKo ? "캠페인 목적에서 시작" : "Browse by campaign goal"}
+    </Link>
+  ) : null;
+
   const mapNavButton =
     listPageLayout && onNavigateToMap ? (
       <button
@@ -1316,6 +1387,7 @@ export function MediaManualBrowseFilters({
       >
         {mobileFilterButton}
         {mobileSortButton}
+        {catalogBrowseSegment}
         <div className="min-w-0 flex-1">{viewModeToggle}</div>
         {mapPageViewModes ? mapToolbarSummaryChips : null}
         {mapNavButton}
@@ -1445,6 +1517,7 @@ export function MediaManualBrowseFilters({
               ) : null}
             </div>
             {sortSelect}
+            {catalogBrowseSegment}
             {viewModeToggle}
             {mapPageViewModes ? mapToolbarSummaryChips : null}
             {mapNavButton}
@@ -1653,6 +1726,7 @@ export function MediaManualBrowseFilters({
           onCompareSummaryClick={
             mapPageViewModes || compareCount === 0 ? undefined : onCompareSummaryClick
           }
+          trailing={targetsHubLink}
         />
       ) : null}
 

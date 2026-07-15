@@ -53,7 +53,7 @@ import {
   discoveryFeaturesIncludeNetwork,
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemDetailPath } from "@/lib/media-slug";
-import { useRouter } from "@/i18n/navigation";
+import { useRouter, Link } from "@/i18n/navigation";
 import {
   buildMediaBrowseQueryString,
   type MediaBrowseFilterQueryState,
@@ -1050,23 +1050,32 @@ function MediaSearchPageInner({
             title={isKo ? "조건에 맞는 매체가 없어요" : "No media match your filters"}
             description={isKo ? "필터를 조정해보세요" : "Try adjusting your filters"}
             action={
-              <button
-                type="button"
-                onClick={() => {
-                  setQuery("");
-                  setMainCategory("");
-                  setSubCategory("");
-                  setTarget("");
-                  setRegionMain("");
-                  setRegionSub("");
-                  setPriceMin("");
-                  setPriceMax("");
-                  setFeatures("");
-                }}
-                className="tkad-type-body tkad-home-accent-text underline"
-              >
-                {isKo ? "필터 초기화" : "Reset filters"}
-              </button>
+              <div className="flex flex-col items-center gap-2 sm:flex-row sm:gap-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setQuery("");
+                    setMainCategory("");
+                    setSubCategory("");
+                    setTarget("");
+                    setRegionMain("");
+                    setRegionSub("");
+                    setPriceMin("");
+                    setPriceMax("");
+                    setFeatures("");
+                  }}
+                  className="tkad-type-body tkad-home-accent-text underline"
+                >
+                  {isKo ? "필터 초기화" : "Reset filters"}
+                </button>
+                <Link
+                  href="/media/targets"
+                  className="tkad-type-body tkad-home-accent-text underline"
+                  data-screenshot="media-empty-targets-cta"
+                >
+                  {isKo ? "목적별로 찾아보기" : "Browse by campaign goal"}
+                </Link>
+              </div>
             }
           />
         ) : (
@@ -1108,6 +1117,15 @@ function MediaSearchPageInner({
           <div className="min-w-0 px-4 pt-3">{filtersBar}</div>
           <div className="min-w-0 px-4 pt-3 pb-[calc(4.25rem+1.5rem+env(safe-area-inset-bottom,0px))] lg:pb-6">
             {bodyContent}
+            <div className="mt-8 border-t border-gray-200/80 pt-4 text-center dark:border-white/10">
+              <Link
+                href="/media/targets"
+                className="tkad-type-meta inline-flex items-center gap-1 font-medium text-tkad-accent underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+                data-screenshot="media-targets-footer-link"
+              >
+                {isKo ? "캠페인 목적별로 매체 찾기" : "Find media by campaign goal"}
+              </Link>
+            </div>
           </div>
         </div>
         {compareBar}

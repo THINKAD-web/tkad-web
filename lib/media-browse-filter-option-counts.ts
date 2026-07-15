@@ -8,6 +8,8 @@ export type BrowseFilterOptionCounts = {
   subCategory: Record<string, number>;
   /** `regionMainId/regionSubId` → 매칭 건수 */
   regionSub: Record<string, number>;
+  /** `features=network` 매칭 건수 */
+  networkFeature: number;
 };
 
 /** 공개 카탈로그 기준 서브카테고리·지역 소분류 옵션별 매칭 건수 */
@@ -37,7 +39,12 @@ export function buildBrowseFilterOptionCounts(
     }
   }
 
-  return { subCategory, regionSub };
+  return {
+    subCategory,
+    regionSub,
+    networkFeature: filterMediaByDiscoveryChips(items, { features: "network" })
+      .length,
+  };
 }
 
 export function browseSubCategoryCount(

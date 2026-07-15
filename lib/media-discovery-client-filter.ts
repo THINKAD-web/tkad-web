@@ -128,6 +128,22 @@ function matchesTargetChip(m: MediaItem, target: string): boolean {
   return mediaMatchesTargetSlugs(m.targetCategory, [trimmed]);
 }
 
+/** `features` 쿼리에서 network 토글 — 기존 instant_booking·24h 등은 유지 */
+export function setFeaturesNetworkEnabled(
+  features: string,
+  enabled: boolean,
+): string {
+  const parts = new Set(
+    features
+      .split(/[,，]/)
+      .map((s) => s.trim())
+      .filter(Boolean),
+  );
+  if (enabled) parts.add("network");
+  else parts.delete("network");
+  return [...parts].join(",");
+}
+
 /** 클라이언트 카탈로그 — 매체 검색·견적 위저드 칩 필터 */
 export function discoveryFeaturesIncludeNetwork(
   features: string | null | undefined,
