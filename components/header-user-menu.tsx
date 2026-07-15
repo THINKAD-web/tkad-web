@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Megaphone, User as UserIcon } from "lucide-react";
@@ -10,44 +8,11 @@ import {
   headerChromeTextButtonClass,
   headerMobileMenuRowClass,
 } from "@/components/public-chrome/header-chrome-buttons";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { HeaderAccountActions } from "@/components/header-account-actions";
 import { FavoritesSessionSync } from "@/components/favorites-session-sync";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { MyPlanStatusBadge } from "@/components/my/my-plan-status-badge";
-
-type Session = {
-  id: string;
-  email: string;
-  name: string;
-  role: string;
-  pointBalance?: number;
-  plan?: string;
-  trialDaysLeft?: number;
-} | null;
-
-function useSession() {
-  const pathname = usePathname();
-  const [session, setSession] = useState<Session>(null);
-  const [loaded, setLoaded] = useState(false);
-  useEffect(() => {
-    let cancelled = false;
-    fetch("/api/auth/session", { cache: "no-store" })
-      .then((r) => r.json())
-      .then((d) => {
-        if (!cancelled) {
-          setSession(d?.ok ? d.data : null);
-          setLoaded(true);
-        }
-      })
-      .catch(() => {
-        if (!cancelled) setLoaded(true);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname]);
-  return { session, loaded };
-}
 
 const menuRowClass = headerMobileMenuRowClass;
 
@@ -59,11 +24,23 @@ export function HeaderUserMenu({
   variant?: "inline" | "menu";
 }) {
   const t = useTranslations("auth");
-  const { session, loaded } = useSession();
+  const { user, loading } = useAuthSession();
   const locale = useLocale();
   const isKo = locale === "ko";
 
-  if (!loaded) return null;
+  if (loading) return null;
+
+  const session = user?.id
+    ? {
+        id: user.id,
+        email: user.email ?? "",
+        name: user.name ?? "",
+        role: user.role ?? "ADVERTISER",
+        pointBalance: user.pointBalance,
+        plan: user.plan,
+        trialDaysLeft: user.trialDaysLeft,
+      }
+    : null;
 
   if (variant === "menu") {
     return (
