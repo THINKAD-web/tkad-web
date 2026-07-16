@@ -53,12 +53,14 @@ export function buildAiRecommendInputFromFreetext(
   const zones = parseResult.fields.seoulZones.value ?? [];
   const busanZones = parseResult.fields.busanZones.value ?? [];
   const gyeonggiZones = parseResult.fields.gyeonggiZones.value ?? [];
+  const incheonZones = parseResult.fields.incheonZones.value ?? [];
   const parsedRegions = parseResult.fields.regions.value ?? [];
   const hasParsedRegion =
     parsedRegions.length > 0 ||
     zones.length > 0 ||
     busanZones.length > 0 ||
-    gyeonggiZones.length > 0;
+    gyeonggiZones.length > 0 ||
+    incheonZones.length > 0;
 
   if (hasParsedRegion && !resolved.region.trim()) {
     return null;
@@ -69,6 +71,7 @@ export function buildAiRecommendInputFromFreetext(
     : zones.length > 0 ? (["seoul"] as const)
     : busanZones.length > 0 ? (["busan"] as const)
     : gyeonggiZones.length > 0 ? (["gyeonggi"] as const)
+    : incheonZones.length > 0 ? (["incheon"] as const)
     : undefined;
 
   const categories = parseResult.fields.categories.value ?? undefined;
@@ -88,6 +91,7 @@ export function buildAiRecommendInputFromFreetext(
     ...(zones.length > 0 ? { seoulZones: zones } : {}),
     ...(busanZones.length > 0 ? { busanZones } : {}),
     ...(gyeonggiZones.length > 0 ? { gyeonggiZones } : {}),
+    ...(incheonZones.length > 0 ? { incheonZones } : {}),
     ...(categories?.length ? { plannerCategories: [...categories] } : {}),
     ...(locationKeywords.length > 0 ? { locationKeywords } : {}),
     ...(mediaIntents.length > 0 ? { mediaIntents } : {}),

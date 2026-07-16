@@ -16,6 +16,11 @@ import {
   GYEONGGI_ZONE_REGEX,
   type PlannerGyeonggiZoneKey,
 } from "@/lib/planner/gyeonggi-zones";
+import {
+  BROWSE_SUB_TO_INCHEON_ZONE,
+  INCHEON_ZONE_REGEX,
+  type PlannerIncheonZoneKey,
+} from "@/lib/planner/incheon-zones";
 import { parseDurationFields } from "@/lib/planner/parse-duration";
 import {
   isPlannerSeoulZoneKey,
@@ -53,6 +58,7 @@ export type PlannerFreetextParseResult = {
     durationDays: ParsedField<number>;
     busanZones: ParsedField<PlannerBusanZoneKey[]>;
     gyeonggiZones: ParsedField<PlannerGyeonggiZoneKey[]>;
+    incheonZones: ParsedField<PlannerIncheonZoneKey[]>;
     categories: ParsedField<PlannerCategory[]>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
@@ -176,7 +182,7 @@ const MACRO_REGION_PATTERNS: { id: string; re: RegExp }[] = [
   { id: "busan", re: /부산|해운대|서면|센텀/i },
   { id: "jeju", re: /제주|서귀포|애월/i },
   { id: "daegu", re: /대구/i },
-  { id: "incheon", re: /인천|송도/i },
+  { id: "incheon", re: /인천|송도|인천공항|영종/i },
   { id: "gyeonggi", re: /경기|판교|분당|수원|성남|일산|동탄/i },
   { id: "seoul", re: /서울|수도권/i },
 ];
@@ -519,11 +525,36 @@ function scanGyeonggiZones(text: string): {
   };
 }
 
+function scanIncheonZones(text: string): {
+  zones: PlannerIncheonZoneKey[];
+  source: string | null;
+  confidence: ParseConfidence;
+} {
+  const found = new Set<PlannerIncheonZoneKey>();
+  let source: string | null = null;
+  for (const { zone, re } of INCHEON_ZONE_REGEX) {
+    const m = text.match(re);
+    if (m?.[0]) {
+      found.add(zone);
+      source = source ? `${source}, ${m[0]}` : m[0];
+    }
+  }
+  if (found.size === 0) {
+    return { zones: [], source: null, confidence: "low" };
+  }
+  return {
+    zones: [...found],
+    source,
+    confidence: "high",
+  };
+}
+
 function parseRegions(text: string): {
   regions: ParsedField<string[]>;
   seoulZones: ParsedField<PlannerSeoulZoneKey[]>;
   busanZones: ParsedField<PlannerBusanZoneKey[]>;
   gyeonggiZones: ParsedField<PlannerGyeonggiZoneKey[]>;
+  incheonZones: ParsedField<PlannerIncheonZoneKey[]>;
 } {
   const allHits = [
     ...scanHotspots(text),
@@ -535,6 +566,7 @@ function parseRegions(text: string): {
   const zoneSet = new Set<PlannerSeoulZoneKey>();
   const busanZoneSet = new Set<PlannerBusanZoneKey>();
   const gyeonggiZoneSet = new Set<PlannerGyeonggiZoneKey>();
+  const incheonZoneSet = new Set<PlannerIncheonZoneKey>();
   const sources: string[] = [];
 
   for (const hit of allHits) {
@@ -556,6 +588,10 @@ function parseRegions(text: string): {
       const zone = BROWSE_SUB_TO_GYEONGGI_ZONE[hit.subId];
       if (zone) gyeonggiZoneSet.add(zone);
     }
+    if (hit.subId && hit.mainId === "incheon") {
+      const zone = BROWSE_SUB_TO_INCHEON_ZONE[hit.subId];
+      if (zone) incheonZoneSet.add(zone);
+    }
   }
 
   const zoneScan = scanSeoulZones(text);
@@ -570,6 +606,10 @@ function parseRegions(text: string): {
   for (const z of gyeonggiZoneScan.zones) gyeonggiZoneSet.add(z);
   if (gyeonggiZoneScan.source) sources.push(gyeonggiZoneScan.source);
 
+  const incheonZoneScan = scanIncheonZones(text);
+  for (const z of incheonZoneScan.zones) incheonZoneSet.add(z);
+  if (incheonZoneScan.source) sources.push(incheonZoneScan.source);
+
   if (zoneSet.size > 0 && !macroSet.has("national")) {
     macroSet.add("seoul");
   }
@@ -579,11 +619,15 @@ function parseRegions(text: string): {
   if (gyeonggiZoneSet.size > 0 && !macroSet.has("national")) {
     macroSet.add("gyeonggi");
   }
+  if (incheonZoneSet.size > 0 && !macroSet.has("national")) {
+    macroSet.add("incheon");
+  }
 
   const regionsArr = [...macroSet];
   const zonesArr = [...zoneSet];
   const busanZonesArr = [...busanZoneSet];
   const gyeonggiZonesArr = [...gyeonggiZoneSet];
+  const incheonZonesArr = [...incheonZoneSet];
 
   return {
     regions:
@@ -612,6 +656,14 @@ function parseRegions(text: string): {
             gyeonggiZonesArr,
             gyeonggiZoneScan.confidence,
             gyeonggiZoneScan.source ?? sources.join(", "),
+          )
+        : emptyField(),
+    incheonZones:
+      incheonZonesArr.length > 0
+        ? field(
+            incheonZonesArr,
+            incheonZoneScan.confidence,
+            incheonZoneScan.source ?? sources.join(", "),
           )
         : emptyField(),
   };
@@ -785,6 +837,7 @@ function collectUnmatchedTokens(
     fields.durationDays.source,
     fields.busanZones.source,
     fields.gyeonggiZones.source,
+    fields.incheonZones.source,
     fields.categories.source,
   ].filter(Boolean) as string[];
 
@@ -835,13 +888,15 @@ export function parsePlannerFreetextBrief(
         durationDays: empty,
         busanZones: empty,
         gyeonggiZones: empty,
+        incheonZones: empty,
         categories: empty,
       },
       unmatchedTokens: [],
     };
   }
 
-  const { regions, seoulZones, busanZones, gyeonggiZones } = parseRegions(text);
+  const { regions, seoulZones, busanZones, gyeonggiZones, incheonZones } =
+    parseRegions(text);
   const duration = parseDurationFields(text);
   const fields = {
     campaignGoal: parseCampaignGoal(text),
@@ -849,6 +904,7 @@ export function parsePlannerFreetextBrief(
     seoulZones,
     busanZones,
     gyeonggiZones,
+    incheonZones,
     ageKeys: parseAgeKeys(text),
     industryKey: parseIndustryKey(text),
     budgetMan: parseBudgetMan(text),
@@ -872,6 +928,7 @@ export function buildScenarioPatchFromFreetextParse(
   const zones = fields.seoulZones.value ?? [];
   const busanZones = fields.busanZones.value ?? [];
   const gyeonggiZones = fields.gyeonggiZones.value ?? [];
+  const incheonZones = fields.incheonZones.value ?? [];
   let regions = fields.regions.value ?? [];
   if (regions.length === 0 && zones.length > 0) {
     regions = ["seoul"];
@@ -881,6 +938,9 @@ export function buildScenarioPatchFromFreetextParse(
   }
   if (regions.length === 0 && gyeonggiZones.length > 0) {
     regions = ["gyeonggi"];
+  }
+  if (regions.length === 0 && incheonZones.length > 0) {
+    regions = ["incheon"];
   }
 
   const durationDays = fields.durationDays.value;
@@ -905,6 +965,7 @@ export function buildScenarioPatchFromFreetextParse(
     ...(zones.length > 0 ? { seoulZones: zones } : {}),
     ...(busanZones.length > 0 ? { busanZones } : {}),
     ...(gyeonggiZones.length > 0 ? { gyeonggiZones } : {}),
+    ...(incheonZones.length > 0 ? { incheonZones } : {}),
     ...(goalFollowUp ? { goalFollowUp } : {}),
     appliedScenario: null,
   };

@@ -23,6 +23,7 @@ import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
+import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
 import {
   selectBudgetNum,
   usePlannerStore,
@@ -72,6 +73,7 @@ export type PlannerRecommendationStoreBinding = {
   seoulZones?: PlannerSeoulZoneKey[];
   busanZones?: PlannerBusanZoneKey[];
   gyeonggiZones?: PlannerGyeonggiZoneKey[];
+  incheonZones?: PlannerIncheonZoneKey[];
   goalFollowUp?: PlannerGoalFollowUp;
   campaignMediaIds: string[];
   campaignMediaQuantities?: CampaignMediaQuantities;
@@ -126,6 +128,7 @@ export function PlannerRecommendationPanel({
   const plannerSeoulZones = usePlannerStore((s) => s.seoulZones);
   const plannerBusanZones = usePlannerStore((s) => s.busanZones);
   const plannerGyeonggiZones = usePlannerStore((s) => s.gyeonggiZones);
+  const plannerIncheonZones = usePlannerStore((s) => s.incheonZones);
   const plannerGoalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const plannerBudgetMan = usePlannerStore(selectBudgetNum);
   const plannerMonths = usePlannerStore((s) => s.months);
@@ -150,6 +153,7 @@ export function PlannerRecommendationPanel({
   const seoulZones = store?.seoulZones ?? plannerSeoulZones;
   const busanZones = store?.busanZones ?? plannerBusanZones;
   const gyeonggiZones = store?.gyeonggiZones ?? plannerGyeonggiZones;
+  const incheonZones = store?.incheonZones ?? plannerIncheonZones;
   const goalFollowUp = store?.goalFollowUp ?? plannerGoalFollowUp;
   const budgetMan = store?.budgetMan ?? plannerBudgetMan;
   const months = store?.months ?? plannerMonths;
@@ -181,13 +185,14 @@ export function PlannerRecommendationPanel({
 
   const depsKey = useMemo(
     () =>
-      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${busanZones.join(",")}|${gyeonggiZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
+      `${goal ?? ""}|${regions.join(",")}|${seoulZones.join(",")}|${busanZones.join(",")}|${gyeonggiZones.join(",")}|${incheonZones.join(",")}|${categories.join(",")}|${ageKeys.join(",")}|${industryKey}|${budgetMan}|${months}|${JSON.stringify(goalFollowUp)}|${refreshTick}`,
     [
       goal,
       regions,
       seoulZones,
       busanZones,
       gyeonggiZones,
+      incheonZones,
       categories,
       ageKeys,
       industryKey,
@@ -218,6 +223,7 @@ export function PlannerRecommendationPanel({
               seoulZones,
               busanZones,
               gyeonggiZones,
+              incheonZones,
               categories,
               ageKeys,
               industryKey,
@@ -349,6 +355,7 @@ export function PlannerRecommendationPanel({
               seoulZones,
               busanZones,
               gyeonggiZones,
+              incheonZones,
               categories,
               ageKeys,
               industryKey,
@@ -500,6 +507,7 @@ export function PlannerRecommendationPanel({
       seoulZones,
       busanZones,
       gyeonggiZones,
+      incheonZones,
       categories,
       ageKeys,
       industryKey,
@@ -513,6 +521,7 @@ export function PlannerRecommendationPanel({
       seoulZones,
       busanZones,
       gyeonggiZones,
+      incheonZones,
       categories,
       ageKeys,
       industryKey,

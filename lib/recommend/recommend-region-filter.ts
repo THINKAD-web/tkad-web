@@ -8,6 +8,8 @@ import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
 import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
 import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
+import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
+import { mediaMatchesIncheonZones } from "@/lib/planner/incheon-zones";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import { mediaMatchesSeoulZones } from "@/lib/planner/seoul-zones";
 
@@ -39,6 +41,7 @@ export type RecommendRegionFilterOpts = {
   seoulZones?: readonly PlannerSeoulZoneKey[];
   busanZones?: readonly PlannerBusanZoneKey[];
   gyeonggiZones?: readonly PlannerGyeonggiZoneKey[];
+  incheonZones?: readonly PlannerIncheonZoneKey[];
 };
 
 export type RecommendMatchMeta = {
@@ -69,6 +72,7 @@ export function resolveAiRecommendPlannerRegionIds(
 
   if (input.busanZones?.length) return ["busan"];
   if (input.gyeonggiZones?.length) return ["gyeonggi"];
+  if (input.incheonZones?.length) return ["incheon"];
   if (input.seoulZones?.length) return ["seoul"];
 
   return undefined;
@@ -132,6 +136,11 @@ export function filterRecommendCatalogByRegions(
   if (zones?.gyeonggiZones?.length && macroSet.has("gyeonggi")) {
     filtered = filtered.filter((m) =>
       mediaMatchesGyeonggiZones(m, zones.gyeonggiZones!),
+    );
+  }
+  if (zones?.incheonZones?.length && macroSet.has("incheon")) {
+    filtered = filtered.filter((m) =>
+      mediaMatchesIncheonZones(m, zones.incheonZones!),
     );
   }
 
@@ -222,13 +231,15 @@ export function runRecommendMatchFromCatalog(
       seoulZones: aiInput.seoulZones ?? undefined,
       busanZones: aiInput.busanZones ?? undefined,
       gyeonggiZones: aiInput.gyeonggiZones ?? undefined,
+      incheonZones: aiInput.incheonZones ?? undefined,
     },
   );
 
   const hasExplicitSubZone = Boolean(
     aiInput.seoulZones?.length ||
       aiInput.busanZones?.length ||
-      aiInput.gyeonggiZones?.length,
+      aiInput.gyeonggiZones?.length ||
+      aiInput.incheonZones?.length,
   );
 
   return matchRecommendWithRegionalPolicy(

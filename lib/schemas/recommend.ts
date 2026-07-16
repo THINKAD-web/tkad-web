@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { PLANNER_BUSAN_ZONE_KEYS } from "@/lib/planner/busan-zones";
 import { PLANNER_GYEONGGI_ZONE_KEYS } from "@/lib/planner/gyeonggi-zones";
+import { PLANNER_INCHEON_ZONE_KEYS } from "@/lib/planner/incheon-zones";
 import { PLANNER_SEOUL_ZONE_KEYS } from "@/lib/planner/seoul-zones";
 
 export const recommendInputSchema = z.object({
@@ -26,6 +27,7 @@ export const recommendInputSchema = z.object({
   seoulZones: z.array(z.enum(PLANNER_SEOUL_ZONE_KEYS)).optional(),
   busanZones: z.array(z.enum(PLANNER_BUSAN_ZONE_KEYS)).optional(),
   gyeonggiZones: z.array(z.enum(PLANNER_GYEONGGI_ZONE_KEYS)).optional(),
+  incheonZones: z.array(z.enum(PLANNER_INCHEON_ZONE_KEYS)).optional(),
   regionCodes: z.array(z.string().max(32)).optional(),
   plannerCategories: z
     .array(z.enum(["digital", "static", "mobile"]))

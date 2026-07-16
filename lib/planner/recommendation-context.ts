@@ -8,6 +8,7 @@ import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
 import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
+import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
 
 /** 플래너·통합 플래너 추천·자동 포트폴리오 공통 컨텍스트 */
 export type RecommendationContext = {
@@ -19,6 +20,8 @@ export type RecommendationContext = {
   busanZones?: readonly PlannerBusanZoneKey[];
   /** 경기 하위 상권 — 빈 배열이면 경기 전체 */
   gyeonggiZones?: readonly PlannerGyeonggiZoneKey[];
+  /** 인천 하위 상권 — 빈 배열이면 인천 전체 */
+  incheonZones?: readonly PlannerIncheonZoneKey[];
   categories: PlannerCategory[];
   ageKeys: PlannerAgeKey[];
   industryKey: PlannerIndustryKey | null;

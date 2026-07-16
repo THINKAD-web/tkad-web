@@ -184,16 +184,19 @@ export function formatGyeonggiZonesText(
     .join(isKo ? " · " : ", ");
 }
 
-/** 서울·부산·경기 상권을 matching-engine regions로 병합 */
+/** 서울·부산·경기·인천 상권을 matching-engine regions로 병합 */
 export function mergePlannerMacroMatchingRegions(
   macroRegions: string[],
   seoulZones: readonly string[],
   busanZones: readonly string[],
   gyeonggiZones: readonly PlannerGyeonggiZoneKey[] = [],
+  incheonZones: readonly string[] = [],
 ): string[] {
   const out: string[] = [];
   for (const r of macroRegions) {
-    if (r === "seoul" || r === "busan" || r === "gyeonggi") continue;
+    if (r === "seoul" || r === "busan" || r === "gyeonggi" || r === "incheon") {
+      continue;
+    }
     out.push(r);
   }
   if (macroRegions.includes("seoul")) {
@@ -215,6 +218,13 @@ export function mergePlannerMacroMatchingRegions(
       out.push(...gyeonggiZones);
     } else {
       out.push("gyeonggi");
+    }
+  }
+  if (macroRegions.includes("incheon")) {
+    if (incheonZones.length > 0) {
+      out.push(...incheonZones);
+    } else {
+      out.push("incheon");
     }
   }
   return out.length > 0 ? out : macroRegions;

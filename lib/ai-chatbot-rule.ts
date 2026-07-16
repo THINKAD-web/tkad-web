@@ -204,6 +204,7 @@ function countParsedFieldsForRoute(
   if (fields.seoulZones.value?.length) n++;
   if (fields.busanZones.value?.length) n++;
   if (fields.gyeonggiZones.value?.length) n++;
+  if (fields.incheonZones.value?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
   if (fields.budgetMan.value != null) n++;

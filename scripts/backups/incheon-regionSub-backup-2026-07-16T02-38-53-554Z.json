@@ -1,0 +1,43 @@
+{
+  "createdAt": "2026-07-16T02:38:53.553Z",
+  "patches": [
+    {
+      "id": "cmqrp5lq8000004i8dr4ysajj",
+      "regionSub": "incheon_airport",
+      "reason": "공항철도 인천공항T2역 → incheon_airport"
+    },
+    {
+      "id": "cmqrpvzn200010ai3wthj2nhw",
+      "regionSub": "incheon_airport",
+      "reason": "공항철도 계양역 → incheon_airport"
+    },
+    {
+      "id": "cmr1kidch00000aj575bp4lag",
+      "regionSub": "incheon_downtown",
+      "reason": "검단 라페온 오분류 수정 → incheon_downtown"
+    }
+  ],
+  "before": [
+    {
+      "id": "cmr1kidch00000aj575bp4lag",
+      "name": "인천 검단 라페온 빌딩 벽면 광고",
+      "location": "인천광역시 서구 원당대로 1029 라페온 빌딩",
+      "regionMain": "incheon",
+      "regionSub": "incheon_airport"
+    },
+    {
+      "id": "cmqrp5lq8000004i8dr4ysajj",
+      "name": "공항철도 인천공항T2역 개찰구 래핑 광고",
+      "location": "인천 중구 제2터미널대로 446 인천국제공항 제2여객터미널 공항철도 개찰구",
+      "regionMain": "incheon",
+      "regionSub": null
+    },
+    {
+      "id": "cmqrpvzn200010ai3wthj2nhw",
+      "name": "공항철도 계양역 개찰구 래핑 광고",
+      "location": "인천 계양구 계양대로 123 계양역 공항철도 개찰구",
+      "regionMain": "incheon",
+      "regionSub": null
+    }
+  ]
+}

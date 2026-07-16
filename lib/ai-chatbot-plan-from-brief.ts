@@ -42,6 +42,7 @@ export type PlanFromBriefParsed = {
   seoulZones: string[] | null;
   busanZones: string[] | null;
   gyeonggiZones: string[] | null;
+  incheonZones: string[] | null;
   ageKeys: string[] | null;
   industryKey: string | null;
   budgetMan: number | null;
@@ -107,6 +108,7 @@ function countParsedFields(result: PlannerFreetextParseResult): number {
   if (fields.seoulZones.value?.length) n++;
   if (fields.busanZones.value?.length) n++;
   if (readGyeonggiZoneValues(result)?.length) n++;
+  if (result.fields.incheonZones.value?.length) n++;
   if (fields.ageKeys.value?.length) n++;
   if (fields.industryKey.value != null) n++;
   if (fields.budgetMan.value != null) n++;
@@ -126,6 +128,7 @@ function toParsedSnapshot(
     seoulZones: fields.seoulZones.value,
     busanZones: fields.busanZones.value,
     gyeonggiZones: readGyeonggiZoneValues(result),
+    incheonZones: fields.incheonZones.value,
     ageKeys: fields.ageKeys.value,
     industryKey: fields.industryKey.value,
     budgetMan: fields.budgetMan.value,
@@ -145,6 +148,7 @@ function patchToRecommendationContext(
     seoulZones: patch.seoulZones ?? [],
     busanZones: patch.busanZones ?? [],
     gyeonggiZones: patch.gyeonggiZones ?? [],
+    incheonZones: patch.incheonZones ?? [],
     categories: patch.categories ?? [],
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,

@@ -90,6 +90,8 @@ import type { PlannerBusanZoneKey } from "@/lib/planner/busan-zones";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
 import type { PlannerGyeonggiZoneKey } from "@/lib/planner/gyeonggi-zones";
 import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
+import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
+import { mediaMatchesIncheonZones } from "@/lib/planner/incheon-zones";
 
 export type PlannerCategory = "digital" | "static" | "mobile";
 
@@ -373,6 +375,7 @@ export function filterPlannerMediaMulti(
   seoulZones: readonly PlannerSeoulZoneKey[] = [],
   busanZones: readonly PlannerBusanZoneKey[] = [],
   gyeonggiZones: readonly PlannerGyeonggiZoneKey[] = [],
+  incheonZones: readonly PlannerIncheonZoneKey[] = [],
 ): MediaItem[] {
   let filtered = filterPlannerMediaByRegions(items, regions, categories);
   if (regions.has("seoul") && seoulZones.length > 0) {
@@ -384,6 +387,11 @@ export function filterPlannerMediaMulti(
   if (regions.has("gyeonggi") && gyeonggiZones.length > 0) {
     filtered = filtered.filter((m) =>
       mediaMatchesGyeonggiZones(m, gyeonggiZones),
+    );
+  }
+  if (regions.has("incheon") && incheonZones.length > 0) {
+    filtered = filtered.filter((m) =>
+      mediaMatchesIncheonZones(m, incheonZones),
     );
   }
   return filtered;

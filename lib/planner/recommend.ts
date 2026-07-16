@@ -9,6 +9,7 @@ import {
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import { mediaMatchesBusanZones } from "@/lib/planner/busan-zones";
 import { mediaMatchesGyeonggiZones } from "@/lib/planner/gyeonggi-zones";
+import { mediaMatchesIncheonZones } from "@/lib/planner/incheon-zones";
 import {
   formatRecommendRationale,
   rationaleKeysFromBreakdown,
@@ -104,6 +105,13 @@ export function recommendPlannerMedia(
     ctx.gyeonggiZones.length > 0
   ) {
     pool = pool.filter((m) => mediaMatchesGyeonggiZones(m, ctx.gyeonggiZones!));
+  }
+  if (
+    ctx.regions.includes("incheon") &&
+    ctx.incheonZones &&
+    ctx.incheonZones.length > 0
+  ) {
+    pool = pool.filter((m) => mediaMatchesIncheonZones(m, ctx.incheonZones!));
   }
 
   const matchingInput = plannerContextToMatching(ctx, seed);

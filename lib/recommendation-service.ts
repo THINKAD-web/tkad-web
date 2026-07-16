@@ -90,12 +90,14 @@ export async function runRecommendation(
         seoulZones: opts.aiRecommendInput.seoulZones ?? undefined,
         busanZones: opts.aiRecommendInput.busanZones ?? undefined,
         gyeonggiZones: opts.aiRecommendInput.gyeonggiZones ?? undefined,
+        incheonZones: opts.aiRecommendInput.incheonZones ?? undefined,
       },
     );
     const hasExplicitSubZone = Boolean(
       opts.aiRecommendInput.seoulZones?.length ||
         opts.aiRecommendInput.busanZones?.length ||
-        opts.aiRecommendInput.gyeonggiZones?.length,
+        opts.aiRecommendInput.gyeonggiZones?.length ||
+        opts.aiRecommendInput.incheonZones?.length,
     );
     const matched = matchRecommendWithRegionalPolicy(
       catalog,

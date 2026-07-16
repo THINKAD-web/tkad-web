@@ -672,6 +672,7 @@ export default function RecommendPageClient({
       const validRegionCodes: RegionCheckboxCode[] = [
         "seoul",
         "capital",
+        "incheon",
         "busan",
         "jeju",
         "national",
@@ -689,6 +690,8 @@ export default function RecommendPageClient({
           ["busan"]
         : input.gyeonggiZones?.length ?
           ["capital"]
+        : input.incheonZones?.length ?
+          ["incheon"]
         : [];
       const payload: MediaAiRecommendFormSubmit = {
         input,

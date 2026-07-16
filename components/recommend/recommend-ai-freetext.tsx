@@ -253,11 +253,13 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
     const parsedZones = parseResult?.fields.seoulZones.value ?? [];
     const parsedBusanZones = parseResult?.fields.busanZones.value ?? [];
     const parsedGyeonggiZones = parseResult?.fields.gyeonggiZones.value ?? [];
+    const parsedIncheonZones = parseResult?.fields.incheonZones.value ?? [];
     const hasParsedRegion =
       parsedRegions.length > 0 ||
       parsedZones.length > 0 ||
       parsedBusanZones.length > 0 ||
-      parsedGyeonggiZones.length > 0;
+      parsedGyeonggiZones.length > 0 ||
+      parsedIncheonZones.length > 0;
     return (
       <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex flex-wrap items-center gap-2">

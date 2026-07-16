@@ -41,6 +41,7 @@ export function resolveScenarioPortfolioMediaIds(
     patch.seoulZones ?? districtHintsToSeoulZones(patch.districtHints ?? []);
   const busanZones = patch.busanZones ?? [];
   const gyeonggiZones = patch.gyeonggiZones ?? [];
+  const incheonZones = patch.incheonZones ?? [];
 
   const filtered = filterPlannerMediaMulti(
     catalog,
@@ -49,6 +50,7 @@ export function resolveScenarioPortfolioMediaIds(
     seoulZones,
     busanZones,
     gyeonggiZones,
+    incheonZones,
   );
   if (filtered.length === 0) return [];
 
@@ -58,6 +60,7 @@ export function resolveScenarioPortfolioMediaIds(
     seoulZones,
     busanZones,
     gyeonggiZones,
+    incheonZones,
     categories,
     ageKeys: patch.ageKeys ?? [],
     industryKey: patch.industryKey ?? null,

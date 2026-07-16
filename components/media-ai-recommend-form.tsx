@@ -14,6 +14,7 @@ import { BtnBlock } from "@/components/brutalist";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
 import { PlannerGyeonggiZoneChips } from "@/components/planner/planner-gyeonggi-zone-chips";
+import { PlannerIncheonZoneChips } from "@/components/planner/planner-incheon-zone-chips";
 import { cn } from "@/lib/utils";
 import {
   PLACEMENT_HINT_KEYS,
@@ -35,12 +36,17 @@ import {
   suggestGyeonggiZones,
   type PlannerGyeonggiZoneKey,
 } from "@/lib/planner/gyeonggi-zones";
+import {
+  suggestIncheonZones,
+  type PlannerIncheonZoneKey,
+} from "@/lib/planner/incheon-zones";
 import type { PlannerCampaignGoal } from "@/lib/planner/types";
 import { recommendIndustryToPlannerIndustryKey as recommendIndustryToPlanner } from "@/lib/recommend/recommend-report-adapter";
 
 export type RegionCheckboxCode =
   | "seoul"
   | "capital"
+  | "incheon"
   | "busan"
   | "jeju"
   | "national";
@@ -166,6 +172,8 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const [busanZonesTouched, setBusanZonesTouched] = useState(false);
   const [gyeonggiZones, setGyeonggiZones] = useState<PlannerGyeonggiZoneKey[]>([]);
   const [gyeonggiZonesTouched, setGyeonggiZonesTouched] = useState(false);
+  const [incheonZones, setIncheonZones] = useState<PlannerIncheonZoneKey[]>([]);
+  const [incheonZonesTouched, setIncheonZonesTouched] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
 
   const budgetMin = 100;
@@ -191,6 +199,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         if (code === "capital") {
           setGyeonggiZones([]);
           setGyeonggiZonesTouched(false);
+        }
+        if (code === "incheon") {
+          setIncheonZones([]);
+          setIncheonZonesTouched(false);
         }
       } else {
         next.add(code);
@@ -237,6 +249,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     if (!regions.has("capital") || gyeonggiZonesTouched || !campaignGoal) return;
     setGyeonggiZones(suggestedGyeonggiZones);
   }, [regions, gyeonggiZonesTouched, campaignGoal, suggestedGyeonggiZones]);
+
+  const suggestedIncheonZones = useMemo(() => {
+    if (!campaignGoal) return [] as PlannerIncheonZoneKey[];
+    return suggestIncheonZones(
+      recommendGoalToPlanner(campaignGoal),
+      recommendIndustryToPlanner(industry ?? "other"),
+    );
+  }, [campaignGoal, industry]);
+
+  useEffect(() => {
+    if (!regions.has("incheon") || incheonZonesTouched || !campaignGoal) return;
+    setIncheonZones(suggestedIncheonZones);
+  }, [regions, incheonZonesTouched, campaignGoal, suggestedIncheonZones]);
 
   const toggleSeoulZone = useCallback((zone: PlannerSeoulZoneKey) => {
     setSeoulZonesTouched(true);
@@ -289,6 +314,23 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     setGyeonggiZones([...suggestedGyeonggiZones]);
   }, [suggestedGyeonggiZones]);
 
+  const toggleIncheonZone = useCallback((zone: PlannerIncheonZoneKey) => {
+    setIncheonZonesTouched(true);
+    setIncheonZones((prev) =>
+      prev.includes(zone) ? prev.filter((z) => z !== zone) : [...prev, zone],
+    );
+  }, []);
+
+  const clearIncheonZones = useCallback(() => {
+    setIncheonZonesTouched(true);
+    setIncheonZones([]);
+  }, []);
+
+  const applySuggestedIncheonZones = useCallback(() => {
+    setIncheonZonesTouched(false);
+    setIncheonZones([...suggestedIncheonZones]);
+  }, [suggestedIncheonZones]);
+
   const toggleAge = useCallback((b: AgeBand) => {
     setAgeBands((prev) => {
       const next = new Set(prev);
@@ -312,6 +354,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       [
         { code: "seoul" as const, label: tr("form.regionSeoul") },
         { code: "capital" as const, label: tr("form.regionGyeonggi") },
+        { code: "incheon" as const, label: tr("form.regionIncheon") },
         { code: "busan" as const, label: tr("form.regionBusan") },
         { code: "jeju" as const, label: tr("form.regionJeju") },
         { code: "national" as const, label: tr("form.regionNational") },
@@ -388,6 +431,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       zoneList: readonly PlannerSeoulZoneKey[],
       busanZoneList: readonly PlannerBusanZoneKey[],
       gyeonggiZoneList: readonly PlannerGyeonggiZoneKey[],
+      incheonZoneList: readonly PlannerIncheonZoneKey[],
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -415,6 +459,10 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
           regionSet.has("capital") && gyeonggiZoneList.length > 0
             ? [...gyeonggiZoneList]
             : undefined,
+        incheonZones:
+          regionSet.has("incheon") && incheonZoneList.length > 0
+            ? [...incheonZoneList]
+            : undefined,
       };
 
       return { input, regionCodes, searchQuery: search };
@@ -438,6 +486,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         seoulZones,
         busanZones,
         gyeonggiZones,
+        incheonZones,
       ),
     );
   };
@@ -574,6 +623,17 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 onToggle={toggleGyeonggiZone}
                 onClear={clearGyeonggiZones}
                 onApplySuggested={applySuggestedGyeonggiZones}
+              />
+            ) : null}
+            {regions.has("incheon") ? (
+              <PlannerIncheonZoneChips
+                embedded
+                selected={incheonZones}
+                suggested={suggestedIncheonZones}
+                isKo={isKo}
+                onToggle={toggleIncheonZone}
+                onClear={clearIncheonZones}
+                onApplySuggested={applySuggestedIncheonZones}
               />
             ) : null}
           </FormField>

@@ -41,6 +41,11 @@ import {
   isPlannerGyeonggiZoneKey,
   suggestGyeonggiZones,
 } from "@/lib/planner/gyeonggi-zones";
+import type { PlannerIncheonZoneKey } from "@/lib/planner/incheon-zones";
+import {
+  isPlannerIncheonZoneKey,
+  suggestIncheonZones,
+} from "@/lib/planner/incheon-zones";
 import {
   getScenarioPreset,
   type PlannerScenarioPresetId,
@@ -61,7 +66,7 @@ import {
  * `migrate()` 훅에서 흡수한다. persist 자체 version은 별도 관리.
  */
 export const PLANNER_STORAGE_KEY = "tkad-planner-plan-v2";
-const PLANNER_PERSIST_VERSION = 6;
+const PLANNER_PERSIST_VERSION = 7;
 
 export type PlannerStoreState = {
   wizardStep: PlannerWizardStep;
@@ -100,6 +105,9 @@ export type PlannerStoreState = {
   /** 경기 선택 시 하위 상권. 빈 배열 = 경기 전체 */
   gyeonggiZones: PlannerGyeonggiZoneKey[];
   gyeonggiZonesTouched: boolean;
+  /** 인천 선택 시 하위 상권. 빈 배열 = 인천 전체 */
+  incheonZones: PlannerIncheonZoneKey[];
+  incheonZonesTouched: boolean;
   /** Step 2 목표별 후속 (전부 optional) */
   goalFollowUp: PlannerGoalFollowUp;
   mediaSelectionExplicit: boolean;
@@ -133,6 +141,10 @@ export type PlannerStoreActions = {
   setGyeonggiZones: (zones: PlannerGyeonggiZoneKey[]) => void;
   clearGyeonggiZones: () => void;
   applySuggestedGyeonggiZones: () => void;
+  toggleIncheonZone: (zone: PlannerIncheonZoneKey) => void;
+  setIncheonZones: (zones: PlannerIncheonZoneKey[]) => void;
+  clearIncheonZones: () => void;
+  applySuggestedIncheonZones: () => void;
   setGoalFollowUp: (patch: Partial<PlannerGoalFollowUp>) => void;
   applyScenarioPreset: (id: PlannerScenarioPresetId) => void;
   /** React `Dispatch<SetStateAction<string[]>>` 호환 — 기존 하위 컴포넌트 시그니처 유지용 */
@@ -175,6 +187,8 @@ const INITIAL_STATE: PlannerStoreState = {
   busanZonesTouched: true,
   gyeonggiZones: [],
   gyeonggiZonesTouched: true,
+  incheonZones: [],
+  incheonZonesTouched: true,
   goalFollowUp: {},
   campaignMediaIds: [],
   campaignMediaQuantities: {},
@@ -245,6 +259,13 @@ export const usePlannerStore = create<PlannerStore>()(
                 gyeonggiZones: suggestGyeonggiZones(goal, s.industryKey),
               }
             : {}),
+          ...(!s.incheonZonesTouched &&
+          s.regions.includes("incheon") &&
+          goal != null
+            ? {
+                incheonZones: suggestIncheonZones(goal, s.industryKey),
+              }
+            : {}),
         })),
 
       toggleRegion: (region) =>
@@ -265,6 +286,10 @@ export const usePlannerStore = create<PlannerStore>()(
             if (region === "gyeonggi") {
               patch.gyeonggiZones = [];
               patch.gyeonggiZonesTouched = true;
+            }
+            if (region === "incheon") {
+              patch.incheonZones = [];
+              patch.incheonZonesTouched = true;
             }
             return patch;
           }
@@ -290,6 +315,16 @@ export const usePlannerStore = create<PlannerStore>()(
             s.campaignGoal != null
           ) {
             patch.gyeonggiZones = suggestGyeonggiZones(
+              s.campaignGoal,
+              s.industryKey,
+            );
+          }
+          if (
+            region === "incheon" &&
+            !s.incheonZonesTouched &&
+            s.campaignGoal != null
+          ) {
+            patch.incheonZones = suggestIncheonZones(
               s.campaignGoal,
               s.industryKey,
             );
@@ -353,6 +388,11 @@ export const usePlannerStore = create<PlannerStore>()(
           s.regions.includes("gyeonggi") &&
           s.campaignGoal != null
             ? { gyeonggiZones: suggestGyeonggiZones(s.campaignGoal, key) }
+            : {}),
+          ...(!s.incheonZonesTouched &&
+          s.regions.includes("incheon") &&
+          s.campaignGoal != null
+            ? { incheonZones: suggestIncheonZones(s.campaignGoal, key) }
             : {}),
         })),
 
@@ -418,6 +458,29 @@ export const usePlannerStore = create<PlannerStore>()(
         set((s) => ({
           gyeonggiZones: suggestGyeonggiZones(s.campaignGoal, s.industryKey),
           gyeonggiZonesTouched: false,
+        })),
+
+      toggleIncheonZone: (zone) =>
+        set((s) => {
+          const next = new Set(s.incheonZones);
+          if (next.has(zone)) next.delete(zone);
+          else next.add(zone);
+          return {
+            incheonZones: [...next] as PlannerIncheonZoneKey[],
+            incheonZonesTouched: true,
+          };
+        }),
+
+      setIncheonZones: (zones) =>
+        set({ incheonZones: [...zones], incheonZonesTouched: true }),
+
+      clearIncheonZones: () =>
+        set({ incheonZones: [], incheonZonesTouched: true }),
+
+      applySuggestedIncheonZones: () =>
+        set((s) => ({
+          incheonZones: suggestIncheonZones(s.campaignGoal, s.industryKey),
+          incheonZonesTouched: false,
         })),
 
       setGoalFollowUp: (patch) =>
@@ -558,6 +621,7 @@ export const usePlannerStore = create<PlannerStore>()(
             districtHintsToSeoulZones(patch.districtHints ?? []);
           const busanZones = patch.busanZones ?? [];
           const gyeonggiZones = patch.gyeonggiZones ?? [];
+          const incheonZones = patch.incheonZones ?? [];
           const campaignMediaIds = [...(patch.campaignMediaIds ?? [])];
 
           return {
@@ -593,6 +657,8 @@ export const usePlannerStore = create<PlannerStore>()(
             busanZonesTouched: busanZones.length > 0,
             gyeonggiZones,
             gyeonggiZonesTouched: gyeonggiZones.length > 0,
+            incheonZones,
+            incheonZonesTouched: incheonZones.length > 0,
             campaignMediaIds,
             campaignMediaQuantities: {},
             campaignMediaPriceOptionIndex: {},
@@ -656,6 +722,8 @@ export const usePlannerStore = create<PlannerStore>()(
         busanZonesTouched: state.busanZonesTouched,
         gyeonggiZones: state.gyeonggiZones,
         gyeonggiZonesTouched: state.gyeonggiZonesTouched,
+        incheonZones: state.incheonZones,
+        incheonZonesTouched: state.incheonZonesTouched,
         goalFollowUp: state.goalFollowUp,
         campaignMediaIds: state.campaignMediaIds,
         campaignMediaQuantities: state.campaignMediaQuantities,
@@ -737,6 +805,13 @@ export const usePlannerStore = create<PlannerStore>()(
         }
         if (typeof raw.gyeonggiZonesTouched === "boolean") {
           merged.gyeonggiZonesTouched = raw.gyeonggiZonesTouched;
+        }
+
+        if (Array.isArray(raw.incheonZones)) {
+          merged.incheonZones = raw.incheonZones.filter(isPlannerIncheonZoneKey);
+        }
+        if (typeof raw.incheonZonesTouched === "boolean") {
+          merged.incheonZonesTouched = raw.incheonZonesTouched;
         }
 
         if (

@@ -87,6 +87,7 @@ import { PlannerSelectedMediaBar } from "@/components/planner/planner-selected-m
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
 import { PlannerBusanZoneChips } from "@/components/planner/planner-busan-zone-chips";
 import { PlannerGyeonggiZoneChips } from "@/components/planner/planner-gyeonggi-zone-chips";
+import { PlannerIncheonZoneChips } from "@/components/planner/planner-incheon-zone-chips";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { formatSeoulZonesText, suggestSeoulZones } from "@/lib/planner/seoul-zones";
 import {
@@ -97,6 +98,10 @@ import {
   formatGyeonggiZonesText,
   suggestGyeonggiZones,
 } from "@/lib/planner/gyeonggi-zones";
+import {
+  formatIncheonZonesText,
+  suggestIncheonZones,
+} from "@/lib/planner/incheon-zones";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { getPlanCart } from "@/lib/plan-cart";
 import { PlannerReportPremiumBlock } from "@/components/planner/planner-report-premium-block";
@@ -263,6 +268,7 @@ export default function PlannerPageClient({
   const seoulZones = usePlannerStore((s) => s.seoulZones);
   const busanZones = usePlannerStore((s) => s.busanZones);
   const gyeonggiZones = usePlannerStore((s) => s.gyeonggiZones);
+  const incheonZones = usePlannerStore((s) => s.incheonZones);
   const goalFollowUp = usePlannerStore((s) => s.goalFollowUp);
   const appliedScenario = usePlannerStore((s) => s.appliedScenario);
   const campaignMediaIds = usePlannerStore((s) => s.campaignMediaIds);
@@ -306,6 +312,11 @@ export default function PlannerPageClient({
   const clearGyeonggiZones = usePlannerStore((s) => s.clearGyeonggiZones);
   const applySuggestedGyeonggiZones = usePlannerStore(
     (s) => s.applySuggestedGyeonggiZones,
+  );
+  const toggleIncheonZone = usePlannerStore((s) => s.toggleIncheonZone);
+  const clearIncheonZones = usePlannerStore((s) => s.clearIncheonZones);
+  const applySuggestedIncheonZones = usePlannerStore(
+    (s) => s.applySuggestedIncheonZones,
   );
   const setGoalFollowUp = usePlannerStore((s) => s.setGoalFollowUp);
   const setCampaignMediaIds = usePlannerStore((s) => s.setCampaignMediaIds);
@@ -402,8 +413,9 @@ export default function PlannerPageClient({
         seoulZones,
         busanZones,
         gyeonggiZones,
+        incheonZones,
       ),
-    [catalog, selectedRegions, categories, seoulZones, busanZones, gyeonggiZones],
+    [catalog, selectedRegions, categories, seoulZones, busanZones, gyeonggiZones, incheonZones],
   );
 
   const suggestedSeoulZones = useMemo(
@@ -418,6 +430,11 @@ export default function PlannerPageClient({
 
   const suggestedGyeonggiZones = useMemo(
     () => suggestGyeonggiZones(campaignGoal, industryKey),
+    [campaignGoal, industryKey],
+  );
+
+  const suggestedIncheonZones = useMemo(
+    () => suggestIncheonZones(campaignGoal, industryKey),
     [campaignGoal, industryKey],
   );
 
@@ -458,6 +475,7 @@ export default function PlannerPageClient({
           seoulZones,
           busanZones,
           gyeonggiZones,
+          incheonZones,
           categories: categoriesArr,
           ageKeys,
           industryKey,
@@ -475,6 +493,7 @@ export default function PlannerPageClient({
       seoulZones,
       busanZones,
       gyeonggiZones,
+      incheonZones,
       categoriesArr,
       ageKeys,
       industryKey,
@@ -1105,8 +1124,11 @@ export default function PlannerPageClient({
     if (selectedRegions.has("gyeonggi") && gyeonggiZones.length > 0) {
       parts.push(formatGyeonggiZonesText(gyeonggiZones, isKo));
     }
+    if (selectedRegions.has("incheon") && incheonZones.length > 0) {
+      parts.push(formatIncheonZonesText(incheonZones, isKo));
+    }
     return parts.join(", ");
-  }, [selectedRegions, mapLabel, seoulZones, busanZones, gyeonggiZones, isKo]);
+  }, [selectedRegions, mapLabel, seoulZones, busanZones, gyeonggiZones, incheonZones, isKo]);
 
   const categoriesSummary = useMemo(
     () =>
@@ -1486,6 +1508,17 @@ export default function PlannerPageClient({
                         onToggle={toggleGyeonggiZone}
                         onClear={clearGyeonggiZones}
                         onApplySuggested={applySuggestedGyeonggiZones}
+                      />
+                    ) : null}
+                    {selectedRegions.has("incheon") ? (
+                      <PlannerIncheonZoneChips
+                        embedded
+                        selected={incheonZones}
+                        suggested={suggestedIncheonZones}
+                        isKo={isKo}
+                        onToggle={toggleIncheonZone}
+                        onClear={clearIncheonZones}
+                        onApplySuggested={applySuggestedIncheonZones}
                       />
                     ) : null}
                   </div>
