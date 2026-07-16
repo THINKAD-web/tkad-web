@@ -5,12 +5,9 @@ export async function pushPlanCartToServer(
   cart: PlanCart,
 ): Promise<PlanCart | null> {
   try {
-    const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-    const sessionData = await sessionRes.json();
-    if (!sessionData?.ok || !sessionData.data) return null;
-
     const res = await fetch("/api/my/plan/sync", {
       method: "POST",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         items: cart.items,
@@ -20,7 +17,7 @@ export async function pushPlanCartToServer(
         updatedAt: cart.updatedAt,
       }),
     });
-    if (!res.ok) return null;
+    if (res.status === 401 || !res.ok) return null;
 
     const data = (await res.json()) as {
       ok?: boolean;
