@@ -3,7 +3,7 @@
 import { useCallback, useState } from "react";
 import { useRouter } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
-import { ArrowRight, Search, Sparkles } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
 import {
@@ -14,15 +14,25 @@ import {
 import { cn } from "@/lib/utils";
 
 const PLACEHOLDER_KO =
-  '예) "강남 2030 브랜딩 3000만원" — 지역·타깃·목표·예산';
+  '예) "강남 2030 브랜딩 3000만원" — 매체명 검색 아님, 지역·타깃·예산';
 const PLACEHOLDER_EN =
-  'e.g. "Gangnam Gen Z branding 30M KRW" — region, audience, goal, budget';
+  'e.g. "Gangnam Gen Z branding 30M KRW" — not a media name search';
 
-export function HomeFreetextEntry() {
+type Props = {
+  variant?: "default" | "slim";
+  /** HomeExploreSplit 카드 내부 — 외곽 섹션·이중 카드 생략 */
+  embedded?: boolean;
+};
+
+export function HomeFreetextEntry({
+  variant = "default",
+  embedded = false,
+}: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
   const [text, setText] = useState("");
+  const slim = variant === "slim";
 
   const canSubmit = isValidFreetextBrief(text);
 
@@ -32,12 +42,9 @@ export function HomeFreetextEntry() {
     router.push(path);
   }, [router, text]);
 
-  return (
-    <section
-      className="px-4 pb-2 md:px-6 md:pb-3 lg:px-8"
-      aria-labelledby="home-freetext-heading"
-    >
-      <div className="mx-auto max-w-5xl rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] via-white to-cyan-500/[0.05] p-4 shadow-sm ring-1 ring-black/5 dark:from-violet-500/10 dark:via-white/[0.03] dark:to-cyan-500/5 dark:ring-white/10 md:rounded-3xl md:p-6">
+  const formBody = (
+    <div className={cn("space-y-3", embedded ? "mt-4" : slim ? "mt-3" : "mt-4")}>
+      {!slim && !embedded ? (
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2">
@@ -50,80 +57,104 @@ export function HomeFreetextEntry() {
             </div>
             <h2
               id="home-freetext-heading"
-              className="mt-2 flex items-center gap-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white md:text-xl"
+              className="mt-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white md:text-xl"
             >
-              <Sparkles
-                className="h-5 w-5 shrink-0 text-violet-500 dark:text-violet-400"
-                aria-hidden
-              />
               {isKo ? "빠른 AI 추천" : "Quick AI recommend"}
             </h2>
             <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-white/65">
               {isKo
                 ? "지역·타깃·목표·예산을 자연어로 입력하면 즉시 TOP·지도·견적까지 이어집니다. 매체명 검색이 아닙니다."
-                : "Enter region, audience, goal, and budget — get ranked picks, map, and quote in one flow. Not a media name search."}
+                : "Enter region, audience, goal, and budget — get ranked picks, map, and quote. Not a media name search."}
             </p>
           </div>
-          <Link
-            href="/media"
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-semibold text-gray-700 transition-colors hover:bg-gray-50 dark:border-white/12 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10"
-          >
-            <Search className="h-3.5 w-3.5" aria-hidden />
-            {isKo ? "매체명 검색" : "Search media"}
-          </Link>
         </div>
+      ) : null}
 
-        <div className="mt-4 space-y-3">
-          <label htmlFor="home-freetext-input" className="sr-only">
-            {isKo ? "캠페인 조건" : "Campaign brief"}
-          </label>
-          <textarea
-            id="home-freetext-input"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            placeholder={isKo ? PLACEHOLDER_KO : PLACEHOLDER_EN}
-            rows={2}
-            maxLength={FREETEXT_BRIEF_MAX_CHARS}
-            className={cn(
-              "w-full resize-y rounded-xl border px-4 py-3 text-sm leading-relaxed",
-              "border-gray-200 bg-white dark:border-white/12 dark:bg-black/25",
-              "focus:outline-none focus:ring-2 focus:ring-violet-400/40",
-            )}
-            onKeyDown={(e) => {
-              if (e.key === "Enter" && !e.shiftKey && canSubmit) {
-                e.preventDefault();
-                goRecommend();
-              }
-            }}
-          />
+      {slim && !embedded ? (
+        <span className="inline-flex rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+          {isKo ? "무료 · 0토큰" : "Free · 0 tokens"}
+        </span>
+      ) : null}
 
-          <FreetextExampleChips
-            isKo={isKo}
-            onSelect={(example) => setText(example)}
-          />
+      <label htmlFor="home-freetext-input" className="sr-only">
+        {isKo ? "캠페인 조건" : "Campaign brief"}
+      </label>
+      <textarea
+        id="home-freetext-input"
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        placeholder={isKo ? PLACEHOLDER_KO : PLACEHOLDER_EN}
+        rows={slim ? 2 : 2}
+        maxLength={FREETEXT_BRIEF_MAX_CHARS}
+        className={cn(
+          "w-full resize-y rounded-xl border px-3 py-2.5 text-sm leading-relaxed",
+          "border-gray-200 bg-white dark:border-white/12 dark:bg-black/25",
+          "focus:outline-none focus:ring-2 focus:ring-violet-400/40",
+          slim && "text-[13px]",
+        )}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" && !e.shiftKey && canSubmit) {
+            e.preventDefault();
+            goRecommend();
+          }
+        }}
+      />
 
-          <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center">
-            <button
-              type="button"
-              onClick={goRecommend}
-              disabled={!canSubmit}
-              className={cn(
-                "inline-flex w-full items-center justify-center gap-2 rounded-xl px-5 py-3 text-sm font-bold text-white transition-opacity sm:w-auto",
-                "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
-                "disabled:cursor-not-allowed disabled:opacity-40",
-              )}
-            >
-              {isKo ? "추천 받기" : "Get recommendations"}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </button>
-            <Link
-              href="/planner"
-              className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-gray-200 bg-white px-4 py-3 text-xs font-semibold text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/12 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10 sm:w-auto"
-            >
-              {isKo ? "단계별 설계는 플래너 →" : "Step-by-step? Open planner →"}
-            </Link>
-          </div>
-        </div>
+      <FreetextExampleChips
+        isKo={isKo}
+        onSelect={(example) => setText(example)}
+        maxChips={slim ? 3 : undefined}
+        hideShuffle={slim}
+      />
+
+      <div
+        className={cn(
+          "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
+          slim && "gap-1.5",
+        )}
+      >
+        <button
+          type="button"
+          onClick={goRecommend}
+          disabled={!canSubmit}
+          className={cn(
+            "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-opacity sm:w-auto",
+            "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
+            "disabled:cursor-not-allowed disabled:opacity-40",
+            slim && "py-2.5 text-[13px]",
+          )}
+        >
+          {isKo ? "추천 받기" : "Get recommendations"}
+          <ArrowRight className="h-4 w-4" aria-hidden />
+        </button>
+        <Link
+          href="/planner"
+          className={cn(
+            "text-center text-xs font-semibold text-gray-500 underline-offset-2 hover:underline dark:text-white/55",
+            slim ? "sm:ml-1" : "inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-white/12 dark:bg-white/5 sm:w-auto",
+          )}
+        >
+          {isKo ? "단계별 플래너 →" : "Step-by-step planner →"}
+        </Link>
+      </div>
+    </div>
+  );
+
+  if (embedded) {
+    return formBody;
+  }
+
+  return (
+    <section
+      className="px-4 pb-2 md:px-6 md:pb-3 lg:px-8"
+      aria-labelledby={slim ? undefined : "home-freetext-heading"}
+    >
+      <div
+        className={cn(
+          "mx-auto max-w-5xl rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] via-white to-cyan-500/[0.05] p-4 shadow-sm ring-1 ring-black/5 dark:from-violet-500/10 dark:via-white/[0.03] dark:to-cyan-500/5 dark:ring-white/10 md:rounded-3xl md:p-6",
+        )}
+      >
+        {formBody}
       </div>
     </section>
   );

@@ -17,6 +17,10 @@ type Props = {
   disabled?: boolean;
   chipClassName?: string;
   className?: string;
+  /** 홈 슬림 모드 등 — 노출 칩 수 제한 */
+  maxChips?: number;
+  /** "새 예시" 버튼 숨김 */
+  hideShuffle?: boolean;
 };
 
 export function FreetextExampleChips({
@@ -25,6 +29,8 @@ export function FreetextExampleChips({
   disabled = false,
   chipClassName,
   className,
+  maxChips,
+  hideShuffle = false,
 }: Props) {
   const [exampleSeed, setExampleSeed] = useState(1);
   const examplePool = isKo
@@ -32,17 +38,17 @@ export function FreetextExampleChips({
     : FREETEXT_EXAMPLE_PROMPTS_EN;
   const chipPool = isKo ? FREETEXT_CHIP_PROMPTS_KO : FREETEXT_CHIP_PROMPTS_EN;
 
-  const visibleExamples = useMemo(
-    () =>
+  const visibleExamples = useMemo(() => {
+    const picked =
       exampleSeed === 1
         ? [...chipPool]
         : pickFreetextExamplePrompts(
             examplePool,
             FREETEXT_EXAMPLE_CHIP_COUNT,
             exampleSeed,
-          ),
-    [chipPool, examplePool, exampleSeed],
-  );
+          );
+    return maxChips != null ? picked.slice(0, maxChips) : picked;
+  }, [chipPool, examplePool, exampleSeed, maxChips]);
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -50,13 +56,15 @@ export function FreetextExampleChips({
         <p className="text-xs font-medium text-muted-foreground">
           {isKo ? "이렇게 입력해보세요" : "Try an example"}
         </p>
-        <button
-          type="button"
-          onClick={() => setExampleSeed((n) => n + 1)}
-          className="text-xs font-semibold text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
-        >
-          {isKo ? "새 예시" : "More examples"}
-        </button>
+        {!hideShuffle ? (
+          <button
+            type="button"
+            onClick={() => setExampleSeed((n) => n + 1)}
+            className="text-xs font-semibold text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
+          >
+            {isKo ? "새 예시" : "More examples"}
+          </button>
+        ) : null}
       </div>
       <div className="flex flex-wrap gap-2">
         {visibleExamples.map((example) => (

@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { Search, BarChart3, MessageSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 const NEON_ICON_GLOW: Record<string, string> = {
   "text-violet-500": "drop-shadow-[0_0_8px_rgba(139,92,246,0.55)]",
@@ -20,7 +21,7 @@ type QuickItem = {
   labelEn: string;
 };
 
-/** G-2: 5 → 3. 탐색(매체+지도) · 기획(플래너) · 문의. 빠른 AI 추천은 히어로 입력창 primary. */
+/** G-2: 5 → 3. 탐색(매체) · 기획(플래너) · 문의. */
 const ITEMS: QuickItem[] = [
   {
     id: "discover",
@@ -48,25 +49,57 @@ const ITEMS: QuickItem[] = [
   },
 ];
 
-export function HomeQuickAccess() {
+type Props = {
+  /** 홈 탐색 카드 안 — 작은 아이콘·여백 */
+  compact?: boolean;
+  /** 외곽 px/py 생략 (부모 카드가 패딩 담당) */
+  embedded?: boolean;
+};
+
+export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
 
+  const iconBox = compact
+    ? "h-11 w-11 sm:h-12 sm:w-12"
+    : "h-14 w-14 sm:h-16 sm:w-16 md:h-[4.25rem] md:w-[4.25rem]";
+  const iconSize = compact ? "h-5 w-5 sm:h-5 sm:w-5" : "h-6 w-6 sm:h-7 sm:w-7";
+
   return (
-    <div className="px-4 py-3 md:py-4">
-      <div className="mx-auto grid max-w-md grid-cols-3 gap-3 sm:max-w-lg sm:gap-4 md:max-w-xl">
+    <div
+      className={cn(
+        !embedded && "px-4 py-3 md:py-4",
+        embedded && "mt-4",
+      )}
+    >
+      <div
+        className={cn(
+          "grid grid-cols-3 gap-2 sm:gap-3",
+          !embedded && "mx-auto max-w-md sm:max-w-lg md:max-w-xl",
+        )}
+      >
         {ITEMS.map((item) => (
           <Link
             key={item.id}
             href={item.href}
-            className="group flex flex-col items-center gap-2"
+            className="group flex flex-col items-center gap-1.5"
           >
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8 sm:h-16 sm:w-16 md:h-[4.25rem] md:w-[4.25rem]">
+            <div
+              className={cn(
+                "flex items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8",
+                iconBox,
+              )}
+            >
               <item.icon
-                className={`h-6 w-6 sm:h-7 sm:w-7 ${item.color} ${NEON_ICON_GLOW[item.color] ?? ""}`}
+                className={cn(iconSize, item.color, NEON_ICON_GLOW[item.color] ?? "")}
               />
             </div>
-            <span className="text-center text-xs leading-tight font-medium text-gray-600 dark:text-white/70 sm:text-[13px]">
+            <span
+              className={cn(
+                "text-center font-medium leading-tight text-gray-600 dark:text-white/70",
+                compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-[13px]",
+              )}
+            >
               {isKo ? item.labelKo : item.labelEn}
             </span>
           </Link>

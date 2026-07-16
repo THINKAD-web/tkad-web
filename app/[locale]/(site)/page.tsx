@@ -2,8 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
-import { HomeFreetextEntry } from "@/components/home/home-freetext-entry";
-import { HomeQuickAccess } from "@/components/home/home-quick-access";
+import { HomeExploreSplit } from "@/components/home/home-explore-split";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
 import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
@@ -68,9 +67,7 @@ export default async function HomePage({
       </h1>
       <HomeHeroBanner />
 
-      <HomeFreetextEntry />
-
-      <HomeQuickAccess />
+      <HomeExploreSplit />
 
       <HomeMediaScroll
         title={isKo ? "이번 주 인기 매체" : "Popular this week"}
