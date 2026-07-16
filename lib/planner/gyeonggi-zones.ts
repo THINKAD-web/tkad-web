@@ -10,6 +10,10 @@ export const PLANNER_GYEONGGI_ZONE_KEYS = [
   "bucheon",
   "gimpo",
   "hanam",
+  "yongin",
+  "anyang",
+  "hwaseong",
+  "gwangmyeong",
 ] as const;
 
 export type PlannerGyeonggiZoneKey = (typeof PLANNER_GYEONGGI_ZONE_KEYS)[number];
@@ -50,6 +54,22 @@ const GYEONGGI_ZONE_DEFS: Record<PlannerGyeonggiZoneKey, ZoneDef> = {
     exact: /하남|미사|위례|신장동|미사대로|위례대로|하남시/i,
     adjacent: /성남|구리/i,
   },
+  yongin: {
+    exact: /용인|기흥|수지|죽전|동백|신갈|용인역|기흥역|수지역/i,
+    adjacent: /성남|오산|광교/i,
+  },
+  anyang: {
+    exact: /안양|군포|평촌|의왕|안양역|평촌역|범계/i,
+    adjacent: /과천|성남/i,
+  },
+  hwaseong: {
+    exact: /화성|동탄|병점|향남|동탄역|병점역|봉담/i,
+    adjacent: /수원|오산|평택/i,
+  },
+  gwangmyeong: {
+    exact: /광명|철산|소하|광명역|철산역|하안/i,
+    adjacent: /부천|구로/i,
+  },
 };
 
 export const PLANNER_GYEONGGI_ZONE_LABELS: Record<
@@ -62,6 +82,10 @@ export const PLANNER_GYEONGGI_ZONE_LABELS: Record<
   bucheon: { labelKo: "부천", labelEn: "Bucheon" },
   gimpo: { labelKo: "김포", labelEn: "Gimpo" },
   hanam: { labelKo: "하남·위례", labelEn: "Hanam / Wirye" },
+  yongin: { labelKo: "용인", labelEn: "Yongin" },
+  anyang: { labelKo: "안양·군포", labelEn: "Anyang / Gunpo" },
+  hwaseong: { labelKo: "화성·동탄", labelEn: "Hwaseong / Dongtan" },
+  gwangmyeong: { labelKo: "광명", labelEn: "Gwangmyeong" },
 };
 
 /** browse `regionSub` → 플래너 경기 상권 */
@@ -73,6 +97,10 @@ export const BROWSE_SUB_TO_GYEONGGI_ZONE: Record<string, PlannerGyeonggiZoneKey>
     gyeonggi_bucheon: "bucheon",
     gyeonggi_gimpo: "gimpo",
     gyeonggi_hanam: "hanam",
+    gyeonggi_yongin: "yongin",
+    gyeonggi_anyang: "anyang",
+    gyeonggi_hwaseong: "hwaseong",
+    gyeonggi_gwangmyeong: "gwangmyeong",
   };
 
 export const GYEONGGI_ZONE_REGEX: { zone: PlannerGyeonggiZoneKey; re: RegExp }[] =
@@ -83,6 +111,10 @@ export const GYEONGGI_ZONE_REGEX: { zone: PlannerGyeonggiZoneKey; re: RegExp }[]
     { zone: "bucheon", re: GYEONGGI_ZONE_DEFS.bucheon.exact },
     { zone: "gimpo", re: GYEONGGI_ZONE_DEFS.gimpo.exact },
     { zone: "hanam", re: GYEONGGI_ZONE_DEFS.hanam.exact },
+    { zone: "yongin", re: GYEONGGI_ZONE_DEFS.yongin.exact },
+    { zone: "anyang", re: GYEONGGI_ZONE_DEFS.anyang.exact },
+    { zone: "hwaseong", re: GYEONGGI_ZONE_DEFS.hwaseong.exact },
+    { zone: "gwangmyeong", re: GYEONGGI_ZONE_DEFS.gwangmyeong.exact },
   ];
 
 const GYEONGGI_NETWORK_RE =

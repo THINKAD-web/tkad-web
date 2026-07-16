@@ -23,8 +23,10 @@ import {
 } from "@/lib/planner/incheon-zones";
 import { parseDurationFields } from "@/lib/planner/parse-duration";
 import {
+  BROWSE_SUB_TO_SEOUL_ZONE,
   isPlannerSeoulZoneKey,
   PLANNER_SEOUL_ZONE_KEYS,
+  SEOUL_ZONE_REGEX,
   type PlannerSeoulZoneKey,
 } from "@/lib/planner/seoul-zones";
 import {
@@ -130,60 +132,13 @@ const SUPPLEMENTAL_INDUSTRY: {
   { key: "indEnt", patterns: [/k\s*pop|kpop|아이돌|콘서트|공연|영화/i] },
 ];
 
-const BROWSE_SUB_TO_SEOUL_ZONE: Record<string, PlannerSeoulZoneKey> = {
-  seoul_gangnam: "gangnam",
-  seoul_coex: "gangnam",
-  seoul_hongdae: "hongdae",
-  seoul_sinchon: "hongdae",
-  seoul_seongsu: "seongsu",
-  seoul_cbd: "myeongdong",
-  seoul_jongno: "myeongdong",
-  seoul_itaewon: "myeongdong",
-  seoul_dongdaemun: "myeongdong",
-  seoul_yeongdeungpo: "yeouido",
-  seoul_jamsil: "gangnam",
-  seoul_guro: "yeouido",
-};
-
-/** 역·일대·권 등 실전 별칭 */
-const SEOUL_ZONE_REGEX: { zone: PlannerSeoulZoneKey; re: RegExp }[] = [
-  {
-    zone: "gangnam",
-    re: /강남(?:역|권|구)?(?:\s*(?:근처|일대|주변))?|강남권|서초|역삼|삼성|코엑스|테헤란|선릉|삼성역/i,
-  },
-  {
-    zone: "hongdae",
-    re: /홍대(?:입구|앞|역)?(?:\s*(?:근처|일대|주변))?|홍대\s*일대|마포|합정|연남|신촌/i,
-  },
-  {
-    zone: "seongsu",
-    re: /성수(?:동|역)?(?:\s*(?:근처|일대|주변))?|성수\s*일대|뚝섬|건대|왕십리/i,
-  },
-  {
-    zone: "myeongdong",
-    re: /명동(?:역)?(?:\s*(?:근처|일대|주변))?/i,
-  },
-  {
-    zone: "myeongdong",
-    re: /을지로(?:\s*(?:근처|일대|주변))?/i,
-  },
-  {
-    zone: "myeongdong",
-    re: /광화문|종로(?:\s*(?:근처|일대|주변))?|동대문|시청/i,
-  },
-  {
-    zone: "yeouido",
-    re: /여의도(?:역)?(?:\s*(?:근처|일대|주변))?|영등포|당산/i,
-  },
-];
-
 const MACRO_REGION_PATTERNS: { id: string; re: RegExp }[] = [
   { id: "national", re: /전국|수도권\s*전체|nationwide/i },
   { id: "busan", re: /부산|해운대|서면|센텀/i },
   { id: "jeju", re: /제주|서귀포|애월/i },
   { id: "daegu", re: /대구/i },
   { id: "incheon", re: /인천|송도|인천공항|영종/i },
-  { id: "gyeonggi", re: /경기|판교|분당|수원|성남|일산|동탄/i },
+  { id: "gyeonggi", re: /경기|판교|분당|수원|성남|일산|동탄|안양|용인|화성|광명/i },
   { id: "seoul", re: /서울|수도권/i },
 ];
 
