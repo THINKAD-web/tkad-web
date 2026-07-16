@@ -2019,7 +2019,25 @@ export default function AdminMediasClient({
       </div>
 
       <div className="flex flex-wrap items-center gap-1 sm:ml-auto">
-        <Button variant="outline" size="xs" asChild className="h-7 px-2 text-xs">
+        <Button
+          variant="outline"
+          size="xs"
+          className="h-7 px-2.5 text-xs md:hidden"
+          onClick={() => openEdit(media)}
+        >
+          수정
+        </Button>
+        <Button
+          variant="ghost"
+          size="xs"
+          asChild
+          className="h-7 px-2 text-[11px] text-muted-foreground md:hidden"
+        >
+          <Link href={`/admin/medias/${media.id}/edit`} title="JSON으로 편집">
+            JSON
+          </Link>
+        </Button>
+        <Button variant="outline" size="xs" asChild className="hidden h-7 px-2 text-xs md:inline-flex">
           <Link href={`/admin/medias/${media.id}/edit`} title="JSON 수정">
             JSON 수정
           </Link>
@@ -2042,6 +2060,7 @@ export default function AdminMediasClient({
           size="icon-xs"
           onClick={() => openEdit(media)}
           title="수정"
+          className="hidden md:inline-flex"
         >
           <Pencil className="h-3.5 w-3.5" />
         </Button>
@@ -2712,7 +2731,14 @@ export default function AdminMediasClient({
                       ? `임시저장 ${new Date(draftSavedAt).toLocaleTimeString("ko-KR")} · 30초마다 자동 저장`
                       : "필수(*) 항목만 채워도 저장 가능 · 주소 입력 시 좌표 자동 변환"}
                   </p>
-                ) : null}
+                ) : (
+                  <Link
+                    href={`/admin/medias/${editing.id}/edit`}
+                    className="mt-1 inline-block text-[11px] font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                  >
+                    JSON으로 편집
+                  </Link>
+                )}
               </div>
               <Button
                 variant="ghost"
