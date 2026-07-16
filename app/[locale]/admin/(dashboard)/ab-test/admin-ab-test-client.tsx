@@ -61,8 +61,9 @@ export default function AdminAbTestClient() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">A/B 테스트</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            히어로 CTA — A: 지금 시작하기 / B: 무료 견적 받기 · 쿠키{" "}
-            <code className="rounded bg-muted px-1">tkad_ab_variant</code>
+            히어로 CTA — A: 지금 시작하기 / B: 무료 견적 받기 (미들웨어 비활성 ·
+            쿠키 <code className="rounded bg-muted px-1">tkad_ab_variant</code>{" "}
+            미설정)
           </p>
         </div>
         <Button variant="outline" size="sm" onClick={() => void load()} disabled={loading}>
@@ -72,6 +73,18 @@ export default function AdminAbTestClient() {
       </div>
 
       {error ? <p className="text-sm text-red-600">{error}</p> : null}
+
+      <Card className="border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/30">
+        <CardContent className="pt-6 text-sm text-amber-950 dark:text-amber-100">
+          <p className="font-semibold">현재 실험 비활성</p>
+          <p className="mt-1 text-amber-900/90 dark:text-amber-100/80">
+            히어로 CTA A/B는 공개 UI에 연결되어 있지 않으며, 미들웨어 쿠키
+            배정도 중단되었습니다. 아래 통계·승자 고정은 DB 기록용이며, 승자를
+            바꿔도 방문자 variant는 자동 반영되지 않습니다. 실험을 다시 켤 때는
+            UI 연동과 함께 미들웨어 또는 Edge Config 경로를 복구하세요.
+          </p>
+        </CardContent>
+      </Card>
 
       <Card>
         <CardHeader>
@@ -86,12 +99,18 @@ export default function AdminAbTestClient() {
             <strong>
               {stats?.forcedVariant
                 ? stats.forcedVariant.toUpperCase()
-                : "없음 (50:50 분기)"}
+                : "없음 (DB만, 미들웨어 미적용)"}
             </strong>
           </p>
           <p className="text-xs text-muted-foreground">
-            미리보기: <a href="/ko?v=a" className="underline">/ko?v=a</a> ·{" "}
-            <a href="/ko?v=b" className="underline">/ko?v=b</a>
+            과거 미리보기 링크 (현재 미적용):{" "}
+            <a href="/ko?v=a" className="underline">
+              /ko?v=a
+            </a>{" "}
+            ·{" "}
+            <a href="/ko?v=b" className="underline">
+              /ko?v=b
+            </a>
           </p>
         </CardContent>
       </Card>

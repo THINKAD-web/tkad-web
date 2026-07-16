@@ -1,7 +1,6 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAbVariant, type AbVariant } from "@/lib/ab-testing";
-import { invalidateAbPolicyCache } from "@/lib/ab-middleware";
 import {
   getAbEventStats,
   setAbTestWinner,
@@ -41,7 +40,6 @@ export async function POST(request: NextRequest) {
       return json({ error: "variant must be a or b" }, 400);
     }
     const row = await setAbTestWinner(variantRaw);
-    invalidateAbPolicyCache();
     return json({
       ok: true,
       forcedVariant: row.forcedVariant,
@@ -51,7 +49,6 @@ export async function POST(request: NextRequest) {
 
   if (action === "start_next_test") {
     const row = await startNextAbTest();
-    invalidateAbPolicyCache();
     return json({
       ok: true,
       forcedVariant: row.forcedVariant,

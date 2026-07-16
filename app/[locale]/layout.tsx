@@ -16,14 +16,12 @@ import { buildStructuredDataGraph } from "@/lib/structured-data";
 import { JsonLd } from "@/components/seo/json-ld";
 import { ThemeProvider } from "@/components/theme-provider";
 import { ThemeInitScript } from "@/components/theme-init-script";
-import { AppProvidersRoot } from "@/components/app-providers-root";
 import { SiteHeader } from "@/components/public-chrome/site-header";
 import { OnboardingProgressBar } from "@/components/onboarding/onboarding-progress-bar";
 import { PublicAnalyticsLoader } from "@/components/public-analytics-loader";
 import { GaTracker } from "@/components/analytics/ga-tracker";
 import { PwaAutoUpdate } from "@/components/pwa-auto-update";
 import { Suspense } from "react";
-import { AbGaVariantSync } from "@/components/ab/ab-ga-variant";
 import { DeferredAnalytics } from "@/components/deferred-analytics";
 import { SpeedInsightsLoader } from "@/components/speed-insights-loader";
 import { fontClassNames } from "@/lib/fonts";
@@ -170,9 +168,6 @@ export default async function LocaleLayout({ children, params }: Props) {
           <Suspense fallback={null}>
             <GaTracker />
           </Suspense>
-        </PublicOnlyMount>
-        <PublicOnlyMount>
-          <AbGaVariantSync />
         </PublicOnlyMount>
         <ThemeProvider>
           <NextIntlClientProvider
