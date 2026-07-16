@@ -38,6 +38,11 @@ function isHiddenPath(pathname: string | null): boolean {
   );
 }
 
+function isHomePath(pathname: string): boolean {
+  const path = pathname.replace(/^\/(ko|en)/, "") || "/";
+  return path === "/" || path === "";
+}
+
 type DesktopQuickAction = {
   id: string;
   href: string;
@@ -56,6 +61,15 @@ function actionRowClass(compact: boolean) {
   );
 }
 
+function mutedSidebarBtn(compact: boolean) {
+  return cn(
+    actionRowClass(compact),
+    "border border-gray-200 font-medium text-gray-600 hover:bg-gray-50",
+    "dark:border-white/12 dark:text-white/65 dark:hover:bg-white/5",
+    "[&_svg]:text-gray-500 dark:[&_svg]:text-white/50",
+  );
+}
+
 function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) {
   const pathname = usePathname() ?? "/";
   const searchParams = useSearchParams();
@@ -67,6 +81,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
 
   if (isHiddenPath(pathname)) return null;
 
+  const onHome = isHomePath(pathname);
   const aiLabel = isKo ? "AI 챗봇 상담" : "AI chatbot";
 
   const actions: DesktopQuickAction[] = [
@@ -100,7 +115,11 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         onClick={openAi}
         title={aiLabel}
         aria-label={aiLabel}
-        className={cn(actionRowClass(compact), "tkad-neon-cta-clean text-white [&_svg]:text-white")}
+        className={cn(
+          onHome
+            ? mutedSidebarBtn(compact)
+            : cn(actionRowClass(compact), "tkad-neon-cta-clean text-white [&_svg]:text-white"),
+        )}
       >
         <Bot className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
         {!compact ? <span className="min-w-0 flex-1 truncate text-left">{aiLabel}</span> : null}
@@ -113,8 +132,12 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         title={tChat("kakaoCta")}
         aria-label={tChat("kakaoCta")}
         className={cn(
-          actionRowClass(compact),
-          "bg-[#FEE500] font-medium text-[#191600] hover:brightness-95",
+          onHome
+            ? mutedSidebarBtn(compact)
+            : cn(
+                actionRowClass(compact),
+                "bg-[#FEE500] font-medium text-[#191600] hover:brightness-95",
+              ),
         )}
       >
         <KakaoTalkIcon className="h-4 w-4 shrink-0" />
@@ -127,7 +150,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         const active = action.match(pathname, tab);
         const label = isKo ? action.labelKo : action.labelEn;
         const Icon = action.icon;
-        const isNeon = action.variant === "neon" || active;
+        const isNeon = !onHome && (action.variant === "neon" || active);
 
         return (
           <Link

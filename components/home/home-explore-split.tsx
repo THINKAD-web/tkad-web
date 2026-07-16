@@ -18,7 +18,8 @@ export function HomeExploreSplit() {
 
   return (
     <section
-      className="px-4 pb-3 md:px-6 md:pb-4 lg:px-8"
+      id="home-explore"
+      className="scroll-mt-16 px-4 pb-3 md:px-6 md:pb-4 lg:px-8"
       aria-label={isKo ? "시작하기" : "Get started"}
     >
       <div className="mx-auto grid max-w-5xl gap-3 md:grid-cols-2 md:gap-4">

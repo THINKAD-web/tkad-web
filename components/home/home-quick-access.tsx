@@ -21,12 +21,12 @@ type QuickItem = {
   labelEn: string;
 };
 
-/** G-2: 5 → 3. 탐색(매체) · 기획(플래너) · 문의. */
+/** G-2: 3 shortcuts — 유형별(매체) · 기획(플래너) · 문의. */
 const ITEMS: QuickItem[] = [
   {
     id: "discover",
-    labelKo: "매체 찾기",
-    labelEn: "Find media",
+    labelKo: "유형별 보기",
+    labelEn: "By type",
     icon: Search,
     href: "/media",
     color: "text-violet-500",
@@ -64,6 +64,7 @@ export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
     ? "h-11 w-11 sm:h-12 sm:w-12"
     : "h-14 w-14 sm:h-16 sm:w-16 md:h-[4.25rem] md:w-[4.25rem]";
   const iconSize = compact ? "h-5 w-5 sm:h-5 sm:w-5" : "h-6 w-6 sm:h-7 sm:w-7";
+  const tonedDown = compact && embedded;
 
   return (
     <div
@@ -86,17 +87,28 @@ export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
           >
             <div
               className={cn(
-                "flex items-center justify-center rounded-2xl border border-gray-100 bg-white shadow-sm transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10 dark:bg-white/8",
+                "flex items-center justify-center rounded-2xl border bg-white shadow-sm dark:bg-white/8",
+                tonedDown
+                  ? "border-gray-100/80 transition-colors group-hover:bg-gray-50 dark:border-white/8 dark:group-hover:bg-white/10"
+                  : "border-gray-100 transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10",
                 iconBox,
               )}
             >
               <item.icon
-                className={cn(iconSize, item.color, NEON_ICON_GLOW[item.color] ?? "")}
+                className={cn(
+                  iconSize,
+                  item.color,
+                  !tonedDown && (NEON_ICON_GLOW[item.color] ?? ""),
+                  tonedDown && "opacity-80",
+                )}
               />
             </div>
             <span
               className={cn(
-                "text-center font-medium leading-tight text-gray-600 dark:text-white/70",
+                "text-center font-medium leading-tight",
+                tonedDown
+                  ? "text-gray-500 dark:text-white/55"
+                  : "text-gray-600 dark:text-white/70",
                 compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-[13px]",
               )}
             >

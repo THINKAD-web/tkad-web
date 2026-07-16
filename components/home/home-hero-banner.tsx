@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { Link } from "@/i18n/navigation";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
 import {
@@ -10,12 +9,15 @@ import {
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
 
+const EXPLORE_SECTION_ID = "home-explore";
+
 type HeroSlide = {
   id: string;
   image: string;
   titleKo: string;
   titleEn: string;
-  href: "/media" | "/planner";
+  subtitleKo: string;
+  subtitleEn: string;
 };
 
 /** 828px WebP from user JPEG CDN (Jul 2026) — public/images/hero + Bunny mirror */
@@ -25,16 +27,25 @@ const SLIDES: HeroSlide[] = [
     image: "/images/hero/hero-slide1-828.webp",
     titleKo: "OOH 단가, 한눈에 비교",
     titleEn: "Compare OOH rates at a glance",
-    href: "/media",
+    subtitleKo: "아래에서 매체 검색·AI 추천 중 원하는 방식으로 시작하세요.",
+    subtitleEn: "Search media or get AI picks — choose your path below.",
   },
   {
     id: "planner",
     image: "/images/hero/hero-slide2-828.webp",
     titleKo: "AI로 캠페인 설계",
     titleEn: "Plan campaigns with AI",
-    href: "/planner",
+    subtitleKo: "지역·예산·타깃을 입력하면 순위·지도·견적까지 한 번에.",
+    subtitleEn: "Enter region, budget, and audience for ranked picks and quotes.",
   },
 ];
+
+function scrollToExplore() {
+  document.getElementById(EXPLORE_SECTION_ID)?.scrollIntoView({
+    behavior: "smooth",
+    block: "start",
+  });
+}
 
 export function HomeHeroBanner() {
   const locale = useLocale();
@@ -60,6 +71,8 @@ export function HomeHeroBanner() {
 
   const slide = SLIDES[current];
   const title = isKo ? slide.titleKo : slide.titleEn;
+  const subtitle = isKo ? slide.subtitleKo : slide.subtitleEn;
+  const ctaLabel = isKo ? "아래에서 시작하기" : "Get started below";
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
@@ -96,11 +109,27 @@ export function HomeHeroBanner() {
           );
         })}
 
-        <Link
-          href={slide.href}
-          className="absolute inset-0 z-10 rounded-2xl md:rounded-3xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2"
-          aria-label={title}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%] rounded-b-2xl bg-gradient-to-t from-black/75 via-black/35 to-transparent md:rounded-b-3xl"
         />
+
+        <div className="absolute inset-x-0 bottom-10 z-20 px-5 text-center md:bottom-12 md:px-8">
+          <p className="text-lg font-bold tracking-tight text-white drop-shadow-sm md:text-2xl">
+            {title}
+          </p>
+          <p className="mx-auto mt-1.5 max-w-md text-xs leading-snug text-white/85 md:text-sm">
+            {subtitle}
+          </p>
+          <button
+            type="button"
+            onClick={scrollToExplore}
+            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:text-sm"
+          >
+            {ctaLabel}
+            <span aria-hidden>↓</span>
+          </button>
+        </div>
 
         <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
           {SLIDES.map((s, i) => (
