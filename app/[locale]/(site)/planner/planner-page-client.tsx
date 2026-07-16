@@ -77,6 +77,8 @@ import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types"
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import {
   buildFreetextBriefApply,
+  briefApplyHasParsedGoal,
+  resolvePlannerWizardStepAfterBriefApply,
   type FreetextBriefApplySummary,
 } from "@/lib/planner/freetext-brief-apply";
 import { decodeBriefFromPlannerQuery } from "@/lib/planner/freetext-brief-url";
@@ -722,6 +724,7 @@ export default function PlannerPageClient({
   const handledCreateQuoteRef = useRef(false);
   const [plannerStoreReady, setPlannerStoreReady] = useState(false);
   const [freetextApplied, setFreetextApplied] = useState(false);
+  const [briefGoalAutoAdvanced, setBriefGoalAutoAdvanced] = useState(false);
   const [freetextBriefSummary, setFreetextBriefSummary] =
     useState<FreetextBriefApplySummary | null>(null);
   const [scenarioPrefillApplied, setScenarioPrefillApplied] = useState(false);
@@ -775,16 +778,25 @@ export default function PlannerPageClient({
     }
 
     applyScenarioAction(payload.patch);
-    setWizardStep(1);
+    const targetStep = resolvePlannerWizardStepAfterBriefApply(
+      payload.parseResult,
+    );
+    const goalAutoAdvanced = briefApplyHasParsedGoal(payload.parseResult);
+    setWizardStep(targetStep);
     setFreetextApplied(true);
+    setBriefGoalAutoAdvanced(goalAutoAdvanced);
     setFreetextBriefSummary(payload.summary);
     handledQueryRef.current = `brief:${briefParam}`;
     stripPlannerQueryKeys(["brief"]);
     toast(
       "success",
-      isKo
-        ? "입력한 조건으로 채워졌습니다. 확인 후 다음 단계로 진행해 주세요."
-        : "Brief applied — review each step, then continue with Next.",
+      goalAutoAdvanced
+        ? isKo
+          ? "목표가 자동 선택되었습니다. 스텝퍼 ①에서 변경하거나 2단계를 확인해 주세요."
+          : "Goal auto-selected. Change it via step ① or review step 2."
+        : isKo
+          ? "입력한 조건으로 채워졌습니다. 확인 후 다음 단계로 진행해 주세요."
+          : "Brief applied — review each step, then continue with Next.",
     );
   }, [
     plannerStoreReady,
@@ -1411,9 +1423,13 @@ export default function PlannerPageClient({
             )}
           >
             <p className="font-medium text-foreground">
-              {isKo
-                ? "조건이 채워졌어요. 각 단계를 확인한 뒤 다음으로 진행해 주세요."
-                : "Your inputs are prefilled. Review each step, then tap Next."}
+              {briefGoalAutoAdvanced
+                ? isKo
+                  ? "입력한 조건으로 목표가 자동 선택되었어요. 스텝퍼 ①을 눌러 목표를 바꿀 수 있습니다."
+                  : "Goal auto-selected from your brief. Tap step ① on the stepper to change it."
+                : isKo
+                  ? "조건이 채워졌어요. 각 단계를 확인한 뒤 다음으로 진행해 주세요."
+                  : "Your inputs are prefilled. Review each step, then tap Next."}
             </p>
             {freetextBriefSummary?.sentence ? (
               <p className="text-xs leading-relaxed text-foreground/80">
