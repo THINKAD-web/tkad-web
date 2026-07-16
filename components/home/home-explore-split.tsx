@@ -77,8 +77,8 @@ export function HomeExploreSplit() {
               </h2>
               <p className="mt-1 text-sm text-gray-600 dark:text-white/65">
                 {isKo
-                  ? "지역·타깃·예산을 입력하면 순위·지도·견적까지 한 번에."
-                  : "Enter region, audience, and budget for ranked picks and quotes."}
+                  ? "추천 페이지에서 조건을 입력하면 순위·지도·견적까지 한 번에."
+                  : "Enter your brief on the recommend page for ranked picks and quotes."}
               </p>
             </div>
           </div>

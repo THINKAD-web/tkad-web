@@ -128,7 +128,10 @@ export default function RecommendPageClient({
   const industryFromUrl = searchParams.get("industry") as HomeBudgetIndustry | null;
   const autoFromUrl = searchParams.get("auto");
   const briefFromUrl = searchParams.get("brief");
+  const modeFromUrl = searchParams.get("mode");
+  const modeAiFromUrl = modeFromUrl === "ai";
   const sessionRestoredRef = useRef(false);
+  const modeAiApplied = useRef(false);
 
   const [similarBanner, setSimilarBanner] = useState<string | null>(null);
 
@@ -490,6 +493,7 @@ export default function RecommendPageClient({
 
   const skipSessionRestore =
     Boolean(briefFromUrl) ||
+    modeAiFromUrl ||
     autoFromUrl === "1" ||
     Boolean(similarCampaignId) ||
     Boolean(searchParams.get("createQuote"));
@@ -728,6 +732,18 @@ export default function RecommendPageClient({
     setLastPayload(payload);
     runAnalysis(payload, 0, { excludeNetwork: true });
   }, [briefFromUrl, catalog, isKo, runAnalysis]);
+
+  // 홈 AI CTA 등 — ?mode=ai 로 도착 시 AI 자연어 탭 기본 선택 (brief= 와 별개)
+  useEffect(() => {
+    if (!modeAiFromUrl || modeAiApplied.current || briefFromUrl) return;
+    modeAiApplied.current = true;
+    setInputMode("ai");
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      url.searchParams.delete("mode");
+      window.history.replaceState({}, "", url.toString());
+    }
+  }, [modeAiFromUrl, briefFromUrl]);
 
   useEffect(() => {
     if (

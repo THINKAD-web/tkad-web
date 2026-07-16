@@ -44,3 +44,11 @@ export function buildRecommendBriefPath(text: string): string | null {
   if (!encoded) return null;
   return `/recommend?${PLANNER_BRIEF_QUERY_KEY}=${encoded}`;
 }
+
+export const RECOMMEND_MODE_QUERY_KEY = "mode";
+export const RECOMMEND_MODE_AI = "ai";
+
+/** 홈 AI 카드 CTA — recommend AI 탭으로 진입 (입력은 recommend에서). */
+export function buildRecommendAiModePath(): string {
+  return `/recommend?${RECOMMEND_MODE_QUERY_KEY}=${RECOMMEND_MODE_AI}`;
+}

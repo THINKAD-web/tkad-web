@@ -1,22 +1,10 @@
 "use client";
 
-import { useCallback, useState } from "react";
-import { useRouter } from "@/i18n/navigation";
-import { useLocale } from "next-intl";
 import { ArrowRight } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { FreetextExampleChips } from "@/components/planner/freetext-example-chips";
-import {
-  FREETEXT_BRIEF_MAX_CHARS,
-  buildRecommendBriefPath,
-  isValidFreetextBrief,
-} from "@/lib/planner/freetext-brief-url";
+import { useLocale } from "next-intl";
+import { buildRecommendAiModePath } from "@/lib/planner/freetext-brief-url";
 import { cn } from "@/lib/utils";
-
-const PLACEHOLDER_KO =
-  '예) "강남 2030 브랜딩 3000만원" — 매체명 검색 아님, 지역·타깃·예산';
-const PLACEHOLDER_EN =
-  'e.g. "Gangnam Gen Z branding 30M KRW" — not a media name search';
 
 type Props = {
   variant?: "default" | "slim";
@@ -30,103 +18,69 @@ export function HomeFreetextEntry({
 }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const router = useRouter();
-  const [text, setText] = useState("");
   const slim = variant === "slim";
+  const recommendPath = buildRecommendAiModePath();
 
-  const canSubmit = isValidFreetextBrief(text);
-
-  const goRecommend = useCallback(() => {
-    const path = buildRecommendBriefPath(text);
-    if (!path) return;
-    router.push(path);
-  }, [router, text]);
-
-  const formBody = (
-    <div className={cn("space-y-3", embedded ? "mt-4" : slim ? "mt-3" : "mt-4")}>
-      {!slim && !embedded ? (
-        <div className="flex flex-wrap items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2">
-              <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
-                {isKo ? "무료 · 규칙" : "Free · Rules"}
-              </span>
-              <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
-                {isKo ? "빠른 추천 · 0토큰" : "Quick picks · 0 tokens"}
-              </span>
-            </div>
-            <h2
-              id="home-freetext-heading"
-              className="mt-2 text-lg font-semibold tracking-tight text-gray-900 dark:text-white md:text-xl"
-            >
-              {isKo ? "빠른 AI 추천" : "Quick AI recommend"}
-            </h2>
-            <p className="mt-1.5 text-sm leading-relaxed text-gray-600 dark:text-white/65">
-              {isKo
-                ? "지역·타깃·목표·예산을 자연어로 입력하면 즉시 TOP·지도·견적까지 이어집니다. 매체명 검색이 아닙니다."
-                : "Enter region, audience, goal, and budget — get ranked picks, map, and quote. Not a media name search."}
-            </p>
+  const ctaBody = (
+    <div
+      className={cn(
+        "flex flex-col",
+        embedded ? "mt-auto pt-4" : slim ? "mt-3" : "mt-4",
+      )}
+    >
+      {!embedded && !slim ? (
+        <div className="mb-4 space-y-2">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+              {isKo ? "무료 · 규칙" : "Free · Rules"}
+            </span>
+            <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+              {isKo ? "빠른 추천 · 0토큰" : "Quick picks · 0 tokens"}
+            </span>
           </div>
+          <h2
+            id="home-freetext-heading"
+            className="text-lg font-semibold tracking-tight text-gray-900 dark:text-white md:text-xl"
+          >
+            {isKo ? "AI로 추천받기" : "AI recommendations"}
+          </h2>
+          <p className="text-sm leading-relaxed text-gray-600 dark:text-white/65">
+            {isKo
+              ? "추천 페이지에서 지역·타깃·예산을 입력하면 순위·지도·견적까지 이어집니다."
+              : "Enter region, audience, and budget on the recommend page for ranked picks, map, and quote."}
+          </p>
         </div>
       ) : null}
 
       {slim && !embedded ? (
-        <span className="inline-flex rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+        <span className="mb-3 inline-flex rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
           {isKo ? "무료 · 0토큰" : "Free · 0 tokens"}
         </span>
       ) : null}
 
-      <label htmlFor="home-freetext-input" className="sr-only">
-        {isKo ? "캠페인 조건" : "Campaign brief"}
-      </label>
-      <textarea
-        id="home-freetext-input"
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-        placeholder={isKo ? PLACEHOLDER_KO : PLACEHOLDER_EN}
-        rows={slim ? 2 : 2}
-        maxLength={FREETEXT_BRIEF_MAX_CHARS}
-        className={cn(
-          "w-full resize-y rounded-xl border px-3 py-2.5 text-sm leading-relaxed",
-          "border-gray-200 bg-white dark:border-white/12 dark:bg-black/25",
-          "focus:outline-none focus:ring-2 focus:ring-violet-400/40",
-          slim && "text-[13px]",
-        )}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" && !e.shiftKey && canSubmit) {
-            e.preventDefault();
-            goRecommend();
-          }
-        }}
-      />
-
-      <FreetextExampleChips
-        isKo={isKo}
-        onSelect={(example) => setText(example)}
-        maxChips={slim ? 3 : undefined}
-        hideShuffle={slim}
-      />
+      <p className="text-xs text-gray-500 dark:text-white/50">
+        {isKo
+          ? '예) "강남 2030 브랜딩 3000만원" — 매체명 검색이 아닙니다.'
+          : 'e.g. "Gangnam Gen Z branding 30M KRW" — not a media name search.'}
+      </p>
 
       <div
         className={cn(
-          "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
+          "mt-3 flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center",
           slim && "gap-1.5",
         )}
       >
-        <button
-          type="button"
-          onClick={goRecommend}
-          disabled={!canSubmit}
+        <Link
+          href={recommendPath}
           className={cn(
             "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-opacity sm:w-auto",
             "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
-            "disabled:cursor-not-allowed disabled:opacity-40",
             slim && "py-2.5 text-[13px]",
           )}
         >
-          {isKo ? "추천 받기" : "Get recommendations"}
+          {isKo ? "AI 추천 시작" : "Start AI recommend"}
           <ArrowRight className="h-4 w-4" aria-hidden />
-        </button>
+        </Link>
         <Link
           href="/planner"
           className={cn(
@@ -141,7 +95,7 @@ export function HomeFreetextEntry({
   );
 
   if (embedded) {
-    return formBody;
+    return ctaBody;
   }
 
   return (
@@ -154,7 +108,7 @@ export function HomeFreetextEntry({
           "mx-auto max-w-5xl rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] via-white to-cyan-500/[0.05] p-4 shadow-sm ring-1 ring-black/5 dark:from-violet-500/10 dark:via-white/[0.03] dark:to-cyan-500/5 dark:ring-white/10 md:rounded-3xl md:p-6",
         )}
       >
-        {formBody}
+        {ctaBody}
       </div>
     </section>
   );

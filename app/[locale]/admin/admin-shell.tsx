@@ -5,6 +5,7 @@ import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo, useState, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { AppProvidersRoot } from "@/components/app-providers-root";
 import { AdminShellNav } from "@/components/admin/admin-shell-nav";
 import type { AdminNavKey } from "@/lib/admin-nav-config";
 import {
@@ -246,6 +247,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
   );
 
   return (
+    <AppProvidersRoot admin>
     <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen overflow-x-clip bg-background font-sans text-foreground">
       <aside className="hidden w-72 shrink-0 md:block">{sidebar}</aside>
 
@@ -278,5 +280,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
         <main className="min-w-0 flex-1 overflow-x-clip overflow-y-auto p-4 md:p-6">{children}</main>
       </div>
     </div>
+    </AppProvidersRoot>
   );
 }
