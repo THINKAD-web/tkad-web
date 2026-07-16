@@ -12,6 +12,8 @@ type Props = {
   className?: string;
   /** 내 플랜 사이드 패널 등 좁은 영역 */
   compact?: boolean;
+  /** Step1 above-fold — 모바일에서도 2열·작은 패딩 */
+  dense?: boolean;
 };
 
 export function PlannerCampaignGoalGrid({
@@ -19,14 +21,15 @@ export function PlannerCampaignGoalGrid({
   onSelect,
   className,
   compact = false,
+  dense = false,
 }: Props) {
   const t = useTranslations("planner");
 
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-2",
-        !compact && "sm:grid-cols-2 sm:gap-3",
+        "grid gap-2",
+        dense ? "grid-cols-2" : "grid-cols-1 sm:grid-cols-2 sm:gap-3",
         className,
       )}
     >
@@ -40,14 +43,14 @@ export function PlannerCampaignGoalGrid({
             className={cn(
               plannerNeon.selectChip,
               "h-full w-full text-left",
-              compact ? "p-3" : "p-5",
+              compact ? "p-3" : dense ? "p-3 sm:p-3.5" : "p-5",
               active ? plannerNeon.selectChipActive : plannerNeon.selectChipIdle,
             )}
           >
             <p
               className={cn(
                 "font-semibold tracking-normal",
-                compact ? "text-sm" : undefined,
+                compact || dense ? "text-sm" : undefined,
               )}
             >
               {t(titleKey)}
@@ -55,7 +58,7 @@ export function PlannerCampaignGoalGrid({
             <p
               className={cn(
                 "leading-relaxed",
-                compact ? "mt-1 text-[11px]" : "mt-2 text-xs",
+                compact || dense ? "mt-0.5 text-[11px]" : "mt-2 text-xs",
                 active
                   ? "dark:text-white/70 text-gray-600"
                   : plannerNeon.subtext,

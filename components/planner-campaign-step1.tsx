@@ -23,25 +23,28 @@ export default function PlannerCampaignStep1({
   const t = useTranslations("planner");
 
   return (
-    <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start">
+    <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)] lg:items-start lg:gap-6">
       <PlannerNeonCard>
-        <div className={plannerNeon.cardHeader}>
+        <div className={cn(plannerNeon.cardHeader, "pb-2 sm:pb-3")}>
           <PlannerNeonLabel>Step 1 / Goal</PlannerNeonLabel>
           <h2
             className={cn(
-              "mt-2 flex items-center gap-2 text-xl sm:text-2xl",
+              "mt-1.5 flex items-center gap-2 text-lg sm:text-xl",
               plannerNeon.headline,
             )}
           >
-            <Sparkles className="h-5 w-5 text-violet-400" />
+            <Sparkles className="h-4 w-4 shrink-0 text-violet-400 sm:h-5 sm:w-5" />
             {t("step1Title")}
           </h2>
-          <p className={cn("mt-2", plannerNeon.subtext)}>{t("step1Desc")}</p>
+          <p className={cn("mt-1 text-xs sm:text-sm", plannerNeon.subtext)}>
+            {t("step1Desc")}
+          </p>
         </div>
-        <div className="p-5 sm:p-6">
+        <div className="px-4 pb-4 pt-0 sm:px-5 sm:pb-5">
           <PlannerCampaignGoalGrid
             selected={campaignGoal}
             onSelect={onSelectGoal}
+            dense
           />
         </div>
       </PlannerNeonCard>
@@ -49,7 +52,7 @@ export default function PlannerCampaignStep1({
       <aside
         className={cn(
           plannerNeon.card,
-          "tkad-planner-step1-aside animate-fade-in-up overflow-hidden",
+          "tkad-planner-step1-aside animate-fade-in-up hidden overflow-hidden lg:block",
         )}
       >
         <div className="space-y-4 p-5">

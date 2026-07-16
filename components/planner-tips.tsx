@@ -13,6 +13,8 @@ type Props = {
   budgetNum: number;
   /** 통합 플래너(7입력+8대시보드) — 단계 번호를 OOH 플래너 tip 규칙에 매핑 */
   variant?: "planner" | "integrated";
+  /** Step1 등 — 한 줄 보조 문구 (박스 없음) */
+  compact?: boolean;
 };
 
 function integratedPlannerTipStep(wizardStep: number): number {
@@ -30,6 +32,7 @@ export default function PlannerTips({
   hasCreative,
   budgetNum,
   variant = "planner",
+  compact = false,
 }: Props) {
   const t = useTranslations("planner");
 
@@ -63,6 +66,20 @@ export default function PlannerTips({
                           ? "tipStep7"
                           : "tipDefault";
 
+  const tipText = t(tipKey);
+
+  if (compact) {
+    if (step === 1 && !campaignGoal) return null;
+    return (
+      <p
+        className="text-center text-xs leading-relaxed text-muted-foreground sm:text-left"
+        role="status"
+      >
+        {tipText}
+      </p>
+    );
+  }
+
   return (
     <div
       className={cn(
@@ -78,7 +95,7 @@ export default function PlannerTips({
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
           [ TIP ]
         </p>
-        <p className="mt-1 leading-relaxed text-foreground">{t(tipKey)}</p>
+        <p className="mt-1 leading-relaxed text-foreground">{tipText}</p>
       </div>
     </div>
   );

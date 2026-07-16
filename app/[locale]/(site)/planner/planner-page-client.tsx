@@ -75,7 +75,6 @@ import { sectionVisible } from "@/lib/planner-report-export/section-visibility";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
 import type { PlannerExportChartDatum } from "@/lib/planner-report-export/types";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { PlannerRecommendHintCard } from "@/components/planner/planner-recommend-hint-card";
 import {
   buildFreetextBriefApply,
   type FreetextBriefApplySummary,
@@ -1388,7 +1387,10 @@ export default function PlannerPageClient({
 
         <PlannerNeonPageBody
           appearance={landingAppearance}
-          className={cn(PLANNER_PAGE_SHELL_CLASS, "py-10 lg:py-12")}
+          className={cn(
+            PLANNER_PAGE_SHELL_CLASS,
+            wizardStep === 1 ? "py-6 lg:py-8" : "py-10 lg:py-12",
+          )}
         >
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <PlannerStepper
@@ -1424,26 +1426,35 @@ export default function PlannerPageClient({
         {wizardStep <= PLANNER_LAST_INPUT_STEP ? (
           <div
             className={cn(
-              "space-y-8 overflow-x-clip pb-28",
+              "overflow-x-clip pb-28",
+              wizardStep === 1 ? "space-y-4" : "space-y-8",
               plannerWizardColumnClass(wizardStep),
             )}
           >
-            <PlannerTips
-              wizardStep={wizardStep}
-              campaignGoal={campaignGoal}
-              campaignMediaCount={campaignMediaIds.length}
-              hasCreative={Boolean(creativeObjectUrl)}
-              budgetNum={budgetNum}
-            />
+            {wizardStep !== 1 ? (
+              <PlannerTips
+                wizardStep={wizardStep}
+                campaignGoal={campaignGoal}
+                campaignMediaCount={campaignMediaIds.length}
+                hasCreative={Boolean(creativeObjectUrl)}
+                budgetNum={budgetNum}
+              />
+            ) : null}
 
             {/* Step 1 — 캠페인 목표 */}
             {wizardStep === 1 ? (
               <>
-                {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
-                <PlannerRecommendHintCard />
                 <PlannerCampaignStep1
                   campaignGoal={campaignGoal}
                   onSelectGoal={setCampaignGoal}
+                />
+                <PlannerTips
+                  wizardStep={wizardStep}
+                  campaignGoal={campaignGoal}
+                  campaignMediaCount={campaignMediaIds.length}
+                  hasCreative={Boolean(creativeObjectUrl)}
+                  budgetNum={budgetNum}
+                  compact
                 />
               </>
             ) : null}
@@ -1836,6 +1847,7 @@ export default function PlannerPageClient({
 
             {wizardStep === 6 ? (
               <>
+                {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
                 {regionalReport && sectionVisible(reportSectionVisibility, "region") ? (
                   <PlanCartRegionalBreakdown
                     rows={regionalReport.regionalBreakdown}
@@ -1905,6 +1917,7 @@ export default function PlannerPageClient({
           </div>
         ) : (
           <div className="mx-auto w-full min-w-0 max-w-3xl space-y-8 overflow-x-clip">
+            {showTrialBanner ? <PlannerTrialBanner isKo={isKo} /> : null}
             <PlannerTips
               wizardStep={7}
               campaignGoal={campaignGoal}
