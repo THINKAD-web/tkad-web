@@ -26,6 +26,7 @@ type Props = {
   onChange: (selections: PlanCartGradeSelection[]) => void;
   onAddonLinesChange: (lines: PlanCartAddonLine[]) => void;
   className?: string;
+  compact?: boolean;
 };
 
 function nextUnusedOptionIndex(
@@ -45,6 +46,7 @@ export function PlanCartGradeSelectionsEditor({
   onChange,
   onAddonLinesChange,
   className,
+  compact = false,
 }: Props) {
   const locale = isKo ? "ko-KR" : "en-US";
   const isGradeMode = isPerUnitGradePriceOptions(media);
@@ -74,8 +76,13 @@ export function PlanCartGradeSelectionsEditor({
   const addonLines = item.addonLines ?? [];
 
   return (
-    <div className={cn("space-y-3", className)}>
-      <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+    <div className={cn(compact ? "space-y-2" : "space-y-3", className)}>
+      <p
+        className={cn(
+          "font-medium uppercase tracking-wide text-muted-foreground",
+          compact ? "text-[9px]" : "text-[10px]",
+        )}
+      >
         {isGradeMode
           ? isKo
             ? "등급별 대수"
@@ -93,7 +100,10 @@ export function PlanCartGradeSelectionsEditor({
         return (
           <div
             key={`${sel.priceOptionIndex}-${rowIndex}`}
-            className="space-y-2 rounded-lg border border-violet-400/20 bg-white/80 p-2.5 dark:border-violet-400/15 dark:bg-white/[0.04]"
+            className={cn(
+              "space-y-2 rounded-lg border border-violet-400/20 bg-white/80 dark:border-violet-400/15 dark:bg-white/[0.04]",
+              compact ? "p-2" : "p-2.5",
+            )}
           >
             <div className="flex items-center justify-between gap-2">
               <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-200">
@@ -157,12 +167,15 @@ export function PlanCartGradeSelectionsEditor({
         );
       })}
 
-      <div className="flex flex-wrap gap-2">
+      <div className={cn("flex flex-wrap gap-2", compact && "gap-1.5")}>
         {canAddMore ? (
           <button
             type="button"
             onClick={addRow}
-            className="inline-flex items-center gap-1 rounded-lg border border-dashed border-violet-400/40 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-200"
+            className={cn(
+              "inline-flex items-center gap-1 rounded-lg border border-dashed border-violet-400/40 font-semibold text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-200",
+              compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
+            )}
           >
             <Plus className="h-3.5 w-3.5" />
             {isGradeMode
@@ -185,12 +198,21 @@ export function PlanCartGradeSelectionsEditor({
         />
       </div>
 
-      <PlanCartItemAddonEditor
-        lines={addonLines}
-        isKo={isKo}
-        onChange={onAddonLinesChange}
-        hideAddButton
-      />
+      {!compact ? (
+        <PlanCartItemAddonEditor
+          lines={addonLines}
+          isKo={isKo}
+          onChange={onAddonLinesChange}
+          hideAddButton
+        />
+      ) : addonLines.length > 0 ? (
+        <PlanCartItemAddonEditor
+          lines={addonLines}
+          isKo={isKo}
+          onChange={onAddonLinesChange}
+          hideAddButton
+        />
+      ) : null}
     </div>
   );
 }

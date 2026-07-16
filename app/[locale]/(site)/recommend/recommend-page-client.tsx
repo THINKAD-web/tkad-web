@@ -173,6 +173,11 @@ export default function RecommendPageClient({
     [planCart.items, fullList, catalog],
   );
 
+  const planCartPickedItems = useMemo(() => {
+    const pickedIds = new Set(planPicked.map((m) => m.id));
+    return planCart.items.filter((item) => pickedIds.has(item.mediaId));
+  }, [planCart.items, planPicked]);
+
   const pickedForQuote = useMemo(
     () => (planPicked.length > 0 ? planPicked : top3.map((s) => s.item)),
     [planPicked, top3],
@@ -1162,10 +1167,12 @@ export default function RecommendPageClient({
       </section>
 
       <RecommendCartBar
-        items={planPicked}
+        cartItems={planCartPickedItems}
+        catalog={catalog}
         locale={locale}
         maxItems={cartMax}
         onRemove={removePlanItem}
+        onUpdateItem={updatePlanCartItem}
         onClear={() => {
           for (const m of planPicked) {
             removePlanItem(m.id);
@@ -1173,7 +1180,7 @@ export default function RecommendPageClient({
         }}
       />
 
-      {planPicked.length > 0 && <div className="h-20" />}
+      {planCartPickedItems.length > 0 && <div className="h-24" />}
       </div>
     </HomeLandingDayNight>
   );
