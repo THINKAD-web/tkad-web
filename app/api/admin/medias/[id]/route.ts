@@ -1,7 +1,7 @@
 import type { Prisma } from "@prisma/client";
 import { MediaAvailability } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
@@ -651,20 +651,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
         newPriceWon: media.price,
       }).catch((err) => console.error("[admin/media] price alert", err));
     }
-    try {
-      for (const locale of ["ko", "en"] as const) {
-        revalidatePath(`/${locale}/compare`);
-        revalidatePath(`/${locale}/media`);
-        revalidatePath(`/${locale}/media/${media.slug ?? id}`);
-        if (media.slug && media.slug !== id) {
-          revalidatePath(`/${locale}/media/${id}`);
-        }
-        revalidatePath(`/${locale}/planner`);
-        revalidatePath(`/${locale}/quote`);
-      }
-    } catch {
-      /* revalidatePath는 일부 환경에서만 동작 */
-    }
+    revalidateMediaCaches({ id, slug: media.slug });
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
     }
@@ -696,6 +683,7 @@ export async function DELETE(request: NextRequest, { params }: Params) {
 
   try {
     await db.media.delete({ where: { id } });
+    revalidateMediaCaches({ id, slug: existing.slug });
     if (bunnyUrls.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrls);
     }

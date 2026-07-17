@@ -1,6 +1,6 @@
-import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
+import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
@@ -170,17 +170,13 @@ export async function POST(request: NextRequest) {
   }
 
   if (!dryRun) {
-    try {
-      for (const locale of ["ko", "en"] as const) {
-        revalidatePath(`/${locale}/medias`);
-        revalidatePath(`/${locale}/media`);
-        revalidatePath(`/${locale}/planner`);
-        revalidatePath(`/${locale}/compare`);
-        revalidatePath(`/${locale}/quote`);
-      }
-    } catch {
-      /* optional */
-    }
+    const affected = outcomes
+      .filter(
+        (o): o is Extract<ImportOutcome, { kind: "created" | "updated" }> =>
+          o.kind === "created" || o.kind === "updated",
+      )
+      .map((o) => ({ id: o.id }));
+    revalidateMediaCachesBulk(affected);
   }
 
   if (isAdminAuthDebugEnabled()) {

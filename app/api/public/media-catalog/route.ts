@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-export const revalidate = 300;
+export const revalidate = 1800;
 export const dynamic = "force-dynamic";
 
 export async function GET() {

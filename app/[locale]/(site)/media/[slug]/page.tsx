@@ -74,15 +74,34 @@ import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export const revalidate = 300;
+export const revalidate = 3600;
 export const dynamicParams = true;
 export const maxDuration = 60;
 
+/**
+ * Vercel 빌드에서 사전 생성할 인기 상위 매체 수 (기본값).
+ *
+ * 각 상세 페이지는 빌드 시 다수의 DB/외부 호출로 렌더가 무겁다(관측상 페이지당
+ * 최대 60s+). Vercel 은 cpus=1 로 직렬 생성하므로, 기본값을 과도하게 잡으면
+ * 45분 빌드 한도를 넘길 수 있다. 따라서 기본은 build-safe 한 소수(24)로 두고,
+ * 빌드 여유가 확인되면 `MEDIA_STATIC_BUILD_LIMIT`(예: 50~100)로 상향한다.
+ * 0 으로 두면 사전 생성 없이 전량 on-demand ISR(revalidate=3600).
+ */
+const MEDIA_DETAIL_STATIC_TOP_N = 24;
+
 export async function generateStaticParams() {
-  if (deferCatalogLandingStaticGeneration()) return [];
-  const vercelLimit = Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 0);
-  const slugLimit =
-    process.env.VERCEL === "1" && vercelLimit > 0 ? vercelLimit : undefined;
+  const envLimit = Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 0);
+  const onVercel = deferCatalogLandingStaticGeneration();
+  // Vercel: 인기 상위 N개만 사전 생성(warm) + 나머지는 on-demand ISR(revalidate=3600).
+  // 로컬/CI(비 Vercel): 전량 사전 생성(기존 동작 유지).
+  const slugLimit = onVercel
+    ? envLimit > 0
+      ? envLimit
+      : MEDIA_DETAIL_STATIC_TOP_N
+    : process.env.VERCEL === "1" && envLimit > 0
+      ? envLimit
+      : undefined;
+  if (onVercel && slugLimit === 0) return [];
   const slugs = await getMediaSlugsForStaticBuild(slugLimit);
   const keywordIds = getAllKeywordFilterMediaIds().map(String);
   const merged = [...new Set([...slugs, ...keywordIds])];

@@ -7,7 +7,7 @@ import { curateAllBudgetTiers } from "@/lib/budget-tool-curations";
 import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 /** Live catalog curation — must be a static literal for Next.js segment config. */
 export const dynamic = "force-dynamic";
 

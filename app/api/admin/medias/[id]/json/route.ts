@@ -1,5 +1,5 @@
-import { revalidatePath } from "next/cache";
 import { NextRequest } from "next/server";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
@@ -83,17 +83,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
     console.log("[admin-api] media JSON PUT", { id: media.id, name: media.name });
   }
 
-  try {
-    for (const locale of ["ko", "en"] as const) {
-      revalidatePath(`/${locale}/compare`);
-      revalidatePath(`/${locale}/media`);
-      revalidatePath(`/${locale}/media/${id}`);
-      revalidatePath(`/${locale}/planner`);
-      revalidatePath(`/${locale}/quote`);
-    }
-  } catch {
-    /* optional */
-  }
+  revalidateMediaCaches({ id, slug: media.slug });
 
   const quick = mediaDbRowToQuickAddJson(media);
   return json({

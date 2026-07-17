@@ -1,7 +1,7 @@
 import QuotePageClient from "./quote-page-client";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
-export const revalidate = 300;
+export const revalidate = 3600;
 
 export default async function QuotePage() {
   const catalog = await fetchPublicMediaCatalog();

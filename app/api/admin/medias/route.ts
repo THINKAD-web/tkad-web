@@ -1,6 +1,6 @@
 import { Prisma } from "@prisma/client";
-import { revalidatePath } from "next/cache";
 import type { NextRequest } from "next/server";
+import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
@@ -361,17 +361,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    try {
-      for (const locale of ["ko", "en"] as const) {
-        revalidatePath(`/${locale}/compare`);
-        revalidatePath(`/${locale}/media`);
-        revalidatePath(`/${locale}/media/${media.slug ?? media.id}`);
-        revalidatePath(`/${locale}/planner`);
-        revalidatePath(`/${locale}/quote`);
-      }
-    } catch {
-      /* optional */
-    }
+    revalidateMediaCaches({ id: media.id, slug: media.slug });
 
     return json({ media: mediaForClient }, 201);
   } catch (err) {
