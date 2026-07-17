@@ -56,17 +56,17 @@ function PrimaryNavCard({
       className={cn(
         "group flex min-h-[4rem] items-start gap-3 rounded-2xl border px-3 py-3 transition-all active:scale-[0.99]",
         active
-          ? "border-violet-500/50 bg-gradient-to-br from-violet-500/20 via-violet-500/10 to-transparent shadow-[0_0_0_1px_rgba(139,92,246,0.35),0_8px_24px_rgba(139,92,246,0.12)]"
-          : "border-border/70 bg-card/80 hover:border-violet-400/35 hover:bg-violet-500/5 dark:bg-white/[0.04] dark:hover:border-violet-400/30 dark:hover:bg-violet-500/10",
+          ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/15"
+          : "border-border/70 bg-card/80 hover:border-[color:var(--qp-accent)]/30 hover:bg-[color:var(--qp-accent-soft)] dark:bg-white/[0.04] dark:hover:border-[color:var(--qp-accent)]/30 dark:hover:bg-[color:var(--qp-accent)]/10",
       )}
       aria-current={active ? "page" : undefined}
     >
       <span
         className={cn(
-          "flex h-9 w-9 shrink-0 items-center justify-center rounded-xl transition-colors",
+          "flex h-9 w-9 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] transition-colors",
           active
-            ? "tkad-neon-cta bg-violet-600 text-white shadow-md dark:bg-violet-500"
-            : "bg-violet-500/10 text-violet-600 dark:text-violet-300",
+            ? "bg-[color:var(--qp-accent)] text-white"
+            : "bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]",
         )}
       >
         <Icon className="h-[17px] w-[17px]" aria-hidden />
@@ -76,7 +76,7 @@ function PrimaryNavCard({
           className={cn(
             "block text-[14px] font-bold leading-tight tracking-tight",
             active
-              ? "text-violet-950 dark:text-violet-50"
+              ? "text-[color:var(--qp-ink)] dark:text-white"
               : "text-foreground",
           )}
         >
@@ -112,7 +112,7 @@ function SecondaryLink({
       className={cn(
         "inline-flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[11px] font-semibold transition-colors",
         active
-          ? "border-violet-500/40 bg-violet-500/15 text-violet-800 dark:text-violet-100"
+          ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-ink)] dark:bg-[color:var(--qp-accent)]/15 dark:text-white"
           : "border-border/60 bg-card/60 text-muted-foreground hover:bg-muted/50 hover:text-foreground",
       )}
     >

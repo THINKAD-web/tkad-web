@@ -249,8 +249,8 @@
  * 결정: 단일 액센트 = Hermès Orange(#ff6200), 그 외 흑백/그레이만,
  *       네온 그라데이션·glow 폐기, radius 축소, 타이포 확대.
  *
- * 이 티켓(P0)은 토큰 "정의"만 담당한다. 실제 적용은 홈(.tkad-quiet) 파일럿 1곳.
- * 컴포넌트/타 페이지 전면 롤아웃은 후속(P1)에서 페이지별 진행.
+ * P0: 토큰 정의 + 홈(.tkad-quiet) 파일럿.
+ * P1: 공유 chrome(헤더/하단탭) + 플래너 + 어드민 팔레트 — 매체 상세는 P2.
  * ────────────────────────────────────────────────────────────────────── */
 :root {
   /* 단일 액센트 (SSOT: --hermes #ff6200) — violet/cyan/pink 대체 */
@@ -283,7 +283,7 @@
 }
 
 /* Home 파일럿 스코프 — 이 클래스 하위에서만 네온 액센트 토큰을 주황 단색으로 치환.
- * (타 페이지·공유 chrome 은 미영향 — 홈 <main> 에만 부여) */
+ * (홈 <main> 에만 부여; 공유 chrome 은 아래 .tkad-nav-chrome / .tkad-qp-cta 로 별도 적용) */
 .tkad-quiet {
   --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
   --tkad-fg-accent: var(--hermes);
@@ -294,6 +294,45 @@
   color: var(--hermes) !important;
 }
 
+/* P1 chrome — 단색 CTA (네온 그라데이션·glow 없음). 매체 상세의 .tkad-neon-cta 는 유지 */
+.tkad-qp-cta {
+  background: var(--qp-accent);
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--qp-accent) 85%, black);
+  box-shadow: none;
+}
+.tkad-qp-cta:hover {
+  background: var(--qp-accent-hover);
+  box-shadow: none;
+}
+
+/* P1 planner scope — 미디어 목록/상세(.tkad-media-page)는 제외 */
+.tkad-planner-neon:not(.tkad-media-page) {
+  --primary: var(--qp-accent);
+  --primary-foreground: #ffffff;
+  --accent: var(--qp-accent);
+  --cta: var(--qp-accent);
+  --ring: var(--qp-accent-ring);
+  --tkad-fg-accent: var(--qp-accent);
+}
+.tkad-planner-neon:not(.tkad-media-page) .tkad-planner-gradient-cta {
+  background: var(--qp-accent) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+}
+.tkad-planner-neon:not(.tkad-media-page) .tkad-planner-wizard-btn-accent {
+  background: var(--qp-accent) !important;
+  background-image: none !important;
+  border-color: var(--qp-accent) !important;
+  box-shadow: none !important;
+}
+html.dark .tkad-planner-neon:not(.tkad-media-page) .tkad-ai-recommend-submit:not(:disabled),
+.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon:not(.tkad-media-page) .tkad-ai-recommend-submit:not(:disabled) {
+  background: var(--qp-accent) !important;
+  background-image: none !important;
+  border-color: color-mix(in srgb, var(--qp-accent) 55%, transparent) !important;
+}
+
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
 /* 관리자 대시보드만: 라이트 모드에서 남색 primary/악센트 제거 + 본문·보조글 대비 강화
  * (shadcn Card/Button/Input 이 --primary, --muted-foreground 등을 쓰므로 AdminShell 루트에 스코프) */
@@ -302,41 +341,41 @@ html:not(.dark) .admin-dashboard-root {
   --foreground: #0a0a0c;
   --card: #ffffff;
   --card-foreground: #0a0a0c;
-  /* Neon admin palette (day) */
-  --primary: #22d3ee;
-  --primary-foreground: #041018;
+  /* Quiet Professional admin palette (day) — cyan/purple → qp */
+  --primary: var(--qp-accent);
+  --primary-foreground: #ffffff;
   --secondary: #e6e4df;
   --secondary-foreground: #0a0a0c;
   --muted: #dcd9d3;
   --muted-foreground: #4a4a50;
-  --accent: #a855f7;
-  --accent-foreground: #0a0a0c;
+  --accent: var(--qp-accent);
+  --accent-foreground: #ffffff;
   --border: #c8c4bc;
   --input: #a8a49c;
-  --ring: rgba(34, 211, 238, 0.45);
-  --cta: #22d3ee;
-  --cta-hover: #06b6d4;
+  --ring: var(--qp-accent-ring);
+  --cta: var(--qp-accent);
+  --cta-hover: var(--qp-accent-hover);
 }
 
-/* Admin dashboard only (dark): override global orange tokens */
+/* Admin dashboard only (dark): Quiet Professional tokens */
 .dark .admin-dashboard-root {
   --background: #07070a;
   --foreground: rgba(248, 250, 252, 0.96);
   --card: rgba(0, 0, 0, 0.35);
   --card-foreground: rgba(248, 250, 252, 0.96);
-  --primary: #22d3ee;
-  --primary-foreground: #05050a;
+  --primary: var(--qp-accent);
+  --primary-foreground: #ffffff;
   --secondary: rgba(255, 255, 255, 0.06);
   --secondary-foreground: rgba(248, 250, 252, 0.96);
   --muted: rgba(255, 255, 255, 0.08);
   --muted-foreground: rgba(248, 250, 252, 0.62);
-  --accent: #a855f7;
-  --accent-foreground: #05050a;
+  --accent: var(--qp-accent);
+  --accent-foreground: #ffffff;
   --border: rgba(255, 255, 255, 0.12);
   --input: rgba(255, 255, 255, 0.12);
-  --ring: rgba(168, 85, 247, 0.45);
-  --cta: #22d3ee;
-  --cta-hover: #67e8f9;
+  --ring: var(--qp-accent-ring);
+  --cta: var(--qp-accent);
+  --cta-hover: var(--qp-accent-hover);
 }
 
 /* Admin 대시보드: `tkad-glass-surface` 기본(검정 유리) 대신 테마 카드 톤 — CRM 등과 동일한 밝기 */
@@ -393,27 +432,27 @@ html.dark .admin-dashboard-root .tkad-glass-surface-soft {
   --cr-surface-soft: rgb(255 255 255 / 0.03);
   --cr-row-even: rgb(255 255 255 / 0.02);
   --cr-row-odd: rgb(255 255 255 / 0.04);
-  --cr-accent: #22d3ee;
-  --cr-accent-border: rgb(34 211 238 / 0.35);
-  --cr-accent-surface: rgb(34 211 238 / 0.15);
+  --cr-accent: var(--qp-accent);
+  --cr-accent-border: color-mix(in srgb, var(--qp-accent) 35%, transparent);
+  --cr-accent-surface: color-mix(in srgb, var(--qp-accent) 15%, transparent);
   --cr-shadow: 0 32px 120px rgb(0 0 0 / 0.55);
   --cr-overlay: linear-gradient(to bottom, rgb(5 5 10 / 0.2), rgb(5 5 10 / 0.85));
   --cr-stat-accent: linear-gradient(
     135deg,
-    rgb(34 211 238 / 0.16),
-    rgb(168 85 247 / 0.12)
+    color-mix(in srgb, var(--qp-accent) 16%, transparent),
+    color-mix(in srgb, var(--qp-ink) 8%, transparent)
   );
-  --cr-stat-accent-border: rgb(34 211 238 / 0.3);
+  --cr-stat-accent-border: color-mix(in srgb, var(--qp-accent) 30%, transparent);
   --cr-sum-row: linear-gradient(
     135deg,
-    rgb(34 211 238 / 0.12),
-    rgb(168 85 247 / 0.1)
+    color-mix(in srgb, var(--qp-accent) 12%, transparent),
+    color-mix(in srgb, var(--qp-ink) 6%, transparent)
   );
   --cr-bar: rgb(255 255 255 / 0.7);
   --cr-bar-track: rgb(255 255 255 / 0.1);
   --cr-thumb-badge-bg: rgb(5 5 10 / 0.85);
   --cr-timeline-track: rgb(255 255 255 / 0.08);
-  --cr-timeline-bar: linear-gradient(90deg, #22d3ee, #a855f7);
+  --cr-timeline-bar: linear-gradient(90deg, var(--qp-accent), var(--qp-ink));
   --cr-grid-opacity: 0.12;
 
   color: var(--cr-fg);
@@ -438,9 +477,9 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document {
   --cr-surface-soft: rgb(255 255 255 / 0.58);
   --cr-row-even: rgb(255 255 255 / 0.45);
   --cr-row-odd: rgb(255 255 255 / 0.68);
-  --cr-accent: #0891b2;
-  --cr-accent-border: rgb(8 145 178 / 0.38);
-  --cr-accent-surface: rgb(34 211 238 / 0.14);
+  --cr-accent: var(--qp-accent);
+  --cr-accent-border: color-mix(in srgb, var(--qp-accent) 38%, transparent);
+  --cr-accent-surface: color-mix(in srgb, var(--qp-accent) 14%, transparent);
   --cr-shadow:
     0 1px 2px rgb(0 0 0 / 0.06),
     0 24px 64px rgb(10 10 12 / 0.1);
@@ -451,20 +490,20 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document {
   );
   --cr-stat-accent: linear-gradient(
     135deg,
-    rgb(34 211 238 / 0.14),
-    rgb(168 85 247 / 0.1)
+    color-mix(in srgb, var(--qp-accent) 14%, transparent),
+    color-mix(in srgb, var(--qp-ink) 6%, transparent)
   );
-  --cr-stat-accent-border: rgb(34 211 238 / 0.35);
+  --cr-stat-accent-border: color-mix(in srgb, var(--qp-accent) 35%, transparent);
   --cr-sum-row: linear-gradient(
     135deg,
-    rgb(34 211 238 / 0.1),
-    rgb(168 85 247 / 0.08)
+    color-mix(in srgb, var(--qp-accent) 10%, transparent),
+    color-mix(in srgb, var(--qp-ink) 5%, transparent)
   );
   --cr-bar: rgb(10 10 12 / 0.22);
   --cr-bar-track: rgb(10 10 12 / 0.08);
   --cr-thumb-badge-bg: rgb(255 255 255 / 0.92);
   --cr-timeline-track: rgb(10 10 12 / 0.06);
-  --cr-timeline-bar: linear-gradient(90deg, #0891b2, #7c3aed);
+  --cr-timeline-bar: linear-gradient(90deg, var(--qp-accent), var(--qp-ink));
   --cr-grid-opacity: 0.07;
 }
 
@@ -1875,13 +1914,13 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   --muted-foreground: var(--home-muted);
   --border: rgb(15 23 42 / 0.11);
   --input: rgb(15 23 42 / 0.12);
-  --ring: rgb(99 102 241 / 0.42);
-  --primary: #4338ca;
-  --primary-foreground: #fafafa;
+  --ring: var(--qp-accent-ring);
+  --primary: var(--qp-accent);
+  --primary-foreground: #ffffff;
   --secondary: rgb(226 232 240 / 0.96);
   --secondary-foreground: var(--home-ink);
-  --accent: #4338ca;
-  --accent-foreground: #fafafa;
+  --accent: var(--qp-accent);
+  --accent-foreground: #ffffff;
   --destructive: #dc2626;
   --destructive-foreground: #fafafa;
 
@@ -1975,13 +2014,13 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   --muted-foreground: rgb(226 232 240 / 0.68);
   --border: rgb(255 255 255 / 0.12);
   --input: rgb(255 255 255 / 0.1);
-  --ring: rgb(167 139 250 / 0.45);
-  --primary: #a5b4fc;
-  --primary-foreground: #0f172a;
+  --ring: var(--qp-accent-ring);
+  --primary: var(--qp-accent);
+  --primary-foreground: #ffffff;
   --secondary: rgb(255 255 255 / 0.08);
   --secondary-foreground: rgb(248 250 252 / 0.92);
-  --accent: #22d3ee;
-  --accent-foreground: #0f172a;
+  --accent: var(--qp-accent);
+  --accent-foreground: #ffffff;
   --destructive: #f87171;
   --destructive-foreground: #0f172a;
 
@@ -3137,20 +3176,14 @@ html:not(.dark) .tkad-nav-chrome {
   color: var(--foreground);
 }
 
-/* 로고 "AD" — 기본 네온 그라데이션 클립은 다크 바에서 대비 부족 → 밝은 스펙트럼으로 재지정 */
+/* 로고 "AD" — P1: 네온 그라데이션 → qp 액센트 단색 (라이트/다크 공통) */
+.tkad-nav-chrome .tkad-home-accent-text,
 .dark .tkad-nav-chrome .tkad-home-accent-text {
-  background-image: linear-gradient(
-    92deg,
-    rgb(196 181 253) 0%,
-    rgb(125 211 252) 48%,
-    rgb(251 207 232) 100%
-  ) !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--qp-accent) !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
 }
 
 /* 드롭다운 항목: 유틸 조합이 꼬여도 제목/설명 대비 유지 */
@@ -3241,7 +3274,7 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-/* ── Mobile bottom tab bar — neon icon chips (Lucide + emoji) ── */
+/* ── Mobile bottom tab bar — Quiet Professional (단색, glow 없음) ── */
 .tkad-mobile-tab-icon-wrap {
   position: relative;
   display: flex;
@@ -3249,115 +3282,66 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
   justify-content: center;
   width: 2.375rem;
   height: 2.375rem;
-  border-radius: 0.875rem;
-  border: 1px solid rgb(168 85 247 / 0.14);
-  background: linear-gradient(
-    145deg,
-    rgb(168 85 247 / 0.06),
-    rgb(34 211 238 / 0.04),
-    rgb(236 72 153 / 0.03)
-  );
-  box-shadow:
-    0 0 12px rgb(124 58 237 / 0.06),
-    inset 0 1px 0 rgb(255 255 255 / 0.06);
+  border-radius: var(--qp-radius-md);
+  border: 1px solid color-mix(in srgb, var(--qp-line) 80%, transparent);
+  background: var(--qp-surface-2);
+  box-shadow: none;
   transition:
-    box-shadow 0.2s ease,
     border-color 0.2s ease,
     transform 0.2s ease,
     background 0.2s ease;
 }
 
 .tkad-mobile-tab-icon-wrap[data-active="true"] {
-  border-color: rgb(168 85 247 / 0.42);
-  background: linear-gradient(
-    135deg,
-    rgb(168 85 247 / 0.28),
-    rgb(34 211 238 / 0.22),
-    rgb(236 72 153 / 0.18)
-  );
-  box-shadow:
-    0 0 0 1px rgb(255 255 255 / 0.08),
-    0 0 18px rgb(168 85 247 / 0.28),
-    0 0 12px rgb(34 211 238 / 0.2),
-    0 0 10px rgb(236 72 153 / 0.12);
+  border-color: color-mix(in srgb, var(--qp-accent) 45%, transparent);
+  background: var(--qp-accent-soft);
+  box-shadow: none;
 }
 
 .tkad-mobile-tab-icon-wrap[data-active="true"]::before {
-  content: "";
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  padding: 1px;
-  background: linear-gradient(
-    135deg,
-    rgb(168 85 247 / 0.85),
-    rgb(34 211 238 / 0.75),
-    rgb(236 72 153 / 0.65)
-  );
-  -webkit-mask:
-    linear-gradient(#000 0 0) content-box,
-    linear-gradient(#000 0 0);
-  -webkit-mask-composite: xor;
-  mask-composite: exclude;
-  opacity: 0.55;
-  pointer-events: none;
+  content: none;
 }
 
 .tkad-mobile-tab-icon {
   position: relative;
   z-index: 1;
-  color: rgb(124 58 237 / 0.55);
-  filter:
-    drop-shadow(0 0 4px rgb(168 85 247 / 0.22))
-    drop-shadow(0 0 6px rgb(34 211 238 / 0.12));
+  color: color-mix(in srgb, var(--qp-fg-muted) 85%, transparent);
+  filter: none;
   transition:
     color 0.2s ease,
-    filter 0.2s ease,
     transform 0.2s ease;
 }
 
 .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
-  color: rgb(196 181 253);
-  filter:
-    drop-shadow(0 0 5px rgb(168 85 247 / 0.75))
-    drop-shadow(0 0 8px rgb(34 211 238 / 0.55))
-    drop-shadow(0 0 10px rgb(236 72 153 / 0.35));
+  color: var(--qp-accent);
+  filter: none;
 }
 
 html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="false"] {
-  border-color: rgb(124 58 237 / 0.16);
-  background: linear-gradient(
-    145deg,
-    rgb(168 85 247 / 0.08),
-    rgb(34 211 238 / 0.05),
-    rgb(255 255 255 / 0.72)
-  );
+  border-color: color-mix(in srgb, var(--qp-line) 90%, transparent);
+  background: var(--qp-surface);
 }
 
 html:not(.dark) .tkad-mobile-tab-icon {
-  color: rgb(109 40 217 / 0.45);
+  color: color-mix(in srgb, var(--qp-fg-muted) 90%, transparent);
 }
 
 html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
-  color: rgb(109 40 217);
-  filter:
-    drop-shadow(0 0 4px rgb(168 85 247 / 0.55))
-    drop-shadow(0 0 8px rgb(34 211 238 / 0.35));
+  color: var(--qp-accent);
+  filter: none;
 }
 
 .dark .tkad-mobile-tab-icon-wrap[data-active="false"] .tkad-mobile-tab-icon {
-  color: rgb(34 211 238 / 0.42);
+  color: rgb(255 255 255 / 0.42);
 }
 
 .dark .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
-  color: rgb(103 232 249);
+  color: var(--qp-accent);
 }
 
 .tkad-mobile-tab-fab .tkad-mobile-tab-icon {
   color: rgb(255 255 255);
-  filter:
-    drop-shadow(0 0 6px rgb(255 255 255 / 0.45))
-    drop-shadow(0 0 10px rgb(34 211 238 / 0.35));
+  filter: none;
 }
 
 /* ── Premium Service card hover ── */
@@ -3704,17 +3688,15 @@ html {
   z-index: -1;
   opacity: 1;
   background:
-    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.12), transparent 55%),
-    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.12), transparent 58%),
-    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.08), transparent 62%),
+    radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--qp-accent) 10%, transparent), transparent 55%),
+    radial-gradient(circle at 82% 22%, color-mix(in srgb, var(--qp-ink) 4%, transparent), transparent 58%),
     linear-gradient(180deg, rgba(6, 6, 10, 0.0) 0%, rgba(6, 6, 10, 0.06) 100%);
 }
 
 .dark .admin-dashboard-root::before {
   background:
-    radial-gradient(circle at 18% 10%, rgba(34, 211, 238, 0.16), transparent 55%),
-    radial-gradient(circle at 82% 22%, rgba(168, 85, 247, 0.16), transparent 58%),
-    radial-gradient(circle at 45% 92%, rgba(236, 72, 153, 0.10), transparent 62%),
+    radial-gradient(circle at 18% 10%, color-mix(in srgb, var(--qp-accent) 14%, transparent), transparent 55%),
+    radial-gradient(circle at 82% 22%, rgba(255, 255, 255, 0.04), transparent 58%),
     linear-gradient(180deg, rgba(0, 0, 0, 0.10) 0%, rgba(0, 0, 0, 0.30) 100%);
 }
 

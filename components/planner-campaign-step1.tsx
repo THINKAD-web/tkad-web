@@ -33,7 +33,7 @@ export default function PlannerCampaignStep1({
               plannerNeon.headline,
             )}
           >
-            <Sparkles className="h-4 w-4 shrink-0 text-violet-400 sm:h-5 sm:w-5" />
+            <Sparkles className="h-4 w-4 shrink-0 text-[color:var(--qp-accent)] sm:h-5 sm:w-5" />
             {t("step1Title")}
           </h2>
           <p className={cn("mt-1 text-xs sm:text-sm", plannerNeon.subtext)}>
@@ -69,13 +69,13 @@ export default function PlannerCampaignStep1({
             className={cn(
               "relative overflow-hidden rounded-xl border transition-transform motion-safe:duration-300",
               campaignGoal
-                ? "border-violet-400/50 motion-safe:scale-[1.01]"
+                ? "border-[color:var(--qp-accent)]/50 motion-safe:scale-[1.01]"
                 : "dark:border-white/10 border-gray-200",
             )}
           >
             <div className="tkad-planner-step1-preview-frame aspect-[2.35/1] w-full bg-gray-100 dark:bg-[#020202]/80">
               <div className="flex h-full flex-col items-center justify-center gap-2 px-4 py-6 sm:py-8">
-                <div className="rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                <div className="rounded-[var(--qp-radius-md)] bg-[color:var(--qp-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                   OOH
                 </div>
                 <p className="text-center text-sm font-bold text-foreground sm:text-base">

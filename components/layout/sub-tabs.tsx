@@ -48,7 +48,7 @@ export function SubTabs({ tabs, currentPath }: SubTabsProps) {
                 className={cn(
                   "flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-xl px-4 py-2 text-sm font-medium transition-all",
                   isActive
-                    ? "tkad-neon-cta-clean text-white shadow-sm"
+                    ? "bg-[color:var(--qp-accent)] text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/8 dark:text-white/70 hover:dark:bg-white/15",
                 )}
                 aria-current={isActive ? "page" : undefined}

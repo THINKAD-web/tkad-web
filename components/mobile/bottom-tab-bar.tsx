@@ -74,10 +74,10 @@ export const MOBILE_BOTTOM_TABS: MobileBottomTabDef[] = [
   },
 ];
 
-const TAB_LABEL_ACTIVE = "tkad-home-accent-text font-semibold";
+const TAB_LABEL_ACTIVE = "font-semibold text-[color:var(--qp-accent)]";
 
 const TAB_LABEL_INACTIVE =
-  "text-violet-500/45 dark:text-cyan-300/35";
+  "text-[color:var(--qp-fg-muted)]/70 dark:text-white/40";
 
 function isHiddenPath(pathname: string | null): boolean {
   if (!pathname) return true;
@@ -94,7 +94,7 @@ function isHiddenPath(pathname: string | null): boolean {
 function TabBadge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="absolute -top-1.5 -right-2 z-10 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-gradient-to-br from-pink-500 to-violet-600 px-1 text-[10px] font-bold leading-none text-white shadow-[0_0_10px_rgba(236,72,153,0.45)] ring-2 ring-white dark:ring-[#05050a]">
+    <span className="absolute -top-1.5 -right-2 z-10 inline-flex min-h-[18px] min-w-[18px] items-center justify-center rounded-full bg-[color:var(--qp-accent)] px-1 text-[10px] font-bold leading-none text-white ring-2 ring-white dark:ring-[#05050a]">
       {count > 99 ? "99+" : count}
     </span>
   );
@@ -140,7 +140,7 @@ function TabNeonIcon({
       {active ? (
         <span
           aria-hidden
-          className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-gradient-to-r from-violet-500 via-cyan-400 to-pink-500 shadow-[0_0_8px_rgba(34,211,238,0.7)]"
+          className="absolute -bottom-1.5 left-1/2 h-1 w-1 -translate-x-1/2 rounded-full bg-[color:var(--qp-accent)]"
         />
       ) : null}
       <TabBadge count={badgeCount} />
@@ -177,17 +177,17 @@ export function BottomTabBar() {
     <nav
       className={cn(
         "fixed bottom-0 left-0 right-0 z-[80] block h-[4.25rem] md:hidden",
-        "border-t border-gray-200/70 bg-white/90 backdrop-blur-xl",
-        "shadow-[0_-6px_40px_rgba(15,23,42,0.08),0_0_24px_rgba(168,85,247,0.06)]",
+        "border-t border-[color:var(--qp-line)]/70 bg-white/95 backdrop-blur-xl",
+        "shadow-[0_-4px_24px_rgba(15,23,42,0.06)]",
         "dark:border-white/10 dark:bg-[#05050a]/92",
-        "dark:shadow-[0_-8px_48px_rgba(0,0,0,0.55),0_0_28px_rgba(124,58,237,0.1)]",
+        "dark:shadow-[0_-6px_28px_rgba(0,0,0,0.45)]",
       )}
       style={{ paddingBottom: "env(safe-area-inset-bottom, 0px)" }}
       aria-label={t("navAria")}
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-violet-500/50 to-transparent dark:via-cyan-400/40"
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-[color:var(--qp-line)]/80 dark:bg-white/10"
       />
       <ul className="flex h-full w-full items-end">
         {MOBILE_BOTTOM_TABS.map((tab) => {
@@ -205,7 +205,7 @@ export function BottomTabBar() {
                   className="tkad-mobile-tab-fab relative z-10 -translate-y-2 flex w-full min-w-0 flex-col items-center transition-all duration-200 active:scale-95"
                   aria-current={active ? "page" : undefined}
                 >
-                  <span className="tkad-neon-cta tkad-neon-border tkad-mobile-tab-fab relative z-10 flex h-14 w-14 items-center justify-center rounded-full">
+                  <span className="tkad-qp-cta tkad-mobile-tab-fab relative z-10 flex h-14 w-14 items-center justify-center rounded-full">
                     <TabNeonIcon
                       Icon={Icon}
                       active={active}

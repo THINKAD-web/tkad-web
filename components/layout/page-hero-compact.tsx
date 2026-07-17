@@ -24,7 +24,7 @@ export function PageHeroCompact({
       <h1 className="text-lg font-bold leading-snug text-gray-900 dark:text-white md:text-xl">
         {title}
         {highlight ? (
-          <span className="text-violet-600 dark:text-violet-300">{highlight}</span>
+          <span className="text-[color:var(--qp-accent)]">{highlight}</span>
         ) : null}
         {titleEnd}
       </h1>

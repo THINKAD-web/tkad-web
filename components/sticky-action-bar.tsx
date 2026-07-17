@@ -54,7 +54,7 @@ export const STICKY_ACTION_BAR_BTN_IDLE =
   "border-gray-200 bg-white text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
 
 export const STICKY_ACTION_BAR_BTN_PRIMARY =
-  "border-0 bg-gradient-to-r from-violet-500 to-cyan-400 font-semibold text-white shadow-sm shadow-violet-500/20";
+  "border-0 bg-[color:var(--qp-accent)] font-semibold text-white hover:bg-[color:var(--qp-accent-hover)]";
 
 export const STICKY_ACTION_BAR_BTN_VIOLET =
   "border-violet-500/40 bg-violet-500 text-white shadow-sm shadow-violet-500/25";

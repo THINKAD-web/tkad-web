@@ -46,7 +46,7 @@ export function PlannerStepCollapsible({
         </div>
         <ChevronDown
           className={cn(
-            "mt-0.5 h-4 w-4 shrink-0 text-violet-400 transition-transform",
+            "mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)] transition-transform",
             open && "rotate-180",
           )}
           aria-hidden

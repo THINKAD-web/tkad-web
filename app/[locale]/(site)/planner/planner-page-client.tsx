@@ -1418,7 +1418,7 @@ export default function PlannerPageClient({
         {wizardStep <= 3 && (freetextApplied || scenarioPrefillApplied) ? (
           <div
             className={cn(
-              "mb-6 space-y-1 rounded-xl border border-violet-400/25 bg-violet-500/10 px-4 py-3 text-sm text-muted-foreground",
+              "mb-6 space-y-1 rounded-[var(--qp-radius-md)] border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)] px-4 py-3 text-sm text-muted-foreground",
               plannerWizardColumnClass(wizardStep),
             )}
           >
@@ -2209,7 +2209,7 @@ export default function PlannerPageClient({
                       <BtnBlock
                         variant="accent"
                         size="md"
-                        className="w-full bg-gradient-to-r from-violet-500 to-cyan-400 font-bold text-white shadow-md shadow-violet-500/25"
+                        className="w-full bg-[color:var(--qp-accent)] font-bold text-white hover:bg-[color:var(--qp-accent-hover)]"
                         onClick={() => void createQuoteFromPlan()}
                         disabled={
                           creatingQuote ||

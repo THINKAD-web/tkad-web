@@ -9,35 +9,35 @@ import { TierGatePanel } from "@/components/entitlements/tier-gate-panel";
 import { plannerProGateTrialHint, plannerTrialBannerText } from "@/lib/entitlements/gate-ui";
 import { cn } from "@/lib/utils";
 
-/** 플래너 네온 UI 공통 클래스 */
+/** 플래너 Quiet Professional UI 공통 클래스 (legacy export name 유지) */
 export const plannerNeon = {
   pageBg: "dark:bg-[#020202] bg-gray-50",
-  card: "rounded-2xl border shadow-sm dark:bg-white/5 bg-white dark:border-white/10 border-gray-100",
-  cardHeader: "border-b dark:border-white/10 border-gray-100 p-5 sm:p-6",
+  card: "rounded-[var(--qp-radius-lg)] border shadow-sm dark:bg-white/5 bg-white dark:border-white/10 border-[color:var(--qp-line)]",
+  cardHeader: "border-b dark:border-white/10 border-[color:var(--qp-line)] p-5 sm:p-6",
   label:
-    "text-xs font-semibold tracking-widest uppercase text-cyan-700/80 dark:text-cyan-300/80",
+    "text-xs font-semibold tracking-widest uppercase text-[color:var(--qp-fg-muted)]",
   headline: "font-bold text-foreground",
   subtext: "text-sm text-muted-foreground",
   kpiCard:
-    "rounded-xl border dark:bg-white/5 bg-violet-50 dark:border-white/10 border-violet-100 p-4",
+    "rounded-[var(--qp-radius-md)] border dark:bg-white/5 bg-[color:var(--qp-accent-soft)] dark:border-white/10 border-[color:var(--qp-line)] p-4",
   kpiValue: "text-2xl font-bold tabular-nums dark:text-white text-gray-900",
   kpiLabel: "text-xs dark:text-white/40 text-gray-400",
-  cta: "inline-flex items-center justify-center gap-2 bg-gradient-to-r from-violet-500 to-cyan-400 text-white tkad-planner-gradient-cta rounded-xl px-5 py-2.5 text-sm font-medium transition-opacity hover:opacity-90",
+  cta: "inline-flex items-center justify-center gap-2 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-5 py-2.5 text-sm font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
   ctaSm:
-    "inline-flex items-center justify-center gap-1.5 bg-gradient-to-r from-violet-500 to-cyan-400 text-white tkad-planner-gradient-cta rounded-xl px-4 py-2 text-sm font-medium transition-opacity hover:opacity-90",
+    "inline-flex items-center justify-center gap-1.5 bg-[color:var(--qp-accent)] text-white rounded-[var(--qp-radius-md)] px-4 py-2 text-sm font-medium transition-colors hover:bg-[color:var(--qp-accent-hover)]",
   selectChip:
-    "rounded-xl border px-4 py-2.5 text-sm font-medium transition-colors touch-manipulation",
+    "rounded-[var(--qp-radius-md)] border px-4 py-2.5 text-sm font-medium transition-colors touch-manipulation",
   selectChipActive:
-    "border-violet-400/60 bg-gradient-to-r from-violet-500/20 to-cyan-400/20 dark:text-white text-gray-900",
+    "border-[color:var(--qp-accent)]/60 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/20 dark:text-white text-gray-900",
   selectChipIdle:
-    "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white dark:text-white/80 text-gray-700 hover:border-violet-300/40",
+    "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white dark:text-white/80 text-gray-700 hover:border-[color:var(--qp-accent)]/35",
 } as const;
 
 export const PLANNER_CHART_COLORS = {
-  violet: "#8B5CF6",
-  cyan: "#06B6D4",
-  pink: "#EC4899",
-  indigo: "#6366F1",
+  violet: "#ff6200",
+  cyan: "#1c1c1f",
+  pink: "#5a5a5e",
+  indigo: "#08080a",
 } as const;
 
 export function PlannerNeonLabel({
@@ -107,7 +107,7 @@ export function PlannerProLockedSkeleton({
       </div>
       <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-b from-background/5 via-background/15 to-background/25">
         <div className="flex flex-col items-center gap-2 rounded-2xl border border-gray-200/80 bg-background/90 px-4 py-3 shadow-sm dark:border-white/15 dark:bg-[#1a1a1a]/80">
-          <Lock className="h-5 w-5 text-violet-500 dark:text-violet-300" aria-hidden />
+          <Lock className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
           <span className="text-xs font-medium text-muted-foreground">
             {isKo ? "잠긴 프리미엄 콘텐츠" : "Locked premium content"}
           </span>
@@ -163,7 +163,7 @@ export function PlannerProTeaserStats({
         <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "총 노출" : "Impressions"}
         </p>
-        <p className="mt-1 text-lg font-bold tabular-nums text-cyan-400 sm:text-xl">
+        <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-accent)] sm:text-xl">
           {totalImpressions.toLocaleString()}
         </p>
       </div>
@@ -171,7 +171,7 @@ export function PlannerProTeaserStats({
         <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "도달률" : "Reach"}
         </p>
-        <p className="mt-1 text-lg font-bold tabular-nums text-violet-400 sm:text-xl">
+        <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-fg)] sm:text-xl">
           {reachCorePct}%
         </p>
       </div>
@@ -179,7 +179,7 @@ export function PlannerProTeaserStats({
         <p className="text-[10px] uppercase tracking-wider text-gray-400 dark:text-white/40">
           ROI
         </p>
-        <p className="mt-1 text-lg font-bold tabular-nums text-pink-400 sm:text-xl">
+        <p className="mt-1 text-lg font-bold tabular-nums text-[color:var(--qp-fg-muted)] sm:text-xl">
           {roiExpected ?? "—"}
           {roiExpected != null ? "x" : ""}
         </p>
@@ -252,9 +252,9 @@ export function PlannerTrialBanner({ isKo }: { isKo: boolean }) {
   return (
     <div
       className={cn(
-        "mb-4 rounded-xl border p-3 sm:p-4",
-        "dark:border-violet-500/30 border-violet-200",
-        "dark:bg-violet-500/10 bg-violet-50",
+        "mb-4 rounded-[var(--qp-radius-md)] border p-3 sm:p-4",
+        "border-[color:var(--qp-accent)]/30 dark:border-[color:var(--qp-accent)]/35",
+        "bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/10",
       )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">

@@ -27,18 +27,17 @@ export default async function AdminLoginPage({ params }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-[calc(100vh-72px)] flex-col items-center justify-center bg-transparent px-4 py-12 text-foreground">
-        <div className="relative w-full max-w-md overflow-hidden rounded-[28px] border border-border/70 bg-card/80 p-6 shadow-[0_28px_120px_rgba(0,0,0,0.18)] backdrop-blur">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+        <div className="relative w-full max-w-md overflow-hidden rounded-[var(--qp-radius-lg)] border border-border/70 bg-card/80 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.14),transparent_60%),radial-gradient(circle_at_40%_90%,rgba(236,72,153,0.10),transparent_65%)]"
+            className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--qp-accent)_12%,transparent),transparent_55%)]"
           />
 
           <div className="relative mb-6 text-center">
             <span className="text-2xl font-black tracking-tight">
-              THINK<span className="tkad-home-accent-text">AD</span>
+              THINK<span className="text-[color:var(--qp-accent)]">AD</span>
             </span>
-            <span className="ml-2 inline-flex items-center rounded-2xl border border-border/70 bg-card/80 px-2 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
+            <span className="ml-2 inline-flex items-center rounded-[var(--qp-radius-md)] border border-border/70 bg-card/80 px-2 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] text-muted-foreground shadow-sm backdrop-blur">
               ADMIN
             </span>
             <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">

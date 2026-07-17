@@ -25,9 +25,9 @@ function isMobileDetailPath(pathname: string): boolean {
 
 function navItemClass(active: boolean, open: boolean) {
   return cn(
-    "inline-flex min-h-8 items-center gap-0.5 rounded-full px-3 py-1.5 text-[13px] font-semibold leading-none transition-colors",
+    "inline-flex min-h-8 items-center gap-0.5 rounded-[var(--qp-radius-md)] px-3 py-1.5 text-[13px] font-semibold leading-none transition-colors",
     active || open
-      ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
+      ? "bg-[color:var(--qp-accent)] text-white [&_svg]:text-white"
       : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/8",
   );
 }
