@@ -22,7 +22,7 @@ export function HomeMediaScroll({
       <div className="px-4 py-4">
         <Link
           href="/media"
-          className="flex items-center justify-center gap-1 rounded-xl border border-dashed border-gray-200 py-3 text-sm font-medium text-gray-600 transition hover:border-violet-300 hover:text-violet-600 dark:border-white/15 dark:text-white/60 dark:hover:border-violet-400/40 dark:hover:text-violet-300"
+          className="flex items-center justify-center gap-1 rounded-md border border-dashed border-gray-200 py-3 text-sm font-medium text-gray-600 transition hover:border-hermes/50 hover:text-hermes dark:border-white/15 dark:text-white/60"
         >
           {isKo ? "매체 둘러보기" : "Browse media"}
           <ChevronRight className="h-4 w-4" aria-hidden />
@@ -34,12 +34,12 @@ export function HomeMediaScroll({
   return (
     <div className="py-4">
       <div className="mb-3 flex items-center justify-between px-4">
-        <h3 className="text-base font-bold text-gray-900 dark:text-white">
+        <h3 className="text-lg font-bold text-gray-900 dark:text-white md:text-xl">
           {title}
         </h3>
         <Link
           href={{ pathname: "/media", query: { sort: "popular" } }}
-          className="flex items-center gap-0.5 text-xs font-medium tkad-home-accent-text"
+          className="flex items-center gap-0.5 text-sm font-medium tkad-home-accent-text"
         >
           {isKo ? "전체보기" : "View all"}
           <ChevronRight className="h-3 w-3" aria-hidden />

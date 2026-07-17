@@ -77,7 +77,7 @@ export function HomeHeroBanner() {
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
       <div
-        className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-2xl bg-gray-100 shadow-sm ring-1 ring-black/5 md:rounded-3xl dark:bg-white/5 dark:ring-white/10"
+        className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10"
         role="region"
         aria-roledescription="carousel"
         aria-label={isKo ? "프로모션" : "Promotions"}
@@ -111,20 +111,20 @@ export function HomeHeroBanner() {
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%] rounded-b-2xl bg-gradient-to-t from-black/75 via-black/35 to-transparent md:rounded-b-3xl"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%] rounded-b-lg bg-gradient-to-t from-black/75 via-black/35 to-transparent"
         />
 
         <div className="absolute inset-x-0 bottom-10 z-20 px-5 text-center md:bottom-12 md:px-8">
-          <p className="text-lg font-bold tracking-tight text-white drop-shadow-sm md:text-2xl">
+          <p className="text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-4xl">
             {title}
           </p>
-          <p className="mx-auto mt-1.5 max-w-md text-xs leading-snug text-white/85 md:text-sm">
+          <p className="mx-auto mt-2 max-w-md text-sm leading-snug text-white/90 md:text-base">
             {subtitle}
           </p>
           <button
             type="button"
             onClick={scrollToExplore}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-full border border-white/25 bg-white/15 px-4 py-2 text-xs font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:text-sm"
+            className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:text-base"
           >
             {ctaLabel}
             <span aria-hidden>↓</span>
@@ -144,7 +144,7 @@ export function HomeHeroBanner() {
               className={cn(
                 "rounded-full transition-all duration-300",
                 i === current
-                  ? "h-1.5 w-6 bg-violet-600 shadow-sm dark:bg-violet-400"
+                  ? "h-1.5 w-6 bg-hermes shadow-sm"
                   : "h-1.5 w-1.5 bg-gray-400/80 hover:bg-gray-500 dark:bg-white/50 dark:hover:bg-white/70",
               )}
               aria-label={

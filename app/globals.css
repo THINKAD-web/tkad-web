@@ -240,6 +240,60 @@
   --cta-hover: #8b5cf6;
 }
 
+/* ══════════════════════════════════════════════════════════════════════
+ * Quiet Professional — 2026 디자인 토큰 방향 (P0: 토큰 정의)
+ *
+ * 배경(디자인 톤 진단): 액센트가 6+ 축(네온 violet/cyan/pink, gold/navy,
+ * admin cyan/purple, 카카오 노랑)으로 분산 + rounded-xl/2xl/full 남용 +
+ * 작은 본문 텍스트 → "화려하고 유아틱" 인상.
+ * 결정: 단일 액센트 = Hermès Orange(#ff6200), 그 외 흑백/그레이만,
+ *       네온 그라데이션·glow 폐기, radius 축소, 타이포 확대.
+ *
+ * 이 티켓(P0)은 토큰 "정의"만 담당한다. 실제 적용은 홈(.tkad-quiet) 파일럿 1곳.
+ * 컴포넌트/타 페이지 전면 롤아웃은 후속(P1)에서 페이지별 진행.
+ * ────────────────────────────────────────────────────────────────────── */
+:root {
+  /* 단일 액센트 (SSOT: --hermes #ff6200) — violet/cyan/pink 대체 */
+  --qp-accent: var(--hermes);
+  --qp-accent-hover: var(--cta-hover);
+  --qp-accent-soft: color-mix(in srgb, var(--hermes) 12%, white);
+  --qp-accent-ring: color-mix(in srgb, var(--hermes) 35%, transparent);
+
+  /* Neutral scale — 액센트 외에는 흑백/그레이만 사용 */
+  --qp-ink: #08080a;
+  --qp-fg: #1c1c1f;
+  --qp-fg-muted: #5a5a5e;
+  --qp-line: #d8d6d0;
+  --qp-surface: #ffffff;
+  --qp-surface-2: #f4f3f0;
+
+  /* Radius — 각진 "quiet professional" 스케일 (xl/2xl/full 남용 축소) */
+  --qp-radius-none: 0;
+  --qp-radius-sm: 0.125rem;  /* 2px */
+  --qp-radius-md: 0.25rem;   /* 4px — 카드/버튼/배지 기본 */
+  --qp-radius-lg: 0.375rem;  /* 6px — 큰 컨테이너/히어로 */
+  --qp-radius-pill: 9999px;  /* 의도적 pill(칩·토글)만 */
+
+  /* Type scale — 본문/헤딩 한 단계 확대 (가독성 개선) */
+  --qp-text-hero: 2.25rem;   /* 36px */
+  --qp-text-h2: 1.5rem;      /* 24px */
+  --qp-text-h3: 1.25rem;     /* 20px */
+  --qp-text-body: 1rem;      /* 16px (기존 14px 본문 대비 확대) */
+  --qp-text-meta: 0.875rem;  /* 14px */
+}
+
+/* Home 파일럿 스코프 — 이 클래스 하위에서만 네온 액센트 토큰을 주황 단색으로 치환.
+ * (타 페이지·공유 chrome 은 미영향 — 홈 <main> 에만 부여) */
+.tkad-quiet {
+  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
+  --tkad-fg-accent: var(--hermes);
+}
+.tkad-quiet .tkad-home-accent-text {
+  background-image: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--hermes) !important;
+}
+
 /* Dark mode tokens (next-themes 가 html.dark 클래스 토글 시 적용) */
 /* 관리자 대시보드만: 라이트 모드에서 남색 primary/악센트 제거 + 본문·보조글 대비 강화
  * (shadcn Card/Button/Input 이 --primary, --muted-foreground 등을 쓰므로 AdminShell 루트에 스코프) */

@@ -31,7 +31,7 @@ export function HomeFreetextEntry({
       {!embedded && !slim ? (
         <div className="mb-4 space-y-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+            <span className="rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-hermes">
               {isKo ? "무료 · 규칙" : "Free · Rules"}
             </span>
             <span className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
@@ -53,7 +53,7 @@ export function HomeFreetextEntry({
       ) : null}
 
       {slim && !embedded ? (
-        <span className="mb-3 inline-flex rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+        <span className="mb-3 inline-flex rounded-sm border border-hermes/30 bg-hermes/10 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-hermes">
           {isKo ? "무료 · 0토큰" : "Free · 0 tokens"}
         </span>
       ) : null}
@@ -73,9 +73,9 @@ export function HomeFreetextEntry({
         <Link
           href={recommendPath}
           className={cn(
-            "inline-flex w-full items-center justify-center gap-2 rounded-xl px-4 py-2.5 text-sm font-bold text-white transition-opacity sm:w-auto",
-            "bg-gradient-to-r from-violet-600 to-cyan-500 hover:opacity-95",
-            slim && "py-2.5 text-[13px]",
+            "inline-flex w-full items-center justify-center gap-2 rounded-md px-4 py-2.5 text-sm font-bold text-white transition-colors sm:w-auto",
+            "bg-hermes hover:bg-cta-hover",
+            slim && "py-2.5 text-sm",
           )}
         >
           {isKo ? "AI 추천 시작" : "Start AI recommend"}
@@ -85,7 +85,7 @@ export function HomeFreetextEntry({
           href="/planner"
           className={cn(
             "text-center text-xs font-semibold text-gray-500 underline-offset-2 hover:underline dark:text-white/55",
-            slim ? "sm:ml-1" : "inline-flex w-full items-center justify-center rounded-xl border border-gray-200 bg-white px-4 py-3 dark:border-white/12 dark:bg-white/5 sm:w-auto",
+            slim ? "sm:ml-1" : "inline-flex w-full items-center justify-center rounded-md border border-gray-200 bg-white px-4 py-3 dark:border-white/12 dark:bg-white/5 sm:w-auto",
           )}
         >
           {isKo ? "단계별 플래너 →" : "Step-by-step planner →"}
@@ -105,7 +105,7 @@ export function HomeFreetextEntry({
     >
       <div
         className={cn(
-          "mx-auto max-w-5xl rounded-2xl border border-violet-400/20 bg-gradient-to-br from-violet-500/[0.06] via-white to-cyan-500/[0.05] p-4 shadow-sm ring-1 ring-black/5 dark:from-violet-500/10 dark:via-white/[0.03] dark:to-cyan-500/5 dark:ring-white/10 md:rounded-3xl md:p-6",
+          "mx-auto max-w-5xl rounded-lg border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-black/5 dark:border-white/10 dark:bg-white/[0.04] dark:ring-white/10 md:p-6",
         )}
       >
         {ctaBody}

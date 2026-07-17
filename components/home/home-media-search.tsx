@@ -51,8 +51,8 @@ export function HomeMediaSearch({ className, prominent = false }: Props) {
           autoComplete="off"
           enterKeyHint="search"
           className={cn(
-            "w-full rounded-2xl border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400",
-            "focus:outline-none focus:ring-2 focus:ring-cyan-400/40",
+            "w-full rounded-md border border-gray-200 bg-white text-gray-900 placeholder:text-gray-400",
+            "focus:outline-none focus:ring-2 focus:ring-hermes/40",
             "dark:border-white/12 dark:bg-white/8 dark:text-white dark:placeholder:text-white/35",
             prominent
               ? "py-3.5 pl-12 pr-4 text-base shadow-sm sm:text-sm"

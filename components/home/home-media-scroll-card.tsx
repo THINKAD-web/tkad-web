@@ -75,7 +75,7 @@ export function HomeMediaScrollCard({
     <Link
       href={href}
       className={cn(
-        "group w-44 shrink-0 snap-start overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5 sm:w-48 md:w-52",
+        "group w-44 shrink-0 snap-start overflow-hidden rounded-md border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md active:scale-[0.99] dark:border-white/10 dark:bg-white/5 sm:w-48 md:w-52",
       )}
     >
       <div className="relative aspect-[4/3] w-full bg-gray-100 dark:bg-gray-800">

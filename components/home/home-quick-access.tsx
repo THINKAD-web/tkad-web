@@ -6,12 +6,6 @@ import { Search, BarChart3, MessageSquare } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-const NEON_ICON_GLOW: Record<string, string> = {
-  "text-violet-500": "drop-shadow-[0_0_8px_rgba(139,92,246,0.55)]",
-  "text-emerald-500": "drop-shadow-[0_0_8px_rgba(52,211,153,0.55)]",
-  "text-rose-500": "drop-shadow-[0_0_8px_rgba(244,63,94,0.45)]",
-};
-
 type QuickItem = {
   id: string;
   icon: LucideIcon;
@@ -29,7 +23,7 @@ const ITEMS: QuickItem[] = [
     labelEn: "By type",
     icon: Search,
     href: "/media",
-    color: "text-violet-500",
+    color: "text-hermes",
   },
   {
     id: "plan",
@@ -37,7 +31,7 @@ const ITEMS: QuickItem[] = [
     labelEn: "Plan campaign",
     icon: BarChart3,
     href: "/planner",
-    color: "text-emerald-500",
+    color: "text-hermes",
   },
   {
     id: "contact",
@@ -45,7 +39,7 @@ const ITEMS: QuickItem[] = [
     labelEn: "Contact",
     icon: MessageSquare,
     href: "/contact",
-    color: "text-rose-500",
+    color: "text-hermes",
   },
 ];
 
@@ -87,7 +81,7 @@ export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
           >
             <div
               className={cn(
-                "flex items-center justify-center rounded-2xl border bg-white shadow-sm dark:bg-white/8",
+                "flex items-center justify-center rounded-md border bg-white shadow-sm dark:bg-white/8",
                 tonedDown
                   ? "border-gray-100/80 transition-colors group-hover:bg-gray-50 dark:border-white/8 dark:group-hover:bg-white/10"
                   : "border-gray-100 transition-transform group-hover:scale-105 active:scale-95 dark:border-white/10",
@@ -98,7 +92,6 @@ export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
                 className={cn(
                   iconSize,
                   item.color,
-                  !tonedDown && (NEON_ICON_GLOW[item.color] ?? ""),
                   tonedDown && "opacity-80",
                 )}
               />
@@ -109,7 +102,7 @@ export function HomeQuickAccess({ compact = false, embedded = false }: Props) {
                 tonedDown
                   ? "text-gray-500 dark:text-white/55"
                   : "text-gray-600 dark:text-white/70",
-                compact ? "text-[11px] sm:text-xs" : "text-xs sm:text-[13px]",
+                compact ? "text-xs sm:text-sm" : "text-sm sm:text-base",
               )}
             >
               {isKo ? item.labelKo : item.labelEn}
