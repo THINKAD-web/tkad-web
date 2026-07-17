@@ -84,6 +84,7 @@ export default async function ReportListPage({ params, searchParams }: ListProps
           title="OOH 시장 "
           highlight="트렌드 리포트"
           description="최신 OOH 광고 트렌드와 시장 인사이트를 확인하세요"
+          showBeta
         />
         <SubTabsBar group="content" currentPath="/report" />
 
