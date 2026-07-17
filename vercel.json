@@ -58,18 +58,6 @@
       "schedule": "0 0 * * *"
     },
     {
-      "path": "/api/cron/generate-trend-report",
-      "schedule": "0 0 * * 1"
-    },
-    {
-      "path": "/api/cron/generate-academy-content",
-      "schedule": "0 0 * * 1,4"
-    },
-    {
-      "path": "/api/cron/generate-guide-content",
-      "schedule": "0 0 * * 3"
-    },
-    {
       "path": "/api/cron/media-owner-monthly-reports",
       "schedule": "0 0 1 * *"
     },
