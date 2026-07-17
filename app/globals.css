@@ -3317,7 +3317,8 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
 .tkad-mobile-tab-icon {
   position: relative;
   z-index: 1;
-  color: color-mix(in srgb, var(--qp-fg-muted) 85%, transparent);
+  /* 라이트 기본: 칩 배경(#f4f3f0/#fff) 대비 충분한 잉크 */
+  color: var(--qp-fg);
   filter: none;
   transition:
     color 0.2s ease,
@@ -3334,8 +3335,8 @@ html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="false"] {
   background: var(--qp-surface);
 }
 
-html:not(.dark) .tkad-mobile-tab-icon {
-  color: color-mix(in srgb, var(--qp-fg-muted) 90%, transparent);
+html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="false"] .tkad-mobile-tab-icon {
+  color: var(--qp-fg);
 }
 
 html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
@@ -3343,14 +3344,26 @@ html:not(.dark) .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-
   filter: none;
 }
 
+/* 다크: 밝은 surface-2 칩 + white/42 아이콘 → 글리프 소실. 칩을 어두운 면으로. */
+.dark .tkad-mobile-tab-icon-wrap {
+  border-color: rgb(255 255 255 / 0.16);
+  background: rgb(255 255 255 / 0.1);
+}
+
 .dark .tkad-mobile-tab-icon-wrap[data-active="false"] .tkad-mobile-tab-icon {
-  color: rgb(255 255 255 / 0.42);
+  color: rgb(255 255 255 / 0.88);
+}
+
+.dark .tkad-mobile-tab-icon-wrap[data-active="true"] {
+  border-color: color-mix(in srgb, var(--qp-accent) 55%, transparent);
+  background: color-mix(in srgb, var(--qp-accent) 22%, transparent);
 }
 
 .dark .tkad-mobile-tab-icon-wrap[data-active="true"] .tkad-mobile-tab-icon {
   color: var(--qp-accent);
 }
 
+/* FAB(플래너) — 주황 원 + 흰 아이콘 유지 */
 .tkad-mobile-tab-fab .tkad-mobile-tab-icon {
   color: rgb(255 255 255);
   filter: none;
