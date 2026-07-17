@@ -49,6 +49,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
           title="브랜드가 선택한 "
           highlight="성공 사례"
           description="실제 집행된 OOH 캠페인의 전략과 성과를 확인하세요"
+          showBeta
         />
         <SubTabsBar group="content" currentPath="/cases" />
         <PageContainer className="border-b border-white/10 pb-6">

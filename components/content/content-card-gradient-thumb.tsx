@@ -44,15 +44,17 @@ export function ContentCardGradientThumb({
       ) : (
         <div
           className={cn(
-            "flex h-full w-full flex-col items-center justify-center gap-2 bg-gradient-to-br",
+            "flex h-full w-full flex-col items-center justify-center gap-1 bg-gradient-to-br",
             gradientKey,
           )}
         >
-          <span className="text-3xl" aria-hidden>
+          <span className="text-lg opacity-80 sm:text-xl" aria-hidden>
             {emoji}
           </span>
           {label ? (
-            <span className="text-xs font-medium text-white/70">{label}</span>
+            <span className="text-[10px] font-medium uppercase tracking-[0.14em] text-white/55">
+              {label}
+            </span>
           ) : null}
         </div>
       )}
