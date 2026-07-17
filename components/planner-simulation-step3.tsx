@@ -241,12 +241,12 @@ export default function PlannerSimulationStep3({
               className={cn(
                 "relative rounded-xl border p-6 transition-colors",
                 creativeObjectUrl
-                  ? "border-violet-400/50 dark:bg-violet-500/10 bg-violet-50"
-                  : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 hover:border-violet-300/40",
+                  ? "border-[color:var(--qp-accent)]/50 dark:bg-[color:var(--qp-accent)]/10 bg-[color:var(--qp-accent-soft)]"
+                  : "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 hover:border-[color:var(--qp-accent)]/40",
               )}
             >
               <div className="flex flex-col items-center justify-center gap-2 text-center">
-                <ImageUp className="h-8 w-8 text-violet-400" aria-hidden />
+                <ImageUp className="h-8 w-8 text-[color:var(--qp-accent)]" aria-hidden />
                 <p className={cn("text-sm font-semibold", plannerNeon.headline)}>
                   {t("creativeUploadCta")}
                 </p>
@@ -301,7 +301,7 @@ export default function PlannerSimulationStep3({
                   >
                     <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/10 bg-gray-200">
                       <div
-                        className="h-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all"
+                        className="h-full bg-[color:var(--qp-accent)] transition-all"
                         style={{ width: `${upload.pct}%` }}
                       />
                     </div>
@@ -310,7 +310,7 @@ export default function PlannerSimulationStep3({
                     </p>
                   </div>
                 ) : upload.status === "done" ? (
-                  <p className="mt-3 inline-flex items-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                  <p className="mt-3 inline-flex items-center gap-1 rounded-lg bg-[color:var(--qp-accent)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest text-white">
                     <Check className="h-3 w-3" aria-hidden />
                     {t("creativeUploadSuccess")}
                   </p>
@@ -345,7 +345,7 @@ export default function PlannerSimulationStep3({
         </div>
         <div className="p-5 sm:p-6">
           {creativeObjectUrl || creativeUploadedUrl ? (
-            <div className="mb-4 rounded-xl border dark:border-violet-500/30 border-violet-200 dark:bg-violet-500/10 bg-violet-50 px-4 py-3">
+            <div className="mb-4 rounded-xl border dark:border-[color:var(--qp-accent)]/30 border-[color:var(--qp-line)] dark:bg-[color:var(--qp-accent)]/10 bg-[color:var(--qp-accent-soft)] px-4 py-3">
               <PlannerNeonLabel>{t("simCompositeApproxTitle")}</PlannerNeonLabel>
               <p className={cn("mt-1 text-sm leading-relaxed", plannerNeon.subtext)}>
                 {t("simCompositeApproxBody")}
@@ -377,8 +377,8 @@ export default function PlannerSimulationStep3({
                           className={cn(
                             "block w-full overflow-hidden rounded-xl border-2 transition-colors",
                             i === slideIndex
-                              ? "border-violet-400"
-                              : "dark:border-white/10 border-gray-200 hover:border-violet-300/50",
+                              ? "border-[color:var(--qp-accent)]"
+                              : "dark:border-white/10 border-gray-200 hover:border-[color:var(--qp-accent)]/50",
                           )}
                           onClick={() => {
                             setSlideDir((i > slideIndex ? 1 : -1) as 1 | -1);
@@ -456,7 +456,7 @@ export default function PlannerSimulationStep3({
                   onClick={goPrev}
                   disabled={slideIndex <= 0}
                   aria-label={t("simPrev")}
-                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-violet-400/50 disabled:opacity-30"
+                  className="absolute left-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-[color:var(--qp-accent)]/50 disabled:opacity-30"
                 >
                   <ChevronLeft className="h-5 w-5" />
                 </button>
@@ -465,7 +465,7 @@ export default function PlannerSimulationStep3({
                   onClick={goNext}
                   disabled={slideIndex >= maxIdx}
                   aria-label={t("simNext")}
-                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-violet-400/50 disabled:opacity-30"
+                  className="absolute right-2 top-1/2 z-20 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/10 bg-white/90 text-foreground transition-colors hover:border-[color:var(--qp-accent)]/50 disabled:opacity-30"
                 >
                   <ChevronRight className="h-5 w-5" />
                 </button>
@@ -503,8 +503,8 @@ export default function PlannerSimulationStep3({
                     className={cn(
                       "h-2 rounded-full transition-all",
                       i === slideIndex
-                        ? "w-8 bg-gradient-to-r from-violet-500 to-cyan-400"
-                        : "w-2 dark:bg-white/20 bg-gray-300 hover:bg-violet-400/50",
+                        ? "w-8 bg-[color:var(--qp-accent)]"
+                        : "w-2 dark:bg-white/20 bg-gray-300 hover:bg-[color:var(--qp-accent)]/50",
                     )}
                     aria-label={t("simDotLabel", { n: i + 1 })}
                   />

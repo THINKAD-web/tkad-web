@@ -35,7 +35,7 @@ function KpiCard({
 }) {
   return (
     <div className={cn(plannerNeon.card, "p-5")}>
-      <Icon className="h-5 w-5 text-violet-400" aria-hidden />
+      <Icon className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
       <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
       </p>
@@ -155,7 +155,7 @@ export function IntegratedCampaignDashboard({ metrics, isKo, months }: Props) {
                     {t("clicks")} · CPC ₩{ch.avgCpcWon.toLocaleString()}
                   </p>
                 </div>
-                <p className="shrink-0 text-sm font-bold text-cyan-500">
+                <p className="shrink-0 text-sm font-bold text-[color:var(--qp-fg-muted)]">
                   {ch.budgetMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
                   {isKo ? "만" : "M"}
                 </p>

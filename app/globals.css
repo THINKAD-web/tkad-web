@@ -310,6 +310,21 @@
   --ring: var(--qp-accent-ring);
   --tkad-fg-accent: var(--qp-accent);
 }
+/* Planner shells — neutralize neon atmosphere (no violet/cyan radials) */
+.tkad-planner-neon:not(.tkad-media-page) .tkad-neon-depth {
+  background: linear-gradient(to bottom, rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 1));
+  opacity: 0.55;
+}
+html:not(.dark) .tkad-planner-neon:not(.tkad-media-page) .tkad-neon-depth {
+  background: linear-gradient(to bottom, #f9fafb, #ffffff);
+  opacity: 0.4;
+}
+.tkad-planner-neon:not(.tkad-media-page) .tkad-neon-grid {
+  opacity: 0 !important;
+}
+html:not(.dark) .tkad-planner-neon:not(.tkad-media-page) .tkad-neon-grid {
+  opacity: 0 !important;
+}
 .tkad-planner-neon:not(.tkad-media-page) .tkad-planner-gradient-cta {
   background: var(--qp-accent) !important;
   background-image: none !important;
@@ -1257,9 +1272,9 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
 /* 다크와 동일: 래퍼는 블록만. flex/gap/padding 추가 시 히어로 너비·간격이 어긋남 */
 .tkad-home-appearance[data-appearance="day"] .tkad-landing-neon {
   background: transparent;
-  --accent: #5b21b6;
-  --cta: #0f766e;
-  --ring: #6366f1;
+  --accent: var(--qp-accent);
+  --cta: var(--qp-accent);
+  --ring: var(--qp-accent-ring);
 }
 
 /* Category / home heroes — 라이트·다크 분리 (Tailwind + 아래 토큰) */

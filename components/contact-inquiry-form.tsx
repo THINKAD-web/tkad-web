@@ -758,14 +758,14 @@ function ContactInquiryForm() {
   const labelClass = "mb-2 block text-sm dark:text-white text-gray-600";
   const inputClass = cn(
     "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900",
-    "placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30",
+    "placeholder:dark:text-white text-gray-400 focus:border-[color:var(--qp-accent)]/50 focus:outline-none focus:ring-1 focus:ring-[color:var(--qp-accent)]/30",
   );
   const btnPrimary =
-    "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px] sm:w-auto";
+    "tkad-qp-cta inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50 sm:min-w-[160px] sm:w-auto";
   const btnSecondary =
     "inline-flex h-12 items-center justify-center rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-6 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:cursor-not-allowed disabled:opacity-50";
   const chipActive =
-    "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 dark:text-white text-gray-900 shadow-[0_8px_28px_rgba(139,92,246,0.35)]";
+    "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)] text-white shadow-sm";
   const chipIdle =
     "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100";
 
@@ -945,10 +945,10 @@ function ContactInquiryForm() {
   if (submitted) {
     return (
       <div className="flex flex-col items-center gap-4 py-12 text-center">
-        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-violet-500/20 to-cyan-400/20 text-cyan-300">
+        <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]">
           <CheckCircle className="h-8 w-8" aria-hidden />
         </div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
           [ SUCCESS ]
         </p>
         <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -960,7 +960,7 @@ function ContactInquiryForm() {
 
         <div className="mt-4 w-full max-w-sm rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
           <div className="flex items-center justify-center gap-2 text-sm font-semibold dark:text-white text-gray-800">
-            <MessageCircle className="h-4 w-4 text-cyan-400" aria-hidden />
+            <MessageCircle className="h-4 w-4 text-[color:var(--qp-accent)]" aria-hidden />
             {tForm("kakaoLead")}
           </div>
           <p className="mt-2 text-center text-sm leading-relaxed dark:text-white text-gray-500">
@@ -996,8 +996,8 @@ function ContactInquiryForm() {
       ) : planTransfer ? (
         <PlannerContactSummary plan={planTransfer} />
       ) : packageRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ PACKAGE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("packageRefBanner")}</p>
@@ -1006,14 +1006,14 @@ function ContactInquiryForm() {
           </p>
           <Link
             href="/media/packages"
-            className="mt-3 inline-flex text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("packageRefViewPackages")} →
           </Link>
         </div>
       ) : plannerPlanRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ PLANNER REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("plannerRefBanner")}</p>
@@ -1022,14 +1022,14 @@ function ContactInquiryForm() {
           </p>
           <Link
             href="/planner"
-            className="mt-3 inline-flex text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("plannerRefViewPlanner")} →
           </Link>
         </div>
       ) : publishedCaseRef ? (
-        <div className="rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4 text-sm dark:text-white text-gray-800">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4 text-sm dark:text-white text-gray-800">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ CASE REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("caseRefBanner")}</p>
@@ -1041,20 +1041,20 @@ function ContactInquiryForm() {
           </p>
           <Link
             href={`/cases/${publishedCaseRef.id}`}
-            className="mt-3 inline-flex text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("caseRefViewCase")} →
           </Link>
         </div>
       ) : academyTopic ? (
         <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-4 text-sm dark:text-white text-gray-800 backdrop-blur">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ ACADEMY REFERENCE ]
           </p>
           <p className="mt-2 font-medium leading-relaxed">{t("academyRefBanner")}</p>
           <Link
             href="/academy"
-            className="mt-3 inline-flex text-sm font-semibold text-cyan-300 transition hover:text-cyan-200"
+            className="mt-3 inline-flex text-sm font-semibold text-[color:var(--qp-accent)] transition hover:opacity-90"
           >
             {t("academyRefBack")} →
           </Link>

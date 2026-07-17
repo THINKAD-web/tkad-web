@@ -10,7 +10,7 @@ type Props = {
 
 export function HowToUseCta({ isKo, phone }: Props) {
   return (
-    <div className="tkad-glass-surface tkad-neon-border mt-16 rounded-[28px] border p-8 text-center sm:p-10">
+    <div className="tkad-glass-surface mt-16 rounded-[28px] border border-gray-200 p-8 text-center backdrop-blur dark:border-white/12 sm:p-10">
       <h2 className="text-xl font-black tracking-tight dark:text-white text-gray-900 sm:text-2xl">
         {isKo ? "아직 궁금한 점이 있으신가요?" : "Still have questions?"}
       </h2>

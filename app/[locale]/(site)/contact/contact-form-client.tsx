@@ -23,7 +23,7 @@ export function ContactFormClient() {
     "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-all";
 
   const tabActive =
-    "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 dark:text-white text-gray-900 shadow-[0_8px_32px_rgba(139,92,246,0.25)]";
+    "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] dark:text-white text-gray-900 shadow-sm";
   const tabIdle = "dark:text-white text-gray-600 hover:dark:border-white/20 border-gray-300 hover:dark:bg-white/10 bg-gray-100";
 
   const extraInfoItems = useMemo(
@@ -33,7 +33,7 @@ export function ContactFormClient() {
 
   return (
     <>
-      <NeonSection className="pt-0">
+      <NeonSection tone="qp" className="pt-0">
         <div className="grid gap-5 lg:grid-cols-5">
           <div className="lg:col-span-3">
             <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 backdrop-blur sm:p-8">
@@ -118,7 +118,7 @@ export function ContactFormClient() {
         </div>
       </NeonSection>
 
-      <NeonSection className="pt-0">
+      <NeonSection tone="qp" className="pt-0">
         <ScrollAnimate>
           <NeonSectionHead
             number="02"
@@ -128,7 +128,7 @@ export function ContactFormClient() {
           />
         </ScrollAnimate>
 
-        <div className="mt-10 overflow-hidden rounded-[28px] dark:bg-white/5 bg-gray-50 backdrop-blur tkad-neon-border tkad-neon-glow">
+        <div className="mt-10 overflow-hidden rounded-[28px] border border-gray-200 dark:border-white/10 dark:bg-white/5 bg-gray-50 backdrop-blur">
           <div className="aspect-video w-full border-b dark:border-white/10 border-gray-200">
             <ContactOfficeMap
               mapHl={mapHl}

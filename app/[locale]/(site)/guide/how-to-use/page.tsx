@@ -96,7 +96,7 @@ export default async function HowToUseGuidePage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <CategoryExploreHero
             code={`// ${isKo ? "사용 가이드" : "HOW TO USE"}`}
             headlineBefore={isKo ? "처음이세요? " : "New here? "}
@@ -120,7 +120,7 @@ export default async function HowToUseGuidePage({ params }: Props) {
             </CategoryHeroCtaRow>
           </CategoryExploreHero>
 
-          <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
+          <NeonSection tone="qp" className="pt-10 pb-12 sm:pt-16 sm:pb-20">
             <NeonSectionHead
               number="01"
               kicker={isKo ? "STEP" : "STEP"}
@@ -140,7 +140,7 @@ export default async function HowToUseGuidePage({ params }: Props) {
             <HowToUseStepsGrid steps={HOW_TO_USE_STEPS} isKo={isKo} />
           </NeonSection>
 
-          <NeonSection className="pt-4 pb-12 sm:pb-20">
+          <NeonSection tone="qp" className="pt-4 pb-12 sm:pb-20">
             <NeonSectionHead
               number="02"
               kicker="FAQ"

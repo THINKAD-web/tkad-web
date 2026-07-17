@@ -36,17 +36,17 @@ import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
  */
 
-const VIOLET = [124, 58, 237] as const; // #7C3AED
-const CYAN = [8, 145, 178] as const; // cyan-600 (print-safe)
+const VIOLET = [255, 98, 0] as const; // qp accent #ff6200
+const CYAN = [28, 28, 31] as const; // qp ink / secondary
 const INK = [17, 24, 39] as const;
 const GRAY_600 = [75, 85, 99] as const;
 const GRAY_500 = [107, 114, 128] as const;
 const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
 const GRAY_100 = [238, 240, 244] as const;
-const CYAN_LIGHT = [120, 220, 235] as const;
+const CYAN_LIGHT = [107, 114, 128] as const; // qp muted secondary text
 const WHITE = [255, 255, 255] as const;
-const CYAN_BAR = [6, 182, 212] as const; // #06B6D4 — 화면 ContributionBar
+const CYAN_BAR = [28, 28, 31] as const; // qp secondary — ContributionBar
 const BAR_TRACK = [243, 244, 246] as const;
 
 /** PR3 균형안 — 여백·타이포·카드 레이아웃 (미세조정은 이 객체만 수정) */

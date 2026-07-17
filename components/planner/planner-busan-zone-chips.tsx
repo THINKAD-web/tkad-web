@@ -41,9 +41,9 @@ export function PlannerBusanZoneChips({
     cn(
       "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
       active
-        ? "bg-cyan-600 text-white shadow-sm shadow-cyan-500/25"
+        ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
         : isSuggested
-          ? "border border-cyan-400/40 bg-cyan-500/10 text-cyan-900 dark:text-cyan-100"
+          ? "border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]"
           : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
     );
 
@@ -79,11 +79,11 @@ export function PlannerBusanZoneChips({
           type="button"
           onClick={onApplySuggested}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border border-cyan-300/40 px-3 py-1.5 text-xs font-medium touch-manipulation",
-            "text-cyan-800 hover:bg-cyan-500/10 dark:text-cyan-200",
+            "inline-flex items-center gap-1.5 rounded-full border border-[color:var(--qp-line)] px-3 py-1.5 text-xs font-medium touch-manipulation",
+            "text-[color:var(--qp-fg-muted)] hover:bg-[color:var(--qp-accent-soft)] dark:text-[color:var(--qp-fg-muted)]",
           )}
         >
-          <Sparkles className="h-3.5 w-3.5 text-cyan-400" />
+          <Sparkles className="h-3.5 w-3.5 text-[color:var(--qp-fg-muted)]" />
           {t("busanZonesApplySuggested")}
         </button>
         {noneSelected ? (

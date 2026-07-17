@@ -32,7 +32,7 @@ function fmtBudget(man: number, isKo: boolean) {
   return isKo ? `${man.toLocaleString()}만원` : `${man.toLocaleString()}M KRW`;
 }
 
-const CHART_COLORS = ["#7C3AED", "#0891B2", "#EC4899", "#10B981", "#F59E0B"];
+const CHART_COLORS = ["#ff6200", "#1c1c1f", "#5a5a5e", "#10B981", "#F59E0B"];
 
 function chartDatumColor(d: PlannerExportChartDatum, index: number): string {
   return plannerChartColor(d.colorKey, index);
@@ -128,12 +128,12 @@ function DonutChart({
 
 function PerformanceGuideBlock({ guide }: { guide: PlannerPerformanceGuide }) {
   return (
-    <div className="rounded-xl border border-violet-200 bg-violet-50/70 p-4 sm:p-5">
-      <p className="text-sm font-semibold text-violet-900">{guide.title}</p>
-      <div className="mt-3 overflow-x-auto rounded-lg border border-violet-100 bg-white">
+    <div className="rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5">
+      <p className="text-sm font-semibold text-gray-900">{guide.title}</p>
+      <div className="mt-3 overflow-x-auto rounded-lg border border-[color:var(--qp-line)] bg-white">
         <table className="w-full min-w-[16rem] border-collapse text-sm">
           <thead>
-            <tr className="border-b border-violet-100 bg-violet-50/80 text-left text-xs font-semibold text-violet-800">
+            <tr className="border-b border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] text-left text-xs font-semibold text-[color:var(--qp-accent)]">
               {guide.table.headers.map((h) => (
                 <th key={h} className="px-3 py-2.5 first:min-w-[5.5rem]">
                   {h}
@@ -167,9 +167,9 @@ function PerformanceGuideBlock({ guide }: { guide: PlannerPerformanceGuide }) {
         {guide.bullets.map((line, i) => (
           <li
             key={i}
-            className="flex gap-2.5 text-sm leading-relaxed text-violet-950/90"
+            className="flex gap-2.5 text-sm leading-relaxed text-gray-950/90"
           >
-            <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-violet-500" />
+            <span className="mt-1.5 inline-block h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--qp-accent)]" />
             <span className="break-words">{line}</span>
           </li>
         ))}
@@ -292,7 +292,7 @@ export const PlannerReportDocument = forwardRef<
                 className="rounded-xl border border-gray-200 bg-gray-50 p-3.5"
               >
                 <p className="text-[11px] font-medium text-gray-500">{k.label}</p>
-                <p className="mt-1 break-words font-sans text-lg font-bold tabular-nums text-violet-700">
+                <p className="mt-1 break-words font-sans text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
                   {k.value}
                 </p>
               </div>
@@ -348,7 +348,7 @@ export const PlannerReportDocument = forwardRef<
                   <p className="mb-3 text-xs font-semibold text-gray-500">
                     {isKo ? "노출 요약" : "Impressions"}
                   </p>
-                  <BarChart data={p.charts.reachSummary} color="#0891B2" isKo={isKo} />
+                  <BarChart data={p.charts.reachSummary} color="#1c1c1f" isKo={isKo} />
                   {p.charts.impressionSplit &&
                   p.charts.impressionSplit.length > 0 ? (
                     <div className="mt-4 border-t border-gray-100 pt-4">
@@ -541,14 +541,14 @@ export const PlannerReportDocument = forwardRef<
             <DocumentSectionHeading>
               {isKo ? "추천 근거" : "Recommendation rationale"}
             </DocumentSectionHeading>
-            <div className="space-y-3 rounded-xl border border-violet-100 bg-violet-50/40 p-4 sm:p-5">
+            <div className="space-y-3 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 sm:p-5">
               {p.recommendRationale.summaryLines.map((line) => (
                 <p key={line} className="text-sm leading-relaxed text-gray-700">
                   {line}
                 </p>
               ))}
               {p.recommendRationale.mediaReasons.length > 0 ? (
-                <ul className="space-y-2 border-t border-violet-100 pt-3">
+                <ul className="space-y-2 border-t border-[color:var(--qp-line)] pt-3">
                   {p.recommendRationale.mediaReasons.map((item) => (
                     <li key={`${item.name}-${item.reason}`} className="text-sm">
                       <span className="font-semibold text-gray-900">
@@ -583,7 +583,7 @@ export const PlannerReportDocument = forwardRef<
             <div className="min-w-0 overflow-x-auto rounded-xl border border-gray-200">
               <table className="w-full min-w-[30rem] border-collapse text-sm">
                 <thead>
-                  <tr className="bg-cyan-600 text-left text-xs font-semibold uppercase tracking-wide text-white">
+                  <tr className="bg-[color:var(--qp-accent)] text-left text-xs font-semibold uppercase tracking-wide text-white">
                     <th className="px-3 py-2.5">{isKo ? "플랫폼" : "Platform"}</th>
                     <th className="px-3 py-2.5">{isKo ? "비중" : "Share"}</th>
                     <th className="px-3 py-2.5 text-right">{isKo ? "예상 노출" : "Est. impressions"}</th>

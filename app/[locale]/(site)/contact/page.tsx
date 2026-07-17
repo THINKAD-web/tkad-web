@@ -28,7 +28,7 @@ export default async function ContactPage({
           subtitle={t("heroDescription")}
         />
 
-        <NeonSection className="pt-0">
+        <NeonSection tone="qp" className="pt-0">
           <PlanSummaryCard />
 
           <div className="grid gap-5 lg:grid-cols-5">

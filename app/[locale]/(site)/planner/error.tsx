@@ -32,14 +32,10 @@ export default function PlannerError({
         >
           <div
             aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-[0.09] tkad-neon-grid"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_55%)]"
+            className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_55%)]"
           />
           <div className="relative">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/80 dark:text-cyan-300/75">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]/80 dark:text-[color:var(--qp-fg-muted)]/75">
               [ PLANNER ]
             </p>
             <h1 className="mt-4 text-xl font-black text-gray-900 dark:text-white">
@@ -61,13 +57,13 @@ export default function PlannerError({
               <button
                 type="button"
                 onClick={() => reset()}
-                className="tkad-neon-cta-clean inline-flex h-12 min-h-12 items-center justify-center rounded-[18px] px-6 text-sm font-black text-white shadow-[0_12px_40px_rgba(124,58,237,0.28)] transition-transform hover:-translate-y-0.5"
+                className="tkad-neon-cta-clean inline-flex h-12 min-h-12 items-center justify-center rounded-[18px] px-6 text-sm font-black text-white shadow-[0_12px_40px_color-mix(in_srgb,var(--qp-accent)_28%,transparent)] transition-transform hover:-translate-y-0.5"
               >
                 {isKo ? "다시 시도" : "Try again"}
               </button>
               <Link
                 href="/media"
-                className="inline-flex h-12 min-h-12 items-center justify-center rounded-[18px] border border-violet-300/45 bg-violet-500/10 px-6 text-sm font-bold text-gray-900 transition hover:bg-violet-500/18 dark:border-violet-400/35 dark:text-white dark:hover:bg-violet-500/20"
+                className="inline-flex h-12 min-h-12 items-center justify-center rounded-[18px] border border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent)]/10 px-6 text-sm font-bold text-gray-900 transition hover:bg-[color:var(--qp-accent)]/18 dark:border-[color:var(--qp-accent)]/35 dark:text-white dark:hover:bg-[color:var(--qp-accent)]/20"
               >
                 {isKo ? "매체 탐색하기" : "Browse media"}
               </Link>

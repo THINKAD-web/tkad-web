@@ -95,7 +95,7 @@ export function PlannerReportFreeSummary({
             >
               · {line.name}
               {line.quantityLabel ? (
-                <span className="ml-1 font-medium tabular-nums text-violet-600 dark:text-violet-300">
+                <span className="ml-1 font-medium tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                   ({line.quantityLabel})
                 </span>
               ) : null}

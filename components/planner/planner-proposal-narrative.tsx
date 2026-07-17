@@ -116,10 +116,10 @@ export function PlannerProposalNarrative({
   if (!loading && !sentences?.length) return null;
 
   return (
-    <PlannerNeonCard className="border-violet-400/25 p-5 sm:p-6">
+    <PlannerNeonCard className="border-[color:var(--qp-accent)]/25 p-5 sm:p-6">
       <div className="flex items-start gap-3">
         <Sparkles
-          className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-300"
+          className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
           aria-hidden
         />
         <div className="min-w-0 flex-1">

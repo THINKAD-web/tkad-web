@@ -25,7 +25,7 @@ export async function ContactInfoSidebar({ locale }: Props) {
         {items.map(({ icon: Icon, label, value }) => (
           <li key={label} className="flex gap-3">
             <Icon
-              className="mt-0.5 h-4 w-4 shrink-0 text-violet-500 dark:text-violet-400"
+              className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]"
               aria-hidden
             />
             <div className="min-w-0">

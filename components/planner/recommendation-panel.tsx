@@ -532,7 +532,7 @@ export function PlannerRecommendationPanel({
   );
 
   return (
-    <PlannerNeonCard className="min-w-0 overflow-x-auto border-violet-400/20">
+    <PlannerNeonCard className="min-w-0 overflow-x-auto border-[color:var(--qp-accent)]/20">
       <div className="flex min-w-0 flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
         <div className="min-w-0 space-y-1">
           <PlannerNeonLabel>{t("recommendEyebrow")}</PlannerNeonLabel>
@@ -542,7 +542,7 @@ export function PlannerRecommendationPanel({
               plannerNeon.headline,
             )}
           >
-            <Sparkles className="h-5 w-5 text-violet-400" aria-hidden />
+            <Sparkles className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
             {t("recommendHeading")}
           </h3>
           <p className={plannerNeon.subtext}>{t("recommendDesc")}</p>
@@ -584,7 +584,7 @@ export function PlannerRecommendationPanel({
             role="status"
             aria-live="polite"
           >
-            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-violet-400 border-t-transparent" />
+            <span className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-[color:var(--qp-accent)] border-t-transparent" />
             {t("recommendLoading")}
           </div>
         ) : recommendations.length === 0 ? (

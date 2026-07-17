@@ -4,7 +4,7 @@ type Props = { isKo: boolean };
 
 export function IntegratedReportInfoCard({ isKo }: Props) {
   return (
-    <div className="mb-6 rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-white/10 dark:bg-white/5">
+    <div className="mb-6 rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 dark:border-white/10 dark:bg-white/5">
       <h3 className="text-base font-bold text-gray-900 dark:text-white">
         📊 {isKo ? "통합 미디어 플래너 보고서" : "Integrated media planner report"}
       </h3>
@@ -21,7 +21,7 @@ export function IntegratedReportInfoCard({ isKo }: Props) {
           </ul>
         </div>
         <div>
-          <p className="text-xs font-bold uppercase tracking-wider text-violet-600 dark:text-violet-400">
+          <p className="text-xs font-bold uppercase tracking-wider text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
             PRO 🔒
           </p>
           <ul className="mt-2 space-y-1.5 text-sm text-gray-600 dark:text-white/70">
@@ -34,7 +34,7 @@ export function IntegratedReportInfoCard({ isKo }: Props) {
         </div>
       </div>
 
-      <p className="mt-4 text-xs text-violet-600 dark:text-violet-400">
+      <p className="mt-4 text-xs text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {isKo
           ? "PRO 업그레이드 시 대행사 PT·비딩 자료로 즉시 활용 가능"
           : "Upgrade to PRO for agency-ready pitch & bidding decks"}

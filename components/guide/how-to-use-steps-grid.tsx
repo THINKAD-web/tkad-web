@@ -13,7 +13,7 @@ export function HowToUseStepsGrid({ steps, isKo }: Props) {
       {steps.map((item) => (
         <article
           key={item.step}
-          className="tkad-glass-surface tkad-neon-border flex h-full flex-col rounded-[24px] border p-6 backdrop-blur"
+          className="tkad-glass-surface flex h-full flex-col rounded-[24px] border border-gray-200 p-6 backdrop-blur dark:border-white/12"
         >
           <div className="flex items-start justify-between gap-3">
             <span className="font-display text-xs font-medium uppercase tracking-[0.2em] text-primary">

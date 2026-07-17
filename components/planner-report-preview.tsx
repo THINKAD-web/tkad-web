@@ -120,8 +120,8 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
         "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white text-foreground",
       )}
     >
-      <div className="tkad-planner-dark-surface rounded-xl bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-7 text-white sm:p-10">
-        <PlannerNeonLabel className="!text-cyan-400/80">Thinkad Planner</PlannerNeonLabel>
+      <div className="tkad-planner-dark-surface rounded-xl bg-[#0a0a12] p-7 text-white sm:p-10">
+        <PlannerNeonLabel className="!text-[color:var(--qp-fg-muted)]/80">Thinkad Planner</PlannerNeonLabel>
         <h3 className="mt-3 text-2xl font-extrabold tracking-tight sm:text-3xl">
           {t("reportPdfTitle")}
         </h3>
@@ -262,11 +262,11 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                     <p className={cn("mt-1 line-clamp-2 text-[11px] leading-relaxed", plannerNeon.subtext)}>
                       {loc}
                     </p>
-                    <span className="mt-1.5 inline-block rounded-md bg-violet-500/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-violet-500 dark:text-violet-300">
+                    <span className="mt-1.5 inline-block rounded-md bg-[color:var(--qp-accent)]/12 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.14em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       {typeLabel(m)}
                     </span>
                     <div className="my-2 border-t dark:border-white/10 border-gray-200" />
-                    <p className="text-sm font-bold tabular-nums text-violet-500 dark:text-violet-400">
+                    <p className="text-sm font-bold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                       <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
                         /{formatPricePeriodShortLabel(m.pricePeriod, isKo ? "ko" : "en")}
@@ -310,13 +310,13 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
             </div>
             <div className={plannerNeon.kpiCard}>
               <p className={plannerNeon.kpiLabel}>{t("reportLabelReachCore")}</p>
-              <p className="mt-2 text-lg font-bold tabular-nums text-violet-400">
+              <p className="mt-2 text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
                 {reachCorePct}%
               </p>
             </div>
             <div className={plannerNeon.kpiCard}>
               <p className={plannerNeon.kpiLabel}>{t("reportLabelReachExtended")}</p>
-              <p className="mt-2 text-lg font-bold tabular-nums text-cyan-400">
+              <p className="mt-2 text-lg font-bold tabular-nums text-[color:var(--qp-fg-muted)]">
                 {reachExtendedPct}%
               </p>
             </div>
@@ -334,11 +334,11 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
             <div
               className={cn(
                 plannerNeon.kpiCard,
-                "bg-gradient-to-br from-violet-500/20 to-cyan-400/10 sm:col-span-2",
+                "bg-[color:var(--qp-accent-soft)] sm:col-span-2",
               )}
             >
               <p className={plannerNeon.kpiLabel}>{t("reportLabelRoiExpected")}</p>
-              <p className="mt-2 text-2xl font-bold tabular-nums text-violet-300">
+              <p className="mt-2 text-2xl font-bold tabular-nums text-[color:var(--qp-accent)]">
                 {metrics.roiExpected}
                 {t("roiUnit")}
               </p>
@@ -379,7 +379,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
                 </div>
                 <div className="h-2 w-full overflow-hidden rounded-full dark:bg-white/10 bg-gray-200">
                   <div
-                    className="h-full bg-gradient-to-r from-violet-500 to-cyan-400"
+                    className="h-full bg-[color:var(--qp-accent)]"
                     style={{ width: `${Math.min(100, Math.max(0, row.pct))}%` }}
                   />
                 </div>
@@ -392,7 +392,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
       <section
         className={cn(
           "rounded-xl border p-5 sm:p-6",
-          "dark:border-violet-500/30 border-violet-200 dark:bg-violet-500/10 bg-violet-50",
+          "dark:border-[color:var(--qp-accent)]/30 border-[color:var(--qp-line)] dark:bg-[color:var(--qp-accent)]/10 bg-[color:var(--qp-accent-soft)]",
         )}
       >
         <PlannerNeonLabel>{t("reportSectionEffectSummary")}</PlannerNeonLabel>
@@ -402,7 +402,7 @@ const PlannerReportPreview = forwardRef<HTMLDivElement, Props>(
         <ul className="mt-4 space-y-2.5 text-sm">
           {effectSummaryLines.map((line, i) => (
             <li key={i} className="flex gap-2 rounded-lg bg-white/50 px-3 py-2 dark:bg-white/5">
-              <span className="font-bold text-violet-400">·</span>
+              <span className="font-bold text-[color:var(--qp-accent)]">·</span>
               <span className={cn("min-w-0 leading-relaxed", plannerNeon.headline)}>
                 {highlightReportScanText(line)}
               </span>
@@ -463,7 +463,7 @@ function PortfolioTrafficSection({
           {isKo ? "노출 패턴 (시간대 · 요일 · 월별)" : "Exposure pattern (hourly · weekday · monthly)"}
         </PlannerNeonLabel>
         {!agg.allReal ? (
-          <span className="rounded-lg border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-violet-400">
+          <span className="rounded-lg border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-widest text-[color:var(--qp-accent)]">
             {isKo ? "일부 추정치" : "partly estimated"}
           </span>
         ) : null}
@@ -544,7 +544,7 @@ function TrafficBarBlock({
         <p className={cn("text-xs font-semibold uppercase tracking-widest", plannerNeon.label)}>
           {title}
         </p>
-        <span className="rounded-md bg-gradient-to-r from-violet-500 to-cyan-400 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
+        <span className="rounded-md bg-[color:var(--qp-accent)] px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-white">
           {peakLabel}
         </span>
       </div>

@@ -139,15 +139,11 @@ function IntegratedPlannerPageBody({
       <div className="relative w-full min-w-0 overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.05] mix-blend-overlay"
         />
         <div className="relative w-full min-w-0">{inner}</div>
       </div>
@@ -885,7 +881,7 @@ export default function IntegratedPlannerPageClient({
                 <div className={plannerNeon.cardHeader}>
                   <PlannerNeonLabel>{ti("step3Label")}</PlannerNeonLabel>
                   <h3 className={cn("mt-2 flex items-center gap-2 text-lg font-bold", plannerNeon.headline)}>
-                    <Wallet className="h-5 w-5 text-violet-400" />
+                    <Wallet className="h-5 w-5 text-[color:var(--qp-accent)]" />
                     {t("stepBudgetTitle")}
                   </h3>
                 </div>
@@ -897,7 +893,7 @@ export default function IntegratedPlannerPageClient({
                     step={500}
                     value={budgetNum}
                     onChange={(e) => setBudget(e.target.value)}
-                    className="w-full accent-violet-500"
+                    className="w-full accent-[color:var(--qp-accent)]"
                   />
                   <input
                     inputMode="numeric"

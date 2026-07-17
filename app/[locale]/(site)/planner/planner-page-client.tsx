@@ -186,15 +186,11 @@ function PlannerNeonPageBody({
       <div className="relative w-full min-w-0 overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-neon-depth"
+          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
         />
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
+          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.05] mix-blend-overlay"
         />
         <div className="relative w-full min-w-0">{inner}</div>
       </div>
@@ -1490,7 +1486,7 @@ export default function PlannerPageClient({
                   <div className={plannerNeon.cardHeader}>
                     <div className="flex flex-wrap items-center gap-2">
                       <PlannerNeonLabel>{t("mapTitle")}</PlannerNeonLabel>
-                      <span className="rounded-full border border-violet-400/40 bg-violet-500/10 px-2 py-0.5 text-[10px] font-semibold text-violet-700 dark:text-violet-200">
+                      <span className="rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {t("requiredMark")}
                       </span>
                     </div>
@@ -1578,7 +1574,7 @@ export default function PlannerPageClient({
                           className={cn(
                             "inline-flex shrink-0 items-center rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
                             ageKeys.includes(k)
-                              ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
+                              ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
                               : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
                           )}
                         >
@@ -1667,7 +1663,7 @@ export default function PlannerPageClient({
                       plannerNeon.headline,
                     )}
                   >
-                    <Wallet className="h-5 w-5 text-violet-400" />
+                    <Wallet className="h-5 w-5 text-[color:var(--qp-accent)]" />
                     {t("stepBudgetTitle")}
                   </h3>
                   <p className={cn("mt-1", plannerNeon.subtext)}>
@@ -1693,7 +1689,7 @@ export default function PlannerPageClient({
                       value={budgetNum}
                       onChange={(e) => setBudget(e.target.value)}
                       className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200"
-                      style={{ accentColor: "#8B5CF6" }}
+                      style={{ accentColor: "#ff6200" }}
                       aria-label={t("budget")}
                     />
                     <div className="mt-4 flex flex-wrap items-end gap-3">
@@ -1708,7 +1704,7 @@ export default function PlannerPageClient({
                           className={cn(
                             "mt-1 h-11 w-full rounded-xl border px-3 font-bold tabular-nums",
                             "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                            "dark:text-white text-gray-900 focus:border-violet-400/60 focus:outline-none",
+                            "dark:text-white text-gray-900 focus:border-[color:var(--qp-accent)]/60 focus:outline-none",
                           )}
                         />
                       </div>
@@ -1722,7 +1718,7 @@ export default function PlannerPageClient({
                       <p
                         className={cn(
                           "mt-4 rounded-xl border px-4 py-3 text-sm leading-relaxed",
-                          "dark:border-violet-500/30 border-violet-200 dark:bg-violet-500/10 bg-violet-50",
+                          "dark:border-[color:var(--qp-accent)]/30 border-[color:var(--qp-line)] dark:bg-[color:var(--qp-accent)]/10 bg-[color:var(--qp-accent-soft)]",
                           plannerNeon.subtext,
                         )}
                       >
@@ -1768,7 +1764,7 @@ export default function PlannerPageClient({
             {wizardStep === 4 ? (
               <div className="w-full min-w-0 max-w-full space-y-6 overflow-x-clip">
                 {addMediaHandoff ? (
-                  <div className="space-y-1 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm text-muted-foreground">
+                  <div className="space-y-1 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] px-4 py-3 text-sm text-muted-foreground">
                     <p>
                       {isKo
                         ? "선택한 매체가 캠페인에 추가되었습니다. 수량·조합을 확인한 뒤 다음 단계로 진행해 주세요."
@@ -1787,7 +1783,7 @@ export default function PlannerPageClient({
                 <PlannerNeonCard>
                   <div className={plannerNeon.cardHeader}>
                     <PlannerNeonLabel className="flex items-center gap-2">
-                      <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+                      <Sparkles className="h-3.5 w-3.5 text-[color:var(--qp-accent)]" />
                       {t("quickScenarioTitle")}
                     </PlannerNeonLabel>
                     <p className={cn("mt-2 text-xs leading-relaxed", plannerNeon.subtext)}>
@@ -1988,7 +1984,7 @@ export default function PlannerPageClient({
               <div
                 className={cn(
                   plannerNeon.card,
-                  "border-violet-400/30 px-4 py-3",
+                  "border-[color:var(--qp-accent)]/30 px-4 py-3",
                 )}
                 role="status"
               >
@@ -2001,7 +1997,7 @@ export default function PlannerPageClient({
                     className={cn(
                       "min-w-0 flex-1 rounded-xl border px-3 py-1.5 text-xs",
                       "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
-                      "dark:text-white text-gray-900 focus:border-violet-400/60 focus:outline-none",
+                      "dark:text-white text-gray-900 focus:border-[color:var(--qp-accent)]/60 focus:outline-none",
                     )}
                   />
                   <BtnBlock
@@ -2052,7 +2048,7 @@ export default function PlannerPageClient({
               <div
                 className={cn(
                   plannerNeon.card,
-                  "border-violet-400/30 py-10 text-center",
+                  "border-[color:var(--qp-accent)]/30 py-10 text-center",
                 )}
               >
                 <PlannerNeonLabel>Need Budget</PlannerNeonLabel>
@@ -2068,7 +2064,7 @@ export default function PlannerPageClient({
                       <p className={plannerNeon.kpiLabel}>
                         {isKo ? "총 예상 노출" : "Est. impressions"}
                       </p>
-                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-cyan-400")}>
+                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-[color:var(--qp-fg-muted)]")}>
                         {metrics.estimatedTotalImpressions.toLocaleString()}
                       </p>
                     </div>
@@ -2076,7 +2072,7 @@ export default function PlannerPageClient({
                       <p className={plannerNeon.kpiLabel}>
                         {isKo ? "핵심 도달" : "Core reach"}
                       </p>
-                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-violet-400")}>
+                      <p className={cn("mt-1 text-xl font-bold tabular-nums text-[color:var(--qp-accent)]")}>
                         {reachSplit.corePct}%
                       </p>
                     </div>
@@ -2131,7 +2127,7 @@ export default function PlannerPageClient({
                           <p className="line-clamp-2 text-sm font-bold tracking-tight text-foreground">
                             {isKo ? m.name : (m.nameEn || m.name) || m.name}
                           </p>
-                          <p className="mt-2 text-sm font-bold tabular-nums text-violet-400">
+                          <p className="mt-2 text-sm font-bold tabular-nums text-[color:var(--qp-accent)]">
                             {formatCatalogPriceFieldWon(m.price, isKo ? "ko" : "en")}
                           </p>
                           <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
@@ -2194,7 +2190,7 @@ export default function PlannerPageClient({
                 </div>
 
                 <div className="tkad-glass-surface relative overflow-hidden rounded-[26px] p-6 sm:p-8">
-                  <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_90%_20%,rgba(168,85,247,0.14),transparent_58%),radial-gradient(circle_at_55%_110%,rgba(236,72,153,0.12),transparent_60%)]" />
+                  <div aria-hidden className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_18%_18%,transparent,transparent_55%),radial-gradient(circle_at_90%_20%,color-mix(in_srgb,var(--qp-accent)_12%,transparent),transparent_58%),radial-gradient(circle_at_55%_110%,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_60%)]" />
                   <div className="relative space-y-5">
                     <div className="space-y-2">
                       <PlannerNeonLabel>Next Step</PlannerNeonLabel>

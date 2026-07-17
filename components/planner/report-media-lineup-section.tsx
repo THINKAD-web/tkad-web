@@ -292,12 +292,12 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
         <div className="space-y-8">
           {p.portfolioGroups.map((group) => (
             <div key={group.regionLabel} className="space-y-4">
-              <h4 className="border-b border-violet-100 pb-2 text-base font-bold text-gray-900">
+              <h4 className="border-b border-[color:var(--qp-line)] pb-2 text-base font-bold text-gray-900">
                 {group.regionLabel}
               </h4>
               {group.categories.map((cat) => (
                 <div key={`${group.regionLabel}-${cat.categoryLabel}`} className="space-y-3">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-violet-600">
+                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[color:var(--qp-accent)]">
                     {cat.categoryLabel}
                   </p>
                   <ul className={listClass}>

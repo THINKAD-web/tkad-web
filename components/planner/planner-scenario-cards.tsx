@@ -68,7 +68,7 @@ export function PlannerScenarioCards({
               selected
                 ? plannerNeon.selectChipActive
                 : plannerNeon.selectChipIdle,
-              "hover:border-violet-300/40",
+              "hover:border-[color:var(--qp-accent)]/40",
             )}
           >
             <div className="flex items-start justify-between gap-2">
@@ -76,14 +76,14 @@ export function PlannerScenarioCards({
                 className={cn(
                   "inline-block rounded-full border px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider",
                   selected
-                    ? "border-violet-300/50 bg-violet-500/20 text-violet-100"
+                    ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/20 text-[color:var(--qp-accent)]"
                     : "border-border text-muted-foreground",
                 )}
               >
                 {variantLabels[scenario.variant]}
               </span>
               {selected ? (
-                <Check className="h-4 w-4 shrink-0 text-violet-400" />
+                <Check className="h-4 w-4 shrink-0 text-[color:var(--qp-accent)]" />
               ) : null}
             </div>
             <p
@@ -111,8 +111,8 @@ export function PlannerScenarioCards({
               className={cn(
                 "mt-3 w-full rounded-lg border px-3 py-2 text-[11px] font-semibold transition-colors",
                 selected
-                  ? "border-violet-400/50 bg-violet-500/20 text-violet-100 hover:bg-violet-500/30"
-                  : "border-violet-300/30 text-violet-300/90 hover:border-violet-300/50 hover:bg-violet-500/10",
+                  ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/20 text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent)]/30"
+                  : "border-[color:var(--qp-accent)]/30 text-[color:var(--qp-accent)]/90 hover:border-[color:var(--qp-accent)]/50 hover:bg-[color:var(--qp-accent)]/10",
               )}
             >
               {applyLabel}

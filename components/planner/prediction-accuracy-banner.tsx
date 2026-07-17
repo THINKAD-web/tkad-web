@@ -22,7 +22,7 @@ export function PredictionAccuracyBanner({
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
+        className="pointer-events-none absolute inset-0 opacity-[0.03] tkad-neon-grid"
       />
       <div className="relative flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">

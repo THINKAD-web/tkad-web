@@ -203,8 +203,8 @@ export function StickyActionBar({
         );
 
   const floatingSurface = cn(
-    "rounded-2xl border border-violet-400/20 bg-background/95 shadow-lg backdrop-blur-md",
-    "dark:border-violet-400/25 dark:bg-[#0a0a0f]/95",
+    "rounded-2xl border border-[color:var(--qp-line)] bg-background/95 shadow-lg backdrop-blur-md",
+    "dark:border-white/12 dark:bg-[#0a0a0f]/95",
   );
 
   const bar = (

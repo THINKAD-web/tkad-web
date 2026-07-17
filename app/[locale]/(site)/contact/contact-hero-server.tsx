@@ -18,7 +18,7 @@ export async function ContactHeroServer({ locale }: Props) {
   ];
 
   return (
-    <NeonSection>
+    <NeonSection tone="qp">
       <NeonSectionHead
         number="01"
         kicker={isKo ? "Contact" : "Contact"}

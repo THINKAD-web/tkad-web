@@ -48,7 +48,7 @@ export function PlannerRegionMap({
               className={cn(
                 "inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full px-3 py-2 text-sm font-semibold transition-all touch-manipulation",
                 active
-                  ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
+                  ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
                   : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
               )}
             >

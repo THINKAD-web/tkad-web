@@ -60,7 +60,7 @@ export function FreetextExampleChips({
           <button
             type="button"
             onClick={() => setExampleSeed((n) => n + 1)}
-            className="text-xs font-semibold text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
+            className="text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
           >
             {isKo ? "새 예시" : "More examples"}
           </button>

@@ -111,10 +111,10 @@ export function PlannerMediaPackagePicker({
                   ? "min-w-0 max-w-full shrink px-2 py-1 text-[10px] leading-tight"
                   : "max-w-full shrink-0 rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
                 selected
-                  ? "border-violet-500 bg-violet-500/15 font-semibold text-violet-800 dark:text-violet-100"
+                  ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/15 font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                   : compact
-                    ? "border-violet-400/20 bg-white/70 font-medium text-foreground/85 hover:border-violet-400/40 dark:bg-white/5"
-                    : "border-violet-400/25 bg-white/80 text-foreground hover:border-violet-400/50 dark:bg-white/5",
+                    ? "border-[color:var(--qp-accent)]/20 bg-white/70 font-medium text-foreground/85 hover:border-[color:var(--qp-accent)]/40 dark:bg-white/5"
+                    : "border-[color:var(--qp-accent)]/25 bg-white/80 text-foreground hover:border-[color:var(--qp-accent)]/50 dark:bg-white/5",
               )}
             >
               <span className="block truncate font-medium">{primary}</span>

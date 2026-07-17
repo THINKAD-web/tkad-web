@@ -37,7 +37,7 @@ export function PlannerScenarioPresets({ onApply }: Props) {
               plannerNeon.selectChip,
               "touch-manipulation p-4 text-left",
               plannerNeon.selectChipIdle,
-              "hover:border-violet-300/40",
+              "hover:border-[color:var(--qp-accent)]/40",
             )}
           >
             <p className={cn("font-bold text-sm", plannerNeon.headline)}>

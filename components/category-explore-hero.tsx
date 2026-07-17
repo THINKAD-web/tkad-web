@@ -3,8 +3,7 @@ import { cn } from "@/lib/utils";
 import { ui } from "@/lib/ui-classes";
 import { StatusBadge } from "@/components/ui/status-badge";
 
-const HEADLINE_GRADIENT =
-  "bg-gradient-to-r from-violet-500 via-pink-500 to-cyan-400 bg-clip-text text-transparent";
+const HEADLINE_ACCENT = "tkad-home-accent-text";
 
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 */
 export const categoryHeroCtaPrimaryClass = cn(
@@ -98,8 +97,10 @@ export function CategoryExploreHero({
         className,
       )}
     >
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth dark:opacity-100 opacity-0" />
-      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid dark:opacity-20 opacity-0" />
+      <div
+        aria-hidden
+        className="absolute inset-0 hidden dark:block bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_6%,transparent),transparent_50%)]"
+      />
       <div
         aria-hidden
         className="absolute inset-0 tkad-hero-noise opacity-0 mix-blend-overlay dark:opacity-[0.07]"
@@ -124,7 +125,7 @@ export function CategoryExploreHero({
           )}
         >
           {headlineBefore}
-          <span className={HEADLINE_GRADIENT}>{headlineGradient}</span>
+          <span className={HEADLINE_ACCENT}>{headlineGradient}</span>
           {headlineAfter}
         </h1>
         <p

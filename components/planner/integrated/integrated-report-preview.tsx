@@ -71,8 +71,8 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
           "dark:border-white/10 dark:bg-white/5 dark:text-gray-100",
         )}
       >
-        <div className="tkad-planner-dark-surface rounded-xl bg-gradient-to-br from-violet-950/90 via-[#0a0a12] to-cyan-950/80 p-8 text-white">
-          <p className="text-xs font-bold uppercase tracking-[0.2em] text-violet-300">
+        <div className="tkad-planner-dark-surface rounded-xl bg-[#0a0a12] p-8 text-white">
+          <p className="text-xs font-bold uppercase tracking-[0.2em] text-[color:var(--qp-accent)]">
             THINKAD Integrated Campaign
           </p>
           <h1 className="mt-3 text-2xl font-black">
@@ -204,7 +204,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 <dt className="text-gray-500">
                   {isKo ? "크로스미디어 도달 증폭" : "Reach amplification"}
                 </dt>
-                <dd className="text-xl font-black text-violet-700">
+                <dd className="text-xl font-black text-[color:var(--qp-accent)]">
                   +{proInsights.crossMediaReachAmplificationPct}%
                 </dd>
               </div>
@@ -212,7 +212,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 <dt className="text-gray-500">
                   {isKo ? "시너지 노출 추정" : "Synergy impressions"}
                 </dt>
-                <dd className="text-xl font-black text-cyan-700 tabular-nums">
+                <dd className="text-xl font-black text-[color:var(--qp-fg-muted)] tabular-nums">
                   {proInsights.synergyImpressionsEstimate.toLocaleString()}
                 </dd>
               </div>
@@ -251,7 +251,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                   <td className="p-2 text-gray-500">
                     {isKo ? "통합 효율 점수" : "Efficiency score"}
                   </td>
-                  <td className="p-2 text-right text-xl font-black text-violet-700">
+                  <td className="p-2 text-right text-xl font-black text-[color:var(--qp-accent)]">
                     {proInsights.integratedEfficiencyScore}/100
                   </td>
                 </tr>
@@ -289,7 +289,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 <dt className="text-xs text-gray-500">
                   {isKo ? "전환 기여" : "Conversion"}
                 </dt>
-                <dd className="mt-1 text-2xl font-black text-cyan-600">
+                <dd className="mt-1 text-2xl font-black text-[color:var(--qp-fg-muted)]">
                   {proInsights.conversionContributionPct}%
                 </dd>
               </div>
@@ -297,7 +297,7 @@ const IntegratedReportPreview = forwardRef<HTMLDivElement, Props>(
                 <dt className="text-xs text-gray-500">
                   {isKo ? "효율 등급" : "Grade"}
                 </dt>
-                <dd className="mt-1 text-3xl font-black text-violet-700">
+                <dd className="mt-1 text-3xl font-black text-[color:var(--qp-accent)]">
                   {proInsights.efficiencyGrade}
                 </dd>
               </div>

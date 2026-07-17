@@ -114,7 +114,7 @@ export function PlannerImpressionsLineChart({
             y={p.y - 4}
             width={8}
             height={8}
-            fill="#8B5CF6"
+            fill="#ff6200"
             stroke="var(--foreground)"
             strokeWidth={2}
           />
@@ -232,7 +232,7 @@ export function PlannerRoiLineChart({
         <path
           d={line("optimistic")}
           fill="none"
-          stroke="#8B5CF6"
+          stroke="#ff6200"
           strokeWidth={2.5}
         />
         {data.map((d, i) => (
@@ -405,7 +405,7 @@ export function PlannerReachDonutChart({
           <circle
             r={r}
             fill="none"
-            stroke="#8B5CF6"
+            stroke="#ff6200"
             strokeWidth={stroke}
             strokeDasharray={`${extLen} ${c}`}
             strokeDashoffset={-coreLen}
@@ -423,7 +423,7 @@ export function PlannerReachDonutChart({
           <span className="font-bold tabular-nums text-foreground">{corePct}%</span>
         </div>
         <div className="flex items-center gap-2 text-xs">
-          <span className="h-3 w-3 shrink-0 bg-[#8B5CF6]" />
+          <span className="h-3 w-3 shrink-0 bg-[#ff6200]" />
           <span className="text-muted-foreground">{extendedLabel}</span>
           <span className="font-bold tabular-nums text-foreground">{extendedPct}%</span>
         </div>
@@ -433,10 +433,10 @@ export function PlannerReachDonutChart({
 }
 
 const PIE_COLORS = [
-  "#8B5CF6",
-  "#06B6D4",
-  "#EC4899",
-  "#6366F1",
+  "#ff6200",
+  "#1c1c1f",
+  "#5a5a5e",
+  "#10B981",
   "#737373",
 ];
 
@@ -566,7 +566,7 @@ export function PlannerCpmCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 2)}
-                fill="#8B5CF6"
+                fill="#ff6200"
               />
               <text
                 x={x + barW / 2}
@@ -676,7 +676,7 @@ export function PlannerMonthCompareChart({
                 y={y}
                 width={barW}
                 height={Math.max(h, 3)}
-                fill={isCurrent ? "#8B5CF6" : "var(--foreground)"}
+                fill={isCurrent ? "#ff6200" : "var(--foreground)"}
               />
               <text
                 x={x + barW / 2}

@@ -67,7 +67,11 @@
 
   /* 섹션 라벨 */
   .ui-section-label {
-    @apply mb-3 text-xs font-medium uppercase tracking-widest text-cyan-600/60 dark:text-cyan-400/60;
+    @apply mb-3 text-xs font-medium uppercase tracking-widest;
+    color: color-mix(in srgb, var(--qp-accent) 70%, transparent);
+  }
+  :is(html.dark) .ui-section-label {
+    color: color-mix(in srgb, var(--qp-accent) 75%, transparent);
   }
 
   /* 섹션 간격 */
@@ -91,13 +95,21 @@
 
   /* Primary / Secondary / Ghost 버튼 */
   .ui-btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 md:text-base;
+    @apply inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-90 active:scale-95 md:text-base;
+    background: var(--qp-accent);
+  }
+  .ui-btn-primary:hover {
+    background: var(--qp-accent-hover, var(--qp-accent));
   }
   .ui-btn-secondary {
     @apply inline-flex items-center justify-center gap-2 rounded-xl border border-gray-300 px-5 py-2.5 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 active:scale-95 dark:border-white/20 dark:text-white dark:hover:bg-white/10 md:text-base;
   }
   .ui-btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 text-sm font-medium text-violet-600 underline-offset-4 transition-colors hover:text-violet-500 hover:underline dark:text-violet-400 dark:hover:text-violet-300 md:text-base;
+    @apply inline-flex items-center justify-center gap-2 text-sm font-medium underline-offset-4 transition-colors hover:underline md:text-base;
+    color: var(--qp-accent);
+  }
+  .ui-btn-ghost:hover {
+    color: var(--qp-accent-hover, var(--qp-accent));
   }
 
   /* 카드 표면 */
@@ -110,10 +122,14 @@
 
   /* 상태 뱃지 */
   .ui-badge-beta {
-    @apply inline-flex items-center rounded-full bg-violet-500/20 px-2 py-0.5 text-xs font-medium text-violet-600 dark:text-violet-400;
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    background: color-mix(in srgb, var(--qp-accent) 20%, transparent);
+    color: var(--qp-accent);
   }
   .ui-badge-new {
-    @apply inline-flex items-center rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs font-medium text-cyan-600 dark:text-cyan-400;
+    @apply inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium;
+    background: color-mix(in srgb, var(--qp-accent) 18%, transparent);
+    color: var(--qp-accent);
   }
   .ui-badge-active {
     @apply inline-flex items-center rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs font-medium text-emerald-600 dark:text-emerald-400;
@@ -165,5 +181,6 @@
 
 /* 로딩 스피너 (버튼 내) */
 .ui-spinner {
-  @apply h-5 w-5 shrink-0 animate-spin text-violet-400;
+  @apply h-5 w-5 shrink-0 animate-spin;
+  color: var(--qp-accent);
 }

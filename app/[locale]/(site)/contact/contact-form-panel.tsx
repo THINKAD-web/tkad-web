@@ -16,7 +16,7 @@ export function ContactFormPanel() {
     "inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-gray-200 bg-gray-50 px-4 py-3 text-sm font-semibold backdrop-blur transition-all dark:border-white/10 dark:bg-white/5";
 
   const tabActive =
-    "border-violet-500/40 bg-gradient-to-r from-violet-500/25 to-cyan-400/20 text-gray-900 shadow-[0_8px_32px_rgba(139,92,246,0.25)] dark:text-white";
+    "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-gray-900 shadow-sm dark:text-white";
   const tabIdle =
     "text-gray-600 hover:border-gray-300 hover:bg-gray-100 dark:text-white dark:hover:border-white/20 dark:hover:bg-white/10";
 

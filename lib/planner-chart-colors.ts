@@ -1,41 +1,41 @@
 /**
  * 플래너 보고서 차트 색상 — 웹·PDF·PPTX 동일 매핑.
- * 고정형=보라, 디지털=시안 등 유형 키 기준으로 일관되게 적용한다.
+ * 브랜드=qp accent, 보조=중립·에메랄드 등 (보라/시안 네온 없음).
  */
 
 import { getMainCategory } from "@/lib/media-browse-categories";
 
-/** 발견하기 메인 카테고리 칩 색 — Tailwind 500 계열 */
+/** 발견하기 메인 카테고리 칩 색 — qp·중립 위주 */
 const BROWSE_CHIP_HEX: Record<string, string> = {
-  violet: "#8B5CF6",
+  violet: "#ff6200",
   blue: "#3B82F6",
-  cyan: "#06B6D4",
-  pink: "#EC4899",
+  cyan: "#1c1c1f",
+  pink: "#5a5a5e",
   rose: "#F43F5E",
   amber: "#F59E0B",
   emerald: "#10B981",
-  orange: "#F97316",
+  orange: "#ff6200",
   teal: "#14B8A6",
-  indigo: "#6366F1",
-  purple: "#A855F7",
+  indigo: "#08080a",
+  purple: "#ff6200",
   gray: "#6B7280",
 };
 
 export const PLANNER_CHART_COLOR_BY_KEY: Record<string, string> = {
-  static: "#7C3AED",
-  digital: "#0891B2",
-  mobile: "#EC4899",
+  static: "#ff6200",
+  digital: "#1c1c1f",
+  mobile: "#5a5a5e",
   network: "#10B981",
   /** 통합 플랜 OOH vs 디지털 */
-  ooh: "#7C3AED",
+  ooh: "#ff6200",
   other: "#6B7280",
 };
 
 export const PLANNER_CHART_PALETTE = [
-  "#7C3AED",
-  "#0891B2",
-  "#EC4899",
+  "#ff6200",
+  "#1c1c1f",
   "#10B981",
+  "#6B7280",
   "#F59E0B",
 ] as const;
 

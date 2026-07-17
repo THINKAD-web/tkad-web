@@ -14,9 +14,9 @@ export function PlannerRecommendHintCard() {
   const t = useTranslations("planner");
 
   return (
-    <PlannerNeonCard className="overflow-hidden border-cyan-400/20">
+    <PlannerNeonCard className="overflow-hidden border-[color:var(--qp-line)]">
       <div className={cn(plannerNeon.cardHeader, "pb-4")}>
-        <PlannerNeonLabel className="!text-cyan-700 dark:!text-cyan-300">
+        <PlannerNeonLabel className="!text-[color:var(--qp-fg-muted)] dark:!text-[color:var(--qp-fg-muted)]">
           {t("recommendHintEyebrow")}
         </PlannerNeonLabel>
         <h3
@@ -26,7 +26,7 @@ export function PlannerRecommendHintCard() {
           )}
         >
           <Sparkles
-            className="mt-0.5 h-5 w-5 shrink-0 text-violet-400"
+            className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-accent)]"
             aria-hidden
           />
           {t("recommendHintTitle")}

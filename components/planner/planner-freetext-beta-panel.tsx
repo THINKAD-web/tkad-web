@@ -122,10 +122,10 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
     <PlannerNeonCard className="overflow-hidden">
       <div className={plannerNeon.cardHeader}>
         <div className="flex flex-wrap items-center gap-2">
-          <PlannerNeonLabel className="!text-violet-600 dark:!text-violet-300">
+          <PlannerNeonLabel className="!text-[color:var(--qp-accent)] dark:!text-[color:var(--qp-accent)]">
             {isKo ? "AI 자연어 입력" : "AI natural language"}
           </PlannerNeonLabel>
-          <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+          <span className="rounded-md border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
             {isKo ? "무료 · 규칙" : "Free · Rules"}
           </span>
         </div>
@@ -135,7 +135,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
             plannerNeon.headline,
           )}
         >
-          <Sparkles className="h-5 w-5 text-violet-400" aria-hidden />
+          <Sparkles className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
           {isKo
             ? "키워드로 조건을 분석해 추천합니다"
             : "Keyword-based brief analysis"}
@@ -157,7 +157,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
           className={cn(
             "w-full resize-y rounded-xl border px-4 py-3 text-sm leading-relaxed",
             "dark:border-white/12 border-gray-200 dark:bg-black/20 bg-white",
-            "focus:outline-none focus:ring-2 focus:ring-violet-400/40",
+            "focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent-ring)]",
           )}
         />
 
@@ -193,8 +193,8 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
             <div
               className={cn(
                 "space-y-4 rounded-xl border p-4 sm:p-5",
-                "border-violet-400/25 bg-gradient-to-br from-violet-500/[0.07] to-cyan-500/[0.05]",
-                "dark:border-violet-400/20 dark:from-violet-500/10 dark:to-cyan-500/5",
+                "border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)]",
+                "dark:border-[color:var(--qp-accent)]/20 dark:bg-[color:var(--qp-accent)]/10",
               )}
             >
               <p className="text-sm font-semibold leading-relaxed text-foreground sm:text-base">
@@ -202,7 +202,7 @@ export function PlannerFreetextBetaPanel({ isKo, onApplied }: Props) {
               </p>
 
               {evidenceRows.length > 0 ? (
-                <ul className="space-y-2 border-t border-violet-400/15 pt-3 dark:border-white/10">
+                <ul className="space-y-2 border-t border-[color:var(--qp-accent)]/15 pt-3 dark:border-white/10">
                   {evidenceRows.map((row) => (
                     <EvidenceRow key={row.key} row={row} isKo={isKo} />
                   ))}

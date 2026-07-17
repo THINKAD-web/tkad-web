@@ -53,7 +53,7 @@ function PlatformCard({
         "relative flex w-full flex-col rounded-2xl border p-4 text-left transition-transform",
         "hover:scale-[1.02] active:scale-[0.98]",
         active
-          ? "border-violet-500/50 bg-violet-500/10 ring-2 ring-violet-500/30"
+          ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/10 ring-2 ring-[color:var(--qp-accent-ring)]"
           : "border-gray-200 bg-white dark:border-white/10 dark:bg-white/5",
       )}
     >
@@ -61,7 +61,7 @@ function PlatformCard({
         className={cn(
           "absolute right-3 top-3 flex h-5 w-5 items-center justify-center rounded-full border-2",
           active
-            ? "border-violet-500 bg-violet-500 text-white"
+            ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] text-white"
             : "border-gray-300 bg-transparent dark:border-white/20",
         )}
       >
@@ -87,12 +87,12 @@ function PlatformCard({
       <span className="mt-1 text-xs text-gray-500 dark:text-white/50">
         {isKo ? channel.descriptionKo : channel.descriptionEn}
       </span>
-      <span className="mt-2 text-xs font-medium text-violet-600 dark:text-violet-300">
+      <span className="mt-2 text-xs font-medium text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {isKo ? channel.synergyKo : channel.synergyEn}
       </span>
 
       {active && scored ? (
-        <span className="mt-2 text-[11px] font-semibold text-cyan-600 dark:text-cyan-400">
+        <span className="mt-2 text-[11px] font-semibold text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
           {isKo ? "추천 비중" : "Suggested share"} {scored.budgetPct}%
           {" · "}
           {isKo ? "예상 노출" : "Est. impressions"}{" "}
@@ -148,9 +148,9 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
 
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-cyan-400/25 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-400/10 p-5 sm:p-6">
+      <div className="rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-5 sm:p-6">
         <div className="flex items-start gap-3">
-          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-cyan-400" />
+          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-fg-muted)]" />
           <div>
             <p className="text-sm font-bold text-foreground dark:text-white">
               {isKo ? result.synergyMessageKo : result.synergyMessageEn}
@@ -177,7 +177,7 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
             step={5}
             value={digitalBudgetPct}
             onChange={(e) => setDigitalBudgetPct(Number(e.target.value))}
-            className="w-full accent-violet-500"
+            className="w-full accent-[color:var(--qp-accent)]"
           />
           <div className="flex justify-between text-sm font-semibold">
             <span>
@@ -185,7 +185,7 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
               {Math.round(budgetMan * (result.oohBudgetPct / 100)).toLocaleString()}
               {isKo ? "만원" : "M KRW"})
             </span>
-            <span className="text-cyan-400">
+            <span className="text-[color:var(--qp-fg-muted)]">
               {t("digitalLabel")} {result.digitalBudgetPct}% (
               {result.totalDigitalBudgetMan.toLocaleString()}
               {isKo ? "만원" : "M KRW"})
@@ -194,7 +194,7 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
         </div>
       </PlannerNeonCard>
 
-      <PlannerNeonCard className="border-violet-400/20">
+      <PlannerNeonCard className="border-[color:var(--qp-accent)]/20">
         <div className="flex flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
           <div className="space-y-1">
             <PlannerNeonLabel>{t("digitalRecommendEyebrow")}</PlannerNeonLabel>

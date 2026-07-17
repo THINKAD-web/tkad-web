@@ -27,8 +27,8 @@ import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup
  * 텍스트/표/도형 네이티브 요소라 영업팀이 PowerPoint 에서 바로 수정 가능.
  */
 
-const VIOLET = "7C3AED";
-const CYAN = "0891B2";
+const VIOLET = "FF6200";
+const CYAN = "1C1C1F";
 const INK = "111827";
 const GRAY = "6B7280";
 const LIGHT = "F1F1F7";
@@ -170,7 +170,7 @@ function addBudgetSplitShapes(
   return barY + barH + 0.22 + rows.length * 0.4 + 0.1;
 }
 
-const CYAN_BAR = "06B6D4";
+const CYAN_BAR = "1C1C1F";
 const BAR_TRACK = "F3F4F6";
 
 function addPptContributionBar(
@@ -260,10 +260,10 @@ export async function buildPlannerReportPptx(
   const exportSections = filterExportSections(p.sections, vis);
   const lineupViewMode = assets?.lineupViewMode ?? "detail";
 
-  const CYAN_LT = "7CDCEB";
+  const ACCENT_LT = "FFB990";
   const wordmark = (size: number) => [
     { text: "THINK", options: { color: WHITE, bold: true } },
-    { text: "AD", options: { color: CYAN_LT, bold: true } },
+    { text: "AD", options: { color: ACCENT_LT, bold: true } },
   ].map((r) => ({ ...r, options: { ...r.options, fontFace: face, fontSize: size } }));
 
   // ── 1. 표지 ──
@@ -272,7 +272,7 @@ export async function buildPlannerReportPptx(
   cover.addText(wordmark(30), { x: 0.7, y: 1.35, w: 6, h: 0.7 });
   cover.addText("CAMPAIGN PLANNER", {
     x: 0.72, y: 2.05, w: 9, h: 0.4, fontFace: face,
-    fontSize: 12, color: "D6C7FF", charSpacing: 3,
+    fontSize: 12, color: "D1D5DB", charSpacing: 3,
   });
   cover.addText(p.documentTitle, {
     x: 0.7, y: 2.7, w: 12, h: 1.4, fontFace: face,
@@ -283,7 +283,7 @@ export async function buildPlannerReportPptx(
     p.kind === "integrated"
       ? isKo ? "OOH + 디지털 통합 캠페인 제안" : "OOH + Digital integrated campaign"
       : isKo ? "OOH 미디어 캠페인 플랜" : "OOH media campaign plan",
-    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: "E1DCF5" },
+    { x: 0.7, y: 4.25, w: 12, h: 0.5, fontFace: face, fontSize: 17, color: "E5E7EB" },
   );
   if (p.clientName) {
     cover.addText(`${p.clientName} ${isKo ? "귀중" : ""}`.trim(), {

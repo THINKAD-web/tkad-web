@@ -26,7 +26,7 @@ export function PlannerContactSummary({ plan }: Props) {
           : "📊 Planner recommended plan";
 
   return (
-    <div className="mb-4 rounded-xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/30 dark:bg-violet-500/10">
+    <div className="mb-4 rounded-xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-4 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10">
       <p className="mb-2 text-sm font-semibold text-gray-900 dark:text-white">
         {title}
       </p>
@@ -38,7 +38,7 @@ export function PlannerContactSummary({ plan }: Props) {
           {i + 1}. {name}
         </p>
       ))}
-      <p className="mt-2 text-xs text-violet-600 dark:text-violet-400">
+      <p className="mt-2 text-xs text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {isKo ? "총 예산" : "Total budget"}:{" "}
         {formatPlanTransferBudget(plan.totalBudget, isKo)} ·{" "}
         {isKo ? "기간" : "Duration"}: {plan.duration}

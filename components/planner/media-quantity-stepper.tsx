@@ -76,7 +76,7 @@ export function PlannerMediaQuantityStepper({
         </span>
       ) : null}
       <div
-        className="inline-flex items-center rounded-lg border border-violet-400/35 bg-white/90 dark:border-violet-400/25 dark:bg-white/5"
+        className="inline-flex items-center rounded-lg border border-[color:var(--qp-accent)]/35 bg-white/90 dark:border-[color:var(--qp-accent)]/25 dark:bg-white/5"
         role="group"
         aria-label={isKo ? "매체 수량" : "Media quantity"}
       >
@@ -84,7 +84,7 @@ export function PlannerMediaQuantityStepper({
           type="button"
           onClick={() => onChange(clamp(units - 1))}
           disabled={atMin}
-          className="flex h-7 w-7 items-center justify-center rounded-l-lg text-violet-700 transition-colors hover:bg-violet-500/10 disabled:opacity-40 dark:text-violet-200"
+          className="flex h-7 w-7 items-center justify-center rounded-l-lg text-[color:var(--qp-accent)] transition-colors hover:bg-[color:var(--qp-accent)]/10 disabled:opacity-40 dark:text-[color:var(--qp-accent)]"
           aria-label={isKo ? "수량 감소" : "Decrease quantity"}
         >
           <Minus className="h-3.5 w-3.5" aria-hidden />
@@ -103,7 +103,7 @@ export function PlannerMediaQuantityStepper({
                 (e.target as HTMLInputElement).blur();
               }
             }}
-            className="h-7 w-14 border-x border-violet-400/35 bg-white px-1 text-center text-xs font-semibold tabular-nums text-foreground outline-none focus:ring-1 focus:ring-violet-400/50 dark:border-violet-400/25 dark:bg-white/5"
+            className="h-7 w-14 border-x border-[color:var(--qp-accent)]/35 bg-white px-1 text-center text-xs font-semibold tabular-nums text-foreground outline-none focus:ring-1 focus:ring-[color:var(--qp-accent-ring)] dark:border-[color:var(--qp-accent)]/25 dark:bg-white/5"
             aria-label={isKo ? "수량 직접 입력" : "Quantity input"}
           />
         ) : (
@@ -115,7 +115,7 @@ export function PlannerMediaQuantityStepper({
           type="button"
           onClick={() => onChange(clamp(units + 1))}
           disabled={atMax}
-          className="flex h-7 w-7 items-center justify-center rounded-r-lg text-violet-700 transition-colors hover:bg-violet-500/10 disabled:opacity-40 dark:text-violet-200"
+          className="flex h-7 w-7 items-center justify-center rounded-r-lg text-[color:var(--qp-accent)] transition-colors hover:bg-[color:var(--qp-accent)]/10 disabled:opacity-40 dark:text-[color:var(--qp-accent)]"
           aria-label={isKo ? "수량 증가" : "Increase quantity"}
         >
           <Plus className="h-3.5 w-3.5" aria-hidden />

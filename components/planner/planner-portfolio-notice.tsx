@@ -84,7 +84,7 @@ export function PlannerPortfolioNotice({
         "flex gap-3 rounded-xl border px-4 py-3 text-sm leading-relaxed",
         isWarning
           ? "border-amber-200 bg-amber-50 text-amber-950 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100"
-          : "border-violet-200 bg-violet-50/80 text-violet-950 dark:border-violet-500/30 dark:bg-violet-500/10 dark:text-violet-100",
+          : "border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] text-gray-950 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]",
         className,
       )}
       role="note"
@@ -92,7 +92,7 @@ export function PlannerPortfolioNotice({
       {isWarning ? (
         <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-amber-600 dark:text-amber-400" />
       ) : (
-        <Info className="mt-0.5 h-4 w-4 shrink-0 text-violet-600 dark:text-violet-400" />
+        <Info className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]" />
       )}
       <ul className="min-w-0 space-y-1.5">
         {lines.map((line) => (

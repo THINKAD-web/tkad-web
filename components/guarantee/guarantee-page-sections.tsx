@@ -37,7 +37,7 @@ function BulletList({ items }: { items: string[] }) {
           className="flex gap-3 text-sm leading-relaxed dark:text-white/85 text-gray-700"
         >
           <span
-            className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400/90"
+            className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--qp-accent)]/90"
             aria-hidden
           />
           <span>{line}</span>
@@ -85,14 +85,14 @@ function CriterionCard({
   const Icon = CRITERION_ICONS[criterion.id] ?? ShieldCheck;
 
   return (
-    <article className="rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-7">
+    <article className="rounded-[28px] border border-gray-200 bg-gray-50 p-6 backdrop-blur dark:border-white/12 dark:bg-white/6 sm:p-7">
       <div className="mb-4 flex items-center justify-between">
         <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white/55 text-gray-500">
           [{String(index + 1).padStart(2, "0")}]
         </span>
-        <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
+        <Icon className="h-6 w-6 text-[color:var(--qp-accent)]/90" aria-hidden />
       </div>
-      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-cyan-600/80 dark:text-cyan-300/80">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--qp-accent)]/80">
         {isKo ? criterion.labelKo : criterion.labelEn}
       </p>
       <p className="mt-2 text-2xl font-black dark:text-white text-gray-900">
@@ -139,6 +139,7 @@ export function GuaranteePageSections({ isKo }: Props) {
           <NeonSection
             key={category.id}
             id={category.id}
+            tone="qp"
             className={cn(
               index === 0 ? "pt-10 pb-12 sm:pt-16 sm:pb-20" : "pt-4 pb-12 sm:pb-20",
               isLast && "pb-16 sm:pb-24",

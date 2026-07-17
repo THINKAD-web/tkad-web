@@ -96,7 +96,7 @@ export default async function GuaranteePage({ params }: Props) {
             </p>
           </div>
 
-          <NeonSection className="border-t-0 py-8 sm:py-10">
+          <NeonSection tone="qp" className="border-t-0 py-8 sm:py-10">
             <div className="mx-auto max-w-3xl">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white/55 text-gray-500">
                 [ {isKo ? "카테고리" : "CATEGORIES"} ]

@@ -93,7 +93,7 @@ export function PlannerSelectedMediaBar({
   return (
     <div
       className={cn(
-        "rounded-2xl border border-violet-400/25 bg-violet-500/5 p-4 dark:border-violet-400/20 dark:bg-violet-500/10",
+        "rounded-2xl border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/5 p-4 dark:border-[color:var(--qp-accent)]/20 dark:bg-[color:var(--qp-accent)]/10",
         className,
       )}
       id={id}
@@ -101,9 +101,9 @@ export function PlannerSelectedMediaBar({
     >
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div className="min-w-0 space-y-0.5">
-          <p className="text-sm font-semibold text-violet-700 dark:text-violet-200">
+          <p className="text-sm font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
             {t("selectedMediaBarLabel")}
-            <span className="ml-1.5 tabular-nums text-violet-600/80 dark:text-violet-300/80">
+            <span className="ml-1.5 tabular-nums text-[color:var(--qp-accent)]/80 dark:text-[color:var(--qp-accent)]/80">
               {t("selectedMediaBarCount", { count: entries.length })}
             </span>
           </p>
@@ -180,9 +180,9 @@ export function PlannerSelectedMediaBar({
 
           return (
             <li key={id} className="min-w-0">
-              <div className="rounded-xl border border-violet-400/30 bg-white px-2.5 py-2 text-xs dark:border-violet-400/25 dark:bg-white/10">
+              <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-white px-2.5 py-2 text-xs dark:border-[color:var(--qp-accent)]/25 dark:bg-white/10">
                 <div className="flex min-w-0 items-start justify-between gap-2">
-                  <p className="min-w-0 flex-1 leading-snug font-medium text-violet-800 dark:text-violet-100">
+                  <p className="min-w-0 flex-1 leading-snug font-medium text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                     <span className="line-clamp-2">{label}</span>
                     {multiOptionSummary ? (
                       <span className="ml-1 font-normal text-muted-foreground">
@@ -202,14 +202,14 @@ export function PlannerSelectedMediaBar({
                   <button
                     type="button"
                     onClick={() => onRemove(id)}
-                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-violet-600 transition-colors hover:bg-violet-500/15 hover:text-rose-600 dark:text-violet-300 dark:hover:text-rose-300"
+                    className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full text-[color:var(--qp-accent)] transition-colors hover:bg-[color:var(--qp-accent)]/15 hover:text-rose-600 dark:text-[color:var(--qp-accent)] dark:hover:text-rose-300"
                     aria-label={t("selectedMediaRemove", { name: label })}
                   >
                     <X className="h-3.5 w-3.5" aria-hidden />
                   </button>
                 </div>
                 {media && onQuantityChange && onPriceOptionChange ? (
-                  <div className="mt-1.5 min-w-0 border-t border-violet-400/15 pt-1.5 dark:border-violet-400/10">
+                  <div className="mt-1.5 min-w-0 border-t border-[color:var(--qp-accent)]/15 pt-1.5 dark:border-[color:var(--qp-accent)]/10">
                     <PlannerMediaQuantityControl
                       media={media}
                       isKo={isKo}

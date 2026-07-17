@@ -27,8 +27,8 @@ function PlanSummaryCardInner() {
   }
 
   return (
-    <div className="mb-4 rounded-2xl border border-violet-200 bg-violet-50 p-4 dark:border-violet-500/30 dark:bg-violet-500/10">
-      <p className="text-sm font-bold text-violet-900 dark:text-violet-200">
+    <div className="mb-4 rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4">
+      <p className="text-sm font-bold text-[color:var(--qp-accent)]">
         {isKo ? "📋 플래너에서 선택한 매체" : "📋 Media from planner"}
       </p>
       <ul className="mt-3 space-y-2">
@@ -38,16 +38,16 @@ function PlanSummaryCardInner() {
             className="flex items-start justify-between gap-3 text-sm text-gray-800 dark:text-white/90"
           >
             <span className="min-w-0 font-medium">{item.mediaName}</span>
-            <span className="shrink-0 tabular-nums text-violet-700 dark:text-violet-300">
+            <span className="shrink-0 tabular-nums text-[color:var(--qp-accent)]">
               {formatWon(item.price)}
             </span>
           </li>
         ))}
       </ul>
-      <p className="mt-3 border-t border-violet-200/80 pt-3 text-sm font-bold text-violet-900 dark:border-violet-500/25 dark:text-violet-200">
+      <p className="mt-3 border-t border-[color:var(--qp-accent)]/25 pt-3 text-sm font-bold text-[color:var(--qp-accent)]">
         {isKo ? "총 예산" : "Total budget"}: {formatWon(totalBudget)}
         {monthly > 0 && totalBudget !== monthly ? (
-          <span className="ml-2 text-xs font-normal text-violet-700/80 dark:text-violet-300/80">
+          <span className="ml-2 text-xs font-normal text-[color:var(--qp-accent)]/80">
             ({isKo ? "월" : "mo"} {formatWon(monthly)})
           </span>
         ) : null}

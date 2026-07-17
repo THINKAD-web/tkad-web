@@ -51,7 +51,7 @@ function SidebarLink({
       className={cn(
         "flex items-center gap-3 rounded-lg px-3 py-2 text-sm transition-colors",
         active
-          ? "bg-cyan-400/10 font-semibold dark:bg-white/8"
+          ? "bg-[color:var(--qp-accent-soft)] font-semibold text-[color:var(--qp-accent)] dark:bg-white/8 dark:text-white"
           : "text-gray-600 hover:bg-gray-100 dark:text-white/70 dark:hover:bg-white/5",
         compact && "justify-center px-2 py-2.5",
       )}

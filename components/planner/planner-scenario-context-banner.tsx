@@ -30,10 +30,10 @@ export function PlannerScenarioContextBanner({
   const variantLabel = variantLabels[scenario.variant];
 
   return (
-    <PlannerNeonCard className="border-violet-400/25">
+    <PlannerNeonCard className="border-[color:var(--qp-accent)]/25">
       <div className="p-5 sm:p-6">
         <PlannerNeonLabel className="flex items-center gap-2">
-          <Sparkles className="h-3.5 w-3.5 text-violet-400" aria-hidden />
+          <Sparkles className="h-3.5 w-3.5 text-[color:var(--qp-accent)]" aria-hidden />
           {t("scenarioContextTitle")}
         </PlannerNeonLabel>
         <p className={cn("mt-3 text-sm font-bold", plannerNeon.headline)}>

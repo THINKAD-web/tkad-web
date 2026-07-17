@@ -31,7 +31,7 @@ const REASON_COLORS: Record<RecommendReasonKey, string> = {
   ageMatch: "border-primary bg-primary text-primary-foreground",
   budgetEfficient: "border-border bg-muted text-foreground",
   goalFit: "border-primary/55 bg-primary/12 text-primary",
-  industryFit: "border-violet-500/55 bg-violet-500/12 text-violet-700 dark:text-violet-300",
+  industryFit: "border-[color:var(--qp-accent)]/55 bg-[color:var(--qp-accent)]/12 text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
   highVisibility: "border-primary bg-card text-primary",
   landmarkHotspot: "border-[#ff6200] bg-[#ff6200]/10 text-[#ff6200]",
   transitHotspot: "border-accent bg-accent/10 text-accent",
@@ -95,7 +95,7 @@ export function IntegratedOohRecommendationPanel({
   const isSelected = (id: string) => selectedIds.includes(id);
 
   return (
-    <PlannerNeonCard className="border-violet-400/20">
+    <PlannerNeonCard className="border-[color:var(--qp-accent)]/20">
       <div className="flex flex-col gap-3 border-b dark:border-white/10 border-gray-100 p-5 sm:flex-row sm:items-start sm:justify-between sm:p-6">
         <div className="space-y-1">
           <PlannerNeonLabel>{t("recommendEyebrow")}</PlannerNeonLabel>
@@ -133,8 +133,8 @@ export function IntegratedOohRecommendationPanel({
                   className={cn(
                     "mt-1 flex h-8 w-8 shrink-0 items-center justify-center rounded-full border-2",
                     active
-                      ? "border-violet-500 bg-violet-500 text-white"
-                      : "border-border bg-card hover:border-violet-400",
+                      ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] text-white"
+                      : "border-border bg-card hover:border-[color:var(--qp-accent)]",
                   )}
                 >
                   {active ? <Check className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
@@ -185,7 +185,7 @@ export function IntegratedOohRecommendationPanel({
             });
           }}
           className={cn(
-            "flex w-full items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-violet-500/10 py-2.5 text-sm font-bold text-violet-700 dark:text-violet-200",
+            "flex w-full items-center justify-center gap-2 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 py-2.5 text-sm font-bold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
           )}
         >
           <Sparkles className="h-4 w-4" />

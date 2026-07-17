@@ -93,7 +93,7 @@ export function ReportSectionVisibilityPanel({
                   <input
                     id={`report-section-${key}`}
                     type="checkbox"
-                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-violet-600 focus:ring-violet-500 disabled:opacity-40"
+                    className="mt-0.5 h-4 w-4 rounded border-gray-300 text-[color:var(--qp-accent)] focus:ring-[color:var(--qp-accent-ring)] disabled:opacity-40"
                     checked={visibility[key]}
                     disabled={disabled}
                     onChange={(e) => setKey(key, e.target.checked)}
@@ -121,7 +121,7 @@ export function ReportSectionVisibilityPanel({
         </ul>
         <button
           type="button"
-          className="text-xs font-medium text-violet-600 hover:text-violet-700 dark:text-violet-300"
+          className="text-xs font-medium text-[color:var(--qp-accent)] hover:text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
           onClick={() => {
             const next = defaultPlannerReportSectionVisibility();
             onChange(next);

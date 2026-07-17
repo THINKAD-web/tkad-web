@@ -166,7 +166,7 @@ export function PlannerMediaRationaleBlock({
   if (scored.length === 0) return null;
   return (
     <div className="rounded-2xl border-2 border-border bg-card p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         [ {isKo ? "왜 이 매체?" : "Why this media?"} ]
       </p>
       <ul className="mt-4 space-y-4">
@@ -798,7 +798,7 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
                           "h-10 w-full min-w-[14rem] rounded-xl border px-3 text-sm",
                           "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white",
                           "dark:text-white text-gray-900 placeholder:dark:text-white/40 placeholder:text-gray-400",
-                          "focus:border-violet-400/60 focus:outline-none sm:w-56",
+                          "focus:border-[color:var(--qp-accent)]/60 focus:outline-none sm:w-56",
                         )}
                       />
                       <PlannerPdfDownloadGate

@@ -8,16 +8,16 @@ import Spinner from "@/components/spinner";
 import { cn } from "@/lib/utils";
 
 const inputCls =
-  "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
+  "h-11 w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[color:var(--qp-accent)]/50 focus:outline-none focus:ring-1 focus:ring-[color:var(--qp-accent)]/30";
 const textareaCls =
-  "w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-violet-500/50 focus:outline-none focus:ring-1 focus:ring-violet-500/30";
+  "w-full rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-2 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[color:var(--qp-accent)]/50 focus:outline-none focus:ring-1 focus:ring-[color:var(--qp-accent)]/30";
 const labelCls = "mb-2 block text-sm dark:text-white text-gray-600";
 const btnPrimary =
-  "inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-6 text-sm font-bold dark:text-white text-gray-900 shadow-[0_12px_40px_rgba(139,92,246,0.35)] transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
+  "tkad-qp-cta inline-flex h-12 w-full items-center justify-center gap-2 rounded-xl px-6 text-sm font-bold text-white shadow-sm transition hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-50";
 const btnSecondary =
   "inline-flex h-10 items-center justify-center gap-2 rounded-xl border dark:border-white/20 border-gray-300 dark:bg-white/10 bg-gray-100 px-4 text-sm font-semibold dark:text-white text-gray-900 transition hover:bg-white/15 disabled:opacity-50";
 const chipActive =
-  "border-violet-500/50 bg-gradient-to-r from-violet-500/90 to-cyan-400/90 dark:text-white text-gray-900 shadow-[0_6px_20px_rgba(139,92,246,0.3)]";
+  "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)] text-white shadow-sm";
 const chipIdle =
   "dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-700 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100";
 
@@ -122,10 +122,10 @@ export function ContactFeedbackSurvey() {
     return (
       <div className="space-y-6 py-4">
         <div className="flex flex-col items-center gap-3 text-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-cyan-500/30 bg-gradient-to-br from-violet-500/20 to-cyan-400/20 text-cyan-300">
+          <div className="flex h-14 w-14 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]">
             <CheckCircle className="h-8 w-8" />
           </div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ THANKS ]
           </p>
           <p className="text-lg font-bold tracking-tight dark:text-white text-gray-900">
@@ -136,8 +136,8 @@ export function ContactFeedbackSurvey() {
           </p>
         </div>
 
-        <div className="rounded-2xl border border-cyan-500/30 bg-cyan-500/5 p-6">
-          <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <div className="rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-6">
+          <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             <Gift className="h-4 w-4" />
             [ {t("couponTitle")} ]
           </div>
@@ -145,7 +145,7 @@ export function ContactFeedbackSurvey() {
             {t("couponHint")}
           </p>
           <div className="mt-4 flex flex-wrap items-center gap-2">
-            <code className="rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 py-2 font-mono text-lg font-bold tracking-wider text-cyan-300">
+            <code className="rounded-xl border dark:border-white/15 border-gray-200 dark:bg-white/10 bg-gray-100 px-4 py-2 font-mono text-lg font-bold tracking-wider text-[color:var(--qp-accent)]">
               {couponCode}
             </code>
             <button type="button" className={btnSecondary} onClick={copyCoupon}>
@@ -303,8 +303,8 @@ export function ContactFeedbackSurvey() {
       </fieldset>
 
       {campaign === "yes" ? (
-        <div className="space-y-3 rounded-xl border border-cyan-500/30 bg-cyan-500/5 p-4">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/90">
+        <div className="space-y-3 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-4">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/90">
             [ {t("qCampaignResult")} ]
           </p>
           <div className="flex flex-wrap gap-0">

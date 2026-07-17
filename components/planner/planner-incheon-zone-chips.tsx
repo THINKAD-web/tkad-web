@@ -41,9 +41,9 @@ export function PlannerIncheonZoneChips({
     cn(
       "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all touch-manipulation sm:text-sm",
       active
-        ? "bg-violet-600 text-white shadow-sm shadow-violet-500/25"
+        ? "bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25"
         : isSuggested
-          ? "border border-violet-400/40 bg-violet-500/10 text-violet-900 dark:text-violet-100"
+          ? "border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 text-gray-900 dark:text-[color:var(--qp-accent)]"
           : "dark:bg-white/10 bg-gray-100 text-gray-800 hover:bg-gray-200 dark:text-white/85 dark:hover:bg-white/15",
     );
 
@@ -79,11 +79,11 @@ export function PlannerIncheonZoneChips({
           type="button"
           onClick={onApplySuggested}
           className={cn(
-            "inline-flex items-center gap-1.5 rounded-full border border-violet-300/40 px-3 py-1.5 text-xs font-medium touch-manipulation",
-            "text-violet-800 hover:bg-violet-500/10 dark:text-violet-200",
+            "inline-flex items-center gap-1.5 rounded-full border border-[color:var(--qp-accent)]/40 px-3 py-1.5 text-xs font-medium touch-manipulation",
+            "text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]",
           )}
         >
-          <Sparkles className="h-3.5 w-3.5 text-violet-400" />
+          <Sparkles className="h-3.5 w-3.5 text-[color:var(--qp-accent)]" />
           {t("incheonZonesApplySuggested")}
         </button>
         {noneSelected ? (

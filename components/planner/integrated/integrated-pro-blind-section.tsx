@@ -45,8 +45,8 @@ export function IntegratedProBlindSection({
           aria-hidden={false}
         >
           <div className="text-center">
-            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-violet-500/30 bg-violet-500/20">
-              <Lock className="h-6 w-6 text-violet-400" aria-hidden />
+            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/20">
+              <Lock className="h-6 w-6 text-[color:var(--qp-accent)]" aria-hidden />
             </div>
             <p className="mb-1 text-base font-bold text-white">{heading}</p>
             <p className="mb-4 text-sm leading-relaxed text-white/60">{body}</p>
