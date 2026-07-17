@@ -11,13 +11,20 @@ import { buildPackageContactHref } from "@/lib/media-packages";
 import { PACKAGE_INDUSTRY_LABELS } from "@/lib/package-industry-labels";
 import { cn } from "@/lib/utils";
 
-const ACCENT_RING: Record<ResolvedMediaPackage["accent"], string> = {
-  violet: "before:from-violet-500/0 before:via-violet-500/35 before:to-violet-500/0",
+const HERMES_RING =
+  "before:from-hermes/0 before:via-hermes/35 before:to-hermes/0";
+
+const ACCENT_RING_PARTIAL: Partial<
+  Record<ResolvedMediaPackage["accent"], string>
+> = {
   rose: "before:from-rose-500/0 before:via-rose-500/35 before:to-rose-500/0",
-  cyan: "before:from-cyan-500/0 before:via-cyan-500/35 before:to-cyan-500/0",
   amber: "before:from-amber-500/0 before:via-amber-500/35 before:to-amber-500/0",
   indigo: "before:from-indigo-500/0 before:via-indigo-500/35 before:to-indigo-500/0",
 };
+
+function accentRingClass(accent: ResolvedMediaPackage["accent"]): string {
+  return ACCENT_RING_PARTIAL[accent] ?? HERMES_RING;
+}
 
 type Props = {
   pkg: ResolvedMediaPackage;
@@ -52,19 +59,19 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
         "dark:border-white/10 border-gray-200 dark:bg-white/5 bg-gray-50 dark:hover:bg-white/[0.08]",
         "dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
         "before:pointer-events-none before:absolute before:-inset-px before:rounded-2xl before:bg-gradient-to-br before:opacity-0 before:transition-opacity before:duration-300 group-hover:before:opacity-100",
-        ACCENT_RING[pkg.accent],
+        accentRingClass(pkg.accent),
       )}
     >
       {/* 상단 — 지역 + 목적 태그 */}
       <div className="relative flex flex-wrap items-center gap-1.5">
-        <span className="inline-flex items-center gap-1 rounded-full border border-cyan-500/40 bg-cyan-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-cyan-700 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-cyan-200">
+        <span className="inline-flex items-center gap-1 rounded-full border border-hermes/30 bg-hermes/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-hermes">
           <Tag className="h-3 w-3" aria-hidden />
           {region}
         </span>
         {pkg.purposes.slice(0, 2).map((p) => (
           <span
             key={p}
-            className="inline-flex items-center rounded-full border border-violet-500/40 bg-violet-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-violet-700 dark:border-violet-400/40 dark:bg-violet-400/10 dark:text-violet-200"
+            className="inline-flex items-center rounded-full border border-hermes/30 bg-hermes/15 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.16em] text-hermes"
           >
             {purposeMap[p]}
           </span>
@@ -99,8 +106,8 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
       </dl>
 
       {/* 추천 이유 */}
-      <div className="relative mt-4 rounded-xl border-l-2 border-cyan-400 bg-cyan-50/60 px-3 py-2 dark:border-cyan-300/70 dark:bg-cyan-400/10">
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-200">
+      <div className="relative mt-4 rounded-xl border-l-2 border-hermes bg-hermes/10 px-3 py-2 dark:border-hermes/70 dark:bg-hermes/10">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
           {`// `}{cardLabels.reason}
         </p>
         <p className="mt-1 text-[13px] leading-relaxed text-foreground/85">
@@ -139,7 +146,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
               <li key={m.id}>
                 <Link
                   href={`/media/${m.id}`}
-                  className="inline-flex rounded-full border border-black/10 dark:bg-white/8 bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-foreground/85 hover:border-cyan-500/40 dark:border-white/12 border-gray-200 dark:bg-white/[0.06]"
+                  className="inline-flex rounded-full border border-black/10 dark:bg-white/8 bg-gray-100 px-2 py-0.5 text-[11px] font-medium text-foreground/85 hover:border-hermes/50 dark:border-white/12 border-gray-200 dark:bg-white/[0.06]"
                 >
                   {isKo ? m.name : m.nameEn || m.name}
                 </Link>
@@ -153,7 +160,7 @@ export function PackageCard({ pkg, isKo, cardLabels }: Props) {
       <div className="relative mt-auto pt-5">
         <Link
           href={buildPackageContactHref(pkg.slug)}
-          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 text-sm font-bold dark:text-white text-gray-900 shadow-[0_10px_28px_rgba(139,92,246,0.30)] transition-transform hover:-translate-y-0.5 dark:shadow-[0_12px_36px_rgba(34,211,238,0.30)]"
+          className="inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-hermes px-5 text-sm font-bold text-white shadow-md shadow-hermes/25 transition-transform hover:-translate-y-0.5 hover:bg-hermes/90"
         >
           {cardLabels.cta}
           <ArrowRight className="h-4 w-4" aria-hidden />
@@ -175,7 +182,7 @@ function Stat({
   return (
     <div className="min-w-0">
       <dt className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
-        <span className="text-cyan-500" aria-hidden>
+        <span className="text-hermes" aria-hidden>
           {icon}
         </span>
         <span className="truncate">{label}</span>

@@ -47,7 +47,7 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top_right,rgba(34,211,238,0.22),transparent_55%),radial-gradient(circle_at_bottom_left,rgba(236,72,153,0.18),transparent_55%)]"
+        className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top_right,rgba(255,98,0,0.12),transparent_55%)]"
       />
       <div className="relative">
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
@@ -84,12 +84,12 @@ export function HomeCommunityNewsletter({ isKo, className }: Props) {
             disabled={status === "loading" || status === "success"}
             onChange={(e) => setEmail(e.target.value)}
             placeholder={isKo ? "work@company.com" : "work@company.com"}
-            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[#a855f7]/30 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 min-w-0 flex-1 rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/35 px-4 text-sm font-semibold dark:text-white text-gray-900 placeholder:dark:text-white outline-none backdrop-blur transition-colors focus:border-white/22 focus:ring-2 focus:ring-[#ff6200]/30 disabled:cursor-not-allowed disabled:opacity-60"
           />
           <button
             type="submit"
             disabled={status === "loading" || status === "success"}
-            className="h-11 shrink-0 rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_14px_44px_rgba(0,0,0,0.5)] transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
+            className="h-11 shrink-0 rounded-full border border-hermes/30 bg-hermes px-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-60"
           >
             {status === "loading"
               ? isKo

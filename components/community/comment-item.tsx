@@ -31,7 +31,7 @@ function renderCommentBody(body: string) {
           <Link
             key={`${i}-${href}`}
             href={href}
-            className="font-semibold text-violet-300 underline underline-offset-2 hover:text-violet-200"
+            className="font-semibold text-hermes underline underline-offset-2 hover:text-hermes/80"
           >
             {label}
           </Link>
@@ -41,7 +41,7 @@ function renderCommentBody(body: string) {
         <a
           key={`${i}-${href}`}
           href={href}
-          className="font-semibold text-violet-300 underline underline-offset-2"
+          className="font-semibold text-hermes underline underline-offset-2"
           target="_blank"
           rel="noopener noreferrer"
         >
@@ -253,7 +253,7 @@ export function CommunityCommentItemCard({
               type="button"
               onClick={handleSave}
               disabled={!canSubmit}
-              className="inline-flex rounded-full border border-[#8B5CF6]/55 bg-[linear-gradient(135deg,rgba(139,92,246,0.26),rgba(59,130,246,0.16))] px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:cursor-not-allowed disabled:opacity-50"
+              className="inline-flex rounded-full border border-hermes/40 bg-hermes/15 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] text-hermes transition-colors hover:bg-hermes/25 disabled:cursor-not-allowed disabled:opacity-50"
             >
               {busy ? (isKo ? "저장 중…" : "Saving…") : isKo ? "저장" : "Save"}
             </button>

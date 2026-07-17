@@ -833,7 +833,7 @@ export default function MediaBrowseClient({
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }
-                className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-sm dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-[#a855f7]/40 sm:h-12 sm:pl-11 sm:pr-4"
+                className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-sm dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-hermes/40 sm:h-12 sm:pl-11 sm:pr-4"
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>
@@ -879,11 +879,11 @@ export default function MediaBrowseClient({
               />
 
               <aside
-                className="flex items-start gap-2.5 rounded-xl border border-violet-500/20 bg-violet-500/[0.06] px-3.5 py-2.5 sm:items-center sm:gap-3 sm:px-4"
+                className="flex items-start gap-2.5 rounded-xl border border-hermes/30 bg-hermes/10 px-3.5 py-2.5 sm:items-center sm:gap-3 sm:px-4"
                 aria-label={tMedia("browseCatalogVerifiedBadge")}
               >
                 <ShieldCheck
-                  className="mt-0.5 h-4 w-4 shrink-0 text-violet-600 dark:text-cyan-400 sm:mt-0"
+                  className="mt-0.5 h-4 w-4 shrink-0 text-hermes sm:mt-0"
                   aria-hidden
                 />
                 <p className="min-w-0 text-[13px] leading-snug text-foreground sm:text-sm">
@@ -919,7 +919,7 @@ export default function MediaBrowseClient({
                   <p className="mb-2 text-sm font-semibold text-foreground">
                     {isKo ? "가격 범위" : "Price range"}
                   </p>
-                  <p className="mb-3 text-xs tabular-nums text-violet-600 dark:text-violet-400">
+                  <p className="mb-3 text-xs tabular-nums text-hermes">
                     ₩{(budgetMin * 10000).toLocaleString()} ~ ₩
                     {(budgetMax * 10000).toLocaleString()}
                   </p>
@@ -937,7 +937,7 @@ export default function MediaBrowseClient({
                           setBudgetMin(Math.min(v, budgetMax));
                           setCatalogPage(1);
                         }}
-                        className="w-full accent-violet-500"
+                        className="w-full accent-hermes"
                       />
                     </label>
                     <label className="flex flex-1 flex-col gap-1 text-xs text-muted-foreground">
@@ -953,7 +953,7 @@ export default function MediaBrowseClient({
                           setBudgetMax(Math.max(v, budgetMin));
                           setCatalogPage(1);
                         }}
-                        className="w-full accent-violet-500"
+                        className="w-full accent-hermes"
                       />
                     </label>
                   </div>
@@ -965,7 +965,7 @@ export default function MediaBrowseClient({
                   <button
                     type="button"
                     onClick={resetFilters}
-                    className="inline-flex items-center gap-1 rounded-full border border-violet-400/40 bg-violet-500/10 px-3 py-1.5 text-xs font-semibold text-violet-700 dark:text-violet-300"
+                    className="inline-flex items-center gap-1 rounded-full border border-hermes/30 bg-hermes/15 px-3 py-1.5 text-xs font-semibold text-hermes"
                   >
                     {isKo ? "필터 초기화 ×" : "Reset filters ×"}
                   </button>

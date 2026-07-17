@@ -77,7 +77,7 @@ export function PlanCartAddonSection({
                   }),
                 )
               }
-              className="rounded-full border border-dashed border-violet-300/50 bg-violet-500/5 px-3 py-1.5 text-xs font-semibold text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-200"
+              className="rounded-full border border-dashed border-hermes/30 bg-hermes/5 px-3 py-1.5 text-xs font-semibold text-hermes transition hover:bg-hermes/10"
             >
               + {preset.name}
             </button>
@@ -129,7 +129,7 @@ export function PlanCartAddonSection({
                       className="h-10 w-16 rounded-lg border dark:border-white/12 border-gray-200 bg-white px-2 text-sm tabular-nums dark:text-white text-gray-900"
                     />
                   </label>
-                  <span className="min-w-[5.5rem] text-right text-sm font-bold tabular-nums text-violet-700 dark:text-violet-300">
+                  <span className="min-w-[5.5rem] text-right text-sm font-bold tabular-nums text-hermes">
                     {formatCatalogPriceFieldWon(subtotal, locale)}
                   </span>
                   <button

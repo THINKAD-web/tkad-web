@@ -5,7 +5,7 @@ import { Loader2, Plus, Trash2, Sparkles } from "lucide-react";
 import type { RfpCampaignMeta, RfpGroup, RfpProposalBrief } from "@/lib/rfp-proposal/types";
 
 const field =
-  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-400 dark:border-white/12 dark:bg-white/5 dark:text-white";
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-hermes/30 dark:border-white/12 dark:bg-white/5 dark:text-white";
 
 function emptyGroup(index: number): RfpGroup {
   return {
@@ -137,14 +137,14 @@ export function StudioRfpParser({ locale }: { locale: string }) {
             type="button"
             onClick={parse}
             disabled={loading}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-5 text-sm font-bold text-white disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-hermes px-5 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {isKo ? "그룹 구조화" : "Structure groups"}
           </button>
           <span className="text-xs text-muted-foreground">{text.length.toLocaleString()} chars</span>
           {source && (
-            <span className="rounded-full bg-violet-100 px-2.5 py-0.5 text-xs font-medium text-violet-800 dark:bg-violet-500/20 dark:text-violet-200">
+            <span className="rounded-full bg-hermes/10 px-2.5 py-0.5 text-xs font-medium text-hermes dark:bg-hermes/20 dark:text-hermes">
               source: {source}
             </span>
           )}

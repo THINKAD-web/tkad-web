@@ -152,8 +152,8 @@ export const COMMUNITY_MEMBER_ROLE_LABELS: Record<
   FREELANCER: {
     ko: "프리랜서",
     en: "Freelancer",
-    accentClassName: "border-[#8B5CF6]/60 text-[#EDE9FE]",
-    surfaceClassName: "border-[#8B5CF6]/50 bg-[#8B5CF6]/15 text-[#EDE9FE]",
+    accentClassName: "border-[#A8A29E]/60 text-[#E7E5E4]",
+    surfaceClassName: "border-[#A8A29E]/50 bg-[#A8A29E]/15 text-[#E7E5E4]",
   },
 };
 

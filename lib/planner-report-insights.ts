@@ -50,7 +50,7 @@ export type PlannerPremiumInsights = {
   competitorExposure: CompetitorExposureRow[];
 };
 
-const GANTT_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#7c3aed", "#0ea5e9"];
+const GANTT_COLORS = ["#ff6200", "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9"];
 
 const BRAND_LIFT_BY_GOAL: Record<
   PlannerCampaignGoal | "default",
@@ -88,7 +88,7 @@ export function buildPlannerPremiumInsights(opts: {
     name: m.name,
     startPct: i * sliceWidth,
     widthPct: sliceWidth - 1,
-    color: GANTT_COLORS[i % GANTT_COLORS.length] ?? "#a855f7",
+    color: GANTT_COLORS[i % GANTT_COLORS.length] ?? "#ff6200",
   }));
 
   const slices = budgetSplitByCategory(portfolio);

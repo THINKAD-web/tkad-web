@@ -25,10 +25,10 @@ export function OfflineClient() {
       <OfflineGlow />
       <div className="relative z-10 mx-auto max-w-lg">
         <header className="text-center">
-          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-cyan-400/30 bg-cyan-400/10 shadow-[0_0_32px_rgba(34,211,238,0.2)]">
-            <WifiOff className="h-8 w-8 text-cyan-300" aria-hidden />
+          <div className="mx-auto mb-5 flex h-16 w-16 items-center justify-center rounded-2xl border border-hermes/30 bg-hermes/10 shadow-sm">
+            <WifiOff className="h-8 w-8 text-hermes" aria-hidden />
           </div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-300">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
             [ OFFLINE ]
           </p>
           <h1 className="mt-3 text-2xl font-extrabold leading-tight tracking-tight">
@@ -51,7 +51,7 @@ export function OfflineClient() {
                 <li key={m.id}>
                   <Link
                     href={m.pagePath}
-                    className="group flex gap-3 rounded-2xl border border-cyan-400/25 bg-cyan-400/[0.06] p-3 transition hover:border-cyan-400/40"
+                    className="group flex gap-3 rounded-2xl border border-hermes/30 bg-hermes/10 p-3 transition hover:border-hermes/40"
                   >
                     {m.imageUrl ? (
                       // eslint-disable-next-line @next/next/no-img-element
@@ -62,7 +62,7 @@ export function OfflineClient() {
                       />
                     ) : null}
                     <div className="min-w-0 flex-1">
-                      <p className="truncate text-sm font-bold dark:text-white text-gray-900 group-hover:text-cyan-100">
+                      <p className="truncate text-sm font-bold dark:text-white text-gray-900 group-hover:text-hermes">
                         {m.name}
                       </p>
                       <p className="mt-1 text-xs dark:text-white text-gray-500">
@@ -107,11 +107,11 @@ function OfflineGlow() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none absolute left-[-20%] top-[-10%] h-72 w-72 rounded-full bg-cyan-400/20 blur-3xl"
+        className="pointer-events-none absolute left-[-20%] top-[-10%] h-72 w-72 rounded-full bg-hermes/10 blur-3xl"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute bottom-[-15%] right-[-10%] h-80 w-80 rounded-full bg-fuchsia-500/15 blur-3xl"
+        className="pointer-events-none absolute bottom-[-15%] right-[-10%] h-80 w-80 rounded-full bg-hermes/5 blur-3xl"
       />
     </>
   );
@@ -123,7 +123,7 @@ function OfflineRetry() {
       <button
         type="button"
         onClick={() => window.location.reload()}
-        className="rounded-full border border-cyan-400/40 bg-cyan-400/15 px-6 py-3 text-sm font-bold text-cyan-300 transition hover:bg-cyan-400/25"
+        className="rounded-full border border-hermes/30 bg-hermes/10 px-6 py-3 text-sm font-bold text-hermes transition hover:bg-hermes/20"
       >
         다시 시도
       </button>
@@ -140,7 +140,7 @@ function OfflineMediaCard({ media }: { media: OfflineRecentMediaCard }) {
     <li>
       <Link
         href={`/ko/media/${media.id}`}
-        className="group flex gap-3 rounded-2xl border dark:border-white/10 border-gray-200 bg-white/[0.04] p-3 transition hover:border-cyan-400/30 hover:bg-cyan-400/[0.06]"
+        className="group flex gap-3 rounded-2xl border dark:border-white/10 border-gray-200 bg-white/[0.04] p-3 transition hover:border-hermes/30 hover:bg-hermes/10"
       >
         {/* eslint-disable-next-line @next/next/no-img-element -- 오프라인 폴백 */}
         <img
@@ -149,7 +149,7 @@ function OfflineMediaCard({ media }: { media: OfflineRecentMediaCard }) {
           className="h-16 w-16 shrink-0 rounded-xl object-cover"
         />
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-bold dark:text-white text-gray-900 group-hover:text-cyan-100">
+          <p className="truncate text-sm font-bold dark:text-white text-gray-900 group-hover:text-hermes">
             {media.name}
           </p>
           <p className="mt-1 text-xs dark:text-white text-gray-500">

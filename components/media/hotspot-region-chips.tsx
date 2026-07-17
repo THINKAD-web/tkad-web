@@ -61,7 +61,7 @@ export function HotspotRegionChips({
                 "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full font-semibold transition-all",
                 compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs sm:text-sm",
                 active
-                  ? "bg-cyan-500 text-white shadow-sm shadow-cyan-500/25"
+                  ? "bg-hermes text-white shadow-sm shadow-hermes/25"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
               )}
               aria-pressed={active}

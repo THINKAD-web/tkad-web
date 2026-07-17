@@ -302,11 +302,7 @@ export default function MediaAiRecommendDashboard({
             <div className="relative grid h-20 w-20 place-items-center overflow-hidden rounded-[26px] border border-border/80 bg-card/80 text-foreground shadow-[0_28px_100px_rgba(0,0,0,0.20)] backdrop-blur">
               <div
                 aria-hidden
-                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_70%_80%,rgba(168,85,247,0.14),transparent_58%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
-              />
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+                className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(255,98,0,0.12),transparent_55%),linear-gradient(165deg,rgba(255,255,255,0.10)_0%,transparent_52%)]"
               />
               <span className="relative z-10 text-[34px] leading-none" aria-hidden>
                 🤖

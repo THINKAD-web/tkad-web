@@ -83,7 +83,7 @@ export function DiscoveryMediaCardHorizontal({
   const thumbInner = (
     <>
       {rank != null ? (
-        <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-[10px] font-black text-white shadow-md">
+        <span className="absolute left-1.5 top-1.5 z-20 flex h-6 w-6 items-center justify-center rounded-full bg-hermes text-[10px] font-black text-white shadow-md">
           {rank}
         </span>
       ) : null}
@@ -187,7 +187,7 @@ export function DiscoveryMediaCardHorizontal({
           "flex w-full items-center justify-center gap-1.5 rounded-xl py-2 text-sm font-semibold transition-colors",
           isInPlan
             ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
-            : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+            : "bg-hermes text-white",
         )}
       >
         {isInPlan ? (
@@ -218,9 +218,9 @@ export function DiscoveryMediaCardHorizontal({
       className={cn(
         "@container discovery-media-card-horizontal min-w-0 max-w-full overflow-hidden rounded-2xl border bg-white shadow-sm dark:bg-white/[0.04]",
         selected
-          ? "border-2 border-violet-500/90 shadow-md shadow-violet-500/15 ring-2 ring-inset ring-violet-400/35 dark:border-violet-400"
+          ? "border-2 border-hermes/90 shadow-md shadow-hermes/15 ring-2 ring-inset ring-hermes/35 dark:border-hermes"
           : hovered
-            ? "border-cyan-400/50 dark:border-cyan-400/40"
+            ? "border-hermes/50 dark:border-hermes/40"
             : "border-gray-100 dark:border-white/10",
         interactive &&
           "cursor-pointer transition-all hover:shadow-md active:scale-[0.99]",

@@ -128,7 +128,7 @@ function ReelsSlide({
           </Link>
           <Link
             href={contactHref}
-            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-3 text-sm font-semibold text-white shadow-lg shadow-violet-900/30 transition hover:bg-violet-500"
+            className="inline-flex min-h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-hermes px-3 text-sm font-semibold text-white shadow-lg shadow-hermes/30 transition hover:bg-hermes/90"
           >
             <MessageCircle className="h-4 w-4 shrink-0" aria-hidden />
             {isKo ? "문의" : "Contact"}
@@ -140,7 +140,7 @@ function ReelsSlide({
               className={cn(
                 "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl border transition",
                 isInPlan
-                  ? "border-violet-300/60 bg-violet-500/30 text-white"
+                  ? "border-hermes/30 bg-hermes/15 text-white"
                   : "border-white/20 bg-white/10 text-white hover:bg-white/20",
               )}
               aria-label={isInPlan ? (isKo ? "플랜에서 제거" : "Remove from plan") : (isKo ? "플랜 담기" : "Add to plan")}

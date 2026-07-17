@@ -32,7 +32,7 @@ import type {
   ReportDashboardData,
 } from "@/lib/report/dashboard-data";
 
-const PIE_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#7c3aed", "#0ea5e9", "#f43f5e"];
+const PIE_COLORS = ["#ff6200", "#1c1c1f", "#ec4899", "#6B7280", "#0ea5e9", "#f43f5e"];
 
 export function ReportDashboardClient({ isKo }: { isKo: boolean }) {
   const t = useTranslations();
@@ -350,9 +350,9 @@ function CpmTrendCard({
               <Line
                 type="monotone"
                 dataKey="cpmKrw"
-                stroke="#a855f7"
+                stroke="#ff6200"
                 strokeWidth={3}
-                dot={{ fill: "#a855f7", r: 4 }}
+                dot={{ fill: "#ff6200", r: 4 }}
                 activeDot={{ r: 6 }}
                 isAnimationActive={false}
               />

@@ -30,7 +30,7 @@ import type { MarketDashboardData, DistrictHeatCell } from "@/lib/insights/marke
 import { DISTRICT_TIER_COLORS } from "@/lib/insights/seoul-districts";
 import { Link } from "@/i18n/navigation";
 
-const PIE_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#f97316", "#6366f1", "#14b8a6", "#eab308"];
+const PIE_COLORS = ["#ff6200", "#1c1c1f", "#ec4899", "#f97316", "#6366f1", "#14b8a6", "#eab308"];
 const LINE_COLORS = ["#ef4444", "#f97316", "#eab308", "#22c55e", "#3b82f6"];
 
 type Props = {
@@ -381,8 +381,8 @@ function MediaTypeSection({
             <XAxis dataKey="name" tick={{ fontSize: 11 }} />
             <YAxis tick={{ fontSize: 11 }} />
             <Tooltip />
-            <Bar dataKey="cpm" fill="#a855f7" name="CPM" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="roi" fill="#22d3ee" name="ROI est." radius={[4, 4, 0, 0]} />
+            <Bar dataKey="cpm" fill="#ff6200" name="CPM" radius={[4, 4, 0, 0]} />
+            <Bar dataKey="roi" fill="#1c1c1f" name="ROI est." radius={[4, 4, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

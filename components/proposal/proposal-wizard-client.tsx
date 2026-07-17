@@ -44,7 +44,7 @@ const glassCard =
   "rounded-2xl border border-gray-200 bg-white p-5 shadow-sm dark:border-white/12 dark:bg-white/5 dark:shadow-[0_12px_40px_rgba(0,0,0,0.35)] sm:p-6";
 
 const inputClass =
-  "mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-cyan-400/50 focus:outline-none focus:ring-2 focus:ring-cyan-400/20 dark:border-white/14 dark:bg-black/40 dark:text-white dark:placeholder:text-white/40";
+  "mt-1.5 w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm text-gray-900 placeholder:text-gray-400 focus:border-hermes/30 focus:outline-none focus:ring-2 focus:ring-hermes/20 dark:border-white/14 dark:bg-black/40 dark:text-white dark:placeholder:text-white/40";
 
 const labelClass =
   "block font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/70";
@@ -64,14 +64,6 @@ function ProposalNeonPageBody({
   if (appearance === "night") {
     return (
       <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-neon-depth"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
-        />
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
@@ -313,7 +305,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
           >
             <div className="mx-auto max-w-3xl space-y-8">
               <div>
-                <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-700 dark:text-cyan-300">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
                   [ {t("resultEyebrow")} ]
                 </p>
                 <h1 className="mt-2 text-2xl font-bold text-gray-900 dark:text-white sm:text-3xl">
@@ -333,7 +325,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
               <button
                 type="button"
                 onClick={() => setResult(null)}
-                className="text-sm font-semibold text-cyan-400 hover:underline"
+                className="text-sm font-semibold text-hermes hover:underline"
               >
                 {t("editAgain")}
               </button>
@@ -366,9 +358,9 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   className={cn(
                     "h-2 w-12 rounded-full transition-colors",
                     step === n
-                      ? "bg-gradient-to-r from-violet-500 to-cyan-400"
+                      ? "bg-hermes"
                       : step > n
-                        ? "bg-cyan-400/40"
+                        ? "bg-hermes/40"
                         : "bg-gray-200 dark:bg-white/15",
                   )}
                   aria-hidden
@@ -386,10 +378,6 @@ export default function ProposalWizardClient({ catalog }: Props) {
             ) : null}
 
             <div className={cn(glassCard, "relative overflow-hidden")}>
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
-            />
 
             {step === 1 ? (
               <div className="relative space-y-4">
@@ -497,7 +485,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                         className={cn(
                           "rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors",
                           goal === val
-                            ? "border-cyan-500/50 bg-cyan-500/10 text-cyan-800 dark:border-cyan-400/50 dark:bg-cyan-400/15 dark:text-cyan-200"
+                            ? "border-hermes/30 bg-hermes/10 text-gray-900 dark:border-hermes/30 dark:bg-hermes/15 dark:text-white"
                             : "border-gray-200 bg-gray-50 text-gray-700 hover:bg-gray-100 dark:border-white/14 dark:bg-white/5 dark:text-white/80 dark:hover:bg-white/10",
                         )}
                       >
@@ -552,7 +540,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                   </BtnBlock>
                   <Link
                     href="/media"
-                    className="inline-flex items-center text-xs font-semibold text-cyan-700 hover:underline dark:text-cyan-400"
+                    className="inline-flex items-center text-xs font-semibold text-hermes hover:underline"
                   >
                     {t("browseMedia")}
                   </Link>
@@ -568,7 +556,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           className={cn(
                             "flex w-full items-center justify-between gap-2 rounded-xl border px-3 py-2.5 text-left text-sm transition-colors",
                             selected
-                              ? "border-cyan-500/40 bg-cyan-50 text-gray-900 dark:border-cyan-400/40 dark:bg-cyan-400/10 dark:text-white"
+                              ? "border-hermes/30 bg-hermes/5 text-gray-900 dark:border-hermes/30 dark:bg-hermes/10 dark:text-white"
                               : "border-gray-200 bg-white text-gray-800 hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white/90 dark:hover:bg-white/10",
                           )}
                         >
@@ -578,7 +566,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                           <span
                             className={cn(
                               "shrink-0  text-[10px]",
-                              selected ? "text-cyan-700 dark:text-cyan-300" : "text-gray-400 dark:text-white/50",
+                              selected ? "text-hermes" : "text-gray-400 dark:text-white/50",
                             )}
                           >
                             {selected ? "✓" : "+"}
@@ -618,7 +606,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!text-gray-900 dark:!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!text-gray-900 dark:!text-white bg-hermes hover:bg-cta-hover"
                   disabled={
                     (step === 1 && !step1Valid) || (step === 2 && !step2Valid)
                   }
@@ -631,7 +619,7 @@ export default function ProposalWizardClient({ catalog }: Props) {
                 <BtnBlock
                   variant="accent"
                   size="md"
-                  className="!text-gray-900 dark:!text-white bg-gradient-to-r from-violet-500 to-cyan-400"
+                  className="!text-gray-900 dark:!text-white bg-hermes hover:bg-cta-hover"
                   disabled={!step3Valid || generating}
                   onClick={() => void onGenerate()}
                 >

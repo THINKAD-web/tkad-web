@@ -77,7 +77,7 @@ export default async function CommunityProfilePage({ params }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
+        <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community/members"
             className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
@@ -87,7 +87,7 @@ export default async function CommunityProfilePage({ params }: Props) {
           </Link>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.15fr)_360px]">
-            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               <NeonSectionHead
                 number="09"
                 kicker="Profile"
@@ -175,7 +175,7 @@ export default async function CommunityProfilePage({ params }: Props) {
                 </div>
               ))}
 
-              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-hermes/10 p-5 backdrop-blur tkad-neon-border">
                 <div className="flex items-start gap-3">
                   <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                   <p className="text-sm leading-relaxed dark:text-white">
@@ -189,7 +189,7 @@ export default async function CommunityProfilePage({ params }: Props) {
           </div>
         </NeonSection>
 
-        <NeonSection className="pt-0 pb-20 sm:pb-24">
+        <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">

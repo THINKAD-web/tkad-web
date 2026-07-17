@@ -34,7 +34,7 @@ const posts: BlogPost[] = [
     slug: "2025-ooh-trend-report",
     category: "trend",
     date: "2025-01-15",
-    gradient: "from-violet-600 to-cyan-500",
+    gradient: "from-zinc-600 to-zinc-900",
     titleKo: "2025 OOH 광고 트렌드 리포트",
     titleEn: "2025 OOH Advertising Trend Report",
     summaryKo:
@@ -47,7 +47,7 @@ const posts: BlogPost[] = [
     slug: "gangnam-landmark-case-study",
     category: "case",
     date: "2024-11-03",
-    gradient: "from-purple-700 to-violet-900",
+    gradient: "from-zinc-700 to-zinc-900",
     titleKo: "강남 랜드마크 빌보드 캠페인 사례",
     titleEn: "Gangnam Landmark Billboard Campaign",
     summaryKo:
@@ -60,7 +60,7 @@ const posts: BlogPost[] = [
     slug: "coex-landmark-launch",
     category: "case",
     date: "2024-07-20",
-    gradient: "from-indigo-600 to-purple-800",
+    gradient: "from-zinc-600 to-zinc-800",
     titleKo: "코엑스 랜드마크 런칭 캠페인",
     titleEn: "COEX Landmark Launch Campaign",
     summaryKo:
@@ -86,7 +86,7 @@ const posts: BlogPost[] = [
     slug: "ooh-media-checklist",
     category: "trend",
     date: "2024-04-10",
-    gradient: "from-violet-500 to-fuchsia-600",
+    gradient: "from-zinc-600 to-zinc-900",
     titleKo: "OOH 매체 선정 체크리스트",
     titleEn: "OOH Media Selection Checklist",
     summaryKo:
@@ -99,7 +99,7 @@ const posts: BlogPost[] = [
     slug: p.slug,
     category: "guide" as const,
     date: p.publishedAt,
-    gradient: "from-cyan-600 to-violet-600",
+    gradient: "from-zinc-600 to-zinc-900",
     titleKo: p.titleKo,
     titleEn: p.titleEn,
     summaryKo: p.descriptionKo,
@@ -143,9 +143,9 @@ export default function BlogPage() {
 
   return (
     <NeonPageShell>
-      <section className="relative overflow-hidden bg-[#05050a] py-16 tkad-neon-depth tkad-neon-grid sm:py-20">
+      <section className="relative overflow-hidden bg-[#05050a] py-16 sm:py-20">
         <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
-          <p className="text-xs font-medium uppercase tracking-widest text-violet-400">
+          <p className="text-xs font-medium uppercase tracking-widest text-hermes">
             Blog
           </p>
           <h1 className={cn("mt-3", neonTitleClass, "text-white")}>
@@ -195,7 +195,7 @@ export default function BlogPage() {
                     className={cn(
                       "rounded-full px-3 py-1.5 text-xs font-semibold transition-colors",
                       isActive
-                        ? "bg-violet-500 text-white"
+                        ? "bg-hermes text-white"
                         : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
                     )}
                   >
@@ -208,10 +208,10 @@ export default function BlogPage() {
         </div>
 
         <div className="mt-4 flex items-center gap-2 text-xs text-gray-500 dark:text-white/50">
-          <Tag className="h-3.5 w-3.5 text-violet-500" aria-hidden />
+          <Tag className="h-3.5 w-3.5 text-hermes" aria-hidden />
           <span>
             {isKo ? "결과" : "Results"}:{" "}
-            <span className="font-bold text-violet-500">{filteredPosts.length}</span>
+            <span className="font-bold text-hermes">{filteredPosts.length}</span>
           </span>
         </div>
 
@@ -265,7 +265,7 @@ export default function BlogPage() {
                   <p className="mt-2 flex-1 text-xs leading-relaxed text-gray-500 dark:text-white/60 sm:text-sm">
                     {summary}
                   </p>
-                  <span className="mt-4 text-xs font-semibold text-violet-500 group-hover:text-violet-400">
+                  <span className="mt-4 text-xs font-semibold text-hermes group-hover:text-hermes/80">
                     {isKo ? "Read more →" : "Read more →"}
                   </span>
                 </div>

@@ -132,7 +132,7 @@ export function PlanCartLineCard({
         draggingId === item.mediaId && "opacity-60",
         dragOverId === item.mediaId &&
           draggingId !== item.mediaId &&
-          "ring-2 ring-violet-400/70",
+          "ring-2 ring-hermes/70",
       )}
     >
       <div className="flex gap-2">

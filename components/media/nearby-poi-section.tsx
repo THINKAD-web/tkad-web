@@ -102,7 +102,7 @@ export function NearbyPoiSection({ lat, lng, address, isKo, className }: Props) 
         {items.map((item) => (
           <li key={item} className="flex items-start gap-2">
             <span
-              className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-cyan-400"
+              className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-hermes"
               aria-hidden
             />
             {item}

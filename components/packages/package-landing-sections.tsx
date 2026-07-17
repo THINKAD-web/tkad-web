@@ -92,7 +92,7 @@ export function PackageGuideSection({
               key={`${step.step}-${step.title}`}
               className="flex gap-4 rounded-2xl border border-border bg-card p-5 shadow-sm"
             >
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-violet-500/20 to-pink-500/20 text-sm font-black text-violet-700 dark:text-violet-200">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-hermes/15 text-sm font-black text-hermes">
                 {step.step}
               </span>
               <div>
@@ -127,7 +127,7 @@ export function PackageIndustrySection({
           {industries.map((label) => (
             <span
               key={label}
-              className="inline-flex rounded-full border border-violet-500/30 bg-violet-500/10 px-3 py-1 text-sm font-medium text-violet-800 dark:text-violet-200"
+              className="inline-flex rounded-full border border-hermes/30 bg-hermes/15 px-3 py-1 text-sm font-medium text-hermes"
             >
               {label}
             </span>
@@ -152,7 +152,7 @@ export function PackageBudgetSection({
         <h2 className="text-xl font-bold tracking-tight sm:text-2xl">
           {isKo ? "평균 예산" : "Typical budget"}
         </h2>
-        <p className="mt-4 text-2xl font-black text-violet-700 dark:text-violet-300">
+        <p className="mt-4 text-2xl font-black text-hermes">
           {avgBudget}
         </p>
       </div>

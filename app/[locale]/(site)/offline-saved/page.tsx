@@ -35,7 +35,7 @@ export default function OfflineSavedMediaPage() {
               <li key={m.id}>
                 <Link
                   href={m.pagePath}
-                  className="flex gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-3 hover:border-cyan-400/30"
+                  className="flex gap-3 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-3 hover:border-hermes/30"
                 >
                   {m.imageUrl ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -62,7 +62,7 @@ export default function OfflineSavedMediaPage() {
         )}
         <Link
           href={`/${locale}`}
-          className="mt-8 inline-block text-sm text-cyan-300 hover:underline"
+          className="mt-8 inline-block text-sm text-hermes hover:underline"
         >
           {isKo ? "홈으로" : "Home"}
         </Link>

@@ -103,14 +103,14 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
     cn(
       "inline-flex items-center justify-center rounded-full border px-3 py-2 font-display text-xs font-medium uppercase tracking-[0.18em] transition-colors sm:px-4",
       active
-        ? "border-cyan-400/35 bg-cyan-500/10 text-cyan-100"
+        ? "border-hermes/40 bg-hermes/10 text-hermes"
         : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:border-white/16 hover:dark:text-white text-gray-700",
     );
 
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
+        <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
             className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
@@ -120,7 +120,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
           </Link>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               <NeonSectionHead
                 number="08"
                 kicker="Members"
@@ -189,7 +189,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
           </div>
         </NeonSection>
 
-        <NeonSection className="pt-0 pb-20 sm:pb-24">
+        <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
@@ -201,7 +201,7 @@ export default async function CommunityMembersPage({ params, searchParams }: Pro
             </div>
             <Link
               href="/community/write"
-              className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+              className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
             >
               {isKo ? "글쓰기 시작" : "Start posting"}
             </Link>

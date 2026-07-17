@@ -166,8 +166,6 @@ export default function AdvertiserDashboardPage() {
     <HomeLandingDayNight portal>
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-gray-50 py-16 text-gray-900 dark:bg-[#05050a] dark:text-white sm:py-20 lg:py-24">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
           <div
             aria-hidden
             className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.1),rgba(0,0,0,0.55),rgba(0,0,0,0.92))]"
@@ -234,7 +232,7 @@ export default function AdvertiserDashboardPage() {
                   className={cn(
                     "relative flex flex-1 items-center justify-center gap-2 rounded-[18px] py-3.5 text-sm font-bold transition-all sm:text-base",
                     section === item.key
-                      ? "bg-primary/20 text-primary shadow-[0_0_0_1px_rgba(34,211,238,0.35),0_8px_32px_rgba(34,211,238,0.12)]"
+                      ? "bg-primary/20 text-primary shadow-sm"
                       : "text-muted-foreground hover:bg-muted/40 hover:text-foreground",
                   )}
                 >

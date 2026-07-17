@@ -77,7 +77,7 @@ export function AdvertiserCampaignDetailClient({
       <div className="mt-5">
         <Link
           href={`/dashboard/campaigns/${initial.id}/analytics`}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] border border-[#22d3ee]/35 bg-[#22d3ee]/10 px-4 py-3 text-sm font-bold text-[#0e7490] transition-colors hover:bg-[#22d3ee]/20 dark:text-[#22d3ee]"
+          className="inline-flex w-full items-center justify-center gap-2 rounded-[18px] border border-hermes/30 bg-hermes/10 px-4 py-3 text-sm font-bold text-hermes transition-colors hover:bg-hermes/20"
         >
           <BarChart3 className="h-4 w-4" />
           {isKo ? "성과 분석 보기" : "View performance analytics"}
