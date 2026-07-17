@@ -80,7 +80,7 @@ export function MediaDetailProposalCard({
                     : "PRO proposal"}
             </span>
             {!compactSecondary ? (
-              <span className="rounded bg-violet-500/15 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+              <span className="rounded bg-[color:var(--qp-accent)]/15 px-1 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                 PRO
               </span>
             ) : null}
@@ -98,13 +98,13 @@ export function MediaDetailProposalCard({
       }
     >
       <div className="flex items-start gap-3">
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
-          <FileText className="h-5 w-5 text-violet-500" />
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color:var(--qp-accent)]/10">
+          <FileText className="h-5 w-5 text-[color:var(--qp-accent)]" />
         </div>
         <div className="min-w-0 flex-1">
           <p className="flex items-center gap-1.5 text-sm font-semibold text-gray-900 dark:text-white">
             {isKo ? "매체 제안서" : "Media proposal"}
-            <span className="rounded-md bg-violet-500/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-violet-600 dark:text-violet-300">
+            <span className="rounded-md bg-[color:var(--qp-accent)]/15 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
               PRO
             </span>
           </p>
@@ -120,7 +120,7 @@ export function MediaDetailProposalCard({
             type="button"
             onClick={onDownloadClick}
             disabled={checking}
-            className="tkad-neon-cta mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-600 px-4 py-2.5 text-sm font-bold shadow-sm transition hover:bg-violet-700 disabled:opacity-60"
+            className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-xl bg-[color:var(--qp-accent)] px-4 py-2.5 text-sm font-bold text-white shadow-sm transition hover:bg-[color:var(--qp-accent-hover)] disabled:opacity-60"
           >
             {checking ? (
               <Loader2 className="h-4 w-4 animate-spin" aria-hidden />

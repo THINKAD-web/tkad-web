@@ -833,8 +833,7 @@ html:not(.dark) .tkad-neon-grid {
     0 0 18px rgba(124, 58, 237, 0.12),
     0 0 12px rgba(34, 211, 238, 0.07);
 }
-/* P2-0: 클래스명 유지, 값은 Quiet Professional 단색 액센트.
- * 매체 상세(.tkad-media-page)만 아래 legacy 네온 오버라이드 유지 (P2-3). */
+/* P2-0: 클래스명 유지, 값은 Quiet Professional 단색 액센트. */
 .tkad-neon-cta {
   background: var(--qp-accent);
   background-image: none;
@@ -859,54 +858,6 @@ html:not(.dark) .tkad-neon-grid {
   background: var(--qp-accent-hover);
   background-image: none;
   box-shadow: none;
-}
-
-/* P2-3 유예: 매체 상세 페이지 sticky/proposal 등만 기존 네온 그라데이션 유지 */
-.tkad-media-page .tkad-neon-cta {
-  background: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%);
-  border-color: rgba(255, 255, 255, 0.08);
-  box-shadow:
-    0 40px 160px rgba(0, 0, 0, 0.72),
-    0 0 0 1px rgba(255, 255, 255, 0.08),
-    0 0 30px rgba(168, 85, 247, 0.16),
-    0 0 18px rgba(34, 211, 238, 0.1),
-    0 0 18px rgba(236, 72, 153, 0.075);
-}
-.tkad-media-page .tkad-neon-cta:hover {
-  background: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%);
-  box-shadow:
-    0 52px 190px rgba(0, 0, 0, 0.78),
-    0 0 0 1px rgba(255, 255, 255, 0.11),
-    0 0 44px rgba(168, 85, 247, 0.26),
-    0 0 28px rgba(34, 211, 238, 0.16),
-    0 0 28px rgba(236, 72, 153, 0.12);
-}
-.tkad-media-page .tkad-neon-cta-clean {
-  background: linear-gradient(
-    135deg,
-    rgba(168, 85, 247, 0.95) 0%,
-    rgba(34, 211, 238, 0.9) 55%,
-    rgba(236, 72, 153, 0.85) 100%
-  );
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  box-shadow:
-    0 34px 140px rgba(0, 0, 0, 0.78),
-    0 0 0 1px rgba(255, 255, 255, 0.06),
-    0 0 24px rgba(168, 85, 247, 0.14),
-    0 0 14px rgba(34, 211, 238, 0.09);
-}
-.tkad-media-page .tkad-neon-cta-clean:hover {
-  background: linear-gradient(
-    135deg,
-    rgba(168, 85, 247, 0.95) 0%,
-    rgba(34, 211, 238, 0.9) 55%,
-    rgba(236, 72, 153, 0.85) 100%
-  );
-  box-shadow:
-    0 44px 170px rgba(0, 0, 0, 0.8),
-    0 0 0 1px rgba(255, 255, 255, 0.09),
-    0 0 34px rgba(168, 85, 247, 0.22),
-    0 0 20px rgba(34, 211, 238, 0.14);
 }
 
 /* 푸터 사용 가이드 — 네온 링크 */

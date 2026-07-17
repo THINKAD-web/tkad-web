@@ -53,8 +53,6 @@ export default function MediaDetailHeroGallery({
   if (!hasImage) {
     return (
       <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-        <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-        <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
         <div
           aria-hidden
           className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
@@ -79,8 +77,6 @@ export default function MediaDetailHeroGallery({
 
   return (
     <section className="tkad-media-detail-hero tkad-home-hero relative w-full overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
       <div
         aria-hidden
         className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
@@ -94,7 +90,7 @@ export default function MediaDetailHeroGallery({
         <div className="group relative aspect-[16/9] w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur-sm">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-10 z-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.35),transparent_55%),radial-gradient(circle_at_right,rgba(34,211,238,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(236,72,153,0.20),transparent_60%)] blur-2xl opacity-70"
+            className="pointer-events-none absolute -inset-10 z-0 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_55%),radial-gradient(circle_at_right,color-mix(in_srgb,var(--qp-ink)_8%,transparent),transparent_58%)] blur-2xl opacity-70"
           />
           <div
             aria-hidden

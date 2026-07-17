@@ -235,7 +235,7 @@ export function MediaDetailLocationPanel({
       {locationRows.length > 0 ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300/80">
+            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
               <MapPin className="h-3.5 w-3.5" aria-hidden />
               {isNetwork ? (isKo ? "설치 지점" : "Locations") : isKo ? "위치" : "Location"}
             </p>
@@ -265,10 +265,10 @@ export function MediaDetailLocationPanel({
                     className={cn(
                       "flex w-full items-start justify-between gap-3 px-4 py-2.5 text-left transition-colors",
                       hasCoord
-                        ? "hover:bg-violet-50 dark:hover:bg-white/5"
+                        ? "hover:bg-[color:var(--qp-accent-soft)] dark:hover:bg-white/5"
                         : "cursor-default",
                       isRowSelected &&
-                        "bg-violet-50 ring-1 ring-inset ring-violet-300/60 dark:bg-violet-500/10 dark:ring-violet-400/40",
+                        "bg-[color:var(--qp-accent-soft)] ring-1 ring-inset ring-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:ring-[color:var(--qp-accent)]/40",
                     )}
                   >
                     <div className="min-w-0">
@@ -282,7 +282,7 @@ export function MediaDetailLocationPanel({
                     </div>
                     <div className="shrink-0 text-right">
                       {loc.unitCount != null ? (
-                        <p className="text-xs font-bold tabular-nums text-violet-600 dark:text-violet-300">
+                        <p className="text-xs font-bold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                           {loc.unitCount.toLocaleString(isKo ? "ko-KR" : "en-US")}
                           {isKo ? unitSuffix : "u"}
                         </p>
@@ -309,7 +309,7 @@ export function MediaDetailLocationPanel({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
-          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300/80">
+          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
             <MapPin className="h-3.5 w-3.5" aria-hidden />
             {t("locationAddressLabel")}
           </p>
@@ -324,7 +324,7 @@ export function MediaDetailLocationPanel({
               href={kakaoUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
+              className="text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
             >
               {t("openKakao")}
             </a>
@@ -332,7 +332,7 @@ export function MediaDetailLocationPanel({
               href={googleUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="text-violet-600 underline-offset-2 hover:underline dark:text-violet-300"
+              className="text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
             >
               {t("openGoogle")}
             </a>

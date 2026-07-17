@@ -25,7 +25,7 @@ import { DataAttributionList } from "@/components/data-confidence-badge";
 
 /** Brutalist 차트 색상 팔레트 — 다색 유지 + bx-* 톤. */
 const CHART_PRIMARY = "#e2e8f0"; // slate-200 (dark-friendly)
-const CHART_ACCENT = "#22d3ee"; // cyan-400 (neon)
+const CHART_ACCENT = "#ff6200"; // hermes / qp accent
 const CHART_NEUTRAL = "#94a3b8"; // slate-400 (neutral)
 const CHART_GRID = "rgba(255,255,255,0.14)";
 

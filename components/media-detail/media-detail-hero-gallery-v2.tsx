@@ -61,7 +61,7 @@ export function MediaDetailHeroGalleryV2({
           <button
             type="button"
             onClick={() => openAt(activeThumb)}
-            className="absolute inset-0 z-10 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-violet-400"
+            className="absolute inset-0 z-10 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]"
             aria-label={labels.expand}
           >
             {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -106,7 +106,7 @@ export function MediaDetailHeroGalleryV2({
               className={cn(
                 "relative aspect-[4/3] overflow-hidden rounded-xl border transition",
                 activeThumb === i
-                  ? "border-violet-400 ring-2 ring-violet-400/40"
+                  ? "border-[color:var(--qp-accent)] ring-2 ring-[color:var(--qp-accent)]/40"
                   : "dark:border-white/10 border-gray-200 opacity-80 hover:opacity-100",
               )}
               aria-label={`${labels.expand} ${i + 1}`}

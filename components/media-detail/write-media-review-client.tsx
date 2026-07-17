@@ -221,7 +221,7 @@ export function WriteMediaReviewClient({
         <button
           type="submit"
           disabled={submitting}
-          className="w-full rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-3 text-sm font-semibold dark:text-white text-gray-900 disabled:opacity-50"
+          className="w-full rounded-xl bg-[color:var(--qp-accent)] py-3 text-sm font-semibold text-white disabled:opacity-50"
         >
           {labels.submit}
         </button>

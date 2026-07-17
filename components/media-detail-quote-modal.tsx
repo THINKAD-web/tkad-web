@@ -80,7 +80,7 @@ function MediaDetailQuoteModalBody({
     btnBlockBase,
     "px-6 py-3 text-xs",
     "h-12 sm:h-14",
-    "rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 touch-manipulation",
+    "rounded-[22px] border dark:border-white/14 border-gray-200 bg-[color:var(--qp-accent)] text-white shadow-sm transition hover:bg-[color:var(--qp-accent-hover)] touch-manipulation",
   );
   const secondaryLinkClass = cn(
     btnBlockBase,
@@ -91,11 +91,6 @@ function MediaDetailQuoteModalBody({
 
   return (
     <div className="relative flex min-h-0 w-full flex-1 flex-col">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
-      />
 
       <div className="relative z-0 min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pt-9 pb-4 sm:px-6 sm:pt-10">
         <div className="mb-4 flex items-start gap-3 border-b dark:border-white/10 border-gray-200 pb-4">
@@ -173,7 +168,7 @@ function MediaDetailQuoteModalBody({
                     className={cn(
                       "absolute right-2.5 top-2.5 flex size-6 items-center justify-center rounded-xl border text-[9px] font-black",
                       selectedCard
-                        ? "dark:border-white/18 border-gray-300 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900"
+                        ? "dark:border-white/18 border-gray-300 bg-[color:var(--qp-accent)] text-white"
                         : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 text-transparent",
                     )}
                     aria-hidden
@@ -198,7 +193,7 @@ function MediaDetailQuoteModalBody({
                   ) : null}
                   {o.stores?.trim() ? (
                     <details className="mt-2 border-t dark:border-white/10 border-gray-200 pt-2">
-                      <summary className="cursor-pointer list-none text-[11px] font-semibold dark:text-violet-300/90 text-violet-700 [&::-webkit-details-marker]:hidden">
+                      <summary className="cursor-pointer list-none text-[11px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90 [&::-webkit-details-marker]:hidden">
                         {isKo ? "포함 지점 보기" : "View locations"}
                       </summary>
                       <span className="mt-1.5 block text-[11px] leading-relaxed dark:text-white/70 text-gray-600">

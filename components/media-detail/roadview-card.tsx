@@ -30,7 +30,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
     <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-violet-600 dark:text-violet-300/80">
+          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
             <Eye className="h-3.5 w-3.5" aria-hidden />
             {t("title")}
           </p>
@@ -43,7 +43,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           aria-label={t("iframeTitle", { name: mediaName })}
-          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-violet-400/30 bg-violet-500/10 px-4 py-2.5 text-sm font-semibold text-violet-600 transition hover:bg-violet-500/20 dark:text-violet-300"
+          className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-4 py-2.5 text-sm font-semibold text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/20 dark:text-[color:var(--qp-accent)]"
         >
           {t("openExternal")}
           <ExternalLink className="h-4 w-4" aria-hidden />

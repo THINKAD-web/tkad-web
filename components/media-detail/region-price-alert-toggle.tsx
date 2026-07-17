@@ -87,7 +87,7 @@ export function RegionPriceAlertToggle({
       {pending ? (
         <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
       ) : subscribed ? (
-        <Bell className="h-3.5 w-3.5 text-cyan-500" aria-hidden />
+        <Bell className="h-3.5 w-3.5 text-[color:var(--qp-accent)]" aria-hidden />
       ) : (
         <BellOff className="h-3.5 w-3.5 text-muted-foreground" aria-hidden />
       )}

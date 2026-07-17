@@ -73,7 +73,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
       )}
       id="media-quote-calculator"
     >
-      <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-700 dark:text-cyan-300/90">
+      <p className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90">
         <Calculator className="h-3.5 w-3.5" aria-hidden />
         {isKo ? "간편 견적" : "Quick estimate"}
       </p>
@@ -96,7 +96,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
             className={cn(
               "rounded-lg border px-3 py-1.5  text-[11px] font-bold transition-colors",
               days === d
-                ? "border-cyan-600/40 bg-cyan-500/15 text-cyan-900 dark:border-cyan-400/50 dark:text-cyan-200"
+                ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)] dark:border-[color:var(--qp-accent)]/50 dark:text-[color:var(--qp-accent)]"
                 : "border-border text-muted-foreground hover:border-foreground/25 hover:text-foreground",
             )}
           >
@@ -129,9 +129,9 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
 
       <p className="mt-5 text-2xl font-black tabular-nums text-foreground sm:text-3xl">
         {isKo ? "집행 기간: " : "Duration: "}
-        <span className="text-cyan-700 dark:text-cyan-300">{days}</span>
+        <span className="text-[color:var(--qp-accent)]">{days}</span>
         {isKo ? "일 → " : "d → "}
-        <span className="bg-gradient-to-r from-violet-300 to-cyan-300 bg-clip-text text-transparent">
+        <span className="text-[color:var(--qp-accent)]">
           {isKo ? "예상 비용 " : "Est. "}
           {formatWonShort(displayCost, locale)}
         </span>

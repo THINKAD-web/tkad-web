@@ -128,7 +128,7 @@ export function MediaDetailHeroInfo({
   return (
     <div className={cn("min-w-0 space-y-5", className)}>
       <div>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-500 dark:text-violet-300/80">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
           {typeLabel}
         </p>
         <h1 className="mt-2 text-balance text-2xl font-black leading-tight tracking-tight dark:text-white text-gray-900 sm:text-3xl">

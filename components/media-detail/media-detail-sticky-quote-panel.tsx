@@ -171,7 +171,7 @@ export function MediaDetailStickyQuotePanel({
   );
 
   const inputCls =
-    "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-violet-400/50 focus:ring-2 focus:ring-violet-400/20";
+    "h-10 w-full rounded-xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-white px-3 text-sm dark:text-white text-gray-900 outline-none focus:border-[color:var(--qp-accent)]/50 focus:ring-2 focus:ring-[color:var(--qp-accent)]/20";
 
   return (
     <aside
@@ -295,7 +295,7 @@ export function MediaDetailStickyQuotePanel({
         <div className="space-y-3">
           <Link
             href={quoteHref}
-            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-3 text-center text-sm font-bold text-gray-900 dark:text-white"
+            className="inline-flex h-11 w-full items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-3 text-center text-sm font-bold text-white"
           >
             {isKo ? "견적 받기" : "Get quote"}
           </Link>
@@ -326,7 +326,7 @@ export function MediaDetailStickyQuotePanel({
           <div className="flex flex-wrap items-center gap-1.5 border-t dark:border-white/10 border-gray-100 pt-2">
             <Link
               href={plannerHref}
-              className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-violet-400/25 bg-violet-500/8 px-2 text-[10px] font-semibold text-violet-800 dark:text-violet-100"
+              className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
             >
               <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
               {isKo ? "플래너" : "Planner"}

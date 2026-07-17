@@ -92,7 +92,7 @@ function IconSpec({
 }) {
   return (
     <div className="flex gap-3 rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3">
-      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-violet-500" aria-hidden />
+      <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]" aria-hidden />
       <div>
         <p className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/40 text-gray-400">
           {label}
@@ -243,7 +243,7 @@ export function MediaDetailExecutionPanel({
                     <details className="group/stores mt-2">
                       <summary
                         className={cn(
-                          "cursor-pointer list-none text-xs font-semibold dark:text-violet-300/90 text-violet-700",
+                          "cursor-pointer list-none text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/90",
                           "[&::-webkit-details-marker]:hidden",
                         )}
                       >
@@ -267,7 +267,7 @@ export function MediaDetailExecutionPanel({
       ) : null}
 
       {featuresText ? (
-        <p className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-white/5 bg-violet-50/50 px-4 py-3 text-sm dark:text-white/75 text-gray-700">
+        <p className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-white/5 bg-[color:var(--qp-accent-soft)] px-4 py-3 text-sm dark:text-white/75 text-gray-700">
           {featuresText}
         </p>
       ) : null}

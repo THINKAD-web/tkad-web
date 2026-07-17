@@ -70,11 +70,6 @@ export function MediaInquiryDialog({
             className="tkad-glass-surface relative w-full max-w-md overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
-            />
             <div className="relative flex items-start justify-between gap-3 border-b dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 px-5 py-4">
               <div className="min-w-0 dark:text-white text-gray-900">
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
@@ -101,7 +96,7 @@ export function MediaInquiryDialog({
               <Link
                 href={`/contact?media=${mediaId}`}
                 onClick={() => setOpen(false)}
-                className="group flex items-center gap-3 rounded-[18px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-4 py-3 dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                className="group flex items-center gap-3 rounded-[18px] border dark:border-white/14 border-gray-200 bg-[color:var(--qp-accent)] px-4 py-3 text-white shadow-sm transition hover:bg-[color:var(--qp-accent-hover)]"
               >
                 <FileText className="h-5 w-5 shrink-0" strokeWidth={2} />
                 <div className="min-w-0 flex-1">

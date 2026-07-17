@@ -102,7 +102,7 @@ export function MediaDetailAddToCart({
         >
           <ShoppingCart className="h-4 w-4" />
           <span className="hidden sm:inline">장바구니</span>
-          <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center bg-gradient-to-br from-violet-600 to-cyan-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 shadow-[0_1px_8px_rgba(124,58,237,0.35)] dark:from-violet-500 dark:to-cyan-400">
+          <span className="inline-flex h-[18px] min-w-[18px] items-center justify-center bg-[color:var(--qp-accent)] px-1 text-[10px] font-bold text-white">
             {ids.length}
           </span>
         </Link>

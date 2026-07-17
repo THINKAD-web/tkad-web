@@ -101,7 +101,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
                   borderRadius: 8,
                 }}
               />
-              <Bar dataKey="index" fill="#22d3ee" radius={[4, 4, 0, 0]} />
+              <Bar dataKey="index" fill="#ff6200" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>
