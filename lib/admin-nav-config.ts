@@ -131,6 +131,7 @@ export const adminNavGroupDefs: {
       "verification",
       "networks",
       "mediaHub",
+      "campaignCalendar",
     ],
   },
   {
@@ -145,7 +146,6 @@ export const adminNavGroupDefs: {
       "quoteTemplates",
       "biddings",
       "campaigns",
-      "campaignCalendar",
       "forecast",
     ],
   },
@@ -159,7 +159,6 @@ export const adminNavGroupDefs: {
       "users",
       "pipeline",
       "crmRecords",
-      "crm",
       "planSnapshots",
     ],
   },

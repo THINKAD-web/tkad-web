@@ -1,4 +1,9 @@
-import { CampaignStatus, MediaApplicationStatus, MediaReviewStatus } from "@prisma/client";
+import {
+  CampaignStatus,
+  MediaApplicationStatus,
+  MediaReviewStatus,
+  OoHQuoteStatus,
+} from "@prisma/client";
 import {
   parseInquiryAdminStatusCode,
   parseInquiryTypeCode,
@@ -44,10 +49,16 @@ export type InquiryTypeSlice = {
   count: number;
 };
 
+export type AdminOpsQueue = {
+  unreadInquiries: number;
+  bookingAwaitingConfirm: number;
+};
+
 export type AdminDashboardData = {
   configured: boolean;
   kpis: DashboardKpi[];
   alerts: DashboardAlert[];
+  opsQueue: AdminOpsQueue;
   recentInquiries: DashboardFeedItem[];
   recentSignups: DashboardFeedItem[];
   recentApplications: DashboardFeedItem[];
@@ -107,6 +118,7 @@ export async function loadAdminDashboardData(
       configured: false,
       kpis: [],
       alerts: [],
+      opsQueue: { unreadInquiries: 0, bookingAwaitingConfirm: 0 },
       recentInquiries: [],
       recentSignups: [],
       recentApplications: [],
@@ -148,6 +160,7 @@ export async function loadAdminDashboardData(
     week1Count,
     week2Count,
     week3Count,
+    bookingAwaitingConfirm,
   ] = await Promise.all([
     db.contactInquiry.count({
       where: { createdAt: { gte: thisMonthStart } },
@@ -232,6 +245,13 @@ export async function loadAdminDashboardData(
     }),
     db.contactInquiry.count({
       where: { createdAt: { gte: weekBoundaries[0]!.gte, lt: weekBoundaries[0]!.lt } },
+    }),
+    db.ooHQuote.count({
+      where: {
+        status: {
+          in: [OoHQuoteStatus.booking_requested, OoHQuoteStatus.booking_pending],
+        },
+      },
     }),
   ]);
 
@@ -378,6 +398,10 @@ export async function loadAdminDashboardData(
     configured: true,
     kpis,
     alerts,
+    opsQueue: {
+      unreadInquiries,
+      bookingAwaitingConfirm,
+    },
     recentInquiries,
     recentSignups,
     recentApplications,

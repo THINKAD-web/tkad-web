@@ -80,7 +80,7 @@ export function AdminInquiryQuotePanel({ inquiryId, quote }: Props) {
           href={`/admin/quotes?tab=booking&highlight=${quote.id}`}
           className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-3 py-2 text-xs font-semibold text-emerald-900 hover:bg-emerald-50"
         >
-          부킹 견적 관리
+          연결된 견적 보기
         </Link>
         {(quote.status === "draft" || quote.status === "sent") && (
           <BtnBlock

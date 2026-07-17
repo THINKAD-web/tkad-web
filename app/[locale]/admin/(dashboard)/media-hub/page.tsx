@@ -1,6 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { AdminBookingRequestsReviewPanel } from "@/components/admin/booking-requests-review-panel";
+import { cn } from "@/lib/utils";
 
 type MediaAvailability = "available" | "reserved" | "maintenance";
 
@@ -60,7 +62,13 @@ function bookingTouchesDay(
   return s.getTime() <= b && e.getTime() >= a;
 }
 
-export default function AdminMediaHubPage() {
+function AdminMediaHubPage() {
+  const searchParams = useSearchParams();
+  const deepMediaId = searchParams.get("mediaId")?.trim() ?? "";
+  const highlightQuoteId = searchParams.get("highlightQuoteId")?.trim() ?? "";
+  const deepLinkAppliedRef = useRef(false);
+  const bookingListRef = useRef<HTMLUListElement | null>(null);
+
   const [list, setList] = useState<MediaRow[]>([]);
   const [sel, setSel] = useState<MediaRow | null>(null);
   const [prices, setPrices] = useState<
@@ -74,6 +82,7 @@ export default function AdminMediaHubPage() {
       endsAt: string;
       /** requested | tentative | confirmed | cancelled | expired */
       status: string;
+      oohQuoteId?: string | null;
     }[]
   >([]);
   const [advertiserExecs, setAdvertiserExecs] = useState<
@@ -186,6 +195,13 @@ export default function AdminMediaHubPage() {
     loadList();
   }, [loadList]);
 
+  const displayList = useMemo(() => {
+    if (!deepMediaId) return list;
+    const hit = list.find((m) => m.id === deepMediaId);
+    if (!hit) return list;
+    return [hit, ...list.filter((m) => m.id !== deepMediaId)];
+  }, [list, deepMediaId]);
+
   const createMedia = async () => {
     if (!newMedia.name.trim() || !newMedia.location.trim()) return;
     const price = Math.round(Number(newMedia.price) || 0);
@@ -218,7 +234,7 @@ export default function AdminMediaHubPage() {
     await loadList();
   };
 
-  const loadDetail = async (m: MediaRow) => {
+  const loadDetail = useCallback(async (m: MediaRow) => {
     setSel(m);
     try {
       const res = await fetch(`/api/admin/medias/${m.id}`, {
@@ -238,6 +254,7 @@ export default function AdminMediaHubPage() {
             startsAt: string;
             endsAt: string;
             status: string;
+            oohQuoteId?: string | null;
           }[];
           advertiserExecutions: {
             id: string;
@@ -267,13 +284,22 @@ export default function AdminMediaHubPage() {
           effectiveFrom: new Date(s.effectiveFrom).toISOString().slice(0, 16),
         })),
       );
-      setBookings(
-        (media.bookings ?? []).map((b) => ({
-          ...b,
-          startsAt: new Date(b.startsAt).toISOString().slice(0, 16),
-          endsAt: new Date(b.endsAt).toISOString().slice(0, 16),
-        })),
-      );
+      const nextBookings = (media.bookings ?? []).map((b) => ({
+        ...b,
+        oohQuoteId: b.oohQuoteId ?? null,
+        startsAt: new Date(b.startsAt).toISOString().slice(0, 16),
+        endsAt: new Date(b.endsAt).toISOString().slice(0, 16),
+      }));
+      setBookings(nextBookings);
+      const highlighted = highlightQuoteId
+        ? nextBookings.find((b) => b.oohQuoteId === highlightQuoteId)
+        : null;
+      if (highlighted?.startsAt) {
+        const d = new Date(highlighted.startsAt);
+        if (!Number.isNaN(d.getTime())) {
+          setCalMonth(new Date(d.getFullYear(), d.getMonth(), 1));
+        }
+      }
       setAdvertiserExecs(
         (media.advertiserExecutions ?? []).map((x) => ({
           ...x,
@@ -295,7 +321,24 @@ export default function AdminMediaHubPage() {
       setBookings([]);
       setAdvertiserExecs([]);
     }
-  };
+  }, [highlightQuoteId]);
+
+  useEffect(() => {
+    if (!deepMediaId || loading || list.length === 0 || deepLinkAppliedRef.current) {
+      return;
+    }
+    const target = list.find((m) => m.id === deepMediaId);
+    if (!target) return;
+    deepLinkAppliedRef.current = true;
+    void loadDetail(target);
+  }, [deepMediaId, loading, list, loadDetail]);
+
+  useEffect(() => {
+    if (!highlightQuoteId || !sel || bookings.length === 0) return;
+    const hit = bookings.some((b) => b.oohQuoteId === highlightQuoteId);
+    if (!hit) return;
+    bookingListRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [highlightQuoteId, sel, bookings]);
 
   const saveAvailability = async (v: MediaAvailability) => {
     if (!sel) return;
@@ -546,19 +589,35 @@ export default function AdminMediaHubPage() {
             </Button>
           </CardHeader>
           <CardContent className="max-h-[520px] space-y-2 overflow-y-auto text-sm">
+            {deepMediaId ? (
+              <p className="rounded-md border border-amber-200 bg-amber-50 px-2 py-1.5 text-[11px] text-amber-900">
+                견적 딥링크 매체 필터 중
+                {highlightQuoteId
+                  ? ` · 홀드 하이라이트 #${highlightQuoteId.slice(-8)}`
+                  : ""}
+              </p>
+            ) : null}
             {loading ? (
               <p className="text-muted-foreground">불러오는 중…</p>
-            ) : list.length === 0 ? (
+            ) : displayList.length === 0 ? (
               <p className="text-muted-foreground">
                 DB에 매체가 없습니다. 시드 또는 API로 먼저 등록하세요.
               </p>
             ) : (
-              list.map((m) => (
+              displayList.map((m) => (
                 <button
                   key={m.id}
                   type="button"
-                  onClick={() => loadDetail(m)}
-                  className={`w-full rounded-lg border p-3 text-left ${ sel?.id === m.id ? "border-primary bg-muted bg-muted/60" : "border-slate-200" }`}
+                  onClick={() => void loadDetail(m)}
+                  className={cn(
+                    "w-full rounded-lg border p-3 text-left",
+                    sel?.id === m.id
+                      ? "border-primary bg-muted/60"
+                      : "border-slate-200",
+                    deepMediaId && m.id === deepMediaId
+                      ? "ring-2 ring-amber-400/80"
+                      : "",
+                  )}
                 >
                   <div className="flex flex-wrap items-center gap-2">
                     <p className="font-semibold text-foreground">{m.name}</p>
@@ -764,8 +823,14 @@ export default function AdminMediaHubPage() {
                           : overlapping.find((b) => b.status === "requested")
                             ? "requested"
                             : null;
-                      const cls =
-                        strongest === "confirmed"
+                      const quoteHoldDay =
+                        Boolean(highlightQuoteId) &&
+                        overlapping.some(
+                          (b) => b.oohQuoteId === highlightQuoteId,
+                        );
+                      const cls = quoteHoldDay
+                        ? "bg-amber-300 font-bold text-amber-950 ring-1 ring-amber-500"
+                        : strongest === "confirmed"
                           ? "bg-emerald-200 font-semibold text-emerald-900"
                           : strongest === "tentative"
                             ? "bg-primary/30 font-semibold text-foreground"
@@ -894,7 +959,7 @@ export default function AdminMediaHubPage() {
                       </Button>
                     ) : null}
                   </div>
-                  <ul className="mt-2 space-y-2 text-xs">
+                  <ul ref={bookingListRef} className="mt-2 space-y-2 text-xs">
                     {bookings.map((b) => {
                       const statusLabel: Record<string, string> = {
                         requested: "신청",
@@ -910,13 +975,27 @@ export default function AdminMediaHubPage() {
                         cancelled: "bg-slate-200 text-slate-700",
                         expired: "bg-slate-100 text-slate-500",
                       };
+                      const isHighlighted =
+                        Boolean(highlightQuoteId) &&
+                        b.oohQuoteId === highlightQuoteId;
                       return (
                         <li
                           key={b.id}
-                          className="flex items-center justify-between gap-2 rounded border p-2"
+                          className={cn(
+                            "flex items-center justify-between gap-2 rounded border p-2",
+                            isHighlighted &&
+                              "border-amber-400 bg-amber-50 ring-2 ring-amber-300 dark:bg-amber-950/30",
+                          )}
                         >
                           <div className="min-w-0 flex-1">
-                            <p className="font-medium">{b.title}</p>
+                            <p className="font-medium">
+                              {b.title}
+                              {isHighlighted ? (
+                                <span className="ml-1.5 text-[10px] font-semibold text-amber-800">
+                                  ← 견적 홀드
+                                </span>
+                              ) : null}
+                            </p>
                             <p className="flex flex-wrap items-center gap-1 text-muted-foreground">
                               <span>
                                 {b.startsAt.replace("T", " ")} ~ {b.endsAt.replace("T", " ")}
@@ -1031,5 +1110,13 @@ export default function AdminMediaHubPage() {
         </Card>
       </div>
     </div>
+  );
+}
+
+export default function AdminMediaHubPageWithSuspense() {
+  return (
+    <Suspense fallback={null}>
+      <AdminMediaHubPage />
+    </Suspense>
   );
 }

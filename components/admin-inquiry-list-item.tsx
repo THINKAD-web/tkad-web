@@ -300,7 +300,7 @@ function AdminInquiryListItem({
                     className="inline-flex items-center gap-1 rounded-md border border-emerald-300 bg-white px-2 py-1 text-xs font-medium text-emerald-900 hover:bg-emerald-50"
                   >
                     <FileText className="h-3 w-3" />
-                    부킹 견적 관리
+                    연결된 견적 보기
                   </Link>
                   <Link
                     href={`/quote/${item.oohQuoteId}/preview`}

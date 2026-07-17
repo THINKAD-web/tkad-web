@@ -162,6 +162,26 @@ export default async function AdminOverviewPage({ params }: Props) {
         </div>
       </header>
 
+      {data.configured ? (
+        <p className="rounded-xl border border-border/50 bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+          <span className="font-semibold text-foreground">오늘 처리</span>
+          {" · "}
+          <Link
+            href={`${prefix}/admin/inquiries?status=new`}
+            className="underline-offset-2 hover:underline"
+          >
+            문의 미응답 {data.opsQueue.unreadInquiries}건
+          </Link>
+          {" / "}
+          <Link
+            href={`${prefix}/admin/quotes?tab=booking`}
+            className="underline-offset-2 hover:underline"
+          >
+            부킹 확정 대기 {data.opsQueue.bookingAwaitingConfirm}건
+          </Link>
+        </p>
+      ) : null}
+
       {/* 오늘의 핵심 지표 — 자체 DB 기반 (GA4 와 별개) */}
       <section className="rounded-2xl border border-border/60 bg-card/40 p-4">
         <div className="mb-3 flex items-center justify-between gap-2">

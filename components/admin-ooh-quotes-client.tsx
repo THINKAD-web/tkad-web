@@ -83,7 +83,35 @@ type OohRow = {
   contractConfirmedAt?: string | null;
   cancelReason?: string | null;
   createdAt?: string | null;
+  mediaIds?: string[];
 };
+
+const HOLD_LINK_STATUSES = new Set([
+  "booking_confirmed",
+  "invoice_sent",
+  "payment_pending",
+  "payment_confirmed",
+  "contract_confirmed",
+  "in_progress",
+  "completed",
+]);
+
+function canShowCalendarHold(row: OohRow): boolean {
+  const mediaId = row.mediaIds?.[0]?.trim();
+  if (!mediaId) return false;
+  if (row.bookingConfirmedAt) return true;
+  return HOLD_LINK_STATUSES.has(row.status);
+}
+
+function mediaHubHoldHref(row: OohRow): string | null {
+  const mediaId = row.mediaIds?.[0]?.trim();
+  if (!mediaId || !canShowCalendarHold(row)) return null;
+  const sp = new URLSearchParams({
+    mediaId,
+    highlightQuoteId: row.id,
+  });
+  return `/admin/media-hub?${sp.toString()}`;
+}
 
 function toPipelineRow(
   row: OohRow,
@@ -460,6 +488,11 @@ export default function AdminOohQuotesClient() {
           {t("openDetail")}
         </Link>
       </Button>
+      {mediaHubHoldHref(row) ? (
+        <Button variant="outline" className={`w-full ${touchBtn}`} asChild>
+          <Link href={mediaHubHoldHref(row)!}>{t("viewCalendarHold")}</Link>
+        </Button>
+      ) : null}
       {canShowSendQuote(row) ? (
         <Button
           variant="outline"
@@ -855,6 +888,13 @@ export default function AdminOohQuotesClient() {
                               {t("openDetail")}
                             </Link>
                           </Button>
+                          {mediaHubHoldHref(row) ? (
+                            <Button size="sm" variant="outline" asChild>
+                              <Link href={mediaHubHoldHref(row)!}>
+                                {t("viewCalendarHold")}
+                              </Link>
+                            </Button>
+                          ) : null}
                           {canShowSendQuote(row) ? (
                             <>
                               <Button

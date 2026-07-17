@@ -2716,6 +2716,7 @@
     "ok": "처리했습니다.",
     "fail": "실패했습니다.",
     "openDetail": "고객 견적 페이지",
+    "viewCalendarHold": "캘린더 홀드 보기",
     "sourceFromAdminQuote": "이 계약은 견적 #{number}에서 생성",
     "sourceFromAdminQuoteLink": "원본 견적 보기",
     "awaitingSignatureHint": "고객이 계약서에 서명해야 청구서를 발송할 수 있습니다.",

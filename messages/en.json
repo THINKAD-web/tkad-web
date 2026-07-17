@@ -2716,6 +2716,7 @@
     "ok": "Done.",
     "fail": "Failed.",
     "openDetail": "Customer quote page",
+    "viewCalendarHold": "View calendar hold",
     "sourceFromAdminQuote": "Created from quote #{number}",
     "sourceFromAdminQuoteLink": "View source quote",
     "awaitingSignatureHint": "The client must sign the contract before you can send an invoice.",
