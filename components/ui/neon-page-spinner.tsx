@@ -30,16 +30,16 @@ export function NeonFullPageSpinner({
         <div
           role="status"
           aria-live="polite"
-          className="tkad-glass-surface tkad-neon-border tkad-neon-glow flex flex-col items-center gap-5 rounded-[28px] border dark:border-white/12 border-gray-200 px-10 py-12 text-center backdrop-blur-md sm:px-14 sm:py-14"
+          className="tkad-glass-surface flex flex-col items-center gap-5 rounded-[28px] border dark:border-white/12 border-gray-200 px-10 py-12 text-center backdrop-blur-md sm:px-14 sm:py-14"
         >
           <span
-            className="tkad-neon-spinner-ring h-12 w-12 animate-spin rounded-full border-[3px] sm:h-14 sm:w-14"
+            className="h-12 w-12 animate-spin rounded-full border-[3px] border-zinc-300 border-t-[color:var(--qp-accent)] sm:h-14 sm:w-14"
             aria-hidden
           />
-          <p className="tkad-home-accent-text tkad-neon-text font-display text-sm font-semibold uppercase tracking-[0.22em] sm:text-base">
+          <p className="font-display text-sm font-semibold uppercase tracking-[0.22em] text-[color:var(--qp-accent)] sm:text-base">
             {label}
           </p>
-          <p className="max-w-xs font-mono text-[10px] uppercase tracking-[0.28em] text-cyan-400/70 sm:text-xs">
+          <p className="max-w-xs font-mono text-[10px] uppercase tracking-[0.28em] text-zinc-500 dark:text-white/50 sm:text-xs">
             // THINKAD
           </p>
         </div>

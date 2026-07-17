@@ -20,13 +20,13 @@ export function MyHubUpgradeBanner({ user, isKo, className }: Props) {
     <div
       className={cn(
         myHubGlassCard,
-        "border-violet-400/25 bg-gradient-to-br from-violet-500/10 via-transparent to-cyan-400/5 p-4 sm:p-5",
+        "border-[color:var(--qp-accent)]/25 bg-gradient-to-br from-[color:var(--qp-accent)]/10 via-transparent to-transparent p-4 sm:p-5",
         className,
       )}
     >
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-violet-500/20 text-violet-500">
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)]">
             <Sparkles className="h-4 w-4" aria-hidden />
           </span>
           <div>

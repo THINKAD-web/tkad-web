@@ -2300,7 +2300,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         className="pointer-events-none absolute inset-0 opacity-0"
                       />
                       <div className="relative flex flex-col items-center gap-5 px-6 py-14 text-center sm:px-10 sm:py-16">
-                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/40 bg-primary/15 shadow-[0_0_32px_rgba(34,211,238,0.2)]">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/15 shadow-[0_0_24px_rgba(255,98,0,0.18)]">
                           <CheckCircle className="h-9 w-9 text-primary" aria-hidden />
                         </div>
                         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">

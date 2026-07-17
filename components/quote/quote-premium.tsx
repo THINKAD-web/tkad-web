@@ -113,12 +113,12 @@ function RoiChart() {
     >
       <defs>
         <linearGradient id={fillId} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="rgba(124,58,237,0.55)" />
-          <stop offset="100%" stopColor="rgba(6,182,212,0.05)" />
+          <stop offset="0%" stopColor="rgba(255,98,0,0.45)" />
+          <stop offset="100%" stopColor="rgba(255,98,0,0.04)" />
         </linearGradient>
         <linearGradient id={lineId} x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#7c3aed" />
-          <stop offset="100%" stopColor="#22d3ee" />
+          <stop offset="0%" stopColor="#ff6200" />
+          <stop offset="100%" stopColor="#c24e00" />
         </linearGradient>
       </defs>
       <path
@@ -143,7 +143,7 @@ function ThinkadLogo() {
       <span
         className="flex h-9 w-9 items-center justify-center rounded-lg text-sm font-black text-white"
         style={{
-          background: "linear-gradient(135deg, #7c3aed 0%, #22d3ee 100%)",
+          background: "linear-gradient(135deg, #ff6200 0%, #c24e00 100%)",
         }}
       >
         T
@@ -693,8 +693,8 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
               className="absolute inset-0"
               style={{
                 background: `
-                radial-gradient(circle at 75% 40%, rgba(124,58,237,0.5), transparent 55%),
-                linear-gradient(120deg, #120e26 0%, #1d1640 45%, #2a1f52 100%)
+                radial-gradient(circle at 75% 40%, rgba(255,98,0,0.35), transparent 55%),
+                linear-gradient(120deg, #121212 0%, #1a1a1a 45%, #242424 100%)
               `,
               }}
             />
@@ -758,7 +758,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                   style={{
                     transform: "rotate(-4deg) skewY(-3deg)",
                     textShadow:
-                      "0 0 24px rgba(124,58,237,0.85), 0 0 48px rgba(34,211,238,0.35)",
+                      "0 0 20px rgba(255,98,0,0.45)",
                     fontFamily:
                       "var(--font-space-grotesk), var(--font-pretendard), sans-serif",
                   }}

@@ -36,7 +36,7 @@ export function HotspotRegionChips({
     >
       <p
         className={cn(
-          "mb-1.5 font-bold text-cyan-600 dark:text-cyan-400",
+          "mb-1.5 font-bold text-[color:var(--qp-accent)]",
           compact ? "text-[10px]" : "text-xs",
         )}
       >

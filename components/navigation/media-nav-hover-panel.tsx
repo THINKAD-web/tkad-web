@@ -70,7 +70,7 @@ export function MediaNavHoverPanel({ links, className }: Props) {
               >
                 {Icon ? (
                   <Icon
-                    className="mt-0.5 h-5 w-5 shrink-0 text-cyan-600 dark:text-cyan-300"
+                    className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-accent)]"
                     aria-hidden
                   />
                 ) : null}

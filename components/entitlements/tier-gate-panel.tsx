@@ -17,7 +17,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
   return (
     <div
       className={cn(
-        "mx-auto max-w-sm rounded-2xl border border-violet-200/80 bg-gradient-to-b from-violet-50/95 to-white px-6 py-7 text-center shadow-lg dark:border-violet-500/25 dark:from-violet-950/60 dark:to-gray-950/70",
+        "mx-auto max-w-sm rounded-2xl border border-[color:var(--qp-accent)]/25 bg-gradient-to-b from-[color:var(--qp-accent)]/8 to-white px-6 py-7 text-center shadow-lg dark:border-[color:var(--qp-accent)]/25 dark:from-[color:var(--qp-accent)]/15 dark:to-gray-950/70",
         compact && "px-5 py-5",
         className,
       )}
@@ -25,10 +25,10 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
       aria-live="polite"
     >
       <Lock
-        className="mx-auto h-8 w-8 text-violet-500 dark:text-violet-300"
+        className="mx-auto h-8 w-8 text-[color:var(--qp-accent)]"
         aria-hidden
       />
-      <p className="mt-3 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300/90">
+      <p className="mt-3 font-display text-[10px] font-bold uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
         {message.eyebrow}
       </p>
       <h3
@@ -43,7 +43,7 @@ export function TierGatePanel({ message, className, compact = false }: Props) {
         {message.description}
       </p>
       {message.hint ? (
-        <p className="mt-2 text-xs font-medium text-violet-700/90 dark:text-violet-200/80">
+        <p className="mt-2 text-xs font-medium text-[color:var(--qp-accent)]/90">
           {message.hint}
         </p>
       ) : null}
@@ -131,7 +131,7 @@ export function TierGateInlineNotice({
   return (
     <div
       className={cn(
-        "rounded-xl border border-violet-300/50 bg-violet-50/90 px-4 py-3 dark:border-violet-500/30 dark:bg-violet-500/10",
+        "rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/8 px-4 py-3 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10",
         className,
       )}
       role="status"

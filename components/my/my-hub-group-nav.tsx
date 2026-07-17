@@ -59,8 +59,8 @@ function PrimaryNavCard({
         "group flex min-h-[4.25rem] items-start gap-3 rounded-2xl border px-3.5 py-3.5 transition-all",
         "active:scale-[0.99]",
         active
-          ? "border-violet-500/50 bg-gradient-to-br from-violet-500/20 via-violet-500/10 to-transparent shadow-[0_0_0_1px_rgba(139,92,246,0.35),0_8px_24px_rgba(139,92,246,0.12)]"
-          : "border-gray-200/90 bg-white/80 hover:border-violet-400/35 hover:bg-violet-500/5 dark:border-white/12 dark:bg-white/[0.04] dark:hover:border-violet-400/30 dark:hover:bg-violet-500/10",
+          ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent)]/10 shadow-[0_0_0_1px_color-mix(in_srgb,var(--qp-accent)_30%,transparent)]"
+          : "border-gray-200/90 bg-white/80 hover:border-[color:var(--qp-accent)]/35 hover:bg-[color:var(--qp-accent)]/5 dark:border-white/12 dark:bg-white/[0.04] dark:hover:border-[color:var(--qp-accent)]/30 dark:hover:bg-[color:var(--qp-accent)]/10",
       )}
       aria-current={active ? "page" : undefined}
     >
@@ -68,8 +68,8 @@ function PrimaryNavCard({
         className={cn(
           "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl transition-colors",
           active
-            ? "tkad-neon-cta bg-violet-600 text-white shadow-md dark:bg-violet-500"
-            : "bg-violet-500/10 text-violet-600 group-hover:bg-violet-500/15 dark:text-violet-300",
+            ? "tkad-qp-cta text-white shadow-md"
+            : "bg-[color:var(--qp-accent)]/10 text-[color:var(--qp-accent)] group-hover:bg-[color:var(--qp-accent)]/15",
         )}
       >
         <Icon className="h-[18px] w-[18px]" aria-hidden />
@@ -79,7 +79,7 @@ function PrimaryNavCard({
           className={cn(
             "block text-[15px] font-bold leading-tight tracking-tight",
             active
-              ? "text-violet-950 dark:text-violet-50"
+              ? "text-gray-950 dark:text-white"
               : "text-gray-900 dark:text-white",
           )}
         >
@@ -117,7 +117,7 @@ function CompactIconLink({
         "inline-flex items-center justify-center gap-1.5 rounded-lg transition-colors",
         iconOnly ? "h-9 w-9" : "px-2.5 py-1.5 text-xs",
         active
-          ? "bg-violet-500/20 font-semibold text-violet-800 dark:text-violet-100"
+          ? "bg-[color:var(--qp-accent)]/15 font-semibold text-[color:var(--qp-accent)]"
           : "text-gray-500 hover:bg-gray-100 hover:text-gray-800 dark:text-white/50 dark:hover:bg-white/8 dark:hover:text-white/85",
       )}
       aria-current={active ? "page" : undefined}
@@ -146,7 +146,7 @@ function AccountLink({
       className={cn(
         "rounded-md px-1 py-0.5 text-[11px] font-medium transition-colors",
         active
-          ? "text-violet-700 underline decoration-violet-500/60 underline-offset-2 dark:text-violet-200"
+          ? "text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/60 underline-offset-2"
           : "text-gray-500 hover:text-gray-800 dark:text-white/45 dark:hover:text-white/75",
       )}
       aria-current={active ? "page" : undefined}
@@ -174,7 +174,7 @@ function SecondaryListLink({
       className={cn(
         "flex items-center gap-2 rounded-lg px-2 py-2 text-[13px] transition-colors",
         active
-          ? "bg-violet-500/15 font-semibold text-violet-800 dark:text-violet-100"
+          ? "bg-[color:var(--qp-accent)]/12 font-semibold text-[color:var(--qp-accent)]"
           : "text-gray-600 hover:bg-gray-100 dark:text-white/65 dark:hover:bg-white/5",
       )}
       aria-current={active ? "page" : undefined}

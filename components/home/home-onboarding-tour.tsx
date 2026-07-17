@@ -153,7 +153,7 @@ export default function HomeOnboardingTour() {
       />
       {targetRect ? (
         <div
-          className="pointer-events-none fixed z-[45] rounded-xl ring-2 ring-cyan-400/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
+          className="pointer-events-none fixed z-[45] rounded-xl ring-2 ring-[color:var(--qp-accent)]/90 shadow-[0_0_0_9999px_rgba(0,0,0,0.45)]"
           style={{
             top: targetRect.top,
             left: targetRect.left,
@@ -197,7 +197,7 @@ export default function HomeOnboardingTour() {
               key={i}
               className={cn(
                 "h-1 flex-1 rounded-full",
-                i === step ? "bg-cyan-500" : "bg-gray-200 dark:bg-white/15",
+                i === step ? "bg-[color:var(--qp-accent)]" : "bg-gray-200 dark:bg-white/15",
               )}
             />
           ))}
@@ -208,7 +208,7 @@ export default function HomeOnboardingTour() {
             <button
               type="button"
               onClick={() => setStep((s) => s + 1)}
-              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2.5 text-xs font-bold text-white"
+              className="flex-1 rounded-xl tkad-qp-cta py-2.5 text-xs font-bold text-white"
             >
               {isKo ? "다음" : "Next"}
             </button>
@@ -216,7 +216,7 @@ export default function HomeOnboardingTour() {
             <button
               type="button"
               onClick={dismissPermanent}
-              className="flex-1 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 py-2.5 text-xs font-bold text-white"
+              className="flex-1 rounded-xl tkad-qp-cta py-2.5 text-xs font-bold text-white"
             >
               {isKo ? "시작하기" : "Got it"}
             </button>

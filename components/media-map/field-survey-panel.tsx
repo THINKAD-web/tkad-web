@@ -116,7 +116,7 @@ export function FieldSurveyPanel({
       <div className="pointer-events-auto flex min-h-0 flex-1 flex-col rounded-t-2xl border dark:border-white/14 border-gray-200 dark:bg-black bg-white dark:bg-white/8 bg-gray-100 shadow-2xl backdrop-blur md:rounded-2xl">
         <div className="flex items-center justify-between border-b dark:border-white/10 border-gray-200 px-4 py-3">
           <div className="flex items-center gap-2">
-            <MapPinned className="h-4 w-4 text-cyan-300" />
+            <MapPinned className="h-4 w-4 text-[color:var(--qp-accent)]" />
             <span className="text-sm font-bold dark:text-white text-gray-900">
               {isKo ? "답사 모드" : "Field survey"}
             </span>

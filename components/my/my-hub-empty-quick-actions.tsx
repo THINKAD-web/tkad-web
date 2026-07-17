@@ -52,10 +52,10 @@ export function MyHubEmptyQuickActions({ isKo, className }: Props) {
               href={action.href}
               className={cn(
                 myHubGlassCard,
-                "group flex flex-col gap-2 p-4 transition-colors hover:border-violet-400/30 hover:bg-violet-500/5",
+                "group flex flex-col gap-2 p-4 transition-colors hover:border-[color:var(--qp-accent)]/30 hover:bg-[color:var(--qp-accent)]/5",
               )}
             >
-              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-violet-500/10 text-violet-600 transition-colors group-hover:bg-violet-500/15 dark:text-violet-300">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-[color:var(--qp-accent)]/10 text-[color:var(--qp-accent)] transition-colors group-hover:bg-[color:var(--qp-accent)]/15">
                 <Icon className="h-4 w-4" aria-hidden />
               </span>
               <span className="text-sm font-bold text-foreground">

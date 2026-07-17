@@ -218,7 +218,7 @@ export function CommandPalette({ open, onClose }: Props) {
                   className={cn(
                     "flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-left transition-colors",
                     idx === activeIdx
-                      ? "bg-cyan-400/10 dark:bg-white/8"
+                      ? "bg-[color:var(--qp-accent)]/10 dark:bg-white/8"
                       : "hover:bg-gray-100 dark:hover:bg-white/5",
                   )}
                 >

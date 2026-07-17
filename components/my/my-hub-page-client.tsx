@@ -339,8 +339,8 @@ export function MyHubPageClient() {
 
       {tab === "favorites" && (
         <section aria-labelledby="my-favorites-heading">
-          <div className="tkad-neon-surface relative mb-6 overflow-hidden rounded-[28px] px-5 py-6 sm:px-8 sm:py-10">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/80">
+          <div className="relative mb-6 overflow-hidden rounded-[28px] border border-border bg-card px-5 py-6 sm:px-8 sm:py-10">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--qp-fg-muted)]">
               {`// ${tFav("label")}`}
             </p>
             <h2

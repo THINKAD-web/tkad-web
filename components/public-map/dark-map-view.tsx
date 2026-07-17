@@ -334,10 +334,10 @@ function CoverageLayer({
     <GeoJSON
       data={geoJson as GeoJSON.GeoJsonObject}
       style={{
-        color: "#22d3ee",
+        color: "#ff6200",
         weight: 2,
         opacity: 0.85,
-        fillColor: "#22d3ee",
+        fillColor: "#ff6200",
         fillOpacity: 0.12,
       }}
     />
@@ -448,8 +448,8 @@ export default function DarkMapView({
             center={[userLocation.lat, userLocation.lng]}
             radius={8}
             pathOptions={{
-              color: "#22d3ee",
-              fillColor: "#22d3ee",
+              color: "#ff6200",
+              fillColor: "#ff6200",
               weight: 2,
               fillOpacity: 0.9,
             }}

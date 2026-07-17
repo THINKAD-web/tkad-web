@@ -138,8 +138,8 @@ export function MyApiKeysPageClient() {
         </Link>
 
         <div className="mb-8 flex items-start gap-3">
-          <div className="rounded-xl border border-cyan-400/30 bg-cyan-500/10 p-3">
-            <KeyRound className="h-6 w-6 text-cyan-300" />
+          <div className="rounded-xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 p-3">
+            <KeyRound className="h-6 w-6 text-[color:var(--qp-accent)]" />
           </div>
           <div>
             <h1 className="text-2xl font-bold dark:text-white text-gray-900">
@@ -152,7 +152,7 @@ export function MyApiKeysPageClient() {
             </p>
             <Link
               href="/developers"
-              className="mt-2 inline-block text-sm text-cyan-300 hover:underline"
+              className="mt-2 inline-block text-sm text-[color:var(--qp-accent)] hover:underline"
             >
               {isKo ? "API 문서 보기 →" : "View API docs →"}
             </Link>
@@ -160,8 +160,8 @@ export function MyApiKeysPageClient() {
         </div>
 
         {newSecret ? (
-          <div className={cn(glassCard, "mb-6 border-cyan-400/40")}>
-            <p className="text-sm font-medium text-cyan-200">
+          <div className={cn(glassCard, "mb-6 border-[color:var(--qp-accent)]/35")}>
+            <p className="text-sm font-medium text-[color:var(--qp-accent)]">
               {isKo
                 ? "새 키가 발급되었습니다. 아래 값은 다시 표시되지 않습니다."
                 : "New key issued. Copy it now — it won't be shown again."}
@@ -204,7 +204,7 @@ export function MyApiKeysPageClient() {
             <button
               type="submit"
               disabled={creating || !name.trim()}
-              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl bg-cyan-500 px-5 text-sm font-bold text-black hover:bg-cyan-400 disabled:opacity-50"
+              className="inline-flex h-11 shrink-0 items-center justify-center gap-2 rounded-xl tkad-qp-cta px-5 text-sm font-bold text-white disabled:opacity-50"
             >
               {creating ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -234,7 +234,7 @@ export function MyApiKeysPageClient() {
                       {isKo ? "플랜" : "Plan"}:{" "}
                       {PLAN_LABEL[k.plan]?.[isKo ? "ko" : "en"] ?? k.plan}
                     </p>
-                    <p className="mt-1 text-xs text-cyan-200/90">
+                    <p className="mt-1 text-xs text-zinc-500 dark:text-white/60">
                       {isKo ? "이번 달" : "This month"}: {k.monthlyUsage}
                       {k.monthlyLimit != null
                         ? ` / ${k.monthlyLimit}`

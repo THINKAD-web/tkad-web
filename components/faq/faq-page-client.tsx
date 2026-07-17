@@ -72,7 +72,7 @@ export function FaqPageClient({ items, isKo }: Props) {
               className={cn(
                 "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
                 activeTab === tab.value
-                  ? "bg-violet-500 text-white"
+                  ? "tkad-qp-cta text-white"
                   : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
               )}
             >
@@ -115,12 +115,12 @@ export function FaqPageClient({ items, isKo }: Props) {
                   >
                     <span
                       aria-hidden
-                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-gradient-to-br from-violet-500 to-cyan-400 text-[11px] font-bold text-white"
+                      className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-[color:var(--qp-accent)] text-[11px] font-bold text-white"
                     >
                       Q
                     </span>
                     <span className="min-w-0 flex-1 space-y-2">
-                      <span className="inline-block rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[11px] font-semibold text-violet-600 dark:text-violet-300">
+                      <span className="inline-block rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 text-[11px] font-semibold text-[color:var(--qp-accent)]">
                         {isKo ? badge.labelKo : badge.labelEn}
                       </span>
                       <span className="block font-semibold leading-snug text-gray-900 dark:text-white">
@@ -129,7 +129,7 @@ export function FaqPageClient({ items, isKo }: Props) {
                     </span>
                     <ChevronDown
                       className={cn(
-                        "mt-1 h-5 w-5 shrink-0 text-violet-500 transition-transform duration-300",
+                        "mt-1 h-5 w-5 shrink-0 text-[color:var(--qp-accent)] transition-transform duration-300",
                         open && "rotate-180",
                       )}
                       aria-hidden

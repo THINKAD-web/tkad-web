@@ -112,10 +112,12 @@ export function MyHubShell({ children }: Props) {
       <div className="tkad-landing-neon tkad-planner-neon tkad-portal-shell min-h-[calc(100dvh-4rem)]">
         {isHubHome ? (
           <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 py-10 text-gray-900 dark:bg-[#05050a] dark:text-white sm:py-14 lg:py-16">
-            <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-            <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+            <div
+              aria-hidden
+              className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
+            />
             <PageContainer className="relative">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-cyan-400/60">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.24em] text-[color:var(--qp-fg-muted)]">
                 {isKo ? "// 마이 허브" : "// My hub"}
               </p>
               <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
@@ -162,7 +164,7 @@ export function MyHubShell({ children }: Props) {
               <div className="min-w-0">
                 <Link
                   href="/my"
-                  className="text-xs font-semibold text-violet-600 dark:text-violet-300"
+                  className="text-xs font-semibold text-[color:var(--qp-accent)]"
                 >
                   {isKo ? "← 마이페이지" : "← My hub"}
                 </Link>

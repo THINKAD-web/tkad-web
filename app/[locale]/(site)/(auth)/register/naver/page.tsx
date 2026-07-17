@@ -123,11 +123,11 @@ function AuthCardDecor() {
     <>
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid"
+        className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:28px_28px]"
       />
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+        className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
       />
     </>
   );

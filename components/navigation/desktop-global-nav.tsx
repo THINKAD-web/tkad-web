@@ -128,7 +128,7 @@ function NavGroupPanel({
               {Icon ? (
                 <Icon
                   className={cn(
-                    "mt-0.5 shrink-0 text-cyan-600 dark:text-cyan-300",
+                    "mt-0.5 shrink-0 text-[color:var(--qp-accent)]",
                     item.id === "ai-recommend"
                       ? "h-3.5 w-3.5 opacity-70"
                       : item.secondary
@@ -153,7 +153,7 @@ function NavGroupPanel({
                     {item.label}
                   </span>
                   {item.badge ? (
-                    <span className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-cyan-700 dark:text-cyan-300">
+                    <span className="rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
                       {item.badge}
                     </span>
                   ) : null}
