@@ -10,6 +10,7 @@ import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
 import { siteUrl } from "@/lib/seo";
 import {
   CHAT_LABEL_OWNER,
@@ -173,6 +174,9 @@ export async function advanceChatQuoteToContract(
       clientName: true,
       clientEmail: true,
       status: true,
+      totalAmount: true,
+      period: true,
+      mediaIds: true,
       chatRoom: { select: { id: true } },
     },
   });
@@ -210,6 +214,15 @@ export async function advanceChatQuoteToContract(
   });
 
   await ensureOohContractExists(db, quoteId, OoHQuoteStatus.booking_confirmed);
+
+  void notifySlackBookingConfirm({
+    quoteId,
+    clientName: row.clientName,
+    totalAmountManwon: row.totalAmount,
+    period: row.period,
+    mediaCount: row.mediaIds.length,
+    source: "chat",
+  }).catch((e) => console.error("[chat-quote] slack booking confirm", e));
 
   const base = siteBaseUrl();
   const contractAbs = `${base}${contractUrl}`;

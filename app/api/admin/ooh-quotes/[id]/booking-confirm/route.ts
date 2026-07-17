@@ -5,6 +5,7 @@ import { getPrisma } from "@/lib/prisma";
 import { canAdminBookingConfirm } from "@/lib/ooh-quote";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { isEmailConfigured, sendEmail } from "@/lib/email/client";
+import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +43,15 @@ export async function PATCH(
   });
 
   await ensureOohContractExists(db, id, updated.status);
+
+  void notifySlackBookingConfirm({
+    quoteId: id,
+    clientName: row.clientName,
+    totalAmountManwon: row.totalAmount,
+    period: row.period,
+    mediaCount: row.mediaIds.length,
+    source: "admin",
+  }).catch((e) => console.error("[booking-confirm] slack", e));
 
   const to = row.clientEmail?.trim();
   if (to && isEmailConfigured()) {

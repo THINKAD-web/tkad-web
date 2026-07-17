@@ -8,6 +8,7 @@ import {
   sendTelegramMessage,
 } from "@/lib/telegram-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackRevisionRequest } from "@/lib/quote-slack-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -117,6 +118,12 @@ export async function POST(
       `<b>견적 수정 요청</b>\n${row.clientName}\n${preview}`,
       { buttons: [{ text: "확인하기", url: adminUrl }] },
     ).catch(() => {});
+
+    void notifySlackRevisionRequest({
+      quoteId: id,
+      clientName: row.clientName,
+      preview,
+    }).catch((e) => console.error("[quote revision-request] slack", e));
 
     return json(
       {

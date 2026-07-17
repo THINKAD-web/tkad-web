@@ -65,4 +65,74 @@ export async function notifySlackQuoteExpiring(opts: {
   });
 }
 
+export async function notifySlackRevisionRequest(opts: {
+  quoteId: string;
+  clientName: string;
+  preview: string;
+}): Promise<{ ok: boolean; skipped?: boolean }> {
+  return sendSlackInsightAlert({
+    severity: "info",
+    title: "견적 수정 요청 (고객)",
+    summary: [`*${opts.clientName}*`, opts.preview].join("\n"),
+    fields: [
+      { label: "견적 ID", value: opts.quoteId },
+      { label: "상태", value: "sent → revision requested" },
+    ],
+    adminUrl: adminOohQuoteUrl(opts.quoteId),
+  });
+}
+
+export async function notifySlackBookingRequest(opts: {
+  quoteId: string;
+  clientName: string;
+  totalAmountManwon: number;
+  period: string;
+  mediaCount: number;
+}): Promise<{ ok: boolean; skipped?: boolean }> {
+  return sendSlackInsightAlert({
+    severity: "info",
+    title: "부킹 요청 (고객 진행 의사)",
+    summary: [
+      `*${opts.clientName}* · ₩${opts.totalAmountManwon.toLocaleString("ko-KR")}만 · ${opts.period}`,
+      `매체 ${opts.mediaCount}건`,
+    ].join("\n"),
+    fields: [
+      { label: "견적 ID", value: opts.quoteId },
+      { label: "상태", value: "booking_requested" },
+    ],
+    adminUrl: adminOohQuoteUrl(opts.quoteId),
+  });
+}
+
+export async function notifySlackBookingConfirm(opts: {
+  quoteId: string;
+  clientName: string;
+  totalAmountManwon: number;
+  period: string;
+  mediaCount: number;
+  /** admin | chat | negotiation */
+  source?: string;
+}): Promise<{ ok: boolean; skipped?: boolean }> {
+  const sourceLabel =
+    opts.source === "chat"
+      ? "채팅 수락"
+      : opts.source === "negotiation"
+        ? "가격 제안 수락"
+        : "어드민 부킹 확정";
+  return sendSlackInsightAlert({
+    severity: "info",
+    title: "부킹 확정",
+    summary: [
+      `*${opts.clientName}* · ₩${opts.totalAmountManwon.toLocaleString("ko-KR")}만 · ${opts.period}`,
+      `매체 ${opts.mediaCount}건 · ${sourceLabel}`,
+    ].join("\n"),
+    fields: [
+      { label: "견적 ID", value: opts.quoteId },
+      { label: "상태", value: "booking_confirmed" },
+      { label: "경로", value: sourceLabel },
+    ],
+    adminUrl: adminOohQuoteUrl(opts.quoteId),
+  });
+}
+
 export { adminInquiryUrl };

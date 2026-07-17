@@ -8,6 +8,7 @@ import {
   sendTelegramMessage,
 } from "@/lib/telegram-notify";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackBookingRequest } from "@/lib/quote-slack-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -84,6 +85,14 @@ export async function POST(
       `<b>부킹 요청</b>\n${row.clientName}\n₩${row.totalAmount.toLocaleString("ko-KR")}만 · ${row.period}\n매체 ${row.mediaIds.length}건`,
       { buttons: [{ text: "확인하기", url: adminUrl }] },
     ).catch(() => {});
+
+    void notifySlackBookingRequest({
+      quoteId: id,
+      clientName: row.clientName,
+      totalAmountManwon: row.totalAmount,
+      period: row.period,
+      mediaCount: row.mediaIds.length,
+    }).catch((e) => console.error("[quote proceed] slack", e));
 
     return json({ success: true }, { status: 200 });
   } catch (e) {

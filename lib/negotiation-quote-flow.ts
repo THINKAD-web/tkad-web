@@ -15,6 +15,7 @@ import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
+import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
 import { siteUrl } from "@/lib/seo";
 import {
   adminOohQuoteUrl,
@@ -152,6 +153,9 @@ export async function advanceNegotiationQuoteToContract(
       clientName: true,
       clientEmail: true,
       status: true,
+      totalAmount: true,
+      period: true,
+      mediaIds: true,
       priceNegotiationId: true,
     },
   });
@@ -191,6 +195,15 @@ export async function advanceNegotiationQuoteToContract(
   });
 
   await ensureOohContractExists(db, quoteId, OoHQuoteStatus.booking_confirmed);
+
+  void notifySlackBookingConfirm({
+    quoteId,
+    clientName: row.clientName,
+    totalAmountManwon: row.totalAmount,
+    period: row.period,
+    mediaCount: row.mediaIds.length,
+    source: "negotiation",
+  }).catch((e) => console.error("[negotiation-quote] slack booking confirm", e));
 
   const base = siteBaseUrl();
   const contractAbs = `${base}${contractUrl}`;
