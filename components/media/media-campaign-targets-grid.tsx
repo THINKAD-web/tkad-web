@@ -47,7 +47,7 @@ export function MediaCampaignTargetsGrid({ previews, isKo }: Props) {
                 className={cn(
                   "rounded-full border px-3.5 py-2 text-sm font-medium transition-all",
                   activeSlug === chip.value
-                    ? "border-violet-400/60 bg-violet-500/15 text-violet-700 dark:text-violet-200"
+                    ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
                     : cn(MEDIA_CHIP_INACTIVE, "border-transparent"),
                 )}
               >
@@ -80,7 +80,8 @@ export function MediaCampaignTargetsGrid({ previews, isKo }: Props) {
               className={cn(
                 "cursor-pointer overflow-hidden border-2 border-border bg-card transition-colors",
                 "hover:border-accent/50 hover:bg-muted/30",
-                activeSlug === card.slug && "border-violet-400/50 ring-2 ring-violet-500/25",
+                activeSlug === card.slug &&
+                  "border-[color:var(--qp-accent)]/50 ring-2 ring-[color:var(--qp-accent)]/25",
               )}
             >
               <div className="relative h-24 bg-muted">

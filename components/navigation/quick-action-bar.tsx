@@ -50,9 +50,13 @@ type DesktopQuickAction = {
   labelEn: string;
   icon: LucideIcon;
   match: (pathname: string, tab: string | null) => boolean;
-  variant?: "neon" | "outline";
+  /** Primary accent CTA (Quiet Professional solid) */
+  variant?: "accent" | "outline";
   badge?: number;
 };
+
+const qpSidebarCta =
+  "tkad-qp-cta text-white [&_svg]:text-white";
 
 function actionRowClass(compact: boolean) {
   return cn(
@@ -91,7 +95,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
       labelKo: PLAN_NAV_LABELS.newPlan.ko,
       labelEn: PLAN_NAV_LABELS.newPlan.en,
       icon: Plus,
-      variant: "neon",
+      variant: "accent",
       match: (p) => p.startsWith("/planner"),
     },
     {
@@ -118,7 +122,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         className={cn(
           onHome
             ? mutedSidebarBtn(compact)
-            : cn(actionRowClass(compact), "tkad-neon-cta-clean text-white [&_svg]:text-white"),
+            : cn(actionRowClass(compact), qpSidebarCta),
         )}
       >
         <Bot className="h-4 w-4 shrink-0" strokeWidth={2.25} aria-hidden />
@@ -150,7 +154,7 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
         const active = action.match(pathname, tab);
         const label = isKo ? action.labelKo : action.labelEn;
         const Icon = action.icon;
-        const isNeon = !onHome && (action.variant === "neon" || active);
+        const isAccent = !onHome && (action.variant === "accent" || active);
 
         return (
           <Link
@@ -160,18 +164,18 @@ function QuickActionBarDesktopInner({ compact = false }: { compact?: boolean }) 
             aria-label={compact ? label : undefined}
             className={cn(
               actionRowClass(compact),
-              isNeon
-                ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
+              isAccent
+                ? qpSidebarCta
                 : action.variant === "outline"
                   ? cn(
                       "border font-medium",
                       active
-                        ? "border-cyan-400/40 bg-cyan-400/10 text-gray-900 dark:text-white [&_svg]:text-cyan-500 dark:[&_svg]:text-cyan-300"
+                        ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-gray-900 dark:text-white [&_svg]:text-[color:var(--qp-accent)]"
                         : "border-gray-200 text-gray-700 hover:bg-gray-50 dark:border-white/15 dark:text-white/80 dark:hover:bg-white/5 [&_svg]:text-gray-500 dark:[&_svg]:text-white/55",
                     )
                   : cn(
                       active
-                        ? "tkad-neon-cta-clean text-white [&_svg]:text-white"
+                        ? qpSidebarCta
                         : "text-gray-700 hover:bg-gray-50 dark:text-white/80 dark:hover:bg-white/5 [&_svg]:text-gray-500 dark:[&_svg]:text-white/55",
                     ),
             )}

@@ -294,7 +294,7 @@
   color: var(--hermes) !important;
 }
 
-/* P1 chrome — 단색 CTA (네온 그라데이션·glow 없음). 매체 상세의 .tkad-neon-cta 는 유지 */
+/* P1/P2-0 chrome — 단색 CTA (네온 그라데이션·glow 없음) */
 .tkad-qp-cta {
   background: var(--qp-accent);
   color: #fff;
@@ -823,16 +823,47 @@ html:not(.dark) .tkad-neon-grid {
     0 0 18px rgba(124, 58, 237, 0.12),
     0 0 12px rgba(34, 211, 238, 0.07);
 }
+/* P2-0: 클래스명 유지, 값은 Quiet Professional 단색 액센트.
+ * 매체 상세(.tkad-media-page)만 아래 legacy 네온 오버라이드 유지 (P2-3). */
 .tkad-neon-cta {
+  background: var(--qp-accent);
+  background-image: none;
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--qp-accent) 85%, black);
+  box-shadow: none;
+}
+.tkad-neon-cta:hover {
+  background: var(--qp-accent-hover);
+  background-image: none;
+  box-shadow: none;
+}
+
+.tkad-neon-cta-clean {
+  background: var(--qp-accent);
+  background-image: none;
+  color: #fff;
+  border: 1px solid color-mix(in srgb, var(--qp-accent) 85%, black);
+  box-shadow: none;
+}
+.tkad-neon-cta-clean:hover {
+  background: var(--qp-accent-hover);
+  background-image: none;
+  box-shadow: none;
+}
+
+/* P2-3 유예: 매체 상세 페이지 sticky/proposal 등만 기존 네온 그라데이션 유지 */
+.tkad-media-page .tkad-neon-cta {
   background: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%);
+  border-color: rgba(255, 255, 255, 0.08);
   box-shadow:
     0 40px 160px rgba(0, 0, 0, 0.72),
     0 0 0 1px rgba(255, 255, 255, 0.08),
     0 0 30px rgba(168, 85, 247, 0.16),
-    0 0 18px rgba(34, 211, 238, 0.10),
+    0 0 18px rgba(34, 211, 238, 0.1),
     0 0 18px rgba(236, 72, 153, 0.075);
 }
-.tkad-neon-cta:hover {
+.tkad-media-page .tkad-neon-cta:hover {
+  background: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%);
   box-shadow:
     0 52px 190px rgba(0, 0, 0, 0.78),
     0 0 0 1px rgba(255, 255, 255, 0.11),
@@ -840,10 +871,13 @@ html:not(.dark) .tkad-neon-grid {
     0 0 28px rgba(34, 211, 238, 0.16),
     0 0 28px rgba(236, 72, 153, 0.12);
 }
-
-/* CTA variant — cleaner, less gradient weight */
-.tkad-neon-cta-clean {
-  background: linear-gradient(135deg, rgba(168, 85, 247, 0.95) 0%, rgba(34, 211, 238, 0.9) 55%, rgba(236, 72, 153, 0.85) 100%);
+.tkad-media-page .tkad-neon-cta-clean {
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.95) 0%,
+    rgba(34, 211, 238, 0.9) 55%,
+    rgba(236, 72, 153, 0.85) 100%
+  );
   border: 1px solid rgba(255, 255, 255, 0.12);
   box-shadow:
     0 34px 140px rgba(0, 0, 0, 0.78),
@@ -851,7 +885,13 @@ html:not(.dark) .tkad-neon-grid {
     0 0 24px rgba(168, 85, 247, 0.14),
     0 0 14px rgba(34, 211, 238, 0.09);
 }
-.tkad-neon-cta-clean:hover {
+.tkad-media-page .tkad-neon-cta-clean:hover {
+  background: linear-gradient(
+    135deg,
+    rgba(168, 85, 247, 0.95) 0%,
+    rgba(34, 211, 238, 0.9) 55%,
+    rgba(236, 72, 153, 0.85) 100%
+  );
   box-shadow:
     0 44px 170px rgba(0, 0, 0, 0.8),
     0 0 0 1px rgba(255, 255, 255, 0.09),
@@ -899,11 +939,11 @@ html:not(.dark) .tkad-neon-grid {
     inset 0 0 12px rgba(34, 211, 238, 0.08);
 }
 
-/* Neon landing scope: keep rest of app stable */
+/* Landing scope — P2-0: accent tokens → Quiet Professional (클래스명 유지, ~70 파일 무수정) */
 .tkad-landing-neon {
-  --accent: #a855f7;
-  --cta: #22d3ee;
-  --ring: #a855f7;
+  --accent: var(--qp-accent);
+  --cta: var(--qp-accent);
+  --ring: var(--qp-accent-ring);
 }
 
 /* ── 홈 낮 모드: 에디토리얼 라이트 — 섹션 카드 분리·여백 리듬 ── */
@@ -2802,35 +2842,20 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
   color: var(--home-ink-soft) !important;
 }
 
-/* 라이트 모드 CTA: 과한 블랙·퍼플 글로우 대신 정제된 리프트 */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean {
-  border-color: rgb(255 255 255 / 0.35) !important;
-  box-shadow:
-    0 2px 0 rgb(255 255 255 / 0.2) inset,
-    0 14px 36px rgb(91 33 182 / 0.22),
-    0 6px 14px rgb(15 118 110 / 0.14) !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean:hover {
-  box-shadow:
-    0 2px 0 rgb(255 255 255 / 0.25) inset,
-    0 18px 44px rgb(91 33 182 / 0.28),
-    0 8px 18px rgb(15 118 110 / 0.18) !important;
-}
-
+/* 라이트 모드 CTA: P2-0 단색 액센트 — 퍼플/시안 글로우 제거 */
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean,
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta {
-  border-color: rgb(255 255 255 / 0.22) !important;
-  box-shadow:
-    0 2px 0 rgb(255 255 255 / 0.18) inset,
-    0 12px 32px rgb(91 33 182 / 0.2),
-    0 4px 12px rgb(15 118 110 / 0.12) !important;
+  background: var(--qp-accent) !important;
+  background-image: none !important;
+  border-color: color-mix(in srgb, var(--qp-accent) 85%, black) !important;
+  box-shadow: none !important;
 }
 
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean:hover,
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta:hover {
-  box-shadow:
-    0 2px 0 rgb(255 255 255 / 0.22) inset,
-    0 16px 40px rgb(91 33 182 / 0.26),
-    0 6px 16px rgb(15 118 110 / 0.16) !important;
+  background: var(--qp-accent-hover) !important;
+  background-image: none !important;
+  box-shadow: none !important;
 }
 
 /* 홈 라이트: 캐러셀 매체 카드 — 히어로와 동일 --home-card-* 언어 */
