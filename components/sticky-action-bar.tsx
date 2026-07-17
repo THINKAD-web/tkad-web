@@ -50,8 +50,12 @@ export const STICKY_ACTION_BAR_ROW =
 export const STICKY_ACTION_BAR_BTN =
   "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold leading-none transition active:scale-95";
 
-/** 보조 액션 — 아이콘만 (밀도 완화, 폰트 축소 없음) */
-export const STICKY_ACTION_BAR_BTN_ICON = "min-w-8 px-2";
+/**
+ * 보조 액션(플랜/비우기/해제) — 짧은 라벨 + 다크 idle 면 강화
+ * (비교/견적은 BTN_IDLE·PRIMARY 유지 — twMerge로 dark:* 가 IDLE 을 덮음)
+ */
+export const STICKY_ACTION_BAR_BTN_ICON =
+  "gap-0.5 px-1.5 dark:border-white/35 dark:bg-white/28 dark:text-white";
 
 export const STICKY_ACTION_BAR_BTN_IDLE =
   "border-gray-200 bg-white text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90";

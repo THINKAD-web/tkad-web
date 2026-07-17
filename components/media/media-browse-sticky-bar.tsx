@@ -86,7 +86,12 @@ export function MediaBrowseStickyBar({
                 aria-label={isKo ? "플랜" : "Plan"}
                 title={isKo ? "담은 매체 보기·개별 해제" : "View saved media"}
               >
-                <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <LayoutList
+                  className="h-3.5 w-3.5 shrink-0"
+                  strokeWidth={2.5}
+                  aria-hidden
+                />
+                {isKo ? "플랜" : "Plan"}
               </button>
               <button
                 type="button"
@@ -99,7 +104,12 @@ export function MediaBrowseStickyBar({
                 aria-label={isKo ? "담기해제" : "Clear saved"}
                 title={isKo ? "담기해제" : "Clear saved"}
               >
-                <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <Trash2
+                  className="h-3.5 w-3.5 shrink-0"
+                  strokeWidth={2.5}
+                  aria-hidden
+                />
+                {isKo ? "비우기" : "Empty"}
               </button>
             </>
           ) : null}
@@ -117,7 +127,12 @@ export function MediaBrowseStickyBar({
                 aria-label={isKo ? "비교해제" : "Clear compare"}
                 title={isKo ? "비교해제" : "Clear compare"}
               >
-                <X className="h-3.5 w-3.5 shrink-0" aria-hidden />
+                <X
+                  className="h-3.5 w-3.5 shrink-0"
+                  strokeWidth={2.5}
+                  aria-hidden
+                />
+                {isKo ? "해제" : "Clear"}
               </button>
               {canCompare ? (
                 <Link
