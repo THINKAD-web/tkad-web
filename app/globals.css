@@ -207,13 +207,8 @@
   --bx-fg-muted: var(--color-bx-gray-dim);
   --bx-border: var(--color-bx-black);
 
-  /* Home accent text — default (night/neon) */
-  --home-accent-gradient: linear-gradient(
-    135deg,
-    #a855f7 0%,
-    #22d3ee 45%,
-    #ec4899 100%
-  );
+  /* Home accent text — quiet-professional solid (카드 가격·포인트 텍스트) */
+  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
 }
 
 /* BrutalNav: sm:h-16 / desktop min-h-16 (64px) */
@@ -989,13 +984,8 @@ html:not(.dark) .tkad-neon-grid {
     #9d174d 100%
   );
 
-  /* 포인트 텍스트 — 다크(네온)와 동일: 보라 → 시안 → 핑크 */
-  --home-accent-gradient: linear-gradient(
-    135deg,
-    #a855f7 0%,
-    #22d3ee 45%,
-    #ec4899 100%
-  );
+  /* 포인트 텍스트 — qp 단색 */
+  --home-accent-gradient: linear-gradient(135deg, #ff6200 0%, #ff6200 100%);
   --home-panel-label: #64748b;
   /* 히어로 우측 ‘aside’: 본문 H1보다 한 단계 부드러운 잉크 */
   --home-panel-value: #334155;
@@ -1173,28 +1163,12 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
   min-height: 0;
 }
 
-/* 공통 포인트 텍스트 (홈/섹션 헤드에서 재사용) */
+/* 공통 포인트 텍스트 (홈/섹션 헤드·카드 가격) — qp 단색 */
 .tkad-home-accent-text {
   display: inline-block;
-  background-image: var(
-    --home-accent-gradient,
-    linear-gradient(135deg, #0b1f4a 0%, #123a8a 18%, #2b2aa8 38%, #5b21b6 54%, #0b7a6f 76%, #9d174d 100%)
-  ) !important;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  -webkit-background-clip: text;
-  -moz-background-clip: text;
-  background-clip: text;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
-  -moz-text-fill-color: transparent;
-}
-
-@supports not (-webkit-background-clip: text) {
-  .tkad-home-accent-text {
-    background-image: none;
-    color: var(--home-ink, #0b1f4a);
-  }
+  background-image: none !important;
+  -webkit-text-fill-color: currentColor !important;
+  color: var(--qp-accent, var(--hermes, #ff6200)) !important;
 }
 
 /* ── PR A — 역할 기반 타이포 유틸 (발견하기·기획하기 공통) ──
@@ -1393,10 +1367,14 @@ html.dark .tkad-media-detail-hero,
   color-scheme: dark;
 }
 
-.tkad-media-detail-hero .bg-clip-text,
-.tkad-media-detail-hero .tkad-home-accent-text {
+.tkad-media-detail-hero .bg-clip-text {
   -webkit-text-fill-color: transparent !important;
   color: transparent !important;
+}
+.tkad-media-detail-hero .tkad-home-accent-text {
+  background-image: none !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
+  color: var(--qp-accent) !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
@@ -1461,15 +1439,13 @@ html.dark .tkad-media-detail-hero,
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-/* 라이트에서도 다크와 동일 네온 그라데이션 (변수 + 클립 명시 — 상위 fill·text-shadow 분리) */
+/* 라이트 neon surface — qp 단색 액센트 */
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-home-accent-text {
-  background-image: var(--home-accent-gradient) !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--qp-accent) !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
   text-shadow: none !important;
 }
 
@@ -1500,27 +1476,23 @@ html.dark .tkad-media-detail-hero,
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.tkad-home-accent-text {
-  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
-  background-repeat: no-repeat !important;
-  background-size: 100% 100% !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--qp-accent) !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
   text-shadow: none !important;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
-    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+  filter: none;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.bg-clip-text {
-  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--qp-accent) !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
   text-shadow: none !important;
-  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.75))
-    drop-shadow(0 1px 2px rgb(15 23 42 / 0.08));
+  filter: none;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border {
@@ -1538,11 +1510,11 @@ html.dark .tkad-media-detail-hero,
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border span.bg-clip-text {
-  background-image: linear-gradient(135deg, #a855f7 0%, #22d3ee 45%, #ec4899 100%) !important;
-  -webkit-background-clip: text !important;
-  background-clip: text !important;
-  color: transparent !important;
-  -webkit-text-fill-color: transparent !important;
+  background-image: none !important;
+  -webkit-background-clip: unset !important;
+  background-clip: unset !important;
+  color: var(--qp-accent) !important;
+  -webkit-text-fill-color: var(--qp-accent) !important;
   text-shadow: none !important;
 }
 

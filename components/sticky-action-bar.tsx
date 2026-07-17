@@ -45,10 +45,13 @@ export const FLOATING_SELECTION_BAR_COMPACT_BOTTOM_CLASS =
 
 /** 하단 액션 바 — 페이지 간 동일 한 줄 버튼 토큰 */
 export const STICKY_ACTION_BAR_ROW =
-  "mx-auto flex w-full max-w-lg items-center gap-1.5";
+  "mx-auto flex w-full max-w-lg items-center gap-1.5 overflow-x-auto [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden";
 
 export const STICKY_ACTION_BAR_BTN =
   "inline-flex h-8 shrink-0 items-center justify-center gap-1 rounded-lg border px-2 text-[11px] font-semibold leading-none transition active:scale-95";
+
+/** 보조 액션 — 아이콘만 (밀도 완화, 폰트 축소 없음) */
+export const STICKY_ACTION_BAR_BTN_ICON = "min-w-8 px-2";
 
 export const STICKY_ACTION_BAR_BTN_IDLE =
   "border-gray-200 bg-white text-gray-800 dark:border-white/12 dark:bg-white/10 dark:text-white/90";
@@ -57,7 +60,7 @@ export const STICKY_ACTION_BAR_BTN_PRIMARY =
   "border-0 bg-[color:var(--qp-accent)] font-semibold text-white hover:bg-[color:var(--qp-accent-hover)]";
 
 export const STICKY_ACTION_BAR_BTN_VIOLET =
-  "border-violet-500/40 bg-violet-500 text-white shadow-sm shadow-violet-500/25";
+  "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)] text-white shadow-sm shadow-[color:var(--qp-accent)]/25";
 
 export const STICKY_ACTION_BAR_BTN_DISABLED =
   "border-gray-200 bg-white text-gray-800 opacity-45 dark:border-white/12 dark:bg-white/10 dark:text-white/90";

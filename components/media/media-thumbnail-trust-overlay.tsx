@@ -23,7 +23,7 @@ const chipBase =
 
 const verifiedClass = cn(
   chipBase,
-  "bg-gradient-to-r from-violet-500/95 via-cyan-400/95 to-fuchsia-500/90 uppercase text-white shadow-[0_4px_16px_rgba(124,58,237,0.35)]",
+  "bg-[color:var(--qp-accent)] uppercase text-white shadow-none",
 );
 
 const instantClass = cn(

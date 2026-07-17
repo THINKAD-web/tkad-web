@@ -2,12 +2,13 @@
 
 import { useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import { GitCompare, LayoutList, X } from "lucide-react";
+import { GitCompare, LayoutList, Trash2, X } from "lucide-react";
 import { BtnBlock } from "@/components/brutalist";
 import { FloatingSelectionBar } from "@/components/floating-selection-bar";
 import {
   STICKY_ACTION_BAR_BTN,
   STICKY_ACTION_BAR_BTN_DISABLED,
+  STICKY_ACTION_BAR_BTN_ICON,
   STICKY_ACTION_BAR_BTN_IDLE,
   STICKY_ACTION_BAR_BTN_PRIMARY,
   STICKY_ACTION_BAR_ROW,
@@ -100,17 +101,28 @@ export default function CompareBar({
                 <button
                   type="button"
                   onClick={() => setPlanSheetOpen(true)}
-                  className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                  className={cn(
+                    STICKY_ACTION_BAR_BTN,
+                    STICKY_ACTION_BAR_BTN_IDLE,
+                    STICKY_ACTION_BAR_BTN_ICON,
+                  )}
+                  aria-label={tPlan("cart")}
+                  title={tPlan("cart")}
                 >
-                  <LayoutList className="h-3 w-3 shrink-0" aria-hidden />
-                  {tPlan("cart")}
+                  <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 </button>
                 <button
                   type="button"
                   onClick={clearPlanCart}
-                  className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                  className={cn(
+                    STICKY_ACTION_BAR_BTN,
+                    STICKY_ACTION_BAR_BTN_IDLE,
+                    STICKY_ACTION_BAR_BTN_ICON,
+                  )}
+                  aria-label={isKo ? "담기해제" : "Clear saved"}
+                  title={isKo ? "담기해제" : "Clear saved"}
                 >
-                  {isKo ? "담기해제" : "Clear saved"}
+                  <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 </button>
               </>
             ) : null}
@@ -120,9 +132,15 @@ export default function CompareBar({
                 <button
                   type="button"
                   onClick={onClear}
-                  className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                  className={cn(
+                    STICKY_ACTION_BAR_BTN,
+                    STICKY_ACTION_BAR_BTN_IDLE,
+                    STICKY_ACTION_BAR_BTN_ICON,
+                  )}
+                  aria-label={t("compareFloatingClear")}
+                  title={t("compareFloatingClear")}
                 >
-                  {t("compareFloatingClear")}
+                  <X className="h-3.5 w-3.5 shrink-0" aria-hidden />
                 </button>
                 {canCompare ? (
                   <Link

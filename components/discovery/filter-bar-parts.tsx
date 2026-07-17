@@ -60,7 +60,7 @@ export function DiscoveryResultSummary({
             <button
               type="button"
               onClick={onSelectedSummaryClick}
-              className="tkad-type-meta font-medium text-tkad-accent underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+              className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
               {selectionVariant === "plan"
                 ? isKo
@@ -71,7 +71,7 @@ export function DiscoveryResultSummary({
                   : `${selectedCount} selected · view`}
             </button>
           ) : (
-            <span className="tkad-type-meta font-medium text-tkad-accent">
+            <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
               {selectionVariant === "plan"
                 ? isKo
                   ? `선택됨 ${selectedCount}개`
@@ -87,12 +87,12 @@ export function DiscoveryResultSummary({
             <button
               type="button"
               onClick={onCartSummaryClick}
-              className="tkad-type-meta tkad-home-accent-text font-medium underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+              className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
               {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
             </button>
           ) : (
-            <span className="tkad-type-meta tkad-home-accent-text font-medium">
+            <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
               {isKo ? `담김 ${cartCount}` : `${cartCount} in cart`}
             </span>
           )
@@ -102,12 +102,12 @@ export function DiscoveryResultSummary({
             <button
               type="button"
               onClick={onCompareSummaryClick}
-              className="tkad-type-meta tkad-home-accent-text font-medium underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+              className="tkad-type-meta font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
             >
               {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
             </button>
           ) : (
-            <span className="tkad-type-meta tkad-home-accent-text font-medium">
+            <span className="tkad-type-meta font-medium text-[color:var(--qp-accent)]">
               {isKo ? `비교 ${compareCount}` : `${compareCount} compare`}
             </span>
           )

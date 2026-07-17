@@ -1,11 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { GitCompare, LayoutList } from "lucide-react";
+import { GitCompare, LayoutList, Trash2, X } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import {
   STICKY_ACTION_BAR_BTN,
   STICKY_ACTION_BAR_BTN_DISABLED,
+  STICKY_ACTION_BAR_BTN_ICON,
   STICKY_ACTION_BAR_BTN_IDLE,
   STICKY_ACTION_BAR_BTN_PRIMARY,
   STICKY_ACTION_BAR_ROW,
@@ -77,18 +78,28 @@ export function MediaBrowseStickyBar({
               <button
                 type="button"
                 onClick={() => setPlanSheetOpen(true)}
-                className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  STICKY_ACTION_BAR_BTN_ICON,
+                )}
+                aria-label={isKo ? "플랜" : "Plan"}
                 title={isKo ? "담은 매체 보기·개별 해제" : "View saved media"}
               >
-                <LayoutList className="h-3 w-3 shrink-0" aria-hidden />
-                {isKo ? "플랜" : "Plan"}
+                <LayoutList className="h-3.5 w-3.5 shrink-0" aria-hidden />
               </button>
               <button
                 type="button"
                 onClick={clearPlanCart}
-                className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  STICKY_ACTION_BAR_BTN_ICON,
+                )}
+                aria-label={isKo ? "담기해제" : "Clear saved"}
+                title={isKo ? "담기해제" : "Clear saved"}
               >
-                {isKo ? "담기해제" : "Clear saved"}
+                <Trash2 className="h-3.5 w-3.5 shrink-0" aria-hidden />
               </button>
             </>
           ) : null}
@@ -98,9 +109,15 @@ export function MediaBrowseStickyBar({
               <button
                 type="button"
                 onClick={onClearCompare}
-                className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE)}
+                className={cn(
+                  STICKY_ACTION_BAR_BTN,
+                  STICKY_ACTION_BAR_BTN_IDLE,
+                  STICKY_ACTION_BAR_BTN_ICON,
+                )}
+                aria-label={isKo ? "비교해제" : "Clear compare"}
+                title={isKo ? "비교해제" : "Clear compare"}
               >
-                {isKo ? "비교해제" : "Clear compare"}
+                <X className="h-3.5 w-3.5 shrink-0" aria-hidden />
               </button>
               {canCompare ? (
                 <Link
@@ -114,7 +131,10 @@ export function MediaBrowseStickyBar({
                 <button
                   type="button"
                   disabled
-                  className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_DISABLED)}
+                  className={cn(
+                    STICKY_ACTION_BAR_BTN,
+                    STICKY_ACTION_BAR_BTN_DISABLED,
+                  )}
                 >
                   <GitCompare className="h-3 w-3 shrink-0" aria-hidden />
                   {isKo ? "비교" : "Compare"}

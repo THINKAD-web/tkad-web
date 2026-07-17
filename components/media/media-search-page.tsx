@@ -1120,7 +1120,7 @@ function MediaSearchPageInner({
             <div className="mt-8 border-t border-gray-200/80 pt-4 text-center dark:border-white/10">
               <Link
                 href="/media/targets"
-                className="tkad-type-meta inline-flex items-center gap-1 font-medium text-tkad-accent underline decoration-tkad-accent/50 underline-offset-2 hover:opacity-90"
+                className="tkad-type-meta inline-flex items-center gap-1 font-medium text-[color:var(--qp-accent)] underline decoration-[color:var(--qp-accent)]/50 underline-offset-2 hover:opacity-90"
                 data-screenshot="media-targets-footer-link"
               >
                 {isKo ? "캠페인 목적별로 매체 찾기" : "Find media by campaign goal"}

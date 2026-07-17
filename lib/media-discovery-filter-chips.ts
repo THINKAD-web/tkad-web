@@ -16,7 +16,7 @@ import {
 } from "lucide-react";
 
 export const MEDIA_CHIP_ACTIVE =
-  "tkad-neon-cta-clean text-white shadow-[0_4px_16px_rgba(124,58,237,0.25)]";
+  "tkad-qp-cta text-white shadow-none";
 
 export const MEDIA_CHIP_INACTIVE =
   "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70";
