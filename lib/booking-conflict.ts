@@ -14,11 +14,16 @@
  * 주의: 이 헬퍼는 *순수 조회*만 수행. 호출자(API 라우트)가 응답·강제 등록 정책을 결정.
  */
 
-import type { MediaBooking, PrismaClient } from "@prisma/client";
+import type { MediaBooking, Prisma, PrismaClient } from "@prisma/client";
 
 /** 충돌 판정에 포함되는 status — UI 와 동기화 필요 */
 export const CONFLICT_BLOCKING_STATUSES = ["tentative", "confirmed"] as const;
 export type ConflictBlockingStatus = (typeof CONFLICT_BLOCKING_STATUSES)[number];
+
+/** PrismaClient 또는 트랜잭션 클라이언트 */
+export type BookingConflictDb = {
+  mediaBooking: PrismaClient["mediaBooking"];
+};
 
 export type ConflictCheckParams = {
   mediaId: string;
@@ -26,6 +31,8 @@ export type ConflictCheckParams = {
   endsAt: Date;
   /** 자기 자신은 충돌 판정에서 제외 (PATCH 시 사용) */
   excludeBookingId?: string;
+  /** 동일 OoH 견적의 기존 홀드는 충돌에서 제외 (재시도·idempotent) */
+  excludeOohQuoteId?: string;
 };
 
 /**
@@ -33,8 +40,14 @@ export type ConflictCheckParams = {
  * 빈 배열이면 충돌 없음.
  */
 export async function findConflictingBookings(
-  db: PrismaClient,
-  { mediaId, startsAt, endsAt, excludeBookingId }: ConflictCheckParams,
+  db: BookingConflictDb,
+  {
+    mediaId,
+    startsAt,
+    endsAt,
+    excludeBookingId,
+    excludeOohQuoteId,
+  }: ConflictCheckParams,
 ): Promise<MediaBooking[]> {
   if (!(startsAt instanceof Date) || !(endsAt instanceof Date)) {
     throw new Error("startsAt / endsAt 는 Date 객체여야 합니다.");
@@ -46,6 +59,10 @@ export async function findConflictingBookings(
     throw new Error("endsAt 는 startsAt 보다 커야 합니다.");
   }
 
+  const notFilters: Prisma.MediaBookingWhereInput[] = [];
+  if (excludeBookingId) notFilters.push({ id: excludeBookingId });
+  if (excludeOohQuoteId) notFilters.push({ oohQuoteId: excludeOohQuoteId });
+
   return db.mediaBooking.findMany({
     where: {
       mediaId,
@@ -53,7 +70,7 @@ export async function findConflictingBookings(
       // a.start < b.end && a.end > b.start
       startsAt: { lt: endsAt },
       endsAt: { gt: startsAt },
-      ...(excludeBookingId ? { NOT: { id: excludeBookingId } } : {}),
+      ...(notFilters.length > 0 ? { NOT: notFilters } : {}),
     },
     orderBy: { startsAt: "asc" },
   });

@@ -5,6 +5,7 @@ import {
   apiZodError,
 } from "@/lib/api-response";
 import { requireMediaOwner } from "@/lib/media-owner-guard";
+import { isBookingHoldConflictError } from "@/lib/ooh-quote-booking-hold";
 import { respondPriceNegotiation } from "@/lib/price-negotiation";
 
 export const runtime = "nodejs";
@@ -31,24 +32,34 @@ export async function PATCH(request: Request, { params }: Params) {
   const parsed = Body.safeParse(raw);
   if (!parsed.success) return apiZodError(parsed.error);
 
-  const result = await respondPriceNegotiation({
-    id,
-    ownerUserId: auth.user.id,
-    accept: parsed.data.accept,
-    ownerNote: parsed.data.ownerNote,
-  });
-
-  if (!result.ok) {
-    return apiError("NOT_FOUND", 404, {
-      message: "요청을 찾을 수 없거나 이미 처리되었습니다.",
+  try {
+    const result = await respondPriceNegotiation({
+      id,
+      ownerUserId: auth.user.id,
+      accept: parsed.data.accept,
+      ownerNote: parsed.data.ownerNote,
     });
-  }
 
-  return apiOk({
-    id,
-    status: parsed.data.accept ? "ACCEPTED" : "REJECTED",
-    quoteId: result.quoteId ?? null,
-    contractUrl: result.contractUrl ?? null,
-    previewUrl: result.previewUrl ?? null,
-  });
+    if (!result.ok) {
+      return apiError("NOT_FOUND", 404, {
+        message: "요청을 찾을 수 없거나 이미 처리되었습니다.",
+      });
+    }
+
+    return apiOk({
+      id,
+      status: parsed.data.accept ? "ACCEPTED" : "REJECTED",
+      quoteId: result.quoteId ?? null,
+      contractUrl: result.contractUrl ?? null,
+      previewUrl: result.previewUrl ?? null,
+    });
+  } catch (e) {
+    if (isBookingHoldConflictError(e)) {
+      return apiError("BOOKING_CONFLICT", 409, {
+        message: e.message,
+        conflicts: e.conflicts,
+      });
+    }
+    throw e;
+  }
 }

@@ -3,6 +3,7 @@ import { OoHQuoteStatus } from "@prisma/client";
 import { syncPipelineStageForOoHQuote } from "@/lib/crm-pipeline-sync";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { canWithdrawProceed } from "@/lib/ooh-quote";
+import { releaseHoldsForQuote } from "@/lib/ooh-quote-booking-hold";
 import { rateLimit } from "@/lib/rate-limit";
 
 export const dynamic = "force-dynamic";
@@ -60,15 +61,22 @@ export async function POST(
       );
     }
 
-    const result = await db.ooHQuote.updateMany({
-      where: {
-        id,
-        status: OoHQuoteStatus.booking_requested,
-      },
-      data: {
-        status: OoHQuoteStatus.sent,
-        bookingRequestedAt: null,
-      },
+    const result = await db.$transaction(async (tx) => {
+      const updated = await tx.ooHQuote.updateMany({
+        where: {
+          id,
+          status: OoHQuoteStatus.booking_requested,
+        },
+        data: {
+          status: OoHQuoteStatus.sent,
+          bookingRequestedAt: null,
+        },
+      });
+      if (updated.count > 0) {
+        // booking_requested 단계에는 홀드가 없을 수 있음 — idempotent no-op
+        await releaseHoldsForQuote(tx, id, "withdraw-proceed");
+      }
+      return updated;
     });
 
     if (result.count === 0) {

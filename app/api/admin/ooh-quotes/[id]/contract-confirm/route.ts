@@ -9,6 +9,7 @@ import { getPrisma } from "@/lib/prisma";
 import { canAdminContractConfirm } from "@/lib/ooh-quote";
 import { sendEmail } from "@/lib/email/client";
 import { notifyCampaignConfirmed } from "@/lib/kakao-alimtalk-notify";
+import { promoteHoldsToConfirmed } from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -51,23 +52,25 @@ export async function PATCH(
     },
   });
 
-  await db.ooHQuote.update({
-    where: { id },
-    data: {
-      status: OoHQuoteStatus.contract_confirmed,
-      contractConfirmedAt: new Date(),
-      campaignId: campaign.id,
-    },
-  });
-
-  await db.oohContract.updateMany({
-    where: {
-      ooHQuoteId: id,
-      status: {
-        in: [OohContractStatus.signed, OohContractStatus.confirmed],
+  await db.$transaction(async (tx) => {
+    await tx.ooHQuote.update({
+      where: { id },
+      data: {
+        status: OoHQuoteStatus.contract_confirmed,
+        contractConfirmedAt: new Date(),
+        campaignId: campaign.id,
       },
-    },
-    data: { status: OohContractStatus.confirmed },
+    });
+    await promoteHoldsToConfirmed(tx, id);
+    await tx.oohContract.updateMany({
+      where: {
+        ooHQuoteId: id,
+        status: {
+          in: [OohContractStatus.signed, OohContractStatus.confirmed],
+        },
+      },
+      data: { status: OohContractStatus.confirmed },
+    });
   });
 
   const isKo = row.locale !== "en";

@@ -118,6 +118,10 @@ export default function AdminOohQuotesClient() {
   const [busyId, setBusyId] = useState<string | null>(null);
   const [payOpenId, setPayOpenId] = useState<string | null>(null);
   const [payAmount, setPayAmount] = useState("");
+  const [bookingConflict, setBookingConflict] = useState<{
+    quoteId: string;
+    conflicts: Array<{ id: string; summary: string }>;
+  } | null>(null);
   const [cancelOpenId, setCancelOpenId] = useState<string | null>(null);
   const [cancelReason, setCancelReason] = useState("");
   const [expandedId, setExpandedId] = useState<string | null>(null);
@@ -274,6 +278,37 @@ export default function AdminOohQuotesClient() {
     }
   };
 
+  const confirmBooking = async (quoteId: string, force = false) => {
+    const res = await fetch(
+      `/api/admin/ooh-quotes/${quoteId}/booking-confirm`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ force }),
+      },
+    );
+    const raw = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      code?: string;
+      conflicts?: Array<{ id: string; summary: string }>;
+    };
+    if (res.status === 409 && raw.code === "BOOKING_CONFLICT") {
+      setBookingConflict({
+        quoteId,
+        conflicts: (raw.conflicts ?? []).map((c) => ({
+          id: c.id,
+          summary: c.summary,
+        })),
+      });
+      throw new Error(raw.error ?? t("bookingConflictTitle"));
+    }
+    if (!res.ok) {
+      throw new Error(raw.error ?? t("fail"));
+    }
+    setBookingConflict(null);
+  };
+
   const run = async (id: string, fn: () => Promise<void>) => {
     setBusyId(id);
     try {
@@ -350,9 +385,7 @@ export default function AdminOohQuotesClient() {
           className={`w-full bg-navy text-white hover:bg-navy/90 ${touchBtn}`}
           disabled={busyId === row.id}
           onClick={() =>
-            void run(row.id, () =>
-              act(`/api/admin/ooh-quotes/${row.id}/booking-confirm`, "PATCH"),
-            )
+            void run(row.id, () => confirmBooking(row.id, false))
           }
         >
           {t("bookingConfirm")}
@@ -462,6 +495,48 @@ export default function AdminOohQuotesClient() {
         <h1 className="text-2xl font-bold tracking-tight text-foreground">{t("title")}</h1>
         <p className="text-sm text-muted-foreground">{t("subtitle")}</p>
       </div>
+
+      {bookingConflict ? (
+        <div
+          role="alert"
+          className="rounded-xl border border-amber-300 bg-amber-50 p-4 text-sm dark:border-amber-500/40 dark:bg-amber-500/10"
+        >
+          <p className="font-semibold text-amber-950 dark:text-amber-100">
+            {t("bookingConflictTitle")}
+          </p>
+          <p className="mt-1 text-amber-900/80 dark:text-amber-100/80">
+            {t("bookingConflictHint")}
+          </p>
+          <ul className="mt-2 list-inside list-disc space-y-1 text-amber-950 dark:text-amber-50">
+            {bookingConflict.conflicts.map((c) => (
+              <li key={c.id}>{c.summary}</li>
+            ))}
+          </ul>
+          <div className="mt-3 flex flex-wrap gap-2">
+            <Button
+              type="button"
+              size="sm"
+              className="bg-navy text-white hover:bg-navy/90"
+              disabled={busyId === bookingConflict.quoteId}
+              onClick={() =>
+                void run(bookingConflict.quoteId, () =>
+                  confirmBooking(bookingConflict.quoteId, true),
+                )
+              }
+            >
+              {t("bookingForceConfirm")}
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              variant="outline"
+              onClick={() => setBookingConflict(null)}
+            >
+              {t("dismiss")}
+            </Button>
+          </div>
+        </div>
+      ) : null}
 
       <Card className={adminQuoteSectionCard}>
         <CardHeader className="pb-3">
@@ -823,10 +898,7 @@ export default function AdminOohQuotesClient() {
                               disabled={busyId === row.id}
                               onClick={() =>
                                 void run(row.id, () =>
-                                  act(
-                                    `/api/admin/ooh-quotes/${row.id}/booking-confirm`,
-                                    "PATCH",
-                                  ),
+                                  confirmBooking(row.id, false),
                                 )
                               }
                             >

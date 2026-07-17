@@ -1,5 +1,6 @@
 import { apiError, apiOk, apiServerError } from "@/lib/api-response";
 import { acceptChatRoomQuote } from "@/lib/chat-quote-flow";
+import { isBookingHoldConflictError } from "@/lib/ooh-quote-booking-hold";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { getCurrentUser } from "@/lib/user-session";
 
@@ -24,6 +25,12 @@ export async function POST(_req: Request, { params }: Params) {
     }
     return apiOk(result);
   } catch (e) {
+    if (isBookingHoldConflictError(e)) {
+      return apiError("BOOKING_CONFLICT", 409, {
+        message: e.message,
+        conflicts: e.conflicts,
+      });
+    }
     const msg = e instanceof Error ? e.message : String(e);
     if (msg === "NOT_CHAT_QUOTE") {
       return apiError("INVALID_QUOTE", 400);

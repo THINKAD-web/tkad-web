@@ -427,17 +427,22 @@ model MediaBooking {
   decidedByAdminId  String?   @map("decided_by_admin_id")
   /// 매체사가 설정한 집행 불가 구간 (`/media-owner` 캘린더)
   isOwnerBlock      Boolean   @default(false) @map("is_owner_block")
+  /// OoH 견적 부킹 확정 시 자동 홀드 연결 (#224)
+  oohQuoteId        String?   @map("ooh_quote_id")
   createdAt         DateTime  @default(now()) @map("created_at")
   updatedAt         DateTime  @updatedAt @map("updated_at")
 
   media       Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   campaign    Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   requestedBy User?     @relation("BookingRequester", fields: [requestedByUserId], references: [id], onDelete: SetNull)
+  oohQuote    OoHQuote? @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
 
   /// 충돌 쿼리(특정 매체 + 활성 status) 빈번 → 복합 인덱스
   @@index([mediaId, status])
   @@index([startsAt, endsAt])
   @@index([requestedByUserId])
+  @@index([mediaId, oohQuoteId])
+  @@index([oohQuoteId])
   @@map("media_bookings")
 }
 
@@ -1042,6 +1047,9 @@ model OoHQuote {
   mediaSelections Json? @map("media_selections")
 
   oohContract OohContract?
+
+  /// 부킹 확정 시 생성된 가용 캘린더 홀드 (#224)
+  mediaBookings MediaBooking[]
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

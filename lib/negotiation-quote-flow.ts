@@ -16,6 +16,7 @@ import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { createNotification } from "@/lib/notifications";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
+import { createHoldsForQuote } from "@/lib/ooh-quote-booking-hold";
 import { siteUrl } from "@/lib/seo";
 import {
   adminOohQuoteUrl,
@@ -155,7 +156,10 @@ export async function advanceNegotiationQuoteToContract(
       status: true,
       totalAmount: true,
       period: true,
+      periodKey: true,
       mediaIds: true,
+      startDate: true,
+      endDate: true,
       priceNegotiationId: true,
     },
   });
@@ -184,14 +188,17 @@ export async function advanceNegotiationQuoteToContract(
   }
 
   const now = new Date();
-  await db.ooHQuote.update({
-    where: { id: quoteId },
-    data: {
-      status: OoHQuoteStatus.booking_confirmed,
-      bookingRequestedAt: now,
-      bookingConfirmedAt: now,
-      quotePdfSentAt: now,
-    },
+  await db.$transaction(async (tx) => {
+    await createHoldsForQuote(tx, row);
+    await tx.ooHQuote.update({
+      where: { id: quoteId },
+      data: {
+        status: OoHQuoteStatus.booking_confirmed,
+        bookingRequestedAt: now,
+        bookingConfirmedAt: now,
+        quotePdfSentAt: now,
+      },
+    });
   });
 
   await ensureOohContractExists(db, quoteId, OoHQuoteStatus.booking_confirmed);

@@ -6,6 +6,11 @@ import { canAdminBookingConfirm } from "@/lib/ooh-quote";
 import { ensureOohContractExists } from "@/lib/ooh-contract-ensure";
 import { isEmailConfigured, sendEmail } from "@/lib/email/client";
 import { notifySlackBookingConfirm } from "@/lib/quote-slack-notify";
+import {
+  createHoldsForQuote,
+  isBookingHoldConflictError,
+  isQuoteHoldDatesRequiredError,
+} from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +31,14 @@ export async function PATCH(
   const deny = assertAdminDb(request);
   if (deny) return deny;
 
+  let force = false;
+  try {
+    const body = (await request.json()) as { force?: unknown };
+    force = body?.force === true;
+  } catch {
+    force = false;
+  }
+
   const { id } = await ctx.params;
   const db = getPrisma();
   const row = await db.ooHQuote.findUnique({ where: { id } });
@@ -34,47 +47,67 @@ export async function PATCH(
     return json({ error: "Invalid status for this action" }, 409);
   }
 
-  const updated = await db.ooHQuote.update({
-    where: { id },
-    data: {
-      status: OoHQuoteStatus.booking_confirmed,
-      bookingConfirmedAt: new Date(),
-    },
-  });
-
-  await ensureOohContractExists(db, id, updated.status);
-
-  void notifySlackBookingConfirm({
-    quoteId: id,
-    clientName: row.clientName,
-    totalAmountManwon: row.totalAmount,
-    period: row.period,
-    mediaCount: row.mediaIds.length,
-    source: "admin",
-  }).catch((e) => console.error("[booking-confirm] slack", e));
-
-  const to = row.clientEmail?.trim();
-  if (to && isEmailConfigured()) {
-    const isKo = row.locale !== "en";
-    const loc = row.locale === "en" ? "en" : "ko";
-    const url = `${siteBaseUrl()}/${loc}/quote/${id}/contract`;
-    try {
-      await sendEmail({
-        to,
-        subject: isKo
-          ? "[싱커드] 부킹 확정 — 전자계약서를 확인해 주세요"
-          : "[THINKAD] Booking confirmed — please review your e-contract",
-        text: isKo
-          ? `안녕하세요 ${row.clientName}님,\n\n부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.\n\n${url}\n\n감사합니다.`
-          : `Hello ${row.clientName},\n\nYour booking is confirmed. Please open the link to review and sign the contract:\n\n${url}\n\nThank you.`,
-        html: isKo
-          ? `<p>안녕하세요 <strong>${row.clientName}</strong>님,</p><p>부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.</p><p><a href="${url}">${url}</a></p>`
-          : `<p>Hello <strong>${row.clientName}</strong>,</p><p>Your booking is confirmed. Please review and sign:</p><p><a href="${url}">${url}</a></p>`,
+  try {
+    const updated = await db.$transaction(async (tx) => {
+      await createHoldsForQuote(tx, row, { force });
+      return tx.ooHQuote.update({
+        where: { id },
+        data: {
+          status: OoHQuoteStatus.booking_confirmed,
+          bookingConfirmedAt: new Date(),
+        },
       });
-    } catch (e) {
-      console.error("[booking-confirm] contract invite email", e);
-    }
-  }
+    });
 
-  return json({ ok: true, status: updated.status });
+    await ensureOohContractExists(db, id, updated.status);
+
+    void notifySlackBookingConfirm({
+      quoteId: id,
+      clientName: row.clientName,
+      totalAmountManwon: row.totalAmount,
+      period: row.period,
+      mediaCount: row.mediaIds.length,
+      source: "admin",
+    }).catch((e) => console.error("[booking-confirm] slack", e));
+
+    const to = row.clientEmail?.trim();
+    if (to && isEmailConfigured()) {
+      const isKo = row.locale !== "en";
+      const loc = row.locale === "en" ? "en" : "ko";
+      const url = `${siteBaseUrl()}/${loc}/quote/${id}/contract`;
+      try {
+        await sendEmail({
+          to,
+          subject: isKo
+            ? "[싱커드] 부킹 확정 — 전자계약서를 확인해 주세요"
+            : "[THINKAD] Booking confirmed — please review your e-contract",
+          text: isKo
+            ? `안녕하세요 ${row.clientName}님,\n\n부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.\n\n${url}\n\n감사합니다.`
+            : `Hello ${row.clientName},\n\nYour booking is confirmed. Please open the link to review and sign the contract:\n\n${url}\n\nThank you.`,
+          html: isKo
+            ? `<p>안녕하세요 <strong>${row.clientName}</strong>님,</p><p>부킹이 확정되었습니다. 아래 링크에서 계약서를 확인하고 전자서명을 진행해 주세요.</p><p><a href="${url}">${url}</a></p>`
+            : `<p>Hello <strong>${row.clientName}</strong>,</p><p>Your booking is confirmed. Please review and sign:</p><p><a href="${url}">${url}</a></p>`,
+        });
+      } catch (e) {
+        console.error("[booking-confirm] contract invite email", e);
+      }
+    }
+
+    return json({ ok: true, status: updated.status, forced: force });
+  } catch (e) {
+    if (isBookingHoldConflictError(e)) {
+      return json(
+        {
+          error: e.message,
+          code: e.code,
+          conflicts: e.conflicts,
+        },
+        409,
+      );
+    }
+    if (isQuoteHoldDatesRequiredError(e)) {
+      return json({ error: e.message, code: e.code }, 400);
+    }
+    throw e;
+  }
 }

@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { OoHQuoteStatus } from "@prisma/client";
 import { assertAdminDb, json } from "@/lib/admin-guard";
 import { getPrisma } from "@/lib/prisma";
+import { releaseHoldsForQuote } from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -40,12 +41,16 @@ export async function PATCH(
     return json({ error: "Campaign already linked; cancel in CRM" }, 409);
   }
 
-  const updated = await db.ooHQuote.update({
-    where: { id },
-    data: {
-      status: OoHQuoteStatus.cancelled,
-      cancelReason: reason,
-    },
+  const updated = await db.$transaction(async (tx) => {
+    const rowUpdated = await tx.ooHQuote.update({
+      where: { id },
+      data: {
+        status: OoHQuoteStatus.cancelled,
+        cancelReason: reason,
+      },
+    });
+    await releaseHoldsForQuote(tx, id, reason);
+    return rowUpdated;
   });
 
   return json({ ok: true, status: updated.status });
