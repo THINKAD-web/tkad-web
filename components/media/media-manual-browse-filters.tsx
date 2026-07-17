@@ -749,13 +749,13 @@ export function MediaManualBrowseFilters({
     return (
       <div data-screenshot="media-region-filter">
         {!includeHotspots ? (
-          <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+          <p className="mb-2 text-xs font-bold text-[color:var(--qp-accent)]">
             {isKo ? "어디서?" : "Where"}
           </p>
         ) : null}
         {includeHotspots && showHotspotRegions ? (
           <div className="mb-3">
-            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-cyan-600 dark:text-cyan-400">
+            <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
               {isKo ? "인기" : "Popular"}
             </p>
             <HotspotRegionChips
@@ -768,7 +768,7 @@ export function MediaManualBrowseFilters({
           </div>
         ) : null}
         {includeHotspots ? (
-          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-cyan-600/80 dark:text-cyan-400/80">
+          <p className="mb-1.5 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]/80">
             {isKo ? "전체 지역" : "All regions"}
           </p>
         ) : null}
@@ -841,7 +841,7 @@ export function MediaManualBrowseFilters({
 
   const renderUnifiedRegionSection = (wrap: boolean) => (
     <div ref={regionSectionRef}>
-      <p className="mb-2 text-xs font-bold text-cyan-600 dark:text-cyan-400">
+      <p className="mb-2 text-xs font-bold text-[color:var(--qp-accent)]">
         {isKo ? "어디서?" : "Where"}
       </p>
       {renderRegionAxis(wrap, { includeHotspots: showHotspotRegions })}
@@ -1103,7 +1103,7 @@ export function MediaManualBrowseFilters({
             : "Search name, region, type"
         }
         className={cn(
-          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-cyan-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30",
+          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30",
           mapToolbarCompact ? "py-2" : "py-3 sm:py-2.5",
         )}
       />

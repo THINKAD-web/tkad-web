@@ -178,7 +178,7 @@ export function MyPlanPageClient() {
       <div className={cn(MOBILE_CHROME_BOTTOM_PAD)}>
         <PageContainer>
           <div className="mb-8">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
               [ MY PLAN ]
             </p>
             <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
@@ -192,7 +192,7 @@ export function MyPlanPageClient() {
             <div className="mt-3">
               <Link
                 href="/my/plan/saved"
-                className="text-xs font-semibold text-violet-600 hover:text-violet-800 dark:text-violet-300 dark:hover:text-violet-100"
+                className="text-xs font-semibold text-[color:var(--qp-accent)] hover:opacity-90"
               >
                 {isKo ? `${tPlan("saved")} 보기 →` : `View ${tPlan("saved")} →`}
               </Link>
@@ -214,7 +214,7 @@ export function MyPlanPageClient() {
                 </Link>
                 <Link
                   href="/recommend"
-                  className="tkad-neon-cta inline-flex items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-3 text-sm font-bold text-white"
+                  className="tkad-qp-cta inline-flex items-center justify-center gap-2 rounded-2xl px-5 py-3 text-sm font-bold text-white"
                 >
                   <Sparkles className="h-4 w-4" />
                   {isKo ? "AI 추천 받기" : "AI recommend"}
@@ -272,7 +272,7 @@ export function MyPlanPageClient() {
                           className={cn(
                             "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
                             selectedIndustry === k
-                              ? "tkad-plan-cart-chip-active bg-cyan-600 shadow-sm ring-1 ring-cyan-400/40"
+                              ? "tkad-plan-cart-chip-active bg-[color:var(--qp-accent)] shadow-sm ring-1 ring-[color:var(--qp-accent)]/40"
                               : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
                           )}
                         >
@@ -294,7 +294,7 @@ export function MyPlanPageClient() {
                           className={cn(
                             "tkad-plan-cart-chip rounded-full px-3.5 py-2 text-sm font-semibold transition",
                             (cart.duration ?? 1) === d.value
-                              ? "tkad-plan-cart-chip-active bg-cyan-600 shadow-sm ring-1 ring-cyan-400/40"
+                              ? "tkad-plan-cart-chip-active bg-[color:var(--qp-accent)] shadow-sm ring-1 ring-[color:var(--qp-accent)]/40"
                               : "border border-gray-200 bg-white text-gray-900 dark:border-white/15 dark:bg-white/10 dark:text-white",
                           )}
                         >

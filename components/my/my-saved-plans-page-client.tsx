@@ -141,7 +141,7 @@ export function MySavedPlansPageClient() {
             <ArrowLeft className="h-4 w-4" />
             {tPlan("cart")}
           </Link>
-          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
+          <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
             [ SAVED PLANS ]
           </p>
           <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">
@@ -192,7 +192,7 @@ export function MySavedPlansPageClient() {
                           {item.description ? ` — ${item.description}` : ""}
                         </p>
                         {item.publishIntent ? (
-                          <span className="mt-2 inline-flex rounded-full bg-violet-500/15 px-2.5 py-0.5 text-[10px] font-bold text-violet-700 dark:text-violet-200">
+                          <span className="mt-2 inline-flex rounded-full bg-[color:var(--qp-accent)]/12 px-2.5 py-0.5 text-[10px] font-bold text-[color:var(--qp-accent)]">
                             {isKo
                               ? INTENT_LABELS[item.publishIntent].ko
                               : INTENT_LABELS[item.publishIntent].en}
@@ -248,7 +248,7 @@ export function MySavedPlansPageClient() {
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition",
                           item.publishIntent === "case"
-                            ? "bg-violet-600 text-white"
+                            ? "tkad-qp-cta text-white"
                             : "border border-gray-200 text-gray-700 dark:border-white/12 dark:text-white/80",
                         )}
                       >
@@ -267,7 +267,7 @@ export function MySavedPlansPageClient() {
                         className={cn(
                           "inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold transition",
                           item.publishIntent === "community"
-                            ? "bg-cyan-600 text-white"
+                            ? "bg-zinc-700 text-white dark:bg-zinc-600"
                             : "border border-gray-200 text-gray-700 dark:border-white/12 dark:text-white/80",
                         )}
                       >

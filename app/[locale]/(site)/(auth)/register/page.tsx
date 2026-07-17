@@ -105,10 +105,10 @@ function RegisterPageInner() {
       <div className="tkad-landing-neon tkad-planner-neon tkad-auth-page min-h-[calc(100vh-72px)] px-4 py-10">
         <div className="mx-auto flex w-full max-w-md flex-col items-center justify-center">
           <div className="tkad-auth-card relative w-full overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.65)] backdrop-blur sm:p-8">
-            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.04)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.04)_1px,transparent_1px)] bg-[size:28px_28px]" />
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+              className="pointer-events-none absolute -inset-24 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
             />
             <div className="relative">
               <div className="mb-6 text-center">
@@ -124,7 +124,7 @@ function RegisterPageInner() {
                     ? "Google·카카오·네이버로 간편 가입하거나 이메일로 가입하세요"
                     : "Sign up with Google, Kakao, Naver, or email"}
                 </p>
-                <p className="mt-2 text-center text-xs font-semibold text-violet-600 dark:text-violet-300">
+                <p className="mt-2 text-center text-xs font-semibold text-[color:var(--qp-accent)]">
                   {isKo ? proTrialSignupHeadlineKo() : proTrialSignupHeadlineEn()}
                 </p>
               </div>
@@ -212,7 +212,7 @@ function RegisterPageInner() {
                   variant="accent"
                   size="lg"
                   disabled={loading}
-                  className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
+                  className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 tkad-qp-cta text-white shadow-[0_18px_60px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5 hover:opacity-95"
                 >
                   {loading && <Spinner size="sm" />}
                   {loading ? "가입 중…" : "가입하기"}

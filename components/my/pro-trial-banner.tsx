@@ -26,13 +26,13 @@ export function ProTrialBanner({ trial, isKo, className }: Props) {
     <div
       className={cn(
         myHubGlassCard,
-        "relative overflow-hidden border-violet-500/30 bg-gradient-to-br from-violet-500/10 via-transparent to-fuchsia-500/5 p-5 sm:p-6",
+        "relative overflow-hidden border-[color:var(--qp-accent)]/30 bg-gradient-to-br from-[color:var(--qp-accent)]/10 via-transparent to-transparent p-5 sm:p-6",
         className,
       )}
     >
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-start gap-3">
-          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/20 text-violet-400">
+          <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)]">
             <Sparkles className="h-5 w-5" aria-hidden />
           </span>
           <div>
@@ -67,7 +67,7 @@ export function ProTrialBanner({ trial, isKo, className }: Props) {
           aria-label={isKo ? "PRO 체험 진행률" : "PRO trial progress"}
         >
           <div
-            className="h-full rounded-full bg-gradient-to-r from-violet-500 to-fuchsia-500 transition-all duration-500"
+            className="h-full rounded-full bg-[color:var(--qp-accent)] transition-all duration-500"
             style={{ width: `${trial.progressPct}%` }}
           />
         </div>

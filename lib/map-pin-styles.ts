@@ -13,21 +13,21 @@ export function pinColorForType(type: string): {
 } {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) {
-    return { fill: "#a855f7", stroke: "#7c3aed", text: "#ffffff" };
+    return { fill: "#ff6200", stroke: "#c24e00", text: "#ffffff" };
   }
   if (t.includes("digital")) {
-    return { fill: "#22c55e", stroke: "#16a34a", text: "#ffffff" };
+    return { fill: "#ff6200", stroke: "#ea580c", text: "#ffffff" };
   }
   if (t.includes("static")) {
-    return { fill: "#22d3ee", stroke: "#0891b2", text: "#0f172a" };
+    return { fill: "#52525b", stroke: "#71717a", text: "#ffffff" };
   }
   if (t.includes("mobile")) {
-    return { fill: "#fb7185", stroke: "#e11d48", text: "#ffffff" };
+    return { fill: "#78716c", stroke: "#a8a29e", text: "#ffffff" };
   }
   if (t.includes("network")) {
-    return { fill: "#a855f7", stroke: "#7c3aed", text: "#ffffff" };
+    return { fill: "#c24e00", stroke: "#ff6200", text: "#ffffff" };
   }
-  return { fill: "#f97316", stroke: "#ea580c", text: "#ffffff" };
+  return { fill: "#71717a", stroke: "#a1a1aa", text: "#ffffff" };
 }
 
 export function pinLetterForType(type: string): string {
@@ -40,7 +40,7 @@ export function pinLetterForType(type: string): string {
   return "";
 }
 
-const MAP_PIN_SELECTION_RING = "#00E5FF";
+const MAP_PIN_SELECTION_RING = "#ff6200";
 
 const pinDataUrlCache = new Map<string, string>();
 const leafletIconCache = new Map<string, L.Icon>();

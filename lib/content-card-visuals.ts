@@ -1,13 +1,14 @@
+/** Quiet-professional neutrals — no violet/cyan neon ramps */
 export const CATEGORY_GRADIENTS: Record<string, string> = {
-  TREND: "from-violet-600 to-purple-800",
-  GUIDE: "from-cyan-600 to-teal-800",
-  REGION: "from-blue-600 to-indigo-800",
-  CAMPAIGN: "from-pink-600 to-rose-800",
-  패션: "from-pink-500 to-rose-700",
-  "F&B": "from-orange-500 to-amber-700",
-  엔터: "from-purple-500 to-violet-700",
-  "IT/앱": "from-blue-500 to-cyan-700",
-  뷰티: "from-rose-500 to-pink-700",
+  TREND: "from-zinc-600 to-zinc-900",
+  GUIDE: "from-stone-600 to-stone-900",
+  REGION: "from-slate-600 to-slate-900",
+  CAMPAIGN: "from-neutral-600 to-neutral-900",
+  패션: "from-stone-500 to-stone-800",
+  "F&B": "from-orange-800 to-zinc-900",
+  엔터: "from-zinc-600 to-zinc-900",
+  "IT/앱": "from-slate-600 to-slate-900",
+  뷰티: "from-stone-600 to-stone-900",
   DEFAULT: "from-gray-600 to-gray-800",
 };
 

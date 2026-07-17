@@ -87,7 +87,7 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
   return (
     <div
       className={cn(
-        "relative overflow-hidden rounded-2xl border border-amber-500/35 bg-gradient-to-r from-amber-500/15 via-violet-500/10 to-cyan-500/10 px-4 py-3 backdrop-blur-sm dark:border-amber-400/25 dark:from-amber-500/10 sm:px-5",
+        "relative overflow-hidden rounded-2xl border border-amber-500/35 bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent px-4 py-3 backdrop-blur-sm dark:border-amber-400/25 dark:from-amber-500/10 sm:px-5",
         className,
       )}
       role="status"

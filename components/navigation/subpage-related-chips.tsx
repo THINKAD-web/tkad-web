@@ -80,7 +80,7 @@ function SubpageRelatedChipsInner() {
               className={cn(
                 "shrink-0 whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors",
                 active
-                  ? "bg-violet-100 text-violet-700 dark:bg-violet-500/20 dark:text-violet-300"
+                  ? "bg-[color:var(--qp-accent)]/12 text-[color:var(--qp-accent)] dark:bg-[color:var(--qp-accent)]/20 dark:text-[color:var(--qp-accent)]"
                   : "bg-gray-100 text-gray-700 dark:bg-white/10 dark:text-white/70",
               )}
               aria-current={active ? "page" : undefined}

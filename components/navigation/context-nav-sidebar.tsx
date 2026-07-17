@@ -61,7 +61,7 @@ function SidebarLink({
           className={cn(
             "h-4 w-4 shrink-0",
             active
-              ? "text-cyan-600 dark:text-cyan-300"
+              ? "text-[color:var(--qp-accent)]"
               : "text-gray-500 dark:text-white/55",
           )}
           aria-hidden

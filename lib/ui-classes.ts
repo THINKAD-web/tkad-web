@@ -73,8 +73,8 @@ export const ui = {
     "rounded-2xl border border-gray-100 bg-white shadow-sm transition-shadow hover:shadow-md dark:border-white/10 dark:bg-white/5 dark:shadow-none",
 
   /** 상태 뱃지 */
-  badgeBeta: "rounded-full bg-violet-500/20 px-2 py-0.5 text-xs text-violet-600 dark:text-violet-400",
-  badgeNew: "rounded-full bg-cyan-500/20 px-2 py-0.5 text-xs text-cyan-600 dark:text-cyan-400",
+  badgeBeta: "rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-xs text-[color:var(--qp-accent)]",
+  badgeNew: "rounded-full border border-zinc-400/30 bg-zinc-500/10 px-2 py-0.5 text-xs text-zinc-700 dark:text-zinc-300",
   badgeActive:
     "rounded-full bg-emerald-500/20 px-2 py-0.5 text-xs text-emerald-600 dark:text-emerald-400",
   badgePending:

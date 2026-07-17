@@ -42,9 +42,9 @@ export function MyPlanStatusBadge({
         className={cn(
           "inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide",
           tone === "pro" &&
-            "tkad-neon-cta bg-violet-600 text-white shadow-sm dark:bg-violet-500",
+            "tkad-qp-cta text-white shadow-sm",
           tone === "trial" &&
-            "tkad-neon-cta bg-gradient-to-r from-violet-600 to-fuchsia-500 text-white shadow-sm",
+            "tkad-qp-cta text-white shadow-sm",
           tone === "free" &&
             "border border-gray-300 bg-gray-100 text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80",
         )}
@@ -57,7 +57,7 @@ export function MyPlanStatusBadge({
       {typeof showPoints === "number" ? (
         <Link
           href="/points"
-          className="inline-flex items-center gap-1 rounded-full border border-violet-400/30 bg-violet-500/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-violet-800 transition hover:bg-violet-500/15 dark:text-violet-200"
+          className="inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent)]/10 px-2.5 py-1 text-[11px] font-semibold tabular-nums text-[color:var(--qp-accent)] transition hover:bg-[color:var(--qp-accent)]/15"
         >
           {showPoints.toLocaleString(isKo ? "ko-KR" : "en-US")}P
         </Link>

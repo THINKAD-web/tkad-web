@@ -238,7 +238,7 @@ export function MySettingsPageClient() {
 
           <section className={cn(glassCard, "mb-6")}>
             <h2 className="flex items-center gap-2 text-sm font-bold dark:text-white text-gray-900">
-              <Mail className="h-4 w-4 text-cyan-300" />
+              <Mail className="h-4 w-4 text-[color:var(--qp-accent)]" />
               {isKo ? "이메일 인증" : "Email verification"}
             </h2>
             <p className="mt-2 text-xs dark:text-white text-gray-500">

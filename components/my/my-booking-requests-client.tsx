@@ -124,7 +124,7 @@ export function MyBookingRequestsClient() {
               [ {t("eyebrow")} ]
             </p>
             <h1 className="mt-2 flex items-center gap-2 text-2xl font-black dark:text-white text-gray-900 sm:text-3xl">
-              <CalendarDays className="h-7 w-7 text-cyan-300" aria-hidden />
+              <CalendarDays className="h-7 w-7 text-[color:var(--qp-accent)]" aria-hidden />
               {t("title")}
             </h1>
             <p className="mt-2 text-sm dark:text-white text-gray-600">{t("desc")}</p>
@@ -158,7 +158,7 @@ export function MyBookingRequestsClient() {
               </p>
               <Link
                 href="/media"
-                className="mt-6 inline-flex items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.85),rgba(34,211,238,0.85))] px-5 py-2.5 font-display text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-[0_12px_40px_rgba(0,0,0,0.35)] transition-transform hover:-translate-y-0.5"
+                className="mt-6 inline-flex items-center gap-2 rounded-xl border dark:border-white/15 border-gray-200 tkad-qp-cta px-5 py-2.5 font-display text-xs font-semibold uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5"
               >
                 {t("browseMedia")}
               </Link>
@@ -199,7 +199,7 @@ export function MyBookingRequestsClient() {
                         <div className="min-w-0">
                           <Link
                             href={`/media/${it.media.id}`}
-                            className="line-clamp-1 text-base font-bold tracking-tight dark:text-white text-gray-900 transition-colors hover:text-cyan-300 sm:text-lg"
+                            className="line-clamp-1 text-base font-bold tracking-tight dark:text-white text-gray-900 transition-colors hover:text-[color:var(--qp-accent)] sm:text-lg"
                           >
                             {it.media.name}
                           </Link>
@@ -256,7 +256,7 @@ export function MyBookingRequestsClient() {
                       </dl>
 
                       {it.notes ? (
-                        <p className="rounded-xl border-l-4 border-cyan-400/50 bg-white/5 px-3 py-2 text-xs dark:text-white text-gray-700">
+                        <p className="rounded-xl border-l-4 border-[color:var(--qp-accent)]/50 bg-white/5 px-3 py-2 text-xs dark:text-white text-gray-700">
                           <span className="font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-500">
                             {t("note")}:
                           </span>{" "}

@@ -81,7 +81,7 @@ export function MyPlanReportPageClient() {
               <ArrowLeft className="h-4 w-4" />
               {tPlan("cart")}
             </Link>
-            <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-600/70 dark:text-cyan-300/70">
+            <p className="mt-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-fg-muted)]">
               [ MY PLAN REPORT ]
             </p>
             <h1 className="mt-2 text-2xl font-black text-gray-900 dark:text-white md:text-3xl">

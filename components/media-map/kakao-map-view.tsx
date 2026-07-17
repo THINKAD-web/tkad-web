@@ -150,11 +150,11 @@ const TKAD_CLUSTER_STYLES: Array<Record<string, string>> = (() => {
     };
   };
   return [
-    mk(38, "10px", "rgba(168,85,247,0.92)", "rgba(168,85,247,0.35)"),
-    mk(42, "11px", "rgba(34,211,238,0.92)", "rgba(34,211,238,0.32)"),
-    mk(46, "12px", "rgba(236,72,153,0.9)", "rgba(236,72,153,0.3)"),
-    mk(50, "13px", "rgba(34,211,238,0.95)", "rgba(34,211,238,0.34)"),
-    mk(54, "14px", "rgba(168,85,247,0.95)", "rgba(168,85,247,0.36)"),
+    mk(38, "10px", "rgba(255,98,0,0.92)", "rgba(255,98,0,0.32)"),
+    mk(42, "11px", "rgba(113,113,122,0.92)", "rgba(113,113,122,0.32)"),
+    mk(46, "12px", "rgba(161,161,170,0.9)", "rgba(161,161,170,0.28)"),
+    mk(50, "13px", "rgba(255,98,0,0.95)", "rgba(255,98,0,0.34)"),
+    mk(54, "14px", "rgba(82,82,91,0.95)", "rgba(82,82,91,0.36)"),
   ];
 })();
 
@@ -293,57 +293,55 @@ function pinColorForType(type: string): {
   const t = (type || "").toLowerCase();
   if (t.includes("office") || t.includes("thinkad")) {
     return {
-      fill: "#a855f7",
-      stroke: "#22d3ee",
-      text: "#0a0a0c",
-      glow: "rgba(168,85,247,0.45)",
+      fill: "#ff6200",
+      stroke: "#ff8a3d",
+      text: "#ffffff",
+      glow: "rgba(255,98,0,0.45)",
       ink: "#05050a",
     };
   }
-  // premium neon palette — consistent with landing day/night
+  // Quiet Professional pin palette (no violet/cyan neon)
   if (t.includes("digital")) {
     return {
-      // lime = immediately recognizable; keep ink dark for readability
-      fill: "#a3e635",
-      stroke: "#a3e635",
-      text: "#14532d",
-      glow: "rgba(163,230,53,0.55)",
+      fill: "#ff6200",
+      stroke: "#ff6200",
+      text: "#ffffff",
+      glow: "rgba(255,98,0,0.45)",
       ink: "#0a0a0c",
     };
   }
   if (t.includes("static")) {
     return {
-      fill: "#a855f7",
-      stroke: "#a855f7",
-      // label sits on a light core, so use dark ink for contrast
-      text: "#0a0a0c",
-      glow: "rgba(168,85,247,0.55)",
+      fill: "#52525b",
+      stroke: "#71717a",
+      text: "#ffffff",
+      glow: "rgba(82,82,91,0.45)",
       ink: "#05050a",
     };
   }
   if (t.includes("mobile")) {
     return {
-      fill: "#ec4899",
-      stroke: "#ec4899",
-      text: "#0a0a0c",
-      glow: "rgba(236,72,153,0.55)",
+      fill: "#78716c",
+      stroke: "#a8a29e",
+      text: "#ffffff",
+      glow: "rgba(120,113,108,0.45)",
       ink: "#05050a",
     };
   }
   if (t.includes("network")) {
     return {
-      fill: "#a855f7",
-      stroke: "#ead6ff",
-      text: "#0a0a0c",
-      glow: "rgba(168,85,247,0.55)",
+      fill: "#c24e00",
+      stroke: "#ff6200",
+      text: "#ffffff",
+      glow: "rgba(255,98,0,0.4)",
       ink: "#05050a",
     };
   }
   return {
-    fill: "#22d3ee",
-    stroke: "#22d3ee",
-    text: "#0a0a0c",
-    glow: "rgba(34,211,238,0.55)",
+    fill: "#71717a",
+    stroke: "#a1a1aa",
+    text: "#ffffff",
+    glow: "rgba(113,113,122,0.45)",
     ink: "#05050a",
   };
 }
@@ -1492,13 +1490,13 @@ export default function KakaoMapView({
       const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="34" height="34" viewBox="0 0 34 34">
   <defs>
     <radialGradient id="ul" cx="17" cy="17" r="15" gradientUnits="userSpaceOnUse">
-      <stop offset="0" stop-color="#22d3ee"/>
-      <stop offset="0.8" stop-color="#22d3ee" stop-opacity="0.4"/>
-      <stop offset="1" stop-color="#22d3ee" stop-opacity="0"/>
+      <stop offset="0" stop-color="#ff6200"/>
+      <stop offset="0.8" stop-color="#ff6200" stop-opacity="0.4"/>
+      <stop offset="1" stop-color="#ff6200" stop-opacity="0"/>
     </radialGradient>
   </defs>
   <circle cx="17" cy="17" r="16" fill="url(#ul)" opacity="0.55"/>
-  <circle cx="17" cy="17" r="8" fill="#22d3ee" stroke="#ffffff" stroke-width="3"/>
+  <circle cx="17" cy="17" r="8" fill="#ff6200" stroke="#ffffff" stroke-width="3"/>
 </svg>`;
       const dataUrl = `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg)}`;
       const image = new kakao.maps.MarkerImage(
@@ -1534,10 +1532,10 @@ export default function KakaoMapView({
     return (
       <div className="flex h-full w-full items-center justify-center bg-transparent p-4">
         <div className="relative w-full max-w-lg overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 px-6 py-8 text-sm dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+            className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
           />
           <div className="relative">
             <div className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
@@ -1561,10 +1559,10 @@ export default function KakaoMapView({
       {!mapReady && (
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center dark:bg-black bg-white/25 p-4">
           <div className="relative w-full max-w-sm overflow-hidden rounded-[22px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/45 px-6 py-8 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.55)] backdrop-blur">
-            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
+            <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.04] bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:32px_32px]" />
             <div
               aria-hidden
-              className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_58%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_58%),radial-gradient(circle_at_left,rgba(236,72,153,0.14),transparent_62%)]"
+              className="pointer-events-none absolute -inset-16 bg-[radial-gradient(circle_at_top,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_58%),radial-gradient(circle_at_bottom,color-mix(in_srgb,var(--qp-accent)_10%,transparent),transparent_58%)]"
             />
             <div className="relative flex flex-col items-center gap-4">
               <div className="rounded-2xl border dark:border-white/14 border-gray-200 dark:bg-white/8 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
@@ -1572,7 +1570,7 @@ export default function KakaoMapView({
               </div>
               <div className="text-sm font-semibold dark:text-white text-gray-800">지도 준비 중…</div>
               <div className="h-2 w-full overflow-hidden rounded-full border dark:border-white/12 border-gray-200 dark:bg-black bg-white/20">
-                <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]" />
+                <div className="h-full w-[42%] animate-[tkadShimmer_1.2s_ease-in-out_infinite] bg-[linear-gradient(90deg,#52525b,#ff6200,#a1a1aa)]" />
               </div>
             </div>
           </div>
