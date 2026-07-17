@@ -1364,7 +1364,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)]">
       <CategoryExploreHero
         code="// 07 / Quote"
         showBeta
@@ -1430,8 +1430,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
           <div className="flex flex-col gap-8 lg:grid lg:grid-cols-[1fr_22rem] lg:items-start lg:gap-10 xl:grid-cols-[1fr_26rem]">
             <div className="order-2 min-w-0 lg:order-1">
-              <div className="tkad-glass-surface tkad-neon-border relative min-h-[380px] overflow-x-clip overflow-y-visible rounded-[32px] border dark:border-white/10 border-gray-200 sm:min-h-[420px]">
-                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
+              <div className="tkad-glass-surface relative min-h-[380px] overflow-x-clip overflow-y-visible rounded-[32px] border border-gray-200 dark:border-white/12 sm:min-h-[420px]">
+                <div aria-hidden className="pointer-events-none absolute inset-0 opacity-0" />
                 <div className="relative border-b dark:border-white/10 border-gray-200 p-6 sm:p-8">
                   <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground sm:text-xs">
                     [ STEP {step} / 4 ]
@@ -1554,7 +1554,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
                         <p className="flex items-center gap-2 text-xs text-gray-500 dark:text-white/50">
                           <ShieldCheck
-                            className="h-3.5 w-3.5 shrink-0 text-violet-500 dark:text-violet-300"
+                            className="h-3.5 w-3.5 shrink-0 text-[color:var(--qp-accent)]"
                             aria-hidden
                           />
                           {tMedia("browseCatalogVerifiedBadge")}
@@ -1909,10 +1909,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </section>
                       ) : null}
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                      <div className="tkad-glass-surface relative overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                         <div
                           aria-hidden
-                          className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
+                          className="pointer-events-none absolute inset-0 opacity-0"
                         />
                         <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
                           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
@@ -1979,10 +1979,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </ul>
                       </div>
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                      <div className="tkad-glass-surface relative overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                         <div
                           aria-hidden
-                          className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
+                          className="pointer-events-none absolute inset-0 opacity-0"
                         />
                         <div className="absolute -left-[9999px]" aria-hidden>
                           <input
@@ -2150,10 +2150,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                         </div>
                       </div>
 
-                      <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                      <div className="tkad-glass-surface relative overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                         <div
                           aria-hidden
-                          className="pointer-events-none absolute inset-0 opacity-[0.05] tkad-neon-grid"
+                          className="pointer-events-none absolute inset-0 opacity-0"
                         />
                         <div className="relative border-b dark:border-white/10 border-gray-200 px-6 py-5 sm:px-8 sm:py-6">
                           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
@@ -2294,10 +2294,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                   )}
 
                   {step === 4 && submitted ? (
-                    <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                    <div className="tkad-glass-surface relative overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                       <div
                         aria-hidden
-                        className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
+                        className="pointer-events-none absolute inset-0 opacity-0"
                       />
                       <div className="relative flex flex-col items-center gap-5 px-6 py-14 text-center sm:px-10 sm:py-16">
                         <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-primary/40 bg-primary/15 shadow-[0_0_32px_rgba(34,211,238,0.2)]">
@@ -2347,7 +2347,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
             <div className="order-1 lg:order-2 lg:sticky lg:top-24">
               <div className="space-y-0">
-                <div className="tkad-glass-surface tkad-neon-border overflow-hidden rounded-[32px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 backdrop-blur-md">
+                <div className="tkad-glass-surface overflow-hidden rounded-[32px] border border-gray-200 bg-gray-50 dark:border-white/12 dark:bg-white/6 backdrop-blur-md">
                   <div className="border-b dark:border-white/10 border-gray-200 p-6 sm:p-7">
                     <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary sm:text-xs">
                       [ ESTIMATE ]

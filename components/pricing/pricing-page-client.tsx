@@ -22,7 +22,7 @@ const planOutlineBtnClass =
   "tkad-pricing-outline-btn mt-8 flex h-11 items-center justify-center rounded-xl border text-sm font-bold transition-colors";
 
 const planCtaPrimaryClass =
-  "tkad-neon-cta-clean mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-black text-white";
+  "tkad-qp-cta mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-black text-white";
 
 function scrollToProUpgrade() {
   document.getElementById("pro-upgrade")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -48,10 +48,10 @@ export function PricingPageClient({
           return (
             <article
               key={key}
-              className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${ highlighted ? "border-cyan-400/40 dark:bg-white/10 bg-gray-100 tkad-neon-border shadow-[0_0_40px_rgba(34,211,238,0.12)]" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50" }`}
+              className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${ highlighted ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-white/10" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50" }`}
             >
               {highlighted ? (
-                <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-cyan-400/30 bg-cyan-500/10 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+                <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-[color:var(--qp-accent)]">
                   <Sparkles className="h-3 w-3" aria-hidden />
                   {isKo ? "인기" : "Popular"}
                 </p>
@@ -64,16 +64,16 @@ export function PricingPageClient({
                   <ProMonthlyPriceDisplay isKo={isKo} />
                 </div>
               ) : key === "free" ? (
-                <p className="mt-2 text-2xl font-black text-cyan-700 dark:text-cyan-200">
+                <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
                   {isKo ? "무료" : "Free"}
                 </p>
               ) : (
-                <p className="mt-2 text-2xl font-black text-cyan-700 dark:text-cyan-200">
+                <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
                   {isKo ? "문의" : "Contact us"}
                 </p>
               )}
               {key === "pro" && showTrial && !isPro ? (
-                <p className="mt-2 text-xs font-semibold text-pink-700 dark:text-pink-200">
+                <p className="mt-2 text-xs font-semibold text-[color:var(--qp-accent)]">
                   {isKo
                     ? `첫 가입 ${PRO_TRIAL_DAYS}일 PRO 무료 체험`
                     : `${PRO_TRIAL_DAYS}-day PRO trial for new signups`}
@@ -91,7 +91,7 @@ export function PricingPageClient({
                     className="flex gap-2 text-sm dark:text-white text-gray-800"
                   >
                     <Check
-                      className="mt-0.5 h-4 w-4 shrink-0 text-cyan-600 dark:text-cyan-300"
+                      className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]"
                       aria-hidden
                     />
                     <span className="min-w-0 flex-1">

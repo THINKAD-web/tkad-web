@@ -86,7 +86,7 @@ export function QuoteRevisionRequestPanel({
             placeholder={t("revisionRequestPlaceholder")}
             className={cn(
               "w-full rounded-xl border border-border bg-background px-3 py-2 text-sm text-foreground",
-              "focus:outline-none focus:ring-2 focus:ring-violet-400/35",
+              "focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35",
             )}
           />
           <p className="text-[11px] text-muted-foreground">

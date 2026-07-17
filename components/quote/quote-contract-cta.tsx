@@ -62,13 +62,13 @@ export function QuoteContractCta({
   return (
     <div
       className={cn(
-        "my-4 rounded-2xl border border-violet-200 bg-violet-50 p-5 dark:border-violet-500/30 dark:bg-violet-500/10",
+        "my-4 rounded-2xl border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-5",
         className,
       )}
     >
       <div className="mb-2 flex items-center gap-2">
         <FileSignature
-          className="h-5 w-5 shrink-0 text-violet-600 dark:text-violet-400"
+          className="h-5 w-5 shrink-0 text-[color:var(--qp-accent)]"
           aria-hidden
         />
         <p className="font-bold text-gray-900 dark:text-white">
@@ -80,7 +80,7 @@ export function QuoteContractCta({
       </p>
       <Link
         href={`/quote/${quoteId}/contract`}
-        className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-opacity hover:opacity-95"
+        className="inline-flex items-center gap-2 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[color:var(--qp-accent-hover)]"
       >
         {t("openContract")} →
       </Link>

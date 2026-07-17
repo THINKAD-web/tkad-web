@@ -3,9 +3,9 @@ import { MediaCardSkeletonGrid } from "@/components/skeletons";
 export default function RecommendLoading() {
   return (
     <>
-      <section className="bg-gradient-to-b from-hero-void via-hero-void to-[#0c0c10] py-20 sm:py-24">
+      <section className="bg-gray-50 py-20 dark:bg-[#0a0a0a] sm:py-24">
         <div className="mx-auto max-w-3xl px-4 text-center sm:px-6">
-          <div className="mx-auto h-4 w-36 animate-pulse bg-violet-500/22" />
+          <div className="mx-auto h-4 w-36 animate-pulse bg-[color:var(--qp-accent)]/22" />
           <div className="mx-auto mt-3 h-3 w-52 animate-pulse bg-hero-fg/15" />
           <div className="mx-auto mt-8 h-11 w-full max-w-lg animate-pulse bg-hero-fg/10" />
           <div className="mx-auto mt-4 h-6 w-full max-w-md animate-pulse bg-hero-fg/10" />

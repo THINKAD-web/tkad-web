@@ -72,7 +72,7 @@ function RecommendMediaRationale({
   if (scoredPortfolio.length === 0) return null;
   return (
     <div className="rounded-2xl border-2 border-border bg-card p-5">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
         [ {isKo ? "왜 이 매체?" : "Why this media?"} ]
       </p>
       <ul className="mt-4 space-y-4">
@@ -428,13 +428,13 @@ export function RecommendReportSection({
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-violet-500/40 bg-card px-5 py-4 text-left transition-colors hover:bg-muted/50"
+        className="flex w-full items-center justify-between gap-3 rounded-2xl border-2 border-[color:var(--qp-accent)]/40 bg-card px-5 py-4 text-left transition-colors hover:bg-muted/50"
         aria-expanded={open}
       >
         <div className="flex items-center gap-3">
-          <Sparkles className="h-5 w-5 shrink-0 text-violet-500" />
+          <Sparkles className="h-5 w-5 shrink-0 text-[color:var(--qp-accent)]" />
           <div>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-600 dark:text-violet-300">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
               [ {isKo ? "AI 효과 보고서" : "AI effect report"} ]
             </p>
             <h2 className="mt-1 text-lg font-bold text-foreground">

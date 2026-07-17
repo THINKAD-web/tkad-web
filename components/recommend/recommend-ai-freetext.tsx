@@ -239,14 +239,14 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
   }, [draft, isKo, onConfirm, parseResult, text]);
 
   const freeRuleBadge = (
-    <span className="rounded-md border border-cyan-400/40 bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-cyan-700 dark:text-cyan-200">
+    <span className="rounded-md border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider text-[color:var(--qp-accent)]">
       {isKo ? "무료 · 규칙" : "Free · Rules"}
     </span>
   );
 
   if (phase === "confirm") {
     const selCls =
-      "h-11 w-full rounded-xl border bg-white px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-violet-400/35 dark:bg-white/8 dark:text-white";
+      "h-11 w-full rounded-xl border bg-white px-3 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35 dark:bg-white/8 dark:text-white";
     const emptyRing = "border-amber-300 dark:border-amber-400/50";
     const filledRing = "border-gray-200 dark:border-white/10";
     const parsedRegions = parseResult?.fields.regions.value ?? [];
@@ -263,7 +263,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
     return (
       <div className="space-y-4 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
         <div className="flex flex-wrap items-center gap-2">
-          <Wand2 className="h-4 w-4 text-violet-500" />
+          <Wand2 className="h-4 w-4 text-[color:var(--qp-accent)]" />
           <p className="text-sm font-bold text-gray-900 dark:text-white">
             {isKo ? "AI 자연어 입력" : "AI natural language"}
           </p>
@@ -274,15 +274,15 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
           <div
             className={cn(
               "space-y-3 rounded-xl border p-4",
-              "border-violet-400/25 bg-gradient-to-br from-violet-500/[0.07] to-cyan-500/[0.05]",
-              "dark:border-violet-400/20 dark:from-violet-500/10 dark:to-cyan-500/5",
+              "border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)]",
+              "dark:border-[color:var(--qp-accent)]/25",
             )}
           >
             <p className="text-sm font-semibold leading-relaxed text-gray-900 dark:text-white">
               {summarySentence}
             </p>
             {evidenceRows.length > 0 ? (
-              <ul className="space-y-1.5 border-t border-violet-400/15 pt-3 dark:border-white/10">
+              <ul className="space-y-1.5 border-t border-gray-200 pt-3 dark:border-white/10">
                 {evidenceRows.map((row) => (
                   <EvidenceRow key={row.key} row={row} isKo={isKo} />
                 ))}
@@ -297,7 +297,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
             : "Review and edit if needed. Industry, target, and budget default when empty."}
         </p>
         {budgetDefaulted ? (
-          <p className="rounded-lg border border-cyan-200/80 bg-cyan-50/80 px-3 py-2 text-[11px] leading-relaxed text-cyan-900 dark:border-cyan-500/25 dark:bg-cyan-500/10 dark:text-cyan-100">
+          <p className="rounded-lg border border-gray-200 bg-gray-50 px-3 py-2 text-[11px] leading-relaxed text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/80">
             {isKo
               ? `예산 미입력 시 월 ${FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN.toLocaleString("ko-KR")}만원 기준으로 추천합니다.`
               : `When budget is empty, recommendations use ${FREETEXT_RECOMMEND_DEFAULT_BUDGET_MAN}M KRW/month.`}
@@ -428,7 +428,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
           <button
             type="button"
             onClick={runRecommend}
-            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-5 py-2.5 text-sm font-bold text-white transition hover:opacity-95"
+            className="inline-flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[color:var(--qp-accent-hover)]"
           >
             <Sparkles className="h-4 w-4" />
             {isKo ? "추천 받기" : "Get recommendations"}
@@ -453,7 +453,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
   return (
     <div className="space-y-3 rounded-2xl border border-gray-200 bg-white p-5 dark:border-white/10 dark:bg-white/5">
       <div className="flex flex-wrap items-center gap-2">
-        <Sparkles className="h-4 w-4 text-violet-500" />
+        <Sparkles className="h-4 w-4 text-[color:var(--qp-accent)]" />
         <p className="text-sm font-bold text-gray-900 dark:text-white">
           {isKo ? "AI 자연어 입력" : "AI natural language"}
         </p>
@@ -470,7 +470,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
         rows={4}
         maxLength={2000}
         placeholder={isKo ? PLACEHOLDER_KO : PLACEHOLDER_EN}
-        className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-violet-400/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
+        className="w-full rounded-xl border border-gray-200 bg-white p-3 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30"
       />
       <FreetextExampleChips
         isKo={isKo}
@@ -482,7 +482,7 @@ export default function RecommendAiFreetext({ locale, onConfirm }: Props) {
         type="button"
         onClick={() => analyze()}
         disabled={parsing || text.trim().length < 3}
-        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-violet-500 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-violet-600 disabled:opacity-60"
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl bg-[color:var(--qp-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[color:var(--qp-accent-hover)] disabled:opacity-60"
       >
         {parsing ? (
           <Loader2 className="h-4 w-4 animate-spin" />

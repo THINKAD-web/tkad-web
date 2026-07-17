@@ -121,7 +121,7 @@ function FormField({
             className={cn(
               "rounded-md px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide",
               required
-                ? "bg-violet-500/15 text-violet-700 dark:text-violet-200"
+                ? "bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
                 : "bg-gray-100 text-gray-500 dark:bg-white/10 dark:text-white/50",
             )}
           >
@@ -143,8 +143,8 @@ function chipClass(selected: boolean) {
   return cn(
     "rounded-xl border px-3 py-2 text-sm font-medium transition-colors touch-manipulation",
     selected
-      ? "border-violet-500/50 bg-gradient-to-r from-violet-500/15 to-cyan-400/15 text-foreground shadow-sm"
-      : "border-gray-200 bg-white text-foreground hover:border-violet-300/50 dark:border-white/10 dark:bg-white/5 dark:hover:border-violet-400/30",
+      ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm"
+      : "border-gray-200 bg-white text-foreground hover:border-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/5 dark:hover:border-[color:var(--qp-accent)]/40",
   );
 }
 
@@ -667,7 +667,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     ? `${budgetMin.toLocaleString()}만원`
                     : `${budgetMin.toLocaleString()}`}
                 </span>
-                <span className="text-sm font-bold text-violet-600 dark:text-violet-300">
+                <span className="text-sm font-bold text-[color:var(--qp-accent)]">
                   {isKo
                     ? `${budgetMan.toLocaleString()}만원`
                     : `${budgetMan.toLocaleString()}`}
@@ -685,7 +685,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                 step={100}
                 value={budgetMan}
                 onChange={(e) => setBudgetMan(Number(e.target.value))}
-                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-violet-500 dark:bg-white/10"
+                className="mt-3 h-2 w-full cursor-pointer appearance-none rounded-full bg-gray-200 accent-[color:var(--qp-accent)] dark:bg-white/10"
                 aria-valuemin={budgetMin}
                 aria-valuemax={budgetMax}
                 aria-valuenow={budgetMan}
@@ -765,7 +765,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={tr("form.searchPlaceholder")}
-                    className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm focus:border-violet-400/60 focus:outline-none dark:border-white/10 dark:bg-black/20"
+                    className="h-11 w-full rounded-xl border border-gray-200 bg-white px-3 text-sm focus:border-[color:var(--qp-accent)]/50 focus:outline-none dark:border-white/10 dark:bg-black/20"
                   />
                 </FormField>
 

@@ -85,10 +85,10 @@ const PROPOSAL_TOKENS: ThemeTokens = {
     padding: 18,
     boxShadow: "0 1px 2px rgba(0,0,0,0.05)",
   },
-  sectionTitle: "#7C3AED",
+  sectionTitle: "#ff6200",
   label: "#6B7280",
   value: "#111827",
-  durationValue: "#7C3AED",
+  durationValue: "#ff6200",
   bodyMuted: "#6B7280",
   tableHead: "#9CA3AF",
   tableCell: "#111827",
@@ -464,23 +464,18 @@ function QuotePremiumOfficialPage({
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
               <p className="text-[11px] font-medium text-gray-500">{copy.supply}</p>
-              <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
+              <p className="mt-1 font-display text-lg font-black tabular-nums text-[color:var(--qp-accent)]">
                 {formatManWon(subtotalWon, isKo)}
               </p>
             </div>
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-3.5">
               <p className="text-[11px] font-medium text-gray-500">{copy.vat}</p>
-              <p className="mt-1 font-display text-lg font-black tabular-nums text-violet-700">
+              <p className="mt-1 font-display text-lg font-black tabular-nums text-[color:var(--qp-accent)]">
                 {formatManWon(vatWon, isKo)}
               </p>
             </div>
-            <div
-              className="col-span-2 rounded-xl border border-violet-200 p-3.5 sm:col-span-1"
-              style={{
-                background: "linear-gradient(135deg, #7C3AED 0%, #06B6D4 100%)",
-              }}
-            >
-              <p className="text-[11px] font-medium text-violet-100">{copy.total}</p>
+            <div className="col-span-2 rounded-xl border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)] p-3.5 sm:col-span-1">
+              <p className="text-[11px] font-medium text-white/85">{copy.total}</p>
               <p className="mt-1 font-display text-xl font-black tabular-nums text-white">
                 {formatManWon(grandTotalWon, isKo)}
               </p>
@@ -490,7 +485,7 @@ function QuotePremiumOfficialPage({
 
         <section className="grid grid-cols-2 gap-8 border-t border-gray-100 pt-8">
           <div>
-            <p className="text-xs font-semibold text-violet-700">{copy.signTitle}</p>
+            <p className="text-xs font-semibold text-[color:var(--qp-accent)]">{copy.signTitle}</p>
             <div className="mt-4 space-y-4 text-[11px] text-gray-500">
               {[copy.signName, copy.signSig, copy.signDate].map((label) => (
                 <div key={label}>
@@ -501,7 +496,7 @@ function QuotePremiumOfficialPage({
             </div>
           </div>
           <div className="relative min-h-[120px] pr-20">
-            <p className="text-xs font-semibold text-violet-700">{copy.issuer}</p>
+            <p className="text-xs font-semibold text-[color:var(--qp-accent)]">{copy.issuer}</p>
             <p className="mt-2 text-sm font-bold text-gray-900">{copy.issuerName}</p>
             <p className="mt-2 text-[11px] text-gray-600">Tel: 02-515-2772</p>
             <p className="text-[11px] text-gray-600">Email: sales@tkad.co.kr</p>
@@ -905,7 +900,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
                 {copy.whyItems.map((item) => (
                   <li key={item.title} className="flex items-start gap-2">
                     <Check
-                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-cyan-500"
+                      className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[color:var(--qp-accent)]"
                       aria-hidden
                     />
                     <div className="min-w-0">

@@ -63,7 +63,7 @@ function RecommendDashboardActionCell({
 }) {
   const Icon = action.icon;
   const className =
-    "flex h-full min-h-[2.75rem] w-full items-center justify-center gap-2 px-3 py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/50";
+    "flex h-full min-h-[2.75rem] w-full items-center justify-center gap-2 px-3 py-2.5 text-center text-sm font-semibold text-foreground transition-colors hover:bg-muted/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40";
 
   if (action.kind === "link") {
     return (
@@ -375,7 +375,7 @@ export default function MediaAiRecommendDashboard({
                               </span>
                               {summary ? (
                                 <span className="mt-1 block space-y-0.5">
-                                  <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+                                  <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
                                     <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
                                     {isKo ? "추천 이유" : "Why"}
                                   </span>

@@ -8,7 +8,7 @@ import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { getCurrentUser } from "@/lib/user-session";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { MediaKeywordLandingHero } from "@/components/media-keyword-landing-hero";
-import { NeonSection } from "@/components/landing/neon/neon-section";
+import { PageContainer } from "@/components/layout/page-container";
 import { PricingPageClient } from "@/components/pricing/pricing-page-client";
 
 type Props = {
@@ -54,6 +54,7 @@ export default async function PricingPage({ params, searchParams }: Props) {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
         <MediaKeywordLandingHero
+          tone="qp"
           eyebrow={`// ${isKo ? "PRICING" : "PRICING"}`}
           title={isKo ? "OOH 데이터, PRO에서" : "OOH data on PRO"}
           description={
@@ -73,22 +74,24 @@ export default async function PricingPage({ params, searchParams }: Props) {
           showBeta={false}
         />
 
-        <NeonSection className="pb-20 pt-8">
-          {sp.success === "1" ? (
-            <p className="mb-6 rounded-xl border border-green-400/30 bg-green-500/10 px-4 py-3 text-center text-sm font-semibold text-green-200">
-              {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
-            </p>
-          ) : null}
-          <Suspense fallback={null}>
-            <PricingPageClient
-              isKo={isKo}
-              loggedIn={Boolean(user)}
-              userName={user?.name}
-              userEmail={user?.email}
-              showTrial={sp.trial === "1" || !user}
-            />
-          </Suspense>
-        </NeonSection>
+        <section className="relative overflow-hidden border-t border-gray-100 bg-white pb-20 pt-8 text-gray-900 dark:border-white/5 dark:bg-[#0a0a0a] dark:text-white">
+          <PageContainer className="relative">
+            {sp.success === "1" ? (
+              <p className="mb-6 rounded-xl border border-emerald-400/30 bg-emerald-500/10 px-4 py-3 text-center text-sm font-semibold text-emerald-800 dark:text-emerald-200">
+                {isKo ? "PRO 구독이 활성화되었습니다!" : "PRO subscription activated!"}
+              </p>
+            ) : null}
+            <Suspense fallback={null}>
+              <PricingPageClient
+                isKo={isKo}
+                loggedIn={Boolean(user)}
+                userName={user?.name}
+                userEmail={user?.email}
+                showTrial={sp.trial === "1" || !user}
+              />
+            </Suspense>
+          </PageContainer>
+        </section>
       </div>
     </HomeLandingDayNight>
   );

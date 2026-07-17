@@ -880,7 +880,7 @@ export default function RecommendPageClient({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-w-0 overflow-x-auto">
+      <div className="tkad-landing-neon tkad-planner-neon min-w-0 overflow-x-auto">
         <PageHero
           eyebrow={isKo ? "// 빠른 추천" : "// Quick recommend"}
           title={isKo ? "빠른 AI " : "Quick AI "}
@@ -970,9 +970,9 @@ export default function RecommendPageClient({
                       : "text-gray-500 dark:text-white/55",
                   )}
                 >
-                  <Sparkles className="h-4 w-4 text-violet-500" />
+                  <Sparkles className="h-4 w-4 text-[color:var(--qp-accent)]" />
                   {isKo ? "AI 자연어 입력" : "AI natural language"}
-                  <span className="rounded border border-cyan-400/40 bg-cyan-500/15 px-1 text-[9px] font-bold uppercase text-cyan-700 dark:text-cyan-200">
+                  <span className="rounded border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-1 text-[9px] font-bold uppercase text-[color:var(--qp-accent)]">
                     {isKo ? "무료" : "Free"}
                   </span>
                 </button>
@@ -985,7 +985,7 @@ export default function RecommendPageClient({
                     onConfirm={handleAiConfirm}
                   />
                   {/* v1 안내: 일반 매체 기준 추천(네트워크 매체 추후 추가) */}
-                  <p className="rounded-xl border border-cyan-100 bg-cyan-50/60 px-3 py-2 text-[11px] leading-relaxed text-cyan-800 dark:border-cyan-500/20 dark:bg-cyan-500/10 dark:text-cyan-200/90">
+                  <p className="rounded-xl border border-gray-200 bg-gray-50/80 px-3 py-2 text-[11px] leading-relaxed text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/75">
                     {isKo
                       ? "현재 일반 매체 기준으로 추천됩니다. 네트워크 매체는 추후 추가될 예정입니다."
                       : "Recommendations currently cover standard media only. Network media will be added soon."}
@@ -1243,21 +1243,17 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
         <div className="relative">
           <div
             aria-hidden
-            className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,rgba(168,85,247,0.22),transparent_70%)] blur-xl"
-          />
-          <div
-            aria-hidden
-            className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,rgba(34,211,238,0.16),transparent_70%)] blur-xl"
+            className="pointer-events-none absolute -inset-6 rounded-[44px] bg-[radial-gradient(closest-side,color-mix(in_srgb,var(--qp-accent)_22%,transparent),transparent_70%)] blur-xl"
           />
 
-          <div className="relative flex h-24 w-24 items-center justify-center rounded-[32px] border border-white/16 bg-[linear-gradient(135deg,rgba(255,255,255,0.16),rgba(255,255,255,0.06))] dark:text-white text-gray-900 shadow-[0_32px_140px_rgba(0,0,0,0.78)] backdrop-blur">
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-[32px] border border-gray-200 bg-white/80 text-gray-900 shadow-sm backdrop-blur dark:border-white/16 dark:bg-white/10 dark:text-white dark:shadow-[0_32px_140px_rgba(0,0,0,0.78)]">
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(120%_90%_at_15%_10%,rgba(168,85,247,0.28),transparent_55%),radial-gradient(110%_85%_at_90%_25%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(95%_75%_at_45%_95%,rgba(236,72,153,0.12),transparent_60%)]"
+              className="pointer-events-none absolute inset-0 rounded-[32px] bg-[radial-gradient(120%_90%_at_20%_15%,color-mix(in_srgb,var(--qp-accent)_18%,transparent),transparent_60%)]"
             />
             <div
               aria-hidden
-              className="pointer-events-none absolute inset-0 rounded-[32px] border dark:border-white/10 border-gray-200 motion-safe:animate-pulse"
+              className="pointer-events-none absolute inset-0 rounded-[32px] border border-gray-200 motion-safe:animate-pulse dark:border-white/10"
             />
             <span className="relative z-10 text-[44px]" aria-hidden>
               🤖
@@ -1282,7 +1278,7 @@ function LoadingOverlay({ isKo }: { isKo: boolean }) {
       <div className="space-y-3 rounded-[28px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 dark:text-white text-gray-900 shadow-[0_28px_120px_rgba(0,0,0,0.75)] backdrop-blur">
         <div className="h-3 w-full overflow-hidden rounded-full border dark:border-white/14 border-gray-200 dark:bg-black bg-white/30">
           <div
-            className="loading-slide h-full w-2/5 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)]"
+            className="loading-slide h-full w-2/5 bg-[color:var(--qp-accent)]"
           />
         </div>
         <div className="space-y-2">

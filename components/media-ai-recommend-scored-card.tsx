@@ -174,7 +174,7 @@ export function RecommendTop3PickRow({
           </span>
           {summary ? (
             <span className="mt-1 line-clamp-2 space-y-0.5 pl-9">
-              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+              <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
                 <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
                 {isKo ? "추천 이유" : "Why"}
               </span>

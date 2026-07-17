@@ -59,7 +59,7 @@ export function QuoteMediaSelectCard({
       className={cn(
         "w-full overflow-hidden rounded-2xl border text-left shadow-sm transition-all hover:shadow-md active:scale-[0.99]",
         selected
-          ? "border-violet-400/60 bg-violet-50/80 ring-2 ring-violet-400/30 dark:border-violet-400/50 dark:bg-violet-500/10"
+          ? "border-[color:var(--qp-accent)]/55 bg-[color:var(--qp-accent-soft)] ring-2 ring-[color:var(--qp-accent)]/25"
           : "border-gray-100 bg-white dark:border-white/10 dark:bg-white/5",
       )}
       aria-pressed={selected}
@@ -92,7 +92,7 @@ export function QuoteMediaSelectCard({
           className={cn(
             "absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full border-2 shadow-sm",
             selected
-              ? "border-violet-500 bg-violet-500 text-white"
+              ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] text-white"
               : "border-white/80 bg-black/40 text-white backdrop-blur-sm",
           )}
           aria-hidden

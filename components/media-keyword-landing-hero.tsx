@@ -16,6 +16,7 @@ export function MediaKeywordLandingHero({
   primaryCta,
   secondaryCta,
   showBeta = true,
+  tone = "neon",
 }: {
   eyebrow: string;
   title: string;
@@ -24,19 +25,41 @@ export function MediaKeywordLandingHero({
   primaryCta: Cta;
   secondaryCta: Cta;
   showBeta?: boolean;
+  /** pricing 등 — 네온 depth/그라데이션 없이 qp 톤 */
+  tone?: "neon" | "qp";
 }) {
+  const isQp = tone === "qp";
+
   return (
     <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-      <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
-      <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
-      <div
-        aria-hidden
-        className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
-      />
+      {isQp ? (
+        <>
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
+          />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.04] mix-blend-overlay" />
+        </>
+      ) : (
+        <>
+          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 opacity-20 tkad-neon-grid" />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay" />
+          <div
+            aria-hidden
+            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.14),rgba(0,0,0,0.58),rgba(0,0,0,0.92))]"
+          />
+        </>
+      )}
 
       <div className="tkad-media-keyword-hero relative mx-auto max-w-7xl px-4 pb-20 pt-20 text-center sm:px-6 sm:pb-28 sm:pt-28 lg:px-8 lg:pb-36 lg:pt-32">
-        <p className="tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/60">
+        <p
+          className={
+            isQp
+              ? "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]"
+              : "tkad-media-keyword-hero__eyebrow flex flex-wrap items-center justify-center gap-x-2 gap-y-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/60"
+          }
+        >
           <span>{eyebrow}</span>
           {showBeta ? <CategoryHeroBetaBadge /> : null}
         </p>

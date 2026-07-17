@@ -25,7 +25,7 @@ export function CompareWinnerCard({ items, isKo, className }: Props) {
   return (
     <section
       className={cn(
-        "relative overflow-hidden rounded-2xl border-2 border-emerald-400/35 bg-gradient-to-br from-emerald-500/12 via-card to-cyan-500/10 p-5 shadow-[0_18px_60px_rgba(16,185,129,0.12)] sm:p-6",
+        "relative overflow-hidden rounded-2xl border-2 border-emerald-400/35 bg-emerald-500/10 p-5 shadow-sm sm:p-6",
         className,
       )}
       aria-label={isKo ? "CPM 효율 추천" : "CPM efficiency pick"}

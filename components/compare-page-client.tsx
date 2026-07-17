@@ -178,7 +178,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
     return (
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+        <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)]">
           <CategoryExploreHero
             code="// COMPARE"
             headlineBefore={isKo ? "" : ""}
@@ -202,7 +202,7 @@ export default function ComparePageClient({ items }: { items: MediaItem[] }) {
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)]">
         <CategoryExploreHero
           code={isKo ? "// 스펙 비교" : "// SPEC COMPARE"}
           showBeta

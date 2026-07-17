@@ -31,7 +31,7 @@ const AXIS_LABELS_EN: Record<string, string> = {
   availability: "Availability",
 };
 
-const COLORS = ["#22d3ee", "#a855f7", "#ec4899", "#10b981", "#f59e0b", "#6366f1"];
+const COLORS = ["#ff6200", "#111111", "#64748b", "#10b981", "#f59e0b", "#475569"];
 
 type Props = {
   items: MediaItem[];

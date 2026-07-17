@@ -149,7 +149,7 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
             setPaying(false);
           }
         }}
-        className="tkad-neon-cta-clean mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-black dark:text-white text-gray-900 disabled:opacity-50"
+        className="tkad-qp-cta mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-black text-white disabled:opacity-50"
       >
         {paying ? (
           <Loader2 className="h-4 w-4 animate-spin" />

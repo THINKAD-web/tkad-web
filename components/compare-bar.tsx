@@ -269,9 +269,9 @@ export default function CompareBar({
               className={cn(
                 blockClass,
                 "min-w-[104px] whitespace-nowrap text-white",
-                "border-gray-200 bg-[linear-gradient(135deg,rgba(34,211,238,0.95)_0%,rgba(168,85,247,0.92)_52%,rgba(236,72,153,0.88)_100%)] dark:border-white/12",
-                "hover:!bg-[linear-gradient(135deg,rgba(34,211,238,1)_0%,rgba(168,85,247,0.98)_52%,rgba(236,72,153,0.96)_100%)]",
-                "shadow-[0_18px_60px_rgba(0,0,0,0.55)]",
+                "border-0 bg-[color:var(--qp-accent)] dark:border-transparent",
+                "hover:!bg-[color:var(--qp-accent-hover)]",
+                "shadow-sm",
               )}
             >
               {t("compareQuoteCta")}

@@ -18,7 +18,7 @@ export function ProMonthlyPriceDisplay({
   const d = getProPriceDisplay();
   const priceClass =
     size === "card"
-      ? "text-2xl font-black text-cyan-700 dark:text-cyan-200"
+      ? "text-2xl font-black text-gray-900 dark:text-white"
       : "font-bold tabular-nums";
 
   return (

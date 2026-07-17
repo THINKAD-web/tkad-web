@@ -324,7 +324,7 @@ export function CompareQuoteCalculator({ items, isKo, className }: Props) {
               <dt className="text-muted-foreground">
                 {isKo ? "예상 총 노출" : "Est. impressions"}
               </dt>
-              <dd className="font-bold tabular-nums text-cyan-600 dark:text-cyan-400">
+              <dd className="font-bold tabular-nums text-[color:var(--qp-accent)]">
                 {totals.totalImpressions.toLocaleString(localeTag)}
               </dd>
             </div>

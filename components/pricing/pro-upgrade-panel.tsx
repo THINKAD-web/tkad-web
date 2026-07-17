@@ -119,7 +119,7 @@ export function ProUpgradePanel({
     return (
       <div
         id="pro-upgrade"
-        className="scroll-mt-24 rounded-[28px] border border-cyan-400/30 bg-gradient-to-br from-violet-500/10 to-cyan-500/10 p-6 text-center sm:p-8"
+        className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 text-center sm:p-8"
       >
         <p className="text-sm font-semibold dark:text-white text-gray-800">
           {isKo
@@ -128,13 +128,13 @@ export function ProUpgradePanel({
         </p>
         <Link
           href="/login?redirect=/pricing#pro-upgrade"
-          className="tkad-neon-cta-clean mt-4 inline-flex h-11 items-center justify-center rounded-xl px-8 text-sm font-black text-white"
+          className="tkad-qp-cta mt-4 inline-flex h-11 items-center justify-center rounded-xl px-8 text-sm font-black text-white"
         >
           {isKo ? "로그인하고 PRO 시작" : "Sign in to start PRO"}
         </Link>
         <p className="mt-3 text-xs text-gray-500 dark:text-white/50">
           {isKo ? "계정이 없으면 " : "No account? "}
-          <Link href="/register" className="font-semibold text-cyan-600 underline dark:text-cyan-300">
+          <Link href="/register" className="font-semibold text-[color:var(--qp-accent)] underline">
             {isKo ? "무료 가입" : "Sign up free"}
           </Link>
         </p>
@@ -147,11 +147,11 @@ export function ProUpgradePanel({
   return (
     <div
       id="pro-upgrade"
-      className="scroll-mt-24 rounded-[28px] border border-cyan-400/30 bg-gradient-to-br from-violet-500/8 via-transparent to-cyan-500/8 p-6 sm:p-8"
+      className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 sm:p-8"
     >
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-cyan-600 dark:text-cyan-300">
+          <p className="inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--qp-accent)]">
             <Sparkles className="h-3.5 w-3.5" aria-hidden />
             {isKo ? "PRO 업그레이드" : "Upgrade to PRO"}
           </p>
@@ -170,20 +170,20 @@ export function ProUpgradePanel({
               : "Use your points instantly or subscribe monthly by card."}
           </p>
         </div>
-        <div className="rounded-2xl border border-violet-200/80 bg-white/80 px-4 py-3 text-right dark:border-violet-400/25 dark:bg-white/5">
+        <div className="rounded-2xl border border-gray-200 bg-white/80 px-4 py-3 text-right dark:border-white/12 dark:bg-white/5">
           <p className="text-[10px] font-semibold uppercase tracking-wider text-gray-500 dark:text-white/45">
             {isKo ? "내 포인트" : "Your points"}
           </p>
           {loadingBalance ? (
-            <Loader2 className="ml-auto mt-1 h-5 w-5 animate-spin text-violet-500" />
+            <Loader2 className="ml-auto mt-1 h-5 w-5 animate-spin text-[color:var(--qp-accent)]" />
           ) : (
-            <p className="mt-0.5 text-2xl font-black tabular-nums text-violet-600 dark:text-violet-300">
+            <p className="mt-0.5 text-2xl font-black tabular-nums text-[color:var(--qp-accent)]">
               {bal.toLocaleString(isKo ? "ko-KR" : "en-US")} P
             </p>
           )}
           <Link
             href="/points"
-            className="mt-1 inline-block text-xs font-semibold text-cyan-600 underline dark:text-cyan-300"
+            className="mt-1 inline-block text-xs font-semibold text-[color:var(--qp-accent)] underline"
           >
             {isKo ? "포인트 더 모으기 →" : "Earn more points →"}
           </Link>
@@ -197,7 +197,7 @@ export function ProUpgradePanel({
           className={cn(
             "rounded-lg px-4 py-2 text-xs font-bold transition-colors",
             payMode === "points"
-              ? "bg-violet-600 text-white"
+              ? "bg-[color:var(--qp-accent)] text-white"
               : "text-gray-600 hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5",
           )}
         >
@@ -209,7 +209,7 @@ export function ProUpgradePanel({
           className={cn(
             "inline-flex items-center gap-1.5 rounded-lg px-4 py-2 text-xs font-bold transition-colors",
             payMode === "card"
-              ? "bg-violet-600 text-white"
+              ? "bg-[color:var(--qp-accent)] text-white"
               : "text-gray-600 hover:bg-gray-50 dark:text-white/70 dark:hover:bg-white/5",
           )}
         >
@@ -230,24 +230,24 @@ export function ProUpgradePanel({
                   className={cn(
                     "flex flex-col rounded-2xl border p-4 transition-shadow",
                     canAfford
-                      ? "border-violet-300/60 bg-white shadow-sm dark:border-violet-400/30 dark:bg-white/5"
+                      ? "border-[color:var(--qp-accent)]/40 bg-white shadow-sm dark:border-[color:var(--qp-accent)]/35 dark:bg-white/5"
                       : "border-gray-200 bg-gray-50/80 dark:border-white/10 dark:bg-white/[0.02]",
                   )}
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex items-center gap-2">
-                      <Icon className="h-5 w-5 text-violet-600 dark:text-violet-300" />
+                      <Icon className="h-5 w-5 text-[color:var(--qp-accent)]" />
                       <p className="text-sm font-bold dark:text-white text-gray-900">
                         {t(`redeem.${type}`)}
                       </p>
                     </div>
                     {(isKo ? badgeKo : badgeEn) ? (
-                      <span className="shrink-0 rounded-full bg-cyan-500/15 px-2 py-0.5 text-[10px] font-bold text-cyan-700 dark:text-cyan-200">
+                      <span className="shrink-0 rounded-full bg-[color:var(--qp-accent-soft)] px-2 py-0.5 text-[10px] font-bold text-[color:var(--qp-accent)]">
                         {isKo ? badgeKo : badgeEn}
                       </span>
                     ) : null}
                   </div>
-                  <p className="mt-3 text-xl font-black tabular-nums text-violet-600 dark:text-violet-300">
+                  <p className="mt-3 text-xl font-black tabular-nums text-[color:var(--qp-accent)]">
                     {cost.toLocaleString(isKo ? "ko-KR" : "en-US")} P
                   </p>
                   <button
@@ -257,7 +257,7 @@ export function ProUpgradePanel({
                     className={cn(
                       "mt-4 flex h-11 items-center justify-center rounded-xl text-xs font-bold transition-colors",
                       canAfford
-                        ? "bg-gradient-to-r from-violet-600 to-cyan-500 text-white hover:opacity-95"
+                        ? "bg-[color:var(--qp-accent)] text-white hover:bg-[color:var(--qp-accent-hover)]"
                         : "cursor-not-allowed bg-gray-200 text-gray-500 dark:bg-white/10 dark:text-white/40",
                     )}
                   >

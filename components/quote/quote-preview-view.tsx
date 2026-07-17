@@ -290,7 +290,7 @@ export default function QuotePreviewView({
     return (
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon flex min-h-[calc(100vh-72px)] items-center justify-center px-4 py-10">
-          <div className="tkad-glass-surface tkad-neon-border w-full max-w-lg rounded-[32px] border p-8 text-center backdrop-blur-md">
+          <div className="tkad-glass-surface border-gray-200 dark:border-white/12 w-full max-w-lg rounded-[32px] border p-8 text-center backdrop-blur-md">
             <p className="text-3xl" aria-hidden>
               ⚠️
             </p>
@@ -321,7 +321,7 @@ export default function QuotePreviewView({
 
   return (
     <HomeLandingDayNight>
-      <div className="tkad-landing-neon tkad-planner-neon tkad-media-page min-h-[calc(100vh-72px)]">
+      <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)]">
         <CategoryExploreHero
           code="// 07 / Quote"
           headlineBefore={isKo ? "" : "Your "}
@@ -358,11 +358,11 @@ export default function QuotePreviewView({
             ) : null}
 
             {showSentBanner ? (
-              <div className="mb-6 rounded-[22px] border-2 border-violet-400/35 bg-violet-50/80 px-5 py-4 dark:border-violet-400/25 dark:bg-violet-500/10">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-800 dark:text-violet-200">
+              <div className="mb-6 rounded-[22px] border-2 border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-5 py-4">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-[color:var(--qp-accent)]">
                   [ {t("sentBannerTitle")} ]
                 </p>
-                <p className="mt-1 text-sm font-medium text-violet-950 dark:text-violet-50/90">
+                <p className="mt-1 text-sm font-medium text-gray-900 dark:text-white/90">
                   {t("sentBannerBody")}
                 </p>
               </div>
@@ -563,7 +563,7 @@ export default function QuotePreviewView({
                 </div>
               </section>
 
-              <div className="tkad-glass-surface tkad-neon-border relative overflow-hidden rounded-[32px] border backdrop-blur-md">
+              <div className="tkad-glass-surface border-gray-200 dark:border-white/12 relative overflow-hidden rounded-[32px] border backdrop-blur-md">
                 <div className="border-b border-border px-6 py-5 sm:px-8">
                   <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
                     [ {isKo ? "캠페인 정보" : "Campaign info"} ]
@@ -607,7 +607,7 @@ export default function QuotePreviewView({
                 </ul>
               </section>
 
-              <div className="tkad-glass-surface tkad-neon-border rounded-[32px] border p-6 sm:p-8">
+              <div className="tkad-glass-surface border-gray-200 dark:border-white/12 rounded-[32px] border p-6 sm:p-8">
                 <div className="flex items-start justify-between gap-4">
                   <div>
                     <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">

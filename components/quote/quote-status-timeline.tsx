@@ -55,7 +55,7 @@ export function QuoteStatusTimeline({
                   "border-emerald-500 bg-emerald-500 text-white dark:border-emerald-400 dark:bg-emerald-500",
                 isCurrent &&
                   !done &&
-                  "animate-pulse border-violet-500 bg-violet-500/15 text-violet-600 dark:border-violet-400 dark:text-violet-300",
+                  "animate-pulse border-[color:var(--qp-accent)] bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]",
                 !done &&
                   !isCurrent &&
                   "border-border bg-card text-muted-foreground",
@@ -72,13 +72,13 @@ export function QuoteStatusTimeline({
                 className={cn(
                   "text-sm font-bold",
                   done && "text-foreground",
-                  isCurrent && !done && "text-violet-700 dark:text-violet-200",
+                  isCurrent && !done && "text-[color:var(--qp-accent)]",
                   !done && !isCurrent && "text-muted-foreground",
                 )}
               >
                 {label}
                 {isCurrent && !done ? (
-                  <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-violet-500 dark:text-violet-300">
+                  <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--qp-accent)]">
                     {t("timelineCurrent")}
                   </span>
                 ) : null}
