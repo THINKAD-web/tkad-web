@@ -30,7 +30,7 @@ export function RoadviewCard({ lat, lng, mediaName }: Props) {
     <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-5">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
-          <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
+          <p className="flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
             <Eye className="h-3.5 w-3.5" aria-hidden />
             {t("title")}
           </p>

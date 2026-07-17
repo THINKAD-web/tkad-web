@@ -232,7 +232,7 @@ export function MediaAnalyticsReportSection({ report, isKo, access }: Props) {
       <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-primary">
         [ {isKo ? "매체 분석 보고서" : "Media analytics report"} ]
       </p>
-      <h2 className="mt-2 text-xl font-black tracking-tight">
+      <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight">
         {isKo ? "데이터 기반 매체 인사이트" : "Data-driven placement insights"}
       </h2>
       <ReportAccessGate

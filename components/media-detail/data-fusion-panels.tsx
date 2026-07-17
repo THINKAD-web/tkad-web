@@ -46,7 +46,7 @@ export function CompetitorOohSection({ report, isKo, access }: Props) {
       <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
         [ {isKo ? "경쟁사 OOH 집행 분석" : "Competitor OOH booking trends"} ]
       </p>
-      <h3 className="mt-2 text-lg font-bold">
+      <h3 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight">
         {isKo ? "업종별 최근 집행 매체" : "Recent media by industry"}
       </h3>
       <ReportAccessGate access={access} feature="competitor" isKo={isKo} className="mt-4">

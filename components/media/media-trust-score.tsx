@@ -71,7 +71,12 @@ export function MediaExecutionSummary({
           : `Last flight ${monthsAgo} mo ago`;
 
   return (
-    <p className={cn("text-sm text-muted-foreground", className)}>
+    <p
+      className={cn(
+        "text-[length:var(--qp-text-meta)] text-gray-600 dark:text-muted-foreground",
+        className,
+      )}
+    >
       {isKo
         ? `누적 집행 ${count}회 · ${recentLabel}`
         : `${count} flights · ${recentLabel}`}

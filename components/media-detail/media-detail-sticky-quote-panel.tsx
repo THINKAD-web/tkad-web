@@ -180,13 +180,13 @@ export function MediaDetailStickyQuotePanel({
         className,
       )}
     >
-      <p className="truncate text-base font-bold dark:text-white text-gray-900">
+      <p className="truncate text-[length:var(--qp-text-body)] font-bold dark:text-white text-gray-900">
         {displayName}
       </p>
-      <p className="mt-1 text-2xl font-black tabular-nums dark:text-white text-gray-900">
+      <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)]">
         {headlinePrice}
       </p>
-      <p className="text-[11px] dark:text-white/45 text-gray-500">
+      <p className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
         {headlinePeriod}
       </p>
       <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
@@ -213,7 +213,7 @@ export function MediaDetailStickyQuotePanel({
         <div className="mt-4 space-y-1.5">
           <label
             htmlFor="sticky-quote-price-option"
-            className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400"
+            className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70"
           >
             {isKo ? "가격 옵션" : "Price option"}
           </label>
@@ -238,12 +238,12 @@ export function MediaDetailStickyQuotePanel({
       ) : null}
 
       <div className="mt-5 space-y-3 border-t dark:border-white/10 border-gray-100 pt-5">
-        <p className="text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+        <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
           {isKo ? "집행 기간" : "Flight dates"}
         </p>
         <div className="grid grid-cols-2 gap-2">
           <label className="space-y-1">
-            <span className="text-[10px] dark:text-white/40 text-gray-400">
+            <span className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
               {isKo ? "시작" : "Start"}
             </span>
             <input
@@ -254,7 +254,7 @@ export function MediaDetailStickyQuotePanel({
             />
           </label>
           <label className="space-y-1">
-            <span className="text-[10px] dark:text-white/40 text-gray-400">
+            <span className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
               {isKo ? "종료" : "End"}
             </span>
             <input
@@ -266,7 +266,7 @@ export function MediaDetailStickyQuotePanel({
           </label>
         </div>
 
-        <div className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3 text-sm">
+        <div className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3 text-[length:var(--qp-text-body)]">
           <p className="flex justify-between gap-2 dark:text-white/80 text-gray-700">
             <span>{isKo ? "예상 비용" : "Est. cost"}</span>
             <span className="font-bold tabular-nums dark:text-white text-gray-900">
@@ -316,7 +316,7 @@ export function MediaDetailStickyQuotePanel({
                 className="w-full"
               />
             </div>
-            <p className="text-center text-[10px] text-gray-400 dark:text-white/35">
+            <p className="text-center text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/55">
               {isKo
                 ? "견적함·플래너는 저장 위치가 다릅니다"
                 : "Quote cart and plan cart are separate"}

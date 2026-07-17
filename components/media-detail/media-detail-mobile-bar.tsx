@@ -72,12 +72,12 @@ export function MediaDetailMobileBar({
     >
       <div className={STICKY_ACTION_BAR_ROW}>
         <div className="min-w-0 flex-1 truncate">
-          <p className="truncate font-display text-[11px] font-bold leading-tight tabular-nums text-gray-900 dark:text-white">
+          <p className="truncate font-display text-[length:var(--qp-text-body)] font-bold leading-tight tabular-nums text-[color:var(--qp-accent)]">
             <span className="whitespace-nowrap">
               {formatCatalogPriceFieldWon(displayPrice.priceWon, locale)}
               {multiPriceOptions && isKo ? "~" : null}
             </span>
-            <span className="ml-1 font-medium text-gray-500 dark:text-white/45">
+            <span className="ml-1 text-[length:var(--qp-text-meta)] font-medium text-gray-600 dark:text-white/65">
               / {displayPeriodLabel}
             </span>
           </p>

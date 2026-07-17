@@ -289,7 +289,7 @@ export function MediaAvailabilityCalendar({
           </p>
           <h2
             id="availability-calendar-heading"
-            className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+            className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground"
           >
             <CalendarDays
               className="mr-2 inline-block h-5 w-5 text-accent"

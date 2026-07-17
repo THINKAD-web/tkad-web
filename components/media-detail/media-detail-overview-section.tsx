@@ -51,10 +51,10 @@ export function MediaDetailOverviewSection({
         className,
       )}
     >
-      <h3 className="font-semibold dark:text-white text-gray-900">{title}</h3>
+      <h3 className="text-[length:var(--qp-text-h3)] font-bold tracking-tight dark:text-white text-gray-900">{title}</h3>
       <div
         className={cn(
-          "mt-3 text-sm leading-relaxed dark:text-white/75 text-gray-700",
+          "mt-3 text-[length:var(--qp-text-body)] leading-relaxed dark:text-white/75 text-gray-700",
           !expanded && isLong && "line-clamp-3",
         )}
       >

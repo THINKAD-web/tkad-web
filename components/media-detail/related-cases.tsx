@@ -26,7 +26,7 @@ export function RelatedCases({ cases, isKo }: Props) {
           <Briefcase className="h-3.5 w-3.5" aria-hidden />
           [ RELATED CASES ]
         </div>
-        <h2 className="mt-2 text-xl font-bold tracking-tight text-foreground">
+        <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
           {t("title")}
         </h2>
         <p className="mt-1 text-[11px] tracking-tight text-muted-foreground">

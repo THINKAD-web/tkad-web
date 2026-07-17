@@ -99,7 +99,7 @@ export default function MediaSimilarCarousel({
           </p>
           <h2
             id="media-similar-heading"
-            className="mt-1 text-[17px] font-bold tracking-tight text-foreground sm:text-lg"
+            className="mt-1 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground"
           >
             {title}
           </h2>

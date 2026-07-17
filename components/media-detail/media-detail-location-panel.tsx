@@ -235,12 +235,12 @@ export function MediaDetailLocationPanel({
       {locationRows.length > 0 ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white">
           <div className="flex flex-wrap items-baseline justify-between gap-2 border-b dark:border-white/10 border-gray-200 px-4 py-3">
-            <p className="flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
+            <p className="flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
               <MapPin className="h-3.5 w-3.5" aria-hidden />
               {isNetwork ? (isKo ? "설치 지점" : "Locations") : isKo ? "위치" : "Location"}
             </p>
             {isNetwork ? (
-              <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
+              <p className="text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
                 {isKo
                   ? `전국 ${netLocations.length.toLocaleString("ko-KR")}개 지점 · 총 ${totalUnits.toLocaleString("ko-KR")}${unitSuffix}`
                   : `${netLocations.length.toLocaleString("en-US")} sites · ${totalUnits.toLocaleString("en-US")} units`}
@@ -272,10 +272,10 @@ export function MediaDetailLocationPanel({
                     )}
                   >
                     <div className="min-w-0">
-                      <p className="truncate text-sm font-semibold dark:text-white text-gray-900">
+                      <p className="truncate text-[length:var(--qp-text-body)] font-semibold dark:text-white text-gray-900">
                         {loc.name}
                       </p>
-                      <p className="mt-0.5 truncate text-xs dark:text-white/55 text-gray-500">
+                      <p className="mt-0.5 truncate text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
                         {loc.region ? `${loc.region} · ` : ""}
                         {loc.address ?? (isKo ? "주소 미등록" : "No address")}
                       </p>
@@ -309,14 +309,14 @@ export function MediaDetailLocationPanel({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
-          <p className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
+          <p className="mb-2 flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
             <MapPin className="h-3.5 w-3.5" aria-hidden />
             {t("locationAddressLabel")}
           </p>
-          <p className="text-sm leading-relaxed dark:text-white/85 text-gray-800">
+          <p className="text-[length:var(--qp-text-body)] leading-relaxed dark:text-white/85 text-gray-800">
             {addressText}
           </p>
-          <p className="mt-2 text-xs dark:text-white/50 text-gray-500">
+          <p className="mt-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
             {t("locationRegionLabel")}: {regionDisplay}
           </p>
           <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">

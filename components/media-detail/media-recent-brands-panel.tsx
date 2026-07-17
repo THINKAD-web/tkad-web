@@ -18,7 +18,7 @@ export function MediaRecentBrandsPanel({ data, isKo, access }: Props) {
 
   const content = (
     <div className="rounded-2xl border border-[color:var(--qp-accent)]/20 bg-[color:var(--qp-accent)]/5 p-5">
-      <h3 className="flex items-center gap-2 text-sm font-bold dark:text-white text-gray-900">
+      <h3 className="flex items-center gap-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight dark:text-white text-gray-900">
         <Users className="h-4 w-4 text-[color:var(--qp-accent)]" />
         {isKo ? "이 매체 최근 집행 브랜드" : "Recent brands on this media"}
       </h3>

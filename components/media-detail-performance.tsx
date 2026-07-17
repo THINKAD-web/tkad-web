@@ -44,12 +44,12 @@ export default function MediaDetailPerformance({
     >
       <div className="mb-8 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
             [ PERFORMANCE METRICS ]
           </p>
           <h2
             id="media-detail-performance-heading"
-            className="mt-2 text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+            className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground"
           >
             {t("performanceTitle")}
           </h2>
@@ -61,7 +61,7 @@ export default function MediaDetailPerformance({
 
       <div className="grid grid-cols-1 gap-0 sm:grid-cols-2">
         <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceStatMonthly")} ]
           </p>
           <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight text-foreground whitespace-nowrap sm:text-4xl">
@@ -69,7 +69,7 @@ export default function MediaDetailPerformance({
           </p>
         </div>
         <div className="-mt-[2px] -ml-[2px] rounded-[22px] border border-border/80 bg-muted/40 px-6 py-7 shadow-xs backdrop-blur">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceStatDaily")} ]
           </p>
           <p className="mt-3 text-3xl font-bold tabular-nums tracking-tight text-foreground whitespace-nowrap sm:text-4xl">
@@ -80,7 +80,7 @@ export default function MediaDetailPerformance({
 
       <div className="mt-10 grid gap-10 lg:grid-cols-2 lg:items-center">
         <div>
-          <p className="mb-4 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mb-4 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceDonutTitle")} ]
           </p>
           <div className="flex flex-col items-center gap-6 sm:flex-row sm:items-center sm:gap-8">
@@ -118,7 +118,7 @@ export default function MediaDetailPerformance({
         </div>
 
         <div>
-          <p className="mb-4 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+          <p className="mb-4 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
             [ {t("performanceBarsTitle")} ]
           </p>
           <ul className="space-y-5">
@@ -153,14 +153,14 @@ export default function MediaDetailPerformance({
 
       <div className="mt-10 rounded-[24px] border border-border/80 bg-muted/30 px-6 py-7 text-foreground shadow-xs backdrop-blur sm:px-7 sm:py-8">
         <div className="flex flex-wrap items-center justify-between gap-3">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
+          <p className="font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent">
             [ {t("performanceVisibilityTitle")} ]
           </p>
           {visibilityBadge ? (
             <span
               className={
                 metrics.visibilityScore >= 90
-                  ? "rounded-xl border border-accent bg-accent px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent-foreground"
+                  ? "rounded-xl border border-accent bg-accent px-3 py-1 font-display text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-accent-foreground"
                   : "rounded-xl border border-border/80 bg-card/70 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground shadow-xs backdrop-blur"
               }
             >
@@ -192,7 +192,7 @@ export default function MediaDetailPerformance({
       </div>
 
       <p className="mt-8 rounded-[22px] border border-border/80 bg-muted/40 px-5 py-4 text-sm font-medium leading-relaxed text-foreground shadow-xs backdrop-blur sm:px-6">
-        <span className="mr-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
+        <span className="mr-2 font-display text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-muted-foreground">
           {`// NOTE`}
         </span>
         {compareNote}

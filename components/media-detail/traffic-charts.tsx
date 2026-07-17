@@ -143,7 +143,7 @@ export function TrafficCharts({
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
             [ TRAFFIC PATTERN ]
           </p>
-          <h3 className="text-lg font-bold tracking-tight text-foreground sm:text-xl">
+          <h3 className="text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
             {t("title")}
           </h3>
           <p className="text-[11px] tracking-tight text-muted-foreground">

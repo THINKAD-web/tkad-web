@@ -56,10 +56,10 @@ function KpiChip({
 }) {
   return (
     <div className="rounded-xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white px-3 py-2.5">
-      <p className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/40 text-gray-400">
+      <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
         {label}
       </p>
-      <p className="mt-1 font-display text-sm font-bold tabular-nums dark:text-white text-gray-900">
+      <p className="mt-1 font-display text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
         {value}
       </p>
     </div>
@@ -103,20 +103,20 @@ export function MediaDetailHeroInfo({
 
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
-      <span className="font-sans text-3xl font-bold tabular-nums dark:text-white text-gray-900">
+      <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
         {formatCatalogPriceFieldWon(primaryPriceOption.price)}
       </span>
     ) : (
-      <span className="font-sans text-2xl font-bold tabular-nums dark:text-white text-gray-900 sm:text-3xl">
+      <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMin)}{" "}
-        <span className="dark:text-white/40 text-gray-400">~</span>{" "}
+        <span className="text-gray-400 dark:text-white/40">~</span>{" "}
         {formatMediaPriceWonWithSymbol(media.keywordFilter.budgetMax)}
       </span>
     )
   ) : (
-    <span className="font-display text-3xl font-black tabular-nums dark:text-white text-gray-900">
+    <span className="font-display text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
       {!isKo && multiPriceOptions ? (
-        <span className="text-lg font-bold dark:text-white/55 text-gray-500">
+        <span className="text-[length:var(--qp-text-meta)] font-bold text-gray-600 dark:text-white/70">
           from{" "}
         </span>
       ) : null}
@@ -156,7 +156,11 @@ export function MediaDetailHeroInfo({
         {media.trustScore != null || media.executionCount != null ? (
           <div className="mt-3 space-y-1.5">
             {media.trustScore != null ? (
-              <MediaTrustScoreBadge score={media.trustScore} isKo={isKo} />
+              <MediaTrustScoreBadge
+                score={media.trustScore}
+                isKo={isKo}
+                className="!text-[length:var(--qp-text-meta)]"
+              />
             ) : null}
             {media.executionCount != null ? (
               <MediaExecutionSummary
@@ -167,18 +171,18 @@ export function MediaDetailHeroInfo({
             ) : null}
           </div>
         ) : null}
-        <p className="mt-3 flex items-center gap-2 text-sm dark:text-white/70 text-gray-600">
+        <p className="mt-3 flex items-center gap-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/70">
           <MapPin className="h-4 w-4 shrink-0" aria-hidden />
           {locationShort}
         </p>
       </div>
 
       <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4 shadow-sm">
-        <p className="text-xs font-semibold uppercase tracking-widest dark:text-white/40 text-gray-400">
+        <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
           {labels.priceTitle}
         </p>
         <div className="mt-1">{priceBlock}</div>
-        <p className="mt-1 text-[11px] dark:text-white/50 text-gray-500">
+        <p className="mt-1 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
           {labels.periodLabel}
         </p>
         <MediaPriceExclNote isKo={isKo} className="mt-1" />
@@ -209,13 +213,13 @@ export function MediaDetailHeroInfo({
           {specBadges.map((badge) => (
             <span
               key={badge.key}
-              className="inline-flex max-w-full items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-2.5 py-1 text-[11px] dark:text-white/80 text-gray-700"
+              className="inline-flex max-w-full items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-2.5 py-1 text-[length:var(--qp-text-meta)] dark:text-white/80 text-gray-700"
               title={`${badge.label}: ${badge.value}`}
             >
-              <span className="shrink-0 font-semibold uppercase tracking-wide dark:text-white/45 text-gray-400">
+              <span className="shrink-0 font-semibold text-gray-600 dark:text-white/70">
                 {badge.label}
               </span>
-              <span className="truncate font-medium">{badge.value}</span>
+              <span className="truncate font-medium text-[length:var(--qp-text-body)]">{badge.value}</span>
             </span>
           ))}
         </div>

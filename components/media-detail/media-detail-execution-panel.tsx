@@ -54,15 +54,15 @@ function Accordion({
       className="group rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white"
       open={defaultOpen}
     >
-      <summary className="cursor-pointer list-none px-4 py-3 font-semibold dark:text-white text-gray-900 [&::-webkit-details-marker]:hidden">
+      <summary className="cursor-pointer list-none px-4 py-3 text-[length:var(--qp-text-h3)] font-bold dark:text-white text-gray-900 [&::-webkit-details-marker]:hidden">
         <span className="flex items-center justify-between gap-2">
           {title}
-          <span className="text-xs dark:text-white/40 text-gray-400 transition group-open:rotate-180">
+          <span className="text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/55 transition group-open:rotate-180">
             ▾
           </span>
         </span>
       </summary>
-      <div className="border-t dark:border-white/10 border-gray-100 px-4 py-4 text-sm leading-relaxed dark:text-white/75 text-gray-700">
+      <div className="border-t dark:border-white/10 border-gray-100 px-4 py-4 text-[length:var(--qp-text-body)] leading-relaxed dark:text-white/75 text-gray-700">
         {children}
       </div>
     </details>
@@ -73,10 +73,10 @@ function SpecRow({ label, value }: { label: string; value?: ReactNode }) {
   if (!value) return null;
   return (
     <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
-      <dt className="text-xs font-semibold uppercase tracking-wide dark:text-white/45 text-gray-400">
+      <dt className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
         {label}
       </dt>
-      <dd className="font-medium dark:text-white/85 text-gray-800">{value}</dd>
+      <dd className="text-[length:var(--qp-text-body)] font-medium dark:text-white/85 text-gray-800">{value}</dd>
     </div>
   );
 }
@@ -94,10 +94,10 @@ function IconSpec({
     <div className="flex gap-3 rounded-xl border dark:border-white/10 border-gray-100 dark:bg-black/20 bg-gray-50 p-3">
       <Icon className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]" aria-hidden />
       <div>
-        <p className="text-[10px] font-semibold uppercase tracking-widest dark:text-white/40 text-gray-400">
+        <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
           {label}
         </p>
-        <p className="mt-1 text-sm font-semibold dark:text-white text-gray-900">{value}</p>
+        <p className="mt-1 text-[length:var(--qp-text-body)] font-semibold dark:text-white text-gray-900">{value}</p>
       </div>
     </div>
   );
@@ -147,7 +147,7 @@ export function MediaDetailExecutionPanel({
   return (
     <div className={cn("space-y-5", className)}>
       <div>
-        <h2 className="text-sm font-bold dark:text-white text-gray-900">
+        <h2 className="text-[length:var(--qp-text-h3)] font-bold tracking-tight dark:text-white text-gray-900">
           {labels.specsTitle}
         </h2>
         <div className="mt-3 grid gap-3 sm:grid-cols-2">
@@ -183,17 +183,17 @@ export function MediaDetailExecutionPanel({
 
       {hasPriceOptions && priceOptions?.length ? (
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 p-4">
-          <p className="mb-3 text-xs font-semibold uppercase tracking-widest dark:text-white/45 text-gray-400">
+          <p className="mb-3 text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
             {isKo ? "가격 옵션" : "Price options"}
           </p>
           {uniformPriceSummary ? (
             <div className="rounded-xl border dark:border-white/8 border-gray-100 dark:bg-black/15 bg-gray-50/80 px-3 py-2.5">
-              <p className="text-sm font-medium dark:text-white/85 text-gray-800">
+              <p className="text-[length:var(--qp-text-body)] font-medium dark:text-white/85 text-gray-800">
                 {isKo
                   ? `${uniformPriceSummary.labelsJoined} 동일 단가`
                   : `${uniformPriceSummary.labelsJoined} — same rate`}
               </p>
-              <p className="mt-1 font-display text-base font-bold tabular-nums dark:text-white text-gray-900">
+              <p className="mt-1 font-display text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
                 {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon)}
               </p>
             </div>
@@ -226,7 +226,7 @@ export function MediaDetailExecutionPanel({
                   key={`${opt.label}-${idx}`}
                   className="rounded-xl border dark:border-white/8 border-gray-100 dark:bg-black/15 bg-gray-50/80 px-3 py-2.5"
                 >
-                  <div className="flex flex-wrap items-baseline justify-between gap-2 text-sm">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2 text-[length:var(--qp-text-body)]">
                     <span className="font-medium dark:text-white/85 text-gray-800">
                       {opt.label}
                     </span>
@@ -235,7 +235,7 @@ export function MediaDetailExecutionPanel({
                     </span>
                   </div>
                   {metaLine ? (
-                    <p className="mt-1 text-xs leading-relaxed dark:text-white/55 text-gray-500">
+                    <p className="mt-1 text-[length:var(--qp-text-meta)] leading-relaxed text-gray-600 dark:text-white/65">
                       {metaLine}
                     </p>
                   ) : null}
@@ -267,7 +267,7 @@ export function MediaDetailExecutionPanel({
       ) : null}
 
       {featuresText ? (
-        <p className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-white/5 bg-[color:var(--qp-accent-soft)] px-4 py-3 text-sm dark:text-white/75 text-gray-700">
+        <p className="rounded-xl border dark:border-white/10 border-gray-100 dark:bg-white/5 bg-[color:var(--qp-accent-soft)] px-4 py-3 text-[length:var(--qp-text-body)] dark:text-white/75 text-gray-700">
           {featuresText}
         </p>
       ) : null}

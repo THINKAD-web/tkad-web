@@ -191,7 +191,7 @@ export function MediaReviewsSection({
       <div className="mt-2 flex flex-wrap items-end justify-between gap-4">
         <h2
           id="media-reviews-heading"
-          className="text-xl font-bold tracking-tight text-foreground sm:text-2xl"
+          className="text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground"
         >
           {isKo ? "광고주 리뷰" : "Advertiser reviews"}
         </h2>

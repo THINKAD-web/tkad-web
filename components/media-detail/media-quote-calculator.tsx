@@ -77,7 +77,7 @@ export function MediaQuoteCalculator({ media, isKo, className }: Props) {
         <Calculator className="h-3.5 w-3.5" aria-hidden />
         {isKo ? "간편 견적" : "Quick estimate"}
       </p>
-      <h2 className="mt-2 text-lg font-black text-foreground">
+      <h2 className="mt-2 text-[length:var(--qp-text-h3)] font-bold tracking-tight text-foreground">
         {isKo ? "집행 기간별 예상 비용" : "Cost by flight length"}
       </h2>
       <p className="mt-1 text-xs text-muted-foreground">
