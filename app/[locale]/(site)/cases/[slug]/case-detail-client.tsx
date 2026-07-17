@@ -109,23 +109,23 @@ export default function CaseDetailClient({
           <CaseDetailContainer>
             <Link
               href="/cases"
-              className="group mb-6 inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500 transition-colors hover:text-[#22d3ee]"
+              className="group mb-6 inline-flex items-center gap-1.5 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500 transition-colors hover:text-[var(--qp-accent)]"
             >
               <ArrowLeft className="h-4 w-4 transition-transform group-hover:-translate-x-0.5" />
               {t("detailBack")}
             </Link>
 
-            <p className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="flex flex-wrap items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
               <span>{`// CASE / ${row.id.slice(0, 8).toUpperCase()}`}</span>
               <CategoryHeroBetaBadge />
             </p>
 
             <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-[#a855f7]/40 bg-[#a855f7]/20 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#e9d5ff]">
+              <span className="rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]">
                 {row.industry}
               </span>
               <span className="inline-flex items-center gap-1.5 rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-3 py-0.5 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-700">
-                <BadgeCheck className="h-3 w-3 text-[#22d3ee]" />
+                <BadgeCheck className="h-3 w-3 text-[var(--qp-accent)]" />
                 {t("detailVerified")}
               </span>
             </div>
@@ -138,13 +138,13 @@ export default function CaseDetailClient({
               {title}
             </h1>
             {headline ? (
-              <p className="mt-3 text-sm font-semibold text-[#22d3ee]">
+              <p className="mt-3 text-sm font-semibold text-[var(--qp-accent)]">
                 {headline}
               </p>
             ) : null}
 
             <div className="mt-6 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                 [ {t("backgroundLabel")} ]
               </p>
               <p className="mt-2 max-w-3xl text-base leading-relaxed dark:text-white text-gray-800 sm:text-lg">
@@ -155,13 +155,13 @@ export default function CaseDetailClient({
             <CaseDetailContainer className="mt-6 flex flex-wrap gap-4 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
               {period ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <Calendar className="h-4 w-4 text-[#22d3ee]" aria-hidden />
+                  <Calendar className="h-4 w-4 text-[var(--qp-accent)]" aria-hidden />
                   {period}
                 </span>
               ) : null}
               {row.budgetRange ? (
                 <span className="inline-flex items-center gap-1.5">
-                  <Wallet className="h-4 w-4 text-[#22d3ee]" aria-hidden />
+                  <Wallet className="h-4 w-4 text-[var(--qp-accent)]" aria-hidden />
                   {t("budgetRangeLabel")}: {row.budgetRange}
                 </span>
               ) : null}
@@ -172,7 +172,7 @@ export default function CaseDetailClient({
         {metrics.length > 0 ? (
           <section className="border-y dark:border-white/10 border-gray-200 py-12 sm:py-16">
             <CaseDetailContainer>
-              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                 [ {t("metricsSectionTitle")} ]
               </p>
               <CaseMetricsCharts metrics={metrics} />
@@ -197,12 +197,12 @@ export default function CaseDetailClient({
 
         <section className="py-16 sm:py-20">
           <CaseDetailContainer>
-            <p className="mb-6 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
+            <p className="mb-6 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
               [ {t("strategySectionTitle")} ]
             </p>
             <div className="grid gap-4 md:grid-cols-2">
               <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
-                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                   <Target className="h-4 w-4" aria-hidden />
                   {t("challengeLabel")}
                 </div>
@@ -211,7 +211,7 @@ export default function CaseDetailClient({
                 </div>
               </div>
               <div className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-6 sm:p-8">
-                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+                <div className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                   <Eye className="h-4 w-4" aria-hidden />
                   {t("solutionLabel")}
                 </div>
@@ -225,7 +225,7 @@ export default function CaseDetailClient({
 
         <section className="border-t dark:border-white/10 border-gray-200 py-16 sm:py-20">
           <CaseDetailContainer>
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
               [ {t("mediaLabel")} ]
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
@@ -237,7 +237,7 @@ export default function CaseDetailClient({
                   <Link
                     key={String(link.id)}
                     href={`/media/${link.id}`}
-                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors hover:border-[#22d3ee]/40 hover:bg-[#22d3ee]/15"
+                    className="rounded-full border dark:border-white/15 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.16em] dark:text-white text-gray-900 transition-colors hover:border-[var(--qp-accent)]/40 hover:bg-[var(--qp-accent)]/15"
                   >
                     {link.label}
                   </Link>
@@ -254,7 +254,7 @@ export default function CaseDetailClient({
 
             {row.resultsKo.length > 0 ? (
               <div className="mt-10 rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 p-5 sm:p-6">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                   [ {t("resultsLabel")} ]
                 </p>
                 <div className="mt-4 dark:text-white text-gray-800">
@@ -268,7 +268,7 @@ export default function CaseDetailClient({
         {galleryUrls.length > 0 ? (
           <section className="py-16">
             <CaseDetailContainer>
-              <p className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+              <p className="mb-5 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                 [ {t("galleryLabel")} ]
               </p>
               <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
@@ -302,8 +302,8 @@ export default function CaseDetailClient({
         {managerComment ? (
           <section className="border-t dark:border-white/10 border-gray-200 py-16">
             <CaseDetailContainer className="mx-auto max-w-3xl">
-              <div className="rounded-[24px] border border-[#a855f7]/30 bg-gradient-to-br from-[#a855f7]/15 to-transparent p-8">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
+              <div className="rounded-[24px] border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] p-8">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                   [ {t("managerCommentTitle")} ]
                 </p>
                 <p className="mt-4 whitespace-pre-wrap text-base leading-relaxed dark:text-white text-gray-800">
@@ -331,7 +331,7 @@ export default function CaseDetailClient({
                 href={`/contact?case=${encodeURIComponent(row.id)}`}
                 variant="dark"
                 size="lg"
-                className="border border-[#22d3ee]/30 bg-[#22d3ee]/10 text-[#22d3ee] hover:bg-[#22d3ee]/20"
+                className="border border-[var(--qp-accent)]/30 bg-[var(--qp-accent)]/10 text-[var(--qp-accent)] hover:bg-[var(--qp-accent)]/20"
               >
                 {t("detailInquiryCta")}
                 <ArrowRight className="h-4 w-4" />
@@ -347,9 +347,9 @@ export default function CaseDetailClient({
                 {prev ? (
                   <Link
                     href={`/cases/${prev.id}`}
-                    className="group flex flex-1 flex-col rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 transition-colors hover:border-[#22d3ee]/30"
+                    className="group flex flex-1 flex-col rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 transition-colors hover:border-[var(--qp-accent)]/30"
                   >
-                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                       <ArrowLeft className="h-3 w-3" />
                       {t("detailPrev")}
                     </span>
@@ -363,9 +363,9 @@ export default function CaseDetailClient({
                 {next ? (
                   <Link
                     href={`/cases/${next.id}`}
-                    className="group flex flex-1 flex-col items-end rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 text-right transition-colors hover:border-[#22d3ee]/30"
+                    className="group flex flex-1 flex-col items-end rounded-[16px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 text-right transition-colors hover:border-[var(--qp-accent)]/30"
                   >
-                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <span className="flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                       {t("detailNext")}
                       <ArrowRight className="h-3 w-3" />
                     </span>

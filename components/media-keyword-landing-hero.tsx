@@ -80,14 +80,22 @@ export function MediaKeywordLandingHero({
         <div className="mt-10 flex flex-col items-stretch justify-center gap-3 sm:flex-row sm:items-center">
           <Link
             href={primaryCta.href}
-            className="tkad-neon-cta-clean inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:h-16 sm:px-10 sm:text-base"
+            className={
+              isQp
+                ? "tkad-qp-cta inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black text-white transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40 focus-visible:ring-offset-2 sm:h-16 sm:px-10 sm:text-base"
+                : "tkad-neon-cta-clean inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:h-16 sm:px-10 sm:text-base"
+            }
           >
             {primaryCta.label}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <Link
             href={secondaryCta.href}
-            className="inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-8 text-sm font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:h-16 sm:px-10 sm:text-base"
+            className={
+              isQp
+                ? "inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] border border-gray-200 bg-white px-8 text-sm font-black text-gray-900 shadow-sm transition-all hover:-translate-y-1 hover:border-[color:var(--qp-accent)]/35 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/35 focus-visible:ring-offset-2 dark:border-white/14 dark:bg-white/6 dark:text-white dark:hover:bg-white/10 sm:h-16 sm:px-10 sm:text-base"
+                : "inline-flex h-14 min-h-14 items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 dark:bg-white/6 bg-gray-50 px-8 text-sm font-black dark:text-white text-gray-900 shadow-[0_30px_120px_rgba(0,0,0,0.7)] backdrop-blur transition-all hover:-translate-y-1 hover:border-white/22 hover:dark:bg-white/10 bg-gray-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/40 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:h-16 sm:px-10 sm:text-base"
+            }
           >
             {secondaryCta.label}
             <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />

@@ -136,8 +136,9 @@ export default async function IndustryLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "업종별 OOH" : "INDUSTRY OOH"}`}
             title={heroTitle}
             description={heroSubtitle}
@@ -155,7 +156,7 @@ export default async function IndustryLandingPage({ params }: Props) {
 
           <IndustryMediaTypes slug={slug} locale={locale} />
 
-          <NeonSection className="pt-4 pb-12 sm:pb-16">
+          <NeonSection tone="qp" className="pt-4 pb-12 sm:pb-16">
             <NeonSectionHead
               number="02"
               kicker={t("mediaGridKicker")}
@@ -172,7 +173,7 @@ export default async function IndustryLandingPage({ params }: Props) {
                 <div className="mt-8 text-center">
                   <Link
                     href="/media"
-                    className="tkad-neon-cta-clean inline-flex h-12 items-center justify-center rounded-[18px] px-8 text-sm font-black dark:text-white text-gray-900"
+                    className="tkad-qp-cta inline-flex h-12 items-center justify-center rounded-[18px] px-8 text-sm font-black dark:text-white text-gray-900"
                   >
                     {isKo ? "전체 매체 보기" : "View all media"}
                   </Link>
@@ -182,7 +183,7 @@ export default async function IndustryLandingPage({ params }: Props) {
           </NeonSection>
 
           {industryCases.length > 0 ? (
-            <NeonSection className="pt-4 pb-12 sm:pb-16">
+            <NeonSection tone="qp" className="pt-4 pb-12 sm:pb-16">
               <NeonSectionHead
                 number="—"
                 kicker={t("casesKicker")}

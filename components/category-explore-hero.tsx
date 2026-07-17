@@ -8,9 +8,9 @@ const HEADLINE_GRADIENT =
 
 /** `/media/packages` 히어로 CTA와 동일한 스타일 토큰 */
 export const categoryHeroCtaPrimaryClass = cn(
-  "category-hero-cta-primary",
-  ui.btnPrimary,
-  "shadow-[0_18px_48px_rgba(139,92,246,0.35)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-400/40 focus-visible:ring-offset-2",
+  "category-hero-cta-primary tkad-qp-cta",
+  "inline-flex items-center justify-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-white transition-all hover:opacity-95 active:scale-95 md:text-base",
+  "shadow-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]/40 focus-visible:ring-offset-2",
 );
 
 export const categoryHeroCtaSecondaryClass = cn(

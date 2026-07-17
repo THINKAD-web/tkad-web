@@ -49,7 +49,7 @@ function FilterChip({
       className={cn(
         "rounded-full border px-3 py-1.5 font-display text-xs font-medium uppercase tracking-[0.16em] transition-all",
         active
-          ? "border-[#22d3ee]/50 bg-[#22d3ee]/15 text-[#22d3ee] shadow-[0_0_20px_rgba(34,211,238,0.15)]"
+          ? "border-[var(--qp-accent)]/50 bg-[var(--qp-accent)]/15 text-[var(--qp-accent)] shadow-[0_0_20px_rgba(34,211,238,0.15)]"
           : "dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 dark:text-white text-gray-600 hover:border-white/25 hover:dark:bg-white/10 bg-gray-100 hover:dark:text-white text-gray-900",
       )}
     >
@@ -73,7 +73,7 @@ function FilterGroup<T extends string>({
 }) {
   return (
     <div>
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#a855f7]">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
         [ {title} ]
       </p>
       <div className="mt-2 flex flex-wrap gap-2">
@@ -199,7 +199,7 @@ export function CasesFilterHub({
           value={query}
           onValueChange={onQueryChange}
           placeholder={t("searchPlaceholder")}
-          className="h-11 w-full rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[#22d3ee]/40 focus:outline-none sm:max-w-md"
+          className="h-11 w-full rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-4 text-sm dark:text-white text-gray-900 placeholder:dark:text-white text-gray-400 focus:border-[var(--qp-accent)]/40 focus:outline-none sm:max-w-md"
           aria-label={t("searchPlaceholder")}
         />
         <div className="flex items-center gap-3">

@@ -138,8 +138,9 @@ export default async function RegionLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "지역별 매체" : "BY REGION"}`}
             title={title}
             description={description}

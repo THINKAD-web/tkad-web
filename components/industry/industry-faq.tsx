@@ -16,7 +16,7 @@ export async function IndustryFaq({ slug }: Props) {
   const tc = await getTranslations("industryPage.common");
 
   return (
-    <NeonSection className="pt-10 pb-16 sm:pt-16 sm:pb-24">
+    <NeonSection tone="qp" className="pt-10 pb-16 sm:pt-16 sm:pb-24">
       <NeonSectionHead
         number="04"
         kicker={t("faqKicker")}

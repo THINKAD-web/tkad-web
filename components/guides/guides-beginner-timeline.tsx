@@ -43,10 +43,10 @@ export function GuidesBeginnerTimeline({ steps, isKo }: Props) {
             {i < steps.length - 1 ? (
               <span
                 aria-hidden
-                className="absolute left-[1.125rem] top-10 bottom-0 w-px bg-gradient-to-b from-cyan-400/50 to-transparent"
+                className="absolute left-[1.125rem] top-10 bottom-0 w-px bg-gradient-to-b from-[color:var(--qp-accent)]/40 to-transparent"
               />
             ) : null}
-            <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-cyan-400/40 bg-cyan-500/15 text-xs font-black text-cyan-200">
+            <div className="relative z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] text-xs font-black text-[color:var(--qp-accent)]">
               {step.step}
             </div>
             <div className="min-w-0 flex-1 rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur">

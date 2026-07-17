@@ -7,9 +7,18 @@ type Props = {
   className?: string;
   innerClassName?: string;
   id?: string;
+  /** qp: 네온 depth/그리드 없이 단색 섹션 */
+  tone?: "neon" | "qp";
 };
 
-export function NeonSection({ children, className, innerClassName, id }: Props) {
+export function NeonSection({
+  children,
+  className,
+  innerClassName,
+  id,
+  tone = "neon",
+}: Props) {
+  const isQp = tone === "qp";
   return (
     <section
       id={id}
@@ -18,12 +27,21 @@ export function NeonSection({ children, className, innerClassName, id }: Props) 
         className,
       )}
     >
-      <div aria-hidden className="absolute inset-0 hidden dark:block tkad-neon-depth" />
-      <div aria-hidden className="absolute inset-0 hidden opacity-20 dark:block tkad-neon-grid" />
-      <div
-        aria-hidden
-        className="absolute inset-0 hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
-      />
+      {isQp ? (
+        <div
+          aria-hidden
+          className="absolute inset-0 hidden dark:block bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_6%,transparent),transparent_50%)]"
+        />
+      ) : (
+        <>
+          <div aria-hidden className="absolute inset-0 hidden dark:block tkad-neon-depth" />
+          <div aria-hidden className="absolute inset-0 hidden opacity-20 dark:block tkad-neon-grid" />
+          <div
+            aria-hidden
+            className="absolute inset-0 hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
+          />
+        </>
+      )}
       <PageContainer className={cn("relative", innerClassName)}>
         {children}
       </PageContainer>

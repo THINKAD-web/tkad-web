@@ -99,7 +99,7 @@ export function TargetLandingGuide({
               key={step}
               className="flex gap-4 rounded-2xl border border-border bg-card px-5 py-4"
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-cyan-500/15 text-sm font-black text-cyan-700 dark:text-cyan-200">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-[color:var(--qp-accent-soft)] text-sm font-black text-cyan-700 dark:text-cyan-200">
                 {i + 1}
               </span>
               <span className="text-sm font-medium leading-relaxed sm:text-base">
@@ -155,7 +155,7 @@ export function CategoryLandingCta({
         </p>
         <Link
           href={href}
-          className="tkad-neon-cta mt-6 inline-flex h-14 items-center justify-center rounded-[22px] px-10 text-base font-black"
+          className="tkad-qp-cta mt-6 inline-flex h-14 items-center justify-center rounded-[22px] px-10 text-base font-black"
         >
           {isKo ? "견적 문의" : "Contact us"}
         </Link>

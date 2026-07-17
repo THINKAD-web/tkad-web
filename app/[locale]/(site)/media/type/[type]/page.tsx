@@ -141,8 +141,9 @@ export default async function TypeLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "유형별 매체" : "BY TYPE"}`}
             title={title}
             description={description}

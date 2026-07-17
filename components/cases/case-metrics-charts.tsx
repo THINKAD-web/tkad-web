@@ -15,7 +15,7 @@ import {
 import { formatCaseStudyMetricValue } from "@/lib/campaign-case-study";
 import type { CaseStudyMetric } from "@/lib/campaign-case-study";
 
-const BAR_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#7c3aed", "#0ea5e9"];
+const BAR_COLORS = ["var(--qp-accent)", "var(--qp-accent)", "#ec4899", "#7c3aed", "#0ea5e9"];
 
 type Props = {
   metrics: CaseStudyMetric[];

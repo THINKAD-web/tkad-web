@@ -66,31 +66,23 @@ export default async function ReportDetailPage({ params }: Params) {
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
         <section className="tkad-home-hero tkad-category-explore-hero relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
           <div
             aria-hidden
-            className="absolute inset-0 opacity-20 tkad-neon-grid"
+            className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
           />
-          <div
-            aria-hidden
-            className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
-          />
-          <div
-            aria-hidden
-            className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.75),rgba(0,0,0,0.95))]"
-          />
+          <div aria-hidden className="absolute inset-0 tkad-hero-noise opacity-[0.04] mix-blend-overlay" />
           <div className="relative mx-auto max-w-4xl px-4 pb-16 pt-16 text-center sm:px-6 sm:pb-20 sm:pt-20 lg:px-8">
-            <nav className="mb-8 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-500">
-              <Link href="/report" className="transition-colors hover:dark:text-white text-gray-900">
+            <nav className="mb-8 font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/55">
+              <Link href="/report" className="transition-colors hover:text-[color:var(--qp-accent)]">
                 {isKo ? "← 트렌드 리포트 목록" : "← Trend reports"}
               </Link>
             </nav>
             <div className="flex flex-wrap items-center justify-center gap-2">
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
-                <span className="tkad-home-accent-text">Report</span>
+              <span className="rounded-2xl border border-gray-200 bg-white px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/80">
+                <span className="text-[color:var(--qp-accent)]">Report</span>
               </span>
               <CategoryHeroBetaBadge />
-              <span className="tkad-neon-border rounded-2xl dark:bg-white/5 bg-gray-50 px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] dark:text-white text-gray-700 backdrop-blur">
+              <span className="rounded-2xl border border-gray-200 bg-white px-3 py-1 font-display text-[10px] font-black uppercase tracking-[0.22em] text-gray-700 dark:border-white/12 dark:bg-white/5 dark:text-white/80">
                 {labelForReportCategory(row.category, isKo)}
               </span>
             </div>
@@ -131,7 +123,7 @@ export default async function ReportDetailPage({ params }: Params) {
             <div className="mt-12 border-t border-border pt-10 dark:border-white/10 border-gray-200">
               <Link
                 href="/report"
-                className="tkad-neon-cta-clean inline-flex h-14 items-center justify-center rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-base"
+                className="tkad-qp-cta inline-flex h-14 items-center justify-center rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/35 focus-visible:ring-offset-2 focus-visible:ring-offset-black sm:text-base"
               >
                 {isKo ? "다른 리포트 보기" : "More reports"}
               </Link>
@@ -160,7 +152,7 @@ export default async function ReportDetailPage({ params }: Params) {
                         <div className="mt-4 flex items-center gap-3 font-display text-[11px] font-semibold uppercase tracking-[0.14em] text-muted-foreground">
                           <span className="inline-flex items-center gap-1 text-foreground dark:text-white text-gray-900">
                             <Heart
-                              className="h-3.5 w-3.5 text-primary dark:text-cyan-300"
+                              className="h-3.5 w-3.5 text-primary dark:text-[color:var(--qp-accent)]"
                               aria-hidden
                             />
                             {post.likeCount}

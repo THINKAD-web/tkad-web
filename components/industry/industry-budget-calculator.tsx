@@ -50,7 +50,7 @@ export function IndustryBudgetCalculator({ slug, priceRefs }: Props) {
     : `₩${(budgetMan * 10_000).toLocaleString("en-US")}`;
 
   return (
-    <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
+    <NeonSection tone="qp" className="pt-10 pb-12 sm:pt-16 sm:pb-20">
       <NeonSectionHead
         number="03"
         kicker={t("budgetKicker")}
@@ -61,7 +61,7 @@ export function IndustryBudgetCalculator({ slug, priceRefs }: Props) {
         <p className="text-center text-sm dark:text-white text-gray-700">{t("budgetLead")}</p>
         <p className="mt-4 text-center font-display text-2xl font-black tabular-nums dark:text-white text-gray-900">
           {formatted}
-          <span className="mt-1 block text-xs font-semibold text-cyan-300/80">
+          <span className="mt-1 block text-xs font-semibold text-[color:var(--qp-accent)]/80">
             {tc("budgetPerMonth")}
           </span>
         </p>
@@ -85,7 +85,7 @@ export function IndustryBudgetCalculator({ slug, priceRefs }: Props) {
         <button
           type="button"
           onClick={goToMedia}
-          className="tkad-neon-cta-clean mx-auto mt-6 flex h-14 w-full max-w-md items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 sm:text-base"
+          className="tkad-qp-cta mx-auto mt-6 flex h-14 w-full max-w-md items-center justify-center gap-2 rounded-[22px] px-8 text-sm font-black dark:text-white text-gray-900 transition-transform hover:-translate-y-1 sm:text-base"
         >
           {t("budgetCta")}
           <ArrowRight className="h-4 w-4" aria-hidden />

@@ -40,13 +40,13 @@ function CardShell({
   const Icon = card.icon;
   return (
     <article
-      className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur tkad-neon-border sm:p-8 ${ card.wide ? "md:col-span-2 lg:col-span-3" : "" }`}
+      className={`rounded-[28px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 backdrop-blur border-gray-200 dark:border-white/12 sm:p-8 ${ card.wide ? "md:col-span-2 lg:col-span-3" : "" }`}
     >
       <div className="mb-4 flex items-center justify-between">
         <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
           [{String(index + 1).padStart(2, "0")}]
         </span>
-        <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
+        <Icon className="h-6 w-6 text-[color:var(--qp-accent)]/90" aria-hidden />
       </div>
       <h3 className="text-lg font-black dark:text-white text-gray-900">
         {isKo ? card.titleKo : card.titleEn}
@@ -76,7 +76,7 @@ function BulletList({ items }: { items: string[] }) {
 
 function SubLabel({ children }: { children: ReactNode }) {
   return (
-    <p className="mt-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-cyan-300/80">
+    <p className="mt-5 font-display text-xs font-medium uppercase tracking-[0.18em] text-[color:var(--qp-accent)]/80">
       [ {children} ]
     </p>
   );
@@ -91,7 +91,7 @@ function ComparisonTable({ isKo }: { isKo: boolean }) {
             <th className="px-3 py-2.5 font-bold dark:text-white text-gray-500">
               {isKo ? "항목" : "Factor"}
             </th>
-            <th className="px-3 py-2.5 font-bold text-cyan-200/90">OOH</th>
+            <th className="px-3 py-2.5 font-bold text-[color:var(--qp-accent)]/90">OOH</th>
             <th className="px-3 py-2.5 font-bold text-pink-200/90">
               {isKo ? "디지털" : "Digital"}
             </th>
@@ -133,7 +133,7 @@ function WhatIsOohDetail({ isKo }: { isKo: boolean }) {
           </span>
         ))}
       </div>
-      <p className="mt-4 rounded-xl border border-cyan-400/25 bg-cyan-500/10 px-4 py-3 text-sm font-bold text-cyan-100">
+      <p className="mt-4 rounded-xl border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)] px-4 py-3 text-sm font-bold text-[color:var(--qp-accent)]">
         {isKo ? OOH_GANGNAM_STAT_KO : OOH_GANGNAM_STAT_EN}
       </p>
     </>
@@ -154,7 +154,7 @@ function MediaTypesDetail({ isKo }: { isKo: boolean }) {
           <BulletList items={isKo ? m.traitsKo : m.traitsEn} />
           <p className="mt-2 text-xs dark:text-white">{isKo ? m.formatsKo : m.formatsEn}</p>
           <p className="mt-1 text-xs dark:text-white">{isKo ? m.suitableKo : m.suitableEn}</p>
-          <p className="mt-2 text-xs font-semibold text-cyan-200/90">
+          <p className="mt-2 text-xs font-semibold text-[color:var(--qp-accent)]/90">
             {isKo ? m.priceKo : m.priceEn}
           </p>
         </div>
@@ -249,7 +249,7 @@ function BudgetDetail({ isKo }: { isKo: boolean }) {
                   >
                     <span className="font-bold dark:text-white text-gray-800">{t.label}</span>
                     <span className="mx-1.5 dark:text-white text-gray-400">·</span>
-                    <span className="font-semibold text-cyan-200/90">{t.budget}</span>
+                    <span className="font-semibold text-[color:var(--qp-accent)]/90">{t.budget}</span>
                     <span className="mt-0.5 block dark:text-white">→ {t.placement}</span>
                   </li>
                 ))}

@@ -175,8 +175,9 @@ export default async function LocalSeoLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "지역별 옥외광고" : "LOCAL OOH"}`}
             title={title}
             description={description}

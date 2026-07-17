@@ -128,8 +128,9 @@ export default async function TargetLandingPage({ params }: Props) {
         }}
       />
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "캠페인 목적" : "CAMPAIGN GOAL"}`}
             title={title}
             description={description}

@@ -30,7 +30,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
   return (
     <article
       className={cn(
-        "group relative flex flex-col overflow-hidden rounded-[22px] border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:border-cyan-400/35 hover:shadow-md dark:border-white/10 dark:bg-gray-900 dark:shadow-none dark:hover:border-[#22d3ee]/35 dark:hover:shadow-[0_12px_48px_rgba(34,211,238,0.12)]",
+        "group relative flex flex-col overflow-hidden rounded-[22px] border border-gray-200 bg-white text-left shadow-sm transition-all duration-300 hover:border-[color:var(--qp-accent)]/35 hover:shadow-md dark:border-white/10 dark:bg-gray-900 dark:shadow-none dark:hover:border-[var(--qp-accent)]/35 dark:hover:shadow-[0_12px_48px_rgba(34,211,238,0.12)]",
         className,
       )}
     >
@@ -47,7 +47,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
                   {t("badgeAnonymized")}
                 </span>
               ) : null}
-              <span className="rounded-full border border-violet-200 bg-violet-100 px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-violet-800 dark:border-[#a855f7]/40 dark:bg-[#a855f7]/20 dark:text-[#e9d5ff]">
+              <span className="rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.14em] text-[color:var(--qp-accent)]">
                 {item.industry}
               </span>
               {region ? (
@@ -83,7 +83,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
           {title}
         </h3>
         {headline ? (
-          <p className="mt-1 line-clamp-1 text-xs text-cyan-500 dark:text-cyan-400">
+          <p className="mt-1 line-clamp-1 text-xs text-[color:var(--qp-accent)]">
             {headline}
           </p>
         ) : null}
@@ -107,7 +107,7 @@ export function CaseStudyCard({ item, className, compact }: Props) {
         {!compact ? (
           <Link
             href={`/contact?case=${encodeURIComponent(item.id)}`}
-            className="mt-4 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-gray-500 transition-colors hover:text-cyan-600 dark:text-white/60 dark:hover:text-[#22d3ee]"
+            className="mt-4 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-gray-500 transition-colors hover:text-[color:var(--qp-accent)] dark:text-white/60"
             onClick={(e) => e.stopPropagation()}
           >
             {t("ctaSimilar")}

@@ -37,7 +37,7 @@ export async function IndustryMediaTypes({ slug }: Props) {
   const t = await getTranslations(`industryPage.slugs.${slug}`);
 
   return (
-    <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
+    <NeonSection tone="qp" className="pt-10 pb-12 sm:pt-16 sm:pb-20">
       <NeonSectionHead
         number="01"
         kicker={t("mediaTypesKicker")}
@@ -57,7 +57,7 @@ export async function IndustryMediaTypes({ slug }: Props) {
                 <span className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   [{String(i + 1).padStart(2, "0")}]
                 </span>
-                <Icon className="h-6 w-6 text-cyan-300/90" aria-hidden />
+                <Icon className="h-6 w-6 text-[color:var(--qp-accent)]/90" aria-hidden />
               </div>
               <h3 className="text-lg font-black dark:text-white text-gray-900">
                 {t(`mediaTypes.${key}.title`)}

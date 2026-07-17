@@ -148,8 +148,9 @@ export default async function AreaLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "지구별 매체" : "BY DISTRICT"}`}
             title={title}
             description={description}

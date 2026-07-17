@@ -139,8 +139,9 @@ export default async function MediaCategoryLandingPage({ params }: Props) {
         }}
       />
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "매체 카테고리" : "MEDIA CATEGORY"}`}
             title={title}
             description={description}

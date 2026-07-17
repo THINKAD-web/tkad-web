@@ -145,8 +145,9 @@ export default async function MarketingTypeLandingPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <MediaKeywordLandingHero
+            tone="qp"
             eyebrow={`// ${isKo ? "매체 유형" : "MEDIA TYPE"}`}
             title={heroTitle}
             description={intro}

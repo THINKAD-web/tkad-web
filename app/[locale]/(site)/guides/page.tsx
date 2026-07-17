@@ -223,7 +223,7 @@ export default async function GuidesIndexPage({ params }: Props) {
       />
 
       <HomeLandingDayNight>
-        <div className="tkad-landing-neon tkad-planner-neon tkad-media-page">
+        <div className="tkad-landing-neon tkad-planner-neon">
           <PageHero
             eyebrow="// GUIDES"
             title={isKo ? "옥외광고 " : "OOH "}
@@ -249,7 +249,7 @@ export default async function GuidesIndexPage({ params }: Props) {
           </div>
 
           {seoGuides.length > 0 ? (
-            <NeonSection className="pt-10 pb-8 sm:pt-14">
+            <NeonSection tone="qp" className="pt-10 pb-8 sm:pt-14">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                 [ {sectionCopy.seoGuides} ]
               </p>
@@ -269,7 +269,7 @@ export default async function GuidesIndexPage({ params }: Props) {
             </NeonSection>
           ) : null}
 
-          <NeonSection className="pt-10 pb-12 sm:pt-16 sm:pb-20">
+          <NeonSection tone="qp" className="pt-10 pb-12 sm:pt-16 sm:pb-20">
             <NeonSectionHead
               number="01"
               kicker={sectionCopy.basicsKicker}
@@ -279,7 +279,7 @@ export default async function GuidesIndexPage({ params }: Props) {
             <GuidesBeginnerBasicsGrid cards={BEGINNER_BASICS_CARDS} isKo={isKo} />
           </NeonSection>
 
-          <NeonSection className="pt-4 pb-12 sm:pb-20">
+          <NeonSection tone="qp" className="pt-4 pb-12 sm:pb-20">
             <NeonSectionHead
               number="02"
               kicker={sectionCopy.timelineKicker}
@@ -291,7 +291,7 @@ export default async function GuidesIndexPage({ params }: Props) {
             </div>
           </NeonSection>
 
-          <NeonSection className="pt-4 pb-12 sm:pb-20">
+          <NeonSection tone="qp" className="pt-4 pb-12 sm:pb-20">
             <NeonSectionHead
               number="03"
               kicker={sectionCopy.faqKicker}
@@ -301,7 +301,7 @@ export default async function GuidesIndexPage({ params }: Props) {
             <GuidesBeginnerFaq items={BEGINNER_FAQS} isKo={isKo} />
           </NeonSection>
 
-          <NeonSection className="pt-4 pb-16 sm:pb-24">
+          <NeonSection tone="qp" className="pt-4 pb-16 sm:pb-24">
             <GuidesBeginnerCta
               isKo={isKo}
               title={sectionCopy.ctaTitle}

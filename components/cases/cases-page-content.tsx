@@ -64,7 +64,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
           </CategoryHeroCtaRow>
         </PageContainer>
 
-        <NeonSection className="pb-0 pt-8 sm:pb-0 sm:pt-12">
+        <NeonSection tone="qp" className="pb-0 pt-8 sm:pb-0 sm:pt-12">
           {empty ? (
             <div className="space-y-14">
               <p className="mx-auto max-w-3xl text-center text-lg font-bold leading-relaxed dark:text-white text-gray-800 sm:text-xl">
@@ -76,7 +76,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
                     key={card.titleKey}
                     className="rounded-[20px] border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 p-5 backdrop-blur"
                   >
-                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+                    <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                       [ {t(card.titleKey)} ]
                     </p>
                     <p className="mt-3 text-[12px] leading-relaxed tracking-tight dark:text-white text-gray-500">
@@ -107,8 +107,8 @@ export async function CasesPageContent({ locale, cases }: Props) {
                 </CasesCatalogSection>
               </Suspense>
 
-              <div className="mt-16 rounded-[24px] border border-[#22d3ee]/25 bg-gradient-to-br from-[#a855f7]/15 via-transparent to-[#22d3ee]/10 px-6 py-10 text-center">
-                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[#22d3ee]">
+              <div className="mt-16 rounded-[24px] border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent-soft)] px-6 py-10 text-center">
+                <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[var(--qp-accent)]">
                   [ NEXT STEP ]
                 </p>
                 <h2 className="mt-3 text-xl font-bold tracking-tight dark:text-white text-gray-900 sm:text-2xl">
