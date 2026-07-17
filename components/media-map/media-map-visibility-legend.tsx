@@ -43,7 +43,7 @@ export function MediaMapVisibilityLegend({
             className="h-3 w-3 shrink-0 rounded-full border"
             style={{
               backgroundColor: entries[4]?.fill ?? "#22D3EE",
-              borderColor: entries[4]?.stroke ?? "#06B6D4",
+              borderColor: entries[4]?.stroke ?? "#ff6200",
             }}
             aria-hidden
           />
@@ -73,7 +73,7 @@ export function MediaMapVisibilityLegend({
               type="checkbox"
               checked={subwayEnabled}
               onChange={(e) => onSubwayEnabledChange(e.target.checked)}
-              className="h-4 w-4 rounded border-border accent-violet-600"
+              className="h-4 w-4 rounded border-border accent-[color:var(--qp-accent)]"
             />
           </label>
         </div>

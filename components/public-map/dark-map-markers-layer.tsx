@@ -45,9 +45,10 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
 
   const sizeClass = clusterSizeClass(count);
   const px = sizeClass === "large" ? 42 : sizeClass === "medium" ? 38 : 34;
-  const border = lightTiles ? "2px solid rgba(15,23,42,0.5)" : "2px solid rgba(255,255,255,0.9)";
-  const fill = lightTiles ? "#06B6D4" : "#00E5FF";
-  const textColor = lightTiles ? "#ffffff" : "#0f172a";
+  /* qp accent — dark/light tiles 모두 흰 숫자로 대비 유지 */
+  const border = lightTiles ? "2px solid rgba(15,23,42,0.45)" : "2px solid rgba(255,255,255,0.92)";
+  const fill = "#ff6200";
+  const textColor = "#ffffff";
   const icon = L.divIcon({
     html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};background:${fill};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${textColor};font-family:ui-sans-serif,system-ui,sans-serif">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,

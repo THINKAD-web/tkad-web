@@ -74,7 +74,7 @@ function MapViewLoadingPlaceholder() {
   return (
     <div className="flex h-full w-full items-center justify-center bg-gray-100 dark:bg-[#0a0a12]">
       <div className="flex flex-col items-center gap-3">
-        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-violet-500 dark:border-white/20 dark:border-t-violet-400" />
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-gray-300 border-t-[color:var(--qp-accent)] dark:border-white/20" />
         <p className="tkad-type-body text-tkad-muted">지도 불러오는 중…</p>
       </div>
     </div>
@@ -1002,7 +1002,7 @@ export default function MediaMapPageClient() {
           className={cn(
             "flex items-center gap-1 px-2 py-1 text-xs leading-[1.375] font-medium transition-colors",
             sheetSnap === "full"
-              ? "bg-violet-500 !text-white"
+              ? "bg-[color:var(--qp-accent)] !text-white"
               : "tkad-type-meta text-gray-600 dark:text-white/70",
           )}
         >
@@ -1017,7 +1017,7 @@ export default function MediaMapPageClient() {
           className={cn(
             "flex items-center gap-1 px-2 py-1 text-xs leading-[1.375] font-medium transition-colors",
             sheetSnap === "peek"
-              ? "bg-violet-500 !text-white"
+              ? "bg-[color:var(--qp-accent)] !text-white"
               : "tkad-type-meta text-gray-600 dark:text-white/70",
           )}
         >
@@ -1079,13 +1079,13 @@ export default function MediaMapPageClient() {
               <div className="relative" data-map-onboarding="search-area">
                 <span
                   aria-hidden
-                  className="pointer-events-none absolute -inset-1 rounded-full bg-violet-500/30 motion-safe:animate-ping"
+                  className="pointer-events-none absolute -inset-1 rounded-full bg-[color:var(--qp-accent)]/30 motion-safe:animate-ping"
                 />
                 <button
                   type="button"
                   disabled={loading}
                   onClick={handleSearchThisArea}
-                  className="pointer-events-auto relative inline-flex h-10 items-center gap-2 rounded-full border border-violet-500/80 bg-violet-600 px-4 text-xs leading-[1.375] font-semibold !text-white shadow-lg shadow-violet-600/35 backdrop-blur-md transition-colors hover:bg-violet-500 disabled:opacity-70 motion-safe:animate-pulse dark:border-violet-400/70 dark:bg-violet-600 dark:shadow-violet-900/40 dark:hover:bg-violet-500"
+                  className="pointer-events-auto relative inline-flex h-10 items-center gap-2 rounded-full border border-[color:var(--qp-accent)]/80 bg-[color:var(--qp-accent)] px-4 text-xs leading-[1.375] font-semibold !text-white shadow-lg shadow-[color:var(--qp-accent)]/30 backdrop-blur-md transition-colors hover:bg-[color:var(--qp-accent-hover)] disabled:opacity-70 motion-safe:animate-pulse dark:border-[color:var(--qp-accent)]/70 dark:bg-[color:var(--qp-accent)] dark:hover:bg-[color:var(--qp-accent-hover)]"
                 >
                   {loading ? (
                     <Loader2 className="h-3.5 w-3.5 animate-spin" aria-hidden />
@@ -1180,7 +1180,7 @@ export default function MediaMapPageClient() {
                   onClick={startSurveyMode}
                   className={cn(
                     surveyMode &&
-                      "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
+                      "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/15",
                   )}
                   aria-label={isKo ? "답사 모드" : "Field survey"}
                 >
@@ -1217,7 +1217,7 @@ export default function MediaMapPageClient() {
               className={cn(
                 "pointer-events-auto absolute left-3 top-3 z-[46] md:hidden",
                 surveyMode &&
-                  "border-violet-400/50 bg-violet-50 dark:bg-violet-500/15",
+                  "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-[color:var(--qp-accent)]/15",
               )}
               aria-label={isKo ? "답사 모드" : "Field survey"}
             />

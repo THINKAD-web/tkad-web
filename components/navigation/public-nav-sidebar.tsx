@@ -105,7 +105,7 @@ export function PublicNavSidebar({
           className={cn(
             "flex min-h-12 items-center gap-3 transition-colors",
             contactActive
-              ? "text-violet-600 dark:text-violet-400"
+              ? "text-[color:var(--qp-accent)]"
               : "text-gray-900 hover:text-gray-950 dark:text-white dark:hover:text-white",
           )}
         >
@@ -113,7 +113,7 @@ export function PublicNavSidebar({
             className={cn(
               "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
               contactActive
-                ? "bg-violet-600 text-white dark:bg-violet-500"
+                ? "bg-[color:var(--qp-accent)] text-white"
                 : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
             )}
           >
@@ -145,14 +145,14 @@ export function PublicNavSidebar({
                 className={cn(
                   "flex w-full min-h-12 items-center gap-3 px-5 py-3 text-left transition-colors",
                   groupActive
-                    ? "text-violet-600 dark:text-violet-400"
+                    ? "text-[color:var(--qp-accent)]"
                     : "text-gray-900 dark:text-white",
                 )}
               >
                 <Icon
                   className={cn(
                     "h-4 w-4 shrink-0 opacity-60",
-                    groupActive && "text-violet-600 opacity-100 dark:text-violet-400",
+                    groupActive && "text-[color:var(--qp-accent)] opacity-100",
                   )}
                   aria-hidden
                 />
@@ -168,7 +168,7 @@ export function PublicNavSidebar({
                   className={cn(
                     "h-5 w-5 shrink-0 text-gray-400 transition-transform dark:text-white/40",
                     expanded && "rotate-180",
-                    groupActive && "text-violet-500 dark:text-violet-400",
+                    groupActive && "text-[color:var(--qp-accent)]",
                   )}
                   aria-hidden
                 />
@@ -211,7 +211,7 @@ export function PublicNavSidebar({
                             className={cn(
                               "flex min-h-12 items-center px-1 py-2.5 transition-colors",
                               active
-                                ? "text-violet-600 dark:text-violet-400"
+                                ? "text-[color:var(--qp-accent)]"
                                 : "text-gray-800 hover:text-gray-900 dark:text-white/85 dark:hover:text-white",
                               item.secondary &&
                                 !active &&

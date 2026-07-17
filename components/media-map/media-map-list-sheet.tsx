@@ -242,7 +242,7 @@ export function MediaMapListSheet({
           </button>
           {showPeekHint && snap === "peek" ? (
             <p
-              className="tkad-type-note mt-1 px-3 text-center font-medium text-violet-600 dark:text-violet-300"
+              className="tkad-type-note mt-1 px-3 text-center font-medium text-[color:var(--qp-accent)]"
               data-map-onboarding="sheet-peek-hint"
             >
               {isKo ? "위로 올려 목록 보기" : "Swipe up for the list"}

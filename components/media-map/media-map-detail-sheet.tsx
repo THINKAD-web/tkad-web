@@ -425,7 +425,7 @@ function MediaMapDetailBody({
               {(item.isInstantBooking || item.isVerified) && (
                 <div className="mb-1 flex flex-wrap gap-1">
                   {item.isInstantBooking ? (
-                    <span className="rounded bg-violet-100 px-1.5 py-0.5 text-[10px] font-semibold text-violet-800 dark:bg-violet-500/20 dark:text-violet-200">
+                    <span className="rounded bg-[color:var(--qp-accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)]">
                       {isKo ? "즉시예약" : "Instant"}
                     </span>
                   ) : null}

@@ -37,19 +37,19 @@ export function MapOnboardingCoachmark({
     >
       <div
         className={cn(
-          "relative rounded-xl border border-violet-400/40 bg-card/95 px-3.5 py-3 text-left shadow-xl shadow-violet-500/15 backdrop-blur-md",
-          "dark:border-violet-400/35 dark:bg-[#12121c]/95",
+          "relative rounded-xl border border-[color:var(--qp-accent)]/40 bg-card/95 px-3.5 py-3 text-left shadow-xl shadow-[color:var(--qp-accent)]/15 backdrop-blur-md",
+          "dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95",
         )}
       >
         {placement === "below" ? (
           <span
             aria-hidden
-            className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-violet-400/40 bg-card dark:border-violet-400/35 dark:bg-[#12121c]/95"
+            className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-l border-t border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95"
           />
         ) : (
           <span
             aria-hidden
-            className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b border-violet-400/40 bg-card dark:border-violet-400/35 dark:bg-[#12121c]/95"
+            className="absolute -bottom-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rotate-45 border-r border-b border-[color:var(--qp-accent)]/40 bg-card dark:border-[color:var(--qp-accent)]/35 dark:bg-[#12121c]/95"
           />
         )}
         <button
@@ -65,7 +65,7 @@ export function MapOnboardingCoachmark({
         <button
           type="button"
           onClick={onDismiss}
-          className="tkad-type-note mt-2.5 font-medium text-violet-600 dark:text-violet-300"
+          className="tkad-type-note mt-2.5 font-medium text-[color:var(--qp-accent)]"
         >
           {dismissLabel}
         </button>
