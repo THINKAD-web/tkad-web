@@ -160,14 +160,14 @@ export default async function BlogSeoPostPage({ params }: Props) {
           <div className="mx-auto max-w-3xl px-4 sm:px-6">
             <Link
               href="/blog"
-              className="inline-flex items-center gap-1.5 text-xs font-semibold text-violet-500"
+              className="inline-flex items-center gap-1.5 text-xs font-semibold text-hermes"
             >
               <ArrowLeft className="h-3.5 w-3.5" />
               {isKo ? "블로그 목록" : "Back to blog"}
             </Link>
 
             <header className="mt-6 rounded-2xl border border-gray-100 bg-white p-6 shadow-sm dark:border-white/10 dark:bg-white/5 sm:p-8">
-              <p className="text-xs font-medium uppercase tracking-widest text-violet-400">
+              <p className="text-xs font-medium uppercase tracking-widest text-hermes">
                 {post.publishedAt}
               </p>
               <h1 className="mt-3 text-2xl font-bold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
@@ -206,7 +206,7 @@ export default async function BlogSeoPostPage({ params }: Props) {
                     <li key={m.id}>
                       <Link
                         href={`/media/${m.id}`}
-                        className="text-sm font-semibold text-violet-500 hover:underline"
+                        className="text-sm font-semibold text-hermes hover:underline"
                       >
                         {isKo ? m.name : m.nameEn || m.name}
                       </Link>
@@ -229,7 +229,7 @@ export default async function BlogSeoPostPage({ params }: Props) {
             <div className="mt-10 text-center">
               <Link
                 href="/planner"
-                className="inline-flex h-12 items-center justify-center rounded-xl bg-gradient-to-r from-violet-500 to-cyan-400 px-8 text-sm font-bold dark:text-white text-gray-900"
+                className="inline-flex h-12 items-center justify-center rounded-xl bg-hermes px-8 text-sm font-bold text-white"
               >
                 {isKo ? "AI 매체 플래너 시작" : "Start AI media planner"}
               </Link>

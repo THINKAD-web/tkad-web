@@ -141,7 +141,7 @@ export function CommunityProfileEditForm({
         variant="accent"
         size="lg"
         disabled={loading}
-        className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)]"
+        className="w-full rounded-[22px] border dark:border-white/14 border-gray-200 bg-hermes dark:text-white text-white shadow-sm"
       >
         {loading && <Spinner size="sm" />}
         {loading ? (isKo ? "저장 중…" : "Saving…") : isKo ? "저장" : "Save"}

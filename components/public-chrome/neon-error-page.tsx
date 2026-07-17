@@ -50,11 +50,11 @@ function NeonErrorActions({
   );
   const secondaryClass = cn(
     actionBtnClass,
-    "border-cyan-400/25 bg-cyan-500/10 text-cyan-100 hover:bg-cyan-500/15",
+    "border-hermes/30 bg-hermes/10 text-hermes hover:bg-hermes/15",
   );
   const retryClass = cn(
     actionBtnClass,
-    "border-transparent bg-gradient-to-r from-violet-500 to-cyan-400 dark:text-white text-gray-900 shadow-lg shadow-violet-500/30",
+    "border-transparent bg-hermes text-white shadow-sm hover:bg-cta-hover",
   );
 
   return (
@@ -70,7 +70,7 @@ function NeonErrorActions({
             type="button"
             variant="accent"
             size="lg"
-            className="min-h-12 w-full bg-gradient-to-r from-violet-500 to-cyan-400 text-base font-bold dark:text-white text-gray-900 shadow-lg shadow-violet-500/30 sm:w-auto"
+            className="min-h-12 w-full bg-hermes text-base font-bold text-white shadow-sm hover:bg-cta-hover sm:w-auto"
             onClick={onReset}
           >
             <RotateCcw className="h-4 w-4" />
@@ -104,7 +104,7 @@ function NeonErrorActions({
             href={secondaryHref}
             variant="secondary"
             size="lg"
-            className="min-h-12 w-full border-cyan-400/25 bg-cyan-500/10 text-cyan-100 sm:w-auto"
+            className="min-h-12 w-full border-hermes/30 bg-hermes/10 text-hermes sm:w-auto"
           >
             {secondaryLabel}
           </BtnBlock>
@@ -135,22 +135,13 @@ function NeonErrorShell({
     >
       <div
         aria-hidden
-        className="pointer-events-none absolute inset-0 opacity-[0.14] tkad-neon-grid"
-      />
-      <div
-        aria-hidden
-        className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgba(34,211,238,0.16),transparent_52%),radial-gradient(circle_at_88%_22%,rgba(168,85,247,0.14),transparent_55%),radial-gradient(circle_at_50%_100%,rgba(244,63,94,0.1),transparent_58%)]"
+        className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
       />
 
       <div className="relative z-10 mx-auto w-full max-w-lg">
         <div className="tkad-glass-surface relative overflow-hidden rounded-[28px] border dark:border-white/12 border-gray-200 p-8 text-center shadow-[0_24px_80px_rgba(0,0,0,0.45)] sm:p-10">
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-0 opacity-20 tkad-neon-grid"
-          />
-
           <div className="relative">
-            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-400/30 bg-rose-500/10 shadow-[0_0_32px_rgba(244,63,94,0.2)]">
+            <div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-2xl border border-rose-400/30 bg-rose-500/10 shadow-sm">
               <AlertTriangle
                 className="h-8 w-8 text-rose-300"
                 strokeWidth={1.75}
@@ -158,12 +149,12 @@ function NeonErrorShell({
               />
             </div>
 
-            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300/90">
+            <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
               {eyebrow}
             </p>
 
             <p
-              className="mt-4 bg-gradient-to-r from-violet-300 via-cyan-200 to-violet-300 bg-clip-text text-7xl font-black leading-none tracking-tighter text-transparent sm:text-8xl"
+              className="mt-4 text-7xl font-black leading-none tracking-tighter text-hermes sm:text-8xl"
               aria-hidden
             >
               {code}

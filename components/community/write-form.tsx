@@ -152,7 +152,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
                 key={cat}
                 type="button"
                 onClick={() => setCategory(cat)}
-                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ active ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900 shadow-[0_18px_48px_rgba(99,102,241,0.22)]" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
+                className={`inline-flex min-w-[150px] flex-col items-start gap-1 rounded-[20px] border px-4 py-3 text-left font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ active ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900 shadow-sm" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white text-gray-800 hover:dark:bg-white/10 bg-gray-100" }`}
               >
                 <span>
                   {labels.emoji} {labels.ko}
@@ -170,8 +170,8 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       </div>
 
       {category === "media_recommend" ? (
-        <div className="grid gap-4 rounded-[24px] border dark:border-violet-400/30 border-violet-200 dark:bg-violet-500/5 bg-violet-50/50 p-5">
-          <p className="text-sm font-semibold dark:text-violet-200 text-violet-800">
+        <div className="grid gap-4 rounded-[24px] border border-hermes/30 bg-hermes/10 p-5">
+          <p className="text-sm font-semibold text-hermes">
             {isKo
               ? "AI 추천을 위해 아래 항목을 입력해주세요."
               : "Fill in the fields below for AI recommendations."}
@@ -334,7 +334,7 @@ export function CommunityWriteForm({ locale, catalog, currentUser }: Props) {
       <button
         type="submit"
         disabled={!canSubmit}
-        className="inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 disabled:opacity-50"
+        className="inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes px-6 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] text-white disabled:opacity-50"
       >
         <Send className="h-3.5 w-3.5" />
         {busy ? "전송 중…" : "글 등록"}

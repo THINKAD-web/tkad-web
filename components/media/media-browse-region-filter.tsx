@@ -66,7 +66,7 @@ export function MediaBrowseRegionFilter({
               className={cn(
                 "rounded-full px-3.5 py-1.5 text-xs font-semibold transition-colors sm:text-sm",
                 active
-                  ? "bg-violet-500 text-white shadow-sm shadow-violet-500/25"
+                  ? "bg-hermes text-white shadow-sm shadow-hermes/25"
                   : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
               )}
             >
@@ -87,7 +87,7 @@ export function MediaBrowseRegionFilter({
                 className={cn(
                   "rounded-full border px-3 py-1 text-[11px] font-medium transition-colors sm:text-xs",
                   active
-                    ? "border-violet-400 bg-violet-500/15 text-violet-700 dark:text-violet-300"
+                    ? "border-hermes/30 bg-hermes/15 text-hermes"
                     : "border-gray-200 text-gray-600 dark:border-white/15 dark:text-white/70",
                 )}
               >

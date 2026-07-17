@@ -90,7 +90,7 @@ export async function CommunityFeedPage({
 
   return (
     <>
-      <NeonSection className="pb-14 pt-16 sm:pb-18 sm:pt-20 lg:pb-24 lg:pt-28">
+      <NeonSection tone="qp" className="pb-14 pt-16 sm:pb-18 sm:pt-20 lg:pb-24 lg:pt-28">
         <div className="flex flex-wrap items-center gap-3">
           {[
             {
@@ -118,7 +118,7 @@ export async function CommunityFeedPage({
         </div>
 
         <div className="mt-8 grid gap-6 lg:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
-          <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+          <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
             <NeonSectionHead
               number="06"
               kicker="Community"
@@ -201,7 +201,7 @@ export async function CommunityFeedPage({
               </div>
             </div>
 
-            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+            <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-hermes/10 p-5 backdrop-blur tkad-neon-border">
               <div className="flex items-start gap-3">
                 <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                 <div>
@@ -258,7 +258,7 @@ export async function CommunityFeedPage({
                     category: activeCategory,
                     sort: option.key as "mixed" | "new" | "popular",
                   })}
-                  className={`inline-flex rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ activeSort === option.key ? "border-[#8b5cf6]/60 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.16))] dark:text-white text-gray-900" : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900" }`}
+                  className={`inline-flex rounded-full border px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors ${ activeSort === option.key ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900" : "dark:border-white/10 border-gray-200 dark:bg-black bg-white/20 dark:text-white hover:dark:bg-white/8 bg-gray-100 hover:dark:text-white text-gray-900" }`}
                 >
                   {option.label}
                 </Link>
@@ -268,7 +268,7 @@ export async function CommunityFeedPage({
         </div>
       </NeonSection>
 
-      <NeonSection className="pt-0">
+      <NeonSection tone="qp" className="pt-0">
         <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div>
             <div className="flex flex-wrap items-end justify-between gap-4">
@@ -317,7 +317,7 @@ export async function CommunityFeedPage({
               </p>
               <Link
                 href="/community/write"
-                  className="mt-6 inline-flex items-center gap-2 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100"
+                  className="mt-6 inline-flex items-center gap-2 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20"
               >
                 {isKo ? "첫 글 작성하기" : "Write the first post"}
                 <ArrowRight className="h-3.5 w-3.5" />

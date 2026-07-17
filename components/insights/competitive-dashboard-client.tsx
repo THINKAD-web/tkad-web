@@ -62,7 +62,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
               key={ind}
               type="button"
               onClick={() => setIndustry(ind)}
-              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${ industry === ind ? "border-violet-500 bg-violet-500/15 text-violet-700 dark:text-violet-200" : "border-border bg-card hover:border-violet-400/40" }`}
+              className={`rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors ${ industry === ind ? "border-hermes bg-hermes/15 text-hermes" : "border-border bg-card hover:border-hermes/30" }`}
             >
               {industryLabel(ind, isKo)}
             </button>
@@ -83,7 +83,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
         <div className="mt-6 grid gap-6 lg:grid-cols-3">
           <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-              <MapPin className="h-4 w-4 text-violet-500" />
+              <MapPin className="h-4 w-4 text-hermes" />
               {isKo ? "지역 집중도" : "Region focus"}
             </h3>
             <ul className="space-y-2">
@@ -95,7 +95,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
                   </div>
                   <div className="mt-1 h-2 overflow-hidden rounded-full bg-muted">
                     <div
-                      className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400"
+                      className="h-full rounded-full bg-hermes"
                       style={{ width: `${r.pct}%` }}
                     />
                   </div>
@@ -106,7 +106,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
 
           <div>
             <h3 className="mb-3 flex items-center gap-2 text-sm font-bold">
-              <Layers className="h-4 w-4 text-cyan-500" />
+              <Layers className="h-4 w-4 text-muted-foreground" />
               {isKo ? "선호 매체 유형" : "Preferred media types"}
             </h3>
             <ul className="space-y-2">
@@ -122,8 +122,8 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
             </ul>
           </div>
 
-          <div className="flex flex-col justify-center rounded-xl border border-violet-400/20 bg-violet-500/5 p-5">
-            <Timer className="h-6 w-6 text-violet-500" />
+          <div className="flex flex-col justify-center rounded-xl border border-hermes/20 bg-hermes/5 p-5">
+            <Timer className="h-6 w-6 text-hermes" />
             <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
               {isKo ? "평균 집행 기간" : "Avg flight duration"}
             </p>
@@ -152,7 +152,7 @@ export function CompetitiveDashboardClient({ isKo, access, teaser }: Props) {
             {display.currentSeasonTop.map((row) => (
               <span
                 key={row.industry}
-                className="rounded-full border border-cyan-400/30 bg-cyan-400/10 px-3 py-1 text-xs font-bold text-cyan-700 dark:text-cyan-200"
+                className="rounded-full border border-hermes/30 bg-hermes/10 px-3 py-1 text-xs font-bold text-hermes"
               >
                 {row.label} · {row.score}
               </span>
@@ -270,7 +270,7 @@ function HeatmapGrid({
                   key={`${ind}-${ml}`}
                   className="h-8 rounded-md border border-border/30"
                   style={{
-                    backgroundColor: `rgba(139, 92, 246, ${alpha})`,
+                    backgroundColor: `rgba(255, 98, 0, ${alpha})`,
                   }}
                   title={`${ind} ${ml}`}
                 />

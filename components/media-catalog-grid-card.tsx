@@ -88,7 +88,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
   const thumbnailOverlays = (
     <>
       {media.catalogSource !== "network" && media.isVerified ? (
-        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-[linear-gradient(135deg,rgba(168,85,247,0.95)_0%,rgba(34,211,238,0.92)_55%,rgba(236,72,153,0.88)_100%)] px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_0_26px_rgba(168,85,247,0.28),0_0_18px_rgba(34,211,238,0.18)]">
+        <div className="absolute right-0 top-0 z-10 border-b-2 border-l-2 border-border bg-hermes px-2.5 py-1 font-display text-xs font-medium uppercase tracking-[0.2em] text-white shadow-sm">
           Verified
         </div>
       ) : media.catalogSource === "network" ? (
@@ -299,7 +299,7 @@ export function MediaCatalogGridCard(props: MediaCatalogGridCardProps) {
                   e.stopPropagation();
                   router.push(`/contact?media=${encodeURIComponent(media.id)}`);
                 }}
-                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-gradient-to-r from-violet-500 to-cyan-400 px-2 py-2 text-xs font-bold dark:text-white text-gray-900 shadow-md shadow-violet-500/25"
+                className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-hermes px-2 py-2 text-xs font-bold text-white shadow-md shadow-hermes/25"
               >
                 <span className="truncate">{tMedia("quickInquiryCta")}</span>
                 <ArrowRight className="h-3.5 w-3.5 shrink-0" aria-hidden />

@@ -18,8 +18,8 @@ function fmt(n: number, isKo: boolean) {
 const ACCENT = [
   "text-primary",
   "text-accent",
-  "text-[#22d3ee]",
-  "text-[#a855f7]",
+  "text-hermes",
+  "text-hermes/80",
 ] as const;
 
 export function AdvertiserSummaryCards({

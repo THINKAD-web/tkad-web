@@ -48,7 +48,7 @@ export default async function CommunityWritePage({ params }: Props) {
   return (
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
-        <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
+        <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href="/community"
             className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
@@ -58,7 +58,7 @@ export default async function CommunityWritePage({ params }: Props) {
           </Link>
 
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.2fr)_360px]">
-            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               <NeonSectionHead
                 number="07"
                 kicker="Write"
@@ -112,7 +112,7 @@ export default async function CommunityWritePage({ params }: Props) {
                   <p>{isKo ? "댓글과 반응은 모두 로그인한 멤버 기준으로 연결됩니다." : "Comments and reactions are tied to signed-in member identities."}</p>
                 </div>
               </div>
-              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-hermes/10 p-5 backdrop-blur tkad-neon-border">
                 <div className="flex items-start gap-3">
                   <Sparkles className="mt-0.5 h-5 w-5 dark:text-white" />
                   <div>
@@ -131,7 +131,7 @@ export default async function CommunityWritePage({ params }: Props) {
           </div>
         </NeonSection>
 
-        <NeonSection className="pt-0 pb-20 sm:pb-24">
+        <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
             <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               {me ? (

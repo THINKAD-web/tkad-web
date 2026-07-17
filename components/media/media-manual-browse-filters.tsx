@@ -791,7 +791,7 @@ export function MediaManualBrowseFilters({
                 className={cn(
                   "whitespace-nowrap rounded-full px-3 py-1.5 text-sm font-medium transition-all",
                   selected
-                    ? "bg-cyan-500 text-white"
+                    ? "bg-hermes text-white"
                     : "bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
                 )}
               >
@@ -802,7 +802,7 @@ export function MediaManualBrowseFilters({
         </div>
 
         {activeRegion ? (
-          <div className="mt-2 flex flex-wrap gap-2 rounded-xl border border-cyan-100 bg-cyan-50/50 p-2 dark:border-cyan-500/20 dark:bg-cyan-500/5">
+          <div className="mt-2 flex flex-wrap gap-2 rounded-xl border border-hermes/30 bg-hermes/10 p-2 dark:border-hermes/30 dark:bg-hermes/10">
             {activeRegion.sub.map((sub) => {
               const selected = regionSub === sub.id;
               const regionCount = browseRegionSubCount(
@@ -823,7 +823,7 @@ export function MediaManualBrowseFilters({
                   className={cn(
                     "whitespace-nowrap rounded-full px-3 py-1 text-xs font-medium transition-all",
                     selected
-                      ? "bg-cyan-500 text-white"
+                      ? "bg-hermes text-white"
                       : "bg-white text-gray-600 dark:bg-white/10 dark:text-white/70",
                     regionDisabled && disabledZeroChipClass,
                   )}

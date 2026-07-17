@@ -91,7 +91,7 @@ export function CommunityPostInteractions({
           disabled={likeBusy || liked}
           className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors disabled:opacity-60 ${
             liked
-              ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900"
+              ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900"
               : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white hover:dark:bg-white/10 bg-gray-100"
           }`}
         >
@@ -107,7 +107,7 @@ export function CommunityPostInteractions({
           disabled={bookmarkBusy}
           className={`inline-flex items-center gap-2 rounded-full border px-5 py-2.5 font-display text-xs font-medium uppercase tracking-[0.22em] transition-colors disabled:opacity-60 ${
             bookmarked
-              ? "border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.28),rgba(34,211,238,0.18))] dark:text-white text-gray-900"
+              ? "border-hermes/40 bg-hermes/15 dark:text-white text-gray-900"
               : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 dark:text-white hover:dark:bg-white/10 bg-gray-100"
           }`}
         >
@@ -292,7 +292,7 @@ export function ReportModal({
                 type="button"
                 onClick={handleSubmit}
                 disabled={busy}
-                className="flex-1 rounded-full border border-[#8b5cf6]/55 bg-[linear-gradient(135deg,rgba(168,85,247,0.26),rgba(34,211,238,0.16))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:dark:bg-white/10 bg-gray-100 disabled:opacity-60"
+                className="flex-1 rounded-full border border-hermes/40 bg-hermes/15 px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900 transition-colors hover:bg-hermes/20 disabled:opacity-60"
               >
                 {busy ? (isKo ? "처리 중…" : "Submitting…") : isKo ? "신고 접수" : "Submit"}
               </button>

@@ -58,7 +58,7 @@ export function DiscoveryMediaCardCompactRow({
     <>
       <div className="relative h-11 w-14 shrink-0 overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800">
         {rank != null ? (
-          <span className="tkad-type-note absolute left-0.5 top-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-violet-500 font-bold text-white">
+          <span className="tkad-type-note absolute left-0.5 top-0.5 z-10 flex h-4 w-4 items-center justify-center rounded-full bg-hermes font-bold text-white">
             {rank}
           </span>
         ) : null}
@@ -124,7 +124,7 @@ export function DiscoveryMediaCardCompactRow({
               "tkad-type-note inline-flex h-6 items-center gap-0.5 rounded-md px-1.5 font-semibold",
               isInPlan
                 ? "bg-rose-500/20 text-rose-700 dark:text-rose-200"
-                : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+                : "bg-hermes text-white",
             )}
             title={isInPlan ? (isKo ? "다시 누르면 빼기" : "Tap again to remove") : undefined}
           >
@@ -219,7 +219,7 @@ export function DiscoveryMediaCardCompactGrid({
     <>
       <div className="relative aspect-square w-full shrink-0 overflow-hidden bg-gray-100 dark:bg-gray-800">
         {rank != null ? (
-          <span className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-xs font-black text-white shadow-md">
+          <span className="absolute left-2 top-2 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-hermes text-xs font-black text-white shadow-md">
             {rank}
           </span>
         ) : null}
@@ -262,7 +262,7 @@ export function DiscoveryMediaCardCompactGrid({
                 "tkad-type-meta flex h-9 w-full items-center justify-center gap-1.5 rounded-xl font-semibold",
                 isInPlan
                   ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
-                  : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+                  : "bg-hermes text-white",
               )}
             >
               {isInPlan ? (
@@ -303,12 +303,12 @@ export function DiscoveryMediaCardCompactGrid({
         <div
           className={cn(
             recommendRationaleProminent
-              ? "mx-1 mb-2 rounded-lg border border-violet-400/35 bg-violet-500/[0.07] px-2.5 py-2 dark:border-violet-400/25 dark:bg-violet-500/10"
+              ? "mx-1 mb-2 rounded-lg border border-hermes/30 bg-hermes/10 px-2.5 py-2 dark:border-hermes/30 dark:bg-hermes/10"
               : "px-3 pb-1",
           )}
         >
           {recommendRationaleProminent ? (
-            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-violet-700 dark:text-violet-300">
+            <p className="mb-1 flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-hermes">
               <Lightbulb className="h-3.5 w-3.5 shrink-0" aria-hidden />
               {isKo ? "추천 이유" : "Why recommended"}
             </p>
@@ -492,7 +492,7 @@ export function DiscoveryMediaCardCatalogTile({
       )}
 
       {rank != null ? (
-        <span className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-violet-500 to-cyan-400 text-xs font-black text-white shadow-md">
+        <span className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-hermes text-xs font-black text-white shadow-md">
           {rank}
         </span>
       ) : visTier ? (
@@ -557,7 +557,7 @@ export function DiscoveryMediaCardCatalogTile({
             "tkad-type-meta mt-2 flex h-8 w-full items-center justify-center gap-1.5 rounded-lg font-semibold",
             isInPlan
               ? "border border-rose-400/50 bg-rose-500/15 text-rose-700 dark:text-rose-200"
-              : "bg-gradient-to-r from-violet-500 to-cyan-400 text-white",
+              : "bg-hermes text-white",
           )}
         >
           {isInPlan ? (
@@ -691,9 +691,9 @@ export const DiscoveryMediaCardMapTile = forwardRef<
       className={cn(
         "relative list-none cursor-pointer overflow-hidden rounded-2xl border bg-white transition-all hover:shadow-md active:scale-[0.99] dark:bg-white/5",
         selected
-          ? "z-0 border-2 border-violet-500/90 shadow-md shadow-violet-500/15 ring-2 ring-inset ring-violet-400/35 dark:border-violet-400"
+          ? "z-0 border-2 border-hermes/90 shadow-md shadow-hermes/15 ring-2 ring-inset ring-hermes/35 dark:border-hermes"
           : hovered
-            ? "border-cyan-400/50 dark:border-cyan-400/40"
+            ? "border-hermes/50 dark:border-hermes/40"
             : "border-gray-100 dark:border-white/10",
       )}
       onClick={() => onSelect(item.id)}

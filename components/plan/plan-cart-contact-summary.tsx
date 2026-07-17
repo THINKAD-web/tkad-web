@@ -31,8 +31,8 @@ export function PlanCartContactSummary() {
   }
 
   return (
-    <div className="rounded-xl border border-violet-500/30 bg-violet-500/5 p-4 text-sm dark:text-white text-gray-800">
-      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-400/90">
+    <div className="rounded-xl border border-hermes/30 bg-hermes/5 p-4 text-sm dark:text-white text-gray-800">
+      <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes/90">
         {isKo ? "📋 선택하신 플랜" : "📋 Your plan"}
       </p>
       <ol className="mt-3 space-y-1.5 text-sm font-medium leading-relaxed">
@@ -42,7 +42,7 @@ export function PlanCartContactSummary() {
           </li>
         ))}
       </ol>
-      <div className="mt-3 space-y-1 border-t border-violet-500/20 pt-3 text-xs dark:text-white/70 text-gray-600">
+      <div className="mt-3 space-y-1 border-t border-hermes/20 pt-3 text-xs dark:text-white/70 text-gray-600">
         <p>
           {isKo ? "월 총 예산" : "Monthly total"}: {formatWon(monthly)}
         </p>

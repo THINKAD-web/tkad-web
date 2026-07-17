@@ -27,7 +27,7 @@ export function ProposalSharePageClient({
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon min-h-[calc(100vh-72px)] bg-gray-50 pb-20 dark:bg-[#05050a]">
         <div className="relative mx-auto max-w-3xl px-4 py-10 sm:px-6">
-          <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-cyan-300">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.28em] text-hermes">
             THINKAD
           </p>
           <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900 sm:text-3xl">

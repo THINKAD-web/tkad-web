@@ -101,12 +101,12 @@ export function PlanCartGradeSelectionsEditor({
           <div
             key={`${sel.priceOptionIndex}-${rowIndex}`}
             className={cn(
-              "space-y-2 rounded-lg border border-violet-400/20 bg-white/80 dark:border-violet-400/15 dark:bg-white/[0.04]",
+              "space-y-2 rounded-lg border border-hermes/20 bg-white/80 dark:border-hermes/15 dark:bg-white/[0.04]",
               compact ? "p-2" : "p-2.5",
             )}
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="text-[11px] font-semibold text-violet-700 dark:text-violet-200">
+              <span className="text-[11px] font-semibold text-hermes">
                 {isGradeMode
                   ? isKo
                     ? `등급 ${rowIndex + 1}`
@@ -173,7 +173,7 @@ export function PlanCartGradeSelectionsEditor({
             type="button"
             onClick={addRow}
             className={cn(
-              "inline-flex items-center gap-1 rounded-lg border border-dashed border-violet-400/40 font-semibold text-violet-700 transition hover:bg-violet-500/10 dark:text-violet-200",
+              "inline-flex items-center gap-1 rounded-lg border border-dashed border-hermes/30 font-semibold text-hermes transition hover:bg-hermes/10",
               compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
             )}
           >

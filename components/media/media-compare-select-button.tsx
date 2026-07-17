@@ -104,7 +104,7 @@ export function MediaCompareSelectButton({
           ? cn(
               "inline-flex h-10 w-10 min-w-10 items-center justify-center rounded-xl border transition-colors",
               selected
-                ? "border-violet-400/55 bg-violet-500/25 text-white"
+                ? "border-hermes/30 bg-hermes/15 text-white"
                 : "border-white/20 bg-white/10 text-white hover:bg-white/20",
             )
           : feedLabeled

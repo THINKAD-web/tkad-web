@@ -70,8 +70,8 @@ export function MediaCatalogListCard({
       href={mediaItemDetailPath(media)}
       className={cn(
         "relative flex gap-3 rounded-xl border border-gray-200 bg-white p-3 transition-colors",
-        "hover:border-violet-300 hover:bg-gray-50/80 active:scale-[0.995]",
-        "dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-violet-500/30 dark:hover:bg-white/[0.05]",
+        "hover:border-hermes/50 hover:bg-gray-50/80 active:scale-[0.995]",
+        "dark:border-white/10 dark:bg-white/[0.03] dark:hover:border-hermes/50 dark:hover:bg-white/[0.05]",
         className,
       )}
     >
@@ -97,7 +97,7 @@ export function MediaCatalogListCard({
         <div className="min-w-0 space-y-0.5">
           <h3 className="line-clamp-1 text-sm font-bold text-gray-900 dark:text-white">
             {isNetwork ? (
-              <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-violet-100 px-1 py-0.5 align-middle text-[10px] font-bold text-violet-700 dark:bg-violet-500/20 dark:text-violet-300">
+              <span className="mr-1 inline-flex items-center gap-0.5 rounded bg-hermes/15 px-1 py-0.5 align-middle text-[10px] font-bold text-hermes">
                 <span aria-hidden>🌐</span>
                 {isKo ? "네트워크" : "Network"}
               </span>
@@ -154,7 +154,7 @@ export function MediaCatalogListCard({
             </p>
             <MediaPriceExclNote isKo={isKo} className="mt-0.5 text-right" />
             {hotBadge ? (
-              <span className="text-[10px] font-semibold text-violet-600 dark:text-violet-300">
+              <span className="text-[10px] font-semibold text-hermes">
                 {isKo ? "인기" : "Hot"}
               </span>
             ) : null}

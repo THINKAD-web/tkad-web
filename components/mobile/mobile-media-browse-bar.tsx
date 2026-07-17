@@ -114,7 +114,7 @@ export function MobileMediaBrowseBar({
                 className={cn(
                   "flex h-9 w-9 items-center justify-center",
                   cardLayout === "compact"
-                    ? "bg-violet-500 text-white"
+                    ? "bg-hermes text-white"
                     : "bg-white text-gray-600 dark:bg-gray-950 dark:text-white/70",
                 )}
               >
@@ -127,7 +127,7 @@ export function MobileMediaBrowseBar({
                 className={cn(
                   "flex h-9 w-9 items-center justify-center border-l border-gray-200 dark:border-white/10",
                   cardLayout === "grid"
-                    ? "bg-violet-500 text-white"
+                    ? "bg-hermes text-white"
                     : "bg-white text-gray-600 dark:bg-gray-950 dark:text-white/70",
                 )}
               >
@@ -149,7 +149,7 @@ export function MobileMediaBrowseBar({
             href="/media/map"
             className="inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white px-3 py-2 text-sm font-medium text-gray-900 dark:border-white/10 dark:bg-gray-950 dark:text-white"
           >
-            <MapIcon className="h-4 w-4 text-violet-500" />
+            <MapIcon className="h-4 w-4 text-hermes" />
             {isKo ? "지도" : "Map"}
           </Link>
         </div>

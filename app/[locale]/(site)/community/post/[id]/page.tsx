@@ -78,7 +78,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
     return (
       <HomeLandingDayNight>
         <div className="tkad-landing-neon tkad-planner-neon">
-          <NeonSection className="pb-20 pt-16 sm:pt-20 lg:pt-24">
+          <NeonSection tone="qp" className="pb-20 pt-16 sm:pt-20 lg:pt-24">
             <div className="mx-auto max-w-3xl rounded-[30px] border border-[#fb7185]/25 bg-[rgba(127,29,29,0.28)] p-8 text-center backdrop-blur">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-rose-200">
                 [ DB 마이그레이션 필요 ]
@@ -116,7 +116,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumb) }}
       />
 
-        <NeonSection className="pb-10 pt-16 sm:pt-20 lg:pt-24">
+        <NeonSection tone="qp" className="pb-10 pt-16 sm:pt-20 lg:pt-24">
           <Link
             href={post.category ? `/community/${post.category}` : "/community"}
             className="inline-flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white transition-colors hover:dark:text-white text-gray-900"
@@ -125,7 +125,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
             {isKo ? labels.ko : labels.en}
           </Link>
           <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1.1fr)_320px]">
-            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border tkad-neon-glow sm:p-8">
+            <div className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               <span className="inline-flex rounded-full border dark:border-white/14 border-gray-200 dark:bg-white/10 bg-gray-100 px-3 py-1 font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-900">
                 {isKo ? labels.shortKo : labels.en}
               </span>
@@ -188,7 +188,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
           </div>
         </NeonSection>
 
-        <NeonSection className="pt-0">
+        <NeonSection tone="qp" className="pt-0">
           <div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
             <article className="rounded-[30px] border dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-6 shadow-[0_36px_140px_rgba(0,0,0,0.72)] backdrop-blur tkad-neon-border sm:p-8">
               <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
@@ -245,7 +245,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
                 </div>
               </div>
 
-              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.12),rgba(34,211,238,0.08),rgba(255,255,255,0.04))] p-5 backdrop-blur tkad-neon-border">
+              <div className="rounded-[28px] border dark:border-white/12 border-gray-200 bg-hermes/10 p-5 backdrop-blur tkad-neon-border">
                 <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-500">
                   {isKo ? "// policy note" : "// policy note"}
                 </p>
@@ -265,7 +265,7 @@ export default async function CommunityPostDetailPage({ params }: Props) {
           </div>
         </NeonSection>
 
-        <NeonSection className="pt-0 pb-20 sm:pb-24">
+        <NeonSection tone="qp" className="pt-0 pb-20 sm:pb-24">
           <CommunityCommentsSection
             postId={post.id}
             locale={locale}

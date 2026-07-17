@@ -54,7 +54,7 @@ export function CommunityPostCard({
       className={cn(
         "group block border-2 border-border bg-card transition-colors hover:bg-muted",
         isNeon &&
-          "rounded-[30px] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-0 dark:text-white text-gray-900 backdrop-blur tkad-neon-border tkad-neon-glow hover:dark:bg-white/10 bg-gray-100",
+          "rounded-[30px] dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50 p-0 dark:text-white text-gray-900 backdrop-blur tkad-neon-border hover:dark:bg-white/10 bg-gray-100",
         className,
       )}
     >

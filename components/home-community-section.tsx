@@ -60,7 +60,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
       <div className="tkad-neon-border relative flex flex-col gap-4 overflow-hidden rounded-[28px] border border-gray-200 bg-white p-6 text-gray-900 shadow-sm dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none sm:p-8">
         <div
           aria-hidden
-          className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top,rgba(168,85,247,0.22),transparent_55%),radial-gradient(circle_at_bottom,rgba(34,211,238,0.18),transparent_55%)]"
+          className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_top,rgba(255,98,0,0.12),transparent_55%)]"
         />
         <div className="relative flex flex-col gap-4">
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-600">
@@ -83,7 +83,7 @@ function CommunityEmptyState({ isKo }: { isKo: boolean }) {
           </ul>
           <Link
             href="/register"
-            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-white/22 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5"
+            className="group mt-2 inline-flex w-fit items-center gap-2 rounded-full border border-hermes/30 bg-hermes px-5 py-3 font-display text-xs font-medium uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-0.5">→</span>
@@ -125,13 +125,13 @@ export function HomeCommunitySection({ posts, locale }: Props) {
                 className={cn(
                   "tkad-neon-border group relative block overflow-hidden rounded-[22px] border border-gray-200 bg-white text-gray-900 shadow-sm transition-all duration-200 hover:shadow-md dark:border-white/12 dark:bg-white/5 dark:text-white dark:shadow-none",
                   "hover:-translate-y-0.5 hover:border-gray-300 hover:bg-gray-50 hover:shadow-md dark:hover:border-white/22 dark:hover:bg-white/[0.07] dark:hover:shadow-[0_24px_72px_rgba(0,0,0,0.55)]",
-                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-violet-500 focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[#a855f7] dark:focus-visible:ring-offset-[#05050a]",
+                  "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes focus-visible:ring-offset-2 focus-visible:ring-offset-white dark:focus-visible:ring-[#ff6200] dark:focus-visible:ring-offset-[#05050a]",
                 )}
               >
                 <article className="relative flex h-full flex-col gap-3 p-4 sm:p-5">
                   <div className="flex flex-wrap items-start justify-between gap-2">
                     <span
-                      className="inline-flex max-w-full items-center rounded-full border dark:border-white/18 border-gray-300 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.9))] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.2em] dark:text-white text-gray-900 shadow-[0_8px_24px_rgba(0,0,0,0.4)]"
+                      className="inline-flex max-w-full items-center rounded-full border border-hermes/30 bg-hermes px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-[0.2em] text-white shadow-sm"
                       style={{ wordBreak: "break-word" }}
                     >
                       {isKo ? labels.shortKo : labels.en}
@@ -189,7 +189,7 @@ export function HomeCommunitySection({ posts, locale }: Props) {
         {posts.length > 0 ? (
           <Link
             href="/register"
-            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-[#a855f7]/70 hover:dark:text-white text-gray-900"
+            className="group inline-flex items-center gap-2 border-b-2 border-transparent font-display text-xs font-medium uppercase tracking-[0.22em] dark:text-white text-gray-800 transition-colors hover:border-hermes/70 hover:dark:text-white text-gray-900"
           >
             {t("communityJoin")}
             <span aria-hidden className="transition-transform group-hover:translate-x-1">

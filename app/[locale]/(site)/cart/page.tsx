@@ -134,7 +134,6 @@ export default function CartPage() {
 
           {ids.length === 0 ? (
             <div className="tkad-glass-surface mx-auto w-full max-w-2xl p-8 sm:p-10">
-              <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
               <h2 className="text-center text-xl font-black tracking-tight dark:text-white text-gray-900">
                 장바구니가 비어있습니다
               </h2>
@@ -227,10 +226,6 @@ export default function CartPage() {
                   aria-busy={loading}
                   className="tkad-glass-surface flex min-h-0 min-w-0 flex-col p-5 sm:p-6 lg:h-full lg:min-h-0 lg:p-7"
                 >
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
-                />
                 <div className="relative flex min-h-0 flex-1 flex-col">
                   <ul className="min-h-0 flex-1 space-y-3 overflow-y-auto overscroll-y-contain">
                     {items.map((it) => (
@@ -283,10 +278,6 @@ export default function CartPage() {
                 </section>
 
                 <aside className="tkad-glass-surface flex min-h-0 min-w-0 flex-col p-5 sm:p-6 lg:h-full lg:min-h-0 lg:p-7">
-                <div
-                  aria-hidden
-                  className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid"
-                />
                 <div className="relative flex min-h-0 flex-1 flex-col">
                   <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col">
                     <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto overscroll-y-contain">
@@ -383,7 +374,7 @@ export default function CartPage() {
                     <button
                       type="submit"
                       disabled={items.length === 0 && ids.length === 0}
-                      className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-[linear-gradient(135deg,rgba(168,85,247,0.95),rgba(34,211,238,0.95),rgba(236,72,153,0.95))] px-6 font-display text-xs font-medium uppercase tracking-[0.18em] dark:text-white text-gray-900 shadow-[0_18px_60px_rgba(0,0,0,0.55)] transition-transform hover:-translate-y-0.5 hover:opacity-95 disabled:opacity-50"
+                      className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-[22px] border dark:border-white/14 border-gray-200 bg-hermes px-6 font-display text-xs font-medium uppercase tracking-[0.18em] text-white shadow-sm transition-transform hover:-translate-y-0.5 hover:bg-cta-hover disabled:opacity-50"
                     >
                       견적 요청하기
                     </button>

@@ -62,7 +62,7 @@ export function ProposalResultDisplay({
             <BtnBlock
               variant="accent"
               size="md"
-              className="!dark:text-white text-gray-900 bg-gradient-to-r from-violet-500 to-cyan-400"
+              className="!dark:text-white text-gray-900 bg-hermes hover:bg-cta-hover"
               onClick={onDownloadClick}
               disabled={pdfBusy || checking}
             >
@@ -105,7 +105,7 @@ export function ProposalResultDisplay({
       </div>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
           [ {t("sectionOverview")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -114,7 +114,7 @@ export function ProposalResultDisplay({
       </section>
 
       <section className={glassCard}>
-        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-violet-300">
+        <h2 className="font-display text-xs font-medium uppercase tracking-[0.22em] text-hermes">
           [ {t("sectionStrategy")} ]
         </h2>
         <p className="mt-3 whitespace-pre-wrap text-sm leading-relaxed dark:text-white text-gray-800">
@@ -134,7 +134,7 @@ export function ProposalResultDisplay({
             >
               <div className="flex flex-wrap items-baseline justify-between gap-2">
                 <p className="font-bold dark:text-white text-gray-900">{row.mediaName}</p>
-                <span className="text-xs text-cyan-300">
+                <span className="text-xs text-hermes">
                   {row.budgetSharePct}%
                 </span>
               </div>
@@ -142,7 +142,7 @@ export function ProposalResultDisplay({
               <p className="mt-2 text-sm dark:text-white text-gray-700">{row.rationale}</p>
               <Link
                 href={`/media/${encodeURIComponent(row.mediaId)}`}
-                className="mt-2 inline-block text-xs font-semibold text-cyan-400 hover:underline"
+                className="mt-2 inline-block text-xs font-semibold text-hermes hover:underline"
               >
                 {t("viewMedia")}
               </Link>
@@ -208,7 +208,7 @@ export function ProposalResultDisplay({
         </h2>
         <ol className="mt-4 space-y-4">
           {proposal.timeline.map((item, i) => (
-            <li key={i} className="border-l-2 border-violet-500/50 pl-4">
+            <li key={i} className="border-l-2 border-hermes/30 pl-4">
               <p className="font-bold dark:text-white text-gray-900">
                 {item.phase}
                 <span className="ml-2 text-xs font-normal dark:text-white text-gray-400">

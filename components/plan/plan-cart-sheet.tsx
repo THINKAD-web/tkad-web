@@ -143,7 +143,7 @@ export function PlanCartSheet({ open, onOpenChange, isKo = true }: Props) {
                 <Link
                   href="/my/plan"
                   onClick={() => onOpenChange(false)}
-                  className="tkad-neon-cta-clean inline-flex h-10 flex-1 items-center justify-center rounded-xl px-4 text-sm font-bold text-white"
+                  className="inline-flex h-10 flex-1 items-center justify-center rounded-xl bg-hermes px-4 text-sm font-bold text-white hover:bg-cta-hover"
                 >
                   {isKo ? "내 플랜에서 보기" : "Open my plan"}
                 </Link>

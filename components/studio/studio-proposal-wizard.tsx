@@ -25,7 +25,7 @@ const GOAL_LABEL: Record<ProposalGoal, string> = {
 };
 
 const field =
-  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-violet-400 dark:border-white/12 dark:bg-white/5 dark:text-white";
+  "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-hermes/30 dark:border-white/12 dark:bg-white/5 dark:text-white";
 
 type GenResult = {
   input: StudioProposalInput;
@@ -150,8 +150,8 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                 className={
                   "rounded-2xl border p-5 text-left transition-all " +
                   (active
-                    ? "border-violet-500 bg-violet-50 ring-1 ring-violet-300 dark:bg-violet-500/10"
-                    : "border-gray-200 bg-white hover:border-violet-300 dark:border-white/10 dark:bg-white/5")
+                    ? "border-hermes bg-hermes/5 ring-1 ring-hermes/30 dark:bg-hermes/10"
+                    : "border-gray-200 bg-white hover:border-hermes/30 dark:border-white/10 dark:bg-white/5")
                 }
               >
                 <p className="text-2xl" aria-hidden>{m.emoji}</p>
@@ -166,7 +166,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
           <button
             type="button"
             onClick={() => setStep(2)}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-violet-600 px-6 text-sm font-bold text-white"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-hermes px-6 text-sm font-bold text-white hover:bg-cta-hover"
           >
             {isKo ? "다음" : "Next"}
           </button>
@@ -185,7 +185,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
         </button>
         <h2 className="mb-4 text-lg font-bold text-gray-900 dark:text-white">
           {isKo ? "2. 정보 입력" : "2. Enter details"}{" "}
-          <span className="text-sm font-normal text-violet-500">{PROPOSAL_TYPE_META[type].emoji} {isKo ? PROPOSAL_TYPE_META[type].ko : PROPOSAL_TYPE_META[type].en}</span>
+          <span className="text-sm font-normal text-hermes">{PROPOSAL_TYPE_META[type].emoji} {isKo ? PROPOSAL_TYPE_META[type].ko : PROPOSAL_TYPE_META[type].en}</span>
         </h2>
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <label className="block">
@@ -227,7 +227,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
                   className={
                     "rounded-full border px-3 py-1.5 text-xs font-semibold transition " +
                     (regions.includes(r)
-                      ? "border-violet-500 bg-violet-500/10 text-violet-600 dark:text-violet-300"
+                      ? "border-hermes bg-hermes/10 text-hermes dark:text-hermes"
                       : "border-gray-200 text-gray-600 dark:border-white/10 dark:text-white/60")
                   }
                 >
@@ -247,7 +247,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             type="button"
             onClick={() => void generate()}
             disabled={loading}
-            className="inline-flex h-11 items-center gap-2 rounded-xl bg-gradient-to-r from-violet-600 to-cyan-500 px-6 text-sm font-bold text-white disabled:opacity-60"
+            className="inline-flex h-11 items-center gap-2 rounded-xl bg-hermes px-6 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
             {loading ? (isKo ? "AI 생성 중..." : "Generating...") : isKo ? "AI 제안서 생성" : "Generate"}
@@ -270,7 +270,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             type="button"
             onClick={() => void downloadPdf()}
             disabled={downloading}
-            className="inline-flex h-10 items-center gap-2 rounded-xl bg-violet-600 px-4 text-sm font-bold text-white disabled:opacity-60"
+            className="inline-flex h-10 items-center gap-2 rounded-xl bg-hermes px-4 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
           >
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <FileText className="h-4 w-4" />}
             PDF
@@ -279,7 +279,7 @@ export function StudioProposalWizard({ locale }: { locale: string }) {
             type="button"
             onClick={() => void downloadPptx()}
             disabled={downloading}
-            className="inline-flex h-10 items-center gap-2 rounded-xl border border-violet-300 px-4 text-sm font-bold text-violet-600 disabled:opacity-60 dark:border-violet-400/30 dark:text-violet-300"
+            className="inline-flex h-10 items-center gap-2 rounded-xl border border-hermes/30 px-4 text-sm font-bold text-hermes disabled:opacity-60 dark:border-hermes/30 dark:text-hermes"
           >
             <Download className="h-4 w-4" />
             PPT
@@ -331,12 +331,12 @@ function Stepper({ step, isKo }: { step: 1 | 2 | 3; isKo: boolean }) {
             <span
               className={
                 "flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold " +
-                (active ? "bg-violet-600 text-white" : "bg-gray-200 text-gray-500 dark:bg-white/10")
+                (active ? "bg-hermes text-white" : "bg-gray-200 text-gray-500 dark:bg-white/10")
               }
             >
               {n}
             </span>
-            <span className={"text-xs font-semibold " + (active ? "text-violet-600 dark:text-violet-300" : "text-muted-foreground")}>{l}</span>
+            <span className={"text-xs font-semibold " + (active ? "text-hermes dark:text-hermes" : "text-muted-foreground")}>{l}</span>
             {i < 2 ? <span className="mx-1 h-px w-6 bg-gray-300 dark:bg-white/20" /> : null}
           </div>
         );

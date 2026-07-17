@@ -49,7 +49,7 @@ export default async function StudioProposalPage({ params }: Props) {
           {access.allowed ? (
             <StudioProposalWizard locale={locale} />
           ) : (
-            <div className="mx-auto max-w-lg rounded-2xl border border-violet-300/40 bg-white/60 p-8 text-center dark:border-violet-400/20 dark:bg-white/5">
+            <div className="mx-auto max-w-lg rounded-2xl border border-hermes/30 bg-white/60 p-8 text-center dark:border-hermes/30 dark:bg-white/5">
               <p className="text-lg font-bold text-gray-900 dark:text-white">
                 {isKo ? "PRO 전용 기능입니다" : "PRO members only"}
               </p>
@@ -65,7 +65,7 @@ export default async function StudioProposalPage({ params }: Props) {
               <div className="mt-5 flex justify-center gap-2">
                 <Link
                   href={access.reason === "login" ? "/login?redirect=/studio/proposal" : "/pricing"}
-                  className="inline-flex h-10 items-center rounded-xl bg-violet-600 px-5 text-sm font-bold text-white"
+                  className="inline-flex h-10 items-center rounded-xl bg-hermes px-5 text-sm font-bold text-white hover:bg-cta-hover"
                 >
                   {access.reason === "login"
                     ? isKo ? "로그인" : "Sign in"

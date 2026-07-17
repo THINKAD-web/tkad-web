@@ -16,11 +16,11 @@ type Props = {
   isKo: boolean;
 };
 
-const VIOLET = "#7c3aed";
+const HERMES = "#ff6200";
 
 function SectionTitle({ children }: { children: React.ReactNode }) {
   return (
-    <h2 className="text-sm font-bold uppercase tracking-wide text-[#7c3aed]">
+    <h2 className="text-sm font-bold uppercase tracking-wide text-[#ff6200]">
       {children}
     </h2>
   );
@@ -29,7 +29,7 @@ function SectionTitle({ children }: { children: React.ReactNode }) {
 const won = (n: number, isKo: boolean) => `₩${n.toLocaleString(isKo ? "ko-KR" : "en-US")}`;
 const num = (n: number, isKo: boolean) => n.toLocaleString(isKo ? "ko-KR" : "en-US");
 
-/** 범용 제안서 문서 렌더 — html-to-pdf 캡처 대상. 기존 제안서 라이트/violet 토큰 재사용. */
+/** 범용 제안서 문서 렌더 — html-to-pdf 캡처 대상. Hermes 오렌지 + 그레이스케일 토큰. */
 export function StudioProposalContent({ input, type, sections, output, isKo }: Props) {
   const meta = PROPOSAL_TYPE_META[type];
   const label = (s: ProposalSectionType) =>
@@ -64,7 +64,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             <SectionTitle>{label(s)}</SectionTitle>
             <table className="mt-2 w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#ddd] text-left text-[#7c3aed]">
+                <tr className="border-b border-[#ddd] text-left text-[#ff6200]">
                   <th className="py-1 pr-2">{isKo ? "매체" : "Media"}</th>
                   <th className="py-1 pr-2">{isKo ? "역할" : "Role"}</th>
                   <th className="py-1 pr-2">{isKo ? "선정 이유" : "Rationale"}</th>
@@ -90,7 +90,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             <SectionTitle>{label(s)}</SectionTitle>
             <table className="mt-2 w-full border-collapse text-xs">
               <thead>
-                <tr className="border-b border-[#ddd] text-left text-[#7c3aed]">
+                <tr className="border-b border-[#ddd] text-left text-[#ff6200]">
                   <th className="py-1 pr-2">{isKo ? "경쟁사" : "Competitor"}</th>
                   <th className="py-1 pr-2">{isKo ? "접근" : "Approach"}</th>
                   <th className="py-1">{isKo ? "차별화 포인트" : "Differentiation"}</th>
@@ -114,11 +114,11 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             <SectionTitle>{label(s)}</SectionTitle>
             <ul className="mt-2 space-y-2 text-sm">
               {output.caseStudies.map((c, i) => (
-                <li key={i} className="rounded-lg border border-[#eee] bg-[#faf9ff] p-3">
+                <li key={i} className="rounded-lg border border-[#eee] bg-gray-50 p-3">
                   <p className="font-semibold">{c.title}</p>
                   <p className="mt-0.5 text-[#444]">{c.summary}</p>
                   {c.result ? (
-                    <p className="mt-1 text-xs font-semibold text-[#0891b2]">
+                    <p className="mt-1 text-xs font-semibold text-[#ff6200]">
                       {isKo ? "성과" : "Result"}: {c.result}
                     </p>
                   ) : null}
@@ -138,11 +138,11 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
                   className={
                     "rounded-lg border p-3 text-xs " +
                     (r.scenario === "base"
-                      ? "border-[#7c3aed]/40 bg-[#7c3aed]/5"
+                      ? "border-[#ff6200]/40 bg-[#ff6200]/5"
                       : "border-[#e5e7eb] bg-white")
                   }
                 >
-                  <p className="font-bold" style={{ color: VIOLET }}>{r.label}</p>
+                  <p className="font-bold" style={{ color: HERMES }}>{r.label}</p>
                   <p className="mt-1.5 text-[#444]">
                     {isKo ? "노출" : "Impr."} <b className="tabular-nums">{num(r.impressions, isKo)}</b>
                   </p>
@@ -202,7 +202,7 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
             </ul>
             {output.expectedOutcomes && output.expectedOutcomes.length ? (
               <div className="mt-3">
-                <p className="text-xs font-bold text-[#7c3aed]">{isKo ? "기대 효과" : "Expected outcomes"}</p>
+                <p className="text-xs font-bold text-[#ff6200]">{isKo ? "기대 효과" : "Expected outcomes"}</p>
                 <ul className="mt-1 list-disc pl-5 text-sm text-[#444]">
                   {output.expectedOutcomes.map((o, i) => (
                     <li key={i}>{o}</li>
@@ -224,8 +224,8 @@ export function StudioProposalContent({ input, type, sections, output, isKo }: P
 
   return (
     <div className="bg-white p-8 text-[#111]">
-      <header className="border-b-2 border-[#7c3aed] pb-4">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#7c3aed]">
+      <header className="border-b-2 border-[#ff6200] pb-4">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#ff6200]">
           THINKAD · 싱커드 · {isKo ? meta.ko : meta.en}
         </p>
         <h1 className="mt-2 text-2xl font-bold">

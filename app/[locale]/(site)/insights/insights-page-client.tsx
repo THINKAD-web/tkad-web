@@ -164,11 +164,6 @@ export default function InsightsPageClient({
     <HomeLandingDayNight>
       <div className="tkad-landing-neon tkad-planner-neon">
         <section className="tkad-home-hero tkad-neon-surface relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#05050a] dark:text-white">
-          <div aria-hidden className="absolute inset-0 tkad-neon-depth" />
-          <div
-            aria-hidden
-            className="absolute inset-0 opacity-20 tkad-neon-grid"
-          />
           <div
             aria-hidden
             className="absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
