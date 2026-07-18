@@ -1,10 +1,13 @@
-/** PDF·PPTX 매체 상세 바로가기 버튼 — 고대비(흰 배경 + 보라 텍스트) */
+/** PDF·PPTX 매체 상세 바로가기 버튼 — 고대비(흰 배경 + qp 액센트 텍스트) */
 
 export function shortMediaUrl(url: string): string {
   return url.replace(/^https?:\/\//, "");
 }
 
 type PdfDoc = import("jspdf").jsPDF;
+
+/** qp 각진 — roundedRect radius mm */
+const R = 0;
 
 export function addPdfMediaDetailLink(
   doc: PdfDoc,
@@ -15,21 +18,21 @@ export function addPdfMediaDetailLink(
     label: string;
     url: string;
     font: string;
-    violet: readonly [number, number, number];
-    cyan: readonly [number, number, number];
+    accent: readonly [number, number, number];
+    ink: readonly [number, number, number];
   },
 ): number {
-  const { x, y, w, label, url, font, violet, cyan } = opts;
+  const { x, y, w, label, url, font, accent, ink } = opts;
   const btnH = 5.5;
 
   doc.setFillColor(255, 255, 255);
-  doc.setDrawColor(violet[0]!, violet[1]!, violet[2]!);
+  doc.setDrawColor(accent[0]!, accent[1]!, accent[2]!);
   doc.setLineWidth(0.35);
-  doc.roundedRect(x, y, w, btnH, 1.1, 1.1, "FD");
+  doc.roundedRect(x, y, w, btnH, R, R, "FD");
 
   doc.setFont(font, "normal");
   doc.setFontSize(7.5);
-  doc.setTextColor(violet[0]!, violet[1]!, violet[2]!);
+  doc.setTextColor(accent[0]!, accent[1]!, accent[2]!);
   const line = (doc.splitTextToSize(label, w - 2) as string[])[0] ?? label;
   doc.text(line, x + w / 2, y + 3.4, { align: "center" });
 
@@ -42,7 +45,7 @@ export function addPdfMediaDetailLink(
 
   const urlY = y + btnH + 1.2;
   doc.setFontSize(6.2);
-  doc.setTextColor(cyan[0]!, cyan[1]!, cyan[2]!);
+  doc.setTextColor(ink[0]!, ink[1]!, ink[2]!);
   const urlLine = (doc.splitTextToSize(shortMediaUrl(url), w) as string[])[0] ?? "";
   if (urlLine) {
     doc.text(urlLine, x + w / 2, urlY + 2.2, { align: "center" });

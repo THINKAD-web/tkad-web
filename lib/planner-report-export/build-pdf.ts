@@ -36,18 +36,22 @@ import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup
  * 견적서 PDF(`build-korean-quote-pdf.ts`)와 동일한 서버 생성 패턴.
  */
 
-const VIOLET = [255, 98, 0] as const; // qp accent #ff6200
-const CYAN = [28, 28, 31] as const; // qp ink / secondary
+/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
+const QP_ACCENT = [255, 98, 0] as const;
+const QP_ACCENT_SOFT = [255, 243, 232] as const;
+/** 주황 커버·배너 위 보조 텍스트 (구 라벤더 대체) */
+const QP_ON_ACCENT_MUTED = [255, 236, 220] as const;
+const QP_INK = [28, 28, 31] as const;
 const INK = [17, 24, 39] as const;
 const GRAY_600 = [75, 85, 99] as const;
 const GRAY_500 = [107, 114, 128] as const;
 const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
 const GRAY_100 = [238, 240, 244] as const;
-const CYAN_LIGHT = [107, 114, 128] as const; // qp muted secondary text
 const WHITE = [255, 255, 255] as const;
-const CYAN_BAR = [28, 28, 31] as const; // qp secondary — ContributionBar
 const BAR_TRACK = [243, 244, 246] as const;
+/** qp 각진 카드 — roundedRect radius mm (견적 PDF와 동일) */
+const R = 0;
 
 /** PR3 균형안 — 여백·타이포·카드 레이아웃 (미세조정은 이 객체만 수정) */
 export const PDF_LAYOUT = {
@@ -154,21 +158,21 @@ export async function buildPlannerReportPdf(
     ensure(14 + followingBlockMm);
     doc.setFont(FONT, "normal");
     doc.setFontSize(11);
-    setFill(VIOLET);
+    setFill(QP_ACCENT);
     doc.rect(M, y, 1.6, 5.2, "F");
     setText(INK);
     doc.text(label, M + 4, y + 4.6);
     y += 9;
   }
 
-  /** THINKAD 워드마크 (THINK 흰색 + AD 시안) */
+  /** THINKAD 워드마크 (THINK·AD 흰색 — 주황 커버/배너 위) */
   function drawWordmark(x: number, baseY: number, size: number) {
     doc.setFont(FONT, "normal");
     doc.setFontSize(size);
     doc.setTextColor(255, 255, 255);
     doc.text("THINK", x, baseY);
     const w = doc.getTextWidth("THINK");
-    setText(CYAN_LIGHT);
+    setText(WHITE);
     doc.text("AD", x + w, baseY);
   }
 
@@ -229,10 +233,10 @@ export async function buildPlannerReportPdf(
         y + 3,
       );
       doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
-      doc.roundedRect(barX, y, barW, 3.2, 1, 1, "F");
+      doc.roundedRect(barX, y, barW, 3.2, R, R, "F");
       const barRgb = plannerChartColorRgb(row.colorKey, i);
       doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
-      doc.roundedRect(barX, y, Math.max(2, (barW * pct) / 100), 3.2, 1, 1, "F");
+      doc.roundedRect(barX, y, Math.max(2, (barW * pct) / 100), 3.2, R, R, "F");
       setText(INK);
       doc.text(formatPlannerSharePct(pct), x + w, y + 3, { align: "right" });
       y += 7;
@@ -263,10 +267,10 @@ export async function buildPlannerReportPdf(
         y + 3,
       );
       doc.setFillColor(GRAY_100[0], GRAY_100[1], GRAY_100[2]);
-      doc.roundedRect(barX, y, barW, 3.2, 1, 1, "F");
+      doc.roundedRect(barX, y, barW, 3.2, R, R, "F");
       const barRgb = perRowColor ? plannerChartColorRgb(row.colorKey, i) : color;
       doc.setFillColor(barRgb[0]!, barRgb[1]!, barRgb[2]!);
-      doc.roundedRect(barX, y, Math.max(2, (barW * row.value) / max), 3.2, 1, 1, "F");
+      doc.roundedRect(barX, y, Math.max(2, (barW * row.value) / max), 3.2, R, R, "F");
       setText(INK);
       doc.text(fmtImp(row.value, isKo), x + w, y + 3, { align: "right" });
       y += 7;
@@ -282,16 +286,16 @@ export async function buildPlannerReportPdf(
     ensure(10 + guide.bullets.length * 8);
     doc.setFont(FONT, "bold");
     doc.setFontSize(9);
-    setText(VIOLET);
+    setText(QP_ACCENT);
     doc.text(guide.title, M, y + 3);
     y += 7;
 
-    doc.setFillColor(248, 245, 255);
-    doc.roundedRect(M, y, contentW, rowH + guide.table.rows.length * rowH + 2, 2, 2, "F");
+    setFill(QP_ACCENT_SOFT);
+    doc.roundedRect(M, y, contentW, rowH + guide.table.rows.length * rowH + 2, R, R, "F");
 
     doc.setFont(FONT, "bold");
     doc.setFontSize(7.5);
-    setText(VIOLET);
+    setText(QP_ACCENT);
     guide.table.headers.forEach((h, i) => {
       const x =
         i === 0 ? M + 2 : M + labelColW + (i - 1) * dataColW + 1;
@@ -338,14 +342,14 @@ export async function buildPlannerReportPdf(
         : "OOH media campaign plan";
 
   // ── 표지 페이지 ──
-  setFill(VIOLET);
+  setFill(QP_ACCENT);
   doc.rect(0, 0, pageW, pageH, "F");
-  setFill(CYAN);
+  setFill(QP_INK);
   doc.rect(0, 0, pageW, 3, "F");
 
   drawWordmark(M, 50, 26);
   doc.setFont(FONT, "normal");
-  doc.setTextColor(214, 199, 255);
+  setText(QP_ON_ACCENT_MUTED);
   doc.setFontSize(10);
   doc.text("CAMPAIGN PLANNER", M, 58);
 
@@ -354,11 +358,11 @@ export async function buildPlannerReportPdf(
   const titleLines = doc.splitTextToSize(p.documentTitle, contentW) as string[];
   doc.text(titleLines, M, 92);
 
-  setFill(CYAN);
+  setFill(QP_INK);
   doc.rect(M, 92 + titleLines.length * 11, 28, 1.6, "F");
 
   doc.setFontSize(13);
-  doc.setTextColor(225, 220, 245);
+  setText(QP_ON_ACCENT_MUTED);
   doc.text(subtitle, M, 104 + titleLines.length * 11);
 
   if (p.clientName) {
@@ -371,7 +375,7 @@ export async function buildPlannerReportPdf(
     );
   }
   doc.setFontSize(10);
-  doc.setTextColor(200, 188, 240);
+  setText(QP_ON_ACCENT_MUTED);
   doc.text(p.generatedAt, M, pageH - 28);
   doc.text(
     `THINKAD (싱커드)   ·   ${CONTACT_EMAIL}   ·   02-515-2772`,
@@ -383,20 +387,20 @@ export async function buildPlannerReportPdf(
   y = 0;
 
   // ── 본문 헤더 배너 (slim) ──
-  setFill(VIOLET);
+  setFill(QP_ACCENT);
   doc.rect(0, 0, pageW, 26, "F");
-  setFill(CYAN);
+  setFill(QP_INK);
   doc.rect(0, 26, pageW, 1.4, "F");
 
   drawWordmark(M, 11, 12);
   doc.setFont(FONT, "normal");
   doc.setFontSize(8);
-  doc.setTextColor(225, 220, 245);
+  setText(QP_ON_ACCENT_MUTED);
   const headSub = [p.clientName, p.campaignName].filter(Boolean).join("  ·  ");
   if (headSub) doc.text(headSub, M, 19);
-  doc.setTextColor(214, 199, 255);
+  setText(QP_ON_ACCENT_MUTED);
   doc.text(p.generatedAt, pageW - M, 11, { align: "right" });
-  doc.setTextColor(225, 220, 245);
+  setText(QP_ON_ACCENT_MUTED);
   doc.text(p.documentTitle, pageW - M, 19, { align: "right" });
 
   y = 38;
@@ -447,12 +451,12 @@ export async function buildPlannerReportPdf(
     kpis.forEach((k, i) => {
       const x = M + kW * i;
       setFill(GRAY_50);
-      doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, 1.5, 1.5, "F");
+      doc.roundedRect(x + 1, y, kW - 2, PDF_LAYOUT.kpiCardHmm, R, R, "F");
       doc.setFont(FONT, "normal");
       doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
       setText(GRAY_500);
       doc.text(k.label, x + 4, y + 5.5);
-      setText(VIOLET);
+      setText(QP_ACCENT);
       doc.setFontSize(PDF_LAYOUT.kpiValuePt);
       const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
       doc.text(vLines.slice(0, 1), x + 4, y + 12);
@@ -539,7 +543,7 @@ export async function buildPlannerReportPdf(
       setText(GRAY_500);
       doc.text(isKo ? "노출 요약" : "Impressions", M, y + 2);
       y += 5;
-      drawBars(M, contentW, ch.reachSummary, CYAN);
+      drawBars(M, contentW, ch.reachSummary, QP_INK);
       y += 3;
       if (ch.impressionSplit && ch.impressionSplit.length) {
         ensure(6 + ch.impressionSplit.length * 7);
@@ -562,7 +566,7 @@ export async function buildPlannerReportPdf(
       setText(GRAY_500);
       doc.text(isKo ? "CPM 비교 (원)" : "CPM comparison (KRW)", M, y + 2);
       y += 5;
-      drawBars(M, contentW, ch.cpmBars, VIOLET, true);
+      drawBars(M, contentW, ch.cpmBars, QP_ACCENT, true);
       y += 3;
     }
     if (ch.performanceGuide) {
@@ -733,11 +737,11 @@ export async function buildPlannerReportPdf(
     doc.text(`${pct}%`, x + w, y, { align: "right" });
     const trackY = y + 2.4;
     setFill(BAR_TRACK);
-    doc.roundedRect(x, trackY, w, trackH, 0.8, 0.8, "F");
+    doc.roundedRect(x, trackY, w, trackH, R, R, "F");
     const fillW = (w * Math.min(100, Math.max(0, pct))) / 100;
     if (fillW > 0.3) {
       setFill(fill);
-      doc.roundedRect(x, trackY, fillW, trackH, 0.8, 0.8, "F");
+      doc.roundedRect(x, trackY, fillW, trackH, R, R, "F");
     }
     return 7;
   }
@@ -776,14 +780,14 @@ export async function buildPlannerReportPdf(
     setFill(WHITE);
     setDraw(GRAY_200);
     doc.setLineWidth(0.25);
-    doc.roundedRect(M, y, contentW, rh, 2.5, 2.5, "FD");
+    doc.roundedRect(M, y, contentW, rh, R, R, "FD");
 
     if (thumbSlot) {
       if (thumb) {
         addPdfThumbImage(doc, thumb, M + pad, y + pad, thumbBox.w, thumbBox.h);
       } else {
         setFill(GRAY_50);
-        doc.roundedRect(M + pad, y + pad, thumbBox.w, thumbBox.h, 1.5, 1.5, "F");
+        doc.roundedRect(M + pad, y + pad, thumbBox.w, thumbBox.h, R, R, "F");
         doc.setFont(FONT, "normal");
         doc.setFontSize(7);
         setText(GRAY_500);
@@ -849,7 +853,7 @@ export async function buildPlannerReportPdf(
         doc.text(isKo ? "월 단가" : "Monthly", textX, ty);
         doc.setFont(FONT, "bold");
         doc.setFontSize(PDF_LAYOUT.detailPriceValuePt);
-        setText(VIOLET);
+        setText(QP_ACCENT);
         doc.text(row.monthlyPriceLabel, textX, ty + 3.5);
       }
       if (row.lineTotalLabel) {
@@ -859,7 +863,7 @@ export async function buildPlannerReportPdf(
         doc.text(isKo ? "집행 소계" : "Subtotal", textX + colW + 3, ty);
         doc.setFont(FONT, "bold");
         doc.setFontSize(PDF_LAYOUT.detailPriceValuePt);
-        setText(VIOLET);
+        setText(QP_ACCENT);
         doc.text(row.lineTotalLabel, textX + colW + 3, ty + 3.5);
       }
       ty += 9;
@@ -868,7 +872,7 @@ export async function buildPlannerReportPdf(
     if (row.recommendReason?.trim()) {
       doc.setFont(FONT, "bold");
       doc.setFontSize(PDF_LAYOUT.detailReasonPt);
-      setText(VIOLET);
+      setText(QP_ACCENT);
       const label = isKo ? "추천 " : "Why ";
       doc.text(label, textX, ty);
       const labelW = doc.getTextWidth(label);
@@ -903,7 +907,7 @@ export async function buildPlannerReportPdf(
           barW,
           isKo ? "노출 기여" : "Exposure share",
           row.exposureContributionPct!,
-          CYAN_BAR,
+          QP_INK,
         );
         drawPdfContributionBar(
           textX + colW + 3,
@@ -911,7 +915,7 @@ export async function buildPlannerReportPdf(
           barW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct!,
-          VIOLET,
+          QP_ACCENT,
         );
         ty = barY + 7;
       } else if (hasExposure) {
@@ -921,7 +925,7 @@ export async function buildPlannerReportPdf(
           barW,
           isKo ? "노출 기여" : "Exposure share",
           row.exposureContributionPct!,
-          CYAN_BAR,
+          QP_INK,
         );
       } else if (hasBudget) {
         ty = barY + drawPdfContributionBar(
@@ -930,7 +934,7 @@ export async function buildPlannerReportPdf(
           barW,
           isKo ? "예산 비중" : "Budget share",
           row.budgetContributionPct!,
-          VIOLET,
+          QP_ACCENT,
         );
       }
     }
@@ -946,8 +950,8 @@ export async function buildPlannerReportPdf(
         label: plannerMediaPageButtonLabel(isKo),
         url: mediaUrl,
         font: FONT,
-        violet: VIOLET,
-        cyan: CYAN,
+        accent: QP_ACCENT,
+        ink: QP_INK,
       });
     }
     y += rh + PDF_LAYOUT.detailCardGapMm;
@@ -1012,7 +1016,7 @@ export async function buildPlannerReportPdf(
     ensure(PDF_LAYOUT.categoryHeaderMm + followingBlockMm);
     doc.setFont(FONT, "bold");
     doc.setFontSize(PDF_LAYOUT.categoryHeaderPt);
-    setText(VIOLET);
+    setText(QP_ACCENT);
     doc.text(label.toUpperCase(), M, y + 4);
     y += PDF_LAYOUT.categoryHeaderMm;
   }
@@ -1145,14 +1149,14 @@ export async function buildPlannerReportPdf(
       setFill(WHITE);
       setDraw(GRAY_200);
       doc.setLineWidth(0.25);
-      doc.roundedRect(cx, rowY, cellW, cellH, 2, 2, "FD");
+      doc.roundedRect(cx, rowY, cellW, cellH, R, R, "FD");
 
       const thumb = row.thumbUrl ? thumbMap.get(row.thumbUrl) : undefined;
       if (thumb) {
         addPdfThumbImage(doc, thumb, cx + pad, rowY + pad, thumbSize, thumbSize);
       } else if (row.thumbUrl?.trim()) {
         setFill(GRAY_50);
-        doc.roundedRect(cx + pad, rowY + pad, thumbSize, thumbSize, 1.5, 1.5, "F");
+        doc.roundedRect(cx + pad, rowY + pad, thumbSize, thumbSize, R, R, "F");
         doc.setFont(FONT, "normal");
         doc.setFontSize(6);
         setText(GRAY_500);
@@ -1187,14 +1191,14 @@ export async function buildPlannerReportPdf(
       if (price) {
         doc.setFont(FONT, "bold");
         doc.setFontSize(PDF_LAYOUT.cardPricePt);
-        setText(VIOLET);
+        setText(QP_ACCENT);
         doc.text(price, cx + pad, ty);
       }
 
       if (mediaUrl) {
         doc.setFont(FONT, "normal");
         doc.setFontSize(PDF_LAYOUT.cardLinkPt);
-        setText(CYAN);
+        setText(QP_INK);
         const linkLabel = isKo ? "상세 →" : "Details →";
         doc.text(linkLabel, cx + cellW - pad, rowY + cellH - 2.2, { align: "right" });
         addPdfRectLink(doc, { x: cx, y: rowY, w: cellW, h: cellH, url: mediaUrl });
@@ -1233,7 +1237,7 @@ export async function buildPlannerReportPdf(
       setFill(WHITE);
       setDraw(GRAY_200);
       doc.setLineWidth(0.2);
-      doc.roundedRect(cx, rowY, cellW, rowH, 1.5, 1.5, "FD");
+      doc.roundedRect(cx, rowY, cellW, rowH, R, R, "FD");
 
       const thumb = row.thumbUrl ? thumbMap.get(row.thumbUrl) : undefined;
       if (thumb) {
@@ -1324,7 +1328,7 @@ export async function buildPlannerReportPdf(
       { label: isKo ? "예상 노출" : "Est. impressions", w: contentW * 0.3 },
     ];
     ensure(9);
-    setFill(CYAN);
+    setFill(QP_INK);
     doc.rect(M, y, contentW, 7, "F");
     doc.setFontSize(8);
     doc.setTextColor(255, 255, 255);
@@ -1367,7 +1371,7 @@ export async function buildPlannerReportPdf(
     for (const line of sec.lines) {
       const wrapped = doc.splitTextToSize(line, contentW - 5) as string[];
       ensure(wrapped.length * 4.6 + 1.5);
-      setFill(VIOLET);
+      setFill(QP_ACCENT);
       doc.circle(M + 1.2, y + 1.6, 0.7, "F");
       setText(GRAY_600);
       doc.text(wrapped, M + 4, y + 3);
