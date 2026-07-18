@@ -81,7 +81,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
   const toggleCart = useCallback(
     (item: MediaItem) => {
       const inCart = cartIds.includes(item.id);
-      toggleCartId(item.id);
+      toggleCartId(item.id, "keyword_landing");
       if (inCart) {
         toast.warning(
           item.name

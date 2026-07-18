@@ -1,5 +1,6 @@
 /** 플랜 장바구니 — localStorage `tkad_plan_cart` */
 
+import { trackPlanCartUsage } from "@/lib/ga-events";
 import { planCartMonthlyTotalWon } from "@/lib/plan-cart-pricing";
 import {
   PLAN_CART_MAX_ITEMS,
@@ -342,6 +343,12 @@ export function addToPlanCart(
       { ...item, addedAt: new Date().toISOString() },
     ],
   });
+  trackPlanCartUsage({
+    media_id: item.mediaId,
+    source: item.addedFrom || "plan_cart",
+    action: "add",
+    media_name: item.mediaName,
+  });
   return { ok: true, added: true };
 }
 
@@ -363,9 +370,17 @@ export function addManyToPlanCart(
 
 export function removeFromPlanCart(mediaId: string): void {
   const cart = getPlanCart();
+  const prev = cart.items.find((i) => i.mediaId === mediaId);
+  if (!prev) return;
   writeCart({
     ...cart,
     items: cart.items.filter((i) => i.mediaId !== mediaId),
+  });
+  trackPlanCartUsage({
+    media_id: mediaId,
+    source: prev.addedFrom || "plan_cart",
+    action: "remove",
+    media_name: prev.mediaName,
   });
 }
 

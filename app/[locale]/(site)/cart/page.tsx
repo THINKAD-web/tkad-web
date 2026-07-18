@@ -97,7 +97,7 @@ export default function CartPage() {
   }
 
   function handleRemove(id: string, name?: string) {
-    remove(id);
+    remove(id, "cart_page");
     toast.warning(name ? `${name}이(가) 장바구니에서 제거되었습니다.` : "장바구니에서 제거되었습니다.");
   }
 

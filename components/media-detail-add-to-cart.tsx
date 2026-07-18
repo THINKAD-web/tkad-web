@@ -27,7 +27,7 @@ export function MediaDetailAddToCart({
   const inCart = has(mediaId);
 
   function handleClick() {
-    toggle(mediaId);
+    toggle(mediaId, "media_detail");
     if (inCart) {
       toast.warning(
         mediaName

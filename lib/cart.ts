@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
+import { trackLegacyCartUsage } from "@/lib/ga-events";
 
 export const CART_KEY = "tkad-media-cart-v1";
 
@@ -46,19 +47,29 @@ export function useCart() {
     };
   }, []);
 
-  const add = useCallback((id: string) => {
+  const add = useCallback((id: string, source = "legacy_cart") => {
     const cur = readRaw();
     if (cur.includes(id)) return;
     writeRaw([...cur, id]);
+    trackLegacyCartUsage({ media_id: id, source, action: "add" });
   }, []);
 
-  const remove = useCallback((id: string) => {
-    writeRaw(readRaw().filter((x) => x !== id));
-  }, []);
-
-  const toggle = useCallback((id: string) => {
+  const remove = useCallback((id: string, source = "legacy_cart") => {
     const cur = readRaw();
-    writeRaw(cur.includes(id) ? cur.filter((x) => x !== id) : [...cur, id]);
+    if (!cur.includes(id)) return;
+    writeRaw(cur.filter((x) => x !== id));
+    trackLegacyCartUsage({ media_id: id, source, action: "remove" });
+  }, []);
+
+  const toggle = useCallback((id: string, source = "legacy_cart") => {
+    const cur = readRaw();
+    const adding = !cur.includes(id);
+    writeRaw(adding ? [...cur, id] : cur.filter((x) => x !== id));
+    trackLegacyCartUsage({
+      media_id: id,
+      source,
+      action: adding ? "add" : "remove",
+    });
   }, []);
 
   const clear = useCallback(() => writeRaw([]), []);
