@@ -42,6 +42,7 @@ const MOBILE_DESC_ITEM_IDS = new Set([
   "campaign-targets",
   "integrated-planner",
   "package-proposal",
+  "rfp-proposal",
   "competitive-intel",
 ]);
 

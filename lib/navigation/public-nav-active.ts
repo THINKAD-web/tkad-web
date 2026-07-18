@@ -74,6 +74,8 @@ export function isPublicNavItemActive(
       return path === "/media/packages" || path.startsWith("/media/packages/");
     case "ai-recommend":
       return path === "/recommend" || path.startsWith("/recommend/");
+    case "rfp-proposal":
+      return path === "/studio/rfp" || path.startsWith("/studio/rfp/");
     case "trend-report":
       return path === "/report" || path.startsWith("/report/");
     case "success-cases":

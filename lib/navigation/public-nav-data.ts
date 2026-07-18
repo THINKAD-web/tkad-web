@@ -3,6 +3,7 @@ import {
   BookMarked,
   ClipboardList,
   Compass,
+  FileText,
   GraduationCap,
   Images,
   Lightbulb,
@@ -35,6 +36,7 @@ export type PublicNavItemId =
   | "integrated-planner"
   | "package-proposal"
   | "ai-recommend"
+  | "rfp-proposal"
   | "creative-library"
   | "dooh-playlists"
   | "creative-studio"
@@ -108,6 +110,12 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
         id: "ai-recommend",
         href: "/recommend",
         icon: Wand2,
+        secondary: true,
+      },
+      {
+        id: "rfp-proposal",
+        href: "/studio/rfp",
+        icon: FileText,
         secondary: true,
       },
     ],

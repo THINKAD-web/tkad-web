@@ -20,7 +20,8 @@
         { "id": "media-planner", "href": "/planner" },
         { "id": "integrated-planner", "href": "/planner/integrated" },
         { "id": "package-proposal", "href": "/media/packages" },
-        { "id": "ai-recommend", "href": "/recommend" }
+        { "id": "ai-recommend", "href": "/recommend" },
+        { "id": "rfp-proposal", "href": "/studio/rfp" }
       ]
     },
     {

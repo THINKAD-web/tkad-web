@@ -199,17 +199,21 @@
         "label": "빠른 AI 추천",
         "desc": "목표·예산에 맞는 AI 매체 추천"
       },
+      "rfp-proposal": {
+        "label": "RFP 제안서",
+        "desc": "RFP 원문 → 권역별 매체 매칭·PDF"
+      },
       "creative-library": {
         "label": "소재 라이브러리",
-        "desc": "업로드·관리·재사용"
+        "desc": "소재 보관·열람·재사용"
       },
       "dooh-playlists": {
         "label": "DOOH 플레이리스트",
-        "desc": "스케줄·룰 기반 재생 목록"
+        "desc": "재생목록 구성·스케줄"
       },
       "creative-studio": {
         "label": "크리에이티브 스튜디오",
-        "desc": "소재 업로드·가이드"
+        "desc": "제작·편집·스펙 가이드"
       },
       "trend-report": {
         "label": "트렌드 리포트",

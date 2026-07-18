@@ -199,17 +199,21 @@
         "label": "Quick AI picks",
         "desc": "AI matches to your goals and budget"
       },
+      "rfp-proposal": {
+        "label": "RFP proposal",
+        "desc": "RFP text → regional media match & PDF"
+      },
       "creative-library": {
         "label": "Creative library",
-        "desc": "Upload, manage, reuse"
+        "desc": "Store, browse, and reuse creatives"
       },
       "dooh-playlists": {
         "label": "DOOH playlists",
-        "desc": "Schedule and rule-based lists"
+        "desc": "Build and schedule playlists"
       },
       "creative-studio": {
         "label": "Creative studio",
-        "desc": "Upload and specs"
+        "desc": "Create, edit, and specs"
       },
       "trend-report": {
         "label": "Trend reports",
