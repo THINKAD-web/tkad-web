@@ -49,7 +49,7 @@ export function QuoteAddonLineRow({ detail, isKo = true, className }: CardProps)
               <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                 {isKo ? "소계" : "Subtotal"}
               </p>
-              <p className="text-[13px] font-extrabold tabular-nums text-violet-700">
+              <p className="text-[13px] font-extrabold tabular-nums text-[color:var(--qp-accent)]">
                 {detail.lineTotalLabel}
               </p>
             </div>
@@ -168,7 +168,7 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
                 key={s.key}
                 className={cn(
                   "inline-flex items-center gap-1 text-[10px] leading-snug",
-                  s.tone === "cyan" ? "text-cyan-700" : "text-gray-600",
+                  s.tone === "cyan" ? "text-[color:var(--qp-accent)]" : "text-gray-600",
                 )}
               >
                 <s.icon className="h-2.5 w-2.5 shrink-0 opacity-70" aria-hidden />
@@ -176,7 +176,7 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
                 <span
                   className={cn(
                     "font-medium",
-                    s.tone === "cyan" ? "text-cyan-700" : "text-gray-700",
+                    s.tone === "cyan" ? "text-[color:var(--qp-accent)]" : "text-gray-700",
                   )}
                 >
                   {s.value}
@@ -204,7 +204,7 @@ export function QuoteMediaLineCard({ detail, isKo = true, className }: CardProps
               <p className="text-[9px] font-semibold uppercase tracking-wide text-gray-400">
                 {isKo ? "소계" : "Subtotal"}
               </p>
-              <p className="text-[13px] font-extrabold tabular-nums text-violet-700">
+              <p className="text-[13px] font-extrabold tabular-nums text-[color:var(--qp-accent)]">
                 {detail.lineTotalLabel}
               </p>
             </div>

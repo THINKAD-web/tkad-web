@@ -1713,11 +1713,11 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   -webkit-text-fill-color: currentColor;
 }
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
-  border-color: #4338ca;
-  background: #4338ca;
+  border-color: var(--qp-accent, #ff6200);
+  background: var(--qp-accent, #ff6200);
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
-  box-shadow: 0 6px 24px rgb(67 56 202 / 0.32);
+  box-shadow: 0 6px 24px color-mix(in srgb, var(--qp-accent, #ff6200) 32%, transparent);
 }
 
 /* 내 플랜 — 선택 칩(보라·시안 배경)은 day에서도 흰 글자 유지 */
@@ -1727,13 +1727,13 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
-  border-color: rgb(99 102 241 / 0.45);
-  background: rgb(238 242 255);
-  color: rgb(67 56 202);
+  border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 45%, transparent);
+  background: var(--qp-accent-soft, color-mix(in srgb, #ff6200 12%, white));
+  color: #c24e00;
   -webkit-text-fill-color: currentColor;
 }
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
-  background: rgb(224 231 255);
+  background: color-mix(in srgb, var(--qp-accent, #ff6200) 18%, white);
 }
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(100 116 139);
@@ -1751,22 +1751,22 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   -webkit-text-fill-color: currentColor;
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
-  border-color: rgb(255 255 255 / 0.16);
-  background: rgb(255 255 255 / 0.12);
+  border-color: var(--qp-accent, #ff6200);
+  background: var(--qp-accent, #ff6200);
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
   box-shadow:
-    0 0 0 1px rgb(34 211 238 / 0.24),
+    0 0 0 1px color-mix(in srgb, var(--qp-accent, #ff6200) 40%, transparent),
     0 24px 80px rgb(0 0 0 / 0.45);
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
-  border-color: rgb(99 102 241 / 0.5);
-  background: rgb(99 102 241 / 0.1);
+  border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 50%, transparent);
+  background: color-mix(in srgb, var(--qp-accent, #ff6200) 14%, transparent);
   color: rgb(255 255 255 / 0.92);
   -webkit-text-fill-color: currentColor;
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
-  background: rgb(99 102 241 / 0.2);
+  background: color-mix(in srgb, var(--qp-accent, #ff6200) 24%, transparent);
 }
 .tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(255 255 255 / 0.55);

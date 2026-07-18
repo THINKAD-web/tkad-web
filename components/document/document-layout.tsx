@@ -35,7 +35,10 @@ export function DocumentSectionHeading({
         className,
       )}
     >
-      <span className="inline-block h-4 w-1.5 rounded-full bg-violet-600" aria-hidden />
+      <span
+        className="inline-block h-4 w-1.5 shrink-0 bg-[color:var(--qp-accent)]"
+        aria-hidden
+      />
       {children}
     </h3>
   );
@@ -56,11 +59,15 @@ export function ThinkadWordmark({
       )}
     >
       <span className={onDark ? "text-white" : "text-gray-900"}>THINK</span>
-      <span className="text-cyan-400">AD</span>
+      <span className="text-[color:var(--qp-accent)]">AD</span>
     </span>
   );
 }
 
+/**
+ * 문서 히어로 — PDF qp 톤과 맞춤: ink(#1c1c1f) 블록 + 주황 룰.
+ * (구 네온 그라데이션·시안 포인트 제거)
+ */
 export function DocumentGradientHero({
   badge,
   title,
@@ -76,7 +83,7 @@ export function DocumentGradientHero({
   title: string;
   subtitle?: string;
   className?: string;
-  /** 프리미엄 견적 상단 골드 띠 */
+  /** 프리미엄 견적 상단 액센트 띠 */
   topAccent?: "gold" | "none";
   /** 미리보기에서 제목 직접 수정 */
   titleEditable?: boolean;
@@ -85,21 +92,24 @@ export function DocumentGradientHero({
   titleAriaLabel?: string;
 }) {
   const titleClassName =
-    "mt-5 w-full text-2xl font-black leading-tight text-white sm:text-3xl [text-shadow:0_1px_2px_rgba(0,0,0,0.25)]";
+    "mt-5 w-full text-2xl font-black leading-tight text-white sm:text-3xl";
 
   return (
     <div
       className={cn(
-        "tkad-planner-dark-surface relative bg-gradient-to-br from-violet-600 via-violet-700 to-violet-800 px-6 py-7 sm:px-9 sm:py-9",
+        "tkad-planner-dark-surface relative bg-[#1c1c1f] px-6 py-7 sm:px-9 sm:py-9",
         className,
       )}
     >
       {topAccent === "gold" ? (
-        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-amber-400" aria-hidden />
+        <div
+          className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-[color:var(--qp-accent)]"
+          aria-hidden
+        />
       ) : null}
       <div className="flex items-center justify-between gap-3">
         <ThinkadWordmark className="text-lg sm:text-xl" onDark />
-        <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-violet-200">
+        <span className="font-display text-[10px] font-semibold uppercase tracking-[0.2em] text-white/70">
           {badge}
         </span>
       </div>
@@ -113,16 +123,23 @@ export function DocumentGradientHero({
           aria-label={titleAriaLabel}
           className={cn(
             titleClassName,
-            "border-0 bg-transparent p-0 placeholder:text-white/45 focus:rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-400/70",
+            "border-0 bg-transparent p-0 placeholder:text-white/45 focus:rounded-md focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/70",
           )}
         />
       ) : (
         <h2 className={titleClassName}>{title}</h2>
       )}
       {subtitle ? (
-        <p className="mt-2 text-sm font-medium text-white/90">{subtitle}</p>
+        <p className="mt-2 text-sm font-medium text-white/85">{subtitle}</p>
       ) : null}
-      <div className="mt-5 h-1 w-16 rounded-full bg-cyan-400" aria-hidden />
+      <div
+        className="mt-5 h-1 w-16 bg-[color:var(--qp-accent)]"
+        aria-hidden
+      />
+      <div
+        className="pointer-events-none absolute inset-x-0 bottom-0 h-[3px] bg-[color:var(--qp-accent)]"
+        aria-hidden
+      />
     </div>
   );
 }
