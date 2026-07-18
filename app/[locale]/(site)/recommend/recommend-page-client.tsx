@@ -26,9 +26,9 @@ import {
 } from "@/lib/ai-media-recommend";
 import type { RegionCheckboxCode } from "@/components/media-ai-recommend-form";
 import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-} from "@/lib/ai-recommend-metrics";
+  estimateCatalogCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 import { savePlanTransferData } from "@/lib/planner-contact-transfer";
 import { planCartMaxItems } from "@/lib/plan-cart-limits";
 import { useIsPro } from "@/hooks/use-is-pro";
@@ -311,10 +311,10 @@ export default function RecommendPageClient({
       );
     }, 0);
     const estimatedReach =
-      picked.reduce((s, m) => s + estimatedMonthlyImpressions(m), 0) *
+      picked.reduce((s, m) => s + resolveMonthlyImpressions(m), 0) *
       duration;
     const cpmValues = picked
-      .map((m) => estimatedCpmWon(m))
+      .map((m) => estimateCatalogCpmWon(m))
       .filter((v): v is number => v != null && Number.isFinite(v));
     const estimatedCpm =
       cpmValues.length > 0

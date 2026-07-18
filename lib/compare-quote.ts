@@ -6,10 +6,9 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-  resolveDisplayCpmWon,
-} from "@/lib/ai-recommend-metrics";
+  resolveCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 import {
   partialRateLookupKeyFromDays,
   quoteLineTotalWonFromPartialRate,
@@ -43,7 +42,7 @@ export function pricePeriodDays(period: MediaPricePeriodKey): number {
 }
 
 export function resolveMediaCpmWon(m: MediaItem): number | null {
-  return resolveDisplayCpmWon(m);
+  return resolveCpmWon(m);
 }
 
 export type MediaQuoteLine = {
@@ -103,7 +102,7 @@ function quoteLineFromCostWon(
   durationDays: number,
 ): MediaQuoteLine {
   const days = Math.max(1, Math.round(durationDays));
-  const monthlyImp = estimatedMonthlyImpressions(media);
+  const monthlyImp = resolveMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
   const cpm =
     impressions > 0 ? Math.round(costWon / (impressions / 1000)) : null;
@@ -130,7 +129,7 @@ function quoteLineFromUnitPrice(
   );
 
   const days = Math.max(1, Math.round(durationDays));
-  const monthlyImp = estimatedMonthlyImpressions(media);
+  const monthlyImp = resolveMonthlyImpressions(media);
   const impressions = Math.round(monthlyImp * (days / 30));
   const cpm =
     impressions > 0 ? Math.round(costWon / (impressions / 1000)) : null;
@@ -296,7 +295,7 @@ export function pickCpmWinner(
   const ties = scored.filter((s) => s.cpm === best.cpm);
   if (ties.length > 1) return null;
 
-  const imp = estimatedMonthlyImpressions(best.m);
+  const imp = resolveMonthlyImpressions(best.m);
   const reason = isKo
     ? `월 약 ${imp.toLocaleString("ko-KR")}회 노출 대비 CPM ₩${Math.round(best.cpm).toLocaleString("ko-KR")}로 비교군 중 가장 효율적입니다.`
     : `Best CPM at ₩${Math.round(best.cpm).toLocaleString("en-US")} vs ~${imp.toLocaleString("en-US")} monthly impressions.`;
@@ -358,7 +357,7 @@ function normalizeScores(
 }
 
 export function buildCompareRadarData(items: MediaItem[]): CompareRadarPoint[] {
-  const impRaw = items.map((m) => estimatedMonthlyImpressions(m));
+  const impRaw = items.map((m) => resolveMonthlyImpressions(m));
   const cpmRaw = items.map((m) => resolveMediaCpmWon(m) ?? 0);
   const visRaw = items.map((m) => m.visibilityScore ?? 0);
   const accRaw = items.map((m) => accessibilityScore(m));

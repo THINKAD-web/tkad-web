@@ -1,5 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
-import { resolveDisplayCpmWon } from "@/lib/ai-recommend-metrics";
+import {
+  resolveCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 
 export {
   MEDIA_ADVANCED_HIGH_PRIORITY_FILTERS,
@@ -200,11 +203,8 @@ export function inferOperatingHoursBucket(
 }
 
 export function effectiveImpressions(m: MediaItem): number | null {
-  const v = m.impressions ?? m.monthlyFootTraffic;
-  if (typeof v === "number" && Number.isFinite(v) && v > 0) return Math.round(v);
-  const d = m.dailyFootTraffic ?? 0;
-  if (d > 0) return Math.round(d * 30);
-  return null;
+  const n = resolveMonthlyImpressions(m);
+  return n > 0 ? n : null;
 }
 
 export function effectiveReach(m: MediaItem): number | null {
@@ -226,7 +226,7 @@ export function effectiveEngagement(m: MediaItem): number | null {
 }
 
 export function effectiveCpm(m: MediaItem): number | null {
-  return resolveDisplayCpmWon(m);
+  return resolveCpmWon(m);
 }
 
 function parseWidthHeightMFromSize(

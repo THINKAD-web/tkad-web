@@ -20,9 +20,9 @@ import {
 } from "@/components/planner/planner-neon-ui";
 import { cn } from "@/lib/utils";
 import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-} from "@/lib/ai-recommend-metrics";
+  estimateCatalogCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 import { normalizeVisibilityScore } from "@/lib/planner-logic";
 import { formatCpmKrw } from "@/lib/media-price-format";
 
@@ -116,8 +116,8 @@ export function IntegratedOohRecommendationPanel({
         {recommendations.map((row) => {
           const m = row.media;
           const active = isSelected(m.id);
-          const cpm = estimatedCpmWon(m);
-          const imp = estimatedMonthlyImpressions(m);
+          const cpm = estimateCatalogCpmWon(m);
+          const imp = resolveMonthlyImpressions(m);
           return (
             <li key={m.id}>
               <div className="flex items-start gap-3 px-5 py-4 sm:px-6">

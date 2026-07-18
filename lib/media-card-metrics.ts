@@ -1,15 +1,12 @@
 import { formatCpmKrw, formatMediaPriceCompactWon } from "@/lib/media-price-format";
 import {
   formatMonthlyImpressionsLabel,
-  resolveDisplayCpmWon,
-} from "@/lib/ai-recommend-metrics";
-import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+  resolveCpmWon,
+  type MediaMetricsInput,
+} from "@/lib/media-metrics";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
-type MetricInput = Pick<
-  HomeCatalogMediaItem,
-  "cpm" | "price" | "impressions" | "monthlyFootTraffic" | "dailyFootTraffic"
->;
+type MetricInput = MediaMetricsInput;
 
 function formatCpmLine(cpm: number | null | undefined, locale: string): string | null {
   if (cpm == null || !Number.isFinite(cpm) || cpm <= 0) return null;
@@ -25,18 +22,8 @@ function formatImpressionsLine(
   return isKo ? `노출 ${label}` : `Reach ${label}`;
 }
 
-/**
- * 목록·지도 카드용 CPM.
- * `resolveDisplayCpmWon`과 동일 — stored `cpm`은 재계산값 ±15% 이내일 때만 신뢰.
- * (구: stored cpm 맹신 → 만 단위 오염값이 목록에만 노출되던 버그 수정)
- */
-export function resolveCpmWon(item: MetricInput): number | null {
-  const resolved = resolveDisplayCpmWon(item);
-  if (resolved != null && resolved > 0 && Number.isFinite(resolved)) {
-    return Math.round(resolved);
-  }
-  return null;
-}
+/** 목록·지도 카드용 CPM — SSOT `lib/media-metrics.resolveCpmWon` */
+export { resolveCpmWon };
 
 /** 카탈로그·피드 카드 썸네일 하단 1줄 — CPM · 월 노출 */
 export function buildCatalogItemMetricLine(

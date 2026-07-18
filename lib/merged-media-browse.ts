@@ -5,7 +5,7 @@ import {
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
-import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-price-format";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type {
   PublicMediaQueryParams,

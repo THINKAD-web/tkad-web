@@ -14,7 +14,7 @@ import {
   YAxis,
 } from "recharts";
 import type { ScoredMedia } from "@/lib/ai-media-recommend";
-import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
+import { resolveMonthlyImpressions } from "@/lib/media-metrics";
 
 type Point = {
   x: number;
@@ -84,7 +84,7 @@ export default function MediaAiRecommendChart({ locale, scored }: Props) {
       const rank = rankById.get(s.item.id) ?? 999;
       return {
         x: s.score,
-        y: estimatedMonthlyImpressions(s.item),
+        y: resolveMonthlyImpressions(s.item),
         z: rank <= 3 ? 2 : 1,
         name: isKo ? s.item.name : (s.item.nameEn || s.item.name),
         id: s.item.id,

@@ -1,7 +1,7 @@
 import {
   formatMonthlyImpressionsLabel,
-  resolveDisplayCpmWon,
-} from "@/lib/ai-recommend-metrics";
+  resolveCpmWon,
+} from "@/lib/media-metrics";
 import { formatCpmKrw } from "@/lib/media-price-format";
 import {
   buildMapItemMetricLine,
@@ -19,9 +19,9 @@ export function formatMapImpressions(
 }
 
 export function formatMapCpm(item: MapMapItem, locale: string): string | null {
-  const cpm = resolveDisplayCpmWon(item);
+  const cpm = resolveCpmWon(item);
   if (cpm == null) return null;
-  return formatCpmKrw(Math.round(cpm), locale);
+  return formatCpmKrw(cpm, locale);
 }
 
 export function buildMapItemMetrics(

@@ -1,11 +1,13 @@
-import { estimatedCpmWon } from "@/lib/ai-recommend-metrics";
 import { catalogToMediaItem } from "@/lib/media-catalog-map";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
+import {
+  estimateCatalogCpmWon,
+  priceToMonthlyEquivalentWon,
+} from "@/lib/media-metrics";
 import {
   formatCpmKrw,
   formatMediaPriceWithPeriodSuffix,
   isNonMonthlyPricePeriod,
-  priceToMonthlyEquivalentWon,
 } from "@/lib/media-price-format";
 
 export type HomePopularCardPriceDisplay = {
@@ -65,7 +67,7 @@ export function homePopularCardCpmWon(
   const monthlyWon = priceToMonthlyEquivalentWon(item.price ?? 0, item.pricePeriod);
   if (monthlyWon <= 0) return null;
   const base = catalogToMediaItem(item);
-  return estimatedCpmWon({ ...base, price: monthlyWon, cpm: undefined });
+  return estimateCatalogCpmWon({ ...base, price: monthlyWon, cpm: undefined });
 }
 
 export function formatHomePopularCardCpm(

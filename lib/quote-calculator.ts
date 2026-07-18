@@ -7,7 +7,7 @@ import {
   monthFactorFromDays,
 } from "@/lib/admin-quote-calc";
 import { catalogPriceFieldToWon } from "@/lib/media-price-format";
-import { estimatedMonthlyImpressions } from "@/lib/ai-recommend-metrics";
+import { resolveMonthlyImpressions } from "@/lib/media-metrics";
 import {
   getQuantityUnitMode,
   isMobileSingleMedia,
@@ -169,7 +169,7 @@ function lineImpressions(
     m.impressions ??
     (m.dailyFootfall != null && m.dailyFootfall > 0
       ? m.dailyFootfall * 30
-      : estimatedMonthlyImpressions({
+      : resolveMonthlyImpressions({
           id: m.id,
           name: m.name,
           nameEn: m.name,

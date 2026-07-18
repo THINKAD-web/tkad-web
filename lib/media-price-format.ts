@@ -396,6 +396,10 @@ export type MediaPriceSortable = Pick<
   "price" | "pricePeriod" | "priceOptions"
 > & { id?: string };
 
+/**
+ * 목록 월환산 정렬 키 — `resolveMonthlyListPriceWon` 과 동일 식.
+ * (media-metrics → price-format 순환 import 방지용; SSOT 진입점은 media-metrics)
+ */
 export function mediaMonthlyEquivalentSortWon(
   media: MediaPriceSortable,
 ): number {

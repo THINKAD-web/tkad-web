@@ -68,8 +68,8 @@ import {
 } from "@/lib/media-filter-advanced";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import {
-  compareMediaByMonthlyEquivalentPrice,
   formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";

@@ -1,8 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
 import {
-  estimatedCpmWon,
-  estimatedMonthlyImpressions,
-} from "@/lib/ai-recommend-metrics";
+  estimateCatalogCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 import {
   filterCatalogByRegionCodes,
   pickRecommendPool,
@@ -141,8 +141,8 @@ function metricLabelsForAxis(
   axis: RecommendTabAxis,
 ): { metricKo: string; metricEn: string; axisScore: number } {
   if (axis === "budgetEfficiency") {
-    const cpm = estimatedCpmWon(scored.media);
-    const imp = estimatedMonthlyImpressions(scored.media);
+    const cpm = estimateCatalogCpmWon(scored.media);
+    const imp = resolveMonthlyImpressions(scored.media);
     if (cpm != null && cpm > 0) {
       const cpmRounded = Math.round(cpm);
       return {
@@ -179,16 +179,16 @@ function sortByAxis(
   if (axis === "budgetEfficiency") {
     return copy
       .filter((s) => {
-        const cpm = estimatedCpmWon(s.media);
+        const cpm = estimateCatalogCpmWon(s.media);
         return cpm != null && cpm > 0;
       })
       .sort((a, b) => {
-        const cpmA = estimatedCpmWon(a.media) ?? Infinity;
-        const cpmB = estimatedCpmWon(b.media) ?? Infinity;
+        const cpmA = estimateCatalogCpmWon(a.media) ?? Infinity;
+        const cpmB = estimateCatalogCpmWon(b.media) ?? Infinity;
         if (cpmA !== cpmB) return cpmA - cpmB;
         return (
-          estimatedMonthlyImpressions(b.media) -
-          estimatedMonthlyImpressions(a.media)
+          resolveMonthlyImpressions(b.media) -
+          resolveMonthlyImpressions(a.media)
         );
       });
   }

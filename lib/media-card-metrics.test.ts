@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { estimatedCpmWon } from "./ai-recommend-metrics.ts";
+import { estimateCatalogCpmWon } from "./media-metrics.ts";
 import {
   buildCatalogItemMetricLine,
   resolveCpmWon,
@@ -11,7 +11,7 @@ test("T1: discards inflated stored cpm when impressions are absolute counts", ()
   const price = 51_351_300;
   const impressions = 1_900_000;
   const storedCpm = 469_100_359;
-  const expectedRecalc = estimatedCpmWon({
+  const expectedRecalc = estimateCatalogCpmWon({
     price,
     impressions,
     cpm: undefined,
@@ -53,7 +53,7 @@ test("T6: uses recalc when stored cpm matches man-unit mis-entry pattern", () =>
 test("keeps stored cpm when within ±15% of recalc", () => {
   const price = 51_351_300;
   const impressions = 1_900_000;
-  const recalc = estimatedCpmWon({ price, impressions, cpm: undefined })!;
+  const recalc = estimateCatalogCpmWon({ price, impressions, cpm: undefined })!;
   const storedNear = recalc * 1.1; // +10% — 허용 구간
 
   const got = resolveCpmWon({

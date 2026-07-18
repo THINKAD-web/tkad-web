@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { priceToMonthlyEquivalentWon } from "@/lib/media-metrics";
 
 /** 월 집행 비용 상한 (원) — 레거시·참고용 (어드민 수동 토글이 우선) */
 export const INSTANT_BOOKING_MAX_MONTHLY_WON = 5_000_000;
@@ -42,20 +43,10 @@ export function isInstantBookingEligible(
   return { eligible: true };
 }
 
+/** 기간 → 월 환산가. SSOT `priceToMonthlyEquivalentWon` (catalog 원 단위 정규화 포함). */
 export function normalizeMonthlyPriceWon(
   price: number,
   period?: string | null,
 ): number {
-  const p = period?.toLowerCase() ?? "month";
-  switch (p) {
-    case "day":
-      return price * 30;
-    case "week":
-      return price * 4;
-    case "biweekly":
-      return price * 2;
-    case "month":
-    default:
-      return price;
-  }
+  return priceToMonthlyEquivalentWon(price, period);
 }

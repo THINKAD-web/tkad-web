@@ -7,9 +7,9 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import type { MediaItem } from "@/lib/media-data";
 import { typeLabels } from "@/lib/media-data";
 import {
-  estimatedMonthlyImpressions,
-  resolveDisplayCpmWon,
-} from "@/lib/ai-recommend-metrics";
+  resolveCpmWon,
+  resolveMonthlyImpressions,
+} from "@/lib/media-metrics";
 import { formatSizeDisplay } from "@/lib/format-media-size";
 import {
   formatCatalogPriceFieldWon,
@@ -26,7 +26,7 @@ const KNOWN_REGION_CODES = new Set([
 ]);
 
 function formatCpmDisplay(m: MediaItem, locale: string): string {
-  const cpm = resolveDisplayCpmWon(m);
+  const cpm = resolveCpmWon(m);
   if (cpm != null && Number.isFinite(cpm) && cpm > 0) {
     return `₩${Math.round(cpm).toLocaleString(locale)}`;
   }
@@ -82,19 +82,19 @@ export function CompareSpecTable({
         key: "impressions",
         label: t("compareRowImpressions"),
         cell: (m) => {
-          const n = estimatedMonthlyImpressions(m);
+          const n = resolveMonthlyImpressions(m);
           return n > 0
             ? `${n.toLocaleString(locale)}${t("compareImpressionsSuffix")}`
             : "—";
         },
-        numVal: (m) => estimatedMonthlyImpressions(m) || null,
+        numVal: (m) => resolveMonthlyImpressions(m) || null,
         better: "higher",
       },
       {
         key: "cpm",
         label: t("compareRowCpm"),
         cell: (m) => formatCpmDisplay(m, locale),
-        numVal: (m) => resolveDisplayCpmWon(m),
+        numVal: (m) => resolveCpmWon(m),
         better: "lower",
       },
       {

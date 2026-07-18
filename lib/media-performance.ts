@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { resolveMonthlyImpressions } from "@/lib/media-metrics";
 
 export type PerformanceDonutKey = "peak" | "standard" | "extended";
 
@@ -18,8 +19,8 @@ export type MediaPerformanceMetrics = {
 
 /** Deterministic reference metrics for detail UI (not a measurement guarantee). */
 export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMetrics {
-  const monthly =
-    media.monthlyFootTraffic ?? Math.round(media.dailyFootTraffic * 30);
+  // SSOT: impressions ?? monthlyFootTraffic ?? daily×30 (버그 #1 수정)
+  const monthly = resolveMonthlyImpressions(media);
   const idHash = media.id
     .split("")
     .reduce((acc, ch) => acc + ch.charCodeAt(0), 0);
@@ -29,8 +30,8 @@ export function resolvePerformanceMetrics(media: MediaItem): MediaPerformanceMet
   const visibilityScore = media.visibilityScore ?? (58 + (seed % 35));
   
   // reach: DB 값을 0-100 스케일로 변환 (백분율로 표시)
-  // DB reach가 있으면 impressions 대비 비율로 계산, 없으면 해시
-  const impressions = media.impressions ?? monthly;
+  // DB reach가 있으면 월노출 대비 비율로 계산, 없으면 해시
+  const impressions = monthly;
   const reachValue = media.reach != null && impressions > 0
     ? Math.min(98, Math.round((media.reach / impressions) * 100))
     : (52 + (seed % 42));

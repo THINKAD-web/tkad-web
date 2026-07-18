@@ -15,7 +15,7 @@ import {
   buildRelaxedMediaPackageWhere,
   mediaPackageSortToOrderBy,
 } from "@/lib/media-package-query";
-import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-price-format";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import {
   prismaMediaToMediaItem,
   type MediaWithAdvertiserExecutions,

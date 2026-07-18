@@ -10,6 +10,7 @@ import {
   getMediaPackageBySlug,
 } from "@/data/packages";
 import type { MediaItem } from "@/lib/media-data";
+import { resolveMonthlyImpressions } from "@/lib/media-metrics";
 import {
   catalogPriceFieldToWon,
   formatMediaPriceWonWithSymbol,
@@ -29,13 +30,10 @@ export type ResolvedMediaPackage = MediaPackageDefinition & {
 };
 
 function monthlyImpressionsForMedia(m: MediaItem): number {
-  return (
-    m.impressions ??
-    m.monthlyFootTraffic ??
-    (m.dailyFootTraffic > 0 ? Math.round(m.dailyFootTraffic * 30) : 0)
-  );
+  return resolveMonthlyImpressions(m);
 }
 
+/** 버그 #3: cheapest raw만 — 기간×배수 미적용. 이번 PR에서 수정하지 않음. */
 function monthlyPriceWonForMedia(m: MediaItem): number {
   const cheapest = getCheapestMediaPriceOption(m);
   const raw = cheapest?.priceWon ?? m.price;

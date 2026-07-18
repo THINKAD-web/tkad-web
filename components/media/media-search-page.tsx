@@ -43,8 +43,8 @@ function useLgUp() {
     () => false,
   );
 }
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import {
-  compareMediaByMonthlyEquivalentPrice,
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";

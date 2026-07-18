@@ -2,10 +2,8 @@ import type { MediaItem } from "@/lib/media-data";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
 import type { PublicMediaSort } from "@/lib/public-media-query";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
-import {
-  compareMediaByMonthlyEquivalentPrice,
-  resolveMediaDisplayPrice,
-} from "@/lib/media-price-format";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
+import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 
 export type MapCatalogFilterParams = {
   category?: string | null;

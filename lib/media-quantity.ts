@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { MEDIA_DAYS_PER_MONTH } from "@/lib/media-metrics";
 import { catalogPriceFieldToWon, formatCatalogPriceFieldWon } from "@/lib/media-price-format";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { computeNetworkMonthlyFromMediaItem, networkInventoryUnitSuffix } from "@/lib/media-network-types";
@@ -281,14 +282,16 @@ export function resolveMonthlyPriceForUnits(
   return priceWon;
 }
 
-const DAYS_PER_MONTH = 30;
-
+/**
+ * 견적·units 비례용 월노출 — **기존 동작 유지** (impressions 필드를 쓰지 않음).
+ * 목록/카드 SSOT(`resolveMonthlyImpressions`)와 의도적으로 다름. 금전 민감 — 임의 변경 금지.
+ */
 function baseMonthlyImpressions(m: MediaItem): number {
   if (m.monthlyFootTraffic != null && m.monthlyFootTraffic > 0) {
     return Math.round(m.monthlyFootTraffic);
   }
   const daily = m.dailyFootTraffic ?? 0;
-  return Math.max(0, Math.round(daily * DAYS_PER_MONTH));
+  return Math.max(0, Math.round(daily * MEDIA_DAYS_PER_MONTH));
 }
 
 /**

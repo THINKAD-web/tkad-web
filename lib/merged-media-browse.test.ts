@@ -5,8 +5,9 @@ import type { MediaItem } from "./media-data.ts";
 import {
   compareMediaByMonthlyEquivalentPrice,
   mediaMonthlyEquivalentSortWon,
-  priceToMonthlyEquivalentWon,
-} from "./media-price-format.ts";
+  resolveMonthlyListPriceWon,
+} from "./media-metrics.ts";
+import { priceToMonthlyEquivalentWon } from "./media-price-format.ts";
 
 function stubMedia(
   partial: Pick<MediaItem, "id" | "name" | "price"> & {
@@ -56,8 +57,12 @@ const midMonth = stubMedia({
 
 test("monthly sort key: day 22M >> month 1.2M", () => {
   assert.equal(
-    mediaMonthlyEquivalentSortWon(shinsegaeDay),
+    resolveMonthlyListPriceWon(shinsegaeDay),
     priceToMonthlyEquivalentWon(22_000_000, "day"),
+  );
+  assert.equal(
+    resolveMonthlyListPriceWon(shinsegaeDay),
+    mediaMonthlyEquivalentSortWon(shinsegaeDay),
   );
   assert.equal(mediaMonthlyEquivalentSortWon(cheapMonth), 1_200_000);
   assert.ok(

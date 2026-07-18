@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { catalogPriceFieldToWon } from "@/lib/media-price-format";
+import { priceToMonthlyEquivalentWon } from "@/lib/media-metrics";
 import { resolveMonthlyPriceForUnits } from "@/lib/media-quantity";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
@@ -251,13 +251,8 @@ function monthlyPriceWon(
   const resolved = resolveMonthlyPriceForUnits(m, quantities?.[m.id]);
   if (resolved > 0) return resolved;
   if (isNetworkCatalogItem(m)) return 0;
-  const won = catalogPriceFieldToWon(m.price);
-  if (won <= 0) return 0;
-  const period = (m.pricePeriod ?? "month").toLowerCase();
-  if (period === "week") return won * 4;
-  if (period === "biweekly") return won * 2;
-  if (period === "day") return won * 30;
-  return won;
+  // quantity 경로 실패 시 raw price+period 환산만 SSOT 공유 (display cheapest 아님 — 버그 #4)
+  return priceToMonthlyEquivalentWon(m.price, m.pricePeriod);
 }
 
 function scoreBudget(

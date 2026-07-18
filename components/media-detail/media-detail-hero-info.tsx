@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
-import { formatMonthlyImpressionsLabel } from "@/lib/ai-recommend-metrics";
+import { formatMonthlyImpressionsLabel } from "@/lib/media-metrics";
 import {
   formatCatalogPriceFieldWon,
   formatCpmKrw,
