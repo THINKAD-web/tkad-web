@@ -118,8 +118,8 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     items: [
       { id: "trend-report", href: "/report", icon: LineChart },
       { id: "success-cases", href: "/cases", icon: Trophy },
-      { id: "academy-content", href: "/academy", icon: GraduationCap },
       { id: "advertiser-guide", href: "/guides", icon: BookMarked },
+      { id: "academy-content", href: "/academy", icon: GraduationCap },
     ],
   },
   {

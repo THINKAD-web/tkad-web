@@ -181,7 +181,7 @@
       },
       "campaign-targets": {
         "label": "Campaign goals",
-        "desc": "Browse by brand, promo, launch, and more"
+        "desc": "Goal-based browse landing · explore by purpose"
       },
       "media-planner": {
         "label": "OOH campaign planner",
@@ -193,11 +193,11 @@
       },
       "package-proposal": {
         "label": "Verified packages",
-        "desc": "Curated bundles by goal and region"
+        "desc": "Ready-made bundles by goal and region"
       },
       "ai-recommend": {
         "label": "Quick AI picks",
-        "desc": "AI matches to your goals and budget"
+        "desc": "1-min instant match · step-by-step in Planner"
       },
       "creative-library": {
         "label": "Creative library",

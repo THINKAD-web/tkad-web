@@ -29,8 +29,8 @@
       "items": [
         { "id": "trend-report", "href": "/report", "beta": true },
         { "id": "success-cases", "href": "/cases", "beta": true },
-        { "id": "academy-content", "href": "/academy", "beta": true },
-        { "id": "advertiser-guide", "href": "/guides" }
+        { "id": "advertiser-guide", "href": "/guides" },
+        { "id": "academy-content", "href": "/academy", "beta": true }
       ]
     },
     {

@@ -63,13 +63,13 @@ export const PLANNING_TABS: SubTab[] = [
 export const CONTENT_TABS: SubTab[] = [
   { label: "트렌드 리포트", href: "/report", icon: FileText },
   { label: "성공 사례", href: "/cases", icon: Trophy },
+  { label: "광고주 가이드", href: "/guides", icon: BookOpen },
   {
     label: "교육 콘텐츠",
     href: "/academy",
     icon: GraduationCap,
     match: (p) => p === "/academy" || p.startsWith("/academy/learn"),
   },
-  { label: "광고주 가이드", href: "/guides", icon: BookOpen },
 ];
 
 export const POLICY_TABS: SubTab[] = [
