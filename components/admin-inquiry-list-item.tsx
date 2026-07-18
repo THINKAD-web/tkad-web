@@ -65,7 +65,7 @@ function typeBadgeClass(
     case "quote":
       return "border-emerald-200 bg-emerald-50 text-emerald-700";
     case "campaign":
-      return "border-violet-200 bg-violet-50 text-violet-700";
+      return "border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]";
     case "media":
       return "border-sky-200 bg-sky-50 text-sky-700";
     case "other":

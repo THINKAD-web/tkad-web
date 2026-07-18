@@ -88,7 +88,7 @@ export function NetworkQuickAddAiTab({
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-base">
-            <Sparkles className="h-4 w-4 text-violet-600" />
+            <Sparkles className="h-4 w-4 text-[color:var(--qp-accent)]" />
             {isEn ? "Describe your network" : "AI로 작성"}
           </CardTitle>
         </CardHeader>

@@ -26,7 +26,7 @@ import {
   adminDesktopTableWrapClass,
   adminMobileTouchBtnClass,
   adminQuoteEmphasisTextClass,
-  adminQuoteLinkVioletClass,
+  adminQuoteLinkAccentClass,
   adminQuoteSectionCard,
   adminQuoteSelectClass,
   adminQuoteTableExpandedRowClass,
@@ -717,7 +717,7 @@ export default function AdminOohQuotesClient() {
                             })}{" "}
                             <Link
                               href={`/admin/quotes/${row.sourceAdminQuoteId}/edit`}
-                              className={adminQuoteLinkVioletClass}
+                              className={adminQuoteLinkAccentClass}
                             >
                               {t("sourceFromAdminQuoteLink")}
                             </Link>
@@ -853,7 +853,7 @@ export default function AdminOohQuotesClient() {
                             })}{" "}
                             <Link
                               href={`/admin/quotes/${row.sourceAdminQuoteId}/edit`}
-                              className={adminQuoteLinkVioletClass}
+                              className={adminQuoteLinkAccentClass}
                             >
                               {t("sourceFromAdminQuoteLink")}
                             </Link>

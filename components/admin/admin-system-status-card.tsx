@@ -84,7 +84,7 @@ export function AdminSystemStatusCard() {
     >
       <div className="flex items-center justify-between gap-3">
         <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          <Activity className="h-4 w-4 text-cyan-400/80" aria-hidden />
+          <Activity className="h-4 w-4 text-[color:var(--qp-accent)]/80" aria-hidden />
           [ 시스템 상태 ]
         </h2>
         <button

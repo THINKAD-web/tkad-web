@@ -108,7 +108,7 @@ export function AdminUserPlanActivityPanel({
           {showFullLink ? (
             <Link
               href={fullHref}
-              className="inline-flex items-center gap-1 text-xs font-semibold text-cyan-700 underline-offset-2 hover:underline dark:text-cyan-400"
+              className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
             >
               전체 보기
               <ExternalLink className="h-3 w-3" />

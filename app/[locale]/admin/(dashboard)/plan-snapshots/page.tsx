@@ -219,19 +219,19 @@ export default function AdminPlanSnapshotsPage() {
         <h1 className="text-2xl font-black tracking-tight">저장된 사용자 플랜</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           저장 플랜·보고서 조회·PDF/PPT 다운로드를 확인합니다. 회원별 상세는{" "}
-          <Link href={`/${locale}/admin/users`} className="text-cyan-700 underline dark:text-cyan-400">
+          <Link href={`/${locale}/admin/users`} className="text-[color:var(--qp-accent)] underline dark:text-[color:var(--qp-accent)]">
             사용자 목록
           </Link>
           의 「플랜·활동」 또는 CRM 프로필에서도 볼 수 있습니다.
         </p>
         {userIdFilter ? (
-          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-cyan-200 bg-cyan-50 px-3 py-2 text-sm dark:border-cyan-900/40 dark:bg-cyan-950/30">
+          <div className="mt-3 flex flex-wrap items-center gap-2 rounded-lg border border-[color:var(--qp-accent)]/30 bg-[color:var(--qp-accent-soft)] px-3 py-2 text-sm dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10">
             <span>
               회원 필터: <strong>{filteredUserLabel}</strong>
             </span>
             <Link
               href={`/${locale}/admin/plan-snapshots`}
-              className="text-xs font-semibold text-cyan-800 underline dark:text-cyan-300"
+              className="text-xs font-semibold text-[color:var(--qp-accent)] underline dark:text-[color:var(--qp-accent)]"
             >
               필터 해제
             </Link>
@@ -308,7 +308,7 @@ export default function AdminPlanSnapshotsPage() {
                     {!userIdFilter ? (
                       <Link
                         href={`/${locale}/admin/plan-snapshots?userId=${row.user.id}`}
-                        className="mb-0.5 block text-xs font-semibold text-cyan-700 hover:underline dark:text-cyan-400"
+                        className="mb-0.5 block text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                       >
                         {row.user.name} · {row.user.email}
                       </Link>

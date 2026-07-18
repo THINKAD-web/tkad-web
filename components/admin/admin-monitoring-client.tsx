@@ -61,7 +61,7 @@ function FunnelBar({
       </div>
       <div className="mt-1.5 h-2 overflow-hidden rounded-full bg-muted">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-violet-500 to-cyan-400 transition-all"
+          className="h-full rounded-full bg-[color:var(--qp-accent)] transition-all"
           style={{ width: `${width}%` }}
         />
       </div>
@@ -115,7 +115,7 @@ export function AdminMonitoringClient({ locale }: Props) {
     <div className="space-y-8 pb-16">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-500/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
             [ Ops Monitoring ]
           </p>
           <h1 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -171,7 +171,7 @@ export function AdminMonitoringClient({ locale }: Props) {
           {/* 1. Visitors */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur">
             <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              <Users className="h-4 w-4 text-cyan-400/80" />
+              <Users className="h-4 w-4 text-[color:var(--qp-accent)]/80" />
               [ 방문자 현황 ]
             </h2>
             <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -213,7 +213,7 @@ export function AdminMonitoringClient({ locale }: Props) {
           {/* 2. Funnel */}
           <section className="rounded-2xl border border-border/60 bg-card/40 p-5 backdrop-blur">
             <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-              <Activity className="h-4 w-4 text-violet-400/80" />
+              <Activity className="h-4 w-4 text-[color:var(--qp-accent)]/80" />
               [ 전환 퍼널 ]
             </h2>
             <div className="mt-4 space-y-4">
@@ -339,7 +339,7 @@ export function AdminMonitoringClient({ locale }: Props) {
               {data.system.vercel.deploymentUrl ? (
                 <a
                   href={data.system.vercel.deploymentUrl}
-                  className="mt-1 inline-block text-cyan-400 hover:underline"
+                  className="mt-1 inline-block text-[color:var(--qp-accent)] hover:underline"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -398,7 +398,7 @@ function StatCard({
       className={cn(
         "rounded-xl border px-4 py-3",
         highlight
-          ? "border-cyan-500/40 bg-cyan-500/10"
+          ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10"
           : "border-border/60 bg-card/60",
       )}
     >
@@ -430,7 +430,7 @@ function RankingCard({
             <li key={r.mediaId} className="flex items-center justify-between gap-2 text-sm">
               <Link
                 href={`/media/${r.mediaId}`}
-                className="min-w-0 truncate hover:text-cyan-400"
+                className="min-w-0 truncate hover:text-[color:var(--qp-accent)]"
               >
                 {i + 1}. {r.name}
               </Link>
@@ -484,7 +484,7 @@ function AlertBlock({
       ) : null}
       <Link
         href={href}
-        className="mt-3 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-cyan-400 hover:underline"
+        className="mt-3 inline-flex items-center gap-1 font-display text-xs font-medium uppercase tracking-[0.16em] text-[color:var(--qp-accent)] hover:underline"
       >
         관리 화면
         <ArrowRight className="h-3 w-3" />

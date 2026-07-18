@@ -6,14 +6,13 @@ export default function AdminLoading() {
   return (
     <div className="space-y-6 p-6">
       <div className="tkad-glass-surface relative overflow-hidden rounded-[22px] p-5">
-        <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.10] tkad-neon-grid" />
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
           {`// LOADING…`}
         </p>
         <div className="skeleton-shimmer mt-3 h-7 w-40" />
         <div className="skeleton-shimmer mt-3 h-4 w-64" />
         <div className="mt-5 h-2 w-48 overflow-hidden rounded-full border border-border/70 bg-card/60">
-          <div className="h-full w-1/3 bg-[linear-gradient(90deg,#a855f7,#22d3ee,#ec4899)] loading-slide" />
+          <div className="h-full w-1/3 bg-[color:var(--qp-accent)] loading-slide" />
         </div>
       </div>
       <div className="grid gap-0 sm:grid-cols-2 lg:grid-cols-4">

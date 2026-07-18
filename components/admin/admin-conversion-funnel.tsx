@@ -67,7 +67,7 @@ export function AdminConversionFunnel() {
               className={
                 "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
                 (period === p
-                  ? "bg-violet-600 text-white"
+                  ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-muted/40")
               }
             >

@@ -109,7 +109,7 @@ export function AdminMediaProposalUpload({
   return (
     <div className="rounded-xl border-2 border-border bg-muted/40 p-4">
       <div className="mb-2 flex items-center gap-2">
-        <FileText className="h-4 w-4 text-violet-600" />
+        <FileText className="h-4 w-4 text-[color:var(--qp-accent)]" />
         <span className="text-xs font-semibold text-foreground">
           제안서 PDF 업로드
         </span>
@@ -130,7 +130,7 @@ export function AdminMediaProposalUpload({
             href={state.proposalUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="break-all text-violet-600 underline"
+            className="break-all text-[color:var(--qp-accent)] underline"
           >
             {state.proposalUrl}
           </a>

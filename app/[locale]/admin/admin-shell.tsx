@@ -211,10 +211,9 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   const sidebar = (
     <div className="tkad-admin-shell relative flex h-full flex-col overflow-hidden border-r border-border/60 bg-card/70 text-card-foreground backdrop-blur">
-      <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.08] tkad-neon-grid" />
       <div
         aria-hidden
-        className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,rgba(34,211,238,0.18),transparent_55%),radial-gradient(circle_at_80%_70%,rgba(168,85,247,0.14),transparent_60%),radial-gradient(circle_at_40%_90%,rgba(236,72,153,0.10),transparent_65%)]"
+        className="pointer-events-none absolute -inset-20 bg-[radial-gradient(circle_at_20%_10%,color-mix(in_srgb,var(--qp-accent)_12%,transparent),transparent_55%),radial-gradient(circle_at_80%_70%,color-mix(in_srgb,var(--qp-ink)_6%,transparent),transparent_60%)]"
       />
 
       <div className="relative flex h-16 items-center gap-2 border-b border-border/60 px-5">
@@ -248,7 +247,7 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
   return (
     <AppProvidersRoot admin>
-    <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-screen overflow-x-clip bg-background font-sans text-foreground">
+    <div className="admin-dashboard-root flex min-h-screen overflow-x-clip bg-background font-sans text-foreground">
       <aside className="hidden w-72 shrink-0 md:block">{sidebar}</aside>
 
       {sidebarOpen && (
@@ -263,7 +262,6 @@ export default function AdminShell({ children }: { children: ReactNode }) {
 
       <div className="flex min-w-0 flex-1 flex-col">
         <header className="relative flex h-14 min-w-0 items-center gap-3 border-b border-border/60 bg-card/70 px-4 backdrop-blur md:px-6">
-          <div aria-hidden className="pointer-events-none absolute inset-0 opacity-[0.06] tkad-neon-grid" />
           <button
             type="button"
             onClick={() => setSidebarOpen(true)}

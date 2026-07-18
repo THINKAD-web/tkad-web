@@ -163,7 +163,7 @@ function GroupSection({
           className={cn(
             "h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform",
             open ? "rotate-0" : "-rotate-90",
-            groupActive && "text-violet-500 dark:text-violet-400",
+            groupActive && "text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
           )}
           aria-hidden
         />
@@ -181,7 +181,7 @@ function GroupSection({
                   className={cn(
                     "flex items-center gap-2.5 rounded-r-md py-2 pl-2.5 pr-2 text-[13px] font-medium transition-colors",
                     active
-                      ? "border-l-2 border-violet-500 bg-violet-50 text-violet-700 dark:bg-white/10 dark:text-white"
+                      ? "border-l-2 border-[color:var(--qp-accent)] bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)] dark:bg-white/10 dark:text-white"
                       : "border-l-2 border-transparent text-muted-foreground hover:bg-muted/50 hover:text-foreground",
                   )}
                 >
@@ -189,7 +189,7 @@ function GroupSection({
                     className={cn(
                       "h-4 w-4 shrink-0",
                       active
-                        ? "text-violet-600 dark:text-white/90"
+                        ? "text-[color:var(--qp-accent)] dark:text-white/90"
                         : "text-muted-foreground",
                     )}
                     aria-hidden

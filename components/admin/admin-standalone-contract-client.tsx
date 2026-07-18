@@ -440,7 +440,7 @@ export default function AdminStandaloneContractClient() {
           <div className="mt-2 flex flex-wrap gap-3 text-xs font-semibold">
             <Link
               href="/admin/contracts"
-              className="text-violet-700 hover:underline dark:text-violet-300"
+              className="text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
             >
               {t("backToList")}
             </Link>

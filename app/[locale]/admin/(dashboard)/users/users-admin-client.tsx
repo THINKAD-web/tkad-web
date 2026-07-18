@@ -30,7 +30,7 @@ const ROLE_LABEL: Record<Role, string> = {
 
 const ROLE_STYLE: Record<Role, string> = {
   advertiser: "bg-blue-100 text-blue-800 hover:bg-blue-100",
-  agency: "bg-purple-100 text-purple-800 hover:bg-purple-100",
+  agency: "bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)]",
   owner: "bg-emerald-100 text-emerald-800 hover:bg-emerald-100",
   admin: "bg-amber-100 text-amber-900 hover:bg-amber-100",
 };
@@ -181,7 +181,7 @@ export default function UsersAdminClient() {
                         )}
                         <Link
                           href={`/${locale}/admin/plan-snapshots?userId=${u.id}`}
-                          className="text-xs text-cyan-700 underline-offset-2 hover:underline dark:text-cyan-400"
+                          className="text-xs text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
                         >
                           플랜·활동
                         </Link>

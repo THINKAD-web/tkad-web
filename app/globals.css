@@ -530,8 +530,8 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document .tkad-neon-grid 
 
 html:not(.dark) .admin-dashboard-root .campaign-report-document .tkad-neon-depth {
   background:
-    radial-gradient(900px 520px at 50% 0%, rgb(34 211 238 / 0.14), transparent 62%),
-    radial-gradient(720px 480px at 12% 88%, rgb(168 85 247 / 0.1), transparent 58%),
+    radial-gradient(900px 520px at 50% 0%, color-mix(in srgb, var(--qp-accent) 14%, transparent), transparent 62%),
+    radial-gradient(720px 480px at 12% 88%, color-mix(in srgb, var(--qp-ink) 8%, transparent), transparent 58%),
     linear-gradient(to bottom, rgb(244 242 238 / 0.15), rgb(244 242 238 / 0.88));
   opacity: 0.85;
 }

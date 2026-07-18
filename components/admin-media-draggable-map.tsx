@@ -417,7 +417,7 @@ export default function AdminMediaDraggableMap({
               strokeWeight: 2,
               strokeColor: "#312e81",
               strokeOpacity: 0.9,
-              fillColor: "#a855f7",
+              fillColor: "#ff6200",
               fillOpacity: 0.14,
             });
             coveragePolygonsRef.current.push(poly);

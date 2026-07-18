@@ -56,7 +56,7 @@ export default function AdminRecommendationsPage() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="flex items-center gap-2 text-2xl font-bold tracking-tight">
-            <Sparkles className="h-6 w-6 text-violet-500" />
+            <Sparkles className="h-6 w-6 text-[color:var(--qp-accent)]" />
             AI 추천 모니터링
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">

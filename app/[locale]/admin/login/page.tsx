@@ -26,7 +26,7 @@ export default async function AdminLoginPage({ params }: Props) {
 
   return (
     <HomeLandingDayNight>
-      <div className="admin-dashboard-root tkad-landing-neon tkad-planner-neon flex min-h-[calc(100vh-72px)] flex-col items-center justify-center bg-transparent px-4 py-12 text-foreground">
+      <div className="admin-dashboard-root flex min-h-[calc(100vh-72px)] flex-col items-center justify-center bg-transparent px-4 py-12 text-foreground">
         <div className="relative w-full max-w-md overflow-hidden rounded-[var(--qp-radius-lg)] border border-border/70 bg-card/80 p-6 shadow-[0_16px_48px_rgba(0,0,0,0.12)] backdrop-blur">
           <div
             aria-hidden

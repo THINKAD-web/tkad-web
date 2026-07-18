@@ -27,13 +27,13 @@ export function AdminQuoteTopSticky({
 }: Props) {
   return (
     <div
-      className="sticky top-0 z-30 -mx-1 rounded-2xl border-2 border-violet-300/60 bg-white/95 px-4 py-3 shadow-md backdrop-blur-md dark:border-violet-400/35 dark:bg-[#0a0a12]/95"
+      className="sticky top-0 z-30 -mx-1 rounded-2xl border-2 border-[color:var(--qp-accent)]/40 bg-white/95 px-4 py-3 shadow-md backdrop-blur-md dark:border-[color:var(--qp-accent)]/35 dark:bg-[#0a0a12]/95"
       role="region"
       aria-label={title}
     >
       <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
         <div className="min-w-0">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.2em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
             {title}
           </p>
           {summary ? (
@@ -56,8 +56,8 @@ export function AdminQuoteTopSticky({
             className={cn(
               "inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border-2 px-4 text-sm font-bold transition-colors sm:w-auto sm:min-w-[220px]",
               canCreate && !busy
-                ? "border-violet-500 bg-gradient-to-r from-violet-500 to-cyan-400 text-white shadow-sm hover:opacity-95"
-                : "cursor-not-allowed border-violet-400/80 bg-white text-foreground dark:border-violet-400/50 dark:bg-white/10 dark:text-white",
+                ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] text-white shadow-sm hover:opacity-95"
+                : "cursor-not-allowed border-[color:var(--qp-accent)]/50 bg-white text-foreground dark:border-[color:var(--qp-accent)]/50 dark:bg-white/10 dark:text-white",
               busy && "pointer-events-none",
             )}
           >

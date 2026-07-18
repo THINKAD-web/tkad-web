@@ -218,7 +218,7 @@ export default function AdminAcademyNewClient() {
   return (
     <div className="space-y-6 p-6 text-foreground">
       <header>
-        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/80">
+        <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
           [ ACADEMY ]
         </p>
         <h1 className="mt-2 text-2xl font-bold tracking-tight">
@@ -295,7 +295,7 @@ export default function AdminAcademyNewClient() {
             type="button"
             disabled={genBusy}
             onClick={() => void runGenerate(false)}
-            className="border-2 border-cyan-500/40 bg-cyan-500/10 hover:bg-cyan-500/20"
+            className="border-2 border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent)]/10 hover:bg-[color:var(--qp-accent-soft)]0/20"
           >
             {genBusy ? (
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />

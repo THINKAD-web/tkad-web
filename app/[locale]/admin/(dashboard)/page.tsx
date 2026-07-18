@@ -49,7 +49,7 @@ function FeedList({
     <div className="rounded-2xl border border-border/60 bg-card/40 backdrop-blur">
       <div className="flex items-center justify-between gap-2 border-b border-border/60 px-4 py-3">
         <h2 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.2em] text-muted-foreground">
-          <Icon className="h-4 w-4 text-cyan-400/80" aria-hidden />
+          <Icon className="h-4 w-4 text-[color:var(--qp-accent)]/80" aria-hidden />
           [ {title} ]
         </h2>
         <Link
@@ -147,7 +147,7 @@ export default async function AdminOverviewPage({ params }: Props) {
     <div className="space-y-6 text-foreground">
       <header className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-cyan-400/80">
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)]/80">
             [ OPERATIONS HUB ]
           </p>
           <h1 className="mt-2 text-xl font-bold tracking-tight sm:text-2xl">
@@ -206,7 +206,7 @@ export default async function AdminOverviewPage({ params }: Props) {
                 <Icon className="h-3.5 w-3.5" />
                 {label}
               </div>
-              <p className="mt-1 text-2xl font-black tabular-nums text-cyan-500 dark:text-cyan-300">
+              <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                 {today.configured ? value.toLocaleString() : "—"}
               </p>
             </div>
@@ -279,9 +279,9 @@ export default async function AdminOverviewPage({ params }: Props) {
             <Link
               key={href}
               href={href}
-              className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/50 px-3 py-3 text-sm font-bold transition hover:border-cyan-400/30 hover:bg-card/80"
+              className="flex items-center gap-2 rounded-xl border border-border/60 bg-card/50 px-3 py-3 text-sm font-bold transition hover:border-[color:var(--qp-accent)]/30 hover:bg-card/80"
             >
-              <Icon className="h-4 w-4 shrink-0 text-cyan-400/90" aria-hidden />
+              <Icon className="h-4 w-4 shrink-0 text-[color:var(--qp-accent)]/90" aria-hidden />
               <span className="min-w-0 truncate">{label}</span>
             </Link>
           ))}

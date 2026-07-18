@@ -13,7 +13,7 @@ import {
 } from "recharts";
 import type { InquiryTypeSlice, WeeklyInquiryPoint } from "@/lib/admin-dashboard-data";
 
-const PIE_COLORS = ["#a855f7", "#22d3ee", "#ec4899", "#f59e0b", "#94a3b8"];
+const PIE_COLORS = ["#ff6200", "#525252", "#e11d48", "#f59e0b", "#94a3b8"];
 
 type Props = {
   weeklyInquiries: WeeklyInquiryPoint[];
@@ -60,9 +60,9 @@ export function AdminDashboardCharts({
                 type="monotone"
                 dataKey="count"
                 name="문의"
-                stroke="#22d3ee"
+                stroke="#ff6200"
                 strokeWidth={2.5}
-                dot={{ r: 4, fill: "#a855f7" }}
+                dot={{ r: 4, fill: "#ff6200" }}
                 activeDot={{ r: 6 }}
               />
             </LineChart>

@@ -879,7 +879,7 @@ export default function AdminNetworkEditor(props: Props) {
               <label className="text-sm font-medium text-slate-700">
                 {t("unitTotalAuto")}
               </label>
-              <div className="flex h-10 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold tabular-nums text-violet-700">
+              <div className="flex h-10 items-center rounded-md border border-slate-200 bg-slate-50 px-3 text-sm font-semibold tabular-nums text-[color:var(--qp-accent)]">
                 {locStats.unitTotal.toLocaleString(locale === "en" ? "en-US" : "ko-KR")}
               </div>
             </div>

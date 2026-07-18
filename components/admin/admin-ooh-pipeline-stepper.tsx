@@ -67,7 +67,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
                       done && "bg-emerald-500/80 dark:bg-emerald-400/80",
                       isCurrent &&
                         !done &&
-                        "animate-pulse bg-violet-500 dark:bg-violet-400",
+                        "animate-pulse bg-[color:var(--qp-accent)] dark:bg-[color:var(--qp-accent)]",
                       !done &&
                         !isCurrent &&
                         "bg-muted-foreground/25 dark:bg-hero-fg/15",
@@ -121,7 +121,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
               className={cn(
                 "mt-3 rounded-md border px-3 py-2 text-sm font-medium",
                 action === "awaitingSignature"
-                  ? "animate-pulse border-violet-300 bg-violet-50 text-violet-800 dark:border-violet-500/40 dark:bg-violet-500/10 dark:text-violet-200"
+                  ? "animate-pulse border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
                   : "border-amber-200/80 bg-amber-50/80 text-amber-900 dark:border-amber-500/30 dark:bg-amber-500/10 dark:text-amber-100",
               )}
             >
@@ -147,7 +147,7 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
                       done &&
                         "border-emerald-500 bg-emerald-500 text-white dark:border-emerald-400 dark:bg-emerald-500",
                       isCurrent &&
-                        "animate-pulse border-violet-500 bg-violet-500/15 text-violet-600 dark:border-violet-400 dark:text-violet-300",
+                        "animate-pulse border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/15 text-[color:var(--qp-accent)] dark:border-[color:var(--qp-accent)]/50 dark:text-[color:var(--qp-accent)]",
                       !done &&
                         !isCurrent &&
                         "border-border bg-card text-muted-foreground",
@@ -164,13 +164,13 @@ export function AdminOohPipelineStepper({ row, variant }: Props) {
                       className={cn(
                         "text-sm font-semibold",
                         done && "text-foreground",
-                        isCurrent && "text-violet-700 dark:text-violet-200",
+                        isCurrent && "text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]",
                         !done && !isCurrent && "text-muted-foreground",
                       )}
                     >
                       {t(stepLabelKey(milestone.id))}
                       {isCurrent ? (
-                        <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-violet-500 dark:text-violet-300">
+                        <span className="ml-2 text-[10px] font-semibold uppercase tracking-wider text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                           {t("pipelineCurrent")}
                         </span>
                       ) : null}

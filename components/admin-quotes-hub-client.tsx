@@ -40,7 +40,7 @@ export default function AdminQuotesHubClient() {
           className={cn(
             "rounded-full px-4 py-2 font-display text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
             tab === "sales"
-              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
               : "text-muted-foreground hover:text-foreground",
           )}
         >
@@ -52,7 +52,7 @@ export default function AdminQuotesHubClient() {
           className={cn(
             "rounded-full px-4 py-2 font-display text-[11px] font-black uppercase tracking-[0.18em] transition-colors",
             tab === "booking"
-              ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+              ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
               : "text-muted-foreground hover:text-foreground",
           )}
         >

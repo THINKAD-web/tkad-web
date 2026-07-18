@@ -1504,7 +1504,7 @@ export default function AdminQuoteNewClient({
             className={cn(
               STICKY_ACTION_BAR_BTN,
               canCreateContract && !contractBusy
-                ? "border-violet-500/50 bg-white font-bold text-violet-800 dark:border-violet-400/50 dark:bg-white/10 dark:text-violet-200"
+                ? "border-[color:var(--qp-accent)]/50 bg-white font-bold text-[color:var(--qp-accent)] dark:border-[color:var(--qp-accent)]/50 dark:bg-white/10 dark:text-[color:var(--qp-accent)]"
                 : STICKY_ACTION_BAR_BTN_IDLE,
               "font-bold",
             )}

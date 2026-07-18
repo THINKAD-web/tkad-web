@@ -97,7 +97,7 @@ function StatCard({ label, value, sub }: { label: string; value: string; sub?: s
   return (
     <div className="rounded-xl border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/5">
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-black tabular-nums text-violet-600 dark:text-violet-300">
+      <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {value}
       </p>
       {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
@@ -267,7 +267,7 @@ export function AdminChatbotDashboard() {
               className={
                 "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
                 (period === p.key
-                  ? "bg-violet-600 text-white"
+                  ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/5")
               }
             >
@@ -340,7 +340,7 @@ export function AdminChatbotDashboard() {
                 <tr
                   key={s.sessionId}
                   onClick={() => void openDetail(s.sessionId)}
-                  className="cursor-pointer border-b transition-colors hover:bg-violet-50/50 dark:border-white/5 dark:hover:bg-white/5"
+                  className="cursor-pointer border-b transition-colors hover:bg-[color:var(--qp-accent-soft)] dark:border-white/5 dark:hover:bg-white/5"
                 >
                   <td className="whitespace-nowrap p-3 text-xs text-muted-foreground">
                     {fmtDateTime(s.lastAt)}
@@ -365,7 +365,7 @@ export function AdminChatbotDashboard() {
                     </p>
                   </td>
                   <td className="p-3 text-center">
-                    <span className="inline-flex items-center gap-1 rounded-full bg-violet-500/10 px-2 py-0.5 text-xs font-semibold text-violet-600 dark:text-violet-300">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-[color:var(--qp-accent)]/10 px-2 py-0.5 text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                       <MessageSquare className="h-3 w-3" />
                       {s.turns}
                     </span>
@@ -460,7 +460,7 @@ export function AdminChatbotDashboard() {
                         className={
                           "max-w-[80%] rounded-2xl px-3.5 py-2 text-sm " +
                           (isUser
-                            ? "rounded-br-sm bg-violet-600 text-white"
+                            ? "rounded-br-sm bg-[color:var(--qp-accent)] text-white"
                             : "rounded-bl-sm border border-gray-200 bg-white text-foreground dark:border-white/10 dark:bg-white/5")
                         }
                       >

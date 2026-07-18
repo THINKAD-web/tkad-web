@@ -37,7 +37,7 @@ const DEMO_POPULAR = [
 const DEMO_FUNNEL = [
   { stage: "문의", count: 347, color: "bg-blue-500" },
   { stage: "견적 요청", count: 189, color: "bg-amber-500" },
-  { stage: "협의·제안 이후", count: 124, color: "bg-purple-500" },
+  { stage: "협의·제안 이후", count: 124, color: "bg-[color:var(--qp-accent)]" },
   { stage: "계약 단계+", count: 89, color: "bg-emerald-500" },
 ];
 
@@ -151,7 +151,7 @@ export default function AdminAnalyticsPage() {
         {
           stage: "제안 이후(캠페인)",
           count: f.pastProposal,
-          color: "bg-purple-500",
+          color: "bg-[color:var(--qp-accent)]",
         },
         { stage: "계약 단계+", count: f.contracted, color: "bg-emerald-500" },
       ];

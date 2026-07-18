@@ -208,14 +208,14 @@ export default function AdminContractsClient() {
             {t("roleHint")}{" "}
             <Link
               href="/admin/quotes?tab=booking"
-              className="font-semibold text-violet-700 underline-offset-2 hover:underline dark:text-violet-300"
+              className="font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
             >
               {t("bookingPipelineLink")}
             </Link>
           </p>
           <Link
             href="/admin/contracts/new"
-            className="inline-flex items-center rounded-full border border-violet-300 bg-violet-50 px-3 py-1 text-xs font-semibold text-violet-800 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-950/40 dark:text-violet-100"
+            className="inline-flex items-center rounded-full border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 py-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
           >
             {t("newContract")}
           </Link>
@@ -358,7 +358,7 @@ export default function AdminContractsClient() {
                       className="w-full text-left"
                       onClick={() => openRow(row.quoteId)}
                     >
-                      <p className="font-mono text-xs font-semibold text-violet-700 dark:text-violet-300">
+                      <p className="font-mono text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {row.contractId.slice(-8).toUpperCase()}
                       </p>
                       <p className="mt-1 text-sm font-semibold text-foreground">
@@ -403,7 +403,7 @@ export default function AdminContractsClient() {
                           href={`/api/quote/${row.quoteId}/contract/signed`}
                           target="_blank"
                           rel="noreferrer"
-                          className={`inline-flex items-center justify-center gap-1.5 rounded-md border border-violet-300 bg-violet-50 px-3 font-semibold text-violet-800 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-950/40 dark:text-violet-100 ${adminMobileTouchBtnClass}`}
+                          className={`inline-flex items-center justify-center gap-1.5 rounded-md border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-3 font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)] ${adminMobileTouchBtnClass}`}
                         >
                           <Download className="h-4 w-4" />
                           {t("signedPdf")}
@@ -439,10 +439,10 @@ export default function AdminContractsClient() {
                   {rows.map((row) => (
                     <tr
                       key={row.quoteId}
-                      className="cursor-pointer border-b border-border/40 transition-colors hover:bg-violet-50/50 dark:hover:bg-violet-950/20"
+                      className="cursor-pointer border-b border-border/40 transition-colors hover:bg-[color:var(--qp-accent-soft)] dark:hover:bg-[color:var(--qp-accent)]/5"
                       onClick={() => openRow(row.quoteId)}
                     >
-                      <td className="px-4 py-3 font-mono text-xs font-semibold text-violet-700 dark:text-violet-300">
+                      <td className="px-4 py-3 font-mono text-xs font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {row.contractId.slice(-8).toUpperCase()}
                       </td>
                       <td className="px-4 py-3">
@@ -481,7 +481,7 @@ export default function AdminContractsClient() {
                               href={`/api/quote/${row.quoteId}/contract/signed`}
                               target="_blank"
                               rel="noreferrer"
-                              className="inline-flex items-center gap-1 rounded-md border border-violet-300 bg-violet-50 px-2 py-1 text-[10px] font-semibold text-violet-800 hover:bg-violet-100 dark:border-violet-500/40 dark:bg-violet-950/40 dark:text-violet-100"
+                              className="inline-flex items-center gap-1 rounded-md border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] px-2 py-1 text-[10px] font-semibold text-[color:var(--qp-accent)] hover:bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/40 dark:bg-[color:var(--qp-accent)]/10 dark:text-[color:var(--qp-accent)]"
                               title={t("signedPdf")}
                             >
                               <Download className="h-3 w-3" />
@@ -529,7 +529,7 @@ export default function AdminContractsClient() {
               <div className="flex flex-wrap gap-2 pt-2">
                 <Link
                   href={`/admin/quotes?tab=booking&highlight=${selectedRow.quoteId}`}
-                  className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:underline dark:text-violet-300"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                 >
                   <ExternalLink className="h-3 w-3" />
                   {t("openInPipeline")}
@@ -539,7 +539,7 @@ export default function AdminContractsClient() {
                     href={`/api/quote/${selectedRow.quoteId}/contract/signed`}
                     target="_blank"
                     rel="noreferrer"
-                    className="inline-flex items-center gap-1 text-xs font-semibold text-violet-700 hover:underline dark:text-violet-300"
+                    className="inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]"
                   >
                     <Download className="h-3 w-3" />
                     {t("signedPdf")}

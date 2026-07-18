@@ -53,14 +53,14 @@ function SortableThumb({
       style={style}
       className={cn(
         "group relative overflow-hidden rounded-lg border-2 bg-muted/30",
-        isPrimary ? "border-cyan-500/60 ring-1 ring-cyan-500/30" : "border-border",
+        isPrimary ? "border-[color:var(--qp-accent)]/60 ring-1 ring-[color:var(--qp-accent)]/30" : "border-border",
         isDragging && "z-10 opacity-60",
       )}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={url} alt="" className="h-24 w-full object-cover" />
       {isPrimary ? (
-        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-cyan-600/90 px-1.5 py-0.5 font-display text-xs font-medium uppercase dark:text-white text-gray-900">
+        <span className="absolute left-1 top-1 inline-flex items-center gap-0.5 rounded bg-[color:var(--qp-accent)]/90 px-1.5 py-0.5 font-display text-xs font-medium uppercase dark:text-white text-gray-900">
           <Star className="h-2.5 w-2.5 fill-current" />
           대표
         </span>
@@ -164,7 +164,7 @@ export function MediaGalleryEditor({
         className={cn(
           "rounded-xl border-2 border-dashed p-4 text-center transition-colors",
           dragOver
-            ? "border-cyan-500/50 bg-cyan-500/10"
+            ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent)]/10"
             : "border-border bg-muted/20",
         )}
       >

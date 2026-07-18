@@ -27,7 +27,7 @@ import {
   adminMobileCardClass,
   adminMobileListClass,
   adminMobileTouchBtnClass,
-  adminQuoteLinkVioletClass,
+  adminQuoteLinkAccentClass,
   adminQuoteSectionCard,
   adminQuoteSelectClass,
 } from "@/components/admin/admin-quote-page-shell";
@@ -399,7 +399,7 @@ export default function AdminQuotesListClient() {
                           <div className="min-w-0 flex-1">
                             <Link
                               href={`/admin/quotes/${row.id}/edit`}
-                              className={`text-sm ${adminQuoteLinkVioletClass}`}
+                              className={`text-sm ${adminQuoteLinkAccentClass}`}
                             >
                               {row.quoteNumber}
                             </Link>
@@ -538,7 +538,7 @@ export default function AdminQuotesListClient() {
                       <td className="px-3 py-2 text-xs font-medium text-foreground dark:text-hero-fg">
                         <Link
                           href={`/admin/quotes/${row.id}/edit`}
-                          className={adminQuoteLinkVioletClass}
+                          className={adminQuoteLinkAccentClass}
                         >
                           {row.quoteNumber}
                         </Link>

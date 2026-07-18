@@ -42,13 +42,13 @@ function ScoreBadge({ score }: { score: number }) {
     "rounded-full border border-border/70 bg-card/80 px-2.5 py-1 text-[10px] font-black uppercase tracking-[0.18em] shadow-sm backdrop-blur";
   if (score >= 4)
     return (
-      <Badge className={`${base} text-[#22d3ee]`}>
+      <Badge className={`${base} text-emerald-600 dark:text-emerald-400`}>
         🛡️ Verified {score}/5
       </Badge>
     );
   if (score < 0)
     return (
-      <Badge className={`${base} text-[#ec4899]`}>
+      <Badge className={`${base} text-rose-600 dark:text-rose-400`}>
         ✕ Rejected
       </Badge>
     );
@@ -59,7 +59,7 @@ function ScoreBadge({ score }: { score: number }) {
       </Badge>
     );
   return (
-    <Badge className={`${base} text-[#a855f7]`}>
+    <Badge className={`${base} text-amber-600 dark:text-amber-400`}>
       🔄 Review {score}/5
     </Badge>
   );
@@ -124,7 +124,7 @@ export default function VerificationQueueClient() {
               onClick={() => setTab(key)}
               className={`inline-flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-semibold transition-all ${
                 active
-                  ? "bg-[linear-gradient(135deg,rgba(34,211,238,0.22),rgba(168,85,247,0.18),rgba(236,72,153,0.14))] text-foreground shadow-[0_18px_70px_rgba(0,0,0,0.14)]"
+                  ? "bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm ring-1 ring-[color:var(--qp-accent)]/25"
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >

@@ -3,7 +3,7 @@
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 
-/** /quote 마법사와 동일한 네온·카드 토큰 — 어드민 quotes 계열 공용 */
+/** 어드민 quotes 계열 공용 레이아웃 — qp 톤 */
 export function AdminQuotePageShell({
   children,
   className,
@@ -14,7 +14,7 @@ export function AdminQuotePageShell({
   return (
     <div
       className={cn(
-        "tkad-planner-neon mx-auto max-w-6xl space-y-6 text-foreground",
+        "mx-auto max-w-6xl space-y-6 text-foreground",
         className,
       )}
     >
@@ -47,8 +47,8 @@ export const adminQuoteTableRowClass =
 export const adminQuoteTableExpandedRowClass =
   "bg-muted/50 dark:bg-card/10";
 
-export const adminQuoteLinkVioletClass =
-  "font-semibold text-violet-700 hover:underline dark:text-violet-300";
+export const adminQuoteLinkAccentClass =
+  "font-semibold text-[color:var(--qp-accent)] hover:underline dark:text-[color:var(--qp-accent)]";
 
 export const adminQuoteEmphasisTextClass =
   "font-medium text-foreground dark:text-hero-fg";

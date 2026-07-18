@@ -40,7 +40,7 @@ const num = (n: number) => n.toLocaleString("ko-KR");
 
 const MODEL_COLORS: Record<string, string> = {
   Haiku: "#22c55e",
-  Sonnet: "#a855f7",
+  Sonnet: "#ff6200",
   Opus: "#ef4444",
 };
 function modelColor(label: string): string {
@@ -63,12 +63,12 @@ function Card({
       className={
         "rounded-xl border p-4 " +
         (accent
-          ? "border-violet-300 bg-violet-50 dark:border-violet-500/30 dark:bg-violet-500/10"
+          ? "border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10"
           : "border-gray-200 bg-white dark:border-white/10 dark:bg-white/5")
       }
     >
       <p className="text-xs font-medium text-muted-foreground">{label}</p>
-      <p className="mt-1 text-2xl font-black tabular-nums text-violet-600 dark:text-violet-300">
+      <p className="mt-1 text-2xl font-black tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
         {value}
       </p>
       {sub ? <p className="mt-0.5 text-[11px] text-muted-foreground">{sub}</p> : null}
@@ -95,7 +95,7 @@ function FeatureCostBars({ rows }: { rows: FeatureRow[] }) {
               </div>
               <div className="h-2.5 overflow-hidden rounded-full bg-gray-100 dark:bg-white/10">
                 <div
-                  className="h-full rounded-full bg-violet-500"
+                  className="h-full rounded-full bg-[color:var(--qp-accent)]"
                   style={{ width: `${Math.max(2, (r.estCostUsd / max) * 100)}%` }}
                 />
               </div>
@@ -164,7 +164,7 @@ function DailyCostChart({ daily }: { daily: DailyPoint[] }) {
           <div
             key={p.date}
             title={`${p.date} · $${p.costUsd.toFixed(4)} · ${num(p.tokens)} tok`}
-            className="group flex-1 rounded-t bg-violet-500/80 transition-colors hover:bg-violet-600"
+            className="group flex-1 rounded-t bg-[color:var(--qp-accent)]/80 transition-colors hover:bg-[color:var(--qp-accent)]"
             style={{ height: `${Math.max(2, (p.costUsd / max) * 100)}%` }}
           />
         ))}
@@ -248,7 +248,7 @@ export function AdminAiUsageDashboard() {
               className={
                 "rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors " +
                 (period === p.key
-                  ? "bg-violet-600 text-white"
+                  ? "bg-[color:var(--qp-accent)] text-white"
                   : "text-muted-foreground hover:bg-gray-50 dark:hover:bg-white/5")
               }
             >
@@ -326,7 +326,7 @@ export function AdminAiUsageDashboard() {
                       </td>
                       <td className="p-3 text-right tabular-nums">{num(f.calls)}</td>
                       <td className="p-3 text-right tabular-nums">{num(f.tokens)}</td>
-                      <td className="p-3 text-right font-semibold tabular-nums text-violet-600 dark:text-violet-300">
+                      <td className="p-3 text-right font-semibold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {krw(f.estCostKrw)}
                       </td>
                     </tr>
@@ -366,7 +366,7 @@ export function AdminAiUsageDashboard() {
                       </td>
                       <td className="p-3 text-right tabular-nums">{num(m.calls)}</td>
                       <td className="p-3 text-right tabular-nums">{num(m.tokens)}</td>
-                      <td className="p-3 text-right font-semibold tabular-nums text-violet-600 dark:text-violet-300">
+                      <td className="p-3 text-right font-semibold tabular-nums text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]">
                         {krw(m.estCostKrw)}
                       </td>
                     </tr>
