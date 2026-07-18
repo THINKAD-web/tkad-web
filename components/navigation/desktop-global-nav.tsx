@@ -158,8 +158,13 @@ function NavGroupPanel({
                     </span>
                   ) : null}
                 </span>
-                {item.desc && item.id !== "ai-recommend" ? (
-                  <span className="mt-0.5 block text-xs text-gray-500 dark:text-white/45">
+                {item.desc ? (
+                  <span
+                    className={cn(
+                      "mt-0.5 block text-xs text-gray-500 dark:text-white/45",
+                      item.id === "ai-recommend" && "leading-snug",
+                    )}
+                  >
                     {item.desc}
                   </span>
                 ) : null}
