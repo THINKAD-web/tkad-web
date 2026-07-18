@@ -36,22 +36,22 @@ export function MediaDetailPageLayout({
   return (
     <div className={cn("pb-[calc(4.25rem+env(safe-area-inset-bottom))] lg:pb-16", className)}>
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-8 xl:grid-cols-[minmax(0,1fr)_320px]">
+        <div className="lg:grid lg:grid-cols-[minmax(0,1fr)_300px] lg:gap-10 xl:grid-cols-[minmax(0,1fr)_320px]">
           <div className="min-w-0">
             {mobileProposal ? (
-              <div className="mb-6">{mobileProposal}</div>
+              <div className="mb-[length:var(--qp-space-section)]">{mobileProposal}</div>
             ) : null}
 
             <MediaDetailTabs tabs={tabs} panels={panels} />
 
             {similarSection ? (
-              <div className="mt-10 border-t dark:border-white/10 border-gray-200 pt-10">
+              <div className="mt-[length:var(--qp-space-section)] border-t border-gray-200 pt-[length:var(--qp-space-section)] dark:border-white/10">
                 {similarSection}
               </div>
             ) : null}
 
             {belowFold ? (
-              <div className="mt-10 space-y-10 border-t dark:border-white/10 border-gray-200 pt-10">
+              <div className="mt-[length:var(--qp-space-section)] space-y-[length:var(--qp-space-section)] border-t border-gray-200 pt-[length:var(--qp-space-section)] dark:border-white/10">
                 {belowFold}
               </div>
             ) : null}

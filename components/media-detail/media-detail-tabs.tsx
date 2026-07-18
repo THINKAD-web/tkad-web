@@ -29,7 +29,7 @@ export function MediaDetailTabs({
       <div
         role="tablist"
         aria-label="Media detail sections"
-        className="sticky top-[68px] z-20 -mx-4 mb-6 flex gap-1 overflow-x-auto border-b dark:border-white/10 border-gray-200 dark:bg-[#020202]/90 bg-white/95 px-4 py-2 backdrop-blur sm:top-[72px] lg:static lg:mx-0 lg:mb-8 lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
+        className="sticky top-[68px] z-20 -mx-4 mb-[length:var(--qp-space-group)] flex gap-1 overflow-x-auto border-b dark:border-white/10 border-gray-200 dark:bg-[#020202]/90 bg-white/95 px-4 py-2 backdrop-blur sm:top-[72px] lg:static lg:mx-0 lg:mb-[length:var(--qp-space-section)] lg:border-0 lg:bg-transparent lg:p-0 lg:backdrop-blur-none"
       >
         {tabs.map((tab) => (
           <button

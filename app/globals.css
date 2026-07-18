@@ -275,6 +275,11 @@
   --qp-text-h3: 1.25rem;     /* 20px */
   --qp-text-body: 1rem;      /* 16px (기존 14px 본문 대비 확대) */
   --qp-text-meta: 0.875rem;  /* 14px */
+
+  /* Space scale — 매체 상세 등 정보 밀도 완화 */
+  --qp-space-stack: 1rem;      /* 16px — 그룹 내부 */
+  --qp-space-group: 1.75rem;   /* 28px — 히어로 정보 그룹 간 */
+  --qp-space-section: 2.75rem; /* 44px — 섹션 간 */
 }
 
 /* Home 파일럿 스코프 — 이 클래스 하위에서만 네온 액센트 토큰을 주황 단색으로 치환.

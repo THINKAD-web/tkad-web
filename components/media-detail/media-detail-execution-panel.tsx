@@ -72,11 +72,13 @@ function Accordion({
 function SpecRow({ label, value }: { label: string; value?: ReactNode }) {
   if (!value) return null;
   return (
-    <div className="flex flex-col gap-0.5 sm:flex-row sm:justify-between sm:gap-4">
+    <div className="flex min-w-0 flex-col gap-1">
       <dt className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
         {label}
       </dt>
-      <dd className="text-[length:var(--qp-text-body)] font-medium dark:text-white/85 text-gray-800">{value}</dd>
+      <dd className="text-[length:var(--qp-text-body)] font-medium text-gray-800 dark:text-white/85">
+        {value}
+      </dd>
     </div>
   );
 }
@@ -144,13 +146,30 @@ export function MediaDetailExecutionPanel({
       ? uniformPriceOptionsSummary(priceOptions)
       : null;
 
+  const operatingHoursValue = !media.keywordFilter
+    ? isKo
+      ? media.operatingHours
+      : media.operatingHoursEn
+    : undefined;
+  const hasExtraSpecs = Boolean(
+    media.brightness?.trim() ||
+      operatingHoursValue?.trim() ||
+      media.installYear ||
+      (isKo && media.targetAge?.trim()),
+  );
+
   return (
-    <div className={cn("space-y-5", className)}>
+    <div
+      className={cn(
+        "space-y-[length:var(--qp-space-group)]",
+        className,
+      )}
+    >
       <div>
         <h2 className="text-[length:var(--qp-text-h3)] font-bold tracking-tight dark:text-white text-gray-900">
           {labels.specsTitle}
         </h2>
-        <div className="mt-3 grid gap-3 sm:grid-cols-2">
+        <div className="mt-4 grid gap-4 sm:grid-cols-2">
           <IconSpec
             icon={Ruler}
             label={labels.size}
@@ -165,20 +184,35 @@ export function MediaDetailExecutionPanel({
             value={media.resolution || labels.empty}
           />
         </div>
-        <dl className="mt-4 space-y-3 rounded-2xl border dark:border-white/10 border-gray-200 p-4">
-          <SpecRow label={labels.brightness} value={media.brightness} />
-          {!media.keywordFilter ? (
-            <SpecRow
-              label={labels.operatingHours}
-              value={isKo ? media.operatingHours : media.operatingHoursEn}
-            />
-          ) : null}
-          <SpecRow
-            label={labels.installYear}
-            value={media.installYear ? String(media.installYear) : undefined}
-          />
-          <SpecRow label={labels.targetAge} value={isKo ? media.targetAge : undefined} />
-        </dl>
+        {hasExtraSpecs ? (
+          <details className="group mt-5 rounded-2xl border border-gray-200 bg-[color:var(--qp-surface-2)] dark:border-white/10 dark:bg-white/[0.03]">
+            <summary className="cursor-pointer list-none px-4 py-3 text-[length:var(--qp-text-meta)] font-semibold text-gray-700 dark:text-white/80 [&::-webkit-details-marker]:hidden">
+              <span className="flex items-center justify-between gap-2">
+                {isKo ? "추가 스펙 보기" : "More specs"}
+                <span className="text-gray-500 transition group-open:rotate-180 dark:text-white/45">
+                  ▾
+                </span>
+              </span>
+            </summary>
+            <dl className="grid gap-x-6 gap-y-5 border-t border-gray-200 px-4 py-5 sm:grid-cols-2 dark:border-white/10">
+              <SpecRow label={labels.brightness} value={media.brightness} />
+              <SpecRow
+                label={labels.operatingHours}
+                value={operatingHoursValue}
+              />
+              <SpecRow
+                label={labels.installYear}
+                value={
+                  media.installYear ? String(media.installYear) : undefined
+                }
+              />
+              <SpecRow
+                label={labels.targetAge}
+                value={isKo ? media.targetAge : undefined}
+              />
+            </dl>
+          </details>
+        ) : null}
       </div>
 
       {hasPriceOptions && priceOptions?.length ? (

@@ -92,7 +92,7 @@ export function MediaDetailHeroSection({
       >
         <MediaDetailHeroTopBar backLabel={labels.back} />
 
-        <div className="grid gap-8 lg:grid-cols-[3fr_2fr] lg:items-start">
+        <div className="grid gap-10 lg:grid-cols-[3fr_2fr] lg:items-start lg:gap-12">
           <MediaDetailHeroGalleryV2
             images={galleryImages}
             heroSrc={heroImage}
@@ -115,9 +115,6 @@ export function MediaDetailHeroSection({
               kpiExposure: labels.kpiExposure,
               kpiCpm: labels.kpiCpm,
               kpiVisibility: labels.kpiVisibility,
-              specSize: labels.specSize,
-              specResolution: labels.specResolution,
-              specBrightness: labels.specBrightness,
             }}
             hasPriceOptions={hasPriceOptions}
             primaryPriceOption={primaryPriceOption}

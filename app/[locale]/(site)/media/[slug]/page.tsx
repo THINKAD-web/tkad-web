@@ -267,19 +267,22 @@ export default async function MediaDetailPage({ params }: Props) {
   })();
 
   const heroSizeTag = formatSizeDisplayOptional(media);
-  const heroTags = media.keywordFilter
-    ? heroTagCandidatesFromKeyword(media.keywordFilter, media.size)
-    : [
-        ...(heroSizeTag ? [heroSizeTag] : []),
-        typeLabel,
-        ...(media.targetAge
-          ? media.targetAge
-              .split(/[,，]/)
-              .map((s) => s.trim())
-              .filter(Boolean)
-              .slice(0, 3)
-          : []),
-      ].filter((x): x is string => Boolean(x && String(x).trim()));
+  /** 히어로 요약 pill — 크기·유형·타깃 최대 3개 (상세 스펙은 집행 탭) */
+  const heroTargetTag = media.targetAge?.trim()
+    ? media.targetAge.trim().length > 28
+      ? `${media.targetAge.trim().slice(0, 26)}…`
+      : media.targetAge.trim()
+    : null;
+  const heroTags = (
+    media.keywordFilter
+      ? heroTagCandidatesFromKeyword(
+          media.keywordFilter,
+          heroSizeTag ?? media.size,
+        )
+      : [heroSizeTag, typeLabel, heroTargetTag]
+  )
+    .filter((x): x is string => Boolean(x && String(x).trim()))
+    .slice(0, 3);
 
   const keywordHints = media.keywordFilter
     ? pickSearchKeywordHints(media.keywordFilter.searchKeywords)

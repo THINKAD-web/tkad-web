@@ -300,70 +300,77 @@ export function MediaDetailStickyQuotePanel({
             {isKo ? "견적 받기" : "Get quote"}
           </Link>
 
-          <div className="space-y-1">
-            <div className="grid grid-cols-2 gap-2">
-              <MediaDetailAddToCart
-                mediaId={media.id}
-                mediaName={displayName}
-                compact
-                showUsageHint
-              />
-              <PlanCartAddButton
-                item={planCartItemFromMediaItem(media, "search")}
-                addedFrom="search"
-                compact
-                mediaDetailLabel
-                className="w-full"
-              />
+          <details className="group rounded-xl border border-gray-100 dark:border-white/10">
+            <summary className="cursor-pointer list-none px-3 py-2 text-center text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/65 [&::-webkit-details-marker]:hidden">
+              <span className="inline-flex items-center gap-1">
+                {isKo ? "담기 · 플래너 · 공유" : "Save · Planner · Share"}
+                <span className="transition group-open:rotate-180">▾</span>
+              </span>
+            </summary>
+            <div className="space-y-2 border-t border-gray-100 px-2 pb-3 pt-2 dark:border-white/10">
+              <div className="grid grid-cols-2 gap-2">
+                <MediaDetailAddToCart
+                  mediaId={media.id}
+                  mediaName={displayName}
+                  compact
+                  showUsageHint
+                />
+                <PlanCartAddButton
+                  item={planCartItemFromMediaItem(media, "search")}
+                  addedFrom="search"
+                  compact
+                  mediaDetailLabel
+                  className="w-full"
+                />
+              </div>
+              <p className="text-center text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/55">
+                {isKo
+                  ? "견적함·플래너는 저장 위치가 다릅니다"
+                  : "Quote cart and plan cart are separate"}
+              </p>
+              <div className="flex flex-wrap items-center gap-1.5">
+                <Link
+                  href={plannerHref}
+                  className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
+                >
+                  <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
+                  {isKo ? "플래너" : "Planner"}
+                </Link>
+                <MediaDetailProposalCard
+                  media={media}
+                  isKo={isKo}
+                  locale={pageLocale}
+                  variant="inline"
+                  compactSecondary
+                  className="min-w-0 flex-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (typeof navigator !== "undefined" && navigator.share) {
+                      void navigator.share({
+                        title: displayName,
+                        url: window.location.href,
+                      });
+                    } else {
+                      void navigator.clipboard?.writeText(window.location.href);
+                    }
+                  }}
+                  className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
+                >
+                  <Share2 className="h-3 w-3 shrink-0" aria-hidden />
+                  {isKo ? "공유" : "Share"}
+                </button>
+                <MediaFavoriteButton
+                  mediaId={media.id}
+                  mediaName={media.name}
+                  mediaNameEn={media.nameEn}
+                  compact
+                  className="!h-8 shrink-0"
+                />
+              </div>
             </div>
-            <p className="text-center text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/55">
-              {isKo
-                ? "견적함·플래너는 저장 위치가 다릅니다"
-                : "Quote cart and plan cart are separate"}
-            </p>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-1.5 border-t dark:border-white/10 border-gray-100 pt-2">
-            <Link
-              href={plannerHref}
-              className="inline-flex h-8 flex-1 min-w-[4.5rem] items-center justify-center gap-1 rounded-lg border border-[color:var(--qp-accent)]/25 bg-[color:var(--qp-accent)]/8 px-2 text-[10px] font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
-            >
-              <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
-              {isKo ? "플래너" : "Planner"}
-            </Link>
-            <MediaDetailProposalCard
-              media={media}
-              isKo={isKo}
-              locale={pageLocale}
-              variant="inline"
-              compactSecondary
-              className="min-w-0 flex-1"
-            />
-            <button
-              type="button"
-              onClick={() => {
-                if (typeof navigator !== "undefined" && navigator.share) {
-                  void navigator.share({
-                    title: displayName,
-                    url: window.location.href,
-                  });
-                } else {
-                  void navigator.clipboard?.writeText(window.location.href);
-                }
-              }}
-              className="inline-flex h-8 flex-1 min-w-[3.5rem] items-center justify-center gap-1 rounded-lg border border-gray-200 bg-gray-50 px-2 text-[10px] font-medium text-gray-700 transition hover:bg-gray-100 dark:border-white/10 dark:bg-white/6 dark:text-white/80 dark:hover:bg-white/10"
-            >
-              <Share2 className="h-3 w-3 shrink-0" aria-hidden />
-              {isKo ? "공유" : "Share"}
-            </button>
-            <MediaFavoriteButton
-              mediaId={media.id}
-              mediaName={media.name}
-              mediaNameEn={media.nameEn}
-              compact
-              className="!h-8 shrink-0"
-            />
-          </div>
+          </details>
         </div>
       </div>
     </aside>

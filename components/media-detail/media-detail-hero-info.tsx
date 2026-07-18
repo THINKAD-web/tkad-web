@@ -18,7 +18,6 @@ import {
 } from "@/components/media/media-trust-score";
 import { MediaTrustBadges } from "@/components/media/media-trust-badges";
 import { resolveMediaCpmWon } from "@/lib/compare-quote";
-import { buildMediaHeroSpecBadges } from "@/lib/media-detail-hero-specs";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -28,9 +27,6 @@ type Labels = {
   kpiExposure: string;
   kpiCpm: string;
   kpiVisibility: string;
-  specSize: string;
-  specResolution: string;
-  specBrightness: string;
 };
 
 type Props = {
@@ -90,16 +86,8 @@ export function MediaDetailHeroInfo({
     pricePeriod: displayPrice.period,
   });
   const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
-  const specBadges = buildMediaHeroSpecBadges(media, {
-    isKo,
-    visibilityScore: performanceMetrics.visibilityScore,
-    labels: {
-      size: labels.specSize,
-      resolution: labels.specResolution,
-      visibility: labels.kpiVisibility,
-      brightness: labels.specBrightness,
-    },
-  });
+  /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
+  const summaryTags = heroTags.slice(0, 3);
 
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
@@ -126,7 +114,13 @@ export function MediaDetailHeroInfo({
   );
 
   return (
-    <div className={cn("min-w-0 space-y-5", className)}>
+    <div
+      className={cn(
+        "min-w-0 flex flex-col gap-[length:var(--qp-space-group)]",
+        className,
+      )}
+    >
+      {/* 그룹 1: 제목 + 핵심 태그 */}
       <div>
         <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
           {typeLabel}
@@ -134,61 +128,68 @@ export function MediaDetailHeroInfo({
         <h1 className="mt-2 text-balance text-2xl font-black leading-tight tracking-tight dark:text-white text-gray-900 sm:text-3xl">
           {displayName}
         </h1>
-        {heroTags.length > 0 ? (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {heroTags.slice(0, 5).map((tag) => (
+        {summaryTags.length > 0 ? (
+          <div className="mt-4 flex flex-wrap gap-2">
+            {summaryTags.map((tag) => (
               <span
                 key={tag}
-                className="rounded-full border dark:border-white/12 border-gray-200 px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide dark:text-white/70 text-gray-600"
+                className="rounded-full border dark:border-white/12 border-gray-200 px-2.5 py-0.5 text-[length:var(--qp-text-meta)] font-semibold dark:text-white/70 text-gray-600"
               >
                 {tag}
               </span>
             ))}
           </div>
         ) : null}
-        {media.trustBadges && media.trustBadges.length > 0 ? (
-          <MediaTrustBadges
-            badges={media.trustBadges}
-            isKo={isKo}
-            className="mt-3"
-          />
-        ) : null}
-        {media.trustScore != null || media.executionCount != null ? (
-          <div className="mt-3 space-y-1.5">
-            {media.trustScore != null ? (
-              <MediaTrustScoreBadge
-                score={media.trustScore}
-                isKo={isKo}
-                className="!text-[length:var(--qp-text-meta)]"
-              />
-            ) : null}
-            {media.executionCount != null ? (
-              <MediaExecutionSummary
-                count={media.executionCount}
-                monthsAgo={media.lastExecutionMonthsAgo ?? null}
-                isKo={isKo}
-              />
-            ) : null}
-          </div>
-        ) : null}
-        <p className="mt-3 flex items-center gap-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/70">
-          <MapPin className="h-4 w-4 shrink-0" aria-hidden />
-          {locationShort}
-        </p>
       </div>
 
-      <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4 shadow-sm">
+      {/* 그룹 2: 신뢰·집행·위치 */}
+      {media.trustBadges?.length ||
+      media.trustScore != null ||
+      media.executionCount != null ||
+      locationShort ? (
+        <div className="space-y-[length:var(--qp-space-stack)] border-t border-gray-200 pt-[length:var(--qp-space-group)] dark:border-white/10">
+          {media.trustBadges && media.trustBadges.length > 0 ? (
+            <MediaTrustBadges badges={media.trustBadges} isKo={isKo} />
+          ) : null}
+          {media.trustScore != null || media.executionCount != null ? (
+            <div className="space-y-1.5">
+              {media.trustScore != null ? (
+                <MediaTrustScoreBadge
+                  score={media.trustScore}
+                  isKo={isKo}
+                  className="!text-[length:var(--qp-text-meta)]"
+                />
+              ) : null}
+              {media.executionCount != null ? (
+                <MediaExecutionSummary
+                  count={media.executionCount}
+                  monthsAgo={media.lastExecutionMonthsAgo ?? null}
+                  isKo={isKo}
+                />
+              ) : null}
+            </div>
+          ) : null}
+          <p className="flex items-center gap-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/70">
+            <MapPin className="h-4 w-4 shrink-0" aria-hidden />
+            {locationShort}
+          </p>
+        </div>
+      ) : null}
+
+      {/* 그룹 3: 가격 */}
+      <div className="rounded-2xl border border-gray-200 bg-[color:var(--qp-surface-2)] p-5 shadow-sm dark:border-white/10 dark:bg-white/5">
         <p className="text-[length:var(--qp-text-meta)] font-semibold text-gray-600 dark:text-white/70">
           {labels.priceTitle}
         </p>
-        <div className="mt-1">{priceBlock}</div>
-        <p className="mt-1 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
+        <div className="mt-2">{priceBlock}</div>
+        <p className="mt-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
           {labels.periodLabel}
         </p>
         <MediaPriceExclNote isKo={isKo} className="mt-1" />
       </div>
 
-      <div className="grid grid-cols-3 gap-2">
+      {/* 그룹 4: KPI */}
+      <div className="grid grid-cols-3 gap-3">
         <KpiChip
           label={labels.kpiExposure}
           value={impressionsLabel ?? "—"}
@@ -207,23 +208,6 @@ export function MediaDetailHeroInfo({
           }
         />
       </div>
-
-      {specBadges.length > 0 ? (
-        <div className="flex flex-wrap gap-1.5">
-          {specBadges.map((badge) => (
-            <span
-              key={badge.key}
-              className="inline-flex max-w-full items-center gap-1 rounded-full border dark:border-white/12 border-gray-200 dark:bg-white/5 bg-gray-50 px-2.5 py-1 text-[length:var(--qp-text-meta)] dark:text-white/80 text-gray-700"
-              title={`${badge.label}: ${badge.value}`}
-            >
-              <span className="shrink-0 font-semibold text-gray-600 dark:text-white/70">
-                {badge.label}
-              </span>
-              <span className="truncate font-medium text-[length:var(--qp-text-body)]">{badge.value}</span>
-            </span>
-          ))}
-        </div>
-      ) : null}
 
       {actions}
     </div>
