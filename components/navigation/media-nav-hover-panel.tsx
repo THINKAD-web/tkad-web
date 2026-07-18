@@ -21,6 +21,10 @@ type PreviewItem = {
   imageUrl?: string;
 };
 
+/** Module cache — hover reopen should not wait on network. */
+let previewCache: PreviewItem[] | null = null;
+let previewInflight: Promise<PreviewItem[]> | null = null;
+
 function mapPreviewItem(m: MediaItem): PreviewItem | null {
   const rawUrl = getPrimaryMediaImageUrl(m);
   if (!rawUrl || !resolveCatalogImageSrc(rawUrl)?.src) return null;
@@ -32,24 +36,60 @@ function mapPreviewItem(m: MediaItem): PreviewItem | null {
   };
 }
 
+function loadFeaturedPreview(): Promise<PreviewItem[]> {
+  if (previewCache) return Promise.resolve(previewCache);
+  if (previewInflight) return previewInflight;
+
+  previewInflight = fetch("/api/public/media?sort=popular&limit=12")
+    .then((r) => r.json())
+    .then((data) => {
+      const items: MediaItem[] = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+          ? data.data
+          : Array.isArray(data?.items)
+            ? data.items
+            : [];
+      const featured = items
+        .map(mapPreviewItem)
+        .filter((item): item is PreviewItem => item != null)
+        .slice(0, 3);
+      previewCache = featured;
+      return featured;
+    })
+    .catch(() => {
+      previewCache = [];
+      return [] as PreviewItem[];
+    })
+    .finally(() => {
+      previewInflight = null;
+    });
+
+  return previewInflight;
+}
+
 export function MediaNavHoverPanel({ links, className }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const [preview, setPreview] = useState<PreviewItem[]>([]);
+  const [preview, setPreview] = useState<PreviewItem[]>(previewCache ?? []);
+  const [loading, setLoading] = useState(previewCache == null);
 
   useEffect(() => {
-    fetch("/api/public/media-catalog")
-      .then((r) => r.json())
-      .then((data) => {
-        const items: MediaItem[] = Array.isArray(data) ? data : data?.items ?? [];
-        if (!Array.isArray(items)) return;
-        const featured = items
-          .map(mapPreviewItem)
-          .filter((item): item is PreviewItem => item != null)
-          .slice(0, 3);
-        setPreview(featured);
-      })
-      .catch(() => setPreview([]));
+    let cancelled = false;
+    if (previewCache) {
+      setPreview(previewCache);
+      setLoading(false);
+      return;
+    }
+    setLoading(true);
+    void loadFeaturedPreview().then((items) => {
+      if (cancelled) return;
+      setPreview(items);
+      setLoading(false);
+    });
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   return (
@@ -94,9 +134,22 @@ export function MediaNavHoverPanel({ links, className }: Props) {
         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
           {isKo ? "추천 매체" : "Featured"}
         </p>
-        {preview.length === 0 ? (
-          <div className="h-32 rounded-xl bg-gray-100 dark:bg-white/5" aria-hidden />
-        ) : (
+        {loading ? (
+          <div className="space-y-2" aria-hidden>
+            {[0, 1, 2].map((i) => (
+              <div
+                key={i}
+                className="flex items-center gap-3 rounded-xl p-2"
+              >
+                <div className="h-12 w-12 shrink-0 animate-pulse rounded-lg bg-gray-200 dark:bg-white/10" />
+                <div className="min-w-0 flex-1 space-y-2">
+                  <div className="h-3 w-[75%] animate-pulse rounded bg-gray-200 dark:bg-white/10" />
+                  <div className="h-2.5 w-1/2 animate-pulse rounded bg-gray-100 dark:bg-white/5" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : preview.length === 0 ? null : (
           preview.map((m) => (
             <Link
               key={m.id}
