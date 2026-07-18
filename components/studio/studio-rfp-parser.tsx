@@ -10,6 +10,7 @@ import {
   Search,
   X,
   RotateCcw,
+  FileDown,
 } from "lucide-react";
 import type {
   RfpCampaignMeta,
@@ -21,6 +22,7 @@ import type {
   RfpMatchedMediaSummary,
 } from "@/lib/rfp-proposal/match-rfp-brief";
 import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { downloadRfpProposalFromMatch } from "@/lib/rfp-proposal-export/client";
 
 const field =
   "w-full rounded-xl border border-gray-200 bg-white px-3 py-2.5 text-sm outline-none focus:border-hermes/30 dark:border-white/12 dark:bg-white/5 dark:text-white";
@@ -76,6 +78,9 @@ export function StudioRfpParser({ locale }: { locale: string }) {
     Record<string, string[]>
   >({});
   const [addIdDraft, setAddIdDraft] = useState<Record<string, string>>({});
+  const [recommendComment, setRecommendComment] = useState("");
+  const [exportLoading, setExportLoading] = useState(false);
+  const [exportError, setExportError] = useState<string | null>(null);
 
   const parse = async () => {
     setError(null);
@@ -254,6 +259,35 @@ export function StudioRfpParser({ locale }: { locale: string }) {
   ): RfpMatchedMediaSummary[] => {
     const excluded = new Set(excludedByGroup[group.groupId] ?? []);
     return group.mediaItems.filter((m) => !excluded.has(m.mediaId));
+  };
+
+  const hasMatchResults =
+    !!matchState &&
+    matchState.groups.some((g) => visibleItems(g).length > 0);
+
+  const exportProposal = async () => {
+    if (!brief || !matchState) return;
+    setExportError(null);
+    setExportLoading(true);
+    try {
+      await downloadRfpProposalFromMatch({
+        brief,
+        matchGroups: matchState.groups,
+        excludedByGroup,
+        locale: isKo ? "ko" : "en",
+        recommendComment: recommendComment.trim() || null,
+      });
+    } catch (e) {
+      setExportError(
+        e instanceof Error
+          ? e.message
+          : isKo
+            ? "제안서 생성에 실패했습니다."
+            : "Proposal export failed.",
+      );
+    } finally {
+      setExportLoading(false);
+    }
   };
 
   return (
@@ -457,27 +491,62 @@ export function StudioRfpParser({ locale }: { locale: string }) {
                   : "Each region group is matched independently against the catalog."}
               </p>
             </div>
-            <button
-              type="button"
-              onClick={runMatch}
-              disabled={matchLoading}
-              className="inline-flex h-10 items-center gap-2 rounded-xl bg-hermes px-5 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
-            >
-              {matchLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <Search className="h-4 w-4" />
-              )}
-              {isKo ? "매체 매칭" : "Match media"}
-            </button>
+            <div className="flex flex-wrap items-center gap-2">
+              <button
+                type="button"
+                onClick={runMatch}
+                disabled={matchLoading}
+                className="inline-flex h-10 items-center gap-2 rounded-xl bg-hermes px-5 text-sm font-bold text-white hover:bg-cta-hover disabled:opacity-60"
+              >
+                {matchLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <Search className="h-4 w-4" />
+                )}
+                {isKo ? "매체 매칭" : "Match media"}
+              </button>
+              <button
+                type="button"
+                onClick={() => void exportProposal()}
+                disabled={!hasMatchResults || exportLoading || matchLoading}
+                className="inline-flex h-10 items-center gap-2 rounded-xl border border-gray-900 bg-gray-900 px-5 text-sm font-bold text-white disabled:opacity-40 dark:border-white dark:bg-white dark:text-gray-900"
+              >
+                {exportLoading ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <FileDown className="h-4 w-4" />
+                )}
+                {isKo ? "제안서 생성" : "Generate proposal"}
+              </button>
+            </div>
           </div>
           {matchError && <p className="text-sm text-red-600">{matchError}</p>}
+          {exportError && <p className="text-sm text-red-600">{exportError}</p>}
           {matchState && (
             <p className="text-xs text-muted-foreground">
               {isKo
                 ? `카탈로그 ${matchState.catalogCount.toLocaleString()}건 기준 · ${matchState.groups.length}개 그룹`
                 : `${matchState.catalogCount.toLocaleString()} catalog items · ${matchState.groups.length} groups`}
             </p>
+          )}
+
+          {hasMatchResults && (
+            <label className="block text-xs text-muted-foreground">
+              {isKo
+                ? "타겟 맞춤 추천 코멘트 (선택 · PDF 반영)"
+                : "Target recommendation comment (optional · in PDF)"}
+              <textarea
+                rows={3}
+                className={`${field} mt-1`}
+                value={recommendComment}
+                onChange={(e) => setRecommendComment(e.target.value)}
+                placeholder={
+                  isKo
+                    ? "예: 공항·핵심상권 DOOH로 인지도, 지하철 PSD로 반복 노출을 제안합니다."
+                    : "Optional narrative for the proposal PDF…"
+                }
+              />
+            </label>
           )}
 
           {matchState?.groups.map((g) => {
