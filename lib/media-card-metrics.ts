@@ -8,7 +8,7 @@ import type { MapMapItem } from "@/components/media-map/media-map-types";
 
 type MetricInput = Pick<
   HomeCatalogMediaItem,
-  "cpm" | "impressions" | "monthlyFootTraffic" | "dailyFootTraffic"
+  "cpm" | "price" | "impressions" | "monthlyFootTraffic" | "dailyFootTraffic"
 >;
 
 function formatCpmLine(cpm: number | null | undefined, locale: string): string | null {
@@ -25,10 +25,12 @@ function formatImpressionsLine(
   return isKo ? `노출 ${label}` : `Reach ${label}`;
 }
 
-function resolveCpmWon(item: MetricInput): number | null {
-  if (item.cpm != null && item.cpm > 0 && Number.isFinite(item.cpm)) {
-    return Math.round(item.cpm);
-  }
+/**
+ * 목록·지도 카드용 CPM.
+ * `resolveDisplayCpmWon`과 동일 — stored `cpm`은 재계산값 ±15% 이내일 때만 신뢰.
+ * (구: stored cpm 맹신 → 만 단위 오염값이 목록에만 노출되던 버그 수정)
+ */
+export function resolveCpmWon(item: MetricInput): number | null {
   const resolved = resolveDisplayCpmWon(item);
   if (resolved != null && resolved > 0 && Number.isFinite(resolved)) {
     return Math.round(resolved);
