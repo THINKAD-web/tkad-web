@@ -177,7 +177,7 @@
       },
       "media-network": {
         "label": "네트워크 매체",
-        "desc": "버스·지하철 등 네트워크 단위 탐색"
+        "desc": "매체 목록의 네트워크 모드"
       },
       "campaign-targets": {
         "label": "캠페인 목적",

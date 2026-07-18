@@ -177,7 +177,7 @@
       },
       "media-network": {
         "label": "Network media",
-        "desc": "Browse bus, subway, and network bundles"
+        "desc": "Network mode in the media catalog"
       },
       "campaign-targets": {
         "label": "Campaign goals",

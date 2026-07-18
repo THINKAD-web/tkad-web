@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import { PageHero } from "@/components/layout/page-hero";
-import { SubTabsBar } from "@/components/layout/sub-tabs-bar";
 import { MediaCampaignTargetsGrid } from "@/components/media/media-campaign-targets-grid";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { Link } from "@/i18n/navigation";
-import { Package } from "lucide-react";
+import { ArrowLeft, Package } from "lucide-react";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { setRequestLocale } from "next-intl/server";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
@@ -60,7 +59,16 @@ export default async function MediaTargetsPage({ params }: Props) {
               : `${verifiedCountLabel} verified placements — pick a goal to open /media filters. Need a curated bundle? See packages.`
           }
         />
-        <SubTabsBar group="discovery" currentPath="/media/targets" />
+
+        <div className="mx-auto max-w-7xl px-4 pt-1 sm:px-6 lg:px-8">
+          <Link
+            href="/media"
+            className="inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-accent"
+          >
+            <ArrowLeft className="h-4 w-4" aria-hidden />
+            {isKo ? "매체 검색으로" : "Back to media search"}
+          </Link>
+        </div>
 
         <div className="mx-auto max-w-7xl px-4 pt-4 sm:px-6 lg:px-8">
           <div className="flex flex-col gap-3 border-2 border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">

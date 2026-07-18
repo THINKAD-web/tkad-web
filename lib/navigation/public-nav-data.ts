@@ -83,6 +83,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
     items: [
       { id: "media-search", href: "/media", icon: Search },
       { id: "map-search", href: "/media/map", icon: MapPin },
+      // desc (i18n): 목록 [네트워크] 모드 — 세그먼트와 동일 목적지
       { id: "media-network", href: "/media?features=network", icon: Network },
       { id: "campaign-targets", href: "/media/targets", icon: Target },
     ],
