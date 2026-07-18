@@ -43,6 +43,17 @@ function galleryExtraCount(item: {
   return Math.max(0, count - 1);
 }
 
+/** Parent `priceLabel` already embeds `/일`·`/월` (or en equivalents). */
+export function priceLabelIncludesPeriodSuffix(
+  priceLabel: string,
+  periodLabel: string,
+): boolean {
+  const price = priceLabel.trim();
+  const period = periodLabel.trim();
+  if (!price || !period) return false;
+  return price.includes(`/${period}`);
+}
+
 export function catalogItemToDisplayModel(
   item: HomeCatalogMediaItem,
   opts: {
@@ -73,7 +84,11 @@ export function catalogItemToDisplayModel(
     thumbnailUrl: item.thumbnailUrl,
     galleryExtraCount: galleryExtraCount(item),
     priceLabel: displayPrice ?? (opts.isKo ? "문의" : "Inquire"),
-    showPeriodSuffix: Boolean(displayPrice && !opts.priceLabel?.trim()),
+    showPeriodSuffix: Boolean(
+      displayPrice &&
+        periodLabel &&
+        !priceLabelIncludesPeriodSuffix(displayPrice, periodLabel),
+    ),
     periodLabel,
     metricLine: buildCatalogItemMetricLine(item, opts.isKo, locale),
     metricLineCompact: buildCatalogItemMetricLineCompact(item, locale),

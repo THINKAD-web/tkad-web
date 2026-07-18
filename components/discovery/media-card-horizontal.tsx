@@ -281,7 +281,7 @@ export function DiscoveryMediaCardHorizontal({
             </p>
             {model.showPeriodSuffix && model.periodLabel ? (
               <span className="tkad-type-note text-tkad-muted">
-                {model.periodLabel}
+                /{model.periodLabel}
               </span>
             ) : null}
             <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />

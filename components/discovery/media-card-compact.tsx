@@ -206,6 +206,7 @@ export function DiscoveryMediaCardCompactGrid({
   planAddedFrom = "search",
 }: CompactGridProps) {
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
+  const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
   const [rationaleOpen, setRationaleOpen] = useState(false);
   const extraBullets = recommendRationaleBullets?.filter(Boolean) ?? [];
   const showExpand =
@@ -214,6 +215,8 @@ export function DiscoveryMediaCardCompactGrid({
     showExpand && rationaleOpen ? extraBullets : extraBullets.slice(0, 0);
   const inlineSecondLine =
     !showExpand && extraBullets.length > 0 ? extraBullets[0] : null;
+  const showPrice =
+    Boolean(priceLabel?.trim()) || Boolean(item.price && item.price > 0);
 
   const body = (
     <>
@@ -247,11 +250,18 @@ export function DiscoveryMediaCardCompactGrid({
           {[item.region, item.type].filter(Boolean).join(" · ") || "\u00a0"}
         </p>
         <div className="mt-auto space-y-2 pt-2">
-          {priceLabel ? (
+          {showPrice ? (
             <div>
-              <p className="tkad-type-price-accent tkad-home-accent-text">
-                {priceLabel}
-              </p>
+              <div className="flex flex-wrap items-baseline gap-x-1.5">
+                <p className="tkad-type-price-accent tkad-home-accent-text">
+                  {model.priceLabel}
+                </p>
+                {model.showPeriodSuffix && model.periodLabel ? (
+                  <span className="tkad-type-note text-tkad-muted">
+                    /{model.periodLabel}
+                  </span>
+                ) : null}
+              </div>
               <MediaPriceExclNote isKo={isKo} className="tkad-type-note mt-0.5" />
             </div>
           ) : null}
@@ -547,6 +557,11 @@ export function DiscoveryMediaCardCatalogTile({
         <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
           {model.priceLabel}
         </p>
+        {model.showPeriodSuffix && model.periodLabel ? (
+          <span className="tkad-type-note text-tkad-muted">
+            /{model.periodLabel}
+          </span>
+        ) : null}
         <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
       </div>
 
@@ -771,6 +786,11 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           <p className="tkad-type-price-accent tkad-home-accent-text tabular-nums">
             {model.priceLabel}
           </p>
+          {model.showPeriodSuffix && model.periodLabel ? (
+            <span className="tkad-type-note text-tkad-muted">
+              /{model.periodLabel}
+            </span>
+          ) : null}
           <MediaPriceExclNote isKo={isKo} className="tkad-type-note" />
         </div>
 
