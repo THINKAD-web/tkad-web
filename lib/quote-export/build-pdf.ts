@@ -12,18 +12,21 @@ import type { QuoteExportPayload } from "@/lib/quote-export/types";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
-const VIOLET = [124, 58, 237] as const;
-const VIOLET_DK = [76, 29, 149] as const;
-const CYAN = [8, 145, 178] as const;
-const CYAN_LT = [120, 220, 235] as const;
+/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
+const ACCENT = [255, 98, 0] as const;
+const ACCENT_DK = [194, 78, 0] as const;
+const ACCENT_SOFT = [255, 243, 232] as const;
 const INK = [17, 24, 39] as const;
+const INK_STRONG = [28, 28, 31] as const;
 const GRAY_600 = [75, 85, 99] as const;
 const GRAY_500 = [107, 114, 128] as const;
 const GRAY_200 = [228, 230, 236] as const;
 const GRAY_50 = [248, 249, 251] as const;
-const DARK_BG = [10, 10, 18] as const;
-const DARK_CARD = [22, 22, 34] as const;
+const DARK_BG = [10, 10, 12] as const;
+const DARK_CARD = [28, 28, 31] as const;
 const WHITE = [255, 255, 255] as const;
+/** qp 각진 카드 — roundedRect radius mm */
+const R = 0;
 
 const M = 15;
 const HERO_H = 44;
@@ -31,8 +34,6 @@ const BASIC_HERO_H = 44;
 const BASIC_SECTION_TITLE_W = 26;
 const BASIC_COMPACT_MEDIA_MIN = 5;
 const QUOTE_BASIC_THUMB_MM = { w: 28, h: 21 } as const;
-const VIOLET_50 = [237, 233, 254] as const;
-const VIOLET_700 = [109, 40, 217] as const;
 const RED_700 = [185, 28, 28] as const;
 
 /** 직인: 로컬 public/brand → 원격 URL 순. 없으면 생략 (가짜 도장 미표시). */
@@ -66,18 +67,17 @@ function drawWordmark(
 ) {
   doc.setFont(font, "normal");
   doc.setFontSize(size);
-  doc.setTextColor(255, 255, 255);
+  doc.setTextColor(onDark ? 255 : INK[0], onDark ? 255 : INK[1], onDark ? 255 : INK[2]);
   doc.text("THINK", x, baseY);
   const w = doc.getTextWidth("THINK");
-  if (onDark) doc.setTextColor(CYAN_LT[0], CYAN_LT[1], CYAN_LT[2]);
-  else doc.setTextColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.text("AD", x + w, baseY);
 }
 
 function sectionTitle(doc: jsPDF, font: string, label: string, y: number): number {
   doc.setFont(font, "normal");
   doc.setFontSize(11);
-  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.rect(M, y, 1.6, 5.2, "F");
   doc.setTextColor(INK[0], INK[1], INK[2]);
   doc.text(label, M + 4, y + 4.6);
@@ -92,21 +92,21 @@ function drawQuoteHero(
   badge: string,
   title: string,
 ): number {
-  doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+  doc.setFillColor(INK_STRONG[0], INK_STRONG[1], INK_STRONG[2]);
   doc.rect(0, 0, pageW, HERO_H, "F");
-  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.rect(0, HERO_H, pageW, 1.2, "F");
 
   drawWordmark(doc, font, M, 14, 14, true);
   doc.setFontSize(7.5);
-  doc.setTextColor(214, 199, 255);
+  doc.setTextColor(229, 231, 235);
   doc.text(badge, pageW - M, 14, { align: "right" });
 
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(20);
   doc.text(title, M, 28);
   doc.setFontSize(9);
-  doc.setTextColor(225, 220, 245);
+  doc.setTextColor(209, 213, 219);
   const sub = `${p.periodLabel} · ${p.issuedAt}`;
   doc.text(sub, M, 36);
   doc.setFontSize(8);
@@ -128,7 +128,7 @@ function drawPdfThumbOrPlaceholder(
   doc.setFillColor(248, 249, 252);
   doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
   doc.setLineWidth(0.15);
-  doc.roundedRect(boxX, boxY, boxW, boxH, 1.5, 1.5, "FD");
+  doc.roundedRect(boxX, boxY, boxW, boxH, R, R, "FD");
   if (thumb) {
     addPdfThumbImage(doc, thumb, boxX, boxY, boxW, boxH);
     return;
@@ -189,7 +189,7 @@ function basicDrawQuoteMediaCards(
     if (isAddon) {
       doc.setLineDashPattern([1.2, 1.2], 0);
     }
-    doc.roundedRect(x, y, w, cardH, 2, 2, isAddon ? "D" : "FD");
+    doc.roundedRect(x, y, w, cardH, R, R, isAddon ? "D" : "FD");
     if (isAddon) {
       doc.setLineDashPattern([], 0);
     }
@@ -219,7 +219,7 @@ function basicDrawQuoteMediaCards(
       doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
       doc.text(isKo ? "소계" : "Sub", priceX, y + 14.5, { align: "right" });
       doc.setFontSize(9.5);
-      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
       doc.text(subVal, priceX, y + 18.5, { align: "right" });
       y += cardH + gap;
       continue;
@@ -274,7 +274,7 @@ function basicDrawQuoteMediaCards(
 
     if (line.dailyTraffic && line.dailyTraffic > 0) {
       doc.setFontSize(6.5);
-      doc.setTextColor(CYAN[0], CYAN[1], CYAN[2]);
+      doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
       const traffic = `${isKo ? "일일 노출" : "Daily"} ${line.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`;
       doc.text(
         (doc.splitTextToSize(traffic, textW) as string[]).slice(0, 1),
@@ -293,7 +293,7 @@ function basicDrawQuoteMediaCards(
 
     if (prorationSpec) {
       doc.setFontSize(6.5);
-      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
       doc.text(
         (doc.splitTextToSize(prorationSpec, textW) as string[]).slice(0, 1),
         textX,
@@ -311,7 +311,7 @@ function basicDrawQuoteMediaCards(
     doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
     doc.text(isKo ? "소계" : "Sub", priceX, y + 14.5, { align: "right" });
     doc.setFontSize(9.5);
-    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
     doc.text(subVal, priceX, y + 18.5, { align: "right" });
 
     y += cardH + gap;
@@ -385,7 +385,7 @@ function drawMediaCards(
     doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
     doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
     doc.setLineWidth(0.2);
-    doc.roundedRect(x, y, w, rh, 2, 2, "FD");
+    doc.roundedRect(x, y, w, rh, R, R, "FD");
 
     if (thumb) {
       addPdfThumbImage(doc, thumb, x + 2, y + 2);
@@ -448,9 +448,9 @@ function drawTotals(
   doc.setFont(font, "normal");
   rows.forEach(([label, val, accent]) => {
     if (accent) {
-      doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-      doc.roundedRect(boxX, ry, boxW, 12, 1.5, 1.5, "F");
-      doc.setTextColor(235, 230, 255);
+      doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.roundedRect(boxX, ry, boxW, 12, R, R, "F");
+      doc.setTextColor(255, 237, 213);
       doc.setFontSize(9);
       doc.text(label, boxX + 4, ry + 7.5);
       doc.setTextColor(255, 255, 255);
@@ -482,7 +482,7 @@ function drawClientCampaign(
 
   y = sectionTitle(doc, font, isKo ? "고객 정보" : "Client", y);
   doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
-  doc.roundedRect(M, y, half, 22, 2, 2, "F");
+  doc.roundedRect(M, y, half, 22, R, R, "F");
   doc.setFontSize(8);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
   doc.text(isKo ? "회사" : "Company", M + 4, y + 6);
@@ -506,7 +506,7 @@ function drawClientCampaign(
 
   const rx = M + half + 6;
   doc.setFillColor(GRAY_50[0], GRAY_50[1], GRAY_50[2]);
-  doc.roundedRect(rx, y, half, 22, 2, 2, "F");
+  doc.roundedRect(rx, y, half, 22, R, R, "F");
   doc.setFontSize(8);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
   doc.text(isKo ? "캠페인" : "Campaign", rx + 4, y + 6);
@@ -533,10 +533,8 @@ function basicDrawSectionTitleAt(
 ): void {
   doc.setFont(font, "normal");
   doc.setFontSize(11);
-  doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-  doc.rect(x, y, 1.8, 5.8, "F");
-  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
-  doc.rect(x, y + 5.8, 1.8, 0.8, "F");
+  doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+  doc.rect(x, y, 1.8, 6.6, "F");
   doc.setTextColor(INK[0], INK[1], INK[2]);
   doc.text(label, x + 5, y + 4.8);
 }
@@ -552,21 +550,21 @@ function basicDrawQuoteHero(
   p: QuoteExportPayload,
   pageW: number,
 ): number {
-  doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+  doc.setFillColor(INK_STRONG[0], INK_STRONG[1], INK_STRONG[2]);
   doc.rect(0, 0, pageW, BASIC_HERO_H, "F");
-  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.rect(0, BASIC_HERO_H, pageW, 1.4, "F");
 
   drawWordmark(doc, font, M, 15, 15, true);
   doc.setFontSize(7);
-  doc.setTextColor(214, 199, 255);
+  doc.setTextColor(229, 231, 235);
   doc.text("ADVERTISING QUOTE", pageW - M, 15, { align: "right" });
 
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(22);
   doc.text(p.isKo ? "광고 견적서" : "Advertising Quote", M, 30);
   doc.setFontSize(9);
-  doc.setTextColor(225, 220, 245);
+  doc.setTextColor(209, 213, 219);
   const sub = `${p.periodLabel} · ${p.issuedAt}`;
   doc.text(sub, M, 38);
   doc.setFontSize(8);
@@ -605,7 +603,7 @@ function basicDrawSummaryStrip(
     doc.setFillColor(255, 255, 255);
     doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
     doc.setLineWidth(0.2);
-    doc.roundedRect(x, y, colW, boxH, 2, 2, "FD");
+    doc.roundedRect(x, y, colW, boxH, R, R, "FD");
 
     doc.setFont(font, "normal");
     doc.setFontSize(6.5);
@@ -613,7 +611,7 @@ function basicDrawSummaryStrip(
     doc.text(labels[i]!.toUpperCase(), x + 3, y + 6);
 
     if (i === 0) {
-      doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+      doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
       doc.setFontSize(14);
       doc.text(
         (doc.splitTextToSize(totalVal, colW - 6) as string[]).slice(0, 1),
@@ -705,7 +703,7 @@ function basicDrawCampaignSection(
   if (durationMeta) {
     const periodW = doc.getTextWidth(p.periodLabel);
     doc.setFontSize(9.5);
-    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
     const metaLines = doc.splitTextToSize(` · ${durationMeta}`, contentW - periodW) as string[];
     doc.text(metaLines[0] ?? "", contentX + periodW, lineY);
   }
@@ -728,11 +726,11 @@ function basicDrawMediaTable(
   const headH = 7;
 
   const drawHeader = (yy: number) => {
-    doc.setFillColor(VIOLET_50[0], VIOLET_50[1], VIOLET_50[2]);
+    doc.setFillColor(ACCENT_SOFT[0], ACCENT_SOFT[1], ACCENT_SOFT[2]);
     doc.rect(x, yy, w, headH, "F");
     doc.setFont(font, "normal");
     doc.setFontSize(6.5);
-    doc.setTextColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+    doc.setTextColor(INK_STRONG[0], INK_STRONG[1], INK_STRONG[2]);
     const heads = isKo ? ["#", "매체명", "위치", "소계"] : ["#", "Media", "Location", "Amt"];
     doc.text(heads[0]!, colX[0]!, yy + 4.8);
     doc.text(heads[1]!, colX[1]!, yy + 4.8);
@@ -774,7 +772,7 @@ function basicDrawMediaTable(
     doc.setFontSize(8);
     doc.setTextColor(GRAY_600[0], GRAY_600[1], GRAY_600[2]);
     doc.text(locLines.slice(0, 2), colX[2]!, y + 4.5);
-    doc.setTextColor(VIOLET_700[0], VIOLET_700[1], VIOLET_700[2]);
+    doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
     doc.setFontSize(9);
     doc.text(
       formatDocumentManWon(line.lineSupplyWon, isKo),
@@ -855,9 +853,9 @@ function basicDrawTotals(
   doc.setFont(font, "normal");
   rows.forEach(([label, val, tone]) => {
     if (tone === "total") {
-      doc.setFillColor(VIOLET[0], VIOLET[1], VIOLET[2]);
-      doc.roundedRect(boxX, ry, boxW, 12, 2, 2, "F");
-      doc.setTextColor(235, 230, 255);
+      doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
+      doc.roundedRect(boxX, ry, boxW, 12, R, R, "F");
+      doc.setTextColor(255, 237, 213);
       doc.setFontSize(7.5);
       doc.text(label, labelX, ry + 7.5);
       doc.setTextColor(255, 255, 255);
@@ -907,13 +905,13 @@ function basicDrawFooter(
   );
 
   doc.setFontSize(7.5);
-  doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.text(isKo ? "담당자 확인" : "Authorized by", M, footerTop + 12);
   doc.setDrawColor(GRAY_200[0], GRAY_200[1], GRAY_200[2]);
   doc.line(M, footerTop + 22, M + contentW * 0.42, footerTop + 22);
 
   const rx = M + contentW * 0.52;
-  doc.setTextColor(VIOLET[0], VIOLET[1], VIOLET[2]);
+  doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.text(p.issuer.company, rx, footerTop + 12);
   doc.setTextColor(INK[0], INK[1], INK[2]);
   doc.setFontSize(8);
@@ -955,20 +953,20 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload, thu
 
   doc.setFillColor(DARK_BG[0], DARK_BG[1], DARK_BG[2]);
   doc.rect(0, 0, pageW, pageH, "F");
-  doc.setFillColor(VIOLET_DK[0], VIOLET_DK[1], VIOLET_DK[2]);
+  doc.setFillColor(INK_STRONG[0], INK_STRONG[1], INK_STRONG[2]);
   doc.rect(0, 0, pageW, 70, "F");
-  doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+  doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
   doc.rect(0, 70, pageW, 1.4, "F");
 
   drawWordmark(doc, font, M, 24, 18, true);
-  doc.setTextColor(214, 199, 255);
+  doc.setTextColor(229, 231, 235);
   doc.setFontSize(10);
   doc.text(isKo ? "광고 캠페인 제안 · 견적" : "Campaign proposal & quote", M, 31);
   doc.setTextColor(255, 255, 255);
   doc.setFontSize(26);
   doc.text(isKo ? "광고 제안서" : "Campaign Proposal", M, 52);
   doc.setFontSize(11);
-  doc.setTextColor(225, 220, 245);
+  doc.setTextColor(209, 213, 219);
   doc.text(`${p.clientCompany} ${isKo ? "귀중" : ""}`.trim(), M, 62);
 
   const stats: Array<[string, string]> = [
@@ -992,12 +990,12 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload, thu
     const xx = M + col * (cardW + 9);
     if (col === 0 && i > 0) sy += 26;
     doc.setFillColor(DARK_CARD[0], DARK_CARD[1], DARK_CARD[2]);
-    doc.roundedRect(xx, sy, cardW, 22, 2, 2, "F");
+    doc.roundedRect(xx, sy, cardW, 22, R, R, "F");
     doc.setFont(font, "normal");
     doc.setFontSize(8);
-    doc.setTextColor(170, 170, 190);
+    doc.setTextColor(156, 163, 175);
     doc.text(s[0], xx + 5, sy + 8);
-    doc.setTextColor(CYAN_LT[0], CYAN_LT[1], CYAN_LT[2]);
+    doc.setTextColor(ACCENT[0], ACCENT[1], ACCENT[2]);
     doc.setFontSize(16);
     doc.text((doc.splitTextToSize(s[1], cardW - 10) as string[]).slice(0, 1), xx + 5, sy + 17);
   });
@@ -1009,16 +1007,16 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload, thu
   hy += 7;
   doc.setFontSize(9);
   p.lines.slice(0, 8).forEach((l) => {
-    doc.setFillColor(CYAN[0], CYAN[1], CYAN[2]);
+    doc.setFillColor(ACCENT[0], ACCENT[1], ACCENT[2]);
     doc.circle(M + 1.4, hy - 1.4, 0.9, "F");
-    doc.setTextColor(225, 225, 235);
+    doc.setTextColor(229, 231, 235);
     const t = `${l.name}  —  ${l.location}`;
     doc.text((doc.splitTextToSize(t, contentW - 8) as string[]).slice(0, 1), M + 5, hy);
     hy += 6.5;
   });
 
   doc.setFontSize(8);
-  doc.setTextColor(150, 150, 170);
+  doc.setTextColor(156, 163, 175);
   doc.text(`No. ${p.quoteNo}  ·  ${p.issuedAt}`, M, pageH - 10);
 
   doc.addPage();
