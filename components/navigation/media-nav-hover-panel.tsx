@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
+import { trackEvent } from "@/lib/ga-events";
 import type { TopNavLink } from "@/lib/navigation/desktop-top-nav";
 import { getPrimaryMediaImageUrl, type MediaItem } from "@/lib/media-data";
 import { resolveCatalogImageSrc } from "@/lib/optimized-image-url";
@@ -132,7 +133,7 @@ export function MediaNavHoverPanel({ links, className }: Props) {
 
       <div className="space-y-2 border-l border-gray-200 pl-4 dark:border-white/10">
         <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-white/40">
-          {isKo ? "추천 매체" : "Featured"}
+          {isKo ? "인기 매체" : "Popular"}
         </p>
         {loading ? (
           <div className="space-y-2" aria-hidden>
@@ -150,10 +151,18 @@ export function MediaNavHoverPanel({ links, className }: Props) {
             ))}
           </div>
         ) : preview.length === 0 ? null : (
-          preview.map((m) => (
+          preview.map((m, index) => (
             <Link
               key={m.id}
               href={`/media/${m.id}`}
+              onClick={() => {
+                trackEvent("discovery_hover_popular_click", {
+                  media_id: m.id,
+                  media_name: m.name,
+                  position: index + 1,
+                  slot: "discovery_nav_hover",
+                });
+              }}
               className="flex items-center gap-3 rounded-xl p-2 transition-colors hover:bg-gray-100 dark:hover:bg-white/5"
             >
               <div className="relative h-12 w-12 shrink-0 overflow-hidden rounded-lg bg-gray-200 dark:bg-white/10">
