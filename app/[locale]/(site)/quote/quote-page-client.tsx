@@ -69,6 +69,7 @@ import {
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
+  compareMediaByMonthlyEquivalentPrice,
   formatMediaPriceWithPeriodSuffix,
 } from "@/lib/media-price-format";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
@@ -570,9 +571,13 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     const arr = [...filteredCatalog];
     switch (discoverySort) {
       case "price_asc":
-        return arr.sort((a, b) => a.price - b.price);
+        return arr.sort((a, b) =>
+          compareMediaByMonthlyEquivalentPrice(a, b, "asc"),
+        );
       case "price_desc":
-        return arr.sort((a, b) => b.price - a.price);
+        return arr.sort((a, b) =>
+          compareMediaByMonthlyEquivalentPrice(a, b, "desc"),
+        );
       case "newest":
         return arr.sort((a, b) => {
           const ta = a.createdAt ? Date.parse(a.createdAt) : 0;

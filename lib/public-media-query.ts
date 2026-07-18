@@ -157,6 +157,15 @@ export function buildPublicMediaWhere(
   return and.length === 1 ? and[0]! : { AND: and };
 }
 
+/**
+ * Prisma `orderBy` 헬퍼.
+ *
+ * 저가/고가(`price_*`)는 DB raw `price` 정렬이다. `pricePeriod`(일/주/2주/월)를
+ * 월 환산할 수 없어 **공개 /media 목록은 쓰지 않는다** — `queryMergedMediaBrowse`
+ * 가 전체 카탈로그(~500)를 메모리에서 `compareMediaByMonthlyEquivalentPrice` 로
+ * 정렬한 뒤 페이지 슬라이스한다 (옵션 b). Prisma 전용 경로(패키지 미리보기 등)는
+ * 호출측에서 동일 비교자로 재정렬하거나 over-fetch 해야 한다.
+ */
 export function buildPublicMediaOrderBy(
   sort: PublicMediaSort | null | undefined,
 ): Prisma.MediaOrderByWithRelationInput[] {
@@ -166,9 +175,10 @@ export function buildPublicMediaOrderBy(
     case "newest":
       return [{ createdAt: "desc" }];
     case "price_asc":
-      return [{ price: "asc" }];
+      // NOT period-normalized — see JSDoc. Prefer app-level monthly sort.
+      return [{ price: "asc" }, { id: "asc" }];
     case "price_desc":
-      return [{ price: "desc" }];
+      return [{ price: "desc" }, { id: "asc" }];
     case "rating":
       return [{ popularityScore: "desc" }, { viewCount: "desc" }, { updatedAt: "desc" }];
     case "popular":
@@ -182,6 +192,13 @@ export function buildPublicMediaOrderBy(
         { updatedAt: "desc" },
       ];
   }
+}
+
+/** Prisma orderBy 로는 월 환산 정렬이 불가해 앱 레벨 정렬이 필요한 sort */
+export function publicMediaSortNeedsAppLevelPriceNormalize(
+  sort: PublicMediaSort | null | undefined,
+): boolean {
+  return sort === "price_asc" || sort === "price_desc";
 }
 
 export function parsePublicMediaQuery(

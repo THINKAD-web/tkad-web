@@ -44,6 +44,7 @@ function useLgUp() {
   );
 }
 import {
+  compareMediaByMonthlyEquivalentPrice,
   formatMediaPriceWithPeriodSuffix,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
@@ -493,8 +494,12 @@ function MediaSearchPageInner({
             query: query.trim(),
           });
           const sorted = [...filtered].sort((a, b) => {
-            if (sort === "price_asc") return (a.price ?? 0) - (b.price ?? 0);
-            if (sort === "price_desc") return (b.price ?? 0) - (a.price ?? 0);
+            if (sort === "price_asc") {
+              return compareMediaByMonthlyEquivalentPrice(a, b, "asc");
+            }
+            if (sort === "price_desc") {
+              return compareMediaByMonthlyEquivalentPrice(a, b, "desc");
+            }
             return (b.dailyFootTraffic ?? 0) - (a.dailyFootTraffic ?? 0);
           });
           const pageSize =

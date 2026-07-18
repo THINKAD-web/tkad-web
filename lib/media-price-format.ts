@@ -390,6 +390,32 @@ export function resolveMediaDisplayPrice(
   };
 }
 
+/** 저가/고가 정렬용 — 표시가를 월 환산한 키 */
+export type MediaPriceSortable = Pick<
+  MediaItem,
+  "price" | "pricePeriod" | "priceOptions"
+> & { id?: string };
+
+export function mediaMonthlyEquivalentSortWon(
+  media: MediaPriceSortable,
+): number {
+  const { priceWon, period } = resolveMediaDisplayPrice(media);
+  return priceToMonthlyEquivalentWon(priceWon, period);
+}
+
+/** 월 환산가 비교. 동률이면 id로 안정 정렬. */
+export function compareMediaByMonthlyEquivalentPrice(
+  a: MediaPriceSortable,
+  b: MediaPriceSortable,
+  direction: "asc" | "desc" = "asc",
+): number {
+  const am = mediaMonthlyEquivalentSortWon(a);
+  const bm = mediaMonthlyEquivalentSortWon(b);
+  const diff = direction === "asc" ? am - bm : bm - am;
+  if (diff !== 0) return diff;
+  return (a.id ?? "").localeCompare(b.id ?? "");
+}
+
 export function formatMediaDisplayPrice(
   media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
   locale = "ko-KR",

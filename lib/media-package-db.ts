@@ -15,11 +15,13 @@ import {
   buildRelaxedMediaPackageWhere,
   mediaPackageSortToOrderBy,
 } from "@/lib/media-package-query";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-price-format";
 import {
   prismaMediaToMediaItem,
   type MediaWithAdvertiserExecutions,
 } from "@/lib/public-media-catalog";
 import type { MediaItem } from "@/lib/media-data";
+import { publicMediaSortNeedsAppLevelPriceNormalize } from "@/lib/public-media-query";
 
 function rowToPublicPackage(row: MediaPackage): PublicMediaPackage {
   const seed = MEDIA_PACKAGE_SEED_DATA.find((s) => s.slug === row.slug);
@@ -148,10 +150,18 @@ async function queryPackageMediaRows(
   take: number,
 ): Promise<MediaWithAdvertiserExecutions[]> {
   const db = getPrisma();
-  return db.media.findMany({
+  const needsMonthlyPriceSort = publicMediaSortNeedsAppLevelPriceNormalize(
+    pkg.sortBy === "price_asc" || pkg.sortBy === "price_desc"
+      ? pkg.sortBy
+      : null,
+  );
+  const rows = await db.media.findMany({
     where,
-    orderBy: mediaPackageSortToOrderBy(pkg.sortBy),
-    take,
+    // price_* 는 raw price 정렬이 틀리므로 안정 키만 쓰고 앱에서 월 환산 재정렬
+    orderBy: needsMonthlyPriceSort
+      ? [{ id: "asc" }]
+      : mediaPackageSortToOrderBy(pkg.sortBy),
+    ...(needsMonthlyPriceSort ? {} : { take }),
     include: {
       advertiserExecutions: {
         select: { advertiserName: true },
@@ -159,6 +169,27 @@ async function queryPackageMediaRows(
       },
     },
   });
+  if (!needsMonthlyPriceSort) return rows;
+  const direction = pkg.sortBy === "price_desc" ? "desc" : "asc";
+  return [...rows]
+    .sort((a, b) =>
+      compareMediaByMonthlyEquivalentPrice(
+        {
+          id: a.id,
+          price: a.price,
+          pricePeriod: a.pricePeriod,
+          priceOptions: a.priceOptions as MediaItem["priceOptions"],
+        },
+        {
+          id: b.id,
+          price: b.price,
+          pricePeriod: b.pricePeriod,
+          priceOptions: b.priceOptions as MediaItem["priceOptions"],
+        },
+        direction,
+      ),
+    )
+    .slice(0, take);
 }
 
 export async function fetchMediaForPackage(

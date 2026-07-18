@@ -5,6 +5,7 @@ import {
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
+import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-price-format";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type {
   PublicMediaQueryParams,
@@ -93,9 +94,13 @@ export function sortMergedBrowseCatalog(
         return bt - at;
       });
     case "price_asc":
-      return arr.sort((a, b) => (a.price ?? 0) - (b.price ?? 0));
+      return arr.sort((a, b) =>
+        compareMediaByMonthlyEquivalentPrice(a, b, "asc"),
+      );
     case "price_desc":
-      return arr.sort((a, b) => (b.price ?? 0) - (a.price ?? 0));
+      return arr.sort((a, b) =>
+        compareMediaByMonthlyEquivalentPrice(a, b, "desc"),
+      );
     case "rating":
       return arr.sort(
         (a, b) =>
