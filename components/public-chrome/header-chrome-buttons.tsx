@@ -33,7 +33,7 @@ export const headerChromeTextButtonClass = cn(
 
 /** 회원가입 — Quiet Professional 단색 CTA (그라데이션·glow 없음) */
 export const headerChromeSignupButtonClass = cn(
-  "inline-flex h-10 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] px-3.5 text-sm font-semibold text-white",
+  "tkad-qp-cta inline-flex h-10 shrink-0 items-center justify-center rounded-[var(--qp-radius-md)] px-3.5 text-sm font-semibold",
   "border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]",
   "transition-colors hover:bg-[color:var(--qp-accent-hover)]",
 );

@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-quote-lines";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
+import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { Plus, Trash2 } from "lucide-react";
 import {
@@ -187,10 +188,10 @@ export function AdminQuoteLinesEditor({
                   );
                 }
 
+                const mediaItem = adminMediaDtoToMediaItem(m);
                 const controlMedia = adminLineMediaItemForControl(m, line.lineId);
-                const isGrade = isPerUnitGradePriceOptions(
-                  adminMediaDtoToMediaItem(m),
-                );
+                const isGrade = isPerUnitGradePriceOptions(mediaItem);
+                const isNetwork = isNetworkCatalogItem(mediaItem);
                 const { rawPrice, period, label } = catalogLinePrice(
                   m,
                   line.priceOptionIndex,
@@ -264,27 +265,7 @@ export function AdminQuoteLinesEditor({
                       )}
                     </td>
                     <td className="px-2 py-2 align-top">
-                      {isGrade ? (
-                        <div className="space-y-1.5">
-                          <Input
-                            type="number"
-                            min={1}
-                            value={String(line.quantity)}
-                            onChange={(e) => {
-                              const n = Math.max(
-                                1,
-                                parseInt(e.target.value, 10) || 1,
-                              );
-                              updateLine(line.lineId, { quantity: n });
-                            }}
-                            className="h-9 w-24 text-right text-sm tabular-nums"
-                            aria-label={isKo ? "대수" : "Fleet count"}
-                          />
-                          <p className="text-[10px] text-muted-foreground">
-                            {isKo ? "대" : "units"}
-                          </p>
-                        </div>
-                      ) : (
+                      {isNetwork ? (
                         <PlannerMediaQuantityControl
                           media={controlMedia}
                           isKo={isKo}
@@ -304,6 +285,40 @@ export function AdminQuoteLinesEditor({
                           }
                           compact
                         />
+                      ) : (
+                        <div className="space-y-1.5">
+                          <Input
+                            type="number"
+                            min={1}
+                            value={String(line.quantity)}
+                            onChange={(e) => {
+                              const n = Math.max(
+                                1,
+                                parseInt(e.target.value, 10) || 1,
+                              );
+                              updateLine(line.lineId, { quantity: n });
+                            }}
+                            className="h-9 w-24 text-right text-sm tabular-nums"
+                            aria-label={
+                              isGrade
+                                ? isKo
+                                  ? "대수"
+                                  : "Fleet count"
+                                : isKo
+                                  ? "수량"
+                                  : "Quantity"
+                            }
+                          />
+                          <p className="text-[10px] text-muted-foreground">
+                            {isGrade
+                              ? isKo
+                                ? "대"
+                                : "units"
+                              : isKo
+                                ? "수량"
+                                : "qty"}
+                          </p>
+                        </div>
                       )}
                     </td>
                     <td className="px-2 py-2 align-middle text-right tabular-nums text-xs">

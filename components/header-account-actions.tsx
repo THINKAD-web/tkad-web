@@ -41,7 +41,7 @@ export function HeaderAccountActions({ onNavigate }: { onNavigate?: () => void }
       <Link
         href="/signup"
         onClick={onNavigate}
-        className="inline-flex rounded-[var(--qp-radius-md)] border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] px-2.5 py-1.5 text-sm font-semibold text-white transition-colors hover:bg-[color:var(--qp-accent-hover)]"
+        className="tkad-qp-cta inline-flex rounded-[var(--qp-radius-md)] border border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)] px-2.5 py-1.5 text-sm font-semibold transition-colors hover:bg-[color:var(--qp-accent-hover)]"
       >
         {t("signup")}
       </Link>

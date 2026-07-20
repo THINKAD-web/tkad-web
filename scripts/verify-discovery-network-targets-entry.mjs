@@ -46,13 +46,10 @@ async function main() {
   await page.goto(`${BASE}/media`, { waitUntil: "domcontentloaded" });
   await page.waitForTimeout(2000);
 
-  const hotspotChip = page.locator('[data-screenshot="media-network-hotspot-chip"]').nth(1);
-  checks.push({ name: "network-hotspot-chip", ok: (await hotspotChip.count()) > 0 });
-  await hotspotChip.click();
-  await page.waitForTimeout(1500);
+  const hotspotChip = page.locator('[data-screenshot="media-network-hotspot-chip"]');
   checks.push({
-    name: "hotspot-chip-network-url",
-    ok: page.url().includes("features=network"),
+    name: "network-hotspot-chip-removed",
+    ok: (await hotspotChip.count()) === 0,
   });
 
   await page.goto(`${BASE}/media`, { waitUntil: "domcontentloaded" });

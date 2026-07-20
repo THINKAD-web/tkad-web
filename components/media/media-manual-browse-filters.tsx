@@ -863,41 +863,15 @@ export function MediaManualBrowseFilters({
   };
 
   const renderHotspotRow = (shortcut = false) => (
-    <div className="flex min-w-0 items-end gap-2">
-      <div className="min-w-0 flex-1">
-        <HotspotRegionChips
-          isKo={isKo}
-          regionSub={regionSub}
-          compact={mapMobileImmersiveMode}
-          shortcutToPanel={shortcut}
-          onOpenFilterPanel={shortcut ? openFilterPanelFocusedOnRegion : undefined}
-          onSelect={handleHotspotSelect}
-          onClear={handleHotspotClear}
-        />
-      </div>
-      {filterIaListPage ? (
-        <button
-          type="button"
-          onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, true))}
-          className={cn(
-            "inline-flex shrink-0 items-center gap-1 whitespace-nowrap rounded-full px-3 py-1.5 text-xs font-semibold transition-all sm:text-sm",
-            variant === "network"
-              ? "bg-indigo-500 text-white shadow-sm"
-              : "bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
-          )}
-          aria-pressed={variant === "network"}
-          data-screenshot="media-network-hotspot-chip"
-        >
-          <Network className="h-3.5 w-3.5 shrink-0" aria-hidden />
-          {isKo ? "네트워크" : "Network"}
-          {optionCounts?.networkFeature != null ? (
-            <span className="tabular-nums text-[10px] opacity-75">
-              {optionCounts.networkFeature}
-            </span>
-          ) : null}
-        </button>
-      ) : null}
-    </div>
+    <HotspotRegionChips
+      isKo={isKo}
+      regionSub={regionSub}
+      compact={mapMobileImmersiveMode}
+      shortcutToPanel={shortcut}
+      onOpenFilterPanel={shortcut ? openFilterPanelFocusedOnRegion : undefined}
+      onSelect={handleHotspotSelect}
+      onClear={handleHotspotClear}
+    />
   );
 
   const renderPriceAndFeatures = () => {

@@ -297,13 +297,18 @@
 /* P1/P2-0 chrome — 단색 CTA (네온 그라데이션·glow 없음) */
 .tkad-qp-cta {
   background: var(--qp-accent);
-  color: #fff;
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
   border: 1px solid color-mix(in srgb, var(--qp-accent) 85%, black);
   box-shadow: none;
 }
 .tkad-qp-cta:hover {
   background: var(--qp-accent-hover);
   box-shadow: none;
+}
+.tkad-qp-cta svg {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 /* P1 planner scope — 미디어 목록/상세(.tkad-media-page)는 제외 */
@@ -3224,16 +3229,20 @@ html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean svg {
 /* Header text safety: `text-white` 유틸만 보정. `dark:text-white*` 는 클래스 문자열에
    `text-white`가 포함돼 매칭되지만 라이트 모드에선 비활성 — 여기까지 덮으면
    반투명 드롭다운 위에서 글자만 선명한 잉크로 고정돼 배경과 충돌한다.
-   네온 CTA pill(활성 대메뉴)은 그라데이션 위 흰 글자 유지. */
-html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]):not(.tkad-neon-cta-clean) {
+   액센트 CTA(회원가입·활성 대메뉴)는 주황 배경 위 흰 글자 유지. */
+html:not(.dark) .tkad-nav-chrome [class*="text-white"]:not([class*="dark:text-white"]):not(.tkad-neon-cta-clean):not(.tkad-qp-cta) {
   color: var(--foreground) !important;
   -webkit-text-fill-color: var(--foreground) !important;
 }
 
 html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean,
-html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean * {
-  color: rgb(255 255 255) !important;
-  -webkit-text-fill-color: rgb(255 255 255) !important;
+html:not(.dark) .tkad-nav-chrome .tkad-neon-cta-clean *,
+html:not(.dark) .tkad-nav-chrome .tkad-qp-cta,
+html:not(.dark) .tkad-nav-chrome .tkad-qp-cta *,
+html:not(.dark) .tkad-nav-chrome .tkad-qp-cta[class*="text-white"]:not([class*="dark:text-white"]):not(.tkad-neon-cta-clean),
+html:not(.dark) .tkad-nav-chrome .tkad-qp-cta [class*="text-white"]:not([class*="dark:text-white"]):not(.tkad-neon-cta-clean) {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
 }
 
 /* ── Mobile bottom tab bar — Quiet Professional (단색, glow 없음) ── */
