@@ -79,3 +79,28 @@ test("buildCatalogItemMetricLine shows recalc cpm not stored outlier", () => {
   assert.match(line!, /CPM ₩27,027/);
   assert.doesNotMatch(line!, /469/);
 });
+
+test("buildCatalogItemMetricLine uses catalogPrice over display price", () => {
+  const impressions = 1_900_000;
+  const catalogPrice = 30_000_000;
+  const displayPrice = 15_000_000;
+  const line = buildCatalogItemMetricLine(
+    {
+      price: displayPrice,
+      catalogPrice,
+      impressions,
+      cpm: undefined,
+    },
+    true,
+    "ko-KR",
+  );
+  const expected = Math.round(catalogPrice / (impressions / 1000));
+  assert.ok(line);
+  assert.match(line!, new RegExp(`CPM ₩${expected.toLocaleString("ko-KR")}`));
+  assert.doesNotMatch(
+    line!,
+    new RegExp(
+      `CPM ₩${Math.round(displayPrice / (impressions / 1000)).toLocaleString("ko-KR")}`,
+    ),
+  );
+});

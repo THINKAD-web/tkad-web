@@ -88,6 +88,8 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
     lastExecutionMonthsAgo: item.lastExecutionMonthsAgo ?? undefined,
     price: display.priceWon > 0 ? display.priceWon : undefined,
     pricePeriod: display.period,
+    catalogPrice: item.price > 0 ? item.price : undefined,
+    catalogPricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
     thumbnailUrl: resolved?.src ?? undefined,
     galleryImages: filterDisplayableMediaImageUrls(
       dedupeImageUrls(item.sampleImages ?? []),
@@ -120,6 +122,8 @@ export function mapMapItemToHomeCatalog(
     location: item.location,
     price: item.price > 0 ? item.price : undefined,
     pricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
+    catalogPrice: item.catalogPrice > 0 ? item.catalogPrice : undefined,
+    catalogPricePeriod: normalizeMediaPricePeriod(item.catalogPricePeriod),
     thumbnailUrl: resolveCatalogImageSrc(item.image)?.src ?? undefined,
     visibilityScore:
       item.visibilityScore > 0 ? item.visibilityScore : undefined,
@@ -133,9 +137,13 @@ export function mapMapItemToHomeCatalog(
 
 /**
  * `HomeCatalogMediaItem` → CPM·성능 지표용 최소 `MediaItem`.
- * `price`는 `mapMediaItemToHomeCatalog` 가 이미 `resolveMediaDisplayPrice` 로 넣은 표시가.
+ * CPM 분자는 `catalogPrice`(대표가); 없으면 표시가 `price` 폴백.
  */
 export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
+  const catalogPrice =
+    typeof item.catalogPrice === "number" && item.catalogPrice > 0
+      ? item.catalogPrice
+      : (item.price ?? 0);
   return {
     id: item.id,
     slug: item.slug,
@@ -145,8 +153,8 @@ export function catalogToMediaItem(item: HomeCatalogMediaItem): MediaItem {
     locationEn: item.location ?? item.region ?? "",
     region: "seoul",
     type: "digital",
-    price: item.price ?? 0,
-    pricePeriod: item.pricePeriod,
+    price: catalogPrice,
+    pricePeriod: item.catalogPricePeriod ?? item.pricePeriod,
     lat: 0,
     lng: 0,
     dailyFootTraffic: item.dailyFootTraffic ?? 0,

@@ -60,11 +60,16 @@ export function buildHomePopularCardPriceDisplay(
   };
 }
 
-/** 홈 인기 카드 — pricePeriod 반영 CPM (월 환산 단가 ÷ 월 노출) */
+/** 홈 인기 카드 — 카탈로그 대표가 월환산 ÷ 월 노출 (표시가와 분리) */
 export function homePopularCardCpmWon(
   item: HomeCatalogMediaItem,
 ): number | null {
-  const monthlyWon = priceToMonthlyEquivalentWon(item.price ?? 0, item.pricePeriod);
+  const catalogPrice =
+    typeof item.catalogPrice === "number" && item.catalogPrice > 0
+      ? item.catalogPrice
+      : (item.price ?? 0);
+  const catalogPeriod = item.catalogPricePeriod ?? item.pricePeriod;
+  const monthlyWon = priceToMonthlyEquivalentWon(catalogPrice, catalogPeriod);
   if (monthlyWon <= 0) return null;
   const base = catalogToMediaItem(item);
   return estimateCatalogCpmWon({ ...base, price: monthlyWon, cpm: undefined });

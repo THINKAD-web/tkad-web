@@ -43,6 +43,8 @@ function toMapItem(m: MediaItem) {
     subCategory: m.subCategory ?? null,
     price: display.priceWon,
     pricePeriod: display.period,
+    catalogPrice: m.price,
+    catalogPricePeriod: m.pricePeriod,
     createdAt: m.createdAt ?? null,
     lat: m.lat,
     lng: m.lng,

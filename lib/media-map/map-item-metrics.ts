@@ -1,11 +1,9 @@
-import {
-  formatMonthlyImpressionsLabel,
-  resolveCpmWon,
-} from "@/lib/media-metrics";
+import { formatMonthlyImpressionsLabel, resolveCpmWon } from "@/lib/media-metrics";
 import { formatCpmKrw } from "@/lib/media-price-format";
 import {
   buildMapItemMetricLine,
   buildCatalogItemMetricLine,
+  metricsInputForCatalogCpm,
 } from "@/lib/media-card-metrics";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
@@ -19,7 +17,7 @@ export function formatMapImpressions(
 }
 
 export function formatMapCpm(item: MapMapItem, locale: string): string | null {
-  const cpm = resolveCpmWon(item);
+  const cpm = resolveCpmWon(metricsInputForCatalogCpm(item));
   if (cpm == null) return null;
   return formatCpmKrw(cpm, locale);
 }

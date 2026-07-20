@@ -4,7 +4,11 @@ import {
   priceToMonthlyEquivalentWon,
   formatMediaPriceWithPeriodSuffix,
 } from "./media-price-format.ts";
-import { buildHomePopularCardPriceDisplay } from "./home-popular-card-display.ts";
+import {
+  buildHomePopularCardPriceDisplay,
+  homePopularCardCpmWon,
+} from "./home-popular-card-display.ts";
+import { estimateCatalogCpmWon } from "./media-metrics.ts";
 
 test("priceToMonthlyEquivalentWon applies period multipliers", () => {
   assert.equal(priceToMonthlyEquivalentWon(1_000_000, "month"), 1_000_000);
@@ -39,5 +43,33 @@ test("buildHomePopularCardPriceDisplay keeps month-only label for monthly media"
   assert.equal(
     display!.primary,
     formatMediaPriceWithPeriodSuffix(80_000_000, "month", "ko-KR"),
+  );
+});
+
+test("homePopularCardCpmWon uses catalogPrice not display price", () => {
+  const item = {
+    id: "pkg-multi",
+    name: "패키지형",
+    price: 15_000_000,
+    pricePeriod: "month" as const,
+    catalogPrice: 30_000_000,
+    catalogPricePeriod: "month" as const,
+    impressions: 5_500_000,
+  };
+  const got = homePopularCardCpmWon(item);
+  const monthly = priceToMonthlyEquivalentWon(30_000_000, "month");
+  const expected = estimateCatalogCpmWon({
+    price: monthly,
+    impressions: 5_500_000,
+    cpm: undefined,
+  });
+  assert.equal(got, expected);
+  assert.notEqual(
+    got,
+    estimateCatalogCpmWon({
+      price: 15_000_000,
+      impressions: 5_500_000,
+      cpm: undefined,
+    }),
   );
 });

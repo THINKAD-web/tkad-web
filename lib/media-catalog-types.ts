@@ -21,8 +21,15 @@ export type HomeCatalogMediaItem = {
   trustScore?: number;
   executionCount?: number;
   lastExecutionMonthsAgo?: number | null;
+  /** 목록 표시가 — `resolveMediaDisplayPrice` (최저 옵션 포함) */
   price?: number;
   pricePeriod?: MediaPricePeriodKey;
+  /**
+   * DB `Media.price` / 대표가 — 카드 CPM SSOT (`resolveCpmWon`).
+   * `price`와 다를 수 있음(패키지 옵션형).
+   */
+  catalogPrice?: number;
+  catalogPricePeriod?: MediaPricePeriodKey;
   thumbnailUrl?: string;
   /** 피드·갤러리용 (최대 6장, 썸네일 포함) */
   galleryImages?: string[];

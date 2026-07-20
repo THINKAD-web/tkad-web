@@ -4,7 +4,10 @@ import { Link } from "@/i18n/navigation";
 import MediaDetailAdminActions from "@/components/media-detail-admin-actions";
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
-import { formatMonthlyImpressionsLabel } from "@/lib/media-metrics";
+import {
+  formatMonthlyImpressionsLabel,
+  resolveCpmWon,
+} from "@/lib/media-metrics";
 import {
   formatCatalogPriceFieldWon,
   formatCpmKrw,
@@ -17,7 +20,6 @@ import {
   MediaTrustScoreBadge,
 } from "@/components/media/media-trust-score";
 import { MediaTrustBadges } from "@/components/media/media-trust-badges";
-import { resolveMediaCpmWon } from "@/lib/compare-quote";
 import { cn } from "@/lib/utils";
 
 type Labels = {
@@ -80,11 +82,8 @@ export function MediaDetailHeroInfo({
   const locale = isKo ? "ko-KR" : "en-US";
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
-  const cpm = resolveMediaCpmWon({
-    ...media,
-    price: displayPrice.priceWon,
-    pricePeriod: displayPrice.period,
-  });
+  /** 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개) */
+  const cpm = resolveCpmWon(media);
   const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
