@@ -9,6 +9,7 @@ import {
 } from "react";
 import { createPortal } from "react-dom";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
+import { bunnyCdnToProxyFallback } from "@/lib/optimized-image-url";
 
 export type MediaLightboxLabels = {
   close: string;
@@ -48,7 +49,28 @@ export default function MediaLightbox({
 
   const slideKey = `${idx}-${src}`;
   const [failedSlideKey, setFailedSlideKey] = useState<string | null>(null);
+  /** CDN → 프록시 1회 재시도용 표시 URL (슬라이드 변경 시 원본으로 리셋) */
+  const [displaySrc, setDisplaySrc] = useState(src);
   const imgFailed = failedSlideKey === slideKey;
+
+  useEffect(() => {
+    setDisplaySrc(src);
+  }, [slideKey, src]);
+
+  const onImgError = useCallback(
+    (e: React.SyntheticEvent<HTMLImageElement>) => {
+      const current =
+        e.currentTarget.currentSrc || e.currentTarget.src || displaySrc;
+      // 이미 프록시면 bunnyCdnToProxyFallback → null (무한 재시도 방지)
+      const fallback = bunnyCdnToProxyFallback(current);
+      if (fallback && fallback !== current) {
+        setDisplaySrc(fallback);
+        return;
+      }
+      setFailedSlideKey(slideKey);
+    },
+    [displaySrc, slideKey],
+  );
 
   const goPrev = useCallback(() => {
     if (n < 2) return;
@@ -176,13 +198,13 @@ export default function MediaLightbox({
             // eslint-disable-next-line @next/next/no-img-element
             <img
               key={slideKey}
-              src={src}
+              src={displaySrc}
               alt={`${altBase} — ${idx + 1} / ${n}`}
               className="max-h-full max-w-full object-contain"
               loading="eager"
               decoding="async"
               draggable={false}
-              onError={() => setFailedSlideKey(slideKey)}
+              onError={onImgError}
             />
           )}
         </div>
