@@ -106,8 +106,8 @@ export function formatMonthlyImpressionsLabel(
 }
 
 /**
- * quantity / matching-engine 폴백용 — 기간 배수만 공유.
- * 목록 표시가(resolveMonthlyListPriceWon)와 혼용하지 말 것.
+ * 기간 배수 환산 — 목록 표시가(`resolveMonthlyListPriceWon`)와 혼용하지 말 것.
+ * (견적 라인·기타 raw 필드 환산에만 사용)
  */
 export { priceToMonthlyEquivalentWon };
 
