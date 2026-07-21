@@ -1077,7 +1077,7 @@ export function MediaManualBrowseFilters({
             : "Search name, region, type"
         }
         className={cn(
-          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30",
+          "w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-base text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/8 dark:text-white dark:placeholder-white/30 sm:text-sm",
           mapToolbarCompact ? "py-2" : "py-3 sm:py-2.5",
         )}
       />

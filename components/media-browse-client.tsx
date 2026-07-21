@@ -833,7 +833,7 @@ export default function MediaBrowseClient({
                 placeholder={
                   isKo ? "매체명, 위치, 키워드로 검색" : "Search media, location, keyword"
                 }
-                className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-sm dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-hermes/40 sm:h-12 sm:pl-11 sm:pr-4"
+                className="h-11 w-full rounded-2xl border dark:border-white/18 border-gray-300 dark:bg-white/8 bg-gray-100 pl-10 pr-3 text-base dark:text-white text-gray-900 shadow-[0_18px_56px_rgba(0,0,0,0.4)] placeholder:dark:text-white backdrop-blur-md focus:border-white/40 focus:outline-none focus:ring-2 focus:ring-hermes/40 sm:h-12 sm:pl-11 sm:pr-4 sm:text-sm"
                 aria-label={isKo ? "매체 검색" : "Search media"}
               />
             </div>

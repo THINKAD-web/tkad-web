@@ -55,7 +55,7 @@ function HeaderMediaSearchField({
           placeholder={t("searchPlaceholder")}
           autoComplete="off"
           enterKeyHint="search"
-          className="min-w-0 flex-1 bg-transparent px-3 text-[13px] text-foreground placeholder:text-muted-foreground focus:outline-none dark:text-white text-gray-900 dark:placeholder:dark:text-white"
+          className="min-w-0 flex-1 bg-transparent px-3 text-base text-foreground placeholder:text-muted-foreground focus:outline-none dark:text-white text-gray-900 dark:placeholder:dark:text-white sm:text-sm"
         />
         <button
           type="submit"
