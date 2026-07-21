@@ -12,3 +12,21 @@ export function formatDocumentManWon(won: number, isKo: boolean): string {
   if (isKo) return `₩${num}만원`;
   return `₩${num} (10K KRW)`;
 }
+
+/** 원 단위 표기 (공식 견적서·어드민 카드형 정렬용) */
+export function formatDocumentWon(won: number, isKo: boolean): string {
+  return `₩${Math.round(won).toLocaleString(isKo ? "ko-KR" : "en-US")}`;
+}
+
+export type QuoteAmountDisplayUnit = "manwon" | "won";
+
+/** 견적 금액 표기 — 카드형(만원) / 공식·어드민(원) */
+export function formatQuoteAmount(
+  won: number,
+  isKo: boolean,
+  unit: QuoteAmountDisplayUnit = "manwon",
+): string {
+  return unit === "won"
+    ? formatDocumentWon(won, isKo)
+    : formatDocumentManWon(won, isKo);
+}

@@ -5,15 +5,15 @@ import { Input } from "@/components/ui/input";
 import { PlannerMediaPackagePicker } from "@/components/planner/media-package-picker";
 import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-quantity-control";
 import type { AdminMediaDto } from "@/lib/admin-media-dto";
+import type { AdminQuoteBillingContext } from "@/lib/admin-quote-billing";
 import {
   adminLineMediaItemForControl,
   adminMediaDtoToMediaItem,
   catalogLinePrice,
-  computeAdminCatalogLineAmountForMedia,
   createCustomQuoteLine,
+  resolveAdminCatalogLineBilling,
   type AdminQuoteCatalogLine,
   type AdminQuoteLine,
-  type AdminQuotePeriodKey,
 } from "@/lib/admin-quote-lines";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
@@ -37,8 +37,7 @@ type Props = {
   medias: AdminMediaDto[];
   isKo: boolean;
   locale: string;
-  days: number;
-  factorForPeriod: (p: AdminQuotePeriodKey, d: number) => number;
+  billing: AdminQuoteBillingContext;
 };
 
 export function AdminQuoteLinesEditor({
@@ -47,8 +46,7 @@ export function AdminQuoteLinesEditor({
   medias,
   isKo,
   locale,
-  days,
-  factorForPeriod,
+  billing,
 }: Props) {
   const mediaById = new Map(medias.map((m) => [m.id, m]));
 
@@ -64,18 +62,6 @@ export function AdminQuoteLinesEditor({
     onChange(lines.filter((line) => line.lineId !== lineId));
   };
 
-  const catalogLineSubtotal = (line: Extract<AdminQuoteLine, { kind: "catalog" }>) => {
-    const m = mediaById.get(line.mediaId);
-    if (!m) return { amount: 0, usesMediaPartialRate: false };
-    return computeAdminCatalogLineAmountForMedia(
-      m,
-      line.priceOptionIndex,
-      days,
-      line.quantity,
-      factorForPeriod,
-    );
-  };
-
   return (
     <div className="space-y-3">
       {lines.length === 0 ? (
@@ -84,14 +70,14 @@ export function AdminQuoteLinesEditor({
         </p>
       ) : (
         <div className="overflow-x-auto rounded-lg border">
-          <table className="w-full min-w-[720px] text-sm">
+          <table className="w-full min-w-[860px] text-sm">
             <thead className={adminQuoteTableTheadClass}>
               <tr className="border-b">
                 <th className="px-3 py-2">항목</th>
                 <th className="w-36 px-2 py-2">등급</th>
-                <th className="w-40 px-2 py-2">수량</th>
+                <th className="w-32 px-2 py-2">수량</th>
                 <th className="w-28 px-2 py-2 text-right">단가</th>
-                <th className="w-28 px-2 py-2 text-right">소계</th>
+                <th className="w-40 px-2 py-2 text-right">소계</th>
                 <th className="w-10 px-2 py-2" />
               </tr>
             </thead>
@@ -197,8 +183,13 @@ export function AdminQuoteLinesEditor({
                   line.priceOptionIndex,
                 );
                 const unitWon = catalogPriceFieldToWon(rawPrice);
-                const { amount: subtotal, usesMediaPartialRate } =
-                  catalogLineSubtotal(line);
+                const billed = resolveAdminCatalogLineBilling({
+                  media: m,
+                  priceOptionIndex: line.priceOptionIndex,
+                  quantity: line.quantity,
+                  billing,
+                  amountOverrideWon: line.amountOverrideWon,
+                });
                 const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
                 const displayName = label ? `${nameBase} (${label})` : nameBase;
 
@@ -211,10 +202,17 @@ export function AdminQuoteLinesEditor({
                       <div className="font-medium text-foreground dark:text-hero-fg">
                         {displayName}
                       </div>
-                      {usesMediaPartialRate ? (
+                      {billed.usesMediaPartialRate ? (
                         <span className="mt-1 inline-block rounded-md border border-accent/40 bg-accent/10 px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-accent">
                           {isKo ? "매체 지정 요율" : "Media rate"}
                         </span>
+                      ) : null}
+                      {billed.usesProRataFallback ? (
+                        <p className="mt-1 text-[10px] leading-snug text-amber-700 dark:text-amber-300">
+                          {isKo
+                            ? "이 매체는 해당 기간 요율이 미등록이라 일할 계산됩니다."
+                            : "No period rate registered — prorated by days/30."}
+                        </p>
                       ) : null}
                       <div className="text-xs text-muted-foreground">
                         {m.location} · {m.type}
@@ -327,8 +325,57 @@ export function AdminQuoteLinesEditor({
                         {formatPricePeriodShortLabel(period, locale)}
                       </span>
                     </td>
-                    <td className="px-2 py-2 align-middle text-right font-semibold tabular-nums">
-                      {formatWon(subtotal)}
+                    <td className="px-2 py-2 align-top text-right">
+                      <Input
+                        type="number"
+                        min={0}
+                        value={String(
+                          billed.amountOverridden
+                            ? billed.amount
+                            : billed.autoAmount,
+                        )}
+                        onChange={(e) => {
+                          const raw = e.target.value.trim();
+                          if (raw === "") {
+                            updateLine(line.lineId, {
+                              amountOverrideWon: null,
+                            });
+                            return;
+                          }
+                          const n = Math.max(0, parseInt(raw, 10) || 0);
+                          if (n === billed.autoAmount) {
+                            updateLine(line.lineId, {
+                              amountOverrideWon: null,
+                            });
+                          } else {
+                            updateLine(line.lineId, {
+                              amountOverrideWon: n,
+                            });
+                          }
+                        }}
+                        className="h-9 w-full text-right text-sm font-semibold tabular-nums"
+                        aria-label={isKo ? "소계 (수동 조정 가능)" : "Subtotal"}
+                      />
+                      {billed.amountOverridden ? (
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {isKo ? "자동" : "Auto"} {formatWon(billed.autoAmount)}
+                          <button
+                            type="button"
+                            className="ml-1 underline"
+                            onClick={() =>
+                              updateLine(line.lineId, {
+                                amountOverrideWon: null,
+                              })
+                            }
+                          >
+                            {isKo ? "되돌리기" : "Reset"}
+                          </button>
+                        </p>
+                      ) : (
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {isKo ? "자동 계산 · 수정 가능" : "Auto · editable"}
+                        </p>
+                      )}
                     </td>
                     <td className="px-2 py-2 align-middle">
                       <Button

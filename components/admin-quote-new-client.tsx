@@ -20,6 +20,13 @@ import {
   inclusiveCampaignDays,
   monthFactorFromDays,
 } from "@/lib/pricing";
+import {
+  ADMIN_DAY_PRESET_OPTIONS,
+  defaultAdminQuoteBillingDates,
+  inferCalendarMonthsFromRange,
+  syncBillingEndDate,
+  type AdminQuoteBillingMode,
+} from "@/lib/admin-quote-billing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
 import { QuotePdfPreview } from "@/components/quote-pdf-preview";
 import { QuoteFormalPreview } from "@/components/quote/quote-formal-preview";
@@ -90,15 +97,6 @@ function todayISODate() {
   return `${y}-${m}-${day}`;
 }
 
-function addMonthsISODate(iso: string, months: number): string {
-  const [y, mo, da] = iso.split("-").map(Number);
-  const d = new Date(y, mo - 1 + months, da);
-  const yy = d.getFullYear();
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const dd = String(d.getDate()).padStart(2, "0");
-  return `${yy}-${mm}-${dd}`;
-}
-
 function addDaysISODate(iso: string, days: number): string {
   const [y, mo, da] = iso.split("-").map(Number);
   const d = new Date(y, mo - 1, da + days);
@@ -131,12 +129,14 @@ export default function AdminQuoteNewClient({
 
   const [lines, setLines] = useState<AdminQuoteLine[]>([]);
 
+  const [billingMode, setBillingMode] =
+    useState<AdminQuoteBillingMode>("calendar_months");
+  const [calendarMonths, setCalendarMonths] = useState(1);
+  const [presetDays, setPresetDays] = useState(15);
   const [startDate, setStartDate] = useState(todayISODate);
-  // NOTE: 일수(포함) 기반으로 월 환산(days/30)을 쓰기 때문에,
-  // 기본값을 "+1개월 동일 일자"로 두면 31일이 되어 1.03개월로 계산되는 경우가 잦습니다.
-  // 기본은 "30일(포함)"이 되도록 종료일을 하루 당겨 설정합니다.
-  const [endDate, setEndDate] = useState(() =>
-    addDaysISODate(addMonthsISODate(todayISODate(), 1), -1),
+  // 기본: 온전한 1개월 (달력 일수와 무관하게 단가×1 청구)
+  const [endDate, setEndDate] = useState(
+    () => defaultAdminQuoteBillingDates(todayISODate()).endDate,
   );
 
   const [discountPercent, setDiscountPercent] = useState("0");
@@ -175,7 +175,8 @@ export default function AdminQuoteNewClient({
       setListLoading(true);
       setListError(null);
       try {
-        const res = await fetch("/api/admin/medias?take=500", {
+        // 전체 카탈로그 필요 — take=500 이면 updatedAt 하위 매체는 검색·라인 hydrate 누락
+        const res = await fetch("/api/admin/medias?take=5000", {
           credentials: "include",
           cache: "no-store",
         });
@@ -248,7 +249,36 @@ export default function AdminQuoteNewClient({
         const period = quote.items[0]?.period ?? "";
         const parsedPeriod = parseCampaignPeriodLabel(period);
 
-        const split = splitQuoteItemsForForm(quote, medias);
+        // 목록 take 밖 매체가 견적에 있으면 ids 로 보강 (개월×단가 청구용 catalog 유지)
+        const have = new Set(medias.map((m) => m.id));
+        const missingIds = [
+          ...new Set(
+            quote.items
+              .map((it) => it.mediaId?.trim() ?? "")
+              .filter(
+                (id) => id.length > 0 && !id.startsWith("custom-") && !have.has(id),
+              ),
+          ),
+        ];
+        let mediasForHydrate = medias;
+        if (missingIds.length > 0) {
+          const missRes = await fetch(
+            `/api/admin/medias?ids=${encodeURIComponent(missingIds.join(","))}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          if (missRes.ok) {
+            const missRaw: unknown = await missRes.json();
+            const { medias: extra } = parseAdminMediaListFromApiJson(missRaw);
+            if (extra.length > 0) {
+              const byId = new Map(medias.map((m) => [m.id, m]));
+              for (const m of extra) byId.set(m.id, m);
+              mediasForHydrate = [...byId.values()];
+              if (!cancelled) setMedias(mediasForHydrate);
+            }
+          }
+        }
+
+        const split = splitQuoteItemsForForm(quote, mediasForHydrate);
 
         if (!cancelled) {
           setQuoteNumber(quote.quoteNumber);
@@ -259,6 +289,8 @@ export default function AdminQuoteNewClient({
           setValidUntilPdf(quote.validUntil.slice(0, 10));
           setIssueDatePdf(quote.createdAt.slice(0, 10));
           if (parsedPeriod) {
+            // 저장된 견적은 자유 날짜로 복원 (개월 모드 sync가 endDate를 덮지 않도록)
+            setBillingMode("custom_dates");
             setStartDate(parsedPeriod.startDate);
             setEndDate(parsedPeriod.endDate);
           }
@@ -292,6 +324,19 @@ export default function AdminQuoteNewClient({
     );
   }, [medias, search]);
 
+  // 개월·일 프리셋 모드에서는 종료일을 모드에 맞게 동기화
+  useEffect(() => {
+    if (billingMode === "custom_dates") return;
+    const synced = syncBillingEndDate({
+      mode: billingMode,
+      calendarMonths,
+      presetDays,
+      startDate,
+      endDate,
+    });
+    if (synced.endDate !== endDate) setEndDate(synced.endDate);
+  }, [billingMode, calendarMonths, presetDays, startDate, endDate]);
+
   const start = useMemo(() => new Date(`${startDate}T12:00:00`), [startDate]);
   const end = useMemo(() => new Date(`${endDate}T12:00:00`), [endDate]);
   const days = useMemo(() => inclusiveCampaignDays(start, end), [start, end]);
@@ -312,6 +357,18 @@ export default function AdminQuoteNewClient({
     }
   }, []);
 
+  const billing = useMemo(
+    () => ({
+      mode: billingMode,
+      calendarMonths: Math.max(1, calendarMonths),
+      presetDays: Math.max(1, presetDays),
+      days,
+      startDate,
+      endDate,
+    }),
+    [billingMode, calendarMonths, presetDays, days, startDate, endDate],
+  );
+
   const campaignPeriodLabel = useMemo(
     () => `${startDate} ~ ${endDate}`,
     [startDate, endDate],
@@ -326,8 +383,9 @@ export default function AdminQuoteNewClient({
         campaignPeriodLabel,
         days,
         factorForPeriod,
+        billing,
       }),
-    [lines, medias, isKo, campaignPeriodLabel, days, factorForPeriod],
+    [lines, medias, isKo, campaignPeriodLabel, days, factorForPeriod, billing],
   );
 
   const lineWons = useMemo(
@@ -420,6 +478,9 @@ export default function AdminQuoteNewClient({
   }, [lineItems, locale]);
 
   const pdfPeriodMultiplier = useMemo(() => {
+    if (billingMode === "calendar_months") {
+      return Math.max(1, Math.round(calendarMonths));
+    }
     const periods = new Set<PeriodKey>();
     for (const it of lineItems) {
       if (!it.mediaId.startsWith("custom-")) periods.add(it.unitPeriod);
@@ -428,7 +489,14 @@ export default function AdminQuoteNewClient({
     const only = [...periods][0];
     if (only === "month") return Math.max(1, Math.round(monthFactor));
     return Math.max(1, Math.round(factorForPeriod(only, days)));
-  }, [lineItems, days, monthFactor, factorForPeriod]);
+  }, [
+    billingMode,
+    calendarMonths,
+    lineItems,
+    days,
+    monthFactor,
+    factorForPeriod,
+  ]);
 
   const saveQuote = useCallback(async () => {
     setPdfError(null);
@@ -894,8 +962,7 @@ export default function AdminQuoteNewClient({
             medias={medias}
             isKo={isKo}
             locale={locale}
-            days={days}
-            factorForPeriod={factorForPeriod}
+            billing={billing}
           />
         </CardContent>
       </Card>
@@ -994,6 +1061,98 @@ export default function AdminQuoteNewClient({
             </CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <span className="mb-2 block text-xs font-medium text-muted-foreground">
+                청구 기간 방식
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {(
+                  [
+                    { id: "calendar_months" as const, label: "개월 단위" },
+                    { id: "day_preset" as const, label: "일 프리셋" },
+                    { id: "custom_dates" as const, label: "직접 날짜" },
+                  ] as const
+                ).map((opt) => (
+                  <Button
+                    key={opt.id}
+                    type="button"
+                    size="sm"
+                    variant={billingMode === opt.id ? "default" : "outline"}
+                    className="h-8 text-xs"
+                    onClick={() => {
+                      if (opt.id === "calendar_months") {
+                        const inferred = inferCalendarMonthsFromRange(
+                          startDate,
+                          endDate,
+                        );
+                        if (inferred != null) setCalendarMonths(inferred);
+                      }
+                      setBillingMode(opt.id);
+                    }}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+            </div>
+
+            {billingMode === "calendar_months" ? (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  개월 수 (온전한 N개월 · 단가×N)
+                </label>
+                <div className="flex flex-wrap items-center gap-2">
+                  {[1, 2, 3, 6, 12].map((n) => (
+                    <Button
+                      key={n}
+                      type="button"
+                      size="sm"
+                      variant={calendarMonths === n ? "default" : "outline"}
+                      className="h-8 min-w-12 text-xs"
+                      onClick={() => setCalendarMonths(n)}
+                    >
+                      {n}개월
+                    </Button>
+                  ))}
+                  <Input
+                    type="number"
+                    min={1}
+                    max={36}
+                    value={String(calendarMonths)}
+                    onChange={(e) =>
+                      setCalendarMonths(
+                        Math.max(1, Math.min(36, parseInt(e.target.value, 10) || 1)),
+                      )
+                    }
+                    className="h-8 w-20 text-sm tabular-nums"
+                    aria-label="개월 수 직접 입력"
+                  />
+                </div>
+              </div>
+            ) : null}
+
+            {billingMode === "day_preset" ? (
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  부분기간 프리셋 (매체 등록 요율 우선)
+                </label>
+                <div className="flex flex-wrap gap-2">
+                  {ADMIN_DAY_PRESET_OPTIONS.map((opt) => (
+                    <Button
+                      key={opt.key}
+                      type="button"
+                      size="sm"
+                      variant={presetDays === opt.days ? "default" : "outline"}
+                      className="h-8 text-xs"
+                      onClick={() => setPresetDays(opt.days)}
+                    >
+                      {opt.labelKo}
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
+
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -1012,16 +1171,30 @@ export default function AdminQuoteNewClient({
                 <Input
                   type="date"
                   value={endDate}
-                  onChange={(e) => setEndDate(e.target.value)}
+                  disabled={billingMode !== "custom_dates"}
+                  onChange={(e) => {
+                    setBillingMode("custom_dates");
+                    setEndDate(e.target.value);
+                  }}
                 />
               </div>
             </div>
             <div className={`${adminQuoteSurfaceMutedClass} px-3 py-2 text-xs text-muted-foreground`}>
               <span className="font-medium text-foreground dark:text-hero-fg">{t("periodSummary")}</span>{" "}
               {t("daysCount", { days })}{" "}
-              <Badge variant="secondary" className="ml-1 text-[10px]">
-                {t("monthFactor", { n: monthFactor.toFixed(2) })}
-              </Badge>
+              {billingMode === "calendar_months" ? (
+                <Badge variant="secondary" className="ml-1 text-[10px]">
+                  온전한 {calendarMonths}개월 · 단가×{calendarMonths}
+                </Badge>
+              ) : billingMode === "day_preset" ? (
+                <Badge variant="secondary" className="ml-1 text-[10px]">
+                  {presetDays}일 프리셋
+                </Badge>
+              ) : (
+                <Badge variant="secondary" className="ml-1 text-[10px]">
+                  {t("monthFactor", { n: monthFactor.toFixed(2) })}
+                </Badge>
+              )}
             </div>
 
             <div className="grid grid-cols-2 gap-3">
@@ -1398,6 +1571,7 @@ export default function AdminQuoteNewClient({
                       periodLabel={campaignPeriodLabel}
                       periodMonths={pdfPeriodMultiplier}
                       periodUnitLabel={pdfPeriodUnit}
+                      amountUnit="won"
                       rows={lineItems.map((it) => {
                         const m = medias.find((x) => x.id === it.mediaId);
                         const size =

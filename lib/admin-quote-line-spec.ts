@@ -5,12 +5,20 @@ export const ADMIN_QUOTE_SPEC_PREFIX = "tkad:v1:";
 export type AdminQuoteLineSpecMeta = {
   priceOptionIndex: number;
   quantityLabel?: string;
+  /** admin이 소계를 수동 덮어쓴 경우 (원) */
+  amountOverrideWon?: number;
 };
 
 export function encodeAdminQuoteItemSpec(
   displaySpec: string,
   meta: AdminQuoteLineSpecMeta,
 ): string {
+  const override =
+    typeof meta.amountOverrideWon === "number" &&
+    Number.isFinite(meta.amountOverrideWon) &&
+    meta.amountOverrideWon >= 0
+      ? Math.round(meta.amountOverrideWon)
+      : undefined;
   return (
     ADMIN_QUOTE_SPEC_PREFIX +
     JSON.stringify({
@@ -19,6 +27,7 @@ export function encodeAdminQuoteItemSpec(
       ...(meta.quantityLabel?.trim()
         ? { quantityLabel: meta.quantityLabel.trim() }
         : {}),
+      ...(override != null ? { amountOverrideWon: override } : {}),
     })
   );
 }
@@ -50,9 +59,19 @@ export function decodeAdminQuoteItemSpec(spec: string | null | undefined): {
       typeof o.quantityLabel === "string" && o.quantityLabel.trim()
         ? o.quantityLabel.trim()
         : undefined;
+    const amountOverrideWon =
+      typeof o.amountOverrideWon === "number" &&
+      Number.isFinite(o.amountOverrideWon) &&
+      o.amountOverrideWon >= 0
+        ? Math.round(o.amountOverrideWon)
+        : undefined;
     return {
       displaySpec: display,
-      meta: { priceOptionIndex, quantityLabel },
+      meta: {
+        priceOptionIndex,
+        quantityLabel,
+        ...(amountOverrideWon != null ? { amountOverrideWon } : {}),
+      },
     };
   } catch {
     return { displaySpec: raw || "—", meta: { priceOptionIndex: 0 } };
