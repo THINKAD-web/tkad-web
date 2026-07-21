@@ -1,4 +1,5 @@
 import type { AdminMediaDto } from "@/lib/admin-media-dto";
+import type { AdminQuoteBillingContext } from "@/lib/admin-quote-billing";
 import {
   decodeAdminQuoteItemSpec,
   encodeAdminQuoteItemSpec,
@@ -22,6 +23,8 @@ export type AdminQuoteCatalogLine = {
   mediaId: string;
   priceOptionIndex: number;
   quantity: number;
+  /** 소계 수동 덮어쓰기(원). null/undefined = 자동 계산 */
+  amountOverrideWon?: number | null;
 };
 
 export type AdminQuoteCustomLine = {
@@ -34,6 +37,14 @@ export type AdminQuoteCustomLine = {
 
 export type AdminQuoteLine = AdminQuoteCatalogLine | AdminQuoteCustomLine;
 
+export type AdminCatalogLineBillingResult = {
+  autoAmount: number;
+  amount: number;
+  usesMediaPartialRate: boolean;
+  usesProRataFallback: boolean;
+  amountOverridden: boolean;
+};
+
 export type AdminQuoteBuiltLineItem = {
   lineId: string;
   mediaId: string;
@@ -45,8 +56,12 @@ export type AdminQuoteBuiltLineItem = {
   quantity: number;
   quantityLabel?: string;
   amount: number;
+  autoAmount?: number;
   /** 매체·옵션 부분기간 요율 적용 */
   usesMediaPartialRate?: boolean;
+  /** 부분기간 요율 미등록 → 일할 폴백 */
+  usesProRataFallback?: boolean;
+  amountOverridden?: boolean;
 };
 
 export function newAdminQuoteLineId(prefix = "l"): string {
@@ -55,7 +70,11 @@ export function newAdminQuoteLineId(prefix = "l"): string {
 
 export function createCatalogQuoteLine(
   mediaId: string,
-  opts?: { priceOptionIndex?: number; quantity?: number },
+  opts?: {
+    priceOptionIndex?: number;
+    quantity?: number;
+    amountOverrideWon?: number | null;
+  },
 ): AdminQuoteCatalogLine {
   return {
     kind: "catalog",
@@ -63,6 +82,7 @@ export function createCatalogQuoteLine(
     mediaId,
     priceOptionIndex: opts?.priceOptionIndex ?? 0,
     quantity: Math.max(1, opts?.quantity ?? 1),
+    amountOverrideWon: opts?.amountOverrideWon ?? null,
   };
 }
 
@@ -127,6 +147,23 @@ export function catalogLinePrice(
   return { rawPrice, period, label: opt?.label ?? null };
 }
 
+export function adminFactorForPeriod(
+  p: AdminQuotePeriodKey,
+  d: number,
+): number {
+  const dd = Math.max(0, d);
+  switch (p) {
+    case "biweekly":
+      return dd / 14;
+    case "week":
+      return dd / 7;
+    case "day":
+      return dd;
+    default:
+      return dd / 30;
+  }
+}
+
 export function computeAdminCatalogLineAmount(
   rawPrice: number,
   period: AdminQuotePeriodKey,
@@ -139,7 +176,10 @@ export function computeAdminCatalogLineAmount(
   return Math.round(unitWon * factor * Math.max(0, quantity));
 }
 
-/** 카탈로그 라인 — partial rate 우선, 없으면 monthFactorFromDays 계열 */
+/**
+ * @deprecated Prefer `resolveAdminCatalogLineBilling` with billing context.
+ * Kept for callers that only pass days + factorForPeriod (legacy tests / OOH bridge).
+ */
 export function computeAdminCatalogLineAmountForMedia(
   m: AdminMediaDto,
   priceOptionIndex: number,
@@ -147,35 +187,106 @@ export function computeAdminCatalogLineAmountForMedia(
   quantity: number,
   factorForPeriod: (p: AdminQuotePeriodKey, d: number) => number,
 ): { amount: number; usesMediaPartialRate: boolean } {
-  const qty = Math.max(0, quantity);
-  const { rawPrice, period } = catalogLinePrice(m, priceOptionIndex);
-  const mediaItem = adminMediaDtoToMediaItem(m);
-  const priceOpt = m.priceOptions?.[Math.max(0, priceOptionIndex)] ?? null;
-  const periodKey = quotePeriodLookupKeyFromDays(days);
-  const partialRate =
-    periodKey != null
-      ? resolvePartialPeriodRate(mediaItem, priceOpt, periodKey)
-      : null;
+  const billing: AdminQuoteBillingContext = {
+    mode: "custom_dates",
+    calendarMonths: 1,
+    presetDays: days,
+    days,
+    startDate: "1970-01-01",
+    endDate: "1970-01-01",
+  };
+  const r = resolveAdminCatalogLineBilling({
+    media: m,
+    priceOptionIndex,
+    quantity,
+    billing,
+    amountOverrideWon: null,
+    factorForPeriod,
+  });
+  return {
+    amount: r.amount,
+    usesMediaPartialRate: r.usesMediaPartialRate,
+  };
+}
 
-  if (partialRate != null) {
-    const unitWon = catalogPriceFieldToWon(rawPrice);
-    return {
-      amount: Math.round(
+/**
+ * Admin 카탈로그 라인 청구.
+ * - calendar_months + 월단가: 단가 × N × qty
+ * - day_preset / custom: partial rate 우선, 없으면 일할 폴백
+ */
+export function resolveAdminCatalogLineBilling(opts: {
+  media: AdminMediaDto;
+  priceOptionIndex: number;
+  quantity: number;
+  billing: AdminQuoteBillingContext;
+  amountOverrideWon?: number | null;
+  factorForPeriod?: (p: AdminQuotePeriodKey, d: number) => number;
+}): AdminCatalogLineBillingResult {
+  const qty = Math.max(0, opts.quantity);
+  const factor = opts.factorForPeriod ?? adminFactorForPeriod;
+  const { rawPrice, period } = catalogLinePrice(
+    opts.media,
+    opts.priceOptionIndex,
+  );
+  const unitWon = catalogPriceFieldToWon(rawPrice);
+  const mediaItem = adminMediaDtoToMediaItem(opts.media);
+  const priceOpt =
+    opts.media.priceOptions?.[Math.max(0, opts.priceOptionIndex)] ?? null;
+
+  let autoAmount = 0;
+  let usesMediaPartialRate = false;
+  let usesProRataFallback = false;
+
+  if (opts.billing.mode === "calendar_months" && period === "month") {
+    const n = Math.max(1, Math.round(opts.billing.calendarMonths));
+    autoAmount = Math.round(unitWon * n * qty);
+  } else {
+    const days =
+      opts.billing.mode === "day_preset"
+        ? Math.max(1, Math.round(opts.billing.presetDays))
+        : Math.max(0, opts.billing.days);
+    const periodKey = quotePeriodLookupKeyFromDays(days);
+    const partialRate =
+      periodKey != null
+        ? resolvePartialPeriodRate(mediaItem, priceOpt, periodKey)
+        : null;
+
+    if (partialRate != null) {
+      autoAmount = Math.round(
         quoteLineTotalWonFromPartialRate(unitWon, partialRate) * qty,
-      ),
-      usesMediaPartialRate: true,
-    };
+      );
+      usesMediaPartialRate = true;
+    } else {
+      autoAmount = computeAdminCatalogLineAmount(
+        rawPrice,
+        period,
+        days,
+        qty,
+        factor,
+      );
+      if (
+        opts.billing.mode === "day_preset" ||
+        opts.billing.mode === "custom_dates"
+      ) {
+        usesProRataFallback = true;
+      } else if (opts.billing.mode === "calendar_months") {
+        // 월단가가 아닌 매체(일/주)를 개월 모드로 잡은 경우 — 실제 일수로 환산
+        usesProRataFallback = true;
+      }
+    }
   }
 
+  const override = opts.amountOverrideWon;
+  const amountOverridden =
+    override != null && Number.isFinite(override) && override >= 0;
+  const amount = amountOverridden ? Math.round(override!) : autoAmount;
+
   return {
-    amount: computeAdminCatalogLineAmount(
-      rawPrice,
-      period,
-      days,
-      qty,
-      factorForPeriod,
-    ),
-    usesMediaPartialRate: false,
+    autoAmount,
+    amount,
+    usesMediaPartialRate,
+    usesProRataFallback,
+    amountOverridden,
   };
 }
 
@@ -218,6 +329,7 @@ export function hydrateAdminQuoteLinesFromItems(
         mediaId,
         priceOptionIndex,
         quantity: Math.max(1, item.quantity),
+        amountOverrideWon: meta.amountOverrideWon ?? null,
       });
       continue;
     }
@@ -243,11 +355,24 @@ export function buildAdminQuoteLineItems(opts: {
   medias: AdminMediaDto[];
   isKo: boolean;
   campaignPeriodLabel: string;
-  days: number;
-  factorForPeriod: (p: AdminQuotePeriodKey, d: number) => number;
+  /** @deprecated use billing */
+  days?: number;
+  factorForPeriod?: (p: AdminQuotePeriodKey, d: number) => number;
+  billing?: AdminQuoteBillingContext;
 }): AdminQuoteBuiltLineItem[] {
-  const { lines, medias, isKo, campaignPeriodLabel, days, factorForPeriod } =
-    opts;
+  const { lines, medias, isKo, campaignPeriodLabel } = opts;
+  const factorForPeriod = opts.factorForPeriod ?? adminFactorForPeriod;
+  const billing: AdminQuoteBillingContext =
+    opts.billing ??
+    ({
+      mode: "custom_dates",
+      calendarMonths: 1,
+      presetDays: opts.days ?? 30,
+      days: opts.days ?? 30,
+      startDate: "1970-01-01",
+      endDate: "1970-01-01",
+    } satisfies AdminQuoteBillingContext);
+
   const byId = new Map(medias.map((m) => [m.id, m]));
   const out: AdminQuoteBuiltLineItem[] = [];
 
@@ -267,6 +392,7 @@ export function buildAdminQuoteLineItems(opts: {
         unitPeriod: "month",
         quantity: qty,
         amount,
+        autoAmount: amount,
       });
       continue;
     }
@@ -278,13 +404,14 @@ export function buildAdminQuoteLineItems(opts: {
       m,
       line.priceOptionIndex,
     );
-    const { amount, usesMediaPartialRate } = computeAdminCatalogLineAmountForMedia(
-      m,
-      line.priceOptionIndex,
-      days,
-      qty,
+    const billed = resolveAdminCatalogLineBilling({
+      media: m,
+      priceOptionIndex: line.priceOptionIndex,
+      quantity: qty,
+      billing,
+      amountOverrideWon: line.amountOverrideWon,
       factorForPeriod,
-    );
+    });
     const unitWon = catalogPriceFieldToWon(rawPrice);
     const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
     const mediaName = label ? `${nameBase} (${label})` : nameBase;
@@ -302,14 +429,20 @@ export function buildAdminQuoteLineItems(opts: {
       spec: encodeAdminQuoteItemSpec(displaySpec, {
         priceOptionIndex: line.priceOptionIndex,
         quantityLabel,
+        ...(billed.amountOverridden
+          ? { amountOverrideWon: billed.amount }
+          : {}),
       }),
       period: campaignPeriodLabel,
       unitPrice: unitWon,
       unitPeriod: period,
       quantity: qty,
       quantityLabel,
-      amount,
-      usesMediaPartialRate,
+      amount: billed.amount,
+      autoAmount: billed.autoAmount,
+      usesMediaPartialRate: billed.usesMediaPartialRate,
+      usesProRataFallback: billed.usesProRataFallback,
+      amountOverridden: billed.amountOverridden,
     });
   }
 
