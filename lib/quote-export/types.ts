@@ -13,6 +13,8 @@ export type QuoteExportLine = {
   location: string;
   unitPriceWon: number;
   lineSupplyWon: number;
+  /** 카탈로그 단가 ≤0 · override 없음 → 「별도 문의」 */
+  priceOnInquiry?: boolean;
   impressions?: number;
   /** 수량 숫자 (admin formal 등) */
   quantity?: number;

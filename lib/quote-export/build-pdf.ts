@@ -6,19 +6,35 @@ import {
   truncateDocText,
   type QuoteAmountDisplayUnit,
 } from "@/lib/document-text";
+import { formatAdminQuoteLineCell } from "@/lib/admin-quote-inquiry";
 import {
   addPdfThumbImage,
   EXPORT_THUMB_BOX_MM,
   loadExportThumbMap,
 } from "@/lib/export-media-images";
 import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
-import type { QuoteExportPayload } from "@/lib/quote-export/types";
+import type { QuoteExportPayload, QuoteExportLine } from "@/lib/quote-export/types";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
 
 function amt(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">, won: number): string {
   const unit: QuoteAmountDisplayUnit = p.amountUnit === "won" ? "won" : "manwon";
   return formatQuoteAmount(won, p.isKo, unit);
+}
+
+function lineAmt(
+  p: Pick<QuoteExportPayload, "isKo" | "amountUnit">,
+  won: number,
+  line: Pick<
+    QuoteExportLine,
+    "unitPriceWon" | "lineSupplyWon" | "priceOnInquiry"
+  >,
+): string {
+  return formatAdminQuoteLineCell(won, p.isKo, (n) => amt(p, n), {
+    priceOnInquiry: line.priceOnInquiry,
+    unitPriceWon: line.unitPriceWon,
+    lineTotalWon: line.lineSupplyWon,
+  });
 }
 
 function amountUnitNote(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">): string {
@@ -213,8 +229,8 @@ function basicDrawQuoteMediaCards(
     const priceX = x + w - 3;
     const textX = x + 2 + thumbW + 3;
     const textW = w - thumbW - 38;
-    const unitVal = amt(p, line.unitPriceWon);
-    const subVal = amt(p, line.lineSupplyWon);
+    const unitVal = lineAmt(p, line.unitPriceWon, line);
+    const subVal = lineAmt(p, line.lineSupplyWon, line);
 
     if (isAddon) {
       doc.setFont(font, "normal");
@@ -385,7 +401,7 @@ function drawMediaCards(
       quoteExportProrationSpecLine(line),
     ].filter(Boolean) as string[];
 
-    const priceLine = `${isKo ? "단가" : "Unit"} ${amt(p, line.unitPriceWon)}  ·  ${isKo ? "소계" : "Subtotal"} ${amt(p, line.lineSupplyWon)}`;
+    const priceLine = `${isKo ? "단가" : "Unit"} ${lineAmt(p, line.unitPriceWon, line)}  ·  ${isKo ? "소계" : "Subtotal"} ${lineAmt(p, line.lineSupplyWon, line)}`;
     const body = [line.name, ...specLines, priceLine].join("\n");
     const lines = doc.splitTextToSize(body, textW) as string[];
     const rh = Math.max(
@@ -791,7 +807,7 @@ function basicDrawMediaTable(
     doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
     doc.setFontSize(9);
     doc.text(
-      amt(p, line.lineSupplyWon),
+      lineAmt(p, line.lineSupplyWon, line),
       colX[3]!,
       y + 4.5,
       { align: "right" },
