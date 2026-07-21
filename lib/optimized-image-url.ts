@@ -5,10 +5,7 @@
  * Cloudinary: 계정 종료로 표시 제외.
  */
 
-import {
-  buildBunnyCdnUrl,
-  isBunnyStorageConfigured,
-} from "@/lib/bunny-storage";
+import { buildBunnyCdnUrl } from "@/lib/bunny-storage";
 
 const CLOUDINARY_HOST = /(^|\.)res\.cloudinary\.com$/i;
 const BUNNY_CDN = /\.b-cdn\.net$/i;
@@ -144,13 +141,15 @@ export function encodeBunnyProxyPathSegments(
 
 /**
  * Pull Zone 장애 시 Storage API same-origin 프록시 URL (onError fallback 전용).
- * `URL.pathname`은 이미 인코딩되어 있으므로 decode → encode 한 번만 수행해
- * `%25E1...` 이중 인코딩을 막는다. App Router `[...path]` 디코딩과 짝을 맞춤.
+ * pathname decode → encode 한 번만 수행해 `%25E1...` 이중 인코딩을 막는다.
+ *
+ * 자격증명(`isBunnyStorageConfigured`)은 검사하지 않는다 — URL 조립만 하며,
+ * Storage 접근은 `/api/bunny-media` 서버 라우트 책임이다. 클라이언트 번들에는
+ * `BUNNY_*` 비밀이 없어 gate를 두면 fallback이 항상 null이 된다.
  */
 export function buildBunnyMediaProxyUrl(
   url: string | null | undefined,
 ): string | null {
-  if (!isBunnyStorageConfigured()) return null;
   const path = bunnyObjectPathFromPublicUrl(url);
   if (!path) return null;
   const decoded = decodeBunnyPathSegments(path.split("/"));

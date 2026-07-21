@@ -18,32 +18,36 @@ const SAMPLE_CDN =
 const NFD_NAME = "강남".normalize("NFD");
 const SPACE_NAME = "foo bar.jpg";
 
-function withBunnyEnv(fn: () => void) {
-  const previousZone = process.env.BUNNY_STORAGE_ZONE;
-  const previousKey = process.env.BUNNY_STORAGE_API_KEY;
-  const previousCdn = process.env.BUNNY_CDN_BASE_URL;
-
-  process.env.BUNNY_STORAGE_ZONE = "tkad";
-  process.env.BUNNY_STORAGE_API_KEY = "test-key";
-  process.env.BUNNY_CDN_BASE_URL = "https://tkad-cdn.b-cdn.net";
-
-  try {
-    fn();
-  } finally {
-    if (previousZone === undefined) delete process.env.BUNNY_STORAGE_ZONE;
-    else process.env.BUNNY_STORAGE_ZONE = previousZone;
-    if (previousKey === undefined) delete process.env.BUNNY_STORAGE_API_KEY;
-    else process.env.BUNNY_STORAGE_API_KEY = previousKey;
-    if (previousCdn === undefined) delete process.env.BUNNY_CDN_BASE_URL;
-    else process.env.BUNNY_CDN_BASE_URL = previousCdn;
-  }
-}
-
 /** App Router `[...path]`가 프록시 URL을 디코딩한 뒤 라우트가 복원하는 object path */
 function proxyUrlToStorageObjectPath(proxyUrl: string): string {
   assert.ok(proxyUrl.startsWith("/api/bunny-media/"));
   const encodedPath = proxyUrl.slice("/api/bunny-media/".length);
   return decodeBunnyPathSegments(encodedPath.split("/")).join("/");
+}
+
+/** 브라우저 번들처럼 BUNNY_* 비밀이 없는 환경을 시뮬레이션 */
+function withoutBunnyEnv(fn: () => void) {
+  const keys = [
+    "BUNNY_STORAGE_ZONE",
+    "BUNNY_STORAGE_API_KEY",
+    "BUNNY_CDN_BASE_URL",
+    "BUNNY_STORAGE_HOST",
+  ] as const;
+  const previous = Object.fromEntries(
+    keys.map((k) => [k, process.env[k]]),
+  ) as Record<(typeof keys)[number], string | undefined>;
+
+  for (const k of keys) delete process.env[k];
+
+  try {
+    fn();
+  } finally {
+    for (const k of keys) {
+      const v = previous[k];
+      if (v === undefined) delete process.env[k];
+      else process.env[k] = v;
+    }
+  }
 }
 
 test("resolvePublicMediaImageUrl returns Bunny CDN as-is (no proxy)", () => {
@@ -71,8 +75,8 @@ test("shouldUseUnoptimizedImage for Bunny CDN and proxy paths", () => {
   assert.equal(shouldUseUnoptimizedImage("/images/hero/slide.webp"), false);
 });
 
-test("bunnyCdnToProxyFallback builds proxy from CDN URL", () => {
-  withBunnyEnv(() => {
+test("bunnyCdnToProxyFallback builds proxy without Bunny env (client-like)", () => {
+  withoutBunnyEnv(() => {
     assert.equal(
       bunnyCdnToProxyFallback(SAMPLE_CDN),
       "/api/bunny-media/tkad/Test/tkad_impress.png",
@@ -84,8 +88,8 @@ test("bunnyCdnToProxyFallback builds proxy from CDN URL", () => {
   });
 });
 
-test("buildBunnyMediaProxyUrl: ASCII — no double encoding, storage round-trip", () => {
-  withBunnyEnv(() => {
+test("buildBunnyMediaProxyUrl: ASCII — no gate, no double encoding", () => {
+  withoutBunnyEnv(() => {
     const proxy = buildBunnyMediaProxyUrl(SAMPLE_CDN);
     assert.equal(proxy, "/api/bunny-media/tkad/Test/tkad_impress.png");
     assert.ok(proxy && !proxy.includes("%25"), "must not double-encode");
@@ -96,22 +100,24 @@ test("buildBunnyMediaProxyUrl: ASCII — no double encoding, storage round-trip"
   });
 });
 
-test("buildBunnyMediaProxyUrl: NFD Korean filename — single encode + round-trip", () => {
-  withBunnyEnv(() => {
+test("buildBunnyMediaProxyUrl: NFD Korean — single encode without Bunny env", () => {
+  withoutBunnyEnv(() => {
     const file = `${NFD_NAME}.jpg`;
     const cdn = `https://tkad-cdn.b-cdn.net/tkad/admin/2026/05/${encodeURIComponent(file)}`;
-    // URL() normalizes pathname encoding
     const href = new URL(cdn).href;
     const pathFromUrl = bunnyObjectPathFromPublicUrl(href);
     assert.ok(pathFromUrl);
 
     const proxy = buildBunnyMediaProxyUrl(href);
-    assert.ok(proxy);
+    assert.ok(proxy, "must build proxy URL without storage credentials");
     assert.ok(!proxy!.includes("%25"), `double-encoded: ${proxy}`);
-    // 단일 인코딩: 파일명 세그먼트에 %가 있으면 %XX 한 겹만
     const fileSeg = proxy!.split("/").pop()!;
     assert.ok(fileSeg.includes("%"), "Korean segment should be percent-encoded");
     assert.equal(fileSeg, encodeURIComponent(file));
+    assert.ok(
+      /%E1%84/i.test(fileSeg),
+      "NFD Hangul should appear as single-encoded %E1%84…",
+    );
 
     const storageKey = proxyUrlToStorageObjectPath(proxy!);
     assert.equal(storageKey, `tkad/admin/2026/05/${file}`);
@@ -119,8 +125,8 @@ test("buildBunnyMediaProxyUrl: NFD Korean filename — single encode + round-tri
   });
 });
 
-test("buildBunnyMediaProxyUrl: space in filename — single encode + round-trip", () => {
-  withBunnyEnv(() => {
+test("buildBunnyMediaProxyUrl: space in filename — single encode without Bunny env", () => {
+  withoutBunnyEnv(() => {
     const cdn = `https://tkad-cdn.b-cdn.net/tkad/Test/${encodeURIComponent(SPACE_NAME)}`;
     const href = new URL(cdn).href;
     const proxy = buildBunnyMediaProxyUrl(href);
