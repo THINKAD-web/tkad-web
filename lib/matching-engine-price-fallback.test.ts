@@ -1,6 +1,6 @@
 /**
- * Bug #4 — matching fallback uses display monthly SSOT when quantity path is 0.
- * Pins the only observed rank/budget-band change: 에어부산 기내 샘플 증정.
+ * Matching budget price = display monthly SSOT (#4 / #4-2).
+ * Pins price=0 + priceOptions media (에어부산 기내 샘플 증정).
  */
 import assert from "node:assert/strict";
 import test from "node:test";
@@ -37,7 +37,7 @@ const baseInput: MatchingInput = {
   goal: "awareness",
 };
 
-test("bug #4: quantity path is 0 so fallback applies for 에어부산-like media", () => {
+test("#4-2: display SSOT used even when quantity path is 0", () => {
   assert.equal(resolveMonthlyPriceForUnits(airBusanSample), 0);
   assert.equal(
     priceToMonthlyEquivalentWon(
@@ -49,26 +49,25 @@ test("bug #4: quantity path is 0 so fallback applies for 에어부산-like media
   assert.equal(resolveMonthlyListPriceWon(airBusanSample), 1_200_000);
 });
 
-test("bug #4: before/after budget band — 18 (price=0) → 15 (display ₩120만)", () => {
-  // Legacy band when monthly price resolved to 0: scoreBudget → 18
-  const legacyPrice = priceToMonthlyEquivalentWon(
-    airBusanSample.price,
-    airBusanSample.pricePeriod,
-  );
-  assert.equal(legacyPrice, 0);
-  const legacyBudgetPts = 18; // scoreBudget: price <= 0 && !network → 18
-
+test("#4-2: budget band uses display ₩120만 (not price=0 → 18)", () => {
   const after = scoreMediaForRanking(airBusanSample, baseInput);
-  assert.equal(after.breakdown.budget, 15);
   // ratio = 1.2M / 50M = 0.024 → below 0.1 band → 15
-  assert.notEqual(after.breakdown.budget, legacyBudgetPts);
+  assert.equal(after.breakdown.budget, 15);
 });
 
-test("bug #4: display SSOT monthly price feeds budget ratio (not eliminated)", () => {
+test("#4-2: display SSOT monthly price feeds budget ratio (over → 0 in ranking)", () => {
   const after = scoreMediaForRanking(airBusanSample, {
     ...baseInput,
     monthlyBudgetWon: 1_000_000,
   });
   // 1.2M > 1M budget → rawBudget -1 → scoreMediaForRanking clamps to 0
   assert.equal(after.breakdown.budget, 0);
+});
+
+test("#4-2: MatchingInput has no mediaQuantities field", () => {
+  const input: MatchingInput = { ...baseInput };
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(input, "mediaQuantities"),
+    false,
+  );
 });

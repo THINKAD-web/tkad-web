@@ -1,6 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMonthlyListPriceWon } from "@/lib/media-metrics";
-import { resolveMonthlyPriceForUnits } from "@/lib/media-quantity";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
   isNetworkCatalogItem,
@@ -50,8 +49,6 @@ export type MatchingInput = {
   plannerAgeKeys?: PlannerAgeKey[];
   /** 새로고침 시 후보 풀 슬라이드 (랜덤 아님) */
   seed?: number;
-  /** 선택 매체별 수량 — scoreMedia 예산 효율 반영 */
-  mediaQuantities?: Record<string, number>;
   /** 자연어 파싱 유형 의도 — scoreCategory 가점 전용 */
   mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[];
 };
@@ -244,24 +241,17 @@ function mediaHaystack(m: MediaItem): string {
   return mediaRegionHaystack(m);
 }
 
-function monthlyPriceWon(
-  m: MediaItem,
-  quantities?: Record<string, number>,
-): number {
-  const resolved = resolveMonthlyPriceForUnits(m, quantities?.[m.id]);
-  if (resolved > 0) return resolved;
-  if (isNetworkCatalogItem(m)) return 0;
-  // quantity 경로 실패 시 목록 display SSOT(최저가 옵션 × 기간 환산) — 버그 #4
+/**
+ * 추천 예산 점수·가격 티어용 월가.
+ * 목록/카드 display SSOT만 사용 — 견적 라인(`resolveMonthlyPriceForUnits`)과 분리 (#4-2).
+ */
+function monthlyPriceWon(m: MediaItem): number {
   return resolveMonthlyListPriceWon(m);
 }
 
-function scoreBudget(
-  m: MediaItem,
-  monthlyBudgetWon: number,
-  quantities?: Record<string, number>,
-): number {
+function scoreBudget(m: MediaItem, monthlyBudgetWon: number): number {
   if (!(monthlyBudgetWon > 0)) return 22;
-  const price = monthlyPriceWon(m, quantities);
+  const price = monthlyPriceWon(m);
   if (price <= 0) {
     return isNetworkCatalogItem(m) ? 12 : 18;
   }
@@ -548,7 +538,7 @@ function deterministicHash(id: string, seed: number): number {
 }
 
 function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
-  const budgetPts = scoreBudget(m, input.monthlyBudgetWon, input.mediaQuantities);
+  const budgetPts = scoreBudget(m, input.monthlyBudgetWon);
   if (budgetPts < 0) return null;
 
   const breakdown: ScoreBreakdown = {
@@ -598,11 +588,7 @@ export function scoreMediaForRanking(
   m: MediaItem,
   input: MatchingInput,
 ): MatchedMedia {
-  const rawBudget = scoreBudget(
-    m,
-    input.monthlyBudgetWon,
-    input.mediaQuantities,
-  );
+  const rawBudget = scoreBudget(m, input.monthlyBudgetWon);
   const budgetPts = rawBudget < 0 ? 0 : rawBudget;
 
   const breakdown: ScoreBreakdown = {
@@ -655,12 +641,11 @@ function mediaTypeBucket(m: MediaItem): string {
 function priceTier(
   m: MediaItem,
   pool: MatchedMedia[],
-  quantities?: Record<string, number>,
 ): "high" | "mid" | "low" {
   const prices = pool
-    .map((p) => monthlyPriceWon(p.media, quantities))
+    .map((p) => monthlyPriceWon(p.media))
     .filter((x) => x > 0);
-  const p = monthlyPriceWon(m, quantities);
+  const p = monthlyPriceWon(m);
   if (prices.length === 0 || p <= 0) return "mid";
   prices.sort((a, b) => a - b);
   const p33 = prices[Math.floor(prices.length * 0.33)] ?? prices[0]!;
