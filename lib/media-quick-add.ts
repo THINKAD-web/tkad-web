@@ -17,6 +17,7 @@ import {
   mergeManualAndAutoTags,
   normalizeSubCategory,
 } from "@/lib/media-json-enrich";
+import { coercePriceOptionPeriodForWrite } from "@/lib/media-price-period-write";
 
 export type QuickAddMediaJson = {
   media_name: string;
@@ -213,6 +214,44 @@ export function validateQuickAddItem(
     };
   }
 
+  let priceOptions: QuickAddMediaJson["price_options"] = null;
+  {
+    const raw = o.price_options ?? o.priceOptions;
+    if (Array.isArray(raw)) {
+      const mapped: NonNullable<QuickAddMediaJson["price_options"]> = [];
+      for (let oi = 0; oi < raw.length; oi++) {
+        const x = raw[oi] as {
+          label?: unknown;
+          price?: unknown;
+          period?: unknown;
+          description?: unknown;
+        };
+        if (typeof x.label !== "string" || typeof x.price !== "number") continue;
+        const row: {
+          label: string;
+          price: number;
+          period?: string;
+          description?: string;
+        } = { label: x.label, price: x.price };
+        if (typeof x.period === "string" && x.period.trim()) {
+          const pr = coercePriceOptionPeriodForWrite(x.period);
+          if (pr.kind === "error") {
+            return {
+              ok: false,
+              error: `${prefix} price_options[${oi}]: ${pr.message}`,
+            };
+          }
+          if (pr.kind === "ok") row.period = pr.period;
+        }
+        if (typeof x.description === "string" && x.description.trim()) {
+          row.description = x.description.trim();
+        }
+        mapped.push(row);
+      }
+      priceOptions = mapped.length > 0 ? mapped : null;
+    }
+  }
+
   const item: QuickAddMediaJson = {
     media_name: o.media_name.trim(),
     description: str("description", ""),
@@ -245,25 +284,7 @@ export function validateQuickAddItem(
     nearby_landmarks: str("nearby_landmarks", ""),
     past_advertisers: str("past_advertisers", "") || str("advertiser_history", ""),
     price_period: str("price_period", "") || undefined,
-    price_options: (() => {
-      const raw = o.price_options ?? o.priceOptions;
-      return Array.isArray(raw)
-        ? (raw as Array<{ label: string; price: number; period?: string; description?: string }>)
-            .filter(
-              (x) => typeof x.label === "string" && typeof x.price === "number",
-            )
-            .map((x) => ({
-              label: x.label,
-              price: x.price,
-              ...(typeof x.period === "string" && x.period.trim()
-                ? { period: x.period.trim() }
-                : {}),
-              ...(typeof x.description === "string" && x.description.trim()
-                ? { description: x.description.trim() }
-                : {}),
-            }))
-        : null;
-    })(),
+    price_options: priceOptions,
     ...(typeRaw ? { type: typeRaw.toLowerCase() } : {}),
   };
 
@@ -566,16 +587,23 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
           description?: string;
         }>)
           .filter((o) => typeof o.label === "string" && typeof o.price === "number")
-          .map((o) => ({
-            label: o.label,
-            price: o.price,
-            ...(typeof o.period === "string" && o.period.trim()
-              ? { period: o.period.trim() }
-              : {}),
-            ...(typeof o.description === "string" && o.description.trim()
-              ? { description: o.description.trim() }
-              : {}),
-          }))
+          .map((o) => {
+            const out: {
+              label: string;
+              price: number;
+              period?: string;
+              description?: string;
+            } = { label: o.label, price: o.price };
+            if (typeof o.period === "string" && o.period.trim()) {
+              const pr = coercePriceOptionPeriodForWrite(o.period);
+              // Already validated in validateQuickAddItem — coerce aliases again for safety
+              if (pr.kind === "ok") out.period = pr.period;
+            }
+            if (typeof o.description === "string" && o.description.trim()) {
+              out.description = o.description.trim();
+            }
+            return out;
+          })
       : null,
   };
 }

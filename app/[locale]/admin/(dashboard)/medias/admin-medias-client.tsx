@@ -86,6 +86,10 @@ import {
   type PartialPeriodRatesDraft,
 } from "@/lib/media-partial-period-rates";
 import { PartialPeriodRatesFields } from "@/components/admin/partial-period-rates-fields";
+import {
+  coercePriceOptionPeriodForWrite,
+  formatPriceOptionPeriodWriteError,
+} from "@/lib/media-price-period-write";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -447,7 +451,14 @@ function jsonStringFromPriceOptDrafts(rows: PriceOptDraft[]): string {
         label: r.label.trim(),
         price: Number.isFinite(price) ? price : 0,
       };
-      if (r.period.trim()) o.period = r.period.trim();
+      if (r.period.trim()) {
+        const coerced = coercePriceOptionPeriodForWrite(r.period);
+        if (coerced.kind === "ok") o.period = coerced.period;
+        else if (coerced.kind === "error") {
+          // validatePriceOptionsJsonField should catch; keep raw for error surface
+          o.period = r.period.trim();
+        }
+      }
       if (r.description.trim()) o.description = r.description.trim();
       const optionRates = partialPeriodRatesMapFromDraft(r.partialPeriodRates);
       if (optionRates) o.partialPeriodRates = optionRates;
@@ -475,6 +486,13 @@ function validatePriceOptionsJsonField(raw: string): string | null {
       }
       if (typeof o.price !== "number" || !Number.isFinite(o.price)) {
         return `가격 옵션[${i}]: price는 숫자여야 합니다.`;
+      }
+      // period: enum 4키 또는 안전 month 별칭만 (서버 normalizePriceOptionsForPrisma 와 동일)
+      if (Object.prototype.hasOwnProperty.call(o, "period") && o.period != null) {
+        const pr = coercePriceOptionPeriodForWrite(o.period);
+        if (pr.kind === "error") {
+          return formatPriceOptionPeriodWriteError(i, pr.message);
+        }
       }
     }
     return null;
