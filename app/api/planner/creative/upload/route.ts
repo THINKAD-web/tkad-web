@@ -3,6 +3,10 @@ import {
   isBunnyStorageConfigured,
   uploadToBunnyStorage,
 } from "@/lib/bunny-storage";
+import {
+  buildBunnyUuidUploadPath,
+  bunnyUploadExtFromFileName,
+} from "@/lib/bunny-upload-path";
 
 export const dynamic = "force-dynamic";
 
@@ -13,14 +17,6 @@ const ACCEPTED = new Set([
   "image/jpg",
   "image/svg+xml",
 ]);
-
-function extFromType(t: string): string {
-  const type = (t || "").toLowerCase();
-  if (type.includes("png")) return "png";
-  if (type.includes("jpeg") || type.includes("jpg")) return "jpg";
-  if (type.includes("svg")) return "svg";
-  return "bin";
-}
 
 export async function POST(request: NextRequest) {
   if (!isBunnyStorageConfigured()) {
@@ -45,8 +41,8 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const ext = extFromType(file.type);
-    const path = `tkad/planner/creative/${crypto.randomUUID()}.${ext}`;
+    const ext = bunnyUploadExtFromFileName(file.name, file.type);
+    const path = buildBunnyUuidUploadPath("tkad/planner/creative", ext);
 
     const out = await uploadToBunnyStorage({
       path,

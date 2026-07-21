@@ -1,3 +1,5 @@
+import { assertAsciiBunnyObjectPath } from "@/lib/bunny-upload-path";
+
 function joinUrl(base: string, path: string): string {
   const b = base.replace(/\/+$/, "");
   const p = path.replace(/^\/+/, "");
@@ -97,7 +99,8 @@ export async function uploadToBunnyStorage(opts: {
     throw new Error("BUNNY_STORAGE_NOT_CONFIGURED");
   }
 
-  const normalizedPath = opts.path.replace(/^\/+/, "");
+  // 한글 NFD 등 비ASCII 키 차단 — 모든 Bunny PUT이 UUID/ASCII 경로를 거치게
+  const normalizedPath = assertAsciiBunnyObjectPath(opts.path);
   const putUrl = `${bunnyStorageBaseUrl()}/${encodeURIComponent(zone)}/${normalizedPath}`;
 
   const res = await fetch(putUrl, {
