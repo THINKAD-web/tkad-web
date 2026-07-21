@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-quote-lines";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
+import { formatAdminQuoteOptionSelectLabel } from "@/lib/admin-quote-option-select-label";
 import { adminQuoteOnInquiryLabel } from "@/lib/admin-quote-inquiry";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
@@ -264,10 +265,15 @@ export function AdminQuoteLinesEditor({
                             );
                             updateLine(line.lineId, { priceOptionIndex: n });
                           }}
+                          aria-label={isKo ? "가격 옵션" : "Price option"}
                         >
                           {(m.priceOptions ?? []).map((o, i) => (
                             <option key={`${o.label}-${i}`} value={i}>
-                              {o.label}
+                              {formatAdminQuoteOptionSelectLabel(
+                                o,
+                                undefined,
+                                locale,
+                              )}
                             </option>
                           ))}
                         </select>
