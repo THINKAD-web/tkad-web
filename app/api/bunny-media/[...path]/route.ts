@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getClientIp } from "@/lib/api-response";
+import { allowBunnyMediaRequest } from "@/lib/bunny-media-rate-limit";
 import { buildBunnyCdnUrl, isBunnyStorageConfigured } from "@/lib/bunny-storage";
 import { decodeBunnyPathSegments } from "@/lib/optimized-image-url";
 
@@ -62,9 +64,17 @@ async function fetchWithTimeout(url: string, init?: RequestInit): Promise<Respon
 }
 
 export async function GET(
-  _req: NextRequest,
+  req: NextRequest,
   ctx: { params: Promise<{ path: string[] }> },
 ) {
+  const ip = getClientIp(req);
+  if (!allowBunnyMediaRequest(ip)) {
+    return new NextResponse("Too Many Requests", {
+      status: 429,
+      headers: { "Retry-After": "60" },
+    });
+  }
+
   if (!isBunnyStorageConfigured()) {
     return new NextResponse("Bunny storage not configured", { status: 503 });
   }
