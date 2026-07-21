@@ -51,7 +51,7 @@ export function HeaderGuestMenu() {
         aria-label={isKo ? "더보기" : "More"}
         aria-expanded={open}
       >
-        <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={2} />
+        <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
         <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]">

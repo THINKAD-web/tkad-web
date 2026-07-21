@@ -125,7 +125,7 @@ export function HeaderProfileDropdown({
         aria-haspopup="menu"
         aria-label={myPageLabel}
       >
-        <UserIcon className="h-[18px] w-[18px]" strokeWidth={2} />
+        <UserIcon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
         <div

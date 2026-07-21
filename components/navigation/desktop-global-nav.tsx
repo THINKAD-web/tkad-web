@@ -228,7 +228,7 @@ export function DesktopGlobalNav() {
                 className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 md:hidden dark:text-white/80 dark:hover:bg-white/10"
                 aria-label={isKo ? "뒤로" : "Back"}
               >
-                <ArrowLeft className="h-5 w-5" />
+                <ArrowLeft className="h-5 w-5" aria-hidden />
               </button>
             ) : (
               <button
@@ -239,9 +239,9 @@ export function DesktopGlobalNav() {
                 aria-expanded={mobileNavOpen}
               >
                 {mobileNavOpen ? (
-                  <X className="h-5 w-5" />
+                  <X className="h-5 w-5" aria-hidden />
                 ) : (
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-5 w-5" aria-hidden />
                 )}
               </button>
             )}

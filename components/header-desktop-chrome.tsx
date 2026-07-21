@@ -25,7 +25,7 @@ export function HeaderDesktopChrome({ isKo }: Props) {
         aria-label={isKo ? "검색 (Cmd+K)" : "Search (Cmd+K)"}
         data-tour="search"
       >
-        <Search className="h-[18px] w-[18px]" strokeWidth={2} />
+        <Search className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
       <HeaderNotificationsBell compact />
       <Link
@@ -34,7 +34,7 @@ export function HeaderDesktopChrome({ isKo }: Props) {
         aria-label={isKo ? "문의하기" : "Contact"}
         data-tour="contact"
       >
-        <MessageSquare className="h-[18px] w-[18px]" strokeWidth={2} />
+        <MessageSquare className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </Link>
       <HeaderAccountActions />
     </div>
