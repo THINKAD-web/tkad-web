@@ -4,10 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useLocale } from "next-intl";
 import { cn } from "@/lib/utils";
-import {
-  optimizeHeroMarqueeUrl,
-  shouldUseUnoptimizedImage,
-} from "@/lib/optimized-image-url";
+import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 
 const EXPLORE_SECTION_ID = "home-explore";
 
@@ -20,7 +17,12 @@ type HeroSlide = {
   subtitleEn: string;
 };
 
-/** 828px WebP from user JPEG CDN (Jul 2026) — public/images/hero + Bunny mirror */
+/**
+ * 828px WebP sources (public/images/hero).
+ * Optimizer로 고해상도 버킷(최대 ~3840w)을 요청하지 않도록 unoptimized + sizes 상한.
+ */
+const HERO_SOURCE_WIDTH_PX = 828;
+
 const SLIDES: HeroSlide[] = [
   {
     id: "media",
@@ -102,8 +104,8 @@ export function HomeHeroBanner() {
                 className="object-cover object-center"
                 priority={isFirst}
                 loading={isFirst ? "eager" : "lazy"}
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 90vw, 1024px"
-                unoptimized={shouldUseUnoptimizedImage(src)}
+                sizes={`(max-width: ${HERO_SOURCE_WIDTH_PX}px) 100vw, ${HERO_SOURCE_WIDTH_PX}px`}
+                unoptimized
               />
             </div>
           );
