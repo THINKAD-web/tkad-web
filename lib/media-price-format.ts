@@ -25,8 +25,9 @@ export function catalogPriceFieldToPriceMan(value: number): number {
 
 /**
  * DB 원 단위 가격 → 공개 UI 표기.
- * - 100만원 미만: ₩50만
- * - 100~9,999만원: ₩1,500만
+ * - 1원~9,999원: ₩500 (만원 반올림으로 0·과대표시 방지)
+ * - 1만~999만: ₩50만
+ * - 1,000만~9,999만: ₩1,500만
  * - 1억 이상: ₩1.2억
  */
 export function formatMediaPrice(price: number, locale = "ko-KR"): string {
@@ -46,7 +47,15 @@ export function formatMediaPriceCompactWon(
   }
 
   const isKo = locale.startsWith("ko");
-  const man = wonUnits / 10_000;
+  const won = Math.round(wonUnits);
+
+  // 만원 미만: 원 단위 폴백 (₩0만 / ₩1만 과대 반올림 방지). EN과 동일 톤.
+  if (won < 10_000) {
+    const loc = isKo ? "ko-KR" : "en-US";
+    return `₩${won.toLocaleString(loc)}`;
+  }
+
+  const man = won / 10_000;
 
   if (isKo) {
     if (man >= 10_000) {
