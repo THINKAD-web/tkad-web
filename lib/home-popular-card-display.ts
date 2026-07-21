@@ -8,6 +8,7 @@ import {
   formatCpmKrw,
   formatMediaPriceWithPeriodSuffix,
   isNonMonthlyPricePeriod,
+  mediaPriceOnInquiryLabel,
 } from "@/lib/media-price-format";
 
 export type HomePopularCardPriceDisplay = {
@@ -23,7 +24,16 @@ export function buildHomePopularCardPriceDisplay(
   locale: string,
   isKo: boolean,
 ): HomePopularCardPriceDisplay | null {
-  if (!item.price || item.price <= 0) return null;
+  if (!item.price || item.price <= 0) {
+    return {
+      primary: mediaPriceOnInquiryLabel(locale),
+      secondary: null,
+      monthlyEquivalentTooltip: isKo
+        ? "단가는 문의 후 안내됩니다."
+        : "Rate is provided on request.",
+      originalPeriodTooltip: null,
+    };
+  }
 
   const original = formatMediaPriceWithPeriodSuffix(
     item.price,

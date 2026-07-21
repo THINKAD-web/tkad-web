@@ -13,6 +13,11 @@ export function catalogPriceFieldToWon(value: number): number {
   return Math.round(value);
 }
 
+/** 공개 단가 미공개(displayWon≤0) — "₩0" 대신 쓰는 문의 표기 */
+export function mediaPriceOnInquiryLabel(locale = "ko-KR"): string {
+  return locale.startsWith("ko") ? "가격 문의" : "Price on request";
+}
+
 /** 견적·합계용 — 월 단가 만원(₩1만) 숫자 */
 export function catalogPriceFieldToPriceMan(value: number): number {
   return catalogPriceFieldToWon(value) / 10_000;
@@ -37,7 +42,7 @@ export function formatMediaPriceCompactWon(
   locale = "ko-KR",
 ): string {
   if (!Number.isFinite(wonUnits) || wonUnits <= 0) {
-    return locale.startsWith("ko") ? "문의" : "Inquire";
+    return mediaPriceOnInquiryLabel(locale);
   }
 
   const isKo = locale.startsWith("ko");
@@ -95,6 +100,9 @@ export function formatMediaPriceWonWithSymbol(
 
 /** 원(₩) 단위 — 컴팩트 + «원» 접미 (PDF·견적서 등) */
 export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string {
+  if (!Number.isFinite(wonUnits) || wonUnits <= 0) {
+    return mediaPriceOnInquiryLabel(locale);
+  }
   const compact = formatMediaPriceCompactWon(wonUnits, locale);
   if (locale.startsWith("ko")) {
     return `${compact.replace(/^₩/, "")}원`;
@@ -341,7 +349,7 @@ export function formatMediaPriceWithPeriodSuffix(
 ): string {
   const won = catalogPriceFieldToWon(price);
   if (won <= 0) {
-    return locale.startsWith("ko") ? "문의" : "Inquire";
+    return mediaPriceOnInquiryLabel(locale);
   }
   const priceLabel = formatMediaPriceCompactWon(won, locale);
   const periodLabel = formatPricePeriodShortLabel(
@@ -388,6 +396,13 @@ export function resolveMediaDisplayPrice(
     priceWon: catalogPriceFieldToWon(media.price ?? 0),
     period: normalizeMediaPricePeriod(media.pricePeriod),
   };
+}
+
+/** 표시 단가 ≤0 (양수 priceOptions 없으면 문의 매체) */
+export function isMediaPriceOnInquiry(
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+): boolean {
+  return resolveMediaDisplayPrice(media).priceWon <= 0;
 }
 
 /** 저가/고가 정렬용 — 표시가를 월 환산한 키 */

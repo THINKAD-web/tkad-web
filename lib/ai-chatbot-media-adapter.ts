@@ -1,6 +1,9 @@
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
-import { formatMediaPriceWithPeriodSuffix } from "@/lib/media-price-format";
+import {
+  formatMediaPriceWithPeriodSuffix,
+  mediaPriceOnInquiryLabel,
+} from "@/lib/media-price-format";
 
 /** Chatbot tool card price is monthly 만원; catalog/plan-cart use DB won field. */
 export function chatbotCardPriceToCatalogWon(priceMan: number): number {
@@ -31,7 +34,7 @@ export function formatChatbotCardPrice(
   isKo: boolean,
 ): string {
   const won = chatbotCardPriceToCatalogWon(card.price);
-  if (won <= 0) return isKo ? "문의" : "Inquire";
+  if (won <= 0) return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
   return formatMediaPriceWithPeriodSuffix(
     won,
     card.pricePeriod ?? "month",

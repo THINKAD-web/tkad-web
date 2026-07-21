@@ -8,6 +8,7 @@ import {
   formatCatalogPriceFieldWon,
   formatMediaPriceWithPeriodSuffix,
   formatPricePeriodShortLabel,
+  mediaPriceOnInquiryLabel,
 } from "@/lib/media-price-format";
 
 export type MediaCardDisplayModel = {
@@ -83,7 +84,8 @@ export function catalogItemToDisplayModel(
     isVerified: item.isVerified,
     thumbnailUrl: item.thumbnailUrl,
     galleryExtraCount: galleryExtraCount(item),
-    priceLabel: displayPrice ?? (opts.isKo ? "문의" : "Inquire"),
+    priceLabel:
+      displayPrice ?? mediaPriceOnInquiryLabel(opts.isKo ? "ko" : "en"),
     showPeriodSuffix: Boolean(
       displayPrice &&
         periodLabel &&

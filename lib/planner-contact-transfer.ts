@@ -2,7 +2,7 @@ import type {
   ContactBudgetV2,
   ContactCampaignGoal,
 } from "@/lib/contact-lead-schema";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 
 export const PLAN_DATA_STORAGE_KEY = "tkad_plan_data";
 
@@ -85,7 +85,7 @@ export function clearPlanTransferData(): void {
 }
 
 export function formatPlanTransferBudget(amountWon: number, isKo: boolean): string {
-  if (amountWon <= 0) return isKo ? "문의" : "Inquire";
+  if (amountWon <= 0) return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
   return formatCatalogPriceFieldWon(amountWon, isKo ? "ko-KR" : "en-US");
 }
 

@@ -50,12 +50,7 @@ export async function MediaBrowseCatalogServer({
               : media.locationEn || media.location;
             const typeLabel =
               typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
-            const price =
-              media.price > 0 ||
-              (media.priceOptions?.some((o) => typeof o.price === "number" && o.price > 0) ??
-                false)
-                ? formatMediaDisplayPrice(media, locale)
-                : null;
+            const price = formatMediaDisplayPrice(media, locale);
             const href = mediaItemDetailPath(media);
             const imageSrc = getPrimaryMediaImageUrl(media);
 
