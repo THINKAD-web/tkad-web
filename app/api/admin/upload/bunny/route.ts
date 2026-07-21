@@ -10,18 +10,9 @@ import {
   isBunnyStorageConfigured,
   uploadToBunnyStorage,
 } from "@/lib/bunny-storage";
+import { buildAdminBunnyImageUploadPath } from "@/lib/bunny-upload-path";
 
 export const dynamic = "force-dynamic";
-
-function extFromType(t: string): string {
-  const type = (t || "").toLowerCase();
-  if (type.includes("png")) return "png";
-  if (type.includes("webp")) return "webp";
-  if (type.includes("avif")) return "avif";
-  if (type.includes("jpeg") || type.includes("jpg")) return "jpg";
-  if (type.includes("svg")) return "svg";
-  return "bin";
-}
 
 function authFailureMeta(code: AdminSessionVerifyCode): {
   error: string;
@@ -147,12 +138,11 @@ export async function POST(request: NextRequest) {
     }
 
     const bytes = await file.arrayBuffer();
-    const ext = extFromType(file.type);
-    const now = new Date();
-    const yyyy = String(now.getUTCFullYear());
-    const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
-    const rand = crypto.randomUUID();
-    const path = `tkad/admin/${yyyy}/${mm}/${rand}.${ext}`;
+    // 원본 한글 파일명은 무시 — UUID + ASCII ext만 키로 사용
+    const path = buildAdminBunnyImageUploadPath(
+      file.type || "application/octet-stream",
+      file.name,
+    );
 
     const out = await uploadToBunnyStorage({
       path,

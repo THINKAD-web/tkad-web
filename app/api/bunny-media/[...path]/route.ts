@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { buildBunnyCdnUrl, isBunnyStorageConfigured } from "@/lib/bunny-storage";
+import { decodeBunnyPathSegments } from "@/lib/optimized-image-url";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -16,8 +17,14 @@ function bunnyStorageBaseUrl(): string {
   return host.replace(/\/+$/, "");
 }
 
+/**
+ * App Router `[...path]` 세그먼트 → 스토리지 object path.
+ * `buildBunnyMediaProxyUrl`이 넣는 단일 percent-encoding을 디코딩해
+ * 유니코드 키로 맞춘다 (이미 디코딩된 세그먼트는 decodeBunnyPathSegments가 보존).
+ */
 function normalizeObjectPath(segments: string[]): string | null {
-  const path = segments.map((s) => s.trim()).filter(Boolean).join("/");
+  const parts = decodeBunnyPathSegments(segments);
+  const path = parts.join("/");
   if (!path || path.includes("..")) return null;
   return path;
 }

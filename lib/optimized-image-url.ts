@@ -104,7 +104,7 @@ export function getPreferredMediaImageUrl(
   return filterDisplayableMediaImageUrls(urls)[0] ?? null;
 }
 
-/** Bunny CDN URL → 스토리지 존 내 object path */
+/** Bunny CDN URL → 스토리지 존 내 object path (`URL.pathname` — 이미 percent-encoded) */
 export function bunnyObjectPathFromPublicUrl(
   url: string | null | undefined,
 ): string | null {
@@ -118,19 +118,44 @@ export function bunnyObjectPathFromPublicUrl(
   }
 }
 
-/** Pull Zone 장애 시 Storage API same-origin 프록시 URL (onError fallback 전용) */
+/**
+ * pathname / 프록시 path 세그먼트를 스토리지 키용 유니코드로 복원.
+ * 이미 디코딩된 세그먼트는 그대로 둔다 (한글·공백 NFD 포함).
+ */
+export function decodeBunnyPathSegments(segments: readonly string[]): string[] {
+  return segments
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .map((segment) => {
+      try {
+        return decodeURIComponent(segment);
+      } catch {
+        return segment;
+      }
+    });
+}
+
+/** 디코딩된 스토리지 키 세그먼트 → `/api/bunny-media/...` 용 단일 percent-encoding */
+export function encodeBunnyProxyPathSegments(
+  decodedSegments: readonly string[],
+): string {
+  return decodedSegments.map((segment) => encodeURIComponent(segment)).join("/");
+}
+
+/**
+ * Pull Zone 장애 시 Storage API same-origin 프록시 URL (onError fallback 전용).
+ * `URL.pathname`은 이미 인코딩되어 있으므로 decode → encode 한 번만 수행해
+ * `%25E1...` 이중 인코딩을 막는다. App Router `[...path]` 디코딩과 짝을 맞춤.
+ */
 export function buildBunnyMediaProxyUrl(
   url: string | null | undefined,
 ): string | null {
   if (!isBunnyStorageConfigured()) return null;
   const path = bunnyObjectPathFromPublicUrl(url);
   if (!path) return null;
-  const encoded = path
-    .split("/")
-    .filter(Boolean)
-    .map((segment) => encodeURIComponent(segment))
-    .join("/");
-  return `/api/bunny-media/${encoded}`;
+  const decoded = decodeBunnyPathSegments(path.split("/"));
+  if (decoded.length === 0) return null;
+  return `/api/bunny-media/${encodeBunnyProxyPathSegments(decoded)}`;
 }
 
 /** CDN 로드 실패 시 onError에서 호출 — 프록시 fallback URL (없으면 null) */
