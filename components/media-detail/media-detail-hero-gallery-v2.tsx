@@ -3,6 +3,7 @@
 import { useCallback, useState } from "react";
 import { ZoomIn } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-lightbox";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
@@ -64,12 +65,14 @@ export function MediaDetailHeroGalleryV2({
             className="absolute inset-0 z-10 block h-full w-full cursor-zoom-in border-0 bg-transparent p-0 outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--qp-accent)]"
             aria-label={labels.expand}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={mainSrc}
+            <BunnyFallbackImage
+              rawSrc={mainSrc}
               alt={altBase}
-              className="absolute inset-0 h-full w-full object-cover transition duration-500 group-hover:scale-[1.02]"
+              fill
+              priority
               fetchPriority="high"
+              sizes="(max-width: 1024px) 100vw, 66vw"
+              className="object-cover transition duration-500 group-hover:scale-[1.02]"
             />
             <span
               aria-hidden
@@ -111,8 +114,13 @@ export function MediaDetailHeroGalleryV2({
               )}
               aria-label={`${labels.expand} ${i + 1}`}
             >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={src} alt="" className="h-full w-full object-cover" />
+              <BunnyFallbackImage
+                rawSrc={src}
+                alt=""
+                fill
+                sizes="(max-width: 1024px) 25vw, 12vw"
+                className="object-cover"
+              />
             </button>
           ))}
         </div>
