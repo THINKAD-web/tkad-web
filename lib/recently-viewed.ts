@@ -1,5 +1,9 @@
-import type { MediaItem } from "./media-data";
+import type { MediaItem, MediaPricePeriodKey } from "./media-data";
 import { getPrimaryMediaImageUrl } from "./media-data";
+import {
+  normalizeMediaPricePeriod,
+  resolveMediaDisplayPrice,
+} from "./media-price-format";
 
 const STORAGE_KEY = "tkad_recently_viewed";
 export const RECENTLY_VIEWED_MAX = 20;
@@ -12,7 +16,10 @@ export type RecentlyViewedRecord = {
   type: string;
   region: string;
   thumbnail: string;
+  /** Display SSOT amount (cheapest option), not always raw catalog `media.price`. */
   price: number;
+  /** Period for `price`; optional on legacy localStorage rows (defaults to month). */
+  pricePeriod?: MediaPricePeriodKey;
   visitedAt: string;
 };
 
@@ -72,6 +79,12 @@ export function readRecentlyViewedRecords(): RecentlyViewedRecord[] {
     if (isRecord(parsed[0])) {
       return (parsed as RecentlyViewedRecord[])
         .filter(isRecord)
+        .map((r) => ({
+          ...r,
+          pricePeriod: r.pricePeriod
+            ? normalizeMediaPricePeriod(r.pricePeriod)
+            : undefined,
+        }))
         .slice(0, RECENTLY_VIEWED_MAX);
     }
 
@@ -147,13 +160,15 @@ export function mediaItemToRecentlyViewedRecord(
   options?: { isKo?: boolean; visitedAt?: string },
 ): RecentlyViewedRecord {
   const isKo = options?.isKo ?? true;
+  const display = resolveMediaDisplayPrice(media);
   return {
     id: media.id,
     name: isKo ? media.name : media.nameEn || media.name,
     type: media.type,
     region: media.region,
     thumbnail: getPrimaryMediaImageUrl(media) ?? "",
-    price: typeof media.price === "number" ? media.price : 0,
+    price: display.priceWon,
+    pricePeriod: display.period,
     visitedAt: options?.visitedAt ?? new Date().toISOString(),
   };
 }

@@ -11,10 +11,7 @@ import {
   resolveMonthlyImpressions,
 } from "@/lib/media-metrics";
 import { formatSizeDisplay } from "@/lib/format-media-size";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 
@@ -56,10 +53,7 @@ export function CompareSpecTable({
       {
         key: "price",
         label: t("compareRowPrice"),
-        cell: (m) =>
-          `${formatCatalogPriceFieldWon(m.price, locale)} · ${t(
-            mediaPricePeriodTranslationKey(m.pricePeriod),
-          )}`,
+        cell: (m) => formatMediaDisplayPrice(m, locale),
         numVal: (m) => m.price > 0 ? m.price : null,
         better: "lower",
       },
@@ -241,7 +235,7 @@ export function CompareSpecTable({
                           {isKo ? m.name : m.nameEn || m.name}
                         </Link>
                         <p className="mt-1 font-display text-[10px] font-bold tabular-nums leading-tight text-accent sm:text-[11px]">
-                          {formatCatalogPriceFieldWon(m.price, locale)}
+                          {formatMediaDisplayPrice(m, locale)}
                         </p>
                         <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                       </div>

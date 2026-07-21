@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useTranslations } from "next-intl";
 import { Search, X } from "lucide-react";
 import { useCompositionControlledInput } from "@/hooks/use-composition-controlled-input";
 import {
@@ -11,10 +10,7 @@ import {
 } from "@/lib/media-data";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 
 interface Props {
   /** 서버 `fetchPublicMediaCatalog()` 등에서 내려준 공개 매체 목록(필수). */
@@ -46,7 +42,6 @@ export default function MediaSearchAutocomplete({
   placeholder,
 }: Props) {
   const isKo = locale === "ko";
-  const tMedia = useTranslations("media");
   const isControlled =
     catalogSearchQuery !== undefined &&
     onCatalogSearchQueryChange !== undefined;
@@ -228,10 +223,7 @@ export default function MediaSearchAutocomplete({
               </div>
               <div className="shrink-0 text-right">
                 <span className="text-[11px] font-semibold leading-tight text-gold-dark">
-                  {formatCatalogPriceFieldWon(media.price)}
-                  <span className="ml-0.5 text-[10px] font-medium text-muted-foreground">
-                    · {tMedia(mediaPricePeriodTranslationKey(media.pricePeriod))}
-                  </span>
+                  {formatMediaDisplayPrice(media, isKo ? "ko-KR" : "en-US")}
                 </span>
                 <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
               </div>

@@ -36,8 +36,7 @@ import { COMPARE_MAX_ITEMS } from "@/lib/compare-constants";
 import { formatMediaLocationShort } from "@/lib/media-location-format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
+  formatMediaDisplayPrice,
 } from "@/lib/media-price-format";
 import { cn } from "@/lib/utils";
 import MediaAiRecommendForm, {
@@ -455,7 +454,6 @@ function AiResultCard({
   addCompareLabel: string;
   quoteLabel: string;
 }) {
-  const tMedia = useTranslations("media");
   const m = scored.item;
   const tl = typeLabels[m.type];
   const primaryUrl = getPrimaryMediaImageUrl(m);
@@ -601,11 +599,7 @@ function AiResultCard({
             compact && "text-center",
           )}
         >
-          {formatCatalogPriceFieldWon(m.price)}
-          <span className="text-xs font-normal text-muted-foreground">
-            {" "}
-            · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
-          </span>
+          {formatMediaDisplayPrice(m, isKo ? "ko-KR" : "en-US")}
         </div>
         <MediaPriceExclNote isKo={isKo} className={cn(compact && "text-center")} />
         <div

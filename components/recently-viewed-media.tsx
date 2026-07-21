@@ -8,10 +8,7 @@ import { MediaCatalogThumbnail } from "@/components/media-catalog-thumbnail";
 import { MEDIA_CATALOG_THUMB_IMG_FILTER_CLASS } from "@/components/media-catalog-shared";
 import { cn } from "@/lib/utils";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import {
   clearRecentlyViewed,
   fetchRecentlyViewedItems,
@@ -146,10 +143,7 @@ export default function RecentlyViewedMedia({ locale }: Props) {
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
                 <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground">
-                  {formatCatalogPriceFieldWon(m.price)}
-                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                    · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
-                  </span>
+                  {formatMediaDisplayPrice(m, isKo ? "ko-KR" : "en-US")}
                 </p>
                 <MediaPriceExclNote isKo={isKo} />
               </div>

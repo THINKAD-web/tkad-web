@@ -6,10 +6,7 @@ import {
 } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import { getTranslations } from "next-intl/server";
 
 type Props = {
@@ -54,10 +51,11 @@ export async function MediaBrowseCatalogServer({
             const typeLabel =
               typeLabels[media.type]?.[isKo ? "ko" : "en"] ?? media.type;
             const price =
-              media.price > 0
-                ? formatCatalogPriceFieldWon(media.price, locale)
+              media.price > 0 ||
+              (media.priceOptions?.some((o) => typeof o.price === "number" && o.price > 0) ??
+                false)
+                ? formatMediaDisplayPrice(media, locale)
                 : null;
-            const periodKey = mediaPricePeriodTranslationKey(media.pricePeriod);
             const href = mediaItemDetailPath(media);
             const imageSrc = getPrimaryMediaImageUrl(media);
 
@@ -96,9 +94,6 @@ export async function MediaBrowseCatalogServer({
                       <>
                         <p className="mt-1.5 text-sm font-bold tabular-nums text-foreground">
                           {price}
-                          <span className="ml-1 text-[10px] font-normal uppercase tracking-wider text-muted-foreground">
-                            · {tMedia(periodKey)}
-                          </span>
                         </p>
                         <MediaPriceExclNote isKo={isKo} className="mt-0.5" />
                       </>

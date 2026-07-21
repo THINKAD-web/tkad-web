@@ -15,10 +15,7 @@ import {
   typeLabels,
 } from "@/lib/media-data";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import {
-  formatCatalogPriceFieldWon,
-  mediaPricePeriodTranslationKey,
-} from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 
 type SortableContext = {
   catalog: readonly MediaItem[];
@@ -207,10 +204,7 @@ export default function MediaSimilarCarousel({
                   {isKo ? m.name : (m.nameEn || m.name)}
                 </p>
                 <p className="mt-1 font-display text-sm font-bold tabular-nums text-foreground">
-                  {formatCatalogPriceFieldWon(m.price)}
-                  <span className="ml-1 text-[10px] font-normal uppercase tracking-[0.18em] text-muted-foreground">
-                    · {tMedia(mediaPricePeriodTranslationKey(m.pricePeriod))}
-                  </span>
+                  {formatMediaDisplayPrice(m, isKo ? "ko-KR" : "en-US")}
                 </p>
                 <MediaPriceExclNote isKo={isKo} />
                 {distanceKm != null && Number.isFinite(distanceKm) ? (

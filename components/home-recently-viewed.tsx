@@ -10,7 +10,7 @@ import {
 } from "@/lib/recently-viewed";
 import { typeLabels } from "@/lib/media-data";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import ScrollAnimate from "@/components/scroll-animate";
 import { cn } from "@/lib/utils";
 
@@ -109,7 +109,13 @@ export default function HomeRecentlyViewed({ locale }: Props) {
                       <span className="truncate">{media.region}</span>
                     </div>
                     <p className="text-sm font-bold tabular-nums dark:text-white text-gray-900">
-                      {formatCatalogPriceFieldWon(media.price)}
+                      {formatMediaDisplayPrice(
+                        {
+                          price: media.price,
+                          pricePeriod: media.pricePeriod ?? "month",
+                        },
+                        isKo ? "ko-KR" : "en-US",
+                      )}
                     </p>
                     <MediaPriceExclNote isKo={isKo} />
                   </div>

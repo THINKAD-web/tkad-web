@@ -1,0 +1,4565 @@
+{
+  "generatedAt": "2026-07-18T08:01:15.651Z",
+  "dryRun": false,
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "count": 651,
+  "records": [
+    {
+      "id": "cmo3d07qd000404l63nbxps27",
+      "name": "코엑스 케이팝 스퀘어 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 22222,
+      "ratio": 0.000990009900099001
+    },
+    {
+      "id": "cmo3ehh9u000004jp5b65rk7x",
+      "name": "삼성동 신라스테이 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 5357,
+      "ratio": 0.003360089602389397
+    },
+    {
+      "id": "cmo3f0k4a000004k43dss6zft",
+      "name": "강남 시그니처스퀘어 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 4688,
+      "ratio": 0.00469283276450512
+    },
+    {
+      "id": "cmo3flct7000004l5jneq3nw0",
+      "name": "홍대 나인 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.003000120004800192
+    },
+    {
+      "id": "cmo3g31e7000004l2gr0x4hyk",
+      "name": "강남 뱅뱅빌딩 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 6818,
+      "ratio": 0.0033734232912877677
+    },
+    {
+      "id": "cmo3gfj02000204l2qr0zhgrb",
+      "name": "강남 HM 타워 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 6667,
+      "ratio": 0.003749812509374531
+    },
+    {
+      "id": "cmo3gmiih000004jsmiutrtsj",
+      "name": "강남 GI-LIVE 이즈타워 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 5000,
+      "ratio": 0.0044
+    },
+    {
+      "id": "cmo3iilyt000004ihx8zuwjpj",
+      "name": "광화문 룩스(LUUX) 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 23810,
+      "ratio": 0.001007979840403192
+    },
+    {
+      "id": "cmo3l99l7000004l7t4rv9oqt",
+      "name": "홍대 스타 피카소빌딩 전광판 광고",
+      "storedCpm": 7800,
+      "plannedRecalcCpm": 14118,
+      "ratio": 0.5524861878453039
+    },
+    {
+      "id": "cmo5x28mu000004iemtnfoioj",
+      "name": "을지로 창강빌딩(구 경기빌딩) 전광판 광고",
+      "storedCpm": 30,
+      "plannedRecalcCpm": 12500,
+      "ratio": 0.0024
+    },
+    {
+      "id": "cmo5x5uxk000204l212my2guy",
+      "name": "롯데백화점 명동본점 전광판 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 15789,
+      "ratio": 0.0020267274684907213
+    },
+    {
+      "id": "cmo5x955r000404l2lri0qvmc",
+      "name": "명동 신한은행 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 4286,
+      "ratio": 0.004199720018665422
+    },
+    {
+      "id": "cmo5xculn000004kz69e9mue7",
+      "name": "명동빌딩 외벽 플렉스 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 13333,
+      "ratio": 0.002100052501312533
+    },
+    {
+      "id": "cmo5xlwwf000004lbjbvq13hq",
+      "name": "명동 엠라이브 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.0049504950495049506
+    },
+    {
+      "id": "cmo5xrw45000004k1o6opfqkz",
+      "name": "명동 K파이낸스빌딩 외벽 아트월 광고",
+      "storedCpm": 55,
+      "plannedRecalcCpm": 46875,
+      "ratio": 0.0011733333333333333
+    },
+    {
+      "id": "cmo5xx2hc000004ju59vmg59d",
+      "name": "명동 K파이낸스빌딩 전광판 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 10714,
+      "ratio": 0.003266753780100803
+    },
+    {
+      "id": "cmo5y12ki000004jvzvukboze",
+      "name": "명동 고려빌딩 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 9091,
+      "ratio": 0.003079969200307997
+    },
+    {
+      "id": "cmo5y3tzs000204jvsu1dt8ld",
+      "name": "명동 케이 로드폴(K-Roadpole) 미디어 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 6667,
+      "ratio": 0.002999850007499625
+    },
+    {
+      "id": "cmo5y61v4000004le73apdvyx",
+      "name": "명동 메가비젼 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 7059,
+      "ratio": 0.003116588751947868
+    },
+    {
+      "id": "cmo5y9uma000204k1n0ly5ndh",
+      "name": "명동 AVENUE 42 미디어폴 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 12500,
+      "ratio": 0.002
+    },
+    {
+      "id": "cmo5ye7b2000404jviyc4t8u1",
+      "name": "을지로입구 교원빌딩 엠시티(M-CITY) 전광판 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 31818,
+      "ratio": 0.001005720032685901
+    },
+    {
+      "id": "cmo5ym89i000204leidj4otua",
+      "name": "명동 ME&MN 전광판 Sync 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 5357,
+      "ratio": 0.004666791114429718
+    },
+    {
+      "id": "cmo5yramn000504jul2h2i3y6",
+      "name": "시청 프레지던트호텔 아트월 광고",
+      "storedCpm": 85,
+      "plannedRecalcCpm": 42857,
+      "ratio": 0.0019833399444664813
+    },
+    {
+      "id": "cmo5yzb4y000404k14gg5v50o",
+      "name": "광화문 일민미술관 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 11250,
+      "ratio": 0.002488888888888889
+    },
+    {
+      "id": "cmo5zgtqk000004l8s594fn51",
+      "name": "신세계백화점 본점 신세계 스퀘어 전광판 광고",
+      "storedCpm": 55,
+      "plannedRecalcCpm": 24444,
+      "ratio": 0.002250040909834724
+    },
+    {
+      "id": "cmo5zlrlw000604jvnn75y37m",
+      "name": "신세계백화점 본점 신관 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.0049504950495049506
+    },
+    {
+      "id": "cmo5zx0se000004kylegnruet",
+      "name": "종각 J-라이브 미디어 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 13889,
+      "ratio": 0.002015983872129023
+    },
+    {
+      "id": "cmo602kh0000004jujhbem3zx",
+      "name": "영동대교 블루펄 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.003000120004800192
+    },
+    {
+      "id": "cmo60b9fh000204juy36d7dop",
+      "name": "삼각지 용산 해태제과빌딩 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 5263,
+      "ratio": 0.004750142504275128
+    },
+    {
+      "id": "cmo60dych000304kylkf3v6jp",
+      "name": "동대문 피아비스콤빌딩 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.003360134405376215
+    },
+    {
+      "id": "cmo60hc4b000004jsvi1nhtps",
+      "name": "KTX 서울역 광장 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 5455,
+      "ratio": 0.00458295142071494
+    },
+    {
+      "id": "cmo60kl2h000004ju46tn4790",
+      "name": "서울역 부양빌딩 전광판 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 1263,
+      "ratio": 0.012668250197941409
+    },
+    {
+      "id": "cmo60o014000004l572ktu83w",
+      "name": "동대문 헬로APM빌딩 전광판 광고",
+      "storedCpm": 30,
+      "plannedRecalcCpm": 8571,
+      "ratio": 0.0035001750087504373
+    },
+    {
+      "id": "cmo60pw9v000504kyx5s3505r",
+      "name": "동대문 콘하스 커브드 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 5714,
+      "ratio": 0.004025201260063003
+    },
+    {
+      "id": "cmo60rxbv000404jus61guhsy",
+      "name": "동대문 밀리오레빌딩 전광판 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 10909,
+      "ratio": 0.002933357777981483
+    },
+    {
+      "id": "cmo60u0gm000204jspdl8gfc7",
+      "name": "동대문 맥스타일 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 9375,
+      "ratio": 0.0029866666666666665
+    },
+    {
+      "id": "cmo60x38n000704kyuxyt2yqh",
+      "name": "동대문 두타몰 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1786,
+      "ratio": 0.010078387458006719
+    },
+    {
+      "id": "cmo6127nn000204juf0eq8vvy",
+      "name": "동대문 롯데피트인 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2778,
+      "ratio": 0.007919366450683946
+    },
+    {
+      "id": "cmo614qkj000004i8qzc3prnq",
+      "name": "신설동 스파이스빌딩 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 5833,
+      "ratio": 0.004285959197668438
+    },
+    {
+      "id": "cmo61couh000404juod5bxqah",
+      "name": "이태원 해밀턴호텔 파노라마 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 5357,
+      "ratio": 0.004666791114429718
+    },
+    {
+      "id": "cmo61eta5000604jujfng9shu",
+      "name": "이태원 스크린LED 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 5769,
+      "ratio": 0.004506846940544288
+    },
+    {
+      "id": "cmo61gmgi000004l8w1yyvtdo",
+      "name": "이태원 KB국민은행 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7368,
+      "ratio": 0.003800217155266015
+    },
+    {
+      "id": "cmo61hvk4000004juhpy0zn8i",
+      "name": "이태원 무신사 에비뉴빌딩 전광판 광고",
+      "storedCpm": 30,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.0036001440057602304
+    },
+    {
+      "id": "cmo61lsrg000204juraw6dpsw",
+      "name": "이태원역 178 외벽 아트월 광고",
+      "storedCpm": 78,
+      "plannedRecalcCpm": 38889,
+      "ratio": 0.002005708555118414
+    },
+    {
+      "id": "cmo61snu0000404ju7ep5vvke",
+      "name": "명동 리모와 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 2381,
+      "ratio": 0.007559848803023939
+    },
+    {
+      "id": "cmo61x9p2000004l74urruqao",
+      "name": "이태원 모드 127 외벽 아트월 광고",
+      "storedCpm": 85,
+      "plannedRecalcCpm": 42105,
+      "ratio": 0.0020187626172663577
+    },
+    {
+      "id": "cmo61zsuy000004l550h1bjvu",
+      "name": "남산터널빌딩 빌보드 광고",
+      "storedCpm": 65,
+      "plannedRecalcCpm": 33281,
+      "ratio": 0.0019530663141131576
+    },
+    {
+      "id": "cmo6241th000004jor20omtxa",
+      "name": "숭례문 제분회관빌딩 전광판 광고",
+      "storedCpm": 2.31,
+      "plannedRecalcCpm": 2308,
+      "ratio": 0.0010008665511265164
+    },
+    {
+      "id": "cmo626uvp000004kyjn4mmm9k",
+      "name": "광화문 고려빌딩 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.007000840100812098
+    },
+    {
+      "id": "cmo62ntop000005l75nq7soif",
+      "name": "부산 사상역 애플아울렛 본관 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.004319654427645789
+    },
+    {
+      "id": "cmo62roxr000004ks4im8j5jk",
+      "name": "일산 디지털 스페이스 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.0030799384012319755
+    },
+    {
+      "id": "cmo6f7wqq000004ld244yostf",
+      "name": "신사 성현빌딩 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7273,
+      "ratio": 0.0038498556304138597
+    },
+    {
+      "id": "cmo6fei36000004l1m01yef2h",
+      "name": "강남 우신빌딩 전광판 광고",
+      "storedCpm": 29,
+      "plannedRecalcCpm": 9474,
+      "ratio": 0.0030610090774751955
+    },
+    {
+      "id": "cmo6fi649000204l1mh7bx57p",
+      "name": "강남 점프밀라노 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.0033599328013439733
+    },
+    {
+      "id": "cmo6fn6g3000404ld8fzds3f2",
+      "name": "강남 343 Canvas 빌보드 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 32143,
+      "ratio": 0.0009955511308838627
+    },
+    {
+      "id": "cmo6fr5rr000004jqd0d3q821",
+      "name": "강남 비제바노 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 11429,
+      "ratio": 0.002362411409572141
+    },
+    {
+      "id": "cmo6g2wrn000204jqr5609wa9",
+      "name": "강남 규정빌딩 전광판 광고 (뉴발란스 빌딩)",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 6522,
+      "ratio": 0.003986507206378411
+    },
+    {
+      "id": "cmo6g7xfd000004jrfk5ppql0",
+      "name": "신논현역 한웰빌딩 빌보드 광고",
+      "storedCpm": 57,
+      "plannedRecalcCpm": 56667,
+      "ratio": 0.0010058764360209645
+    },
+    {
+      "id": "cmo6gk9yq000004jy9q2ef964",
+      "name": "강남 GT 대각 빌딩 외벽 아트월 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 23077,
+      "ratio": 0.0009966633444555184
+    },
+    {
+      "id": "cmo6gymei000004jmfz9zvdze",
+      "name": "논현역 국전빌딩 옥상 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.003919921601567969
+    },
+    {
+      "id": "cmo6h4p41000004l5bxhz9d37",
+      "name": "논현역 논현빌딩 전광판 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 14118,
+      "ratio": 0.002266610001416631
+    },
+    {
+      "id": "cmo6hq2qh000004lh3w4fkelt",
+      "name": "강남대로 K1 빌보드 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 8929,
+      "ratio": 0.0024638817336767836
+    },
+    {
+      "id": "cmo6hz6l3000004jv0ncqx7l0",
+      "name": "제주 노형오거리 전광판 광고",
+      "storedCpm": 29,
+      "plannedRecalcCpm": 4828,
+      "ratio": 0.006006628003314002
+    },
+    {
+      "id": "cmo6i5vdo000004jopntcpuo3",
+      "name": "제주 노형이마트 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 5063,
+      "ratio": 0.005530317993284614
+    },
+    {
+      "id": "cmo6i9kjn000004jrdwpa4qh3",
+      "name": "제주 광양사거리 다이소빌딩 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.006239500839932805
+    },
+    {
+      "id": "cmo6ihr4q000004l4hoe5lqyi",
+      "name": "제주 광양사거리 그린빌딩 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 4348,
+      "ratio": 0.006209751609935602
+    },
+    {
+      "id": "cmo6ir888000004l5fx2rxd4i",
+      "name": "제주 중앙로 사거리 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3788,
+      "ratio": 0.006599788806758183
+    },
+    {
+      "id": "cmo6ix9wa000004kzq4dfvo5n",
+      "name": "경부고속도로 신갈IC K-pad 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 2885,
+      "ratio": 0.006239168110918544
+    },
+    {
+      "id": "cmo6j4m0m000004kw7h60lxql",
+      "name": "광주 한국방송통신전파진흥원 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 5102,
+      "ratio": 0.005096040768326146
+    },
+    {
+      "id": "cmo6ja078000204kw1hpw20tx",
+      "name": "광주 신세계안과 광연빌딩 전광판 광고",
+      "storedCpm": 29,
+      "plannedRecalcCpm": 5739,
+      "ratio": 0.005053145147238195
+    },
+    {
+      "id": "cmo6jghoj000004jo2gdtykds",
+      "name": "광주 국립아시아문화전당 안산빌딩 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 4348,
+      "ratio": 0.005519779208831647
+    },
+    {
+      "id": "cmo6orica000004jpeyp0f6sf",
+      "name": "고촌역 김포 고촌 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 3529,
+      "ratio": 0.00793425899688297
+    },
+    {
+      "id": "cmo6oy4p3000204jpnmztukt2",
+      "name": "고촌역 김포 송청빌딩 벽면 빌보드 광고",
+      "storedCpm": 30,
+      "plannedRecalcCpm": 7609,
+      "ratio": 0.003942699434879748
+    },
+    {
+      "id": "cmo6p9gi5000004ju8qyaql5e",
+      "name": "부산 해운대 그랜드 조선 LED 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 11905,
+      "ratio": 0.0018479630407391852
+    },
+    {
+      "id": "cmo6q1g1n000004l5d4wzhcin",
+      "name": "광주시청 상무지구 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 2400,
+      "ratio": 0.010833333333333334
+    },
+    {
+      "id": "cmo6r9dxn000004i316q9ls20",
+      "name": "광주 상무지구 옥탑광고 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 3200,
+      "ratio": 0.008125
+    },
+    {
+      "id": "cmo736x3q000004jifhtq72xs",
+      "name": "고촌역 김포 아라베스트빌 벽면 빌보드 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 5102,
+      "ratio": 0.005488043904351235
+    },
+    {
+      "id": "cmo73bwhj000204jiorp0n9hw",
+      "name": "대구 동성로 28아트스퀘어 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 2703,
+      "ratio": 0.008879023307436182
+    },
+    {
+      "id": "cmo73nwwl000204jo7djnf700",
+      "name": "대구 로얄빌딩 외벽 래핑 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.003919921601567969
+    },
+    {
+      "id": "cmo73s84w000004kyzrei6a4j",
+      "name": "대구 반월당네거리 동아백화점 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3030,
+      "ratio": 0.00825082508250825
+    },
+    {
+      "id": "cmo747vjn000004jsh7fzoa7b",
+      "name": "대구 공평네거리 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 3333,
+      "ratio": 0.008100810081008101
+    },
+    {
+      "id": "cmo74ek5f000004jp7xyowkfy",
+      "name": "잠실 유토피아 전광판 광고",
+      "storedCpm": 1.92,
+      "plannedRecalcCpm": 1923,
+      "ratio": 0.0009984399375975038
+    },
+    {
+      "id": "cmo7fdpqb000004kzqpw67k6p",
+      "name": "성남 모란사거리 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.0058505850585058505
+    },
+    {
+      "id": "cmo7fx6j8000004l5f62rwqzk",
+      "name": "전주 경기장네거리 덕천빌딩 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 3913,
+      "ratio": 0.006900076667518528
+    },
+    {
+      "id": "cmo7g95vl000004l595m7sgs3",
+      "name": "부산 구서IC 세정타워 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 3636,
+      "ratio": 0.007700770077007701
+    },
+    {
+      "id": "cmocuxv8b000004jpj092tc8k",
+      "name": "여의도 환승센터 쉘터 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 18182,
+      "ratio": 0.0013749862501374985
+    },
+    {
+      "id": "cmocvh2o3000204jpgayoew86",
+      "name": "여의도 IFC 파노라마 200 미디어 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 7353,
+      "ratio": 0.0024479804161566705
+    },
+    {
+      "id": "cmocvlqxl000104jxhk0zqqfb",
+      "name": "여의도 IFC 타워 디지털 사이니지 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.00352
+    },
+    {
+      "id": "cmocwp83j000004jydnleh4qj",
+      "name": "인천 파라다이스시티 쓰리 윈도우 미디어 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 9184,
+      "ratio": 0.003484320557491289
+    },
+    {
+      "id": "cmocx14zb000004l05j30gdrc",
+      "name": "스타필드 하남점 미디어타워 & 파노라마 스크린 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 7813,
+      "ratio": 0.002815819787533598
+    },
+    {
+      "id": "cmocx36r4000004k1yvrv6y13",
+      "name": "더현대서울 사운즈 포레스트 미디어월 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 24324,
+      "ratio": 0.001151126459463904
+    },
+    {
+      "id": "cmocx8yee000204k1k7fxy3m0",
+      "name": "코엑스 나인투나인 큐브 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 13514,
+      "ratio": 0.0019239307384934143
+    },
+    {
+      "id": "cmocxq02c000004ksy5yojeqb",
+      "name": "채널 코엑스 미디어 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 9091,
+      "ratio": 0.0028599714002859973
+    },
+    {
+      "id": "cmoczcy54000004iinbh730xl",
+      "name": "여의도 IFC 서브웨이 디지털 사이니지 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.0032199356012879744
+    },
+    {
+      "id": "cmocziugc000004ih5fulnnvv",
+      "name": "강남 센트럴시티 시계탑 디지털 사이니지 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 4828,
+      "ratio": 0.005385252692626346
+    },
+    {
+      "id": "cmoczjsgm000004l5okhk3t7g",
+      "name": "용산역 아이파크몰 6F 시네마 싱크월 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 6061,
+      "ratio": 0.0044547104438211515
+    },
+    {
+      "id": "cmoczr4q0000004l8h6aqllk3",
+      "name": "용산역 아이파크몰 3F 싱크월 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 5952,
+      "ratio": 0.004368279569892473
+    },
+    {
+      "id": "cmoczvfrm000204l5c1tjqi35",
+      "name": "용산역 아이파크몰 3F 도파민스테이션 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 8929,
+      "ratio": 0.0030238548549669617
+    },
+    {
+      "id": "cmod0byfm000404l8lvj87iy2",
+      "name": "한남 HILLS 외벽 아트월 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 183529,
+      "ratio": 0.00019070555607015785
+    },
+    {
+      "id": "cmod0qyqw000004jsjszwr5ga",
+      "name": "용산 라부티크 블루 외벽 아트월 광고",
+      "storedCpm": 38,
+      "plannedRecalcCpm": 323077,
+      "ratio": 0.00011761901961451914
+    },
+    {
+      "id": "cmod63z8h000004lar8lfzc4l",
+      "name": "광화문 루미 미디어 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 27027,
+      "ratio": 0.000999000999000999
+    },
+    {
+      "id": "cmod6a2i6000004jutaz5kkit",
+      "name": "시청 디조빌딩 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 9091,
+      "ratio": 0.0028599714002859973
+    },
+    {
+      "id": "cmoe2sdbn000004lb3yqhzoos",
+      "name": "신촌 스타빌딩 외벽 아트월 광고",
+      "storedCpm": 34,
+      "plannedRecalcCpm": 34286,
+      "ratio": 0.0009916584028466428
+    },
+    {
+      "id": "cmoeegaso000004josipc7kqt",
+      "name": "도산대로 S&S타워 전광판 광고",
+      "storedCpm": 7,
+      "plannedRecalcCpm": 6818,
+      "ratio": 0.001026694045174538
+    },
+    {
+      "id": "cmoefh6p6000004l7zaau0r9t",
+      "name": "도산대로 BMW빌딩 전광판 광고",
+      "storedCpm": 4,
+      "plannedRecalcCpm": 4000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmoefn4zx000004i7jsbn32sx",
+      "name": "강남 브라운 성형외과 전광판 광고 (DSG빌딩)",
+      "storedCpm": 8,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.0009600384015360614
+    },
+    {
+      "id": "cmoefzuqw000004ldr11vdhki",
+      "name": "대전 세븐팩토리 전광판 광고",
+      "storedCpm": 2.7,
+      "plannedRecalcCpm": 2667,
+      "ratio": 0.0010123734533183353
+    },
+    {
+      "id": "cmoeg3fvj000004k18cp1hsgn",
+      "name": "부산 순천향빌딩 전광판 광고",
+      "storedCpm": 3.1,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.000992
+    },
+    {
+      "id": "cmoegeup8000004l5vi4ne2aw",
+      "name": "부산 연산역 교차로 엠파크 전광판 광고",
+      "storedCpm": 4.2,
+      "plannedRecalcCpm": 4211,
+      "ratio": 0.0009973877938731894
+    },
+    {
+      "id": "cmoegluf8000204ldbj44j2uq",
+      "name": "여의도 여의12 올림픽대로 디지털 광고",
+      "storedCpm": 7.1,
+      "plannedRecalcCpm": 7059,
+      "ratio": 0.00100580818812863
+    },
+    {
+      "id": "cmoegxvh2000004jph1w6hwie",
+      "name": "홍대 스칼렛빌딩 전광판 광고",
+      "storedCpm": 6.5,
+      "plannedRecalcCpm": 6522,
+      "ratio": 0.0009966268015946028
+    },
+    {
+      "id": "cmoehvz8k000004lbgg3x7dbj",
+      "name": "마포역 도원빌딩 전광판 광고",
+      "storedCpm": 7,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.0009799804003919922
+    },
+    {
+      "id": "cmoehygbf000004kzbj4jjng2",
+      "name": "테헤란로 대명 루첸타워 전광판 광고",
+      "storedCpm": 6.3,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.001008
+    },
+    {
+      "id": "cmoeiqs47000004k7n7mp111t",
+      "name": "지하철 2호선 강남역 미디어월 광고",
+      "storedCpm": 8.3,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.000996039841593664
+    },
+    {
+      "id": "cmoeiyvcf000004ky64k0c9ri",
+      "name": "강남역 자이언트월 미디어 광고",
+      "storedCpm": 6.3,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.001008
+    },
+    {
+      "id": "cmof4noau000004l2wsiuabot",
+      "name": "강남 미진프라자 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1200,
+      "ratio": 0.015
+    },
+    {
+      "id": "cmof4rf1t000004la8mqc92io",
+      "name": "용산 무경빌딩 외벽 아트월 광고",
+      "storedCpm": 13.3,
+      "plannedRecalcCpm": 26667,
+      "ratio": 0.0004987437657029287
+    },
+    {
+      "id": "cmof4vznn000004iinaioc6eb",
+      "name": "강남 미왕빌딩 전광판 광고",
+      "storedCpm": 5.8,
+      "plannedRecalcCpm": 5769,
+      "ratio": 0.0010053735482752643
+    },
+    {
+      "id": "cmof5417k000204lanx892ehf",
+      "name": "강남 미진프라자 래핑 아트월 광고",
+      "storedCpm": 21,
+      "plannedRecalcCpm": 41379,
+      "ratio": 0.000507503806278547
+    },
+    {
+      "id": "cmof68wje000004joftmtbzue",
+      "name": "도산대로 강남빌딩 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.007000840100812098
+    },
+    {
+      "id": "cmoforsto000004jrjawzqx3y",
+      "name": "지하철 2호선 강남역 PMP 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 7895,
+      "ratio": 0.004433185560481318
+    },
+    {
+      "id": "cmofozazn000004jxwwapnyz9",
+      "name": "2호선 건대입구역 디지털포스터 지하철 광고",
+      "storedCpm": 45,
+      "plannedRecalcCpm": 2941,
+      "ratio": 0.015300918055083304
+    },
+    {
+      "id": "cmofp8byj000004jrqctglqs7",
+      "name": "2호선 잠실역 디지털포스터 지하철 광고",
+      "storedCpm": 38,
+      "plannedRecalcCpm": 781,
+      "ratio": 0.04865556978233035
+    },
+    {
+      "id": "cmofpcsf0000004le5ynd6i5a",
+      "name": "지하철 2호선 신촌역 디지털포스터 광고",
+      "storedCpm": 42,
+      "plannedRecalcCpm": 1389,
+      "ratio": 0.03023758099352052
+    },
+    {
+      "id": "cmofpfkgk000004l5b0uvgv6t",
+      "name": "2호선 사당역 디지털포스터 지하철 광고",
+      "storedCpm": 48,
+      "plannedRecalcCpm": 2174,
+      "ratio": 0.02207911683532659
+    },
+    {
+      "id": "cmofprkck000204jr5ij37udz",
+      "name": "공항철도 서울역 랩핑 무빙워크 핸드레일 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 6190,
+      "ratio": 0.004361873990306946
+    },
+    {
+      "id": "cmofpvqak000204jrmhjsdgk7",
+      "name": "지하철 2호선 강남역 아트래핑 지하철 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.0288028802880288
+    },
+    {
+      "id": "cmofq1dky000204l50loidtiq",
+      "name": "공항철도 서울역 E/S 핸드레일 랩핑 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 5128,
+      "ratio": 0.005070202808112325
+    },
+    {
+      "id": "cmofq46f8000204leputaopdy",
+      "name": "신림역사거리 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 2500,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmofqc5hb000404l581glhkhx",
+      "name": "잠실 롯데월드몰 아트캔버스 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2703,
+      "ratio": 0.008139104698483167
+    },
+    {
+      "id": "cmofsvh69000004l7c8q2w5fc",
+      "name": "잠실 롯데월드몰 미디어 샹들리에 광고",
+      "storedCpm": 21,
+      "plannedRecalcCpm": 2604,
+      "ratio": 0.008064516129032258
+    },
+    {
+      "id": "cmofszw06000204l7i195fgqb",
+      "name": "잠실 롯데월드몰 스퀘어 스탠딩 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 2809,
+      "ratio": 0.008187967248131008
+    },
+    {
+      "id": "cmoft2k1s000404l7zd4cu9kr",
+      "name": "잠실 롯데월드몰 커브드 스탠딩 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2747,
+      "ratio": 0.008008736803785948
+    },
+    {
+      "id": "cmoftn5sa000004i2czjp6nxx",
+      "name": "압구정로데오 H2 광고",
+      "storedCpm": 29,
+      "plannedRecalcCpm": 20000,
+      "ratio": 0.00145
+    },
+    {
+      "id": "cmofzt13y000004iaqb29f71w",
+      "name": "현대백화점 무역센터점 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 5882,
+      "ratio": 0.004080244814688882
+    },
+    {
+      "id": "cmoicsn9h00002hjkg5k5qab5",
+      "name": "이대 중앙빌딩 전광판 광고",
+      "storedCpm": 3.9,
+      "plannedRecalcCpm": 3889,
+      "ratio": 0.0010028284906145539
+    },
+    {
+      "id": "cmoicxh50000004jldvz524rn",
+      "name": "홍대 미래프라자 전광판 광고",
+      "storedCpm": 2.7,
+      "plannedRecalcCpm": 2667,
+      "ratio": 0.0010123734533183353
+    },
+    {
+      "id": "cmoidd38o000004k09esg76px",
+      "name": "홍대 상진빌딩 전광판 광고",
+      "storedCpm": 2.7,
+      "plannedRecalcCpm": 2667,
+      "ratio": 0.0010123734533183353
+    },
+    {
+      "id": "cmoidrv5h000004l596jxzu89",
+      "name": "지하철 2호선 홍대입구역 아트래핑 광고",
+      "storedCpm": 12.5,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.002999760019198464
+    },
+    {
+      "id": "cmoidyqp3000004l4kbqfpd7v",
+      "name": "홍대 엠스크린 전광판 광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 1765,
+      "ratio": 0.001019830028328612
+    },
+    {
+      "id": "cmoifb6d1000004jv1ytpm5pz",
+      "name": "홍대 파라다이스텔 빌보드 광고",
+      "storedCpm": 3.6,
+      "plannedRecalcCpm": 3636,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmoifgrsi000004jxzwxudz86",
+      "name": "홍대입구 고종환빌딩 그래피티 외벽 광고",
+      "storedCpm": 5.6,
+      "plannedRecalcCpm": 11111,
+      "ratio": 0.0005040050400504005
+    },
+    {
+      "id": "cmoiflen9000204jx0zmaey1i",
+      "name": "지하철 2호선 홍대입구역 아트캔버스 광고",
+      "storedCpm": 4.4,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmoiftohh000404jx0bxv87ll",
+      "name": "영등포 타임스퀘어 자이언트 아트캔버스 광고",
+      "storedCpm": 1.3,
+      "plannedRecalcCpm": 1290,
+      "ratio": 0.0010077519379844962
+    },
+    {
+      "id": "cmoifvxb6000604jxmw7b3ov7",
+      "name": "지하철 2호선 강남역 아트캔버스 광고",
+      "storedCpm": 3.2,
+      "plannedRecalcCpm": 3200,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmoifyo3g000004ldc5rkbj53",
+      "name": "홍대 오트파사드 E-DISPLAY & 아트월 광고",
+      "storedCpm": 12,
+      "plannedRecalcCpm": 2667,
+      "ratio": 0.0044994375703037125
+    },
+    {
+      "id": "cmoig45kh000004i7bvdio77b",
+      "name": "홍대 시그니처 전광판 광고",
+      "storedCpm": 2,
+      "plannedRecalcCpm": 1600,
+      "ratio": 0.00125
+    },
+    {
+      "id": "cmoig8ceq000204jxf3m4kqhl",
+      "name": "이태원 한남 스퀘어 광고",
+      "storedCpm": 24.5,
+      "plannedRecalcCpm": 49091,
+      "ratio": 0.0004990731498645373
+    },
+    {
+      "id": "cmoigbimb000004ibtxtg5y5e",
+      "name": "시청 광학빌딩 외벽 아트월 광고",
+      "storedCpm": 11.3,
+      "plannedRecalcCpm": 22588,
+      "ratio": 0.0005002656277669559
+    },
+    {
+      "id": "cmoighgdj000004ldv7i295em",
+      "name": "한강진 한남 카시나 외벽 아트월 광고",
+      "storedCpm": 21,
+      "plannedRecalcCpm": 42000,
+      "ratio": 0.0005
+    },
+    {
+      "id": "cmoigmub4000204ldy691acwo",
+      "name": "압구정 제원빌딩 외벽 아트월 광고",
+      "storedCpm": 11.8,
+      "plannedRecalcCpm": 23636,
+      "ratio": 0.000499238449822305
+    },
+    {
+      "id": "cmoih1s8z000004l1pvbm5n9p",
+      "name": "홍대 한울빌딩 외벽 아트월 광고",
+      "storedCpm": 10.5,
+      "plannedRecalcCpm": 20952,
+      "ratio": 0.0005011454753722795
+    },
+    {
+      "id": "cmoiok6vc000004ihc65he4vc",
+      "name": "홍대 동교빌딩 외벽 아트월 광고",
+      "storedCpm": 8.75,
+      "plannedRecalcCpm": 17500,
+      "ratio": 0.0005
+    },
+    {
+      "id": "cmoion1kw000004k30ph61ueo",
+      "name": "서울시 스마트 쉘터 광고 (홍대입구역)",
+      "storedCpm": 3.6,
+      "plannedRecalcCpm": 3636,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmoioq1ky000004jvima0wj2d",
+      "name": "건대입구역 스마트쉘터 광고",
+      "storedCpm": 0.7,
+      "plannedRecalcCpm": 694,
+      "ratio": 0.0010086455331412103
+    },
+    {
+      "id": "cmoiovojx000204ldfuoi4pwo",
+      "name": "독립문역 스마트쉘터 광고",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1714,
+      "ratio": 0.0009918319719953326
+    },
+    {
+      "id": "cmoioyhzu000004l88tmmtfzx",
+      "name": "마곡역 스마트쉘터 광고",
+      "storedCpm": 0.7,
+      "plannedRecalcCpm": 714,
+      "ratio": 0.000980392156862745
+    },
+    {
+      "id": "cmokchyi4000004js484675yf",
+      "name": "스타필드 수원점 미디어타워 광고",
+      "storedCpm": 3.1,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.000992
+    },
+    {
+      "id": "cmokcok1s000204l1rtbt1scz",
+      "name": "스타필드 하남 주차장 파노라마 광고",
+      "storedCpm": 2.7,
+      "plannedRecalcCpm": 2727,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmokcrlqk000004l26wcjkpbn",
+      "name": "인천국제공항 제2터미널 웰컴 미디어 광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 1875,
+      "ratio": 0.0010133333333333333
+    },
+    {
+      "id": "cmokcw7on000204jso0xml0r3",
+      "name": "스타필드 고양점 미디어타워 & 파노라마 스크린 광고",
+      "storedCpm": 2.9,
+      "plannedRecalcCpm": 2941,
+      "ratio": 0.0009860591635498129
+    },
+    {
+      "id": "cmokd0wie000404l1c1fy99s5",
+      "name": "인천국제공항 제2터미널 캐로셀 네트워크 광고",
+      "storedCpm": 5.4,
+      "plannedRecalcCpm": 5385,
+      "ratio": 0.0010027855153203343
+    },
+    {
+      "id": "cmokd3izi000004jo01htyag9",
+      "name": "인천국제공항 제2터미널 브릿지 광고",
+      "storedCpm": 10.9,
+      "plannedRecalcCpm": 10909,
+      "ratio": 0.0009991749931249428
+    },
+    {
+      "id": "cmokde10o000604l1gcqhdeng",
+      "name": "인천국제공항 제2터미널 미디어폴 광고",
+      "storedCpm": 4.2,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.001007919366450684
+    },
+    {
+      "id": "cmokdkqkp000004jyotnkpv5h",
+      "name": "인천국제공항 제2터미널 스폰서 미디어 광고",
+      "storedCpm": 17.3,
+      "plannedRecalcCpm": 17308,
+      "ratio": 0.0009995377859949156
+    },
+    {
+      "id": "cmokdndn9000004jmpqbjexjc",
+      "name": "인천국제공항 제2터미널 빅 스퀘어 광고",
+      "storedCpm": 5.2,
+      "plannedRecalcCpm": 5172,
+      "ratio": 0.001005413766434648
+    },
+    {
+      "id": "cmokdric4000004lgqn0unkfc",
+      "name": "인천국제공항 제2터미널 센터스퀘어 광고",
+      "storedCpm": 4,
+      "plannedRecalcCpm": 4000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmokduapm000004jreheydvdj",
+      "name": "인천국제공항 제2터미널 프리미엄 스퀘어 광고",
+      "storedCpm": 8.9,
+      "plannedRecalcCpm": 8929,
+      "ratio": 0.000996752155896517
+    },
+    {
+      "id": "cmokdw4hv000204jr73i3k86r",
+      "name": "인천국제공항 제2터미널 미디어 아트 광고",
+      "storedCpm": 11.3,
+      "plannedRecalcCpm": 11290,
+      "ratio": 0.00100088573959256
+    },
+    {
+      "id": "cmotzs1rj000004jxv4z38rc5",
+      "name": "광화문 다정빌딩 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 5556,
+      "ratio": 0.003959683225341973
+    },
+    {
+      "id": "cmotzxfcl000004jvinrqejqb",
+      "name": "양재 다보빌딩 전광판 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 2188,
+      "ratio": 0.007312614259597806
+    },
+    {
+      "id": "cmou04p01000004jmsik3qj6b",
+      "name": "부산 해운대 임팩트웨이브 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.004500450045004501
+    },
+    {
+      "id": "cmou0cw0o000005l4i9f0x9tr",
+      "name": "홍대 나비타워 빌보드 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 7273,
+      "ratio": 0.0034373710985838033
+    },
+    {
+      "id": "cmou0ysdd000004jvwwhpj04x",
+      "name": "홍대 토니모리 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 1458,
+      "ratio": 0.019204389574759947
+    },
+    {
+      "id": "cmou1ghoo000004lerlrap9de",
+      "name": "홍대 커브드월 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 2182,
+      "ratio": 0.011457378551787351
+    },
+    {
+      "id": "cmowvovxf000004l756ss68ih",
+      "name": "광화문 이화빌딩 빌보드 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 8929,
+      "ratio": 0.0022398924851607122
+    },
+    {
+      "id": "cmowvpuu4000004i64reyvy2o",
+      "name": "광화문 청계광장 주차타워 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 3750,
+      "ratio": 0.005866666666666667
+    },
+    {
+      "id": "cmowvrnyk000004jsc4bnssvr",
+      "name": "광화문 청계광장 한국빌딩 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7273,
+      "ratio": 0.0038498556304138597
+    },
+    {
+      "id": "cmowwyzzn000004l47leap89r",
+      "name": "종로3가 화영빌딩 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2083,
+      "ratio": 0.01056168987037926
+    },
+    {
+      "id": "cmowwzdx3000004jxdp4h6ih1",
+      "name": "종로3가 낙원빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.015126050420168067
+    },
+    {
+      "id": "cmowwzy12000004jvc0p6gfbi",
+      "name": "시청 세계빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1346,
+      "ratio": 0.01337295690936107
+    },
+    {
+      "id": "cmowx4j49000004l817ot2v8t",
+      "name": "명동 충무빌딩 전광판 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 1059,
+      "ratio": 0.015108593012275733
+    },
+    {
+      "id": "cmowx4s0r000204jvloc310yi",
+      "name": "광화문 코리아나 호텔 K-VISION 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 8621,
+      "ratio": 0.0032478830762092564
+    },
+    {
+      "id": "cmox09v6k000004la61yzgxj1",
+      "name": "명동 허주회관빌딩 전광판 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 610,
+      "ratio": 0.02459016393442623
+    },
+    {
+      "id": "cmox0cnpe000004joeh8b7ic2",
+      "name": "광화문 구세군회관 전광판 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 8276,
+      "ratio": 0.0038666022232962784
+    },
+    {
+      "id": "cmox0f1q5000004ic5ttjyd43",
+      "name": "종각 보신각 외벽 아트월 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 39929,
+      "ratio": 0.0008765558866988905
+    },
+    {
+      "id": "cmox0glf2000204ic227lsid8",
+      "name": "신촌역 퀸즈빌딩 전광판 광고",
+      "storedCpm": 38,
+      "plannedRecalcCpm": 9412,
+      "ratio": 0.004037399065023374
+    },
+    {
+      "id": "cmox0h8ek000004jppjjo5k9o",
+      "name": "신촌 현대백화점 유플렉스 광고",
+      "storedCpm": 37,
+      "plannedRecalcCpm": 8696,
+      "ratio": 0.004254829806807727
+    },
+    {
+      "id": "cmox0lshg000004lbfe6jk8kv",
+      "name": "KTX 서울역 디지털 사각기둥 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3947,
+      "ratio": 0.006333924499619965
+    },
+    {
+      "id": "cmox0m6iv000004ji7jygb54t",
+      "name": "종로3가역 12번 출구 옥상빌보드 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 104,
+      "ratio": 0.17307692307692307
+    },
+    {
+      "id": "cmox0mgek000004i88qkxx09n",
+      "name": "신촌 31 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.00704
+    },
+    {
+      "id": "cmox0mx35000204i8odbpwgvl",
+      "name": "을지로 정산빌딩 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 2778,
+      "ratio": 0.007199424046076314
+    },
+    {
+      "id": "cmox0ppcz000004l4r6sp277c",
+      "name": "KTX 서울역 파노라마 전광판 광고",
+      "storedCpm": 4.32,
+      "plannedRecalcCpm": 4324,
+      "ratio": 0.0009990749306197965
+    },
+    {
+      "id": "cmox0q2ce000404i8sdxeirk1",
+      "name": "홍대 M-스크린 배너 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 18286,
+      "ratio": 0.0017499726566772395
+    },
+    {
+      "id": "cmox0s8av000004l83l8u9wfc",
+      "name": "KTX 서울역 원형기둥 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1778,
+      "ratio": 0.010123734533183352
+    },
+    {
+      "id": "cmox0sfp5000204l8m1w65p63",
+      "name": "KTX 서울역 벽면 랩핑 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 6875,
+      "ratio": 0.004072727272727273
+    },
+    {
+      "id": "cmox0xdjc000404lb6lzkne7o",
+      "name": "KTX 서울역 2층 대합실 와이드칼라 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 5455,
+      "ratio": 0.004399633363886343
+    },
+    {
+      "id": "cmox0xpa8000204jiv6wqvpdl",
+      "name": "명동 평화빌딩 전광판 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 706,
+      "ratio": 0.0226628895184136
+    },
+    {
+      "id": "cmox0xwpz000404l4l9wosmwd",
+      "name": "명동 엠브이 라이브 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 870,
+      "ratio": 0.017241379310344827
+    },
+    {
+      "id": "cmox0zq9p000604l8kjyp38m2",
+      "name": "종각 DGB빌딩 전광판 광고",
+      "storedCpm": 31,
+      "plannedRecalcCpm": 5263,
+      "ratio": 0.005890176705301159
+    },
+    {
+      "id": "cmox127nj000804l8p3nmo48i",
+      "name": "불광역 보광빌딩 전광판 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 4375,
+      "ratio": 0.008
+    },
+    {
+      "id": "cmox12pu5000404jijn02224l",
+      "name": "합정역 동성빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1842,
+      "ratio": 0.009771986970684038
+    },
+    {
+      "id": "cmox14pqi000a04l8wwqca4gm",
+      "name": "공항철도 홍대입구역 DS 광고 (5.6번)",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.004500450045004501
+    },
+    {
+      "id": "cmox1if98000004l8xl49fghr",
+      "name": "강변 동서울터미널 LED 전광판 광고",
+      "storedCpm": 4,
+      "plannedRecalcCpm": 4000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmox1isjw000004l7gp5j7uga",
+      "name": "건대 롯데 스타시티 전광판 광고",
+      "storedCpm": 30,
+      "plannedRecalcCpm": 1000,
+      "ratio": 0.03
+    },
+    {
+      "id": "cmox1ktrm000004ky0zxhol2d",
+      "name": "성수 연무장길 캔버스 LED 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 5455,
+      "ratio": 0.0036663611365719525
+    },
+    {
+      "id": "cmox1l6tx000204kysagmp1v8",
+      "name": "성수역 디지털 성수15 2호선 지하철 광고",
+      "storedCpm": 35,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.0056
+    },
+    {
+      "id": "cmox1ngef000204l7whv03uj2",
+      "name": "성수역 엔스퀘어 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.004559635229181665
+    },
+    {
+      "id": "cmox1q6mc000004ju1dklxhhg",
+      "name": "왕십리 비트플렉스 광고",
+      "storedCpm": 32,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.02772963604852686
+    },
+    {
+      "id": "cmox1rmx5000204ju98zj5nsd",
+      "name": "청량리 무광빌딩 전광판 광고",
+      "storedCpm": 17,
+      "plannedRecalcCpm": 769,
+      "ratio": 0.022106631989596878
+    },
+    {
+      "id": "cmox9zy6g000004js6696iu0v",
+      "name": "부산 해운대 엘리시아호텔 외벽 아트월 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 23077,
+      "ratio": 0.0009966633444555184
+    },
+    {
+      "id": "cmoxa16wn000004jyp56n66ur",
+      "name": "부산 해운대역 송호빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1316,
+      "ratio": 0.013677811550151976
+    },
+    {
+      "id": "cmoxa3i1x000204jygmlgyn84",
+      "name": "부산 해운대 유카로빌딩 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2500,
+      "ratio": 0.0088
+    },
+    {
+      "id": "cmoxs4gur000004jvno4skc1n",
+      "name": "부산 지하철 2호선 센텀시티역 디지털사이니지 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.012596221133659902
+    },
+    {
+      "id": "cmoxs5x0z000005lb7oywk1ge",
+      "name": "부산 카페 라푀유 외벽 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 7813,
+      "ratio": 0.0035837706386791244
+    },
+    {
+      "id": "cmoxs7s2x000205lbh5tf2jjq",
+      "name": "부산 서면교차로 삼성빌딩 전광판 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 1176,
+      "ratio": 0.012755102040816327
+    },
+    {
+      "id": "cmoxs93ix000004jylq0qfhvn",
+      "name": "부산 서면교차로 기업은행 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1724,
+      "ratio": 0.01160092807424594
+    },
+    {
+      "id": "cmoxtv559000004l012ucp5ih",
+      "name": "롯데백화점 부산 본점 전광판 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 968,
+      "ratio": 0.01962809917355372
+    },
+    {
+      "id": "cmoxv0c10000004ibkhytl26r",
+      "name": "부산 남포동 HL타워 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1379,
+      "ratio": 0.014503263234227702
+    },
+    {
+      "id": "cmoxwu87g000004jo5e7oojhw",
+      "name": "부산 중앙역 금진빌딩 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.013995801259622114
+    },
+    {
+      "id": "cmoy0pq73000004kyp252e84b",
+      "name": "부산 미남교차로 대영빌딩 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1563,
+      "ratio": 0.012795905310300703
+    },
+    {
+      "id": "cmoy0vzij000204jy17lysdd2",
+      "name": "창원 LG베스트샵 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1563,
+      "ratio": 0.012795905310300703
+    },
+    {
+      "id": "cmoy0ywj8000004l8oxad4wpt",
+      "name": "진주 10호 광장교차로 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 1346,
+      "ratio": 0.01634472511144131
+    },
+    {
+      "id": "cmoy5ebht000004jsf0jfv9ql",
+      "name": "부산 지하철 2호선 사상역 디지털사이니지 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.012998266897746967
+    },
+    {
+      "id": "cmoy5h09h000004jo5avjq0tf",
+      "name": "대구 범어네거리 전광판 광고",
+      "storedCpm": 1.5,
+      "plannedRecalcCpm": 1471,
+      "ratio": 0.0010197144799456153
+    },
+    {
+      "id": "cmoy5hg79000004ld0q3z2bnb",
+      "name": "동대구 복합환승센터 전광판 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 1053,
+      "ratio": 0.018043684710351376
+    },
+    {
+      "id": "cmoy5jrdi000004i9543h9wb9",
+      "name": "동대구역 대합실 디지털미디어 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.017101710171017102
+    },
+    {
+      "id": "cmoy5n2kk000204jsrrom21ib",
+      "name": "대구 반월당역 환승구간 터널 전광판 광고 세트",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 862,
+      "ratio": 0.02088167053364269
+    },
+    {
+      "id": "cmoyjrhu1000004jubn133nyj",
+      "name": "부산 지하철 1·3호선 연산역 디지털 사이니지 광고",
+      "storedCpm": 1.43,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.001000699790062981
+    },
+    {
+      "id": "cmoyjxgn5000004lepbkbec5l",
+      "name": "NC 다이노스 메인 전광판 광고",
+      "storedCpm": 4.7,
+      "plannedRecalcCpm": 824,
+      "ratio": 0.005703883495145631
+    },
+    {
+      "id": "cmoyjyni0000204jujc85dhca",
+      "name": "대구 신세계백화점 전광판 광고",
+      "storedCpm": 0.92,
+      "plannedRecalcCpm": 923,
+      "ratio": 0.0009967497291440955
+    },
+    {
+      "id": "cmoyk2ahd000204leto9vdkw3",
+      "name": "대구 죽전사거리 윤암빌딩 전광판 광고",
+      "storedCpm": 1.19,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp01ri6p000604l5uybv0qkr",
+      "name": "KTX 청량리역 사각기둥 광고",
+      "storedCpm": 0.7,
+      "plannedRecalcCpm": 714,
+      "ratio": 0.000980392156862745
+    },
+    {
+      "id": "cmp0207q1000404l7fw8bc939",
+      "name": "신사 메트로빌딩 전광판 광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 1842,
+      "ratio": 0.000977198697068404
+    },
+    {
+      "id": "cmp021ojt000604l1ken36wh9",
+      "name": "강남 원앤원빌딩 전광판 광고",
+      "storedCpm": 4.7,
+      "plannedRecalcCpm": 4688,
+      "ratio": 0.0010025597269624573
+    },
+    {
+      "id": "cmp027fo0000a04l16p2swiio",
+      "name": "강남 랜드마크빌딩 전광판 광고",
+      "storedCpm": 3.9,
+      "plannedRecalcCpm": 3871,
+      "ratio": 0.0010074916042366313
+    },
+    {
+      "id": "cmp028dmk000604kzu1jm7ex8",
+      "name": "김포공항 동아빌딩 전광판 광고",
+      "storedCpm": 2.4,
+      "plannedRecalcCpm": 2381,
+      "ratio": 0.001007979840403192
+    },
+    {
+      "id": "cmp02989a000804l5lk08ra0v",
+      "name": "사당역 산광빌딩 전광판 광고",
+      "storedCpm": 3,
+      "plannedRecalcCpm": 3019,
+      "ratio": 0.0009937065253395165
+    },
+    {
+      "id": "cmp02a32h000804jx74rsirpz",
+      "name": "서울대입구역 우남빌딩 전광판 광고",
+      "storedCpm": 2.1,
+      "plannedRecalcCpm": 2128,
+      "ratio": 0.000986842105263158
+    },
+    {
+      "id": "cmp02df4n000c04l108l21ra9",
+      "name": "스타필드 안성점 미디어타워 광고",
+      "storedCpm": 10.8,
+      "plannedRecalcCpm": 10811,
+      "ratio": 0.0009989825178059384
+    },
+    {
+      "id": "cmp02e0n7000a04jx1rze9gst",
+      "name": "여의도 IFC 시네마 DS 광고",
+      "storedCpm": 6.25,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp02kgeh000804kz7pc7pv1t",
+      "name": "강남 센트럴시티 언더월드 패브릭5 광고",
+      "storedCpm": 5.4,
+      "plannedRecalcCpm": 5405,
+      "ratio": 0.0009990749306197965
+    },
+    {
+      "id": "cmp02lm2d000c04kzu8wo3e6z",
+      "name": "강남 센트럴시티 이마트24상단 라이트박스 광고",
+      "storedCpm": 3,
+      "plannedRecalcCpm": 2976,
+      "ratio": 0.0010080645161290322
+    },
+    {
+      "id": "cmp02mv9s000e04l1tlkvxy7a",
+      "name": "강남 센트럴시티 커튼월 라이트 박스 광고",
+      "storedCpm": 8.7,
+      "plannedRecalcCpm": 8721,
+      "ratio": 0.0009975920192638458
+    },
+    {
+      "id": "cmp02npts000804l7xefcajsf",
+      "name": "강남 센트럴시티 진입로 디지털 사이티지 광고",
+      "storedCpm": 4.2,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.001007919366450684
+    },
+    {
+      "id": "cmp02obov000004josyak118o",
+      "name": "강남 센트럴시티 보이드 디지털사이니지 광고",
+      "storedCpm": 3.8,
+      "plannedRecalcCpm": 3784,
+      "ratio": 0.0010042283298097251
+    },
+    {
+      "id": "cmp02p1ei000a04l7aqmf0vnd",
+      "name": "강남 센트럴시티 게이트 DS 광고",
+      "storedCpm": 4.7,
+      "plannedRecalcCpm": 4688,
+      "ratio": 0.0010025597269624573
+    },
+    {
+      "id": "cmp02q6wy000c04l7757f1f4h",
+      "name": "강남 센트럴시티 스퀘어 DS 광고",
+      "storedCpm": 7.1,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000993980120397592
+    },
+    {
+      "id": "cmp02tc6b000e04l73w1ycspt",
+      "name": "강남 센트럴시티 지하주차장 라이트박스 광고",
+      "storedCpm": 5.7,
+      "plannedRecalcCpm": 5699,
+      "ratio": 0.001000175469380593
+    },
+    {
+      "id": "cmp0eixym000204iblzrh6a9m",
+      "name": "강남 센트럴시티 언더월드 디지털사이니지 광고",
+      "storedCpm": 11.1,
+      "plannedRecalcCpm": 11111,
+      "ratio": 0.0009990099900999009
+    },
+    {
+      "id": "cmp0ekqf0000004l2it1jt0my",
+      "name": "신사 메가 센트로(확장) 랩핑 광고",
+      "storedCpm": 15.4,
+      "plannedRecalcCpm": 15385,
+      "ratio": 0.0010009749756256093
+    },
+    {
+      "id": "cmp0elflu000004jstutwqozo",
+      "name": "성수 호텔포코 빌보드 광고",
+      "storedCpm": 8.3,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.000996039841593664
+    },
+    {
+      "id": "cmp0er2cp000204l29x0gg03l",
+      "name": "강남대로 미디어폴 광고",
+      "storedCpm": 14,
+      "plannedRecalcCpm": 14035,
+      "ratio": 0.000997506234413965
+    },
+    {
+      "id": "cmp0eu15v000204jsjrn73r5c",
+      "name": "신사 메가센트로 옥탑 광고",
+      "storedCpm": 19.5,
+      "plannedRecalcCpm": 19455,
+      "ratio": 0.0010023130300693909
+    },
+    {
+      "id": "cmp0eypg9000004jikad7yrxu",
+      "name": "지하철 9호선 신논현역 캔버스9 광고",
+      "storedCpm": 2.2,
+      "plannedRecalcCpm": 2199,
+      "ratio": 0.0010004547521600727
+    },
+    {
+      "id": "cmp0eza7s000204jim80t8ymo",
+      "name": "지하철 9호선 고속터미널역 캔버스9 광고",
+      "storedCpm": 1.09,
+      "plannedRecalcCpm": 1093,
+      "ratio": 0.0009972552607502288
+    },
+    {
+      "id": "cmp0ezyna000004ient8k3ogh",
+      "name": "지하철 9호선 노량진역 캔버스9 광고",
+      "storedCpm": 1.02,
+      "plannedRecalcCpm": 1016,
+      "ratio": 0.0010039370078740158
+    },
+    {
+      "id": "cmp0f0hei000404l2jhaokr9d",
+      "name": "지하철 9호선 여의도역 캔버스9 광고",
+      "storedCpm": 2.18,
+      "plannedRecalcCpm": 2180,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp0f3wki000604ibq97ht1kj",
+      "name": "원주 고속버스터미널 옆 대호빌딩 전광판 광고",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1739,
+      "ratio": 0.00097757331799885
+    },
+    {
+      "id": "cmp0f8s2i000804ibzqa9awfs",
+      "name": "대전역 광장 시그니아빌딩 옥상전광판 광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 1892,
+      "ratio": 0.0010042283298097251
+    },
+    {
+      "id": "cmp0fafob000204ielpuyv2i4",
+      "name": "대전 뉴유성프라자 전광판 광고",
+      "storedCpm": 3,
+      "plannedRecalcCpm": 3030,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmp0fdko2000404ji9jn4xlin",
+      "name": "영등포 태광빌딩 전광판 광고",
+      "storedCpm": 5.3,
+      "plannedRecalcCpm": 5263,
+      "ratio": 0.0010070302109063272
+    },
+    {
+      "id": "cmp0fj58m000604iekx06k3w4",
+      "name": "사당 도양빌딩 전광판 광고",
+      "storedCpm": 4.5,
+      "plannedRecalcCpm": 4528,
+      "ratio": 0.000993816254416961
+    },
+    {
+      "id": "cmp0flm3o000804l25v8pmo4x",
+      "name": "여의도 원센티널 전광판 광고",
+      "storedCpm": 3.6,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.0010081209745169421
+    },
+    {
+      "id": "cmp0fmd42000a04l2h8i63c9a",
+      "name": "신사 휴먼타워 H-STATION 전광판 광고",
+      "storedCpm": 2.9,
+      "plannedRecalcCpm": 2885,
+      "ratio": 0.0010051993067590988
+    },
+    {
+      "id": "cmp0fmxl0000004l5u5uyxetd",
+      "name": "도산대로 백영빌딩 전광판 광고",
+      "storedCpm": 3.9,
+      "plannedRecalcCpm": 3947,
+      "ratio": 0.0009880922219407144
+    },
+    {
+      "id": "cmp0fp890000a04ib0rc2ymad",
+      "name": "강남 어메이징 파르나스 미디어필러 광고",
+      "storedCpm": 12.2,
+      "plannedRecalcCpm": 12245,
+      "ratio": 0.0009963250306247447
+    },
+    {
+      "id": "cmp0fpvkv000204l5gk6h9z1f",
+      "name": "강남 파고다타워 파나플렉스&랩핑 광고",
+      "storedCpm": 26.4,
+      "plannedRecalcCpm": 26389,
+      "ratio": 0.0010004168403501459
+    },
+    {
+      "id": "cmp0fqllg000c04l224m03z8e",
+      "name": "강남 파고다타워 파나플렉스 광고",
+      "storedCpm": 20.8,
+      "plannedRecalcCpm": 20833,
+      "ratio": 0.0009984159746555946
+    },
+    {
+      "id": "cmp0fsg94000e04l2tjtr1rir",
+      "name": "도산대로 SGF타워 전광판 광고",
+      "storedCpm": 3.9,
+      "plannedRecalcCpm": 3947,
+      "ratio": 0.0009880922219407144
+    },
+    {
+      "id": "cmp0ft41s000604jis6yarw35",
+      "name": "테헤란로 슈페리어타워 전광판 광고",
+      "storedCpm": 4.7,
+      "plannedRecalcCpm": 4688,
+      "ratio": 0.0010025597269624573
+    },
+    {
+      "id": "cmp0fvmmi000804jit9tm56ts",
+      "name": "강남 어메이징 파르나스 라이트박스 광고",
+      "storedCpm": 17.9,
+      "plannedRecalcCpm": 17857,
+      "ratio": 0.001002408019264154
+    },
+    {
+      "id": "cmp0g6lhz000804ieyfz5ywk1",
+      "name": "도산대로 MZ 캔버스 옥탑 광고",
+      "storedCpm": 13.5,
+      "plannedRecalcCpm": 13514,
+      "ratio": 0.0009989640372946574
+    },
+    {
+      "id": "cmp0g7wc8000a04ieq9xemdiu",
+      "name": "인천 터미널역 커브드 광고",
+      "storedCpm": 3.2,
+      "plannedRecalcCpm": 3200,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp0gbdnu000404l534qeaulo",
+      "name": "인천 부평역 KB국민은행 전광판 광고",
+      "storedCpm": 3,
+      "plannedRecalcCpm": 3030,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmp0gchtx000g04ibkdgdqhrz",
+      "name": "인천 부평역 창성빌딩 전광판 광고",
+      "storedCpm": 4.8,
+      "plannedRecalcCpm": 4848,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmp0gd45o000c04ji4usu8p0e",
+      "name": "예술회관역 인천1호선 지하철 DS 광고",
+      "storedCpm": 1.3,
+      "plannedRecalcCpm": 1294,
+      "ratio": 0.0010046367851622876
+    },
+    {
+      "id": "cmp0geb4p000i04ibjncqsfya",
+      "name": "부평구청역 인천1호선 지하철 DS 광고",
+      "storedCpm": 2,
+      "plannedRecalcCpm": 2000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp0gg9e3000e04jicm5nl221",
+      "name": "작전역 인천1호선 지하철 DS 광고",
+      "storedCpm": 2.1,
+      "plannedRecalcCpm": 2065,
+      "ratio": 0.001016949152542373
+    },
+    {
+      "id": "cmp0ghi1y000k04ib74b3zpz2",
+      "name": "인천 지하철 디지털 사이니지 광고 (계양역)",
+      "storedCpm": 1.2,
+      "plannedRecalcCpm": 1176,
+      "ratio": 0.001020408163265306
+    },
+    {
+      "id": "cmp0gi5je000g04jile8iqnr5",
+      "name": "부평역 인천1호선 지하철 DS 광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 1946,
+      "ratio": 0.0009763617677286742
+    },
+    {
+      "id": "cmp0gjlox000m04ib37h33kgd",
+      "name": "원인재역 인천1호선 지하철 DS 광고",
+      "storedCpm": 1.4,
+      "plannedRecalcCpm": 1410,
+      "ratio": 0.0009929078014184398
+    },
+    {
+      "id": "cmp0gyh8i000004jp4u4xokpx",
+      "name": "강원 용평리조트 스키장 전광판 광고",
+      "storedCpm": 55.6,
+      "plannedRecalcCpm": 55556,
+      "ratio": 0.0010007919936640508
+    },
+    {
+      "id": "cmp0h0vim000004l756rxncaq",
+      "name": "강원 웰리힐리 파크 스키장 전광판 광고",
+      "storedCpm": 46.9,
+      "plannedRecalcCpm": 46875,
+      "ratio": 0.0010005333333333332
+    },
+    {
+      "id": "cmp0rlo9x000004ktbg9ix4ad",
+      "name": "강원 휘닉스파크 스키장 전광판 광고",
+      "storedCpm": 35.7,
+      "plannedRecalcCpm": 35714,
+      "ratio": 0.000999607996863975
+    },
+    {
+      "id": "cmp0rn2si000004ib4p2ytrb7",
+      "name": "강원 비발디파크(구: 대명) 스키장 광고",
+      "storedCpm": 48.1,
+      "plannedRecalcCpm": 48077,
+      "ratio": 0.0010004783992345612
+    },
+    {
+      "id": "cmp0rojyd000004l21dlkqci8",
+      "name": "강원 오크밸리 리조트 스키장 전광판 광고",
+      "storedCpm": 35.7,
+      "plannedRecalcCpm": 35714,
+      "ratio": 0.000999607996863975
+    },
+    {
+      "id": "cmp3aru5q000004kzxzxwourt",
+      "name": "서울 시내 버스 TV 광고",
+      "storedCpm": 0.9,
+      "plannedRecalcCpm": 889,
+      "ratio": 0.0010123734533183351
+    },
+    {
+      "id": "cmp3biu21000004l8a8ijkh9c",
+      "name": "지하철 2호선 메트로라이브 광고",
+      "storedCpm": 1,
+      "plannedRecalcCpm": 1000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3cfdsy000004jo3v38d9f4",
+      "name": "헤스티아 LED 버스 외부 랩핑 광고",
+      "storedCpm": 1.92,
+      "plannedRecalcCpm": 1923,
+      "ratio": 0.0009984399375975038
+    },
+    {
+      "id": "cmp3csmb2000004l43sen816g",
+      "name": "지하철 신분당선 메트로 라이브 광고",
+      "storedCpm": 0.53,
+      "plannedRecalcCpm": 526,
+      "ratio": 0.0010076045627376426
+    },
+    {
+      "id": "cmp3ev9u5000004jpiwb5oj69",
+      "name": "대전 버스 외부 광고",
+      "storedCpm": 0.054,
+      "plannedRecalcCpm": 54,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3ny83f00001jjkucdrzl7q",
+      "name": "(지선) 경기 버스 외부 광고",
+      "storedCpm": 0.055,
+      "plannedRecalcCpm": 55,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3oel3d00021jjk0lbp1u75",
+      "name": "(광역) 경기 버스 외부 광고",
+      "storedCpm": 0.059,
+      "plannedRecalcCpm": 59,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3u6zta00061jjksoe03iv3",
+      "name": "(B권역) 서울 버스 외부 광고",
+      "storedCpm": 0.038,
+      "plannedRecalcCpm": 38,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3uulqi000004lb9uwuuspg",
+      "name": "(A권역) 서울 버스 외부 광고",
+      "storedCpm": 0.035,
+      "plannedRecalcCpm": 35,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3uwie0000204lbw1zmrp2l",
+      "name": "금호 고속버스 외부 광고",
+      "storedCpm": 0.024,
+      "plannedRecalcCpm": 24,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3v1nz5000004kzekccm73t",
+      "name": "MOAD 차량 광고",
+      "storedCpm": 0.021,
+      "plannedRecalcCpm": 21,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3v7v99000204l1gdoodg2q",
+      "name": "택시 미디어바 광고",
+      "storedCpm": 0.34,
+      "plannedRecalcCpm": 345,
+      "ratio": 0.0009855072463768116
+    },
+    {
+      "id": "cmp3v92yy000004jr7i6ykgy1",
+      "name": "골프장 미디어바 광고",
+      "storedCpm": 1.75,
+      "plannedRecalcCpm": 1754,
+      "ratio": 0.0009977194982896237
+    },
+    {
+      "id": "cmp3v9nq7000404l1865x84wf",
+      "name": "경기 버스 내부 유리창 프로모션 광고",
+      "storedCpm": 0.008,
+      "plannedRecalcCpm": 8,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp3vahjk000204jrc8b97d7y",
+      "name": "(지선) 경기 버스 내부 파노라마 광고",
+      "storedCpm": 0.016,
+      "plannedRecalcCpm": 13,
+      "ratio": 0.0012307692307692308
+    },
+    {
+      "id": "cmp3vb0q9000204kzu575iq32",
+      "name": "(광역) 경기 버스 내부 파노라마 광고",
+      "storedCpm": 0.017,
+      "plannedRecalcCpm": 17,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmp65rrot000004jx2o87isb3",
+      "name": "시청 근원빌딩 전광판 광고",
+      "storedCpm": 1.18,
+      "plannedRecalcCpm": 1176,
+      "ratio": 0.0010034013605442176
+    },
+    {
+      "id": "cmp69eour000004jfak485hgz",
+      "name": "영동대교 리베라호텔 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 1333,
+      "ratio": 0.016504126031507877
+    },
+    {
+      "id": "cmp6hewof000004lacxmyp02m",
+      "name": "강릉 옥천오거리 전광판 광고",
+      "storedCpm": 0.91,
+      "plannedRecalcCpm": 909,
+      "ratio": 0.0010011001100110012
+    },
+    {
+      "id": "cmp6hl2gs000204lavbke1kqt",
+      "name": "신사 YK빌딩 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3158,
+      "ratio": 0.007916402786573781
+    },
+    {
+      "id": "cmp7vhftd000004iblf8rbd6c",
+      "name": "신사 SYH타워 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.00840042002100105
+    },
+    {
+      "id": "cmp7vz5s7000004leqxvoa2vk",
+      "name": "도산대로 큐빅타워 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.0064
+    },
+    {
+      "id": "cmp7w9fil000004jv7nhfqbzd",
+      "name": "도산대로 엠포리아빌딩 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 3429,
+      "ratio": 0.006707494896471274
+    },
+    {
+      "id": "cmp7wcek4000204jvupgubwwz",
+      "name": "도산대로 썬앤빌 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 3158,
+      "ratio": 0.007599746675110829
+    },
+    {
+      "id": "cmp7xmueg000004lgs51khfhw",
+      "name": "도산대로 벤츠빌딩 전광판 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 2903,
+      "ratio": 0.006544953496383052
+    },
+    {
+      "id": "cmp7xoyeo000204lg592ohioh",
+      "name": "도산대로 SB 타워 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 3000,
+      "ratio": 0.008333333333333333
+    },
+    {
+      "id": "cmp7xwnw8000004jlwswyc2ep",
+      "name": "강남구청 성보빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 2500,
+      "ratio": 0.0072
+    },
+    {
+      "id": "cmp7y3wc6000204jl2adjd2he",
+      "name": "도산대로 한섬빌딩 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 3750,
+      "ratio": 0.005866666666666667
+    },
+    {
+      "id": "cmp7y6sqa000004jrsqzhazmu",
+      "name": "강남 글로리강남 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2182,
+      "ratio": 0.01008249312557287
+    },
+    {
+      "id": "cmp7yyiau000004jqp8bqmfhc",
+      "name": "강남대로 GM-LIVE 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 2586,
+      "ratio": 0.008894044856921888
+    },
+    {
+      "id": "cmp7z2c68000204jqzl9gl5z9",
+      "name": "논현역 미래빌딩 전광판 광고",
+      "storedCpm": 17,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.011896431070678797
+    },
+    {
+      "id": "cmp7z7waw000404jlrroix1o6",
+      "name": "테헤란로 역삼빌딩 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.007000350017500875
+    },
+    {
+      "id": "cmp854473000004kyp3henucz",
+      "name": "테헤란로 현익빌딩 전광판 광고",
+      "storedCpm": 21,
+      "plannedRecalcCpm": 3158,
+      "ratio": 0.006649778340721976
+    },
+    {
+      "id": "cmp85qcq6000004ky87bbnrlf",
+      "name": "테헤란로 아이타워 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.008050402520126006
+    },
+    {
+      "id": "cmp85wzre000004jo20fg632s",
+      "name": "테헤란로 디에이빌딩 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 2222,
+      "ratio": 0.009900990099009901
+    },
+    {
+      "id": "cmp862u6o000204jogpge95g5",
+      "name": "테헤란로 GV-LIVE 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 2727,
+      "ratio": 0.009900990099009901
+    },
+    {
+      "id": "cmp867txy000004l1mik3bkdx",
+      "name": "교대역 일이타워 전광판 광고",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 2500,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmp86dklz000004kz1i8b8bxb",
+      "name": "강남 고속터미널 르본시티빌딩 전광판",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 1905,
+      "ratio": 0.009973753280839895
+    },
+    {
+      "id": "cmp86e1eq000004jiqkh6c8ms",
+      "name": "강남 고속터미널 전광판 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 1458,
+      "ratio": 0.0102880658436214
+    },
+    {
+      "id": "cmp86oqb1000004l5l2fo6o5y",
+      "name": "홍대 임오빌딩 전광판 광고",
+      "storedCpm": 12,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.010084033613445379
+    },
+    {
+      "id": "cmp86taa5000204jiewtmz7pp",
+      "name": "홍대 지은빌딩 전광판 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 1778,
+      "ratio": 0.010123734533183352
+    },
+    {
+      "id": "cmp87m4wy000004if34aufpnj",
+      "name": "서대문 신한은행 전광판 광고",
+      "storedCpm": 15,
+      "plannedRecalcCpm": 1538,
+      "ratio": 0.00975292587776333
+    },
+    {
+      "id": "cmp87ybb1000004jrw92ua6bz",
+      "name": "시청 대웅빌딩 전광판 광고",
+      "storedCpm": 7,
+      "plannedRecalcCpm": 727,
+      "ratio": 0.009628610729023384
+    },
+    {
+      "id": "cmp8jgg60000004l5t34i8sjz",
+      "name": "평택역 평택오거리 영진빌딩 전광판 광고",
+      "storedCpm": 9,
+      "plannedRecalcCpm": 938,
+      "ratio": 0.009594882729211088
+    },
+    {
+      "id": "cmp8jj2au000004jvi9uf9jmn",
+      "name": "평택 통복시장 전광판 광고",
+      "storedCpm": 12,
+      "plannedRecalcCpm": 1200,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmp8jmqx9000004jp76n7epc3",
+      "name": "천안 고속버스터미널 전광판 광고",
+      "storedCpm": 9,
+      "plannedRecalcCpm": 921,
+      "ratio": 0.009771986970684038
+    },
+    {
+      "id": "cmp8naebb000004jsvad492fc",
+      "name": "천안 남부오거리 전광판 광고",
+      "storedCpm": 10,
+      "plannedRecalcCpm": 952,
+      "ratio": 0.01050420168067227
+    },
+    {
+      "id": "cmp8nmebf000004juegyhnlti",
+      "name": "천안 일봉산사거리 타월랜드 전광판 광고",
+      "storedCpm": 11,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.009900990099009901
+    },
+    {
+      "id": "cmp8no8l0000004l796vh70f4",
+      "name": "정안 알밤(순천방향)휴게소 전광판 광고",
+      "storedCpm": 11,
+      "plannedRecalcCpm": 1053,
+      "ratio": 0.010446343779677113
+    },
+    {
+      "id": "cmp8ojwer000004l7vldk10kr",
+      "name": "광주 종합버스터미널 맞은편 KBC방송국 전광판 광고",
+      "storedCpm": 9,
+      "plannedRecalcCpm": 938,
+      "ratio": 0.009594882729211088
+    },
+    {
+      "id": "cmp8ona80000004jocub56vgl",
+      "name": "광주 광천사거리 광주MBC 전광판 광고",
+      "storedCpm": 10,
+      "plannedRecalcCpm": 962,
+      "ratio": 0.010395010395010396
+    },
+    {
+      "id": "cmp8p00j9000004l4z5iwwkf0",
+      "name": "광주 상무지구 아이타워 전광판 광고",
+      "storedCpm": 11,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.009900990099009901
+    },
+    {
+      "id": "cmpa2v7id000004juw4qne70o",
+      "name": "종로 건세빌딩 전광판 광고",
+      "storedCpm": 12,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.010084033613445379
+    },
+    {
+      "id": "cmpa2y6rs000104jls9rl0wjh",
+      "name": "종로 큐브빌딩 전광판 광고",
+      "storedCpm": 10,
+      "plannedRecalcCpm": 1042,
+      "ratio": 0.009596928982725527
+    },
+    {
+      "id": "cmpaximu2000004js3rjbqrw5",
+      "name": "남대문 자유빌딩 전광판 광고",
+      "storedCpm": 23,
+      "plannedRecalcCpm": 2308,
+      "ratio": 0.00996533795493934
+    },
+    {
+      "id": "cmpaxsejk000004jurdrj6n9b",
+      "name": "시청 재능교육빌딩 전광판 광고",
+      "storedCpm": 20,
+      "plannedRecalcCpm": 1042,
+      "ratio": 0.019193857965451054
+    },
+    {
+      "id": "cmpayba5g000204jusf607yzp",
+      "name": "충무로 국제빌딩 전광판 광고",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmpazcs38000004kwhf5nf2u8",
+      "name": "명동 재원빌딩 전광판 광고",
+      "storedCpm": 2.11,
+      "plannedRecalcCpm": 2105,
+      "ratio": 0.001002375296912114
+    },
+    {
+      "id": "cmpb8atef000004lbkr77qifn",
+      "name": "서울역 일신빌딩 전광판 광고",
+      "storedCpm": 1.19,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpb8yv60000004l19x9hlk5v",
+      "name": "여의도 유진빌딩 전광판 광고",
+      "storedCpm": 2.08,
+      "plannedRecalcCpm": 2083,
+      "ratio": 0.0009985597695631302
+    },
+    {
+      "id": "cmpb933af000204l18q4t16kt",
+      "name": "여의도 대승빌딩 전광판 광고",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmpb97bzq000404l179dvpjp6",
+      "name": "노량진 순만빌딩 전광판 광고",
+      "storedCpm": 1.32,
+      "plannedRecalcCpm": 1316,
+      "ratio": 0.0010030395136778115
+    },
+    {
+      "id": "cmpb9bnil000004ihro2u9x8r",
+      "name": "쿠팡 송파캠프 전광판 광고",
+      "storedCpm": 1.78,
+      "plannedRecalcCpm": 1778,
+      "ratio": 0.001001124859392576
+    },
+    {
+      "id": "cmpb9dme2000204ihxhn8dgzp",
+      "name": "천호역 신라빌딩 전광판 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmpb9i454000404ihm4gaidcz",
+      "name": "현대백화점 천호점 전광판 광고",
+      "storedCpm": 1.46,
+      "plannedRecalcCpm": 1458,
+      "ratio": 0.0010013717421124828
+    },
+    {
+      "id": "cmpb9m8e9000004iihqknci6x",
+      "name": "천호사거리 태승빌딩 전광판 광고",
+      "storedCpm": 1.51,
+      "plannedRecalcCpm": 1163,
+      "ratio": 0.001298366294067068
+    },
+    {
+      "id": "cmpb9r2hy000204iiy1rpsr6f",
+      "name": "천호대로 강동빌딩 전광판 광고",
+      "storedCpm": 1.55,
+      "plannedRecalcCpm": 1591,
+      "ratio": 0.0009742300439974859
+    },
+    {
+      "id": "cmpbcufq0000004l4kl2vh2no",
+      "name": "사당역 삼진빌딩 전광판 광고",
+      "storedCpm": 4.3,
+      "plannedRecalcCpm": 4286,
+      "ratio": 0.0010032664489034065
+    },
+    {
+      "id": "cmpbcz6tq000004jry0n257v9",
+      "name": "구로 동해빌딩 전광판 광고",
+      "storedCpm": 1.6,
+      "plannedRecalcCpm": 1563,
+      "ratio": 0.0010236724248240564
+    },
+    {
+      "id": "cmpbd5ji0000004lbxssgh6sq",
+      "name": "구로 경동나비엔 전광판 광고",
+      "storedCpm": 1.3,
+      "plannedRecalcCpm": 1333,
+      "ratio": 0.0009752438109527382
+    },
+    {
+      "id": "cmpc9yuwa000004l8blx83uyn",
+      "name": "여수 메가박스 전광판 광고",
+      "storedCpm": 2.2,
+      "plannedRecalcCpm": 2222,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmpca1tbb000204l84v1kfrzn",
+      "name": "순천 팔마오거리 지뜨호텔 전광판 광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 1818,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmpca463d000404l8on57twws",
+      "name": "순천 조례삼거리 서울우리병원 전광판 광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 1875,
+      "ratio": 0.0010133333333333333
+    },
+    {
+      "id": "cmpcabkgx000004kw0io16eoi",
+      "name": "광주 금남로 천하빌딩 전광판 광고",
+      "storedCpm": 1.25,
+      "plannedRecalcCpm": 1250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpcamnsx000004i3q2d5ohav",
+      "name": "광주 송정역 은성빌딩 전광판 광고",
+      "storedCpm": 1.6,
+      "plannedRecalcCpm": 1579,
+      "ratio": 0.001013299556681444
+    },
+    {
+      "id": "cmpcascft000204kwtjycd0zc",
+      "name": "목포 코아빌딩 전광판 광고",
+      "storedCpm": 2.1,
+      "plannedRecalcCpm": 2105,
+      "ratio": 0.000997624703087886
+    },
+    {
+      "id": "cmpcawpfp000204i385nxaflt",
+      "name": "목포 MBC스테이션월 전광판 광고",
+      "storedCpm": 2.75,
+      "plannedRecalcCpm": 2750,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpdb1yeb000004jxohnd90wm",
+      "name": "춘천 중앙로터리 SC제일은행 전광판 광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 1905,
+      "ratio": 0.0009973753280839894
+    },
+    {
+      "id": "cmpdbwneg000004ju3yqfxpqc",
+      "name": "원주 남부시장사거리 전광판 광고",
+      "storedCpm": 1.1,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmpdc3g3l000004i96rajw4yn",
+      "name": "원주 혁신도시 조은빌동 전광판 광고",
+      "storedCpm": 1.05,
+      "plannedRecalcCpm": 1053,
+      "ratio": 0.0009971509971509972
+    },
+    {
+      "id": "cmpdd869l000004le53f42g85",
+      "name": "대구 범어네거리 W한의원 전광판",
+      "storedCpm": 25,
+      "plannedRecalcCpm": 1071,
+      "ratio": 0.02334267040149393
+    },
+    {
+      "id": "cmpddmu7u000004jjvot8dk5r",
+      "name": "대구 신매네거리 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 1250,
+      "ratio": 0.0216
+    },
+    {
+      "id": "cmpddti3k000004l5vipglpib",
+      "name": "대구 벤처밸리네거리 호산빌딩 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.02339688041594454
+    },
+    {
+      "id": "cmpde6uwe000004la5s2hnywv",
+      "name": "대구 효신네거리 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 1176,
+      "ratio": 0.022108843537414966
+    },
+    {
+      "id": "cmpdebcdm000004ji3ljh78u9",
+      "name": "대구 동대구역네거리 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 789,
+      "ratio": 0.02788339670468948
+    },
+    {
+      "id": "cmpdey0jo000004jp7wp8b88x",
+      "name": "대구 동대구역 무제여관 전광판 광고",
+      "storedCpm": 24,
+      "plannedRecalcCpm": 1034,
+      "ratio": 0.02321083172147002
+    },
+    {
+      "id": "cmpdf5www000004l1rkkssf7s",
+      "name": "대구 동대구역 은종빌딩 전광판 광고",
+      "storedCpm": 26,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.021848739495798318
+    },
+    {
+      "id": "cmpdfxbux000004jpuc7t18q2",
+      "name": "대구 동대구역 W525타워 전광판 광고",
+      "storedCpm": 28,
+      "plannedRecalcCpm": 1458,
+      "ratio": 0.019204389574759947
+    },
+    {
+      "id": "cmpdtixqw000504l1o2d5iakf",
+      "name": "신사 송천빌딩 전광판 광고",
+      "storedCpm": 27,
+      "plannedRecalcCpm": 5455,
+      "ratio": 0.004949587534372136
+    },
+    {
+      "id": "cmpdvixn0000104jre8fcrabz",
+      "name": "지하철 2호선 강남역 아트플랫폼 광고",
+      "storedCpm": 2.9,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.0010150507525376268
+    },
+    {
+      "id": "cmpdw6b60000204lbzq9zn0go",
+      "name": "부산 자갈치역 JS메디컬 전광판 광고",
+      "storedCpm": 22,
+      "plannedRecalcCpm": 1875,
+      "ratio": 0.011733333333333333
+    },
+    {
+      "id": "cmpdw86yy000604lbo1njx8en",
+      "name": "부산 자갈치시장 해안미디어보드 전광판 광고",
+      "storedCpm": 21,
+      "plannedRecalcCpm": 789,
+      "ratio": 0.026615969581749048
+    },
+    {
+      "id": "cmpmip7fl000004ju6113q3tc",
+      "name": "구파발역 스마트쉘터 광고",
+      "storedCpm": 5.9,
+      "plannedRecalcCpm": 5882,
+      "ratio": 0.0010030601836110166
+    },
+    {
+      "id": "cmppir953000h04jrwr9k7yep",
+      "name": "강남 메가박스 시티빌딩 G-VISION 커브형 전광판 광고",
+      "storedCpm": 1.76,
+      "plannedRecalcCpm": 1765,
+      "ratio": 0.0009971671388101983
+    },
+    {
+      "id": "cmppk9clv001v04jrmrd2e4vv",
+      "name": "코엑스 언더월드 파노라마 광고",
+      "storedCpm": 4.2,
+      "plannedRecalcCpm": 4211,
+      "ratio": 0.0009973877938731894
+    },
+    {
+      "id": "cmppklr9i001d04jvmndwnnl2",
+      "name": "코엑스 XPACE 브릿지 광고",
+      "storedCpm": 8.7,
+      "plannedRecalcCpm": 8679,
+      "ratio": 0.0010024196335983407
+    },
+    {
+      "id": "cmppl4vg7000004jrvdukvwgz",
+      "name": "코엑스 XPACE 빅브릿지 광고",
+      "storedCpm": 8.2,
+      "plannedRecalcCpm": 8214,
+      "ratio": 0.0009982955928901874
+    },
+    {
+      "id": "cmppl6vlf000204kzyig0m1g5",
+      "name": "코엑스 XPACE 와이드브릿지 광고",
+      "storedCpm": 3.6,
+      "plannedRecalcCpm": 3590,
+      "ratio": 0.0010027855153203343
+    },
+    {
+      "id": "cmpplau20000304jjpk4dvmix",
+      "name": "코엑스 XPACE 엣지컬럼 광고",
+      "storedCpm": 8.2,
+      "plannedRecalcCpm": 8163,
+      "ratio": 0.0010045326473110375
+    },
+    {
+      "id": "cmppld6o5000104l7280vmqhe",
+      "name": "코엑스 XPACE 스퀘어브릿지 광고",
+      "storedCpm": 3.8,
+      "plannedRecalcCpm": 3784,
+      "ratio": 0.0010042283298097251
+    },
+    {
+      "id": "cmppljk1g000b04kzoztgrsuh",
+      "name": "코엑스 브랜드에비뉴(C-LIVE) 광고",
+      "storedCpm": 9.4,
+      "plannedRecalcCpm": 9375,
+      "ratio": 0.0010026666666666667
+    },
+    {
+      "id": "cmpsk57c5000004l8o39qnxs2",
+      "name": "서울 고속터미널 전자게시대 광고",
+      "storedCpm": 0.37,
+      "plannedRecalcCpm": 372,
+      "ratio": 0.0009946236559139785
+    },
+    {
+      "id": "cmptfu901000204leus08dpvg",
+      "name": "신세계 여주 프리미엄 아울렛 전광판 광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 1786,
+      "ratio": 0.001007838745800672
+    },
+    {
+      "id": "cmptgcp8w000004lcetwqulfq",
+      "name": "양양고속도로 가평휴게소 미디어 광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 1818,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmpthegrq000004lb9iccjkho",
+      "name": "샤롯데시어터 디지털사이니지 광고",
+      "storedCpm": 3.6,
+      "plannedRecalcCpm": 3600,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpti93x3000004iivq6hxh24",
+      "name": "롯데월드 매직서클 & DID 패키지 광고",
+      "storedCpm": 2.2,
+      "plannedRecalcCpm": 2222,
+      "ratio": 0.0009900990099009901
+    },
+    {
+      "id": "cmptklfa7000104jxmftxlrt7",
+      "name": "45인승 리무진 버스 래핑 광고",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1719,
+      "ratio": 0.0009889470622454915
+    },
+    {
+      "id": "cmpwwytko000004jpqecqr1ro",
+      "name": "서울 남부버스터미널 LED 전광판 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmpwxsqf5000004jst7x1huq3",
+      "name": "KTX 경주역 출입구 상단 조명 광고 (1번/2번)",
+      "storedCpm": 4.8,
+      "plannedRecalcCpm": 4800,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpwy0iwv000204jsg5oa2bu2",
+      "name": "KTX 경주역 LED전광판 광고",
+      "storedCpm": 4,
+      "plannedRecalcCpm": 4000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmpxgdyzc000004jsicuh4bvb",
+      "name": "지하철 신분당선 판교역 미디어가든 광고",
+      "storedCpm": 2.86,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.0010010500525026252
+    },
+    {
+      "id": "cmq979xt9000304l1xdjsaylw",
+      "name": "스타필드 하남점 LED 전광판 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmq97fjbd000704l10023hg6a",
+      "name": "더현대 서울 디지털갤러리 광고",
+      "storedCpm": 3.13,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.0010016
+    },
+    {
+      "id": "cmq97qr8m000004lh178f83fr",
+      "name": "스타필드 위례점 LED 전광판 광고",
+      "storedCpm": 0.71,
+      "plannedRecalcCpm": 714,
+      "ratio": 0.0009943977591036414
+    },
+    {
+      "id": "cmq97wp63000304l1gzeec2b0",
+      "name": "스타필드 부천점 LED 전광판 광고",
+      "storedCpm": 0.94,
+      "plannedRecalcCpm": 938,
+      "ratio": 0.0010021321961620469
+    },
+    {
+      "id": "cmq97zu2j000504l1jj94n7cy",
+      "name": "스타필드 안성점 LED 전광판 광고",
+      "storedCpm": 1.43,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.001000699790062981
+    },
+    {
+      "id": "cmq98gjxy000704jj0lvh0o8q",
+      "name": "스타필드 빌리지 운정점 LED 전광판 광고",
+      "storedCpm": 0.86,
+      "plannedRecalcCpm": 857,
+      "ratio": 0.0010035005834305717
+    },
+    {
+      "id": "cmq99js80000204l7kldgf4a1",
+      "name": "스타필드 하남점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 2.78,
+      "plannedRecalcCpm": 2778,
+      "ratio": 0.0010007199424046077
+    },
+    {
+      "id": "cmq9a8fpc000704lceqlspz1v",
+      "name": "스타필드 고양점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 3.13,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.0010016
+    },
+    {
+      "id": "cmq9alham001504js8vjdk66d",
+      "name": "스타필드 안성점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 3.57,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.0009997199663959674
+    },
+    {
+      "id": "cmq9azr0v002604jsgrz6ggxd",
+      "name": "스타필드 수원점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 3.03,
+      "plannedRecalcCpm": 3030,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmq9b3pz1002904js6w1b0t7x",
+      "name": "스타필드 시티 위례점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 2.5,
+      "plannedRecalcCpm": 2500,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmq9b9j1h001d04jwpo1w4lac",
+      "name": "스타필드 부천점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 2,
+      "plannedRecalcCpm": 2000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmq9bbwwm001g04jwwn990igi",
+      "name": "스타필드 시티 명지점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 2.07,
+      "plannedRecalcCpm": 2069,
+      "ratio": 0.001000483325277912
+    },
+    {
+      "id": "cmq9bfwbz000r04ieoiklvf0e",
+      "name": "스타필드 시티 운정점 스탠딩&E.V홀 스크린 광고",
+      "storedCpm": 2.31,
+      "plannedRecalcCpm": 2308,
+      "ratio": 0.0010008665511265164
+    },
+    {
+      "id": "cmq9cpmym000204jltw5crun4",
+      "name": "서울 택시 상단 영상 광고",
+      "storedCpm": 8,
+      "plannedRecalcCpm": 8000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmq9dhabv000204lappy0cbwo",
+      "name": "에코큐브 스마트 쉘터 광고 (테헤란로)",
+      "storedCpm": 1.63,
+      "plannedRecalcCpm": 1630,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqa6k2lz000304jvk9ikbnl3",
+      "name": "인천 구월로데오광장 전광판 광고",
+      "storedCpm": 1.25,
+      "plannedRecalcCpm": 1250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqa7egri000204jukbc91zqd",
+      "name": "제주공항 1층 도착장 LED 광고",
+      "storedCpm": 6.25,
+      "plannedRecalcCpm": 6250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqa7mm2x000104lbnnn4rn6m",
+      "name": "제주공항 1층 도착장 라이트박스 광고 (LB-01)",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqa7t29m000404l4hc1dw5zl",
+      "name": "제주공항 1층 국내/국제 경계선 LED 광고",
+      "storedCpm": 2.86,
+      "plannedRecalcCpm": 2857,
+      "ratio": 0.0010010500525026252
+    },
+    {
+      "id": "cmqa7wy4o000204iegd2fmtl5",
+      "name": "제주공항 2층 면세구간 사각기둥 LED 광고",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqa89ys3000g04laexgq6r7t",
+      "name": "제주공항 2층 면세점 라이트박스 광고",
+      "storedCpm": 5.77,
+      "plannedRecalcCpm": 5769,
+      "ratio": 0.001000173340266944
+    },
+    {
+      "id": "cmqa8ejxd000004lacybzvzho",
+      "name": "제주공항 3층 출발장 라이트박스 광고(LB-09, LB-10)",
+      "storedCpm": 8.33,
+      "plannedRecalcCpm": 8333,
+      "ratio": 0.000999639985599424
+    },
+    {
+      "id": "cmqa8jogg000b04lapfs3omr9",
+      "name": "제주공항 TV전시대 라이트박스 광고",
+      "storedCpm": 10.53,
+      "plannedRecalcCpm": 10526,
+      "ratio": 0.001000380011400342
+    },
+    {
+      "id": "cmqa8uayk000004if5mo3208k",
+      "name": "제주공항 프로모션 존 광고",
+      "storedCpm": 16.67,
+      "plannedRecalcCpm": 16667,
+      "ratio": 0.0010001799964000722
+    },
+    {
+      "id": "cmqa924nc000204ky1c141kst",
+      "name": "제주공항 디지털 사이니지 광고 (패키지)",
+      "storedCpm": 2.34,
+      "plannedRecalcCpm": 2344,
+      "ratio": 0.0009982935153583618
+    },
+    {
+      "id": "cmqaedojj000p04laqr25pbdl",
+      "name": "AK플라자 평택점 LED 광고",
+      "storedCpm": 0.48,
+      "plannedRecalcCpm": 476,
+      "ratio": 0.0010084033613445378
+    },
+    {
+      "id": "cmqaeqzrx000104i5124jpxif",
+      "name": "AK플라자 수원점 LED 광고",
+      "storedCpm": 0.77,
+      "plannedRecalcCpm": 769,
+      "ratio": 0.0010013003901170351
+    },
+    {
+      "id": "cmqafbhc3000204jpkne5ybz6",
+      "name": "AK플라자 분당점 스퀘어 LED 광고",
+      "storedCpm": 0.69,
+      "plannedRecalcCpm": 690,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqafnkt6000004jo47xxvcrb",
+      "name": "지하철 신분당선 강남역 미디어가든 광고",
+      "storedCpm": 3.53,
+      "plannedRecalcCpm": 3529,
+      "ratio": 0.0010002833663927458
+    },
+    {
+      "id": "cmqagank3000004l8e6y4bf8d",
+      "name": "롯데백화점 부산본점 DS 패키지 광고",
+      "storedCpm": 1.15,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.0009965337954939341
+    },
+    {
+      "id": "cmqagtgda000404jg1pnhnq74",
+      "name": "강남 그린 스마트존 광고 (All In One Package)",
+      "storedCpm": 6.67,
+      "plannedRecalcCpm": 6667,
+      "ratio": 0.001000449977501125
+    },
+    {
+      "id": "cmqg6em2r000c04l50zwklunv",
+      "name": "강서구청사거리 베스틴빌딩 전광판 광고",
+      "storedCpm": 3.02,
+      "plannedRecalcCpm": 2642,
+      "ratio": 0.0011430734292202877
+    },
+    {
+      "id": "cmqg6okft000104l2yh5dll83",
+      "name": "강서구청사거리 SJ라벨라 전광판 광고",
+      "storedCpm": 2.94,
+      "plannedRecalcCpm": 2745,
+      "ratio": 0.0010710382513661203
+    },
+    {
+      "id": "cmqg7nhl2000004i8derlksof",
+      "name": "부천 서광빌딩 전광판 광고",
+      "storedCpm": 3.14,
+      "plannedRecalcCpm": 3137,
+      "ratio": 0.0010009563277016257
+    },
+    {
+      "id": "cmqg7yhvi000q04l852a7gya4",
+      "name": "디지털단지오거리 마인드호텔 전광판 광고",
+      "storedCpm": 2.38,
+      "plannedRecalcCpm": 2381,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqg8kvgl000004jmez9xrqvi",
+      "name": "성남 페퍼저축은행 본점 전광판",
+      "storedCpm": 4.07,
+      "plannedRecalcCpm": 4068,
+      "ratio": 0.0010004916420845624
+    },
+    {
+      "id": "cmqhz0v45000104jii9gfjnfh",
+      "name": "신세계백화점 대전점 미디어 광고",
+      "storedCpm": 2.22,
+      "plannedRecalcCpm": 2222,
+      "ratio": 0.0009990999099909993
+    },
+    {
+      "id": "cmqhzcczb000104juszxjtvdt",
+      "name": "대전 버스 쉘터 광고",
+      "storedCpm": 1.25,
+      "plannedRecalcCpm": 1250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqhzzg6c000704l2809gq0xe",
+      "name": "대전 으능정이 스카이로드",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1563,
+      "ratio": 0.000998080614203455
+    },
+    {
+      "id": "cmqi5zlxl000004jjra4yncnf",
+      "name": "광주 유스퀘어 / KBC 중앙 버스쉘터 광고",
+      "storedCpm": 1.25,
+      "plannedRecalcCpm": 1250,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqi6gczc000304l45szy54cf",
+      "name": "광주 버스쉘터 광고",
+      "storedCpm": 0.48,
+      "plannedRecalcCpm": 480,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqi6xjgq000604jj5krliihl",
+      "name": "광주 유스퀘어 기둥 전광판 광고",
+      "storedCpm": 0.28,
+      "plannedRecalcCpm": 278,
+      "ratio": 0.0010071942446043167
+    },
+    {
+      "id": "cmqi7afly000804jjt8wtzifh",
+      "name": "광주 지하철 디지털포스터 광고",
+      "storedCpm": 0.78,
+      "plannedRecalcCpm": 778,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqit76mb000004l4bwjq16q1",
+      "name": "부산 스마트 쉼터형 버스쉘터 광고",
+      "storedCpm": 0.46,
+      "plannedRecalcCpm": 462,
+      "ratio": 0.0009956709956709957
+    },
+    {
+      "id": "cmqitkt21000104l7f31igpr8",
+      "name": "부산 BRT 버스쉘터 광고",
+      "storedCpm": 0.35,
+      "plannedRecalcCpm": 353,
+      "ratio": 0.0009915014164305948
+    },
+    {
+      "id": "cmqizalfq000404l2fzm01b4z",
+      "name": "KTX 차내 영상 광고",
+      "storedCpm": 49.3,
+      "plannedRecalcCpm": 49283,
+      "ratio": 0.0010003449465332873
+    },
+    {
+      "id": "cmqizv1gn000104ik5abt93ut",
+      "name": "KTX 차내 자막 광고",
+      "storedCpm": 8.2,
+      "plannedRecalcCpm": 8214,
+      "ratio": 0.0009982955928901874
+    },
+    {
+      "id": "cmqj2yn5l000104l84ppjbbv0",
+      "name": "대구 시내버스 외부광고",
+      "storedCpm": 1.8,
+      "plannedRecalcCpm": 88,
+      "ratio": 0.020454545454545454
+    },
+    {
+      "id": "cmqj3tdx1000304l54haj7juo",
+      "name": "광주 광역버스 외부광고",
+      "storedCpm": 2.1,
+      "plannedRecalcCpm": 143,
+      "ratio": 0.014685314685314687
+    },
+    {
+      "id": "cmqjbizs5000504if1dyoe7oj",
+      "name": "광주 시내버스 내부 영상 광고",
+      "storedCpm": 1.45,
+      "plannedRecalcCpm": 7,
+      "ratio": 0.20714285714285713
+    },
+    {
+      "id": "cmqjcgjww000004jxxsp6le5f",
+      "name": "부산 시내버스 내부 시트커버 광고",
+      "storedCpm": 0.48,
+      "plannedRecalcCpm": 5,
+      "ratio": 0.096
+    },
+    {
+      "id": "cmqjcnlpw000004lbr74ccfgw",
+      "name": "부산 마을버스 내부광고",
+      "storedCpm": 0.55,
+      "plannedRecalcCpm": 15,
+      "ratio": 0.03666666666666667
+    },
+    {
+      "id": "cmqjd84x1000004joxobzs0w8",
+      "name": "부산 시내버스 내부 중앙문 광고",
+      "storedCpm": 0.55,
+      "plannedRecalcCpm": 5,
+      "ratio": 0.11000000000000001
+    },
+    {
+      "id": "cmqjdj9yr000104i6kcdcxdt1",
+      "name": "부산 시내버스 외부광고",
+      "storedCpm": 1.3,
+      "plannedRecalcCpm": 43,
+      "ratio": 0.030232558139534883
+    },
+    {
+      "id": "cmqjdrl7c000104l85q0lxcr0",
+      "name": "부산 마을버스 외부광고",
+      "storedCpm": 1.9,
+      "plannedRecalcCpm": 125,
+      "ratio": 0.0152
+    },
+    {
+      "id": "cmqje4ew4000504la7yw31uh5",
+      "name": "부산 지하철 2호선 디지털사이니지 패키지",
+      "storedCpm": 17.8,
+      "plannedRecalcCpm": 1000,
+      "ratio": 0.0178
+    },
+    {
+      "id": "cmqjeji35000104jy8yz3inre",
+      "name": "부산 지하철 2호선 사각기둥 광고",
+      "storedCpm": 8.5,
+      "plannedRecalcCpm": 714,
+      "ratio": 0.011904761904761904
+    },
+    {
+      "id": "cmqjeyajd000004l4dwomu4yv",
+      "name": "부산 지하철 2호선  원형기둥 광고",
+      "storedCpm": 7.8,
+      "plannedRecalcCpm": 207,
+      "ratio": 0.03768115942028986
+    },
+    {
+      "id": "cmqjfh4oi000104l5cg8v9wwo",
+      "name": "부산 지하철 2호선 벽면조명 광고",
+      "storedCpm": 6.5,
+      "plannedRecalcCpm": 111,
+      "ratio": 0.05855855855855856
+    },
+    {
+      "id": "cmqjfo8ar000004jv12sudq50",
+      "name": "서울 버스 외부 광고 (A권역/B권역)",
+      "storedCpm": 1.1,
+      "plannedRecalcCpm": 32,
+      "ratio": 0.034375
+    },
+    {
+      "id": "cmqjgaph8000004l1l8lisi2p",
+      "name": "서울 시내버스 중앙문 PKG 광고",
+      "storedCpm": 0.9,
+      "plannedRecalcCpm": 3,
+      "ratio": 0.3
+    },
+    {
+      "id": "cmqjhyh05000404jsdl9go5ht",
+      "name": "인천 송도 가로등 미디어 스트리트 광고",
+      "storedCpm": 92,
+      "plannedRecalcCpm": 7692,
+      "ratio": 0.011960478419136765
+    },
+    {
+      "id": "cmqjivdxk000004js6ltgkr6n",
+      "name": "KTX 오송역 LED 영상광고",
+      "storedCpm": 45,
+      "plannedRecalcCpm": 3784,
+      "ratio": 0.011892177589852008
+    },
+    {
+      "id": "cmqk6ykiq000704jpkzc6z6i3",
+      "name": "인천 송도 트리플스트리트 미디어터널 광고",
+      "storedCpm": 78,
+      "plannedRecalcCpm": 6522,
+      "ratio": 0.011959521619135235
+    },
+    {
+      "id": "cmqk75i0a000h04jpxjru9hpr",
+      "name": "인천 송도 A~C동 지하 연결통로 미디어 월 광고",
+      "storedCpm": 60,
+      "plannedRecalcCpm": 5000,
+      "ratio": 0.012
+    },
+    {
+      "id": "cmqkaqs8t000004l5l4p9crkn",
+      "name": "경기 G버스 TV 광고",
+      "storedCpm": 12,
+      "plannedRecalcCpm": 1000,
+      "ratio": 0.012
+    },
+    {
+      "id": "cmqnw55um000504l7mmuapmbt",
+      "name": "메가박스 시그니처 삼성 코엑스점 전광판 광고",
+      "storedCpm": 6.67,
+      "plannedRecalcCpm": 6667,
+      "ratio": 0.001000449977501125
+    },
+    {
+      "id": "cmqnw98wt000n04jryvia4on2",
+      "name": "메가박스 시그니처 구의 이스트폴점 전광판 광고",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqnxndxp000004kzq0pe5bke",
+      "name": "시그니처 도산 전광판 광고",
+      "storedCpm": 3.13,
+      "plannedRecalcCpm": 3125,
+      "ratio": 0.0010016
+    },
+    {
+      "id": "cmqp7sr5k000004jpyzaczfao",
+      "name": "분당선 압구정로데오역 헬로 로데오 DS 광고",
+      "storedCpm": 1.23,
+      "plannedRecalcCpm": 1231,
+      "ratio": 0.000999187652315191
+    },
+    {
+      "id": "cmqpabzxo000204l8xmqx12z8",
+      "name": "구리 돌다리 사거리 전광판 광고",
+      "storedCpm": 0.94,
+      "plannedRecalcCpm": 938,
+      "ratio": 0.0010021321961620469
+    },
+    {
+      "id": "cmqqt0pwz000004i9us0i97w1",
+      "name": "지하철 공항철도 홍대입구역 환승통로 래핑 벽면 광고 ①-1",
+      "storedCpm": 3.33,
+      "plannedRecalcCpm": 3333,
+      "ratio": 0.000999099909990999
+    },
+    {
+      "id": "cmqqt9jz8000204i94ezv23xv",
+      "name": "지하철 공항철도 홍대입구역 환승통로 래핑 벽면 광고 ①-2",
+      "storedCpm": 3.33,
+      "plannedRecalcCpm": 3333,
+      "ratio": 0.000999099909990999
+    },
+    {
+      "id": "cmqqtdzpo000004kyxgyff2ct",
+      "name": "공항철도 홍대입구 래핑 환승 통로 벽면 광고 3",
+      "storedCpm": 3.33,
+      "plannedRecalcCpm": 3333,
+      "ratio": 0.000999099909990999
+    },
+    {
+      "id": "cmqqtj8lq000104l4xr4ajz0v",
+      "name": "공항철도 홍대입구역 환승통로 무인워크 패키지 광고",
+      "storedCpm": 18.4,
+      "plannedRecalcCpm": 18400,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqqtssxl000204jy0p8pkyo8",
+      "name": "공항철도 홍대입구역 3번 출구 랩핑 패키지 광고",
+      "storedCpm": 14.55,
+      "plannedRecalcCpm": 14545,
+      "ratio": 0.0010003437607425233
+    },
+    {
+      "id": "cmqqtzlk6000d04lktvd4qq11",
+      "name": "공항철도 홍대입구역 3번 출구 코너 래핑 광고",
+      "storedCpm": 5.88,
+      "plannedRecalcCpm": 5882,
+      "ratio": 0.000999659979598776
+    },
+    {
+      "id": "cmqqu3jmw000404jslayiqp5s",
+      "name": "공항철도 홍대입구역 4번 출구 패키지 광고",
+      "storedCpm": 14.29,
+      "plannedRecalcCpm": 14286,
+      "ratio": 0.001000279994400112
+    },
+    {
+      "id": "cmqqu75fp000704js9nhywx9p",
+      "name": "공항철도 홍대입구역 중앙통로 벽면 패키지 광고",
+      "storedCpm": 12.66,
+      "plannedRecalcCpm": 14375,
+      "ratio": 0.0008806956521739131
+    },
+    {
+      "id": "cmqrlupi5000004jmjc2l7wil",
+      "name": "공항철도 서울역 무빙워크 핸드레일 A,B구역 패키지 광고",
+      "storedCpm": 10.89,
+      "plannedRecalcCpm": 10889,
+      "ratio": 0.001000091835797594
+    },
+    {
+      "id": "cmqrm0mvd000004jl7ca3zr6b",
+      "name": "공항철도 서울역 지하3층 환승 구간 광고",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqrm5szv00040bksfoyxzrth",
+      "name": "공항철도 서울역 에스컬레이터 광고③ (지하상층~지상1층)",
+      "storedCpm": 4.17,
+      "plannedRecalcCpm": 4167,
+      "ratio": 0.0010007199424046077
+    },
+    {
+      "id": "cmqrmn6dd000d0bkxnyv1k95o",
+      "name": "공항철도 서울역 에스컬레이터 광고 ④ (지하1층~지하2층)",
+      "storedCpm": 4.72,
+      "plannedRecalcCpm": 4722,
+      "ratio": 0.0009995764506565013
+    },
+    {
+      "id": "cmqrmo26a000f0bkxmar02m9t",
+      "name": "공항철도 서울역 에스컬레이터 광고 ⑤ (지하2층~지하3층)",
+      "storedCpm": 3.37,
+      "plannedRecalcCpm": 3368,
+      "ratio": 0.0010005938242280286
+    },
+    {
+      "id": "cmqrnc9uw00010bj7wh5uteyv",
+      "name": "공항철도 개찰구 래핑 Full Package 광고",
+      "storedCpm": 4.71,
+      "plannedRecalcCpm": 4706,
+      "ratio": 0.0010008499787505312
+    },
+    {
+      "id": "cmqror59000000bi04kjwjkmf",
+      "name": "공항철도 주요 역사 개찰구 래핑 패키지 광고",
+      "storedCpm": 4.84,
+      "plannedRecalcCpm": 4839,
+      "ratio": 0.0010002066542674107
+    },
+    {
+      "id": "cmqrouzqm00000bgh3hmh6sza",
+      "name": "공항철도 서울역 개찰구 래핑 광고",
+      "storedCpm": 3.64,
+      "plannedRecalcCpm": 3636,
+      "ratio": 0.0010011001100110012
+    },
+    {
+      "id": "cmqrozlqf00000bi1voky1g6s",
+      "name": "공항철도 홍대입구역 개찰구 래핑 광고",
+      "storedCpm": 3.94,
+      "plannedRecalcCpm": 3939,
+      "ratio": 0.0010002538715410002
+    },
+    {
+      "id": "cmqrp2sdo000204levvkf0tp6",
+      "name": "공항철도 인천공항T1역 개찰구 래핑 광고",
+      "storedCpm": 3.93,
+      "plannedRecalcCpm": 3929,
+      "ratio": 0.0010002545176889795
+    },
+    {
+      "id": "cmqrp5lq8000004i8dr4ysajj",
+      "name": "공항철도 인천공항T2역 개찰구 래핑 광고",
+      "storedCpm": 5.22,
+      "plannedRecalcCpm": 5217,
+      "ratio": 0.0010005750431282346
+    },
+    {
+      "id": "cmqrp9jnr00000bksl9e6g9fq",
+      "name": "공항철도 디지털미디어시티역 개찰구 래핑",
+      "storedCpm": 5.61,
+      "plannedRecalcCpm": 5612,
+      "ratio": 0.0009996436208125445
+    },
+    {
+      "id": "cmqrpktcl00010bje7r3329op",
+      "name": "공항철도 마곡나루역 개찰구 래핑 광고",
+      "storedCpm": 5.22,
+      "plannedRecalcCpm": 5217,
+      "ratio": 0.0010005750431282346
+    },
+    {
+      "id": "cmqrpnxqa00000bj9zhwkdlpj",
+      "name": "공항철도 김포공항역 개찰구 래핑 광고",
+      "storedCpm": 5.38,
+      "plannedRecalcCpm": 5385,
+      "ratio": 0.000999071494893222
+    },
+    {
+      "id": "cmqrpszqp00020bj9kw9m7lzw",
+      "name": "공항철도 공덕역 개찰구 래핑 광고",
+      "storedCpm": 4.95,
+      "plannedRecalcCpm": 4952,
+      "ratio": 0.0009995961227786754
+    },
+    {
+      "id": "cmqrpvzn200010ai3wthj2nhw",
+      "name": "공항철도 계양역 개찰구 래핑 광고",
+      "storedCpm": 4.71,
+      "plannedRecalcCpm": 4706,
+      "ratio": 0.0010008499787505312
+    },
+    {
+      "id": "cmqrpy6vh00030ai366l1xgkn",
+      "name": "공항철도 검암역 개찰구 래핑 광고",
+      "storedCpm": 4.88,
+      "plannedRecalcCpm": 4878,
+      "ratio": 0.001000410004100041
+    },
+    {
+      "id": "cmqrqmra200000bi6tgfbo3uy",
+      "name": "합정역 스마트쉘터 광고 (상·하행)",
+      "storedCpm": 4.76,
+      "plannedRecalcCpm": 4762,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqrqs8hh00000bhxu7psej98",
+      "name": "홍대입구역 스마트쉘터 광고 (상·하행)",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqrqvsb700000bjbcpuhmbdo",
+      "name": "홍대/합정 스마트쉘터 Full Package 광고",
+      "storedCpm": 7.14,
+      "plannedRecalcCpm": 7143,
+      "ratio": 0.000999580008399832
+    },
+    {
+      "id": "cmqruwydr00010bj8vetag2sj",
+      "name": "인천국제공항 키로뷰 Full Package 광고",
+      "storedCpm": 4.44,
+      "plannedRecalcCpm": 4444,
+      "ratio": 0.0009990999099909993
+    },
+    {
+      "id": "cmqrvanaa000104kwitn49xax",
+      "name": "키로뷰 인천국제공항 1터미널 광고",
+      "storedCpm": 5.45,
+      "plannedRecalcCpm": 5455,
+      "ratio": 0.000999083409715857
+    },
+    {
+      "id": "cmqrvefua00010ajgb2ra6gal",
+      "name": "키로뷰 인천국제공항 2터미널 광고",
+      "storedCpm": 5.22,
+      "plannedRecalcCpm": 5217,
+      "ratio": 0.0010005750431282346
+    },
+    {
+      "id": "cmqsrz8n300000ajiqljoibbc",
+      "name": "지하철 5678호선 CM보드 Full Package 광고",
+      "storedCpm": 1.35,
+      "plannedRecalcCpm": 1351,
+      "ratio": 0.000999259807549963
+    },
+    {
+      "id": "cmqssg7q5000004jy5bn2s2ap",
+      "name": "잠실역 지하철 8호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmqssshal00000aj56oar1bmt",
+      "name": "잠실역 지하철 8호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmqssz39f000004kzyxy94y0t",
+      "name": "고속터미널역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.44,
+      "plannedRecalcCpm": 1436,
+      "ratio": 0.0010027855153203343
+    },
+    {
+      "id": "cmqst2ikt000009jky9e0xgbj",
+      "name": "고속터미널역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.44,
+      "plannedRecalcCpm": 1436,
+      "ratio": 0.0010027855153203343
+    },
+    {
+      "id": "cmqst3drx00000ai11qdpmkqk",
+      "name": "건대입구역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqst5w6p000109kpkfqfo4sz",
+      "name": "건대입구역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqst9336000209kp6u0huka5",
+      "name": "여의도역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstczzv00030ajnxs3isw5w",
+      "name": "여의도역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstdweo000009htvl12i0a3",
+      "name": "종로3가역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqste6hy00000akoxccqnmi5",
+      "name": "합정역 지하철 6호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstg2ic00000aj8tktimqip",
+      "name": "종로3가역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstilj0000009j6ndxign8p",
+      "name": "합정역 지하철 6호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstjkkk00060aku4v2cv9am",
+      "name": "광화문역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstjysd000309j6jbcz5dc4",
+      "name": "가산디지털단지역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqstojg700000akuo08nqrm2",
+      "name": "가산디지털단지역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqstp5bx00030bkn0xs830xg",
+      "name": "공덕역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqsts4as00030aku9se9w9l2",
+      "name": "공덕역 지하철 5,7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqstuyl1000004jqlgi2wjeh",
+      "name": "왕십리역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqstx2v500000bkkde7vct8z",
+      "name": "광화문역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsu0fln00010ajgr8ygq0q5",
+      "name": "노원역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsu272r000104l2a83ci39o",
+      "name": "왕십리역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsu3gft000804jf6ewuxdij",
+      "name": "연신내역 지하철 6호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsu9e6100010akgzaq59o3l",
+      "name": "노원역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsuikmp00000ajajxoeuga5",
+      "name": "목동역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsulaol00020ajauq5iu3yo",
+      "name": "연신내역 지하철 6호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsulxgk000109kpyg6pnczr",
+      "name": "영등포구청역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsuok4v000004juzcg0peji",
+      "name": "목동역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsuq16d000009jm80iv63qr",
+      "name": "지하철 7호선 강남구청역 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsusov9000209jmzrlv0wp3",
+      "name": "영등포구청역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsutcos000104kvqvo0eua1",
+      "name": "논현역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsuwnmd00020akqsftkqat9",
+      "name": "강남구청역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsuxgmu00010akq6pgm99bi",
+      "name": "천호역 지하철 5호선 CM보드 광고 (조명)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsuzrfj000109jfjhjkjgaf",
+      "name": "논현역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsv0neh00010akoov4irdgn",
+      "name": "군자역 지하철 5,7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsv3mrk000309kl1g5v8m6k",
+      "name": "천호역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsv4rvb000609jf6hie6u56",
+      "name": "장지역 지하철 8호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsv7bre000009kkdgl0yg4g",
+      "name": "지하철 5,7호선 군자역 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsv94cy00030bjcnuxvei3k",
+      "name": "어린이대공원역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqsvaxtt00000ajjtiqzo55d",
+      "name": "장지역 지하철 8호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsvbk3t00010ajjekxwyx5h",
+      "name": "상봉역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsve0ds00000ajffvsoi5xm",
+      "name": "어린이대공원역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1556,
+      "ratio": 0.0010025706940874036
+    },
+    {
+      "id": "cmqsvfqun00010ajf9igcanhx",
+      "name": "철산역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsvhtww000104jp9zlj1cnn",
+      "name": "상봉역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsvijtu000204jphuqbhlm3",
+      "name": "강동역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsvkrpn00010ajbc1df31sc",
+      "name": "철산역 지하철 7호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsvljxg00020ajbbzl4u9p2",
+      "name": "을지로4가역 지하철 5호선 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqsvnjwc00000aja5g41bt7c",
+      "name": "강동역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.7,
+      "plannedRecalcCpm": 1697,
+      "ratio": 0.0010017678255745434
+    },
+    {
+      "id": "cmqsvtycf00000akixutq6exw",
+      "name": "을지로4가역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.04,
+      "plannedRecalcCpm": 1037,
+      "ratio": 0.0010028929604628737
+    },
+    {
+      "id": "cmqt1otrs00000ajfv6siozwr",
+      "name": "종로 북촌 57갤러리 카페 외벽",
+      "storedCpm": 9.52,
+      "plannedRecalcCpm": 17857,
+      "ratio": 0.0005331242649941199
+    },
+    {
+      "id": "cmqt6zp0w000004kynh35zezw",
+      "name": "숭례문 스마트쉘터 광고 (영상)",
+      "storedCpm": 0.59,
+      "plannedRecalcCpm": 588,
+      "ratio": 0.0010034013605442176
+    },
+    {
+      "id": "cmqt77tds00050akhrb5wuh5f",
+      "name": "숭례문 스마트쉘터 광고 (래핑)",
+      "storedCpm": 0.59,
+      "plannedRecalcCpm": 588,
+      "ratio": 0.0010034013605442176
+    },
+    {
+      "id": "cmqt7egdr000104l54jc6hrmc",
+      "name": "광역전철 스티커 + 듀얼 LCD Full Package 광고",
+      "storedCpm": 1.08,
+      "plannedRecalcCpm": 1081,
+      "ratio": 0.0009990749306197965
+    },
+    {
+      "id": "cmqt8fdte00000ajdvcly2y87",
+      "name": "지하철 1호선 용산역 스크린도어 광고",
+      "storedCpm": 0.93,
+      "plannedRecalcCpm": 476,
+      "ratio": 0.001953781512605042
+    },
+    {
+      "id": "cmqt8p7ce00000aht6emxr7oz",
+      "name": "지하철 1호선 영등포역 스크린도어 광고",
+      "storedCpm": 1.01,
+      "plannedRecalcCpm": 519,
+      "ratio": 0.0019460500963391137
+    },
+    {
+      "id": "cmqt8rfzr00000akpugmx34qt",
+      "name": "지하철 1호선 신도림역 스크린도어 광고",
+      "storedCpm": 0.81,
+      "plannedRecalcCpm": 417,
+      "ratio": 0.0019424460431654677
+    },
+    {
+      "id": "cmqt8t5j800010aj4pqv7m3lq",
+      "name": "지하철 1호선 구로역 스크린도어 광고",
+      "storedCpm": 0.87,
+      "plannedRecalcCpm": 444,
+      "ratio": 0.0019594594594594594
+    },
+    {
+      "id": "cmqt8uxhu000104l85230nc2r",
+      "name": "지하철 1호선 가산디지털단지역 스크린도어 광고",
+      "storedCpm": 1.22,
+      "plannedRecalcCpm": 625,
+      "ratio": 0.001952
+    },
+    {
+      "id": "cmqt8wujs000004ie7vrf66b6",
+      "name": "지하철 1호선 안양역 스크린도어 광고",
+      "storedCpm": 1.73,
+      "plannedRecalcCpm": 889,
+      "ratio": 0.0019460067491563553
+    },
+    {
+      "id": "cmqt8yhvq000304k4vb3iastd",
+      "name": "지하철 1호선 수원역 스크린도어 광고",
+      "storedCpm": 0.95,
+      "plannedRecalcCpm": 488,
+      "ratio": 0.0019467213114754097
+    },
+    {
+      "id": "cmqt906rj00000ajlt4lmwchi",
+      "name": "지하철 1호선 부평역 스크린도어 광고",
+      "storedCpm": 1.26,
+      "plannedRecalcCpm": 645,
+      "ratio": 0.0019534883720930232
+    },
+    {
+      "id": "cmqt91cbu00030ajlgq94wfcr",
+      "name": "지하철 분당선 선릉역 스크린도어 광고",
+      "storedCpm": 1.34,
+      "plannedRecalcCpm": 690,
+      "ratio": 0.0019420289855072465
+    },
+    {
+      "id": "cmqt92hbl00040ajlfvekhvmn",
+      "name": "지하철 분당선 서현역 스크린도어 광고",
+      "storedCpm": 1.81,
+      "plannedRecalcCpm": 930,
+      "ratio": 0.001946236559139785
+    },
+    {
+      "id": "cmqtci0ny000204l8dw0fq4mz",
+      "name": "지하철 강남역 신분당선 출구 디지털 사이니지 광고",
+      "storedCpm": 1.41,
+      "plannedRecalcCpm": 1765,
+      "ratio": 0.0007988668555240793
+    },
+    {
+      "id": "cmqussobh000104l2pw60qme2",
+      "name": "KTX 서울역 브릿지 전광판 광고",
+      "storedCpm": 1.74,
+      "plannedRecalcCpm": 1739,
+      "ratio": 0.0010005750431282346
+    },
+    {
+      "id": "cmquva07z000104jm83ve58cu",
+      "name": "지하철 5호선 오목교역 CM보드 조명 광고 (인쇄)",
+      "storedCpm": 1.84,
+      "plannedRecalcCpm": 1837,
+      "ratio": 0.0010016330974414807
+    },
+    {
+      "id": "cmquvbwf1000704jmqk1dnx35",
+      "name": "오목교역 지하철 5호선 CM보드 영상 광고 (디지털)",
+      "storedCpm": 1.84,
+      "plannedRecalcCpm": 1837,
+      "ratio": 0.0010016330974414807
+    },
+    {
+      "id": "cmquwmka0000604l2qyl38ys7",
+      "name": "명동 미디어폴 디지털 광고",
+      "storedCpm": 1.54,
+      "plannedRecalcCpm": 1538,
+      "ratio": 0.0010013003901170351
+    },
+    {
+      "id": "cmqxwgvs3000104l8e0pj7vxj",
+      "name": "노량진 백이빌딩 전광판 광고",
+      "storedCpm": 1.56,
+      "plannedRecalcCpm": 1563,
+      "ratio": 0.000998080614203455
+    },
+    {
+      "id": "cmqy00saa000004jsndwsfkqe",
+      "name": "부산 서면 센텀메디컬타워 전광판 광고",
+      "storedCpm": 1.11,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.0009990999099909993
+    },
+    {
+      "id": "cmqy0l1eb000204jxb6filhry",
+      "name": "부산 연산역 영남빌딩 전광판 광고",
+      "storedCpm": 1.59,
+      "plannedRecalcCpm": 1591,
+      "ratio": 0.0009993714644877436
+    },
+    {
+      "id": "cmqy1y26e000004l4ooujawvv",
+      "name": "제주지방법원 사거리 전광판 광고",
+      "storedCpm": 3.57,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.0009997199663959674
+    },
+    {
+      "id": "cmqy25eov000004l5ltwmpkh1",
+      "name": "부산 연산역 동광빌딩 전광판 광고",
+      "storedCpm": 1.85,
+      "plannedRecalcCpm": 1852,
+      "ratio": 0.0009989200863930886
+    },
+    {
+      "id": "cmqy2gb32000004l2pf6j5vhg",
+      "name": "부산 남포역 한국투자증권 전광판 광고",
+      "storedCpm": 1.43,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.001000699790062981
+    },
+    {
+      "id": "cmqyev6n8000804l5pejsjdx7",
+      "name": "부산 사상역 청호빌딩 전광판 광고",
+      "storedCpm": 2,
+      "plannedRecalcCpm": 2000,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmqyf7p66000404jqvxjezlcg",
+      "name": "부산 경성대부경대역 전광판 광고",
+      "storedCpm": 2.17,
+      "plannedRecalcCpm": 2174,
+      "ratio": 0.000998160073597056
+    },
+    {
+      "id": "cmqygbdkb000204lemkq78k0i",
+      "name": "부산 남포동 광복로 패션거리 전광판 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmqz8amy6000b04lhvo2ft66a",
+      "name": "도심공항 리무진버스 외부 광고 (강북)",
+      "storedCpm": 0.47,
+      "plannedRecalcCpm": 474,
+      "ratio": 0.000991561181434599
+    },
+    {
+      "id": "cmqz8dlro000204l74mpuu8ys",
+      "name": "도심공항 리무진버스 외부 광고 (강남)",
+      "storedCpm": 0.53,
+      "plannedRecalcCpm": 533,
+      "ratio": 0.0009943714821763602
+    },
+    {
+      "id": "cmqz8nw3c000004legwvfs6dt",
+      "name": "도심공항 리무진버스 내부동영상 광고",
+      "storedCpm": 0.67,
+      "plannedRecalcCpm": 673,
+      "ratio": 0.0009955423476968796
+    },
+    {
+      "id": "cmqz91a0e000104js4dd8i780",
+      "name": "도심공항 리무진버스 윈도우스티커 광고",
+      "storedCpm": 0.39,
+      "plannedRecalcCpm": 56,
+      "ratio": 0.0069642857142857145
+    },
+    {
+      "id": "cmqz954e3000204i9989ts451",
+      "name": "도심공항 리무진버스 헤드시트 광고",
+      "storedCpm": 0.42,
+      "plannedRecalcCpm": 95,
+      "ratio": 0.004421052631578947
+    },
+    {
+      "id": "cmqz98w4l000204juaxwqz27x",
+      "name": "도심공항 리무진버스 창문상단 광고",
+      "storedCpm": 0.62,
+      "plannedRecalcCpm": 62,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmqz9dlm3000004kz40bnelm7",
+      "name": "도심공항 리무진버스 트렁크존 광고",
+      "storedCpm": 0.53,
+      "plannedRecalcCpm": 106,
+      "ratio": 0.005
+    },
+    {
+      "id": "cmqzask0o000004jvjc51e6pq",
+      "name": "삼성역 코엑스몰 인피니트 로드 광고 (복제)",
+      "storedCpm": 12.2,
+      "plannedRecalcCpm": 12245,
+      "ratio": 0.0009963250306247447
+    },
+    {
+      "id": "cmqzz9xdu00030aho3swdnc8x",
+      "name": "구의역 이스트폴 스퀘어 파노라마 + LED 보드 광고",
+      "storedCpm": 0.94,
+      "plannedRecalcCpm": 938,
+      "ratio": 0.0010021321961620469
+    },
+    {
+      "id": "cmr0p4wk6000004ky6mjvw3qb",
+      "name": "디지털 사각기둥 (PSP) 지하철 광고",
+      "storedCpm": 2.8,
+      "plannedRecalcCpm": 2800,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmr1kidch00000aj575bp4lag",
+      "name": "인천 검단 라페온 빌딩 벽면 광고",
+      "storedCpm": 6.14,
+      "plannedRecalcCpm": 5926,
+      "ratio": 0.0010361120485993924
+    },
+    {
+      "id": "cmr1kpnhr000009i03t4nfmf4",
+      "name": "고촌역 김포 헤센 스마트 오피스텔 벽면 광고",
+      "storedCpm": 6.14,
+      "plannedRecalcCpm": 6140,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmr388sc5001d04gyvru56mtw",
+      "name": "서초 T-Center 호남선 쉘터 광고",
+      "storedCpm": 7.41,
+      "plannedRecalcCpm": 7407,
+      "ratio": 0.0010004050222762251
+    },
+    {
+      "id": "cmr38dci3000204lck0xilwvd",
+      "name": "서초 T-Center 경부선 쉘터 광고",
+      "storedCpm": 3.17,
+      "plannedRecalcCpm": 3175,
+      "ratio": 0.0009984251968503937
+    },
+    {
+      "id": "cmr3i4jhw000604kz4zjxrtqr",
+      "name": "고속터미널 중앙 쉘터 광고 시내 (22-020) 차도면",
+      "storedCpm": 6.32,
+      "plannedRecalcCpm": 6316,
+      "ratio": 0.001000633312222926
+    },
+    {
+      "id": "cmr3i8muu000804jmc81d7tdh",
+      "name": "고속터미널 시외 디지털 쉘터 광고 (22-019) 75인치 LCD",
+      "storedCpm": 5.68,
+      "plannedRecalcCpm": 5682,
+      "ratio": 0.0009996480112636394
+    },
+    {
+      "id": "cmr3igc0y00010ajjevi41nl6",
+      "name": "고속터미널 중앙 쉘터 광고 시외 (22-019) 차도면",
+      "storedCpm": 6.82,
+      "plannedRecalcCpm": 6818,
+      "ratio": 0.0010002933411557642
+    },
+    {
+      "id": "cmr3iki4p000009j7v4hfu8pn",
+      "name": "고속터미널 시내 디지털 쉘터 (22-020) 75인치 LCD",
+      "storedCpm": 5.26,
+      "plannedRecalcCpm": 5263,
+      "ratio": 0.0009994299828994869
+    },
+    {
+      "id": "cmr4nagem000704l52xu5gxgy",
+      "name": "디지털 택시쉘터 광고 (용산 한강로)",
+      "storedCpm": 10.42,
+      "plannedRecalcCpm": 1042,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmr4ngm43000004l7w4jjppyw",
+      "name": "디지털 택시쉘터 광고 (강남 신사동)",
+      "storedCpm": 6.94,
+      "plannedRecalcCpm": 694,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmr4nl093000104jmtfyrqe4x",
+      "name": "디지털 택시쉘터 광고 (강남 대치동)",
+      "storedCpm": 7.35,
+      "plannedRecalcCpm": 735,
+      "ratio": 0.01
+    },
+    {
+      "id": "cmr9bs2r3000304jyy4lts3ty",
+      "name": "서울법인 택시 외부 광고",
+      "storedCpm": 0.51,
+      "plannedRecalcCpm": 5,
+      "ratio": 0.10200000000000001
+    },
+    {
+      "id": "cmr9bz5sp001g04l1fse5rrxn",
+      "name": "서울법인 브랜드 택시 광고 (독점형)",
+      "storedCpm": 0.83,
+      "plannedRecalcCpm": 833,
+      "ratio": 0.0009963985594237694
+    },
+    {
+      "id": "cmr9xedzi000a04layhba2ulc",
+      "name": "택배카보드 차량 광고",
+      "storedCpm": 0.1,
+      "plannedRecalcCpm": 102,
+      "ratio": 0.000980392156862745
+    },
+    {
+      "id": "cmra67eet000104l76ok7mf72",
+      "name": "양양서피비치 선셋바 포토월 광고",
+      "storedCpm": 5.36,
+      "plannedRecalcCpm": 5357,
+      "ratio": 0.0010005600149337317
+    },
+    {
+      "id": "cmracbp47000804l40z3wcrqa",
+      "name": "세종 버스 외부 광고",
+      "storedCpm": 0.061,
+      "plannedRecalcCpm": 61,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmrbqcmov000c04l8v4jzeor6",
+      "name": "충무로 제일병원빌딩 전광판 광고",
+      "storedCpm": 2.51,
+      "plannedRecalcCpm": 2514,
+      "ratio": 0.0009984089101034207
+    },
+    {
+      "id": "cmrc4mbhk000004kwk9eaxjy1",
+      "name": "지하철 9호선 캔버스9 광고 Turn-Key (4개역 통합)",
+      "storedCpm": 1.19,
+      "plannedRecalcCpm": 1190,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmrelhkca000204l1goz4prsz",
+      "name": "부산 지하철 1호선 서면역 디지털 사이니지 광고",
+      "storedCpm": 17,
+      "plannedRecalcCpm": 1042,
+      "ratio": 0.016314779270633396
+    },
+    {
+      "id": "cmrellqsm000t04l51u2snadu",
+      "name": "부산 지하철 1호선 서면역 디지털 사이니지 메인 환승 광고",
+      "storedCpm": 17,
+      "plannedRecalcCpm": 1042,
+      "ratio": 0.016314779270633396
+    },
+    {
+      "id": "cmrelp345000c04iepnfxrrem",
+      "name": "부산 지하철 2호선 서면역 디지털 사이니지 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.01386481802426343
+    },
+    {
+      "id": "cmrem2d1n000104l9xon1ob7t",
+      "name": "부산 서면역 미디어필러 사각기둥 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 1429,
+      "ratio": 0.013296011196641007
+    },
+    {
+      "id": "cmrem8pug000104ky4xujze1y",
+      "name": "부산 지하철 2호선 서면역 디지털 사이니지 메인 환승 기둥 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 1154,
+      "ratio": 0.01386481802426343
+    },
+    {
+      "id": "cmremxktc000a04kvgdiifzb3",
+      "name": "부산 서면교차로 전광판 광고",
+      "storedCpm": 14,
+      "plannedRecalcCpm": 694,
+      "ratio": 0.020172910662824207
+    },
+    {
+      "id": "cmrep774v000304jrv9zmylys",
+      "name": "부산 해운대 엘리시아 호텔 외벽 광고",
+      "storedCpm": 18,
+      "plannedRecalcCpm": 9231,
+      "ratio": 0.0019499512512187196
+    },
+    {
+      "id": "cmrerp29p000504l80rhvkqc2",
+      "name": "부산도시철도 1·2호선 승강장 PDV 광고",
+      "storedCpm": 13,
+      "plannedRecalcCpm": 333,
+      "ratio": 0.03903903903903904
+    },
+    {
+      "id": "cmretdztq000d04jzfoizdihm",
+      "name": "서면 롯데백화점 중앙몰 디지털포스터 광고",
+      "storedCpm": 11,
+      "plannedRecalcCpm": 178,
+      "ratio": 0.06179775280898876
+    },
+    {
+      "id": "cmretfj3p000604jv3d4h48ea",
+      "name": "서면 롯데백화점 중앙몰 전광판 광고",
+      "storedCpm": 17,
+      "plannedRecalcCpm": 536,
+      "ratio": 0.03171641791044776
+    },
+    {
+      "id": "cmretjv9h000a04jv0j4vb59t",
+      "name": "서면 롯데백화점 중앙몰 디지털 사이니지 광고",
+      "storedCpm": 19,
+      "plannedRecalcCpm": 625,
+      "ratio": 0.0304
+    },
+    {
+      "id": "cmrf0d1l8000905l5qi3gfd54",
+      "name": "코엑스 파르나스 미디어타워 광고",
+      "storedCpm": 16,
+      "plannedRecalcCpm": 3200,
+      "ratio": 0.005
+    },
+    {
+      "id": "cmrg5360d000104l7s0vllbeq",
+      "name": "강남 센타빌딩 대형 외벽 아트월 광고",
+      "storedCpm": 13,
+      "plannedRecalcCpm": 6486,
+      "ratio": 0.0020043169904409497
+    },
+    {
+      "id": "cmrkycwn2000204l8nmtjdor3",
+      "name": "청주 사창사거리 재원빌딩 전광판 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmrkysn91000304jrl3toj3aa",
+      "name": "강남 고속버스터미널 미디어타워 광고",
+      "storedCpm": 0.77,
+      "plannedRecalcCpm": 769,
+      "ratio": 0.0010013003901170351
+    },
+    {
+      "id": "cmrkzdyik000304joss2awelw",
+      "name": "코엑스 S-LIVE 미디어 광고",
+      "storedCpm": 2.72,
+      "plannedRecalcCpm": 2717,
+      "ratio": 0.001001104158998896
+    },
+    {
+      "id": "cmrkzt04s000l04l40d7139j2",
+      "name": "마곡 원그로브 복합문화공간 미디어 광고",
+      "storedCpm": 4.23,
+      "plannedRecalcCpm": 4225,
+      "ratio": 0.0010011834319526628
+    },
+    {
+      "id": "cmrl0mlxe000204kwkf4nx45k",
+      "name": "테헤란로 성담빌딩 전광판 광고",
+      "storedCpm": 3.33,
+      "plannedRecalcCpm": 3333,
+      "ratio": 0.000999099909990999
+    },
+    {
+      "id": "cmrl1o96l000104l1dwy24xus",
+      "name": "천안·아산 버스 외부 광고",
+      "storedCpm": 0.16,
+      "plannedRecalcCpm": 157,
+      "ratio": 0.0010191082802547772
+    },
+    {
+      "id": "cmrl1x0gk000104jrkbh344ox",
+      "name": "구로디지털단지 대창빌딩 전광판 광고",
+      "storedCpm": 1.39,
+      "plannedRecalcCpm": 1389,
+      "ratio": 0.0010007199424046077
+    },
+    {
+      "id": "cmrl2hpgw000m04jp7f010nlv",
+      "name": "여의도 파크원 미디어월 전광판 광고",
+      "storedCpm": 0.98,
+      "plannedRecalcCpm": 980,
+      "ratio": 0.001
+    },
+    {
+      "id": "cmrl2slo4000n04lau914hdkb",
+      "name": "도산대로 SEDEC 외벽 광고",
+      "storedCpm": 23.81,
+      "plannedRecalcCpm": 47619,
+      "ratio": 0.0005000105000105
+    },
+    {
+      "id": "cmrlyb71o000004jm7j8b0tsu",
+      "name": "에어부산 국제선 탑승권 후면 광고",
+      "storedCpm": 18.87,
+      "plannedRecalcCpm": 18868,
+      "ratio": 0.0010001059995760017
+    },
+    {
+      "id": "cmrlz4v2l000104jmqd142nxa",
+      "name": "에어부산 항공기 외부 랩핑 광고",
+      "storedCpm": 14.81,
+      "plannedRecalcCpm": 148148,
+      "ratio": 0.00009996759996759997
+    },
+    {
+      "id": "cmrlzusu6000704kw28nuhi0a",
+      "name": "에어부산 기내지 FLY&FUN 광고",
+      "storedCpm": 8.86,
+      "plannedRecalcCpm": 8823,
+      "ratio": 0.0010041935849484302
+    },
+    {
+      "id": "cmrm0clin000404k10744z4ap",
+      "name": "에어부산 기내 윈도우 미디어 광고",
+      "storedCpm": 8.1,
+      "plannedRecalcCpm": 8102,
+      "ratio": 0.0009997531473710194
+    },
+    {
+      "id": "cmrm0izis000109l0qmxawp0m",
+      "name": "에어부산 기내 사이드월 패널 광고",
+      "storedCpm": 17.36,
+      "plannedRecalcCpm": 17361,
+      "ratio": 0.0009999423996313577
+    },
+    {
+      "id": "cmrm0xl6k000204jy1un9gwrw",
+      "name": "에어부산 기내 트레이 테이블 광고",
+      "storedCpm": 17.36,
+      "plannedRecalcCpm": 17361,
+      "ratio": 0.0009999423996313577
+    },
+    {
+      "id": "cmrm1v9eo000104kyrj3fojan",
+      "name": "나우인명동 전광판 광고",
+      "storedCpm": 0.53,
+      "plannedRecalcCpm": 533,
+      "ratio": 0.0009943714821763602
+    },
+    {
+      "id": "cmrm2f88q000204kydtp2vmzj",
+      "name": "전통시장 LED 전광판 광고",
+      "storedCpm": 2.38,
+      "plannedRecalcCpm": 128,
+      "ratio": 0.01859375
+    },
+    {
+      "id": "cmrm3e9hb000204jmhn2x9rnz",
+      "name": "갤러리아 백화점 EAST B1 MEDIA WALL 광고",
+      "storedCpm": 14.86,
+      "plannedRecalcCpm": 14861,
+      "ratio": 0.0009999327097772693
+    },
+    {
+      "id": "cmrm3fc6d000n04kydi14rh4s",
+      "name": "갤러리아 백화점 EAST DUAL LCD 광고",
+      "storedCpm": 12.38,
+      "plannedRecalcCpm": 12384,
+      "ratio": 0.0009996770025839793
+    },
+    {
+      "id": "cmrm3li4a000104iemha295of",
+      "name": "갤러리아 백화점 WEST 출입구 DS 광고",
+      "storedCpm": 4.95,
+      "plannedRecalcCpm": 4954,
+      "ratio": 0.0009991925716592654
+    },
+    {
+      "id": "cmrm47dry00010ahtq1bssgdg",
+      "name": "공항철도 서울역 디지털사이니지 광고",
+      "storedCpm": 0.57,
+      "plannedRecalcCpm": 571,
+      "ratio": 0.0009982486865148861
+    },
+    {
+      "id": "cmrm4dkze001j0ahtritqcahk",
+      "name": "공항철도 공덕역 디지털사이니지 광고",
+      "storedCpm": 2.05,
+      "plannedRecalcCpm": 2051,
+      "ratio": 0.0009995124329595319
+    },
+    {
+      "id": "cmrm4g35k001q0ahtz7m2ph5f",
+      "name": "공항철도 홍대입구역 디지털사이니지 광고",
+      "storedCpm": 1.67,
+      "plannedRecalcCpm": 1667,
+      "ratio": 0.0010017996400719855
+    },
+    {
+      "id": "cmrm4l6j7001c04jvgxdenwp8",
+      "name": "공항철도 디지털미디어시티역 디지털사이니지 광고",
+      "storedCpm": 2.42,
+      "plannedRecalcCpm": 2424,
+      "ratio": 0.0009983498349834983
+    },
+    {
+      "id": "cmrm4vdkj002f04ky05j2tcez",
+      "name": "공항철도 김포공항역 디지털사이니지 광고",
+      "storedCpm": 3.92,
+      "plannedRecalcCpm": 3922,
+      "ratio": 0.0009994900560938297
+    },
+    {
+      "id": "cmrm54gsp000005jv1s4w13bi",
+      "name": "공항철도 검암역 디지털사이니지 광고",
+      "storedCpm": 3.57,
+      "plannedRecalcCpm": 3571,
+      "ratio": 0.0009997199663959674
+    },
+    {
+      "id": "cmrm5a2pl000004ievne55oex",
+      "name": "공항철도 인천국제공항 T1 디지털사이니지 광고",
+      "storedCpm": 1.05,
+      "plannedRecalcCpm": 1053,
+      "ratio": 0.0009971509971509972
+    },
+    {
+      "id": "cmrm688ju000404jxpyc36h9i",
+      "name": "이태원 디지털 미디어 블록 광고",
+      "storedCpm": 2.89,
+      "plannedRecalcCpm": 2889,
+      "ratio": 0.0010003461405330564
+    },
+    {
+      "id": "cmrn6o2ez000904l75lkwwgol",
+      "name": "신도림역 디큐브시티 LED 영상 광고",
+      "storedCpm": 1.11,
+      "plannedRecalcCpm": 1111,
+      "ratio": 0.0009990999099909993
+    },
+    {
+      "id": "cmrn711g8000404ib3hct4qpy",
+      "name": "성신여대입구역 강북미디어빌딩 전광판 광고",
+      "storedCpm": 2.92,
+      "plannedRecalcCpm": 2917,
+      "ratio": 0.0010010284538909838
+    },
+    {
+      "id": "cmrpvsn0k000p04l7ddhs9bwc",
+      "name": "HD한양주유소 빌보드 광고",
+      "storedCpm": 5.05,
+      "plannedRecalcCpm": 5053,
+      "ratio": 0.0009994062932911143
+    },
+    {
+      "id": "cmrpziv05000004ib6eyjx30k",
+      "name": "인천국제공항 제2터미널 웰컴 미디어월 광고",
+      "storedCpm": 5.13,
+      "plannedRecalcCpm": 5128,
+      "ratio": 0.001000390015600624
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+{
+  "afterApply": true,
+  "activeMediaTotal": 705,
+  "activeWithStoredCpm": 689,
+  "buckets": {
+    "within_15pct": 687,
+    "understored": 0,
+    "overstored": 0,
+    "uncomputable": 2
+  },
+  "note": "within_15pct=687 = original 36 trusted + 651 corrected. understored=0. uncomputable=2 unchanged."
+}

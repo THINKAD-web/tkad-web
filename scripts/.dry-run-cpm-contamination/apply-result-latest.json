@@ -1,0 +1,65 @@
+{
+  "appliedAt": "2026-07-18T08:05:49.612Z",
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "backupPath": "scripts/.backups/cpm-contamination-2026-07-18T08-01-15-650Z.json",
+  "candidateCount": 651,
+  "updated": 651,
+  "noop": 0,
+  "skipped": {
+    "noStoredCpm": 16,
+    "within15": 36,
+    "uncomputable": 2,
+    "alreadyEqual": 0,
+    "overstored": 0
+  },
+  "samplesAfter": [
+    {
+      "id": "cmo3d07qd000404l63nbxps27",
+      "name": "코엑스 케이팝 스퀘어 전광판 광고",
+      "before": 22,
+      "after": 22222
+    },
+    {
+      "id": "cmo3ehh9u000004jp5b65rk7x",
+      "name": "삼성동 신라스테이 전광판 광고",
+      "before": 18,
+      "after": 5357
+    },
+    {
+      "id": "cmo3f0k4a000004k43dss6zft",
+      "name": "강남 시그니처스퀘어 전광판 광고",
+      "before": 22,
+      "after": 4688
+    },
+    {
+      "id": "cmo3flct7000004l5jneq3nw0",
+      "name": "홍대 나인 전광판 광고",
+      "before": 25,
+      "after": 8333
+    },
+    {
+      "id": "cmo3g31e7000004l2gr0x4hyk",
+      "name": "강남 뱅뱅빌딩 전광판 광고",
+      "before": 23,
+      "after": 6818
+    },
+    {
+      "id": "cmo3gfj02000204l2qr0zhgrb",
+      "name": "강남 HM 타워 전광판 광고",
+      "before": 25,
+      "after": 6667
+    },
+    {
+      "id": "cmo3gmiih000004jsmiutrtsj",
+      "name": "강남 GI-LIVE 이즈타워 전광판 광고",
+      "before": 22,
+      "after": 5000
+    },
+    {
+      "id": "cmo3iilyt000004ihx8zuwjpj",
+      "name": "광화문 룩스(LUUX) 전광판 광고",
+      "before": 24,
+      "after": 23810
+    }
+  ]
+}

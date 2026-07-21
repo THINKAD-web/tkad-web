@@ -33,6 +33,7 @@ import {
 } from "@/lib/media-install-locations";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
+import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
 
 export const dynamic = "force-dynamic";
 
@@ -229,11 +230,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.resolution = String(body.resolution ?? "").trim() || null;
   if (body.operatingHours !== undefined)
     data.operatingHours = String(body.operatingHours ?? "").trim() || null;
-  if (body.dailyFootfall !== undefined) {
-    const n = Math.round(Number(body.dailyFootfall));
-    data.dailyFootfall =
-      body.dailyFootfall === null || !Number.isFinite(n) ? null : n;
-  }
   if (body.weekdayFootfall !== undefined) {
     const n = Math.round(Number(body.weekdayFootfall));
     data.weekdayFootfall =
@@ -241,11 +237,6 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   if (body.targetAge !== undefined)
     data.targetAge = String(body.targetAge ?? "").trim() || null;
-  if (body.impressions !== undefined) {
-    const n = Math.round(Number(body.impressions));
-    data.impressions =
-      body.impressions === null || !Number.isFinite(n) ? null : n;
-  }
   if (body.reach !== undefined) {
     const n = Number(body.reach);
     data.reach = body.reach === null || !Number.isFinite(n) ? null : n;
@@ -254,9 +245,53 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     const n = Number(body.frequency);
     data.frequency = body.frequency === null || !Number.isFinite(n) ? null : n;
   }
+
+  const metricsPatch: {
+    dailyFootfall?: number | null;
+    impressions?: number | null;
+    cpm?: number | null;
+  } = {};
+  if (body.dailyFootfall !== undefined) {
+    metricsPatch.dailyFootfall =
+      body.dailyFootfall === null ? null : Number(body.dailyFootfall);
+  }
+  if (body.impressions !== undefined) {
+    metricsPatch.impressions =
+      body.impressions === null ? null : Number(body.impressions);
+  }
   if (body.cpm !== undefined) {
-    const n = Number(body.cpm);
-    data.cpm = body.cpm === null || !Number.isFinite(n) ? null : n;
+    metricsPatch.cpm = body.cpm === null ? null : Number(body.cpm);
+  }
+  let metricsWarnings: ReturnType<typeof validateMediaMetricsWrite>["warnings"] =
+    [];
+  if (Object.keys(metricsPatch).length > 0) {
+    const metrics = validateMediaMetricsWrite(metricsPatch, {
+      price:
+        typeof data.price === "number"
+          ? data.price
+          : (existing.price ?? null),
+      existingDailyFootfall: existing.dailyFootfall,
+      existingImpressions: existing.impressions,
+    });
+    if (!metrics.ok) {
+      return json(
+        {
+          error: metrics.errors.map((e) => e.message).join("; "),
+          errors: metrics.errors,
+        },
+        400,
+      );
+    }
+    if (metrics.values.dailyFootfall !== undefined) {
+      data.dailyFootfall = metrics.values.dailyFootfall;
+    }
+    if (metrics.values.impressions !== undefined) {
+      data.impressions = metrics.values.impressions;
+    }
+    if (metrics.values.cpm !== undefined) {
+      data.cpm = metrics.values.cpm;
+    }
+    metricsWarnings = metrics.warnings;
   }
   if (body.engagementRate !== undefined) {
     const n = Number(body.engagementRate);
@@ -655,7 +690,10 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
     }
-    return json({ media: mediaForClient });
+    return json({
+      media: mediaForClient,
+      ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
+    });
   } catch (err) {
     // 기존 구현은 모든 오류를 404로 감춰서(Prisma 스키마 불일치 포함) 디버깅이 어려웠음.
     // 운영/개발 모두에서 최소한의 힌트를 제공한다.

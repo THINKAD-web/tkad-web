@@ -1,5 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
-import { priceToMonthlyEquivalentWon } from "@/lib/media-metrics";
+import { resolveMonthlyListPriceWon } from "@/lib/media-metrics";
 import { resolveMonthlyPriceForUnits } from "@/lib/media-quantity";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import {
@@ -251,8 +251,8 @@ function monthlyPriceWon(
   const resolved = resolveMonthlyPriceForUnits(m, quantities?.[m.id]);
   if (resolved > 0) return resolved;
   if (isNetworkCatalogItem(m)) return 0;
-  // quantity 경로 실패 시 raw price+period 환산만 SSOT 공유 (display cheapest 아님 — 버그 #4)
-  return priceToMonthlyEquivalentWon(m.price, m.pricePeriod);
+  // quantity 경로 실패 시 목록 display SSOT(최저가 옵션 × 기간 환산) — 버그 #4
+  return resolveMonthlyListPriceWon(m);
 }
 
 function scoreBudget(

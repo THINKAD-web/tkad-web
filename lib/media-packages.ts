@@ -10,12 +10,11 @@ import {
   getMediaPackageBySlug,
 } from "@/data/packages";
 import type { MediaItem } from "@/lib/media-data";
-import { resolveMonthlyImpressions } from "@/lib/media-metrics";
 import {
-  catalogPriceFieldToWon,
-  formatMediaPriceWonWithSymbol,
-  getCheapestMediaPriceOption,
-} from "@/lib/media-price-format";
+  resolveMonthlyImpressions,
+  resolveMonthlyListPriceWon,
+} from "@/lib/media-metrics";
+import { formatMediaPriceWonWithSymbol } from "@/lib/media-price-format";
 
 export type ResolvedMediaPackage = MediaPackageDefinition & {
   media: MediaItem[];
@@ -33,11 +32,9 @@ function monthlyImpressionsForMedia(m: MediaItem): number {
   return resolveMonthlyImpressions(m);
 }
 
-/** 버그 #3: cheapest raw만 — 기간×배수 미적용. 이번 PR에서 수정하지 않음. */
+/** 패키지 가격 범위 — 목록 SSOT와 동일 월환산 (cheapest display × 기간 배수). */
 function monthlyPriceWonForMedia(m: MediaItem): number {
-  const cheapest = getCheapestMediaPriceOption(m);
-  const raw = cheapest?.priceWon ?? m.price;
-  return catalogPriceFieldToWon(raw);
+  return resolveMonthlyListPriceWon(m);
 }
 
 function formatReachCompact(n: number, isKo: boolean): string {

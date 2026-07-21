@@ -10,7 +10,7 @@ import {
   type RecentlyViewedRecord,
 } from "@/lib/recently-viewed";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 
 export function RecentlyViewedSection() {
   const locale = useLocale();
@@ -61,8 +61,11 @@ export function RecentlyViewedSection() {
             <p className="mt-0.5 truncate font-display text-xs font-medium uppercase tracking-[0.18em] text-muted-foreground">
               {`// `}{m.region} · {m.type}
             </p>
-            <p className="mt-1 text-[10px] tabular-nums text-foreground">
-              {formatCatalogPriceFieldWon(m.price)}
+            <p className="mt-1 truncate text-[10px] tabular-nums text-foreground">
+              {formatMediaDisplayPrice(
+                { price: m.price, pricePeriod: m.pricePeriod ?? "month" },
+                isKo ? "ko-KR" : "en-US",
+              )}
             </p>
             <MediaPriceExclNote isKo={isKo} />
           </Link>

@@ -25,6 +25,7 @@ import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
+import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
 
 export const dynamic = "force-dynamic";
 
@@ -231,20 +232,57 @@ export async function POST(request: NextRequest) {
   if (res !== undefined) data.resolution = res;
   const oh = optStr(body.operatingHours);
   if (oh !== undefined) data.operatingHours = oh;
-  const df = optInt(body.dailyFootfall);
-  if (df !== undefined) data.dailyFootfall = df;
   const wf = optInt(body.weekdayFootfall);
   if (wf !== undefined) data.weekdayFootfall = wf;
   const ta = optStr(body.targetAge);
   if (ta !== undefined) data.targetAge = ta;
-  const imp = optInt(body.impressions);
-  if (imp !== undefined) data.impressions = imp;
   const reach = optNum(body.reach);
   if (reach !== undefined) data.reach = reach;
   const freq = optNum(body.frequency);
   if (freq !== undefined) data.frequency = freq;
-  const cpm = optNum(body.cpm);
-  if (cpm !== undefined) data.cpm = cpm;
+
+  const metricsPatch: {
+    dailyFootfall?: number | null;
+    impressions?: number | null;
+    cpm?: number | null;
+  } = {};
+  if (body.dailyFootfall !== undefined) {
+    metricsPatch.dailyFootfall =
+      body.dailyFootfall === null ? null : Number(body.dailyFootfall);
+  }
+  if (body.impressions !== undefined) {
+    metricsPatch.impressions =
+      body.impressions === null ? null : Number(body.impressions);
+  }
+  if (body.cpm !== undefined) {
+    metricsPatch.cpm = body.cpm === null ? null : Number(body.cpm);
+  }
+  let metricsWarnings: ReturnType<typeof validateMediaMetricsWrite>["warnings"] =
+    [];
+  if (Object.keys(metricsPatch).length > 0) {
+    const metrics = validateMediaMetricsWrite(metricsPatch, {
+      price: typeof data.price === "number" ? data.price : null,
+    });
+    if (!metrics.ok) {
+      return json(
+        {
+          error: metrics.errors.map((e) => e.message).join("; "),
+          errors: metrics.errors,
+        },
+        400,
+      );
+    }
+    if (metrics.values.dailyFootfall !== undefined) {
+      data.dailyFootfall = metrics.values.dailyFootfall;
+    }
+    if (metrics.values.impressions !== undefined) {
+      data.impressions = metrics.values.impressions;
+    }
+    if (metrics.values.cpm !== undefined) {
+      data.cpm = metrics.values.cpm;
+    }
+    metricsWarnings = metrics.warnings;
+  }
   const er = optNum(body.engagementRate);
   if (er !== undefined) data.engagementRate = er;
   const vs = optInt(body.visibilityScore);
@@ -363,7 +401,13 @@ export async function POST(request: NextRequest) {
 
     revalidateMediaCaches({ id: media.id, slug: media.slug });
 
-    return json({ media: mediaForClient }, 201);
+    return json(
+      {
+        media: mediaForClient,
+        ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
+      },
+      201,
+    );
   } catch (err) {
     console.error("[admin-api] media POST failed", err);
     return json({ error: prismaMediaPostErrorMessage(err) }, 500);

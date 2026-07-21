@@ -8,6 +8,7 @@ import {
 } from "@/lib/admin-media-csv";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
 import { isValidCatalogMediaType } from "@/lib/media-auto-categorize";
+import { validateCsvDailyFootfall } from "@/lib/media-metrics-write";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -106,6 +107,11 @@ async function createMediaFromCsvRow(
     throw new Error("invalid type");
   }
 
+  const footfall = validateCsvDailyFootfall(row.exposure);
+  if (!footfall.ok) {
+    throw new Error(footfall.errors.map((e) => e.message).join("; "));
+  }
+
   const filled = await enrichNewMediaLocationFromKakao({
     location: row.location,
     latitude: null,
@@ -124,7 +130,7 @@ async function createMediaFromCsvRow(
       description: row.description || null,
       width: row.width,
       height: row.height,
-      dailyFootfall: row.exposure,
+      dailyFootfall: footfall.values.dailyFootfall ?? null,
       latitude: filled.latitude,
       longitude: filled.longitude,
       city: filled.city,
