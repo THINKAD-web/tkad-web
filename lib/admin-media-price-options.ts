@@ -3,6 +3,10 @@ import {
   parsePartialPeriodRatesFromPriceOptionRow,
   type PartialPeriodRatesMap,
 } from "@/lib/media-partial-period-rates";
+import {
+  coercePriceOptionPeriodForWrite,
+  formatPriceOptionPeriodWriteError,
+} from "@/lib/media-price-period-write";
 
 /** Admin·API 공통: DB `price_options` JSON 배열 한 행 */
 export type AdminMediaPriceOption = {
@@ -22,6 +26,7 @@ export type NormalizePriceOptionsResult =
  * PATCH/POST `priceOptions` 본문 정규화.
  * - 키가 없으면 `skip`
  * - `null` 또는 유효 항목 없음 → `JsonNull`
+ * - period: enum 4키 또는 안전 month 별칭(→month). 그 외는 error (재발 방지)
  */
 export function normalizePriceOptionsForPrisma(
   body: Record<string, unknown>,
@@ -54,16 +59,24 @@ export function normalizePriceOptionsForPrisma(
     if (!label || !Number.isFinite(price)) {
       continue;
     }
-    const period =
-      typeof o.period === "string" && o.period.trim()
-        ? o.period.trim()
-        : undefined;
+    const periodResult = coercePriceOptionPeriodForWrite(o.period);
+    if (periodResult.kind === "error") {
+      return {
+        kind: "error",
+        message: formatPriceOptionPeriodWriteError(i, periodResult.message),
+      };
+    }
+    if (periodResult.kind === "ok" && periodResult.coercedFrom) {
+      console.warn(
+        `[priceOptions] period alias coerced: "${periodResult.coercedFrom}" → month (index ${i}, label=${label})`,
+      );
+    }
     const description =
       typeof o.description === "string" && o.description.trim()
         ? o.description.trim()
         : undefined;
     const item: AdminMediaPriceOption = { label, price };
-    if (period) item.period = period;
+    if (periodResult.kind === "ok") item.period = periodResult.period;
     if (description) item.description = description;
     const partialPeriodRates = parsePartialPeriodRatesFromPriceOptionRow(o);
     if (partialPeriodRates) item.partialPeriodRates = partialPeriodRates;
