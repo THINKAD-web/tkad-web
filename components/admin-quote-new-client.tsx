@@ -249,8 +249,6 @@ export default function AdminQuoteNewClient({
         const period = quote.items[0]?.period ?? "";
         const parsedPeriod = parseCampaignPeriodLabel(period);
 
-
-
         // 목록 take 밖 매체가 견적에 있으면 ids 로 보강 (개월×단가 청구용 catalog 유지)
         const have = new Set(medias.map((m) => m.id));
         const missingIds = [
@@ -1573,6 +1571,7 @@ export default function AdminQuoteNewClient({
                       periodLabel={campaignPeriodLabel}
                       periodMonths={pdfPeriodMultiplier}
                       periodUnitLabel={pdfPeriodUnit}
+                      amountUnit="won"
                       rows={lineItems.map((it) => {
                         const m = medias.find((x) => x.id === it.mediaId);
                         const size =

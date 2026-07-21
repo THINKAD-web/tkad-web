@@ -5,7 +5,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import type { QuoteTemplateId } from "@/lib/build-quote-pdf";
 import { cn } from "@/lib/utils";
-import { formatDocumentManWon } from "@/lib/document-text";
+import {
+  formatQuoteAmount,
+  type QuoteAmountDisplayUnit,
+} from "@/lib/document-text";
 import { QuoteMediaLineCard, QuoteAddonLineRow, isQuoteAddonRow } from "@/components/document/quote-media-line-card";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import {
@@ -102,10 +105,12 @@ function QuoteSummaryStrip({
   isKo,
   grandTotalWon,
   validityText,
+  formatAmount,
 }: {
   isKo: boolean;
   grandTotalWon: number;
   validityText: string;
+  formatAmount: (won: number) => string;
 }) {
   const thinkadContact = isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772";
 
@@ -120,7 +125,7 @@ function QuoteSummaryStrip({
             {isKo ? "총액 (VAT 포함)" : "Total (incl. VAT)"}
           </p>
           <p className="quote-pdf-amount mt-1 text-2xl font-black tabular-nums tracking-tight text-violet-700">
-            {formatDocumentManWon(grandTotalWon, isKo)}
+            {formatAmount(grandTotalWon)}
           </p>
         </div>
         <div className="rounded-xl border border-gray-200/80 bg-white/80 px-4 py-3.5">
@@ -151,6 +156,7 @@ function QuoteDefaultTotalsPanel({
   showDiscountBreakdown,
   supplyLabel,
   vatLabel,
+  formatAmount,
 }: {
   isKo: boolean;
   subtotalWon: number;
@@ -162,6 +168,7 @@ function QuoteDefaultTotalsPanel({
   showDiscountBreakdown: boolean;
   supplyLabel: string;
   vatLabel: string;
+  formatAmount: (won: number) => string;
 }) {
   return (
     <div className="w-full space-y-1.5 rounded-xl border border-gray-200/50 bg-white p-4 text-[15px]">
@@ -171,7 +178,7 @@ function QuoteDefaultTotalsPanel({
             {isKo ? "소계" : "Subtotal"}
           </span>
           <span className="font-bold tabular-nums text-gray-900">
-            {formatDocumentManWon(linesSubtotalWon, isKo)}
+            {formatAmount(linesSubtotalWon)}
           </span>
         </div>
       ) : null}
@@ -181,7 +188,7 @@ function QuoteDefaultTotalsPanel({
             {discountSummary ?? (isKo ? "할인" : "Discount")}
           </span>
           <span className="font-bold tabular-nums">
-            −{formatDocumentManWon(discountTotalWon!, isKo)}
+            −{formatAmount(discountTotalWon!)}
           </span>
         </div>
       ) : null}
@@ -190,7 +197,7 @@ function QuoteDefaultTotalsPanel({
           {supplyLabel}
         </span>
         <span className="font-bold tabular-nums text-gray-900 quote-pdf-amount">
-          {formatDocumentManWon(subtotalWon, isKo)}
+          {formatAmount(subtotalWon)}
         </span>
       </div>
       <div className="flex justify-between gap-6">
@@ -198,7 +205,7 @@ function QuoteDefaultTotalsPanel({
           {vatLabel}
         </span>
         <span className="font-bold tabular-nums text-gray-900 quote-pdf-amount">
-          {formatDocumentManWon(vatWon, isKo)}
+          {formatAmount(vatWon)}
         </span>
       </div>
       <div
@@ -209,7 +216,7 @@ function QuoteDefaultTotalsPanel({
       >
         <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
         <span className="quote-pdf-amount tabular-nums">
-          {formatDocumentManWon(grandTotalWon, isKo)}
+          {formatAmount(grandTotalWon)}
         </span>
       </div>
     </div>
@@ -219,9 +226,11 @@ function QuoteDefaultTotalsPanel({
 function QuoteMediaCompactTable({
   rows,
   isKo,
+  formatAmount,
 }: {
   rows: QuotePdfPreviewRow[];
   isKo: boolean;
+  formatAmount: (won: number) => string;
 }) {
   const tHead = isKo
     ? ["#", "매체명", "위치", "소계"]
@@ -262,7 +271,7 @@ function QuoteMediaCompactTable({
                 {row.location || "—"}
               </td>
               <td className="px-3 py-2.5 text-right text-sm font-bold tabular-nums text-violet-700">
-                {formatDocumentManWon(row.lineTotalWon, isKo)}
+                {formatAmount(row.lineTotalWon)}
               </td>
             </tr>
           ))}
@@ -325,6 +334,8 @@ type Props = {
   discountTotalWon?: number;
   discountSummary?: string;
   vatIncluded?: boolean;
+  /** admin 카드형: 공식 견적서와 동일하게 원 표기 */
+  amountUnit?: QuoteAmountDisplayUnit;
 };
 
 export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
@@ -348,12 +359,15 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
       linesSubtotalWon,
       discountTotalWon,
       discountSummary,
+      amountUnit = "manwon",
     },
     ref,
   ) {
     const t = useTranslations("quote");
     const locale = useLocale();
     const isKo = locale === "ko";
+    const formatAmount = (won: number) =>
+      formatQuoteAmount(won, isKo, amountUnit);
     const dateStr = new Intl.DateTimeFormat(isKo ? "ko-KR" : "en-US", {
       year: "numeric",
       month: "long",
@@ -415,6 +429,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             isKo={isKo}
             grandTotalWon={grandTotalWon}
             validityText={validityText}
+            formatAmount={formatAmount}
           />
         ) : null}
 
@@ -516,7 +531,13 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                   <dt className="text-xs font-medium text-gray-500">
                     {isKo ? "금액 단위" : "Amount unit"}
                   </dt>
-                  <dd className="mt-0.5 text-sm text-gray-600">{t("pdfAmountUnitNote")}</dd>
+                  <dd className="mt-0.5 text-sm text-gray-600">
+                    {amountUnit === "won"
+                      ? isKo
+                        ? "금액 표시 단위: 원 (KRW)"
+                        : "Amounts in KRW (won)"
+                      : t("pdfAmountUnitNote")}
+                  </dd>
                 </div>
               </dl>
             </section>
@@ -533,13 +554,17 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 {isKo ? "선택된 매체가 없습니다." : "No media selected."}
               </p>
             ) : useCompactMedia ? (
-              <QuoteMediaCompactTable rows={rows} isKo={isKo} />
+              <QuoteMediaCompactTable
+                rows={rows}
+                isKo={isKo}
+                formatAmount={formatAmount}
+              />
             ) : (
               <ul className={cn(isDefaultDoc ? "space-y-2" : "space-y-4")}>
                 {rows.map((row, idx) => {
                   const unitLabel = row.unitPeriodLabel
-                    ? `${formatDocumentManWon(row.unitPriceWon, isKo)} / ${row.unitPeriodLabel}`
-                    : formatDocumentManWon(row.unitPriceWon, isKo);
+                    ? `${formatAmount(row.unitPriceWon)} / ${row.unitPeriodLabel}`
+                    : formatAmount(row.unitPriceWon);
                   const isAddon = isQuoteAddonRow(row);
                   const detail: DocumentMediaDetail = {
                     id: row.id,
@@ -555,7 +580,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     dailyTraffic: row.dailyFootTraffic ?? undefined,
                     broadcastLabel: row.broadcastLabel ?? undefined,
                     monthlyPriceLabel: unitLabel,
-                    lineTotalLabel: formatDocumentManWon(row.lineTotalWon, isKo),
+                    lineTotalLabel: formatAmount(row.lineTotalWon),
                     executionPeriodLabel: row.executionPeriodLabel ?? undefined,
                   };
                   return (
@@ -592,6 +617,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 showDiscountBreakdown={showDiscountBreakdown}
                 supplyLabel={t("pdfSupply")}
                 vatLabel={t("pdfVat")}
+                formatAmount={formatAmount}
               />
             ) : showDiscountBreakdown ? (
               <div
@@ -608,7 +634,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       {isKo ? "소계" : "Subtotal"}
                     </span>
                     <span className="font-bold tabular-nums text-violet-700">
-                      {formatDocumentManWon(linesSubtotalWon, isKo)}
+                      {formatAmount(linesSubtotalWon)}
                     </span>
                   </div>
                 ) : null}
@@ -618,7 +644,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       {discountSummary ?? (isKo ? "할인" : "Discount")}
                     </span>
                     <span className="font-bold tabular-nums">
-                      −{formatDocumentManWon(discountTotalWon!, isKo)}
+                      −{formatAmount(discountTotalWon!)}
                     </span>
                   </div>
                 ) : null}
@@ -627,7 +653,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     {t("pdfSupply")}
                   </span>
                   <span className="font-bold tabular-nums text-violet-700">
-                    {formatDocumentManWon(subtotalWon, isKo)}
+                    {formatAmount(subtotalWon)}
                   </span>
                 </div>
                 <div className="flex justify-between">
@@ -635,7 +661,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     {t("pdfVat")}
                   </span>
                   <span className="font-bold tabular-nums text-violet-700">
-                    {formatDocumentManWon(vatWon, isKo)}
+                    {formatAmount(vatWon)}
                   </span>
                 </div>
                 <div
@@ -646,7 +672,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                 >
                   <span>{isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)"}</span>
                   <span className="tabular-nums">
-                    {formatDocumentManWon(grandTotalWon, isKo)}
+                    {formatAmount(grandTotalWon)}
                   </span>
                 </div>
               </div>
@@ -672,7 +698,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       isDefaultDoc ? "text-xl" : "text-lg",
                     )}
                   >
-                    {formatDocumentManWon(subtotalWon, isKo)}
+                    {formatAmount(subtotalWon)}
                   </p>
                 </div>
                 <div
@@ -695,7 +721,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       isDefaultDoc ? "text-xl" : "text-lg",
                     )}
                   >
-                    {formatDocumentManWon(vatWon, isKo)}
+                    {formatAmount(vatWon)}
                   </p>
                 </div>
                 <div
@@ -713,7 +739,7 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                       isDefaultDoc ? "text-2xl" : "text-xl font-bold",
                     )}
                   >
-                    {formatDocumentManWon(grandTotalWon, isKo)}
+                    {formatAmount(grandTotalWon)}
                   </p>
                 </div>
               </div>

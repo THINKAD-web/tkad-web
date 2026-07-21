@@ -52,6 +52,11 @@ export type QuoteExportPayload = {
   discountTotalWon?: number;
   discountSummary?: string;
   vatIncluded?: boolean;
+  /**
+   * 금액 표기 단위. admin 카드형 PDF는 공식 견적서와 맞추기 위해 `won`.
+   * 공개 위저드 기본은 `manwon`.
+   */
+  amountUnit?: "manwon" | "won";
   /** 프리미엄 표지/대시보드용 통계 */
   totalImpressions: number;
   blendedCpmWon: number | null;

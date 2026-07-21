@@ -532,6 +532,8 @@ export async function buildQuoteExportPayloadFromAdminDraft(
     discountTotalWon: input.discountTotalWon,
     discountSummary: input.discountSummary,
     vatIncluded: input.vatIncluded,
+    /** 어드민 카드형 PDF ↔ 공식 견적서 금액 단위 통일 (원) */
+    amountUnit: "won",
     totalImpressions,
     blendedCpmWon:
       totalImpressions > 0

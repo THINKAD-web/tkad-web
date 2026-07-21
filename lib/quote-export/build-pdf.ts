@@ -1,7 +1,11 @@
 import type { jsPDF } from "jspdf";
 import { registerNotoSansKrIfAvailable } from "@/lib/jspdf-register-noto-kr";
 import { krFontFamily } from "@/lib/jspdf-kr-font-constants";
-import { formatDocumentManWon, truncateDocText } from "@/lib/document-text";
+import {
+  formatQuoteAmount,
+  truncateDocText,
+  type QuoteAmountDisplayUnit,
+} from "@/lib/document-text";
 import {
   addPdfThumbImage,
   EXPORT_THUMB_BOX_MM,
@@ -11,6 +15,18 @@ import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 import type { QuoteExportPayload } from "@/lib/quote-export/types";
 import { formatCampaignDurationMeta } from "@/lib/quote-campaign-period";
 import { isQuoteAddonLineId } from "@/lib/quote-addon-line";
+
+function amt(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">, won: number): string {
+  const unit: QuoteAmountDisplayUnit = p.amountUnit === "won" ? "won" : "manwon";
+  return formatQuoteAmount(won, p.isKo, unit);
+}
+
+function amountUnitNote(p: Pick<QuoteExportPayload, "isKo" | "amountUnit">): string {
+  if (p.amountUnit === "won") {
+    return p.isKo ? "금액 단위: 원 (KRW)" : "Amounts in KRW (won)";
+  }
+  return p.isKo ? "금액 단위: 만원 (₩10,000)" : "Amounts in 10K KRW";
+}
 
 /** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
 const ACCENT = [255, 98, 0] as const;
@@ -197,8 +213,8 @@ function basicDrawQuoteMediaCards(
     const priceX = x + w - 3;
     const textX = x + 2 + thumbW + 3;
     const textW = w - thumbW - 38;
-    const unitVal = formatDocumentManWon(line.unitPriceWon, isKo);
-    const subVal = formatDocumentManWon(line.lineSupplyWon, isKo);
+    const unitVal = amt(p, line.unitPriceWon);
+    const subVal = amt(p, line.lineSupplyWon);
 
     if (isAddon) {
       doc.setFont(font, "normal");
@@ -369,7 +385,7 @@ function drawMediaCards(
       quoteExportProrationSpecLine(line),
     ].filter(Boolean) as string[];
 
-    const priceLine = `${isKo ? "단가" : "Unit"} ${formatDocumentManWon(line.unitPriceWon, isKo)}  ·  ${isKo ? "소계" : "Subtotal"} ${formatDocumentManWon(line.lineSupplyWon, isKo)}`;
+    const priceLine = `${isKo ? "단가" : "Unit"} ${amt(p, line.unitPriceWon)}  ·  ${isKo ? "소계" : "Subtotal"} ${amt(p, line.lineSupplyWon)}`;
     const body = [line.name, ...specLines, priceLine].join("\n");
     const lines = doc.splitTextToSize(body, textW) as string[];
     const rh = Math.max(
@@ -424,23 +440,23 @@ function drawTotals(
   if (linesSubtotal > 0 && (discountTotal > 0 || linesSubtotal !== p.supplyWon)) {
     rows.push([
       isKo ? "소계" : "Subtotal",
-      formatDocumentManWon(linesSubtotal, isKo),
+      amt(p, linesSubtotal),
       false,
     ]);
   }
   if (discountTotal > 0) {
     rows.push([
       p.discountSummary ?? (isKo ? "할인" : "Discount"),
-      `−${formatDocumentManWon(discountTotal, isKo)}`,
+      `−${amt(p, discountTotal)}`,
       false,
     ]);
   }
   rows.push(
-    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), false],
-    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), false],
+    [isKo ? "공급가액" : "Supply", amt(p, p.supplyWon), false],
+    [isKo ? "부가세 (10%)" : "VAT (10%)", amt(p, p.vatWon), false],
     [
       isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)",
-      formatDocumentManWon(p.totalWon, isKo),
+      amt(p, p.totalWon),
       true,
     ],
   );
@@ -516,7 +532,7 @@ function drawClientCampaign(
   doc.setFontSize(7.5);
   doc.setTextColor(GRAY_500[0], GRAY_500[1], GRAY_500[2]);
   doc.text(
-    isKo ? "금액 단위: 만원 (₩10,000)" : "Amounts in 10K KRW",
+    amountUnitNote(p),
     rx + 4,
     y + 18,
   );
@@ -589,7 +605,7 @@ function basicDrawSummaryStrip(
   const labels = isKo
     ? ["총액 (VAT 포함)", "유효기간", "싱커드 담당"]
     : ["Total (incl. VAT)", "Valid until", "THINKAD"];
-  const totalVal = formatDocumentManWon(p.totalWon, isKo);
+  const totalVal = amt(p, p.totalWon);
   const validityVal = `${p.isKo ? "유효" : "Valid"} ${p.validUntil}`;
   const contactVal = isKo ? "견적·제안 · 02-515-2772" : "Sales · 02-515-2772";
 
@@ -775,7 +791,7 @@ function basicDrawMediaTable(
     doc.setTextColor(ACCENT_DK[0], ACCENT_DK[1], ACCENT_DK[2]);
     doc.setFontSize(9);
     doc.text(
-      formatDocumentManWon(line.lineSupplyWon, isKo),
+      amt(p, line.lineSupplyWon),
       colX[3]!,
       y + 4.5,
       { align: "right" },
@@ -830,21 +846,21 @@ function basicDrawTotals(
   const linesSubtotal = p.linesSubtotalWon ?? 0;
   const discountTotal = p.discountTotalWon ?? 0;
   if (linesSubtotal > 0 && (discountTotal > 0 || linesSubtotal !== p.supplyWon)) {
-    rows.push([isKo ? "소계" : "Subtotal", formatDocumentManWon(linesSubtotal, isKo), "normal"]);
+    rows.push([isKo ? "소계" : "Subtotal", amt(p, linesSubtotal), "normal"]);
   }
   if (discountTotal > 0) {
     rows.push([
       p.discountSummary ?? (isKo ? "할인" : "Discount"),
-      `−${formatDocumentManWon(discountTotal, isKo)}`,
+      `−${amt(p, discountTotal)}`,
       "discount",
     ]);
   }
   rows.push(
-    [isKo ? "공급가액" : "Supply", formatDocumentManWon(p.supplyWon, isKo), "normal"],
-    [isKo ? "부가세 (10%)" : "VAT (10%)", formatDocumentManWon(p.vatWon, isKo), "normal"],
+    [isKo ? "공급가액" : "Supply", amt(p, p.supplyWon), "normal"],
+    [isKo ? "부가세 (10%)" : "VAT (10%)", amt(p, p.vatWon), "normal"],
     [
       isKo ? "합계 (VAT 포함)" : "Total (incl. VAT)",
-      formatDocumentManWon(p.totalWon, isKo),
+      amt(p, p.totalWon),
       "total",
     ],
   );
@@ -979,9 +995,9 @@ async function buildPremium(doc: jsPDF, font: string, p: QuoteExportPayload, thu
     ],
     [
       isKo ? "블렌디드 CPM" : "Blended CPM",
-      p.blendedCpmWon ? formatDocumentManWon(p.blendedCpmWon, isKo) : "—",
+      p.blendedCpmWon ? amt(p, p.blendedCpmWon) : "—",
     ],
-    [isKo ? "합계 금액" : "Total", formatDocumentManWon(p.totalWon, isKo)],
+    [isKo ? "합계 금액" : "Total", amt(p, p.totalWon)],
   ];
   let sy = 84;
   const cardW = (contentW - 9) / 2;
