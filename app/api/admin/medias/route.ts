@@ -80,25 +80,40 @@ export async function GET(request: NextRequest) {
   if (deny) return deny;
   const db = getPrisma();
   const { searchParams } = new URL(request.url);
-  const take = Math.min(Number(searchParams.get("take") ?? 200) || 200, 500);
+  /** 견적 빌더 등 전체 카탈로그가 필요한 화면 — 상한 5000 (기존 500이면 하위 매체 검색/hydrate 누락) */
+  const take = Math.min(Number(searchParams.get("take") ?? 200) || 200, 5000);
   const q = searchParams.get("q")?.trim();
+  const idsRaw = searchParams.get("ids")?.trim();
+  const ids = idsRaw
+    ? [
+        ...new Set(
+          idsRaw
+            .split(",")
+            .map((s) => s.trim())
+            .filter((s) => s.length > 0 && !s.startsWith("custom-")),
+        ),
+      ].slice(0, 200)
+    : [];
 
-  const where: Prisma.MediaWhereInput | undefined = q
-    ? {
-        OR: [
-          { name: { contains: q, mode: "insensitive" } },
-          { nameEn: { contains: q, mode: "insensitive" } },
-          { location: { contains: q, mode: "insensitive" } },
-          { district: { contains: q, mode: "insensitive" } },
-          { city: { contains: q, mode: "insensitive" } },
-        ],
-      }
-    : undefined;
+  const where: Prisma.MediaWhereInput | undefined =
+    ids.length > 0
+      ? { id: { in: ids } }
+      : q
+        ? {
+            OR: [
+              { name: { contains: q, mode: "insensitive" } },
+              { nameEn: { contains: q, mode: "insensitive" } },
+              { location: { contains: q, mode: "insensitive" } },
+              { district: { contains: q, mode: "insensitive" } },
+              { city: { contains: q, mode: "insensitive" } },
+            ],
+          }
+        : undefined;
 
   const medias = await db.media.findMany({
     where,
     orderBy: { updatedAt: "desc" },
-    take,
+    ...(ids.length > 0 ? {} : { take }),
   });
   const mediasWithCoverage = await attachCoverageDistrictCodesById(db, medias);
   const mediasWithExtras = await attachInstallLocationsById(

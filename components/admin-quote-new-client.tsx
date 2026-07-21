@@ -175,7 +175,8 @@ export default function AdminQuoteNewClient({
       setListLoading(true);
       setListError(null);
       try {
-        const res = await fetch("/api/admin/medias?take=500", {
+        // 전체 카탈로그 필요 — take=500 이면 updatedAt 하위 매체는 검색·라인 hydrate 누락
+        const res = await fetch("/api/admin/medias?take=5000", {
           credentials: "include",
           cache: "no-store",
         });
@@ -249,7 +250,37 @@ export default function AdminQuoteNewClient({
         const parsedPeriod = parseCampaignPeriodLabel(period);
 
 
-        const split = splitQuoteItemsForForm(quote, medias);
+
+        // 목록 take 밖 매체가 견적에 있으면 ids 로 보강 (개월×단가 청구용 catalog 유지)
+        const have = new Set(medias.map((m) => m.id));
+        const missingIds = [
+          ...new Set(
+            quote.items
+              .map((it) => it.mediaId?.trim() ?? "")
+              .filter(
+                (id) => id.length > 0 && !id.startsWith("custom-") && !have.has(id),
+              ),
+          ),
+        ];
+        let mediasForHydrate = medias;
+        if (missingIds.length > 0) {
+          const missRes = await fetch(
+            `/api/admin/medias?ids=${encodeURIComponent(missingIds.join(","))}`,
+            { credentials: "include", cache: "no-store" },
+          );
+          if (missRes.ok) {
+            const missRaw: unknown = await missRes.json();
+            const { medias: extra } = parseAdminMediaListFromApiJson(missRaw);
+            if (extra.length > 0) {
+              const byId = new Map(medias.map((m) => [m.id, m]));
+              for (const m of extra) byId.set(m.id, m);
+              mediasForHydrate = [...byId.values()];
+              if (!cancelled) setMedias(mediasForHydrate);
+            }
+          }
+        }
+
+        const split = splitQuoteItemsForForm(quote, mediasForHydrate);
 
         if (!cancelled) {
           setQuoteNumber(quote.quoteNumber);

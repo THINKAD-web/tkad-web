@@ -314,14 +314,18 @@ export function hydrateAdminQuoteLinesFromItems(
     const mediaId = item.mediaId?.trim() ?? "";
     const isCustom = !mediaId || mediaId.startsWith("custom-");
 
-    if (!isCustom && byId.has(mediaId)) {
-      const m = byId.get(mediaId)!;
+    // 카탈로그 mediaId 는 목록에 없어도 catalog 로 유지한다.
+    // (take 한도로 누락된 매체를 custom 으로 강등하면 개월×단가 청구가 깨짐)
+    if (!isCustom) {
+      const m = byId.get(mediaId);
       const { displaySpec, meta } = decodeAdminQuoteItemSpec(item.spec);
-      const priceOptionIndex = inferPriceOptionIndexFromMediaName(
-        m,
-        item.mediaName,
-        meta.priceOptionIndex,
-      );
+      const priceOptionIndex = m
+        ? inferPriceOptionIndexFromMediaName(
+            m,
+            item.mediaName,
+            meta.priceOptionIndex,
+          )
+        : Math.max(0, meta.priceOptionIndex ?? 0);
       void displaySpec;
       lines.push({
         kind: "catalog",
@@ -334,9 +338,8 @@ export function hydrateAdminQuoteLinesFromItems(
       continue;
     }
 
-    const customId = isCustom
-      ? mediaId.replace(/^custom-/, "") || `item-${item.id}`
-      : `orphan-${item.id}`;
+    const customId =
+      mediaId.replace(/^custom-/, "") || `item-${item.id}`;
 
     lines.push({
       kind: "custom",

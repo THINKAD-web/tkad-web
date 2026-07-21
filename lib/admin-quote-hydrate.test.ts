@@ -140,6 +140,32 @@ test("splitQuoteItemsForForm keeps custom lines in the same array", () => {
   assert.equal(lines[0]?.kind, "custom");
 });
 
+test("splitQuoteItemsForForm keeps catalog kind when media missing from list", () => {
+  const quote = quoteWithItems([
+    {
+      id: "1",
+      mediaId: "missing-media-id",
+      mediaName: "신림역사거리 전광판 광고 (30초 (1일 100회))",
+      spec: encodeAdminQuoteItemSpec("1224×672", {
+        priceOptionIndex: 1,
+        quantityLabel: "30초 (1일 100회)",
+      }),
+      period: "2026-08-01 ~ 2026-08-30",
+      unitPrice: 7000000,
+      quantity: 1,
+      amount: 7000000,
+    },
+  ]);
+
+  const { lines } = splitQuoteItemsForForm(quote, []);
+  assert.equal(lines.length, 1);
+  assert.equal(lines[0]?.kind, "catalog");
+  if (lines[0]?.kind === "catalog") {
+    assert.equal(lines[0].mediaId, "missing-media-id");
+    assert.equal(lines[0].priceOptionIndex, 1);
+  }
+});
+
 test("admin quote line spec codec round-trips priceOptionIndex and quantityLabel", () => {
   const encoded = encodeAdminQuoteItemSpec("1920×1080", {
     priceOptionIndex: 2,
