@@ -2577,6 +2577,7 @@
     "sumSupply": "Supply amount",
     "sumVat": "VAT (10%)",
     "sumTotal": "Grand total",
+    "sumInquiryNote": "{count} on-request line(s) excluded from totals",
     "pdfSectionTitle": "Quote PDF & client",
     "quoteNumberLabel": "Quote number",
     "quoteIssueDate": "Issue date",

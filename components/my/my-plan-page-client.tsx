@@ -29,7 +29,7 @@ import {
 } from "@/lib/plan-cart-planner-bridge";
 import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
 import { SavePlanButton } from "@/components/my/save-plan-button";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
@@ -116,7 +116,7 @@ export function MyPlanPageClient() {
     : null;
 
   function formatWon(amount: number) {
-    if (amount <= 0) return isKo ? "문의" : "Inquire";
+    if (amount <= 0) return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
     return formatCatalogPriceFieldWon(amount, isKo ? "ko-KR" : "en-US");
   }
 

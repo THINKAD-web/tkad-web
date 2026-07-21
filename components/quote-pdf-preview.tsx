@@ -9,6 +9,7 @@ import {
   formatQuoteAmount,
   type QuoteAmountDisplayUnit,
 } from "@/lib/document-text";
+import { formatAdminQuoteLineCell } from "@/lib/admin-quote-inquiry";
 import { QuoteMediaLineCard, QuoteAddonLineRow, isQuoteAddonRow } from "@/components/document/quote-media-line-card";
 import { MediaDetailCard } from "@/components/document/media-detail-card";
 import {
@@ -271,7 +272,13 @@ function QuoteMediaCompactTable({
                 {row.location || "—"}
               </td>
               <td className="px-3 py-2.5 text-right text-sm font-bold tabular-nums text-violet-700">
-                {formatAmount(row.lineTotalWon)}
+                {formatAdminQuoteLineCell(row.lineTotalWon, isKo, (n) =>
+                  formatAmount(n),
+                {
+                  priceOnInquiry: row.priceOnInquiry,
+                  unitPriceWon: row.unitPriceWon,
+                  lineTotalWon: row.lineTotalWon,
+                })}
               </td>
             </tr>
           ))}
@@ -292,6 +299,8 @@ export type QuotePdfPreviewRow = {
   unitPriceWon: number;
   /** 라인 합계 (원). */
   lineTotalWon: number;
+  /** 카탈로그 단가 ≤0 · override 없음 → 「별도 문의」 */
+  priceOnInquiry?: boolean;
   /** 단가 기간 라벨 (예: 2주, 월) */
   unitPeriodLabel?: string;
   /** 집행 기간 라벨 (행별) */
@@ -562,9 +571,23 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
             ) : (
               <ul className={cn(isDefaultDoc ? "space-y-2" : "space-y-4")}>
                 {rows.map((row, idx) => {
+                  const cellOpts = {
+                    priceOnInquiry: row.priceOnInquiry,
+                    unitPriceWon: row.unitPriceWon,
+                    lineTotalWon: row.lineTotalWon,
+                  };
+                  const unitFormatted = formatAdminQuoteLineCell(
+                    row.unitPriceWon,
+                    isKo,
+                    (n) => formatAmount(n),
+                    cellOpts,
+                  );
                   const unitLabel = row.unitPeriodLabel
-                    ? `${formatAmount(row.unitPriceWon)} / ${row.unitPeriodLabel}`
-                    : formatAmount(row.unitPriceWon);
+                    ? row.priceOnInquiry ||
+                      (row.unitPriceWon <= 0 && row.lineTotalWon <= 0)
+                      ? unitFormatted
+                      : `${unitFormatted} / ${row.unitPeriodLabel}`
+                    : unitFormatted;
                   const isAddon = isQuoteAddonRow(row);
                   const detail: DocumentMediaDetail = {
                     id: row.id,
@@ -580,7 +603,12 @@ export const QuotePdfPreview = forwardRef<HTMLDivElement, Props>(
                     dailyTraffic: row.dailyFootTraffic ?? undefined,
                     broadcastLabel: row.broadcastLabel ?? undefined,
                     monthlyPriceLabel: unitLabel,
-                    lineTotalLabel: formatAmount(row.lineTotalWon),
+                    lineTotalLabel: formatAdminQuoteLineCell(
+                      row.lineTotalWon,
+                      isKo,
+                      (n) => formatAmount(n),
+                      cellOpts,
+                    ),
                     executionPeriodLabel: row.executionPeriodLabel ?? undefined,
                   };
                   return (

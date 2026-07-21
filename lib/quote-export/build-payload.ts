@@ -450,6 +450,7 @@ export type AdminQuoteDraftExportRow = {
   period: string;
   unitPriceWon: number;
   lineTotalWon: number;
+  priceOnInquiry?: boolean;
   location?: string;
   spec?: string;
   quantity?: number;
@@ -496,6 +497,7 @@ export async function buildQuoteExportPayloadFromAdminDraft(
         unitPriceWon: r.unitPriceWon,
         lineSupplyWon: r.lineTotalWon,
         impressions: media?.impressions ?? 0,
+        priceOnInquiry: r.priceOnInquiry,
       },
       media,
       input.isKo,
@@ -565,6 +567,7 @@ function mapQuoteExportLine(
     unitPriceWon: number;
     lineSupplyWon: number;
     impressions: number;
+    priceOnInquiry?: boolean;
   },
   row:
     | {
@@ -594,6 +597,7 @@ function mapQuoteExportLine(
     unitPriceWon: line.unitPriceWon,
     lineSupplyWon: line.lineSupplyWon,
     impressions: line.impressions,
+    ...(line.priceOnInquiry ? { priceOnInquiry: true } : {}),
   };
   if (!row) return base;
 

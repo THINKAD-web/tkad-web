@@ -84,6 +84,7 @@ import {
 } from "@/components/sticky-action-bar";
 import { cn } from "@/lib/utils";
 import type { FormalQuoteIssuer } from "@/lib/formal-quote-issuer";
+import { countAdminQuoteInquiryLines } from "@/lib/admin-quote-inquiry";
 
 function formatWon(n: number) {
   return `${new Intl.NumberFormat("ko-KR").format(Math.round(n))}원`;
@@ -393,6 +394,11 @@ export default function AdminQuoteNewClient({
     [lineItems],
   );
 
+  const inquiryLineCount = useMemo(
+    () => countAdminQuoteInquiryLines(lineItems),
+    [lineItems],
+  );
+
   const hasLines = lines.length > 0;
 
   const dpct = Math.min(100, Math.max(0, parseFloat(discountPercent) || 0));
@@ -446,6 +452,7 @@ export default function AdminQuoteNewClient({
           unitPriceWon: it.unitPrice,
           quantity: it.quantity,
           lineTotalWon: it.amount,
+          ...(it.priceOnInquiry ? { priceOnInquiry: true } : {}),
         })),
       }),
     [
@@ -815,6 +822,7 @@ export default function AdminQuoteNewClient({
               spec: decodeAdminQuoteItemSpec(it.spec).displaySpec,
               quantity: it.quantity,
               quantityLabel: it.quantityLabel,
+              ...(it.priceOnInquiry ? { priceOnInquiry: true } : {}),
             };
           }),
         }),
@@ -1495,6 +1503,11 @@ export default function AdminQuoteNewClient({
                   {formatWon(totals.totalWon)}
                 </dd>
               </div>
+              {inquiryLineCount > 0 ? (
+                <p className="text-xs text-muted-foreground sm:col-span-2 lg:col-span-3">
+                  {t("sumInquiryNote", { count: inquiryLineCount })}
+                </p>
+              ) : null}
             </dl>
           )}
         </CardContent>
@@ -1590,6 +1603,7 @@ export default function AdminQuoteNewClient({
                           location: m?.location ?? "—",
                           unitPriceWon: it.unitPrice,
                           lineTotalWon: it.amount,
+                          ...(it.priceOnInquiry ? { priceOnInquiry: true } : {}),
                           size,
                           dailyFootTraffic: m?.dailyFootfall ?? null,
                           visibilityScore: m?.visibilityScore ?? null,
@@ -1646,6 +1660,11 @@ export default function AdminQuoteNewClient({
                 <span>합계</span>
                 <span className="tabular-nums">{formatWon(totals.totalWon)}</span>
               </div>
+              {inquiryLineCount > 0 ? (
+                <p className="pt-1 text-[11px] text-muted-foreground">
+                  {t("sumInquiryNote", { count: inquiryLineCount })}
+                </p>
+              ) : null}
               <p className="pt-1 text-[11px] text-muted-foreground">
                 견적번호 {displayQuoteNumber} · 유효기간 {validUntilPdf}
               </p>

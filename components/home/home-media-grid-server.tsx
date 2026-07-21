@@ -1,7 +1,7 @@
 import { MediaCard } from "@/components/media/media-card";
 import { type MediaItem } from "@/lib/media-data";
 import { mediaItemDetailPath } from "@/lib/media-network-types";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatMediaDisplayPrice } from "@/lib/media-price-format";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 
 type Props = {
@@ -24,9 +24,8 @@ export function HomeMediaGridServer({
 
   return (
     <ul className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-      {items.map((m, index) => {
-        const priceLabel =
-          m.price > 0 ? formatCatalogPriceFieldWon(m.price, locale) : null;
+          {items.map((m, index) => {
+        const priceLabel = formatMediaDisplayPrice(m, locale);
 
         return (
           <li key={m.id} className="min-w-0 list-none">

@@ -7,6 +7,7 @@ import {
   formatFormalWon,
   getFormalQuoteIssuer,
 } from "@/lib/formal-quote-issuer";
+import { formatAdminQuoteLineCell } from "@/lib/admin-quote-inquiry";
 import { resolveQuoteStampDataUrl } from "@/lib/quote-pdf-assets";
 
 /** THINKAD brand — globals.css navy / gold */
@@ -24,6 +25,8 @@ export type AdminFormalQuotePdfRow = {
   unitPriceWon: number;
   quantity: number;
   lineTotalWon: number;
+  /** 카탈로그 단가 ≤0 · override 없음 → 「별도 문의」 */
+  priceOnInquiry?: boolean;
 };
 
 export type AdminFormalQuotePdfParams = {
@@ -315,15 +318,33 @@ export async function createAdminFormalQuotePdfDoc(
     for (let i = 0; i < periodLines.length; i++) {
       doc.text(periodLines[i]!, colX[2]! + 1, ly + i * 3.2);
     }
-    doc.text(formatFormalWon(row.unitPriceWon, p.isKo), unitAlignX, y + 3.5, {
-      align: "right",
-    });
+    doc.text(
+      formatAdminQuoteLineCell(row.unitPriceWon, p.isKo, formatFormalWon, {
+        priceOnInquiry: row.priceOnInquiry,
+        unitPriceWon: row.unitPriceWon,
+        lineTotalWon: row.lineTotalWon,
+      }),
+      unitAlignX,
+      y + 3.5,
+      {
+        align: "right",
+      },
+    );
     doc.text(String(row.quantity), colX[4]! + colW[4]! / 2, y + 3.5, {
       align: "center",
     });
-    doc.text(formatFormalWon(row.lineTotalWon, p.isKo), amountAlignX, y + 3.5, {
-      align: "right",
-    });
+    doc.text(
+      formatAdminQuoteLineCell(row.lineTotalWon, p.isKo, formatFormalWon, {
+        priceOnInquiry: row.priceOnInquiry,
+        unitPriceWon: row.unitPriceWon,
+        lineTotalWon: row.lineTotalWon,
+      }),
+      amountAlignX,
+      y + 3.5,
+      {
+        align: "right",
+      },
+    );
     y += h;
   }
 

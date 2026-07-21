@@ -152,14 +152,22 @@ export function quoteToPdfParams(
   const periodLabel =
     periods.length === 0 ? "—" : periods.length <= 2 ? periods.join(", ") : `${periods[0]} 외`;
 
-  const rows: AdminFormalQuotePdfRow[] = quote.items.map((it) => ({
-    name: it.mediaName,
-    spec: it.spec ?? "—",
-    period: it.period,
-    unitPriceWon: it.unitPrice,
-    quantity: it.quantity,
-    lineTotalWon: it.amount,
-  }));
+  const rows: AdminFormalQuotePdfRow[] = quote.items.map((it) => {
+    const unitPriceWon =
+      it.unitPrice <= 0 && it.amount > 0
+        ? Math.round(it.amount / Math.max(1, it.quantity))
+        : it.unitPrice;
+    const priceOnInquiry = it.unitPrice <= 0 && it.amount <= 0;
+    return {
+      name: it.mediaName,
+      spec: it.spec ?? "—",
+      period: it.period,
+      unitPriceWon,
+      quantity: it.quantity,
+      lineTotalWon: it.amount,
+      ...(priceOnInquiry ? { priceOnInquiry: true } : {}),
+    };
+  });
 
   const supplyWon = Math.max(0, quote.subtotal - quote.discount);
 

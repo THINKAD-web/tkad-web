@@ -17,6 +17,7 @@ import {
 } from "@/lib/admin-quote-lines";
 import { catalogPriceFieldToWon } from "@/lib/pricing";
 import { formatPricePeriodShortLabel } from "@/lib/media-price-format";
+import { adminQuoteOnInquiryLabel } from "@/lib/admin-quote-inquiry";
 import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import { isPerUnitGradePriceOptions } from "@/lib/media-quantity";
 import { Plus, Trash2 } from "lucide-react";
@@ -190,8 +191,20 @@ export function AdminQuoteLinesEditor({
                   billing,
                   amountOverrideWon: line.amountOverrideWon,
                 });
+                const catalogOnInquiry = !(
+                  Number.isFinite(unitWon) && unitWon > 0
+                );
+                const priceOnInquiry =
+                  catalogOnInquiry && !billed.amountOverridden;
+                const displayUnitWon =
+                  catalogOnInquiry && billed.amountOverridden
+                    ? Math.round(
+                        billed.amount / Math.max(1, line.quantity),
+                      )
+                    : unitWon;
                 const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
                 const displayName = label ? `${nameBase} (${label})` : nameBase;
+                const inquiryLabel = adminQuoteOnInquiryLabel(isKo);
 
                 return (
                   <tr
@@ -320,20 +333,33 @@ export function AdminQuoteLinesEditor({
                       )}
                     </td>
                     <td className="px-2 py-2 align-middle text-right tabular-nums text-xs">
-                      {new Intl.NumberFormat("ko-KR").format(unitWon)}
-                      <span className="ml-1 text-[10px] text-muted-foreground">
-                        {formatPricePeriodShortLabel(period, locale)}
-                      </span>
+                      {priceOnInquiry ? (
+                        <span className="font-medium text-muted-foreground">
+                          {inquiryLabel}
+                        </span>
+                      ) : (
+                        <>
+                          {new Intl.NumberFormat("ko-KR").format(displayUnitWon)}
+                          <span className="ml-1 text-[10px] text-muted-foreground">
+                            {formatPricePeriodShortLabel(period, locale)}
+                          </span>
+                        </>
+                      )}
                     </td>
                     <td className="px-2 py-2 align-top text-right">
                       <Input
                         type="number"
                         min={0}
-                        value={String(
+                        value={
                           billed.amountOverridden
-                            ? billed.amount
-                            : billed.autoAmount,
-                        )}
+                            ? String(billed.amount)
+                            : priceOnInquiry
+                              ? ""
+                              : String(billed.autoAmount)
+                        }
+                        placeholder={
+                          priceOnInquiry ? inquiryLabel : undefined
+                        }
                         onChange={(e) => {
                           const raw = e.target.value.trim();
                           if (raw === "") {
@@ -343,7 +369,7 @@ export function AdminQuoteLinesEditor({
                             return;
                           }
                           const n = Math.max(0, parseInt(raw, 10) || 0);
-                          if (n === billed.autoAmount) {
+                          if (!priceOnInquiry && n === billed.autoAmount) {
                             updateLine(line.lineId, {
                               amountOverrideWon: null,
                             });
@@ -354,11 +380,21 @@ export function AdminQuoteLinesEditor({
                           }
                         }}
                         className="h-9 w-full text-right text-sm font-semibold tabular-nums"
-                        aria-label={isKo ? "소계 (수동 조정 가능)" : "Subtotal"}
+                        aria-label={
+                          priceOnInquiry
+                            ? isKo
+                              ? "소계 (협의가 입력)"
+                              : "Subtotal (negotiated)"
+                            : isKo
+                              ? "소계 (수동 조정 가능)"
+                              : "Subtotal"
+                        }
                       />
                       {billed.amountOverridden ? (
                         <p className="mt-1 text-[10px] text-muted-foreground">
-                          {isKo ? "자동" : "Auto"} {formatWon(billed.autoAmount)}
+                          {catalogOnInquiry
+                            ? inquiryLabel
+                            : `${isKo ? "자동" : "Auto"} ${formatWon(billed.autoAmount)}`}
                           <button
                             type="button"
                             className="ml-1 underline"
@@ -370,6 +406,12 @@ export function AdminQuoteLinesEditor({
                           >
                             {isKo ? "되돌리기" : "Reset"}
                           </button>
+                        </p>
+                      ) : priceOnInquiry ? (
+                        <p className="mt-1 text-[10px] text-muted-foreground">
+                          {isKo
+                            ? "합계 제외 · 협의가 입력 가능"
+                            : "Excluded from total · enter negotiated amount"}
                         </p>
                       ) : (
                         <p className="mt-1 text-[10px] text-muted-foreground">

@@ -62,6 +62,11 @@ export type AdminQuoteBuiltLineItem = {
   /** 부분기간 요율 미등록 → 일할 폴백 */
   usesProRataFallback?: boolean;
   amountOverridden?: boolean;
+  /**
+   * 카탈로그 표시단가 ≤0 이고 소계 override 없음 → 「별도 문의」.
+   * override가 있으면 false이며 unitPrice/amount에 협의가가 반영됨.
+   */
+  priceOnInquiry?: boolean;
 };
 
 export function newAdminQuoteLineId(prefix = "l"): string {
@@ -416,6 +421,13 @@ export function buildAdminQuoteLineItems(opts: {
       factorForPeriod,
     });
     const unitWon = catalogPriceFieldToWon(rawPrice);
+    const catalogOnInquiry = !(Number.isFinite(unitWon) && unitWon > 0);
+    const priceOnInquiry = catalogOnInquiry && !billed.amountOverridden;
+    /** override된 문의 라인은 단가도 협의가÷수량으로 표시·PDF에 맞춤 */
+    const displayUnitWon =
+      catalogOnInquiry && billed.amountOverridden
+        ? Math.round(billed.amount / qty)
+        : unitWon;
     const nameBase = isKo ? m.name : (m.nameEn || m.name) || m.name;
     const mediaName = label ? `${nameBase} (${label})` : nameBase;
     const displaySpec = mediaSpecLine(m);
@@ -437,7 +449,7 @@ export function buildAdminQuoteLineItems(opts: {
           : {}),
       }),
       period: campaignPeriodLabel,
-      unitPrice: unitWon,
+      unitPrice: displayUnitWon,
       unitPeriod: period,
       quantity: qty,
       quantityLabel,
@@ -446,6 +458,7 @@ export function buildAdminQuoteLineItems(opts: {
       usesMediaPartialRate: billed.usesMediaPartialRate,
       usesProRataFallback: billed.usesProRataFallback,
       amountOverridden: billed.amountOverridden,
+      priceOnInquiry,
     });
   }
 

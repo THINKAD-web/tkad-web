@@ -2577,6 +2577,7 @@
     "sumSupply": "공급가액",
     "sumVat": "부가세 (10%)",
     "sumTotal": "합계",
+    "sumInquiryNote": "별도 문의 항목 {count}건 (합계 미포함)",
     "pdfSectionTitle": "견적서 PDF · 고객 정보",
     "quoteNumberLabel": "견적 번호",
     "quoteIssueDate": "발행일",

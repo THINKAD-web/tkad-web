@@ -5,7 +5,7 @@ import { useLocale } from "next-intl";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { planCartMonthlyTotal } from "@/lib/plan-cart";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
 function PlanSummaryCardInner() {
@@ -22,7 +22,7 @@ function PlanSummaryCardInner() {
   const localeTag = isKo ? "ko-KR" : "en-US";
 
   function formatWon(amount: number) {
-    if (amount <= 0) return isKo ? "문의" : "Inquire";
+    if (amount <= 0) return mediaPriceOnInquiryLabel(localeTag);
     return formatCatalogPriceFieldWon(amount, localeTag);
   }
 

@@ -9,7 +9,7 @@ import type {
   ContactBudgetV2,
   ContactCampaignGoal,
 } from "@/lib/contact-lead-schema";
-import { formatCatalogPriceFieldWon } from "@/lib/media-price-format";
+import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 
 const PLAN_CART_GOAL_TO_CONTACT: Record<string, ContactCampaignGoal> = {
   brand: "brand_awareness",
@@ -52,7 +52,7 @@ function goalLabel(goal: string | undefined, isKo: boolean): string {
 }
 
 function formatManwon(price: number, isKo: boolean): string {
-  if (price <= 0) return isKo ? "문의" : "Inquire";
+  if (price <= 0) return mediaPriceOnInquiryLabel(isKo ? "ko" : "en");
   return formatCatalogPriceFieldWon(price, isKo ? "ko-KR" : "en-US");
 }
 

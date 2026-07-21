@@ -44,6 +44,7 @@ function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
     typeof o.quantityLabel === "string" && o.quantityLabel.trim()
       ? o.quantityLabel.trim()
       : undefined;
+  const priceOnInquiry = o.priceOnInquiry === true;
   return {
     mediaId,
     name,
@@ -54,6 +55,7 @@ function parseRow(r: unknown): AdminQuoteDraftExportRow | null {
     spec,
     quantity,
     quantityLabel,
+    ...(priceOnInquiry ? { priceOnInquiry: true } : {}),
   };
 }
 

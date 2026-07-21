@@ -4,6 +4,7 @@ import {
   buildMediaPageTitle,
   formatMediaSeoMonthlyPriceLabel,
 } from "@/lib/media-seo";
+import { mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 import { isBunnyMediaUrl } from "@/lib/optimized-image-url";
 import { ogImageUrl, siteUrl } from "@/lib/seo";
 
@@ -57,7 +58,7 @@ export function buildMediaOgDescription(media: MediaItem, locale: string): strin
     : media.locationEn || media.location || "";
   const pricePart =
     formatMediaSeoMonthlyPriceLabel(media, locale) ||
-    (isKo ? "문의" : "Inquire");
+    mediaPriceOnInquiryLabel(locale);
 
   const parts = [region, typeStr, isKo ? "광고 매체" : "OOH media", address, pricePart]
     .map((p) => p.trim())

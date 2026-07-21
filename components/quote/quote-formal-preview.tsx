@@ -8,6 +8,7 @@ import {
   getFormalQuoteIssuer,
   type FormalQuoteIssuer,
 } from "@/lib/formal-quote-issuer";
+import { formatAdminQuoteLineCell } from "@/lib/admin-quote-inquiry";
 import { QuoteStampImage } from "@/components/quote/quote-stamp-image";
 import { cn } from "@/lib/utils";
 
@@ -248,13 +249,31 @@ export const QuoteFormalPreview = forwardRef<HTMLDivElement, Props>(
                       {row.period}
                     </td>
                     <td className="px-1.5 py-2 text-right tabular-nums leading-snug">
-                      {formatFormalWon(row.unitPriceWon, isKo)}
+                      {formatAdminQuoteLineCell(
+                        row.unitPriceWon,
+                        isKo,
+                        formatFormalWon,
+                        {
+                          priceOnInquiry: row.priceOnInquiry,
+                          unitPriceWon: row.unitPriceWon,
+                          lineTotalWon: row.lineTotalWon,
+                        },
+                      )}
                     </td>
                     <td className="px-1.5 py-2 text-center tabular-nums">
                       {row.quantity}
                     </td>
                     <td className="px-2.5 py-2 text-right font-semibold tabular-nums leading-snug">
-                      {formatFormalWon(row.lineTotalWon, isKo)}
+                      {formatAdminQuoteLineCell(
+                        row.lineTotalWon,
+                        isKo,
+                        formatFormalWon,
+                        {
+                          priceOnInquiry: row.priceOnInquiry,
+                          unitPriceWon: row.unitPriceWon,
+                          lineTotalWon: row.lineTotalWon,
+                        },
+                      )}
                     </td>
                   </tr>
                 ))}
