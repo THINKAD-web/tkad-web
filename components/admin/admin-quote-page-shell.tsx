@@ -34,9 +34,9 @@ export const adminQuoteSectionTitle =
 
 export const adminQuoteSectionHint = "mt-1 text-xs text-muted-foreground";
 
-/** quotes/contracts 계열 공용 — 라이트·다크 대비 통일 */
+/** quotes/contracts 계열 공용 — 라이트·다크 대비 통일 (native select 가독성) */
 export const adminQuoteSelectClass =
-  "rounded-md border border-input bg-white px-2 text-sm text-foreground dark:bg-white/5 dark:text-hero-fg";
+  "rounded-md border border-input bg-white px-2 text-sm text-foreground shadow-xs dark:border-hero-fg/30 dark:bg-zinc-900 dark:text-hero-fg";
 
 export const adminQuoteTableTheadClass =
   "border-b bg-muted text-left text-xs text-muted-foreground dark:bg-card/5";
