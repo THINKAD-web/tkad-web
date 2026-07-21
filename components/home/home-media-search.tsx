@@ -56,7 +56,7 @@ export function HomeMediaSearch({ className, prominent = false }: Props) {
             "dark:border-white/12 dark:bg-white/8 dark:text-white dark:placeholder:text-white/35",
             prominent
               ? "py-3.5 pl-12 pr-4 text-base shadow-sm sm:text-sm"
-              : "py-2.5 pl-10 pr-3 text-sm",
+              : "py-2.5 pl-10 pr-3 text-base sm:text-sm",
           )}
         />
       </div>

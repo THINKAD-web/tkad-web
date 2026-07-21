@@ -130,7 +130,7 @@ export function HeaderNotificationsBell({
         className={className ?? menuRowClass}
         aria-label={aria}
       >
-        <Bell className="h-4 w-4 shrink-0" strokeWidth={2} />
+        <Bell className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
         <span className="flex-1">{isKo ? "알림" : "Notifications"}</span>
         {unreadCount > 0 ? (
           <span className="inline-flex h-5 min-w-5 items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-bold dark:text-white text-gray-900">
@@ -155,7 +155,7 @@ export function HeaderNotificationsBell({
         aria-expanded={open}
         aria-haspopup="true"
       >
-        <Bell className="h-4 w-4" strokeWidth={2} />
+        <Bell className="h-4 w-4" strokeWidth={2} aria-hidden />
         {unreadCount > 0 ? (
           <span className="absolute -top-0.5 -right-0.5 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[10px] font-bold dark:text-white text-gray-900 ring-1 ring-white/30">
             {unreadCount > 99 ? "99+" : unreadCount}

@@ -4091,7 +4091,7 @@ img {
   }
 }
 
-/* iOS Safari: 16px 미만 입력 시 자동 줌 방지 */
+/* iOS Safari: 16px 미만 입력 시 자동 줌 방지 (viewport maximumScale 대신) */
 @media (max-width: 767px) {
   input:not([type="checkbox"]):not([type="radio"]):not([type="range"]),
   select,

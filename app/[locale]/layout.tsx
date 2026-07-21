@@ -42,6 +42,8 @@ type Props = {
 export const viewport = {
   width: "device-width",
   initialScale: 1,
+  // Do not set maximumScale / userScalable:false — blocks pinch-zoom (WCAG).
+  // iOS focus zoom is prevented via 16px inputs (globals.css + text-base on search fields).
   // PWA: 노치/홈인디케이터 영역까지 풀-블리드 (env(safe-area-inset-*) 활용)
   viewportFit: "cover" as const,
   themeColor: "#020202",

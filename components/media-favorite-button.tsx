@@ -166,6 +166,7 @@ export function MediaFavoriteButton({
       <Heart
         className={compact ? "h-3.5 w-3.5 sm:h-4 sm:w-4" : "h-4 w-4"}
         fill={favorited ? "currentColor" : "none"}
+        aria-hidden
       />
     </button>
   );
