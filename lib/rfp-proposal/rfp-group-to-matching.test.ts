@@ -25,10 +25,10 @@ const subwayGroup: RfpGroup = {
   mediaTypeKeywords: ["PSD", "스크린도어"],
 };
 
-test("mapMediaTypeKeywords: DOOH/사이니지 → digital", () => {
-  const m = mapMediaTypeKeywords(["디지털 사이니지", "DOOH"]);
-  assert.deepEqual(m.categories, ["digital"]);
-  assert.equal(m.mediaIntents, undefined);
+test("mapMediaTypeKeywords: 전광판 → billboard + digital", () => {
+  const m = mapMediaTypeKeywords(["전광판"]);
+  assert.ok(m.categories?.includes("digital"));
+  assert.ok(m.mediaIntents?.includes("billboard"));
 });
 
 test("mapMediaTypeKeywords: PSD/스크린도어 → subway intent", () => {

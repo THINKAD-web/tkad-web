@@ -70,12 +70,21 @@ function buildPlanReply(plan: PlanFromBriefResult, locale: "ko" | "en"): string 
 
   lines.push(
     isKo
-      ? `\n\n아래 ${plan.items.length}개 매체를 추천드려요.`
-      : `\n\nHere are ${plan.items.length} picks for you.`,
+      ? `\n\n아래 ${plan.items.length}개 매체를 추천드려요. [정확 매칭]은 지역·유형이 모두 맞고, [인근·유사 추천]은 인접 상권이거나 유사 유형입니다.`
+      : `\n\nHere are ${plan.items.length} picks. [Exact match] fits region+format; [Nearby / related] is adjacent or similar.`,
   );
 
   plan.items.slice(0, 4).forEach((item: PlanFromBriefItem, idx) => {
     const name = displayName(item, isKo);
+    const precision =
+      item.matchPrecisionLabel ??
+      (item.matchPrecision === "exact"
+        ? isKo
+          ? "정확 매칭"
+          : "Exact match"
+        : isKo
+          ? "인근·유사 추천"
+          : "Nearby / related");
     const reasons =
       item.reasonLabels.length > 0
         ? item.reasonLabels.slice(0, 3).join(isKo ? " · " : " · ")
@@ -83,7 +92,7 @@ function buildPlanReply(plan: PlanFromBriefResult, locale: "ko" | "en"): string 
           ? "조건 적합"
           : "Good fit";
     lines.push(
-      `\n${idx + 1}. ${name} — ${reasons}\n   [/media/${item.id}](/media/${item.id})`,
+      `\n${idx + 1}. [${precision}] ${name} — ${reasons}\n   [/media/${item.id}](/media/${item.id})`,
     );
   });
 
@@ -236,7 +245,14 @@ export function completeRuleChatbot(params: {
   if (!("error" in plan)) {
     if (plan.parsedFieldCount > 0) {
       const cards = plan.items.slice(0, 6).map(
-        ({ score: _s, reasonKeys: _k, reasonLabels: _l, ...card }) => card,
+        ({
+          score: _s,
+          reasonKeys: _k,
+          reasonLabels: _l,
+          matchPrecision: _p,
+          matchPrecisionLabel: _pl,
+          ...card
+        }) => card,
       );
       return {
         reply: buildPlanReply(plan, locale),

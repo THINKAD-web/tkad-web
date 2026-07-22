@@ -62,6 +62,10 @@ export function mapMediaTypeKeywords(keywords: readonly string[]): {
     ) {
       categories.add("digital");
     }
+    if (/전광판|빌보드|billboard|미디어월|미디어타워|미디어파사드/i.test(raw)) {
+      intents.add("billboard");
+      categories.add("digital");
+    }
     if (/와이드\s*칼라|와이드칼라|빌보드|현수막|지주|static|인쇄/.test(k)) {
       categories.add("static");
     }
@@ -74,6 +78,10 @@ export function mapMediaTypeKeywords(keywords: readonly string[]): {
     categories.add("mobile");
   }
   if (/dooh|디지털\s*사이니지|사이니지|웨이파인딩/i.test(joined)) {
+    categories.add("digital");
+  }
+  if (/전광판|빌보드|billboard|미디어월|미디어타워/i.test(joined)) {
+    intents.add("billboard");
     categories.add("digital");
   }
 

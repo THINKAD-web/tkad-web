@@ -31,4 +31,6 @@ export type RecommendationContext = {
   /** 단기·행사 집행 일수 (freetext 파싱) */
   durationDays?: number;
   goalFollowUp?: PlannerGoalFollowUp;
+  /** 자연어 유형 의도 — matching-engine mediaIntents */
+  mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[];
 };

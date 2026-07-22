@@ -12,6 +12,7 @@ import {
   mapMediaItemToHomeCatalog,
 } from "@/lib/media-catalog-map";
 import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
+import { matchPrecisionLabel } from "@/lib/matching-engine";
 import { DiscoveryMediaCard } from "@/components/discovery/media-card";
 import type { MediaCardCompactLayout } from "@/components/discovery/media-card-types";
 import type { PlanCartAddedFrom } from "@/lib/plan-cart";
@@ -82,9 +83,26 @@ export function RecommendScoredMediaCard({
       : null;
   const { summary, bullets } = resolveRationaleTexts(scored, locale);
   const mapTile = compactLayout === "map-tile";
+  const precision = scored.matchPrecision;
+  const precisionText = precision
+    ? matchPrecisionLabel(precision, isKo)
+    : null;
 
   return (
     <li className={cn("min-w-0 list-none", className)}>
+      {precisionText ? (
+        <p
+          className={cn(
+            "mb-1.5 text-[10px] font-semibold uppercase tracking-wide",
+            precision === "exact"
+              ? "text-[color:var(--qp-accent)]"
+              : "text-muted-foreground",
+          )}
+        >
+          {precision === "exact" ? "● " : "○ "}
+          {precisionText}
+        </p>
+      ) : null}
       <DiscoveryMediaCard
         variant="compact"
         compactLayout={compactLayout}
@@ -172,6 +190,18 @@ export function RecommendTop3PickRow({
               {name}
             </span>
           </span>
+          {scored.matchPrecision ? (
+            <span
+              className={cn(
+                "pl-9 text-[10px] font-semibold uppercase tracking-wide",
+                scored.matchPrecision === "exact"
+                  ? "text-[color:var(--qp-accent)]"
+                  : "text-muted-foreground",
+              )}
+            >
+              {matchPrecisionLabel(scored.matchPrecision, isKo)}
+            </span>
+          ) : null}
           {summary ? (
             <span className="mt-1 line-clamp-2 space-y-0.5 pl-9">
               <span className="flex items-center gap-1 text-[10px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">

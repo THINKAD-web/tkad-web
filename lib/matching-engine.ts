@@ -13,7 +13,7 @@ import {
   getMediaCategoryBySlug,
 } from "@/lib/media-categories";
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
-import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent } from "@/lib/planner-logic";
+import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent, mediaMatchesBillboardIntent } from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
@@ -65,6 +65,9 @@ export type ScoreBreakdown = {
 
 export type MatchReason = { ko: string; en: string };
 
+/** exact = 지역 exact + 유형 의도 충족 / near = 인근·유사 */
+export type MatchPrecision = "exact" | "near";
+
 export type MatchedMedia = {
   media: MediaItem;
   score: number;
@@ -75,6 +78,8 @@ export type MatchedMedia = {
   reasoning?: string;
   expectedImpact?: string;
   priority: number;
+  /** 지역·유형 exact 여부 — UI 「정확 매칭」/「인근·유사」 */
+  matchPrecision?: MatchPrecision;
 };
 
 type RegionDef = { exact: RegExp; adjacent: RegExp };
@@ -85,8 +90,9 @@ const REGION_DEFS: Record<string, RegionDef> = {
     adjacent: /송파|잠실|양재|대치|도곡|개포/i,
   },
   hongdae: {
-    exact: /홍대|마포|합정|상수|연남|신촌|서강|망원|공덕/i,
-    adjacent: /용산|이태원|서대문|은평/i,
+    /* 홍대 코어 상권(도보권). 신촌·공덕·서강은 adjacent(인근). */
+    exact: /홍대|합정|상수|연남|망원|홍익/i,
+    adjacent: /신촌|서강|공덕|마포|용산|이태원|서대문|은평/i,
   },
   seongsu: {
     exact: /성수|뚝섬|건대|왕십리|성동|연무장/i,
@@ -390,7 +396,7 @@ function scoreCategory(
   categories: string[] | undefined,
   goal: string,
   goalTags: string[] | undefined,
-  mediaIntents?: readonly ("subway" | "bus_wrap")[],
+  mediaIntents?: readonly ("subway" | "bus_wrap" | "billboard")[],
 ): number {
   const inputCats = (categories ?? []).map((c) => c.trim()).filter(Boolean);
   const mediaCats = m.mediaCategory ?? [];
@@ -471,6 +477,15 @@ function scoreCategory(
     }
   }
 
+  if (mediaIntents?.includes("billboard")) {
+    if (mediaMatchesBillboardIntent(m)) {
+      best = Math.max(best, 15);
+    } else {
+      /* 아트래핑·역사 digital 등 — 풀에는 남기되 순위 하락 */
+      best = Math.min(best, 3);
+    }
+  }
+
   return Math.min(15, best);
 }
 
@@ -537,6 +552,37 @@ function deterministicHash(id: string, seed: number): number {
   return h >>> 0;
 }
 
+function resolveMatchPrecision(
+  m: MediaItem,
+  input: MatchingInput,
+  breakdown: ScoreBreakdown,
+): MatchPrecision {
+  const regionExact = breakdown.region >= 25;
+  const intents = input.mediaIntents ?? [];
+  let typeExact = true;
+  if (intents.includes("billboard")) {
+    typeExact = mediaMatchesBillboardIntent(m);
+  } else if (intents.includes("subway")) {
+    typeExact = mediaMatchesPlannerSubwayIntent(m);
+  } else if (intents.includes("bus_wrap")) {
+    typeExact = mediaMatchesPlannerBusWrapIntent(m);
+  } else if ((input.categories?.length ?? 0) > 0) {
+    typeExact = breakdown.category >= 12;
+  }
+  return regionExact && typeExact ? "exact" : "near";
+}
+
+/** UI 라벨 — 정확 매칭 / 인근·유사 추천 */
+export function matchPrecisionLabel(
+  precision: MatchPrecision | undefined,
+  isKo: boolean,
+): string {
+  if (precision === "exact") {
+    return isKo ? "정확 매칭" : "Exact match";
+  }
+  return isKo ? "인근·유사 추천" : "Nearby / related";
+}
+
 function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
   const budgetPts = scoreBudget(m, input.monthlyBudgetWon);
   if (budgetPts < 0) return null;
@@ -569,6 +615,14 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
       breakdown.popularity,
   );
 
+  /* 전광판 의도인데 아트래핑·쉘터 등이면 총점 상한 — 폴백 노출은 유지하되 exact 아래로 */
+  if (
+    input.mediaIntents?.includes("billboard") &&
+    !mediaMatchesBillboardIntent(m)
+  ) {
+    breakdown.total = Math.min(breakdown.total, 72);
+  }
+
   return {
     media: m,
     score: breakdown.total,
@@ -577,6 +631,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
     budgetAllocation: 0,
     role: "sub",
     priority: 0,
+    matchPrecision: resolveMatchPrecision(m, input, breakdown),
   };
 }
 
@@ -619,6 +674,13 @@ export function scoreMediaForRanking(
       breakdown.popularity,
   );
 
+  if (
+    input.mediaIntents?.includes("billboard") &&
+    !mediaMatchesBillboardIntent(m)
+  ) {
+    breakdown.total = Math.min(breakdown.total, 72);
+  }
+
   return {
     media: m,
     score: breakdown.total,
@@ -627,6 +689,7 @@ export function scoreMediaForRanking(
     budgetAllocation: 0,
     role: "sub",
     priority: 0,
+    matchPrecision: resolveMatchPrecision(m, input, breakdown),
   };
 }
 
@@ -889,8 +952,19 @@ export function matchMediaCatalog(
 
   windowed = mergeNetworkCandidatesIntoWindow(windowed, rescored, input);
 
-  const picked = selectDiversePortfolio(windowed, limit, seed);
-  return applyNetworkRecommendationQuota(picked, rescored, input, limit);
+  const picked = applyNetworkRecommendationQuota(
+    selectDiversePortfolio(windowed, limit, seed),
+    rescored,
+    input,
+    limit,
+  );
+  /* exact 매칭을 soft보다 앞에 — 동점이면 score 유지 */
+  return [...picked].sort((a, b) => {
+    const ae = a.matchPrecision === "exact" ? 1 : 0;
+    const be = b.matchPrecision === "exact" ? 1 : 0;
+    if (ae !== be) return be - ae;
+    return b.score - a.score;
+  });
 }
 
 export function oneLineReason(

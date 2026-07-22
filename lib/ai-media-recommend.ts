@@ -82,6 +82,7 @@ export type ScoredMedia = {
   reasons: MatchReason[];
   /** 규칙 기반 조건 연결 문장 (최대 3줄) */
   rationaleLines?: import("@/lib/recommend/recommend-rationale").LocalizedRationaleLine[];
+  matchPrecision?: import("@/lib/matching-engine").MatchPrecision;
 };
 
 /** score = budget*0.4 + target*0.3 + region*0.2 + visibility*0.1 (각 0–100 근사). */

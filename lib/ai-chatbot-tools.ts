@@ -204,7 +204,14 @@ export function executeChatbotTool(
       return { result: { error: out.error }, cards: [] };
     }
     const cards = out.items.slice(0, 6).map(
-      ({ score: _s, reasonKeys: _k, reasonLabels: _l, ...card }) => card,
+      ({
+        score: _s,
+        reasonKeys: _k,
+        reasonLabels: _l,
+        matchPrecision: _p,
+        matchPrecisionLabel: _pl,
+        ...card
+      }) => card,
     );
     return { result: out, cards };
   }

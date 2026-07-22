@@ -32,8 +32,9 @@ const SEOUL_ZONE_DEFS: Record<PlannerSeoulZoneKey, ZoneDef> = {
     adjacent: /양재|대치|도곡|개포|관악|동작|사당|신림|봉천/i,
   },
   hongdae: {
-    exact: /홍대|마포|합정|상수|연남|신촌|서강|망원|공덕/i,
-    adjacent: /용산|이태원|서대문|은평/i,
+    /* 홍대 코어. 신촌·공덕·서강·마포(광의)는 인근. */
+    exact: /홍대|합정|상수|연남|망원|홍익/i,
+    adjacent: /신촌|서강|공덕|마포|용산|이태원|서대문|은평/i,
   },
   seongsu: {
     exact: /성수|뚝섬|건대|왕십리|성동|연무장/i,
