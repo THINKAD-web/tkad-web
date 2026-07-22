@@ -36,6 +36,13 @@ function clusterSizeClass(count: number): string {
   return "small";
 }
 
+/** 광역 줌에서 더 넓게 뭉침 → overview 디스크 개수·면적 부담 완화 */
+function maxClusterRadiusForZoom(zoom: number): number {
+  if (zoom <= 11) return 110;
+  if (zoom <= 13) return 90;
+  return 72;
+}
+
 const clusterIconCache = new Map<string, L.DivIcon>();
 
 function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
@@ -44,13 +51,16 @@ function buildClusterIcon(count: number, lightTiles: boolean): L.DivIcon {
   if (cached) return cached;
 
   const sizeClass = clusterSizeClass(count);
-  const px = sizeClass === "large" ? 42 : sizeClass === "medium" ? 38 : 34;
-  /* qp accent — dark/light tiles 모두 흰 숫자로 대비 유지 */
-  const border = lightTiles ? "2px solid rgba(15,23,42,0.45)" : "2px solid rgba(255,255,255,0.92)";
+  const px = sizeClass === "large" ? 32 : sizeClass === "medium" ? 28 : 24;
+  /* qp accent — dark: 흰 테두리 약화(0.35), light: 기존 slate */
+  const border = lightTiles
+    ? "2px solid rgba(15,23,42,0.45)"
+    : "2px solid rgba(255,255,255,0.35)";
   const fill = "#ff6200";
   const textColor = "#ffffff";
+  const fontSize = sizeClass === "small" ? "10px" : "11px";
   const icon = L.divIcon({
-    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};background:${fill};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;color:${textColor};font-family:ui-sans-serif,system-ui,sans-serif">${count}</div>`,
+    html: `<div style="width:${px}px;height:${px}px;border-radius:999px;border:${border};background:${fill};display:flex;align-items:center;justify-content:center;font-size:${fontSize};font-weight:800;color:${textColor};font-family:ui-sans-serif,system-ui,sans-serif">${count}</div>`,
     className: `tkad-map-cluster tkad-map-cluster--${sizeClass}`,
     iconSize: L.point(px, px),
   });
@@ -169,7 +179,7 @@ export function DarkMapMarkersLayer({
     const layer = disableCluster
       ? L.layerGroup()
       : L.markerClusterGroup({
-          maxClusterRadius: 72,
+          maxClusterRadius: maxClusterRadiusForZoom,
           disableClusteringAtZoom: 16,
           spiderfyOnMaxZoom: true,
           showCoverageOnHover: false,

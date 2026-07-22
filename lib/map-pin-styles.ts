@@ -65,7 +65,7 @@ function buildPinDataUrl(
 ): string {
   const useScore = visibilityScore !== undefined;
   const { fill, stroke, text } = useScore
-    ? pinColorForVisibilityScore(visibilityScore)
+    ? pinColorForVisibilityScore(visibilityScore, forLightBackground)
     : pinColorForType(type);
   const size = selected ? 34 : 30;
   const ring = selected ? 3 : 2;
@@ -74,7 +74,7 @@ function buildPinDataUrl(
     ? MAP_PIN_SELECTION_RING
     : forLightBackground
       ? "rgba(15,23,42,0.55)"
-      : "rgba(255,255,255,0.9)";
+      : "rgba(255,255,255,0.35)";
   const labelFill = text;
   const showLabel = label.length > 0 && !useScore;
 

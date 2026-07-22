@@ -17,7 +17,7 @@ export type VisibilityPinTierDef = {
   rangeLabelEn: string;
 };
 
-/** 연함(낮은 점수) → 진함(높은 점수) */
+/** 라이트/voyager 타일용 — 연함(낮은 점수) → 진함(높은 점수) */
 export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
   {
     tier: 0,
@@ -93,6 +93,91 @@ export const VISIBILITY_PIN_TIERS: readonly VisibilityPinTierDef[] = [
   },
 ] as const;
 
+/**
+ * Carto dark_all 타일용 — tier1 크림(#FFEDD5) 대신 muted orange.
+ * 순위(연함→진함)는 라이트와 동일, 다크 배경에서 흰 점처럼 튀지 않게.
+ */
+export const VISIBILITY_PIN_TIERS_DARK: readonly VisibilityPinTierDef[] = [
+  {
+    tier: 0,
+    min: Number.NEGATIVE_INFINITY,
+    max: 0,
+    fill: "#64748b",
+    stroke: "#94a3b8",
+    text: "#f1f5f9",
+    labelKo: "미입력",
+    labelEn: "No score",
+    rangeLabelKo: "—",
+    rangeLabelEn: "—",
+  },
+  {
+    tier: 1,
+    min: 1,
+    max: 84,
+    fill: "#9A3412",
+    stroke: "#C2410C",
+    text: "#FFEDD5",
+    labelKo: "기본",
+    labelEn: "Basic",
+    rangeLabelKo: "1–84",
+    rangeLabelEn: "1–84",
+  },
+  {
+    tier: 2,
+    min: 85,
+    max: 88,
+    fill: "#C2410C",
+    stroke: "#EA580C",
+    text: "#FFEDD5",
+    labelKo: "표준",
+    labelEn: "Standard",
+    rangeLabelKo: "85–88",
+    rangeLabelEn: "85–88",
+  },
+  {
+    tier: 3,
+    min: 89,
+    max: 91,
+    fill: "#EA580C",
+    stroke: "#FB923C",
+    text: "#FFF7ED",
+    labelKo: "양호",
+    labelEn: "Good",
+    rangeLabelKo: "89–91",
+    rangeLabelEn: "89–91",
+  },
+  {
+    tier: 4,
+    min: 92,
+    max: 94,
+    fill: "#F97316",
+    stroke: "#FDBA74",
+    text: "#0f172a",
+    labelKo: "높음",
+    labelEn: "High",
+    rangeLabelKo: "92–94",
+    rangeLabelEn: "92–94",
+  },
+  {
+    tier: 5,
+    min: 95,
+    max: 100,
+    fill: "#ff6200",
+    stroke: "#FDBA74",
+    text: "#ffffff",
+    labelKo: "최상",
+    labelEn: "Top",
+    rangeLabelKo: "95+",
+    rangeLabelEn: "95+",
+  },
+] as const;
+
+export function visibilityPinTiersForTiles(
+  forLightBackground: boolean,
+): readonly VisibilityPinTierDef[] {
+  return forLightBackground ? VISIBILITY_PIN_TIERS : VISIBILITY_PIN_TIERS_DARK;
+}
+
 export function visibilityPinTierForScore(
   score: number | null | undefined,
 ): VisibilityPinTier {
@@ -105,23 +190,37 @@ export function visibilityPinTierForScore(
 
 export function visibilityPinTierDefForScore(
   score: number | null | undefined,
+  forLightBackground = true,
 ): VisibilityPinTierDef {
   const tier = visibilityPinTierForScore(score);
-  return VISIBILITY_PIN_TIERS.find((t) => t.tier === tier) ?? VISIBILITY_PIN_TIERS[0]!;
+  const table = visibilityPinTiersForTiles(forLightBackground);
+  return table.find((t) => t.tier === tier) ?? table[0]!;
 }
 
-export function pinColorForVisibilityScore(score: number | null | undefined): {
+/**
+ * @param forLightBackground true = voyager/light tiles (기본, 기존 크림 tier1).
+ *   false = dark_all — muted orange palette.
+ */
+export function pinColorForVisibilityScore(
+  score: number | null | undefined,
+  forLightBackground = true,
+): {
   fill: string;
   stroke: string;
   text: string;
 } {
-  const { fill, stroke, text } = visibilityPinTierDefForScore(score);
+  const { fill, stroke, text } = visibilityPinTierDefForScore(
+    score,
+    forLightBackground,
+  );
   return { fill, stroke, text };
 }
 
 /** 범례용 — tier 0(미입력) 포함 전체 */
-export function visibilityPinLegendEntries(): VisibilityPinTierDef[] {
-  return [...VISIBILITY_PIN_TIERS];
+export function visibilityPinLegendEntries(
+  forLightBackground = true,
+): VisibilityPinTierDef[] {
+  return [...visibilityPinTiersForTiles(forLightBackground)];
 }
 
 /** @deprecated Use VISIBILITY_PIN_BRAND_NEON */

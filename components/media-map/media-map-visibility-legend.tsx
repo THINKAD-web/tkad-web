@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { ChevronDown } from "lucide-react";
+import { useTheme } from "next-themes";
 import { visibilityPinLegendEntries } from "@/lib/map-pin-visibility-colors";
 import { mapFloatingPanelClass } from "@/components/media-map/map-floating-ui";
 import { cn } from "@/lib/utils";
@@ -22,7 +23,10 @@ export function MediaMapVisibilityLegend({
   showSubwayToggle = false,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
-  const entries = visibilityPinLegendEntries();
+  const { resolvedTheme } = useTheme();
+  /* 지도 타일과 동일: dark → muted orange 팔레트 */
+  const forLightMapTiles = resolvedTheme !== "dark";
+  const entries = visibilityPinLegendEntries(forLightMapTiles);
 
   return (
     <div

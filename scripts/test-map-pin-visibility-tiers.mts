@@ -32,9 +32,19 @@ expectTier(95, 5, "최상");
 expectTier(100, 5, "최상");
 
 const gray = pinColorForVisibilityScore(0);
-assert.equal(gray.fill, "#94a3b8", "unknown fill");
+assert.equal(gray.fill, "#94a3b8", "unknown fill (light)");
+
+const basicLight = pinColorForVisibilityScore(50, true);
+assert.equal(basicLight.fill, "#FFEDD5", "tier1 cream on light tiles");
+
+const basicDark = pinColorForVisibilityScore(50, false);
+assert.equal(basicDark.fill, "#9A3412", "tier1 muted on dark tiles");
+assert.notEqual(basicDark.fill, "#FFEDD5", "dark must not use cream");
 
 const top = pinColorForVisibilityScore(98);
-assert.equal(top.fill, "#00E5FF", "top fill");
+assert.equal(top.fill, "#ff6200", "top fill");
+
+const topDark = pinColorForVisibilityScore(98, false);
+assert.equal(topDark.fill, "#ff6200", "top fill dark");
 
 console.log("test-map-pin-visibility-tiers: ok");
