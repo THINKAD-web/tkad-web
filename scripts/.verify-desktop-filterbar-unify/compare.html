@@ -1,0 +1,36 @@
+<!doctype html><html><head><meta charset=utf-8><title>Desktop filterbar unify</title>
+<style>
+body{font-family:ui-sans-serif,system-ui;background:#111;color:#f5f5f5;padding:24px;max-width:1100px;margin:0 auto}
+h1{font-size:20px;margin:0 0 8px} .meta{color:#999;font-size:13px;margin-bottom:20px}
+table{width:100%;border-collapse:collapse;margin:16px 0;font-size:13px}
+th,td{border:1px solid #333;padding:8px 10px;text-align:left}
+th{background:#1a1a1a;color:#aaa} .bad{color:#f87171;font-weight:700} .good{color:#4ade80;font-weight:700}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+.card{border:1px solid #333;border-radius:12px;padding:12px;background:#161616}
+.card h2{font-size:14px;margin:0 0 10px;color:#ccc}
+.card img{width:100%;height:auto;border-radius:8px;background:#0a0a0a}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:8px 0}
+.chip{border:1px solid #444;border-radius:10px;padding:4px 8px;font-size:11px}
+</style></head><body>
+<h1>Desktop filterbar unify — before / after</h1>
+<p class="meta">Viewport 1440×900 · /ko/media · heights in px · target TOOLBAR_CTRL_H = 36</p>
+<table>
+<tr><th>Control</th><th>Before</th><th>After</th><th>Δ</th></tr>
+<tr><td>필터</td><td class="bad">30.5</td><td class="good">36</td><td>+5.5</td></tr>
+<tr><td>정렬</td><td class="bad">31.0</td><td class="good">36</td><td>+5.0</td></tr>
+<tr><td>매체·네트워크 래퍼</td><td>36.0</td><td class="good">36</td><td>0</td></tr>
+<tr><td>매체/네트워크 버튼</td><td class="bad">34.0</td><td class="good">36</td><td>+2.0</td></tr>
+<tr><td>뷰모드 버튼</td><td class="bad">26.5</td><td class="good">36</td><td>+9.5</td></tr>
+<tr><td>지도</td><td class="bad">30.5</td><td class="good">36</td><td>+5.5</td></tr>
+<tr><td>스프레드</td><td class="bad">9.5</td><td class="good">0</td><td>unified</td></tr>
+</table>
+<div class="grid">
+  <div class="card"><h2>Before — view mode (26.5px)</h2><img src="before-media-viewmode.png" alt="before viewmode"></div>
+  <div class="card"><h2>After — view mode (36px)</h2><img src="after-media-viewmode.png" alt="after viewmode"></div>
+  <div class="card"><h2>After — filter (36px)</h2><img src="after-media-filter.png" alt="filter"></div>
+  <div class="card"><h2>After — segment (36px)</h2><img src="after-media-segment.png" alt="segment"></div>
+  <div class="card"><h2>After — sort (36px)</h2><img src="after-media-sort.png" alt="sort"></div>
+  <div class="card"><h2>After — map (36px)</h2><img src="after-media-map.png" alt="map"></div>
+</div>
+<div class="card" style="margin-top:16px"><h2>After — full toolbar</h2><img src="after-media-toolbar.png" alt="toolbar"></div>
+</body></html>

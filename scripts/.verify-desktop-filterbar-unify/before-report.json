@@ -1,0 +1,708 @@
+{
+  "summary": {
+    "viewport": "1440x900 (≥1280 desktop)",
+    "measuredAt": "2026-07-22T18:59:31.605Z",
+    "media": {
+      "heights": {
+        "filter": 30.5,
+        "sort": 31,
+        "segment": 36,
+        "segmentMedia": 34,
+        "segmentNetwork": 34,
+        "viewModes": [
+          {
+            "text": "카드",
+            "h": 26.5,
+            "pressed": "true",
+            "padY": "4px",
+            "font": "12px"
+          },
+          {
+            "text": "피드",
+            "h": 26.5,
+            "pressed": "false",
+            "padY": "4px",
+            "font": "12px"
+          },
+          {
+            "text": "몰입 보기",
+            "h": 26.5,
+            "pressed": "false",
+            "padY": "4px",
+            "font": "12px"
+          },
+          {
+            "text": "컴팩트",
+            "h": 26.5,
+            "pressed": "false",
+            "padY": "4px",
+            "font": "12px"
+          }
+        ],
+        "map": 30.5
+      },
+      "paddingFont": {
+        "filter": {
+          "pt": "6px",
+          "pb": "6px",
+          "px": "12px",
+          "font": "12px",
+          "border": "1px"
+        },
+        "sort": {
+          "pt": "6px",
+          "pb": "6px",
+          "font": "12px",
+          "border": "1px"
+        },
+        "segmentMedia": {
+          "pt": "6px",
+          "pb": "6px",
+          "font": "14px"
+        },
+        "view0": {
+          "pt": "4px",
+          "pb": "4px",
+          "px": "8px",
+          "font": "12px"
+        },
+        "map": {
+          "pt": "6px",
+          "pb": "6px",
+          "font": "12px"
+        }
+      },
+      "hover": {
+        "filter": {
+          "tag": "BUTTON",
+          "text": "필터",
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "lab(27.1134 -0.956401 -12.3224)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "map": {
+          "tag": "BUTTON",
+          "text": "지도",
+          "height": 30.5,
+          "bg": "lab(98.2596 -0.247031 -0.706708)",
+          "color": "lab(27.1134 -0.956401 -12.3224)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "viewInactive": {
+          "tag": "BUTTON",
+          "text": "피드",
+          "height": 26.5,
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "lab(35.6337 -1.58697 -10.8425)",
+          "border": "rgb(216, 214, 208)"
+        },
+        "activeViewRest": {
+          "text": "카드",
+          "height": 26.5,
+          "bg": "rgb(255, 98, 0)",
+          "color": "rgb(255, 255, 255)",
+          "border": "color(srgb 0.85 0.326667 0)"
+        },
+        "filterRest": {
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "lab(27.1134 -0.956401 -12.3224)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "mapRest": {
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "lab(27.1134 -0.956401 -12.3224)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "filterOpen": {
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "lab(27.1134 -0.956401 -12.3224)",
+          "expanded": "true"
+        }
+      },
+      "crops": {
+        "filter": "media-filter.png",
+        "sort": "media-sort.png",
+        "segment": "media-segment.png",
+        "viewmode": "media-viewmode.png",
+        "map": "media-map.png"
+      },
+      "classes": {
+        "filter": "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 px-3 py-1.5",
+        "sort": "tkad-type-meta min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 font-medium text-gray-600 focus:outline-none sm:w-auto sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70 py-1.5",
+        "segment": "flex shrink-0 overflow-hidden rounded-xl h-9 ring-1 ring-inset ring-gray-200 dark:ring-white/10 md:h-auto md:ring-0 md:border md:border-gray-200 md:dark:border-white/10",
+        "view0": "flex items-center gap-1 font-medium transition-all tkad-type-meta h-9 min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1 tkad-qp-cta text-white shadow-none",
+        "map": "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 px-3 py-0 h-9 md:h-auto md:py-1.5 transition-colors hover:bg-gray-50 dark:hove"
+      }
+    },
+    "mapPage": {
+      "heights": {
+        "filter": 30.5,
+        "sort": 31,
+        "viewModes": [
+          {
+            "text": "목록",
+            "h": 30.5,
+            "pressed": "false"
+          },
+          {
+            "text": "지도",
+            "h": 30.5,
+            "pressed": "true"
+          }
+        ]
+      },
+      "crops": {
+        "filter": "map-filter.png",
+        "sort": "map-sort.png",
+        "segment": null,
+        "viewmode": "map-viewmode.png",
+        "map": null
+      },
+      "hover": {
+        "filter": {
+          "tag": "BUTTON",
+          "text": "필터",
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "rgb(12, 12, 24)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "viewInactive": {
+          "tag": "BUTTON",
+          "text": "목록",
+          "height": 30.5,
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "rgb(12, 12, 24)",
+          "border": "rgba(15, 23, 42, 0.11)"
+        },
+        "activeViewRest": {
+          "text": "지도",
+          "height": 30.5,
+          "bg": "rgb(255, 98, 0)",
+          "color": "rgb(255, 255, 255)",
+          "border": "color(srgb 0.85 0.326667 0)"
+        },
+        "filterRest": {
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "rgb(12, 12, 24)",
+          "border": "lab(91.6229 -0.159115 -2.26791)"
+        },
+        "mapRest": null,
+        "filterOpen": {
+          "height": 30.5,
+          "bg": "rgb(255, 255, 255)",
+          "color": "rgb(12, 12, 24)",
+          "expanded": "true"
+        }
+      }
+    }
+  },
+  "media": {
+    "route": "/ko/media",
+    "label": "media",
+    "data": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "toolbarFound": true,
+      "toolbarClass": "flex min-h-0 flex-1 flex-col md:flex-row",
+      "filter": {
+        "text": "필터",
+        "aria": "필터 열기",
+        "pressed": null,
+        "expanded": "false",
+        "height": 30.5,
+        "width": 88.77,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "12px",
+        "lineHeight": "16.5px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 px-3 py-1.5",
+        "x": 712,
+        "y": 74.7
+      },
+      "sort": {
+        "text": "인기순 최신순 저가순 고가순",
+        "aria": "정렬",
+        "pressed": null,
+        "expanded": null,
+        "height": 31,
+        "width": 78,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "12px",
+        "lineHeight": "normal",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "lab(96.1596 -0.0823438 -1.13575)",
+        "color": "lab(35.6337 -1.58697 -10.8425)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "tkad-type-meta min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 font-medium text-gray-600 focus:outline-none sm:w-auto sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70 py-1.5",
+        "x": 808.8,
+        "y": 74.5
+      },
+      "segment": {
+        "text": "매체 네트워크",
+        "aria": "",
+        "pressed": null,
+        "expanded": null,
+        "height": 36,
+        "width": 124.69,
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(8, 8, 10)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "flex shrink-0 overflow-hidden rounded-xl h-9 ring-1 ring-inset ring-gray-200 dark:ring-white/10 md:h-auto md:ring-0 md:border md:border-gray-200 md:dark:border-white/10",
+        "x": 894.8,
+        "y": 72
+      },
+      "segmentMedia": {
+        "text": "매체",
+        "aria": "",
+        "pressed": "true",
+        "expanded": null,
+        "height": 34,
+        "width": 50.23,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "0px",
+        "bg": "rgb(255, 98, 0)",
+        "color": "rgb(255, 255, 255)",
+        "borderColor": "color(srgb 0.85 0.326667 0)",
+        "className": "inline-flex items-center font-medium transition-all tkad-type-meta h-full px-3 py-0 md:h-auto md:px-3 md:py-1.5 md:text-sm tkad-qp-cta text-white shadow-none",
+        "x": 895.8,
+        "y": 73
+      },
+      "segmentNetwork": {
+        "text": "네트워크",
+        "aria": "",
+        "pressed": "false",
+        "expanded": null,
+        "height": 34,
+        "width": 72.45,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "14px",
+        "lineHeight": "20px",
+        "borderTop": "0px",
+        "borderBottom": "0px",
+        "borderRadius": "0px",
+        "bg": "lab(96.1596 -0.0823438 -1.13575)",
+        "color": "lab(35.6337 -1.58697 -10.8425)",
+        "borderColor": "rgb(216, 214, 208)",
+        "className": "inline-flex items-center font-medium transition-all tkad-type-meta h-full px-3 py-0 md:h-auto md:px-3 md:py-1.5 md:text-sm bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+        "x": 946,
+        "y": 73
+      },
+      "viewWrap": {
+        "text": "카드 피드 몰입 보기 컴팩트",
+        "aria": "",
+        "pressed": null,
+        "expanded": null,
+        "height": 28.5,
+        "width": 257.48,
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "8px",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(8, 8, 10)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto border border-gray-200 dark:border-white/10 w-full rounded-lg md:w-auto",
+        "x": 1027.5,
+        "y": 75.8
+      },
+      "viewModes": [
+        {
+          "text": "카드",
+          "aria": "카드",
+          "pressed": "true",
+          "expanded": null,
+          "height": 26.5,
+          "width": 56.77,
+          "paddingTop": "4px",
+          "paddingBottom": "4px",
+          "paddingLeft": "8px",
+          "paddingRight": "8px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "1px",
+          "borderBottom": "1px",
+          "borderRadius": "0px",
+          "bg": "rgb(255, 98, 0)",
+          "color": "rgb(255, 255, 255)",
+          "borderColor": "color(srgb 0.85 0.326667 0)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta h-9 min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1 tkad-qp-cta text-white shadow-none",
+          "x": 1028.5,
+          "y": 76.8
+        },
+        {
+          "text": "피드",
+          "aria": "피드",
+          "pressed": "false",
+          "expanded": null,
+          "height": 26.5,
+          "width": 54.77,
+          "paddingTop": "4px",
+          "paddingBottom": "4px",
+          "paddingLeft": "8px",
+          "paddingRight": "8px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "0px",
+          "borderBottom": "0px",
+          "borderRadius": "0px",
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "lab(35.6337 -1.58697 -10.8425)",
+          "borderColor": "rgb(216, 214, 208)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta h-9 min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1 bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+          "x": 1085.2,
+          "y": 76.8
+        },
+        {
+          "text": "몰입 보기",
+          "aria": "몰입 보기",
+          "pressed": "false",
+          "expanded": null,
+          "height": 26.5,
+          "width": 78.81,
+          "paddingTop": "4px",
+          "paddingBottom": "4px",
+          "paddingLeft": "8px",
+          "paddingRight": "8px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "0px",
+          "borderBottom": "0px",
+          "borderRadius": "0px",
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "lab(35.6337 -1.58697 -10.8425)",
+          "borderColor": "rgb(216, 214, 208)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta h-9 min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1 bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+          "x": 1140,
+          "y": 76.8
+        },
+        {
+          "text": "컴팩트",
+          "aria": "컴팩트",
+          "pressed": "false",
+          "expanded": null,
+          "height": 26.5,
+          "width": 65.14,
+          "paddingTop": "4px",
+          "paddingBottom": "4px",
+          "paddingLeft": "8px",
+          "paddingRight": "8px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "0px",
+          "borderBottom": "0px",
+          "borderRadius": "0px",
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "lab(35.6337 -1.58697 -10.8425)",
+          "borderColor": "rgb(216, 214, 208)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta h-9 min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1 bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+          "x": 1218.8,
+          "y": 76.8
+        }
+      ],
+      "map": {
+        "text": "지도",
+        "aria": "지도에서 보기",
+        "pressed": null,
+        "expanded": null,
+        "height": 30.5,
+        "width": 66.77,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "12px",
+        "lineHeight": "16.5px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 px-3 py-0 h-9 md:h-auto md:py-1.5 transition-colors hover:bg-gray-50 dark:hove",
+        "x": 1292.9,
+        "y": 74.8
+      }
+    },
+    "hover": {
+      "filter": {
+        "tag": "BUTTON",
+        "text": "필터",
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "map": {
+        "tag": "BUTTON",
+        "text": "지도",
+        "height": 30.5,
+        "bg": "lab(98.2596 -0.247031 -0.706708)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "viewInactive": {
+        "tag": "BUTTON",
+        "text": "피드",
+        "height": 26.5,
+        "bg": "lab(96.1596 -0.0823438 -1.13575)",
+        "color": "lab(35.6337 -1.58697 -10.8425)",
+        "border": "rgb(216, 214, 208)"
+      },
+      "activeViewRest": {
+        "text": "카드",
+        "height": 26.5,
+        "bg": "rgb(255, 98, 0)",
+        "color": "rgb(255, 255, 255)",
+        "border": "color(srgb 0.85 0.326667 0)"
+      },
+      "filterRest": {
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "mapRest": {
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "filterOpen": {
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "lab(27.1134 -0.956401 -12.3224)",
+        "expanded": "true"
+      }
+    },
+    "crops": {
+      "filter": "media-filter.png",
+      "sort": "media-sort.png",
+      "segment": "media-segment.png",
+      "viewmode": "media-viewmode.png",
+      "map": "media-map.png"
+    }
+  },
+  "map": {
+    "route": "/ko/media/map",
+    "label": "map",
+    "data": {
+      "viewport": {
+        "w": 1440,
+        "h": 900
+      },
+      "toolbarFound": true,
+      "toolbarClass": "flex min-h-0 flex-1 flex-col md:flex-row",
+      "filter": {
+        "text": "필터",
+        "aria": "필터 열기",
+        "pressed": null,
+        "expanded": "false",
+        "height": 30.5,
+        "width": 88.77,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "12px",
+        "lineHeight": "16.5px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(12, 12, 24)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80 px-3 py-1.5",
+        "x": 440,
+        "y": 68.7
+      },
+      "sort": {
+        "text": "인기순 최신순 저가순 고가순",
+        "aria": "정렬",
+        "pressed": null,
+        "expanded": null,
+        "height": 31,
+        "width": 78,
+        "paddingTop": "6px",
+        "paddingBottom": "6px",
+        "paddingLeft": "12px",
+        "paddingRight": "12px",
+        "fontSize": "12px",
+        "lineHeight": "normal",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "lab(96.1596 -0.0823438 -1.13575)",
+        "color": "rgb(12, 12, 24)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "tkad-type-meta min-w-0 flex-1 rounded-xl border border-gray-200 bg-gray-100 px-3 font-medium text-gray-600 focus:outline-none sm:w-auto sm:flex-none dark:border-white/10 dark:bg-white/8 dark:text-white/70 py-1.5",
+        "x": 536.8,
+        "y": 68.5
+      },
+      "segment": null,
+      "segmentMedia": null,
+      "segmentNetwork": null,
+      "viewWrap": {
+        "text": "목록 지도",
+        "aria": "",
+        "pressed": null,
+        "expanded": null,
+        "height": 32.5,
+        "width": 121.53,
+        "paddingTop": "0px",
+        "paddingBottom": "0px",
+        "paddingLeft": "0px",
+        "paddingRight": "0px",
+        "fontSize": "16px",
+        "lineHeight": "26.4px",
+        "borderTop": "1px",
+        "borderBottom": "1px",
+        "borderRadius": "12px",
+        "bg": "rgba(0, 0, 0, 0)",
+        "color": "rgb(51, 65, 85)",
+        "borderColor": "lab(91.6229 -0.159115 -2.26791)",
+        "className": "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10",
+        "x": 622.8,
+        "y": 67.8
+      },
+      "viewModes": [
+        {
+          "text": "목록",
+          "aria": "목록",
+          "pressed": "false",
+          "expanded": null,
+          "height": 30.5,
+          "width": 58.77,
+          "paddingTop": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "10px",
+          "paddingRight": "10px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "0px",
+          "borderBottom": "0px",
+          "borderRadius": "0px",
+          "bg": "lab(96.1596 -0.0823438 -1.13575)",
+          "color": "rgb(12, 12, 24)",
+          "borderColor": "rgba(15, 23, 42, 0.11)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta px-2.5 py-1.5 bg-gray-100 text-gray-600 dark:bg-white/8 dark:text-white/70",
+          "x": 623.8,
+          "y": 68.8
+        },
+        {
+          "text": "지도",
+          "aria": "지도",
+          "pressed": "true",
+          "expanded": null,
+          "height": 30.5,
+          "width": 60.77,
+          "paddingTop": "6px",
+          "paddingBottom": "6px",
+          "paddingLeft": "10px",
+          "paddingRight": "10px",
+          "fontSize": "12px",
+          "lineHeight": "16.5px",
+          "borderTop": "1px",
+          "borderBottom": "1px",
+          "borderRadius": "0px",
+          "bg": "rgb(255, 98, 0)",
+          "color": "rgb(255, 255, 255)",
+          "borderColor": "color(srgb 0.85 0.326667 0)",
+          "className": "flex items-center gap-1 font-medium transition-all tkad-type-meta px-2.5 py-1.5 tkad-qp-cta text-white shadow-none",
+          "x": 682.5,
+          "y": 68.8
+        }
+      ],
+      "map": null
+    },
+    "hover": {
+      "filter": {
+        "tag": "BUTTON",
+        "text": "필터",
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(12, 12, 24)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "viewInactive": {
+        "tag": "BUTTON",
+        "text": "목록",
+        "height": 30.5,
+        "bg": "lab(96.1596 -0.0823438 -1.13575)",
+        "color": "rgb(12, 12, 24)",
+        "border": "rgba(15, 23, 42, 0.11)"
+      },
+      "activeViewRest": {
+        "text": "지도",
+        "height": 30.5,
+        "bg": "rgb(255, 98, 0)",
+        "color": "rgb(255, 255, 255)",
+        "border": "color(srgb 0.85 0.326667 0)"
+      },
+      "filterRest": {
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(12, 12, 24)",
+        "border": "lab(91.6229 -0.159115 -2.26791)"
+      },
+      "mapRest": null,
+      "filterOpen": {
+        "height": 30.5,
+        "bg": "rgb(255, 255, 255)",
+        "color": "rgb(12, 12, 24)",
+        "expanded": "true"
+      }
+    },
+    "crops": {
+      "filter": "map-filter.png",
+      "sort": "map-sort.png",
+      "segment": null,
+      "viewmode": "map-viewmode.png",
+      "map": null
+    }
+  }
+}
