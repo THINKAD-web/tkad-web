@@ -1,0 +1,57 @@
+{
+  "measuredAt": "2026-07-22T20:32:57.335Z",
+  "concurrentUpload": {
+    "initialCount": 1,
+    "batches": 4,
+    "beforeFixLostUrls": [
+      "https://cdn.example/existing.jpg",
+      "https://cdn.example/u4.jpg"
+    ],
+    "beforeFixCount": 2,
+    "afterFixUrls": [
+      "https://cdn.example/existing.jpg",
+      "https://cdn.example/u1.jpg",
+      "https://cdn.example/u2.jpg",
+      "https://cdn.example/u3.jpg",
+      "https://cdn.example/u4.jpg"
+    ],
+    "afterFixCount": 5,
+    "staleDropped": true
+  },
+  "purgeIntentGate": {
+    "noIntent": {
+      "toPurge": [],
+      "skippedWithoutIntent": [
+        "https://tkad-cdn.b-cdn.net/b.jpg"
+      ]
+    },
+    "withIntent": {
+      "toPurge": [
+        "https://tkad-cdn.b-cdn.net/b.jpg"
+      ],
+      "skippedWithoutIntent": []
+    }
+  },
+  "dbSample": {
+    "id": "cmrwirjcs000504jlnlr684lo",
+    "name": "인천지하철 1호선 디지털사이니지 전체 턴키 (7개 역사) 광고",
+    "updatedAt": "2026-07-22T20:29:22.765Z",
+    "before": {
+      "image": "https://tkad-cdn.b-cdn.net/%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%92%E1%85%A1%E1%84%8E%E1%85%A5%E1%86%AF%201%E1%84%92%E1%85%A9%E1%84%89%E1%85%A5%E1%86%AB%20%E1%84%87%E1%85%AE%E1%84%91%E1%85%A7%E1%86%BC%E1%84%8B%E1%85%A7%E1%86%A8%20%E1%84%83%E1%85%B5%E1%84%8C%E1%85%B5%E1%84%90%E1%85%A5%E1%86%AF%E1%84%89%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%82%E1%85%B5%E1%84%8C%E1%85%B55.jpg",
+      "extractedCount": 19,
+      "mergedCount": 18,
+      "primaryInExtracted": true
+    },
+    "afterIdleSaveSimulation": {
+      "image": "https://tkad-cdn.b-cdn.net/%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%8C%E1%85%B5%E1%84%92%E1%85%A1%E1%84%8E%E1%85%A5%E1%86%AF%201%E1%84%92%E1%85%A9%E1%84%89%E1%85%A5%E1%86%AB%20%E1%84%87%E1%85%AE%E1%84%91%E1%85%A7%E1%86%BC%E1%84%8B%E1%85%A7%E1%86%A8%20%E1%84%83%E1%85%B5%E1%84%8C%E1%85%B5%E1%84%90%E1%85%A5%E1%86%AF%E1%84%89%E1%85%A1%E1%84%8B%E1%85%B5%E1%84%82%E1%85%B5%E1%84%8C%E1%85%B55.jpg",
+      "extractedCount": 17,
+      "mergedCount": 18,
+      "uniquePreserved": true,
+      "sameSet": true
+    },
+    "accidentalShrinkPurgeSkipped": {
+      "skippedCount": 1,
+      "toPurgeCount": 0
+    }
+  }
+}

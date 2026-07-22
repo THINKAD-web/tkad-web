@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import {
   DndContext,
   PointerSensor,
@@ -20,9 +20,13 @@ import { GripVertical, ImagePlus, Loader2, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
+export type GalleryUrlsChange =
+  | string[]
+  | ((prev: string[]) => string[]);
+
 type Props = {
   urls: string[];
-  onChange: (urls: string[]) => void;
+  onChange: (urls: GalleryUrlsChange) => void;
   onUploadFiles: (files: File[]) => Promise<string[]>;
   onDeleteRemote?: (url: string) => Promise<void>;
   busy?: boolean;
@@ -86,6 +90,19 @@ function SortableThumb({
   );
 }
 
+function appendUploaded(prev: string[], uploaded: string[]): string[] {
+  if (uploaded.length === 0) return prev;
+  const seen = new Set(prev);
+  const next = [...prev];
+  for (const raw of uploaded) {
+    const u = raw.trim();
+    if (!u || seen.has(u)) continue;
+    seen.add(u);
+    next.push(u);
+  }
+  return next;
+}
+
 export function MediaGalleryEditor({
   urls,
   onChange,
@@ -95,6 +112,9 @@ export function MediaGalleryEditor({
 }: Props) {
   const [dragOver, setDragOver] = useState(false);
   const [localBusy, setLocalBusy] = useState(false);
+  /** Serialize overlapping pickFiles so concurrent uploads cannot drop earlier URLs. */
+  const uploadChainRef = useRef<Promise<void>>(Promise.resolve());
+  const uploadPendingRef = useRef(0);
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 6 } }),
   );
@@ -108,24 +128,36 @@ export function MediaGalleryEditor({
       const oldIndex = ids.indexOf(String(active.id));
       const newIndex = ids.indexOf(String(over.id));
       if (oldIndex < 0 || newIndex < 0) return;
-      onChange(arrayMove(urls, oldIndex, newIndex));
+      onChange((prev) => arrayMove(prev, oldIndex, newIndex));
     },
-    [ids, onChange, urls],
+    [ids, onChange],
   );
 
   const pickFiles = useCallback(
-    async (files: FileList | File[]) => {
+    (files: FileList | File[]) => {
       const list = Array.from(files).filter((f) => f.type.startsWith("image/"));
       if (list.length === 0) return;
+
+      uploadPendingRef.current += 1;
       setLocalBusy(true);
-      try {
-        const uploaded = await onUploadFiles(list);
-        onChange([...urls, ...uploaded]);
-      } finally {
-        setLocalBusy(false);
-      }
+      const run = async () => {
+        try {
+          const uploaded = await onUploadFiles(list);
+          // Functional update: always append onto the latest gallery, not a stale closure.
+          onChange((prev) => appendUploaded(prev, uploaded));
+        } finally {
+          uploadPendingRef.current = Math.max(0, uploadPendingRef.current - 1);
+          if (uploadPendingRef.current === 0) setLocalBusy(false);
+        }
+      };
+
+      uploadChainRef.current = uploadChainRef.current
+        .then(run, run)
+        .catch(() => {
+          /* upload errors surface via onUploadFiles / parent saveError */
+        });
     },
-    [onChange, onUploadFiles, urls],
+    [onChange, onUploadFiles],
   );
 
   const removeAt = useCallback(
@@ -139,7 +171,11 @@ export function MediaGalleryEditor({
           // 목록에서는 제거, CDN 삭제 실패는 무시 가능
         }
       }
-      onChange(urls.filter((_, i) => i !== index));
+      onChange((prev) => {
+        const i = prev.indexOf(url);
+        if (i < 0) return prev;
+        return prev.filter((_, idx) => idx !== i);
+      });
     },
     [onChange, onDeleteRemote, urls],
   );
@@ -158,7 +194,7 @@ export function MediaGalleryEditor({
           e.preventDefault();
           setDragOver(false);
           if (e.dataTransfer.files?.length) {
-            void pickFiles(e.dataTransfer.files);
+            pickFiles(e.dataTransfer.files);
           }
         }}
         className={cn(
@@ -178,7 +214,7 @@ export function MediaGalleryEditor({
           className="hidden"
           id="media-gallery-file-input"
           onChange={(e) => {
-            if (e.target.files) void pickFiles(e.target.files);
+            if (e.target.files) pickFiles(e.target.files);
             e.target.value = "";
           }}
         />

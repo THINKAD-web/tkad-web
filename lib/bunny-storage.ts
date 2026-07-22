@@ -160,6 +160,37 @@ export function bunnyPublicUrlsRemoved(
   });
 }
 
+/**
+ * CDN purge candidates ∩ client-declared intent (`purgeImageUrls`).
+ * Without an explicit allow-list, skip purge (stale form shrink must not delete CDN).
+ * Intentional gallery ✕ already hits `/api/admin/upload/bunny/delete`.
+ */
+export function resolveBunnyUrlsToPurge(
+  previous: string[],
+  next: string[],
+  explicitPurgeImageUrls: unknown,
+): { toPurge: string[]; skippedWithoutIntent: string[] } {
+  const candidates = bunnyPublicUrlsRemoved(previous, next);
+  if (candidates.length === 0) {
+    return { toPurge: [], skippedWithoutIntent: [] };
+  }
+  if (!Array.isArray(explicitPurgeImageUrls)) {
+    return { toPurge: [], skippedWithoutIntent: candidates };
+  }
+  const allow = new Set(
+    explicitPurgeImageUrls
+      .filter((u): u is string => typeof u === "string")
+      .map((u) => u.trim())
+      .filter(Boolean),
+  );
+  if (allow.size === 0) {
+    return { toPurge: [], skippedWithoutIntent: candidates };
+  }
+  const toPurge = candidates.filter((u) => allow.has(u.trim()));
+  const skippedWithoutIntent = candidates.filter((u) => !allow.has(u.trim()));
+  return { toPurge, skippedWithoutIntent };
+}
+
 /** Bunny CDN 자산 URL 일괄 삭제 (실패 시 로그만, throw 안 함) */
 export async function deleteBunnyPublicUrls(urls: string[]): Promise<void> {
   if (!isBunnyStorageConfigured() || urls.length === 0) return;

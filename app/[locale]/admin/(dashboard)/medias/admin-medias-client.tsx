@@ -38,7 +38,16 @@ import {
   FileSpreadsheet,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
-import { MediaGalleryEditor } from "@/components/admin/media-gallery-editor";
+import {
+  MediaGalleryEditor,
+  type GalleryUrlsChange,
+} from "@/components/admin/media-gallery-editor";
+import {
+  applyGalleryUrlsToFormParts,
+  galleryUrlsFromFormParts,
+  imageFieldsForApiBody,
+  mergePrimaryAndExtracted,
+} from "@/lib/admin-media-gallery-urls";
 import { AdminMediaProposalUpload } from "@/components/admin/admin-media-proposal-upload";
 import {
   AdminMediaQualityToolbar,
@@ -300,20 +309,21 @@ type AdminMediaForm = {
 };
 
 function galleryUrlsFromForm(form: AdminMediaForm): string[] {
-  const gallery = form.extractedImagesText.trim().split("\n").filter(Boolean);
-  const primary = form.image.trim();
-  if (primary) return [primary, ...gallery.filter((u) => u !== primary)];
-  return gallery;
+  return galleryUrlsFromFormParts(form.image, form.extractedImagesText);
 }
 
 function applyGalleryUrlsToForm(
   urls: string[],
 ): Pick<AdminMediaForm, "image" | "extractedImagesText"> {
-  if (urls.length === 0) return { image: "", extractedImagesText: "" };
-  return {
-    image: urls[0]!,
-    extractedImagesText: urls.slice(1).join("\n"),
-  };
+  return applyGalleryUrlsToFormParts(urls);
+}
+
+function resolveGalleryUrlsChange(
+  form: AdminMediaForm,
+  next: GalleryUrlsChange,
+): string[] {
+  const current = galleryUrlsFromForm(form);
+  return typeof next === "function" ? next(current) : next;
 }
 
 const emptyForm: AdminMediaForm = {
@@ -585,17 +595,14 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     .split(/[\n,]/)
     .map((s) => s.trim())
     .filter(Boolean);
-  const galleryLines = form.extractedImagesText
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const imageInput = form.image.trim();
-  /** 대표 URL: 입력 필드 우선, 비어 있으면 갤러리 첫 줄(공개 카탈로그가 image → extracted 순으로 병합하므로 일치시킴) */
-  const primaryImage = imageInput || galleryLines[0] || null;
-  /** 대표와 동일한 URL은 extracted 에서 제외해 DB·목록에 이중 저장되지 않게 함 */
-  const extractedImages = primaryImage
-    ? galleryLines.filter((u) => u !== primaryImage)
-    : galleryLines;
+  /**
+   * Merge image + extracted then split: primary strip never drops a unique URL
+   * that only existed in one of the two fields (stale/partial form safety).
+   */
+  const { image: primaryImage, extractedImages } = imageFieldsForApiBody(
+    form.image,
+    form.extractedImagesText,
+  );
   const vis = Math.round(Number(form.visibilityScore) || 0);
   let priceOptions: unknown = null;
   const rawOpts = form.priceOptionsJson.trim();
@@ -825,6 +832,8 @@ export default function AdminMediasClient({
   const [formImageUploadBusy, setFormImageUploadBusy] = useState(false);
   /** 목록 GET이 저장/삭제보다 늦게 끝나면 옛 데이터로 덮어쓰는 레이스 방지 */
   const listFetchGenRef = useRef(0);
+  /** Gallery ✕ removals — sent as purgeImageUrls so PATCH won't CDN-delete accidental shrinks. */
+  const intentionalPurgeUrlsRef = useRef<string[]>([]);
 
   const [nearbyPreview, setNearbyPreview] = useState<{
     nearbyFacilities: string | null;
@@ -1200,6 +1209,7 @@ export default function AdminMediasClient({
     setEditing(null);
     setForm(prefill ?? emptyForm);
     setPriceOptDrafts([]);
+    intentionalPurgeUrlsRef.current = [];
     setSaveError(null);
     setModalOpen(true);
   }, []);
@@ -1209,6 +1219,7 @@ export default function AdminMediasClient({
     setEditing(media);
     setForm(f);
     setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
+    intentionalPurgeUrlsRef.current = [];
     setSaveError(null);
     setModalOpen(true);
   }, []);
@@ -1316,6 +1327,8 @@ export default function AdminMediasClient({
     setSaveLoading(true);
     setSaveError(null);
     const body = formToApiBody(form);
+    const purgeImageUrls = [...new Set(intentionalPurgeUrlsRef.current)];
+    if (purgeImageUrls.length > 0) body.purgeImageUrls = purgeImageUrls;
     if (editing) {
       const row = medias.find((x) => x.id === editing.id);
       body.isActive = row?.isActive !== false;
@@ -1367,6 +1380,7 @@ export default function AdminMediasClient({
           await loadMedias({ showSpinner: false });
         }
       }
+      intentionalPurgeUrlsRef.current = [];
       clearAdminMediaFormDraft();
       setDraftSavedAt(null);
       setModalOpen(false);
@@ -1869,34 +1883,55 @@ export default function AdminMediasClient({
         ),
       );
       try {
-        const secureUrl = await uploadFileToBunny(item.file);
         const mid = item.mediaId!;
+        const secureUrl = await uploadFileToBunny(item.file);
         const detailRes = await fetch(`/api/admin/medias/${mid}`, {
           credentials: "include",
         });
         const detailJson = (await detailRes.json()) as {
-          media?: unknown;
+          media?: { id?: string } | unknown;
         };
         const detail = detailJson.media
           ? normalizeAdminMediaRow(detailJson.media)
           : null;
-        const prevUrls = detail?.extractedImages ?? [];
-        const nextUrls = [...prevUrls, secureUrl];
-        const primary = detail?.image ?? secureUrl;
+        // Defense against cross-media contamination: never patch a different row.
+        if (!detail || detail.id !== mid) {
+          throw new Error("매체 조회 결과가 요청 ID와 일치하지 않습니다");
+        }
+        const combined = mergePrimaryAndExtracted(
+          detail.image,
+          detail.extractedImages,
+        );
+        if (combined.includes(secureUrl)) {
+          // Already attached — treat as success without rewriting other images.
+          setUploadItems((prev) =>
+            prev.map((it, i) =>
+              i === idx ? { ...it, progress: 100, status: "done" } : it,
+            ),
+          );
+          continue;
+        }
+        const nextCombined = [...combined, secureUrl];
+        const primary = nextCombined[0] ?? secureUrl;
+        const nextExtracted = nextCombined.slice(1);
         const patchRes = await fetch(`/api/admin/medias/${mid}`, {
           method: "PATCH",
           credentials: "include",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            extractedImages: nextUrls,
             image: primary,
+            extractedImages: nextExtracted,
           }),
         });
         if (!patchRes.ok) throw new Error("매체 갱신 실패");
         setMedias((ms) =>
           ms.map((m) =>
             m.id === mid
-              ? { ...m, extractedImages: nextUrls, image: primary }
+              ? {
+                  ...m,
+                  image: primary,
+                  extractedImages: nextExtracted,
+                }
               : m,
           ),
         );
@@ -3824,11 +3859,22 @@ export default function AdminMediasClient({
               </div>
               <MediaGalleryEditor
                 urls={galleryUrlsFromForm(form)}
-                onChange={(urls) =>
-                  setForm((f) => ({ ...f, ...applyGalleryUrlsToForm(urls) }))
+                onChange={(next) =>
+                  setForm((f) => ({
+                    ...f,
+                    ...applyGalleryUrlsToForm(
+                      resolveGalleryUrlsChange(f, next),
+                    ),
+                  }))
                 }
                 onUploadFiles={uploadGalleryFiles}
-                onDeleteRemote={deleteBunnyImage}
+                onDeleteRemote={async (url) => {
+                  intentionalPurgeUrlsRef.current = [
+                    ...intentionalPurgeUrlsRef.current,
+                    url,
+                  ];
+                  await deleteBunnyImage(url);
+                }}
                 busy={formImageUploadBusy}
               />
               {editing ? (
