@@ -79,10 +79,17 @@ import { cn } from "@/lib/utils";
 
 const MAP_TYPE_FILTERS_EXPANDED_KEY = "tkad-media-map-type-filters-expanded";
 
+/**
+ * Sticky 모바일 툴바 컨트롤 공통 높이 — 36px (Tailwind h-9).
+ * 필터/정렬/지도·세그먼트·뷰모드를 맞추고, immersive 아이콘은 동일 높이의 정사각(h-9 w-9) 유지.
+ */
+const TOOLBAR_CTRL_H = "h-9";
 /** 필터·정렬 등 상단 컨트롤 — 뷰모드 토글과 동일 tkad-type-meta */
 const TOOLBAR_CTRL_BTN =
   "inline-flex shrink-0 items-center gap-1.5 rounded-xl border border-gray-200 bg-white tkad-type-meta font-medium text-gray-700 dark:border-white/10 dark:bg-white/5 dark:text-white/80";
+/** 데스크톱·공용 패딩. 모바일 sticky는 TOOLBAR_CTRL_H + py-0 으로 고정 높이. */
 const TOOLBAR_CTRL_PAD = "px-3 py-1.5";
+const TOOLBAR_CTRL_PAD_MOBILE = cn("px-3 py-0", TOOLBAR_CTRL_H);
 
 export type MediaManualBrowseViewMode = "feed" | "card" | "compact" | "reels" | "map";
 
@@ -1145,7 +1152,10 @@ export function MediaManualBrowseFilters({
             className={cn(
               "flex items-center gap-1 font-medium transition-all tkad-type-meta",
               listPageLayout
-                ? "min-h-9 min-w-0 flex-1 justify-center px-2 py-1.5 md:min-h-0 md:flex-none md:px-2 md:py-1"
+                ? cn(
+                    TOOLBAR_CTRL_H,
+                    "min-w-0 flex-1 justify-center px-2 py-0 md:h-auto md:flex-none md:px-2 md:py-1",
+                  )
                 : "px-2.5 py-1.5",
               active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
             )}
@@ -1168,7 +1178,16 @@ export function MediaManualBrowseFilters({
 
   const catalogBrowseSegment = filterIaListPage ? (
     <div
-      className="flex shrink-0 overflow-hidden rounded-xl border border-gray-200 dark:border-white/10"
+      className={cn(
+        "flex shrink-0 overflow-hidden rounded-xl",
+        /* 모바일: h-9 + inset ring(보더가 높이에서 빠지지 않음). md+: 기존 border+패딩 */
+        listPageLayout
+          ? cn(
+              TOOLBAR_CTRL_H,
+              "ring-1 ring-inset ring-gray-200 dark:ring-white/10 md:h-auto md:ring-0 md:border md:border-gray-200 md:dark:border-white/10",
+            )
+          : "border border-gray-200 dark:border-white/10",
+      )}
       data-screenshot="media-catalog-browse-segment"
     >
       <button
@@ -1176,7 +1195,10 @@ export function MediaManualBrowseFilters({
         aria-pressed={variant === "media"}
         onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, false))}
         className={cn(
-          "px-2.5 py-1 text-xs font-medium transition-all sm:px-3 sm:py-1.5 sm:text-sm",
+          "inline-flex items-center font-medium transition-all tkad-type-meta",
+          listPageLayout
+            ? "h-full px-3 py-0 md:h-auto md:px-3 md:py-1.5 md:text-sm"
+            : "px-2.5 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm",
           variant === "media" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
         )}
       >
@@ -1187,7 +1209,10 @@ export function MediaManualBrowseFilters({
         aria-pressed={variant === "network"}
         onClick={() => onFeaturesChange(setFeaturesNetworkEnabled(features, true))}
         className={cn(
-          "px-2.5 py-1 text-xs font-medium transition-all sm:px-3 sm:py-1.5 sm:text-sm",
+          "inline-flex items-center font-medium transition-all tkad-type-meta",
+          listPageLayout
+            ? "h-full px-3 py-0 md:h-auto md:px-3 md:py-1.5 md:text-sm"
+            : "px-2.5 py-1 text-xs sm:px-3 sm:py-1.5 sm:text-sm",
           variant === "network" ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
         )}
       >
@@ -1214,7 +1239,9 @@ export function MediaManualBrowseFilters({
         onClick={onNavigateToMap}
         className={cn(
           TOOLBAR_CTRL_BTN,
-          TOOLBAR_CTRL_PAD,
+          /* 모바일 sticky: 공통 h-9 / md+: 기존 패딩 */
+          TOOLBAR_CTRL_PAD_MOBILE,
+          "md:h-auto md:py-1.5",
           "transition-colors hover:bg-gray-50 dark:hover:bg-white/10",
         )}
         aria-label={isKo ? "지도에서 보기" : "Open map"}
@@ -1268,7 +1295,7 @@ export function MediaManualBrowseFilters({
           return;
         }
       }}
-      className={cn(TOOLBAR_CTRL_BTN, TOOLBAR_CTRL_PAD)}
+      className={cn(TOOLBAR_CTRL_BTN, TOOLBAR_CTRL_PAD_MOBILE)}
       aria-label={isKo ? "정렬" : "Sort"}
     >
       <Filter className="h-4 w-4 rotate-90" aria-hidden />
@@ -1280,7 +1307,7 @@ export function MediaManualBrowseFilters({
     <button
       type="button"
       onClick={() => setSheetOpen(true)}
-      className={cn(TOOLBAR_CTRL_BTN, TOOLBAR_CTRL_PAD)}
+      className={cn(TOOLBAR_CTRL_BTN, TOOLBAR_CTRL_PAD_MOBILE)}
       aria-haspopup="dialog"
       aria-expanded={sheetOpen}
       aria-label={isKo ? "필터 열기" : "Open filters"}
@@ -1295,9 +1322,12 @@ export function MediaManualBrowseFilters({
     </button>
   );
 
+  /** Immersive map: 정사각 아이콘 버튼 — 공통 높이(h-9) 유지, 폭도 동일 */
   const TOOLBAR_ICON_BTN = cn(
     TOOLBAR_CTRL_BTN,
-    "relative h-9 w-9 justify-center gap-0 p-0",
+    "relative justify-center gap-0 p-0",
+    TOOLBAR_CTRL_H,
+    "w-9",
   );
 
   const mobileFilterButtonIcon = (
