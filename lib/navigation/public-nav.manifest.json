@@ -9,7 +9,6 @@
       "items": [
         { "id": "media-search", "href": "/media" },
         { "id": "map-search", "href": "/media/map" },
-        { "id": "media-network", "href": "/media?features=network" },
         { "id": "campaign-targets", "href": "/media/targets" }
       ]
     },

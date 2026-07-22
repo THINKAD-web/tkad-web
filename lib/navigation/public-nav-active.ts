@@ -62,8 +62,6 @@ export function isPublicNavItemActive(
       return isMediaSearchBrowsePath(path, features);
     case "map-search":
       return isMapBrowsePath(path);
-    case "media-network":
-      return isNetworkBrowsePath(path, features);
     case "campaign-targets":
       return isCampaignTargetsPath(path);
     case "media-planner":

@@ -38,7 +38,6 @@ type Props = {
 
 /** 이름만으로 의미가 모호한 항목 — 모바일에서만 한 줄 설명 유지 */
 const MOBILE_DESC_ITEM_IDS = new Set([
-  "media-network",
   "campaign-targets",
   "integrated-planner",
   "package-proposal",
