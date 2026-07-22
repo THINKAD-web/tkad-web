@@ -17,6 +17,11 @@ import {
   mergeManualAndAutoTags,
   normalizeSubCategory,
 } from "@/lib/media-json-enrich";
+import {
+  parseMediaInstallLocations,
+  resolveMediaCoordsForSave,
+  type MediaInstallLocation,
+} from "@/lib/media-install-locations";
 import { coercePriceOptionPeriodForWrite } from "@/lib/media-price-period-write";
 
 export type QuickAddMediaJson = {
@@ -29,6 +34,13 @@ export type QuickAddMediaJson = {
   city: string;
   latitude: number | null;
   longitude: number | null;
+  /**
+   * 복수 설치 지점. JSON 편집·bulk-import에서 `install_locations` 별칭도 허용.
+   * - 키 없음(`undefined`): 기존 DB 값 유지 (update 시)
+   * - `null` 또는 `[]`: 지점 비우기
+   * - 배열: 저장 후 대표 lat/lng는 centroid로 동기화
+   */
+  installLocations?: MediaInstallLocation[] | null;
   price_per_month: number;
   price_note: string;
   /** 대표 가격 기간: month | biweekly | week | day (기본 month) */
@@ -252,6 +264,42 @@ export function validateQuickAddItem(
     }
   }
 
+  let installLocations: QuickAddMediaJson["installLocations"];
+  {
+    const hasInstallKey =
+      Object.prototype.hasOwnProperty.call(o, "installLocations") ||
+      Object.prototype.hasOwnProperty.call(o, "install_locations");
+    if (hasInstallKey) {
+      const raw = o.installLocations ?? o.install_locations;
+      if (raw === null) {
+        installLocations = null;
+      } else if (!Array.isArray(raw)) {
+        return {
+          ok: false,
+          error: `${prefix} installLocations는 배열 또는 null이어야 합니다.`,
+        };
+      } else {
+        const parsed = parseMediaInstallLocations(raw);
+        const invalidCoord = raw.some((row) => {
+          if (row === null || typeof row !== "object" || Array.isArray(row)) {
+            return true;
+          }
+          const r = row as { latitude?: unknown; longitude?: unknown };
+          const la = optNum(r.latitude);
+          const ln = optNum(r.longitude);
+          return la === null || ln === null;
+        });
+        if (invalidCoord && raw.length > 0 && parsed.length === 0) {
+          return {
+            ok: false,
+            error: `${prefix} installLocations 항목은 latitude/longitude 숫자가 필요합니다.`,
+          };
+        }
+        installLocations = parsed.length > 0 ? parsed : null;
+      }
+    }
+  }
+
   const item: QuickAddMediaJson = {
     media_name: o.media_name.trim(),
     description: str("description", ""),
@@ -262,6 +310,7 @@ export function validateQuickAddItem(
     city: cityStr,
     latitude: lat,
     longitude: lng,
+    ...(installLocations !== undefined ? { installLocations } : {}),
     price_per_month: ppm,
     price_note: str("price_note", ""),
     width_m: optNum(o.width_m),
@@ -350,52 +399,77 @@ export type MediaQuickAddCreate = {
     period?: string;
     description?: string;
   }> | null;
+  /**
+   * undefined = install_locations 컬럼을 건드리지 않음.
+   * null/배열 = `persistMediaInstallLocations`로 별도 저장.
+   */
+  installLocations?: MediaInstallLocation[] | null;
 };
+
+/** Prisma create/update data에서 installLocations를 분리 (raw SQL persist 전용). */
+export function splitQuickAddInstallLocations(p: MediaQuickAddCreate): {
+  prismaFields: Omit<MediaQuickAddCreate, "installLocations">;
+  installLocations: MediaInstallLocation[] | null | undefined;
+} {
+  const { installLocations, ...prismaFields } = p;
+  return { prismaFields, installLocations };
+}
 
 export function mediaQuickAddCreateToPrismaUpdate(
   p: MediaQuickAddCreate,
 ): Prisma.MediaUpdateInput {
+  const { prismaFields } = splitQuickAddInstallLocations(p);
   return {
-    name: p.name,
-    nameEn: p.nameEn,
-    location: p.location,
-    region: p.region,
-    type: p.type,
-    price: p.price,
-    image: p.image,
-    width: p.width,
-    height: p.height,
-    description: p.description,
-    subCategory: p.subCategory,
-    tags: p.tags,
-    district: p.district,
-    city: p.city,
-    latitude: p.latitude,
-    longitude: p.longitude,
-    priceNote: p.priceNote,
-    widthM: p.widthM,
-    heightM: p.heightM,
-    resolution: p.resolution,
-    operatingHours: p.operatingHours,
-    dailyFootfall: p.dailyFootfall,
-    weekdayFootfall: p.weekdayFootfall,
-    targetAge: p.targetAge,
-    impressions: p.impressions,
-    reach: p.reach,
-    frequency: p.frequency,
-    cpm: p.cpm,
-    engagementRate: p.engagementRate,
-    visibilityScore: p.visibilityScore,
-    effectMemo: p.effectMemo,
-    extractedImages: p.extractedImages,
-    nearbyFacilities: p.nearbyFacilities,
-    nearbyStations: p.nearbyStations,
-    nearbyLandmarks: p.nearbyLandmarks,
-    pastAdvertisers: p.pastAdvertisers,
-    ...(p.pricePeriod ? { pricePeriod: p.pricePeriod as "month" | "biweekly" | "week" | "day" } : {}),
-    priceOptions: p.priceOptions !== null && p.priceOptions !== undefined
-      ? p.priceOptions
-      : Prisma.JsonNull,
+    name: prismaFields.name,
+    nameEn: prismaFields.nameEn,
+    location: prismaFields.location,
+    region: prismaFields.region,
+    type: prismaFields.type,
+    price: prismaFields.price,
+    image: prismaFields.image,
+    width: prismaFields.width,
+    height: prismaFields.height,
+    description: prismaFields.description,
+    subCategory: prismaFields.subCategory,
+    tags: prismaFields.tags,
+    district: prismaFields.district,
+    city: prismaFields.city,
+    latitude: prismaFields.latitude,
+    longitude: prismaFields.longitude,
+    priceNote: prismaFields.priceNote,
+    widthM: prismaFields.widthM,
+    heightM: prismaFields.heightM,
+    resolution: prismaFields.resolution,
+    operatingHours: prismaFields.operatingHours,
+    dailyFootfall: prismaFields.dailyFootfall,
+    weekdayFootfall: prismaFields.weekdayFootfall,
+    targetAge: prismaFields.targetAge,
+    impressions: prismaFields.impressions,
+    reach: prismaFields.reach,
+    frequency: prismaFields.frequency,
+    cpm: prismaFields.cpm,
+    engagementRate: prismaFields.engagementRate,
+    visibilityScore: prismaFields.visibilityScore,
+    effectMemo: prismaFields.effectMemo,
+    extractedImages: prismaFields.extractedImages,
+    nearbyFacilities: prismaFields.nearbyFacilities,
+    nearbyStations: prismaFields.nearbyStations,
+    nearbyLandmarks: prismaFields.nearbyLandmarks,
+    pastAdvertisers: prismaFields.pastAdvertisers,
+    ...(prismaFields.pricePeriod
+      ? {
+          pricePeriod: prismaFields.pricePeriod as
+            | "month"
+            | "biweekly"
+            | "week"
+            | "day",
+        }
+      : {}),
+    priceOptions:
+      prismaFields.priceOptions !== null &&
+      prismaFields.priceOptions !== undefined
+        ? prismaFields.priceOptions
+        : Prisma.JsonNull,
   };
 }
 
@@ -434,7 +508,9 @@ export function mediaDbRowToQuickAddJson(m: {
   pastAdvertisers: string | null;
   pricePeriod?: string | null;
   priceOptions?: unknown;
+  installLocations?: unknown;
 }): QuickAddMediaJson {
+  const installs = parseMediaInstallLocations(m.installLocations);
   return {
     media_name: m.name,
     description: m.description ?? "",
@@ -446,6 +522,7 @@ export function mediaDbRowToQuickAddJson(m: {
     city: m.city ?? "",
     latitude: m.latitude,
     longitude: m.longitude,
+    ...(installs.length > 0 ? { installLocations: installs } : {}),
     price_per_month: m.price,
     price_note: m.priceNote ?? "",
     width_m: m.widthM,
@@ -486,6 +563,10 @@ export function quickAddJsonWithAliasKeys(
     advertiser_history: row.past_advertisers,
     /** `price_options`와 동일 배열 — camelCase 에디터·목업 JSON과 동기화 */
     priceOptions: row.price_options ?? null,
+    /** snake_case 별칭 — bulk/가이드 문서와 동기화 */
+    ...(row.installLocations !== undefined
+      ? { install_locations: row.installLocations }
+      : {}),
   };
 }
 
@@ -541,6 +622,20 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
       ? row.type.trim().toLowerCase()
       : inferredType;
 
+  let latitude = row.latitude;
+  let longitude = row.longitude;
+  let installLocations: MediaInstallLocation[] | null | undefined;
+  if (row.installLocations !== undefined) {
+    const resolved = resolveMediaCoordsForSave({
+      installLocations: row.installLocations,
+      latitude: row.latitude,
+      longitude: row.longitude,
+    });
+    latitude = resolved.latitude;
+    longitude = resolved.longitude;
+    installLocations = resolved.installLocations;
+  }
+
   return {
     name: row.media_name,
     nameEn: null,
@@ -556,8 +651,9 @@ export function mapQuickAddToDb(row: QuickAddMediaJson): MediaQuickAddCreate {
     tags,
     district: district || null,
     city: city || null,
-    latitude: row.latitude,
-    longitude: row.longitude,
+    latitude,
+    longitude,
+    ...(installLocations !== undefined ? { installLocations } : {}),
     priceNote: row.price_note.trim() || null,
     widthM: row.width_m,
     heightM: row.height_m,

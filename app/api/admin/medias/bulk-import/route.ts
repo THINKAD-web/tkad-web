@@ -7,9 +7,11 @@ import { getPrisma } from "@/lib/prisma";
 import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
 import {
   mediaQuickAddCreateToPrismaUpdate,
+  splitQuickAddInstallLocations,
   validateQuickAddItems,
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
+import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -106,6 +108,8 @@ export async function POST(request: NextRequest) {
           });
           continue;
         }
+        const { installLocations } =
+          splitQuickAddInstallLocations(createPayload);
         const data = mediaQuickAddCreateToPrismaUpdate(createPayload);
         data.addressVerified = addressVerified;
         if (autoPopulatedAt != null) {
@@ -115,6 +119,13 @@ export async function POST(request: NextRequest) {
           where: { id: existing.id },
           data,
         });
+        if (installLocations !== undefined) {
+          await persistMediaInstallLocations(
+            db,
+            updated.id,
+            installLocations,
+          );
+        }
         if (updated.price !== existing.price) {
           await db.mediaPriceSnapshot.create({
             data: {
@@ -138,14 +149,23 @@ export async function POST(request: NextRequest) {
           });
           continue;
         }
+        const { prismaFields, installLocations } =
+          splitQuickAddInstallLocations(createPayload);
         const created = await db.media.create({
           data: {
-            ...createPayload,
-            priceOptions: createPayload.priceOptions ?? Prisma.JsonNull,
+            ...prismaFields,
+            priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified,
             autoPopulatedAt,
           },
         });
+        if (installLocations !== undefined) {
+          await persistMediaInstallLocations(
+            db,
+            created.id,
+            installLocations,
+          );
+        }
         await db.mediaPriceSnapshot.create({
           data: {
             mediaId: created.id,

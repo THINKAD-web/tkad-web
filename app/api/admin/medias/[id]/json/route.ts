@@ -7,8 +7,10 @@ import {
   mediaDbRowToQuickAddJson,
   mediaQuickAddCreateToPrismaUpdate,
   quickAddJsonWithAliasKeys,
+  splitQuickAddInstallLocations,
   validateQuickAddItem,
 } from "@/lib/media-quick-add";
+import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -57,6 +59,7 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   const { createPayload, addressVerified, autoPopulatedAt } =
     await enrichQuickAddRowForPersist(validated.item);
+  const { installLocations } = splitQuickAddInstallLocations(createPayload);
 
   const data = mediaQuickAddCreateToPrismaUpdate(createPayload);
   data.addressVerified = addressVerified;
@@ -68,6 +71,10 @@ export async function PUT(request: NextRequest, { params }: Params) {
     where: { id },
     data,
   });
+
+  if (installLocations !== undefined) {
+    await persistMediaInstallLocations(db, id, installLocations);
+  }
 
   if (media.price !== before.price) {
     await db.mediaPriceSnapshot.create({
@@ -85,10 +92,12 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   revalidateMediaCaches({ id, slug: media.slug });
 
-  const quick = mediaDbRowToQuickAddJson(media);
+  const refreshed = await db.media.findUnique({ where: { id } });
+  const forJson = refreshed ?? media;
+  const quick = mediaDbRowToQuickAddJson(forJson);
   return json({
     ok: true,
-    media,
+    media: forJson,
     json: quickAddJsonWithAliasKeys(quick),
   });
 }

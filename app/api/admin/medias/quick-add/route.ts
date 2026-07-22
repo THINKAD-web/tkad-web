@@ -8,8 +8,10 @@ import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate"
 import { maybeAutoFillNearbyMediaFields } from "@/lib/media-nearby-facilities";
 import {
   mapQuickAddToDb,
+  splitQuickAddInstallLocations,
   validateQuickAddItems,
 } from "@/lib/media-quick-add";
+import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 
 export const dynamic = "force-dynamic";
 
@@ -93,19 +95,28 @@ export async function POST(request: NextRequest) {
             ? { ...withNearby, daily_footfall: foot }
             : withNearby;
         const base = mapQuickAddToDb(withFoot);
+        const { prismaFields, installLocations } =
+          splitQuickAddInstallLocations(base);
         const media = await tx.media.create({
           data: {
-            ...base,
-            priceOptions: base.priceOptions ?? Prisma.JsonNull,
+            ...prismaFields,
+            priceOptions: prismaFields.priceOptions ?? Prisma.JsonNull,
             addressVerified: geoVerified,
             autoPopulatedAt: autoNear?.autoPopulatedAt ?? null,
           },
         });
+        if (installLocations !== undefined) {
+          await persistMediaInstallLocations(
+            tx,
+            media.id,
+            installLocations,
+          );
+        }
         await tx.mediaPriceSnapshot.create({
           data: {
             mediaId: media.id,
             price: media.price,
-            note: base.priceNote?.slice(0, 200) || "quick-add",
+            note: prismaFields.priceNote?.slice(0, 200) || "quick-add",
           },
         });
         created.push({ id: media.id, name: media.name });

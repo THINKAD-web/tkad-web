@@ -64,6 +64,44 @@ const SAMPLE_BULK_JSON = `[
     "nearby_stations": "",
     "nearby_landmarks": "",
     "past_advertisers": ""
+  },
+  {
+    "media_name": "부산 도시철도 샘플 (복수 설치 지점)",
+    "description": "installLocations가 있으면 대표 latitude/longitude는 지점 centroid로 자동 동기화됩니다. 별칭 install_locations 도 동일합니다.",
+    "sub_category": "디지털사이니지",
+    "tags": ["부산", "지하철"],
+    "full_address": "부산광역시 부산진구",
+    "district": "부산진구",
+    "city": "부산",
+    "latitude": null,
+    "longitude": null,
+    "installLocations": [
+      {
+        "label": "서면역 1번 출구",
+        "location": "부산 부산진구 중앙대로 지하",
+        "latitude": 35.1578,
+        "longitude": 129.0592
+      },
+      {
+        "label": "해운대역",
+        "location": "부산 해운대구 우동",
+        "latitude": 35.1631,
+        "longitude": 129.1636
+      }
+    ],
+    "price_per_month": 12000000,
+    "price_note": "VAT 별도",
+    "operating_hours": "05:00 - 24:00",
+    "daily_footfall": null,
+    "weekday_footfall": null,
+    "target_age": "20~40대",
+    "visibility_score": 80,
+    "effect_memo": "",
+    "extracted_images": [],
+    "nearby_facilities": "",
+    "nearby_stations": "",
+    "nearby_landmarks": "",
+    "past_advertisers": ""
   }
 ]`;
 

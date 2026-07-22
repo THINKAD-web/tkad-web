@@ -1,0 +1,134 @@
+{
+  "measuredAt": "2026-07-22T23:22:44.267Z",
+  "sampleId": "cmqruwydr00010bj8vetag2sj",
+  "sampleName": "인천국제공항 키로뷰 Full Package 광고",
+  "exportOk": true,
+  "exportInstallCount": 2,
+  "centroidOk": true,
+  "mappedCentroid": {
+    "latitude": 36.69881993026493,
+    "longitude": 127.32038530890266,
+    "installCount": 3
+  },
+  "writeOk": true,
+  "restoreOk": true,
+  "regressionOk": true,
+  "payloadPreview": {
+    "media_name": "인천국제공항 키로뷰 Full Package 광고",
+    "description": "인천국제공항 제1·제2여객터미널에 설치된 KIRO VIEW 영상광고 매체입니다. 총 246대(1터미널 121대 + 2터미널 125대) 규모로, 인천공항 유일의 무게 측정 키오스크 광고 매체입니다. 탑승 수속 전 필수로 이용하는 동선에 위치해 높은 주목도와 반복 노출 효과를 제공합니다. 일반구역과 면세구역 모두 커버하며, 사운드 지원이 가능한 프리미엄 디지털 영상 매체입니다.",
+    "sub_category": "키오스크 영상광고",
+    "type": "digital",
+    "tags": [
+      "인천공항 키로뷰",
+      "KIRO VIEW",
+      "인천공항 광고",
+      "공항 키오스크",
+      "무게측정 키오스크",
+      "1터미널 2터미널",
+      "사운드 지원",
+      "고객 접점 매체",
+      "여행객 타겟",
+      "프리미엄 타겟",
+      "인천",
+      "공항",
+      "디지털",
+      "일반구역",
+      "면세구역",
+      "인천공항T1역",
+      "인천공항T2역 (공항철도)",
+      "인천국제공항 제1",
+      "2여객터미널",
+      "체크인 카운터",
+      "탑승 게이트",
+      "면세점",
+      "교통센터",
+      "중구",
+      "키오스크 영상광고",
+      "인천공항2터미널역",
+      "인천공항2터미널역 공항철도 (약 62m)",
+      "인천공항2터미널역 공항철도",
+      "인천국제공항 제2여객터미널 강동석관"
+    ],
+    "full_address": "인천 중구 공항로 272 인천국제공항 제1·제2여객터미널 (일반구역 + 면세구역)",
+    "district": "중구",
+    "city": "인천",
+    "latitude": 37.4584298953974,
+    "longitude": 126.442777963354,
+    "installLocations": [
+      {
+        "label": "인천국제공항T1",
+        "location": "인천 중구 공항로 271 인천국제공항역",
+        "latitude": 37.4476109663729,
+        "longitude": 126.452346738588
+      },
+      {
+        "label": "인천국제공항T2",
+        "location": "인천 중구 제2터미널대로 446 (운서동) 지하1층",
+        "latitude": 37.4692488244219,
+        "longitude": 126.43320918812
+      }
+    ],
+    "price_per_month": 20000000,
+    "price_note": "Full Package 월 20,000,000원 (VAT 별도) / 1터미널 12M + 2터미널 12M",
+    "width_m": null,
+    "height_m": null,
+    "resolution": "1080x1920 (세로형) / 1920x1080 (가로형)",
+    "operating_hours": "02:00 ~ 익일 01:00 (23시간)",
+    "daily_footfall": 350000,
+    "weekday_footfall": null,
+    "target_age": "20~60대 (국내·국제 여행객, 비즈니스맨)",
+    "impressions": 4500000,
+    "reach": 850000,
+    "frequency": 5.3,
+    "cpm": 4444,
+    "engagement_rate": 6.8,
+    "visibility_score": 97,
+    "effect_memo": "인천국제공항 키로뷰 Full Package는 인천공항 제1·2터미널 246대에 설치된 유일한 무게 측정 키오스크 영상광고 매체입니다. 탑승 수속 전 필수 동선에 위치해 모든 승객이 반드시 이용하며, 일반구역에서는 무게 측정 시 사운드와 함께 가로형 광고가 노출되고, 면세구역에서는 세로형 영상이 장시간 반복 노출됩니다. 고품질 타겟(여행객·비즈니스)에게 강력한 브랜딩 효과를 제공합니다.",
+    "extracted_images": [
+      "https://tkad-cdn.b-cdn.net/%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%A9%E1%84%87%E1%85%B22.jpeg",
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/07/6089513b-9643-4b14-96de-62350c61798e.jpg",
+      "https://tkad-cdn.b-cdn.net/(2026.ver)_%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AE%E1%86%A8%E1%84%8C%E1%85%A6%E1%84%80%E1%85%A9%E1%86%BC%E1%84%92%E1%85%A1%E1%86%BC%20%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%A9%E1%84%87%E1%85%B2%20%E1%84%86%E1%85%A2%E1%84%8E%E1%85%A6%E1%84%8C%E1%85%A6%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A5.010.jpeg",
+      "https://tkad-cdn.b-cdn.net/(2026.ver)_%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AE%E1%86%A8%E1%84%8C%E1%85%A6%E1%84%80%E1%85%A9%E1%86%BC%E1%84%92%E1%85%A1%E1%86%BC%20%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%A9%E1%84%87%E1%85%B2%20%E1%84%86%E1%85%A2%E1%84%8E%E1%85%A6%E1%84%8C%E1%85%A6%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A5.011.jpeg",
+      "https://tkad-cdn.b-cdn.net/(2026.ver)_%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AE%E1%86%A8%E1%84%8C%E1%85%A6%E1%84%80%E1%85%A9%E1%86%BC%E1%84%92%E1%85%A1%E1%86%BC%20%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%A9%E1%84%87%E1%85%B2%20%E1%84%86%E1%85%A2%E1%84%8E%E1%85%A6%E1%84%8C%E1%85%A6%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A5.012.jpeg",
+      "https://tkad-cdn.b-cdn.net/(2026.ver)_%E1%84%8B%E1%85%B5%E1%86%AB%E1%84%8E%E1%85%A5%E1%86%AB%E1%84%80%E1%85%AE%E1%86%A8%E1%84%8C%E1%85%A6%E1%84%80%E1%85%A9%E1%86%BC%E1%84%92%E1%85%A1%E1%86%BC%20%E1%84%8F%E1%85%B5%E1%84%8B%E1%85%A9%E1%84%87%E1%85%B2%20%E1%84%86%E1%85%A2%E1%84%8E%E1%85%A6%E1%84%8C%E1%85%A6%E1%84%8B%E1%85%A1%E1%86%AB%E1%84%89%E1%85%A5.013.jpeg"
+    ],
+    "nearby_facilities": "인천공항2터미널역 공항철도, 인천국제공항 제2여객터미널 강동석관",
+    "nearby_stations": "인천공항2터미널역 공항철도 (약 62m)",
+    "nearby_landmarks": "인천국제공항 제1·2여객터미널",
+    "past_advertisers": "아우디, 삼성화재, 신한카드, 카카오T, LG유플러스, 토스뱅크, 무신사, 교촌치킨, 디즈니플러스",
+    "price_period": "month",
+    "price_options": [
+      {
+        "label": "Full Package (1터미널 + 2터미널 / 총 246대)",
+        "price": 20000000,
+        "period": "month",
+        "description": "광고 단가 월 20,000,000원 (VAT 별도)"
+      }
+    ],
+    "surrounding_facilities": "인천공항2터미널역 공항철도, 인천국제공항 제2여객터미널 강동석관",
+    "nearby_subway": "인천공항2터미널역 공항철도 (약 62m)",
+    "advertiser_history": "아우디, 삼성화재, 신한카드, 카카오T, LG유플러스, 토스뱅크, 무신사, 교촌치킨, 디즈니플러스",
+    "priceOptions": [
+      {
+        "label": "Full Package (1터미널 + 2터미널 / 총 246대)",
+        "price": 20000000,
+        "period": "month",
+        "description": "광고 단가 월 20,000,000원 (VAT 별도)"
+      }
+    ],
+    "install_locations": [
+      {
+        "label": "인천국제공항T1",
+        "location": "인천 중구 공항로 271 인천국제공항역",
+        "latitude": 37.4476109663729,
+        "longitude": 126.452346738588
+      },
+      {
+        "label": "인천국제공항T2",
+        "location": "인천 중구 제2터미널대로 446 (운서동) 지하1층",
+        "latitude": 37.4692488244219,
+        "longitude": 126.43320918812
+      }
+    ]
+  }
+}
