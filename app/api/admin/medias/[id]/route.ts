@@ -21,9 +21,9 @@ import { persistMediaCoverageDistrictCodes } from "@/lib/persist-media-coverage-
 import { notifyFavoriteUsersMediaAvailability } from "@/lib/notifications";
 import { notifyFavoriteUsersPriceChange } from "@/lib/notifications-price";
 import {
-  bunnyPublicUrlsRemoved,
   collectMediaImageUrls,
   deleteBunnyPublicUrls,
+  resolveBunnyUrlsToPurge,
 } from "@/lib/bunny-storage";
 import {
   parseInstallLocationsBody,
@@ -637,10 +637,34 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       body.extractedImages !== undefined
         ? (body.extractedImages as string[])
         : existing.extractedImages;
-    bunnyUrlsToPurge = bunnyPublicUrlsRemoved(
-      collectMediaImageUrls(existing.image, existing.extractedImages),
-      collectMediaImageUrls(nextImage, nextExtracted),
+    const previousUrls = collectMediaImageUrls(
+      existing.image,
+      existing.extractedImages,
     );
+    const nextUrls = collectMediaImageUrls(nextImage, nextExtracted);
+    const { toPurge, skippedWithoutIntent } = resolveBunnyUrlsToPurge(
+      previousUrls,
+      nextUrls,
+      body.purgeImageUrls,
+    );
+    bunnyUrlsToPurge = toPurge;
+    if (skippedWithoutIntent.length > 0) {
+      console.warn(
+        "[admin-api] media PATCH skipped bunny CDN purge (no matching purgeImageUrls)",
+        {
+          id,
+          skippedCount: skippedWithoutIntent.length,
+          skippedSample: skippedWithoutIntent.slice(0, 5),
+        },
+      );
+    }
+    if (toPurge.length > 0) {
+      console.info("[admin-api] media PATCH bunny CDN purge approved", {
+        id,
+        purgeCount: toPurge.length,
+        purgeSample: toPurge.slice(0, 5),
+      });
+    }
   }
 
   delete (data as { installLocations?: unknown }).installLocations;

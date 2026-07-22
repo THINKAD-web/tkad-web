@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="ko"><head><meta charset="utf-8"/>
+<title>Admin gallery image-loss fix verify</title>
+<style>
+body{font-family:ui-sans-serif,system-ui;margin:24px;background:#0b0f14;color:#e8eef7}
+h1{font-size:20px} h2{font-size:15px;margin-top:28px;color:#9fb3c8}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.card{border:1px solid #243041;border-radius:12px;padding:16px;background:#121821}
+.bad{color:#ff8b8b}.good{color:#7ddea5} code{font-size:12px;word-break:break-all}
+.pill{display:inline-block;padding:2px 8px;border-radius:999px;background:#1c2736;margin:2px;font-size:11px}
+</style></head><body>
+<h1>Admin gallery image-loss fix — verification</h1>
+<p>Measured: 2026-07-22T20:32:57.335Z</p>
+<div class="grid">
+  <div class="card">
+    <h2 class="bad">BEFORE — stale closure race</h2>
+    <p>4 rapid uploads from same snapshot → keep only last batch</p>
+    <p>Count: <strong>2</strong> (expected 5)</p>
+    <span class="pill">existing.jpg</span><span class="pill">u4.jpg</span>
+  </div>
+  <div class="card">
+    <h2 class="good">AFTER — functional append</h2>
+    <p>Each completion appends onto latest gallery</p>
+    <p>Count: <strong>5</strong></p>
+    <span class="pill">existing.jpg</span><span class="pill">u1.jpg</span><span class="pill">u2.jpg</span><span class="pill">u3.jpg</span><span class="pill">u4.jpg</span>
+  </div>
+</div>
+<div class="card" style="margin-top:16px">
+  <h2>CDN purge gate</h2>
+  <p>No purgeImageUrls → toPurge=0, skipped=1</p>
+  <p>With purgeImageUrls=[b.jpg] → toPurge=1</p>
+</div>
+<div class="card" style="margin-top:16px">
+  <h2>DB sample idle-save</h2>
+  <p><code>cmrwirjcs000504jlnlr684lo</code><br/>인천지하철 1호선 디지털사이니지 전체 턴키 (7개 역사) 광고</p>
+  <p>merged before=18, extracted=19, primary∈extracted=true</p>
+  <p class="good">after idle save: merged=18, uniquePreserved=true, sameSet=true</p>
+  <p>accidental shrink without intent: CDN toPurge=0, skipped=1</p>
+</div>
+</body></html>
