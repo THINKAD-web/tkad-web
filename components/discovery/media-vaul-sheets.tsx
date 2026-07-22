@@ -15,7 +15,12 @@ type FilterSheetProps = {
   children: ReactNode;
 };
 
-/** vaul — 카테고리·상세 필터 (peek / half / full 스냅) */
+/**
+ * vaul — 카테고리·상세 필터.
+ * snapPoints(148px peek 등)는 시트 전체가 transform으로만 일부 노출되어
+ * 하단 CTA가 뷰포트 밖(진단 y≈1485)으로 밀림. 정렬 시트와 같이
+ * snap 없이 max-h + flex footer로 열어 CTA를 항상 보이게 함.
+ */
 export function MediaFilterVaulSheet({
   open,
   onOpenChange,
@@ -26,18 +31,12 @@ export function MediaFilterVaulSheet({
   children,
 }: FilterSheetProps) {
   return (
-    <Drawer.Root
-      open={open}
-      onOpenChange={onOpenChange}
-      snapPoints={["148px", 0.55, 0.92]}
-      fadeFromIndex={1}
-      modal
-    >
+    <Drawer.Root open={open} onOpenChange={onOpenChange} modal>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[60] bg-black/50 md:hidden" />
+        <Drawer.Overlay className="fixed inset-0 z-[90] bg-black/50 md:hidden" />
         <Drawer.Content
           className={cn(
-            "fixed inset-x-0 bottom-0 z-[61] flex max-h-[92dvh] flex-col rounded-t-2xl border-t border-border/80 bg-card outline-none md:hidden",
+            "fixed inset-x-0 bottom-0 z-[91] flex max-h-[92dvh] flex-col rounded-t-2xl border-t border-border/80 bg-card outline-none md:hidden",
             "dark:border-white/10 dark:bg-[#0a0a12]",
           )}
         >
@@ -51,7 +50,8 @@ export function MediaFilterVaulSheet({
           <div className="min-h-0 flex-1 space-y-4 overflow-y-auto overscroll-contain px-4 py-4">
             {children}
           </div>
-          <div className="flex shrink-0 items-center gap-2 border-t border-border/70 px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] dark:border-white/10">
+          {/* shrink-0 footer — 시트 가시 영역 하단에 CTA 고정 */}
+          <div className="flex shrink-0 items-center gap-2 border-t border-border/70 bg-card px-4 py-3 pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))] dark:border-white/10 dark:bg-[#0a0a12]">
             <button
               type="button"
               onClick={onReset}
@@ -93,10 +93,10 @@ export function MediaSortVaulSheet({
   return (
     <Drawer.Root open={open} onOpenChange={onOpenChange} modal>
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 z-[60] bg-black/40 md:hidden" />
+        <Drawer.Overlay className="fixed inset-0 z-[90] bg-black/40 md:hidden" />
         <Drawer.Content
           className={cn(
-            "fixed inset-x-0 bottom-0 z-[61] flex flex-col rounded-t-2xl border-t border-border/80 bg-card outline-none md:hidden",
+            "fixed inset-x-0 bottom-0 z-[91] flex flex-col rounded-t-2xl border-t border-border/80 bg-card outline-none md:hidden",
             "dark:border-white/10 dark:bg-[#0a0a12]",
           )}
         >

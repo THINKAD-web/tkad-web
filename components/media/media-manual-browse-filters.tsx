@@ -1122,7 +1122,8 @@ export function MediaManualBrowseFilters({
     <div
       className={cn(
         "scrollbar-hide flex min-w-0 shrink-0 overflow-x-auto rounded-xl border border-gray-200 dark:border-white/10",
-        listPageLayout && "rounded-lg",
+        /* 모바일 sticky 2행에서는 전폭; md+ 툴바는 콘텐츠 너비만 */
+        listPageLayout && "w-full rounded-lg md:w-auto",
       )}
       data-screenshot={
         mapPageViewModes ? "media-view-mode-map-split" : "media-view-mode"
@@ -1143,12 +1144,20 @@ export function MediaManualBrowseFilters({
             aria-pressed={active}
             className={cn(
               "flex items-center gap-1 font-medium transition-all tkad-type-meta",
-              listPageLayout ? "px-2 py-1" : "px-2.5 py-1.5",
+              listPageLayout
+                ? "min-h-9 min-w-0 flex-1 justify-center px-2 py-1.5 md:min-h-0 md:flex-none md:px-2 md:py-1"
+                : "px-2.5 py-1.5",
               active ? MEDIA_CHIP_ACTIVE : MEDIA_CHIP_INACTIVE,
             )}
           >
             <Icon className="h-3.5 w-3.5 shrink-0" aria-hidden />
-            <span className={listPageLayout ? "sr-only sm:not-sr-only" : "hidden sm:inline"}>
+            <span
+              className={
+                listPageLayout
+                  ? "max-w-[4.5rem] truncate md:max-w-none"
+                  : "hidden sm:inline"
+              }
+            >
               {isKo ? mode.labelKo : mode.labelEn}
             </span>
           </button>
@@ -1336,18 +1345,29 @@ export function MediaManualBrowseFilters({
     </div>
   ) : null;
 
+  /**
+   * /media 목록 모바일 sticky — 1행에 필터·정렬·세그먼트·지도를 두고
+   * 뷰모드는 2행 전폭으로 분리(1행 flex-1 붕괴로 5px 찌그러짐 방지).
+   * md+ 는 이 블록 자체가 md:hidden.
+   */
   const mobileStickyControlRow =
     mobileStickyToolbar && unifiedToolbar && !mapMobileImmersiveMode ? (
       <div
-        className="sticky top-14 z-30 -mx-4 flex min-w-0 items-center gap-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
+        className="sticky top-14 z-30 -mx-4 space-y-2 border-b border-gray-200/80 bg-gray-50/95 px-4 py-2 backdrop-blur-md md:hidden dark:border-white/10 dark:bg-[#020202]/95"
         data-screenshot="media-mobile-sticky-controls"
       >
-        {mobileFilterButton}
-        {mobileSortButton}
-        {catalogBrowseSegment}
-        <div className="min-w-0 flex-1">{viewModeToggle}</div>
-        {mapPageViewModes ? mapToolbarSummaryChips : null}
-        {mapNavButton}
+        <div className="flex min-w-0 items-center gap-2">
+          {mobileFilterButton}
+          {mobileSortButton}
+          {catalogBrowseSegment}
+          {mapPageViewModes ? mapToolbarSummaryChips : null}
+          {mapNavButton}
+        </div>
+        {viewModeToggle ? (
+          <div className="min-w-0 w-full" data-screenshot="media-mobile-view-mode-row">
+            {viewModeToggle}
+          </div>
+        ) : null}
       </div>
     ) : null;
 
