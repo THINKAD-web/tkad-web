@@ -27,11 +27,11 @@ export async function CasesHero({ locale, empty }: Props) {
       <CategoryHeroCtaRow>
         <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
           {t("cases.reportCtaQuote")}
-          <ArrowRight className="h-4 w-4" aria-hidden />
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
         </Link>
         <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
           {isKo ? "무료 상담" : "Free consult"}
-          <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
+          <ArrowRight className="h-3.5 w-3.5 dark:text-white text-gray-700" aria-hidden />
         </Link>
       </CategoryHeroCtaRow>
     </CategoryExploreHero>

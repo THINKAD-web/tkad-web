@@ -53,16 +53,16 @@ export async function CasesPageContent({ locale, cases }: Props) {
         />
         <SubTabsBar group="content" currentPath="/cases" />
         <PageContainer className="border-b border-white/10 pb-6">
-          <CategoryHeroCtaRow>
-            <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
-              {t("cases.reportCtaQuote")}
-              <ArrowRight className="h-4 w-4" aria-hidden />
-            </Link>
-            <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
-              {isKo ? "무료 상담" : "Free consult"}
-              <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
-            </Link>
-          </CategoryHeroCtaRow>
+      <CategoryHeroCtaRow>
+        <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
+          {t("cases.reportCtaQuote")}
+          <ArrowRight className="h-3.5 w-3.5" aria-hidden />
+        </Link>
+        <Link href="/contact" className={categoryHeroCtaSecondaryClass}>
+          {isKo ? "무료 상담" : "Free consult"}
+          <ArrowRight className="h-3.5 w-3.5 dark:text-white text-gray-700" aria-hidden />
+        </Link>
+      </CategoryHeroCtaRow>
         </PageContainer>
 
         <NeonSection tone="qp" className="pb-0 pt-8 sm:pb-0 sm:pt-12">
@@ -89,7 +89,7 @@ export async function CasesPageContent({ locale, cases }: Props) {
               <div className="flex flex-col items-center justify-center">
                 <Link href="/quote" className={categoryHeroCtaPrimaryClass}>
                   {t("cases.reportCtaQuote")}
-                  <ArrowRight className="h-4 w-4" aria-hidden />
+                  <ArrowRight className="h-3.5 w-3.5" aria-hidden />
                 </Link>
               </div>
             </div>

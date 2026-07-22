@@ -316,6 +316,7 @@
   --primary: var(--qp-accent);
   --primary-foreground: #ffffff;
   --accent: var(--qp-accent);
+  --accent-foreground: #ffffff;
   --cta: var(--qp-accent);
   --ring: var(--qp-accent-ring);
   --tkad-fg-accent: var(--qp-accent);
@@ -630,11 +631,12 @@ html:not(.dark) .admin-dashboard-root .campaign-report-document [style*='color: 
   --card: #0a0a0a;
   --card-foreground: #f4f2ef;
   --primary: #ff6200;
-  --primary-foreground: #020202;
+  /* Solid orange fills — white label (not near-black) for contrast */
+  --primary-foreground: #ffffff;
   --secondary: #0f0f12;
   --secondary-foreground: #f4f2ef;
   --accent: #ff6200;
-  --accent-foreground: #020202;
+  --accent-foreground: #ffffff;
   --muted: #0f0f12;
   --muted-foreground: #9b9ba3;
   --destructive: #f87171;
@@ -1404,7 +1406,17 @@ html.dark .tkad-media-detail-hero,
 /* 라이트 랜딩: 브랜드 CTA(주황) 버튼은 텍스트를 항상 흰색으로 (hover bg-foreground에서도 대비 유지) */
 .tkad-home-appearance[data-appearance="day"]
   .tkad-neon-surface
-  .bg-accent.text-white {
+  .bg-accent.text-white,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-qp-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-qp-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .bg-hermes,
+.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .bg-hermes *,
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-neon-surface
+  [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+.tkad-home-appearance[data-appearance="day"]
+  .tkad-neon-surface
+  [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
@@ -1670,7 +1682,14 @@ html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta *,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent * {
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent *,
+/* Solid orange chips/CTAs — day text-white→ink remapping must not darken labels */
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
@@ -2067,16 +2086,17 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   opacity: 1;
 }
 
+/* Day planner primary — Quiet Professional 주황 (레거시 indigo #4338ca 제거) */
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary {
-  color: #4338ca !important;
+  color: var(--qp-accent) !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-primary {
-  background-color: #4338ca !important;
+  background-color: var(--qp-accent) !important;
 }
 
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary {
-  border-color: rgb(67 56 202 / 0.55) !important;
+  border-color: color-mix(in srgb, var(--qp-accent) 55%, transparent) !important;
 }
 
 /* Planner 내부 “탭 버튼”들 (-mt/-ml로 붙는 형태): 라이트에서 카드 톤으로 정리 */
@@ -2090,7 +2110,7 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-card:hover,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-muted:hover {
   background: rgb(255 255 255 / 1) !important;
-  border-color: rgb(99 102 241 / 0.28) !important;
+  border-color: color-mix(in srgb, var(--qp-accent) 28%, transparent) !important;
 }
 
 /* Night(네온) — 플래너 카드도 홈 다크 네온 톤으로 */
@@ -2470,6 +2490,12 @@ html:not(.dark) .tkad-glass-surface-soft [class*="text-white/"] {
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary.bg-primary *,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta,
 .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes *,
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) *,
 .tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent,
 .tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent *,
 .tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .bg-accent,
@@ -2487,7 +2513,13 @@ html:not(.dark) .tkad-planner-neon .bg-accent *,
 html:not(.dark) .tkad-planner-neon .border-primary.bg-primary,
 html:not(.dark) .tkad-planner-neon .border-primary.bg-primary *,
 html:not(.dark) .tkad-planner-neon .tkad-planner-gradient-cta,
-html:not(.dark) .tkad-planner-neon .tkad-planner-gradient-cta * {
+html:not(.dark) .tkad-planner-neon .tkad-planner-gradient-cta *,
+html:not(.dark) .tkad-planner-neon .tkad-qp-cta,
+html:not(.dark) .tkad-planner-neon .tkad-qp-cta *,
+html:not(.dark) .tkad-planner-neon .bg-hermes,
+html:not(.dark) .tkad-planner-neon .bg-hermes *,
+html:not(.dark) .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+html:not(.dark) .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }

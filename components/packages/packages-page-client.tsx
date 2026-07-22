@@ -38,23 +38,21 @@ export function PackagesPageClient({
       <SubTabs tabs={PLANNING_TABS} currentPath="/media/packages" />
 
       <section className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 sm:py-12 lg:px-8">
-        <div className="flex flex-col gap-3 border-2 border-border bg-card p-4 sm:flex-row sm:items-center sm:justify-between sm:p-5">
+        <div className="flex flex-col gap-3 border border-border/70 bg-muted/30 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-4 dark:bg-white/[0.03]">
           <div className="min-w-0 space-y-1">
-            <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-              [ {isKo ? "역할 구분" : "How this differs"} ]
-            </p>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm leading-relaxed text-muted-foreground">
               {isKo
-                ? "패키지 = 미리 짜 둔 조합·견적 진입. 목적만 고르고 탐색하려면 캠페인 목적 허브를 쓰세요."
-                : "Packages = curated bundles for quoting. For goal-only browsing, use Campaign targets."}
+                ? "여기는 미리 짜 둔 조합으로 견적까지 이어가는 곳입니다. 목적만 골라 탐색하려면 캠페인 목적별 매체를 쓰세요."
+                : "These are curated bundles for quoting. To browse by goal only, use Campaign targets."}
             </p>
           </div>
           <Link
             href="/media/targets"
-            className="inline-flex shrink-0 items-center gap-2 border-2 border-border bg-muted px-3 py-2 text-xs font-bold text-foreground transition-colors hover:border-accent"
+            className="inline-flex shrink-0 items-center gap-1.5 text-sm font-medium text-[color:var(--qp-accent)] underline-offset-2 transition-colors hover:underline"
           >
-            <Target className="h-3.5 w-3.5 text-accent" aria-hidden />
-            {isKo ? "캠페인 목적별 매체 →" : "Browse by campaign goal →"}
+            <Target className="h-3.5 w-3.5" aria-hidden />
+            {isKo ? "캠페인 목적별 매체" : "Browse by campaign goal"}
+            <ArrowRight className="h-3.5 w-3.5" aria-hidden />
           </Link>
         </div>
 
