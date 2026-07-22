@@ -1,7 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { matchesPlannerCategory } from "@/lib/planner-logic";
 import type { PlannerCategory } from "@/lib/planner/types";
-import { matchMediaCatalog } from "@/lib/matching-engine";
+import { matchMediaCatalog, type MatchPrecision } from "@/lib/matching-engine";
 import {
   plannerContextToMatching,
   displayContextFromPlannerContext,
@@ -41,6 +41,7 @@ export type ScoredMedia = {
   reasons: RecommendReason[];
   /** 조건 연결 문장 (최대 3줄) */
   rationaleLines: LocalizedRationaleLine[];
+  matchPrecision?: MatchPrecision;
 };
 
 function reasonWeightForKey(
@@ -134,6 +135,7 @@ export function recommendPlannerMedia(
         locale,
         display,
       ),
+      matchPrecision: m.matchPrecision,
     };
   });
 }

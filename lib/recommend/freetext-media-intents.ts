@@ -1,5 +1,5 @@
-/** 자연어에서 추출한 매체 유형 의도 — scoreCategory 가점 전용 */
-export type FreetextMediaIntent = "subway" | "bus_wrap";
+/** 자연어에서 추출한 매체 유형 의도 — scoreCategory 가점·감점 */
+export type FreetextMediaIntent = "subway" | "bus_wrap" | "billboard";
 
 export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
   const t = text.trim();
@@ -15,6 +15,15 @@ export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
     /버스\s*(?:래핑|랩핑|wrap)|(?:래핑|랩핑|wrap)\s*버스|bus\s*wrap/i.test(t)
   ) {
     intents.add("bus_wrap");
+  }
+
+  /* 전광판·빌보드·LED 파사드 — digital 전체(역사 아트래핑 등)와 구분 */
+  if (
+    /전광판|빌보드|billboard|미디어\s*(?:월|타워|파사드)|미디어월|미디어타워|led\s*(?:전광|보드|스크린)?/i.test(
+      t,
+    )
+  ) {
+    intents.add("billboard");
   }
 
   return [...intents];
@@ -34,6 +43,8 @@ export function extractFreetextLocationKeywords(text: string): string[] {
     { kw: "강남", re: /강남/i },
     { kw: "성수", re: /성수/i },
     { kw: "홍대", re: /홍대/i },
+    { kw: "신촌", re: /신촌/i },
+    { kw: "합정", re: /합정/i },
     { kw: "해운대", re: /해운대/i },
   ];
 

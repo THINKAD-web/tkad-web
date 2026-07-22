@@ -13,8 +13,10 @@ import {
   type RecommendReasonKey,
 } from "@/lib/planner/recommend";
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
+import { parseFreetextMediaIntents } from "@/lib/recommend/freetext-media-intents";
 import type { PlannerScenarioApplyPatch } from "@/lib/planner/scenario-types";
 import type { AiChatbotMediaCard } from "@/lib/ai-chatbot-tools";
+import { matchPrecisionLabel, type MatchPrecision } from "@/lib/matching-engine";
 
 function readGyeonggiZoneValues(
   result: PlannerFreetextParseResult,
@@ -56,6 +58,8 @@ export type PlanFromBriefItem = AiChatbotMediaCard & {
   score: number;
   reasonKeys: RecommendReasonKey[];
   reasonLabels: string[];
+  matchPrecision?: MatchPrecision;
+  matchPrecisionLabel?: string;
 };
 
 export type PlanFromBriefResult = {
@@ -141,6 +145,7 @@ function toParsedSnapshot(
 
 function patchToRecommendationContext(
   patch: PlannerScenarioApplyPatch,
+  mediaIntents?: RecommendationContext["mediaIntents"],
 ): RecommendationContext {
   return {
     goal: patch.campaignGoal ?? null,
@@ -156,6 +161,7 @@ function patchToRecommendationContext(
     months: patch.months ?? 1,
     durationDays: patch.goalFollowUp?.eventDurationDays ?? undefined,
     goalFollowUp: patch.goalFollowUp,
+    ...(mediaIntents?.length ? { mediaIntents } : {}),
   };
 }
 
@@ -192,16 +198,23 @@ export function executePlanFromBrief(
   }
 
   const limit = clampLimit(limitInput, 6, 10);
-  const ctx = patchToRecommendationContext(apply.patch);
+  const mediaIntents = parseFreetextMediaIntents(trimmed);
+  const ctx = patchToRecommendationContext(
+    apply.patch,
+    mediaIntents.length > 0 ? mediaIntents : undefined,
+  );
   const scored = recommendPlannerMedia(catalog, ctx, limit);
   const parsedFieldCount = countParsedFields(apply.parseResult);
   const needsClarification = parsedFieldCount === 0;
+  const isKo = locale === "ko";
 
   const items: PlanFromBriefItem[] = scored.map((row) => ({
     ...compactMediaCard(row.media),
     score: row.score,
     reasonKeys: row.reasons.map((r) => r.key),
     reasonLabels: formatRecommendReasonLabels(row.reasons, locale),
+    matchPrecision: row.matchPrecision,
+    matchPrecisionLabel: matchPrecisionLabel(row.matchPrecision, isKo),
   }));
 
   return {

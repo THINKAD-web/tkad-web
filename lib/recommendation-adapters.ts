@@ -141,6 +141,7 @@ export function plannerContextToMatching(
     goalTags: goalTags.length > 0 ? goalTags : undefined,
     categories: ctx.categories.length > 0 ? [...ctx.categories] : undefined,
     seed,
+    ...(ctx.mediaIntents?.length ? { mediaIntents: [...ctx.mediaIntents] } : {}),
   };
 }
 
@@ -185,6 +186,7 @@ export function matchedToAiScored(
         },
       ],
       rationaleLines: bundle.lines,
+      matchPrecision: m.matchPrecision,
     };
   });
 }
@@ -218,6 +220,7 @@ export function matchedToPlannerScored(
         locale,
         display,
       ),
+      matchPrecision: m.matchPrecision,
     };
   });
 }

@@ -352,6 +352,45 @@ export function mediaMatchesPlannerBusWrapIntent(item: MediaItem): boolean {
   return false;
 }
 
+const PLANNER_BILLBOARD_POSITIVE_RE =
+  /전광판|빌보드|billboard|미디어\s*(?:월|타워|파사드)|미디어월|미디어타워|미디어파사드|digital[\s_-]?signage|led(?:\s*(?:보드|스크린|전광))?|파사드|facade/i;
+
+const PLANNER_BILLBOARD_NEGATIVE_RE =
+  /아트래핑|아트\s*래핑|아트캔버스|아트\s*캔버스|(?:차량|버스|택시)\s*(?:래핑|랩핑|wrap)|vehicle\s*wrap|bus\s*wrap|랩핑\s*광고|래핑\s*광고|키오스크|kiosk|택시\s*쉘터|taxi\s*shelter|버스\s*쉘터|bus\s*shelter/i;
+
+/**
+ * 「전광판」의도 — LED·빌보드·사이니지·파사드.
+ * 지하철 역사 아트래핑·차량 래핑 등 형태가 다른 digital은 제외.
+ */
+export function mediaMatchesBillboardIntent(item: MediaItem): boolean {
+  const primary = [
+    item.name,
+    item.nameEn,
+    item.subCategory,
+    item.mediaSubCategory,
+    item.networkSubtype,
+  ]
+    .filter(Boolean)
+    .join(" ");
+  if (!primary.trim()) return false;
+
+  if (PLANNER_BILLBOARD_NEGATIVE_RE.test(primary)) return false;
+
+  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`.toLowerCase();
+  if (
+    /subway_station|subway_train|bus_wrap|vehicle_wrap|elevator|kiosk|shelter/.test(sub) &&
+    !/전광판|빌보드|digital_signage|led/.test(sub) &&
+    !PLANNER_BILLBOARD_POSITIVE_RE.test(primary)
+  ) {
+    return false;
+  }
+
+  if (/전광판|빌보드|billboard|digital_signage/.test(sub)) return true;
+  if (PLANNER_BILLBOARD_POSITIVE_RE.test(primary)) return true;
+
+  return false;
+}
+
 export function filterPlannerMedia(
   items: readonly MediaItem[],
   region: "all" | string,

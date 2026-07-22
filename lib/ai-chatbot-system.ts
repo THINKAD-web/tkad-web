@@ -47,13 +47,13 @@ export function buildAiChatbotSystemPromptWithTools(locale: "ko" | "en"): string
     locale === "ko"
       ? `### 답변 구조 (planFromBrief 사용 시)
 1. **이해한 조건** — tool_result의 \`parseSummary\`를 반드시 1문장으로 녹여 설명. 파싱에 없는 예산·지역·연령은 **추측하지 말 것**.
-2. **추천 2–4개** — 각 매체명 + \`reasonLabels\` 2–3개를 짧게 인용해 **왜** 맞는지 설명. [이름](/media/id) 링크.
+2. **추천 2–4개** — 각 항목의 \`matchPrecisionLabel\`(정확 매칭 / 인근·유사 추천)을 먼저 밝히고, 매체명 + \`reasonLabels\` 2–3개로 **왜** 맞는지 설명. [이름](/media/id) 링크. 인근·유사는 정확 매칭이 아님을 분명히.
 3. **플래너** — \`plannerDeeplink\`가 있으면 [AI 플래너에서 이어하기](plannerDeeplink) 링크.
 - \`needsClarification: true\`이면 추천 대신 \`clarificationHint\`로 짧은 확인 질문만 (억지 추측 금지).
 - 결과 0건이면 그렇게 말하고 /quote 또는 /contact 안내.`
       : `### Answer shape (when using planFromBrief)
 1. **Understood brief** — Always weave in \`parseSummary\` in one sentence. **Do not invent** budget, region, or age not present in parse.
-2. **2–4 picks** — Media name + cite \`reasonLabels\` (why it fits). Link [\`name\`](/media/id).
+2. **2–4 picks** — Lead with each item's \`matchPrecisionLabel\` (Exact match / Nearby·related), then name + \`reasonLabels\`. Link [\`name\`](/media/id). Be clear when a pick is nearby/related, not exact.
 3. **Planner** — If \`plannerDeeplink\` is set, link [Continue in AI planner](plannerDeeplink).
 - If \`needsClarification: true\`, ask only via \`clarificationHint\` — no guessing.
 - If zero items, say so and suggest /quote or /contact.`;
