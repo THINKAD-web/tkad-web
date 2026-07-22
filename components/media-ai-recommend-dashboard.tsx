@@ -13,7 +13,6 @@ import {
   Sparkles,
   Star,
   Trophy,
-  Lightbulb,
   type LucideIcon,
 } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
@@ -28,7 +27,6 @@ import {
   RECOMMEND_TOP3_GRID_CLASS,
   RecommendScoredMediaCard,
 } from "@/components/media-ai-recommend-scored-card";
-import { rationaleLinesForLocale } from "@/lib/recommendation-adapters";
 import { RecommendationAxisTabs } from "@/components/recommendation/recommendation-axis-tabs";
 import { RecommendReportSection } from "@/components/recommend/recommend-report-section";
 import { PlanCartBulkAddButton } from "@/components/plan/plan-cart-bulk-add-button";
@@ -255,8 +253,8 @@ export default function MediaAiRecommendDashboard({
   ]);
 
   return (
-    <div className="min-w-0 overflow-x-auto border-2 border-border bg-card p-5 sm:p-7 lg:p-10">
-      <div className="space-y-10">
+    /* ui-container 1겹만 수평 패딩 — dashboardShell / mapPanel 중첩 제거 */
+    <div className="min-w-0 space-y-10 overflow-x-clip">
         {regionMeta?.regionSupplemented ? (
           <p className="rounded-2xl border border-amber-400/35 bg-amber-500/10 px-4 py-3 text-sm font-medium text-amber-900 dark:text-amber-100">
             {isKo
@@ -314,10 +312,9 @@ export default function MediaAiRecommendDashboard({
           </div>
         </header>
 
-        {/* 상단 주요 영역: 지도(전폭) + TOP3(가로 그리드) */}
+        {/* 지도(전폭 1겹 border) + TOP3 그리드 — 중첩 shell / 중복 TOP3 리스트 없음 */}
         <section className="space-y-6">
-          {/* 지도 영역 */}
-          <div className="space-y-3 border-2 border-border bg-card p-5">
+          <div className="min-w-0 space-y-3">
             <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
               <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
                 <MapPin className="h-4 w-4 text-accent" />
@@ -337,65 +334,10 @@ export default function MediaAiRecommendDashboard({
               pinMetaById={pinMetaById}
               fixedMapHeightPx={Math.max(380, 400)}
             />
-
-            {top3.length > 0 && (
-              <div className="mt-4 border-2 border-border bg-muted px-4 py-3 text-foreground">
-                <div className="mb-2 flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-accent">
-                  <Trophy className="h-3.5 w-3.5" />
-                  [ TOP 3 PICKS ]
-                </div>
-                <ol className="space-y-2">
-                  {top3.map((s, i) => {
-                    const summary =
-                      rationaleLinesForLocale(
-                        s.rationaleLines ?? s.reasons.map((r) => ({
-                          ko: r.ko,
-                          en: r.en,
-                        })),
-                        locale,
-                      )[0] ?? "";
-                    const name = isKo ? s.item.name : s.item.nameEn || s.item.name;
-                    return (
-                      <li
-                        key={s.item.id}
-                        className="border-t-2 border-border pt-2 first:border-t-0 first:pt-0"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <span className="inline-flex min-w-0 flex-1 items-start gap-2">
-                            <span className="flex h-6 w-6 shrink-0 items-center justify-center border-2 border-border bg-accent text-[10px] font-bold text-accent-foreground">
-                              {i + 1}
-                            </span>
-                            <span className="min-w-0">
-                              <span className="line-clamp-1 text-xs font-bold tracking-tight text-foreground">
-                                {name}
-                              </span>
-                              {summary ? (
-                                <span className="mt-1 block space-y-0.5">
-                                  <span className="flex items-center gap-1 text-[9px] font-bold uppercase tracking-wide text-[color:var(--qp-accent)]">
-                                    <Lightbulb className="h-3 w-3 shrink-0" aria-hidden />
-                                    {isKo ? "추천 이유" : "Why"}
-                                  </span>
-                                  <span className="line-clamp-2 text-[11px] font-medium leading-snug text-foreground">
-                                    {summary}
-                                  </span>
-                                </span>
-                              ) : null}
-                            </span>
-                          </span>
-                          <span className="shrink-0 font-display text-xs font-medium uppercase tracking-[0.18em] text-accent">
-                            {isKo ? `${s.score}점` : `M${s.score}`}
-                          </span>
-                        </div>
-                      </li>
-                    );
-                  })}
-                </ol>
-              </div>
-            )}
           </div>
 
-          {/* TOP 3 — 좁은 사이드 컬럼 대신 반응형 가로 그리드 */}
-          <div className="space-y-4 border-2 border-border bg-muted p-5 sm:p-6">
+          {/* TOP 3 — 반응형 가로 그리드 (단일 카드, ui-container 전폭) */}
+          <div className="min-w-0 space-y-4 border-2 border-border bg-muted p-5 sm:p-6">
             <div>
               <h3 className="flex items-center gap-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground">
                 <Trophy className="h-4 w-4 text-accent" />
@@ -613,7 +555,6 @@ export default function MediaAiRecommendDashboard({
             </div>
           </div>
         </section>
-      </div>
     </div>
   );
 }
