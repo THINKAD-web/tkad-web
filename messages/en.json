@@ -3363,6 +3363,20 @@
     "imagePreparing": "Image coming soon"
   },
   "homePage": {
+    "twoAxis": {
+      "eyebrow": "THINKAD",
+      "title": "OOH and digital, in one place",
+      "subtitle": "Pick the surface that fits your campaign and start right away.",
+      "oohTitle": "Out-of-home",
+      "oohBadge": "This site · OOH",
+      "oohDesc": "Compare billboards, subway, bus, and more — then move into quotes.",
+      "oohCta": "Browse media",
+      "digitalTitle": "Digital marketing",
+      "digitalBadge": "THINKAD Digital",
+      "digitalDesc": "SNS and search ad packages with campaign-level custom quotes.",
+      "digitalCta": "THINKAD Digital",
+      "digitalCtaExternal": "Open THINKAD Digital in a new tab"
+    },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "Ads, all in one place",
     "heroLiveToday": "Today's impressions",
