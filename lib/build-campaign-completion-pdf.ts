@@ -247,7 +247,7 @@ function drawCoverPage(
   doc.setFont("courier", "normal");
   doc.setFontSize(8);
   setColor(doc, "text", [255, 255, 255]);
-  doc.text("OOH MEDIA AGENCY", MARGIN_X, 30);
+  doc.text("OOH MEDIA PLATFORM", MARGIN_X, 30);
 
   doc.setFont("courier", "bold");
   doc.setFontSize(8);

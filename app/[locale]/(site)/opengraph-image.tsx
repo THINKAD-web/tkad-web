@@ -4,7 +4,7 @@ import { ogForRoute } from "@/lib/og-route-copy";
 import { getPublicMediaCountLabel } from "@/lib/trust-metrics";
 
 export const alt =
-  "THINKAD 싱커드 — Korea OOH agency | 대한민국 No.1 옥외광고 에이전시";
+  "THINKAD 싱커드 — Korea OOH platform | 옥외광고 플랫폼";
 export const size = ogSize;
 export const contentType = "image/png";
 

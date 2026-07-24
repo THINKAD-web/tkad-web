@@ -15,9 +15,9 @@ const historyData = [
     titleKo: "THINKAD 설립",
     titleEn: "THINKAD Founded",
     descriptionKo:
-      "주식회사 싱커드(THINKAD) 설립. OOH 전문 에이전시의 첫걸음을 내딛었습니다.",
+      "주식회사 싱커드(THINKAD) 설립. OOH 전문 기업의 첫걸음을 내딛었습니다.",
     descriptionEn:
-      "THINKAD Inc. was founded as 'The Thinking Ad Agency,' taking its first step as a specialized OOH agency.",
+      "THINKAD Inc. was founded, taking its first step as a specialized OOH company.",
   },
   {
     year: "2017",

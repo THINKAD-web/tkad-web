@@ -12,8 +12,8 @@ export async function generateMetadata({
   const isKo = locale === "ko";
   const title = isKo ? "연혁" : "History";
   const description = isKo
-    ? "2016년 설립 이후 싱커드(THINKAD)가 걸어온 OOH 광고 에이전시의 발자취와 주요 이정표."
-    : "Milestones since 2016—how THINKAD grew into Korea's OOH partner.";
+    ? "2016년 설립 이후 싱커드(THINKAD)가 걸어온 OOH 플랫폼의 발자취와 주요 이정표."
+    : "Milestones since 2016—how THINKAD grew into Korea's OOH platform.";
   const ogTitle = isKo
     ? "회사 연혁 | THINKAD 싱커드"
     : "Our history | THINKAD";
