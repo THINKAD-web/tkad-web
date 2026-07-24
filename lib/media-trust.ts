@@ -39,8 +39,8 @@ const BADGE_DEFS: Record<
   },
   instant_booking: {
     emoji: "⚡",
-    labelKo: "즉시 예약",
-    labelEn: "Instant book",
+    labelKo: "즉시 예약(안내)",
+    labelEn: "Instant book (info)",
   },
   verified_execution: {
     emoji: "✅",

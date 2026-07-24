@@ -465,7 +465,7 @@ function AiResultCard({
       : null;
   const availability =
     m.availability === "available"
-      ? { text: isKo ? "즉시 예약 가능" : "Available now", className: "bg-emerald-500 dark:text-white text-gray-900" }
+      ? { text: isKo ? "즉시 예약(안내)" : "Instant (info)", className: "bg-emerald-500 dark:text-white text-gray-900" }
       : m.availability === "reserved" || m.availability === "maintenance"
         ? { text: isKo ? "협의 필요" : "Check availability", className: "bg-slate-700 dark:text-white text-gray-900" }
         : null;

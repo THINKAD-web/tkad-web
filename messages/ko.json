@@ -613,10 +613,10 @@
     "quickInquiryFavorite": "찜하기 ♡",
     "quickInquiryCta": "빠른 문의",
     "availabilityLive": {
-      "badgeInstant": "즉시 예약 가능",
+      "badgeInstant": "즉시 예약(안내)",
       "badgePartial": "일부 가능",
       "badgeScarce": "마감 임박",
-      "filterInstant": "즉시 예약 가능",
+      "filterInstant": "즉시 예약(안내)",
       "scarcityEyebrow": "마감 임박",
       "scarcityTitle": "이번 달 마감 임박 매체",
       "scarcityDesc": "가용 슬롯이 20% 미만인 매체입니다. 빠른 문의로 일정을 확보하세요.",
@@ -3252,7 +3252,9 @@
       "estimatedCost": "{start}~{end} ({days}일) 예상 비용: {cost}",
       "ctaInquiryPeriod": "이 기간으로 문의",
       "ctaInstantBook": "즉시 예약",
-      "legendSelected": "선택됨"
+      "legendSelected": "선택됨",
+      "sparseTitle": "가용성 정보가 제한적입니다",
+      "sparseDesc": "이 매체는 아직 시스템에 쌓인 예약·계약 일정이 거의 없습니다. 캘린더가 비어 있어도 실제 재고와 다를 수 있으니, 최종 일정은 문의·견적으로 확인해 주세요."
     },
     "traffic": {
       "title": "시간대 · 요일 · 월별 유동인구",

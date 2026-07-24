@@ -33,6 +33,8 @@ type Props = {
   /** 카탈로그 price 필드 (원 또는 만원) */
   catalogPrice?: number;
   pricePeriod?: MediaPricePeriodKey | string | null;
+  /** MediaBooking 이력이 거의 없을 때 정직 안내 */
+  availabilitySparse?: boolean;
 };
 
 type BlockedRange = {
@@ -72,6 +74,7 @@ export function MediaAvailabilityCalendar({
   instantBookingEligible = false,
   catalogPrice = 0,
   pricePeriod = "month",
+  availabilitySparse = false,
 }: Props) {
   const locale = useLocale();
   const t = useTranslations("mediaDetail.availability");
@@ -344,6 +347,18 @@ export function MediaAvailabilityCalendar({
           </button>
         </div>
       </div>
+
+      {availabilitySparse ? (
+        <div
+          role="status"
+          className="mt-4 rounded-lg border border-amber-500/30 bg-amber-500/10 px-3 py-2.5 text-sm text-amber-950 dark:text-amber-100"
+        >
+          <p className="font-semibold tracking-tight">{t("sparseTitle")}</p>
+          <p className="mt-1 text-[13px] leading-snug opacity-90">
+            {t("sparseDesc")}
+          </p>
+        </div>
+      ) : null}
 
       <div className="mt-4 flex flex-wrap gap-2">
         <button

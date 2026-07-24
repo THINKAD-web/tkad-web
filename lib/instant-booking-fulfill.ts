@@ -4,8 +4,14 @@ import {
   getInstantBookingAdminEmail,
   getInstantBookingCustomerEmail,
 } from "@/lib/email/instant-booking-notify";
+import {
+  confirmInstantPaymentHold,
+  createInstantPaymentHold,
+  isInstantHoldConflictError,
+} from "@/lib/instant-booking-hold";
+import { findConflictingBookings } from "@/lib/booking-conflict";
 
-/** 결제 완료 후 MediaBooking 생성 + 상태 갱신 */
+/** 결제 완료 후 MediaBooking 생성/승격 + 상태 갱신 */
 export async function fulfillInstantBooking(
   bookingId: string,
   paymentId?: string,
@@ -28,22 +34,48 @@ export async function fulfillInstantBooking(
   const end = new Date(booking.endDate);
   end.setHours(23, 59, 59, 999);
 
-  const mediaBooking = await db.mediaBooking.create({
-    data: {
+  if (booking.mediaBookingId) {
+    await confirmInstantPaymentHold(db, booking.mediaBookingId, booking.id);
+  } else {
+    const conflicts = await findConflictingBookings(db, {
       mediaId: booking.mediaId,
-      title: `[즉시예약] ${booking.media.name}`,
       startsAt: start,
       endsAt: end,
-      status: "confirmed",
-      notes: `Instant booking ${booking.id}\nCreative: ${booking.creativeUrl}`,
-      requestedByUserId: booking.userId,
-      requesterName: booking.contactName,
-      requesterEmail: booking.contactEmail,
-      requesterPhone: booking.contactPhone,
-      budgetWon: booking.amount,
-      decidedAt: new Date(),
-    },
-  });
+    });
+    if (conflicts.length > 0) {
+      throw new Error("SELECTED_RANGE_CONFLICT");
+    }
+    try {
+      await createInstantPaymentHold(db, {
+        bookingId: booking.id,
+        mediaId: booking.mediaId,
+        mediaName: booking.media.name,
+        startsAt: start,
+        endsAt: end,
+        contactName: booking.contactName,
+        contactEmail: booking.contactEmail,
+        contactPhone: booking.contactPhone,
+        userId: booking.userId,
+        amount: booking.amount,
+      });
+      const refreshed = await db.booking.findUniqueOrThrow({
+        where: { id: bookingId },
+        select: { mediaBookingId: true },
+      });
+      if (refreshed.mediaBookingId) {
+        await confirmInstantPaymentHold(
+          db,
+          refreshed.mediaBookingId,
+          booking.id,
+        );
+      }
+    } catch (e) {
+      if (isInstantHoldConflictError(e)) {
+        throw new Error("SELECTED_RANGE_CONFLICT");
+      }
+      throw e;
+    }
+  }
 
   const updated = await db.booking.update({
     where: { id: bookingId },
@@ -51,7 +83,6 @@ export async function fulfillInstantBooking(
       status: "paid",
       paidAt: new Date(),
       paymentId: paymentId ?? undefined,
-      mediaBookingId: mediaBooking.id,
     },
     include: { media: { select: { id: true, name: true } } },
   });

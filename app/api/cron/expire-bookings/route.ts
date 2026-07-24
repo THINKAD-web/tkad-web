@@ -1,17 +1,19 @@
 /**
- * 예약 신청(requested) 자동 만료.
+ * 예약 신청(requested) 자동 만료 + 즉시예약 결제 홀드 TTL 만료.
  *
- * - status="requested" + createdAt 가 N일 이상 경과 → status="expired"
- * - 만료 기간: env BOOKING_REQUEST_EXPIRE_DAYS (기본 7일)
- * - 인증: `Authorization: Bearer ${CRON_SECRET}` (다른 cron 들과 동일 패턴)
+ * 1) status="requested" + createdAt 가 N일 이상 경과 → status="expired"
+ *    - 만료 기간: env BOOKING_REQUEST_EXPIRE_DAYS (기본 7일)
+ * 2) 즉시예약 payment_pending + tentative MediaBooking 홀드 (기본 30분 TTL)
  *
- * Vercel Cron 또는 외부 스케줄러에서 일 1회 호출 권장.
+ * 인증: `Authorization: Bearer ${CRON_SECRET}`
+ * Vercel Cron: 15분마다 (홀드 TTL 대응)
  */
 
 import { NextRequest } from "next/server";
 import { MediaBookingStatus } from "@prisma/client";
 import { json } from "@/lib/admin-guard";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { expireStaleInstantPaymentHolds } from "@/lib/instant-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -54,11 +56,14 @@ async function runExpire(request: NextRequest) {
     },
   });
 
+  const instantHolds = await expireStaleInstantPaymentHolds(db);
+
   return json({
     ok: true,
     expiredCount: result.count,
     cutoffIso: cutoff.toISOString(),
     expireDays: days,
+    instantPaymentHolds: instantHolds,
   });
 }
 

@@ -39,6 +39,8 @@ type Props = {
   regionDisplay: string;
   periodLabel: string;
   instantBookingEligible: boolean;
+  /** MediaBooking 이력 부족 시 캘린더 정직 안내 */
+  availabilitySparse?: boolean;
   labels: {
     back: string;
     priceTitle: string;
@@ -100,6 +102,7 @@ export function MediaDetailPageView({
   regionDisplay,
   periodLabel,
   instantBookingEligible,
+  availabilitySparse = false,
   labels,
   belowFold,
 }: Props) {
@@ -174,6 +177,7 @@ export function MediaDetailPageView({
                 instantBookingEligible={instantBookingEligible}
                 catalogPrice={media.price}
                 pricePeriod={media.pricePeriod}
+                availabilitySparse={availabilitySparse}
               />
             ),
             execution: (

@@ -5,6 +5,7 @@ import {
   BookingHoldConflictError,
   QuoteHoldDatesRequiredError,
   createHoldsForQuote,
+  ensureConfirmedHoldsForQuote,
   promoteHoldsToConfirmed,
   releaseHoldsForQuote,
   resolveQuoteHoldRange,
@@ -215,6 +216,26 @@ test("promoteHoldsToConfirmed: updates tentative → confirmed", async () => {
   const { db, updated } = mockDb({});
   const result = await promoteHoldsToConfirmed(db, "q1");
   assert.equal(result.updated, 1);
+  assert.deepEqual(updated[0], { status: MediaBookingStatus.confirmed });
+});
+
+test("ensureConfirmedHoldsForQuote: creates then promotes when empty", async () => {
+  const { db, created, updated } = mockDb({
+    existingCount: 0,
+    medias: [{ id: "m1", name: "Media 1" }],
+  });
+  const result = await ensureConfirmedHoldsForQuote(db, {
+    id: "q1",
+    clientName: "A",
+    mediaIds: ["m1"],
+    startDate: new Date("2026-08-01"),
+    endDate: new Date("2026-08-31"),
+    periodKey: "30days",
+    period: "30일",
+  });
+  assert.equal(result.created, 1);
+  assert.equal(result.promoted, 1);
+  assert.equal(created.length, 1);
   assert.deepEqual(updated[0], { status: MediaBookingStatus.confirmed });
 });
 

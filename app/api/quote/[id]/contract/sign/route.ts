@@ -21,6 +21,7 @@ import {
   isCloudinaryConfigured,
   uploadOohContractPdf,
 } from "@/lib/cloudinary-upload-contract";
+import { promoteHoldsToConfirmed } from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -195,6 +196,13 @@ export async function POST(
       contractPdfUrl,
     },
   });
+
+  // 전자서명 완료 시 가용 캘린더 홀드를 confirmed 로 승격 (SSOT)
+  try {
+    await promoteHoldsToConfirmed(db, id);
+  } catch (e) {
+    console.error("[contract sign] promote holds", e);
+  }
 
   void postInternalAlert({
     type: "ooh_contract_signed",

@@ -67,7 +67,7 @@ export function MediaTrustGradeBadges({
           )}
         >
           <Zap className={compact ? "h-3 w-3" : "h-3.5 w-3.5"} />
-          {isKo ? "즉시견적" : "Instant quote"}
+          {isKo ? "즉시예약(안내)" : "Instant (info)"}
         </span>
       ) : null}
     </div>

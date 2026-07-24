@@ -109,7 +109,7 @@ const MAIN_ICONS: Record<string, LucideIcon> = {
 };
 
 const FEATURE_CHIPS = [
-  { value: "instant_booking", labelKo: "즉시 예약", labelEn: "Instant book" },
+  { value: "instant_booking", labelKo: "즉시 예약(안내)", labelEn: "Instant book (info)" },
   { value: "network", labelKo: "네트워크", labelEn: "Network" },
   { value: "24h", labelKo: "24시간", labelEn: "24h" },
 ] as const;

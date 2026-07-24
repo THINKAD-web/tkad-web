@@ -9,7 +9,11 @@ import { getPrisma } from "@/lib/prisma";
 import { canAdminContractConfirm } from "@/lib/ooh-quote";
 import { sendEmail } from "@/lib/email/client";
 import { notifyCampaignConfirmed } from "@/lib/kakao-alimtalk-notify";
-import { promoteHoldsToConfirmed } from "@/lib/ooh-quote-booking-hold";
+import {
+  ensureConfirmedHoldsForQuote,
+  isBookingHoldConflictError,
+  isQuoteHoldDatesRequiredError,
+} from "@/lib/ooh-quote-booking-hold";
 
 export const dynamic = "force-dynamic";
 
@@ -52,26 +56,50 @@ export async function PATCH(
     },
   });
 
-  await db.$transaction(async (tx) => {
-    await tx.ooHQuote.update({
-      where: { id },
-      data: {
-        status: OoHQuoteStatus.contract_confirmed,
-        contractConfirmedAt: new Date(),
-        campaignId: campaign.id,
-      },
-    });
-    await promoteHoldsToConfirmed(tx, id);
-    await tx.oohContract.updateMany({
-      where: {
-        ooHQuoteId: id,
-        status: {
-          in: [OohContractStatus.signed, OohContractStatus.confirmed],
+  try {
+    await db.$transaction(async (tx) => {
+      // SSOT: 홀드가 없으면 생성 후 confirmed 승격 (booking_confirm 누락 보완)
+      await ensureConfirmedHoldsForQuote(tx, row);
+      await tx.ooHQuote.update({
+        where: { id },
+        data: {
+          status: OoHQuoteStatus.contract_confirmed,
+          contractConfirmedAt: new Date(),
+          campaignId: campaign.id,
         },
-      },
-      data: { status: OohContractStatus.confirmed },
+      });
+      await tx.oohContract.updateMany({
+        where: {
+          ooHQuoteId: id,
+          status: {
+            in: [OohContractStatus.signed, OohContractStatus.confirmed],
+          },
+        },
+        data: { status: OohContractStatus.confirmed },
+      });
     });
-  });
+  } catch (e) {
+    if (isQuoteHoldDatesRequiredError(e)) {
+      return json(
+        {
+          error: "계약 확정에 시작일(또는 기간)이 필요합니다.",
+          code: e.code,
+        },
+        409,
+      );
+    }
+    if (isBookingHoldConflictError(e)) {
+      return json(
+        {
+          error: e.message,
+          code: e.code,
+          conflicts: e.conflicts,
+        },
+        409,
+      );
+    }
+    throw e;
+  }
 
   const isKo = row.locale !== "en";
   try {

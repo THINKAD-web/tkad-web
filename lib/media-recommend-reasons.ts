@@ -22,8 +22,8 @@ const LABELS: Record<
     en: "Newly listed",
   },
   instant_booking: {
-    ko: "즉시 예약 가능",
-    en: "Instant booking available",
+    ko: "즉시 예약 안내",
+    en: "Instant book (info)",
   },
   personalized: {
     ko: "회원님 취향에 맞춤",

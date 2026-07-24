@@ -8,6 +8,10 @@ import {
 } from "@/lib/instant-booking-pricing";
 import { generateOrderId } from "@/lib/toss-payments";
 import { getCurrentUser } from "@/lib/user-session";
+import {
+  createInstantPaymentHold,
+  isInstantHoldConflictError,
+} from "@/lib/instant-booking-hold";
 
 export async function POST(request: Request) {
   try {
@@ -90,21 +94,6 @@ export async function POST(request: Request) {
 
     const amount = computeInstantBookingAmount(media, start, end);
 
-    const overlapping = await prisma.mediaBooking.findFirst({
-      where: {
-        mediaId,
-        status: { in: ["tentative", "confirmed"] },
-        startsAt: { lte: end },
-        endsAt: { gte: start },
-      },
-    });
-    if (overlapping) {
-      return NextResponse.json(
-        { error: "선택한 기간에 이미 예약이 있습니다." },
-        { status: 409 },
-      );
-    }
-
     const user = await getCurrentUser();
     if (user) {
       const { assertUserCanContactOrPay } = await import(
@@ -139,31 +128,60 @@ export async function POST(request: Request) {
       }
     }
 
-    const booking = await prisma.booking.create({
-      data: {
+    const startsAt = new Date(start);
+    startsAt.setHours(0, 0, 0, 0);
+    const endsAt = new Date(end);
+    endsAt.setHours(23, 59, 59, 999);
+
+    const booking = await prisma.$transaction(async (tx) => {
+      const created = await tx.booking.create({
+        data: {
+          mediaId,
+          userId: user?.id ?? null,
+          startDate: start,
+          endDate: end,
+          creativeUrl,
+          creativeType: body.creativeType?.trim() || null,
+          creativeId: linkedCreativeId,
+          playlistId: linkedPlaylistId,
+          amount,
+          status: "payment_pending",
+          orderId,
+          contactName,
+          contactEmail,
+          contactPhone: contactPhone || null,
+        },
+      });
+
+      await createInstantPaymentHold(tx, {
+        bookingId: created.id,
         mediaId,
-        userId: user?.id ?? null,
-        startDate: start,
-        endDate: end,
-        creativeUrl,
-        creativeType: body.creativeType?.trim() || null,
-        creativeId: linkedCreativeId,
-        playlistId: linkedPlaylistId,
-        amount,
-        status: "payment_pending",
-        orderId,
+        mediaName: media.name,
+        startsAt,
+        endsAt,
         contactName,
         contactEmail,
         contactPhone: contactPhone || null,
-      },
+        userId: user?.id ?? null,
+        amount,
+      });
+
+      return tx.booking.findUniqueOrThrow({ where: { id: created.id } });
     });
 
     return NextResponse.json({
       id: booking.id,
       orderId: booking.orderId,
       amount: booking.amount,
+      mediaBookingId: booking.mediaBookingId,
     });
   } catch (e) {
+    if (isInstantHoldConflictError(e)) {
+      return NextResponse.json(
+        { error: "선택한 기간에 이미 예약이 있습니다." },
+        { status: 409 },
+      );
+    }
     console.error("[instant-bookings POST]", e);
     return NextResponse.json(
       { error: "예약 생성에 실패했습니다." },

@@ -22,7 +22,7 @@ export type MediaMapActiveFilterChip = {
 };
 
 const FEATURE_LABELS: Record<string, { labelKo: string; labelEn: string }> = {
-  instant_booking: { labelKo: "즉시 예약", labelEn: "Instant book" },
+  instant_booking: { labelKo: "즉시 예약(안내)", labelEn: "Instant book (info)" },
   network: { labelKo: "네트워크", labelEn: "Network" },
   "24h": { labelKo: "24시간", labelEn: "24h" },
 };

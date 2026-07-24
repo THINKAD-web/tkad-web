@@ -82,6 +82,10 @@
       "schedule": "0 15 * * *"
     },
     {
+      "path": "/api/cron/expire-bookings",
+      "schedule": "*/15 * * * *"
+    },
+    {
       "path": "/api/cron/api-usage-alerts",
       "schedule": "0 2 * * *"
     },
