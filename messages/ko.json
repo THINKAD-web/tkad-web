@@ -134,6 +134,9 @@
     "faq": "FAQ",
     "quote": "견적 요청",
     "contact": "문의하기",
+    "thinkadDigital": "THINKAD Digital",
+    "thinkadDigitalDesc": "SNS·검색광고 패키지",
+    "thinkadDigitalExternal": "새 탭에서 THINKAD Digital 열기",
     "sidebarLabel": "사이트 메뉴",
     "planner": "미디어 플래너",
     "recommend": "AI 매체추천",
@@ -3403,6 +3406,20 @@
     "imagePreparing": "이미지 준비 중"
   },
   "homePage": {
+    "twoAxis": {
+      "eyebrow": "THINKAD",
+      "title": "옥외와 디지털, 한곳에서",
+      "subtitle": "매체 특성에 맞는 축을 고르고 바로 시작하세요.",
+      "oohTitle": "옥외광고",
+      "oohBadge": "이 사이트 · OOH",
+      "oohDesc": "전광판·지하철·버스 등 전국 OOH 매체를 비교하고 견적까지 이어갑니다.",
+      "oohCta": "매체 둘러보기",
+      "digitalTitle": "디지털 마케팅",
+      "digitalBadge": "THINKAD Digital",
+      "digitalDesc": "SNS·검색광고 패키지와 캠페인별 맞춤 견적을 진행합니다.",
+      "digitalCta": "THINKAD Digital",
+      "digitalCtaExternal": "새 탭에서 THINKAD Digital 열기"
+    },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "광고, 한 곳에서 끝내세요",
     "heroLiveToday": "오늘 누적 노출",

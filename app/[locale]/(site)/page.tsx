@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
+import { HomeTwoAxis } from "@/components/home/home-two-axis";
 import { HomeExploreSplit } from "@/components/home/home-explore-split";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
@@ -66,6 +67,8 @@ export default async function HomePage({
         {homePageSrOnlyH1(locale, verifiedMediaLabel)}
       </h1>
       <HomeHeroBanner />
+
+      <HomeTwoAxis />
 
       <HomeExploreSplit />
 
