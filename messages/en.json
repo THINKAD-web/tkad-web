@@ -2240,7 +2240,15 @@
     "reportDesc": "PDF with OOH plan, digital linkage, synergy impact, and integrated budget table.",
     "downloadPdf": "Download integrated proposal PDF",
     "pdfDownloaded": "PDF downloaded.",
-    "pdfFailed": "PDF generation failed."
+    "pdfFailed": "PDF generation failed.",
+    "thinkadDigitalCardAria": "THINKAD Digital package info",
+    "thinkadDigitalCardEyebrow": "Also consider",
+    "thinkadDigitalCardTitle": "THINKAD Digital packages",
+    "thinkadDigitalCardDesc": "Managed monthly SNS + search retainers. Separate from the CPC/CPM channel recommendations above — not included in this plan’s digital budget split.",
+    "thinkadDigitalPerMonth": "/mo",
+    "thinkadDigitalCardNote": "List prices · request a custom quote if you need a tailored plan.",
+    "thinkadDigitalPricingCta": "View packages & pricing",
+    "thinkadDigitalContactCta": "Inquire first"
   },
   "footer": {
     "description": "The Thinking Ad Agency, THINKAD",

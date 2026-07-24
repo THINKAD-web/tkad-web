@@ -23,6 +23,7 @@ import {
   PlannerNeonLabel,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
+import { ThinkadDigitalPackageCard } from "@/components/planner/integrated/thinkad-digital-package-card";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -228,7 +229,10 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
           </button>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3">
+        <div
+          data-testid="integrated-digital-channel-grid"
+          className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3"
+        >
           {DIGITAL_CHANNELS.map((channel) => (
             <PlatformCard
               key={channel.id}
@@ -241,6 +245,9 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
           ))}
         </div>
       </PlannerNeonCard>
+
+      {/* Cross-sell only — outside DIGITAL_CHANNELS / budget / scoring */}
+      <ThinkadDigitalPackageCard />
     </div>
   );
 }
