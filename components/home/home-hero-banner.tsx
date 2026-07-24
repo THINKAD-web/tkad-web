@@ -11,15 +11,18 @@ const EXPLORE_SECTION_ID = "home-explore";
 type HeroSlide = {
   id: string;
   image: string;
+  /** 이미지 alt / 스크린리더용 — 비주얼 카피는 WebP에 구워져 있음 */
   titleKo: string;
   titleEn: string;
-  subtitleKo: string;
-  subtitleEn: string;
 };
 
 /**
  * 828px WebP sources (public/images/hero).
  * Optimizer로 고해상도 버킷(최대 ~3840w)을 요청하지 않도록 unoptimized + sizes 상한.
+ *
+ * hero-slide*.webp 에 타이틀·서브카피·하단 UI가 이미 합성되어 있으므로
+ * 캐러셀 프레임 안에는 이미지+도트만 두고, 브랜드 슬로건/CTA는 프레임 바깥에 둔다.
+ * (슬로건 오버레이가 WebP 카피와 겹치던 회귀 방지)
  */
 const HERO_SOURCE_WIDTH_PX = 828;
 
@@ -29,16 +32,12 @@ const SLIDES: HeroSlide[] = [
     image: "/images/hero/hero-slide1-828.webp",
     titleKo: "OOH 단가, 한눈에 비교",
     titleEn: "Compare OOH rates at a glance",
-    subtitleKo: "아래에서 매체 검색·AI 추천 중 원하는 방식으로 시작하세요.",
-    subtitleEn: "Search media or get AI picks — choose your path below.",
   },
   {
     id: "planner",
     image: "/images/hero/hero-slide2-828.webp",
     titleKo: "AI로 캠페인 설계",
     titleEn: "Plan campaigns with AI",
-    subtitleKo: "지역·예산·타깃을 입력하면 순위·지도·견적까지 한 번에.",
-    subtitleEn: "Enter region, budget, and audience for ranked picks and quotes.",
   },
 ];
 
@@ -72,94 +71,85 @@ export function HomeHeroBanner() {
     return () => clearInterval(timer);
   }, [next]);
 
-  const slide = SLIDES[current];
-  const title = isKo ? slide.titleKo : slide.titleEn;
-  const subtitle = isKo ? slide.subtitleKo : slide.subtitleEn;
   const ctaLabel = isKo ? "아래에서 시작하기" : "Get started below";
   const slogan = t("heroBannerSlogan");
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
-      <div
-        className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10"
-        role="region"
-        aria-roledescription="carousel"
-        aria-label={isKo ? "프로모션" : "Promotions"}
-      >
-        {SLIDES.map((s, i) => {
-          const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
-          const alt = isKo ? s.titleKo : s.titleEn;
-          const isFirst = i === 0;
-          return (
-            <div
-              key={s.id}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-700",
-                i === current ? "opacity-100" : "opacity-0",
-              )}
-              aria-hidden={i !== current}
-            >
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover object-center"
-                priority={isFirst}
-                loading={isFirst ? "eager" : "lazy"}
-                sizes={`(max-width: ${HERO_SOURCE_WIDTH_PX}px) 100vw, ${HERO_SOURCE_WIDTH_PX}px`}
-                unoptimized
-              />
-            </div>
-          );
-        })}
-
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%] rounded-b-lg bg-gradient-to-t from-black/75 via-black/35 to-transparent"
-        />
-
-        <div className="absolute inset-x-0 bottom-10 z-20 px-5 text-center md:bottom-12 md:px-8">
-          <p className="text-balance text-2xl font-black leading-tight tracking-tight text-white drop-shadow-sm md:text-5xl">
+      <div className="mx-auto w-full max-w-5xl">
+        <div className="mb-3 text-center md:mb-4">
+          <p className="text-balance text-2xl font-black tracking-tight text-gray-900 dark:text-white md:text-4xl">
             {slogan}
-          </p>
-          <p className="mt-2 text-lg font-bold tracking-tight text-white/95 drop-shadow-sm md:text-2xl">
-            {title}
-          </p>
-          <p className="mx-auto mt-1.5 max-w-md text-sm leading-snug text-white/90 md:text-base">
-            {subtitle}
           </p>
           <button
             type="button"
             onClick={scrollToExplore}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:text-base"
+            className="mt-2.5 inline-flex items-center gap-1.5 rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-hermes/40 dark:border-white/20 dark:bg-white/10 dark:text-white dark:hover:bg-white/15 md:mt-3 md:text-base"
           >
             {ctaLabel}
             <span aria-hidden>↓</span>
           </button>
         </div>
 
-        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
-          {SLIDES.map((s, i) => (
-            <button
-              key={s.id}
-              type="button"
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                goTo(i);
-              }}
-              className={cn(
-                "rounded-full transition-all duration-300",
-                i === current
-                  ? "h-1.5 w-6 bg-hermes shadow-sm"
-                  : "h-1.5 w-1.5 bg-gray-400/80 hover:bg-gray-500 dark:bg-white/50 dark:hover:bg-white/70",
-              )}
-              aria-label={
-                isKo ? `${i + 1}번째 배너` : `Banner ${i + 1}`
-              }
-              aria-current={i === current ? "true" : undefined}
-            />
-          ))}
+        <div
+          className="relative aspect-video w-full overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10"
+          role="region"
+          aria-roledescription="carousel"
+          aria-label={isKo ? "프로모션" : "Promotions"}
+        >
+          {SLIDES.map((s, i) => {
+            const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
+            const alt = isKo ? s.titleKo : s.titleEn;
+            const isFirst = i === 0;
+            const active = i === current;
+            return (
+              <div
+                key={s.id}
+                className={cn(
+                  "absolute inset-0 transition-opacity duration-700",
+                  active
+                    ? "z-[1] opacity-100"
+                    : "pointer-events-none z-0 opacity-0",
+                )}
+                aria-hidden={!active}
+              >
+                <Image
+                  src={src}
+                  alt={alt}
+                  fill
+                  className="object-cover object-center"
+                  priority={isFirst}
+                  loading={isFirst ? "eager" : "lazy"}
+                  sizes={`(max-width: ${HERO_SOURCE_WIDTH_PX}px) 100vw, ${HERO_SOURCE_WIDTH_PX}px`}
+                  unoptimized
+                />
+              </div>
+            );
+          })}
+
+          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
+            {SLIDES.map((s, i) => (
+              <button
+                key={s.id}
+                type="button"
+                onClick={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  goTo(i);
+                }}
+                className={cn(
+                  "rounded-full transition-all duration-300",
+                  i === current
+                    ? "h-1.5 w-6 bg-hermes shadow-sm"
+                    : "h-1.5 w-1.5 bg-white/80 hover:bg-white",
+                )}
+                aria-label={
+                  isKo ? `${i + 1}번째 배너` : `Banner ${i + 1}`
+                }
+                aria-current={i === current ? "true" : undefined}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </div>
