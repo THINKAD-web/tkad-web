@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 
@@ -49,9 +49,15 @@ function scrollToExplore() {
   });
 }
 
-export function HomeHeroBanner() {
+type Props = {
+  /** SEO H1 — 시각적으로는 슬로건보다 보조, DOM에서는 그대로 노출 */
+  seoHeading: string;
+};
+
+export function HomeHeroBanner({ seoHeading }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const t = useTranslations("homePage");
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -75,6 +81,7 @@ export function HomeHeroBanner() {
   const title = isKo ? slide.titleKo : slide.titleEn;
   const subtitle = isKo ? slide.subtitleKo : slide.subtitleEn;
   const ctaLabel = isKo ? "아래에서 시작하기" : "Get started below";
+  const slogan = t("heroBannerSlogan");
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
@@ -113,27 +120,33 @@ export function HomeHeroBanner() {
 
         <div
           aria-hidden
-          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[55%] rounded-b-lg bg-gradient-to-t from-black/75 via-black/35 to-transparent"
+          className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-[65%] rounded-b-lg bg-gradient-to-t from-black/80 via-black/40 to-transparent"
         />
 
-        <div className="absolute inset-x-0 bottom-10 z-20 px-5 text-center md:bottom-12 md:px-8">
-          <p className="text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-4xl">
+        <div className="absolute inset-x-0 bottom-9 z-20 px-4 text-center sm:bottom-10 sm:px-5 md:bottom-12 md:px-8">
+          <p className="text-balance text-[1.65rem] font-black leading-tight tracking-tight text-white drop-shadow-sm sm:text-3xl md:text-5xl">
+            {slogan}
+          </p>
+          <h1 className="mx-auto mt-1.5 max-w-2xl text-balance text-xs font-medium leading-snug text-white/85 sm:mt-2 sm:text-sm md:text-base">
+            {seoHeading}
+          </h1>
+          <p className="mt-2.5 text-base font-bold tracking-tight text-white/95 drop-shadow-sm sm:mt-3 sm:text-lg md:text-2xl">
             {title}
           </p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-snug text-white/90 md:text-base">
+          <p className="mx-auto mt-1 max-w-md text-xs leading-snug text-white/85 sm:mt-1.5 sm:text-sm md:text-base">
             {subtitle}
           </p>
           <button
             type="button"
             onClick={scrollToExplore}
-            className="mt-4 inline-flex items-center gap-1.5 rounded-md border border-white/25 bg-white/15 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:text-base"
+            className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/25 bg-white/15 px-3.5 py-1.5 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 sm:mt-4 sm:px-4 sm:py-2 md:text-base"
           >
             {ctaLabel}
             <span aria-hidden>↓</span>
           </button>
         </div>
 
-        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
+        <div className="absolute bottom-2.5 left-1/2 z-20 flex -translate-x-1/2 gap-2 sm:bottom-3 md:bottom-4">
           {SLIDES.map((s, i) => (
             <button
               key={s.id}
