@@ -4,7 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, ChevronDown, Menu, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, Menu, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeaderDesktopChrome } from "@/components/header-desktop-chrome";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
@@ -15,6 +15,7 @@ import {
   type ResolvedPublicNavGroup,
   type ResolvedPublicNavItem,
 } from "@/lib/navigation/build-public-nav";
+import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 
 function isMobileDetailPath(pathname: string): boolean {
   return (
@@ -283,6 +284,16 @@ export function DesktopGlobalNav() {
                 </NavDropdown>
               );
             })}
+            <a
+              href={THINKAD_DIGITAL_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={navItemClass(false, false)}
+              aria-label={t("nav.thinkadDigitalExternal")}
+            >
+              {t("nav.thinkadDigital")}
+              <ExternalLink className="h-3 w-3 opacity-55" aria-hidden />
+            </a>
           </nav>
 
           <div className="relative z-10 ml-auto shrink-0">

@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, usePathname } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { ChevronDown, MessageSquare } from "lucide-react";
+import { ChevronDown, ExternalLink, MessageSquare, MonitorSmartphone } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { ResolvedPublicNavGroup } from "@/lib/navigation/build-public-nav";
 import { findActiveNavGroupId } from "@/lib/navigation/build-public-nav";
@@ -14,6 +14,7 @@ import {
   MOBILE_DEMOTED_NAV_GROUP_IDS,
   MOBILE_PRIMARY_NAV_GROUP_IDS,
 } from "@/lib/navigation/public-nav-data";
+import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { NavBetaBadge } from "@/components/navigation/nav-beta-badge";
 
 function defaultMobileOpenIds(activeGroupId: string | null): Set<string> {
@@ -98,7 +99,7 @@ export function PublicNavSidebar({
       )}
       aria-label="Main navigation"
     >
-      <div className="border-b border-gray-200/80 px-5 py-3 dark:border-white/10">
+      <div className="space-y-1 border-b border-gray-200/80 px-5 py-3 dark:border-white/10">
         <Link
           href="/contact"
           onClick={onNavigate}
@@ -123,6 +124,27 @@ export function PublicNavSidebar({
             {t("contact")}
           </span>
         </Link>
+        <a
+          href={THINKAD_DIGITAL_URL}
+          target="_blank"
+          rel="noopener noreferrer"
+          onClick={onNavigate}
+          className="flex min-h-12 items-center gap-3 text-gray-900 transition-colors hover:text-gray-950 dark:text-white dark:hover:text-white"
+          aria-label={t("thinkadDigitalExternal")}
+        >
+          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70">
+            <MonitorSmartphone className="h-4 w-4" aria-hidden />
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-center gap-2 text-xl font-semibold leading-snug tracking-tight">
+              {t("thinkadDigital")}
+              <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-50" aria-hidden />
+            </span>
+            <span className="mt-0.5 block text-xs text-gray-400 dark:text-white/40">
+              {t("thinkadDigitalDesc")}
+            </span>
+          </span>
+        </a>
       </div>
       <ul className="flex flex-col divide-y divide-gray-200/80 dark:divide-white/10">
         {groups.map((group) => {
