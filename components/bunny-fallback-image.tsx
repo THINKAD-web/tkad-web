@@ -15,7 +15,8 @@ type Props = Omit<ImageProps, "src" | "onError" | "unoptimized"> & {
 };
 
 /**
- * Bunny CDN 직링크 표시 + 로드 실패 시 /api/bunny-media 프록시로 1회 재시도.
+ * Bunny CDN 직링크 표시 + 로드 실패 시 /api/bunny-media 로 1회 재시도
+ * (스토리지 miss 시 해당 라우트가 CDN으로 302 — Origin 바이트 프록시 없음).
  */
 export function BunnyFallbackImage({
   rawSrc,

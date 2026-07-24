@@ -77,7 +77,8 @@ import { formatSizeDisplayOptional } from "@/lib/format-media-size";
 
 type Props = { params: Promise<{ locale: string; slug: string }> };
 
-export const revalidate = 3600;
+/** 일 1회 ISR. 어드민 저장 시 revalidateMediaCaches로 즉시 반영. */
+export const revalidate = 86400;
 export const dynamicParams = true;
 export const maxDuration = 60;
 
@@ -88,14 +89,14 @@ export const maxDuration = 60;
  * 최대 60s+). Vercel 은 cpus=1 로 직렬 생성하므로, 기본값을 과도하게 잡으면
  * 45분 빌드 한도를 넘길 수 있다. 따라서 기본은 build-safe 한 소수(24)로 두고,
  * 빌드 여유가 확인되면 `MEDIA_STATIC_BUILD_LIMIT`(예: 50~100)로 상향한다.
- * 0 으로 두면 사전 생성 없이 전량 on-demand ISR(revalidate=3600).
+ * 0 으로 두면 사전 생성 없이 전량 on-demand ISR(revalidate=86400).
  */
 const MEDIA_DETAIL_STATIC_TOP_N = 24;
 
 export async function generateStaticParams() {
   const envLimit = Number(process.env.MEDIA_STATIC_BUILD_LIMIT ?? 0);
   const onVercel = deferCatalogLandingStaticGeneration();
-  // Vercel: 인기 상위 N개만 사전 생성(warm) + 나머지는 on-demand ISR(revalidate=3600).
+  // Vercel: 인기 상위 N개만 사전 생성(warm) + 나머지는 on-demand ISR(revalidate=86400).
   // 로컬/CI(비 Vercel): 전량 사전 생성(기존 동작 유지).
   const slugLimit = onVercel
     ? envLimit > 0

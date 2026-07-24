@@ -31,8 +31,11 @@ import {
 } from "@/lib/trust-metrics";
 import "../globals.css";
 
-/** ISR: marketing subtree; admin/client opt out via their own layouts. */
-export const revalidate = 3600;
+/**
+ * 전역 revalidate 없음 — ISR Write 파도 방지.
+ * 홈·목록·상세 등 필요한 페이지에만 개별 revalidate 설정.
+ * 매체 수정 시 어드민이 revalidateMediaCaches()로 on-demand 무효화.
+ */
 
 type Props = {
   children: React.ReactNode;

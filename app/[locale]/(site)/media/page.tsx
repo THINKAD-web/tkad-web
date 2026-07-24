@@ -8,7 +8,7 @@ import type { MediaCatalogSort } from "@/lib/media-catalog-types";
 import { mapMediaItemToHomeCatalog } from "@/lib/media-catalog-map";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
-export const revalidate = 1800;
+export const revalidate = 3600;
 
 type Props = {
   params: Promise<{ locale: string }>;

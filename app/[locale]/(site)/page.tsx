@@ -15,7 +15,7 @@ import {
   homePageSrOnlyH1,
 } from "@/lib/trust-metrics";
 
-export const revalidate = 1800;
+export const revalidate = 3600;
 
 export async function generateMetadata({
   params,

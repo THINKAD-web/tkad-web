@@ -9,8 +9,8 @@ const MEDIA_CACHE_LOCALES = ["ko", "en"] as const;
  *   상세 경로는 리터럴 path 이므로 Route Handler 에서 호출 시 "그 페이지 1개"만
  *   stale 처리되고 다음 방문 때 갱신된다(즉시 반영 보장, wave 없음).
  * - 의도적으로 `/planner`·`/quote`·`/compare` 는 건드리지 않는다. 이들은
- *   revalidate=3600 사용자 도구로 매체별 최신성이 필요 없고, 매 편집마다
- *   무효화하면 ISR write wave 를 만든다(ISR Writes 진단 참조).
+ *   revalidate=86400 상세/목록은 어드민 편집 시에만 여기서 무효화한다.
+ *   planner·quote·compare 까지 매 편집마다 건드리면 ISR write wave 가 난다.
  */
 export function revalidateMediaCaches(ref: {
   id: string;

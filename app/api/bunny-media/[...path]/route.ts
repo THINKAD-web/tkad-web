@@ -108,24 +108,15 @@ export async function GET(
     return new NextResponse(`Storage ${upstream.status}`, { status: 502 });
   }
 
+  /**
+   * Storage miss 시 CDN 바이트를 Origin이 다시 받아 프록시하지 않음
+   * (Fast Origin Transfer 절감). 브라우저가 Bunny CDN으로 직접 가도록 302.
+   * CDN URL이 없으면 404 — Vercel이 이미지 본문을 중계하지 않음.
+   */
   const cdnUrl = buildBunnyCdnUrl(objectPath);
   if (!cdnUrl) {
     return new NextResponse("Storage 404", { status: 404 });
   }
 
-  let cdnRes: Response;
-  try {
-    cdnRes = await fetchWithTimeout(cdnUrl, { cache: "no-store" });
-  } catch (e) {
-    const msg = e instanceof Error ? e.message : String(e);
-    return new NextResponse(`CDN fetch failed: ${msg}`, { status: 502 });
-  }
-
-  if (!cdnRes.ok) {
-    return new NextResponse(`CDN ${cdnRes.status}`, {
-      status: cdnRes.status === 404 ? 404 : 502,
-    });
-  }
-
-  return imageResponseFromUpstream(cdnRes);
+  return NextResponse.redirect(cdnUrl, 302);
 }
