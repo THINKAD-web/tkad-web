@@ -48,6 +48,10 @@ type CampaignItem = {
   endDate: string | null;
   mediaNames: string[];
   impressionsTotal: number;
+  proofThumbUrl?: string | null;
+  proofCount?: number;
+  latestProofAt?: string | null;
+  reportReady?: boolean;
 };
 
 type PlannerPlanItem = {
@@ -324,9 +328,9 @@ export function MyHubPageClient() {
                       endDate: c.endDate,
                       mediaNames: c.mediaNames,
                       impressionsTotal: c.impressionsTotal,
-                      proofThumbUrl: null,
-                      proofCount: 0,
-                      latestProofAt: null,
+                      proofThumbUrl: c.proofThumbUrl ?? null,
+                      proofCount: c.proofCount ?? 0,
+                      latestProofAt: c.latestProofAt ?? null,
                     }}
                     isKo={isKo}
                   />

@@ -238,10 +238,7 @@ export async function fetchAdvertiserCampaignDetail(
       createdAt: p.createdAt.toISOString(),
     })),
     mapPins: pins,
-    reportReady:
-      Boolean(c.reportGeneratedAt) ||
-      c.status === "completed" ||
-      c.proofPhotos.length > 0,
+    reportReady: Boolean(c.reportGeneratedAt),
     reportGeneratedAt: c.reportGeneratedAt?.toISOString() ?? null,
     mediaBookings: c.mediaBookings.map((b) => ({
       id: b.id,
@@ -329,7 +326,7 @@ export async function fetchAdvertiserNotifications(
         items.push({
           id: `report-${c.id}`,
           type: "report_ready",
-          title: "성과 보고서가 준비되었습니다",
+          title: "성과 보고서가 준비띘었습니다",
           body: c.name,
           campaignId: c.id,
           createdAt: c.reportGeneratedAt.toISOString(),
@@ -378,10 +375,10 @@ export async function fetchAdvertiserInquiries(email: string) {
       id: q.id,
       kind: "quote" as const,
       date: q.createdAt.toISOString(),
-      title: `견적 (${q.mediaIds.length}개 매체)`,
+      title: `견젝 (${q.mediaIds.length}개 매체)`,
       body: q.totalAmount
-        ? `${q.totalAmount.toLocaleString("ko-KR")}원`
-        : "견적 진행 중",
+        ? `${q.totalAmount.toLocaleString("ko-KR")}웝`
+        : "견젝 진행 중",
       status: q.status,
     })),
   ].sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
