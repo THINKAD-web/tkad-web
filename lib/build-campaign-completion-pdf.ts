@@ -9,6 +9,11 @@ import {
   computeCampaignTotalAmount,
   type CampaignKpiBooking,
 } from "@/lib/campaign-kpis";
+import {
+  computeCampaignPredictionVariance,
+  formatImpressionsCompact,
+  formatVariancePct,
+} from "@/lib/prediction-accuracy";
 
 export type CompletionPdfSchedule = {
   title: string;
@@ -39,6 +44,7 @@ export type CompletionPdfMediaBooking = {
   status: string;
   /** KPI 산출용 (선택) */
   dailyFootTraffic?: number | null;
+  impressions?: number | null;
   region?: string | null;
 };
 
@@ -368,6 +374,7 @@ function drawExecutiveSummary(
     startsAt: b.startsAt,
     endsAt: b.endsAt,
     dailyFootTraffic: b.dailyFootTraffic ?? null,
+    impressions: b.impressions ?? null,
     type: b.type,
     region: b.region ?? null,
     location: b.location,
@@ -375,6 +382,10 @@ function drawExecutiveSummary(
   const stats = computeCampaignBaseStats(kpiBookings);
   const totalAmount = computeCampaignTotalAmount(p.financialDocs);
   const plannerKpis = computeCampaignPlannerKpis(stats, totalAmount);
+  const variance = computeCampaignPredictionVariance(
+    kpiBookings,
+    p.proofPhotos?.length ?? 0,
+  );
 
   // 한 줄 요약 (템플릿 — AI X)
   let y = 38;
@@ -389,7 +400,57 @@ function drawExecutiveSummary(
     doc.text(line, MARGIN_X, y);
     y += 8;
   }
-  y += 8;
+  y += 4;
+
+  // 예측 vs 검증된 추정치 (prediction-accuracy — 계약 스냅샷 없음, 생성 시 재계산)
+  if (variance) {
+    const note =
+      "플래너와 동일 기준(유동×인지율 0.4)으로 리포트 생성 시점에 재계산합니다. 계약 시점 예측 스냅샷은 별도 저장되지 않으며, 센서 절대 실측이 아닌 검증된 추정치입니다." +
+      (variance.hasProofData
+        ? " 인증 사진 반영(+1.5~3%)."
+        : " 인증 사진 없음 — 보정 미적용.");
+    const noteLines = doc.splitTextToSize(note, CONTENT_W - 8) as string[];
+    const boxH = 28 + Math.min(noteLines.length, 3) * 4;
+    setColor(doc, "fill", C_OFF);
+    doc.rect(MARGIN_X, y, CONTENT_W, boxH, "F");
+    setColor(doc, "draw", C_BLACK);
+    doc.setLineWidth(0.5);
+    doc.rect(MARGIN_X, y, CONTENT_W, boxH, "S");
+    monoLabel(
+      doc,
+      fam,
+      "예측 vs 검증된 추정치",
+      MARGIN_X + 4,
+      y + 7,
+      7,
+      C_ACCENT,
+    );
+    doc.setFont(fam, hasKrFont ? "normal" : "bold");
+    doc.setFontSize(9);
+    setColor(doc, "text", C_BLACK);
+    const predL = `예측 노출 ${formatImpressionsCompact(variance.predictedImpressions, "ko")}회`;
+    const verL = `검증된 추정치 ${formatImpressionsCompact(variance.actualImpressions, "ko")}회 (${formatVariancePct(variance.variancePct, "ko")})`;
+    doc.text(predL, MARGIN_X + 4, y + 16);
+    doc.text(verL, MARGIN_X + 4, y + 23);
+    doc.setFontSize(7);
+    setColor(doc, "text", C_GRAY);
+    let ny = y + 30;
+    for (const line of noteLines.slice(0, 3)) {
+      doc.text(line, MARGIN_X + 4, ny);
+      ny += 4;
+    }
+    y += boxH + 4;
+  } else {
+    doc.setFontSize(8);
+    setColor(doc, "text", C_GRAY);
+    doc.text(
+      "예측/검증된 추정치: 유동 데이터 부족으로 산출 불가",
+      MARGIN_X,
+      y + 4,
+    );
+    y += 10;
+  }
+  y += 4;
 
   // KPI 그리드 (8개)
   const kpiCardH = 32;

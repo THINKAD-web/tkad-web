@@ -14,9 +14,11 @@ export type PlatformPredictionAccuracy = {
 };
 
 export type PredictionVariance = {
+  /** 플래너형 예측 (유동 × 0.4) — 리포트 생성 시점 재계산 */
   predictedImpressions: number;
+  /** 검증된 추정치 (유동/impressions + 사진 보정). 센서 실측 아님 */
   actualImpressions: number;
-  /** (actual - predicted) / predicted × 100 */
+  /** (verified - predicted) / predicted × 100 */
   variancePct: number;
   hasProofData: boolean;
 };
@@ -48,8 +50,8 @@ export function computePredictedImpressionsFromBookings(
 }
 
 /**
- * 집행 후 실측 노출 — DB impressions·유동 기반 + 인증 사진 보정.
- * 인증 사진이 있을수록 현장 실측에 가깝게 보정합니다.
+ * 집행 후 검증된 추정치 — DB impressions·유동 기반 + 인증 사진 보정.
+ * 센서 절대 실측이 아님. 사진이 있으면 소폭(+1.5~3%) 보정.
  */
 export function computeActualImpressionsFromBookings(
   bookings: CampaignKpiBooking[] | null | undefined,

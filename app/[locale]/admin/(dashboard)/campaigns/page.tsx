@@ -592,8 +592,15 @@ export default function AdminCampaignsPage() {
     }
   };
 
-  const downloadAiCompletionPdf = async () => {
+  const issueAndSendCompletionReport = async () => {
     if (!selectedId) return;
+    if (
+      !window.confirm(
+        "결과 리포트를 생성하고 고객 이메일로 발송할까요?\n(PDF 생성 · reportGeneratedAt 기록 · 상태 completed)",
+      )
+    ) {
+      return;
+    }
     setPdfBusy(true);
     try {
       const res = await fetch(
@@ -601,42 +608,32 @@ export default function AdminCampaignsPage() {
         {
           method: "POST",
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ force: true }),
         },
       );
+      const j = (await res.json().catch(() => ({}))) as {
+        error?: string;
+        emailed?: boolean;
+        reportGeneratedAt?: string | null;
+        skipped?: boolean;
+        reason?: string | null;
+      };
       if (!res.ok) {
-        const j = (await res.json().catch(() => ({}))) as { error?: string };
-        const hint =
-          res.status === 503
-            ? "\n(서버에 ANTHROPIC_API_KEY 가 설정되어 있지 않습니다. Vercel 환경변수를 확인해주세요.)"
-            : "";
-        window.alert(`${j.error ?? "PDF 생성 실패"}${hint}`);
+        window.alert(j.error ?? "리포트 생성·발송 실패");
         return;
       }
-      const blob = await res.blob();
-      const cd = res.headers.get("Content-Disposition");
-      // #5: RFC 5987 filename*=UTF-8'' 우선 (한글 파일명), 없으면 ASCII fallback
-      let name = "THINKAD-OOH-Report.pdf";
-      const utf8Match = cd?.match(/filename\*=UTF-8''([^;]+)/i);
-      if (utf8Match?.[1]) {
-        try {
-          name = decodeURIComponent(utf8Match[1].trim());
-        } catch {
-          /* fall through */
-        }
-      } else {
-        const asciiMatch = cd?.match(/filename="([^"]+)"/);
-        if (asciiMatch?.[1]) name = asciiMatch[1];
-      }
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = name;
-      a.click();
-      URL.revokeObjectURL(url);
-    } catch (e) {
-      console.error("[admin/campaigns] AI PDF fetch failed", e);
+      const mailHint = j.emailed
+        ? "이메일 발송 완료"
+        : "이메일은 미발송(주소/설정 확인)";
       window.alert(
-        `PDF 생성 중 네트워크 오류가 발생했습니다.\n${e instanceof Error ? e.message : String(e)}`,
+        `리포트 발행 완료.\n${mailHint}\nreportGeneratedAt: ${j.reportGeneratedAt ?? "—"}`,
+      );
+      await load();
+    } catch (e) {
+      console.error("[admin/campaigns] issue report failed", e);
+      window.alert(
+        `리포트 생성 중 네트워크 오류가 발생했습니다.\n${e instanceof Error ? e.message : String(e)}`,
       );
     } finally {
       setPdfBusy(false);
@@ -1118,9 +1115,18 @@ export default function AdminCampaignsPage() {
                       <FileText className="h-3.5 w-3.5" />
                       간단 PDF
                     </a>
+                    <button
+                      type="button"
+                      disabled={pdfBusy}
+                      onClick={() => void issueAndSendCompletionReport()}
+                      className="-ml-[2px] inline-flex items-center justify-center gap-1.5 border-2 border-bx-black bg-bx-accent px-4 py-2 font-mono text-[11px] font-bold uppercase tracking-[0.18em] text-bx-black transition-colors hover:bg-bx-black hover:text-bx-white disabled:opacity-50"
+                    >
+                      <FileText className="h-3.5 w-3.5" />
+                      {pdfBusy ? "처리 중…" : "리포트 생성·발송"}
+                    </button>
                   </div>
                   <p className="font-mono text-[10px] tracking-tight text-bx-gray-dim">
-                    {`// `}보고서 미리보기(웹) / 간단 PDF(서버) 를 제공합니다.
+                    {`// `}미리보기 / 간단 PDF / 생성·발송(이메일 + reportGeneratedAt + completed)
                   </p>
                 </div>
 
