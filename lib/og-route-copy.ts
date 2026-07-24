@@ -11,7 +11,7 @@ const routes = {
   home: {
     ko: {
       badge: "Korea's #1 OOH Ad Agency",
-      title: "생각하는 광고회사, 싱커드",
+      title: "THINKAD",
       subtitle: "전국 {count} 검증된 옥외광고 매체 · 데이터 기반 캠페인 컨설팅",
     },
     en: {
@@ -23,7 +23,7 @@ const routes = {
   about: {
     ko: {
       badge: "About THINKAD",
-      title: "생각하는 광고회사, 싱커드",
+      title: "THINKAD",
       subtitle: "2016년 설립 · 15년 이상 OOH 업력 · 100+ 대기업 파트너",
     },
     en: {

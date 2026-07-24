@@ -582,7 +582,7 @@ export const QuotePremium = forwardRef<HTMLDivElement, QuotePremiumProps>(
 
     const copy = isKo
       ? {
-          topTagline: "// 생각하는 광고회사, 싱커드",
+          topTagline: "// THINKAD",
           clientMeta: `고객: ${displayBrand} · ${dateLabel} · ${version}`,
           heroEn: "Advertising Proposal",
           heroKo: "광고 제안서",
