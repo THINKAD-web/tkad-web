@@ -1088,7 +1088,7 @@
   "about": {
     "title": "회사 소개",
     "subtitle": "15년 OOH 광고 전문 에이전시",
-    "heroSlogan": "생각하는 광고회사, 브랜드의 공간을 설계합니다.",
+    "heroSlogan": "브랜드의 공간을 설계합니다.",
     "statFoundedLabel": "설립 연도",
     "statCampaignsLabel": "진행 캠페인",
     "statMediaLabel": "검증·운영 매체",
@@ -1098,7 +1098,7 @@
     "valuesLead": "데이터와 현장 경험으로 OOH 캠페인의 기준을 높입니다.",
     "historyEyebrow": "연혁",
     "historyTitle": "THINKAD의 역사",
-    "historyDescription": "싱커드(THINKAD)는 '생각하는 광고회사'라는 슬로건 아래, 코엑스 K-POP 스퀘어, 강남대로 미디어폴 등 국내 랜드마크 전광판을 직접 운영·관리하는 한국 OOH 미디어랩 전문 에이전시입니다. 서울 성수동에 본사를 두고 전국 네트워크를 기반으로 브랜드의 온·오프라인을 잇는 통합 옥외광고 솔루션을 제공합니다.",
+    "historyDescription": "싱커드(THINKAD)는 코엑스 K-POP 스퀘어, 강남대로 미디어폴 등 국내 랜드마크 전광판을 직접 운영·관리하는 한국 OOH 미디어랩 전문 에이전시입니다. 서울 성수동에 본사를 두고 전국 네트워크를 기반으로 브랜드의 온·오프라인을 잇는 통합 옥외광고 솔루션을 제공합니다.",
     "history2016": "주식회사 싱커드(THINKAD) 설립",
     "history2017": "첫 대형 OOH 캠페인 수행",
     "history2019": "등록·운영 매체 100개 돌파",
@@ -2206,7 +2206,7 @@
     "pdfFailed": "PDF 생성에 실패했습니다."
   },
   "footer": {
-    "description": "생각하는 광고회사, 싱커드",
+    "description": "(주)싱커드",
     "companyName": "주식회사 싱커드 (THINKAD)",
     "ceo": "대표: 이재한",
     "bizNumber": "사업자등록번호: 319-86-00382",
