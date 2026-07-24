@@ -11,6 +11,15 @@ function readTossSecretKey(): string | null {
   return process.env.TOSS_PAYMENTS_SECRET_KEY?.trim() || null;
 }
 
+/**
+ * Preview/local only — never set on Production.
+ * When true, `mock_*` / `test_mock_*` paymentKeys skip the Toss API (DMPILOT pattern).
+ */
+export function isTossMockMode(): boolean {
+  if (process.env.TOSS_PAYMENTS_MOCK === "1") return true;
+  return process.env.TOSS_PAYMENTS_ALLOW_MOCK_CONFIRM === "1";
+}
+
 /** Toss orderId — 영문·숫자·하이픈·언더스코어, 6~64자 */
 export function generateOrderId(): string {
   const suffix = randomBytes(4).toString("hex");
@@ -42,6 +51,22 @@ export async function confirmTossPayment(opts: {
   orderId: string;
   amount: number;
 }): Promise<TossConfirmResult> {
+  const mockable =
+    isTossMockMode() &&
+    (opts.paymentKey.startsWith("mock_") ||
+      opts.paymentKey.startsWith("test_mock_"));
+  if (mockable) {
+    return {
+      paymentKey: opts.paymentKey,
+      orderId: opts.orderId,
+      status: "DONE",
+      totalAmount: opts.amount,
+      method: "MOCK",
+      approvedAt: new Date().toISOString(),
+      raw: { mock: true },
+    };
+  }
+
   const res = await fetch(`${TOSS_API}/payments/confirm`, {
     method: "POST",
     headers: {
