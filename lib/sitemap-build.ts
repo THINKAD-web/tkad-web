@@ -31,9 +31,14 @@ export const CRITICAL_SITEMAP_PATHS = [
   "/special/fandom",
   "/faq",
   "/guides",
+  "/guide/how-to-use",
   "/report",
   "/cases",
   "/about",
+  "/guarantee",
+  "/privacy",
+  "/terms",
+  "/refund",
 ] as const;
 
 const TECHNICAL_MEDIA_TYPE_SLUGS = new Set<string>(KNOWN_TYPE_SLUGS);

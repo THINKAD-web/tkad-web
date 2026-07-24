@@ -143,8 +143,14 @@ export const publicSeoPaths = [
   "/planner",
   "/glossary",
   "/guides",
+  "/guide/how-to-use",
   "/budget-tool",
+  "/pricing",
   "/pricing-guide",
+  "/guarantee",
+  "/privacy",
+  "/terms",
+  "/refund",
 ] as const;
 
 export function absoluteUrl(path: string): string {
