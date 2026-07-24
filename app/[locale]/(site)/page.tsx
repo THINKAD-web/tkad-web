@@ -62,9 +62,10 @@ export default async function HomePage({
       id="main-content"
       className="tkad-quiet min-h-screen bg-gray-50 dark:bg-[#020202]"
     >
-      <HomeHeroBanner
-        seoHeading={homePageSrOnlyH1(locale, verifiedMediaLabel)}
-      />
+      <h1 className="sr-only">
+        {homePageSrOnlyH1(locale, verifiedMediaLabel)}
+      </h1>
+      <HomeHeroBanner />
 
       <HomeExploreSplit />
 
