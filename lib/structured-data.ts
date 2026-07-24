@@ -15,11 +15,23 @@ const INSTAGRAM_THINKAD = "https://www.instagram.com/thinkad_korea" as const;
 const ORG_ID = `${siteUrl}/#organization`;
 const LOCAL_ID = `${siteUrl}/#localbusiness`;
 const WEBSITE_ID = `${siteUrl}/#website`;
+const WEBAPP_ID = `${siteUrl}/#webapp`;
 
-/** Organization + LocalBusiness + WebSite JSON-LD for THINKAD. */
+const ORG_DESCRIPTION_KO =
+  "옥외광고를 검색·계획·계약·집행·성과 확인까지 한 곳에서 끝내는 OOH 플랫폼. 전국 매체 실시간 단가 비교.";
+const ORG_DESCRIPTION_EN =
+  "OOH outdoor advertising platform for search, planning, contracts, execution, and performance — compare media at live rates nationwide.";
+
+/**
+ * Organization + LocalBusiness + WebSite + WebApplication JSON-LD for THINKAD.
+ * WebApplication is typed for crawlers/LLMs; no aggregateRating (no verified public ratings).
+ */
 export function buildStructuredDataGraph(locale: string) {
   const isKo = locale === "ko";
   const localizedSiteUrl = `${siteUrl}/${locale}`;
+  const description = isKo ? ORG_DESCRIPTION_KO : ORG_DESCRIPTION_EN;
+  const brandName = isKo ? "THINKAD 싱커드" : "THINKAD";
+
   return {
     "@context": "https://schema.org",
     "@graph": [
@@ -37,8 +49,7 @@ export function buildStructuredDataGraph(locale: string) {
           height: 512,
         },
         image: `${siteUrl}/pwa-icon/512`,
-        description:
-          "대한민국 No.1 OOH 광고 에이전시. 전국 옥외광고 매체 검색, 데이터 기반 캠페인 컨설팅, 집행 및 사후관리.",
+        description,
         foundingDate: "2016",
         taxID: "319-86-00382",
         sameAs: [KAKAO_CHANNEL_PUBLIC_URL, INSTAGRAM_THINKAD],
@@ -97,7 +108,7 @@ export function buildStructuredDataGraph(locale: string) {
         "@type": "WebSite",
         "@id": WEBSITE_ID,
         url: siteUrl,
-        name: isKo ? "THINKAD 싱커드" : "THINKAD",
+        name: brandName,
         publisher: { "@id": ORG_ID },
         inLanguage: isKo ? "ko-KR" : "en-US",
         potentialAction: {
@@ -107,6 +118,24 @@ export function buildStructuredDataGraph(locale: string) {
             urlTemplate: `${localizedSiteUrl}/media?q={search_term_string}`,
           },
           "query-input": "required name=search_term_string",
+        },
+      },
+      {
+        "@type": "WebApplication",
+        "@id": WEBAPP_ID,
+        name: brandName,
+        url: siteUrl,
+        description,
+        applicationCategory: "BusinessApplication",
+        operatingSystem: "Web browser",
+        browserRequirements: "Requires JavaScript. Requires HTML5.",
+        inLanguage: isKo ? "ko-KR" : "en-US",
+        image: `${siteUrl}/pwa-icon/512`,
+        provider: { "@id": ORG_ID },
+        offers: {
+          "@type": "Offer",
+          price: 0,
+          priceCurrency: "KRW",
         },
       },
     ],

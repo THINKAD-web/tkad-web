@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
-import { useLocale } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import { optimizeHeroMarqueeUrl } from "@/lib/optimized-image-url";
 
@@ -52,6 +52,7 @@ function scrollToExplore() {
 export function HomeHeroBanner() {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const t = useTranslations("homePage");
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
 
@@ -75,6 +76,7 @@ export function HomeHeroBanner() {
   const title = isKo ? slide.titleKo : slide.titleEn;
   const subtitle = isKo ? slide.subtitleKo : slide.subtitleEn;
   const ctaLabel = isKo ? "아래에서 시작하기" : "Get started below";
+  const slogan = t("heroBannerSlogan");
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
@@ -117,10 +119,13 @@ export function HomeHeroBanner() {
         />
 
         <div className="absolute inset-x-0 bottom-10 z-20 px-5 text-center md:bottom-12 md:px-8">
-          <p className="text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-4xl">
+          <p className="text-balance text-2xl font-black leading-tight tracking-tight text-white drop-shadow-sm md:text-5xl">
+            {slogan}
+          </p>
+          <p className="mt-2 text-lg font-bold tracking-tight text-white/95 drop-shadow-sm md:text-2xl">
             {title}
           </p>
-          <p className="mx-auto mt-2 max-w-md text-sm leading-snug text-white/90 md:text-base">
+          <p className="mx-auto mt-1.5 max-w-md text-sm leading-snug text-white/90 md:text-base">
             {subtitle}
           </p>
           <button

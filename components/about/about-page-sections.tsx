@@ -1,3 +1,4 @@
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   categoryHeroCtaPrimaryClass,
@@ -14,18 +15,40 @@ import { cn } from "@/lib/utils";
 
 type Props = { isKo: boolean; verifiedLabel: string };
 
-export function AboutPageSections({ isKo, verifiedLabel }: Props) {
-  const storyParagraphs = isKo
-    ? [
-        "옥외광고를 하려면 수십 개 대행사에 전화해야 했습니다.\n단가는 물어봐야 알 수 있었고,\n같은 매체도 대행사마다 가격이 달랐습니다.",
-        "싱커드는 2014년, 이 구조를 바꾸기로 했습니다.\n국내 최초로 OOH 매체 단가를 투명하게 공개하고\n쇼핑몰처럼 검색하고 비교할 수 있는 플랫폼을 만들었습니다.",
-        "그 이후 수많은 회사들이 싱커드를 벤치마킹했고\n지금은 많은 광고주·대행사·매체사가\n싱커드를 업계 표준으로 인정합니다.",
-      ]
-    : [
-        "Planning OOH meant calling dozens of agencies.\nRates were hidden until you asked,\nand the same media cost different prices by vendor.",
-        "In 2014, THINKAD set out to change that.\nWe were the first in Korea to publish OOH media rates openly\nand built a platform to search and compare media like a store.",
-        "Many companies benchmarked THINKAD afterward.\nToday advertisers, agencies, and media owners\nrecognize us as an industry standard.",
-      ];
+function BulletSection({
+  title,
+  items,
+}: {
+  title: string;
+  items: string[];
+}) {
+  return (
+    <section className="py-16 md:py-24">
+      <div className="mx-auto max-w-3xl px-4">
+        <h2 className="mb-8 text-center text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
+          {title}
+        </h2>
+        <ul className="space-y-4">
+          {items.map((item) => (
+            <li
+              key={item}
+              className="flex gap-3 rounded-2xl bg-white px-5 py-4 text-base leading-relaxed text-gray-700 dark:bg-white/5 dark:text-white/80 md:text-lg"
+            >
+              <span
+                className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[color:var(--qp-accent)]"
+                aria-hidden
+              />
+              <span>{item}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+    </section>
+  );
+}
+
+export async function AboutPageSections({ isKo, verifiedLabel }: Props) {
+  const t = await getTranslations("about");
 
   const timelineItems: AboutTimelineItem[] = isKo
     ? [
@@ -83,129 +106,46 @@ export function AboutPageSections({ isKo, verifiedLabel }: Props) {
         },
       ];
 
-  const diffCards = isKo
-    ? [
-        {
-          icon: "🏆",
-          title: "검증된 데이터",
-          body: `추정이 아닌 실제 집행 데이터\n현장 검증 ${verifiedLabel} 매체\n10년간 쌓인 실거래 단가`,
-        },
-        {
-          icon: "🤖",
-          title: "AI + 전문가",
-          body: "AI가 빠르게 찾고\n전문가가 정확하게 확인\n입찰·단가·현장까지 책임",
-        },
-        {
-          icon: "🔗",
-          title: "원스톱 집행",
-          body: "검색 → 기획 → 견적 → 계약\n한 플랫폼에서 끝\n업계 유일 전자계약 시스템",
-        },
-      ]
-    : [
-        {
-          icon: "🏆",
-          title: "Verified data",
-          body: `Real execution data, not estimates\n${verifiedLabel} field-verified media\nA decade of transaction pricing`,
-        },
-        {
-          icon: "🤖",
-          title: "AI + experts",
-          body: "AI finds options fast\nExperts validate accuracy\nAccountability through bidding and field ops",
-        },
-        {
-          icon: "🔗",
-          title: "One-stop execution",
-          body: "Search → plan → quote → contract\nAll on one platform\nIndustry-only e-contract system",
-        },
-      ];
+  const companyLeft = [
+    [t("companyNameLabel"), t("companyNameValue")],
+    [t("companyCeoLabel"), t("companyCeoValue")],
+    [t("companyBizLabel"), t("companyBizValue")],
+    [t("companyEcommerceLabel"), t("companyEcommerceValue")],
+    [t("companyAddressLabel"), t("companyAddressValue")],
+  ] as const;
 
-  const companyLeft = isKo
-    ? [
-        ["상호", "주식회사 싱커드"],
-        ["대표", "이재한"],
-        ["사업자번호", "319-86-00382"],
-        ["통신판매업", "2017-서울성동-0681"],
-        [
-          "주소",
-          "서울특별시 성동구 뚝섬로17가길 48\n성수에이원지식산업센터 1102호",
-        ],
-      ]
-    : [
-        ["Company", "THINKAD Co., Ltd."],
-        ["CEO", "Jaehan Lee"],
-        ["Business ID", "319-86-00382"],
-        ["E-commerce reg.", "2017-Seoul Seongdong-0681"],
-        [
-          "Address",
-          "1102, Seongsu A1 Knowledge Industry Center\n48, Ttukseom-ro 17ga-gil, Seongdong-gu, Seoul",
-        ],
-      ];
-
-  const companyRight = isKo
-    ? [
-        ["전화", "02-515-2772"],
-        ["이메일", "sales@tkad.co.kr"],
-        ["운영시간", "평일 09:00 ~ 18:00\n(토·일·공휴일 휴무)"],
-      ]
-    : [
-        ["Phone", "02-515-2772"],
-        ["Email", "sales@tkad.co.kr"],
-        ["Hours", "Weekdays 09:00–18:00\n(Closed weekends & holidays)"],
-      ];
+  const companyRight = [
+    [t("companyPhoneLabel"), t("companyPhoneValue")],
+    [t("companyEmailLabel"), t("companyEmailValue")],
+    [t("companyHoursLabel"), t("companyHoursValue")],
+  ] as const;
 
   return (
     <>
-      <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="mb-10 text-center text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
-            {isKo ? "수십 군데 전화하던 시대를 바꿨습니다" : "We changed the era of dozens of phone calls"}
-          </h2>
-          <div className="mx-auto max-w-2xl space-y-6 text-center text-base leading-relaxed text-gray-600 md:text-lg dark:text-white/70">
-            {storyParagraphs.map((paragraph) => (
-              <p key={paragraph.slice(0, 24)} className="whitespace-pre-line">
-                {paragraph}
-              </p>
-            ))}
-          </div>
-        </div>
-      </section>
+      <BulletSection
+        title={t("capabilitiesTitle")}
+        items={[
+          t("capability1", { count: verifiedLabel }),
+          t("capability2"),
+          t("capability3"),
+        ]}
+      />
+
+      <BulletSection
+        title={t("trustTitle")}
+        items={[t("trust1"), t("trust2"), t("trust3")]}
+      />
 
       <AboutBrandTimeline
-        title={isKo ? "싱커드의 역사" : "THINKAD history"}
+        title={t("historyTitle")}
         items={timelineItems}
-        currentLabel={isKo ? "현재" : "Now"}
+        currentLabel={t("timelineCurrent")}
       />
 
       <section className="py-16 md:py-24">
         <div className="mx-auto max-w-4xl px-4">
           <h2 className="mb-10 text-center text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
-            {isKo ? "싱커드가 다른 이유" : "Why THINKAD is different"}
-          </h2>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
-            {diffCards.map((card) => (
-              <div
-                key={card.title}
-                className="rounded-2xl bg-white p-6 dark:bg-white/5"
-              >
-                <p className="mb-4 text-4xl" aria-hidden>
-                  {card.icon}
-                </p>
-                <h3 className="mb-3 text-lg font-bold text-gray-900 dark:text-white">
-                  {card.title}
-                </h3>
-                <p className="whitespace-pre-line text-sm leading-relaxed text-gray-600 dark:text-white/60">
-                  {card.body}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-4xl px-4">
-          <h2 className="mb-10 text-center text-2xl font-bold text-gray-900 dark:text-white md:text-3xl">
-            {isKo ? "회사 정보" : "Company information"}
+            {t("companyTitle")}
           </h2>
           <div className="grid gap-10 md:grid-cols-2">
             <dl className="space-y-4">
@@ -227,7 +167,7 @@ export function AboutPageSections({ isKo, verifiedLabel }: Props) {
                     {label}
                   </dt>
                   <dd className="mt-1 whitespace-pre-line text-sm leading-relaxed text-gray-800 dark:text-white/80">
-                    {label === (isKo ? "이메일" : "Email") ? (
+                    {label === t("companyEmailLabel") ? (
                       <a
                         href="mailto:sales@tkad.co.kr"
                         className="text-violet-600 hover:underline dark:text-violet-400"
@@ -249,12 +189,10 @@ export function AboutPageSections({ isKo, verifiedLabel }: Props) {
         <div className="mx-auto max-w-4xl px-4">
           <div className="rounded-2xl bg-gradient-to-r from-violet-600 to-cyan-500 p-10 text-center">
             <h2 className="text-2xl font-bold text-white md:text-3xl">
-              {isKo ? "지금 싱커드와 함께 시작하세요" : "Start with THINKAD today"}
+              {t("ctaTitle")}
             </h2>
             <p className="mx-auto mt-4 max-w-lg whitespace-pre-line text-sm leading-relaxed text-white/90 md:text-base">
-              {isKo
-                ? `${verifiedLabel} 검증 매체를 직접 검색하고\nAI 플래너로 3분 만에 캠페인을 설계하세요`
-                : `Browse ${verifiedLabel} verified media\nand plan a campaign in 3 minutes with AI planner`}
+              {t("ctaSubtitle", { count: verifiedLabel })}
             </p>
             <CategoryHeroCtaRow className="mt-8 justify-center">
               <Link
@@ -264,7 +202,7 @@ export function AboutPageSections({ isKo, verifiedLabel }: Props) {
                   "border-0 bg-white text-violet-700 hover:bg-white/95",
                 )}
               >
-                {isKo ? "매체 탐색하기" : "Explore media"}
+                {t("ctaExplore")}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link
@@ -274,7 +212,7 @@ export function AboutPageSections({ isKo, verifiedLabel }: Props) {
                   "border-white/30 bg-white/10 text-white hover:bg-white/20",
                 )}
               >
-                {isKo ? "무료 상담 신청" : "Free consultation"}
+                {t("ctaContact")}
               </Link>
             </CategoryHeroCtaRow>
           </div>

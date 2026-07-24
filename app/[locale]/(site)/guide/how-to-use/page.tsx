@@ -99,22 +99,24 @@ export default async function HowToUseGuidePage({ params }: Props) {
         <div className="tkad-landing-neon tkad-planner-neon">
           <CategoryExploreHero
             code={`// ${isKo ? "사용 가이드" : "HOW TO USE"}`}
-            headlineBefore={isKo ? "처음이세요? " : "New here? "}
-            headlineGradient={isKo ? "3분이면 충분해요" : "3 minutes is enough"}
+            headlineBefore={isKo ? "광고, " : "Ads, "}
+            headlineGradient={
+              isKo ? "한 곳에서 끝내세요" : "all in one place"
+            }
             subtitle={
               isKo
-                ? "매체 탐색부터 견적 요청까지 단계별로 안내해드립니다."
-                : "Step-by-step from media discovery to requesting a quote."
+                ? "검색부터 성과 확인까지, 플랫폼에서 이어지는 흐름을 4단계로 짧게 안내합니다."
+                : "A short 4-step path from search through performance — on one platform."
             }
             showBeta={false}
           >
             <CategoryHeroCtaRow>
               <Link href="/media" className={categoryHeroCtaPrimaryClass}>
-                {isKo ? "매체 검색 시작" : "Browse media"}
+                {isKo ? "지금 매체 검색해보기" : "Browse media now"}
                 <ArrowRight className="h-4 w-4" aria-hidden />
               </Link>
               <Link href="/planner" className={categoryHeroCtaSecondaryClass}>
-                {isKo ? "AI 플래너" : "AI planner"}
+                {isKo ? "플랜·견적 확인하기" : "Open planner"}
                 <ArrowRight className="h-4 w-4 dark:text-white text-gray-700" aria-hidden />
               </Link>
             </CategoryHeroCtaRow>
@@ -127,15 +129,19 @@ export default async function HowToUseGuidePage({ params }: Props) {
               title={
                 isKo ? (
                   <>
-                    THINKAD 이용 <span className="tkad-home-accent-text">6단계</span>
+                    THINKAD <span className="tkad-home-accent-text">4단계</span>
                   </>
                 ) : (
                   <>
-                    <span className="tkad-home-accent-text">6 steps</span> on THINKAD
+                    <span className="tkad-home-accent-text">4 steps</span> on THINKAD
                   </>
                 )
               }
-              meta={isKo ? "탐색 → 비교 → 패키지 → 플래너 → 견적 → 포인트" : "Discover → compare → packages → planner → quote → points"}
+              meta={
+                isKo
+                  ? "검색·추천 → 플랜·견적 → 계약·집행 → 성과"
+                  : "Search → plan & quote → contract & flight → performance"
+              }
             />
             <HowToUseStepsGrid steps={HOW_TO_USE_STEPS} isKo={isKo} />
           </NeonSection>
