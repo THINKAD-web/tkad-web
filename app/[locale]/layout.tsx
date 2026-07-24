@@ -117,8 +117,8 @@ export async function generateMetadata({
       title: titleDefault,
       description,
       images: defaultOgImages(locale, {
-        ko: "THINKAD 싱커드 — 대한민국 No.1 OOH 광고 에이전시",
-        en: "THINKAD — Korea's leading OOH advertising agency",
+        ko: "THINKAD 싱커드 — OOH 옥외광고 플랫폼",
+        en: "THINKAD — Korea OOH advertising platform",
       }),
     },
     twitter: {
@@ -128,8 +128,8 @@ export async function generateMetadata({
       title: titleDefault,
       description,
       images: defaultOgImages(locale, {
-        ko: "THINKAD 싱커드 — 대한민국 No.1 OOH 광고 에이전시",
-        en: "THINKAD — Korea's leading OOH advertising agency",
+        ko: "THINKAD 싱커드 — OOH 옥외광고 플랫폼",
+        en: "THINKAD — Korea OOH advertising platform",
       }),
     },
     other: {

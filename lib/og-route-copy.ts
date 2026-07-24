@@ -10,13 +10,13 @@ const MEDIA_COUNT_OG_ROUTE_IDS = ["home", "media"] as const;
 const routes = {
   home: {
     ko: {
-      badge: "Korea's #1 OOH Ad Agency",
+      badge: "Korea OOH Platform",
       title: "THINKAD",
       subtitle: "전국 {count} 검증된 옥외광고 매체 · 데이터 기반 캠페인 컨설팅",
     },
     en: {
-      badge: "Korea's #1 OOH Ad Agency",
-      title: "The Thinking Ad Agency",
+      badge: "Korea OOH Platform",
+      title: "THINKAD",
       subtitle: "{count} verified OOH media nationwide · Data-driven campaign consulting",
     },
   },
@@ -28,7 +28,7 @@ const routes = {
     },
     en: {
       badge: "About THINKAD",
-      title: "THINKAD — Korea's OOH agency",
+      title: "THINKAD — Korea's OOH platform",
       subtitle: "Founded 2016 · 15+ years in OOH · 100+ enterprise partners",
     },
   },

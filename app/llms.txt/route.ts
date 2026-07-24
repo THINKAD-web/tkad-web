@@ -8,7 +8,7 @@ import { siteUrl } from "@/lib/seo";
 export function GET() {
   const o = siteUrl.replace(/\/$/, "");
   const body = [
-    "# THINKAD (싱커드) — Korea OOH advertising agency",
+    "# THINKAD (싱커드) — Korea OOH advertising platform",
     "# Public marketing site; admin/API paths are disallowed in robots.txt",
     "",
     `Sitemap: ${o}/sitemap.xml`,
