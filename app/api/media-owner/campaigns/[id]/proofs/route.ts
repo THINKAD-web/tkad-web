@@ -17,6 +17,8 @@ type Params = { params: Promise<{ id: string }> };
 const schema = z.object({
   imageUrl: z.string().url(),
   caption: z.string().max(500).optional().nullable(),
+  latitude: z.number().optional().nullable(),
+  longitude: z.number().optional().nullable(),
 });
 
 export async function POST(request: Request, { params }: Params) {
@@ -53,6 +55,8 @@ export async function POST(request: Request, { params }: Params) {
       caption:
         parsed.data.caption?.trim() ||
         `[매체사] ${auth.user.name}`,
+      latitude: parsed.data.latitude ?? null,
+      longitude: parsed.data.longitude ?? null,
       uploadSource: "media_owner",
       uploadedByUserId: auth.user.id,
     });

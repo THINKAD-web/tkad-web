@@ -8,6 +8,7 @@ import {
   ownerGlassCard,
 } from "@/components/media-owner/media-owner-shell";
 import { uploadOwnerProofImage } from "@/lib/media-owner-upload";
+import { readGeolocationDetailed } from "@/lib/campaign-proof-upload-client";
 import { useAppToast } from "@/lib/use-toast";
 
 type CampaignRow = {
@@ -53,13 +54,18 @@ export function MediaOwnerCampaignsClient() {
     if (!file.type.startsWith("image/")) return;
     setUploading(true);
     try {
+      const geo = await readGeolocationDetailed();
       const url = await uploadOwnerProofImage(campaignId, file);
       const res = await fetch(
         `/api/media-owner/campaigns/${campaignId}/proofs`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ imageUrl: url }),
+          body: JSON.stringify({
+            imageUrl: url,
+            latitude: geo.coords?.latitude ?? null,
+            longitude: geo.coords?.longitude ?? null,
+          }),
         },
       );
       const json = await res.json();
@@ -69,8 +75,12 @@ export function MediaOwnerCampaignsClient() {
       }
       toast.success(
         isKo
-          ? "인증 사진이 어드민에 전달되었습니다."
-          : "Proof photo submitted.",
+          ? geo.coords
+            ? "인증 사진이 어드민에 전달되었습니다. (GPS 포함)"
+            : "인증 사진이 어드민에 전달되었습니다. GPS 없이 저장됨 — 가능하면 위치 권한을 허용해 주세요."
+          : geo.coords
+            ? "Proof photo submitted (with GPS)."
+            : "Proof photo submitted without GPS — enable location when possible.",
       );
       await load();
     } catch (e) {
@@ -91,8 +101,8 @@ export function MediaOwnerCampaignsClient() {
         </h2>
         <p className="mt-1 text-sm dark:text-white text-gray-500">
           {isKo
-            ? "내 매체에서 진행 중인 캠페인 · 광고주 업종은 익명 처리됩니다."
-            : "Active campaigns on your media · advertiser industry is anonymized."}
+            ? "내 매체에서 진행 중인 캠페인 · 광고주 업종은 익명 처리됩니다. 인증 사진 업로드 시 GPS 첨부를 권장합니다(거부해도 업로드 가능)."
+            : "Active campaigns on your media · advertiser industry is anonymized. GPS is recommended when uploading proof (upload still works if denied)."}
         </p>
       </div>
 

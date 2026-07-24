@@ -337,6 +337,34 @@ export default function AdminOohQuotesClient() {
     setBookingConflict(null);
   };
 
+  const confirmContract = async (quoteId: string) => {
+    const res = await fetch(
+      `/api/admin/ooh-quotes/${quoteId}/contract-confirm`,
+      {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+      },
+    );
+    const raw = (await res.json().catch(() => ({}))) as {
+      error?: string;
+      proofUploadUrl?: string | null;
+    };
+    if (!res.ok) {
+      throw new Error(raw.error ?? t("fail"));
+    }
+    if (raw.proofUploadUrl) {
+      try {
+        await navigator.clipboard.writeText(raw.proofUploadUrl);
+      } catch {
+        /* ignore */
+      }
+      window.alert(
+        `계약 확정 · 현장 인증 URL이 발급되어 클립보드에 복사되었습니다.\n\n${raw.proofUploadUrl}`,
+      );
+    }
+  };
+
   const run = async (id: string, fn: () => Promise<void>) => {
     setBusyId(id);
     try {
@@ -427,9 +455,7 @@ export default function AdminOohQuotesClient() {
           className={`w-full bg-gold text-foreground dark:text-hero-fg ${touchBtn}`}
           disabled={busyId === row.id}
           onClick={() =>
-            void run(row.id, () =>
-              act(`/api/admin/ooh-quotes/${row.id}/contract-confirm`, "PATCH"),
-            )
+            void run(row.id, () => confirmContract(row.id))
           }
         >
           {t("contractConfirm")}
@@ -998,12 +1024,7 @@ export default function AdminOohQuotesClient() {
                               className="bg-gold text-foreground dark:text-hero-fg"
                               disabled={busyId === row.id}
                               onClick={() =>
-                                void run(row.id, () =>
-                                  act(
-                                    `/api/admin/ooh-quotes/${row.id}/contract-confirm`,
-                                    "PATCH",
-                                  ),
-                                )
+                                void run(row.id, () => confirmContract(row.id))
                               }
                             >
                               {t("contractConfirm")}

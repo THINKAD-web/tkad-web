@@ -9,9 +9,9 @@ export const GUARANTEE_PAGE_META = {
   titleKo: "성과 보증 정책",
   titleEn: "Performance Guarantee Policy",
   descriptionKo:
-    "OOH 성과 데이터 보증 — 배지 부여 기준, 예측 정확도, 미달 시 환불 조건, 인증 사진 정책",
+    "OOH 성과 데이터 보증 — 배지 부여 기준, 검증된 추정치, 미달 시 환불 조건, 인증 사진 정책",
   descriptionEn:
-    "OOH performance data guarantee — badge criteria, prediction accuracy, refund terms, and proof photo policy",
+    "OOH performance data guarantee — badge criteria, verified estimates, refund terms, and proof photo policy",
   keywordsKo: [
     "OOH 성과 보증",
     "광고 성과 환불",
@@ -32,10 +32,10 @@ export const GUARANTEE_PAGE_META = {
   heroTitleEn: "Performance ",
   heroHighlightEn: "Guarantee",
   heroDescriptionKo:
-    "데이터로 증명하는 OOH — 배지 기준, 예측 정확도, 미달 시 환불·인증 사진 정책",
+    "데이터로 증명하는 OOH — 배지 기준, 검증된 추정치, 미달 시 환불·인증 사진 정책",
   heroDescriptionEn:
-    "OOH backed by data — badge criteria, prediction accuracy, refunds, and proof photo rules",
-  lastUpdated: "2026.05.26",
+    "OOH backed by data — badge criteria, verified estimates, refunds, and proof photo rules",
+  lastUpdated: "2026.07.24",
 } as const;
 
 export type GuaranteeBadgeCriterion = {
@@ -82,8 +82,10 @@ export const GUARANTEE_BADGE_CRITERIA: GuaranteeBadgeCriterion[] = [
     labelEn: "Proof photos",
     valueKo: "1장 이상",
     valueEn: "1+ photo",
-    detailKo: "현장 촬영·GPS·일시가 확인된 인증 사진",
-    detailEn: "Field photos with GPS and timestamp verification",
+    detailKo:
+      "현장 인증 사진 1장 이상(배지 산정). GPS·촬영 시각 첨부는 권장이며, 없어도 장수 기준은 충족됩니다.",
+    detailEn:
+      "At least one field proof photo (badge count). GPS and capture time are recommended but not required for the count.",
   },
 ];
 
@@ -118,18 +120,18 @@ export const GUARANTEE_CATEGORIES: GuaranteeCategory[] = [
     metaKo: "데이터로 증명하는 OOH",
     metaEn: "OOH impact you can verify",
     introKo:
-      "THINKAD 싱커드는 OOH 광고의 효과를 데이터로 증명합니다. 플래너 예측·집행 후 실측·인증 사진을 연계해 광고주가 성과를 검증할 수 있도록 합니다.",
+      "THINKAD 싱커드는 OOH 광고 성과를 데이터로 설명합니다. 플래너 예측·집행 후 검증된 추정치·현장 인증 사진을 연계해 광고주가 결과를 확인할 수 있도록 합니다.",
     introEn:
-      "THINKAD proves OOH impact with data — planner forecasts, post-flight measurements, and field proof photos linked in one flow.",
+      "THINKAD explains OOH outcomes with data — planner forecasts, post-flight verified estimates, and field proof photos in one flow.",
     bulletsKo: [
-      "플래너에서 예측 노출·도달을 확인하고 집행 후 실측과 비교",
-      "완료 리포트에 예측 vs 실측 수치를 함께 제공",
-      "인증 사진 업로드 시 실측치 확정 및 배지 유지",
+      "플래너에서 예측 노출·도달을 확인하고 집행 후 검증된 추정치와 비교",
+      "완료 리포트에 「예측 노출」과 「검증된 추정치」를 함께 제공",
+      "현장 인증 사진은 집행 증거이며, 추정치의 신뢰도를 보완합니다",
     ],
     bulletsEn: [
-      "Compare planner forecasts with post-flight measurements",
-      "Completion reports show predicted vs. measured impressions",
-      "Proof photos finalize measured numbers and badge eligibility",
+      "Compare planner forecasts with post-flight verified estimates",
+      "Completion reports show predicted vs. verified estimated impressions",
+      "Proof photos document the flight and support estimate confidence",
     ],
   },
   {
@@ -158,17 +160,19 @@ export const GUARANTEE_CATEGORIES: GuaranteeCategory[] = [
     titleEn: "Prediction accuracy",
     accentKo: "정확도",
     accentEn: "accuracy",
-    metaKo: "플래너·실측 연계",
-    metaEn: "Planner + measured results",
+    metaKo: "플래너·검증된 추정치 연계",
+    metaEn: "Planner + verified estimates",
     bulletsKo: [
-      "플래너 노출·도달 추정치는 매체 유동·단가·과거 집행 실측을 반영한 내부 모델입니다.",
-      "플랫폼 예측 정확도는 최근 완료 캠페인(인증 사진 포함)의 예측 대비 실측 오차를 누적해 산출합니다.",
-      "완료 리포트에는 「예측 노출」과 「실측 노출」을 함께 표시하며, 인증 사진이 업로드될수록 실측치가 확정됩니다.",
+      "플래너 노출·도달 추정치는 매체 유동·단가·과거 집행 데이터를 반영한 내부 모델입니다.",
+      "「검증된 추정치」는 유동인구·매체 노출 데이터 등 카탈로그·집행 기록을 바탕으로 산출하며, 현장 인증 사진이 있으면 소폭(+1.5~3%) 보정합니다. 센서·카운터로 집계한 절대 실측이 아닙니다.",
+      "플랫폼 예측 정확도는 최근 완료 캠페인(인증 사진 포함)의 예측 대비 검증된 추정치 오차를 누적해 산출합니다.",
+      "완료 리포트에는 「예측 노출」과 「검증된 추정치」를 함께 표시합니다.",
     ],
     bulletsEn: [
-      "Planner reach/impression estimates use traffic, pricing, and historical verified flights.",
-      "Platform accuracy is computed from recent completed campaigns with proof photos.",
-      "Completion reports show predicted vs. measured impressions; proof uploads finalize numbers.",
+      "Planner reach/impression estimates use traffic, pricing, and historical flight data.",
+      "“Verified estimates” are derived from catalog foot-traffic and flight records; proof photos apply a small uplift (+1.5–3%). They are not sensor-counted absolute measurements.",
+      "Platform accuracy aggregates forecast vs. verified-estimate error on recent completed campaigns with proof photos.",
+      "Completion reports show predicted impressions alongside verified estimates.",
     ],
   },
   {
@@ -184,14 +188,14 @@ export const GUARANTEE_CATEGORIES: GuaranteeCategory[] = [
     metaEn: "Below 80% · claim within 14 days",
     bulletsKo: [
       "계약서·견적서에 「성과 보증」 조항이 명시된 캠페인에 한해 적용됩니다.",
-      "집행 완료 후 플래너·계약서에 기재된 예측 노출 대비 실측 노출이 80% 미만인 경우, 미달분에 해당하는 광고비를 환불·크레딧으로 보상할 수 있습니다.",
-      "환불 산정은 인증 사진·GPS·촬영 일시가 확인된 실측 데이터를 기준으로 하며, 천재지변·매체사 귀책 외 광고주 사유(소재 지연·조기 종료 등)는 제외됩니다.",
+      "집행 완료 후 플래너·계약서에 기재된 예측 노출 대비 「검증된 추정치」가 80% 미만인 경우, 미달분에 해당하는 광고비를 환불·크레딧으로 보상할 수 있습니다.",
+      "환불 산정은 완료 리포트의 검증된 추정치를 기준으로 하며, 현장 인증 사진(가능하면 GPS·촬영 시각 포함)은 집행 사실 확인에 활용됩니다. 천재지변·매체사 귀책 외 광고주 사유(소재 지연·조기 종료 등)는 제외됩니다.",
       `환불 요청: 집행 종료 후 14일 이내, ${CONTACT_EMAIL} 또는 고객센터(02-515-2772)로 캠페인 ID·완료 리포트·미달 근거를 제출해 주세요.`,
     ],
     bulletsEn: [
       "Applies only to campaigns with an explicit performance guarantee in the contract or quote.",
-      "If measured impressions are below 80% of the contracted/planner prediction after flight, the shortfall may be refunded or credited.",
-      "Refunds use verified proof data (GPS, timestamps). Force majeure and advertiser-caused delays are excluded.",
+      "If the verified estimate is below 80% of the contracted/planner prediction after flight, the shortfall may be refunded or credited.",
+      "Refunds use the completion-report verified estimate; proof photos (preferably with GPS and timestamp) help confirm the flight. Force majeure and advertiser-caused delays are excluded.",
       `File claims within 14 days of campaign end at ${CONTACT_EMAIL} or support (02-515-2772) with campaign ID and completion report.`,
     ],
     highlightKo: "개별 캠페인의 성과 보증·환불은 계약 조항 및 본 정책을 따릅니다.",
@@ -210,14 +214,14 @@ export const GUARANTEE_CATEGORIES: GuaranteeCategory[] = [
     metaKo: "현장 검증 의무",
     metaEn: "Field verification duty",
     bulletsKo: [
-      "매체사·현장 담당자는 집행 기간 중 합의된 횟수 이상 현장 인증 사진을 업로드해야 합니다.",
+      "매체사·현장 담당자는 집행 기간 중 합의된 횟수 이상 현장 인증 사진을 업로드해야 합니다. GPS·촬영 시각 첨부를 권장합니다.",
       "인증 사진 미제공·허위 업로드가 확인되면 해당 매체의 「성과 데이터 보증」 배지가 즉시 해제되며, 반복 시 매체 노출·즉시 예약 등급이 하향 조정될 수 있습니다.",
-      "광고주에게 인증 사진이 제공되지 않아 실측 검증이 불가능한 경우, 회사는 대체 실측(유동 데이터·제3자 리포트)을 제공하거나, 미인증 기간에 대한 부분 환불을 검토합니다.",
+      "광고주에게 인증 사진이 제공되지 않아 현장 확인이 어려운 경우, 회사는 대체 자료(유동 데이터·제3자 리포트)를 제공하거나, 미인증 기간에 대한 부분 환불을 검토합니다.",
     ],
     bulletsEn: [
-      "Media owners must upload agreed field proof photos during the flight period.",
+      "Media owners must upload agreed field proof photos during the flight; GPS and capture time are recommended.",
       "Missing or fraudulent proof may revoke the performance badge and lower listing priority.",
-      "If proof is unavailable, THINKAD may provide alternative measurement or partial refund for unverified periods.",
+      "If proof is unavailable, THINKAD may provide alternative materials or partial refund for unverified periods.",
     ],
   },
   {
@@ -229,12 +233,12 @@ export const GUARANTEE_CATEGORIES: GuaranteeCategory[] = [
     titleEn: "Policy notice",
     accentKo: "안내",
     accentEn: "notice",
-    metaKo: "참고용 예측치",
-    metaEn: "Indicative forecasts",
+    metaKo: "참고용 예측·추정치",
+    metaEn: "Indicative forecasts & estimates",
     introKo:
-      "예측치는 참고용이며, 개별 캠페인의 성과 보증·환불은 별도 계약 조항 및 본 정책에 따릅니다.",
+      "예측치와 검증된 추정치는 참고용이며, 개별 캠페인의 성과 보증·환불은 별도 계약 조항 및 본 정책에 따릅니다.",
     introEn:
-      "Forecasts are indicative; binding guarantees follow individual contracts and this policy.",
+      "Forecasts and verified estimates are indicative; binding guarantees follow individual contracts and this policy.",
     highlightKo:
       "본 문서는 법무팀 검토 전 임시 표준 템플릿입니다. 정식 오픈 시 개별 고지됩니다.",
     highlightEn:

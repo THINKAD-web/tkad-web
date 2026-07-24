@@ -150,6 +150,7 @@ export default function AdminCampaignsPage() {
     { id: string; imageUrl: string; caption: string | null; createdAt: string }[]
   >([]);
   const [proofMsg, setProofMsg] = useState<string | null>(null);
+  const [proofUploadUrl, setProofUploadUrl] = useState<string | null>(null);
   const [mediaBookings, setMediaBookings] = useState<{
     id?: string;
     title: string;
@@ -199,10 +200,12 @@ export default function AdminCampaignsPage() {
 
   const loadDetail = async (id: string) => {
     setSelectedId(id);
+    setProofUploadUrl(null);
     try {
-      const [cRes, uRes] = await Promise.all([
+      const [cRes, uRes, proofTokRes] = await Promise.all([
         fetch(`/api/admin/campaigns/${id}`),
         fetch("/api/admin/quote-requests?unlinked=1"),
+        fetch(`/api/admin/campaigns/${id}/proof-upload-token`),
       ]);
       const cJson = (await cRes.json()) as {
         campaign?: {
@@ -218,6 +221,10 @@ export default function AdminCampaignsPage() {
         };
       };
       const uJson = (await uRes.json()) as { quotes?: LinkedQuoteRow[] };
+      const tokJson = (await proofTokRes.json().catch(() => ({}))) as {
+        uploadUrl?: string;
+      };
+      if (tokJson.uploadUrl) setProofUploadUrl(tokJson.uploadUrl);
       const c = cJson.campaign;
       if (!c) {
         setEvents([]);
@@ -384,6 +391,23 @@ export default function AdminCampaignsPage() {
   const uploadProofImage = async (file: File) => {
     if (!selectedId) return;
     setProofMsg(null);
+    let latitude: number | null = null;
+    let longitude: number | null = null;
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      try {
+        const pos = await new Promise<GeolocationPosition>((resolve, reject) => {
+          navigator.geolocation.getCurrentPosition(resolve, reject, {
+            enableHighAccuracy: true,
+            timeout: 12_000,
+            maximumAge: 60_000,
+          });
+        });
+        latitude = pos.coords.latitude;
+        longitude = pos.coords.longitude;
+      } catch {
+        /* GPS 권장 — 거부해도 업로드 계속 */
+      }
+    }
     const sigRes = await fetch("/api/admin/upload/cloudinary", {
       method: "POST",
     });
@@ -419,13 +443,21 @@ export default function AdminCampaignsPage() {
     const post = await fetch(`/api/admin/campaigns/${selectedId}/proofs`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ imageUrl: upJson.secure_url }),
+      body: JSON.stringify({
+        imageUrl: upJson.secure_url,
+        latitude,
+        longitude,
+      }),
     });
     if (!post.ok) {
       setProofMsg("증빙 저장 실패");
       return;
     }
-    setProofMsg("증빙이 등록되었습니다.");
+    setProofMsg(
+      latitude != null
+        ? "증빙이 등록되었습니다. (GPS 포함)"
+        : "증빙이 등록되었습니다. GPS 없음 — 가능하면 위치 권한을 허용해 주세요.",
+    );
     await loadDetail(selectedId);
   };
 
@@ -975,6 +1007,40 @@ export default function AdminCampaignsPage() {
                     <Camera className="h-4 w-4" />
                     송출 증빙 사진
                   </h3>
+                  {proofUploadUrl ? (
+                    <div className="mb-2 rounded border border-slate-200 bg-slate-50 p-2 text-xs">
+                      <p className="font-semibold text-navy">현장 인증 QR URL</p>
+                      <a
+                        href={proofUploadUrl}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="mt-1 block break-all text-blue-700 underline"
+                      >
+                        {proofUploadUrl}
+                      </a>
+                      <div className="mt-1 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          className="underline"
+                          onClick={() => {
+                            void navigator.clipboard.writeText(proofUploadUrl);
+                            setProofMsg("현장 URL을 클립보드에 복사했습니다.");
+                          }}
+                        >
+                          URL 복사
+                        </button>
+                        <a
+                          href={`/api/admin/campaigns/${selectedId}/proof-qr`}
+                          className="underline"
+                        >
+                          QR PNG 다운로드
+                        </a>
+                      </div>
+                    </div>
+                  ) : null}
+                  <p className="mb-2 text-[11px] text-muted-foreground">
+                    GPS 위치 첨부를 권장합니다. 거부해도 업로드는 가능합니다.
+                  </p>
                   <label className="mb-2 inline-flex cursor-pointer items-center gap-2 rounded border border-dashed border-slate-300 px-3 py-2 text-xs hover:bg-slate-50">
                     이미지 업로드
                     <input

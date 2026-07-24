@@ -14,6 +14,11 @@ import {
   isBookingHoldConflictError,
   isQuoteHoldDatesRequiredError,
 } from "@/lib/ooh-quote-booking-hold";
+import {
+  getOrCreateProofUploadToken,
+  publicProofUploadPath,
+} from "@/lib/campaign-proof-service";
+import { siteUrl } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -128,9 +133,26 @@ export async function PATCH(
     }).catch((err) => console.error("[contract-confirm] alimtalk:", err));
   }
 
+  // 현장 인증 QR SOP — 계약 확정 시 토큰 자동 발급
+  let proofUploadUrl: string | null = null;
+  let proofToken: string | null = null;
+  try {
+    const tokenRow = await getOrCreateProofUploadToken(campaign.id);
+    const locale = row.locale === "en" ? "en" : "ko";
+    const base = (
+      process.env.NEXT_PUBLIC_SITE_URL?.trim() || siteUrl
+    ).replace(/\/$/, "");
+    proofToken = tokenRow.token;
+    proofUploadUrl = `${base}${publicProofUploadPath(locale, tokenRow.token)}`;
+  } catch (e) {
+    console.error("[contract-confirm] proof token", e);
+  }
+
   return json({
     ok: true,
     status: OoHQuoteStatus.contract_confirmed,
     campaignId: campaign.id,
+    proofToken,
+    proofUploadUrl,
   });
 }

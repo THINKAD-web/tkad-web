@@ -69,23 +69,44 @@ export async function uploadProofFile(
   });
 }
 
-export function readGeolocation(): Promise<{
-  latitude: number;
-  longitude: number;
-} | null> {
+export type GeoReadResult = {
+  status: "ready" | "denied" | "unavailable" | "timeout";
+  coords: { latitude: number; longitude: number } | null;
+};
+
+/** 권장 GPS — 거부/실패해도 null 반환(업로드 차단 없음) */
+export function readGeolocationDetailed(): Promise<GeoReadResult> {
   return new Promise((resolve) => {
-    if (!navigator.geolocation) {
-      resolve(null);
+    if (typeof navigator === "undefined" || !navigator.geolocation) {
+      resolve({ status: "unavailable", coords: null });
       return;
     }
     navigator.geolocation.getCurrentPosition(
       (pos) =>
         resolve({
-          latitude: pos.coords.latitude,
-          longitude: pos.coords.longitude,
+          status: "ready",
+          coords: {
+            latitude: pos.coords.latitude,
+            longitude: pos.coords.longitude,
+          },
         }),
-      () => resolve(null),
+      (err) => {
+        if (err.code === err.PERMISSION_DENIED) {
+          resolve({ status: "denied", coords: null });
+        } else if (err.code === err.TIMEOUT) {
+          resolve({ status: "timeout", coords: null });
+        } else {
+          resolve({ status: "unavailable", coords: null });
+        }
+      },
       { enableHighAccuracy: true, timeout: 12_000, maximumAge: 60_000 },
     );
   });
+}
+
+export function readGeolocation(): Promise<{
+  latitude: number;
+  longitude: number;
+} | null> {
+  return readGeolocationDetailed().then((r) => r.coords);
 }
