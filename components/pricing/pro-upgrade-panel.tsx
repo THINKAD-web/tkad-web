@@ -7,6 +7,11 @@ import { Crown, CreditCard, Loader2, Sparkles, Zap, Rocket } from "lucide-react"
 import { POINT_COSTS, type RedeemType } from "@/lib/points-constants";
 import { formatProCardPriceLabel } from "@/lib/entitlements/pricing";
 import { ProSubscriptionCheckout } from "@/components/pricing/pro-subscription-checkout";
+import { SubscriptionConfirmOnReturn } from "@/components/pricing/subscription-confirm-on-return";
+import {
+  AGENCY_MONTHLY_KRW,
+  LITE_MONTHLY_KRW,
+} from "@/lib/entitlements/constants";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 
@@ -145,6 +150,8 @@ export function ProUpgradePanel({
   const bal = balance ?? 0;
 
   return (
+    <>
+    <SubscriptionConfirmOnReturn isKo={isKo} onConfirmed={onPlanChange} />
     <div
       id="pro-upgrade"
       className="scroll-mt-24 rounded-[28px] border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] p-6 sm:p-8"
@@ -292,9 +299,67 @@ export function ProUpgradePanel({
             isKo={isKo}
             customerName={userName}
             customerEmail={userEmail}
+            plan="PRO"
           />
         </div>
       )}
     </div>
+
+      <div
+        id="lite-upgrade"
+        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+      >
+        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
+          LITE
+        </p>
+        <h3 className="mt-2 text-lg font-black dark:text-white text-gray-900">
+          {isKo
+            ? `플래너 결과 · PDF — 월 ₩${LITE_MONTHLY_KRW.toLocaleString("ko-KR")}`
+            : `Planner results & PDF — ₩${LITE_MONTHLY_KRW.toLocaleString("en-US")}/mo`}
+        </h3>
+        <p className="mt-2 max-w-xl text-sm text-gray-600 dark:text-white/65">
+          {isKo
+            ? "AI 시뮬레이션·경쟁 분석·마켓 데이터는 포함되지 않습니다."
+            : "Does not include AI simulation, competitor analysis, or market data."}
+        </p>
+        <div className="mt-5 max-w-lg">
+          <ProSubscriptionCheckout
+            isKo={isKo}
+            customerName={userName}
+            customerEmail={userEmail}
+            plan="LITE"
+            autoStart={false}
+          />
+        </div>
+      </div>
+
+      <div
+        id="agency-upgrade"
+        className="scroll-mt-24 mt-6 rounded-[28px] border border-gray-200 bg-gray-50/80 p-6 dark:border-white/12 dark:bg-white/5 sm:p-8"
+      >
+        <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-gray-500 dark:text-white/50">
+          AGENCY
+        </p>
+        <h3 className="mt-2 text-lg font-black dark:text-white text-gray-900">
+          {isKo
+            ? `PRO 기능 + 팀 좌석 — 월 ₩${AGENCY_MONTHLY_KRW.toLocaleString("ko-KR")}`
+            : `PRO features + team seats — ₩${AGENCY_MONTHLY_KRW.toLocaleString("en-US")}/mo`}
+        </h3>
+        <p className="mt-2 max-w-xl text-sm text-gray-600 dark:text-white/65">
+          {isKo
+            ? "대행사·팀을 위한 좌석. 화이트라벨은 별도 검토 대상입니다."
+            : "Seats for agency teams. White-label is not included."}
+        </p>
+        <div className="mt-5 max-w-lg">
+          <ProSubscriptionCheckout
+            isKo={isKo}
+            customerName={userName}
+            customerEmail={userEmail}
+            plan="AGENCY"
+            autoStart={false}
+          />
+        </div>
+      </div>
+    </>
   );
 }

@@ -51,7 +51,7 @@ export async function buildMarketInsightsWeeklyEmails(): Promise<
       OR: [
         { trialEndsAt: { gt: new Date() } },
         { proTrialEndsAt: { gt: new Date() } },
-        { plan: { in: ["PRO_TRIAL", "PRO", "ENTERPRISE"] } },
+        { plan: { in: ["PRO_TRIAL", "PRO", "AGENCY", "ENTERPRISE"] } },
         {
           subscriptions: {
             some: {

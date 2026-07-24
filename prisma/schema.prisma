@@ -1528,21 +1528,26 @@ enum ApiKeyPlan {
 enum ReportAccessLevel {
   FREE
   MEMBER
+  LITE
   PRO
   ENTERPRISE
 }
 
 enum SubscriptionPlan {
   FREE
+  LITE
   PRO
+  AGENCY
   ENTERPRISE
 }
 
 /// 사용자 요금제 (회원가입 PRO 14일 체험 포함)
 enum UserPlan {
   FREE
+  LITE
   PRO_TRIAL
   PRO
+  AGENCY
   ENTERPRISE
 }
 

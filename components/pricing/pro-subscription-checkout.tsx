@@ -1,51 +1,67 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { useRouter } from "@/i18n/navigation";
 import { ANONYMOUS, loadPaymentWidget } from "@tosspayments/payment-widget-sdk";
 import { Loader2 } from "lucide-react";
 import {
   getTossClientKey,
   isTossPaymentsConfigured,
 } from "@/lib/toss-payments-client";
-import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+import {
+  orderNameForCheckoutPlan,
+  type CheckoutablePlan,
+} from "@/lib/subscription-billing-client";
 
 type Props = {
   isKo: boolean;
   customerName: string;
   customerEmail: string;
+  plan?: CheckoutablePlan;
+  /** false면 사용자가 버튼을 누를 때만 체크아웃/위젯 생성 (LITE·AGENCY) */
+  autoStart?: boolean;
 };
 
-function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Props) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
+export function ProSubscriptionCheckout({
+  isKo,
+  customerName,
+  customerEmail,
+  plan = "PRO",
+  autoStart = true,
+}: Props) {
   const widgetRef = useRef<Awaited<ReturnType<typeof loadPaymentWidget>> | null>(null);
+  const [started, setStarted] = useState(autoStart);
   const [ready, setReady] = useState(false);
   const [paying, setPaying] = useState(false);
-  const [confirming, setConfirming] = useState(false);
   const [orderId, setOrderId] = useState<string | null>(null);
   const [chargeAmount, setChargeAmount] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   const clientKey = getTossClientKey();
   const configured = isTossPaymentsConfigured();
+  const methodElId = `${plan.toLowerCase()}-payment-method`;
+  const agreementElId = `${plan.toLowerCase()}-agreement`;
 
   useEffect(() => {
-    if (!configured) return;
+    if (!configured || !started) return;
     let cancelled = false;
     (async () => {
       try {
         const res = await fetch("/api/subscriptions/checkout", {
           method: "POST",
           credentials: "include",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ plan }),
         });
         const data = (await res.json()) as {
           data?: { orderId: string; amount: number };
-          error?: string;
+          error?: { message?: string } | string;
         };
         if (!res.ok || !data.data?.orderId) {
-          throw new Error(data.error ?? "checkout_failed");
+          const errMsg =
+            typeof data.error === "string"
+              ? data.error
+              : data.error?.message ?? "checkout_failed";
+          throw new Error(errMsg);
         }
         if (cancelled) return;
         setOrderId(data.data.orderId);
@@ -53,10 +69,10 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
 
         const widget = await loadPaymentWidget(clientKey!, ANONYMOUS);
         if (cancelled) return;
-        await widget.renderPaymentMethods("#pro-payment-method", {
+        await widget.renderPaymentMethods(`#${methodElId}`, {
           value: data.data.amount,
         });
-        await widget.renderAgreement("#pro-agreement");
+        await widget.renderAgreement(`#${agreementElId}`);
         widgetRef.current = widget;
         setReady(true);
       } catch (e) {
@@ -68,40 +84,7 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
     return () => {
       cancelled = true;
     };
-  }, [clientKey, configured]);
-
-  useEffect(() => {
-    const paymentKey = searchParams.get("paymentKey");
-    const returnedOrderId = searchParams.get("orderId");
-    const returnedAmount = searchParams.get("amount");
-    if (!paymentKey || !returnedOrderId || !returnedAmount) return;
-
-    let cancelled = false;
-    (async () => {
-      setConfirming(true);
-      try {
-        const res = await fetch("/api/subscriptions/confirm", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            paymentKey,
-            orderId: returnedOrderId,
-            amount: Number(returnedAmount),
-          }),
-        });
-        if (!res.ok) throw new Error("confirm_failed");
-        if (!cancelled) router.replace("/pricing?success=1");
-      } catch {
-        if (!cancelled) setError(isKo ? "결제 확인 실패" : "Payment confirmation failed");
-      } finally {
-        if (!cancelled) setConfirming(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [searchParams, router, isKo]);
+  }, [clientKey, configured, plan, methodElId, agreementElId, started]);
 
   if (!configured) {
     return (
@@ -113,19 +96,35 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
     );
   }
 
-  if (confirming) {
+  if (!started) {
     return (
-      <div className="flex items-center justify-center gap-2 py-8 text-sm dark:text-white">
-        <Loader2 className="h-5 w-5 animate-spin" />
-        {isKo ? "결제 확인 중…" : "Confirming payment…"}
-      </div>
+      <button
+        type="button"
+        onClick={() => setStarted(true)}
+        className="tkad-qp-cta flex h-12 w-full items-center justify-center rounded-xl text-sm font-black text-white"
+      >
+        {isKo ? "카드 결제 준비" : "Prepare card payment"}
+      </button>
     );
   }
 
+  const payLabel =
+    plan === "LITE"
+      ? isKo
+        ? "LITE 구독 결제하기"
+        : "Subscribe to LITE"
+      : plan === "AGENCY"
+        ? isKo
+          ? "AGENCY 구독 결제하기"
+          : "Subscribe to AGENCY"
+        : isKo
+          ? "PRO 구독 결제하기"
+          : "Subscribe to PRO";
+
   return (
     <div className="rounded-2xl border dark:border-white/12 border-gray-200 dark:bg-black bg-white/30 p-5">
-      <div id="pro-payment-method" />
-      <div id="pro-agreement" className="mt-4" />
+      <div id={methodElId} />
+      <div id={agreementElId} className="mt-4" />
       {error ? <p className="mt-3 text-sm text-red-300">{error}</p> : null}
       <button
         type="button"
@@ -137,7 +136,7 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
           try {
             await widgetRef.current.requestPayment({
               orderId,
-              orderName: isKo ? "THINKAD PRO 월 구독" : "THINKAD PRO monthly",
+              orderName: orderNameForCheckoutPlan(plan, isKo),
               customerName,
               customerEmail,
               successUrl: `${window.location.origin}${window.location.pathname}?success=1`,
@@ -151,16 +150,10 @@ function ProSubscriptionCheckoutInner({ isKo, customerName, customerEmail }: Pro
         }}
         className="tkad-qp-cta mt-6 flex h-12 w-full items-center justify-center rounded-xl text-sm font-black text-white disabled:opacity-50"
       >
-        {paying ? (
-          <Loader2 className="h-4 w-4 animate-spin" />
-        ) : (
-          isKo ? "PRO 구독 결제하기" : "Subscribe to PRO"
-        )}
+        {paying ? <Loader2 className="h-4 w-4 animate-spin" /> : payLabel}
       </button>
     </div>
   );
 }
 
-export const ProSubscriptionCheckout = withSearchParamsSuspense(
-  ProSubscriptionCheckoutInner,
-);
+export const PaidSubscriptionCheckout = ProSubscriptionCheckout;

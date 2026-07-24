@@ -1,13 +1,22 @@
 import { randomBytes } from "node:crypto";
-import type { SubscriptionStatus } from "@prisma/client";
+import type { SubscriptionPlan, SubscriptionStatus } from "@prisma/client";
 import { confirmTossPayment } from "@/lib/toss-payments";
-import { discountedProPriceKrw } from "@/lib/entitlements/pricing";
+import {
+  amountKrwForCheckoutPlan,
+  orderNameForCheckoutPlan,
+  type CheckoutablePlan,
+} from "@/lib/subscription-billing-client";
 import { prisma } from "@/lib/prisma";
 import { isDatabaseConfigured } from "@/lib/prisma";
 import {
+  activateAgencyPlanForUser,
+  activateLitePlanForUser,
   activateProPlanForUser,
   syncUserPlanAfterSubscriptionEnd,
 } from "@/lib/check-plan";
+
+export type { CheckoutablePlan };
+export { amountKrwForCheckoutPlan, orderNameForCheckoutPlan };
 
 export function generateSubscriptionOrderId(): string {
   return `sub_${Date.now()}_${randomBytes(4).toString("hex")}`;
@@ -40,15 +49,54 @@ function addOneMonth(from = new Date()): Date {
   return endDate;
 }
 
+async function activateUserPlanForSubscription(
+  userId: string,
+  plan: SubscriptionPlan,
+): Promise<void> {
+  if (plan === "LITE") {
+    await activateLitePlanForUser(userId);
+    return;
+  }
+  if (plan === "AGENCY") {
+    await activateAgencyPlanForUser(userId);
+    return;
+  }
+  if (plan === "ENTERPRISE") {
+    await prisma.user.update({
+      where: { id: userId },
+      data: {
+        plan: "ENTERPRISE",
+        trialStartedAt: null,
+        trialEndsAt: null,
+        proTrialEndsAt: null,
+      },
+    });
+    return;
+  }
+  await activateProPlanForUser(userId);
+}
+
+/** @deprecated use createPaidCheckout(userId, "PRO") */
 export async function createProCheckout(userId: string) {
+  return createPaidCheckout(userId, "PRO");
+}
+
+export async function createPaidCheckout(
+  userId: string,
+  plan: CheckoutablePlan,
+) {
+  if (plan !== "LITE" && plan !== "PRO" && plan !== "AGENCY") {
+    throw new Error("invalid_checkout_plan");
+  }
+
   const orderId = generateSubscriptionOrderId();
   const endDate = addOneMonth();
-  const amountKrw = discountedProPriceKrw();
+  const amountKrw = amountKrwForCheckoutPlan(plan);
 
   const sub = await prisma.subscription.create({
     data: {
       userId,
-      plan: "PRO",
+      plan,
       status: "PAST_DUE",
       orderId,
       amountKrw,
@@ -56,7 +104,7 @@ export async function createProCheckout(userId: string) {
     },
   });
 
-  return { subscriptionId: sub.id, orderId, amount: amountKrw };
+  return { subscriptionId: sub.id, orderId, amount: amountKrw, plan };
 }
 
 /** 결제 완료 후 Subscription + User.plan 동기화 */
@@ -64,7 +112,7 @@ export async function activateProSubscriptionRecord(opts: {
   orderId: string;
   paymentKey?: string | null;
   userId?: string;
-}): Promise<{ userId: string } | null> {
+}): Promise<{ userId: string; plan: SubscriptionPlan } | null> {
   if (!isDatabaseConfigured() || !isSubscriptionOrderId(opts.orderId)) {
     return null;
   }
@@ -72,7 +120,7 @@ export async function activateProSubscriptionRecord(opts: {
   const sub = await prisma.subscription.findFirst({
     where: {
       orderId: opts.orderId,
-      plan: "PRO",
+      plan: { in: ["LITE", "PRO", "AGENCY", "ENTERPRISE"] },
       ...(opts.userId ? { userId: opts.userId } : {}),
     },
   });
@@ -90,8 +138,8 @@ export async function activateProSubscriptionRecord(opts: {
     },
   });
 
-  await activateProPlanForUser(sub.userId);
-  return { userId: sub.userId };
+  await activateUserPlanForSubscription(sub.userId, sub.plan);
+  return { userId: sub.userId, plan: sub.plan };
 }
 
 export async function confirmProSubscription(opts: {
@@ -101,7 +149,11 @@ export async function confirmProSubscription(opts: {
   amount: number;
 }) {
   const sub = await prisma.subscription.findFirst({
-    where: { userId: opts.userId, orderId: opts.orderId, plan: "PRO" },
+    where: {
+      userId: opts.userId,
+      orderId: opts.orderId,
+      plan: { in: ["LITE", "PRO", "AGENCY"] },
+    },
   });
   if (!sub) throw new Error("subscription_not_found");
   if (sub.amountKrw != null && sub.amountKrw !== opts.amount) {
@@ -141,7 +193,7 @@ export async function handleTossSubscriptionWebhook(payload: {
       paymentKey: payload.paymentKey,
     });
     return activated
-      ? { handled: true, action: "activated_pro" }
+      ? { handled: true, action: `activated_${activated.plan.toLowerCase()}` }
       : { handled: false };
   }
 
@@ -149,7 +201,10 @@ export async function handleTossSubscriptionWebhook(payload: {
   if (!subStatus) return { handled: false };
 
   const sub = await prisma.subscription.findFirst({
-    where: { orderId, plan: "PRO" },
+    where: {
+      orderId,
+      plan: { in: ["LITE", "PRO", "AGENCY", "ENTERPRISE"] },
+    },
     select: { id: true, userId: true },
   });
   if (!sub) return { handled: false };
@@ -171,7 +226,7 @@ export async function expireEndedSubscriptions(): Promise<number> {
   const ended = await prisma.subscription.findMany({
     where: {
       status: "ACTIVE",
-      plan: { in: ["PRO", "ENTERPRISE"] },
+      plan: { in: ["LITE", "PRO", "AGENCY", "ENTERPRISE"] },
       endDate: { lt: now },
     },
     select: { id: true, userId: true },

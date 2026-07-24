@@ -122,6 +122,13 @@ function formatFeatureCell(
     };
   }
 
+  if (minLevel === "LITE") {
+    return {
+      kind: "pro_required",
+      display: isKo ? "🔒 LITE+" : "🔒 LITE+",
+    };
+  }
+
   if (minLevel === "PRO") {
     return {
       kind: "pro_required",
