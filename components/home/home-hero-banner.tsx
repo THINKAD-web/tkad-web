@@ -21,14 +21,12 @@ type HeroSlide = {
 /**
  * Hero slides — Bunny CDN 직결 (Strategy A).
  * 로컬 `public/images/hero/hero-slide*-828.webp` 는 롤백용으로 유지하되 참조하지 않음.
- *
- * 슬라이드1 파일명은 NFD 한글(광화문…). NFC 인코딩 URL은 404.
  */
 const SLIDES: HeroSlide[] = [
   {
     id: "gwanghwamun-kt",
     image:
-      "https://tkad-cdn.b-cdn.net/%E1%84%80%E1%85%AA%E1%86%BC%E1%84%92%E1%85%AA%E1%84%86%E1%85%AE%E1%86%AB%20KT%20%E1%84%89%E1%85%B3%E1%84%8F%E1%85%B0%E1%84%8B%E1%85%A5.jpg",
+      "https://tkad-cdn.b-cdn.net/tkad/admin/2026/07/bdda9382-c6c8-407e-8ba0-13ecd5984d62.jpg",
     altKo: "광화문 KT 스퀘어 미디어월",
     altEn: "Gwanghwamun KT Square media wall",
   },
