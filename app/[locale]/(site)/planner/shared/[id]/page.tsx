@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getTranslations } from "next-intl/server";
@@ -9,6 +10,24 @@ import { getPrimaryMediaImageUrl } from "@/lib/media-data";
 import { PLANNER_DEFAULT_CATEGORIES } from "@/lib/planner/types";
 
 export const dynamic = "force-dynamic";
+
+type Props = {
+  params: Promise<{ locale: string; id: string }>;
+};
+
+/** TTL 공유 링크 — `/proposal/[id]` 와 동일하게 검색 인덱싱 제외 */
+export async function generateMetadata({ params }: Props): Promise<Metadata> {
+  const locale = await resolveLocaleParam(params);
+  const isKo = locale === "ko";
+  return {
+    title: isKo ? "공유된 플래너 플랜" : "Shared planner plan",
+    robots: {
+      index: false,
+      follow: false,
+      googleBot: { index: false, follow: false },
+    },
+  };
+}
 
 type PlanJson = {
   campaignGoal: string | null;
@@ -42,11 +61,7 @@ async function loadPlan(id: string) {
   return plan;
 }
 
-export default async function SharedPlannerPage({
-  params,
-}: {
-  params: Promise<{ locale: string; id: string }>;
-}) {
+export default async function SharedPlannerPage({ params }: Props) {
   const { id } = await params;
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
