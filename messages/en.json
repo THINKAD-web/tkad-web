@@ -613,10 +613,10 @@
     "quickInquiryFavorite": "Save ♡",
     "quickInquiryCta": "Quick inquiry",
     "availabilityLive": {
-      "badgeInstant": "Book now",
+      "badgeInstant": "Instant book (info)",
       "badgePartial": "Limited slots",
       "badgeScarce": "Almost full",
-      "filterInstant": "Book now",
+      "filterInstant": "Instant book (info)",
       "scarcityEyebrow": "Almost full",
       "scarcityTitle": "Closing soon this month",
       "scarcityDesc": "These placements have under 20% availability left. Contact us to secure dates.",
@@ -3271,7 +3271,9 @@
       "estimatedCost": "{start}–{end} ({days} days) est. cost: {cost}",
       "ctaInquiryPeriod": "Inquire for this period",
       "ctaInstantBook": "Instant book",
-      "legendSelected": "Selected"
+      "legendSelected": "Selected",
+      "sparseTitle": "Limited availability data",
+      "sparseDesc": "This placement has little recorded booking history in our calendar. An empty calendar may not mean open inventory — please confirm dates via inquiry or quote."
     },
     "traffic": {
       "title": "Hourly · Weekday · Monthly footfall",

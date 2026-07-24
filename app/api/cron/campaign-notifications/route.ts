@@ -145,6 +145,7 @@ export async function GET(request: NextRequest) {
     milestones: milestones.milestones,
     renewalGenerated: renewal.generated,
     renewalEmailed: renewal.emailed,
+    reportsIssued: milestones.reportsIssued,
     checked: campaigns.length,
     date: tomorrowYmd,
     reviewWindow: yesterdayYmd,

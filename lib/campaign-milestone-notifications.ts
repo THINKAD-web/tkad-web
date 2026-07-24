@@ -7,6 +7,7 @@ import {
   resolveCampaignNotifyPhone,
 } from "@/lib/kakao-alimtalk-notify";
 import { notifyMediaOwnerCampaignConfirmed } from "@/lib/media-owner-notify";
+import { issueCampaignCompletionReport } from "@/lib/campaign-completion-report-issue";
 import { siteUrl } from "@/lib/seo";
 
 type CampaignRow = {
@@ -104,6 +105,7 @@ export async function runCampaignMilestoneNotifications(
   created: number;
   alimtalk: number;
   emails: number;
+  reportsIssued: number;
   milestones: Record<string, number>;
 }> {
   const todayYmd = seoulYmd(new Date());
@@ -111,6 +113,7 @@ export async function runCampaignMilestoneNotifications(
   let created = 0;
   let alimtalk = 0;
   let emails = 0;
+  let reportsIssued = 0;
 
   const activeStatuses = [
     "contract",
@@ -276,8 +279,25 @@ export async function runCampaignMilestoneNotifications(
       bump("end_d3_owner", n);
     }
 
-    // 종료 D+5: 리포트 발송 + 다음 캠페인 제안 (renewal cron과 병행)
+    // 종료 D+5: 리포트 미발급 시 한 번 더 시도 + 다음 캠페인 제안
     if (endYmd === addSeoulDays(todayYmd, -5)) {
+      if (!c.reportGeneratedAt) {
+        try {
+          const issued = await issueCampaignCompletionReport(c.id, {
+            db,
+            sendEmail: true,
+            markCompleted: true,
+            force: false,
+          });
+          if (!issued.skipped) {
+            reportsIssued += 1;
+            bump("end_p5_report_issue", 1);
+            if (issued.emailed) emails += 1;
+          }
+        } catch (e) {
+          console.error("[milestones] end D+5 issue report", c.id, e);
+        }
+      }
       if (
         await notifyAdvertiser(c as CampaignRow, {
           dedupeKey: `ms:end_p5_renewal:${c.id}:${todayYmd}`,
@@ -292,22 +312,49 @@ export async function runCampaignMilestoneNotifications(
       }
     }
 
-    // 종료 D+1: 리포트 작성 중
+    // 종료 D+1: 리포트 생성·발송 + 안내 (PDF 링크 포함)
     if (endYmd === addSeoulDays(todayYmd, -1)) {
+      let reportAt = c.reportGeneratedAt;
+      if (!reportAt) {
+        try {
+          const issued = await issueCampaignCompletionReport(c.id, {
+            db,
+            sendEmail: true,
+            markCompleted: true,
+            force: false,
+          });
+          if (!issued.skipped) {
+            reportsIssued += 1;
+            bump("end_p1_report_issue", 1);
+            if (issued.emailed) emails += 1;
+            reportAt = issued.reportGeneratedAt
+              ? new Date(issued.reportGeneratedAt)
+              : new Date();
+          }
+        } catch (e) {
+          console.error("[milestones] end D+1 issue report", c.id, e);
+        }
+      }
+
+      const reportReady = Boolean(reportAt);
+      const reportPath = `/api/my/dashboard/campaigns/${c.id}/report`;
       if (
         await notifyAdvertiser(c as CampaignRow, {
           dedupeKey: `ms:end_p1_report:${c.id}:${todayYmd}`,
-          title: "결과 리포트 작성 중",
-          body: `「${c.name}」캠페인이 종료되었습니다. 결과 리포트를 준비 중입니다.`,
-          link: dash,
-          emailSubject: `[THINKAD] 결과 리포트 작성 중 — ${c.name}`,
+          title: reportReady
+            ? "결과 리포트 준비 완료"
+            : "결과 리포트 작성 중",
+          body: reportReady
+            ? `「${c.name}」결과 리포트가 준비되었습니다. PDF를 확인해 주세요.`
+            : `「${c.name}」캠페인이 종료되었습니다. 결과 리포트를 준비 중입니다.`,
+          link: reportReady ? reportPath : dash,
+          // PDF 첨부 메일은 issue 쪽에서 이미 발송 — 인앱 알림만 (중복 메일 방지)
         })
       ) {
         bump("end_p1_report", 1);
-        emails += 1;
       }
     }
   }
 
-  return { created, alimtalk, emails, milestones: counts };
+  return { created, alimtalk, emails, reportsIssued, milestones: counts };
 }

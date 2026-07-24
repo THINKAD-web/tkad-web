@@ -3,8 +3,16 @@
 import { useMemo } from "react";
 import { Link } from "@/i18n/navigation";
 import { Check, Sparkles } from "lucide-react";
-import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
-import { getPricingGuestFootnote, getPricingPlans } from "@/lib/entitlements/pricing-plans";
+import {
+  AGENCY_MONTHLY_KRW,
+  LITE_MONTHLY_KRW,
+  PRO_TRIAL_DAYS,
+} from "@/lib/entitlements/constants";
+import {
+  getPricingGuestFootnote,
+  getPricingPlans,
+  type PricingPlanId,
+} from "@/lib/entitlements/pricing-plans";
 import { ProUpgradePanel } from "@/components/pricing/pro-upgrade-panel";
 import { ProMonthlyPriceDisplay } from "@/components/pricing/pro-monthly-price";
 import { useIsPro } from "@/hooks/use-is-pro";
@@ -24,8 +32,27 @@ const planOutlineBtnClass =
 const planCtaPrimaryClass =
   "tkad-qp-cta mt-8 flex h-11 w-full items-center justify-center rounded-xl text-sm font-black text-white";
 
-function scrollToProUpgrade() {
-  document.getElementById("pro-upgrade")?.scrollIntoView({ behavior: "smooth", block: "start" });
+function scrollToCheckout(plan: "lite" | "pro" | "agency") {
+  const id =
+    plan === "lite"
+      ? "lite-upgrade"
+      : plan === "agency"
+        ? "agency-upgrade"
+        : "pro-upgrade";
+  document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+}
+
+function planTitle(id: PricingPlanId): string {
+  if (id === "free") return "FREE";
+  if (id === "lite") return "LITE";
+  if (id === "pro") return "PRO";
+  if (id === "agency") return "AGENCY";
+  return "ENTERPRISE";
+}
+
+function formatMonthlyKrw(amount: number, isKo: boolean): string {
+  const n = amount.toLocaleString(isKo ? "ko-KR" : "en-US");
+  return isKo ? `월 ₩${n}` : `₩${n}/mo`;
 }
 
 export function PricingPageClient({
@@ -41,14 +68,14 @@ export function PricingPageClient({
 
   return (
     <div className="space-y-8">
-      <div className="grid gap-6 lg:grid-cols-3">
+      <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-5">
         {plans.map((plan) => {
           const key = plan.id;
           const highlighted = key === "pro";
           return (
             <article
               key={key}
-              className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${ highlighted ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-white/10" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50" }`}
+              className={`rounded-[28px] border p-6 backdrop-blur sm:p-8 ${highlighted ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] dark:bg-white/10" : "dark:border-white/12 border-gray-200 dark:bg-white/6 bg-gray-50"}`}
             >
               {highlighted ? (
                 <p className="mb-3 inline-flex items-center gap-1 rounded-full border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-0.5 font-display text-xs font-medium uppercase tracking-wider text-[color:var(--qp-accent)]">
@@ -57,7 +84,7 @@ export function PricingPageClient({
                 </p>
               ) : null}
               <h2 className="text-xl font-black uppercase dark:text-white text-gray-900">
-                {key === "free" ? "FREE" : key === "pro" ? "PRO" : "ENTERPRISE"}
+                {planTitle(key)}
               </h2>
               {key === "pro" ? (
                 <div className="mt-2">
@@ -66,6 +93,14 @@ export function PricingPageClient({
               ) : key === "free" ? (
                 <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
                   {isKo ? "무료" : "Free"}
+                </p>
+              ) : key === "lite" ? (
+                <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
+                  {formatMonthlyKrw(LITE_MONTHLY_KRW, isKo)}
+                </p>
+              ) : key === "agency" ? (
+                <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
+                  {formatMonthlyKrw(AGENCY_MONTHLY_KRW, isKo)}
                 </p>
               ) : (
                 <p className="mt-2 text-2xl font-black text-gray-800 dark:text-white">
@@ -85,37 +120,67 @@ export function PricingPageClient({
                 </p>
               ) : null}
               <ul className="mt-6 space-y-2">
-                {plan.features.map((f) => (
-                  <li
-                    key={f.id}
-                    className="flex gap-2 text-sm dark:text-white text-gray-800"
-                  >
-                    <Check
-                      className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]"
-                      aria-hidden
-                    />
-                    <span className="min-w-0 flex-1">
-                      {f.text}
-                      {f.comingSoon ? (
-                        <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
-                          {isKo ? "준비 중" : "Coming soon"}
-                        </span>
-                      ) : null}
-                    </span>
-                  </li>
-                ))}
+                {plan.features
+                  .filter((f) => f.id !== "price")
+                  .map((f) => (
+                    <li
+                      key={f.id}
+                      className="flex gap-2 text-sm dark:text-white text-gray-800"
+                    >
+                      <Check
+                        className="mt-0.5 h-4 w-4 shrink-0 text-[color:var(--qp-accent)]"
+                        aria-hidden
+                      />
+                      <span className="min-w-0 flex-1">
+                        {f.text}
+                        {f.comingSoon ? (
+                          <span className="ml-1.5 inline-flex rounded-full border border-amber-400/50 bg-amber-500/10 px-1.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-amber-800 dark:text-amber-200">
+                            {isKo ? "준비 중" : "Coming soon"}
+                          </span>
+                        ) : null}
+                      </span>
+                    </li>
+                  ))}
               </ul>
               {key === "free" ? (
                 <Link
                   href={loggedIn ? "/media" : "/register"}
                   className={planOutlineBtnClass}
                 >
-                  {loggedIn ? (isKo ? "매체 탐색" : "Browse media") : isKo ? "무료 가입" : "Sign up free"}
+                  {loggedIn
+                    ? isKo
+                      ? "매체 탐색"
+                      : "Browse media"
+                    : isKo
+                      ? "무료 가입"
+                      : "Sign up free"}
                 </Link>
+              ) : null}
+              {key === "lite" ? (
+                loggedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => scrollToCheckout("lite")}
+                    className={planOutlineBtnClass}
+                  >
+                    {isKo ? "LITE 시작하기 ↓" : "Get LITE ↓"}
+                  </button>
+                ) : (
+                  <Link
+                    href="/login?redirect=/pricing#lite-upgrade"
+                    className={planOutlineBtnClass}
+                  >
+                    {isKo ? "로그인 후 LITE" : "Sign in for LITE"}
+                  </Link>
+                )
               ) : null}
               {key === "pro" ? (
                 loggedIn ? (
-                  <button type="button" onClick={scrollToProUpgrade} className={planCtaPrimaryClass}>
+                  <button
+                    type="button"
+                    onClick={() => scrollToCheckout("pro")}
+                    className={planCtaPrimaryClass}
+                  >
                     {isPro
                       ? isKo
                         ? "PRO 기간 연장하기 ↓"
@@ -130,6 +195,24 @@ export function PricingPageClient({
                     className={planCtaPrimaryClass}
                   >
                     {isKo ? "로그인 후 PRO 시작" : "Sign in for PRO"}
+                  </Link>
+                )
+              ) : null}
+              {key === "agency" ? (
+                loggedIn ? (
+                  <button
+                    type="button"
+                    onClick={() => scrollToCheckout("agency")}
+                    className={planOutlineBtnClass}
+                  >
+                    {isKo ? "AGENCY 시작하기 ↓" : "Get AGENCY ↓"}
+                  </button>
+                ) : (
+                  <Link
+                    href="/login?redirect=/pricing#agency-upgrade"
+                    className={planOutlineBtnClass}
+                  >
+                    {isKo ? "로그인 후 AGENCY" : "Sign in for AGENCY"}
                   </Link>
                 )
               ) : null}

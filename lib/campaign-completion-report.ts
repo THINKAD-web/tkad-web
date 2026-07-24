@@ -64,8 +64,9 @@ export async function buildCampaignCompletionReportPdfBuffer(
       startsAt: b.startsAt,
       endsAt: b.endsAt,
       status: b.status,
-      // KPI 산출용 (Executive Summary)
+      // KPI·예측/검증된 추정치 산출용 (Executive Summary)
       dailyFootTraffic: b.media?.dailyFootfall ?? null,
+      impressions: b.media?.impressions ?? null,
       region: b.media?.region ?? null,
       trafficPattern:
         (b.media as { trafficPattern?: { hourly?: number[]; weekly?: number[]; monthly?: number[] } | null } | null | undefined)

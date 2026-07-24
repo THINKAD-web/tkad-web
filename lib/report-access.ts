@@ -33,13 +33,26 @@ export function resolveLevelFromPlan(
   userPlan: { plan: string; trialEndsAt: Date | null; proTrialEndsAt: Date | null },
 ): ReportAccessLevel {
   const now = Date.now();
+  const subActive = status === "ACTIVE" || status === "TRIALING";
+  const subTrialOk = !trialEndsAt || trialEndsAt.getTime() >= now;
+
   if (plan === "ENTERPRISE" && status === "ACTIVE") return "ENTERPRISE";
-  if (plan === "PRO" && (status === "ACTIVE" || status === "TRIALING")) {
-    if (trialEndsAt && trialEndsAt.getTime() < now) return "MEMBER";
+  // AGENCY 기능 게이트 = PRO (팀 좌석은 별도)
+  if (plan === "AGENCY" && subActive) {
+    if (!subTrialOk) return "MEMBER";
     return "PRO";
+  }
+  if (plan === "PRO" && subActive) {
+    if (!subTrialOk) return "MEMBER";
+    return "PRO";
+  }
+  if (plan === "LITE" && subActive) {
+    if (!subTrialOk) return "MEMBER";
+    return "LITE";
   }
   if (userPlan.plan === "ENTERPRISE") return "ENTERPRISE";
   if (isPro(userPlan)) return "PRO";
+  if (userPlan.plan === "LITE") return "LITE";
   if (plan === "FREE" || status === "EXPIRED" || status === "CANCELLED") {
     return "MEMBER";
   }
@@ -69,7 +82,9 @@ export async function getUserReportLevel(userId: string | null): Promise<ReportA
 
     const sub = user.subscriptions[0];
     if (!sub) {
+      if (user.plan === "ENTERPRISE") return "ENTERPRISE";
       if (isPro(user)) return "PRO";
+      if (user.plan === "LITE") return "LITE";
       return "MEMBER";
     }
 

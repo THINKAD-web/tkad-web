@@ -23,14 +23,20 @@ export function MyPlanStatusBadge({
   const plan = user.plan ?? "FREE";
 
   let label: string;
-  let tone: "free" | "trial" | "pro";
+  let tone: "free" | "trial" | "pro" | "lite";
 
   if (pro && plan === "PRO_TRIAL" && days > 0) {
     label = isKo ? `PRO 체험 D-${days}` : `PRO trial · ${days}d left`;
     tone = "trial";
+  } else if (plan === "AGENCY") {
+    label = "AGENCY";
+    tone = "pro";
   } else if (pro && (plan === "PRO" || plan === "ENTERPRISE")) {
     label = plan === "ENTERPRISE" ? "ENTERPRISE" : "PRO";
     tone = "pro";
+  } else if (plan === "LITE") {
+    label = "LITE";
+    tone = "lite";
   } else {
     label = isKo ? "FREE" : "FREE";
     tone = "free";
@@ -45,11 +51,13 @@ export function MyPlanStatusBadge({
             "tkad-qp-cta text-white shadow-sm",
           tone === "trial" &&
             "tkad-qp-cta text-white shadow-sm",
+          tone === "lite" &&
+            "border border-[color:var(--qp-accent)]/40 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]",
           tone === "free" &&
             "border border-gray-300 bg-gray-100 text-gray-700 dark:border-white/15 dark:bg-white/10 dark:text-white/80",
         )}
       >
-        {tone !== "free" ? (
+        {tone !== "free" && tone !== "lite" ? (
           <Sparkles className="h-3 w-3 shrink-0" aria-hidden />
         ) : null}
         {label}

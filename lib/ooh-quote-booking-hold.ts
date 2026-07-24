@@ -186,6 +186,37 @@ export async function promoteHoldsToConfirmed(
   return { updated: result.count };
 }
 
+/**
+ * 계약 확정 SSOT — 홀드가 없으면 생성 후 confirmed 로 승격.
+ * booking_confirm 을 건너뛴 경로에서도 MediaBooking 이 남도록 강제.
+ */
+export async function ensureConfirmedHoldsForQuote(
+  db: QuoteHoldDb,
+  quote: QuoteHoldSource,
+  opts?: { force?: boolean },
+): Promise<{ created: number; promoted: number; alreadyConfirmed: number }> {
+  const mediaIds = uniqueMediaIds(quote.mediaIds);
+  if (mediaIds.length === 0) {
+    return { created: 0, promoted: 0, alreadyConfirmed: 0 };
+  }
+
+  const alreadyConfirmed = await db.mediaBooking.count({
+    where: {
+      oohQuoteId: quote.id,
+      status: MediaBookingStatus.confirmed,
+    },
+  });
+
+  const createResult = await createHoldsForQuote(db, quote, opts);
+  const promoteResult = await promoteHoldsToConfirmed(db, quote.id);
+
+  return {
+    created: createResult.created,
+    promoted: promoteResult.updated,
+    alreadyConfirmed,
+  };
+}
+
 /** cancel / withdraw 시 활성 홀드 해제 (내역 유지) */
 export async function releaseHoldsForQuote(
   db: QuoteHoldDb,

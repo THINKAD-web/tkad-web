@@ -425,8 +425,15 @@ function MediaMapDetailBody({
               {(item.isInstantBooking || item.isVerified) && (
                 <div className="mb-1 flex flex-wrap gap-1">
                   {item.isInstantBooking ? (
-                    <span className="rounded bg-[color:var(--qp-accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)]">
-                      {isKo ? "즉시예약" : "Instant"}
+                    <span
+                      className="rounded bg-[color:var(--qp-accent-soft)] px-1.5 py-0.5 text-[10px] font-semibold text-[color:var(--qp-accent)]"
+                      title={
+                        isKo
+                          ? "운영자가 즉시 예약 경로를 켠 매체입니다. 날짜별 재고는 캘린더·영업 확인이 필요합니다."
+                          : "Instant-book path is enabled by ops. Check the calendar — dates are not live inventory."
+                      }
+                    >
+                      {isKo ? "즉시예약(안내)" : "Instant (info)"}
                     </span>
                   ) : null}
                   {item.isVerified ? (

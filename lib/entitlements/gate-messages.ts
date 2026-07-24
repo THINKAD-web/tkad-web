@@ -52,6 +52,7 @@ function requiredTierEyebrow(minLevel: EntitlementAccessLevel, isKo: boolean): s
   if (minLevel === "MEMBER") {
     return isKo ? "FREE 회원" : "FREE member";
   }
+  if (minLevel === "LITE") return "LITE";
   if (minLevel === "PRO") return "PRO";
   return "Enterprise";
 }
@@ -67,10 +68,15 @@ function aiDailyLimitsLine(isKo: boolean): string {
 
 function proUnlocksHint(feature: ReportFeature, isKo: boolean): string | undefined {
   const min = FEATURE_MIN_LEVEL[feature];
+  if (min === "LITE") {
+    return isKo
+      ? `LITE에서 ${featureLabel(feature, true)}를 이용할 수 있어요. AI 시뮬레이션·경쟁 분석은 PRO입니다.`
+      : `LITE unlocks ${featureLabel(feature, false)}. Simulation & competitor analysis stay on PRO.`;
+  }
   if (min !== "PRO") return undefined;
   return isKo
-    ? `PRO에서 ${featureLabel(feature, true)}·노출 예측·시뮬레이션·PDF 보고서를 이용할 수 있어요.`
-    : `PRO unlocks ${featureLabel(feature, false)}, forecasts, simulation & PDF reports.`;
+    ? `PRO에서 ${featureLabel(feature, true)}·노출 예측·시뮬레이션을 이용할 수 있어요.`
+    : `PRO unlocks ${featureLabel(feature, false)}, forecasts & simulation.`;
 }
 
 /**
@@ -150,17 +156,38 @@ export function buildFeatureGateMessage(opts: {
   }
 
   // upgrade (logged-in FREE / below min)
+  const needsLite = minLevel === "LITE";
+  const needsPro = minLevel === "PRO";
   return {
-    eyebrow: "PRO",
-    title: isKo ? `${title} — PRO 전용` : `${title} — PRO only`,
-    description:
-      isKo
-        ? `이 기능은 PRO 전용이에요. FREE에서는 플래너 입력(Step 1~6)까지 가능합니다.`
-        : `This feature requires PRO. FREE includes planner input through Step 6.`,
+    eyebrow: needsLite ? "LITE" : "PRO",
+    title: needsLite
+      ? isKo
+        ? `${title} — LITE 이상`
+        : `${title} — LITE+`
+      : isKo
+        ? `${title} — PRO 전용`
+        : `${title} — PRO only`,
+    description: needsLite
+      ? isKo
+        ? `이 기능은 LITE 이상에서 이용할 수 있어요. FREE에서는 플래너 입력(Step 1~6)까지 가능합니다.`
+        : `Requires LITE or higher. FREE includes planner input through Step 6.`
+      : needsPro
+        ? isKo
+          ? `이 기능은 PRO 전용이에요. LITE는 플래너 결과·PDF만 포함합니다.`
+          : `This feature requires PRO. LITE covers planner results & PDF only.`
+        : isKo
+          ? `이 기능은 PRO 전용이에요. FREE에서는 플래너 입력(Step 1~6)까지 가능합니다.`
+          : `This feature requires PRO. FREE includes planner input through Step 6.`,
     hint: proUnlocksHint(feature, isKo) ?? trialHint,
     primaryCta: {
       href: "/pricing",
-      label: isKo ? "PRO 무료 체험" : "Start PRO trial",
+      label: needsLite
+        ? isKo
+          ? "LITE 알아보기"
+          : "View LITE"
+        : isKo
+          ? "PRO 무료 체험"
+          : "Start PRO trial",
     },
     secondaryCta: {
       href: "/pricing?trial=1",

@@ -28,6 +28,14 @@ export async function POST(request: NextRequest, { params }: Params) {
       campaignId,
       imageUrl,
       caption: String(body.caption ?? "").trim() || null,
+      latitude:
+        typeof body.latitude === "number" && Number.isFinite(body.latitude)
+          ? body.latitude
+          : null,
+      longitude:
+        typeof body.longitude === "number" && Number.isFinite(body.longitude)
+          ? body.longitude
+          : null,
       uploadSource: "admin",
     });
     return json({ photo }, 201);

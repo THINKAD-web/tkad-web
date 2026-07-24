@@ -54,9 +54,14 @@ export function MediaThumbnailTrustOverlay({
             instantClass,
             "absolute left-1.5 top-1.5 sm:left-2 sm:top-2",
           )}
+          title={
+            isKo
+              ? "운영자가 즉시 예약 경로를 켠 매체입니다. 날짜별 재고와는 다를 수 있습니다."
+              : "Instant-book path enabled by ops — not live date inventory."
+          }
         >
           <Zap className="h-3 w-3 shrink-0" />
-          {isKo ? "즉시예약" : "Instant"}
+          {isKo ? "즉시예약(안내)" : "Instant (info)"}
         </span>
       ) : null}
 

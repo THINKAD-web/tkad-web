@@ -6,13 +6,22 @@
 /** PRO 구독 월 요금 (KRW) */
 export const PRO_MONTHLY_KRW = 99_000;
 
+/** LITE 구독 월 요금 (KRW) — 플래너 결과 + PDF */
+export const LITE_MONTHLY_KRW = 39_000;
+
+/** AGENCY 구독 월 요금 (KRW) — PRO 기능 + 팀 좌석 */
+export const AGENCY_MONTHLY_KRW = 290_000;
+
+/** AGENCY 기본 팀 좌석 (본인 포함) */
+export const AGENCY_TEAM_SEATS = 5;
+
 /** 신규 가입 PRO 체험 기간 (일) */
 export const PRO_TRIAL_DAYS = 14;
 
 /** FREE 회원 플래너 PDF 1회 무료 (리드 수집) */
 export const FREE_PLANNER_PDF_LIMIT = 1;
 
-/** FREE 플래너 입력 허용 마지막 단계 (Step 7 결과·시뮬은 PRO) */
+/** FREE 플래너 입력 허용 마지막 단계 (결과·PDF는 LITE+, 시뮬은 PRO) */
 export const FREE_PLANNER_INPUT_LAST_STEP = 6;
 
 /** FREE 회원 플랜·추천 카트 최대 개수 */

@@ -4,8 +4,9 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useLocale } from "next-intl";
 import { Camera, CheckCircle2, ImagePlus, Loader2, MapPin } from "lucide-react";
 import {
-  readGeolocation,
+  readGeolocationDetailed,
   uploadProofFile,
+  type GeoReadResult,
 } from "@/lib/campaign-proof-upload-client";
 import { cn } from "@/lib/utils";
 
@@ -36,6 +37,20 @@ export function ProofUploadMobileClient({
   const [done, setDone] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [geo, setGeo] = useState<{ lat: number; lng: number } | null>(null);
+  const [geoStatus, setGeoStatus] = useState<
+    GeoReadResult["status"] | "pending"
+  >("pending");
+
+  const refreshGeo = useCallback(async () => {
+    setGeoStatus("pending");
+    const result = await readGeolocationDetailed();
+    setGeoStatus(result.status);
+    if (result.coords) {
+      setGeo({ lat: result.coords.latitude, lng: result.coords.longitude });
+    } else {
+      setGeo(null);
+    }
+  }, []);
 
   useEffect(() => {
     if (token && !initialName) {
@@ -56,30 +71,47 @@ export function ProofUploadMobileClient({
   }, [token, initialName, initialMedia, mediaPick]);
 
   useEffect(() => {
-    void readGeolocation().then((g) => {
-      if (g) setGeo({ lat: g.latitude, lng: g.longitude });
-    });
-  }, []);
+    void refreshGeo();
+  }, [refreshGeo]);
 
   const handleFile = useCallback(
     async (file: File) => {
       setError(null);
       setUploading(true);
       try {
+        let lat = geo?.lat ?? null;
+        let lng = geo?.lng ?? null;
+        if (lat == null || lng == null) {
+          const fresh = await readGeolocationDetailed();
+          if (fresh.coords) {
+            lat = fresh.coords.latitude;
+            lng = fresh.coords.longitude;
+            setGeo({ lat, lng });
+            setGeoStatus("ready");
+          } else {
+            setGeoStatus(fresh.status);
+          }
+        }
         await uploadProofFile(
           file,
           { campaignId, token },
           {
             mediaName: mediaPick || mediaNames[0] || null,
-            latitude: geo?.lat ?? null,
-            longitude: geo?.lng ?? null,
+            latitude: lat,
+            longitude: lng,
             capturedAt: new Date(),
-            uploadSource: token ? "qr" : "mobile",
+            uploadSource: token ? "qr" : campaignId ? "admin" : "mobile",
           },
         );
         setDone(true);
       } catch (e) {
-        setError(e instanceof Error ? e.message : isKo ? "업로드 실패" : "Upload failed");
+        setError(
+          e instanceof Error
+            ? e.message
+            : isKo
+              ? "업로드 실패"
+              : "Upload failed",
+        );
       } finally {
         setUploading(false);
       }
@@ -109,12 +141,25 @@ export function ProofUploadMobileClient({
     );
   }
 
+  const geoHint =
+    geoStatus === "pending"
+      ? isKo
+        ? "위치 정보를 가져오는 중…"
+        : "Acquiring location…"
+      : geo
+        ? null
+        : isKo
+          ? "GPS 위치를 포함하면 인증 신뢰도가 높아집니다. 거부해도 업로드는 가능합니다."
+          : "Including GPS improves proof trust. You can still upload if location is denied.";
+
   return (
     <div className="mx-auto min-h-[100dvh] max-w-lg px-4 py-6 pb-10">
       <p className="font-display text-xs font-medium uppercase tracking-[0.2em] text-violet-300/80">
         {title ?? (isKo ? "현장 인증" : "Field proof")}
       </p>
-      <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">{campaignName || "—"}</h1>
+      <h1 className="mt-2 text-2xl font-bold dark:text-white text-gray-900">
+        {campaignName || "—"}
+      </h1>
 
       {geo ? (
         <p className="mt-2 flex items-center gap-1 text-xs text-emerald-300/90">
@@ -122,14 +167,25 @@ export function ProofUploadMobileClient({
           GPS {geo.lat.toFixed(5)}, {geo.lng.toFixed(5)}
         </p>
       ) : (
-        <p className="mt-2 text-xs dark:text-white">
-          {isKo ? "위치 정보를 가져오는 중…" : "Acquiring location…"}
-        </p>
+        <div className="mt-2 space-y-1">
+          <p className="text-xs dark:text-white text-gray-500">{geoHint}</p>
+          {geoStatus !== "pending" ? (
+            <button
+              type="button"
+              onClick={() => void refreshGeo()}
+              className="text-xs font-semibold text-violet-300 underline underline-offset-2"
+            >
+              {isKo ? "위치 다시 요청" : "Retry location"}
+            </button>
+          ) : null}
+        </div>
       )}
 
       {mediaNames.length > 1 ? (
         <label className="mt-6 block">
-          <span className="text-xs dark:text-white text-gray-500">{isKo ? "매체" : "Media"}</span>
+          <span className="text-xs dark:text-white text-gray-500">
+            {isKo ? "매체" : "Media"}
+          </span>
           <select
             className="mt-1 h-11 w-full rounded-xl border dark:border-white/15 border-gray-200 dark:bg-black bg-white/40 dark:bg-white/8 bg-gray-100 px-3 text-sm dark:text-white text-gray-900"
             value={mediaPick}
@@ -195,8 +251,8 @@ export function ProofUploadMobileClient({
 
       <p className="mt-8 text-center text-[11px] dark:text-white text-gray-400">
         {isKo
-          ? "촬영 시각·매체명이 자동 태그되며 THINKAD 워터마크가 적용됩니다."
-          : "Capture time and media name are tagged; THINKAD watermark applied."}
+          ? "촬영 시각·매체명이 자동 태그되며 THINKAD 워터마크가 적용됩니다. GPS는 권장이며 필수는 아닙니다."
+          : "Capture time and media name are tagged; THINKAD watermark applied. GPS is recommended, not required."}
       </p>
     </div>
   );

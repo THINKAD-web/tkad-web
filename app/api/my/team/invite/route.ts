@@ -10,6 +10,8 @@ import {
 import { prisma } from "@/lib/prisma";
 import { sendEmail, isEmailConfigured } from "@/lib/email/client";
 import { siteUrl } from "@/lib/seo";
+import { assertTeamHasInviteSeat } from "@/lib/team-seats";
+import { AGENCY_TEAM_SEATS } from "@/lib/entitlements/constants";
 import { apiError, apiOk, apiServerError, apiZodError } from "@/lib/api-response";
 
 export const runtime = "nodejs";
@@ -50,6 +52,19 @@ export async function POST(req: Request) {
     if (email === user.email.toLowerCase()) {
       return apiError("INVALID_EMAIL", 400, {
         message: "본인 이메일은 초대할 수 없습니다.",
+      });
+    }
+
+    const seat = await assertTeamHasInviteSeat({
+      teamId: ctx.team.id,
+      ownerUserId: ctx.team.ownerId,
+    });
+    if (!seat.ok) {
+      const needsAgency = seat.limit <= 1;
+      return apiError("SEAT_LIMIT", 403, {
+        message: needsAgency
+          ? `팀 초대는 AGENCY 플랜(${AGENCY_TEAM_SEATS}석)부터 이용할 수 있습니다.`
+          : `팀 좌석이 가득 찼습니다 (${seat.occupied}/${seat.limit}).`,
       });
     }
 

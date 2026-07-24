@@ -2,17 +2,20 @@ import { featureLabel } from "@/lib/report-access-shared";
 import {
   AI_DAILY_LIMITS,
   API_KEY_MONTHLY_LIMITS,
+  AGENCY_MONTHLY_KRW,
+  AGENCY_TEAM_SEATS,
   COMPARE_MAX_ITEMS,
   FAVORITES_GUEST_MAX,
   FREE_PLANNER_INPUT_LAST_STEP,
   FREE_PLANNER_PDF_LIMIT,
+  LITE_MONTHLY_KRW,
   PLAN_CART_MAX_ITEMS_FREE,
   PLAN_CART_MAX_ITEMS_PRO,
 } from "@/lib/entitlements/constants";
 import { FEATURE_MIN_LEVEL, type ReportFeature } from "@/lib/entitlements/features";
 import { formatEntitlementLimit } from "@/lib/entitlements/gate-messages";
 
-export type PricingPlanId = "free" | "pro" | "enterprise";
+export type PricingPlanId = "free" | "lite" | "pro" | "agency" | "enterprise";
 
 export type PricingPlanFeature = {
   id: string;
@@ -49,15 +52,16 @@ function apiLimitsSummary(isKo: boolean): string {
     : `Public API (FREE ${free} · PRO ${pro} · Enterprise ${ent})`;
 }
 
-function proFeatureBullets(isKo: boolean): PricingPlanFeature[] {
-  const proFeatures = (Object.keys(FEATURE_MIN_LEVEL) as ReportFeature[]).filter(
-    (f) => FEATURE_MIN_LEVEL[f] === "PRO",
-  );
-
-  return proFeatures.map((f) => ({
-    id: f,
-    text: featureLabel(f, isKo),
-  }));
+function featuresAtMin(
+  min: "LITE" | "PRO",
+  isKo: boolean,
+): PricingPlanFeature[] {
+  return (Object.keys(FEATURE_MIN_LEVEL) as ReportFeature[])
+    .filter((f) => FEATURE_MIN_LEVEL[f] === min)
+    .map((f) => ({
+      id: f,
+      text: featureLabel(f, isKo),
+    }));
 }
 
 /** /pricing 카드 혜택 — entitlements 상수·FEATURE_MIN_LEVEL 단일 소스 */
@@ -79,12 +83,6 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
     isKo,
     "개",
     " items",
-  );
-  const aiGuest = formatEntitlementLimit(
-    AI_DAILY_LIMITS.guest,
-    isKo,
-    "회/일",
-    "/day",
   );
   const aiFree = formatEntitlementLimit(
     AI_DAILY_LIMITS.user,
@@ -110,14 +108,21 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
     "회",
     " use(s)",
   );
+  const seats = formatEntitlementLimit(
+    AGENCY_TEAM_SEATS,
+    isKo,
+    "석",
+    " seats",
+  );
 
   const plannerInput = isKo
     ? `플래너 조건 입력 (Step 1~${FREE_PLANNER_INPUT_LAST_STEP})`
     : `Planner input (steps 1–${FREE_PLANNER_INPUT_LAST_STEP})`;
-  const plannerProOnly = isKo
-    ? "플래너 결과·시뮬레이션·PDF는 PRO"
-    : "Planner results, simulation & PDF — PRO";
   const mediaSpec = featureLabel("media_spec", isKo);
+  const litePrice = LITE_MONTHLY_KRW.toLocaleString(isKo ? "ko-KR" : "en-US");
+  const agencyPrice = AGENCY_MONTHLY_KRW.toLocaleString(
+    isKo ? "ko-KR" : "en-US",
+  );
 
   return [
     {
@@ -125,7 +130,12 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
       features: [
         { id: "media_spec", text: mediaSpec },
         { id: "planner_input", text: plannerInput },
-        { id: "planner_pro_gate", text: plannerProOnly },
+        {
+          id: "planner_gate_note",
+          text: isKo
+            ? "플래너 결과·PDF는 LITE 이상"
+            : "Planner results & PDF — LITE+",
+        },
         {
           id: "plan_cart",
           text: isKo
@@ -159,9 +169,26 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
       ],
     },
     {
+      id: "lite",
+      features: [
+        ...featuresAtMin("LITE", isKo),
+        {
+          id: "price",
+          text: isKo ? `월 ₩${litePrice}` : `₩${litePrice}/mo`,
+        },
+        {
+          id: "pro_note",
+          text: isKo
+            ? "AI 시뮬레이션·경쟁 분석·마켓은 PRO"
+            : "Simulation, competitor & market — PRO",
+        },
+      ],
+    },
+    {
       id: "pro",
       features: [
-        ...proFeatureBullets(isKo),
+        ...featuresAtMin("LITE", isKo),
+        ...featuresAtMin("PRO", isKo),
         {
           id: "plan_cart",
           text: isKo
@@ -181,6 +208,25 @@ export function getPricingPlans(isKo: boolean): PricingPlanCard[] {
         {
           id: "ai_freetext",
           text: isKo ? "AI 자유입력 추천" : "AI free-text recommendations",
+        },
+      ],
+    },
+    {
+      id: "agency",
+      features: [
+        {
+          id: "includes_pro",
+          text: isKo ? "PRO 기능 전부 포함" : "All PRO features included",
+        },
+        {
+          id: "team_seats",
+          text: isKo
+            ? `팀 좌석 ${seats} (본인 포함)`
+            : `Team seats — ${seats} (incl. you)`,
+        },
+        {
+          id: "price",
+          text: isKo ? `월 ₩${agencyPrice}` : `₩${agencyPrice}/mo`,
         },
       ],
     },

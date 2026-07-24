@@ -1,71 +1,55 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
-import { getPrisma } from "@/lib/prisma";
+import { issueCampaignCompletionReport } from "@/lib/campaign-completion-report-issue";
 
 export const dynamic = "force-dynamic";
+export const maxDuration = 60;
 
 type Params = { params: Promise<{ id: string }> };
 
 /**
- * #5: "[클라이언트명]_THINKAD_옥외광고_성과보고서_YYYYMM.pdf"
- * 클라이언트명 비어있으면 "클라이언트미지정", 파일명 금지 문자 제거.
+ * Admin: 완료 리포트 생성·발송.
+ * PDF 생성 + Resend(가능 시) + reportGeneratedAt + status=completed.
+ * (구 AI generate-report 경로는 410 — 이 엔드포인트로 대체)
  */
-function buildClientReportFilename(clientCompany: string | null | undefined): string {
-  const raw = (clientCompany ?? "").trim() || "클라이언트미지정";
-  const safe = raw.replace(/[\\/:*?"<>|]/g, "").replace(/\s+/g, "_");
-  const now = new Date();
-  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  return `${safe}_THINKAD_옥외광고_성과보고서_${yyyymm}.pdf`;
-}
-
-function asciiFallbackFilename(campaignId: string): string {
-  const now = new Date();
-  const yyyymm = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, "0")}`;
-  return `THINKAD-OOH-Report-${campaignId.slice(0, 8)}-${yyyymm}.pdf`;
-}
-
 export async function POST(request: NextRequest, { params }: Params) {
   const deny = assertAdminDb(request);
   if (deny) return deny;
   const { id } = await params;
 
-  // CURSOR_RULES.md: AI 자동 생성 절대 금지
-  return json(
-    {
-      error:
-        "AI 기반 완료 보고서 생성은 비활성화되어 있습니다. (CURSOR_RULES: AI 자동 생성 금지)",
-    },
-    410,
-  );
+  let force = false;
+  try {
+    const body = (await request.json().catch(() => ({}))) as {
+      force?: boolean;
+    };
+    force = body.force === true;
+  } catch {
+    /* empty body ok */
+  }
 
   try {
-    // unreachable
-    const buf = await Promise.resolve(Buffer.from([]));
-    // 클라이언트명 조회 (파일명용) — buildCampaignCompletionReportPdfBuffer 가
-    // 이미 caller-side 에서 fetch 하지만 여기서 다시 fetch 비용은 미미.
-    const db = getPrisma();
-    const c = await db.campaign.findUnique({
-      where: { id },
-      select: { clientCompany: true },
+    const result = await issueCampaignCompletionReport(id, {
+      sendEmail: true,
+      markCompleted: true,
+      force,
     });
-    const filename = buildClientReportFilename(c?.clientCompany);
-    return new Response(new Uint8Array(buf), {
-      status: 200,
-      headers: {
-        "Content-Type": "application/pdf",
-        "Content-Disposition": `attachment; filename="${asciiFallbackFilename(id)}"; filename*=UTF-8''${encodeURIComponent(filename)}`,
-        "Cache-Control": "no-store, private",
-      },
+
+    if (result.reason === "not_found") {
+      return json({ error: "Campaign not found" }, 404);
+    }
+
+    return json({
+      ok: true,
+      skipped: result.skipped,
+      reason: result.reason ?? null,
+      reportGeneratedAt: result.reportGeneratedAt,
+      emailed: result.emailed,
+      markedCompleted: result.markedCompleted,
+      filename: result.filename,
     });
   } catch (e) {
     const msg = e instanceof Error ? e.message : String(e);
-    if (msg.includes("not found") || msg.includes("Campaign not found")) {
-      return json({ error: msg }, 404);
-    }
-    if (msg.includes("ANTHROPIC_API_KEY")) {
-      return json({ error: "AI 미설정: ANTHROPIC_API_KEY" }, 503);
-    }
-    console.error("[generate-report]", e);
+    console.error("[generate-report/issue]", e);
     return json({ error: msg }, 500);
   }
 }

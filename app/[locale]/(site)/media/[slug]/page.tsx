@@ -64,6 +64,9 @@ import { MediaDetailOverviewSection } from "@/components/media-detail/media-deta
 import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
+import { isAvailabilityDataSparse } from "@/lib/media-availability-coverage";
+import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
+import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   mediaItemDetailPath,
   shouldRedirectMediaIdToSlug,
@@ -230,6 +233,21 @@ export default async function MediaDetailPage({ params }: Props) {
     }
   }
 
+  let blockingBookingCount = 0;
+  if (!media.keywordFilter && isDatabaseConfigured()) {
+    try {
+      blockingBookingCount = await getPrisma().mediaBooking.count({
+        where: {
+          mediaId: media.id,
+          status: { in: [...CONFLICT_BLOCKING_STATUSES] },
+        },
+      });
+    } catch (e) {
+      console.error("[media-detail] booking coverage failed", media.id, e);
+    }
+  }
+  const availabilitySparse = isAvailabilityDataSparse(blockingBookingCount);
+
   const priceOptions = Array.isArray(media.priceOptions)
     ? media.priceOptions
     : undefined;
@@ -337,6 +355,7 @@ export default async function MediaDetailPage({ params }: Props) {
         regionDisplay={regionDisplay}
         periodLabel={periodLabel}
         instantBookingEligible={isInstantBookingEligible(media).eligible}
+        availabilitySparse={availabilitySparse}
         labels={{
           back: t("back"),
           priceTitle: t("priceTitle"),

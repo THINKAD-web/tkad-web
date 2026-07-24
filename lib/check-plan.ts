@@ -3,7 +3,15 @@ import { isDatabaseConfigured } from "@/lib/prisma";
 import { PRO_TRIAL_DAYS } from "@/lib/report-pricing-constants";
 
 export type { PlanCheckUser } from "@/lib/plan-check-shared";
-export { isPro, trialDaysLeft, trialProgressPct } from "@/lib/plan-check-shared";
+export {
+  isPro,
+  isLiteOrAbove,
+  isAgencyOrAbove,
+  userPlanToAccessLevel,
+  teamSeatLimitForPlan,
+  trialDaysLeft,
+  trialProgressPct,
+} from "@/lib/plan-check-shared";
 
 const MS_DAY = 24 * 60 * 60 * 1000;
 
@@ -47,6 +55,14 @@ export function buildTrialGrantData(now = new Date()) {
   };
 }
 
+function clearTrialFields() {
+  return {
+    trialStartedAt: null,
+    trialEndsAt: null,
+    proTrialEndsAt: null,
+  };
+}
+
 /** 유료 PRO 구독 활성화 — 체험 필드 초기화 */
 export async function activateProPlanForUser(userId: string): Promise<void> {
   if (!isDatabaseConfigured()) return;
@@ -54,14 +70,38 @@ export async function activateProPlanForUser(userId: string): Promise<void> {
     where: { id: userId },
     data: {
       plan: "PRO",
-      trialStartedAt: null,
-      trialEndsAt: null,
-      proTrialEndsAt: null,
+      ...clearTrialFields(),
     },
   });
 }
 
-/** 구독 종료 시 FREE로 다운그레이드 (다른 활성 구독 없을 때만) */
+/** 유료 LITE 구독 활성화 */
+export async function activateLitePlanForUser(userId: string): Promise<void> {
+  if (!isDatabaseConfigured()) return;
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      plan: "LITE",
+      ...clearTrialFields(),
+    },
+  });
+}
+
+/** 유료 AGENCY 구독 활성화 (기능 게이트는 PRO와 동일) */
+export async function activateAgencyPlanForUser(userId: string): Promise<void> {
+  if (!isDatabaseConfigured()) return;
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      plan: "AGENCY",
+      ...clearTrialFields(),
+    },
+  });
+}
+
+const PAID_SUBSCRIPTION_PLANS = ["LITE", "PRO", "AGENCY", "ENTERPRISE"] as const;
+
+/** 구독 종료 시 잔여 활성 구독에 맞춰 User.plan 동기화 */
 export async function syncUserPlanAfterSubscriptionEnd(
   userId: string,
 ): Promise<void> {
@@ -71,7 +111,7 @@ export async function syncUserPlanAfterSubscriptionEnd(
   const activePaid = await prisma.subscription.findFirst({
     where: {
       userId,
-      plan: { in: ["PRO", "ENTERPRISE"] },
+      plan: { in: [...PAID_SUBSCRIPTION_PLANS] },
       status: { in: ["ACTIVE", "TRIALING"] },
       OR: [{ endDate: null }, { endDate: { gt: now } }],
     },
@@ -82,12 +122,20 @@ export async function syncUserPlanAfterSubscriptionEnd(
   if (activePaid?.plan === "ENTERPRISE") {
     await prisma.user.update({
       where: { id: userId },
-      data: { plan: "ENTERPRISE" },
+      data: { plan: "ENTERPRISE", ...clearTrialFields() },
     });
+    return;
+  }
+  if (activePaid?.plan === "AGENCY") {
+    await activateAgencyPlanForUser(userId);
     return;
   }
   if (activePaid?.plan === "PRO") {
     await activateProPlanForUser(userId);
+    return;
+  }
+  if (activePaid?.plan === "LITE") {
+    await activateLitePlanForUser(userId);
     return;
   }
 

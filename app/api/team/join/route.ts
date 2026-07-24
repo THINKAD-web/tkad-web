@@ -3,6 +3,8 @@ import { getCurrentUser } from "@/lib/user-session";
 import { prisma } from "@/lib/prisma";
 import { apiError, apiOk, apiServerError, apiZodError } from "@/lib/api-response";
 import { TEAM_ROLE_LABEL } from "@/lib/team-permissions";
+import { countTeamOccupiedSeats } from "@/lib/team-seats";
+import { teamSeatLimitForPlan } from "@/lib/plan-check-shared";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -83,6 +85,24 @@ export async function POST(req: Request) {
     if (existing) {
       return apiError("ALREADY_IN_TEAM", 409, {
         message: "이미 팀에 소속되어 있습니다.",
+      });
+    }
+
+    const owner = await prisma.user.findUnique({
+      where: { id: invite.team.ownerId },
+      select: { plan: true },
+    });
+    const limit = teamSeatLimitForPlan(owner?.plan ?? "FREE");
+    // 수락 시 이 초대는 occupied에 포함되므로, members + 다른 pending만 세고 limit 비교
+    const occupiedWithoutThisInvite = await countTeamOccupiedSeats(invite.teamId);
+    // count includes this pending invite; accepting converts invite → member (net 0),
+    // so block only when members alone already at/over limit.
+    const memberCount = await prisma.teamMember.count({
+      where: { teamId: invite.teamId },
+    });
+    if (memberCount >= limit) {
+      return apiError("SEAT_LIMIT", 403, {
+        message: `팀 좌석이 가득 찼습니다 (${occupiedWithoutThisInvite}/${limit}).`,
       });
     }
 

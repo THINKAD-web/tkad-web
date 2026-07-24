@@ -1,6 +1,9 @@
 /**
  * Client-safe feature → minimum access level mapping.
  * DB/subscription resolution stays in `lib/report-access.ts`.
+ *
+ * Rank: FREE < MEMBER < LITE < PRO < ENTERPRISE
+ * AGENCY / PRO_TRIAL map to PRO for feature gates (same entitlements as PRO).
  */
 
 export type ReportFeature =
@@ -14,10 +17,11 @@ export type ReportFeature =
   | "whitelabel"
   | "market_dashboard";
 
-/** Mirrors Prisma `ReportAccessLevel` string values — no @prisma/client import */
+/** Mirrors Prisma `ReportAccessLevel` (+ product tiers) — no @prisma/client import */
 export type EntitlementAccessLevel =
   | "FREE"
   | "MEMBER"
+  | "LITE"
   | "PRO"
   | "ENTERPRISE";
 
@@ -26,10 +30,11 @@ export const FEATURE_MIN_LEVEL: Record<
   EntitlementAccessLevel
 > = {
   media_spec: "MEMBER",
-  /** FREE — Step 1~6 입력만; Step 7 결과·시뮬은 PRO (pricing·UI 게이트와 동기) */
-  planner_result: "PRO",
+  /** LITE — 플래너 결과 열람 */
+  planner_result: "LITE",
+  /** LITE — PDF 다운로드 (FREE 1회 체험은 별도 consume) */
+  planner_pdf: "LITE",
   detail_data: "PRO",
-  planner_pdf: "PRO",
   competitor: "PRO",
   simulation_full: "PRO",
   market_dashboard: "PRO",
@@ -40,10 +45,11 @@ export const FEATURE_MIN_LEVEL: Record<
 export const LEVEL_RANK: Record<EntitlementAccessLevel, number> = {
   FREE: 0,
   MEMBER: 1,
-  PRO: 2,
-  ENTERPRISE: 3,
+  LITE: 2,
+  PRO: 3,
+  ENTERPRISE: 4,
 };
 
 export function rankLevel(level: EntitlementAccessLevel | string): number {
-  return LEVEL_RANK[level as EntitlementAccessLevel];
+  return LEVEL_RANK[level as EntitlementAccessLevel] ?? 0;
 }
