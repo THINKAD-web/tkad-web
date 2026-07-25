@@ -2,7 +2,7 @@ import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
 import { readOAuthHmacSecretOrDev } from "@/lib/oauth-hmac-secret";
 import { prisma } from "@/lib/prisma";
-import type { AppUserRole } from "@prisma/client";
+import type { AppUserRole, UserPlan } from "@prisma/client";
 
 export const USER_SESSION_COOKIE = "tkad_user_session";
 
@@ -137,6 +137,10 @@ export type CurrentUser = {
   region: string | null;
   locale: string;
   emailVerifiedAt: Date | null;
+  /** SaaS plan — used by SSO accessLevel (and other plan-aware call sites). */
+  plan: UserPlan;
+  trialEndsAt: Date | null;
+  proTrialEndsAt: Date | null;
 };
 
 export async function getCurrentUser(): Promise<CurrentUser | null> {
@@ -157,6 +161,9 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
       communityBio: true,
       locale: true,
       emailVerifiedAt: true,
+      plan: true,
+      trialEndsAt: true,
+      proTrialEndsAt: true,
     },
   });
   if (!row) return null;

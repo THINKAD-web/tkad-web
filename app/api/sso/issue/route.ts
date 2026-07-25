@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/user-session";
+import { userPlanToAccessLevel } from "@/lib/plan-check-shared";
 import { ssoDigitalOrigin } from "@/lib/sso/constants";
 import {
   createSsoCodeValue,
@@ -54,11 +55,18 @@ export async function GET(req: Request) {
     return NextResponse.redirect(new URL(loginRedirectUrl(locale), req.url));
   }
 
+  const accessLevel = userPlanToAccessLevel({
+    plan: user.plan,
+    trialEndsAt: user.trialEndsAt,
+    proTrialEndsAt: user.proTrialEndsAt,
+  });
+
   const code = createSsoCodeValue();
   await putSsoCode(code, {
     userId: user.id,
     email: user.email,
     state,
+    accessLevel,
   });
   await clearSsoPendingCookie();
 

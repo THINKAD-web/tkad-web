@@ -25,7 +25,7 @@ function extractSecret(req: Request, body: Body): string | null {
 /**
  * POST /api/sso/verify
  * Server-to-server only. Body: { code, state }. Auth: X-SSO-Secret or Bearer.
- * Consumes the one-time code and returns { userId, email }.
+ * Consumes the one-time code and returns { userId, email, accessLevel? }.
  */
 export async function POST(req: Request) {
   const expected = readSsoSharedSecret();
@@ -79,6 +79,10 @@ export async function POST(req: Request) {
 
   return NextResponse.json({
     ok: true,
-    data: { userId: payload.userId, email: payload.email },
+    data: {
+      userId: payload.userId,
+      email: payload.email,
+      ...(payload.accessLevel ? { accessLevel: payload.accessLevel } : {}),
+    },
   });
 }

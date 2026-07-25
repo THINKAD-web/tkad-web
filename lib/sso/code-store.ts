@@ -1,16 +1,55 @@
 import { randomBytes } from "crypto";
 import { Redis } from "@upstash/redis";
 import { SSO_CODE_TTL_SEC } from "@/lib/sso/constants";
+import type { EntitlementAccessLevel } from "@/lib/entitlements/features";
 
 export type SsoCodePayload = {
   userId: string;
   email: string;
   state: string;
+  /** Optional — older codes omit this; consumers must default. */
+  accessLevel?: EntitlementAccessLevel;
 };
 
 type Stored = SsoCodePayload & { exp: number };
 
 const KEY_PREFIX = "tkad:sso:code:";
+
+const ACCESS_LEVELS = new Set<string>([
+  "MEMBER",
+  "LITE",
+  "PRO",
+  "ENTERPRISE",
+]);
+
+function isAccessLevel(value: unknown): value is EntitlementAccessLevel {
+  return typeof value === "string" && ACCESS_LEVELS.has(value);
+}
+
+/** Normalize stored row → payload; drops invalid optional accessLevel. */
+function toSsoCodePayload(row: {
+  userId?: unknown;
+  email?: unknown;
+  state?: unknown;
+  accessLevel?: unknown;
+}): SsoCodePayload | null {
+  if (
+    typeof row.userId !== "string" ||
+    typeof row.email !== "string" ||
+    typeof row.state !== "string"
+  ) {
+    return null;
+  }
+  const payload: SsoCodePayload = {
+    userId: row.userId,
+    email: row.email,
+    state: row.state,
+  };
+  if (isAccessLevel(row.accessLevel)) {
+    payload.accessLevel = row.accessLevel;
+  }
+  return payload;
+}
 
 let _redis: Redis | null = null;
 let _redisTried = false;
@@ -49,7 +88,7 @@ function memConsume(code: string): SsoCodePayload | null {
   mem.delete(code);
   if (!row) return null;
   if (Date.now() > row.exp) return null;
-  return { userId: row.userId, email: row.email, state: row.state };
+  return toSsoCodePayload(row);
 }
 
 export function createSsoCodeValue(): string {
@@ -92,14 +131,7 @@ export async function consumeSsoCode(
             return v;
           })();
     if (!row || typeof row !== "object") return null;
-    if (
-      typeof row.userId !== "string" ||
-      typeof row.email !== "string" ||
-      typeof row.state !== "string"
-    ) {
-      return null;
-    }
-    return { userId: row.userId, email: row.email, state: row.state };
+    return toSsoCodePayload(row);
   } catch {
     return memConsume(code);
   }
