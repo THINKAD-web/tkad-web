@@ -1,0 +1,218 @@
+/**
+ * OOH home hero tone — scoped to HomeHeroBanner only.
+ * Accent: orange #ff6200 only. No blue glows / #3b82f6.
+ * Do not import dmpilot --hermes (that repo aliases hermes to blue).
+ */
+
+.ooh-home-hero {
+  --ooh-hero-navy-0: #0a1420;
+  --ooh-hero-navy-1: #132033;
+  --ooh-hero-navy-warm: #1a120e;
+  --ooh-hero-orange: #ff6200;
+  position: relative;
+  isolation: isolate;
+  background: var(--ooh-hero-navy-0);
+}
+
+.ooh-home-hero__base {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    155deg,
+    var(--ooh-hero-navy-0) 0%,
+    var(--ooh-hero-navy-1) 48%,
+    var(--ooh-hero-navy-warm) 100%
+  );
+}
+
+/* Orange brand glow — occupies the slot dmpilot uses for brand glow (orange, not blue). */
+.ooh-home-hero__glow {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  border-radius: inherit;
+  pointer-events: none;
+  background: radial-gradient(
+    ellipse 80% 70% at 85% 15%,
+    color-mix(in srgb, var(--ooh-hero-orange) 34%, transparent),
+    transparent 55%
+  );
+}
+
+.ooh-home-hero__grid {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0.22;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, white 14%, transparent) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      color-mix(in srgb, white 14%, transparent) 1px,
+      transparent 1px
+    );
+  background-size: 48px 48px;
+  mask-image: radial-gradient(
+    ellipse 75% 70% at 70% 40%,
+    #000 20%,
+    transparent 75%
+  );
+}
+
+.ooh-home-hero__photos {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  border-radius: inherit;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.ooh-home-hero__slide {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  transition: opacity 700ms ease;
+}
+
+.ooh-home-hero__slide[data-active="true"] {
+  opacity: 1;
+}
+
+.ooh-home-hero__slide-img {
+  object-fit: cover;
+  object-position: center;
+  /* Soft photo wash — keeps navy + orange tone dominant */
+  opacity: 0.28;
+  mix-blend-mode: soft-light;
+}
+
+.ooh-home-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  border-radius: inherit;
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgb(0 0 0 / 0.62) 0%,
+    rgb(0 0 0 / 0.28) 42%,
+    rgb(0 0 0 / 0.38) 100%
+  );
+}
+
+.ooh-home-hero__content {
+  position: absolute;
+  inset-inline: 0;
+  bottom: 2.5rem;
+  z-index: 5;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-inline: 1.25rem;
+  text-align: center;
+}
+
+@media (min-width: 768px) {
+  .ooh-home-hero__content {
+    bottom: 3rem;
+    padding-inline: 2rem;
+  }
+}
+
+.ooh-home-hero__slogan {
+  text-wrap: balance;
+  font-size: 1.5rem;
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: #fff;
+  text-shadow:
+    0 1px 2px rgb(0 0 0 / 0.55),
+    0 4px 18px rgb(0 0 0 / 0.35);
+}
+
+@media (min-width: 768px) {
+  .ooh-home-hero__slogan {
+    font-size: 2.25rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  .ooh-home-hero__slogan {
+    font-size: 3rem;
+  }
+}
+
+.ooh-home-hero__cta {
+  margin-top: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  border-radius: 0.375rem;
+  border: 1px solid rgb(255 255 255 / 0.3);
+  background: rgb(0 0 0 / 0.4);
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s ease;
+}
+
+.ooh-home-hero__cta:hover {
+  background: rgb(0 0 0 / 0.55);
+}
+
+.ooh-home-hero__cta:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px rgb(255 255 255 / 0.5);
+}
+
+@media (min-width: 768px) {
+  .ooh-home-hero__cta {
+    margin-top: 1rem;
+    font-size: 1rem;
+  }
+}
+
+.ooh-home-hero__dots {
+  position: absolute;
+  bottom: 0.75rem;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  transform: translateX(-50%);
+  gap: 0.375rem;
+}
+
+@media (min-width: 768px) {
+  .ooh-home-hero__dots {
+    bottom: 1rem;
+  }
+}
+
+.ooh-home-hero__dot {
+  border-radius: 9999px;
+  transition: all 0.3s ease;
+  height: 0.25rem;
+  width: 0.25rem;
+  background: rgb(255 255 255 / 0.55);
+}
+
+.ooh-home-hero__dot:hover {
+  background: #fff;
+}
+
+.ooh-home-hero__dot[data-current="true"] {
+  width: 1rem;
+  background: #ff6200;
+  box-shadow: 0 1px 2px rgb(0 0 0 / 0.25);
+}

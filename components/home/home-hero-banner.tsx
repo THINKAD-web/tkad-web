@@ -8,25 +8,29 @@ import {
   optimizeHeroMarqueeUrl,
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
+import "./home-hero-banner.css";
 
 const EXPLORE_SECTION_ID = "home-explore";
 
 type HeroSlide = {
   id: string;
   image: string;
+  /** Local webp fallback if Bunny CDN fails */
+  fallback: string;
   altKo: string;
   altEn: string;
 };
 
 /**
  * Hero slides — Bunny CDN 직결 (Strategy A).
- * 로컬 `public/images/hero/hero-slide*-828.webp` 는 롤백용으로 유지하되 참조하지 않음.
+ * 로컬 `public/images/hero/hero-slide*-828.webp` 는 CDN onError fallback.
  */
 const SLIDES: HeroSlide[] = [
   {
     id: "gwanghwamun-kt",
     image:
       "https://tkad-cdn.b-cdn.net/tkad/admin/2026/07/bdda9382-c6c8-407e-8ba0-13ecd5984d62.jpg",
+    fallback: "/images/hero/hero-slide1-828.webp",
     altKo: "광화문 KT 스퀘어 미디어월",
     altEn: "Gwanghwamun KT Square media wall",
   },
@@ -34,6 +38,7 @@ const SLIDES: HeroSlide[] = [
     id: "outdoor-led",
     image:
       "https://tkad-cdn.b-cdn.net/tkad/admin/2026/07/f558dfc5-b3d8-4741-897a-53aab65513f0.jpg",
+    fallback: "/images/hero/hero-slide2-828.webp",
     altKo: "도심 건물 외벽 대형 LED 전광판",
     altEn: "Large outdoor LED billboard on a city building",
   },
@@ -55,6 +60,7 @@ export function HomeHeroBanner() {
   const t = useTranslations("homePage");
   const [current, setCurrent] = useState(0);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [failedIds, setFailedIds] = useState<Record<string, true>>({});
 
   const goTo = useCallback((index: number) => {
     setCurrent((index + SLIDES.length) % SLIDES.length);
@@ -78,62 +84,68 @@ export function HomeHeroBanner() {
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
       <div
-        className="relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-lg bg-gray-100 shadow-sm ring-1 ring-black/5 dark:bg-white/5 dark:ring-white/10"
+        className={cn(
+          "ooh-home-hero relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-lg",
+          "shadow-sm ring-1 ring-black/40",
+        )}
         role="region"
-        aria-roledescription="carousel"
-        aria-label={isKo ? "프로모션" : "Promotions"}
+        aria-label={isKo ? "홈 히어로" : "Home hero"}
       >
-        {SLIDES.map((s, i) => {
-          const src = optimizeHeroMarqueeUrl(s.image) ?? s.image;
-          const alt = isKo ? s.altKo : s.altEn;
-          const isFirst = i === 0;
-          const active = i === current;
-          return (
-            <div
-              key={s.id}
-              className={cn(
-                "absolute inset-0 transition-opacity duration-700",
-                active
-                  ? "z-[1] opacity-100"
-                  : "pointer-events-none z-0 opacity-0",
-              )}
-              aria-hidden={!active}
-            >
-              <Image
-                src={src}
-                alt={alt}
-                fill
-                className="object-cover object-center"
-                priority={isFirst}
-                loading={isFirst ? "eager" : "lazy"}
-                sizes={HERO_SIZES}
-                unoptimized={shouldUseUnoptimizedImage(src)}
-              />
-            </div>
-          );
-        })}
+        <div className="ooh-home-hero__base" aria-hidden />
+        <div className="ooh-home-hero__glow" aria-hidden />
+        <div className="ooh-home-hero__grid" aria-hidden />
 
-        {/* 밝은 주간 사진 위 슬로건/CTA 가독성 — 상·하단 이중 그라데이션 */}
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 z-10 rounded-lg bg-gradient-to-t from-black/75 via-black/25 to-black/45"
-        />
+        <div className="ooh-home-hero__photos" aria-hidden>
+          {SLIDES.map((s, i) => {
+            const useFallback = Boolean(failedIds[s.id]);
+            const src = useFallback
+              ? s.fallback
+              : (optimizeHeroMarqueeUrl(s.image) ?? s.image);
+            const active = i === current;
+            const isFirst = i === 0;
+            return (
+              <div
+                key={s.id}
+                className="ooh-home-hero__slide"
+                data-active={active ? "true" : "false"}
+              >
+                <Image
+                  src={src}
+                  alt=""
+                  fill
+                  className="ooh-home-hero__slide-img"
+                  priority={isFirst}
+                  loading={isFirst ? "eager" : "lazy"}
+                  sizes={HERO_SIZES}
+                  unoptimized={
+                    useFallback ? true : shouldUseUnoptimizedImage(src)
+                  }
+                  onError={() => {
+                    if (!failedIds[s.id]) {
+                      setFailedIds((prev) => ({ ...prev, [s.id]: true }));
+                    }
+                  }}
+                />
+              </div>
+            );
+          })}
+        </div>
 
-        <div className="absolute inset-x-0 bottom-10 z-20 flex flex-col items-center px-5 text-center md:bottom-12 md:px-8">
-          <p className="text-balance text-2xl font-black leading-tight tracking-tight text-white drop-shadow-md md:text-4xl lg:text-5xl">
-            {slogan}
-          </p>
+        <div className="ooh-home-hero__scrim" aria-hidden />
+
+        <div className="ooh-home-hero__content">
+          <p className="ooh-home-hero__slogan">{slogan}</p>
           <button
             type="button"
             onClick={scrollToExplore}
-            className="mt-3 inline-flex items-center gap-1.5 rounded-md border border-white/30 bg-black/40 px-4 py-2 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-black/55 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 md:mt-4 md:text-base"
+            className="ooh-home-hero__cta"
           >
             {ctaLabel}
             <span aria-hidden>↓</span>
           </button>
         </div>
 
-        <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 gap-2 md:bottom-4">
+        <div className="ooh-home-hero__dots">
           {SLIDES.map((s, i) => (
             <button
               key={s.id}
@@ -143,13 +155,13 @@ export function HomeHeroBanner() {
                 e.stopPropagation();
                 goTo(i);
               }}
-              className={cn(
-                "rounded-full transition-all duration-300",
-                i === current
-                  ? "h-1.5 w-6 bg-hermes shadow-sm"
-                  : "h-1.5 w-1.5 bg-white/70 hover:bg-white",
-              )}
-              aria-label={isKo ? `${i + 1}번째 배너` : `Banner ${i + 1}`}
+              className="ooh-home-hero__dot"
+              data-current={i === current ? "true" : "false"}
+              aria-label={
+                isKo
+                  ? `${i + 1}번째 배경 이미지`
+                  : `Background image ${i + 1}`
+              }
               aria-current={i === current ? "true" : undefined}
             />
           ))}
