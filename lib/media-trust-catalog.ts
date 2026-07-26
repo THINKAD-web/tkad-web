@@ -362,7 +362,6 @@ export async function attachMediaTrustToMediaItems(
       trustScore,
       executionCount: execution.totalCount,
       lastExecutionMonthsAgo: execution.monthsSinceLast,
-      performanceGuaranteed: false,
     };
   });
 }

@@ -209,8 +209,6 @@ export interface MediaItem {
   executionCount?: number;
   /** 최근 집행으로부터 경과 개월 수 */
   lastExecutionMonthsAgo?: number | null;
-  /** @deprecated Performance-guarantee badge retired — always unset/false. */
-  performanceGuaranteed?: boolean;
   /** 이동형(`mobile`) 서비스 구역 — 전국 시·군·구 행정코드(5자리). 공개 지도 폴리곤에 사용 */
   coverageDistrictCodes?: string[];
   /** 어드민 매체 관리 — 즉시 예약 CTA 수동 on/off (DB `instant_booking_enabled`) */
