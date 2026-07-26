@@ -1,6 +1,5 @@
 import type { PlatformPredictionAccuracy } from "@/lib/prediction-accuracy";
 import { cn } from "@/lib/utils";
-import { Link } from "@/i18n/navigation";
 
 type Props = {
   accuracy: PlatformPredictionAccuracy;
@@ -40,12 +39,6 @@ export function PredictionAccuracyBanner({
             ? `(최근 ${accuracy.sampleSize}건 집행 실측 데이터 기반)`
             : `(Based on ${accuracy.sampleSize} recent verified flights)`}
         </p>
-        <Link
-          href="/guarantee"
-          className="text-xs font-medium text-emerald-400 underline-offset-2 hover:underline"
-        >
-          {isKo ? "성과 보증 정책 →" : "Performance guarantee policy →"}
-        </Link>
       </div>
     </div>
   );

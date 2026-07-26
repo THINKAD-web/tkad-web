@@ -92,17 +92,17 @@ export const HOW_TO_USE_STEPS: HowToUseStep[] = [
     titleEn: "Check performance",
     bulletsKo: [
       "집행 후 성과를 확인할 수 있습니다",
-      "예측 대비 실측이 기준에 못 미치면 성과 보증 정책을 적용합니다",
+      "예측·집행 결과는 리포트와 상담으로 이어서 검토합니다",
       "사업자·정책 안내는 관련 페이지에서 확인합니다",
     ],
     bulletsEn: [
       "Review results after the flight",
-      "If measured results fall short of forecast against criteria, the performance guarantee applies",
+      "Review forecasts and outcomes via reports and consultation",
       "Business and policy details are on the linked pages",
     ],
-    ctaKo: "성과 보증 알아보기 →",
-    ctaEn: "See performance guarantee →",
-    href: "/guarantee",
+    ctaKo: "문의하기 →",
+    ctaEn: "Contact us →",
+    href: "/contact",
   },
 ];
 
@@ -156,9 +156,9 @@ export const HOW_TO_USE_FAQS: HowToUseFaq[] = [
     questionKo: "성과가 예측보다 낮으면요?",
     questionEn: "What if results fall short of the forecast?",
     answerKo:
-      "성과 보증 정책에 따라 예측 대비 실측이 기준에 못 미치면 환불 절차를 안내합니다. 자세한 조건은 성과 보증 페이지를 확인하세요.",
+      "예측치는 참고용입니다. 집행 후 리포트와 담당 상담을 통해 결과를 검토하고, 필요하면 다음 캠페인 매체·예산 조정을 안내합니다.",
     answerEn:
-      "Under the performance guarantee, if measured results fall short of forecast against criteria, we guide the refund process. See the guarantee page for terms.",
+      "Forecasts are indicative. After the flight, review results via the report and your manager — we can help adjust media or budget for the next campaign.",
   },
   {
     questionKo: "매체사로 가입하고 싶어요.",

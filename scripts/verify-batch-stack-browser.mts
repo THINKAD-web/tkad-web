@@ -120,11 +120,9 @@ async function main() {
     ),
   );
 
-  // 4) completion report wording (guarantee public page — PDF uses same copy)
+  // 4) about page (performance guarantee policy page retired)
   results.push(
-    await checkPage(page, "04-completion-estimate-copy", "/ko/guarantee", [], [
-      "검증된 추정치",
-    ]),
+    await checkPage(page, "04-about-page", "/ko/about", ["소개", "THINKAD"], []),
   );
 
   // 5) campaign detail — may redirect to login; still capture

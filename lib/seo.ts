@@ -147,7 +147,6 @@ export const publicSeoPaths = [
   "/budget-tool",
   "/pricing",
   "/pricing-guide",
-  "/guarantee",
   "/privacy",
   "/terms",
   "/refund",

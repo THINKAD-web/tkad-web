@@ -35,7 +35,6 @@ export const CRITICAL_SITEMAP_PATHS = [
   "/report",
   "/cases",
   "/about",
-  "/guarantee",
   "/privacy",
   "/terms",
   "/refund",
