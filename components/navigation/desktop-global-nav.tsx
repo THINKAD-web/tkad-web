@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -198,10 +198,21 @@ export function DesktopGlobalNav() {
   const t = useTranslations();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileScrollLockYRef = useRef(0);
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
   const activeGroupId = findActiveNavGroupId(pathname, navGroups, searchParams);
   const showMobileBack = isMobileDetailPath(pathname);
+
+  const setMobileNavOpenSafe = useCallback((next: boolean | ((v: boolean) => boolean)) => {
+    setMobileNavOpen((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next;
+      if (resolved && !prev) {
+        mobileScrollLockYRef.current = window.scrollY;
+      }
+      return resolved;
+    });
+  }, []);
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -211,21 +222,43 @@ export function DesktopGlobalNav() {
   useEffect(() => {
     if (!mobileNavOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setMobileNavOpen(false);
+      if (e.key === "Escape") setMobileNavOpenSafe(false);
     };
     document.addEventListener("keydown", onKey);
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
+
+    // Keep sticky header in place (no body position:fixed). Block background
+    // scroll via overflow + non-passive touchmove outside the panel — iOS Safari.
+    const scrollY = mobileScrollLockYRef.current;
+    const html = document.documentElement;
+    const { body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.classList.add("tkad-nav-scroll-lock");
+
+    const onTouchMove = (e: TouchEvent) => {
+      const panel = document.querySelector(".tkad-site-header-panel");
+      const target = e.target as Node | null;
+      if (panel && target && panel.contains(target)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+
     return () => {
       document.removeEventListener("keydown", onKey);
-      document.body.style.overflow = prev;
+      document.removeEventListener("touchmove", onTouchMove);
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      html.classList.remove("tkad-nav-scroll-lock");
+      window.scrollTo(0, scrollY);
     };
-  }, [mobileNavOpen]);
+  }, [mobileNavOpen, setMobileNavOpenSafe]);
 
   return (
     <header className="tkad-nav-chrome sticky top-0 z-50 w-full border-b border-gray-200/90 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#05050a]/95">
       <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-4 sm:gap-4 md:px-6 lg:px-8">
-        <div className="flex min-w-0 items-center gap-2">
+        <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-none">
           {showMobileBack ? (
             <button
               type="button"
@@ -237,7 +270,7 @@ export function DesktopGlobalNav() {
             </button>
           ) : null}
 
-          <div className="tkad-site-brand">
+          <div className="tkad-site-brand min-w-0">
             <Link
               href="/"
               className="tkad-site-brand-parent"
@@ -300,7 +333,7 @@ export function DesktopGlobalNav() {
           <HeaderDesktopChrome isKo={isKo} />
           <button
             type="button"
-            onClick={() => setMobileNavOpen((v) => !v)}
+            onClick={() => setMobileNavOpenSafe((v) => !v)}
             className="tkad-site-header-menu-btn md:hidden"
             aria-label={
               mobileNavOpen
@@ -330,7 +363,7 @@ export function DesktopGlobalNav() {
         >
           <PublicNavSidebar
             groups={navGroups}
-            onNavigate={() => setMobileNavOpen(false)}
+            onNavigate={() => setMobileNavOpenSafe(false)}
             density="panel"
           />
         </div>

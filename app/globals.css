@@ -3218,6 +3218,13 @@ html:not(.dark) .tkad-nav-chrome {
   white-space: nowrap;
 }
 
+/* iPhone SE-class: keep THINKAD + account + menu; sublabel after brand fits once chrome icons hide */
+@media (max-width: 359px) {
+  .tkad-site-brand-sub {
+    display: none;
+  }
+}
+
 /* Digital-style mobile menu button + drop-down panel (no full-screen overlay) */
 .tkad-site-header-menu-btn {
   display: inline-flex;
@@ -3245,6 +3252,13 @@ html:not(.dark) .tkad-nav-chrome {
   padding: 16px 20px 20px;
   max-height: calc(100dvh - 3.5rem);
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+html.tkad-nav-scroll-lock,
+html.tkad-nav-scroll-lock body {
+  overscroll-behavior: none;
 }
 
 .dark .tkad-site-header-panel {
