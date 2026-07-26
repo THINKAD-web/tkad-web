@@ -4,11 +4,14 @@ import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, ChevronDown, ExternalLink, Menu, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeaderDesktopChrome } from "@/components/header-desktop-chrome";
+import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
+import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
 import { PublicNavSidebar } from "@/components/navigation/public-nav-sidebar";
+import { headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 import {
   buildPublicNavGroups,
   findActiveNavGroupId,
@@ -199,6 +202,7 @@ export function DesktopGlobalNav() {
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const mobileScrollLockYRef = useRef(0);
+  const commandPalette = useCommandPaletteOptional();
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
   const activeGroupId = findActiveNavGroupId(pathname, navGroups, searchParams);
@@ -361,6 +365,28 @@ export function DesktopGlobalNav() {
           role="dialog"
           aria-label={isKo ? "모바일 메뉴" : "Mobile menu"}
         >
+          {/* Absorbs header icons hidden below md — search / notifications (contact is in sidebar) */}
+          <div className="mb-2 border-b border-gray-200/80 pb-2 dark:border-white/10">
+            <button
+              type="button"
+              className={cn(headerMobileMenuRowClass, "w-full px-1")}
+              onClick={() => {
+                setMobileNavOpenSafe(false);
+                // Open after panel unmount so dialog focus does not steal palette
+                window.setTimeout(() => commandPalette?.setOpen(true), 0);
+              }}
+            >
+              <Search className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+              <span className="flex-1 text-left">
+                {isKo ? "검색" : "Search"}
+              </span>
+            </button>
+            <HeaderNotificationsBell
+              variant="menu"
+              onNavigate={() => setMobileNavOpenSafe(false)}
+              className={cn(headerMobileMenuRowClass, "px-1")}
+            />
+          </div>
           <PublicNavSidebar
             groups={navGroups}
             onNavigate={() => setMobileNavOpenSafe(false)}
