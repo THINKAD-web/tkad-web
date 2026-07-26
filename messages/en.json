@@ -1051,7 +1051,12 @@
       "advancedTitle": "Advanced options",
       "advancedHint": "Search, media type, and placement filters—expand only if needed.",
       "randomFill": "Fill with sample values",
-      "randomFillHint": "For inspiration only. Review and edit before starting analysis."
+      "randomFillHint": "For inspiration only. Review and edit before starting analysis.",
+      "channelTypeLabel": "Channel type",
+      "channelTypeHint": "Selection is stored for now; integrated planning will use it later.",
+      "channelTypeOoh": "OOH",
+      "channelTypeDigital": "Digital",
+      "channelTypeIntegrated": "Integrated"
     },
     "heroTitle": "THINKAD AI media recommendation",
     "heroSubtitle": "Enter campaign goals, budget, and region for AI-ranked OOH media. Browse in list or map view, add to your cart, and request a quote in one step.",
@@ -3383,7 +3388,7 @@
   "homePage": {
     "twoAxis": {
       "eyebrow": "THINKAD",
-      "title": "OOH and digital, in one place",
+      "title": "OOH, digital, and integrated — in one place",
       "subtitle": "Pick the surface that fits your campaign and start right away.",
       "oohTitle": "Out-of-home",
       "oohBadge": "This site · OOH",
@@ -3393,7 +3398,11 @@
       "digitalBadge": "THINKAD Digital",
       "digitalDesc": "SNS and search ad packages with campaign-level custom quotes.",
       "digitalCta": "THINKAD Digital",
-      "digitalCtaExternal": "Open THINKAD Digital in a new tab"
+      "digitalCtaExternal": "Open THINKAD Digital in a new tab",
+      "integratedTitle": "OOH + digital integrated planning",
+      "integratedBadge": "Integrated",
+      "integratedDesc": "Split budget across OOH and digital for a mixed plan",
+      "integratedCta": "Start integrated planning"
     },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "Ads in 5 minutes — from OOH planner to report.",

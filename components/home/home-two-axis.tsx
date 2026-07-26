@@ -1,11 +1,16 @@
-import { ExternalLink, MonitorSmartphone, PanelsTopLeft } from "lucide-react";
+import {
+  ExternalLink,
+  Layers,
+  MonitorSmartphone,
+  PanelsTopLeft,
+} from "lucide-react";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 import { cn } from "@/lib/utils";
 
 /**
- * 홈 히어로 직하 — OOH(이 사이트) / 디지털(THINKAD Digital) 두 축 안내.
+ * 홈 히어로 직하 — OOH / 디지털 / 통합 플래닝 세 축 안내.
  * 히어로·explore 분기 UI는 건드리지 않음.
  */
 export async function HomeTwoAxis() {
@@ -44,7 +49,7 @@ export async function HomeTwoAxis() {
           </p>
         </div>
 
-        <div className="grid gap-3 md:grid-cols-2 md:gap-4">
+        <div className="grid gap-3 md:grid-cols-3 md:gap-4">
           <article className={cardClass}>
             <div className="flex items-start gap-3">
               <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-hermes">
@@ -104,6 +109,35 @@ export async function HomeTwoAxis() {
               {t("digitalCta")}
               <ExternalLink className="h-3.5 w-3.5 opacity-60" aria-hidden />
             </a>
+          </article>
+
+          <article className={cardClass}>
+            <div className="flex items-start gap-3">
+              <span className="mt-0.5 flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-hermes">
+                <Layers className="h-5 w-5" aria-hidden />
+              </span>
+              <div className="min-w-0">
+                <h3 className="text-lg font-bold tracking-tight text-gray-900 dark:text-white">
+                  {t("integratedTitle")}
+                </h3>
+                <p className="mt-1 text-sm text-gray-500 dark:text-white/50">
+                  {t("integratedBadge")}
+                </p>
+              </div>
+            </div>
+            <p className="mt-3 flex-1 text-base text-gray-600 dark:text-white/65">
+              {t("integratedDesc")}
+            </p>
+            <Link
+              href="/recommend?channelType=integrated"
+              className={cn(
+                ctaClass,
+                "border border-hermes/40 bg-hermes/5 text-hermes hover:bg-hermes/10",
+                "dark:border-hermes/50 dark:bg-hermes/10 dark:text-hermes dark:hover:bg-hermes/15",
+              )}
+            >
+              {t("integratedCta")}
+            </Link>
           </article>
         </div>
       </div>

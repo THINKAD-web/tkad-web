@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from "react";
+import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
 import {
   Bus,
@@ -24,6 +25,12 @@ import {
   type TargetAudience,
 } from "@/lib/ai-media-recommend";
 import { RECOMMEND_FUNNEL_GOAL_OPTS } from "@/lib/recommend/campaign-goal-options";
+import {
+  parseRecommendChannelType,
+  readStoredRecommendChannelType,
+  writeStoredRecommendChannelType,
+  type RecommendChannelType,
+} from "@/lib/recommend/channel-type";
 import {
   suggestSeoulZones,
   type PlannerSeoulZoneKey,
@@ -90,6 +97,8 @@ export type MediaAiRecommendFormSubmit = {
   input: AiRecommendInput;
   regionCodes: RegionCheckboxCode[];
   searchQuery: string;
+  /** UI preference only — not used by the OOH recommend engine yet. */
+  channelType?: RecommendChannelType;
 };
 
 type Props = {
@@ -151,8 +160,10 @@ function chipClass(selected: boolean) {
 export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const tr = useTranslations("recommend");
   const tPlacement = useTranslations("recommend.form.placementHints");
+  const searchParams = useSearchParams();
   const isKo = locale === "ko";
 
+  const [channelType, setChannelType] = useState<RecommendChannelType>("ooh");
   const [regions, setRegions] = useState<Set<RegionCheckboxCode>>(
     () => new Set(),
   );
@@ -182,6 +193,25 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
   const requiredMark = tr("form.requiredMark");
   const optionalMark = tr("form.optionalMark");
   const fieldBadge = { requiredLabel: requiredMark, optionalLabel: optionalMark };
+
+  useEffect(() => {
+    const fromUrl = parseRecommendChannelType(searchParams.get("channelType"));
+    const next = fromUrl ?? readStoredRecommendChannelType("ooh");
+    setChannelType(next);
+    writeStoredRecommendChannelType(next);
+    if (fromUrl && typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (url.searchParams.has("channelType")) {
+        url.searchParams.delete("channelType");
+        window.history.replaceState({}, "", url.toString());
+      }
+    }
+  }, [searchParams]);
+
+  const selectChannelType = useCallback((value: RecommendChannelType) => {
+    setChannelType(value);
+    writeStoredRecommendChannelType(value);
+  }, []);
 
   const toggleRegion = useCallback((code: RegionCheckboxCode) => {
     setRegions((prev) => {
@@ -417,6 +447,18 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
     [tr],
   );
 
+  const channelTypeOptions: {
+    value: RecommendChannelType;
+    label: string;
+  }[] = useMemo(
+    () => [
+      { value: "ooh", label: tr("form.channelTypeOoh") },
+      { value: "digital", label: tr("form.channelTypeDigital") },
+      { value: "integrated", label: tr("form.channelTypeIntegrated") },
+    ],
+    [tr],
+  );
+
   const buildPayload = useCallback(
     (
       goal: CampaignGoal,
@@ -432,6 +474,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
       busanZoneList: readonly PlannerBusanZoneKey[],
       gyeonggiZoneList: readonly PlannerGyeonggiZoneKey[],
       incheonZoneList: readonly PlannerIncheonZoneKey[],
+      channel: RecommendChannelType,
     ): MediaAiRecommendFormSubmit => {
       const regionCodes = [...regionSet];
       let regionCode: AiRecommendInput["region"] = "all";
@@ -465,13 +508,19 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
             : undefined,
       };
 
-      return { input, regionCodes, searchQuery: search };
+      return {
+        input,
+        regionCodes,
+        searchQuery: search,
+        channelType: channel,
+      };
     },
     [],
   );
 
   const handleSubmit = () => {
     if (!campaignGoal) return;
+    writeStoredRecommendChannelType(channelType);
     onSubmit(
       buildPayload(
         campaignGoal,
@@ -487,6 +536,7 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         busanZones,
         gyeonggiZones,
         incheonZones,
+        channelType,
       ),
     );
   };
@@ -553,6 +603,27 @@ export default function MediaAiRecommendForm({ locale, onSubmit }: Props) {
         </div>
 
         <div className="space-y-6 p-5 sm:p-6">
+          <FormField
+            label={tr("form.channelTypeLabel")}
+            hint={tr("form.channelTypeHint")}
+            {...fieldBadge}
+          >
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={tr("form.channelTypeLabel")}>
+              {channelTypeOptions.map(({ value, label }) => (
+                <button
+                  key={value}
+                  type="button"
+                  role="radio"
+                  aria-checked={channelType === value}
+                  onClick={() => selectChannelType(value)}
+                  className={chipClass(channelType === value)}
+                >
+                  {label}
+                </button>
+              ))}
+            </div>
+          </FormField>
+
           <FormField
             label={tr("form.goalLabel")}
             required
