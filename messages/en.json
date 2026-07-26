@@ -1053,15 +1053,15 @@
       "randomFill": "Fill with sample values",
       "randomFillHint": "For inspiration only. Review and edit before starting analysis.",
       "channelTypeLabel": "Channel type",
-      "channelTypeHint": "Your choice is saved. Integrated auto-allocation is not ready yet; results stay single-channel.",
+      "channelTypeHint": "Your choice is saved. Integrated auto-allocation is not ready yet; results are OOH-channel recommendations.",
       "channelTypeOoh": "OOH",
       "channelTypeDigital": "Digital",
       "channelTypeIntegrated": "Integrated"
     },
     "integratedNotice": {
       "title": "Only single-channel results are auto-calculated for now",
-      "body": "OOH + digital budget split is not fully automated yet. Open the integrated planner or talk to us for a combined package.",
-      "ctaPlanner": "Open integrated planner",
+      "body": "Integrated auto-allocation is in progress · request a consult below for an OOH+digital package. Results shown here are OOH-catalog recommendations.",
+      "ctaPlanner": "Open THINKAD integrated planner",
       "ctaContact": "Request integrated consult"
     },
     "heroTitle": "THINKAD AI media recommendation",
