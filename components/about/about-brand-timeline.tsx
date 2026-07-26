@@ -139,11 +139,10 @@ export const ABOUT_TIMELINE_ICONS = {
   sparkles: Sparkles,
 } as const;
 
-/** Year order + icon mapping only — titles come from i18n `history{year}` keys. */
+/** Year order + icon mapping only — titles/descriptions from i18n `history{year}*`. */
 export const ABOUT_TIMELINE_YEARS = [
-  { year: "2016", icon: ABOUT_TIMELINE_ICONS.lightbulb },
+  { year: "2014", icon: ABOUT_TIMELINE_ICONS.lightbulb },
   { year: "2017", icon: ABOUT_TIMELINE_ICONS.shoppingBag },
-  { year: "2019", icon: ABOUT_TIMELINE_ICONS.users },
   { year: "2022", icon: ABOUT_TIMELINE_ICONS.users },
-  { year: "2025", icon: ABOUT_TIMELINE_ICONS.sparkles, current: true },
+  { year: "2026", icon: ABOUT_TIMELINE_ICONS.sparkles, current: true },
 ] as const;

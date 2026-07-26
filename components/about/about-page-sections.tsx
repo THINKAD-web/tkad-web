@@ -53,12 +53,25 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
   const t = await getTranslations("about");
 
   const timelineItems: AboutTimelineItem[] = ABOUT_TIMELINE_YEARS.map(
-    (entry) => ({
-      year: entry.year,
-      icon: entry.icon,
-      title: t(`history${entry.year}` as "history2016"),
-      current: "current" in entry ? entry.current : false,
-    }),
+    (entry) => {
+      const titleKey = `history${entry.year}` as
+        | "history2014"
+        | "history2017"
+        | "history2022"
+        | "history2026";
+      const descKey = `history${entry.year}Desc` as
+        | "history2014Desc"
+        | "history2017Desc"
+        | "history2022Desc"
+        | "history2026Desc";
+      return {
+        year: entry.year,
+        icon: entry.icon,
+        title: t(titleKey),
+        description: t(descKey),
+        current: "current" in entry ? entry.current : false,
+      };
+    },
   );
 
   const companyLeft = [

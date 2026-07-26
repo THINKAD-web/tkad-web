@@ -158,7 +158,7 @@ export function guaranteePolicySections(isKo: boolean): LegalSection[] {
         title: "1. 성과 데이터 보증 개요",
         paragraphs: [
           "THINKAD 싱커드는 OOH 광고 성과를 데이터로 설명합니다. 플래너 예측·집행 후 검증된 추정치·현장 인증 사진을 연계해 광고주가 결과를 확인할 수 있도록 합니다.",
-          "「📊 성과 데이터 보증」 배지는 집행 5회 이상, 리뷰 3개 이상, 평균 평점 4.0 이상, 현장 인증 사진 1장 이상 보유 매체에 부여됩니다. GPS·촬영 시각은 권장이며 배지 장수 산정에 필수는 아닙니다.",
+          "「📊 성과 데이터 보증」 배지는 집행 5회 이상, 리뷰 3개 이상, 평균 평점 4.0 이상, 현장 인증 사진 1장 이상인 등록/검증 매체에 부여됩니다. GPS·촬영 시각은 권장이며 배지 장수 산정에 필수는 아닙니다.",
         ],
       },
       {
@@ -199,7 +199,7 @@ export function guaranteePolicySections(isKo: boolean): LegalSection[] {
       title: "1. Performance data guarantee",
       paragraphs: [
         "THINKAD explains OOH outcomes with data — planner forecasts, post-flight verified estimates, and field proof photos.",
-        "The 📊 Performance data guaranteed badge is awarded when a medium has 5+ flights, 3+ reviews, 4.0+ average rating, and at least one field proof photo. GPS and capture time are recommended but not required for the badge count.",
+        "The 📊 Performance data guaranteed badge is awarded to registered/verified media with 5+ flights, 3+ reviews, 4.0+ average rating, and at least one field proof photo. GPS and capture time are recommended but not required for the badge count.",
       ],
     },
     {
