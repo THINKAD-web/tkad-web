@@ -1053,10 +1053,16 @@
       "randomFill": "Fill with sample values",
       "randomFillHint": "For inspiration only. Review and edit before starting analysis.",
       "channelTypeLabel": "Channel type",
-      "channelTypeHint": "Selection is stored for now; integrated planning will use it later.",
+      "channelTypeHint": "Your choice is saved. Integrated auto-allocation is not ready yet; results are OOH-channel recommendations.",
       "channelTypeOoh": "OOH",
       "channelTypeDigital": "Digital",
       "channelTypeIntegrated": "Integrated"
+    },
+    "integratedNotice": {
+      "title": "Only single-channel results are auto-calculated for now",
+      "body": "Integrated auto-allocation is in progress · request a consult below for an OOH+digital package. Results shown here are OOH-catalog recommendations.",
+      "ctaPlanner": "Open THINKAD integrated planner",
+      "ctaContact": "Request integrated consult"
     },
     "heroTitle": "THINKAD AI media recommendation",
     "heroSubtitle": "Enter campaign goals, budget, and region for AI-ranked OOH media. Browse in list or map view, add to your cart, and request a quote in one step.",
