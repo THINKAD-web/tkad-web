@@ -31,6 +31,8 @@ import {
   readPlanTransferData,
   type PlanTransferData,
 } from "@/lib/planner-contact-transfer";
+import { recommendIndustryToContactIndustry } from "@/lib/recommend/integrated-contact-handoff";
+import type { Industry } from "@/lib/ai-media-recommend";
 import {
   buildPlanCartContactMessage,
   planCartBudgetToContactBudgetV2,
@@ -92,6 +94,7 @@ function ContactInquiryForm() {
   const t = useTranslations("contact");
   const tForm = useTranslations("contactForm");
   const tPlanner = useTranslations("planner");
+  const tRecommend = useTranslations("recommend");
   const locale = useLocale();
   const isKo = locale === "ko";
   const searchParams = useSearchParams();
@@ -125,6 +128,7 @@ function ContactInquiryForm() {
   const rerunCampaignId = searchParams.get("rerun")?.trim() ?? "";
   const rerunPrefillDone = useRef<string | null>(null);
   const fromParam = searchParams.get("from");
+  const isIntegratedContact = fromParam?.trim() === "integrated";
   const toParam = searchParams.get("to");
   const quoteParam = searchParams.get("quote");
   const isPlanCartPrefill = fromParam?.trim() === "plan";
@@ -333,6 +337,16 @@ function ContactInquiryForm() {
         ),
         { shouldValidate: true, shouldDirty: true },
       );
+    }
+
+    const mappedIndustry = recommendIndustryToContactIndustry(
+      stored.recommendIndustry as Industry | undefined,
+    );
+    if (mappedIndustry) {
+      setValue("industry", mappedIndustry, {
+        shouldValidate: true,
+        shouldDirty: true,
+      });
     }
 
     setValue(
@@ -991,6 +1005,28 @@ function ContactInquiryForm() {
         {tForm("stepLabel", { current: step + 1, total: 4 })}
       </p>
 
+      {isIntegratedContact ? (
+        <div
+          className="rounded-2xl border-2 border-amber-500/40 bg-amber-500/10 px-5 py-4"
+          role="status"
+        >
+          <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+            [ {tRecommend("integratedNotice.title")} ]
+          </p>
+          <p className="mt-2 text-sm font-bold text-foreground">
+            {tRecommend("integratedNotice.body")}
+          </p>
+          <div className="mt-4 flex flex-wrap gap-3">
+            <Link
+              href="/planner/integrated"
+              className="inline-flex min-h-11 items-center justify-center rounded-xl bg-[color:var(--qp-accent)] px-4 text-sm font-semibold text-white transition hover:opacity-90"
+            >
+              {tRecommend("integratedNotice.ctaPlanner")}
+            </Link>
+          </div>
+        </div>
+      ) : null}
+
       {isPlanCartPrefill ? (
         <PlanCartContactSummary />
       ) : planTransfer ? (
@@ -1383,6 +1419,8 @@ function ContactInquiryForm() {
                   <Spinner className="mr-2" />
                   {tForm("submitting")}
                 </>
+              ) : isIntegratedContact ? (
+                tForm("submitIntegratedConsult")
               ) : (
                 tForm("submitConsult")
               )}
