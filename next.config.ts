@@ -44,14 +44,25 @@ const nextConfig: NextConfig = {
         destination: "https://app.tkad.co.kr/:path*",
         permanent: true,
       },
+      // Performance guarantee policy retired (2026-07) — keep permanent redirects.
       {
-        source: "/:locale(ko|en)/guarantee/guarante",
-        destination: "/:locale/guarantee",
+        source: "/:locale(ko|en)/guarantee",
+        destination: "/:locale/about",
         permanent: true,
       },
       {
-        source: "/guarantee/guarante",
-        destination: "/guarantee",
+        source: "/:locale(ko|en)/guarantee/:path*",
+        destination: "/:locale/about",
+        permanent: true,
+      },
+      {
+        source: "/guarantee",
+        destination: "/about",
+        permanent: true,
+      },
+      {
+        source: "/guarantee/:path*",
+        destination: "/about",
         permanent: true,
       },
     ];

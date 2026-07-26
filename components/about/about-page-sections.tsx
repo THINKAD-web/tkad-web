@@ -112,7 +112,7 @@ export async function AboutPageSections({ verifiedLabel }: Props) {
 
       <BulletSection
         title={t("trustTitle")}
-        items={[t("trust1"), t("trust2"), t("trust3")]}
+        items={[t("trust1"), t("trust3")]}
       />
 
       <section className="py-16 md:py-24" aria-labelledby="about-ecosystem-heading">

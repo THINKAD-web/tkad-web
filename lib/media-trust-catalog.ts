@@ -362,9 +362,6 @@ export async function attachMediaTrustToMediaItems(
       trustScore,
       executionCount: execution.totalCount,
       lastExecutionMonthsAgo: execution.monthsSinceLast,
-      performanceGuaranteed: trustBadges.some(
-        (b) => b.id === "performance_guaranteed",
-      ),
     };
   });
 }
