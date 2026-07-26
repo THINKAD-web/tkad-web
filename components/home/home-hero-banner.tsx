@@ -3,14 +3,13 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
+import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
   optimizeHeroMarqueeUrl,
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
 import "./home-hero-banner.css";
-
-const EXPLORE_SECTION_ID = "home-explore";
 
 type HeroSlide = {
   id: string;
@@ -47,13 +46,6 @@ const SLIDES: HeroSlide[] = [
 /** max-w-5xl 히어로 프레임 기준 — CDN 원본(~1168–1280w)보다 크게 요청하지 않음 */
 const HERO_SIZES = "(max-width: 1024px) 100vw, 1024px";
 
-function scrollToExplore() {
-  document.getElementById(EXPLORE_SECTION_ID)?.scrollIntoView({
-    behavior: "smooth",
-    block: "start",
-  });
-}
-
 export function HomeHeroBanner() {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -78,14 +70,14 @@ export function HomeHeroBanner() {
     return () => clearInterval(timer);
   }, [next]);
 
-  const ctaLabel = isKo ? "아래에서 시작하기" : "Get started below";
   const slogan = t("heroBannerSlogan");
+  const lead = t("heroBannerLead");
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
       <div
         className={cn(
-          "ooh-home-hero relative mx-auto aspect-video w-full max-w-5xl overflow-hidden rounded-lg",
+          "ooh-home-hero relative mx-auto w-full max-w-5xl overflow-hidden rounded-lg",
           "shadow-sm ring-1 ring-black/40",
         )}
         role="region"
@@ -135,14 +127,18 @@ export function HomeHeroBanner() {
 
         <div className="ooh-home-hero__content">
           <p className="ooh-home-hero__slogan">{slogan}</p>
-          <button
-            type="button"
-            onClick={scrollToExplore}
-            className="ooh-home-hero__cta"
-          >
-            {ctaLabel}
-            <span aria-hidden>↓</span>
-          </button>
+          <p className="ooh-home-hero__lead">{lead}</p>
+          <div className="ooh-home-hero__ctas">
+            <Link href="/media" className="ooh-home-hero__cta ooh-home-hero__cta--primary">
+              {t("heroBannerCtaBrowse")}
+            </Link>
+            <Link
+              href="/recommend?mode=ai"
+              className="ooh-home-hero__cta ooh-home-hero__cta--secondary"
+            >
+              {t("heroBannerCtaAi")}
+            </Link>
+          </div>
         </div>
 
         <div className="ooh-home-hero__dots">
