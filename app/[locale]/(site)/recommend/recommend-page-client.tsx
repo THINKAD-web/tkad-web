@@ -84,6 +84,7 @@ import {
   serializeScoredList,
   writeRecommendSessionSnapshot,
 } from "@/lib/recommend/recommend-session-persist";
+import { readStoredRecommendChannelType } from "@/lib/recommend/channel-type";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -899,6 +900,37 @@ export default function RecommendPageClient({
             <p className="mb-6 rounded-2xl border border-[#22d3ee]/30 bg-[#22d3ee]/10 px-4 py-3 text-center text-sm font-semibold text-[#0e7490] dark:text-[#22d3ee]">
               {similarBanner}
             </p>
+          ) : null}
+          {(phase === "dashboard" || phase === "list") &&
+          (lastPayload?.channelType ?? readStoredRecommendChannelType()) ===
+            "integrated" ? (
+            <div
+              className="mb-8 rounded-2xl border-2 border-amber-500/40 bg-amber-500/10 px-5 py-4"
+              role="status"
+            >
+              <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-amber-700 dark:text-amber-300">
+                [ {tr("integratedNotice.title")} ]
+              </p>
+              <p className="mt-2 text-sm font-bold text-foreground">
+                {tr("integratedNotice.body")}
+              </p>
+              <div className="mt-4 flex flex-wrap gap-3">
+                <BtnBlock
+                  variant="accent"
+                  size="md"
+                  href="/planner/integrated"
+                >
+                  {tr("integratedNotice.ctaPlanner")}
+                </BtnBlock>
+                <BtnBlock
+                  variant="secondary"
+                  size="md"
+                  href="/contact?from=integrated"
+                >
+                  {tr("integratedNotice.ctaContact")}
+                </BtnBlock>
+              </div>
+            </div>
           ) : null}
           {autoFromUrl === "1" && phase === "dashboard" && top3.length > 0 ? (
             <div className="mb-8 rounded-2xl border-2 border-accent/40 bg-muted/50 px-5 py-4">

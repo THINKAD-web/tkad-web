@@ -1054,10 +1054,16 @@
       "randomFill": "조건 무작위 채우기",
       "randomFillHint": "입력이 막막할 때만 사용하세요. 채운 뒤 직접 수정하고 분석을 눌러 주세요.",
       "channelTypeLabel": "채널 타입",
-      "channelTypeHint": "지금은 선택만 저장됩니다. 이후 통합 플래닝에 반영됩니다.",
+      "channelTypeHint": "선택은 저장됩니다. 통합 자동 배분은 아직 준비 중이며, 결과는 채널별 추천입니다.",
       "channelTypeOoh": "OOH",
       "channelTypeDigital": "디지털",
       "channelTypeIntegrated": "통합"
+    },
+    "integratedNotice": {
+      "title": "지금은 채널별 결과만 자동 계산됩니다",
+      "body": "옥외+디지털 통합 배분은 아직 자동으로 완성되지 않습니다. 통합 플래너에서 설계하거나, 상담으로 패키지 제안을 받아 보세요.",
+      "ctaPlanner": "통합 플래너 열기",
+      "ctaContact": "통합 상담 받기"
     },
     "heroTitle": "싱커드 AI 매체 추천",
     "heroSubtitle": "캠페인 목표·예산·지역을 입력하면 AI가 최적의 OOH 매체를 추천합니다. 리스트와 지도로 살펴보고 장바구니에 담아 한 번에 견적을 요청하세요.",
