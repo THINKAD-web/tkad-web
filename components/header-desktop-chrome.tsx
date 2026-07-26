@@ -6,6 +6,7 @@ import { HeaderAccountActions } from "@/components/header-account-actions";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { headerChromeIconGhostClass } from "@/components/public-chrome/header-chrome-buttons";
 import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
+import { cn } from "@/lib/utils";
 import { MessageSquare, Search } from "lucide-react";
 
 type Props = {
@@ -18,19 +19,22 @@ export function HeaderDesktopChrome({ isKo }: Props) {
   return (
     <div className="flex items-center gap-1">
       <FavoritesSessionSync />
+      {/* Mobile: drop icon cluster so THINKAD + OOH MKT + account + menu fit SE widths */}
       <button
         type="button"
         onClick={() => palette?.setOpen(true)}
-        className={headerChromeIconGhostClass}
+        className={cn(headerChromeIconGhostClass, "max-md:hidden")}
         aria-label={isKo ? "검색 (Cmd+K)" : "Search (Cmd+K)"}
         data-tour="search"
       >
         <Search className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
-      <HeaderNotificationsBell compact />
+      <div className="max-md:hidden">
+        <HeaderNotificationsBell compact />
+      </div>
       <Link
         href="/contact"
-        className={headerChromeIconGhostClass}
+        className={cn(headerChromeIconGhostClass, "max-md:hidden")}
         aria-label={isKo ? "문의하기" : "Contact"}
         data-tour="contact"
       >

@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, useCallback } from "react";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import { useSearchParams } from "next/navigation";
 import { useLocale, useTranslations } from "next-intl";
-import { ArrowLeft, ChevronDown, ExternalLink, Menu, X } from "lucide-react";
+import { ArrowLeft, ChevronDown, ExternalLink, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeaderDesktopChrome } from "@/components/header-desktop-chrome";
+import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
+import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
 import { PublicNavSidebar } from "@/components/navigation/public-nav-sidebar";
+import { headerMobileMenuRowClass } from "@/components/public-chrome/header-chrome-buttons";
 import {
   buildPublicNavGroups,
   findActiveNavGroupId,
@@ -198,10 +201,22 @@ export function DesktopGlobalNav() {
   const t = useTranslations();
   const [openMenu, setOpenMenu] = useState<string | null>(null);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const mobileScrollLockYRef = useRef(0);
+  const commandPalette = useCommandPaletteOptional();
 
   const navGroups = useMemo(() => buildPublicNavGroups(t), [t]);
   const activeGroupId = findActiveNavGroupId(pathname, navGroups, searchParams);
   const showMobileBack = isMobileDetailPath(pathname);
+
+  const setMobileNavOpenSafe = useCallback((next: boolean | ((v: boolean) => boolean)) => {
+    setMobileNavOpen((prev) => {
+      const resolved = typeof next === "function" ? next(prev) : next;
+      if (resolved && !prev) {
+        mobileScrollLockYRef.current = window.scrollY;
+      }
+      return resolved;
+    });
+  }, []);
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -210,115 +225,175 @@ export function DesktopGlobalNav() {
 
   useEffect(() => {
     if (!mobileNavOpen) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    return () => {
-      document.body.style.overflow = prev;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setMobileNavOpenSafe(false);
     };
-  }, [mobileNavOpen]);
+    document.addEventListener("keydown", onKey);
+
+    // Keep sticky header in place (no body position:fixed). Block background
+    // scroll via overflow + non-passive touchmove outside the panel — iOS Safari.
+    const scrollY = mobileScrollLockYRef.current;
+    const html = document.documentElement;
+    const { body } = document;
+    const prevHtmlOverflow = html.style.overflow;
+    const prevBodyOverflow = body.style.overflow;
+    html.style.overflow = "hidden";
+    body.style.overflow = "hidden";
+    html.classList.add("tkad-nav-scroll-lock");
+
+    const onTouchMove = (e: TouchEvent) => {
+      const panel = document.querySelector(".tkad-site-header-panel");
+      const target = e.target as Node | null;
+      if (panel && target && panel.contains(target)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", onTouchMove, { passive: false });
+
+    return () => {
+      document.removeEventListener("keydown", onKey);
+      document.removeEventListener("touchmove", onTouchMove);
+      html.style.overflow = prevHtmlOverflow;
+      body.style.overflow = prevBodyOverflow;
+      html.classList.remove("tkad-nav-scroll-lock");
+      window.scrollTo(0, scrollY);
+    };
+  }, [mobileNavOpen, setMobileNavOpenSafe]);
 
   return (
-    <>
-      <header className="tkad-nav-chrome sticky top-0 z-50 w-full border-b border-gray-200/90 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#05050a]/95">
-        <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-4 sm:gap-4 md:px-6 lg:px-8">
-          <div className="flex min-w-0 items-center gap-1 sm:gap-2">
-            {showMobileBack ? (
-              <button
-                type="button"
-                onClick={() => router.back()}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 md:hidden dark:text-white/80 dark:hover:bg-white/10"
-                aria-label={isKo ? "뒤로" : "Back"}
-              >
-                <ArrowLeft className="h-5 w-5" aria-hidden />
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={() => setMobileNavOpen((v) => !v)}
-                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 md:hidden dark:text-white/80 dark:hover:bg-white/10"
-                aria-label={isKo ? "메뉴" : "Menu"}
-                aria-expanded={mobileNavOpen}
-              >
-                {mobileNavOpen ? (
-                  <X className="h-5 w-5" aria-hidden />
-                ) : (
-                  <Menu className="h-5 w-5" aria-hidden />
-                )}
-              </button>
-            )}
+    <header className="tkad-nav-chrome sticky top-0 z-50 w-full border-b border-gray-200/90 bg-white/95 backdrop-blur-md dark:border-white/10 dark:bg-[#05050a]/95">
+      <div className="mx-auto flex h-14 max-w-[1600px] items-center gap-2 px-4 sm:gap-4 md:px-6 lg:px-8">
+        <div className="flex min-w-0 flex-1 items-center gap-2 md:flex-none">
+          {showMobileBack ? (
+            <button
+              type="button"
+              onClick={() => router.back()}
+              className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-lg text-gray-700 transition-colors hover:bg-gray-100 md:hidden dark:text-white/80 dark:hover:bg-white/10"
+              aria-label={isKo ? "뒤로" : "Back"}
+            >
+              <ArrowLeft className="h-5 w-5" aria-hidden />
+            </button>
+          ) : null}
 
+          <div className="tkad-site-brand min-w-0">
             <Link
               href="/"
-              className="shrink-0 whitespace-nowrap text-base font-black tracking-tight text-gray-900 sm:text-lg dark:text-white"
+              className="tkad-site-brand-parent"
+              aria-label="THINKAD"
             >
-              <span>THINK</span>{" "}
+              THINK
               <span className="tkad-home-accent-text">AD</span>
             </Link>
-          </div>
-
-          <nav
-            className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
-            aria-label={isKo ? "주 메뉴" : "Main menu"}
-          >
-            {navGroups.map((group) => {
-              const label = isKo ? group.label : group.labelEn;
-              const isDiscovery = group.id === "discovery";
-
-              return (
-                <NavDropdown
-                  key={group.id}
-                  label={label}
-                  open={openMenu === group.id}
-                  onOpen={() => setOpenMenu(group.id)}
-                  onClose={() => setOpenMenu(null)}
-                  active={activeGroupId === group.id}
-                >
-                  {isDiscovery ? (
-                    <MediaNavHoverPanel links={discoveryLinksFromGroup(group)} />
-                  ) : (
-                    <NavGroupPanel
-                      group={group}
-                      onClose={() => setOpenMenu(null)}
-                    />
-                  )}
-                </NavDropdown>
-              );
-            })}
-            <a
-              href={THINKAD_DIGITAL_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className={navItemClass(false, false)}
-              aria-label={t("nav.thinkadDigitalExternal")}
+            <Link
+              href="/"
+              className="tkad-site-brand-sub"
+              aria-label={isKo ? "THINKAD OOH MKT 홈" : "THINKAD OOH MKT home"}
             >
-              {t("nav.thinkadDigital")}
-              <ExternalLink className="h-3 w-3 opacity-55" aria-hidden />
-            </a>
-          </nav>
-
-          <div className="relative z-10 ml-auto shrink-0">
-            <HeaderDesktopChrome isKo={isKo} />
+              OOH MKT
+            </Link>
           </div>
         </div>
-      </header>
 
-      {mobileNavOpen ? (
-        <>
+        <nav
+          className="hidden min-w-0 flex-1 items-center gap-1 md:flex"
+          aria-label={isKo ? "주 메뉴" : "Main menu"}
+        >
+          {navGroups.map((group) => {
+            const label = isKo ? group.label : group.labelEn;
+            const isDiscovery = group.id === "discovery";
+
+            return (
+              <NavDropdown
+                key={group.id}
+                label={label}
+                open={openMenu === group.id}
+                onOpen={() => setOpenMenu(group.id)}
+                onClose={() => setOpenMenu(null)}
+                active={activeGroupId === group.id}
+              >
+                {isDiscovery ? (
+                  <MediaNavHoverPanel links={discoveryLinksFromGroup(group)} />
+                ) : (
+                  <NavGroupPanel
+                    group={group}
+                    onClose={() => setOpenMenu(null)}
+                  />
+                )}
+              </NavDropdown>
+            );
+          })}
+          <a
+            href={THINKAD_DIGITAL_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={navItemClass(false, false)}
+            aria-label={t("nav.thinkadDigitalExternal")}
+          >
+            {t("nav.thinkadDigital")}
+            <ExternalLink className="h-3 w-3 opacity-55" aria-hidden />
+          </a>
+        </nav>
+
+        <div className="relative z-10 ml-auto flex shrink-0 items-center gap-1">
+          <HeaderDesktopChrome isKo={isKo} />
           <button
             type="button"
-            className="fixed inset-0 z-40 bg-black/40 md:hidden"
-            aria-label={isKo ? "메뉴 닫기" : "Close menu"}
-            onClick={() => setMobileNavOpen(false)}
-          />
-          <div className="fixed inset-x-0 top-14 z-50 max-h-[calc(100dvh-3.5rem)] overflow-y-auto border-b border-gray-200 bg-white shadow-xl md:hidden dark:border-white/10 dark:bg-[#05050a]">
-            <PublicNavSidebar
-              groups={navGroups}
-              onNavigate={() => setMobileNavOpen(false)}
-              density="comfortable"
+            onClick={() => setMobileNavOpenSafe((v) => !v)}
+            className="tkad-site-header-menu-btn md:hidden"
+            aria-label={
+              mobileNavOpen
+                ? isKo
+                  ? "메뉴 닫기"
+                  : "Close menu"
+                : isKo
+                  ? "메뉴 열기"
+                  : "Open menu"
+            }
+            aria-expanded={mobileNavOpen}
+          >
+            {mobileNavOpen ? (
+              <X className="h-5 w-5" aria-hidden />
+            ) : (
+              <Menu className="h-5 w-5" aria-hidden />
+            )}
+          </button>
+        </div>
+      </div>
+
+      {mobileNavOpen ? (
+        <div
+          className="tkad-site-header-panel md:hidden"
+          role="dialog"
+          aria-label={isKo ? "모바일 메뉴" : "Mobile menu"}
+        >
+          {/* Absorbs header icons hidden below md — search / notifications (contact is in sidebar) */}
+          <div className="mb-2 border-b border-gray-200/80 pb-2 dark:border-white/10">
+            <button
+              type="button"
+              className={cn(headerMobileMenuRowClass, "w-full px-1")}
+              onClick={() => {
+                setMobileNavOpenSafe(false);
+                // Open after panel unmount so dialog focus does not steal palette
+                window.setTimeout(() => commandPalette?.setOpen(true), 0);
+              }}
+            >
+              <Search className="h-4 w-4 shrink-0" strokeWidth={2} aria-hidden />
+              <span className="flex-1 text-left">
+                {isKo ? "검색" : "Search"}
+              </span>
+            </button>
+            <HeaderNotificationsBell
+              variant="menu"
+              onNavigate={() => setMobileNavOpenSafe(false)}
+              className={cn(headerMobileMenuRowClass, "px-1")}
             />
           </div>
-        </>
+          <PublicNavSidebar
+            groups={navGroups}
+            onNavigate={() => setMobileNavOpenSafe(false)}
+            density="panel"
+          />
+        </div>
       ) : null}
-    </>
+    </header>
   );
 }

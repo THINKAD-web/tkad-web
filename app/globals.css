@@ -3185,6 +3185,87 @@ html:not(.dark) .tkad-nav-chrome {
   -webkit-text-fill-color: var(--qp-accent) !important;
 }
 
+/* Digital parity: THINKAD + OOH MKT brand labeling */
+.tkad-site-brand {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.tkad-site-brand-parent {
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1rem;
+  line-height: 1;
+  color: inherit;
+  white-space: nowrap;
+}
+
+@media (min-width: 640px) {
+  .tkad-site-brand-parent {
+    font-size: 1.125rem;
+  }
+}
+
+.tkad-site-brand-sub {
+  font-weight: 700;
+  font-size: 0.68em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  line-height: 1;
+  color: var(--qp-accent);
+  white-space: nowrap;
+}
+
+/* iPhone SE-class: keep THINKAD + account + menu; sublabel after brand fits once chrome icons hide */
+@media (max-width: 359px) {
+  .tkad-site-brand-sub {
+    display: none;
+  }
+}
+
+/* Digital-style mobile menu button + drop-down panel (no full-screen overlay) */
+.tkad-site-header-menu-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: 1px solid color-mix(in srgb, var(--border, #d8d6d0) 100%, transparent);
+  border-radius: 0.25rem;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+.tkad-site-header-menu-btn:hover {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
+
+.tkad-site-header-panel {
+  border-top: 1px solid color-mix(in srgb, var(--border, #d8d6d0) 100%, transparent);
+  background: inherit;
+  padding: 16px 20px 20px;
+  max-height: calc(100dvh - 3.5rem);
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+}
+
+html.tkad-nav-scroll-lock,
+html.tkad-nav-scroll-lock body {
+  overscroll-behavior: none;
+}
+
+.dark .tkad-site-header-panel {
+  border-top-color: rgb(255 255 255 / 0.1);
+  background: #05050a;
+}
+
 /* 드롭다운 항목: 유틸 조합이 꼬여도 제목/설명 대비 유지 */
 .dark .tkad-nav-chrome [role="menuitem"] span:first-of-type {
   color: rgb(252 252 252) !important;
