@@ -19,6 +19,10 @@ export interface PlanTransferData {
   estimatedReach?: number;
   estimatedCpm?: number;
   source: PlanTransferSource;
+  /** Recommend handoff — raw industry key for contact prefill */
+  recommendIndustry?: string;
+  /** Recommend handoff — monthly budget cap (만원) */
+  budgetMaxMan?: number;
 }
 
 const GOAL_TO_CONTACT: Record<string, ContactCampaignGoal> = {
@@ -45,11 +49,20 @@ export function readPlanTransferData(): PlanTransferData | null {
     const raw = window.localStorage.getItem(PLAN_DATA_STORAGE_KEY);
     if (!raw) return null;
     const parsed = JSON.parse(raw) as Partial<PlanTransferData>;
-    if (!Array.isArray(parsed.mediaIds) || parsed.mediaIds.length === 0) {
+    const mediaIds = Array.isArray(parsed.mediaIds)
+      ? parsed.mediaIds.filter((id): id is string => typeof id === "string")
+      : [];
+    const source =
+      parsed.source === "ai_recommend" ||
+      parsed.source === "integrated" ||
+      parsed.source === "planner"
+        ? parsed.source
+        : "planner";
+    if (mediaIds.length === 0 && source !== "integrated") {
       return null;
     }
     return {
-      mediaIds: parsed.mediaIds.filter((id): id is string => typeof id === "string"),
+      mediaIds,
       mediaNames: Array.isArray(parsed.mediaNames)
         ? parsed.mediaNames.map(String)
         : [],
@@ -67,12 +80,13 @@ export function readPlanTransferData(): PlanTransferData | null {
           : undefined,
       estimatedCpm:
         typeof parsed.estimatedCpm === "number" ? parsed.estimatedCpm : undefined,
-      source:
-        parsed.source === "ai_recommend" ||
-        parsed.source === "integrated" ||
-        parsed.source === "planner"
-          ? parsed.source
-          : "planner",
+      source,
+      recommendIndustry:
+        typeof parsed.recommendIndustry === "string"
+          ? parsed.recommendIndustry
+          : undefined,
+      budgetMaxMan:
+        typeof parsed.budgetMaxMan === "number" ? parsed.budgetMaxMan : undefined,
     };
   } catch {
     return null;
@@ -109,12 +123,31 @@ export function buildPlanTransferContactMessage(
       : "";
 
   if (isKo) {
+    if (plan.source === "integrated") {
+      return [
+        "[온오프 통합 미디어믹스 요청]",
+        "통합 자동 배분은 준비 중 · 아래 상담으로 옥외+디지털 패키지 제안.",
+        lines.length > 0 ? "" : null,
+        lines.length > 0 ? "[OOH 추천 매체]" : null,
+        ...lines,
+        "",
+        `총 예산: ${budgetLabel}`,
+        `집행 기간: ${plan.duration}개월`,
+        plan.goal ? `캠페인 목표: ${plan.goal}` : "",
+        plan.region ? `희망 지역: ${plan.region}` : "",
+        plan.budgetMaxMan
+          ? `월 예산 상한: ${plan.budgetMaxMan.toLocaleString("ko-KR")}만원`
+          : "",
+        reachLine.replace(/^\n/, ""),
+        cpmLine.replace(/^\n/, ""),
+      ]
+        .filter(Boolean)
+        .join("\n");
+    }
     const header =
       plan.source === "ai_recommend"
         ? "[AI 추천 매체]"
-        : plan.source === "integrated"
-          ? "[통합 플래너 추천 매체]"
-          : "[플래너 추천 매체]";
+        : "[플래너 추천 매체]";
     return [
       header,
       ...lines,
@@ -129,12 +162,32 @@ export function buildPlanTransferContactMessage(
       .join("\n");
   }
 
+  if (plan.source === "integrated") {
+    return [
+      "[OOH + digital integrated mix request]",
+      "Integrated auto-allocation is in progress · request an OOH+digital package below.",
+      lines.length > 0 ? "" : null,
+      lines.length > 0 ? "[OOH recommended media]" : null,
+      ...lines,
+      "",
+      `Total budget: ${budgetLabel}`,
+      `Duration: ${plan.duration} month(s)`,
+      plan.goal ? `Campaign goal: ${plan.goal}` : "",
+      plan.region ? `Preferred region: ${plan.region}` : "",
+      plan.budgetMaxMan
+        ? `Monthly budget cap: ₩${(plan.budgetMaxMan * 10_000).toLocaleString("en-US")}`
+        : "",
+      reachLine.replace(/^\n/, ""),
+      cpmLine.replace(/^\n/, ""),
+    ]
+      .filter(Boolean)
+      .join("\n");
+  }
+
   const header =
     plan.source === "ai_recommend"
       ? "[AI recommended media]"
-      : plan.source === "integrated"
-        ? "[Integrated planner media]"
-        : "[Planner recommended media]";
+      : "[Planner recommended media]";
   return [
     header,
     ...lines,

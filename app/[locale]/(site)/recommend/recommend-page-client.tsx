@@ -85,6 +85,9 @@ import {
   writeRecommendSessionSnapshot,
 } from "@/lib/recommend/recommend-session-persist";
 import { readStoredRecommendChannelType } from "@/lib/recommend/channel-type";
+import {
+  buildIntegratedRecommendPlanTransfer,
+} from "@/lib/recommend/integrated-contact-handoff";
 
 const RecommendCartBar = dynamic(
   () => import("@/components/recommend-cart-bar"),
@@ -339,6 +342,31 @@ export default function RecommendPageClient({
     router.push("/contact?from=ai");
     setNavigatingQuote(false);
   }, [pickedForQuote, lastPayload, isKo, router, toast, effectiveQuantities, effectivePriceOptionIndex]);
+
+  const goToIntegratedContact = useCallback(() => {
+    if (!lastPayload) {
+      router.push("/contact?from=integrated");
+      return;
+    }
+    const transfer = buildIntegratedRecommendPlanTransfer({
+      payload: lastPayload,
+      picked: pickedForQuote,
+      isKo,
+      planCartItems: planCart.items,
+      quantities: effectiveQuantities,
+      priceOptionIndex: effectivePriceOptionIndex,
+    });
+    savePlanTransferData(transfer);
+    router.push("/contact?from=integrated");
+  }, [
+    lastPayload,
+    pickedForQuote,
+    isKo,
+    planCart.items,
+    effectiveQuantities,
+    effectivePriceOptionIndex,
+    router,
+  ]);
 
   /**
    * 추천 결과로 견적서를 직접 생성하고 미리보기로 이동.
@@ -925,7 +953,7 @@ export default function RecommendPageClient({
                 <BtnBlock
                   variant="secondary"
                   size="md"
-                  href="/contact?from=integrated"
+                  onClick={goToIntegratedContact}
                 >
                   {tr("integratedNotice.ctaContact")}
                 </BtnBlock>
