@@ -40,7 +40,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function AboutPage({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
-  const isKo = locale === "ko";
   const t = await getTranslations("about");
   const verifiedLabel = await getPublicMediaCountLabel("verified");
 
@@ -53,7 +52,7 @@ export default async function AboutPage({ params }: Props) {
           highlight=""
           description={t("identityBody")}
         />
-        <AboutPageSections isKo={isKo} verifiedLabel={verifiedLabel} />
+        <AboutPageSections verifiedLabel={verifiedLabel} />
       </div>
     </HomeLandingDayNight>
   );
