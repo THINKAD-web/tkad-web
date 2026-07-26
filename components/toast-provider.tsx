@@ -80,7 +80,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
       {children}
       <div
         aria-live="polite"
-        className="pointer-events-none fixed top-4 right-4 z-[100] flex w-full max-w-sm flex-col gap-2"
+        className="pointer-events-none fixed inset-x-4 top-4 z-[100] flex flex-col items-end gap-2"
       >
         {toasts.map((t) => {
           const Icon = ICONS[t.type];
@@ -88,7 +88,7 @@ export default function ToastProvider({ children }: { children: ReactNode }) {
             <div
               key={t.id}
               className={cn(
-                "pointer-events-auto flex items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-300",
+                "pointer-events-auto flex w-full max-w-sm items-start gap-3 rounded-xl border p-4 shadow-lg transition-all duration-300",
                 STYLES[t.type],
                 t.removing
                   ? "translate-x-full opacity-0"

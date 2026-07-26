@@ -5,7 +5,6 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   BookOpen,
-  ChevronDown,
   ChevronRight,
   Gift,
   Globe,
@@ -20,6 +19,8 @@ import {
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
+  headerChromeDropdownBackdropClass,
+  headerChromeDropdownPanelClass,
   headerChromeIconGhostClass,
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
@@ -128,22 +129,26 @@ export function HeaderProfileDropdown({
         <UserIcon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
-        <div
-          role="menu"
-          className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]"
-        >
-          {menuPanel === "usage" ? (
-            <HeaderUsageGuideMenuPanel
-              isKo={isKo}
-              onClose={() => {
-                close();
-                onNavigate?.();
-              }}
-              onBack={() => setMenuPanel("main")}
-              title={tGuide("usageGuide")}
-            />
-          ) : (
-            <>
+        <>
+          <button
+            type="button"
+            aria-label={isKo ? "메뉴 닫기" : "Close menu"}
+            className={headerChromeDropdownBackdropClass}
+            onClick={close}
+          />
+          <div role="menu" className={headerChromeDropdownPanelClass}>
+            {menuPanel === "usage" ? (
+              <HeaderUsageGuideMenuPanel
+                isKo={isKo}
+                onClose={() => {
+                  close();
+                  onNavigate?.();
+                }}
+                onBack={() => setMenuPanel("main")}
+                title={tGuide("usageGuide")}
+              />
+            ) : (
+              <>
           <p className="truncate px-3 py-2 text-xs font-semibold text-gray-500 dark:text-white/50">
             {session.name}
           </p>
@@ -263,9 +268,10 @@ export function HeaderProfileDropdown({
             <LogOut className="h-4 w-4 opacity-70" />
             {logoutLabel}
           </button>
-            </>
-          )}
-        </div>
+              </>
+            )}
+          </div>
+        </>
       ) : null}
     </div>
   );
