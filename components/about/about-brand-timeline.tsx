@@ -6,7 +6,7 @@ export type AboutTimelineItem = {
   year: string;
   icon: LucideIcon;
   title: string;
-  description: string;
+  description?: string;
   current?: boolean;
 };
 
@@ -44,7 +44,7 @@ export function AboutBrandTimeline({
                   className={cn(
                     "rounded-2xl border p-5 md:max-w-sm",
                     item.current
-                      ? "border-violet-500/30 bg-violet-500/10"
+                      ? "border-hermes/35 bg-hermes/10"
                       : "border-gray-100 bg-white dark:border-white/10 dark:bg-white/5",
                     isLeft ? "md:text-right" : "md:text-left",
                   )}
@@ -59,7 +59,7 @@ export function AboutBrandTimeline({
                       className={cn(
                         "flex h-10 w-10 shrink-0 items-center justify-center rounded-xl",
                         item.current
-                          ? "bg-violet-500/20 text-violet-500"
+                          ? "bg-hermes/15 text-hermes"
                           : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
                       )}
                     >
@@ -70,7 +70,7 @@ export function AboutBrandTimeline({
                         className={cn(
                           "text-sm font-semibold",
                           item.current
-                            ? "text-violet-500 dark:text-violet-400"
+                            ? "text-hermes"
                             : "text-gray-500 dark:text-white/50",
                         )}
                       >
@@ -86,9 +86,11 @@ export function AboutBrandTimeline({
                       </h3>
                     </div>
                   </div>
-                  <p className="text-sm leading-relaxed text-gray-600 dark:text-white/60">
-                    {item.description}
-                  </p>
+                  {item.description ? (
+                    <p className="text-sm leading-relaxed text-gray-600 dark:text-white/60">
+                      {item.description}
+                    </p>
+                  ) : null}
                 </article>
               );
 
@@ -101,7 +103,7 @@ export function AboutBrandTimeline({
                     className={cn(
                       "absolute top-6 left-[11px] z-10 flex h-3 w-3 rounded-full border-2 md:left-1/2 md:-translate-x-1/2",
                       item.current
-                        ? "border-violet-500 bg-violet-500"
+                        ? "border-hermes bg-hermes"
                         : "border-gray-300 bg-white dark:border-white/30 dark:bg-[#0A0A0A]",
                     )}
                     aria-hidden
@@ -136,3 +138,11 @@ export const ABOUT_TIMELINE_ICONS = {
   users: Users,
   sparkles: Sparkles,
 } as const;
+
+/** Year order + icon mapping only — titles/descriptions from i18n `history{year}*`. */
+export const ABOUT_TIMELINE_YEARS = [
+  { year: "2014", icon: ABOUT_TIMELINE_ICONS.lightbulb },
+  { year: "2017", icon: ABOUT_TIMELINE_ICONS.shoppingBag },
+  { year: "2022", icon: ABOUT_TIMELINE_ICONS.users },
+  { year: "2026", icon: ABOUT_TIMELINE_ICONS.sparkles, current: true },
+] as const;

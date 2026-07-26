@@ -23,9 +23,9 @@ export const FAQ_ITEMS: FaqItem[] = [
     questionKo: "옥외광고는 어떤 종류가 있나요?",
     questionEn: "What types of outdoor advertising are available?",
     answerKo:
-      "빌보드, 디지털 사이니지, 지하철 광고, 버스 광고, 전광판 등 다양한 종류가 있습니다. 싱커드는 전국 {count} 검증된 매체를 보유하고 있어 캠페인 목표에 맞는 최적의 매체를 추천해 드립니다.",
+      "빌보드, 디지털 사이니지, 지하철 광고, 버스 광고, 전광판 등 다양한 종류가 있습니다. 싱커드는 전국 {count} 검증 매체를 카탈로그로 연결해 캠페인 목표에 맞는 최적의 매체를 추천해 드립니다.",
     answerEn:
-      "We offer billboards, digital signage, subway ads, bus ads, LED displays, and more. THINKAD has {count} verified media nationwide and recommends the best media for your campaign goals.",
+      "We offer billboards, digital signage, subway ads, bus ads, LED displays, and more. THINKAD connects {count} verified media nationwide in our catalog and recommends the best fit for your campaign goals.",
   },
   {
     id: "2",
@@ -33,9 +33,9 @@ export const FAQ_ITEMS: FaqItem[] = [
     questionKo: "전국 단위 OOH 캠페인도 가능한가요?",
     questionEn: "Do you handle nationwide OOH campaigns across Korea?",
     answerKo:
-      "네, 가능합니다. 싱커드는 서울·수도권은 물론, 광역시와 주요 관광지를 아우르는 국내 OOH 미디어랩으로 전국 단위 캠페인을 기획·운영합니다.",
+      "네, 가능합니다. 싱커드는 서울·수도권은 물론 광역시와 주요 관광지를 아우르는 검증 매체 네트워크를 바탕으로 전국 단위 OOH 캠페인을 기획·대행합니다.",
     answerEn:
-      "Yes. As a Korean OOH media lab, THINKAD plans and operates nationwide campaigns across Seoul, the capital area, major cities, and key tourist destinations in Korea.",
+      "Yes. THINKAD plans and brokers nationwide OOH campaigns across Seoul, the capital area, major cities, and key tourist destinations through a verified media network.",
   },
   {
     id: "3",
@@ -113,9 +113,9 @@ export const FAQ_ITEMS: FaqItem[] = [
     questionKo: "싱커드만의 차별점은 무엇인가요?",
     questionEn: "What makes THINKAD different?",
     answerKo:
-      "모든 매체를 직접 현장 방문하여 검증하고, 1년 이상 축적된 효과 데이터를 기반으로 매체를 추천합니다. 계약부터 사후관리까지 원스톱 서비스를 제공하며, 데이터 기반의 투명한 리포팅을 보장합니다.",
+      "모든 매체를 직접 현장 방문하여 검증하고, 1년 이상 축적된 효과 데이터를 기반으로 매체를 추천합니다. 계약부터 사후관리까지 원스톱으로 대행하며, 데이터 기반의 투명한 리포팅을 제공합니다.",
     answerEn:
-      "We personally visit and verify every media site, recommend media based on 1+ years of performance data, provide one-stop service from contract to post-care, and guarantee transparent data-driven reporting.",
+      "We personally visit and verify every media site, recommend media based on 1+ years of performance data, broker one-stop service from contract to post-care, and provide transparent data-driven reporting.",
   },
   {
     id: "11",

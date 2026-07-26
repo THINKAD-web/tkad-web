@@ -7,61 +7,51 @@ import { BtnBlock } from "@/components/brutalist";
 import { ArrowLeft, ArrowRight, Clock, Flag } from "lucide-react";
 import { cn } from "@/lib/utils";
 
+/** Aligned with about timeline SoT (2014 / 2017 / 2022 / 2026). */
 const historyData = [
   {
-    year: "2016",
-    labelKo: "설립",
-    labelEn: "Founded",
-    titleKo: "THINKAD 설립",
-    titleEn: "THINKAD Founded",
+    year: "2014",
+    labelKo: "설립·투명화",
+    labelEn: "Founded & transparency",
+    titleKo: "국내 최초 OOH 단가 투명화",
+    titleEn: "First transparent OOH rates in Korea",
     descriptionKo:
-      "주식회사 싱커드(THINKAD) 설립. OOH 전문 기업의 첫걸음을 내딛었습니다.",
+      "주식회사 싱커드(THINKAD) 설립과 함께 매체별 단가를 온라인에 공개하며, 업계 최초로 OOH 가격 투명화를 시작했습니다.",
     descriptionEn:
-      "THINKAD Inc. was founded, taking its first step as a specialized OOH company.",
+      "THINKAD Inc. was founded and published per-media pricing online — starting an industry-first push for OOH rate transparency.",
   },
   {
     year: "2017",
-    labelKo: "첫 대형 프로젝트",
-    labelEn: "First Major Project",
-    titleKo: "국내 대형 OOH 캠페인 수행",
-    titleEn: "First Large-Scale OOH Campaign",
+    labelKo: "검색 플랫폼",
+    labelEn: "Search platform",
+    titleKo: "쇼핑몰형 매체 검색 플랫폼",
+    titleEn: "Store-style media search",
     descriptionKo:
-      "국내 대기업과 함께 첫 대형 OOH 캠페인을 수행하며 전국 단위 옥외 미디어 운영 역량을 입증했습니다.",
+      "카테고리별 매체 분류와 견적 원스톱 처리를 갖춘 검색형 플랫폼으로, 광고주가 검증 매체를 비교·선택할 수 있게 했습니다.",
     descriptionEn:
-      "Executed the first large-scale OOH campaign with a major Korean enterprise, proving nationwide outdoor media capabilities.",
-  },
-  {
-    year: "2019",
-    labelKo: "100개 매체 돌파",
-    labelEn: "100 Media Milestone",
-    titleKo: "운영 매체 100개 돌파",
-    titleEn: "Surpassed 100 Operated Media",
-    descriptionKo:
-      "코엑스 K-POP 스퀘어, 강남대로 미디어폴 등 랜드마크 매체를 포함해 운영·관리 매체 수가 100개를 돌파했습니다.",
-    descriptionEn:
-      "Surpassed 100 operated and managed media, including landmark displays such as COEX K-POP Square and Gangnam-daero Media Pole.",
+      "Launched a store-style search platform with category browsing and one-stop quoting so advertisers can compare verified media.",
   },
   {
     year: "2022",
-    labelKo: "전국 확대",
-    labelEn: "Nationwide Expansion",
-    titleKo: "국내 OOH 네트워크 확장",
-    titleEn: "Korean OOH Network Expansion",
+    labelKo: "미디어렙",
+    labelEn: "Media rep",
+    titleKo: "미디어렙 공식 인정",
+    titleEn: "Recognized media rep",
     descriptionKo:
-      "코엑스 K-POP 스퀘어, 강남대로 미디어폴를 비롯한 주요 랜드마크와의 파트너십을 강화하며 국내 OOH 네트워크를 확장했습니다.",
+      "광고주·대행사·매체사 파트너십을 바탕으로 국내 OOH 네트워크를 확장하며, 대행·검증형 미디어렙으로 자리잡았습니다.",
     descriptionEn:
-      "Expanded our Korean OOH network by strengthening partnerships with key domestic landmarks such as COEX K-POP Square and Gangnam-daero Media Pole.",
+      "Expanded the Korean OOH network through advertiser, agency, and media-owner partnerships — established as a verified media-rep model.",
   },
   {
-    year: "2025",
-    labelKo: "AI 플랫폼 런칭",
-    labelEn: "AI Platform Launch",
-    titleKo: "AI 기반 OOH 플래닝 플랫폼 런칭",
-    titleEn: "Launched AI-Powered OOH Planning Platform",
+    year: "2026",
+    labelKo: "AI 플랫폼",
+    labelEn: "AI platform",
+    titleKo: "AI 플랫폼으로 진화",
+    titleEn: "Evolved into an AI platform",
     descriptionKo:
-      "데이터와 AI를 결합한 OOH 플래닝 플랫폼을 런칭하여 매체 추천과 캠페인 성과 예측을 한층 고도화했습니다.",
+      "AI 플래너·전자계약·통합 분석까지 이어지는 플랫폼으로 고도화해, 옥외·디지털·통합 플래닝을 한곳에서 지원합니다.",
     descriptionEn:
-      "Launched an AI-powered OOH planning platform, advancing media recommendations and campaign performance prediction.",
+      "Advanced into an AI platform spanning planner, e-contracts, and unified analytics — supporting OOH, digital, and integrated planning.",
   },
 ] as const;
 
@@ -204,13 +194,13 @@ export default function HistoryPage() {
               <div className="space-y-4 p-5 text-[12px] leading-relaxed tracking-tight text-muted-foreground">
                 <p>
                   {`// `}{isKo
-                    ? "설립 이후 싱커드는 국내 OOH 핵심 거점을 기반으로 매체 네트워크를 확장하며 한국 OOH 미디어랩 전문 회사로 성장해왔습니다."
-                    : "Since its founding, THINKAD has expanded its media network around key domestic OOH hubs and grown into a specialized Korean OOH media lab."}
+                    ? "설립 이후 싱커드는 국내 OOH 핵심 거점의 검증 매체 네트워크를 확장하며, 대행·검증형 미디어 플랫폼으로 성장해왔습니다."
+                    : "Since founding, THINKAD has expanded a verified media network around key domestic OOH hubs as an agency and verification platform."}
                 </p>
                 <p>
                   {`// `}{isKo
-                    ? "2025년에는 데이터와 AI를 결합한 OOH 플래닝 플랫폼을 런칭하여, 매체 추천과 성과 예측을 한층 고도화했습니다."
-                    : "In 2025, THINKAD launched an AI-powered OOH planning platform, further advancing media recommendations and performance forecasting."}
+                    ? "2026년에는 데이터와 AI를 결합한 OOH 플래닝 플랫폼을 고도화하여, 매체 추천과 캠페인 설계를 한곳에서 이어갑니다."
+                    : "In 2026, THINKAD advanced its AI-powered OOH planning platform so media recommendations and campaign design continue in one place."}
                 </p>
                 <div className="pt-2">
                   <BtnBlock href="/about" variant="secondary" size="sm" className="w-full justify-center">
