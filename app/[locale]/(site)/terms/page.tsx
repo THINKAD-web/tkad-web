@@ -49,7 +49,6 @@ export default async function TermsPage({ params }: Props) {
       relatedLinks={[
         { href: "/privacy", label: isKo ? "개인정보처리방침" : "Privacy Policy" },
         { href: "/refund", label: isKo ? "환불 정책" : "Refund Policy" },
-        { href: "/guarantee", label: isKo ? "성과 보증 정책" : "Performance Guarantee" },
       ]}
     />
   );
