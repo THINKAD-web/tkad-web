@@ -33,8 +33,11 @@ type Props = {
   onNavigate?: () => void;
   initialOpenId?: string | null;
   className?: string;
-  /** @deprecated mobile-only component; kept for call-site compat */
-  density?: "default" | "comfortable";
+  /**
+   * `panel` — Digital site-header panel typography/spacing (standard).
+   * `default` / `comfortable` — legacy denser mobile drawer look.
+   */
+  density?: "default" | "comfortable" | "panel";
 };
 
 /** 이름만으로 의미가 모호한 항목 — 모바일에서만 한 줄 설명 유지 */
@@ -51,10 +54,12 @@ export function PublicNavSidebar({
   onNavigate,
   initialOpenId = null,
   className,
+  density = "default",
 }: Props) {
   const t = useTranslations("nav");
   const pathname = usePathname() ?? "";
   const searchParams = useSearchParams();
+  const isPanel = density === "panel";
   const contactActive =
     pathname === "/contact" || pathname.startsWith("/contact/");
   const activeGroupId = useMemo(
@@ -95,32 +100,47 @@ export function PublicNavSidebar({
     <nav
       className={cn(
         "flex flex-col bg-white text-gray-900 dark:bg-gray-950 dark:text-white",
+        isPanel && "tkad-site-header-panel-nav",
         className,
       )}
       aria-label="Main navigation"
     >
-      <div className="space-y-1 border-b border-gray-200/80 px-5 py-3 dark:border-white/10">
+      <div
+        className={cn(
+          "space-y-1 border-b border-gray-200/80 dark:border-white/10",
+          isPanel ? "px-1 pb-3" : "px-5 py-3",
+        )}
+      >
         <Link
           href="/contact"
           onClick={onNavigate}
           className={cn(
-            "flex min-h-12 items-center gap-3 transition-colors",
+            "flex items-center gap-3 transition-colors",
+            isPanel ? "min-h-11 py-3" : "min-h-12",
             contactActive
               ? "text-[color:var(--qp-accent)]"
               : "text-gray-900 hover:text-gray-950 dark:text-white dark:hover:text-white",
+            isPanel && "border-b border-gray-200/80 dark:border-white/10",
           )}
         >
+          {!isPanel ? (
+            <span
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
+                contactActive
+                  ? "bg-[color:var(--qp-accent)] text-white"
+                  : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
+              )}
+            >
+              <MessageSquare className="h-4 w-4" aria-hidden />
+            </span>
+          ) : null}
           <span
             className={cn(
-              "flex h-9 w-9 shrink-0 items-center justify-center rounded-lg",
-              contactActive
-                ? "bg-[color:var(--qp-accent)] text-white"
-                : "bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70",
+              "font-semibold leading-snug tracking-tight",
+              isPanel ? "text-[0.95rem]" : "text-xl",
             )}
           >
-            <MessageSquare className="h-4 w-4" aria-hidden />
-          </span>
-          <span className="text-xl font-semibold leading-snug tracking-tight">
             {t("contact")}
           </span>
         </Link>
@@ -129,24 +149,43 @@ export function PublicNavSidebar({
           target="_blank"
           rel="noopener noreferrer"
           onClick={onNavigate}
-          className="flex min-h-12 items-center gap-3 text-gray-900 transition-colors hover:text-gray-950 dark:text-white dark:hover:text-white"
+          className={cn(
+            "flex items-center gap-3 text-gray-900 transition-colors hover:text-gray-950 dark:text-white dark:hover:text-white",
+            isPanel
+              ? "min-h-11 border-b border-gray-200/80 py-3 dark:border-white/10"
+              : "min-h-12",
+          )}
           aria-label={t("thinkadDigitalExternal")}
         >
-          <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70">
-            <MonitorSmartphone className="h-4 w-4" aria-hidden />
-          </span>
+          {!isPanel ? (
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-gray-100 text-gray-600 dark:bg-white/10 dark:text-white/70">
+              <MonitorSmartphone className="h-4 w-4" aria-hidden />
+            </span>
+          ) : null}
           <span className="min-w-0 flex-1">
-            <span className="flex items-center gap-2 text-xl font-semibold leading-snug tracking-tight">
+            <span
+              className={cn(
+                "flex items-center gap-2 font-semibold leading-snug tracking-tight",
+                isPanel ? "text-[0.95rem]" : "text-xl",
+              )}
+            >
               {t("thinkadDigital")}
               <ExternalLink className="h-3.5 w-3.5 shrink-0 opacity-50" aria-hidden />
             </span>
-            <span className="mt-0.5 block text-xs text-gray-400 dark:text-white/40">
-              {t("thinkadDigitalDesc")}
-            </span>
+            {!isPanel ? (
+              <span className="mt-0.5 block text-xs text-gray-400 dark:text-white/40">
+                {t("thinkadDigitalDesc")}
+              </span>
+            ) : null}
           </span>
         </a>
       </div>
-      <ul className="flex flex-col divide-y divide-gray-200/80 dark:divide-white/10">
+      <ul
+        className={cn(
+          "flex flex-col",
+          isPanel ? "gap-1" : "divide-y divide-gray-200/80 dark:divide-white/10",
+        )}
+      >
         {groups.map((group) => {
           const Icon = group.icon;
           const expanded = openIds.has(group.id);
@@ -165,30 +204,41 @@ export function PublicNavSidebar({
                 aria-controls={`nav-panel-${group.id}`}
                 onClick={() => toggle(group.id)}
                 className={cn(
-                  "flex w-full min-h-12 items-center gap-3 px-5 py-3 text-left transition-colors",
+                  "flex w-full items-center gap-3 text-left transition-colors",
+                  isPanel ? "min-h-11 px-1 py-3" : "min-h-12 px-5 py-3",
                   groupActive
                     ? "text-[color:var(--qp-accent)]"
                     : "text-gray-900 dark:text-white",
+                  isPanel && "border-b border-gray-200/80 dark:border-white/10",
                 )}
               >
                 <Icon
                   className={cn(
-                    "h-4 w-4 shrink-0 opacity-60",
+                    "shrink-0 opacity-60",
+                    isPanel ? "h-3.5 w-3.5" : "h-4 w-4",
                     groupActive && "text-[color:var(--qp-accent)] opacity-100",
                   )}
                   aria-hidden
                 />
                 <span className="min-w-0 flex-1">
-                  <span className="block text-2xl font-bold leading-tight tracking-tight">
+                  <span
+                    className={cn(
+                      "block font-bold leading-tight tracking-tight",
+                      isPanel ? "text-[0.95rem] font-semibold" : "text-2xl",
+                    )}
+                  >
                     {group.label}
                   </span>
-                  <span className="mt-0.5 block font-display text-[11px] font-medium lowercase tracking-[0.22em] text-gray-400 dark:text-white/35">
-                    {group.labelEn}
-                  </span>
+                  {!isPanel ? (
+                    <span className="mt-0.5 block font-display text-[11px] font-medium lowercase tracking-[0.22em] text-gray-400 dark:text-white/35">
+                      {group.labelEn}
+                    </span>
+                  ) : null}
                 </span>
                 <ChevronDown
                   className={cn(
-                    "h-5 w-5 shrink-0 text-gray-400 transition-transform dark:text-white/40",
+                    "shrink-0 text-gray-400 transition-transform dark:text-white/40",
+                    isPanel ? "h-4 w-4" : "h-5 w-5",
                     expanded && "rotate-180",
                     groupActive && "text-[color:var(--qp-accent)]",
                   )}
@@ -206,7 +256,12 @@ export function PublicNavSidebar({
                 )}
               >
                 <ul className="overflow-hidden">
-                  <div className="space-y-0 pb-2 pl-8 pr-4 pt-0.5">
+                  <div
+                    className={cn(
+                      "space-y-0 pt-0.5",
+                      isPanel ? "pb-2 pl-4 pr-1" : "pb-2 pl-8 pr-4",
+                    )}
+                  >
                     {group.items.map((item, index) => {
                       const active = isPublicNavItemActive(
                         pathname,
@@ -214,7 +269,9 @@ export function PublicNavSidebar({
                         searchParams,
                       );
                       const showDesc =
-                        item.desc && MOBILE_DESC_ITEM_IDS.has(item.id);
+                        !isPanel &&
+                        item.desc &&
+                        MOBILE_DESC_ITEM_IDS.has(item.id);
                       const showPlanningDivider =
                         group.id === "planning" &&
                         item.id === "ai-recommend" &&
@@ -231,13 +288,16 @@ export function PublicNavSidebar({
                             href={item.href}
                             onClick={onNavigate}
                             className={cn(
-                              "flex min-h-12 items-center px-1 py-2.5 transition-colors",
+                              "flex items-center px-1 transition-colors",
+                              isPanel ? "min-h-10 py-2" : "min-h-12 py-2.5",
                               active
                                 ? "text-[color:var(--qp-accent)]"
                                 : "text-gray-800 hover:text-gray-900 dark:text-white/85 dark:hover:text-white",
                               item.secondary &&
                                 !active &&
                                 "text-gray-600 dark:text-white/60",
+                              isPanel &&
+                                "border-b border-gray-200/60 dark:border-white/8",
                             )}
                           >
                             <span className="min-w-0 flex-1">
@@ -245,9 +305,11 @@ export function PublicNavSidebar({
                                 <span
                                   className={cn(
                                     "leading-snug tracking-tight",
-                                    item.secondary
-                                      ? "text-lg font-medium"
-                                      : "text-xl font-semibold",
+                                    isPanel
+                                      ? "text-[0.95rem] font-semibold"
+                                      : item.secondary
+                                        ? "text-lg font-medium"
+                                        : "text-xl font-semibold",
                                   )}
                                 >
                                   {item.label}

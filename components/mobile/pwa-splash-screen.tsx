@@ -52,14 +52,12 @@ export function PwaSplashScreen({ className }: Props) {
               className="rounded-[22px] shadow-[0_20px_60px_rgba(139,92,246,0.45)]"
             />{" "}
             <p className="mt-5 text-3xl font-black tracking-tight text-white">
-              {" "}
-              <span>THINK</span>{" "}
-              <span className="tkad-home-accent-text">AD</span>{" "}
-            </p>{" "}
-            <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.28em] text-white/50">
-              {" "}
-              OOH Platform{" "}
-            </p>{" "}
+              THINK
+              <span className="tkad-home-accent-text">AD</span>
+            </p>
+            <p className="mt-2 font-display text-xs font-medium uppercase tracking-[0.14em] text-white/50">
+              OOH MKT
+            </p>
           </motion.div>{" "}
         </motion.div>
       ) : null}{" "}
