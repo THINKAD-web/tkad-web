@@ -1052,7 +1052,12 @@
       "advancedTitle": "세부 조건 (선택)",
       "advancedHint": "매체 검색·유형·노출 환경은 필요할 때만 펼쳐 주세요.",
       "randomFill": "조건 무작위 채우기",
-      "randomFillHint": "입력이 막막할 때만 사용하세요. 채운 뒤 직접 수정하고 분석을 눌러 주세요."
+      "randomFillHint": "입력이 막막할 때만 사용하세요. 채운 뒤 직접 수정하고 분석을 눌러 주세요.",
+      "channelTypeLabel": "채널 타입",
+      "channelTypeHint": "지금은 선택만 저장됩니다. 이후 통합 플래닝에 반영됩니다.",
+      "channelTypeOoh": "OOH",
+      "channelTypeDigital": "디지털",
+      "channelTypeIntegrated": "통합"
     },
     "heroTitle": "싱커드 AI 매체 추천",
     "heroSubtitle": "캠페인 목표·예산·지역을 입력하면 AI가 최적의 OOH 매체를 추천합니다. 리스트와 지도로 살펴보고 장바구니에 담아 한 번에 견적을 요청하세요.",
@@ -3418,7 +3423,7 @@
   "homePage": {
     "twoAxis": {
       "eyebrow": "THINKAD",
-      "title": "옥외와 디지털, 한곳에서",
+      "title": "옥외·디지털·통합, 한곳에서",
       "subtitle": "매체 특성에 맞는 축을 고르고 바로 시작하세요.",
       "oohTitle": "옥외광고",
       "oohBadge": "이 사이트 · OOH",
@@ -3428,7 +3433,11 @@
       "digitalBadge": "THINKAD Digital",
       "digitalDesc": "SNS·검색광고 패키지와 캠페인별 맞춤 견적을 진행합니다.",
       "digitalCta": "THINKAD Digital",
-      "digitalCtaExternal": "새 탭에서 THINKAD Digital 열기"
+      "digitalCtaExternal": "새 탭에서 THINKAD Digital 열기",
+      "integratedTitle": "OOH+디지털 통합 플래닝",
+      "integratedBadge": "통합",
+      "integratedDesc": "예산을 나눠서 옥외+디지털 믹스로 최적화하고 싶다면",
+      "integratedCta": "통합 플래닝 시작"
     },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "광고, 손끝에서 5분 — OOH 플래너와 보고서까지.",
