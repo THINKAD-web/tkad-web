@@ -25,6 +25,21 @@ export const headerChromeIconGhostClass = cn(
 export const headerChromeMenuItemClass =
   "flex w-full items-center gap-2.5 px-3 py-2 text-sm font-medium text-gray-800 transition-colors hover:bg-gray-100 dark:text-white/90 dark:hover:bg-white/8";
 
+/**
+ * Guest/profile chrome dropdown panel.
+ * Mobile: full-bleed under the h-14 header (same plane as hamburger panel).
+ * md+: anchored w-64 dropdown.
+ */
+export const headerChromeDropdownPanelClass = cn(
+  "z-[60] overflow-x-hidden overflow-y-auto border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]",
+  "fixed inset-x-0 top-14 max-h-[min(70dvh,calc(100dvh-3.5rem))] w-full max-w-none rounded-none border-x-0 border-y",
+  "md:absolute md:inset-x-auto md:right-0 md:top-[calc(100%+0.35rem)] md:max-h-[min(80vh,32rem)] md:w-64 md:max-w-[calc(100vw-1.5rem)] md:rounded-xl md:border",
+);
+
+/** Mobile-only dimmer behind the full-bleed chrome dropdown. */
+export const headerChromeDropdownBackdropClass =
+  "fixed inset-0 z-[55] bg-black/35 md:hidden";
+
 export const headerChromeTextButtonClass = cn(
   headerChromeBase,
   headerChromeHover,

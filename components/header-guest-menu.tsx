@@ -7,10 +7,12 @@ import { BookOpen, ChevronRight, Globe, Moon, MoreHorizontal, Sun } from "lucide
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
+  headerChromeDropdownBackdropClass,
+  headerChromeDropdownPanelClass,
   headerChromeIconGhostClass,
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
-import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
+import { setManualTheme } from "@/lib/theme-auto";
 import { HeaderUsageGuideMenuPanel } from "@/components/header-usage-guide-menu";
 
 export function HeaderGuestMenu() {
@@ -54,72 +56,84 @@ export function HeaderGuestMenu() {
         <MoreHorizontal className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+0.35rem)] z-[60] w-64 max-w-[calc(100vw-1.5rem)] overflow-hidden rounded-xl border border-gray-200 bg-white py-1 shadow-xl dark:border-white/12 dark:bg-[#0a0a12]">
-          {menuPanel === "usage" ? (
-            <HeaderUsageGuideMenuPanel
-              isKo={isKo}
-              onClose={close}
-              onBack={() => setMenuPanel("main")}
-              title={t("usageGuide")}
-            />
-          ) : (
-            <>
+        <>
           <button
             type="button"
-            onClick={() => setMenuPanel("usage")}
-            className={headerChromeMenuItemClass}
-          >
-            <BookOpen className="h-4 w-4 opacity-70" />
-            <span className="min-w-0 flex-1 text-left">{t("usageGuide")}</span>
-            <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
-          </button>
-          <button
-            type="button"
-            disabled={isPending}
-            onClick={() => {
-              const next = locale === "ko" ? "en" : "ko";
-              startTransition(() => {
-                if (pathname == null || pathname === "") return;
-                router.replace(pathname, { locale: next });
-              });
-              close();
-            }}
-            className={headerChromeMenuItemClass}
-          >
-            <Globe className="h-4 w-4 opacity-70" />
-            {locale === "ko" ? "English" : "한국어"}
-          </button>
-          {mounted ? (
-            <button
-              type="button"
-              onClick={() => {
-                const isDark = resolvedTheme === "dark";
-                setManualTheme(isDark ? "light" : "dark");
-                setTheme(isDark ? "light" : "dark");
-              }}
-              className={headerChromeMenuItemClass}
-            >
-              {resolvedTheme === "dark" ? (
-                <Sun className="h-4 w-4 opacity-70" />
-              ) : (
-                <Moon className="h-4 w-4 opacity-70" />
-              )}
-              {resolvedTheme === "dark"
-                ? isKo
-                  ? "라이트 모드"
-                  : "Light mode"
-                : isKo
-                  ? "다크 모드"
-                  : "Dark mode"}
-            </button>
-          ) : null}
-          <div className="my-1 border-t border-gray-100 dark:border-white/10" />
-          <Link href="/login" onClick={close} className={headerChromeMenuItemClass}>
-            {t("login")}
-          </Link>
-            </>
-          )}
-        </div>
+            aria-label={isKo ? "메뉴 닫기" : "Close menu"}
+            className={headerChromeDropdownBackdropClass}
+            onClick={close}
+          />
+          <div className={headerChromeDropdownPanelClass}>
+            {menuPanel === "usage" ? (
+              <HeaderUsageGuideMenuPanel
+                isKo={isKo}
+                onClose={close}
+                onBack={() => setMenuPanel("main")}
+                title={t("usageGuide")}
+              />
+            ) : (
+              <>
+                <button
+                  type="button"
+                  onClick={() => setMenuPanel("usage")}
+                  className={headerChromeMenuItemClass}
+                >
+                  <BookOpen className="h-4 w-4 opacity-70" />
+                  <span className="min-w-0 flex-1 text-left">{t("usageGuide")}</span>
+                  <ChevronRight className="h-4 w-4 shrink-0 opacity-50" />
+                </button>
+                <button
+                  type="button"
+                  disabled={isPending}
+                  onClick={() => {
+                    const next = locale === "ko" ? "en" : "ko";
+                    startTransition(() => {
+                      if (pathname == null || pathname === "") return;
+                      router.replace(pathname, { locale: next });
+                    });
+                    close();
+                  }}
+                  className={headerChromeMenuItemClass}
+                >
+                  <Globe className="h-4 w-4 opacity-70" />
+                  {locale === "ko" ? "English" : "한국어"}
+                </button>
+                {mounted ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const isDark = resolvedTheme === "dark";
+                      setManualTheme(isDark ? "light" : "dark");
+                      setTheme(isDark ? "light" : "dark");
+                    }}
+                    className={headerChromeMenuItemClass}
+                  >
+                    {resolvedTheme === "dark" ? (
+                      <Sun className="h-4 w-4 opacity-70" />
+                    ) : (
+                      <Moon className="h-4 w-4 opacity-70" />
+                    )}
+                    {resolvedTheme === "dark"
+                      ? isKo
+                        ? "라이트 모드"
+                        : "Light mode"
+                      : isKo
+                        ? "다크 모드"
+                        : "Dark mode"}
+                  </button>
+                ) : null}
+                <div className="my-1 border-t border-gray-100 dark:border-white/10" />
+                <Link
+                  href="/login"
+                  onClick={close}
+                  className={headerChromeMenuItemClass}
+                >
+                  {t("login")}
+                </Link>
+              </>
+            )}
+          </div>
+        </>
       ) : null}
     </div>
   );
