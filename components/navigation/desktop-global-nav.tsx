@@ -7,6 +7,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { ArrowLeft, ChevronDown, ExternalLink, Menu, Search, X } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { HeaderDesktopChrome } from "@/components/header-desktop-chrome";
+import { HeaderCartLink } from "@/components/header-cart-link";
 import { HeaderNotificationsBell } from "@/components/header-notifications-bell";
 import { MediaNavHoverPanel } from "@/components/navigation/media-nav-hover-panel";
 import { useCommandPaletteOptional } from "@/components/navigation/command-palette-provider";
@@ -382,6 +383,11 @@ export function DesktopGlobalNav() {
               </span>
             </button>
             <HeaderNotificationsBell
+              variant="menu"
+              onNavigate={() => setMobileNavOpenSafe(false)}
+              className={cn(headerMobileMenuRowClass, "px-1")}
+            />
+            <HeaderCartLink
               variant="menu"
               onNavigate={() => setMobileNavOpenSafe(false)}
               className={cn(headerMobileMenuRowClass, "px-1")}
