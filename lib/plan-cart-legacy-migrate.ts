@@ -1,4 +1,3 @@
-import { CART_KEY } from "@/lib/cart";
 import type { MediaItem } from "@/lib/media-data";
 import {
   addManyToPlanCart,
@@ -7,6 +6,7 @@ import {
 } from "@/lib/plan-cart";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
+export const LEGACY_CART_KEY = "tkad-media-cart-v1";
 export const LEGACY_CART_MIGRATED_FLAG = "tkad_legacy_cart_migrated_v1";
 
 export type LegacyCartMigrateResult =
@@ -25,7 +25,7 @@ export type LegacyCartMigrateResult =
 function readLegacyIds(): string[] {
   if (typeof window === "undefined") return [];
   try {
-    const raw = window.localStorage.getItem(CART_KEY);
+    const raw = window.localStorage.getItem(LEGACY_CART_KEY);
     if (!raw) return [];
     const arr = JSON.parse(raw);
     return Array.isArray(arr)
@@ -44,7 +44,7 @@ function isMigrated(): boolean {
 function markMigratedAndClearLegacy(): void {
   if (typeof window === "undefined") return;
   window.localStorage.setItem(LEGACY_CART_MIGRATED_FLAG, "1");
-  window.localStorage.removeItem(CART_KEY);
+  window.localStorage.removeItem(LEGACY_CART_KEY);
 }
 
 async function fetchCatalogItems(ids: string[]): Promise<MediaItem[] | null> {

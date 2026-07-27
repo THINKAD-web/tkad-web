@@ -9,7 +9,7 @@ import {
   Plus,
   Check,
 } from "lucide-react";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
@@ -153,7 +153,7 @@ function ReelsSlide({
             </button>
           ) : (
             <>
-              <MediaCartAddButton
+              <PlanCartToggleButton
                 item={planItem}
                 addedFrom="search"
                 iconOnly

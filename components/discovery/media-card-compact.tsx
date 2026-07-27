@@ -5,7 +5,7 @@ import { Link } from "@/i18n/navigation";
 import Image from "next/image";
 import { ChevronDown, Lightbulb, Plus, X } from "lucide-react";
 import { DiscoveryMediaCardActions } from "@/components/discovery/discovery-media-card-actions";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import {
   catalogItemToDisplayModel,
@@ -146,7 +146,7 @@ export function DiscoveryMediaCardCompactRow({
               gridInline
               className="!h-[1.125rem] !px-1.5 !text-[8px]"
             />
-            <MediaCartAddButton
+            <PlanCartToggleButton
               item={planCartItemFromCatalog(item, "search")}
               addedFrom="search"
               gridInline
@@ -299,7 +299,7 @@ export function DiscoveryMediaCardCompactGrid({
                 gridInline
                 className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
               />
-              <MediaCartAddButton
+              <PlanCartToggleButton
                 item={planCartItemFromCatalog(item, planAddedFrom)}
                 addedFrom={planAddedFrom}
                 gridInline
