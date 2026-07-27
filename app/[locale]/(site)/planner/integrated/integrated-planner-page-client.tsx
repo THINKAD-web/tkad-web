@@ -58,6 +58,8 @@ import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
+import type { DigitalChannel } from "@/lib/planner/digital-channels";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import { computeIntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
 import type { MediaItem } from "@/lib/media-data";
 import { useToast } from "@/components/toast-provider";
@@ -118,6 +120,8 @@ const CATEGORIES: {
 type Props = {
   catalog: MediaItem[];
   databaseEmpty: boolean;
+  digitalChannels: DigitalChannel[];
+  digitalCatalogMeta: DigitalCatalogBridgeMeta;
 };
 
 function IntegratedPlannerPageBody({
@@ -155,6 +159,8 @@ function IntegratedPlannerPageBody({
 export default function IntegratedPlannerPageClient({
   catalog,
   databaseEmpty,
+  digitalChannels,
+  digitalCatalogMeta,
 }: Props) {
   const t = useTranslations("planner");
   const ti = useTranslations("plannerIntegrated");
@@ -474,6 +480,7 @@ export default function IntegratedPlannerPageClient({
         budgetMan: budgetNum,
         digitalBudgetPct,
         selectedChannelIds: digitalChannelIds,
+        channels: digitalChannels,
       }),
     [
       campaignGoal,
@@ -482,6 +489,7 @@ export default function IntegratedPlannerPageClient({
       budgetNum,
       digitalBudgetPct,
       digitalChannelIds,
+      digitalChannels,
     ],
   );
 
@@ -496,6 +504,7 @@ export default function IntegratedPlannerPageClient({
         regions,
         goal: campaignGoal,
         pricing: portfolioPricing,
+        digitalChannels,
       }),
     [
       portfolio,
@@ -506,6 +515,7 @@ export default function IntegratedPlannerPageClient({
       regions,
       campaignGoal,
       portfolioPricing,
+      digitalChannels,
     ],
   );
 
@@ -991,6 +1001,8 @@ export default function IntegratedPlannerPageClient({
                 <IntegratedDigitalRecommendationPanel
                   portfolio={portfolio}
                   isKo={isKo}
+                  digitalChannels={digitalChannels}
+                  digitalCatalogMeta={digitalCatalogMeta}
                 />
               </div>
             ) : null}
