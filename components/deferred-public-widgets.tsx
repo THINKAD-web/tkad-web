@@ -7,6 +7,7 @@
  */
 import dynamic from "next/dynamic";
 import { PlanCartSessionSync } from "@/components/plan/plan-cart-session-sync";
+import { PlanCartLegacyMigrate } from "@/components/plan/plan-cart-legacy-migrate";
 
 const RecentlyViewedSync = dynamic(
   () => import("@/components/recently-viewed-sync"),
@@ -23,6 +24,7 @@ const HomeOnboardingTour = dynamic(
 export default function DeferredPublicWidgets() {
   return (
     <>
+      <PlanCartLegacyMigrate />
       <PlanCartSessionSync />
       <PwaCatalogSync />
       <RecentlyViewedSync />

@@ -17,9 +17,7 @@ type Props = {
   isKo: boolean;
   planItem: Omit<PlanCartItem, "addedAt">;
   inCompare: boolean;
-  inCart: boolean;
   onToggleCompare: () => void;
-  onToggleCart: () => void;
   isVerified?: boolean;
   isInstantBooking?: boolean;
   imagePriority?: boolean;
@@ -35,9 +33,7 @@ export function MediaDiscoveryGridCard({
   isKo,
   planItem,
   inCompare,
-  inCart,
   onToggleCompare,
-  onToggleCart,
   isVerified,
   isInstantBooking,
   imagePriority = false,
