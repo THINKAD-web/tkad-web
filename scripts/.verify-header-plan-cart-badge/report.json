@@ -1,0 +1,40 @@
+{
+  "base": "https://tkad-web-git-feat-header-plan-cart-badge-mannote-6701s-projects.vercel.app",
+  "desktop": {
+    "badgeBefore": {
+      "found": true,
+      "count": null
+    },
+    "itemsAdded": 2,
+    "badgeAfter": {
+      "found": true,
+      "count": "1"
+    },
+    "badgeIncreased": true
+  },
+  "mobile": {
+    "planRowVisible": false,
+    "pillText": "양호 · 63점집행 이력·리뷰·데이터 완성도 기반 산정",
+    "pillVisible": true
+  },
+  "layout": {
+    "chromeBox": {
+      "x": 965.546875,
+      "y": 8,
+      "width": 282.453125,
+      "height": 40
+    },
+    "cartVisible": true,
+    "cartBox": {
+      "x": 1005.546875,
+      "y": 10,
+      "width": 36,
+      "height": 36
+    },
+    "notifBox": null
+  },
+  "screenshots": [
+    "desktop-header-after-add.png",
+    "mobile-menu-plan-cart-row.png"
+  ]
+}

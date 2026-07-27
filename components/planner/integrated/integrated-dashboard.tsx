@@ -8,7 +8,10 @@ import {
   TrendingUp,
   Eye,
 } from "lucide-react";
+import type { IntegratedMixResponse } from "@/lib/integrated/schemas";
 import type { IntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
+import { extractMixKpiView } from "@/lib/integrated/map-mix-to-ui";
+import { IntegratedMixKpiStrip } from "@/components/planner/integrated/integrated-mix-kpi-strip";
 import {
   PlannerNeonCard,
   PlannerNeonLabel,
@@ -18,6 +21,7 @@ import { cn } from "@/lib/utils";
 
 type Props = {
   metrics: IntegratedCampaignMetrics;
+  mix?: IntegratedMixResponse | null;
   isKo: boolean;
   months: number;
 };
@@ -27,14 +31,16 @@ function KpiCard({
   label,
   value,
   sub,
+  testId,
 }: {
   icon: typeof Eye;
   label: string;
   value: string;
   sub?: string;
+  testId?: string;
 }) {
   return (
-    <div className={cn(plannerNeon.card, "p-5")}>
+    <div className={cn(plannerNeon.card, "p-5")} data-testid={testId}>
       <Icon className="h-5 w-5 text-[color:var(--qp-accent)]" aria-hidden />
       <p className="mt-3 text-xs font-semibold uppercase tracking-wider text-muted-foreground">
         {label}
@@ -49,8 +55,27 @@ function KpiCard({
   );
 }
 
-export function IntegratedCampaignDashboard({ metrics, isKo, months }: Props) {
+function formatRange(
+  min: number | null,
+  max: number | null,
+  locale: string,
+): string {
+  if (min == null && max == null) return "—";
+  const lo = min ?? max!;
+  const hi = max ?? min!;
+  if (lo === hi) return lo.toLocaleString(locale);
+  return `${lo.toLocaleString(locale)}–${hi.toLocaleString(locale)}`;
+}
+
+export function IntegratedCampaignDashboard({
+  metrics,
+  mix,
+  isKo,
+  months,
+}: Props) {
   const t = useTranslations("plannerIntegrated");
+  const locale = isKo ? "ko-KR" : "en-US";
+  const mixKpis = mix ? extractMixKpiView(mix) : null;
 
   return (
     <div className="space-y-8">
@@ -64,31 +89,65 @@ export function IntegratedCampaignDashboard({ metrics, isKo, months }: Props) {
         </p>
       </div>
 
+      {mixKpis ? <IntegratedMixKpiStrip kpis={mixKpis} isKo={isKo} /> : null}
+
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
           icon={Eye}
           label={t("kpiOohImpressions")}
-          value={metrics.oohImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
+          value={(mixKpis?.oohCampaignImpressions ?? metrics.oohImpressions).toLocaleString(locale)}
           sub={
             metrics.oohCpmKrw
-              ? `CPM ₩${metrics.oohCpmKrw.toLocaleString(isKo ? "ko-KR" : "en-US")}`
+              ? `CPM ₩${metrics.oohCpmKrw.toLocaleString(locale)}`
               : undefined
           }
+          testId="dashboard-kpi-ooh-impressions"
+        />
+        <KpiCard
+          icon={Eye}
+          label={t("kpiDigitalMonthlyImpressions")}
+          value={
+            mixKpis
+              ? formatRange(
+                  mixKpis.digitalMonthlyImpressionsMin,
+                  mixKpis.digitalMonthlyImpressionsMax,
+                  locale,
+                )
+              : metrics.digitalTotalImpressions.toLocaleString(locale)
+          }
+          testId="dashboard-kpi-digital-monthly-impressions"
+        />
+        <KpiCard
+          icon={Eye}
+          label={t("kpiCombinedImpressions")}
+          value={
+            mixKpis
+              ? formatRange(
+                  mixKpis.combinedImpressionsMin,
+                  mixKpis.combinedImpressionsMax,
+                  locale,
+                )
+              : "—"
+          }
+          testId="dashboard-kpi-combined-impressions"
         />
         <KpiCard
           icon={MousePointerClick}
           label={t("kpiDigitalClicks")}
-          value={metrics.digitalTotalClicks.toLocaleString(isKo ? "ko-KR" : "en-US")}
+          value={metrics.digitalTotalClicks.toLocaleString(locale)}
           sub={t("kpiDigitalClicksSub", {
             count: metrics.digitalChannels.length,
           })}
         />
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         <KpiCard
           icon={Search}
           label={t("kpiBrandSearch")}
           value={`+${metrics.brandSearchChangePct}%`}
           sub={t("kpiBrandSearchSub", {
-            during: metrics.brandSearchDuring.toLocaleString(isKo ? "ko-KR" : "en-US"),
+            during: metrics.brandSearchDuring.toLocaleString(locale),
           })}
         />
         <KpiCard
@@ -114,20 +173,22 @@ export function IntegratedCampaignDashboard({ metrics, isKo, months }: Props) {
             <div>
               <dt className="text-xs text-muted-foreground">{t("budgetOoh")}</dt>
               <dd className="font-bold">
-                {metrics.oohBudgetMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                {metrics.oohBudgetMan.toLocaleString(locale)}
                 {isKo ? "만원" : "M KRW"}
               </dd>
             </div>
             <div>
               <dt className="text-xs text-muted-foreground">{t("reach")}</dt>
               <dd className="font-bold">
-                {metrics.oohReach.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                {metrics.oohReach.toLocaleString(locale)}
               </dd>
             </div>
             <div className="col-span-2">
-              <dt className="text-xs text-muted-foreground">{t("impressions")}</dt>
+              <dt className="text-xs text-muted-foreground">
+                {t("kpiOohImpressions")}
+              </dt>
               <dd className="font-bold">
-                {metrics.oohImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                {(mixKpis?.oohCampaignImpressions ?? metrics.oohImpressions).toLocaleString(locale)}
               </dd>
             </div>
           </dl>
@@ -151,17 +212,27 @@ export function IntegratedCampaignDashboard({ metrics, isKo, months }: Props) {
                     {isKo ? ch.nameKo : ch.nameEn}
                   </p>
                   <p className="text-xs text-muted-foreground">
-                    {ch.estimatedClicks.toLocaleString(isKo ? "ko-KR" : "en-US")}{" "}
+                    {ch.estimatedClicks.toLocaleString(locale)}{" "}
                     {t("clicks")} · CPC ₩{ch.avgCpcWon.toLocaleString()}
                   </p>
                 </div>
                 <p className="shrink-0 text-sm font-bold text-[color:var(--qp-fg-muted)]">
-                  {ch.budgetMan.toLocaleString(isKo ? "ko-KR" : "en-US")}
+                  {ch.budgetMan.toLocaleString(locale)}
                   {isKo ? "만" : "M"}
                 </p>
               </li>
             ))}
           </ul>
+          {mixKpis ? (
+            <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
+              {t("kpiDigitalMonthlyImpressions")}:{" "}
+              {formatRange(
+                mixKpis.digitalMonthlyImpressionsMin,
+                mixKpis.digitalMonthlyImpressionsMax,
+                locale,
+              )}
+            </p>
+          ) : null}
           <p className="border-t dark:border-white/8 border-gray-100 px-5 py-3 text-[11px] text-muted-foreground sm:px-6">
             {t("apiNote")}
           </p>
