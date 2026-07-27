@@ -1,4 +1,7 @@
-import { readDigitalOrigin } from "@/lib/integration/digital-origin";
+import {
+  readDigitalOrigin,
+  readDigitalOriginProtectionBypass,
+} from "@/lib/integration/digital-origin";
 import {
   INTEGRATION_CALLER_ID,
   readIntegrationServiceSecret,
@@ -27,13 +30,19 @@ export async function fetchDigitalCatalogInternal(): Promise<FetchDigitalCatalog
   const timer = setTimeout(() => controller.abort(), FETCH_TIMEOUT_MS);
 
   try {
+    const protectionBypass = readDigitalOriginProtectionBypass();
+    const headers: Record<string, string> = {
+      Authorization: `Bearer ${secret}`,
+      "X-Tkad-Caller": INTEGRATION_CALLER_ID,
+      Accept: "application/json",
+    };
+    if (protectionBypass) {
+      headers["x-vercel-protection-bypass"] = protectionBypass;
+    }
+
     const res = await fetch(url, {
       method: "GET",
-      headers: {
-        Authorization: `Bearer ${secret}`,
-        "X-Tkad-Caller": INTEGRATION_CALLER_ID,
-        Accept: "application/json",
-      },
+      headers,
       signal: controller.signal,
       cache: "no-store",
     });
