@@ -1,10 +1,21 @@
 import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
 
+function readDigitalOriginFromEnv(): string | null {
+  for (const key of ["DIGITAL_ORIGIN", "SSO_DIGITAL_ORIGIN"] as const) {
+    const raw = process.env[key]?.trim();
+    if (raw) return raw.replace(/\/$/, "");
+  }
+  return null;
+}
+
 /** Digital origin for internal catalog/mix calls. Preview must point at Preview Digital. */
 export function readDigitalOrigin(): string {
-  const fromEnv = process.env.DIGITAL_ORIGIN?.trim() || process.env.SSO_DIGITAL_ORIGIN?.trim();
-  if (fromEnv) return fromEnv.replace(/\/$/, "");
-  return THINKAD_DIGITAL_URL.replace(/\/$/, "");
+  return readDigitalOriginFromEnv() ?? THINKAD_DIGITAL_URL.replace(/\/$/, "");
+}
+
+/** For diagnostics — whether env explicitly set a non-empty origin. */
+export function readDigitalOriginConfigured(): string | null {
+  return readDigitalOriginFromEnv();
 }
 
 /** Vercel Deployment Protection bypass for server-to-server calls to Preview Digital. */
