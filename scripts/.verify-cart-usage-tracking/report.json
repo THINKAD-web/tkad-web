@@ -1,0 +1,15 @@
+{
+  "ok": true,
+  "fails": [],
+  "events": {
+    "plan": "add_to_plan_cart",
+    "sharedParams": [
+      "media_id",
+      "source",
+      "action",
+      "media_name",
+      "cart_kind"
+    ]
+  },
+  "checkedAt": "2026-07-27T17:57:19.755Z"
+}

@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
-import { Link } from "@/i18n/navigation";
+import { Link, useRouter } from "@/i18n/navigation";
 import {
   ChevronLeft,
   ChevronRight,
@@ -61,6 +61,15 @@ import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
 import type { DigitalChannel } from "@/lib/planner/digital-channels";
 import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import { computeIntegratedCampaignMetrics } from "@/lib/planner/integrated-metrics";
+import { buildIntegratedMixRequest } from "@/lib/integrated/build-mix-request";
+import {
+  mapMixToDigitalRecommendResult,
+  mergeMixIntoIntegratedMetrics,
+} from "@/lib/integrated/map-mix-to-ui";
+import { buildIntegratedMixPlanTransfer } from "@/lib/integrated/contact-handoff";
+import { useIntegratedMix } from "@/hooks/use-integrated-mix";
+import { savePlanTransferData } from "@/lib/planner-contact-transfer";
+import { IntegratedMixErrorBanner } from "@/components/planner/integrated/integrated-mix-error-banner";
 import type { MediaItem } from "@/lib/media-data";
 import { useToast } from "@/components/toast-provider";
 import { cn } from "@/lib/utils";
@@ -167,8 +176,11 @@ export default function IntegratedPlannerPageClient({
   const tm = useTranslations("media");
   const locale = useLocale();
   const isKo = locale === "ko";
+  const localeKey = isKo ? "ko" : "en";
+  const router = useRouter();
   const { toast } = useToast();
   const landingAppearance = useTkadAppearance();
+  const [navigatingContact, setNavigatingContact] = useState(false);
 
   const wizardStep = useIntegratedPlannerStore((s) => s.wizardStep);
   const campaignGoal = useIntegratedPlannerStore((s) => s.campaignGoal);
@@ -471,7 +483,46 @@ export default function IntegratedPlannerPageClient({
     [portfolio, budgetNum, months, portfolioPricing],
   );
 
-  const digitalResult = useMemo(
+  const mixRequest = useMemo(
+    () =>
+      buildIntegratedMixRequest({
+        campaignGoal,
+        industryKey,
+        regions,
+        ageKeys,
+        budgetMan: budgetNum,
+        months,
+        digitalBudgetPct,
+        selectedOohMediaIds: campaignMediaIds,
+        locale: localeKey,
+      }),
+    [
+      campaignGoal,
+      industryKey,
+      regions,
+      ageKeys,
+      budgetNum,
+      months,
+      digitalBudgetPct,
+      campaignMediaIds,
+      localeKey,
+    ],
+  );
+
+  const mixEnabled =
+    wizardStep >= 5 &&
+    portfolio.length > 0 &&
+    campaignGoal != null &&
+    mixRequest != null;
+
+  const {
+    data: mixResult,
+    loading: mixLoading,
+    error: mixError,
+    refetch: refetchMix,
+  } = useIntegratedMix(mixRequest, mixEnabled);
+
+  const fallbackDigitalResult = useMemo(
     () =>
       recommendDigitalChannels({
         goal: campaignGoal,
@@ -493,7 +544,29 @@ export default function IntegratedPlannerPageClient({
     ],
   );
 
-  const integratedMetrics = useMemo(
+  const digitalResult = useMemo(() => {
+    if (!mixResult) return fallbackDigitalResult;
+    return mapMixToDigitalRecommendResult({
+      mix: mixResult,
+      portfolio,
+      regions,
+      budgetMan: budgetNum,
+      selectedChannelIds: digitalChannelIds,
+      digitalChannels,
+      isKo,
+    });
+  }, [
+    mixResult,
+    fallbackDigitalResult,
+    portfolio,
+    regions,
+    budgetNum,
+    digitalChannelIds,
+    digitalChannels,
+    isKo,
+  ]);
+
+  const baseIntegratedMetrics = useMemo(
     () =>
       computeIntegratedCampaignMetrics({
         portfolio,
@@ -518,6 +591,64 @@ export default function IntegratedPlannerPageClient({
       digitalChannels,
     ],
   );
+
+  const integratedMetrics = useMemo(() => {
+    if (!baseIntegratedMetrics) return null;
+    if (!mixResult) return baseIntegratedMetrics;
+    return mergeMixIntoIntegratedMetrics(
+      baseIntegratedMetrics,
+      mixResult,
+      digitalChannelIds,
+      digitalChannels,
+    );
+  }, [
+    baseIntegratedMetrics,
+    mixResult,
+    digitalChannelIds,
+    digitalChannels,
+  ]);
+
+  const goToIntegratedContact = useCallback(() => {
+    if (navigatingContact) return;
+    if (mixResult) {
+      savePlanTransferData(
+        buildIntegratedMixPlanTransfer({
+          mix: mixResult,
+          portfolio,
+          campaignGoal,
+          regions,
+          months,
+          budgetTotalWon: budgetNum * 10_000,
+          isKo,
+        }),
+      );
+    } else if (portfolio.length > 0) {
+      savePlanTransferData({
+        mediaIds: portfolio.map((m) => m.id),
+        mediaNames: portfolio.map((m) =>
+          isKo ? m.name : m.nameEn || m.name,
+        ),
+        totalBudget: budgetNum * 10_000,
+        duration: Math.max(1, Math.round(months)),
+        region: regions.join(", ") || undefined,
+        goal: campaignGoal ?? undefined,
+        source: "integrated",
+      });
+    }
+    setNavigatingContact(true);
+    router.push("/contact?from=integrated");
+    setNavigatingContact(false);
+  }, [
+    navigatingContact,
+    mixResult,
+    portfolio,
+    campaignGoal,
+    regions,
+    months,
+    budgetNum,
+    isKo,
+    router,
+  ]);
 
   const regionOptions = useMemo(
     () =>
@@ -1003,6 +1134,11 @@ export default function IntegratedPlannerPageClient({
                   isKo={isKo}
                   digitalChannels={digitalChannels}
                   digitalCatalogMeta={digitalCatalogMeta}
+                  mix={mixResult}
+                  mixLoading={mixLoading}
+                  mixError={mixError}
+                  onMixRetry={refetchMix}
+                  onMixContact={goToIntegratedContact}
                 />
               </div>
             ) : null}
@@ -1021,6 +1157,15 @@ export default function IntegratedPlannerPageClient({
             ) : null}
 
             {wizardStep === 7 && integratedMetrics ? (
+              <div className="space-y-6">
+                {mixError ? (
+                  <IntegratedMixErrorBanner
+                    error={mixError}
+                    isKo={isKo}
+                    onRetry={refetchMix}
+                    onContact={goToIntegratedContact}
+                  />
+                ) : null}
               <IntegratedReportStep
                 isKo={isKo}
                 campaignGoal={campaignGoal}
@@ -1056,6 +1201,7 @@ export default function IntegratedPlannerPageClient({
                   goalFollowUp,
                 }}
               />
+              </div>
             ) : null}
           </div>
         ) : integratedMetrics ? (
@@ -1078,7 +1224,12 @@ export default function IntegratedPlannerPageClient({
                 {t("back")}
               </BtnBlock>
               <div className="flex flex-wrap gap-2">
-                <BtnBlock href="/contact" variant="accent" size="md">
+                <BtnBlock
+                  variant="accent"
+                  size="md"
+                  onClick={goToIntegratedContact}
+                  disabled={navigatingContact}
+                >
                   <Send className="h-4 w-4" />
                   {t("ctaQuote")}
                 </BtnBlock>
@@ -1089,6 +1240,7 @@ export default function IntegratedPlannerPageClient({
             </div>
             <IntegratedCampaignDashboard
               metrics={integratedMetrics}
+              mix={mixResult}
               isKo={isKo}
               months={Math.round(months)}
             />
