@@ -10,10 +10,10 @@ import {
   type ScoredDigitalChannel,
 } from "@/lib/planner/recommend-digital";
 import {
-  DIGITAL_CHANNELS,
   type DigitalChannel,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import {
   selectIntegratedBudgetNum,
   useIntegratedPlannerStore,
@@ -29,6 +29,8 @@ import { cn } from "@/lib/utils";
 type Props = {
   portfolio: MediaItem[];
   isKo: boolean;
+  digitalChannels: DigitalChannel[];
+  digitalCatalogMeta?: DigitalCatalogBridgeMeta;
 };
 
 function PlatformCard({
@@ -104,7 +106,12 @@ function PlatformCard({
   );
 }
 
-export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props) {
+export function IntegratedDigitalRecommendationPanel({
+  portfolio,
+  isKo,
+  digitalChannels,
+  digitalCatalogMeta,
+}: Props) {
   const t = useTranslations("plannerIntegrated");
   const goal = useIntegratedPlannerStore((s) => s.campaignGoal);
   const regions = useIntegratedPlannerStore((s) => s.regions);
@@ -128,8 +135,9 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
         budgetMan,
         digitalBudgetPct,
         selectedChannelIds: selectedIds,
+        channels: digitalChannels,
       }),
-    [goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedIds],
+    [goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedIds, digitalChannels],
   );
 
   const scoredById = useMemo(
@@ -231,9 +239,10 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
 
         <div
           data-testid="integrated-digital-channel-grid"
+          data-catalog-source={digitalCatalogMeta?.source ?? "static"}
           className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3"
         >
-          {DIGITAL_CHANNELS.map((channel) => (
+          {digitalChannels.map((channel) => (
             <PlatformCard
               key={channel.id}
               channel={channel}

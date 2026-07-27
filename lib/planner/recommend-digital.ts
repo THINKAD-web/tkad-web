@@ -142,9 +142,20 @@ export function recommendDigitalChannels(opts: {
   budgetMan: number;
   digitalBudgetPct: number;
   selectedChannelIds: DigitalChannelId[];
+  /** Live catalog pricing from digital-catalog-bridge (6a). Defaults to static DIGITAL_CHANNELS. */
+  channels?: DigitalChannel[];
 }): DigitalRecommendResult {
-  const { goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedChannelIds } =
-    opts;
+  const {
+    goal,
+    regions,
+    portfolio,
+    budgetMan,
+    digitalBudgetPct,
+    selectedChannelIds,
+    channels: channelSource,
+  } = opts;
+  const channelPool =
+    channelSource && channelSource.length > 0 ? channelSource : DIGITAL_CHANNELS;
   const primaryRegion = regions[0] ?? "seoul";
   const regionKo = regionLabelKo(primaryRegion, portfolio);
   const regionEn = regionLabelEn(primaryRegion, portfolio);
@@ -152,8 +163,8 @@ export function recommendDigitalChannels(opts: {
 
   const pool =
     selectedChannelIds.length > 0
-      ? DIGITAL_CHANNELS.filter((c) => selectedChannelIds.includes(c.id))
-      : DIGITAL_CHANNELS;
+      ? channelPool.filter((c) => selectedChannelIds.includes(c.id))
+      : channelPool;
 
   const scored = pool
     .map((channel) => ({
