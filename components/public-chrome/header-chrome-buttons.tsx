@@ -1,6 +1,6 @@
 import { cn } from "@/lib/utils";
 
-/** 모바일 햄버거 패널 — 찜·알림·장바구니 등 행 (다크: 부모 배경 상속, 라이트: hover만) */
+/** 모바일 햄버거 패널 — 찜·알림·담은 매체 등 행 (다크: 부모 배경 상속, 라이트: hover만) */
 export const headerMobileMenuRowClass =
   "flex min-h-[3.25rem] items-center gap-3 px-5 py-3 text-sm font-semibold tracking-normal text-zinc-900 transition-colors hover:bg-zinc-200/80 dark:bg-transparent dark:text-white dark:hover:bg-white/6";
 
