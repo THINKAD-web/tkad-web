@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Share2, Sparkles } from "lucide-react";
-import { MediaDetailAddToCart } from "@/components/media-detail-add-to-cart";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
@@ -308,26 +307,13 @@ export function MediaDetailStickyQuotePanel({
               </span>
             </summary>
             <div className="space-y-2 border-t border-gray-100 px-2 pb-3 pt-2 dark:border-white/10">
-              <div className="grid grid-cols-2 gap-2">
-                <MediaDetailAddToCart
-                  mediaId={media.id}
-                  mediaName={displayName}
-                  compact
-                  showUsageHint
-                />
-                <PlanCartAddButton
-                  item={planCartItemFromMediaItem(media, "search")}
-                  addedFrom="search"
-                  compact
-                  mediaDetailLabel
-                  className="w-full"
-                />
-              </div>
-              <p className="text-center text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/55">
-                {isKo
-                  ? "견적함·플래너는 저장 위치가 다릅니다"
-                  : "Quote cart and plan cart are separate"}
-              </p>
+              <PlanCartAddButton
+                item={planCartItemFromMediaItem(media, "search")}
+                addedFrom="search"
+                compact
+                mediaDetailLabel
+                className="w-full"
+              />
               <div className="flex flex-wrap items-center gap-1.5">
                 <Link
                   href={plannerHref}

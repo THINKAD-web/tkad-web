@@ -312,7 +312,9 @@
     "cart": "담은 매체",
     "saved": "저장 스냅샷",
     "plannerResults": "플래너·제안서",
-    "newPlan": "새 플랜"
+    "newPlan": "새 플랜",
+    "legacyMigrateSuccess": "견적함 매체 {count}개를 담은 매체로 옮겼습니다.",
+    "legacyMigratePartial": "견적함 매체 {migrated}개를 옮겼습니다. {skipped}개는 담은 매체 한도({max}개)로 이전되지 않았습니다."
   },
   "favoritesNav": {
     "label": "관심매체"
@@ -1066,12 +1068,12 @@
       "ctaContact": "통합 상담 받기"
     },
     "heroTitle": "싱커드 AI 매체 추천",
-    "heroSubtitle": "캠페인 목표·예산·지역을 입력하면 AI가 최적의 OOH 매체를 추천합니다. 리스트와 지도로 살펴보고 장바구니에 담아 한 번에 견적을 요청하세요.",
-    "cartTitle": "장바구니",
+    "heroSubtitle": "캠페인 목표·예산·지역을 입력하면 AI가 최적의 OOH 매체를 추천합니다. 리스트와 지도로 살펴보고 담은 매체에 담아 한 번에 견적을 요청하세요.",
+    "cartTitle": "담은 매체",
     "cartClear": "비우기",
     "cartQuote": "견적 요청",
     "cartRemoveSuffix": "제거",
-    "cartAdd": "장바구니 담기",
+    "cartAdd": "매체 담기",
     "addTop3ToCart": "상위 3개 담기",
     "quoteWithCart": "담은 매체로 견적",
     "quoteWithTop3": "상위 3개로 견적",
