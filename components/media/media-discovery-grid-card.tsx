@@ -2,7 +2,7 @@
 
 import { Link } from "@/i18n/navigation";
 import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
 import type { PlanCartItem } from "@/lib/plan-cart";
@@ -89,7 +89,7 @@ export function MediaDiscoveryGridCard({
               gridInline
               className="min-w-0 flex-1 !h-8 !rounded-lg !px-1 !text-[10px]"
             />
-            <MediaCartAddButton
+            <PlanCartToggleButton
               item={planItem}
               addedFrom="search"
               gridInline

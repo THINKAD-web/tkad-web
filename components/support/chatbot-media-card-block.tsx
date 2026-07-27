@@ -8,7 +8,7 @@ import {
   chatbotCardToCatalogItem,
   formatChatbotCardPrice,
 } from "@/lib/ai-chatbot-media-adapter";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { planCartItemFromCatalog } from "@/lib/plan-cart-item-builders";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
@@ -95,7 +95,7 @@ export function ChatbotMediaCardBlock({ card, isKo, className }: Props) {
             gridInline
             className="!h-7 !px-2 !text-[10px]"
           />
-          <MediaCartAddButton
+          <PlanCartToggleButton
             item={planItem}
             addedFrom="ai_recommend"
             gridInline
