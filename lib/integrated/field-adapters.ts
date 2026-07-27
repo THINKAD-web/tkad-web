@@ -82,7 +82,10 @@ export function buildDigitalMixPayload(opts: {
       gender: genderToDigitalTarget(opts.gender),
       geo: regionsToDigitalGeo(opts.regions),
     },
-    budgetMonthly: Math.max(500_000, opts.digitalBudgetWon),
+    budgetMonthly: Math.max(
+      500_000,
+      Math.round(opts.digitalBudgetWon / Math.max(1, opts.periodMonths)),
+    ),
     periodWeeks: Math.max(1, Math.min(52, opts.periodMonths * 4)),
     channelType: "integrated",
   };

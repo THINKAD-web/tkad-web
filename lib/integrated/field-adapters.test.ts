@@ -34,7 +34,7 @@ describe("field-adapters", () => {
     assert.equal(payload.channelType, "integrated");
     assert.equal(payload.goal, "AWARENESS");
     assert.equal(payload.industry, "ECOMMERCE");
-    assert.equal(payload.budgetMonthly, 3_000_000);
+    assert.equal(payload.budgetMonthly, 1_000_000);
     assert.equal(payload.periodWeeks, 12);
     assert.equal(payload.target.gender, "F");
   });
