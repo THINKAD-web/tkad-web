@@ -1,3 +1,4 @@
+import { unstable_cache } from "next/cache";
 import {
   DIGITAL_CHANNELS,
   type DigitalChannel,
@@ -10,6 +11,8 @@ import {
   DIGITAL_PLATFORM_IDS,
   matchCatalogItemToPlatformId,
 } from "@/lib/planner/digital-platform-map";
+
+export const DIGITAL_CATALOG_BRIDGE_CACHE_TAG = "digital-catalog-bridge";
 
 export type DigitalCatalogBridgeMeta = {
   source: "live" | "static";
@@ -142,8 +145,7 @@ export function buildDigitalChannelsFromCatalogItems(
   };
 }
 
-/** SSR entry — fetch Digital internal catalog or fall back to static channels. */
-export async function loadDigitalChannelsForIntegratedPlanner(): Promise<DigitalCatalogBridgeResult> {
+async function loadDigitalChannelsForIntegratedPlannerUncached(): Promise<DigitalCatalogBridgeResult> {
   const fetched = await fetchDigitalCatalogInternal();
   if (!fetched.ok) {
     console.error("[digital-catalog-bridge] using static channels", {
@@ -168,6 +170,16 @@ export async function loadDigitalChannelsForIntegratedPlanner(): Promise<Digital
     fetchedAt: fetched.data.fetchedAt,
   });
 }
+
+/**
+ * SSR entry — fetch Digital internal catalog or fall back to static channels.
+ * Cached 1h to match integrated planner page ISR (B1a).
+ */
+export const loadDigitalChannelsForIntegratedPlanner = unstable_cache(
+  loadDigitalChannelsForIntegratedPlannerUncached,
+  ["digital-catalog-bridge-integrated"],
+  { revalidate: 3600, tags: [DIGITAL_CATALOG_BRIDGE_CACHE_TAG] },
+);
 
 export function resolveDigitalChannels(
   liveChannels?: DigitalChannel[] | null,
