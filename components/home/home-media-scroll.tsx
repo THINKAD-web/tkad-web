@@ -48,7 +48,7 @@ export function HomeMediaScroll({
             {eyebrow}
           </p>
         ) : null}
-        <div className="flex items-center justify-between gap-3">
+        <div className="flex flex-nowrap items-center justify-between gap-3">
           <h3
             className={cn(
               "min-w-0 font-bold text-gray-900 dark:text-white",
@@ -57,13 +57,15 @@ export function HomeMediaScroll({
           >
             {title}
           </h3>
-          <Link
-            href={{ pathname: "/media", query: { sort: "popular" } }}
-            className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-sm font-medium tkad-home-accent-text"
-          >
-            {isKo ? "전체보기" : "View all"}
-            <ChevronRight className="h-3 w-3" aria-hidden />
-          </Link>
+          <div className="shrink-0 text-sm font-medium tkad-home-accent-text">
+            <Link
+              href={{ pathname: "/media", query: { sort: "popular" } }}
+              className="inline-flex items-center gap-0.5 whitespace-nowrap hover:opacity-90"
+            >
+              {isKo ? "전체보기" : "View all"}
+              <ChevronRight className="h-3 w-3 shrink-0" aria-hidden />
+            </Link>
+          </div>
         </div>
         {subtitle ? (
           <p className="mt-1 text-sm text-gray-500 dark:text-white/50">

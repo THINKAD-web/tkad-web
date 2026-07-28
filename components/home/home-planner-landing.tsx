@@ -3,7 +3,6 @@ import {
   ArrowRight,
   CheckSquare,
   FileText,
-  MapPinned,
   Sparkles,
   Timer,
 } from "lucide-react";
@@ -16,6 +15,8 @@ import type {
 } from "@/lib/home-landing-media-grid";
 import { HomeMediaScroll } from "@/components/home/home-media-scroll";
 import { HomeContentFeed } from "@/components/home/home-content-feed";
+import { HomePrecisionExamplePanel } from "@/components/home/home-precision-example-panel";
+import { HOME_PRECISION_EXAMPLES } from "@/lib/home-precision-examples";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { HomeReportItem } from "@/lib/report-queries";
 import type { HomeCaseItem } from "@/lib/case-queries";
@@ -131,7 +132,7 @@ export async function HomePlannerLanding({
   ];
 
   const tileClass = cn(
-    "flex flex-col rounded-lg border border-gray-200 bg-white p-4 shadow-sm ring-1 ring-black/5",
+    "flex min-h-0 flex-col rounded-lg border border-gray-200 bg-white p-2.5 shadow-sm ring-1 ring-black/5 sm:p-4",
     "transition-colors hover:border-hermes/30 dark:border-white/10 dark:bg-white/[0.04] dark:ring-white/10 dark:hover:border-hermes/40",
   );
 
@@ -144,16 +145,16 @@ export async function HomePlannerLanding({
         title={t("speedTitle")}
         lead={t("speedLead")}
       >
-        <div className="grid gap-3 sm:grid-cols-3 md:gap-4">
+        <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
           {metricCards.map((m) => (
             <div
               key={m.label}
-              className="rounded-lg border border-gray-200 bg-white px-4 py-5 dark:border-white/10 dark:bg-white/[0.04]"
+              className="rounded-lg border border-gray-200 bg-white px-2 py-3 sm:px-4 sm:py-5 dark:border-white/10 dark:bg-white/[0.04]"
             >
-              <p className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+              <p className="text-base font-bold tracking-tight text-gray-900 dark:text-white sm:text-2xl">
                 {m.value}
               </p>
-              <p className="mt-1.5 text-sm text-gray-600 dark:text-white/60">
+              <p className="mt-1 text-[11px] leading-snug text-gray-600 dark:text-white/60 sm:mt-1.5 sm:text-sm">
                 {m.label}
               </p>
             </div>
@@ -226,22 +227,21 @@ export async function HomePlannerLanding({
         title={t("precisionTitle")}
         lead={t("precisionLead")}
       >
-        <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
-          <div>
-            <p className="text-xs font-medium text-gray-500 dark:text-white/45">
-              {t("precisionExampleLabel")}
-            </p>
-            <p className="mt-2 inline-flex items-center gap-2 rounded-md border border-dashed border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 dark:border-white/20 dark:bg-white/[0.04] dark:text-white/85">
-              <MapPinned className="h-4 w-4 shrink-0 text-hermes" aria-hidden />
-              <span className="font-medium">{t("precisionExample")}</span>
-            </p>
-            <p className="mt-3 text-sm text-gray-600 dark:text-white/60">
-              {t("precisionHint")}
-            </p>
-          </div>
+        <div className="flex flex-col gap-6 lg:flex-row lg:items-end lg:justify-between">
+          <HomePrecisionExamplePanel
+            examples={HOME_PRECISION_EXAMPLES[isKo ? "ko" : "en"]}
+            exampleLabel={t("precisionExampleLabel")}
+            hint={t("precisionHint")}
+            columnLabels={{
+              region: t("precisionExampleColRegion"),
+              target: t("precisionExampleColTarget"),
+              goal: t("precisionExampleColGoal"),
+              budget: t("precisionExampleColBudget"),
+            }}
+          />
           <Link
             href={{ pathname: "/recommend", query: { mode: "ai" } }}
-            className="inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 text-sm font-semibold text-hermes transition-colors hover:bg-hermes/10"
+            className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 text-sm font-semibold text-hermes transition-colors hover:bg-hermes/10 sm:w-auto lg:self-end"
           >
             {t("precisionCta")}
             <ArrowRight className="h-4 w-4" aria-hidden />
@@ -259,16 +259,16 @@ export async function HomePlannerLanding({
         title={t("quoteTitle")}
         lead={t("quoteLead")}
       >
-        <ol className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+        <ol className="grid grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-4">
           {quoteSteps.map((label, i) => (
             <li
               key={label}
-              className="flex items-start gap-3 rounded-lg border border-gray-200 bg-white p-4 dark:border-white/10 dark:bg-white/[0.04]"
+              className="flex items-start gap-2 rounded-lg border border-gray-200 bg-white p-3 dark:border-white/10 dark:bg-white/[0.04] sm:gap-3 sm:p-4"
             >
-              <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-sm font-bold text-hermes">
+              <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-md bg-hermes/10 text-xs font-bold text-hermes sm:h-8 sm:w-8 sm:text-sm">
                 {i + 1}
               </span>
-              <span className="pt-1 text-sm font-medium leading-snug text-gray-800 dark:text-white/85">
+              <span className="pt-0.5 text-xs font-medium leading-snug text-gray-800 dark:text-white/85 sm:pt-1 sm:text-sm">
                 {label}
               </span>
             </li>
@@ -306,14 +306,14 @@ export async function HomePlannerLanding({
               <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
                 {t("coverageOohLabel")}
               </h3>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {oohTiles.map((tile) => (
                   <Link key={tile.subId} href={tile.href} className={tileClass}>
-                    <p className="text-base font-bold text-gray-900 dark:text-white">
+                    <p className="text-xs font-bold leading-snug text-gray-900 dark:text-white sm:text-base">
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
                     {tile.count > 0 ? (
-                      <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
+                      <p className="mt-1 text-[10px] text-gray-500 dark:text-white/45 sm:text-xs">
                         {t("coverageCount", { count: tile.count })}
                       </p>
                     ) : null}
@@ -326,7 +326,7 @@ export async function HomePlannerLanding({
               <h3 className="mb-3 text-sm font-semibold text-gray-900 dark:text-white">
                 {t("coverageDigitalLabel")}
               </h3>
-              <div className="grid gap-3 sm:grid-cols-3">
+              <div className="grid grid-cols-3 gap-2 sm:gap-3">
                 {digitalTiles.map((tile) => (
                   <a
                     key={tile.platformId}
@@ -335,11 +335,11 @@ export async function HomePlannerLanding({
                     rel="noopener noreferrer"
                     className={tileClass}
                   >
-                    <p className="text-base font-bold text-gray-900 dark:text-white">
+                    <p className="text-xs font-bold leading-snug text-gray-900 dark:text-white sm:text-base">
                       {isKo ? tile.labelKo : tile.labelEn}
                     </p>
                     {tile.count > 0 ? (
-                      <p className="mt-1 text-xs text-gray-500 dark:text-white/45">
+                      <p className="mt-1 text-[10px] text-gray-500 dark:text-white/45 sm:text-xs">
                         {t("coverageCount", { count: tile.count })}
                       </p>
                     ) : null}
