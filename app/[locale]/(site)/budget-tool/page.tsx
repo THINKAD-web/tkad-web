@@ -7,9 +7,8 @@ import { curateAllBudgetTiers } from "@/lib/budget-tool-curations";
 import { BudgetToolClient } from "./budget-tool-client";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 
+/** ISR 1h — force-dynamic removed so revalidate takes effect (B1b). */
 export const revalidate = 3600;
-/** Live catalog curation — must be a static literal for Next.js segment config. */
-export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ locale: string }> };
 
