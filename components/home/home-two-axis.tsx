@@ -129,7 +129,7 @@ export async function HomeTwoAxis() {
               {t("integratedDesc")}
             </p>
             <Link
-              href="/recommend?channelType=integrated"
+              href="/planner/integrated"
               className={cn(
                 ctaClass,
                 "border border-hermes/40 bg-hermes/5 text-hermes hover:bg-hermes/10",
