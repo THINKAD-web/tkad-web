@@ -12,6 +12,7 @@ import {
 import { useTranslations } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Button } from "@/components/ui/button";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import {
   ArrowLeft,
   Calculator,
@@ -854,6 +855,7 @@ function NetworkPriceCalculator({
   const [units, setUnits] = useState<number>(bounds.default);
   const [months, setMonths] = useState<number>(1);
   const [busy, setBusy] = useState(false);
+  const { user: sessionUser } = useAuthSession();
 
   const monthly = useMemo(
     () =>
@@ -879,15 +881,13 @@ function NetworkPriceCalculator({
     if (busy) return;
     setBusy(true);
     try {
-      let user: { name?: string; email?: string; company?: string | null } | null =
-        null;
-      try {
-        const sres = await fetch("/api/auth/session", { cache: "no-store" });
-        const sd = await sres.json();
-        if (sd?.ok && sd.data?.email) user = sd.data;
-      } catch {
-        /* ignore */
-      }
+      const user = sessionUser?.email
+        ? (sessionUser as {
+            name?: string;
+            email: string;
+            company?: string | null;
+          })
+        : null;
       const period = isKo ? `${months}개월` : `${months} month${months > 1 ? "s" : ""}`;
       if (!user?.email) {
         const back = `/media/network/${encodeURIComponent(
@@ -920,7 +920,7 @@ function NetworkPriceCalculator({
     } finally {
       setBusy(false);
     }
-  }, [busy, data.catalogId, isKo, months, router, total, units]);
+  }, [busy, data.catalogId, isKo, months, monthly, router, sessionUser, units]);
 
   // 로그인 후 ?createQuote=1 복귀 시 수량 복원 + 자동 견적 생성
   const resumedRef = useRef(false);

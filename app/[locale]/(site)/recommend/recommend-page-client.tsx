@@ -7,6 +7,7 @@ import { useState, useCallback, useMemo, useEffect, useRef } from "react";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
 import { BtnBlock } from "@/components/brutalist";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageHero } from "@/components/layout/page-hero";
 import { SubTabs } from "@/components/layout/sub-tabs";
@@ -114,6 +115,7 @@ export default function RecommendPageClient({
   const { toast } = useToast();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { user: sessionUser } = useAuthSession();
   const { isPro } = useIsPro();
   const cartMax = planCartMaxItems(isPro);
   const {
@@ -389,20 +391,13 @@ export default function RecommendPageClient({
 
       setCreatingQuote(true);
       try {
-        let user:
-          | { name?: string; email?: string; company?: string | null }
-          | null = null;
-        try {
-          const sessionRes = await fetch("/api/auth/session", {
-            cache: "no-store",
-          });
-          const sessionData = await sessionRes.json();
-          if (sessionData?.ok && sessionData.data?.email) {
-            user = sessionData.data;
-          }
-        } catch {
-          /* ignore */
-        }
+        const user = sessionUser?.email
+          ? (sessionUser as {
+              name?: string;
+              email: string;
+              company?: string | null;
+            })
+          : null;
 
         if (!user?.email) {
           const ids = picked.map((m) => m.id).join(",");
@@ -517,7 +512,19 @@ export default function RecommendPageClient({
         setCreatingQuote(false);
       }
     },
-    [pickedForQuote, catalog, lastPayload, creatingQuote, isKo, router, toast, effectiveQuantities, effectivePriceOptionIndex],
+    [
+      pickedForQuote,
+      catalog,
+      lastPayload,
+      creatingQuote,
+      isKo,
+      router,
+      toast,
+      effectiveQuantities,
+      effectivePriceOptionIndex,
+      sessionUser,
+      planCart.items,
+    ],
   );
 
   const skipSessionRestore =

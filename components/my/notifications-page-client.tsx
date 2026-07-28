@@ -5,6 +5,7 @@ import { useLocale } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import { Bell, CheckCheck } from "lucide-react";
 import { PageContainer } from "@/components/layout/page-container";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { FullPageSpinner, EmptyState } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -33,20 +34,24 @@ export function NotificationsPageClient() {
   const router = useRouter();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { user, loading: authLoading } = useAuthSession();
   const [filter, setFilter] = useState<Filter>("all");
   const [items, setItems] = useState<NotificationItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [markingAll, setMarkingAll] = useState(false);
 
+  useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login?redirect=/my/notifications");
+      return;
+    }
+  }, [authLoading, user, router]);
+
   const load = useCallback(async () => {
+    if (authLoading || !user) return;
     setLoading(true);
     try {
-      const res = await fetch("/api/auth/session", { cache: "no-store" });
-      const session = await res.json();
-      if (!session?.ok || !session.data) {
-        router.replace("/login?redirect=/my/notifications");
-        return;
-      }
       const q =
         filter === "unread"
           ? "/api/my/notifications?unread=true&limit=100"
@@ -57,7 +62,7 @@ export function NotificationsPageClient() {
     } finally {
       setLoading(false);
     }
-  }, [filter, router]);
+  }, [filter, user, authLoading]);
 
   useEffect(() => {
     void load();

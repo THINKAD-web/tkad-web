@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect } from "react";
 import { useSearchParams } from "next/navigation";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useLocale, useTranslations } from "next-intl";
@@ -14,6 +14,10 @@ import { Link } from "@/i18n/navigation";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
 import { EmailVerificationBanner } from "@/components/auth/email-verification-banner";
+import {
+  useAuthSession,
+  type AuthSessionUser,
+} from "@/components/auth/auth-session-provider";
 import { MyHubGroupNav } from "@/components/my/my-hub-group-nav";
 import { MyHubUpgradeBanner } from "@/components/my/my-hub-upgrade-banner";
 import { MyPlanStatusBadge } from "@/components/my/my-plan-status-badge";
@@ -25,18 +29,14 @@ import {
   legacyMyHubTabRedirect,
 } from "@/lib/my-hub-nav-config";
 
-type Me = {
+type Me = AuthSessionUser & {
   id: string;
   email: string;
   name: string;
   role: string;
   needsEmailVerification?: boolean;
-  plan?: string;
-  trialStartedAt?: string | null;
-  trialEndsAt?: string | null;
   trialDaysLeft?: number;
   trialProgressPct?: number;
-  pointBalance?: number;
 };
 
 type Props = {
@@ -47,6 +47,11 @@ function stripLocale(path: string): string {
   return path.replace(/^\/(ko|en)/, "") || "/";
 }
 
+function asMe(user: AuthSessionUser | null): Me | null {
+  if (!user?.id || !user.email || !user.name || !user.role) return null;
+  return user as Me;
+}
+
 export function MyHubShell({ children }: Props) {
   const pathname = usePathname() ?? "/my";
   const searchParams = useSearchParams();
@@ -54,10 +59,9 @@ export function MyHubShell({ children }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("myHub");
+  const { user, loading, refresh } = useAuthSession();
 
-  const [me, setMe] = useState<Me | null>(null);
-  const [loading, setLoading] = useState(true);
-
+  const me = asMe(user);
   const barePath = stripLocale(pathname);
   const isHubHome = barePath === "/my";
   const tab = searchParams.get("tab");
@@ -70,26 +74,11 @@ export function MyHubShell({ children }: Props) {
   }, [tab, router]);
 
   useEffect(() => {
-    if (!isMyHubPath(pathname)) return;
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/auth/session", { cache: "no-store" });
-        const data = await res.json();
-        if (cancelled) return;
-        if (!data.ok || !data.data) {
-          router.replace("/login?redirect=/my");
-          return;
-        }
-        setMe(data.data);
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [pathname, router]);
+    if (!isMyHubPath(pathname) || loading) return;
+    if (!user) {
+      router.replace("/login?redirect=/my");
+    }
+  }, [pathname, router, loading, user]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
@@ -186,11 +175,7 @@ export function MyHubShell({ children }: Props) {
             {me.needsEmailVerification ? (
               <EmailVerificationBanner
                 onVerified={() => {
-                  void fetch("/api/auth/session", { cache: "no-store" })
-                    .then((r) => r.json())
-                    .then((d) => {
-                      if (d.ok && d.data) setMe(d.data);
-                    });
+                  void refresh({ force: true });
                 }}
                 className="mb-6"
               />
@@ -200,8 +185,12 @@ export function MyHubShell({ children }: Props) {
               <ProTrialBanner
                 trial={{
                   plan: me.plan!,
-                  trialStartedAt: me.trialStartedAt ?? null,
-                  trialEndsAt: me.trialEndsAt ?? null,
+                  trialStartedAt: me.trialStartedAt
+                    ? String(me.trialStartedAt)
+                    : null,
+                  trialEndsAt: me.trialEndsAt
+                    ? String(me.trialEndsAt)
+                    : null,
                   daysLeft: me.trialDaysLeft ?? 0,
                   progressPct: me.trialProgressPct ?? 0,
                 }}
