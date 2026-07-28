@@ -37,5 +37,8 @@
 - 운영자 수동 정정 대기 (자동화 금지)
 
 ## 비범위 (유지)
-- 읽기 `normalizeMediaPricePeriod`의 단기 한글→day/week 자동 매핑 — 아직 안 함
+- 읽기 `normalizeMediaPricePeriod`의 단기 한글→day/week/biweekly 자동 매핑 — **A1a 적용 (2026-07-28)**
+  - SSOT: `lib/media-price-period-read.ts`
+  - 2주 수동 검증 대기 5건 제외: `TICKET-a1a-manual-review-5-biweekly.md`
+  - A1b/A1c: `scripts/report-a1b-a1c-periods.mjs` 리포트만
 - 80건 DB 정정 — 사람 검토 후

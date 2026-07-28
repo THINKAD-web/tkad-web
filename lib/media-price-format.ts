@@ -4,6 +4,11 @@ import type {
   MediaPricePeriodKey,
 } from "@/lib/media-data";
 import { isAddonSurchargePriceOption } from "@/lib/media-price-addon-option";
+import {
+  normalizeMediaPricePeriodRead,
+  readContextFromMedia,
+  type MediaPricePeriodReadContext,
+} from "@/lib/media-price-period-read";
 
 /**
  * DB `Media.price` / 카탈로그 가격 필드 → 원(KRW).
@@ -157,11 +162,9 @@ export function formatCatalogPriceKrwLong(
 
 export function normalizeMediaPricePeriod(
   v: string | undefined | null,
+  ctx?: MediaPricePeriodReadContext,
 ): MediaPricePeriodKey {
-  if (v === "biweekly" || v === "week" || v === "day" || v === "month") {
-    return v;
-  }
-  return "month";
+  return normalizeMediaPricePeriodRead(v, ctx);
 }
 
 export function mediaPricePeriodTranslationKey(
@@ -419,7 +422,7 @@ export function isMediaPriceOnInquiry(
 export type MediaPriceSortable = Pick<
   MediaItem,
   "price" | "pricePeriod" | "priceOptions"
-> & { id?: string };
+> & { id?: string; name?: string };
 
 /**
  * 목록 월환산 정렬 키 — `resolveMonthlyListPriceWon` 과 동일 식.
@@ -458,9 +461,13 @@ export function formatMediaDisplayPrice(
  * 가산/할증 옵션은 제외. root가 가산가와 같고 본상품 옵션이 있으면 root도 제외.
  */
 export function getCheapestMediaPriceOption(
-  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions"> & {
+    id?: string;
+    name?: string;
+  },
 ): { priceWon: number; period: MediaPricePeriodKey } | null {
   type Cand = { rawPrice: number; period: MediaPricePeriodKey };
+  const periodCtx = readContextFromMedia(media);
   const opts = media.priceOptions ?? [];
   const positiveOpts = opts.filter(
     (o) => typeof o.price === "number" && o.price > 0,
@@ -480,7 +487,7 @@ export function getCheapestMediaPriceOption(
   if (rootPositive && !rootMatchesAddonOnly) {
     candidates.push({
       rawPrice: rootPrice,
-      period: normalizeMediaPricePeriod(media.pricePeriod),
+      period: normalizeMediaPricePeriod(media.pricePeriod, periodCtx),
     });
   }
 
@@ -488,7 +495,10 @@ export function getCheapestMediaPriceOption(
   for (const opt of optsForCheapest) {
     candidates.push({
       rawPrice: opt.price,
-      period: normalizeMediaPricePeriod(opt.period ?? media.pricePeriod),
+      period: normalizeMediaPricePeriod(
+        opt.period ?? media.pricePeriod,
+        periodCtx,
+      ),
     });
   }
 
@@ -496,7 +506,7 @@ export function getCheapestMediaPriceOption(
     if (rootPositive) {
       return {
         priceWon: catalogPriceFieldToWon(rootPrice),
-        period: normalizeMediaPricePeriod(media.pricePeriod),
+        period: normalizeMediaPricePeriod(media.pricePeriod, periodCtx),
       };
     }
     return null;
