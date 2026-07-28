@@ -7,8 +7,8 @@ import IntegratedPlannerPageClient from "./integrated-planner-page-client";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { loadDigitalChannelsForIntegratedPlanner } from "@/lib/planner/digital-catalog-bridge";
 
+/** ISR 1h — force-dynamic 제거로 페이지 캐시 활성화 (B1a). Mix API는 별도 force-dynamic 유지. */
 export const revalidate = 3600;
-export const dynamic = "force-dynamic";
 
 type Props = { params: Promise<{ locale: string }> };
 

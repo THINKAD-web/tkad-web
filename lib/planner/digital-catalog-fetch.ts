@@ -40,11 +40,13 @@ export async function fetchDigitalCatalogInternal(): Promise<FetchDigitalCatalog
       headers["x-vercel-protection-bypass"] = protectionBypass;
     }
 
+    // Align with integrated planner page ISR (3600). cache: "no-store" would
+    // force the whole route dynamic and defeat revalidate on the page.
     const res = await fetch(url, {
       method: "GET",
       headers,
       signal: controller.signal,
-      cache: "no-store",
+      next: { revalidate: 3600 },
     });
 
     if (!res.ok) {
