@@ -4,11 +4,11 @@ import { buildShareMetadata, pageAlternates } from "@/lib/seo";
 import { HomeHeroBanner } from "@/components/home/home-hero-banner";
 import { HomeTwoAxis } from "@/components/home/home-two-axis";
 import { HomeExploreSplit } from "@/components/home/home-explore-split";
-import { HomeMediaScroll } from "@/components/home/home-media-scroll";
-import { HomeContentFeed } from "@/components/home/home-content-feed";
+import { HomePlannerLanding } from "@/components/home/home-planner-landing";
 import { fetchPublicMediaCatalog } from "@/lib/media-catalog";
 import { fetchPublishedReports } from "@/lib/report-queries";
 import { fetchPublishedCases } from "@/lib/case-queries";
+import { getHomeLandingCoverageTiles } from "@/lib/home-landing-media-grid";
 import {
   getPublicMediaCountLabel,
   homePageMetadataTitle,
@@ -49,13 +49,13 @@ export default async function HomePage({
   params: Promise<{ locale: string }>;
 }) {
   const { locale } = await params;
-  const isKo = locale === "ko" || locale.startsWith("ko");
   const verifiedMediaLabel = await getPublicMediaCountLabel("verified");
 
-  const [popularMedia, reportItems, caseItems] = await Promise.all([
+  const [popularMedia, reportItems, caseItems, coverage] = await Promise.all([
     fetchPublicMediaCatalog({ sort: "popular", limit: 8 }).catch(() => []),
     fetchPublishedReports({ limit: 3 }).catch(() => []),
     fetchPublishedCases({ limit: 3, locale }).catch(() => []),
+    getHomeLandingCoverageTiles(),
   ]);
 
   return (
@@ -72,16 +72,13 @@ export default async function HomePage({
 
       <HomeExploreSplit />
 
-      <HomeMediaScroll
-        title={isKo ? "이번 주 인기 매체" : "Popular this week"}
-        media={popularMedia}
-        locale={locale}
-      />
-
-      <HomeContentFeed
+      <HomePlannerLanding
+        mediaCountLabel={verifiedMediaLabel}
+        oohTiles={coverage.ooh}
+        digitalTiles={coverage.digital}
+        popularMedia={popularMedia}
         reports={reportItems}
         cases={caseItems}
-        locale={locale}
       />
     </main>
   );
