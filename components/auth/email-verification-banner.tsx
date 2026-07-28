@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { Mail, RefreshCw, X } from "lucide-react";
 import { useLocale } from "next-intl";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { Spinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -13,14 +14,38 @@ type Props = {
   onVerified?: () => void;
 };
 
+type SessionWithVerification = {
+  needsEmailVerification?: boolean;
+};
+
 export function EmailVerificationBanner({ className, onDismiss, onVerified }: Props) {
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { user, loading: authLoading, refresh } = useAuthSession();
   const [dismissed, setDismissed] = useState(false);
   const [sending, setSending] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
   const [sent, setSent] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const pendingCheckRef = useRef(false);
+
+  useEffect(() => {
+    if (!pendingCheckRef.current || authLoading) return;
+    pendingCheckRef.current = false;
+    setRefreshing(false);
+    if (!user) {
+      setError(isKo ? "상태 확인에 실패했습니다." : "Failed to check status.");
+      return;
+    }
+    const needs = (user as SessionWithVerification).needsEmailVerification;
+    if (!needs) {
+      onVerified?.();
+      setDismissed(true);
+      onDismiss?.();
+      return;
+    }
+    setError(isKo ? "아직 인증되지 않았습니다." : "Not verified yet.");
+  }, [user, authLoading, isKo, onVerified, onDismiss]);
 
   if (dismissed) return null;
 
@@ -58,24 +83,13 @@ export function EmailVerificationBanner({ className, onDismiss, onVerified }: Pr
   async function refreshStatus() {
     setRefreshing(true);
     setError(null);
+    pendingCheckRef.current = true;
     try {
-      const res = await fetch("/api/auth/session", { cache: "no-store" });
-      const data = await res.json();
-      if (!data.ok || !data.data) {
-        setError(isKo ? "상태 확인에 실패했습니다." : "Failed to check status.");
-        return;
-      }
-      if (!data.data.needsEmailVerification) {
-        onVerified?.();
-        setDismissed(true);
-        onDismiss?.();
-        return;
-      }
-      setError(isKo ? "아직 인증되지 않았습니다." : "Not verified yet.");
+      await refresh({ force: true });
     } catch {
-      setError(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");
-    } finally {
+      pendingCheckRef.current = false;
       setRefreshing(false);
+      setError(isKo ? "네트워크 오류가 발생했습니다." : "Network error.");
     }
   }
 

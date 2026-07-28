@@ -29,6 +29,7 @@ import {
 } from "@/lib/plan-cart-planner-bridge";
 import { PlannerCampaignGoalGrid } from "@/components/planner/planner-campaign-goal-grid";
 import { SavePlanButton } from "@/components/my/save-plan-button";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { formatCatalogPriceFieldWon, mediaPriceOnInquiryLabel } from "@/lib/media-price-format";
 import { packagePeriodToggleMeta } from "@/lib/quote-package-period-toggle";
 import { useAppToast } from "@/lib/use-toast";
@@ -42,6 +43,7 @@ export function MyPlanPageClient() {
   const isKo = locale === "ko";
   const router = useRouter();
   const toast = useAppToast();
+  const { user } = useAuthSession();
   const {
     cart,
     remove,
@@ -127,9 +129,7 @@ export function MyPlanPageClient() {
       return;
     }
     try {
-      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-      const sessionData = await sessionRes.json();
-      if (sessionData?.ok && sessionData.data) {
+      if (user) {
         await fetch("/api/my/plan/sync", {
           method: "POST",
           headers: { "Content-Type": "application/json" },

@@ -6,6 +6,7 @@ import { useLocale } from "next-intl";
 import { useRouter, Link } from "@/i18n/navigation";
 import { Users } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { FullPageSpinner, Spinner } from "@/components/ui/spinner";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
 
@@ -18,6 +19,7 @@ function JoinTeamClientInner() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const token = searchParams.get("token")?.trim() ?? "";
+  const { user } = useAuthSession();
 
   const [loading, setLoading] = useState(true);
   const [accepting, setAccepting] = useState(false);
@@ -65,9 +67,7 @@ function JoinTeamClientInner() {
     setAccepting(true);
     setError(null);
     try {
-      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-      const session = await sessionRes.json();
-      if (!session?.ok || !session.data) {
+      if (!user) {
         router.push(`/login?redirect=${encodeURIComponent(`/join?token=${token}`)}`);
         return;
       }

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useLocale } from "next-intl";
 import { Link, useRouter } from "@/i18n/navigation";
 import { Bell, FileText, Film, ListMusic, LogOut, Megaphone } from "lucide-react";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
 import { PageContainer } from "@/components/layout/page-container";
@@ -59,8 +60,13 @@ export default function AdvertiserDashboardPage() {
   const locale = useLocale();
   const isKo = locale === "ko";
   const router = useRouter();
-  const [me, setMe] = useState<Me>(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading: authLoading } = useAuthSession();
+  const me: Me =
+    user?.id && user.email && user.name
+      ? { id: user.id, email: user.email, name: user.name }
+      : null;
+  const loading = authLoading;
+  const userId = user?.id;
   const [tab, setTab] = useState<CampaignTab>("active");
   const [summary, setSummary] = useState<Summary | null>(null);
   const [campaigns, setCampaigns] = useState<AdvertiserCampaignCardItem[]>([]);
@@ -72,25 +78,14 @@ export default function AdvertiserDashboardPage() {
   );
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await fetch("/api/auth/session", { cache: "no-store" });
-      const data = await res.json();
-      if (cancelled) return;
-      if (!data.ok || !data.data) {
-        router.replace("/login?redirect=/dashboard");
-        return;
-      }
-      setMe(data.data);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
+    if (authLoading) return;
+    if (!userId) {
+      router.replace("/login?redirect=/dashboard");
+    }
+  }, [authLoading, userId, router]);
 
   useEffect(() => {
-    if (!me) return;
+    if (!userId) return;
     let cancelled = false;
     (async () => {
       const [sRes, nRes, iRes] = await Promise.all([
@@ -109,10 +104,10 @@ export default function AdvertiserDashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [me]);
+  }, [userId]);
 
   useEffect(() => {
-    if (!me) return;
+    if (!userId) return;
     let cancelled = false;
     setCampaignsLoading(true);
     (async () => {
@@ -127,7 +122,7 @@ export default function AdvertiserDashboardPage() {
     return () => {
       cancelled = true;
     };
-  }, [me, tab]);
+  }, [userId, tab]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });

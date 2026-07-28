@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { Bell, BellOff, Loader2 } from "lucide-react";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { useAppToast } from "@/lib/use-toast";
 
 export function RegionPriceAlertToggle({
@@ -15,14 +16,14 @@ export function RegionPriceAlertToggle({
 }) {
   const isKo = locale.startsWith("ko");
   const toast = useAppToast();
+  const { user, loading: authLoading } = useAuthSession();
   const [subscribed, setSubscribed] = useState<boolean | null>(null);
   const [pending, setPending] = useState(false);
 
-  const refresh = useCallback(async () => {
+  const loadAlertState = useCallback(async () => {
+    if (authLoading) return;
     try {
-      const s = await fetch("/api/auth/session", { cache: "no-store" });
-      const sd = await s.json();
-      if (!sd?.ok || !sd.data) {
+      if (!user) {
         setSubscribed(null);
         return;
       }
@@ -36,11 +37,11 @@ export function RegionPriceAlertToggle({
     } catch {
       setSubscribed(null);
     }
-  }, [regionZone]);
+  }, [regionZone, user, authLoading]);
 
   useEffect(() => {
-    void refresh();
-  }, [refresh]);
+    void loadAlertState();
+  }, [loadAlertState]);
 
   async function toggle() {
     if (subscribed === null) {

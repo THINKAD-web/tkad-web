@@ -18,7 +18,13 @@ export type AuthSessionUser = PlanCheckUser & {
   email?: string | null;
   name?: string;
   role?: string;
+  company?: string | null;
   pointBalance?: number;
+  needsEmailVerification?: boolean;
+  trialDaysLeft?: number;
+  trialProgressPct?: number;
+  trialStartedAt?: string | null;
+  trialEndsAt?: string | null;
 };
 
 type RefreshOptions = {
