@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { hapticLight } from "@/lib/haptic";
+import { useMobileChromeOverlayOptional } from "@/components/mobile/mobile-chrome-overlay-context";
 import { useMobileTabBadges } from "@/hooks/use-mobile-tab-badges";
 import { openContactChannelSheet } from "@/components/contact/contact-channel-provider";
 
@@ -165,13 +166,14 @@ export function BottomTabBar() {
   const pathname = usePathname();
   const t = useTranslations("mobileTabs");
   const badges = useMobileTabBadges();
+  const chromeOverlay = useMobileChromeOverlayOptional();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  if (!mounted || isHiddenPath(pathname)) return null;
+  if (!mounted || isHiddenPath(pathname) || chromeOverlay?.isAnyOpen) return null;
 
   return (
     <nav
