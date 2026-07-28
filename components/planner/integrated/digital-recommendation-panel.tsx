@@ -219,14 +219,14 @@ export function IntegratedDigitalRecommendationPanel({
 
       {mixKpis ? <IntegratedMixKpiStrip kpis={mixKpis} isKo={isKo} /> : null}
 
-      <div className="rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-5 sm:p-6">
+      <div className="rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-5 sm:p-6 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10">
         <div className="flex items-start gap-3">
-          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-fg-muted)]" />
+          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-accent)]" />
           <div>
-            <p className="text-sm font-bold text-foreground dark:text-white">
+            <p className="text-sm font-bold leading-relaxed text-gray-950 dark:text-[color:var(--qp-accent)]">
               {isKo ? result.synergyMessageKo : result.synergyMessageEn}
             </p>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs leading-relaxed text-gray-600 dark:text-white/70">
               {t("synergyHint")}
             </p>
           </div>

@@ -42,41 +42,34 @@ export function HomeMediaScroll({
 
   return (
     <div className={cn(!embedded && "py-4")}>
-      <div
-        className={cn(
-          "mb-4 flex items-end justify-between gap-3",
-          !embedded && "px-4",
-        )}
-      >
-        <div className="min-w-0">
-          {eyebrow ? (
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
-              {eyebrow}
-            </p>
-          ) : null}
+      <div className={cn("mb-4", !embedded && "px-4")}>
+        {eyebrow ? (
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-hermes">
+            {eyebrow}
+          </p>
+        ) : null}
+        <div className="flex items-center justify-between gap-3">
           <h3
             className={cn(
-              "font-bold text-gray-900 dark:text-white",
-              eyebrow
-                ? "mt-1.5 text-lg md:text-xl"
-                : "text-lg md:text-xl",
+              "min-w-0 font-bold text-gray-900 dark:text-white",
+              eyebrow ? "mt-1.5 text-lg md:text-xl" : "text-lg md:text-xl",
             )}
           >
             {title}
           </h3>
-          {subtitle ? (
-            <p className="mt-1 text-sm text-gray-500 dark:text-white/50">
-              {subtitle}
-            </p>
-          ) : null}
+          <Link
+            href={{ pathname: "/media", query: { sort: "popular" } }}
+            className="inline-flex shrink-0 items-center gap-0.5 whitespace-nowrap text-sm font-medium tkad-home-accent-text"
+          >
+            {isKo ? "전체보기" : "View all"}
+            <ChevronRight className="h-3 w-3" aria-hidden />
+          </Link>
         </div>
-        <Link
-          href={{ pathname: "/media", query: { sort: "popular" } }}
-          className="flex shrink-0 items-center gap-0.5 text-sm font-medium tkad-home-accent-text"
-        >
-          {isKo ? "전체보기" : "View all"}
-          <ChevronRight className="h-3 w-3" aria-hidden />
-        </Link>
+        {subtitle ? (
+          <p className="mt-1 text-sm text-gray-500 dark:text-white/50">
+            {subtitle}
+          </p>
+        ) : null}
       </div>
 
       <div
