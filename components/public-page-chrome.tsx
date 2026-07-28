@@ -6,6 +6,7 @@ import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate
 import { ContextNavAsideShell } from "@/components/navigation/context-nav-sidebar";
 import { AppProvidersRoot } from "@/components/app-providers-root";
 import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
+import { MobileChromeOverlayProvider } from "@/components/mobile/mobile-chrome-overlay-context";
 
 type Props = {
   skipLinkLabel: string;
@@ -17,10 +18,11 @@ type Props = {
 export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
   return (
     <AuthSessionProvider>
-      <a href="#main-content" className="skip-link">
-        {skipLinkLabel}
-      </a>
-      <div className="flex min-h-0 flex-1 flex-col">
+      <MobileChromeOverlayProvider>
+        <a href="#main-content" className="skip-link">
+          {skipLinkLabel}
+        </a>
+        <div className="flex min-h-0 flex-1 flex-col">
         <ConditionalPublicChrome>
           <TopLoader />
           {header}
@@ -45,6 +47,7 @@ export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
           </div>
         </div>
       </div>
+      </MobileChromeOverlayProvider>
     </AuthSessionProvider>
   );
 }

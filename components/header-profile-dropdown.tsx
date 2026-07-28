@@ -19,11 +19,10 @@ import {
 import { useTheme } from "next-themes";
 import { cn } from "@/lib/utils";
 import {
-  headerChromeDropdownBackdropClass,
-  headerChromeDropdownPanelClass,
   headerChromeIconGhostClass,
   headerChromeMenuItemClass,
 } from "@/components/public-chrome/header-chrome-buttons";
+import { HeaderChromeDropdownOverlay } from "@/components/public-chrome/header-chrome-dropdown-overlay";
 import { isAutoThemeMode, setManualTheme } from "@/lib/theme-auto";
 import { isPro } from "@/lib/plan-check-shared";
 import { HeaderUsageGuideMenuPanel } from "@/components/header-usage-guide-menu";
@@ -66,7 +65,8 @@ export function HeaderProfileDropdown({
   const [menuPanel, setMenuPanel] = useState<"main" | "usage">("main");
   const [mounted, setMounted] = useState(false);
   const [isPending, startTransition] = useTransition();
-  const rootRef = useRef<HTMLDivElement>(null);
+  const anchorRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   const days = session.trialDaysLeft ?? 0;
   const pro = isPro(session);
@@ -81,15 +81,6 @@ export function HeaderProfileDropdown({
     await fetch("/api/auth/logout", { method: "POST", credentials: "same-origin" });
     window.location.href = `/${locale}/login`;
   };
-
-  useEffect(() => {
-    if (!open) return;
-    function onDoc(e: MouseEvent) {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    }
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
 
   useEffect(() => {
     if (!open) setMenuPanel("main");
@@ -117,8 +108,9 @@ export function HeaderProfileDropdown({
   };
 
   return (
-    <div ref={rootRef} className="relative">
+    <div className="relative">
       <button
+        ref={anchorRef}
         type="button"
         onClick={() => setOpen((v) => !v)}
         className={cn(headerChromeIconGhostClass, open && "bg-gray-100 dark:bg-white/10")}
@@ -128,15 +120,15 @@ export function HeaderProfileDropdown({
       >
         <UserIcon className="h-[18px] w-[18px]" strokeWidth={2} aria-hidden />
       </button>
-      {open ? (
-        <>
-          <button
-            type="button"
-            aria-label={isKo ? "메뉴 닫기" : "Close menu"}
-            className={headerChromeDropdownBackdropClass}
-            onClick={close}
-          />
-          <div role="menu" className={headerChromeDropdownPanelClass}>
+      <HeaderChromeDropdownOverlay
+        open={open}
+        onClose={close}
+        anchorRef={anchorRef}
+        panelRef={panelRef}
+        overlayKey="header-profile-dropdown"
+        closeAriaLabel={isKo ? "메뉴 닫기" : "Close menu"}
+        panelRole="menu"
+      >
             {menuPanel === "usage" ? (
               <HeaderUsageGuideMenuPanel
                 isKo={isKo}
@@ -270,9 +262,7 @@ export function HeaderProfileDropdown({
           </button>
               </>
             )}
-          </div>
-        </>
-      ) : null}
+      </HeaderChromeDropdownOverlay>
     </div>
   );
 }
