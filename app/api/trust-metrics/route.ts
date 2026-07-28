@@ -5,7 +5,8 @@ import {
   getTrustMetrics,
 } from "@/lib/trust-metrics";
 
-export const dynamic = "force-dynamic";
+/** Public trust metrics — CDN cache 1h (B2). */
+export const revalidate = 3600;
 
 /** 공개 신뢰 지표 (포맷된 문자열 포함). */
 export async function GET() {

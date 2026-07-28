@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { getForcedAbVariant } from "@/lib/ab-test-db";
 
-export const dynamic = "force-dynamic";
+/** Short CDN cache for AB forced-variant policy (B2). */
 export const revalidate = 30;
 
 export async function GET() {
