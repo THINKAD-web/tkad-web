@@ -12,7 +12,6 @@ import { MobileKeyboardProvider } from "@/components/mobile/mobile-keyboard-prov
 import { PushHapticListener } from "@/components/mobile/push-haptic-listener";
 import { PwaSplashScreen } from "@/components/mobile/pwa-splash-screen";
 import { MobileAppOverlays } from "@/components/mobile/mobile-app-overlays";
-import { MobileChromeOverlayProvider } from "@/components/mobile/mobile-chrome-overlay-context";
 import { PlanCartLegacyMigrate } from "@/components/plan/plan-cart-legacy-migrate";
 
 type Props = {
@@ -43,13 +42,11 @@ export function AppProvidersRoot({ children, admin }: Props) {
           <RecentPageTracker />
           <MobileSearchProvider>
             <MobileDetailChromeProvider>
-              <MobileChromeOverlayProvider>
-                <MobileKeyboardProvider />
-                <PushHapticListener />
-                <PwaSplashScreen />
-                {children}
-                <MobileAppOverlays />
-              </MobileChromeOverlayProvider>
+              <MobileKeyboardProvider />
+              <PushHapticListener />
+              <PwaSplashScreen />
+              {children}
+              <MobileAppOverlays />
             </MobileDetailChromeProvider>
           </MobileSearchProvider>
         </CommandPaletteProvider>
