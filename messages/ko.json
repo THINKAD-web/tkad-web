@@ -2268,14 +2268,6 @@
     "downloadPdf": "통합 제안서 PDF 다운로드",
     "pdfDownloaded": "PDF가 다운로드되었습니다.",
     "pdfFailed": "PDF 생성에 실패했습니다.",
-    "thinkadDigitalCardAria": "THINKAD Digital 패키지 안내",
-    "thinkadDigitalCardEyebrow": "함께 고려해보세요",
-    "thinkadDigitalCardTitle": "THINKAD Digital 패키지",
-    "thinkadDigitalCardDesc": "SNS·검색광고 월정액 대행 서비스입니다. 위 채널 추천(CPC/CPM 추정)과는 별개이며, 이 플랜 예산 배분에는 포함되지 않습니다.",
-    "thinkadDigitalPerMonth": "/월",
-    "thinkadDigitalCardNote": "정가 기준 · 맞춤 견적이 필요하면 문의로 이어갈 수 있습니다.",
-    "thinkadDigitalPricingCta": "패키지·가격 보기",
-    "thinkadDigitalContactCta": "먼저 문의하기"
   },
   "footer": {
     "description": "(주)싱커드",
