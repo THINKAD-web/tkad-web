@@ -922,11 +922,27 @@ export const usePlannerStore = create<PlannerStore>()(
   ),
 );
 
-/** 사용자 입력을 BUDGET 범위로 정규화한 숫자값 */
-export function selectBudgetNum(s: PlannerStoreState): number {
-  const n = Number.parseInt(s.budget.replace(/,/g, ""), 10);
-  if (!Number.isFinite(n)) return PLANNER_BUDGET_MIN;
+/** 사용자 입력 문자열에서 만원 단위 숫자 파싱. 빈·잘못된 값은 null */
+export function parsePlannerBudgetMan(
+  s: Pick<PlannerStoreState, "budget">,
+): number | null {
+  const raw = s.budget.replace(/,/g, "").trim();
+  if (!raw) return null;
+  const n = Number.parseInt(raw, 10);
+  if (!Number.isFinite(n)) return null;
+  return n;
+}
+
+/** 만원 단위 예산을 허용 범위로 클램프 */
+export function clampPlannerBudgetMan(n: number): number {
   return Math.min(PLANNER_BUDGET_MAX, Math.max(PLANNER_BUDGET_MIN, n));
+}
+
+/** 시뮬레이션·슬라이더용 정규화 값. 최소 미만·빈 입력은 0 (검증은 parsePlannerBudgetMan 별도) */
+export function selectBudgetNum(s: PlannerStoreState): number {
+  const parsed = parsePlannerBudgetMan(s);
+  if (parsed === null || parsed < PLANNER_BUDGET_MIN) return 0;
+  return Math.min(PLANNER_BUDGET_MAX, parsed);
 }
 
 /** 입력 마지막 단계까지 진행했는지 */

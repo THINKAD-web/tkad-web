@@ -125,7 +125,7 @@ import {
   type PlannerCategory,
 } from "@/lib/planner/types";
 import type { SavedPlannerPlanJson } from "@/lib/planner/contact-prefill";
-import { selectBudgetNum, usePlannerStore } from "@/lib/planner/store";
+import { selectBudgetNum, clampPlannerBudgetMan, parsePlannerBudgetMan, usePlannerStore } from "@/lib/planner/store";
 import { canProceedFromStep } from "@/lib/planner/validation";
 import { resolveWizardStepAfterPlanCartImport } from "@/lib/planner/plan-cart-import";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
@@ -261,6 +261,16 @@ export default function PlannerPageClient({
   const categoriesArr = usePlannerStore((s) => s.categories);
   const budget = usePlannerStore((s) => s.budget);
   const budgetNum = usePlannerStore(selectBudgetNum);
+  const [budgetFieldFocused, setBudgetFieldFocused] = useState(false);
+  const budgetSliderValue = useMemo(() => {
+    const parsed = parsePlannerBudgetMan({ budget });
+    if (parsed === null) return PLANNER_BUDGET_MIN;
+    return clampPlannerBudgetMan(parsed);
+  }, [budget]);
+  const budgetManForSummary = useMemo(
+    () => parsePlannerBudgetMan({ budget }) ?? 0,
+    [budget],
+  );
   const months = usePlannerStore((s) => s.months);
   const ageKeys = usePlannerStore((s) => s.ageKeys);
   const industryKey = usePlannerStore((s) => s.industryKey);
@@ -294,6 +304,15 @@ export default function PlannerPageClient({
   const toggleRegion = usePlannerStore((s) => s.toggleRegion);
   const toggleCategoryAction = usePlannerStore((s) => s.toggleCategory);
   const setBudget = usePlannerStore((s) => s.setBudget);
+  const handleBudgetBlur = useCallback(() => {
+    setBudgetFieldFocused(false);
+    const parsed = parsePlannerBudgetMan({ budget });
+    if (parsed === null) {
+      setBudget(String(PLANNER_BUDGET_MIN));
+      return;
+    }
+    setBudget(String(clampPlannerBudgetMan(parsed)));
+  }, [budget, setBudget]);
   const setMonths = usePlannerStore((s) => s.setMonths);
   const toggleAgeKey = usePlannerStore((s) => s.toggleAgeKey);
   const setIndustryKey = usePlannerStore((s) => s.setIndustryKey);
@@ -1671,9 +1690,10 @@ export default function PlannerPageClient({
                       min={PLANNER_BUDGET_MIN}
                       max={PLANNER_BUDGET_MAX}
                       step={500}
-                      value={budgetNum}
+                      value={budgetSliderValue}
+                      disabled={budgetFieldFocused}
                       onChange={(e) => setBudget(e.target.value)}
-                      className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200"
+                      className="h-2 w-full cursor-pointer appearance-none rounded-full dark:bg-white/10 bg-gray-200 disabled:cursor-not-allowed disabled:opacity-50"
                       style={{ accentColor: "#ff6200" }}
                       aria-label={t("budget")}
                     />
@@ -1683,6 +1703,8 @@ export default function PlannerPageClient({
                         <input
                           inputMode="numeric"
                           value={budget}
+                          onFocus={() => setBudgetFieldFocused(true)}
+                          onBlur={handleBudgetBlur}
                           onChange={(e) =>
                             setBudget(e.target.value.replace(/[^\d]/g, ""))
                           }
@@ -1695,7 +1717,9 @@ export default function PlannerPageClient({
                       </div>
                       <p className={cn("pb-1 text-sm", plannerNeon.subtext)}>
                         {t("budgetPerMonthSummary", {
-                          amount: Math.round(budgetNum / Math.max(months, 1)),
+                          amount: Math.round(
+                            budgetManForSummary / Math.max(months, 1),
+                          ),
                         })}
                       </p>
                     </div>

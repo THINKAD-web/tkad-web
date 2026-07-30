@@ -3,7 +3,8 @@ import {
   type PlannerWizardStep,
 } from "@/lib/planner/types";
 import {
-  selectBudgetNum,
+  clampPlannerBudgetMan,
+  parsePlannerBudgetMan,
   type PlannerStoreState,
 } from "@/lib/planner/store";
 
@@ -42,10 +43,12 @@ export function canProceedFromStep(
       return state.regions.length > 0
         ? { ok: true }
         : { ok: false, errorKey: "selectRegion" };
-    case 3:
-      return selectBudgetNum(state) >= PLANNER_BUDGET_MIN
+    case 3: {
+      const parsed = parsePlannerBudgetMan(state);
+      return parsed !== null && clampPlannerBudgetMan(parsed) >= PLANNER_BUDGET_MIN
         ? { ok: true }
         : { ok: false, errorKey: "needBudget" };
+    }
     case 4:
       return state.campaignMediaIds.length > 0
         ? { ok: true }
