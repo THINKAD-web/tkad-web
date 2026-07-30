@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { useLocale, useTranslations } from "next-intl";
 import {
@@ -17,6 +17,7 @@ import { BtnBlock } from "@/components/brutalist";
 import { PlanCartLineCard } from "@/components/plan/plan-cart-line-card";
 import { usePlanCart } from "@/hooks/use-plan-cart";
 import { PLAN_CART_DURATION_OPTIONS } from "@/lib/plan-cart";
+import { setPlanCartUserEditing } from "@/lib/plan-cart-local-guard";
 import {
   planCartAddonTotalWon,
   planCartCatalogById,
@@ -55,6 +56,7 @@ export function MyPlanPageClient() {
   } = usePlanCart();
   const [confirmClear, setConfirmClear] = useState(false);
   const [budgetInput, setBudgetInput] = useState("");
+  const budgetEditingRef = useRef(false);
   const [draggingId, setDraggingId] = useState<string | null>(null);
   const [dragOverId, setDragOverId] = useState<string | null>(null);
   const [catalog, setCatalog] = useState<MediaItem[]>([]);
@@ -88,6 +90,7 @@ export function MyPlanPageClient() {
   }, [loadCatalog]);
 
   useEffect(() => {
+    if (budgetEditingRef.current) return;
     setBudgetInput(
       cart.totalBudget != null && cart.totalBudget > 0
         ? String(Math.round(cart.totalBudget / 10_000))
@@ -248,6 +251,14 @@ export function MyPlanPageClient() {
                       type="number"
                       min={0}
                       value={budgetInput}
+                      onFocus={() => {
+                        budgetEditingRef.current = true;
+                        setPlanCartUserEditing(true);
+                      }}
+                      onBlur={() => {
+                        budgetEditingRef.current = false;
+                        setPlanCartUserEditing(false);
+                      }}
                       onChange={(e) => {
                         setBudgetInput(e.target.value);
                         const n = Number(e.target.value);

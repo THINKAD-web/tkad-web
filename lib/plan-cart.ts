@@ -90,6 +90,7 @@ export type BulkAddToPlanCartResult = {
 import {
   normalizePlanCartOptionSelections,
 } from "@/lib/plan-cart-option-selections";
+import { touchPlanCartLocalEdit } from "@/lib/plan-cart-local-guard";
 
 const EMPTY_CART = (): PlanCart => ({
   items: [],
@@ -114,7 +115,41 @@ function writeCart(cart: PlanCart) {
     updatedAt: new Date().toISOString(),
   };
   window.localStorage.setItem(PLAN_CART_KEY, JSON.stringify(next));
+  touchPlanCartLocalEdit();
   emitChange(next);
+}
+
+type CartMutationResult<T> = { cart: PlanCart; result: T };
+
+let cartMutationDepth = 0;
+
+/**
+ * localStorage read→write 를 단일 스택에서 원자적으로 처리.
+ * writeCart → emitChange 리스너가 재진입해도 항상 최신 cart 를 읽는다.
+ */
+function runPlanCartMutation<T>(
+  mutate: (cart: PlanCart) => CartMutationResult<T>,
+): T {
+  let result!: T;
+  const execute = () => {
+    const cart = getPlanCart();
+    const { cart: next, result: r } = mutate(cart);
+    writeCart(next);
+    result = r;
+  };
+
+  if (cartMutationDepth > 0) {
+    execute();
+    return result;
+  }
+
+  cartMutationDepth += 1;
+  try {
+    execute();
+  } finally {
+    cartMutationDepth -= 1;
+  }
+  return result;
 }
 
 function normalizeItem(raw: unknown): PlanCartItem | null {
@@ -285,14 +320,10 @@ export function savePlanCartMeta(
     Pick<PlanCart, "campaignGoal" | "totalBudget" | "duration" | "industryKey">
   >,
 ): PlanCart {
-  const cart = getPlanCart();
-  const next: PlanCart = {
-    ...cart,
-    ...patch,
-    updatedAt: new Date().toISOString(),
-  };
-  writeCart(next);
-  return next;
+  return runPlanCartMutation((cart) => {
+    const next: PlanCart = { ...cart, ...patch };
+    return { cart: next, result: next };
+  });
 }
 
 export function replacePlanCart(cart: PlanCart): void {
@@ -329,58 +360,97 @@ export function addToPlanCart(
   item: Omit<PlanCartItem, "addedAt">,
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
 ): AddToPlanCartResult {
-  const cart = getPlanCart();
-  if (cart.items.some((i) => i.mediaId === item.mediaId)) {
-    return { ok: true, added: false, reason: "duplicate" };
-  }
-  if (cart.items.length >= maxItems) {
-    return { ok: false, reason: "max_reached" };
-  }
-  writeCart({
-    ...cart,
-    items: [
-      ...cart.items,
-      { ...item, addedAt: new Date().toISOString() },
-    ],
+  return runPlanCartMutation((cart) => {
+    if (cart.items.some((i) => i.mediaId === item.mediaId)) {
+      return {
+        cart,
+        result: { ok: true, added: false, reason: "duplicate" } as AddToPlanCartResult,
+      };
+    }
+    if (cart.items.length >= maxItems) {
+      return {
+        cart,
+        result: { ok: false, reason: "max_reached" } as AddToPlanCartResult,
+      };
+    }
+    const next: PlanCart = {
+      ...cart,
+      items: [
+        ...cart.items,
+        { ...item, addedAt: new Date().toISOString() },
+      ],
+    };
+    trackPlanCartUsage({
+      media_id: item.mediaId,
+      source: item.addedFrom || "plan_cart",
+      action: "add",
+      media_name: item.mediaName,
+    });
+    return {
+      cart: next,
+      result: { ok: true, added: true } as AddToPlanCartResult,
+    };
   });
-  trackPlanCartUsage({
-    media_id: item.mediaId,
-    source: item.addedFrom || "plan_cart",
-    action: "add",
-    media_name: item.mediaName,
-  });
-  return { ok: true, added: true };
 }
 
 export function addManyToPlanCart(
   items: Omit<PlanCartItem, "addedAt">[],
   maxItems: number = PLAN_CART_MAX_ITEMS_FREE,
 ): BulkAddToPlanCartResult {
-  let added = 0;
-  let skippedDuplicate = 0;
-  let skippedMax = 0;
-  for (const item of items) {
-    const result = addToPlanCart(item, maxItems);
-    if (result.ok && result.added) added += 1;
-    else if (result.ok && !result.added) skippedDuplicate += 1;
-    else skippedMax += 1;
-  }
-  return { added, skippedDuplicate, skippedMax };
+  return runPlanCartMutation((cart) => {
+    let added = 0;
+    let skippedDuplicate = 0;
+    let skippedMax = 0;
+    let nextItems = [...cart.items];
+    const seen = new Set(nextItems.map((i) => i.mediaId));
+
+    for (const item of items) {
+      if (seen.has(item.mediaId)) {
+        skippedDuplicate += 1;
+        continue;
+      }
+      if (nextItems.length >= maxItems) {
+        skippedMax += 1;
+        continue;
+      }
+      nextItems = [
+        ...nextItems,
+        { ...item, addedAt: new Date().toISOString() },
+      ];
+      seen.add(item.mediaId);
+      added += 1;
+      trackPlanCartUsage({
+        media_id: item.mediaId,
+        source: item.addedFrom || "plan_cart",
+        action: "add",
+        media_name: item.mediaName,
+      });
+    }
+
+    return {
+      cart: { ...cart, items: nextItems },
+      result: { added, skippedDuplicate, skippedMax },
+    };
+  });
 }
 
 export function removeFromPlanCart(mediaId: string): void {
-  const cart = getPlanCart();
-  const prev = cart.items.find((i) => i.mediaId === mediaId);
-  if (!prev) return;
-  writeCart({
-    ...cart,
-    items: cart.items.filter((i) => i.mediaId !== mediaId),
-  });
-  trackPlanCartUsage({
-    media_id: mediaId,
-    source: prev.addedFrom || "plan_cart",
-    action: "remove",
-    media_name: prev.mediaName,
+  runPlanCartMutation((cart) => {
+    const prev = cart.items.find((i) => i.mediaId === mediaId);
+    if (!prev) {
+      return { cart, result: undefined };
+    }
+    const next: PlanCart = {
+      ...cart,
+      items: cart.items.filter((i) => i.mediaId !== mediaId),
+    };
+    trackPlanCartUsage({
+      media_id: mediaId,
+      source: prev.addedFrom || "plan_cart",
+      action: "remove",
+      media_name: prev.mediaName,
+    });
+    return { cart: next, result: undefined };
   });
 }
 
@@ -399,134 +469,146 @@ export function updatePlanCartItem(
     >
   >,
 ): void {
-  const cart = getPlanCart();
-  const items = cart.items.map((item) => {
-    if (item.mediaId !== mediaId) return item;
-    const next = { ...item };
-    if ("quantity" in patch) {
-      const q = patch.quantity;
-      if (q == null || !Number.isFinite(q) || q <= 0) {
-        delete next.quantity;
-      } else {
-        next.quantity = Math.round(q);
+  runPlanCartMutation((cart) => {
+    const items = cart.items.map((item) => {
+      if (item.mediaId !== mediaId) return item;
+      const next = { ...item };
+      if ("quantity" in patch) {
+        const q = patch.quantity;
+        if (q == null || !Number.isFinite(q) || q <= 0) {
+          delete next.quantity;
+        } else {
+          next.quantity = Math.round(q);
+        }
       }
-    }
-    if ("priceOptionIndex" in patch) {
-      const idx = patch.priceOptionIndex;
-      if (idx == null || !Number.isFinite(idx) || idx < 0) {
-        delete next.priceOptionIndex;
-      } else {
-        next.priceOptionIndex = Math.round(idx);
+      if ("priceOptionIndex" in patch) {
+        const idx = patch.priceOptionIndex;
+        if (idx == null || !Number.isFinite(idx) || idx < 0) {
+          delete next.priceOptionIndex;
+        } else {
+          next.priceOptionIndex = Math.round(idx);
+        }
       }
-    }
-    if ("gradeSelections" in patch) {
-      const gs = patch.gradeSelections;
-      if (!gs?.length) {
-        delete next.gradeSelections;
-      } else {
-        next.gradeSelections = gs
-          .map(normalizeGradeSelection)
-          .filter((x): x is PlanCartGradeSelection => x !== null);
-        if (next.gradeSelections.length === 0) delete next.gradeSelections;
+      if ("gradeSelections" in patch) {
+        const gs = patch.gradeSelections;
+        if (!gs?.length) {
+          delete next.gradeSelections;
+        } else {
+          next.gradeSelections = gs
+            .map(normalizeGradeSelection)
+            .filter((x): x is PlanCartGradeSelection => x !== null);
+          if (next.gradeSelections.length === 0) delete next.gradeSelections;
+        }
       }
-    }
-    if ("optionSelections" in patch) {
-      const os = patch.optionSelections;
-      if (!os?.length) {
-        delete next.optionSelections;
-      } else {
-        next.optionSelections = normalizePlanCartOptionSelections(os);
-        if (!next.optionSelections?.length) delete next.optionSelections;
+      if ("optionSelections" in patch) {
+        const os = patch.optionSelections;
+        if (!os?.length) {
+          delete next.optionSelections;
+        } else {
+          next.optionSelections = normalizePlanCartOptionSelections(os);
+          if (!next.optionSelections?.length) delete next.optionSelections;
+        }
       }
-    }
-    if ("addonLines" in patch) {
-      const al = patch.addonLines;
-      if (!al?.length) {
-        delete next.addonLines;
-      } else {
-        next.addonLines = al
-          .map(normalizeAddonLine)
-          .filter((x): x is PlanCartAddonLine => x !== null);
-        if (next.addonLines.length === 0) delete next.addonLines;
+      if ("addonLines" in patch) {
+        const al = patch.addonLines;
+        if (!al?.length) {
+          delete next.addonLines;
+        } else {
+          next.addonLines = al
+            .map(normalizeAddonLine)
+            .filter((x): x is PlanCartAddonLine => x !== null);
+          if (next.addonLines.length === 0) delete next.addonLines;
+        }
       }
-    }
-    if ("usePackagePeriod" in patch) {
-      if (patch.usePackagePeriod === true) {
-        next.usePackagePeriod = true;
-      } else {
-        delete next.usePackagePeriod;
-        delete next.lineCampaignDays;
+      if ("usePackagePeriod" in patch) {
+        if (patch.usePackagePeriod === true) {
+          next.usePackagePeriod = true;
+        } else {
+          delete next.usePackagePeriod;
+          delete next.lineCampaignDays;
+        }
       }
-    }
-    if ("lineCampaignDays" in patch) {
-      const days = patch.lineCampaignDays;
-      if (days != null && Number.isFinite(days) && days > 0) {
-        next.lineCampaignDays = Math.round(days);
-      } else {
-        delete next.lineCampaignDays;
+      if ("lineCampaignDays" in patch) {
+        const days = patch.lineCampaignDays;
+        if (days != null && Number.isFinite(days) && days > 0) {
+          next.lineCampaignDays = Math.round(days);
+        } else {
+          delete next.lineCampaignDays;
+        }
       }
-    }
-    return next;
+      return next;
+    });
+    return { cart: { ...cart, items }, result: undefined };
   });
-  writeCart({ ...cart, items });
 }
 
 export function addPlanCartAddonLine(line: PlanCartAddonLine): void {
-  const cart = getPlanCart();
-  writeCart({
-    ...cart,
-    addonLines: [...(cart.addonLines ?? []), line],
-  });
+  runPlanCartMutation((cart) => ({
+    cart: {
+      ...cart,
+      addonLines: [...(cart.addonLines ?? []), line],
+    },
+    result: undefined,
+  }));
 }
 
 export function updatePlanCartAddonLine(
   id: string,
   patch: Partial<Pick<PlanCartAddonLine, "name" | "unitPriceWon" | "quantity">>,
 ): void {
-  const cart = getPlanCart();
-  const addonLines = (cart.addonLines ?? []).map((line) => {
-    if (line.id !== id) return line;
-    const next = { ...line, ...patch };
-    if (patch.unitPriceWon != null) {
-      next.unitPriceWon = Math.max(0, Math.round(patch.unitPriceWon));
-    }
-    if (patch.quantity != null) {
-      next.quantity = Math.max(1, Math.round(patch.quantity));
-    }
-    return next;
+  runPlanCartMutation((cart) => {
+    const addonLines = (cart.addonLines ?? []).map((line) => {
+      if (line.id !== id) return line;
+      const next = { ...line, ...patch };
+      if (patch.unitPriceWon != null) {
+        next.unitPriceWon = Math.max(0, Math.round(patch.unitPriceWon));
+      }
+      if (patch.quantity != null) {
+        next.quantity = Math.max(1, Math.round(patch.quantity));
+      }
+      return next;
+    });
+    return { cart: { ...cart, addonLines }, result: undefined };
   });
-  writeCart({ ...cart, addonLines });
 }
 
 export function removePlanCartAddonLine(id: string): void {
-  const cart = getPlanCart();
-  const addonLines = (cart.addonLines ?? []).filter((line) => line.id !== id);
-  writeCart({
-    ...cart,
-    addonLines: addonLines.length > 0 ? addonLines : undefined,
+  runPlanCartMutation((cart) => {
+    const addonLines = (cart.addonLines ?? []).filter((line) => line.id !== id);
+    return {
+      cart: {
+        ...cart,
+        addonLines: addonLines.length > 0 ? addonLines : undefined,
+      },
+      result: undefined,
+    };
   });
 }
 
 export function reorderPlanCartItems(fromIndex: number, toIndex: number): void {
-  const cart = getPlanCart();
-  if (
-    fromIndex < 0 ||
-    toIndex < 0 ||
-    fromIndex >= cart.items.length ||
-    toIndex >= cart.items.length ||
-    fromIndex === toIndex
-  ) {
-    return;
-  }
-  const items = [...cart.items];
-  const [moved] = items.splice(fromIndex, 1);
-  if (!moved) return;
-  items.splice(toIndex, 0, moved);
-  writeCart({ ...cart, items });
+  runPlanCartMutation((cart) => {
+    if (
+      fromIndex < 0 ||
+      toIndex < 0 ||
+      fromIndex >= cart.items.length ||
+      toIndex >= cart.items.length ||
+      fromIndex === toIndex
+    ) {
+      return { cart, result: undefined };
+    }
+    const items = [...cart.items];
+    const [moved] = items.splice(fromIndex, 1);
+    if (!moved) return { cart, result: undefined };
+    items.splice(toIndex, 0, moved);
+    return { cart: { ...cart, items }, result: undefined };
+  });
 }
 
 export function clearPlanCart(): void {
-  writeCart({ ...EMPTY_CART(), addonLines: undefined });
+  runPlanCartMutation((cart) => ({
+    cart: { ...EMPTY_CART(), addonLines: undefined },
+    result: undefined,
+  }));
 }
 
 export function getPlanCartCount(): number {

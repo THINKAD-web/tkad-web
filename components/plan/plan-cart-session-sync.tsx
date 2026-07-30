@@ -7,6 +7,10 @@ import {
   getPlanCart,
   PLAN_CART_CHANGE_EVENT,
 } from "@/lib/plan-cart";
+import {
+  msUntilPlanCartApplyAllowed,
+  shouldDeferServerPlanCartApply,
+} from "@/lib/plan-cart-local-guard";
 import { pushPlanCartToServer } from "@/lib/plan-cart-server-sync";
 
 function parseUpdatedAt(iso: string | undefined): number {
@@ -28,6 +32,13 @@ export function PlanCartSessionSync() {
 
     let cancelled = false;
 
+    function scheduleSync(delayMs: number) {
+      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
+      syncTimerRef.current = setTimeout(() => {
+        void syncCart();
+      }, delayMs);
+    }
+
     async function syncCart(): Promise<void> {
       if (!loggedIn || cancelled) return;
 
@@ -47,6 +58,18 @@ export function PlanCartSessionSync() {
         return;
       }
 
+      if (shouldDeferServerPlanCartApply()) {
+        const waitMs = Math.max(400, msUntilPlanCartApplyAllowed());
+        scheduleSync(waitMs);
+        return;
+      }
+
+      const mergedMs = parseUpdatedAt(merged.updatedAt);
+      if (nowUpdatedMs > mergedMs) {
+        void syncCart();
+        return;
+      }
+
       applyingFromServerRef.current = true;
       applySyncedPlanCart(merged);
       queueMicrotask(() => {
@@ -60,10 +83,7 @@ export function PlanCartSessionSync() {
 
     const onCartChange = () => {
       if (!loggedIn || applyingFromServerRef.current) return;
-      if (syncTimerRef.current) clearTimeout(syncTimerRef.current);
-      syncTimerRef.current = setTimeout(() => {
-        void syncCart();
-      }, 400);
+      scheduleSync(400);
     };
 
     window.addEventListener(PLAN_CART_CHANGE_EVENT, onCartChange);

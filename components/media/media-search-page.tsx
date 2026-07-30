@@ -297,6 +297,8 @@ function MediaSearchPageInner({
   const [loading, setLoading] = useState(false);
   const [loadingMore, setLoadingMore] = useState(false);
   const catalogFetchGeneration = useRef(0);
+  const mediaCountRef = useRef(0);
+  mediaCountRef.current = media.length;
   /** replaceState 로 쓴 쿼리 — popstate 외 URL→state 역동기화 방지 */
   const lastPushedBrowseQueryRef = useRef<string | null>(null);
   const browseFilterSettersRef = useRef({
@@ -476,9 +478,14 @@ function MediaSearchPageInner({
   }, [compareEntries, router]);
 
   const fetchMedia = useCallback(
-    async (opts: { page: number; append: boolean }) => {
+    async (
+      opts: { page: number; append: boolean },
+      fetchGeneration: number,
+    ) => {
+      const isStale = () => catalogFetchGeneration.current !== fetchGeneration;
+
       if (opts.append) setLoadingMore(true);
-      else setLoading(true);
+      else if (mediaCountRef.current === 0) setLoading(true);
       try {
         if (plannerMode) {
           const source = initialCatalogItems;
@@ -508,6 +515,7 @@ function MediaSearchPageInner({
             ? slicePlannerEmbeddedCatalog(sorted, opts.page)
             : sorted.slice(0, opts.page * pageSize);
           const mapped = slice.map((row) => mapMediaItemToHomeCatalog(row));
+          if (isStale()) return;
           setTotal(sorted.length);
           setMedia(mapped);
           setCatalogItems(slice);
@@ -538,8 +546,10 @@ function MediaSearchPageInner({
         const res = await fetch(`/api/public/media?${params}`, {
           cache: "no-store",
         });
+        if (isStale()) return;
         if (res.ok) {
           const json = (await res.json()) as PublicMediaListResponse;
+          if (isStale()) return;
           const rows = Array.isArray(json.data)
             ? json.data
             : Array.isArray(json.media)
@@ -557,6 +567,7 @@ function MediaSearchPageInner({
       } catch (e) {
         console.error(e);
       } finally {
+        if (isStale()) return;
         if (opts.append) setLoadingMore(false);
         else setLoading(false);
       }
@@ -699,14 +710,15 @@ function MediaSearchPageInner({
     const debounceMs = generation === 1 ? 0 : 300;
     const timer = setTimeout(() => {
       if (catalogFetchGeneration.current !== generation) return;
-      void fetchMedia({ page: 1, append: false });
+      void fetchMedia({ page: 1, append: false }, generation);
     }, debounceMs);
     return () => clearTimeout(timer);
   }, [fetchMedia]);
 
   const handleLoadMore = () => {
     if (loading || loadingMore || !hasMore) return;
-    void fetchMedia({ page: page + 1, append: true });
+    const generation = catalogFetchGeneration.current;
+    void fetchMedia({ page: page + 1, append: true }, generation);
   };
 
   const priceLocale = locale.startsWith("ko") ? "ko-KR" : "en-US";
@@ -853,7 +865,7 @@ function MediaSearchPageInner({
       onViewModeChange={handleViewModeChange}
       resultCount={media.length}
       totalCount={total}
-      loading={loading}
+      loading={loading && media.length === 0}
       unifiedToolbar={appShell}
       mobileBottomBar={false}
       mobileStickyToolbar={appShell}
