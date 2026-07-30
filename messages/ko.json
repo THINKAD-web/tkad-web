@@ -2267,7 +2267,7 @@
     "reportDesc": "OOH 매체 플랜, 디지털 연계 플랜, 시너지 효과, 통합 예산 배분표가 포함된 PDF입니다.",
     "downloadPdf": "통합 제안서 PDF 다운로드",
     "pdfDownloaded": "PDF가 다운로드되었습니다.",
-    "pdfFailed": "PDF 생성에 실패했습니다.",
+    "pdfFailed": "PDF 생성에 실패했습니다."
   },
   "footer": {
     "description": "(주)싱커드",
