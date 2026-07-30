@@ -1,5 +1,8 @@
 import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import {
+  inclusiveCampaignDaysFromIso,
+} from "@/lib/quote-campaign-days";
+import {
   calculateMediaQuoteByDays,
   calculateMediaQuoteFromOption,
   type MediaQuoteLine,
@@ -66,6 +69,10 @@ export function buildMediaDetailQuoteHref(
     priceOptionIndex?: number;
     units?: number;
     period?: string;
+    /** 캘린더 집행일 → inclusive 일수 (금액 SSOT) */
+    campaignDays?: number;
+    flightStart?: string;
+    flightEnd?: string;
   },
 ): string {
   const q = new URLSearchParams();
@@ -76,7 +83,21 @@ export function buildMediaDetailQuoteHref(
   if (opts.period) q.set("period", opts.period);
   const u = opts.units ?? resolveMediaQuantity(media);
   if (u > 1) q.set("units", String(u));
+  if (opts.campaignDays != null && opts.campaignDays > 0) {
+    q.set("campaignDays", String(Math.round(opts.campaignDays)));
+  }
+  if (opts.flightStart) q.set("start", opts.flightStart);
+  if (opts.flightEnd) q.set("end", opts.flightEnd);
   return `/quote?${q.toString()}`;
+}
+
+/** 스티키 패널 date input → inclusive 일수 */
+export function flightDatesToCampaignDays(
+  startDate: string,
+  endDate: string,
+): number | null {
+  if (!startDate || !endDate) return null;
+  return inclusiveCampaignDaysFromIso(startDate, endDate);
 }
 
 export function buildMediaDetailPlannerHref(

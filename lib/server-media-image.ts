@@ -92,7 +92,16 @@ export async function fetchMediaImageDataUrl(
   url: string | null | undefined,
 ): Promise<string | null> {
   const raw = url?.trim();
-  if (!raw || isCloudinaryMediaUrl(raw)) return null;
+  if (!raw) return null;
+
+  // Cloudinary — 브라우저 표시는 제외하나, PDF 임베드는 공개 HTTPS fetch 시도
+  if (isCloudinaryMediaUrl(raw)) {
+    if (/^https?:\/\//i.test(raw)) {
+      const d = await fetchAsDataUrl(raw);
+      if (d) return d;
+    }
+    return null;
+  }
 
   // 1) Bunny Storage API (가장 안정 — 핫링크·Vercel 자기호출 우회)
   const storagePath = bunnyPathFromInput(raw);

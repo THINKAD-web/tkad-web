@@ -11,7 +11,7 @@ import type { BrowseCategoryChip } from "@/lib/media-categories";
 import type { MediaCatalogCardLayout } from "@/components/media-catalog-shared";
 
 const SORT_TABS_KO = [
-  { value: "default", label: "인기순" },
+  { value: "default", label: "오늘의 인기" },
   { value: "newest", label: "최신순" },
   { value: "priceAsc", label: "저가순" },
   { value: "ratingDesc", label: "평점순" },

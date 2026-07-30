@@ -35,25 +35,89 @@ export const EXPORT_THUMB_BOX_MM = { w: 20, h: 15 } as const;
 export const PLANNER_EXPORT_THUMB_BOX_MM = { w: 32, h: 24 } as const;
 
 /** 서버 임베드용 4:3 cover 크롭 (픽셀) — jsPDF·Keynote 등에서 비율 깨짐 방지 */
-const EXPORT_THUMB_PIXELS = { w: 400, h: 300 } as const;
+export const EXPORT_THUMB_PIXELS = { w: 400, h: 300 } as const;
 
-async function coverCropThumbDataUrl(dataUrl: string): Promise<string> {
+/** 매체 제안서 PDF 히어로 — 16:9 */
+export const PROPOSAL_HERO_PIXELS = { w: 1200, h: 675 } as const;
+
+export const PROPOSAL_HERO_JPEG_QUALITY = 88;
+export const PROPOSAL_GALLERY_JPEG_QUALITY = 84;
+
+export async function coverCropImageDataUrl(
+  dataUrl: string,
+  opts: {
+    width: number;
+    height: number;
+    quality: number;
+  },
+): Promise<string> {
   try {
     const sharp = (await import("sharp")).default;
     const base64 = dataUrl.includes(",") ? (dataUrl.split(",", 2)[1] ?? "") : dataUrl;
     const input = Buffer.from(base64, "base64");
     const out = await sharp(input)
       .rotate()
-      .resize(EXPORT_THUMB_PIXELS.w, EXPORT_THUMB_PIXELS.h, {
+      .resize(opts.width, opts.height, {
         fit: "cover",
         position: "centre",
       })
-      .jpeg({ quality: 84 })
+      .jpeg({ quality: opts.quality })
       .toBuffer();
     return `data:image/jpeg;base64,${out.toString("base64")}`;
   } catch {
     return dataUrl;
   }
+}
+
+async function coverCropThumbDataUrl(dataUrl: string): Promise<string> {
+  return coverCropImageDataUrl(dataUrl, {
+    width: EXPORT_THUMB_PIXELS.w,
+    height: EXPORT_THUMB_PIXELS.h,
+    quality: PROPOSAL_GALLERY_JPEG_QUALITY,
+  });
+}
+
+/** URL fetch → cover crop → JPEG data URL (PDF 임베드용) */
+export async function loadExportImageForPdf(
+  url: string,
+  opts: {
+    width: number;
+    height: number;
+    quality: number;
+    timeoutMs?: number;
+  },
+): Promise<string | null> {
+  const timeoutMs = opts.timeoutMs ?? 12_000;
+  try {
+    const raw = await Promise.race([
+      fetchMediaImageDataUrl(url),
+      new Promise<null>((resolve) => setTimeout(() => resolve(null), timeoutMs)),
+    ]);
+    if (!raw) return null;
+    return await coverCropImageDataUrl(raw, {
+      width: opts.width,
+      height: opts.height,
+      quality: opts.quality,
+    });
+  } catch {
+    return null;
+  }
+}
+
+export function loadProposalHeroImage(url: string): Promise<string | null> {
+  return loadExportImageForPdf(url, {
+    width: PROPOSAL_HERO_PIXELS.w,
+    height: PROPOSAL_HERO_PIXELS.h,
+    quality: PROPOSAL_HERO_JPEG_QUALITY,
+  });
+}
+
+export function loadProposalGalleryImage(url: string): Promise<string | null> {
+  return loadExportImageForPdf(url, {
+    width: EXPORT_THUMB_PIXELS.w,
+    height: EXPORT_THUMB_PIXELS.h,
+    quality: PROPOSAL_GALLERY_JPEG_QUALITY,
+  });
 }
 
 /** jsPDF — 4:3 cover 크롭 썸네일 (눌림 방지) */
@@ -69,7 +133,7 @@ export function addPdfThumbImage(
   doc.setFillColor(248, 249, 252);
   doc.roundedRect(boxX, boxY, boxW, boxH, 1.5, 1.5, "F");
   try {
-    // loadExportThumbMap 에서 이미 4:3 cover 로 정규화됨 → 박스와 동일 비율
+    // loadExportThumbMap / loadExportImageForPdf 에서 JPEG 로 정규화됨
     doc.addImage(dataUrl, fmt, boxX, boxY, boxW, boxH);
   } catch {
     /* skip broken image */

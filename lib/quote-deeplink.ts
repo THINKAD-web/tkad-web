@@ -44,6 +44,9 @@ export function buildQuoteDeeplinkPath(
     quantities?: QuoteDeeplinkQuantities;
     priceOptionIndex?: QuoteDeeplinkPriceOptions;
     period?: string;
+    campaignDays?: number;
+    flightStart?: string;
+    flightEnd?: string;
   },
 ): string {
   const ids = mediaItems.map((m) => m.id).filter(Boolean);
@@ -80,5 +83,10 @@ export function buildQuoteDeeplinkPath(
   }
 
   if (opts?.period) q.set("period", opts.period);
+  if (opts?.campaignDays != null && opts.campaignDays > 0 && ids.length === 1) {
+    q.set("campaignDays", String(Math.round(opts.campaignDays)));
+    if (opts.flightStart) q.set("start", opts.flightStart);
+    if (opts.flightEnd) q.set("end", opts.flightEnd);
+  }
   return `/quote?${q.toString()}`;
 }

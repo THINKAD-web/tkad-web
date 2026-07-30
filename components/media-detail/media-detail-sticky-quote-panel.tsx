@@ -29,13 +29,16 @@ import {
   buildMediaDetailPlannerHref,
   buildMediaDetailQuoteHref,
   calculateMediaDetailQuote,
+  flightDatesToCampaignDays,
   shouldShowMediaDetailQuantityControl,
 } from "@/lib/media-detail-quantity";
 import {
   getQuantityUnitMode,
+  isPerUnitGradePriceOptions,
   resolveImpressionsForUnits,
   resolveMediaQuantity,
 } from "@/lib/media-quantity";
+import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -117,14 +120,15 @@ export function MediaDetailStickyQuotePanel({
   }, [selectedOption, media.pricePeriod]);
 
   const days = useMemo(() => {
-    if (startDate && endDate) {
-      const s = new Date(startDate);
-      const e = new Date(endDate);
-      const diff = Math.ceil((e.getTime() - s.getTime()) / 86400000) + 1;
-      if (Number.isFinite(diff) && diff > 0) return diff;
-    }
+    const fromFlight = flightDatesToCampaignDays(startDate, endDate);
+    if (fromFlight != null) return fromFlight;
     return hasPriceOptions ? optionBundleDays : 30;
   }, [startDate, endDate, hasPriceOptions, optionBundleDays]);
+
+  const flightCampaignDays = useMemo(
+    () => flightDatesToCampaignDays(startDate, endDate),
+    [startDate, endDate],
+  );
 
   const quote = useMemo(
     () =>
@@ -160,8 +164,11 @@ export function MediaDetailStickyQuotePanel({
         priceOptionIndex: effectivePoIdx,
         units,
         period: inferQuoteCampaignPeriodFromMedia(media, effectivePoIdx),
+        campaignDays: flightCampaignDays ?? undefined,
+        flightStart: flightCampaignDays != null ? startDate : undefined,
+        flightEnd: flightCampaignDays != null ? endDate : undefined,
       }),
-    [media, effectivePoIdx, units],
+    [media, effectivePoIdx, units, flightCampaignDays, startDate, endDate],
   );
 
   const plannerHref = useMemo(
@@ -205,6 +212,12 @@ export function MediaDetailStickyQuotePanel({
               setOptIdx(i);
               setPriceOptionIndex((prev) => ({ ...prev, [media.id]: i }));
               rememberQuoteEntryPriceOption(media.id, i);
+              if (isPerUnitGradePriceOptions(media)) {
+                setQuantities((prev) => ({
+                  ...prev,
+                  [media.id]: resolveQuoteUnitsForPriceOption(media, i),
+                }));
+              }
             }}
           />
         </div>
@@ -224,6 +237,12 @@ export function MediaDetailStickyQuotePanel({
               const idx = Number.isFinite(v) ? v : 0;
               setOptIdx(idx);
               rememberQuoteEntryPriceOption(media.id, idx);
+              if (isPerUnitGradePriceOptions(media)) {
+                setQuantities((prev) => ({
+                  ...prev,
+                  [media.id]: resolveQuoteUnitsForPriceOption(media, idx),
+                }));
+              }
             }}
             className={inputCls}
           >

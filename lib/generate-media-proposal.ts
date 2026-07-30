@@ -13,13 +13,18 @@ import {
   krFontFamily,
   ensureKrFontForServerPdf,
 } from "@/lib/jspdf-register-noto-kr";
-import { fetchMediaImageDataUrl } from "@/lib/server-media-image";
 import { loadThinkadLogoDataUrl } from "@/lib/quote-pdf-assets";
+import {
+  dataUrlImageFormat,
+  loadProposalGalleryImage,
+  loadProposalHeroImage,
+} from "@/lib/export-media-images";
 import {
   resolveTrafficPattern,
   buildInsights,
   type StoredTrafficPattern,
 } from "@/lib/media-traffic-estimate";
+import { buildMediaProposalOverviewRows } from "@/lib/media-proposal-pdf-spec";
 
 const PAGE_W = 210;
 const PAGE_H = 297;
@@ -27,17 +32,25 @@ const MX = 16;
 const CW = PAGE_W - MX * 2;
 const CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 /** Bump when PDF layout/font logic changes (invalidates stale cache). */
-const CACHE_VERSION = "v4-img";
+const CACHE_VERSION = "v5-qp-hermes-p3";
 
-// 플래너 보고서와 통일된 라이트 팔레트
-const VIOLET: [number, number, number] = [124, 58, 237];
-const VIOLET_DK: [number, number, number] = [91, 33, 182];
-const CYAN: [number, number, number] = [6, 182, 212];
+/** qp 각진 카드 — 플래너·견적 PDF와 동일 */
+const R = 0;
+const SECTION_BAR_W = 1.6;
+const FOOTER_H = 24;
+const HEADER_RULE_H = 1.2;
+
+/** Quiet Professional — 흑백 + 주황 단일 액센트 (#ff6200) */
+const ACCENT: [number, number, number] = [255, 98, 0];
+const ACCENT_DK: [number, number, number] = [194, 78, 0];
+const ACCENT_SOFT: [number, number, number] = [255, 243, 232];
+const ON_ACCENT_MUTED: [number, number, number] = [255, 236, 220];
 const INK: [number, number, number] = [17, 24, 39];
 const MUTED: [number, number, number] = [107, 114, 128];
 const FAINT: [number, number, number] = [156, 163, 175];
-const LINE: [number, number, number] = [229, 231, 235];
-const PANEL: [number, number, number] = [249, 250, 251];
+const LINE: [number, number, number] = [228, 230, 236];
+const PANEL: [number, number, number] = [248, 249, 251];
+const CHART_BAR_SOFT: [number, number, number] = [255, 210, 180];
 const WHITE: [number, number, number] = [255, 255, 255];
 
 const CONTACT = {
@@ -94,15 +107,6 @@ function setFont(
   }
 }
 
-function guessImageFormat(dataUrl: string): "PNG" | "JPEG" | "WEBP" {
-  if (dataUrl.startsWith("data:image/png")) return "PNG";
-  if (dataUrl.startsWith("data:image/webp")) return "WEBP";
-  return "JPEG";
-}
-async function fetchImageDataUrl(url: string): Promise<string | null> {
-  return fetchMediaImageDataUrl(url);
-}
-
 /** 페이지 머리말/꼬리말 (라이트) */
 function drawPageChrome(doc: jsPDF, fam: string, hasKr: boolean) {
   doc.setDrawColor(...LINE);
@@ -121,13 +125,83 @@ function addPageIfNeeded(
   hasKr: boolean,
   y: number,
   need = 18,
+  reserveFooter = false,
 ): number {
-  if (y > PAGE_H - need) {
+  const bottom = reserveFooter ? PAGE_H - FOOTER_H - 4 : PAGE_H - 14;
+  if (y > bottom - need) {
     doc.addPage();
     drawPageChrome(doc, fam, hasKr);
     return 22;
   }
   return y;
+}
+
+function drawProposalHeader(
+  doc: jsPDF,
+  fam: string,
+  hasKr: boolean,
+  opts: {
+    logo: string | null;
+    isKo: boolean;
+    issuedStr: string;
+    mediaIdShort: string;
+  },
+): number {
+  const top = 10;
+  if (opts.logo) {
+    try {
+      doc.addImage(opts.logo, "PNG", MX, top, 22, 13);
+    } catch {
+      /* skip */
+    }
+  }
+  const textX = MX + (opts.logo ? 25 : 0);
+  setFont(doc, fam, hasKr, "bold");
+  doc.setFontSize(8.5);
+  doc.setTextColor(...INK);
+  doc.text("THINK", textX, top + 5);
+  const thinkW = doc.getTextWidth("THINK");
+  doc.setTextColor(...ACCENT);
+  doc.text("AD", textX + thinkW, top + 5);
+
+  setFont(doc, fam, hasKr, "bold");
+  doc.setFontSize(16);
+  doc.setTextColor(...INK);
+  doc.text(opts.isKo ? "매체 제안서" : "Media Proposal", textX, top + 12);
+
+  setFont(doc, fam, hasKr, "normal");
+  doc.setFontSize(7.5);
+  doc.setTextColor(...MUTED);
+  doc.text(`${opts.isKo ? "발행일" : "Issued"}  ${opts.issuedStr}`, PAGE_W - MX, top + 4, {
+    align: "right",
+  });
+  doc.text(
+    `${opts.isKo ? "매체 ID" : "Media ID"}  ${opts.mediaIdShort}`,
+    PAGE_W - MX,
+    top + 9,
+    { align: "right" },
+  );
+
+  const ruleY = top + 17;
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.2);
+  doc.line(MX, ruleY, PAGE_W - MX, ruleY);
+  doc.setFillColor(...ACCENT);
+  doc.rect(MX, ruleY + 0.15, CW, HEADER_RULE_H, "F");
+  return ruleY + HEADER_RULE_H + 5;
+}
+
+function panelRect(
+  doc: jsPDF,
+  x: number,
+  y: number,
+  w: number,
+  h: number,
+  mode: "F" | "FD" | "D" | "S" = "FD",
+) {
+  doc.setDrawColor(...LINE);
+  doc.setLineWidth(0.25);
+  doc.roundedRect(x, y, w, h, R, R, mode);
 }
 
 function sectionTitle(
@@ -138,21 +212,19 @@ function sectionTitle(
   y: number,
 ): number {
   y = addPageIfNeeded(doc, fam, hasKr, y, 14);
-  doc.setFillColor(...VIOLET);
-  doc.rect(MX, y - 4, 2.6, 5.5, "F");
-  doc.setFillColor(...CYAN);
-  doc.rect(MX + 2.6, y - 4, 1.2, 5.5, "F");
-  setFont(doc, fam, hasKr, "bold");
-  doc.setFontSize(11.5);
+  doc.setFillColor(...ACCENT);
+  doc.rect(MX, y - 3.8, SECTION_BAR_W, 5.2, "F");
+  setFont(doc, fam, hasKr, "normal");
+  doc.setFontSize(11);
   doc.setTextColor(...INK);
-  doc.text(label, MX + 7, y);
-  return y + 8;
+  doc.text(label, MX + SECTION_BAR_W + 2.4, y);
+  return y + 7.5;
 }
 
-/** 미니 벡터 아이콘 (violet stroke) */
+/** 미니 벡터 아이콘 (accent stroke) */
 function icon(doc: jsPDF, kind: string, x: number, y: number) {
-  doc.setDrawColor(...VIOLET);
-  doc.setFillColor(...VIOLET);
+  doc.setDrawColor(...ACCENT);
+  doc.setFillColor(...ACCENT);
   doc.setLineWidth(0.4);
   const c = (cx: number, cy: number, r: number, s: "S" | "F" = "S") =>
     doc.circle(cx, cy, r, s);
@@ -192,9 +264,14 @@ function icon(doc: jsPDF, kind: string, x: number, y: number) {
       break;
     case "won":
       doc.setFontSize(6.4);
-      doc.setTextColor(...VIOLET);
+      doc.setTextColor(...ACCENT);
       setFontSafe(doc);
       doc.text("₩", x + 0.6, y + 0.2);
+      break;
+    case "display":
+      doc.rect(x, y - 2.4, 4.2, 2.6, "S");
+      doc.line(x + 0.8, y - 1.8, x + 3.4, y - 1.8);
+      doc.line(x + 2, y - 1.8, x + 2, y + 0.2);
       break;
     default:
       c(x + 2, y - 1, 1.4);
@@ -272,56 +349,31 @@ export async function generateMediaProposalPdf(
 
   const logo = loadThinkadLogoDataUrl();
 
-  // ── 헤더: 좌측 보라 그라디언트 사이드바 ──
-  doc.setFillColor(...VIOLET);
-  doc.rect(0, 0, 2.5, PAGE_H, "F");
-  doc.setFillColor(...CYAN);
-  doc.rect(2.5, 0, 1.2, PAGE_H, "F");
-
-  if (logo) {
-    try {
-      doc.addImage(logo, "PNG", MX, 9, 24, 14.5);
-    } catch {
-      /* skip */
-    }
-  }
-  setFont(doc, fam, hasKr, "bold");
-  doc.setFontSize(9);
-  doc.setTextColor(...VIOLET_DK);
-  doc.text("THINKAD", MX + (logo ? 27 : 0), logo ? 15 : 14);
-  setFont(doc, fam, hasKr, "bold");
-  doc.setFontSize(18);
-  doc.setTextColor(...INK);
-  doc.text(isKo ? "매체 제안서" : "Media Proposal", MX + (logo ? 27 : 0), logo ? 22 : 22);
-
-  setFont(doc, fam, hasKr, "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...MUTED);
-  doc.text(`${isKo ? "발행일" : "Issued"}  ${issuedStr}`, PAGE_W - MX, 13, {
-    align: "right",
-  });
-  doc.text(`${isKo ? "매체 ID" : "Media ID"}  ${media.id.slice(-10).toUpperCase()}`, PAGE_W - MX, 18, {
-    align: "right",
+  let y = drawProposalHeader(doc, fam, hasKr, {
+    logo,
+    isKo,
+    issuedStr,
+    mediaIdShort: media.id.slice(-10).toUpperCase(),
   });
 
-  let y = 30;
-
-  // ── 히어로: 대표 사진 + 오버레이 ──
+  // ── 히어로: 16:9 cover crop + JPEG (sharp) ──
   const hero =
     media.sampleImages?.[0] != null
-      ? await fetchImageDataUrl(media.sampleImages[0])
+      ? await loadProposalHeroImage(media.sampleImages[0])
       : null;
   const heroH = 58;
+  const heroW = (heroH * 16) / 9;
+  const heroX = MX + (CW - heroW) / 2;
   if (hero) {
     try {
-      doc.addImage(hero, guessImageFormat(hero), MX, y, CW, heroH);
+      doc.addImage(hero, dataUrlImageFormat(hero), heroX, y, heroW, heroH);
     } catch {
       doc.setFillColor(...PANEL);
-      doc.rect(MX, y, CW, heroH, "F");
+      doc.rect(heroX, y, heroW, heroH, "F");
     }
   } else {
-    doc.setFillColor(...VIOLET_DK);
-    doc.rect(MX, y, CW, heroH, "F");
+    doc.setFillColor(...ACCENT_DK);
+    doc.rect(heroX, y, heroW, heroH, "F");
   }
   // 하단 그라디언트 오버레이 (반투명 띠 누적) — GState 미지원 환경이면 건너뜀
   try {
@@ -333,7 +385,7 @@ export async function generateMediaProposalPdf(
       for (let i = 0; i < 18; i++) {
         doc.setFillColor(15, 15, 25);
         dg.setGState(new dg.GState({ opacity: 0.045 }));
-        doc.rect(MX, y + heroH - 22 + i, CW, 22 - i, "F");
+        doc.rect(heroX, y + heroH - 22 + i, heroW, 22 - i, "F");
       }
       dg.setGState(new dg.GState({ opacity: 1 }));
     }
@@ -341,55 +393,46 @@ export async function generateMediaProposalPdf(
     /* overlay is cosmetic */
   }
   doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.3);
-  doc.rect(MX, y, CW, heroH, "S");
+  doc.setLineWidth(0.25);
+  doc.roundedRect(heroX, y, heroW, heroH, R, R, "S");
   // 유형 뱃지
   setFont(doc, fam, hasKr, "bold");
   doc.setFontSize(7);
   const badgeW = doc.getTextWidth(typeLabel) + 7;
-  doc.setFillColor(...VIOLET);
-  doc.roundedRect(MX + 5, y + heroH - 17, badgeW, 6, 1.5, 1.5, "F");
+  doc.setFillColor(...ACCENT);
+  doc.roundedRect(heroX + 5, y + heroH - 17, badgeW, 6, R, R, "F");
   doc.setTextColor(...WHITE);
-  doc.text(typeLabel, MX + 5 + badgeW / 2, y + heroH - 13, { align: "center" });
+  doc.text(typeLabel, heroX + 5 + badgeW / 2, y + heroH - 13, { align: "center" });
   // 매체명 오버레이
   setFont(doc, fam, hasKr, "bold");
   doc.setFontSize(15);
   doc.setTextColor(...WHITE);
   doc.text(
-    (doc.splitTextToSize(mediaTitle, CW - 12) as string[]).slice(0, 1),
-    MX + 5,
+    (doc.splitTextToSize(mediaTitle, heroW - 12) as string[]).slice(0, 1),
+    heroX + 5,
     y + heroH - 4,
   );
-  y += heroH + 8;
+  y += heroH + 10;
 
-  // ── 매체 기본 정보 카드 (2열) ──
-  y = sectionTitle(doc, fam, hasKr, isKo ? "매체 기본 정보" : "Media Overview", y);
+  // ── 매체 개요 (2열 카드) ──
+  y = sectionTitle(doc, fam, hasKr, isKo ? "매체 개요" : "Media Overview", y);
   const colW = (CW - 6) / 2;
-  const leftRows: Array<[string, string, string]> = [
-    ["pin", isKo ? "위치" : "Location", locationLine],
-    ["tag", isKo ? "유형" : "Type", categoryLabel],
-    ["ruler", isKo ? "규격" : "Size", media.size || media.resolution || "—"],
-    ["clock", isKo ? "운영시간" : "Hours", media.operatingHours || (isKo ? "24시간" : "24h")],
-  ];
   const monthlyImpr = media.impressions ?? null;
-  const dailyFootfall = monthlyImpr ? Math.round(monthlyImpr / 30) : null;
   const priceWon = catalogPriceFieldToWon(media.price);
-  const rightRows: Array<[string, string, string]> = [
-    [
-      "users",
-      isKo ? "일일 유동인구(추정)" : "Daily footfall (est.)",
-      dailyFootfall ? `${dailyFootfall.toLocaleString(locale)}${isKo ? "명" : ""}` : "—",
-    ],
-    ["bulb", isKo ? "송출/노출" : "Display", media.resolution ? `${media.resolution}` : (isKo ? "상시 송출" : "Always-on")],
-    ["calendar", isKo ? "최소 집행" : "Min. period", isKo ? "1개월~" : "1 month+"],
-    ["won", isKo ? "월 단가" : "Monthly", `₩${priceWon.toLocaleString(locale)}`],
-  ];
+  const { left: leftRows, right: rightRows } = buildMediaProposalOverviewRows(
+    media,
+    {
+      isKo,
+      locale,
+      categoryLabel,
+      locationLine,
+      priceWon,
+    },
+  );
   const cardH = 4 * 11 + 8;
   y = addPageIfNeeded(doc, fam, hasKr, y, cardH + 4);
   doc.setFillColor(...WHITE);
-  doc.setDrawColor(...LINE);
-  doc.setLineWidth(0.3);
-  doc.roundedRect(MX, y, CW, cardH, 2.5, 2.5, "FD");
+  panelRect(doc, MX, y, CW, cardH, "FD");
   doc.setDrawColor(...LINE);
   doc.line(MX + colW + 3, y + 4, MX + colW + 3, y + cardH - 4);
   let ry = y + 9;
@@ -398,46 +441,10 @@ export async function generateMediaProposalPdf(
     specRow(doc, fam, hasKr, rightRows[i]![0], rightRows[i]![1], rightRows[i]![2], MX + colW + 9, ry, colW - 8);
     ry += 11;
   }
-  y += cardH + 8;
+  y += cardH + 10;
 
-  // ── 상권 분석 ──
-  y = sectionTitle(doc, fam, hasKr, isKo ? "주변 상권" : "Trade Area", y);
-  doc.setFillColor(...PANEL);
-  doc.setDrawColor(...LINE);
-  const taLines = doc.splitTextToSize(
-    isKo
-      ? `${region} 일대는 ${categoryLabel} 매체가 운영되는 상권으로, 유동인구가 꾸준히 형성되는 지역입니다. 본 매체는 ${locationLine}에 위치해 주변 상업·교통 동선의 노출 효과를 기대할 수 있습니다.`
-      : `The ${region} area sees steady footfall around ${locationLine}, offering exposure along nearby commercial and transit routes.`,
-    CW - 12,
-  ) as string[];
-  const taH = 12 + taLines.length * 4.6 + 8;
-  y = addPageIfNeeded(doc, fam, hasKr, y, taH + 4);
-  doc.roundedRect(MX, y, CW, taH, 2.5, 2.5, "FD");
-  // region chips
-  let chipX = MX + 5;
-  const chips = regionChips.slice(0, 4);
-  for (const ch of chips.length ? chips : [region].filter(Boolean)) {
-    setFont(doc, fam, hasKr, "bold");
-    doc.setFontSize(7);
-    const cw = doc.getTextWidth(ch) + 6;
-    doc.setFillColor(237, 233, 254);
-    doc.roundedRect(chipX, y + 4, cw, 5.5, 1.4, 1.4, "F");
-    doc.setTextColor(...VIOLET_DK);
-    doc.text(ch, chipX + cw / 2, y + 7.8, { align: "center" });
-    chipX += cw + 3;
-  }
-  setFont(doc, fam, hasKr, "normal");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...INK);
-  let ty = y + 16;
-  for (const ln of taLines) {
-    doc.text(ln, MX + 5, ty);
-    ty += 4.6;
-  }
-  y += taH + 8;
-
-  // ── 위치 지도 ──
-  y = sectionTitle(doc, fam, hasKr, isKo ? "위치 안내" : "Location Map", y);
+  // ── 위치 · 상권 (칩 + 주소 + 설명 + 지도) ──
+  y = sectionTitle(doc, fam, hasKr, isKo ? "위치 · 상권" : "Location & Trade Area", y);
   const mapDataUrl = await fetchStaticMapDataUrl({
     lat: media.lat,
     lng: media.lng,
@@ -445,32 +452,79 @@ export async function generateMediaProposalPdf(
     height: 300,
     zoom: 15,
   });
-  const mapH = 48;
-  y = addPageIfNeeded(doc, fam, hasKr, y, mapH + 6);
+  const mapH = 44;
+  const taLines = doc.splitTextToSize(
+    isKo
+      ? `${region} 일대는 ${categoryLabel} 매체가 운영되는 상권으로, 유동인구가 꾸준히 형성되는 지역입니다. 본 매체는 ${locationLine}에 위치해 주변 상업·교통 동선의 노출 효과를 기대할 수 있습니다.`
+      : `The ${region} area sees steady footfall around ${locationLine}, offering exposure along nearby commercial and transit routes.`,
+    CW - 14,
+  ) as string[];
+  const locBlockH = 10 + taLines.length * 4.4 + mapH + (mapDataUrl ? 10 : 16);
+  y = addPageIfNeeded(doc, fam, hasKr, y, locBlockH + 4);
+  doc.setFillColor(...PANEL);
+  panelRect(doc, MX, y, CW, locBlockH, "FD");
+
+  let chipX = MX + 5;
+  const chips = regionChips.slice(0, 4);
+  for (const ch of chips.length ? chips : [region].filter(Boolean)) {
+    setFont(doc, fam, hasKr, "bold");
+    doc.setFontSize(7);
+    const cw = doc.getTextWidth(ch) + 6;
+    doc.setFillColor(...ACCENT_SOFT);
+    doc.roundedRect(chipX, y + 4, cw, 5.5, R, R, "F");
+    doc.setTextColor(...ACCENT_DK);
+    doc.text(ch, chipX + cw / 2, y + 7.8, { align: "center" });
+    chipX += cw + 3;
+  }
+
+  setFont(doc, fam, hasKr, "bold");
+  doc.setFontSize(9.5);
+  doc.setTextColor(...INK);
+  doc.text(
+    (doc.splitTextToSize(locationLine, CW - 12) as string[]).slice(0, 2),
+    MX + 5,
+    y + 14,
+  );
+  setFont(doc, fam, hasKr, "normal");
+  doc.setFontSize(8);
+  doc.setTextColor(...MUTED);
+  doc.text(
+    `${media.lat.toFixed(5)}, ${media.lng.toFixed(5)}`,
+    PAGE_W - MX - 5,
+    y + 14,
+    { align: "right" },
+  );
+
+  let ty = y + 19;
+  for (const ln of taLines) {
+    doc.text(ln, MX + 5, ty);
+    ty += 4.4;
+  }
+
+  const mapY = ty + 3;
   if (mapDataUrl) {
     try {
-      doc.addImage(mapDataUrl, "PNG", MX, y, CW, mapH);
+      doc.addImage(mapDataUrl, "PNG", MX + 5, mapY, CW - 10, mapH);
       doc.setDrawColor(...LINE);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(MX, y, CW, mapH, 2, 2, "S");
-      y += mapH + 4;
+      doc.setLineWidth(0.25);
+      doc.roundedRect(MX + 5, mapY, CW - 10, mapH, R, R, "S");
     } catch {
-      y += 2;
+      doc.setFillColor(...WHITE);
+      panelRect(doc, MX + 5, mapY, CW - 10, 12, "F");
+      setFont(doc, fam, hasKr, "normal");
+      doc.setFontSize(8);
+      doc.setTextColor(...MUTED);
+      doc.text(`${media.lat.toFixed(5)}, ${media.lng.toFixed(5)}`, MX + 8, mapY + 7);
     }
   } else {
-    doc.setFillColor(...PANEL);
-    doc.roundedRect(MX, y, CW, 14, 2, 2, "F");
+    doc.setFillColor(...WHITE);
+    panelRect(doc, MX + 5, mapY, CW - 10, 12, "F");
     setFont(doc, fam, hasKr, "normal");
-    doc.setFontSize(8.5);
+    doc.setFontSize(8);
     doc.setTextColor(...MUTED);
-    doc.text(`${media.lat.toFixed(5)}, ${media.lng.toFixed(5)}`, MX + 5, y + 9);
-    y += 18;
+    doc.text(`${media.lat.toFixed(5)}, ${media.lng.toFixed(5)}`, MX + 8, mapY + 7);
   }
-  setFont(doc, fam, hasKr, "normal");
-  doc.setFontSize(7.5);
-  doc.setTextColor(...FAINT);
-  doc.text(locationLine, MX, y + 1);
-  y += 8;
+  y += locBlockH + 10;
 
   // ── 노출 예측 / 유동인구 분석 ──
   const { pattern, isEstimated } = resolveTrafficPattern(
@@ -488,28 +542,38 @@ export async function generateMediaProposalPdf(
   );
   // 막대그래프 (시간대별 24)
   const chartH = 26;
-  const chartW = CW;
-  y = addPageIfNeeded(doc, fam, hasKr, y, chartH + 22);
+  const chartPadX = 5;
+  const chartInnerW = CW - chartPadX * 2;
+  y = addPageIfNeeded(doc, fam, hasKr, y, chartH + 28);
+  doc.setFillColor(...PANEL);
+  panelRect(doc, MX, y - 2, CW, chartH + 20, "FD");
+  const chartInnerY = y + 2;
   const maxV = Math.max(...pattern.hourly, 0.0001);
-  const barW = chartW / 24;
+  const barW = chartInnerW / 24;
   const peakIdx = pattern.hourly.indexOf(maxV);
-  const baseY = y + chartH;
+  const baseY = chartInnerY + chartH;
   for (let h = 0; h < 24; h++) {
     const bh = (pattern.hourly[h]! / maxV) * (chartH - 2);
-    if (h === peakIdx) doc.setFillColor(...VIOLET);
-    else doc.setFillColor(199, 210, 254);
-    doc.rect(MX + h * barW + 0.6, baseY - bh, barW - 1.2, bh, "F");
+    if (h === peakIdx) doc.setFillColor(...ACCENT);
+    else doc.setFillColor(...CHART_BAR_SOFT);
+    doc.rect(MX + chartPadX + h * barW + 0.6, baseY - bh, barW - 1.2, bh, "F");
   }
   doc.setDrawColor(...LINE);
   doc.setLineWidth(0.2);
-  doc.line(MX, baseY, MX + chartW, baseY);
+  doc.line(MX + chartPadX, baseY, MX + chartPadX + chartInnerW, baseY);
   setFont(doc, fam, hasKr, "normal");
   doc.setFontSize(6);
   doc.setTextColor(...FAINT);
   for (const hh of [0, 6, 12, 18, 23]) {
-    doc.text(String(hh), MX + hh * barW + barW / 2, baseY + 3.5, { align: "center" });
+    doc.text(String(hh), MX + chartPadX + hh * barW + barW / 2, baseY + 3.5, {
+      align: "center",
+    });
   }
-  y = baseY + 7;
+  setFont(doc, fam, hasKr, "normal");
+  doc.setFontSize(6.5);
+  doc.setTextColor(...MUTED);
+  doc.text(isKo ? "시간대별 상대 유동 (0–23시)" : "Hourly relative footfall (0–23h)", MX + 5, chartInnerY - 0.5);
+  y = baseY + 9;
 
   // 인사이트 3칸 + 월 노출
   const wkdayAvg = (pattern.weekly.slice(0, 5).reduce((a, b) => a + b, 0) / 5) || 0;
@@ -532,51 +596,74 @@ export async function generateMediaProposalPdf(
   y = addPageIfNeeded(doc, fam, hasKr, y, 18);
   for (let i = 0; i < stats.length; i++) {
     const sx = MX + i * (sCardW + 3);
-    doc.setFillColor(...PANEL);
-    doc.setDrawColor(...LINE);
-    doc.setLineWidth(0.25);
-    doc.roundedRect(sx, y, sCardW, 15, 2, 2, "FD");
+    doc.setFillColor(...WHITE);
+    panelRect(doc, sx, y, sCardW, 15, "FD");
     setFont(doc, fam, hasKr, "normal");
     doc.setFontSize(6.4);
     doc.setTextColor(...MUTED);
     doc.text((doc.splitTextToSize(stats[i]![0], sCardW - 4) as string[]).slice(0, 1), sx + 2.5, y + 4.5);
     setFont(doc, fam, hasKr, "bold");
     doc.setFontSize(8.6);
-    doc.setTextColor(...VIOLET_DK);
+    doc.setTextColor(...ACCENT_DK);
     doc.text((doc.splitTextToSize(stats[i]![1], sCardW - 4) as string[]).slice(0, 2), sx + 2.5, y + 9.5);
   }
-  y += 15 + 8;
+  y += 15 + 10;
 
-  // ── 추가 사진 갤러리 ──
+  // ── 현장 사진 갤러리 ──
   const gallery = (media.sampleImages ?? []).slice(1, 4);
   if (gallery.length) {
-    y = sectionTitle(doc, fam, hasKr, isKo ? "현장 사진" : "Gallery", y);
-    const gW = (CW - (gallery.length - 1) * 4) / gallery.length;
-    const gH = 32;
-    y = addPageIfNeeded(doc, fam, hasKr, y, gH + 4);
+    y = sectionTitle(doc, fam, hasKr, isKo ? "현장 사진" : "On-site Photos", y);
+    const gH = 34;
+    const gW = (gH * 4) / 3;
+    const galleryGap = 4;
+    const captionH = 5;
+    const galleryRowW = gallery.length * gW + (gallery.length - 1) * galleryGap;
+    const galleryStartX = MX + (CW - galleryRowW) / 2;
+    y = addPageIfNeeded(doc, fam, hasKr, y, gH + captionH + 6);
+    const galleryData = await Promise.all(
+      gallery.map((url) => loadProposalGalleryImage(url)),
+    );
     for (let i = 0; i < gallery.length; i++) {
-      const data = await fetchImageDataUrl(gallery[i]!);
-      const gx = MX + i * (gW + 4);
+      const data = galleryData[i];
+      const gx = galleryStartX + i * (gW + galleryGap);
+      doc.setFillColor(...WHITE);
+      panelRect(doc, gx, y, gW, gH + captionH, "FD");
+      doc.setFillColor(...ACCENT);
+      doc.rect(gx, y, gW, 0.7, "F");
       if (data) {
         try {
-          doc.addImage(data, guessImageFormat(data), gx, y, gW, gH);
+          doc.addImage(data, dataUrlImageFormat(data), gx, y + 0.7, gW, gH - 0.7);
         } catch {
           doc.setFillColor(...PANEL);
-          doc.rect(gx, y, gW, gH, "F");
+          doc.rect(gx, y + 0.7, gW, gH - 0.7, "F");
         }
       } else {
         doc.setFillColor(...PANEL);
-        doc.rect(gx, y, gW, gH, "F");
+        doc.rect(gx, y + 0.7, gW, gH - 0.7, "F");
       }
-      doc.setDrawColor(...LINE);
-      doc.setLineWidth(0.3);
-      doc.roundedRect(gx, y, gW, gH, 2, 2, "S");
+      setFont(doc, fam, hasKr, "bold");
+      doc.setFontSize(6.5);
+      doc.setTextColor(...ACCENT_DK);
+      doc.text(
+        `${String(i + 1).padStart(2, "0")}`,
+        gx + 2.5,
+        y + gH + 3.5,
+      );
+      setFont(doc, fam, hasKr, "normal");
+      doc.setFontSize(6);
+      doc.setTextColor(...MUTED);
+      doc.text(
+        isKo ? "현장" : "Site",
+        gx + gW - 2.5,
+        y + gH + 3.5,
+        { align: "right" },
+      );
     }
-    y += gH + 8;
+    y += gH + captionH + 10;
   }
 
   // ── 단가 정보 ──
-  y = sectionTitle(doc, fam, hasKr, isKo ? "단가 정보" : "Pricing", y);
+  y = sectionTitle(doc, fam, hasKr, isKo ? "단가" : "Pricing", y);
   const periodKey = mediaDetailPricePeriodTranslationKey(media.pricePeriod);
   const periodLabel = isKo
     ? (({ month: "월", biweekly: "2주", week: "주", day: "일" } as const)[
@@ -589,18 +676,16 @@ export async function generateMediaProposalPdf(
     [isKo ? "6개월 집행" : "6 months", `₩${(priceWon * 6).toLocaleString(locale)}`],
   ];
   const pCardW = (CW - 8) / 3;
-  y = addPageIfNeeded(doc, fam, hasKr, y, 26);
+  y = addPageIfNeeded(doc, fam, hasKr, y, 26, true);
   for (let i = 0; i < 3; i++) {
     const px = MX + i * (pCardW + 4);
     const accent = i === 0;
-    if (accent) doc.setFillColor(...VIOLET);
-    else doc.setFillColor(...PANEL);
-    doc.setDrawColor(...LINE);
-    doc.setLineWidth(0.25);
-    doc.roundedRect(px, y, pCardW, 20, 2.5, 2.5, accent ? "F" : "FD");
+    if (accent) doc.setFillColor(...ACCENT);
+    else doc.setFillColor(...WHITE);
+    panelRect(doc, px, y, pCardW, 20, accent ? "F" : "FD");
     setFont(doc, fam, hasKr, "normal");
     doc.setFontSize(7.5);
-    doc.setTextColor(...(accent ? ([222, 215, 250] as [number, number, number]) : MUTED));
+    doc.setTextColor(...(accent ? ON_ACCENT_MUTED : MUTED));
     doc.text(priceCols[i]![0], px + 4, y + 7);
     setFont(doc, fam, hasKr, "bold");
     doc.setFontSize(11);
@@ -611,6 +696,7 @@ export async function generateMediaProposalPdf(
   setFont(doc, fam, hasKr, "normal");
   doc.setFontSize(7.5);
   doc.setTextColor(...MUTED);
+  y = addPageIfNeeded(doc, fam, hasKr, y, 10, true);
   doc.text(
     isKo
       ? "※ VAT 별도 · 장기 집행 시 할인 협의 가능합니다."
@@ -636,9 +722,9 @@ export async function generateMediaProposalPdf(
 
   // ── 푸터 ──
   const fy = PAGE_H - 24;
-  doc.setFillColor(...VIOLET);
+  doc.setFillColor(...ACCENT);
   doc.rect(0, fy, PAGE_W, 24, "F");
-  doc.setFillColor(...CYAN);
+  doc.setFillColor(...ACCENT_DK);
   doc.rect(0, fy, PAGE_W, 0.8, "F");
   setFont(doc, fam, hasKr, "bold");
   doc.setFontSize(9.5);
@@ -646,11 +732,11 @@ export async function generateMediaProposalPdf(
   doc.text(isKo ? "THINKAD 문의" : "Contact THINKAD", MX, fy + 9);
   setFont(doc, fam, hasKr, "normal");
   doc.setFontSize(8);
-  doc.setTextColor(230, 224, 252);
+  doc.setTextColor(...ON_ACCENT_MUTED);
   doc.text(`Tel. ${CONTACT.tel}    ${CONTACT.email}`, MX, fy + 15.5);
   doc.text(CONTACT.site, PAGE_W - MX, fy + 15.5, { align: "right" });
   doc.setFontSize(6.8);
-  doc.setTextColor(214, 205, 248);
+  doc.setTextColor(255, 220, 195);
   doc.text(
     isKo
       ? "본 제안서는 참고용이며 실제 단가·집행 조건은 협의 가능합니다."

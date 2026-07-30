@@ -22,6 +22,7 @@ import {
   shouldShowMediaDetailQuantityControl,
 } from "@/lib/media-detail-quantity";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
+import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
 import { cn } from "@/lib/utils";
 
 function MediaDetailQuoteModalBody({
@@ -127,6 +128,10 @@ function MediaDetailQuoteModalBody({
               onPriceOptionChange={(i) => {
                 setOptIdx(i);
                 setPriceOptionIndex((prev) => ({ ...prev, [media.id]: i }));
+                setQuantities((prev) => ({
+                  ...prev,
+                  [media.id]: resolveQuoteUnitsForPriceOption(media, i, prev[media.id]),
+                }));
               }}
             />
           </div>
@@ -155,7 +160,14 @@ function MediaDetailQuoteModalBody({
                   type="button"
                   role="radio"
                   aria-checked={selectedCard}
-                  onClick={() => setOptIdx(i)}
+                  onClick={() => {
+                setOptIdx(i);
+                setPriceOptionIndex((prev) => ({ ...prev, [media.id]: i }));
+                setQuantities((prev) => ({
+                  ...prev,
+                  [media.id]: resolveQuoteUnitsForPriceOption(media, i, prev[media.id]),
+                }));
+              }}
                   className={cn(
                     "relative w-full rounded-[22px] border p-3 text-left transition-all sm:p-3.5",
                     "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/18 focus-visible:ring-offset-2 focus-visible:ring-offset-black",

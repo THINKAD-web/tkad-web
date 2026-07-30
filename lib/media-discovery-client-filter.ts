@@ -10,6 +10,7 @@ import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
 import { resolveBrowseRegionSubId } from "@/lib/plan-cart-report/region-subdivision";
 import type { MediaItem } from "@/lib/media-data";
+import { matchesMediaTextQuery } from "@/lib/media-data";
 
 function mediaMatchesBrowseRegionSub(
   m: MediaItem,
@@ -228,7 +229,7 @@ export function filterMediaByDiscoveryChips(
     ) {
       return false;
     }
-    if (q.length > 0 && !mediaSearchHaystack(m).includes(q)) return false;
+    if (q.length > 0 && !matchesMediaTextQuery(m, q)) return false;
     return true;
   });
 }

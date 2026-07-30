@@ -27,7 +27,6 @@ import {
   PlannerNeonLabel,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
-import { ThinkadDigitalPackageCard } from "@/components/planner/integrated/thinkad-digital-package-card";
 import { IntegratedMixErrorBanner } from "@/components/planner/integrated/integrated-mix-error-banner";
 import { IntegratedMixKpiStrip } from "@/components/planner/integrated/integrated-mix-kpi-strip";
 import { extractMixKpiView } from "@/lib/integrated/map-mix-to-ui";
@@ -318,8 +317,6 @@ export function IntegratedDigitalRecommendationPanel({
           ))}
         </div>
       </PlannerNeonCard>
-
-      <ThinkadDigitalPackageCard />
     </div>
   );
 }

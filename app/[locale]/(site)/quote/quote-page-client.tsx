@@ -91,7 +91,12 @@ import {
   parseQuotePoMap,
   parseQuoteUnitsMap,
 } from "@/lib/quote-deeplink";
-import { isPerUnitGradePriceOptions, resolveMediaQuantity } from "@/lib/media-quantity";
+import {
+  formatCustomCampaignPeriodLabel,
+  nearestQuoteCampaignPeriodKey,
+  resolveQuoteCampaignDaysFromParams,
+} from "@/lib/quote-campaign-days";
+import { resolveQuoteUnitsForPriceOption } from "@/lib/quote-entry-quantity";
 import { shouldShowPlannerQuantityControl } from "@/lib/planner/planner-media-quantity";
 import { useToast } from "@/components/toast-provider";
 import { useRouter } from "@/i18n/navigation";
@@ -160,6 +165,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
 
   const [step, setStep] = useState<WizardStep>(1);
   const [period, setPeriod] = useState<PeriodKey>("30days");
+  /** URL·매체상세 캘린더에서 전달된 집행 일수 — period 프리셋보다 우선 */
+  const [campaignDaysOverride, setCampaignDaysOverride] = useState<number | null>(
+    null,
+  );
+  const [flightStart, setFlightStart] = useState<string | null>(null);
+  const [flightEnd, setFlightEnd] = useState<string | null>(null);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [browseViewMode, setBrowseViewMode] =
     useState<MediaManualBrowseViewMode>("card");
@@ -259,9 +270,6 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         }
       }
     }
-    if (Object.keys(mobileQtyInit).length > 0) {
-      setMediaQuantities(mobileQtyInit);
-    }
     if (Object.keys(networkQtyInit).length > 0) {
       setNetworkQuoteOptions((prev) => ({ ...prev, ...networkQtyInit }));
     }
@@ -275,6 +283,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       if (n > 0) {
         poIdx = Math.min(po, n - 1);
         setMediaPriceOptionIndex({ [matchedIds[0]!]: poIdx });
+        if (m && isPerUnitGradePriceOptions(m) && !unitsRaw) {
+          mobileQtyInit[matchedIds[0]!] = resolveQuoteUnitsForPriceOption(
+            m,
+            poIdx,
+          );
+        }
       }
     } else if (Object.keys(poFromMap).length > 0) {
       const nextPo: Record<string, number> = {};
@@ -288,7 +302,18 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       if (Object.keys(nextPo).length > 0) setMediaPriceOptionIndex(nextPo);
     }
     const periodParam = params.get("period");
-    if (periodParam && isQuoteCampaignPeriodKey(periodParam)) {
+    const flightResolved = resolveQuoteCampaignDaysFromParams({
+      campaignDaysRaw: params.get("campaignDays"),
+      startRaw: params.get("start"),
+      endRaw: params.get("end"),
+    });
+    if (flightResolved.campaignDays != null) {
+      setCampaignDaysOverride(flightResolved.campaignDays);
+      setFlightStart(flightResolved.flightStart);
+      setFlightEnd(flightResolved.flightEnd);
+      setPeriod(nearestQuoteCampaignPeriodKey(flightResolved.campaignDays));
+      periodDirtyRef.current = true;
+    } else if (periodParam && isQuoteCampaignPeriodKey(periodParam)) {
       setPeriod(periodParam);
       periodDirtyRef.current = true;
     } else if (matchedIds.length === 1) {
@@ -296,6 +321,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       if (m) {
         setPeriod(inferQuoteCampaignPeriodFromMedia(m, poIdx));
       }
+    }
+    if (Object.keys(mobileQtyInit).length > 0) {
+      setMediaQuantities((prev) => ({ ...prev, ...mobileQtyInit }));
     }
   }, [catalog]);
 
@@ -425,11 +453,12 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
         return next;
       });
       const opt = media.priceOptions?.[idx];
-      if (
-        isPerUnitGradePriceOptions(media) &&
-        opt?.units != null &&
-        opt.units > 0
-      ) {
+      if (isPerUnitGradePriceOptions(media)) {
+        setMediaQuantities((p) => ({
+          ...p,
+          [media.id]: resolveQuoteUnitsForPriceOption(media, idx, p[media.id]),
+        }));
+      } else if (opt?.units != null && opt.units > 0) {
         setMediaQuantities((p) => ({ ...p, [media.id]: opt.units! }));
       }
       if (
@@ -604,10 +633,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
   const hasMoreMedia = mediaPage * mediaPageSize < sortedCatalog.length;
 
   const periodMonths = useMemo(
-    () => quoteCampaignDaysFromPeriodKey(period) / 30,
-    [period],
+    () =>
+      (campaignDaysOverride ?? quoteCampaignDaysFromPeriodKey(period)) / 30,
+    [campaignDaysOverride, period],
   );
-  const periodLabel = t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+  const periodLabel = useMemo(() => {
+    if (
+      campaignDaysOverride != null &&
+      campaignDaysOverride !== quoteCampaignDaysFromPeriodKey(period)
+    ) {
+      return formatCustomCampaignPeriodLabel(campaignDaysOverride, isKo);
+    }
+    return t(`quote.periods.${period}` as `quote.periods.${PeriodKey}`);
+  }, [campaignDaysOverride, period, isKo, t]);
 
   const quoteLineContexts = useMemo(
     () =>
@@ -622,6 +660,7 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
           networkUnits: isNw ? opt?.units ?? m.networkMinUnits ?? 1 : undefined,
           mobileUnits: !isNw ? mediaQuantities[m.id] : undefined,
           usePackagePeriod: usePackagePeriodByMediaId[m.id] === true,
+          campaignDaysOverride: campaignDaysOverride ?? undefined,
         });
       }),
     [
@@ -633,17 +672,19 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       isKo,
       period,
       periodLabel,
+      campaignDaysOverride,
     ],
   );
 
   const pdfPeriodLabel = useMemo(() => {
-    const globalDays = quoteCampaignDaysFromPeriodKey(period);
+    const globalDays =
+      campaignDaysOverride ?? quoteCampaignDaysFromPeriodKey(period);
     const lineDays = quoteLineContexts.map((line) => line.campaignDays);
     const allSame =
       lineDays.length === 0 || lineDays.every((d) => d === globalDays);
     if (allSame) return periodLabel;
     return t("quote.periodMixedSummary", { period: periodLabel });
-  }, [quoteLineContexts, period, periodLabel, t]);
+  }, [quoteLineContexts, period, periodLabel, campaignDaysOverride, t]);
 
   const unitPriceSumMan = useMemo(
     () => quoteLineContexts.reduce((sum, line) => sum + line.unitPriceMan, 0),
@@ -1742,6 +1783,9 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                           value={period}
                           onChange={(e) => {
                             periodDirtyRef.current = true;
+                            setCampaignDaysOverride(null);
+                            setFlightStart(null);
+                            setFlightEnd(null);
                             setPeriod(e.target.value as PeriodKey);
                           }}
                           className="h-12 w-full rounded-[18px] border-2 border-border bg-card px-4 text-base text-foreground focus:border-accent focus:outline-none sm:h-14"
@@ -1753,6 +1797,17 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
                             </option>
                           ))}
                         </select>
+                        {campaignDaysOverride != null &&
+                        campaignDaysOverride !==
+                          quoteCampaignDaysFromPeriodKey(period) ? (
+                          <p className="mt-2 text-sm text-muted-foreground">
+                            {t("quote.customCampaignDaysFromDetail", {
+                              days: campaignDaysOverride,
+                              start: flightStart ?? "",
+                              end: flightEnd ?? "",
+                            })}
+                          </p>
+                        ) : null}
                       </div>
                       {/* 예산 입력 제거 — 매체를 이미 선택했으므로 불필요 */}
                     </div>

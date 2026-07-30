@@ -3,7 +3,7 @@ import { describe, it } from "node:test";
 import { DIGITAL_CHANNELS } from "@/lib/planner/digital-channels";
 import { recommendDigitalChannels } from "@/lib/planner/recommend-digital";
 
-/** Guard: ThinkadDigitalPackageCard must not expand or alter CPC channel catalog. */
+/** Guard: CPC channel catalog must not include THINKAD Digital package SKUs. */
 describe("recommendDigitalChannels regression (no Thinkad Digital package in catalog)", () => {
   it("keeps DIGITAL_CHANNELS ids unchanged", () => {
     assert.deepEqual(
