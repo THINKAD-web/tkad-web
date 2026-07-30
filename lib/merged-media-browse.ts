@@ -5,6 +5,7 @@ import {
 } from "@/lib/media-discovery-client-filter";
 import { mediaItemMatchesNetworkTypeChip } from "@/lib/media-network-types";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
+import { getCachedDailyEngagementScoreRecord } from "@/lib/media-popularity-daily-cache";
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import type {
@@ -80,7 +81,24 @@ export function applyMergedBrowseExtraFilters(
   return out;
 }
 
-/** Discovery browse·지도 인기순 — 홈 주간 인기와 동일한 popularity 폴백 우선 */
+/** Discovery browse·지도 인기순 — 최근 24h 참여 점수(10분 캐시), tie-break은 주간 폴백 */
+export async function sortMergedBrowseCatalogAsync(
+  items: MediaItem[],
+  sort: PublicMediaSort | null | undefined,
+): Promise<MediaItem[]> {
+  if (sort !== "popular" && sort !== "default" && sort != null) {
+    return sortMergedBrowseCatalog(items, sort);
+  }
+  const dailyScores = await getCachedDailyEngagementScoreRecord();
+  return [...items].sort((a, b) => {
+    const scoreDelta =
+      (dailyScores[b.id] ?? 0) - (dailyScores[a.id] ?? 0);
+    if (scoreDelta !== 0) return scoreDelta;
+    return compareMediaPopularRank(a, b);
+  });
+}
+
+/** 비인기 sort·테스트용 동기 정렬 */
 export function sortMergedBrowseCatalog(
   items: MediaItem[],
   sort: PublicMediaSort | null | undefined,
@@ -145,13 +163,11 @@ export async function queryMergedMediaBrowse(params: MergedBrowseQuery): Promise
   const page = Math.max(1, params.page ?? 1);
   const limit = Math.min(100, Math.max(1, params.limit ?? 24));
   const catalog = await loadMergedBrowseCatalog();
-  const filtered = sortMergedBrowseCatalog(
-    filterMergedBrowseCatalog(catalog, params),
-    params.sort,
-  );
+  const filtered = filterMergedBrowseCatalog(catalog, params);
+  const sorted = await sortMergedBrowseCatalogAsync(filtered, params.sort);
   const total = filtered.length;
   const skip = (page - 1) * limit;
-  const data = filtered.slice(skip, skip + limit);
+  const data = sorted.slice(skip, skip + limit);
   return {
     data,
     total,

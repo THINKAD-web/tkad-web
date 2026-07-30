@@ -93,7 +93,7 @@ export function expandMediaRegionChip(value: string): string[] {
 }
 
 export const MEDIA_SEARCH_SORT_OPTIONS = [
-  { label: "인기순", value: "popular" },
+  { label: "오늘의 인기", value: "popular" },
   { label: "최신순", value: "newest" },
   { label: "저가순", value: "price_asc" },
   { label: "고가순", value: "price_desc" },

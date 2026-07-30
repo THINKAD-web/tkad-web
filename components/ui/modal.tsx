@@ -53,7 +53,7 @@ export default function Modal({
   if (!open || !mounted) return null;
 
   const node = (
-    <div className="fixed inset-0 z-[70] flex items-center justify-center p-3 sm:p-4">
+    <div className="fixed inset-0 z-[85] flex items-center justify-center p-3 sm:p-4">
       <div
         className={cn(
           "absolute inset-0 dark:bg-black bg-white dark:bg-white/5 bg-gray-500/50 backdrop-blur-md transition-opacity duration-300",

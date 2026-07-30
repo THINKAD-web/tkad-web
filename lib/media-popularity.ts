@@ -284,6 +284,17 @@ export async function computeMediaPopularityScores(): Promise<
   return out;
 }
 
+/** 최근 24시간 참여 점수 — browse `/media` 인기순(일간)용 */
+export async function computeDailyEngagementScores(): Promise<Map<string, number>> {
+  const since1d = new Date(Date.now() - 24 * 60 * 60 * 1000);
+  const map = await loadEngagementSince(since1d);
+  const out = new Map<string, number>();
+  for (const [id, counts] of map) {
+    out.set(id, scoreFromCounts(counts));
+  }
+  return out;
+}
+
 /**
  * 모든 활성 매체 popularityScore 갱신 (cron·수동 호출).
  */

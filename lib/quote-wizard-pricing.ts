@@ -12,6 +12,7 @@ import {
   partialPeriodRateToPercentLabel,
   PARTIAL_PERIOD_RATE_DAYS,
   PARTIAL_PERIOD_RATE_KEYS,
+  partialRateLookupKeyFromDays,
   quoteLineTotalWonFromPartialRate,
   resolvePartialPeriodRate,
   type PartialPeriodRateAdminKey,
@@ -112,6 +113,24 @@ export function resolveQuoteMediaPricePeriod(
     media.priceOptions?.[priceOptionIndex],
     media.pricePeriod,
   );
+}
+
+/** 캠페인 일수 × 매체 단가 주기 → 집행 회수 (명시 일수 기준) */
+export function quoteCampaignUnitsFromDays(
+  campaignDays: number,
+  pricePeriod: MediaPricePeriodKey,
+): number {
+  const days = Math.max(1, Math.round(campaignDays));
+  switch (pricePeriod) {
+    case "biweekly":
+      return days / 14;
+    case "week":
+      return days / 7;
+    case "day":
+      return days;
+    default:
+      return days / 30;
+  }
 }
 
 /** 캠페인 기간 × 매체 단가 주기 → 집행 회수 */
@@ -239,6 +258,8 @@ export function buildQuoteWizardLineContext(
     mobileUnits?: number;
     /** true면 패키지 번들 기간만 집행 — proration 없음 */
     usePackagePeriod?: boolean;
+    /** URL·캘린더에서 전달된 집행 일수 — period 프리셋보다 우선 */
+    campaignDaysOverride?: number;
   },
 ): QuoteWizardLineContext {
   const isNw = media.catalogSource === "network";
@@ -258,7 +279,10 @@ export function buildQuoteWizardLineContext(
   const pricePeriod = resolveQuoteMediaPricePeriod(media, poIdx, isNw);
   const explicitBundleDays =
     priceOpt != null ? tryResolveExplicitPriceOptionBundleDays(priceOpt) : null;
-  const globalCampaignDays = quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
+  const globalCampaignDays =
+    opts.campaignDaysOverride != null && opts.campaignDaysOverride > 0
+      ? Math.round(opts.campaignDaysOverride)
+      : quoteCampaignDaysFromPeriodKey(opts.campaignPeriod);
   const usePackagePeriod =
     opts.usePackagePeriod === true &&
     !isNw &&
@@ -273,9 +297,17 @@ export function buildQuoteWizardLineContext(
         resolveMediaQuantity(media, opts.mobileUnits)
       : null;
 
+  const partialRateLookupKey =
+    opts.campaignDaysOverride != null && opts.campaignDaysOverride > 0
+      ? partialRateLookupKeyFromDays(globalCampaignDays)
+      : opts.campaignPeriod;
   const partialRate =
-    !isNw && !usePackagePeriod
-      ? resolvePartialPeriodRate(media, priceOpt ?? null, opts.campaignPeriod)
+    !isNw && !usePackagePeriod && partialRateLookupKey
+      ? resolvePartialPeriodRate(
+          media,
+          priceOpt ?? null,
+          partialRateLookupKey,
+        )
       : null;
 
   let usesMediaPartialRate = false;
@@ -314,7 +346,10 @@ export function buildQuoteWizardLineContext(
       lineTotalMan = lineTotalWon / 10_000;
     }
   } else {
-    campaignUnits = quoteCampaignUnits(opts.campaignPeriod, pricePeriod);
+    campaignUnits =
+      opts.campaignDaysOverride != null && opts.campaignDaysOverride > 0
+        ? quoteCampaignUnitsFromDays(campaignDays, pricePeriod)
+        : quoteCampaignUnits(opts.campaignPeriod, pricePeriod);
     lineTotalMan = quoteLineTotalMan(unitPriceMan, campaignUnits);
   }
 

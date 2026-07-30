@@ -76,6 +76,7 @@ import {
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { buildAdminMediasListUrl } from "@/lib/admin-medias-list-url";
 import {
   KOREA_SIDO_ORDERED,
   KOREA_SIGUNGU_COVERAGE,
@@ -832,6 +833,7 @@ export default function AdminMediasClient({
   const [formImageUploadBusy, setFormImageUploadBusy] = useState(false);
   /** 목록 GET이 저장/삭제보다 늦게 끝나면 옛 데이터로 덮어쓰는 레이스 방지 */
   const listFetchGenRef = useRef(0);
+  const listBootstrappedRef = useRef(initialMedias.length > 0);
   /** Gallery ✕ removals — sent as purgeImageUrls so PATCH won't CDN-delete accidental shrinks. */
   const intentionalPurgeUrlsRef = useRef<string[]>([]);
 
@@ -1067,14 +1069,18 @@ export default function AdminMediasClient({
     fetchNearbyPreview,
   ]);
 
-  const loadMedias = useCallback(async (opts?: { showSpinner?: boolean }) => {
+  const loadMedias = useCallback(async (opts?: { showSpinner?: boolean; q?: string }) => {
     const showSpinner = opts?.showSpinner ?? false;
+    const query = (opts?.q ?? search).trim();
     const gen = ++listFetchGenRef.current;
     if (showSpinner) setListLoading(true);
     setListError(null);
     try {
       const result = await adminFetchJson(
-        `/api/admin/medias?take=500&_=${Date.now()}`,
+        buildAdminMediasListUrl({
+          q: query || undefined,
+          cacheBust: true,
+        }),
         {
           credentials: "include",
           cache: "no-store",
@@ -1111,12 +1117,9 @@ export default function AdminMediasClient({
         setListLoading(false);
       }
     }
-  }, [refreshEngagement]);
+  }, [refreshEngagement, search]);
 
   useEffect(() => {
-    const hasServerData = initialMedias.length > 0;
-    const serverErr = initialListError != null;
-    void loadMedias({ showSpinner: !hasServerData && !serverErr });
     if (typeof window !== "undefined") {
       const params = new URLSearchParams(window.location.search);
       if (params.has("updated")) {
@@ -1124,8 +1127,23 @@ export default function AdminMediasClient({
         window.history.replaceState(null, "", window.location.pathname);
       }
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- 초기 서버 props 기준 1회
-  }, [loadMedias, resetListFilters]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- mount: ?updated= only
+  }, [resetListFilters]);
+
+  useEffect(() => {
+    const q = search.trim();
+    const debounceMs = q ? 300 : 0;
+    const timer = setTimeout(() => {
+      const showSpinner =
+        q.length > 0 ||
+        (!listBootstrappedRef.current &&
+          initialMedias.length === 0 &&
+          initialListError == null);
+      listBootstrappedRef.current = true;
+      void loadMedias({ showSpinner, q: search });
+    }, debounceMs);
+    return () => clearTimeout(timer);
+  }, [search, loadMedias, initialMedias.length, initialListError]);
 
   useEffect(() => {
     const onPageShow = (e: PageTransitionEvent) => {
@@ -1146,14 +1164,6 @@ export default function AdminMediasClient({
       if (
         availabilityFilter !== "all" &&
         m.availability !== availabilityFilter
-      ) {
-        return false;
-      }
-      if (
-        search &&
-        !m.name.toLowerCase().includes(search.toLowerCase()) &&
-        !(m.nameEn ?? "").toLowerCase().includes(search.toLowerCase()) &&
-        !m.location.toLowerCase().includes(search.toLowerCase())
       ) {
         return false;
       }
@@ -1186,7 +1196,6 @@ export default function AdminMediasClient({
   }, [
     medias,
     typeFilter,
-    search,
     publicFilter,
     availabilityFilter,
     qualityFilter,

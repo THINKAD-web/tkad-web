@@ -1352,6 +1352,7 @@
     "priceOptionLabel": "Price option",
     "usePackagePeriodOnly": "Package period only ({period})",
     "periodMixedSummary": "{period} (varies by media)",
+    "customCampaignDaysFromDetail": "Flight period from media detail: {days} days ({start} – {end}). Totals use this duration.",
     "period": "Campaign Period",
     "periodPlaceholder": "Select period",
     "periods": {

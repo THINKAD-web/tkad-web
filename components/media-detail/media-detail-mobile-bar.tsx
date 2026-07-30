@@ -1,9 +1,8 @@
 "use client";
 
-import { useMemo } from "react";
-import { Link } from "@/i18n/navigation";
 import { MediaFavoriteButton } from "@/components/media-favorite-button";
 import { PlanCartAddButton } from "@/components/plan/plan-cart-add-button";
+import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 import {
   STICKY_ACTION_BAR_BTN,
@@ -13,15 +12,11 @@ import {
   StickyActionBar,
 } from "@/components/sticky-action-bar";
 import type { MediaItem } from "@/lib/media-data";
-import { findCheapestPriceOptionIndex } from "@/lib/compare-quote";
 import {
   formatCatalogPriceFieldWon,
   formatPricePeriodShortLabel,
   resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
-import { buildMediaDetailQuoteHref } from "@/lib/media-detail-quantity";
-import { inferQuoteCampaignPeriodFromMedia } from "@/lib/quote-wizard-pricing";
-import { rememberQuoteEntryPriceOption } from "@/lib/quote-wizard-entry";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -43,20 +38,6 @@ export function MediaDetailMobileBar({
   const displayPeriodLabel = formatPricePeriodShortLabel(
     displayPrice.period,
     isKo ? "ko" : "en",
-  );
-
-  const defaultOptIdx = useMemo(
-    () => findCheapestPriceOptionIndex(media),
-    [media],
-  );
-
-  const quoteHref = useMemo(
-    () =>
-      buildMediaDetailQuoteHref(media, {
-        priceOptionIndex: defaultOptIdx,
-        period: inferQuoteCampaignPeriodFromMedia(media, defaultOptIdx),
-      }),
-    [media, defaultOptIdx],
   );
 
   return (
@@ -97,17 +78,15 @@ export function MediaDetailMobileBar({
           mediaDetailLabel
           className={cn(STICKY_ACTION_BAR_BTN, STICKY_ACTION_BAR_BTN_IDLE, "!h-8 shrink-0")}
         />
-        <Link
-          href={quoteHref}
-          onClick={() => rememberQuoteEntryPriceOption(media.id, defaultOptIdx)}
+        <MediaQuoteCtaButton
+          media={media}
+          variant="sticky"
           className={cn(
             STICKY_ACTION_BAR_BTN,
             STICKY_ACTION_BAR_BTN_VIOLET,
             "!h-8 !w-auto shrink-0 !rounded-lg !border-0 !px-2.5 !text-[11px] !font-semibold !shadow-sm !tracking-normal",
           )}
-        >
-          {isKo ? "견적 받기" : "Get quote"}
-        </Link>
+        />
       </div>
     </StickyActionBar>
   );
