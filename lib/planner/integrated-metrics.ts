@@ -6,10 +6,14 @@ import {
 } from "@/lib/planner-logic";
 import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
 import {
-  getDigitalChannel,
   OOH_DIGITAL_SYNERGY_LIFT,
+  type DigitalChannel,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
+import {
+  getDigitalChannelFromList,
+  resolveDigitalChannels,
+} from "@/lib/planner/digital-catalog-bridge";
 
 export type DigitalChannelMetrics = {
   id: DigitalChannelId;
@@ -60,6 +64,8 @@ export function computeIntegratedCampaignMetrics(opts: {
   regions: string[];
   goal: PlannerCampaignGoal | null;
   pricing?: PlannerPortfolioPricing;
+  /** Live catalog pricing from digital-catalog-bridge (6a). */
+  digitalChannels?: DigitalChannel[];
 }): IntegratedCampaignMetrics | null {
   const {
     portfolio,
@@ -70,7 +76,9 @@ export function computeIntegratedCampaignMetrics(opts: {
     regions,
     goal,
     pricing,
+    digitalChannels: digitalChannelSource,
   } = opts;
+  const digitalChannels = resolveDigitalChannels(digitalChannelSource);
   if (portfolio.length === 0 || budgetMan <= 0) return null;
 
   const oohBudgetMan = Math.round(budgetMan * ((100 - digitalBudgetPct) / 100));
@@ -89,9 +97,9 @@ export function computeIntegratedCampaignMetrics(opts: {
   const channelCount = Math.max(1, digitalChannelIds.length);
   const perChannelMan = digitalBudgetMan / channelCount;
 
-  const digitalChannels: DigitalChannelMetrics[] = digitalChannelIds.map(
+  const digitalChannelMetrics: DigitalChannelMetrics[] = digitalChannelIds.map(
     (id) => {
-      const ch = getDigitalChannel(id)!;
+      const ch = getDigitalChannelFromList(id, digitalChannels)!;
       const budgetWon = perChannelMan * 10_000;
       const estimatedClicks = Math.round(budgetWon / ch.avgCpcWon);
       const estimatedImpressions = Math.round(
@@ -110,11 +118,11 @@ export function computeIntegratedCampaignMetrics(opts: {
     },
   );
 
-  const digitalTotalClicks = digitalChannels.reduce(
+  const digitalTotalClicks = digitalChannelMetrics.reduce(
     (s, c) => s + c.estimatedClicks,
     0,
   );
-  const digitalTotalImpressions = digitalChannels.reduce(
+  const digitalTotalImpressions = digitalChannelMetrics.reduce(
     (s, c) => s + c.estimatedImpressions,
     0,
   );
@@ -139,7 +147,7 @@ export function computeIntegratedCampaignMetrics(opts: {
     oohImpressions: oohMetrics?.estimatedTotalImpressions ?? 0,
     oohReach: advanced?.uniqueReach ?? oohMetrics?.estimatedTotalImpressions ?? 0,
     oohCpmKrw: advanced?.cpmKrw ?? null,
-    digitalChannels,
+    digitalChannels: digitalChannelMetrics,
     digitalTotalClicks,
     digitalTotalImpressions,
     brandSearchBaseline,

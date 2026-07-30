@@ -3,7 +3,7 @@
 import type { MouseEvent } from "react";
 import { ArrowUpRight, MessageCircle } from "lucide-react";
 import { Link } from "@/i18n/navigation";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import type { PlanCartAddedFrom, PlanCartItem } from "@/lib/plan-cart";
 import { cn } from "@/lib/utils";
@@ -79,7 +79,7 @@ export function DiscoveryMediaCardActions({
           <ArrowUpRight className="h-3 w-3 shrink-0" aria-hidden />
           <span className="truncate">{isKo ? "상세 보기" : "Details"}</span>
         </Link>
-        <MediaCartAddButton
+        <PlanCartToggleButton
           item={planItem}
           addedFrom={addedFrom}
           gridInline
@@ -133,7 +133,7 @@ export function DiscoveryMediaCardActions({
               className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
             />
           ) : null}
-          <MediaCartAddButton
+          <PlanCartToggleButton
             item={planItem}
             addedFrom={addedFrom}
             gridInline
@@ -147,7 +147,7 @@ export function DiscoveryMediaCardActions({
   if (layout === "map-tile") {
     return (
       <div className={cn("mt-2 flex items-stretch gap-1.5", className)}>
-        <MediaCartAddButton
+        <PlanCartToggleButton
           item={planItem}
           addedFrom={addedFrom}
           gridInline
@@ -203,7 +203,7 @@ export function DiscoveryMediaCardActions({
               className="!h-7 !min-w-0 !flex-1 !rounded-lg !px-1.5 !text-[10px]"
             />
           ) : null}
-          <MediaCartAddButton
+          <PlanCartToggleButton
             item={planItem}
             addedFrom={addedFrom}
             gridInline
@@ -247,7 +247,7 @@ export function DiscoveryMediaCardActions({
             className={cn(btnClass, size === "comfortable" && "!rounded-lg")}
           />
         ) : null}
-        <MediaCartAddButton
+        <PlanCartToggleButton
           item={planItem}
           addedFrom={addedFrom}
           gridInline

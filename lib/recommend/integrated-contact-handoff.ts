@@ -17,7 +17,7 @@ import { planCartLinePeriodTotalWon } from "@/lib/plan-cart-pricing";
 import {
   estimateCatalogCpmWon,
   resolveMonthlyImpressions,
-} from "@/lib/media-price-format";
+} from "@/lib/media-metrics";
 
 const RECOMMEND_INDUSTRY_TO_CONTACT: Partial<Record<Industry, ContactIndustry>> = {
   beauty: "beauty_fashion",

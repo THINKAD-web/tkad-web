@@ -2,18 +2,22 @@
 
 import { useMemo } from "react";
 import { useTranslations } from "next-intl";
-import { Check, Sparkles, TrendingUp } from "lucide-react";
+import { Check, Loader2, Sparkles, TrendingUp } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
+import type { IntegratedMixResponse } from "@/lib/integrated/schemas";
+import type { IntegratedMixFetchResult } from "@/lib/integrated/client-mix";
 import {
   defaultDigitalChannelIds,
   recommendDigitalChannels,
+  type DigitalRecommendResult,
   type ScoredDigitalChannel,
 } from "@/lib/planner/recommend-digital";
 import {
-  DIGITAL_CHANNELS,
   type DigitalChannel,
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
+import { mapMixToDigitalRecommendResult } from "@/lib/integrated/map-mix-to-ui";
 import {
   selectIntegratedBudgetNum,
   useIntegratedPlannerStore,
@@ -24,11 +28,21 @@ import {
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
 import { ThinkadDigitalPackageCard } from "@/components/planner/integrated/thinkad-digital-package-card";
+import { IntegratedMixErrorBanner } from "@/components/planner/integrated/integrated-mix-error-banner";
+import { IntegratedMixKpiStrip } from "@/components/planner/integrated/integrated-mix-kpi-strip";
+import { extractMixKpiView } from "@/lib/integrated/map-mix-to-ui";
 import { cn } from "@/lib/utils";
 
 type Props = {
   portfolio: MediaItem[];
   isKo: boolean;
+  digitalChannels: DigitalChannel[];
+  digitalCatalogMeta?: DigitalCatalogBridgeMeta;
+  mix: IntegratedMixResponse | null;
+  mixLoading: boolean;
+  mixError: Extract<IntegratedMixFetchResult, { ok: false }> | null;
+  onMixRetry?: () => void;
+  onMixContact?: () => void;
 };
 
 function PlatformCard({
@@ -96,7 +110,7 @@ function PlatformCard({
         <span className="mt-2 text-[11px] font-semibold text-[color:var(--qp-fg-muted)] dark:text-[color:var(--qp-fg-muted)]">
           {isKo ? "추천 비중" : "Suggested share"} {scored.budgetPct}%
           {" · "}
-          {isKo ? "예상 노출" : "Est. impressions"}{" "}
+          {isKo ? "월간 노출 (추정)" : "Monthly impressions (est.)"}{" "}
           {scored.estimatedImpressions.toLocaleString(isKo ? "ko-KR" : "en-US")}
         </span>
       ) : null}
@@ -104,7 +118,17 @@ function PlatformCard({
   );
 }
 
-export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props) {
+export function IntegratedDigitalRecommendationPanel({
+  portfolio,
+  isKo,
+  digitalChannels,
+  digitalCatalogMeta,
+  mix,
+  mixLoading,
+  mixError,
+  onMixRetry,
+  onMixContact,
+}: Props) {
   const t = useTranslations("plannerIntegrated");
   const goal = useIntegratedPlannerStore((s) => s.campaignGoal);
   const regions = useIntegratedPlannerStore((s) => s.regions);
@@ -119,7 +143,7 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
     (s) => s.setDigitalChannelIds,
   );
 
-  const result = useMemo(
+  const fallbackResult = useMemo(
     () =>
       recommendDigitalChannels({
         goal,
@@ -128,9 +152,32 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
         budgetMan,
         digitalBudgetPct,
         selectedChannelIds: selectedIds,
+        channels: digitalChannels,
       }),
-    [goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedIds],
+    [goal, regions, portfolio, budgetMan, digitalBudgetPct, selectedIds, digitalChannels],
   );
+
+  const result: DigitalRecommendResult = useMemo(() => {
+    if (!mix) return fallbackResult;
+    return mapMixToDigitalRecommendResult({
+      mix,
+      portfolio,
+      regions,
+      budgetMan,
+      selectedChannelIds: selectedIds,
+      digitalChannels,
+      isKo,
+    });
+  }, [
+    mix,
+    fallbackResult,
+    portfolio,
+    regions,
+    budgetMan,
+    selectedIds,
+    digitalChannels,
+    isKo,
+  ]);
 
   const scoredById = useMemo(
     () => new Map(result.channels.map((row) => [row.channel.id, row])),
@@ -147,16 +194,39 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
     setDigitalChannelIds(top.length ? top : defaultDigitalChannelIds());
   };
 
+  const mixKpis = mix ? extractMixKpiView(mix) : null;
+
   return (
     <div className="space-y-6">
-      <div className="rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-5 sm:p-6">
+      {mixError ? (
+        <IntegratedMixErrorBanner
+          error={mixError}
+          isKo={isKo}
+          onRetry={onMixRetry}
+          onContact={onMixContact}
+        />
+      ) : null}
+
+      {mixLoading ? (
+        <div
+          className="flex items-center gap-2 rounded-xl border border-[color:var(--qp-line)] bg-white/50 px-4 py-3 text-sm text-muted-foreground dark:bg-white/5"
+          data-testid="integrated-mix-loading"
+        >
+          <Loader2 className="h-4 w-4 animate-spin" aria-hidden />
+          {t("mixLoading")}
+        </div>
+      ) : null}
+
+      {mixKpis ? <IntegratedMixKpiStrip kpis={mixKpis} isKo={isKo} /> : null}
+
+      <div className="rounded-2xl border border-[color:var(--qp-line)] bg-[color:var(--qp-accent-soft)] p-5 sm:p-6 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10">
         <div className="flex items-start gap-3">
-          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-fg-muted)]" />
+          <TrendingUp className="mt-0.5 h-5 w-5 shrink-0 text-[color:var(--qp-accent)]" />
           <div>
-            <p className="text-sm font-bold text-foreground dark:text-white">
+            <p className="text-sm font-bold leading-relaxed text-gray-950 dark:text-[color:var(--qp-accent)]">
               {isKo ? result.synergyMessageKo : result.synergyMessageEn}
             </p>
-            <p className="mt-2 text-xs text-muted-foreground">
+            <p className="mt-2 text-xs leading-relaxed text-gray-600 dark:text-white/70">
               {t("synergyHint")}
             </p>
           </div>
@@ -178,7 +248,8 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
             step={5}
             value={digitalBudgetPct}
             onChange={(e) => setDigitalBudgetPct(Number(e.target.value))}
-            className="w-full accent-[color:var(--qp-accent)]"
+            disabled={mixLoading}
+            className="w-full accent-[color:var(--qp-accent)] disabled:opacity-50"
           />
           <div className="flex justify-between text-sm font-semibold">
             <span>
@@ -218,10 +289,11 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
           <button
             type="button"
             onClick={handleSelectRecommended}
+            disabled={mixLoading}
             className={cn(
               plannerNeon.selectChip,
               plannerNeon.selectChipIdle,
-              "shrink-0 self-start",
+              "shrink-0 self-start disabled:opacity-50",
             )}
           >
             <Sparkles className="mr-1.5 inline h-3.5 w-3.5" />
@@ -231,9 +303,10 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
 
         <div
           data-testid="integrated-digital-channel-grid"
+          data-catalog-source={digitalCatalogMeta?.source ?? "static"}
           className="grid grid-cols-2 gap-3 p-5 sm:grid-cols-3 sm:p-6 md:grid-cols-3"
         >
-          {DIGITAL_CHANNELS.map((channel) => (
+          {digitalChannels.map((channel) => (
             <PlatformCard
               key={channel.id}
               channel={channel}
@@ -246,7 +319,6 @@ export function IntegratedDigitalRecommendationPanel({ portfolio, isKo }: Props)
         </div>
       </PlannerNeonCard>
 
-      {/* Cross-sell only — outside DIGITAL_CHANNELS / budget / scoring */}
       <ThinkadDigitalPackageCard />
     </div>
   );

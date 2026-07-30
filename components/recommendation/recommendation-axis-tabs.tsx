@@ -25,7 +25,7 @@ import {
   RECOMMEND_MEDIA_GRID_CLASS,
   RecommendScoredMediaCard,
 } from "@/components/media-ai-recommend-scored-card";
-import { MediaCartAddButton } from "@/components/media/media-cart-add-button";
+import { PlanCartToggleButton } from "@/components/plan/plan-cart-toggle-button";
 import { planCartItemFromMediaItem } from "@/lib/plan-cart-item-builders";
 
 const TOP_N_OPTIONS = [5, 10, 20] as const;
@@ -266,7 +266,7 @@ function RecommendAxisList({
                 ))}
               </div>
             </div>
-            <MediaCartAddButton
+            <PlanCartToggleButton
               item={planCartItemFromMediaItem(item.media, "ai_recommend")}
               addedFrom="ai_recommend"
               className="!h-8 !rounded-lg !px-2.5 !text-[11px]"

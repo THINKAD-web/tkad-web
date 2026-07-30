@@ -7,6 +7,7 @@ import type { PlanCart } from "@/lib/plan-cart";
 import type { SavedPlanCartReportSummary } from "@/lib/saved-plan-cart/types";
 import { defaultSavedPlanTitle } from "@/lib/saved-plan-cart/types";
 import { BtnBlock } from "@/components/brutalist";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { useAppToast } from "@/lib/use-toast";
 
 type Props = {
@@ -33,6 +34,7 @@ export function SavePlanButton({
 }: Props) {
   const router = useRouter();
   const toast = useAppToast();
+  const { user } = useAuthSession();
   const [open, setOpen] = useState(false);
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -41,15 +43,7 @@ export function SavePlanButton({
 
   const openDialog = useCallback(async () => {
     if (cart.items.length === 0) return;
-    try {
-      const sessionRes = await fetch("/api/auth/session", { cache: "no-store" });
-      const sessionData = await sessionRes.json();
-      if (!sessionData?.ok || !sessionData.data) {
-        setNeedsLogin(true);
-        setOpen(true);
-        return;
-      }
-    } catch {
+    if (!user) {
       setNeedsLogin(true);
       setOpen(true);
       return;
@@ -58,7 +52,7 @@ export function SavePlanButton({
     setTitle(defaultSavedPlanTitle(cart, isKo));
     setDescription("");
     setOpen(true);
-  }, [cart, isKo]);
+  }, [cart, isKo, user]);
 
   async function handleSave() {
     if (cart.items.length === 0) return;

@@ -1,5 +1,4 @@
-import { prisma } from "@/lib/prisma";
-import { getCurrentUser } from "@/lib/user-session";
+import { getAuthSessionUserRow } from "@/lib/user-session";
 import { userNeedsEmailVerification } from "@/lib/user-email";
 import { apiOk, apiServerError } from "@/lib/api-response";
 import { trialDaysLeft, trialProgressPct } from "@/lib/check-plan";
@@ -9,21 +8,10 @@ export const runtime = "nodejs";
 
 export async function GET() {
   try {
-    const user = await getCurrentUser();
-    if (!user) return apiOk(null);
+    const session = await getAuthSessionUserRow();
+    if (!session) return apiOk(null);
 
-    const row = await prisma.user.findUnique({
-      where: { id: user.id },
-      select: {
-        passwordHash: true,
-        phone: true,
-        plan: true,
-        trialStartedAt: true,
-        trialEndsAt: true,
-        proTrialEndsAt: true,
-        createdAt: true,
-      },
-    });
+    const { user, row } = session;
 
     const needsEmailVerification = row
       ? userNeedsEmailVerification({

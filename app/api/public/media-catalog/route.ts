@@ -1,8 +1,8 @@
 import { NextResponse } from "next/server";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 
+/** CDN-friendly public catalog — ISR 30m (B2). */
 export const revalidate = 1800;
-export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Link, useRouter } from "@/i18n/navigation";
 import { useTranslations } from "next-intl";
 import { ArrowLeft, CalendarDays, Loader2 } from "lucide-react";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 
@@ -62,24 +63,22 @@ const STATUS_STYLE: Record<Status, string> = {
 export function MyBookingRequestsClient() {
   const t = useTranslations("myBookingRequests");
   const router = useRouter();
+  const { user, loading: authLoading } = useAuthSession();
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [authChecked, setAuthChecked] = useState(false);
+
+  const authChecked = !authLoading && !!user;
 
   useEffect(() => {
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login?redirect=/my/booking-requests");
+      return;
+    }
     let cancelled = false;
     (async () => {
       try {
-        const sessRes = await fetch("/api/auth/session", { cache: "no-store" });
-        const sess = await sessRes.json();
-        if (cancelled) return;
-        if (!sess.ok || !sess.data) {
-          router.replace("/login?redirect=/my/booking-requests");
-          return;
-        }
-        setAuthChecked(true);
-
         const res = await fetch("/api/my/booking-requests", {
           cache: "no-store",
         });
@@ -103,9 +102,9 @@ export function MyBookingRequestsClient() {
     return () => {
       cancelled = true;
     };
-  }, [router]);
+  }, [router, user, authLoading]);
 
-  if (!authChecked && loading) {
+  if (!authChecked && (authLoading || loading)) {
     return <FullPageSpinner label={t("loading")} />;
   }
 

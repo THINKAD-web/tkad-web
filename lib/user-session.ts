@@ -1,5 +1,6 @@
 import { createHmac, createHash, timingSafeEqual } from "crypto";
 import { cookies } from "next/headers";
+import { cache } from "react";
 import { readOAuthHmacSecretOrDev } from "@/lib/oauth-hmac-secret";
 import { prisma } from "@/lib/prisma";
 import type { AppUserRole, UserPlan } from "@prisma/client";
@@ -143,7 +144,11 @@ export type CurrentUser = {
   proTrialEndsAt: Date | null;
 };
 
-export async function getCurrentUser(): Promise<CurrentUser | null> {
+/**
+ * Per-request dedup (React.cache) — multiple RSC/API call sites in one
+ * render share a single Prisma user lookup (B3).
+ */
+export const getCurrentUser = cache(async (): Promise<CurrentUser | null> => {
   const c = await cookies();
   const token = c.get(USER_SESSION_COOKIE)?.value;
   const result = verifyUserSessionDetails(token);
@@ -168,7 +173,62 @@ export async function getCurrentUser(): Promise<CurrentUser | null> {
   });
   if (!row) return null;
   return { ...row, region: null };
-}
+});
+
+/**
+ * Session API payload helper — one cookie verify + one Prisma row (B3).
+ * Shares request scope with getCurrentUser via React.cache when both run.
+ */
+export const getAuthSessionUserRow = cache(async () => {
+  const c = await cookies();
+  const token = c.get(USER_SESSION_COOKIE)?.value;
+  const result = verifyUserSessionDetails(token);
+  if (!result.ok) return null;
+
+  const row = await prisma.user.findFirst({
+    where: { id: result.userId, deletedAt: null },
+    select: {
+      id: true,
+      email: true,
+      name: true,
+      company: true,
+      role: true,
+      communityRole: true,
+      communityBio: true,
+      locale: true,
+      emailVerifiedAt: true,
+      plan: true,
+      trialEndsAt: true,
+      proTrialEndsAt: true,
+      passwordHash: true,
+      phone: true,
+      trialStartedAt: true,
+      createdAt: true,
+    },
+  });
+  if (!row) return null;
+
+  const {
+    passwordHash,
+    phone,
+    trialStartedAt,
+    createdAt,
+    ...userFields
+  } = row;
+
+  return {
+    user: { ...userFields, region: null } satisfies CurrentUser,
+    row: {
+      passwordHash,
+      phone,
+      plan: row.plan,
+      trialStartedAt,
+      trialEndsAt: row.trialEndsAt,
+      proTrialEndsAt: row.proTrialEndsAt,
+      createdAt,
+    },
+  };
+});
 
 export async function createSessionRecord(params: {
   userId: string;

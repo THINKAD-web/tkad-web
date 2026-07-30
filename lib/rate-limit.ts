@@ -61,6 +61,7 @@ const PRESET_MEMORY: Record<
   mediaRegister: { limit: 3, windowMs: 10 * 60_000 },
   recommend: { limit: 5, windowMs: 60_000 },
   authRegister: { limit: 3, windowMs: 5 * 60_000 },
+  integratedMix: { limit: 5, windowMs: 60_000 },
 };
 
 function upstashConfigured(): boolean {

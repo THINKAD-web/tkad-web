@@ -12,6 +12,7 @@ import {
   type MyHubMediaItem,
 } from "@/components/my/my-hub-media-grid-card";
 import { AdvertiserCampaignCard } from "@/components/advertiser-dashboard/campaign-card";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { NeonFullPageSpinner } from "@/components/ui/neon-page-spinner";
 import { Spinner, EmptyState } from "@/components/ui/spinner";
 import {
@@ -88,6 +89,7 @@ export function MyHubPageClient() {
   const tPlan = useTranslations("planNav");
   const tFav = useTranslations("favoritesNav");
   const toast = useAppToast();
+  const { user, loading: authLoading } = useAuthSession();
 
   const tab: MyHubPanelTab =
     parseMyHubPanelTab(searchParams.get("tab")) ?? "campaigns";
@@ -97,7 +99,6 @@ export function MyHubPageClient() {
     if (legacy) router.replace(legacy);
   }, [searchParams, router]);
 
-  const [ready, setReady] = useState(false);
   const [campaignFilter, setCampaignFilter] = useState<CampaignTab>("active");
   const [campaigns, setCampaigns] = useState<CampaignItem[]>([]);
   const [campaignsLoading, setCampaignsLoading] = useState(false);
@@ -110,23 +111,14 @@ export function MyHubPageClient() {
   const [recentLoading, setRecentLoading] = useState(true);
   const { cart: planCart } = usePlanCart();
 
+  const ready = !authLoading && !!user;
+
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const res = await fetch("/api/auth/session", { cache: "no-store" });
-      const data = await res.json();
-      if (!cancelled) {
-        if (!data.ok || !data.data) {
-          router.replace("/login?redirect=/my");
-          return;
-        }
-        setReady(true);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [router]);
+    if (authLoading) return;
+    if (!user) {
+      router.replace("/login?redirect=/my");
+    }
+  }, [authLoading, user, router]);
 
   useEffect(() => {
     if (!ready) return;

@@ -25,7 +25,7 @@ type Props = {
 };
 
 /** 매체 목록·지도 공통 — 담은 매체(plan cart) 담기 토글 */
-export function MediaCartAddButton({
+export function PlanCartToggleButton({
   item,
   addedFrom,
   gridInline = false,

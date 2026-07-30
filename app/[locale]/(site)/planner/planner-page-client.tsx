@@ -55,6 +55,7 @@ import {
 import { buildPlannerRecommendationCatalog } from "@/lib/planner/recommendation-catalog";
 import { PLANNER_PERIOD_OPTIONS } from "@/lib/planner-period";
 import { useToast } from "@/components/toast-provider";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { cn } from "@/lib/utils";
 import { PlannerRegionMap } from "@/components/planner-region-map";
 import { PlannerStepCollapsible } from "@/components/planner/planner-step-collapsible";
@@ -226,6 +227,7 @@ export default function PlannerPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const { toast } = useToast();
+  const { user: sessionUser } = useAuthSession();
   const landingAppearance = useTkadAppearance();
   const { showTrialBanner } = useIsPro();
   const {
@@ -1021,18 +1023,7 @@ export default function PlannerPageClient({
         mediaPlacements: state.mediaPlacements,
       };
 
-      let userEmail: string | undefined;
-      try {
-        const sessionRes = await fetch("/api/auth/session", {
-          cache: "no-store",
-        });
-        const sessionData = await sessionRes.json();
-        if (sessionData?.ok && sessionData.data?.email) {
-          userEmail = sessionData.data.email as string;
-        }
-      } catch {
-        /* ignore */
-      }
+      const userEmail = sessionUser?.email ?? undefined;
 
       const res = await fetch("/api/planner/save", {
         method: "POST",
@@ -1072,7 +1063,7 @@ export default function PlannerPageClient({
       }
       return data.id;
     },
-    [savedPlanId, shareWithTeam],
+    [savedPlanId, sessionUser?.email, shareWithTeam],
   );
 
   const savePlan = useCallback(async (saveMode: "share" | "draft" = "share") => {
@@ -1238,20 +1229,13 @@ export default function PlannerPageClient({
 
     setCreatingQuote(true);
     try {
-      let user:
-        | { name?: string; email?: string; company?: string | null }
-        | null = null;
-      try {
-        const sessionRes = await fetch("/api/auth/session", {
-          cache: "no-store",
-        });
-        const sessionData = await sessionRes.json();
-        if (sessionData?.ok && sessionData.data?.email) {
-          user = sessionData.data;
-        }
-      } catch {
-        /* ignore */
-      }
+      const user = sessionUser?.email
+        ? (sessionUser as {
+            name?: string;
+            email: string;
+            company?: string | null;
+          })
+        : null;
 
       if (!user?.email) {
         toast(
@@ -1309,6 +1293,7 @@ export default function PlannerPageClient({
     portfolio,
     router,
     selectedMediaForSimulation,
+    sessionUser,
     teamPerms.canContactOrPay,
     teamPerms.loaded,
     toast,

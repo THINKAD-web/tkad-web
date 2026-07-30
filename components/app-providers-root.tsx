@@ -12,6 +12,7 @@ import { MobileKeyboardProvider } from "@/components/mobile/mobile-keyboard-prov
 import { PushHapticListener } from "@/components/mobile/push-haptic-listener";
 import { PwaSplashScreen } from "@/components/mobile/pwa-splash-screen";
 import { MobileAppOverlays } from "@/components/mobile/mobile-app-overlays";
+import { PlanCartLegacyMigrate } from "@/components/plan/plan-cart-legacy-migrate";
 
 type Props = {
   children: ReactNode;
@@ -34,6 +35,7 @@ export function AppProvidersRoot({ children, admin }: Props) {
 
   return (
     <ToastProvider>
+      <PlanCartLegacyMigrate />
       <ContactChannelProvider>
         <CommandPaletteProvider>
           <PointToastListener />

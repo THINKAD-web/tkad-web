@@ -1,11 +1,10 @@
 "use client";
 
-import { useCallback, useEffect, useState, type ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import { useLocale } from "next-intl";
 import { Link, usePathname, useRouter } from "@/i18n/navigation";
 import {
   Building2,
-  CalendarRange,
   Gavel,
   LayoutDashboard,
   Loader2,
@@ -17,6 +16,7 @@ import {
   Palette,
 } from "lucide-react";
 import { HomeLandingDayNight } from "@/components/home-landing-day-night";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { FullPageSpinner } from "@/components/ui/spinner";
 import { cn } from "@/lib/utils";
 import { isMediaOwnerPortalRole } from "@/lib/media-owner-role";
@@ -39,37 +39,29 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const locale = useLocale();
   const isKo = locale === "ko";
+  const { user, loading } = useAuthSession();
 
-  const [loading, setLoading] = useState(true);
-  const [me, setMe] = useState<Me | null>(null);
-
-  const loadSession = useCallback(async () => {
-    const res = await fetch("/api/auth/session", { cache: "no-store" });
-    const json = await res.json();
-    if (!res.ok || !json.ok || !json.data) {
-      router.replace("/login?redirect=/media-owner/dashboard");
-      return null;
-    }
-    const user = json.data as Me;
-    if (!isMediaOwnerPortalRole(user.role)) {
-      router.replace("/my");
-      return null;
-    }
-    return user;
-  }, [router]);
+  const me: Me | null =
+    user?.id && user.name && user.email && user.role
+      ? {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          role: user.role,
+        }
+      : null;
+  const role = user?.role;
 
   useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      const user = await loadSession();
-      if (cancelled) return;
-      if (user) setMe(user);
-      setLoading(false);
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, [loadSession]);
+    if (loading) return;
+    if (!user?.id) {
+      router.replace("/login?redirect=/media-owner/dashboard");
+      return;
+    }
+    if (!role || !isMediaOwnerPortalRole(role)) {
+      router.replace("/my");
+    }
+  }, [loading, user?.id, role, router]);
 
   async function logout() {
     await fetch("/api/auth/logout", { method: "POST" });
@@ -84,7 +76,7 @@ export function MediaOwnerShell({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!me) return null;
+  if (!me || !isMediaOwnerPortalRole(me.role)) return null;
 
   return (
     <HomeLandingDayNight>

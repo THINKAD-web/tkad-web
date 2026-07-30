@@ -17,8 +17,6 @@ export type GaLaunchEvent =
   | "signup"
   | "start_pro_trial";
 
-/** useCart(레거시 견적함) vs usePlanCart(플랜 카트) 비교용 — 파라미터 스키마 통일 */
-export const CART_USAGE_EVENT_LEGACY = "add_to_cart_legacy";
 export const CART_USAGE_EVENT_PLAN = "add_to_plan_cart";
 
 export type CartUsageTrackParams = {
@@ -66,17 +64,6 @@ export function trackGaEvent(
     }
   }
   gtag("event", name, clean);
-}
-
-/** 레거시 견적함(`tkad-media-cart-v1`) 담기/빼기 */
-export function trackLegacyCartUsage(params: CartUsageTrackParams): void {
-  trackEvent(CART_USAGE_EVENT_LEGACY, {
-    media_id: params.media_id,
-    source: params.source,
-    action: params.action,
-    media_name: params.media_name,
-    cart_kind: "legacy",
-  });
 }
 
 /** 플랜 카트(`tkad_plan_cart`) 담기/빼기 — planner store의 `add_to_plan` 과 별개 */

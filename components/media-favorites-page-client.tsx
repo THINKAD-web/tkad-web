@@ -7,6 +7,7 @@ import { ArrowRight, Heart } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import { MediaCard, type MediaCardItem } from "@/components/my/media-card";
 import { BtnBlock } from "@/components/brutalist";
+import { useAuthSession } from "@/components/auth/auth-session-provider";
 import { EmptyState, Spinner } from "@/components/ui/spinner";
 import { useAppToast } from "@/lib/use-toast";
 import {
@@ -50,17 +51,16 @@ export function MediaFavoritesPageClient({
   const locale = useLocale();
   const isKo = locale === "ko";
   const toast = useAppToast();
+  const { user, loading: authLoading } = useAuthSession();
+  const loggedIn = !!user;
   const [loading, setLoading] = useState(true);
-  const [loggedIn, setLoggedIn] = useState(false);
   const [items, setItems] = useState<FavoriteRow[]>([]);
 
   const load = useCallback(async () => {
+    if (authLoading) return;
     setLoading(true);
     try {
-      const s = await fetch("/api/auth/session", { cache: "no-store" });
-      const sd = await s.json();
-      if (sd?.ok && sd.data) {
-        setLoggedIn(true);
+      if (user) {
         const r = await fetch("/api/my/favorites", { cache: "no-store" });
         const rd = await r.json();
         if (rd?.ok && Array.isArray(rd.data?.items)) {
@@ -87,13 +87,12 @@ export function MediaFavoritesPageClient({
           setItems([]);
         }
       } else {
-        setLoggedIn(false);
         setItems(entriesToRows(getGuestFavoriteEntries(), catalog));
       }
     } finally {
       setLoading(false);
     }
-  }, [catalog]);
+  }, [catalog, user, authLoading]);
 
   useEffect(() => {
     void load();

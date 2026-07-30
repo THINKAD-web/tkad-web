@@ -21,8 +21,6 @@ import {
   normalizeMediaPricePeriod,
   resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
-import { useCart } from "@/lib/cart";
-import { useAppToast } from "@/lib/use-toast";
 
 type Props = {
   items: MediaItem[];
@@ -44,8 +42,6 @@ function renderPriceLabel(item: MediaItem, locale: string): string | null {
  */
 export function MediaKeywordLandingCatalog({ items, locale }: Props) {
   const isKo = locale === "ko" || locale.startsWith("ko");
-  const toast = useAppToast();
-  const { ids: cartIds, toggle: toggleCartId } = useCart();
   const [compareEntries, setCompareEntriesState] = useState<CompareCartEntry[]>(
     [],
   );
@@ -77,32 +73,6 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
         ];
     setCompareCartEntries(next);
   }, []);
-
-  const toggleCart = useCallback(
-    (item: MediaItem) => {
-      const inCart = cartIds.includes(item.id);
-      toggleCartId(item.id, "keyword_landing");
-      if (inCart) {
-        toast.warning(
-          item.name
-            ? `${item.name}이(가) 장바구니에서 제거되었습니다.`
-            : "장바구니에서 제거되었습니다.",
-        );
-      } else {
-        toast.success(
-          item.name
-            ? `${item.name}이(가) 장바구니에 담겼습니다.`
-            : "매체가 장바구니에 담겼습니다.",
-        );
-      }
-    },
-    [cartIds, toggleCartId, toast],
-  );
-
-  const isInCart = useCallback(
-    (id: string) => cartIds.includes(id),
-    [cartIds],
-  );
 
   const compareItems = useMemo(
     () => entriesToCompareMediaItems(compareEntries, items),
@@ -136,9 +106,7 @@ export function MediaKeywordLandingCatalog({ items, locale }: Props) {
               isKo={isKo}
               planItem={planCartItemFromMediaItem(m, "search")}
               inCompare={isInCompare(m.id)}
-              inCart={isInCart(m.id)}
               onToggleCompare={() => toggleCompare(m)}
-              onToggleCart={() => toggleCart(m)}
               isVerified={m.isVerified === true}
               isInstantBooking={instant}
               imagePriority={index < 6}

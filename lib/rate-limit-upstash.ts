@@ -5,7 +5,8 @@ export type RateLimitPreset =
   | "contact"
   | "mediaRegister"
   | "recommend"
-  | "authRegister";
+  | "authRegister"
+  | "integratedMix";
 
 const PRESETS: Record<
   RateLimitPreset,
@@ -15,6 +16,7 @@ const PRESETS: Record<
   mediaRegister: { requests: 3, window: "10 m" },
   recommend: { requests: 5, window: "1 m" },
   authRegister: { requests: 3, window: "5 m" },
+  integratedMix: { requests: 5, window: "1 m" },
 };
 
 const limiters = new Map<RateLimitPreset, Ratelimit>();

@@ -152,8 +152,8 @@ function chipClass(selected: boolean) {
   return cn(
     "rounded-xl border px-3 py-2 text-sm font-medium transition-colors touch-manipulation",
     selected
-      ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] text-foreground shadow-sm"
-      : "border-gray-200 bg-white text-foreground hover:border-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/5 dark:hover:border-[color:var(--qp-accent)]/40",
+      ? "border-[color:var(--qp-accent)]/45 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)] shadow-sm dark:bg-[color:var(--qp-accent)]/15"
+      : "border-gray-200 bg-white text-gray-900 hover:border-[color:var(--qp-accent)]/35 dark:border-white/10 dark:bg-white/5 dark:text-white/85 dark:hover:border-[color:var(--qp-accent)]/40",
   );
 }
 

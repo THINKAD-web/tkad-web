@@ -57,7 +57,7 @@ export function PlannerMediaPackagePicker({
 
   return (
     <div
-      className={cn(compact ? "min-w-0 space-y-1" : "space-y-1.5", className)}
+      className={cn(compact ? "min-w-0 space-y-1.5" : "space-y-2", className)}
       onClick={(e) => {
         e.preventDefault();
         e.stopPropagation();
@@ -65,7 +65,7 @@ export function PlannerMediaPackagePicker({
       onKeyDown={(e) => e.stopPropagation()}
     >
       {!compact ? (
-        <p className="text-[10px] font-medium uppercase tracking-wide text-muted-foreground">
+        <p className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
           {isKo
             ? isNetwork
               ? `패키지 (${networkUnitSuffix})`
@@ -81,8 +81,8 @@ export function PlannerMediaPackagePicker({
       ) : null}
       <div
         className={cn(
-          "flex min-w-0 gap-1",
-          compact ? "flex-wrap gap-1" : "flex-wrap gap-1.5",
+          "flex min-w-0",
+          compact ? "flex-wrap gap-1.5" : "flex-wrap gap-2",
         )}
         role="listbox"
         aria-label={isKo ? "패키지 선택" : "Package selection"}
@@ -108,8 +108,8 @@ export function PlannerMediaPackagePicker({
               className={cn(
                 "rounded-md border text-left transition-colors",
                 compact
-                  ? "min-w-0 max-w-full shrink px-2 py-1 text-[10px] leading-tight"
-                  : "max-w-full shrink-0 rounded-lg px-2.5 py-1.5 text-[11px] leading-snug",
+                  ? "min-w-0 max-w-full shrink rounded-lg px-2.5 py-1.5 text-[11px] leading-snug"
+                  : "max-w-full shrink-0 rounded-lg px-3 py-2 text-xs leading-snug",
                 selected
                   ? "border-[color:var(--qp-accent)] bg-[color:var(--qp-accent)]/15 font-semibold text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]"
                   : compact
@@ -119,7 +119,7 @@ export function PlannerMediaPackagePicker({
             >
               <span className="block truncate font-medium">{primary}</span>
               {!compact && !isNetwork && opt.description && selected ? (
-                <span className="mt-0.5 block text-[10px] font-normal text-muted-foreground line-clamp-1">
+                <span className="mt-0.5 block text-[11px] font-normal text-muted-foreground line-clamp-1">
                   {opt.description}
                 </span>
               ) : null}
@@ -127,7 +127,7 @@ export function PlannerMediaPackagePicker({
                 <span
                   className={cn(
                     "block tabular-nums text-muted-foreground",
-                    compact ? "text-[9px]" : "mt-0.5 text-[10px]",
+                    compact ? "text-[10px]" : "mt-0.5 text-[11px]",
                   )}
                 >
                   {formatCatalogPriceFieldWon(
@@ -137,7 +137,7 @@ export function PlannerMediaPackagePicker({
                 </span>
               ) : null}
               {compact && !isNetwork ? (
-                <span className="block truncate text-[9px] tabular-nums text-muted-foreground">
+                <span className="block truncate text-[10px] tabular-nums text-muted-foreground">
                   {formatCatalogPriceFieldWon(
                     opt.price,
                     isKo ? "ko-KR" : "en-US",

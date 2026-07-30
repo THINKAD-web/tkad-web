@@ -23,6 +23,8 @@ export interface PlanTransferData {
   recommendIndustry?: string;
   /** Recommend handoff — monthly budget cap (만원) */
   budgetMaxMan?: number;
+  /** Integrated mix BFF — memo lines appended to contact message */
+  mixSummaryLines?: string[];
 }
 
 const GOAL_TO_CONTACT: Record<string, ContactCampaignGoal> = {
@@ -87,6 +89,9 @@ export function readPlanTransferData(): PlanTransferData | null {
           : undefined,
       budgetMaxMan:
         typeof parsed.budgetMaxMan === "number" ? parsed.budgetMaxMan : undefined,
+      mixSummaryLines: Array.isArray(parsed.mixSummaryLines)
+        ? parsed.mixSummaryLines.filter((line): line is string => typeof line === "string")
+        : undefined,
     };
   } catch {
     return null;
@@ -126,9 +131,10 @@ export function buildPlanTransferContactMessage(
     if (plan.source === "integrated") {
       return [
         "[온오프 통합 미디어믹스 요청]",
-        "통합 자동 배분은 준비 중 · 아래 상담으로 옥외+디지털 패키지 제안.",
-        lines.length > 0 ? "" : null,
-        lines.length > 0 ? "[OOH 추천 매체]" : null,
+        "OOH+디지털 통합 미디어믹스(BFF) 결과를 바탕으로 상담을 요청합니다.",
+        ...(plan.mixSummaryLines ?? []),
+        plan.mixSummaryLines?.length ? "" : null,
+        lines.length > 0 ? "[OOH 선택 매체]" : null,
         ...lines,
         "",
         `총 예산: ${budgetLabel}`,
@@ -165,9 +171,10 @@ export function buildPlanTransferContactMessage(
   if (plan.source === "integrated") {
     return [
       "[OOH + digital integrated mix request]",
-      "Integrated auto-allocation is in progress · request an OOH+digital package below.",
-      lines.length > 0 ? "" : null,
-      lines.length > 0 ? "[OOH recommended media]" : null,
+      "Requesting consultation based on the integrated media mix (BFF) result.",
+      ...(plan.mixSummaryLines ?? []),
+      plan.mixSummaryLines?.length ? "" : null,
+      lines.length > 0 ? "[Selected OOH media]" : null,
       ...lines,
       "",
       `Total budget: ${budgetLabel}`,
