@@ -5,6 +5,15 @@ import {
   visibilityPinTierForScore,
 } from "@/lib/map-pin-visibility-colors";
 
+export type PinShapeKind = "circle" | "rounded-square" | "diamond";
+
+export function pinShapeForType(type: string): PinShapeKind {
+  const t = (type || "").toLowerCase();
+  if (t.includes("static")) return "rounded-square";
+  if (t.includes("network")) return "diamond";
+  return "circle";
+}
+
 export function pinColorForType(type: string): {
   fill: string;
   stroke: string;
@@ -18,13 +27,13 @@ export function pinColorForType(type: string): {
     return { fill: "#ff6200", stroke: "#ea580c", text: "#ffffff" };
   }
   if (t.includes("static")) {
-    return { fill: "#52525b", stroke: "#71717a", text: "#ffffff" };
+    return { fill: "#334155", stroke: "#475569", text: "#ffffff" };
   }
   if (t.includes("mobile")) {
     return { fill: "#78716c", stroke: "#a8a29e", text: "#ffffff" };
   }
   if (t.includes("network")) {
-    return { fill: "#c24e00", stroke: "#ff6200", text: "#ffffff" };
+    return { fill: "#1e4976", stroke: "#2d5f8a", text: "#ffffff" };
   }
   return { fill: "#71717a", stroke: "#a1a1aa", text: "#ffffff" };
 }
@@ -83,6 +92,47 @@ const MAP_PIN_SELECTION_RING = "#ff6200";
 
 const pinDataUrlCache = new Map<string, string>();
 
+function buildInnerShape(
+  shape: PinShapeKind,
+  fill: string,
+  innerEdge: string,
+): string {
+  switch (shape) {
+    case "rounded-square":
+      return `<rect x="5" y="5" width="22" height="22" rx="5" fill="${fill}" stroke="${innerEdge}" stroke-width="1"/>`;
+    case "diamond":
+      return `<polygon points="16,5 27,16 16,27 5,16" fill="${fill}" stroke="${innerEdge}" stroke-width="1"/>`;
+    default:
+      return `<circle cx="16" cy="16" r="11" fill="${fill}" stroke="${innerEdge}" stroke-width="1"/>`;
+  }
+}
+
+function buildOuterRing(
+  shape: PinShapeKind,
+  outerStroke: string,
+  outerRing: number,
+): string {
+  switch (shape) {
+    case "rounded-square":
+      return `<rect x="2.5" y="2.5" width="27" height="27" rx="6" fill="none" stroke="${outerStroke}" stroke-width="${outerRing}"/>`;
+    case "diamond":
+      return `<polygon points="16,2 30,16 16,30 2,16" fill="none" stroke="${outerStroke}" stroke-width="${outerRing}"/>`;
+    default:
+      return `<circle cx="16" cy="16" r="14" fill="none" stroke="${outerStroke}" stroke-width="${outerRing}"/>`;
+  }
+}
+
+function buildSelectionIndicator(shape: PinShapeKind): string {
+  switch (shape) {
+    case "rounded-square":
+      return `<rect x="10.5" y="10.5" width="11" height="11" rx="2.5" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="1.75" opacity="0.95"/>`;
+    case "diamond":
+      return `<polygon points="16,10.5 21.5,16 16,21.5 10.5,16" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="1.75" opacity="0.95"/>`;
+    default:
+      return `<circle cx="16" cy="16" r="5.5" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="1.75" opacity="0.95"/>`;
+  }
+}
+
 export function pinIconCacheKey(
   type: string,
   highlighted: boolean,
@@ -103,6 +153,7 @@ export function buildPinDataUrl(
   visibilityScore?: number | null,
 ): string {
   const { fill, text } = pinColorForType(type);
+  const shape = pinShapeForType(type);
   const tierDef = visibilityPinTierDefForScore(
     visibilityScore !== undefined ? visibilityScore : null,
     forLightBackground,
@@ -110,7 +161,6 @@ export function buildPinDataUrl(
   const size = selected ? 34 : 30;
   const outerRing = selected ? 3 : 2.5;
   const outerStroke = selected ? MAP_PIN_SELECTION_RING : tierDef.stroke;
-  const innerR = 11;
   const label = pinLetterForType(type);
   const innerEdge = forLightBackground
     ? "rgba(15,23,42,0.18)"
@@ -118,18 +168,14 @@ export function buildPinDataUrl(
 
   const svg = `
   <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="${innerR}" fill="${fill}" stroke="${innerEdge}" stroke-width="1"/>
-    <circle cx="16" cy="16" r="14" fill="none" stroke="${outerStroke}" stroke-width="${outerRing}"/>
+    ${buildInnerShape(shape, fill, innerEdge)}
+    ${buildOuterRing(shape, outerStroke, outerRing)}
     ${
       label
         ? `<text x="16" y="20.5" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" font-weight="800" fill="${text}">${label}</text>`
         : ""
     }
-    ${
-      selected
-        ? `<circle cx="16" cy="16" r="5.5" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="1.75" opacity="0.95"/>`
-        : ""
-    }
+    ${selected ? buildSelectionIndicator(shape) : ""}
   </svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
 }

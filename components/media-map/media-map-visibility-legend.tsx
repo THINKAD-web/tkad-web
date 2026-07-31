@@ -152,8 +152,8 @@ export function MediaMapVisibilityLegend({
           </ul>
           <p className="tkad-type-note mt-1.5 text-tkad-muted">
             {isKo
-              ? "외곽 ring 진할수록 높은 가시성 · 안쪽 문자는 매체 유형"
-              : "Darker outer ring = higher visibility · inner letter = media type"}
+              ? "외곽 ring 진할수록 높은 가시성 · 모양·문자로 매체 유형 구분"
+              : "Darker outer ring = higher visibility · shape and letter = media type"}
           </p>
           {showSubwayToggle ? (
             <p className="tkad-type-note mt-2 text-tkad-muted">

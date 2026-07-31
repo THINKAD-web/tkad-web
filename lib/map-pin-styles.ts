@@ -17,7 +17,9 @@ export {
   pinDataUrl,
   pinLegendMiniDataUrl,
   pinLetterForType,
+  pinShapeForType,
   type MediaTypePinLegendEntry,
+  type PinShapeKind,
 } from "@/lib/map-pin-icon-data";
 
 const leafletIconCache = new Map<string, L.Icon>();
