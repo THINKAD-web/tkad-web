@@ -18,7 +18,7 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { visibilityPinTierDefForScore } from "@/lib/map-pin-visibility-colors";
-import { resolveItemMapDisplayMode } from "@/lib/media-map/map-display-mode";
+import { MapTileThumbnailBadges } from "@/components/media-map/map-tile-thumbnail-badges";
 import { cn } from "@/lib/utils";
 import type {
   DiscoveryMediaCardCatalogProps,
@@ -683,10 +683,6 @@ export const DiscoveryMediaCardMapTile = forwardRef<
   const thumb = catalogThumbnailImageProps(item.image);
   const locationLine =
     [item.district, item.region].filter(Boolean).join(" · ") || item.location;
-  const visTier =
-    item.visibilityScore > 0
-      ? visibilityPinTierDefForScore(item.visibilityScore)
-      : null;
   const planItem = planCartItemFromCatalog(
     {
       id: item.id,
@@ -740,53 +736,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           </div>
         )}
 
-        {(() => {
-          const mode = resolveItemMapDisplayMode(item);
-          if (mode === "service_region") {
-            const label = item.serviceRegionLabel?.trim();
-            return (
-              <span className="tkad-type-note absolute right-1.5 top-1.5 max-w-[85%] truncate rounded bg-emerald-900/90 px-1.5 py-0.5 font-semibold text-white shadow-sm dark:bg-emerald-800/90">
-                {isKo
-                  ? label
-                    ? `서비스 지역: ${label}`
-                    : "서비스 지역 미등록"
-                  : label
-                    ? `Service: ${label}`
-                    : "Region unassigned"}
-              </span>
-            );
-          }
-          if (mode === "location_unknown") {
-            return (
-              <span className="tkad-type-note absolute right-1.5 top-1.5 rounded bg-slate-800/85 px-1.5 py-0.5 font-semibold text-white shadow-sm dark:bg-slate-700/90">
-                {isKo ? "위치 미확인" : "Location unknown"}
-              </span>
-            );
-          }
-          return null;
-        })()}
-
-        {visTier ? (
-          <span
-            className="tkad-type-note absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 font-bold tabular-nums shadow-sm"
-            style={{
-              backgroundColor: visTier.fill,
-              color: visTier.text,
-              border: `1px solid ${visTier.stroke}`,
-            }}
-          >
-            {item.visibilityScore}
-          </span>
-        ) : null}
-
-        <MediaThumbnailTrustOverlay
-          item={{
-            isVerified: item.isVerified,
-            isInstantBooking: item.isInstantBooking,
-          }}
-          isKo={isKo}
-          variant="card"
-        />
+        <MapTileThumbnailBadges item={item} isKo={isKo} hideVisibilityScore />
 
         {model.metricLine ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">

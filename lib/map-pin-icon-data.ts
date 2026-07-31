@@ -57,7 +57,7 @@ export type MediaTypePinLegendEntry = {
   noteEn?: string;
 };
 
-/** `/media/map` 범례 — D/S/M/N 미니 핀 (mobile 은 지도 핀 미표시) */
+/** `/media/map` 범례 — type별 미니 핀 (mobile 은 지도 핀 미표시) */
 export const MEDIA_TYPE_PIN_LEGEND_ENTRIES: readonly MediaTypePinLegendEntry[] =
   [
     {
@@ -152,7 +152,7 @@ export function buildPinDataUrl(
   forLightBackground = false,
   visibilityScore?: number | null,
 ): string {
-  const { fill, text } = pinColorForType(type);
+  const { fill } = pinColorForType(type);
   const shape = pinShapeForType(type);
   const tierDef = visibilityPinTierDefForScore(
     visibilityScore !== undefined ? visibilityScore : null,
@@ -161,7 +161,6 @@ export function buildPinDataUrl(
   const size = selected ? 34 : 30;
   const outerRing = selected ? 3 : 2.5;
   const outerStroke = selected ? MAP_PIN_SELECTION_RING : tierDef.stroke;
-  const label = pinLetterForType(type);
   const innerEdge = forLightBackground
     ? "rgba(15,23,42,0.18)"
     : "rgba(255,255,255,0.28)";
@@ -170,11 +169,6 @@ export function buildPinDataUrl(
   <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">
     ${buildInnerShape(shape, fill, innerEdge)}
     ${buildOuterRing(shape, outerStroke, outerRing)}
-    ${
-      label
-        ? `<text x="16" y="20.5" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" font-weight="800" fill="${text}">${label}</text>`
-        : ""
-    }
     ${selected ? buildSelectionIndicator(shape) : ""}
   </svg>`;
   return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
@@ -194,7 +188,7 @@ export function pinDataUrl(
   return url;
 }
 
-/** 범례 미니 핀 — 대표 tier ring + 타입 fill/문자 */
+/** 범례 미니 핀 — 대표 tier ring + type 실루엣 */
 export function pinLegendMiniDataUrl(
   type: string,
   forLightBackground = false,

@@ -18,6 +18,7 @@ import {
 } from "@/lib/public-dark-map-config";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import { DarkMapMarkersLayer } from "@/components/public-map/dark-map-markers-layer";
+import type { MapPinLabelOverlayState } from "@/lib/map-pin-labels";
 import {
   DarkMapTileLayer,
   resolveDarkMapLightTiles,
@@ -72,6 +73,8 @@ type Props = {
   preferLightTiles?: boolean;
   /** 수도권 지하철 GeoJSON 오버레이 — `/media/map` 전용 */
   subwayOverlayEnabled?: boolean;
+  /** zoom·cap 기반 bulk 핀 라벨 상태 (선택 핀 제외) */
+  onPinLabelStateChange?: (state: MapPinLabelOverlayState) => void;
 };
 
 /** 외부 nonce 변경 시 invalidateSize() — 컨테이너 크기 변화가 없는 레이아웃/스냅 전환에도 타일 보정 */
@@ -365,6 +368,7 @@ export default function DarkMapView({
   themeAwareTiles = false,
   preferLightTiles = false,
   subwayOverlayEnabled = false,
+  onPinLabelStateChange,
 }: Props) {
   const { resolvedTheme } = useTheme();
   const [tilesLoading, setTilesLoading] = useState(true);
@@ -442,6 +446,7 @@ export default function DarkMapView({
           onSelect={onSelectStable}
           disableCluster={!useCluster}
           lightTiles={lightTiles}
+          onPinLabelStateChange={onPinLabelStateChange}
         />
         {userLocation ? (
           <CircleMarker

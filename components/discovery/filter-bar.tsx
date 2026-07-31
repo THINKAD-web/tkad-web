@@ -19,6 +19,8 @@ export {
   DiscoveryFilterSheetHeader,
   DiscoveryEmptyState,
   formatMapViewCountLabel,
+  formatMapViewCountCompact,
+  formatMapViewCountDetail,
   type DiscoveryResultSummaryProps,
   type DiscoveryFilterSheetHeaderProps,
   type DiscoveryEmptyStateProps,
