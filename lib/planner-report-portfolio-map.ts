@@ -1,48 +1,17 @@
 import type { MapMarker } from "@/components/public-map/map-types";
 import type { MapBounds } from "@/components/public-map/map-types";
 import type { MediaItem } from "@/lib/media-data";
+import { mapMarkersForMediaDetail } from "@/lib/media-detail-map-markers";
 import {
-  mapMarkersForMediaDetail,
-  mediaItemHasMapCoordinates,
-} from "@/lib/media-detail-map-markers";
-import { PUBLIC_DARK_MAP_DEFAULT_CENTER } from "@/lib/public-dark-map-config";
+  isCatalogFallbackCoordinate,
+  isValidPlotCoordinate,
+  mediaItemHasPlottableMapCoordinates,
+} from "@/lib/media-map/map-plottable-coordinates";
 
-/** `prismaMediaToMediaItem` DB null 폴백 좌표 */
-export function isCatalogFallbackCoordinate(lat: number, lng: number): boolean {
-  return (
-    Math.abs(lat - PUBLIC_DARK_MAP_DEFAULT_CENTER.lat) < 1e-4 &&
-    Math.abs(lng - PUBLIC_DARK_MAP_DEFAULT_CENTER.lng) < 1e-4
-  );
-}
-
-function isValidPlotCoordinate(lat: number, lng: number): boolean {
-  return (
-    Number.isFinite(lat) &&
-    Number.isFinite(lng) &&
-    Math.abs(lat) <= 90 &&
-    Math.abs(lng) <= 180 &&
-    !(lat === 0 && lng === 0) &&
-    !isCatalogFallbackCoordinate(lat, lng)
-  );
-}
-
-/** 보고서 미니맵 — 핀 표시 가능 여부 (폴백·0,0 제외, installLocations 우선) */
-export function mediaItemHasPlottableMapCoordinates(
-  media: Pick<
-    MediaItem,
-    "lat" | "lng" | "installLocations" | "coordinatesAreFallback"
-  >,
-): boolean {
-  const installs = media.installLocations ?? [];
-  if (
-    installs.some((p) => isValidPlotCoordinate(p.lat, p.lng))
-  ) {
-    return true;
-  }
-  if (!mediaItemHasMapCoordinates(media)) return false;
-  if (media.coordinatesAreFallback) return false;
-  return isValidPlotCoordinate(media.lat, media.lng);
-}
+export {
+  isCatalogFallbackCoordinate,
+  mediaItemHasPlottableMapCoordinates,
+} from "@/lib/media-map/map-plottable-coordinates";
 
 /** 단일 매체 → 유효 핀만 (폴백 좌표 마커 제외) */
 export function mapMarkersForPlottableMedia(

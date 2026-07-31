@@ -18,6 +18,7 @@ import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
 import { visibilityPinTierDefForScore } from "@/lib/map-pin-visibility-colors";
+import { resolveItemMapDisplayMode } from "@/lib/media-map/map-display-mode";
 import { cn } from "@/lib/utils";
 import type {
   DiscoveryMediaCardCatalogProps,
@@ -738,6 +739,32 @@ export const DiscoveryMediaCardMapTile = forwardRef<
             {isKo ? "준비중" : "No image"}
           </div>
         )}
+
+        {(() => {
+          const mode = resolveItemMapDisplayMode(item);
+          if (mode === "service_region") {
+            const label = item.serviceRegionLabel?.trim();
+            return (
+              <span className="tkad-type-note absolute right-1.5 top-1.5 max-w-[85%] truncate rounded bg-emerald-900/90 px-1.5 py-0.5 font-semibold text-white shadow-sm dark:bg-emerald-800/90">
+                {isKo
+                  ? label
+                    ? `서비스 지역: ${label}`
+                    : "서비스 지역 미등록"
+                  : label
+                    ? `Service: ${label}`
+                    : "Region unassigned"}
+              </span>
+            );
+          }
+          if (mode === "location_unknown") {
+            return (
+              <span className="tkad-type-note absolute right-1.5 top-1.5 rounded bg-slate-800/85 px-1.5 py-0.5 font-semibold text-white shadow-sm dark:bg-slate-700/90">
+                {isKo ? "위치 미확인" : "Location unknown"}
+              </span>
+            );
+          }
+          return null;
+        })()}
 
         {visTier ? (
           <span

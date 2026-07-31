@@ -8,8 +8,10 @@ import {
   PUBLIC_MAP_TILE_URLS,
   isPublicMapLightTile,
   isPublicMapLightTileFromTheme,
+  publicMapTileAttributionForTheme,
   publicMapTileUrlForTheme,
 } from "@/lib/public-dark-map-config";
+import { isVWorldTilesConfigured } from "@/lib/public-vworld-map-config";
 
 type Props = {
   themeAware?: boolean;
@@ -21,19 +23,40 @@ type Props = {
 export function DarkMapTileLayer({ themeAware = false, preferLight = false }: Props) {
   const { resolvedTheme } = useTheme();
 
+  const useVWorldLight =
+    themeAware && !preferLight && resolvedTheme !== "dark" && isVWorldTilesConfigured();
+
   const url = preferLight
     ? PUBLIC_MAP_TILE_URLS.light
     : themeAware
       ? publicMapTileUrlForTheme(resolvedTheme)
       : PUBLIC_DARK_MAP_TILE_URL;
 
+  const attribution = preferLight
+    ? '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    : themeAware
+      ? publicMapTileAttributionForTheme(resolvedTheme)
+      : '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
+
   return (
     <TileLayer
-      key={preferLight ? "light" : themeAware ? `theme-${resolvedTheme ?? "light"}` : "static"}
+      key={
+        preferLight
+          ? "light"
+          : themeAware
+            ? useVWorldLight
+              ? "vworld"
+              : `theme-${resolvedTheme ?? "light"}`
+            : "static"
+      }
       url={url}
-      subdomains={PUBLIC_DARK_MAP_TILE_SUBDOMAINS}
-      maxZoom={20}
-      attribution='&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      {...(useVWorldLight
+        ? { maxZoom: 19 }
+        : {
+            subdomains: PUBLIC_DARK_MAP_TILE_SUBDOMAINS,
+            maxZoom: 20,
+          })}
+      attribution={attribution}
     />
   );
 }

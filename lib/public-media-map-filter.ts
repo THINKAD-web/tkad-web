@@ -1,7 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { compareMediaPopularRank } from "@/lib/media-popularity";
 import type { PublicMediaSort } from "@/lib/public-media-query";
-import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
+import { matchesBrowseRegion } from "@/lib/media-discovery-client-filter";
 import { compareMediaByMonthlyEquivalentPrice } from "@/lib/media-metrics";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 
@@ -14,14 +14,6 @@ export type MapCatalogFilterParams = {
   minPrice?: number | null;
   maxPrice?: number | null;
 };
-
-function includesInsensitive(
-  hay: string | undefined | null,
-  needle: string,
-): boolean {
-  if (!hay) return false;
-  return hay.toLowerCase().includes(needle.toLowerCase());
-}
 
 /** `/media` `buildPublicMediaWhere` 와 동일한 의미 — 인메모리 카탈로그용 */
 export function matchesMapCatalogFilter(
@@ -41,22 +33,8 @@ export function matchesMapCatalogFilter(
   }
 
   const region = params.region?.trim();
-  if (region) {
-    const aliases = expandMediaRegionChip(region);
-    const match = aliases.some((alias) => {
-      const needle = alias.toLowerCase();
-      return (
-        includesInsensitive(m.region, needle) ||
-        includesInsensitive(m.city, needle) ||
-        includesInsensitive(m.district, needle) ||
-        includesInsensitive(m.regionZone, needle) ||
-        includesInsensitive(m.location, needle) ||
-        includesInsensitive(m.name, needle) ||
-        includesInsensitive(m.nearbyStations, needle) ||
-        includesInsensitive(m.nearbyLandmarks, needle)
-      );
-    });
-    if (!match) return false;
+  if (region && !matchesBrowseRegion(m, "", "", region)) {
+    return false;
   }
 
   const q = params.q?.trim().toLowerCase();

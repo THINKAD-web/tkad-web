@@ -1,4 +1,5 @@
 import type { MediaItem } from "@/lib/media-data";
+import { getSigunguCoverage } from "@/lib/geo/korea-sgg-coverage";
 
 /** Region / location matching haystack — includes network branch rows. */
 export function mediaRegionHaystack(m: MediaItem): string {
@@ -30,5 +31,22 @@ export function mediaRegionHaystack(m: MediaItem): string {
     parts.push(loc.label, loc.location);
   }
 
+  for (const code of m.coverageDistrictCodes ?? []) {
+    const row = getSigunguCoverage(code);
+    if (row) {
+      parts.push(row.code, row.nameKo, row.sidoName, shortSidoName(row.sidoName));
+    }
+  }
+
   return parts.filter(Boolean).join(" ").toLowerCase();
+}
+
+function shortSidoName(sidoName: string): string {
+  return sidoName
+    .replace(/특별자치시$/, "")
+    .replace(/특별자치도$/, "")
+    .replace(/특별시$/, "")
+    .replace(/광역시$/, "")
+    .replace(/도$/, "")
+    .trim();
 }

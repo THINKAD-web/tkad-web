@@ -148,15 +148,56 @@ export function centroidOfCoverageCodes(codes: string[]): { lat: number; lng: nu
   return { lat: s.lat / pts.length, lng: s.lng / pts.length };
 }
 
-/** 시도명을 짧은 지역 라벨로 (도시 필드 자동 채움용) */
-export function inferShortRegionLabelFromCodes(codes: string[]): string {
-  const first = codes.map((c) => getSigunguCoverage(c)).find(Boolean);
-  if (!first) return "";
-  return first.sidoName
+function shortSidoName(sidoName: string): string {
+  return sidoName
     .replace(/특별자치시$/, "")
     .replace(/특별자치도$/, "")
     .replace(/특별시$/, "")
     .replace(/광역시$/, "")
     .replace(/도$/, "")
     .trim();
+}
+
+function shortSigunguName(nameKo: string): string {
+  return nameKo.replace(/(특별|광역)?(시|군|구)$/g, "").trim() || nameKo;
+}
+
+/** 시도명을 짧은 지역 라벨로 (도시 필드 자동 채움용) */
+export function inferShortRegionLabelFromCodes(codes: string[]): string {
+  const first = codes.map((c) => getSigunguCoverage(c)).find(Boolean);
+  if (!first) return "";
+  return shortSidoName(first.sidoName);
+}
+
+/** 이동형 서비스 구역 — 리스트·카드 배지용 */
+export function formatServiceRegionLabel(
+  codes: readonly string[],
+  maxParts = 3,
+): string {
+  const rows = codes
+    .map((c) => getSigunguCoverage(c.trim()))
+    .filter((r): r is SigunguCoverage => Boolean(r));
+  if (rows.length === 0) return "";
+
+  const uniqueSido = [...new Set(rows.map((r) => r.sidoName))];
+  if (uniqueSido.length === 1 && rows.length <= maxParts) {
+    return rows.map((r) => shortSigunguName(r.nameKo)).join("·");
+  }
+
+  const sidoParts = uniqueSido.map(shortSidoName);
+  if (sidoParts.length <= maxParts) {
+    return sidoParts.join("·");
+  }
+  return `${sidoParts.slice(0, maxParts).join("·")} 외 ${sidoParts.length - maxParts}`;
+}
+
+/** network 매체 — networkRegionLabels 배지용 */
+export function formatNetworkServiceRegionLabel(
+  labels: readonly string[] | undefined,
+  maxParts = 4,
+): string {
+  const trimmed = (labels ?? []).map((l) => l.trim()).filter(Boolean);
+  if (trimmed.length === 0) return "";
+  if (trimmed.length <= maxParts) return trimmed.join("·");
+  return `${trimmed.slice(0, maxParts).join("·")} 외 ${trimmed.length - maxParts}`;
 }

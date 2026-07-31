@@ -8,6 +8,10 @@ import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 import { mediaRegionHaystack } from "@/lib/media-region-haystack";
+import {
+  mediaMatchesCoverageRegion,
+  resolveRegionFilterSigunguCodes,
+} from "@/lib/media-map/coverage-region-match";
 import { resolveBrowseRegionSubId } from "@/lib/plan-cart-report/region-subdivision";
 import type { MediaItem } from "@/lib/media-data";
 import { matchesMediaTextQuery } from "@/lib/media-data";
@@ -33,28 +37,44 @@ export function matchesBrowseRegion(
   regionSub: string,
   legacyRegion: string,
 ): boolean {
+  const coverageFilter = resolveRegionFilterSigunguCodes({
+    regionMain,
+    regionSub,
+    legacyRegion,
+  });
+
   if (regionSub.trim()) {
     const trimmed = regionSub.trim();
     const canonicalSub = resolveBrowseRegionSubId(trimmed);
     if (canonicalSub) {
-      return mediaMatchesBrowseRegionSub(m, canonicalSub);
+      if (mediaMatchesBrowseRegionSub(m, canonicalSub)) return true;
+    } else if (m.regionSub === trimmed) {
+      return true;
+    } else {
+      const aliases = expandBrowseRegionSub(trimmed);
+      const hay = mediaSearchHaystack(m);
+      if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
+        return true;
+      }
     }
-    if (m.regionSub === trimmed) return true;
-    const aliases = expandBrowseRegionSub(trimmed);
-    const hay = mediaSearchHaystack(m);
-    return aliases.some((alias) => hay.includes(alias.toLowerCase()));
-  }
-  if (regionMain.trim()) {
+  } else if (regionMain.trim()) {
     if (m.regionMain === regionMain.trim()) return true;
     const aliases = expandBrowseRegionSub(regionMain);
     const hay = mediaSearchHaystack(m);
-    return aliases.some((alias) => hay.includes(alias.toLowerCase()));
+    if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
+      return true;
+    }
+  } else {
+    const trimmed = legacyRegion.trim();
+    if (!trimmed) return true;
+    const aliases = expandMediaRegionChip(trimmed);
+    const hay = mediaSearchHaystack(m);
+    if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
+      return true;
+    }
   }
-  const trimmed = legacyRegion.trim();
-  if (!trimmed) return true;
-  const aliases = expandMediaRegionChip(trimmed);
-  const hay = mediaSearchHaystack(m);
-  return aliases.some((alias) => hay.includes(alias.toLowerCase()));
+
+  return mediaMatchesCoverageRegion(m, coverageFilter);
 }
 
 function matchesBrowseCategory(

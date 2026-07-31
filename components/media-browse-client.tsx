@@ -116,6 +116,7 @@ import {
   BROWSE_CATEGORY_CHIPS,
 } from "@/lib/media-categories";
 import { mediaMatchesCategorySlug, mediaMatchesTargetSlug } from "@/lib/media-category-landing";
+import { matchesBrowseRegion } from "@/lib/media-discovery-client-filter";
 import { MediaBrowseRegionFilter } from "@/components/media/media-browse-region-filter";
 import {
   PageSubNav,
@@ -573,11 +574,8 @@ export default function MediaBrowseClient({
       );
     }
     if (mobileRegionChip.trim()) {
-      const chip = mobileRegionChip.toLowerCase();
       base = base.filter((m) =>
-        [m.region, m.district, m.city, m.name, m.nameEn].some((v) =>
-          v?.toLowerCase().includes(chip),
-        ),
+        matchesBrowseRegion(m, "", "", mobileRegionChip.trim()),
       );
     }
     return base;
