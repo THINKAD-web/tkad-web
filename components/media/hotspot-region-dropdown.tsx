@@ -1,11 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { ChevronDown } from "lucide-react";
 import {
   hotspotRegionLabel,
   listMediaHotspotRegions,
 } from "@/lib/media-hotspot-regions";
+import {
+  AnchoredOverlayPortal,
+  anchoredPlacementBelowTriggerLeft,
+} from "@/components/ui/anchored-overlay-portal";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -17,7 +21,7 @@ type Props = {
   compact?: boolean;
 };
 
-/** `/media/map` — 인기 지역 가로 칩 대신 컴팩트 드롭다운 */
+/** `/media/map` — 인기 지역 compact dropdown (body portal) */
 export function HotspotRegionDropdown({
   isKo = true,
   regionSub,
@@ -28,16 +32,13 @@ export function HotspotRegionDropdown({
 }: Props) {
   const hotspots = listMediaHotspotRegions();
   const [open, setOpen] = useState(false);
-  const rootRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    if (!open) return;
-    const onDoc = (e: MouseEvent) => {
-      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
-    };
-    document.addEventListener("mousedown", onDoc);
-    return () => document.removeEventListener("mousedown", onDoc);
-  }, [open]);
+  const getPlacement = useCallback(
+    (anchor: HTMLElement) => anchoredPlacementBelowTriggerLeft(anchor, 176),
+    [],
+  );
 
   if (hotspots.length === 0) return null;
 
@@ -49,16 +50,18 @@ export function HotspotRegionDropdown({
       : "Hot areas";
 
   return (
-    <div ref={rootRef} className={cn("relative shrink-0", className)}>
+    <>
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "inline-flex items-center gap-1 rounded-full border font-semibold transition-colors",
+          "inline-flex shrink-0 items-center gap-1 rounded-full border font-semibold transition-colors",
           compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
           active
             ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
             : "border-border/80 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-white/12 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
+          className,
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
@@ -72,11 +75,19 @@ export function HotspotRegionDropdown({
           aria-hidden
         />
       </button>
-      {open ? (
-        <ul
-          role="listbox"
-          className="absolute left-0 top-[calc(100%+0.35rem)] z-50 max-h-64 min-w-[11rem] overflow-y-auto rounded-xl border border-border/80 bg-card py-1 shadow-lg dark:border-white/12 dark:bg-[#0a0a12]"
-        >
+
+      <AnchoredOverlayPortal
+        open={open}
+        onClose={() => setOpen(false)}
+        anchorRef={triggerRef}
+        panelRef={panelRef}
+        getPlacement={getPlacement}
+        backdropClassName="absolute inset-0 bg-transparent"
+        closeAriaLabel={isKo ? "닫기" : "Close"}
+        dialogAriaLabel={isKo ? "인기 지역" : "Hot areas"}
+        panelClassName="overflow-y-auto rounded-xl border border-border/80 bg-card py-1 shadow-lg dark:border-white/12 dark:bg-[#0a0a12]"
+      >
+        <ul role="listbox" className="min-w-[11rem]">
           {active ? (
             <li role="option">
               <button
@@ -123,7 +134,7 @@ export function HotspotRegionDropdown({
             );
           })}
         </ul>
-      ) : null}
-    </div>
+      </AnchoredOverlayPortal>
+    </>
   );
 }

@@ -62,6 +62,10 @@ import {
   type MediaMapActiveFilterKey,
 } from "@/lib/media-map/active-filter-chips";
 import { CompositionSearchInput } from "@/components/ui/composition-input";
+import {
+  AnchoredOverlayPortal,
+  anchoredPlacementBelowTriggerRight,
+} from "@/components/ui/anchored-overlay-portal";
 import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
 import { HotspotRegionChips } from "@/components/media/hotspot-region-chips";
 import { HotspotRegionDropdown } from "@/components/media/hotspot-region-dropdown";
@@ -283,18 +287,7 @@ export function MediaManualBrowseFilters({
   const desktopFilterPortalRef = useRef<HTMLDivElement>(null);
   const advancedSectionRef = useRef<HTMLDivElement>(null);
   const regionSectionRef = useRef<HTMLDivElement>(null);
-  const [portalMounted, setPortalMounted] = useState(false);
-  const [desktopFilterPanelAnchor, setDesktopFilterPanelAnchor] = useState<{
-    top: number;
-    right: number;
-    width: number;
-  } | null>(null);
-
-  useEffect(() => {
-    setPortalMounted(true);
-  }, []);
-
-  /** `/media` 목록 — 패널 IA 정리(유형 표면만, 목적·지역·가격·features 패널) */
+  const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const filterIaListPage =
     listPageLayout && unifiedToolbar && !mapPageViewModes;
 
@@ -605,7 +598,7 @@ export function MediaManualBrowseFilters({
     setBottomBarSlot(document.getElementById(MEDIA_MOBILE_BOTTOM_BAR_SLOT_ID));
   }, [mobileBottomBar]);
 
-  // 데스크탑 패널: 바깥 클릭 닫기 (지도 Portal 패널은 backdrop·Escape 로 닫음)
+  // 데스크탑 패널: 바깥 클릭 닫기 (지도 Portal 패널은 AnchoredOverlayPortal)
   useEffect(() => {
     if (!desktopPanelOpen || desktopMapFilterPortal) return;
     const onDoc = (e: MouseEvent) => {
@@ -615,44 +608,6 @@ export function MediaManualBrowseFilters({
     };
     document.addEventListener("mousedown", onDoc);
     return () => document.removeEventListener("mousedown", onDoc);
-  }, [desktopPanelOpen, desktopMapFilterPortal]);
-
-  useEffect(() => {
-    if (!desktopPanelOpen || !desktopMapFilterPortal) return;
-    const prev = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setDesktopPanelOpen(false);
-    };
-    document.addEventListener("keydown", onKey);
-    return () => {
-      document.body.style.overflow = prev;
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [desktopPanelOpen, desktopMapFilterPortal]);
-
-  useEffect(() => {
-    if (!desktopPanelOpen || !desktopMapFilterPortal) {
-      setDesktopFilterPanelAnchor(null);
-      return;
-    }
-    const update = () => {
-      const el = desktopPanelRef.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      setDesktopFilterPanelAnchor({
-        top: rect.bottom + 6,
-        right: Math.max(16, window.innerWidth - rect.right),
-        width: Math.min(448, window.innerWidth - 32),
-      });
-    };
-    update();
-    window.addEventListener("resize", update);
-    window.addEventListener("scroll", update, true);
-    return () => {
-      window.removeEventListener("resize", update);
-      window.removeEventListener("scroll", update, true);
-    };
   }, [desktopPanelOpen, desktopMapFilterPortal]);
 
   useEffect(() => {
@@ -1895,38 +1850,20 @@ export function MediaManualBrowseFilters({
         </div>
       ) : null}
 
-      {desktopMapFilterPortal &&
-      desktopPanelOpen &&
-      portalMounted &&
-      desktopFilterPanelAnchor
-        ? createPortal(
-            <div
-              className="fixed inset-0 z-[60] hidden md:block"
-              role="dialog"
-              aria-modal="true"
-              aria-label={isKo ? "필터" : "Filters"}
-            >
-              <button
-                type="button"
-                aria-label={isKo ? "필터 닫기" : "Close filters"}
-                onClick={() => setDesktopPanelOpen(false)}
-                className="absolute inset-0 bg-black/50"
-              />
-              <div
-                ref={desktopFilterPortalRef}
-                className={cn("absolute", unifiedToolbarDesktopFilterPanelClass)}
-                style={{
-                  top: desktopFilterPanelAnchor.top,
-                  right: desktopFilterPanelAnchor.right,
-                  width: desktopFilterPanelAnchor.width,
-                }}
-              >
-                {renderUnifiedToolbarDesktopFilterPanelBody()}
-              </div>
-            </div>,
-            document.body,
-          )
-        : null}
+      <AnchoredOverlayPortal
+        open={Boolean(desktopMapFilterPortal && desktopPanelOpen)}
+        onClose={() => setDesktopPanelOpen(false)}
+        anchorRef={desktopPanelRef}
+        panelRef={desktopFilterPortalRef}
+        getPlacement={anchoredPlacementBelowTriggerRight}
+        lockBodyScroll
+        desktopOnly
+        closeAriaLabel={isKo ? "필터 닫기" : "Close filters"}
+        dialogAriaLabel={isKo ? "필터" : "Filters"}
+        panelClassName={unifiedToolbarDesktopFilterPanelClass}
+      >
+        {renderUnifiedToolbarDesktopFilterPanelBody()}
+      </AnchoredOverlayPortal>
     </div>
   );
 }
