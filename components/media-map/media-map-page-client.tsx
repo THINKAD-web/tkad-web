@@ -426,7 +426,7 @@ export default function MediaMapPageClient() {
   ]);
 
   const fetchItems = useCallback(
-    async (b: MapBounds | null, f: MapBrowseFilters) => {
+    async (b: MapBounds | null, f: MapBrowseFilters): Promise<boolean> => {
       mapFetchAbortRef.current?.abort();
       const controller = new AbortController();
       mapFetchAbortRef.current = controller;
@@ -454,12 +454,12 @@ export default function MediaMapPageClient() {
           cache: "no-store",
           signal: controller.signal,
         });
-        if (generation !== fetchGenerationRef.current) return;
+        if (generation !== fetchGenerationRef.current) return false;
 
         const ct = res.headers.get("content-type") ?? "";
         if (!res.ok || !ct.includes("application/json")) {
           failToast();
-          return;
+          return false;
         }
         let data: {
           ok?: boolean;
@@ -476,11 +476,11 @@ export default function MediaMapPageClient() {
         try {
           data = (await res.json()) as typeof data;
         } catch {
-          if (generation !== fetchGenerationRef.current) return;
+          if (generation !== fetchGenerationRef.current) return false;
           failToast();
-          return;
+          return false;
         }
-        if (generation !== fetchGenerationRef.current) return;
+        if (generation !== fetchGenerationRef.current) return false;
         if (data?.ok && data.data) {
           const next = Array.isArray(data.data.items) ? data.data.items : [];
           setItems(next);
@@ -520,11 +520,15 @@ export default function MediaMapPageClient() {
           } else if (!nationalScope) {
             lastTextSearchQRef.current = "";
           }
+          return true;
         }
-      } catch (e) {
-        if (e instanceof DOMException && e.name === "AbortError") return;
-        if (generation !== fetchGenerationRef.current) return;
         failToast();
+        return false;
+      } catch (e) {
+        if (e instanceof DOMException && e.name === "AbortError") return false;
+        if (generation !== fetchGenerationRef.current) return false;
+        failToast();
+        return false;
       } finally {
         if (generation === fetchGenerationRef.current) {
           setLoading(false);
@@ -537,11 +541,10 @@ export default function MediaMapPageClient() {
   const runSearch = useCallback(
     async (b: MapBounds) => {
       const f = browseFiltersRef.current;
-      if (isMapTextSearchActive(f)) {
-        await fetchItems(null, f);
-      } else {
-        await fetchItems(b, f);
-      }
+      const ok = isMapTextSearchActive(f)
+        ? await fetchItems(null, f)
+        : await fetchItems(b, f);
+      if (!ok) return;
       setSearchedBounds(b);
       searchedBoundsRef.current = b;
       setViewportDirty(false);
@@ -559,7 +562,8 @@ export default function MediaMapPageClient() {
         await fetchItems(null, f);
         return;
       }
-      await fetchItems(KOREA_MAP_OVERVIEW_BOUNDS, f);
+      const ok = await fetchItems(KOREA_MAP_OVERVIEW_BOUNDS, f);
+      if (!ok) return;
       setSearchedBounds(KOREA_MAP_OVERVIEW_BOUNDS);
       searchedBoundsRef.current = KOREA_MAP_OVERVIEW_BOUNDS;
     })();
