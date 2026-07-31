@@ -10,17 +10,17 @@ import {
 } from "../lib/map-pin-labels.ts";
 
 assert.equal(MAP_PIN_NAME_LABEL_MIN_ZOOM, 17);
-assert.equal(MAP_PIN_NAME_LABEL_MAX_VISIBLE, 40);
+assert.equal(MAP_PIN_NAME_LABEL_MAX_VISIBLE, 18);
 
 const belowZoom = resolveMapPinLabelOverlayState(16.9, 10);
 assert.equal(belowZoom.bulkLabelsEnabled, false);
 assert.equal(belowZoom.capActive, false);
 
-const atZoomUnderCap = resolveMapPinLabelOverlayState(17, 40);
+const atZoomUnderCap = resolveMapPinLabelOverlayState(17, 18);
 assert.equal(atZoomUnderCap.bulkLabelsEnabled, true);
 assert.equal(atZoomUnderCap.capActive, false);
 
-const atZoomOverCap = resolveMapPinLabelOverlayState(17, 41);
+const atZoomOverCap = resolveMapPinLabelOverlayState(17, 19);
 assert.equal(atZoomOverCap.bulkLabelsEnabled, false);
 assert.equal(atZoomOverCap.capActive, true);
 

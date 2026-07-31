@@ -3,8 +3,8 @@
 /** zoom ≥ 17 에서 뷰포트 내 핀에 매체명 라벨 표시 */
 export const MAP_PIN_NAME_LABEL_MIN_ZOOM = 17;
 
-/** 뷰포트 내 핀 수가 이 값을 초과하면 bulk 라벨 off (선택 핀 제외) */
-export const MAP_PIN_NAME_LABEL_MAX_VISIBLE = 40;
+/** 뷰포트 내 핀 수가 이 값을 초과하면 bulk 라벨 off (선택 핀 제외) — 밀집 구역만 */
+export const MAP_PIN_NAME_LABEL_MAX_VISIBLE = 18;
 
 export type MapPinLabelOverlayState = {
   zoom: number;
