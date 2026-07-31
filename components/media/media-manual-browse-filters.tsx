@@ -287,7 +287,6 @@ export function MediaManualBrowseFilters({
   const desktopFilterPortalRef = useRef<HTMLDivElement>(null);
   const advancedSectionRef = useRef<HTMLDivElement>(null);
   const regionSectionRef = useRef<HTMLDivElement>(null);
-  const [planSheetOpen, setPlanSheetOpen] = useState(false);
   const filterIaListPage =
     listPageLayout && unifiedToolbar && !mapPageViewModes;
 
