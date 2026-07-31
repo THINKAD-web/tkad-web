@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useRef, useState, type CSSProperties, type ReactNode } from "react";
 import { createPortal } from "react-dom";
 import { X } from "lucide-react";
 import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
@@ -75,6 +75,7 @@ type DetailProps = {
   inCart?: boolean;
   onToggleCompare?: () => void;
   onToggleCart?: () => void;
+  onViewInList?: () => void;
 };
 
 function CloseButton({
@@ -157,6 +158,7 @@ function MapMarkerPreviewBody({
   showClose = true,
   inCompare,
   onToggleCompare,
+  onViewInList,
 }: {
   item: MapMapItem;
   catalogItem: ReturnType<typeof mapMapItemToHomeCatalog>;
@@ -166,6 +168,7 @@ function MapMarkerPreviewBody({
   showClose?: boolean;
   inCompare?: boolean;
   onToggleCompare?: () => void;
+  onViewInList?: () => void;
 }) {
   const thumb = catalogThumbnailImageProps(catalogItem.thumbnailUrl);
   const priceLabel = formatPrice(item.price, item.pricePeriod, isKo ? "ko" : "en");
@@ -237,6 +240,15 @@ function MapMarkerPreviewBody({
             className="!mt-0"
             stopPropagation
           />
+          {onViewInList ? (
+            <button
+              type="button"
+              onClick={onViewInList}
+              className="tkad-type-meta mt-1 w-full rounded-lg border border-[color:var(--qp-accent)]/35 bg-[color:var(--qp-accent-soft)] px-2.5 py-1.5 font-semibold text-[color:var(--qp-accent)] transition-colors hover:bg-[color:var(--qp-accent)]/12 active:bg-[color:var(--qp-accent)]/18 dark:border-[color:var(--qp-accent)]/30 dark:bg-[color:var(--qp-accent)]/10"
+            >
+              {isKo ? "목록에서 보기" : "View in list"}
+            </button>
+          ) : null}
         </div>
       </div>
     </div>
@@ -252,6 +264,7 @@ function MediaMapDetailBody({
   inCart,
   onToggleCompare,
   onToggleCart,
+  onViewInList,
 }: DetailProps) {
   const catalogItem = useMemo(() => mapMapItemToHomeCatalog(item), [item]);
   const href = `/media/${item.id}`;
@@ -346,6 +359,7 @@ function MediaMapDetailBody({
         showClose={false}
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
+        onViewInList={onViewInList}
       />
     );
   }
@@ -360,6 +374,7 @@ function MediaMapDetailBody({
         onClose={onClose}
         inCompare={inCompare}
         onToggleCompare={onToggleCompare}
+        onViewInList={onViewInList}
       />
     );
   }
@@ -489,7 +504,10 @@ function MediaMapDetailBody({
   return null;
 }
 
-const BOTTOM_SHEET_DISMISS_DRAG_PX = 72;
+/** bottom-sheet dismiss · dock swipe-up — 동일 threshold */
+export const MAP_SHEET_DRAG_THRESHOLD_PX = 72;
+
+const BOTTOM_SHEET_DISMISS_DRAG_PX = MAP_SHEET_DRAG_THRESHOLD_PX;
 
 function MediaMapBottomSheetShell({
   item,
@@ -574,6 +592,91 @@ function MediaMapBottomSheetShell({
   );
 }
 
+function MediaMapDockShell({
+  item,
+  isKo,
+  className,
+  style,
+  onSwipeUp,
+  children,
+}: {
+  item: MapMapItem;
+  isKo: boolean;
+  className?: string;
+  style?: CSSProperties;
+  onSwipeUp?: () => void;
+  children: ReactNode;
+}) {
+  const dragStartY = useRef<number | null>(null);
+  const [dragOffset, setDragOffset] = useState(0);
+  const [dragging, setDragging] = useState(false);
+
+  const resetDrag = () => {
+    dragStartY.current = null;
+    setDragging(false);
+    setDragOffset(0);
+  };
+
+  const handleTouchStart = (clientY: number) => {
+    if (!onSwipeUp) return;
+    dragStartY.current = clientY;
+    setDragging(true);
+  };
+
+  const handleTouchMove = (clientY: number) => {
+    if (dragStartY.current == null) return;
+    const delta = Math.max(0, dragStartY.current - clientY);
+    setDragOffset(Math.min(delta, 48));
+  };
+
+  const handleTouchEnd = () => {
+    if (dragOffset >= MAP_SHEET_DRAG_THRESHOLD_PX) {
+      onSwipeUp?.();
+    }
+    resetDrag();
+  };
+
+  return (
+    <div
+      id="media-map-preview-dock"
+      role="dialog"
+      aria-label={item.name}
+      className={cn(
+        "pointer-events-auto absolute inset-x-0 z-[25]",
+        "mx-2 max-h-[min(36dvh,240px)] overflow-y-auto rounded-xl sm:mx-3",
+        "border border-gray-200 bg-white/95 shadow-lg backdrop-blur-md",
+        "dark:border-white/12 dark:bg-[#0a0a12]/95",
+        !dragging && "transition-transform duration-300 ease-out",
+        className,
+      )}
+      style={{
+        ...style,
+        transform:
+          dragOffset > 0 ? `translateY(-${dragOffset}px)` : style?.transform,
+      }}
+    >
+      {onSwipeUp ? (
+        <div
+          className="flex h-6 shrink-0 cursor-grab touch-none select-none items-center justify-center active:cursor-grabbing"
+          aria-label={
+            isKo ? "위로 스와이프해 목록에서 보기" : "Swipe up to view in list"
+          }
+          onTouchStart={(e) => handleTouchStart(e.touches[0]?.clientY ?? 0)}
+          onTouchMove={(e) => handleTouchMove(e.touches[0]?.clientY ?? 0)}
+          onTouchEnd={handleTouchEnd}
+          onTouchCancel={resetDrag}
+        >
+          <span
+            aria-hidden
+            className="h-1 w-10 rounded-full bg-gray-300 dark:bg-white/25"
+          />
+        </div>
+      ) : null}
+      {children}
+    </div>
+  );
+}
+
 export function MediaMapDetailSheet({
   item,
   onClose,
@@ -585,6 +688,8 @@ export function MediaMapDetailSheet({
   onToggleCompare,
   onToggleCart,
   floatingBarOffset = false,
+  onViewInList,
+  style,
 }: {
   item: MapMapItem;
   onClose: () => void;
@@ -597,6 +702,9 @@ export function MediaMapDetailSheet({
   onToggleCart?: () => void;
   /** 하단 CompareBar·내 플랜 바가 열려 있을 때 겹침 방지 */
   floatingBarOffset?: boolean;
+  /** 모바일 dock — full 리스트로 전환 */
+  onViewInList?: () => void;
+  style?: CSSProperties;
 }) {
   const [portalMounted, setPortalMounted] = useState(false);
 
@@ -612,6 +720,7 @@ export function MediaMapDetailSheet({
     inCart,
     onToggleCompare,
     onToggleCart,
+    onViewInList,
   };
 
   if (variant === "bottom-sheet") {
@@ -644,20 +753,15 @@ export function MediaMapDetailSheet({
 
   if (variant === "dock") {
     return (
-      <div
-        id="media-map-preview-dock"
-        role="dialog"
-        aria-label={item.name}
-        className={cn(
-          "pointer-events-auto absolute inset-x-0 bottom-0 z-[25]",
-          "mx-2 mb-2 max-h-[min(36dvh,220px)] overflow-y-auto rounded-xl sm:mx-3 sm:mb-3",
-          "border border-gray-200 bg-white/95 shadow-lg backdrop-blur-md",
-          "dark:border-white/12 dark:bg-[#0a0a12]/95",
-          className,
-        )}
+      <MediaMapDockShell
+        item={item}
+        isKo={isKo}
+        className={className}
+        style={style}
+        onSwipeUp={onViewInList}
       >
         <MediaMapDetailBody {...bodyProps} variant="dock" />
-      </div>
+      </MediaMapDockShell>
     );
   }
 
