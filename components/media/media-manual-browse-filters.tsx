@@ -55,7 +55,6 @@ import {
   DiscoveryFilterSheetHeader,
   DiscoveryResultSummary,
   formatBrowseListResultLabel,
-  formatMapViewCountLabel,
   formatMapViewCountCompact,
 } from "@/components/discovery/filter-bar-parts";
 import {
