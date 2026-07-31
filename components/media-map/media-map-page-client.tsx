@@ -49,6 +49,7 @@ import {
   mapBoundsIntersect,
 } from "@/lib/media-map/map-item-bounds";
 import {
+  MEDIA_MAP_LIST_SHEET_TRANSITION_MS,
   MediaMapListSheet,
   type MediaMapSheetSnap,
 } from "@/components/media-map/media-map-list-sheet";
@@ -245,6 +246,8 @@ export default function MediaMapPageClient() {
   const itemsRef = useRef<Item[]>([]);
   const markersRef = useRef<MapMarker[]>([]);
   const listItemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  /** dock CTA/스와이프 → full 전환 시 transition 종료 후 scroll (중복 방지) */
+  const deferListScrollRef = useRef(false);
   const regionPanSkipRef = useRef(true);
   const hotspotPanOnlyRef = useRef(false);
   const forceSearchRef = useRef(false);
@@ -662,7 +665,7 @@ export default function MediaMapPageClient() {
     if (hit) setSelectedItem(hit);
   }, [selectedId, items]);
 
-  useEffect(() => {
+  const scrollSelectedListItem = useCallback(() => {
     if (!selectedId) return;
     const mediaId = resolveMediaIdFromMapPinId(selectedId);
     const el = listItemRefs.current.get(mediaId);
@@ -671,7 +674,23 @@ export default function MediaMapPageClient() {
       block: isMobile ? "center" : "nearest",
       behavior: "smooth",
     });
-  }, [selectedId, items, isMobile]);
+  }, [selectedId, isMobile]);
+
+  const handleViewSelectedInList = useCallback(() => {
+    deferListScrollRef.current = true;
+    setSheetSnap("full");
+    window.setTimeout(() => {
+      scrollSelectedListItem();
+      deferListScrollRef.current = false;
+    }, MEDIA_MAP_LIST_SHEET_TRANSITION_MS);
+  }, [scrollSelectedListItem]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    if (isMobile && sheetSnap !== "full") return;
+    if (deferListScrollRef.current) return;
+    scrollSelectedListItem();
+  }, [selectedId, items, isMobile, sheetSnap, scrollSelectedListItem]);
 
   const handleUserViewportAdjusted = useCallback(() => {
     setViewportDirty(true);
@@ -1317,6 +1336,7 @@ export default function MediaMapPageClient() {
               isKo={isKo}
               inCompare={isInCompare(selected.id)}
               onToggleCompare={() => toggleCompare(selected)}
+              onViewInList={handleViewSelectedInList}
               className="z-[45] max-h-[min(32dvh,200px)]"
               style={{ bottom: peekChromeHeight + 8 }}
             />

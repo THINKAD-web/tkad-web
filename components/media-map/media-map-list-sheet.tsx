@@ -14,6 +14,9 @@ import {
   MAP_ONBOARDING_KEYS,
 } from "@/lib/media-map/onboarding-storage";
 
+/** list sheet snap transition — scrollIntoView 지연과 동기 */
+export const MEDIA_MAP_LIST_SHEET_TRANSITION_MS = 320;
+
 /** 모바일 지도 목록 시트 — peek(지도 풀) / full(목록 풀) 2단만 */
 export type MediaMapSheetSnap = "peek" | "full";
 
