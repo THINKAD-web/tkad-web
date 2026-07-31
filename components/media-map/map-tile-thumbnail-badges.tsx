@@ -141,6 +141,7 @@ export function MapTileThumbnailBadges({
         "pointer-events-none absolute inset-x-1.5 top-1.5 z-10 flex flex-wrap items-start gap-1 sm:inset-x-2 sm:top-2",
         className,
       )}
+      data-map-tile-badge-stack
       aria-hidden
     >
       {visible.map((badge) => (
