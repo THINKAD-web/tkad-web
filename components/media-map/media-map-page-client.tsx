@@ -11,6 +11,7 @@ import { MapFloatingButton, mapFloatingPanelClass } from "@/components/media-map
 import { cn } from "@/lib/utils";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import type { DarkMapProgrammaticView } from "@/components/public-map/dark-map-view";
+import type { MapPinLabelOverlayState } from "@/lib/map-pin-labels";
 import {
   mapMarkersForMapCatalogItem,
   resolveMediaIdFromMapPinId,
@@ -196,6 +197,10 @@ export default function MediaMapPageClient() {
   const [invalidateNonce, setInvalidateNonce] = useState(0);
   /** "이 지역에서 검색" 1회성 코치마크 */
   const [showSearchCoachmark, setShowSearchCoachmark] = useState(false);
+  const [pinLabelState, setPinLabelState] = useState<MapPinLabelOverlayState | null>(
+    null,
+  );
+  const [showPinLabelCapHint, setShowPinLabelCapHint] = useState(false);
   const [subwayOverlayEnabled, setSubwayOverlayEnabled] = useState(false);
   const pvNonceRef = useRef(0);
   const [programmaticView, setProgrammaticView] =
@@ -386,6 +391,24 @@ export default function MediaMapPageClient() {
   const handleSubwayOverlayChange = useCallback((enabled: boolean) => {
     setSubwayOverlayEnabled(enabled);
     writeSubwayOverlayEnabled(enabled);
+  }, []);
+
+  const handlePinLabelStateChange = useCallback(
+    (state: MapPinLabelOverlayState) => {
+      setPinLabelState(state);
+      if (
+        state.capActive &&
+        !hasSeenMapOnboarding(MAP_ONBOARDING_KEYS.pinLabelCapHint)
+      ) {
+        setShowPinLabelCapHint(true);
+      }
+    },
+    [],
+  );
+
+  const dismissPinLabelCapHint = useCallback(() => {
+    markMapOnboardingSeen(MAP_ONBOARDING_KEYS.pinLabelCapHint);
+    setShowPinLabelCapHint(false);
   }, []);
 
   // 레이아웃 전환(데스크톱↔모바일)·바텀시트 스냅·peek 크롬 높이 변경 후 지도 타일 재계산
@@ -1203,6 +1226,7 @@ export default function MediaMapPageClient() {
               invalidateNonce={invalidateNonce}
               themeAwareTiles
               subwayOverlayEnabled={subwayOverlayEnabled}
+              onPinLabelStateChange={handlePinLabelStateChange}
             />
           </div>
 
@@ -1323,13 +1347,38 @@ export default function MediaMapPageClient() {
           ) : null}
 
           {mapChromeVisible ? (
-            <MediaMapVisibilityLegend
-              isKo={isKo}
-              className="absolute bottom-3 left-3 z-[10] max-w-[168px] sm:bottom-4 sm:left-4"
-              showSubwayToggle
-              subwayEnabled={subwayOverlayEnabled}
-              onSubwayEnabledChange={handleSubwayOverlayChange}
-            />
+            <div className="pointer-events-none absolute bottom-3 left-3 z-[10] flex max-w-[min(100%-1.5rem,220px)] flex-col items-start gap-2 sm:bottom-4 sm:left-4">
+              {showPinLabelCapHint && pinLabelState?.capActive ? (
+                <div
+                  className={cn(
+                    mapFloatingPanelClass(
+                      "pointer-events-auto px-3 py-2 text-left",
+                    ),
+                  )}
+                  role="status"
+                >
+                  <p className="tkad-type-note leading-snug text-foreground">
+                    {isKo
+                      ? "매체가 많아 이름이 숨겨졌습니다. 더 확대하면 매체명이 보입니다."
+                      : "Too many pins here — zoom in to see media names."}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={dismissPinLabelCapHint}
+                    className="tkad-type-note mt-1.5 font-semibold text-[color:var(--qp-accent)] hover:underline"
+                  >
+                    {isKo ? "알겠어요" : "Got it"}
+                  </button>
+                </div>
+              ) : null}
+              <MediaMapVisibilityLegend
+                isKo={isKo}
+                className="pointer-events-auto max-w-[168px]"
+                showSubwayToggle
+                subwayEnabled={subwayOverlayEnabled}
+                onSubwayEnabledChange={handleSubwayOverlayChange}
+              />
+            </div>
           ) : null}
 
           <div className="pointer-events-none absolute right-3 top-3 z-[46] hidden flex-col gap-2 sm:right-4 sm:top-4 md:flex">

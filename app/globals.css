@@ -4294,6 +4294,16 @@ img {
   border-top-color: rgba(15, 23, 42, 0.88) !important;
 }
 
+.tkad-dark-map-root .tkad-pin-name-label--selected {
+  background: rgba(255, 98, 0, 0.92) !important;
+  font-weight: 700 !important;
+  box-shadow: 0 2px 10px rgba(255, 98, 0, 0.35) !important;
+}
+
+.tkad-dark-map-root .tkad-pin-name-label--selected::before {
+  border-top-color: rgba(255, 98, 0, 0.92) !important;
+}
+
 .tkad-map-pin-icon {
   transition:
     transform 0.18s ease,

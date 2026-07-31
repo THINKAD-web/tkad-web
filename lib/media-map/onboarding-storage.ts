@@ -9,6 +9,8 @@ export const MAP_ONBOARDING_KEYS = {
   searchNudge: `${PREFIX}search_nudge_seen`,
   /** 모바일 시트 peek 드래그 힌트 */
   sheetPeekHint: `${PREFIX}sheet_hint_seen`,
+  /** 밀집 구역 cap 시 매체명 라벨 힌트 */
+  pinLabelCapHint: `${PREFIX}pin_label_cap_hint_seen`,
 } as const;
 
 export type MapOnboardingKey =

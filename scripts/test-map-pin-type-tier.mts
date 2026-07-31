@@ -39,7 +39,7 @@ assert.notEqual(digitalHigh, staticHigh, "type changes data url");
 assert.notEqual(staticHigh, networkHigh, "network vs static");
 
 const svgDigital = decodeSvg(digitalHigh);
-assert.match(svgDigital, />D</, "digital letter");
+assert.doesNotMatch(svgDigital, /<text[\s>]/, "no letter text on pin");
 assert.match(svgDigital, /fill="#ff6200"/, "digital fill");
 assert.match(svgDigital, /<circle cx="16"/, "digital circle shape");
 assert.match(
@@ -51,12 +51,12 @@ assert.match(
 );
 
 const svgStatic = decodeSvg(staticHigh);
-assert.match(svgStatic, />S</, "static letter");
+assert.doesNotMatch(svgStatic, /<text[\s>]/, "no letter text on pin");
 assert.match(svgStatic, /fill="#334155"/, "static fill");
 assert.match(svgStatic, /<rect x="5"/, "static rounded-square shape");
 
 const svgNetwork = decodeSvg(networkHigh);
-assert.match(svgNetwork, />N</, "network letter");
+assert.doesNotMatch(svgNetwork, /<text[\s>]/, "no letter text on pin");
 assert.match(svgNetwork, /fill="#1e4976"/, "network navy fill");
 assert.match(svgNetwork, /points="16,5 27,16 16,27 5,16"/, "network diamond shape");
 

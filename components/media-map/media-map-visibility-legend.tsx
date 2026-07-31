@@ -93,7 +93,7 @@ export function MediaMapVisibilityLegend({
           <ul className="space-y-1.5">
             {MEDIA_TYPE_PIN_LEGEND_ENTRIES.map((entry) => (
               <li
-                key={entry.letter}
+                key={entry.sampleType}
                 className="tkad-type-note leading-tight text-tkad-secondary"
               >
                 <span className="flex items-start gap-2">
@@ -109,7 +109,7 @@ export function MediaMapVisibilityLegend({
                   />
                   <span className="min-w-0">
                     <span className="font-medium text-foreground">
-                      {entry.letter} · {isKo ? entry.labelKo : entry.labelEn}
+                      {isKo ? entry.labelKo : entry.labelEn}
                     </span>
                     {entry.noteKo ? (
                       <span className="mt-0.5 block text-tkad-muted">
@@ -152,8 +152,8 @@ export function MediaMapVisibilityLegend({
           </ul>
           <p className="tkad-type-note mt-1.5 text-tkad-muted">
             {isKo
-              ? "외곽 ring 진할수록 높은 가시성 · 모양·문자로 매체 유형 구분"
-              : "Darker outer ring = higher visibility · shape and letter = media type"}
+              ? "외곽 ring 진할수록 높은 가시성 · 모양·색으로 매체 유형 구분 · 확대 시 매체명 표시"
+              : "Darker outer ring = higher visibility · shape and color = media type · zoom in for names"}
           </p>
           {showSubwayToggle ? (
             <p className="tkad-type-note mt-2 text-tkad-muted">
