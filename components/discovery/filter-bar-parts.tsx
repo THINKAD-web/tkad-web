@@ -242,6 +242,42 @@ export function formatMapViewCountLabel(
   return isKo ? `전국 ${resultCount}개` : `${resultCount} nationwide`;
 }
 
+/** `/media/map` — 툴바·시트용 축약 카운트 */
+export function formatMapViewCountCompact(
+  resultCount: number,
+  isKo: boolean,
+): string {
+  const n = isKo ? resultCount.toLocaleString("ko-KR") : resultCount.toLocaleString();
+  return isKo ? `${n}개` : `${n} results`;
+}
+
+/** hover/title용 상세 breakdown */
+export function formatMapViewCountDetail(
+  listed: number,
+  mapPins: number,
+  serviceRegion: number,
+  locationUnknown: number,
+  isKo: boolean,
+): string {
+  const parts = [
+    isKo ? `목록 ${listed}개` : `${listed} listed`,
+    isKo ? `지도 ${mapPins}개` : `${mapPins} on map`,
+  ];
+  if (serviceRegion > 0) {
+    parts.push(
+      isKo ? `서비스지역 ${serviceRegion}` : `${serviceRegion} service region`,
+    );
+  }
+  if (locationUnknown > 0) {
+    parts.push(
+      isKo
+        ? `위치 미확인 ${locationUnknown}`
+        : `${locationUnknown} location unknown`,
+    );
+  }
+  return parts.join(" · ");
+}
+
 const fmtCount = (n: number, isKo: boolean) =>
   isKo ? n.toLocaleString("ko-KR") : n.toLocaleString();
 

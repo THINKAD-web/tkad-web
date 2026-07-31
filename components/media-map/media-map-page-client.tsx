@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import dynamic from "next/dynamic";
-import { DiscoveryFilterBar, formatMapViewCountLabel, type DiscoveryFilterBarViewMode } from "@/components/discovery/filter-bar";
+import { DiscoveryFilterBar, formatMapViewCountCompact, formatMapViewCountDetail, formatMapViewCountLabel, type DiscoveryFilterBarViewMode } from "@/components/discovery/filter-bar";
 import { ClipboardCheck, Crosshair, LayoutList, Loader2, Map as MapIcon, Search } from "lucide-react";
 import { FieldSurveyPanel } from "@/components/media-map/field-survey-panel";
 import { MediaMapVisibilityLegend } from "@/components/media-map/media-map-visibility-legend";
@@ -1102,31 +1102,20 @@ export default function MediaMapPageClient() {
     (i) => resolveItemMapDisplayMode(i) === "location_unknown",
   ).length;
 
-  const mapResultLabel = (() => {
+  const mapResultLabel = formatMapViewCountCompact(items.length, isKo);
+  const mapResultDetailLabel = (() => {
     const hasExtra =
       serviceRegionInView > 0 || locationUnknownInView > 0;
-    if (!hasExtra) {
-      return formatMapViewCountLabel(items.length, matchTotal, isKo);
+    if (!hasExtra && (matchTotal == null || matchTotal <= items.length)) {
+      return mapResultLabel;
     }
-    const parts = [
-      isKo ? `목록 ${items.length}개` : `${items.length} listed`,
-      isKo ? `지도 ${mapPinCount}개` : `${mapPinCount} on map`,
-    ];
-    if (serviceRegionInView > 0) {
-      parts.push(
-        isKo
-          ? `서비스지역 ${serviceRegionInView}`
-          : `${serviceRegionInView} service region`,
-      );
-    }
-    if (locationUnknownInView > 0) {
-      parts.push(
-        isKo
-          ? `위치 미확인 ${locationUnknownInView}`
-          : `${locationUnknownInView} location unknown`,
-      );
-    }
-    return parts.join(" · ");
+    return formatMapViewCountDetail(
+      items.length,
+      mapPinCount,
+      serviceRegionInView,
+      locationUnknownInView,
+      isKo,
+    );
   })();
 
   const showMapEmptyOverlay =
@@ -1138,7 +1127,10 @@ export default function MediaMapPageClient() {
   const mobileSheetHeader = (
     <div className="flex min-h-0 items-center justify-between gap-2 leading-tight">
       <div className="flex min-w-0 flex-1 items-center gap-2">
-        <p className="tkad-type-meta min-w-0 truncate font-semibold text-foreground">
+        <p
+          className="tkad-type-meta min-w-0 truncate font-semibold text-foreground"
+          title={mapResultDetailLabel}
+        >
           {showMapEmptyOverlay
             ? isKo
               ? "이 영역 0개"

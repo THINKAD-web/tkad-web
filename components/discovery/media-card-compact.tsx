@@ -736,7 +736,7 @@ export const DiscoveryMediaCardMapTile = forwardRef<
           </div>
         )}
 
-        <MapTileThumbnailBadges item={item} isKo={isKo} />
+        <MapTileThumbnailBadges item={item} isKo={isKo} hideVisibilityScore />
 
         {model.metricLine ? (
           <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">

@@ -56,6 +56,7 @@ import {
   DiscoveryResultSummary,
   formatBrowseListResultLabel,
   formatMapViewCountLabel,
+  formatMapViewCountCompact,
 } from "@/components/discovery/filter-bar-parts";
 import {
   buildMapBrowseActiveFilterChips,
@@ -64,6 +65,7 @@ import {
 import { CompositionSearchInput } from "@/components/ui/composition-input";
 import { PlanCartSheet } from "@/components/plan/plan-cart-sheet";
 import { HotspotRegionChips } from "@/components/media/hotspot-region-chips";
+import { HotspotRegionDropdown } from "@/components/media/hotspot-region-dropdown";
 import { useBrowseFilterOptionCounts } from "@/hooks/use-browse-filter-option-counts";
 import {
   browseRegionSubCount,
@@ -433,17 +435,13 @@ export function MediaManualBrowseFilters({
   /** 지도 — bounds 로 줄어든 경우만 화면/전국 split, 그 외 /media 와 동일 포맷 */
   const filterApplyCountPhrase = loading
     ? null
-    : mapPageViewModes &&
-        viewMode === "map" &&
-        variant !== "network" &&
-        total != null &&
-        total > resultCount
-      ? formatMapViewCountLabel(resultCount, total, isKo)
+    : mapPageViewModes && viewMode === "map" && variant !== "network"
+      ? formatMapViewCountCompact(resultCount, isKo)
       : formatBrowseListResultLabel(resultCount, total, isKo, resultKind);
 
   const mapCountLabel =
     viewMode === "map" && variant !== "network"
-      ? formatMapViewCountLabel(resultCount, total, isKo)
+      ? formatMapViewCountCompact(resultCount, isKo)
       : null;
 
   const resultLabel = loading
@@ -947,6 +945,19 @@ export function MediaManualBrowseFilters({
     />
   );
 
+  const renderHotspotControl = (opts?: { compact?: boolean }) =>
+    mapPageViewModes ? (
+      <HotspotRegionDropdown
+        isKo={isKo}
+        regionSub={regionSub}
+        compact={opts?.compact ?? mapToolbarCompact}
+        onSelect={handleHotspotSelect}
+        onClear={handleHotspotClear}
+      />
+    ) : (
+      renderHotspotRow(filterIaListPage)
+    );
+
   const renderPriceAndFeatures = () => {
     const minParsed = priceMin.trim() ? Number(priceMin) : null;
     const maxParsed = priceMax.trim() ? Number(priceMax) : null;
@@ -1419,6 +1430,7 @@ export function MediaManualBrowseFilters({
       {searchInput}
       {mobileFilterButtonIcon}
       {mobileSortButtonIcon}
+      {showHotspotRegions ? renderHotspotControl({ compact: true }) : null}
       {mapPageViewModes ? mapToolbarSummaryChips : null}
     </div>
   ) : null;
@@ -1514,7 +1526,7 @@ export function MediaManualBrowseFilters({
             {mapMobileImmersiveMode ? (
               <>
                 {mobileImmersiveControlRow}
-                {showHotspotRegions && variant === "media"
+                {showHotspotRegions && variant === "media" && !mapPageViewModes
                   ? renderHotspotRow(filterIaListPage)
                   : null}
               </>
@@ -1587,13 +1599,16 @@ export function MediaManualBrowseFilters({
               ) : null}
             </div>
             {sortSelect}
+            {showHotspotRegions && mapPageViewModes
+              ? renderHotspotControl({ compact: true })
+              : null}
             {catalogBrowseSegment}
             {viewModeToggle}
             {mapPageViewModes ? mapToolbarSummaryChips : null}
             {mapNavButton}
             {toolbarEnd}
           </div>
-          {showHotspotRegions && variant === "media" ? (
+          {showHotspotRegions && variant === "media" && !mapPageViewModes ? (
             <div className="hidden min-w-0 md:block">{renderHotspotRow(filterIaListPage)}</div>
           ) : null}
           {showListTypeChipRow ? (
