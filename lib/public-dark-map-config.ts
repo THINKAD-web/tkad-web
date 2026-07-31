@@ -1,4 +1,11 @@
-/** 공개(사용자) 지도 — Carto 타일 (홈 히어로·/media/map·매체 상세 공통) */
+import {
+  VWORLD_WMTS_LAYERS,
+  VWORLD_TILE_ATTRIBUTION,
+  isVWorldTilesConfigured,
+  vworldWmtsTileUrl,
+} from "@/lib/public-vworld-map-config";
+
+/** 공개(사용자) 지도 — VWorld(키 있을 때) / Carto fallback */
 
 export const PUBLIC_MAP_TILE_SUBDOMAINS = "abcd";
 
@@ -24,13 +31,29 @@ export const PUBLIC_MAP_TILE_PRESET: PublicMapTilePreset = "voyager";
 export const PUBLIC_DARK_MAP_TILE_URL =
   PUBLIC_MAP_TILE_URLS[PUBLIC_MAP_TILE_PRESET];
 
-/** next-themes `resolvedTheme` 기준 — /media/map themeAware 타일 (라벨 포함) */
+/**
+ * next-themes `resolvedTheme` 기준 — /media/map themeAware 타일.
+ * - Light: `NEXT_PUBLIC_VWORLD_API_KEY` 있으면 VWorld Base, 없으면 Carto voyager
+ * - Dark: VWorld dark 타일 없음 → Carto dark 유지
+ */
 export function publicMapTileUrlForTheme(
   resolvedTheme: string | undefined,
 ): string {
-  return resolvedTheme === "dark"
-    ? PUBLIC_MAP_TILE_URLS.dark
-    : PUBLIC_MAP_TILE_URLS.voyager;
+  if (resolvedTheme === "dark") {
+    return PUBLIC_MAP_TILE_URLS.dark;
+  }
+  const vworld = vworldWmtsTileUrl(VWORLD_WMTS_LAYERS.base);
+  if (vworld) return vworld;
+  return PUBLIC_MAP_TILE_URLS.voyager;
+}
+
+export function publicMapTileAttributionForTheme(
+  resolvedTheme: string | undefined,
+): string {
+  if (resolvedTheme !== "dark" && isVWorldTilesConfigured()) {
+    return VWORLD_TILE_ATTRIBUTION;
+  }
+  return '&copy; <a href="https://carto.com/">CARTO</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>';
 }
 
 export function isPublicMapLightTileFromTheme(

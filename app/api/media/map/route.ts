@@ -1,5 +1,11 @@
-import { getPublicMediaMapCatalogCached } from "@/lib/public-media-map-catalog-cache";
+import {
+  mapItemShowsOnMap,
+  resolveMapDisplayMode,
+  resolveServiceRegionLabel,
+  type MapDisplayMode,
+} from "@/lib/media-map/map-display-mode";
 import { mediaItemIntersectsMapBounds } from "@/lib/media-detail-map-markers";
+import { getPublicMediaMapCatalogCached } from "@/lib/public-media-map-catalog-cache";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { resolveMediaDisplayPrice } from "@/lib/media-price-format";
 import { filterMediaByDiscoveryChips } from "@/lib/media-discovery-client-filter";
@@ -30,7 +36,52 @@ function parseSort(raw: string | null): PublicMediaSort {
   return "popular";
 }
 
-function toMapItem(m: MediaItem) {
+function itemHasAnyCoordinate(m: MediaItem): boolean {
+  const hasValidCoord =
+    Number.isFinite(m.lat) &&
+    Number.isFinite(m.lng) &&
+    Math.abs(m.lat) <= 90 &&
+    Math.abs(m.lng) <= 180;
+  const hasInstallCoords = (m.installLocations ?? []).some(
+    (p) =>
+      Number.isFinite(p.lat) &&
+      Number.isFinite(p.lng) &&
+      Math.abs(p.lat) <= 90 &&
+      Math.abs(p.lng) <= 180,
+  );
+  return hasValidCoord || hasInstallCoords;
+}
+
+function itemIncludedInMapList(
+  m: MediaItem,
+  bounds: {
+    swLat: number;
+    neLat: number;
+    swLng: number;
+    neLng: number;
+  } | null,
+  nationalScope: boolean,
+): boolean {
+  const mode = resolveMapDisplayMode(m);
+
+  if (mode === "service_region" || mode === "location_unknown") {
+    return true;
+  }
+
+  if (!itemHasAnyCoordinate(m)) return false;
+
+  if (!nationalScope && bounds) {
+    return mediaItemIntersectsMapBounds(m, bounds);
+  }
+
+  return true;
+}
+
+function toMapItem(
+  m: MediaItem,
+  mapDisplayMode: MapDisplayMode,
+  serviceRegionLabel: string | undefined,
+) {
   const display = resolveMediaDisplayPrice(m);
   return {
     id: m.id,
@@ -67,6 +118,12 @@ function toMapItem(m: MediaItem) {
           lng: p.lng,
         }))
       : undefined,
+    mapDisplayMode,
+    serviceRegionLabel: serviceRegionLabel ?? null,
+    /** @deprecated `mapDisplayMode === "location_unknown"` 사용 */
+    locationUnknown: mapDisplayMode === "location_unknown",
+    coverageDistrictCodes:
+      m.coverageDistrictCodes?.length ? [...m.coverageDistrictCodes] : undefined,
   };
 }
 
@@ -127,47 +184,36 @@ export async function GET(req: Request) {
 
     const filterMatched = filterMediaByDiscoveryChips(all, chipFilterOpts);
 
-    const filtered = filterMatched.filter((m) => {
-      const hasValidCoord =
-        Number.isFinite(m.lat) &&
-        Number.isFinite(m.lng) &&
-        Math.abs(m.lat) <= 90 &&
-        Math.abs(m.lng) <= 180;
-      const hasInstallCoords = (m.installLocations ?? []).some(
-        (p) =>
-          Number.isFinite(p.lat) &&
-          Number.isFinite(p.lng) &&
-          Math.abs(p.lat) <= 90 &&
-          Math.abs(p.lng) <= 180,
-      );
-      if (!hasValidCoord && !hasInstallCoords) return false;
-      if (
-        !nationalScope &&
-        swLat != null &&
-        neLat != null &&
-        swLng != null &&
-        neLng != null
-      ) {
-        if (
-          !mediaItemIntersectsMapBounds(m, {
-            swLat,
-            neLat,
-            swLng,
-            neLng,
-          })
-        ) {
-          return false;
-        }
-      }
-      return true;
-    });
+    const bounds =
+      swLat != null && neLat != null && swLng != null && neLng != null
+        ? { swLat, neLat, swLng, neLng }
+        : null;
 
-    const items = sortMapCatalogItems(filtered, filterParams.sort).map(toMapItem);
+    const filtered = filterMatched.filter((m) =>
+      itemIncludedInMapList(m, bounds, nationalScope),
+    );
+
+    const sorted = sortMapCatalogItems(filtered, filterParams.sort);
+    let mapPlottableTotal = 0;
+    let serviceRegionTotal = 0;
+    let locationUnknownTotal = 0;
+
+    const items = sorted.map((m) => {
+      const mapDisplayMode = resolveMapDisplayMode(m);
+      const serviceRegionLabel = resolveServiceRegionLabel(m);
+      if (mapItemShowsOnMap(mapDisplayMode)) mapPlottableTotal += 1;
+      else if (mapDisplayMode === "service_region") serviceRegionTotal += 1;
+      else locationUnknownTotal += 1;
+      return toMapItem(m, mapDisplayMode, serviceRegionLabel);
+    });
 
     return apiOk({
       items,
       total: items.length,
       matchTotal: filterMatched.length,
+      mapPlottableTotal,
+      serviceRegionTotal,
+      locationUnknownTotal,
       facets,
     });
   } catch (e) {

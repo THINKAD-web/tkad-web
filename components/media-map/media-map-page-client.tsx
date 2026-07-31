@@ -69,6 +69,18 @@ import {
   readSubwayOverlayEnabled,
   writeSubwayOverlayEnabled,
 } from "@/lib/public-map/seoul-metro-overlay-storage";
+import {
+  MAP_AUTO_SEARCH_BOUNDS_CHANGE_THRESHOLD,
+  MAP_AUTO_SEARCH_DEBOUNCE_MS,
+  mapBoundsChangeExceedsThreshold,
+} from "@/lib/media-map/map-bounds-change";
+import {
+  resolveItemMapDisplayMode,
+} from "@/lib/media-map/map-display-mode";
+
+function itemShowsMapPin(item: MapMapItem): boolean {
+  return resolveItemMapDisplayMode(item) === "pin";
+}
 
 function MapViewLoadingPlaceholder() {
   return (
@@ -138,8 +150,16 @@ export default function MediaMapPageClient() {
   const [viewportDirty, setViewportDirty] = useState(false);
   const [items, setItems] = useState<Item[]>([]);
   const [matchTotal, setMatchTotal] = useState<number | undefined>(undefined);
+  const [mapPlottableTotal, setMapPlottableTotal] = useState<number | undefined>(
+    undefined,
+  );
+  const [serviceRegionTotal, setServiceRegionTotal] = useState<
+    number | undefined
+  >(undefined);
   const [facets, setFacets] = useState<Facets>({ regions: [], types: [] });
   const [loading, setLoading] = useState(false);
+  /** 자동 영역 재조회(fetch) 진행 중 — 우상단 스피너 표시용 */
+  const [autoRefreshing, setAutoRefreshing] = useState(false);
   const initialUrl = useRef(readInitialUrlState());
   const [browseFilters, setBrowseFilters] = useState<MapBrowseFilters>(() =>
     initMapBrowseFiltersFromUrl(initialUrl.current),
@@ -235,6 +255,11 @@ export default function MediaMapPageClient() {
   const lastTextSearchQRef = useRef("");
   const mapFetchAbortRef = useRef<AbortController | null>(null);
   const fetchGenerationRef = useRef(0);
+  const autoSearchDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const viewportDirtyRef = useRef(false);
+  const boundsRef = useRef<MapBounds | null>(null);
 
   useEffect(() => {
     return () => {
@@ -245,6 +270,21 @@ export default function MediaMapPageClient() {
   useEffect(() => {
     browseFiltersRef.current = browseFilters;
   }, [browseFilters]);
+
+  useEffect(() => {
+    viewportDirtyRef.current = viewportDirty;
+  }, [viewportDirty]);
+
+  useEffect(() => {
+    boundsRef.current = bounds;
+  }, [bounds]);
+
+  const clearAutoSearchDebounce = useCallback(() => {
+    if (autoSearchDebounceRef.current != null) {
+      window.clearTimeout(autoSearchDebounceRef.current);
+      autoSearchDebounceRef.current = null;
+    }
+  }, []);
 
   const applyTextSearchMapView = useCallback(
     (
@@ -423,7 +463,15 @@ export default function MediaMapPageClient() {
         }
         let data: {
           ok?: boolean;
-          data?: { items?: Item[]; facets?: Facets; matchTotal?: number };
+          data?: {
+            items?: Item[];
+            facets?: Facets;
+            matchTotal?: number;
+            mapPlottableTotal?: number;
+            serviceRegionTotal?: number;
+            locationUnknownTotal?: number;
+            locationUnknownIds?: string[];
+          };
         };
         try {
           data = (await res.json()) as typeof data;
@@ -440,6 +488,18 @@ export default function MediaMapPageClient() {
             typeof data.data.matchTotal === "number"
               ? data.data.matchTotal
               : next.length,
+          );
+          setMapPlottableTotal(
+            typeof data.data.mapPlottableTotal === "number"
+              ? data.data.mapPlottableTotal
+              : next.filter(itemShowsMapPin).length,
+          );
+          setServiceRegionTotal(
+            typeof data.data.serviceRegionTotal === "number"
+              ? data.data.serviceRegionTotal
+              : next.filter(
+                  (i) => resolveItemMapDisplayMode(i) === "service_region",
+                ).length,
           );
           setFacets(
             data.data.facets ?? {
@@ -573,8 +633,9 @@ export default function MediaMapPageClient() {
   }, [browseFilters.regionMain, browseFilters.regionSub, emitProgrammaticView]);
 
   const markers: MapMarker[] = useMemo(() => {
-    const fromItems = items.flatMap((i) => mapMarkersForMapCatalogItem(i));
-    if (!selectedItem) return fromItems;
+    const plottable = items.filter(itemShowsMapPin);
+    const fromItems = plottable.flatMap((i) => mapMarkersForMapCatalogItem(i));
+    if (!selectedItem || !itemShowsMapPin(selectedItem)) return fromItems;
     const selectedPins = mapMarkersForMapCatalogItem(selectedItem);
     if (selectedPins.length === 0) return fromItems;
     const existingIds = new Set(fromItems.map((m) => m.id));
@@ -612,6 +673,46 @@ export default function MediaMapPageClient() {
     setViewportDirty(true);
   }, []);
 
+  /** Pan/zoom 종료 후 debounce → bounds 10% 이상 변화 시 자동 재조회 */
+  useEffect(() => {
+    clearAutoSearchDebounce();
+
+    if (isMapTextSearchActive(browseFilters)) return;
+    if (!viewportDirty || !bounds || !searchedBounds) return;
+    if (!mapBoundsChangeExceedsThreshold(searchedBounds, bounds)) return;
+
+    autoSearchDebounceRef.current = window.setTimeout(() => {
+      autoSearchDebounceRef.current = null;
+      if (!viewportDirtyRef.current) return;
+      const b = boundsRef.current;
+      const s = searchedBoundsRef.current;
+      if (!b || !s) return;
+      if (isMapTextSearchActive(browseFiltersRef.current)) return;
+      if (
+        !mapBoundsChangeExceedsThreshold(
+          s,
+          b,
+          MAP_AUTO_SEARCH_BOUNDS_CHANGE_THRESHOLD,
+        )
+      ) {
+        return;
+      }
+      setAutoRefreshing(true);
+      void runSearch(b).finally(() => setAutoRefreshing(false));
+    }, MAP_AUTO_SEARCH_DEBOUNCE_MS);
+
+    return clearAutoSearchDebounce;
+  }, [
+    bounds,
+    viewportDirty,
+    searchedBounds,
+    browseFilters.q,
+    runSearch,
+    clearAutoSearchDebounce,
+  ]);
+
+  useEffect(() => () => clearAutoSearchDebounce(), [clearAutoSearchDebounce]);
+
   const dismissSearchCoachmark = useCallback(() => {
     markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchCoachmark);
     setShowSearchCoachmark(false);
@@ -620,9 +721,11 @@ export default function MediaMapPageClient() {
   const handleSearchThisArea = useCallback(() => {
     dismissSearchCoachmark();
     markMapOnboardingSeen(MAP_ONBOARDING_KEYS.searchNudge);
+    clearAutoSearchDebounce();
+    setAutoRefreshing(false);
     if (!bounds) return;
     void runSearch(bounds);
-  }, [bounds, runSearch, dismissSearchCoachmark]);
+  }, [bounds, runSearch, dismissSearchCoachmark, clearAutoSearchDebounce]);
 
   const showSearchAreaButton =
     !isMapTextSearchActive(browseFilters) &&
@@ -639,6 +742,7 @@ export default function MediaMapPageClient() {
       const mediaId = resolveMediaIdFromMapPinId(id);
       const item = itemsRef.current.find((i) => i.id === mediaId);
       if (item) setSelectedItem(item);
+      if (!item || !itemShowsMapPin(item)) return;
       const mk =
         markersRef.current.find((m) => m.id === id) ??
         markersRef.current.find(
@@ -961,11 +1065,42 @@ export default function MediaMapPageClient() {
     />
   );
 
-  const mapResultLabel = formatMapViewCountLabel(
-    items.length,
-    matchTotal,
-    isKo,
-  );
+  const mapPinCount =
+    mapPlottableTotal ?? items.filter(itemShowsMapPin).length;
+  const serviceRegionInView =
+    serviceRegionTotal ??
+    items.filter((i) => resolveItemMapDisplayMode(i) === "service_region")
+      .length;
+  const locationUnknownInView = items.filter(
+    (i) => resolveItemMapDisplayMode(i) === "location_unknown",
+  ).length;
+
+  const mapResultLabel = (() => {
+    const hasExtra =
+      serviceRegionInView > 0 || locationUnknownInView > 0;
+    if (!hasExtra) {
+      return formatMapViewCountLabel(items.length, matchTotal, isKo);
+    }
+    const parts = [
+      isKo ? `목록 ${items.length}개` : `${items.length} listed`,
+      isKo ? `지도 ${mapPinCount}개` : `${mapPinCount} on map`,
+    ];
+    if (serviceRegionInView > 0) {
+      parts.push(
+        isKo
+          ? `서비스지역 ${serviceRegionInView}`
+          : `${serviceRegionInView} service region`,
+      );
+    }
+    if (locationUnknownInView > 0) {
+      parts.push(
+        isKo
+          ? `위치 미확인 ${locationUnknownInView}`
+          : `${locationUnknownInView} location unknown`,
+      );
+    }
+    return parts.join(" · ");
+  })();
 
   const showMapEmptyOverlay =
     (searchedBounds || isMapTextSearchActive(browseFilters)) &&
@@ -1072,6 +1207,27 @@ export default function MediaMapPageClient() {
               isKo={isKo}
               className="pointer-events-none absolute inset-x-4 top-[38%] z-[12] -translate-y-1/2 sm:inset-x-auto sm:left-1/2 sm:w-full sm:max-w-sm sm:-translate-x-1/2"
             />
+          ) : null}
+
+          {autoRefreshing && mapChromeVisible ? (
+            <div
+              className={cn(
+                mapFloatingPanelClass(
+                  "pointer-events-none absolute z-[47] inline-flex items-center gap-1.5 px-2.5 py-1.5",
+                ),
+                "right-3 top-3 sm:right-4 sm:top-4 md:top-14",
+              )}
+              role="status"
+              aria-live="polite"
+            >
+              <Loader2
+                className="h-3.5 w-3.5 shrink-0 animate-spin text-[color:var(--qp-accent)]"
+                aria-hidden
+              />
+              <span className="tkad-type-meta font-medium text-foreground">
+                {isKo ? "지역 데이터 갱신 중…" : "Updating area…"}
+              </span>
+            </div>
           ) : null}
 
           {showSearchAreaButton && mapChromeVisible ? (
