@@ -10,6 +10,10 @@ import {
   AnchoredOverlayPortal,
   anchoredPlacementBelowTriggerLeft,
 } from "@/components/ui/anchored-overlay-portal";
+import {
+  MAP_TOOLBAR_CTRL,
+  MAP_TOOLBAR_CTRL_ACTIVE,
+} from "@/components/media-map/map-toolbar-control-styles";
 import { cn } from "@/lib/utils";
 
 type Props = {
@@ -18,6 +22,7 @@ type Props = {
   onSelect: (regionMain: string, regionSub: string) => void;
   onClear: () => void;
   className?: string;
+  /** @deprecated toolbar uses fixed h-9; kept for call-site compat */
   compact?: boolean;
 };
 
@@ -56,17 +61,16 @@ export function HotspotRegionDropdown({
         type="button"
         onClick={() => setOpen((o) => !o)}
         className={cn(
-          "inline-flex shrink-0 items-center gap-1 rounded-full border font-semibold transition-colors",
-          compact ? "px-2.5 py-1 text-[11px]" : "px-3 py-1.5 text-xs",
-          active
-            ? "border-[color:var(--qp-accent)]/50 bg-[color:var(--qp-accent-soft)] text-[color:var(--qp-accent)]"
-            : "border-border/80 bg-gray-100 text-gray-700 hover:bg-gray-200 dark:border-white/12 dark:bg-white/10 dark:text-white/80 dark:hover:bg-white/15",
+          MAP_TOOLBAR_CTRL,
+          active && MAP_TOOLBAR_CTRL_ACTIVE,
           className,
         )}
         aria-expanded={open}
         aria-haspopup="listbox"
       >
-        <span className="max-w-[8rem] truncate">{triggerLabel}</span>
+        <span className="max-w-[5.5rem] truncate sm:max-w-[6.5rem]">
+          {triggerLabel}
+        </span>
         <ChevronDown
           className={cn(
             "h-3.5 w-3.5 shrink-0 opacity-70 transition-transform",
