@@ -1,113 +1,26 @@
-/** 공개 다크 지도 마커 핀 — `/media/map`·매체 상세 공통 (단색 원형, popply 스타일) */
+/** Leaflet 핀 아이콘 — SVG 는 `map-pin-icon-data` */
 
 import L from "leaflet";
 import {
-  pinColorForVisibilityScore,
-  visibilityPinTierForScore,
-} from "@/lib/map-pin-visibility-colors";
+  clearMapPinDataUrlCache,
+  mapPinDataUrlCacheSize,
+  pinDataUrl,
+  pinIconCacheKey,
+} from "@/lib/map-pin-icon-data";
 
-export function pinColorForType(type: string): {
-  fill: string;
-  stroke: string;
-  text: string;
-} {
-  const t = (type || "").toLowerCase();
-  if (t.includes("office") || t.includes("thinkad")) {
-    return { fill: "#ff6200", stroke: "#c24e00", text: "#ffffff" };
-  }
-  if (t.includes("digital")) {
-    return { fill: "#ff6200", stroke: "#ea580c", text: "#ffffff" };
-  }
-  if (t.includes("static")) {
-    return { fill: "#52525b", stroke: "#71717a", text: "#ffffff" };
-  }
-  if (t.includes("mobile")) {
-    return { fill: "#78716c", stroke: "#a8a29e", text: "#ffffff" };
-  }
-  if (t.includes("network")) {
-    return { fill: "#c24e00", stroke: "#ff6200", text: "#ffffff" };
-  }
-  return { fill: "#71717a", stroke: "#a1a1aa", text: "#ffffff" };
-}
+export {
+  buildPinDataUrl,
+  clearMapPinDataUrlCache,
+  mapPinDataUrlCacheSize,
+  MEDIA_TYPE_PIN_LEGEND_ENTRIES,
+  pinColorForType,
+  pinDataUrl,
+  pinLegendMiniDataUrl,
+  pinLetterForType,
+  type MediaTypePinLegendEntry,
+} from "@/lib/map-pin-icon-data";
 
-export function pinLetterForType(type: string): string {
-  const t = (type || "").toLowerCase();
-  if (t.includes("office") || t.includes("thinkad")) return "T";
-  if (t.includes("digital")) return "D";
-  if (t.includes("static")) return "S";
-  if (t.includes("mobile")) return "M";
-  if (t.includes("network")) return "N";
-  return "";
-}
-
-const MAP_PIN_SELECTION_RING = "#ff6200";
-
-const pinDataUrlCache = new Map<string, string>();
 const leafletIconCache = new Map<string, L.Icon>();
-
-function pinIconCacheKey(
-  type: string,
-  highlighted: boolean,
-  forLightBackground: boolean,
-  visibilityScore?: number | null,
-): string {
-  const useScore = visibilityScore !== undefined;
-  const tier = useScore ? visibilityPinTierForScore(visibilityScore) : "type";
-  const typeKey = useScore ? "" : (type || "").toLowerCase();
-  return `${typeKey}|${tier}|${forLightBackground ? 1 : 0}|${highlighted ? 1 : 0}`;
-}
-
-function buildPinDataUrl(
-  type: string,
-  selected: boolean,
-  forLightBackground = false,
-  visibilityScore?: number | null,
-): string {
-  const useScore = visibilityScore !== undefined;
-  const { fill, stroke, text } = useScore
-    ? pinColorForVisibilityScore(visibilityScore, forLightBackground)
-    : pinColorForType(type);
-  const size = selected ? 34 : 30;
-  const ring = selected ? 3 : 2;
-  const label = pinLetterForType(type);
-  const ringColor = selected
-    ? MAP_PIN_SELECTION_RING
-    : forLightBackground
-      ? "rgba(15,23,42,0.55)"
-      : "rgba(255,255,255,0.35)";
-  const labelFill = text;
-  const showLabel = label.length > 0 && !useScore;
-
-  const svg = `
-  <svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 32 32">
-    <circle cx="16" cy="16" r="14" fill="${fill}" stroke="${ringColor}" stroke-width="${ring}"/>
-    ${
-      showLabel
-        ? `<text x="16" y="20.5" text-anchor="middle" font-family="ui-sans-serif, system-ui, sans-serif" font-size="11" font-weight="800" fill="${labelFill}">${label}</text>`
-        : ""
-    }
-    ${
-      useScore && selected
-        ? `<circle cx="16" cy="16" r="5.5" fill="none" stroke="${MAP_PIN_SELECTION_RING}" stroke-width="1.75" opacity="0.95"/>`
-        : ""
-    }
-  </svg>`;
-  return `data:image/svg+xml;charset=UTF-8,${encodeURIComponent(svg.trim())}`;
-}
-
-export function pinDataUrl(
-  type: string,
-  selected: boolean,
-  forLightBackground = false,
-  visibilityScore?: number | null,
-): string {
-  const key = pinIconCacheKey(type, selected, forLightBackground, visibilityScore);
-  const cached = pinDataUrlCache.get(key);
-  if (cached) return cached;
-  const url = buildPinDataUrl(type, selected, forLightBackground, visibilityScore);
-  pinDataUrlCache.set(key, url);
-  return url;
-}
 
 export function leafletPinIcon(
   type: string,
@@ -134,13 +47,13 @@ export function leafletPinIcon(
 
 /** 테스트·벤치마크용 */
 export function clearMapPinIconCaches(): void {
-  pinDataUrlCache.clear();
+  clearMapPinDataUrlCache();
   leafletIconCache.clear();
 }
 
 export function mapPinIconCacheSizes(): { dataUrls: number; icons: number } {
   return {
-    dataUrls: pinDataUrlCache.size,
+    dataUrls: mapPinDataUrlCacheSize(),
     icons: leafletIconCache.size,
   };
 }
