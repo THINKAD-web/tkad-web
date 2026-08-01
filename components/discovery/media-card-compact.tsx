@@ -13,11 +13,14 @@ import {
 } from "@/lib/media-card-display";
 import { MediaCompareSelectButton } from "@/components/media/media-compare-select-button";
 import { MediaThumbnailTrustOverlay } from "@/components/media/media-thumbnail-trust-overlay";
+import {
+  buildCatalogThumbnailBadges,
+  MediaThumbnailBadgeStack,
+} from "@/components/media/media-thumbnail-badge-stack";
 import { MediaTrustScoreBadge } from "@/components/media/media-trust-score";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import { catalogThumbnailImageProps } from "@/lib/media-catalog-map";
-import { visibilityPinTierDefForScore } from "@/lib/map-pin-visibility-colors";
 import { MapTileThumbnailBadges } from "@/components/media-map/map-tile-thumbnail-badges";
 import { cn } from "@/lib/utils";
 import type {
@@ -478,12 +481,8 @@ export function DiscoveryMediaCardCatalogTile({
   const model = catalogItemToDisplayModel(item, { href, isKo, priceLabel });
   const thumb = catalogThumbnailImageProps(item.thumbnailUrl);
   const locationLine = item.region || item.location || "";
-  const visScore = item.visibilityScore ?? 0;
-  const visTier =
-    rank == null && visScore > 0
-      ? visibilityPinTierDefForScore(visScore)
-      : null;
   const planItem = planCartItemFromCatalog(item, planAddedFrom);
+  const thumbnailBadges = buildCatalogThumbnailBadges(item, isKo, { rank });
 
   const imageBlock = (
     <div className="relative aspect-[4/3] w-full overflow-hidden bg-gray-100 dark:bg-gray-800">
@@ -502,24 +501,7 @@ export function DiscoveryMediaCardCatalogTile({
         </div>
       )}
 
-      {rank != null ? (
-        <span className="absolute left-1.5 top-1.5 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-hermes text-xs font-black text-white shadow-md">
-          {rank}
-        </span>
-      ) : visTier ? (
-        <span
-          className="tkad-type-note absolute left-1.5 top-1.5 rounded px-1.5 py-0.5 font-bold tabular-nums shadow-sm"
-          style={{
-            backgroundColor: visTier.fill,
-            color: visTier.text,
-            border: `1px solid ${visTier.stroke}`,
-          }}
-        >
-          {visScore}
-        </span>
-      ) : null}
-
-      <MediaThumbnailTrustOverlay item={item} isKo={isKo} variant="card" />
+      <MediaThumbnailBadgeStack badges={thumbnailBadges} />
 
       {model.metricLine ? (
         <div className="pointer-events-none absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 via-black/45 to-transparent px-2 pb-1.5 pt-5">
