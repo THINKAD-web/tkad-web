@@ -2795,6 +2795,7 @@ enum PaymentLogStatus {
   succeeded
   failed
   cancelled
+  needs_manual_refund
 }
 
 model Booking {

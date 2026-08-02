@@ -10,6 +10,45 @@ import {
   isInstantHoldConflictError,
 } from "@/lib/instant-booking-hold";
 import { findConflictingBookings } from "@/lib/booking-conflict";
+import {
+  recordInstantBookingManualRefundNeeded,
+  type InstantBookingFulfillmentFailureReason,
+} from "@/lib/instant-booking-manual-refund";
+
+type FulfillmentBooking = {
+  id: string;
+  mediaId: string;
+  mediaBookingId: string | null;
+  amount: number;
+  orderId: string;
+  contactName: string;
+  contactEmail: string;
+  contactPhone: string | null;
+  userId: string | null;
+  startDate: Date;
+  endDate: Date;
+  status: string;
+  media: { id: string; name: string };
+};
+
+async function abortFulfillment(
+  booking: FulfillmentBooking,
+  paymentId: string | undefined,
+  reason: InstantBookingFulfillmentFailureReason,
+  mediaBookingId?: string | null,
+): Promise<never> {
+  await recordInstantBookingManualRefundNeeded({
+    bookingId: booking.id,
+    paymentKey: paymentId ?? null,
+    mediaBookingId: mediaBookingId ?? booking.mediaBookingId,
+    amount: booking.amount,
+    orderId: booking.orderId,
+    contactEmail: booking.contactEmail,
+    mediaName: booking.media.name,
+    reason,
+  });
+  throw new Error(reason);
+}
 
 /** 결제 완료 후 MediaBooking 생성/승격 + 상태 갱신 */
 export async function fulfillInstantBooking(
@@ -35,7 +74,14 @@ export async function fulfillInstantBooking(
   end.setHours(23, 59, 59, 999);
 
   if (booking.mediaBookingId) {
-    await confirmInstantPaymentHold(db, booking.mediaBookingId, booking.id);
+    const confirmed = await confirmInstantPaymentHold(
+      db,
+      booking.mediaBookingId,
+      booking.id,
+    );
+    if (!confirmed) {
+      await abortFulfillment(booking, paymentId, "HOLD_NOT_CONFIRMED");
+    }
   } else {
     const conflicts = await findConflictingBookings(db, {
       mediaId: booking.mediaId,
@@ -43,7 +89,7 @@ export async function fulfillInstantBooking(
       endsAt: end,
     });
     if (conflicts.length > 0) {
-      throw new Error("SELECTED_RANGE_CONFLICT");
+      await abortFulfillment(booking, paymentId, "SELECTED_RANGE_CONFLICT");
     }
     try {
       await createInstantPaymentHold(db, {
@@ -63,15 +109,23 @@ export async function fulfillInstantBooking(
         select: { mediaBookingId: true },
       });
       if (refreshed.mediaBookingId) {
-        await confirmInstantPaymentHold(
+        const confirmed = await confirmInstantPaymentHold(
           db,
           refreshed.mediaBookingId,
           booking.id,
         );
+        if (!confirmed) {
+          await abortFulfillment(
+            booking,
+            paymentId,
+            "HOLD_NOT_CONFIRMED",
+            refreshed.mediaBookingId,
+          );
+        }
       }
     } catch (e) {
       if (isInstantHoldConflictError(e)) {
-        throw new Error("SELECTED_RANGE_CONFLICT");
+        await abortFulfillment(booking, paymentId, "SELECTED_RANGE_CONFLICT");
       }
       throw e;
     }

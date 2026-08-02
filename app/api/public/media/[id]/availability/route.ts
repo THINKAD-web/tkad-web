@@ -17,7 +17,7 @@
 
 import { NextRequest } from "next/server";
 import { z } from "zod";
-import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
+import { activeBookingWhere } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { parseNetworkRawId } from "@/lib/media-network-public";
 
@@ -143,7 +143,7 @@ export async function GET(request: NextRequest, { params }: Params) {
   const bookings = await db.mediaBooking.findMany({
     where: {
       mediaId,
-      status: { in: [...CONFLICT_BLOCKING_STATUSES] },
+      ...activeBookingWhere(),
       startsAt: { lt: cappedTo },
       endsAt: { gt: fromDate },
     },

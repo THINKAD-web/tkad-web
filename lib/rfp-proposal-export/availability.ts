@@ -1,4 +1,4 @@
-import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
+import { activeBookingWhere } from "@/lib/booking-conflict";
 import {
   bookingsToBlockedRanges,
   computeMonthAvailabilityStats,
@@ -50,7 +50,7 @@ export async function fetchRfpMediaAvailabilityBatch(
     const bookings = await db.mediaBooking.findMany({
       where: {
         mediaId: { in: unique },
-        status: { in: [...CONFLICT_BLOCKING_STATUSES] },
+        ...activeBookingWhere(),
         startsAt: { lt: cappedTo },
         endsAt: { gt: monthStart },
       },
