@@ -1,6 +1,7 @@
 /**
  * Neon scale-to-zero: wake compute before migrate deploy (best-effort).
  * Never fails the build — migrate deploy remains the real gate.
+ * Preview cold-start validation: Vercel build runs this before migrate.
  */
 import { setTimeout as sleep } from "node:timers/promises";
 import pg from "pg";
