@@ -6,12 +6,15 @@
 import { MediaBookingStatus, InstantBookingStatus } from "@prisma/client";
 import type { PrismaClient } from "@prisma/client";
 import { findConflictingBookings } from "@/lib/booking-conflict";
+import {
+  INSTANT_PAYMENT_HOLD_MARKER,
+  INSTANT_PAYMENT_HOLD_TTL_MS,
+} from "@/lib/instant-payment-hold-constants";
 
-/** notes 에 심는 식별자 — cron 만료·디버그에 사용 */
-export const INSTANT_PAYMENT_HOLD_MARKER = "[instant-payment-hold]";
-
-/** 결제 대기 홀드 TTL (기본 30분) */
-export const INSTANT_PAYMENT_HOLD_TTL_MS = 30 * 60 * 1000;
+export {
+  INSTANT_PAYMENT_HOLD_MARKER,
+  INSTANT_PAYMENT_HOLD_TTL_MS,
+} from "@/lib/instant-payment-hold-constants";
 
 export function instantPaymentHoldExpiresAt(from = new Date()): Date {
   return new Date(from.getTime() + INSTANT_PAYMENT_HOLD_TTL_MS);
@@ -92,20 +95,25 @@ export async function createInstantPaymentHold(
   return { mediaBookingId: mediaBooking.id };
 }
 
-/** 결제 완료 시 홀드 → confirmed (없으면 생성은 호출자 책임) */
+/** 결제 완료 시 홀드 → confirmed. tentative+마커일 때만 승격. */
 export async function confirmInstantPaymentHold(
   db: HoldDb,
   mediaBookingId: string,
   bookingId: string,
-): Promise<void> {
-  await db.mediaBooking.update({
-    where: { id: mediaBookingId },
+): Promise<boolean> {
+  const result = await db.mediaBooking.updateMany({
+    where: {
+      id: mediaBookingId,
+      status: MediaBookingStatus.tentative,
+      notes: { contains: INSTANT_PAYMENT_HOLD_MARKER },
+    },
     data: {
       status: MediaBookingStatus.confirmed,
       notes: `${INSTANT_PAYMENT_HOLD_MARKER} bookingId=${bookingId} fulfilledAt=${new Date().toISOString()}`,
       decidedAt: new Date(),
     },
   });
+  return result.count > 0;
 }
 
 /**

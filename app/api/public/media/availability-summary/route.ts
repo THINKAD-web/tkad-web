@@ -3,7 +3,7 @@
  * GET /api/public/media/availability-summary?month=YYYY-MM
  */
 import { NextRequest } from "next/server";
-import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
+import { activeBookingWhere } from "@/lib/booking-conflict";
 import {
   bookingsToBlockedRanges,
   computeMonthAvailabilityStats,
@@ -66,7 +66,7 @@ export async function GET(request: NextRequest) {
   const bookings = await db.mediaBooking.findMany({
     where: {
       mediaId: { in: mediaIds },
-      status: { in: [...CONFLICT_BLOCKING_STATUSES] },
+      ...activeBookingWhere(),
       startsAt: { lt: cappedTo },
       endsAt: { gt: monthStart },
     },

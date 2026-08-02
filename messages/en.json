@@ -3682,7 +3682,10 @@
       "payFailed": "Payment request failed.",
       "confirming": "Confirming payment…",
       "confirmFailed": "Payment confirmation failed.",
-      "alreadyPaid": "This booking is already paid."
+      "alreadyPaid": "This booking is already paid.",
+      "holdExpiredTitle": "Payment window expired",
+      "holdExpiredDesc": "Your reservation hold has expired. Please start a new booking.",
+      "holdExpiredRebook": "Book again"
     },
     "confirm": {
       "titlePaid": "Booking confirmed",

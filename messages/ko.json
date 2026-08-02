@@ -3359,7 +3359,10 @@
       "payFailed": "결제 요청에 실패했습니다.",
       "confirming": "결제 승인 처리 중…",
       "confirmFailed": "결제 승인에 실패했습니다.",
-      "alreadyPaid": "이미 결제가 완료된 예약입니다."
+      "alreadyPaid": "이미 결제가 완료된 예약입니다.",
+      "holdExpiredTitle": "결제 시간이 만료되었습니다",
+      "holdExpiredDesc": "예약 홀드가 만료되어 결제를 진행할 수 없습니다. 다시 예약해 주세요.",
+      "holdExpiredRebook": "다시 예약하기"
     },
     "confirm": {
       "titlePaid": "예약이 확정되었습니다",

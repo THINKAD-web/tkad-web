@@ -65,7 +65,7 @@ import MediaDetailPremiumPoints from "@/components/media-detail-premium-points";
 import { getMediaRecentBrands } from "@/lib/insights/media-recent-brands";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
 import { isAvailabilityDataSparse } from "@/lib/media-availability-coverage";
-import { CONFLICT_BLOCKING_STATUSES } from "@/lib/booking-conflict";
+import { activeBookingWhere } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import {
   mediaItemDetailPath,
@@ -240,7 +240,7 @@ export default async function MediaDetailPage({ params }: Props) {
       blockingBookingCount = await getPrisma().mediaBooking.count({
         where: {
           mediaId: media.id,
-          status: { in: [...CONFLICT_BLOCKING_STATUSES] },
+          ...activeBookingWhere(),
         },
       });
     } catch (e) {

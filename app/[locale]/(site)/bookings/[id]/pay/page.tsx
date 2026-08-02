@@ -4,6 +4,7 @@ import { Suspense } from "react";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import { TossPaymentCheckout } from "@/components/instant-booking/toss-payment-checkout";
+import { isPaymentPendingHoldActive } from "@/lib/booking-conflict";
 import { getPrisma } from "@/lib/prisma";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 
@@ -36,6 +37,26 @@ export default async function BookingPayPage({ params }: Props) {
     );
   }
   if (booking.status !== "payment_pending") notFound();
+
+  if (!isPaymentPendingHoldActive(booking.createdAt)) {
+    const tExpired = await getTranslations("instantBooking.pay");
+    return (
+      <main className="mx-auto max-w-lg px-4 py-16 text-center">
+        <h1 className="text-xl font-black tracking-tight">
+          {tExpired("holdExpiredTitle")}
+        </h1>
+        <p className="mt-3 text-sm text-muted-foreground">
+          {tExpired("holdExpiredDesc")}
+        </p>
+        <Link
+          href={`/media/${booking.mediaId}/book`}
+          className="mt-6 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-primary-foreground"
+        >
+          {tExpired("holdExpiredRebook")}
+        </Link>
+      </main>
+    );
+  }
 
   const t = await getTranslations("instantBooking.pay");
   const start = booking.startDate.toISOString().slice(0, 10);
