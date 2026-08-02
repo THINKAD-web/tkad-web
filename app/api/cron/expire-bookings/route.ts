@@ -6,7 +6,7 @@
  * 2) 즉시예약 payment_pending + tentative MediaBooking 홀드 (기본 30분 TTL)
  *
  * 인증: `Authorization: Bearer ${CRON_SECRET}`
- * Vercel Cron: 15분마다 (홀드 TTL 대응)
+ * Vercel Cron: 매시 정각 (scale-to-zero wake 절감; 만료 최대 ~1h 지연)
  */
 
 import { NextRequest } from "next/server";

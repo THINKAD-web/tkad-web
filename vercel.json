@@ -182,7 +182,7 @@
     },
     {
       "path": "/api/cron/expire-bookings",
-      "schedule": "*/15 * * * *"
+      "schedule": "0 * * * *"
     },
     {
       "path": "/api/cron/api-usage-alerts",
