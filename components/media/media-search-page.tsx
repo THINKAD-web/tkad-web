@@ -29,6 +29,11 @@ import { usePlanCart } from "@/hooks/use-plan-cart";
 import { useAppToast } from "@/lib/use-toast";
 import { cn } from "@/lib/utils";
 import { withSearchParamsSuspense } from "@/components/with-search-params-suspense";
+import {
+  MediaBrowsePageSkeleton,
+  MediaCardSkeleton,
+  MediaCardSkeletonGrid,
+} from "@/components/media/media-card-skeleton";
 
 function subscribeLg(cb: () => void) {
   const mq = window.matchMedia("(min-width: 1024px)");
@@ -64,7 +69,6 @@ import {
 } from "@/lib/media-browse-grid";
 import { MediaReelsBrowse } from "@/components/media/media-reels-browse";
 import {
-  DiscoveryMapTileSkeleton,
   DiscoveryMediaFeedCardSkeleton,
 } from "@/components/discovery/discovery-route-skeletons";
 import {
@@ -160,6 +164,44 @@ function applyBrowseFilterUrlState(
   setters.setNetworkType(state.networkType);
 }
 
+/** `fetchMedia` URL 파라미터 직렬화 — SSR skip 비교용 */
+function buildMediaBrowseFetchKey(input: {
+  query: string;
+  networkBrowse: boolean;
+  networkType: string;
+  mainCategory: string;
+  subCategory: string;
+  target: string;
+  regionMain: string;
+  regionSub: string;
+  priceMin: string;
+  priceMax: string;
+  features: string;
+  sort: string;
+  page: number;
+  limit?: number;
+}): string {
+  const params = new URLSearchParams();
+  if (input.query) params.set("q", input.query);
+  if (input.networkBrowse) {
+    params.set("features", input.features.trim() || "network");
+    if (input.networkType) params.set("networkType", input.networkType);
+  } else {
+    if (input.mainCategory) params.set("mainCategory", input.mainCategory);
+    if (input.subCategory) params.set("subCategory", input.subCategory);
+    if (input.target) params.set("target", input.target);
+    if (input.features.trim()) params.set("features", input.features.trim());
+  }
+  if (input.regionMain) params.set("regionMain", input.regionMain);
+  if (input.regionSub) params.set("regionSub", input.regionSub);
+  if (input.priceMin.trim()) params.set("priceMin", input.priceMin.trim());
+  if (input.priceMax.trim()) params.set("priceMax", input.priceMax.trim());
+  params.set("sort", input.sort);
+  params.set("page", String(input.page));
+  params.set("limit", String(input.limit ?? PAGE_SIZE));
+  return params.toString();
+}
+
 function formatPriceLabel(
   price?: number,
   period?: string,
@@ -248,6 +290,19 @@ function MediaSearchPageInner({
       initialTarget,
       initialNetworkType,
     ],
+  );
+
+  /** SSR `page.tsx` 와 동일 조건이면 mount fetch skip */
+  const mountSsrFetchKey = useMemo(
+    () =>
+      buildMediaBrowseFetchKey({
+        ...initialFromUrl,
+        networkBrowse:
+          discoveryFeaturesIncludeNetwork(initialFromUrl.features) ||
+          catalogVariant === "network",
+        page: 1,
+      }),
+    [initialFromUrl, catalogVariant],
   );
 
   const [query, setQuery] = useState(initialFromUrl.query);
@@ -485,7 +540,7 @@ function MediaSearchPageInner({
       const isStale = () => catalogFetchGeneration.current !== fetchGeneration;
 
       if (opts.append) setLoadingMore(true);
-      else if (mediaCountRef.current === 0) setLoading(true);
+      else setLoading(true);
       try {
         if (plannerMode) {
           const source = initialCatalogItems;
@@ -710,10 +765,30 @@ function MediaSearchPageInner({
     const debounceMs = generation === 1 ? 0 : 300;
     const timer = setTimeout(() => {
       if (catalogFetchGeneration.current !== generation) return;
+
+      if (generation === 1 && !plannerMode) {
+        const currentKey = buildMediaBrowseFetchKey({
+          query,
+          networkBrowse,
+          networkType,
+          mainCategory,
+          subCategory,
+          target,
+          regionMain,
+          regionSub,
+          priceMin,
+          priceMax,
+          features,
+          sort,
+          page: 1,
+        });
+        if (currentKey === mountSsrFetchKey) return;
+      }
+
       void fetchMedia({ page: 1, append: false }, generation);
     }, debounceMs);
     return () => clearTimeout(timer);
-  }, [fetchMedia]);
+  }, [fetchMedia, mountSsrFetchKey, plannerMode, query, networkBrowse, networkType, mainCategory, subCategory, target, regionMain, regionSub, priceMin, priceMax, features, sort]);
 
   const handleLoadMore = () => {
     if (loading || loadingMore || !hasMore) return;
@@ -865,7 +940,7 @@ function MediaSearchPageInner({
       onViewModeChange={handleViewModeChange}
       resultCount={media.length}
       totalCount={total}
-      loading={loading && media.length === 0}
+      loading={loading && !loadingMore}
       unifiedToolbar={appShell}
       mobileBottomBar={false}
       mobileStickyToolbar={appShell}
@@ -916,6 +991,23 @@ function MediaSearchPageInner({
     </div>
   );
 
+  const showListSkeleton = loading && !loadingMore && media.length === 0;
+  const listRefetching = loading && !loadingMore && media.length > 0;
+
+  const listRefetchOverlay = (
+    <div
+      className="pointer-events-none absolute inset-x-0 top-0 z-10 flex flex-col items-center gap-1 px-4 pt-1"
+      aria-live="polite"
+    >
+      <div className="h-0.5 w-full max-w-sm overflow-hidden rounded-full bg-gray-200 dark:bg-white/10">
+        <div className="h-full w-1/3 animate-pulse rounded-full bg-[color:var(--qp-accent)]" />
+      </div>
+      <p className="tkad-type-meta text-tkad-muted">
+        {isKo ? "불러오는 중…" : "Loading…"}
+      </p>
+    </div>
+  );
+
   /** 본문(매체 목록/지도) — 외부 여백 없이 순수 콘텐츠만. 셸/문서 흐름 양쪽에서 재사용 */
   const bodyContent =
     viewMode === "map" && !appShell ? (
@@ -923,7 +1015,7 @@ function MediaSearchPageInner({
         className="relative min-w-0 overflow-x-clip"
         data-screenshot="media-view-map"
       >
-        {loading ? (
+        {loading && !loadingMore && mapDisplayItems.length === 0 ? (
             <div
               className="animate-pulse rounded-2xl border border-gray-100 bg-gray-200 dark:border-white/10 dark:bg-white/10"
               style={{ height: mapHeightPx, minHeight: 360 }}
@@ -944,14 +1036,21 @@ function MediaSearchPageInner({
             />
           ) : (
             <div className="relative">
-              <MediaBrowseMap
-                items={mapDisplayItems}
-                locale={locale}
-                selectedId={mapSelectedId}
-                onSelectId={handleMapSelectId}
-                fixedMapHeightPx={mapHeightPx}
-                showFooterCaption={false}
-              />
+              {listRefetching ? listRefetchOverlay : null}
+              <div
+                className={cn(
+                  listRefetching && "pointer-events-none opacity-50 transition-opacity",
+                )}
+              >
+                <MediaBrowseMap
+                  items={mapDisplayItems}
+                  locale={locale}
+                  selectedId={mapSelectedId}
+                  onSelectId={handleMapSelectId}
+                  fixedMapHeightPx={mapHeightPx}
+                  showFooterCaption={false}
+                />
+              </div>
               {mapPopupOpen && mapSelectedMedia ? (
                 <MediaPinPopup
                   media={mapSelectedMedia}
@@ -993,29 +1092,42 @@ function MediaSearchPageInner({
         />
       ) : (
       <>
-      <div
-        className={cn(
-          "min-w-0 overflow-x-clip",
-          viewMode === "feed" &&
-            cn(
-              "grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4",
-              plannerMode && "gap-2 sm:gap-3",
-            ),
-          viewMode === "card" &&
-            (plannerMode
-              ? "grid auto-rows-fr items-stretch [&>*]:min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
-              : MEDIA_BROWSE_CARD_GRID_CLASS),
-          viewMode === "compact" &&
-            cn(
-              "grid [&>*]:min-w-0",
-              plannerMode
-                ? "grid-cols-2 gap-0.5 sm:gap-x-3 lg:grid-cols-4"
-                : "grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
-            ),
-        )}
-        data-screenshot={`media-view-${viewMode}`}
-      >
-        {loading ? (
+      <div className="relative min-w-0">
+        {listRefetching ? listRefetchOverlay : null}
+        {showListSkeleton && viewMode === "card" && !plannerMode ? (
+          <MediaCardSkeletonGrid count={8} />
+        ) : (
+        <div
+          className={cn(
+            "min-w-0 overflow-x-clip transition-opacity",
+            listRefetching && "pointer-events-none opacity-50",
+            viewMode === "feed" &&
+              cn(
+                "grid grid-cols-1 gap-3 sm:grid-cols-2 md:gap-4",
+                plannerMode && "gap-2 sm:gap-3",
+              ),
+            viewMode === "card" &&
+              (plannerMode
+                ? "grid auto-rows-fr items-stretch [&>*]:min-w-0 grid-cols-2 gap-2 sm:gap-3 lg:grid-cols-3"
+                : MEDIA_BROWSE_CARD_GRID_CLASS),
+            viewMode === "compact" &&
+              cn(
+                "grid [&>*]:min-w-0",
+                plannerMode
+                  ? "grid-cols-2 gap-0.5 sm:gap-x-3 lg:grid-cols-4"
+                  : "grid-cols-1 gap-0.5 sm:grid-cols-2 sm:gap-x-3 lg:grid-cols-4",
+              ),
+          )}
+          data-screenshot={`media-view-${viewMode}`}
+        >
+        {showListSkeleton ? (
+          viewMode === "card" && plannerMode ? (
+            Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-full min-h-0">
+                <MediaCardSkeleton />
+              </div>
+            ))
+          ) : (
           Array.from({
             length: viewMode === "compact" ? 16 : 6,
           }).map((_, i) => (
@@ -1023,18 +1135,14 @@ function MediaSearchPageInner({
               key={i}
               className={cn(
                 "animate-pulse",
-                viewMode === "card" || viewMode === "feed"
+                viewMode === "feed"
                   ? "overflow-hidden rounded-2xl border border-gray-100 dark:border-white/10"
-                  : viewMode === "compact"
-                    ? "flex min-h-[3rem] items-center gap-2.5"
-                    : "flex gap-3",
+                  : "flex min-h-[3rem] items-center gap-2.5",
               )}
             >
               {viewMode === "feed" ? (
                 <DiscoveryMediaFeedCardSkeleton />
-              ) : viewMode === "card" ? (
-                <DiscoveryMapTileSkeleton />
-              ) : viewMode === "compact" ? (
+              ) : (
                 <>
                   <div className="h-11 w-14 shrink-0 rounded-lg bg-gray-200 dark:bg-white/10" />
                   <div className="min-w-0 flex-1 space-y-1">
@@ -1042,26 +1150,10 @@ function MediaSearchPageInner({
                     <div className="h-2.5 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
                   </div>
                 </>
-              ) : (
-                <>
-                  <div
-                    className={cn(
-                      "bg-gray-200 dark:bg-white/10",
-                      viewMode === "card"
-                        ? "aspect-square w-full"
-                        : "h-12 w-16 flex-shrink-0 rounded-xl",
-                    )}
-                  />
-                  {viewMode === "card" ? (
-                    <div className="space-y-2 p-3">
-                      <div className="h-4 w-3/4 rounded bg-gray-200 dark:bg-white/10" />
-                      <div className="h-3 w-1/2 rounded bg-gray-200 dark:bg-white/10" />
-                    </div>
-                  ) : null}
-                </>
               )}
             </div>
           ))
+          )
         ) : media.length === 0 ? (
           <DiscoveryEmptyState
             title={isKo ? "조건에 맞는 매체가 없어요" : "No media match your filters"}
@@ -1097,6 +1189,8 @@ function MediaSearchPageInner({
           />
         ) : (
           media.map((item) => renderMediaCard(item))
+        )}
+        </div>
         )}
       </div>
 
@@ -1169,4 +1263,7 @@ function MediaSearchPageInner({
   );
 }
 
-export const MediaSearchPage = withSearchParamsSuspense(MediaSearchPageInner);
+export const MediaSearchPage = withSearchParamsSuspense(
+  MediaSearchPageInner,
+  <MediaBrowsePageSkeleton />,
+);

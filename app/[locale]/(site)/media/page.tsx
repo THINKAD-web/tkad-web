@@ -1,4 +1,5 @@
 import { Suspense } from "react";
+import { MediaBrowsePageSkeleton } from "@/components/media/media-card-skeleton";
 import { MediaSearchPage } from "@/components/media/media-search-page";
 import {
   countPublicMediaCatalog,
@@ -67,7 +68,7 @@ export default async function MediaPage({ params, searchParams }: Props) {
   const initialMedia = initialCatalogItems.map(mapMediaItemToHomeCatalog);
 
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<MediaBrowsePageSkeleton />}>
       <MediaSearchPage
         appShell
         initialMedia={initialMedia}
