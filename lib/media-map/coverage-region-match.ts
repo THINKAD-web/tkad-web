@@ -2,9 +2,7 @@ import {
   KOREA_SIGUNGU_COVERAGE,
   type SigunguCoverage,
 } from "@/lib/geo/korea-sgg-coverage";
-import {
-  expandMediaRegionChip,
-} from "@/lib/media-discovery-filter-chips";
+import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
 import {
   MEDIA_BROWSE_REGIONS,
   expandBrowseRegionSub,
@@ -41,6 +39,83 @@ function sidoNamesMatch(a: string, b: string): boolean {
   return na === nb || na.includes(nb) || nb.includes(na);
 }
 
+function shortSidoName(sidoName: string): string {
+  return sidoName
+    .replace(/특별자치시$/, "")
+    .replace(/특별자치도$/, "")
+    .replace(/특별시$/, "")
+    .replace(/광역시$/, "")
+    .replace(/도$/, "")
+    .trim();
+}
+
+function normalizeRegionKey(value: string): string {
+  return value.trim().toLowerCase().replace(/\s+/g, "");
+}
+
+function stripDistrictSuffix(nameKo: string): string {
+  return nameKo.replace(/(특별|광역)?(시|군|구)$/g, "");
+}
+
+function expandTermParts(term: string): string[] {
+  return term
+    .split(/[/,，·]/)
+    .map((part) => part.trim())
+    .filter(Boolean);
+}
+
+function isRowInScopedSido(
+  row: SigunguCoverage,
+  scopedSidoNames: readonly string[] | undefined,
+): boolean {
+  if (!scopedSidoNames?.length) return true;
+  return scopedSidoNames.some((sido) => sidoNamesMatch(row.sidoName, sido));
+}
+
+/**
+ * browse alias / label → 시군구 exact match (부분 문자열·nameShort 단독 비교 금지).
+ * "강남" → 서울 강남구 O, 광주 남구 X · "서초" → 서초구 O, 광주 서구 X
+ */
+function termPartMatchesSigungu(part: string, row: SigunguCoverage): boolean {
+  const p = normalizeRegionKey(part);
+  if (!p || p.length < 2) return false;
+
+  const nameNorm = normalizeRegionKey(row.nameKo);
+  const short = normalizeRegionKey(stripDistrictSuffix(row.nameKo));
+  const sidoNorm = normalizeRegionKey(row.sidoName);
+  const sidoShort = normalizeRegionKey(shortSidoName(row.sidoName));
+
+  if (p === nameNorm || p === short) return true;
+  if (nameNorm === `${p}구` || nameNorm === `${p}군` || nameNorm === `${p}시`) {
+    return true;
+  }
+
+  const fullKeys = [
+    `${sidoShort}${row.nameKo}`,
+    `${sidoShort} ${row.nameKo}`,
+    `${row.sidoName}${row.nameKo}`,
+    `${row.sidoName} ${row.nameKo}`,
+    `${sidoShort}${stripDistrictSuffix(row.nameKo)}`,
+  ];
+  if (fullKeys.some((key) => normalizeRegionKey(key) === p)) return true;
+
+  if (nameNorm.endsWith(`${p}구`) || nameNorm.endsWith(`${p}군`)) return true;
+  if (p.length >= 2 && nameNorm.includes(`시${p}`)) return true;
+
+  if (p === sidoNorm || p === sidoShort) return true;
+
+  return false;
+}
+
+function termMatchesSigungu(
+  term: string,
+  row: SigunguCoverage,
+  scopedSidoNames?: readonly string[],
+): boolean {
+  if (!isRowInScopedSido(row, scopedSidoNames)) return false;
+  return expandTermParts(term).some((part) => termPartMatchesSigungu(part, row));
+}
+
 function sigunguCodesForSidoNames(sidoNames: readonly string[]): Set<string> {
   const codes = new Set<string>();
   for (const row of KOREA_SIGUNGU_COVERAGE) {
@@ -51,27 +126,16 @@ function sigunguCodesForSidoNames(sidoNames: readonly string[]): Set<string> {
   return codes;
 }
 
-function termMatchesSigungu(term: string, row: SigunguCoverage): boolean {
-  const t = term.trim().toLowerCase();
-  if (!t || t.length < 2) return false;
-  const nameKo = row.nameKo.toLowerCase();
-  const sido = row.sidoName.toLowerCase();
-  const nameShort = nameKo.replace(/(특별|광역)?(시|군|구)$/g, "");
-  return (
-    nameKo.includes(t) ||
-    sido.includes(t) ||
-    t.includes(nameShort) ||
-    nameShort.includes(t)
-  );
-}
-
-function sigunguCodesForSearchTerms(terms: readonly string[]): Set<string> {
+function sigunguCodesForSearchTerms(
+  terms: readonly string[],
+  scopedSidoNames?: readonly string[],
+): Set<string> {
   const codes = new Set<string>();
   const uniq = [...new Set(terms.map((t) => t.trim()).filter(Boolean))];
   if (uniq.length === 0) return codes;
 
   for (const row of KOREA_SIGUNGU_COVERAGE) {
-    if (uniq.some((term) => termMatchesSigungu(term, row))) {
+    if (uniq.some((term) => termMatchesSigungu(term, row, scopedSidoNames))) {
       codes.add(row.code);
     }
   }
@@ -90,17 +154,14 @@ function addCodesFromBrowseSub(subId: string, into: Set<string>) {
   const found = findBrowseSubById(subId);
   if (found) {
     if (found.main.id === "national" || found.sub.id === "national") return;
-    const terms = [
-      found.sub.label,
-      ...(found.sub.aliases ?? []),
-      found.main.label,
-    ];
-    for (const code of sigunguCodesForSearchTerms(terms)) into.add(code);
+    const scopedSido = BROWSE_MAIN_SIDO_NAMES[found.main.id];
+    const terms = [found.sub.label, ...(found.sub.aliases ?? [])];
+    for (const code of sigunguCodesForSearchTerms(terms, scopedSido)) {
+      into.add(code);
+    }
     return;
   }
-  for (const code of sigunguCodesForSearchTerms(
-    expandBrowseRegionSub(subId),
-  )) {
+  for (const code of sigunguCodesForSearchTerms(expandBrowseRegionSub(subId))) {
     into.add(code);
   }
 }

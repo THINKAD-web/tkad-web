@@ -5,13 +5,19 @@ import {
   type BrowseCategoryChip,
 } from "@/lib/media-categories";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
-import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
-import { mediaRegionHaystack } from "@/lib/media-region-haystack";
+import {
+  aliasHaystackForeignSidoConflict,
+  aliasMatchesHaystackToken,
+  browseSubHaystackAliases,
+  mediaMatchesBrowseRegionHaystackFallback,
+  mediaRegionAliasHaystack,
+} from "@/lib/media-browse-region-haystack-match";
 import {
   mediaMatchesCoverageRegion,
   resolveRegionFilterSigunguCodes,
 } from "@/lib/media-map/coverage-region-match";
+import { getBrowseRegionMain } from "@/lib/media-browse-regions";
 import { resolveBrowseRegionSubId } from "@/lib/plan-cart-report/region-subdivision";
 import type { MediaItem } from "@/lib/media-data";
 import { matchesMediaTextQuery } from "@/lib/media-data";
@@ -27,8 +33,27 @@ function mediaMatchesBrowseRegionSub(
   return false;
 }
 
-function mediaSearchHaystack(m: MediaItem): string {
-  return mediaRegionHaystack(m);
+function matchesBrowseRegionHaystackLegacy(
+  m: MediaItem,
+  regionMain: string,
+  aliases: readonly string[],
+): boolean {
+  const main = regionMain.trim();
+  const hay = mediaRegionAliasHaystack(m);
+  if (main && aliasHaystackForeignSidoConflict(hay, main)) return false;
+
+  const mediaMain = m.regionMain?.trim();
+  if (
+    mediaMain &&
+    main &&
+    mediaMain !== main &&
+    mediaMain !== "national" &&
+    main !== "national"
+  ) {
+    return false;
+  }
+
+  return aliases.some((alias) => aliasMatchesHaystackToken(alias, hay));
 }
 
 export function matchesBrowseRegion(
@@ -43,6 +68,7 @@ export function matchesBrowseRegion(
     legacyRegion,
   });
 
+  // ① regionSub / regionMain 태그 정확 일치
   if (regionSub.trim()) {
     const trimmed = regionSub.trim();
     const canonicalSub = resolveBrowseRegionSubId(trimmed);
@@ -50,31 +76,35 @@ export function matchesBrowseRegion(
       if (mediaMatchesBrowseRegionSub(m, canonicalSub)) return true;
     } else if (m.regionSub === trimmed) {
       return true;
-    } else {
-      const aliases = expandBrowseRegionSub(trimmed);
-      const hay = mediaSearchHaystack(m);
-      if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
-        return true;
-      }
     }
   } else if (regionMain.trim()) {
     if (m.regionMain === regionMain.trim()) return true;
-    const aliases = expandBrowseRegionSub(regionMain);
-    const hay = mediaSearchHaystack(m);
-    if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
-      return true;
-    }
-  } else {
-    const trimmed = legacyRegion.trim();
-    if (!trimmed) return true;
-    const aliases = expandMediaRegionChip(trimmed);
-    const hay = mediaSearchHaystack(m);
-    if (aliases.some((alias) => hay.includes(alias.toLowerCase()))) {
-      return true;
-    }
+  } else if (!legacyRegion.trim()) {
+    return true;
   }
 
-  return mediaMatchesCoverageRegion(m, coverageFilter);
+  // ② coverage codes 매칭
+  if (mediaMatchesCoverageRegion(m, coverageFilter)) return true;
+
+  // ③ haystack alias fallback (coverage 비어있거나 실패 시)
+  if (regionSub.trim()) {
+    return mediaMatchesBrowseRegionHaystackFallback(
+      m,
+      regionMain,
+      regionSub.trim(),
+      coverageFilter,
+    );
+  }
+
+  if (regionMain.trim()) {
+    const main = getBrowseRegionMain(regionMain.trim());
+    if (!main) return false;
+    const aliases = main.sub.flatMap((s) => browseSubHaystackAliases(s));
+    return matchesBrowseRegionHaystackLegacy(m, regionMain, aliases);
+  }
+
+  const aliases = expandMediaRegionChip(legacyRegion.trim());
+  return matchesBrowseRegionHaystackLegacy(m, "", aliases);
 }
 
 function matchesBrowseCategory(

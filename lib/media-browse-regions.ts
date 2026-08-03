@@ -65,7 +65,15 @@ export const MEDIA_BROWSE_REGIONS: BrowseRegionMain[] = [
       {
         id: "incheon_airport",
         label: "인천공항",
-        aliases: ["인천공항", "airport", "T1", "T2", "공항철도", "영종"],
+        aliases: [
+          "인천공항",
+          "인천국제공항",
+          "airport",
+          "T1",
+          "T2",
+          "공항철도",
+          "영종",
+        ],
       },
       {
         id: "incheon_downtown",
