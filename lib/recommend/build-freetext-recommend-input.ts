@@ -75,6 +75,7 @@ export function buildAiRecommendInputFromFreetext(
     : undefined;
 
   const categories = parseResult.fields.categories.value ?? undefined;
+  const subwayLine = parseResult.fields.subwayLine.value ?? undefined;
   const locationKeywords = extractFreetextLocationKeywords(freetextSource);
   const mediaIntents = parseFreetextMediaIntents(freetextSource);
 
@@ -93,6 +94,7 @@ export function buildAiRecommendInputFromFreetext(
     ...(gyeonggiZones.length > 0 ? { gyeonggiZones } : {}),
     ...(incheonZones.length > 0 ? { incheonZones } : {}),
     ...(categories?.length ? { plannerCategories: [...categories] } : {}),
+    ...(subwayLine ? { subwayLine } : {}),
     ...(locationKeywords.length > 0 ? { locationKeywords } : {}),
     ...(mediaIntents.length > 0 ? { mediaIntents } : {}),
     freetextSource: freetextSource.trim(),

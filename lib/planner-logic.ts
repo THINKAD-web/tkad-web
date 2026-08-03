@@ -302,17 +302,30 @@ const PLANNER_SUBWAY_PRIMARY_RE =
 const PLANNER_SUBWAY_EXCLUDE_RE =
   /스타필드|shopping\s*mall|백화점|department|아울렛|outlet/i;
 
-/** 지하철 역·승강장·차내 등 — 몰 DOOH 제외 */
+/** 지하철 역·승강장·차내 등 — 몰 DOOH·택시 제외 */
 export function mediaMatchesPlannerSubwayIntent(item: MediaItem): boolean {
   const primary = plannerMobilePrimaryHaystack(item);
   if (!primary.trim()) return false;
+
+  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`.toLowerCase();
+
+  if (/택시|taxi/i.test(primary) || /택시|taxi/i.test(sub)) {
+    return false;
+  }
 
   if (PLANNER_SUBWAY_EXCLUDE_RE.test(primary) && !PLANNER_SUBWAY_PRIMARY_RE.test(primary)) {
     return false;
   }
 
-  const sub = `${item.mediaSubCategory ?? ""} ${item.subCategory ?? ""}`.toLowerCase();
-  if (/subway|지하철/.test(sub)) return true;
+  if (/subway|지하철/.test(sub)) {
+    if (
+      /^subway_station$/i.test(item.mediaSubCategory ?? "") &&
+      !/지하철|subway|역|호선|platform|screendoor|cm보드/i.test(primary)
+    ) {
+      return false;
+    }
+    return true;
+  }
 
   if (PLANNER_SUBWAY_PRIMARY_RE.test(primary)) {
     if (PLANNER_MOBILE_EXCLUSION_RE.test(primary)) {

@@ -15,6 +15,10 @@ import {
 import { plannerIndustryHintScore } from "@/lib/planner/industry-match";
 import { matchesPlannerCategory, mediaMatchesPlannerMobileIntent, mediaMatchesPlannerSubwayIntent, mediaMatchesPlannerBusWrapIntent, mediaMatchesBillboardIntent } from "@/lib/planner-logic";
 import { matchesPlannerRegion } from "@/lib/planner/planner-regions";
+import {
+  detectMediaSubwayLine,
+  subwayLinesMatch,
+} from "@/lib/planner/subway-line";
 import { scoreTargetAgeForPlanner } from "@/lib/planner/parse-target-age";
 import type { PlannerAgeKey } from "@/lib/planner/types";
 import { rationaleToMatchReasons } from "@/lib/recommend/recommend-rationale";
@@ -51,6 +55,8 @@ export type MatchingInput = {
   seed?: number;
   /** 자연어 파싱 유형 의도 — scoreCategory 가점 전용 */
   mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[];
+  /** 지하철 노선 — `9`, `arex`, `daegu:3` 등 (자연어 파싱) */
+  subwayLine?: string;
 };
 
 export type ScoreBreakdown = {
@@ -60,6 +66,8 @@ export type ScoreBreakdown = {
   target: number;
   category: number;
   popularity: number;
+  /** 노선 일치 가·감점 (subwayLine 쿼리 시) */
+  subwayLine?: number;
   total: number;
 };
 
@@ -397,6 +405,7 @@ function scoreCategory(
   goal: string,
   goalTags: string[] | undefined,
   mediaIntents?: readonly ("subway" | "bus_wrap" | "billboard")[],
+  subwayLine?: string,
 ): number {
   const inputCats = (categories ?? []).map((c) => c.trim()).filter(Boolean);
   const mediaCats = m.mediaCategory ?? [];
@@ -457,7 +466,12 @@ function scoreCategory(
   }
 
   if (mediaIntents?.includes("subway")) {
-    if (mediaMatchesPlannerSubwayIntent(m)) {
+    const queryLine = subwayLine?.trim();
+    const mediaLine = queryLine ? detectMediaSubwayLine(m) : null;
+
+    if (queryLine && mediaLine && !subwayLinesMatch(queryLine, mediaLine.key)) {
+      best = Math.min(best, 2);
+    } else if (mediaMatchesPlannerSubwayIntent(m)) {
       best = Math.max(best, 15);
     } else {
       best = Math.min(best, 2);
@@ -487,6 +501,29 @@ function scoreCategory(
   }
 
   return Math.min(15, best);
+}
+
+const SUBWAY_LINE_MATCH_BONUS = 25;
+const SUBWAY_LINE_MISMATCH_PENALTY = -35;
+const SUBWAY_LINE_AMBIGUOUS_PENALTY = -12;
+
+function scoreSubwayLine(
+  m: MediaItem,
+  input: MatchingInput,
+): number {
+  const queryLine = input.subwayLine?.trim();
+  if (!queryLine) return 0;
+
+  if (!mediaMatchesPlannerSubwayIntent(m)) return 0;
+
+  const mediaLine = detectMediaSubwayLine(m);
+  if (mediaLine && subwayLinesMatch(queryLine, mediaLine.key)) {
+    return SUBWAY_LINE_MATCH_BONUS;
+  }
+  if (mediaLine && !subwayLinesMatch(queryLine, mediaLine.key)) {
+    return SUBWAY_LINE_MISMATCH_PENALTY;
+  }
+  return SUBWAY_LINE_AMBIGUOUS_PENALTY;
 }
 
 function plannerCategoryHaystack(m: MediaItem): string {
@@ -598,6 +635,7 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
       String(input.goal ?? ""),
       input.goalTags,
       input.mediaIntents,
+      input.subwayLine,
     ),
     popularity: Math.min(
       10,
@@ -605,14 +643,21 @@ function scoreMedia(m: MediaItem, input: MatchingInput): MatchedMedia | null {
     ),
     total: 0,
   };
+  const linePts = scoreSubwayLine(m, input);
+  if (linePts !== 0) breakdown.subwayLine = linePts;
+  const scoreCap = input.subwayLine?.trim() ? 120 : 100;
   breakdown.total = Math.min(
-    100,
-    breakdown.budget +
-      breakdown.region +
-      breakdown.industry +
-      breakdown.target +
-      breakdown.category +
-      breakdown.popularity,
+    scoreCap,
+    Math.max(
+      0,
+      breakdown.budget +
+        breakdown.region +
+        breakdown.industry +
+        breakdown.target +
+        breakdown.category +
+        breakdown.popularity +
+        linePts,
+    ),
   );
 
   /* 전광판 의도인데 아트래핑·쉘터 등이면 총점 상한 — 폴백 노출은 유지하되 exact 아래로 */
@@ -657,6 +702,7 @@ export function scoreMediaForRanking(
       String(input.goal ?? ""),
       input.goalTags,
       input.mediaIntents,
+      input.subwayLine,
     ),
     popularity: Math.min(
       10,
@@ -664,14 +710,21 @@ export function scoreMediaForRanking(
     ),
     total: 0,
   };
+  const linePts = scoreSubwayLine(m, input);
+  if (linePts !== 0) breakdown.subwayLine = linePts;
+  const scoreCap = input.subwayLine?.trim() ? 120 : 100;
   breakdown.total = Math.min(
-    100,
-    breakdown.budget +
-      breakdown.region +
-      breakdown.industry +
-      breakdown.target +
-      breakdown.category +
-      breakdown.popularity,
+    scoreCap,
+    Math.max(
+      0,
+      breakdown.budget +
+        breakdown.region +
+        breakdown.industry +
+        breakdown.target +
+        breakdown.category +
+        breakdown.popularity +
+        linePts,
+    ),
   );
 
   if (

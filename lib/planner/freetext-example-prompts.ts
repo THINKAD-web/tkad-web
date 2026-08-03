@@ -52,3 +52,36 @@ export function pickFreetextExamplePrompts(
   }
   return items.slice(0, Math.min(count, items.length));
 }
+
+/** 이전 노출 세트를 최대한 제외하고 선택 (풀 부족 시 나머지 슬롯만 보충) */
+export function pickFreetextExamplePromptsExcluding(
+  pool: readonly string[],
+  count: number,
+  seed: number,
+  exclude: readonly string[],
+): string[] {
+  const excludeSet = new Set(exclude);
+  const need = Math.min(count, pool.length);
+  const available = pool.filter((item) => !excludeSet.has(item));
+
+  if (available.length >= need) {
+    return pickFreetextExamplePrompts(available, need, seed);
+  }
+
+  const primary = pickFreetextExamplePrompts(
+    available,
+    available.length,
+    seed,
+  );
+  const slotsLeft = need - primary.length;
+  if (slotsLeft <= 0) return primary;
+
+  const fallbackPool = pool.filter((item) => !primary.includes(item));
+  const filler = pickFreetextExamplePrompts(fallbackPool, slotsLeft, seed + 1);
+  return [...primary, ...filler];
+}
+
+/** LCG — 결정적 다음 seed */
+export function nextFreetextExampleSeed(seed: number): number {
+  return ((seed >>> 0 || 1) * 1664525 + 1013904223) >>> 0 || 1;
+}

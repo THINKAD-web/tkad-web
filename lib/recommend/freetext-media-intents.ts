@@ -12,6 +12,14 @@ export function parseFreetextMediaIntents(text: string): FreetextMediaIntent[] {
   }
 
   if (
+    /(?:\d+\s*호선|신분당\s*선|경의[\s·]?중앙\s*선|공항\s*철도|\barex\b|분당\s*선|인천\s*[12]\s*호선)/i.test(
+      t,
+    )
+  ) {
+    intents.add("subway");
+  }
+
+  if (
     /버스\s*(?:래핑|랩핑|wrap)|(?:래핑|랩핑|wrap)\s*버스|bus\s*wrap/i.test(t)
   ) {
     intents.add("bus_wrap");

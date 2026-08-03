@@ -63,6 +63,8 @@ export type AiRecommendInput = {
   freetextSource?: string | null;
   /** 파싱된 유형 의도 — 지하철·버스래핑 가점 (matching-engine) */
   mediaIntents?: readonly import("@/lib/recommend/freetext-media-intents").FreetextMediaIntent[] | null;
+  /** 지하철 노선 — `9`, `arex`, `daegu:3` 등 */
+  subwayLine?: string | null;
   /** 서울 등 선택 시 `mediaHaystack`에 포함되는 키워드로 한 번 더 좁힘 (하나라도 매칭) */
   locationKeywords?: readonly string[] | null;
   /** 희망 집행 기간(주). UI·사유 문구용 — 스코어 가중은 선택적 */

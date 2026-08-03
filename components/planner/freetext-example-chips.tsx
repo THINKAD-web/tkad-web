@@ -1,13 +1,15 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   FREETEXT_CHIP_PROMPTS_EN,
   FREETEXT_CHIP_PROMPTS_KO,
   FREETEXT_EXAMPLE_CHIP_COUNT,
   FREETEXT_EXAMPLE_PROMPTS_EN,
   FREETEXT_EXAMPLE_PROMPTS_KO,
-  pickFreetextExamplePrompts,
+  nextFreetextExampleSeed,
+  pickFreetextExamplePromptsExcluding,
 } from "@/lib/planner/freetext-example-prompts";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,10 @@ type Props = {
   hideShuffle?: boolean;
 };
 
+function randomExampleSeed(): number {
+  return (Math.floor(Math.random() * 0xffffffff) >>> 0) || 1;
+}
+
 export function FreetextExampleChips({
   isKo,
   onSelect,
@@ -32,23 +38,47 @@ export function FreetextExampleChips({
   maxChips,
   hideShuffle = false,
 }: Props) {
-  const [exampleSeed, setExampleSeed] = useState(1);
+  /** 0 = SSR·hydration 고정 칩, >0 = shuffle 적용 */
+  const [exampleSeed, setExampleSeed] = useState(0);
+  const [excludeExamples, setExcludeExamples] = useState<readonly string[]>([]);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
   const examplePool = isKo
     ? FREETEXT_EXAMPLE_PROMPTS_KO
     : FREETEXT_EXAMPLE_PROMPTS_EN;
   const chipPool = isKo ? FREETEXT_CHIP_PROMPTS_KO : FREETEXT_CHIP_PROMPTS_EN;
 
+  useEffect(() => {
+    setExcludeExamples([]);
+    setExampleSeed(randomExampleSeed());
+  }, [isKo]);
+
   const visibleExamples = useMemo(() => {
-    const picked =
-      exampleSeed === 1
-        ? [...chipPool]
-        : pickFreetextExamplePrompts(
-            examplePool,
-            FREETEXT_EXAMPLE_CHIP_COUNT,
-            exampleSeed,
-          );
-    return maxChips != null ? picked.slice(0, maxChips) : picked;
-  }, [chipPool, examplePool, exampleSeed, maxChips]);
+    const count =
+      maxChips != null ?
+        Math.min(maxChips, FREETEXT_EXAMPLE_CHIP_COUNT)
+      : FREETEXT_EXAMPLE_CHIP_COUNT;
+
+    if (exampleSeed === 0) {
+      return [...chipPool].slice(0, count);
+    }
+
+    return pickFreetextExamplePromptsExcluding(
+      examplePool,
+      count,
+      exampleSeed,
+      excludeExamples,
+    );
+  }, [chipPool, examplePool, exampleSeed, excludeExamples, maxChips]);
+
+  const handleShuffle = useCallback(() => {
+    setIsRefreshing(true);
+    window.setTimeout(() => {
+      setExcludeExamples(visibleExamples);
+      setExampleSeed((seed) => nextFreetextExampleSeed(seed || randomExampleSeed()));
+      setIsRefreshing(false);
+    }, 160);
+  }, [visibleExamples]);
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -59,14 +89,30 @@ export function FreetextExampleChips({
         {!hideShuffle ? (
           <button
             type="button"
-            onClick={() => setExampleSeed((n) => n + 1)}
-            className="text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
+            onClick={handleShuffle}
+            disabled={disabled || isRefreshing}
+            className={cn(
+              "inline-flex items-center gap-1 text-xs font-semibold text-[color:var(--qp-accent)] underline-offset-2 transition-opacity hover:underline dark:text-[color:var(--qp-accent)]",
+              (disabled || isRefreshing) && "opacity-60",
+            )}
           >
+            <RefreshCw
+              className={cn(
+                "h-3 w-3 shrink-0 transition-transform duration-300",
+                isRefreshing && "animate-spin",
+              )}
+              aria-hidden
+            />
             {isKo ? "새 예시" : "More examples"}
           </button>
         ) : null}
       </div>
-      <div className="flex flex-wrap gap-2">
+      <div
+        className={cn(
+          "flex flex-wrap gap-2 transition-opacity duration-150 ease-out",
+          isRefreshing ? "opacity-0" : "opacity-100",
+        )}
+      >
         {visibleExamples.map((example) => (
           <button
             key={`${exampleSeed}-${example}`}

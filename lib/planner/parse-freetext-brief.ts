@@ -30,6 +30,10 @@ import {
   type PlannerSeoulZoneKey,
 } from "@/lib/planner/seoul-zones";
 import {
+  parseSubwayLineFromText,
+  type SubwayLineKey,
+} from "@/lib/planner/subway-line";
+import {
   PLANNER_DEFAULT_CATEGORIES,
   PLANNER_BUDGET_MIN,
   type PlannerAgeKey,
@@ -62,6 +66,8 @@ export type PlannerFreetextParseResult = {
     gyeonggiZones: ParsedField<PlannerGyeonggiZoneKey[]>;
     incheonZones: ParsedField<PlannerIncheonZoneKey[]>;
     categories: ParsedField<PlannerCategory[]>;
+    /** 지하철 노선 — `9`, `arex`, `daegu:3` 등 */
+    subwayLine: ParsedField<SubwayLineKey>;
   };
   /** 인식되지 않은 잔여 토큰·구문 */
   unmatchedTokens: string[];
@@ -742,8 +748,8 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
       cat: "digital",
       re: /지하철\s*(?:역|역사|승강장|플랫폼|스크린도어)|subway\s*station/i,
     },
-    { cat: "digital", re: /2호선\s*(?:역|역사|승강장)/i },
-    { cat: "mobile", re: /2호선\s*(?:차내|열차|랩핑)/i },
+    { cat: "digital", re: /(?:\d+\s*호선)\s*(?:역|역사|승강장|플랫폼)/i },
+    { cat: "mobile", re: /(?:\d+\s*호선)\s*(?:차내|열차|랩핑)/i },
   ];
 
   for (const { cat, re } of rules) {
@@ -751,10 +757,14 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
     if (m?.[0]) hits.push({ cat, source: m[0].trim() });
   }
 
+  const parsedLine = parseSubwayLineFromText(text);
+  if (parsedLine) {
+    hits.push({ cat: "digital", source: parsedLine.labelKo });
+  }
+
   const subwayAmbiguous = text.match(/지하철|subway/i);
-  const subwaySpecific = /지하철\s*(?:역|역사|차내|랩핑|열차)|2호선/i.test(
-    text,
-  );
+  const subwaySpecific =
+    /지하철\s*(?:역|역사|차내|랩핑|열차)/i.test(text) || parsedLine != null;
 
   if (hits.length === 0 && subwayAmbiguous && !subwaySpecific) {
     return field(
@@ -776,6 +786,12 @@ export function parseCategories(text: string): ParsedField<PlannerCategory[]> {
   return field(cats, confidence, sources.join(", "));
 }
 
+function parseSubwayLine(text: string): ParsedField<SubwayLineKey> {
+  const detected = parseSubwayLineFromText(text);
+  if (!detected) return emptyField();
+  return field(detected.key, "high", detected.labelKo);
+}
+
 function collectUnmatchedTokens(
   text: string,
   fields: PlannerFreetextParseResult["fields"],
@@ -794,6 +810,7 @@ function collectUnmatchedTokens(
     fields.gyeonggiZones.source,
     fields.incheonZones.source,
     fields.categories.source,
+    fields.subwayLine.source,
   ].filter(Boolean) as string[];
 
   for (const src of sources) {
@@ -845,6 +862,7 @@ export function parsePlannerFreetextBrief(
         gyeonggiZones: empty,
         incheonZones: empty,
         categories: empty,
+        subwayLine: empty,
       },
       unmatchedTokens: [],
     };
@@ -866,6 +884,7 @@ export function parsePlannerFreetextBrief(
     months: duration.months,
     durationDays: duration.durationDays,
     categories: parseCategories(text),
+    subwayLine: parseSubwayLine(text),
   };
 
   return {
