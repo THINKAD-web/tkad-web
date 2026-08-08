@@ -70,3 +70,6 @@ scripts/simulate-*.ts
 scripts/print-admin-*.ts
 *.png
 scripts/fix-*.ts
+
+# 매체 지표 감사 리포트 (scripts/audit-media-metrics.ts 출력물)
+audit-report.json
