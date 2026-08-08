@@ -2,6 +2,7 @@ import type { MediaItem, MediaPriceOption } from "@/lib/media-data";
 import {
   inclusiveCampaignDaysFromIso,
 } from "@/lib/quote-campaign-days";
+import { daysToPeriodKey } from "@/lib/metrics/quote-params";
 import {
   calculateMediaQuoteByDays,
   calculateMediaQuoteFromOption,
@@ -80,11 +81,26 @@ export function buildMediaDetailQuoteHref(
   if (opts.priceOptionIndex != null && opts.priceOptionIndex > 0) {
     q.set("po", String(opts.priceOptionIndex));
   }
-  if (opts.period) q.set("period", opts.period);
+
+  /**
+   * D-06 — `period` 는 **실제 집행 일수에서 유도**한다.
+   * 호출부가 넘긴 문자열을 그대로 싣던 기존 동작 때문에 7일 상품인
+   * M-CITY 에 `period=1day` 가 붙었다. 일수를 알 수 있으면 그것이 정본이고,
+   * 운영 6키에 정확히 대응할 때만 period 를 함께 싣는다.
+   */
+  const days =
+    opts.campaignDays != null && opts.campaignDays > 0
+      ? Math.round(opts.campaignDays)
+      : null;
+  const derivedPeriod = days != null ? daysToPeriodKey(days) : null;
+  const period = derivedPeriod ?? opts.period;
+  if (period) q.set("period", period);
+
   const u = opts.units ?? resolveMediaQuantity(media);
   if (u > 1) q.set("units", String(u));
-  if (opts.campaignDays != null && opts.campaignDays > 0) {
-    q.set("campaignDays", String(Math.round(opts.campaignDays)));
+  if (days != null) {
+    q.set("days", String(days));
+    q.set("campaignDays", String(days));
   }
   if (opts.flightStart) q.set("start", opts.flightStart);
   if (opts.flightEnd) q.set("end", opts.flightEnd);

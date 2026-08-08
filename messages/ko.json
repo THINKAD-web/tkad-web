@@ -3520,7 +3520,7 @@
     },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "광고, 손끝에서 5분 — OOH 플래너와 보고서까지.",
-    "heroBannerLead": "실시간 단가 비교와 AI 추천, 전국 720+ 매체를 한 곳에서.",
+    "heroBannerLead": "실시간 단가 비교와 AI 추천, 전국 {count} 매체를 한 곳에서.",
     "heroBannerCtaBrowse": "매체 둘러보기",
     "heroBannerCtaAi": "AI 추천 시작",
     "heroLiveToday": "오늘 누적 노출",
