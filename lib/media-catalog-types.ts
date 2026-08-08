@@ -30,6 +30,16 @@ export type HomeCatalogMediaItem = {
    */
   catalogPrice?: number;
   catalogPricePeriod?: MediaPricePeriodKey;
+  /**
+   * 실제 등록 상품가 (`lib/metrics/media-price-adapter`).
+   * 표시가와 CPM 분자가 **같은 값**을 쓰도록 하는 단일 기준 —
+   * 일/주 단가 × N 선형 환산이 아니다 (D-04/D-05).
+   */
+  productPriceWon?: number;
+  /** `productPriceWon` 이 성립하는 실제 상품 일수 */
+  productPriceDays?: number;
+  /** 등록 상품과 정확히 일치하지 않아 보간·외삽된 값이면 true */
+  productPriceIsEstimate?: boolean;
   thumbnailUrl?: string;
   /** 피드·갤러리용 (최대 6장, 썸네일 포함) */
   galleryImages?: string[];

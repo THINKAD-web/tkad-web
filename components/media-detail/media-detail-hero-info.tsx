@@ -10,10 +10,10 @@ import {
 } from "@/lib/media-metrics";
 import {
   formatCatalogPriceFieldWon,
-  formatCpmKrw,
   formatMediaPriceWonWithSymbol,
   resolveMediaDisplayPrice,
 } from "@/lib/media-price-format";
+import { resolveCpmDisplay } from "@/lib/metrics/format";
 import { MediaPriceExclNote } from "@/components/media/media-price-excl-note";
 import {
   MediaExecutionSummary,
@@ -82,8 +82,11 @@ export function MediaDetailHeroInfo({
   const locale = isKo ? "ko-KR" : "en-US";
   const displayPrice = resolveMediaDisplayPrice(media);
   const multiPriceOptions = (media.priceOptions?.length ?? 0) >= 2;
-  /** 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개) */
-  const cpm = resolveCpmWon(media);
+  /**
+   * 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개).
+   * 극단값은 `resolveCpmDisplay` 가 "CPM 산정 중" 으로 대체한다 (⑧).
+   */
+  const cpmDisplay = resolveCpmDisplay(resolveCpmWon(media), locale);
   const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
@@ -195,7 +198,7 @@ export function MediaDetailHeroInfo({
         />
         <KpiChip
           label={labels.kpiCpm}
-          value={cpm != null ? formatCpmKrw(Math.round(cpm), locale) : "—"}
+          value={cpmDisplay.rawWon != null ? cpmDisplay.text : "—"}
         />
         <KpiChip
           label={labels.kpiVisibility}

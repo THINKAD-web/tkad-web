@@ -18,6 +18,7 @@ import {
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
 import { resolveMediaDisplayPrice, normalizeMediaPricePeriod } from "@/lib/media-price-format";
+import { resolveMediaPriceForDisplay } from "@/lib/metrics/media-price-adapter";
 import type { HomeCatalogMediaItem } from "@/lib/media-catalog-types";
 import type { MapMapItem } from "@/components/media-map/media-map-types";
 
@@ -42,6 +43,8 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
         })()
       : (typeLabels[item.type]?.ko ?? item.type);
   const display = resolveMediaDisplayPrice(item);
+  // 표시가·CPM 분자 공통 기준 — 30일 등록 상품가 (선형 환산 아님)
+  const product = resolveMediaPriceForDisplay(item, 30);
 
   return {
     id: item.id,
@@ -90,6 +93,9 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
     pricePeriod: display.period,
     catalogPrice: item.price > 0 ? item.price : undefined,
     catalogPricePeriod: normalizeMediaPricePeriod(item.pricePeriod),
+    productPriceWon: product?.won,
+    productPriceDays: product?.days,
+    productPriceIsEstimate: product?.isEstimate,
     thumbnailUrl: resolved?.src ?? undefined,
     galleryImages: filterDisplayableMediaImageUrls(
       dedupeImageUrls(item.sampleImages ?? []),
