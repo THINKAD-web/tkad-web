@@ -1,5 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { resolveMediaQuantity } from "@/lib/media-quantity";
+import { resolveMediaPriceForDisplay } from "@/lib/metrics/media-price-adapter";
+import { daysToPeriodKey } from "@/lib/metrics/quote-params";
 
 export type QuoteDeeplinkQuantities = Record<string, number>;
 export type QuoteDeeplinkPriceOptions = Record<string, number>;
@@ -88,5 +90,65 @@ export function buildQuoteDeeplinkPath(
     if (opts.flightStart) q.set("start", opts.flightStart);
     if (opts.flightEnd) q.set("end", opts.flightEnd);
   }
+  return `/quote?${q.toString()}`;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// Canonical 견적 링크 — `?media&optionId&days` (D-06)
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * `PriceOption.id` → 기존 `po` 인덱스.
+ * 어댑터가 붙이는 id 형식은 `base` | `po-{idx}` 이다.
+ */
+export function quoteOptionIdToIndex(
+  optionId: string | null | undefined,
+): number | null {
+  if (!optionId) return null;
+  if (optionId === "base") return 0;
+  const m = /^po-(\d+)$/.exec(optionId);
+  if (!m) return null;
+  const idx = Number.parseInt(m[1]!, 10);
+  return Number.isFinite(idx) && idx >= 0 ? idx : null;
+}
+
+/**
+ * 매체 1건 견적 딥링크 — **실제 적용 상품에서 파라미터를 유도한다.**
+ *
+ * 기존 경로는 `pricePeriod`(단가 주기) 문자열을 그대로 실어 보내서,
+ * 7일 상품인 M-CITY 에 `period=1day` 가 붙었다. 여기서는 `resolvePrice`
+ * 가 고른 상품의 일수를 `days` 로 싣고, `period` 는 운영 6키에 정확히
+ * 대응할 때만 붙인다 (호환용).
+ *
+ * `campaignDays` · `po` 는 기존 `/quote` 리더 호환을 위해 함께 싣는다.
+ */
+export function buildMediaQuoteDeeplinkPath(
+  media: MediaItem,
+  opts?: { days?: number; units?: number },
+): string {
+  const requestedDays = opts?.days && opts.days > 0 ? Math.round(opts.days) : 30;
+  const resolved = resolveMediaPriceForDisplay(media, requestedDays);
+
+  const q = new URLSearchParams();
+  q.set("media", media.id);
+
+  const days = resolved?.days ?? requestedDays;
+  q.set("days", String(days));
+  // 기존 리더 호환 — campaignDays 를 우선 읽고 period 로 폴백한다
+  q.set("campaignDays", String(days));
+
+  const periodKey = daysToPeriodKey(days);
+  if (periodKey) q.set("period", periodKey);
+
+  if (resolved?.optionId) {
+    q.set("optionId", resolved.optionId);
+    const idx = quoteOptionIdToIndex(resolved.optionId);
+    if (idx != null && idx > 0) q.set("po", String(idx));
+  }
+
+  if (opts?.units != null && shouldEncodeUnits(media, opts.units)) {
+    q.set("units", String(Math.round(opts.units)));
+  }
+
   return `/quote?${q.toString()}`;
 }

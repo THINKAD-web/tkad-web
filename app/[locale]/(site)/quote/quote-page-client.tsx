@@ -90,6 +90,7 @@ import {
   buildQuoteDeeplinkPath,
   parseQuotePoMap,
   parseQuoteUnitsMap,
+  quoteOptionIdToIndex,
 } from "@/lib/quote-deeplink";
 import {
   formatCustomCampaignPeriodLabel,
@@ -275,8 +276,10 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
       setNetworkQuoteOptions((prev) => ({ ...prev, ...networkQtyInit }));
     }
 
+    // canonical `optionId` 우선, 없으면 기존 `po` 인덱스 (D-06)
+    const optionIdx = quoteOptionIdToIndex(params.get("optionId"));
     const poRaw = params.get("po");
-    const po = poRaw != null ? parseInt(poRaw, 10) : NaN;
+    const po = optionIdx != null ? optionIdx : poRaw != null ? parseInt(poRaw, 10) : NaN;
     let poIdx = 0;
     if (matchedIds.length === 1 && Number.isFinite(po) && po >= 0) {
       const m = catalog.find((x) => x.id === matchedIds[0]);
@@ -304,7 +307,8 @@ export default function QuotePageClient({ catalog }: { catalog: MediaItem[] }) {
     }
     const periodParam = params.get("period");
     const flightResolved = resolveQuoteCampaignDaysFromParams({
-      campaignDaysRaw: params.get("campaignDays"),
+      // canonical `days` 우선 — period 문자열보다 항상 신뢰할 수 있다
+      campaignDaysRaw: params.get("days") ?? params.get("campaignDays"),
       startRaw: params.get("start"),
       endRaw: params.get("end"),
     });

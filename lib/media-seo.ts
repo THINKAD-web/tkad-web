@@ -11,6 +11,19 @@ const META_DESC_MAX = 158;
 const TITLE_MAX = 72;
 
 /**
+ * 고정 지점을 가진 매체인지 — 위치 파생 키워드(주변 역·랜드마크·시설)를
+ * 쓸 수 있는지의 판정. 버스·택시 등 이동형은 노선 전체를 돌기 때문에
+ * "주변" 이라는 개념 자체가 성립하지 않는다.
+ */
+export function isLocationBoundMedia(
+  media: Pick<MediaItem, "type" | "subCategory">,
+): boolean {
+  if (media.type === "mobile") return false;
+  const sub = media.subCategory?.toLowerCase() ?? "";
+  return !/bus_exterior|bus_interior|taxi|vehicle_wrap|버스|택시|랩핑/.test(sub);
+}
+
+/**
  * DB/JSON(태그, 키워드필터, 위치, 유형 등)에서 SEO·AI 인용에 쓸 키 구문을 모읍니다.
  * 중복 제거, 과도한 길이(한 구문 48자) 제한.
  */
@@ -59,12 +72,26 @@ export function collectMediaSeoKeywordStrings(
   if (media.city) push(media.city);
   if (media.district) push(media.district);
 
-  for (const raw of [media.nearbyStations, media.nearbyLandmarks]) {
-    if (!raw) continue;
-    for (const p of raw.split(/[,，、]/)) push(p);
-  }
-  if (media.nearbyFacilities) {
-    for (const p of media.nearbyFacilities.split(/[,，、]/)) push(p);
+  /**
+   * D-18 — 이동형 매체는 고정 지점이 없으므로 "주변 시설·역·랜드마크" 가
+   * 성립하지 않는다. 버스·택시 레코드의 이 필드들은 좌표 기반 자동 수집이
+   * 남긴 값이라, 노선과 무관한 타 매체 고유명사(롯데백화점 본점, 을지로 …)가
+   * 그대로 들어와 meta-keywords 를 오염시킨다.
+   *
+   * 참고: 코드 계층에는 전역 상태 오염도 캐시 키 충돌도 없다.
+   * 수집기(`collectMediaSeoKeywordStrings`)는 순수 함수다. 남은 오염은
+   * 레코드 자체의 값이며, 전수 탐지는 감사 하네스 R-09 가 담당한다.
+   */
+  if (!isLocationBoundMedia(media)) {
+    // 이동형 — 위치 파생 키워드 전부 생략
+  } else {
+    for (const raw of [media.nearbyStations, media.nearbyLandmarks]) {
+      if (!raw) continue;
+      for (const p of raw.split(/[,，、]/)) push(p);
+    }
+    if (media.nearbyFacilities) {
+      for (const p of media.nearbyFacilities.split(/[,，、]/)) push(p);
+    }
   }
 
   if (media.networkSubtype) push(media.networkSubtype);

@@ -66,7 +66,7 @@ export default async function HomePage({
       <h1 className="sr-only">
         {homePageSrOnlyH1(locale, verifiedMediaLabel)}
       </h1>
-      <HomeHeroBanner />
+      <HomeHeroBanner mediaCountLabel={verifiedMediaLabel} />
 
       <HomeTwoAxis />
 

@@ -6,6 +6,10 @@ import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { cn } from "@/lib/utils";
 import {
+  MEDIA_COUNT_LABEL_FALLBACK,
+  injectMediaCountPlaceholder,
+} from "@/lib/media-count-copy";
+import {
   optimizeHeroMarqueeUrl,
   shouldUseUnoptimizedImage,
 } from "@/lib/optimized-image-url";
@@ -46,7 +50,15 @@ const SLIDES: HeroSlide[] = [
 /** max-w-5xl 히어로 프레임 기준 — CDN 원본(~1168–1280w)보다 크게 요청하지 않음 */
 const HERO_SIZES = "(max-width: 1024px) 100vw, 1024px";
 
-export function HomeHeroBanner() {
+type HomeHeroBannerProps = {
+  /**
+   * DB `count()` 기반 매체 수 라벨 (예: "760+").
+   * 미전달 시 보수적 폴백 — 카피에 숫자를 하드코딩하지 않는다 (④).
+   */
+  mediaCountLabel?: string;
+};
+
+export function HomeHeroBanner({ mediaCountLabel }: HomeHeroBannerProps = {}) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const t = useTranslations("homePage");
@@ -71,7 +83,10 @@ export function HomeHeroBanner() {
   }, [next]);
 
   const slogan = t("heroBannerSlogan");
-  const lead = t("heroBannerLead");
+  const lead = injectMediaCountPlaceholder(
+    t("heroBannerLead"),
+    mediaCountLabel || MEDIA_COUNT_LABEL_FALLBACK,
+  );
 
   return (
     <div className="px-4 pt-3 pb-2 md:px-6 md:pt-4 md:pb-3 lg:px-8">
