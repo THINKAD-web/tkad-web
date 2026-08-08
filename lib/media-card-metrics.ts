@@ -1,4 +1,5 @@
-import { formatCpmKrw, formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { formatMediaPriceCompactWon } from "@/lib/media-price-format";
+import { resolveCpmDisplay } from "@/lib/metrics/format";
 import {
   formatMonthlyImpressionsLabel,
   resolveCpmWon,
@@ -35,9 +36,14 @@ export function metricsInputForCatalogCpm(item: MetricInput): MediaMetricsInput 
   };
 }
 
+/**
+ * 카드 CPM 1줄. 극단값은 `resolveCpmDisplay` 가 "CPM 산정 중" 으로 바꾼다.
+ * 값 자체가 없으면 줄을 만들지 않는다 (기존 동작 유지).
+ */
 function formatCpmLine(cpm: number | null | undefined, locale: string): string | null {
-  if (cpm == null || !Number.isFinite(cpm) || cpm <= 0) return null;
-  return `CPM ${formatCpmKrw(Math.round(cpm), locale)}`;
+  const display = resolveCpmDisplay(cpm, locale);
+  if (display.rawWon == null) return null;
+  return display.displayable ? `CPM ${display.text}` : display.text;
 }
 
 function formatImpressionsLine(
@@ -71,8 +77,10 @@ export function buildCatalogItemMetricLineCompact(
   locale: string,
 ): string | null {
   const cpmWon = resolveCpmWon(metricsInputForCatalogCpm(item));
-  if (cpmWon == null) return null;
-  return `CPM ${formatMediaPriceCompactWon(cpmWon, locale)}`;
+  const display = resolveCpmDisplay(cpmWon, locale);
+  if (display.rawWon == null) return null;
+  if (!display.displayable) return display.text;
+  return `CPM ${formatMediaPriceCompactWon(cpmWon as number, locale)}`;
 }
 
 export function buildMapItemMetricLine(

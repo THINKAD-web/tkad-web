@@ -5,11 +5,11 @@ import {
   priceToMonthlyEquivalentWon,
 } from "@/lib/media-metrics";
 import {
-  formatCpmKrw,
   formatMediaPriceWithPeriodSuffix,
   isNonMonthlyPricePeriod,
   mediaPriceOnInquiryLabel,
 } from "@/lib/media-price-format";
+import { formatMediaPrice, resolveCpmDisplay } from "@/lib/metrics/format";
 
 export type HomePopularCardPriceDisplay = {
   primary: string;
@@ -20,10 +20,40 @@ export type HomePopularCardPriceDisplay = {
 };
 
 export function buildHomePopularCardPriceDisplay(
-  item: Pick<HomeCatalogMediaItem, "price" | "pricePeriod">,
+  item: Pick<
+    HomeCatalogMediaItem,
+    | "price"
+    | "pricePeriod"
+    | "productPriceWon"
+    | "productPriceDays"
+    | "productPriceIsEstimate"
+  >,
   locale: string,
   isKo: boolean,
 ): HomePopularCardPriceDisplay | null {
+  // ⑦ 실제 등록 상품가가 있으면 그것이 기준이다. 일/주 단가 × N 로
+  //    월가를 만들어내면 M-CITY 처럼 실제 7,000만 상품이 1억으로 부풀어
+  //    43% 과다 견적이 된다 (D-04).
+  if (item.productPriceWon && item.productPriceWon > 0) {
+    const days = item.productPriceDays ?? 30;
+    const isEstimate = item.productPriceIsEstimate === true;
+    const primary = formatMediaPrice(item.productPriceWon, days, locale, {
+      isEstimate,
+    });
+    return {
+      primary,
+      secondary: null,
+      monthlyEquivalentTooltip: isEstimate
+        ? isKo
+          ? `등록 상품가 사이 보간 추정값입니다 (${days}일 기준). 실 견적 시 확정됩니다.`
+          : `Interpolated between listed products (${days}-day basis). Confirmed at quotation.`
+        : isKo
+          ? `운영 등록 ${days}일 상품가입니다.`
+          : `Listed ${days}-day product rate.`,
+      originalPeriodTooltip: null,
+    };
+  }
+
   if (!item.price || item.price <= 0) {
     return {
       primary: mediaPriceOnInquiryLabel(locale),
@@ -70,28 +100,42 @@ export function buildHomePopularCardPriceDisplay(
   };
 }
 
-/** 홈 인기 카드 — 카탈로그 대표가 월환산 ÷ 월 노출 (표시가와 분리) */
+/**
+ * 홈 인기 카드 CPM — 분자는 **표시가와 동일한** 등록 상품가.
+ *
+ * 이전에는 라벨이 `price`/`pricePeriod`(주 기준)를, CPM 이
+ * `catalogPrice`/`catalogPricePeriod`(일 기준)를 읽어 한 카드 안에서
+ * 기간 기준이 갈렸다. 그 결과 M-CITY 가 라벨 ₩1억/월 · CPM ₩954,545 로
+ * 표시됐다 (일 단가 × 30). 이제 둘 다 `productPriceWon` 을 쓴다.
+ */
 export function homePopularCardCpmWon(
   item: HomeCatalogMediaItem,
 ): number | null {
-  const catalogPrice =
-    typeof item.catalogPrice === "number" && item.catalogPrice > 0
-      ? item.catalogPrice
-      : (item.price ?? 0);
-  const catalogPeriod = item.catalogPricePeriod ?? item.pricePeriod;
-  const monthlyWon = priceToMonthlyEquivalentWon(catalogPrice, catalogPeriod);
+  const productWon = item.productPriceWon;
+  const monthlyWon =
+    typeof productWon === "number" && productWon > 0
+      ? productWon
+      : // 폴백: 등록 상품가를 못 구한 매체만 기존 월환산 경로를 쓴다
+        priceToMonthlyEquivalentWon(
+          typeof item.catalogPrice === "number" && item.catalogPrice > 0
+            ? item.catalogPrice
+            : (item.price ?? 0),
+          item.catalogPricePeriod ?? item.pricePeriod,
+        );
   if (monthlyWon <= 0) return null;
   const base = catalogToMediaItem(item);
   return estimateCatalogCpmWon({ ...base, price: monthlyWon, cpm: undefined });
 }
 
+/** 광고주 대면 — 극단값은 "CPM 산정 중" 으로 대체된다 (⑧) */
 export function formatHomePopularCardCpm(
   item: HomeCatalogMediaItem,
   locale: string,
 ): string | null {
   const cpm = homePopularCardCpmWon(item);
-  if (cpm == null) return null;
-  return formatCpmKrw(cpm, locale);
+  const display = resolveCpmDisplay(cpm, locale);
+  if (display.rawWon == null) return null;
+  return display.text;
 }
 
 export function homePopularCardCpmTooltip(isKo: boolean): string {

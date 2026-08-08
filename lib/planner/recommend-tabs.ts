@@ -13,7 +13,7 @@ import {
   type MatchedMedia,
   type ScoreBreakdown,
 } from "@/lib/matching-engine";
-import { formatCpmKrw } from "@/lib/media-price-format";
+import { resolveCpmDisplay } from "@/lib/metrics/format";
 import { matchesPlannerCategory } from "@/lib/planner-logic";
 import { filterCatalogByPlannerRegions } from "@/lib/planner/planner-regions";
 import type { RecommendationContext } from "@/lib/planner/recommendation-context";
@@ -143,12 +143,16 @@ function metricLabelsForAxis(
   if (axis === "budgetEfficiency") {
     const cpm = estimateCatalogCpmWon(scored.media);
     const imp = resolveMonthlyImpressions(scored.media);
-    if (cpm != null && cpm > 0) {
-      const cpmRounded = Math.round(cpm);
+    // ⑧ 극단값이면 CPM 문구를 "산정 중" 으로 대체하되 노출은 그대로 보여준다
+    const ko = resolveCpmDisplay(cpm, "ko");
+    const en = resolveCpmDisplay(cpm, "en");
+    if (ko.rawWon != null) {
+      const impKo = `월 ${Math.round(imp / 1000).toLocaleString()}K 노출`;
+      const impEn = `${Math.round(imp / 1000).toLocaleString()}K imp/mo`;
       return {
-        axisScore: cpmEfficiencyScore(cpm),
-        metricKo: `CPM ${formatCpmKrw(cpmRounded, "ko")} · 월 ${Math.round(imp / 1000).toLocaleString()}K 노출`,
-        metricEn: `CPM ${formatCpmKrw(cpmRounded, "en")} · ${Math.round(imp / 1000).toLocaleString()}K imp/mo`,
+        axisScore: ko.displayable ? cpmEfficiencyScore(ko.rawWon) : 0,
+        metricKo: `${ko.displayable ? `CPM ${ko.text}` : ko.text} · ${impKo}`,
+        metricEn: `${en.displayable ? `CPM ${en.text}` : en.text} · ${impEn}`,
       };
     }
     return {
