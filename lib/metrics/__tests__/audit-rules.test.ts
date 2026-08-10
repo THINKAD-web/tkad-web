@@ -383,3 +383,74 @@ test("모든 규칙에 severity 와 라벨이 정의되어 있다", () => {
     assert.ok(v.mediaId.length > 0);
   }
 });
+
+// ── R-5 심화: 라벨 vs period 불일치 (M-CITY 근본 원인 탐지) ──
+
+import { parseLabelDays } from "../audit-rules";
+
+test("R-05b: priceOption 라벨 파싱 — 일/주/개월", () => {
+  assert.equal(parseLabelDays("7일"), 7);
+  assert.equal(parseLabelDays("1개월"), 30);
+  assert.equal(parseLabelDays("2주"), 14);
+  assert.equal(parseLabelDays("1 week"), 7);
+  assert.equal(parseLabelDays("20초 기준"), null);
+  assert.equal(parseLabelDays(null), null);
+});
+
+test('R-05b: "1개월" 라벨 + period="day" — 30배 오라벨 감지 (M-CITY 근본 원인)', () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      name: "M-CITY",
+      type: "digital",
+      mediaSubCategory: "digital_signage",
+      price: 70_000_000,
+      pricePeriod: "day",
+      priceOptions: [
+        { label: "1개월", price: 70_000_000, period: "day" },
+      ],
+    }),
+    acc,
+  );
+  const r05 = acc.violations.filter((v) => v.rule === "R-05");
+  assert.ok(r05.length >= 1, "R-05 미탐지");
+  const labelMismatch = r05.find(
+    (v) => v.detail?.labelDays === 30 && v.detail?.periodDays === 1,
+  );
+  assert.ok(labelMismatch, "라벨(30일) vs period(1일) 매칭 실패");
+  assert.ok(labelMismatch.message.includes("30배 틀린다") ||
+            labelMismatch.message.includes("다른 값을 낸다"));
+});
+
+test("R-05b: 라벨과 period 가 일치하면 잡히지 않는다", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      priceOptions: [
+        { label: "7일", price: 25_000_000, period: "week" },
+        { label: "1개월", price: 70_000_000, period: "month" },
+      ],
+    }),
+    acc,
+  );
+  const labelHits = acc.violations.filter(
+    (v) => v.rule === "R-05" && v.detail?.labelDays,
+  );
+  assert.equal(labelHits.length, 0);
+});
+
+test('R-05c: 매체명에 "1개월" 인데 pricePeriod="day" — 감지', () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      name: "강남대로 1개월 상시 노출",
+      pricePeriod: "day",
+      price: 5_000_000,
+    }),
+    acc,
+  );
+  const nameMismatch = acc.violations.find(
+    (v) => v.rule === "R-05" && v.detail?.nameDays === 30,
+  );
+  assert.ok(nameMismatch, "R-05c 미탐지");
+});

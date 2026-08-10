@@ -1,5 +1,6 @@
 import type { MediaItem } from "@/lib/media-data";
 import { normalizeMonthlyPriceWon } from "@/lib/instant-booking-eligibility";
+import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
 
 export function countBookingDays(start: Date, end: Date): number {
   const s = startOfDay(start);
@@ -14,15 +15,37 @@ function startOfDay(d: Date): Date {
   return x;
 }
 
-/** 기간별 집행 금액 (원) — 월 단가를 일할 계산 (최소 1일) */
+/**
+ * 기간별 즉시예약 집행 금액 (원).
+ *
+ * 이 함수는 광고주가 실제로 결제하는 금액을 산출한다 —
+ * `/api/instant-bookings` 가 그대로 charge 한다. 표시 계층의 계산과
+ * 갈리면 안 된다.
+ *
+ * 우선순위 (V-5·R-1 동일):
+ *   1. `priceOptions` 를 볼 수 있으면 등록 상품가 정확 일치 → 보간
+ *   2. 아니면 기존 월 환산 × 일할 (호출부가 옵션을 안 주는 legacy 경로)
+ *
+ * legacy 경로는 D-04 패턴 그대로다. 옵션이 없는 매체에서만 동작한다.
+ */
 export function calculateInstantBookingAmount(opts: {
   monthlyPriceWon: number;
   pricePeriod?: string | null;
   startDate: Date;
   endDate: Date;
+  /** 옵션을 넘기면 등록 상품가 우선 경로로 진입한다 (권장) */
+  media?: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">;
 }): number {
   const days = countBookingDays(opts.startDate, opts.endDate);
   if (days <= 0) return 0;
+
+  if (opts.media) {
+    const product = resolveMediaProductPrice(opts.media, days);
+    if (product) {
+      return Math.max(1, product.amount);
+    }
+  }
+
   const monthly = normalizeMonthlyPriceWon(
     opts.monthlyPriceWon,
     opts.pricePeriod,
@@ -32,7 +55,7 @@ export function calculateInstantBookingAmount(opts: {
 }
 
 export function computeInstantBookingAmount(
-  media: Pick<MediaItem, "price" | "pricePeriod">,
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
   startDate: Date,
   endDate: Date,
 ): number {
@@ -41,6 +64,7 @@ export function computeInstantBookingAmount(
     pricePeriod: media.pricePeriod,
     startDate,
     endDate,
+    media,
   });
 }
 

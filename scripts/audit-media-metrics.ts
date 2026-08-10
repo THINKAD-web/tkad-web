@@ -32,6 +32,12 @@ import {
   type AuditMediaRow,
   type RuleId,
 } from "../lib/metrics/audit-rules.ts";
+import {
+  calculateMediaQuoteByDays,
+  subscribeProductRateConflict,
+  type ProductRateConflict,
+} from "../lib/compare-quote.ts";
+import type { MediaItem } from "../lib/media-data.ts";
 
 const root = resolve(fileURLToPath(new URL(".", import.meta.url)), "..");
 config({ path: resolve(root, ".env") });
@@ -90,7 +96,11 @@ const SEVERITY_TITLE = {
   P2: "IA·품질",
 } as const;
 
-export function printSummary(total: number, acc: AuditAccumulator): void {
+export function printSummary(
+  total: number,
+  acc: AuditAccumulator,
+  conflicts: readonly ProductRateConflict[] = [],
+): void {
   const { violations, fieldGaps, cpmSamples } = acc;
 
   const mediaByRule = new Map<RuleId, Set<string>>();
@@ -152,6 +162,25 @@ export function printSummary(total: number, acc: AuditAccumulator): void {
   console.log(
     `\nP0 위반이 하나라도 있는 매체: ${p0Media.size.toLocaleString()} / ${total.toLocaleString()} (${p0Pct}%)`,
   );
+
+  // R-3 — 상품가 vs 요율 5% 이상 벌어진 매체 (조용히 덮어쓰지 않았음을 로그로 남긴다)
+  if (conflicts.length > 0) {
+    console.log(
+      `\n[R-3] 등록 상품가 vs 부분기간 요율 충돌: ${conflicts.length}건 (상품가를 사용)`,
+    );
+    const worst = conflicts
+      .slice()
+      .sort((a, b) => b.deviation - a.deviation)
+      .slice(0, 10);
+    for (const c of worst) {
+      console.log(
+        `  ${(c.deviation * 100).toFixed(0).padStart(4)}%  ${c.days}일  ` +
+          `상품 ₩${c.productWon.toLocaleString().padStart(12)}  vs  ` +
+          `요율 ₩${c.rateWon.toLocaleString().padStart(12)}  ` +
+          `${c.mediaName.slice(0, 34)}  (${c.mediaId})`,
+      );
+    }
+  }
   console.log("\n※ 이 스크립트는 DB 에 쓰지 않습니다.");
   console.log("   PR-3(스키마)·PR-4(마이그레이션)는 이 리포트 검토 후에 진행하세요.\n");
 }
@@ -203,7 +232,25 @@ async function main(): Promise<void> {
     })) as unknown as AuditMediaRow[];
 
     const acc = auditAll(rows);
-    printSummary(rows.length, acc);
+
+    // R-3 — 상품가 vs 요율 충돌을 30일 기준으로 프로브.
+    // subscribeProductRateConflict 는 calculateMediaQuoteByDays 가 exact
+    // 상품가와 partialPeriodRates 를 둘 다 갖고 있고 5% 넘게 벌어질 때 짖는다.
+    const conflicts: ProductRateConflict[] = [];
+    const unsub = subscribeProductRateConflict((c) => conflicts.push(c));
+    for (const row of rows) {
+      const media = row as unknown as MediaItem;
+      for (const days of [7, 15, 30]) {
+        try {
+          calculateMediaQuoteByDays(media, days);
+        } catch {
+          /* 견적 산출 오류는 개별 매체 문제이며 감사를 중단하지 않는다 */
+        }
+      }
+    }
+    unsub();
+
+    printSummary(rows.length, acc, conflicts);
 
     const report = {
       generatedAt: new Date().toISOString(),
@@ -224,6 +271,7 @@ async function main(): Promise<void> {
       fieldGaps: acc.fieldGaps,
       schemaMissingFields: SCHEMA_MISSING_FIELDS,
       cpmOutliers: topCpmOutliers(acc.cpmSamples, 50),
+      productRateConflicts: conflicts,
       violations: acc.violations,
       cpmSamples: acc.cpmSamples,
     };

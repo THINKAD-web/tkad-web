@@ -206,6 +206,23 @@ const SELLING_UNIT_PATTERNS: Array<[RegExp, string]> = [
   [/지점\s*(당|기준)|1\s*개\s*지점/, "site"],
 ];
 
+/**
+ * priceOption 라벨에 명시된 일수 (예: "7일", "1개월", "2주" → 각각 7, 30, 14).
+ * 없으면 null.
+ */
+export function parseLabelDays(label: string | null | undefined): number | null {
+  if (!label) return null;
+  const t = label.trim();
+  const day = t.match(/(\d+)\s*일/);
+  if (day) return Math.max(1, Number.parseInt(day[1]!, 10));
+  const week = t.match(/(\d+)\s*주/);
+  if (week) return Math.max(1, Number.parseInt(week[1]!, 10)) * 7;
+  const month = t.match(/(\d+)\s*개월/);
+  if (month) return Math.max(1, Number.parseInt(month[1]!, 10)) * 30;
+  if (/\b1\s*week\b/i.test(t)) return 7;
+  return null;
+}
+
 /** 가격 표기·비고·본문에서 선언된 판매 단위를 읽는다 */
 export function parseDeclaredSellingUnit(row: AuditMediaRow): string | null {
   const haystack = [
@@ -414,6 +431,43 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
       "R-05",
       `가격은 1대 기준인데 유동인구 ${daily.toLocaleString()}명은 노선 전체 규모 — 분자·분모 단위 불일치`,
       { declaredUnit, dailyFootfall: daily },
+    );
+  }
+
+  // R-05b — priceOption 라벨 일수 vs period 키가 어긋난 레코드.
+  // ₩954,545 의 근본 원인이 코드가 아니라 데이터일 가능성이 높다:
+  // "1개월" 라벨에 period="day" 가 붙어 있으면 어느 계산기든 30배 틀린다.
+  // PR-5a 는 우선 상품가를 신뢰하도록 우회했지만, unit 을 읽는 legacy
+  // 코드는 여전히 틀리므로 감사가 잡아준다.
+  if (Array.isArray(row.priceOptions)) {
+    row.priceOptions.forEach((raw, idx) => {
+      if (!raw || typeof raw !== "object") return;
+      const opt = raw as Record<string, unknown>;
+      const label = typeof opt.label === "string" ? opt.label : "";
+      const labelDays = parseLabelDays(label);
+      const periodStr =
+        typeof opt.period === "string" ? opt.period : row.pricePeriod;
+      const periodDays = periodToDays(periodStr);
+      if (labelDays == null || periodDays == null) return;
+      if (labelDays !== periodDays) {
+        push(
+          "R-05",
+          `priceOptions[${idx}] 라벨 "${label}"(${labelDays}일)과 period="${periodStr}"(${periodDays}일) 불일치 — 견적·CPM 계산기가 다른 값을 낸다`,
+          { optionIdx: idx, label, labelDays, period: periodStr, periodDays },
+        );
+      }
+    });
+  }
+
+  // R-05c — 매체 이름·설명에 "1개월"이 있는데 pricePeriod 가 "day"/"week"
+  // 인 경우. M-CITY 케이스가 여기 해당한다 (홈 카드 ₩954,545 의 진짜 뿌리).
+  const nameDays = parseLabelDays(row.name);
+  const baseDays = periodToDays(row.pricePeriod);
+  if (nameDays != null && baseDays != null && nameDays !== baseDays) {
+    push(
+      "R-05",
+      `매체명에 "${nameDays}일" 표현이 있으나 pricePeriod="${row.pricePeriod}"(${baseDays}일) — 이름이 상품가 기간을 오라벨링했을 가능성`,
+      { nameDays, pricePeriod: row.pricePeriod, baseDays },
     );
   }
 
