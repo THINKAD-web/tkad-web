@@ -100,6 +100,7 @@ import {
   coercePriceOptionPeriodForWrite,
   formatPriceOptionPeriodWriteError,
 } from "@/lib/media-price-period-write";
+import { needsSovBadge, sovBadgeLabel } from "@/lib/metrics/format";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -3978,8 +3979,19 @@ export default function AdminMediasClient({
                   />
                 </div>
                 <div>
-                  <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  <label className="mb-1 flex flex-wrap items-center gap-1.5 text-xs font-medium text-muted-foreground">
                     CPM
+                    {needsSovBadge({
+                      type: form.type,
+                      mediaSubCategory: form.browseSubCategory,
+                    }) ? (
+                      <span
+                        className="rounded border border-amber-400/50 bg-amber-400/10 px-1.5 py-0.5 text-[10px] font-semibold text-amber-600 dark:text-amber-400"
+                        title="loop 매체인데 소재 점유율(SOV)이 반영돼 있지 않습니다. 노출이 과다 산정되며, 값이 정상 범위 안이라 CPM 가드에도 걸리지 않습니다."
+                      >
+                        {sovBadgeLabel()}
+                      </span>
+                    ) : null}
                   </label>
                   <Input
                     value={form.cpm}

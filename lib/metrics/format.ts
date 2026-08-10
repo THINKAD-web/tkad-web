@@ -12,6 +12,7 @@ import {
   formatMediaPriceCompactWon,
   mediaPriceOnInquiryLabel,
 } from "@/lib/media-price-format";
+import { isStaticMedia } from "./classify";
 
 // ─────────────────────────────────────────────────────────────────
 // CPM 극단값 가드
@@ -164,6 +165,39 @@ export function formatMediaPrice(
   const base = `${amount} / ${period}`;
   if (!opts?.isEstimate) return base;
   return locale.startsWith("ko") ? `${base} (추정)` : `${base} (est.)`;
+}
+
+// ─────────────────────────────────────────────────────────────────
+// SOV 미적용 상태 표시 (관리자 전용)
+// ─────────────────────────────────────────────────────────────────
+
+/**
+ * 이 매체의 노출·CPM 이 **SOV 미적용 상태**인지.
+ *
+ * loop 매체(DOOH·옥내 사이니지)는 소재 점유율만큼만 내 노출이다.
+ * 현재 스키마에는 `spotDuration`/`loopDuration` 컬럼이 아예 없어서
+ * SOV 를 적용할 수 없고, 그래서 노출이 최대 20배 부풀어 있다.
+ *
+ * 문제는 이 값들이 **정상 범위 안**이라 CPM 극단값 가드에 걸리지 않는다는
+ * 것이다. 즉 "일관되게 틀린" 상태로 조용히 굳는다. 관리자 화면에 상태를
+ * 계속 띄워서 5b 까지 잊히지 않게 한다.
+ */
+export function needsSovBadge(media: {
+  type?: string | null;
+  subCategory?: string | null;
+  mediaSubCategory?: string | null;
+}): boolean {
+  return !isStaticMedia({
+    type: media.type,
+    subCategory: media.mediaSubCategory ?? media.subCategory,
+  });
+}
+
+/** 관리자 배지 문구 — 화면에서 잊히는 것을 막는 것이 목적이다 */
+export function sovBadgeLabel(locale = "ko-KR"): string {
+  return locale.startsWith("ko")
+    ? "SOV 미적용 · 5b 대기"
+    : "SOV not applied · pending 5b";
 }
 
 // ─────────────────────────────────────────────────────────────────
