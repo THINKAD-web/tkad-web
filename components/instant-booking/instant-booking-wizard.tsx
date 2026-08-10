@@ -132,8 +132,9 @@ export function InstantBookingWizard({ media, locale, initialRange, prefill }: P
       pricePeriod: media.pricePeriod,
       startDate: parseYmd(rangeStart),
       endDate: parseYmd(rangeEnd),
+      media, // 등록 상품가 우선 경로 (V-5·R-1)
     });
-  }, [media.price, media.pricePeriod, rangeStart, rangeEnd]);
+  }, [media, rangeStart, rangeEnd]);
 
   const onDayClick = useCallback(
     (day: Date) => {

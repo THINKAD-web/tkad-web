@@ -100,8 +100,12 @@ export function resolvePrice(
   }
 
   const max = options[options.length - 1];
+  // R-4 — 총액이 최장 상품가 아래로 내려가면 안 된다. 등록된 최장 상품보다
+  // 하루 더 산다고 총액이 8.5% 싸질 수는 없다. 장기 할인은 훨씬 나중부터만
+  // 유효하고, 그 사이 구간은 최장 상품가 자체가 하한이다.
+  const discounted = (max.price / max.days) * days * LONG_TERM_DISCOUNT;
   return {
-    amount: Math.round((max.price / max.days) * days * LONG_TERM_DISCOUNT),
+    amount: Math.round(Math.max(max.price, discounted)),
     basis: "extrapolated",
     isEstimate: true,
     note: "장기 집행 추정값. 실 견적 시 협의 단가 적용",
