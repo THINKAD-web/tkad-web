@@ -15,6 +15,7 @@ import {
   resolvePartialPeriodRate,
   type PartialPeriodRateAdminKey,
 } from "@/lib/media-partial-period-rates";
+import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
 
@@ -150,23 +151,49 @@ export function quotePeriodLookupKeyFromDays(
   return partialRateLookupKeyFromDays(days);
 }
 
+/**
+ * 집행 일수 기준 견적 금액.
+ *
+ * 우선순위 (D-04 / PR-5a ⑦):
+ *   1. **정확히 일치하는 등록 상품가** — 실제로 파는 금액이므로 최우선
+ *   2. 운영이 설정한 부분기간 요율(partialPeriodRates)
+ *   3. 등록 상품 사이 로그 보간 · 장기 할인 외삽
+ *   4. (마지막 폴백) 단가 × 일수 선형 환산
+ *
+ * 4번이 기본값이던 시절, `pricePeriod` 가 "day" 로 잘못 기재된 M-CITY 는
+ * 30일 견적이 70,000,000 × 30 = **21억** 으로 산출됐다. 실제 등록된 30일
+ * 상품가는 7,000만이다. 홈 카드는 7,000만, 견적서는 21억으로 갈렸다.
+ */
 export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
   const days = Math.max(1, Math.round(durationDays));
+  const unitPriceWon = catalogPriceFieldToWon(media.price);
+
+  // 1. 등록 상품과 일수가 정확히 일치하면 그 금액이 정본이다.
+  const product = resolveMediaProductPrice(media, days);
+  if (product && product.basis === "exact") {
+    return quoteLineFromCostWon(media, product.amount, durationDays);
+  }
+
+  // 2. 운영이 설정한 부분기간 요율.
   const periodKey = quotePeriodLookupKeyFromDays(days);
   const partialRate =
     periodKey != null
       ? resolvePartialPeriodRate(media, null, periodKey)
       : null;
-  const unitPriceWon = catalogPriceFieldToWon(media.price);
-
   if (partialRate != null) {
     const costWon = quoteLineTotalWonFromPartialRate(unitPriceWon, partialRate);
     return quoteLineFromCostWon(media, costWon, durationDays);
   }
 
+  // 3. 등록 상품 기반 보간·외삽 (선형 환산보다 항상 낫다).
+  if (product) {
+    return quoteLineFromCostWon(media, product.amount, durationDays);
+  }
+
+  // 4. 가격 옵션을 전혀 해석할 수 없을 때만 기존 선형 환산.
   const period = normalizeMediaPricePeriod(media.pricePeriod);
   const periodDays = pricePeriodDays(period);
   return quoteLineFromUnitPrice(media, unitPriceWon, durationDays, periodDays);
