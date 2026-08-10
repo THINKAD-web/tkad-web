@@ -136,7 +136,7 @@ export function printSummary(
   )) {
     const pct = total > 0 ? ((count / total) * 100).toFixed(0) : "0";
     const note = (SCHEMA_MISSING_FIELDS as readonly string[]).includes(field)
-      ? "  ← 스키마에 컬럼 없음 (PR-3에서 추가)"
+      ? "  ← PR-3 컬럼 · backfill 대기 (PR-4)"
       : "";
     console.log(
       `  ${pad(field, 28)} ${String(count).padStart(5)}건 (${pct}%)${note}`,
@@ -226,6 +226,22 @@ async function main(): Promise<void> {
         tags: true,
         nearbyStations: true,
         nearbyLandmarks: true,
+        // PR-3 신규 컬럼 — backfill 진척 추적 (전부 nullable)
+        sellingUnit: true,
+        contactRate: true,
+        spotDuration: true,
+        loopDuration: true,
+        playsPerHour: true,
+        coverageDongs: true,
+        coveragePopulation: true,
+        demoGenderSplit: true,
+        demoAgeSplit: true,
+        resolutionW: true,
+        resolutionH: true,
+        aspectRatio: true,
+        fileFormats: true,
+        submissionDeadline: true,
+        regionCode: true,
       },
       orderBy: { id: "asc" },
       ...(limit ? { take: limit } : {}),

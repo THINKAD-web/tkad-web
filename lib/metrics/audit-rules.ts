@@ -68,6 +68,23 @@ export type AuditMediaRow = {
   tags: string[];
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
+  // PR-3 신규 필드 — 컬럼은 존재하되 backfill 전이면 null.
+  // 감사는 이 값들을 읽어 R-07 결손 카운트에 반영한다.
+  sellingUnit?: string | null;
+  contactRate?: number | null;
+  spotDuration?: number | null;
+  loopDuration?: number | null;
+  playsPerHour?: number | null;
+  coverageDongs?: unknown;
+  coveragePopulation?: number | null;
+  demoGenderSplit?: unknown;
+  demoAgeSplit?: unknown;
+  resolutionW?: number | null;
+  resolutionH?: number | null;
+  aspectRatio?: string | null;
+  fileFormats?: string[] | null;
+  submissionDeadline?: number | null;
+  regionCode?: string | null;
 };
 
 export type Violation = {
@@ -93,8 +110,9 @@ export type CpmSample = {
 };
 
 /**
- * PR-3 에서 추가될 필드 — 지금은 스키마에 컬럼 자체가 없다.
- * "값이 비었다"가 아니라 "컬럼이 없다"이므로 결손율은 항상 100% 다.
+ * PR-3 에서 컬럼은 추가됐지만 backfill 전이라 대부분 NULL 인 필드.
+ * 이관은 PR-4 에서 수행하며, 감사가 그 진척률을 추적한다.
+ * ("스키마에 컬럼 없음" 이 아니라 "값이 비어 있음" 으로 리포트 표기가 바뀐다)
  */
 export const SCHEMA_MISSING_FIELDS = [
   "sellingUnit",
@@ -505,8 +523,19 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
       acc.fieldGaps[field] = (acc.fieldGaps[field] ?? 0) + 1;
     }
   }
+  // PR-3 필드는 이제 컬럼으로 존재한다. 값이 실제로 있는지 검사하고
+  // 없을 때만 결손 카운트를 올린다. backfill 진척도가 이 숫자로 보인다.
   for (const field of SCHEMA_MISSING_FIELDS) {
-    acc.fieldGaps[field] = (acc.fieldGaps[field] ?? 0) + 1;
+    const v = rowRecord[field];
+    const empty =
+      v == null ||
+      v === "" ||
+      (Array.isArray(v) && v.length === 0) ||
+      (typeof v === "object" &&
+        v !== null &&
+        !Array.isArray(v) &&
+        Object.keys(v as Record<string, unknown>).length === 0);
+    if (empty) acc.fieldGaps[field] = (acc.fieldGaps[field] ?? 0) + 1;
   }
   if (missing.length > 0) {
     push("R-07", `필수 필드 ${missing.length}개 결손: ${missing.join(", ")}`, {
