@@ -45,6 +45,8 @@ import {
 } from "@/components/admin/media-gallery-editor";
 import {
   applyGalleryUrlsToFormParts,
+  galleryFormSnapshot,
+  galleryFormSnapshotTouched,
   galleryUrlsFromFormParts,
   imageFieldsForApiBody,
   mergePrimaryAndExtracted,
@@ -85,6 +87,7 @@ import {
   MediaLayerBadges,
 } from "@/lib/media/badges";
 import { buildAdminMediasListUrl } from "@/lib/admin-medias-list-url";
+import { cn } from "@/lib/utils";
 import {
   KOREA_SIDO_ORDERED,
   KOREA_SIGUNGU_COVERAGE,
@@ -599,7 +602,16 @@ function parseOptFloat(s: string): number | null {
   return Number.isFinite(n) ? n : null;
 }
 
-function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
+type FormToApiBodyOptions = {
+  /** false on PATCH when gallery untouched — server keeps existing image fields. */
+  includeGalleryFields?: boolean;
+};
+
+function formToApiBody(
+  form: AdminMediaForm,
+  opts?: FormToApiBodyOptions,
+): Record<string, unknown> {
+  const includeGalleryFields = opts?.includeGalleryFields !== false;
   const tags = form.tags
     .split(/[\n,]/)
     .map((s) => s.trim())
@@ -630,7 +642,9 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     region: form.region.trim(),
     type: form.type.trim(),
     price: Math.round(form.price) || 0,
-    image: primaryImage,
+    ...(includeGalleryFields
+      ? { image: primaryImage, extractedImages }
+      : {}),
     width: form.width.trim() || null,
     height: form.height.trim() || null,
     description: form.description.trim() || null,
@@ -686,7 +700,6 @@ function formToApiBody(form: AdminMediaForm): Record<string, unknown> {
     visibilityScore: Number.isFinite(vis) ? Math.max(0, Math.min(100, vis)) : 0,
     effectMemo: form.effectMemo.trim() || null,
     pastAdvertisers: form.pastAdvertisers.trim() || null,
-    extractedImages,
     coverageDistrictCodes:
       form.type.trim() === "mobile" ? form.coverageDistrictCodes : [],
   };
@@ -846,6 +859,10 @@ export default function AdminMediasClient({
   const listBootstrappedRef = useRef(initialMedias.length > 0);
   /** Gallery ✕ removals — sent as purgeImageUrls so PATCH won't CDN-delete accidental shrinks. */
   const intentionalPurgeUrlsRef = useRef<string[]>([]);
+  /** openEdit fresh GET baseline — omit gallery on PATCH when unchanged. */
+  const initialGallerySnapshotRef = useRef<GalleryFormSnapshot | null>(null);
+  const editDetailLoadGenRef = useRef(0);
+  const [editDetailLoading, setEditDetailLoading] = useState(false);
 
   const [nearbyPreview, setNearbyPreview] = useState<{
     nearbyFacilities: string | null;
@@ -1038,6 +1055,14 @@ export default function AdminMediasClient({
 
   useEffect(() => {
     if (!modalOpen) {
+      editDetailLoadGenRef.current += 1;
+      setEditDetailLoading(false);
+      initialGallerySnapshotRef.current = null;
+    }
+  }, [modalOpen]);
+
+  useEffect(() => {
+    if (!modalOpen) {
       setNearbyPreview(null);
       setGeoLookupError(null);
       setNearbyPreviewLoading(false);
@@ -1225,6 +1250,9 @@ export default function AdminMediasClient({
   }, [filtered.length, pageSize]);
 
   const openAdd = useCallback((prefill?: AdminMediaForm) => {
+    editDetailLoadGenRef.current += 1;
+    setEditDetailLoading(false);
+    initialGallerySnapshotRef.current = null;
     setEditing(null);
     setForm(prefill ?? emptyForm);
     setPriceOptDrafts([]);
@@ -1233,14 +1261,66 @@ export default function AdminMediasClient({
     setModalOpen(true);
   }, []);
 
-  const openEdit = useCallback((media: AdminMediaDto) => {
-    const f = apiToForm(media);
+  const openEdit = useCallback(async (media: AdminMediaDto) => {
+    const gen = ++editDetailLoadGenRef.current;
     setEditing(media);
-    setForm(f);
-    setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
-    intentionalPurgeUrlsRef.current = [];
     setSaveError(null);
+    intentionalPurgeUrlsRef.current = [];
+    initialGallerySnapshotRef.current = null;
     setModalOpen(true);
+
+    const spinnerTimer = window.setTimeout(() => {
+      if (editDetailLoadGenRef.current === gen) setEditDetailLoading(true);
+    }, 300);
+
+    try {
+      const detail = await adminFetchJson(`/api/admin/medias/${media.id}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (editDetailLoadGenRef.current !== gen) return;
+
+      if (!detail.ok) {
+        const f = apiToForm(media);
+        setForm(f);
+        setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
+        initialGallerySnapshotRef.current = galleryFormSnapshot(
+          f.image,
+          f.extractedImagesText,
+        );
+        setSaveError(
+          detail.message || "최신 매체 정보를 불러오지 못했습니다. 목록 데이터로 표시합니다.",
+        );
+        return;
+      }
+
+      const raw = detail.data as { media?: unknown };
+      const row = raw.media ? normalizeAdminMediaRow(raw.media) : null;
+      if (!row) {
+        const f = apiToForm(media);
+        setForm(f);
+        setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
+        initialGallerySnapshotRef.current = galleryFormSnapshot(
+          f.image,
+          f.extractedImagesText,
+        );
+        setSaveError("최신 매체 정보를 불러오지 못했습니다. 목록 데이터로 표시합니다.");
+        return;
+      }
+
+      setMedias((prev) => prev.map((m) => (m.id === row.id ? row : m)));
+      setEditing(row);
+      const f = apiToForm(row);
+      setForm(f);
+      setPriceOptDrafts(priceOptDraftsFromJson(f.priceOptionsJson));
+      initialGallerySnapshotRef.current = galleryFormSnapshot(
+        f.image,
+        f.extractedImagesText,
+      );
+    } finally {
+      window.clearTimeout(spinnerTimer);
+      if (editDetailLoadGenRef.current === gen) setEditDetailLoading(false);
+    }
   }, []);
 
   const handleRecompute = useCallback(async () => {
@@ -1273,7 +1353,12 @@ export default function AdminMediasClient({
             prev.map((m) => (m.id === row.id ? row : m)),
           );
           setEditing(row);
-          setForm(apiToForm(row));
+          const f = apiToForm(row);
+          setForm(f);
+          initialGallerySnapshotRef.current = galleryFormSnapshot(
+            f.image,
+            f.extractedImagesText,
+          );
         }
       }
       const changed =
@@ -1307,7 +1392,7 @@ export default function AdminMediasClient({
           : null;
         if (row) {
           setMedias((prev) => [row, ...prev]);
-          openEdit(row);
+          void openEdit(row);
         }
       } finally {
         setDuplicateBusyId(null);
@@ -1391,7 +1476,13 @@ export default function AdminMediasClient({
     listFetchGenRef.current += 1;
     setSaveLoading(true);
     setSaveError(null);
-    const rawBody = formToApiBody(form);
+    const galleryTouched = galleryFormSnapshotTouched(
+      galleryFormSnapshot(form.image, form.extractedImagesText),
+      editing ? initialGallerySnapshotRef.current : null,
+    );
+    const rawBody = formToApiBody(form, {
+      includeGalleryFields: galleryTouched,
+    });
     const purgeImageUrls = [...new Set(intentionalPurgeUrlsRef.current)];
     if (purgeImageUrls.length > 0) rawBody.purgeImageUrls = purgeImageUrls;
     if (editing) {
@@ -2134,7 +2225,7 @@ export default function AdminMediasClient({
           variant="outline"
           size="xs"
           className="h-7 px-2.5 text-xs md:hidden"
-          onClick={() => openEdit(media)}
+          onClick={() => void openEdit(media)}
         >
           수정
         </Button>
@@ -2169,7 +2260,7 @@ export default function AdminMediasClient({
         <Button
           variant="ghost"
           size="icon-xs"
-          onClick={() => openEdit(media)}
+          onClick={() => void openEdit(media)}
           title="수정"
           className="hidden md:inline-flex"
         >
@@ -2861,7 +2952,7 @@ export default function AdminMediasClient({
                         variant="outline"
                         size="xs"
                         className="h-7 text-[11px]"
-                        disabled={recomputeLoading}
+                        disabled={recomputeLoading || editDetailLoading}
                         onClick={() => void handleRecompute()}
                       >
                         {recomputeLoading ? (
@@ -2883,7 +2974,13 @@ export default function AdminMediasClient({
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
-            <CardContent className="min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 pb-2 pr-3 sm:px-6 sm:pr-5">
+            <div className="relative min-h-0 flex-1">
+              <CardContent
+                className={cn(
+                  "min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 pb-2 pr-3 sm:px-6 sm:pr-5",
+                  editDetailLoading && "pointer-events-none select-none opacity-50",
+                )}
+              >
               {saveError && (
                 <p className="text-sm text-red-600">{saveError}</p>
               )}
@@ -4129,7 +4226,8 @@ export default function AdminMediasClient({
                     !form.location.trim() ||
                     !form.region.trim() ||
                     !form.type.trim() ||
-                    saveLoading
+                    saveLoading ||
+                    editDetailLoading
                   }
                 >
                   {saveLoading ? (
@@ -4145,6 +4243,19 @@ export default function AdminMediasClient({
                 </Button>
               </div>
             </CardContent>
+              {editDetailLoading ? (
+                <div
+                  className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-2 bg-background/75 backdrop-blur-[1px]"
+                  aria-live="polite"
+                  aria-busy
+                >
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                  <p className="text-xs text-muted-foreground">
+                    최신 매체 정보 불러오는 중…
+                  </p>
+                </div>
+              ) : null}
+            </div>
           </Card>
         </div>
       )}
