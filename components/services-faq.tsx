@@ -4,6 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedCard } from "@/components/animated-card";
+import { staggerDelayMs } from "@/lib/scroll-stagger";
 
 export type FaqItem = { question: string; answer: string };
 
@@ -33,7 +34,7 @@ export function ServicesFaq({ title, items, className }: Props) {
           const open = openIndex === i;
           return (
             <li key={item.question}>
-              <AnimatedCard delay={i * 70}>
+              <AnimatedCard delay={staggerDelayMs(i)}>
                 <div className="-mt-[2px] overflow-hidden rounded-[2px] border dark:border-white/14 border-gray-200 dark:bg-white/5 bg-gray-50 shadow-[0_24px_80px_rgba(0,0,0,0.45)]">
                   <button
                     type="button"

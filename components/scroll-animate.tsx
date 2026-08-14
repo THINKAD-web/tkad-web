@@ -5,7 +5,7 @@ import { useEffect, useRef, type ReactNode } from "react";
 type Props = {
   children: ReactNode;
   className?: string;
-  /** Delay in ms; use `index * 100` for staggered cards (0.1s steps). */
+  /** Delay in ms. 인덱스 스태거는 `staggerDelayMs(i)` 를 쓸 것. */
   delay?: number;
   /** "fade-up" (default) | "fade-in" | "count-up" */
   variant?: "fade-up" | "fade-in" | "count-up";
