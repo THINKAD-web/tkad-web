@@ -147,8 +147,6 @@ import {
   PlannerTrialBanner,
   plannerNeon,
 } from "@/components/planner/planner-neon-ui";
-import type { HomeAppearance } from "@/lib/home-appearance";
-import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
 import {
   generateScenarios,
@@ -168,36 +166,36 @@ const plannerWizardColumnClass = (step: number) =>
     step === 6 ? "max-w-7xl" : "max-w-3xl",
   );
 
+/**
+ * 낮/밤 외형은 `html.dark` 파생(Tailwind `dark:`) — night 전용 배경·노이즈는 dark 에서만.
+ * 라이트에선 배경 투명·오버레이 미표시로 과거 day(래퍼 없음)와 동일하게 보인다.
+ */
 function PlannerNeonPageBody({
-  appearance,
   className,
   children,
 }: {
-  appearance: HomeAppearance;
   className?: string;
   children: ReactNode;
 }) {
-  const inner = (
-    <div className={cn("tkad-planner-neon w-full min-w-0 max-w-full", className)}>
-      {children}
+  return (
+    <div className="relative w-full min-w-0 overflow-hidden dark:bg-[#020202] dark:text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)] dark:block"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden tkad-hero-noise opacity-[0.05] mix-blend-overlay dark:block"
+      />
+      <div className="relative w-full min-w-0">
+        <div
+          className={cn("tkad-planner-neon w-full min-w-0 max-w-full", className)}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
-  if (appearance === "night") {
-    return (
-      <div className="relative w-full min-w-0 overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.05] mix-blend-overlay"
-        />
-        <div className="relative w-full min-w-0">{inner}</div>
-      </div>
-    );
-  }
-  return inner;
 }
 
 import { PLANNER_CAMPAIGN_GOAL_DEFS } from "@/lib/planner/campaign-goal-defs";
@@ -228,7 +226,6 @@ export default function PlannerPageClient({
   const isKo = locale === "ko";
   const { toast } = useToast();
   const { user: sessionUser } = useAuthSession();
-  const landingAppearance = useTkadAppearance();
   const { showTrialBanner } = useIsPro();
   const {
     allowed: plannerResultAllowed,
@@ -1359,7 +1356,6 @@ export default function PlannerPageClient({
           <SubTabs tabs={PLANNING_TABS} currentPath="/planner" />
 
           <PlannerNeonPageBody
-            appearance={landingAppearance}
             className="mx-auto max-w-lg px-4 py-20 text-center sm:px-6"
           >
             <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-foreground/70">
@@ -1398,7 +1394,6 @@ export default function PlannerPageClient({
         <SubTabs tabs={PLANNING_TABS} currentPath="/planner" />
 
         <PlannerNeonPageBody
-          appearance={landingAppearance}
           className={cn(
             PLANNER_PAGE_SHELL_CLASS,
             wizardStep === 1 ? "py-6 lg:py-8" : "py-10 lg:py-12",
