@@ -173,6 +173,11 @@ export function parseOperatingHours(
   return { operatingStart: padTime(m[1]), operatingEnd: padTime(m[2]) };
 }
 
+/** width_m/height_m legacy quirk: ≤50 treated as meters, >50 as mm already. */
+function legacyDimToMm(val: number): number {
+  return val > 50 ? Math.round(val) : Math.round(val * 1000);
+}
+
 function parseMmFromText(text: unknown): number | null {
   if (text == null || text === "") return null;
   const s = String(text).trim().toLowerCase();
@@ -198,8 +203,8 @@ export function resolveDimensions(row: MediaRow): {
 } {
   if (row.width_m != null && row.height_m != null) {
     return {
-      widthMm: Math.round(Number(row.width_m) * 1000),
-      heightMm: Math.round(Number(row.height_m) * 1000),
+      widthMm: legacyDimToMm(Number(row.width_m)),
+      heightMm: legacyDimToMm(Number(row.height_m)),
       dimensionSource: "MEASURED",
     };
   }
@@ -208,7 +213,13 @@ export function resolveDimensions(row: MediaRow): {
   const fromHeight = parseMmFromText(row.height);
   const combined = parseMmFromText(`${row.width ?? ""}x${row.height ?? ""}`);
 
-  if (combined && combined > 0) {
+  // Avoid false positives when width/height text concat spurious "NxM" (e.g. "C : 477" + "850")
+  if (
+    row.width_m == null &&
+    row.height_m == null &&
+    combined &&
+    combined > 0
+  ) {
     const w = fromWidth ?? combined;
     const h = fromHeight ?? combined;
     if (w && h) {
@@ -222,13 +233,9 @@ export function resolveDimensions(row: MediaRow): {
 
   if (row.width_m != null || row.height_m != null || row.width || row.height) {
     const w =
-      row.width_m != null
-        ? Math.round(Number(row.width_m) * 1000)
-        : fromWidth;
+      row.width_m != null ? legacyDimToMm(Number(row.width_m)) : fromWidth;
     const h =
-      row.height_m != null
-        ? Math.round(Number(row.height_m) * 1000)
-        : fromHeight;
+      row.height_m != null ? legacyDimToMm(Number(row.height_m)) : fromHeight;
     return {
       widthMm: w ?? null,
       heightMm: h ?? null,
