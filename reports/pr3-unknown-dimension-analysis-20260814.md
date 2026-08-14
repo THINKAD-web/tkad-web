@@ -56,7 +56,7 @@ ORDER BY unknown_count DESC;
 - **원인**: 옥외 빌보드·래핑 등 현장 규격 미기록, 텍스트 필드만 존재.
 - **대응**:
   - 활성 매체 → **현장 실측** 또는 위성/Street View 보조 추정
-  - 비활성·단종 → **is_active` 검토 후 catalog 정리** (폐기 후보)
+  - 비활성·단종 → `is_active` 검토 후 catalog 정리 (폐기 후보)
 
 ### 그 외 (10건: other 4 + bus_wrap 2 + taxi 1 + subway_concourse는 위에 포함됨)
 
