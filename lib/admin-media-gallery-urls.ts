@@ -70,3 +70,28 @@ export function imageFieldsForApiBody(
     galleryUrlsFromFormParts(image, extractedImagesText),
   );
 }
+
+/** Admin form gallery snapshot for "touched" detection on PATCH omit. */
+export type GalleryFormSnapshot = {
+  image: string;
+  extractedImagesText: string;
+};
+
+export function galleryFormSnapshot(
+  image: string,
+  extractedImagesText: string,
+): GalleryFormSnapshot {
+  return { image, extractedImagesText };
+}
+
+/** `initial === null` → new media POST; always send gallery fields. */
+export function galleryFormSnapshotTouched(
+  current: GalleryFormSnapshot,
+  initial: GalleryFormSnapshot | null,
+): boolean {
+  if (initial === null) return true;
+  return (
+    current.image !== initial.image ||
+    current.extractedImagesText !== initial.extractedImagesText
+  );
+}

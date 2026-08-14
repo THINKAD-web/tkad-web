@@ -3,6 +3,8 @@ import test from "node:test";
 import {
   applyGalleryUrlsToFormParts,
   dedupeUrlsPreserveOrder,
+  galleryFormSnapshot,
+  galleryFormSnapshotTouched,
   galleryUrlsFromFormParts,
   imageFieldsForApiBody,
   mergePrimaryAndExtracted,
@@ -53,4 +55,32 @@ test("gallery form round-trip", () => {
   const parts = applyGalleryUrlsToFormParts(urls);
   assert.equal(parts.image, "a");
   assert.equal(parts.extractedImagesText, "b\nc");
+});
+
+test("galleryFormSnapshotTouched — null initial means POST (always touched)", () => {
+  const snap = galleryFormSnapshot("a", "b");
+  assert.equal(galleryFormSnapshotTouched(snap, null), true);
+});
+
+test("galleryFormSnapshotTouched — unchanged gallery is not touched", () => {
+  const initial = galleryFormSnapshot("cover", "e1\ne2");
+  assert.equal(galleryFormSnapshotTouched(initial, initial), false);
+});
+
+test("galleryFormSnapshotTouched — name-only edit leaves gallery untouched", () => {
+  const initial = galleryFormSnapshot("cover", "e1\ne2");
+  const current = galleryFormSnapshot("cover", "e1\ne2");
+  assert.equal(galleryFormSnapshotTouched(current, initial), false);
+});
+
+test("galleryFormSnapshotTouched — reorder or edit marks touched", () => {
+  const initial = galleryFormSnapshot("a", "b\nc");
+  assert.equal(
+    galleryFormSnapshotTouched(galleryFormSnapshot("a", "c\nb"), initial),
+    true,
+  );
+  assert.equal(
+    galleryFormSnapshotTouched(galleryFormSnapshot("b", "a\nc"), initial),
+    true,
+  );
 });
