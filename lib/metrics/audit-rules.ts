@@ -471,6 +471,34 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
     );
   }
 
+  // R-05d — priceOptions 가 비어 있고 base row 만 있는 매체 (R-7).
+  //   `mediaPriceOptions` 의 "자기모순 base 폐기" 는 명시 옵션이 있을 때만
+  //   동작한다. base 만 있는 매체는 폐기할 대상이 없어 pricePeriod 오라벨
+  //   문제(day 로 잘못 기재된 M-CITY 계열)에 노출된 채 남는다.
+  //   여기서는 이런 매체를 별도 목록으로 잡아 PR-4 데이터 정정 큐에 담는다.
+  const hasExplicitOptions =
+    Array.isArray(row.priceOptions) &&
+    row.priceOptions.some((o) => {
+      if (!o || typeof o !== "object") return false;
+      const opt = o as Record<string, unknown>;
+      const price = opt.price;
+      return typeof price === "number" && price > 0;
+    });
+  if (!hasExplicitOptions && row.price > 0 && baseDays != null) {
+    const riskyPeriod = baseDays < 7; // day / week 이하 → 30배·4배 부풀림 위험
+    push(
+      "R-05",
+      `priceOptions 비어 있고 base row 만 있음 (price=₩${row.price.toLocaleString()}, pricePeriod="${row.pricePeriod}") — base 폐기 안전망이 없어 pricePeriod 오라벨 시 견적이 그대로 부풀어 오른다${riskyPeriod ? " ⚠ 특히 위험" : ""}`,
+      {
+        baseOnly: true,
+        price: row.price,
+        pricePeriod: row.pricePeriod,
+        baseDays,
+        riskyPeriod,
+      },
+    );
+  }
+
   // ── R-06 본문 서술 vs 데이터 유동인구 ────────────────────────
   const stated = parseStatedDailyTraffic(row.description);
   if (stated != null && daily > 0) {

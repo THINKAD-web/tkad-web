@@ -454,3 +454,69 @@ test('R-05c: 매체명에 "1개월" 인데 pricePeriod="day" — 감지', () => 
   );
   assert.ok(nameMismatch, "R-05c 미탐지");
 });
+
+// ── R-7 base row 단독 매체 감지 ──
+
+test("R-7: priceOptions 비어 있고 base row 만 있는 매체는 감지 대상", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      name: "M-CITY (가정)",
+      priceOptions: null,
+      price: 70_000_000,
+      pricePeriod: "day",
+    }),
+    acc,
+  );
+  const baseOnly = acc.violations.find(
+    (v) => v.rule === "R-05" && v.detail?.baseOnly === true,
+  );
+  assert.ok(baseOnly, "R-7 미탐지");
+  assert.equal(baseOnly.detail?.riskyPeriod, true, "day 라벨은 고위험으로 표기");
+  assert.ok(baseOnly.message.includes("base 폐기 안전망이 없어"));
+});
+
+test("R-7: 명시 옵션이 하나라도 있으면 R-7 은 잡지 않는다", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      priceOptions: [{ label: "1개월", price: 70_000_000, period: "month" }],
+      price: 70_000_000,
+      pricePeriod: "day",
+    }),
+    acc,
+  );
+  const baseOnly = acc.violations.find(
+    (v) => v.rule === "R-05" && v.detail?.baseOnly === true,
+  );
+  assert.equal(baseOnly, undefined);
+});
+
+test("R-7: month 라벨 base-only 는 위험도 낮음으로 표기", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({ priceOptions: null, price: 5_000_000, pricePeriod: "month" }),
+    acc,
+  );
+  const baseOnly = acc.violations.find(
+    (v) => v.rule === "R-05" && v.detail?.baseOnly === true,
+  );
+  assert.ok(baseOnly);
+  assert.equal(baseOnly.detail?.riskyPeriod, false);
+});
+
+test("R-7: 유효하지 않은 옵션(0원 등)만 있으면 base-only 로 취급", () => {
+  const acc = createAccumulator();
+  auditRow(
+    row({
+      priceOptions: [{ label: "무효", price: 0, period: "month" }],
+      price: 5_000_000,
+      pricePeriod: "day",
+    }),
+    acc,
+  );
+  const baseOnly = acc.violations.find(
+    (v) => v.rule === "R-05" && v.detail?.baseOnly === true,
+  );
+  assert.ok(baseOnly, "0원짜리 rogue 옵션이 안전망을 만들지 않아야 한다");
+});

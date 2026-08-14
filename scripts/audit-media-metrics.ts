@@ -163,6 +163,52 @@ export function printSummary(
     `\nP0 위반이 하나라도 있는 매체: ${p0Media.size.toLocaleString()} / ${total.toLocaleString()} (${p0Pct}%)`,
   );
 
+  // R-7 — priceOptions 비어 있는 매체는 base 폐기 안전망이 없다.
+  //       매체명·price·pricePeriod 를 전부 나열해 PR-4 정정 큐에 담는다.
+  const baseOnly = violations.filter(
+    (v) => v.rule === "R-05" && v.detail?.baseOnly === true,
+  );
+  if (baseOnly.length > 0) {
+    console.log(
+      `\n[R-7] priceOptions 비어 있고 base row 만 있는 매체: ${baseOnly.length}건 (전체의 ${((baseOnly.length / total) * 100).toFixed(0)}%)`,
+    );
+    console.log(
+      `      → base 폐기 안전망이 동작하지 않으므로 pricePeriod 오라벨이 견적을 그대로 30배 부풀린다.`,
+    );
+    const risky = baseOnly.filter((v) => v.detail?.riskyPeriod === true);
+    console.log(
+      `      → 그중 day/week 이하 라벨(고위험): ${risky.length}건\n`,
+    );
+    console.log(
+      `      ${"pricePeriod".padEnd(9)} ${"price".padStart(14)}  slug/id                              매체명`,
+    );
+    console.log(`      ${"-".repeat(90)}`);
+    // 고위험 먼저, 그다음 나머지. 각 그룹당 최대 100건까지 보여준다 (PR-4 정정 큐 상한).
+    const sorted = [
+      ...risky.sort(
+        (a, b) => (b.detail?.price as number) - (a.detail?.price as number),
+      ),
+      ...baseOnly
+        .filter((v) => !risky.includes(v))
+        .sort(
+          (a, b) =>
+            (b.detail?.price as number) - (a.detail?.price as number),
+        ),
+    ].slice(0, 100);
+    for (const v of sorted) {
+      const period = String(v.detail?.pricePeriod ?? "?");
+      const price = (v.detail?.price as number) ?? 0;
+      const flag = v.detail?.riskyPeriod ? " ⚠" : "  ";
+      console.log(
+        `     ${flag} ${period.padEnd(9)} ₩${price.toLocaleString().padStart(12)}  ` +
+          `${(v.slug ?? v.mediaId).padEnd(36).slice(0, 36)} ${v.name.slice(0, 40)}`,
+      );
+    }
+    if (baseOnly.length > sorted.length) {
+      console.log(`      ... (+${baseOnly.length - sorted.length}건, JSON 리포트 참조)`);
+    }
+  }
+
   // R-3 — 상품가 vs 요율 5% 이상 벌어진 매체 (조용히 덮어쓰지 않았음을 로그로 남긴다)
   if (conflicts.length > 0) {
     console.log(
@@ -182,7 +228,10 @@ export function printSummary(
     }
   }
   console.log("\n※ 이 스크립트는 DB 에 쓰지 않습니다.");
-  console.log("   PR-3(스키마)·PR-4(마이그레이션)는 이 리포트 검토 후에 진행하세요.\n");
+  console.log("   PR-3(스키마)·PR-4(마이그레이션)는 이 리포트 검토 후에 진행하세요.");
+  console.log(
+    "   기존 즉시예약 amount 이상치 조사는 scripts/investigate-instant-booking-overcharge.sql 참조.\n",
+  );
 }
 
 function parseArg(name: string): string | undefined {
