@@ -4,7 +4,7 @@ import {
   SCROLL_STAGGER_MAX_MS,
   SCROLL_STAGGER_STEP_MS,
   staggerDelayMs,
-} from "./scroll-stagger.ts";
+} from "./scroll-stagger-delay.ts";
 
 test("B-1: 스태거 1스텝은 30ms", () => {
   assert.equal(SCROLL_STAGGER_STEP_MS, 30);

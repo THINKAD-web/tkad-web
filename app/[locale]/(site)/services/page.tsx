@@ -15,7 +15,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { AnimatedCard } from "@/components/animated-card";
-import { staggerDelayMs } from "@/lib/scroll-stagger";
+import { staggerDelayMs } from "@/lib/scroll-stagger-delay";
 import { ServicesFaq } from "@/components/services-faq";
 import { NeonSection } from "@/components/landing/neon/neon-section";
 import { NeonSectionHead } from "@/components/landing/neon/neon-section-head";

@@ -4,7 +4,7 @@ import { useState } from "react";
 import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { AnimatedCard } from "@/components/animated-card";
-import { staggerDelayMs } from "@/lib/scroll-stagger";
+import { staggerDelayMs } from "@/lib/scroll-stagger-delay";
 
 export type FaqItem = { question: string; answer: string };
 
