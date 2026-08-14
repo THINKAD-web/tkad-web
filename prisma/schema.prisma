@@ -156,27 +156,40 @@ enum OohContractStatus {
   cancelled
 }
 
+enum ReliabilityGrade {
+  A // 실측/사업자 공식 데이터
+  B // 공공데이터 기반 추정
+  C // fallback (유형별 평균, legacy 값 포함)
+}
+
+enum DimensionSource {
+  MEASURED // 실측 (사업자 spec sheet)
+  PARSED_FROM_TEXT // 기존 문자열 필드 파싱
+  ESTIMATED_MEDIAN // 유사 매체 중앙값 fallback
+  UNKNOWN // 규격 미확인 (추천 대상 제외)
+}
+
 model Media {
-  id           String           @id @default(cuid())
+  id                 String           @id @default(cuid())
   /// Public URL slug — `/media/[slug]`
-  slug         String?          @unique
-  name         String
-  nameEn       String?          @map("name_en")
-  location     String
-  region       String
+  slug               String?          @unique
+  name               String
+  nameEn             String?          @map("name_en")
+  location           String
+  region             String
   /// 서울 권역·수도권·지방 세부 코드 (`lib/media-regions.ts`)
-  regionZone   String?  @map("region_zone")
+  regionZone         String?          @map("region_zone")
   /// Catalog code: `digital` | `static` | `mobile` (OOH 유형)
-  type         String
-  price        Int
-  pricePeriod  MediaPricePeriod @default(month) @map("price_period")
+  type               String
+  price              Int
+  pricePeriod        MediaPricePeriod @default(month) @map("price_period")
   /// 가격 옵션 (JSON 배열). 예: [{"label":"20초 기준","price":30000000,"period":"month"},{"label":"15초 기준","price":25000000,"period":"month"}]
-  priceOptions Json?            @map("price_options")
+  priceOptions       Json?            @map("price_options")
   /// 부분기간 요율 lookup — 예: {"3days":0.35,"1week":0.45,"2weeks":0.6,"3weeks":0.8}
-  partialPeriodRates Json?      @map("partial_period_rates")
-  image        String?
-  width        String?
-  height       String?
+  partialPeriodRates Json?            @map("partial_period_rates")
+  image              String?
+  width              String?
+  height             String?
 
   description           String?
   subCategory           String?   @map("sub_category")
@@ -251,14 +264,14 @@ model Media {
    */
   autoPopulatedAt       DateTime? @map("auto_populated_at")
 
-  availability  MediaAvailability @default(available) @map("availability")
+  availability          MediaAvailability @default(available) @map("availability")
   /// 공개 상세·즉시 예약 CTA — 어드민 매체 관리 「노출」에서 수동 on/off
-  instantBookingEnabled Boolean @default(false) @map("instant_booking_enabled")
-  isActive      Boolean           @default(true) @map("is_active")
+  instantBookingEnabled Boolean           @default(false) @map("instant_booking_enabled")
+  isActive              Boolean           @default(true) @map("is_active")
   /// 홈(`page.tsx`) 추천 영역 — `fetchHomeFeaturedMedia`가 `isFeatured=true` 우선 조회
-  isFeatured    Boolean           @default(false) @map("is_featured")
+  isFeatured            Boolean           @default(false) @map("is_featured")
   /// 홈 추천 정렬: 오름차순, null은 뒤로
-  featuredOrder Int?              @map("featured_order")
+  featuredOrder         Int?              @map("featured_order")
 
   /// 홈 인기 매체 영역 — `fetchHomePopularMedia`가 `isPopular=true` 우선 조회 (추천과 독립)
   isPopular    Boolean @default(false) @map("is_popular")
@@ -284,21 +297,25 @@ model Media {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  ownerUser            User?                    @relation("MediaOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
-  priceSnapshots       MediaPriceSnapshot[]
-  bookings             MediaBooking[]
-  priceChangeRequests  MediaPriceChangeRequest[]
-  instantBookings      Booking[]
-  advertiserExecutions MediaAdvertiserExecution[]
-  reviews              MediaReview[]
-  dataFusion           MediaDataFusion?
-  ownerBids            MediaOwnerBid[]
-  priceNegotiations       PriceNegotiationRequest[]
+  ownerUser                   User?                        @relation("MediaOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  priceSnapshots              MediaPriceSnapshot[]
+  bookings                    MediaBooking[]
+  priceChangeRequests         MediaPriceChangeRequest[]
+  instantBookings             Booking[]
+  advertiserExecutions        MediaAdvertiserExecution[]
+  reviews                     MediaReview[]
+  dataFusion                  MediaDataFusion?
+  ownerBids                   MediaOwnerBid[]
+  priceNegotiations           PriceNegotiationRequest[]
   campaignCreativeSubmissions CampaignCreativeSubmission[]
   chatRooms                   ChatRoom[]
 
   /// 네트워크 패키지 내 개별 지점과의 연결 (선택)
   networkLocations MediaNetworkLocation[]
+
+  factSheet       MediaFactSheet?
+  externalSignals MediaExternalSignal[]
+  computedMetric  MediaComputedMetric?
 
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
@@ -307,6 +324,95 @@ model Media {
   @@index([regionMain, regionSub])
   @@index([ownerUserId])
   @@map("media")
+}
+
+model MediaFactSheet {
+  id      String @id @default(cuid())
+  mediaId String @unique @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  latitude  Float
+  longitude Float
+
+  mediaSubtype String @map("media_subtype")
+
+  widthMm         Int?             @map("width_mm")
+  heightMm        Int?             @map("height_mm")
+  dimensionSource DimensionSource? @map("dimension_source")
+
+  installHeightM Float? @map("install_height_m")
+  bearing        Int?
+  viewDistanceM  Float? @map("view_distance_m")
+
+  operatingStart String? @map("operating_start")
+  operatingEnd   String? @map("operating_end")
+  timezone       String  @default("Asia/Seoul")
+
+  /// NOTE: stationCode 표준 미확정 (PR1 위임 1).
+  ///       현재 후보: 서울교통공사 자체 코드 | 국토부 표준 코드
+  ///       PR3 백필 착수 전 재한이 확정 → 여기 코멘트 갱신
+  stationCode     String? @map("station_code")
+  /// 환승역 노선별 구분용 (Phase 2)
+  stationLineCode String? @map("station_line_code")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([mediaSubtype])
+  @@index([stationCode])
+  @@map("media_fact_sheets")
+}
+
+model MediaExternalSignal {
+  id      String @id @default(cuid())
+  mediaId String @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  sourceType String @map("source_type")
+  sourceKey  String @map("source_key")
+  rawValue   Json   @map("raw_value")
+
+  sourceUrl   String?   @map("source_url")
+  collectedAt DateTime  @map("collected_at")
+  validFrom   DateTime  @map("valid_from")
+  validTo     DateTime? @map("valid_to")
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@index([mediaId, sourceType])
+  @@index([sourceType, collectedAt])
+  @@index([sourceType, sourceKey])
+  @@map("media_external_signals")
+}
+
+model MediaComputedMetric {
+  id      String @id @default(cuid())
+  mediaId String @unique @map("media_id")
+  media   Media  @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+
+  dailyImpressions  Int   @map("daily_impressions")
+  hourlyImpressions Json? @map("hourly_impressions")
+
+  cpm Int
+
+  /// 시야거리·방향·설치높이·주변 장애물에서 계산 (0.0–1.0)
+  visibilityScore Float? @map("visibility_score")
+
+  reliabilityGrade ReliabilityGrade @map("reliability_grade")
+
+  modelVersion    String   @map("model_version")
+  computedAt      DateTime @map("computed_at")
+  sourceSignalIds String[] @default([]) @map("source_signal_ids")
+
+  legacyDailyImpressions Int? @map("legacy_daily_impressions")
+  legacyCpm              Int? @map("legacy_cpm")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@index([reliabilityGrade])
+  @@index([computedAt])
+  @@map("media_computed_metrics")
 }
 
 model MediaCategory {
@@ -384,7 +490,7 @@ model PriceNegotiationRequest {
   contactEmail     String                 @map("contact_email") @db.VarChar(254)
   contactPhone     String                 @map("contact_phone") @db.VarChar(20)
   companyName      String?                @map("company_name") @db.VarChar(120)
-  proposedPriceWon Int                  @map("proposed_price_won")
+  proposedPriceWon Int                    @map("proposed_price_won")
   message          String?                @db.Text
   status           PriceNegotiationStatus @default(PENDING)
   ownerNote        String?                @map("owner_note") @db.Text
@@ -393,8 +499,8 @@ model PriceNegotiationRequest {
   createdAt        DateTime               @default(now()) @map("created_at")
   updatedAt        DateTime               @updatedAt @map("updated_at")
 
-  media Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  user  User? @relation(fields: [userId], references: [id], onDelete: SetNull)
+  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user     User?     @relation(fields: [userId], references: [id], onDelete: SetNull)
   oohQuote OoHQuote?
 
   @@index([mediaId, status, createdAt(sort: Desc)])
@@ -463,33 +569,33 @@ model MediaAdvertiserExecution {
 }
 
 model CrmAccount {
-  id        String   @id @default(cuid())
-  email     String   @unique
-  company   String
-  name      String
-  phone     String?
-  tier      CrmTier  @default(standard)
+  id                String             @id @default(cuid())
+  email             String             @unique
+  company           String
+  name              String
+  phone             String?
+  tier              CrmTier            @default(standard)
   /// 연결된 가입 사용자
-  userId    String?  @unique @map("user_id")
+  userId            String?            @unique @map("user_id")
   /// 영업 담당자 (이메일 또는 이름)
-  assignedTo String? @map("assigned_to") @db.VarChar(120)
-  pipelineStage SalesPipelineStage @default(new_inquiry) @map("pipeline_stage")
-  expectedAmountWon Int? @map("expected_amount_won")
-  lastContactAt DateTime? @map("last_contact_at")
-  firstInquiryAt DateTime? @map("first_inquiry_at")
-  quoteSentAt DateTime? @map("quote_sent_at")
-  stageChangedAt DateTime? @map("stage_changed_at")
-  tags      String[] @default([])
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  assignedTo        String?            @map("assigned_to") @db.VarChar(120)
+  pipelineStage     SalesPipelineStage @default(new_inquiry) @map("pipeline_stage")
+  expectedAmountWon Int?               @map("expected_amount_won")
+  lastContactAt     DateTime?          @map("last_contact_at")
+  firstInquiryAt    DateTime?          @map("first_inquiry_at")
+  quoteSentAt       DateTime?          @map("quote_sent_at")
+  stageChangedAt    DateTime?          @map("stage_changed_at")
+  tags              String[]           @default([])
+  createdAt         DateTime           @default(now()) @map("created_at")
+  updatedAt         DateTime           @updatedAt @map("updated_at")
 
-  user        User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
-  campaigns   Campaign[]
-  contactLogs    CrmContactLog[]
-  notes          CrmNote[]
-  customerNotes  CustomerNote[]
-  followUps      CrmFollowUp[]
-  pipelineCard   PipelineCard?
+  user          User?           @relation(fields: [userId], references: [id], onDelete: SetNull)
+  campaigns     Campaign[]
+  contactLogs   CrmContactLog[]
+  notes         CrmNote[]
+  customerNotes CustomerNote[]
+  followUps     CrmFollowUp[]
+  pipelineCard  PipelineCard?
 
   @@index([pipelineStage])
   @@index([assignedTo])
@@ -499,30 +605,30 @@ model CrmAccount {
 
 /// 영업 파이프라인 칸반 카드 (문의·견적·CRM 계정 연동)
 model PipelineCard {
-  id              String             @id @default(cuid())
-  stage           SalesPipelineStage @default(new_inquiry)
-  company         String
-  contactName     String             @map("contact_name")
-  email           String?
-  phone           String?
-  expectedAmount  Int                @default(0) @map("expected_amount")
-  assignedTo      String?            @map("assigned_to") @db.VarChar(120)
-  lastContactAt   DateTime?          @map("last_contact_at")
-  firstInquiryAt  DateTime?          @map("first_inquiry_at")
-  quoteSentAt     DateTime?          @map("quote_sent_at")
-  stageChangedAt  DateTime?          @map("stage_changed_at")
-  tags            String[]           @default([])
-  sourceType      String             @default("manual") @map("source_type")
-  crmAccountId    String?            @unique @map("crm_account_id")
-  userId          String?            @map("user_id")
-  contactInquiryId String?           @unique @map("contact_inquiry_id")
-  oohQuoteId      String?            @unique @map("ooh_quote_id")
-  createdAt       DateTime           @default(now()) @map("created_at")
-  updatedAt       DateTime           @updatedAt @map("updated_at")
+  id               String             @id @default(cuid())
+  stage            SalesPipelineStage @default(new_inquiry)
+  company          String
+  contactName      String             @map("contact_name")
+  email            String?
+  phone            String?
+  expectedAmount   Int                @default(0) @map("expected_amount")
+  assignedTo       String?            @map("assigned_to") @db.VarChar(120)
+  lastContactAt    DateTime?          @map("last_contact_at")
+  firstInquiryAt   DateTime?          @map("first_inquiry_at")
+  quoteSentAt      DateTime?          @map("quote_sent_at")
+  stageChangedAt   DateTime?          @map("stage_changed_at")
+  tags             String[]           @default([])
+  sourceType       String             @default("manual") @map("source_type")
+  crmAccountId     String?            @unique @map("crm_account_id")
+  userId           String?            @map("user_id")
+  contactInquiryId String?            @unique @map("contact_inquiry_id")
+  oohQuoteId       String?            @unique @map("ooh_quote_id")
+  createdAt        DateTime           @default(now()) @map("created_at")
+  updatedAt        DateTime           @updatedAt @map("updated_at")
 
-  crmAccount      CrmAccount?      @relation(fields: [crmAccountId], references: [id], onDelete: SetNull)
-  contactInquiry  ContactInquiry?  @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
-  oohQuote        OoHQuote?        @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
+  crmAccount     CrmAccount?     @relation(fields: [crmAccountId], references: [id], onDelete: SetNull)
+  contactInquiry ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
+  oohQuote       OoHQuote?       @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
 
   @@index([stage])
   @@index([assignedTo])
@@ -532,13 +638,13 @@ model PipelineCard {
 
 /// 광고주 프로필 타임라인 메모
 model CustomerNote {
-  id            String   @id @default(cuid())
-  userId        String?  @map("user_id")
-  crmAccountId  String?  @map("crm_account_id")
-  body          String   @db.Text
-  kind          String   @default("note")
-  authorLabel   String?  @map("author_label") @db.VarChar(80)
-  createdAt     DateTime @default(now()) @map("created_at")
+  id           String   @id @default(cuid())
+  userId       String?  @map("user_id")
+  crmAccountId String?  @map("crm_account_id")
+  body         String   @db.Text
+  kind         String   @default("note")
+  authorLabel  String?  @map("author_label") @db.VarChar(80)
+  createdAt    DateTime @default(now()) @map("created_at")
 
   user       User?       @relation(fields: [userId], references: [id], onDelete: Cascade)
   crmAccount CrmAccount? @relation(fields: [crmAccountId], references: [id], onDelete: Cascade)
@@ -638,18 +744,18 @@ model Campaign {
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  account        CrmAccount?             @relation(fields: [accountId], references: [id], onDelete: SetNull)
-  ownerUser      User?                   @relation("CampaignOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
-  scheduleEvents CampaignScheduleEvent[]
-  financialDocs  CampaignFinancialDoc[]
-  mediaBookings  MediaBooking[]
-  quoteRequests  QuoteRequest[]
+  account             CrmAccount?                  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  ownerUser           User?                        @relation("CampaignOwner", fields: [ownerUserId], references: [id], onDelete: SetNull)
+  scheduleEvents      CampaignScheduleEvent[]
+  financialDocs       CampaignFinancialDoc[]
+  mediaBookings       MediaBooking[]
+  quoteRequests       QuoteRequest[]
   proofPhotos         CampaignProofPhoto[]
   proofUploadTokens   CampaignProofUploadToken[]
   proofWeeklyDigests  CampaignProofWeeklyDigest[]
-  successCase    SuccessCase?
-  oohQuote       OoHQuote?
-  mediaReviews   MediaReview[]
+  successCase         SuccessCase?
+  oohQuote            OoHQuote?
+  mediaReviews        MediaReview[]
   creativeSubmissions CampaignCreativeSubmission[]
   renewalProposal     CampaignRenewalProposal?
 
@@ -714,11 +820,11 @@ model ChatRoom {
   createdAt         DateTime       @default(now()) @map("created_at")
   updatedAt         DateTime       @updatedAt @map("updated_at")
 
-  media      Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  advertiser User      @relation("ChatAdvertiser", fields: [advertiserUserId], references: [id], onDelete: Cascade)
-  owner      User      @relation("ChatOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
+  media      Media         @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  advertiser User          @relation("ChatAdvertiser", fields: [advertiserUserId], references: [id], onDelete: Cascade)
+  owner      User          @relation("ChatOwner", fields: [ownerUserId], references: [id], onDelete: Cascade)
   messages   ChatMessage[]
-  oohQuote   OoHQuote? @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
+  oohQuote   OoHQuote?     @relation(fields: [oohQuoteId], references: [id], onDelete: SetNull)
 
   @@unique([mediaId, advertiserUserId])
   @@index([ownerUserId, status, lastMessageAt(sort: Desc)])
@@ -727,20 +833,20 @@ model ChatRoom {
 }
 
 model ChatMessage {
-  id              String         @id @default(cuid())
-  roomId          String         @map("room_id")
-  senderRole      ChatSenderRole @map("sender_role")
-  senderUserId    String?        @map("sender_user_id")
-  displayLabel    String         @map("display_label") @db.VarChar(32)
-  body            String         @db.Text
-  bodySanitized   String         @map("body_sanitized") @db.Text
-  contactBlocked  Boolean        @default(false) @map("contact_blocked")
-  attachmentUrl   String?        @map("attachment_url") @db.Text
-  attachmentType  String?        @map("attachment_type") @db.VarChar(16)
-  attachmentName  String?        @map("attachment_name") @db.VarChar(200)
-  isAutoReply     Boolean        @default(false) @map("is_auto_reply")
-  quoteId         String?        @map("quote_id")
-  createdAt       DateTime       @default(now()) @map("created_at")
+  id             String         @id @default(cuid())
+  roomId         String         @map("room_id")
+  senderRole     ChatSenderRole @map("sender_role")
+  senderUserId   String?        @map("sender_user_id")
+  displayLabel   String         @map("display_label") @db.VarChar(32)
+  body           String         @db.Text
+  bodySanitized  String         @map("body_sanitized") @db.Text
+  contactBlocked Boolean        @default(false) @map("contact_blocked")
+  attachmentUrl  String?        @map("attachment_url") @db.Text
+  attachmentType String?        @map("attachment_type") @db.VarChar(16)
+  attachmentName String?        @map("attachment_name") @db.VarChar(200)
+  isAutoReply    Boolean        @default(false) @map("is_auto_reply")
+  quoteId        String?        @map("quote_id")
+  createdAt      DateTime       @default(now()) @map("created_at")
 
   room   ChatRoom @relation(fields: [roomId], references: [id], onDelete: Cascade)
   sender User?    @relation(fields: [senderUserId], references: [id], onDelete: SetNull)
@@ -750,21 +856,21 @@ model ChatMessage {
 }
 
 model CampaignProofPhoto {
-  id         String   @id @default(cuid())
-  campaignId String   @map("campaign_id")
+  id                  String    @id @default(cuid())
+  campaignId          String    @map("campaign_id")
   /// 원본 Cloudinary URL
-  imageUrl   String   @map("image_url")
+  imageUrl            String    @map("image_url")
   /// 워터마크 적용 URL (공개·광고주 노출 기본)
-  imageUrlWatermarked String? @map("image_url_watermarked")
-  caption    String?
-  mediaName  String?  @map("media_name")
-  latitude   Float?
-  longitude  Float?
-  capturedAt DateTime? @map("captured_at")
-  uploadSource String? @map("upload_source") @db.VarChar(16)
+  imageUrlWatermarked String?   @map("image_url_watermarked")
+  caption             String?
+  mediaName           String?   @map("media_name")
+  latitude            Float?
+  longitude           Float?
+  capturedAt          DateTime? @map("captured_at")
+  uploadSource        String?   @map("upload_source") @db.VarChar(16)
   /// 매체사·현장·어드민 업로더
-  uploadedByUserId String? @map("uploaded_by_user_id")
-  createdAt  DateTime @default(now()) @map("created_at")
+  uploadedByUserId    String?   @map("uploaded_by_user_id")
+  createdAt           DateTime  @default(now()) @map("created_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -790,11 +896,11 @@ model CampaignProofUploadToken {
 
 /// 주간 인증 리포트 이메일 발송 이력 (중복 방지)
 model CampaignProofWeeklyDigest {
-  id          String   @id @default(cuid())
-  campaignId  String   @map("campaign_id")
-  periodKey   String   @map("period_key") @db.VarChar(10)
-  recipient   String
-  sentAt      DateTime @default(now()) @map("sent_at")
+  id         String   @id @default(cuid())
+  campaignId String   @map("campaign_id")
+  periodKey  String   @map("period_key") @db.VarChar(10)
+  recipient  String
+  sentAt     DateTime @default(now()) @map("sent_at")
 
   campaign Campaign @relation(fields: [campaignId], references: [id], onDelete: Cascade)
 
@@ -852,21 +958,21 @@ model QuoteTemplate {
 }
 
 model ContactInquiry {
-  id          String   @id @default(cuid())
-  company     String
-  name        String
-  phone       String
-  email       String?
-  inquiryType String?  @map("inquiry_type")
-  budget      String?
-  message     String
+  id              String    @id @default(cuid())
+  company         String
+  name            String
+  phone           String
+  email           String?
+  inquiryType     String?   @map("inquiry_type")
+  budget          String?
+  message         String
   /// 자동 분류: industry_budget_region 등
-  categoryCode   String?   @map("category_code") @db.VarChar(64)
-  assigneeEmail  String?   @map("assignee_email") @db.VarChar(254)
-  assignedAt     DateTime? @map("assigned_at")
+  categoryCode    String?   @map("category_code") @db.VarChar(64)
+  assigneeEmail   String?   @map("assignee_email") @db.VarChar(254)
+  assignedAt      DateTime? @map("assigned_at")
   firstResponseAt DateTime? @map("first_response_at")
-  slaEscalatedAt DateTime? @map("sla_escalated_at")
-  createdAt   DateTime @default(now()) @map("created_at")
+  slaEscalatedAt  DateTime? @map("sla_escalated_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
 
   oohQuote       OoHQuote?
   pipelineCard   PipelineCard?
@@ -879,13 +985,13 @@ model ContactInquiry {
 
 /// 광고주 가입 환영 이메일 드립 (Day 0/1/3/7/14)
 model UserWelcomeDrip {
-  userId          String    @id @map("user_id")
-  day0SentAt      DateTime? @map("day0_sent_at")
-  day1SentAt      DateTime? @map("day1_sent_at")
-  day3SentAt      DateTime? @map("day3_sent_at")
-  day7SentAt      DateTime? @map("day7_sent_at")
-  day14SentAt     DateTime? @map("day14_sent_at")
-  createdAt       DateTime  @default(now()) @map("created_at")
+  userId      String    @id @map("user_id")
+  day0SentAt  DateTime? @map("day0_sent_at")
+  day1SentAt  DateTime? @map("day1_sent_at")
+  day3SentAt  DateTime? @map("day3_sent_at")
+  day7SentAt  DateTime? @map("day7_sent_at")
+  day14SentAt DateTime? @map("day14_sent_at")
+  createdAt   DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -962,8 +1068,8 @@ model QuoteRequest {
   campaignId    String?  @map("campaign_id")
   createdAt     DateTime @default(now()) @map("created_at")
 
-  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
-  oohQuote OoHQuote?
+  campaign       Campaign?       @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  oohQuote       OoHQuote?
   openBidRequest OpenBidRequest?
 
   @@index([campaignId])
@@ -996,8 +1102,8 @@ model OoHQuote {
   paymentConfirmedAt  DateTime? @map("payment_confirmed_at")
   contractConfirmedAt DateTime? @map("contract_confirmed_at")
 
-  adminNote      String?   @map("admin_note")
-  cancelReason   String?   @map("cancel_reason")
+  adminNote           String?   @map("admin_note")
+  cancelReason        String?   @map("cancel_reason")
   /// 고객 수정 요청 본문 (sent 상태에서만 제출; P2 처리 시 null 클리어)
   revisionMessage     String?   @map("revision_message") @db.Text
   revisionRequestedAt DateTime? @map("revision_requested_at")
@@ -1017,21 +1123,23 @@ model OoHQuote {
   contactInquiryId String?         @unique @map("contact_inquiry_id")
   contactInquiry   ContactInquiry? @relation(fields: [contactInquiryId], references: [id], onDelete: SetNull)
 
-  priceNegotiationId String?                 @unique @map("price_negotiation_id")
+  priceNegotiationId String?                  @unique @map("price_negotiation_id")
   priceNegotiation   PriceNegotiationRequest? @relation(fields: [priceNegotiationId], references: [id], onDelete: SetNull)
 
-  /** Admin formal Quote → contract pipeline bridge (P1) */
+  /**
+   * Admin formal Quote → contract pipeline bridge (P1)
+   */
   sourceAdminQuoteId String? @unique @map("source_admin_quote_id")
   sourceAdminQuote   Quote?  @relation(fields: [sourceAdminQuoteId], references: [id], onDelete: SetNull)
 
   chatRoom ChatRoom?
 
-  pipelineCard     PipelineCard?
+  pipelineCard PipelineCard?
 
   /// `lib/quote-calculator.ts` 산출 JSON (라인·VAT·유효기간 등)
-  quoteBreakdown Json? @map("quote_breakdown")
-  validUntil     DateTime? @map("valid_until")
-  discountRate   Float     @default(0) @map("discount_rate")
+  quoteBreakdown     Json?     @map("quote_breakdown")
+  validUntil         DateTime? @map("valid_until")
+  discountRate       Float     @default(0) @map("discount_rate")
   /// 만료 D-3 알림톡 발송 시각
   expiryNoticeSentAt DateTime? @map("expiry_notice_sent_at")
 
@@ -1567,90 +1675,90 @@ enum CommunityMemberRole {
 }
 
 model User {
-  id              String               @id @default(cuid())
-  email           String               @unique
-  passwordHash    String?              @map("password_hash")
-  name            String
-  phone           String?
-  company         String?
-  locale          String               @default("ko")
-  role            AppUserRole          @default(advertiser)
-  communityRole   CommunityMemberRole? @map("community_role")
-  communityBio    String?              @map("community_bio")
+  id                        String               @id @default(cuid())
+  email                     String               @unique
+  passwordHash              String?              @map("password_hash")
+  name                      String
+  phone                     String?
+  company                   String?
+  locale                    String               @default("ko")
+  role                      AppUserRole          @default(advertiser)
+  communityRole             CommunityMemberRole? @map("community_role")
+  communityBio              String?              @map("community_bio")
   /**
    * 커뮤니티 멤버 디렉터리·프로필용 지역 (서울/부산/대구 등)
    */
-  region          String?              @map("region")
-  emailVerifiedAt           DateTime? @map("email_verified_at")
-  emailVerifyToken          String?   @unique @map("email_verify_token")
-  emailVerifyTokenExpiresAt DateTime? @map("email_verify_token_expires_at")
-  lastLoginAt               DateTime? @map("last_login_at")
-  deletedAt       DateTime?            @map("deleted_at")
-  plan                    UserPlan  @default(FREE)
-  trialStartedAt          DateTime? @map("trial_started_at")
-  trialEndsAt             DateTime? @map("trial_ends_at")
-  proTrialEndsAt          DateTime? @map("pro_trial_ends_at")
-  freeReportDownloads     Int       @default(0) @map("free_report_downloads")
-  plannerLeadCaptured     Boolean   @default(false) @map("planner_lead_captured")
-  trialReminderSentAt     DateTime? @map("trial_reminder_sent_at")
-  createdAt       DateTime             @default(now()) @map("created_at")
-  updatedAt       DateTime             @updatedAt @map("updated_at")
+  region                    String?              @map("region")
+  emailVerifiedAt           DateTime?            @map("email_verified_at")
+  emailVerifyToken          String?              @unique @map("email_verify_token")
+  emailVerifyTokenExpiresAt DateTime?            @map("email_verify_token_expires_at")
+  lastLoginAt               DateTime?            @map("last_login_at")
+  deletedAt                 DateTime?            @map("deleted_at")
+  plan                      UserPlan             @default(FREE)
+  trialStartedAt            DateTime?            @map("trial_started_at")
+  trialEndsAt               DateTime?            @map("trial_ends_at")
+  proTrialEndsAt            DateTime?            @map("pro_trial_ends_at")
+  freeReportDownloads       Int                  @default(0) @map("free_report_downloads")
+  plannerLeadCaptured       Boolean              @default(false) @map("planner_lead_captured")
+  trialReminderSentAt       DateTime?            @map("trial_reminder_sent_at")
+  createdAt                 DateTime             @default(now()) @map("created_at")
+  updatedAt                 DateTime             @updatedAt @map("updated_at")
 
-  accounts                Account[]
-  sessions                UserSession[]
-  bookingRequests         MediaBooking[]         @relation("BookingRequester")
-  ownedCampaigns          Campaign[]             @relation("CampaignOwner")
-  instantBookings         Booking[]
-  communityPosts          CommunityPost[]        @relation("CommunityPostAuthor")
-  communityComments       CommunityComment[]     @relation("CommunityCommentAuthor")
-  communityPostLikes      CommunityPostLike[]
-  communityBookmarks      CommunityBookmark[]
-  creatives               Creative[]             @relation("UserCreatives")
-  playlists               CreativePlaylist[]     @relation("UserPlaylists")
-  newsletterSubscriptions NewsletterSubscriber[] @relation("UserNewsletters")
-  notifications           Notification[]
-  ownedTeams              Team[]                 @relation("TeamOwner")
-  teamMemberships         TeamMember[]
-  mediaReviews            MediaReview[]
-  mediaReviewHelpfuls     MediaReviewHelpful[]
-  passwordResetTokens     PasswordResetToken[]
-  searchLogs              SearchLog[]
-  preference              UserPreference?
-  chatLogs                ChatLog[]
-  supportChatLogs         SupportChatLog[]
-  welcomeDrip             UserWelcomeDrip?
-  apiKeys                 ApiKey[]
-  ownedMedia              Media[]                  @relation("MediaOwner")
-  mediaPriceChangeRequests MediaPriceChangeRequest[]
-  mediaOwnerSettlements   MediaOwnerSettlement[]
-  mediaOwnerBranding      MediaOwnerBranding?
-  mediaOwnerReportDownloads MediaOwnerReportDownload[]
-  crmAccount              CrmAccount?
-  pushSubscriptions       PushSubscription[]
-  customerNotes           CustomerNote[]
-  subscriptions           Subscription[]
-  mediaOwnerStats         MediaOwnerStats?
-  mediaOwnerBids          MediaOwnerBid[]          @relation("MediaOwnerBids")
-  mediaOwnerReviews       MediaOwnerReview[]       @relation("MediaOwnerReviews")
-  mediaOwnerReviewsGiven  MediaOwnerReview[]       @relation("AdvertiserReviews")
-  marketInsightsDigests   MarketInsightsWeeklyDigest[]
-  mediaOwnerProfile       MediaOwnerProfile?
-  regionPriceAlerts       UserRegionPriceAlert[]
-  priceNegotiations       PriceNegotiationRequest[]
+  accounts                    Account[]
+  sessions                    UserSession[]
+  bookingRequests             MediaBooking[]               @relation("BookingRequester")
+  ownedCampaigns              Campaign[]                   @relation("CampaignOwner")
+  instantBookings             Booking[]
+  communityPosts              CommunityPost[]              @relation("CommunityPostAuthor")
+  communityComments           CommunityComment[]           @relation("CommunityCommentAuthor")
+  communityPostLikes          CommunityPostLike[]
+  communityBookmarks          CommunityBookmark[]
+  creatives                   Creative[]                   @relation("UserCreatives")
+  playlists                   CreativePlaylist[]           @relation("UserPlaylists")
+  newsletterSubscriptions     NewsletterSubscriber[]       @relation("UserNewsletters")
+  notifications               Notification[]
+  ownedTeams                  Team[]                       @relation("TeamOwner")
+  teamMemberships             TeamMember[]
+  mediaReviews                MediaReview[]
+  mediaReviewHelpfuls         MediaReviewHelpful[]
+  passwordResetTokens         PasswordResetToken[]
+  searchLogs                  SearchLog[]
+  preference                  UserPreference?
+  chatLogs                    ChatLog[]
+  supportChatLogs             SupportChatLog[]
+  welcomeDrip                 UserWelcomeDrip?
+  apiKeys                     ApiKey[]
+  ownedMedia                  Media[]                      @relation("MediaOwner")
+  mediaPriceChangeRequests    MediaPriceChangeRequest[]
+  mediaOwnerSettlements       MediaOwnerSettlement[]
+  mediaOwnerBranding          MediaOwnerBranding?
+  mediaOwnerReportDownloads   MediaOwnerReportDownload[]
+  crmAccount                  CrmAccount?
+  pushSubscriptions           PushSubscription[]
+  customerNotes               CustomerNote[]
+  subscriptions               Subscription[]
+  mediaOwnerStats             MediaOwnerStats?
+  mediaOwnerBids              MediaOwnerBid[]              @relation("MediaOwnerBids")
+  mediaOwnerReviews           MediaOwnerReview[]           @relation("MediaOwnerReviews")
+  mediaOwnerReviewsGiven      MediaOwnerReview[]           @relation("AdvertiserReviews")
+  marketInsightsDigests       MarketInsightsWeeklyDigest[]
+  mediaOwnerProfile           MediaOwnerProfile?
+  regionPriceAlerts           UserRegionPriceAlert[]
+  priceNegotiations           PriceNegotiationRequest[]
   campaignCreativeSubmissions CampaignCreativeSubmission[]
-  chatRoomsAsAdvertiser   ChatRoom[] @relation("ChatAdvertiser")
-  chatRoomsAsOwner        ChatRoom[] @relation("ChatOwner")
-  chatMessages            ChatMessage[]
-  savedMediaPlan          UserSavedPlan?
-  savedPlanCarts          SavedPlanCart[]
-  planReportActivities    PlanReportActivity[]
+  chatRoomsAsAdvertiser       ChatRoom[]                   @relation("ChatAdvertiser")
+  chatRoomsAsOwner            ChatRoom[]                   @relation("ChatOwner")
+  chatMessages                ChatMessage[]
+  savedMediaPlan              UserSavedPlan?
+  savedPlanCarts              SavedPlanCart[]
+  planReportActivities        PlanReportActivity[]
 
-  referredByUserId String? @map("referred_by_user_id")
-  referredBy       User?   @relation("UserReferrals", fields: [referredByUserId], references: [id], onDelete: SetNull)
-  referrals        User[]  @relation("UserReferrals")
-  userPoint        UserPoint?
+  referredByUserId  String?            @map("referred_by_user_id")
+  referredBy        User?              @relation("UserReferrals", fields: [referredByUserId], references: [id], onDelete: SetNull)
+  referrals         User[]             @relation("UserReferrals")
+  userPoint         UserPoint?
   pointTransactions PointTransaction[]
-  pointCredits     UserPointCredit[]
+  pointCredits      UserPointCredit[]
 
   @@index([email])
   @@index([referredByUserId])
@@ -1691,16 +1799,16 @@ model UserPoint {
 }
 
 model PointTransaction {
-  id          String         @id @default(cuid())
-  userId      String         @map("user_id")
-  type        PointEventType
-  amount      Int
-  description String         @db.VarChar(200)
-  refId       String?        @map("ref_id") @db.VarChar(64)
-  balanceAfter Int?          @map("balance_after")
-  expiresAt   DateTime?      @map("expires_at")
-  expiredAt   DateTime?      @map("expired_at")
-  createdAt   DateTime       @default(now()) @map("created_at")
+  id           String         @id @default(cuid())
+  userId       String         @map("user_id")
+  type         PointEventType
+  amount       Int
+  description  String         @db.VarChar(200)
+  refId        String?        @map("ref_id") @db.VarChar(64)
+  balanceAfter Int?           @map("balance_after")
+  expiresAt    DateTime?      @map("expires_at")
+  expiredAt    DateTime?      @map("expired_at")
+  createdAt    DateTime       @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1711,12 +1819,12 @@ model PointTransaction {
 }
 
 model UserPointCredit {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
-  creditType    String   @map("credit_type") @db.VarChar(32)
-  remainingUses Int      @default(1) @map("remaining_uses")
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
+  creditType    String    @map("credit_type") @db.VarChar(32)
+  remainingUses Int       @default(1) @map("remaining_uses")
   expiresAt     DateTime? @map("expires_at")
-  createdAt     DateTime @default(now()) @map("created_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -1950,21 +2058,21 @@ model UserSession {
 
 /// 공개 플래너 저장·공유 플랜. 30일 후 자동 만료.
 model SavedPlannerPlan {
-  id        String   @id @default(cuid())
-  expiresAt DateTime @map("expires_at")
+  id           String   @id @default(cuid())
+  expiresAt    DateTime @map("expires_at")
   /**
    * 저장 시 선택적으로 입력. 재편집·이메일 재전송 플로우에 활용
    */
-  userEmail String?  @map("user_email")
-  teamId    String?  @map("team_id")
-  isTeamShared Boolean @default(false) @map("is_team_shared")
+  userEmail    String?  @map("user_email")
+  teamId       String?  @map("team_id")
+  isTeamShared Boolean  @default(false) @map("is_team_shared")
   /**
    * PlannerStore partialize 결과 그대로 직렬화된 입력 상태 전체
    */
-  planJson  Json     @map("plan_json")
-  viewCount Int      @default(0) @map("view_count")
-  createdAt DateTime @default(now()) @map("created_at")
-  updatedAt DateTime @updatedAt @map("updated_at")
+  planJson     Json     @map("plan_json")
+  viewCount    Int      @default(0) @map("view_count")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
 
   team Team? @relation(fields: [teamId], references: [id], onDelete: SetNull)
 
@@ -2071,33 +2179,33 @@ model UserSavedPlan {
 
 /// 사용자가 저장한 플랜 카트 스냅샷 (보고서·사례·커뮤니티 파이프라인용)
 model SavedPlanCart {
-  id            String    @id @default(cuid())
-  userId        String    @map("user_id")
-  title         String    @db.VarChar(200)
-  description   String?   @db.Text
-  source        String    @default("plan_cart") @db.VarChar(32)
-  items         Json      @default("[]")
-  campaignGoal  String?   @map("campaign_goal") @db.VarChar(32)
-  totalBudget   Int?      @map("total_budget")
-  duration      Int?
-  reportSummary Json?     @map("report_summary")
-  mediaCount    Int       @default(0) @map("media_count")
-  regionsText   String?   @map("regions_text") @db.VarChar(500)
-  goalTitle     String?   @map("goal_title") @db.VarChar(120)
-  status        String    @default("saved") @db.VarChar(32)
-  publishIntent String?   @map("publish_intent") @db.VarChar(32)
-  adminNote     String?   @map("admin_note") @db.Text
+  id                      String    @id @default(cuid())
+  userId                  String    @map("user_id")
+  title                   String    @db.VarChar(200)
+  description             String?   @db.Text
+  source                  String    @default("plan_cart") @db.VarChar(32)
+  items                   Json      @default("[]")
+  campaignGoal            String?   @map("campaign_goal") @db.VarChar(32)
+  totalBudget             Int?      @map("total_budget")
+  duration                Int?
+  reportSummary           Json?     @map("report_summary")
+  mediaCount              Int       @default(0) @map("media_count")
+  regionsText             String?   @map("regions_text") @db.VarChar(500)
+  goalTitle               String?   @map("goal_title") @db.VarChar(120)
+  status                  String    @default("saved") @db.VarChar(32)
+  publishIntent           String?   @map("publish_intent") @db.VarChar(32)
+  adminNote               String?   @map("admin_note") @db.Text
   /// 사례로 승격된 SuccessCase.id
-  promotedSuccessCaseId    String?   @map("promoted_success_case_id")
+  promotedSuccessCaseId   String?   @map("promoted_success_case_id")
   /// 커뮤니티로 승격된 CommunityPost.id
-  promotedCommunityPostId  String?   @map("promoted_community_post_id")
-  promotedAt               DateTime? @map("promoted_at")
+  promotedCommunityPostId String?   @map("promoted_community_post_id")
+  promotedAt              DateTime? @map("promoted_at")
   /// 사용자가 저장 플랜을 내 플랜으로 불러온 횟수
-  restoreCount             Int       @default(0) @map("restore_count")
-  lastRestoredAt           DateTime? @map("last_restored_at")
-  deletedAt     DateTime? @map("deleted_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  restoreCount            Int       @default(0) @map("restore_count")
+  lastRestoredAt          DateTime? @map("last_restored_at")
+  deletedAt               DateTime? @map("deleted_at")
+  createdAt               DateTime  @default(now()) @map("created_at")
+  updatedAt               DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -2184,9 +2292,9 @@ model MediaReview {
   createdAt      DateTime          @default(now()) @map("created_at")
   updatedAt      DateTime          @updatedAt @map("updated_at")
 
-  media    Media     @relation(fields: [mediaId], references: [id], onDelete: Cascade)
-  user     User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  campaign Campaign? @relation(fields: [campaignId], references: [id], onDelete: SetNull)
+  media    Media                @relation(fields: [mediaId], references: [id], onDelete: Cascade)
+  user     User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  campaign Campaign?            @relation(fields: [campaignId], references: [id], onDelete: SetNull)
   helpfuls MediaReviewHelpful[]
 
   @@unique([mediaId, userId])
@@ -2375,44 +2483,44 @@ enum MediaOwnerSettlementStatus {
 }
 
 model MediaApplication {
-  id             String                 @id @default(cuid())
-  companyName    String                 @map("company_name")
-  contactName    String                 @map("contact_name")
-  contactPhone   String                 @map("contact_phone")
-  contactEmail   String                 @map("contact_email")
-  mediaName      String                 @map("media_name")
+  id                    String                 @id @default(cuid())
+  companyName           String                 @map("company_name")
+  contactName           String                 @map("contact_name")
+  contactPhone          String                 @map("contact_phone")
+  contactEmail          String                 @map("contact_email")
+  mediaName             String                 @map("media_name")
   /// digital | static | other
-  mediaType      String                 @map("media_type")
-  address        String
-  addressDetail  String?                @map("address_detail")
-  zonecode       String?
-  latitude       Float?
-  longitude      Float?
-  city           String?
-  district       String?
-  widthCm        Int?                   @map("width_cm")
-  heightCm       Int?                   @map("height_cm")
-  isDigital      Boolean                @default(false) @map("is_digital")
-  operatingHours String?                @map("operating_hours")
-  hasLighting    Boolean                @default(false) @map("has_lighting")
-  dailyFootfall  Int?                   @map("daily_footfall")
-  monthlyPrice   Int                    @map("monthly_price")
-  minFlightDays  Int?                   @map("min_flight_days")
-  photoFrontUrl  String                 @map("photo_front_url")
-  photoSideUrl   String                 @map("photo_side_url")
-  photoNightUrl  String                 @map("photo_night_url")
-  notes          String?                @db.Text
-  status         MediaApplicationStatus @default(PENDING)
-  reviewNote     String?                @map("review_note") @db.Text
-  reviewedAt     DateTime?              @map("reviewed_at")
-  createdMediaId String?                @map("created_media_id")
-  submitterIp    String?                @map("submitter_ip")
+  mediaType             String                 @map("media_type")
+  address               String
+  addressDetail         String?                @map("address_detail")
+  zonecode              String?
+  latitude              Float?
+  longitude             Float?
+  city                  String?
+  district              String?
+  widthCm               Int?                   @map("width_cm")
+  heightCm              Int?                   @map("height_cm")
+  isDigital             Boolean                @default(false) @map("is_digital")
+  operatingHours        String?                @map("operating_hours")
+  hasLighting           Boolean                @default(false) @map("has_lighting")
+  dailyFootfall         Int?                   @map("daily_footfall")
+  monthlyPrice          Int                    @map("monthly_price")
+  minFlightDays         Int?                   @map("min_flight_days")
+  photoFrontUrl         String                 @map("photo_front_url")
+  photoSideUrl          String                 @map("photo_side_url")
+  photoNightUrl         String                 @map("photo_night_url")
+  notes                 String?                @db.Text
+  status                MediaApplicationStatus @default(PENDING)
+  reviewNote            String?                @map("review_note") @db.Text
+  reviewedAt            DateTime?              @map("reviewed_at")
+  createdMediaId        String?                @map("created_media_id")
+  submitterIp           String?                @map("submitter_ip")
   /// 로그인 매체사가 제출한 경우
-  userId         String?                @map("user_id")
+  userId                String?                @map("user_id")
   /// PENDING 24시간 초과 리마인더 발송 시각
-  pendingReminderSentAt DateTime?       @map("pending_reminder_sent_at")
-  createdAt      DateTime               @default(now()) @map("created_at")
-  updatedAt      DateTime               @updatedAt @map("updated_at")
+  pendingReminderSentAt DateTime?              @map("pending_reminder_sent_at")
+  createdAt             DateTime               @default(now()) @map("created_at")
+  updatedAt             DateTime               @updatedAt @map("updated_at")
 
   @@index([status, createdAt])
   @@index([userId])
@@ -2438,27 +2546,27 @@ enum PotentialMediaOutreachStatus {
 
 /// 지도 검색 등으로 발굴한 잠재 매체
 model PotentialMedia {
-  id              String                       @id @default(cuid())
-  name            String                       @db.VarChar(200)
-  address         String                       @db.VarChar(500)
-  lat             Float?
-  lng             Float?
-  foundFrom       PotentialMediaSource         @map("found_from")
+  id                   String                       @id @default(cuid())
+  name                 String                       @db.VarChar(200)
+  address              String                       @db.VarChar(500)
+  lat                  Float?
+  lng                  Float?
+  foundFrom            PotentialMediaSource         @map("found_from")
   /// 전화·이메일·웹 등 JSON { phone?, email?, url? }
-  contactInfo     Json?                        @map("contact_info")
-  externalPlaceId String?                      @map("external_place_id") @db.VarChar(120)
-  outreachStatus  PotentialMediaOutreachStatus @default(NEW) @map("outreach_status")
-  outreachSequenceStep Int @default(0) @map("outreach_sequence_step")
-  outreachToken   String?                      @unique @map("outreach_token") @db.VarChar(64)
-  outreachEmail   String?                      @map("outreach_email") @db.VarChar(254)
-  emailedAt       DateTime?                    @map("emailed_at")
-  followUp1SentAt DateTime?                    @map("follow_up1_sent_at")
-  followUp2SentAt DateTime?                    @map("follow_up2_sent_at")
-  emailOpenedAt   DateTime?                    @map("email_opened_at")
-  registeredAt    DateTime?                    @map("registered_at")
-  notes           String?                      @db.Text
-  createdAt       DateTime                     @default(now()) @map("created_at")
-  updatedAt       DateTime                     @updatedAt @map("updated_at")
+  contactInfo          Json?                        @map("contact_info")
+  externalPlaceId      String?                      @map("external_place_id") @db.VarChar(120)
+  outreachStatus       PotentialMediaOutreachStatus @default(NEW) @map("outreach_status")
+  outreachSequenceStep Int                          @default(0) @map("outreach_sequence_step")
+  outreachToken        String?                      @unique @map("outreach_token") @db.VarChar(64)
+  outreachEmail        String?                      @map("outreach_email") @db.VarChar(254)
+  emailedAt            DateTime?                    @map("emailed_at")
+  followUp1SentAt      DateTime?                    @map("follow_up1_sent_at")
+  followUp2SentAt      DateTime?                    @map("follow_up2_sent_at")
+  emailOpenedAt        DateTime?                    @map("email_opened_at")
+  registeredAt         DateTime?                    @map("registered_at")
+  notes                String?                      @db.Text
+  createdAt            DateTime                     @default(now()) @map("created_at")
+  updatedAt            DateTime                     @updatedAt @map("updated_at")
 
   @@unique([foundFrom, externalPlaceId])
   @@index([outreachStatus, createdAt(sort: Desc)])
@@ -2467,19 +2575,19 @@ model PotentialMedia {
 
 /// 매체사 인센티브 · 온보딩 이메일 · 추천
 model MediaOwnerProfile {
-  userId                String    @id @map("user_id")
-  referralCode          String    @unique @map("referral_code") @db.VarChar(16)
-  referredByUserId      String?   @map("referred_by_user_id")
-  proFreeUntil          DateTime? @map("pro_free_until")
-  lifetimePro           Boolean   @default(false) @map("lifetime_pro")
-  approvedMediaCount    Int       @default(0) @map("approved_media_count")
-  onboardingStartedAt   DateTime  @default(now()) @map("onboarding_started_at")
-  emailDay0SentAt       DateTime? @map("email_day0_sent_at")
-  emailDay1SentAt       DateTime? @map("email_day1_sent_at")
-  emailDay3SentAt       DateTime? @map("email_day3_sent_at")
-  emailDay7SentAt       DateTime? @map("email_day7_sent_at")
-  createdAt             DateTime  @default(now()) @map("created_at")
-  updatedAt             DateTime  @updatedAt @map("updated_at")
+  userId              String    @id @map("user_id")
+  referralCode        String    @unique @map("referral_code") @db.VarChar(16)
+  referredByUserId    String?   @map("referred_by_user_id")
+  proFreeUntil        DateTime? @map("pro_free_until")
+  lifetimePro         Boolean   @default(false) @map("lifetime_pro")
+  approvedMediaCount  Int       @default(0) @map("approved_media_count")
+  onboardingStartedAt DateTime  @default(now()) @map("onboarding_started_at")
+  emailDay0SentAt     DateTime? @map("email_day0_sent_at")
+  emailDay1SentAt     DateTime? @map("email_day1_sent_at")
+  emailDay3SentAt     DateTime? @map("email_day3_sent_at")
+  emailDay7SentAt     DateTime? @map("email_day7_sent_at")
+  createdAt           DateTime  @default(now()) @map("created_at")
+  updatedAt           DateTime  @updatedAt @map("updated_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -2489,16 +2597,16 @@ model MediaOwnerProfile {
 
 /// 매체사 단가 수정 요청 (어드민 검토)
 model MediaPriceChangeRequest {
-  id              String                 @id @default(cuid())
-  mediaId         String                 @map("media_id")
-  ownerUserId     String                 @map("owner_user_id")
-  currentPrice    Int                    @map("current_price")
-  requestedPrice  Int                    @map("requested_price")
-  reason          String?                @db.Text
-  status          MediaPriceChangeStatus @default(PENDING)
-  reviewNote      String?                @map("review_note") @db.Text
-  reviewedAt      DateTime?              @map("reviewed_at")
-  createdAt       DateTime               @default(now()) @map("created_at")
+  id             String                 @id @default(cuid())
+  mediaId        String                 @map("media_id")
+  ownerUserId    String                 @map("owner_user_id")
+  currentPrice   Int                    @map("current_price")
+  requestedPrice Int                    @map("requested_price")
+  reason         String?                @db.Text
+  status         MediaPriceChangeStatus @default(PENDING)
+  reviewNote     String?                @map("review_note") @db.Text
+  reviewedAt     DateTime?              @map("reviewed_at")
+  createdAt      DateTime               @default(now()) @map("created_at")
 
   media     Media @relation(fields: [mediaId], references: [id], onDelete: Cascade)
   ownerUser User  @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
@@ -2510,19 +2618,19 @@ model MediaPriceChangeRequest {
 
 /// 매체사 월별 정산
 model MediaOwnerSettlement {
-  id                    String                   @id @default(cuid())
-  ownerUserId           String                   @map("owner_user_id")
-  periodMonth           String                   @map("period_month") @db.VarChar(7)
-  grossWon              Int                      @map("gross_won")
-  feeWon                Int                      @map("fee_won")
-  netWon                Int                      @map("net_won")
+  id                    String                     @id @default(cuid())
+  ownerUserId           String                     @map("owner_user_id")
+  periodMonth           String                     @map("period_month") @db.VarChar(7)
+  grossWon              Int                        @map("gross_won")
+  feeWon                Int                        @map("fee_won")
+  netWon                Int                        @map("net_won")
   status                MediaOwnerSettlementStatus @default(SCHEDULED)
-  taxInvoiceRequestedAt DateTime?                @map("tax_invoice_requested_at")
-  statementSentAt       DateTime?                @map("statement_sent_at")
-  completedAt           DateTime?                @map("completed_at")
-  notes                 String?                  @db.Text
-  createdAt             DateTime                 @default(now()) @map("created_at")
-  updatedAt             DateTime                 @updatedAt @map("updated_at")
+  taxInvoiceRequestedAt DateTime?                  @map("tax_invoice_requested_at")
+  statementSentAt       DateTime?                  @map("statement_sent_at")
+  completedAt           DateTime?                  @map("completed_at")
+  notes                 String?                    @db.Text
+  createdAt             DateTime                   @default(now()) @map("created_at")
+  updatedAt             DateTime                   @updatedAt @map("updated_at")
 
   ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
 
@@ -2720,18 +2828,18 @@ model MediaOwnerBid {
 
 /// 매체사 등급·누적 실적 (비딩 우선 노출·인센티브)
 model MediaOwnerStats {
-  id                      String         @id @default(cuid())
-  ownerUserId             String         @unique @map("owner_user_id")
-  tier                    MediaOwnerTier @default(BRONZE)
-  cumulativeContractWon     Int            @default(0) @map("cumulative_contract_won")
-  registrationFeeWaived     Boolean        @default(false) @map("registration_fee_waived")
-  successfulBidCount        Int            @default(0) @map("successful_bid_count")
-  avgRating               Float?         @map("avg_rating")
-  reviewCount             Int            @default(0) @map("review_count")
-  avgResponseMinutes      Int?           @map("avg_response_minutes")
-  lastResponseAt          DateTime?      @map("last_response_at")
-  createdAt               DateTime       @default(now()) @map("created_at")
-  updatedAt               DateTime       @updatedAt @map("updated_at")
+  id                    String         @id @default(cuid())
+  ownerUserId           String         @unique @map("owner_user_id")
+  tier                  MediaOwnerTier @default(BRONZE)
+  cumulativeContractWon Int            @default(0) @map("cumulative_contract_won")
+  registrationFeeWaived Boolean        @default(false) @map("registration_fee_waived")
+  successfulBidCount    Int            @default(0) @map("successful_bid_count")
+  avgRating             Float?         @map("avg_rating")
+  reviewCount           Int            @default(0) @map("review_count")
+  avgResponseMinutes    Int?           @map("avg_response_minutes")
+  lastResponseAt        DateTime?      @map("last_response_at")
+  createdAt             DateTime       @default(now()) @map("created_at")
+  updatedAt             DateTime       @updatedAt @map("updated_at")
 
   ownerUser User @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
 
@@ -2874,9 +2982,9 @@ model Creative {
   /// 소프트 삭제 — UI 와 API 에서 deletedAt: null 만 노출
   deletedAt    DateTime?    @map("deleted_at")
 
-  user          User                   @relation("UserCreatives", fields: [userId], references: [id], onDelete: Cascade)
-  playlistItems CreativePlaylistItem[]
-  bookings      Booking[]
+  user                User                         @relation("UserCreatives", fields: [userId], references: [id], onDelete: Cascade)
+  playlistItems       CreativePlaylistItem[]
+  bookings            Booking[]
   campaignSubmissions CampaignCreativeSubmission[]
 
   @@index([userId])
@@ -3113,19 +3221,19 @@ model OpsBackupRun {
 
 /// B2B 공개 API 키 (대행사·파트너 연동) — 평문 key는 keyHash(SHA-256)에만 저장
 model ApiKey {
-  id           String     @id @default(cuid())
-  userId       String     @map("user_id")
-  name         String     @db.VarChar(80)
-  keyHash      String     @unique @map("key_hash")
-  keyPrefix    String     @map("key_prefix") @db.VarChar(24)
-  keyLast4     String     @default("") @map("key_last4") @db.VarChar(4)
-  plan         ApiKeyPlan @default(FREE)
-  requestCount Int        @default(0) @map("request_count")
-  usageMonth   String     @default("") @map("usage_month") @db.VarChar(7)
-  lastUsedAt   DateTime?  @map("last_used_at")
-  lastBurstAlertAt DateTime? @map("last_burst_alert_at")
-  isActive     Boolean    @default(true) @map("is_active")
-  createdAt    DateTime   @default(now()) @map("created_at")
+  id               String     @id @default(cuid())
+  userId           String     @map("user_id")
+  name             String     @db.VarChar(80)
+  keyHash          String     @unique @map("key_hash")
+  keyPrefix        String     @map("key_prefix") @db.VarChar(24)
+  keyLast4         String     @default("") @map("key_last4") @db.VarChar(4)
+  plan             ApiKeyPlan @default(FREE)
+  requestCount     Int        @default(0) @map("request_count")
+  usageMonth       String     @default("") @map("usage_month") @db.VarChar(7)
+  lastUsedAt       DateTime?  @map("last_used_at")
+  lastBurstAlertAt DateTime?  @map("last_burst_alert_at")
+  isActive         Boolean    @default(true) @map("is_active")
+  createdAt        DateTime   @default(now()) @map("created_at")
 
   user      User          @relation(fields: [userId], references: [id], onDelete: Cascade)
   usageLogs ApiUsageLog[]
@@ -3155,15 +3263,15 @@ model ApiUsageLog {
 
 /// AI·플래너 매체 추천 요청 로그
 model RecommendationLog {
-  id                  String   @id @default(cuid())
-  userId              String?  @map("user_id")
-  sessionId           String?  @map("session_id") @db.VarChar(64)
-  source              String   @db.VarChar(32)
-  input               Json
-  recommendations     Json
-  selectedMediaIds    String[] @default([]) @map("selected_media_ids")
-  convertedToInquiry  Boolean  @default(false) @map("converted_to_inquiry")
-  createdAt           DateTime @default(now()) @map("created_at")
+  id                 String   @id @default(cuid())
+  userId             String?  @map("user_id")
+  sessionId          String?  @map("session_id") @db.VarChar(64)
+  source             String   @db.VarChar(32)
+  input              Json
+  recommendations    Json
+  selectedMediaIds   String[] @default([]) @map("selected_media_ids")
+  convertedToInquiry Boolean  @default(false) @map("converted_to_inquiry")
+  createdAt          DateTime @default(now()) @map("created_at")
 
   @@index([createdAt(sort: Desc)])
   @@index([source, createdAt(sort: Desc)])
@@ -3172,15 +3280,15 @@ model RecommendationLog {
 
 /// OOH 패키지 큐레이션 — 동적 필터로 매체 자동 매칭
 model MediaPackage {
-  id          String   @id @default(cuid())
-  slug        String   @unique
+  id          String  @id @default(cuid())
+  slug        String  @unique
   name        String
   subtitle    String
-  description String   @db.Text
-  heroColor   String   @map("hero_color")
+  description String  @db.Text
+  heroColor   String  @map("hero_color")
   icon        String
-  order       Int      @default(0)
-  isActive    Boolean  @default(true) @map("is_active")
+  order       Int     @default(0)
+  isActive    Boolean @default(true) @map("is_active")
 
   filterRegion   String[] @default([]) @map("filter_region")
   filterCategory String[] @default([]) @map("filter_category")
