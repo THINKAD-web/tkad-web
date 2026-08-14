@@ -1,5 +1,6 @@
 import type { AdminMediaLayerBadges } from "@/lib/admin-media-dto";
 import { LOCKED_FIELD_TOOLTIP } from "@/lib/media/locked-fields";
+import { isPreComputationVersion } from "@/lib/media/engine/constants";
 
 export function ReliabilityBadge({
   grade,
@@ -64,7 +65,7 @@ export function MediaLayerBadges({
       {badges.reliabilityGrade ? (
         <ReliabilityBadge grade={badges.reliabilityGrade} />
       ) : null}
-      {badges.modelVersion === "legacy-migration-v1" ? (
+      {isPreComputationVersion(badges.modelVersion) ? (
         <LegacyValueBadge />
       ) : null}
       {badges.dimensionSource === "UNKNOWN" ? <DimensionUnknownBadge /> : null}
