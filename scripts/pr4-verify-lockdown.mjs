@@ -22,6 +22,11 @@ const MEDIA_ID =
     ? process.argv[process.argv.indexOf("--media-id") + 1]
     : process.env.PR4_TEST_MEDIA_ID) ?? "";
 
+const VERCEL_SHARE =
+  (process.argv.includes("--share")
+    ? process.argv[process.argv.indexOf("--share") + 1]
+    : process.env.VERCEL_SHARE_TOKEN) ?? "";
+
 const ADMIN_USER = (process.env.ADMIN_USERNAME || "admin").trim();
 const ADMIN_PASSWORD = (
   process.env.ADMIN_PASSWORD ||
@@ -44,7 +49,18 @@ const LOCKED_FIELDS = [
 
 const CONTROL_FIELDS = ["name", "latitude"];
 
+async function primeVercelBypass(cookieJar) {
+  if (!VERCEL_SHARE) return;
+  const res = await fetch(`${BASE}/?_vercel_share=${VERCEL_SHARE}`, {
+    redirect: "follow",
+    headers: cookieJar.length ? { Cookie: cookieJar.join("; ") } : {},
+  });
+  const setCookie = res.headers.getSetCookie?.() ?? [];
+  for (const c of setCookie) cookieJar.push(c.split(";")[0]);
+}
+
 async function login(cookieJar) {
+  await primeVercelBypass(cookieJar);
   const res = await fetch(`${BASE}/api/admin/auth/login`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

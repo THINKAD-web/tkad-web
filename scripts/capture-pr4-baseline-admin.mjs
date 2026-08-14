@@ -17,6 +17,10 @@ const BASE = (process.env.SCREENSHOT_BASE ?? "http://127.0.0.1:3000").replace(
 const OUT = process.argv.includes("--output")
   ? path.resolve(process.argv[process.argv.indexOf("--output") + 1])
   : path.join(process.cwd(), "docs/screenshots/pr4-baseline");
+const VERCEL_SHARE =
+  (process.argv.includes("--share")
+    ? process.argv[process.argv.indexOf("--share") + 1]
+    : process.env.VERCEL_SHARE_TOKEN) ?? "";
 const ADMIN_USER = (process.env.ADMIN_USERNAME || "admin").trim();
 const ADMIN_PASSWORD = (
   process.env.ADMIN_PASSWORD ||
@@ -53,6 +57,13 @@ async function main() {
   const page = await context.newPage();
 
   try {
+    if (VERCEL_SHARE) {
+      await page.goto(`${BASE}/?_vercel_share=${VERCEL_SHARE}`, {
+        waitUntil: "domcontentloaded",
+        timeout: 90000,
+      });
+      await page.waitForTimeout(1000);
+    }
     await loginViaApi(context);
 
     await page.goto(`${BASE}/ko/admin/medias`, {
