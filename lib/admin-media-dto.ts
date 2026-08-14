@@ -10,6 +10,25 @@ import {
 
 export type MediaAvailability = "available" | "reserved" | "maintenance";
 
+/** PR4: media_fact_sheets + media_computed_metrics 뱃지용 */
+export type AdminMediaLayerBadges = {
+  reliabilityGrade: "A" | "B" | "C" | null;
+  modelVersion: string | null;
+  dimensionSource: string | null;
+  legacyCpm: number | null;
+};
+
+export const ADMIN_MEDIA_LAYER_INCLUDE = {
+  factSheet: { select: { dimensionSource: true } },
+  computedMetric: {
+    select: {
+      reliabilityGrade: true,
+      modelVersion: true,
+      legacyCpm: true,
+    },
+  },
+} as const;
+
 /** Admin 매체 관리 / API 공통 DTO (클라이언트·서버 직렬화용) */
 export type AdminMediaDto = {
   id: string;
@@ -89,6 +108,8 @@ export type AdminMediaDto = {
   mediaSubCategory: string | null;
   regionMain: string | null;
   regionSub: string | null;
+  /** PR4: 3-layer badge data (admin list/modal only) */
+  layerBadges: AdminMediaLayerBadges | null;
 };
 
 const AVAIL: MediaAvailability[] = ["available", "reserved", "maintenance"];
@@ -163,6 +184,67 @@ function pickIsoDateTime(
   if (typeof v === "string") return v;
   if (v instanceof Date) return v.toISOString();
   return null;
+}
+
+function pickLayerBadges(r: Record<string, unknown>): AdminMediaLayerBadges | null {
+  const nested = r.layerBadges;
+  if (nested && typeof nested === "object" && !Array.isArray(nested)) {
+    const b = nested as Record<string, unknown>;
+    const grade = b.reliabilityGrade ?? b.reliability_grade;
+    return {
+      reliabilityGrade:
+        grade === "A" || grade === "B" || grade === "C" ? grade : null,
+      modelVersion:
+        typeof b.modelVersion === "string"
+          ? b.modelVersion
+          : typeof b.model_version === "string"
+            ? b.model_version
+            : null,
+      dimensionSource:
+        typeof b.dimensionSource === "string"
+          ? b.dimensionSource
+          : typeof b.dimension_source === "string"
+            ? b.dimension_source
+            : null,
+      legacyCpm: pickNum(b, "legacyCpm", "legacy_cpm"),
+    };
+  }
+
+  const factSheet = r.factSheet ?? r.fact_sheet;
+  const computedMetric = r.computedMetric ?? r.computed_metric;
+  if (
+    (!factSheet || typeof factSheet !== "object") &&
+    (!computedMetric || typeof computedMetric !== "object")
+  ) {
+    return null;
+  }
+
+  const fs =
+    factSheet && typeof factSheet === "object"
+      ? (factSheet as Record<string, unknown>)
+      : null;
+  const cm =
+    computedMetric && typeof computedMetric === "object"
+      ? (computedMetric as Record<string, unknown>)
+      : null;
+  const grade = cm?.reliabilityGrade ?? cm?.reliability_grade;
+  return {
+    reliabilityGrade:
+      grade === "A" || grade === "B" || grade === "C" ? grade : null,
+    modelVersion:
+      typeof cm?.modelVersion === "string"
+        ? cm.modelVersion
+        : typeof cm?.model_version === "string"
+          ? cm.model_version
+          : null,
+    dimensionSource:
+      typeof fs?.dimensionSource === "string"
+        ? fs.dimensionSource
+        : typeof fs?.dimension_source === "string"
+          ? fs.dimension_source
+          : null,
+    legacyCpm: cm ? pickNum(cm, "legacyCpm", "legacy_cpm") : null,
+  };
 }
 
 /** API/Prisma JSON 한 건 → DTO (snake_case·누락 필드 방어) */
@@ -286,6 +368,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     mediaSubCategory: pickStr(r, "mediaSubCategory", "media_sub_category"),
     regionMain: pickStr(r, "regionMain", "region_main"),
     regionSub: pickStr(r, "regionSub", "region_sub"),
+    layerBadges: pickLayerBadges(r),
   };
 }
 
@@ -310,7 +393,28 @@ export function parseAdminMediaListFromApiJson(data: unknown): {
   return { medias, error: null };
 }
 
-export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
+export function prismaMediaToAdminDto(
+  m: Media & {
+    factSheet?: { dimensionSource: string | null } | null;
+    computedMetric?: {
+      reliabilityGrade: string;
+      modelVersion: string;
+      legacyCpm: number | null;
+    } | null;
+  },
+): AdminMediaDto {
+  const grade = m.computedMetric?.reliabilityGrade;
+  const layerBadges: AdminMediaLayerBadges | null =
+    m.factSheet || m.computedMetric
+      ? {
+          reliabilityGrade:
+            grade === "A" || grade === "B" || grade === "C" ? grade : null,
+          modelVersion: m.computedMetric?.modelVersion ?? null,
+          dimensionSource: m.factSheet?.dimensionSource ?? null,
+          legacyCpm: m.computedMetric?.legacyCpm ?? null,
+        }
+      : null;
+
   return {
     id: m.id,
     name: m.name,
@@ -383,5 +487,6 @@ export function prismaMediaToAdminDto(m: Media): AdminMediaDto {
     mediaSubCategory: m.mediaSubCategory,
     regionMain: m.regionMain,
     regionSub: m.regionSub,
+    layerBadges,
   };
 }

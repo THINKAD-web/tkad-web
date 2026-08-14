@@ -13,6 +13,21 @@ export function json(data: unknown, status = 200) {
   return NextResponse.json(data, { status, headers });
 }
 
+export function jsonWithHeaders(
+  data: unknown,
+  status: number,
+  extraHeaders?: Record<string, string>,
+) {
+  const headers = new Headers();
+  headers.set("Cache-Control", "no-store, private");
+  if (extraHeaders) {
+    for (const [key, value] of Object.entries(extraHeaders)) {
+      headers.set(key, value);
+    }
+  }
+  return NextResponse.json(data, { status, headers });
+}
+
 export function adminUnauthorized() {
   return json({ error: "Unauthorized" }, 401);
 }
