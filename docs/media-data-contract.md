@@ -58,14 +58,16 @@
 
 ### 2.3 파생층 (Computed) — Fact + Signal으로 **계산된 지표**
 
-- 일/시간대 노출, CPM, 신뢰도 등급
+- 일/시간대 노출, CPM, **가시성(`visibilityScore`)**, 신뢰도 등급
 - `computation_model_version`, `computed_at`, `sourceSignalIds` 필수
 - 공개 UI·추천은 PR9 이후 Computed 우선, PR9 전까지 `Media` 레거시 폴백
+- **결정 (PR1 검수):** `visibilityScore`는 **Computed 전용**. Fact proxy·어드민 수동 입력은 PR3 백필 후 `MediaComputedMetric`로 이관, PR4+ 어드민에서는 read-only
 
 ### 2.4 메타·운영 (Operational) — 3계층 밖, 카탈로그 운영용
 
 - 가격, 노출 on/off, 홈 featured, popularity cron, 제안서 URL 등
 - 이번 시퀀스에서 **이관 대상 아님** (단, 가격은 Fact adjacent)
+- **결정 (PR1 검수):** Operational 필드는 **`Media` 본체 유지**. 별도 테이블(`MediaOperational` 등) **만들지 않음** (YAGNI). PR2–9 스키마·PR10+ legacy drop까지 동일 row
 
 ---
 
@@ -86,7 +88,28 @@
 | `operatingStart` | String | `HH:mm` | ✅ | 예: `06:00` |
 | `operatingEnd` | String | `HH:mm` | ✅ | 예: `24:00` |
 | `timezone` | String | IANA | ✅ | 기본 `Asia/Seoul` |
-| `stationCode` | String | — | 조건부 | 지하철 매체: 국토부 역 코드 |
+| `stationCode` | String | — | 조건부 | 지하철 매체. **Phase 1: 서울 한정** (표준 코드 체계는 §16.2 보류) |
+| `dimensionSource` | Enum | — | 권장 | 규격 출처 — §3.1 |
+
+### 3.1 규격 결측 대응 (PR1 위임 5)
+
+DB 조사 기준 `widthM`/`heightM` 약 18% 결측. **3단 대응** (순서 고정):
+
+| 단계 | 조건 | 처리 | 구현 PR |
+|:----:|------|------|---------|
+| 1 | `widthMm`/`heightMm` null | 어드민·카드 **「규격 미확인」** 뱃지. 추천·CPM 계산에서 size 의존 로직 skip | PR4 |
+| 2 | 문자열(`width`/`height`) 파싱 실패 | 동일 `mediaSubtype`·유사 규격 매체 **중앙값 fallback** → `dimensionSource=ESTIMATED_MEDIAN` | PR3·PR5 |
+| 3 | fallback 불가 | 매체사 **실측 요청** 큐. `dimensionSource=UNKNOWN` 유지 | PR4+ |
+
+`dimensionSource` enum: `MEASURED` | `PARSED_FROM_TEXT` | `ESTIMATED_MEDIAN` | `UNKNOWN`
+
+### 3.2 `stationCode` 스코프 (PR1 위임 2)
+
+| Phase | 범위 | 비고 |
+|-------|------|------|
+| **Phase 1** (PR2–PR5) | **서울 지하철** (`regionMain=seoul`, subway subtype) | `stationCode`·Signal `station_code` 연동 대상 |
+| **Phase 2** (PR6+) | 부산·대구·인천·광주·대전 등 **지방 도시철도** | 별도 코드 체계·API 매핑 |
+| **Phase 2** (PR6+) | **환승역** 노선별 구분 | `stationLineCode` 등 — 스키마 필드만 PR2 준비 |
 
 **레거시 매핑 (PR3 백필)**
 
@@ -131,6 +154,7 @@
 | `dailyImpressions` | Int | 회/일 | 일 노출량 (OTS proxy) |
 | `hourlyImpressions` | Json | 회/시 | `[{ hour: 0–23, impressions: int }, …]` |
 | `cpm` | Int | 원/CPM | `price`·노출 기반 |
+| `visibilityScore` | Float | 0.0–1.0 | 시야거리·방향·설치높이·장애물 기반 **Computed** (Fact 아님) |
 | `reliabilityGrade` | String | A/B/C | §6 규칙 |
 | `modelVersion` | String | — | 예: `v0-fallback`, `v1.0` |
 | `computedAt` | DateTime | — | 마지막 계산 시각 |
@@ -212,7 +236,7 @@
 | `frequency` | Float? | Computed | 임의 | 상세 |
 | `cpm` | Float? | `cpm` | 임의 | 카드, 플래너 CPM 바 |
 | `engagementRate` | Float? | Computed (미정) | 임의 | 상세 |
-| `visibilityScore` | Int | Computed 또는 Fact proxy | **어드민 0–100 수동** | 지도 핀·필터·매칭 가중 |
+| `visibilityScore` | Int | `visibilityScore` (Computed) | **어드민 0–100 수동** → PR3 이관 후 metric-engine 계산 | 지도 핀·필터·매칭 가중 |
 
 **`lib/public-media-catalog.ts` 매핑**
 
@@ -220,7 +244,9 @@
 - `impressions` → `monthlyFootTraffic` / `impressions`
 - `cpm` → `MediaItem.cpm`
 
-### 7.4 메타·운영 (Operational — 3계층 외)
+### 7.4 메타·운영 (Operational — 3계층 외, Media 본체 유지)
+
+> **결정 (§16.1 위임 4):** 아래 필드는 PR2–PR10+까지 `Media` row에 잔류. 별도 Operational 테이블 없음.
 
 | Media 필드 | 설명 |
 |------------|------|
@@ -300,7 +326,7 @@
 | 카드 썸네일 뱃지 | `isVerified`, `instantBookingEnabled`, `visibilityScore` | Operational / Computed |
 | 카드 부제 | `location`, `regionMain`·`regionSub` label | Fact |
 | 카드 가격 | `price`, `pricePeriod` | Operational |
-| 검색 칩 | `visibilityScore`, tags | Computed / Fact |
+| 검색 칩 | `visibilityScore`, tags | Computed / Fact (tags) |
 | 상세 KPI | `dailyFootfall`, `impressions`, `cpm`, `reach`, `frequency` | **Computed (목표)** |
 | 상세 차트 | `trafficPattern` | Signal (목표) |
 | 지도 핀 | `lat`/`lng`, `installLocations`, `visibilityScore` | Fact / Computed |
@@ -349,9 +375,10 @@ PR2 `MediaFactSheet.mediaSubtype` 문자열 집합 (확장 가능).
 | 항목 | 설명 |
 |------|------|
 | **복합어 토큰화** | `지하철광고`, `9호선지하철`, `강남전광판` 등 **공백 없는 입력** → `unmatchedTokens` 잔류 (`parse-freetext-brief.ts`). 파서 전반 영향 → **별도 Phase 2** |
+| **지방 지하철·환승역** | Phase 1 **서울 한정** — §3.2. 부산/대구/인천/광주/대전·환승역 `stationLineCode` → **Phase 2** |
 | `bearing`/`installHeightM` 백필 | DB 미보유 — PR3 skip 리포트 |
 | `MediaNetwork` Computed | 지점 합산 엔진 — PR8+ |
-| `visibilityScore` 정의 | 현재 수동 0–100 — v1에서 Computed 정의 필요 |
+| `visibilityScore` v1 정의 | PR1 결정: **Computed 계층**. v1 산식(시야계수) — PR5+ metric-engine |
 
 ---
 
@@ -363,6 +390,7 @@ PR2 `MediaFactSheet.mediaSubtype` 문자열 집합 (확장 가능).
 - [x] Computed 필드·grade 규칙 §5–§6
 - [x] 추천·스크리너·UI 의존성 §8–§10
 - [x] 코드 변경 없음 (docs only)
+- [x] PR1 검수 결정 반영 — §16 (위임 2–5 확정, 위임 1 보류)
 
 ---
 
@@ -370,3 +398,33 @@ PR2 `MediaFactSheet.mediaSubtype` 문자열 집합 (확장 가능).
 
 - **승인:** 재한 최종 리뷰 후 `docs/media-data-contract` → `main` merge
 - **롤백:** 본 파일 revert — 런타임·DB 영향 없음
+
+---
+
+## 16. PR1 검수 결정사항 (2026-08-14)
+
+PR1 자동 검수(`reports/pr1-review-20260814-1307.md`) 판단 위임 5건에 대한 재한 결정.
+
+### 16.1 확정 (위임 2–5)
+
+| # | 항목 | 결정 | 문서 반영 |
+|:-:|------|------|-----------|
+| 2 | 지하철·`stationCode` 스코프 | **Phase 1 서울 한정**. 지방 도시철도·환승역 → **Phase 2 이후** | §3.2, §13 |
+| 3 | `visibilityScore` 계층 | **Computed** (Fact 아님). `MediaComputedMetric.visibilityScore` | §2.3, §5, §7.3, §8–§10 |
+| 4 | Operational 처리 | **`Media` 본체 유지**. 별도 테이블 **안 함** (YAGNI) | §2.4, §7.4 |
+| 5 | 규격 결측 대응 | **3단:** ① 뱃지 → ② 유사 매체 중앙값 fallback → ③ 실측 요청 | §3.1, `dimensionSource` |
+
+### 16.2 보류 (위임 1 — `stationCode` 표준)
+
+**상태:** 재한 **API 문서 확인 대기 중** — PR3 백필 착수 전 확정 필요.
+
+**후보 (미확정):**
+
+| 후보 | 설명 | 검토 포인트 |
+|------|------|-------------|
+| 국토부 표준 역 코드 | §3 초안·공공데이터 `station_code` | 승하차 API와 1:1 매칭 여부 |
+| 서울교통공사 자체 코드 | 서울 1–9호선 내부 코드 | 공공 API와 변환 테이블 필요 여부 |
+
+**Phase 1 범위는 §3.2와 무관하게 서울 한정으로 진행.** 코드 **값 체계**만 확정 대기. PR2 스키마는 `stationCode`·`stationLineCode` 필드만 추가, 코멘트에 미확정 표시.
+
+**확정 시 갱신:** 본 §16.2, §3 `stationCode` 비고, PR2 `MediaFactSheet` 스키마 코멘트.
