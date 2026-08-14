@@ -2974,7 +2974,7 @@ export default function AdminMediasClient({
                 <X className="h-4 w-4" />
               </Button>
             </CardHeader>
-            <div className="relative min-h-0 flex-1">
+            <div className="relative flex min-h-0 flex-1 flex-col overflow-hidden">
               <CardContent
                 className={cn(
                   "min-h-0 flex-1 space-y-4 overflow-y-auto overflow-x-hidden px-4 pb-2 pr-3 sm:px-6 sm:pr-5",
