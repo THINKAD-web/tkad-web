@@ -76,9 +76,9 @@ import {
   normalizeAdminMediaRow,
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
-import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
 import { useToast } from "@/components/toast-provider";
-import { LOCKED_FIELD_TOOLTIP } from "@/lib/media/locked-fields";
+import { LOCKED_FIELD_TOOLTIP, stripLockedFields } from "@/lib/media/locked-fields";
 import {
   LOCKED_INPUT_CLASS,
   LockedComputedFieldBadge,
@@ -1391,59 +1391,52 @@ export default function AdminMediasClient({
     listFetchGenRef.current += 1;
     setSaveLoading(true);
     setSaveError(null);
-    const body = formToApiBody(form);
+    const rawBody = formToApiBody(form);
     const purgeImageUrls = [...new Set(intentionalPurgeUrlsRef.current)];
-    if (purgeImageUrls.length > 0) body.purgeImageUrls = purgeImageUrls;
+    if (purgeImageUrls.length > 0) rawBody.purgeImageUrls = purgeImageUrls;
     if (editing) {
       const row = medias.find((x) => x.id === editing.id);
-      body.isActive = row?.isActive !== false;
+      rawBody.isActive = row?.isActive !== false;
     }
+    const { cleaned } = stripLockedFields(rawBody);
+    const body = cleaned as Record<string, unknown>;
     try {
-      if (editing) {
-        const result = await adminFetchJson(
-          `/api/admin/medias/${editing.id}`,
-          {
-            method: "PATCH",
-            credentials: "include",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(body),
-          },
+      const saveUrl = editing
+        ? `/api/admin/medias/${editing.id}`
+        : "/api/admin/medias";
+      const saveMethod = editing ? "PATCH" : "POST";
+      const res = await fetch(saveUrl, {
+        method: saveMethod,
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+      const parsed = await readAdminResponseJson(res);
+      if (!parsed.ok) {
+        setSaveError(parsed.message);
+        return;
+      }
+      const strippedHeader = res.headers.get("X-Locked-Fields-Stripped");
+      if (strippedHeader) {
+        toast(
+          "warning",
+          `다음 필드는 자동 계산되어 저장되지 않았습니다: ${strippedHeader}`,
         );
-        if (!result.ok) {
-          setSaveError(result.message);
-          return;
-        }
-        const data = result.data as { media?: unknown; error?: string };
-        const patched = data.media
-          ? normalizeAdminMediaRow(data.media)
-          : null;
-        if (patched) {
+      }
+      const data = parsed.data as { media?: unknown; error?: string };
+      const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+      if (editing) {
+        if (row) {
           setMedias((prev) =>
-            prev.map((m) => (m.id === patched.id ? patched : m)),
+            prev.map((m) => (m.id === row.id ? row : m)),
           );
         } else {
           await loadMedias({ showSpinner: false });
         }
+      } else if (row) {
+        setMedias((prev) => [row, ...prev]);
       } else {
-        const result = await adminFetchJson("/api/admin/medias", {
-          method: "POST",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        if (!result.ok) {
-          setSaveError(result.message);
-          return;
-        }
-        const data = result.data as { media?: unknown; error?: string };
-        const created = data.media
-          ? normalizeAdminMediaRow(data.media)
-          : null;
-        if (created) {
-          setMedias((prev) => [created, ...prev]);
-        } else {
-          await loadMedias({ showSpinner: false });
-        }
+        await loadMedias({ showSpinner: false });
       }
       intentionalPurgeUrlsRef.current = [];
       clearAdminMediaFormDraft();
@@ -1456,7 +1449,7 @@ export default function AdminMediasClient({
     } finally {
       setSaveLoading(false);
     }
-  }, [editing, form, loadMedias, medias]);
+  }, [editing, form, loadMedias, medias, toast]);
 
   const handleDelete = useCallback(
     async (id: string) => {
