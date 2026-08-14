@@ -36,6 +36,7 @@ import {
   ShieldCheck,
   Copy,
   FileSpreadsheet,
+  RefreshCw,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import {
@@ -76,6 +77,7 @@ import {
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { useToast } from "@/components/toast-provider";
 import { LOCKED_FIELD_TOOLTIP } from "@/lib/media/locked-fields";
 import {
   LOCKED_INPUT_CLASS,
@@ -748,6 +750,7 @@ export default function AdminMediasClient({
   initialEngagement = {},
 }: Props) {
   const searchParams = useSearchParams();
+  const { toast } = useToast();
   const [medias, setMedias] = useState<AdminMediaDto[]>(() => initialMedias);
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const [duplicateBusyId, setDuplicateBusyId] = useState<string | null>(null);
@@ -827,6 +830,7 @@ export default function AdminMediasClient({
   /** 가격 옵션 카드 UI — 저장 시 `form.priceOptionsJson`과 동기화 */
   const [priceOptDrafts, setPriceOptDrafts] = useState<PriceOptDraft[]>([]);
   const [saveLoading, setSaveLoading] = useState(false);
+  const [recomputeLoading, setRecomputeLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -1238,6 +1242,52 @@ export default function AdminMediasClient({
     setSaveError(null);
     setModalOpen(true);
   }, []);
+
+  const handleRecompute = useCallback(async () => {
+    if (!editing) return;
+    setRecomputeLoading(true);
+    setSaveError(null);
+    try {
+      const res = await adminFetchJson(
+        `/api/admin/medias/${editing.id}/recompute`,
+        { method: "POST", credentials: "include" },
+      );
+      if (!res.ok) {
+        toast("error", res.message);
+        return;
+      }
+      const payload = res.data as {
+        engineVersion?: string;
+        computedAt?: string;
+        changed?: { dailyImpressions: boolean; cpm: boolean };
+      };
+      const detail = await adminFetchJson(`/api/admin/medias/${editing.id}`, {
+        credentials: "include",
+        cache: "no-store",
+      });
+      if (detail.ok) {
+        const raw = detail.data as { media?: unknown };
+        const row = raw.media ? normalizeAdminMediaRow(raw.media) : null;
+        if (row) {
+          setMedias((prev) =>
+            prev.map((m) => (m.id === row.id ? row : m)),
+          );
+          setEditing(row);
+          setForm(apiToForm(row));
+        }
+      }
+      const changed =
+        payload.changed?.dailyImpressions || payload.changed?.cpm;
+      toast(
+        changed ? "warning" : "success",
+        `재계산 완료: ${payload.engineVersion ?? "engine"} · ${
+          changed ? "값 변경 감지" : "pass-through (값 유지)"
+        }`,
+      );
+    } finally {
+      setRecomputeLoading(false);
+    }
+  }, [editing, toast]);
 
   const duplicateMedia = useCallback(
     async (media: AdminMediaDto) => {
@@ -2811,8 +2861,23 @@ export default function AdminMediasClient({
                     >
                       JSON으로 편집
                     </Link>
-                    <div className="mt-2">
+                    <div className="mt-2 flex flex-wrap items-center gap-2">
                       <MediaLayerBadges badges={editing.layerBadges} />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="xs"
+                        className="h-7 text-[11px]"
+                        disabled={recomputeLoading}
+                        onClick={() => void handleRecompute()}
+                      >
+                        {recomputeLoading ? (
+                          <Loader2 className="mr-1 h-3 w-3 animate-spin" />
+                        ) : (
+                          <RefreshCw className="mr-1 h-3 w-3" />
+                        )}
+                        지금 재계산
+                      </Button>
                     </div>
                   </>
                 )}
