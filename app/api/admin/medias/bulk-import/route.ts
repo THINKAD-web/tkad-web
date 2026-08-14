@@ -1,7 +1,7 @@
 import { NextRequest } from "next/server";
 import { Prisma } from "@prisma/client";
 import { revalidateMediaCachesBulk } from "@/lib/media-cache-revalidate";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
 import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
@@ -12,6 +12,8 @@ import {
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -65,7 +67,28 @@ export async function POST(request: NextRequest) {
     return null;
   });
 
-  const validated = validateQuickAddItems(itemsRaw);
+  const strippedAll: string[] = [];
+  const sanitizedItems = itemsRaw.map((item, index) => {
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      return item;
+    }
+    const { cleaned, stripped } = stripLockedFields(
+      item as Record<string, unknown>,
+    );
+    if (stripped.length > 0) {
+      strippedAll.push(...stripped);
+      logLockdownAttempt({
+        timestamp: new Date().toISOString(),
+        mediaId: explicitIds[index] ?? `bulk-import-row-${index}`,
+        source: "bulk_import",
+        strippedFields: stripped,
+        ip: request.headers.get("x-forwarded-for") ?? undefined,
+      });
+    }
+    return cleaned;
+  });
+
+  const validated = validateQuickAddItems(sanitizedItems);
   if (!validated.ok) {
     return json({ error: validated.error }, 400);
   }
@@ -216,11 +239,20 @@ export async function POST(request: NextRequest) {
     failed: outcomes.filter((o) => o.kind === "failed").length,
   };
 
-  return json({
-    ok: true,
-    matchKey,
-    dryRun,
-    counts,
-    outcomes,
-  });
+  const strippedHeader =
+    strippedAll.length > 0 ? [...new Set(strippedAll)].join(",") : undefined;
+
+  return jsonWithHeaders(
+    {
+      ok: true,
+      matchKey,
+      dryRun,
+      counts,
+      outcomes,
+    },
+    200,
+    strippedHeader
+      ? { "X-Locked-Fields-Stripped": strippedHeader }
+      : undefined,
+  );
 }

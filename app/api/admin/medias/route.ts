@@ -1,7 +1,7 @@
 import { Prisma } from "@prisma/client";
 import type { NextRequest } from "next/server";
 import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
 import { maybeEstimateDailyFootfall } from "@/lib/media-daily-footfall-estimate";
@@ -26,6 +26,11 @@ import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-distr
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
 import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
+import {
+  ADMIN_MEDIA_LAYER_INCLUDE,
+} from "@/lib/admin-media-dto";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -113,6 +118,7 @@ export async function GET(request: NextRequest) {
   const medias = await db.media.findMany({
     where,
     orderBy: { updatedAt: "desc" },
+    include: ADMIN_MEDIA_LAYER_INCLUDE,
     ...(ids.length > 0 ? {} : { take }),
   });
   const mediasWithCoverage = await attachCoverageDistrictCodesById(db, medias);
@@ -133,6 +139,20 @@ export async function POST(request: NextRequest) {
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
+
+  const { cleaned, stripped } = stripLockedFields(body);
+  body = cleaned as Record<string, unknown>;
+  if (stripped.length > 0) {
+    logLockdownAttempt({
+      timestamp: new Date().toISOString(),
+      mediaId: "new",
+      source: "api_post",
+      strippedFields: stripped,
+      ip: request.headers.get("x-forwarded-for") ?? undefined,
+    });
+  }
+  const strippedHeader =
+    stripped.length > 0 ? stripped.join(",") : undefined;
 
   const name = String(body.name ?? "").trim();
   const location = String(body.location ?? "").trim();
@@ -416,12 +436,15 @@ export async function POST(request: NextRequest) {
 
     revalidateMediaCaches({ id: media.id, slug: media.slug });
 
-    return json(
+    return jsonWithHeaders(
       {
         media: mediaForClient,
         ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
       },
       201,
+      strippedHeader
+        ? { "X-Locked-Fields-Stripped": strippedHeader }
+        : undefined,
     );
   } catch (err) {
     console.error("[admin-api] media POST failed", err);

@@ -2,7 +2,7 @@ import type { Prisma } from "@prisma/client";
 import { MediaAvailability } from "@prisma/client";
 import { NextRequest } from "next/server";
 import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { kakaoFillForMediaPatch } from "@/lib/media-location-enrich";
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
@@ -34,6 +34,8 @@ import {
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -71,6 +73,20 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   } catch {
     return json({ error: "Invalid JSON" }, 400);
   }
+
+  const { cleaned, stripped } = stripLockedFields(body);
+  body = cleaned as Record<string, unknown>;
+  if (stripped.length > 0) {
+    logLockdownAttempt({
+      timestamp: new Date().toISOString(),
+      mediaId: id,
+      source: "api_patch",
+      strippedFields: stripped,
+      ip: request.headers.get("x-forwarded-for") ?? undefined,
+    });
+  }
+  const strippedHeader =
+    stripped.length > 0 ? stripped.join(",") : undefined;
 
   const db = getPrisma();
   const existing = await db.media.findUnique({ where: { id } });
@@ -714,10 +730,16 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (bunnyUrlsToPurge.length > 0) {
       void deleteBunnyPublicUrls(bunnyUrlsToPurge);
     }
-    return json({
-      media: mediaForClient,
-      ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
-    });
+    return jsonWithHeaders(
+      {
+        media: mediaForClient,
+        ...(metricsWarnings.length > 0 ? { warnings: metricsWarnings } : {}),
+      },
+      200,
+      strippedHeader
+        ? { "X-Locked-Fields-Stripped": strippedHeader }
+        : undefined,
+    );
   } catch (err) {
     // 기존 구현은 모든 오류를 404로 감춰서(Prisma 스키마 불일치 포함) 디버깅이 어려웠음.
     // 운영/개발 모두에서 최소한의 힌트를 제공한다.
