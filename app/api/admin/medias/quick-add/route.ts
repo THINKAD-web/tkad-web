@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { getPrisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
@@ -12,6 +12,8 @@ import {
   validateQuickAddItems,
 } from "@/lib/media-quick-add";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +53,28 @@ export async function POST(request: NextRequest) {
     return json({ error: "items 배열이 필요합니다." }, 400);
   }
 
-  const validated = validateQuickAddItems(itemsRaw);
+  const strippedAll: string[] = [];
+  const sanitizedItems = itemsRaw.map((item, index) => {
+    if (item === null || typeof item !== "object" || Array.isArray(item)) {
+      return item;
+    }
+    const { cleaned, stripped } = stripLockedFields(
+      item as Record<string, unknown>,
+    );
+    if (stripped.length > 0) {
+      strippedAll.push(...stripped);
+      logLockdownAttempt({
+        timestamp: new Date().toISOString(),
+        mediaId: `quick-add-row-${index}`,
+        source: "quick_add",
+        strippedFields: stripped,
+        ip: request.headers.get("x-forwarded-for") ?? undefined,
+      });
+    }
+    return cleaned;
+  });
+
+  const validated = validateQuickAddItems(sanitizedItems);
   if (!validated.ok) {
     return json({ error: validated.error }, 400);
   }
@@ -130,7 +153,16 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    return json({ ok: true, count: created.length, created }, 201);
+    const strippedHeader =
+      strippedAll.length > 0 ? [...new Set(strippedAll)].join(",") : undefined;
+
+    return jsonWithHeaders(
+      { ok: true, count: created.length, created },
+      201,
+      strippedHeader
+        ? { "X-Locked-Fields-Stripped": strippedHeader }
+        : undefined,
+    );
   } catch (err) {
     console.error("[admin-api] quick-add failed", err);
     return json(

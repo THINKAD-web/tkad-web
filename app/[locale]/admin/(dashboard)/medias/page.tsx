@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import {
   prismaMediaToAdminDto,
   type AdminMediaDto,
+  ADMIN_MEDIA_LAYER_INCLUDE,
 } from "@/lib/admin-media-dto";
 import { loadMediaEngagementMap } from "@/lib/admin-media-engagement";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
@@ -25,6 +26,7 @@ export default async function AdminMediasPage() {
         db.media.findMany({
           orderBy: { updatedAt: "desc" },
           take: 500,
+          include: ADMIN_MEDIA_LAYER_INCLUDE,
         }),
         loadMediaEngagementMap(),
       ]);

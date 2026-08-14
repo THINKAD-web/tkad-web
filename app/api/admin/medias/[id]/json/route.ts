@@ -1,6 +1,6 @@
 import { NextRequest } from "next/server";
 import { revalidateMediaCaches } from "@/lib/media-cache-revalidate";
-import { assertAdminDb, json } from "@/lib/admin-guard";
+import { assertAdminDb, json, jsonWithHeaders } from "@/lib/admin-guard";
 import { isAdminAuthDebugEnabled } from "@/lib/admin-session";
 import { enrichQuickAddRowForPersist } from "@/lib/media-quick-add-enrich-one";
 import {
@@ -12,6 +12,8 @@ import {
 } from "@/lib/media-quick-add";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { getPrisma } from "@/lib/prisma";
+import { stripLockedFields } from "@/lib/media/locked-fields";
+import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
 
@@ -48,7 +50,21 @@ export async function PUT(request: NextRequest, { params }: Params) {
     return json({ error: "요청 본문은 객체여야 합니다." }, 400);
   }
 
-  const validated = validateQuickAddItem(body, 0);
+  const bodyRecord = body as Record<string, unknown>;
+  const { cleaned, stripped } = stripLockedFields(bodyRecord);
+  if (stripped.length > 0) {
+    logLockdownAttempt({
+      timestamp: new Date().toISOString(),
+      mediaId: id,
+      source: "json_edit",
+      strippedFields: stripped,
+      ip: request.headers.get("x-forwarded-for") ?? undefined,
+    });
+  }
+  const strippedHeader =
+    stripped.length > 0 ? stripped.join(",") : undefined;
+
+  const validated = validateQuickAddItem(cleaned, 0);
   if (!validated.ok) {
     return json({ error: validated.error }, 400);
   }
@@ -95,9 +111,15 @@ export async function PUT(request: NextRequest, { params }: Params) {
   const refreshed = await db.media.findUnique({ where: { id } });
   const forJson = refreshed ?? media;
   const quick = mediaDbRowToQuickAddJson(forJson);
-  return json({
-    ok: true,
-    media: forJson,
-    json: quickAddJsonWithAliasKeys(quick),
-  });
+  return jsonWithHeaders(
+    {
+      ok: true,
+      media: forJson,
+      json: quickAddJsonWithAliasKeys(quick),
+    },
+    200,
+    strippedHeader
+      ? { "X-Locked-Fields-Stripped": strippedHeader }
+      : undefined,
+  );
 }
