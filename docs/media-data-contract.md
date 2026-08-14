@@ -88,7 +88,7 @@
 | `operatingStart` | String | `HH:mm` | ✅ | 예: `06:00` |
 | `operatingEnd` | String | `HH:mm` | ✅ | 예: `24:00` |
 | `timezone` | String | IANA | ✅ | 기본 `Asia/Seoul` |
-| `stationCode` | String | — | 조건부 | 지하철 매체. **Phase 1: 서울 한정** (표준 코드 체계는 §16.2 보류) |
+| `stationCode` | String | — | 조건부 | 지하철 매체. **Phase 1: 서울 한정** — 4자리 역번호 (`§16.2`, 잠정 확정) |
 | `dimensionSource` | Enum | — | 권장 | 규격 출처 — §3.1 |
 
 ### 3.1 규격 결측 대응 (PR1 위임 5)
@@ -390,7 +390,7 @@ PR2 `MediaFactSheet.mediaSubtype` 문자열 집합 (확장 가능).
 - [x] Computed 필드·grade 규칙 §5–§6
 - [x] 추천·스크리너·UI 의존성 §8–§10
 - [x] 코드 변경 없음 (docs only)
-- [x] PR1 검수 결정 반영 — §16 (위임 2–5 확정, 위임 1 보류)
+- [x] PR1 검수 결정 반영 — §16 (위임 1–5 확정, 위임 1은 §16.2 잠정)
 
 ---
 
@@ -405,26 +405,42 @@ PR2 `MediaFactSheet.mediaSubtype` 문자열 집합 (확장 가능).
 
 PR1 자동 검수(`reports/pr1-review-20260814-1307.md`) 판단 위임 5건에 대한 재한 결정.
 
-### 16.1 확정 (위임 2–5)
+### 16.1 확정 (위임 1–5)
 
 | # | 항목 | 결정 | 문서 반영 |
 |:-:|------|------|-----------|
+| 1 | `stationCode` 표준 | **확정 (잠정)** — 서울교통공사 4자리 역번호 (`data.go.kr`). B단계 API 실측으로 최종 검증 예정 | §16.2, §3 |
 | 2 | 지하철·`stationCode` 스코프 | **Phase 1 서울 한정**. 지방 도시철도·환승역 → **Phase 2 이후** | §3.2, §13 |
 | 3 | `visibilityScore` 계층 | **Computed** (Fact 아님). `MediaComputedMetric.visibilityScore` | §2.3, §5, §7.3, §8–§10 |
 | 4 | Operational 처리 | **`Media` 본체 유지**. 별도 테이블 **안 함** (YAGNI) | §2.4, §7.4 |
 | 5 | 규격 결측 대응 | **3단:** ① 뱃지 → ② 유사 매체 중앙값 fallback → ③ 실측 요청 | §3.1, `dimensionSource` |
 
-### 16.2 보류 (위임 1 — `stationCode` 표준)
+### 16.2 `stationCode` 표준 (위임 1 — **옵션 A, 잠정 확정**)
 
-**상태:** 재한 **API 문서 확인 대기 중** — PR3 백필 착수 전 확정 필요.
+**상태:** 미결 → **확정 (잠정)**. B단계 착수 전 API 응답 실측으로 최종 검증 예정.
 
-**후보 (미확정):**
+| 항목 | 값 |
+|------|-----|
+| **표준** | 서울교통공사 **4자리 역번호** 체계 (`data.go.kr` 공공데이터포털 기반) |
+| **API** | `서울교통공사_역별승하차인원` |
+| **엔드포인트** | `http://apis.data.go.kr/B553766/psgr/getStnPsgr` |
+| **역 코드 파라미터** | `stnCd` (선택) |
+| **필수 파라미터** | `serviceKey`, `pasngYmd` (`YYYYMMDD`) |
+| **코드 형식** | 4자리 숫자 (zero-padded) |
+| **예시** | 서울역 `0150`, 성수역 `0211`, 강남역 `0222` |
+| **환승역** | 노선별 분리 — 호선 + 역번호 4자리 (`stationLineCode`와 병행, §3.2) |
+| **인증** | `serviceKey` (`data.go.kr` 활용신청) |
 
-| 후보 | 설명 | 검토 포인트 |
-|------|------|-------------|
-| 국토부 표준 역 코드 | §3 초안·공공데이터 `station_code` | 승하차 API와 1:1 매칭 여부 |
-| 서울교통공사 자체 코드 | 서울 1–9호선 내부 코드 | 공공 API와 변환 테이블 필요 여부 |
+**커버리지**
 
-**Phase 1 범위는 §3.2와 무관하게 서울 한정으로 진행.** 코드 **값 체계**만 확정 대기. PR2 스키마는 `stationCode`·`stationLineCode` 필드만 추가, 코멘트에 미확정 표시.
+| Phase | 범위 | 비고 |
+|-------|------|------|
+| **Phase 1** (PR2–PR5, B단계 정규화) | 서울교통공사 **1~8호선** 중심 | `stationCode`·Signal `station_code` 1차 연동 |
+| **Phase 2** (PR6+ 후보) | 9호선·우이신설·신분당·공항철도 | 별도 API·코드 체계 매핑 |
+| **Phase 3** (PR6+ 후보) | 인천·부산·대구 등 **지방** | 별도 API·코드 체계 |
 
-**확정 시 갱신:** 본 §16.2, §3 `stationCode` 비고, PR2 `MediaFactSheet` 스키마 코멘트.
+**부록 — PR3 백필 레거시**
+
+PR3 백필 시점 `nearbyStations`에 **RAW_COPY** 상태인 매체 **217건**은 B단계 PR `feat/media-stationcode-normalize`에서 본 표준 4자리 코드로 변환·정리 예정. (데이터 정리는 본 문서 범위 밖 — PR6+ 파이프라인 전제.)
+
+> **잠정 확정:** 공개 CSV·API 문서 스키마 기반 채택. 실제 `getStnPsgr` 응답 필드·코드 매칭은 B단계 착수 시 검증 후 필요 시 본 § 재정정.
