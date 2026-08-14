@@ -5,6 +5,7 @@
  *   npx tsx scripts/recompute-all-media.ts --mode=dry-run
  *   npx tsx scripts/recompute-all-media.ts --mode=execute --confirm=YES-RECOMPUTE-preview
  *   npx tsx scripts/recompute-all-media.ts --mode=execute --confirm=YES-RECOMPUTE-production --only-stale --stale-days=30
+ *   npx tsx scripts/recompute-all-media.ts --mode=verify
  */
 import { execSync } from "node:child_process";
 import { writeFileSync, mkdirSync } from "node:fs";
@@ -213,13 +214,153 @@ function renderReport(stats: Stats): string {
   return lines.join("\n");
 }
 
+type VerifyResult = {
+  modelVersions: { model_version: string; c: number }[];
+  dailyMismatch: number;
+  knownExceptionCount: number;
+  cpmMismatch: number;
+  grades: { reliability_grade: string; c: number }[];
+  maxComputedAt: Date | null;
+  pass: boolean;
+};
+
+async function runVerify(pool: Pool): Promise<VerifyResult> {
+  assertTable("media_computed_metrics");
+
+  const modelVersions = (
+    await pool.query(
+      `SELECT model_version, COUNT(*)::int AS c FROM media_computed_metrics GROUP BY model_version ORDER BY 1`,
+    )
+  ).rows as { model_version: string; c: number }[];
+
+  const dailyMismatch = (
+    await pool.query(
+      `SELECT COUNT(*)::int AS c FROM media_computed_metrics
+       WHERE daily_impressions != COALESCE(legacy_daily_impressions, 0)
+         AND NOT (
+           legacy_daily_impressions IS NULL
+           AND daily_impressions > 0
+         )`,
+    )
+  ).rows[0].c as number;
+
+  const knownExceptionCount = (
+    await pool.query(
+      `SELECT COUNT(*)::int AS c FROM media_computed_metrics
+       WHERE legacy_daily_impressions IS NULL AND daily_impressions > 0`,
+    )
+  ).rows[0].c as number;
+
+  const cpmMismatch = (
+    await pool.query(
+      `SELECT COUNT(*)::int AS c FROM media_computed_metrics
+       WHERE cpm != COALESCE(legacy_cpm, 0)`,
+    )
+  ).rows[0].c as number;
+
+  const grades = (
+    await pool.query(
+      `SELECT reliability_grade, COUNT(*)::int AS c FROM media_computed_metrics GROUP BY reliability_grade ORDER BY 1`,
+    )
+  ).rows as { reliability_grade: string; c: number }[];
+
+  const maxComputedAt = (
+    await pool.query(`SELECT MAX(computed_at) AS max FROM media_computed_metrics`)
+  ).rows[0].max as Date | null;
+
+  const pass = dailyMismatch === 0 && cpmMismatch === 0;
+
+  return {
+    modelVersions,
+    dailyMismatch,
+    knownExceptionCount,
+    cpmMismatch,
+    grades,
+    maxComputedAt,
+    pass,
+  };
+}
+
+function renderVerifyReport(env: string, host: string, verify: VerifyResult): string {
+  const lines = [
+    `# PR5 engine v0 verify SQL`,
+    "",
+    `**Environment**: ${env} (${host})`,
+    "",
+    "## Results",
+    "",
+    "| Check | Expected | Actual | Pass |",
+    "|-------|----------|--------|:----:|",
+  ];
+
+  const v0 = verify.modelVersions.find((r) => r.model_version === MODEL_VERSIONS.V0_FALLBACK)?.c ?? 0;
+  const legacy = verify.modelVersions.find((r) => r.model_version === MODEL_VERSIONS.LEGACY_MIGRATION_V1)?.c ?? 0;
+  lines.push(`| v0-fallback count | 821 | ${v0} | ${v0 === 821 ? "✓" : "✗"} |`);
+  lines.push(`| legacy-migration-v1 count | 0 | ${legacy} | ${legacy === 0 ? "✓" : "✗"} |`);
+  lines.push(
+    `| daily_impressions mismatch (edge excluded) | 0 | ${verify.dailyMismatch} | ${verify.dailyMismatch === 0 ? "✓" : "✗"} |`,
+  );
+  lines.push(
+    `| known exception (legacy NULL, daily > 0) | 1 | ${verify.knownExceptionCount} | ${verify.knownExceptionCount === 1 ? "✓" : "✗"} |`,
+  );
+  lines.push(
+    `| cpm mismatch | 0 | ${verify.cpmMismatch} | ${verify.cpmMismatch === 0 ? "✓" : "✗"} |`,
+  );
+  const gradeC = verify.grades.find((g) => g.reliability_grade === "C")?.c ?? 0;
+  lines.push(`| grade C | 821 | ${gradeC} | ${gradeC === 821 ? "✓" : "✗"} |`);
+  lines.push(
+    `| max(computed_at) | recent | ${verify.maxComputedAt?.toISOString() ?? "null"} | — |`,
+  );
+  lines.push("", `**Overall**: ${verify.pass ? "PASS" : "FAIL"}`, "");
+  lines.push(
+    "## Known Exception (PR3 백필 유래)",
+    "",
+    "- 1건: `mediaId=cmp3cfdsy000004jo3v38d9f4`, name=\"헤스티아 (익스클루시브) 버스 외부 LED 전광판\"",
+    "- `legacy_daily_impressions=NULL`, `daily_impressions=1,733,333`",
+    "- 원인: `daily_footfall` NULL이지만 `impressions=52,000,000` 존재",
+    "- 백필 스크립트 `toComputedMetric()` (impressions/30 fallback)에 의해 저장",
+    "- v0 pass-through는 이 값 유지 (변경 없음)",
+    "- 향후 v1에서도 동일 규칙 적용 예정",
+    "",
+  );
+  return lines.join("\n");
+}
+
 async function main() {
   const url = process.env.DATABASE_URL;
   if (!url) throw new Error("DATABASE_URL required");
 
   const modeRaw = getArg("--mode") ?? "dry-run";
-  const mode = modeRaw === "execute" ? "execute" : "dry-run";
+  const mode =
+    modeRaw === "execute"
+      ? "execute"
+      : modeRaw === "verify"
+        ? "verify"
+        : "dry-run";
   const env = detectEnv(url);
+  const host = new URL(url).hostname.split(".")[0];
+
+  if (mode === "verify") {
+    const pool = new Pool({ connectionString: url });
+    try {
+      const verify = await runVerify(pool);
+      const report = renderVerifyReport(env, host, verify);
+      console.log(report);
+      const ts = new Date().toISOString().replace(/[-:T]/g, "").slice(0, 13);
+      const outPath = join(
+        process.cwd(),
+        "reports",
+        `pr5-engine-v0-${env === "production" ? "prod" : "preview"}-verify-${ts}.md`,
+      );
+      mkdirSync(join(process.cwd(), "reports"), { recursive: true });
+      writeFileSync(outPath, report);
+      console.log(`\nWrote ${outPath}`);
+      if (!verify.pass) process.exitCode = 1;
+    } finally {
+      await pool.end();
+    }
+    return;
+  }
   const confirm = getArg("--confirm");
   const expectedConfirm = `YES-RECOMPUTE-${env === "production" ? "production" : "preview"}`;
 
@@ -243,7 +384,7 @@ async function main() {
   const stats: Stats = {
     env,
     mode,
-    host: new URL(url).hostname.split(".")[0],
+    host,
     gitSha: execSync("git rev-parse HEAD", { encoding: "utf8" }).trim(),
     scope: scopeAll
       ? "all"
