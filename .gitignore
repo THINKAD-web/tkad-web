@@ -72,4 +72,6 @@ scripts/print-admin-*.ts
 !docs/screenshots/
 !docs/screenshots/pr4-baseline/
 !docs/screenshots/pr4-baseline/*.png
+!docs/screenshots/pr4-after/
+!docs/screenshots/pr4-after/*.png
 scripts/fix-*.ts
