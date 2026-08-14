@@ -8,6 +8,8 @@ import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
 import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { useToast } from "@/components/toast-provider";
+import { COMPUTED_FIELDS_LOCKED, LOCKED_FIELD_SNAKE_ALIASES } from "@/lib/media/locked-fields";
 import { PartialPeriodRatesFields } from "@/components/admin/partial-period-rates-fields";
 import {
   EMPTY_PARTIAL_PERIOD_RATES_DRAFT,
@@ -21,6 +23,7 @@ type Props = { mediaId: string };
 
 export default function MediaJsonEditClient({ mediaId }: Props) {
   const router = useRouter();
+  const { toast } = useToast();
   const [text, setText] = useState("");
   const [partialPeriodRates, setPartialPeriodRates] =
     useState<PartialPeriodRatesDraft>({ ...EMPTY_PARTIAL_PERIOD_RATES_DRAFT });
@@ -160,26 +163,48 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
         return;
       }
 
-      const result = await adminFetchJson(
-        `/api/admin/medias/${mediaId}/json`,
-        {
-          method: "PUT",
-          credentials: "include",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(parsed),
-        },
-      );
-      if (!result.ok) {
-        setError(result.message);
+      const jsonRes = await fetch(`/api/admin/medias/${mediaId}/json`, {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(parsed),
+      });
+      const jsonRaw = await jsonRes.text();
+      let jsonData: unknown = {};
+      if (jsonRaw.trim()) {
+        try {
+          jsonData = JSON.parse(jsonRaw);
+        } catch {
+          setError("서버 응답을 읽을 수 없습니다.");
+          return;
+        }
+      }
+      if (!jsonRes.ok) {
+        const msg =
+          typeof jsonData === "object" &&
+          jsonData !== null &&
+          "error" in jsonData &&
+          typeof (jsonData as { error: unknown }).error === "string"
+            ? (jsonData as { error: string }).error
+            : `저장 실패 (HTTP ${jsonRes.status})`;
+        setError(msg);
         return;
       }
-      const raw: unknown = result.data;
+
+      const strippedHeader = jsonRes.headers.get("X-Locked-Fields-Stripped");
+      if (strippedHeader) {
+        toast(
+          "warning",
+          `다음 필드는 자동 계산되어 저장되지 않았습니다: ${strippedHeader}`,
+        );
+      }
+
       const nextJson =
-        typeof raw === "object" &&
-        raw !== null &&
-        "json" in raw &&
-        typeof (raw as { json: unknown }).json === "object"
-          ? (raw as { json: Record<string, unknown> }).json
+        typeof jsonData === "object" &&
+        jsonData !== null &&
+        "json" in jsonData &&
+        typeof (jsonData as { json: unknown }).json === "object"
+          ? (jsonData as { json: Record<string, unknown> }).json
           : null;
       if (nextJson) {
         setText(JSON.stringify(nextJson, null, 2));
@@ -230,6 +255,14 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
           <p className="text-sm text-muted-foreground">
             ID: <code className="text-xs">{mediaId}</code> · quick-add와 동일 키
             · 부분기간 요율은 아래 패널에서 편집 (매체 목록 폼과 동기화)
+          </p>
+          <p className="mt-1 text-xs text-muted-foreground">
+            🔒 Computed 필드(
+            {[
+              ...COMPUTED_FIELDS_LOCKED,
+              ...Object.keys(LOCKED_FIELD_SNAKE_ALIASES),
+            ].join(", ")}
+            )는 참조용으로 표시되며 저장 시 무시됩니다.
           </p>
         </div>
         <Button variant="outline" size="sm" asChild>

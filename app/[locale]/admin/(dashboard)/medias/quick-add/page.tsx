@@ -42,15 +42,7 @@ const SAMPLE_JSON = `{
   "height_m": 4.2,
   "resolution": "3840×2160",
   "operating_hours": "06:00–24:00",
-  "daily_footfall": 280000,
-  "weekday_footfall": 220000,
   "target_age": "20–40대",
-  "impressions": 1200000,
-  "reach": 45.2,
-  "frequency": 3.1,
-  "cpm": 8500,
-  "engagement_rate": 1.2,
-  "visibility_score": 88,
   "effect_memo": "야간 대비 시인성 우수",
   "extracted_images": [
     "https://res.cloudinary.com/demo/image/upload/w_800/sample.jpg"
