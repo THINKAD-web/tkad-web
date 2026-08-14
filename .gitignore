@@ -69,4 +69,7 @@ scripts/screenshot-*
 scripts/simulate-*.ts
 scripts/print-admin-*.ts
 *.png
+!docs/screenshots/
+!docs/screenshots/pr4-baseline/
+!docs/screenshots/pr4-baseline/*.png
 scripts/fix-*.ts
