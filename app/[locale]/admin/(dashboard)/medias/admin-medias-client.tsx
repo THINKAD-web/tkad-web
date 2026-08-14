@@ -76,6 +76,12 @@ import {
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { LOCKED_FIELD_TOOLTIP } from "@/lib/media/locked-fields";
+import {
+  LOCKED_INPUT_CLASS,
+  LockedComputedFieldBadge,
+  MediaLayerBadges,
+} from "@/lib/media/badges";
 import { buildAdminMediasListUrl } from "@/lib/admin-medias-list-url";
 import {
   KOREA_SIDO_ORDERED,
@@ -2581,6 +2587,7 @@ export default function AdminMediasClient({
                               <MediaQualityScoreBadge
                                 score={mediaQualityScore(media)}
                               />
+                              <MediaLayerBadges badges={media.layerBadges} />
                               <span className="text-xs font-semibold tabular-nums text-foreground">
                                 ₩{media.price.toLocaleString()}
                               </span>
@@ -2707,6 +2714,9 @@ export default function AdminMediasClient({
                           </tr>
                           <tr className={`${rowClass} border-b last:border-0`}>
                             <td colSpan={4} className="px-3 py-2 align-middle">
+                              <div className="mb-2">
+                                <MediaLayerBadges badges={media.layerBadges} />
+                              </div>
                               {renderMediaListActionBar(media)}
                             </td>
                           </tr>
@@ -2794,12 +2804,17 @@ export default function AdminMediasClient({
                       : "필수(*) 항목만 채워도 저장 가능 · 주소 입력 시 좌표 자동 변환"}
                   </p>
                 ) : (
-                  <Link
-                    href={`/admin/medias/${editing.id}/edit`}
-                    className="mt-1 inline-block text-[11px] font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
-                  >
-                    JSON으로 편집
-                  </Link>
+                  <>
+                    <Link
+                      href={`/admin/medias/${editing.id}/edit`}
+                      className="mt-1 inline-block text-[11px] font-medium text-muted-foreground underline underline-offset-2 hover:text-foreground"
+                    >
+                      JSON으로 편집
+                    </Link>
+                    <div className="mt-2">
+                      <MediaLayerBadges badges={editing.layerBadges} />
+                    </div>
+                  </>
                 )}
               </div>
               <Button
@@ -3494,26 +3509,27 @@ export default function AdminMediasClient({
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     일일 유동인구
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.dailyFootfall}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, dailyFootfall: e.target.value }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     평일 유동인구
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.weekdayFootfall}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        weekdayFootfall: e.target.value,
-                      }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
               </div>
@@ -3933,73 +3949,79 @@ export default function AdminMediasClient({
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     노출(imp)
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.impressions}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, impressions: e.target.value }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     가시성 점수 0–100
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.visibilityScore}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        visibilityScore: e.target.value,
-                      }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     도달률
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.reach}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, reach: e.target.value }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     빈도
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.frequency}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, frequency: e.target.value }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     CPM
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.cpm}
-                    onChange={(e) =>
-                      setForm((f) => ({ ...f, cpm: e.target.value }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     참여율
+                    <LockedComputedFieldBadge />
                   </label>
                   <Input
                     value={form.engagementRate}
-                    onChange={(e) =>
-                      setForm((f) => ({
-                        ...f,
-                        engagementRate: e.target.value,
-                      }))
-                    }
+                    disabled
+                    readOnly
+                    className={LOCKED_INPUT_CLASS}
+                    title={LOCKED_FIELD_TOOLTIP}
                   />
                 </div>
               </div>
