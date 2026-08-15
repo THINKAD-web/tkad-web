@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { cn } from "@/lib/utils";
-import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 
 type Props = {
   children: ReactNode;
@@ -11,10 +10,13 @@ type Props = {
   className?: string;
 };
 
-/** `data-appearance` 는 ThemeToggle(전역 라이트/다크)과 동기 — 헤더·본문·푸터 토큰 일치 */
+/**
+ * 랜딩 라이트/다크 래퍼. 외형(day/night)은 CSS 가 `html.dark` 에서 파생한다
+ * (`html.dark .tkad-home-appearance …` / `html:not(.dark) …`). 과거의 JS state
+ * `data-appearance` 는 SSR(서버 시간)과 클라이언트 `html.dark` 가 어긋나 깜빡임을
+ * 유발해 제거했다 — `html.dark` 이 단일 진실의 원천.
+ */
 export function HomeLandingDayNight({ children, portal, className }: Props) {
-  const appearance = useTkadAppearance();
-
   return (
     <div
       className={cn(
@@ -22,8 +24,6 @@ export function HomeLandingDayNight({ children, portal, className }: Props) {
         portal && "tkad-portal-appearance",
         className,
       )}
-      data-appearance={appearance}
-      suppressHydrationWarning
     >
       {children}
     </div>

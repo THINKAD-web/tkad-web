@@ -85,7 +85,6 @@ import { IntegratedDigitalRecommendationPanel } from "@/components/planner/integ
 import { IntegratedReportStep } from "@/components/planner/integrated/integrated-report-step";
 import { IntegratedCampaignDashboard } from "@/components/planner/integrated/integrated-dashboard";
 import PlannerTips from "@/components/planner-tips";
-import { useTkadAppearance } from "@/lib/use-tkad-appearance";
 import { PlannerScenarioCards } from "@/components/planner/planner-scenario-cards";
 import { PlannerGoalFollowUpPanel } from "@/components/planner/planner-goal-follow-up-panel";
 import { PlannerSeoulZoneChips } from "@/components/planner/planner-seoul-zone-chips";
@@ -102,7 +101,6 @@ import {
 } from "@/lib/planner/generate-scenarios";
 import type { PlannerScenario } from "@/lib/planner/scenario-types";
 import { resolveScenarioPortfolioMediaIds } from "@/lib/planner/apply-scenario-portfolio";
-import type { HomeAppearance } from "@/lib/home-appearance";
 import type { ReactNode } from "react";
 
 const GOALS: {
@@ -133,36 +131,36 @@ type Props = {
   digitalCatalogMeta: DigitalCatalogBridgeMeta;
 };
 
+/**
+ * 낮/밤 외형은 `html.dark` 파생(Tailwind `dark:`) — night 전용 배경·노이즈는 dark 에서만.
+ * 라이트에선 배경 투명·오버레이 미표시로 과거 day(래퍼 없음)와 동일하게 보인다.
+ */
 function IntegratedPlannerPageBody({
-  appearance,
   className,
   children,
 }: {
-  appearance: HomeAppearance;
   className?: string;
   children: ReactNode;
 }) {
-  const inner = (
-    <div className={cn("tkad-planner-neon w-full min-w-0 max-w-full", className)}>
-      {children}
+  return (
+    <div className="relative w-full min-w-0 overflow-hidden dark:bg-[#020202] dark:text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)] dark:block"
+      />
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden tkad-hero-noise opacity-[0.05] mix-blend-overlay dark:block"
+      />
+      <div className="relative w-full min-w-0">
+        <div
+          className={cn("tkad-planner-neon w-full min-w-0 max-w-full", className)}
+        >
+          {children}
+        </div>
+      </div>
     </div>
   );
-  if (appearance === "night") {
-    return (
-      <div className="relative w-full min-w-0 overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 bg-[radial-gradient(ellipse_at_top,color-mix(in_srgb,var(--qp-accent)_8%,transparent),transparent_55%)]"
-        />
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.05] mix-blend-overlay"
-        />
-        <div className="relative w-full min-w-0">{inner}</div>
-      </div>
-    );
-  }
-  return inner;
 }
 
 export default function IntegratedPlannerPageClient({
@@ -179,7 +177,6 @@ export default function IntegratedPlannerPageClient({
   const localeKey = isKo ? "ko" : "en";
   const router = useRouter();
   const { toast } = useToast();
-  const landingAppearance = useTkadAppearance();
   const [navigatingContact, setNavigatingContact] = useState(false);
 
   const wizardStep = useIntegratedPlannerStore((s) => s.wizardStep);
@@ -821,7 +818,6 @@ export default function IntegratedPlannerPageClient({
       <SubTabs tabs={PLANNING_TABS} currentPath="/planner/integrated" />
 
       <IntegratedPlannerPageBody
-        appearance={landingAppearance}
         className="mx-auto w-full min-w-0 max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
       >
         {wizardStep <= LAST_STEP ? (

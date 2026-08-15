@@ -348,7 +348,7 @@ html:not(.dark) .tkad-planner-neon:not(.tkad-media-page) .tkad-neon-grid {
   box-shadow: none !important;
 }
 html.dark .tkad-planner-neon:not(.tkad-media-page) .tkad-ai-recommend-submit:not(:disabled),
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon:not(.tkad-media-page) .tkad-ai-recommend-submit:not(:disabled) {
+html.dark .tkad-home-appearance .tkad-planner-neon:not(.tkad-media-page) .tkad-ai-recommend-submit:not(:disabled) {
   background: var(--qp-accent) !important;
   background-image: none !important;
   border-color: color-mix(in srgb, var(--qp-accent) 55%, transparent) !important;
@@ -920,7 +920,7 @@ html:not(.dark) .tkad-neon-grid {
 }
 
 /* ── 홈 낮 모드: 에디토리얼 라이트 — 섹션 카드 분리·여백 리듬 ── */
-.tkad-home-appearance[data-appearance="day"] {
+html:not(.dark) .tkad-home-appearance {
   min-height: 100dvh;
   /* html.dark 와 동시에 쓰일 때 native / color-mix 가 밝은 글자로 고정되는 경우 방지 */
   color-scheme: light dark;
@@ -1046,7 +1046,7 @@ html:not(.dark) .tkad-neon-grid {
 }
 
 /* 라이트 랜딩: `main` 기본 배경이 `body --background`(회색)일 때 푸터 직전에 가로 띠로 노출됨 */
-main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
+html:not(.dark) main#main-content:has(.tkad-home-appearance) {
   background-color: #ffffff;
   background-image:
     radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
@@ -1055,7 +1055,7 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
     linear-gradient(180deg, #ffffff 0%, #f7f8ff 44%, #ffffff 100%);
 }
 
-.tkad-home-appearance[data-appearance="day"] > .tkad-landing-neon {
+html:not(.dark) .tkad-home-appearance > .tkad-landing-neon {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -1064,7 +1064,7 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
 }
 
 /* 랜딩 밤 + 루트에 planner-neon(아카데미·인사이트·사례 목록 등): 사이트 라이트일 때 크림 body 가 비치면 밤(밝은 글자) 토큰이 전부 묻음 */
-.tkad-home-appearance[data-appearance="night"] > .tkad-landing-neon.tkad-planner-neon {
+html.dark .tkad-home-appearance > .tkad-landing-neon.tkad-planner-neon {
   flex: 1 1 auto;
   display: flex;
   flex-direction: column;
@@ -1075,8 +1075,8 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
 }
 
 /* 포털(`/dashboard`, `/my`) — 라이트 `100dvh` 래퍼·main 배경 차로 푸터 직전 높이가 달라 보이는 현상 방지 */
-.tkad-home-appearance.tkad-portal-appearance[data-appearance="day"],
-.tkad-home-appearance.tkad-portal-appearance[data-appearance="night"] {
+html:not(.dark) .tkad-home-appearance.tkad-portal-appearance,
+html.dark .tkad-home-appearance.tkad-portal-appearance {
   min-height: 0;
 }
 
@@ -1088,12 +1088,12 @@ main#main-content:has(.tkad-home-appearance[data-appearance="day"]) {
   min-height: calc(100dvh - 4rem);
 }
 
-main#main-content:has(.tkad-portal-appearance[data-appearance="night"]) {
+html.dark main#main-content:has(.tkad-portal-appearance) {
   background-color: #05050a;
   background-image: none;
 }
 
-main#main-content:has(.tkad-portal-appearance[data-appearance="day"]) {
+html:not(.dark) main#main-content:has(.tkad-portal-appearance) {
   background-color: #ffffff;
   background-image:
     radial-gradient(115% 70% at 0% -6%, rgba(99, 102, 241, 0.07), transparent 50%),
@@ -1233,7 +1233,7 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
 }
 
 /* 다크와 동일: 래퍼는 블록만. flex/gap/padding 추가 시 히어로 너비·간격이 어긋남 */
-.tkad-home-appearance[data-appearance="day"] .tkad-landing-neon {
+html:not(.dark) .tkad-home-appearance .tkad-landing-neon {
   background: transparent;
   --accent: var(--qp-accent);
   --cta: var(--qp-accent);
@@ -1250,8 +1250,8 @@ body:has(.tkad-media-map-shell) .tkad-media-app-shell.tkad-media-map-shell {
 
 html:not(.dark) .tkad-category-explore-hero,
 html:not(.dark) .tkad-home-hero-neo,
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero,
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero-neo {
+html:not(.dark) .tkad-home-appearance .tkad-category-explore-hero,
+html:not(.dark) .tkad-home-appearance .tkad-home-hero-neo {
   background: #f9fafb !important;
   color: rgb(15 23 42) !important;
   color-scheme: light;
@@ -1260,16 +1260,16 @@ html:not(.dark) .tkad-home-hero-neo,
 
 html:not(.dark) .tkad-category-explore-hero > [aria-hidden],
 html:not(.dark) .tkad-home-hero-neo > [aria-hidden],
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero > [aria-hidden],
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero-neo > [aria-hidden] {
+html:not(.dark) .tkad-home-appearance .tkad-category-explore-hero > [aria-hidden],
+html:not(.dark) .tkad-home-appearance .tkad-home-hero-neo > [aria-hidden] {
   opacity: 0 !important;
   visibility: hidden !important;
 }
 
 html.dark .tkad-category-explore-hero,
 html.dark .tkad-home-hero-neo,
-.tkad-home-appearance[data-appearance="night"] .tkad-category-explore-hero,
-.tkad-home-appearance[data-appearance="night"] .tkad-home-hero-neo {
+html.dark .tkad-home-appearance .tkad-category-explore-hero,
+html.dark .tkad-home-appearance .tkad-home-hero-neo {
   background: #05050a !important;
   color: rgb(255 255 255) !important;
   color-scheme: dark;
@@ -1308,7 +1308,7 @@ html:not(.dark) .tkad-nav-chrome .category-hero-beta-badge {
 }
 
 html:not(.dark) .tkad-category-explore-hero .category-hero-beta-badge,
-.tkad-home-appearance[data-appearance="day"] .tkad-category-explore-hero .category-hero-beta-badge {
+html:not(.dark) .tkad-home-appearance .tkad-category-explore-hero .category-hero-beta-badge {
   color: var(--qp-accent) !important;
   -webkit-text-fill-color: currentColor !important;
   background-color: color-mix(in srgb, var(--qp-accent) 12%, white) !important;
@@ -1323,20 +1323,20 @@ html:not(.dark) .tkad-category-explore-hero .category-hero-beta-badge,
 }
 
 html:not(.dark) .tkad-media-detail-hero,
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero {
+html:not(.dark) .tkad-home-appearance .tkad-media-detail-hero {
   background: #f9fafb !important;
   color: rgb(15 23 42) !important;
   color-scheme: light;
 }
 
 html:not(.dark) .tkad-media-detail-hero > [aria-hidden],
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-hero > [aria-hidden] {
+html:not(.dark) .tkad-home-appearance .tkad-media-detail-hero > [aria-hidden] {
   opacity: 0 !important;
   visibility: hidden !important;
 }
 
 html.dark .tkad-media-detail-hero,
-.tkad-home-appearance[data-appearance="night"] .tkad-media-detail-hero {
+html.dark .tkad-home-appearance .tkad-media-detail-hero {
   background: #05050a !important;
   color: rgb(255 255 255) !important;
   color-scheme: dark;
@@ -1352,7 +1352,7 @@ html.dark .tkad-media-detail-hero,
   color: var(--qp-accent) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .category-hero-beta-badge {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .category-hero-beta-badge {
   color: var(--qp-accent) !important;
   -webkit-text-fill-color: currentColor !important;
   background-color: color-mix(in srgb, var(--qp-accent) 12%, white) !important;
@@ -1361,7 +1361,7 @@ html.dark .tkad-media-detail-hero,
 }
 
 /* 각 히어로·Neon 섹션 = 떠 있는 라이트 패널 — 프리미엄 깊이(입체 그림자) */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface {
   position: relative;
   overflow: hidden;
   border-radius: clamp(1.2rem, 2.4vw, 1.85rem);
@@ -1381,40 +1381,40 @@ html.dark .tkad-media-detail-hero,
 }
 
 /* 라이트 모드: 무지개 테두리 글로우 약화(카드·패널 공통) */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-border::before {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-border::before {
   opacity: 0.04 !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface > [aria-hidden] {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface > [aria-hidden] {
   opacity: 0 !important;
   visibility: hidden !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface [class*="text-white"] {
   color: rgb(12 12 24) !important;
   /* Tailwind text-white* 가 남기는 -webkit-text-fill 만 바꾸면 클립 그라데이션이 ‘하얀 덩어리’로 보임 */
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .text-cyan-300,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .text-cyan-200,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="text-cyan-"] {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .text-cyan-300,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .text-cyan-200,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface [class*="text-cyan-"] {
   color: rgb(8 145 178) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* 라이트 랜딩: 브랜드 CTA(주황) 버튼은 텍스트를 항상 흰색으로 (hover bg-foreground에서도 대비 유지) */
-.tkad-home-appearance[data-appearance="day"]
+html:not(.dark) .tkad-home-appearance
   .tkad-neon-surface
   .bg-accent.text-white,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-qp-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-qp-cta *,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .bg-hermes,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .bg-hermes *,
-.tkad-home-appearance[data-appearance="day"]
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-qp-cta,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-qp-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .bg-hermes,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .bg-hermes *,
+html:not(.dark) .tkad-home-appearance
   .tkad-neon-surface
   [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
-.tkad-home-appearance[data-appearance="day"]
+html:not(.dark) .tkad-home-appearance
   .tkad-neon-surface
   [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
   color: rgb(255 255 255) !important;
@@ -1422,7 +1422,7 @@ html.dark .tkad-media-detail-hero,
 }
 
 /* 라이트 neon surface — qp 단색 액센트 */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-home-accent-text {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-home-accent-text {
   background-image: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
@@ -1432,18 +1432,18 @@ html.dark .tkad-media-detail-hero,
 }
 
 /* 그라데이션 CTA는 밝은 글자 유지 (위 규칙이 text-white 유틸까지 덮어씀) */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean *,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta * {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta-clean,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta-clean *,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta * {
   color: rgb(252 252 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="border-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface [class*="border-white"] {
   border-color: rgb(22 22 48 / 0.12) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface [class*="bg-white/"] {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface [class*="bg-white/"] {
   background-color: rgb(255 255 255 / 0.98) !important;
   box-shadow:
     0 14px 44px rgb(22 22 48 / 0.07),
@@ -1451,13 +1451,13 @@ html.dark .tkad-media-detail-hero,
 }
 
 /* 섹션 타이틀 — 낮: 흰색 text-shadow 금지(히어로 h1과 동일), 액센트 네온 클립 */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 {
+html:not(.dark) .tkad-home-appearance .tkad-neon-section-head h2 {
   color: var(--home-ink) !important;
   text-shadow: none !important;
   letter-spacing: -0.065em !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.tkad-home-accent-text {
+html:not(.dark) .tkad-home-appearance .tkad-neon-section-head h2 span.tkad-home-accent-text {
   background-image: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
@@ -1467,7 +1467,7 @@ html.dark .tkad-media-detail-hero,
   filter: none;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head h2 span.bg-clip-text {
+html:not(.dark) .tkad-home-appearance .tkad-neon-section-head h2 span.bg-clip-text {
   background-image: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
@@ -1477,7 +1477,7 @@ html.dark .tkad-media-detail-hero,
   filter: none;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border {
+html:not(.dark) .tkad-home-appearance .tkad-neon-section-head .tkad-neon-border {
   background: linear-gradient(
     135deg,
     rgb(255 255 255 / 0.98) 0%,
@@ -1491,7 +1491,7 @@ html.dark .tkad-media-detail-hero,
     0 14px 36px rgb(15 23 42 / 0.055) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-section-head .tkad-neon-border span.bg-clip-text {
+html:not(.dark) .tkad-home-appearance .tkad-neon-section-head .tkad-neon-border span.bg-clip-text {
   background-image: none !important;
   -webkit-background-clip: unset !important;
   background-clip: unset !important;
@@ -1500,55 +1500,55 @@ html.dark .tkad-media-detail-hero,
   text-shadow: none !important;
 }
 
-.tkad-home-appearance[data-appearance="day"]
+html:not(.dark) .tkad-home-appearance
   .tkad-neon-section-head
   .flex.flex-wrap.items-center.gap-3
   > span:nth-child(2) {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-section-cta {
+html:not(.dark) .tkad-home-appearance .tkad-home-section-cta {
   border-color: rgb(15 23 42 / 0.18) !important;
   color: var(--home-ink-soft) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-section-cta:hover {
+html:not(.dark) .tkad-home-appearance .tkad-home-section-cta:hover {
   border-color: rgb(67 56 202 / 0.45) !important;
   color: var(--home-ink) !important;
 }
 
 /* 마지막 CTA 블록 — 라이트 카드 위 네온 글로우 텍스트 섀도 제거 */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-text {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-text {
   text-shadow: none !important;
   color: var(--home-ink) !important;
 }
 
 /* /services FAQ — 낮: 답변 행 어두운 필름 제거 */
-.tkad-home-appearance[data-appearance="day"] .tkad-services-faq .tkad-services-faq-answer {
+html:not(.dark) .tkad-home-appearance .tkad-services-faq .tkad-services-faq-answer {
   background: rgb(248 250 252 / 0.96) !important;
   border-color: rgb(15 23 42 / 0.08) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-services-faq .text-cyan-200 {
+html:not(.dark) .tkad-home-appearance .tkad-services-faq .text-cyan-200 {
   color: rgb(8 145 178) !important;
 }
 
 /* 홈 낮: 우하단 FloatingCta — 밝은 배경 위에서 글래스+흰 글자가 사라지는 문제 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-floating-cta {
+html:not(.dark) .tkad-home-appearance .tkad-home-floating-cta {
   background-color: rgb(255 255 255 / 0.94) !important;
   box-shadow:
     0 22px 70px rgb(22 22 48 / 0.12),
     0 0 0 1px rgb(22 22 48 / 0.08) !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-home-floating-cta > .min-w-0 [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-home-floating-cta > .min-w-0 [class*="text-white"] {
   color: rgb(14 14 24) !important;
 }
 
 /* ── Planner neon skin (scoped) ───────────────────────────────────────────── */
 /* 기존 Planner는 브루탈(2px border + bg-card/bg-muted) 기반. 홈 네온 랜딩(day/night) 안에서만 “글래스 카드”로 리스킨. */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-card,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-muted,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.border-border.bg-hero-void {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-card,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-muted,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-hero-void {
   border-width: 1px !important;
   border-color: var(--home-line-soft) !important;
   background: rgb(255 255 255 / 0.98) !important;
@@ -1556,7 +1556,7 @@ html.dark .tkad-media-detail-hero,
   border-radius: 1.35rem !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-b-2.border-border {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-b-2.border-border {
   border-bottom-width: 1px !important;
   border-color: var(--home-line-soft) !important;
 }
@@ -1566,31 +1566,31 @@ html.dark .tkad-media-detail-hero,
  * Tailwind v4 `.text-foreground` → `color: var(--foreground)` (빌드된 layout.css 기준).
  * 변수 재매핑 + 아래 유틸별 !important 로 흰 글자·-webkit-text-fill 잔류까지 끊음.
  */
-.tkad-home-appearance[data-appearance="day"] .tkad-landing-neon.tkad-planner-neon[class*="bg-[#0A0A0A]"],
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon[class*="bg-[#0A0A0A]"] {
+html:not(.dark) .tkad-home-appearance .tkad-landing-neon.tkad-planner-neon[class*="bg-[#0A0A0A]"],
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon[class*="bg-[#0A0A0A]"] {
   background: transparent !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [class*="text-white"] {
   color: rgb(12 12 24) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* PDF/통합 보고서 등 의도적 다크 그라데이션 표면 — day에서도 밝은 글자 유지 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surface,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surface [class*="text-white"] {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-dark-surface [class*="text-violet"] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-dark-surface [class*="text-violet"] {
   color: rgb(196 181 253) !important;
   -webkit-text-fill-color: rgb(196 181 253) !important;
 }
 
 /* 보고서·견적 흰 문서 본문 — planner-neon 글자색 재매핑과 격리 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface {
   color: rgb(17 24 39) !important;
   background-color: #ffffff !important;
   -webkit-text-fill-color: currentColor !important;
@@ -1598,7 +1598,7 @@ html.dark .tkad-media-detail-hero,
 
 /* 사이트 다크 + 플래너 night: text-foreground·dark:text-* 가 흰 문서 위에서 사라지지 않게 */
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-foreground,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-foreground {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-foreground {
   color: rgb(17 24 39) !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -1614,50 +1614,50 @@ html.dark .tkad-planner-neon .tkad-document-light-surface [class*="dark:text-vio
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"],
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"],
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface [class*="text-gray-"] {
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* 보고서 흰 문서 — 발견하기 피드·카드·컴팩트의 tkad 토큰을 라이트 잉크로 (html.dark 포함) */
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-tkad-secondary,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-tkad-muted {
   color: rgb(75 85 99) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 html.dark .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .text-tkad-accent {
   color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-type-label,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-type-label {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .tkad-type-title,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .tkad-type-label {
   color: rgb(17 24 39) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 html.dark .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .tkad-home-accent-text {
   background-image: none !important;
   color: rgb(124 58 237) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-feed {
   background-color: #ffffff !important;
   border-color: rgb(229 231 235) !important;
 }
 
 /* 견적 PDF 미리보기 — planner-neon day의 text-white 재매핑 예외 (그라데이션 합계 바) */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-light-surface .quote-pdf-totals-gradient * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
@@ -1667,35 +1667,35 @@ html.dark .tkad-planner-neon .tkad-document-light-surface .discovery-media-card-
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-document-cta *,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-document-cta * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-document-cta *,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-cta,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-document-cta * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .category-hero-cta-primary *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta-clean *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-neon-cta *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-wizard-btn-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .category-hero-cta-primary,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .category-hero-cta-primary *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-neon-cta-clean,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-neon-cta-clean *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-neon-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-neon-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-wizard-btn-accent,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-wizard-btn-accent *,
 /* Solid orange chips/CTAs — day text-white→ink remapping must not darken labels */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-qp-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-qp-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-hermes,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-hermes *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-wizard-btn-accent,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-wizard-btn-accent * {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-wizard-btn-accent,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-wizard-btn-accent * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
@@ -1720,7 +1720,7 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   border-color: rgb(124 58 237 / 0.55) !important;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   background: linear-gradient(
     135deg,
     rgb(124 58 237) 0%,
@@ -1730,13 +1730,13 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
 }
 
 /* 견적 마법사 — 단계 숫자 버튼 (라이트 모드 가독성) */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn {
   border-color: rgb(226 232 240);
   background: rgb(248 250 252);
   color: rgb(71 85 105);
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
   border-color: var(--qp-accent, #ff6200);
   background: var(--qp-accent, #ff6200);
   color: rgb(255 255 255) !important;
@@ -1745,36 +1745,36 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
 }
 
 /* 내 플랜 — 선택 칩(보라·시안 배경)은 day에서도 흰 글자 유지 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-plan-cart-chip-active,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-plan-cart-chip-active * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-plan-cart-chip-active,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-plan-cart-chip-active * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
   border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 45%, transparent);
   background: var(--qp-accent-soft, color-mix(in srgb, #ff6200 12%, white));
   color: #c24e00;
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
   background: color-mix(in srgb, var(--qp-accent, #ff6200) 18%, white);
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-label {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(100 116 139);
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-quote-wizard-step-label-active {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label-active {
   color: rgb(15 23 42);
   -webkit-text-fill-color: currentColor;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn {
   border-color: rgb(255 255 255 / 0.12);
   background: rgb(255 255 255 / 0.06);
   color: rgb(255 255 255 / 0.55);
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-active {
   border-color: var(--qp-accent, #ff6200);
   background: var(--qp-accent, #ff6200);
   color: rgb(255 255 255) !important;
@@ -1783,41 +1783,41 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
     0 0 0 1px color-mix(in srgb, var(--qp-accent, #ff6200) 40%, transparent),
     0 24px 80px rgb(0 0 0 / 0.45);
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done {
   border-color: color-mix(in srgb, var(--qp-accent, #ff6200) 50%, transparent);
   background: color-mix(in srgb, var(--qp-accent, #ff6200) 14%, transparent);
   color: rgb(255 255 255 / 0.92);
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-btn-done:hover {
   background: color-mix(in srgb, var(--qp-accent, #ff6200) 24%, transparent);
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-label {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label {
   color: rgb(255 255 255 / 0.55);
   -webkit-text-fill-color: currentColor;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-quote-wizard-step-label-active {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-quote-wizard-step-label-active {
   color: rgb(255 255 255 / 0.92);
   -webkit-text-fill-color: currentColor;
 }
 
 /* 요금제 플랜 보조 CTA — day/night·html.dark 와 `dark:text-white` 유틸 충돌 방지 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-pricing-outline-btn {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-pricing-outline-btn {
   border-color: rgb(226 232 240) !important;
   background-color: rgb(243 244 246) !important;
   color: rgb(15 23 42) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-pricing-outline-btn:hover {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-pricing-outline-btn:hover {
   background-color: rgb(229 231 235) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-pricing-outline-btn {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-pricing-outline-btn {
   border-color: rgb(255 255 255 / 0.2) !important;
   background-color: rgb(255 255 255 / 0.1) !important;
   color: rgb(248 250 252 / 0.96) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-pricing-outline-btn:hover {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-pricing-outline-btn:hover {
   background-color: rgb(255 255 255 / 0.15) !important;
 }
 
@@ -1871,7 +1871,7 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
 }
 
 /* Step 1 미리보기 카드 — appearance 기준 배경·대비 (Tailwind dark: 와 분리) */
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-aside {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-step1-aside {
   background: linear-gradient(
     145deg,
     rgb(46 16 101 / 0.42),
@@ -1880,7 +1880,7 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   border-color: rgb(255 255 255 / 0.12) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-step1-aside {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-step1-aside {
   background: linear-gradient(
     145deg,
     rgb(245 243 255 / 0.98),
@@ -1889,19 +1889,19 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   border-color: rgb(15 23 42 / 0.1) !important;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-step1-preview-frame {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-step1-preview-frame {
   background-color: rgb(2 2 2 / 0.82) !important;
   border-color: rgb(255 255 255 / 0.1) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-step1-preview-frame {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-step1-preview-frame {
   background-color: rgb(241 245 249 / 0.96) !important;
   border-color: rgb(15 23 42 / 0.08) !important;
 }
 
 /* 히어로는 라이트 배경 + text-gray-900 — 예전 “항상 다크 히어로”용 흰 글자 강제 제거 */
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon {
   color: var(--home-body) !important;
   -webkit-text-fill-color: currentColor !important;
 
@@ -1947,64 +1947,64 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   --color-destructive-foreground: var(--destructive-foreground);
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground {
   color: var(--home-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-muted-foreground {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-muted-foreground {
   color: var(--home-muted) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/40 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/40 {
   color: color-mix(in oklab, var(--home-ink) 40%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/70 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/70 {
   color: color-mix(in oklab, var(--home-ink) 70%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/75 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/75 {
   color: color-mix(in oklab, var(--home-ink) 75%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/80 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/80 {
   color: color-mix(in oklab, var(--home-ink) 80%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/85 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/85 {
   color: color-mix(in oklab, var(--home-ink) 85%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/90 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/90 {
   color: color-mix(in oklab, var(--home-ink) 90%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 @supports not (color: color-mix(in lab, red, red)) {
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/40 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/40 {
     color: rgb(2 6 23 / 0.4) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/70 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/70 {
     color: rgb(2 6 23 / 0.7) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/75 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/75 {
     color: rgb(2 6 23 / 0.75) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/80 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/80 {
     color: rgb(2 6 23 / 0.8) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/85 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/85 {
     color: rgb(2 6 23 / 0.85) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground\/90 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-foreground\/90 {
     color: rgb(2 6 23 / 0.9) !important;
   }
 }
 
 /* Planner 밤: 랜딩 night + 사이트 라이트일 때 루트 잉크가 어두우면 글래스 카드와 충돌 가능 — 다크 UI 토큰으로 고정 */
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon {
+html.dark .tkad-home-appearance .tkad-planner-neon {
   --background: rgb(8 10 18 / 0.55);
   --foreground: rgb(248 250 252 / 0.96);
   --card: rgb(255 255 255 / 0.06);
@@ -2050,73 +2050,57 @@ html.dark .tkad-planner-neon .tkad-ai-recommend-submit:not(:disabled) {
   -webkit-text-fill-color: currentColor !important;
 }
 
-/* 사이트 다크 + 랜딩 낮: 루트 --foreground(밝은색) 잔류로 밝은 main 배경 위에서 글자가 사라지는 경우 차단 */
-html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon {
-  color: var(--home-body) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-foreground {
-  color: var(--home-ink) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-muted-foreground {
-  color: var(--home-muted) !important;
-  -webkit-text-fill-color: currentColor !important;
-}
-
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary-foreground {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-primary-foreground {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary-foreground\/85 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-primary-foreground\/85 {
   color: rgb(255 255 255 / 0.9) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .fill-foreground {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .fill-foreground {
   fill: var(--home-ink);
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon input::placeholder,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon textarea::placeholder {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon input::placeholder,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon textarea::placeholder {
   color: var(--home-muted) !important;
   opacity: 1;
 }
 
 /* Day planner primary — Quiet Professional 주황 (레거시 indigo #4338ca 제거) */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-primary {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-primary {
   color: var(--qp-accent) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-primary {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-primary {
   background-color: var(--qp-accent) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-primary {
   border-color: color-mix(in srgb, var(--qp-accent) 55%, transparent) !important;
 }
 
 /* Planner 내부 “탭 버튼”들 (-mt/-ml로 붙는 형태): 라이트에서 카드 톤으로 정리 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-card,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-muted {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon button.border-2.border-border.bg-card,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon button.border-2.border-border.bg-muted {
   border-width: 1px !important;
   border-color: var(--home-line) !important;
   background: rgb(248 250 252 / 0.98) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-card:hover,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon button.border-2.border-border.bg-muted:hover {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon button.border-2.border-border.bg-card:hover,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon button.border-2.border-border.bg-muted:hover {
   background: rgb(255 255 255 / 1) !important;
   border-color: color-mix(in srgb, var(--qp-accent) 28%, transparent) !important;
 }
 
 /* Night(네온) — 플래너 카드도 홈 다크 네온 톤으로 */
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-card,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-muted,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.border-border.bg-hero-void {
+html.dark .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-card,
+html.dark .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-muted,
+html.dark .tkad-home-appearance .tkad-planner-neon .border-2.border-border.bg-hero-void {
   border-width: 1px !important;
   border-color: rgb(255 255 255 / 0.10) !important;
   background: rgb(255 255 255 / 0.05) !important;
@@ -2125,14 +2109,14 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   backdrop-filter: blur(14px);
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-b-2.border-border {
+html.dark .tkad-home-appearance .tkad-planner-neon .border-b-2.border-border {
   border-bottom-width: 1px !important;
   border-color: rgb(255 255 255 / 0.10) !important;
 }
 
 /* Planner: 일부 컴포넌트는 `border-2 bg-card`만 있고 border-border 클래스가 없음 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.bg-card,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-2.bg-muted {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-2.bg-card,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-2.bg-muted {
   border-width: 1px !important;
   border-color: var(--home-line-soft) !important;
   background: rgb(255 255 255 / 0.98) !important;
@@ -2140,8 +2124,8 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   border-radius: 1.35rem !important;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.bg-card,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .border-2.bg-muted {
+html.dark .tkad-home-appearance .tkad-planner-neon .border-2.bg-card,
+html.dark .tkad-home-appearance .tkad-planner-neon .border-2.bg-muted {
   border-width: 1px !important;
   border-color: rgb(255 255 255 / 0.10) !important;
   background: rgb(255 255 255 / 0.05) !important;
@@ -2151,62 +2135,62 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
 }
 
 /* Planner map (SVG) */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-bg {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-bg {
   fill: rgb(248 250 252 / 1);
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-bg {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-bg {
   fill: rgb(255 255 255 / 0.04);
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .fill-muted-foreground {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .fill-muted-foreground {
   fill: var(--home-muted);
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .fill-muted-foreground {
+html.dark .tkad-home-appearance .tkad-planner-neon .fill-muted-foreground {
   fill: rgb(255 255 255 / 0.55);
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .fill-foreground {
+html.dark .tkad-home-appearance .tkad-planner-neon .fill-foreground {
   fill: rgb(255 255 255 / 0.9);
 }
 
 /* Planner 지역 맵 SVG — 미선택 path에 fill-card 유틸 쓰면 밤에 거의 흰색이 되어 라벨(흰색 상속)과 붕괴 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-off {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-off {
   fill: rgb(226 232 240 / 0.98) !important;
   stroke: rgb(15 23 42 / 0.16) !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-off:hover {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-off:hover {
   fill: rgb(203 213 225 / 0.98) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-off {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-off {
   fill: rgb(255 255 255 / 0.07) !important;
   stroke: rgb(255 255 255 / 0.18) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-off:hover {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-off:hover {
   fill: rgb(255 255 255 / 0.11) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-zone-on {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-on {
   stroke: rgb(15 23 42 / 0.22) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-zone-on {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-zone-on {
   stroke: rgb(255 255 255 / 0.24) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-korea,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-label-idle {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-korea,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-label-idle {
   fill: var(--home-ink) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-korea,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-label-idle {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-korea,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-label-idle {
   fill: rgb(248 250 252 / 0.94) !important;
 }
 .tkad-planner-neon .tkad-planner-map-label-active {
   fill: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-map-count-idle {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-count-idle {
   fill: var(--home-muted) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-planner-map-count-idle {
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-planner-map-count-idle {
   fill: rgb(226 232 240 / 0.72) !important;
 }
 .tkad-planner-neon .tkad-planner-map-count-active {
@@ -2214,145 +2198,145 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
 }
 
 /* Planner: 작은 태그/힌트 텍스트 */
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-muted-foreground {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-muted-foreground {
   color: rgb(255 255 255 / 0.62) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground {
   color: rgb(255 255 255 / 0.92) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/40 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/40 {
   color: rgb(255 255 255 / 0.37) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/70 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/70 {
   color: rgb(255 255 255 / 0.64) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/75 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/75 {
   color: rgb(255 255 255 / 0.69) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/80 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/80 {
   color: rgb(255 255 255 / 0.74) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/85 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/85 {
   color: rgb(255 255 255 / 0.78) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-foreground\/90 {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-foreground\/90 {
   color: rgb(255 255 255 / 0.83) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .bg-card {
+html.dark .tkad-home-appearance .tkad-planner-neon .bg-card {
   background-color: rgb(255 255 255 / 0.05) !important;
 }
 
 /* Planner: 타일형(탭/그리드) -2px border 합치기 → 1px 기준으로 보정 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .-ml-\[2px\],
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .-ml-\[2px\] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .-ml-\[2px\],
+html.dark .tkad-home-appearance .tkad-planner-neon .-ml-\[2px\] {
   margin-left: -1px !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .-mt-\[2px\],
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .-mt-\[2px\] {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .-mt-\[2px\],
+html.dark .tkad-home-appearance .tkad-planner-neon .-mt-\[2px\] {
   margin-top: -1px !important;
 }
 
 /* Planner: hero-void 패널도 네온 카드 톤으로 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hero-void {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-hero-void {
   background-color: rgb(248 250 252 / 0.92) !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg {
   color: var(--home-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* 낮: hero 패널 배경은 라이트인데 `text-hero-fg/*` 는 여전히 밝은 크림(--hero-fg) → 대비 붕괴 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/40 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/40 {
   color: color-mix(in oklab, var(--home-ink) 40%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/55 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/55 {
   color: color-mix(in oklab, var(--home-ink) 55%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/60 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/60 {
   color: color-mix(in oklab, var(--home-ink) 60%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/65 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/65 {
   color: color-mix(in oklab, var(--home-ink) 65%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/70 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/70 {
   color: color-mix(in oklab, var(--home-ink) 70%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/75 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/75 {
   color: color-mix(in oklab, var(--home-ink) 75%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/80 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/80 {
   color: color-mix(in oklab, var(--home-ink) 80%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/85 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/85 {
   color: color-mix(in oklab, var(--home-ink) 85%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/90 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/90 {
   color: color-mix(in oklab, var(--home-ink) 90%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/95 {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/95 {
   color: color-mix(in oklab, var(--home-ink) 95%, transparent) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 @supports not (color: color-mix(in lab, red, red)) {
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/40 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/40 {
     color: rgb(2 6 23 / 0.4) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/55 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/55 {
     color: rgb(2 6 23 / 0.55) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/60 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/60 {
     color: rgb(2 6 23 / 0.6) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/65 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/65 {
     color: rgb(2 6 23 / 0.65) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/70 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/70 {
     color: rgb(2 6 23 / 0.7) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/75 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/75 {
     color: rgb(2 6 23 / 0.75) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/80 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/80 {
     color: rgb(2 6 23 / 0.8) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/85 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/85 {
     color: rgb(2 6 23 / 0.85) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/90 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/90 {
     color: rgb(2 6 23 / 0.9) !important;
   }
-  .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-hero-fg\/95 {
+  html:not(.dark) .tkad-home-appearance .tkad-planner-neon .text-hero-fg\/95 {
     color: rgb(2 6 23 / 0.95) !important;
   }
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .bg-hero-void {
+html.dark .tkad-home-appearance .tkad-planner-neon .bg-hero-void {
   background-color: rgb(255 255 255 / 0.04) !important;
 }
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .text-hero-fg {
+html.dark .tkad-home-appearance .tkad-planner-neon .text-hero-fg {
   color: rgb(255 255 255 / 0.92) !important;
 }
 
 /* `/media` — 랜딩 night 본문과 히어로 하단 연속 */
-.tkad-home-appearance[data-appearance="night"] .tkad-media-page {
+html.dark .tkad-home-appearance .tkad-media-page {
   background: #05050a;
 }
 
@@ -2374,8 +2358,8 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
   -webkit-text-fill-color: rgb(255 255 255 / 0.94) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-secondary * {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(248 250 252 / 0.95) !important;
   color: rgb(15 23 42 / 0.92) !important;
@@ -2383,8 +2367,8 @@ html.dark .tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .text-
 }
 
 /* day + html:not(.dark) — .bg-accent 흰 글자 규칙보다 우선 (흰 배경·흰 글자 충돌 방지) */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid *,
 html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid,
 html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-solid * {
   border: 2px solid rgb(234 88 12 / 0.45) !important;
@@ -2395,19 +2379,19 @@ html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-so
 }
 
 /* `/media/*` 하단 링크(매체 찾기) — 라이트에서 text-white 대비 보정 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-media-links-footer [class*="text-white"] {
   color: var(--home-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-links-footer [class*="text-white/"] {
+html:not(.dark) .tkad-home-appearance .tkad-media-links-footer [class*="text-white/"] {
   color: var(--home-muted) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
 /* ── Shared Glass Surfaces (premium neon) ──
  * Use these for panels/cards/widgets so the UI feels "finished" via consistency.
- * Base (night): black glass. Day: white glass via data-appearance override. */
+ * Base (night): black glass. Day: white glass via html:not(.dark) override. */
 .tkad-glass-surface {
   position: relative;
   border-radius: 22px;
@@ -2430,8 +2414,8 @@ html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-so
   -webkit-backdrop-filter: blur(12px);
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft {
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.94) !important;
   color: var(--home-ink) !important;
@@ -2439,14 +2423,14 @@ html:not(.dark) .tkad-planner-neon .tkad-compare-action-bar .tkad-compare-cta-so
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface [class*="text-white"],
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface [class*="text-white"],
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft [class*="text-white"] {
   color: var(--home-ink) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface [class*="text-white/"],
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft [class*="text-white/"] {
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface [class*="text-white/"],
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft [class*="text-white/"] {
   color: var(--home-muted) !important;
   -webkit-text-fill-color: currentColor !important;
 }
@@ -2478,28 +2462,28 @@ html:not(.dark) .tkad-glass-surface-soft [class*="text-white/"] {
 }
 
 /* 글래스 패널·플래너/견적 위저드 — accent·primary·그라데이션 CTA는 라이트에서도 흰색 라벨 유지 */
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .tkad-planner-wizard-btn-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .tkad-planner-wizard-btn-accent *,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent.text-white,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent.text-white *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-accent *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary.bg-primary,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .border-primary.bg-primary *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-planner-gradient-cta *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-qp-cta *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .bg-hermes *,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) *,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface .bg-accent *,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .bg-accent,
-.tkad-home-appearance[data-appearance="day"] .tkad-glass-surface-soft .bg-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface .tkad-planner-wizard-btn-accent,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface .tkad-planner-wizard-btn-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-accent.text-white,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-accent.text-white *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-accent,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-primary.bg-primary,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .border-primary.bg-primary *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-gradient-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-planner-gradient-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-qp-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-qp-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-hermes,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .bg-hermes *,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]),
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon [class*="bg-[color:var(--qp-accent)]"]:not([class*="bg-[color:var(--qp-accent)]/"]) *,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface .bg-accent,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface .bg-accent *,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft .bg-accent,
+html:not(.dark) .tkad-home-appearance .tkad-glass-surface-soft .bg-accent *,
 html:not(.dark) .tkad-glass-surface .tkad-planner-wizard-btn-accent,
 html:not(.dark) .tkad-glass-surface .tkad-planner-wizard-btn-accent *,
 html:not(.dark) .tkad-glass-surface-soft .tkad-planner-wizard-btn-accent,
@@ -2595,7 +2579,7 @@ html:not(.dark) .tkad-glass-surface button[class*="bg-cyan-5"] {
 }
 
 /* Home budget widget — outside NeonSection */
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel,
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel,
 html:not(.dark) .tkad-budget-widget-panel {
   border-color: rgb(15 23 42 / 0.1) !important;
   background: rgb(255 255 255 / 0.96) !important;
@@ -2603,43 +2587,43 @@ html:not(.dark) .tkad-budget-widget-panel {
   box-shadow: var(--home-card-shadow, 0 18px 44px rgb(15 23 42 / 0.058)) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="text-white"],
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel [class*="text-white"],
 html:not(.dark) .tkad-budget-widget-panel [class*="text-white"] {
   color: var(--home-ink, #020617) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="text-white/"],
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel [class*="text-white/"],
 html:not(.dark) .tkad-budget-widget-panel [class*="text-white/"] {
   color: var(--home-muted, #64748b) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel .text-cyan-300,
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel .text-cyan-300,
 html:not(.dark) .tkad-budget-widget-panel .text-cyan-300 {
   color: rgb(8 145 178) !important;
   -webkit-text-fill-color: currentColor !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="border-white"],
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel [class*="border-white"],
 html:not(.dark) .tkad-budget-widget-panel [class*="border-white"] {
   border-color: rgb(15 23 42 / 0.12) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="bg-white/"],
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel [class*="bg-white/"],
 html:not(.dark) .tkad-budget-widget-panel [class*="bg-white/"] {
   background-color: rgb(248 250 252 / 0.98) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel [class*="dark:bg-black bg-white/"],
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel [class*="dark:bg-black bg-white/"],
 html:not(.dark) .tkad-budget-widget-panel select,
 html:not(.dark) .tkad-budget-widget-panel [class*="dark:bg-black bg-white/"] {
   background-color: rgb(255 255 255 / 0.98) !important;
   color: var(--home-ink, #020617) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel .tkad-neon-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-budget-widget-panel .tkad-neon-cta *,
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel .tkad-neon-cta,
+html:not(.dark) .tkad-home-appearance .tkad-budget-widget-panel .tkad-neon-cta *,
 html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta,
 html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
   color: rgb(255 255 255) !important;
@@ -2647,215 +2631,215 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
 }
 
 /* `/login|/register` — auth pages match neon landing background */
-.tkad-home-appearance[data-appearance="night"] .tkad-auth-page {
+html.dark .tkad-home-appearance .tkad-auth-page {
   background: #05050a;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-auth-card {
+html:not(.dark) .tkad-home-appearance .tkad-auth-card {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.94) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-auth-card [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-auth-card [class*="text-white"] {
   color: var(--home-ink) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-auth-card [class*="text-white/"] {
+html:not(.dark) .tkad-home-appearance .tkad-auth-card [class*="text-white/"] {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-auth-input {
+html:not(.dark) .tkad-home-appearance .tkad-auth-input {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.94) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-auth-input::placeholder {
+html:not(.dark) .tkad-home-appearance .tkad-auth-input::placeholder {
   color: var(--home-muted) !important;
   opacity: 1;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-hero__eyebrow {
+html:not(.dark) .tkad-home-appearance .tkad-media-hero__eyebrow {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-hero__subtitle {
+html:not(.dark) .tkad-home-appearance .tkad-media-hero__subtitle {
   color: var(--home-body) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search input {
+html:not(.dark) .tkad-home-appearance .tkad-home-hero .tkad-media-hero-search input {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.94) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search input::placeholder {
+html:not(.dark) .tkad-home-appearance .tkad-home-hero .tkad-media-hero-search input::placeholder {
   color: var(--home-muted) !important;
   opacity: 1;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-hero .tkad-media-hero-search svg {
+html:not(.dark) .tkad-home-appearance .tkad-home-hero .tkad-media-hero-search svg {
   color: var(--home-muted) !important;
 }
 
 /* `/media/map` 검색창 — 라이트 랜딩과 동일 토큰 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-input {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-search-input {
   color: var(--home-ink) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-input::placeholder {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-search-input::placeholder {
   color: var(--home-muted) !important;
   opacity: 1;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-pill {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-search-pill {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.94) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-search-pill svg {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-search-pill svg {
   color: var(--home-muted) !important;
 }
 
 /* `/media/map` 상단 필터 칩(정렬/타입) — 라이트 랜딩과 동일 토큰 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-top-filter {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.92) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter span {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-top-filter span {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-top-filter select {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-top-filter select {
   color: var(--home-ink) !important;
   border-color: rgb(15 23 42 / 0.14) !important;
 }
 
 /* `/media/map` 선택 미니 팝업 — 라이트 랜딩과 동일 토큰 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-mini-popup {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.92) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup [class*="text-white"] {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-mini-popup [class*="text-white"] {
   color: var(--home-ink) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-map-mini-popup [class*="text-white/"] {
+html:not(.dark) .tkad-home-appearance .tkad-media-map-mini-popup [class*="text-white/"] {
   color: var(--home-muted) !important;
 }
 
 /* `/media/map` 바텀시트 문의 CTA — day 랜딩의 text-white 덮어쓰기 예외 */
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta,
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta *,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-media-map-sheet-cta,
-.tkad-home-appearance[data-appearance="night"] .tkad-planner-neon .tkad-media-map-sheet-cta * {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta,
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta *,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta,
+html.dark .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta * {
   color: rgb(255 255 255) !important;
   -webkit-text-fill-color: rgb(255 255 255) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-planner-neon .tkad-media-map-sheet-cta {
+html:not(.dark) .tkad-home-appearance .tkad-planner-neon .tkad-media-map-sheet-cta {
   border-color: rgb(91 33 182 / 0.45) !important;
   background: rgb(109 40 217) !important;
 }
 
-.tkad-home-appearance[data-appearance="night"] .tkad-media-main-tabs {
+html.dark .tkad-home-appearance .tkad-media-main-tabs {
   border-color: rgb(255 255 255 / 0.12) !important;
   background: rgb(255 255 255 / 0.06) !important;
   box-shadow: 0 24px 80px rgb(0 0 0 / 0.45);
 }
 
 /* `/recommend` 히어로 — 라이트 랜딩과 동일 토큰 */
-.tkad-home-appearance[data-appearance="day"] .tkad-recommend-hero__eyebrow {
+html:not(.dark) .tkad-home-appearance .tkad-recommend-hero__eyebrow {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-recommend-hero__subtitle {
+html:not(.dark) .tkad-home-appearance .tkad-recommend-hero__subtitle {
   color: var(--home-body) !important;
 }
 
 /* `/media/[id]` 상세 히어로 CTA(보조) — 라이트에서 흰 텍스트가 사라지지 않도록 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-cta-secondary {
+html:not(.dark) .tkad-home-appearance .tkad-media-detail-cta-secondary {
   border-color: rgb(15 23 42 / 0.14) !important;
   background: rgb(255 255 255 / 0.92) !important;
   color: var(--home-ink) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-detail-cta-secondary:hover {
+html:not(.dark) .tkad-home-appearance .tkad-media-detail-cta-secondary:hover {
   background: rgb(255 255 255 / 1) !important;
   border-color: rgb(99 102 241 / 0.22) !important;
 }
 
 /* `/media/region|type|area/*` 키워드 랜딩 히어로 — 라이트 랜딩과 동일 토큰 */
-.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero__eyebrow {
+html:not(.dark) .tkad-home-appearance .tkad-media-keyword-hero__eyebrow {
   color: var(--home-muted) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero__body {
+html:not(.dark) .tkad-home-appearance .tkad-media-keyword-hero__body {
   color: var(--home-body) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero-icon {
+html:not(.dark) .tkad-home-appearance .tkad-media-keyword-hero-icon {
   border-color: rgb(15 23 42 / 0.12) !important;
   background: rgb(255 255 255 / 0.82) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-media-keyword-hero-icon svg {
+html:not(.dark) .tkad-home-appearance .tkad-media-keyword-hero-icon svg {
   color: var(--home-ink-soft) !important;
 }
 
 /* 라이트 모드 CTA: P2-0 단색 액센트 — 퍼플/시안 글로우 제거 */
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta-clean,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta {
   background: var(--qp-accent) !important;
   background-image: none !important;
   border-color: color-mix(in srgb, var(--qp-accent) 85%, black) !important;
   box-shadow: none !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta-clean:hover,
-.tkad-home-appearance[data-appearance="day"] .tkad-neon-surface .tkad-neon-cta:hover {
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta-clean:hover,
+html:not(.dark) .tkad-home-appearance .tkad-neon-surface .tkad-neon-cta:hover {
   background: var(--qp-accent-hover) !important;
   background-image: none !important;
   box-shadow: none !important;
 }
 
 /* 홈 라이트: 캐러셀 매체 카드 — 히어로와 동일 --home-card-* 언어 */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel a.group.relative.flex.h-full {
   border: 1px solid var(--home-line-soft) !important;
   background: var(--home-card-surface) !important;
   box-shadow: var(--home-card-shadow) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full:hover {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel a.group.relative.flex.h-full:hover {
   border-color: rgb(67 56 202 / 0.2) !important;
   box-shadow: var(--home-card-shadow-hover) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel a.group.relative.flex.h-full .rounded-t-2xl {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel a.group.relative.flex.h-full .rounded-t-2xl {
   border-color: rgb(15 23 42 / 0.06) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel .absolute.right-0.top-0 {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel .absolute.right-0.top-0 {
   border-color: rgb(15 23 42 / 0.08) !important;
   box-shadow:
     0 1px 0 rgb(255 255 255 / 0.85) inset,
     0 3px 10px rgb(15 23 42 / 0.07) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel-arrow {
   border-color: rgb(15 23 42 / 0.1) !important;
   background: rgb(255 255 255 / 0.95) !important;
   color: rgb(30 41 59) !important;
@@ -2864,25 +2848,25 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
     0 6px 16px rgb(15 23 42 / 0.08) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow:hover:not(:disabled) {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel-arrow:hover:not(:disabled) {
   border-color: rgb(99 102 241 / 0.35) !important;
   background: rgb(255 255 255 / 1) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-media-carousel-arrow:disabled {
+html:not(.dark) .tkad-home-appearance .tkad-home-media-carousel-arrow:disabled {
   opacity: 0.35 !important;
 }
 
 /* ── 홈 라이트: 4단계 매체 검증 — 엘리베이션 중심, 네온 글로우 제거 ── */
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-icon-halo {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-icon-halo {
   display: none !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps > div:nth-child(1) {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps > div:nth-child(1) {
   background: rgb(15 23 42 / 0.075) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps > div:nth-child(2) {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps > div:nth-child(2) {
   background: linear-gradient(
     to right,
     transparent,
@@ -2891,27 +2875,27 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
   ) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .grid > * {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps .grid > * {
   border: 1px solid var(--home-line-faint) !important;
   background: var(--home-step-surface) !important;
   box-shadow: var(--home-step-shadow) !important;
   backdrop-filter: blur(12px) saturate(1.03) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .grid > *:hover {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps .grid > *:hover {
   border-color: rgb(67 56 202 / 0.14) !important;
   box-shadow: var(--home-step-shadow-hover) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .tkad-neon-border::before {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps .tkad-neon-border::before {
   opacity: 0 !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .absolute.right-4.top-3 {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps .absolute.right-4.top-3 {
   color: rgb(15 23 42 / 0.07) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps [class*="size-12"].rounded-2xl {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps [class*="size-12"].rounded-2xl {
   border-color: var(--home-line-soft) !important;
   background: rgb(255 255 255 / 0.82) !important;
   box-shadow:
@@ -2919,15 +2903,15 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
     0 2px 8px rgb(15 23 42 / 0.04) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps div.mt-5.h-1.w-full {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps div.mt-5.h-1.w-full {
   background: rgb(15 23 42 / 0.065) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps div.mt-5.h-1 > div {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps div.mt-5.h-1 > div {
   background: var(--home-step-progress) !important;
 }
 
-.tkad-home-appearance[data-appearance="day"] .tkad-home-verification-steps .mt-2.size-5.rounded-full {
+html:not(.dark) .tkad-home-appearance .tkad-home-verification-steps .mt-2.size-5.rounded-full {
   border-color: var(--home-line-soft) !important;
   background: rgb(255 255 255 / 0.95) !important;
   box-shadow: 0 0 0 5px rgb(252 252 254 / 1) !important;

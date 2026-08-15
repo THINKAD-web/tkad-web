@@ -17,8 +17,6 @@ import { PageHero } from "@/components/layout/page-hero";
 import { BtnBlock } from "@/components/brutalist";
 import { ProposalResultDisplay } from "@/components/proposal/proposal-result-display";
 import type { MediaItem } from "@/lib/media-data";
-import { useTkadAppearance } from "@/lib/use-tkad-appearance";
-import type { HomeAppearance } from "@/lib/home-appearance";
 import type { PlannerAgeKey } from "@/lib/planner/types";
 import {
   recommendPlannerMedia,
@@ -49,30 +47,28 @@ const inputClass =
 const labelClass =
   "block font-display text-xs font-medium uppercase tracking-[0.18em] text-gray-500 dark:text-white/70";
 
+/**
+ * 낮/밤 외형은 `html.dark` 파생(Tailwind `dark:`) — night 전용 배경·노이즈는 dark 에서만.
+ * 라이트에선 배경 투명·노이즈 미표시로 과거 day(래퍼 없음)와 동일하게 보인다.
+ */
 function ProposalNeonPageBody({
-  appearance,
   className,
   children,
 }: {
-  appearance: HomeAppearance;
   className?: string;
   children: ReactNode;
 }) {
-  const inner = (
-    <div className={cn("tkad-planner-neon", className)}>{children}</div>
-  );
-  if (appearance === "night") {
-    return (
-      <div className="relative overflow-hidden bg-gray-50 text-gray-900 dark:bg-[#020202] dark:text-white">
-        <div
-          aria-hidden
-          className="pointer-events-none absolute inset-0 tkad-hero-noise opacity-[0.07] mix-blend-overlay"
-        />
-        <div className="relative">{inner}</div>
+  return (
+    <div className="relative overflow-hidden dark:bg-[#020202] dark:text-white">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-0 hidden tkad-hero-noise opacity-[0.07] mix-blend-overlay dark:block"
+      />
+      <div className="relative">
+        <div className={cn("tkad-planner-neon", className)}>{children}</div>
       </div>
-    );
-  }
-  return inner;
+    </div>
+  );
 }
 
 type Props = {
@@ -87,7 +83,6 @@ export default function ProposalWizardClient({ catalog }: Props) {
   const searchParams = useSearchParams();
   const fromPlanner = searchParams.get("fromPlanner") === "1";
   const plannerPrefillDone = useRef(false);
-  const landingAppearance = useTkadAppearance();
 
   const [step, setStep] = useState(1);
   const [plannerPrefillNotice, setPlannerPrefillNotice] = useState(false);
@@ -300,7 +295,6 @@ export default function ProposalWizardClient({ catalog }: Props) {
             description={t("heroDesc")}
           />
           <ProposalNeonPageBody
-            appearance={landingAppearance}
             className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
           >
             <div className="mx-auto max-w-3xl space-y-8">
@@ -347,7 +341,6 @@ export default function ProposalWizardClient({ catalog }: Props) {
         />
 
         <ProposalNeonPageBody
-          appearance={landingAppearance}
           className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8 lg:py-12"
         >
           <div className="mx-auto max-w-3xl space-y-8">
