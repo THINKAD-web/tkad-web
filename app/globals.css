@@ -2963,12 +2963,21 @@ html:not(.dark) .tkad-budget-widget-panel .tkad-neon-cta * {
 }
 
 /* ── Intersection Observer scroll animations ── */
+/*
+ * 세컨더리 페이지 톤다운 (B-1).
+ * 32px / 0.8s 는 스크롤 중 요소가 "떠오르는" 이동량이 커서 화면이 흔들리는
+ * 인상을 준다. 12px / 0.3s 로 낮춰 존재는 남기되 시선을 끌지 않게 한다.
+ *
+ * 이 클래스는 `ScrollAnimate` 를 통해서만 적용되고, 그 소비자는 전부
+ * 세컨더리 페이지다 (services · contact · privacy · terms · refund ·
+ * register/media). 홈은 `ScrollAnimate` 를 쓰지 않으므로 영향받지 않는다.
+ */
 .scroll-fade-up {
   opacity: 0;
-  transform: translateY(32px);
+  transform: translateY(12px);
   will-change: transform, opacity;
-  transition: opacity 0.8s cubic-bezier(0.33, 1, 0.68, 1),
-              transform 0.8s cubic-bezier(0.33, 1, 0.68, 1);
+  transition: opacity 0.3s cubic-bezier(0.33, 1, 0.68, 1),
+              transform 0.3s cubic-bezier(0.33, 1, 0.68, 1);
 }
 .scroll-fade-up.scroll-visible {
   opacity: 1;

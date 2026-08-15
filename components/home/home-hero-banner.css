@@ -176,6 +176,26 @@
   line-height: 1.5;
   color: rgb(255 255 255 / 0.78);
   text-shadow: 0 1px 2px rgb(0 0 0 / 0.45);
+
+  /*
+   * B-2 — 배너 텍스트 길이 변동 방어 (상한만).
+   *
+   * 컨테이너는 aspect-ratio 로 높이가 고정돼 있고 내용은 absolute + 중앙
+   * 정렬이라 페이지 전체 CLS 는 발생하지 않는다. 다만 lead 줄 수가 바뀌면
+   * 중앙 정렬 스택이 다시 잡히며 슬로건은 위로, CTA 는 아래로 움직인다.
+   *
+   * 여기서는 **3줄 이상으로 넘치는 것만** 막는다. 2줄 고정 확보
+   * (min-height) 는 지금 1줄인 ko 레이아웃을 확실히 바꾸는 대신 아직
+   * 발생하지 않은 시프트를 막는 교환이라 적용하지 않는다.
+   *
+   * TODO(#378 ④ 머지 후): lead 에 매체 수 라벨이 주입되면 실제 길이를 보고
+   * min-height 2줄 확보가 필요한지 다시 판단할 것.
+   */
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  overflow: hidden;
 }
 
 @media (min-width: 768px) {
