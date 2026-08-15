@@ -1759,10 +1759,46 @@ model User {
   userPoint         UserPoint?
   pointTransactions PointTransaction[]
   pointCredits      UserPointCredit[]
+  /// 저장된 캠페인 플랜 (30일 TTL, 공유 링크)
+  campaignPlans     CampaignPlan[]     @relation("CampaignPlanOwner")
 
   @@index([email])
   @@index([referredByUserId])
   @@map("users")
+}
+
+/// 저장·공유 캠페인 플랜.
+///
+/// `engineVersion` 을 스냅샷하는 이유는, 계산식이 바뀌면 과거 제안서의
+/// 숫자가 소급 변경되어 광고주와 분쟁이 나기 때문이다. 재계산 시에는
+/// 원 엔진 버전과의 차이를 명시한다. (진단서 §4)
+///
+/// 3계층 계약(docs/media-data-contract.md)과 무관한 독립 테이블이며,
+/// PR-3 재설계(docs/pr3-redesign.md)와 함께 진행되지 않고 먼저 머지된다.
+model CampaignPlan {
+  id            String    @id @default(cuid())
+  /// 로그인 없이 공유용. 링크에 실려 다닌다.
+  shareToken    String    @unique @map("share_token")
+  ownerId       String?   @map("owner_id")
+  /// 원본 브리프 (성별·연령·지역·기간·예산 등).
+  brief         Json
+  /// 확정 매체 믹스.
+  mediaMix      Json      @map("media_mix")
+  /// 계산 결과 스냅샷 (Reach/Frequency/GRP·총 노출·혼합 CPM).
+  metrics       Json
+  /// 계산 로직 버전 — 재현성 확보 (`METRICS_ENGINE_VERSION`).
+  engineVersion String    @map("engine_version")
+  /// TTL 30일. cron 이 만료된 것을 삭제한다.
+  expiresAt     DateTime? @map("expires_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  owner User? @relation("CampaignPlanOwner", fields: [ownerId], references: [id], onDelete: SetNull)
+
+  @@index([shareToken])
+  @@index([ownerId])
+  @@index([expiresAt])
+  @@map("campaign_plans")
 }
 
 enum PointEventType {
