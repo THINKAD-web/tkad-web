@@ -1,6 +1,7 @@
 # PR-3 재설계안 — 3계층 계약 준수 재배치
 
 **작성:** 2026-08-15 · 작성자: 재한 검토 대상 · **결정 문서, 코드 아님**
+**결정 반영:** 2026-08-15 — §A 공식·§B 배치·D-4 경고·R-11 괴리 감지 승인 결과 수록
 
 ## 배경
 
@@ -105,16 +106,21 @@ if (measured contactRate 실측치 존재):
     contactRate      = measured
     contactRateBasis = "measured"
 elif (visibilityScore != null):
-    contactRate      = DEFAULT_CONTACT_RATE[media_class] * (0.6 + 0.4 * visibilityScore)
+    visibilityNormalized = visibilityScore / 100          # DB int 0-100 → 0.0-1.0
+    contactRate      = DEFAULT_CONTACT_RATE[media_class] × (0.8 + 0.4 × visibilityNormalized)
     contactRateBasis = "derived"
-    // visibilityScore=1.0 이면 기준값 그대로, 0.0 이면 60% 로 감쇠
-    // 0.6 하한은 "시인성이 나빠도 완전히 안 보이는 건 아니다" 반영
+    # visibilityScore=0  → factor=0.80 → 기준값의 80 %
+    # visibilityScore=100 → factor=1.20 → 기준값의 120 % (상한 없음; 유형별 기준값이 이미 낮음)
 else:
     contactRate      = DEFAULT_CONTACT_RATE[media_class]
     contactRateBasis = "default"
 ```
 
-계수 0.6·0.4 는 초안이다. Signal 이 쌓이면 실측치로 회귀해 재조정한다.
+**검산 (M-CITY, dooh_large, visibilityScore=91):**
+`contactRate = 0.30 × (0.8 + 0.4 × 91/100) = 0.30 × 1.164 = 0.349 ≈ 0.35`
+이전 공식(`0.6 + 0.4 × score`)은 M-CITY 에서 0.964를 줘 업계 기준 3~6배 과다. 교체 이유다.
+
+계수 0.8·0.4 는 Signal 이 쌓이면 실측치로 회귀해 재조정한다.
 
 ## 수정 §B — demo_* 는 Signal 이력 + Computed 스냅샷
 
@@ -155,7 +161,7 @@ model MediaComputedMetric {
 |---|---|---|
 | 어드민 recompute 버튼 | 즉시 | 데이터 이관·수기 검토 후 즉시 반영 |
 | Signal 이 새로 들어옴 | 이벤트 트리거 | 새 원본이 도착하면 파생 스냅샷도 갱신 |
-| 정기 배치 | **주 1회 (일요일 03:00 KST)** | 인구 데이터가 그 이상 자주 갱신되지 않는다 |
+| 정기 배치 | **주 1회 (일요일 03:00 KST)** ✅ 승인 | 인구 데이터가 그 이상 자주 갱신되지 않는다 |
 | 매체 Fact 변경 (좌표 등) | 이벤트 트리거 | 커버 지역이 바뀌면 인구 프로파일이 바뀐다 |
 
 주기가 너무 짧으면 리소스 낭비, 너무 길면 광고주가 최신 인구 데이터를
@@ -248,12 +254,16 @@ model MediaComputedMetric {
 
 | 규칙 | 검사 | severity |
 |---|---|---|
-| **R-11** | `Media.impressions` vs `MediaComputedMetric.dailyImpressions × 30` 괴리 30%↑ | P1 |
+| **R-11** | `Media.impressions` vs `MediaComputedMetric.dailyImpressions × 30` 괴리 30%↑ (정보성) | P1 |
 | **R-12** | `MediaComputedMetric.demoGenderSplit` 이 Signal 최신값보다 오래됨 (스냅샷 stale) | P1 |
 | **R-13** | `MediaFactSheet` 없는 매체 (Fact 미채움) | P0 |
 | **R-14** | `MediaComputedMetric.reliabilityGrade === "C"` + `modelVersion === "v0-fallback"` 매체 비중 | 메트릭 |
 
-R-11 은 표시 계층의 정본을 어느 쪽으로 볼지 확정되기 전까지는 정보성으로만 남긴다.
+**R-11 결정 (2026-08-15):** `Media.*` legacy 필드는 현재 그대로 유지한다.
+`MediaComputedMetric` 이 최종 정본이며, `Media.*` 는 읽기 전용 미러로 전환 예정.
+지금 당장은 legacy를 제거하지 않고 **괴리 30% 이상** 매체를 P1 경고로 감사 스크립트가 잡는다.
+제거 시점은 PR-4 데이터 이관 완료 후 재판단.
+
 R-12·R-13 은 backfill 진척 추적용.
 
 ## 배포 순서
@@ -265,9 +275,20 @@ R-12·R-13 은 backfill 진척 추적용.
 5. 데이터 이관 (별도 PR-4) — `contactRate` 유도, `demo_*` Signal 수집,
    스냅샷 생성. 감사 리포트 승인 후 진행.
 
-## 미결 판단 요청
+## 결정 완료 (2026-08-15, E-4)
 
-1. §A 의 계수 (0.6·0.4) 초안 승인 여부 — Signal 축적 전까지는 임시값
-2. §B 의 정기 배치 주기 — 주 1회(일요일 03:00 KST) 초안
-3. R-11 정본 방향 — Media 본체 legacy 유지 vs Computed 전환
-   (전자는 지금 그대로, 후자는 PR9+ 예정)
+| 항목 | 결정 |
+|---|---|
+| §A contactRate 공식 | ✅ `DEFAULT[class] × (0.8 + 0.4 × visibilityScore/100)` 채택. 이전 `0.6 + 0.4 × score` 는 과다 산정으로 폐기. M-CITY 검산 0.35 |
+| §B demo 정기 배치 | ✅ 주 1회 (일요일 03:00 KST) |
+| D-4 pricePeriod 검증 | ✅ 세 규칙 전부 **경고만**. 거부 미도입. PR-4 후 거부 승격 재판단 (별도 문서) |
+| R-11 정본 방향 | ✅ legacy(`Media.*`) 현행 유지 + 괴리 30%↑ **감지만**(정보성). Computed 가 최종 정본, 제거는 PR-4 이관 후 |
+
+## 배포 타이밍 (PR-4 의존)
+
+- **지금 (문서 승인 후):** 이 문서 + CampaignPlan PR(#394) + 감사 하네스(#397)
+- **PR-4 데이터 이관 후:**
+  - contactRate 유도 규칙 실제 배선 (§A 공식)
+  - demo_* Signal 수집 + 주 1회 배치 가동
+  - pricePeriod 경고 → 거부 승격 재판단
+  - `Media.*` legacy → 읽기 전용 미러 → 제거 순차 전환 (R-11)
