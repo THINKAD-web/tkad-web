@@ -1,5 +1,5 @@
 import { formatMonthlyImpressionsLabel, resolveCpmWon } from "@/lib/media-metrics";
-import { formatCpmKrw } from "@/lib/media-price-format";
+import { resolveCpmDisplay } from "@/lib/metrics/format";
 import {
   buildMapItemMetricLine,
   buildCatalogItemMetricLine,
@@ -16,10 +16,12 @@ export function formatMapImpressions(
   return formatMonthlyImpressionsLabel(item, isKo);
 }
 
+/** 지도 핀 CPM — 극단값은 "CPM 산정 중" (⑧) */
 export function formatMapCpm(item: MapMapItem, locale: string): string | null {
   const cpm = resolveCpmWon(metricsInputForCatalogCpm(item));
-  if (cpm == null) return null;
-  return formatCpmKrw(cpm, locale);
+  const display = resolveCpmDisplay(cpm, locale);
+  if (display.rawWon == null) return null;
+  return display.text;
 }
 
 export function buildMapItemMetrics(

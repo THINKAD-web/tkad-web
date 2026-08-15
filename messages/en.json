@@ -3474,7 +3474,7 @@
     },
     "heroEyebrow": "// PREMIUM OOH MARKETPLACE",
     "heroBannerSlogan": "Ads in 5 minutes — from OOH planner to report.",
-    "heroBannerLead": "Compare live rates, get AI picks, and browse 720+ media nationwide — in one place.",
+    "heroBannerLead": "Compare live rates, get AI picks, and browse {count} media nationwide — in one place.",
     "heroBannerCtaBrowse": "Browse media",
     "heroBannerCtaAi": "Start AI recommend",
     "heroLiveToday": "Today's impressions",

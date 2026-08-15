@@ -10,11 +10,14 @@ import {
   resolveMonthlyImpressions,
 } from "@/lib/media-metrics";
 import {
+  PARTIAL_PERIOD_RATE_DAYS,
+  PARTIAL_PERIOD_RATE_KEYS,
   partialRateLookupKeyFromDays,
   quoteLineTotalWonFromPartialRate,
   resolvePartialPeriodRate,
   type PartialPeriodRateAdminKey,
 } from "@/lib/media-partial-period-rates";
+import { resolveMediaProductPrice } from "@/lib/metrics/media-price-adapter";
 
 export type QuoteDurationUnit = "day" | "week" | "month";
 
@@ -143,6 +146,38 @@ function quoteLineFromUnitPrice(
   };
 }
 
+/**
+ * R-4 — 부분기간 요율 스케줄 사이 선형 보간.
+ * 스케줄이 하나도 없거나 요청 일수가 스케줄 범위 밖이면 null.
+ * 스케줄 안이면 두 인접 rate 를 이어 그 지점의 rate 를 돌려준다.
+ */
+function interpolatePartialRate(
+  media: MediaItem,
+  days: number,
+): number | null {
+  const points: Array<{ days: number; rate: number }> = [];
+  for (const key of PARTIAL_PERIOD_RATE_KEYS) {
+    const rate = resolvePartialPeriodRate(media, null, key);
+    if (rate != null) {
+      points.push({ days: PARTIAL_PERIOD_RATE_DAYS[key], rate });
+    }
+  }
+  if (points.length < 2) return null;
+  points.sort((a, b) => a.days - b.days);
+  if (days <= points[0].days || days >= points[points.length - 1].days) {
+    return null;
+  }
+  for (let i = 1; i < points.length; i += 1) {
+    const lo = points[i - 1];
+    const hi = points[i];
+    if (days >= lo.days && days <= hi.days) {
+      const t = (days - lo.days) / (hi.days - lo.days);
+      return lo.rate + t * (hi.rate - lo.rate);
+    }
+  }
+  return null;
+}
+
 /** 비교·상세 instant quote — 일수 → 부분기간 lookup 키 (운영 6단위, 정확 일치만) */
 export function quotePeriodLookupKeyFromDays(
   days: number,
@@ -150,23 +185,120 @@ export function quotePeriodLookupKeyFromDays(
   return partialRateLookupKeyFromDays(days);
 }
 
+/**
+ * 상품가 vs 요율 충돌 임계 — 5% 넘게 다르면 상품가를 쓰되 사고를 남긴다.
+ * 운영이 요율을 갱신했는데 상품가가 안 따라온 상황일 수 있다.
+ */
+const PRODUCT_VS_RATE_MISMATCH_THRESHOLD = 0.05;
+
+export type ProductRateConflict = {
+  mediaId: string;
+  mediaName: string;
+  days: number;
+  productWon: number;
+  rateWon: number;
+  deviation: number;
+};
+
+/**
+ * 감사 리포트가 회수해가는 큐. 프로덕션 로그는 여기 남기지 않고
+ * 별도 채널(감사 하네스·Sentry)로 뽑는다.
+ */
+const conflictSubscribers = new Set<(c: ProductRateConflict) => void>();
+
+export function subscribeProductRateConflict(
+  fn: (c: ProductRateConflict) => void,
+): () => void {
+  conflictSubscribers.add(fn);
+  return () => conflictSubscribers.delete(fn);
+}
+
+function reportConflict(c: ProductRateConflict): void {
+  for (const fn of conflictSubscribers) {
+    try {
+      fn(c);
+    } catch {
+      /* 구독자 오류는 견적 산출을 막지 않는다 */
+    }
+  }
+}
+
+/**
+ * 집행 일수 기준 견적 금액.
+ *
+ * 우선순위 (D-04 / PR-5a ⑦ / R-3):
+ *   1. **정확히 일치하는 등록 상품가** — 실제로 파는 금액이므로 최우선.
+ *      운영 요율과 5% 넘게 다르면 conflictSubscribers 에 보고한 뒤 상품가 사용.
+ *   2. 운영이 설정한 부분기간 요율 (상품가가 아예 없을 때만)
+ *   3. 등록 상품 사이 로그 보간 · 장기 할인 외삽
+ *   4. (마지막 폴백) 단가 × 일수 선형 환산
+ *
+ * 4번이 기본값이던 시절, `pricePeriod` 가 "day" 로 잘못 기재된 M-CITY 는
+ * 30일 견적이 70,000,000 × 30 = **21억** 으로 산출됐다. 실제 등록된 30일
+ * 상품가는 7,000만이다. 홈 카드는 7,000만, 견적서는 21억으로 갈렸다.
+ */
 export function calculateMediaQuoteByDays(
   media: MediaItem,
   durationDays: number,
 ): MediaQuoteLine {
   const days = Math.max(1, Math.round(durationDays));
+  const unitPriceWon = catalogPriceFieldToWon(media.price);
+
+  const product = resolveMediaProductPrice(media, days);
   const periodKey = quotePeriodLookupKeyFromDays(days);
   const partialRate =
     periodKey != null
       ? resolvePartialPeriodRate(media, null, periodKey)
       : null;
-  const unitPriceWon = catalogPriceFieldToWon(media.price);
 
+  // 1. 등록 상품과 일수가 정확히 일치하면 그 금액이 정본이다.
+  if (product && product.basis === "exact") {
+    // R-3 — 같은 일수에 요율도 있으면 두 값이 5% 넘게 다른지 검사한다.
+    // 조용히 덮어쓰지 않는다.
+    if (partialRate != null) {
+      const rateWon = Math.round(unitPriceWon * partialRate);
+      const deviation =
+        product.amount > 0
+          ? Math.abs(rateWon - product.amount) / product.amount
+          : 0;
+      if (deviation > PRODUCT_VS_RATE_MISMATCH_THRESHOLD) {
+        reportConflict({
+          mediaId: media.id,
+          mediaName: media.name,
+          days,
+          productWon: product.amount,
+          rateWon,
+          deviation,
+        });
+      }
+    }
+    return quoteLineFromCostWon(media, product.amount, durationDays);
+  }
+
+  // 2. 운영이 설정한 부분기간 요율 (정확 상품가가 없을 때 다음 순위).
+  //    R-4 — 등록 상품 사이 외삽값보다 요율이 우선이다. 특히 "최단 상품보다
+  //    짧은 기간" 처리에서 상품가는 상수(=최단 상품 그대로)로 굳어 단조성을
+  //    깨는데, 그 구간을 운영 요율이 매끄럽게 채운다.
   if (partialRate != null) {
     const costWon = quoteLineTotalWonFromPartialRate(unitPriceWon, partialRate);
     return quoteLineFromCostWon(media, costWon, durationDays);
   }
 
+  // 2b. 요율 스케줄이 있는데 요청 일수가 스케줄 사이에 놓인 경우 —
+  //     선형으로 rate 곡선 보간. 5일이 3일·7일 rate 사이에서 통째로
+  //     상품 외삽값(=월 상품가)에 떨어지지 않게 한다 (R-4 회귀 방지).
+  const rateInterp = interpolatePartialRate(media, days);
+  if (rateInterp != null) {
+    const costWon = Math.round(unitPriceWon * rateInterp);
+    return quoteLineFromCostWon(media, costWon, durationDays);
+  }
+
+  // 3. 등록 상품 기반 보간·외삽 (선형 환산보다 항상 낫다).
+  if (product) {
+    return quoteLineFromCostWon(media, product.amount, durationDays);
+  }
+
+  // 4. 가격 옵션을 전혀 해석할 수 없을 때만 기존 선형 환산.
   const period = normalizeMediaPricePeriod(media.pricePeriod);
   const periodDays = pricePeriodDays(period);
   return quoteLineFromUnitPrice(media, unitPriceWon, durationDays, periodDays);
