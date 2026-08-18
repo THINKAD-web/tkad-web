@@ -3,6 +3,7 @@ import { StrictMode, Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
+import { loadDigitalChannelsForIntegratedPlanner } from "@/lib/planner/digital-catalog-bridge";
 import { BriefFlowClient } from "@/components/planner/brief/brief-flow-client";
 
 /** PR-6c — 통합 3단계 플래너 (구 6단계·v2 흐름 대체) */
@@ -28,6 +29,7 @@ export default async function PlannerPage({ params }: Props) {
   setRequestLocale(locale);
   const isKo = locale === "ko";
   const { catalog } = await fetchPlannerMediaCatalog();
+  const digitalBridge = await loadDigitalChannelsForIntegratedPlanner();
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -50,10 +52,18 @@ export default async function PlannerPage({ params }: Props) {
       <Suspense fallback={null}>
         {process.env.NODE_ENV === "development" ? (
           <StrictMode>
-            <BriefFlowClient catalog={catalog} />
+            <BriefFlowClient
+              catalog={catalog}
+              digitalChannels={digitalBridge.channels}
+              digitalCatalogMeta={digitalBridge.meta}
+            />
           </StrictMode>
         ) : (
-          <BriefFlowClient catalog={catalog} />
+          <BriefFlowClient
+            catalog={catalog}
+            digitalChannels={digitalBridge.channels}
+            digitalCatalogMeta={digitalBridge.meta}
+          />
         )}
       </Suspense>
     </main>

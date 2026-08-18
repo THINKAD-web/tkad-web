@@ -37,6 +37,10 @@ import {
 } from "@/lib/planner/brief/types";
 import { BRIEF_PRESETS, presetToBrief } from "@/lib/planner/brief/presets";
 import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
+import {
+  BRIEF_CHANNEL_MODES,
+  type BriefChannelMode,
+} from "@/lib/planner/brief/brief-integrated-adapters";
 
 const GOAL_LABELS: Record<BriefGoal, { ko: string; en: string }> = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -64,6 +68,28 @@ const AGE_LABELS: Record<BriefAgeBand, string> = {
   "30s": "30s",
   "40s": "40s",
   "50s+": "50+",
+};
+
+const CHANNEL_MODE_LABELS: Record<
+  BriefChannelMode,
+  { ko: string; en: string; hint: { ko: string; en: string } }
+> = {
+  ooh_only: {
+    ko: "OOH만",
+    en: "OOH only",
+    hint: {
+      ko: "옥외 매체만 집행합니다.",
+      en: "Outdoor media only.",
+    },
+  },
+  ooh_digital: {
+    ko: "OOH + 디지털",
+    en: "OOH + Digital",
+    hint: {
+      ko: "Step 2에서 디지털 채널 배분을 함께 설계합니다.",
+      en: "Step 2 includes digital channel allocation.",
+    },
+  },
 };
 
 function Chip({
@@ -191,6 +217,33 @@ export function BriefStepOne({
             </button>
           ))}
         </div>
+      </section>
+
+      <hr className="border-border" />
+
+      {/* ── 채널 (O-1) ── */}
+      <section>
+        <SectionLabel>{isKo ? "채널" : "Channels"}</SectionLabel>
+        <div className="inline-flex overflow-hidden rounded-lg border border-border">
+          {BRIEF_CHANNEL_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => store.setChannelMode(mode)}
+              className={`px-4 py-2 text-sm font-medium ${
+                store.channelMode === mode
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-muted-foreground hover:text-foreground"
+              }`}
+              data-channel-mode={mode}
+            >
+              {CHANNEL_MODE_LABELS[mode][isKo ? "ko" : "en"]}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {CHANNEL_MODE_LABELS[store.channelMode].hint[isKo ? "ko" : "en"]}
+        </p>
       </section>
 
       <hr className="border-border" />

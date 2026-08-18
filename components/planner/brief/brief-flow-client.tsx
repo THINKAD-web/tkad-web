@@ -13,6 +13,8 @@ import { useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import type { MediaItem } from "@/lib/media-data";
+import type { DigitalChannel } from "@/lib/planner/digital-channels";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import { useBriefStore, type BriefStoreState } from "@/lib/planner/brief/store";
 import { countMixUnits } from "@/lib/planner/brief/brief-fingerprint";
 import {
@@ -85,8 +87,12 @@ const selectStep = (s: BriefStoreState) => s.wizardStep;
 
 export function BriefFlowClient({
   catalog = [],
+  digitalChannels = [],
+  digitalCatalogMeta,
 }: {
   catalog?: readonly MediaItem[];
+  digitalChannels?: readonly DigitalChannel[];
+  digitalCatalogMeta?: DigitalCatalogBridgeMeta;
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
@@ -200,7 +206,11 @@ export function BriefFlowClient({
       {step === 1 ? (
         <BriefStepOne onRequestNext={() => goToStep(2)} />
       ) : step === 2 ? (
-        <BriefStepTwo catalog={catalog} />
+        <BriefStepTwo
+          catalog={catalog}
+          digitalChannels={digitalChannels}
+          digitalCatalogMeta={digitalCatalogMeta}
+        />
       ) : (
         <BriefStepThree catalog={catalog} />
       )}
