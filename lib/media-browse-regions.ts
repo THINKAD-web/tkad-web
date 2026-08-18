@@ -182,6 +182,20 @@ export const MEDIA_BROWSE_REGIONS: BrowseRegionMain[] = [
     labelEn: "Nationwide",
     sub: [{ id: "national", label: "전국 네트워크", aliases: ["전국", "national", "네트워크"] }],
   },
+  /** LL-series — 해외 매체 Browse 탈출구 (KR 17개 taxonomy 확장 없음) */
+  {
+    id: "overseas",
+    label: "해외",
+    labelEn: "Overseas",
+    sub: [
+      {
+        id: "overseas",
+        label: "해외",
+        labelEn: "Overseas",
+        aliases: ["해외", "overseas", "international", "jp", "japan", "일본"],
+      },
+    ],
+  },
 ];
 
 const MAIN_BY_ID = new Map(MEDIA_BROWSE_REGIONS.map((r) => [r.id, r]));
@@ -284,6 +298,16 @@ export function inferBrowseRegionFromMedia(input: {
   if (regionMacro === "busan") return { main: "busan", sub: "busan_downtown" };
   if (regionMacro === "jeju") return { main: "jeju", sub: "jeju_downtown" };
   if (regionMacro === "national") return { main: "national", sub: "national" };
+  if (
+    regionMacro === "jp" ||
+    regionMacro === "us" ||
+    regionMacro === "cn" ||
+    regionMacro === "sg" ||
+    regionMacro === "international" ||
+    regionMacro === "other"
+  ) {
+    return { main: "overseas", sub: "overseas" };
+  }
 
   const zone = input.regionZone?.trim();
   if (zone === "gangnam") return { main: "seoul", sub: "seoul_gangnam" };

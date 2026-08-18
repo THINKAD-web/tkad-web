@@ -27,11 +27,11 @@ test("planner eligibility is KR-only", () => {
   assert.equal(isPlannerEligibleCountry("JP"), false);
 });
 
-test("overseasRegionDefaults does not force region_main", () => {
+test("overseasRegionDefaults uses overseas browse escape hatch", () => {
   const d = overseasRegionDefaults("JP");
   assert.equal(d.region, "jp");
-  assert.equal(d.regionMain, null);
-  assert.equal(d.regionSub, null);
+  assert.equal(d.regionMain, "overseas");
+  assert.equal(d.regionSub, "overseas");
 });
 
 test("hasValidManualCoords rejects invalid coords", () => {

@@ -63,16 +63,18 @@ export function mediaNameKoPlaceholder(country: string): string {
   return "예: 강남역 대형 빌보드";
 }
 
-/** 해외 매체 — browse region_main을 억지로 채우지 않음 */
+/** 해외 매체 — browse region_main을 억지로 KR taxonomy에 넣지 않음 */
+export const OVERSEAS_BROWSE_REGION_MAIN = "overseas" as const;
+
 export function overseasRegionDefaults(country: MediaCountryCode): {
   region: string;
-  regionMain: null;
-  regionSub: null;
+  regionMain: typeof OVERSEAS_BROWSE_REGION_MAIN;
+  regionSub: typeof OVERSEAS_BROWSE_REGION_MAIN;
 } {
   return {
     region: country === "OTHER" ? "international" : country.toLowerCase(),
-    regionMain: null,
-    regionSub: null,
+    regionMain: OVERSEAS_BROWSE_REGION_MAIN,
+    regionSub: OVERSEAS_BROWSE_REGION_MAIN,
   };
 }
 
