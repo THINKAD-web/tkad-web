@@ -26,6 +26,12 @@ test("⑧ 정상 범위 CPM 은 그대로 표시된다", () => {
   assert.equal(formatCPM(11_364), "₩11,364");
 });
 
+test("⑧ JP 매체 CPM 은 ¥ 표시 (KRW CPM × 환율)", () => {
+  process.env.KRW_JPY_RATE = "0.1126";
+  assert.equal(formatCPM(1_814, "ko-KR", "JP"), "¥204");
+  assert.equal(formatCPM(1_814, "ko-KR", "KR"), "₩1,814");
+});
+
 test("⑧ 경계값 — 임계값 자체는 표시한다", () => {
   assert.equal(resolveCpmDisplay(CPM_DISPLAY_MIN_WON).displayable, true);
   assert.equal(resolveCpmDisplay(CPM_DISPLAY_MAX_WON).displayable, true);

@@ -4,6 +4,7 @@
 import { normalizeMediaCountry, type MediaCountryCode } from "@/lib/media-country";
 import {
   catalogPriceFieldToWon,
+  formatCpmKrw,
   formatMediaPriceCompactWon,
   formatPricePeriodShortLabel,
   mediaPriceOnInquiryLabel,
@@ -88,6 +89,52 @@ export function formatMediaPriceJpyPreview(won: number): string | null {
   const krw = catalogPriceFieldToWon(won);
   if (krw <= 0) return null;
   return formatJpyFromKrwWon(krw, "ko-KR");
+}
+
+/** CPM 표시 — country=JP 이면 ¥ (내부 계산값은 KRW CPM 그대로). */
+export function formatCpmForDisplay(
+  cpmWon: number,
+  country: string | null | undefined,
+  locale = "ko-KR",
+): string {
+  if (!Number.isFinite(cpmWon) || cpmWon <= 0) {
+    return locale.startsWith("ko") ? "—" : "—";
+  }
+  if (isJapanDisplayCountry(country)) {
+    return formatJpyFromKrwWon(Math.round(cpmWon), locale);
+  }
+  return formatCpmKrw(Math.round(cpmWon), locale);
+}
+
+/**
+ * 상세 스티키 «예상 비용» — JP는 ¥, KR은 기존 «약 N만원».
+ * 견적 계산(`costWon`)은 KRW SSOT; 표시만 변환한다.
+ */
+export function formatMediaCostEstimateShort(
+  won: number,
+  country: string | null | undefined,
+  locale: string,
+): string {
+  const isKo = locale.startsWith("ko");
+  if (isJapanDisplayCountry(country)) {
+    const yen = formatMediaPriceForDisplay(won, country, locale);
+    return isKo ? `약 ${yen}` : `~${yen}`;
+  }
+  if (won >= 100_000_000) {
+    const eok = won / 100_000_000;
+    return isKo
+      ? `약 ${eok % 1 === 0 ? eok.toFixed(0) : eok.toFixed(1)}억원`
+      : `~₩${(won / 1_000_000).toFixed(1)}M`;
+  }
+  if (won >= 10_000) {
+    const man = won / 10_000;
+    return isKo
+      ? `약 ${man % 1 === 0 ? man.toFixed(0) : man.toFixed(1)}만원`
+      : `~₩${won.toLocaleString(locale)}`;
+  }
+  return isKo
+    ? `${won.toLocaleString("ko-KR")}원`
+    : `₩${won.toLocaleString("en-US")}`;
 }
 
 export function countryDefaultDisplayCurrency(

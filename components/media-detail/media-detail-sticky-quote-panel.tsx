@@ -10,10 +10,10 @@ import { PlannerMediaQuantityControl } from "@/components/planner/planner-media-
 import type { MediaItem } from "@/lib/media-data";
 import {
   findCheapestPriceOptionIndex,
-  formatWonShort,
   pricePeriodDays,
   resolvePriceOptionBundleDays,
 } from "@/lib/compare-quote";
+import { formatMediaCostEstimateShort } from "@/lib/media-display-currency";
 import { rememberQuoteEntryPriceOption } from "@/lib/quote-wizard-entry";
 import {
   inferQuoteCampaignPeriodFromMedia,
@@ -147,8 +147,8 @@ export function MediaDetailStickyQuotePanel({
   }, [media, units, packageMode, hasPriceOptions]);
 
   const headlinePrice = hasPriceOptions && selectedOption
-    ? formatCatalogPriceFieldWon(selectedOption.price, locale)
-    : formatCatalogPriceFieldWon(media.price, locale);
+    ? formatCatalogPriceFieldWon(selectedOption.price, locale, media.country)
+    : formatCatalogPriceFieldWon(media.price, locale, media.country);
 
   const headlinePeriod = hasPriceOptions && selectedOption
     ? resolveMediaPriceOptionPeriodLabel(
@@ -248,7 +248,7 @@ export function MediaDetailStickyQuotePanel({
           >
             {priceOptions.map((o, i) => (
               <option key={`${o.label}-${i}`} value={i}>
-                {o.label} — {formatCatalogPriceFieldWon(o.price, locale)}
+                {o.label} — {formatCatalogPriceFieldWon(o.price, locale, media.country)}
               </option>
             ))}
           </select>
@@ -288,7 +288,11 @@ export function MediaDetailStickyQuotePanel({
           <p className="flex justify-between gap-2 dark:text-white/80 text-gray-700">
             <span>{isKo ? "예상 비용" : "Est. cost"}</span>
             <span className="font-bold tabular-nums dark:text-white text-gray-900">
-              {formatWonShort(quote.costWon, isKo ? "ko" : "en")}
+              {formatMediaCostEstimateShort(
+                quote.costWon,
+                media.country,
+                locale,
+              )}
             </span>
           </p>
           {monthlyImpressions > 0 ? (

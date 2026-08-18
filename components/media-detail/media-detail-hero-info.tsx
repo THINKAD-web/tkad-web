@@ -86,7 +86,11 @@ export function MediaDetailHeroInfo({
    * 히어로 기본 CPM — 카탈로그 대표가 SSOT (견적 스티키 선택옵션 CPM과 별개).
    * 극단값은 `resolveCpmDisplay` 가 "CPM 산정 중" 으로 대체한다 (⑧).
    */
-  const cpmDisplay = resolveCpmDisplay(resolveCpmWon(media), locale);
+  const cpmDisplay = resolveCpmDisplay(
+    resolveCpmWon(media),
+    locale,
+    media.country,
+  );
   const impressionsLabel = formatMonthlyImpressionsLabel(media, isKo);
   /** 크기·유형·타깃만 — 해상도/시인성 등은 집행 탭에서 노출 */
   const summaryTags = heroTags.slice(0, 3);
