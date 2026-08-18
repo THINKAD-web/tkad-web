@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
+import { StrictMode, Suspense } from "react";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
 import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
@@ -48,7 +48,13 @@ export default async function PlannerPage({ params }: Props) {
       </header>
 
       <Suspense fallback={null}>
-        <BriefFlowClient catalog={catalog} />
+        {process.env.NODE_ENV === "development" ? (
+          <StrictMode>
+            <BriefFlowClient catalog={catalog} />
+          </StrictMode>
+        ) : (
+          <BriefFlowClient catalog={catalog} />
+        )}
       </Suspense>
     </main>
   );

@@ -3,18 +3,24 @@
 /**
  * PR-6c 통합 플래너 3단계 흐름 — `/planner` 메인.
  * L-1/L-2: 브리프·믹스 세션 경계 + 재진입 확인.
+ *
+ * N-1: React 19 + zustand — selector가 매 getSnapshot마다 새 객체를
+ * 반환하면 useSyncExternalStore 무한 루프. boolean selector만 사용한다.
  */
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import { useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore, type BriefStoreState } from "@/lib/planner/brief/store";
+import { countMixUnits } from "@/lib/planner/brief/brief-fingerprint";
 import {
-  countMixUnits,
-  isMixBriefStale,
-} from "@/lib/planner/brief/brief-fingerprint";
+  selectMixCount,
+  selectMixIsStale,
+  shouldPromptResumeSession,
+  shouldPromptStaleMixBeforeStep,
+} from "@/lib/planner/brief/brief-session-logic";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
 import { BriefStepThree } from "@/components/planner/brief/brief-step-three";
@@ -76,8 +82,6 @@ function Stepper({
 }
 
 const selectStep = (s: BriefStoreState) => s.wizardStep;
-const selectMixUnits = (s: BriefStoreState) => s.mixUnits;
-const selectMixFingerprint = (s: BriefStoreState) => s.mixBriefFingerprint;
 
 export function BriefFlowClient({
   catalog = [],
@@ -90,18 +94,8 @@ export function BriefFlowClient({
   const planFromUrl = searchParams.get("plan");
 
   const wizardStep = useBriefStore(selectStep);
-  const mixUnits = useBriefStore(selectMixUnits);
-  const mixBriefFingerprint = useBriefStore(selectMixFingerprint);
-  const briefCore = useBriefStore((s) => ({
-    budgetInputWon: s.budgetInputWon,
-    budgetMode: s.budgetMode,
-    regionCodes: s.regionCodes,
-    genders: s.genders,
-    ageBands: s.ageBands,
-    flightStart: s.flightStart,
-    flightEnd: s.flightEnd,
-    goal: s.goal,
-  }));
+  const mixCount = useBriefStore(selectMixCount);
+  const mixIsStale = useBriefStore(selectMixIsStale);
   const setWizardStep = useBriefStore((s) => s.setWizardStep);
   const reset = useBriefStore((s) => s.reset);
   const clearMix = useBriefStore((s) => s.clearMix);
@@ -115,35 +109,34 @@ export function BriefFlowClient({
     () => false,
   );
   const step: BriefWizardStep = hydrated ? wizardStep : 1;
-  const mixCount = countMixUnits(mixUnits);
 
   const [resumeOpen, setResumeOpen] = useState(false);
   const [staleOpen, setStaleOpen] = useState(false);
   const pendingStepRef = useRef<BriefWizardStep | null>(null);
   const resumePromptedRef = useRef(false);
 
-  const mixIsStale = isMixBriefStale({
-    mixUnits,
-    mixBriefFingerprint,
-    brief: briefCore,
-  });
-
-  useEffect(() => {
-    if (!hydrated || planFromUrl || resumePromptedRef.current) return;
-    if (mixCount >= 1) {
-      resumePromptedRef.current = true;
-      setResumeOpen(true);
-    }
-  }, [hydrated, mixCount, planFromUrl]);
+  // L-2: hydration 직후 1회만 — mixCount를 effect deps에 넣지 않는다.
+  useLayoutEffect(() => {
+    if (resumePromptedRef.current) return;
+    const state = useBriefStore.getState();
+    const shouldOpen = shouldPromptResumeSession({
+      hydrated,
+      planFromUrl,
+      alreadyPrompted: resumePromptedRef.current,
+      mixUnits: state.mixUnits,
+    });
+    if (!shouldOpen) return;
+    resumePromptedRef.current = true;
+    setResumeOpen(true);
+  }, [hydrated, planFromUrl]);
 
   const goToStep = useCallback(
     (target: BriefWizardStep) => {
+      const state = useBriefStore.getState();
       if (
-        (target === 2 || target === 3) &&
-        isMixBriefStale({
-          mixUnits: useBriefStore.getState().mixUnits,
-          mixBriefFingerprint: useBriefStore.getState().mixBriefFingerprint,
-          brief: useBriefStore.getState(),
+        shouldPromptStaleMixBeforeStep({
+          targetStep: target,
+          state,
         })
       ) {
         pendingStepRef.current = target;
@@ -156,9 +149,10 @@ export function BriefFlowClient({
   );
 
   const handleResumeContinue = () => {
+    const state = useBriefStore.getState();
     if (
-      !useBriefStore.getState().mixBriefFingerprint &&
-      countMixUnits(useBriefStore.getState().mixUnits) > 0
+      !state.mixBriefFingerprint &&
+      countMixUnits(state.mixUnits) > 0
     ) {
       acknowledgeMixForCurrentBrief();
     }
@@ -204,9 +198,7 @@ export function BriefFlowClient({
 
       <Stepper step={step} isKo={isKo} onJump={goToStep} />
       {step === 1 ? (
-        <BriefStepOne
-          onRequestNext={() => goToStep(2)}
-        />
+        <BriefStepOne onRequestNext={() => goToStep(2)} />
       ) : step === 2 ? (
         <BriefStepTwo catalog={catalog} />
       ) : (
