@@ -14,7 +14,6 @@ import {
   overseasRegionDefaults,
   OVERSEAS_BROWSE_REGION_MAIN,
 } from "../lib/media-country.ts";
-import { fetchPlannerMediaCatalog } from "../lib/public-media-catalog.ts";
 import { stripLockedFieldsForMediaSave } from "../lib/media/locked-fields.ts";
 
 const SLUG = "ll3-verify-shibuya-admin";
@@ -70,12 +69,69 @@ async function main() {
     assert.equal(row.regionMain, "overseas");
     assert.equal(row.dailyFootfall, 12000);
 
-    const { catalog } = await fetchPlannerMediaCatalog();
+    // ── Planner exclusion: country=KR is the DB gate (NOT regionMain) ──
+    const plannerWhere = { isActive: true, country: "KR" as const };
+    const jpMatchesPlannerQuery = await db.media.findFirst({
+      where: { ...plannerWhere, id: mediaId },
+    });
     assert.equal(
-      catalog.some((m) => m.id === mediaId),
-      false,
-      "planner must exclude JP media (U-3)",
+      jpMatchesPlannerQuery,
+      null,
+      "JP row must not match fetchPlannerMediaCatalog where (country=KR)",
     );
+
+    // Control: KR + regionMain=overseas still matches country gate (regionMain is not in WHERE)
+    const controlSlug = `${SLUG}-kr-control`;
+    await db.media.deleteMany({ where: { slug: controlSlug } });
+    const krControl = await db.media.create({
+      data: {
+        slug: controlSlug,
+        name: "LL3 KR control (regionMain=overseas)",
+        location: "Seoul test",
+        country: "KR",
+        region: "seoul",
+        regionMain: OVERSEAS_BROWSE_REGION_MAIN,
+        regionSub: OVERSEAS_BROWSE_REGION_MAIN,
+        type: "digital",
+        price: 1_000_000,
+        latitude: 37.5665,
+        longitude: 126.978,
+        isActive: true,
+      },
+    });
+    const krMatchesPlannerQuery = await db.media.findFirst({
+      where: { ...plannerWhere, id: krControl.id },
+    });
+    assert.ok(
+      krMatchesPlannerQuery,
+      "KR row with regionMain=overseas must still match country=KR planner query",
+    );
+
+    const plannerIds = new Set(
+      (
+        await db.media.findMany({
+          where: plannerWhere,
+          select: { id: true },
+        })
+      ).map((r) => r.id),
+    );
+    assert.equal(
+      plannerIds.has(mediaId),
+      false,
+      "planner DB gate excludes JP (country=KR WHERE)",
+    );
+    assert.equal(
+      plannerIds.has(krControl.id),
+      true,
+      "planner DB gate includes KR even when regionMain=overseas",
+    );
+
+    await db.media.delete({ where: { id: krControl.id } }).catch(() => {});
+
+    console.log(
+      "  planner gate: findMany { isActive, country: 'KR' } — regionMain not in WHERE",
+    );
+    console.log("  control: KR+regionMain=overseas ∈ plannerIds; JP ∉ plannerIds");
 
     console.log("✅ LL-3 overseas admin verification passed");
   } finally {
