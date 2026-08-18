@@ -7,6 +7,7 @@
  * 금액 포맷 자체는 `lib/media-price-format` 의 검증된 구현에 위임한다.
  * 여기서 새로 정하는 것은 **무엇을 보여줄지**(기간 동반 표기, 극단값 차단)다.
  */
+import { formatCpmForDisplay } from "@/lib/media-display-currency";
 import {
   formatCpmKrw,
   formatMediaPriceCompactWon,
@@ -58,6 +59,7 @@ function cpmPendingLabel(locale: string): string {
 export function resolveCpmDisplay(
   cpmWon: number | null | undefined,
   locale = "ko-KR",
+  country?: string | null,
 ): CpmDisplay {
   if (cpmWon == null || !Number.isFinite(cpmWon) || cpmWon <= 0) {
     return {
@@ -87,7 +89,7 @@ export function resolveCpmDisplay(
   }
 
   return {
-    text: formatCpmKrw(Math.round(cpmWon), locale),
+    text: formatCpmForDisplay(Math.round(cpmWon), country, locale),
     displayable: true,
     rawWon: cpmWon,
   };
@@ -100,8 +102,9 @@ export function resolveCpmDisplay(
 export function formatCPM(
   cpmWon: number | null | undefined,
   locale = "ko-KR",
+  country?: string | null,
 ): string {
-  return resolveCpmDisplay(cpmWon, locale).text;
+  return resolveCpmDisplay(cpmWon, locale, country).text;
 }
 
 /**

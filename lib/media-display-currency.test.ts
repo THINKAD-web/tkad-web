@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import {
+  formatCpmForDisplay,
   formatJpyFromKrwWon,
+  formatMediaCostEstimateShort,
   formatMediaPriceForDisplay,
   formatMediaPriceJpyPreview,
   getKrwJpyRate,
@@ -48,4 +50,22 @@ test("formatMediaPriceJpyPreview returns null for zero price", () => {
 test("formatJpyFromKrwWon rounds to integer yen", () => {
   process.env.KRW_JPY_RATE = "0.1126";
   assert.equal(formatJpyFromKrwWon(10_000_000), "¥1,126,000");
+});
+
+test("formatCpmForDisplay: JP shows yen CPM", () => {
+  process.env.KRW_JPY_RATE = "0.1126";
+  assert.equal(formatCpmForDisplay(1_814, "JP", "ko-KR"), "¥204");
+  assert.match(formatCpmForDisplay(1_814, "KR", "ko-KR"), /^₩/);
+});
+
+test("formatMediaCostEstimateShort: JP uses yen label", () => {
+  process.env.KRW_JPY_RATE = "0.1126";
+  assert.equal(
+    formatMediaCostEstimateShort(300_000, "JP", "ko-KR"),
+    "약 ¥33,780",
+  );
+  assert.match(
+    formatMediaCostEstimateShort(300_000, "KR", "ko-KR"),
+    /약 30만원/,
+  );
 });
