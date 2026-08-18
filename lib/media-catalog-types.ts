@@ -21,6 +21,8 @@ export type HomeCatalogMediaItem = {
   trustScore?: number;
   executionCount?: number;
   lastExecutionMonthsAgo?: number | null;
+  /** ISO 3166-1 alpha-2 — JJ-1 JP ¥ 표시 */
+  country?: string;
   /** 목록 표시가 — `resolveMediaDisplayPrice` (최저 옵션 포함) */
   price?: number;
   pricePeriod?: MediaPricePeriodKey;

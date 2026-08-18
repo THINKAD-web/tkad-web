@@ -50,6 +50,7 @@ export function mapMediaItemToHomeCatalog(item: MediaItem): HomeCatalogMediaItem
     id: item.id,
     slug: item.slug,
     name: item.name,
+    country: item.country,
     type: typeLabel,
     region: item.region ?? item.district ?? item.city,
     location: item.location?.trim() || undefined,

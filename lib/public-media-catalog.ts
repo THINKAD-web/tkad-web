@@ -197,6 +197,7 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     nameEn: resolveNameEn(m.name, m.nameEn),
     location: m.location,
     locationEn,
+    country,
     region: m.region,
     regionZone: m.regionZone?.trim() || undefined,
     popularityScore: m.popularityScore ?? 0,

@@ -94,7 +94,7 @@ export function MediaDetailHeroInfo({
   const priceBlock = media.keywordFilter ? (
     hasPriceOptions && primaryPriceOption ? (
       <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
-        {formatCatalogPriceFieldWon(primaryPriceOption.price)}
+        {formatCatalogPriceFieldWon(primaryPriceOption.price, locale, media.country)}
       </span>
     ) : (
       <span className="font-sans text-[1.75rem] font-black tabular-nums leading-none text-[color:var(--qp-accent)]">
@@ -110,7 +110,7 @@ export function MediaDetailHeroInfo({
           from{" "}
         </span>
       ) : null}
-      {formatCatalogPriceFieldWon(displayPrice.priceWon, locale)}
+      {formatCatalogPriceFieldWon(displayPrice.priceWon, locale, media.country)}
       {multiPriceOptions && isKo ? "~" : null}
     </span>
   );
