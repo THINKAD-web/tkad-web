@@ -112,6 +112,16 @@ import {
   formatPriceOptionPeriodWriteError,
 } from "@/lib/media-price-period-write";
 import { needsSovBadge, sovBadgeLabel } from "@/lib/metrics/format";
+import {
+  DEFAULT_MEDIA_COUNTRY,
+  hasValidManualCoords,
+  isKoreaMediaCountry,
+  MEDIA_COUNTRY_OPTIONS,
+  mediaNameEnPlaceholder,
+  mediaNameKoPlaceholder,
+  normalizeMediaCountry,
+  overseasRegionDefaults,
+} from "@/lib/media-country";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -265,6 +275,8 @@ function matchesCategoryFilter(type: string, filter: string): boolean {
 type AdminMediaForm = {
   name: string;
   nameEn: string;
+  /** ISO 3166-1 alpha-2 */
+  country: string;
   location: string;
   city: string;
   district: string;
@@ -342,6 +354,7 @@ function resolveGalleryUrlsChange(
 const emptyForm: AdminMediaForm = {
   name: "",
   nameEn: "",
+  country: DEFAULT_MEDIA_COUNTRY,
   location: "",
   city: "",
   district: "",
@@ -530,6 +543,7 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
   return {
     name: m.name,
     nameEn: m.nameEn ?? "",
+    country: normalizeMediaCountry(m.country),
     location: m.location,
     city: m.city ?? "",
     district: m.district ?? "",
@@ -639,6 +653,7 @@ function formToApiBody(
   return {
     name: form.name.trim(),
     nameEn: form.nameEn.trim() || null,
+    country: normalizeMediaCountry(form.country),
     location: form.location.trim(),
     region: form.region.trim(),
     type: form.type.trim(),
@@ -948,6 +963,10 @@ export default function AdminMediasClient({
   }, []);
 
   const onGeocodeFromAddress = useCallback(async () => {
+    if (!isKoreaMediaCountry(form.country)) {
+      setGeoLookupError("해외 매체는 카카오 주소 검색을 사용할 수 없습니다. 좌표를 직접 입력하세요.");
+      return;
+    }
     const q = form.location.trim();
     if (!q) {
       setGeoLookupError("위치(주소)를 입력하세요.");
@@ -1019,7 +1038,7 @@ export default function AdminMediasClient({
     } finally {
       setGeoLookupLoading(false);
     }
-  }, [form.location, activeInstallKey]);
+  }, [form.location, form.country, activeInstallKey]);
 
   const onInstallPointMove = useCallback((id: string, lat: number, lng: number) => {
     setForm((f) => {
@@ -1053,6 +1072,8 @@ export default function AdminMediasClient({
         .filter((p): p is NonNullable<typeof p> => p != null),
     [form.installLocations],
   );
+
+  const isOverseasMedia = !isKoreaMediaCountry(form.country);
 
   useEffect(() => {
     if (!modalOpen) {
@@ -1268,11 +1289,10 @@ export default function AdminMediasClient({
     setSaveError(null);
     intentionalPurgeUrlsRef.current = [];
     initialGallerySnapshotRef.current = null;
+    setForm(emptyForm);
+    setPriceOptDrafts([]);
+    setEditDetailLoading(true);
     setModalOpen(true);
-
-    const spinnerTimer = window.setTimeout(() => {
-      if (editDetailLoadGenRef.current === gen) setEditDetailLoading(true);
-    }, 300);
 
     try {
       const detail = await adminFetchJson(`/api/admin/medias/${media.id}`, {
@@ -1319,7 +1339,6 @@ export default function AdminMediasClient({
         f.extractedImagesText,
       );
     } finally {
-      window.clearTimeout(spinnerTimer);
       if (editDetailLoadGenRef.current === gen) setEditDetailLoading(false);
     }
   }, []);
@@ -1461,6 +1480,19 @@ export default function AdminMediasClient({
 
   const handleSave = useCallback(async () => {
     if (!form.name.trim() || !form.location.trim()) return;
+    const isKorea = isKoreaMediaCountry(form.country);
+    if (!isKorea) {
+      const resolved = resolveMediaCoordsForSave({
+        installLocations:
+          normalizeInstallLocationsFromInput(form.installLocations) ?? [],
+        latitude: parseOptFloat(form.latitude),
+        longitude: parseOptFloat(form.longitude),
+      });
+      if (!hasValidManualCoords(resolved.latitude, resolved.longitude)) {
+        setSaveError("해외 매체는 설치 지점 위·경도를 수동으로 입력해야 합니다.");
+        return;
+      }
+    }
     const poErr = validatePriceOptionsJsonField(form.priceOptionsJson);
     if (poErr) {
       setSaveError(poErr);
@@ -2990,6 +3022,43 @@ export default function AdminMediasClient({
               </p>
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
+                  국가 *
+                </label>
+                <select
+                  className="h-9 w-full rounded-md border border-input bg-background px-3 text-sm"
+                  value={form.country}
+                  onChange={(e) => {
+                    const country = normalizeMediaCountry(e.target.value);
+                    setForm((f) => {
+                      if (isKoreaMediaCountry(country)) {
+                        return { ...f, country };
+                      }
+                      const defaults = overseasRegionDefaults(country);
+                      return {
+                        ...f,
+                        country,
+                        region: defaults.region,
+                        browseRegionMain: "",
+                        browseRegionSub: "",
+                      };
+                    });
+                  }}
+                >
+                  {MEDIA_COUNTRY_OPTIONS.map((opt) => (
+                    <option key={opt.code} value={opt.code}>
+                      {opt.labelKo} ({opt.code})
+                    </option>
+                  ))}
+                </select>
+                {isOverseasMedia ? (
+                  <p className="mt-1 text-[10px] text-amber-700">
+                    해외 매체: 주소는 자유 입력, 좌표는 수동 입력 필수. 카카오
+                    지오코딩은 사용하지 않습니다.
+                  </p>
+                ) : null}
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   매체명 (한국어) *
                 </label>
                 <Input
@@ -2997,7 +3066,7 @@ export default function AdminMediasClient({
                   onChange={(e) =>
                     setForm((f) => ({ ...f, name: e.target.value }))
                   }
-                  placeholder="강남역 대형 빌보드"
+                  placeholder={mediaNameKoPlaceholder(form.country)}
                 />
               </div>
               <div>
@@ -3009,7 +3078,7 @@ export default function AdminMediasClient({
                   onChange={(e) =>
                     setForm((f) => ({ ...f, nameEn: e.target.value }))
                   }
-                  placeholder="Gangnam Station Large Billboard"
+                  placeholder={mediaNameEnPlaceholder(form.country, true)}
                 />
               </div>
               <div>
@@ -3021,7 +3090,11 @@ export default function AdminMediasClient({
                   onChange={(e) =>
                     setForm((f) => ({ ...f, location: e.target.value }))
                   }
-                  placeholder="경기도 가평군 설악면 미사리로540번길 51"
+                  placeholder={
+                    isOverseasMedia
+                      ? "예: 1-2-3 Dogenzaka, Shibuya, Tokyo"
+                      : "경기도 가평군 설악면 미사리로540번길 51"
+                  }
                 />
                 <p className="mt-1 text-[10px] text-muted-foreground">
                   카탈로그·검색에 쓰는 대표 주소입니다. 실제 설치 좌표는 아래
@@ -3157,10 +3230,17 @@ export default function AdminMediasClient({
                                 size="xs"
                                 className="h-8 shrink-0 text-[10px]"
                                 disabled={
+                                  isOverseasMedia ||
                                   geoLookupLoading ||
                                   !(row.location.trim() || form.location.trim())
                                 }
                                 onClick={() => {
+                                  if (isOverseasMedia) {
+                                    setGeoLookupError(
+                                      "해외 매체는 카카오 주소 검색을 사용할 수 없습니다.",
+                                    );
+                                    return;
+                                  }
                                   setActiveInstallKey(row.key);
                                   const q = row.location.trim() || form.location.trim();
                                   if (!q) return;
@@ -3223,7 +3303,7 @@ export default function AdminMediasClient({
                           </div>
                           <div>
                             <label className="mb-1 block text-[10px] text-muted-foreground">
-                              위도
+                              위도{isOverseasMedia ? " *" : ""}
                             </label>
                             <Input
                               className="h-8 text-sm"
@@ -3248,7 +3328,7 @@ export default function AdminMediasClient({
                           </div>
                           <div>
                             <label className="mb-1 block text-[10px] text-muted-foreground">
-                              경도
+                              경도{isOverseasMedia ? " *" : ""}
                             </label>
                             <Input
                               className="h-8 text-sm"
@@ -3291,6 +3371,7 @@ export default function AdminMediasClient({
                   activePointId={activeInstallKey}
                   onActivePointChange={setActiveInstallKey}
                   onPointPositionChange={onInstallPointMove}
+                  mapProvider={isOverseasMedia ? "google" : "auto"}
                   heightPx={300}
                 />
               ) : (

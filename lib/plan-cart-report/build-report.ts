@@ -7,7 +7,6 @@ import {
   computePlannerPortfolioMonthlyMan,
   normalizeMediaTypeForPlanner,
   plannerReportCategoryKey,
-  reachSplitForGoal,
   resolvePlannerMediaKind,
   type PlannerCampaignGoal,
   type PlannerMetrics,
@@ -184,7 +183,6 @@ export function buildPlanCartReportBundle(args: {
     months,
     { campaignGoal, pricing },
   );
-  const reachSplit = reachSplitForGoal(campaignGoal);
   const regionalBreakdown = computePlanCartRegionalBreakdown(
     portfolioSorted,
     months,
@@ -242,8 +240,8 @@ export function buildPlanCartReportBundle(args: {
       matchedCount: portfolio.length,
       monthCompare: comparePlansByDuration(portfolioSorted, budgetMan, [1, 3, 6]),
       metrics,
-      reachCorePct: reachSplit.corePct,
-      reachExtendedPct: reachSplit.extendedPct,
+      reachCorePct: 0,
+      reachExtendedPct: 0,
       selectedMediaCount: cart.items.length,
       portfolioOverBudget: monthlyTotalMan > budgetMan + 0.01,
       portfolioMonthlyTotalMan: monthlyTotalMan,

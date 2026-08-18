@@ -12,9 +12,13 @@
 import { useMemo } from "react";
 import { useLocale } from "next-intl";
 import type { MediaItem } from "@/lib/media-data";
+import type { DigitalChannel } from "@/lib/planner/digital-channels";
+import type { DigitalCatalogBridgeMeta } from "@/lib/planner/digital-catalog-bridge";
 import { Button } from "@/components/ui/button";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import { flightDays, totalBudgetWon } from "@/lib/planner/brief/types";
+import { buildBriefIntegratedMixRequest } from "@/lib/planner/brief/brief-integrated-adapters";
+import { useIntegratedMix } from "@/hooks/use-integrated-mix";
 import {
   regionOverInclusions,
   overInclusionMessage,
@@ -28,6 +32,7 @@ import {
 } from "@/lib/planner/brief/scoring";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
+import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -140,13 +145,23 @@ function MediaCard({
   );
 }
 
-export function BriefStepTwo({ catalog }: { catalog: readonly MediaItem[] }) {
+export function BriefStepTwo({
+  catalog,
+  digitalChannels = [],
+  digitalCatalogMeta,
+}: {
+  catalog: readonly MediaItem[];
+  digitalChannels?: readonly DigitalChannel[];
+  digitalCatalogMeta?: DigitalCatalogBridgeMeta;
+}) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const store = useBriefStore();
+  const localeKey = isKo ? "ko" : "en";
 
   const days = flightDays(store) ?? 30;
   const budgetWon = totalBudgetWon(store);
+  const showDigital = store.channelMode === "ooh_digital";
 
   // 지역 필터 — 17시도 선택을 browse 14그룹으로 변환해 적용
   const candidates = useMemo(() => {
@@ -186,6 +201,39 @@ export function BriefStepTwo({ catalog }: { catalog: readonly MediaItem[] }) {
     () => regionOverInclusions(store.regionCodes),
     [store.regionCodes],
   );
+
+  const portfolio = useMemo(
+    () =>
+      lines.map((l) => l.media).filter((m): m is MediaItem => m != null),
+    [lines],
+  );
+
+  const selectedOohIds = useMemo(
+    () => Object.keys(store.mixUnits).filter((id) => store.mixUnits[id]! > 0),
+    [store.mixUnits],
+  );
+
+  const mixRequest = useMemo(
+    () =>
+      showDigital
+        ? buildBriefIntegratedMixRequest({
+            brief: store,
+            digitalBudgetPct: store.digitalBudgetPct,
+            selectedOohMediaIds: selectedOohIds,
+            locale: localeKey,
+          })
+        : null,
+    [showDigital, store, selectedOohIds, localeKey],
+  );
+
+  const mixEnabled = showDigital && mixRequest != null;
+
+  const {
+    data: mixResult,
+    loading: mixLoading,
+    error: mixError,
+    refetch: refetchMix,
+  } = useIntegratedMix(mixRequest, mixEnabled);
 
   return (
     <div className="mx-auto grid max-w-6xl gap-6 lg:grid-cols-[1fr_320px]">
@@ -254,6 +302,19 @@ export function BriefStepTwo({ catalog }: { catalog: readonly MediaItem[] }) {
               ? "조건에 맞는 매체가 없습니다. 지역 조건을 넓혀 보세요."
               : "No media match. Try widening the region filter."}
           </p>
+        ) : null}
+
+        {showDigital ? (
+          <BriefDigitalPanel
+            portfolio={portfolio.length > 0 ? portfolio : catalog.slice(0, 3)}
+            isKo={isKo}
+            digitalChannels={[...digitalChannels]}
+            digitalCatalogMeta={digitalCatalogMeta}
+            mix={mixResult}
+            mixLoading={mixLoading}
+            mixError={mixError}
+            onMixRetry={refetchMix}
+          />
         ) : null}
       </div>
 

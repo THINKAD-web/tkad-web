@@ -21,6 +21,10 @@ import {
   showMediaCardContributions,
 } from "@/lib/planner-report-export/media-card-layout";
 import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup-segments";
+import {
+  EXPORT_BADGE_PDF,
+  exportBadgeBracketLabel,
+} from "@/lib/planner-report-export/export-badge";
 
 /**
  * 플래너 보고서 PPTX — pptxgenjs 로 편집 가능한 제안서 슬라이드를 생성한다.
@@ -374,7 +378,31 @@ export async function buildPlannerReportPptx(
     const ky = 1.25 + i * 1.25;
     s2.addShape(pptx.ShapeType.roundRect, { x: 8.2, y: ky, w: 4.5, h: 1.05, fill: { color: LIGHT }, rectRadius: 0.08, line: { color: "E4E6EC", width: 0.5 } });
     s2.addText(k.label, { x: 8.4, y: ky + 0.12, w: 4.1, h: 0.3, fontFace: face, fontSize: 10, color: GRAY });
-    s2.addText(k.value, { x: 8.4, y: ky + 0.42, w: 4.1, h: 0.55, fontFace: face, fontSize: 20, bold: true, color: VIOLET });
+    if (k.status === "pending") {
+      s2.addText("—", { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.35, fontFace: face, fontSize: 16, bold: true, color: GRAY });
+    } else {
+      s2.addText(k.value, { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.45, fontFace: face, fontSize: 18, bold: true, color: VIOLET });
+    }
+    const badgeColors = EXPORT_BADGE_PDF[k.badge];
+    s2.addShape(pptx.ShapeType.roundRect, {
+      x: 8.4,
+      y: ky + (k.status === "pending" ? 0.72 : 0.82),
+      w: 2.2,
+      h: 0.22,
+      fill: { color: badgeColors.fill.replace("#", "") },
+      line: { color: badgeColors.border.replace("#", ""), width: 0.5 },
+      rectRadius: 0.04,
+    });
+    s2.addText(exportBadgeBracketLabel(k.badge, isKo), {
+      x: 8.45,
+      y: ky + (k.status === "pending" ? 0.73 : 0.83),
+      w: 2.1,
+      h: 0.2,
+      fontFace: face,
+      fontSize: 7,
+      bold: true,
+      color: badgeColors.text.replace("#", ""),
+    });
   });
 
   // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──

@@ -227,6 +227,22 @@ export function printSummary(
       );
     }
   }
+
+  const r10 = violations.filter((v) => v.rule === "R-10");
+  if (r10.length > 0) {
+    console.log(`\n[R-10] country 이상: ${r10.length}건`);
+    for (const v of r10.slice(0, 20)) {
+      console.log(
+        `  ${(v.detail?.country ?? "?").toString().padEnd(6)} ${(v.slug ?? v.mediaId).padEnd(36).slice(0, 36)} ${v.message.slice(0, 60)}`,
+      );
+    }
+    if (r10.length > 20) {
+      console.log(`  ... (+${r10.length - 20}건, JSON 리포트 참조)`);
+    }
+  } else {
+    console.log("\n[R-10] country 이상: 0건");
+  }
+
   console.log("\n※ 이 스크립트는 DB 에 쓰지 않습니다.");
   console.log("   PR-3(스키마)·PR-4(마이그레이션)는 이 리포트 검토 후에 진행하세요.");
   console.log(
@@ -275,6 +291,7 @@ async function main(): Promise<void> {
         tags: true,
         nearbyStations: true,
         nearbyLandmarks: true,
+        country: true,
       },
       orderBy: { id: "asc" },
       ...(limit ? { take: limit } : {}),

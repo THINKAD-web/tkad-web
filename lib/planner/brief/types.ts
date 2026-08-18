@@ -39,6 +39,14 @@ export type BudgetMode = "total" | "monthly";
 /** 3단계 흐름 — 기존 6단계 위저드(types.ts)와 별개 */
 export type BriefWizardStep = 1 | 2 | 3;
 
+/** O-2 Step 1 진입 모드 */
+export type BriefEntryMode = "quick" | "detailed";
+
+export const BRIEF_ENTRY_MODES: readonly BriefEntryMode[] = [
+  "quick",
+  "detailed",
+] as const;
+
 /**
  * Step 1 입력 상태. `CampaignPlanBrief` 로 투영 가능한 상위집합.
  * 예산은 입력 원값(budgetInputWon + budgetMode)을 보존하고,
@@ -111,6 +119,19 @@ export function briefRequiredStatus(brief: CampaignBriefInput): {
   const budget = brief.budgetInputWon > 0;
   const flight = flightDays(brief) != null;
   return { budget, flight, ok: budget && flight };
+}
+
+/** O-2 빠른 추천 — 예산만 필수 */
+export function briefQuickRequiredStatus(brief: CampaignBriefInput): {
+  budget: boolean;
+  ok: boolean;
+} {
+  const budget = brief.budgetInputWon > 0;
+  return { budget, ok: budget };
+}
+
+export function isBriefEntryMode(v: unknown): v is BriefEntryMode {
+  return v === "quick" || v === "detailed";
 }
 
 /** 타깃·지역이 기본값(전체)인지 — Step 화면에 "전국·전 타깃 기준" 명시용 */
