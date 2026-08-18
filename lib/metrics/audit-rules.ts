@@ -27,7 +27,8 @@ export type RuleId =
   | "R-06"
   | "R-07"
   | "R-08"
-  | "R-09";
+  | "R-09"
+  | "R-10";
 
 export const RULES: Record<RuleId, { severity: Severity; label: string }> = {
   "R-01": { severity: "P0", label: "인구 상한 초과" },
@@ -39,6 +40,7 @@ export const RULES: Record<RuleId, { severity: Severity; label: string }> = {
   "R-07": { severity: "P1", label: "필수 필드 결손" },
   "R-08": { severity: "P2", label: "slug/cuid 중복 URL" },
   "R-09": { severity: "P2", label: "meta-keywords 타매체 혼입" },
+  "R-10": { severity: "P1", label: "country 이상 (U-series)" },
 };
 
 /** 감사 대상 매체 — DB `Media` 에서 읽는 필드만 */
@@ -68,6 +70,8 @@ export type AuditMediaRow = {
   tags: string[];
   nearbyStations: string | null;
   nearbyLandmarks: string | null;
+  /** U-series — ISO 3166-1 alpha-2 (migration 전에는 undefined) */
+  country?: string | null;
 };
 
 export type Violation = {
@@ -516,6 +520,71 @@ export function auditRow(row: AuditMediaRow, acc: AuditAccumulator): void {
       `본문에 "하루 ${stated.toLocaleString()}명" 서술이 있으나 dailyFootfall 미입력`,
       { stated },
     );
+  }
+
+  // ── R-10 country (U-series) ───────────────────────────────────
+  if (Object.prototype.hasOwnProperty.call(row, "country")) {
+    const raw = row.country;
+    const code =
+      typeof raw === "string" && raw.trim() ? raw.trim().toUpperCase() : null;
+    if (!code) {
+      acc.fieldGaps.country = (acc.fieldGaps.country ?? 0) + 1;
+      push("R-10", "country 컬럼 null/empty — planner KR 필터에서 제외될 수 있음", {
+        country: raw,
+      });
+    } else {
+      const valid = ["KR", "JP", "US", "CN", "SG", "OTHER"].includes(code);
+      if (!valid) {
+        push("R-10", `country="${code}" — 허용 코드(KR/JP/US/CN/SG/OTHER) 밖`, {
+          country: code,
+        });
+      }
+      if (code !== "KR") {
+        const lat = row.latitude;
+        const lng = row.longitude;
+        const hasCoords =
+          lat != null &&
+          lng != null &&
+          Number.isFinite(lat) &&
+          Number.isFinite(lng) &&
+          !(lat === 0 && lng === 0);
+        if (!hasCoords) {
+          push(
+            "R-10",
+            `해외(country=${code}) 매체인데 latitude/longitude 없음 — admin 수동 좌표 필요`,
+            { country: code },
+          );
+        }
+        const rm = row.regionMain?.trim().toLowerCase();
+        const koreanSido = [
+          "seoul",
+          "busan",
+          "incheon",
+          "daegu",
+          "gwangju",
+          "daejeon",
+          "ulsan",
+          "sejong",
+          "gyeonggi",
+          "gangwon",
+          "chungbuk",
+          "chungnam",
+          "jeonbuk",
+          "jeonnam",
+          "gyeongbuk",
+          "gyeongnam",
+          "jeju",
+          "national",
+        ];
+        if (rm && koreanSido.includes(rm)) {
+          push(
+            "R-10",
+            `해외(country=${code})인데 regionMain="${row.regionMain}" — 17시도 taxonomy 오염`,
+            { country: code, regionMain: row.regionMain },
+          );
+        }
+      }
+    }
   }
 
   // ── R-07 필수 필드 결손 ──────────────────────────────────────
