@@ -2,6 +2,10 @@
 
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import {
+  EXPORT_BADGE_HTML_CLASS,
+  exportBadgeBracketLabel,
+} from "@/lib/planner-report-export/export-badge";
 import type {
   PlannerReportExportPayload,
   PlannerExportChartDatum,
@@ -290,11 +294,43 @@ export const PlannerReportDocument = forwardRef<
               <div
                 key={k.label}
                 className="rounded-xl border border-gray-200 bg-gray-50 p-3.5"
+                data-testid={
+                  k.status === "pending" ? "report-kpi-pending" : "report-kpi-value"
+                }
               >
                 <p className="text-[11px] font-medium text-gray-500">{k.label}</p>
-                <p className="mt-1 break-words font-sans text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
-                  {k.value}
-                </p>
+                {k.status === "pending" ? (
+                  <div className="mt-1">
+                    <p className="font-sans text-lg font-bold tabular-nums text-gray-400">
+                      —
+                    </p>
+                    <span
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      data-testid="report-kpi-badge"
+                      data-kpi-badge={k.badge}
+                    >
+                      {exportBadgeBracketLabel(k.badge, isKo)}
+                    </span>
+                    {k.pendingHint ? (
+                      <p className="mt-0.5 text-[10px] leading-snug text-gray-500">
+                        {k.pendingHint}
+                      </p>
+                    ) : null}
+                  </div>
+                ) : (
+                  <div className="mt-1">
+                    <p className="break-words font-sans text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
+                      {k.value}
+                    </p>
+                    <span
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      data-testid="report-kpi-badge"
+                      data-kpi-badge={k.badge}
+                    >
+                      {exportBadgeBracketLabel(k.badge, isKo)}
+                    </span>
+                  </div>
+                )}
               </div>
             ))}
           </div>

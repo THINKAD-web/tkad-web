@@ -17,10 +17,13 @@ import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
 import {
   EMPTY_BRIEF,
   normalizeBriefInput,
+  isBriefEntryMode,
   type BriefAgeBand,
+  type BriefEntryMode,
   type BriefGoal,
   type BriefIndustry,
   type BriefWizardStep,
+  type BriefEntryMode,
   type BudgetMode,
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
@@ -33,6 +36,15 @@ import {
   computeBriefFingerprint,
   countMixUnits,
 } from "@/lib/planner/brief/brief-fingerprint";
+import {
+  isBriefChannelMode,
+  type BriefChannelMode,
+} from "@/lib/planner/brief/brief-integrated-adapters";
+import {
+  defaultDigitalChannelIds,
+  type DigitalChannelId,
+} from "@/lib/planner/recommend-digital";
+import { DIGITAL_CHANNELS } from "@/lib/planner/digital-channels";
 
 export const BRIEF_STORAGE_KEY = "tkad-planner-brief-v1";
 
@@ -44,6 +56,14 @@ function toggleIn<T>(list: readonly T[], value: T): T[] {
 
 export type BriefStoreState = CampaignBriefInput & {
   wizardStep: BriefWizardStep;
+  /** O-2: 빠른 추천 vs 자세히 설계 */
+  entryMode: BriefEntryMode;
+  /** O-1: OOH만 vs OOH+디지털 */
+  channelMode: BriefChannelMode;
+  /** O-1: 디지털 예산 비중 (10–50%) */
+  digitalBudgetPct: number;
+  /** O-1: 선택 디지털 채널 */
+  digitalChannelIds: DigitalChannelId[];
   /** 선택한 매체 → 구매 수량 (Step 2 믹스). 0 이하면 제거된 것으로 본다 */
   mixUnits: Record<string, number>;
   /** mixUnits 가 마지막으로 확정·담긴 시점의 브리프 지문 (L-1) */
@@ -68,6 +88,15 @@ export type BriefStoreActions = {
   setWizardStep: (step: BriefWizardStep) => void;
   reset: () => void;
 
+  // ── O-2 진입 모드 ──
+  setEntryMode: (mode: BriefEntryMode) => void;
+
+  // ── O-1 채널 ──
+  setChannelMode: (mode: BriefChannelMode) => void;
+  setDigitalBudgetPct: (pct: number) => void;
+  toggleDigitalChannel: (id: DigitalChannelId) => void;
+  setDigitalChannelIds: (ids: DigitalChannelId[]) => void;
+
   // ── Step 2 믹스 ──
   addMediaToMix: (mediaId: string, units?: number) => void;
   removeMediaFromMix: (mediaId: string) => void;
@@ -83,9 +112,26 @@ export type BriefStore = BriefStoreState & BriefStoreActions;
 const INITIAL: BriefStoreState = {
   ...EMPTY_BRIEF,
   wizardStep: 1,
+  entryMode: "detailed",
+  channelMode: "ooh_only",
+  digitalBudgetPct: 30,
+  digitalChannelIds: defaultDigitalChannelIds(),
   mixUnits: {},
   mixBriefFingerprint: null,
 };
+
+function normalizeDigitalChannelIds(raw: unknown): DigitalChannelId[] {
+  if (!Array.isArray(raw) || raw.length === 0) return defaultDigitalChannelIds();
+  const allowed = new Set(DIGITAL_CHANNELS.map((c) => c.id));
+  const out: DigitalChannelId[] = [];
+  for (const id of raw) {
+    if (typeof id === "string" && allowed.has(id as DigitalChannelId)) {
+      const typed = id as DigitalChannelId;
+      if (!out.includes(typed)) out.push(typed);
+    }
+  }
+  return out.length > 0 ? out : defaultDigitalChannelIds();
+}
 
 function stampMixFingerprint(state: BriefStoreState): Partial<BriefStoreState> {
   if (countMixUnits(state.mixUnits) === 0) {
@@ -147,6 +193,20 @@ export const useBriefStore = create<BriefStore>()(
 
       setWizardStep: (step) => set({ wizardStep: step }),
       reset: () => set({ ...INITIAL }),
+
+      setEntryMode: (mode) => set({ entryMode: mode }),
+
+      setChannelMode: (mode) => set({ channelMode: mode }),
+      setDigitalBudgetPct: (pct) =>
+        set({ digitalBudgetPct: Math.max(10, Math.min(50, Math.round(pct))) }),
+      toggleDigitalChannel: (id) =>
+        set((s) => ({
+          digitalChannelIds: s.digitalChannelIds.includes(id)
+            ? s.digitalChannelIds.filter((x) => x !== id)
+            : [...s.digitalChannelIds, id],
+        })),
+      setDigitalChannelIds: (ids) =>
+        set({ digitalChannelIds: normalizeDigitalChannelIds(ids) }),
 
       addMediaToMix: (mediaId, units = 1) =>
         set((s) => {
@@ -221,6 +281,10 @@ export const useBriefStore = create<BriefStore>()(
         flightEnd: s.flightEnd,
         freeText: s.freeText,
         wizardStep: s.wizardStep,
+        entryMode: s.entryMode,
+        channelMode: s.channelMode,
+        digitalBudgetPct: s.digitalBudgetPct,
+        digitalChannelIds: s.digitalChannelIds,
         mixUnits: s.mixUnits,
         mixBriefFingerprint: s.mixBriefFingerprint,
       }),
@@ -231,6 +295,17 @@ export const useBriefStore = create<BriefStore>()(
           ...current,
           ...normalizeBriefInput(p),
           wizardStep: step === 1 || step === 2 || step === 3 ? step : 1,
+          entryMode: isBriefEntryMode(p.entryMode)
+            ? p.entryMode
+            : current.entryMode,
+          channelMode: isBriefChannelMode(p.channelMode)
+            ? p.channelMode
+            : current.channelMode,
+          digitalBudgetPct:
+            typeof p.digitalBudgetPct === "number"
+              ? Math.max(10, Math.min(50, Math.round(p.digitalBudgetPct)))
+              : current.digitalBudgetPct,
+          digitalChannelIds: normalizeDigitalChannelIds(p.digitalChannelIds),
           mixUnits: normalizeMixUnits(p.mixUnits),
           mixBriefFingerprint:
             typeof p.mixBriefFingerprint === "string"

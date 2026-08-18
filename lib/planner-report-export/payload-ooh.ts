@@ -35,6 +35,12 @@ import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { ExportKpiBadgeKey } from "@/lib/planner-report-export/export-badge";
+import {
+  exportKpiPending,
+  exportKpiValue,
+} from "@/lib/planner-report-export/export-kpi";
+import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -51,8 +57,6 @@ export type BuildOohPayloadArgs = {
   goalFollowUp?: PlannerGoalFollowUp;
   portfolio: MediaItem[];
   metrics: PlannerMetrics | null;
-  reachCorePct: number;
-  reachExtendedPct: number;
   blendedCpmKrw: number | null;
   budgetAllocation: {
     key: string;
@@ -73,6 +77,10 @@ export type BuildOohPayloadArgs = {
   campaignMediaPriceOptionIndex?: Record<string, number>;
   /** 내 플랜 보고서 — 복수 옵션 라벨·금액 */
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
+  /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
+  digitalOmittedNotice?: string;
+  /** PR-8-2 — KPI별 배지 (미지정 시 impressions/cpm=estimated, reach/roi=pending) */
+  kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
 };
 
 export function buildOohReportPayload(
@@ -96,34 +104,39 @@ export function buildOohReportPayload(
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
 
+  const badge = (key: ExportKpiBadgeKey): PlannerExportBadgeKind => {
+    if (key === "reach" || key === "roi") return "pending";
+    return a.kpiBadges?.[key] ?? "estimated";
+  };
+
   const kpis: PlannerReportExportPayload["kpis"] = [];
   if (a.metrics || usePortfolioReach) {
-    kpis.push({
-      label: isKo ? "총 예상 노출" : "Est. impressions",
-      value: fmt(
-        usePortfolioReach
-          ? portfolioMetrics.totalImpressions
-          : (a.metrics?.estimatedTotalImpressions ?? 0),
+    kpis.push(
+      exportKpiValue(
+        isKo ? "총 예상 노출" : "Est. impressions",
+        fmt(
+          usePortfolioReach
+            ? portfolioMetrics.totalImpressions
+            : (a.metrics?.estimatedTotalImpressions ?? 0),
+        ),
+        badge("impressions"),
       ),
-    });
+    );
   }
-  if (a.metrics) {
-    kpis.push({
-      label: isKo ? "기대 ROI" : "Expected ROI",
-      value: `${a.metrics.roiExpected}${isKo ? "배" : "×"}`,
-    });
-  }
-  kpis.push({
-    label: isKo ? "핵심 타깃 도달" : "Core reach",
-    value: `${a.reachCorePct}%`,
-  });
+  kpis.push(
+    exportKpiPending(isKo ? "핵심 타깃 도달" : "Core reach", isKo),
+  );
+  kpis.push(exportKpiPending(isKo ? "기대 ROI" : "Expected ROI", isKo));
   const blendedForKpi =
     portfolioMetrics.blendedCpmKrw ?? a.blendedCpmKrw ?? null;
   if (blendedForKpi && blendedForKpi > 0) {
-    kpis.push({
-      label: isKo ? "블렌디드 CPM" : "Blended CPM",
-      value: `₩${blendedForKpi.toLocaleString()}`,
-    });
+    kpis.push(
+      exportKpiValue(
+        isKo ? "블렌디드 CPM" : "Blended CPM",
+        `₩${blendedForKpi.toLocaleString()}`,
+        badge("cpm"),
+      ),
+    );
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
@@ -227,7 +240,7 @@ export function buildOohReportPayload(
     });
   }
 
-  if (a.portfolio.length && a.metrics) {
+  if (a.portfolio.length) {
     const topMedia = a.portfolio[0]?.name ?? (isKo ? "핵심 매체" : "key media");
     const strategyCtx = {
       isKo,
@@ -241,12 +254,24 @@ export function buildOohReportPayload(
       portfolioCount: a.portfolio.length,
     };
     const extraLines = buildReportStrategyLines(strategyCtx);
+    const impressionTotal =
+      a.metrics || usePortfolioReach
+        ? fmt(
+            usePortfolioReach
+              ? portfolioMetrics.totalImpressions
+              : (a.metrics?.estimatedTotalImpressions ?? 0),
+          )
+        : null;
     const strategyLines = [
       buildReportWhyLine(strategyCtx),
       ...extraLines,
-      isKo
-        ? `예상 효과 · 총 ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)}회 노출, 핵심 타깃 도달 ${a.reachCorePct}% (확장 ${a.reachExtendedPct}%), 기대 ROI ${a.metrics.roiExpected}배`
-        : `Impact · ${fmt(usePortfolioReach ? portfolioMetrics.totalImpressions : a.metrics.estimatedTotalImpressions)} impressions, ${a.reachCorePct}% core reach (ext. ${a.reachExtendedPct}%), ${a.metrics.roiExpected}× expected ROI`,
+      impressionTotal
+        ? isKo
+          ? `예상 효과 · 총 ${impressionTotal}회 노출(추정). 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다.`
+          : `Impact · ${impressionTotal} estimated impressions. Core reach and ROI will be available after dong-level population data is connected.`
+        : isKo
+          ? "예상 효과 · 핵심 타깃 도달률·ROI는 행정동 인구 데이터 연동 후 제공됩니다."
+          : "Impact · Core reach and ROI will be available after dong-level population data is connected.",
       isKo
         ? `다음 액션 · ${topMedia} 우선 확정 후, 동일 동선의 디지털 리타게팅을 연계하면 전환 기여를 추가로 끌어올릴 수 있습니다.`
         : `Next · Lock ${topMedia} first, then layer digital retargeting on the same routes to lift conversion contribution.`,
@@ -274,6 +299,12 @@ export function buildOohReportPayload(
     sections.push({
       title: isKo ? "효과 요약" : "Effect summary",
       lines: a.effectSummaryLines,
+    });
+  }
+  if (a.digitalOmittedNotice) {
+    sections.push({
+      title: isKo ? "디지털 채널" : "Digital channels",
+      lines: [a.digitalOmittedNotice],
     });
   }
   if (a.regionBreakdown && a.regionBreakdown.length > 1) {
@@ -384,6 +415,7 @@ export function buildOohReportPayload(
     portfolioGroups,
     recommendRationale,
     sections,
+    digitalOmittedNotice: a.digitalOmittedNotice,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
       : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",

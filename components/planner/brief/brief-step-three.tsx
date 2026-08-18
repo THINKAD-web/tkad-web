@@ -10,14 +10,23 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useLocale } from "next-intl";
 import { useSearchParams } from "next/navigation";
+import { FileDown, Loader2, Lock } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import type { CampaignPlanStoredMetrics } from "@/lib/campaign-plan-schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
+import { PlannerPdfDownloadGate } from "@/components/planner/planner-pdf-download-gate";
 import { useBriefStore } from "@/lib/planner/brief/store";
-import { buildMixLines } from "@/lib/planner/brief/build-plan-snapshot";
+import {
+  buildCampaignPlanSnapshot,
+  buildMixLines,
+} from "@/lib/planner/brief/build-plan-snapshot";
+import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapter";
+import { downloadPlannerReport } from "@/lib/planner-report-export/client";
+import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
+import { useToast } from "@/components/toast-provider";
 import {
   calcMixMetrics,
   type MixMetrics,
@@ -176,6 +185,10 @@ export function BriefStepThree({
   const [loadingPlan, setLoadingPlan] = useState(Boolean(planFromUrl));
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [exporting, setExporting] =
+    useState<PlannerReportExportFormat | null>(null);
+  const [exportError, setExportError] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     if (!planFromUrl) return;
@@ -258,6 +271,53 @@ export function BriefStepThree({
       setSaving(false);
     }
   }, [store, isKo]);
+
+  const exportPlan = useMemo(() => {
+    if (savedPlan) return savedPlan;
+    if (lines.length === 0) return null;
+    return buildCampaignPlanSnapshot({
+      brief: store,
+      catalog,
+      mixUnits: store.mixUnits,
+    });
+  }, [savedPlan, lines.length, store, catalog]);
+
+  const handleExport = useCallback(
+    async (format: PlannerReportExportFormat) => {
+      if (exporting || !exportPlan) return;
+      setExporting(format);
+      setExportError(null);
+      try {
+        const payload = buildBriefReportPayload({
+          plan: exportPlan,
+          catalog,
+          isKo,
+          channelMode: store.channelMode,
+          hasDigitalSnapshot: false,
+        });
+        await downloadPlannerReport(format, payload, {
+          activitySource: "planner",
+        });
+        toast(
+          "success",
+          isKo ? "제안서를 저장했습니다." : "Proposal saved.",
+        );
+      } catch (e) {
+        console.error("[brief-step-three export]", e);
+        const msg =
+          e instanceof Error
+            ? e.message
+            : isKo
+              ? "제안서 생성에 실패했습니다."
+              : "Proposal export failed.";
+        setExportError(msg);
+        toast("error", msg);
+      } finally {
+        setExporting(null);
+      }
+    },
+    [exporting, exportPlan, catalog, isKo, store.channelMode, toast],
+  );
 
   const won = (n: number) =>
     isKo ? `₩${n.toLocaleString("ko-KR")}` : `₩${n.toLocaleString("en-US")}`;
@@ -384,11 +444,49 @@ export function BriefStepThree({
               : "Sharing unlocks after dong population data is connected."}
           </p>
 
-          <Button type="button" variant="secondary" className="w-full" disabled>
-            {isKo
-              ? "제안서 생성 (8단계 · 준비 중)"
-              : "Generate proposal (step 8 · soon)"}
-          </Button>
+          <PlannerPdfDownloadGate
+            isKo={isKo}
+            onAllowedDownload={() => void handleExport("pdf")}
+          >
+            {({ onDownloadClick, pdfAllowed, checking }) => (
+              <Button
+                type="button"
+                variant="secondary"
+                className="w-full"
+                disabled={
+                  exporting !== null ||
+                  checking ||
+                  lines.length === 0
+                }
+                onClick={onDownloadClick}
+              >
+                {exporting === "pdf" ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : !pdfAllowed ? (
+                  <Lock className="mr-2 h-4 w-4" />
+                ) : (
+                  <FileDown className="mr-2 h-4 w-4" />
+                )}
+                {!pdfAllowed
+                  ? isKo
+                    ? "제안서 PDF (PRO)"
+                    : "Proposal PDF (PRO)"
+                  : isKo
+                    ? "제안서 PDF 생성"
+                    : "Generate proposal PDF"}
+              </Button>
+            )}
+          </PlannerPdfDownloadGate>
+          {exportError ? (
+            <p className="text-xs text-destructive">{exportError}</p>
+          ) : null}
+          {store.channelMode === "ooh_digital" ? (
+            <p className="text-[11px] text-muted-foreground">
+              {isKo
+                ? "디지털 채널 배분은 이번 보고서에 포함되지 않았습니다."
+                : "Digital channel allocation is not included in this report."}
+            </p>
+          ) : null}
         </div>
 
         <div className="mt-3">

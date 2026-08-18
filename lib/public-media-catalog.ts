@@ -18,6 +18,7 @@ import {
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { keywordFilterItemToMediaItem } from "@/lib/keyword-filter-media-detail";
 import { getMediaBrowseMockCatalog } from "@/lib/media-browse-catalog";
+import { isKoreaMediaCountry } from "@/lib/media-country";
 import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalog-extras";
 import { parseMediaInstallLocations } from "@/lib/media-install-locations";
 import { isInstantBookingEligible } from "@/lib/instant-booking-eligibility";
@@ -106,9 +107,12 @@ function resolveNameEn(koreanName: string, dbNameEn: string | null | undefined):
 
 /** Map Prisma row → public `MediaItem` (list/detail/compare). */
 export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaItem {
-  const lat = m.latitude ?? 37.5665;
-  const lng = m.longitude ?? 126.978;
-  const coordinatesAreFallback = m.latitude == null || m.longitude == null;
+  const country = (m as Media & { country?: string }).country ?? "KR";
+  const korea = isKoreaMediaCountry(country);
+  const lat = m.latitude ?? (korea ? 37.5665 : 0);
+  const lng = m.longitude ?? (korea ? 126.978 : 0);
+  const coordinatesAreFallback =
+    (m.latitude == null || m.longitude == null) && korea;
   const daily = m.dailyFootfall ?? 0;
   const imgs = filterDisplayableMediaImageUrls(
     dedupeImageUrls(
@@ -661,7 +665,7 @@ export async function fetchPlannerMediaCatalog(): Promise<{
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true },
+      where: { isActive: true, country: "KR" },
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });

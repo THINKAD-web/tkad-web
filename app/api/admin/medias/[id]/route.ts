@@ -36,6 +36,12 @@ import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import {
+  hasValidManualCoords,
+  isKoreaMediaCountry,
+  normalizeMediaCountry,
+  overseasRegionDefaults,
+} from "@/lib/media-country";
 
 export const dynamic = "force-dynamic";
 
@@ -97,6 +103,9 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (body.name != null) data.name = String(body.name).trim();
   if (body.nameEn !== undefined)
     data.nameEn = String(body.nameEn ?? "").trim() || null;
+  if (body.country !== undefined) {
+    data.country = normalizeMediaCountry(body.country);
+  }
   if (body.location != null) data.location = String(body.location).trim();
   if (body.region != null) data.region = String(body.region).trim();
   if (body.regionZone !== undefined) {
@@ -443,9 +452,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   if ("location" in body) {
     const trimmed = String(body.location ?? "").trim();
-    const geo = await kakaoFillForMediaPatch(body, trimmed);
+    const patchCountry =
+      data.country != null
+        ? normalizeMediaCountry(data.country as string)
+        : normalizeMediaCountry(existing.country);
+    const geo = await kakaoFillForMediaPatch(body, trimmed, patchCountry);
     if (geo) Object.assign(data, geo);
   }
+
+  const effectiveCountry =
+    data.country != null
+      ? normalizeMediaCountry(data.country as string)
+      : normalizeMediaCountry(existing.country);
+  const isKorea = isKoreaMediaCountry(effectiveCountry);
 
   let mergedLat: number | null = existing.latitude;
   if ("latitude" in body) {
@@ -501,6 +520,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     data.longitude = coordsResolved.longitude;
   }
 
+  if (!isKorea) {
+    const defaults = overseasRegionDefaults(normalizeMediaCountry(effectiveCountry));
+    data.region = defaults.region;
+    data.regionMain = defaults.regionMain;
+    data.regionSub = defaults.regionSub;
+    if (!hasValidManualCoords(mergedLat, mergedLng)) {
+      return json(
+        { error: "해외 매체는 위·경도 수동 입력이 필요합니다." },
+        400,
+      );
+    }
+  }
+
   const mergedNearby =
     "nearbyFacilities" in body
       ? body.nearbyFacilities === null || body.nearbyFacilities === undefined
@@ -533,6 +565,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     !mergedLandmarks?.trim();
 
   if (
+    isKorea &&
     !nearbyKeysTouched &&
     mergedLat != null &&
     mergedLng != null &&
@@ -587,6 +620,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 
   if (
+    isKorea &&
     !("dailyFootfall" in body) &&
     mergedLat != null &&
     mergedLng != null &&
@@ -637,11 +671,18 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     region: mergedRegion,
     regionZone: mergedRegionZone,
   };
-  applyNormalizedMediaLocation(locNorm);
-  data.region = locNorm.region;
-  data.regionZone = locNorm.regionZone;
-  if (locNorm.city) data.city = locNorm.city;
-  if (locNorm.district) data.district = locNorm.district;
+  if (isKorea) {
+    applyNormalizedMediaLocation(locNorm);
+    data.region = locNorm.region;
+    data.regionZone = locNorm.regionZone;
+    if (locNorm.city) data.city = locNorm.city;
+    if (locNorm.district) data.district = locNorm.district;
+  } else {
+    data.region = mergedRegion;
+    data.regionZone = mergedRegionZone;
+    if (mergedCity != null) data.city = mergedCity;
+    if (mergedDistrict != null) data.district = mergedDistrict;
+  }
 
   let bunnyUrlsToPurge: string[] = [];
   if (body.extractedImages !== undefined || body.image !== undefined) {
