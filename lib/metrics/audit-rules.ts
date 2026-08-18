@@ -108,8 +108,6 @@ export const SCHEMA_MISSING_FIELDS = [
   "playsPerHour",
   "coverageDongs",
   "coveragePopulation",
-  "demoGenderSplit",
-  "demoAgeSplit",
   "resolutionW",
   "resolutionH",
   "aspectRatio",
