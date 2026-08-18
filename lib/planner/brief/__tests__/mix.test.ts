@@ -342,3 +342,27 @@ test("[fixture] 모든 축은 근거 문장을 반드시 가진다", () => {
     }
   }
 });
+
+test("[fixture] 혼합 CPM — 총 노출 0이면 산정 불가", () => {
+  const metrics = calcMixMetrics({
+    lines: [],
+    days: 14,
+    budgetWon: 30_000_000,
+  });
+  assert.equal(metrics.mixCpmWon.value, null);
+  assert.equal(metrics.totalImpressions.value, 0);
+});
+
+test("[fixture] 혼합 CPM — 금액·노출 없으면 CPM 산정 불가", () => {
+  const metrics = calcMixMetrics({
+    lines: [
+      {
+        media: fixtureMedia({ price: 0, dailyFootTraffic: 0 }),
+        units: 1,
+      },
+    ],
+    days: 14,
+    budgetWon: 30_000_000,
+  });
+  assert.equal(metrics.mixCpmWon.value, null);
+});

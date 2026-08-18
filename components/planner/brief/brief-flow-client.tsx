@@ -1,12 +1,7 @@
 "use client";
 
 /**
- * PR-6a 통합 플래너 3단계 흐름 (임시 마운트 `/planner/v2`).
- *
- * 6a 범위: Step 1 만 실제 구현. Step 2(믹스 편집)·Step 3(요약·저장)은
- * 후속 PR(6b/6c) 자리표시자. 흐름·상태 전환만 먼저 검증한다.
- *
- * 6c 에서 `/planner` 를 이 흐름으로 교체하고 legacy 6단계를 리다이렉트한다.
+ * PR-6c 통합 플래너 3단계 흐름 — `/planner` 메인.
  */
 
 import { useSyncExternalStore } from "react";
@@ -15,6 +10,7 @@ import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore, type BriefStoreState } from "@/lib/planner/brief/store";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
+import { BriefStepThree } from "@/components/planner/brief/brief-step-three";
 import type { BriefWizardStep } from "@/lib/planner/brief/types";
 
 const STEP_LABELS: Record<BriefWizardStep, { ko: string; en: string }> = {
@@ -68,34 +64,6 @@ function Stepper({
   );
 }
 
-function StepPlaceholder({
-  isKo,
-  onBack,
-}: {
-  isKo: boolean;
-  onBack: () => void;
-}) {
-  const pr = "PR-6c";
-  const title = isKo ? "결과 · 저장·공유" : "Result · save & share";
-  return (
-    <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border p-10 text-center">
-      <p className="text-lg font-semibold">{title}</p>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {isKo
-          ? `이 단계는 ${pr} 에서 구현됩니다. Step 1 브리프 상태는 저장되어 있습니다.`
-          : `This step ships in ${pr}. Your Step 1 brief is saved.`}
-      </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-6 text-sm font-medium text-primary underline"
-      >
-        {isKo ? "← 브리프로 돌아가기" : "← Back to brief"}
-      </button>
-    </div>
-  );
-}
-
 const selectStep = (s: BriefStoreState) => s.wizardStep;
 
 export function BriefFlowClient({
@@ -108,8 +76,6 @@ export function BriefFlowClient({
   const wizardStep = useBriefStore(selectStep);
   const setWizardStep = useBriefStore((s) => s.setWizardStep);
 
-  // persist 복원 전 SSR/CSR 불일치 방지 — 하이드레이션 완료 전엔 step 1.
-  // useSyncExternalStore: 서버 스냅샷 false, 클라 복원 시 반응형 전환.
   const hydrated = useSyncExternalStore(
     (cb) => useBriefStore.persist.onFinishHydration(cb),
     () => useBriefStore.persist.hasHydrated(),
@@ -125,7 +91,7 @@ export function BriefFlowClient({
       ) : step === 2 ? (
         <BriefStepTwo catalog={catalog} />
       ) : (
-        <StepPlaceholder isKo={isKo} onBack={() => setWizardStep(2)} />
+        <BriefStepThree catalog={catalog} />
       )}
     </div>
   );

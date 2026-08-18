@@ -12,11 +12,11 @@ export async function generateMetadata({
   const locale = await resolveLocaleParam(params);
   const isKo = locale === "ko";
   const title = isKo
-    ? "OOH 미디어 플래너 | THINKAD 싱커드"
-    : "OOH media planner | THINKAD";
+    ? "미디어 플래너 | THINKAD"
+    : "Media Planner | THINKAD";
   const description = isKo
-    ? "예산과 타겟을 입력하면 AI가 최적 매체 조합과 예상 성과를 3분 안에 제안합니다."
-    : "Enter budget and target audience—get an AI-recommended media mix and forecast in about 3 minutes.";
+    ? "브리프 → 믹스 → 결과, 3단계로 캠페인 플랜을 만듭니다."
+    : "Brief → mix → result — build a campaign plan in three steps.";
   const ogTitle = title;
   return {
     title,

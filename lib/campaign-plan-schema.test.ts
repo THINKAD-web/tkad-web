@@ -40,6 +40,15 @@ const SAMPLE = {
     totalImpressions: 1_000_000,
     mixCpmWon: 45_000,
     totalCostWon: 45_000_000,
+    dataQuality: {
+      totalCostWon: "measured",
+      totalImpressions: "derived",
+      mixCpmWon: "derived",
+      netReach: null,
+      reachRate: null,
+      frequency: null,
+      grp: null,
+    },
   },
 };
 
