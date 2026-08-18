@@ -92,6 +92,8 @@ export interface MediaItem {
   nearbyStations?: string;
   /** 주변 랜드마크 요약 */
   nearbyLandmarks?: string;
+  /** ISO 3166-1 alpha-2 — JJ-1 JP ¥ 표시 */
+  country?: string;
   type: string;
   price: number;
   /** 집행 단가 기준: 월·2주·주·일 */

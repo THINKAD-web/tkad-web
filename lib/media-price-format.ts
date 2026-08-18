@@ -9,6 +9,10 @@ import {
   readContextFromMedia,
   type MediaPricePeriodReadContext,
 } from "@/lib/media-price-period-read";
+import {
+  formatMediaPriceForDisplay,
+  formatMediaPriceWithPeriodForDisplay,
+} from "@/lib/media-display-currency";
 
 /**
  * DB `Media.price` / 카탈로그 가격 필드 → 원(KRW).
@@ -125,12 +129,15 @@ export function formatMediaPriceWon(wonUnits: number, locale = "ko-KR"): string 
   return compact;
 }
 
-/** 카탈로그 `price` 필드(원) → 컴팩트 ₩ */
+/** DB 원 단위 가격 → 공개 UI 표기. JP 매체는 ¥ 표시 (JJ-1). */
 export function formatCatalogPriceFieldWon(
   value: number,
   locale = "ko-KR",
+  country?: string | null,
 ): string {
-  return formatMediaPrice(value, locale);
+  const won = catalogPriceFieldToWon(value);
+  if (won <= 0) return mediaPriceOnInquiryLabel(locale);
+  return formatMediaPriceForDisplay(won, country, locale);
 }
 
 /** @deprecated alias — `formatCatalogPriceFieldWon` 과 동일 */
@@ -359,17 +366,13 @@ export function formatMediaPriceWithPeriodSuffix(
   price: number,
   period: MediaPricePeriodKey | string | null | undefined,
   locale = "ko-KR",
+  country?: string | null,
 ): string {
   const won = catalogPriceFieldToWon(price);
   if (won <= 0) {
     return mediaPriceOnInquiryLabel(locale);
   }
-  const priceLabel = formatMediaPriceCompactWon(won, locale);
-  const periodLabel = formatPricePeriodShortLabel(
-    period,
-    locale.startsWith("ko") ? "ko" : "en",
-  );
-  return `${priceLabel}/${periodLabel}`;
+  return formatMediaPriceWithPeriodForDisplay(won, period, country, locale);
 }
 
 /** 카드·예산 비교용 — 단가 주기 → 월 환산(원). matching-engine 과 동일 계수. */
@@ -449,11 +452,18 @@ export function compareMediaByMonthlyEquivalentPrice(
 }
 
 export function formatMediaDisplayPrice(
-  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions">,
+  media: Pick<MediaItem, "price" | "pricePeriod" | "priceOptions"> & {
+    country?: string | null;
+  },
   locale = "ko-KR",
 ): string {
   const { priceWon, period } = resolveMediaDisplayPrice(media);
-  return formatMediaPriceWithPeriodSuffix(priceWon, period, locale);
+  return formatMediaPriceWithPeriodSuffix(
+    priceWon,
+    period,
+    locale,
+    media.country,
+  );
 }
 
 /**

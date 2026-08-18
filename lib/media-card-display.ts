@@ -67,7 +67,7 @@ export function catalogItemToDisplayModel(
   const locale = opts.isKo ? "ko-KR" : "en-US";
   const formattedNumericPrice =
     item.price && item.price > 0
-      ? formatCatalogPriceFieldWon(item.price, locale)
+      ? formatCatalogPriceFieldWon(item.price, locale, item.country)
       : null;
   const displayPrice =
     opts.priceLabel?.trim() || formattedNumericPrice || null;
@@ -108,6 +108,7 @@ export function mapItemToDisplayModel(
     item.price,
     item.pricePeriod,
     locale,
+    item.country,
   );
 
   return {

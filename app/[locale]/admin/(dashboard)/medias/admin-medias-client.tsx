@@ -122,6 +122,7 @@ import {
   normalizeMediaCountry,
   overseasRegionDefaults,
 } from "@/lib/media-country";
+import { formatMediaPriceJpyPreview } from "@/lib/media-display-currency";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -1074,6 +1075,10 @@ export default function AdminMediasClient({
   );
 
   const isOverseasMedia = !isKoreaMediaCountry(form.country);
+  const jpyPricePreview = useMemo(() => {
+    if (form.country !== "JP" || !form.price) return null;
+    return formatMediaPriceJpyPreview(form.price);
+  }, [form.country, form.price]);
 
   useEffect(() => {
     if (!modalOpen) {
@@ -3738,6 +3743,14 @@ export default function AdminMediasClient({
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   원 단위로 입력 (예: 70만원 → 700000)
                 </p>
+                {jpyPricePreview ? (
+                  <p className="mt-1 text-[11px] font-medium text-amber-800">
+                    ¥ 미리보기: {jpyPricePreview}
+                    <span className="ml-1 font-normal text-muted-foreground">
+                      (저장값은 원화 그대로)
+                    </span>
+                  </p>
+                ) : null}
               </div>
               <p className="rounded-md border border-border bg-muted/40 px-3 py-2 text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">
                 선택 정보

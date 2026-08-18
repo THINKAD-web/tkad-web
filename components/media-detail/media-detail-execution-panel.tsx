@@ -228,7 +228,7 @@ export function MediaDetailExecutionPanel({
                   : `${uniformPriceSummary.labelsJoined} — same rate`}
               </p>
               <p className="mt-1 font-display text-[length:var(--qp-text-body)] font-bold tabular-nums dark:text-white text-gray-900">
-                {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon)}
+                {formatCatalogPriceFieldWon(uniformPriceSummary.priceWon, isKo ? "ko-KR" : "en-US", media.country)}
               </p>
             </div>
           ) : (
@@ -265,7 +265,7 @@ export function MediaDetailExecutionPanel({
                       {opt.label}
                     </span>
                     <span className="font-display font-bold tabular-nums dark:text-white text-gray-900">
-                      {formatCatalogPriceFieldWon(opt.price)}
+                      {formatCatalogPriceFieldWon(opt.price, isKo ? "ko-KR" : "en-US", media.country)}
                     </span>
                   </div>
                   {metaLine ? (

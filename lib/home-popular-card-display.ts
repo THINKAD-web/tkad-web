@@ -27,6 +27,7 @@ export function buildHomePopularCardPriceDisplay(
     | "productPriceWon"
     | "productPriceDays"
     | "productPriceIsEstimate"
+    | "country"
   >,
   locale: string,
   isKo: boolean,
@@ -69,12 +70,14 @@ export function buildHomePopularCardPriceDisplay(
     item.price,
     item.pricePeriod,
     locale,
+    item.country,
   );
   const monthlyWon = priceToMonthlyEquivalentWon(item.price, item.pricePeriod);
   const monthlyLabel = formatMediaPriceWithPeriodSuffix(
     monthlyWon,
     "month",
     locale,
+    item.country,
   );
 
   if (!isNonMonthlyPricePeriod(item.pricePeriod)) {
