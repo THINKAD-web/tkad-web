@@ -130,7 +130,12 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
         : undefined;
 
   const locationEn =
-    [m.district, m.city].filter(Boolean).join(", ") || m.location;
+    (m as Media & { locationEn?: string | null }).locationEn?.trim() ||
+    [m.district, m.city].filter(Boolean).join(", ") ||
+    m.location;
+
+  const descriptionEnRaw = (m as Media & { descriptionEn?: string | null })
+    .descriptionEn;
 
   const priceOptions: MediaPriceOption[] | undefined = (() => {
     const raw = (m as unknown as { priceOptions?: unknown }).priceOptions;
@@ -245,9 +250,13 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     features: m.effectMemo ?? m.description ?? undefined,
     featuresEn: m.effectMemo ?? m.description ?? undefined,
     catalogDescription: m.description?.trim() || undefined,
-    catalogDescriptionEn: m.description?.trim() || undefined,
+    catalogDescriptionEn:
+      descriptionEnRaw?.trim() || m.description?.trim() || undefined,
     description: m.description?.trim() || undefined,
-    descriptionEn: m.description?.trim() || undefined,
+    descriptionEn:
+      descriptionEnRaw?.trim() ||
+      m.description?.trim() ||
+      undefined,
     trafficPattern:
       m.trafficPattern && typeof m.trafficPattern === "object"
         ? (m.trafficPattern as MediaItem["trafficPattern"])

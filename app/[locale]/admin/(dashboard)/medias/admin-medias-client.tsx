@@ -123,6 +123,10 @@ import {
   overseasRegionDefaults,
 } from "@/lib/media-country";
 import { formatMediaPriceJpyPreview } from "@/lib/media-display-currency";
+import {
+  AdminMediaEnTranslateFields,
+  fetchMediaEnTranslation,
+} from "@/components/admin/admin-media-en-translate-fields";
 
 const AdminMediaInstallLocationsMap = dynamic(
   () => import("@/components/admin-media-install-locations-map"),
@@ -276,6 +280,8 @@ function matchesCategoryFilter(type: string, filter: string): boolean {
 type AdminMediaForm = {
   name: string;
   nameEn: string;
+  locationEn: string;
+  descriptionEn: string;
   /** ISO 3166-1 alpha-2 */
   country: string;
   location: string;
@@ -355,6 +361,8 @@ function resolveGalleryUrlsChange(
 const emptyForm: AdminMediaForm = {
   name: "",
   nameEn: "",
+  locationEn: "",
+  descriptionEn: "",
   country: DEFAULT_MEDIA_COUNTRY,
   location: "",
   city: "",
@@ -544,6 +552,8 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
   return {
     name: m.name,
     nameEn: m.nameEn ?? "",
+    locationEn: m.locationEn ?? "",
+    descriptionEn: m.descriptionEn ?? "",
     country: normalizeMediaCountry(m.country),
     location: m.location,
     city: m.city ?? "",
@@ -654,6 +664,8 @@ function formToApiBody(
   return {
     name: form.name.trim(),
     nameEn: form.nameEn.trim() || null,
+    locationEn: form.locationEn.trim() || null,
+    descriptionEn: form.descriptionEn.trim() || null,
     country: normalizeMediaCountry(form.country),
     location: form.location.trim(),
     region: form.region.trim(),
@@ -889,6 +901,13 @@ export default function AdminMediasClient({
   const [geoLookupLoading, setGeoLookupLoading] = useState(false);
   const [geoLookupError, setGeoLookupError] = useState<string | null>(null);
   const [activeInstallKey, setActiveInstallKey] = useState<string | null>(null);
+  const [aiTranslateLoading, setAiTranslateLoading] = useState(false);
+  const [aiTranslateError, setAiTranslateError] = useState<string | null>(null);
+  const [aiDraftFields, setAiDraftFields] = useState({
+    nameEn: false,
+    locationEn: false,
+    descriptionEn: false,
+  });
   const [coverageSidoFilter, setCoverageSidoFilter] = useState("서울특별시");
   const [coverageSigunguSearch, setCoverageSigunguSearch] = useState("");
 
@@ -1079,6 +1098,34 @@ export default function AdminMediasClient({
     if (form.country !== "JP" || !form.price) return null;
     return formatMediaPriceJpyPreview(form.price);
   }, [form.country, form.price]);
+
+  const runAiEnTranslation = useCallback(async () => {
+    setAiTranslateError(null);
+    setAiTranslateLoading(true);
+    try {
+      const result = await fetchMediaEnTranslation(form);
+      if (!result.ok) {
+        setAiTranslateError(result.message);
+        return;
+      }
+      const j = result.data;
+      setForm((f) => ({
+        ...f,
+        nameEn: j.nameEn?.trim() || f.nameEn,
+        locationEn: j.locationEn?.trim() || f.locationEn,
+        descriptionEn: j.descriptionEn?.trim() || f.descriptionEn,
+      }));
+      setAiDraftFields({
+        nameEn: Boolean(j.nameEn?.trim()),
+        locationEn: Boolean(j.locationEn?.trim()),
+        descriptionEn: Boolean(j.descriptionEn?.trim()),
+      });
+    } catch {
+      setAiTranslateError("AI 요청 실패");
+    } finally {
+      setAiTranslateLoading(false);
+    }
+  }, [form]);
 
   useEffect(() => {
     if (!modalOpen) {
@@ -1285,6 +1332,8 @@ export default function AdminMediasClient({
     setPriceOptDrafts([]);
     intentionalPurgeUrlsRef.current = [];
     setSaveError(null);
+    setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
+    setAiTranslateError(null);
     setModalOpen(true);
   }, []);
 
@@ -1292,6 +1341,8 @@ export default function AdminMediasClient({
     const gen = ++editDetailLoadGenRef.current;
     setEditing(media);
     setSaveError(null);
+    setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
+    setAiTranslateError(null);
     intentionalPurgeUrlsRef.current = [];
     initialGallerySnapshotRef.current = null;
     setForm(emptyForm);
@@ -1570,6 +1621,7 @@ export default function AdminMediasClient({
       intentionalPurgeUrlsRef.current = [];
       clearAdminMediaFormDraft();
       setDraftSavedAt(null);
+      setAiDraftFields({ nameEn: false, locationEn: false, descriptionEn: false });
       setModalOpen(false);
     } catch (e) {
       setSaveError(
@@ -3074,18 +3126,16 @@ export default function AdminMediasClient({
                   placeholder={mediaNameKoPlaceholder(form.country)}
                 />
               </div>
-              <div>
-                <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  매체명 (영어)
-                </label>
-                <Input
-                  value={form.nameEn}
-                  onChange={(e) =>
-                    setForm((f) => ({ ...f, nameEn: e.target.value }))
-                  }
-                  placeholder={mediaNameEnPlaceholder(form.country, true)}
-                />
-              </div>
+              <AdminMediaEnTranslateFields
+                form={form}
+                setForm={setForm}
+                aiDraftFields={aiDraftFields}
+                setAiDraftFields={setAiDraftFields}
+                aiTranslateLoading={aiTranslateLoading}
+                aiTranslateError={aiTranslateError}
+                editDetailLoading={editDetailLoading}
+                onTranslate={runAiEnTranslation}
+              />
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
                   위치(주소) *

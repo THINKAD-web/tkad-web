@@ -35,6 +35,8 @@ export type AdminMediaDto = {
   id: string;
   name: string;
   nameEn: string | null;
+  /** JJ-2: 영문 위치 (AI 초안 또는 수동) */
+  locationEn: string | null;
   location: string;
   /** ISO 3166-1 alpha-2 */
   country: string;
@@ -46,6 +48,8 @@ export type AdminMediaDto = {
   width: string | null;
   height: string | null;
   description: string | null;
+  /** JJ-2: 영문 상세 설명 (AI 초안 또는 수동) */
+  descriptionEn: string | null;
   subCategory: string | null;
   mediaCategory: string[];
   targetCategory: string[];
@@ -286,6 +290,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     id,
     name,
     nameEn: pickStr(r, "nameEn", "name_en"),
+    locationEn: pickStr(r, "locationEn", "location_en"),
     country: normalizeMediaCountry(r.country),
     location,
     region,
@@ -296,6 +301,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     width: pickStr(r, "width", "width"),
     height: pickStr(r, "height", "height"),
     description: pickStr(r, "description", "description"),
+    descriptionEn: pickStr(r, "descriptionEn", "description_en"),
     subCategory: pickStr(r, "subCategory", "sub_category"),
     mediaCategory: pickStrArr(r, "mediaCategory", "media_category"),
     targetCategory: pickStrArr(r, "targetCategory", "target_category"),
@@ -423,6 +429,7 @@ export function prismaMediaToAdminDto(
     id: m.id,
     name: m.name,
     nameEn: m.nameEn,
+    locationEn: (m as Media & { locationEn?: string | null }).locationEn ?? null,
     country: normalizeMediaCountry(m.country),
     location: m.location,
     region: m.region,
@@ -433,6 +440,8 @@ export function prismaMediaToAdminDto(
     width: m.width,
     height: m.height,
     description: m.description,
+    descriptionEn:
+      (m as Media & { descriptionEn?: string | null }).descriptionEn ?? null,
     subCategory: m.subCategory,
     mediaCategory: m.mediaCategory ?? [],
     targetCategory: m.targetCategory ?? [],

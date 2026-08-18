@@ -214,6 +214,10 @@ export async function POST(request: NextRequest) {
 
   const desc = optStr(body.description);
   if (desc !== undefined) data.description = desc;
+  const descEn = optStr(body.descriptionEn);
+  if (descEn !== undefined) data.descriptionEn = descEn;
+  const locEn = optStr(body.locationEn);
+  if (locEn !== undefined) data.locationEn = locEn;
   const sc = optStr(body.subCategory);
   if (sc !== undefined) data.subCategory = sc;
   const tags = optStrArr(body.tags);

@@ -175,6 +175,8 @@ model Media {
   slug               String?          @unique
   name               String
   nameEn             String?          @map("name_en")
+  /// 영문 위치 표기 (JJ-2 AI 번역·수동 입력)
+  locationEn         String?          @map("location_en")
   location           String
   /// ISO 3166-1 alpha-2 (U-series: KR default, overseas manual coords)
   country            String           @default("KR")
@@ -194,6 +196,7 @@ model Media {
   height             String?
 
   description           String?
+  descriptionEn         String?          @map("description_en")
   subCategory           String?   @map("sub_category")
   /// 매체 카테고리 slug 배열 (대·소분류, `MediaCategory.slug`)
   mediaCategory         String[]  @default([]) @map("media_category")
