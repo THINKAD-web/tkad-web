@@ -8,6 +8,7 @@ import {
   mediaNameEnPlaceholder,
   normalizeMediaCountry,
   overseasRegionDefaults,
+  applyOverseasMediaRegionFieldsOnSave,
 } from "./media-country.ts";
 
 test("normalizeMediaCountry defaults empty to KR", () => {
@@ -32,6 +33,13 @@ test("overseasRegionDefaults uses overseas browse escape hatch", () => {
   assert.equal(d.region, "jp");
   assert.equal(d.regionMain, "overseas");
   assert.equal(d.regionSub, "overseas");
+});
+
+test("applyOverseasMediaRegionFieldsOnSave clears stale region_zone", () => {
+  const d = applyOverseasMediaRegionFieldsOnSave("JP");
+  assert.equal(d.regionMain, "overseas");
+  assert.equal(d.region, "jp");
+  assert.equal(d.regionZone, null);
 });
 
 test("hasValidManualCoords rejects invalid coords", () => {

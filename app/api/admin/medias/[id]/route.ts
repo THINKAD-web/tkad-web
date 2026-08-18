@@ -40,7 +40,7 @@ import {
   hasValidManualCoords,
   isKoreaMediaCountry,
   normalizeMediaCountry,
-  overseasRegionDefaults,
+  applyOverseasMediaRegionFieldsOnSave,
 } from "@/lib/media-country";
 
 export const dynamic = "force-dynamic";
@@ -529,10 +529,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
 
   if (!isKorea) {
-    const defaults = overseasRegionDefaults(normalizeMediaCountry(effectiveCountry));
-    data.region = defaults.region;
-    data.regionMain = defaults.regionMain;
-    data.regionSub = defaults.regionSub;
+    const overseasRegion = applyOverseasMediaRegionFieldsOnSave(effectiveCountry);
+    data.region = overseasRegion.region;
+    data.regionMain = overseasRegion.regionMain;
+    data.regionSub = overseasRegion.regionSub;
+    data.regionZone = overseasRegion.regionZone;
     if (!hasValidManualCoords(mergedLat, mergedLng)) {
       return json(
         { error: "해외 매체는 위·경도 수동 입력이 필요합니다." },
@@ -686,8 +687,11 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     if (locNorm.city) data.city = locNorm.city;
     if (locNorm.district) data.district = locNorm.district;
   } else {
-    data.region = mergedRegion;
-    data.regionZone = mergedRegionZone;
+    const overseasRegion = applyOverseasMediaRegionFieldsOnSave(effectiveCountry);
+    data.region = overseasRegion.region;
+    data.regionMain = overseasRegion.regionMain;
+    data.regionSub = overseasRegion.regionSub;
+    data.regionZone = overseasRegion.regionZone;
     if (mergedCity != null) data.city = mergedCity;
     if (mergedDistrict != null) data.district = mergedDistrict;
   }
