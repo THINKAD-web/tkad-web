@@ -1,14 +1,11 @@
-import { Suspense } from "react";
-import RecommendPageClient from "./recommend-page-client";
-import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
+import { redirect } from "@/i18n/navigation";
 
-export const dynamic = "force-dynamic";
-
-export default async function RecommendPage() {
-  const catalog = await fetchPublicMediaCatalog();
-  return (
-    <Suspense fallback={null}>
-      <RecommendPageClient catalog={catalog} />
-    </Suspense>
-  );
+/** Legacy `/recommend` — next.config 301 + runtime redirect to `/planner`. */
+export default async function RecommendPage({
+  params,
+}: {
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+  redirect({ href: "/planner", locale });
 }
