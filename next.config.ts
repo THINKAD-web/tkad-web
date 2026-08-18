@@ -65,6 +65,32 @@ const nextConfig: NextConfig = {
         destination: "/about",
         permanent: true,
       },
+      // PR-6c — legacy 플래닝 진입점 → 통합 3단계 `/planner`
+      {
+        source: "/:locale(ko|en)/planner/v2",
+        destination: "/:locale/planner",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ko|en)/planner/integrated",
+        destination: "/:locale/planner",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ko|en)/planner/integrated/:path*",
+        destination: "/:locale/planner",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ko|en)/recommend",
+        destination: "/:locale/planner",
+        permanent: true,
+      },
+      {
+        source: "/:locale(ko|en)/media/packages",
+        destination: "/:locale/planner",
+        permanent: true,
+      },
     ];
   },
   /** 개발 모드 상단 Next 이슈 인디케이터(예: “N Issue”) 비활성화 — 운영 빌드에는 영향 없음 */

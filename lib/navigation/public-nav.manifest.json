@@ -16,10 +16,7 @@
       "id": "planning",
       "icon": "clipboard-list",
       "items": [
-        { "id": "media-planner", "href": "/planner" },
-        { "id": "integrated-planner", "href": "/planner/integrated" },
-        { "id": "package-proposal", "href": "/media/packages" },
-        { "id": "ai-recommend", "href": "/recommend" }
+        { "id": "media-planner", "href": "/planner" }
       ]
     },
     {

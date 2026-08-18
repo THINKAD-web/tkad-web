@@ -100,7 +100,6 @@ export async function HomePlannerLanding({
       value: t("speedMetric2Value", { count: mediaCountLabel }),
       label: t("speedMetric2Label"),
     },
-    { value: t("speedMetric3Value"), label: t("speedMetric3Label") },
   ];
 
   const steps = [
@@ -145,7 +144,7 @@ export async function HomePlannerLanding({
         title={t("speedTitle")}
         lead={t("speedLead")}
       >
-        <div className="grid grid-cols-3 gap-2 sm:gap-3 md:gap-4">
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
           {metricCards.map((m) => (
             <div
               key={m.label}
@@ -162,14 +161,14 @@ export async function HomePlannerLanding({
         </div>
         <div className="mt-8 flex flex-wrap items-center gap-3">
           <Link
-            href="/planner/integrated"
+            href="/planner"
             className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
           >
             {t("speedCtaPrimary")}
             <ArrowRight className="h-4 w-4" aria-hidden />
           </Link>
           <Link
-            href="/planner"
+            href="/media"
             className="inline-flex min-h-11 items-center justify-center rounded-md border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition-colors hover:bg-gray-50 dark:border-white/20 dark:bg-transparent dark:text-white dark:hover:bg-white/5"
           >
             {t("speedCtaSecondary")}
@@ -240,7 +239,7 @@ export async function HomePlannerLanding({
             }}
           />
           <Link
-            href={{ pathname: "/recommend", query: { mode: "ai" } }}
+            href="/planner"
             className="inline-flex min-h-11 w-full shrink-0 items-center justify-center gap-1.5 rounded-md border border-hermes/40 bg-hermes/5 px-5 py-2.5 text-sm font-semibold text-hermes transition-colors hover:bg-hermes/10 sm:w-auto lg:self-end"
           >
             {t("precisionCta")}
@@ -400,7 +399,7 @@ export async function HomePlannerLanding({
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Link
-                href="/planner/integrated"
+                href="/planner"
                 className="inline-flex min-h-11 items-center justify-center gap-1.5 rounded-md bg-hermes px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-hermes/90"
               >
                 {t("closeCtaPrimary")}

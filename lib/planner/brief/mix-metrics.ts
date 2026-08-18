@@ -159,10 +159,17 @@ export function calcMixMetrics(params: {
   }
 
   // 혼합 CPM — 단일 진입점(calcCPM)과 동일한 정의: 금액 / 노출 × 1000.
-  // 노출이 최소 기준 미만이면 산정하지 않는다.
+  // 유형별 CPM_BOUNDS 는 혼합에 적용할 수 없지만, 터무니없는 값은 막는다:
+  // - 총 노출 <= 0 이면 산정 불가
+  // - CPM <= 0 이면 산정 불가 (총액·노출 불일치)
   let mixCpm: number | null = null;
-  if (totalImpressions >= MIN_IMPRESSIONS_FOR_CPM && totalCostWon > 0) {
-    mixCpm = Math.round((totalCostWon / totalImpressions) * 1000);
+  if (
+    totalImpressions > 0 &&
+    totalImpressions >= MIN_IMPRESSIONS_FOR_CPM &&
+    totalCostWon > 0
+  ) {
+    const raw = Math.round((totalCostWon / totalImpressions) * 1000);
+    mixCpm = raw > 0 ? raw : null;
   }
 
   const budgetWon = Math.max(0, params.budgetWon);

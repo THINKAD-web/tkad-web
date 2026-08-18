@@ -3,15 +3,12 @@ import {
   BookOpen,
   FileText,
   GraduationCap,
-  Link2,
   Map,
   Network,
-  Package,
   Palette,
   RefreshCw,
   Search,
   Shield,
-  Sparkles,
   Target,
   Trophy,
   Tv2,
@@ -48,16 +45,16 @@ export const DISCOVERY_TABS: SubTab[] = [
 
 export const PLANNING_TABS: SubTab[] = [
   {
-    label: "단계별 플래너",
+    label: "미디어 플래너",
     href: "/planner",
     icon: BarChart3,
     match: (p) =>
       p === "/planner" ||
-      (p.startsWith("/planner") && !p.startsWith("/planner/integrated")),
+      p.startsWith("/planner/") ||
+      p === "/recommend" ||
+      p.startsWith("/recommend") ||
+      p === "/media/packages",
   },
-  { label: "통합 미디어 플래너", href: "/planner/integrated", icon: Link2 },
-  { label: "패키지 제안", href: "/media/packages", icon: Package },
-  { label: "빠른 AI 추천", href: "/recommend", icon: Sparkles },
 ];
 
 export const CONTENT_TABS: SubTab[] = [

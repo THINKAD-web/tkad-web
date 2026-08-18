@@ -1,20 +1,27 @@
 "use client";
 
 /**
- * PR-6a 통합 플래너 3단계 흐름 (임시 마운트 `/planner/v2`).
- *
- * 6a 범위: Step 1 만 실제 구현. Step 2(믹스 편집)·Step 3(요약·저장)은
- * 후속 PR(6b/6c) 자리표시자. 흐름·상태 전환만 먼저 검증한다.
- *
- * 6c 에서 `/planner` 를 이 흐름으로 교체하고 legacy 6단계를 리다이렉트한다.
+ * PR-6c 통합 플래너 3단계 흐름 — `/planner` 메인.
+ * L-1/L-2: 브리프·믹스 세션 경계 + 재진입 확인.
  */
 
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
+import { useSearchParams } from "next/navigation";
 import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore, type BriefStoreState } from "@/lib/planner/brief/store";
+import {
+  countMixUnits,
+  isMixBriefStale,
+} from "@/lib/planner/brief/brief-fingerprint";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
+import { BriefStepThree } from "@/components/planner/brief/brief-step-three";
+import {
+  BriefMixStaleDialog,
+  BriefResumeDialog,
+} from "@/components/planner/brief/brief-session-dialogs";
 import type { BriefWizardStep } from "@/lib/planner/brief/types";
 
 const STEP_LABELS: Record<BriefWizardStep, { ko: string; en: string }> = {
@@ -68,35 +75,9 @@ function Stepper({
   );
 }
 
-function StepPlaceholder({
-  isKo,
-  onBack,
-}: {
-  isKo: boolean;
-  onBack: () => void;
-}) {
-  const pr = "PR-6c";
-  const title = isKo ? "결과 · 저장·공유" : "Result · save & share";
-  return (
-    <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border p-10 text-center">
-      <p className="text-lg font-semibold">{title}</p>
-      <p className="mt-2 text-sm text-muted-foreground">
-        {isKo
-          ? `이 단계는 ${pr} 에서 구현됩니다. Step 1 브리프 상태는 저장되어 있습니다.`
-          : `This step ships in ${pr}. Your Step 1 brief is saved.`}
-      </p>
-      <button
-        type="button"
-        onClick={onBack}
-        className="mt-6 text-sm font-medium text-primary underline"
-      >
-        {isKo ? "← 브리프로 돌아가기" : "← Back to brief"}
-      </button>
-    </div>
-  );
-}
-
 const selectStep = (s: BriefStoreState) => s.wizardStep;
+const selectMixUnits = (s: BriefStoreState) => s.mixUnits;
+const selectMixFingerprint = (s: BriefStoreState) => s.mixBriefFingerprint;
 
 export function BriefFlowClient({
   catalog = [],
@@ -105,28 +86,140 @@ export function BriefFlowClient({
 }) {
   const locale = useLocale();
   const isKo = locale === "ko";
-  const wizardStep = useBriefStore(selectStep);
-  const setWizardStep = useBriefStore((s) => s.setWizardStep);
+  const searchParams = useSearchParams();
+  const planFromUrl = searchParams.get("plan");
 
-  // persist 복원 전 SSR/CSR 불일치 방지 — 하이드레이션 완료 전엔 step 1.
-  // useSyncExternalStore: 서버 스냅샷 false, 클라 복원 시 반응형 전환.
+  const wizardStep = useBriefStore(selectStep);
+  const mixUnits = useBriefStore(selectMixUnits);
+  const mixBriefFingerprint = useBriefStore(selectMixFingerprint);
+  const briefCore = useBriefStore((s) => ({
+    budgetInputWon: s.budgetInputWon,
+    budgetMode: s.budgetMode,
+    regionCodes: s.regionCodes,
+    genders: s.genders,
+    ageBands: s.ageBands,
+    flightStart: s.flightStart,
+    flightEnd: s.flightEnd,
+    goal: s.goal,
+  }));
+  const setWizardStep = useBriefStore((s) => s.setWizardStep);
+  const reset = useBriefStore((s) => s.reset);
+  const clearMix = useBriefStore((s) => s.clearMix);
+  const acknowledgeMixForCurrentBrief = useBriefStore(
+    (s) => s.acknowledgeMixForCurrentBrief,
+  );
+
   const hydrated = useSyncExternalStore(
     (cb) => useBriefStore.persist.onFinishHydration(cb),
     () => useBriefStore.persist.hasHydrated(),
     () => false,
   );
   const step: BriefWizardStep = hydrated ? wizardStep : 1;
+  const mixCount = countMixUnits(mixUnits);
+
+  const [resumeOpen, setResumeOpen] = useState(false);
+  const [staleOpen, setStaleOpen] = useState(false);
+  const pendingStepRef = useRef<BriefWizardStep | null>(null);
+  const resumePromptedRef = useRef(false);
+
+  const mixIsStale = isMixBriefStale({
+    mixUnits,
+    mixBriefFingerprint,
+    brief: briefCore,
+  });
+
+  useEffect(() => {
+    if (!hydrated || planFromUrl || resumePromptedRef.current) return;
+    if (mixCount >= 1) {
+      resumePromptedRef.current = true;
+      setResumeOpen(true);
+    }
+  }, [hydrated, mixCount, planFromUrl]);
+
+  const goToStep = useCallback(
+    (target: BriefWizardStep) => {
+      if (
+        (target === 2 || target === 3) &&
+        isMixBriefStale({
+          mixUnits: useBriefStore.getState().mixUnits,
+          mixBriefFingerprint: useBriefStore.getState().mixBriefFingerprint,
+          brief: useBriefStore.getState(),
+        })
+      ) {
+        pendingStepRef.current = target;
+        setStaleOpen(true);
+        return;
+      }
+      setWizardStep(target);
+    },
+    [setWizardStep],
+  );
+
+  const handleResumeContinue = () => {
+    if (
+      !useBriefStore.getState().mixBriefFingerprint &&
+      countMixUnits(useBriefStore.getState().mixUnits) > 0
+    ) {
+      acknowledgeMixForCurrentBrief();
+    }
+    setResumeOpen(false);
+  };
+
+  const handleResumeFreshStart = () => {
+    reset();
+    setResumeOpen(false);
+  };
+
+  const handleKeepMix = () => {
+    acknowledgeMixForCurrentBrief();
+    setStaleOpen(false);
+    const target = pendingStepRef.current ?? 2;
+    pendingStepRef.current = null;
+    setWizardStep(target);
+  };
+
+  const handleClearMix = () => {
+    clearMix();
+    setStaleOpen(false);
+    const target = pendingStepRef.current ?? 2;
+    pendingStepRef.current = null;
+    setWizardStep(target);
+  };
 
   return (
     <div>
-      <Stepper step={step} isKo={isKo} onJump={setWizardStep} />
+      <BriefResumeDialog
+        open={resumeOpen}
+        mixCount={mixCount}
+        isKo={isKo}
+        onContinue={handleResumeContinue}
+        onFreshStart={handleResumeFreshStart}
+      />
+      <BriefMixStaleDialog
+        open={staleOpen}
+        isKo={isKo}
+        onKeepMix={handleKeepMix}
+        onClearMix={handleClearMix}
+      />
+
+      <Stepper step={step} isKo={isKo} onJump={goToStep} />
       {step === 1 ? (
-        <BriefStepOne />
+        <BriefStepOne
+          onRequestNext={() => goToStep(2)}
+        />
       ) : step === 2 ? (
         <BriefStepTwo catalog={catalog} />
       ) : (
-        <StepPlaceholder isKo={isKo} onBack={() => setWizardStep(2)} />
+        <BriefStepThree catalog={catalog} />
       )}
+
+      {step === 2 && mixIsStale && !staleOpen && !resumeOpen ? (
+        <p className="mx-auto mt-4 max-w-3xl rounded-lg border border-amber-400/40 bg-amber-400/10 p-3 text-xs text-amber-900 dark:text-amber-200">
+          {isKo
+            ? "브리프 조건이 담을 때와 다릅니다. Step 1으로 돌아가 확인하거나, 매체를 조정해 주세요."
+            : "Brief conditions differ from when media was added. Review Step 1 or adjust the mix."}
+        </p>
+      ) : null}
     </div>
   );
 }

@@ -9,10 +9,8 @@ import {
   LineChart,
   ListVideo,
   MapPin,
-  Package,
   Palette,
   Search,
-  Sparkles,
   Target,
   Trophy,
   Wand2,
@@ -87,27 +85,7 @@ export const PUBLIC_NAV_GROUPS: PublicNavGroupDef[] = [
   {
     id: "planning",
     icon: ClipboardList,
-    items: [
-      { id: "media-planner", href: "/planner", icon: Lightbulb },
-      {
-        id: "integrated-planner",
-        href: "/planner/integrated",
-        icon: Sparkles,
-        secondary: true,
-      },
-      {
-        id: "package-proposal",
-        href: "/media/packages",
-        icon: Package,
-        secondary: true,
-      },
-      {
-        id: "ai-recommend",
-        href: "/recommend",
-        icon: Wand2,
-        secondary: true,
-      },
-    ],
+    items: [{ id: "media-planner", href: "/planner", icon: Lightbulb }],
   },
   {
     id: "insights",

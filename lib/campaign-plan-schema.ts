@@ -11,8 +11,11 @@
  * 하나의 형태를 정의할 뿐, 매체 데이터 계층을 참조하지 않는다.
  */
 
-/** 계산 엔진 버전 상수 — 스냅샷 시 자동 기록. */
-export const CAMPAIGN_PLAN_ENGINE_VERSION = "v0.1.0-plan-storage";
+import { METRICS_ENGINE_VERSION } from "@/lib/metrics/constants";
+import type { MetricBasis } from "@/lib/metrics/defaults";
+
+/** 계산 엔진 버전 — `CampaignPlan.engineVersion` 스냅샷에 기록 */
+export const CAMPAIGN_PLAN_ENGINE_VERSION = METRICS_ENGINE_VERSION;
 
 /** 기본 30일 TTL — DB `expires_at` 에 저장 */
 export const CAMPAIGN_PLAN_TTL_DAYS = 30;
@@ -68,10 +71,25 @@ export type CampaignPlanMetrics = {
   totalCostWon: number;
 };
 
+/** 저장 시 각 지표의 basis — 재계산·감사 추적용 (PR-6c) */
+export type CampaignPlanDataQuality = {
+  totalCostWon: MetricBasis;
+  totalImpressions: MetricBasis;
+  mixCpmWon: MetricBasis | null;
+  netReach: null;
+  reachRate: null;
+  frequency: null;
+  grp: null;
+};
+
+export type CampaignPlanStoredMetrics = CampaignPlanMetrics & {
+  dataQuality: CampaignPlanDataQuality;
+};
+
 export type CampaignPlanSnapshot = {
   brief: CampaignPlanBrief;
   mediaMix: CampaignPlanMediaLine[];
-  metrics: CampaignPlanMetrics;
+  metrics: CampaignPlanStoredMetrics;
   engineVersion: string;
 };
 

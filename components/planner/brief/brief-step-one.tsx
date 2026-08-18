@@ -110,7 +110,14 @@ function SectionLabel({
   );
 }
 
-export function BriefStepOne({ onNext }: { onNext?: () => void }) {
+export function BriefStepOne({
+  onRequestNext,
+  onNext,
+}: {
+  /** L-1: 부모가 Step 2 이동 전 브리프·믹스 확인 */
+  onRequestNext?: () => void;
+  onNext?: () => void;
+}) {
   const locale = useLocale();
   const isKo = locale === "ko";
 
@@ -400,7 +407,8 @@ export function BriefStepOne({ onNext }: { onNext?: () => void }) {
           type="button"
           disabled={!required.ok}
           onClick={() => {
-            store.setWizardStep(2);
+            if (onRequestNext) onRequestNext();
+            else store.setWizardStep(2);
             onNext?.();
           }}
         >
