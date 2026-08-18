@@ -456,12 +456,25 @@ export async function buildPlannerReportPdf(
       doc.setFontSize(PDF_LAYOUT.kpiLabelPt);
       setText(GRAY_500);
       doc.text(k.label, x + 4, y + 5.5);
-      setText(QP_ACCENT);
-      doc.setFontSize(PDF_LAYOUT.kpiValuePt);
-      const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
-      doc.text(vLines.slice(0, 1), x + 4, y + 12);
+      if (k.status === "pending") {
+        setText(GRAY_500);
+        doc.setFontSize(8);
+        doc.text("—", x + 4, y + 11);
+        doc.setFontSize(7);
+        const badge = k.badgeLabel ? `[${k.badgeLabel}]` : "[산정 중]";
+        doc.text(badge, x + 4, y + 14.5);
+        if (k.pendingHint) {
+          const hintLines = doc.splitTextToSize(k.pendingHint, kW - 7) as string[];
+          doc.text(hintLines.slice(0, 2), x + 4, y + 17.5);
+        }
+      } else {
+        setText(QP_ACCENT);
+        doc.setFontSize(PDF_LAYOUT.kpiValuePt);
+        const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
+        doc.text(vLines.slice(0, 1), x + 4, y + 12);
+      }
     });
-    y += 22;
+    y += 24;
   }
 
   // ── 성과 요약 차트 ──

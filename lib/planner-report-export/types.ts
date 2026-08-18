@@ -9,7 +9,16 @@
 
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 
-export type PlannerExportKpi = { label: string; value: string };
+export type PlannerExportKpiStatus = "value" | "pending";
+
+export type PlannerExportKpi = {
+  label: string;
+  value: string;
+  /** pending — 6b MetricsPanel 과 동일한 [산정 중] 상태 */
+  status?: PlannerExportKpiStatus;
+  badgeLabel?: string;
+  pendingHint?: string;
+};
 
 /** @see lib/document-media-detail.ts — 화면·PDF·PPTX 동일 필드 */
 export type PlannerExportMediaRow = {
@@ -151,6 +160,8 @@ export type PlannerReportExportPayload = {
   sections?: PlannerExportSection[];
   /** 데이터 기반 추천 근거 (AI narrative 와 별도) */
   recommendRationale?: PlannerExportRecommendRationale;
+  /** O-1 digital gap (R-3) — 스냅샷 없이 ooh_digital 일 때 PDF·화면에 명시 */
+  digitalOmittedNotice?: string;
   disclaimer: string;
 };
 

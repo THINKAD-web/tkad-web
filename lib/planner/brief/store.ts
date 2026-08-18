@@ -17,10 +17,13 @@ import type { CampaignPlanGender } from "@/lib/campaign-plan-schema";
 import {
   EMPTY_BRIEF,
   normalizeBriefInput,
+  isBriefEntryMode,
   type BriefAgeBand,
+  type BriefEntryMode,
   type BriefGoal,
   type BriefIndustry,
   type BriefWizardStep,
+  type BriefEntryMode,
   type BudgetMode,
   type CampaignBriefInput,
 } from "@/lib/planner/brief/types";
@@ -53,6 +56,8 @@ function toggleIn<T>(list: readonly T[], value: T): T[] {
 
 export type BriefStoreState = CampaignBriefInput & {
   wizardStep: BriefWizardStep;
+  /** O-2: 빠른 추천 vs 자세히 설계 */
+  entryMode: BriefEntryMode;
   /** O-1: OOH만 vs OOH+디지털 */
   channelMode: BriefChannelMode;
   /** O-1: 디지털 예산 비중 (10–50%) */
@@ -83,6 +88,9 @@ export type BriefStoreActions = {
   setWizardStep: (step: BriefWizardStep) => void;
   reset: () => void;
 
+  // ── O-2 진입 모드 ──
+  setEntryMode: (mode: BriefEntryMode) => void;
+
   // ── O-1 채널 ──
   setChannelMode: (mode: BriefChannelMode) => void;
   setDigitalBudgetPct: (pct: number) => void;
@@ -104,6 +112,7 @@ export type BriefStore = BriefStoreState & BriefStoreActions;
 const INITIAL: BriefStoreState = {
   ...EMPTY_BRIEF,
   wizardStep: 1,
+  entryMode: "detailed",
   channelMode: "ooh_only",
   digitalBudgetPct: 30,
   digitalChannelIds: defaultDigitalChannelIds(),
@@ -184,6 +193,8 @@ export const useBriefStore = create<BriefStore>()(
 
       setWizardStep: (step) => set({ wizardStep: step }),
       reset: () => set({ ...INITIAL }),
+
+      setEntryMode: (mode) => set({ entryMode: mode }),
 
       setChannelMode: (mode) => set({ channelMode: mode }),
       setDigitalBudgetPct: (pct) =>
@@ -270,6 +281,7 @@ export const useBriefStore = create<BriefStore>()(
         flightEnd: s.flightEnd,
         freeText: s.freeText,
         wizardStep: s.wizardStep,
+        entryMode: s.entryMode,
         channelMode: s.channelMode,
         digitalBudgetPct: s.digitalBudgetPct,
         digitalChannelIds: s.digitalChannelIds,
@@ -283,6 +295,9 @@ export const useBriefStore = create<BriefStore>()(
           ...current,
           ...normalizeBriefInput(p),
           wizardStep: step === 1 || step === 2 || step === 3 ? step : 1,
+          entryMode: isBriefEntryMode(p.entryMode)
+            ? p.entryMode
+            : current.entryMode,
           channelMode: isBriefChannelMode(p.channelMode)
             ? p.channelMode
             : current.channelMode,
