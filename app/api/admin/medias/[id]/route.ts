@@ -103,6 +103,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   if (body.name != null) data.name = String(body.name).trim();
   if (body.nameEn !== undefined)
     data.nameEn = String(body.nameEn ?? "").trim() || null;
+  if (body.locationEn !== undefined)
+    data.locationEn = String(body.locationEn ?? "").trim() || null;
   if (body.country !== undefined) {
     data.country = normalizeMediaCountry(body.country);
   }
@@ -134,6 +136,8 @@ export async function PATCH(request: NextRequest, { params }: Params) {
 
   if (body.description !== undefined)
     data.description = String(body.description ?? "").trim() || null;
+  if (body.descriptionEn !== undefined)
+    data.descriptionEn = String(body.descriptionEn ?? "").trim() || null;
   if (body.subCategory !== undefined)
     data.subCategory = String(body.subCategory ?? "").trim() || null;
   if (body.tags !== undefined) {

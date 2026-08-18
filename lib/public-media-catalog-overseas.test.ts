@@ -22,6 +22,8 @@ function baseMedia(overrides: Partial<Media> = {}): Media {
     width: null,
     height: null,
     description: null,
+    descriptionEn: null,
+    locationEn: null,
     subCategory: null,
     mediaCategory: [],
     mediaMainCategory: null,
@@ -97,4 +99,34 @@ test("prismaMediaToMediaItem: KR keeps Seoul fallback", () => {
   assert.ok(Math.abs(item.lat! - 37.5665) < 0.001);
   assert.ok(Math.abs(item.lng! - 126.978) < 0.001);
   assert.equal(item.coordinatesAreFallback, true);
+});
+
+test("prismaMediaToMediaItem: descriptionEn/locationEn from DB when set", () => {
+  const item = prismaMediaToMediaItem({
+    ...baseMedia({
+      description: "한국어 설명",
+      descriptionEn: "English description",
+      location: "도쿄",
+      locationEn: "Tokyo, Japan",
+      district: "Shibuya",
+      city: "Tokyo",
+    }),
+    advertiserExecutions: [],
+  });
+  assert.equal(item.descriptionEn, "English description");
+  assert.equal(item.locationEn, "Tokyo, Japan");
+});
+
+test("prismaMediaToMediaItem: en fields fallback when null", () => {
+  const item = prismaMediaToMediaItem({
+    ...baseMedia({
+      description: "한국어 설명",
+      location: "시부야",
+      district: "Shibuya",
+      city: "Tokyo",
+    }),
+    advertiserExecutions: [],
+  });
+  assert.equal(item.descriptionEn, "한국어 설명");
+  assert.equal(item.locationEn, "Shibuya, Tokyo");
 });
