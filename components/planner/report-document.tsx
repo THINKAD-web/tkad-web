@@ -2,6 +2,10 @@
 
 import { forwardRef } from "react";
 import { cn } from "@/lib/utils";
+import {
+  EXPORT_BADGE_HTML_CLASS,
+  exportBadgeBracketLabel,
+} from "@/lib/planner-report-export/export-badge";
 import type {
   PlannerReportExportPayload,
   PlannerExportChartDatum,
@@ -300,9 +304,13 @@ export const PlannerReportDocument = forwardRef<
                     <p className="font-sans text-lg font-bold tabular-nums text-gray-400">
                       —
                     </p>
-                    <p className="mt-0.5 text-[10px] font-semibold text-zinc-500">
-                      [{k.badgeLabel ?? (isKo ? "산정 중" : "Pending")}]
-                    </p>
+                    <span
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      data-testid="report-kpi-badge"
+                      data-kpi-badge={k.badge}
+                    >
+                      {exportBadgeBracketLabel(k.badge, isKo)}
+                    </span>
                     {k.pendingHint ? (
                       <p className="mt-0.5 text-[10px] leading-snug text-gray-500">
                         {k.pendingHint}
@@ -310,9 +318,18 @@ export const PlannerReportDocument = forwardRef<
                     ) : null}
                   </div>
                 ) : (
-                  <p className="mt-1 break-words font-sans text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
-                    {k.value}
-                  </p>
+                  <div className="mt-1">
+                    <p className="break-words font-sans text-lg font-bold tabular-nums text-[color:var(--qp-accent)]">
+                      {k.value}
+                    </p>
+                    <span
+                      className={`mt-0.5 inline-flex items-center rounded border px-1.5 py-0.5 text-[10px] font-semibold ${EXPORT_BADGE_HTML_CLASS[k.badge]}`}
+                      data-testid="report-kpi-badge"
+                      data-kpi-badge={k.badge}
+                    >
+                      {exportBadgeBracketLabel(k.badge, isKo)}
+                    </span>
+                  </div>
                 )}
               </div>
             ))}

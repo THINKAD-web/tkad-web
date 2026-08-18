@@ -35,10 +35,12 @@ import type { PlannerCampaignGoal } from "@/lib/planner-logic";
 import type { PlannerGoalFollowUp } from "@/lib/planner/goal-follow-up";
 import { buildGoalFollowUpReportLines } from "@/lib/planner/goal-follow-up";
 import type { PlannerSeoulZoneKey } from "@/lib/planner/seoul-zones";
+import type { ExportKpiBadgeKey } from "@/lib/planner-report-export/export-badge";
 import {
   exportKpiPending,
   exportKpiValue,
 } from "@/lib/planner-report-export/export-kpi";
+import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 
 export type BuildOohPayloadArgs = {
   isKo: boolean;
@@ -77,6 +79,8 @@ export type BuildOohPayloadArgs = {
   planCartItems?: import("@/lib/plan-cart").PlanCartItem[];
   /** R-3: channelMode=ooh_digital 이지만 digital 스냅샷 없을 때 */
   digitalOmittedNotice?: string;
+  /** PR-8-2 — KPI별 배지 (미지정 시 impressions/cpm=estimated, reach/roi=pending) */
+  kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
 };
 
 export function buildOohReportPayload(
@@ -100,6 +104,11 @@ export function buildOohReportPayload(
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
 
+  const badge = (key: ExportKpiBadgeKey): PlannerExportBadgeKind => {
+    if (key === "reach" || key === "roi") return "pending";
+    return a.kpiBadges?.[key] ?? "estimated";
+  };
+
   const kpis: PlannerReportExportPayload["kpis"] = [];
   if (a.metrics || usePortfolioReach) {
     kpis.push(
@@ -110,6 +119,7 @@ export function buildOohReportPayload(
             ? portfolioMetrics.totalImpressions
             : (a.metrics?.estimatedTotalImpressions ?? 0),
         ),
+        badge("impressions"),
       ),
     );
   }
@@ -124,6 +134,7 @@ export function buildOohReportPayload(
       exportKpiValue(
         isKo ? "블렌디드 CPM" : "Blended CPM",
         `₩${blendedForKpi.toLocaleString()}`,
+        badge("cpm"),
       ),
     );
   }

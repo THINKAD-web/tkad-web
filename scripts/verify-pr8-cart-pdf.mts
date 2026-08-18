@@ -19,13 +19,22 @@ function buildPreviewHtml(payload: ReturnType<typeof buildOohReportPayload>): st
         return `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#f9fafb">
           <div style="font-size:11px;color:#6b7280">${k.label}</div>
           <div style="font-size:18px;font-weight:bold;color:#9ca3af">—</div>
-          <div style="font-size:10px;font-weight:600;color:#71717a">[${k.badgeLabel ?? "산정 중"}]</div>
+          <div style="font-size:10px;font-weight:600;color:#71717a">[${k.badge === "pending" ? "산정 중" : k.badge}]</div>
           <div style="font-size:10px;color:#6b7280;margin-top:4px">${k.pendingHint ?? ""}</div>
         </div>`;
       }
+      const badgeLabel =
+        k.badge === "measured"
+          ? "실측"
+          : k.badge === "estimated"
+            ? "추정"
+            : k.badge === "benchmark"
+              ? "벤치마크 기반"
+              : "산정 중";
       return `<div style="border:1px solid #e5e7eb;border-radius:12px;padding:14px;background:#f9fafb">
         <div style="font-size:11px;color:#6b7280">${k.label}</div>
         <div style="font-size:18px;font-weight:bold;color:#7c3aed">${k.value}</div>
+        <div style="font-size:10px;font-weight:600;color:#b45309">[${badgeLabel}]</div>
       </div>`;
     })
     .join("");
@@ -88,6 +97,7 @@ async function main() {
   const has62 = joined.includes("62%");
   const has45 = /4\.5/.test(joined);
   const pendingCount = payload.kpis.filter((k) => k.status === "pending").length;
+  const badgeCount = payload.kpis.filter((k) => k.badge != null).length;
 
   const htmlPath = path.join(OUT, "cart-kpi-preview.html");
   writeFileSync(htmlPath, buildPreviewHtml(payload));
@@ -104,8 +114,8 @@ async function main() {
   await page.screenshot({ path: path.join(OUT, "02-my-plan-report-page.png"), fullPage: true });
   await browser.close();
 
-  console.log(JSON.stringify({ has62, has45, pendingCount }, null, 2));
-  const pass = !has62 && !has45 && pendingCount >= 2;
+  console.log(JSON.stringify({ has62, has45, pendingCount, badgeCount, kpiBadges: payload.kpis.map((k) => k.badge) }, null, 2));
+  const pass = !has62 && !has45 && pendingCount >= 2 && badgeCount === payload.kpis.length;
   console.log(pass ? "\n✅ R-1 PASS" : "\n❌ R-1 FAIL");
   console.log(`Screenshots: ${OUT}`);
   process.exit(pass ? 0 : 1);

@@ -40,6 +40,11 @@ import {
   exportReachPendingLine,
   exportRoiPendingLine,
 } from "@/lib/planner-report-export/export-kpi";
+import {
+  metricBasisToExportBadge,
+  type ExportKpiBadgeKey,
+  type PlannerExportBadgeKind,
+} from "@/lib/planner-report-export/export-badge";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
 
@@ -223,6 +228,21 @@ function resolveDigitalOmittedNotice(
   return args.isKo ? EXPORT_DIGITAL_OMITTED_KO : EXPORT_DIGITAL_OMITTED_EN;
 }
 
+function buildBriefKpiBadges(
+  plan: BriefReportPlan,
+): Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>> {
+  const dq = plan.metrics.dataQuality;
+  const badges: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>> = {
+    impressions: metricBasisToExportBadge(dq.totalImpressions),
+    reach: "pending",
+    roi: "pending",
+  };
+  if (plan.metrics.mixCpmWon != null && dq.mixCpmWon != null) {
+    badges.cpm = metricBasisToExportBadge(dq.mixCpmWon);
+  }
+  return badges;
+}
+
 function buildEffectSummaryLines(args: {
   isKo: boolean;
   metrics: Pick<
@@ -333,8 +353,12 @@ export function buildBriefReportPayload(
     campaignMediaQuantities: quantities,
     campaignMediaPriceOptionIndex: priceOptionIndex,
     digitalOmittedNotice,
+    kpiBadges: buildBriefKpiBadges(plan),
   });
 }
+
+/** CampaignPlan dataQuality → export badge (화면 DataQualityBadge 와 1:1) */
+export { metricBasisToExportBadge };
 
 /** PlannerReportSharedProps.narrativeContext 용 (선택) */
 export function briefNarrativeAgeKeys(plan: BriefReportPlan) {
