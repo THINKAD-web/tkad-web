@@ -1,4 +1,5 @@
 import type { Media } from "@prisma/client";
+import { normalizeMediaCountry } from "@/lib/media-country";
 import {
   parsePartialPeriodRatesRaw,
   type PartialPeriodRatesMap,
@@ -35,6 +36,8 @@ export type AdminMediaDto = {
   name: string;
   nameEn: string | null;
   location: string;
+  /** ISO 3166-1 alpha-2 */
+  country: string;
   region: string;
   regionZone: string | null;
   type: string;
@@ -283,6 +286,7 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
     id,
     name,
     nameEn: pickStr(r, "nameEn", "name_en"),
+    country: normalizeMediaCountry(r.country),
     location,
     region,
     regionZone,
@@ -419,6 +423,7 @@ export function prismaMediaToAdminDto(
     id: m.id,
     name: m.name,
     nameEn: m.nameEn,
+    country: normalizeMediaCountry(m.country),
     location: m.location,
     region: m.region,
     regionZone: m.regionZone,

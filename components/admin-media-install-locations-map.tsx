@@ -16,7 +16,20 @@ import {
   loadKakaoMapsSdk,
 } from "@/lib/kakao-maps-admin";
 
-function getAdminMapProvider(): "kakao" | "google" | "fallback" {
+function getAdminMapProvider(
+  prefer?: "kakao" | "google" | "auto",
+): "kakao" | "google" | "fallback" {
+  if (prefer === "google") {
+    const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (typeof g === "string" && g.trim().length > 0) return "google";
+    return "fallback";
+  }
+  if (prefer === "kakao") {
+    if (getKakaoMapAppKey()) return "kakao";
+    const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
+    if (typeof g === "string" && g.trim().length > 0) return "google";
+    return "fallback";
+  }
   if (getKakaoMapAppKey()) return "kakao";
   const g = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
   if (typeof g === "string" && g.trim().length > 0) return "google";
@@ -73,6 +86,8 @@ type Props = {
   activePointId: string | null;
   onActivePointChange: (id: string) => void;
   onPointPositionChange: (id: string, lat: number, lng: number) => void;
+  /** auto = Kakao 우선; google = 해외 매체 등 Google Maps 강제 */
+  mapProvider?: "kakao" | "google" | "auto";
   className?: string;
   heightPx?: number;
 };
@@ -82,10 +97,11 @@ export default function AdminMediaInstallLocationsMap({
   activePointId,
   onActivePointChange,
   onPointPositionChange,
+  mapProvider = "auto",
   className,
   heightPx = 280,
 }: Props) {
-  const provider = getAdminMapProvider();
+  const provider = getAdminMapProvider(mapProvider);
   const containerRef = useRef<HTMLDivElement>(null);
   const cleanupRef = useRef<(() => void) | null>(null);
   const [mapEpoch, bumpMapEpoch] = useReducer((n: number) => n + 1, 0);

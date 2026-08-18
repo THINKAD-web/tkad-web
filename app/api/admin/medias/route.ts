@@ -31,6 +31,12 @@ import {
 } from "@/lib/admin-media-dto";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import {
+  hasValidManualCoords,
+  isKoreaMediaCountry,
+  normalizeMediaCountry,
+  overseasRegionDefaults,
+} from "@/lib/media-country";
 
 export const dynamic = "force-dynamic";
 
@@ -200,7 +206,11 @@ export async function POST(request: NextRequest) {
     image: String(body.image ?? "").trim() || null,
     width: String(body.width ?? "").trim() || null,
     height: String(body.height ?? "").trim() || null,
+    country: normalizeMediaCountry(body.country),
   };
+
+  const mediaCountry = data.country as string;
+  const isKorea = isKoreaMediaCountry(mediaCountry);
 
   const desc = optStr(body.description);
   if (desc !== undefined) data.description = desc;
@@ -343,12 +353,25 @@ export async function POST(request: NextRequest) {
   }
 
   try {
+    if (!isKorea) {
+      const defaults = overseasRegionDefaults(normalizeMediaCountry(mediaCountry));
+      data.region = defaults.region;
+      data.regionMain = defaults.regionMain;
+      data.regionSub = defaults.regionSub;
+      if (!hasValidManualCoords(data.latitude ?? null, data.longitude ?? null)) {
+        return json(
+          { error: "해외 매체는 위·경도 수동 입력이 필요합니다." },
+          400,
+        );
+      }
+    } else {
     const filled = await enrichNewMediaLocationFromKakao({
       location: data.location,
       latitude: data.latitude ?? null,
       longitude: data.longitude ?? null,
       city: data.city ?? null,
       district: data.district ?? null,
+      country: mediaCountry,
     });
     data.latitude = filled.latitude;
     data.longitude = filled.longitude;
@@ -399,6 +422,7 @@ export async function POST(request: NextRequest) {
     data.regionZone = locNorm.regionZone;
     if (locNorm.city) data.city = locNorm.city;
     if (locNorm.district) data.district = locNorm.district;
+    }
 
     const db = getPrisma();
     if (!data.slug) {

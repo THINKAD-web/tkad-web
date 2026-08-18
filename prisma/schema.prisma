@@ -176,6 +176,8 @@ model Media {
   name               String
   nameEn             String?          @map("name_en")
   location           String
+  /// ISO 3166-1 alpha-2 (U-series: KR default, overseas manual coords)
+  country            String           @default("KR")
   region             String
   /// 서울 권역·수도권·지방 세부 코드 (`lib/media-regions.ts`)
   regionZone         String?          @map("region_zone")
