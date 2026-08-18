@@ -4,6 +4,18 @@
 This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` before writing any code. Heed deprecation notices.
 <!-- END:nextjs-agent-rules -->
 
+## 로컬 빌드 (함정 주의)
+
+- **로컬 `next build` 는 기준선 타입 에러 366건 때문에 항상 실패한다.** 내 변경이 깬 것이 아니다.
+  `next.config` 의 `typescript.ignoreBuildErrors: process.env.VERCEL === "1"` 때문에 Vercel만 typecheck를 건너뛴다 (이슈 #400).
+- Vercel과 동일 조건 검증은 **`VERCEL=1`** 을 붙일 것:
+  ```bash
+  VERCEL=1 SKIP_CATALOG_HEAVY_SSG=1 npx next build --webpack
+  ```
+- 빌드 후 **`public/sw.js` 가 재생성되면 커밋하지 말고 되돌릴 것** (`git checkout -- public/sw.js`).
+  next-pwa가 precache manifest에 **로컬 청크 해시**를 박아 넣는다 — 커밋하면 Vercel이 만들지도 않은 자산을 가리키게 된다.
+- 신규 타입 에러 판정은 빌드가 아니라 `npx tsc --noEmit` 건수 비교로 할 것 (main 대비 증가분 0).
+
 ## Verification: hydration warnings
 
 - 브라우저 자동화 중 hydration warning 이 보일 때 diff 가 `data-cursor-ref` 같은 주입 속성 차이만 가리키면, 먼저 앱 버그가 아니라 automation noise 로 판단할 것.
