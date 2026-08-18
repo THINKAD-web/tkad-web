@@ -80,7 +80,7 @@ import {
 } from "@/lib/admin-media-dto";
 import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
 import { useToast } from "@/components/toast-provider";
-import { LOCKED_FIELD_TOOLTIP, stripLockedFields } from "@/lib/media/locked-fields";
+import { LOCKED_FIELD_TOOLTIP, stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import {
   LOCKED_INPUT_CLASS,
   LockedComputedFieldBadge,
@@ -121,6 +121,7 @@ import {
   mediaNameKoPlaceholder,
   normalizeMediaCountry,
   overseasRegionDefaults,
+  OVERSEAS_BROWSE_REGION_MAIN,
 } from "@/lib/media-country";
 import { formatMediaPriceJpyPreview } from "@/lib/media-display-currency";
 import {
@@ -548,17 +549,21 @@ function validatePriceOptionsJsonField(raw: string): string | null {
 
 function apiToForm(m: AdminMediaDto): AdminMediaForm {
   const { parentSlug, subSlugs } = splitMediaCategoryForm(m.mediaCategory ?? []);
+  const country = normalizeMediaCountry(m.country);
   const browse = browseFieldsFromDto(m);
+  const overseasDefaults = isKoreaMediaCountry(country)
+    ? null
+    : overseasRegionDefaults(country);
   return {
     name: m.name,
     nameEn: m.nameEn ?? "",
     locationEn: m.locationEn ?? "",
     descriptionEn: m.descriptionEn ?? "",
-    country: normalizeMediaCountry(m.country),
+    country,
     location: m.location,
     city: m.city ?? "",
     district: m.district ?? "",
-    region: m.region,
+    region: overseasDefaults?.region ?? m.region,
     type: m.type,
     price: m.price,
     ...(() => {
@@ -609,8 +614,12 @@ function apiToForm(m: AdminMediaDto): AdminMediaForm {
     coverageDistrictCodes: [...(m.coverageDistrictCodes ?? [])],
     browseMainCategory: browse.browseMain,
     browseSubCategory: browse.browseSub,
-    browseRegionMain: browse.regionMain,
-    browseRegionSub: browse.regionSub,
+    browseRegionMain: overseasDefaults
+      ? browse.regionMain || OVERSEAS_BROWSE_REGION_MAIN
+      : browse.regionMain,
+    browseRegionSub: overseasDefaults
+      ? browse.regionSub || OVERSEAS_BROWSE_REGION_MAIN
+      : browse.regionSub,
   };
 }
 
@@ -1578,7 +1587,7 @@ export default function AdminMediasClient({
       const row = medias.find((x) => x.id === editing.id);
       rawBody.isActive = row?.isActive !== false;
     }
-    const { cleaned } = stripLockedFields(rawBody);
+    const { cleaned } = stripLockedFieldsForMediaSave(rawBody, form.country);
     const body = cleaned as Record<string, unknown>;
     try {
       const saveUrl = editing
@@ -3095,8 +3104,8 @@ export default function AdminMediasClient({
                         ...f,
                         country,
                         region: defaults.region,
-                        browseRegionMain: "",
-                        browseRegionSub: "",
+                        browseRegionMain: OVERSEAS_BROWSE_REGION_MAIN,
+                        browseRegionSub: OVERSEAS_BROWSE_REGION_MAIN,
                       };
                     });
                   }}
@@ -3601,15 +3610,24 @@ export default function AdminMediasClient({
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                    지역/코드 *
+                    지역/코드 {isOverseasMedia ? "(자동)" : "*"}
                   </label>
                   <Input
                     value={form.region}
+                    readOnly={isOverseasMedia}
+                    disabled={isOverseasMedia}
                     onChange={(e) =>
                       setForm((f) => ({ ...f, region: e.target.value }))
                     }
-                    placeholder="seoul, 서울 등"
+                    placeholder={isOverseasMedia ? "jp" : "seoul, 서울 등"}
+                    className={isOverseasMedia ? LOCKED_INPUT_CLASS : undefined}
                   />
+                  {isOverseasMedia ? (
+                    <p className="mt-1 text-[10px] text-muted-foreground">
+                      해외 매체는 country 코드({form.country}) 기준으로 저장됩니다.
+                      한국 taxonomy(seoul/national) 값은 사용하지 않습니다.
+                    </p>
+                  ) : null}
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
@@ -3777,7 +3795,9 @@ export default function AdminMediasClient({
 
               <div>
                 <label className="mb-1 block text-xs font-medium text-muted-foreground">
-                  가격 (원)
+                  {form.country === "JP"
+                    ? "가격 (원, ¥ 미리보기)"
+                    : "가격 (원)"}
                 </label>
                 <Input
                   type="number"
@@ -3809,27 +3829,43 @@ export default function AdminMediasClient({
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     일일 유동인구
-                    <LockedComputedFieldBadge />
+                    {isOverseasMedia ? null : <LockedComputedFieldBadge />}
                   </label>
                   <Input
                     value={form.dailyFootfall}
-                    disabled
-                    readOnly
-                    className={LOCKED_INPUT_CLASS}
-                    title={LOCKED_FIELD_TOOLTIP}
+                    disabled={!isOverseasMedia}
+                    readOnly={!isOverseasMedia}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, dailyFootfall: e.target.value }))
+                    }
+                    className={isOverseasMedia ? undefined : LOCKED_INPUT_CLASS}
+                    title={
+                      isOverseasMedia
+                        ? "해외 매체 — 수동 입력 (한국 자동 추정 없음)"
+                        : LOCKED_FIELD_TOOLTIP
+                    }
+                    placeholder={isOverseasMedia ? "선택" : undefined}
                   />
                 </div>
                 <div>
                   <label className="mb-1 block text-xs font-medium text-muted-foreground">
                     평일 유동인구
-                    <LockedComputedFieldBadge />
+                    {isOverseasMedia ? null : <LockedComputedFieldBadge />}
                   </label>
                   <Input
                     value={form.weekdayFootfall}
-                    disabled
-                    readOnly
-                    className={LOCKED_INPUT_CLASS}
-                    title={LOCKED_FIELD_TOOLTIP}
+                    disabled={!isOverseasMedia}
+                    readOnly={!isOverseasMedia}
+                    onChange={(e) =>
+                      setForm((f) => ({ ...f, weekdayFootfall: e.target.value }))
+                    }
+                    className={isOverseasMedia ? undefined : LOCKED_INPUT_CLASS}
+                    title={
+                      isOverseasMedia
+                        ? "해외 매체 — 수동 입력 (한국 자동 추정 없음)"
+                        : LOCKED_FIELD_TOOLTIP
+                    }
+                    placeholder={isOverseasMedia ? "선택" : undefined}
                   />
                 </div>
               </div>
@@ -3916,6 +3952,7 @@ export default function AdminMediasClient({
                 />
               </div>
               <AdminMediaCategoryFields
+                country={form.country}
                 browseMain={form.browseMainCategory}
                 browseSub={form.browseSubCategory}
                 regionMain={form.browseRegionMain}

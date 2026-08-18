@@ -34,7 +34,7 @@ import {
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
-import { stripLockedFields } from "@/lib/media/locked-fields";
+import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import {
   hasValidManualCoords,
@@ -80,7 +80,15 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  const { cleaned, stripped } = stripLockedFields(body);
+  const db = getPrisma();
+  const existing = await db.media.findUnique({ where: { id } });
+  if (!existing) return json({ error: "Not found" }, 404);
+
+  const saveCountry =
+    body.country !== undefined
+      ? normalizeMediaCountry(body.country)
+      : normalizeMediaCountry(existing.country);
+  const { cleaned, stripped } = stripLockedFieldsForMediaSave(body, saveCountry);
   body = cleaned as Record<string, unknown>;
   if (stripped.length > 0) {
     logLockdownAttempt({
@@ -92,11 +100,7 @@ export async function PATCH(request: NextRequest, { params }: Params) {
     });
   }
   const strippedHeader =
-    stripped.length > 0 ? stripped.join(",") : undefined;
-
-  const db = getPrisma();
-  const existing = await db.media.findUnique({ where: { id } });
-  if (!existing) return json({ error: "Not found" }, 404);
+    stripped.length > 0 ? stripped.join(",") : "";
 
   const data: Prisma.MediaUpdateInput = {};
   let installLocationsToPersist: MediaInstallLocation[] | null | undefined;

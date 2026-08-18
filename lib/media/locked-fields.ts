@@ -1,3 +1,5 @@
+import { isKoreaMediaCountry } from "@/lib/media-country";
+
 /**
  * Computed 계층 필드 — 관리자 편집 불가
  * PR4: 3층(모달 UI / JSON edit / API PATCH·PUT) 모두 이 상수만 참조
@@ -66,4 +68,33 @@ export function stripLockedFields<T extends Record<string, unknown>>(
   }
 
   return { cleaned: cleaned as Partial<T>, stripped };
+}
+
+/** 해외 매체 — 유동인구는 한국 자동 추정 없음 → admin 수동 입력 허용 */
+const OVERSEAS_MANUAL_FOOTFALL: LockedField[] = [
+  "dailyFootfall",
+  "weekdayFootfall",
+];
+
+export function stripLockedFieldsForMediaSave<T extends Record<string, unknown>>(
+  input: T,
+  country?: string | null,
+): {
+  cleaned: Partial<T>;
+  stripped: LockedField[];
+} {
+  if (isKoreaMediaCountry(country)) {
+    return stripLockedFields(input);
+  }
+  const preserved = {} as Partial<T>;
+  for (const key of OVERSEAS_MANUAL_FOOTFALL) {
+    if (key in input) {
+      preserved[key as keyof T] = input[key as keyof T];
+    }
+  }
+  const { cleaned, stripped } = stripLockedFields(input);
+  return {
+    cleaned: { ...cleaned, ...preserved },
+    stripped: stripped.filter((f) => !OVERSEAS_MANUAL_FOOTFALL.includes(f)),
+  };
 }

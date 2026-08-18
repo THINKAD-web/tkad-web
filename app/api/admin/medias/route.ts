@@ -29,7 +29,7 @@ import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
 import {
   ADMIN_MEDIA_LAYER_INCLUDE,
 } from "@/lib/admin-media-dto";
-import { stripLockedFields } from "@/lib/media/locked-fields";
+import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import {
   hasValidManualCoords,
@@ -146,7 +146,10 @@ export async function POST(request: NextRequest) {
     return json({ error: "Invalid JSON" }, 400);
   }
 
-  const { cleaned, stripped } = stripLockedFields(body);
+  const { cleaned, stripped } = stripLockedFieldsForMediaSave(
+    body,
+    normalizeMediaCountry(body.country),
+  );
   body = cleaned as Record<string, unknown>;
   if (stripped.length > 0) {
     logLockdownAttempt({

@@ -14,9 +14,12 @@ import {
   isValidBrowseSub,
 } from "@/lib/media-browse-categories";
 import { MEDIA_BROWSE_REGIONS, browseRegionLabel } from "@/lib/media-browse-regions";
+import { isKoreaMediaCountry } from "@/lib/media-country";
 
 type Props = {
   locale?: string;
+  /** ISO 3166-1 alpha-2 — LL: 해외일 때 Browse 지역 KR 목록 숨김 */
+  country?: string;
   browseMain: string;
   browseSub: string;
   regionMain: string;
@@ -37,6 +40,7 @@ type Props = {
 
 export function AdminMediaCategoryFields({
   locale = "ko",
+  country = "KR",
   browseMain,
   browseSub,
   regionMain,
@@ -54,6 +58,10 @@ export function AdminMediaCategoryFields({
   hideLegacySeo = false,
 }: Props) {
   const [legacyOpen, setLegacyOpen] = useState(false);
+  const isKorea = isKoreaMediaCountry(country);
+  const browseRegionOptions = isKorea
+    ? MEDIA_BROWSE_REGIONS.filter((r) => r.id !== "overseas")
+    : MEDIA_BROWSE_REGIONS.filter((r) => r.id === "overseas");
   const tops = getTopMediaCategories();
   const children = parentSlug ? getChildCategories(parentSlug) : [];
   const browseSubs = MEDIA_CATEGORIES.find((m) => m.id === browseMain)?.sub ?? [];
@@ -110,6 +118,12 @@ export function AdminMediaCategoryFields({
 
       <div>
         <p className="mb-2 text-xs font-semibold text-foreground">Browse 지역</p>
+        {!isKorea ? (
+          <p className="mb-2 text-[10px] text-amber-800">
+            해외 매체 — 「해외」로 분류됩니다. 한국 시·도 taxonomy는 사용하지
+            않습니다.
+          </p>
+        ) : null}
         <div className="grid gap-3 sm:grid-cols-2">
           <label className="block">
             <span className="mb-1 block text-[11px] text-muted-foreground">
@@ -117,14 +131,15 @@ export function AdminMediaCategoryFields({
             </span>
             <select
               value={regionMain}
+              disabled={!isKorea && browseRegionOptions.length <= 1}
               onChange={(e) => {
                 onRegionMainChange(e.target.value);
                 onRegionSubChange("");
               }}
-              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm"
+              className="h-9 w-full rounded-md border border-input bg-background px-2 text-sm disabled:opacity-70"
             >
               <option value="">선택…</option>
-              {MEDIA_BROWSE_REGIONS.map((r) => (
+              {browseRegionOptions.map((r) => (
                 <option key={r.id} value={r.id}>
                   {browseRegionLabel(r.id, locale, "main")}
                 </option>
