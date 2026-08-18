@@ -29,6 +29,10 @@ import {
   durationToFlight,
   parseBriefFromText,
 } from "@/lib/planner/brief/natural-language";
+import {
+  computeBriefFingerprint,
+  countMixUnits,
+} from "@/lib/planner/brief/brief-fingerprint";
 
 export const BRIEF_STORAGE_KEY = "tkad-planner-brief-v1";
 
@@ -42,6 +46,8 @@ export type BriefStoreState = CampaignBriefInput & {
   wizardStep: BriefWizardStep;
   /** 선택한 매체 → 구매 수량 (Step 2 믹스). 0 이하면 제거된 것으로 본다 */
   mixUnits: Record<string, number>;
+  /** mixUnits 가 마지막으로 확정·담긴 시점의 브리프 지문 (L-1) */
+  mixBriefFingerprint: string | null;
 };
 
 export type BriefStoreActions = {
@@ -68,6 +74,8 @@ export type BriefStoreActions = {
   setMixUnits: (mediaId: string, units: number) => void;
   replaceMix: (lines: readonly { mediaId: string; units: number }[]) => void;
   clearMix: () => void;
+  /** 현재 브리프 기준으로 mix 지문을 갱신 (담은 매체 유지 확인) */
+  acknowledgeMixForCurrentBrief: () => void;
 };
 
 export type BriefStore = BriefStoreState & BriefStoreActions;
@@ -76,7 +84,15 @@ const INITIAL: BriefStoreState = {
   ...EMPTY_BRIEF,
   wizardStep: 1,
   mixUnits: {},
+  mixBriefFingerprint: null,
 };
+
+function stampMixFingerprint(state: BriefStoreState): Partial<BriefStoreState> {
+  if (countMixUnits(state.mixUnits) === 0) {
+    return { mixBriefFingerprint: null };
+  }
+  return { mixBriefFingerprint: computeBriefFingerprint(state) };
+}
 
 /** 저장값 → 안전한 믹스 (양수 정수 수량만) */
 function normalizeMixUnits(raw: unknown): Record<string, number> {
@@ -133,39 +149,61 @@ export const useBriefStore = create<BriefStore>()(
       reset: () => set({ ...INITIAL }),
 
       addMediaToMix: (mediaId, units = 1) =>
-        set((s) => ({
-          mixUnits: { ...s.mixUnits, [mediaId]: Math.max(1, Math.floor(units)) },
-        })),
+        set((s) => {
+          const mixUnits = {
+            ...s.mixUnits,
+            [mediaId]: Math.max(1, Math.floor(units)),
+          };
+          const next = { ...s, mixUnits };
+          return {
+            mixUnits,
+            ...(countMixUnits(s.mixUnits) === 0
+              ? stampMixFingerprint(next)
+              : {}),
+          };
+        }),
 
       removeMediaFromMix: (mediaId) =>
         set((s) => {
           const next = { ...s.mixUnits };
           delete next[mediaId];
-          return { mixUnits: next };
+          const state = { ...s, mixUnits: next };
+          return { mixUnits: next, ...stampMixFingerprint(state) };
         }),
 
       setMixUnits: (mediaId, units) =>
         set((s) => {
           const n = Math.floor(units);
+          const next = { ...s.mixUnits };
           if (!Number.isFinite(n) || n <= 0) {
-            const next = { ...s.mixUnits };
             delete next[mediaId];
-            return { mixUnits: next };
+          } else {
+            next[mediaId] = n;
           }
-          return { mixUnits: { ...s.mixUnits, [mediaId]: n } };
+          const state = { ...s, mixUnits: next };
+          return {
+            mixUnits: next,
+            ...(countMixUnits(next) === 0 || countMixUnits(s.mixUnits) === 0
+              ? stampMixFingerprint(state)
+              : {}),
+          };
         }),
 
       replaceMix: (lines) =>
-        set(() => {
-          const next: Record<string, number> = {};
+        set((s) => {
+          const mixUnits: Record<string, number> = {};
           for (const l of lines) {
             const n = Math.floor(l.units);
-            if (Number.isFinite(n) && n > 0) next[l.mediaId] = n;
+            if (Number.isFinite(n) && n > 0) mixUnits[l.mediaId] = n;
           }
-          return { mixUnits: next };
+          const state = { ...s, mixUnits };
+          return { mixUnits, ...stampMixFingerprint(state) };
         }),
 
-      clearMix: () => set({ mixUnits: {} }),
+      clearMix: () => set({ mixUnits: {}, mixBriefFingerprint: null }),
+
+      acknowledgeMixForCurrentBrief: () =>
+        set((s) => stampMixFingerprint(s)),
     }),
     {
       name: BRIEF_STORAGE_KEY,
@@ -184,6 +222,7 @@ export const useBriefStore = create<BriefStore>()(
         freeText: s.freeText,
         wizardStep: s.wizardStep,
         mixUnits: s.mixUnits,
+        mixBriefFingerprint: s.mixBriefFingerprint,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<BriefStoreState>;
@@ -193,6 +232,10 @@ export const useBriefStore = create<BriefStore>()(
           ...normalizeBriefInput(p),
           wizardStep: step === 1 || step === 2 || step === 3 ? step : 1,
           mixUnits: normalizeMixUnits(p.mixUnits),
+          mixBriefFingerprint:
+            typeof p.mixBriefFingerprint === "string"
+              ? p.mixBriefFingerprint
+              : null,
         };
       },
     },
