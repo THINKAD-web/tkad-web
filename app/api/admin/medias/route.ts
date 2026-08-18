@@ -35,7 +35,7 @@ import {
   hasValidManualCoords,
   isKoreaMediaCountry,
   normalizeMediaCountry,
-  overseasRegionDefaults,
+  applyOverseasMediaRegionFieldsOnSave,
 } from "@/lib/media-country";
 
 export const dynamic = "force-dynamic";
@@ -361,10 +361,11 @@ export async function POST(request: NextRequest) {
 
   try {
     if (!isKorea) {
-      const defaults = overseasRegionDefaults(normalizeMediaCountry(mediaCountry));
-      data.region = defaults.region;
-      data.regionMain = defaults.regionMain;
-      data.regionSub = defaults.regionSub;
+      const overseasRegion = applyOverseasMediaRegionFieldsOnSave(mediaCountry);
+      data.region = overseasRegion.region;
+      data.regionMain = overseasRegion.regionMain;
+      data.regionSub = overseasRegion.regionSub;
+      data.regionZone = overseasRegion.regionZone;
       if (!hasValidManualCoords(data.latitude ?? null, data.longitude ?? null)) {
         return json(
           { error: "해외 매체는 위·경도 수동 입력이 필요합니다." },

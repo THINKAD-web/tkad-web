@@ -78,6 +78,25 @@ export function overseasRegionDefaults(country: MediaCountryCode): {
   };
 }
 
+/**
+ * Admin save (POST/PATCH) — country≠KR 일 때 region taxonomy 강제.
+ * onChange 없이 저장만 해도 stale regionMain/region_zone 이 덮어써지게 한다.
+ */
+export function applyOverseasMediaRegionFieldsOnSave(
+  country: string | null | undefined,
+): {
+  region: string;
+  regionMain: typeof OVERSEAS_BROWSE_REGION_MAIN;
+  regionSub: typeof OVERSEAS_BROWSE_REGION_MAIN;
+  regionZone: null;
+} {
+  const defaults = overseasRegionDefaults(normalizeMediaCountry(country));
+  return {
+    ...defaults,
+    regionZone: null,
+  };
+}
+
 export function hasValidManualCoords(
   lat: number | null | undefined,
   lng: number | null | undefined,
