@@ -60,6 +60,13 @@ export function selectMixCount(s: BriefStoreState): number {
   return countMixUnits(s.mixUnits);
 }
 
+/** Q-1: React 19 — 원시 enum 값만 반환 */
+export function selectChannelMode(
+  s: BriefStoreState,
+): BriefStoreState["channelMode"] {
+  return s.channelMode;
+}
+
 /**
  * N-3: effect 시뮬레이션 — 동일 입력에 setState(open)가 1회만 발생하는지.
  * (React 렌더 없이 resume prompt idempotency 검증)
