@@ -204,7 +204,7 @@ export function BriefFlowClient({
 
       <Stepper step={step} isKo={isKo} onJump={goToStep} />
       {step === 1 ? (
-        <BriefStepOne onRequestNext={() => goToStep(2)} />
+        <BriefStepOne catalog={catalog} onRequestNext={() => goToStep(2)} />
       ) : step === 2 ? (
         <BriefStepTwo
           catalog={catalog}

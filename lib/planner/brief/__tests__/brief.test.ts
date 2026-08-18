@@ -14,6 +14,7 @@ import {
   flightDays,
   totalBudgetWon,
   briefRequiredStatus,
+  briefQuickRequiredStatus,
   briefUsesDefaults,
   normalizeBriefInput,
   toCampaignPlanBrief,
@@ -254,4 +255,15 @@ test("프리셋 3개, 무작위 아님, 완결 브리프로 환산", async () =>
   assert.equal(beauty.flightStart, "2026-09-01");
   assert.equal(beauty.flightEnd, "2026-09-14");
   assert.deepEqual(beauty.regionCodes, ["11", "41"]);
+});
+
+test("O-2 빠른 추천 — 예산만 필수", () => {
+  assert.deepEqual(briefQuickRequiredStatus(EMPTY_BRIEF), {
+    budget: false,
+    ok: false,
+  });
+  assert.deepEqual(
+    briefQuickRequiredStatus({ ...EMPTY_BRIEF, budgetInputWon: 30_000_000 }),
+    { budget: true, ok: true },
+  );
 });

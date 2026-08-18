@@ -6,6 +6,7 @@ import type { BriefStoreState } from "../store.ts";
 import {
   isStableSnapshot,
   selectChannelMode,
+  selectEntryMode,
   selectMixIsStale,
   shouldPromptResumeSession,
   shouldPromptStaleMixBeforeStep,
@@ -16,6 +17,7 @@ function baseState(over: Partial<BriefStoreState> = {}): BriefStoreState {
   return {
     ...EMPTY_BRIEF,
     wizardStep: 1,
+    entryMode: "detailed",
     channelMode: "ooh_only",
     digitalBudgetPct: 30,
     digitalChannelIds: ["naver", "kakao", "meta"],
@@ -35,6 +37,7 @@ function baseState(over: Partial<BriefStoreState> = {}): BriefStoreState {
     applyBriefPreset: () => {},
     setWizardStep: () => {},
     reset: () => {},
+    setEntryMode: () => {},
     setChannelMode: () => {},
     setDigitalBudgetPct: () => {},
     toggleDigitalChannel: () => {},
@@ -184,10 +187,28 @@ test("anti-pattern: 객체 selector는 연속 호출 시 참조 불안정 (N-1 �
   assert.equal(isStableSnapshot(badSelector, 10), false);
 });
 
+test("Q-1: selectEntryMode — 100회 getSnapshot Object.is 안정", () => {
+  const state = baseState({ entryMode: "quick" });
+  assert.equal(isStableSnapshot(() => selectEntryMode(state), 100), true);
+  assert.equal(selectEntryMode(state), "quick");
+});
+
 test("Q-1: selectChannelMode — 100회 getSnapshot Object.is 안정", () => {
   const state = baseState({ channelMode: "ooh_digital" });
   assert.equal(isStableSnapshot(() => selectChannelMode(state), 100), true);
   assert.equal(selectChannelMode(state), "ooh_digital");
+});
+
+test("Q-1 anti-pattern: entryMode+channelMode 객체 selector는 불안정", () => {
+  const state = baseState({
+    entryMode: "quick",
+    channelMode: "ooh_digital",
+  });
+  const badSelector = () => ({
+    entryMode: state.entryMode,
+    channelMode: state.channelMode,
+  });
+  assert.equal(isStableSnapshot(badSelector, 10), false);
 });
 
 test("plan URL 있으면 resume prompt 스킵", () => {

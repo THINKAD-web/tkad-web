@@ -12,6 +12,7 @@
 
 import { useMemo, useState } from "react";
 import { useLocale } from "next-intl";
+import type { MediaItem } from "@/lib/media-data";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -24,14 +25,17 @@ import {
 } from "@/lib/planner/brief/regions";
 import {
   BRIEF_AGE_BANDS,
+  BRIEF_ENTRY_MODES,
   BRIEF_GENDERS,
   BRIEF_GOALS,
   BRIEF_INDUSTRIES,
+  briefQuickRequiredStatus,
   briefRequiredStatus,
   briefUsesDefaults,
   flightDays,
   totalBudgetWon,
   type BriefAgeBand,
+  type BriefEntryMode,
   type BriefGoal,
   type BriefIndustry,
 } from "@/lib/planner/brief/types";
@@ -41,6 +45,7 @@ import {
   BRIEF_CHANNEL_MODES,
   type BriefChannelMode,
 } from "@/lib/planner/brief/brief-integrated-adapters";
+import { BriefQuickRankPanel } from "@/components/planner/brief/brief-quick-rank";
 
 const GOAL_LABELS: Record<BriefGoal, { ko: string; en: string }> = {
   awareness: { ko: "인지", en: "Awareness" },
@@ -92,6 +97,28 @@ const CHANNEL_MODE_LABELS: Record<
   },
 };
 
+const ENTRY_MODE_LABELS: Record<
+  BriefEntryMode,
+  { ko: string; en: string; desc: { ko: string; en: string } }
+> = {
+  quick: {
+    ko: "빠른 추천",
+    en: "Quick recommend",
+    desc: {
+      ko: "예산·지역만으로 매체 순위를 바로 확인합니다.",
+      en: "See media rankings with budget and region only.",
+    },
+  },
+  detailed: {
+    ko: "자세히 설계",
+    en: "Detailed plan",
+    desc: {
+      ko: "기간·타깃·목표까지 입력해 믹스를 설계합니다.",
+      en: "Add flight, target, and goals to design a mix.",
+    },
+  },
+};
+
 function Chip({
   active,
   onClick,
@@ -137,9 +164,11 @@ function SectionLabel({
 }
 
 export function BriefStepOne({
+  catalog = [],
   onRequestNext,
   onNext,
 }: {
+  catalog?: readonly MediaItem[];
   /** L-1: 부모가 Step 2 이동 전 브리프·믹스 확인 */
   onRequestNext?: () => void;
   onNext?: () => void;
@@ -149,8 +178,10 @@ export function BriefStepOne({
 
   const store = useBriefStore();
   const [freeTextDraft, setFreeTextDraft] = useState(store.freeText);
+  const isQuick = store.entryMode === "quick";
 
   const required = briefRequiredStatus(store);
+  const quickRequired = briefQuickRequiredStatus(store);
   const defaults = briefUsesDefaults(store);
   const days = flightDays(store);
   const totalWon = totalBudgetWon(store);
@@ -162,6 +193,109 @@ export function BriefStepOne({
 
   return (
     <div className="mx-auto flex max-w-3xl flex-col gap-8">
+      {/* ── O-2 진입 모드 ── */}
+      <section>
+        <SectionLabel>{isKo ? "시작 방식" : "How to start"}</SectionLabel>
+        <div className="inline-flex overflow-hidden rounded-lg border border-border">
+          {BRIEF_ENTRY_MODES.map((mode) => (
+            <button
+              key={mode}
+              type="button"
+              onClick={() => store.setEntryMode(mode)}
+              className={`px-4 py-2 text-sm font-medium ${
+                store.entryMode === mode
+                  ? "bg-primary text-primary-foreground"
+                  : "bg-background text-muted-foreground hover:text-foreground"
+              }`}
+              data-entry-mode={mode}
+            >
+              {ENTRY_MODE_LABELS[mode][isKo ? "ko" : "en"]}
+            </button>
+          ))}
+        </div>
+        <p className="mt-2 text-xs text-muted-foreground">
+          {ENTRY_MODE_LABELS[store.entryMode].desc[isKo ? "ko" : "en"]}
+        </p>
+      </section>
+
+      <hr className="border-border" />
+
+      {isQuick ? (
+        <>
+          {/* ── 빠른 추천: 예산 ── */}
+          <section>
+            <SectionLabel required>
+              {isKo ? "예산" : "Budget"}
+            </SectionLabel>
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="flex items-center gap-1">
+                <Input
+                  inputMode="numeric"
+                  value={budgetManInput}
+                  onChange={(e) => {
+                    const n = Number(e.target.value.replace(/[^0-9]/g, ""));
+                    store.setBudgetInputWon(Number.isFinite(n) ? n * 10_000 : 0);
+                  }}
+                  placeholder="3000"
+                  className="w-32 text-right"
+                />
+                <span className="text-sm text-muted-foreground">
+                  {isKo ? "만원" : "0k KRW"}
+                </span>
+              </div>
+            </div>
+          </section>
+
+          {/* ── 빠른 추천: 지역 ── */}
+          <section>
+            <SectionLabel>{isKo ? "지역" : "Regions"}</SectionLabel>
+            <div className="flex flex-wrap gap-2">
+              {SIDO_REGIONS.map((r) => (
+                <Chip
+                  key={r.code}
+                  active={store.regionCodes.includes(r.code)}
+                  onClick={() => store.toggleRegion(r.code as SidoCode)}
+                >
+                  {isKo ? r.ko : r.en}
+                </Chip>
+              ))}
+            </div>
+            {defaults.allRegions ? (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {isKo
+                  ? "미선택 — 전국 기준으로 진행합니다."
+                  : "None selected — proceeding nationwide."}
+              </p>
+            ) : (
+              <p className="mt-2 text-xs text-muted-foreground">
+                {summarizeSidoCodes(store.regionCodes, isKo, 4)}
+              </p>
+            )}
+          </section>
+
+          <section>
+            <SectionLabel>{isKo ? "추천 순위" : "Rankings"}</SectionLabel>
+            <BriefQuickRankPanel catalog={catalog} isKo={isKo} />
+          </section>
+
+          <div className="rounded-xl border border-primary/30 bg-primary/5 p-4">
+            <p className="text-sm font-medium">
+              {isKo
+                ? "예산·기간을 더 넣어 정확도를 높이려면"
+                : "For better accuracy, add budget and flight details"}
+            </p>
+            <Button
+              type="button"
+              variant="link"
+              className="mt-1 h-auto p-0 text-sm"
+              onClick={() => store.setEntryMode("detailed")}
+            >
+              {isKo ? "→ 자세히 설계로 전환" : "→ Switch to detailed planning"}
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
       {/* ── 자연어 입력 ── */}
       <section>
         <SectionLabel>
@@ -468,6 +602,8 @@ export function BriefStepOne({
           {isKo ? "다음 · 믹스 편집" : "Next · Edit mix"}
         </Button>
       </div>
+        </>
+      )}
     </div>
   );
 }

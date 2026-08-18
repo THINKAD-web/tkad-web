@@ -61,6 +61,11 @@ export function selectMixCount(s: BriefStoreState): number {
 }
 
 /** Q-1: React 19 — 원시 enum 값만 반환 */
+export function selectEntryMode(s: BriefStoreState): BriefStoreState["entryMode"] {
+  return s.entryMode;
+}
+
+/** Q-1: React 19 — 원시 enum 값만 반환 */
 export function selectChannelMode(
   s: BriefStoreState,
 ): BriefStoreState["channelMode"] {
