@@ -1,4 +1,5 @@
 import { geocodeAddressWithKakao, getKakaoRestApiKey } from "@/lib/kakao-address-geocode";
+import { isKoreaMediaCountry } from "@/lib/media-country";
 import type { QuickAddMediaJson } from "@/lib/media-quick-add";
 
 /** 좌표·시·구가 비어 있을 때만 카카오 주소검색으로 채움 (기존 값은 덮어쓰지 않음). */
@@ -39,12 +40,16 @@ export type LocationEnrichInput = {
   longitude: number | null;
   city: string | null;
   district: string | null;
+  country?: string | null;
 };
 
 /** 신규 매체 등록: 빈 필드만 카카오로 보강. */
 export async function enrichNewMediaLocationFromKakao(
   input: LocationEnrichInput,
 ): Promise<LocationEnrichInput & { addressVerified: boolean }> {
+  if (!isKoreaMediaCountry(input.country)) {
+    return { ...input, addressVerified: false };
+  }
   if (!getKakaoRestApiKey()) return { ...input, addressVerified: false };
   const q = input.location.trim();
   if (!q) return { ...input, addressVerified: false };
@@ -79,6 +84,7 @@ export async function enrichNewMediaLocationFromKakao(
 export async function kakaoFillForMediaPatch(
   body: Record<string, unknown>,
   newLocationTrimmed: string,
+  country?: string | null,
 ): Promise<Partial<{
   latitude: number | null;
   longitude: number | null;
@@ -86,6 +92,7 @@ export async function kakaoFillForMediaPatch(
   district: string | null;
   addressVerified: boolean;
 }> | null> {
+  if (!isKoreaMediaCountry(country)) return null;
   if (!getKakaoRestApiKey()) return null;
   if (!("location" in body) || !newLocationTrimmed) return null;
   if ("latitude" in body || "longitude" in body) return null;
