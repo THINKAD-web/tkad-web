@@ -8,14 +8,18 @@
  */
 
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
+import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
 
 export type PlannerExportKpiStatus = "value" | "pending";
 
 export type PlannerExportKpi = {
   label: string;
   value: string;
+  /** 화면 DataQualityBadge / AllocationSourceBadge 와 1:1 */
+  badge: PlannerExportBadgeKind;
   /** pending — 6b MetricsPanel 과 동일한 [산정 중] 상태 */
   status?: PlannerExportKpiStatus;
+  /** @deprecated badge 로부터 파생 — 하위 호환 */
   badgeLabel?: string;
   pendingHint?: string;
 };

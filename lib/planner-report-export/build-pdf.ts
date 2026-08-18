@@ -30,6 +30,11 @@ import {
   type MediaCardSpec,
 } from "@/lib/planner-report-export/media-card-layout";
 import { buildPortfolioLineupSegments } from "@/lib/planner-report-export/lineup-segments";
+import {
+  EXPORT_BADGE_PDF,
+  exportBadgeBracketLabel,
+} from "@/lib/planner-report-export/export-badge";
+import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
 
 /**
  * 플래너 보고서 PDF — 서버에서 jsPDF 로 직접 그린다 (벡터 텍스트, 한글 폰트 내장).
@@ -102,6 +107,27 @@ export const PDF_LAYOUT = {
 } as const;
 
 const M = PDF_LAYOUT.marginMm;
+
+function drawKpiBadge(
+  doc: import("jspdf").jsPDF,
+  k: PlannerExportKpi,
+  x: number,
+  y: number,
+  maxW: number,
+  isKo: boolean,
+): void {
+  const colors = EXPORT_BADGE_PDF[k.badge];
+  const label = exportBadgeBracketLabel(k.badge, isKo);
+  const labelW = Math.min(maxW - 2, doc.getTextWidth(label) + 3);
+  const h = 3.2;
+  doc.setFillColor(colors.fill);
+  doc.setDrawColor(colors.border);
+  doc.setLineWidth(0.2);
+  doc.roundedRect(x, y, labelW, h, 0.4, 0.4, "FD");
+  doc.setFontSize(6);
+  doc.setTextColor(colors.text);
+  doc.text(label, x + 1.2, y + 2.2);
+}
 
 function fmtImp(n: number, isKo: boolean): string {
   if (!Number.isFinite(n) || n <= 0) return "—";
@@ -460,10 +486,10 @@ export async function buildPlannerReportPdf(
         setText(GRAY_500);
         doc.setFontSize(8);
         doc.text("—", x + 4, y + 11);
-        doc.setFontSize(7);
-        const badge = k.badgeLabel ? `[${k.badgeLabel}]` : "[산정 중]";
-        doc.text(badge, x + 4, y + 14.5);
+        drawKpiBadge(doc, k, x + 4, y + 12.5, kW - 7, isKo);
         if (k.pendingHint) {
+          doc.setFontSize(6);
+          setText(GRAY_500);
           const hintLines = doc.splitTextToSize(k.pendingHint, kW - 7) as string[];
           doc.text(hintLines.slice(0, 2), x + 4, y + 17.5);
         }
@@ -471,10 +497,11 @@ export async function buildPlannerReportPdf(
         setText(QP_ACCENT);
         doc.setFontSize(PDF_LAYOUT.kpiValuePt);
         const vLines = doc.splitTextToSize(k.value, kW - 7) as string[];
-        doc.text(vLines.slice(0, 1), x + 4, y + 12);
+        doc.text(vLines.slice(0, 1), x + 4, y + 11);
+        drawKpiBadge(doc, k, x + 4, y + 13.5, kW - 7, isKo);
       }
     });
-    y += 24;
+    y += 26;
   }
 
   // ── 성과 요약 차트 ──

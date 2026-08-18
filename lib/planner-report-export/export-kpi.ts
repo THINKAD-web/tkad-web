@@ -1,4 +1,8 @@
 import type { PlannerExportKpi } from "@/lib/planner-report-export/types";
+import {
+  exportBadgeBracketLabel,
+  type PlannerExportBadgeKind,
+} from "@/lib/planner-report-export/export-badge";
 
 export const EXPORT_KPI_PENDING_HINT_KO =
   "행정동 인구 데이터 연동 후 제공";
@@ -10,16 +14,25 @@ export const EXPORT_DIGITAL_OMITTED_KO =
 export const EXPORT_DIGITAL_OMITTED_EN =
   "Digital channel allocation is not included in this report.";
 
-export function exportKpiValue(label: string, value: string): PlannerExportKpi {
-  return { label, value, status: "value" };
+export function exportKpiValue(
+  label: string,
+  value: string,
+  badge: PlannerExportBadgeKind,
+): PlannerExportKpi {
+  return { label, value, status: "value", badge };
 }
 
-export function exportKpiPending(label: string, isKo: boolean): PlannerExportKpi {
+export function exportKpiPending(
+  label: string,
+  isKo: boolean,
+): PlannerExportKpi {
+  const badge: PlannerExportBadgeKind = "pending";
   return {
     label,
     value: "—",
     status: "pending",
-    badgeLabel: isKo ? "산정 중" : "Pending",
+    badge,
+    badgeLabel: exportBadgeBracketLabel(badge, isKo).replace(/^\[|\]$/g, ""),
     pendingHint: isKo ? EXPORT_KPI_PENDING_HINT_KO : EXPORT_KPI_PENDING_HINT_EN,
   };
 }

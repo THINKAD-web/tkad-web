@@ -99,6 +99,8 @@ test("brief-report-adapter: demo reach/ROI 없음 + pending KPI", () => {
   assert.ok(
     pending.every((k) => k.pendingHint === EXPORT_KPI_PENDING_HINT_KO),
   );
+  assert.ok(payload.kpis.every((k) => k.badge != null));
+  assert.equal(payload.kpis.find((k) => k.label === "총 예상 노출")?.badge, "estimated");
 });
 
 test("brief-report-adapter: ooh_digital + no digital snapshot → notice", () => {

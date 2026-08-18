@@ -6,6 +6,7 @@ import {
   EXPORT_DIGITAL_OMITTED_KO,
   EXPORT_KPI_PENDING_HINT_KO,
 } from "@/lib/planner-report-export/export-kpi";
+import { assertAllKpisHaveBadge } from "@/lib/planner-report-export/export-badge";
 
 const stubMedia: MediaItem = {
   id: "m-test-1",
@@ -59,6 +60,12 @@ test("PR-8-3: KPI에 demo reach 62%·ROI 4.5배 없음", () => {
   assert.ok(
     pending.every((k) => k.pendingHint === EXPORT_KPI_PENDING_HINT_KO),
     "pending hint",
+  );
+  assertAllKpisHaveBadge(payload.kpis);
+  assert.equal(payload.kpis.find((k) => k.label === "총 예상 노출")?.badge, "estimated");
+  assert.ok(
+    pending.every((k) => k.badge === "pending"),
+    "pending badge kind",
   );
 });
 
@@ -128,4 +135,9 @@ test("PR-8-3: cart 경로 — metrics 있어도 demo KPI 없음", async () => {
   const joined = JSON.stringify(payload.kpis);
   assert.ok(!joined.includes("62"));
   assert.ok(!/4\.5/.test(joined));
+  assertAllKpisHaveBadge(payload.kpis);
+  assert.ok(
+    payload.kpis.every((k) => k.badge != null),
+    "cart path: every KPI has badge",
+  );
 });
