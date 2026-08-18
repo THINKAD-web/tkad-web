@@ -5,6 +5,7 @@ import { EMPTY_BRIEF } from "../types.ts";
 import type { BriefStoreState } from "../store.ts";
 import {
   isStableSnapshot,
+  selectChannelMode,
   selectMixIsStale,
   shouldPromptResumeSession,
   shouldPromptStaleMixBeforeStep,
@@ -15,6 +16,9 @@ function baseState(over: Partial<BriefStoreState> = {}): BriefStoreState {
   return {
     ...EMPTY_BRIEF,
     wizardStep: 1,
+    channelMode: "ooh_only",
+    digitalBudgetPct: 30,
+    digitalChannelIds: ["naver", "kakao", "meta"],
     mixUnits: {},
     mixBriefFingerprint: null,
     setBudgetInputWon: () => {},
@@ -31,6 +35,10 @@ function baseState(over: Partial<BriefStoreState> = {}): BriefStoreState {
     applyBriefPreset: () => {},
     setWizardStep: () => {},
     reset: () => {},
+    setChannelMode: () => {},
+    setDigitalBudgetPct: () => {},
+    toggleDigitalChannel: () => {},
+    setDigitalChannelIds: () => {},
     addMediaToMix: () => {},
     removeMediaFromMix: () => {},
     setMixUnits: () => {},
@@ -174,6 +182,12 @@ test("anti-pattern: 객체 selector는 연속 호출 시 참조 불안정 (N-1 �
     budgetMode: state.budgetMode,
   });
   assert.equal(isStableSnapshot(badSelector, 10), false);
+});
+
+test("Q-1: selectChannelMode — 100회 getSnapshot Object.is 안정", () => {
+  const state = baseState({ channelMode: "ooh_digital" });
+  assert.equal(isStableSnapshot(() => selectChannelMode(state), 100), true);
+  assert.equal(selectChannelMode(state), "ooh_digital");
 });
 
 test("plan URL 있으면 resume prompt 스킵", () => {
