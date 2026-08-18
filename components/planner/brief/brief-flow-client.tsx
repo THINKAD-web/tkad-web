@@ -11,8 +11,10 @@
 
 import { useSyncExternalStore } from "react";
 import { useLocale } from "next-intl";
+import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore, type BriefStoreState } from "@/lib/planner/brief/store";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
+import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
 import type { BriefWizardStep } from "@/lib/planner/brief/types";
 
 const STEP_LABELS: Record<BriefWizardStep, { ko: string; en: string }> = {
@@ -67,23 +69,14 @@ function Stepper({
 }
 
 function StepPlaceholder({
-  step,
   isKo,
   onBack,
 }: {
-  step: 2 | 3;
   isKo: boolean;
   onBack: () => void;
 }) {
-  const pr = step === 2 ? "PR-6b" : "PR-6c";
-  const title =
-    step === 2
-      ? isKo
-        ? "믹스 편집 · 지표 패널"
-        : "Mix editing · metrics panel"
-      : isKo
-        ? "결과 · 저장·공유"
-        : "Result · save & share";
+  const pr = "PR-6c";
+  const title = isKo ? "결과 · 저장·공유" : "Result · save & share";
   return (
     <div className="mx-auto max-w-3xl rounded-xl border border-dashed border-border p-10 text-center">
       <p className="text-lg font-semibold">{title}</p>
@@ -105,7 +98,11 @@ function StepPlaceholder({
 
 const selectStep = (s: BriefStoreState) => s.wizardStep;
 
-export function BriefFlowClient() {
+export function BriefFlowClient({
+  catalog = [],
+}: {
+  catalog?: readonly MediaItem[];
+}) {
   const locale = useLocale();
   const isKo = locale === "ko";
   const wizardStep = useBriefStore(selectStep);
@@ -125,12 +122,10 @@ export function BriefFlowClient() {
       <Stepper step={step} isKo={isKo} onJump={setWizardStep} />
       {step === 1 ? (
         <BriefStepOne />
+      ) : step === 2 ? (
+        <BriefStepTwo catalog={catalog} />
       ) : (
-        <StepPlaceholder
-          step={step === 2 ? 2 : 3}
-          isKo={isKo}
-          onBack={() => setWizardStep(1)}
-        />
+        <StepPlaceholder isKo={isKo} onBack={() => setWizardStep(2)} />
       )}
     </div>
   );

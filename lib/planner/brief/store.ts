@@ -40,6 +40,8 @@ function toggleIn<T>(list: readonly T[], value: T): T[] {
 
 export type BriefStoreState = CampaignBriefInput & {
   wizardStep: BriefWizardStep;
+  /** 선택한 매체 → 구매 수량 (Step 2 믹스). 0 이하면 제거된 것으로 본다 */
+  mixUnits: Record<string, number>;
 };
 
 export type BriefStoreActions = {
@@ -59,11 +61,33 @@ export type BriefStoreActions = {
   applyBriefPreset: (preset: CampaignBriefInput) => void;
   setWizardStep: (step: BriefWizardStep) => void;
   reset: () => void;
+
+  // ── Step 2 믹스 ──
+  addMediaToMix: (mediaId: string, units?: number) => void;
+  removeMediaFromMix: (mediaId: string) => void;
+  setMixUnits: (mediaId: string, units: number) => void;
+  replaceMix: (lines: readonly { mediaId: string; units: number }[]) => void;
+  clearMix: () => void;
 };
 
 export type BriefStore = BriefStoreState & BriefStoreActions;
 
-const INITIAL: BriefStoreState = { ...EMPTY_BRIEF, wizardStep: 1 };
+const INITIAL: BriefStoreState = {
+  ...EMPTY_BRIEF,
+  wizardStep: 1,
+  mixUnits: {},
+};
+
+/** 저장값 → 안전한 믹스 (양수 정수 수량만) */
+function normalizeMixUnits(raw: unknown): Record<string, number> {
+  if (!raw || typeof raw !== "object") return {};
+  const out: Record<string, number> = {};
+  for (const [id, v] of Object.entries(raw as Record<string, unknown>)) {
+    const n = typeof v === "number" ? Math.floor(v) : NaN;
+    if (Number.isFinite(n) && n > 0) out[id] = n;
+  }
+  return out;
+}
 
 export const useBriefStore = create<BriefStore>()(
   persist(
@@ -107,6 +131,41 @@ export const useBriefStore = create<BriefStore>()(
 
       setWizardStep: (step) => set({ wizardStep: step }),
       reset: () => set({ ...INITIAL }),
+
+      addMediaToMix: (mediaId, units = 1) =>
+        set((s) => ({
+          mixUnits: { ...s.mixUnits, [mediaId]: Math.max(1, Math.floor(units)) },
+        })),
+
+      removeMediaFromMix: (mediaId) =>
+        set((s) => {
+          const next = { ...s.mixUnits };
+          delete next[mediaId];
+          return { mixUnits: next };
+        }),
+
+      setMixUnits: (mediaId, units) =>
+        set((s) => {
+          const n = Math.floor(units);
+          if (!Number.isFinite(n) || n <= 0) {
+            const next = { ...s.mixUnits };
+            delete next[mediaId];
+            return { mixUnits: next };
+          }
+          return { mixUnits: { ...s.mixUnits, [mediaId]: n } };
+        }),
+
+      replaceMix: (lines) =>
+        set(() => {
+          const next: Record<string, number> = {};
+          for (const l of lines) {
+            const n = Math.floor(l.units);
+            if (Number.isFinite(n) && n > 0) next[l.mediaId] = n;
+          }
+          return { mixUnits: next };
+        }),
+
+      clearMix: () => set({ mixUnits: {} }),
     }),
     {
       name: BRIEF_STORAGE_KEY,
@@ -124,6 +183,7 @@ export const useBriefStore = create<BriefStore>()(
         flightEnd: s.flightEnd,
         freeText: s.freeText,
         wizardStep: s.wizardStep,
+        mixUnits: s.mixUnits,
       }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<BriefStoreState>;
@@ -132,6 +192,7 @@ export const useBriefStore = create<BriefStore>()(
           ...current,
           ...normalizeBriefInput(p),
           wizardStep: step === 1 || step === 2 || step === 3 ? step : 1,
+          mixUnits: normalizeMixUnits(p.mixUnits),
         };
       },
     },

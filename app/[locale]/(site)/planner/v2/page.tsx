@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { setRequestLocale } from "next-intl/server";
 import { resolveLocaleParam } from "@/lib/resolve-locale";
+import { fetchPlannerMediaCatalog } from "@/lib/public-media-catalog";
 import { BriefFlowClient } from "@/components/planner/brief/brief-flow-client";
 
 /**
@@ -13,7 +14,8 @@ import { BriefFlowClient } from "@/components/planner/brief/brief-flow-client";
  * 비어 있지 않게 한다. 인터랙티브 입력만 클라이언트.
  */
 
-export const dynamic = "force-static";
+/** 매체 카탈로그는 DB 소스 유지 (`fetchPlannerMediaCatalog`) — ISR 1h */
+export const revalidate = 3600;
 
 type Props = { params: Promise<{ locale: string }> };
 
@@ -32,6 +34,7 @@ export default async function PlannerV2Page({ params }: Props) {
   const locale = await resolveLocaleParam(params);
   setRequestLocale(locale);
   const isKo = locale === "ko";
+  const { catalog } = await fetchPlannerMediaCatalog();
 
   return (
     <main className="mx-auto w-full max-w-5xl px-4 py-10">
@@ -52,7 +55,7 @@ export default async function PlannerV2Page({ params }: Props) {
         </p>
       </header>
 
-      <BriefFlowClient />
+      <BriefFlowClient catalog={catalog} />
     </main>
   );
 }

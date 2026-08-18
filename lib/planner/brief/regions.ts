@@ -112,6 +112,66 @@ export function browseMainIdToSidoCodes(mainId: string): SidoCode[] {
   );
 }
 
+/**
+ * 매체 필터 과대포함 — 선택한 시도가 속한 browse 그룹에 **선택하지 않은
+ * 시도가 함께 딸려오는** 경우를 찾는다.
+ *
+ * 매체 DB 는 17시도가 아니라 browse 14그룹(`Media.regionMain`)으로만
+ * 분류돼 있다. 충청·경상·전라는 여러 시도가 한 그룹이라, 충북만 골라도
+ * 필터는 충청 전체로 넓어진다. 과소포함이 아니라 **과대포함**이므로
+ * 사용자에게 무엇이 섞이는지 이름을 대야 한다.
+ *
+ * 2차 정제(매체 city/district ↔ 시군구 대조)는 6b 스코프 밖.
+ */
+export type RegionOverInclusion = {
+  browseMainId: string;
+  /** 사용자가 실제로 고른 시도 */
+  selected: SidoCode[];
+  /** 함께 딸려오는(고르지 않은) 시도 */
+  alsoIncluded: SidoCode[];
+};
+
+export function regionOverInclusions(
+  codes: readonly SidoCode[],
+): RegionOverInclusion[] {
+  const selected = new Set(normalizeSidoCodes(codes));
+  if (selected.size === 0) return []; // 전국 선택 = 과대포함 개념 없음
+
+  const byGroup = new Map<string, SidoCode[]>();
+  for (const code of selected) {
+    const row = BY_CODE.get(code);
+    if (!row) continue;
+    const list = byGroup.get(row.browseMainId) ?? [];
+    list.push(code);
+    byGroup.set(row.browseMainId, list);
+  }
+
+  const out: RegionOverInclusion[] = [];
+  for (const [mainId, picked] of byGroup) {
+    const members = browseMainIdToSidoCodes(mainId);
+    const missing = members.filter((m) => !selected.has(m));
+    if (missing.length === 0) continue; // 그룹 전체를 골랐으면 새는 것 없음
+    out.push({
+      browseMainId: mainId,
+      selected: normalizeSidoCodes(picked),
+      alsoIncluded: normalizeSidoCodes(missing),
+    });
+  }
+  return out;
+}
+
+/** "충북을 선택하셨지만 세종·충남 매체도 함께 표시됩니다." */
+export function overInclusionMessage(
+  row: RegionOverInclusion,
+  isKo: boolean,
+): string {
+  const sel = row.selected.map((c) => sidoLabel(c, isKo)).join("·");
+  const extra = row.alsoIncluded.map((c) => sidoLabel(c, isKo)).join("·");
+  return isKo
+    ? `${sel}을(를) 선택하셨지만 ${extra} 매체도 함께 표시됩니다.`
+    : `You selected ${sel}, but media from ${extra} are also shown.`;
+}
+
 /** 라벨 요약 — "서울·경기 외 2" 형식 */
 export function summarizeSidoCodes(
   codes: readonly SidoCode[],
