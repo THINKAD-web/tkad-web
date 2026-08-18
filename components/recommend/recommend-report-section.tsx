@@ -345,8 +345,6 @@ export function RecommendReportSection({
         goalFollowUp: {},
         portfolio: portfolioForExport,
         metrics: metricsBundle.metrics,
-        reachCorePct: metricsBundle.reachCorePct,
-        reachExtendedPct: metricsBundle.reachExtendedPct,
         blendedCpmKrw,
         budgetAllocation,
         cpmBars,

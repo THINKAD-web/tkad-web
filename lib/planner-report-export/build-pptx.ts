@@ -374,7 +374,12 @@ export async function buildPlannerReportPptx(
     const ky = 1.25 + i * 1.25;
     s2.addShape(pptx.ShapeType.roundRect, { x: 8.2, y: ky, w: 4.5, h: 1.05, fill: { color: LIGHT }, rectRadius: 0.08, line: { color: "E4E6EC", width: 0.5 } });
     s2.addText(k.label, { x: 8.4, y: ky + 0.12, w: 4.1, h: 0.3, fontFace: face, fontSize: 10, color: GRAY });
-    s2.addText(k.value, { x: 8.4, y: ky + 0.42, w: 4.1, h: 0.55, fontFace: face, fontSize: 20, bold: true, color: VIOLET });
+    if (k.status === "pending") {
+      s2.addText("—", { x: 8.4, y: ky + 0.38, w: 4.1, h: 0.35, fontFace: face, fontSize: 16, bold: true, color: GRAY });
+      s2.addText(`[${k.badgeLabel ?? "산정 중"}]`, { x: 8.4, y: ky + 0.68, w: 4.1, h: 0.25, fontFace: face, fontSize: 8, color: GRAY });
+    } else {
+      s2.addText(k.value, { x: 8.4, y: ky + 0.42, w: 4.1, h: 0.55, fontFace: face, fontSize: 20, bold: true, color: VIOLET });
+    }
   });
 
   // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──

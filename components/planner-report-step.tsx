@@ -21,6 +21,10 @@ import type {
 import { formatPlannerPeriodDisplay } from "@/lib/planner-period";
 import { downloadPlannerReport } from "@/lib/planner-report-export/client";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import {
+  exportReachPendingLine,
+  exportRoiPendingLine,
+} from "@/lib/planner-report-export/export-kpi";
 import type { PlannerReportExportFormat } from "@/lib/planner-report-export/types";
 import { CONTACT_EMAIL } from "@/lib/constants";
 import { useToast } from "@/components/toast-provider";
@@ -307,27 +311,19 @@ function usePlannerReportDerived(props: PlannerReportSharedProps) {
       t("reportSummaryImpTotal", {
         n: totalImp.toLocaleString(),
       }),
-      t("reportSummaryReach", {
-        core: props.reachCorePct,
-        ext: props.reachExtendedPct,
-      }),
+      exportReachPendingLine(props.isKo),
     ];
     if (blendedCpmKrw != null) {
       lines.push(
         t("reportSummaryCpm", { n: blendedCpmKrw.toLocaleString() }),
       );
     }
-    if (props.metrics) {
-      lines.push(
-        t("reportSummaryRoi", { n: props.metrics.roiExpected }),
-      );
-    }
+    lines.push(exportRoiPendingLine(props.isKo));
     lines.push(t("reportSummaryDisclaimerShort"));
     return lines;
   }, [
     props.metrics,
-    props.reachCorePct,
-    props.reachExtendedPct,
+    props.isKo,
     blendedCpmKrw,
     portfolioReport,
     usePortfolioReach,
@@ -431,8 +427,6 @@ export default function PlannerReportStep(props: PlannerReportSharedProps) {
         goalFollowUp: props.goalFollowUp,
         portfolio: portfolioForExport,
         metrics: props.metrics,
-        reachCorePct: props.reachCorePct,
-        reachExtendedPct: props.reachExtendedPct,
         blendedCpmKrw: derived.blendedCpmKrw,
         budgetAllocation: derived.budgetAllocation,
         cpmBars: derived.cpmBars,
@@ -917,8 +911,6 @@ export function PlannerReportPdfCompact(props: PlannerReportSharedProps) {
           goalFollowUp: props.goalFollowUp,
           portfolio: portfolioForExport,
           metrics: props.metrics,
-          reachCorePct: props.reachCorePct,
-          reachExtendedPct: props.reachExtendedPct,
           blendedCpmKrw: derived.blendedCpmKrw,
           budgetAllocation: derived.budgetAllocation,
           cpmBars: derived.cpmBars,

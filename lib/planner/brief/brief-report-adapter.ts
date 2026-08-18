@@ -1,0 +1,343 @@
+/**
+ * PR-8-1 — 브리프 Step 3 → 보고서 export payload.
+ *
+ * `computePlannerMetrics` / `reachSplitForGoal` 호출 금지.
+ * 숫자는 CampaignPlan 스냅샷 metrics + portfolio 기반 파생만 사용.
+ */
+
+import type { MediaItem } from "@/lib/media-data";
+import type {
+  CampaignPlanMediaLine,
+  CampaignPlanSnapshot,
+  CampaignPlanStoredMetrics,
+} from "@/lib/campaign-plan-schema";
+import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
+import {
+  budgetSplitByCategory,
+  plannerReportCategoryKey,
+  portfolioCpmByCategory,
+  type PlannerCampaignGoal,
+  type PlannerMetrics,
+} from "@/lib/planner-logic";
+import {
+  briefAgeBandsToPlannerKeys,
+  briefGoalToPlanner,
+  briefIndustryToPlanner,
+  type BriefChannelMode,
+  type BriefGoal,
+  type BriefIndustry,
+} from "@/lib/planner/brief/brief-integrated-adapters";
+import { summarizeSidoCodes } from "@/lib/planner/brief/regions";
+import {
+  flightDays,
+  type CampaignBriefInput,
+} from "@/lib/planner/brief/types";
+import { getMediaPackageOptions } from "@/lib/media-quantity";
+import { plannerIndustryLabel } from "@/lib/planner/types";
+import {
+  EXPORT_DIGITAL_OMITTED_EN,
+  EXPORT_DIGITAL_OMITTED_KO,
+  exportReachPendingLine,
+  exportRoiPendingLine,
+} from "@/lib/planner-report-export/export-kpi";
+import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
+import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+
+const GOAL_TITLES_KO: Record<PlannerCampaignGoal, string> = {
+  brand: "브랜드 인지도",
+  launch: "신제품 론칭",
+  event: "이벤트·프로모션",
+  sales: "전환·판매",
+  local: "지역 마케팅",
+};
+
+const GOAL_TITLES_EN: Record<PlannerCampaignGoal, string> = {
+  brand: "Brand awareness",
+  launch: "Product launch",
+  event: "Event promotion",
+  sales: "Conversion",
+  local: "Local marketing",
+};
+
+const BRIEF_GOAL_LABELS_KO: Record<string, string> = {
+  awareness: "인지",
+  consideration: "고려",
+  conversion: "전환",
+};
+
+const BRIEF_GOAL_LABELS_EN: Record<string, string> = {
+  awareness: "Awareness",
+  consideration: "Consideration",
+  conversion: "Conversion",
+};
+
+export type BriefReportPlan = SavedCampaignPlan | CampaignPlanSnapshot;
+
+export type BuildBriefReportPayloadArgs = {
+  plan: BriefReportPlan;
+  catalog: readonly MediaItem[];
+  isKo: boolean;
+  /** O-1 live store — snapshot에 digital 없을 때 R-3 notice */
+  channelMode?: BriefChannelMode;
+  /** Phase 2/3: digital 스냅샷 존재 시 true → notice 생략 */
+  hasDigitalSnapshot?: boolean;
+  generatedAt?: string;
+};
+
+function isBriefGoal(v: string | undefined): v is BriefGoal {
+  return v === "awareness" || v === "consideration" || v === "conversion";
+}
+
+function isBriefIndustry(v: string | undefined): v is BriefIndustry {
+  return (
+    v === "fb" ||
+    v === "retail" ||
+    v === "tech" ||
+    v === "finance" ||
+    v === "ent" ||
+    v === "other"
+  );
+}
+
+function briefFromPlan(plan: BriefReportPlan): CampaignBriefInput {
+  const b = plan.brief;
+  return {
+    budgetInputWon: b.budgetWon,
+    budgetMode: "total",
+    regionCodes: b.regionCodes as CampaignBriefInput["regionCodes"],
+    genders: b.genders ?? [],
+    ageBands: (b.ageBands ?? []) as CampaignBriefInput["ageBands"],
+    goal: isBriefGoal(b.goal) ? b.goal : null,
+    industry: isBriefIndustry(b.industry) ? b.industry : null,
+    flightStart: b.flightStart || null,
+    flightEnd: b.flightEnd || null,
+    freeText: b.freeText ?? "",
+  };
+}
+
+export function resolveBriefPortfolio(
+  plan: BriefReportPlan,
+  catalog: readonly MediaItem[],
+): MediaItem[] {
+  const byId = new Map(catalog.map((m) => [m.id, m]));
+  return plan.mediaMix
+    .map((line) => byId.get(line.mediaId))
+    .filter((m): m is MediaItem => m != null);
+}
+
+export function briefMixQuantities(
+  mediaMix: readonly CampaignPlanMediaLine[],
+): Record<string, number> {
+  const out: Record<string, number> = {};
+  for (const line of mediaMix) {
+    if (line.units > 0) out[line.mediaId] = line.units;
+  }
+  return out;
+}
+
+export function briefPriceOptionIndex(
+  mediaMix: readonly CampaignPlanMediaLine[],
+  catalog: readonly MediaItem[],
+): Record<string, number> {
+  const byId = new Map(catalog.map((m) => [m.id, m]));
+  const out: Record<string, number> = {};
+  for (const line of mediaMix) {
+    if (!line.optionId) continue;
+    const media = byId.get(line.mediaId);
+    if (!media) continue;
+    const options = getMediaPackageOptions(media);
+    const idx = options.findIndex((o) => o.id === line.optionId);
+    if (idx >= 0) out[line.mediaId] = idx;
+  }
+  return out;
+}
+
+/** 스냅샷 metrics → export용 impressions only (demo ROI/reach 금지) */
+export function snapshotMetricsToExportMetrics(
+  stored: CampaignPlanStoredMetrics,
+  months: number,
+): Pick<
+  PlannerMetrics,
+  "estimatedMonthlyImpressions" | "estimatedTotalImpressions"
+> {
+  const total = stored.totalImpressions;
+  const monthly =
+    months > 0 ? Math.round(total / months) : total;
+  return {
+    estimatedMonthlyImpressions: monthly,
+    estimatedTotalImpressions: total,
+  };
+}
+
+function inferBriefCategoriesText(
+  portfolio: readonly MediaItem[],
+  isKo: boolean,
+): string {
+  const keys = new Set<string>();
+  for (const m of portfolio) {
+    const key = plannerReportCategoryKey(m);
+    if (key === "digital") keys.add(isKo ? "디지털" : "Digital");
+    else if (key === "static") keys.add(isKo ? "고정형" : "Static");
+    else if (key === "mobile") keys.add(isKo ? "이동형" : "Mobile");
+  }
+  return [...keys].join(", ") || (isKo ? "혼합" : "Mixed");
+}
+
+function briefAgeText(
+  ageBands: readonly string[] | undefined,
+  isKo: boolean,
+): string {
+  if (!ageBands?.length) return isKo ? "전 연령" : "All ages";
+  return ageBands.join(", ");
+}
+
+function briefGoalTitle(
+  brief: CampaignBriefInput,
+  isKo: boolean,
+): string {
+  const plannerGoal = briefGoalToPlanner(brief.goal);
+  if (brief.goal) {
+    const custom = isKo
+      ? BRIEF_GOAL_LABELS_KO[brief.goal]
+      : BRIEF_GOAL_LABELS_EN[brief.goal];
+    if (custom) {
+      return isKo ? `${custom} 캠페인` : `${custom} campaign`;
+    }
+  }
+  return isKo ? GOAL_TITLES_KO[plannerGoal] : GOAL_TITLES_EN[plannerGoal];
+}
+
+function briefPeriodMonths(plan: BriefReportPlan): number {
+  const days =
+    plan.mediaMix[0]?.days ??
+    flightDays(briefFromPlan(plan)) ??
+    30;
+  return Math.max(1, Math.min(12, Math.round(days / 30)));
+}
+
+function resolveDigitalOmittedNotice(
+  args: BuildBriefReportPayloadArgs,
+): string | undefined {
+  if (args.channelMode !== "ooh_digital") return undefined;
+  if (args.hasDigitalSnapshot) return undefined;
+  return args.isKo ? EXPORT_DIGITAL_OMITTED_KO : EXPORT_DIGITAL_OMITTED_EN;
+}
+
+function buildEffectSummaryLines(args: {
+  isKo: boolean;
+  metrics: Pick<
+    PlannerMetrics,
+    "estimatedMonthlyImpressions" | "estimatedTotalImpressions"
+  >;
+  blendedCpmKrw: number | null;
+}): string[] {
+  const fmt = (n: number) =>
+    n.toLocaleString(args.isKo ? "ko-KR" : "en-US");
+  const lines: string[] = [
+    args.isKo
+      ? `월 예상 노출 ${fmt(args.metrics.estimatedMonthlyImpressions)}회`
+      : `Est. monthly impressions ${fmt(args.metrics.estimatedMonthlyImpressions)}`,
+    args.isKo
+      ? `총 예상 노출 ${fmt(args.metrics.estimatedTotalImpressions)}회`
+      : `Est. total impressions ${fmt(args.metrics.estimatedTotalImpressions)}`,
+    exportReachPendingLine(args.isKo),
+  ];
+  if (args.blendedCpmKrw != null && args.blendedCpmKrw > 0) {
+    lines.push(
+      args.isKo
+        ? `블렌디드 CPM ₩${fmt(args.blendedCpmKrw)}`
+        : `Blended CPM ₩${fmt(args.blendedCpmKrw)}`,
+    );
+  }
+  lines.push(exportRoiPendingLine(args.isKo));
+  return lines;
+}
+
+export function buildBriefReportPayload(
+  args: BuildBriefReportPayloadArgs,
+): PlannerReportExportPayload {
+  const { plan, catalog, isKo } = args;
+  const brief = briefFromPlan(plan);
+  const portfolio = resolveBriefPortfolio(plan, catalog);
+  const quantities = briefMixQuantities(plan.mediaMix);
+  const priceOptionIndex = briefPriceOptionIndex(plan.mediaMix, catalog);
+  const pricing = { quantities, priceOptionIndex };
+  const months = briefPeriodMonths(plan);
+  const periodCtx = months > 0 ? { months } : undefined;
+  const budgetMan = Math.max(0, Math.round(plan.brief.budgetWon / 10_000));
+  const campaignGoal = briefGoalToPlanner(brief.goal);
+  const industryKey = briefIndustryToPlanner(brief.industry);
+  const exportMetrics = snapshotMetricsToExportMetrics(plan.metrics, months);
+
+  const budgetAllocation = budgetSplitByCategory(
+    portfolio,
+    pricing,
+    periodCtx,
+  ).map((s) => ({
+    key: s.key,
+    label: isKo ? s.labelKo : s.labelEn,
+    pct: s.pct,
+    valueWon: s.value,
+    actualWon: s.actualWon,
+  }));
+
+  const cpmBars = portfolioCpmByCategory(portfolio, pricing, periodCtx).map(
+    (p) => ({
+      key: p.key,
+      label: isKo ? p.labelKo : p.labelEn,
+      value: p.cpm,
+    }),
+  );
+
+  const blendedCpmKrw = plan.metrics.mixCpmWon;
+
+  const days = flightDays(brief);
+  const periodDisplay =
+    brief.flightStart && brief.flightEnd
+      ? days != null
+        ? isKo
+          ? `${brief.flightStart} ~ ${brief.flightEnd} (${days}일)`
+          : `${brief.flightStart} ~ ${brief.flightEnd} (${days}d)`
+        : `${brief.flightStart} ~ ${brief.flightEnd}`
+      : isKo
+        ? `${months}개월`
+        : `${months} month${months > 1 ? "s" : ""}`;
+
+  const digitalOmittedNotice = resolveDigitalOmittedNotice(args);
+
+  return buildOohReportPayload({
+    isKo,
+    goalTitle: briefGoalTitle(brief, isKo),
+    budgetMan,
+    periodDisplay,
+    regionsText: summarizeSidoCodes(brief.regionCodes, isKo),
+    categoriesText: inferBriefCategoriesText(portfolio, isKo),
+    ageText: briefAgeText(plan.brief.ageBands, isKo),
+    industryText: plannerIndustryLabel(industryKey, isKo),
+    industryKey,
+    campaignGoal,
+    portfolio,
+    metrics: exportMetrics as PlannerMetrics,
+    blendedCpmKrw,
+    budgetAllocation,
+    cpmBars,
+    effectSummaryLines: buildEffectSummaryLines({
+      isKo,
+      metrics: exportMetrics,
+      blendedCpmKrw,
+    }),
+    generatedAt:
+      args.generatedAt ??
+      new Date().toLocaleString(isKo ? "ko-KR" : "en-US"),
+    months,
+    campaignMediaQuantities: quantities,
+    campaignMediaPriceOptionIndex: priceOptionIndex,
+    digitalOmittedNotice,
+  });
+}
+
+/** PlannerReportSharedProps.narrativeContext 용 (선택) */
+export function briefNarrativeAgeKeys(plan: BriefReportPlan) {
+  const brief = briefFromPlan(plan);
+  return briefAgeBandsToPlannerKeys(brief.ageBands);
+}
