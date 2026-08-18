@@ -360,6 +360,11 @@ model MediaFactSheet {
   /// 환승역 노선별 구분용 (Phase 2)
   stationLineCode String? @map("station_line_code")
 
+  /// PR-3 Phase 1 — DOOH SOV 입력 (migration 20260818210000)
+  spotDurationSec Int? @map("spot_duration_sec")
+  loopDurationSec Int? @map("loop_duration_sec")
+  playsPerHour    Int? @map("plays_per_hour")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -411,6 +416,19 @@ model MediaComputedMetric {
 
   legacyDailyImpressions Int? @map("legacy_daily_impressions")
   legacyCpm              Int? @map("legacy_cpm")
+
+  /// PR-3 Phase 1 — OTS→LTS 전환율 스냅샷 (migration 20260818210000)
+  contactRate                Float?  @map("contact_rate")
+  contactRateBasis           String? @map("contact_rate_basis")
+  contactRateInputVisibility Float?  @map("contact_rate_input_visibility")
+  contactRateInputClass      String? @map("contact_rate_input_class")
+  sovShare                   Float?  @map("sov_share")
+  sovShareBasis              String? @map("sov_share_basis")
+
+  /// PR-3 Phase 3 — 타깃 demo 스냅샷 (docs/pr3-redesign.md §B)
+  demoGenderSplit       Json?    @map("demo_gender_split")
+  demoAgeSplit          Json?    @map("demo_age_split")
+  demoSourceSignalIds   String[] @default([]) @map("demo_source_signal_ids")
 
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")

@@ -269,8 +269,7 @@ test("R-07: 결손 필드를 세고, 스키마에 없는 필드는 전건 카운
   auditRow(row({ resolution: null, targetAge: null }), acc);
   assert.ok(acc.fieldGaps.resolution >= 1);
   assert.ok(acc.fieldGaps.targetAge >= 1);
-  // PR-3 에서 추가될 필드는 항상 100% 결손
-  assert.equal(acc.fieldGaps.demoGenderSplit, 1);
+  // PR-3 스키마 미존재 필드는 전건 카운트
   assert.equal(acc.fieldGaps.coveragePopulation, 1);
   assert.equal(acc.fieldGaps.loopDuration, 1);
 });
