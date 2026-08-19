@@ -5,14 +5,12 @@
  * MediaItem 을 엔진 입력으로 변환하고, 기본값을 쓴 경우 그 근거(basis)를
  * 값과 함께 올려보낸다.
  *
- * ## 계산 가능 3개 / 산정 불가 4개
+ * ## 계산 가능 7개 (Phase 4a-4)
  *
- * 행정동 인구 데이터가 리포지토리·DB 어디에도 없다. 따라서 모집단이
- * 분모인 지표(순 도달·도달률·평균 빈도·GRP)는 **계산을 시도하지 않고
- * null 을 반환한다.** 없는 데이터로 숫자를 만들지 않는다.
+ *   예산 소진 · 총 노출 · 혼합 CPM · 순 도달 · 도달률 · 평균 빈도 · GRP
  *
- *   계산 가능 : 예산 소진 · 총 노출 · 혼합 CPM
- *   산정 불가 : 순 도달 · 도달률 · 평균 빈도 · GRP  → 인구 데이터 연동 후
+ * coverage 가 없는 매체는 도달 계산에서 **제외**하고 나머지로 산출한다.
+ * 제외 건수는 `reachMeta.excludedCount` 로 UI 에 노출한다.
  */
 
 import type { MediaItem } from "@/lib/media-data";
@@ -28,7 +26,12 @@ import {
   type MetricBasis,
   type MetricValue,
 } from "@/lib/metrics/defaults";
-import type { DongProfile, TargetSpec } from "@/lib/metrics/types";
+import type { DongProfile, ReachResult, TargetSpec } from "@/lib/metrics/types";
+import {
+  buildCoverageByMediaId,
+  buildDongProfilesFromLines,
+  mediaIdsWithoutCoverage,
+} from "./reach-adapter.ts";
 
 /** 믹스 한 줄 — 매체 + 구매 수량 */
 export type MixLine = {
@@ -56,11 +59,13 @@ export type MixMetrics = {
   /** 혼합 CPM (원). 노출이 너무 적거나 범위 밖이면 null */
   mixCpmWon: MetricValue<number | null>;
 
-  // ── 산정 불가 (행정동 인구 데이터 연동 후 제공) ──
-  netReach: null;
-  reachRate: null;
-  frequency: null;
-  grp: null;
+  // ── Reach (coverage 있는 매체만; basis=derived — contactRate·SOV 추정 포함) ──
+  netReach: MetricValue<number> | null;
+  reachRate: MetricValue<number> | null;
+  frequency: MetricValue<number> | null;
+  grp: MetricValue<number> | null;
+  /** coverage NULL 매체 제외 메타 */
+  reachMeta: ReachCalcMeta | null;
 
   // ── 예산 ──
   budgetWon: number;
@@ -69,6 +74,20 @@ export type MixMetrics = {
   /** 예산 초과분 (초과 없으면 0) */
   overBudgetWon: number;
   isOverBudget: boolean;
+};
+
+/** Reach 지표 basis — MOIS 인구는 실측이나 contactRate·SOV·성연령 전국 폴백으로 전체 추정 */
+export const REACH_METRIC_BASIS: MetricBasis = "derived";
+
+export type ReachCalcMeta = {
+  includedCount: number;
+  excludedCount: number;
+  excludedMediaIds: string[];
+};
+
+export type TryCalcReachSuccess = {
+  result: ReachResult;
+  meta: ReachCalcMeta;
 };
 
 function priceBasisToMetricBasis(
@@ -137,6 +156,8 @@ export function calcMixMetrics(params: {
   lines: readonly MixLine[];
   days: number;
   budgetWon: number;
+  /** 미지정 시 전 타깃 */
+  target?: TargetSpec;
 }): MixMetrics {
   const days = Math.max(1, Math.floor(params.days));
   const lines = params.lines.map((l) => calcLineMetrics(l, days));
@@ -175,6 +196,50 @@ export function calcMixMetrics(params: {
   const budgetWon = Math.max(0, params.budgetWon);
   const overBudgetWon = Math.max(0, totalCostWon - budgetWon);
 
+  const excludedMediaIds = mediaIdsWithoutCoverage(params.lines);
+  const reachWrap = tryCalcReach({
+    lines: params.lines,
+    days,
+    target: params.target ?? {},
+    dongs: buildDongProfilesFromLines(params.lines),
+    coverageByMediaId: buildCoverageByMediaId(params.lines),
+  });
+
+  const reachFields = reachWrap
+    ? {
+        netReach: {
+          value: Math.round(reachWrap.result.netReach),
+          basis: REACH_METRIC_BASIS,
+        },
+        reachRate: {
+          value: reachWrap.result.reachRate,
+          basis: REACH_METRIC_BASIS,
+        },
+        frequency: {
+          value: Math.round(reachWrap.result.frequency * 10) / 10,
+          basis: REACH_METRIC_BASIS,
+        },
+        grp: {
+          value: Math.round(reachWrap.result.grp * 10) / 10,
+          basis: REACH_METRIC_BASIS,
+        },
+        reachMeta: reachWrap.meta,
+      }
+    : {
+        netReach: null,
+        reachRate: null,
+        frequency: null,
+        grp: null,
+        reachMeta:
+          excludedMediaIds.length > 0
+            ? {
+                includedCount: 0,
+                excludedCount: excludedMediaIds.length,
+                excludedMediaIds,
+              }
+            : null,
+      };
+
   return {
     lines,
     totalCostWon: {
@@ -190,11 +255,7 @@ export function calcMixMetrics(params: {
       basis: weakestBasis([...costBases, ...impBases]),
     },
 
-    // 모집단 없음 → 계산 시도조차 하지 않는다
-    netReach: null,
-    reachRate: null,
-    frequency: null,
-    grp: null,
+    ...reachFields,
 
     budgetWon,
     budgetUsedRate: budgetWon > 0 ? totalCostWon / budgetWon : 0,
@@ -204,34 +265,37 @@ export function calcMixMetrics(params: {
 }
 
 /**
- * 도달 지표 — **모집단이 있을 때만** 계산한다.
+ * 도달 지표 — coverage·모집단이 있는 매체만 포함.
  *
- * 현재는 행정동 인구 데이터가 없어 항상 `null` 을 반환한다. 인구 데이터가
- * 연동되면 `dongs` 가 채워지고 이 경로가 살아난다(별도 트랙, PR-4 동반).
- *
- * `reachRate <= 1.0` 가드는 그때를 위해 살려 둔다 — 도달률이 100% 를
- * 넘는 것은 정의상 불가능하므로, 넘으면 계산이 틀린 것이다.
+ * coverage NULL 매체는 제외하고 나머지로 계산한다 (전체 [산정 중] 아님).
+ * `reachRate <= 1.0`, `netReach <= targetPopulation` 가드.
  */
 export function tryCalcReach(params: {
   lines: readonly MixLine[];
   days: number;
   target: TargetSpec;
-  /** 행정동 인구 프로파일. 비어 있으면 계산하지 않는다 */
   dongs: readonly DongProfile[];
-  /** 매체별 커버 행정동. 비어 있으면 계산하지 않는다 */
-  coverageByMediaId: Readonly<Record<string, readonly { code: string; weight: number }[]>>;
+  coverageByMediaId: Readonly<
+    Record<string, readonly { code: string; weight: number }[]>
+  >;
   onError?: (message: string) => void;
-}): ReturnType<typeof calcNetReach> | null {
+}): TryCalcReachSuccess | null {
   const { dongs, coverageByMediaId, target } = params;
   const days = Math.max(1, Math.floor(params.days));
 
-  // 모집단이 없으면 시도하지 않는다 — 없는 데이터로 숫자를 만들지 않는다.
   if (dongs.length === 0) return null;
+
+  const excludedMediaIds: string[] = [];
+  const includedIds: string[] = [];
 
   const medias = params.lines
     .map((l) => {
       const coverageDongs = coverageByMediaId[l.media.id] ?? [];
-      if (coverageDongs.length === 0) return null;
+      if (coverageDongs.length === 0) {
+        excludedMediaIds.push(l.media.id);
+        return null;
+      }
+      includedIds.push(l.media.id);
       const { dailyImpressions, totalImpressions } = calcImpressions({
         dailyTraffic: l.media.dailyFootTraffic ?? 0,
         contactRate: resolveContactRateWithBasis({
@@ -260,16 +324,41 @@ export function tryCalcReach(params: {
 
   const result = calcNetReach({ medias, dongs, target, days });
 
-  // 도달률은 정의상 1.0 을 넘을 수 없다. 넘으면 계산이 틀린 것이므로
-  // 화면에 내보내지 않는다.
   if (!Number.isFinite(result.reachRate) || result.reachRate > 1) {
-    const msg = `[mix-metrics] reachRate 가 1.0 을 초과했습니다 (${result.reachRate}). 모집단·커버리지 입력을 확인하세요.`;
+    const msg = `[mix-metrics] reachRate > 1.0 (${result.reachRate}) — null 반환`;
     if (params.onError) params.onError(msg);
     else console.error(msg);
     return null;
   }
 
-  return result;
+  if (
+    !Number.isFinite(result.netReach) ||
+    result.netReach > result.targetPopulation
+  ) {
+    const msg = `[mix-metrics] netReach > targetPopulation (${result.netReach} > ${result.targetPopulation}) — null 반환`;
+    if (params.onError) params.onError(msg);
+    else console.error(msg);
+    return null;
+  }
+
+  const coveragePopCap = params.lines
+    .filter((l) => includedIds.includes(l.media.id))
+    .reduce((sum, l) => sum + (l.media.coveragePopulation ?? 0), 0);
+  if (coveragePopCap > 0 && result.netReach > coveragePopCap * 1.01) {
+    const msg = `[mix-metrics] netReach > coveragePopulation sum (${result.netReach} > ${coveragePopCap}) — null 반환`;
+    if (params.onError) params.onError(msg);
+    else console.error(msg);
+    return null;
+  }
+
+  return {
+    result,
+    meta: {
+      includedCount: medias.length,
+      excludedCount: excludedMediaIds.length,
+      excludedMediaIds,
+    },
+  };
 }
 
 /** 매체 유형별 CPM 정상 범위 — 화면 경고용 (엔진 CPM_BOUNDS 재사용) */

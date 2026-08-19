@@ -6,11 +6,12 @@ import type { CampaignPlanSnapshot } from "@/lib/campaign-plan-schema";
 import type { MediaItem } from "@/lib/media-data";
 import { buildMixLines } from "@/lib/planner/brief/build-plan-snapshot";
 import { calcMixMetrics } from "@/lib/planner/brief/mix-metrics";
+import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
   briefMixQuantities,
   type BriefReportPlan,
 } from "@/lib/planner/brief/brief-report-adapter";
-import { flightDays } from "@/lib/planner/brief/types";
+import { flightDays, type CampaignBriefInput } from "@/lib/planner/brief/types";
 import {
   metricBasisToExportBadge,
   type ExportKpiBadgeKey,
@@ -66,11 +67,19 @@ export function briefScreenExportKpiBadges(
     lines,
     days,
     budgetWon: plan.brief.budgetWon,
+    target: briefToTargetSpec({
+      genders: plan.brief.genders ?? [],
+      ageBands: (plan.brief.ageBands ?? []) as CampaignBriefInput["ageBands"],
+    }),
   });
   const badges: PlannerExportBadgeKind[] = [
     metricBasisToExportBadge(metrics.totalImpressions.basis),
-    "pending",
-    "pending",
+    metrics.netReach != null
+      ? metricBasisToExportBadge(metrics.netReach.basis)
+      : "pending",
+    metrics.netReach != null
+      ? metricBasisToExportBadge(metrics.reachRate!.basis)
+      : "pending",
   ];
   if (metrics.mixCpmWon.value != null) {
     badges.push(metricBasisToExportBadge(metrics.mixCpmWon.basis));

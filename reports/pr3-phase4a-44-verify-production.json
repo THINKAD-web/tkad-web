@@ -1,0 +1,48 @@
+{
+  "generatedAt": "2026-08-19T02:38:04.345Z",
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "isProd": true,
+  "scenario": "3천만원 서울·경기 2030 여성 2주",
+  "catalog": {
+    "seoulGyeonggiSampled": 200,
+    "withCoverage": 194,
+    "moisSignals": 72
+  },
+  "briefScenario": {
+    "mediaCount": 10,
+    "days": 14,
+    "netReach": 1801838,
+    "reachRate": 0.5778269544306248,
+    "reachRatePct": "57.78",
+    "frequency": 19.6,
+    "grp": 1134.2,
+    "basis": "derived",
+    "reachRateLe1": true,
+    "excludedCount": 0,
+    "allFourMetricsPresent": true
+  },
+  "patterns": {
+    "oneVsTen": {
+      "reach1": 0,
+      "reach10": 1801838,
+      "reachIncreases": true,
+      "reachSublinear": false,
+      "freq1": 0,
+      "freq10": 19.6,
+      "frequencyIncreases": true
+    },
+    "sameGuVsMultiGu": {
+      "sameGuReach": 74752,
+      "multiGuReach": 102753,
+      "multiGuHigher": true,
+      "sameGuCount": 2,
+      "multiGuCount": 3
+    },
+    "partialCoverageMix": {
+      "excludedCount": 1,
+      "stillHasReach": true,
+      "excludedNotice": true
+    }
+  },
+  "verdict": "pass"
+}

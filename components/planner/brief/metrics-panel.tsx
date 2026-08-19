@@ -1,12 +1,10 @@
 "use client";
 
 /**
- * PR-6b 실시간 지표 패널.
+ * PR-6b / Phase 4a-4 실시간 지표 패널.
  *
- * 계산 가능 3개(예산 소진·총 노출·혼합 CPM)는 값과 신뢰도 배지를 함께,
- * 산정 불가 4개(순 도달·도달률·평균 빈도·GRP)는 **자리를 비우지 않고**
- * 회색 + [산정 중] + "무엇이 오는지" 한 줄로 보여준다. 빈 화면은 고장으로
- * 보인다.
+ * 계산 가능 7개: 예산·노출·CPM + 순 도달·도달률·빈도·GRP
+ * Reach 는 coverage 있는 매체만 포함; 제외 건수는 안내 문구로 표시.
  */
 
 import type { MixMetrics } from "@/lib/planner/brief/mix-metrics";
@@ -60,6 +58,18 @@ function PendingRow({
   );
 }
 
+function formatReach(n: number, isKo: boolean): string {
+  if (n >= 1_000_000) {
+    const m = n / 1_000_000;
+    return isKo ? `${m.toFixed(1)}백만` : `${m.toFixed(1)}M`;
+  }
+  if (n >= 10_000) {
+    const k = n / 10_000;
+    return isKo ? `${k.toFixed(1)}만` : `${Math.round(n / 1000)}K`;
+  }
+  return n.toLocaleString(isKo ? "ko-KR" : "en-US");
+}
+
 export function MetricsPanel({
   metrics,
   isKo,
@@ -73,14 +83,15 @@ export function MetricsPanel({
       : `₩${n.toLocaleString("en-US")}`;
 
   const pendingHint = isKo
-    ? "행정동 인구 데이터 연동 후 제공"
-    : "Available after dong population data is connected";
+    ? "커버리지·인구 데이터가 있는 매체가 없습니다"
+    : "No media with coverage population data in this mix";
 
   const usedPct = Math.round(metrics.budgetUsedRate * 100);
+  const reachReady = metrics.netReach != null;
+  const excluded = metrics.reachMeta?.excludedCount ?? 0;
 
   return (
     <aside className="rounded-xl border border-border bg-card p-4">
-      {/* 고정 안내 — 대외 사용 금지 */}
       <p className="mb-3 rounded-lg border border-amber-400/40 bg-amber-400/10 p-2.5 text-[11px] leading-relaxed text-amber-800 dark:text-amber-300">
         {isKo
           ? "노출·도달은 추정치입니다. 데이터 정합성 작업 진행 중 — 대외 제안서에 사용 금지."
@@ -91,7 +102,6 @@ export function MetricsPanel({
         {isKo ? "실시간 지표" : "Live metrics"}
       </h3>
 
-      {/* ── 계산 가능 ── */}
       <div className="divide-y divide-border">
         <Row
           label={isKo ? "예산 소진" : "Budget used"}
@@ -123,7 +133,6 @@ export function MetricsPanel({
         />
       </div>
 
-      {/* 예산 초과 — 막지 않고 명확히 표시 */}
       {metrics.isOverBudget ? (
         <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-[11px] font-medium text-destructive">
           {isKo
@@ -132,29 +141,67 @@ export function MetricsPanel({
         </p>
       ) : null}
 
-      {/* ── 산정 불가 ── */}
       <div className="mt-4 border-t border-dashed border-border pt-3">
         <p className="mb-1 text-[11px] font-semibold text-muted-foreground">
-          {isKo ? "인구 데이터 연동 후 제공" : "Pending population data"}
+          {isKo ? "도달 추정 (MOIS 인구 + ρ=0.7)" : "Reach estimate (MOIS pop + ρ=0.7)"}
         </p>
         <div className="divide-y divide-border">
-          <PendingRow
-            label={isKo ? "순 도달" : "Net reach"}
-            hint={pendingHint}
-            isKo={isKo}
-          />
-          <PendingRow
-            label={isKo ? "도달률" : "Reach rate"}
-            hint={pendingHint}
-            isKo={isKo}
-          />
-          <PendingRow
-            label={isKo ? "평균 빈도" : "Avg. frequency"}
-            hint={pendingHint}
-            isKo={isKo}
-          />
-          <PendingRow label="GRP" hint={pendingHint} isKo={isKo} />
+          {reachReady ? (
+            <>
+              <Row
+                label={isKo ? "순 도달" : "Net reach"}
+                value={formatReach(metrics.netReach!.value, isKo)}
+                basis={metrics.netReach!.basis}
+                isKo={isKo}
+              />
+              <Row
+                label={isKo ? "도달률" : "Reach rate"}
+                value={`${(metrics.reachRate!.value * 100).toFixed(1)}%`}
+                basis={metrics.reachRate!.basis}
+                isKo={isKo}
+              />
+              <Row
+                label={isKo ? "평균 빈도" : "Avg. frequency"}
+                value={String(metrics.frequency!.value)}
+                basis={metrics.frequency!.basis}
+                isKo={isKo}
+              />
+              <Row
+                label="GRP"
+                value={String(metrics.grp!.value)}
+                basis={metrics.grp!.basis}
+                isKo={isKo}
+              />
+            </>
+          ) : (
+            <>
+              <PendingRow
+                label={isKo ? "순 도달" : "Net reach"}
+                hint={pendingHint}
+                isKo={isKo}
+              />
+              <PendingRow
+                label={isKo ? "도달률" : "Reach rate"}
+                hint={pendingHint}
+                isKo={isKo}
+              />
+              <PendingRow
+                label={isKo ? "평균 빈도" : "Avg. frequency"}
+                hint={pendingHint}
+                isKo={isKo}
+              />
+              <PendingRow label="GRP" hint={pendingHint} isKo={isKo} />
+            </>
+          )}
         </div>
+
+        {excluded > 0 ? (
+          <p className="mt-2 rounded-lg border border-border bg-muted/50 p-2 text-[11px] text-muted-foreground">
+            {isKo
+              ? `${excluded}개 매체는 인구·커버리지 데이터 미비로 도달 계산에서 제외되었습니다.`
+              : `${excluded} media excluded from reach — missing coverage population data.`}
+          </p>
+        ) : null}
       </div>
     </aside>
   );

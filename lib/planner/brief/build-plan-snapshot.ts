@@ -16,6 +16,7 @@ import {
   calcLineMetrics,
   type MixLine,
 } from "@/lib/planner/brief/mix-metrics";
+import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
   flightDays,
   toCampaignPlanBrief,
@@ -47,6 +48,7 @@ export function buildCampaignPlanSnapshot(params: {
     lines,
     days,
     budgetWon: planBrief.budgetWon,
+    target: briefToTargetSpec(params.brief),
   });
 
   const mediaMix: CampaignPlanMediaLine[] = lines.map((line) => {
@@ -79,11 +81,11 @@ export function buildCampaignPlanSnapshot(params: {
   });
 
   const storedMetrics: CampaignPlanStoredMetrics = {
-    netReach: 0,
+    netReach: metrics.netReach?.value ?? 0,
     targetPopulation: 0,
-    reachRate: 0,
-    frequency: 0,
-    grp: 0,
+    reachRate: metrics.reachRate?.value ?? 0,
+    frequency: metrics.frequency?.value ?? 0,
+    grp: metrics.grp?.value ?? 0,
     effectiveReach: 0,
     effectiveReachRate: 0,
     totalImpressions: metrics.totalImpressions.value,
@@ -94,10 +96,10 @@ export function buildCampaignPlanSnapshot(params: {
       totalImpressions: metrics.totalImpressions.basis,
       mixCpmWon:
         metrics.mixCpmWon.value == null ? null : metrics.mixCpmWon.basis,
-      netReach: null,
-      reachRate: null,
-      frequency: null,
-      grp: null,
+      netReach: metrics.netReach?.basis ?? null,
+      reachRate: metrics.reachRate?.basis ?? null,
+      frequency: metrics.frequency?.basis ?? null,
+      grp: metrics.grp?.basis ?? null,
     },
   };
 

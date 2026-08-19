@@ -222,6 +222,9 @@ export interface MediaItem {
   >;
   /** Signal 병합 스냅샷이면 derived */
   demoFromSignal?: boolean;
+  /** PR-3 Phase 4a — Reach 커버리지 (MOIS 구 + 인구) */
+  coverageDongs?: Array<{ code: string; weight: number; population: number }>;
+  coveragePopulation?: number;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {
