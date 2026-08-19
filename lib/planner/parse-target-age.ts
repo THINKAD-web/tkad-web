@@ -71,6 +71,21 @@ export function parseTargetAge(raw: string | null | undefined): ParsedTargetAge 
     return { kind: "range", minDecade: 20, maxDecade: 30, source: "range" };
   }
 
+  // "20-39세", "20세~35세" — 연령(세) 범위
+  const yearRange = text.match(/(\d{1,2})\s*세?\s*[~\-–—]\s*(\d{1,2})\s*세/);
+  if (yearRange) {
+    const minAge = Number(yearRange[1]);
+    const maxAge = Number(yearRange[2]);
+    if (maxAge >= minAge) {
+      return {
+        kind: "range",
+        minDecade: clampDecade(Math.floor(minAge / 10) * 10),
+        maxDecade: clampDecade(Math.floor(maxAge / 10) * 10),
+        source: "range",
+      };
+    }
+  }
+
   return { kind: "all", source: "fallback" };
 }
 

@@ -14,16 +14,19 @@
  *
  * ## basis 의미
  * - `measured`  : 매체별 실측값이 DB 에 있다
- * - `derived`   : 매체 사양(SOV 스펙 등)에서 계산했다
+ * - `derived`   : Signal 병합·매체 사양에서 계산했다
+ * - `parsed`    : `Media.targetAge` 텍스트 파싱 (연령만)
  * - `default`   : 유형별 기본 상수로 대체했다 → 화면에 [추정]
  */
 
 import { isStaticMedia, classifyMedia } from "./classify";
+import { targetAgeToAgeSplit } from "./demo-age-bridge";
 import { resolveSovShare as engineResolveSovShare } from "./impressions";
 import { DEFAULT_CONTACT_RATE } from "./constants";
-import type { MediaMetricClass } from "./types";
+import type { AgeBand, Gender, MediaMetricClass, TargetSpec } from "./types";
+import { AGE_BANDS } from "./types";
 
-export type MetricBasis = "measured" | "derived" | "default";
+export type MetricBasis = "measured" | "derived" | "parsed" | "default";
 
 export type MetricValue<T = number> = {
   value: T;
@@ -156,6 +159,155 @@ export function weakestBasis(
 ): MetricBasis {
   if (bases.length === 0) return "default";
   if (bases.includes("default")) return "default";
+  if (bases.includes("parsed")) return "parsed";
   if (bases.includes("derived")) return "derived";
   return "measured";
+}
+
+// ── PR-3 Phase 3 — demo gender/age profiles (재한 승인 2026-08-19) ──
+
+export type DemoGenderSplit = { male: number; female: number };
+export type DemoAgeSplit = Record<AgeBand, number>;
+
+/** 승인본 — reports/pr3-phase3-demo-defaults-draft.md */
+export const DEFAULT_DEMO_GENDER: Record<MediaMetricClass, DemoGenderSplit> = {
+  dooh_large: { male: 0.54, female: 0.46 },
+  dooh_mid: { male: 0.47, female: 0.53 },
+  subway_psd: { male: 0.48, female: 0.52 },
+  subway_light: { male: 0.5, female: 0.5 },
+  bus_exterior: { male: 0.46, female: 0.54 },
+  bus_shelter: { male: 0.47, female: 0.53 },
+  elevator_tv: { male: 0.5, female: 0.5 },
+  airport: { male: 0.48, female: 0.52 },
+  static_other: { male: 0.51, female: 0.49 },
+};
+
+/** 승인본 — reports/pr3-phase3-demo-defaults-draft.md */
+export const DEFAULT_DEMO_AGE: Record<MediaMetricClass, DemoAgeSplit> = {
+  dooh_large: { "10s": 0.07, "20s": 0.18, "30s": 0.26, "40s": 0.28, "50s+": 0.21 },
+  dooh_mid: { "10s": 0.1, "20s": 0.24, "30s": 0.28, "40s": 0.22, "50s+": 0.16 },
+  subway_psd: { "10s": 0.12, "20s": 0.3, "30s": 0.28, "40s": 0.18, "50s+": 0.12 },
+  subway_light: { "10s": 0.1, "20s": 0.28, "30s": 0.26, "40s": 0.2, "50s+": 0.16 },
+  bus_exterior: { "10s": 0.14, "20s": 0.26, "30s": 0.24, "40s": 0.2, "50s+": 0.16 },
+  bus_shelter: { "10s": 0.11, "20s": 0.22, "30s": 0.24, "40s": 0.22, "50s+": 0.21 },
+  elevator_tv: { "10s": 0.08, "20s": 0.16, "30s": 0.18, "40s": 0.2, "50s+": 0.38 },
+  airport: { "10s": 0.05, "20s": 0.18, "30s": 0.32, "40s": 0.28, "50s+": 0.17 },
+  static_other: { "10s": 0.08, "20s": 0.16, "30s": 0.2, "40s": 0.24, "50s+": 0.32 },
+};
+
+export type MediaDemoSource = {
+  type?: string;
+  subCategory?: string | null;
+  mainCategory?: string | null;
+  name?: string | null;
+  widthM?: number | null;
+  heightM?: number | null;
+  targetAge?: string | null;
+  demoGenderSplit?: DemoGenderSplit | null;
+  demoAgeSplit?: DemoAgeSplit | Partial<Record<AgeBand, number>> | null;
+  /** Signal 병합 스냅샷이면 derived, 아니면 measured */
+  demoFromSignal?: boolean;
+};
+
+function classifyDemoSource(media: MediaDemoSource): MediaMetricClass {
+  return classifyMedia({
+    type: media.type ?? "",
+    subCategory: media.subCategory,
+    mainCategory: media.mainCategory,
+    name: media.name,
+    widthM: media.widthM,
+    heightM: media.heightM,
+  });
+}
+
+function isValidGenderSplit(v: unknown): v is DemoGenderSplit {
+  if (!v || typeof v !== "object") return false;
+  const o = v as Record<string, unknown>;
+  if (typeof o.male !== "number" || typeof o.female !== "number") return false;
+  const sum = o.male + o.female;
+  return o.male >= 0 && o.female >= 0 && Math.abs(sum - 1) < 0.02;
+}
+
+function isValidAgeSplit(v: unknown): v is Partial<Record<AgeBand, number>> {
+  if (!v || typeof v !== "object") return false;
+  const o = v as Record<string, unknown>;
+  let sum = 0;
+  for (const band of AGE_BANDS) {
+    const n = o[band];
+    if (n == null) continue;
+    if (typeof n !== "number" || n < 0) return false;
+    sum += n;
+  }
+  return sum > 0 && Math.abs(sum - 1) < 0.02;
+}
+
+function toFullAgeSplit(
+  partial: Partial<Record<AgeBand, number>>,
+): DemoAgeSplit {
+  const out = {} as DemoAgeSplit;
+  for (const band of AGE_BANDS) {
+    out[band] = partial[band] ?? 0;
+  }
+  return out;
+}
+
+/**
+ * demo gender + 근거.
+ * 우선순위: DB 스냅샷(measured/derived) → 유형별 DEFAULT_DEMO_GENDER.
+ */
+export function resolveDemoGenderSplitWithBasis(
+  media: MediaDemoSource,
+): MetricValue<DemoGenderSplit> {
+  if (isValidGenderSplit(media.demoGenderSplit)) {
+    return {
+      value: media.demoGenderSplit,
+      basis: media.demoFromSignal ? "derived" : "measured",
+    };
+  }
+  const mediaClass = classifyDemoSource(media);
+  return { value: DEFAULT_DEMO_GENDER[mediaClass], basis: "default" };
+}
+
+/**
+ * demo age + 근거.
+ * 우선순위: DB 스냅샷 → targetAge 파싱(parsed) → DEFAULT_DEMO_AGE[class].
+ */
+export function resolveDemoAgeSplitWithBasis(
+  media: MediaDemoSource,
+): MetricValue<DemoAgeSplit> {
+  if (isValidAgeSplit(media.demoAgeSplit)) {
+    return {
+      value: toFullAgeSplit(media.demoAgeSplit),
+      basis: media.demoFromSignal ? "derived" : "measured",
+    };
+  }
+  const parsed = targetAgeToAgeSplit(media.targetAge);
+  if (parsed) {
+    return { value: toFullAgeSplit(parsed), basis: "parsed" };
+  }
+  const mediaClass = classifyDemoSource(media);
+  return { value: DEFAULT_DEMO_AGE[mediaClass], basis: "default" };
+}
+
+/** 브리프 타깃 대비 매체 demo 프로파일 내 타깃 비중 (0–1). */
+export function targetAudienceShare(
+  genderSplit: DemoGenderSplit,
+  ageSplit: DemoAgeSplit,
+  target: TargetSpec,
+): number {
+  let genderShare = 1;
+  if (target.genders && target.genders.length > 0) {
+    genderShare = target.genders.reduce(
+      (sum, g) => sum + (genderSplit[g as Gender] ?? 0),
+      0,
+    );
+  }
+  let ageShare = 1;
+  if (target.ageBands && target.ageBands.length > 0) {
+    ageShare = target.ageBands.reduce(
+      (sum, b) => sum + (ageSplit[b] ?? 0),
+      0,
+    );
+  }
+  return genderShare * ageShare;
 }

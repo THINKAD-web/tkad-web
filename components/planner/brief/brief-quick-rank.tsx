@@ -13,6 +13,7 @@ import {
   scoreMediaCandidates,
   type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
+import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 
 const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
@@ -110,11 +111,14 @@ export function BriefQuickRankPanel({
 
   return (
     <div data-testid="brief-quick-rank-panel">
-      {store.genders.length > 0 ? (
-        <p className="mb-3 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
-          {isKo
-            ? "성별 데이터 준비 중 — 순위에 미반영입니다. 연령·지역·예산 효율만 반영됩니다."
-            : "Gender data pending — not reflected in ranking. Only age, region and budget efficiency are used."}
+      {store.genders.length > 0 || store.ageBands.length > 0 ? (
+        <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
+          <span>
+            {isKo
+              ? "성별·연령은 매체 유형·등록 정보 기반 추정치입니다."
+              : "Gender and age use type-based or registered-text estimates."}
+          </span>
+          <DataQualityBadge basis="default" isKo={isKo} />
         </p>
       ) : null}
 

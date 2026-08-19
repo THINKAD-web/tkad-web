@@ -15,6 +15,8 @@ import {
   resolveContactRateWithBasis,
   weakestBasis,
   DEFAULT_SOV_SHARE,
+  DEFAULT_DEMO_AGE,
+  DEFAULT_DEMO_GENDER,
 } from "../../../metrics/defaults.ts";
 import {
   calcLineMetrics,
@@ -130,6 +132,8 @@ test("contactRate 실측 없으면 default, 있으면 measured", () => {
 test("weakestBasis: 추정이 하나라도 섞이면 결과는 추정", () => {
   assert.equal(weakestBasis(["measured", "measured"]), "measured");
   assert.equal(weakestBasis(["measured", "derived"]), "derived");
+  assert.equal(weakestBasis(["measured", "parsed"]), "parsed");
+  assert.equal(weakestBasis(["parsed", "derived"]), "parsed");
   assert.equal(weakestBasis(["measured", "derived", "default"]), "default");
   assert.equal(weakestBasis([]), "default");
 });
@@ -286,42 +290,102 @@ test("[fixture] 지역 조건이 없으면 지역 축을 만들지 않는다", (
   );
 });
 
-test("[fixture] 타깃 라벨이 없으면 타깃 축을 만들지 않는다", () => {
+test("[fixture] demo 없고 브리프 타깃만 있으면 class default로 타깃 축 생성", () => {
   const scored = scoreMediaCandidates({
-    candidates: [fixtureMedia()], // keywordFilter 없음
-    brief: { ...EMPTY_BRIEF, ageBands: ["20s", "30s"] },
-    days: 30,
-  });
-  assert.equal(
-    scored[0].axes.some((a) => a.key === "target"),
-    false,
-    "근거를 못 쓰면 축을 만들지 않는다",
-  );
-});
-
-test("[fixture] 타깃 라벨이 있으면 축 + 근거 문장이 생긴다", () => {
-  const media = fixtureMedia({
-    keywordFilter: {
-      searchKeywords: [],
-      specialFeature: [],
-      regionLabels: [],
-      mediaLabels: [],
-      targetLabels: ["2030", "직장인"],
-      industryLabels: [],
-      budgetMin: 0,
-      budgetMax: 0,
-      priceText: "",
-    },
-  } as Partial<MediaItem>);
-  const scored = scoreMediaCandidates({
-    candidates: [media],
+    candidates: [fixtureMedia({ subCategory: "subway_station" })],
     brief: { ...EMPTY_BRIEF, ageBands: ["20s", "30s"] },
     days: 30,
   });
   const axis = scored[0].axes.find((a) => a.key === "target");
   assert.ok(axis, "타깃 축 존재");
-  assert.ok(axis.rationale.includes("2030"), "근거에 라벨 원문");
   assert.ok(axis.score > 0);
+  assert.ok(
+    axis.rationale.includes("추정") || axis.rationale.toLowerCase().includes("estimate"),
+  );
+});
+
+test("[fixture] demo 스냅샷으로 성별·연령 순위가 달라진다", () => {
+  const subway = fixtureMedia({
+    id: "subway",
+    subCategory: "subway_station",
+    regionMain: "seoul",
+    demoGenderSplit: DEFAULT_DEMO_GENDER.subway_psd,
+    demoAgeSplit: DEFAULT_DEMO_AGE.subway_psd,
+    price: 25_000_000,
+    dailyFootTraffic: 200_000,
+  });
+  const elevator = fixtureMedia({
+    id: "elevator",
+    subCategory: "elevator",
+    regionMain: "seoul",
+    demoGenderSplit: DEFAULT_DEMO_GENDER.elevator_tv,
+    demoAgeSplit: DEFAULT_DEMO_AGE.elevator_tv,
+    price: 25_000_000,
+    dailyFootTraffic: 200_000,
+  });
+
+  const female2030 = scoreMediaCandidates({
+    candidates: [subway, elevator],
+    brief: {
+      ...EMPTY_BRIEF,
+      regionCodes: ["11"],
+      genders: ["female"],
+      ageBands: ["20s", "30s"],
+    },
+    days: 14,
+  });
+  const male50 = scoreMediaCandidates({
+    candidates: [subway, elevator],
+    brief: {
+      ...EMPTY_BRIEF,
+      regionCodes: ["11"],
+      genders: ["male"],
+      ageBands: ["50s+"],
+    },
+    days: 14,
+  });
+
+  assert.notEqual(
+    female2030[0]?.media.id,
+    male50[0]?.media.id,
+    "2030 여성 vs 50s+ 남성 Top1이 달라야 한다",
+  );
+
+  const withTarget = female2030.filter((s) =>
+    s.axes.some((a) => a.key === "target"),
+  ).length;
+  assert.equal(withTarget, 2, "타깃 축이 생성되어야 한다");
+});
+
+test("[fixture] subway_psd가 2030 여성 share에서 elevator_tv보다 높다", () => {
+  const subway = fixtureMedia({
+    id: "subway",
+    subCategory: "subway_station",
+    demoGenderSplit: DEFAULT_DEMO_GENDER.subway_psd,
+    demoAgeSplit: DEFAULT_DEMO_AGE.subway_psd,
+  });
+  const elevator = fixtureMedia({
+    id: "elevator",
+    subCategory: "elevator",
+    demoGenderSplit: DEFAULT_DEMO_GENDER.elevator_tv,
+    demoAgeSplit: DEFAULT_DEMO_AGE.elevator_tv,
+  });
+  const scored = scoreMediaCandidates({
+    candidates: [subway, elevator],
+    brief: {
+      ...EMPTY_BRIEF,
+      genders: ["female"],
+      ageBands: ["20s", "30s"],
+    },
+    days: 14,
+  });
+  const subwayTarget =
+    scored.find((s) => s.media.id === "subway")?.axes.find((a) => a.key === "target")
+      ?.score ?? 0;
+  const elevatorTarget =
+    scored.find((s) => s.media.id === "elevator")?.axes.find((a) => a.key === "target")
+      ?.score ?? 0;
+  assert.ok(subwayTarget > elevatorTarget, "subway_psd 2030 여성 share > elevator_tv");
 });
 
 test("[fixture] 모든 축은 근거 문장을 반드시 가진다", () => {

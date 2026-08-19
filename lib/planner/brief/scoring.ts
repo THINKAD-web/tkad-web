@@ -7,21 +7,28 @@
  * 근거로 몇 점인지** 한 줄로 말할 수 있어야 하고, 말할 수 없으면 그 축은
  * 결과에서 아예 빠진다. 없는 데이터로 점수를 만들지 않는다.
  *
- * ## 성별은 이번 범위에서 가중치 0
+ * ## 타깃 적합 — demo gender/age (PR-3 Phase 3)
  *
- * 매체별 성별 구성비 데이터가 DB 에 없다(demo_* 는 PR-3 재설계 예정).
- * 따라서 성별은 **순위에 반영하지 않는다.** 타깃 축은 연령 라벨만 쓴다.
- * 화면에도 "성별 데이터 준비 중 — 순위에 미반영"을 명시한다.
+ * 연령 우선순위: demoAgeSplit(measured/derived) → targetAge 파싱(parsed)
+ * → 유형 default. 성별: demoGenderSplit → 유형 default.
+ * `lib/metrics/defaults.ts` · `lib/metrics/demo-age-bridge.ts`
  *
  * ## 축별 데이터 출처
  * - 지역 적합 : `Media.regionMain` (browse 14그룹) ↔ 브리프 17시도 역매핑
  * - 예산 효율 : 등록 상품가 ÷ 노출 = CPM, 같은 유형 후보군 중앙값 대비
- * - 타깃 적합 : `keywordFilter.targetLabels` (편집 라벨) ↔ 브리프 연령대
- *               ※ 실측 인구 구성비가 아니라 운영이 붙인 라벨이다
+ * - 타깃 적합 : demo gender/age share ↔ 브리프 성별·연령
  */
 
 import type { MediaItem } from "@/lib/media-data";
 import { classifyMedia } from "@/lib/metrics/classify";
+import {
+  resolveDemoAgeSplitWithBasis,
+  resolveDemoGenderSplitWithBasis,
+  targetAudienceShare,
+  weakestBasis,
+  type MediaDemoSource,
+  type MetricBasis,
+} from "@/lib/metrics/defaults";
 import type { MediaMetricClass } from "@/lib/metrics/types";
 import { calcLineMetrics } from "@/lib/planner/brief/mix-metrics";
 import { sidoCodesToBrowseMainIds, sidoLabel } from "@/lib/planner/brief/regions";
@@ -42,6 +49,8 @@ export type ScoredMedia = {
   /** 존재하는 축들의 평균 (0~100). 축이 하나도 없으면 0 */
   total: number;
   axes: ScoreAxis[];
+  /** 타깃 축이 있을 때 demo basis (배지·UI용) */
+  targetBasis?: MetricBasis | null;
   /** 참고용 — 1개 기준 CPM (계산 불가 시 null) */
   unitCpmWon: number | null;
 };
@@ -51,7 +60,6 @@ export function parseAgeLabel(label: string): BriefAgeBand[] {
   const out = new Set<BriefAgeBand>();
   const s = label.replace(/\s+/g, "");
 
-  // "2030", "3040", "1020", "4050" 형태
   const combo: Record<string, BriefAgeBand[]> = {
     "1020": ["10s", "20s"],
     "2030": ["20s", "30s"],
@@ -63,7 +71,6 @@ export function parseAgeLabel(label: string): BriefAgeBand[] {
     if (s.includes(k)) v.forEach((b) => out.add(b));
   }
 
-  // "20대", "30대" 형태
   for (const m of s.matchAll(/(\d0)대/g)) {
     const n = Number(m[1]);
     if (n === 10) out.add("10s");
@@ -76,25 +83,48 @@ export function parseAgeLabel(label: string): BriefAgeBand[] {
   return [...out];
 }
 
-/** 매체의 연령 라벨 전체 → 연령대 집합 */
-function mediaAgeBands(media: MediaItem): BriefAgeBand[] {
-  const labels = media.keywordFilter?.targetLabels ?? [];
-  const out = new Set<BriefAgeBand>();
-  for (const l of labels) {
-    for (const b of parseAgeLabel(l)) out.add(b);
-  }
-  return [...out];
+function demoSourceFromMedia(media: MediaItem): MediaDemoSource {
+  return {
+    type: media.type,
+    subCategory: media.subCategory ?? media.mediaSubCategory,
+    mainCategory: media.mediaCategory?.[0] ?? media.mediaMainCategory,
+    name: media.name,
+    widthM: media.widthM,
+    heightM: media.heightM,
+    targetAge: media.targetAge,
+    demoGenderSplit: media.demoGenderSplit,
+    demoAgeSplit: media.demoAgeSplit,
+    demoFromSignal: media.demoFromSignal,
+  };
 }
 
-/** 매체의 연령 라벨 원문 중 브리프 연령대와 겹치는 것 (근거 문장용) */
-function matchingAgeLabels(
-  media: MediaItem,
-  wanted: readonly BriefAgeBand[],
-): string[] {
-  const labels = media.keywordFilter?.targetLabels ?? [];
-  return labels.filter((l) =>
-    parseAgeLabel(l).some((b) => wanted.includes(b)),
-  );
+function formatTargetRationale(
+  basis: MetricBasis,
+  sharePct: number,
+  isKo: boolean,
+): string {
+  if (isKo) {
+    switch (basis) {
+      case "measured":
+        return `타깃 인구 비중 ${sharePct}% · 실측 demo 프로파일`;
+      case "derived":
+        return `타깃 인구 비중 ${sharePct}% · Signal 병합 demo`;
+      case "parsed":
+        return `타깃 인구 비중 ${sharePct}% · 등록 targetAge 파싱`;
+      default:
+        return `타깃 인구 비중 ${sharePct}% · 매체 유형 기반 추정`;
+    }
+  }
+  switch (basis) {
+    case "measured":
+      return `Target share ${sharePct}% · measured demo profile`;
+    case "derived":
+      return `Target share ${sharePct}% · signal-merged demo`;
+    case "parsed":
+      return `Target share ${sharePct}% · parsed targetAge`;
+    default:
+      return `Target share ${sharePct}% · type-based estimate`;
+  }
 }
 
 function median(nums: readonly number[]): number | null {
@@ -128,9 +158,11 @@ const CLASS_LABEL: Record<MediaMetricClass, string> = {
 function mediaClassOf(media: MediaItem): MediaMetricClass {
   return classifyMedia({
     type: media.type,
-    subCategory: media.subCategory,
-    mainCategory: media.mediaCategory?.[0],
+    subCategory: media.subCategory ?? media.mediaSubCategory,
+    mainCategory: media.mediaCategory?.[0] ?? media.mediaMainCategory,
     name: media.name,
+    widthM: media.widthM,
+    heightM: media.heightM,
   });
 }
 
@@ -150,7 +182,6 @@ export function scoreMediaCandidates(params: {
   const { candidates, brief, days } = params;
   const isKo = params.isKo ?? true;
 
-  // 예산 효율 기준선 — 같은 유형 후보들의 CPM 중앙값
   const cpmByMedia = new Map<string, number | null>();
   const cpmByClass = new Map<MediaMetricClass, number[]>();
   for (const m of candidates) {
@@ -169,13 +200,14 @@ export function scoreMediaCandidates(params: {
   }
 
   const wantedBrowseIds = new Set(sidoCodesToBrowseMainIds(brief.regionCodes));
+  const hasTargetBrief =
+    brief.genders.length > 0 || brief.ageBands.length > 0;
 
   return candidates
     .map((media): ScoredMedia => {
       const axes: ScoreAxis[] = [];
+      let targetBasis: MetricBasis | null = null;
 
-      // ── 지역 적합 ──
-      // 브리프에 지역 조건이 없으면(전국) 변별력이 없어 축을 만들지 않는다.
       if (wantedBrowseIds.size > 0 && media.regionMain) {
         const hit = wantedBrowseIds.has(media.regionMain);
         const where =
@@ -197,13 +229,11 @@ export function scoreMediaCandidates(params: {
         });
       }
 
-      // ── 예산 효율 ──
       const cpm = cpmByMedia.get(media.id) ?? null;
       const cls = mediaClassOf(media);
       const med = medianByClass.get(cls) ?? null;
       if (cpm != null && med != null && med > 0) {
         const diffPct = Math.round(((cpm - med) / med) * 100);
-        // 싼 쪽이 고득점. 중앙값 대비 -50% → 100, +50% → 0
         const score = Math.max(0, Math.min(100, 50 - diffPct));
         const sign = diffPct > 0 ? "+" : "";
         axes.push({
@@ -215,25 +245,24 @@ export function scoreMediaCandidates(params: {
         });
       }
 
-      // ── 타깃 적합 (연령만 — 성별은 데이터 없어 가중치 0) ──
-      if (brief.ageBands.length > 0) {
-        const bands = mediaAgeBands(media);
-        if (bands.length > 0) {
-          const matched = matchingAgeLabels(media, brief.ageBands);
-          const overlap = bands.filter((b) => brief.ageBands.includes(b));
-          const score = Math.round(
-            (overlap.length / brief.ageBands.length) * 100,
-          );
-          if (matched.length > 0) {
-            axes.push({
-              key: "target",
-              score: Math.min(100, score),
-              rationale: isKo
-                ? `타깃 라벨 "${matched.slice(0, 2).join(", ")}" · 요청 연령대와 겹침`
-                : `Target label "${matched.slice(0, 2).join(", ")}" overlaps requested ages`,
-            });
-          }
-        }
+      if (hasTargetBrief) {
+        const source = demoSourceFromMedia(media);
+        const genderRes = resolveDemoGenderSplitWithBasis(source);
+        const ageRes = resolveDemoAgeSplitWithBasis(source);
+        const share = targetAudienceShare(genderRes.value, ageRes.value, {
+          genders: brief.genders.length > 0 ? brief.genders : undefined,
+          ageBands: brief.ageBands.length > 0 ? brief.ageBands : undefined,
+        });
+        const basisParts: MetricBasis[] = [];
+        if (brief.genders.length > 0) basisParts.push(genderRes.basis);
+        if (brief.ageBands.length > 0) basisParts.push(ageRes.basis);
+        targetBasis = weakestBasis(basisParts);
+        const score = Math.round(share * 100);
+        axes.push({
+          key: "target",
+          score: Math.min(100, Math.max(0, score)),
+          rationale: formatTargetRationale(targetBasis, score, isKo),
+        });
       }
 
       const total =
@@ -241,7 +270,7 @@ export function scoreMediaCandidates(params: {
           ? Math.round(axes.reduce((s, a) => s + a.score, 0) / axes.length)
           : 0;
 
-      return { media, total, axes, unitCpmWon: cpm };
+      return { media, total, axes, targetBasis, unitCpmWon: cpm };
     })
     .sort((a, b) => b.total - a.total);
 }
@@ -266,7 +295,6 @@ export function buildRecommendedMix(params: {
     if (!line.costWon) continue;
     const cost = line.costWon.value;
     if (cost <= 0) continue;
-    // 예산을 넘기면 담지 않는다 — 추천 믹스는 예산을 초과하지 않는다.
     if (spent + cost > params.budgetWon) continue;
     out.push({ mediaId: s.media.id, units: 1 });
     spent += cost;
