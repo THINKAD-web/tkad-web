@@ -1,0 +1,178 @@
+{
+  "generatedAt": "2026-08-19T02:03:09.411Z",
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "isProd": true,
+  "mode": "dry-run",
+  "apiKeyRequired": false,
+  "dataSource": {
+    "method": "mois_csv_post",
+    "url": "https://jumin.mois.go.kr/statMonth.do",
+    "referenceMonth": "2026-07",
+    "loginRequired": false
+  },
+  "mois": {
+    "leafSigunguCount": 72,
+    "seoulCount": 25,
+    "gyeonggiCount": 47,
+    "sample": [
+      {
+        "regionCode": "1111000000",
+        "sigunguName": "종로구",
+        "population": 136139
+      },
+      {
+        "regionCode": "1114000000",
+        "sigunguName": "중구",
+        "population": 117493
+      },
+      {
+        "regionCode": "1117000000",
+        "sigunguName": "용산구",
+        "population": 199575
+      },
+      {
+        "regionCode": "1120000000",
+        "sigunguName": "성동구",
+        "population": 274346
+      },
+      {
+        "regionCode": "1121500000",
+        "sigunguName": "광진구",
+        "population": 330802
+      }
+    ]
+  },
+  "media": {
+    "seoulGyeonggiActive": 605,
+    "distinctDistricts": 55
+  },
+  "districtMapping": {
+    "mapped": 45,
+    "failed": [
+      {
+        "district": "부평구",
+        "reason": "no_mois_match"
+      }
+    ],
+    "skipped": [
+      {
+        "district": "서울 전역",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "강남구 등",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "강남·서초·분당·영통",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "성동구 외 다수",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "종로구 외 다수",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "서울 전역 (1~8호선)",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "경기도 전역",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "다수",
+        "reason": "skip_broad_coverage"
+      },
+      {
+        "district": "서울 전역 (1~4호선)",
+        "reason": "skip_broad_coverage"
+      }
+    ]
+  },
+  "signals": {
+    "existingPopulationDemographics": 0,
+    "wouldCreate": 72,
+    "noAnchorMedia": 0,
+    "anchorMethods": {
+      "district_anchor": 40,
+      "sido_fallback_anchor": 32
+    },
+    "preview": [
+      {
+        "sourceKey": "1111000000",
+        "sigunguName": "종로구",
+        "population": 136139,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1114000000",
+        "sigunguName": "중구",
+        "population": 117493,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1117000000",
+        "sigunguName": "용산구",
+        "population": 199575,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1120000000",
+        "sigunguName": "성동구",
+        "population": 274346,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1121500000",
+        "sigunguName": "광진구",
+        "population": 330802,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1123000000",
+        "sigunguName": "동대문구",
+        "population": 353070,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1126000000",
+        "sigunguName": "중랑구",
+        "population": 376282,
+        "anchorMethod": "district_anchor",
+        "hasAnchor": true
+      },
+      {
+        "sourceKey": "1129000000",
+        "sigunguName": "성북구",
+        "population": 421289,
+        "anchorMethod": "sido_fallback_anchor",
+        "hasAnchor": true
+      }
+    ]
+  },
+  "executePlan": {
+    "sourceType": "population_demographics",
+    "sourceUrl": "https://jumin.mois.go.kr/statMonth.do",
+    "rawValueShape": [
+      "regionCode",
+      "regionName",
+      "sigunguName",
+      "sidoName",
+      "population",
+      "referenceMonth",
+      "method"
+    ],
+    "note": "Signal은 sourceType+sourceKey(행정기관코드)로 조회. mediaId는 FK 충족용 anchor(해당 구 district 매체 1건)."
+  },
+  "verdict": "review_mapping_failures"
+}
