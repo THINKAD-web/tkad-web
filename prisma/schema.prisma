@@ -430,6 +430,10 @@ model MediaComputedMetric {
   demoAgeSplit          Json?    @map("demo_age_split")
   demoSourceSignalIds   String[] @default([]) @map("demo_source_signal_ids")
 
+  /// PR-3 Phase 4a — Reach 커버리지 스냅샷 (docs/pr3-redesign.md §B)
+  coveragePopulation Int? @map("coverage_population")
+  coverageDongs      Json? @map("coverage_dongs")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
