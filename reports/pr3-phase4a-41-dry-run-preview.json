@@ -1,0 +1,62 @@
+{
+  "generatedAt": "2026-08-19T01:44:35.640Z",
+  "host": "ep-shiny-sun-ahrk7gkk-pooler.c-3.us-east-1.aws.neon.tech",
+  "isProd": false,
+  "isPreview": true,
+  "mode": "dry-run",
+  "scope": "schema-migrate-only",
+  "backfillIncluded": false,
+  "migrations": {
+    "phase4a": {
+      "name": "20260820120000_pr3_phase4a_coverage_snapshot",
+      "applied": false,
+      "wouldRunOnDeploy": true,
+      "ddl": [
+        "ADD COLUMN IF NOT EXISTS coverage_population INTEGER",
+        "ADD COLUMN IF NOT EXISTS coverage_dongs JSONB"
+      ],
+      "expectedBehavior": "apply DDL — 2 nullable columns on media_computed_metrics"
+    },
+    "pendingOnDeploy": [
+      "20260820120000_pr3_phase4a_coverage_snapshot"
+    ]
+  },
+  "tables": {
+    "media_computed_metrics": {
+      "totalRows": 821,
+      "coverageColumns": {
+        "coverage_population": {
+          "exists": false,
+          "afterMigrate": "NULL"
+        },
+        "coverage_dongs": {
+          "exists": false,
+          "afterMigrate": "NULL"
+        }
+      },
+      "coverageNonNullCounts": "columns_not_yet_present"
+    },
+    "media": {
+      "activeCount": 804,
+      "orphanCoverageColumns": [
+        "coverage_dongs",
+        "coverage_population"
+      ]
+    }
+  },
+  "dataImpact": {
+    "updates": 0,
+    "deletes": 0,
+    "existingColumnChanges": 0,
+    "newColumnsOnly": [
+      "coverage_population",
+      "coverage_dongs"
+    ],
+    "existingRowsAffected": 821,
+    "impactSummary": "ADD COLUMN IF NOT EXISTS only — 기존 컬럼/값 변경 없음. 신규 coverage 컬럼은 NULL만 추가.",
+    "risks": [
+      "Preview orphan: media.coverage_dongs,coverage_population exists — Phase 4a targets media_computed_metrics only; no data copy planned"
+    ]
+  },
+  "verdict": "safe"
+}
