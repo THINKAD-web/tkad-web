@@ -3,9 +3,11 @@ import test from "node:test";
 import {
   formatCpmForDisplay,
   formatJpyFromKrwWon,
+  formatKrwPrimaryWithJpyFootnote,
   formatMediaCostEstimateShort,
   formatMediaPriceForDisplay,
   formatMediaPriceJpyPreview,
+  formatReportJpyExchangeFootnote,
   getKrwJpyRate,
   isJapanDisplayCountry,
   krwWonToJpy,
@@ -68,4 +70,25 @@ test("formatMediaCostEstimateShort: JP uses yen label", () => {
     formatMediaCostEstimateShort(300_000, "KR", "ko-KR"),
     /약 30만원/,
   );
+});
+
+test("formatKrwPrimaryWithJpyFootnote: KR primary only; JP adds yen footnote", () => {
+  process.env.KRW_JPY_RATE = "0.1126";
+  assert.equal(
+    formatKrwPrimaryWithJpyFootnote(22_000_000, "KR", "ko-KR"),
+    "₩2,200만",
+  );
+  assert.equal(
+    formatKrwPrimaryWithJpyFootnote(22_000_000, "JP", "ko-KR"),
+    "₩2,200만 (¥2,477,200)",
+  );
+});
+
+test("formatReportJpyExchangeFootnote includes rate and as-of date", () => {
+  process.env.KRW_JPY_RATE = "0.1126";
+  process.env.KRW_JPY_RATE_AS_OF = "2026-08-18";
+  const ko = formatReportJpyExchangeFootnote(true);
+  assert.match(ko, /0\.1126/);
+  assert.match(ko, /2026-08-18/);
+  assert.match(ko, /KRW/);
 });

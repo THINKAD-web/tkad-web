@@ -661,7 +661,14 @@ export const PlannerReportDocument = forwardRef<
         )}
 
         {/* 면책 */}
-        <p className="border-t border-gray-100 pt-5 text-[11px] leading-relaxed text-gray-400">
+        {p.currencyFootnote ? (
+          <p className="border-t border-gray-100 pt-5 text-[11px] leading-relaxed text-gray-500">
+            {p.currencyFootnote}
+          </p>
+        ) : null}
+        <p
+          className={`text-[11px] leading-relaxed text-gray-400 ${p.currencyFootnote ? "pt-2" : "border-t border-gray-100 pt-5"}`}
+        >
           {p.disclaimer}
         </p>
       </div>

@@ -1429,7 +1429,10 @@ export async function buildPlannerReportPdf(
   doc.setFont(FONT, "normal");
   doc.setFontSize(7.5);
   setText(GRAY_500);
-  const disc = doc.splitTextToSize(p.disclaimer, contentW) as string[];
+  const footnotes: string[] = [];
+  if (p.currencyFootnote) footnotes.push(p.currencyFootnote);
+  footnotes.push(p.disclaimer);
+  const disc = doc.splitTextToSize(footnotes.join("\n\n"), contentW) as string[];
   doc.text(disc, M, y + 2);
 
   footer();

@@ -14,6 +14,9 @@ import type { MediaPricePeriodKey } from "@/lib/media-data";
 /** 1 KRW = N JPY (예: 0.1126). env 미설정 시 2026-08-18 시장 근사치. */
 const DEFAULT_KRW_JPY_RATE = 0.1126;
 
+/** `KRW_JPY_RATE` 갱신 기준일 (보고서 각주). */
+const DEFAULT_KRW_JPY_RATE_AS_OF = "2026-08-18";
+
 /**
  * KRW→JPY 고정환율 (옵션 A).
  * 수동 갱신 필요 — .env.production.example 주석의 갱신일 참고.
@@ -25,6 +28,18 @@ export function getKrwJpyRate(): number {
     if (Number.isFinite(n) && n > 0) return n;
   }
   return DEFAULT_KRW_JPY_RATE;
+}
+
+/** env `KRW_JPY_RATE_AS_OF` 또는 기본 갱신일 (YYYY-MM-DD). */
+export function getKrwJpyRateAsOfDate(): string {
+  const raw = process.env.KRW_JPY_RATE_AS_OF?.trim();
+  return raw && /^\d{4}-\d{2}-\d{2}$/.test(raw) ? raw : DEFAULT_KRW_JPY_RATE_AS_OF;
+}
+
+export function portfolioHasJapanMedia(
+  items: ReadonlyArray<{ country?: string | null }>,
+): boolean {
+  return items.some((m) => isJapanDisplayCountry(m.country));
 }
 
 export function krwWonToJpy(won: number): number {
@@ -47,6 +62,32 @@ export function formatJpyFromKrwWon(
   const jpy = krwWonToJpy(won);
   if (jpy <= 0) return mediaPriceOnInquiryLabel(locale);
   return `¥${jpy.toLocaleString("ja-JP")}`;
+}
+
+/**
+ * 보고서 행 단가 — KRW SSOT primary, JP 매체만 `(¥N)` 병기 (옵션 b).
+ * 합계·차트·KPI는 호출부에서 KRW 숫자 그대로 유지.
+ */
+export function formatKrwPrimaryWithJpyFootnote(
+  won: number,
+  country: string | null | undefined,
+  locale = "ko-KR",
+): string {
+  const krw = catalogPriceFieldToWon(won);
+  if (krw <= 0) return mediaPriceOnInquiryLabel(locale);
+  const primary = formatMediaPriceForDisplay(krw, "KR", locale);
+  if (!isJapanDisplayCountry(country)) return primary;
+  return `${primary} (${formatJpyFromKrwWon(krw, locale)})`;
+}
+
+/** JP 매체가 믹스에 있을 때 보고서 각주 (환율·기준일). */
+export function formatReportJpyExchangeFootnote(isKo: boolean): string {
+  const rate = getKrwJpyRate();
+  const asOf = getKrwJpyRateAsOfDate();
+  if (isKo) {
+    return `일본 매체 ¥ 환산: 1원 = ${rate}엔 (기준일 ${asOf}). 합계·차트·KPI는 원화(KRW) 기준입니다.`;
+  }
+  return `JPY equivalents for Japan media: 1 KRW = ${rate} JPY (as of ${asOf}). Totals, charts, and KPIs remain in KRW.`;
 }
 
 /**
