@@ -1,0 +1,69 @@
+{
+  "generatedAt": "2026-08-19T02:12:07.200Z",
+  "count": 7,
+  "cases": [
+    {
+      "id": "cmrm2f88q000204kydtp2vmzj",
+      "name": "전통시장 LED 전광판 광고",
+      "regionMain": "seoul",
+      "regionSub": null,
+      "city": "경기",
+      "district": "부천시 원미구",
+      "expected": "gyeonggi"
+    },
+    {
+      "id": "cmqrpy6vh00030ai366l1xgkn",
+      "name": "공항철도 검암역 개찰구 래핑 광고",
+      "regionMain": "seoul",
+      "regionSub": "seoul_itaewon",
+      "city": "인천",
+      "district": "서구",
+      "expected": "incheon"
+    },
+    {
+      "id": "cmqrnc9uw00010bj7wh5uteyv",
+      "name": "공항철도 개찰구 래핑 Full Package 광고",
+      "regionMain": "seoul",
+      "regionSub": "seoul_itaewon",
+      "city": "인천",
+      "district": "서구",
+      "expected": "incheon"
+    },
+    {
+      "id": "cmoy5jrdi000004i9543h9wb9",
+      "name": "대구 지하철 3호선 동대구역 대합실 디지털미디어 광고",
+      "regionMain": "seoul",
+      "regionSub": "seoul_guro",
+      "city": "대구",
+      "district": "동구",
+      "expected": "daegu"
+    },
+    {
+      "id": "cmqrpnxqa00000bj9zhwkdlpj",
+      "name": "공항철도 김포공항역 개찰구 래핑 광고",
+      "regionMain": "seoul",
+      "regionSub": null,
+      "city": "경기도",
+      "district": "김포시",
+      "expected": "gyeonggi"
+    },
+    {
+      "id": "cmqt7egdr000104l54jc6hrmc",
+      "name": "광역전철 스티커 + 듀얼 LCD Full Package 광고",
+      "regionMain": "seoul",
+      "regionSub": null,
+      "city": "경기",
+      "district": "성남시 분당구",
+      "expected": "gyeonggi"
+    },
+    {
+      "id": "cmqt906rj00000ajlt4lmwchi",
+      "name": "지하철 1호선 부평역 스크린도어 광고",
+      "regionMain": "seoul",
+      "regionSub": null,
+      "city": "인천",
+      "district": "부평구",
+      "expected": "incheon"
+    }
+  ]
+}
