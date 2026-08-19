@@ -1265,7 +1265,8 @@ export async function buildPlannerReportPptx(
   // ── 면책 ──
   const last = pptx.addSlide();
   last.background = { color: WHITE };
-  last.addText(p.disclaimer, {
+  const footerText = [p.currencyFootnote, p.disclaimer].filter(Boolean).join("\n\n");
+  last.addText(footerText, {
     x: 0.8, y: 3.2, w: 11.7, h: 1.2, fontFace: face, fontSize: 11, color: GRAY, align: "center", valign: "middle",
   });
 

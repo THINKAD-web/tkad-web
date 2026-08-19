@@ -166,6 +166,8 @@ export type PlannerReportExportPayload = {
   recommendRationale?: PlannerExportRecommendRationale;
   /** O-1 digital gap (R-3) — 스냅샷 없이 ooh_digital 일 때 PDF·화면에 명시 */
   digitalOmittedNotice?: string;
+  /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */
+  currencyFootnote?: string;
   disclaimer: string;
 };
 

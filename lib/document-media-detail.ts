@@ -3,10 +3,10 @@ import { MEDIA_CATEGORIES } from "@/lib/media-browse-categories";
 import {
   catalogPriceFieldToWon,
   formatCatalogPriceFieldWon,
-  formatMediaPrice,
   formatPricePeriodShortLabel,
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
+import { formatKrwPrimaryWithJpyFootnote } from "@/lib/media-display-currency";
 import {
   formatPlannerQuantityLabel,
   plannerMediaPeriodLineWon,
@@ -76,6 +76,7 @@ export type DocumentMediaDetailSource =
       keywordFilter?: MediaItem["keywordFilter"];
       priceOptions?: MediaItem["priceOptions"];
       features?: string | null;
+      country?: string | null;
     };
 
 function browseCategoryLabel(
@@ -211,6 +212,39 @@ function resolveThumb(m: DocumentMediaDetailSource): string | null {
   return null;
 }
 
+function resolveMediaCountry(
+  m: DocumentMediaDetailSource,
+): string | null | undefined {
+  return "country" in m ? m.country : undefined;
+}
+
+function formatReportMonthlyPriceLabel(
+  won: number,
+  period: string,
+  country: string | null | undefined,
+  isKo: boolean,
+): string {
+  const locale = isKo ? "ko-KR" : "en-US";
+  return `${formatKrwPrimaryWithJpyFootnote(won, country, locale)}/${formatPricePeriodShortLabel(
+    period,
+    isKo ? "ko" : "en",
+  )}`;
+}
+
+function formatReportLineTotalLabel(
+  lineTotalWon: number,
+  country: string | null | undefined,
+  isKo: boolean,
+  months?: number,
+): string {
+  const locale = isKo ? "ko-KR" : "en-US";
+  let label = formatKrwPrimaryWithJpyFootnote(lineTotalWon, country, locale);
+  if (months && months > 1) {
+    label += isKo ? ` (${months}개월)` : ` (${months} mo)`;
+  }
+  return label;
+}
+
 export function mediaToDocumentDetail(
   m: DocumentMediaDetailSource,
   opts: {
@@ -239,18 +273,26 @@ export function mediaToDocumentDetail(
     "pricePeriod" in m && m.pricePeriod
       ? normalizeMediaPricePeriod(m.pricePeriod)
       : "month";
+  const country = resolveMediaCountry(m);
 
   let monthlyPriceLabel: string | undefined;
   if (price != null && price > 0) {
-    monthlyPriceLabel = `${formatCatalogPriceFieldWon(price, isKo ? "ko" : "en")}/${formatPricePeriodShortLabel(period, isKo ? "ko" : "en")}`;
+    monthlyPriceLabel = formatReportMonthlyPriceLabel(
+      price,
+      period,
+      country,
+      isKo,
+    );
   }
 
   let lineTotalLabel: string | undefined;
   if (opts.lineTotalWon != null && opts.lineTotalWon > 0) {
-    lineTotalLabel = formatMediaPrice(opts.lineTotalWon, isKo ? "ko" : "en");
-    if (opts.months && opts.months > 1) {
-      lineTotalLabel += isKo ? ` (${opts.months}개월)` : ` (${opts.months} mo)`;
-    }
+    lineTotalLabel = formatReportLineTotalLabel(
+      opts.lineTotalWon,
+      country,
+      isKo,
+      opts.months,
+    );
   }
 
   const operatingHours = isKo
@@ -369,10 +411,12 @@ export function mediaItemToExportRow(
   });
   const monthlyPriceLabel =
     monthlyWon > 0
-      ? `${formatCatalogPriceFieldWon(monthlyWon, isKo ? "ko" : "en")}/${formatPricePeriodShortLabel(
+      ? formatReportMonthlyPriceLabel(
+          monthlyWon,
           m.pricePeriod ?? "month",
-          isKo ? "ko" : "en",
-        )}`
+          m.country,
+          isKo,
+        )
       : detail.monthlyPriceLabel;
   const quantityLabel = (() => {
     if (opts?.planCartItem) {
@@ -399,12 +443,12 @@ export function mediaItemToExportRow(
     monthlyPriceLabel,
     lineTotalLabel:
       lineTotalWon != null && lineTotalWon > 0
-        ? formatMediaPrice(lineTotalWon, isKo ? "ko" : "en") +
-          (opts?.months && opts.months > 1
-            ? isKo
-              ? ` (${opts.months}개월)`
-              : ` (${opts.months} mo)`
-            : "")
+        ? formatReportLineTotalLabel(
+            lineTotalWon,
+            m.country,
+            isKo,
+            opts?.months,
+          )
         : detail.lineTotalLabel,
     quantityLabel,
   };

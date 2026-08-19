@@ -10,6 +10,10 @@ import {
   computePortfolioContributions,
   mediaItemToExportRow,
 } from "@/lib/document-media-detail";
+import {
+  formatReportJpyExchangeFootnote,
+  portfolioHasJapanMedia,
+} from "@/lib/media-display-currency";
 import type {
   PlannerExportChartDatum,
   PlannerExportRegionBreakdown,
@@ -416,6 +420,9 @@ export function buildOohReportPayload(
     recommendRationale,
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
+    currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)
+      ? formatReportJpyExchangeFootnote(isKo)
+      : undefined,
     disclaimer: isKo
       ? "본 보고서는 THINKAD 내부 추정 모델 기반이며, 실제 집행 시 매체 재고·계약 조건에 따라 달라질 수 있습니다."
       : "This report uses THINKAD internal estimates; actual delivery may vary by inventory and terms.",
