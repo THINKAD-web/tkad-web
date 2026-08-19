@@ -1,0 +1,716 @@
+{
+  "generatedAt": "2026-08-19T02:12:07.200Z",
+  "host": "ep-holy-cloud-ah6w4cml-pooler.c-3.us-east-1.aws.neon.tech",
+  "isProd": true,
+  "mode": "dry-run",
+  "signalsLoaded": 72,
+  "media": {
+    "seoulGyeonggiActive": 605,
+    "skipNoComputed": 50,
+    "alreadyFilled": 0,
+    "wouldUpdate": 544,
+    "wouldFail": 11
+  },
+  "mappingDesign": {
+    "priority": [
+      "1. district direct (single gu)",
+      "2. district broad (서울/경기 전역, · 구 목록) → equal weight multi-dong",
+      "3. regionSub cluster → equal weight multi-dong",
+      "4. fail → NULL"
+    ],
+    "skipped9Policy": {
+      "서울 전역*": "broad_seoul_equal — 25구 균등 weight",
+      "경기도 전역": "broad_gyeonggi_equal — 47 unit 균등",
+      "강남·서초·분당·영통": "district_dot_list_equal — 명시 구 4개 균등",
+      "강남구 등 / 다수 / X 외 다수": "regionSub cluster if available; else ambiguous → NULL",
+      "recommendation": "복수 구 **균등 배분** (calcNetReach 구조와 일치). 대표 1구만 쓰면 광역 매체 도달이 과소."
+    }
+  },
+  "regionMainMismatch": {
+    "count": 7,
+    "cases": [
+      {
+        "id": "cmrm2f88q000204kydtp2vmzj",
+        "name": "전통시장 LED 전광판 광고",
+        "regionMain": "seoul",
+        "regionSub": null,
+        "city": "경기",
+        "district": "부천시 원미구",
+        "expected": "gyeonggi"
+      },
+      {
+        "id": "cmqrpy6vh00030ai366l1xgkn",
+        "name": "공항철도 검암역 개찰구 래핑 광고",
+        "regionMain": "seoul",
+        "regionSub": "seoul_itaewon",
+        "city": "인천",
+        "district": "서구",
+        "expected": "incheon"
+      },
+      {
+        "id": "cmqrnc9uw00010bj7wh5uteyv",
+        "name": "공항철도 개찰구 래핑 Full Package 광고",
+        "regionMain": "seoul",
+        "regionSub": "seoul_itaewon",
+        "city": "인천",
+        "district": "서구",
+        "expected": "incheon"
+      },
+      {
+        "id": "cmoy5jrdi000004i9543h9wb9",
+        "name": "대구 지하철 3호선 동대구역 대합실 디지털미디어 광고",
+        "regionMain": "seoul",
+        "regionSub": "seoul_guro",
+        "city": "대구",
+        "district": "동구",
+        "expected": "daegu"
+      },
+      {
+        "id": "cmqrpnxqa00000bj9zhwkdlpj",
+        "name": "공항철도 김포공항역 개찰구 래핑 광고",
+        "regionMain": "seoul",
+        "regionSub": null,
+        "city": "경기도",
+        "district": "김포시",
+        "expected": "gyeonggi"
+      },
+      {
+        "id": "cmqt7egdr000104l54jc6hrmc",
+        "name": "광역전철 스티커 + 듀얼 LCD Full Package 광고",
+        "regionMain": "seoul",
+        "regionSub": null,
+        "city": "경기",
+        "district": "성남시 분당구",
+        "expected": "gyeonggi"
+      },
+      {
+        "id": "cmqt906rj00000ajlt4lmwchi",
+        "name": "지하철 1호선 부평역 스크린도어 광고",
+        "regionMain": "seoul",
+        "regionSub": null,
+        "city": "인천",
+        "district": "부평구",
+        "expected": "incheon"
+      }
+    ]
+  },
+  "results": {
+    "byMethod": {
+      "district_seoul_full": 493,
+      "broad_seoul_equal": 8,
+      "district_gyeonggi_full": 30,
+      "region_sub_cluster_equal": 2,
+      "district_dot_list_equal": 1,
+      "district_sigungu_suffix": 4,
+      "broad_gyeonggi_equal": 6
+    },
+    "byReason": {
+      "ambiguous_district_no_regionsub": 2,
+      "region_main_mismatch(expected=gyeonggi)": 3,
+      "no_district_or_regionsub": 2,
+      "region_main_mismatch(expected=incheon)": 3,
+      "region_main_mismatch(expected=daegu)": 1
+    },
+    "mappedSamples": [
+      {
+        "mediaId": "cmoig8ceq000204jxf3m4kqhl",
+        "name": "이태원 한남 스퀘어 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "용산구"
+        ],
+        "coveragePopulation": 199575
+      },
+      {
+        "mediaId": "cmqst2ikt000009jky9e0xgbj",
+        "name": "고속터미널역 지하철 7호선 CM보드 조명 광고 (인쇄)",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "서초구"
+        ],
+        "coveragePopulation": 414616
+      },
+      {
+        "mediaId": "cmrt38lsj000809ia823w6e6d",
+        "name": "김포공항 국내선 1층 도착장 격리 대합실 라이트박스 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "강서구"
+        ],
+        "coveragePopulation": 548268
+      },
+      {
+        "mediaId": "cmp3u6zta00061jjksoe03iv3",
+        "name": "(B권역) 서울 버스 외부 광고",
+        "method": "broad_seoul_equal",
+        "sigunguNames": [
+          "종로구",
+          "중구",
+          "용산구",
+          "성동구",
+          "광진구",
+          "동대문구",
+          "중랑구",
+          "성북구",
+          "강북구",
+          "도봉구",
+          "노원구",
+          "은평구",
+          "서대문구",
+          "마포구",
+          "양천구",
+          "강서구",
+          "구로구",
+          "금천구",
+          "영등포구",
+          "동작구",
+          "관악구",
+          "서초구",
+          "강남구",
+          "송파구",
+          "강동구"
+        ],
+        "coveragePopulation": 371371
+      },
+      {
+        "mediaId": "cmr9bs2r3000304jyy4lts3ty",
+        "name": "서울법인 택시 외부 광고",
+        "method": "broad_seoul_equal",
+        "sigunguNames": [
+          "종로구",
+          "중구",
+          "용산구",
+          "성동구",
+          "광진구",
+          "동대문구",
+          "중랑구",
+          "성북구",
+          "강북구",
+          "도봉구",
+          "노원구",
+          "은평구",
+          "서대문구",
+          "마포구",
+          "양천구",
+          "강서구",
+          "구로구",
+          "금천구",
+          "영등포구",
+          "동작구",
+          "관악구",
+          "서초구",
+          "강남구",
+          "송파구",
+          "강동구"
+        ],
+        "coveragePopulation": 371371
+      },
+      {
+        "mediaId": "cmp8jgg60000004l5t34i8sjz",
+        "name": "평택역 평택오거리 영진빌딩 전광판 광고",
+        "method": "district_gyeonggi_full",
+        "sigunguNames": [
+          "평택시"
+        ],
+        "coveragePopulation": 620754
+      },
+      {
+        "mediaId": "cmoioq1ky000004jvima0wj2d",
+        "name": "건대입구역 스마트쉘터 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "광진구"
+        ],
+        "coveragePopulation": 330802
+      },
+      {
+        "mediaId": "cmrs16cuc000004l4sbr2m4tl",
+        "name": "지하철 3호선 압구정역 맥스비전 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "강남구"
+        ],
+        "coveragePopulation": 552631
+      },
+      {
+        "mediaId": "cmoehygbf000004kzbj4jjng2",
+        "name": "테헤란로 대명 루첸타워 전광판 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "강남구"
+        ],
+        "coveragePopulation": 552631
+      },
+      {
+        "mediaId": "cmo626uvp000004kyjn4mmm9k",
+        "name": "광화문 고려빌딩 전광판 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "종로구"
+        ],
+        "coveragePopulation": 136139
+      },
+      {
+        "mediaId": "cmo6orica000004jpeyp0f6sf",
+        "name": "고촌역 김포 고촌 전광판 광고",
+        "method": "district_gyeonggi_full",
+        "sigunguNames": [
+          "김포시"
+        ],
+        "coveragePopulation": 483964
+      },
+      {
+        "mediaId": "cmo3f0k4a000004k43dss6zft",
+        "name": "강남 시그니처 스퀘어 전광판 광고",
+        "method": "district_seoul_full",
+        "sigunguNames": [
+          "강남구"
+        ],
+        "coveragePopulation": 552631
+      }
+    ],
+    "failedSamples": [
+      {
+        "mediaId": "cmrsrt7e4000204i9y7tfd360",
+        "name": "게릴라 포스터 광고",
+        "reason": "ambiguous_district_no_regionsub"
+      },
+      {
+        "mediaId": "cmrm2f88q000204kydtp2vmzj",
+        "name": "전통시장 LED 전광판 광고",
+        "reason": "region_main_mismatch(expected=gyeonggi)"
+      },
+      {
+        "mediaId": "cmrx4slkh001804jp9nhh25fl",
+        "name": "지하철 디지털 스크린도어(PSD) 광고",
+        "reason": "ambiguous_district_no_regionsub"
+      },
+      {
+        "mediaId": "cmst5ofuc000q04jsn0m0y8o0",
+        "name": "스포애니 피트니스 센터 광고",
+        "reason": "no_district_or_regionsub"
+      },
+      {
+        "mediaId": "cmqrpy6vh00030ai366l1xgkn",
+        "name": "공항철도 검암역 개찰구 래핑 광고",
+        "reason": "region_main_mismatch(expected=incheon)"
+      },
+      {
+        "mediaId": "cmqrnc9uw00010bj7wh5uteyv",
+        "name": "공항철도 개찰구 래핑 Full Package 광고",
+        "reason": "region_main_mismatch(expected=incheon)"
+      },
+      {
+        "mediaId": "cmoy5jrdi000004i9543h9wb9",
+        "name": "대구 지하철 3호선 동대구역 대합실 디지털미디어 광고",
+        "reason": "region_main_mismatch(expected=daegu)"
+      },
+      {
+        "mediaId": "cmqrpnxqa00000bj9zhwkdlpj",
+        "name": "공항철도 김포공항역 개찰구 래핑 광고",
+        "reason": "region_main_mismatch(expected=gyeonggi)"
+      },
+      {
+        "mediaId": "cmqt7egdr000104l54jc6hrmc",
+        "name": "광역전철 스티커 + 듀얼 LCD Full Package 광고",
+        "reason": "region_main_mismatch(expected=gyeonggi)"
+      },
+      {
+        "mediaId": "cmqt906rj00000ajlt4lmwchi",
+        "name": "지하철 1호선 부평역 스크린도어 광고",
+        "reason": "region_main_mismatch(expected=incheon)"
+      },
+      {
+        "mediaId": "cmq9cpmym000204jltw5crun4",
+        "name": "서울 택시 상단 영상 광고",
+        "reason": "no_district_or_regionsub"
+      }
+    ]
+  },
+  "bySigungu": [
+    {
+      "sigunguName": "강남구",
+      "mediaCount": 122,
+      "signalPopulation": 552631
+    },
+    {
+      "sigunguName": "중구",
+      "mediaCount": 65,
+      "signalPopulation": 117493
+    },
+    {
+      "sigunguName": "마포구",
+      "mediaCount": 59,
+      "signalPopulation": 356154
+    },
+    {
+      "sigunguName": "서초구",
+      "mediaCount": 53,
+      "signalPopulation": 414616
+    },
+    {
+      "sigunguName": "강서구",
+      "mediaCount": 50,
+      "signalPopulation": 548268
+    },
+    {
+      "sigunguName": "용산구",
+      "mediaCount": 43,
+      "signalPopulation": 199575
+    },
+    {
+      "sigunguName": "종로구",
+      "mediaCount": 35,
+      "signalPopulation": 136139
+    },
+    {
+      "sigunguName": "성동구",
+      "mediaCount": 31,
+      "signalPopulation": 274346
+    },
+    {
+      "sigunguName": "영등포구",
+      "mediaCount": 28,
+      "signalPopulation": 371691
+    },
+    {
+      "sigunguName": "송파구",
+      "mediaCount": 22,
+      "signalPopulation": 649715
+    },
+    {
+      "sigunguName": "광진구",
+      "mediaCount": 21,
+      "signalPopulation": 330802
+    },
+    {
+      "sigunguName": "구로구",
+      "mediaCount": 17,
+      "signalPopulation": 382531
+    },
+    {
+      "sigunguName": "서대문구",
+      "mediaCount": 16,
+      "signalPopulation": 299531
+    },
+    {
+      "sigunguName": "동작구",
+      "mediaCount": 16,
+      "signalPopulation": 371543
+    },
+    {
+      "sigunguName": "강동구",
+      "mediaCount": 16,
+      "signalPopulation": 498701
+    },
+    {
+      "sigunguName": "관악구",
+      "mediaCount": 14,
+      "signalPopulation": 477503
+    },
+    {
+      "sigunguName": "은평구",
+      "mediaCount": 12,
+      "signalPopulation": 453056
+    },
+    {
+      "sigunguName": "양천구",
+      "mediaCount": 12,
+      "signalPopulation": 420595
+    },
+    {
+      "sigunguName": "금천구",
+      "mediaCount": 12,
+      "signalPopulation": 222421
+    },
+    {
+      "sigunguName": "노원구",
+      "mediaCount": 11,
+      "signalPopulation": 480549
+    },
+    {
+      "sigunguName": "성남시 분당구",
+      "mediaCount": 11,
+      "signalPopulation": 467039
+    },
+    {
+      "sigunguName": "동대문구",
+      "mediaCount": 10,
+      "signalPopulation": 353070
+    },
+    {
+      "sigunguName": "중랑구",
+      "mediaCount": 10,
+      "signalPopulation": 376282
+    },
+    {
+      "sigunguName": "김포시",
+      "mediaCount": 10,
+      "signalPopulation": 483964
+    },
+    {
+      "sigunguName": "하남시",
+      "mediaCount": 10,
+      "signalPopulation": 327423
+    },
+    {
+      "sigunguName": "평택시",
+      "mediaCount": 9,
+      "signalPopulation": 620754
+    },
+    {
+      "sigunguName": "성북구",
+      "mediaCount": 8,
+      "signalPopulation": 421289
+    },
+    {
+      "sigunguName": "강북구",
+      "mediaCount": 8,
+      "signalPopulation": 277695
+    },
+    {
+      "sigunguName": "도봉구",
+      "mediaCount": 8,
+      "signalPopulation": 298067
+    },
+    {
+      "sigunguName": "파주시",
+      "mediaCount": 8,
+      "signalPopulation": 534503
+    },
+    {
+      "sigunguName": "광명시",
+      "mediaCount": 8,
+      "signalPopulation": 303726
+    },
+    {
+      "sigunguName": "부천시 소사구",
+      "mediaCount": 8,
+      "signalPopulation": 224007
+    },
+    {
+      "sigunguName": "안성시",
+      "mediaCount": 8,
+      "signalPopulation": 199314
+    },
+    {
+      "sigunguName": "수원시 장안구",
+      "mediaCount": 7,
+      "signalPopulation": 269791
+    },
+    {
+      "sigunguName": "수원시 영통구",
+      "mediaCount": 7,
+      "signalPopulation": 362098
+    },
+    {
+      "sigunguName": "수원시 팔달구",
+      "mediaCount": 7,
+      "signalPopulation": 193325
+    },
+    {
+      "sigunguName": "고양시 덕양구",
+      "mediaCount": 7,
+      "signalPopulation": 482849
+    },
+    {
+      "sigunguName": "수원시 권선구",
+      "mediaCount": 7,
+      "signalPopulation": 360118
+    },
+    {
+      "sigunguName": "성남시 중원구",
+      "mediaCount": 7,
+      "signalPopulation": 199084
+    },
+    {
+      "sigunguName": "안양시 만안구",
+      "mediaCount": 7,
+      "signalPopulation": 234045
+    },
+    {
+      "sigunguName": "부천시 오정구",
+      "mediaCount": 7,
+      "signalPopulation": 148710
+    },
+    {
+      "sigunguName": "고양시 일산동구",
+      "mediaCount": 7,
+      "signalPopulation": 298158
+    },
+    {
+      "sigunguName": "구리시",
+      "mediaCount": 7,
+      "signalPopulation": 188040
+    },
+    {
+      "sigunguName": "여주시",
+      "mediaCount": 7,
+      "signalPopulation": 113383
+    },
+    {
+      "sigunguName": "가평군",
+      "mediaCount": 7,
+      "signalPopulation": 62048
+    },
+    {
+      "sigunguName": "성남시 수정구",
+      "mediaCount": 6,
+      "signalPopulation": 234987
+    },
+    {
+      "sigunguName": "의정부시",
+      "mediaCount": 6,
+      "signalPopulation": 461879
+    },
+    {
+      "sigunguName": "안양시 동안구",
+      "mediaCount": 6,
+      "signalPopulation": 328098
+    },
+    {
+      "sigunguName": "부천시 원미구",
+      "mediaCount": 6,
+      "signalPopulation": 382134
+    },
+    {
+      "sigunguName": "동두천시",
+      "mediaCount": 6,
+      "signalPopulation": 86186
+    },
+    {
+      "sigunguName": "안산시 상록구",
+      "mediaCount": 6,
+      "signalPopulation": 320505
+    },
+    {
+      "sigunguName": "안산시 단원구",
+      "mediaCount": 6,
+      "signalPopulation": 288378
+    },
+    {
+      "sigunguName": "고양시 일산서구",
+      "mediaCount": 6,
+      "signalPopulation": 276159
+    },
+    {
+      "sigunguName": "과천시",
+      "mediaCount": 6,
+      "signalPopulation": 81008
+    },
+    {
+      "sigunguName": "남양주시",
+      "mediaCount": 6,
+      "signalPopulation": 727373
+    },
+    {
+      "sigunguName": "오산시",
+      "mediaCount": 6,
+      "signalPopulation": 254747
+    },
+    {
+      "sigunguName": "시흥시",
+      "mediaCount": 6,
+      "signalPopulation": 514996
+    },
+    {
+      "sigunguName": "군포시",
+      "mediaCount": 6,
+      "signalPopulation": 249253
+    },
+    {
+      "sigunguName": "의왕시",
+      "mediaCount": 6,
+      "signalPopulation": 165701
+    },
+    {
+      "sigunguName": "용인시 처인구",
+      "mediaCount": 6,
+      "signalPopulation": 287270
+    },
+    {
+      "sigunguName": "용인시 기흥구",
+      "mediaCount": 6,
+      "signalPopulation": 434408
+    },
+    {
+      "sigunguName": "용인시 수지구",
+      "mediaCount": 6,
+      "signalPopulation": 368881
+    },
+    {
+      "sigunguName": "이천시",
+      "mediaCount": 6,
+      "signalPopulation": 225911
+    },
+    {
+      "sigunguName": "화성시 만세구",
+      "mediaCount": 6,
+      "signalPopulation": 234363
+    },
+    {
+      "sigunguName": "화성시 효행구",
+      "mediaCount": 6,
+      "signalPopulation": 160788
+    },
+    {
+      "sigunguName": "화성시 병점구",
+      "mediaCount": 6,
+      "signalPopulation": 175045
+    },
+    {
+      "sigunguName": "화성시 동탄구",
+      "mediaCount": 6,
+      "signalPopulation": 429477
+    },
+    {
+      "sigunguName": "광주시",
+      "mediaCount": 6,
+      "signalPopulation": 400323
+    },
+    {
+      "sigunguName": "양주시",
+      "mediaCount": 6,
+      "signalPopulation": 297352
+    },
+    {
+      "sigunguName": "포천시",
+      "mediaCount": 6,
+      "signalPopulation": 140454
+    },
+    {
+      "sigunguName": "연천군",
+      "mediaCount": 6,
+      "signalPopulation": 43107
+    },
+    {
+      "sigunguName": "양평군",
+      "mediaCount": 6,
+      "signalPopulation": 126995
+    }
+  ],
+  "sanityChecks": [
+    {
+      "sigunguName": "강남구",
+      "signalPopulation": 552631,
+      "mediaCount": 122
+    },
+    {
+      "sigunguName": "서초구",
+      "signalPopulation": 414616,
+      "mediaCount": 53
+    },
+    {
+      "sigunguName": "마포구",
+      "signalPopulation": 356154,
+      "mediaCount": 59
+    },
+    {
+      "sigunguName": "성남시 분당구",
+      "signalPopulation": 467039,
+      "mediaCount": 11
+    }
+  ],
+  "phaseBaselineNote": "execute 시 contact_rate/demo/coverage 외 컬럼 untouched",
+  "verdict": "review"
+}
