@@ -221,7 +221,7 @@ export async function fetchMediaForPackage(
     }
 
     return {
-      media: rows.map(prismaMediaToMediaItem),
+      media: rows.map((row) => prismaMediaToMediaItem(row)),
       usedFallback,
     };
   } catch (e) {

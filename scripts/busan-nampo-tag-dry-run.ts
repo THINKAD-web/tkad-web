@@ -202,7 +202,7 @@ async function loadCatalogFromDb(): Promise<MediaItem[]> {
       },
     },
   });
-  return rows.map(prismaMediaToMediaItem);
+  return rows.map((row) => prismaMediaToMediaItem(row));
 }
 
 async function main() {

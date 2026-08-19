@@ -67,7 +67,7 @@ async function main() {
     },
   });
 
-  const catalog = rows.map(prismaMediaToMediaItem);
+  const catalog = rows.map((row) => prismaMediaToMediaItem(row));
   const wanted = new Set(sidoCodesToBrowseMainIds(["11", "41"]));
   const candidates = catalog.filter(
     (m) =>
