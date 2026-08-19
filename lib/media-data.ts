@@ -215,6 +215,13 @@ export interface MediaItem {
   coverageDistrictCodes?: string[];
   /** 어드민 매체 관리 — 즉시 예약 CTA 수동 on/off (DB `instant_booking_enabled`) */
   instantBookingEnabled?: boolean;
+  /** PR-3 Phase 3 — Computed demo 스냅샷 (planner 타깃 스코어링) */
+  demoGenderSplit?: { male: number; female: number };
+  demoAgeSplit?: Partial<
+    Record<"10s" | "20s" | "30s" | "40s" | "50s+", number>
+  >;
+  /** Signal 병합 스냅샷이면 derived */
+  demoFromSignal?: boolean;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {

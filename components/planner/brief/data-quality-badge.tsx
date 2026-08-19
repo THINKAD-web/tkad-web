@@ -9,6 +9,7 @@
  *
  *   measured → [실측]  DB 실측값
  *   derived  → [추정]  매체 사양·등록가에서 계산 (직접 측정 아님)
+ *   parsed   → [추정]  등록 targetAge 파싱
  *   default  → [추정]  유형별 기본 상수로 대체
  *   null     → [산정 중]
  */
@@ -44,8 +45,12 @@ const BASIS_DETAIL: Record<MetricBasis, { ko: string; en: string }> = {
     ko: "매체 사양·등록 상품가에서 계산한 값입니다.",
     en: "Derived from media specs / registered product price.",
   },
+  parsed: {
+    ko: "등록된 targetAge 텍스트를 파싱한 연령 추정치입니다.",
+    en: "Age estimate parsed from registered targetAge text.",
+  },
   default: {
-    ko: "매체별 데이터가 없어 유형별 기본값으로 대체했습니다. (PR-4 이후 실데이터로 교체)",
+    ko: "매체별 데이터가 없어 유형별 기본값으로 대체했습니다.",
     en: "No per-media data — substituted a per-type default.",
   },
 };

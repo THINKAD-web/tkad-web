@@ -28,9 +28,14 @@ import {
   parsePartialPeriodRatesRaw,
 } from "@/lib/media-partial-period-rates";
 
-/** Catalog/detail 쿼리용: 집행 이력으로 광고주 문자열 생성 */
+/** Catalog/detail 쿼리용: 집행 이력 + demo 스냅샷 */
 export type MediaWithAdvertiserExecutions = Media & {
   advertiserExecutions?: Pick<MediaAdvertiserExecution, "advertiserName">[];
+  computedMetric?: {
+    demoGenderSplit: unknown;
+    demoAgeSplit: unknown;
+    demoSourceSignalIds: string[];
+  } | null;
 };
 
 function buildPastAdvertisersFromExecutions(
@@ -195,6 +200,26 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
 
   const partialPeriodRates = parsePartialPeriodRatesRaw(m.partialPeriodRates);
 
+  const cm = m.computedMetric;
+  const demoGenderRaw = cm?.demoGenderSplit;
+  const demoAgeRaw = cm?.demoAgeSplit;
+  const demoGenderSplit =
+    demoGenderRaw &&
+    typeof demoGenderRaw === "object" &&
+    typeof (demoGenderRaw as { male?: unknown }).male === "number" &&
+    typeof (demoGenderRaw as { female?: unknown }).female === "number"
+      ? {
+          male: (demoGenderRaw as { male: number }).male,
+          female: (demoGenderRaw as { female: number }).female,
+        }
+      : undefined;
+  const demoAgeSplit =
+    demoAgeRaw && typeof demoAgeRaw === "object"
+      ? (demoAgeRaw as MediaItem["demoAgeSplit"])
+      : undefined;
+  const demoFromSignal =
+    (cm?.demoSourceSignalIds?.length ?? 0) > 0 ? true : undefined;
+
   return {
     id: m.id,
     slug: m.slug?.trim() || undefined,
@@ -299,6 +324,9 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     createdAt: m.createdAt instanceof Date
       ? m.createdAt.toISOString()
       : (typeof m.createdAt === "string" ? m.createdAt : undefined),
+    demoGenderSplit,
+    demoAgeSplit,
+    demoFromSignal,
   };
 }
 
@@ -315,6 +343,13 @@ const catalogInclude = {
   advertiserExecutions: {
     select: { advertiserName: true } as const,
     orderBy: { createdAt: "desc" as const },
+  },
+  computedMetric: {
+    select: {
+      demoGenderSplit: true,
+      demoAgeSplit: true,
+      demoSourceSignalIds: true,
+    },
   },
 } as const;
 

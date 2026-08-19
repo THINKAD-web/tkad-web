@@ -6,7 +6,7 @@
  * 좌: 추천 매체 카드 (3축 점수 + 근거)
  * 우: 실시간 지표 패널 (추가·제거·수량 변경 시 즉시 재계산)
  *
- * 성별은 매체별 데이터가 없어 순위에 반영하지 않는다 — 화면에 명시한다.
+ * 성별·연령 demo 스냅샷(PR-3 Phase 3)으로 타깃 축을 계산한다.
  */
 
 import { useMemo } from "react";
@@ -253,12 +253,15 @@ export function BriefStepTwo({
           </div>
         ) : null}
 
-        {/* 성별 미반영 명시 */}
-        {store.genders.length > 0 ? (
-          <p className="mb-3 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
-            {isKo
-              ? "성별 데이터 준비 중 — 순위에 미반영입니다. 연령·지역·예산 효율만 반영됩니다."
-              : "Gender data pending — not reflected in ranking. Only age, region and budget efficiency are used."}
+        {/* demo 타깃 추정 안내 */}
+        {store.genders.length > 0 || store.ageBands.length > 0 ? (
+          <p className="mb-3 flex flex-wrap items-center gap-2 rounded-lg border border-border bg-muted/40 p-2.5 text-[11px] text-muted-foreground">
+            <span>
+              {isKo
+                ? "성별·연령은 매체 유형·등록 정보 기반 추정치입니다."
+                : "Gender and age use type-based or registered-text estimates."}
+            </span>
+            <DataQualityBadge basis="default" isKo={isKo} />
           </p>
         ) : null}
 

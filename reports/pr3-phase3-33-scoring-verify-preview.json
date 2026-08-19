@@ -1,0 +1,68 @@
+{
+  "generatedAt": "2026-08-19T01:25:45.147Z",
+  "host": "ep-shiny-sun-ahrk7gkk-pooler.c-3.us-east-1.aws.neon.tech",
+  "catalog": {
+    "activeKr": 804,
+    "seoulGyeonggiCandidates": 582,
+    "withDemoSnapshot": 0
+  },
+  "brief": "30M KRW · Seoul+Gyeonggi · 2030 female · 14 days",
+  "checks": {
+    "withTargetAxis": 582,
+    "sameFemaleMaleTop10": false,
+    "same2030vs50Top10": false,
+    "femaleVsMaleTop10Differs": true,
+    "age2030vs50Top10Differs": true
+  },
+  "top10": {
+    "female2030": [
+      "트렌드랩 성수 이마트24 TO-GO Zone 멀티비전 광고",
+      "트렌드랩 성수 이마트24 카운터사이니지 광고",
+      "서울대입구역 우남빌딩 전광판 광고",
+      "공항철도 홍대입구 래핑 환승 통로 벽면 광고 3",
+      "지하철 2호선 서울대입구역 맥스비전 광고",
+      "공항철도 홍대입구역 3번 출구 코너 래핑 광고",
+      "홍대 나비타워 빌보드 광고",
+      "홍대 파라다이스텔 빌보드 광고",
+      "홍대 토니모리 전광판 광고",
+      "홍대 오트파사드 E-DISPLAY & 아트월 광고"
+    ],
+    "male2030": [
+      "지하철 2호선 서울대입구역 맥스비전 광고",
+      "홍대 나비타워 빌보드 광고",
+      "홍대 파라다이스텔 빌보드 광고",
+      "공항철도 홍대입구 래핑 환승 통로 벽면 광고 3",
+      "트렌드랩 성수 이마트24 TO-GO Zone 멀티비전 광고",
+      "트렌드랩 성수 이마트24 카운터사이니지 광고",
+      "공항철도 홍대입구역 3번 출구 코너 래핑 광고",
+      "서울대입구역 우남빌딩 전광판 광고",
+      "잠실 유토피아 전광판 광고",
+      "강남 몬테소리 전광판 광고"
+    ],
+    "female50plus": [
+      "도산대로 학일빌딩 전광판 광고",
+      "쿠팡 송파캠프 전광판 광고",
+      "여의도 대승빌딩 전광판 광고",
+      "공항철도 디지털미디어시티역 개찰구 래핑",
+      "영동대교 리베라호텔 전광판 광고",
+      "공항철도 마곡나루역 개찰구 래핑 광고",
+      "전통시장 LED 전광판 광고",
+      "(광역) 경기 버스 내부 파노라마 광고",
+      "공항철도 검암역 개찰구 래핑 광고",
+      "논현역 미래빌딩 전광판 광고"
+    ]
+  },
+  "classShare2030FemalePct": {
+    "subway_psd": 30.2,
+    "dooh_mid": 27.6,
+    "bus_exterior": 27,
+    "subway_light": 27,
+    "airport": 26,
+    "static_other": 17.6
+  },
+  "subwayPsdRankFemale2030": 72,
+  "priorInvestigation": {
+    "sameFemaleMale": true,
+    "withTargetAxis": 0
+  }
+}
