@@ -55,7 +55,7 @@ export async function fetchPublicMediaMapCatalog(): Promise<PublicMediaMapCatalo
       orderBy: { updatedAt: "desc" },
     });
     const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
-    const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
+    const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
     const catalog = await appendNetworksIfAny(dbItems);
     return { catalog, facets: computeMapCatalogFacets(catalog) };
   } catch (e) {

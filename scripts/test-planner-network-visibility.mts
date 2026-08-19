@@ -198,7 +198,7 @@ if (process.env.DATABASE_URL) {
       }),
     ]);
     const liveCatalog = [
-      ...mediaRows.map(prismaMediaToMediaItem),
+      ...mediaRows.map((row) => prismaMediaToMediaItem(row)),
       ...networkRows.map(prismaNetworkToMediaItem),
     ];
     const liveFiltered = filterPlannerMediaMulti(

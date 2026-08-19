@@ -228,7 +228,7 @@ export function prismaMediaToMediaItem(
     (cm?.demoSourceSignalIds?.length ?? 0) > 0 ? true : undefined;
 
   const coverageDongs =
-    moisPopIndex && cm?.coverageDongs
+    moisPopIndex instanceof Map && cm?.coverageDongs
       ? parseCoverageDongsWithPopulation(cm.coverageDongs, moisPopIndex)
       : undefined;
   const coveragePopulation =
@@ -402,7 +402,7 @@ export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCata
       include: catalogInclude,
     });
     const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
-    const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
+    const dbItems = rowsWithCoverage.map((row) => prismaMediaToMediaItem(row));
     const { attachReviewStatsToMediaItems } = await import("@/lib/media-reviews");
     const withReviews = await attachReviewStatsToMediaItems(dbItems);
     const { attachMediaTrustToMediaItems } = await import(
@@ -447,7 +447,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
         if (ao !== bo) return ao - bo;
         return b.updatedAt.getTime() - a.updatedAt.getTime();
       });
-      return sorted.slice(0, max).map(prismaMediaToMediaItem);
+      return sorted.slice(0, max).map((row) => prismaMediaToMediaItem(row));
     }
     const fallback = await db.media.findMany({
       where: { isActive: true },
@@ -460,7 +460,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
         db,
         fallback,
       );
-      return fallbackWithCoverage.map(prismaMediaToMediaItem);
+      return fallbackWithCoverage.map((row) => prismaMediaToMediaItem(row));
     }
     return [];
   } catch {
@@ -496,7 +496,7 @@ export async function fetchHomeWeeklyPopularMedia(
     );
     const top = ranked.slice(0, max);
     const withCoverage = await attachPublicMediaCatalogExtras(db, top);
-    return withCoverage.map(prismaMediaToMediaItem);
+    return withCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch (e) {
     console.warn(
       "[fetchHomeWeeklyPopularMedia] query failed (run popularity migration?)",
@@ -525,7 +525,7 @@ export async function fetchHomeNewMedia(
       include: catalogInclude,
     });
     const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
-    return withCoverage.map(prismaMediaToMediaItem);
+    return withCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch {
     return [];
   }
@@ -550,7 +550,7 @@ export async function fetchHomeInstantBookingMedia(
     });
     const withCoverage = await attachPublicMediaCatalogExtras(db, rows);
     const items = withCoverage
-      .map(prismaMediaToMediaItem)
+      .map((row) => prismaMediaToMediaItem(row))
       .filter((m) => isInstantBookingEligible(m).eligible);
     return items.slice(0, max);
   } catch {
@@ -580,7 +580,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
         if (ao !== bo) return ao - bo;
         return b.updatedAt.getTime() - a.updatedAt.getTime();
       });
-      return sorted.slice(0, max).map(prismaMediaToMediaItem);
+      return sorted.slice(0, max).map((row) => prismaMediaToMediaItem(row));
     }
   } catch (e) {
     console.warn(
@@ -601,7 +601,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
       db,
       fallback,
     );
-    return fallbackWithCoverage.map(prismaMediaToMediaItem);
+    return fallbackWithCoverage.map((row) => prismaMediaToMediaItem(row));
   } catch {
     return [];
   }
