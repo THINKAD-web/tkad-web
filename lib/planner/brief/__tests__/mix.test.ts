@@ -22,7 +22,9 @@ import {
   calcLineMetrics,
   calcMixMetrics,
   tryCalcReach,
+  REACH_METRIC_BASIS,
 } from "../mix-metrics.ts";
+import { briefToTargetSpec } from "../reach-adapter.ts";
 import { parseAgeLabel, scoreMediaCandidates, buildRecommendedMix } from "../scoring.ts";
 import type { MediaItem } from "../../../media-data.ts";
 
@@ -46,6 +48,8 @@ function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
     pricePeriod: "month",
     dailyFootTraffic: 300_000,
     visibilityScore: 85,
+    coverageDongs: [{ code: "1168000000", weight: 1, population: 552_631 }],
+    coveragePopulation: 552_631,
     ...over,
   } as MediaItem;
 }
@@ -146,23 +150,40 @@ test("DEFAULT_SOV_SHARE 는 모든 유형에 값이 있다", () => {
 
 // ── H-2: 계산 가능 3개 / 산정 불가 4개 ─────────────────────
 
-test("[fixture] 믹스 지표 — 도달 4종은 항상 null (모집단 없음)", () => {
+test("[fixture] 믹스 지표 — coverage 있으면 도달 4종 계산 (basis=derived)", () => {
   const m = calcMixMetrics({
     lines: [{ media: fixtureMedia(), units: 1 }],
-    days: 30,
+    days: 14,
     budgetWon: 50_000_000,
+    target: { genders: ["female"], ageBands: ["20s", "30s"] },
   });
 
-  // 계산 가능 3개
   assert.ok(m.totalCostWon.value > 0);
   assert.ok(m.totalImpressions.value > 0);
   assert.ok(m.mixCpmWon.value != null && m.mixCpmWon.value > 0);
 
-  // 산정 불가 4개 — 계산 시도조차 하지 않는다
+  assert.ok(m.netReach != null);
+  assert.ok(m.reachRate != null);
+  assert.ok(m.frequency != null);
+  assert.ok(m.grp != null);
+  assert.equal(m.netReach!.basis, REACH_METRIC_BASIS);
+  assert.ok(m.reachRate!.value <= 1);
+  assert.ok(m.netReach!.value > 0);
+});
+
+test("[fixture] coverage 없는 매체는 도달 null", () => {
+  const m = calcMixMetrics({
+    lines: [
+      {
+        media: fixtureMedia({ coverageDongs: undefined, coveragePopulation: undefined }),
+        units: 1,
+      },
+    ],
+    days: 14,
+    budgetWon: 30_000_000,
+  });
   assert.equal(m.netReach, null);
   assert.equal(m.reachRate, null);
-  assert.equal(m.frequency, null);
-  assert.equal(m.grp, null);
 });
 
 test("[fixture] SOV 기본값을 쓰면 노출 basis 가 default 로 내려간다", () => {
@@ -178,14 +199,13 @@ test("tryCalcReach: 모집단(dongs)이 없으면 계산하지 않고 null", () 
     lines: [{ media: fixtureMedia(), units: 1 }],
     days: 30,
     target: {},
-    dongs: [], // 인구 데이터 없음
-    coverageByMediaId: {},
+    dongs: [],
+    coverageByMediaId: { "fx-1": [{ code: "1168000000", weight: 1 }] },
     onError: () => {
       errored = true;
     },
   });
   assert.equal(r, null);
-  // 계산을 시도하지 않았으므로 에러도 없어야 한다
   assert.equal(errored, false);
 });
 
@@ -193,14 +213,14 @@ test("tryCalcReach: 모집단이 있으면 계산하고 reachRate <= 1.0 을 지
   const r = tryCalcReach({
     lines: [{ media: fixtureMedia(), units: 1 }],
     days: 7,
-    target: {},
-    dongs: [{ code: "1168051000", population: 500_000 }],
-    coverageByMediaId: { "fx-1": [{ code: "1168051000", weight: 1 }] },
+    target: { genders: ["female"], ageBands: ["20s", "30s"] },
+    dongs: [{ code: "1168000000", population: 552_631 }],
+    coverageByMediaId: { "fx-1": [{ code: "1168000000", weight: 1 }] },
   });
   assert.ok(r != null, "모집단이 있으면 계산된다");
-  assert.ok(r.reachRate <= 1, "도달률은 1.0 을 넘을 수 없다");
-  assert.ok(r.reachRate >= 0);
-  assert.ok(r.netReach <= r.targetPopulation, "순 도달 <= 모집단");
+  assert.ok(r.result.reachRate <= 1, "도달률은 1.0 을 넘을 수 없다");
+  assert.ok(r.result.reachRate >= 0);
+  assert.ok(r.result.netReach <= r.result.targetPopulation, "순 도달 <= 모집단");
 });
 
 // ── H-4: 예산 ──────────────────────────────────────────────
@@ -429,4 +449,92 @@ test("[fixture] 혼합 CPM — 금액·노출 없으면 CPM 산정 불가", () =
     budgetWon: 30_000_000,
   });
   assert.equal(metrics.mixCpmWon.value, null);
+});
+
+test("[4a-4] coverage NULL 매체 혼합 — 제외 후 나머지로 도달 계산", () => {
+  const withCov = fixtureMedia({ id: "a" });
+  const noCov = fixtureMedia({
+    id: "b",
+    coverageDongs: undefined,
+    coveragePopulation: undefined,
+  });
+  const m = calcMixMetrics({
+    lines: [
+      { media: withCov, units: 1 },
+      { media: noCov, units: 1 },
+    ],
+    days: 14,
+    budgetWon: 30_000_000,
+    target: { genders: ["female"], ageBands: ["20s", "30s"] },
+  });
+  assert.ok(m.netReach != null);
+  assert.equal(m.reachMeta?.excludedCount, 1);
+  assert.deepEqual(m.reachMeta?.excludedMediaIds, ["b"]);
+});
+
+test("[4a-4] 1개 vs 10개 매체 — Reach 체감 증가, Frequency 증가", () => {
+  const target = { genders: ["female"], ageBands: ["20s", "30s"] } as const;
+  const one = calcMixMetrics({
+    lines: [{ media: fixtureMedia({ id: "m0" }), units: 1 }],
+    days: 14,
+    budgetWon: 30_000_000,
+    target,
+  });
+  const ten = calcMixMetrics({
+    lines: Array.from({ length: 10 }, (_, i) => ({
+      media: fixtureMedia({ id: `m${i}` }),
+      units: 1,
+    })),
+    days: 14,
+    budgetWon: 300_000_000,
+    target,
+  });
+  assert.ok(one.netReach!.value > 0);
+  assert.ok(ten.netReach!.value > one.netReach!.value);
+  assert.ok(ten.netReach!.value < one.netReach!.value * 10);
+  assert.ok(ten.frequency!.value > one.frequency!.value);
+});
+
+test("[4a-4] 같은 구 vs 여러 구 — 후자 Reach 더 큼 (ρ 보정)", () => {
+  const gangnam = { code: "1168000000", weight: 1, population: 552_631 };
+  const seocho = { code: "1165000000", weight: 1, population: 414_616 };
+  const mapo = { code: "1144000000", weight: 1, population: 356_154 };
+  const target = { genders: ["female"], ageBands: ["20s", "30s"] } as const;
+  const sameGu = calcMixMetrics({
+    lines: [
+      { media: fixtureMedia({ id: "a", coverageDongs: [gangnam] }), units: 1 },
+      { media: fixtureMedia({ id: "b", coverageDongs: [gangnam] }), units: 1 },
+    ],
+    days: 14,
+    budgetWon: 60_000_000,
+    target,
+  });
+  const multiGu = calcMixMetrics({
+    lines: [
+      { media: fixtureMedia({ id: "c", coverageDongs: [gangnam] }), units: 1 },
+      { media: fixtureMedia({ id: "d", coverageDongs: [seocho] }), units: 1 },
+      { media: fixtureMedia({ id: "e", coverageDongs: [mapo] }), units: 1 },
+    ],
+    days: 14,
+    budgetWon: 90_000_000,
+    target,
+  });
+  assert.ok(multiGu.netReach!.value > sameGu.netReach!.value);
+});
+
+test("briefToTargetSpec — 2030 여성 브리프", () => {
+  const t = briefToTargetSpec({
+    genders: ["female"],
+    ageBands: ["20s", "30s"],
+    budgetInputWon: 30_000_000,
+    budgetMode: "total",
+    regionCodes: ["11", "41"],
+    goal: null,
+    industry: null,
+    flightStart: null,
+    flightEnd: null,
+    freeText: "",
+  });
+  assert.deepEqual(t.genders, ["female"]);
+  assert.deepEqual(t.ageBands, ["20s", "30s"]);
 });

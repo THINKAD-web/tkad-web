@@ -25,6 +25,7 @@ import {
   sidoCodesToBrowseMainIds,
 } from "@/lib/planner/brief/regions";
 import { calcMixMetrics, type MixLine } from "@/lib/planner/brief/mix-metrics";
+import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
   scoreMediaCandidates,
   buildRecommendedMix,
@@ -193,8 +194,14 @@ export function BriefStepTwo({
   }, [catalog, store.mixUnits]);
 
   const metrics = useMemo(
-    () => calcMixMetrics({ lines, days, budgetWon }),
-    [lines, days, budgetWon],
+    () =>
+      calcMixMetrics({
+        lines,
+        days,
+        budgetWon,
+        target: briefToTargetSpec(store),
+      }),
+    [lines, days, budgetWon, store.genders, store.ageBands],
   );
 
   const overIncl = useMemo(

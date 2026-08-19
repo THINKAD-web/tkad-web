@@ -27,14 +27,18 @@ import {
   parsePartialPeriodRatesFromPriceOptionRow,
   parsePartialPeriodRatesRaw,
 } from "@/lib/media-partial-period-rates";
+import { parseCoverageDongsWithPopulation } from "@/lib/planner/brief/reach-adapter";
+import { fetchMoisPopulationIndex } from "@/lib/metrics/mois-population-index";
 
-/** Catalog/detail 쿼리용: 집행 이력 + demo 스냅샷 */
+/** Catalog/detail 쿼리용: 집행 이력 + demo·coverage 스냅샷 */
 export type MediaWithAdvertiserExecutions = Media & {
   advertiserExecutions?: Pick<MediaAdvertiserExecution, "advertiserName">[];
   computedMetric?: {
     demoGenderSplit: unknown;
     demoAgeSplit: unknown;
     demoSourceSignalIds: string[];
+    coverageDongs: unknown;
+    coveragePopulation: number | null;
   } | null;
 };
 
@@ -111,7 +115,10 @@ function resolveNameEn(koreanName: string, dbNameEn: string | null | undefined):
 }
 
 /** Map Prisma row → public `MediaItem` (list/detail/compare). */
-export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaItem {
+export function prismaMediaToMediaItem(
+  m: MediaWithAdvertiserExecutions,
+  moisPopIndex?: ReadonlyMap<string, number>,
+): MediaItem {
   const country = (m as Media & { country?: string }).country ?? "KR";
   const korea = isKoreaMediaCountry(country);
   const lat = m.latitude ?? (korea ? 37.5665 : 0);
@@ -220,6 +227,15 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
   const demoFromSignal =
     (cm?.demoSourceSignalIds?.length ?? 0) > 0 ? true : undefined;
 
+  const coverageDongs =
+    moisPopIndex && cm?.coverageDongs
+      ? parseCoverageDongsWithPopulation(cm.coverageDongs, moisPopIndex)
+      : undefined;
+  const coveragePopulation =
+    cm?.coveragePopulation != null && cm.coveragePopulation > 0
+      ? cm.coveragePopulation
+      : undefined;
+
   return {
     id: m.id,
     slug: m.slug?.trim() || undefined,
@@ -327,6 +343,8 @@ export function prismaMediaToMediaItem(m: MediaWithAdvertiserExecutions): MediaI
     demoGenderSplit,
     demoAgeSplit,
     demoFromSignal,
+    coverageDongs,
+    coveragePopulation,
   };
 }
 
@@ -349,6 +367,8 @@ const catalogInclude = {
       demoGenderSplit: true,
       demoAgeSplit: true,
       demoSourceSignalIds: true,
+      coverageDongs: true,
+      coveragePopulation: true,
     },
   },
 } as const;
@@ -715,7 +735,10 @@ export async function fetchPlannerMediaCatalog(): Promise<{
       include: catalogInclude,
     });
     const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);
-    const dbItems = rowsWithCoverage.map(prismaMediaToMediaItem);
+    const moisPopIndex = await fetchMoisPopulationIndex(db);
+    const dbItems = rowsWithCoverage.map((r) =>
+      prismaMediaToMediaItem(r, moisPopIndex),
+    );
     const catalog = await appendNetworksIfAny(dbItems);
     if (catalog.length === 0) {
       return { catalog: [], databaseEmpty: true };

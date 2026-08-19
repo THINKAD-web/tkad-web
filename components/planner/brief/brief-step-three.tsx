@@ -31,6 +31,7 @@ import {
   calcMixMetrics,
   type MixMetrics,
 } from "@/lib/planner/brief/mix-metrics";
+import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
   flightDays,
   totalBudgetWon,
@@ -177,8 +178,14 @@ export function BriefStepThree({
   );
 
   const liveMetrics = useMemo(
-    () => calcMixMetrics({ lines, days, budgetWon }),
-    [lines, days, budgetWon],
+    () =>
+      calcMixMetrics({
+        lines,
+        days,
+        budgetWon,
+        target: briefToTargetSpec(store),
+      }),
+    [lines, days, budgetWon, store.genders, store.ageBands],
   );
 
   const [savedPlan, setSavedPlan] = useState<SavedCampaignPlan | null>(null);
