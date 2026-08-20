@@ -9,6 +9,7 @@ import {
   getMediaApplicationConfirmationEmail,
 } from "@/lib/email/media-application-notify";
 import { parseMediaApplicationSubmit } from "@/lib/media-application";
+import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
 import { geocodeAddressWithKakao } from "@/lib/kakao-address-geocode";
 import { getCurrentUser } from "@/lib/user-session";
 import { notifySlackMediaApplication } from "@/lib/media-application-slack";
@@ -84,6 +85,21 @@ export async function POST(request: NextRequest) {
   }
 
   const d = parsed.data;
+  if (d.dailyFootfall != null) {
+    const metrics = validateMediaMetricsWrite(
+      { dailyFootfall: d.dailyFootfall },
+      { name: d.mediaName, type: d.mediaType },
+    );
+    if (!metrics.ok) {
+      return json(
+        {
+          error: metrics.errors.map((e) => e.message).join("; "),
+          fields: ["dailyFootfall"],
+        },
+        { status: 400 },
+      );
+    }
+  }
   let latitude = d.latitude ?? null;
   let longitude = d.longitude ?? null;
   let city = d.city ?? null;

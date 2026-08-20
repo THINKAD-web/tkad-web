@@ -25,7 +25,13 @@ import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
 import { attachCoverageDistrictCodesById } from "@/lib/read-media-coverage-district-codes";
 import { applyNormalizedMediaLocation } from "@/lib/apply-media-location-normalize";
 import { assignUniqueMediaSlug } from "@/lib/assign-media-slug";
-import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  metricsWriteNeedsAckBody,
+  readAcknowledgeMetricsWarnings,
+  validateMediaMetricsWrite,
+} from "@/lib/media-metrics-write";
 import {
   ADMIN_MEDIA_LAYER_INCLUDE,
 } from "@/lib/admin-media-dto";
@@ -311,18 +317,35 @@ export async function POST(request: NextRequest) {
   }
   let metricsWarnings: ReturnType<typeof validateMediaMetricsWrite>["warnings"] =
     [];
-  if (Object.keys(metricsPatch).length > 0) {
+  const metricsTouched =
+    Object.keys(metricsPatch).length > 0 ||
+    body.name !== undefined ||
+    body.priceNote !== undefined ||
+    body.priceOptions !== undefined ||
+    body.description !== undefined;
+  if (metricsTouched) {
     const metrics = validateMediaMetricsWrite(metricsPatch, {
       price: typeof data.price === "number" ? data.price : null,
+      name,
+      description: data.description as string | null | undefined,
+      priceNote: data.priceNote as string | null | undefined,
+      priceOptions: body.priceOptions,
+      type,
+      mainCategory: data.mediaMainCategory as string | null | undefined,
+      subCategory:
+        (data.mediaSubCategory as string | null | undefined) ??
+        (data.subCategory as string | null | undefined),
+      widthM: data.widthM as number | null | undefined,
+      heightM: data.heightM as number | null | undefined,
     });
-    if (!metrics.ok) {
-      return json(
-        {
-          error: metrics.errors.map((e) => e.message).join("; "),
-          errors: metrics.errors,
-        },
-        400,
-      );
+    const gate = gateMediaMetricsWrite(metrics, {
+      acknowledgeWarnings: readAcknowledgeMetricsWarnings(body),
+    });
+    if (gate.kind === "error") {
+      return json(metricsWriteErrorBody(gate.result), 400);
+    }
+    if (gate.kind === "needs_ack") {
+      return json(metricsWriteNeedsAckBody(gate.result), 409);
     }
     if (metrics.values.dailyFootfall !== undefined) {
       data.dailyFootfall = metrics.values.dailyFootfall;

@@ -25,6 +25,11 @@ import {
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
+import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
+import {
+  isMetricsWarningsPayload,
+  type MediaMetricsFieldWarning,
+} from "@/lib/media-metrics-write";
 
 const SAMPLE_JSON = `{
   "media_name": "강남역 인근 디지털 보드",
@@ -71,6 +76,9 @@ export default function AdminMediaQuickAddPage() {
   const debouncedText = useDebouncedValue(text, 400);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [metricsWarnings, setMetricsWarnings] = useState<
+    MediaMetricsFieldWarning[] | null
+  >(null);
   /** 비우면 자동 분류 */
   const [typeOverride, setTypeOverride] = useState<Record<number, string>>({});
   /** 비우면 JSON tags 기준(미입력 상태는 카드에서 원본 표시) */
@@ -117,7 +125,7 @@ export default function AdminMediaQuickAddPage() {
     setSubmitError(null);
   }, []);
 
-  const onSubmit = async () => {
+  const onSubmit = async (acknowledgeMetricsWarnings = false) => {
     if (parseState.kind !== "ok") return;
     setSubmitting(true);
     setSubmitError(null);
@@ -126,12 +134,22 @@ export default function AdminMediaQuickAddPage() {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ items: mergedItems }),
+        body: JSON.stringify({
+          items: mergedItems,
+          ...(acknowledgeMetricsWarnings
+            ? { acknowledgeMetricsWarnings: true }
+            : {}),
+        }),
       });
       if (!result.ok) {
+        if (result.status === 409 && isMetricsWarningsPayload(result.data)) {
+          setMetricsWarnings(result.data.warnings);
+          return;
+        }
         setSubmitError(result.message);
         return;
       }
+      setMetricsWarnings(null);
       // 목록 페이지가 bfcache·클라이언트 상태로 옛 데이터를 보이지 않도록 쿼리로 재조회 유도
       router.push(`/admin/medias?updated=${Date.now()}`);
       router.refresh();
@@ -183,6 +201,14 @@ export default function AdminMediaQuickAddPage() {
 
   return (
     <div className="mx-auto max-w-5xl space-y-6">
+      {metricsWarnings && metricsWarnings.length > 0 ? (
+        <MetricsWriteWarningsModal
+          warnings={metricsWarnings}
+          busy={submitting}
+          onCancel={() => setMetricsWarnings(null)}
+          onConfirm={() => void onSubmit(true)}
+        />
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <Link
@@ -320,7 +346,7 @@ export default function AdminMediaQuickAddPage() {
             type="button"
             className="border-2 border-border bg-primary font-semibold text-primary-foreground transition-colors hover:bg-foreground hover:border-border"
             disabled={parseState.kind !== "ok" || submitting}
-            onClick={onSubmit}
+            onClick={() => void onSubmit()}
           >
             {submitting ? (
               <>

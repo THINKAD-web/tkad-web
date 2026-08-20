@@ -14,6 +14,13 @@ import { persistMediaInstallLocations } from "@/lib/persist-media-install-locati
 import { getPrisma } from "@/lib/prisma";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  metricsWriteNeedsAckBody,
+  readAcknowledgeMetricsWarnings,
+  validateMappedMediaMetrics,
+} from "@/lib/media-metrics-write";
 
 export const dynamic = "force-dynamic";
 
@@ -51,6 +58,8 @@ export async function PUT(request: NextRequest, { params }: Params) {
   }
 
   const bodyRecord = body as Record<string, unknown>;
+  const acknowledgeMetricsWarnings =
+    readAcknowledgeMetricsWarnings(bodyRecord);
   const { cleaned, stripped } = stripLockedFields(bodyRecord);
   if (stripped.length > 0) {
     logLockdownAttempt({
@@ -75,6 +84,20 @@ export async function PUT(request: NextRequest, { params }: Params) {
 
   const { createPayload, addressVerified, autoPopulatedAt } =
     await enrichQuickAddRowForPersist(validated.item);
+  const metrics = validateMappedMediaMetrics(createPayload, {
+    dailyFootfall: before.dailyFootfall,
+    impressions: before.impressions,
+    cpm: before.cpm,
+  });
+  const gate = gateMediaMetricsWrite(metrics, {
+    acknowledgeWarnings: acknowledgeMetricsWarnings,
+  });
+  if (gate.kind === "error") {
+    return json(metricsWriteErrorBody(gate.result), 400);
+  }
+  if (gate.kind === "needs_ack") {
+    return json(metricsWriteNeedsAckBody(gate.result), 409);
+  }
   const { installLocations } = splitQuickAddInstallLocations(createPayload);
 
   const data = mediaQuickAddCreateToPrismaUpdate(createPayload);

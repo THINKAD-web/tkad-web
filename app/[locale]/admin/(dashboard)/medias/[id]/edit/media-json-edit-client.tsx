@@ -10,6 +10,11 @@ import { Loader2, ArrowLeft, Save } from "lucide-react";
 import { adminFetchJson } from "@/lib/admin-client-fetch";
 import { useToast } from "@/components/toast-provider";
 import { COMPUTED_FIELDS_LOCKED, LOCKED_FIELD_SNAKE_ALIASES } from "@/lib/media/locked-fields";
+import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
+import {
+  isMetricsWarningsPayload,
+  type MediaMetricsFieldWarning,
+} from "@/lib/media-metrics-write";
 import { PartialPeriodRatesFields } from "@/components/admin/partial-period-rates-fields";
 import {
   EMPTY_PARTIAL_PERIOD_RATES_DRAFT,
@@ -30,6 +35,9 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [metricsWarnings, setMetricsWarnings] = useState<
+    MediaMetricsFieldWarning[] | null
+  >(null);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const load = useCallback(async () => {
@@ -131,7 +139,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
     }
   }, [text]);
 
-  const save = async () => {
+  const save = async (acknowledgeMetricsWarnings = false) => {
     setError(null);
     let parsed: unknown;
     try {
@@ -167,7 +175,12 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(parsed),
+        body: JSON.stringify({
+          ...(parsed as Record<string, unknown>),
+          ...(acknowledgeMetricsWarnings
+            ? { acknowledgeMetricsWarnings: true }
+            : {}),
+        }),
       });
       const jsonRaw = await jsonRes.text();
       let jsonData: unknown = {};
@@ -180,6 +193,10 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
         }
       }
       if (!jsonRes.ok) {
+        if (jsonRes.status === 409 && isMetricsWarningsPayload(jsonData)) {
+          setMetricsWarnings(jsonData.warnings);
+          return;
+        }
         const msg =
           typeof jsonData === "object" &&
           jsonData !== null &&
@@ -190,6 +207,7 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
         setError(msg);
         return;
       }
+      setMetricsWarnings(null);
 
       const strippedHeader = jsonRes.headers.get("X-Locked-Fields-Stripped");
       if (strippedHeader) {
@@ -244,6 +262,14 @@ export default function MediaJsonEditClient({ mediaId }: Props) {
 
   return (
     <div className="mx-auto max-w-6xl space-y-4">
+      {metricsWarnings && metricsWarnings.length > 0 ? (
+        <MetricsWriteWarningsModal
+          warnings={metricsWarnings}
+          busy={saving}
+          onCancel={() => setMetricsWarnings(null)}
+          onConfirm={() => void save(true)}
+        />
+      ) : null}
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div>
           <p className="font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">

@@ -6,6 +6,11 @@ import {
   resolveNetworkRegionsArray,
 } from "@/lib/network-location-enrich";
 import { Prisma } from "@prisma/client";
+import {
+  metricsWriteErrorBody,
+  validateNetworkAggregateFootfall,
+  validateNetworkLocationFootfall,
+} from "@/lib/media-metrics-write";
 
 export const dynamic = "force-dynamic";
 
@@ -149,6 +154,17 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       o.targetCategory !== undefined ? strArr(o.targetCategory) : undefined,
   };
 
+  if (updateData.dailyFootfall !== undefined) {
+    const agg = validateNetworkAggregateFootfall(
+      typeof updateData.dailyFootfall === "number"
+        ? updateData.dailyFootfall
+        : null,
+    );
+    if (!agg.ok) {
+      return json(metricsWriteErrorBody(agg), 400);
+    }
+  }
+
   const locationsRaw = o.locations;
   if (Array.isArray(locationsRaw)) {
     const enriched = enrichNetworkLocations(
@@ -171,6 +187,19 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           };
         }),
     );
+
+    for (const loc of enriched) {
+      const locMetrics = validateNetworkLocationFootfall(loc.dailyFootfall);
+      if (!locMetrics.ok) {
+        return json(
+          {
+            ...metricsWriteErrorBody(locMetrics),
+            error: `${loc.name}: ${metricsWriteErrorBody(locMetrics).error}`,
+          },
+          400,
+        );
+      }
+    }
 
     const manualRegions =
       o.regions !== undefined ? strArr(o.regions) : strArr(existing.regions);

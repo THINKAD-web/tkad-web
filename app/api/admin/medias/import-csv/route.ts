@@ -8,7 +8,11 @@ import {
 } from "@/lib/admin-media-csv";
 import { enrichNewMediaLocationFromKakao } from "@/lib/media-location-enrich";
 import { isValidCatalogMediaType } from "@/lib/media-auto-categorize";
-import { validateCsvDailyFootfall } from "@/lib/media-metrics-write";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  validateCsvDailyFootfall,
+} from "@/lib/media-metrics-write";
 import { getPrisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
@@ -51,14 +55,32 @@ export async function POST(request: NextRequest) {
   }
 
   if (dryRun) {
+    const metricErrors: MediaCsvRowError[] = [...parsed.errors];
+    for (const row of parsed.rows) {
+      const footfall = validateCsvDailyFootfall(row.exposure, {
+        name: row.name,
+        type: row.type,
+      });
+      const gate = gateMediaMetricsWrite(footfall, {
+        requireAckForWarnings: false,
+        rejectPackageScaleOnBatch: true,
+      });
+      if (gate.kind === "error") {
+        metricErrors.push({
+          rowIndex: row.rowIndex,
+          field: "노출수",
+          message: metricsWriteErrorBody(gate.result).error,
+        });
+      }
+    }
     return json({
-      ok: parsed.errors.length === 0,
+      ok: metricErrors.length === 0,
       dryRun: true,
       preview: parsed.rows,
-      errors: parsed.errors,
+      errors: metricErrors,
       counts: {
         valid: parsed.rows.length,
-        errors: parsed.errors.length,
+        errors: metricErrors.length,
       },
     });
   }
@@ -107,9 +129,16 @@ async function createMediaFromCsvRow(
     throw new Error("invalid type");
   }
 
-  const footfall = validateCsvDailyFootfall(row.exposure);
-  if (!footfall.ok) {
-    throw new Error(footfall.errors.map((e) => e.message).join("; "));
+  const footfall = validateCsvDailyFootfall(row.exposure, {
+    name: row.name,
+    type: row.type,
+  });
+  const gate = gateMediaMetricsWrite(footfall, {
+    requireAckForWarnings: false,
+    rejectPackageScaleOnBatch: true,
+  });
+  if (gate.kind === "error") {
+    throw new Error(metricsWriteErrorBody(gate.result).error);
   }
 
   const filled = await enrichNewMediaLocationFromKakao({

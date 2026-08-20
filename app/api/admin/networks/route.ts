@@ -8,6 +8,11 @@ import {
   parseAndBuildNetworkCreateBodyFromObject,
   type NetworkCreateBody,
 } from "@/lib/network-quick-add";
+import {
+  metricsWriteErrorBody,
+  validateNetworkAggregateFootfall,
+  validateNetworkLocationFootfall,
+} from "@/lib/media-metrics-write";
 import { Prisma } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
@@ -104,6 +109,23 @@ export async function POST(request: NextRequest) {
     return json({ error: built.error }, 400);
   }
   const payload = built.body!;
+
+  const agg = validateNetworkAggregateFootfall(payload.dailyFootfall);
+  if (!agg.ok) {
+    return json(metricsWriteErrorBody(agg), 400);
+  }
+  for (const loc of payload.locations) {
+    const locMetrics = validateNetworkLocationFootfall(loc.dailyFootfall);
+    if (!locMetrics.ok) {
+      return json(
+        {
+          ...metricsWriteErrorBody(locMetrics),
+          error: `${loc.name}: ${metricsWriteErrorBody(locMetrics).error}`,
+        },
+        400,
+      );
+    }
+  }
 
   const db = getPrisma();
   try {
