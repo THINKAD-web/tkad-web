@@ -365,6 +365,9 @@ model MediaFactSheet {
   loopDurationSec Int? @map("loop_duration_sec")
   playsPerHour    Int? @map("plays_per_hour")
 
+  /// Phase 1b — isStaticMedia() 우회, loop SOV 경로 강제 (bus TV·택시 영상 등)
+  forceLoopSov Boolean? @map("force_loop_sov")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 

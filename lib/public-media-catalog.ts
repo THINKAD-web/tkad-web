@@ -30,7 +30,7 @@ import {
 import { parseCoverageDongsWithPopulation } from "@/lib/planner/brief/reach-adapter";
 import { fetchMoisPopulationIndex } from "@/lib/metrics/mois-population-index";
 
-/** Catalog/detail 쿼리용: 집행 이력 + demo·coverage 스냅샷 */
+/** Catalog/detail 쿼리용: 집행 이력 + demo·coverage·FactSheet 스냅샷 */
 export type MediaWithAdvertiserExecutions = Media & {
   advertiserExecutions?: Pick<MediaAdvertiserExecution, "advertiserName">[];
   computedMetric?: {
@@ -39,6 +39,12 @@ export type MediaWithAdvertiserExecutions = Media & {
     demoSourceSignalIds: string[];
     coverageDongs: unknown;
     coveragePopulation: number | null;
+  } | null;
+  factSheet?: {
+    forceLoopSov: boolean | null;
+    spotDurationSec: number | null;
+    loopDurationSec: number | null;
+    playsPerHour: number | null;
   } | null;
 };
 
@@ -236,6 +242,26 @@ export function prismaMediaToMediaItem(
       ? cm.coveragePopulation
       : undefined;
 
+  const fs = (m as {
+    factSheet?: {
+      forceLoopSov?: boolean | null;
+      spotDurationSec?: number | null;
+      loopDurationSec?: number | null;
+      playsPerHour?: number | null;
+    } | null;
+  }).factSheet;
+  const forceLoopSov = fs?.forceLoopSov === true ? true : undefined;
+  const spotDurationSec =
+    fs?.spotDurationSec != null && fs.spotDurationSec > 0
+      ? fs.spotDurationSec
+      : undefined;
+  const loopDurationSec =
+    fs?.loopDurationSec != null && fs.loopDurationSec > 0
+      ? fs.loopDurationSec
+      : undefined;
+  const playsPerHour =
+    fs?.playsPerHour != null && fs.playsPerHour > 0 ? fs.playsPerHour : undefined;
+
   return {
     id: m.id,
     slug: m.slug?.trim() || undefined,
@@ -345,6 +371,10 @@ export function prismaMediaToMediaItem(
     demoFromSignal,
     coverageDongs,
     coveragePopulation,
+    forceLoopSov,
+    spotDurationSec,
+    loopDurationSec,
+    playsPerHour,
   };
 }
 
@@ -369,6 +399,14 @@ const catalogInclude = {
       demoSourceSignalIds: true,
       coverageDongs: true,
       coveragePopulation: true,
+    },
+  },
+  factSheet: {
+    select: {
+      forceLoopSov: true,
+      spotDurationSec: true,
+      loopDurationSec: true,
+      playsPerHour: true,
     },
   },
 } as const;

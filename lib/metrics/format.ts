@@ -189,7 +189,9 @@ export function needsSovBadge(media: {
   type?: string | null;
   subCategory?: string | null;
   mediaSubCategory?: string | null;
+  forceLoopSov?: boolean | null;
 }): boolean {
+  if (media.forceLoopSov === true) return false;
   return !isStaticMedia({
     type: media.type,
     subCategory: media.mediaSubCategory ?? media.subCategory,

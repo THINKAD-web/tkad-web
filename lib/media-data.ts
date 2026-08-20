@@ -225,6 +225,11 @@ export interface MediaItem {
   /** PR-3 Phase 4a — Reach 커버리지 (MOIS 구 + 인구) */
   coverageDongs?: Array<{ code: string; weight: number; population: number }>;
   coveragePopulation?: number;
+  /** Phase 1b — FactSheet loop SOV override */
+  forceLoopSov?: boolean;
+  spotDurationSec?: number;
+  loopDurationSec?: number;
+  playsPerHour?: number;
 }
 
 export function getMediaById(id: string | number): MediaItem | undefined {
