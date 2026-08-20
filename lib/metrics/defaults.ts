@@ -26,7 +26,12 @@ import { DEFAULT_CONTACT_RATE } from "./constants";
 import type { AgeBand, Gender, MediaMetricClass, TargetSpec } from "./types";
 import { AGE_BANDS } from "./types";
 
-export type MetricBasis = "measured" | "derived" | "parsed" | "default";
+export type MetricBasis =
+  | "measured"
+  | "derived"
+  | "override"
+  | "parsed"
+  | "default";
 
 export type MetricValue<T = number> = {
   value: T;
@@ -67,6 +72,8 @@ export type MediaSovSource = {
   subCategory?: string;
   mainCategory?: string;
   name?: string;
+  /** MediaFactSheet.forceLoopSov — isStaticMedia() 보다 우선 */
+  forceLoopSov?: boolean;
   /** PR-3 이후 채워질 예정 — 지금은 항상 undefined */
   spotDuration?: number;
   loopDuration?: number;
@@ -76,8 +83,8 @@ export type MediaSovSource = {
 /**
  * SOV(소재 점유율) + 근거.
  *
- * 우선순위: 정적(정의상 1.0) → 매체 사양 기반 계산 → 유형별 기본값.
- * 엔진이 0 을 반환하는 경우에만 기본값으로 덮어쓰고 `default` 로 표시한다.
+ * 우선순위: FactSheet override(loop) → spot/loop spec → DEFAULT[class] → 정적 1.0.
+ * override·spec·default 경로는 `isStaticMedia()` 보다 먼저 평가한다.
  */
 export function resolveSovShareWithBasis(
   media: MediaSovSource,
@@ -89,9 +96,22 @@ export function resolveSovShareWithBasis(
     name: media.name,
   };
 
+  if (media.forceLoopSov === true) {
+    const fromSpec = engineResolveSovShare({
+      isStatic: false,
+      spotDuration: media.spotDuration,
+      loopDuration: media.loopDuration,
+      playsPerHour: media.playsPerHour,
+    });
+    if (fromSpec > 0) {
+      return { value: fromSpec, basis: "override" };
+    }
+    const mediaClass = classifyMedia(classifyInput);
+    return { value: DEFAULT_SOV_SHARE[mediaClass], basis: "override" };
+  }
+
   const isStatic = isStaticMedia(classifyInput);
   if (isStatic) {
-    // 정적 매체는 소재가 항상 노출된다 — 가정이 아니라 정의다.
     return { value: 1, basis: "derived" };
   }
 
@@ -106,7 +126,6 @@ export function resolveSovShareWithBasis(
     return { value: fromSpec, basis: "derived" };
   }
 
-  // 엔진이 0 → SOV 근거 없음. 기본값으로 덮어쓰되 그 사실을 실어 보낸다.
   const mediaClass = classifyMedia(classifyInput);
   return { value: DEFAULT_SOV_SHARE[mediaClass], basis: "default" };
 }
@@ -161,6 +180,7 @@ export function weakestBasis(
   if (bases.includes("default")) return "default";
   if (bases.includes("parsed")) return "parsed";
   if (bases.includes("derived")) return "derived";
+  if (bases.includes("override")) return "override";
   return "measured";
 }
 

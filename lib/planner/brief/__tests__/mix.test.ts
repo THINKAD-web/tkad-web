@@ -119,6 +119,29 @@ test("SOV 스펙이 있으면 계산값 + basis=derived", () => {
   assert.ok(Math.abs(r.value - 0.05) < 1e-9);
 });
 
+test("forceLoopSov override — isStatic mobile bus도 loop SOV + basis=override", () => {
+  const r = resolveSovShareWithBasis({
+    type: "mobile",
+    subCategory: "bus_exterior",
+    name: "경기 G버스 TV",
+    forceLoopSov: true,
+  });
+  assert.equal(r.basis, "override");
+  assert.equal(r.value, DEFAULT_SOV_SHARE.bus_exterior);
+});
+
+test("forceLoopSov + spot/loop spec — 값은 spec, basis=override", () => {
+  const r = resolveSovShareWithBasis({
+    type: "mobile",
+    subCategory: "bus_exterior",
+    forceLoopSov: true,
+    spotDuration: 15,
+    loopDuration: 300,
+  });
+  assert.equal(r.basis, "override");
+  assert.ok(Math.abs(r.value - 0.05) < 1e-9);
+});
+
 test("contactRate 실측 없으면 default, 있으면 measured", () => {
   const d = resolveContactRateWithBasis({ type: "digital", subCategory: "led_screen" });
   assert.equal(d.basis, "default");
@@ -136,9 +159,11 @@ test("contactRate 실측 없으면 default, 있으면 measured", () => {
 test("weakestBasis: 추정이 하나라도 섞이면 결과는 추정", () => {
   assert.equal(weakestBasis(["measured", "measured"]), "measured");
   assert.equal(weakestBasis(["measured", "derived"]), "derived");
+  assert.equal(weakestBasis(["measured", "override"]), "override");
   assert.equal(weakestBasis(["measured", "parsed"]), "parsed");
   assert.equal(weakestBasis(["parsed", "derived"]), "parsed");
   assert.equal(weakestBasis(["measured", "derived", "default"]), "default");
+  assert.equal(weakestBasis(["override", "derived"]), "derived");
   assert.equal(weakestBasis([]), "default");
 });
 

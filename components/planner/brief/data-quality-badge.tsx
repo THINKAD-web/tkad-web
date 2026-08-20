@@ -53,6 +53,10 @@ const BASIS_DETAIL: Record<MetricBasis, { ko: string; en: string }> = {
     ko: "매체별 데이터가 없어 유형별 기본값으로 대체했습니다.",
     en: "No per-media data — substituted a per-type default.",
   },
+  override: {
+    ko: "운영팀이 loop SOV로 수동 지정한 매체입니다.",
+    en: "Loop SOV manually specified by ops.",
+  },
 };
 
 export function DataQualityBadge({

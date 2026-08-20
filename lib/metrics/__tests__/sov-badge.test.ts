@@ -23,6 +23,25 @@ test("V-3: subCategory / mediaSubCategory 양쪽 필드명을 받는다", () => 
   assert.equal(needsSovBadge({ type: "mobile", subCategory: "bus_exterior" }), false);
 });
 
+test("V-3: forceLoopSov override 매체는 SOV 배지 없음", () => {
+  assert.equal(
+    needsSovBadge({
+      type: "digital",
+      mediaSubCategory: "digital_signage",
+      forceLoopSov: true,
+    }),
+    false,
+  );
+  assert.equal(
+    needsSovBadge({
+      type: "mobile",
+      mediaSubCategory: "bus_exterior",
+      forceLoopSov: true,
+    }),
+    false,
+  );
+});
+
 test("V-3: 배지 문구에 5b 대기 상태가 드러난다", () => {
   assert.equal(sovBadgeLabel(), "SOV 미적용 · 5b 대기");
   assert.ok(sovBadgeLabel("en-US").includes("5b"));

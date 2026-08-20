@@ -97,6 +97,19 @@ function priceBasisToMetricBasis(
   return basis === "exact" ? "measured" : "derived";
 }
 
+function mediaSovSource(media: MediaItem) {
+  return {
+    type: media.type,
+    subCategory: media.subCategory ?? media.mediaSubCategory,
+    mainCategory: media.mediaCategory?.[0],
+    name: media.name,
+    forceLoopSov: media.forceLoopSov,
+    spotDuration: media.spotDurationSec,
+    loopDuration: media.loopDurationSec,
+    playsPerHour: media.playsPerHour,
+  };
+}
+
 /** 한 매체 줄의 지표 (노출·금액) */
 export function calcLineMetrics(line: MixLine, days: number): MixLineMetrics {
   const { media, units } = line;
@@ -108,12 +121,7 @@ export function calcLineMetrics(line: MixLine, days: number): MixLineMetrics {
     name: media.name,
   });
 
-  const sovShare = resolveSovShareWithBasis({
-    type: media.type,
-    subCategory: media.subCategory,
-    mainCategory: media.mediaCategory?.[0],
-    name: media.name,
-  });
+  const sovShare = resolveSovShareWithBasis(mediaSovSource(media));
 
   const { totalImpressions } = calcImpressions({
     dailyTraffic: media.dailyFootTraffic ?? 0,
@@ -303,11 +311,7 @@ export function tryCalcReach(params: {
           subCategory: l.media.subCategory,
           name: l.media.name,
         }).value,
-        sovShare: resolveSovShareWithBasis({
-          type: l.media.type,
-          subCategory: l.media.subCategory,
-          name: l.media.name,
-        }).value,
+        sovShare: resolveSovShareWithBasis(mediaSovSource(l.media)).value,
         units: l.units,
         days,
       });
