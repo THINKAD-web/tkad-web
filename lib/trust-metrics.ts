@@ -1,4 +1,5 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import {
   formatTrustCount,
   MEDIA_COUNT_LABEL_FALLBACK,
@@ -40,7 +41,7 @@ async function aggregate(): Promise<TrustMetrics> {
   try {
     const db = getPrisma();
     const [mediaCount, brandCount, campaignCount] = await Promise.all([
-      db.media.count({ where: { isActive: true } }),
+      db.media.count({ where: publicActiveMediaWhere() }),
       db.user.count({ where: { role: "advertiser", deletedAt: null } }),
       db.ooHQuote.count({
         where: { status: { in: CAMPAIGN_STATUSES as never } },
@@ -108,7 +109,7 @@ async function countVerifiedActiveMedia(): Promise<number> {
   if (!isDatabaseConfigured()) return 0;
   try {
     return await getPrisma().media.count({
-      where: { isActive: true, isVerified: true },
+      where: publicActiveMediaWhere({ isVerified: true }),
     });
   } catch (e) {
     console.error(

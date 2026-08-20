@@ -29,3 +29,15 @@ export function logLockdownAttempt(entry: LockdownAuditEntry): void {
   });
   console.warn(`[AUDIT] ${line}`);
 }
+
+export function logReviewStatusChange(entry: {
+  mediaId: string;
+  from: string;
+  to: string;
+  reviewReason: string | null;
+  source: string;
+}): void {
+  console.warn(
+    `[AUDIT] ${JSON.stringify({ kind: "PHASE_B_REVIEW_STATUS", ...entry, timestamp: new Date().toISOString() })}`,
+  );
+}

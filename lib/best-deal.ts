@@ -1,6 +1,7 @@
 import type { MediaItem } from "@/lib/media-data";
 import { mediaMonthlyPriceWon } from "@/lib/media-price-transparency";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export type MediaDiscountResult = {
   discountPct: number;
@@ -58,13 +59,12 @@ export async function calculateMediaDiscount(
 
   const db = getPrisma();
   const peers = await db.media.findMany({
-    where: {
+    where: publicActiveMediaWhere({
       region,
       type,
-      isActive: true,
       id: { not: mediaId },
       price: { gt: 0 },
-    },
+    }),
     select: { price: true },
   });
 

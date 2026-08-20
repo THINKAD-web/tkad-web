@@ -80,6 +80,7 @@ import {
 } from "@/lib/admin-media-dto";
 import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
 import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
+import { AdminMediaReviewFlagBadge } from "@/components/admin/admin-media-review-flag-badge";
 import {
   isMetricsWarningsPayload,
   type MediaMetricsFieldWarning,
@@ -1729,6 +1730,30 @@ export default function AdminMediasClient({
     }
   }, []);
 
+  const markReviewStatusReviewed = useCallback(async (m: AdminMediaDto) => {
+    listFetchGenRef.current += 1;
+    try {
+      const result = await adminFetchJson(`/api/admin/medias/${m.id}`, {
+        method: "PATCH",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewStatus: "reviewed" }),
+      });
+      if (!result.ok) {
+        setListError(result.message);
+        return;
+      }
+      const data = result.data as { media?: unknown };
+      const row = data.media ? normalizeAdminMediaRow(data.media) : null;
+      if (row) {
+        setMedias((prev) => prev.map((x) => (x.id === m.id ? row : x)));
+        setListError(null);
+      }
+    } catch {
+      /* ignore */
+    }
+  }, []);
+
   const toggleCatalogVerified = useCallback(async (m: AdminMediaDto) => {
     listFetchGenRef.current += 1;
     const next = !m.isVerified;
@@ -2830,6 +2855,15 @@ export default function AdminMediasClient({
                               ) : null}
                             </p>
                             <div className="flex flex-wrap items-center gap-1.5">
+                              <AdminMediaReviewFlagBadge
+                                reviewStatus={media.reviewStatus}
+                                reviewReason={media.reviewReason}
+                                onMarkReviewed={
+                                  media.reviewStatus === "flagged"
+                                    ? () => void markReviewStatusReviewed(media)
+                                    : undefined
+                                }
+                              />
                               <Badge
                                 variant="secondary"
                                 className="border border-border bg-card text-[10px] font-display font-bold uppercase tracking-[0.1em] text-foreground"
@@ -2940,6 +2974,15 @@ export default function AdminMediasClient({
                                   </span>
                                 ) : null}
                               </p>
+                              <AdminMediaReviewFlagBadge
+                                reviewStatus={media.reviewStatus}
+                                reviewReason={media.reviewReason}
+                                onMarkReviewed={
+                                  media.reviewStatus === "flagged"
+                                    ? () => void markReviewStatusReviewed(media)
+                                    : undefined
+                                }
+                              />
                             </td>
                             <td className="px-2 py-2.5 align-middle">
                               <Badge

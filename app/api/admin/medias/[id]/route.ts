@@ -41,7 +41,8 @@ import {
   validateMediaMetricsWrite,
 } from "@/lib/media-metrics-write";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
-import { logLockdownAttempt } from "@/lib/media/audit-log";
+import { logLockdownAttempt, logReviewStatusChange } from "@/lib/media/audit-log";
+import { isMediaReviewStatus } from "@/lib/media-review-status";
 import {
   hasValidManualCoords,
   isKoreaMediaCountry,
@@ -506,6 +507,22 @@ export async function PATCH(request: NextRequest, { params }: Params) {
       return json({ error: "isVerified must be boolean" }, 400);
     }
     data.isVerified = body.isVerified;
+  }
+  if (body.reviewStatus !== undefined) {
+    if (!isMediaReviewStatus(body.reviewStatus)) {
+      return json(
+        { error: "reviewStatus must be clean | flagged | reviewed" },
+        400,
+      );
+    }
+    data.reviewStatus = body.reviewStatus;
+    logReviewStatusChange({
+      mediaId: id,
+      from: existing.reviewStatus,
+      to: body.reviewStatus,
+      reviewReason: existing.reviewReason ?? null,
+      source: "api_patch",
+    });
   }
 
   if ("location" in body) {

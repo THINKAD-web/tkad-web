@@ -273,6 +273,11 @@ model Media {
   /// 공개 상세·즉시 예약 CTA — 어드민 매체 관리 「노출」에서 수동 on/off
   instantBookingEnabled Boolean           @default(false) @map("instant_booking_enabled")
   isActive              Boolean           @default(true) @map("is_active")
+  /// Operational 플래그 (Fact/Signal/Computed 아님). 공개 카탈로그 검토 상태.
+  /// `clean` | `flagged` | `reviewed` — Computed lockdown 대상 아님.
+  reviewStatus String    @default("clean") @map("review_status")
+  reviewReason String?   @map("review_reason")
+  flaggedAt    DateTime? @map("flagged_at")
   /// 홈(`page.tsx`) 추천 영역 — `fetchHomeFeaturedMedia`가 `isFeatured=true` 우선 조회
   isFeatured            Boolean           @default(false) @map("is_featured")
   /// 홈 추천 정렬: 오름차순, null은 뒤로
@@ -325,6 +330,7 @@ model Media {
   @@index([isFeatured, featuredOrder])
   @@index([isPopular, popularOrder])
   @@index([isActive, popularityScore(sort: Desc)])
+  @@index([isActive, reviewStatus])
   @@index([mediaMainCategory, mediaSubCategory])
   @@index([regionMain, regionSub])
   @@index([ownerUserId])

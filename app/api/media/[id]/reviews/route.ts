@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getPrisma } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { getCurrentUser } from "@/lib/user-session";
 import {
   getMediaReviewEligibility,
@@ -45,7 +46,7 @@ export async function POST(
 
   const db = getPrisma();
   const media = await db.media.findFirst({
-    where: { id: mediaId, isActive: true },
+    where: publicActiveMediaWhere({ id: mediaId }),
     select: { id: true, name: true },
   });
   if (!media) {

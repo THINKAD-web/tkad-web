@@ -1,5 +1,6 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import type { CaseStudyMediaLink } from "@/lib/success-case-public";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 /**
  * `mediaIds`로 카탈로그 매체명을 조회해 상세 페이지 링크 라벨을 보강합니다.
@@ -24,7 +25,7 @@ export async function resolveCaseMediaLinks(
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { id: { in: mediaIds }, isActive: true },
+      where: publicActiveMediaWhere({ id: { in: mediaIds } }),
       select: { id: true, name: true, nameEn: true },
     });
     const byId = new Map(rows.map((r) => [r.id, r]));

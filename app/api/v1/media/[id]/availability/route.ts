@@ -3,6 +3,7 @@ import { z } from "zod";
 import { activeBookingWhere } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { withApiKeyAuth, v1Error } from "@/lib/api-key-auth";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -81,11 +82,11 @@ export async function GET(request: NextRequest, { params }: Params) {
       }
 
       const db = getPrisma();
-      const media = await db.media.findUnique({
-        where: { id: mediaId },
+      const media = await db.media.findFirst({
+        where: publicActiveMediaWhere({ id: mediaId }),
         select: { id: true, isActive: true },
       });
-      if (!media || !media.isActive) {
+      if (!media) {
         return v1Error("NOT_FOUND", 404, "Media not found");
       }
 

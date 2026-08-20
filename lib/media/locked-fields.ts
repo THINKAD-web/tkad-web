@@ -3,6 +3,7 @@ import { isKoreaMediaCountry } from "@/lib/media-country";
 /**
  * Computed 계층 필드 — 관리자 편집 불가
  * PR4: 3층(모달 UI / JSON edit / API PATCH·PUT) 모두 이 상수만 참조
+ * `reviewStatus` / `reviewReason` / `flaggedAt` 은 Operational 이라 여기 넣지 않음.
  */
 export const COMPUTED_FIELDS_LOCKED = [
   "dailyFootfall",
