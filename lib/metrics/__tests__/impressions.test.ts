@@ -29,6 +29,22 @@ test("SOV 근거가 없는 디지털 매체는 0 — 1.0 폴백 금지 (D-01 재
   assert.equal(hasSovBasis({ spotDuration: 15, loopDuration: 300 }), true);
 });
 
+test("D-01: M-CITY 15초/300초 loop → LTS 는 SOV 없음, impressions 는 SOV 적용", () => {
+  const dailyTraffic = 160_000;
+  const contactRate = 0.458;
+  const sov = resolveSovShare({ spotDuration: 15, loopDuration: 300 });
+  const r = calcImpressions({
+    dailyTraffic,
+    contactRate,
+    sovShare: sov,
+    units: 1,
+    days: 30,
+  });
+  assert.equal(r.dailyLtsContacts, Math.round(dailyTraffic * contactRate));
+  assert.ok(r.dailyImpressions < r.dailyLtsContacts);
+  assert.equal(r.dailyImpressions, Math.round(r.dailyLtsContacts * sov));
+});
+
 test("D-01: M-CITY 15초/300초 loop → 노출이 SOV 미적용 대비 1/20", () => {
   const dailyTraffic = 160_000;
   const contactRate = 0.458;

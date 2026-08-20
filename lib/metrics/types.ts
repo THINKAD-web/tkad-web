@@ -49,7 +49,9 @@ export type ImpressionInput = {
 };
 
 export type ImpressionResult = {
-  /** 일 노출 (판매 단위 × 수량 반영) */
+  /** 일 LTS 접촉 (traffic × contactRate × units — SOV 미적용) */
+  dailyLtsContacts: number;
+  /** 일 노출 (traffic × contactRate × sov × units) */
   dailyImpressions: number;
   /** 기간 총 노출 */
   totalImpressions: number;
@@ -171,6 +173,8 @@ export type CoverageDong = {
 
 export type PlannedMedia = {
   mediaId: string;
+  /** 일 LTS — reach 확률(dailyP) 입력. SOV 미포함 */
+  dailyLtsContacts: number;
   dailyImpressions: number;
   totalImpressions: number;
   coverageDongs: readonly CoverageDong[];

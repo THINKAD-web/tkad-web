@@ -19,10 +19,18 @@ const DONGS: DongProfile[] = [
   dong("1114055", 18_000),
 ];
 
-function media(id: string, dailyImpressions: number, codes: string[], days = 14): PlannedMedia {
+function media(
+  id: string,
+  dailyImpressions: number,
+  codes: string[],
+  days = 14,
+  dailyLtsContacts?: number,
+): PlannedMedia {
   const weight = 1 / codes.length;
+  const lts = dailyLtsContacts ?? dailyImpressions;
   return {
     mediaId: id,
+    dailyLtsContacts: lts,
     dailyImpressions,
     totalImpressions: dailyImpressions * days,
     coverageDongs: codes.map((code) => ({ code, weight })),

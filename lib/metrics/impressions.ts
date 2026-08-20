@@ -83,10 +83,11 @@ export function calcImpressions(input: ImpressionInput): ImpressionResult {
   const units = Math.max(0, Math.floor(positive(input.units) || 0));
   const days = Math.max(0, Math.floor(positive(input.days) || 0));
 
+  const dailyLtsContacts = Math.round(traffic * contact * units);
   const dailyImpressions = Math.round(traffic * contact * sov * units);
   const totalImpressions = Math.round(dailyImpressions * days);
 
-  return { dailyImpressions, totalImpressions };
+  return { dailyLtsContacts, dailyImpressions, totalImpressions };
 }
 
 /**
