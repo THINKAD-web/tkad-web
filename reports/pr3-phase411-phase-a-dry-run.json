@@ -1,0 +1,425 @@
+{
+  "generatedAt": "2026-08-20T04:14:52.574Z",
+  "summary": [
+    {
+      "id": "gbus-64m",
+      "title": "G버스 TV 월노출 64M (bus) — hard reject",
+      "ok": false,
+      "gate": "error",
+      "errors": [
+        "impressions_class_cap"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "ee-placeholder",
+      "title": "EE stored ₩3 vs recalc ~₩2,679 — 10× error + placeholder warn",
+      "ok": false,
+      "gate": "error",
+      "errors": [
+        "cpm_mismatch"
+      ],
+      "warnings": [
+        "cpm_placeholder"
+      ]
+    },
+    {
+      "id": "full-package-18-5m",
+      "title": "잠실 Full Package 18.5M dooh_large — cap pass + PKG warn → 409",
+      "ok": true,
+      "gate": "needs_ack",
+      "errors": [],
+      "warnings": [
+        "package_network_scale"
+      ]
+    },
+    {
+      "id": "metro-live-45m",
+      "title": "메트로라이브 45M subway — impressions cap reject",
+      "ok": false,
+      "gate": "error",
+      "errors": [
+        "impressions_class_cap"
+      ],
+      "warnings": []
+    },
+    {
+      "id": "normal-bus-wrap",
+      "title": "버스 래핑 1대 정상 범위 — pass",
+      "ok": true,
+      "gate": "ok",
+      "errors": [],
+      "warnings": []
+    },
+    {
+      "id": "cc-airport-kiroview-pkg",
+      "title": "CC 인천공항 키로뷰 Full Package — catalog 4.5M imp / 350k daily (network 5M 미적용)",
+      "ok": true,
+      "gate": "needs_ack",
+      "errors": [],
+      "warnings": [
+        "package_network_scale"
+      ]
+    },
+    {
+      "id": "cc-cmboard-full-package",
+      "title": "CC 5678 CM보드 Full Package 18.5M subway — class cap 15M reject",
+      "ok": false,
+      "gate": "error",
+      "errors": [
+        "impressions_class_cap"
+      ],
+      "warnings": []
+    }
+  ],
+  "csvBatchGate": "error",
+  "networkChecks": [
+    {
+      "id": "network-4.99m",
+      "ok": true,
+      "expect": true
+    },
+    {
+      "id": "network-5.000001m",
+      "ok": false,
+      "expect": false
+    }
+  ],
+  "cases": [
+    {
+      "id": "gbus-64m",
+      "title": "G버스 TV 월노출 64M (bus) — hard reject",
+      "result": {
+        "ok": false,
+        "errors": [
+          {
+            "field": "impressions",
+            "code": "impressions_class_cap",
+            "message": "impressions (64,000,000) exceeds bus_exterior monthly cap 2,000,000",
+            "details": {
+              "impressions": 64000000,
+              "cap": 2000000,
+              "mediaClass": "bus_exterior"
+            }
+          }
+        ],
+        "warnings": [],
+        "values": {
+          "dailyFootfall": 1500000,
+          "impressions": 64000000,
+          "cpm": 1000
+        }
+      },
+      "gate": {
+        "kind": "error",
+        "status": 400,
+        "result": {
+          "ok": false,
+          "errors": [
+            {
+              "field": "impressions",
+              "code": "impressions_class_cap",
+              "message": "impressions (64,000,000) exceeds bus_exterior monthly cap 2,000,000",
+              "details": {
+                "impressions": 64000000,
+                "cap": 2000000,
+                "mediaClass": "bus_exterior"
+              }
+            }
+          ],
+          "warnings": [],
+          "values": {
+            "dailyFootfall": 1500000,
+            "impressions": 64000000,
+            "cpm": 1000
+          }
+        }
+      }
+    },
+    {
+      "id": "ee-placeholder",
+      "title": "EE stored ₩3 vs recalc ~₩2,679 — 10× error + placeholder warn",
+      "result": {
+        "ok": false,
+        "errors": [
+          {
+            "field": "cpm",
+            "code": "cpm_mismatch",
+            "message": "stored cpm (3) differs from recalculated (2,679) by ≥10×.",
+            "details": {
+              "storedCpm": 3,
+              "recalculatedCpm": 2679.0000685824016,
+              "ratio": 893.0000228608004
+            }
+          }
+        ],
+        "warnings": [
+          {
+            "field": "cpm",
+            "code": "cpm_placeholder",
+            "message": "stored cpm ₩3 looks like a placeholder (₩1–₩10); recalculated ₩2,679.",
+            "details": {
+              "storedCpm": 3,
+              "recalculatedCpm": 2679.0000685824016
+            }
+          }
+        ],
+        "values": {
+          "impressions": 11198208,
+          "cpm": 3
+        }
+      },
+      "gate": {
+        "kind": "error",
+        "status": 400,
+        "result": {
+          "ok": false,
+          "errors": [
+            {
+              "field": "cpm",
+              "code": "cpm_mismatch",
+              "message": "stored cpm (3) differs from recalculated (2,679) by ≥10×.",
+              "details": {
+                "storedCpm": 3,
+                "recalculatedCpm": 2679.0000685824016,
+                "ratio": 893.0000228608004
+              }
+            }
+          ],
+          "warnings": [
+            {
+              "field": "cpm",
+              "code": "cpm_placeholder",
+              "message": "stored cpm ₩3 looks like a placeholder (₩1–₩10); recalculated ₩2,679.",
+              "details": {
+                "storedCpm": 3,
+                "recalculatedCpm": 2679.0000685824016
+              }
+            }
+          ],
+          "values": {
+            "impressions": 11198208,
+            "cpm": 3
+          }
+        }
+      }
+    },
+    {
+      "id": "full-package-18-5m",
+      "title": "잠실 Full Package 18.5M dooh_large — cap pass + PKG warn → 409",
+      "result": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          {
+            "field": "impressions",
+            "code": "package_network_scale",
+            "message": "Package/PKG/Turn-Key/통합 등 키워드와 과대 노출·유동이 함께 있습니다. 네트워크 전체 규모를 판매단위 1개에 넣은 것은 아닌지 확인하세요.",
+            "details": {
+              "impressions": 18500000,
+              "dailyFootfall": null,
+              "mediaClass": "dooh_large"
+            }
+          }
+        ],
+        "values": {
+          "impressions": 18500000
+        }
+      },
+      "gate": {
+        "kind": "needs_ack",
+        "status": 409,
+        "result": {
+          "ok": true,
+          "errors": [],
+          "warnings": [
+            {
+              "field": "impressions",
+              "code": "package_network_scale",
+              "message": "Package/PKG/Turn-Key/통합 등 키워드와 과대 노출·유동이 함께 있습니다. 네트워크 전체 규모를 판매단위 1개에 넣은 것은 아닌지 확인하세요.",
+              "details": {
+                "impressions": 18500000,
+                "dailyFootfall": null,
+                "mediaClass": "dooh_large"
+              }
+            }
+          ],
+          "values": {
+            "impressions": 18500000
+          }
+        }
+      }
+    },
+    {
+      "id": "metro-live-45m",
+      "title": "메트로라이브 45M subway — impressions cap reject",
+      "result": {
+        "ok": false,
+        "errors": [
+          {
+            "field": "impressions",
+            "code": "impressions_class_cap",
+            "message": "impressions (45,000,000) exceeds subway_psd monthly cap 15,000,000",
+            "details": {
+              "impressions": 45000000,
+              "cap": 15000000,
+              "mediaClass": "subway_psd"
+            }
+          }
+        ],
+        "warnings": [],
+        "values": {
+          "impressions": 45000000
+        }
+      },
+      "gate": {
+        "kind": "error",
+        "status": 400,
+        "result": {
+          "ok": false,
+          "errors": [
+            {
+              "field": "impressions",
+              "code": "impressions_class_cap",
+              "message": "impressions (45,000,000) exceeds subway_psd monthly cap 15,000,000",
+              "details": {
+                "impressions": 45000000,
+                "cap": 15000000,
+                "mediaClass": "subway_psd"
+              }
+            }
+          ],
+          "warnings": [],
+          "values": {
+            "impressions": 45000000
+          }
+        }
+      }
+    },
+    {
+      "id": "normal-bus-wrap",
+      "title": "버스 래핑 1대 정상 범위 — pass",
+      "result": {
+        "ok": true,
+        "errors": [],
+        "warnings": [],
+        "values": {
+          "dailyFootfall": 42000,
+          "impressions": 189000,
+          "cpm": 4233
+        }
+      },
+      "gate": {
+        "kind": "ok",
+        "result": {
+          "ok": true,
+          "errors": [],
+          "warnings": [],
+          "values": {
+            "dailyFootfall": 42000,
+            "impressions": 189000,
+            "cpm": 4233
+          }
+        }
+      }
+    },
+    {
+      "id": "cc-airport-kiroview-pkg",
+      "title": "CC 인천공항 키로뷰 Full Package — catalog 4.5M imp / 350k daily (network 5M 미적용)",
+      "result": {
+        "ok": true,
+        "errors": [],
+        "warnings": [
+          {
+            "field": "impressions",
+            "code": "package_network_scale",
+            "message": "Package/PKG/Turn-Key/통합 등 키워드와 과대 노출·유동이 함께 있습니다. 네트워크 전체 규모를 판매단위 1개에 넣은 것은 아닌지 확인하세요.",
+            "details": {
+              "impressions": 4500000,
+              "dailyFootfall": 350000,
+              "mediaClass": "airport"
+            }
+          }
+        ],
+        "values": {
+          "dailyFootfall": 350000,
+          "impressions": 4500000,
+          "cpm": 4444
+        }
+      },
+      "gate": {
+        "kind": "needs_ack",
+        "status": 409,
+        "result": {
+          "ok": true,
+          "errors": [],
+          "warnings": [
+            {
+              "field": "impressions",
+              "code": "package_network_scale",
+              "message": "Package/PKG/Turn-Key/통합 등 키워드와 과대 노출·유동이 함께 있습니다. 네트워크 전체 규모를 판매단위 1개에 넣은 것은 아닌지 확인하세요.",
+              "details": {
+                "impressions": 4500000,
+                "dailyFootfall": 350000,
+                "mediaClass": "airport"
+              }
+            }
+          ],
+          "values": {
+            "dailyFootfall": 350000,
+            "impressions": 4500000,
+            "cpm": 4444
+          }
+        }
+      }
+    },
+    {
+      "id": "cc-cmboard-full-package",
+      "title": "CC 5678 CM보드 Full Package 18.5M subway — class cap 15M reject",
+      "result": {
+        "ok": false,
+        "errors": [
+          {
+            "field": "impressions",
+            "code": "impressions_class_cap",
+            "message": "impressions (18,500,000) exceeds subway_psd monthly cap 15,000,000",
+            "details": {
+              "impressions": 18500000,
+              "cap": 15000000,
+              "mediaClass": "subway_psd"
+            }
+          }
+        ],
+        "warnings": [],
+        "values": {
+          "dailyFootfall": 1600000,
+          "impressions": 18500000
+        }
+      },
+      "gate": {
+        "kind": "error",
+        "status": 400,
+        "result": {
+          "ok": false,
+          "errors": [
+            {
+              "field": "impressions",
+              "code": "impressions_class_cap",
+              "message": "impressions (18,500,000) exceeds subway_psd monthly cap 15,000,000",
+              "details": {
+                "impressions": 18500000,
+                "cap": 15000000,
+                "mediaClass": "subway_psd"
+              }
+            }
+          ],
+          "warnings": [],
+          "values": {
+            "dailyFootfall": 1600000,
+            "impressions": 18500000
+          }
+        }
+      }
+    }
+  ]
+}

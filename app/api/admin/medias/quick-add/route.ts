@@ -12,7 +12,13 @@ import {
   validateQuickAddItems,
 } from "@/lib/media-quick-add";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
-import { stripLockedFields } from "@/lib/media/locked-fields";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  metricsWriteNeedsAckBody,
+  readAcknowledgeMetricsWarnings,
+  validateMappedMediaMetrics,
+} from "@/lib/media-metrics-write";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 
 export const dynamic = "force-dynamic";
@@ -74,6 +80,8 @@ export async function POST(request: NextRequest) {
     return cleaned;
   });
 
+  const acknowledgeMetricsWarnings = readAcknowledgeMetricsWarnings(body);
+
   const validated = validateQuickAddItems(sanitizedItems);
   if (!validated.ok) {
     return json({ error: validated.error }, 400);
@@ -118,6 +126,22 @@ export async function POST(request: NextRequest) {
             ? { ...withNearby, daily_footfall: foot }
             : withNearby;
         const base = mapQuickAddToDb(withFoot);
+        const metrics = validateMappedMediaMetrics(base);
+        const gate = gateMediaMetricsWrite(metrics, {
+          acknowledgeWarnings: acknowledgeMetricsWarnings,
+        });
+        if (gate.kind === "error") {
+          const err = new Error("METRICS_ERROR");
+          (err as Error & { metricsResult: typeof metrics }).metricsResult =
+            metrics;
+          throw err;
+        }
+        if (gate.kind === "needs_ack") {
+          const err = new Error("METRICS_WARNINGS");
+          (err as Error & { metricsResult: typeof metrics }).metricsResult =
+            metrics;
+          throw err;
+        }
         const { prismaFields, installLocations } =
           splitQuickAddInstallLocations(base);
         const media = await tx.media.create({
@@ -164,6 +188,19 @@ export async function POST(request: NextRequest) {
         : undefined,
     );
   } catch (err) {
+    if (err instanceof Error) {
+      const metrics = (
+        err as Error & {
+          metricsResult?: ReturnType<typeof validateMappedMediaMetrics>;
+        }
+      ).metricsResult;
+      if (err.message === "METRICS_ERROR" && metrics) {
+        return json(metricsWriteErrorBody(metrics), 400);
+      }
+      if (err.message === "METRICS_WARNINGS" && metrics) {
+        return json(metricsWriteNeedsAckBody(metrics), 409);
+      }
+    }
     console.error("[admin-api] quick-add failed", err);
     return json(
       { error: prismaQuickAddErrorMessage(err) },

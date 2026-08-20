@@ -33,7 +33,13 @@ import {
 } from "@/lib/media-install-locations";
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { attachInstallLocationsById } from "@/lib/read-media-install-locations";
-import { validateMediaMetricsWrite } from "@/lib/media-metrics-write";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  metricsWriteNeedsAckBody,
+  readAcknowledgeMetricsWarnings,
+  validateMediaMetricsWrite,
+} from "@/lib/media-metrics-write";
 import { stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
 import {
@@ -297,7 +303,13 @@ export async function PATCH(request: NextRequest, { params }: Params) {
   }
   let metricsWarnings: ReturnType<typeof validateMediaMetricsWrite>["warnings"] =
     [];
-  if (Object.keys(metricsPatch).length > 0) {
+  const metricsTouched =
+    Object.keys(metricsPatch).length > 0 ||
+    body.name !== undefined ||
+    body.priceNote !== undefined ||
+    body.priceOptions !== undefined ||
+    body.description !== undefined;
+  if (metricsTouched) {
     const metrics = validateMediaMetricsWrite(metricsPatch, {
       price:
         typeof data.price === "number"
@@ -305,15 +317,53 @@ export async function PATCH(request: NextRequest, { params }: Params) {
           : (existing.price ?? null),
       existingDailyFootfall: existing.dailyFootfall,
       existingImpressions: existing.impressions,
+      existingCpm: existing.cpm,
+      name:
+        typeof data.name === "string"
+          ? data.name
+          : existing.name,
+      description:
+        data.description !== undefined
+          ? (data.description as string | null)
+          : existing.description,
+      priceNote:
+        data.priceNote !== undefined
+          ? (data.priceNote as string | null)
+          : existing.priceNote,
+      priceOptions:
+        body.priceOptions !== undefined
+          ? body.priceOptions
+          : existing.priceOptions,
+      type:
+        typeof data.type === "string" ? data.type : existing.type,
+      mainCategory:
+        data.mediaMainCategory !== undefined
+          ? (data.mediaMainCategory as string | null)
+          : existing.mediaMainCategory,
+      subCategory:
+        (data.mediaSubCategory !== undefined
+          ? (data.mediaSubCategory as string | null)
+          : existing.mediaSubCategory) ??
+        (data.subCategory !== undefined
+          ? (data.subCategory as string | null)
+          : existing.subCategory),
+      widthM:
+        data.widthM !== undefined
+          ? (data.widthM as number | null)
+          : existing.widthM,
+      heightM:
+        data.heightM !== undefined
+          ? (data.heightM as number | null)
+          : existing.heightM,
     });
-    if (!metrics.ok) {
-      return json(
-        {
-          error: metrics.errors.map((e) => e.message).join("; "),
-          errors: metrics.errors,
-        },
-        400,
-      );
+    const gate = gateMediaMetricsWrite(metrics, {
+      acknowledgeWarnings: readAcknowledgeMetricsWarnings(body),
+    });
+    if (gate.kind === "error") {
+      return json(metricsWriteErrorBody(gate.result), 400);
+    }
+    if (gate.kind === "needs_ack") {
+      return json(metricsWriteNeedsAckBody(gate.result), 409);
     }
     if (metrics.values.dailyFootfall !== undefined) {
       data.dailyFootfall = metrics.values.dailyFootfall;

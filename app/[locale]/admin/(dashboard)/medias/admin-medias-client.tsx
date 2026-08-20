@@ -79,6 +79,11 @@ import {
   parseAdminMediaListFromApiJson,
 } from "@/lib/admin-media-dto";
 import { adminFetchJson, readAdminResponseJson } from "@/lib/admin-client-fetch";
+import { MetricsWriteWarningsModal } from "@/components/admin/metrics-write-warnings-modal";
+import {
+  isMetricsWarningsPayload,
+  type MediaMetricsFieldWarning,
+} from "@/lib/media-metrics-write";
 import { useToast } from "@/components/toast-provider";
 import { LOCKED_FIELD_TOOLTIP, stripLockedFieldsForMediaSave } from "@/lib/media/locked-fields";
 import {
@@ -883,6 +888,9 @@ export default function AdminMediasClient({
   const [saveLoading, setSaveLoading] = useState(false);
   const [recomputeLoading, setRecomputeLoading] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
+  const [metricsWarnings, setMetricsWarnings] = useState<
+    MediaMetricsFieldWarning[] | null
+  >(null);
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
 
@@ -1543,7 +1551,7 @@ export default function AdminMediasClient({
     }));
   }, []);
 
-  const handleSave = useCallback(async () => {
+  const handleSave = useCallback(async (acknowledgeMetricsWarnings = false) => {
     if (!form.name.trim() || !form.location.trim()) return;
     const isKorea = isKoreaMediaCountry(form.country);
     if (!isKorea) {
@@ -1589,6 +1597,9 @@ export default function AdminMediasClient({
     }
     const { cleaned } = stripLockedFieldsForMediaSave(rawBody, form.country);
     const body = cleaned as Record<string, unknown>;
+    if (acknowledgeMetricsWarnings) {
+      body.acknowledgeMetricsWarnings = true;
+    }
     try {
       const saveUrl = editing
         ? `/api/admin/medias/${editing.id}`
@@ -1602,9 +1613,17 @@ export default function AdminMediasClient({
       });
       const parsed = await readAdminResponseJson(res);
       if (!parsed.ok) {
+        if (
+          parsed.status === 409 &&
+          isMetricsWarningsPayload(parsed.data)
+        ) {
+          setMetricsWarnings(parsed.data.warnings);
+          return;
+        }
         setSaveError(parsed.message);
         return;
       }
+      setMetricsWarnings(null);
       const strippedHeader = res.headers.get("X-Locked-Fields-Stripped");
       if (strippedHeader) {
         toast(
@@ -3016,6 +3035,15 @@ export default function AdminMediasClient({
           </CardContent>
         </Card>
       </div>
+
+      {metricsWarnings && metricsWarnings.length > 0 ? (
+        <MetricsWriteWarningsModal
+          warnings={metricsWarnings}
+          busy={saveLoading}
+          onCancel={() => setMetricsWarnings(null)}
+          onConfirm={() => void handleSave(true)}
+        />
+      ) : null}
 
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex min-h-0 items-end justify-center p-0 sm:items-center sm:p-4">

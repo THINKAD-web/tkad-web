@@ -14,6 +14,11 @@ import {
 import { persistMediaInstallLocations } from "@/lib/persist-media-install-locations";
 import { stripLockedFields } from "@/lib/media/locked-fields";
 import { logLockdownAttempt } from "@/lib/media/audit-log";
+import {
+  gateMediaMetricsWrite,
+  metricsWriteErrorBody,
+  validateMappedMediaMetrics,
+} from "@/lib/media-metrics-write";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
@@ -121,6 +126,31 @@ export async function POST(request: NextRequest) {
 
       const { createPayload, addressVerified, autoPopulatedAt } =
         await enrichQuickAddRowForPersist(row);
+
+      const metrics = validateMappedMediaMetrics(
+        createPayload,
+        existing
+          ? {
+              dailyFootfall: existing.dailyFootfall,
+              impressions: existing.impressions,
+              cpm: existing.cpm,
+            }
+          : undefined,
+      );
+      // error = 해당 행만 실패 (배치 전체 롤백 아님, 경고를 error로 다운그레이드하지 않음).
+      // Package+과대 규모는 모달이 없으므로 행 실패로 승격.
+      const gate = gateMediaMetricsWrite(metrics, {
+        requireAckForWarnings: false,
+        rejectPackageScaleOnBatch: true,
+      });
+      if (gate.kind === "error") {
+        outcomes.push({
+          kind: "failed",
+          name: row.media_name,
+          error: metricsWriteErrorBody(gate.result).error,
+        });
+        continue;
+      }
 
       if (existing) {
         if (dryRun) {

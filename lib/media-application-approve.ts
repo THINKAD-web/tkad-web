@@ -9,6 +9,7 @@ import {
   mapQuickAddToDb,
   type QuickAddMediaJson,
 } from "@/lib/media-quick-add";
+import { validateMappedMediaMetrics } from "@/lib/media-metrics-write";
 import { onMediaApplicationApproved } from "@/lib/media-owner-incentives";
 import { notifyMediaOwnerApplicationApproved } from "@/lib/media-owner-notify";
 
@@ -155,6 +156,12 @@ export async function approveMediaApplication(
     foot != null ? { ...withNearby, daily_footfall: foot } : withNearby;
 
   const base = mapQuickAddToDb(withFoot);
+  const metrics = validateMappedMediaMetrics(base);
+  if (!metrics.ok) {
+    throw new Error(
+      `메트릭 검증 실패: ${metrics.errors.map((e) => e.message).join("; ")}`,
+    );
+  }
 
   let ownerUserId: string | null = app.userId ?? null;
   if (!ownerUserId && app.contactEmail) {

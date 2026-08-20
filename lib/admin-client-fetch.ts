@@ -5,12 +5,17 @@
 
 export async function readAdminResponseJson(res: Response): Promise<
   | { ok: true; data: unknown }
-  | { ok: false; message: string }
+  | { ok: false; message: string; status: number; data: unknown }
 > {
   const raw = await res.text();
   if (!raw.trim()) {
     if (res.ok) return { ok: true, data: {} };
-    return { ok: false, message: `요청 실패 (HTTP ${res.status})` };
+    return {
+      ok: false,
+      message: `요청 실패 (HTTP ${res.status})`,
+      status: res.status,
+      data: {},
+    };
   }
   let data: unknown;
   try {
@@ -19,6 +24,8 @@ export async function readAdminResponseJson(res: Response): Promise<
     return {
       ok: false,
       message: `서버 응답을 읽을 수 없습니다 (HTTP ${res.status}). 배포 로그·DB 연결을 확인해 주세요.`,
+      status: res.status,
+      data: {},
     };
   }
   if (!res.ok) {
@@ -29,7 +36,7 @@ export async function readAdminResponseJson(res: Response): Promise<
       typeof (data as { error: unknown }).error === "string"
         ? (data as { error: string }).error
         : `요청 실패 (HTTP ${res.status})`;
-    return { ok: false, message: msg };
+    return { ok: false, message: msg, status: res.status, data };
   }
   return { ok: true, data };
 }
@@ -39,7 +46,7 @@ export async function adminFetchJson(
   init?: RequestInit,
 ): Promise<
   | { ok: true; data: unknown; status: number }
-  | { ok: false; message: string; status: number }
+  | { ok: false; message: string; status: number; data?: unknown }
 > {
   let res: Response;
   try {
@@ -50,7 +57,12 @@ export async function adminFetchJson(
   }
   const parsed = await readAdminResponseJson(res);
   if (!parsed.ok) {
-    return { ok: false, message: parsed.message, status: res.status };
+    return {
+      ok: false,
+      message: parsed.message,
+      status: parsed.status,
+      data: parsed.data,
+    };
   }
   return { ok: true, data: parsed.data, status: res.status };
 }
