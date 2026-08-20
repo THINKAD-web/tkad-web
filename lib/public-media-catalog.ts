@@ -29,6 +29,7 @@ import {
 } from "@/lib/media-partial-period-rates";
 import { parseCoverageDongsWithPopulation } from "@/lib/planner/brief/reach-adapter";
 import { fetchMoisPopulationIndex } from "@/lib/metrics/mois-population-index";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 /** Catalog/detail 쿼리용: 집행 이력 + demo·coverage·FactSheet 스냅샷 */
 export type MediaWithAdvertiserExecutions = Media & {
@@ -435,7 +436,7 @@ export const fetchPublicMediaCatalog = cache(async function fetchPublicMediaCata
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
@@ -471,7 +472,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
   try {
     const db = getPrisma();
     const featured = await db.media.findMany({
-      where: { isActive: true, isFeatured: true },
+      where: publicActiveMediaWhere({ isFeatured: true }),
       include: catalogInclude,
     });
     if (featured.length > 0) {
@@ -488,7 +489,7 @@ export async function fetchHomeFeaturedMedia(max = 4): Promise<MediaItem[]> {
       return sorted.slice(0, max).map((row) => prismaMediaToMediaItem(row));
     }
     const fallback = await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       orderBy: { updatedAt: "desc" },
       take: max,
       include: catalogInclude,
@@ -520,10 +521,9 @@ export async function fetchHomeWeeklyPopularMedia(
     const db = getPrisma();
     // 폴백 점수를 위해 충분한 풀을 가져와 JS 에서 가중 정렬.
     const pool = await db.media.findMany({
-      where: {
-        isActive: true,
-        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
-      },
+      where: publicActiveMediaWhere(
+        excludeIds.length ? { id: { notIn: excludeIds } } : undefined,
+      ),
       orderBy: [{ popularityScore: "desc" }, { updatedAt: "desc" }],
       take: Math.max(max * 6, 60),
       include: catalogInclude,
@@ -553,10 +553,9 @@ export async function fetchHomeNewMedia(
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: {
-        isActive: true,
-        ...(excludeIds.length ? { id: { notIn: excludeIds } } : {}),
-      },
+      where: publicActiveMediaWhere(
+        excludeIds.length ? { id: { notIn: excludeIds } } : undefined,
+      ),
       // createdAt 동률(대량 시드) 대비 id 보조 정렬로 안정적 최신순.
       orderBy: [{ createdAt: "desc" }, { id: "desc" }],
       take: max,
@@ -577,11 +576,10 @@ export async function fetchHomeInstantBookingMedia(
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: {
-        isActive: true,
+      where: publicActiveMediaWhere({
         type: "digital",
         availability: "available",
-      },
+      }),
       orderBy: [{ popularityScore: "desc" }, { price: "asc" }],
       take: 48,
       include: catalogInclude,
@@ -604,7 +602,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
   // 1) isPopular=true 우선 조회. DB 에 컬럼이 없는 배포 직후 환경은 catch 로 폴백.
   try {
     const popular = await db.media.findMany({
-      where: { isActive: true, isPopular: true },
+      where: publicActiveMediaWhere({ isPopular: true }),
       include: catalogInclude,
     });
     if (popular.length > 0) {
@@ -630,7 +628,7 @@ export async function fetchHomePopularMedia(max = 4): Promise<MediaItem[]> {
   // 2) 폴백: 가장 최근 업데이트된 매체
   try {
     const fallback = await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       orderBy: [{ updatedAt: "desc" }],
       take: max,
       include: catalogInclude,
@@ -768,7 +766,7 @@ export async function fetchPlannerMediaCatalog(): Promise<{
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true, country: "KR" },
+      where: publicActiveMediaWhere({ country: "KR" }),
       orderBy: { updatedAt: "desc" },
       include: catalogInclude,
     });
@@ -807,10 +805,9 @@ export async function resolveMediaForDetail(
   try {
     const db = getPrisma();
     const row = await db.media.findFirst({
-      where: {
-        isActive: true,
+      where: publicActiveMediaWhere({
         OR: [{ id: slugOrId }, { slug: slugOrId }],
-      },
+      }),
       include: {
         advertiserExecutions: {
           select: { advertiserName: true },
@@ -834,7 +831,7 @@ export async function getAllMediaSlugsForStaticParams(): Promise<string[]> {
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       select: { id: true, slug: true },
     });
     return rows.map((r) => r.slug?.trim() || r.id);
@@ -858,7 +855,7 @@ export async function getMediaSlugsForStaticBuild(
     const db = getPrisma();
     const take = limit && limit > 0 ? limit : undefined;
     const popular = await db.media.findMany({
-      where: { isActive: true, isPopular: true },
+      where: publicActiveMediaWhere({ isPopular: true }),
       select: { id: true, slug: true },
       orderBy: { updatedAt: "desc" },
       ...(take ? { take } : {}),
@@ -868,10 +865,9 @@ export async function getMediaSlugsForStaticBuild(
       return take ? popularSlugs.slice(0, take) : popularSlugs;
     }
     const rest = await db.media.findMany({
-      where: {
-        isActive: true,
+      where: publicActiveMediaWhere({
         id: { notIn: popular.map((r) => r.id) },
-      },
+      }),
       select: { id: true, slug: true },
       orderBy: { updatedAt: "desc" },
       take: take - popularSlugs.length,

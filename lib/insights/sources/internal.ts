@@ -1,5 +1,6 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import type { InternalInsight } from "@/lib/insights/types";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 /**
  * 자체 매체 DB 에서 차별화 인사이트를 추출.
@@ -41,7 +42,7 @@ async function getRegionDistribution(): Promise<InternalInsight | null> {
     const db = getPrisma();
     const rows = await db.media.groupBy({
       by: ["region"],
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       _count: { _all: true },
     });
     const stats: RegionCount[] = rows
@@ -71,7 +72,7 @@ async function getTypeDistribution(): Promise<InternalInsight | null> {
     const db = getPrisma();
     const rows = await db.media.groupBy({
       by: ["type"],
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       _count: { _all: true },
     });
     const stats: TypeCount[] = rows
@@ -98,7 +99,7 @@ async function getNewlyAdded(days = 30): Promise<InternalInsight | null> {
     const db = getPrisma();
     const since = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
     const rows = await db.media.findMany({
-      where: { isActive: true, createdAt: { gte: since } },
+      where: publicActiveMediaWhere({ createdAt: { gte: since } }),
       select: { name: true, region: true, type: true },
       orderBy: { createdAt: "desc" },
       take: 30,
@@ -161,13 +162,13 @@ async function getFeaturedMedia(): Promise<InternalInsight | null> {
     const db = getPrisma();
     const [byVisibility, byTraffic] = await Promise.all([
       db.media.findMany({
-        where: { isActive: true, visibilityScore: { gt: 0 } },
+        where: publicActiveMediaWhere({ visibilityScore: { gt: 0 } }),
         select: { name: true, region: true, visibilityScore: true },
         orderBy: { visibilityScore: "desc" },
         take: 5,
       }),
       db.media.findMany({
-        where: { isActive: true, dailyFootfall: { not: null, gt: 0 } },
+        where: publicActiveMediaWhere({ dailyFootfall: { not: null, gt: 0 } }),
         select: { name: true, region: true, dailyFootfall: true },
         orderBy: { dailyFootfall: "desc" },
         take: 5,

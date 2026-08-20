@@ -19,6 +19,7 @@ import { NextRequest } from "next/server";
 import { z } from "zod";
 import { activeBookingWhere } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { parseNetworkRawId } from "@/lib/media-network-public";
 
 export const dynamic = "force-dynamic";
@@ -130,11 +131,11 @@ export async function GET(request: NextRequest, { params }: Params) {
   }
 
   // 매체 존재 확인 (404 응답으로 광고주에게 정확한 피드백)
-  const media = await db.media.findUnique({
-    where: { id: mediaId },
+  const media = await db.media.findFirst({
+    where: publicActiveMediaWhere({ id: mediaId }),
     select: { id: true, isActive: true },
   });
-  if (!media || !media.isActive) {
+  if (!media) {
     return Response.json({ error: "Media not found" }, { status: 404 });
   }
 

@@ -14,6 +14,7 @@ import {
   resolveMediaQuantity,
   resolveMonthlyPriceForUnits,
 } from "@/lib/media-quantity";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import {
   buildQuoteWizardLineContext,
   isQuoteCampaignPeriodKey,
@@ -195,7 +196,7 @@ export async function calculateQuoteFromMediaIds(
     throw new Error("NO_MEDIA_IDS");
   }
   const rows = await db.media.findMany({
-    where: { id: { in: ids.slice(0, 24) }, isActive: true },
+    where: publicActiveMediaWhere({ id: { in: ids.slice(0, 24) } }),
     select: {
       id: true,
       name: true,

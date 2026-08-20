@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { publicNotFlaggedMediaWhere } from "@/lib/media-review-status";
 import { resolveBrowseCategoryParams } from "@/lib/media-browse-categories";
 import { expandBrowseRegionSub } from "@/lib/media-browse-regions";
 import { expandMediaRegionChip } from "@/lib/media-discovery-filter-chips";
@@ -45,7 +46,10 @@ function parseFeatures(featuresRaw: string | null | undefined): string[] {
 export function buildPublicMediaWhere(
   params: PublicMediaQueryParams,
 ): Prisma.MediaWhereInput {
-  const and: Prisma.MediaWhereInput[] = [{ isActive: true }];
+  const and: Prisma.MediaWhereInput[] = [
+    { isActive: true },
+    publicNotFlaggedMediaWhere(),
+  ];
 
   const resolved = resolveBrowseCategoryParams({
     mainCategory: params.mainCategory,

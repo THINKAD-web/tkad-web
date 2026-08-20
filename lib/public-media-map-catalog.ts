@@ -4,6 +4,7 @@ import { attachPublicMediaCatalogExtras } from "@/lib/attach-public-media-catalo
 import { fetchPublicMediaNetworks } from "@/lib/media-network-public";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { prismaMediaToMediaItem } from "@/lib/public-media-catalog";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export type PublicMediaMapCatalogFacets = {
   regions: string[];
@@ -51,7 +52,7 @@ export async function fetchPublicMediaMapCatalog(): Promise<PublicMediaMapCatalo
   try {
     const db = getPrisma();
     const rows = await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       orderBy: { updatedAt: "desc" },
     });
     const rowsWithCoverage = await attachPublicMediaCatalogExtras(db, rows);

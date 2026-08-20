@@ -1,4 +1,5 @@
 import type { Prisma } from "@prisma/client";
+import { publicActiveMediaWhere, publicNotFlaggedMediaWhere } from "@/lib/media-review-status";
 import type { PublicMediaPackage } from "@/lib/media-package-types";
 import {
   buildPublicMediaOrderBy,
@@ -33,7 +34,10 @@ export function buildMediaPackageWhere(
   filters: MediaPackageFilterInput,
   opts?: { relax?: boolean },
 ): Prisma.MediaWhereInput {
-  const and: Prisma.MediaWhereInput[] = [{ isActive: true }];
+  const and: Prisma.MediaWhereInput[] = [
+    { isActive: true },
+    publicNotFlaggedMediaWhere(),
+  ];
   const relax = opts?.relax === true;
 
   const regions = filters.filterRegion.filter(Boolean);
@@ -108,5 +112,5 @@ export function buildRelaxedMediaPackageWhere(
 }
 
 export function buildPopularFallbackWhere(): Prisma.MediaWhereInput {
-  return { isActive: true };
+  return publicActiveMediaWhere();
 }

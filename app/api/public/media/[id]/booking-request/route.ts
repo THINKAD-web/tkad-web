@@ -19,6 +19,7 @@ import { verifyTurnstileForRequest } from "@/lib/turnstile-verify";
 import { getCurrentUser } from "@/lib/user-session";
 import { findConflictingBookings } from "@/lib/booking-conflict";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import {
   sendBookingRequestAdminAlert,
   sendBookingRequestReceived,
@@ -155,11 +156,11 @@ export async function POST(request: NextRequest, { params }: Params) {
   }
 
   const db = getPrisma();
-  const media = await db.media.findUnique({
-    where: { id: mediaId },
+  const media = await db.media.findFirst({
+    where: publicActiveMediaWhere({ id: mediaId }),
     select: { id: true, name: true, isActive: true, ownerUserId: true },
   });
-  if (!media || !media.isActive) {
+  if (!media) {
     return Response.json({ error: "Media not found" }, { status: 404 });
   }
 

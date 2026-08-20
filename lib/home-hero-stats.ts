@@ -1,4 +1,5 @@
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 /**
  * 홈 히어로 노출 수가 DB에 없거나 합계가 0일 때 사용하는 보수적 플레이스홀더.
@@ -32,13 +33,12 @@ export async function fetchHomeHeroInventoryStats(): Promise<HomeHeroInventorySn
     const [sumAgg, verifiedCount] = await Promise.all([
       db.media.aggregate({
         _sum: { impressions: true },
-        where: {
-          isActive: true,
+        where: publicActiveMediaWhere({
           impressions: { not: null, gt: 0 },
-        },
+        }),
       }),
       db.media.count({
-        where: { isActive: true, isVerified: true },
+        where: publicActiveMediaWhere({ isVerified: true }),
       }),
     ]);
 

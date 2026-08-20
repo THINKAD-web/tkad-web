@@ -12,6 +12,7 @@ import {
   type AvailabilityTier,
 } from "@/lib/media-availability-stats";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,7 @@ export async function GET(request: NextRequest) {
   const cappedTo = new Date(monthEnd.getTime() + 86400000);
 
   const activeMedia = await db.media.findMany({
-    where: { isActive: true },
+    where: publicActiveMediaWhere(),
     select: { id: true },
   });
   const mediaIds = activeMedia.map((m) => m.id);

@@ -3,6 +3,7 @@ import { getPublishedSuccessCases } from "@/lib/public-content-queries";
 import { fetchPublicMediaCatalog } from "@/lib/public-media-catalog";
 import { INDUSTRY_SLUGS } from "@/lib/industry-landing";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { siteUrl, sitemapPaths } from "@/lib/seo";
 import { listGuideMeta } from "@/lib/guides-data";
 import { BLOG_SEO_POSTS } from "@/lib/blog-seo-posts";
@@ -219,7 +220,7 @@ export async function fetchActiveMediaSlugRows(): Promise<MediaSlugRow[]> {
   try {
     const db = getPrisma();
     return await db.media.findMany({
-      where: { isActive: true },
+      where: publicActiveMediaWhere(),
       select: { id: true, slug: true, updatedAt: true },
       orderBy: { updatedAt: "desc" },
     });

@@ -9,6 +9,7 @@ import {
   calculateQuoteFromMediaIds,
   periodLabelForDays,
 } from "@/lib/quote-calculator";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { postInternalAlert } from "@/lib/internal-webhook";
 import { notifySlackInquiryQuoteDraft } from "@/lib/quote-slack-notify";
 import { sendTelegramMessage } from "@/lib/telegram-notify";
@@ -49,7 +50,9 @@ async function resolveMediaForIntent(
 > {
   if (intent.mediaIds.length > 0) {
     const rows = await db.media.findMany({
-      where: { id: { in: intent.mediaIds.slice(0, 12) }, isActive: true },
+      where: publicActiveMediaWhere({
+        id: { in: intent.mediaIds.slice(0, 12) },
+      }),
     });
     const order = new Map(intent.mediaIds.map((id, i) => [id, i]));
     return rows.sort((a, b) => (order.get(a.id) ?? 0) - (order.get(b.id) ?? 0));
@@ -57,11 +60,10 @@ async function resolveMediaForIntent(
 
   const regionFilter = regionWhereClause(intent.regions);
   const rows = await db.media.findMany({
-    where: {
-      isActive: true,
+    where: publicActiveMediaWhere({
       availability: "available",
       ...(regionFilter ?? {}),
-    },
+    }),
     orderBy: [{ popularityScore: "desc" }, { visibilityScore: "desc" }],
     take: 3,
   });

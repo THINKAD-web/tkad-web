@@ -90,6 +90,10 @@ export type AdminMediaDto = {
   instantBookingEnabled: boolean;
   /** 목록 노출·운영 on/off (예약 가용과 별개) */
   isActive: boolean;
+  /** Operational — Phase B. `clean` | `flagged` | `reviewed` */
+  reviewStatus: "clean" | "flagged" | "reviewed";
+  reviewReason: string | null;
+  flaggedAt: string | null;
   /** 홈 추천 매체 */
   isFeatured: boolean;
   /** 추천 노출 순서 (작을수록 앞) */
@@ -352,6 +356,13 @@ export function normalizeAdminMediaRow(raw: unknown): AdminMediaDto | null {
       false,
     ),
     isActive,
+    reviewStatus: ((): AdminMediaDto["reviewStatus"] => {
+      const v = pickStr(r, "reviewStatus", "review_status");
+      if (v === "flagged" || v === "reviewed" || v === "clean") return v;
+      return "clean";
+    })(),
+    reviewReason: pickStr(r, "reviewReason", "review_reason"),
+    flaggedAt: pickIsoDateTime(r, "flaggedAt", "flagged_at"),
     isFeatured: pickBool(r, "isFeatured", "is_featured", false),
     featuredOrder: pickInt(r, "featuredOrder", "featured_order"),
     isPopular: pickBool(r, "isPopular", "is_popular", false),
@@ -485,6 +496,12 @@ export function prismaMediaToAdminDto(
     availability: m.availability as MediaAvailability,
     instantBookingEnabled: m.instantBookingEnabled,
     isActive: m.isActive,
+    reviewStatus:
+      m.reviewStatus === "flagged" || m.reviewStatus === "reviewed"
+        ? m.reviewStatus
+        : "clean",
+    reviewReason: m.reviewReason ?? null,
+    flaggedAt: m.flaggedAt?.toISOString() ?? null,
     isFeatured: m.isFeatured,
     featuredOrder: m.featuredOrder,
     isPopular: m.isPopular,

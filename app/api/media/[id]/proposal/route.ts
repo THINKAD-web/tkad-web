@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { prismaMediaToMediaItem } from "@/lib/public-media-catalog";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 import { generateMediaProposalPdf } from "@/lib/generate-media-proposal";
 import { mediaProposalDownloadFilename } from "@/lib/media-proposal-filename";
 import { getCurrentUser } from "@/lib/user-session";
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest, { params }: Params) {
 
   const db = getPrisma();
   const row = await db.media.findFirst({
-    where: { id, isActive: true },
+    where: publicActiveMediaWhere({ id }),
     include: {
       advertiserExecutions: {
         select: { advertiserName: true },

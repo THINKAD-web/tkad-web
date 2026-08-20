@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getMediaById, type MediaItem } from "@/lib/media-data";
 import { getPrisma, isDatabaseConfigured } from "@/lib/prisma";
 import { prismaMediaToMediaItem } from "@/lib/public-media-catalog";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 const MAX_IDS = 24;
 
@@ -31,7 +32,7 @@ export async function GET(req: Request) {
     try {
       const db = getPrisma();
       const rows = await db.media.findMany({
-        where: { id: { in: ids }, isActive: true },
+        where: publicActiveMediaWhere({ id: { in: ids } }),
         include: {
           advertiserExecutions: {
             select: { advertiserName: true },

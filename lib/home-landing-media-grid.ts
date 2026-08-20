@@ -16,6 +16,7 @@ import {
   type DigitalChannelId,
 } from "@/lib/planner/digital-channels";
 import { THINKAD_DIGITAL_URL } from "@/lib/navigation/cross-brand";
+import { publicActiveMediaWhere } from "@/lib/media-review-status";
 
 export type HomeLandingOohTile = {
   kind: "ooh";
@@ -174,10 +175,9 @@ async function loadOohTilesUncached(): Promise<HomeLandingOohTile[]> {
   try {
     const rows = await getPrisma().media.groupBy({
       by: ["mediaSubCategory"],
-      where: {
-        isActive: true,
+      where: publicActiveMediaWhere({
         mediaSubCategory: { not: null },
-      },
+      }),
       _count: { _all: true },
     });
     const counts = new Map<string, number>();
