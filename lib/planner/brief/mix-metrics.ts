@@ -304,19 +304,21 @@ export function tryCalcReach(params: {
         return null;
       }
       includedIds.push(l.media.id);
-      const { dailyImpressions, totalImpressions } = calcImpressions({
-        dailyTraffic: l.media.dailyFootTraffic ?? 0,
-        contactRate: resolveContactRateWithBasis({
-          type: l.media.type,
-          subCategory: l.media.subCategory,
-          name: l.media.name,
-        }).value,
-        sovShare: resolveSovShareWithBasis(mediaSovSource(l.media)).value,
-        units: l.units,
-        days,
-      });
+      const { dailyLtsContacts, dailyImpressions, totalImpressions } =
+        calcImpressions({
+          dailyTraffic: l.media.dailyFootTraffic ?? 0,
+          contactRate: resolveContactRateWithBasis({
+            type: l.media.type,
+            subCategory: l.media.subCategory,
+            name: l.media.name,
+          }).value,
+          sovShare: resolveSovShareWithBasis(mediaSovSource(l.media)).value,
+          units: l.units,
+          days,
+        });
       return {
         mediaId: l.media.id,
+        dailyLtsContacts,
         dailyImpressions,
         totalImpressions,
         coverageDongs,

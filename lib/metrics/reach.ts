@@ -1,8 +1,16 @@
 /**
  * Reach / Frequency / GRP — 행정동 그리드 기반 중복 제거.
  *
- * 노출 수의 단순 합은 도달이 아니다. 같은 통근자가 같은 전광판을 한 달에
- * 40번 본다. 그걸 40명으로 세면 제안서의 도달 숫자가 통째로 허구가 된다.
+ * ## LTS vs Impressions (Phase 4a-5)
+ *
+ * - **LTS** (Likelihood To See): 지나간 사람 중 시선이 닿은 접촉 — SOV 없음.
+ *   `dailyLtsContacts` 로 dailyP(일일 접촉 확률)를 구한다.
+ * - **Impressions**: LTS 중 **내 소재**를 본 횟수 — SOV 포함.
+ *   `totalImpressions` 로 frequency 분자·effective reach Poisson λ 를 구한다.
+ *
+ * loop 매체에서 SOV 를 reach 에 섞으면 "같은 사람이 40번 봤다"를
+ * "40명이 봤다"로 세는 효과가 난다. reach 는 매체 앞을 지나간 unique
+ * 접촉(LTS) 기준이고, frequency 는 실제 노출(impressions) / reach 이다.
  */
 import {
   DONG_CORRELATION_RHO,
@@ -61,7 +69,7 @@ function poissonAtLeast(lambda: number, k: number): number {
 type DongAccumulator = {
   /** 아직 도달되지 않았을 확률 */
   notReached: number;
-  /** 이 행정동에 귀속된 총 노출 */
+  /** 이 행정동에 귀속된 총 노출 (impressions — SOV 포함) */
   impressions: number;
 };
 
@@ -71,6 +79,9 @@ type DongAccumulator = {
  * 매체를 행정동 단위로 겹쳐 쌓되, 같은 행정동 안의 매체들은 상당 부분
  * 같은 사람이 본다는 점을 상관계수 ρ 로 보정한다. ρ 를 0 으로 두면
  * 매체를 늘릴수록 도달이 선형으로 늘어나 실제보다 크게 부풀려진다.
+ *
+ * dailyP 는 LTS(dailyLtsContacts) 기준 — "매체 앞을 지나가며 시선이 닿은
+ * unique 접촉" 확률. frequency 분자는 impressions(totalImpressions) 그대로.
  */
 export function calcNetReach(params: {
   medias: readonly PlannedMedia[];
@@ -102,7 +113,7 @@ export function calcNetReach(params: {
 
       const dailyP = Math.min(
         MAX_DAILY_CONTACT_PROBABILITY,
-        Math.max(0, (media.dailyImpressions * weight) / population),
+        Math.max(0, (media.dailyLtsContacts * weight) / population),
       );
       const periodP = 1 - Math.pow(1 - dailyP, days);
 

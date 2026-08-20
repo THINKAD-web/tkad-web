@@ -1,0 +1,111 @@
+{
+  "generatedAt": "2026-08-20T02:50:21.304Z",
+  "days": 14,
+  "brief": {
+    "genders": [
+      "female"
+    ],
+    "ageBands": [
+      "20s",
+      "30s"
+    ],
+    "budgetInputWon": 100000000,
+    "budgetMode": "total",
+    "regionCodes": [],
+    "goal": null,
+    "industry": null,
+    "flightStart": "2026-08-01",
+    "flightEnd": "2026-08-14",
+    "freeText": ""
+  },
+  "hybridCounterfactualFreq": 11.3,
+  "scenarios": {
+    "wrapOnly": {
+      "label": "wrap-only (10)",
+      "mediaCount": 10,
+      "legacy": {
+        "netReach": 685398.4329967393,
+        "frequency": 13.940796389368835,
+        "totalImpressions": 9555000,
+        "reachRate": 0.5457505508313208
+      },
+      "current": {
+        "netReach": 685398.4329967393,
+        "frequency": 13.940796389368835,
+        "totalImpressions": 9555000,
+        "reachRate": 0.5457505508313208
+      },
+      "mixPanelFrequency": 13.9,
+      "coveragePopulationSum": 1114113,
+      "checks": {
+        "reachUnchanged": true,
+        "frequencyUnchanged": true,
+        "impressionsUnchanged": true,
+        "reachRateLe1": true,
+        "netReachLeTarget": true,
+        "netReachLeCoverage": true,
+        "tryCalcReachOk": true,
+        "rho": 0.7
+      },
+      "pass": true
+    },
+    "loopOnly": {
+      "label": "loop-only (1b execute 10)",
+      "mediaCount": 10,
+      "legacy": {
+        "netReach": 240093.87287796015,
+        "frequency": 7.819441527165849,
+        "totalImpressions": 1877400,
+        "reachRate": 0.07699509577986256
+      },
+      "current": {
+        "netReach": 1620982.8506498116,
+        "frequency": 1.1581862197045436,
+        "totalImpressions": 1877400,
+        "reachRate": 0.5198288833748653
+      },
+      "mixPanelFrequency": 1.2,
+      "coveragePopulationSum": 1733815,
+      "checks": {
+        "impressionsUnchanged": true,
+        "reachIncreased": true,
+        "frequencyDecreased": true,
+        "reachRateLe1": true,
+        "netReachLeTarget": true,
+        "netReachLeCoverage": true,
+        "tryCalcReachOk": true,
+        "rho": 0.7
+      },
+      "pass": true
+    },
+    "mix4a44": {
+      "label": "4a-4 mix (10)",
+      "mediaCount": 10,
+      "legacy": {
+        "netReach": 936672.3217537857,
+        "frequency": 21.798511096997167,
+        "totalImpressions": 20418062,
+        "reachRate": 0.3003790736652292
+      },
+      "current": {
+        "netReach": 1804376.2136684612,
+        "frequency": 11.315856330475683,
+        "totalImpressions": 20418062,
+        "reachRate": 0.5786408363070813
+      },
+      "mixPanelFrequency": 11.3,
+      "coveragePopulationSum": 3277708,
+      "checks": {
+        "freqNearHybrid": true,
+        "reachRestored": true,
+        "reachRateLe1": true,
+        "netReachLeTarget": true,
+        "netReachLeCoverage": true,
+        "tryCalcReachOk": true,
+        "rho": 0.7
+      },
+      "pass": true
+    }
+  },
+  "allPass": true
+}
