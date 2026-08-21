@@ -1,5 +1,9 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { MapMarker } from "@/components/public-map/map-types";
+import {
+  mapItemShowsOnMap,
+  resolveMapDisplayMode,
+} from "@/lib/media-map/map-display-mode";
 
 /** 복수 설치 핀 id (`mediaId-install-0`) → 매체 id */
 export function resolveMediaIdFromMapPinId(pinId: string): string {
@@ -140,11 +144,12 @@ function buildMapMarker(
   return marker;
 }
 
-/** 공개 매체 상세·지도 — `installLocations` 또는 대표 좌표 → 카카오 핀 */
+/** 공개 매체 상세 — 핀 모드만 좌표 마커. 이동형은 `/media/map` 과 같이 빈 배열 */
 export function mapMarkersForMediaDetail(
   media: MediaItem,
   isKo: boolean,
 ): MapMarker[] {
+  if (!mapItemShowsOnMap(resolveMapDisplayMode(media))) return [];
   const baseName = isKo ? media.name : media.nameEn || media.name;
   const points = mapPointsForMediaItem(media);
   const price = Number(media.price ?? 0);

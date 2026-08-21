@@ -1,15 +1,28 @@
 "use client";
 
+import { useMemo } from "react";
 import dynamic from "next/dynamic";
 import type { MapBounds, MapMarker } from "@/components/public-map/map-types";
 import type { MapViewCommand } from "@/components/media-map/kakao-map-view";
+import {
+  mapViewCommandToDarkProgrammaticView,
+  markerLatLngBounds,
+  mediaDetailUsesLeafletMap,
+} from "@/lib/media-detail-map-engine";
 
 const KakaoMapView = dynamic(
   () => import("@/components/media-map/kakao-map-view"),
   { ssr: false },
 );
 
+const DarkMapView = dynamic(
+  () => import("@/components/public-map/dark-map-view"),
+  { ssr: false },
+);
+
 type Props = {
+  /** ISO country — 해외(≠KR)만 Leaflet. 생략 시 국내(카카오) */
+  country?: string | null;
   markers: MapMarker[];
   selectedId?: string | null;
   onSelect?: (id: string) => void;
@@ -18,22 +31,25 @@ type Props = {
   zoom?: number;
   coverageGeoJson?: unknown | null;
   fitCoverageBounds?: boolean;
-  /** 소수 핀(상세·복수 설치) — 클러스터 합쳐짐 방지 */
   disableCluster?: boolean;
-  /** 네트워크 다지점 — 모든 핀이 한 화면에 들어오도록 bounds 맞춤 */
   fitMarkersBounds?: boolean;
-  /** 선택 시 클로즈업 줌 (카카오 레벨, 작을수록 확대) */
   zoomOnSelect?: number;
-  /** 단일 명령형 뷰 채널 (넘기면 레거시 fit/panTo effect 비활성) */
   command?: MapViewCommand;
 };
 
-/** 매체 상세 — 단일/소수 핀 카카오 지도 (Leaflet 대신) */
+function noopBounds(_b: MapBounds) {}
+
+/**
+ * 매체 상세 임베드 지도.
+ * 해외: `/media/map` 과 같은 Leaflet+Carto (`DarkMapView`).
+ * 국내: 기존 카카오 (`KakaoMapView`).
+ */
 export function MediaDetailKakaoMap({
+  country,
   markers,
   selectedId = markers[0]?.id ?? null,
   onSelect = () => {},
-  onBoundsChange = () => {},
+  onBoundsChange = noopBounds,
   center,
   zoom = 4,
   coverageGeoJson = null,
@@ -43,6 +59,42 @@ export function MediaDetailKakaoMap({
   zoomOnSelect,
   command,
 }: Props) {
+  const useLeaflet = mediaDetailUsesLeafletMap(country);
+
+  const leafletProgrammatic = useMemo(() => {
+    const fromCmd = mapViewCommandToDarkProgrammaticView(command ?? null, markers);
+    if (fromCmd) return fromCmd;
+    if (!fitMarkersBounds || markers.length <= 1) return null;
+    const b = markerLatLngBounds(markers);
+    if (!b) return null;
+    return {
+      lat: center.lat,
+      lng: center.lng,
+      zoom,
+      nonce: 1,
+      fitBounds: b,
+      fitBoundsMaxZoom: 16,
+    };
+  }, [command, markers, fitMarkersBounds, center.lat, center.lng, zoom]);
+
+  if (useLeaflet) {
+    return (
+      <DarkMapView
+        markers={markers}
+        selectedId={selectedId}
+        onSelect={onSelect}
+        onBoundsChange={onBoundsChange}
+        center={center}
+        zoom={zoom}
+        coverageGeoJson={coverageGeoJson}
+        fitCoverageBounds={fitCoverageBounds}
+        disableCluster={disableCluster}
+        programmaticView={leafletProgrammatic}
+        themeAwareTiles
+      />
+    );
+  }
+
   return (
     <KakaoMapView
       markers={markers}

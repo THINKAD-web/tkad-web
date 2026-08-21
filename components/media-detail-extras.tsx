@@ -12,6 +12,13 @@ import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kaka
 import { MediaQuoteCtaButton } from "@/components/media-quote-cta";
 import { MediaInquiryDialog } from "@/components/media-detail/inquiry-dialog";
 import { SectionHead } from "@/components/brutalist/section-head";
+import { mediaDetailUsesLeafletMap } from "@/lib/media-detail-map-engine";
+import {
+  mapItemShowsOnMap,
+  resolveMapDisplayMode,
+  resolveMediaDetailMapNotice,
+} from "@/lib/media-map/map-display-mode";
+import { MediaDetailServiceRegionPanel } from "@/components/media-detail/media-detail-service-region-panel";
 
 export default function MediaDetailExtras({
   media,
@@ -43,6 +50,11 @@ export default function MediaDetailExtras({
     () => mapMarkersForMediaDetail(media, isKo),
     [media, isKo],
   );
+  const mapNotice = useMemo(
+    () => resolveMediaDetailMapNotice(media, isKo),
+    [media, isKo],
+  );
+  const showMapPins = mapItemShowsOnMap(resolveMapDisplayMode(media));
   const mapCenter = useMemo(
     () => mapCenterForMediaDetail(media, mapMarkers),
     [media, mapMarkers],
@@ -81,6 +93,7 @@ export default function MediaDetailExtras({
   const effectiveCoverageGeoJson = coverageCodesKey ? coverageGeoJson : null;
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(isKo ? media.name : (media.nameEn || media.name))},${media.lat},${media.lng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${media.lat},${media.lng}`;
+  const useLeafletMap = mediaDetailUsesLeafletMap(media.country);
   const regionDisplay = useMemo(() => {
     switch (media.region) {
       case "seoul":
@@ -133,7 +146,10 @@ export default function MediaDetailExtras({
             </p>
             <p className="text-base font-bold text-foreground">{regionDisplay}</p>
           </div>
+          {showMapPins ? (
           <div className="flex flex-wrap items-center gap-x-4 gap-y-2 border-t border-border/70 pt-5">
+            {useLeafletMap ? null : (
+              <>
             <a
               href={kakaoUrl}
               target="_blank"
@@ -145,6 +161,8 @@ export default function MediaDetailExtras({
             <span className="text-muted-foreground/40 select-none" aria-hidden>
               ·
             </span>
+              </>
+            )}
             <a
               href={googleUrl}
               target="_blank"
@@ -154,13 +172,16 @@ export default function MediaDetailExtras({
               {labels.openGoogle}
             </a>
           </div>
+          ) : null}
         </div>
         <div className="min-w-0 flex-1 overflow-hidden rounded-[24px] border border-border/80 bg-card/80 shadow-sm backdrop-blur lg:min-w-0 lg:flex-[1.15]">
           <p className="border-b border-border/70 px-4 py-2 font-display text-xs font-medium uppercase tracking-[0.22em] text-muted-foreground">
-            [ {isKo ? "카카오 지도" : "Kakao map"} ]
+            [ {useLeafletMap ? (isKo ? "지도" : "Map") : isKo ? "카카오 지도" : "Kakao map"} ]
           </p>
           <div className="h-[400px]">
+            {showMapPins ? (
             <MediaDetailKakaoMap
+              country={media.country}
               markers={mapMarkers}
               selectedId={mapSelectedId}
               onSelect={(id) => setMapSelectedId(id)}
@@ -170,6 +191,9 @@ export default function MediaDetailExtras({
               fitCoverageBounds={Boolean(media.coverageDistrictCodes?.length)}
               disableCluster={mapMarkers.length <= 8}
             />
+            ) : mapNotice ? (
+              <MediaDetailServiceRegionPanel notice={mapNotice} />
+            ) : null}
           </div>
         </div>
       </div>

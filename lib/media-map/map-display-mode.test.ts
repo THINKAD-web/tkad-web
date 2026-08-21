@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import {
   resolveMapDisplayMode,
+  resolveMediaDetailMapNotice,
   resolveServiceRegionLabel,
 } from "./map-display-mode.ts";
 import {
@@ -50,7 +51,7 @@ test("resolveServiceRegionLabel — mobile coverage codes", () => {
     type: "mobile",
     coverageDistrictCodes: ["41111", "41113"],
   });
-  assert.match(label ?? "", /경기/);
+  assert.match(label ?? "", /수원/);
 });
 
 test("resolveRegionFilterSigunguCodes — gyeonggi main", () => {
@@ -87,4 +88,22 @@ test("mediaMatchesCoverageRegion — non-overlapping region", () => {
     ),
     false,
   );
+});
+
+const kumhoBus = {
+  id: "cmp3uwie0000204lbw1zmrp2l",
+  name: "금호 고속버스 외부 광고",
+  type: "mobile" as const,
+  lat: 36.414177,
+  lng: 127.640163,
+  region: "national",
+  regionMain: "national",
+};
+
+test("금호 고속버스 — service_region, 전국 안내, 핀 없음", () => {
+  assert.equal(resolveMapDisplayMode(kumhoBus), "service_region");
+  const notice = resolveMediaDetailMapNotice(kumhoBus, true);
+  assert.ok(notice);
+  assert.equal(notice!.mode, "service_region");
+  assert.equal(notice!.title, "전국 서비스 매체");
 });
