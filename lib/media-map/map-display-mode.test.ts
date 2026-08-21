@@ -98,6 +98,7 @@ const kumhoBus = {
   lng: 127.640163,
   region: "national",
   regionMain: "national",
+  coverageDistrictCodes: ["41111", "41113"],
 };
 
 test("금호 고속버스 — service_region, 전국 안내, 핀 없음", () => {
