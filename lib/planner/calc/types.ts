@@ -336,8 +336,38 @@ export const PLAN_WARNING_CODES = [
 
 export type PlanWarningCode = (typeof PLAN_WARNING_CODES)[number];
 
+/**
+ * 경고의 성격 — 고쳐야 할 대상이 누구인지로 나눈다.
+ *
+ *   `data` : 매체 레코드·요율 테이블이 부실해서 뜬다. 운영자가 고친다 (A-4·A-6).
+ *            보고서에서는 하단 데이터 출처 각주로 모은다.
+ *   `plan` : 데이터는 멀쩡하고 사용자가 그렇게 구성했다. 사용자가 조정한다.
+ *            보고서·위저드에서는 예산 카드 옆 실시간 힌트로 붙인다.
+ *
+ * 엔진 자체의 버그를 잡는 사후 검증은 이 배열이 아니라 `runValidation` 이
+ * 별도 타입으로 반환한다 — 개발자용 진단이 광고주 보고서에 섞이지 않게 한다.
+ */
+export type PlanWarningKind = "data" | "plan";
+
+/** 코드 → 성격. 엔진이 이 표에서 `kind` 를 채우므로 둘이 어긋날 수 없다. */
+export const PLAN_WARNING_KIND: Record<PlanWarningCode, PlanWarningKind> = {
+  PERIOD_NO_EXACT_RATE_KEY: "data",
+  PERIOD_MISSING_FLIGHT_DATES: "data",
+  REGION_UNMAPPED: "data",
+  REGION_SUB_UNMAPPED: "data",
+  MEDIA_TYPE_UNKNOWN: "data",
+  MEDIA_IMPRESSIONS_MISSING: "data",
+  MEDIA_PRICE_MISSING: "data",
+  IMPRESSIONS_BASIS_CONFLICT: "data",
+  REACH_NOT_MODELED: "data",
+  BUDGET_OVER: "plan",
+  BUDGET_UNDER_UTILIZED: "plan",
+};
+
 export type PlanWarning = {
   code: PlanWarningCode;
+  /** `PLAN_WARNING_KIND[code]` 와 항상 일치한다 */
+  kind: PlanWarningKind;
   severity: "info" | "warn" | "error";
   messageKo: string;
   messageEn: string;

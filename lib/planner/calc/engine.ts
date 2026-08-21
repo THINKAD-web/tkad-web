@@ -37,6 +37,7 @@ import {
   IMPRESSIONS_BASIS_CONFLICT_TOLERANCE,
   PLAN_DAYS_PER_MONTH,
   PLAN_ENGINE_VERSION,
+  PLAN_WARNING_KIND,
   type CalcPlanInput,
   type PlanBreakdown,
   type PlanBudgetUsage,
@@ -78,6 +79,14 @@ function cpmOf(won: number, impressions: number): number | null {
   return Math.round(won / (impressions / 1000));
 }
 
+/**
+ * 경고 생성 — `kind` 는 `PLAN_WARNING_KIND` 에서만 온다.
+ * 호출부가 직접 지정하지 않으므로 코드와 성격이 어긋날 수 없다.
+ */
+function warn(w: Omit<PlanWarning, "kind">): PlanWarning {
+  return { ...w, kind: PLAN_WARNING_KIND[w.code] };
+}
+
 // ---------------------------------------------------------------------------
 // 기간
 // ---------------------------------------------------------------------------
@@ -99,13 +108,13 @@ function normalizePeriod(
     const fromRange = inclusiveCampaignDaysFromIso(input.startDate, input.endDate);
     if (fromRange == null) {
       days = 1;
-      warnings.push({
+      warnings.push(warn({
         code: "PERIOD_MISSING_FLIGHT_DATES",
         severity: "error",
         messageKo: "캠페인 시작·종료일을 해석할 수 없어 1일로 계산했습니다.",
         messageEn: "Could not parse the flight dates; calculated as 1 day.",
         context: { startDate: input.startDate, endDate: input.endDate },
-      });
+      }));
     } else {
       days = fromRange;
       startDate = input.startDate;
@@ -118,24 +127,24 @@ function normalizePeriod(
   }
 
   if (!startDate || !endDate) {
-    warnings.push({
+    warnings.push(warn({
       code: "PERIOD_MISSING_FLIGHT_DATES",
       severity: "info",
       messageKo: "시작·종료일이 없어 보고서에 기간을 일수로만 표기합니다.",
       messageEn: "No flight dates supplied; the report shows day count only.",
       context: { days },
-    });
+    }));
   }
 
   const exactRateKey = partialRateLookupKeyFromDays(days);
   if (exactRateKey == null) {
-    warnings.push({
+    warnings.push(warn({
       code: "PERIOD_NO_EXACT_RATE_KEY",
       severity: "warn",
       messageKo: `캠페인 ${days}일은 운영 부분기간 요율 구간(1·3·5·7·15·30일)과 일치하지 않습니다. 금액이 선형 환산됐을 수 있습니다.`,
       messageEn: `A ${days}-day flight does not match an operational rate tier (1/3/5/7/15/30 days); pricing may have been prorated linearly.`,
       context: { days },
-    });
+    }));
   }
 
   return {
@@ -208,14 +217,14 @@ function resolveRegionRef(
       city: m.city,
     });
     if (zoneId == null) {
-      warnings.push({
+      warnings.push(warn({
         code: "REGION_UNMAPPED",
         severity: "warn",
         messageKo: `${m.name} — 권역을 특정하지 못했습니다.`,
         messageEn: `${m.name} — could not resolve a region zone.`,
         mediaId: m.id,
         context: { district: m.district ?? null, city: m.city ?? null },
-      });
+      }));
     }
   }
 
@@ -241,7 +250,7 @@ function resolveRegionRef(
     mainId = inferred.main;
     subId = inferred.sub;
     mapped = false;
-    warnings.push({
+    warnings.push(warn({
       code: "REGION_SUB_UNMAPPED",
       severity: "warn",
       messageKo: `${m.name} — 세부 구역이 저장돼 있지 않아 추정값을 사용했습니다. 보고서에 확정 지역으로 표기하지 마세요.`,
@@ -253,7 +262,7 @@ function resolveRegionRef(
         inferredMain: inferred.main,
         inferredSub: inferred.sub,
       },
-    });
+    }));
   }
 
   const subLabel = (loc: "ko" | "en"): string | null =>
@@ -291,46 +300,46 @@ function buildMediaItems(
       ? (rawType.toLowerCase() as PlanMediaType)
       : null;
     if (type == null) {
-      warnings.push({
+      warnings.push(warn({
         code: "MEDIA_TYPE_UNKNOWN",
         severity: "info",
         messageKo: `${m.name} — 매체 유형 "${rawType || "(비어 있음)"}" 이 카탈로그 3종(디지털·고정형·이동형)에 없습니다.`,
         messageEn: `${m.name} — media type "${rawType || "(empty)"}" is not one of digital/static/mobile.`,
         mediaId: m.id,
         context: { rawType: rawType || null },
-      });
+      }));
     }
 
     if (monthlyImpressions <= 0) {
-      warnings.push({
+      warnings.push(warn({
         code: "MEDIA_IMPRESSIONS_MISSING",
         severity: "warn",
         messageKo: `${m.name} — 유동인구·노출 데이터가 없어 노출 0 으로 집계됩니다.`,
         messageEn: `${m.name} — no traffic data; counted as zero impressions.`,
         mediaId: m.id,
-      });
+      }));
     }
 
     if (itemNet <= 0) {
-      warnings.push({
+      warnings.push(warn({
         code: "MEDIA_PRICE_MISSING",
         severity: "warn",
         messageKo: `${m.name} — 단가가 0 이라 예산 비중·CPM 이 왜곡될 수 있습니다.`,
         messageEn: `${m.name} — zero net price; budget share and CPM may be distorted.`,
         mediaId: m.id,
-      });
+      }));
     }
 
     const conflict = detectBasisConflict(m);
     if (conflict) {
-      warnings.push({
+      warnings.push(warn({
         code: "IMPRESSIONS_BASIS_CONFLICT",
         severity: "info",
         messageKo: `${m.name} — 저장된 노출(${conflict.stored.toLocaleString("ko-KR")})과 일 유동인구 환산값(${conflict.derived.toLocaleString("ko-KR")})이 다릅니다. 현재는 유동인구 기준을 사용합니다.`,
         messageEn: `${m.name} — stored impressions (${conflict.stored.toLocaleString("en-US")}) differ from the daily-footfall estimate (${conflict.derived.toLocaleString("en-US")}). The footfall basis is in use.`,
         mediaId: m.id,
         context: { stored: conflict.stored, derived: conflict.derived },
-      });
+      }));
     }
 
     return {
@@ -476,12 +485,12 @@ function computeReach(
   warnings: PlanWarning[],
 ): PlanReach {
   if (items.length === 0 || totalImpressions <= 0) {
-    warnings.push({
+    warnings.push(warn({
       code: "REACH_NOT_MODELED",
       severity: "info",
       messageKo: "노출 데이터가 없어 추정 도달을 산출하지 못했습니다.",
       messageEn: "No impression data; reach could not be modeled.",
-    });
+    }));
     return {
       status: "estimating",
       value: null,
@@ -509,12 +518,12 @@ function computeReach(
   reach = round(reach);
 
   if (reach <= 0) {
-    warnings.push({
+    warnings.push(warn({
       code: "REACH_NOT_MODELED",
       severity: "info",
       messageKo: "추정 도달이 0 으로 계산되어 표시하지 않습니다.",
       messageEn: "Modeled reach came out as zero; not displayed.",
-    });
+    }));
     return {
       status: "estimating",
       value: null,
@@ -562,21 +571,21 @@ function computeBudgetUsage(
         : "fit";
 
   if (status === "over") {
-    warnings.push({
+    warnings.push(warn({
       code: "BUDGET_OVER",
       severity: "warn",
       messageKo: `매체 순액이 예산의 ${usagePct}% 입니다.`,
       messageEn: `Media net is ${usagePct}% of the budget.`,
       context: { budgetWon: budget, usedWon, usagePct },
-    });
+    }));
   } else if (status === "under") {
-    warnings.push({
+    warnings.push(warn({
       code: "BUDGET_UNDER_UTILIZED",
       severity: "info",
       messageKo: `예산 소진율이 ${usagePct}% 입니다. 매체를 더 담을 수 있습니다.`,
       messageEn: `Budget utilization is ${usagePct}%; there is room for more media.`,
       context: { budgetWon: budget, usedWon, usagePct },
-    });
+    }));
   }
 
   return {
