@@ -373,7 +373,7 @@ export function MediaDetailLocationPanel({
       </div>
 
       {useLeafletMap || !showMapPins ? null : (
-        <RoadviewCard>
+        <RoadviewCard
           lat={mapLat}
           lng={mapLng}
           mediaName={spotName}
