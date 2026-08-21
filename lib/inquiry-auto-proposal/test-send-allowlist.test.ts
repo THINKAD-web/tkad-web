@@ -17,6 +17,12 @@ test("customer domains are rejected", () => {
   if (!d.ok) assert.equal(d.error, "not_test_allowlist");
 });
 
+test("customer To doris@yidu.com is rejected by allowlist", () => {
+  const d = assertInquiryAutoProposalTestRecipient("doris@yidu.com");
+  assert.equal(d.ok, false);
+  if (!d.ok) assert.equal(d.error, "not_test_allowlist");
+});
+
 test("invalid email is rejected", () => {
   const d = assertInquiryAutoProposalTestRecipient("not-an-email");
   assert.equal(d.ok, false);
