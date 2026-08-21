@@ -46,6 +46,39 @@ export type PlanPeriodInput =
   | { kind: "days"; days: number }
   | { kind: "months"; months: number };
 
+/**
+ * 월노출을 어느 DB 필드에서 해소했는지 — 값이 아니라 **출처** 를 기록한다.
+ *
+ * `Media.impressions` 와 `Media.dailyFootfall` 은 각각 독립 nullable 컬럼이고,
+ * 둘 다 자동 계산·admin 잠금 필드다. `impressions = dailyFootfall × 30` 을
+ * 강제하는 제약이 스키마에도 저장 경로에도 없다.
+ * 그래서 코드베이스에 우선순위가 다른 해소 함수가 3개 공존한다.
+ *
+ *   1. `resolveMonthlyImpressions`  (media-metrics.ts:33 — 목록·카드 SSOT)
+ *      impressions → monthlyFootTraffic → daily×30
+ *   2. `baseMonthlyImpressions`     (media-quantity.ts:289 — 견적·플래너)
+ *      monthlyFootTraffic → daily×30   ※ impressions 를 아예 보지 않음
+ *   3. `resolveDailyTraffic`        (document-media-detail.ts:96 — PDF 카드)
+ *      dailyFootTraffic → impressions/30
+ *
+ * 어느 것을 정본으로 삼을지는 CPM·금액을 바꾸므로 A-1 이 단독으로 정하지 않는다
+ * (media-quantity.ts:287 「금전 민감 — 임의 변경 금지」).
+ * A-1 은 현행 플래너 기준(2번)을 유지하면서 출처를 드러내고,
+ * 값이 서로 어긋나면 `IMPRESSIONS_BASIS_CONFLICT` 경고를 남긴다.
+ */
+export type PlanImpressionsBasis =
+  /** `Media.impressions` 직접 사용 */
+  | "impressions"
+  /** `monthlyFootTraffic` 직접 사용 */
+  | "monthlyFootTraffic"
+  /** `dailyFootfall × 30` 환산 */
+  | "dailyDerived"
+  /** 셋 다 없음 — 0 으로 집계 */
+  | "none";
+
+/** `impressions` 와 `dailyFootfall × 30` 이 이 비율을 넘게 어긋나면 경고 */
+export const IMPRESSIONS_BASIS_CONFLICT_TOLERANCE = 0.05;
+
 export type PlanMediaInput = {
   media: MediaItem;
   /** 수량 (모빌리티 대수·네트워크 유닛). 미지정 = 매체 기본값 */
@@ -230,10 +263,22 @@ export type PlanMediaItem = {
   browseCategoryKey: string;
   region: PlanRegionRef;
   units: number;
-  /** 30일 환산 노출 (수량 반영) — 매체 노출의 SSOT */
+  /**
+   * 30일 환산 노출 (수량 반영) — 매체 노출의 **해소된 기준값**.
+   * 원본 DB 필드가 아니라 `impressionsBasis` 순서로 해소한 결과다.
+   * daily·campaign 은 모두 이 값에서 파생시켜 세 값의 비율을 고정한다.
+   */
   monthlyImpressions: number;
+  /** monthlyImpressions 를 어느 필드에서 해소했는지 */
+  impressionsBasis: PlanImpressionsBasis;
   /** = monthlyImpressions / 30 */
   dailyImpressions: number;
+  /**
+   * `dailyFootfall` 원본값. `dailyImpressions` 와 다를 수 있다.
+   * 현재 PDF 매체 카드("일일 노출 165,000회")가 쓰는 값이라 표시 호환용으로 보존한다.
+   * **비중·정렬·CPM 계산에 쓰지 말 것** — 순서 역전의 원인이었다.
+   */
+  rawDailyFootTraffic: number | null;
   /** = dailyImpressions × period.days */
   campaignImpressions: number;
   /** 캠페인 기간 순액(원) — 입력값 그대로 (엔진 미계산) */
@@ -272,8 +317,13 @@ export const PLAN_WARNING_CODES = [
   "REGION_SUB_UNMAPPED",
   /** `Media.type` 이 digital·static·mobile 중 어느 것도 아님 */
   "MEDIA_TYPE_UNKNOWN",
-  /** dailyFootTraffic·monthlyFootTraffic 모두 없음 — 노출 0 으로 집계됨 */
+  /** impressions·monthlyFootTraffic·dailyFootTraffic 모두 없음 — 노출 0 으로 집계됨 */
   "MEDIA_IMPRESSIONS_MISSING",
+  /**
+   * `Media.impressions` 와 `dailyFootfall × 30` 이 허용 오차를 넘게 어긋남.
+   * 어느 쪽을 정본으로 볼지에 따라 CPM·비중이 달라진다 — A-4 데이터 정합 대상.
+   */
+  "IMPRESSIONS_BASIS_CONFLICT",
   /** itemNet 이 0 이하 — 예산 비중·CPM 왜곡 */
   "MEDIA_PRICE_MISSING",
   /** 매체 순액이 입력 예산을 초과 */
