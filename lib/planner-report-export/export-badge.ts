@@ -2,9 +2,9 @@
  * PR-8-2 — export KPI 배지 (화면 DataQualityBadge / AllocationSourceBadge 와 1:1).
  */
 
-import { basisToBadge } from "@/components/planner/brief/data-quality-badge";
 import type { DigitalAllocationSource } from "@/components/planner/brief/allocation-source-badge";
 import type { MetricBasis } from "@/lib/metrics/defaults";
+import { basisToBadge } from "@/lib/planner/brief/basis-to-badge";
 
 export type PlannerExportBadgeKind =
   | "measured"
