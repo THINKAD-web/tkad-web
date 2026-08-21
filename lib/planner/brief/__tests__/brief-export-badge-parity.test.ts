@@ -1,6 +1,9 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import test from "node:test";
 import type { MediaItem } from "@/lib/media-data";
+import { basisToBadge } from "@/lib/planner/brief/basis-to-badge";
 import type { CampaignPlanSnapshot } from "@/lib/campaign-plan-schema";
 import { buildCampaignPlanSnapshot } from "@/lib/planner/brief/build-plan-snapshot";
 import { buildBriefReportPayload } from "@/lib/planner/brief/brief-report-adapter";
@@ -119,4 +122,16 @@ test("S-4: 모든 KPI에 badge 필드 존재", () => {
   for (const k of payload.kpis) {
     assert.ok(k.badge, `missing badge on ${k.label}`);
   }
+});
+
+test("basisToBadge stays in lib so server PDF/dry-run can call it", () => {
+  assert.equal(basisToBadge("measured"), "measured");
+  assert.equal(basisToBadge("derived"), "estimated");
+  assert.equal(basisToBadge(null), "pending");
+  const src = readFileSync(
+    resolve("lib/planner-report-export/export-badge.ts"),
+    "utf8",
+  );
+  assert.equal(src.includes("data-quality-badge"), false);
+  assert.equal(src.includes("@/lib/planner/brief/basis-to-badge"), true);
 });

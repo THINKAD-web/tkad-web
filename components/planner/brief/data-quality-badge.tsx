@@ -15,14 +15,12 @@
  */
 
 import type { MetricBasis } from "@/lib/metrics/defaults";
+import {
+  basisToBadge,
+  type BadgeKind,
+} from "@/lib/planner/brief/basis-to-badge";
 
-export type BadgeKind = "measured" | "estimated" | "pending";
-
-export function basisToBadge(basis: MetricBasis | null | undefined): BadgeKind {
-  if (basis == null) return "pending";
-  if (basis === "measured") return "measured";
-  return "estimated";
-}
+export { basisToBadge, type BadgeKind };
 
 const LABELS: Record<BadgeKind, { ko: string; en: string }> = {
   measured: { ko: "실측", en: "Measured" },
