@@ -43,7 +43,6 @@ import {
   computePlannerMetrics,
   computeBudgetBlurbParts,
   estimateCpmByCategory,
-  portfolioCpmByCategory,
   reachSplitForGoal,
   comparePlansByDuration,
   resolvePlannerPortfolio,
