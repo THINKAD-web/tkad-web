@@ -16,14 +16,6 @@ type Matched = {
   cpmWon: number | null;
 };
 
-type Option = {
-  optionId: string;
-  kind: "single" | "combo";
-  names: string[];
-  monthlyWon: number;
-  sellingUnitFollowUp: boolean;
-};
-
 type DryRun = {
   parsed: {
     budgetWon: number;
@@ -36,7 +28,20 @@ type DryRun = {
   matched: Matched[];
   eligibleCount: number;
   excludedCount: number;
-  options: Option[];
+  mixUnits: Record<string, number>;
+  brief: {
+    budgetInputWon: number;
+    budgetMode: string;
+    flightStart: string | null;
+    flightEnd: string | null;
+  };
+  snapshot: {
+    totalCostWon: number;
+    totalImpressions: number;
+    mixCpmWon: number | null;
+    netReach: number;
+  } | null;
+  thumbs: { id?: string; name: string; thumbUrl: string | null }[];
 };
 
 function won(n: number) {
@@ -50,7 +55,6 @@ export function AdminInquiryAutoProposalClient() {
   const [err, setErr] = useState<string | null>(null);
   const [msg, setMsg] = useState<string | null>(null);
   const [result, setResult] = useState<DryRun | null>(null);
-  const [optionId, setOptionId] = useState<string>("");
 
   async function runDry() {
     setBusy("dry");
@@ -65,9 +69,9 @@ export function AdminInquiryAutoProposalClient() {
       const data = (await res.json()) as DryRun & { error?: string };
       if (!res.ok) throw new Error(data.error ?? `http_${res.status}`);
       setResult(data);
-      setOptionId(data.options[0]?.optionId ?? "");
+      const thumbOk = (data.thumbs ?? []).filter((t) => t.thumbUrl).length;
       setMsg(
-        `매칭 ${data.matched.length} · 통과 ${data.eligibleCount} · 제외 ${data.excludedCount} · 옵션 ${data.options.length}`,
+        `매칭 ${data.matched.length} · 통과 ${data.eligibleCount} · 제외 ${data.excludedCount} · 썸네일 ${thumbOk}/${data.thumbs?.length ?? 0}`,
       );
     } catch (e) {
       setErr(e instanceof Error ? e.message : "dry_run_failed");
@@ -77,8 +81,8 @@ export function AdminInquiryAutoProposalClient() {
   }
 
   async function sendTest() {
-    if (!optionId) {
-      setErr("옵션을 선택하세요");
+    if (!result || result.eligibleCount === 0) {
+      setErr("통과 매체가 없습니다");
       return;
     }
     setBusy("send");
@@ -88,7 +92,7 @@ export function AdminInquiryAutoProposalClient() {
       const res = await fetch("/api/admin/inquiry-auto-proposal/send", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, optionId, to }),
+        body: JSON.stringify({ text, to }),
       });
       const data = (await res.json()) as {
         error?: string;
@@ -115,8 +119,8 @@ export function AdminInquiryAutoProposalClient() {
         </p>
         <h1 className="text-xl font-bold tracking-tight">문의 자동 매칭 dry-run</h1>
         <p className="text-[11px] tracking-tight text-muted-foreground">
-          {`// `}인바운드 메일은 아직 없음. 본문 붙여넣기 → 필터 SSOT(flagged · class
-          CPM_BOUNDS) → 제안서. 발송은 @tkad.co.kr 등 테스트 주소만.
+          {`// `}인바운드 메일은 아직 없음. 본문 → 매체 id → Step 3와 동일 스냅샷.
+          발송은 @tkad.co.kr 등 테스트 주소만.
         </p>
       </header>
 
@@ -141,19 +145,21 @@ export function AdminInquiryAutoProposalClient() {
         </button>
       </section>
 
-      {err ? (
-        <p className="text-sm text-destructive">{err}</p>
-      ) : null}
-      {msg ? (
-        <p className="text-sm text-foreground">{msg}</p>
-      ) : null}
+      {err ? <p className="text-sm text-destructive">{err}</p> : null}
+      {msg ? <p className="text-sm text-foreground">{msg}</p> : null}
 
       {result ? (
         <>
           <section className="grid grid-cols-2 gap-3 xl:grid-cols-4">
             {[
               { label: "예산", value: won(result.parsed.budgetWon) },
-              { label: "기간", value: `${result.parsed.months}개월` },
+              {
+                label: "기간",
+                value:
+                  result.brief.flightStart && result.brief.flightEnd
+                    ? `${result.brief.flightStart} ~ ${result.brief.flightEnd}`
+                    : `${result.parsed.months}개월`,
+              },
               { label: "통과", value: `${result.eligibleCount}` },
               { label: "제외", value: `${result.excludedCount}` },
             ].map((s) => (
@@ -171,9 +177,35 @@ export function AdminInquiryAutoProposalClient() {
             </p>
           ) : null}
 
+          {result.snapshot ? (
+            <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+              {[
+                { label: "Step3 총비용", value: won(result.snapshot.totalCostWon) },
+                {
+                  label: "Step3 총노출",
+                  value: result.snapshot.totalImpressions.toLocaleString("ko-KR"),
+                },
+                {
+                  label: "Step3 믹스 CPM",
+                  value:
+                    result.snapshot.mixCpmWon != null
+                      ? won(result.snapshot.mixCpmWon)
+                      : "—",
+                },
+              ].map((s) => (
+                <div key={s.label} className="border-2 border-border bg-card p-4">
+                  <p className="font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                    {s.label}
+                  </p>
+                  <p className="mt-1 text-lg font-bold tabular-nums">{s.value}</p>
+                </div>
+              ))}
+            </section>
+          ) : null}
+
           <section className="space-y-2">
             <h2 className="font-display text-xs uppercase tracking-[0.18em] text-emerald-800">
-              [ 통과 후보 ]
+              [ 통과 후보 · mixUnits=1 ]
             </h2>
             <ul className="space-y-1 text-sm">
               {eligible.map((m) => (
@@ -181,7 +213,9 @@ export function AdminInquiryAutoProposalClient() {
                   <span className="font-medium">{m.name}</span>
                   <span className="ml-2 tabular-nums text-muted-foreground">
                     {won(m.monthlyWon)}
-                    {m.cpmWon != null ? ` · CPM ₩${Math.round(m.cpmWon).toLocaleString("ko-KR")}` : ""}
+                    {m.cpmWon != null
+                      ? ` · CPM ₩${Math.round(m.cpmWon).toLocaleString("ko-KR")}`
+                      : ""}
                     {m.sellingUnitUndeclared ? " · 확인 후 회신" : ""}
                   </span>
                 </li>
@@ -211,38 +245,28 @@ export function AdminInquiryAutoProposalClient() {
             </ul>
           </section>
 
+          {result.thumbs.length > 0 ? (
+            <section className="space-y-2">
+              <h2 className="font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
+                [ PDF 썸네일 소스 ]
+              </h2>
+              <ul className="space-y-1 text-sm">
+                {result.thumbs.map((t) => (
+                  <li key={t.id ?? t.name} className="border border-border px-3 py-2">
+                    <span className="font-medium">{t.name}</span>
+                    <span className="ml-2 break-all text-muted-foreground">
+                      {t.thumbUrl ?? "없음"}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ) : null}
+
           <section className="space-y-3 border-2 border-border bg-card p-4">
             <h2 className="font-display text-xs uppercase tracking-[0.18em] text-muted-foreground">
-              [ 옵션 · 테스트 발송 ]
+              [ Step 3 제안서 · 테스트 발송 ]
             </h2>
-            <div className="space-y-2">
-              {result.options.map((o) => (
-                <label
-                  key={o.optionId}
-                  className="flex cursor-pointer items-start gap-2 border border-border px-3 py-2 text-sm"
-                >
-                  <input
-                    type="radio"
-                    name="option"
-                    checked={optionId === o.optionId}
-                    onChange={() => setOptionId(o.optionId)}
-                    className="mt-1"
-                  />
-                  <span>
-                    <span className="font-medium">{o.kind === "single" ? "단일" : "조합"}</span>
-                    {" · "}
-                    {o.names.join(" + ")}
-                    <span className="ml-2 tabular-nums text-muted-foreground">
-                      {won(o.monthlyWon)}
-                      {o.sellingUnitFollowUp ? " · 확인 후 회신" : ""}
-                    </span>
-                  </span>
-                </label>
-              ))}
-              {result.options.length === 0 ? (
-                <p className="text-sm text-muted-foreground">예산 내 옵션 없음</p>
-              ) : null}
-            </div>
             <div className="flex flex-col gap-2 sm:flex-row">
               <input
                 type="email"
@@ -254,7 +278,7 @@ export function AdminInquiryAutoProposalClient() {
               <button
                 type="button"
                 onClick={() => void sendTest()}
-                disabled={busy !== null || !optionId}
+                disabled={busy !== null || !result.snapshot}
                 className="inline-flex h-11 items-center justify-center gap-2 border-2 border-border px-4 font-display text-xs font-medium uppercase tracking-[0.18em] disabled:opacity-50"
               >
                 {busy === "send" ? (
