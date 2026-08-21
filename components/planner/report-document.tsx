@@ -238,7 +238,7 @@ export const PlannerReportDocument = forwardRef<
   const visibleSections = filterExportSections(p.sections, vis);
   const summary: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
-    [isKo ? "총 예산" : "Total budget", fmtBudget(p.budgetMan, isKo)],
+    [isKo ? "총 예산" : "Total budget", p.budgetHonesty?.coverValue ?? fmtBudget(p.budgetMan, isKo)],
     [isKo ? "집행 기간" : "Flight", p.periodDisplay || "—"],
     [isKo ? "지역" : "Regions", p.regionsText || "—"],
     [isKo ? "매체 유형" : "Media types", p.categoriesText || "—"],
@@ -334,6 +334,15 @@ export const PlannerReportDocument = forwardRef<
               </div>
             ))}
           </div>
+        ) : null}
+
+        {p.budgetHonesty?.overBudgetBanner ? (
+          <p
+            className="rounded-xl border border-destructive/40 bg-destructive/10 px-3.5 py-2.5 text-[12px] font-medium text-destructive"
+            data-testid="report-over-budget-banner"
+          >
+            {p.budgetHonesty.overBudgetBanner}
+          </p>
         ) : null}
 
         {/* 성과 요약 차트 */}

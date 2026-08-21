@@ -9,6 +9,7 @@
 
 import type { PlannerPerformanceGuide } from "@/lib/planner-report-performance-guide";
 import type { PlannerExportBadgeKind } from "@/lib/planner-report-export/export-badge";
+import type { PlannerExportBudgetHonesty } from "@/lib/planner/brief/over-budget-copy";
 
 export type PlannerExportKpiStatus = "value" | "pending";
 
@@ -164,6 +165,10 @@ export type PlannerReportExportPayload = {
   sections?: PlannerExportSection[];
   /** 데이터 기반 추천 근거 (AI narrative 와 별도) */
   recommendRationale?: PlannerExportRecommendRationale;
+  /** 문의 자동 매칭 경로 — 「직접 선택한」 문구 대신 사용 */
+  mixSource?: "inquiry_match";
+  /** 요청 예산 vs 이 구성 — 표지·KPI 배너·매체 카드 하단 */
+  budgetHonesty?: PlannerExportBudgetHonesty;
   /** O-1 digital gap (R-3) — 스냅샷 없이 ooh_digital 일 때 PDF·화면에 명시 */
   digitalOmittedNotice?: string;
   /** JP 매체 포함 시 ¥ 환산 각주 (합계·차트는 KRW 유지) */

@@ -62,6 +62,8 @@ const snapshot: CampaignPlanSnapshot = {
     totalImpressions: 240_000,
     mixCpmWon: 6667,
     totalCostWon: 1_600_000,
+    overBudgetWon: 0,
+    budgetUsedRate: 1_600_000 / 30_000_000,
     dataQuality: {
       totalCostWon: "measured",
       totalImpressions: "derived",

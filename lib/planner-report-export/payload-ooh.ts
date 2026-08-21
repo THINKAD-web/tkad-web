@@ -85,6 +85,8 @@ export type BuildOohPayloadArgs = {
   digitalOmittedNotice?: string;
   /** PR-8-2 — KPI별 배지 (미지정 시 impressions/cpm=estimated, reach/roi=pending) */
   kpiBadges?: Partial<Record<ExportKpiBadgeKey, PlannerExportBadgeKind>>;
+  mixSource?: "inquiry_match";
+  budgetHonesty?: import("@/lib/planner/brief/over-budget-copy").PlannerExportBudgetHonesty;
 };
 
 export function buildOohReportPayload(
@@ -348,6 +350,7 @@ export function buildOohReportPayload(
     months,
     isKo,
     isAutoPortfolio: a.isAutoPortfolio,
+    isInquiryMatched: a.mixSource === "inquiry_match",
   });
 
   const subdivisionReport = computeRegionSubdivisionReport(
@@ -418,6 +421,8 @@ export function buildOohReportPayload(
     portfolio: portfolioRows,
     portfolioGroups,
     recommendRationale,
+    mixSource: a.mixSource,
+    budgetHonesty: a.budgetHonesty,
     sections,
     digitalOmittedNotice: a.digitalOmittedNotice,
     currencyFootnote: portfolioHasJapanMedia(orderedPortfolio)

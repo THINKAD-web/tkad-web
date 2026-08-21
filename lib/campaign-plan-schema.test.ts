@@ -5,6 +5,7 @@ import {
   CAMPAIGN_PLAN_TTL_DAYS,
   defaultExpiresAt,
   isEngineVersionCurrent,
+  resolveStoredOverBudget,
   snapshotWithEngineVersion,
 } from "./campaign-plan-schema.ts";
 
@@ -40,6 +41,8 @@ const SAMPLE = {
     totalImpressions: 1_000_000,
     mixCpmWon: 45_000,
     totalCostWon: 45_000_000,
+    overBudgetWon: 15_000_000,
+    budgetUsedRate: 1.5,
     dataQuality: {
       totalCostWon: "measured",
       totalImpressions: "derived",
@@ -70,4 +73,19 @@ test("TTL 30일 = 기본 만료 시각", () => {
   const now = new Date("2026-09-01T00:00:00Z");
   const exp = defaultExpiresAt(now);
   assert.equal(exp.toISOString(), "2026-10-01T00:00:00.000Z");
+});
+
+test("resolveStoredOverBudget restores missing fields from totalCost − budget", () => {
+  const restored = resolveStoredOverBudget(
+    { totalCostWon: 69_000_000 },
+    30_000_000,
+  );
+  assert.equal(restored.overBudgetWon, 39_000_000);
+  assert.equal(restored.budgetUsedRate, 69_000_000 / 30_000_000);
+  const stored = resolveStoredOverBudget(
+    { totalCostWon: 69_000_000, overBudgetWon: 39_000_000, budgetUsedRate: 2.3 },
+    30_000_000,
+  );
+  assert.equal(stored.overBudgetWon, 39_000_000);
+  assert.equal(stored.budgetUsedRate, 2.3);
 });

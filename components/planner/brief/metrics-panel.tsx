@@ -10,6 +10,7 @@
 import type { MixMetrics } from "@/lib/planner/brief/mix-metrics";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import type { MetricBasis } from "@/lib/metrics/defaults";
+import { overBudgetBannerLine } from "@/lib/planner/brief/over-budget-copy";
 
 function Row({
   label,
@@ -135,9 +136,7 @@ export function MetricsPanel({
 
       {metrics.isOverBudget ? (
         <p className="mt-2 rounded-lg border border-destructive/40 bg-destructive/10 p-2 text-[11px] font-medium text-destructive">
-          {isKo
-            ? `예산 초과 ${won(metrics.overBudgetWon)} — 수량을 줄이거나 예산을 조정해 주세요.`
-            : `Over budget by ${won(metrics.overBudgetWon)}.`}
+          {overBudgetBannerLine(metrics.overBudgetWon, isKo)}
         </p>
       ) : null}
 

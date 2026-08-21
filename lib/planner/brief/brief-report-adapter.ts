@@ -11,6 +11,7 @@ import type {
   CampaignPlanSnapshot,
   CampaignPlanStoredMetrics,
 } from "@/lib/campaign-plan-schema";
+import { resolveStoredOverBudget } from "@/lib/campaign-plan-schema";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
 import {
   budgetSplitByCategory,
@@ -47,6 +48,7 @@ import {
 } from "@/lib/planner-report-export/export-badge";
 import { buildOohReportPayload } from "@/lib/planner-report-export/payload-ooh";
 import type { PlannerReportExportPayload } from "@/lib/planner-report-export/types";
+import { buildExportBudgetHonesty } from "@/lib/planner/brief/over-budget-copy";
 
 const GOAL_TITLES_KO: Record<PlannerCampaignGoal, string> = {
   brand: "브랜드 인지도",
@@ -87,6 +89,8 @@ export type BuildBriefReportPayloadArgs = {
   /** Phase 2/3: digital 스냅샷 존재 시 true → notice 생략 */
   hasDigitalSnapshot?: boolean;
   generatedAt?: string;
+  /** 문의 자동 매칭 → 「문의 내용으로 자동 매칭된」 */
+  mixSource?: "inquiry_match";
 };
 
 function isBriefGoal(v: string | undefined): v is BriefGoal {
@@ -311,6 +315,18 @@ export function buildBriefReportPayload(
 
   const blendedCpmKrw = plan.metrics.mixCpmWon;
 
+  const { overBudgetWon, budgetUsedRate } = resolveStoredOverBudget(
+    plan.metrics,
+    plan.brief.budgetWon,
+  );
+  const budgetHonesty = buildExportBudgetHonesty({
+    requestWon: plan.brief.budgetWon,
+    mixWon: plan.metrics.totalCostWon,
+    overBudgetWon,
+    budgetUsedRate,
+    isKo,
+  });
+
   const days = flightDays(brief);
   const periodDisplay =
     brief.flightStart && brief.flightEnd
@@ -354,6 +370,8 @@ export function buildBriefReportPayload(
     campaignMediaPriceOptionIndex: priceOptionIndex,
     digitalOmittedNotice,
     kpiBadges: buildBriefKpiBadges(plan),
+    mixSource: args.mixSource,
+    budgetHonesty,
   });
 }
 

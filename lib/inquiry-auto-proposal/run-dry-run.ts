@@ -149,6 +149,7 @@ export async function buildInquiryAutoProposal(
       catalog: mixCatalog,
       isKo: true,
       generatedAt: args.generatedAt,
+      mixSource: "inquiry_match",
     }),
     inquiryFollowUpLines(dryRun),
   );

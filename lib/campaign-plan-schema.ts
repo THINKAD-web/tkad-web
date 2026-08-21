@@ -69,7 +69,34 @@ export type CampaignPlanMetrics = {
   mixCpmWon: number | null;
   /** 총액 (원) */
   totalCostWon: number;
+  /** 총액 − 요청 예산 (초과 없으면 0) — calcMixMetrics.overBudgetWon */
+  overBudgetWon: number;
+  /** 총액 / 요청 예산 (0~1+, 초과 시 1 초과) — calcMixMetrics.budgetUsedRate */
+  budgetUsedRate: number;
 };
+
+/** 구 스냅샷에 overBudgetWon 이 없을 때 totalCost − budget 으로 복원 */
+export function resolveStoredOverBudget(
+  metrics: Pick<CampaignPlanMetrics, "totalCostWon"> &
+    Partial<Pick<CampaignPlanMetrics, "overBudgetWon" | "budgetUsedRate">>,
+  budgetWon: number,
+): { overBudgetWon: number; budgetUsedRate: number } {
+  const mixWon = metrics.totalCostWon;
+  const request = Math.max(0, budgetWon);
+  const overBudgetWon =
+    typeof metrics.overBudgetWon === "number" &&
+    Number.isFinite(metrics.overBudgetWon)
+      ? Math.max(0, metrics.overBudgetWon)
+      : Math.max(0, mixWon - request);
+  const budgetUsedRate =
+    typeof metrics.budgetUsedRate === "number" &&
+    Number.isFinite(metrics.budgetUsedRate)
+      ? metrics.budgetUsedRate
+      : request > 0
+        ? mixWon / request
+        : 0;
+  return { overBudgetWon, budgetUsedRate };
+}
 
 /** 저장 시 각 지표의 basis — 재계산·감사 추적용 (PR-6c) */
 export type CampaignPlanDataQuality = {
