@@ -436,9 +436,10 @@ export async function buildPlannerReportPdf(
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
     [
       isKo ? "총 예산" : "Total budget",
-      isKo
-        ? `${p.budgetMan.toLocaleString()}만원`
-        : `${p.budgetMan.toLocaleString()}M KRW`,
+      p.budgetHonesty?.coverValue ??
+        (isKo
+          ? `${p.budgetMan.toLocaleString()}만원`
+          : `${p.budgetMan.toLocaleString()}M KRW`),
     ],
     [isKo ? "집행 기간" : "Flight", p.periodDisplay || "—"],
     [isKo ? "지역" : "Regions", p.regionsText || "—"],
@@ -448,10 +449,12 @@ export async function buildPlannerReportPdf(
   ];
   const colW = contentW / 2;
   const rowH = PDF_LAYOUT.summaryRowHmm;
+  const budgetRowH = p.budgetHonesty ? 18 : rowH;
   summary.forEach(([label, value], i) => {
     const col = i % 2;
     const x = M + col * colW;
-    if (col === 0) ensure(rowH);
+    const thisRowH = i <= 1 ? budgetRowH : rowH;
+    if (col === 0) ensure(thisRowH);
     doc.setFont(FONT, "normal");
     doc.setFontSize(PDF_LAYOUT.summaryLabelPt);
     setText(GRAY_500);
@@ -459,8 +462,9 @@ export async function buildPlannerReportPdf(
     setText(INK);
     doc.setFontSize(PDF_LAYOUT.summaryValuePt);
     const lines = doc.splitTextToSize(value, colW - 4) as string[];
-    doc.text(lines.slice(0, 2), x, y + 9);
-    if (col === 1 || i === summary.length - 1) y += rowH;
+    const maxLines = i === 1 && p.budgetHonesty ? 3 : 2;
+    doc.text(lines.slice(0, maxLines), x, y + 9);
+    if (col === 1 || i === summary.length - 1) y += thisRowH;
   });
 
   y += 2;
@@ -502,6 +506,22 @@ export async function buildPlannerReportPdf(
       }
     });
     y += 26;
+
+    if (p.budgetHonesty?.overBudgetBanner) {
+      const banner = p.budgetHonesty.overBudgetBanner;
+      const bannerLines = doc.splitTextToSize(banner, contentW - 8) as string[];
+      const bannerH = Math.max(10, 6 + bannerLines.length * 4);
+      ensure(bannerH + 4);
+      setFill([254, 226, 226]);
+      setDraw([252, 165, 165]);
+      doc.setLineWidth(0.3);
+      doc.roundedRect(M, y, contentW, bannerH, R, R, "FD");
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText([185, 28, 28]);
+      doc.text(bannerLines, M + 3, y + 5);
+      y += bannerH + 6;
+    }
   }
 
   // ── 성과 요약 차트 ──
@@ -1166,6 +1186,16 @@ export async function buildPlannerReportPdf(
       }
     }
     y += 4;
+    if (p.portfolio.length > 0 && p.budgetHonesty?.mixVsBudgetFootnote) {
+      const note = p.budgetHonesty.mixVsBudgetFootnote;
+      const noteLines = doc.splitTextToSize(note, contentW) as string[];
+      ensure(noteLines.length * 4.5 + 4);
+      doc.setFont(FONT, "normal");
+      doc.setFontSize(8.5);
+      setText([185, 28, 28]);
+      doc.text(noteLines, M, y + 3);
+      y += noteLines.length * 4.5 + 4;
+    }
   }
 
   function drawMediaCardGrid(

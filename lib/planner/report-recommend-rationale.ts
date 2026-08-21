@@ -21,9 +21,17 @@ export function buildPlannerRecommendRationale(args: {
   months: number;
   isKo: boolean;
   isAutoPortfolio?: boolean;
+  isInquiryMatched?: boolean;
 }): PlannerRecommendRationale | undefined {
-  const { portfolio, portfolioRows, budgetMan, months, isKo, isAutoPortfolio } =
-    args;
+  const {
+    portfolio,
+    portfolioRows,
+    budgetMan,
+    months,
+    isKo,
+    isAutoPortfolio,
+    isInquiryMatched,
+  } = args;
   if (portfolio.length === 0) return undefined;
 
   const budget = computePlannerPortfolioBudgetStatus(
@@ -42,7 +50,13 @@ export function buildPlannerRecommendRationale(args: {
 
   const summaryLines: string[] = [];
 
-  if (isAutoPortfolio) {
+  if (isInquiryMatched) {
+    summaryLines.push(
+      isKo
+        ? `문의 내용으로 자동 매칭된 ${portfolio.length}개 매체로 구성된 플랜입니다.`
+        : `This plan comprises ${portfolio.length} media auto-matched from the inquiry.`,
+    );
+  } else if (isAutoPortfolio) {
     summaryLines.push(
       isKo
         ? `캠페인 조건(목표·지역·타깃)에 맞춰 매칭 점수 상위 후보 중 월 예산 상한(92%) 내에서 ${portfolio.length}개 매체를 자동 선별했습니다.`

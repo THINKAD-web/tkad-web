@@ -76,6 +76,8 @@ function stubBuild(): InquiryAutoProposalBuild {
         totalImpressions: 0,
         mixCpmWon: null,
         totalCostWon: 0,
+        overBudgetWon: 0,
+        budgetUsedRate: 0,
         dataQuality: {
           totalCostWon: "measured",
           totalImpressions: "derived",

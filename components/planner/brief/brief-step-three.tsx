@@ -13,7 +13,10 @@ import { useSearchParams } from "next/navigation";
 import { FileDown, Loader2, Lock } from "lucide-react";
 import type { MediaItem } from "@/lib/media-data";
 import type { SavedCampaignPlan } from "@/lib/campaign-plan-store";
-import type { CampaignPlanStoredMetrics } from "@/lib/campaign-plan-schema";
+import {
+  resolveStoredOverBudget,
+  type CampaignPlanStoredMetrics,
+} from "@/lib/campaign-plan-schema";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
@@ -50,7 +53,10 @@ function storedMetricsToMixMetrics(
   budgetWon: number,
 ): MixMetrics {
   const totalCostWon = stored.totalCostWon;
-  const overBudgetWon = Math.max(0, totalCostWon - budgetWon);
+  const { overBudgetWon, budgetUsedRate } = resolveStoredOverBudget(
+    stored,
+    budgetWon,
+  );
   return {
     lines: [],
     totalCostWon: {
@@ -70,7 +76,7 @@ function storedMetricsToMixMetrics(
     frequency: null,
     grp: null,
     budgetWon,
-    budgetUsedRate: budgetWon > 0 ? totalCostWon / budgetWon : 0,
+    budgetUsedRate,
     overBudgetWon,
     isOverBudget: overBudgetWon > 0,
   };

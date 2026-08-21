@@ -358,7 +358,7 @@ export async function buildPlannerReportPptx(
   header(s2, isKo ? "캠페인 개요" : "Campaign overview");
   const summaryRows: Array<[string, string]> = [
     [isKo ? "캠페인 목표" : "Goal", p.goalTitle || "—"],
-    [isKo ? "총 예산" : "Total budget", isKo ? `${p.budgetMan.toLocaleString()}만원` : `${p.budgetMan.toLocaleString()}M KRW`],
+    [isKo ? "총 예산" : "Total budget", p.budgetHonesty?.coverValue ?? (isKo ? `${p.budgetMan.toLocaleString()}만원` : `${p.budgetMan.toLocaleString()}M KRW`)],
     [isKo ? "집행 기간" : "Flight", p.periodDisplay || "—"],
     [isKo ? "지역" : "Regions", p.regionsText || "—"],
     [isKo ? "매체 유형" : "Media types", p.categoriesText || "—"],
@@ -404,6 +404,28 @@ export async function buildPlannerReportPptx(
       color: badgeColors.text.replace("#", ""),
     });
   });
+
+  if (p.budgetHonesty?.overBudgetBanner) {
+    s2.addShape(pptx.ShapeType.roundRect, {
+      x: 0.6,
+      y: 6.55,
+      w: 12.1,
+      h: 0.55,
+      fill: { color: "FEE2E2" },
+      rectRadius: 0.06,
+      line: { color: "FECACA", width: 0.5 },
+    });
+    s2.addText(p.budgetHonesty.overBudgetBanner, {
+      x: 0.75,
+      y: 6.62,
+      w: 11.8,
+      h: 0.4,
+      fontFace: face,
+      fontSize: 11,
+      bold: true,
+      color: "B91C1C",
+    });
+  }
 
   // ── 2.5 성과 요약 (도형 차트 — Keynote·Google Slides 호환) ──
   const ch = p.charts;
@@ -1225,6 +1247,23 @@ export async function buildPlannerReportPptx(
       }
       if (rendered >= 12) break;
     }
+  }
+
+  if (p.budgetHonesty?.mixVsBudgetFootnote && lineupSlideIdx > 0) {
+    const slides = (
+      pptx as unknown as { slides?: { addText: (t: string, o: object) => void }[] }
+    ).slides;
+    const lastLineup = slides?.[slides.length - 1];
+    lastLineup?.addText(p.budgetHonesty.mixVsBudgetFootnote, {
+      x: 0.6,
+      y: 7.18,
+      w: 12.1,
+      h: 0.28,
+      fontFace: face,
+      fontSize: 11,
+      bold: true,
+      color: "B91C1C",
+    });
   }
 
   // ── 4. 디지털 배분 (통합) ──

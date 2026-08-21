@@ -91,6 +91,8 @@ export function buildCampaignPlanSnapshot(params: {
     totalImpressions: metrics.totalImpressions.value,
     mixCpmWon: metrics.mixCpmWon.value,
     totalCostWon: metrics.totalCostWon.value,
+    overBudgetWon: metrics.overBudgetWon,
+    budgetUsedRate: metrics.budgetUsedRate,
     dataQuality: {
       totalCostWon: metrics.totalCostWon.basis,
       totalImpressions: metrics.totalImpressions.basis,

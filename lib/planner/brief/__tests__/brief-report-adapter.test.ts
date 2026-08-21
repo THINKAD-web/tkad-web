@@ -64,6 +64,8 @@ const snapshot: CampaignPlanSnapshot = {
     totalImpressions: 240_000,
     mixCpmWon: 6667,
     totalCostWon: 1_600_000,
+    overBudgetWon: 0,
+    budgetUsedRate: 1_600_000 / 30_000_000,
     dataQuality: {
       totalCostWon: "measured",
       totalImpressions: "derived",
@@ -121,4 +123,55 @@ test("snapshotMetricsToExportMetrics: impressions only", () => {
   assert.equal(m.estimatedTotalImpressions, 240_000);
   assert.equal(m.estimatedMonthlyImpressions, 240_000);
   assert.ok(!("roiExpected" in m));
+});
+
+test("brief-report-adapter: over-budget honesty uses stored mix metrics + inquiry copy", () => {
+  const over = {
+    ...snapshot,
+    metrics: {
+      ...snapshot.metrics,
+      totalCostWon: 69_000_000,
+      overBudgetWon: 39_000_000,
+      budgetUsedRate: 69_000_000 / 30_000_000,
+    },
+  };
+  const payload = buildBriefReportPayload({
+    plan: over,
+    catalog: [catalogMedia],
+    isKo: true,
+    mixSource: "inquiry_match",
+  });
+  assert.equal(
+    payload.budgetHonesty?.coverValue,
+    "요청 예산 ₩30,000,000 / 이 구성 ₩69,000,000 (230%)",
+  );
+  assert.equal(
+    payload.budgetHonesty?.overBudgetBanner,
+    "예산 초과 ₩39,000,000 — 수량을 줄이거나 예산을 조정해 주세요.",
+  );
+  assert.equal(
+    payload.budgetHonesty?.mixVsBudgetFootnote,
+    "요청 예산 대비 230% 구성입니다",
+  );
+  assert.equal(payload.mixSource, "inquiry_match");
+  assert.ok(
+    payload.recommendRationale?.summaryLines[0]?.includes(
+      "문의 내용으로 자동 매칭된",
+    ),
+  );
+  assert.equal(
+    payload.recommendRationale?.summaryLines.some((l) => l.includes("직접 선택한")),
+    false,
+  );
+});
+
+test("brief-report-adapter: planner hand-pick keeps 직접 선택한", () => {
+  const payload = buildBriefReportPayload({
+    plan: snapshot,
+    catalog: [catalogMedia],
+    isKo: true,
+  });
+  assert.ok(
+    payload.recommendRationale?.summaryLines[0]?.includes("직접 선택한"),
+  );
 });

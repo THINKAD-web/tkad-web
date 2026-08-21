@@ -66,6 +66,8 @@ export async function POST(request: NextRequest) {
       },
       snapshot: {
         totalCostWon: built.snapshot.metrics.totalCostWon,
+        overBudgetWon: built.snapshot.metrics.overBudgetWon,
+        budgetUsedRate: built.snapshot.metrics.budgetUsedRate,
         totalImpressions: built.snapshot.metrics.totalImpressions,
         mixCpmWon: built.snapshot.metrics.mixCpmWon,
         netReach: built.snapshot.metrics.netReach,

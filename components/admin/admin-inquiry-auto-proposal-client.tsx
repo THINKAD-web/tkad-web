@@ -37,6 +37,8 @@ type DryRun = {
   };
   snapshot: {
     totalCostWon: number;
+    overBudgetWon: number;
+    budgetUsedRate: number;
     totalImpressions: number;
     mixCpmWon: number | null;
     netReach: number;
@@ -181,6 +183,17 @@ export function AdminInquiryAutoProposalClient() {
             <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
               {[
                 { label: "Step3 총비용", value: won(result.snapshot.totalCostWon) },
+                {
+                  label: "요청 대비",
+                  value: `${Math.round(result.snapshot.budgetUsedRate * 100)}%`,
+                },
+                {
+                  label: "예산 초과",
+                  value:
+                    result.snapshot.overBudgetWon > 0
+                      ? won(result.snapshot.overBudgetWon)
+                      : "없음",
+                },
                 {
                   label: "Step3 총노출",
                   value: result.snapshot.totalImpressions.toLocaleString("ko-KR"),

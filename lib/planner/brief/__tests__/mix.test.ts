@@ -26,6 +26,7 @@ import {
 } from "../mix-metrics.ts";
 import { briefToTargetSpec } from "../reach-adapter.ts";
 import { parseAgeLabel, scoreMediaCandidates, buildRecommendedMix } from "../scoring.ts";
+import { buildCampaignPlanSnapshot } from "../build-plan-snapshot.ts";
 import type { MediaItem } from "../../../media-data.ts";
 
 // ── [fixture] 합성 매체 — 프로덕션 DB 값 아님 ──────────────
@@ -282,6 +283,29 @@ test("[fixture] 예산 초과를 막지 않고 초과분을 명확히 계산한�
   assert.ok(m.overBudgetWon > 0);
   assert.equal(m.overBudgetWon, m.totalCostWon.value - 10_000_000);
   assert.ok(m.budgetUsedRate > 1);
+});
+
+test("[fixture] CampaignPlan 스냅샷은 overBudgetWon을 저장한다", () => {
+  const media = fixtureMedia();
+  const m = calcMixMetrics({
+    lines: [{ media, units: 3 }],
+    days: 30,
+    budgetWon: 10_000_000,
+  });
+  const snap = buildCampaignPlanSnapshot({
+    brief: {
+      ...EMPTY_BRIEF,
+      budgetInputWon: 10_000_000,
+      budgetMode: "total",
+      flightStart: "2026-09-01",
+      flightEnd: "2026-09-30",
+    },
+    catalog: [media],
+    mixUnits: { [media.id]: 3 },
+  });
+  assert.equal(snap.metrics.overBudgetWon, m.overBudgetWon);
+  assert.equal(snap.metrics.budgetUsedRate, m.budgetUsedRate);
+  assert.equal(snap.metrics.totalCostWon, m.totalCostWon.value);
 });
 
 test("[fixture] 추천 믹스는 예산을 넘지 않는다", () => {

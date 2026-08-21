@@ -340,6 +340,15 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
         </ul>
       )}
 
+      {p.portfolio.length > 0 && p.budgetHonesty?.mixVsBudgetFootnote ? (
+        <p
+          className="text-[12px] font-medium text-destructive"
+          data-testid="report-mix-vs-budget"
+        >
+          {p.budgetHonesty.mixVsBudgetFootnote}
+        </p>
+      ) : null}
+
       {p.portfolio.length > 0 ? (
         <p className="text-[11px] leading-snug text-gray-400">
           {viewMode === "feed"
