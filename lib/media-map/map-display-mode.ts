@@ -123,18 +123,18 @@ export function resolveMediaDetailMapNotice(
       ? "Mobile media has no fixed site, so no map pin is shown."
       : "This listing has no plottable site coordinates, so no map pin is shown.";
 
-  if (regionLabel) {
-    return {
-      mode,
-      title: isKo ? `서비스 지역: ${regionLabel}` : `Service area: ${regionLabel}`,
-      description: noPinHint,
-    };
-  }
-
   if (isNationalBrowseRegion(media)) {
     return {
       mode,
       title: isKo ? "전국 서비스 매체" : "Nationwide service media",
+      description: noPinHint,
+    };
+  }
+
+  if (regionLabel) {
+    return {
+      mode,
+      title: isKo ? `서비스 지역: ${regionLabel}` : `Service area: ${regionLabel}`,
       description: noPinHint,
     };
   }
