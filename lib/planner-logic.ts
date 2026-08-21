@@ -1039,11 +1039,28 @@ const BROWSE_CATEGORY_META: Record<
   other: { labelKo: "기타", labelEn: "Other" },
 };
 
+/** 보고서 유형 키 → 라벨 (CalcEngine 이 같은 라벨을 쓰도록 공개) */
+export function plannerReportCategoryLabels(
+  key: string,
+): { labelKo: string; labelEn: string } {
+  return {
+    labelKo: TYPE_META[key]?.labelKo ?? key,
+    labelEn: TYPE_META[key]?.labelEn ?? key,
+  };
+}
+
 function browseCategoryLabels(key: string): { labelKo: string; labelEn: string } {
   if (BROWSE_CATEGORY_META[key]) return BROWSE_CATEGORY_META[key]!;
   const main = getMainCategory(key);
   if (!main) return { labelKo: key, labelEn: key };
   return { labelKo: main.label, labelEn: main.labelEn ?? main.label };
+}
+
+/** 탐색 카테고리 키 → 라벨 (CalcEngine 공개용) */
+export function plannerBrowseCategoryLabels(
+  key: string,
+): { labelKo: string; labelEn: string } {
+  return browseCategoryLabels(key);
 }
 
 /** 발견하기 메인 카테고리(mediaMainCategory) — 미입력·미등록은 기타 */

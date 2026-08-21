@@ -31,6 +31,7 @@
     "smoke": "tsx scripts/smoke-test.ts",
     "audit:media": "tsx scripts/audit-media-metrics.ts",
     "test:metrics": "tsx --test lib/metrics/__tests__/*.test.ts",
+    "test:planner-calc": "tsx --test lib/planner/calc/__tests__/*.test.ts",
     "build:metro-geo": "tsx scripts/build-metro-geojson.mts",
     "build:metro-geo:capital": "tsx scripts/build-seoul-metro-geojson.mts",
     "build:ktx-srt-geo": "tsx scripts/build-ktx-srt-geojson.mts",
