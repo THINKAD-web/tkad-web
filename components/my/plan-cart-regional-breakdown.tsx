@@ -108,17 +108,6 @@ export function PlanCartRegionalBreakdown({ rows, isKo, className }: Props) {
                   ) : null}
                 </dd>
               </div>
-              {row.uniqueReach > 0 ? (
-                <div>
-                  <dt className="text-xs text-gray-500 dark:text-white/50">
-                    {isKo ? "추정 도달" : "Est. reach"}
-                  </dt>
-                  <dd className="mt-0.5 font-medium tabular-nums text-gray-800 dark:text-white/90">
-                    {row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")}
-                    {isKo ? "명" : ""}
-                  </dd>
-                </div>
-              ) : null}
               {row.cpmKrw != null && row.cpmKrw > 0 ? (
                 <div>
                   <dt className="text-xs text-gray-500 dark:text-white/50">CPM</dt>

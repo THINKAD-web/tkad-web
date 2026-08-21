@@ -273,7 +273,12 @@ export function planCartPeriodTotalWon(
   opts?: PlannerPeriodPricingContext & { isKo?: boolean },
 ): number {
   const byId = catalog ? planCartCatalogById(catalog) : null;
-  const months = Math.max(1, cart.duration ?? 1);
+  // A-1 Wave 2 — `Math.max(1, ...)` 클램프 제거.
+  // 유일한 호출자(my-plan-page-client)가 opts 없이 부르므로 이 값이 실제로 쓰인다.
+  // 클램프를 두면 21일 플랜의 페이지 총액이 1개월치로 나와,
+  // 같은 화면에서 만드는 보고서 금액과 어긋난다.
+  const months =
+    cart.duration != null && cart.duration > 0 ? cart.duration : 1;
   const periodCtx: PlannerPeriodPricingContext = {
     weeks: opts?.weeks,
     months: opts?.weeks != null ? undefined : (opts?.months ?? months),

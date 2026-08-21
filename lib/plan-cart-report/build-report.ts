@@ -170,7 +170,11 @@ export function buildPlanCartReportBundle(args: {
   const portfolioSorted = flattenPlanCartReportGroups(portfolioGroups);
   const pricing = planCartPortfolioPricing(cart);
 
-  const months = Math.max(1, cart.duration ?? 1);
+  // A-1 Wave 2 — `Math.max(1, ...)` 클램프 제거.
+  // planner-page-client 가 `duration: months` 로 저장하므로 21일 플랜은 0.7 이 들어온다.
+  // 1 로 올림하면 「내 플랜」 보고서가 지역 표와 같은 금액 왜곡을 일으킨다.
+  const months =
+    cart.duration != null && cart.duration > 0 ? cart.duration : 1;
   const budgetMan = resolvePlanCartBudgetMan(cart, portfolioSorted, pricing);
   const campaignGoal = mapPlanCartGoalToPlanner(cart.campaignGoal) ?? "brand";
   const goalTitle = isKo

@@ -1,14 +1,11 @@
 import type { MediaItem } from "@/lib/media-data";
-import { catalogPriceFieldToPriceMan, catalogPriceFieldToWon } from "@/lib/media-price-format";
 import {
-  plannerMonthlyImpressionsForMedia,
+  plannerMediaPeriodLineWon,
   plannerMonthlyPriceWonForMedia,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
-import {
-  computeAdvancedPlannerMetrics,
-  formatPlannerSharePct,
-} from "@/lib/planner-logic";
+import { formatPlannerSharePct } from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
 import {
   NETWORK_REGION_META,
   normalizeNetworkRegionKey,
@@ -189,18 +186,23 @@ function regionSortOrder(key: string): number {
   return planReportRegionSortOrder(key);
 }
 
-function monthlyImpressionsOf(
-  m: MediaItem,
-  pricing?: PlannerPortfolioPricing,
-): number {
-  return plannerMonthlyImpressionsForMedia(
-    m,
-    pricing?.quantities,
-    pricing?.priceOptionIndex,
-  );
-}
 
 /** 담은 매체를 지역별로 묶어 예산·노출·도달 지표 산출 */
+/**
+ * 지역별 예산·노출 집계.
+ *
+ * A-1 Wave 2 — 기간 처리를 `calculatePlan` 으로 넘겼다.
+ * 기존에는 `Math.max(1, months)` 클램프 때문에 30일 미만 캠페인에서
+ * 기간을 전혀 반영하지 못해, 같은 보고서의 매체 표와 금액이 어긋났다
+ * (21일 캠페인: 매체 표 490만 vs 지역 표 700만).
+ *
+ * 지역 grouping 은 `planReportRegionKey` 를 그대로 쓴다. 네트워크 지역
+ * 정규화·위치 힌트가 들어간 표시 택소노미라 엔진의 권역 코드와 다르다.
+ * 숫자만 엔진에서 가져오고 묶는 기준은 바꾸지 않는다.
+ *
+ * 추정 도달 열은 제거했다. 포화 모델을 지역 단위로 쪼개면 매체 1개 그룹에서
+ * 상수(노출의 40.1%)만 반복되기 때문이다.
+ */
 export function computePlanCartRegionalBreakdown(
   portfolio: readonly MediaItem[],
   months: number,
@@ -209,7 +211,22 @@ export function computePlanCartRegionalBreakdown(
 ): PlannerExportRegionBreakdown[] {
   if (portfolio.length === 0) return [];
 
-  const m = Math.max(1, months);
+  const periodCtx = { months: months > 0 ? months : 1 };
+
+  const plan = calculatePlan({
+    media: portfolio.map((item) => ({
+      media: item,
+      units: pricing?.quantities?.[item.id],
+      // 매체 표의 line total 과 같은 함수를 쓴다 — 두 표의 합계가 일치해야 한다.
+      itemNet: plannerMediaPeriodLineWon(item, periodCtx, pricing, isKo),
+    })),
+    period: { kind: "months", months: periodCtx.months },
+    budgetWon: 0,
+    locale: isKo ? "ko" : "en",
+  });
+
+  const planById = new Map(plan.mediaItems.map((m) => [m.id, m]));
+
   const groups = new Map<string, MediaItem[]>();
   for (const item of portfolio) {
     const key = planReportRegionKey(item);
@@ -228,10 +245,7 @@ export function computePlanCartRegionalBreakdown(
       ),
     0,
   );
-  const totalMonthlyImp = portfolio.reduce(
-    (s, item) => s + monthlyImpressionsOf(item, pricing),
-    0,
-  );
+  const totalMonthlyImp = plan.impressions.monthlyEquivalent;
 
   const rows: PlannerExportRegionBreakdown[] = [];
 
@@ -246,21 +260,19 @@ export function computePlanCartRegionalBreakdown(
         ),
       0,
     );
-    const monthlyImpressions = media.reduce(
-      (s, item) => s + monthlyImpressionsOf(item, pricing),
+    const planRows = media
+      .map((item) => planById.get(item.id))
+      .filter((r): r is NonNullable<typeof r> => r != null);
+
+    const monthlyImpressions = planRows.reduce(
+      (s, r) => s + r.monthlyImpressions,
       0,
     );
-    const totalImpressions = monthlyImpressions * m;
-    const periodBudgetWon = monthlyBudgetWon * m;
-    const budgetMan = Math.max(
-      0.01,
-      media.reduce((s, item) => s + catalogPriceFieldToPriceMan(item.price), 0),
+    const totalImpressions = planRows.reduce(
+      (s, r) => s + r.campaignImpressions,
+      0,
     );
-    const advanced = computeAdvancedPlannerMetrics({
-      portfolio: media,
-      budgetMan,
-      months: m,
-    });
+    const periodBudgetWon = planRows.reduce((s, r) => s + r.itemNet, 0);
 
     rows.push({
       regionKey,
@@ -278,8 +290,10 @@ export function computePlanCartRegionalBreakdown(
         totalMonthlyImp > 0
           ? Math.round((monthlyImpressions / totalMonthlyImp) * 1000) / 10
           : 0,
-      uniqueReach: advanced?.uniqueReach ?? 0,
-      cpmKrw: advanced?.cpmKrw ?? null,
+      cpmKrw:
+        totalImpressions > 0 && periodBudgetWon > 0
+          ? Math.round(periodBudgetWon / (totalImpressions / 1000))
+          : null,
     });
   }
 
@@ -299,12 +313,6 @@ export function regionalBreakdownSectionLines(
     const imp = isKo
       ? `월 노출 ${r.monthlyImpressions.toLocaleString("ko-KR")}회 · 기간 ${r.totalImpressions.toLocaleString("ko-KR")}회 (${formatPlannerSharePct(r.impressionPct)})`
       : `${r.monthlyImpressions.toLocaleString("en-US")} imp/mo · ${r.totalImpressions.toLocaleString("en-US")} total (${formatPlannerSharePct(r.impressionPct)})`;
-    const reach =
-      r.uniqueReach > 0
-        ? isKo
-          ? ` · 추정 도달 ${r.uniqueReach.toLocaleString("ko-KR")}명`
-          : ` · est. reach ${r.uniqueReach.toLocaleString("en-US")}`
-        : "";
     const cpm =
       r.cpmKrw != null && r.cpmKrw > 0
         ? isKo
@@ -312,7 +320,7 @@ export function regionalBreakdownSectionLines(
           : ` · CPM ₩${r.cpmKrw.toLocaleString("en-US")}`
         : "";
     return isKo
-      ? `${r.label} — 매체 ${r.mediaCount}개 · ${budget} · ${imp}${reach}${cpm}`
-      : `${r.label} — ${r.mediaCount} media · ${budget} · ${imp}${reach}${cpm}`;
+      ? `${r.label} — 매체 ${r.mediaCount}개 · ${budget} · ${imp}${cpm}`
+      : `${r.label} — ${r.mediaCount} media · ${budget} · ${imp}${cpm}`;
   });
 }

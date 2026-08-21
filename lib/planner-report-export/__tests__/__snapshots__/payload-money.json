@@ -1,7 +1,7 @@
 {
   "korea-campaign-21d": {
     "purpose": "합의된 회귀 케이스 — 3매체 · 21일 · 700만",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 700,
       "cpmKpi": [
         "블렌디드 CPM=₩964"
@@ -52,24 +52,6 @@
             "value": 1333,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": [
-          {
-            "label": "관악권",
-            "value": 4000000,
-            "pct": 57.1
-          },
-          {
-            "label": "강남권",
-            "value": 2000000,
-            "pct": 28.6
-          },
-          {
-            "label": "마포권",
-            "value": 1000000,
-            "pct": 14.3
-          }
         ]
       },
       "portfolio": [
@@ -97,14 +79,36 @@
           "lineTotalLabel": "₩70만",
           "budgetContributionPct": 14
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
           "label": "서울",
           "mediaCount": 3,
           "monthlyBudgetWon": 7000000,
-          "periodBudgetWon": 7000000,
+          "periodBudgetWon": 4900000,
           "budgetPct": 100,
           "cpmKrw": 964
         }
@@ -114,7 +118,7 @@
           "regionKey": "gwanak",
           "label": "관악권",
           "monthlyBudgetWon": 4000000,
-          "periodBudgetWon": 4000000,
+          "periodBudgetWon": 2800000,
           "budgetPct": 57.1,
           "cpmKrw": 808
         },
@@ -122,7 +126,7 @@
           "regionKey": "gangnam",
           "label": "강남권",
           "monthlyBudgetWon": 2000000,
-          "periodBudgetWon": 2000000,
+          "periodBudgetWon": 1400000,
           "budgetPct": 28.6,
           "cpmKrw": 1282
         },
@@ -130,7 +134,7 @@
           "regionKey": "mapo",
           "label": "마포권",
           "monthlyBudgetWon": 1000000,
-          "periodBudgetWon": 1000000,
+          "periodBudgetWon": 700000,
           "budgetPct": 14.3,
           "cpmKrw": 1333
         }
@@ -212,36 +216,32 @@
         {
           "regionKey": "seoul",
           "monthlyImpressions": 7260000,
-          "totalImpressions": 7260000,
-          "impressionPct": 100,
-          "uniqueReach": 2141926
+          "totalImpressions": 5082000,
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": [
         {
           "regionKey": "gwanak",
-          "totalImpressions": 4950000,
-          "impressionPct": 68.2,
-          "uniqueReach": 1986110
+          "totalImpressions": 3465000,
+          "impressionPct": 68.2
         },
         {
           "regionKey": "gangnam",
-          "totalImpressions": 1560000,
-          "impressionPct": 21.5,
-          "uniqueReach": 625926
+          "totalImpressions": 1092000,
+          "impressionPct": 21.5
         },
         {
           "regionKey": "mapo",
-          "totalImpressions": 750000,
-          "impressionPct": 10.3,
-          "uniqueReach": 300926
+          "totalImpressions": 525000,
+          "impressionPct": 10.3
         }
       ]
     }
   },
   "exact-30d": {
     "purpose": "요율 키 정확 일치 경로 (30days)",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 700,
       "cpmKpi": [
         "블렌디드 CPM=₩964"
@@ -292,24 +292,6 @@
             "value": 1333,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": [
-          {
-            "label": "관악권",
-            "value": 4000000,
-            "pct": 57.1
-          },
-          {
-            "label": "강남권",
-            "value": 2000000,
-            "pct": 28.6
-          },
-          {
-            "label": "마포권",
-            "value": 1000000,
-            "pct": 14.3
-          }
         ]
       },
       "portfolio": [
@@ -337,7 +319,29 @@
           "lineTotalLabel": "₩100만",
           "budgetContributionPct": 14
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
@@ -453,35 +457,31 @@
           "regionKey": "seoul",
           "monthlyImpressions": 7260000,
           "totalImpressions": 7260000,
-          "impressionPct": 100,
-          "uniqueReach": 2141926
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": [
         {
           "regionKey": "gwanak",
           "totalImpressions": 4950000,
-          "impressionPct": 68.2,
-          "uniqueReach": 1986110
+          "impressionPct": 68.2
         },
         {
           "regionKey": "gangnam",
           "totalImpressions": 1560000,
-          "impressionPct": 21.5,
-          "uniqueReach": 625926
+          "impressionPct": 21.5
         },
         {
           "regionKey": "mapo",
           "totalImpressions": 750000,
-          "impressionPct": 10.3,
-          "uniqueReach": 300926
+          "impressionPct": 10.3
         }
       ]
     }
   },
   "two-week-14d": {
     "purpose": "2주 프리셋 — 15days 키 불일치로 선형 폴백 (A-6 확인 대상)",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 700,
       "cpmKpi": [
         "블렌디드 CPM=₩964"
@@ -532,24 +532,6 @@
             "value": 1333,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": [
-          {
-            "label": "관악권",
-            "value": 4000000,
-            "pct": 57.1
-          },
-          {
-            "label": "강남권",
-            "value": 2000000,
-            "pct": 28.6
-          },
-          {
-            "label": "마포권",
-            "value": 1000000,
-            "pct": 14.3
-          }
         ]
       },
       "portfolio": [
@@ -577,14 +559,36 @@
           "lineTotalLabel": "₩47만",
           "budgetContributionPct": 14
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
           "label": "서울",
           "mediaCount": 3,
           "monthlyBudgetWon": 7000000,
-          "periodBudgetWon": 7000000,
+          "periodBudgetWon": 3266667,
           "budgetPct": 100,
           "cpmKrw": 964
         }
@@ -594,7 +598,7 @@
           "regionKey": "gwanak",
           "label": "관악권",
           "monthlyBudgetWon": 4000000,
-          "periodBudgetWon": 4000000,
+          "periodBudgetWon": 1866667,
           "budgetPct": 57.1,
           "cpmKrw": 808
         },
@@ -602,7 +606,7 @@
           "regionKey": "gangnam",
           "label": "강남권",
           "monthlyBudgetWon": 2000000,
-          "periodBudgetWon": 2000000,
+          "periodBudgetWon": 933333,
           "budgetPct": 28.6,
           "cpmKrw": 1282
         },
@@ -610,7 +614,7 @@
           "regionKey": "mapo",
           "label": "마포권",
           "monthlyBudgetWon": 1000000,
-          "periodBudgetWon": 1000000,
+          "periodBudgetWon": 466667,
           "budgetPct": 14.3,
           "cpmKrw": 1333
         }
@@ -692,36 +696,32 @@
         {
           "regionKey": "seoul",
           "monthlyImpressions": 7260000,
-          "totalImpressions": 7260000,
-          "impressionPct": 100,
-          "uniqueReach": 2141926
+          "totalImpressions": 3388000,
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": [
         {
           "regionKey": "gwanak",
-          "totalImpressions": 4950000,
-          "impressionPct": 68.2,
-          "uniqueReach": 1986110
+          "totalImpressions": 2310000,
+          "impressionPct": 68.2
         },
         {
           "regionKey": "gangnam",
-          "totalImpressions": 1560000,
-          "impressionPct": 21.5,
-          "uniqueReach": 625926
+          "totalImpressions": 728000,
+          "impressionPct": 21.5
         },
         {
           "regionKey": "mapo",
-          "totalImpressions": 750000,
-          "impressionPct": 10.3,
-          "uniqueReach": 300926
+          "totalImpressions": 350000,
+          "impressionPct": 10.3
         }
       ]
     }
   },
   "with-quantities": {
     "purpose": "units 비례 경로 — 수량 2 이상 (도달 변화 관측 대상)",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 700,
       "cpmKpi": [
         "블렌디드 CPM=₩1,006"
@@ -762,19 +762,6 @@
             "value": 1333,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": [
-          {
-            "label": "관악권",
-            "value": 4000000,
-            "pct": 80
-          },
-          {
-            "label": "마포권",
-            "value": 1000000,
-            "pct": 20
-          }
         ]
       },
       "portfolio": [
@@ -794,7 +781,24 @@
           "lineTotalLabel": "₩400만",
           "budgetContributionPct": 50
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 80
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 20
+          }
+        ]
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
@@ -803,7 +807,7 @@
           "monthlyBudgetWon": 8000000,
           "periodBudgetWon": 8000000,
           "budgetPct": 100,
-          "cpmKrw": 877
+          "cpmKrw": 1006
         }
       ],
       "regionSubdivision": [
@@ -819,7 +823,7 @@
           "regionKey": "mapo",
           "label": "마포권",
           "monthlyBudgetWon": 1000000,
-          "periodBudgetWon": 1000000,
+          "periodBudgetWon": 4000000,
           "budgetPct": 20,
           "cpmKrw": 1333
         }
@@ -861,12 +865,12 @@
           {
             "label": "관악권",
             "value": 4950000,
-            "pct": 86.8
+            "pct": 62.3
           },
           {
             "label": "마포권",
-            "value": 750000,
-            "pct": 13.2
+            "value": 3000000,
+            "pct": 37.7
           }
         ]
       },
@@ -887,57 +891,57 @@
           "regionKey": "seoul",
           "monthlyImpressions": 7950000,
           "totalImpressions": 7950000,
-          "impressionPct": 100,
-          "uniqueReach": 2055118
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": [
         {
           "regionKey": "gwanak",
           "totalImpressions": 4950000,
-          "impressionPct": 86.8,
-          "uniqueReach": 1986110
+          "impressionPct": 62.3
         },
         {
           "regionKey": "mapo",
-          "totalImpressions": 750000,
-          "impressionPct": 13.2,
-          "uniqueReach": 300926
+          "totalImpressions": 3000000,
+          "impressionPct": 37.7
         }
       ]
     }
   },
   "with-network": {
     "purpose": "네트워크 매체 — 패키지 단가 경로",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 1200,
       "cpmKpi": [
-        "블렌디드 CPM=₩76"
+        "블렌디드 CPM=₩189"
       ],
       "charts": {
         "budgetSplit": [
           {
             "label": "디지털",
-            "value": 4000000,
+            "value": 10000000,
             "pct": 100
           }
         ],
         "browseBudgetSplit": [
           {
+            "label": "디지털/온라인",
+            "value": 6000000,
+            "pct": 60
+          },
+          {
             "label": "기타",
             "value": 4000000,
-            "pct": 100
+            "pct": 40
           }
         ],
         "cpmBars": [
           {
             "label": "디지털",
-            "value": 76,
+            "value": 189,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": []
+        ]
       },
       "portfolio": [
         {
@@ -946,26 +950,32 @@
           "priceLabel": "₩400만/월",
           "monthlyPriceLabel": "₩400만/월",
           "lineTotalLabel": "₩400만",
-          "budgetContributionPct": 100
+          "budgetContributionPct": 40
         },
         {
           "id": "m-nw",
           "name": "편의점 네트워크",
           "priceLabel": "₩600만/월",
           "monthlyPriceLabel": "₩600만/월",
-          "lineTotalLabel": null,
-          "budgetContributionPct": 0
+          "lineTotalLabel": "₩600만",
+          "budgetContributionPct": 60
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": []
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
           "label": "서울",
           "mediaCount": 2,
-          "monthlyBudgetWon": 4000000,
-          "periodBudgetWon": 4000000,
+          "monthlyBudgetWon": 10000000,
+          "periodBudgetWon": 10000000,
           "budgetPct": 100,
-          "cpmKrw": 1361
+          "cpmKrw": 189
         }
       ],
       "regionSubdivision": []
@@ -1016,8 +1026,7 @@
           "regionKey": "seoul",
           "monthlyImpressions": 52950000,
           "totalImpressions": 52950000,
-          "impressionPct": 100,
-          "uniqueReach": 2145315
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": []
@@ -1025,7 +1034,7 @@
   },
   "single-media": {
     "purpose": "경계 케이스 — 매체 1개",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 200,
       "cpmKpi": [
         "블렌디드 CPM=₩1,282"
@@ -1051,9 +1060,7 @@
             "value": 1282,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": []
+        ]
       },
       "portfolio": [
         {
@@ -1064,7 +1071,13 @@
           "lineTotalLabel": "₩200만",
           "budgetContributionPct": 100
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": []
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
@@ -1114,8 +1127,7 @@
           "regionKey": "seoul",
           "monthlyImpressions": 1560000,
           "totalImpressions": 1560000,
-          "impressionPct": 100,
-          "uniqueReach": 625926
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": []
@@ -1123,7 +1135,7 @@
   },
   "impressions-conflict": {
     "purpose": "A안 준수 — impressions 저장값을 무시하고 일 유동인구 기준을 쓰는지 고정",
-    "money": {
+    "mediaMoney": {
       "budgetMan": 500,
       "cpmKpi": [
         "블렌디드 CPM=₩768"
@@ -1159,19 +1171,6 @@
             "value": 1282,
             "pct": null
           }
-        ],
-        "regionBudgetSplit": [],
-        "regionSubdivisionBudgetSplit": [
-          {
-            "label": "광화문/도심",
-            "value": 3000000,
-            "pct": 60
-          },
-          {
-            "label": "강남/서초",
-            "value": 2000000,
-            "pct": 40
-          }
         ]
       },
       "portfolio": [
@@ -1191,7 +1190,24 @@
           "lineTotalLabel": "₩200만",
           "budgetContributionPct": 40
         }
-      ],
+      ]
+    },
+    "aggregateMoney": {
+      "charts": {
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "광화문/도심",
+            "value": 3000000,
+            "pct": 60
+          },
+          {
+            "label": "강남/서초",
+            "value": 2000000,
+            "pct": 40
+          }
+        ]
+      },
       "regionBreakdown": [
         {
           "regionKey": "seoul",
@@ -1279,22 +1295,19 @@
           "regionKey": "seoul",
           "monthlyImpressions": 6510000,
           "totalImpressions": 6510000,
-          "impressionPct": 100,
-          "uniqueReach": 2107670
+          "impressionPct": 100
         }
       ],
       "regionSubdivision": [
         {
           "regionKey": "seoul_cbd",
           "totalImpressions": 4950000,
-          "impressionPct": 76,
-          "uniqueReach": 1986110
+          "impressionPct": 76
         },
         {
           "regionKey": "seoul_gangnam",
           "totalImpressions": 1560000,
-          "impressionPct": 24,
-          "uniqueReach": 625926
+          "impressionPct": 24
         }
       ]
     }

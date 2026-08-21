@@ -108,6 +108,9 @@ const M_NETWORK = media({
   price: 6_000_000,
   dailyFootTraffic: 80_000,
   networkMinUnits: 10,
+  // 네트워크 가격 경로를 실제로 태우려면 유닛 단가가 있어야 한다.
+  // 없으면 monthly price 가 0 이 되어 이 시나리오가 아무것도 검증하지 못한다.
+  networkPricePerUnit: 300_000,
   city: "서울",
   regionMain: "seoul",
   regionSub: "seoul_cbd",

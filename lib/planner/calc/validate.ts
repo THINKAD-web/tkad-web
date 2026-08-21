@@ -26,6 +26,7 @@ import {
 export const PLAN_VALIDATION_CHECKS = [
   "MEDIA_NET_SUM",
   "IMPRESSION_SUM",
+  "OTS_SUM",
   "BUDGET_USAGE_SUM",
   "MEDIA_SHARE_CLOSURE",
   "BREAKDOWN_SHARE_CLOSURE",
@@ -117,6 +118,18 @@ export function runValidation(plan: PlanResult): PlanValidationReport {
       expected: impSum,
       actual: campaignTotal,
       delta: campaignTotal - impSum,
+    });
+  }
+
+  const otsSum = sum(items.map((m) => m.ots));
+  if (otsSum !== plan.impressions.ots) {
+    add({
+      check: "OTS_SUM",
+      message:
+        "impressions.ots does not equal the sum of mediaItems[].ots",
+      expected: otsSum,
+      actual: plan.impressions.ots,
+      delta: plan.impressions.ots - otsSum,
     });
   }
 

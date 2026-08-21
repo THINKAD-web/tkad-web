@@ -109,7 +109,6 @@ export type PlannerExportRegionBreakdown = {
   monthlyImpressions: number;
   totalImpressions: number;
   impressionPct: number;
-  uniqueReach: number;
   cpmKrw: number | null;
 };
 

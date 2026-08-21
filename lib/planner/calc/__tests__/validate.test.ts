@@ -426,3 +426,23 @@ test("REACH_NOT_MODELED 는 severity=info 다 (각주 중복 표시 방지 근�
   assert.equal(w.severity, "info");
   assert.equal(w.kind, "data");
 });
+
+test("OTS_SUM — 상위 OTS 를 조작하면 잡아낸다", () => {
+  const report = runValidation(
+    corrupt((p) => {
+      p.impressions.ots += 1_000;
+    }),
+  );
+  assert.equal(report.ok, false);
+  assert.ok(report.issues.some((i) => i.check === "OTS_SUM"));
+});
+
+test("OTS_SUM — 매체 OTS 를 조작해도 잡아낸다", () => {
+  const report = runValidation(
+    corrupt((p) => {
+      p.mediaItems[0]!.ots += 5;
+    }),
+  );
+  assert.equal(report.ok, false);
+  assert.ok(report.issues.some((i) => i.check === "OTS_SUM"));
+});

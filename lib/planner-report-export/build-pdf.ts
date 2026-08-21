@@ -661,9 +661,9 @@ export async function buildPlannerReportPdf(
       y += 3;
     }
     const cols = isKo
-      ? ["지역", "매체", "월 예산", "월 노출", "도달"]
-      : ["Region", "Media", "Monthly", "Imp/mo", "Reach"];
-    const cw = [28, 14, 38, 32, 28];
+      ? ["지역", "매체", "월 예산", "월 노출"]
+      : ["Region", "Media", "Monthly", "Imp/mo"];
+    const cw = [34, 18, 46, 40];
     ensure(8 + p.regionBreakdown.length * 7);
     doc.setFontSize(8);
     setText(GRAY_500);
@@ -682,9 +682,6 @@ export async function buildPlannerReportPdf(
         String(row.mediaCount),
         `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
         row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
-        row.uniqueReach > 0
-          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
-          : "—",
       ];
       cells.forEach((cell, i) => {
         setText(i === 0 ? INK : GRAY_600);
@@ -762,9 +759,6 @@ export async function buildPlannerReportPdf(
         String(row.mediaCount),
         `₩${row.monthlyBudgetWon.toLocaleString(isKo ? "ko-KR" : "en-US")}`,
         row.monthlyImpressions.toLocaleString(isKo ? "ko-KR" : "en-US"),
-        row.uniqueReach > 0
-          ? row.uniqueReach.toLocaleString(isKo ? "ko-KR" : "en-US")
-          : "—",
       ];
       cells.forEach((cell, i) => {
         setText(i === 0 ? INK : GRAY_600);

@@ -357,6 +357,7 @@ export function buildOohReportPayload(
     orderedPortfolio,
     months,
     isKo,
+    pricing,
   );
   if (subdivisionReport) {
     charts.regionSubdivisionBudgetSplit =
