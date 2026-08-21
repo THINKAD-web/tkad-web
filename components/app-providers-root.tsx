@@ -20,8 +20,10 @@ type Props = {
 };
 
 /**
- * 전역 providers — DOM shell 없이 children 만 감쌈 (RSC main/footer 스트리밍 순서 보존).
- * AuthSessionProvider 는 PublicPageChrome 에서 헤더·본문 공통으로 감쌈.
+ * 전역 providers — DOM shell 없이 children 만 감쌈.
+ * PublicPageChrome 에서는 헤더+본문+푸터를 한 번에 넘긴다 (헤더 돋보기가
+ * CommandPaletteProvider 안에 있어야 클릭이 동작). AuthSessionProvider 는
+ * PublicPageChrome 에서 그 바깥을 감쌈.
  */
 export function AppProvidersRoot({ children, admin }: Props) {
   if (admin) {

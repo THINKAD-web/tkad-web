@@ -14,39 +14,46 @@ type Props = {
   children: ReactNode;
 };
 
-/** 공개 site chrome — 서버 shell (main → footer 순서 고정) */
+/**
+ * 공개 site chrome — 서버 shell (main → footer 순서 고정).
+ * AppProvidersRoot 는 헤더를 포함해야 함. CommandPalette / MobileSearch 가
+ * 헤더 돋보기·⌘K 와 같은 트리를 써야 한다. header 는 서버에서 children 으로
+ * 넘기므로 RSC 슬롯 패턴은 유지된다.
+ */
 export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
   return (
     <AuthSessionProvider>
       <MobileChromeOverlayProvider>
-        <a href="#main-content" className="skip-link">
-          {skipLinkLabel}
-        </a>
-        <div className="flex min-h-0 flex-1 flex-col">
-        <ConditionalPublicChrome>
-          <TopLoader />
-          {header}
-        </ConditionalPublicChrome>
-
-        <div className="flex min-h-0 flex-1 flex-col md:flex-row">
-          <ConditionalPublicChrome>
-            <ContextNavAsideShell />
-          </ConditionalPublicChrome>
-
-          <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-            <main
-              id="main-content"
-              className="tkad-app-ui flex min-w-0 flex-col max-md:overflow-x-clip max-md:tkad-mobile-scroll md:min-h-0 md:flex-1 md:overflow-visible"
-            >
-              <AppProvidersRoot>{children}</AppProvidersRoot>
-            </main>
+        <AppProvidersRoot>
+          <a href="#main-content" className="skip-link">
+            {skipLinkLabel}
+          </a>
+          <div className="flex min-h-0 flex-1 flex-col">
             <ConditionalPublicChrome>
-              <FooterBrutal />
-              <DeferredPublicWidgetsGate />
+              <TopLoader />
+              {header}
             </ConditionalPublicChrome>
+
+            <div className="flex min-h-0 flex-1 flex-col md:flex-row">
+              <ConditionalPublicChrome>
+                <ContextNavAsideShell />
+              </ConditionalPublicChrome>
+
+              <div className="flex min-h-0 min-w-0 flex-1 flex-col">
+                <main
+                  id="main-content"
+                  className="tkad-app-ui flex min-w-0 flex-col max-md:overflow-x-clip max-md:tkad-mobile-scroll md:min-h-0 md:flex-1 md:overflow-visible"
+                >
+                  {children}
+                </main>
+                <ConditionalPublicChrome>
+                  <FooterBrutal />
+                  <DeferredPublicWidgetsGate />
+                </ConditionalPublicChrome>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
+        </AppProvidersRoot>
       </MobileChromeOverlayProvider>
     </AuthSessionProvider>
   );
