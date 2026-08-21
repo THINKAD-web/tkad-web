@@ -388,14 +388,16 @@ function groupToShares(
 ): Share[] {
   const groups = new Map<
     string,
-    { impressions: number; budget: number; count: number }
+    { impressions: number; monthly: number; budget: number; count: number }
   >();
 
   for (const item of items) {
     const key = keyOf(item);
     if (key == null) continue;
-    const g = groups.get(key) ?? { impressions: 0, budget: 0, count: 0 };
+    const g =
+      groups.get(key) ?? { impressions: 0, monthly: 0, budget: 0, count: 0 };
     g.impressions += item.campaignImpressions;
+    g.monthly += item.monthlyImpressions;
     g.budget += item.itemNet;
     g.count += 1;
     groups.set(key, g);
@@ -417,6 +419,7 @@ function groupToShares(
         budgetAmount: g.budget,
         budgetShare: sharePct(g.budget, totalBudget),
         impressions: g.impressions,
+        monthlyImpressions: g.monthly,
         impressionShare: sharePct(g.impressions, totalImpressions),
         cpmWon: cpmOf(g.budget, g.impressions),
         mediaCount: g.count,

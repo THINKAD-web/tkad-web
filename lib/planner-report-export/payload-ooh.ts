@@ -1,11 +1,8 @@
 import type { MediaItem } from "@/lib/media-data";
 import type { PlannerMetrics } from "@/lib/planner-logic";
-import {
-  computePortfolioReportMetrics,
-  impressionShareByCategory,
-  budgetSplitByBrowseCategory,
-  impressionShareByBrowseCategory,
-} from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
+import { plannerMediaPeriodLineWon } from "@/lib/planner/planner-media-quantity";
+import { reportPlanValidation } from "@/lib/planner/calc/report-validation";
 import {
   computePortfolioContributions,
   mediaItemToExportRow,
@@ -101,12 +98,37 @@ export function buildOohReportPayload(
   const campaignMonths = a.months ?? 1;
   const periodCtx =
     campaignMonths > 0 ? { months: campaignMonths } : undefined;
-  const portfolioMetrics = computePortfolioReportMetrics(
-    a.portfolio,
-    campaignMonths,
-    pricing,
-    periodCtx,
-  );
+  /**
+   * A-1 Wave 4 — 보고서 payload 의 모든 지표가 여기서 나온다.
+   * 예전에는 총노출·CPM·유형별 비중·탐색 카테고리 비중을 각각 다른 함수로
+   * 재계산해, 같은 보고서 안에서 값이 어긋날 수 있었다.
+   */
+  const plan = calculatePlan({
+    media: a.portfolio.map((m) => ({
+      media: m,
+      units: pricing.quantities?.[m.id],
+      itemNet: plannerMediaPeriodLineWon(
+        m,
+        periodCtx ?? { months: 1 },
+        pricing,
+        isKo,
+      ),
+    })),
+    period: { kind: "months", months: campaignMonths > 0 ? campaignMonths : 1 },
+    budgetWon: Math.max(0, a.budgetMan) * 10_000,
+    goal: a.campaignGoal ?? null,
+    industryKey: a.industryKey ?? null,
+    locale: isKo ? "ko" : "en",
+  });
+
+  // 엔진이 스스로의 약속을 지켰는지 확인한다. 실패해도 던지지 않는다.
+  reportPlanValidation(plan, "report_payload_ooh");
+
+  const portfolioMetrics = {
+    monthlyImpressions: plan.impressions.monthlyEquivalent,
+    totalImpressions: plan.impressions.campaignTotal,
+    blendedCpmKrw: plan.cpm.campaignWon,
+  };
   const usePortfolioReach =
     a.portfolio.length > 0 && portfolioMetrics.monthlyImpressions > 0;
 
@@ -146,11 +168,7 @@ export function buildOohReportPayload(
   }
 
   // ── 차트 데이터 (웹·PDF·PPTX 공용) ──
-  const browseBudgetSlices = budgetSplitByBrowseCategory(
-    a.portfolio,
-    pricing,
-    periodCtx,
-  );
+  const browseBudgetSlices = plan.breakdown.byBrowseCategory;
   const charts: PlannerExportCharts = {
     budgetSplit: a.budgetAllocation
       .filter((s) => s.valueWon > 0)
@@ -161,12 +179,12 @@ export function buildOohReportPayload(
         pct: s.pct,
       })),
     browseBudgetSplit: browseBudgetSlices
-      .filter((s) => s.value > 0)
+      .filter((s) => s.budgetAmount > 0)
       .map((s) => ({
         label: isKo ? s.labelKo : s.labelEn,
-        value: s.value,
+        value: s.budgetAmount,
         colorKey: s.key,
-        pct: s.pct,
+        pct: s.budgetShare,
       })),
     cpmBars: a.cpmBars
       .filter((c) => c.value > 0)
@@ -199,20 +217,24 @@ export function buildOohReportPayload(
           ].filter((d) => d.value > 0)
         : [],
     impressionSplit: usePortfolioReach
-      ? impressionShareByCategory(a.portfolio, pricing).map((s) => ({
-          label: isKo ? s.labelKo : s.labelEn,
-          value: s.value,
-          colorKey: s.key,
-          pct: s.pct,
-        }))
+      ? plan.breakdown.byCategory
+          .filter((s) => s.monthlyImpressions > 0)
+          .map((s) => ({
+            label: isKo ? s.labelKo : s.labelEn,
+            value: s.monthlyImpressions,
+            colorKey: s.key,
+            pct: s.impressionShare,
+          }))
       : [],
     browseImpressionSplit: usePortfolioReach
-      ? impressionShareByBrowseCategory(a.portfolio, pricing).map((s) => ({
-          label: isKo ? s.labelKo : s.labelEn,
-          value: s.value,
-          colorKey: s.key,
-          pct: s.pct,
-        }))
+      ? plan.breakdown.byBrowseCategory
+          .filter((s) => s.monthlyImpressions > 0)
+          .map((s) => ({
+            label: isKo ? s.labelKo : s.labelEn,
+            value: s.monthlyImpressions,
+            colorKey: s.key,
+            pct: s.impressionShare,
+          }))
       : [],
     regionBudgetSplit: a.regionBudgetCharts,
     regionImpressionSplit: a.regionImpressionCharts,

@@ -225,6 +225,12 @@ export type Share = {
   budgetShare: number;
   /** 캠페인 총 노출 */
   impressions: number;
+  /**
+   * 30일 환산 노출. 차트가 "월 노출 비중" 을 표시할 때 쓴다.
+   * `impressionShare` 는 campaign 기준이든 monthly 기준이든 동일하다 —
+   * campaign = monthly × days/30 이 모든 매체에 균일하게 적용되기 때문이다.
+   */
+  monthlyImpressions: number;
   /** 0~100 (%) */
   impressionShare: number;
   cpmWon: number | null;
