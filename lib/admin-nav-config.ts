@@ -11,6 +11,7 @@ export type AdminNavKey =
   | "linkHealth"
   | "operatorManual"
   | "inquiries"
+  | "inquiryAutoProposal"
   | "biddings"
   | "chatMonitor"
   | "chatbotLogs"
@@ -154,6 +155,7 @@ export const adminNavGroupDefs: {
     labelKey: "groupCustomers",
     itemKeys: [
       "inquiries",
+      "inquiryAutoProposal",
       "chatMonitor",
       "chatbotLogs",
       "users",

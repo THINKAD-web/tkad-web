@@ -77,6 +77,7 @@ const navDefs: NavDef[] = [
   { href: "/admin/health", key: "linkHealth", icon: Radar },
   { href: "/admin/manual", key: "operatorManual", icon: FileText },
   { href: "/admin/inquiries", key: "inquiries", icon: MessageSquareText },
+  { href: "/admin/inquiry-auto-proposal", key: "inquiryAutoProposal", icon: Sparkles },
   { href: "/admin/biddings", key: "biddings", icon: ClipboardList },
   { href: "/admin/chat", key: "chatMonitor", icon: Inbox },
   { href: "/admin/chatbot", key: "chatbotLogs", icon: Bot },
