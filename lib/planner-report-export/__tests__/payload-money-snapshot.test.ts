@@ -301,3 +301,72 @@ for (const s of SNAPSHOT_SCENARIOS) {
     );
   });
 }
+
+/**
+ * 픽스처 건전성 가드 (Wave 2 보강).
+ *
+ * 스냅샷은 픽스처가 실제로 경로를 태울 때만 의미가 있다. 지금까지 껍데기
+ * 스냅샷을 세 번 만들었다.
+ *   Wave 0 — price 를 원 단위로 잘못 넣어 CPM 이 0 으로 반올림돼 cpmBars 가 비었다
+ *   Wave 0 — regionBreakdown 을 인자로 넘기지 않아 지역 표가 0행이었다
+ *   Wave 2 — 네트워크 매체에 단가 필드가 없어 금액이 0 이었다
+ *
+ * 셋 다 "값이 0/빈 값인데 아무도 안 봤다" 는 같은 유형이다.
+ * 여기서 한 번에 훑어 다음 픽스처가 조용히 죽는 것을 막는다.
+ */
+for (const s of SNAPSHOT_SCENARIOS) {
+  test(`[픽스처 가드] ${s.id} — 의도한 경로가 실제로 값을 낸다`, () => {
+    const payload = buildOohReportPayload(buildScenarioArgs(s));
+
+    assert.equal(
+      payload.portfolio.length,
+      s.portfolio.length,
+      "매체가 payload 에서 누락됐다",
+    );
+
+    for (const row of payload.portfolio) {
+      const line = parseWonLabel(row.lineTotalLabel);
+      assert.ok(
+        line != null && line > 0,
+        `${row.name} 의 lineTotalLabel 이 비었다 — 가격 필드가 부족한 픽스처다`,
+      );
+      const monthly = parseWonLabel(row.monthlyPriceLabel);
+      assert.ok(
+        monthly != null && monthly > 0,
+        `${row.name} 의 monthlyPriceLabel 이 비었다`,
+      );
+      assert.ok(
+        (row.dailyTraffic ?? 0) > 0,
+        `${row.name} 의 일 유동인구가 0 이다`,
+      );
+      assert.ok(
+        row.budgetContributionPct != null && row.exposureContributionPct != null,
+        `${row.name} 의 기여도가 계산되지 않았다`,
+      );
+    }
+
+    const budgetSplit = payload.charts?.budgetSplit ?? [];
+    assert.ok(budgetSplit.length > 0, "예산 도넛이 비었다");
+    for (const d of budgetSplit) {
+      assert.ok(d.value > 0, `budgetSplit "${d.label}" 값이 0 이다`);
+    }
+
+    const cpmBars = payload.charts?.cpmBars ?? [];
+    assert.ok(
+      cpmBars.length > 0,
+      "CPM 막대가 비었다 — 단가 대비 노출이 너무 작아 0 으로 반올림됐을 수 있다",
+    );
+    for (const d of cpmBars) {
+      assert.ok(d.value > 0, `cpmBars "${d.label}" 값이 0 이다`);
+    }
+
+    const regions = payload.regionBreakdown ?? [];
+    assert.ok(regions.length > 0, "지역 표가 0행이다 — 인자 배선을 확인할 것");
+    for (const r of regions) {
+      assert.ok(r.monthlyBudgetWon > 0, `지역 "${r.label}" 금액이 0 이다`);
+      assert.ok(r.periodBudgetWon > 0, `지역 "${r.label}" 기간 금액이 0 이다`);
+      assert.ok(r.monthlyImpressions > 0, `지역 "${r.label}" 노출이 0 이다`);
+      assert.ok(r.cpmKrw != null && r.cpmKrw > 0, `지역 "${r.label}" CPM 이 없다`);
+    }
+  });
+}
