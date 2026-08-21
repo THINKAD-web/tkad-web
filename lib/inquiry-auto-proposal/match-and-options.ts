@@ -26,15 +26,6 @@ export type MatchedProposalMedia = {
   mediaClass: string;
 };
 
-export type ProposalOption = {
-  optionId: string;
-  kind: "single" | "combo";
-  mediaIds: string[];
-  names: string[];
-  monthlyWon: number;
-  sellingUnitFollowUp: boolean;
-};
-
 const AIRPORT_NOISE_RE = /공항철도|에어부산|리무진|기내|항공기/;
 
 function hay(row: ProposalCatalogRow): string {
@@ -120,59 +111,4 @@ export function matchInquiryMedia(
     });
   }
   return out.sort((a, b) => a.monthlyWon - b.monthlyWon);
-}
-
-function optionId(ids: string[]): string {
-  const sorted = [...ids].sort();
-  return sorted.length === 1
-    ? `single:${sorted[0]}`
-    : `combo:${sorted.join("+")}`;
-}
-
-const MAX_SINGLES = 8;
-const MAX_COMBOS = 8;
-
-export function buildProposalOptions(
-  matched: readonly MatchedProposalMedia[],
-  budgetWon: number,
-): ProposalOption[] {
-  const eligible = matched.filter((m) => m.eligible);
-  const singles: ProposalOption[] = eligible
-    .filter((m) => m.monthlyWon > 0 && m.monthlyWon <= budgetWon)
-    .slice(0, MAX_SINGLES)
-    .map((m) => ({
-      optionId: optionId([m.id]),
-      kind: "single" as const,
-      mediaIds: [m.id],
-      names: [m.name],
-      monthlyWon: m.monthlyWon,
-      sellingUnitFollowUp: m.sellingUnitUndeclared,
-    }));
-
-  const combos: ProposalOption[] = [];
-  for (let i = 0; i < eligible.length && combos.length < MAX_COMBOS; i++) {
-    for (let j = i + 1; j < eligible.length && combos.length < MAX_COMBOS; j++) {
-      const a = eligible[i]!;
-      const b = eligible[j]!;
-      const sum = a.monthlyWon + b.monthlyWon;
-      if (sum <= 0 || sum > budgetWon) continue;
-      combos.push({
-        optionId: optionId([a.id, b.id]),
-        kind: "combo",
-        mediaIds: [a.id, b.id],
-        names: [a.name, b.name],
-        monthlyWon: sum,
-        sellingUnitFollowUp: a.sellingUnitUndeclared || b.sellingUnitUndeclared,
-      });
-    }
-  }
-
-  return [...singles, ...combos];
-}
-
-export function findOption(
-  options: readonly ProposalOption[],
-  optionIdValue: string,
-): ProposalOption | null {
-  return options.find((o) => o.optionId === optionIdValue) ?? null;
 }

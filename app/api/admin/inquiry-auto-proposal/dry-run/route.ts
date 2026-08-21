@@ -1,6 +1,9 @@
 import { NextRequest } from "next/server";
 import { assertAdminDb, json } from "@/lib/admin-guard";
-import { runInquiryAutoProposalDryRun } from "@/lib/inquiry-auto-proposal/run-dry-run";
+import {
+  buildInquiryAutoProposal,
+  runInquiryAutoProposalDryRun,
+} from "@/lib/inquiry-auto-proposal/run-dry-run";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -21,20 +24,57 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const result = await runInquiryAutoProposalDryRun(text);
+    const dry = await runInquiryAutoProposalDryRun(text);
+    const parsed = {
+      budgetWon: dry.parsed.budgetWon,
+      budgetAssumed: dry.parsed.budgetAssumed,
+      months: dry.parsed.months,
+      wantsAirport: dry.parsed.wantsAirport,
+      wantsRestStopLed: dry.parsed.wantsRestStopLed,
+      namedNeedles: dry.parsed.namedNeedles,
+    };
+    if (dry.eligible.length === 0) {
+      return json({
+        parsed,
+        matched: dry.matched,
+        eligibleCount: 0,
+        excludedCount: dry.excluded.length,
+        mixUnits: dry.mixUnits,
+        brief: {
+          budgetInputWon: dry.brief.budgetInputWon,
+          budgetMode: dry.brief.budgetMode,
+          flightStart: dry.brief.flightStart,
+          flightEnd: dry.brief.flightEnd,
+        },
+        snapshot: null,
+        thumbs: [],
+      });
+    }
+
+    const built = await buildInquiryAutoProposal({ text });
     return json({
-      parsed: {
-        budgetWon: result.parsed.budgetWon,
-        budgetAssumed: result.parsed.budgetAssumed,
-        months: result.parsed.months,
-        wantsAirport: result.parsed.wantsAirport,
-        wantsRestStopLed: result.parsed.wantsRestStopLed,
-        namedNeedles: result.parsed.namedNeedles,
+      parsed,
+      matched: built.dryRun.matched,
+      eligibleCount: built.dryRun.eligible.length,
+      excludedCount: built.dryRun.excluded.length,
+      mixUnits: built.dryRun.mixUnits,
+      brief: {
+        budgetInputWon: built.dryRun.brief.budgetInputWon,
+        budgetMode: built.dryRun.brief.budgetMode,
+        flightStart: built.dryRun.brief.flightStart,
+        flightEnd: built.dryRun.brief.flightEnd,
       },
-      matched: result.matched,
-      eligibleCount: result.eligible.length,
-      excludedCount: result.excluded.length,
-      options: result.options,
+      snapshot: {
+        totalCostWon: built.snapshot.metrics.totalCostWon,
+        totalImpressions: built.snapshot.metrics.totalImpressions,
+        mixCpmWon: built.snapshot.metrics.mixCpmWon,
+        netReach: built.snapshot.metrics.netReach,
+      },
+      thumbs: built.payload.portfolio.map((row) => ({
+        id: row.id,
+        name: row.name,
+        thumbUrl: row.thumbUrl ?? null,
+      })),
     });
   } catch (e) {
     console.error("[inquiry-auto-proposal/dry-run]", e);

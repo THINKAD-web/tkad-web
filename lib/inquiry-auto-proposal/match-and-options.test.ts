@@ -3,12 +3,12 @@ import { test } from "node:test";
 import type { MediaItem } from "@/lib/media-data";
 import { parseInquiryProposalText } from "./parse-inquiry-text";
 import {
-  buildProposalOptions,
   matchInquiryMedia,
   type ProposalCatalogRow,
 } from "./match-and-options";
 import { PILOT_DEFAULT_INQUIRY_TEXT } from "./pilot-skus";
-import { resolveOptionPortfolio } from "./run-dry-run";
+import { inquiryMixUnits } from "./to-brief";
+import { runInquiryAutoProposalDryRun } from "./run-dry-run";
 
 function row(partial: {
   id: string;
@@ -111,7 +111,7 @@ test("parses budget 3000만 and airport + rest-stop intent", () => {
   assert.equal(p.namedNeedles.length, 5);
 });
 
-test("filters flagged and out-of-bounds CPM from options", () => {
+test("filters flagged and out-of-bounds CPM from mixUnits", async () => {
   const parsed = parseInquiryProposalText(PILOT_DEFAULT_INQUIRY_TEXT);
   const matched = matchInquiryMedia(catalog, parsed);
   const flagged = matched.find((m) => m.id === "flagged-air");
@@ -127,33 +127,14 @@ test("filters flagged and out-of-bounds CPM from options", () => {
   assert.equal(rest!.eligible, false);
   assert.ok(rest!.reasons.includes("cpm_class_bounds"));
 
-  const options = buildProposalOptions(matched, parsed.budgetWon);
-  assert.ok(options.every((o) => !o.mediaIds.includes("pkg")));
-  assert.ok(options.every((o) => !o.mediaIds.includes("rest")));
-  assert.ok(options.every((o) => !o.mediaIds.includes("flagged-air")));
-  assert.ok(options.some((o) => o.optionId === "single:t1"));
-  assert.ok(options.some((o) => o.optionId === "combo:t1+t2"));
-});
-
-test("resolveOptionPortfolio refuses leaked ids", () => {
-  const parsed = parseInquiryProposalText(PILOT_DEFAULT_INQUIRY_TEXT);
-  const matched = matchInquiryMedia(catalog, parsed);
-  const options = buildProposalOptions(matched, parsed.budgetWon);
-  const ok = options.find((o) => o.optionId === "single:t1");
-  assert.ok(ok);
-  const { items } = resolveOptionPortfolio(catalog, ok!);
-  assert.equal(items[0]?.id, "t1");
-
-  assert.throws(
-    () =>
-      resolveOptionPortfolio(catalog, {
-        optionId: "single:pkg",
-        kind: "single",
-        mediaIds: ["pkg"],
-        names: ["pkg"],
-        monthlyWon: 20_000_000,
-        sellingUnitFollowUp: false,
-      }),
-    /PROPOSAL_FILTER_LEAK/,
-  );
+  const dry = await runInquiryAutoProposalDryRun(PILOT_DEFAULT_INQUIRY_TEXT, {
+    proposalCatalog: catalog,
+    flightStart: "2026-09-01",
+  });
+  assert.equal(dry.mixUnits.pkg, undefined);
+  assert.equal(dry.mixUnits.rest, undefined);
+  assert.equal(dry.mixUnits["flagged-air"], undefined);
+  assert.equal(dry.mixUnits.t1, 1);
+  assert.equal(dry.mixUnits.t2, 1);
+  assert.deepEqual(inquiryMixUnits(dry.eligible.map((m) => m.id)), dry.mixUnits);
 });

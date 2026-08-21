@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
   const deny = assertAdminDb(request);
   if (deny) return deny;
 
-  let body: { text?: unknown; optionId?: unknown; to?: unknown };
+  let body: { text?: unknown; to?: unknown };
   try {
     body = await request.json();
   } catch {
@@ -19,12 +19,11 @@ export async function POST(request: NextRequest) {
   }
 
   const text = typeof body.text === "string" ? body.text : "";
-  const optionId = typeof body.optionId === "string" ? body.optionId : "";
   const to = typeof body.to === "string" ? body.to : "";
 
   try {
     const result = await dispatchInquiryAutoProposalSend(
-      { text, optionId, to },
+      { text, to },
       { isEmailConfigured, sendEmailWithPdfAttachment },
     );
     if (!result.ok) {
@@ -33,7 +32,6 @@ export async function POST(request: NextRequest) {
     return json({
       ok: true,
       to: result.to,
-      optionId: result.optionId,
       names: result.names,
     });
   } catch (e) {
