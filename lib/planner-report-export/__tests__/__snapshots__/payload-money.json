@@ -1,0 +1,1302 @@
+{
+  "korea-campaign-21d": {
+    "purpose": "합의된 회귀 케이스 — 3매체 · 21일 · 700만",
+    "money": {
+      "budgetMan": 700,
+      "cpmKpi": [
+        "블렌디드 CPM=₩964"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 2800000,
+            "pct": 57.1
+          },
+          {
+            "label": "고정형",
+            "value": 1400000,
+            "pct": 28.6
+          },
+          {
+            "label": "이동형",
+            "value": 700000,
+            "pct": 14.3
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 4200000,
+            "pct": 85.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 700000,
+            "pct": 14.3
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 808,
+            "pct": null
+          },
+          {
+            "label": "고정형",
+            "value": 1282,
+            "pct": null
+          },
+          {
+            "label": "이동형",
+            "value": 1333,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "name": "서울대입구역 맥스비전",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩280만",
+          "budgetContributionPct": 57
+        },
+        {
+          "id": "m2",
+          "name": "강남대로 빌보드",
+          "priceLabel": "₩200만/월",
+          "monthlyPriceLabel": "₩200만/월",
+          "lineTotalLabel": "₩140만",
+          "budgetContributionPct": 29
+        },
+        {
+          "id": "m3",
+          "name": "홍대 버스 래핑",
+          "priceLabel": "₩100만/월",
+          "monthlyPriceLabel": "₩100만/월",
+          "lineTotalLabel": "₩70만",
+          "budgetContributionPct": 14
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 3,
+          "monthlyBudgetWon": 7000000,
+          "periodBudgetWon": 7000000,
+          "budgetPct": 100,
+          "cpmKrw": 964
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "label": "관악권",
+          "monthlyBudgetWon": 4000000,
+          "periodBudgetWon": 4000000,
+          "budgetPct": 57.1,
+          "cpmKrw": 808
+        },
+        {
+          "regionKey": "gangnam",
+          "label": "강남권",
+          "monthlyBudgetWon": 2000000,
+          "periodBudgetWon": 2000000,
+          "budgetPct": 28.6,
+          "cpmKrw": 1282
+        },
+        {
+          "regionKey": "mapo",
+          "label": "마포권",
+          "monthlyBudgetWon": 1000000,
+          "periodBudgetWon": 1000000,
+          "budgetPct": 14.3,
+          "cpmKrw": 1333
+        }
+      ]
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=5,082,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "고정형",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "이동형",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 6510000,
+            "pct": 89.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": [
+          {
+            "label": "관악권",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "강남권",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "마포권",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 68
+        },
+        {
+          "id": "m2",
+          "dailyTraffic": 52000,
+          "exposureContributionPct": 21
+        },
+        {
+          "id": "m3",
+          "dailyTraffic": 25000,
+          "exposureContributionPct": 10
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 7260000,
+          "totalImpressions": 7260000,
+          "impressionPct": 100,
+          "uniqueReach": 2141926
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "totalImpressions": 4950000,
+          "impressionPct": 68.2,
+          "uniqueReach": 1986110
+        },
+        {
+          "regionKey": "gangnam",
+          "totalImpressions": 1560000,
+          "impressionPct": 21.5,
+          "uniqueReach": 625926
+        },
+        {
+          "regionKey": "mapo",
+          "totalImpressions": 750000,
+          "impressionPct": 10.3,
+          "uniqueReach": 300926
+        }
+      ]
+    }
+  },
+  "exact-30d": {
+    "purpose": "요율 키 정확 일치 경로 (30days)",
+    "money": {
+      "budgetMan": 700,
+      "cpmKpi": [
+        "블렌디드 CPM=₩964"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "고정형",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "이동형",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 6000000,
+            "pct": 85.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 808,
+            "pct": null
+          },
+          {
+            "label": "고정형",
+            "value": 1282,
+            "pct": null
+          },
+          {
+            "label": "이동형",
+            "value": 1333,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "name": "서울대입구역 맥스비전",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩400만",
+          "budgetContributionPct": 57
+        },
+        {
+          "id": "m2",
+          "name": "강남대로 빌보드",
+          "priceLabel": "₩200만/월",
+          "monthlyPriceLabel": "₩200만/월",
+          "lineTotalLabel": "₩200만",
+          "budgetContributionPct": 29
+        },
+        {
+          "id": "m3",
+          "name": "홍대 버스 래핑",
+          "priceLabel": "₩100만/월",
+          "monthlyPriceLabel": "₩100만/월",
+          "lineTotalLabel": "₩100만",
+          "budgetContributionPct": 14
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 3,
+          "monthlyBudgetWon": 7000000,
+          "periodBudgetWon": 7000000,
+          "budgetPct": 100,
+          "cpmKrw": 964
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "label": "관악권",
+          "monthlyBudgetWon": 4000000,
+          "periodBudgetWon": 4000000,
+          "budgetPct": 57.1,
+          "cpmKrw": 808
+        },
+        {
+          "regionKey": "gangnam",
+          "label": "강남권",
+          "monthlyBudgetWon": 2000000,
+          "periodBudgetWon": 2000000,
+          "budgetPct": 28.6,
+          "cpmKrw": 1282
+        },
+        {
+          "regionKey": "mapo",
+          "label": "마포권",
+          "monthlyBudgetWon": 1000000,
+          "periodBudgetWon": 1000000,
+          "budgetPct": 14.3,
+          "cpmKrw": 1333
+        }
+      ]
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=7,260,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "고정형",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "이동형",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 6510000,
+            "pct": 89.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": [
+          {
+            "label": "관악권",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "강남권",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "마포권",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 68
+        },
+        {
+          "id": "m2",
+          "dailyTraffic": 52000,
+          "exposureContributionPct": 21
+        },
+        {
+          "id": "m3",
+          "dailyTraffic": 25000,
+          "exposureContributionPct": 10
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 7260000,
+          "totalImpressions": 7260000,
+          "impressionPct": 100,
+          "uniqueReach": 2141926
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "totalImpressions": 4950000,
+          "impressionPct": 68.2,
+          "uniqueReach": 1986110
+        },
+        {
+          "regionKey": "gangnam",
+          "totalImpressions": 1560000,
+          "impressionPct": 21.5,
+          "uniqueReach": 625926
+        },
+        {
+          "regionKey": "mapo",
+          "totalImpressions": 750000,
+          "impressionPct": 10.3,
+          "uniqueReach": 300926
+        }
+      ]
+    }
+  },
+  "two-week-14d": {
+    "purpose": "2주 프리셋 — 15days 키 불일치로 선형 폴백 (A-6 확인 대상)",
+    "money": {
+      "budgetMan": 700,
+      "cpmKpi": [
+        "블렌디드 CPM=₩964"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 1866667,
+            "pct": 57.1
+          },
+          {
+            "label": "고정형",
+            "value": 933333,
+            "pct": 28.6
+          },
+          {
+            "label": "이동형",
+            "value": 466667,
+            "pct": 14.3
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 2800000,
+            "pct": 85.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 466667,
+            "pct": 14.3
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 808,
+            "pct": null
+          },
+          {
+            "label": "고정형",
+            "value": 1282,
+            "pct": null
+          },
+          {
+            "label": "이동형",
+            "value": 1333,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 57.1
+          },
+          {
+            "label": "강남권",
+            "value": 2000000,
+            "pct": 28.6
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 14.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "name": "서울대입구역 맥스비전",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩187만",
+          "budgetContributionPct": 57
+        },
+        {
+          "id": "m2",
+          "name": "강남대로 빌보드",
+          "priceLabel": "₩200만/월",
+          "monthlyPriceLabel": "₩200만/월",
+          "lineTotalLabel": "₩93만",
+          "budgetContributionPct": 29
+        },
+        {
+          "id": "m3",
+          "name": "홍대 버스 래핑",
+          "priceLabel": "₩100만/월",
+          "monthlyPriceLabel": "₩100만/월",
+          "lineTotalLabel": "₩47만",
+          "budgetContributionPct": 14
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 3,
+          "monthlyBudgetWon": 7000000,
+          "periodBudgetWon": 7000000,
+          "budgetPct": 100,
+          "cpmKrw": 964
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "label": "관악권",
+          "monthlyBudgetWon": 4000000,
+          "periodBudgetWon": 4000000,
+          "budgetPct": 57.1,
+          "cpmKrw": 808
+        },
+        {
+          "regionKey": "gangnam",
+          "label": "강남권",
+          "monthlyBudgetWon": 2000000,
+          "periodBudgetWon": 2000000,
+          "budgetPct": 28.6,
+          "cpmKrw": 1282
+        },
+        {
+          "regionKey": "mapo",
+          "label": "마포권",
+          "monthlyBudgetWon": 1000000,
+          "periodBudgetWon": 1000000,
+          "budgetPct": 14.3,
+          "cpmKrw": 1333
+        }
+      ]
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=3,388,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "고정형",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "이동형",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 6510000,
+            "pct": 89.7
+          },
+          {
+            "label": "교통 매체",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": [
+          {
+            "label": "관악권",
+            "value": 4950000,
+            "pct": 68.2
+          },
+          {
+            "label": "강남권",
+            "value": 1560000,
+            "pct": 21.5
+          },
+          {
+            "label": "마포권",
+            "value": 750000,
+            "pct": 10.3
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 68
+        },
+        {
+          "id": "m2",
+          "dailyTraffic": 52000,
+          "exposureContributionPct": 21
+        },
+        {
+          "id": "m3",
+          "dailyTraffic": 25000,
+          "exposureContributionPct": 10
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 7260000,
+          "totalImpressions": 7260000,
+          "impressionPct": 100,
+          "uniqueReach": 2141926
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "totalImpressions": 4950000,
+          "impressionPct": 68.2,
+          "uniqueReach": 1986110
+        },
+        {
+          "regionKey": "gangnam",
+          "totalImpressions": 1560000,
+          "impressionPct": 21.5,
+          "uniqueReach": 625926
+        },
+        {
+          "regionKey": "mapo",
+          "totalImpressions": 750000,
+          "impressionPct": 10.3,
+          "uniqueReach": 300926
+        }
+      ]
+    }
+  },
+  "with-quantities": {
+    "purpose": "units 비례 경로 — 수량 2 이상 (도달 변화 관측 대상)",
+    "money": {
+      "budgetMan": 700,
+      "cpmKpi": [
+        "블렌디드 CPM=₩1,006"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 4000000,
+            "pct": 50
+          },
+          {
+            "label": "이동형",
+            "value": 4000000,
+            "pct": 50
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 4000000,
+            "pct": 50
+          },
+          {
+            "label": "교통 매체",
+            "value": 4000000,
+            "pct": 50
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 808,
+            "pct": null
+          },
+          {
+            "label": "이동형",
+            "value": 1333,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "관악권",
+            "value": 4000000,
+            "pct": 80
+          },
+          {
+            "label": "마포권",
+            "value": 1000000,
+            "pct": 20
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "name": "서울대입구역 맥스비전",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩400만",
+          "budgetContributionPct": 50
+        },
+        {
+          "id": "m3",
+          "name": "홍대 버스 래핑",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩400만",
+          "budgetContributionPct": 50
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 2,
+          "monthlyBudgetWon": 8000000,
+          "periodBudgetWon": 8000000,
+          "budgetPct": 100,
+          "cpmKrw": 877
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "label": "관악권",
+          "monthlyBudgetWon": 4000000,
+          "periodBudgetWon": 4000000,
+          "budgetPct": 80,
+          "cpmKrw": 808
+        },
+        {
+          "regionKey": "mapo",
+          "label": "마포권",
+          "monthlyBudgetWon": 1000000,
+          "periodBudgetWon": 1000000,
+          "budgetPct": 20,
+          "cpmKrw": 1333
+        }
+      ]
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=7,950,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 4950000,
+            "pct": 62.3
+          },
+          {
+            "label": "이동형",
+            "value": 3000000,
+            "pct": 37.7
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 4950000,
+            "pct": 62.3
+          },
+          {
+            "label": "교통 매체",
+            "value": 3000000,
+            "pct": 37.7
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": [
+          {
+            "label": "관악권",
+            "value": 4950000,
+            "pct": 86.8
+          },
+          {
+            "label": "마포권",
+            "value": 750000,
+            "pct": 13.2
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 62
+        },
+        {
+          "id": "m3",
+          "dailyTraffic": 25000,
+          "exposureContributionPct": 38
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 7950000,
+          "totalImpressions": 7950000,
+          "impressionPct": 100,
+          "uniqueReach": 2055118
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "gwanak",
+          "totalImpressions": 4950000,
+          "impressionPct": 86.8,
+          "uniqueReach": 1986110
+        },
+        {
+          "regionKey": "mapo",
+          "totalImpressions": 750000,
+          "impressionPct": 13.2,
+          "uniqueReach": 300926
+        }
+      ]
+    }
+  },
+  "with-network": {
+    "purpose": "네트워크 매체 — 패키지 단가 경로",
+    "money": {
+      "budgetMan": 1200,
+      "cpmKpi": [
+        "블렌디드 CPM=₩76"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 4000000,
+            "pct": 100
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 4000000,
+            "pct": 100
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 76,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": []
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "name": "서울대입구역 맥스비전",
+          "priceLabel": "₩400만/월",
+          "monthlyPriceLabel": "₩400만/월",
+          "lineTotalLabel": "₩400만",
+          "budgetContributionPct": 100
+        },
+        {
+          "id": "m-nw",
+          "name": "편의점 네트워크",
+          "priceLabel": "₩600만/월",
+          "monthlyPriceLabel": "₩600만/월",
+          "lineTotalLabel": null,
+          "budgetContributionPct": 0
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 2,
+          "monthlyBudgetWon": 4000000,
+          "periodBudgetWon": 4000000,
+          "budgetPct": 100,
+          "cpmKrw": 1361
+        }
+      ],
+      "regionSubdivision": []
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=52,950,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 52950000,
+            "pct": 100
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "디지털/온라인",
+            "value": 48000000,
+            "pct": 90.7
+          },
+          {
+            "label": "기타",
+            "value": 4950000,
+            "pct": 9.3
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": []
+      },
+      "portfolio": [
+        {
+          "id": "m1",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 9
+        },
+        {
+          "id": "m-nw",
+          "dailyTraffic": 80000,
+          "exposureContributionPct": 91
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 52950000,
+          "totalImpressions": 52950000,
+          "impressionPct": 100,
+          "uniqueReach": 2145315
+        }
+      ],
+      "regionSubdivision": []
+    }
+  },
+  "single-media": {
+    "purpose": "경계 케이스 — 매체 1개",
+    "money": {
+      "budgetMan": 200,
+      "cpmKpi": [
+        "블렌디드 CPM=₩1,282"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "고정형",
+            "value": 2000000,
+            "pct": 100
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 2000000,
+            "pct": 100
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "고정형",
+            "value": 1282,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": []
+      },
+      "portfolio": [
+        {
+          "id": "m2",
+          "name": "강남대로 빌보드",
+          "priceLabel": "₩200만/월",
+          "monthlyPriceLabel": "₩200만/월",
+          "lineTotalLabel": "₩200만",
+          "budgetContributionPct": 100
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 1,
+          "monthlyBudgetWon": 2000000,
+          "periodBudgetWon": 2000000,
+          "budgetPct": 100,
+          "cpmKrw": 1282
+        }
+      ],
+      "regionSubdivision": []
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=1,560,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "고정형",
+            "value": 1560000,
+            "pct": 100
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 1560000,
+            "pct": 100
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": []
+      },
+      "portfolio": [
+        {
+          "id": "m2",
+          "dailyTraffic": 52000,
+          "exposureContributionPct": 100
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 1560000,
+          "totalImpressions": 1560000,
+          "impressionPct": 100,
+          "uniqueReach": 625926
+        }
+      ],
+      "regionSubdivision": []
+    }
+  },
+  "impressions-conflict": {
+    "purpose": "A안 준수 — impressions 저장값을 무시하고 일 유동인구 기준을 쓰는지 고정",
+    "money": {
+      "budgetMan": 500,
+      "cpmKpi": [
+        "블렌디드 CPM=₩768"
+      ],
+      "charts": {
+        "budgetSplit": [
+          {
+            "label": "디지털",
+            "value": 3000000,
+            "pct": 60
+          },
+          {
+            "label": "고정형",
+            "value": 2000000,
+            "pct": 40
+          }
+        ],
+        "browseBudgetSplit": [
+          {
+            "label": "기타",
+            "value": 5000000,
+            "pct": 100
+          }
+        ],
+        "cpmBars": [
+          {
+            "label": "디지털",
+            "value": 606,
+            "pct": null
+          },
+          {
+            "label": "고정형",
+            "value": 1282,
+            "pct": null
+          }
+        ],
+        "regionBudgetSplit": [],
+        "regionSubdivisionBudgetSplit": [
+          {
+            "label": "광화문/도심",
+            "value": 3000000,
+            "pct": 60
+          },
+          {
+            "label": "강남/서초",
+            "value": 2000000,
+            "pct": 40
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m-conflict",
+          "name": "노출 충돌 매체",
+          "priceLabel": "₩300만/월",
+          "monthlyPriceLabel": "₩300만/월",
+          "lineTotalLabel": "₩300만",
+          "budgetContributionPct": 60
+        },
+        {
+          "id": "m2",
+          "name": "강남대로 빌보드",
+          "priceLabel": "₩200만/월",
+          "monthlyPriceLabel": "₩200만/월",
+          "lineTotalLabel": "₩200만",
+          "budgetContributionPct": 40
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "label": "서울",
+          "mediaCount": 2,
+          "monthlyBudgetWon": 5000000,
+          "periodBudgetWon": 5000000,
+          "budgetPct": 100,
+          "cpmKrw": 768
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "seoul_cbd",
+          "label": "광화문/도심",
+          "monthlyBudgetWon": 3000000,
+          "periodBudgetWon": 3000000,
+          "budgetPct": 60,
+          "cpmKrw": 606
+        },
+        {
+          "regionKey": "seoul_gangnam",
+          "label": "강남/서초",
+          "monthlyBudgetWon": 2000000,
+          "periodBudgetWon": 2000000,
+          "budgetPct": 40,
+          "cpmKrw": 1282
+        }
+      ]
+    },
+    "impressions": {
+      "impressionKpi": [
+        "총 예상 노출=6,510,000",
+        "핵심 타깃 도달=—",
+        "기대 ROI=—"
+      ],
+      "charts": {
+        "impressionSplit": [
+          {
+            "label": "디지털",
+            "value": 4950000,
+            "pct": 76
+          },
+          {
+            "label": "고정형",
+            "value": 1560000,
+            "pct": 24
+          }
+        ],
+        "browseImpressionSplit": [
+          {
+            "label": "기타",
+            "value": 6510000,
+            "pct": 100
+          }
+        ],
+        "regionImpressionSplit": [],
+        "regionSubdivisionImpressionSplit": [
+          {
+            "label": "광화문/도심",
+            "value": 4950000,
+            "pct": 76
+          },
+          {
+            "label": "강남/서초",
+            "value": 1560000,
+            "pct": 24
+          }
+        ]
+      },
+      "portfolio": [
+        {
+          "id": "m-conflict",
+          "dailyTraffic": 165000,
+          "exposureContributionPct": 76
+        },
+        {
+          "id": "m2",
+          "dailyTraffic": 52000,
+          "exposureContributionPct": 24
+        }
+      ],
+      "regionBreakdown": [
+        {
+          "regionKey": "seoul",
+          "monthlyImpressions": 6510000,
+          "totalImpressions": 6510000,
+          "impressionPct": 100,
+          "uniqueReach": 2107670
+        }
+      ],
+      "regionSubdivision": [
+        {
+          "regionKey": "seoul_cbd",
+          "totalImpressions": 4950000,
+          "impressionPct": 76,
+          "uniqueReach": 1986110
+        },
+        {
+          "regionKey": "seoul_gangnam",
+          "totalImpressions": 1560000,
+          "impressionPct": 24,
+          "uniqueReach": 625926
+        }
+      ]
+    }
+  }
+}
