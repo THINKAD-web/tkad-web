@@ -12,14 +12,12 @@
  */
 
 import type { MediaItem } from "@/lib/media-data";
-import {
-  budgetSplitByCategory,
-  computePortfolioReportMetrics,
-  portfolioCpmByCategory,
-  portfolioDailyByCategory,
-} from "@/lib/planner-logic";
+import { calculatePlan } from "@/lib/planner/calc/engine";
 import { computePlanCartRegionalBreakdown } from "@/lib/plan-cart-report/regional-breakdown";
-import type { PlannerPortfolioPricing } from "@/lib/planner/planner-media-quantity";
+import {
+  plannerMediaPeriodLineWon,
+  type PlannerPortfolioPricing,
+} from "@/lib/planner/planner-media-quantity";
 import type { BuildOohPayloadArgs } from "@/lib/planner-report-export/payload-ooh";
 
 function media(o: Partial<MediaItem> & Pick<MediaItem, "id">): MediaItem {
@@ -194,31 +192,42 @@ export function buildScenarioArgs(s: SnapshotScenario): BuildOohPayloadArgs {
   };
   const periodCtx = s.months > 0 ? { months: s.months } : undefined;
 
-  const budgetAllocation = budgetSplitByCategory(
-    s.portfolio,
-    pricing,
-    periodCtx,
-  ).map((x) => ({
+  // A-1 Wave 4 — 재현부도 새 경로로 교체했다.
+  // `usePlannerReportDerived` 가 지금 하는 것과 같다.
+  // **이 교체 후에도 스냅샷이 그대로여야** A-1 전체가 값 중립임이 증명된다.
+  const plan = calculatePlan({
+    media: s.portfolio.map((m) => ({
+      media: m,
+      units: pricing.quantities?.[m.id],
+      itemNet: plannerMediaPeriodLineWon(
+        m,
+        periodCtx ?? { months: 1 },
+        pricing,
+        true,
+      ),
+    })),
+    period: { kind: "months", months: s.months > 0 ? s.months : 1 },
+    budgetWon: Math.max(0, s.budgetMan) * 10_000,
+  });
+
+  const budgetAllocation = plan.breakdown.byCategory.map((x) => ({
     key: x.key,
     label: x.labelKo,
-    pct: x.pct,
-    valueWon: x.value,
-    actualWon: x.actualWon,
+    pct: x.budgetShare,
+    valueWon: x.budgetAmount,
+    actualWon: x.budgetAmount,
   }));
 
-  const cpmBars = portfolioCpmByCategory(s.portfolio, pricing, periodCtx).map(
-    (p) => ({ key: p.key, label: p.labelKo, value: p.cpm }),
-  );
+  const cpmBars = plan.breakdown.byCategory
+    .filter((x) => (x.cpmWon ?? 0) > 0)
+    .map((x) => ({ key: x.key, label: x.labelKo, value: x.cpmWon ?? 0 }))
+    .sort((x, y) => x.value - y.value);
 
-  const report = computePortfolioReportMetrics(
-    s.portfolio,
-    s.months,
-    pricing,
-    periodCtx,
-  );
-
-  // 차트 입력이 실제 화면과 같은 경로를 타는지 확인하기 위해 함께 계산한다.
-  portfolioDailyByCategory(s.portfolio);
+  const report = {
+    monthlyImpressions: plan.impressions.monthlyEquivalent,
+    totalImpressions: plan.impressions.campaignTotal,
+    blendedCpmKrw: plan.cpm.campaignWon,
+  };
 
   // planner-page-client 재현 — 지역 표는 호출자가 계산해 payload 에 넘긴다.
   // 이 함수 안의 `Math.max(1, months)` 클램프가 Wave 2 교체 대상이다.
