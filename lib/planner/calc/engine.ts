@@ -295,6 +295,7 @@ function buildMediaItems(
     const campaignImpressions = round(dailyImpressions * period.days);
     const itemNet = Math.max(0, round(entry.itemNet));
 
+    const visNorm = normalizeVisibilityScore(m.visibilityScore);
     const rawType = (m.type ?? "").trim();
     const type: PlanMediaType | null = isValidCatalogMediaType(rawType)
       ? (rawType.toLowerCase() as PlanMediaType)
@@ -360,7 +361,9 @@ function buildMediaItems(
       impressionShare: 0,
       budgetShare: 0,
       cpmWon: cpmOf(itemNet, campaignImpressions),
-      visibilityNorm: normalizeVisibilityScore(m.visibilityScore),
+      monthlyCpmWon: cpmOf(itemNet, monthlyImpressions),
+      visibilityNorm: visNorm,
+      ots: round(campaignImpressions * visNorm),
     } satisfies PlanMediaItem;
   });
 
@@ -622,6 +625,7 @@ export function calculatePlan(input: CalcPlanInput): PlanResult {
     0,
   );
   const mediaNet = mediaItems.reduce((s, m) => s + m.itemNet, 0);
+  const ots = mediaItems.reduce((s, m) => s + m.ots, 0);
 
   const budgetUsage = computeBudgetUsage(input.budgetWon, mediaNet, warnings);
   const reach = computeReach(
@@ -653,10 +657,12 @@ export function calculatePlan(input: CalcPlanInput): PlanResult {
       daily: round(daily),
       monthlyEquivalent: round(monthlyEquivalent),
       campaignTotal,
+      ots,
     },
     cpm: {
       campaignWon: cpmOf(mediaNet, campaignTotal),
       monthlyWon: cpmOf(mediaNet, round(monthlyEquivalent)),
+      budgetWon: cpmOf(budgetUsage.budgetWon, campaignTotal),
     },
     reach,
     breakdown: buildBreakdown(mediaItems),

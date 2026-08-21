@@ -166,6 +166,11 @@ export type PlanImpressions = {
    * 화면·PDF·저장 플랜의 **유일한** 총노출 값.
    */
   campaignTotal: number;
+  /**
+   * OTS — 가시성 가중 노출 = Σ round(campaignImpressions × visibilityNorm).
+   * `computeAdvancedPlannerMetrics` 의 totalOts 와 같은 정의다.
+   */
+  ots: number;
 };
 
 export type PlanCpm = {
@@ -173,6 +178,13 @@ export type PlanCpm = {
   campaignWon: number | null;
   /** 30일 환산 기준 — 카탈로그 단가와 비교할 때만 사용 */
   monthlyWon: number | null;
+  /**
+   * 예산 기준 = money.budgetInput / (impressions.campaignTotal / 1000).
+   * 매체 순액이 아니라 **사용자가 입력한 예산** 이 분자다.
+   * 효과 시뮬레이션 패널의 "예산 기준 CPM" 이 쓰는 값으로,
+   * `computeAdvancedPlannerMetrics` 의 cpmKrw 와 같은 정의다.
+   */
+  budgetWon: number | null;
 };
 
 /**
@@ -287,9 +299,14 @@ export type PlanMediaItem = {
   impressionShare: number;
   /** 포트폴리오 내 예산 비중 0~100 (%) */
   budgetShare: number;
+  /** 캠페인 기준 = itemNet / (campaignImpressions / 1000) */
   cpmWon: number | null;
+  /** 30일 환산 기준 = itemNet / (monthlyImpressions / 1000). 상위 `cpm.monthlyWon` 과 대칭 */
+  monthlyCpmWon: number | null;
   /** 0~1 정규화 가시성 */
   visibilityNorm: number;
+  /** 가시성 가중 노출 = round(campaignImpressions × visibilityNorm). 상위 `impressions.ots` 와 대칭 */
+  ots: number;
 };
 
 // ---------------------------------------------------------------------------
