@@ -1,0 +1,5 @@
+mediaId,mediaName,mediaSubCategory(현재),impressions,dailyFootfall,airport cap 초과 여부,subway_psd cap 초과 여부,cohort
+cmrm47dry00010ahtq1bssgdg,공항철도 서울역 디지털사이니지 광고,subway_station,10500000,350000,Y,N,new
+
+# Phase B ABC 6건 (이미 처리 중) — 위 신규 건수에 포함하지 않음
+# (갭 구간에 해당하는 ABC 6건 없음)

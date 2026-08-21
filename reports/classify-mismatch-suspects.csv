@@ -1,0 +1,57 @@
+direction,reason,mediaId,mediaName,type,mediaSubCategory,mediaClass,nameOnlyClass,monthlyCap
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrm5szv00040bksfoyxzrth,공항철도 서울역 에스컬레이터 광고③ (지하상층~지상1층),static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm5a2pl000004ievne55oex,공항철도 인천국제공항 T1 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqqtzlk6000d04lktvd4qq11,공항철도 홍대입구역 3번 출구 코너 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmofq1dky000204l50loidtiq,공항철도 서울역 E/S 핸드레일 랩핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrpy6vh00030ai366l1xgkn,공항철도 검암역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrpszqp00020bj9kw9m7lzw,공항철도 공덕역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrnc9uw00010bj7wh5uteyv,공항철도 개찰구 래핑 Full Package 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrp2sdo000204levvkf0tp6,공항철도 인천공항T1역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_interior),cmqz8nw3c000004legwvfs6dt,도심공항 리무진버스 내부동영상 광고,mobile,bus_interior,bus_exterior,bus_exterior,2000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_interior),cmqz954e3000204i9989ts451,도심공항 리무진버스 헤드시트 광고,mobile,bus_interior,bus_exterior,bus_exterior,2000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmp0s4prw000204ktul6suaow,대구 국제공항 국내선 1층 전광판 광고,digital,digital_signage,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm4g35k001q0ahtz7m2ph5f,공항철도 홍대입구역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrm0mvd000004jl7ca3zr6b,공항철도 서울역 지하3층 환승 구간 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrp9jnr00000bksl9e6g9fq,공항철도 디지털미디어시티역 개찰구 래핑,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_interior),cmqz91a0e000104js4dd8i780,도심공항 리무진버스 윈도우스티커 광고,mobile,bus_interior,bus_exterior,bus_exterior,2000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrp5lq8000004i8dr4ysajj,공항철도 인천공항T2역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrpktcl00010bje7r3329op,공항철도 마곡나루역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqror59000000bi04kjwjkmf,공항철도 주요 역사 개찰구 래핑 패키지 광고,static,subway_station,subway_psd,subway_light,15000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmqa7egri000204jukbc91zqd,제주공항 1층 도착장 LED 광고,digital,digital_signage,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmozef5v4000404l21zc780sn,인천공항 T1 Center Bridge,digital,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmofprkck000204jr5ij37udz,공항철도 서울역 랩핑 무빙워크 핸드레일 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrozlqf00000bi1voky1g6s,공항철도 홍대입구역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,subway_station taxonomy but name is not subway,cmoy0vd5u000004jypwos0wsw,KTX창원역 현대메디빌딩 옥탑 광고,static,subway_station,subway_psd,static_other,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrouzqm00000bgh3hmh6sza,공항철도 서울역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_interior),cmqz98w4l000204juaxwqz27x,도심공항 리무진버스 창문상단 광고,mobile,bus_interior,bus_exterior,bus_exterior,2000000
+false_subway,subway_station taxonomy but name is not subway,cmp3v7v99000204l1gdoodg2q,택시 미디어바 광고,mobile,subway_station,subway_psd,bus_exterior,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrmn6dd000d0bkxnyv1k95o,공항철도 서울역 에스컬레이터 광고 ④ (지하1층~지하2층),static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrmo26a000f0bkxmar02m9t,공항철도 서울역 에스컬레이터 광고 ⑤ (지하2층~지하3층),static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqqu75fp000704js9nhywx9p,공항철도 홍대입구역 중앙통로 벽면 패키지 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrlupi5000004jmjc2l7wil,"공항철도 서울역 무빙워크 핸드레일 A,B구역 패키지 광고",static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmqa7wy4o000204iegd2fmtl5,제주공항 2층 면세구간 사각기둥 LED 광고,digital,digital_signage,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrpnxqa00000bj9zhwkdlpj,공항철도 김포공항역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmqa924nc000204ky1c141kst,제주공항 국내선 출발/도착 DS 광고 (패키지),digital,digital_signage,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqqtj8lq000104l4xr4ajz0v,공항철도 홍대입구역 환승통로 무인워크 패키지 광고,static,subway_station,subway_psd,airport,15000000
+missed_subway,name looks subway but class=dooh_mid (sub=digital_signage),cmqje4ew4000504la7yw31uh5,부산 지하철 2호선 디지털사이니지 패키지,digital,digital_signage,dooh_mid,subway_light,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqqtssxl000204jy0p8pkyo8,공항철도 홍대입구역 3번 출구 랩핑 패키지 광고,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_exterior),cmqz8dlro000204l74mpuu8ys,도심공항 리무진버스 외부 광고 (강남),mobile,bus_exterior,bus_exterior,bus_exterior,2000000
+missed_subway,name looks subway but class=dooh_mid (sub=digital_signage),cmqtci0ny000204l8dw0fq4mz,지하철 강남역 신분당선 출구 디지털 사이니지 광고,digital,digital_signage,dooh_mid,subway_light,8000000
+missed_subway,name looks subway but class=dooh_mid (sub=digital_signage),cmoyjrhu1000004jubn133nyj,부산 지하철 1·3호선 연산역 디지털 사이니지 광고,digital,digital_signage,dooh_mid,subway_light,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqrpvzn200010ai3wthj2nhw,공항철도 계양역 개찰구 래핑 광고,static,subway_station,subway_psd,airport,15000000
+false_subway,subway_station taxonomy but name is not subway,cmp0g6lhz000804ieyfz5ywk1,도산대로 MZ 캔버스 옥탑 광고,static,subway_station,subway_psd,bus_exterior,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm4l6j7001c04jvgxdenwp8,공항철도 디지털미디어시티역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm54gsp000005jv1s4w13bi,공항철도 검암역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+missed_subway,name looks subway but class=dooh_large (sub=digital_signage),cmp0207q1000404l7fw8bc939,신사 메트로빌딩 전광판 광고,digital,digital_signage,dooh_large,static_other,20000000
+missed_subway,name looks subway but class=airport (sub=airport),cmrt206ee001b04ldzcatfifa,김포공항 국내선 1층 지하철 연결 E/S 상단 디지털 와이드칼라 광고,digital,airport,airport,subway_light,10000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmqa7t29m000404l4hc1dw5zl,제주공항 1층 국내/국제 경계선 LED 광고,digital,digital_signage,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm4vdkj002f04ky05j2tcez,공항철도 김포공항역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmox14pqi000a04l8wwqca4gm,공항철도 홍대입구역 DS 광고 (5.6번),digital,digital_signage,dooh_mid,airport,8000000
+missed_airport,name looks airport but class=dooh_mid (sub=media_pole),cmokde10o000604l1gcqhdeng,인천공항 T2 미디어폴 광고,digital,media_pole,dooh_mid,airport,8000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmqqu3jmw000404jslayiqp5s,공항철도 홍대입구역 4번 출구 패키지 광고,static,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=dooh_mid (sub=digital_signage),cmp028dmk000604kzu1jm7ex8,김포공항 동아빌딩 전광판 광고,digital,digital_signage,dooh_mid,airport,8000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_interior),cmqz9dlm3000004kz40bnelm7,도심공항 리무진버스 트렁크존 광고,mobile,bus_interior,bus_exterior,bus_exterior,2000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm47dry00010ahtq1bssgdg,공항철도 서울역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+missed_airport,name looks airport but class=bus_exterior (sub=bus_exterior),cmqz8amy6000b04lhvo2ft66a,도심공항 리무진버스 외부 광고 (강북),mobile,bus_exterior,bus_exterior,bus_exterior,2000000
+false_subway,airport-like name/location but subway class (taxonomy subway_station wins over name),cmrm4dkze001j0ahtritqcahk,공항철도 공덕역 디지털사이니지 광고,digital,subway_station,subway_psd,airport,15000000
+false_subway,golf media classified subway,cmp3v92yy000004jr7i6ykgy1,골프장 미디어바 광고,mobile,subway_station,subway_psd,static_other,15000000

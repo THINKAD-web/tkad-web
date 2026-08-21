@@ -1,0 +1,31 @@
+sampleBucket,mediaId,mediaName,ratio,impressions,dailyFootfall,mediaClass,mediaMainCategory,type,location,region,isActive,reviewStatus
+lowest10,cmou04p01000004jmsik3qj6b,부산 해운대 임팩트웨이브 전광판 광고,31.03,4500000,145000,dooh_large,ooh,digital,부산 해운대구 해운대해변로 277,busan,true,clean
+lowest10,cmqg8kvgl000004jmez9xrqvi,성남 페퍼저축은행 본점 전광판,31.05,2950000,95000,dooh_large,ooh,digital,경기도 성남시 분당구 황새울로 340 페퍼존빌딩,national,true,clean
+lowest10,cmqg6okft000104l2yh5dll83,강서구청사거리 SJ라벨라 전광판 광고,31.10,2550000,82000,dooh_large,ooh,digital,서울특별시 강서구 화곡로 350 SJ라벨라,seoul,true,clean
+lowest10,cmqg6em2r000c04l50zwklunv,강서구청사거리 베스틴빌딩 전광판 광고,31.18,2650000,85000,dooh_large,ooh,digital,서울특별시 강서구 공항대로 411 베스틴빌딩,seoul,true,clean
+lowest10,cmp8jj2au000004jvi9uf9jmn,평택 통복시장 전광판 광고,31.25,2500000,80000,dooh_mid,ooh,digital,경기 평택시 통복로 43,national,true,clean
+lowest10,cmo60kl2h000004ju46tn4790,서울역 부양빌딩 전광판 광고,31.88,9500000,298000,dooh_large,ooh,digital,서울 용산구 동자동 43-74,seoul,true,clean
+lowest10,cmqsvkrpn00010ajbc1df31sc,철산역 지하철 7호선 CM보드 영상 광고 (디지털),32.14,1350000,42000,subway_psd,transit,digital,경기 광명시 철산로 21 철산역 대합실,seoul,true,clean
+lowest10,cmqsvfqun00010ajf9igcanhx,철산역 지하철 7호선 CM보드 조명 광고 (인쇄),32.14,1350000,42000,subway_psd,transit,static,경기 광명시 철산로 21 철산역 대합실,seoul,true,clean
+lowest10,cmp3v7v99000204l1gdoodg2q,택시 미디어바 광고,32.22,14500000,450000,subway_psd,transit,mobile,"서울, 제주, 전주, 춘천, 포항, 경주, 목포, 청주, 세종 전역 택시 노선",jeju,true,clean
+lowest10,cmokduapm000004jreheydvdj,인천공항 T2 프리미엄스퀘어 광고,32.31,4200000,130000,airport,transit,digital,인천광역시 중구 공항로 272 인천국제공항 제2여객터미널 3층 면세구역,national,true,clean
+highest10,cmp3v92yy000004jr7i6ykgy1,골프장 미디어바 광고,335.29,2850000,8500,subway_psd,transit,mobile,"경기도 용인, 파주, 이천, 가평 주요 골프장",national,true,clean
+highest10,cmp0s58ou000404kty3ncswwp,대구 국제공항 국내선 2층 격리대합실 사각기둥 광고,222.22,1600000,7200,airport,transit,digital,"대구광역시 동구 공항로 221 대구국제공항 국내선 2층 격리대합실 사각기둥 11,12",national,true,clean
+highest10,cmp0s2i8b000004jxap4ok8ci,대구 국제공항 카트 광고,211.76,1800000,8500,airport,transit,static,대구광역시 동구 공항로 221 대구국제공항,national,true,clean
+highest10,cmp0s5qz9000404jxxq1ve1su,대구 국제공항 도착장 멀티비전 광고,176.00,2200000,12500,airport,transit,digital,대구광역시 동구 공항로 221 대구국제공항 1층 도착장 멀티비전,national,true,clean
+highest10,cmqp7sr5k000004jpyzaczfao,분당선 압구정로데오역 헬로 로데오 DS 광고,171.05,6500000,38000,subway_psd,transit,digital,서울 강남구 압구정로 402 지하 1층 대합실,seoul,true,clean
+highest10,cmp0s4prw000204ktul6suaow,대구 국제공항 국내선 1층 전광판 광고,150.00,1800000,12000,dooh_mid,ooh,digital,대구광역시 동구 공항로 221 대구국제공항 1층 일반대합실 도착장,national,false,clean
+highest10,cmptf5nk9000004lebz3i8yv9,블루스퀘어 미디어 광고,141.18,1200000,8500,dooh_mid,culture,digital,서울특별시 용산구 이태원로 294 블루스퀘어,seoul,true,clean
+highest10,cmp0s3jby000204jxwc3kgllo,대구 국제공항 2층 출발장 보안검색 바구니 광고,141.18,1200000,8500,airport,transit,static,대구광역시 동구 공항로 221 대구국제공항 2층 출발장 보안검색 구역,national,true,clean
+highest10,cmo5zgtqk000004l8s594fn51,신세계백화점 본점 신세계 스퀘어 전광판 광고,134.67,4500000,33414,dooh_large,ooh,digital,서울 중구 소공로 63 신세계백화점 본점,seoul,true,clean
+highest10,cmpc9yuwa000004l8blx83uyn,여수 메가박스 전광판 광고,126.76,1800000,14200,dooh_large,ooh,digital,전라남도 여수시 신월로 96 메가박스 여수웅천,national,true,clean
+random10_seed_20260820,cmpwxsqf5000004jst7x1huq3,KTX 경주역 출입구 상단 조명 광고 (1번/2번),71.43,2500000,35000,subway_light,transit,static,경상북도 경주시 건천읍 경주역로 80,national,false,clean
+random10_seed_20260820,cmrm3fc6d000n04kydi14rh4s,갤러리아 백화점 EAST DUAL LCD 광고,95.00,807500,8500,dooh_mid,shopping,digital,서울 강남구 압구정로 407 갤러리아 명품관 EAST B1~1층 중층,seoul,true,clean
+random10_seed_20260820,cmo60u0gm000204jspdl8gfc7,동대문 맥스타일 전광판 광고,64.59,1600000,24771,dooh_large,ooh,digital,서울 중구 마장로 3 맥스타일,seoul,true,clean
+random10_seed_20260820,cmqst9336000209kp6u0huka5,여의도역 지하철 5호선 CM보드 영상 광고 (디지털),66.00,3300000,50000,subway_psd,transit,digital,서울 영등포구 여의대로 24 여의도역 대합실,seoul,true,clean
+random10_seed_20260820,cmqstjkkk00060aku4v2cv9am,광화문역 지하철 5호선 CM보드 영상 광고 (디지털),52.38,3300000,63000,subway_psd,transit,digital,서울 종로구 세종대로 167 광화문역 대합실,seoul,true,clean
+random10_seed_20260820,cmqstczzv00030ajnxs3isw5w,여의도역 지하철 5호선 CM보드 조명 광고 (인쇄),66.00,3300000,50000,subway_psd,transit,static,서울 영등포구 여의대로 24 여의도역 대합실,seoul,true,clean
+random10_seed_20260820,cmo5xx2hc000004ju59vmg59d,명동 K파이낸스빌딩 전광판 광고,41.90,1400000,33414,dooh_large,ooh,digital,서울 중구 남대문로 55 K파이낸스빌딩,seoul,true,clean
+random10_seed_20260820,cmrep774v000304jrv9zmylys,부산 해운대 엘리시아 호텔 외벽 광고,36.11,6500000,180000,static_other,ooh,static,부산 해운대구 구남로 49,national,true,clean
+random10_seed_20260820,cmqg7nhl2000004i8derlksof,부천 서광빌딩 전광판 광고,34.00,2550000,75000,dooh_large,ooh,digital,경기도 부천시 오정구 신흥로 441번길 86 서광빌딩,national,true,clean
+random10_seed_20260820,cmqstp5bx00030bkn0xs830xg,공덕역 지하철 5호선 CM보드 영상 광고 (디지털),36.99,2700000,73000,subway_psd,transit,digital,서울 마포구 마포대로 92 공덕역 대합실,seoul,true,clean
