@@ -16,6 +16,13 @@ import {
 } from "@/lib/media-detail-map-markers";
 import { cn } from "@/lib/utils";
 import { networkInventoryUnitSuffix } from "@/lib/media-network-types";
+import { mediaDetailUsesLeafletMap } from "@/lib/media-detail-map-engine";
+import {
+  mapItemShowsOnMap,
+  resolveMapDisplayMode,
+  resolveMediaDetailMapNotice,
+} from "@/lib/media-map/map-display-mode";
+import { MediaDetailServiceRegionPanel } from "@/components/media-detail/media-detail-service-region-panel";
 
 /** 카카오 지도 — 선택 시 클로즈업 (작을수록 확대) */
 const LOCATION_FOCUS_ZOOM = 4;
@@ -55,6 +62,11 @@ export function MediaDetailLocationPanel({
     () => mapMarkersForMediaDetail(media, isKo),
     [media, isKo],
   );
+  const mapNotice = useMemo(
+    () => resolveMediaDetailMapNotice(media, isKo),
+    [media, isKo],
+  );
+  const showMapPins = mapItemShowsOnMap(resolveMapDisplayMode(media));
   const mapCenter = useMemo(
     () => mapCenterForMediaDetail(media, mapMarkers),
     [media, mapMarkers],
@@ -149,6 +161,7 @@ export function MediaDetailLocationPanel({
       }));
     }
     const hasCoord =
+      showMapPins &&
       Number.isFinite(media.lat) &&
       Number.isFinite(media.lng) &&
       !(media.lat === 0 && media.lng === 0);
@@ -161,7 +174,7 @@ export function MediaDetailLocationPanel({
         lng: hasCoord ? media.lng : undefined,
       },
     ];
-  }, [netLocations, media, isKo, regionDisplay]);
+  }, [netLocations, media, isKo, regionDisplay, showMapPins]);
 
   // media 변경(다른 매체 보기)에만 반응 — mapMarkers 객체 identity 의존 제거(상위 리렌더 취약성 차단).
   useEffect(() => {
@@ -212,6 +225,7 @@ export function MediaDetailLocationPanel({
   );
   const kakaoUrl = `https://map.kakao.com/link/map/${encodeURIComponent(spotName)},${mapLat},${mapLng}`;
   const googleUrl = `https://www.google.com/maps/search/?api=1&query=${mapLat},${mapLng}`;
+  const useLeafletMap = mediaDetailUsesLeafletMap(media.country);
   const addressText =
     selectedInstall?.location?.trim() ||
     (isKo ? media.location : media.locationEn || media.location);
@@ -220,15 +234,20 @@ export function MediaDetailLocationPanel({
     <div className={cn("space-y-6", className)}>
       <div className="overflow-hidden rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white shadow-sm">
         <div className="h-80 min-h-[20rem] w-full sm:h-96">
-          <MediaDetailKakaoMap
-            markers={mapMarkers}
-            selectedId={selectedId}
-            onSelect={selectMarker}
-            center={mapCenter}
-            zoom={mapZoom}
-            disableCluster={mapMarkers.length <= 8}
-            command={mapCommand}
-          />
+          {showMapPins ? (
+            <MediaDetailKakaoMap
+              country={media.country}
+              markers={mapMarkers}
+              selectedId={selectedId}
+              onSelect={selectMarker}
+              center={mapCenter}
+              zoom={mapZoom}
+              disableCluster={mapMarkers.length <= 8}
+              command={mapCommand}
+            />
+          ) : mapNotice ? (
+            <MediaDetailServiceRegionPanel notice={mapNotice} />
+          ) : null}
         </div>
       </div>
 
@@ -307,7 +326,7 @@ export function MediaDetailLocationPanel({
         </div>
       ) : null}
 
-      <div className="grid gap-4 sm:grid-cols-2">
+      <div className={cn("grid gap-4", !useLeafletMap && showMapPins && "sm:grid-cols-2")}>
         <div className="rounded-2xl border dark:border-white/10 border-gray-200 dark:bg-white/5 bg-white p-4">
           <p className="mb-2 flex items-center gap-2 text-[length:var(--qp-text-meta)] font-semibold tracking-wide text-[color:var(--qp-accent)] dark:text-[color:var(--qp-accent)]/80">
             <MapPin className="h-3.5 w-3.5" aria-hidden />
@@ -319,15 +338,18 @@ export function MediaDetailLocationPanel({
           <p className="mt-2 text-[length:var(--qp-text-meta)] text-gray-600 dark:text-white/65">
             {t("locationRegionLabel")}: {regionDisplay}
           </p>
+          {showMapPins ? (
           <div className="mt-3 flex flex-wrap gap-3 text-xs font-semibold">
-            <a
-              href={kakaoUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
-            >
-              {t("openKakao")}
-            </a>
+            {useLeafletMap ? null : (
+              <a
+                href={kakaoUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-[color:var(--qp-accent)] underline-offset-2 hover:underline dark:text-[color:var(--qp-accent)]"
+              >
+                {t("openKakao")}
+              </a>
+            )}
             <a
               href={googleUrl}
               target="_blank"
@@ -337,21 +359,26 @@ export function MediaDetailLocationPanel({
               {t("openGoogle")}
             </a>
           </div>
+          ) : null}
         </div>
 
-        <NearbyPoiSection
-          lat={mapLat}
-          lng={mapLng}
-          address={addressText}
-          isKo={isKo}
-        />
+        {useLeafletMap || !showMapPins ? null : (
+          <NearbyPoiSection
+            lat={mapLat}
+            lng={mapLng}
+            address={addressText}
+            isKo={isKo}
+          />
+        )}
       </div>
 
-      <RoadviewCard
-        lat={mapLat}
-        lng={mapLng}
-        mediaName={spotName}
-      />
+      {useLeafletMap || !showMapPins ? null : (
+        <RoadviewCard>
+          lat={mapLat}
+          lng={mapLng}
+          mediaName={spotName}
+        />
+      )}
     </div>
   );
 }

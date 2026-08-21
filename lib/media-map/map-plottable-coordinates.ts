@@ -1,5 +1,4 @@
 import type { MediaItem } from "@/lib/media-data";
-import { mediaItemHasMapCoordinates } from "@/lib/media-detail-map-markers";
 import { PUBLIC_DARK_MAP_DEFAULT_CENTER } from "@/lib/public-dark-map-config";
 
 /** `prismaMediaToMediaItem` DB null 폴백 좌표 (서울시청) */
@@ -32,7 +31,6 @@ export function mediaItemHasPlottableMapCoordinates(
   if (installs.some((p) => isValidPlotCoordinate(p.lat, p.lng))) {
     return true;
   }
-  if (!mediaItemHasMapCoordinates(media)) return false;
   if (media.coordinatesAreFallback) return false;
   return isValidPlotCoordinate(media.lat, media.lng);
 }

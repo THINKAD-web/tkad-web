@@ -8,6 +8,11 @@ import {
 import type { MediaItem } from "@/lib/media-data";
 import type { MediaPerformanceMetrics } from "@/lib/media-performance";
 import { cn } from "@/lib/utils";
+import {
+  mapItemShowsOnMap,
+  resolveMapDisplayMode,
+  resolveMediaDetailMapNotice,
+} from "@/lib/media-map/map-display-mode";
 
 type Labels = {
   back: string;
@@ -68,7 +73,7 @@ export function MediaDetailHeroSection({
     : `${displayName} — THINKAD media detail`;
 
   const mapFallback =
-    media.lat && media.lng
+    mapItemShowsOnMap(resolveMapDisplayMode(media)) && media.lat && media.lng
       ? {
           id: media.id,
           name: displayName,
@@ -78,6 +83,7 @@ export function MediaDetailHeroSection({
           type: media.type,
         }
       : null;
+  const mapNotice = resolveMediaDetailMapNotice(media, isKo);
 
   return (
     <>
@@ -99,6 +105,8 @@ export function MediaDetailHeroSection({
             altBase={imageAlt}
             labels={labels.gallery}
             mapFallback={mapFallback}
+            mapNotice={mapNotice}
+            country={media.country}
           />
 
           <MediaDetailHeroInfo

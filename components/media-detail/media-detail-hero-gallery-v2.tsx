@@ -7,7 +7,9 @@ import { BunnyFallbackImage } from "@/components/bunny-fallback-image";
 import { MediaDetailKakaoMap } from "@/components/media-detail/media-detail-kakao-map";
 import MediaLightbox, { type MediaLightboxLabels } from "@/components/media-lightbox";
 import { MediaImagePlaceholder } from "@/components/media-image-placeholder";
+import { MediaDetailServiceRegionPanel } from "@/components/media-detail/media-detail-service-region-panel";
 import { cn } from "@/lib/utils";
+import type { MediaDetailMapNotice } from "@/lib/media-map/map-display-mode";
 
 type MapMarker = {
   id: string;
@@ -24,6 +26,9 @@ type Props = {
   altBase: string;
   labels: MediaLightboxLabels & { clickHint: string };
   mapFallback?: MapMarker | null;
+  mapNotice?: MediaDetailMapNotice | null;
+  /** 히어로 지도 폴백 — 해외는 Leaflet */
+  country?: string | null;
   className?: string;
 };
 
@@ -33,6 +38,8 @@ export function MediaDetailHeroGalleryV2({
   altBase,
   labels,
   mapFallback,
+  mapNotice,
+  country,
   className,
 }: Props) {
   const tMedia = useTranslations("media");
@@ -84,12 +91,15 @@ export function MediaDetailHeroGalleryV2({
         ) : mapFallback ? (
           <div className="absolute inset-0">
             <MediaDetailKakaoMap
+              country={country}
               markers={[mapFallback]}
               selectedId={mapFallback.id}
               center={{ lat: mapFallback.lat, lng: mapFallback.lng }}
               zoom={4}
             />
           </div>
+        ) : mapNotice ? (
+          <MediaDetailServiceRegionPanel notice={mapNotice} className="absolute inset-0 min-h-0" />
         ) : (
           <MediaImagePlaceholder
             label={tMedia("imagePreparing")}
