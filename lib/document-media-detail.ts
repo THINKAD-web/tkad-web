@@ -10,7 +10,6 @@ import { formatKrwPrimaryWithJpyFootnote } from "@/lib/media-display-currency";
 import {
   formatPlannerQuantityLabel,
   plannerMediaPeriodLineWon,
-  plannerMonthlyImpressionsForMedia,
   plannerMonthlyPriceWonForMedia,
   plannerUnitsForMedia,
   shouldShowPlannerQuantityControl,
@@ -18,6 +17,7 @@ import {
   type PlannerPeriodPricingContext,
   type PlannerPortfolioPricing,
 } from "@/lib/planner/planner-media-quantity";
+import { calculatePlan } from "@/lib/planner/calc/engine";
 import type { PlanCartItem } from "@/lib/plan-cart";
 import { formatPlanCartMultiOptionQuantityLabel } from "@/lib/plan-cart-option-selections";
 import {
@@ -322,42 +322,58 @@ export function mediaToDocumentDetail(
   };
 }
 
-/** 플래너 포트폴리오 — 노출·예산 기여도(%) */
+/**
+ * 플래너 포트폴리오 — 노출·예산 기여도(%).
+ *
+ * A-1 Wave 3 — `calculatePlan` 을 소비한다.
+ *
+ * 기존에는 노출 기여도를 `plannerMonthlyImpressionsForMedia × months` 로
+ * 따로 계산했다. 매체 카드가 표시하는 일 유동인구와 계산 기준이 달라
+ * 카드 순서와 기여도 순서가 뒤집힐 수 있었다 (D3 매체 순서 역전).
+ * 이제 노출·예산 비중이 `PlanResult` 한 곳에서 나오므로 어긋날 수 없다.
+ *
+ * 금액은 여전히 호출자 정책이다 — `itemNet` 에 매체 표 line total 과
+ * 같은 함수를 넣어 지역 표·기여도·매체 표가 모두 같은 금액을 본다.
+ */
 export function computePortfolioContributions(
   items: MediaItem[],
   months: number,
   pricing?: PlannerPortfolioPricing,
   periodCtx?: PlannerPeriodPricingContext,
 ): Map<string, { exposurePct: number; budgetPct: number }> {
-  const ctx =
-    periodCtx ?? (months > 0 ? { months } : undefined);
-  const effectiveMonths = months > 0 ? months : 1;
-  const exposureWeights = items.map(
-    (m) =>
-      plannerMonthlyImpressionsForMedia(
-        m,
-        pricing?.quantities,
-        pricing?.priceOptionIndex,
-      ) * effectiveMonths,
-  );
-  const budgetWeights = items.map((m) =>
-    ctx
-      ? plannerMediaPeriodLineWon(m, ctx, pricing)
-      : plannerMonthlyPriceWonForMedia(
-          m,
-          pricing?.quantities,
-          pricing?.priceOptionIndex,
-        ),
-  );
-  const expTotal = exposureWeights.reduce((a, b) => a + b, 0) || 1;
-  const budTotal = budgetWeights.reduce((a, b) => a + b, 0) || 1;
   const map = new Map<string, { exposurePct: number; budgetPct: number }>();
-  items.forEach((m, i) => {
-    map.set(m.id, {
-      exposurePct: Math.round((exposureWeights[i]! / expTotal) * 100),
-      budgetPct: Math.round((budgetWeights[i]! / budTotal) * 100),
-    });
+  if (items.length === 0) return map;
+
+  const ctx = periodCtx ?? (months > 0 ? { months } : undefined);
+  const effectiveMonths = months > 0 ? months : 1;
+
+  const plan = calculatePlan({
+    media: items.map((m) => ({
+      media: m,
+      units: pricing?.quantities?.[m.id],
+      itemNet: ctx
+        ? plannerMediaPeriodLineWon(m, ctx, pricing)
+        : plannerMonthlyPriceWonForMedia(
+            m,
+            pricing?.quantities,
+            pricing?.priceOptionIndex,
+          ),
+    })),
+    period: { kind: "months", months: effectiveMonths },
+    budgetWon: 0,
   });
+
+  // `impressionShare` 는 이미 소수 1자리로 반올림돼 있다. 그걸 다시 정수로
+  // 반올림하면 이중 반올림이 되어 21.49% 가 22% 로 올라간다.
+  // 분자·분모 모두 PlanResult 값이므로 재계산이 아니라 표시 반올림만 한 번 한다.
+  const impTotal = plan.impressions.campaignTotal || 1;
+  const netTotal = plan.money.mediaNet || 1;
+  for (const row of plan.mediaItems) {
+    map.set(row.id, {
+      exposurePct: Math.round((row.campaignImpressions / impTotal) * 100),
+      budgetPct: Math.round((row.itemNet / netTotal) * 100),
+    });
+  }
   return map;
 }
 

@@ -349,6 +349,11 @@ export function buildOohReportPayload(
     budgetMan: a.budgetMan,
     months,
     isKo,
+    // 이미 pricing·periodCtx 로 계산한 값을 넘긴다 — 본문과 KPI 가 같은 CPM 을 쓴다.
+    blendedCpmKrw: portfolioMetrics.blendedCpmKrw,
+    totalImpressions: portfolioMetrics.totalImpressions,
+    monthlyImpressions: portfolioMetrics.monthlyImpressions,
+    pricing,
     isAutoPortfolio: a.isAutoPortfolio,
     isInquiryMatched: a.mixSource === "inquiry_match",
   });
