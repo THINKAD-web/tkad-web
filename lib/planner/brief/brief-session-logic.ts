@@ -48,6 +48,20 @@ export function shouldPromptStaleMixBeforeStep(params: {
   });
 }
 
+/** stale·resume 모달이 동시에/연속으로 뜨지 않도록 단일 진입점 */
+export function shouldOpenStaleMixDialog(params: {
+  targetStep: BriefWizardStep;
+  state: Parameters<typeof shouldPromptStaleMixBeforeStep>[0]["state"];
+  resumeDialogOpen: boolean;
+  staleDialogOpen: boolean;
+}): boolean {
+  if (params.resumeDialogOpen || params.staleDialogOpen) return false;
+  return shouldPromptStaleMixBeforeStep({
+    targetStep: params.targetStep,
+    state: params.state,
+  });
+}
+
 /** React 19 useSyncExternalStore — selector는 원시값/안정 참조만 반환 */
 export function selectMixIsStale(s: BriefStoreState): boolean {
   return isMixBriefStale({

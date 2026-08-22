@@ -28,9 +28,9 @@ import { calcMixMetrics, type MixLine } from "@/lib/planner/brief/mix-metrics";
 import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
 import {
   scoreMediaCandidates,
-  buildRecommendedMix,
   type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
+import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
 import { MetricsPanel } from "@/components/planner/brief/metrics-panel";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
 import { BriefDigitalPanel } from "@/components/planner/brief/brief-digital-panel";
@@ -281,7 +281,11 @@ export function BriefStepTwo({
             variant="outline"
             onClick={() =>
               store.replaceMix(
-                buildRecommendedMix({ scored, days, budgetWon }),
+                rebuildBriefRecommendedMix({
+                  brief: store,
+                  catalog,
+                  isKo,
+                }),
               )
             }
           >
