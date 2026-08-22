@@ -82,11 +82,6 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        source: "/:locale(ko|en)/recommend",
-        destination: "/:locale/planner",
-        permanent: true,
-      },
-      {
         source: "/:locale(ko|en)/media/packages",
         destination: "/:locale/planner",
         permanent: true,
