@@ -22,7 +22,7 @@ import { useIntegratedMix } from "@/hooks/use-integrated-mix";
 import {
   regionOverInclusions,
   overInclusionMessage,
-  sidoCodesToBrowseMainIds,
+  filterBriefCatalogByRegion,
 } from "@/lib/planner/brief/regions";
 import { calcMixMetrics, type MixLine } from "@/lib/planner/brief/mix-metrics";
 import { briefToTargetSpec } from "@/lib/planner/brief/reach-adapter";
@@ -39,6 +39,7 @@ const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
   budget: { ko: "예산 효율", en: "Budget efficiency" },
   region: { ko: "지역 적합", en: "Region fit" },
+  industry: { ko: "업종 적합", en: "Industry fit" },
 };
 
 function MediaCard({
@@ -164,14 +165,10 @@ export function BriefStepTwo({
   const budgetWon = totalBudgetWon(store);
   const showDigital = store.channelMode === "ooh_digital";
 
-  // 지역 필터 — 17시도 선택을 browse 14그룹으로 변환해 적용
-  const candidates = useMemo(() => {
-    const wanted = new Set(sidoCodesToBrowseMainIds(store.regionCodes));
-    if (wanted.size === 0) return catalog;
-    return catalog.filter(
-      (m) => !m.regionMain || wanted.has(m.regionMain) || m.regionMain === "national",
-    );
-  }, [catalog, store.regionCodes]);
+  const candidates = useMemo(
+    () => filterBriefCatalogByRegion(catalog, store.regionCodes),
+    [catalog, store.regionCodes],
+  );
 
   const scored = useMemo(
     () =>

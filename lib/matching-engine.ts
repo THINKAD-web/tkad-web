@@ -338,6 +338,14 @@ function normalizeIndustry(raw: string): string {
   return m[raw.trim().toLowerCase()] ?? raw.trim().toLowerCase();
 }
 
+/** 브리프·외부 소비용 — matchMediaCatalog industry 축과 동일 (0–20점). */
+export function scoreMediaIndustryMatch(
+  m: MediaItem,
+  industryRaw: string,
+): number {
+  return scoreIndustry(m, industryRaw);
+}
+
 function scoreIndustry(m: MediaItem, industryRaw: string): number {
   const industry = normalizeIndustry(industryRaw);
   const def = INDUSTRY_DEFS[industry] ?? INDUSTRY_DEFS.other!;

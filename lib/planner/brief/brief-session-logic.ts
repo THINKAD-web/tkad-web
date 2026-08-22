@@ -37,6 +37,7 @@ export function shouldPromptStaleMixBeforeStep(params: {
     | "flightStart"
     | "flightEnd"
     | "goal"
+    | "industry"
   >;
 }): boolean {
   if (params.targetStep !== 2 && params.targetStep !== 3) return false;
