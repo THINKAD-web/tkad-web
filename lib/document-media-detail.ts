@@ -39,8 +39,23 @@ export type DocumentMediaDetail = {
   categoryLabel?: string;
   size?: string;
   operatingHours?: string;
-  /** 일일 유동·노출 */
+  /**
+   * 일 유동인구 — 매체 앞을 지나간 사람 수(raw). 수량 반영 후 값이다.
+   * "일일 노출" 로 라벨링하지 말 것 — 실제 노출과는 유형별로 최대 20배
+   * 차이난다 (증상3 스코핑 문서 참고).
+   */
   dailyTraffic?: number;
+  /**
+   * 일 실노출(추정) — 접촉률·SOV 보정을 반영한, 실제로 광고를 보는 사람 수.
+   * `PlanMediaItem.dailyImpressions` 에서 그대로 가져온다(재계산 없음).
+   * 보고서의 기여도·CPM·정렬은 전부 이 기준이다 — 표시 병기에만 쓰고
+   * 계산에 다시 넣지 말 것.
+   *
+   * 엔진 결과(`plan.mediaItems`)에 접근할 수 있는 호출자(브리프·플랜카트
+   * 보고서)만 채운다. 견적서 등 엔진을 거치지 않는 경로는 undefined —
+   * 그 경로는 raw 만 있던 기존 동작 그대로다.
+   */
+  adjustedDailyReach?: number;
   /** DOOH 송출 (예: 15초 / 시간당 240회) */
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
@@ -390,6 +405,11 @@ export function mediaItemToExportRow(
     pricing?: PlannerPortfolioPricing;
     quantities?: CampaignMediaQuantities;
     planCartItem?: PlanCartItem;
+    /**
+     * `PlanMediaItem.dailyImpressions` (엔진 이미 계산한 값) — id 로 조회.
+     * 증상3 병기용. 없으면 `adjustedDailyReach` 는 undefined.
+     */
+    adjustedDailyReachById?: Readonly<Record<string, number>>;
   },
 ): import("@/lib/planner-report-export/types").PlannerExportMediaRow {
   const c = opts?.contributions?.get(m.id);
@@ -503,5 +523,6 @@ export function mediaItemToExportRow(
         : detail.lineTotalLabel,
     quantityLabel,
     dailyTraffic,
+    adjustedDailyReach: opts?.adjustedDailyReachById?.[m.id],
   };
 }

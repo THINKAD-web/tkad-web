@@ -32,8 +32,14 @@ export function collectMediaCardSpecs(
   }
   if (row.dailyTraffic && row.dailyTraffic > 0) {
     specs.push({
-      label: isKo ? "일일 노출" : "Daily reach",
+      label: isKo ? "일 유동인구" : "Daily footfall",
       value: `${row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`,
+    });
+  }
+  if (row.adjustedDailyReach && row.adjustedDailyReach > 0) {
+    specs.push({
+      label: isKo ? "일 실노출(추정)" : "Daily reach (est.)",
+      value: `${row.adjustedDailyReach.toLocaleString(isKo ? "ko-KR" : "en-US")}${isKo ? "회" : ""}`,
     });
   }
   if (row.broadcastLabel) {

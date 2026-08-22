@@ -354,13 +354,13 @@ test("카드 스펙에 수량과 지점 합산 일일 노출이 나란히 뜬다
 
   const specs = collectMediaCardSpecs(network, true);
   const qty = specs.find((s) => s.label === "수량");
-  const daily = specs.find((s) => s.label === "일일 노출");
+  const daily = specs.find((s) => s.label === "일 유동인구");
 
   assert.equal(qty?.value, "50지점");
   assert.equal(
     daily?.value,
     "1,750,000회",
-    "수량과 일일 노출이 같은 지점 수 기준으로 일관돼야 한다",
+    "수량과 일 유동인구가 같은 지점 수 기준으로 일관돼야 한다",
   );
 });
 

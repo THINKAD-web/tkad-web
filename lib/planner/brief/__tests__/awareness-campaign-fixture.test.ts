@@ -198,25 +198,31 @@ test("[현행 불일치] 추천 근거에 월 환산 예산(6,429만)이 등장�
   assert.equal(Math.round(3000 / (FLIGHT_DAYS / 30)), 6429, "3,000만 ÷ (14/30)");
 });
 
-// ── 현행 불일치 ③ — 카드 일일노출과 노출기여 순위 역전 ─────────────────────
+// ── ③ raw · SOV보정 노출 병기 (증상3 구현) ─────────────────────────────────
 //
 // A-1b Wave 3 이후 기여도는 **저장 스냅샷**(접촉률×SOV 보정)에서 나오고,
-// 카드 `dailyTraffic` 은 여전히 **raw 유동인구**다. 유형별 20배 보정 차이가
-// 그대로 순위 역전으로 보인다. Wave 4 의 네트워크 건과 같은 부류
-// (카드 표시 기준 ≠ 집계 기준)이며, 그때 네트워크만 고치고 이쪽은 남았다.
+// 카드는 여전히 raw 유동인구만 보여줘 순위가 어긋나 보였다. Wave 4 의
+// 네트워크 건과 같은 부류(카드 표시 기준 ≠ 집계 기준)다.
+//
+// 해결 방식은 raw 를 계산에 되돌리는 게 아니라 **병기**다 — `dailyTraffic`
+// (raw)과 `adjustedDailyReach`(SOV 보정, 계산 기준과 동일값)를 둘 다
+// payload 에 싣는다. 계산 기준은 여전히 SOV 보정값 하나뿐이다.
 
-test("[현행 불일치] 일일노출 1위가 기여도 3위로 밀린다", () => {
+test("카드에 raw 유동인구와 SOV 보정 실노출이 함께 실린다", () => {
   const p = payload();
-  assert.equal(row(p, "우남빌딩 전광판").dailyTraffic, 221_286);
-  assert.equal(Math.round(row(p, "우남빌딩 전광판").exposureContributionPct ?? 0), 12);
-  assert.equal(row(p, "홍대 코너래핑").dailyTraffic, 42_000);
-  assert.equal(Math.round(row(p, "홍대 코너래핑").exposureContributionPct ?? 0), 45);
+  const wunam = row(p, "우남빌딩 전광판");
+  assert.equal(wunam.dailyTraffic, 221_286, "raw 는 그대로");
+  assert.equal(wunam.adjustedDailyReach, 2_766, "221,286 × 0.0125");
+
+  const hongdae = row(p, "홍대 코너래핑");
+  assert.equal(hongdae.dailyTraffic, 42_000);
+  assert.equal(hongdae.adjustedDailyReach, 10_500, "42,000 × 0.25");
 });
 
-test("[현행 불일치] 카드 일일노출 순위와 기여도 순위가 다르다", () => {
+test("기여도 순위는 SOV 보정값 순위와 같고 raw 순위와는 다르다", () => {
   const p = payload();
-  const byDaily = [...p.portfolio]
-    .sort((a, b) => (b.dailyTraffic ?? 0) - (a.dailyTraffic ?? 0))
+  const byAdjusted = [...p.portfolio]
+    .sort((a, b) => (b.adjustedDailyReach ?? 0) - (a.adjustedDailyReach ?? 0))
     .map((r) => r.name);
   const byContribution = [...p.portfolio]
     .sort(
@@ -224,11 +230,73 @@ test("[현행 불일치] 카드 일일노출 순위와 기여도 순위가 다�
         (b.exposureContributionPct ?? 0) - (a.exposureContributionPct ?? 0),
     )
     .map((r) => r.name);
-  assert.notDeepEqual(
-    byDaily,
-    byContribution,
-    "두 순위가 같아지면 ③ 이 해결된 것 — 기대값을 교체할 것",
+  const byRaw = [...p.portfolio]
+    .sort((a, b) => (b.dailyTraffic ?? 0) - (a.dailyTraffic ?? 0))
+    .map((r) => r.name);
+
+  assert.deepEqual(byContribution, byAdjusted, "기여도는 보정값 기준");
+  assert.notDeepEqual(byContribution, byRaw, "raw 기준이면 다시 역전이 생긴다");
+});
+
+/**
+ * 보강 요청 — raw 병기가 순수 표시 기능이고 계산에 관여하지 않는다는 것 자체를
+ * 증명한다. 같은 저장 스냅샷(같은 `impressions`)을 두고 카탈로그의 raw
+ * `dailyFootTraffic` 만 임의로 바꿔 재렌더링했을 때, `dailyTraffic`(raw
+ * 병기값) 이외의 **모든 계산 결과가 완전히 동일**해야 한다.
+ *
+ * override 경로(`itemImpressions`)가 살아있는 한 raw 는 `rawDailyFootTraffic`
+ * 패스스루로만 쓰이고 `dailyImpressions`/노출/CPM/정렬 계산에는 재도입되지
+ * 않는다(engine.ts) — 이 테스트가 그 사실 자체를 지킨다.
+ */
+test("raw 값을 바꿔도 dailyTraffic 표시 외에는 아무 계산도 안 움직인다", () => {
+  const original = payload();
+
+  // 저장 스냅샷은 그대로 두고, 카탈로그의 raw 유동인구만 무작위로 바꾼다
+  // (일부러 순서를 뒤집을 만한 값으로 — 계산에 새면 바로 드러나게).
+  const skewedCatalog = CATALOG.map((m, i) => ({
+    ...m,
+    dailyFootTraffic: [999_999, 1, 500_000, 2, 777_777][i],
+  }));
+  const skewed = buildBriefReportPayload({
+    plan: snapshot(),
+    catalog: skewedCatalog,
+    isKo: true,
+  });
+
+  // raw 병기값만 달라져야 한다.
+  for (const m of CATALOG) {
+    const a = row(original, m.name);
+    const b = row(skewed, m.name);
+    assert.notEqual(a.dailyTraffic, b.dailyTraffic, `${m.name} raw 는 바뀌어야 한다`);
+  }
+
+  // 그 외에는 전부 동일 — 기여도·예산비중·SOV 보정 노출·CPM.
+  for (const m of CATALOG) {
+    const a = row(original, m.name);
+    const b = row(skewed, m.name);
+    assert.equal(a.adjustedDailyReach, b.adjustedDailyReach, `${m.name} 보정 노출`);
+    assert.equal(a.exposureContributionPct, b.exposureContributionPct, `${m.name} 노출기여`);
+    assert.equal(a.budgetContributionPct, b.budgetContributionPct, `${m.name} 예산기여`);
+    assert.equal(a.lineTotalLabel, b.lineTotalLabel, `${m.name} 라인 금액`);
+  }
+
+  // 1p·4p·상권표 집계, 정렬 순서, 예산 요약 전부 동일.
+  const kpiOf = (p: ReturnType<typeof payload>) =>
+    p.kpis.find((k) => k.label === "총 예상 노출")?.value;
+  assert.equal(kpiOf(original), kpiOf(skewed));
+  assert.equal(
+    (original.regionSubdivision?.breakdown ?? [])
+      .reduce((s, r) => s + r.totalImpressions, 0),
+    (skewed.regionSubdivision?.breakdown ?? [])
+      .reduce((s, r) => s + r.totalImpressions, 0),
   );
+  assert.deepEqual(
+    original.portfolio.map((r) => r.name),
+    skewed.portfolio.map((r) => r.name),
+    "정렬·나열 순서 동일",
+  );
+  assert.equal(original.budgetHonesty?.coverValue, skewed.budgetHonesty?.coverValue);
+  assert.equal(original.partialRateNotice, skewed.partialRateNotice);
 });
 
 /**

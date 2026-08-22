@@ -403,6 +403,14 @@ export function buildOohReportPayload(
     pricing,
     periodCtx,
   );
+  /**
+   * 증상3 — 카드 병기용 SOV 보정 일 실노출. 새 계산이 아니라 이미 위에서
+   * `calculatePlan` 이 낸 `plan.mediaItems[].dailyImpressions` 를 id 로만
+   * 옮긴다. 별도로 다시 계산하면 Wave 3 가 겪은 다중 배선 문제가 재발한다.
+   */
+  const adjustedDailyReachById = Object.fromEntries(
+    plan.mediaItems.map((mi) => [mi.id, Math.round(mi.dailyImpressions)]),
+  );
   const portfolioRows = orderedPortfolio.map((m) =>
     mediaItemToExportRow(m, isKo, {
       months,
@@ -410,6 +418,7 @@ export function buildOohReportPayload(
       contributions,
       pricing,
       planCartItem: a.planCartItems?.find((item) => item.mediaId === m.id),
+      adjustedDailyReachById,
     }),
   );
 

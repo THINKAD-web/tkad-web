@@ -37,7 +37,10 @@ export type PlannerExportMediaRow = {
   categoryLabel?: string;
   size?: string;
   operatingHours?: string;
+  /** 일 유동인구(raw) — "일 유동인구" 로 표기할 것, "일일 노출" 아님 */
   dailyTraffic?: number;
+  /** 일 실노출(추정) — 접촉률·SOV 보정. 기여도·CPM·정렬의 기준값과 동일 */
+  adjustedDailyReach?: number;
   broadcastLabel?: string;
   monthlyPriceLabel?: string;
   lineTotalLabel?: string;
