@@ -17,6 +17,7 @@
  * - 지역 적합 : `Media.regionMain` (browse 14그룹) ↔ 브리프 17시도 역매핑
  * - 예산 효율 : 등록 상품가 ÷ 노출 = CPM, 같은 유형 후보군 중앙값 대비
  * - 타깃 적합 : demo gender/age share ↔ 브리프 성별·연령
+ * - 업종 적합 : matchMediaCatalog `scoreIndustry` + targetCategory 보조
  */
 
 import type { MediaItem } from "@/lib/media-data";
@@ -31,10 +32,17 @@ import {
 } from "@/lib/metrics/defaults";
 import type { MediaMetricClass } from "@/lib/metrics/types";
 import { calcLineMetrics } from "@/lib/planner/brief/mix-metrics";
-import { sidoCodesToBrowseMainIds, sidoLabel } from "@/lib/planner/brief/regions";
-import type { BriefAgeBand, CampaignBriefInput } from "@/lib/planner/brief/types";
+import {
+  briefIndustryToPlanner,
+} from "@/lib/planner/brief/brief-integrated-adapters";
+import { sidoCodesToBrowseMainIds, sidoLabel, summarizeSidoCodes } from "@/lib/planner/brief/regions";
+import type { BriefAgeBand, BriefIndustry, CampaignBriefInput } from "@/lib/planner/brief/types";
+import { scoreMediaIndustryMatch } from "@/lib/matching-engine";
+import {
+  PLANNER_INDUSTRY_TO_MATCHING,
+} from "@/lib/planner/industry-match";
 
-export type ScoreAxisKey = "region" | "budget" | "target";
+export type ScoreAxisKey = "region" | "budget" | "target" | "industry";
 
 export type ScoreAxis = {
   key: ScoreAxisKey;
@@ -166,6 +174,103 @@ function mediaClassOf(media: MediaItem): MediaMetricClass {
   });
 }
 
+const BRIEF_INDUSTRY_LABEL: Record<BriefIndustry, { ko: string; en: string }> = {
+  fb: { ko: "F&B", en: "F&B" },
+  retail: { ko: "유통·리테일", en: "Retail" },
+  tech: { ko: "IT·테크", en: "Tech" },
+  finance: { ko: "금융", en: "Finance" },
+  ent: { ko: "엔터·미디어", en: "Entertainment" },
+  other: { ko: "기타", en: "Other" },
+};
+
+function formatIndustryRationale(
+  industry: BriefIndustry,
+  score: number,
+  isKo: boolean,
+): string {
+  const label = BRIEF_INDUSTRY_LABEL[industry][isKo ? "ko" : "en"];
+  if (score >= 85) {
+    return isKo
+      ? `${label} 업종 키워드·매체 유형 일치`
+      : `Strong ${label} keyword and media-type fit`;
+  }
+  if (score >= 55) {
+    return isKo
+      ? `${label} 업종 관련 신호(텍스트·유형)`
+      : `${label}-related signals in media profile`;
+  }
+  return isKo
+    ? `${label} 업종과 직접 연관 신호 약함`
+    : `Weak direct ${label} association`;
+}
+
+function industryAxisScore(
+  media: MediaItem,
+  industry: BriefIndustry,
+): number {
+  const plannerKey = briefIndustryToPlanner(industry);
+  const matchingIndustry = PLANNER_INDUSTRY_TO_MATCHING[plannerKey];
+  let pts = scoreMediaIndustryMatch(media, matchingIndustry);
+  const targetCats = media.targetCategory ?? [];
+  const industryLabels = media.industryLabels ?? [];
+  const labelHay = industryLabels.join(" ").toLowerCase();
+  if (
+    targetCats.length > 0 &&
+    (labelHay.includes(industry) ||
+      (industry === "fb" && /f&b|fnb|food|식음/i.test(labelHay)))
+  ) {
+    pts = Math.min(20, pts + 3);
+  }
+  return Math.min(100, Math.max(0, Math.round((pts / 20) * 100)));
+}
+
+/** Quick/Step2 랭킹 기준 문구 — 실제 store 타게팅을 반영 */
+export function briefRankingBasisLabel(
+  brief: Pick<
+    CampaignBriefInput,
+    "regionCodes" | "genders" | "ageBands" | "industry"
+  >,
+  days: number,
+  isKo: boolean,
+): string {
+  const region =
+    brief.regionCodes.length === 0
+      ? isKo
+        ? "전국"
+        : "Nationwide"
+      : summarizeSidoCodes(brief.regionCodes, isKo, 3);
+
+  const targetParts: string[] = [];
+  if (brief.genders.length > 0) {
+    for (const g of brief.genders) {
+      targetParts.push(
+        g === "female" ? (isKo ? "여성" : "Female") : isKo ? "남성" : "Male",
+      );
+    }
+  }
+  if (brief.ageBands.length > 0) {
+    targetParts.push(...brief.ageBands);
+  }
+  const target =
+    targetParts.length > 0
+      ? targetParts.join("·")
+      : isKo
+        ? "전 타깃"
+        : "All audiences";
+
+  const industry =
+    brief.industry && brief.industry !== "other"
+      ? BRIEF_INDUSTRY_LABEL[brief.industry][isKo ? "ko" : "en"]
+      : null;
+
+  const segments = [region, target, industry, `${days}${isKo ? "일" : "d"}`].filter(
+    Boolean,
+  );
+  return isKo
+    ? `현재 설정 기준 참고 순위 — ${segments.join(" · ")}`
+    : `Reference ranking — ${segments.join(" · ")}`;
+}
+
 /**
  * 후보 매체 스코어링.
  *
@@ -262,6 +367,19 @@ export function scoreMediaCandidates(params: {
           key: "target",
           score: Math.min(100, Math.max(0, score)),
           rationale: formatTargetRationale(targetBasis, score, isKo),
+        });
+      }
+
+      if (brief.industry && brief.industry !== "other") {
+        const industryScore = industryAxisScore(media, brief.industry);
+        axes.push({
+          key: "industry",
+          score: industryScore,
+          rationale: formatIndustryRationale(
+            brief.industry,
+            industryScore,
+            isKo,
+          ),
         });
       }
 

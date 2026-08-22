@@ -11,6 +11,7 @@ import { briefQuickRequiredStatus } from "@/lib/planner/brief/types";
 import { sidoCodesToBrowseMainIds } from "@/lib/planner/brief/regions";
 import {
   scoreMediaCandidates,
+  briefRankingBasisLabel,
   type ScoredMedia,
 } from "@/lib/planner/brief/scoring";
 import { DataQualityBadge } from "@/components/planner/brief/data-quality-badge";
@@ -19,6 +20,7 @@ const AXIS_LABEL: Record<string, { ko: string; en: string }> = {
   target: { ko: "타깃 적합", en: "Target fit" },
   budget: { ko: "예산 효율", en: "Budget efficiency" },
   region: { ko: "지역 적합", en: "Region fit" },
+  industry: { ko: "업종 적합", en: "Industry fit" },
 };
 
 const QUICK_DAYS = 30;
@@ -123,9 +125,7 @@ export function BriefQuickRankPanel({
       ) : null}
 
       <p className="mb-2 text-xs text-muted-foreground">
-        {isKo
-          ? `전국·전 타깃·${QUICK_DAYS}일 기준 참고 순위입니다.`
-          : `Reference ranking — nationwide, all audiences, ${QUICK_DAYS}-day basis.`}
+        {briefRankingBasisLabel(store, QUICK_DAYS, isKo)}
       </p>
 
       <ul className="space-y-2">

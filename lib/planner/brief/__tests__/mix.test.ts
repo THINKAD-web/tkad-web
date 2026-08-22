@@ -25,7 +25,7 @@ import {
   REACH_METRIC_BASIS,
 } from "../mix-metrics.ts";
 import { briefToTargetSpec } from "../reach-adapter.ts";
-import { parseAgeLabel, scoreMediaCandidates, buildRecommendedMix } from "../scoring.ts";
+import { parseAgeLabel, scoreMediaCandidates, buildRecommendedMix, briefRankingBasisLabel } from "../scoring.ts";
 import { buildCampaignPlanSnapshot } from "../build-plan-snapshot.ts";
 import type { MediaItem } from "../../../media-data.ts";
 
@@ -455,6 +455,66 @@ test("[fixture] subway_psd가 2030 여성 share에서 elevator_tv보다 높다",
     scored.find((s) => s.media.id === "elevator")?.axes.find((a) => a.key === "target")
       ?.score ?? 0;
   assert.ok(subwayTarget > elevatorTarget, "subway_psd 2030 여성 share > elevator_tv");
+});
+
+test("[fixture] 업종 축 — F&B 키워드 매체가 retail 대비 높은 industry 점수", () => {
+  const fnbMedia = fixtureMedia({
+    id: "fnb-bus",
+    type: "mobile",
+    subCategory: "bus_shelter",
+    location: "강남 상권 버스쉘터",
+    tags: ["카페", "식음료"],
+    regionMain: "seoul",
+    price: 10_000_000,
+    dailyFootTraffic: 100_000,
+  });
+  const techMedia = fixtureMedia({
+    id: "tech-dooh",
+    type: "digital",
+    subCategory: "office",
+    location: "판교 테크밸리",
+    tags: ["it", "saas"],
+    regionMain: "seoul",
+    price: 10_000_000,
+    dailyFootTraffic: 100_000,
+  });
+  const fbBrief = {
+    ...EMPTY_BRIEF,
+    regionCodes: ["11"] as const,
+    industry: "fb" as const,
+  };
+  const fbScored = scoreMediaCandidates({
+    candidates: [fnbMedia, techMedia],
+    brief: fbBrief,
+    days: 14,
+  });
+  const fnbIndustry =
+    fbScored.find((s) => s.media.id === "fnb-bus")?.axes.find((a) => a.key === "industry")
+      ?.score ?? 0;
+  const techIndustry =
+    fbScored.find((s) => s.media.id === "tech-dooh")?.axes.find((a) => a.key === "industry")
+      ?.score ?? 0;
+  assert.ok(fnbIndustry > techIndustry, "F&B 브리프에서 버스쉘터 > 테크 DOOH");
+  assert.ok(fnbIndustry >= 55);
+});
+
+test("[fixture] briefRankingBasisLabel reflects store targeting", () => {
+  const label = briefRankingBasisLabel(
+    {
+      ...EMPTY_BRIEF,
+      regionCodes: ["11"],
+      genders: ["female"],
+      ageBands: ["20s", "30s"],
+      industry: "fb",
+    },
+    30,
+    true,
+  );
+  assert.match(label, /서울/);
+  assert.match(label, /여성/);
+  assert.match(label, /F&B/);
+  assert.match(label, /30일/);
+  assert.ok(!label.includes("전국·전 타깃"));
 });
 
 test("[fixture] 모든 축은 근거 문장을 반드시 가진다", () => {
