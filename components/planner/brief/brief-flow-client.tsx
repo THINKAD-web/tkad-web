@@ -20,9 +20,10 @@ import { countMixUnits } from "@/lib/planner/brief/brief-fingerprint";
 import {
   selectMixCount,
   selectMixIsStale,
+  shouldOpenStaleMixDialog,
   shouldPromptResumeSession,
-  shouldPromptStaleMixBeforeStep,
 } from "@/lib/planner/brief/brief-session-logic";
+import { rebuildBriefRecommendedMix } from "@/lib/planner/brief/rebuild-mix";
 import { BriefStepOne } from "@/components/planner/brief/brief-step-one";
 import { BriefStepTwo } from "@/components/planner/brief/brief-step-two";
 import { BriefStepThree } from "@/components/planner/brief/brief-step-three";
@@ -104,7 +105,7 @@ export function BriefFlowClient({
   const mixIsStale = useBriefStore(selectMixIsStale);
   const setWizardStep = useBriefStore((s) => s.setWizardStep);
   const reset = useBriefStore((s) => s.reset);
-  const clearMix = useBriefStore((s) => s.clearMix);
+  const replaceMix = useBriefStore((s) => s.replaceMix);
   const acknowledgeMixForCurrentBrief = useBriefStore(
     (s) => s.acknowledgeMixForCurrentBrief,
   );
@@ -140,9 +141,11 @@ export function BriefFlowClient({
     (target: BriefWizardStep) => {
       const state = useBriefStore.getState();
       if (
-        shouldPromptStaleMixBeforeStep({
+        shouldOpenStaleMixDialog({
           targetStep: target,
           state,
+          resumeDialogOpen: resumeOpen,
+          staleDialogOpen: staleOpen,
         })
       ) {
         pendingStepRef.current = target;
@@ -151,7 +154,7 @@ export function BriefFlowClient({
       }
       setWizardStep(target);
     },
-    [setWizardStep],
+    [setWizardStep, resumeOpen, staleOpen],
   );
 
   const handleResumeContinue = () => {
@@ -178,8 +181,15 @@ export function BriefFlowClient({
     setWizardStep(target);
   };
 
-  const handleClearMix = () => {
-    clearMix();
+  const handleRebuildMix = () => {
+    const state = useBriefStore.getState();
+    replaceMix(
+      rebuildBriefRecommendedMix({
+        brief: state,
+        catalog,
+        isKo,
+      }),
+    );
     setStaleOpen(false);
     const target = pendingStepRef.current ?? 2;
     pendingStepRef.current = null;
@@ -199,7 +209,7 @@ export function BriefFlowClient({
         open={staleOpen}
         isKo={isKo}
         onKeepMix={handleKeepMix}
-        onClearMix={handleClearMix}
+        onRebuildMix={handleRebuildMix}
       />
 
       <Stepper step={step} isKo={isKo} onJump={goToStep} />

@@ -59,12 +59,12 @@ export function BriefMixStaleDialog({
   open,
   isKo,
   onKeepMix,
-  onClearMix,
+  onRebuildMix,
 }: {
   open: boolean;
   isKo: boolean;
   onKeepMix: () => void;
-  onClearMix: () => void;
+  onRebuildMix: () => void;
 }) {
   return (
     <Modal
@@ -79,20 +79,20 @@ export function BriefMixStaleDialog({
         </h2>
         <p className="mt-2 text-sm text-muted-foreground">
           {isKo
-            ? "예산·지역·타깃·기간 등 핵심 조건이 이전과 다릅니다. 담아둔 매체를 그대로 유지할까요?"
-            : "Core brief fields differ from when you added media. Keep the current mix?"}
+            ? "예산·지역·타깃·업종 등 핵심 조건이 이전과 다릅니다. 새 조건에 맞춰 매체 구성을 다시 추천해드릴까요?"
+            : "Core brief fields differ from when you built the mix. Rebuild recommendations for the new conditions?"}
         </p>
         <div className="mt-6 flex flex-col gap-2 sm:flex-row">
           <Button type="button" className="flex-1" onClick={onKeepMix}>
-            {isKo ? "매체 유지" : "Keep media"}
+            {isKo ? "유지" : "Keep mix"}
           </Button>
           <Button
             type="button"
             variant="outline"
             className="flex-1"
-            onClick={onClearMix}
+            onClick={onRebuildMix}
           >
-            {isKo ? "매체 비우기" : "Clear mix"}
+            {isKo ? "다시 추천받기" : "Rebuild mix"}
           </Button>
         </div>
       </div>

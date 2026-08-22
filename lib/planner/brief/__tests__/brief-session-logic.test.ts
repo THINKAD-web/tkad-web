@@ -8,6 +8,7 @@ import {
   selectChannelMode,
   selectEntryMode,
   selectMixIsStale,
+  shouldOpenStaleMixDialog,
   shouldPromptResumeSession,
   shouldPromptStaleMixBeforeStep,
   simulateResumePromptEffect,
@@ -162,6 +163,99 @@ test("stale mix: 매체 비우기 후 Step 2 — 확인 불필요", () => {
     shouldPromptStaleMixBeforeStep({ targetStep: 2, state }),
     false,
   );
+});
+
+test("stale mix: 업종 변경 시 Step 2 진입 전 확인", () => {
+  const briefA = {
+    ...EMPTY_BRIEF,
+    budgetInputWon: 30_000_000,
+    industry: "fb" as const,
+  };
+  const fp = computeBriefFingerprint(briefA);
+  const state = baseState({
+    ...briefA,
+    mixUnits: { m1: 1 },
+    mixBriefFingerprint: fp,
+    industry: "tech",
+  });
+  assert.equal(
+    shouldPromptStaleMixBeforeStep({ targetStep: 2, state }),
+    true,
+  );
+});
+
+test("stale dialog: 이미 열려 있으면 중복 오픈 차단", () => {
+  const briefA = {
+    ...EMPTY_BRIEF,
+    budgetInputWon: 30_000_000,
+  };
+  const fp = computeBriefFingerprint(briefA);
+  const state = baseState({
+    ...briefA,
+    mixUnits: { m1: 1 },
+    mixBriefFingerprint: fp,
+    budgetInputWon: 50_000_000,
+  });
+  assert.equal(
+    shouldOpenStaleMixDialog({
+      targetStep: 2,
+      state,
+      resumeDialogOpen: false,
+      staleDialogOpen: true,
+    }),
+    false,
+  );
+});
+
+test("stale dialog: resume 모달 열려 있으면 stale 차단", () => {
+  const briefA = {
+    ...EMPTY_BRIEF,
+    budgetInputWon: 30_000_000,
+  };
+  const fp = computeBriefFingerprint(briefA);
+  const state = baseState({
+    ...briefA,
+    mixUnits: { m1: 1 },
+    mixBriefFingerprint: fp,
+    budgetInputWon: 50_000_000,
+  });
+  assert.equal(
+    shouldOpenStaleMixDialog({
+      targetStep: 2,
+      state,
+      resumeDialogOpen: true,
+      staleDialogOpen: false,
+    }),
+    false,
+  );
+});
+
+test("stale dialog: 조건 충족 시 1회만 true", () => {
+  const briefA = {
+    ...EMPTY_BRIEF,
+    budgetInputWon: 30_000_000,
+  };
+  const fp = computeBriefFingerprint(briefA);
+  const state = baseState({
+    ...briefA,
+    mixUnits: { m1: 1 },
+    mixBriefFingerprint: fp,
+    budgetInputWon: 50_000_000,
+  });
+  const first = shouldOpenStaleMixDialog({
+    targetStep: 2,
+    state,
+    resumeDialogOpen: false,
+    staleDialogOpen: false,
+  });
+  assert.equal(first, true);
+  const second = shouldOpenStaleMixDialog({
+    targetStep: 2,
+    state,
+    resumeDialogOpen: false,
+    staleDialogOpen: true,
+  });
+  assert.equal(second, false);
 });
 
 // ── N-3: React 19 getSnapshot 안정성 ──
