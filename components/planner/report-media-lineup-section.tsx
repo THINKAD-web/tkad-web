@@ -88,7 +88,26 @@ function exportRowToCatalogItem(row: PlannerExportMediaRow, index: number): Home
   };
 }
 
-/** 컴팩트·카드·피드 — raw 유동인구를 보정값 옆 작은 아이콘+툴팁으로 노출 */
+/** 컴팩트·카드·피드 — raw 유동인구: 데스크톱 툴팁 배지 + 모바일 인라인 각주 */
+function rawFootfallCopy(
+  row: PlannerExportMediaRow,
+  isKo: boolean,
+): { short: string; full: string } | null {
+  if (row.dailyTraffic == null || row.dailyTraffic <= 0) return null;
+  if (row.adjustedDailyReach == null) return null;
+  const traffic = row.dailyTraffic.toLocaleString(isKo ? "ko-KR" : "en-US");
+  if (isKo) {
+    return {
+      short: `일 유동인구(참고) ${traffic}회`,
+      full: `일 유동인구(참고): ${traffic}회 — 위 노출은 접촉률·SOV 보정 실노출 추정치입니다.`,
+    };
+  }
+  return {
+    short: `Daily footfall (ref.) ${traffic}`,
+    full: `Daily footfall (reference): ${traffic} — the figure above is an SOV-adjusted reach estimate.`,
+  };
+}
+
 function RawFootfallHint({
   row,
   isKo,
@@ -98,23 +117,46 @@ function RawFootfallHint({
   isKo: boolean;
   className?: string;
 }) {
-  if (row.dailyTraffic == null || row.dailyTraffic <= 0) return null;
-  if (row.adjustedDailyReach == null) return null;
-  const label = isKo
-    ? `일 유동인구(참고): ${row.dailyTraffic.toLocaleString("ko-KR")}회 — 위 노출은 접촉률·SOV 보정 실노출 추정치입니다.`
-    : `Daily footfall (reference): ${row.dailyTraffic.toLocaleString("en-US")} — the figure above is an SOV-adjusted reach estimate.`;
+  const copy = rawFootfallCopy(row, isKo);
+  if (!copy) return null;
   return (
     <span
       role="img"
-      aria-label={label}
-      title={label}
+      aria-label={copy.full}
+      title={copy.full}
       className={cn(
-        "pointer-events-auto inline-flex h-4 w-4 items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold leading-none text-white",
+        "pointer-events-auto hidden h-4 w-4 items-center justify-center rounded-full bg-black/55 text-[10px] font-semibold leading-none text-white sm:inline-flex",
         className,
       )}
     >
       i
     </span>
+  );
+}
+
+function RawFootfallMobileNote({
+  row,
+  isKo,
+  className,
+}: {
+  row: PlannerExportMediaRow;
+  isKo: boolean;
+  className?: string;
+}) {
+  const copy = rawFootfallCopy(row, isKo);
+  if (!copy) return null;
+  return (
+    <p
+      className={cn(
+        "sm:hidden text-[10px] leading-snug text-muted-foreground",
+        className,
+      )}
+    >
+      {copy.short}
+      {isKo
+        ? " · 위 노출은 접촉률·SOV 보정 실노출 추정치"
+        : " · reach above is SOV/contact-rate adjusted"}
+    </p>
   );
 }
 
@@ -145,15 +187,18 @@ function DetailLineupCard({
   const href = mediaHref(row);
   const detail = exportRowToDetail(row, index);
   return (
-    <div className={DOCUMENT_LINEUP_CARD}>
-      <MediaDetailCard
-        detail={detail}
-        isKo={isKo}
-        showContribution
-        largeThumb
-        portfolioSize={portfolioSize}
-        mediaPageHref={href ?? undefined}
-      />
+    <div className="space-y-1">
+      <div className={DOCUMENT_LINEUP_CARD}>
+        <MediaDetailCard
+          detail={detail}
+          isKo={isKo}
+          showContribution
+          largeThumb
+          portfolioSize={portfolioSize}
+          mediaPageHref={href ?? undefined}
+        />
+      </div>
+      <RawFootfallMobileNote row={row} isKo={isKo} className="px-1" />
     </div>
   );
 }
@@ -192,13 +237,18 @@ function DiscoveryLineupCard({
           isKo={isKo}
           className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
         />
+        <RawFootfallMobileNote
+          row={row}
+          isKo={isKo}
+          className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
+        />
       </div>
     );
   }
 
   if (viewMode === "card") {
     return (
-      <div className={cn(DOCUMENT_LINEUP_CARD, "relative h-full")}>
+      <div className={cn(DOCUMENT_LINEUP_CARD, "relative h-full flex flex-col")}>
         <DiscoveryMediaCard
           variant="compact"
           compactLayout="grid"
@@ -213,6 +263,11 @@ function DiscoveryLineupCard({
           row={row}
           isKo={isKo}
           className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
+        />
+        <RawFootfallMobileNote
+          row={row}
+          isKo={isKo}
+          className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
         />
       </div>
     );
@@ -234,6 +289,11 @@ function DiscoveryLineupCard({
         row={row}
         isKo={isKo}
         className="pointer-events-auto absolute right-1.5 top-1.5 z-10"
+      />
+      <RawFootfallMobileNote
+        row={row}
+        isKo={isKo}
+        className="border-t border-gray-100 px-2 py-1.5 dark:border-gray-200"
       />
     </div>
   );

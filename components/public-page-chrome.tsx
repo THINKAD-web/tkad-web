@@ -6,7 +6,9 @@ import DeferredPublicWidgetsGate from "@/components/deferred-public-widgets-gate
 import { ContextNavAsideShell } from "@/components/navigation/context-nav-sidebar";
 import { AppProvidersRoot } from "@/components/app-providers-root";
 import { AuthSessionProvider } from "@/components/auth/auth-session-provider";
+import { MOBILE_CHROME_BOTTOM_PAD } from "@/lib/layout/container-classes";
 import { MobileChromeOverlayProvider } from "@/components/mobile/mobile-chrome-overlay-context";
+import { cn } from "@/lib/utils";
 
 type Props = {
   skipLinkLabel: string;
@@ -42,7 +44,10 @@ export function PublicPageChrome({ skipLinkLabel, header, children }: Props) {
               <div className="flex min-h-0 min-w-0 flex-1 flex-col">
                 <main
                   id="main-content"
-                  className="tkad-app-ui flex min-w-0 flex-col max-md:overflow-x-clip max-md:tkad-mobile-scroll md:min-h-0 md:flex-1 md:overflow-visible"
+                  className={cn(
+                    "tkad-app-ui flex min-w-0 flex-col max-md:overflow-x-clip max-md:tkad-mobile-scroll md:min-h-0 md:flex-1 md:overflow-visible",
+                    MOBILE_CHROME_BOTTOM_PAD,
+                  )}
                 >
                   {children}
                 </main>
