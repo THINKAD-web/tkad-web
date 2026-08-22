@@ -61,6 +61,10 @@ const CATALOG: MediaItem[] = [
     // 수량 효과의 전제 — 네트워크 카탈로그 항목이어야 units 가 노출에 반영된다.
     catalogSource: "network",
     type: "digital",
+    // 실제 편의점 네트워크는 DB 저장 시 `networkSubtype` 이 채워진다
+    // (`media-network-public.ts` — `networkSubtype: n.type`). A-1b Wave 4 전
+    // 픽스처는 이 분류를 빠뜨려, 수량 접미사가 "대" 로 폴백하는 상태를 고정했다.
+    networkSubtype: "convenience_store",
     price: 2_000_000,
     dailyFootTraffic: 35_000, // 지점당
     networkPricePerUnit: 40_000,
@@ -301,48 +305,49 @@ test("네트워크 매체의 노출 기여도가 수량을 반영한다", () => 
 });
 
 /**
- * Wave 4 대상 — 현행 동작을 그대로 고정한다.
+ * A-1b Wave 4 — 네트워크 매체의 수량 표시를 고친다.
  *
- * 수량 자체는 이미 표기된다 (`quantityLabel`). 문제는 두 가지다.
+ * 수량 자체는 이미 표기됐다 (`quantityLabel`). 문제는 두 가지였다.
  *
  *   1. `dailyTraffic` 은 **지점당** 값인데 카드는 "일일 노출 35,000회" 로
- *      적어, 이 매체 전체의 일 노출로 읽힌다. 실제 합산은 1,750,000 이다.
- *   2. 편의점 네트워크의 단위가 "대" 다. `networkQuantitySuffixForItem` 이
- *      접미사를 못 찾으면 "대" 로 폴백하기 때문이다. 지점이 맞다.
+ *      적어, 이 매체 전체의 일 노출로 읽혔다. 실제 합산은 1,750,000 이다.
+ *   2. 편의점 네트워크의 단위가 "대" 였다. `networkInventoryUnitSuffix` 가
+ *      elevator 만 특수 처리하고 나머지 전부 "대" 로 하드코딩했기 때문이다.
  *
- * 계산은 맞고 **표기가 오해를 부르는** 상태다. Wave 4 에서 이 두 단언이
- * 깨지는 것이 정상이며, 그때 기대값을 교체한다.
+ * 계산은 항상 맞았고 **표기만 오해를 불렀다** — 그래서 이 회귀 시리즈의
+ * 다른 Wave 들과 달리 상권표·기여도·총노출 등 숫자 지표는 전혀 움직이지
+ * 않는다(테스트 "네트워크 매체의 노출 기여도가 수량을 반영한다" 등 참고).
  */
-test("[Wave 4 전] 네트워크 카드의 일일 노출이 지점당 값이다", () => {
+test("네트워크 카드의 일일 노출이 지점 합산값이다", () => {
   const p = payload();
   const network = p.portfolio.find((r) => r.name.includes("이마트24"));
   assert.ok(network);
 
   assert.equal(
     network.dailyTraffic,
-    35_000,
-    "카드 표시는 지점당 유동인구다 — 합산(1,750,000)이 아니다",
+    35_000 * NETWORK_UNITS,
+    "카드 표시가 지점 합산(1,750,000)이어야 한다",
   );
   assert.notEqual(
     network.dailyTraffic,
-    35_000 * NETWORK_UNITS,
-    "합산으로 바뀌었다면 Wave 4 완료 신호",
+    35_000,
+    "지점당 값 그대로면 Wave 4 회귀",
   );
 });
 
-test("[Wave 4 전] 편의점 네트워크 수량 단위가 '대' 로 폴백된다", () => {
+test("편의점 네트워크 수량 단위가 '지점' 이다", () => {
   const p = payload();
   const network = p.portfolio.find((r) => r.name.includes("이마트24"));
   assert.ok(network);
 
   assert.equal(
     network.quantityLabel,
-    "50대",
-    "지점 단위 접미사가 없어 '대' 로 폴백한다 — '50지점' 이 되면 Wave 4 완료 신호",
+    "50지점",
+    "편의점 네트워크는 '대' 가 아니라 '지점' 이어야 한다",
   );
 });
 
-test("[Wave 4 전] 카드 스펙에 수량과 일일 노출이 나란히 뜬다", () => {
+test("카드 스펙에 수량과 지점 합산 일일 노출이 나란히 뜬다", () => {
   const p = payload();
   const network = p.portfolio.find((r) => r.name.includes("이마트24"));
   assert.ok(network);
@@ -351,11 +356,11 @@ test("[Wave 4 전] 카드 스펙에 수량과 일일 노출이 나란히 뜬다"
   const qty = specs.find((s) => s.label === "수량");
   const daily = specs.find((s) => s.label === "일일 노출");
 
-  assert.equal(qty?.value, "50대");
+  assert.equal(qty?.value, "50지점");
   assert.equal(
     daily?.value,
-    "35,000회",
-    "지점당임을 알리는 단서 없이 총량처럼 읽힌다 — Wave 4 대상",
+    "1,750,000회",
+    "수량과 일일 노출이 같은 지점 수 기준으로 일관돼야 한다",
   );
 });
 

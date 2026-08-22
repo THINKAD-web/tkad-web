@@ -7,6 +7,7 @@ import {
   normalizeMediaPricePeriod,
 } from "@/lib/media-price-format";
 import { formatKrwPrimaryWithJpyFootnote } from "@/lib/media-display-currency";
+import { isNetworkCatalogItem } from "@/lib/matching-network-helpers";
 import {
   formatPlannerQuantityLabel,
   plannerMediaPeriodLineWon,
@@ -453,6 +454,15 @@ export function mediaItemToExportRow(
       pricing.priceOptionIndex,
     );
   })();
+  /**
+   * A-1b Wave 4 — 네트워크 매체는 `dailyFootTraffic` 이 지점당 값이다.
+   * 카드는 "일일 노출" 이라는 이름으로 전체량인 것처럼 보여줬으므로,
+   * 선택 지점 수(`units`)를 곱해 실제 합산 노출을 표시한다.
+   */
+  const dailyTraffic =
+    isNetworkCatalogItem(m) && detail.dailyTraffic != null
+      ? detail.dailyTraffic * units
+      : detail.dailyTraffic;
   return {
     ...detail,
     region: m.region ?? undefined,
@@ -469,5 +479,6 @@ export function mediaItemToExportRow(
           )
         : detail.lineTotalLabel,
     quantityLabel,
+    dailyTraffic,
   };
 }
