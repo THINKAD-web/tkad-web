@@ -8,7 +8,7 @@ import { useMemo } from "react";
 import type { MediaItem } from "@/lib/media-data";
 import { useBriefStore } from "@/lib/planner/brief/store";
 import { briefQuickRequiredStatus } from "@/lib/planner/brief/types";
-import { sidoCodesToBrowseMainIds } from "@/lib/planner/brief/regions";
+import { filterBriefCatalogByRegion } from "@/lib/planner/brief/regions";
 import {
   scoreMediaCandidates,
   briefRankingBasisLabel,
@@ -80,13 +80,10 @@ export function BriefQuickRankPanel({
   const store = useBriefStore();
   const ready = briefQuickRequiredStatus(store);
 
-  const candidates = useMemo(() => {
-    const wanted = new Set(sidoCodesToBrowseMainIds(store.regionCodes));
-    if (wanted.size === 0) return catalog;
-    return catalog.filter(
-      (m) => !m.regionMain || wanted.has(m.regionMain) || m.regionMain === "national",
-    );
-  }, [catalog, store.regionCodes]);
+  const candidates = useMemo(
+    () => filterBriefCatalogByRegion(catalog, store.regionCodes),
+    [catalog, store.regionCodes],
+  );
 
   const scored = useMemo(
     () =>

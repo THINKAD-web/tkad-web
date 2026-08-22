@@ -2,10 +2,10 @@
  * PR-6c L-1 — 브리프 핵심 필드 지문(fingerprint).
  *
  * mixUnits 가 어느 브리프 조건에서 담겼는지 추적한다.
- * 예산·지역·타깃·기간·목표만 포함 (업종·자연어 원문은 제외 —
- * 미세조정 시 불필요한 확인을 줄이기 위함).
+ * 예산·지역·타깃·기간·목표·업종을 포함한다.
  */
 
+import type { MediaItem } from "@/lib/media-data";
 import type { CampaignBriefInput } from "@/lib/planner/brief/types";
 import { normalizeSidoCodes } from "@/lib/planner/brief/regions";
 
@@ -19,6 +19,7 @@ export type BriefFingerprintInput = Pick<
   | "flightStart"
   | "flightEnd"
   | "goal"
+  | "industry"
 >;
 
 export function computeBriefFingerprint(
@@ -33,6 +34,7 @@ export function computeBriefFingerprint(
     flightStart: brief.flightStart ?? "",
     flightEnd: brief.flightEnd ?? "",
     goal: brief.goal ?? null,
+    industry: brief.industry ?? null,
   };
   return JSON.stringify(payload);
 }

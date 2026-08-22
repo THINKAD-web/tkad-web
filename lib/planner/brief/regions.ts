@@ -14,6 +14,8 @@
  * (데이터 정확도·매체 커버리지 재배선은 이번 범위 아님 — 구조만 만든다.)
  */
 
+import type { MediaItem } from "@/lib/media-data";
+
 export type SidoCode =
   | "11" // 서울
   | "26" // 부산
@@ -99,6 +101,23 @@ export function sidoCodesToBrowseMainIds(codes: readonly SidoCode[]): string[] {
     if (row) out.add(row.browseMainId);
   }
   return [...out];
+}
+
+/**
+ * 브리프 Step 2 / Quick 랭킹 후보 필터.
+ * 지역이 선택됐을 때 `regionMain` 이 없는 매체는 제외한다(전국 0.8% 미만).
+ */
+export function filterBriefCatalogByRegion(
+  catalog: readonly MediaItem[],
+  regionCodes: readonly SidoCode[],
+): MediaItem[] {
+  const wanted = new Set(sidoCodesToBrowseMainIds(regionCodes));
+  if (wanted.size === 0) return [...catalog];
+  return catalog.filter((m) => {
+    const main = m.regionMain?.trim();
+    if (!main) return false;
+    return wanted.has(main) || main === "national";
+  });
 }
 
 /**

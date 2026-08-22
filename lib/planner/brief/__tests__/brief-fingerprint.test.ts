@@ -31,14 +31,34 @@ test("computeBriefFingerprint: 핵심 필드만 반영", () => {
   assert.equal(a, b, "정렬 순서 무관 동일 지문");
 });
 
-test("업종·freeText 변경은 지문에 영향 없음", () => {
+test("업종 변경은 지문에 반영된다", () => {
   const base = computeBriefFingerprint({
     ...EMPTY_BRIEF,
     budgetInputWon: 10_000_000,
     flightStart: "2026-01-01",
     flightEnd: "2026-01-14",
+    industry: null,
   });
-  assert.equal(base, computeBriefFingerprint({ ...EMPTY_BRIEF, industry: "fb", freeText: "x", budgetInputWon: 10_000_000, flightStart: "2026-01-01", flightEnd: "2026-01-14" }));
+  const withFb = computeBriefFingerprint({
+    ...EMPTY_BRIEF,
+    industry: "fb",
+    budgetInputWon: 10_000_000,
+    flightStart: "2026-01-01",
+    flightEnd: "2026-01-14",
+  });
+  assert.notEqual(base, withFb);
+  assert.equal(
+    base,
+    computeBriefFingerprint({
+      ...EMPTY_BRIEF,
+      freeText: "x",
+      budgetInputWon: 10_000_000,
+      flightStart: "2026-01-01",
+      flightEnd: "2026-01-14",
+      industry: null,
+    }),
+    "freeText 는 여전히 지문에 영향 없음",
+  );
 });
 
 test("isMixBriefStale: mix 없으면 false", () => {

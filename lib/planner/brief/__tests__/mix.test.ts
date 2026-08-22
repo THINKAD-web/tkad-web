@@ -4,6 +4,7 @@ import test from "node:test";
 import {
   regionOverInclusions,
   overInclusionMessage,
+  filterBriefCatalogByRegion,
 } from "../regions.ts";
 import {
   EMPTY_BRIEF,
@@ -56,6 +57,27 @@ function fixtureMedia(over: Partial<MediaItem> = {}): MediaItem {
 }
 
 // ── H-지역: 과대포함 경고 ──────────────────────────────────
+
+test("전국(빈 regionCodes)이면 regionMain 없는 매체도 포함", () => {
+  const catalog = [
+    fixtureMedia({ id: "a", regionMain: "seoul" }),
+    fixtureMedia({ id: "b", regionMain: undefined }),
+  ];
+  assert.equal(filterBriefCatalogByRegion(catalog, []).length, 2);
+});
+
+test("지역 선택 시 regionMain 없는 매체는 제외", () => {
+  const catalog = [
+    fixtureMedia({ id: "a", regionMain: "seoul" }),
+    fixtureMedia({ id: "b", regionMain: undefined }),
+    fixtureMedia({ id: "c", regionMain: "busan" }),
+  ];
+  const out = filterBriefCatalogByRegion(catalog, ["11"]);
+  assert.deepEqual(
+    out.map((m) => m.id),
+    ["a"],
+  );
+});
 
 test("충북만 선택하면 세종·충남이 함께 딸려온다고 경고한다", () => {
   const rows = regionOverInclusions(["43"]); // 충북
