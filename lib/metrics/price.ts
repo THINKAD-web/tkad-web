@@ -113,6 +113,25 @@ export function resolvePrice(
 }
 
 /**
+ * 요청 기간보다 **짧게는 팔지 않는** 매체인지 — 최소 판매 단위(일)를 돌려준다.
+ * 해당 없으면 null.
+ *
+ * `resolvePrice` 의 `upper && !lower` 갈래와 같은 조건이다. 그 갈래는 최단
+ * 상품가를 그대로 청구액으로 잡지만(반달은 팔지 않으므로), 보고서 표시 금액은
+ * 선형 환산이라 둘이 갈린다. 어느 쪽이 맞는지는 매체마다 협상으로 정해지므로
+ * 시스템이 단정하지 않고, 이 함수로 "갈릴 수 있는 매체"만 식별해 안내한다.
+ */
+export function minSellableDaysAbove(
+  priceOptions: readonly PriceOption[],
+  days: number,
+): number | null {
+  const options = normalizePriceOptions(priceOptions);
+  const shortest = options[0];
+  if (!shortest || !Number.isFinite(days) || days <= 0) return null;
+  return shortest.days > days ? shortest.days : null;
+}
+
+/**
  * 등록된 월(30일) 상품가와 일/주 단가 선형 환산값의 괴리 (R-03).
  * 0.1 이면 선형 환산이 실제 월 상품가보다 10% 높다는 뜻.
  * 반환 null = 비교 대상 부족.

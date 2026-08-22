@@ -225,7 +225,11 @@ function lineupListClass(viewMode: PlannerReportViewMode): string {
 type Props = {
   payload: Pick<
     PlannerReportExportPayload,
-    "portfolio" | "portfolioGroups" | "isKo"
+    | "portfolio"
+    | "portfolioGroups"
+    | "isKo"
+    | "budgetHonesty"
+    | "partialRateNotice"
   >;
 };
 
@@ -346,6 +350,15 @@ export function ReportMediaLineupSection({ payload: p }: Props) {
           data-testid="report-mix-vs-budget"
         >
           {p.budgetHonesty.mixVsBudgetFootnote}
+        </p>
+      ) : null}
+
+      {p.portfolio.length > 0 && p.partialRateNotice ? (
+        <p
+          className="text-[11px] leading-snug text-amber-700"
+          data-testid="report-partial-rate-notice"
+        >
+          {p.partialRateNotice}
         </p>
       ) : null}
 

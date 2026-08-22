@@ -370,6 +370,16 @@ export const PLAN_WARNING_CODES = [
   "IMPRESSIONS_BASIS_CONFLICT",
   /** itemNet 이 0 이하 — 예산 비중·CPM 왜곡 */
   "MEDIA_PRICE_MISSING",
+  /**
+   * 이 매체의 최소 판매 단위가 캠페인 기간보다 길다 — 반달 상품이 없다.
+   *
+   * 보고서 표시 금액은 선형 환산(예: 월정가 × 14/30)이지만, 실제 청구는
+   * 최소 판매 단위(월정가 전액)로 갈 수 있다. 어느 쪽인지는 매체마다 협상으로
+   * 정해지므로 시스템이 한쪽으로 단정하지 않고, 표시는 선형 환산으로 통일한
+   * 채 이 경고로 "갈릴 수 있음" 을 남긴다. `PERIOD_NO_EXACT_RATE_KEY` 가
+   * 기간 쪽 사정이라면 이쪽은 매체 쪽 사정이다.
+   */
+  "MEDIA_NO_PARTIAL_RATE_TIER",
   /** 매체 순액이 입력 예산을 초과 */
   "BUDGET_OVER",
   /** 예산 소진율이 현저히 낮음 */
@@ -402,6 +412,7 @@ export const PLAN_WARNING_KIND: Record<PlanWarningCode, PlanWarningKind> = {
   MEDIA_TYPE_UNKNOWN: "data",
   MEDIA_IMPRESSIONS_MISSING: "data",
   MEDIA_PRICE_MISSING: "data",
+  MEDIA_NO_PARTIAL_RATE_TIER: "data",
   IMPRESSIONS_BASIS_CONFLICT: "data",
   REACH_NOT_MODELED: "data",
   BUDGET_OVER: "plan",

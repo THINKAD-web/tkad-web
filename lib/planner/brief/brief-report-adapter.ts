@@ -398,13 +398,39 @@ export function buildBriefReportPayload(
 
   const blendedCpmKrw = plan.metrics.mixCpmWon;
 
+  /**
+   * 1p 헤더 「이 구성」 — **표시 금액 기준**(선형 환산)을 쓴다.
+   *
+   * 저장 스냅샷의 `metrics.totalCostWon` 은 실제 등록 상품가 합이라, 반달
+   * 상품이 없는 매체가 있으면 월정가 전액이 잡힌다(14일 캠페인에 1,250만원).
+   * 반면 같은 문서의 매체 라인·예산 배분·지역표는 전부 선형 환산(583만원)
+   * 기준이다. 헤더만 저장값을 쓰면 1p 와 나머지가 어긋난다 — 실제로 그렇게
+   * 보고됐다.
+   *
+   * 그래서 표시는 문서 전체와 같은 기준으로 통일하고, 청구액이 협의로 갈릴 수
+   * 있다는 사실은 `partialRateNotice` 각주가 상한과 함께 밝힌다
+   * (`lib/planner/partial-rate-notice.ts`). 저장값 자체는 그대로 둔다 —
+   * 협상 전 참고치로서의 역할이 따로 있다.
+   */
+  const displayedMixWon = budgetAllocation.reduce(
+    (sum, s) => sum + (s.actualWon ?? s.valueWon),
+    0,
+  );
+  /**
+   * 표시 기준을 산출할 수 없으면(단가 미등록 등으로 0) 저장값으로 되돌린다.
+   * 「₩0 (0%)」 은 어떤 기준으로도 사실이 아니고, 예산 초과 배너까지 사라진다.
+   * Wave 3 의 `briefMixImpressions` 와 같은 all-or-nothing 원칙 — 표시 기준과
+   * 저장 기준을 섞어 제3의 값을 만들지 않는다.
+   */
+  const headerMixWon =
+    displayedMixWon > 0 ? displayedMixWon : plan.metrics.totalCostWon;
   const { overBudgetWon, budgetUsedRate } = resolveStoredOverBudget(
-    plan.metrics,
+    displayedMixWon > 0 ? { totalCostWon: displayedMixWon } : plan.metrics,
     plan.brief.budgetWon,
   );
   const budgetHonesty = buildExportBudgetHonesty({
     requestWon: plan.brief.budgetWon,
-    mixWon: plan.metrics.totalCostWon,
+    mixWon: headerMixWon,
     overBudgetWon,
     budgetUsedRate,
     isKo,

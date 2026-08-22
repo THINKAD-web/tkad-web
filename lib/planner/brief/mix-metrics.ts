@@ -110,7 +110,27 @@ function mediaSovSource(media: MediaItem) {
   };
 }
 
-/** 한 매체 줄의 지표 (노출·금액) */
+/**
+ * 한 매체 줄의 지표 (노출·금액).
+ *
+ * **금액의 역할 — 「협상 전 참고치」.**
+ * `costWon` 은 `resolveMediaProductPrice(media, days)` 즉 **실제 등록 상품가**다.
+ * 반달 상품이 없으면 최소 판매 단위(보통 월정가) 전액이 나온다 — 반달을 팔지
+ * 않는 매체에서 실제로 청구될 수 있는 금액이다.
+ *
+ * 보고서에 **표시**되는 라인 금액은 이 값이 아니라
+ * `plannerMediaPeriodLineWon` 의 선형 환산액(월정가 × days/30)이다. 둘은
+ * 의도적으로 다르며 역할이 갈린다.
+ *
+ *   저장(`calcLineMetrics`)      → 협상 전 참고치 · 청구 상한
+ *   표시(`plannerMediaPeriodLineWon`) → 제안 견적 · 문서 전체의 통일 기준
+ *
+ * 어느 쪽이 최종 청구 기준인지는 매체마다 협상으로 정해지므로 시스템이
+ * 단정하지 않는다. 대신 갈릴 수 있는 매체가 있으면 엔진이
+ * `MEDIA_NO_PARTIAL_RATE_TIER` 경고를, 보고서가 `partialRateNotice` 각주를
+ * 낸다(`lib/planner/partial-rate-notice.ts`). 한쪽을 다른 쪽에 맞추려고
+ * 고치기 전에 그 문서를 먼저 읽을 것.
+ */
 export function calcLineMetrics(line: MixLine, days: number): MixLineMetrics {
   const { media, units } = line;
 

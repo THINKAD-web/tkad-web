@@ -147,32 +147,40 @@ test("저장 시점 노출 보정률이 유형별로 20배 차이난다 (디지�
   assert.equal(Math.round(0.25 / 0.0125), 20);
 });
 
-// ── 현행 불일치 ① — 1p 헤더 예산이 나머지와 다르다 ─────────────────────────
+// ── ① 청구 기준 — 표시는 선형 환산으로 통일, 상한은 각주로 명시 ────────────
 //
 // `metrics.totalCostWon` 은 `resolveMediaProductPrice(media, 14)` 를 쓰는데,
 // 등록 상품이 월(30일)뿐이면 **월 정가를 그대로** 돌려준다(반달은 못 판다).
-// 반면 보고서 매체 라인·예산배분은 `plannerMediaPeriodLineWon` 의 선형
-// 환산(14/30)을 쓴다. 같은 문서 안에 1,250만과 583만이 함께 실린다.
+// 그 값 자체는 「협상 전 참고치」로 저장에 남기고, 보고서 표시는 문서 전체와
+// 같은 선형 환산 기준(583만)으로 통일한다. 갈릴 수 있다는 사실은 각주가 상한과
+// 함께 밝힌다 — 어느 한 숫자로 단정하지 않는다.
 
-test("[현행 불일치] 저장 totalCostWon 이 월 정가 합이다 (기간 미반영)", () => {
+test("저장 totalCostWon 은 월 정가 합으로 남는다 (협상 전 참고치)", () => {
   assert.equal(snapshot().metrics.totalCostWon, MONTHLY_LIST_SUM);
 });
 
-test("[현행 불일치] 1p 헤더 '이 구성' 과 매체 라인 합계가 어긋난다", () => {
+test("1p 헤더 '이 구성' 이 매체 라인·예산배분과 같은 기준이다", () => {
   const p = payload();
   assert.equal(
     p.budgetHonesty?.coverValue,
-    "요청 예산 ₩30,000,000 / 이 구성 ₩12,500,000 (42%)",
+    "요청 예산 ₩30,000,000 / 이 구성 ₩5,833,333 (19%)",
   );
-  assert.equal(p.budgetHonesty?.mixWon, MONTHLY_LIST_SUM);
-
   const splitSum = (p.charts?.budgetSplit ?? []).reduce((s, d) => s + d.value, 0);
-  assert.equal(splitSum, PRORATED_SUM, "4p 예산배분은 기간 환산 기준");
-  assert.notEqual(
+  assert.equal(splitSum, PRORATED_SUM);
+  assert.equal(
     p.budgetHonesty?.mixWon,
     splitSum,
-    "고쳐지면 이 둘이 같아져야 한다",
+    "헤더가 저장값(1,250만)으로 돌아가면 1p 와 나머지가 다시 어긋난다",
   );
+});
+
+test("반달 상품이 없다는 사실이 각주로 붙고 상한이 월정가 합이다", () => {
+  const notice = payload().partialRateNotice;
+  assert.ok(notice, "월 단위로만 파는 매체가 있으면 각주가 있어야 한다");
+  assert.match(notice, /월 단위로만/);
+  assert.match(notice, /1,250만원/, `상한 = ${MONTHLY_LIST_SUM}`);
+  // 개발자용 경고 코드가 광고주 문구로 새면 안 된다.
+  assert.ok(!notice.includes("MEDIA_NO_PARTIAL_RATE_TIER"));
 });
 
 // ── 현행 불일치 ② — 추천 근거의 정체불명 숫자 ──────────────────────────────
