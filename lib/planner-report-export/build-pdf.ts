@@ -738,9 +738,9 @@ export async function buildPlannerReportPdf(
       y += 3;
     }
     const subCols = isKo
-      ? ["상권·권역", "매체", "월 예산", "월 노출", "도달"]
-      : ["Sub-area", "Media", "Monthly", "Imp/mo", "Reach"];
-    const subCw = [32, 14, 36, 30, 28];
+      ? ["상권·권역", "매체", "월 예산", "월 노출"]
+      : ["Sub-area", "Media", "Monthly", "Imp/mo"];
+    const subCw = [38, 18, 44, 40];
     ensure(8 + p.regionSubdivision.breakdown.length * 7);
     doc.setFontSize(8);
     setText(GRAY_500);

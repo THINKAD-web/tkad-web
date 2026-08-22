@@ -44,8 +44,8 @@ export function PlanCartRegionalBreakdown({ rows, isKo, className }: Props) {
         </h2>
         <p className="mt-1 text-sm text-gray-500 dark:text-white/55">
           {isKo
-            ? "담은 매체를 지역 단위로 묶어 월 예산·노출·추정 도달을 비교합니다."
-            : "Grouped by region: monthly spend, impressions, and estimated reach."}
+            ? "담은 매체를 지역 단위로 묶어 월 예산·노출을 비교합니다."
+            : "Grouped by region: monthly spend and impressions."}
         </p>
       </div>
 
